@@ -821,11 +821,18 @@
       async function handleDrop(e) {
         const dt = e.dataTransfer;
         const files = dt.files;
+        const messageInput = document.getElementById("message-input");
 
         for (let file of files) {
           try {
             const fileData = await readFileContent(file);
-            displayFileMessage(fileData);
+
+            // Add to message input exactly like dropdown does
+            if (messageInput.value !== '') {
+              messageInput.value += ' ';
+            }
+            messageInput.value += fileData.name;
+            autoGrowTextarea(messageInput);
           } catch (error) {
             console.error('Error reading file:', error);
           }
@@ -1925,20 +1932,19 @@
       const files = event.target.files;
       if (files.length === 0) return;
 
+      const messageInput = document.getElementById("message-input");
+
       // Process each selected file
       Array.from(files).forEach(file => {
         const reader = new FileReader();
 
         reader.onload = function (e) {
-          const fileData = {
-            name: file.name,
-            type: file.type,
-            size: file.size,
-            content: e.target.result
-          };
-
-          // Display the file message
-          displayFileMessage(fileData);
+          // Add to message input exactly like dropdown does
+          if (messageInput.value !== '') {
+            messageInput.value += ' ';
+          }
+          messageInput.value += file.name;
+          autoGrowTextarea(messageInput);
         };
 
         reader.onerror = function () {
@@ -1952,14 +1958,12 @@
         if (file.type.startsWith('text/') || textExtensions.includes(fileExtension)) {
           reader.readAsText(file);
         } else {
-          // For binary files, just show file info without content
-          const fileData = {
-            name: file.name,
-            type: file.type,
-            size: file.size,
-            content: '[Binary file - content not displayed]'
-          };
-          displayFileMessage(fileData);
+          // For binary files, just show filename
+          if (messageInput.value !== '') {
+            messageInput.value += ' ';
+          }
+          messageInput.value += file.name;
+          autoGrowTextarea(messageInput);
         }
       });
 
