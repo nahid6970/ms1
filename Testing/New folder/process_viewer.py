@@ -37,7 +37,9 @@ class ProcessViewer(QWidget):
         self.process_table = QTableWidget()
         self.process_table.setColumnCount(2)
         self.process_table.setHorizontalHeaderLabels(['Name', 'Command Path'])
-        self.process_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        # Set specific resize modes for columns
+        self.process_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)  # Name column
+        self.process_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)  # Command Path column
         self.process_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self.process_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         layout.addWidget(self.process_table)
