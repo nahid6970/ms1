@@ -78,13 +78,14 @@ class AddEditShortcutDialog(QDialog):
         # Add form layout to top layout
         top_layout.addLayout(form_layout)
         
-        # Right side - action/replacement with bigger height
+        # Right side - action/replacement with bigger height and width
         if self.shortcut_type == "script":
             # Action
             action_layout = QVBoxLayout()
             action_layout.addWidget(QLabel("Action:"))
             self.action_edit = QTextEdit()
             self.action_edit.setMinimumHeight(300)  # Bigger height
+            self.action_edit.setMinimumWidth(400)   # Bigger width
             action_layout.addWidget(self.action_edit)
             top_layout.addLayout(action_layout)
         else:
@@ -93,6 +94,7 @@ class AddEditShortcutDialog(QDialog):
             replacement_layout.addWidget(QLabel("Replacement Text:"))
             self.replacement_edit = QTextEdit()
             self.replacement_edit.setMinimumHeight(300)  # Bigger height
+            self.replacement_edit.setMinimumWidth(400)   # Bigger width
             replacement_layout.addWidget(self.replacement_edit)
             top_layout.addLayout(replacement_layout)
         
