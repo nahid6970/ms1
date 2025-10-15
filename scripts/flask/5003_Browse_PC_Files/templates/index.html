@@ -497,6 +497,7 @@
 
         .bookmark-move-up,
         .bookmark-move-down,
+        .bookmark-edit,
         .bookmark-remove {
             cursor: pointer;
             font-size: 14px;
@@ -521,6 +522,15 @@
 
         .bookmark-move-down:hover {
             background-color: #2196F3;
+            color: white;
+        }
+
+        .bookmark-edit {
+            color: #4CAF50;
+        }
+
+        .bookmark-edit:hover {
+            background-color: #4CAF50;
             color: white;
         }
 
@@ -1505,6 +1515,9 @@
                                     <span class="bookmark-move-down" 
                                         onclick="event.stopPropagation(); moveMoveFolder('${folder.path.replace(/'/g, "\\'")}', 'down');"
                                         title="Move down">↓</span>
+                                    <span class="bookmark-edit"
+                                        onclick="event.stopPropagation(); editMoveFolder('${folder.path.replace(/'/g, "\\'")}', '${folder.name.replace(/'/g, "\\'")}');"
+                                        title="Edit">✏️</span>
                                     <span class="bookmark-remove"
                                         onclick="event.stopPropagation(); removeMoveFolder('${folder.path.replace(/'/g, "\\'")}');"
                                         title="Remove">×</span>
@@ -1538,6 +1551,9 @@
                                     <span class="bookmark-move-down" 
                                         onclick="event.stopPropagation(); moveMoveFolder('${folder.path.replace(/'/g, "\\'")}', 'down');"
                                         title="Move down">↓</span>
+                                    <span class="bookmark-edit"
+                                        onclick="event.stopPropagation(); editMoveFolder('${folder.path.replace(/'/g, "\\'")}', '${folder.name.replace(/'/g, "\\'")}');"
+                                        title="Edit">✏️</span>
                                     <span class="bookmark-remove"
                                         onclick="event.stopPropagation(); removeMoveFolder('${folder.path.replace(/'/g, "\\'")}');"
                                         title="Remove">×</span>
@@ -1581,6 +1597,70 @@
                         console.error('Request failed:', error);
                         alert('Request failed: ' + error);
                     });
+            }
+        }
+
+        function editMoveFolder(currentPath, currentName) {
+            const newName = prompt('Enter new name for the move folder:', currentName);
+            if (newName && newName.trim() !== '') {
+                const newPath = prompt('Enter new path for the move folder:', currentPath);
+                if (newPath && newPath.trim() !== '') {
+                    // Remove the old folder first
+                    fetch('/remove_move_folder', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            path: currentPath
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Add the new folder with updated details
+                            fetch('/add_move_folder', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({
+                                    path: newPath.trim(),
+                                    name: newName.trim()
+                                })
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    refreshMoveFolderDropdown();
+                                } else {
+                                    alert('Error updating folder: ' + data.error);
+                                    // Re-add the original folder if update failed
+                                    fetch('/add_move_folder', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                        },
+                                        body: JSON.stringify({
+                                            path: currentPath,
+                                            name: currentName
+                                        })
+                                    });
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error updating folder:', error);
+                                alert('Error updating folder: ' + error);
+                            });
+                        } else {
+                            alert('Error removing old folder: ' + data.error);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error removing old folder:', error);
+                        alert('Error removing old folder: ' + error);
+                    });
+                }
             }
         }
 

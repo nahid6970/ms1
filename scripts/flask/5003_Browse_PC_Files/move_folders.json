@@ -8,9 +8,17 @@
     "hover_text_color": "#000000"
   },
   {
-    "path": "C:/Users/nahid/ms/msBackups/@JOB/job_solution_downloads/Done",
+    "path": "C:/Users/nahid/ms/msBackups/@JOB/From_dnplayer/edu_done",
     "name": "edu_Done",
-    "bg_color": "#4dff61",
+    "bg_color": "#66ff8c",
+    "text_color": "#000000",
+    "hover_bg_color": "#ff9800",
+    "hover_text_color": "#000000"
+  },
+  {
+    "path": "C:/Users/nahid/ms/msBackups/@JOB/From_dnplayer/edu_later",
+    "name": "edu_later",
+    "bg_color": "#a3f5e7",
     "text_color": "#000000",
     "hover_bg_color": "#ff9800",
     "hover_text_color": "#000000"
