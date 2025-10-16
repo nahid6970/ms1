@@ -122,6 +122,10 @@ document.addEventListener('DOMContentLoaded', function () {
               const heightValue = link.li_height.includes('px') || link.li_height.includes('%') || link.li_height === 'auto' ? link.li_height : link.li_height + 'px';
               listItem.style.minHeight = heightValue;
             }
+            if (link.li_border_radius) {
+              const radiusValue = link.li_border_radius.includes('px') || link.li_border_radius.includes('%') ? link.li_border_radius : link.li_border_radius + 'px';
+              listItem.style.borderRadius = radiusValue;
+            }
 
             let linkContent;
 
@@ -1297,6 +1301,7 @@ document.addEventListener('DOMContentLoaded', function () {
         li_height: document.getElementById('link-li-height').value || undefined,
         li_bg_color: document.getElementById('link-li-bg-color').value || undefined,
         li_hover_color: document.getElementById('link-li-hover-color').value || undefined,
+        li_border_radius: document.getElementById('link-li-border-radius').value || undefined,
         hidden: document.getElementById('link-hidden').checked || undefined,
       };
 
@@ -1388,6 +1393,7 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('edit-link-li-height').value = link.li_height || '';
     document.getElementById('edit-link-li-bg-color').value = link.li_bg_color || '';
     document.getElementById('edit-link-li-hover-color').value = link.li_hover_color || '';
+    document.getElementById('edit-link-li-border-radius').value = link.li_border_radius || '';
     document.getElementById('edit-link-hidden').checked = link.hidden || false;
     editLinkPopup.classList.remove('hidden');
     applyPopupStyling(link.group || 'Ungrouped');
@@ -1423,6 +1429,7 @@ document.addEventListener('DOMContentLoaded', function () {
           li_height: document.getElementById('edit-link-li-height').value || undefined,
           li_bg_color: document.getElementById('edit-link-li-bg-color').value || undefined,
           li_hover_color: document.getElementById('edit-link-li-hover-color').value || undefined,
+          li_border_radius: document.getElementById('edit-link-li-border-radius').value || undefined,
           hidden: document.getElementById('edit-link-hidden').checked || undefined,
         };
 
