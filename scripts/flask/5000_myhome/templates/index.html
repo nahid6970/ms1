@@ -165,6 +165,42 @@
           opacity: 0;
         }
       }
+
+      /* Preview note button styles */
+      .preview-note-button {
+        background: #2196F3;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 8px 12px;
+        cursor: pointer;
+        font-size: 16px;
+        height: fit-content;
+        min-height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      }
+
+      .preview-note-button:hover {
+        background: #1976D2;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      }
+
+      .preview-note-button:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      }
+
+      .preview-note-button:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+      }
     </style>
 
     <div id="links-container"
@@ -291,8 +327,14 @@
           </div>
           <input type="text" id="link-border-radius" placeholder="Border Radius">
           <input type="text" id="link-title" placeholder="Title (for tooltip)">
-          <textarea id="link-note" placeholder="Note (optional)" rows="3"
-            style="resize: vertical; font-family: inherit;"></textarea>
+          <div style="display: flex; gap: 10px; align-items: flex-start;">
+            <textarea id="link-note"
+              placeholder="Note (optional) - Supports Markdown: **bold**, *italic*, `code`, # Header" rows="3"
+              style="resize: vertical; font-family: inherit; flex: 1;"></textarea>
+            <button type="button" id="preview-note-btn" class="preview-note-button" title="Preview Note as Markdown">
+              <i class="nf nf-md-eye"></i>
+            </button>
+          </div>
           <div style="display: flex; align-items: center; gap: 10px;">
             <label for="link-hidden">
               <input type="checkbox" id="link-hidden">
@@ -339,8 +381,15 @@
           </div>
           <input type="text" id="edit-link-border-radius" placeholder="Border Radius">
           <input type="text" id="edit-link-title" placeholder="Title (for tooltip)">
-          <textarea id="edit-link-note" placeholder="Note (optional)" rows="3"
-            style="resize: vertical; font-family: inherit;"></textarea>
+          <div style="display: flex; gap: 10px; align-items: flex-start;">
+            <textarea id="edit-link-note"
+              placeholder="Note (optional) - Supports Markdown: **bold**, *italic*, `code`, # Header" rows="3"
+              style="resize: vertical; font-family: inherit; flex: 1;"></textarea>
+            <button type="button" id="edit-preview-note-btn" class="preview-note-button"
+              title="Preview Note as Markdown">
+              <i class="nf nf-md-eye"></i>
+            </button>
+          </div>
           <div style="display: flex; align-items: center; gap: 10px;">
             <label for="edit-link-hidden">
               <input type="checkbox" id="edit-link-hidden">
@@ -693,6 +742,41 @@
           setTimeout(() => applyColorPreview(e.target), 0);
         }
       }, true);
+
+      // Handle note preview button clicks
+      document.addEventListener('click', function (e) {
+        if (e.target.id === 'preview-note-btn' || e.target.closest('#preview-note-btn')) {
+          e.preventDefault();
+          const noteContent = document.getElementById('link-note').value;
+          previewNote(noteContent);
+        } else if (e.target.id === 'edit-preview-note-btn' || e.target.closest('#edit-preview-note-btn')) {
+          e.preventDefault();
+          const noteContent = document.getElementById('edit-link-note').value;
+          previewNote(noteContent);
+        }
+      });
+
+      // Function to preview note in new window
+      function previewNote(content) {
+        if (!content || !content.trim()) {
+          alert('No note content to preview');
+          return;
+        }
+
+        const encodedContent = encodeURIComponent(content);
+        const previewUrl = `/preview-note?content=${encodedContent}`;
+
+        // Open in new window
+        const previewWindow = window.open(
+          previewUrl,
+          'notePreview',
+          'width=900,height=700,scrollbars=yes,resizable=yes,toolbar=no,menubar=no,location=no,status=no'
+        );
+
+        if (!previewWindow) {
+          alert('Please allow popups to preview notes');
+        }
+      }
     </script>
 
 

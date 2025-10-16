@@ -415,5 +415,151 @@ def open_file():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/preview-note')
+def preview_note():
+    """Preview note content as rendered Markdown"""
+    note_content = request.args.get('content', '')
+    
+    if not note_content:
+        html_content = '<h2>No note content to preview</h2>'
+    else:
+        # Convert Markdown syntax to HTML
+        html_content = convert_markdown_to_html(note_content)
+    
+    # Use the dedicated template
+    return render_template('note_preview.html', content=html_content)
+
+def convert_markdown_to_html(text):
+    """Convert Markdown syntax to HTML"""
+    import re
+    
+    # Escape HTML characters first
+    text = text.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+    
+    # Split into lines for better processing
+    lines = text.split('\n')
+    html_lines = []
+    in_code_block = False
+    code_block_content = []
+    
+    for line in lines:
+        original_line = line
+        line_stripped = line.strip()
+        
+        # Handle code blocks first
+        if line_stripped.startswith('```'):
+            if in_code_block:
+                # End code block
+                code_content = '\n'.join(code_block_content)
+                html_lines.append(f'<pre><code>{code_content}</code></pre>')
+                code_block_content = []
+                in_code_block = False
+            else:
+                # Start code block
+                in_code_block = True
+            continue
+        
+        if in_code_block:
+            code_block_content.append(line)
+            continue
+        
+        if not line_stripped:
+            # Empty line - will be handled as paragraph break
+            html_lines.append('')
+            continue
+            
+        # Check for headers (Markdown uses # for headers)
+        if re.match(r'^#{1,6} ', line_stripped):
+            level = len(re.match(r'^#+', line_stripped).group())
+            header_text = re.sub(r'^#+ ', '', line_stripped)
+            html_lines.append(f'<h{level}>{header_text}</h{level}>')
+        # Check for lists
+        elif re.match(r'^[-*+] ', line_stripped):
+            list_text = re.sub(r'^[-*+] ', '', line_stripped)
+            html_lines.append(f'<li>{list_text}</li>')
+        elif re.match(r'^\d+\. ', line_stripped):
+            list_text = re.sub(r'^\d+\. ', '', line_stripped)
+            html_lines.append(f'<li>{list_text}</li>')
+        # Check for blockquotes
+        elif line_stripped.startswith('> '):
+            quote_text = re.sub(r'^> ', '', line_stripped)
+            html_lines.append(f'<blockquote>{quote_text}</blockquote>')
+        else:
+            html_lines.append(line_stripped)
+    
+    # Now join and create proper HTML structure
+    result = []
+    current_paragraph = []
+    current_list = []
+    list_type = None
+    
+    for line in html_lines:
+        if line == '':
+            # Empty line - end current paragraph/list if any
+            if current_paragraph:
+                paragraph_text = ' '.join(current_paragraph)
+                result.append(f'<p>{paragraph_text}</p>')
+                current_paragraph = []
+            if current_list:
+                list_tag = 'ul' if list_type == 'unordered' else 'ol'
+                result.append(f'<{list_tag}>{"".join(current_list)}</{list_tag}>')
+                current_list = []
+                list_type = None
+        elif line.startswith('<h') or line.startswith('<pre') or line.startswith('<blockquote'):
+            # Block element - end current paragraph/list and add the block
+            if current_paragraph:
+                paragraph_text = ' '.join(current_paragraph)
+                result.append(f'<p>{paragraph_text}</p>')
+                current_paragraph = []
+            if current_list:
+                list_tag = 'ul' if list_type == 'unordered' else 'ol'
+                result.append(f'<{list_tag}>{"".join(current_list)}</{list_tag}>')
+                current_list = []
+                list_type = None
+            result.append(line)
+        elif line.startswith('<li>'):
+            # List item - add to current list
+            if current_paragraph:
+                paragraph_text = ' '.join(current_paragraph)
+                result.append(f'<p>{paragraph_text}</p>')
+                current_paragraph = []
+            current_list.append(line)
+            if list_type is None:
+                list_type = 'unordered'  # Default to unordered
+        else:
+            # Regular text - add to current paragraph
+            if current_list:
+                list_tag = 'ul' if list_type == 'unordered' else 'ol'
+                result.append(f'<{list_tag}>{"".join(current_list)}</{list_tag}>')
+                current_list = []
+                list_type = None
+            current_paragraph.append(line)
+    
+    # Don't forget the last paragraph/list
+    if current_paragraph:
+        paragraph_text = ' '.join(current_paragraph)
+        result.append(f'<p>{paragraph_text}</p>')
+    if current_list:
+        list_tag = 'ul' if list_type == 'unordered' else 'ol'
+        result.append(f'<{list_tag}>{"".join(current_list)}</{list_tag}>')
+    
+    text = '\n'.join(result)
+    
+    # Now apply inline formatting
+    # Bold and italic (Markdown syntax)
+    text = re.sub(r'\*\*([^*]+)\*\*', r'<strong>\1</strong>', text)  # **bold**
+    text = re.sub(r'\*([^*]+)\*', r'<em>\1</em>', text)  # *italic*
+    text = re.sub(r'__([^_]+)__', r'<strong>\1</strong>', text)  # __bold__
+    text = re.sub(r'_([^_]+)_', r'<em>\1</em>', text)  # _italic_
+    text = re.sub(r'~~([^~]+)~~', r'<del>\1</del>', text)  # ~~strikethrough~~
+    
+    # Inline code (Markdown syntax)
+    text = re.sub(r'`([^`]+)`', r'<code>\1</code>', text)  # `code`
+    
+    # Links (Markdown syntax: [text](url))
+    text = re.sub(r'\[([^\]]+)\]\(([^)]+)\)', r'<a href="\2" target="_blank">\1</a>', text)
+    
+    return text
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
