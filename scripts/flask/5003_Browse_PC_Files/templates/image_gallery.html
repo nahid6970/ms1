@@ -404,7 +404,7 @@
         .image-wrapper.zoomed {
             padding: 30px;
             box-sizing: border-box;
-            justify-content: center;
+            justify-content: flex-start;
             align-items: flex-start;
         }
 
@@ -422,7 +422,7 @@
             cursor: zoom-out;
             max-width: none;
             max-height: none;
-            transform-origin: top center;
+            transform-origin: top left;
         }
 
         .nav-arrow {
@@ -769,8 +769,14 @@
         document.getElementById('zoomInput').addEventListener('input', function () {
             if (isZoomed) {
                 const image = document.getElementById('mainImage');
+                const wrapper = document.getElementById('imageWrapper');
                 const zoomLevel = parseInt(this.value) / 100;
                 image.style.transform = `scale(${zoomLevel})`;
+                
+                // Update wrapper scroll behavior to accommodate zoomed image
+                const scrollLeft = wrapper.scrollLeft;
+                const scrollTop = wrapper.scrollTop;
+                
                 updateMinimapViewport();
             }
         });
@@ -832,23 +838,23 @@
         function startDrag(e) {
             if (!isZoomed) return;
             isDragging = true;
-            const container = document.getElementById('imageContainer');
-            startX = e.pageX - container.offsetLeft;
-            startY = e.pageY - container.offsetTop;
-            scrollLeft = container.scrollLeft;
-            scrollTop = container.scrollTop;
+            const wrapper = document.getElementById('imageWrapper');
+            startX = e.pageX - wrapper.offsetLeft;
+            startY = e.pageY - wrapper.offsetTop;
+            scrollLeft = wrapper.scrollLeft;
+            scrollTop = wrapper.scrollTop;
         }
 
         function drag(e) {
             if (!isDragging || !isZoomed) return;
             e.preventDefault();
-            const container = document.getElementById('imageContainer');
-            const x = e.pageX - container.offsetLeft;
-            const y = e.pageY - container.offsetTop;
-            const walkX = (x - startX) * 2;
-            const walkY = (y - startY) * 2;
-            container.scrollLeft = scrollLeft - walkX;
-            container.scrollTop = scrollTop - walkY;
+            const wrapper = document.getElementById('imageWrapper');
+            const x = e.pageX - wrapper.offsetLeft;
+            const y = e.pageY - wrapper.offsetTop;
+            const walkX = (x - startX);
+            const walkY = (y - startY);
+            wrapper.scrollLeft = scrollLeft - walkX;
+            wrapper.scrollTop = scrollTop - walkY;
         }
 
         function stopDrag() {
@@ -856,7 +862,7 @@
         }
 
         // Add drag event listeners
-        document.getElementById('imageContainer').addEventListener('mousedown', startDrag);
+        document.getElementById('imageWrapper').addEventListener('mousedown', startDrag);
         document.addEventListener('mousemove', drag);
         document.addEventListener('mouseup', stopDrag);
 
