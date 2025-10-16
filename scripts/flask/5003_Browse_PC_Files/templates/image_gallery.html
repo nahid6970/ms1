@@ -773,9 +773,10 @@
                 const zoomLevel = parseInt(this.value) / 100;
                 image.style.transform = `scale(${zoomLevel})`;
                 
-                // Update wrapper scroll behavior to accommodate zoomed image
-                const scrollLeft = wrapper.scrollLeft;
-                const scrollTop = wrapper.scrollTop;
+                // Preserve current scroll position relative to the zoom level
+                const rect = wrapper.getBoundingClientRect();
+                const centerX = wrapper.scrollLeft + rect.width / 2;
+                const centerY = wrapper.scrollTop + rect.height / 2;
                 
                 updateMinimapViewport();
             }
@@ -839,8 +840,8 @@
             if (!isZoomed) return;
             isDragging = true;
             const wrapper = document.getElementById('imageWrapper');
-            startX = e.pageX - wrapper.offsetLeft;
-            startY = e.pageY - wrapper.offsetTop;
+            startX = e.pageX - wrapper.getBoundingClientRect().left;
+            startY = e.pageY - wrapper.getBoundingClientRect().top;
             scrollLeft = wrapper.scrollLeft;
             scrollTop = wrapper.scrollTop;
         }
@@ -849,8 +850,8 @@
             if (!isDragging || !isZoomed) return;
             e.preventDefault();
             const wrapper = document.getElementById('imageWrapper');
-            const x = e.pageX - wrapper.offsetLeft;
-            const y = e.pageY - wrapper.offsetTop;
+            const x = e.pageX - wrapper.getBoundingClientRect().left;
+            const y = e.pageY - wrapper.getBoundingClientRect().top;
             const walkX = (x - startX);
             const walkY = (y - startY);
             wrapper.scrollLeft = scrollLeft - walkX;
