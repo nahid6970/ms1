@@ -179,6 +179,11 @@
       border-left: 4px solid #28a745;
     }
 
+    .file-message .card-body i {
+      font-size: 1.5rem;
+      margin-right: 0.5rem;
+    }
+
     /* Enhanced styling for code block notification */
     .code-block-notification {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -691,7 +696,7 @@
                 </ul>
               </div>
               <button type="button" class="btn btn-outline-secondary" onclick="openFileUpload()" title="Upload Files">
-                📁
+                <i class="nf nf-mdi-folder_open"></i>
               </button>
             </div>
             <input type="file" id="fileInput" multiple style="display: none;"
@@ -821,18 +826,11 @@
       async function handleDrop(e) {
         const dt = e.dataTransfer;
         const files = dt.files;
-        const messageInput = document.getElementById("message-input");
 
         for (let file of files) {
           try {
             const fileData = await readFileContent(file);
-
-            // Add to message input exactly like dropdown does
-            if (messageInput.value !== '') {
-              messageInput.value += ' ';
-            }
-            messageInput.value += fileData.name;
-            autoGrowTextarea(messageInput);
+            displayFileMessage(fileData);
           } catch (error) {
             console.error('Error reading file:', error);
           }
@@ -842,72 +840,56 @@
       function getFileIcon(fileName) {
         const extension = fileName.toLowerCase().split('.').pop();
         const iconMap = {
-          // Programming languages
-          'py': '🐍',
-          'js': '🟨',
-          'ts': '🔷',
-          'html': '🌐',
-          'css': '🎨',
-          'java': '☕',
-          'cpp': '⚙️',
-          'c': '⚙️',
-          'cs': '🔷',
-          'php': '🐘',
-          'rb': '💎',
-          'go': '🐹',
-          'rs': '🦀',
-          'kt': '🟣',
-          'swift': '🍎',
-          'scala': '🔴',
-          'r': '📊',
-          'matlab': '📊',
-          'perl': '🐪',
-          'lua': '🌙',
-          'dart': '🎯',
-
-          // Scripts
-          'ps1': '💙',
-          'sh': '🐚',
-          'bash': '🐚',
-          'bat': '⚫',
-          'cmd': '⚫',
-
-          // Data formats
-          'json': '📋',
-          'xml': '📄',
-          'yaml': '📝',
-          'yml': '📝',
-          'csv': '📊',
-          'sql': '🗃️',
-
-          // Documents
-          'md': '📝',
-          'txt': '📄',
-          'pdf': '📕',
-          'doc': '📘',
-          'docx': '📘',
-
-          // Images
-          'png': '🖼️',
-          'jpg': '🖼️',
-          'jpeg': '🖼️',
-          'gif': '🖼️',
-          'svg': '🎨',
-
-          // Archives
-          'zip': '📦',
-          'rar': '📦',
-          '7z': '📦',
-          'tar': '📦',
-
-          // Config files
-          'ini': '⚙️',
-          'conf': '⚙️',
-          'config': '⚙️',
-          'env': '🔧',
-
-          // Default
-          'default': '📄'
+          'py': 'nf nf-dev-python',
+          'js': 'nf nf-dev-javascript_badge',
+          'ts': 'nf nf-dev-typescript_badge',
+          'html': 'nf nf-dev-html5',
+          'css': 'nf nf-dev-css3',
+          'java': 'nf nf-dev-java',
+          'cpp': 'nf nf-dev-cpp',
+          'c': 'nf nf-dev-c',
+          'cs': 'nf nf-dev-csharp',
+          'php': 'nf nf-dev-php',
+          'rb': 'nf nf-dev-ruby',
+          'go': 'nf nf-dev-go',
+          'rs': 'nf nf-dev-rust',
+          'kt': 'nf nf-dev-kotlin',
+          'swift': 'nf nf-dev-swift',
+          'scala': 'nf nf-dev-scala',
+          'r': 'nf nf-dev-r',
+          'perl': 'nf nf-dev-perl',
+          'lua': 'nf nf-dev-lua',
+          'dart': 'nf nf-dev-dart',
+          'ps1': 'nf nf-dev-powershell',
+          'sh': 'nf nf-dev-shell',
+          'bash': 'nf nf-dev-shell',
+          'bat': 'nf nf-dev-terminal',
+          'cmd': 'nf nf-dev-terminal',
+          'json': 'nf nf-mdi-json',
+          'xml': 'nf nf-mdi-xml',
+          'yaml': 'nf nf-mdi-yaml',
+          'yml': 'nf nf-mdi-yaml',
+          'csv': 'nf nf-mdi-file_delimited',
+          'sql': 'nf nf-mdi-database',
+          'md': 'nf nf-dev-markdown',
+          'txt': 'nf nf-mdi-file_document',
+          'pdf': 'nf nf-mdi-file_pdf',
+          'doc': 'nf nf-mdi-file_word',
+          'docx': 'nf nf-mdi-file_word',
+          'png': 'nf nf-mdi-file_image',
+          'jpg': 'nf nf-mdi-file_image',
+          'jpeg': 'nf nf-mdi-file_image',
+          'gif': 'nf nf-mdi-file_image',
+          'svg': 'nf nf-mdi-svg',
+          'zip': 'nf nf-mdi-zip_box',
+          'rar': 'nf nf-mdi-zip_box',
+          '7z': 'nf nf-mdi-zip_box',
+          'tar': 'nf nf-mdi-zip_box',
+          'ini': 'nf nf-mdi-settings',
+          'conf': 'nf nf-mdi-settings',
+          'config': 'nf nf-mdi-settings',
+          'env': 'nf nf-mdi-settings',
+          'default': 'nf nf-mdi-file'
         };
 
         return iconMap[extension] || iconMap['default'];
@@ -931,11 +913,11 @@
         cardBody.classList.add("card-body");
 
         // Get appropriate file icon
-        const fileIcon = getFileIcon(fileData.name);
+        const fileIconClass = getFileIcon(fileData.name);
 
         // File header with icon
         const fileHeader = document.createElement("div");
-        fileHeader.innerHTML = `<strong>${fileIcon} ${fileData.name}</strong> <small class="text-muted">(${formatFileSize(fileData.size)})</small>`;
+        fileHeader.innerHTML = `<i class="${fileIconClass}"></i> <strong>${fileData.name}</strong> <small class="text-muted">(${formatFileSize(fileData.size)})</small>`;
         cardBody.appendChild(fileHeader);
 
         card.appendChild(cardBody);
@@ -1932,38 +1914,13 @@
       const files = event.target.files;
       if (files.length === 0) return;
 
-      const messageInput = document.getElementById("message-input");
-
       // Process each selected file
-      Array.from(files).forEach(file => {
-        const reader = new FileReader();
-
-        reader.onload = function (e) {
-          // Add to message input exactly like dropdown does
-          if (messageInput.value !== '') {
-            messageInput.value += ' ';
-          }
-          messageInput.value += file.name;
-          autoGrowTextarea(messageInput);
-        };
-
-        reader.onerror = function () {
+      Array.from(files).forEach(async file => {
+        try {
+          const fileData = await readFileContent(file);
+          displayFileMessage(fileData);
+        } catch (error) {
           showNotification(`Error reading file: ${file.name}`, 'error');
-        };
-
-        // Read file as text
-        const textExtensions = ['.py', '.js', '.html', '.css', '.txt', '.md', '.json', '.xml', '.yaml', '.yml', '.ps1', '.sh', '.java', '.cpp', '.c', '.cs', '.php', '.rb', '.go', '.rs', '.kt', '.swift'];
-        const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
-
-        if (file.type.startsWith('text/') || textExtensions.includes(fileExtension)) {
-          reader.readAsText(file);
-        } else {
-          // For binary files, just show filename
-          if (messageInput.value !== '') {
-            messageInput.value += ' ';
-          }
-          messageInput.value += file.name;
-          autoGrowTextarea(messageInput);
         }
       });
 
