@@ -45,8 +45,18 @@ document.addEventListener('DOMContentLoaded', function () {
             simpleListItem.className = 'simple-link-item';
 
             const simpleLink = document.createElement('a');
-            simpleLink.href = link.url;
-            simpleLink.target = '_blank';
+            const clickAction = link.click_action || 'url';
+            
+            if (clickAction === 'note') {
+              simpleLink.href = '#';
+              simpleLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                openNotePreview(encodeURIComponent(link.note || ''));
+              });
+            } else {
+              simpleLink.href = link.url;
+              simpleLink.target = '_blank';
+            }
 
             if (link.name && link.name.trim() !== '') {
                 const truncatedName = link.name.length > 25 ? link.name.substring(0, 25) + '...' : link.name;
@@ -105,24 +115,30 @@ document.addEventListener('DOMContentLoaded', function () {
 
             let linkContent;
 
+            // Determine what to do on click based on click_action
+            const clickAction = link.click_action || 'url';
+            const linkUrl = clickAction === 'note' ? '#' : link.url;
+            const clickHandler = clickAction === 'note' ? `onclick="openNotePreview('${encodeURIComponent(link.note || '')}'); return false;"` : '';
+            const targetAttr = clickAction === 'url' ? 'target="_blank"' : '';
+
             if (link.default_type === 'nerd-font' && link.icon_class) {
-              linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''} ${link.font_size ? `font-size: ${link.font_size};` : ''}" title="${link.title || link.name}"><i class="${link.icon_class}"></i></a>`;
+              linkContent = `<a href="${linkUrl}" ${clickHandler} ${targetAttr} style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''} ${link.font_size ? `font-size: ${link.font_size};` : ''}" title="${link.title || link.name}"><i class="${link.icon_class}"></i></a>`;
             } else if (link.default_type === 'img' && link.img_src) {
               const width = link.width || '50';
               const height = link.height || '50';
-              linkContent = `<a href="${link.url}" title="${link.title || link.name}"><img src="${link.img_src}" width="${width}" height="${height}"></a>`;
+              linkContent = `<a href="${linkUrl}" ${clickHandler} ${targetAttr} title="${link.title || link.name}"><img src="${link.img_src}" width="${width}" height="${height}"></a>`;
             } else if (link.default_type === 'text' && link.text) {
-              linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''} ${link.font_size ? `font-size: ${link.font_size};` : ''}" title="${link.title || link.name}">${link.text}</a>`;
+              linkContent = `<a href="${linkUrl}" ${clickHandler} ${targetAttr} style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''} ${link.font_size ? `font-size: ${link.font_size};` : ''}" title="${link.title || link.name}">${link.text}</a>`;
             } else {
               // Fallback if default_type is not set or doesn't match available content
               if (link.icon_class) {
-                linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''} ${link.font_size ? `font-size: ${link.font_size};` : ''}" title="${link.title || link.name}"><i class="${link.icon_class}"></i></a>`;
+                linkContent = `<a href="${linkUrl}" ${clickHandler} ${targetAttr} style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''} ${link.font_size ? `font-size: ${link.font_size};` : ''}" title="${link.title || link.name}"><i class="${link.icon_class}"></i></a>`;
               } else if (link.img_src) {
                 const width = link.width || '50';
                 const height = link.height || '50';
-                linkContent = `<a href="${link.url}" title="${link.title || link.name}"><img src="${link.img_src}" width="${width}" height="${height}"></a>`;
+                linkContent = `<a href="${linkUrl}" ${clickHandler} ${targetAttr} title="${link.title || link.name}"><img src="${link.img_src}" width="${width}" height="${height}"></a>`;
               } else {
-                linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''} ${link.font_size ? `font-size: ${link.font_size};` : ''}" title="${link.title || link.name}">${link.name}</a>`;
+                linkContent = `<a href="${linkUrl}" ${clickHandler} ${targetAttr} style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''} ${link.font_size ? `font-size: ${link.font_size};` : ''}" title="${link.title || link.name}">${link.name}</a>`;
               }
             }
 
@@ -1256,6 +1272,7 @@ document.addEventListener('DOMContentLoaded', function () {
         font_size: document.getElementById('link-font-size').value || undefined,
         title: document.getElementById('link-title').value || undefined,
         note: document.getElementById('link-note').value || undefined,
+        click_action: document.querySelector('input[name="link-click-action"]:checked').value || 'url',
         li_bg_color: document.getElementById('link-li-bg-color').value || undefined,
         li_hover_color: document.getElementById('link-li-hover-color').value || undefined,
         hidden: document.getElementById('link-hidden').checked || undefined,
@@ -1331,6 +1348,15 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('edit-link-border-radius').value = link.border_radius || '';
     document.getElementById('edit-link-title').value = link.title || '';
     document.getElementById('edit-link-note').value = link.note || '';
+    
+    // Set click action radio buttons
+    const clickAction = link.click_action || 'url';
+    if (clickAction === 'note') {
+      document.getElementById('edit-link-action-note').checked = true;
+    } else {
+      document.getElementById('edit-link-action-url').checked = true;
+    }
+    
     document.getElementById('edit-link-font-size').value = link.font_size || '';
     document.getElementById('edit-link-li-bg-color').value = link.li_bg_color || '';
     document.getElementById('edit-link-li-hover-color').value = link.li_hover_color || '';
@@ -1363,6 +1389,7 @@ document.addEventListener('DOMContentLoaded', function () {
           border_radius: document.getElementById('edit-link-border-radius').value || undefined,
           title: document.getElementById('edit-link-title').value || undefined,
           note: document.getElementById('edit-link-note').value || undefined,
+          click_action: document.querySelector('input[name="edit-link-click-action"]:checked').value || 'url',
           font_size: document.getElementById('edit-link-font-size').value || undefined,
           li_bg_color: document.getElementById('edit-link-li-bg-color').value || undefined,
           li_hover_color: document.getElementById('edit-link-li-hover-color').value || undefined,
@@ -1524,6 +1551,29 @@ document.addEventListener('DOMContentLoaded', function () {
     
     document.body.removeChild(textArea);
   }
+
+  // Function to open note preview
+  window.openNotePreview = function(noteContent) {
+    const decodedContent = decodeURIComponent(noteContent);
+    if (!decodedContent || !decodedContent.trim()) {
+      alert('No note content to preview');
+      return;
+    }
+
+    const encodedContent = encodeURIComponent(decodedContent);
+    const previewUrl = `/preview-note?content=${encodedContent}`;
+    
+    // Open in new window
+    const previewWindow = window.open(
+      previewUrl,
+      'notePreview',
+      'width=900,height=700,scrollbars=yes,resizable=yes,toolbar=no,menubar=no,location=no,status=no'
+    );
+
+    if (!previewWindow) {
+      alert('Please allow popups to preview notes');
+    }
+  };
 
   // Show notification function
   function showNotification(message, type = 'info') {

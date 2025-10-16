@@ -305,6 +305,19 @@
           <input type="text" id="link-name" placeholder="Name">
           <input type="text" id="link-group" placeholder="Group (optional)">
           <input type="url" id="link-url" placeholder="URL">
+
+          <div style="display: flex; gap: 20px; align-items: center; margin: 10px 0;">
+            <label style="font-weight: 500;">Click Action:</label>
+            <label style="display: flex; align-items: center; gap: 5px;">
+              <input type="radio" name="link-click-action" id="link-action-url" value="url" checked>
+              Open URL
+            </label>
+            <label style="display: flex; align-items: center; gap: 5px;">
+              <input type="radio" name="link-click-action" id="link-action-note" value="note">
+              Open Note
+            </label>
+          </div>
+
           <label for="link-default-type">Default Type:</label>
           <select id="link-default-type">
             <option value="nerd-font">nerd-font</option>
@@ -355,6 +368,19 @@
           <input type="text" id="edit-link-name" placeholder="Name">
           <input type="text" id="edit-link-group" placeholder="Group (optional)">
           <input type="url" id="edit-link-url" placeholder="URL">
+
+          <div style="display: flex; gap: 20px; align-items: center; margin: 10px 0;">
+            <label style="font-weight: 500;">Click Action:</label>
+            <label style="display: flex; align-items: center; gap: 5px;">
+              <input type="radio" name="edit-link-click-action" id="edit-link-action-url" value="url" checked>
+              Open URL
+            </label>
+            <label style="display: flex; align-items: center; gap: 5px;">
+              <input type="radio" name="edit-link-click-action" id="edit-link-action-note" value="note">
+              Open Note
+            </label>
+          </div>
+
           <label for="edit-link-default-type">Default Type:</label>
           <select id="edit-link-default-type">
             <option value="nerd-font">nerd-font</option>
