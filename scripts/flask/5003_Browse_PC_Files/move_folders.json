@@ -58,9 +58,9 @@
   {
     "path": "D:/Trash",
     "name": "trash",
-    "bg_color": "#444",
+    "bg_color": "#ff0000",
     "text_color": "#ffffff",
-    "hover_bg_color": "#FF9800",
+    "hover_bg_color": "#ff9800",
     "hover_text_color": "#000000"
   }
 ]
