@@ -102,15 +102,69 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             if (link.li_bg_color) {
-              listItem.style.backgroundColor = link.li_bg_color;
+              const bgColors = link.li_bg_color.split(',').map(c => c.trim());
+              if (bgColors.length > 1) {
+                // Multiple colors - create animated gradient background
+                const gradientColors = bgColors.join(', ');
+                const style = document.createElement('style');
+                const uniqueId = 'bg-gradient-' + Math.random().toString(36).substr(2, 9);
+                const animName = 'bgGradientShift-' + uniqueId;
+                const randomDelay = (Math.random() * 3).toFixed(2);
+                listItem.dataset.bgGradientId = uniqueId;
+                listItem.classList.add('animated-gradient-bg');
+                
+                style.textContent = `
+                  .link-item.animated-gradient-bg[data-bg-gradient-id="${uniqueId}"] {
+                    background: linear-gradient(45deg, ${gradientColors});
+                    background-size: 400% 400%;
+                    animation: ${animName} 3s ease infinite;
+                    animation-delay: -${randomDelay}s;
+                  }
+                  @keyframes ${animName} {
+                    0% { background-position: 0% 50%; }
+                    50% { background-position: 100% 50%; }
+                    100% { background-position: 0% 50%; }
+                  }
+                `;
+                document.head.appendChild(style);
+              } else {
+                listItem.style.backgroundColor = link.li_bg_color;
+              }
             }
             if (link.li_hover_color) {
-              listItem.addEventListener('mouseover', () => {
-                listItem.style.backgroundColor = link.li_hover_color;
-              });
-              listItem.addEventListener('mouseout', () => {
-                listItem.style.backgroundColor = link.li_bg_color || '';
-              });
+              const hoverColors = link.li_hover_color.split(',').map(c => c.trim());
+              if (hoverColors.length > 1) {
+                // Multiple colors - create animated gradient hover
+                const gradientColors = hoverColors.join(', ');
+                const style = document.createElement('style');
+                const uniqueId = 'hover-gradient-' + Math.random().toString(36).substr(2, 9);
+                const animName = 'hoverGradientShift-' + uniqueId;
+                const randomDelay = (Math.random() * 3).toFixed(2);
+                listItem.dataset.hoverGradientId = uniqueId;
+                listItem.classList.add('animated-gradient-hover');
+                
+                style.textContent = `
+                  .link-item.animated-gradient-hover[data-hover-gradient-id="${uniqueId}"]:hover {
+                    background: linear-gradient(45deg, ${gradientColors}) !important;
+                    background-size: 400% 400% !important;
+                    animation: ${animName} 3s ease infinite !important;
+                    animation-delay: -${randomDelay}s !important;
+                  }
+                  @keyframes ${animName} {
+                    0% { background-position: 0% 50%; }
+                    50% { background-position: 100% 50%; }
+                    100% { background-position: 0% 50%; }
+                  }
+                `;
+                document.head.appendChild(style);
+              } else {
+                listItem.addEventListener('mouseover', () => {
+                  listItem.style.backgroundColor = link.li_hover_color;
+                });
+                listItem.addEventListener('mouseout', () => {
+                  listItem.style.backgroundColor = link.li_bg_color || '';
+                });
+              }
             }
 
             // Apply minimum width and height constraints
@@ -123,7 +177,54 @@ document.addEventListener('DOMContentLoaded', function () {
               listItem.style.minHeight = heightValue;
             }
             if (link.li_border_color) {
-              listItem.style.border = `2px solid ${link.li_border_color}`;
+              // Check if it's a gradient (contains comma-separated colors)
+              const colors = link.li_border_color.split(',').map(c => c.trim());
+              if (colors.length > 1) {
+                // Multiple colors - create animated gradient border
+                const gradientColors = colors.join(', ');
+                const borderWidth = '4px';
+                
+                // Apply the gradient animation
+                const style = document.createElement('style');
+                const uniqueId = 'gradient-' + Math.random().toString(36).substr(2, 9);
+                const animName = 'gradientBorderShift-' + uniqueId;
+                const randomDelay = (Math.random() * 3).toFixed(2);
+                listItem.dataset.gradientId = uniqueId;
+                listItem.classList.add('animated-gradient-border');
+                
+                const bgColor = link.li_bg_color || '#474747';
+                
+                style.textContent = `
+                  .link-item.animated-gradient-border[data-gradient-id="${uniqueId}"] {
+                    position: relative;
+                    border: ${borderWidth} solid;
+                    border-image: linear-gradient(45deg, ${gradientColors}) 1;
+                    animation: ${animName} 3s linear infinite;
+                    animation-delay: -${randomDelay}s;
+                  }
+                  @keyframes ${animName} {
+                    0% { 
+                      border-image: linear-gradient(0deg, ${gradientColors}) 1;
+                    }
+                    25% { 
+                      border-image: linear-gradient(90deg, ${gradientColors}) 1;
+                    }
+                    50% { 
+                      border-image: linear-gradient(180deg, ${gradientColors}) 1;
+                    }
+                    75% { 
+                      border-image: linear-gradient(270deg, ${gradientColors}) 1;
+                    }
+                    100% { 
+                      border-image: linear-gradient(360deg, ${gradientColors}) 1;
+                    }
+                  }
+                `;
+                document.head.appendChild(style);
+              } else {
+                // Single color - normal border
+                listItem.style.border = `2px solid ${link.li_border_color}`;
+              }
             }
             if (link.li_border_radius) {
               const radiusValue = link.li_border_radius.includes('px') || link.li_border_radius.includes('%') ? link.li_border_radius : link.li_border_radius + 'px';
@@ -166,6 +267,73 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             listItem.innerHTML = linkContent;
+
+            // Apply gradient to inner link element if background_color has multiple colors
+            if (link.background_color) {
+              const bgColors = link.background_color.split(',').map(c => c.trim());
+              if (bgColors.length > 1) {
+                const linkElement = listItem.querySelector('a');
+                if (linkElement) {
+                  const gradientColors = bgColors.join(', ');
+                  const style = document.createElement('style');
+                  const uniqueId = 'link-bg-gradient-' + Math.random().toString(36).substr(2, 9);
+                  const animName = 'linkBgGradientShift-' + uniqueId;
+                  const randomDelay = (Math.random() * 3).toFixed(2);
+                  linkElement.dataset.linkBgGradientId = uniqueId;
+                  linkElement.classList.add('animated-link-gradient-bg');
+                  
+                  style.textContent = `
+                    a.animated-link-gradient-bg[data-link-bg-gradient-id="${uniqueId}"] {
+                      background: linear-gradient(45deg, ${gradientColors}) !important;
+                      background-size: 400% 400% !important;
+                      animation: ${animName} 3s ease infinite !important;
+                      animation-delay: -${randomDelay}s !important;
+                    }
+                    @keyframes ${animName} {
+                      0% { background-position: 0% 50%; }
+                      50% { background-position: 100% 50%; }
+                      100% { background-position: 0% 50%; }
+                    }
+                  `;
+                  document.head.appendChild(style);
+                }
+              }
+            }
+
+            // Apply gradient to text color if color has multiple colors
+            if (link.color) {
+              const textColors = link.color.split(',').map(c => c.trim());
+              if (textColors.length > 1) {
+                const linkElement = listItem.querySelector('a');
+                if (linkElement) {
+                  const gradientColors = textColors.join(', ');
+                  const style = document.createElement('style');
+                  const uniqueId = 'link-text-gradient-' + Math.random().toString(36).substr(2, 9);
+                  const animName = 'linkTextGradientShift-' + uniqueId;
+                  const randomDelay = (Math.random() * 3).toFixed(2);
+                  linkElement.dataset.linkTextGradientId = uniqueId;
+                  linkElement.classList.add('animated-link-gradient-text');
+                  
+                  style.textContent = `
+                    a.animated-link-gradient-text[data-link-text-gradient-id="${uniqueId}"] {
+                      background: linear-gradient(45deg, ${gradientColors});
+                      background-size: 400% 400%;
+                      -webkit-background-clip: text;
+                      -webkit-text-fill-color: transparent;
+                      background-clip: text;
+                      animation: ${animName} 3s ease infinite;
+                      animation-delay: -${randomDelay}s;
+                    }
+                    @keyframes ${animName} {
+                      0% { background-position: 0% 50%; }
+                      50% { background-position: 100% 50%; }
+                      100% { background-position: 0% 50%; }
+                    }
+                  `;
+                  document.head.appendChild(style);
+                }
+              }
+            }
 
             listItem.addEventListener('contextmenu', (event) => {
                 const items = [
