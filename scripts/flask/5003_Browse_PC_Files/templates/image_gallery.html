@@ -523,6 +523,9 @@
                 <input type="number" class="zoom-input" id="zoomInput" value="150" min="100" max="500" step="10">
                 <span style="font-size: 12px; color: #aaa;">%</span>
             </div>
+            <button class="control-btn" id="minimapToggle" onclick="toggleMinimap()" title="Toggle Minimap">
+                <i class="nf nf-fa-map"></i> Minimap
+            </button>
             <div class="move-dropdown">
                 <button class="control-btn move-btn" onclick="toggleMoveDropdown(event)">
                     <i class="nf nf-fa-folder_open"></i> Move to
@@ -669,6 +672,37 @@
         let isZoomed = false;
         let isDragging = false;
         let startX, startY, scrollLeft, scrollTop;
+        let minimapEnabled = localStorage.getItem('minimapEnabled') !== 'false'; // Default to true
+
+        // Initialize minimap toggle button state
+        document.addEventListener('DOMContentLoaded', function() {
+            const minimapToggle = document.getElementById('minimapToggle');
+            if (minimapToggle) {
+                if (minimapEnabled) {
+                    minimapToggle.style.backgroundColor = '#4CAF50';
+                } else {
+                    minimapToggle.style.backgroundColor = '#444';
+                }
+            }
+        });
+
+        function toggleMinimap() {
+            minimapEnabled = !minimapEnabled;
+            localStorage.setItem('minimapEnabled', minimapEnabled);
+            
+            const minimapToggle = document.getElementById('minimapToggle');
+            if (minimapEnabled) {
+                minimapToggle.style.backgroundColor = '#4CAF50';
+                // Show minimap if we're zoomed
+                if (isZoomed) {
+                    showMinimap();
+                }
+            } else {
+                minimapToggle.style.backgroundColor = '#444';
+                // Hide minimap
+                hideMinimap();
+            }
+        }
 
         function toggleZoom() {
             const image = document.getElementById('mainImage');
@@ -685,8 +719,10 @@
                 wrapper.classList.add('zoomed');
                 isZoomed = true;
 
-                // Show minimap
-                showMinimap();
+                // Show minimap if enabled
+                if (minimapEnabled) {
+                    showMinimap();
+                }
 
                 // Small delay to let CSS apply, then scroll to show top-left of image
                 setTimeout(() => {
@@ -710,6 +746,7 @@
 
         // Minimap functionality
         function showMinimap() {
+            if (!minimapEnabled) return;
             const minimap = document.getElementById('minimap');
             minimap.style.display = 'block';
             updateMinimapViewport();
@@ -777,7 +814,10 @@
                 const centerX = wrapper.scrollLeft + rect.width / 2;
                 const centerY = wrapper.scrollTop + rect.height / 2;
                 
-                updateMinimapViewport();
+                // Update minimap if enabled
+                if (minimapEnabled) {
+                    updateMinimapViewport();
+                }
             }
         });
 
