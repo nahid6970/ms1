@@ -729,24 +729,34 @@
             const minimapImage = document.getElementById('minimapImage');
             const viewport = document.getElementById('minimapViewport');
 
-            // Get dimensions
-            const wrapperRect = wrapper.getBoundingClientRect();
-            const imageRect = image.getBoundingClientRect();
+            // Get the natural dimensions of the image
+            const naturalWidth = image.naturalWidth;
+            const naturalHeight = image.naturalHeight;
+            
+            // Get current zoom level
+            const zoomInput = document.getElementById('zoomInput');
+            const zoomLevel = parseInt(zoomInput.value) / 100;
+            
+            // Calculate actual zoomed image dimensions
+            const zoomedWidth = naturalWidth * zoomLevel;
+            const zoomedHeight = naturalHeight * zoomLevel;
+            
+            // Get minimap dimensions
             const minimapRect = minimapImage.getBoundingClientRect();
-
-            // Calculate scale factor between minimap and actual image
-            const scaleX = minimapRect.width / imageRect.width;
-            const scaleY = minimapRect.height / imageRect.height;
-
-            // Calculate viewport size on minimap
-            const viewportWidth = wrapperRect.width * scaleX;
-            const viewportHeight = wrapperRect.height * scaleY;
-
+            
+            // Calculate scale factor between minimap and zoomed image
+            const scaleX = minimapRect.width / zoomedWidth;
+            const scaleY = minimapRect.height / zoomedHeight;
+            
+            // Calculate viewport size on minimap (what portion of the image is visible)
+            const viewportWidth = Math.min(wrapper.clientWidth * scaleX, minimapRect.width);
+            const viewportHeight = Math.min(wrapper.clientHeight * scaleY, minimapRect.height);
+            
             // Calculate viewport position on minimap
             const scrollLeft = wrapper.scrollLeft;
             const scrollTop = wrapper.scrollTop;
-            const viewportLeft = scrollLeft * scaleX;
-            const viewportTop = scrollTop * scaleY;
+            const viewportLeft = Math.max(0, Math.min(scrollLeft * scaleX, minimapRect.width - viewportWidth));
+            const viewportTop = Math.max(0, Math.min(scrollTop * scaleY, minimapRect.height - viewportHeight));
 
             // Update viewport element
             viewport.style.width = viewportWidth + 'px';
@@ -778,24 +788,37 @@
             const clickX = e.clientX - minimapRect.left;
             const clickY = e.clientY - minimapRect.top;
 
-            // Calculate scale factor
-            const imageRect = image.getBoundingClientRect();
-            const scaleX = imageRect.width / minimapRect.width;
-            const scaleY = imageRect.height / minimapRect.height;
+            // Get current zoom level
+            const zoomInput = document.getElementById('zoomInput');
+            const zoomLevel = parseInt(zoomInput.value) / 100;
+            
+            // Calculate actual zoomed image dimensions
+            const naturalWidth = image.naturalWidth;
+            const naturalHeight = image.naturalHeight;
+            const zoomedWidth = naturalWidth * zoomLevel;
+            const zoomedHeight = naturalHeight * zoomLevel;
 
-            // Calculate target scroll position
+            // Calculate scale factor from minimap to zoomed image
+            const scaleX = zoomedWidth / minimapRect.width;
+            const scaleY = zoomedHeight / minimapRect.height;
+
+            // Calculate target scroll position (center the clicked point)
             const targetScrollLeft = (clickX * scaleX) - (wrapper.clientWidth / 2);
             const targetScrollTop = (clickY * scaleY) - (wrapper.clientHeight / 2);
 
-            // Scroll to target position
+            // Get maximum scroll values
+            const maxScrollLeft = Math.max(0, zoomedWidth - wrapper.clientWidth);
+            const maxScrollTop = Math.max(0, zoomedHeight - wrapper.clientHeight);
+
+            // Scroll to target position with bounds checking
             wrapper.scrollTo({
-                left: Math.max(0, targetScrollLeft),
-                top: Math.max(0, targetScrollTop),
+                left: Math.max(0, Math.min(targetScrollLeft, maxScrollLeft)),
+                top: Math.max(0, Math.min(targetScrollTop, maxScrollTop)),
                 behavior: 'smooth'
             });
 
             // Update viewport after scroll
-            setTimeout(updateMinimapViewport, 100);
+            setTimeout(updateMinimapViewport, 200);
         });
 
         // Update minimap viewport on scroll
