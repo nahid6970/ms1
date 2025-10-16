@@ -113,6 +113,16 @@ document.addEventListener('DOMContentLoaded', function () {
               });
             }
 
+            // Apply minimum width and height constraints
+            if (link.li_width) {
+              const widthValue = link.li_width.includes('px') || link.li_width.includes('%') || link.li_width === 'auto' ? link.li_width : link.li_width + 'px';
+              listItem.style.minWidth = widthValue;
+            }
+            if (link.li_height) {
+              const heightValue = link.li_height.includes('px') || link.li_height.includes('%') || link.li_height === 'auto' ? link.li_height : link.li_height + 'px';
+              listItem.style.minHeight = heightValue;
+            }
+
             let linkContent;
 
             // Determine what to do on click based on click_action
@@ -120,25 +130,31 @@ document.addEventListener('DOMContentLoaded', function () {
             const linkUrl = clickAction === 'note' ? '#' : link.url;
             const clickHandler = clickAction === 'note' ? `onclick="openNotePreview('${encodeURIComponent(link.note || '')}'); return false;"` : '';
             const targetAttr = clickAction === 'url' ? 'target="_blank"' : '';
+            
+            // Build width and height styles for non-image elements
+            const dimensionStyles = [];
+            if (link.width) dimensionStyles.push(`width: ${link.width.includes('px') || link.width.includes('%') || link.width === 'auto' ? link.width : link.width + 'px'}`);
+            if (link.height) dimensionStyles.push(`height: ${link.height.includes('px') || link.height.includes('%') || link.height === 'auto' ? link.height : link.height + 'px'}`);
+            const dimensionStyle = dimensionStyles.length > 0 ? dimensionStyles.join('; ') + '; ' : '';
 
             if (link.default_type === 'nerd-font' && link.icon_class) {
-              linkContent = `<a href="${linkUrl}" ${clickHandler} ${targetAttr} style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''} ${link.font_size ? `font-size: ${link.font_size};` : ''}" title="${link.title || link.name}"><i class="${link.icon_class}"></i></a>`;
+              linkContent = `<a href="${linkUrl}" ${clickHandler} ${targetAttr} style="text-decoration: none; ${dimensionStyle}color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''} ${link.font_size ? `font-size: ${link.font_size};` : ''} display: inline-flex; align-items: center; justify-content: center;" title="${link.title || link.name}"><i class="${link.icon_class}"></i></a>`;
             } else if (link.default_type === 'img' && link.img_src) {
               const width = link.width || '50';
               const height = link.height || '50';
               linkContent = `<a href="${linkUrl}" ${clickHandler} ${targetAttr} title="${link.title || link.name}"><img src="${link.img_src}" width="${width}" height="${height}"></a>`;
             } else if (link.default_type === 'text' && link.text) {
-              linkContent = `<a href="${linkUrl}" ${clickHandler} ${targetAttr} style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''} ${link.font_size ? `font-size: ${link.font_size};` : ''}" title="${link.title || link.name}">${link.text}</a>`;
+              linkContent = `<a href="${linkUrl}" ${clickHandler} ${targetAttr} style="text-decoration: none; ${dimensionStyle}color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''} ${link.font_size ? `font-size: ${link.font_size};` : ''} display: inline-flex; align-items: center; justify-content: center; text-align: center; overflow: hidden;" title="${link.title || link.name}">${link.text}</a>`;
             } else {
               // Fallback if default_type is not set or doesn't match available content
               if (link.icon_class) {
-                linkContent = `<a href="${linkUrl}" ${clickHandler} ${targetAttr} style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''} ${link.font_size ? `font-size: ${link.font_size};` : ''}" title="${link.title || link.name}"><i class="${link.icon_class}"></i></a>`;
+                linkContent = `<a href="${linkUrl}" ${clickHandler} ${targetAttr} style="text-decoration: none; ${dimensionStyle}color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''} ${link.font_size ? `font-size: ${link.font_size};` : ''} display: inline-flex; align-items: center; justify-content: center;" title="${link.title || link.name}"><i class="${link.icon_class}"></i></a>`;
               } else if (link.img_src) {
                 const width = link.width || '50';
                 const height = link.height || '50';
                 linkContent = `<a href="${linkUrl}" ${clickHandler} ${targetAttr} title="${link.title || link.name}"><img src="${link.img_src}" width="${width}" height="${height}"></a>`;
               } else {
-                linkContent = `<a href="${linkUrl}" ${clickHandler} ${targetAttr} style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''} ${link.font_size ? `font-size: ${link.font_size};` : ''}" title="${link.title || link.name}">${link.name}</a>`;
+                linkContent = `<a href="${linkUrl}" ${clickHandler} ${targetAttr} style="text-decoration: none; ${dimensionStyle}color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''} ${link.font_size ? `font-size: ${link.font_size};` : ''} display: inline-flex; align-items: center; justify-content: center; text-align: center; overflow: hidden;" title="${link.title || link.name}">${link.name}</a>`;
               }
             }
 
@@ -1268,6 +1284,8 @@ document.addEventListener('DOMContentLoaded', function () {
         color: document.getElementById('link-color').value || undefined,
         img_src: document.getElementById('link-img-src').value || undefined,
         text: document.getElementById('link-text').value || undefined,
+        width: document.getElementById('link-width').value || undefined,
+        height: document.getElementById('link-height').value || undefined,
         default_type: document.querySelector('input[name="link-default-type"]:checked').value || 'text',
         background_color: document.getElementById('link-background-color').value || undefined,
         border_radius: document.getElementById('link-border-radius').value || undefined,
@@ -1275,6 +1293,8 @@ document.addEventListener('DOMContentLoaded', function () {
         title: document.getElementById('link-title').value || undefined,
         note: document.getElementById('link-note').value || undefined,
         click_action: document.querySelector('input[name="link-click-action"]:checked').value || 'url',
+        li_width: document.getElementById('link-li-width').value || undefined,
+        li_height: document.getElementById('link-li-height').value || undefined,
         li_bg_color: document.getElementById('link-li-bg-color').value || undefined,
         li_hover_color: document.getElementById('link-li-hover-color').value || undefined,
         hidden: document.getElementById('link-hidden').checked || undefined,
@@ -1364,6 +1384,8 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     
     document.getElementById('edit-link-font-size').value = link.font_size || '';
+    document.getElementById('edit-link-li-width').value = link.li_width || '';
+    document.getElementById('edit-link-li-height').value = link.li_height || '';
     document.getElementById('edit-link-li-bg-color').value = link.li_bg_color || '';
     document.getElementById('edit-link-li-hover-color').value = link.li_hover_color || '';
     document.getElementById('edit-link-hidden').checked = link.hidden || false;
@@ -1397,6 +1419,8 @@ document.addEventListener('DOMContentLoaded', function () {
           note: document.getElementById('edit-link-note').value || undefined,
           click_action: document.querySelector('input[name="edit-link-click-action"]:checked').value || 'url',
           font_size: document.getElementById('edit-link-font-size').value || undefined,
+          li_width: document.getElementById('edit-link-li-width').value || undefined,
+          li_height: document.getElementById('edit-link-li-height').value || undefined,
           li_bg_color: document.getElementById('edit-link-li-bg-color').value || undefined,
           li_hover_color: document.getElementById('edit-link-li-hover-color').value || undefined,
           hidden: document.getElementById('edit-link-hidden').checked || undefined,
