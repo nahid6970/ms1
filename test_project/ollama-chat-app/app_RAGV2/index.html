@@ -647,6 +647,44 @@
     .success-notification .check-icon {
       font-size: 1.5em;
     }
+
+    /* RAG-specific styles */
+    .rag-document-card {
+      border-left: 4px solid #007bff;
+    }
+
+    .rag-search-result {
+      border-left: 3px solid #28a745;
+      margin-bottom: 10px;
+    }
+
+    .rag-distance-badge {
+      font-size: 0.8em;
+    }
+
+    /* RAG Status styles */
+    .rag-status-ready {
+      background-color: #d1e7dd !important;
+      border-color: #badbcc !important;
+      color: #0f5132 !important;
+    }
+
+    .rag-status-error {
+      background-color: #f8d7da !important;
+      border-color: #f5c2c7 !important;
+      color: #842029 !important;
+    }
+
+    .rag-status-warning {
+      background-color: #fff3cd !important;
+      border-color: #ffecb5 !important;
+      color: #664d03 !important;
+    }
+
+    .rag-status-icon {
+      font-size: 1.2em;
+      margin-right: 0.5rem;
+    }
   </style>
 </head>
 
@@ -656,7 +694,7 @@
       <div class="card-header ollama-header d-flex justify-content-between align-items-center flex-wrap gap-2">
         <h1 class="m-0 ollama-title">Ollama Web UI</h1>
         <div class="d-flex align-items-center gap-2">
-          <a href="rag_interface.html" class="btn btn-sm btn-outline-light" title="RAG System">📚 RAG</a>
+          <button class="btn btn-sm btn-outline-light" id="rag-btn" title="RAG System">📚 RAG</button>
           <select id="model-select" class="form-select form-select-sm ollama-model-select"></select>
           <button class="btn btn-sm btn-outline-light" id="settings-btn"><i class="nf nf-md-cog"></i></button>
         </div>
@@ -747,6 +785,261 @@
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
           <button type="button" class="btn btn-primary" onclick="resetToDefaults()">Reset to Defaults</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RAG Management Modal -->
+  <div class="modal fade" id="ragModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">📚 RAG System Management</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <!-- Navigation Tabs -->
+          <ul class="nav nav-tabs mb-4" id="ragTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="rag-status-tab" data-bs-toggle="tab" data-bs-target="#rag-status"
+                type="button">Status</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="rag-add-tab" data-bs-toggle="tab" data-bs-target="#rag-add" type="button">Add
+                Documents</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="rag-search-tab" data-bs-toggle="tab" data-bs-target="#rag-search"
+                type="button">Search</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="rag-manage-tab" data-bs-toggle="tab" data-bs-target="#rag-manage"
+                type="button">Manage</button>
+            </li>
+          </ul>
+
+          <div class="tab-content" id="ragTabContent">
+            <!-- Status Tab -->
+            <div class="tab-pane fade show active" id="rag-status" role="tabpanel">
+              <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                  <h6 class="mb-0">🔍 System Status</h6>
+                  <div class="btn-group">
+                    <button class="btn btn-outline-secondary btn-sm" onclick="checkRAGSystemStatus()"
+                      title="Refresh Status">
+                      <i class="nf nf-md-refresh"></i> Refresh
+                    </button>
+                    <button class="btn btn-outline-info btn-sm" onclick="testRAGConnection()"
+                      title="Test RAG Connection">
+                      <i class="nf nf-md-test_tube"></i> Test
+                    </button>
+                  </div>
+                </div>
+                <div class="card-body">
+                  <div id="ragSystemStatus">
+                    <div class="d-flex align-items-center">
+                      <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                      <span>Checking RAG system status...</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card mt-4">
+                <div class="card-header">
+                  <h6 class="mb-0">💡 How RAG Works</h6>
+                </div>
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-md-4">
+                      <div class="mb-3">
+                        <strong>🔤 Embedding Model:</strong><br>
+                        <code>nomic-embed-text</code><br>
+                        <span class="text-muted">Converts documents to vectors for search</span>
+                      </div>
+                    </div>
+                    <div class="col-md-4">
+                      <div class="mb-3">
+                        <strong>🤖 Chat Models:</strong><br>
+                        <code>gemma2:1b</code>, <code>qwen2.5:8b</code><br>
+                        <span class="text-muted">Generate responses using RAG context</span>
+                      </div>
+                    </div>
+                    <div class="col-md-4">
+                      <div class="mb-3">
+                        <strong>🔄 Process:</strong>
+                        <ol class="mb-0 ps-3 small">
+                          <li>Add documents → vectors created</li>
+                          <li>Ask question → relevant docs found</li>
+                          <li>Chat model → uses context to respond</li>
+                        </ol>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="alert alert-success mt-3">
+                    <strong>✨ Tip:</strong> Any chat model you select will automatically use your knowledge base! Just
+                    add documents here, then ask questions in the main chat.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Add Documents Tab -->
+            <div class="tab-pane fade" id="rag-add" role="tabpanel">
+              <div class="card">
+                <div class="card-header">
+                  <h6 class="mb-0">📁 Add Documents to Knowledge Base</h6>
+                </div>
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="text-center p-4 border rounded bg-light">
+                        <i class="nf nf-mdi-file_plus" style="font-size: 3rem; color: #007bff;"></i>
+                        <h5 class="mt-3">Add Single File</h5>
+                        <p class="text-muted">Select a single document to add</p>
+                        <button class="btn btn-primary" onclick="ragBrowseFile()">
+                          <i class="nf nf-mdi-folder_open"></i> Choose File
+                        </button>
+                        <input type="file" id="ragFileInput" style="display: none;"
+                          accept=".txt,.md,.py,.js,.html,.css,.json,.xml,.yaml,.yml,.csv,.sql,.sh,.ps1,.bat,.cmd,.java,.cpp,.c,.cs,.php,.rb,.go,.rs,.kt,.swift,.scala,.r,.perl,.lua,.dart">
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="text-center p-4 border rounded bg-light">
+                        <i class="nf nf-mdi-folder_plus" style="font-size: 3rem; color: #28a745;"></i>
+                        <h5 class="mt-3">Add Entire Folder</h5>
+                        <p class="text-muted">Select a folder to add all files</p>
+                        <button class="btn btn-success" onclick="ragBrowseFolder()">
+                          <i class="nf nf-mdi-folder_open"></i> Choose Folder
+                        </button>
+                        <input type="file" id="ragFolderInput" style="display: none;" webkitdirectory directory
+                          multiple>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- File Details Form (Hidden by default) -->
+                  <div id="ragFileDetails" class="mt-4" style="display: none;">
+                    <div class="card border-primary">
+                      <div class="card-header bg-primary text-white">
+                        <h6 class="mb-0">📝 File Details</h6>
+                      </div>
+                      <div class="card-body">
+                        <div class="row">
+                          <div class="col-md-8">
+                            <div class="mb-3">
+                              <label class="form-label">Selected Path:</label>
+                              <input type="text" class="form-control" id="ragSelectedPath" readonly>
+                            </div>
+                          </div>
+                          <div class="col-md-4">
+                            <div class="mb-3">
+                              <label class="form-label">Category:</label>
+                              <select class="form-select" id="ragCategory">
+                                <option value="general">General</option>
+                                <option value="code">Code</option>
+                                <option value="documentation">Documentation</option>
+                                <option value="configuration">Configuration</option>
+                                <option value="notes">Notes</option>
+                              </select>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="d-flex gap-2">
+                          <button class="btn btn-success" id="ragConfirmAdd">
+                            <i class="nf nf-md-check"></i> Add to Knowledge Base
+                          </button>
+                          <button class="btn btn-outline-secondary" onclick="ragCancelAdd()">
+                            <i class="nf nf-md-close"></i> Cancel
+                          </button>
+                        </div>
+                        <div id="ragAddProgress" class="mt-3" style="display: none;">
+                          <div class="progress">
+                            <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                          </div>
+                          <small class="text-muted">Processing files...</small>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Supported Files Info -->
+                  <div class="mt-4">
+                    <div class="alert alert-info">
+                      <strong>📋 Supported File Types:</strong>
+                      <div class="small mt-1">
+                        <span class="badge bg-secondary me-1">.txt</span>
+                        <span class="badge bg-secondary me-1">.md</span>
+                        <span class="badge bg-secondary me-1">.py</span>
+                        <span class="badge bg-secondary me-1">.js</span>
+                        <span class="badge bg-secondary me-1">.html</span>
+                        <span class="badge bg-secondary me-1">.css</span>
+                        <span class="badge bg-secondary me-1">.json</span>
+                        <span class="badge bg-secondary me-1">.xml</span>
+                        <span class="badge bg-secondary me-1">.yaml</span>
+                        <span class="badge bg-secondary me-1">.sql</span>
+                        <span class="badge bg-secondary me-1">.java</span>
+                        <span class="badge bg-secondary me-1">.cpp</span>
+                        <span class="badge bg-secondary me-1">.cs</span>
+                        <span class="badge bg-secondary me-1">.php</span>
+                        <span class="badge bg-secondary me-1">.go</span>
+                        <span class="badge bg-secondary me-1">.rs</span>
+                        <span class="badge bg-secondary me-1">and more...</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Search Tab -->
+            <div class="tab-pane fade" id="rag-search" role="tabpanel">
+              <div class="card">
+                <div class="card-header">
+                  <h6>Search Documents</h6>
+                </div>
+                <div class="card-body">
+                  <div class="mb-3">
+                    <label for="ragSearchQuery" class="form-label">Search Query</label>
+                    <input type="text" class="form-control" id="ragSearchQuery"
+                      placeholder="Enter your search query...">
+                  </div>
+                  <div class="mb-3">
+                    <label for="ragNumResults" class="form-label">Number of Results</label>
+                    <select class="form-select" id="ragNumResults">
+                      <option value="3">3</option>
+                      <option value="5" selected>5</option>
+                      <option value="10">10</option>
+                    </select>
+                  </div>
+                  <button class="btn btn-primary" onclick="ragSearchDocuments()">Search</button>
+                  <div id="ragSearchResults" class="mt-4"></div>
+                </div>
+              </div>
+            </div>
+
+
+
+            <!-- Manage Tab -->
+            <div class="tab-pane fade" id="rag-manage" role="tabpanel">
+              <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                  <h6>Document Collection</h6>
+                  <div>
+                    <button class="btn btn-outline-primary btn-sm" onclick="ragLoadDocuments()">Refresh</button>
+                    <button class="btn btn-outline-danger btn-sm" onclick="ragClearCollection()">Clear All</button>
+                  </div>
+                </div>
+                <div class="card-body">
+                  <div id="ragDocumentsList"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
         </div>
       </div>
     </div>
@@ -952,6 +1245,8 @@
       const messageInput = document.getElementById("message-input");
       const clearCodeButton = document.getElementById("clear-code");
       const settingsBtn = document.getElementById("settings-btn");
+      const ragBtn = document.getElementById("rag-btn");
+      const ragModal = new bootstrap.Modal(document.getElementById('ragModal'));
       const settingsModal = new bootstrap.Modal(document.getElementById('settingsModal'));
       const maxTokensSlider = document.getElementById('max-tokens-slider');
       const maxTokensValue = document.getElementById('max-tokens-value');
@@ -1172,6 +1467,12 @@
         // Small delay to ensure DOM elements are ready
         setTimeout(initializeRAGEventListeners, 100);
         settingsModal.show();
+      });
+
+      ragBtn.addEventListener("click", () => {
+        checkRAGSystemStatus();
+        ragLoadDocuments();
+        ragModal.show();
       });
 
       maxTokensSlider.addEventListener('input', (e) => {
@@ -1941,6 +2242,750 @@
 
       // Add file input change handler
       document.getElementById('fileInput').addEventListener('change', handleFileSelection);
+    });
+
+    // ===== RAG FUNCTIONALITY =====
+
+    // Check RAG system status
+    async function checkRAGSystemStatus() {
+      const statusDiv = document.getElementById('ragSystemStatus');
+
+      // Show checking status
+      statusDiv.className = 'alert alert-info mb-3';
+      statusDiv.innerHTML = `
+        <div class="d-flex align-items-center">
+          <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+          <span>Checking RAG system status...</span>
+        </div>
+      `;
+
+      let ragEndpoints = {
+        search: false,
+        addFile: false,
+        documents: false,
+        clear: false
+      };
+
+      let errorDetails = [];
+
+      // Check each RAG endpoint
+      try {
+        const searchResponse = await fetch('/api/rag/search', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query: 'test', n_results: 1 })
+        });
+        ragEndpoints.search = searchResponse.status !== 404;
+        if (!ragEndpoints.search && searchResponse.status === 404) {
+          errorDetails.push('Search endpoint not found');
+        }
+      } catch (e) {
+        errorDetails.push(`Search endpoint error: ${e.message}`);
+      }
+
+      try {
+        const docsResponse = await fetch('/api/rag/documents');
+        ragEndpoints.documents = docsResponse.status !== 404;
+        if (!ragEndpoints.documents && docsResponse.status === 404) {
+          errorDetails.push('Documents endpoint not found');
+        }
+      } catch (e) {
+        errorDetails.push(`Documents endpoint error: ${e.message}`);
+      }
+
+      // Check if any RAG endpoints are working
+      const workingEndpoints = Object.values(ragEndpoints).filter(Boolean).length;
+
+      if (workingEndpoints === 0) {
+        // No RAG endpoints found - check requirements
+        await checkRAGRequirements(statusDiv, errorDetails);
+      } else if (workingEndpoints < 2) {
+        // Partial functionality
+        statusDiv.className = 'alert alert-warning rag-status-warning mb-3';
+        statusDiv.innerHTML = `
+          <div class="d-flex align-items-center">
+            <span class="rag-status-icon">⚠️</span>
+            <div>
+              <strong>RAG System Partially Available</strong>
+              <div class="small">
+                Some endpoints working (${workingEndpoints}/4). Issues: ${errorDetails.join(', ')}
+                <br><strong>Try:</strong> Restart your RAG server or check server logs
+              </div>
+            </div>
+          </div>
+        `;
+      } else {
+        // System appears to be working
+        try {
+          // Try to get actual status if available
+          const statusResponse = await fetch('/api/rag/status');
+          if (statusResponse.ok) {
+            const data = await statusResponse.json();
+            statusDiv.className = 'alert alert-success rag-status-ready mb-3';
+            statusDiv.innerHTML = `
+              <div class="d-flex align-items-center">
+                <span class="rag-status-icon">✅</span>
+                <div>
+                  <strong>RAG System Ready</strong>
+                  <div class="small">
+                    Embedding Model: ${data.embedding_model || 'Available'} | 
+                    Documents: ${data.document_count || 0} | 
+                    Vector Store: ${data.vector_store_status || 'Ready'}
+                  </div>
+                </div>
+              </div>
+            `;
+          } else {
+            throw new Error('Status endpoint not available');
+          }
+        } catch (e) {
+          // Endpoints work but no detailed status
+          statusDiv.className = 'alert alert-success rag-status-ready mb-3';
+          statusDiv.innerHTML = `
+            <div class="d-flex align-items-center">
+              <span class="rag-status-icon">✅</span>
+              <div>
+                <strong>RAG System Available</strong>
+                <div class="small">
+                  Core endpoints responding (${workingEndpoints}/4) | Ready to use
+                </div>
+              </div>
+            </div>
+          `;
+        }
+      }
+    }
+
+    // Check specific RAG requirements
+    async function checkRAGRequirements(statusDiv, errorDetails = []) {
+      let missingComponents = [];
+      let installInstructions = [];
+
+      try {
+        // Check if Ollama is running
+        const ollamaResponse = await fetch('/api/tags');
+        if (!ollamaResponse.ok) {
+          missingComponents.push('Ollama server');
+          installInstructions.push('Start Ollama server');
+        } else {
+          // Check if embedding model is available
+          const models = await ollamaResponse.json();
+          const hasEmbeddingModel = models.models?.some(model =>
+            model.name.includes('embed') ||
+            model.name.includes('nomic') ||
+            model.name.includes('mxbai')
+          );
+
+          if (!hasEmbeddingModel) {
+            missingComponents.push('Embedding model');
+            installInstructions.push('Install embedding model: <code>ollama pull nomic-embed-text</code>');
+          }
+        }
+      } catch (e) {
+        missingComponents.push('Ollama connection');
+        installInstructions.push('Ensure Ollama is running and accessible');
+      }
+
+      // Check RAG server endpoints
+      const ragEndpointsToCheck = ['/api/rag/search', '/api/rag/documents', '/api/rag/add_file'];
+      let ragServerWorking = false;
+
+      for (const endpoint of ragEndpointsToCheck) {
+        try {
+          const response = await fetch(endpoint);
+          if (response.status !== 404) {
+            ragServerWorking = true;
+            break;
+          }
+        } catch (e) {
+          // Continue checking other endpoints
+        }
+      }
+
+      if (!ragServerWorking) {
+        missingComponents.push('RAG server');
+        installInstructions.push('Start RAG server - check if your backend supports RAG endpoints');
+        if (errorDetails.length > 0) {
+          installInstructions.push(`Errors: ${errorDetails.join(', ')}`);
+        }
+      }
+
+      // Display results
+      if (missingComponents.length === 0) {
+        statusDiv.className = 'alert alert-warning rag-status-warning mb-3';
+        statusDiv.innerHTML = `
+          <div class="d-flex align-items-center">
+            <span class="rag-status-icon">⚠️</span>
+            <div>
+              <strong>RAG System Connection Issue</strong>
+              <div class="small">Components appear available but connection failed. Try refreshing.</div>
+            </div>
+          </div>
+        `;
+      } else {
+        statusDiv.className = 'alert alert-danger rag-status-error mb-3';
+        statusDiv.innerHTML = `
+          <div class="d-flex align-items-center">
+            <span class="rag-status-icon">❌</span>
+            <div>
+              <strong>Missing RAG Components</strong>
+              <div class="small">
+                Missing: ${missingComponents.join(', ')}
+                <ul class="mb-0 mt-1">
+                  ${installInstructions.map(instruction => `<li>${instruction}</li>`).join('')}
+                  <li>Install vector database (ChromaDB): <code>pip install chromadb</code></li>
+                  <li>Install sentence transformers: <code>pip install sentence-transformers</code></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    // Test RAG connection with detailed feedback
+    async function testRAGConnection() {
+      const statusDiv = document.getElementById('ragSystemStatus');
+
+      statusDiv.className = 'alert alert-info mb-3';
+      statusDiv.innerHTML = `
+        <div class="d-flex align-items-center">
+          <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+          <span>Testing RAG connection...</span>
+        </div>
+      `;
+
+      const tests = [
+        { name: 'Documents List', url: '/api/rag/documents', method: 'GET' },
+        { name: 'Search Test', url: '/api/rag/search', method: 'POST', body: { query: 'test', n_results: 1 } },
+        { name: 'Add File Test', url: '/api/rag/add_file', method: 'POST', body: { file_path: 'test.txt', metadata: {} } },
+        { name: 'Clear Test', url: '/api/rag/clear', method: 'POST', body: {} }
+      ];
+
+      let results = [];
+
+      for (const test of tests) {
+        try {
+          const options = {
+            method: test.method,
+            headers: { 'Content-Type': 'application/json' }
+          };
+
+          if (test.body) {
+            options.body = JSON.stringify(test.body);
+          }
+
+          const response = await fetch(test.url, options);
+          const status = response.status;
+
+          if (status === 404) {
+            results.push(`❌ ${test.name}: Endpoint not found (404)`);
+          } else if (status >= 200 && status < 300) {
+            results.push(`✅ ${test.name}: Working (${status})`);
+          } else if (status >= 400 && status < 500) {
+            results.push(`⚠️ ${test.name}: Client error (${status}) - endpoint exists but request invalid`);
+          } else {
+            results.push(`❌ ${test.name}: Server error (${status})`);
+          }
+        } catch (error) {
+          results.push(`❌ ${test.name}: Connection failed - ${error.message}`);
+        }
+      }
+
+      const workingTests = results.filter(r => r.includes('✅')).length;
+      const partialTests = results.filter(r => r.includes('⚠️')).length;
+
+      let alertClass, icon, title;
+      if (workingTests >= 2) {
+        alertClass = 'alert alert-success rag-status-ready mb-3';
+        icon = '✅';
+        title = 'RAG Connection Test: PASSED';
+      } else if (workingTests > 0 || partialTests > 0) {
+        alertClass = 'alert alert-warning rag-status-warning mb-3';
+        icon = '⚠️';
+        title = 'RAG Connection Test: PARTIAL';
+      } else {
+        alertClass = 'alert alert-danger rag-status-error mb-3';
+        icon = '❌';
+        title = 'RAG Connection Test: FAILED';
+      }
+
+      statusDiv.className = alertClass;
+      statusDiv.innerHTML = `
+        <div class="d-flex align-items-center">
+          <span class="rag-status-icon">${icon}</span>
+          <div>
+            <strong>${title}</strong>
+            <div class="small">
+              <div class="mt-1">
+                ${results.join('<br>')}
+              </div>
+              <div class="mt-2">
+                <strong>Summary:</strong> ${workingTests} working, ${partialTests} partial, ${results.length - workingTests - partialTests} failed
+              </div>
+              ${workingTests >= 3 ? `
+                <div class="mt-2 text-success">
+                  <strong>✅ RAG Ready:</strong> Your embedding model works automatically with any chat model you select.
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // File browser functions
+    function ragBrowseFile() {
+      document.getElementById('ragFileInput').click();
+    }
+
+    function ragBrowseFolder() {
+      document.getElementById('ragFolderInput').click();
+    }
+
+    // Handle file selection from browser
+    function ragHandleFileSelection(event) {
+      const files = event.target.files;
+      if (files.length > 0) {
+        const file = files[0];
+
+        // Show file details form
+        document.getElementById('ragFileDetails').style.display = 'block';
+        document.getElementById('ragSelectedPath').value = file.name;
+
+        // Auto-detect category based on file extension
+        const extension = file.name.toLowerCase().split('.').pop();
+        const categoryMap = {
+          'py': 'code',
+          'js': 'code',
+          'html': 'code',
+          'css': 'code',
+          'java': 'code',
+          'cpp': 'code',
+          'c': 'code',
+          'cs': 'code',
+          'php': 'code',
+          'rb': 'code',
+          'go': 'code',
+          'rs': 'code',
+          'kt': 'code',
+          'swift': 'code',
+          'md': 'documentation',
+          'txt': 'documentation',
+          'json': 'configuration',
+          'xml': 'configuration',
+          'yaml': 'configuration',
+          'yml': 'configuration'
+        };
+
+        const suggestedCategory = categoryMap[extension] || 'general';
+        document.getElementById('ragCategory').value = suggestedCategory;
+
+        // Store file for later processing
+        window.selectedRAGFile = file;
+        window.selectedRAGType = 'file';
+      }
+    }
+
+    // Handle folder selection from browser
+    function ragHandleFolderSelection(event) {
+      const files = event.target.files;
+      if (files.length > 0) {
+        // Get the common path from the first file
+        const firstFile = files[0];
+        const pathParts = firstFile.webkitRelativePath.split('/');
+        const folderName = pathParts[0];
+
+        // Show file details form
+        document.getElementById('ragFileDetails').style.display = 'block';
+        document.getElementById('ragSelectedPath').value = `${folderName} (${files.length} files)`;
+
+        // Auto-suggest category based on folder name
+        const folderLower = folderName.toLowerCase();
+        let suggestedCategory = 'general';
+
+        if (folderLower.includes('doc')) suggestedCategory = 'documentation';
+        else if (folderLower.includes('src') || folderLower.includes('code')) suggestedCategory = 'code';
+        else if (folderLower.includes('config')) suggestedCategory = 'configuration';
+        else if (folderLower.includes('test')) suggestedCategory = 'notes';
+
+        document.getElementById('ragCategory').value = suggestedCategory;
+
+        // Store files for later processing
+        window.selectedRAGFiles = files;
+        window.selectedRAGType = 'folder';
+        window.selectedRAGFolderName = folderName;
+
+        // Show file count
+        showNotification(`Selected folder with ${files.length} files`);
+      }
+    }
+
+    // Cancel adding files
+    function ragCancelAdd() {
+      document.getElementById('ragFileDetails').style.display = 'none';
+      document.getElementById('ragSelectedPath').value = '';
+      document.getElementById('ragCategory').value = 'general';
+      window.selectedRAGFile = null;
+      window.selectedRAGFiles = null;
+      window.selectedRAGType = null;
+      window.selectedRAGFolderName = null;
+    }
+
+    // Confirm adding files to RAG
+    async function ragConfirmAdd() {
+      const category = document.getElementById('ragCategory').value;
+      const progressDiv = document.getElementById('ragAddProgress');
+      const progressBar = progressDiv.querySelector('.progress-bar');
+
+      if (!window.selectedRAGType) {
+        alert('No files selected');
+        return;
+      }
+
+      // Show progress
+      progressDiv.style.display = 'block';
+      progressBar.style.width = '10%';
+
+      try {
+        if (window.selectedRAGType === 'file') {
+          // Handle single file
+          const file = window.selectedRAGFile;
+          const fileContent = await readFileAsText(file);
+
+          progressBar.style.width = '50%';
+
+          const response = await fetch('/api/rag/add_file', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              file_path: file.name,
+              content: fileContent,
+              metadata: { category, added_at: new Date().toISOString() }
+            })
+          });
+
+          progressBar.style.width = '100%';
+
+          const data = await response.json();
+          if (data.success) {
+            alert(`File added successfully! Created ${data.chunk_ids?.length || 1} chunks.`);
+            ragCancelAdd();
+            ragLoadDocuments();
+          } else {
+            alert('Failed to add file: ' + (data.error || 'Unknown error'));
+          }
+        } else if (window.selectedRAGType === 'folder') {
+          // Handle folder
+          const files = window.selectedRAGFiles;
+          let successCount = 0;
+          let totalChunks = 0;
+
+          for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const progress = ((i + 1) / files.length) * 100;
+            progressBar.style.width = `${progress}%`;
+
+            try {
+              const fileContent = await readFileAsText(file);
+              const response = await fetch('/api/rag/add_file', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  file_path: file.webkitRelativePath || file.name,
+                  content: fileContent,
+                  metadata: { category, added_at: new Date().toISOString() }
+                })
+              });
+
+              const data = await response.json();
+              if (data.success) {
+                successCount++;
+                totalChunks += data.chunk_ids?.length || 1;
+              }
+            } catch (error) {
+              console.error(`Error processing file ${file.name}:`, error);
+            }
+          }
+
+          alert(`Folder processed!\nFiles added: ${successCount}/${files.length}\nTotal chunks created: ${totalChunks}`);
+          ragCancelAdd();
+          ragLoadDocuments();
+        }
+      } catch (error) {
+        console.error('Error adding files:', error);
+        alert('Failed to add files: ' + error.message);
+      } finally {
+        // Hide progress after 2 seconds
+        setTimeout(() => {
+          progressDiv.style.display = 'none';
+          progressBar.style.width = '0%';
+        }, 2000);
+      }
+    }
+
+    // Helper function to read file as text
+    async function readFileAsText(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target.result);
+        reader.onerror = () => reject(reader.error);
+        reader.readAsText(file);
+      });
+    }
+
+    // Search documents
+    async function ragSearchDocuments() {
+      const query = document.getElementById('ragSearchQuery').value;
+      const numResults = document.getElementById('ragNumResults').value;
+
+      if (!query.trim()) {
+        alert('Please enter a search query');
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/rag/search', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query, n_results: parseInt(numResults) })
+        });
+
+        const data = await response.json();
+        ragDisplaySearchResults(data.results);
+      } catch (error) {
+        console.error('Search error:', error);
+        alert('Search failed: ' + error.message);
+      }
+    }
+
+    function ragDisplaySearchResults(results) {
+      const container = document.getElementById('ragSearchResults');
+
+      if (!results || results.length === 0) {
+        container.innerHTML = '<div class="alert alert-info">No results found</div>';
+        return;
+      }
+
+      let html = '<h6>Search Results:</h6>';
+      results.forEach((result, index) => {
+        const distance = (result.distance * 100).toFixed(1);
+        html += `
+          <div class="card rag-search-result">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <h6 class="card-title">Result ${index + 1}</h6>
+                <span class="badge bg-secondary rag-distance-badge">Distance: ${distance}%</span>
+              </div>
+              <p class="card-text">${result.content.substring(0, 300)}${result.content.length > 300 ? '...' : ''}</p>
+              <small class="text-muted">
+                ${result.metadata.filename || 'Unknown file'} | 
+                Chunk ${result.metadata.chunk_index + 1}/${result.metadata.chunk_count}
+              </small>
+            </div>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    // Add file
+    async function ragAddFile() {
+      const filePath = document.getElementById('ragFilePath').value;
+      const category = document.getElementById('ragFileCategory').value;
+
+      if (!filePath.trim()) {
+        alert('Please enter a file path');
+        return;
+      }
+
+      const metadata = {
+        category: category || 'general',
+        added_at: new Date().toISOString()
+      };
+
+      try {
+        const response = await fetch('/api/rag/add_file', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ file_path: filePath, metadata })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          alert(`File added successfully! Created ${data.chunk_ids.length} chunks.`);
+          document.getElementById('ragFilePath').value = '';
+          document.getElementById('ragFileCategory').value = '';
+        }
+      } catch (error) {
+        console.error('Add file error:', error);
+        alert('Failed to add file: ' + error.message);
+      }
+    }
+
+    // Add folder
+    async function ragAddFolder() {
+      const folderPath = document.getElementById('ragFolderPath').value;
+      const category = document.getElementById('ragFolderCategory').value;
+      const recursive = document.getElementById('ragRecursiveFolder').checked;
+      const extensions = document.getElementById('ragFileExtensions').value;
+
+      if (!folderPath.trim()) {
+        alert('Please enter a folder path');
+        return;
+      }
+
+      const fileExtensions = extensions.split(',').map(ext => ext.trim()).filter(ext => ext);
+      if (fileExtensions.length === 0) {
+        alert('Please specify at least one file extension');
+        return;
+      }
+
+      const metadata = {
+        category: category || 'general',
+        added_at: new Date().toISOString()
+      };
+
+      // Show progress
+      const progressDiv = document.getElementById('ragFolderProgress');
+      const progressBar = progressDiv.querySelector('.progress-bar');
+      progressDiv.style.display = 'block';
+      progressBar.style.width = '10%';
+
+      try {
+        const response = await fetch('/api/rag/add_directory', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            directory_path: folderPath,
+            metadata,
+            recursive,
+            file_extensions: fileExtensions
+          })
+        });
+
+        progressBar.style.width = '50%';
+
+        const data = await response.json();
+
+        progressBar.style.width = '100%';
+
+        if (data.success) {
+          const totalFiles = Object.keys(data.added_files).length;
+          const totalChunks = Object.values(data.added_files).reduce((sum, chunks) => sum + chunks.length, 0);
+
+          alert(`Folder added successfully!\nFiles processed: ${totalFiles}\nTotal chunks created: ${totalChunks}`);
+
+          document.getElementById('ragFolderPath').value = '';
+          document.getElementById('ragFolderCategory').value = '';
+          ragLoadDocuments(); // Refresh the documents list
+        } else {
+          alert('Failed to add folder: ' + (data.error || 'Unknown error'));
+        }
+      } catch (error) {
+        console.error('Add folder error:', error);
+        alert('Failed to add folder: ' + error.message);
+      } finally {
+        // Hide progress after 2 seconds
+        setTimeout(() => {
+          progressDiv.style.display = 'none';
+          progressBar.style.width = '0%';
+        }, 2000);
+      }
+    }
+
+    // Load documents
+    async function ragLoadDocuments() {
+      try {
+        const response = await fetch('/api/rag/documents');
+        const data = await response.json();
+        ragDisplayDocuments(data.documents);
+      } catch (error) {
+        console.error('Load documents error:', error);
+        alert('Failed to load documents: ' + error.message);
+      }
+    }
+
+    function ragDisplayDocuments(documents) {
+      const container = document.getElementById('ragDocumentsList');
+
+      if (!documents || documents.length === 0) {
+        container.innerHTML = '<div class="alert alert-info">No documents in collection</div>';
+        return;
+      }
+
+      let html = '';
+      documents.forEach(doc => {
+        html += `
+          <div class="card rag-document-card mb-3">
+            <div class="card-body">
+              <h6 class="card-title">${doc.metadata.title || doc.filename}</h6>
+              <p class="card-text">
+                <strong>Chunks:</strong> ${doc.chunk_count} | 
+                <strong>File:</strong> ${doc.filename}
+              </p>
+              <small class="text-muted">
+                Added: ${doc.metadata.added_at ? new Date(doc.metadata.added_at).toLocaleString() : 'Unknown'}
+                ${doc.metadata.tags ? ' | Tags: ' + doc.metadata.tags.join(', ') : ''}
+              </small>
+            </div>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    // Clear collection
+    async function ragClearCollection() {
+      if (!confirm('Are you sure you want to clear all documents? This cannot be undone.')) {
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/rag/clear', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({})
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          alert('Collection cleared successfully!');
+          ragLoadDocuments();
+        }
+      } catch (error) {
+        console.error('Clear collection error:', error);
+        alert('Failed to clear collection: ' + error.message);
+      }
+    }
+
+    // Enter key support for RAG search and file input handlers
+    document.addEventListener('DOMContentLoaded', () => {
+      const ragSearchQuery = document.getElementById('ragSearchQuery');
+      if (ragSearchQuery) {
+        ragSearchQuery.addEventListener('keypress', function (e) {
+          if (e.key === 'Enter') {
+            ragSearchDocuments();
+          }
+        });
+      }
+
+      // Add file input event listeners
+      const ragFileInput = document.getElementById('ragFileInput');
+      if (ragFileInput) {
+        ragFileInput.addEventListener('change', ragHandleFileSelection);
+      }
+
+      const ragFolderInput = document.getElementById('ragFolderInput');
+      if (ragFolderInput) {
+        ragFolderInput.addEventListener('change', ragHandleFolderSelection);
+      }
+
+      // Add confirm button event listener
+      const ragConfirmBtn = document.getElementById('ragConfirmAdd');
+      if (ragConfirmBtn) {
+        ragConfirmBtn.addEventListener('click', ragConfirmAdd);
+      }
     });
 
   </script>
