@@ -46,5 +46,13 @@
     "text_color": "#000000",
     "hover_bg_color": "#ff9800",
     "hover_text_color": "#000000"
+  },
+  {
+    "path": "C:/Users/nahid/ms/msBackups/@JOB/From_dnplayer/trash",
+    "name": "trash",
+    "bg_color": "#ff0000",
+    "text_color": "#ffffff",
+    "hover_bg_color": "#ff9800",
+    "hover_text_color": "#000000"
   }
 ]
