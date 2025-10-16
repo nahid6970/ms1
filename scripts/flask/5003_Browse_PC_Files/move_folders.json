@@ -48,16 +48,16 @@
     "hover_text_color": "#000000"
   },
   {
-    "path": "C:/Users/nahid/ms/msBackups/@JOB/From_dnplayer/trash",
-    "name": "trash",
-    "bg_color": "#ff0000",
+    "path": "C:/Users/nahid/ms/msBackups/@Family/@Riyad",
+    "name": "@Riyad",
+    "bg_color": "#444",
     "text_color": "#ffffff",
-    "hover_bg_color": "#ff9800",
+    "hover_bg_color": "#FF9800",
     "hover_text_color": "#000000"
   },
   {
-    "path": "C:/Users/nahid/ms/msBackups/@Family/@Riyad",
-    "name": "@Riyad",
+    "path": "D:/Trash",
+    "name": "trash",
     "bg_color": "#444",
     "text_color": "#ffffff",
     "hover_bg_color": "#FF9800",
