@@ -102,6 +102,48 @@
             -moz-appearance: textfield;
         }
 
+        .minimap {
+            position: fixed;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 200px;
+            max-height: 300px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #444;
+            border-radius: 8px;
+            padding: 10px;
+            z-index: 100;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .minimap-content {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        .minimap-image {
+            width: 100%;
+            height: auto;
+            max-height: 280px;
+            object-fit: contain;
+            border-radius: 4px;
+        }
+
+        .minimap-viewport {
+            position: absolute;
+            border: 2px solid #2196F3;
+            background: rgba(33, 150, 243, 0.2);
+            cursor: pointer;
+            border-radius: 2px;
+            box-shadow: 0 0 10px rgba(33, 150, 243, 0.5);
+        }
+
+        .minimap-viewport:hover {
+            background: rgba(33, 150, 243, 0.3);
+        }
+
         .move-dropdown {
             position: relative;
             display: inline-block;
@@ -506,6 +548,14 @@
                 <!-- Quick move folders will be loaded here -->
             </div>
         </div>
+        <!-- Minimap -->
+        <div class="minimap" id="minimap" style="display: none;">
+            <div class="minimap-content">
+                <img src="/serve_image/{{ dir_path }}/{{ current_image }}" alt="minimap" class="minimap-image" id="minimapImage">
+                <div class="minimap-viewport" id="minimapViewport"></div>
+            </div>
+        </div>
+
         <div class="image-wrapper" id="imageWrapper">
             <img src="/serve_image/{{ dir_path }}/{{ current_image }}" alt="{{ current_image }}" class="main-image"
                 id="mainImage" onclick="toggleZoom()">
@@ -636,10 +686,14 @@
                 wrapper.classList.add('zoomed');
                 isZoomed = true;
 
+                // Show minimap
+                showMinimap();
+
                 // Small delay to let CSS apply, then scroll to show top-left of image
                 setTimeout(() => {
                     wrapper.scrollLeft = 0;
                     wrapper.scrollTop = 0;
+                    updateMinimapViewport();
                 }, 10);
             } else {
                 // Reset to default
@@ -649,7 +703,56 @@
                 wrapper.scrollLeft = 0;
                 wrapper.scrollTop = 0;
                 isZoomed = false;
+
+                // Hide minimap
+                hideMinimap();
             }
+        }
+
+        // Minimap functionality
+        function showMinimap() {
+            const minimap = document.getElementById('minimap');
+            minimap.style.display = 'block';
+            updateMinimapViewport();
+        }
+
+        function hideMinimap() {
+            const minimap = document.getElementById('minimap');
+            minimap.style.display = 'none';
+        }
+
+        function updateMinimapViewport() {
+            if (!isZoomed) return;
+
+            const wrapper = document.getElementById('imageWrapper');
+            const image = document.getElementById('mainImage');
+            const minimapImage = document.getElementById('minimapImage');
+            const viewport = document.getElementById('minimapViewport');
+
+            // Get dimensions
+            const wrapperRect = wrapper.getBoundingClientRect();
+            const imageRect = image.getBoundingClientRect();
+            const minimapRect = minimapImage.getBoundingClientRect();
+
+            // Calculate scale factor between minimap and actual image
+            const scaleX = minimapRect.width / imageRect.width;
+            const scaleY = minimapRect.height / imageRect.height;
+
+            // Calculate viewport size on minimap
+            const viewportWidth = wrapperRect.width * scaleX;
+            const viewportHeight = wrapperRect.height * scaleY;
+
+            // Calculate viewport position on minimap
+            const scrollLeft = wrapper.scrollLeft;
+            const scrollTop = wrapper.scrollTop;
+            const viewportLeft = scrollLeft * scaleX;
+            const viewportTop = scrollTop * scaleY;
+
+            // Update viewport element
+            viewport.style.width = viewportWidth + 'px';
+            viewport.style.height = viewportHeight + 'px';
+            viewport.style.left = viewportLeft + 'px';
+            viewport.style.top = viewportTop + 'px';
         }
 
         // Update zoom when input changes (if already zoomed)
@@ -658,6 +761,47 @@
                 const image = document.getElementById('mainImage');
                 const zoomLevel = parseInt(this.value) / 100;
                 image.style.transform = `scale(${zoomLevel})`;
+                updateMinimapViewport();
+            }
+        });
+
+        // Minimap click navigation
+        document.getElementById('minimap').addEventListener('click', function(e) {
+            if (!isZoomed) return;
+
+            const minimapImage = document.getElementById('minimapImage');
+            const wrapper = document.getElementById('imageWrapper');
+            const image = document.getElementById('mainImage');
+
+            // Get click position relative to minimap image
+            const minimapRect = minimapImage.getBoundingClientRect();
+            const clickX = e.clientX - minimapRect.left;
+            const clickY = e.clientY - minimapRect.top;
+
+            // Calculate scale factor
+            const imageRect = image.getBoundingClientRect();
+            const scaleX = imageRect.width / minimapRect.width;
+            const scaleY = imageRect.height / minimapRect.height;
+
+            // Calculate target scroll position
+            const targetScrollLeft = (clickX * scaleX) - (wrapper.clientWidth / 2);
+            const targetScrollTop = (clickY * scaleY) - (wrapper.clientHeight / 2);
+
+            // Scroll to target position
+            wrapper.scrollTo({
+                left: Math.max(0, targetScrollLeft),
+                top: Math.max(0, targetScrollTop),
+                behavior: 'smooth'
+            });
+
+            // Update viewport after scroll
+            setTimeout(updateMinimapViewport, 100);
+        });
+
+        // Update minimap viewport on scroll
+        document.getElementById('imageWrapper').addEventListener('scroll', function() {
+            if (isZoomed) {
+                updateMinimapViewport();
             }
         });
 
