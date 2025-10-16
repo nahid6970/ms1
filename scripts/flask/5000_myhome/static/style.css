@@ -947,8 +947,8 @@ div.toggle-container {
 
 /* Box stacking for groups */
 .group_type_box {
-  flex: 0 0 auto;
-  /* Allow to sit side-by-side, fixed width */
+  flex: 1 1 auto;
+  /* Allow to grow and shrink dynamically */
   margin-right: 10px;
   /* Add some space between horizontally stacked groups */
   vertical-align: top;
