@@ -315,11 +315,52 @@
         }
 
         .bookmark-add-btn {
-            background-color: #4CAF50 !important;
+            background-color: #555;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            margin-right: 5px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+            white-space: nowrap;
         }
 
         .bookmark-add-btn:hover {
-            background-color: #45a049 !important;
+            background-color: #666;
+        }
+
+        /* Override for the plus button styling */
+        .bookmark-group .bookmark-add-btn {
+            background-color: transparent !important;
+            color: #ffffff;
+            padding: 5px;
+            border: 1px solid #4CAF50;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            margin-right: 5px;
+        }
+
+        .bookmark-group .bookmark-add-btn:hover {
+            background-color: rgba(76, 175, 80, 0.1) !important;
+            border-color: #45a049;
+        }
+
+        /* Specific styling for move folder plus button */
+        .bookmark-group[style*="background-color: #666"] .bookmark-add-btn {
+            border-color: #FF9800;
+            color: #FF9800;
+        }
+
+        .bookmark-group[style*="background-color: #666"] .bookmark-add-btn:hover {
+            background-color: rgba(255, 152, 0, 0.1) !important;
+            border-color: #f57c00;
         }
 
         .bookmark-dropdown {
@@ -584,19 +625,6 @@
             color: #000;
             transform: scale(1.05);
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-
-        .path-link {
-            color: #2196F3;
-            text-decoration: none;
-            padding: 2px 4px;
-            border-radius: 3px;
-            transition: background-color 0.2s;
-        }
-
-        .path-link:hover {
-            background-color: rgba(33, 150, 243, 0.1);
-            text-decoration: underline;
         }
 
         .path-separator {
@@ -936,13 +964,13 @@
 
             <!-- Bookmark Group -->
             <div class="bookmark-group">
-                <button class="bookmark-add-btn" onclick="addBookmark()">
-                    <i class="nf nf-fa-bookmark"></i> Add
+                <button class="bookmark-add-btn" onclick="addBookmark()" title="Add Bookmark">
+                    <i class="nf nf-fa-plus"></i>
                 </button>
 
                 <div class="bookmark-dropdown">
                     <button onclick="toggleBookmarkDropdown(event)">
-                        <i class="nf nf-fa-chevron_down"></i> Bookmarks
+                        <i class="nf nf-fa-bookmark"></i> Bookmarks
                     </button>
                     <div class="bookmark-dropdown-content" id="bookmarkDropdown">
                         {% for bookmark in bookmarks %}
@@ -975,13 +1003,13 @@
 
             <!-- Move Folders Group -->
             <div class="bookmark-group" style="background-color: #666;">
-                <button class="bookmark-add-btn" onclick="addMoveFolder()" style="background-color: #FF9800;">
-                    <i class="nf nf-fa-folder_open"></i> Add Move
+                <button class="bookmark-add-btn" onclick="addMoveFolder()" style="background-color: #FF9800;" title="Add Move Folder">
+                    <i class="nf nf-fa-plus"></i>
                 </button>
 
                 <div class="bookmark-dropdown">
-                    <button onclick="toggleMoveFolderDropdown(event)" style="background-color: #FF9800;">
-                        <i class="nf nf-fa-chevron_down"></i> Move Folders
+                    <button onclick="toggleMoveFolderDropdown(event)" style="background-color: #FF9800; color: #000000;">
+                        <i class="nf nf-fa-folder_open"></i> Move Folders
                     </button>
                     <div class="bookmark-dropdown-content" id="moveFolderDropdown">
                         <!-- Move folders will be loaded here -->
