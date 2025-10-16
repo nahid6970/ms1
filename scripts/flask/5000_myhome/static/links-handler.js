@@ -982,7 +982,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const editGroupPopup = document.getElementById('edit-group-popup');
     const editGroupNameInput = document.getElementById('edit-group-name');
     const editGroupOriginalName = document.getElementById('edit-group-original-name');
-    const editGroupDisplaySelect = document.getElementById('edit-group-display');
+    // Radio buttons for display style (no longer a select)
     const editGroupCollapsibleCheckbox = document.getElementById('edit-group-collapsible');
     const editGroupHorizontalStackCheckbox = document.getElementById('edit-group-horizontal-stack');
     const editGroupPasswordProtectCheckbox = document.getElementById('edit-group-password-protect');
@@ -1007,7 +1007,9 @@ document.addEventListener('DOMContentLoaded', function () {
     // Find a link in the current group to get its display_style, collapsible setting, and styling options
     const linksInGroup = links.filter(link => (link.group || 'Ungrouped') === currentGroupName);
     if (linksInGroup.length > 0) {
-      editGroupDisplaySelect.value = linksInGroup[0].display_style || 'flex';
+      // Set display style radio buttons
+      const displayStyle = linksInGroup[0].display_style || 'flex';
+      document.querySelector(`input[name="edit-group-display"][value="${displayStyle}"]`).checked = true;
       editGroupCollapsibleCheckbox.checked = linksInGroup[0].collapsible || false;
       editGroupHorizontalStackCheckbox.checked = linksInGroup[0].horizontal_stack || false;
       editGroupPasswordProtectCheckbox.checked = linksInGroup[0].password_protect || false;
@@ -1475,7 +1477,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const originalGroupName = document.getElementById('edit-group-original-name').value;
         const newGroupName = document.getElementById('edit-group-name').value;
-        const newDisplayStyle = document.getElementById('edit-group-display').value;
+        const newDisplayStyle = document.querySelector('input[name="edit-group-display"]:checked').value;
         const isCollapsible = document.getElementById('edit-group-collapsible').checked;
         const isHorizontalStack = document.getElementById('edit-group-horizontal-stack').checked;
         const isPasswordProtected = document.getElementById('edit-group-password-protect').checked;

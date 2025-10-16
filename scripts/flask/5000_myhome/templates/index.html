@@ -215,11 +215,17 @@
           <input type="hidden" id="edit-group-original-name">
           <label for="edit-group-name">Group Name:</label>
           <input type="text" id="edit-group-name" placeholder="Enter group name (leave empty for 'Ungrouped')" required>
-          <label for="edit-group-display">Display Style:</label>
-          <select id="edit-group-display">
-            <option value="flex">Flex</option>
-            <option value="list-item">List Item</option>
-          </select>
+          <div style="display: flex; gap: 20px; align-items: center; margin: 10px 0;">
+            <label style="font-weight: 500;">Display Style:</label>
+            <label style="display: flex; align-items: center; gap: 5px;">
+              <input type="radio" name="edit-group-display" id="edit-group-display-flex" value="flex" checked>
+              Flex
+            </label>
+            <label style="display: flex; align-items: center; gap: 5px;">
+              <input type="radio" name="edit-group-display" id="edit-group-display-list" value="list-item">
+              List Item
+            </label>
+          </div>
           <div style="display: flex; align-items: center; gap: 10px;">
             <label for="edit-group-collapsible">
               <input type="checkbox" id="edit-group-collapsible">
