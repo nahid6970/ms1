@@ -321,22 +321,22 @@
           <div style="display: flex; gap: 20px; align-items: center; margin: 10px 0;">
             <label style="font-weight: 500;">Default Type:</label>
             <label style="display: flex; align-items: center; gap: 5px;">
-              <input type="radio" name="link-default-type" id="link-type-nerd-font" value="nerd-font" checked>
+              <input type="radio" name="link-default-type" id="link-type-text" value="text" checked>
+              Text
+            </label>
+            <label style="display: flex; align-items: center; gap: 5px;">
+              <input type="radio" name="link-default-type" id="link-type-nerd-font" value="nerd-font">
               Nerd Font
             </label>
             <label style="display: flex; align-items: center; gap: 5px;">
               <input type="radio" name="link-default-type" id="link-type-img" value="img">
               Image
             </label>
-            <label style="display: flex; align-items: center; gap: 5px;">
-              <input type="radio" name="link-default-type" id="link-type-text" value="text">
-              Text
-            </label>
           </div>
           <div style="display: flex; gap: 10px;">
-            <input type="text" id="link-text" placeholder="Text (if no icon/image)">
-            <input type="url" id="link-img-src" placeholder="Image URL (if no icon)">
+            <input type="text" id="link-text" placeholder="Text (primary option)">
             <input type="text" id="link-icon-class" placeholder="Icon Class (e.g., nf nf-cod-mail)">
+            <input type="url" id="link-img-src" placeholder="Image URL (if no text/icon)">
           </div>
           <div style="display: flex; gap: 10px;">
             <input type="text" id="link-color" placeholder="Color (e.g., #f46613 or red)">
@@ -393,22 +393,22 @@
           <div style="display: flex; gap: 20px; align-items: center; margin: 10px 0;">
             <label style="font-weight: 500;">Default Type:</label>
             <label style="display: flex; align-items: center; gap: 5px;">
-              <input type="radio" name="edit-link-default-type" id="edit-link-type-nerd-font" value="nerd-font" checked>
+              <input type="radio" name="edit-link-default-type" id="edit-link-type-text" value="text" checked>
+              Text
+            </label>
+            <label style="display: flex; align-items: center; gap: 5px;">
+              <input type="radio" name="edit-link-default-type" id="edit-link-type-nerd-font" value="nerd-font">
               Nerd Font
             </label>
             <label style="display: flex; align-items: center; gap: 5px;">
               <input type="radio" name="edit-link-default-type" id="edit-link-type-img" value="img">
               Image
             </label>
-            <label style="display: flex; align-items: center; gap: 5px;">
-              <input type="radio" name="edit-link-default-type" id="edit-link-type-text" value="text">
-              Text
-            </label>
           </div>
           <div style="display: flex; gap: 10px;">
-            <input type="text" id="edit-link-text" placeholder="Text (if no icon/image)">
-            <input type="url" id="edit-link-img-src" placeholder="Image URL (if no icon)">
+            <input type="text" id="edit-link-text" placeholder="Text (primary option)">
             <input type="text" id="edit-link-icon-class" placeholder="Icon Class (e.g., nf nf-cod-mail)">
+            <input type="url" id="edit-link-img-src" placeholder="Image URL (if no text/icon)">
           </div>
           <div style="display: flex; gap: 10px;">
             <input type="text" id="edit-link-width" placeholder="Width (e.g., 50)">

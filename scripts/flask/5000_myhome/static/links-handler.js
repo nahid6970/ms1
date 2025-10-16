@@ -1266,7 +1266,7 @@ document.addEventListener('DOMContentLoaded', function () {
         color: document.getElementById('link-color').value || undefined,
         img_src: document.getElementById('link-img-src').value || undefined,
         text: document.getElementById('link-text').value || undefined,
-        default_type: document.querySelector('input[name="link-default-type"]:checked').value || 'nerd-font',
+        default_type: document.querySelector('input[name="link-default-type"]:checked').value || 'text',
         background_color: document.getElementById('link-background-color').value || undefined,
         border_radius: document.getElementById('link-border-radius').value || undefined,
         font_size: document.getElementById('link-font-size').value || undefined,
@@ -1345,7 +1345,7 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('edit-link-text').value = link.text || '';
     
     // Set default type radio buttons
-    const defaultType = link.default_type || 'nerd-font';
+    const defaultType = link.default_type || 'text';
     document.querySelector(`input[name="edit-link-default-type"][value="${defaultType}"]`).checked = true;
     
     document.getElementById('edit-link-background-color').value = link.background_color || '';
@@ -1388,7 +1388,7 @@ document.addEventListener('DOMContentLoaded', function () {
           width: document.getElementById('edit-link-width').value || undefined,
           height: document.getElementById('edit-link-height').value || undefined,
           text: document.getElementById('edit-link-text').value || undefined,
-          default_type: document.querySelector('input[name="edit-link-default-type"]:checked').value || 'nerd-font',
+          default_type: document.querySelector('input[name="edit-link-default-type"]:checked').value || 'text',
           background_color: document.getElementById('edit-link-background-color').value || undefined,
           border_radius: document.getElementById('edit-link-border-radius').value || undefined,
           title: document.getElementById('edit-link-title').value || undefined,
