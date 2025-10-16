@@ -176,6 +176,13 @@ document.addEventListener('DOMContentLoaded', function () {
               const heightValue = link.li_height.includes('px') || link.li_height.includes('%') || link.li_height === 'auto' ? link.li_height : link.li_height + 'px';
               listItem.style.minHeight = heightValue;
             }
+            // Apply border radius first
+            let borderRadiusValue = '5px';
+            if (link.li_border_radius) {
+              borderRadiusValue = link.li_border_radius.includes('px') || link.li_border_radius.includes('%') ? link.li_border_radius : link.li_border_radius + 'px';
+              listItem.style.borderRadius = borderRadiusValue;
+            }
+
             if (link.li_border_color) {
               // Check if it's a gradient (contains comma-separated colors)
               const colors = link.li_border_color.split(',').map(c => c.trim());
@@ -192,32 +199,33 @@ document.addEventListener('DOMContentLoaded', function () {
                 listItem.dataset.gradientId = uniqueId;
                 listItem.classList.add('animated-gradient-border');
                 
-                const bgColor = link.li_bg_color || '#474747';
+                // Set position relative
+                listItem.style.position = 'relative';
+                listItem.style.border = 'none';
+                
+                // Get background color for the inner area
+                const bgColor = link.li_bg_color ? (link.li_bg_color.includes(',') ? 'transparent' : link.li_bg_color) : '#474747';
                 
                 style.textContent = `
                   .link-item.animated-gradient-border[data-gradient-id="${uniqueId}"] {
                     position: relative;
-                    border: ${borderWidth} solid;
-                    border-image: linear-gradient(45deg, ${gradientColors}) 1;
-                    animation: ${animName} 3s linear infinite;
+                    background: linear-gradient(45deg, ${gradientColors});
+                    background-size: 400% 400%;
+                    padding: ${borderWidth};
+                    animation: ${animName} 3s ease infinite;
                     animation-delay: -${randomDelay}s;
                   }
+                  .link-item.animated-gradient-border[data-gradient-id="${uniqueId}"] > a {
+                    display: flex;
+                    width: 100%;
+                    height: 100%;
+                    background: ${bgColor};
+                    border-radius: calc(${borderRadiusValue} - ${borderWidth});
+                  }
                   @keyframes ${animName} {
-                    0% { 
-                      border-image: linear-gradient(0deg, ${gradientColors}) 1;
-                    }
-                    25% { 
-                      border-image: linear-gradient(90deg, ${gradientColors}) 1;
-                    }
-                    50% { 
-                      border-image: linear-gradient(180deg, ${gradientColors}) 1;
-                    }
-                    75% { 
-                      border-image: linear-gradient(270deg, ${gradientColors}) 1;
-                    }
-                    100% { 
-                      border-image: linear-gradient(360deg, ${gradientColors}) 1;
-                    }
+                    0% { background-position: 0% 50%; }
+                    50% { background-position: 100% 50%; }
+                    100% { background-position: 0% 50%; }
                   }
                 `;
                 document.head.appendChild(style);
@@ -225,10 +233,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 // Single color - normal border
                 listItem.style.border = `2px solid ${link.li_border_color}`;
               }
-            }
-            if (link.li_border_radius) {
-              const radiusValue = link.li_border_radius.includes('px') || link.li_border_radius.includes('%') ? link.li_border_radius : link.li_border_radius + 'px';
-              listItem.style.borderRadius = radiusValue;
             }
 
             let linkContent;
