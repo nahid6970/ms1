@@ -23,20 +23,33 @@
             border-bottom: 1px solid #5a67d8;
             padding: 12px 20px;
             display: flex;
-            align-items: center;
             justify-content: space-between;
+            align-items: center;
             box-shadow: 0 2px 8px rgba(0,0,0,0.15);
             z-index: 1000;
             position: relative;
+        }
+
+        .gallery-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
         }
 
         .pdf-title {
             font-size: 16px;
             font-weight: 500;
             color: #ffffff;
-            flex: 1;
-            margin-left: 15px;
             text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .image-counter {
+            font-size: 14px;
+            color: #e0e0e0;
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 500;
         }
 
         .pdf-tools {
@@ -232,11 +245,15 @@
 </head>
 <body>
     <div class="pdf-header">
-        <a href="/?dir_path={{ dir_path }}" class="back-btn">
-            ← Back to Files
-        </a>
-        
-        <div class="pdf-title">{{ current_pdf }} - Quick Move</div>
+        <div class="gallery-info">
+            <a href="/?dir_path={{ dir_path }}" class="back-btn">
+                ← Back to Files
+            </a>
+            
+            <div class="pdf-title">{{ current_pdf }}</div>
+            
+            <div class="image-counter">{{ current_index }} of {{ total_pdfs }}</div>
+        </div>
         
         <div class="pdf-tools">
             <button class="tool-btn" onclick="toggleQuickMove()" title="Quick Move PDF">
