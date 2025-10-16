@@ -931,6 +931,7 @@ div.toggle-container {
 
 .link-group {
   background-color: #2d2d2d;
+  border: 1px solid #b3d9ff;
   border-radius: 8px;
   padding: 10px;
   margin-bottom: 10px;
