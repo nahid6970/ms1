@@ -1044,8 +1044,8 @@ div.toggle-container {
 /* Text links in box popup should be rectangular */
 #group_type_box-popup .popup-content-inner .link-item.link-type-text {
   min-width: 120px;
-  max-width: 300px;
-  width: auto;
+  max-width: none;
+  flex: 1;
   height: auto;
   min-height: 60px;
   padding: 10px 15px;
