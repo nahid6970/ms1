@@ -827,6 +827,99 @@
             setTimeout(updateMinimapViewport, 200);
         });
 
+        // Minimap viewport drag functionality
+        let isMinimapDragging = false;
+        let minimapStartX, minimapStartY;
+        let minimapViewportStartLeft, minimapViewportStartTop;
+
+        document.getElementById('minimapViewport').addEventListener('mousedown', function(e) {
+            if (!isZoomed) return;
+            isMinimapDragging = true;
+            const viewport = document.getElementById('minimapViewport');
+            minimapStartX = e.clientX;
+            minimapStartY = e.clientY;
+            minimapViewportStartLeft = parseFloat(viewport.style.left) || 0;
+            minimapViewportStartTop = parseFloat(viewport.style.top) || 0;
+            e.stopPropagation();
+        });
+
+        document.addEventListener('mousemove', function(e) {
+            // Handle image panning
+            if (isDragging && isZoomed) {
+                e.preventDefault();
+                const wrapper = document.getElementById('imageWrapper');
+                const x = e.pageX - wrapper.getBoundingClientRect().left;
+                const y = e.pageY - wrapper.getBoundingClientRect().top;
+                const walkX = (x - startX);
+                const walkY = (y - startY);
+                wrapper.scrollLeft = scrollLeft - walkX;
+                wrapper.scrollTop = scrollTop - walkY;
+            }
+            
+            // Handle minimap viewport dragging
+            if (isMinimapDragging && isZoomed) {
+                e.preventDefault();
+                const viewport = document.getElementById('minimapViewport');
+                const minimapImage = document.getElementById('minimapImage');
+                const wrapper = document.getElementById('imageWrapper');
+                const image = document.getElementById('mainImage');
+                
+                // Calculate movement delta
+                const deltaX = e.clientX - minimapStartX;
+                const deltaY = e.clientY - minimapStartY;
+                
+                // Calculate new viewport position
+                const newLeft = minimapViewportStartLeft + deltaX;
+                const newTop = minimapViewportStartTop + deltaY;
+                
+                // Get minimap dimensions
+                const minimapRect = minimapImage.getBoundingClientRect();
+                const viewportRect = viewport.getBoundingClientRect();
+                
+                // Constrain to minimap boundaries
+                const maxLeft = minimapRect.width - viewportRect.width;
+                const maxTop = minimapRect.height - viewportRect.height;
+                
+                const constrainedLeft = Math.max(0, Math.min(newLeft, maxLeft));
+                const constrainedTop = Math.max(0, Math.min(newTop, maxTop));
+                
+                // Update viewport position
+                viewport.style.left = constrainedLeft + 'px';
+                viewport.style.top = constrainedTop + 'px';
+                
+                // Get current zoom level
+                const zoomInput = document.getElementById('zoomInput');
+                const zoomLevel = parseInt(zoomInput.value) / 100;
+                
+                // Calculate actual zoomed image dimensions
+                const naturalWidth = image.naturalWidth;
+                const naturalHeight = image.naturalHeight;
+                const zoomedWidth = naturalWidth * zoomLevel;
+                const zoomedHeight = naturalHeight * zoomLevel;
+
+                // Calculate scale factor from minimap to zoomed image
+                const scaleX = zoomedWidth / minimapRect.width;
+                const scaleY = zoomedHeight / minimapRect.height;
+
+                // Calculate target scroll position
+                const targetScrollLeft = constrainedLeft * scaleX;
+                const targetScrollTop = constrainedTop * scaleY;
+
+                // Get maximum scroll values
+                const maxScrollLeft = Math.max(0, zoomedWidth - wrapper.clientWidth);
+                const maxScrollTop = Math.max(0, zoomedHeight - wrapper.clientHeight);
+
+                // Scroll to target position
+                wrapper.scrollLeft = Math.max(0, Math.min(targetScrollLeft, maxScrollLeft));
+                wrapper.scrollTop = Math.max(0, Math.min(targetScrollTop, maxScrollTop));
+            }
+        });
+
+        document.addEventListener('mouseup', function() {
+            isDragging = false;
+            isMinimapDragging = false;
+        });
+
         // Update minimap viewport on scroll
         document.getElementById('imageWrapper').addEventListener('scroll', function() {
             if (isZoomed) {
