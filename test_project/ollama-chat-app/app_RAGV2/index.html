@@ -734,7 +734,7 @@
                 </ul>
               </div>
               <button type="button" class="btn btn-outline-secondary" onclick="openFileUpload()" title="Upload Files">
-                <i class="nf nf-mdi-folder_open"></i>
+                📁
               </button>
             </div>
             <input type="file" id="fileInput" multiple style="display: none;"
@@ -2183,10 +2183,11 @@
     }
 
     // Show notification
-    function showNotification(message) {
+    function showNotification(message, type = 'success') {
       // Create a simple toast notification
       const toast = document.createElement('div');
-      toast.className = 'position-fixed top-0 end-0 m-3 alert alert-success alert-dismissible';
+      const alertClass = type === 'error' ? 'alert-danger' : 'alert-success';
+      toast.className = `position-fixed top-0 end-0 m-3 alert ${alertClass} alert-dismissible`;
       toast.style.zIndex = '9999';
       toast.innerHTML = `
         ${message}
@@ -2205,25 +2206,78 @@
 
     // ===== FILE UPLOAD FUNCTIONALITY =====
 
-    // Open file upload dialog
+    // Open file upload dialog - adds content directly to chat
     function openFileUpload() {
-      document.getElementById('fileInput').click();
+      // Create a fresh file input
+      const fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.multiple = true;
+      fileInput.accept = '.txt,.py,.js,.html,.css,.json,.md,.ps1,.sh,.java,.cpp,.c,.cs,.php,.rb,.go,.rs,.kt,.swift,.xml,.yaml,.yml';
+
+      // Handle file selection by adding content to chat input
+      fileInput.onchange = async function (event) {
+        const files = event.target.files;
+        if (files.length === 0) return;
+
+        const messageInput = document.getElementById('message-input');
+        let fileContent = '';
+
+        for (let file of files) {
+          try {
+            // Read file content
+            const content = await new Promise((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onload = (e) => resolve(e.target.result);
+              reader.onerror = () => reject(reader.error);
+              reader.readAsText(file);
+            });
+
+            // Add file content to the message
+            fileContent += `\n\n**File: ${file.name}**\n\`\`\`\n${content}\n\`\`\`\n`;
+          } catch (error) {
+            fileContent += `\n\n**File: ${file.name}** - Error reading file\n`;
+            console.error('Error reading file:', error);
+          }
+        }
+
+        // Add content to the message input
+        if (messageInput.value.trim()) {
+          messageInput.value += fileContent;
+        } else {
+          messageInput.value = fileContent.trim();
+        }
+
+        // Auto-resize the textarea
+        messageInput.style.height = 'auto';
+        messageInput.style.height = Math.min(messageInput.scrollHeight, 200) + 'px';
+
+        // Focus on the input
+        messageInput.focus();
+      };
+
+      // Open the file dialog
+      fileInput.click();
     }
 
-    // Handle file selection
-    function handleFileSelection(event) {
+    // Handle file selection - using same logic as drag-and-drop
+    async function handleFileSelection(event) {
+      console.log('handleFileSelection called', event);
       const files = event.target.files;
+      console.log('Files selected:', files.length);
+
       if (files.length === 0) return;
 
-      // Process each selected file
-      Array.from(files).forEach(async file => {
+      // Process files the same way as drag-and-drop
+      for (let file of files) {
+        console.log('Processing file:', file.name);
         try {
           const fileData = await readFileContent(file);
+          console.log('File data:', fileData);
           displayFileMessage(fileData);
         } catch (error) {
-          showNotification(`Error reading file: ${file.name}`, 'error');
+          console.error('Error reading file:', error);
         }
-      });
+      }
 
       // Clear the input so the same file can be selected again
       event.target.value = '';
