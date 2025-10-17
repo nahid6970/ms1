@@ -62,33 +62,40 @@ def create_editor_chooser(file_path):
             root.destroy()
             open_with_editor(file_path, editor_name.lower().replace("vscode", "vscode"))
         
-        btn = tk.Button(
-            button_frame,
+        # Create frame for button
+        btn_frame = tk.Frame(button_frame, bg=color, width=120, height=60, cursor='hand2')
+        btn_frame.pack(side='left', padx=10)
+        btn_frame.pack_propagate(False)
+        
+        # Create label inside frame for better centering
+        label = tk.Label(
+            btn_frame,
             text=f"{icon}\n{editor_name}",
             font=button_font,
             bg=color,
             fg='#000000',
-            activebackground=color,
-            activeforeground='#000000',
-            width=10,
-            height=3,
-            relief='flat',
-            cursor='hand2',
-            command=on_click,
-            compound='center',
-            justify='center'
+            cursor='hand2'
         )
-        btn.pack(side='left', padx=10)
+        label.place(relx=0.5, rely=0.5, anchor='center')
+        
+        # Bind click events
+        btn_frame.bind('<Button-1>', lambda e: on_click())
+        label.bind('<Button-1>', lambda e: on_click())
         
         # Hover effect
         def on_enter(e):
-            btn.config(bg=adjust_color(color, 1.2))
+            new_color = adjust_color(color, 1.2)
+            btn_frame.config(bg=new_color)
+            label.config(bg=new_color)
         
         def on_leave(e):
-            btn.config(bg=color)
+            btn_frame.config(bg=color)
+            label.config(bg=color)
         
-        btn.bind("<Enter>", on_enter)
-        btn.bind("<Leave>", on_leave)
+        btn_frame.bind("<Enter>", on_enter)
+        btn_frame.bind("<Leave>", on_leave)
+        label.bind("<Enter>", on_enter)
+        label.bind("<Leave>", on_leave)
     
     def adjust_color(hex_color, factor):
         """Lighten color by factor"""

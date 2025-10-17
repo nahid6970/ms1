@@ -7,36 +7,37 @@ def view_bookmarks():
     """Display bookmarks in fzf and allow actions on selected bookmark"""
     bookmarks_file = r"C:\Users\nahid\script_output\bookmarks.json"
     
-    # Load bookmarks
-    if not os.path.exists(bookmarks_file):
-        print("No bookmarks found. Press F5 to add bookmarks!")
-        return
-    
-    try:
-        with open(bookmarks_file, 'r', encoding='utf-8') as f:
-            bookmarks = json.load(f)
-    except json.JSONDecodeError:
-        print("Error reading bookmarks file")
-        return
-    
-    if not bookmarks:
-        print("No bookmarks found. Press F5 to add bookmarks!")
-        return
-    
-    # Filter out non-existent files
-    valid_bookmarks = [b for b in bookmarks if os.path.exists(b)]
-    
-    # Update bookmarks file if some were invalid
-    if len(valid_bookmarks) != len(bookmarks):
-        with open(bookmarks_file, 'w', encoding='utf-8') as f:
-            json.dump(valid_bookmarks, f, indent=2, ensure_ascii=False)
-    
-    if not valid_bookmarks:
-        print("All bookmarks point to non-existent files")
-        return
-    
-    # Create preview script
-    preview_script_content = '''
+    while True:  # Loop to keep showing bookmarks after opening files
+        # Load bookmarks
+        if not os.path.exists(bookmarks_file):
+            print("No bookmarks found. Press F5 to add bookmarks!")
+            return
+        
+        try:
+            with open(bookmarks_file, 'r', encoding='utf-8') as f:
+                bookmarks = json.load(f)
+        except json.JSONDecodeError:
+            print("Error reading bookmarks file")
+            return
+        
+        if not bookmarks:
+            print("No bookmarks found. Press F5 to add bookmarks!")
+            return
+        
+        # Filter out non-existent files
+        valid_bookmarks = [b for b in bookmarks if os.path.exists(b)]
+        
+        # Update bookmarks file if some were invalid
+        if len(valid_bookmarks) != len(bookmarks):
+            with open(bookmarks_file, 'w', encoding='utf-8') as f:
+                json.dump(valid_bookmarks, f, indent=2, ensure_ascii=False)
+        
+        if not valid_bookmarks:
+            print("All bookmarks point to non-existent files")
+            return
+        
+        # Create preview script
+        preview_script_content = '''
 param($FilePath)
 
 if (-not (Test-Path $FilePath)) {
@@ -89,50 +90,54 @@ catch {
 }
 '''
     
-    preview_script_file = None
-    try:
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, encoding='utf-8', suffix='.ps1') as preview_script:
-            preview_script.write(preview_script_content)
-            preview_script_file = preview_script.name
-        
-        # Prepare fzf input
-        fzf_input = "\n".join(valid_bookmarks)
-        
-        # Run fzf
-        fzf_args = [
-            "fzf",
-            "--prompt=Bookmarks: ",
-            "--header=Enter: Open in nvim | Ctrl-O: Explorer | Ctrl-C: Copy | Ctrl-P: Toggle Preview | Del: Remove",
-            f"--preview=powershell -ExecutionPolicy Bypass -File \"{preview_script_file}\" {{}}",
-            "--preview-window=right:60%:border-left",
-            "--preview-window=hidden",  # Start with preview hidden
-            "--border",
-            "--layout=reverse",
-            "--color=bg:-1,bg+:-1,fg:#d1ff94,fg+:#8fdbff,hl:#fe8019,hl+:#fe8019,info:#83a598,prompt:#b8bb26,pointer:#d3869b,marker:#ff4747,spinner:#fe8019,header:#83a598,preview-bg:-1,border:#d782ff",
-            "--bind=ctrl-o:execute-silent(explorer.exe /select,{})",
-            "--bind=ctrl-c:execute-silent(echo {} | clip)",
-            "--bind=ctrl-p:toggle-preview",
-            f"--bind=del:execute-silent(python remove_bookmark.py {{}})+reload(python reload_bookmarks.py)"
-        ]
-        
-        process = subprocess.Popen(fzf_args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True, encoding='utf-8')
-        stdout, _ = process.communicate(input=fzf_input)
-        
-        # Open selected bookmark with editor chooser
-        if stdout and process.returncode == 0:
+        preview_script_file = None
+        try:
+            with tempfile.NamedTemporaryFile(mode='w', delete=False, encoding='utf-8', suffix='.ps1') as preview_script:
+                preview_script.write(preview_script_content)
+                preview_script_file = preview_script.name
+            
+            # Prepare fzf input
+            fzf_input = "\n".join(valid_bookmarks)
+            
+            # Run fzf
+            fzf_args = [
+                "fzf",
+                "--prompt=Bookmarks: ",
+                "--header=Enter: Open | Ctrl-O: Explorer | Ctrl-C: Copy | Ctrl-P: Toggle Preview | Del: Remove | ESC: Exit",
+                f"--preview=powershell -ExecutionPolicy Bypass -File \"{preview_script_file}\" {{}}",
+                "--preview-window=right:60%:border-left",
+                "--preview-window=hidden",  # Start with preview hidden
+                "--border",
+                "--layout=reverse",
+                "--color=bg:-1,bg+:-1,fg:#d1ff94,fg+:#8fdbff,hl:#fe8019,hl+:#fe8019,info:#83a598,prompt:#b8bb26,pointer:#d3869b,marker:#ff4747,spinner:#fe8019,header:#83a598,preview-bg:-1,border:#d782ff",
+                "--bind=ctrl-o:execute-silent(explorer.exe /select,{})",
+                "--bind=ctrl-c:execute-silent(echo {} | clip)",
+                "--bind=ctrl-p:toggle-preview",
+                f"--bind=del:execute-silent(python remove_bookmark.py {{}})+reload(python reload_bookmarks.py)"
+            ]
+            
+            process = subprocess.Popen(fzf_args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True, encoding='utf-8')
+            stdout, _ = process.communicate(input=fzf_input)
+            
+            # If user pressed ESC or cancelled, exit the loop
+            if not stdout or process.returncode != 0:
+                return
+            
+            # Open selected bookmark with editor chooser
             selected_file = stdout.strip()
             if selected_file:
                 # Get script directory
                 script_dir = os.path.dirname(os.path.abspath(__file__))
                 editor_chooser = os.path.join(script_dir, "editor_chooser.py")
                 subprocess.run(f'python "{editor_chooser}" "{selected_file}"', shell=True)
-        
-    finally:
-        if preview_script_file and os.path.exists(preview_script_file):
-            try:
-                os.remove(preview_script_file)
-            except:
-                pass
+                # Loop continues, showing bookmarks again
+            
+        finally:
+            if preview_script_file and os.path.exists(preview_script_file):
+                try:
+                    os.remove(preview_script_file)
+                except:
+                    pass
 
 if __name__ == "__main__":
     view_bookmarks()
