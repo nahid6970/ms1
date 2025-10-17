@@ -399,7 +399,7 @@ python "{menu_script_path}" "!temp_file!"
             "--bind=ctrl-r:execute-silent(powershell -command Start-Process '{1}')",
             f"--bind=f1:execute-silent(cmd /c start cmd /k type {temp_shortcut_file} & pause)",
             f"--bind=f2:execute-silent(powershell -ExecutionPolicy Bypass -File \"{toggle_script_file}\")+refresh-preview",
-            f"--bind=f4:execute-silent(python \"{view_bookmarks_script}\")",
+            f"--bind=f4:execute-silent(start cmd /c python \"{view_bookmarks_script}\")",
             f"--bind=f5:execute-silent(python \"{add_bookmark_script}\" {{1}})",
             "--bind=ctrl-p:toggle-preview",
         ]
