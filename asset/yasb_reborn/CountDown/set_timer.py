@@ -1,10 +1,12 @@
-import tkinter as tk
+import customtkinter as ctk
 from tkinter import messagebox
 import re
 import time
-import json
-from datetime import datetime, timedelta
 import os
+
+# Set the appearance mode and color theme
+ctk.set_appearance_mode("dark")
+ctk.set_default_color_theme("blue")
 
 def parse_time_input(time_str):
     """Parse time input like '5h 3m' or '1d 5h 3m' and return total seconds"""
@@ -51,19 +53,25 @@ def save_timer(end_time):
 def set_timer():
     """Main function to set the timer with GUI"""
     # Create main window
-    root = tk.Tk()
+    root = ctk.CTk()
     root.title("Set Timer")
-    root.geometry("350x200")
+    root.geometry("400x250")
     root.resizable(False, False)
     
     # Center the window
     root.eval('tk::PlaceWindow . center')
     
-    # Create and pack widgets
-    label = tk.Label(root, text="Enter time (e.g., 5h 3m or 1d 5h 3m):", font=("Arial", 10))
-    label.pack(pady=20)
+    # Configure font
+    font_family = "JetBrains Mono"
     
-    entry = tk.Entry(root, width=30, font=("Arial", 12))
+    # Create and pack widgets
+    label = ctk.CTkLabel(root, text="Enter time (e.g., 5h 3m or 1d 5h 3m):", 
+                        font=(font_family, 14))
+    label.pack(pady=(20, 10))
+    
+    entry = ctk.CTkEntry(root, width=300, height=35, 
+                        font=(font_family, 14), 
+                        placeholder_text="e.g., 5h 3m or 1d 5h 3m")
     entry.pack(pady=10)
     entry.focus()
     
@@ -95,11 +103,16 @@ def set_timer():
     # Bind Enter key to submit
     entry.bind('<Return>', lambda event: on_submit())
     
-    submit_btn = tk.Button(root, text="Set Timer", command=on_submit, font=("Arial", 12), width=15, height=1)
+    submit_btn = ctk.CTkButton(root, text="Set Timer", command=on_submit, 
+                              font=(font_family, 14), 
+                              width=150, height=35,
+                              corner_radius=10)
     submit_btn.pack(pady=20)
     
     # Add example label
-    example_label = tk.Label(root, text="Examples: 5h 3m, 1d 5h 3m, 30m, 2h", font=("Arial", 8), fg="gray")
+    example_label = ctk.CTkLabel(root, text="Examples: 5h 3m, 1d 5h 3m, 30m, 2h", 
+                                font=(font_family, 12), 
+                                text_color="gray")
     example_label.pack()
     
     # Run the application
