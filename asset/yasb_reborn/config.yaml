@@ -59,6 +59,7 @@ bars:
         - "whkd"
         - "notifications"
       right:
+        - "countdown_timer"
         - "scoop_updates"
         - "winget_updates"
 widgets:
@@ -441,40 +442,40 @@ widgets:
   disk:
     type: "yasb.disk.DiskWidget"
     options:
-        label: "<span>\uf473</span>"
-        label_alt: "<span>\uf473</span>"
-        group_label:
-          volume_labels: ["C", "D", "E", "F"]
-          show_label_name: false 
-          blur: True
-          round_corners: True
-          round_corners_type: "normal"
-          border_color: "System"
-          alignment: "right"
-          direction: "down"
-          distance: 6
-        callbacks:
-          on_left: "toggle_group"
-        container_padding:
-          top: 0
-          left: 10
-          bottom: 0
-          right: 10
-        label_shadow:
-          enabled: false
-          color: "black"
-          radius: 3
-          offset: [0, 0]
+      label: "<span>\uf473</span>"
+      label_alt: "<span>\uf473</span>"
+      group_label:
+        volume_labels: ["C", "D", "E", "F"]
+        show_label_name: false
+        blur: True
+        round_corners: True
+        round_corners_type: "normal"
+        border_color: "System"
+        alignment: "right"
+        direction: "down"
+        distance: 6
+      callbacks:
+        on_left: "toggle_group"
+      container_padding:
+        top: 0
+        left: 10
+        bottom: 0
+        right: 10
+      label_shadow:
+        enabled: false
+        color: "black"
+        radius: 3
+        offset: [0, 0]
   home_folder:
     type: "yasb.home.HomeWidget"
     options:
       label: "<span>\ue613</span>"
       menu_list:
-      - { title: "User Home", path: "~" }
-      - { title: "Download", path: "D:\\Downloads" }
-      - { title: "msBackups", path: "C:\\Users\\nahid\\ms\\msBackups" }
-      - { title: "Job", path: "C:\\Users\\nahid\\ms\\msBackups\\@JOB" }
-      - { title: "ms1", path: "C:\\Users\\nahid\\ms\\ms1" }
+        - { title: "User Home", path: "~" }
+        - { title: "Download", path: "D:\\Downloads" }
+        - { title: "msBackups", path: "C:\\Users\\nahid\\ms\\msBackups" }
+        - { title: "Job", path: "C:\\Users\\nahid\\ms\\msBackups\\@JOB" }
+        - { title: "ms1", path: "C:\\Users\\nahid\\ms\\ms1" }
       system_menu: false
       power_menu: false
       blur: true
@@ -498,42 +499,43 @@ widgets:
   server_monitor:
     type: "yasb.server_monitor.ServerMonitor"
     options:
-        label: "<span>\uf510</span>"
-        label_alt: "{online}/{offline} of {total}"
-        ssl_check: false
-        ssl_verify: false
-        ssl_warning: 10
-        timeout: 2
-        update_interval: 60
-        desktop_notifications:
-          ssl: false
-          offline: true
-        servers: [
-          '192.168.0.101:5000',
-          '192.168.0.101:5001',
-          '192.168.0.101:5002',
-          '192.168.0.101:5003',
+      label: "<span>\uf510</span>"
+      label_alt: "{online}/{offline} of {total}"
+      ssl_check: false
+      ssl_verify: false
+      ssl_warning: 10
+      timeout: 2
+      update_interval: 60
+      desktop_notifications:
+        ssl: false
+        offline: true
+      servers:
+        [
+          "192.168.0.101:5000",
+          "192.168.0.101:5001",
+          "192.168.0.101:5002",
+          "192.168.0.101:5003",
         ]
-        menu:
-          blur: True
-          round_corners: True
-          round_corners_type: "normal"
-          border_color: "System"
-          alignment: "right"
-          direction: "down"
-        callbacks:
-          on_left: "toggle_menu"
-          on_right: "toggle_label"
-        container_padding:
-          top: 0
-          left: 10
-          bottom: 0
-          right: 10
-        label_shadow:
-          enabled: false
-          color: "black"
-          radius: 3
-          offset: [0, 0]
+      menu:
+        blur: True
+        round_corners: True
+        round_corners_type: "normal"
+        border_color: "System"
+        alignment: "right"
+        direction: "down"
+      callbacks:
+        on_left: "toggle_menu"
+        on_right: "toggle_label"
+      container_padding:
+        top: 0
+        left: 10
+        bottom: 0
+        right: 10
+      label_shadow:
+        enabled: false
+        color: "black"
+        radius: 3
+        offset: [0, 0]
   todo:
     type: "yasb.todo.TodoWidget"
     options:
@@ -625,7 +627,7 @@ widgets:
       class_name: "ip-info-widget"
       exec_options:
         run_cmd: "curl.exe https://ipinfo.io"
-        run_interval: 120000  # every 5 minutes
+        run_interval: 120000 # every 5 minutes
         return_format: "json"
         hide_empty: false
       callbacks:
@@ -643,55 +645,80 @@ widgets:
         radius: 3
         offset: [0, 0]
   scoop_updates:
-      type: "yasb.custom.CustomWidget"
-      options:
-        label: "<span>\uf0ab</span> {data[count]}"
-        label_alt: "<span>\uf466</span> Scoop: {data[count]} packages"
-        class_name: "scoop-widget"
-        exec_options:
-          run_cmd: "C:\\Users\\nahid\\ms\\ms1\\asset\\yasb_reborn\\x_scoop_count_package.bat"
-          run_interval: 300000  # every 5 minutes
-          return_format: "json"
-          hide_empty: true
-        callbacks:
-          on_left: "exec powershell -Command \"Start-Process powershell -ArgumentList '-NoExit', '-Command', 'scoop update *' -Verb RunAs\""
-          on_middle: "toggle_label"
-          on_right: "exec cmd /c start https://scoop.sh"
-        container_padding:
-          top: 0
-          left: 10
-          bottom: 0
-          right: 10
-        label_shadow:
-          enabled: false
-          color: "black"
-          radius: 3
-          offset: [0, 0]
+    type: "yasb.custom.CustomWidget"
+    options:
+      label: "<span>\uf0ab</span> {data[count]}"
+      label_alt: "<span>\uf466</span> Scoop: {data[count]} packages"
+      class_name: "scoop-widget"
+      exec_options:
+        run_cmd: "C:\\Users\\nahid\\ms\\ms1\\asset\\yasb_reborn\\x_scoop_count_package.bat"
+        run_interval: 300000 # every 5 minutes
+        return_format: "json"
+        hide_empty: true
+      callbacks:
+        on_left: 'exec powershell -Command "Start-Process powershell -ArgumentList ''-NoExit'', ''-Command'', ''scoop update *'' -Verb RunAs"'
+        on_middle: "toggle_label"
+        on_right: "exec cmd /c start https://scoop.sh"
+      container_padding:
+        top: 0
+        left: 10
+        bottom: 0
+        right: 10
+      label_shadow:
+        enabled: false
+        color: "black"
+        radius: 3
+        offset: [0, 0]
   winget_updates:
-      type: "yasb.custom.CustomWidget"
-      options:
-        label: "<span>\uf0ab</span> {data[count]}"
-        label_alt: "<span>\uf17a</span> Winget: {data[count]} packages"
-        class_name: "winget-widget"
-        exec_options:
-          run_cmd: "C:\\Users\\nahid\\ms\\ms1\\asset\\yasb_reborn\\x_winget_count_package.bat"
-          run_interval: 300000  # every 5 minutes
-          return_format: "json"
-          hide_empty: true
-        callbacks:
-          on_left: "exec powershell -Command \"Start-Process powershell -ArgumentList '-NoExit', '-Command', 'winget upgrade --all' -Verb RunAs\""
-          on_middle: "toggle_label"
-          on_right: "exec cmd /c start https://winget.run"
-        container_padding:
-          top: 0
-          left: 10
-          bottom: 0
-          right: 10
-        label_shadow:
-          enabled: false
-          color: "black"
-          radius: 3
-          offset: [0, 0]
+    type: "yasb.custom.CustomWidget"
+    options:
+      label: "<span>\uf0ab</span> {data[count]}"
+      label_alt: "<span>\uf17a</span> Winget: {data[count]} packages"
+      class_name: "winget-widget"
+      exec_options:
+        run_cmd: "C:\\Users\\nahid\\ms\\ms1\\asset\\yasb_reborn\\x_winget_count_package.bat"
+        run_interval: 300000 # every 5 minutes
+        return_format: "json"
+        hide_empty: true
+      callbacks:
+        on_left: 'exec powershell -Command "Start-Process powershell -ArgumentList ''-NoExit'', ''-Command'', ''winget upgrade --all'' -Verb RunAs"'
+        on_middle: "toggle_label"
+        on_right: "exec cmd /c start https://winget.run"
+      container_padding:
+        top: 0
+        left: 10
+        bottom: 0
+        right: 10
+      label_shadow:
+        enabled: false
+        color: "black"
+        radius: 3
+        offset: [0, 0]
+  countdown_timer:
+    type: "yasb.custom.CustomWidget"
+    options:
+      label: "<span>\udb81\udd1f</span> {data[days]} days {data[minutes]} minutes"
+      label_alt: "<span>\uf17a</span> Winget: {data[count]} packages"
+      class_name: "countdown-widget"
+      exec_options:
+        run_cmd: "C:\\Users\\nahid\\ms\\ms1\\asset\\yasb_reborn\\CountDown\\get_timer.bat"
+        run_interval: 300000 # every 5 minutes
+        return_format: "json"
+        hide_empty: true
+      callbacks:
+        on_left: "exec cmd /c C://Users//nahid//ms//ms1//asset//yasb_reborn//CountDown//set_timer.py"
+        on_middle: "toggle_label"
+        on_right: "exec cmd /c start https://winget.run"
+      container_padding:
+        top: 0
+        left: 10
+        bottom: 0
+        right: 10
+      label_shadow:
+        enabled: false
+        color: "black"
+        radius: 3
+        offset: [0, 0]
   ai_chat:
     type: "yasb.ai_chat.AiChatWidget"
     options:
@@ -714,16 +741,16 @@ widgets:
         enabled: false
         corner: "top_right"
         color: "red"
-        margin: [ 0, 2 ]
+        margin: [0, 2]
       callbacks:
         on_left: "toggle_chat"
       providers:
         - provider: "Ollama"
           api_endpoint: "http://localhost:11434/v1"
           credential: "ollama"
-          models: 
-          - name: "gemma3:1b"
-            label: "Gemma3"
+          models:
+            - name: "gemma3:1b"
+              label: "Gemma3"
       container_padding:
         top: 0
         left: 10
@@ -795,7 +822,7 @@ widgets:
         enabled: false
         color: "black"
         radius: 3
-        offset: [ 1, 1 ]
+        offset: [1, 1]
   whkd:
     type: "yasb.whkd.WhkdWidget"
     options:
@@ -805,7 +832,7 @@ widgets:
           key_replace: "\ue70f"
         - key: "ctrl"
           key_replace: "Ctrl"
-        - key: "alt" 
+        - key: "alt"
           key_replace: "Alt"
         - key: "shift"
           key_replace: "Shift"
@@ -821,7 +848,7 @@ widgets:
         enabled: false
         color: "black"
         radius: 3
-        offset: [ 1, 1 ]
+        offset: [1, 1]
   apps:
     type: "yasb.applications.ApplicationsWidget"
     options:
@@ -829,11 +856,11 @@ widgets:
       app_list:
         # - {icon: "\uf0a2", launch: "notification_center", name: "Notification Center"} # launch notification center
         # - {icon: "\ueb51", launch: "quick_settings"} # launch quick settings
-        - {icon: "\ue632", launch: "cmd /c powershell -c emacs"}
-        - {icon: "\ue6ae", launch: "cmd /c start powershell -c cd ~ ; nvim"}
+        - { icon: "\ue632", launch: "cmd /c powershell -c emacs" }
+        - { icon: "\ue6ae", launch: "cmd /c start powershell -c cd ~ ; nvim" }
         # - {icon: "\uf489", launch: "wt", name: "Windows Terminal"} # launch terminal
       label_shadow:
         enabled: false
         color: "black"
         radius: 3
-        offset: [ 1, 1 ]
+        offset: [1, 1]
