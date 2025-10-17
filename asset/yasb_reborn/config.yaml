@@ -697,12 +697,12 @@ widgets:
   countdown_timer:
     type: "yasb.custom.CustomWidget"
     options:
-      label: "<span>\udb81\udd1f</span> {data[days]} days {data[minutes]} minutes"
+      label: "<span>\udb81\udd1b</span> {data[days]}-{data[minutes]}"
       label_alt: "<span>\uf17a</span> Winget: {data[count]} packages"
       class_name: "countdown-widget"
       exec_options:
         run_cmd: "C:\\Users\\nahid\\ms\\ms1\\asset\\yasb_reborn\\CountDown\\get_timer.bat"
-        run_interval: 300000 # every 5 minutes
+        run_interval: 10000 # every 5 minutes
         return_format: "json"
         hide_empty: true
       callbacks:
