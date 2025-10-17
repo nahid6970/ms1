@@ -67,14 +67,16 @@ def create_editor_chooser(file_path):
             text=f"{icon}\n{editor_name}",
             font=button_font,
             bg=color,
-            fg='#ffffff',
+            fg='#000000',
             activebackground=color,
-            activeforeground='#ffffff',
+            activeforeground='#000000',
             width=10,
             height=3,
             relief='flat',
             cursor='hand2',
-            command=on_click
+            command=on_click,
+            compound='center',
+            justify='center'
         )
         btn.pack(side='left', padx=10)
         
