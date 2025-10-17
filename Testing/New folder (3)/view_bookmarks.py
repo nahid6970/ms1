@@ -102,15 +102,13 @@ catch {
         fzf_args = [
             "fzf",
             "--prompt=Bookmarks: ",
-            "--header=Enter: Open | Ctrl-O: Explorer | Ctrl-C: Copy | Ctrl-P: Toggle Preview | Del: Remove",
-            "--with-nth=1",
+            "--header=Enter: Open in nvim | Ctrl-O: Explorer | Ctrl-C: Copy | Ctrl-P: Toggle Preview | Del: Remove",
             f"--preview=powershell -ExecutionPolicy Bypass -File \"{preview_script_file}\" {{}}",
             "--preview-window=right:60%:border-left",
             "--preview-window=hidden",  # Start with preview hidden
             "--border",
             "--layout=reverse",
             "--color=bg:-1,bg+:-1,fg:#d1ff94,fg+:#8fdbff,hl:#fe8019,hl+:#fe8019,info:#83a598,prompt:#b8bb26,pointer:#d3869b,marker:#ff4747,spinner:#fe8019,header:#83a598,preview-bg:-1,border:#d782ff",
-            "--bind=enter:execute(code {})",
             "--bind=ctrl-o:execute-silent(explorer.exe /select,{})",
             "--bind=ctrl-c:execute-silent(echo {} | clip)",
             "--bind=ctrl-p:toggle-preview",
@@ -119,6 +117,15 @@ catch {
         
         process = subprocess.Popen(fzf_args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True, encoding='utf-8')
         stdout, _ = process.communicate(input=fzf_input)
+        
+        # Open selected bookmark with editor chooser
+        if stdout and process.returncode == 0:
+            selected_file = stdout.strip()
+            if selected_file:
+                # Get script directory
+                script_dir = os.path.dirname(os.path.abspath(__file__))
+                editor_chooser = os.path.join(script_dir, "editor_chooser.py")
+                subprocess.run(f'python "{editor_chooser}" "{selected_file}"', shell=True)
         
     finally:
         if preview_script_file and os.path.exists(preview_script_file):
