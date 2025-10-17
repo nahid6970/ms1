@@ -57,7 +57,46 @@ def create_editor_chooser(file_path):
         ("Zed", "#ff6b6b", ""),
     ]
     
-    def create_button(editor_name, color, icon):
+    # Track current selection
+    current_index = [1]  # Start with VSCode (middle button)
+    buttons = []
+    
+    def adjust_color(hex_color, factor):
+        """Lighten color by factor"""
+        hex_color = hex_color.lstrip('#')
+        r, g, b = int(hex_color[0:2], 16), int(hex_color[2:4], 16), int(hex_color[4:6], 16)
+        r = min(255, int(r * factor))
+        g = min(255, int(g * factor))
+        b = min(255, int(b * factor))
+        return f'#{r:02x}{g:02x}{b:02x}'
+    
+    def update_focus():
+        """Update button sizes and appearance based on focus"""
+        for i, (btn_frame, label, editor_name, color) in enumerate(buttons):
+            if i == current_index[0]:
+                # Focused button - larger
+                btn_frame.config(width=140, height=70, highlightthickness=2, highlightbackground='#ffffff')
+                label.config(font=tkfont.Font(family="Segoe UI", size=12, weight="bold"))
+            else:
+                # Unfocused button - normal size
+                btn_frame.config(width=120, height=60, highlightthickness=0)
+                label.config(font=button_font)
+    
+    def on_key(event):
+        """Handle arrow key navigation"""
+        if event.keysym == 'Left':
+            current_index[0] = max(0, current_index[0] - 1)
+            update_focus()
+        elif event.keysym == 'Right':
+            current_index[0] = min(len(editors) - 1, current_index[0] + 1)
+            update_focus()
+        elif event.keysym == 'Return':
+            # Enter key - select current button
+            editor_name = editors[current_index[0]][0]
+            root.destroy()
+            open_with_editor(file_path, editor_name.lower().replace("vscode", "vscode"))
+    
+    def create_button(editor_name, color, icon, index):
         def on_click():
             root.destroy()
             open_with_editor(file_path, editor_name.lower().replace("vscode", "vscode"))
@@ -99,18 +138,20 @@ def create_editor_chooser(file_path):
         btn_frame.bind("<Leave>", on_leave)
         label.bind("<Enter>", on_enter)
         label.bind("<Leave>", on_leave)
+        
+        # Store button reference
+        buttons.append((btn_frame, label, editor_name, color))
     
-    def adjust_color(hex_color, factor):
-        """Lighten color by factor"""
-        hex_color = hex_color.lstrip('#')
-        r, g, b = int(hex_color[0:2], 16), int(hex_color[2:4], 16), int(hex_color[4:6], 16)
-        r = min(255, int(r * factor))
-        g = min(255, int(g * factor))
-        b = min(255, int(b * factor))
-        return f'#{r:02x}{g:02x}{b:02x}'
+    for i, (editor_name, color, icon) in enumerate(editors):
+        create_button(editor_name, color, icon, i)
     
-    for editor_name, color, icon in editors:
-        create_button(editor_name, color, icon)
+    # Bind arrow keys
+    root.bind('<Left>', on_key)
+    root.bind('<Right>', on_key)
+    root.bind('<Return>', on_key)
+    
+    # Set initial focus
+    update_focus()
     
     # ESC to close
     root.bind('<Escape>', lambda e: root.destroy())
