@@ -18,6 +18,9 @@ def create_editor_chooser(file_path):
     root.title("Choose Editor")
     root.configure(bg='#1e1e1e')
     
+    # Remove window border and add custom border
+    root.overrideredirect(True)
+    
     # Center window
     window_width = 500
     window_height = 150
@@ -27,13 +30,22 @@ def create_editor_chooser(file_path):
     y = (screen_height - window_height) // 2
     root.geometry(f'{window_width}x{window_height}+{x}+{y}')
     
+    # Create border frame
+    border_color = '#d782ff'
+    border_frame = tk.Frame(root, bg=border_color, bd=0)
+    border_frame.place(x=0, y=0, width=window_width, height=window_height)
+    
+    # Inner content frame
+    content_frame = tk.Frame(border_frame, bg='#1e1e1e', bd=0)
+    content_frame.place(x=2, y=2, width=window_width-4, height=window_height-4)
+    
     # Title label
     title_font = tkfont.Font(family="Segoe UI", size=12, weight="bold")
-    title = tk.Label(root, text="Open with:", font=title_font, bg='#1e1e1e', fg='#ffffff')
+    title = tk.Label(content_frame, text="Open with:", font=title_font, bg='#1e1e1e', fg='#ffffff')
     title.pack(pady=(15, 10))
     
     # Button frame
-    button_frame = tk.Frame(root, bg='#1e1e1e')
+    button_frame = tk.Frame(content_frame, bg='#1e1e1e')
     button_frame.pack(pady=10)
     
     # Button style
