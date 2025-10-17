@@ -68,15 +68,18 @@ def create_editor_chooser(file_path):
         btn_frame.pack_propagate(False)
         
         # Create label inside frame for better centering
+        display_text = f"{icon}\n{editor_name}" if icon else editor_name
         label = tk.Label(
             btn_frame,
-            text=f"{icon}\n{editor_name}",
+            text=display_text,
             font=button_font,
             bg=color,
             fg='#000000',
-            cursor='hand2'
+            cursor='hand2',
+            justify='center'
         )
-        label.place(relx=0.5, rely=0.5, anchor='center')
+        # Use pack with expand to truly center
+        label.pack(expand=True)
         
         # Bind click events
         btn_frame.bind('<Button-1>', lambda e: on_click())
