@@ -102,16 +102,18 @@ catch {
         fzf_args = [
             "fzf",
             "--prompt=Bookmarks: ",
-            "--header=Enter: Open | Ctrl-O: Explorer | Ctrl-C: Copy | Del: Remove bookmark",
+            "--header=Enter: Open | Ctrl-O: Explorer | Ctrl-C: Copy | Ctrl-P: Toggle Preview | Del: Remove",
             "--with-nth=1",
             f"--preview=powershell -ExecutionPolicy Bypass -File \"{preview_script_file}\" {{}}",
             "--preview-window=right:60%:border-left",
+            "--preview-window=hidden",  # Start with preview hidden
             "--border",
             "--layout=reverse",
             "--color=bg:-1,bg+:-1,fg:#d1ff94,fg+:#8fdbff,hl:#fe8019,hl+:#fe8019,info:#83a598,prompt:#b8bb26,pointer:#d3869b,marker:#ff4747,spinner:#fe8019,header:#83a598,preview-bg:-1,border:#d782ff",
             "--bind=enter:execute(code {})",
             "--bind=ctrl-o:execute-silent(explorer.exe /select,{})",
             "--bind=ctrl-c:execute-silent(echo {} | clip)",
+            "--bind=ctrl-p:toggle-preview",
             f"--bind=del:execute-silent(python remove_bookmark.py {{}})+reload(python reload_bookmarks.py)"
         ]
         
