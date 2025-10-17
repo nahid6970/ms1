@@ -109,7 +109,7 @@ catch {
                 "--preview-window=hidden",  # Start with preview hidden
                 "--border",
                 "--layout=reverse",
-                "--color=bg:-1,bg+:-1,fg:#d1ff94,fg+:#8fdbff,hl:#fe8019,hl+:#fe8019,info:#83a598,prompt:#b8bb26,pointer:#d3869b,marker:#ff4747,spinner:#fe8019,header:#83a598,preview-bg:-1,border:#d782ff",
+                "--color=bg:-1,bg+:#1e1e1e,fg:#d1ff94,fg+:#8fdbff,hl:#fe8019,hl+:#fe8019,info:#83a598,prompt:#b8bb26,pointer:#d3869b,marker:#ff4747,spinner:#fe8019,header:#83a598,preview-bg:-1,border:#d782ff",
                 "--bind=ctrl-o:execute-silent(explorer.exe /select,{})",
                 "--bind=ctrl-c:execute-silent(echo {} | clip)",
                 "--bind=ctrl-p:toggle-preview",
