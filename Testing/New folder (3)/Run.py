@@ -31,6 +31,8 @@ Shortcuts available:
   Ctrl-p  : Toggle preview window on/off
   F1      : Show this shortcuts help window
   F2      : Toggle between chafa/viu and QuickLook for image preview
+  F4      : View bookmarks (open saved bookmarks list)
+  F5      : Add current file to bookmarks
   
 Multi-select: Use Tab to select multiple files, then use any action
 Supports files with spaces in their names!
@@ -374,6 +376,11 @@ python "{menu_script_path}" "!temp_file!"
             batch_temp.write(batch_content)
             batch_file = batch_temp.name
 
+        # Get absolute paths for bookmark scripts
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        add_bookmark_script = os.path.join(script_dir, "add_bookmark.py")
+        view_bookmarks_script = os.path.join(script_dir, "view_bookmarks.py")
+        
         # Prepare fzf arguments with PowerShell preview for images and F2 toggle
         fzf_args = [
             "fzf",
@@ -392,6 +399,8 @@ python "{menu_script_path}" "!temp_file!"
             "--bind=ctrl-r:execute-silent(powershell -command Start-Process '{1}')",
             f"--bind=f1:execute-silent(cmd /c start cmd /k type {temp_shortcut_file} & pause)",
             f"--bind=f2:execute-silent(powershell -ExecutionPolicy Bypass -File \"{toggle_script_file}\")+refresh-preview",
+            f"--bind=f4:execute-silent(python \"{view_bookmarks_script}\")",
+            f"--bind=f5:execute-silent(python \"{add_bookmark_script}\" {{1}})",
             "--bind=ctrl-p:toggle-preview",
         ]
 
