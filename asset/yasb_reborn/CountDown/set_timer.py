@@ -84,7 +84,7 @@ def set_timer():
             
             # Save to file
             if save_timer(end_time):
-                messagebox.showinfo("Success", f"Timer set for {time_input} from now.")
+                # Close window silently on success (no confirmation message)
                 root.destroy()
             else:
                 messagebox.showerror("Error", "Failed to save timer.")
