@@ -5,9 +5,10 @@ import json
 
 def get_remaining_time():
     """Calculate and return the remaining time from the saved timer"""
-    # Get the directory where this script is located
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    timer_file_path = os.path.join(script_dir, 'timer_end_time.txt')
+    # Get the user's home directory
+    home_dir = os.path.expanduser("~")
+    timer_dir = os.path.join(home_dir, "script_output")
+    timer_file_path = os.path.join(timer_dir, 'timer_end_time.txt')
     
     # Check if timer file exists
     if not os.path.exists(timer_file_path):

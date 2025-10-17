@@ -30,11 +30,16 @@ def parse_time_input(time_str):
     return total_seconds
 
 def save_timer(end_time):
-    """Save the end time to a file in the same directory as this script"""
+    """Save the end time to a file in the user's home directory"""
     try:
-        # Get the directory where this script is located
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        timer_file_path = os.path.join(script_dir, 'timer_end_time.txt')
+        # Get the user's home directory
+        home_dir = os.path.expanduser("~")
+        timer_dir = os.path.join(home_dir, "script_output")
+        
+        # Create the directory if it doesn't exist
+        os.makedirs(timer_dir, exist_ok=True)
+        
+        timer_file_path = os.path.join(timer_dir, 'timer_end_time.txt')
         
         with open(timer_file_path, 'w') as f:
             f.write(str(end_time))
