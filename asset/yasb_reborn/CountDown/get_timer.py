@@ -5,14 +5,18 @@ import json
 
 def get_remaining_time():
     """Calculate and return the remaining time from the saved timer"""
+    # Get the directory where this script is located
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    timer_file_path = os.path.join(script_dir, 'timer_end_time.txt')
+    
     # Check if timer file exists
-    if not os.path.exists('timer_end_time.txt'):
+    if not os.path.exists(timer_file_path):
         print("No timer has been set. Please run set_timer.py first.")
         return None
     
     try:
         # Read end time from file
-        with open('timer_end_time.txt', 'r') as f:
+        with open(timer_file_path, 'r') as f:
             end_timestamp = float(f.read().strip())
         
         # Get current time
@@ -23,7 +27,7 @@ def get_remaining_time():
         
         if remaining_seconds <= 0:
             print("Timer has expired!")
-            os.remove('timer_end_time.txt')
+            os.remove(timer_file_path)
             return None
         
         # Convert seconds to days, hours, minutes, seconds
