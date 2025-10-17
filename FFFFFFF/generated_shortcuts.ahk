@@ -451,7 +451,7 @@ LAlt & c:: {
     OpenWithEditor()
     OpenWithEditor() {
     ; Configuration - Change this to switch editors easily
-    EDITOR := "zed"  ; Options: "nvim", "vscode", "zed"
+    EDITOR := "nvim"  ; Options: "nvim", "vscode", "zed"
         ; Backup current clipboard content
         ClipboardBackup := ClipboardAll()
         ; Clear clipboard and copy the selected file path
