@@ -1,3 +1,34 @@
+// Helper function to parse colors intelligently (handles rgb, rgba, hex, and named colors)
+function parseColors(colorString) {
+  if (!colorString) return [];
+  
+  // Match rgb/rgba patterns and other colors
+  const rgbPattern = /rgba?\([^)]+\)/g;
+  const matches = colorString.match(rgbPattern);
+  
+  if (matches) {
+    // Has RGB/RGBA colors - extract them and the rest
+    let remaining = colorString;
+    const colors = [];
+    
+    matches.forEach(match => {
+      colors.push(match.trim());
+      remaining = remaining.replace(match, '|||SPLIT|||');
+    });
+    
+    // Split remaining by comma and filter out empty/split markers
+    const otherColors = remaining.split(',')
+      .map(c => c.trim())
+      .filter(c => c && c !== '|||SPLIT|||');
+    
+    // Combine all colors
+    return [...colors, ...otherColors].filter(c => c);
+  } else {
+    // No RGB - simple comma split
+    return colorString.split(',').map(c => c.trim()).filter(c => c);
+  }
+}
+
 document.addEventListener('DOMContentLoaded', function () {
   const linksContainer = document.getElementById('links-container');
   const addLinkForm = document.getElementById('add-link-form');
@@ -102,7 +133,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             if (link.li_bg_color) {
-              const bgColors = link.li_bg_color.split(',').map(c => c.trim());
+              const bgColors = parseColors(link.li_bg_color);
               if (bgColors.length > 1) {
                 // Multiple colors - create animated gradient background
                 const gradientColors = bgColors.join(', ');
@@ -132,7 +163,7 @@ document.addEventListener('DOMContentLoaded', function () {
               }
             }
             if (link.li_hover_color) {
-              const hoverColors = link.li_hover_color.split(',').map(c => c.trim());
+              const hoverColors = parseColors(link.li_hover_color);
               if (hoverColors.length > 1) {
                 // Multiple colors - create animated gradient hover
                 const gradientColors = hoverColors.join(', ');
@@ -185,7 +216,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (link.li_border_color) {
               // Check if it's a gradient (contains comma-separated colors)
-              const colors = link.li_border_color.split(',').map(c => c.trim());
+              const colors = parseColors(link.li_border_color);
               if (colors.length > 1) {
                 // Multiple colors - create animated gradient border
                 const gradientColors = colors.join(', ');
@@ -274,7 +305,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Apply gradient to inner link element if background_color has multiple colors
             if (link.background_color) {
-              const bgColors = link.background_color.split(',').map(c => c.trim());
+              const bgColors = parseColors(link.background_color);
               if (bgColors.length > 1) {
                 const linkElement = listItem.querySelector('a');
                 if (linkElement) {
@@ -306,7 +337,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Apply gradient to text color if color has multiple colors
             if (link.color) {
-              const textColors = link.color.split(',').map(c => c.trim());
+              const textColors = parseColors(link.color);
               if (textColors.length > 1) {
                 const linkElement = listItem.querySelector('a');
                 if (linkElement) {
