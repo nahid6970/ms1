@@ -5,7 +5,7 @@ import tempfile
 
 def view_bookmarks():
     """Display bookmarks in fzf and allow actions on selected bookmark"""
-    bookmarks_file = "bookmarks.json"
+    bookmarks_file = r"C:\Users\nahid\script_output\bookmarks.json"
     
     # Load bookmarks
     if not os.path.exists(bookmarks_file):

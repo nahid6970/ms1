@@ -4,7 +4,7 @@ import os
 
 def remove_bookmark(file_path):
     """Remove a file path from bookmarks.json"""
-    bookmarks_file = "bookmarks.json"
+    bookmarks_file = r"C:\Users\nahid\script_output\bookmarks.json"
     
     if not os.path.exists(bookmarks_file):
         return

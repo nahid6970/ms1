@@ -4,7 +4,7 @@ import os
 
 def add_bookmark(file_path):
     """Add a file path to bookmarks.json"""
-    bookmarks_file = "bookmarks.json"
+    bookmarks_file = r"C:\Users\nahid\script_output\bookmarks.json"
     
     # Load existing bookmarks
     bookmarks = []
