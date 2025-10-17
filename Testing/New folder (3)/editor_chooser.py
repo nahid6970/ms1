@@ -49,7 +49,7 @@ def create_editor_chooser(file_path):
     button_frame.pack(pady=10)
     
     # Button style
-    button_font = tkfont.Font(family="Segoe UI", size=11)
+    button_font = tkfont.Font(family="Segoe UI", size=11, weight="bold")
     
     editors = [
         ("nvim", "#19d600", ""),
