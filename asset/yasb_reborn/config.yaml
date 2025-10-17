@@ -697,7 +697,7 @@ widgets:
   countdown_timer:
     type: "yasb.custom.CustomWidget"
     options:
-      label: "{data[days]}-{data[minutes]}"
+      label: "{data[days]}-{data[hours]}-{data[minutes]}"
       label_alt: ""
       class_name: "countdown-widget"
       exec_options:
