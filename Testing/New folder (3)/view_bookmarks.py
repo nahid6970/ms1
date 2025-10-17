@@ -2,6 +2,36 @@ import json
 import os
 import subprocess
 import tempfile
+import sys
+
+def remove_bookmark(file_path, bookmarks_file):
+    """Remove a file path from bookmarks.json"""
+    if not os.path.exists(bookmarks_file):
+        return
+    
+    try:
+        with open(bookmarks_file, 'r', encoding='utf-8') as f:
+            bookmarks = json.load(f)
+    except json.JSONDecodeError:
+        return
+    
+    if file_path in bookmarks:
+        bookmarks.remove(file_path)
+        with open(bookmarks_file, 'w', encoding='utf-8') as f:
+            json.dump(bookmarks, f, indent=2, ensure_ascii=False)
+
+def reload_bookmarks(bookmarks_file):
+    """Output current bookmarks for fzf reload"""
+    if not os.path.exists(bookmarks_file):
+        return ""
+    
+    try:
+        with open(bookmarks_file, 'r', encoding='utf-8') as f:
+            bookmarks = json.load(f)
+        valid_bookmarks = [b for b in bookmarks if os.path.exists(b)]
+        return "\n".join(valid_bookmarks)
+    except:
+        return ""
 
 def view_bookmarks():
     """Display bookmarks in fzf and allow actions on selected bookmark"""
@@ -113,7 +143,7 @@ catch {
                 "--bind=ctrl-o:execute-silent(explorer.exe /select,{})",
                 "--bind=ctrl-c:execute-silent(echo {} | clip)",
                 "--bind=ctrl-p:toggle-preview",
-                f"--bind=del:execute-silent(python remove_bookmark.py {{}})+reload(python reload_bookmarks.py)"
+                f"--bind=del:execute-silent(python \"{os.path.abspath(__file__)}\" --remove {{}})+reload(python \"{os.path.abspath(__file__)}\" --reload)"
             ]
             
             process = subprocess.Popen(fzf_args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True, encoding='utf-8')
@@ -140,4 +170,13 @@ catch {
                     pass
 
 if __name__ == "__main__":
-    view_bookmarks()
+    bookmarks_file = r"C:\Users\nahid\script_output\bookmarks.json"
+    
+    # Handle command line arguments for remove/reload
+    if len(sys.argv) > 1:
+        if sys.argv[1] == "--remove" and len(sys.argv) > 2:
+            remove_bookmark(sys.argv[2], bookmarks_file)
+        elif sys.argv[1] == "--reload":
+            print(reload_bookmarks(bookmarks_file))
+    else:
+        view_bookmarks()
