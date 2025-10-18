@@ -2174,7 +2174,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   // Move entire group up or down
-  async function moveGroup(draggedGroupName, targetGroupName) {
+  async function moveGroup(draggedGroupName, direction) {
     try {
       const response = await fetch('/api/links');
       const links = await response.json();
@@ -2183,11 +2183,15 @@ document.addEventListener('DOMContentLoaded', function () {
       const groupNames = [...new Set(links.map(link => link.group || 'Ungrouped'))];
       
       const draggedIndex = groupNames.indexOf(draggedGroupName);
-      const targetIndex = groupNames.indexOf(targetGroupName);
+      const targetIndex = draggedIndex + (direction > 0 ? 1 : -1);
 
-      // Remove the dragged group name and insert it at the target position
-      groupNames.splice(draggedIndex, 1);
-      groupNames.splice(targetIndex, 0, draggedGroupName);
+      // Check bounds
+      if (targetIndex < 0 || targetIndex >= groupNames.length) {
+        return;
+      }
+
+      // Swap the dragged group with the target group
+      [groupNames[draggedIndex], groupNames[targetIndex]] = [groupNames[targetIndex], groupNames[draggedIndex]];
 
       // Rebuild the links array based on the new group order
       const newLinks = [];
@@ -2230,18 +2234,34 @@ document.addEventListener('DOMContentLoaded', function () {
       const movedLink = currentLinks[oldIndex];
       const groupName = movedLink.group || 'Ungrouped';
 
-      // Preserve group-level properties
-      const groupProperties = {
-        collapsible: movedLink.collapsible,
-        display_style: movedLink.display_style,
-        horizontal_stack: movedLink.horizontal_stack,
-        password_protect: movedLink.password_protect,
-        top_name: movedLink.top_name,
-        top_bg_color: movedLink.top_bg_color,
-        top_text_color: movedLink.top_text_color,
-        top_border_color: movedLink.top_border_color,
-        top_hover_color: movedLink.top_hover_color,
-      };
+      // Preserve group-level properties for ALL groups, not just the one being reordered
+      const groupProperties = {};
+      
+      // Collect properties for all groups
+      currentLinks.forEach(link => {
+        const group = link.group || 'Ungrouped';
+        if (!groupProperties[group]) {
+          groupProperties[group] = {
+            collapsible: link.collapsible,
+            display_style: link.display_style,
+            horizontal_stack: link.horizontal_stack,
+            password_protect: link.password_protect,
+            top_name: link.top_name,
+            top_bg_color: link.top_bg_color,
+            top_text_color: link.top_text_color,
+            top_border_color: link.top_border_color,
+            top_hover_color: link.top_hover_color,
+            popup_bg_color: link.popup_bg_color,
+            popup_text_color: link.popup_text_color,
+            popup_border_color: link.popup_border_color,
+            popup_border_radius: link.popup_border_radius,
+            horizontal_bg_color: link.horizontal_bg_color,
+            horizontal_text_color: link.horizontal_text_color,
+            horizontal_border_color: link.horizontal_border_color,
+            horizontal_hover_color: link.horizontal_hover_color
+          };
+        }
+      });
 
       // Remove the dragged link from its original position
       const [draggedLink] = currentLinks.splice(oldIndex, 1);
@@ -2249,10 +2269,16 @@ document.addEventListener('DOMContentLoaded', function () {
       // Insert the dragged link at the new position
       currentLinks.splice(newIndex, 0, draggedLink);
 
-      // Update all links in the same group with the preserved properties
+      // Update all links with their respective group properties
       currentLinks.forEach(link => {
-        if ((link.group || 'Ungrouped') === groupName) {
-          Object.assign(link, groupProperties);
+        const group = link.group || 'Ungrouped';
+        if (groupProperties[group]) {
+          // Only copy properties that exist in the groupProperties
+          Object.keys(groupProperties[group]).forEach(prop => {
+            if (groupProperties[group][prop] !== undefined) {
+              link[prop] = groupProperties[group][prop];
+            }
+          });
         }
       });
 

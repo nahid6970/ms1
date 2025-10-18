@@ -200,7 +200,52 @@ def add_link():
     # Ensure horizontal_stack is set, default to false if not provided
     if 'horizontal_stack' not in new_link:
         new_link['horizontal_stack'] = False
+    
     links = read_data()
+    
+    # If this link belongs to an existing group, inherit the group properties
+    group_name = new_link.get('group')
+    if group_name:
+        # Look for an existing link in the same group to copy properties from
+        for existing_link in links:
+            if existing_link.get('group') == group_name:
+                # Copy group-level properties
+                if 'collapsible' in existing_link:
+                    new_link['collapsible'] = existing_link['collapsible']
+                if 'display_style' in existing_link:
+                    new_link['display_style'] = existing_link['display_style']
+                if 'horizontal_stack' in existing_link:
+                    new_link['horizontal_stack'] = existing_link['horizontal_stack']
+                if 'password_protect' in existing_link:
+                    new_link['password_protect'] = existing_link['password_protect']
+                if 'top_name' in existing_link:
+                    new_link['top_name'] = existing_link['top_name']
+                if 'top_bg_color' in existing_link:
+                    new_link['top_bg_color'] = existing_link['top_bg_color']
+                if 'top_text_color' in existing_link:
+                    new_link['top_text_color'] = existing_link['top_text_color']
+                if 'top_border_color' in existing_link:
+                    new_link['top_border_color'] = existing_link['top_border_color']
+                if 'top_hover_color' in existing_link:
+                    new_link['top_hover_color'] = existing_link['top_hover_color']
+                if 'popup_bg_color' in existing_link:
+                    new_link['popup_bg_color'] = existing_link['popup_bg_color']
+                if 'popup_text_color' in existing_link:
+                    new_link['popup_text_color'] = existing_link['popup_text_color']
+                if 'popup_border_color' in existing_link:
+                    new_link['popup_border_color'] = existing_link['popup_border_color']
+                if 'popup_border_radius' in existing_link:
+                    new_link['popup_border_radius'] = existing_link['popup_border_radius']
+                if 'horizontal_bg_color' in existing_link:
+                    new_link['horizontal_bg_color'] = existing_link['horizontal_bg_color']
+                if 'horizontal_text_color' in existing_link:
+                    new_link['horizontal_text_color'] = existing_link['horizontal_text_color']
+                if 'horizontal_border_color' in existing_link:
+                    new_link['horizontal_border_color'] = existing_link['horizontal_border_color']
+                if 'horizontal_hover_color' in existing_link:
+                    new_link['horizontal_hover_color'] = existing_link['horizontal_hover_color']
+                break  # Only need to copy from one existing link in the group
+    
     links.append(new_link)
     write_data(links)
     return jsonify({'message': 'Link added successfully'}), 201
