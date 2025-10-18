@@ -471,12 +471,11 @@ body.modal-open {
 }
 
 .card-buttons {
-    position: absolute;
-    top: 8px;
-    right: 8px;
     display: flex;
-    gap: 6px;
+    gap: 4px;
     align-items: center;
+    justify-content: center;
+    margin-top: 5px;
 }
 
 .card-info {
@@ -493,12 +492,12 @@ body.modal-open {
 
 .btn-icon {
     display: inline-block;
-    width: 24px;
-    height: 24px;
+    width: 16px;
+    height: 16px;
     border-radius: 50%;
     text-align: center;
-    line-height: 24px;
-    font-size: 12px;
+    line-height: 16px;
+    font-size: 9px;
     text-decoration: none;
     border: none;
     cursor: pointer;

@@ -84,14 +84,14 @@
                                 &nbsp;
                             {% endif %}
                         </div>
-                        <div class="card-buttons">
-                            <a href="#" onclick="openEditShowModal({{ show.id }})" class="btn-icon btn-edit" title="Edit"></a>
-                            <a href="{{ url_for('delete_show', show_id=show.id) }}" class="btn-icon btn-delete" onclick="return confirm('Are you sure you want to delete this show?')" title="Delete"></a>
-                        </div>
                         <div class="card-info">
                             <p class="episode-count {% if show.watched_count == 0 %}no-episodes-watched{% elif show.watched_count > 0 and show.watched_count < show.total_count %}some-episodes-watched{% elif show.watched_count == show.total_count and show.total_count > 0 %}all-episodes-watched{% endif %}">{{ show.watched_count }}/{{ show.total_count }}</p>
                             <p class="last-episode-added">{{ show.last_episode_added }}</p>
                             <p class="show-status {% if show.status == 'Ended' %}status-ended{% else %}status-continuing{% endif %}">{{ show.status or 'Continuing' }}</p>
+                            <div class="card-buttons">
+                                <a href="#" onclick="openEditShowModal({{ show.id }})" class="btn-icon btn-edit" title="Edit"></a>
+                                <a href="{{ url_for('delete_show', show_id=show.id) }}" class="btn-icon btn-delete" onclick="return confirm('Are you sure you want to delete this show?')" title="Delete"></a>
+                            </div>
                         </div>
                     </div>
                 </div>
