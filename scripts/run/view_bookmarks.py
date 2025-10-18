@@ -154,13 +154,17 @@ catch {
             if not stdout or process.returncode != 0:
                 return
             
-            # Open selected bookmark with editor chooser
-            selected_file = stdout.strip()
-            if selected_file:
+            # Open selected bookmark(s) with editor chooser
+            selected_files = stdout.strip()
+            if selected_files:
                 # Get script directory
                 script_dir = os.path.dirname(os.path.abspath(__file__))
                 editor_chooser = os.path.join(script_dir, "editor_chooser.py")
-                subprocess.run(f'python "{editor_chooser}" "{selected_file}"', shell=True)
+                
+                # Split multiple selected files and pass them all
+                file_list = selected_files.split('\n')
+                files_args = ' '.join([f'"{f}"' for f in file_list])
+                subprocess.run(f'python "{editor_chooser}" {files_args}', shell=True)
                 # Loop continues, showing bookmarks again
             
         finally:
