@@ -133,6 +133,7 @@ catch {
             fzf_args = [
                 "fzf",
                 "--prompt=Bookmarks: ",
+                "--multi",
                 "--header=Enter: Open | Ctrl-O: Explorer | Ctrl-C: Copy | Ctrl-P: Toggle Preview | Del: Remove | ESC: Exit",
                 f"--preview=powershell -ExecutionPolicy Bypass -File \"{preview_script_file}\" {{}}",
                 "--preview-window=right:60%:border-left",
