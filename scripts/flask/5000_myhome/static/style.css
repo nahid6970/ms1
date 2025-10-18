@@ -1257,24 +1257,69 @@ a.add-button.custom-sidebar-button[style*="background-color"] {
   color: yellow;
 }
 
+/* Mobile styles */
+@media (max-width: 768px) {
+  /* Popup container adjustments for mobile */
+  .popup-container .Menu {
+    flex-direction: column;
+    width: 95vw;
+    max-width: 95vw;
+    max-height: 95vh;
+    padding: 15px;
+  }
 
+  /* Make form fields full width on mobile */
+  .popup-container input[type="text"],
+  .popup-container input[type="url"],
+  .popup-container textarea {
+    width: 100%;
+    min-width: auto;
+  }
 
+  /* Stack name and group fields on mobile */
+  #add-link-form > div[style*="flex"]:first-child,
+  #edit-link-form > div[style*="flex"]:first-child {
+    flex-direction: column;
+    gap: 10px;
+  }
 
+  /* Stack font family and font size fields on mobile */
+  #add-link-form > div[style*="flex"] input[id*="font"],
+  #edit-link-form > div[style*="flex"] input[id*="font"] {
+    width: 100%;
+  }
 
+  /* Adjust note panel for mobile */
+  #add-link-note-panel,
+  #edit-link-note-panel {
+    width: 100%;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #555;
+  }
 
+  /* Center preview buttons on mobile */
+  .preview-note-button {
+    align-self: center;
+    width: 100%;
+    justify-content: center;
+  }
 
+  /* Two-column layout becomes single column on mobile */
+  .form-panel,
+  .note-panel {
+    width: 100% !important;
+    margin-right: 0 !important;
+    margin-bottom: 20px;
+  }
 
-
-
-
-
-
-@media (max-width: 600px) {
-
+  /* Adjust popup positioning for mobile */
   .Menu,
   .group_type_box.expanded {
-    max-width: 90vw;
-    max-height: 90vh;
+    width: 95vw;
+    max-width: 95vw;
+    max-height: 95vh;
+    padding: 15px;
   }
 
   html,
@@ -1293,7 +1338,6 @@ a.add-button.custom-sidebar-button[style*="background-color"] {
   }
 
   .link-item a {
-    /* Styles for the link itself within the container */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1309,9 +1353,7 @@ a.add-button.custom-sidebar-button[style*="background-color"] {
 
   .group_type_normal {
     list-style: none;
-    /* Remove default list bullets */
     padding: 0px;
-    /* Remove default padding */
     display: flex;
     flex-wrap: wrap;
     justify-content: left;
@@ -1321,7 +1363,6 @@ a.add-button.custom-sidebar-button[style*="background-color"] {
   }
 
   ul.group_type_normal {
-    /* margin-top: 0; */
     margin: -4px;
   }
 
@@ -1345,5 +1386,11 @@ a.add-button.custom-sidebar-button[style*="background-color"] {
     max-width: 50px;
     max-height: 30px;
     flex-shrink: 0;
+  }
+  
+  /* Ensure popup doesn't go beyond screen */
+  .popup-container {
+    align-items: flex-start !important;
+    padding-top: 20px;
   }
 }
