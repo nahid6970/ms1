@@ -1464,6 +1464,35 @@ document.addEventListener('DOMContentLoaded', function () {
       const response = await fetch('/api/links');
       const links = await response.json();
 
+      // Preserve group-level properties for ALL groups
+      const groupProperties = {};
+      
+      // Collect properties for all groups
+      links.forEach(link => {
+        const group = link.group || 'Ungrouped';
+        if (!groupProperties[group]) {
+          groupProperties[group] = {
+            collapsible: link.collapsible,
+            display_style: link.display_style,
+            horizontal_stack: link.horizontal_stack,
+            password_protect: link.password_protect,
+            top_name: link.top_name,
+            top_bg_color: link.top_bg_color,
+            top_text_color: link.top_text_color,
+            top_border_color: link.top_border_color,
+            top_hover_color: link.top_hover_color,
+            popup_bg_color: link.popup_bg_color,
+            popup_text_color: link.popup_text_color,
+            popup_border_color: link.popup_border_color,
+            popup_border_radius: link.popup_border_radius,
+            horizontal_bg_color: link.horizontal_bg_color,
+            horizontal_text_color: link.horizontal_text_color,
+            horizontal_border_color: link.horizontal_border_color,
+            horizontal_hover_color: link.horizontal_hover_color
+          };
+        }
+      });
+
       // Find all links in both groups
       const group1Links = [];
       const group2Links = [];
@@ -1495,6 +1524,19 @@ document.addEventListener('DOMContentLoaded', function () {
         } else {
           const groupLinks = links.filter(link => (link.group || 'Ungrouped') === groupName);
           groupLinks.forEach(link => newLinks.push(link));
+        }
+      });
+
+      // Update all links with their respective group properties
+      newLinks.forEach(link => {
+        const group = link.group || 'Ungrouped';
+        if (groupProperties[group]) {
+          // Only copy properties that exist in the groupProperties
+          Object.keys(groupProperties[group]).forEach(prop => {
+            if (groupProperties[group][prop] !== undefined) {
+              link[prop] = groupProperties[group][prop];
+            }
+          });
         }
       });
 
