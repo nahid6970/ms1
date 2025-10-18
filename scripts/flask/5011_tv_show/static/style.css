@@ -50,14 +50,17 @@ body {
 
 .header-container {
     display: grid;
-    grid-template-columns: 1fr auto 1fr; /* Left, Center, Right */
+    grid-template-columns: 1fr auto 1fr;
+    /* Left, Center, Right */
     align-items: center;
     padding: 0 20px;
 }
 
 .header-container h1 {
-    grid-column: 2; /* Place h1 in the center column */
-    margin: 0; /* Remove default margin */
+    grid-column: 2;
+    /* Place h1 in the center column */
+    margin: 0;
+    /* Remove default margin */
 }
 
 .add-button {
@@ -81,12 +84,14 @@ body {
 
 /* Scan button specific styles */
 .scan-button {
-    background-color: #007bff !important; /* Blue background for scan */
+    background-color: #007bff !important;
+    /* Blue background for scan */
     color: white !important;
 }
 
 .scan-button:hover {
-    background-color: #0056b3 !important; /* Darker blue on hover */
+    background-color: #0056b3 !important;
+    /* Darker blue on hover */
 }
 
 
@@ -98,14 +103,20 @@ body {
 
 /* Modal Styles */
 .modal {
-    display: none; /* Hidden by default */
-    position: fixed; /* Stay in place */
-    z-index: 200; /* Higher than sticky buttons */
+    display: none;
+    /* Hidden by default */
+    position: fixed;
+    /* Stay in place */
+    z-index: 200;
+    /* Higher than sticky buttons */
     left: 0;
     top: 0;
-    width: 100%; /* Full width */
-    height: 100%; /* Full height */
-    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+    width: 100%;
+    /* Full width */
+    height: 100%;
+    /* Full height */
+    background-color: rgba(0, 0, 0, 0.4);
+    /* Black w/ opacity */
 }
 
 body.modal-open {
@@ -114,14 +125,18 @@ body.modal-open {
 
 .modal-content {
     background-color: #282828;
-    margin: 5% auto; /* Moved higher */
+    margin: 5% auto;
+    /* Moved higher */
     padding: 20px;
     border: 1px solid #888;
-    width: 60%; /* Reduced width */
+    width: 60%;
+    /* Reduced width */
     border-radius: 8px;
     position: relative;
-    max-height: 70vh; /* Limit modal content height */
-    overflow-y: auto; /* Enable scrolling for modal content */
+    max-height: 70vh;
+    /* Limit modal content height */
+    overflow-y: auto;
+    /* Enable scrolling for modal content */
 }
 
 .close {
@@ -150,10 +165,11 @@ body.modal-open {
     text-align: left;
 }
 
-.modal-content form input[type="text"], 
-.modal-content form input[type="number"], 
+.modal-content form input[type="text"],
+.modal-content form input[type="number"],
 .modal-content form input[type="url"] {
-    width: calc(100% - 20px); /* Adjust for padding */
+    width: calc(100% - 20px);
+    /* Adjust for padding */
     padding: 10px;
     margin-bottom: 15px;
     border: 1px solid #555;
@@ -175,7 +191,8 @@ body.modal-open {
 
 .controls-container {
     display: flex;
-    flex-wrap: wrap; /* Allow items to wrap to the next line */
+    flex-wrap: wrap;
+    /* Allow items to wrap to the next line */
     justify-content: center;
     align-items: center;
     gap: 20px;
@@ -185,17 +202,24 @@ body.modal-open {
 .search-form {
     display: flex;
     gap: 10px;
-    align-items: center; /* Align items vertically in the center */
+    align-items: center;
+    /* Align items vertically in the center */
 }
 
 .search-form input[type="text"],
 .search-form .btn {
-    padding: 8px 10px; /* Consistent padding */
-    height: 38px; /* Explicit height */
-    box-sizing: border-box; /* Include padding and border in the element's total width and height */
-    font-size: 1em; /* Consistent font size */
-    line-height: 1.2; /* Consistent line height */
-    margin: 0; /* Remove any default margins */
+    padding: 8px 10px;
+    /* Consistent padding */
+    height: 38px;
+    /* Explicit height */
+    box-sizing: border-box;
+    /* Include padding and border in the element's total width and height */
+    font-size: 1em;
+    /* Consistent font size */
+    line-height: 1.2;
+    /* Consistent line height */
+    margin: 0;
+    /* Remove any default margins */
 }
 
 .search-form input[type="text"] {
@@ -362,19 +386,23 @@ body.modal-open {
     border: 1px solid #bbb;
     flex: 0 0 auto;
     transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
-    padding-bottom: 10px; /* Add padding to the bottom of the card */
+    padding-bottom: 10px;
+    /* Add padding to the bottom of the card */
     display: flex;
     flex-direction: column;
-    justify-content: space-between; /* Distribute space to push buttons to bottom */
+    justify-content: space-between;
+    /* Distribute space to push buttons to bottom */
 }
 
 .show-card.completed {
-    background-color: rgba(29, 185, 84, 0.15); /* Green tint for completed shows */
+    background-color: rgba(29, 185, 84, 0.15);
+    /* Green tint for completed shows */
     border-color: rgba(29, 185, 84, 0.4);
 }
 
 .show-card.completed:hover {
-    background-color: rgba(29, 185, 84, 0.25); /* Slightly stronger green tint on hover */
+    background-color: rgba(29, 185, 84, 0.25);
+    /* Slightly stronger green tint on hover */
 }
 
 .show-card:hover {
@@ -385,7 +413,7 @@ body.modal-open {
     background-color: #485461;
 }
 
-.show-card > a {
+.show-card>a {
     text-decoration: none;
     color: #e0e0e0;
 }
@@ -401,6 +429,7 @@ body.modal-open {
     padding-bottom: 1px;
     padding-left: 0px;
     padding-right: 0px;
+    position: relative;
 }
 
 .show-card .img-wrapper img {
@@ -411,18 +440,107 @@ body.modal-open {
     display: block;
 }
 
+.card-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.card-overlay>* {
+    pointer-events: auto;
+}
+
+.stars-container {
+    color: gold;
+    font-size: 1.4em;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9);
+    line-height: 1;
+    letter-spacing: -4px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 8px 0;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.6), transparent);
+}
+
+.card-buttons {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+.card-info {
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.85), transparent);
+    padding: 10px 8px 8px 8px;
+    text-align: center;
+}
+
+.card-info p {
+    margin: 3px 0;
+    font-size: 0.95em;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.9);
+}
+
+.btn-icon {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 24px;
+    font-size: 12px;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    transition: transform 0.2s;
+    flex-shrink: 0;
+}
+
+.btn-icon:hover {
+    transform: scale(1.1);
+}
+
+.btn-edit {
+    background-color: #007bff;
+    color: white;
+}
+
+.btn-delete {
+    background-color: #dc3545;
+    color: white;
+}
+
 .show-card h3 {
     font-size: 1.5em;
     color: #e0e0e0;
     margin-top: 10px;
     height: 4em;
     align-content: end;
+    display: none;
+    /* Hide title in card view */
 }
 
 .show-card p {
     font-size: 1.2em;
     color: white;
-    margin: 5px 0; /* Reduced margin for tighter spacing */
+    margin: 5px 0;
+    /* Reduced margin for tighter spacing */
+}
+
+.show-card p:first-of-type {
+    display: none;
+    /* Hide year in card view */
 }
 
 .show-card p:last-of-type {
@@ -430,36 +548,37 @@ body.modal-open {
     margin: 5px 0;
 }
 
-.show-card p.no-episodes-watched {
+.episode-count.no-episodes-watched {
     color: red;
+    font-weight: bold;
 }
 
-.show-card p.some-episodes-watched {
+.episode-count.some-episodes-watched {
     color: yellow;
+    font-weight: bold;
 }
 
-.show-card p.all-episodes-watched {
-    color: #1db954; /* Green color for watched shows */
+.episode-count.all-episodes-watched {
+    color: #1db954;
+    font-weight: bold;
 }
 
 .show-card p.last-episode-added {
-    color: #888; /* Gray color for last episode date */
-    font-size: 0.9em;
-    margin: 5px 0; /* Consistent spacing */
+    color: #ddd;
+    font-size: 0.85em;
 }
 
 .show-card p.show-status {
-    font-size: 0.9em;
+    font-size: 0.85em;
     font-weight: 600;
-    margin: 5px 0; /* Consistent spacing */
 }
 
 .show-card p.status-continuing {
-    color: #28a745; /* Green for continuing shows */
+    color: #28a745;
 }
 
 .show-card p.status-ended {
-    color: #dc3545; /* Red for ended shows */
+    color: #dc3545;
 }
 
 .show-card .btn-group {
@@ -570,28 +689,34 @@ body.modal-open {
 }
 
 .episode-list li.episode-watched {
-    background-color: rgba(29, 185, 84, 0.15); /* Green tint for watched episodes */
+    background-color: rgba(29, 185, 84, 0.15);
+    /* Green tint for watched episodes */
     border: 1px solid rgba(29, 185, 84, 0.3);
 }
 
 .episode-list li.episode-watched:hover {
-    background-color: rgba(29, 185, 84, 0.25); /* Slightly stronger green tint on hover */
+    background-color: rgba(29, 185, 84, 0.25);
+    /* Slightly stronger green tint on hover */
 }
 
 .episode-title {
     flex: 1;
-    min-width: 0; /* Allow text to truncate if needed */
-    margin-right: 15px; /* Consistent spacing from buttons */
+    min-width: 0;
+    /* Allow text to truncate if needed */
+    margin-right: 15px;
+    /* Consistent spacing from buttons */
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
 .episode-controls {
-    flex-shrink: 0; /* Prevent buttons from shrinking */
+    flex-shrink: 0;
+    /* Prevent buttons from shrinking */
     display: flex;
     align-items: center;
-    gap: 10px; /* Consistent spacing between buttons */
+    gap: 10px;
+    /* Consistent spacing between buttons */
 }
 
 .episode-controls a {
@@ -599,7 +724,8 @@ body.modal-open {
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    flex-shrink: 0; /* Prevent individual buttons from shrinking */
+    flex-shrink: 0;
+    /* Prevent individual buttons from shrinking */
 }
 
 .edit-dot {
@@ -615,7 +741,8 @@ body.modal-open {
     color: #e0e0e0;
 }
 
-h1, h2 {
+h1,
+h2 {
     color: #1db954;
 }
 
@@ -625,20 +752,30 @@ h1, h2 {
     background-color: #333;
     color: #e0e0e0;
     border-radius: 4px;
-    height: 38px; /* Explicit height */
-    box-sizing: border-box; /* Include padding and border in the element's total width and height */
-    font-size: 1em; /* Consistent font size */
-    line-height: 1.2; /* Consistent line height */
-    margin: 0; /* Remove any default margins */
+    height: 38px;
+    /* Explicit height */
+    box-sizing: border-box;
+    /* Include padding and border in the element's total width and height */
+    font-size: 1em;
+    /* Consistent font size */
+    line-height: 1.2;
+    /* Consistent line height */
+    margin: 0;
+    /* Remove any default margins */
 }
 
 .show-cover form button[type="submit"] {
     padding: 8px 10px;
-    height: 38px; /* Explicit height */
-    box-sizing: border-box; /* Include padding and border in the element's total width and height */
-    font-size: 1em; /* Consistent font size */
-    line-height: 1.2; /* Consistent line height */
-    margin: 0; /* Remove any default margins */
+    height: 38px;
+    /* Explicit height */
+    box-sizing: border-box;
+    /* Include padding and border in the element's total width and height */
+    font-size: 1em;
+    /* Consistent font size */
+    line-height: 1.2;
+    /* Consistent line height */
+    margin: 0;
+    /* Remove any default margins */
 }
 
 button[type="submit"] {
@@ -651,7 +788,8 @@ button[type="submit"] {
 }
 
 input[type="checkbox"]:checked {
-    accent-color: #1db954; /* Green color */
+    accent-color: #1db954;
+    /* Green color */
 }
 
 .rating-group {
@@ -739,15 +877,15 @@ input[type="checkbox"]:checked {
     transition: .4s;
 }
 
-input:checked + .slider {
+input:checked+.slider {
     background-color: #1db954;
 }
 
-input:focus + .slider {
+input:focus+.slider {
     box-shadow: 0 0 1px #1db954;
 }
 
-input:checked + .slider:before {
+input:checked+.slider:before {
     -webkit-transform: translateX(26px);
     -ms-transform: translateX(26px);
     transform: translateX(26px);
@@ -787,47 +925,65 @@ input:checked + .slider:before {
 
 /* Table View Styles */
 html.table-view-active .show-grid {
-    display: block; /* Override flex for grid */
+    display: block;
+    /* Override flex for grid */
 }
 
 html.table-view-active .show-card {
-    width: auto; /* Take full width */
+    width: auto;
+    /* Take full width */
     display: grid;
-    grid-template-columns: 2fr 1fr 1.5fr 1fr 1.2fr 1fr 0.5fr 0.5fr; /* Name, Year, Watched/Total, Rating, Last Episode, Status, Edit, Delete */
+    grid-template-columns: 2fr 1fr 1.5fr 1fr 1.2fr 1fr 0.5fr 0.5fr;
+    /* Name, Year, Watched/Total, Rating, Last Episode, Status, Edit, Delete */
     gap: 10px;
     align-items: center;
     padding: 10px;
-    border: 1px solid #444; /* Set all borders to #444 */
+    border: 1px solid #444;
+    /* Set all borders to #444 */
     background-color: #282828;
     margin-bottom: 5px;
 }
 
 html.table-view-active .show-card.completed {
-    background-color: rgba(29, 185, 84, 0.1); /* Green tint for completed shows in table view */
+    background-color: rgba(29, 185, 84, 0.1);
+    /* Green tint for completed shows in table view */
     border-color: rgba(29, 185, 84, 0.3);
 }
 
 html.table-view-active .show-card:hover {
-    transform: none; /* Disable hover transform */
-    border: 1px solid #bbb; /* Reset border */
+    transform: none;
+    /* Disable hover transform */
+    border: 1px solid #bbb;
+    /* Reset border */
     box-shadow: none;
-    background-color: #333; /* Darker background on hover */
+    background-color: #333;
+    /* Darker background on hover */
 }
 
 html.table-view-active .show-card.completed:hover {
-    background-color: rgba(29, 185, 84, 0.25); /* Green hover for completed shows in table view */
+    background-color: rgba(29, 185, 84, 0.25);
+    /* Green hover for completed shows in table view */
     border-color: rgba(29, 185, 84, 0.5);
 }
 
 html.table-view-active .show-card .img-wrapper {
-    display: none; /* Hide images */
+    display: none;
+    /* Hide images */
+}
+
+html.table-view-active .card-overlay {
+    display: none;
+    /* Hide card overlay in table view */
 }
 
 html.table-view-active .show-card h3 {
     margin: 0;
     height: auto;
     text-align: left;
-    grid-column: 1; /* Name in first column */
+    grid-column: 1;
+    /* Name in first column */
+    display: block;
+    /* Show title in table view */
 }
 
 html.table-view-active .show-card p {
@@ -836,73 +992,103 @@ html.table-view-active .show-card p {
 }
 
 html.table-view-active .show-card p:nth-of-type(1) {
-    grid-column: 2; /* Year in second column */
+    grid-column: 2;
+    /* Year in second column */
+    display: block;
+    /* Show year in table view */
 }
 
 html.table-view-active .show-card p:nth-of-type(2) {
-    grid-column: 3; /* Watched/Total in third column */
+    grid-column: 4;
+    /* Rating text in fourth column */
 }
 
-html.table-view-active .show-card p:nth-of-type(3) {
-    grid-column: 4; /* Rating in fourth column */
-    display: block; /* Ensure rating is visible */
+html.table-view-active .episode-count {
+    grid-column: 3;
+    /* Watched/Total in third column */
+    display: block !important;
 }
 
-html.table-view-active .show-card p:nth-of-type(4) {
-    grid-column: 5; /* Last episode added in fifth column */
-    display: block; /* Ensure last episode date is visible */
+/* Hide the rating stars container in table view */
+html.table-view-active .stars-container {
+    display: none;
 }
 
-html.table-view-active .show-card p:nth-of-type(5) {
-    grid-column: 6; /* Status in sixth column */
-    display: block; /* Ensure status is visible */
+/* Rating text for table view */
+.show-card p.rating-text {
+    display: none;
+    /* Hidden in card view */
+}
+
+html.table-view-active .show-card p.rating-text {
+    grid-column: 4;
+    /* Rating in fourth column */
+    display: block;
+    /* Show in table view */
+    margin: 0;
+    text-align: center;
+}
+
+html.table-view-active .show-card .last-episode-added {
+    grid-column: 5;
+    /* Last episode in fifth column */
+    display: block !important;
+}
+
+html.table-view-active .show-card .show-status {
+    grid-column: 6;
+    /* Status in sixth column */
+    display: block !important;
 }
 
 html.table-view-active .show-card .btn-edit {
-    grid-column: 7; /* Edit button in seventh column */
+    grid-column: 7;
+    /* Edit button in seventh column */
 }
 
 html.table-view-active .show-card .btn-delete {
-    grid-column: 8; /* Delete button in eighth column */
+    grid-column: 8;
+    /* Delete button in eighth column */
 }
 
 
 
-.show-card-buttons {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    margin-top: 5px;
-    padding: 5px;
-}
 
-html.table-view-active .show-card-buttons {
-    display: contents; /* Make children direct grid items in table view */
-}
 
 /* New styles for form action buttons in show.html */
 .form-action-button {
-    background-color: #007bff; /* Blue color */
+    background-color: #007bff;
+    /* Blue color */
     color: white;
-    padding: 8px 10px; /* Consistent padding */
+    padding: 8px 10px;
+    /* Consistent padding */
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    height: 38px; /* Match input height */
-    box-sizing: border-box; /* Include padding and border in the element's total width and height */
-    font-size: 1em; /* Consistent font size */
-    line-height: 1.2; /* Consistent line height */
-    margin: 0; /* Remove any default margins */
-    text-decoration: none; /* For anchor tags */
-    display: flex; /* Use flex to center icon if needed */
+    height: 38px;
+    /* Match input height */
+    box-sizing: border-box;
+    /* Include padding and border in the element's total width and height */
+    font-size: 1em;
+    /* Consistent font size */
+    line-height: 1.2;
+    /* Consistent line height */
+    margin: 0;
+    /* Remove any default margins */
+    text-decoration: none;
+    /* For anchor tags */
+    display: flex;
+    /* Use flex to center icon if needed */
     align-items: center;
     justify-content: center;
 }
 
 .form-action-button:hover {
-    background-color: #0056b3; /* Darker blue on hover */
+    background-color: #0056b3;
+    /* Darker blue on hover */
 }
 
 .add-episode-button:hover {
-    background-color: #158a3e; /* Green hover for add episode button */
+    background-color: #158a3e;
+    /* Green hover for add episode button */
 }
