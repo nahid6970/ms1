@@ -1,5 +1,9 @@
 @import url("https://www.nerdfonts.com/assets/css/webfont.css");
 
+html {
+    scroll-behavior: smooth;
+}
+
 body {
     font-family: Arial, sans-serif;
     background: #1c1c1c;

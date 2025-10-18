@@ -99,18 +99,22 @@ function openFolderViaServer(event, showId) {
         });
 }
 
+// Restore scroll position immediately (before DOMContentLoaded to prevent flash)
+const savedScrollPosition = localStorage.getItem('scrollPosition');
+if (savedScrollPosition !== null) {
+    // Set scroll position immediately
+    window.scrollTo({
+        top: parseInt(savedScrollPosition),
+        behavior: 'instant'
+    });
+    localStorage.removeItem('scrollPosition');
+}
+
 // Toggle Table View and Default Home Page
 document.addEventListener('DOMContentLoaded', () => {
     const tableViewToggle = document.getElementById('tableViewToggle');
     const defaultHomePageSelect = document.getElementById('defaultHomePage');
     const html = document.documentElement;
-
-    // Restore scroll position if it was saved
-    const savedScrollPosition = localStorage.getItem('scrollPosition');
-    if (savedScrollPosition !== null) {
-        window.scrollTo(0, parseInt(savedScrollPosition));
-        localStorage.removeItem('scrollPosition');
-    }
 
     // Load table view preference from localStorage
     const isTableViewEnabled = localStorage.getItem('tableViewEnabled') === 'true';
