@@ -490,6 +490,7 @@ body.modal-open {
     margin: 3px 0;
     font-size: 0.95em;
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.9);
+    display: block !important;
 }
 
 .btn-icon {
@@ -549,19 +550,24 @@ body.modal-open {
     margin: 5px 0;
 }
 
-.episode-count.no-episodes-watched {
-    color: red;
+.card-info .episode-count {
+    color: white;
     font-weight: bold;
+    font-size: 1.1em !important;
+    margin: 3px 0;
+    display: block !important;
+}
+
+.episode-count.no-episodes-watched {
+    color: red !important;
 }
 
 .episode-count.some-episodes-watched {
-    color: yellow;
-    font-weight: bold;
+    color: yellow !important;
 }
 
 .episode-count.all-episodes-watched {
-    color: #1db954;
-    font-weight: bold;
+    color: #1db954 !important;
 }
 
 .show-card p.last-episode-added {
