@@ -430,6 +430,7 @@ body.modal-open {
     padding-left: 0px;
     padding-right: 0px;
     position: relative;
+    height: calc(325px + 100px);
 }
 
 .show-card .img-wrapper img {
