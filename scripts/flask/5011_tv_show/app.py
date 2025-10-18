@@ -220,7 +220,7 @@ def index():
             
             if recent_dates:
                 latest_date = max(recent_dates)
-                show['last_episode_added'] = latest_date.strftime('%Y-%m-%d')
+                show['last_episode_added'] = latest_date.strftime('%d %B, %Y')
             else:
                 show['last_episode_added'] = 'Unknown'
         else:
