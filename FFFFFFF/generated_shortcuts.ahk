@@ -9,7 +9,7 @@ ScrollLock:: {
     run_py_script()
     run_py_script()
     {
-        Run("C:\Users\nahid\ms\ms1\run.py", , "Show")
+        Run("C:\Users\nahid\ms\ms1\scripts\run\Run.py", , "Show")
         ; Wait a moment for the window to appear
         Sleep(1000)
         ; Make the window always on top (assumes it's the active window)

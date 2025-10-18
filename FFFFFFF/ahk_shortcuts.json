@@ -12,8 +12,9 @@
             "name": "Run Python Script",
             "description": "Opens run.py in the ms1 directory",
             "hotkey": "ScrollLock",
-            "action": "run_py_script()\nrun_py_script()\n{\n    Run(\"C:\\Users\\nahid\\ms\\ms1\\run.py\", , \"Show\")\n    ; Wait a moment for the window to appear\n    Sleep(1000)\n    ; Make the window always on top (assumes it's the active window)\n    ;WinSetAlwaysOnTop(true, \"A\")\n}",
-            "category": "Launch"
+            "action": "run_py_script()\nrun_py_script()\n{\n    Run(\"C:\\Users\\nahid\\ms\\ms1\\scripts\\run\\Run.py\", , \"Show\")\n    ; Wait a moment for the window to appear\n    Sleep(1000)\n    ; Make the window always on top (assumes it's the active window)\n    ;WinSetAlwaysOnTop(true, \"A\")\n}",
+            "category": "Launch",
+            "enabled": true
         },
         {
             "name": "Monitor Internal",
@@ -263,6 +264,5 @@
             "trigger": ";change",
             "replacement": "ok i have made some changes from last time  so keep that in mind now"
         }
-    ],
-    "show_categories": true
+    ]
 }
