@@ -161,10 +161,34 @@ document.addEventListener('DOMContentLoaded', () => {
                 currentShowId = card.dataset.showId;
                 console.log('Right-clicked on show:', currentShowId);
                 
-                // Position the context menu
-                contextMenu.style.left = event.pageX + 'px';
-                contextMenu.style.top = event.pageY + 'px';
+                // Position the context menu using clientX/clientY for viewport coordinates
+                const x = event.clientX;
+                const y = event.clientY;
+                
+                // Get menu dimensions
                 contextMenu.style.display = 'block';
+                const menuWidth = contextMenu.offsetWidth;
+                const menuHeight = contextMenu.offsetHeight;
+                
+                // Adjust position if menu would go off screen
+                const windowWidth = window.innerWidth;
+                const windowHeight = window.innerHeight;
+                
+                let left = x;
+                let top = y;
+                
+                // Check if menu goes off right edge
+                if (x + menuWidth > windowWidth) {
+                    left = windowWidth - menuWidth - 5;
+                }
+                
+                // Check if menu goes off bottom edge
+                if (y + menuHeight > windowHeight) {
+                    top = windowHeight - menuHeight - 5;
+                }
+                
+                contextMenu.style.left = left + 'px';
+                contextMenu.style.top = top + 'px';
             });
         });
 
