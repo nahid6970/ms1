@@ -73,7 +73,9 @@ def set_timer():
                         font=(font_family, 14), 
                         placeholder_text="e.g., 5h 3m or 1d 5h 3m")
     entry.pack(pady=10)
-    entry.focus()
+    
+    # Ensure focus is set on the entry field
+    root.after(100, lambda: entry.focus())
     
     def on_submit():
         time_input = entry.get().strip()
