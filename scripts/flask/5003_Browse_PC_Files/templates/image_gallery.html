@@ -104,6 +104,31 @@
             -moz-appearance: textfield;
         }
 
+        .zoom-btn {
+            background-color: #444;
+            color: white;
+            border: 1px solid #666;
+            border-radius: 4px;
+            width: 30px;
+            height: 30px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .zoom-btn:hover {
+            background-color: #2196F3;
+            border-color: #2196F3;
+        }
+
+        .zoom-btn:active {
+            transform: scale(0.95);
+        }
+
         .minimap {
             position: fixed;
             right: 20px;
@@ -521,26 +546,26 @@
         </div>
         <div class="gallery-controls">
             <div class="zoom-control">
-                <label></label>
+                <button class="zoom-btn" onclick="zoomOut()" title="Zoom Out">-</button>
                 <input type="number" class="zoom-input" id="zoomInput" value="150" min="10" max="500" step="10">
-                <span style="font-size: 12px; color: #aaa;">%</span>
+                <button class="zoom-btn" onclick="zoomIn()" title="Zoom In">+</button>
             </div>
             <button class="control-btn" id="minimapToggle" onclick="toggleMinimap()" title="Toggle Minimap">
-                <i class="nf nf-fa-map"></i> 
+                <i class="nf nf-fa-map"></i>
             </button>
             <div class="move-dropdown">
                 <button class="control-btn move-btn" onclick="toggleMoveDropdown(event)">
-                    <i class="nf nf-fa-folder_open"></i> 
+                    <i class="nf nf-fa-folder_open"></i>
                 </button>
                 <div class="move-dropdown-content" id="moveDropdown">
                     <!-- Move folders will be loaded here -->
                 </div>
             </div>
             <button class="control-btn" onclick="toggleQuickMove()" id="quickMoveToggle">
-                <i class="nf nf-fa-eye"></i> 
+                <i class="nf nf-fa-eye"></i>
             </button>
             <button class="control-btn back-btn" onclick="goBack()">
-                <i class="nf nf-fa-arrow_left"></i> 
+                <i class="nf nf-fa-arrow_left"></i>
             </button>
         </div>
     </div>
@@ -555,7 +580,8 @@
         <!-- Minimap -->
         <div class="minimap" id="minimap" style="display: none;">
             <div class="minimap-content">
-                <img src="/serve_image/{{ dir_path }}/{{ current_image }}" alt="minimap" class="minimap-image" id="minimapImage">
+                <img src="/serve_image/{{ dir_path }}/{{ current_image }}" alt="minimap" class="minimap-image"
+                    id="minimapImage">
                 <div class="minimap-viewport" id="minimapViewport"></div>
             </div>
         </div>
@@ -677,7 +703,7 @@
         let minimapEnabled = localStorage.getItem('minimapEnabled') !== 'false'; // Default to true
 
         // Initialize minimap toggle button state
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const minimapToggle = document.getElementById('minimapToggle');
             if (minimapToggle) {
                 if (minimapEnabled) {
@@ -691,7 +717,7 @@
         function toggleMinimap() {
             minimapEnabled = !minimapEnabled;
             localStorage.setItem('minimapEnabled', minimapEnabled);
-            
+
             const minimapToggle = document.getElementById('minimapToggle');
             if (minimapEnabled) {
                 minimapToggle.style.backgroundColor = '#4CAF50';
@@ -770,26 +796,26 @@
             // Get the natural dimensions of the image
             const naturalWidth = image.naturalWidth;
             const naturalHeight = image.naturalHeight;
-            
+
             // Get current zoom level
             const zoomInput = document.getElementById('zoomInput');
             const zoomLevel = parseInt(zoomInput.value) / 100;
-            
+
             // Calculate actual zoomed image dimensions
             const zoomedWidth = naturalWidth * zoomLevel;
             const zoomedHeight = naturalHeight * zoomLevel;
-            
+
             // Get minimap dimensions
             const minimapRect = minimapImage.getBoundingClientRect();
-            
+
             // Calculate scale factor between minimap and zoomed image
             const scaleX = minimapRect.width / zoomedWidth;
             const scaleY = minimapRect.height / zoomedHeight;
-            
+
             // Calculate viewport size on minimap (what portion of the image is visible)
             const viewportWidth = Math.min(wrapper.clientWidth * scaleX, minimapRect.width);
             const viewportHeight = Math.min(wrapper.clientHeight * scaleY, minimapRect.height);
-            
+
             // Calculate viewport position on minimap
             const scrollLeft = wrapper.scrollLeft;
             const scrollTop = wrapper.scrollTop;
@@ -810,12 +836,12 @@
                 const wrapper = document.getElementById('imageWrapper');
                 const zoomLevel = parseInt(this.value) / 100;
                 image.style.transform = `scale(${zoomLevel})`;
-                
+
                 // Preserve current scroll position relative to the zoom level
                 const rect = wrapper.getBoundingClientRect();
                 const centerX = wrapper.scrollLeft + rect.width / 2;
                 const centerY = wrapper.scrollTop + rect.height / 2;
-                
+
                 // Update minimap if enabled
                 if (minimapEnabled) {
                     updateMinimapViewport();
@@ -824,7 +850,7 @@
         });
 
         // Minimap click navigation
-        document.getElementById('minimap').addEventListener('click', function(e) {
+        document.getElementById('minimap').addEventListener('click', function (e) {
             if (!isZoomed) return;
 
             const minimapImage = document.getElementById('minimapImage');
@@ -839,7 +865,7 @@
             // Get current zoom level
             const zoomInput = document.getElementById('zoomInput');
             const zoomLevel = parseInt(zoomInput.value) / 100;
-            
+
             // Calculate actual zoomed image dimensions
             const naturalWidth = image.naturalWidth;
             const naturalHeight = image.naturalHeight;
@@ -874,7 +900,7 @@
         let minimapStartX, minimapStartY;
         let minimapViewportStartLeft, minimapViewportStartTop;
 
-        document.getElementById('minimapViewport').addEventListener('mousedown', function(e) {
+        document.getElementById('minimapViewport').addEventListener('mousedown', function (e) {
             if (!isZoomed) return;
             isMinimapDragging = true;
             const viewport = document.getElementById('minimapViewport');
@@ -885,7 +911,7 @@
             e.stopPropagation();
         });
 
-        document.addEventListener('mousemove', function(e) {
+        document.addEventListener('mousemove', function (e) {
             // Handle image panning
             if (isDragging && isZoomed) {
                 e.preventDefault();
@@ -897,7 +923,7 @@
                 wrapper.scrollLeft = scrollLeft - walkX;
                 wrapper.scrollTop = scrollTop - walkY;
             }
-            
+
             // Handle minimap viewport dragging
             if (isMinimapDragging && isZoomed) {
                 e.preventDefault();
@@ -905,34 +931,34 @@
                 const minimapImage = document.getElementById('minimapImage');
                 const wrapper = document.getElementById('imageWrapper');
                 const image = document.getElementById('mainImage');
-                
+
                 // Calculate movement delta
                 const deltaX = e.clientX - minimapStartX;
                 const deltaY = e.clientY - minimapStartY;
-                
+
                 // Calculate new viewport position
                 const newLeft = minimapViewportStartLeft + deltaX;
                 const newTop = minimapViewportStartTop + deltaY;
-                
+
                 // Get minimap dimensions
                 const minimapRect = minimapImage.getBoundingClientRect();
                 const viewportRect = viewport.getBoundingClientRect();
-                
+
                 // Constrain to minimap boundaries
                 const maxLeft = minimapRect.width - viewportRect.width;
                 const maxTop = minimapRect.height - viewportRect.height;
-                
+
                 const constrainedLeft = Math.max(0, Math.min(newLeft, maxLeft));
                 const constrainedTop = Math.max(0, Math.min(newTop, maxTop));
-                
+
                 // Update viewport position
                 viewport.style.left = constrainedLeft + 'px';
                 viewport.style.top = constrainedTop + 'px';
-                
+
                 // Get current zoom level
                 const zoomInput = document.getElementById('zoomInput');
                 const zoomLevel = parseInt(zoomInput.value) / 100;
-                
+
                 // Calculate actual zoomed image dimensions
                 const naturalWidth = image.naturalWidth;
                 const naturalHeight = image.naturalHeight;
@@ -957,13 +983,13 @@
             }
         });
 
-        document.addEventListener('mouseup', function() {
+        document.addEventListener('mouseup', function () {
             isDragging = false;
             isMinimapDragging = false;
         });
 
         // Update minimap viewport on scroll
-        document.getElementById('imageWrapper').addEventListener('scroll', function() {
+        document.getElementById('imageWrapper').addEventListener('scroll', function () {
             if (isZoomed) {
                 updateMinimapViewport();
             }
@@ -1208,9 +1234,9 @@
         function showColorPalette(event, index, folderPath, folderName, bgColor, textColor, hoverBgColor, hoverTextColor) {
             event.preventDefault();
             event.stopPropagation();
-            
+
             console.log('Right-click detected on folder', index, 'opening color palette');
-            
+
             // Directly open the color picker
             showColorPicker(folderPath, folderName, bgColor, textColor, hoverBgColor, hoverTextColor);
         }
@@ -1238,23 +1264,23 @@
                                 }
                             </style>
                         `).join('');
-                        
+
                         // Add right-click event listeners after creating the elements
                         setTimeout(() => {
                             data.folders.forEach((folder, index) => {
                                 const folderBtn = document.querySelector(`.quick-move-folder-${index}`);
                                 if (folderBtn) {
-                                    folderBtn.addEventListener('contextmenu', function(event) {
+                                    folderBtn.addEventListener('contextmenu', function (event) {
                                         event.preventDefault();
                                         event.stopPropagation();
                                         showColorPalette(
-                                            event, 
-                                            index, 
-                                            folder.path, 
-                                            folder.name, 
-                                            folder.bg_color || '#444', 
-                                            folder.text_color || '#ffffff', 
-                                            folder.hover_bg_color || '#FF9800', 
+                                            event,
+                                            index,
+                                            folder.path,
+                                            folder.name,
+                                            folder.bg_color || '#444',
+                                            folder.text_color || '#ffffff',
+                                            folder.hover_bg_color || '#FF9800',
                                             folder.hover_text_color || '#000000'
                                         );
                                     });
@@ -1387,6 +1413,32 @@
             }
         });
 
+        // Zoom button functions
+        function zoomIn() {
+            const zoomInput = document.getElementById('zoomInput');
+            let currentZoom = parseInt(zoomInput.value);
+            currentZoom = Math.min(500, currentZoom + 10);
+            zoomInput.value = currentZoom;
+
+            if (isZoomed) {
+                const image = document.getElementById('mainImage');
+                const zoomLevel = currentZoom / 100;
+                image.style.transform = `scale(${zoomLevel})`;
+            }
+        }
+
+        function zoomOut() {
+            const zoomInput = document.getElementById('zoomInput');
+            let currentZoom = parseInt(zoomInput.value);
+            currentZoom = Math.max(10, currentZoom - 10);
+            zoomInput.value = currentZoom;
+
+            if (isZoomed) {
+                const image = document.getElementById('mainImage');
+                const zoomLevel = currentZoom / 100;
+                image.style.transform = `scale(${zoomLevel})`;
+            }
+        }
 
     </script>
 </body>
