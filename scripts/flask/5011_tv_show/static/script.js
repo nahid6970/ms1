@@ -40,6 +40,9 @@ async function openEditShowModal(showId) {
 
     document.getElementById('editShowForm').action = `/edit_show/${show.id}`;
 
+    // Save scroll position before opening modal
+    localStorage.setItem('scrollPosition', window.scrollY);
+
     document.getElementById('editShowModal').style.display = 'block';
     document.body.classList.add('modal-open');
 }
@@ -101,6 +104,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const tableViewToggle = document.getElementById('tableViewToggle');
     const defaultHomePageSelect = document.getElementById('defaultHomePage');
     const html = document.documentElement;
+
+    // Restore scroll position if it was saved
+    const savedScrollPosition = localStorage.getItem('scrollPosition');
+    if (savedScrollPosition !== null) {
+        window.scrollTo(0, parseInt(savedScrollPosition));
+        localStorage.removeItem('scrollPosition');
+    }
 
     // Load table view preference from localStorage
     const isTableViewEnabled = localStorage.getItem('tableViewEnabled') === 'true';
