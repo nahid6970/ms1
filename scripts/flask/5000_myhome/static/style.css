@@ -528,12 +528,11 @@ input:checked+.slider:before {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 100%;
-  max-width: fit-content;
+  width: auto;
+  max-width: 90vw;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-
-  /* max-width: 90vw; */
-  /* max-height: 90vh; */
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
 #group_type_box-popup .popup-content-inner {
