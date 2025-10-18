@@ -1087,3 +1087,42 @@ html.table-view-active .show-card .btn-delete {
     background-color: #158a3e;
     /* Green hover for add episode button */
 }
+
+/* Context Menu Styles */
+.context-menu {
+    position: fixed;
+    background: #282828;
+    border: 1px solid #444;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+    display: none;
+    min-width: 150px;
+    overflow: hidden;
+    pointer-events: auto;
+}
+
+.context-menu-item {
+    padding: 12px 16px;
+    cursor: pointer;
+    color: #e0e0e0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background 0.2s;
+    font-size: 0.95em;
+}
+
+.context-menu-item:hover {
+    background: #3a3a3a;
+}
+
+.context-menu-delete:hover {
+    background: #dc3545;
+    color: white;
+}
+
+.context-menu-item i {
+    width: 16px;
+    text-align: center;
+}

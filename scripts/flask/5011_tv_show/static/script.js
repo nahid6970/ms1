@@ -144,6 +144,62 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
+
+    // Context Menu functionality
+    const contextMenu = document.getElementById('contextMenu');
+    const contextEdit = document.getElementById('contextEdit');
+    const contextDelete = document.getElementById('contextDelete');
+    let currentShowId = null;
+
+    if (contextMenu && contextEdit && contextDelete) {
+        // Show context menu on right-click
+        document.querySelectorAll('.show-card').forEach(card => {
+            card.addEventListener('contextmenu', (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                
+                currentShowId = card.dataset.showId;
+                console.log('Right-clicked on show:', currentShowId);
+                
+                // Position the context menu
+                contextMenu.style.left = event.pageX + 'px';
+                contextMenu.style.top = event.pageY + 'px';
+                contextMenu.style.display = 'block';
+            });
+        });
+
+        // Handle Edit click
+        contextEdit.addEventListener('click', (event) => {
+            event.stopPropagation();
+            if (currentShowId) {
+                openEditShowModal(parseInt(currentShowId));
+            }
+            contextMenu.style.display = 'none';
+        });
+
+        // Handle Delete click
+        contextDelete.addEventListener('click', (event) => {
+            event.stopPropagation();
+            if (currentShowId) {
+                if (confirm('Are you sure you want to delete this show?')) {
+                    window.location.href = `/delete_show/${currentShowId}`;
+                }
+            }
+            contextMenu.style.display = 'none';
+        });
+
+        // Hide context menu on click anywhere else
+        document.addEventListener('click', (event) => {
+            if (!contextMenu.contains(event.target)) {
+                contextMenu.style.display = 'none';
+            }
+        });
+
+        // Hide context menu on scroll
+        document.addEventListener('scroll', () => {
+            contextMenu.style.display = 'none';
+        });
+    }
 });
 
 // Sort Menu Functions
