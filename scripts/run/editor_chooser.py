@@ -6,7 +6,8 @@ from tkinter import font as tkfont
 def open_with_editor(file_path, editor):
     """Open file with selected editor"""
     if editor == "nvim":
-        subprocess.run(f'nvim "{file_path}"', shell=True)
+        # Launch nvim in a new terminal window
+        subprocess.run(['start', 'cmd', '/k', 'nvim', file_path], shell=True)
     elif editor == "vscode":
         subprocess.run(f'code "{file_path}"', shell=True)
     elif editor == "zed":
