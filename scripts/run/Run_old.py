@@ -392,7 +392,7 @@ python "{menu_script_path}" "!temp_file!"
             "--layout=reverse", 
             "--color=bg:-1,bg+:-1,fg:#d1ff94,fg+:#8fdbff,hl:#fe8019,hl+:#fe8019,info:#83a598,prompt:#b8bb26,pointer:#d3869b,marker:#ff4747,spinner:#fe8019,header:#83a598,preview-bg:-1,border:#d782ff",
             f"--bind=enter:execute({batch_file} {{+1}})",
-            f"--bind=ctrl-n:execute-silent(python \"{editor_chooser_script}\" {{1}})",
+            f"--bind=ctrl-n:execute-silent(python \"{editor_chooser_script}\" {{+1}})",
             "--bind=ctrl-o:execute-silent(explorer.exe /select,{1})",
             "--bind=ctrl-c:execute-silent(echo {1} | clip)",
             "--bind=ctrl-r:execute-silent(powershell -command Start-Process '{1}')",

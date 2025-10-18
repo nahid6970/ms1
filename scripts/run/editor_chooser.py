@@ -3,18 +3,34 @@ import subprocess
 import tkinter as tk
 from tkinter import font as tkfont
 
-def open_with_editor(file_path, editor):
-    """Open file with selected editor"""
+def open_with_editor(file_paths, editor):
+    """Open file(s) with selected editor"""
     if editor == "nvim":
-        # Launch nvim in a new terminal window
-        subprocess.run(['start', 'cmd', '/k', 'nvim', file_path], shell=True)
+        # Launch nvim in a new terminal window with all files in tabs
+        if isinstance(file_paths, list):
+            files_args = ' '.join([f'"{fp}"' for fp in file_paths])
+            subprocess.run(f'start cmd /k nvim -p {files_args}', shell=True)
+        else:
+            subprocess.run(['start', 'cmd', '/k', 'nvim', file_paths], shell=True)
     elif editor == "vscode":
-        subprocess.run(f'code "{file_path}"', shell=True)
+        if isinstance(file_paths, list):
+            for file_path in file_paths:
+                subprocess.run(f'code "{file_path}"', shell=True)
+        else:
+            subprocess.run(f'code "{file_paths}"', shell=True)
     elif editor == "zed":
-        subprocess.run(f'zed "{file_path}"', shell=True)
+        if isinstance(file_paths, list):
+            for file_path in file_paths:
+                subprocess.run(f'zed "{file_path}"', shell=True)
+        else:
+            subprocess.run(f'zed "{file_paths}"', shell=True)
 
-def create_editor_chooser(file_path):
+def create_editor_chooser(file_paths):
     """Create a GUI window to choose editor"""
+    # Normalize to list
+    if not isinstance(file_paths, list):
+        file_paths = [file_paths]
+    
     root = tk.Tk()
     root.title("Choose Editor")
     root.configure(bg='#1e1e1e')
@@ -42,7 +58,9 @@ def create_editor_chooser(file_path):
     
     # Title label
     title_font = tkfont.Font(family="Segoe UI", size=12, weight="bold")
-    title = tk.Label(content_frame, text="Open with:", font=title_font, bg='#1e1e1e', fg='#ffffff')
+    file_count = len(file_paths)
+    title_text = f"Open {file_count} file{'s' if file_count > 1 else ''} with:"
+    title = tk.Label(content_frame, text=title_text, font=title_font, bg='#1e1e1e', fg='#ffffff')
     title.pack(pady=(15, 10))
     
     # Button frame
@@ -95,12 +113,12 @@ def create_editor_chooser(file_path):
             # Enter key - select current button
             editor_name = editors[current_index[0]][0]
             root.destroy()
-            open_with_editor(file_path, editor_name.lower().replace("vscode", "vscode"))
+            open_with_editor(file_paths, editor_name.lower().replace("vscode", "vscode"))
     
     def create_button(editor_name, color, icon, index):
         def on_click():
             root.destroy()
-            open_with_editor(file_path, editor_name.lower().replace("vscode", "vscode"))
+            open_with_editor(file_paths, editor_name.lower().replace("vscode", "vscode"))
         
         # Create frame for button
         btn_frame = tk.Frame(button_frame, bg=color, width=120, height=60, cursor='hand2')
@@ -161,7 +179,8 @@ def create_editor_chooser(file_path):
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
-        file_path = sys.argv[1]
-        create_editor_chooser(file_path)
+        # Accept multiple file paths as arguments
+        file_paths = sys.argv[1:]
+        create_editor_chooser(file_paths)
     else:
-        print("Usage: python editor_chooser.py <file_path>")
+        print("Usage: python editor_chooser.py <file_path> [<file_path2> ...]")
