@@ -1686,6 +1686,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     editGroupPopup.classList.remove('hidden');
     applyPopupStyling(currentGroupName);
+
+    // Prevent body scroll when popup is open
+    document.body.style.overflow = 'hidden';
   }
 
   // Drag and Drop functionality for collapsible groups
@@ -2802,6 +2805,29 @@ document.addEventListener('DOMContentLoaded', function () {
       e.target.classList.add('hidden');
       document.body.style.overflow = '';
     }
+  });
+
+  // Watch for any popup being shown and prevent body scroll
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+        const target = mutation.target;
+        if (target.classList.contains('popup-container')) {
+          if (!target.classList.contains('hidden')) {
+            // Popup is shown, prevent body scroll
+            document.body.style.overflow = 'hidden';
+          } else {
+            // Popup is hidden, restore body scroll
+            document.body.style.overflow = '';
+          }
+        }
+      }
+    });
+  });
+
+  // Observe all popup containers
+  document.querySelectorAll('.popup-container').forEach((popup) => {
+    observer.observe(popup, { attributes: true });
   });
 });
 
