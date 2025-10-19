@@ -1762,7 +1762,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const linkId = editLinkIndexInput.value;
         const originalLink = links[linkId];
-        const groupName = originalLink.group || 'Ungrouped';
+        const originalGroupName = originalLink.group || 'Ungrouped';
+        const newGroupName = document.getElementById('edit-link-group').value || 'Ungrouped';
 
         const updatedLink = {
           name: document.getElementById('edit-link-name').value,
@@ -1791,8 +1792,9 @@ document.addEventListener('DOMContentLoaded', function () {
           hidden: document.getElementById('edit-link-hidden').checked || undefined,
         };
 
-        // Preserve group-level properties if not explicitly changed in link edit
-        if (originalLink) {
+        // Only preserve group-level properties if the link stays in the same group
+        // If moving to a different group, don't copy group-level properties
+        if (originalLink && originalGroupName === newGroupName) {
           updatedLink.collapsible = originalLink.collapsible;
           updatedLink.display_style = originalLink.display_style;
           updatedLink.horizontal_stack = originalLink.horizontal_stack;
@@ -1810,6 +1812,38 @@ document.addEventListener('DOMContentLoaded', function () {
           updatedLink.horizontal_text_color = originalLink.horizontal_text_color;
           updatedLink.horizontal_border_color = originalLink.horizontal_border_color;
           updatedLink.horizontal_hover_color = originalLink.horizontal_hover_color;
+        } else if (originalLink) {
+          // When moving to a different group, inherit properties from the new group
+          // First, we need to get the current links to find an existing link in the new group
+          try {
+            const response = await fetch('/api/links');
+            const allLinks = await response.json();
+            
+            // Look for an existing link in the new group to copy properties from
+            const newGroupLink = allLinks.find(link => (link.group || 'Ungrouped') === newGroupName);
+            if (newGroupLink) {
+              // Copy group-level properties from the new group
+              updatedLink.collapsible = newGroupLink.collapsible;
+              updatedLink.display_style = newGroupLink.display_style;
+              updatedLink.horizontal_stack = newGroupLink.horizontal_stack;
+              updatedLink.password_protect = newGroupLink.password_protect;
+              updatedLink.top_name = newGroupLink.top_name;
+              updatedLink.top_bg_color = newGroupLink.top_bg_color;
+              updatedLink.top_text_color = newGroupLink.top_text_color;
+              updatedLink.top_border_color = newGroupLink.top_border_color;
+              updatedLink.top_hover_color = newGroupLink.top_hover_color;
+              updatedLink.popup_bg_color = newGroupLink.popup_bg_color;
+              updatedLink.popup_text_color = newGroupLink.popup_text_color;
+              updatedLink.popup_border_color = newGroupLink.popup_border_color;
+              updatedLink.popup_border_radius = newGroupLink.popup_border_radius;
+              updatedLink.horizontal_bg_color = newGroupLink.horizontal_bg_color;
+              updatedLink.horizontal_text_color = newGroupLink.horizontal_text_color;
+              updatedLink.horizontal_border_color = newGroupLink.horizontal_border_color;
+              updatedLink.horizontal_hover_color = newGroupLink.horizontal_hover_color;
+            }
+          } catch (error) {
+            console.error('Error fetching links for group properties:', error);
+          }
         }
 
         try {
@@ -1826,8 +1860,9 @@ document.addEventListener('DOMContentLoaded', function () {
             await fetchAndDisplayLinks();
 
             // Re-open the top group if it was open
+            // Check both original and new group names
             if (originalLink.collapsible) {
-              const groupElement = document.querySelector(`.group_type_top[data-group-name="${groupName}"]`);
+              const groupElement = document.querySelector(`.group_type_top[data-group-name="${originalGroupName}"]`);
               if (groupElement) {
                 const content = groupElement.querySelector('.group_type_top-content');
                 const toggleBtn = groupElement.querySelector('.group_type_top-toggle-btn');
@@ -1839,9 +1874,31 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
               }
             } else if (originalLink.horizontal_stack) {
-              const groupDiv = document.querySelector(`.link-group[data-group-name="${groupName}"]`);
+              const groupDiv = document.querySelector(`.link-group[data-group-name="${originalGroupName}"]`);
               if (groupDiv) {
                 groupDiv.click();
+              }
+            }
+
+            // Also re-open the new group if it's collapsible or horizontal stack
+            if (newGroupName !== originalGroupName) {
+              // Check if the new group is collapsible
+              const newGroupElement = document.querySelector(`.group_type_top[data-group-name="${newGroupName}"]`);
+              if (newGroupElement) {
+                const content = newGroupElement.querySelector('.group_type_top-content');
+                const toggleBtn = newGroupElement.querySelector('.group_type_top-toggle-btn');
+                if (content && toggleBtn) {
+                  content.classList.add('expanded');
+                  toggleBtn.textContent = '▲';
+                  newGroupElement.classList.add('expanded');
+                  moveToExpandedRow(newGroupElement);
+                }
+              }
+              
+              // Check if the new group is horizontal stack
+              const newGroupDiv = document.querySelector(`.link-group[data-group-name="${newGroupName}"]`);
+              if (newGroupDiv && newGroupDiv.classList.contains('group_type_box')) {
+                newGroupDiv.click();
               }
             }
 
