@@ -1880,7 +1880,7 @@ document.addEventListener('DOMContentLoaded', function () {
               }
             }
 
-            // Also re-open the new group if it's collapsible or horizontal stack
+            // Also re-open the new group if it's collapsible or horizontal stack and has changed
             if (newGroupName !== originalGroupName) {
               // Check if the new group is collapsible
               const newGroupElement = document.querySelector(`.group_type_top[data-group-name="${newGroupName}"]`);

@@ -307,8 +307,16 @@ def edit_link(link_id):
                     if 'horizontal_hover_color' in existing_link:
                         updated_link['horizontal_hover_color'] = existing_link['horizontal_hover_color']
                     break  # Only need to copy from one existing link in the group
+            
+            # Remove the link from its original position
+            removed_link = links.pop(link_id)
+            
+            # Add the updated link to the end of the list to maintain proper group ordering
+            links.append(updated_link)
+        else:
+            # If staying in the same group, just update in place
+            links[link_id] = updated_link
         
-        links[link_id] = updated_link
         write_data(links)
         return jsonify({'message': 'Link updated successfully'})
     return jsonify({'message': 'Link not found'}), 404
