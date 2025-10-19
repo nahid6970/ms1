@@ -593,22 +593,163 @@ document.addEventListener('DOMContentLoaded', function () {
     if (firstLink && firstLink.link) {
       const linkData = firstLink.link;
 
-      // Apply background color
+      // Apply background color (with gradient support)
       if (linkData.top_bg_color) {
-        collapsibleGroup.style.setProperty('--top-bg-color', linkData.top_bg_color);
-        collapsibleGroup.style.backgroundColor = linkData.top_bg_color;
+        const parsed = parseColors(linkData.top_bg_color);
+        if (parsed.colors.length > 1) {
+          const style = document.createElement('style');
+          const uniqueId = 'top-bg-gradient-' + Math.random().toString(36).substr(2, 9);
+          const animName = 'topBgGradientShift-' + uniqueId;
+          const randomDelay = (Math.random() * 3).toFixed(2);
+          collapsibleGroup.dataset.topBgGradientId = uniqueId;
+          collapsibleGroup.classList.add('animated-top-gradient-bg');
+
+          const anim = generateGradientAnimation(parsed, animName, randomDelay);
+          style.textContent = `
+            .group_type_top.animated-top-gradient-bg[data-top-bg-gradient-id="${uniqueId}"] {
+              ${anim.baseStyle || ''}
+              animation: ${anim.animation}
+            }
+            @keyframes ${animName} {
+              ${anim.keyframes}
+            }
+          `;
+          document.head.appendChild(style);
+        } else {
+          collapsibleGroup.style.setProperty('--top-bg-color', linkData.top_bg_color);
+          collapsibleGroup.style.backgroundColor = linkData.top_bg_color;
+        }
       }
 
-      // Apply text color
+      // Apply text color (with gradient support)
       if (linkData.top_text_color) {
-        collapsibleGroup.style.setProperty('--top-text-color', linkData.top_text_color);
-        title.style.color = linkData.top_text_color;
+        const parsed = parseColors(linkData.top_text_color);
+        if (parsed.colors.length > 1) {
+          const style = document.createElement('style');
+          const uniqueId = 'top-text-gradient-' + Math.random().toString(36).substr(2, 9);
+          const animName = 'topTextGradientShift-' + uniqueId;
+          const randomDelay = (Math.random() * 3).toFixed(2);
+          title.dataset.topTextGradientId = uniqueId;
+          title.classList.add('animated-top-gradient-text');
+
+          if (parsed.animationType === 'rotate') {
+            const numColors = parsed.colors.length;
+            let keyframes = '';
+            for (let i = 0; i < numColors; i++) {
+              const startPercent = (i / numColors * 100).toFixed(2);
+              const endPercent = ((i + 1) / numColors * 100).toFixed(2);
+              keyframes += `${startPercent}% { color: ${parsed.colors[i]}; }\n`;
+              if (i < numColors - 1) {
+                keyframes += `${endPercent}% { color: ${parsed.colors[i]}; }\n`;
+              }
+            }
+            keyframes += `100% { color: ${parsed.colors[0]}; }\n`;
+
+            style.textContent = `
+              .animated-top-gradient-text[data-top-text-gradient-id="${uniqueId}"] {
+                animation: ${animName} ${numColors * 2}s ease-in-out infinite;
+                animation-delay: -${randomDelay}s;
+              }
+              @keyframes ${animName} {
+                ${keyframes}
+              }
+            `;
+          } else {
+            const angle = parsed.angle || '45deg';
+            const gradientColors = parsed.colors.join(', ');
+            style.textContent = `
+              .animated-top-gradient-text[data-top-text-gradient-id="${uniqueId}"] {
+                background: linear-gradient(${angle}, ${gradientColors});
+                background-size: 400% 400%;
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+                animation: ${animName} 3s ease infinite;
+                animation-delay: -${randomDelay}s;
+              }
+              @keyframes ${animName} {
+                0% { background-position: 0% 50%; }
+                50% { background-position: 100% 50%; }
+                100% { background-position: 0% 50%; }
+              }
+            `;
+          }
+          document.head.appendChild(style);
+        } else {
+          collapsibleGroup.style.setProperty('--top-text-color', linkData.top_text_color);
+          title.style.color = linkData.top_text_color;
+        }
       }
 
-      // Apply border color
+      // Apply border color (with gradient support)
       if (linkData.top_border_color) {
-        collapsibleGroup.style.setProperty('--top-border-color', linkData.top_border_color);
-        collapsibleGroup.style.border = `1px solid ${linkData.top_border_color}`;
+        const parsed = parseColors(linkData.top_border_color);
+        if (parsed.colors.length > 1) {
+          const borderWidth = '2px';
+          const style = document.createElement('style');
+          const uniqueId = 'top-border-gradient-' + Math.random().toString(36).substr(2, 9);
+          const animName = 'topBorderGradientShift-' + uniqueId;
+          const randomDelay = (Math.random() * 3).toFixed(2);
+          collapsibleGroup.dataset.topBorderGradientId = uniqueId;
+          collapsibleGroup.classList.add('animated-top-gradient-border');
+
+          collapsibleGroup.style.position = 'relative';
+          collapsibleGroup.style.border = 'none';
+
+          const bgColor = linkData.top_bg_color && !linkData.top_bg_color.includes(',') ? linkData.top_bg_color : '#2d2d2d';
+
+          if (parsed.animationType === 'rotate') {
+            const numColors = parsed.colors.length;
+            let keyframes = '';
+            for (let i = 0; i < numColors; i++) {
+              const startPercent = (i / numColors * 100).toFixed(2);
+              const endPercent = ((i + 1) / numColors * 100).toFixed(2);
+              keyframes += `${startPercent}% { background: ${parsed.colors[i]}; }\n`;
+              if (i < numColors - 1) {
+                keyframes += `${endPercent}% { background: ${parsed.colors[i]}; }\n`;
+              }
+            }
+            keyframes += `100% { background: ${parsed.colors[0]}; }\n`;
+
+            style.textContent = `
+              .group_type_top.animated-top-gradient-border[data-top-border-gradient-id="${uniqueId}"] {
+                padding: ${borderWidth};
+                animation: ${animName} ${numColors * 2}s ease-in-out infinite;
+                animation-delay: -${randomDelay}s;
+              }
+              .group_type_top.animated-top-gradient-border[data-top-border-gradient-id="${uniqueId}"] > * {
+                background: ${bgColor};
+              }
+              @keyframes ${animName} {
+                ${keyframes}
+              }
+            `;
+          } else {
+            const angle = parsed.angle || '45deg';
+            const gradientColors = parsed.colors.join(', ');
+            style.textContent = `
+              .group_type_top.animated-top-gradient-border[data-top-border-gradient-id="${uniqueId}"] {
+                background: linear-gradient(${angle}, ${gradientColors});
+                background-size: 400% 400%;
+                padding: ${borderWidth};
+                animation: ${animName} 3s ease infinite;
+                animation-delay: -${randomDelay}s;
+              }
+              .group_type_top.animated-top-gradient-border[data-top-border-gradient-id="${uniqueId}"] > * {
+                background: ${bgColor};
+              }
+              @keyframes ${animName} {
+                0% { background-position: 0% 50%; }
+                50% { background-position: 100% 50%; }
+                100% { background-position: 0% 50%; }
+              }
+            `;
+          }
+          document.head.appendChild(style);
+        } else {
+          collapsibleGroup.style.setProperty('--top-border-color', linkData.top_border_color);
+          collapsibleGroup.style.border = `1px solid ${linkData.top_border_color}`;
+        }
       }
 
       // Apply hover color
@@ -1027,15 +1168,169 @@ document.addEventListener('DOMContentLoaded', function () {
 
       // Apply custom horizontal stack styling
       const linkData = firstLinkInGroup.link;
+
+      // Apply background color (with gradient support)
       if (linkData.horizontal_bg_color) {
-        groupDiv.style.setProperty('--horizontal-bg-color', linkData.horizontal_bg_color);
+        const parsed = parseColors(linkData.horizontal_bg_color);
+        if (parsed.colors.length > 1) {
+          const style = document.createElement('style');
+          const uniqueId = 'horiz-bg-gradient-' + Math.random().toString(36).substr(2, 9);
+          const animName = 'horizBgGradientShift-' + uniqueId;
+          const randomDelay = (Math.random() * 3).toFixed(2);
+          groupDiv.dataset.horizBgGradientId = uniqueId;
+          groupDiv.classList.add('animated-horiz-gradient-bg');
+
+          const anim = generateGradientAnimation(parsed, animName, randomDelay);
+          style.textContent = `
+            .group_type_box.animated-horiz-gradient-bg[data-horiz-bg-gradient-id="${uniqueId}"] {
+              ${anim.baseStyle || ''}
+              animation: ${anim.animation}
+            }
+            @keyframes ${animName} {
+              ${anim.keyframes}
+            }
+          `;
+          document.head.appendChild(style);
+        } else {
+          groupDiv.style.setProperty('--horizontal-bg-color', linkData.horizontal_bg_color);
+          groupDiv.style.backgroundColor = linkData.horizontal_bg_color;
+        }
       }
+
+      // Apply text color (with gradient support)
       if (linkData.horizontal_text_color) {
-        groupDiv.style.setProperty('--horizontal-text-color', linkData.horizontal_text_color);
+        const parsed = parseColors(linkData.horizontal_text_color);
+        if (parsed.colors.length > 1) {
+          const style = document.createElement('style');
+          const uniqueId = 'horiz-text-gradient-' + Math.random().toString(36).substr(2, 9);
+          const animName = 'horizTextGradientShift-' + uniqueId;
+          const randomDelay = (Math.random() * 3).toFixed(2);
+          groupDiv.dataset.horizTextGradientId = uniqueId;
+          groupDiv.classList.add('animated-horiz-gradient-text');
+
+          if (parsed.animationType === 'rotate') {
+            const numColors = parsed.colors.length;
+            let keyframes = '';
+            for (let i = 0; i < numColors; i++) {
+              const startPercent = (i / numColors * 100).toFixed(2);
+              const endPercent = ((i + 1) / numColors * 100).toFixed(2);
+              keyframes += `${startPercent}% { color: ${parsed.colors[i]}; }\n`;
+              if (i < numColors - 1) {
+                keyframes += `${endPercent}% { color: ${parsed.colors[i]}; }\n`;
+              }
+            }
+            keyframes += `100% { color: ${parsed.colors[0]}; }\n`;
+
+            style.textContent = `
+              .group_type_box.animated-horiz-gradient-text[data-horiz-text-gradient-id="${uniqueId}"],
+              .group_type_box.animated-horiz-gradient-text[data-horiz-text-gradient-id="${uniqueId}"] .group-title {
+                animation: ${animName} ${numColors * 2}s ease-in-out infinite;
+                animation-delay: -${randomDelay}s;
+              }
+              @keyframes ${animName} {
+                ${keyframes}
+              }
+            `;
+          } else {
+            const angle = parsed.angle || '45deg';
+            const gradientColors = parsed.colors.join(', ');
+            style.textContent = `
+              .group_type_box.animated-horiz-gradient-text[data-horiz-text-gradient-id="${uniqueId}"],
+              .group_type_box.animated-horiz-gradient-text[data-horiz-text-gradient-id="${uniqueId}"] .group-title {
+                background: linear-gradient(${angle}, ${gradientColors});
+                background-size: 400% 400%;
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+                animation: ${animName} 3s ease infinite;
+                animation-delay: -${randomDelay}s;
+              }
+              @keyframes ${animName} {
+                0% { background-position: 0% 50%; }
+                50% { background-position: 100% 50%; }
+                100% { background-position: 0% 50%; }
+              }
+            `;
+          }
+          document.head.appendChild(style);
+        } else {
+          groupDiv.style.setProperty('--horizontal-text-color', linkData.horizontal_text_color);
+          groupDiv.style.color = linkData.horizontal_text_color;
+        }
       }
+
+      // Apply border color (with gradient support)
       if (linkData.horizontal_border_color) {
-        groupDiv.style.setProperty('--horizontal-border-color', linkData.horizontal_border_color);
+        const parsed = parseColors(linkData.horizontal_border_color);
+        if (parsed.colors.length > 1) {
+          const borderWidth = '2px';
+          const style = document.createElement('style');
+          const uniqueId = 'horiz-border-gradient-' + Math.random().toString(36).substr(2, 9);
+          const animName = 'horizBorderGradientShift-' + uniqueId;
+          const randomDelay = (Math.random() * 3).toFixed(2);
+          groupDiv.dataset.horizBorderGradientId = uniqueId;
+          groupDiv.classList.add('animated-horiz-gradient-border');
+
+          groupDiv.style.position = 'relative';
+          groupDiv.style.border = 'none';
+
+          const bgColor = linkData.horizontal_bg_color && !linkData.horizontal_bg_color.includes(',') ? linkData.horizontal_bg_color : '#2d2d2d';
+
+          if (parsed.animationType === 'rotate') {
+            const numColors = parsed.colors.length;
+            let keyframes = '';
+            for (let i = 0; i < numColors; i++) {
+              const startPercent = (i / numColors * 100).toFixed(2);
+              const endPercent = ((i + 1) / numColors * 100).toFixed(2);
+              keyframes += `${startPercent}% { background: ${parsed.colors[i]}; }\n`;
+              if (i < numColors - 1) {
+                keyframes += `${endPercent}% { background: ${parsed.colors[i]}; }\n`;
+              }
+            }
+            keyframes += `100% { background: ${parsed.colors[0]}; }\n`;
+
+            style.textContent = `
+              .group_type_box.animated-horiz-gradient-border[data-horiz-border-gradient-id="${uniqueId}"] {
+                padding: ${borderWidth};
+                animation: ${animName} ${numColors * 2}s ease-in-out infinite;
+                animation-delay: -${randomDelay}s;
+              }
+              .group_type_box.animated-horiz-gradient-border[data-horiz-border-gradient-id="${uniqueId}"] > * {
+                background: ${bgColor};
+              }
+              @keyframes ${animName} {
+                ${keyframes}
+              }
+            `;
+          } else {
+            const angle = parsed.angle || '45deg';
+            const gradientColors = parsed.colors.join(', ');
+            style.textContent = `
+              .group_type_box.animated-horiz-gradient-border[data-horiz-border-gradient-id="${uniqueId}"] {
+                background: linear-gradient(${angle}, ${gradientColors});
+                background-size: 400% 400%;
+                padding: ${borderWidth};
+                animation: ${animName} 3s ease infinite;
+                animation-delay: -${randomDelay}s;
+              }
+              .group_type_box.animated-horiz-gradient-border[data-horiz-border-gradient-id="${uniqueId}"] > * {
+                background: ${bgColor};
+              }
+              @keyframes ${animName} {
+                0% { background-position: 0% 50%; }
+                50% { background-position: 100% 50%; }
+                100% { background-position: 0% 50%; }
+              }
+            `;
+          }
+          document.head.appendChild(style);
+        } else {
+          groupDiv.style.setProperty('--horizontal-border-color', linkData.horizontal_border_color);
+          groupDiv.style.border = `1px solid ${linkData.horizontal_border_color}`;
+        }
       }
+
+      // Apply hover color
       if (linkData.horizontal_hover_color) {
         groupDiv.style.setProperty('--horizontal-hover-color', linkData.horizontal_hover_color);
       }
