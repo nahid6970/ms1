@@ -584,6 +584,57 @@ input:checked+.slider:before {
   flex-direction: column;
 }
 
+/* Desktop only: Move submit buttons to left sidebar */
+@media (min-width: 769px) {
+  /* Add padding to make room for left button */
+  #add-link-popup .Menu,
+  #edit-link-popup .Menu,
+  #edit-group-popup .Menu {
+    padding-left: 70px;
+  }
+
+  /* Position submit buttons vertically on the left */
+  #add-link-form button[type="submit"],
+  #edit-link-form button[type="submit"],
+  #edit-group-form button[type="submit"] {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    padding: 30px 12px;
+    width: 45px;
+    height: auto;
+    min-height: 150px;
+    border-radius: 8px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: bold;
+    letter-spacing: 2px;
+    transition: all 0.3s ease;
+    z-index: 10;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+
+  #add-link-form button[type="submit"]:hover,
+  #edit-link-form button[type="submit"]:hover,
+  #edit-group-form button[type="submit"]:hover {
+    background-color: #45a049;
+    transform: translateY(-50%) scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  }
+
+  #add-link-form button[type="submit"]:active,
+  #edit-link-form button[type="submit"]:active,
+  #edit-group-form button[type="submit"]:active {
+    transform: translateY(-50%) scale(0.98);
+  }
+}
+
 /* Note textarea should grow to fill available space */
 #add-link-note-panel textarea,
 #edit-link-note-panel textarea {
