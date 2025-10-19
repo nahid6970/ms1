@@ -348,6 +348,7 @@ img {
   transform: translateY(-5px) scale(1.02);
   background-color: #000000;
   box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+  z-index: 10;
 }
 
 .link-item:hover::before {
