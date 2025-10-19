@@ -362,7 +362,8 @@ document.addEventListener('DOMContentLoaded', function () {
           const dimensionStyle = dimensionStyles.length > 0 ? dimensionStyles.join('; ') + '; ' : '';
 
           if (link.default_type === 'svg' && link.svg_code) {
-            linkContent = `<a href="${linkUrl}" ${clickHandler} ${targetAttr} style="text-decoration: none; ${dimensionStyle}display: inline-flex; align-items: center; justify-content: center;" title="${link.title || link.name}">${link.svg_code}</a>`;
+            const svgColorClass = link.color ? `svg-colored-${Math.random().toString(36).substr(2, 9)}` : '';
+            linkContent = `<a href="${linkUrl}" ${clickHandler} ${targetAttr} class="${svgColorClass}" style="text-decoration: none; ${dimensionStyle}display: inline-flex; align-items: center; justify-content: center; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''}" title="${link.title || link.name}">${link.svg_code}</a>`;
           } else if (link.default_type === 'nerd-font' && link.icon_class) {
             linkContent = `<a href="${linkUrl}" ${clickHandler} ${targetAttr} style="text-decoration: none; ${dimensionStyle}color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''} ${link.font_family ? `font-family: ${link.font_family};` : ''} ${link.font_size ? `font-size: ${link.font_size};` : ''} display: inline-flex; align-items: center; justify-content: center;" title="${link.title || link.name}"><i class="${link.icon_class}"></i></a>`;
           } else if (link.default_type === 'img' && link.img_src) {
@@ -385,6 +386,84 @@ document.addEventListener('DOMContentLoaded', function () {
           }
 
           listItem.innerHTML = linkContent;
+
+          // Apply color to SVG elements
+          if (link.default_type === 'svg' && link.color) {
+            const linkElement = listItem.querySelector('a');
+            if (linkElement) {
+              const svgElements = linkElement.querySelectorAll('svg, svg *');
+              const parsed = parseColors(link.color);
+
+              if (parsed.colors.length > 1) {
+                // Multiple colors - create animated gradient
+                const style = document.createElement('style');
+                const uniqueId = 'svg-gradient-' + Math.random().toString(36).substr(2, 9);
+                const animName = 'svgGradientShift-' + uniqueId;
+                const randomDelay = (Math.random() * 3).toFixed(2);
+                linkElement.dataset.svgGradientId = uniqueId;
+                linkElement.classList.add('animated-svg-gradient');
+
+                if (parsed.animationType === 'rotate') {
+                  const numColors = parsed.colors.length;
+                  let keyframes = '';
+                  for (let i = 0; i < numColors; i++) {
+                    const startPercent = (i / numColors * 100).toFixed(2);
+                    const endPercent = ((i + 1) / numColors * 100).toFixed(2);
+                    keyframes += `${startPercent}% { fill: ${parsed.colors[i]}; stroke: ${parsed.colors[i]}; }\n`;
+                    if (i < numColors - 1) {
+                      keyframes += `${endPercent}% { fill: ${parsed.colors[i]}; stroke: ${parsed.colors[i]}; }\n`;
+                    }
+                  }
+                  keyframes += `100% { fill: ${parsed.colors[0]}; stroke: ${parsed.colors[0]}; }\n`;
+
+                  style.textContent = `
+                    a.animated-svg-gradient[data-svg-gradient-id="${uniqueId}"] svg,
+                    a.animated-svg-gradient[data-svg-gradient-id="${uniqueId}"] svg * {
+                      animation: ${animName} ${numColors * 2}s ease-in-out infinite;
+                      animation-delay: -${randomDelay}s;
+                    }
+                    @keyframes ${animName} {
+                      ${keyframes}
+                    }
+                  `;
+                } else {
+                  // For slide mode with SVG, we'll use rotate mode behavior since gradients don't work well with fill
+                  const numColors = parsed.colors.length;
+                  let keyframes = '';
+                  for (let i = 0; i < numColors; i++) {
+                    const startPercent = (i / numColors * 100).toFixed(2);
+                    keyframes += `${startPercent}% { fill: ${parsed.colors[i]}; stroke: ${parsed.colors[i]}; }\n`;
+                  }
+                  keyframes += `100% { fill: ${parsed.colors[0]}; stroke: ${parsed.colors[0]}; }\n`;
+
+                  style.textContent = `
+                    a.animated-svg-gradient[data-svg-gradient-id="${uniqueId}"] svg,
+                    a.animated-svg-gradient[data-svg-gradient-id="${uniqueId}"] svg * {
+                      animation: ${animName} ${numColors * 2}s ease-in-out infinite;
+                      animation-delay: -${randomDelay}s;
+                    }
+                    @keyframes ${animName} {
+                      ${keyframes}
+                    }
+                  `;
+                }
+                document.head.appendChild(style);
+              } else {
+                // Single color - apply directly
+                const style = document.createElement('style');
+                const uniqueId = 'svg-color-' + Math.random().toString(36).substr(2, 9);
+                linkElement.dataset.svgColorId = uniqueId;
+                style.textContent = `
+                  a[data-svg-color-id="${uniqueId}"] svg,
+                  a[data-svg-color-id="${uniqueId}"] svg * {
+                    fill: ${link.color} !important;
+                    stroke: ${link.color} !important;
+                  }
+                `;
+                document.head.appendChild(style);
+              }
+            }
+          }
 
           // Apply gradient to inner link element if background_color has multiple colors
           if (link.background_color) {
@@ -414,8 +493,8 @@ document.addEventListener('DOMContentLoaded', function () {
             }
           }
 
-          // Apply gradient to text color if color has multiple colors
-          if (link.color) {
+          // Apply gradient to text color if color has multiple colors (for non-SVG elements)
+          if (link.color && link.default_type !== 'svg') {
             const parsed = parseColors(link.color);
             if (parsed.colors.length > 1) {
               const linkElement = listItem.querySelector('a');
