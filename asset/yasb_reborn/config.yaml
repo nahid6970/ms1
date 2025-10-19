@@ -753,6 +753,7 @@ widgets:
               label: "Gemma3"
             - name: "gpt-oss:20b-cloud"
               label: "gpt-oss:20b-cloud"
+              instructions: "C:/Users/nahid/ms/ms1/asset/yasb_reborn/ai_chat/custom_gpt_chatmode.md"
       container_padding:
         top: 0
         left: 10
