@@ -752,8 +752,15 @@ document.addEventListener('DOMContentLoaded', function () {
       }
 
       const popup = document.getElementById('group_type_box-popup');
+      const popupBox = popup.querySelector('.group_type_box');
       const popupContent = popup.querySelector('.popup-content-inner');
       popupContent.innerHTML = '';
+
+      // Update popup title
+      const popupTitle = popupBox.querySelector('h3');
+      if (popupTitle) {
+        popupTitle.textContent = displayName;
+      }
 
       // Clone all elements into the popup
       elements.forEach((element, index) => {
@@ -1028,8 +1035,16 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         const popup = document.getElementById('group_type_box-popup');
+        const popupBox = popup.querySelector('.group_type_box');
         const popupContent = popup.querySelector('.popup-content-inner');
         popupContent.innerHTML = '';
+
+        // Update popup title
+        const popupTitle = popupBox.querySelector('h3');
+        if (popupTitle) {
+          popupTitle.textContent = groupName;
+        }
+
         elements.forEach(element => {
           const clonedElement = element.cloneNode(true);
           const linkIndex = parseInt(clonedElement.dataset.linkIndex);
