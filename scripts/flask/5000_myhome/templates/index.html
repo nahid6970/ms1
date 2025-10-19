@@ -210,8 +210,10 @@
 
     <div id="edit-group-popup" class="popup-container hidden">
       <div class="Menu">
-        <span class="close-button">&times;</span>
-        <h3>Group Settings</h3>
+        <div class="popup-header">
+          <h3>Group Settings</h3>
+          <span class="close-button">&times;</span>
+        </div>
         <form id="edit-group-form" style="display: flex; flex-direction: column; gap: 10px; width: 400px;">
           <input type="hidden" id="edit-group-original-name">
           <label for="edit-group-name">Group Name:</label>
@@ -307,8 +309,10 @@
     <div id="add-link-popup" class="popup-container hidden">
       <div class="Menu" style="display: flex; width: fit-content; max-width: 90vw;">
         <div style="width: 400px; margin-right: 20px;" class="form-panel">
-          <span class="close-button">&times;</span>
-          <h3>Add New Link</h3>
+          <div class="popup-header">
+            <h3>Add New Link</h3>
+            <span class="close-button">&times;</span>
+          </div>
           <form id="add-link-form" style="display: flex; flex-direction: column; gap: 10px;">
             <div style="display: flex; gap: 10px;">
               <input type="text" id="link-name" placeholder="Name" style="flex: 1;">
@@ -399,8 +403,10 @@
     <div id="edit-link-popup" class="popup-container hidden">
       <div class="Menu" style="display: flex; width: fit-content; max-width: 90vw;">
         <div style="width: 400px; margin-right: 20px;" class="form-panel">
-          <span class="close-button">&times;</span>
-          <h3>Edit Link</h3>
+          <div class="popup-header">
+            <h3>Edit Link</h3>
+            <span class="close-button">&times;</span>
+          </div>
           <form id="edit-link-form" style="display: flex; flex-direction: column; gap: 10px;">
             <input type="hidden" id="edit-link-index">
             <div style="display: flex; gap: 10px;">
@@ -502,8 +508,10 @@
 
     <div id="add-sidebar-button-popup" class="popup-container hidden">
       <div class="Menu">
-        <span class="close-button">&times;</span>
-        <h3>Add Sidebar Button</h3>
+        <div class="popup-header">
+          <h3>Add Sidebar Button</h3>
+          <span class="close-button">&times;</span>
+        </div>
         <form id="add-sidebar-button-form" style="display: flex; flex-direction: column; gap: 10px; width: 450px;">
           <input type="text" id="sidebar-button-name" placeholder="Button Name" required>
           <input type="url" id="sidebar-button-url" placeholder="URL" required>
@@ -554,8 +562,10 @@
 
     <div id="edit-sidebar-button-popup" class="popup-container hidden">
       <div class="Menu">
-        <span class="close-button">&times;</span>
-        <h3>Edit Sidebar Button</h3>
+        <div class="popup-header">
+          <h3>Edit Sidebar Button</h3>
+          <span class="close-button">&times;</span>
+        </div>
         <form id="edit-sidebar-button-form" style="display: flex; flex-direction: column; gap: 10px; width: 450px;">
           <input type="hidden" id="edit-sidebar-button-index">
           <input type="text" id="edit-sidebar-button-name" placeholder="Button Name" required>

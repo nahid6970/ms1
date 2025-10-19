@@ -559,7 +559,19 @@ input:checked+.slider:before {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   max-height: 90vh;
   display: flex;
+}
+
+/* Single column popups (edit group, sidebar buttons) */
+#edit-group-popup .Menu,
+#add-sidebar-button-popup .Menu,
+#edit-sidebar-button-popup .Menu {
   flex-direction: column;
+}
+
+/* Two column popups (add/edit link with note panel) */
+#add-link-popup .Menu,
+#edit-link-popup .Menu {
+  flex-direction: row;
 }
 
 /* Form popups need scrollbar */
@@ -585,6 +597,7 @@ input:checked+.slider:before {
 /* Box popup doesn't need outer scrollbar */
 .group_type_box.expanded {
   overflow: hidden;
+  flex-direction: column;
 }
 
 #group_type_box-popup .popup-content-inner {
@@ -1247,8 +1260,10 @@ a.add-button.custom-sidebar-button[style*="background-color"] {
 /* Mobile styles */
 @media (max-width: 768px) {
   /* Popup container adjustments for mobile */
-  .popup-container .Menu {
-    flex-direction: column;
+  .popup-container .Menu,
+  #add-link-popup .Menu,
+  #edit-link-popup .Menu {
+    flex-direction: column !important;
     width: 95vw;
     max-width: 95vw;
     max-height: 95vh;
