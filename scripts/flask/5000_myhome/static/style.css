@@ -185,6 +185,30 @@ body::-webkit-scrollbar-track {
   /* Color of the track (black) */
 }
 
+/* Thin scrollbar for all popup content */
+.Menu *,
+.popup-content-inner * {
+  scrollbar-width: thin;
+  scrollbar-color: #ff0000 #000000;
+}
+
+.Menu *::-webkit-scrollbar,
+.popup-content-inner *::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.Menu *::-webkit-scrollbar-thumb,
+.popup-content-inner *::-webkit-scrollbar-thumb {
+  background-color: #ff000f;
+  border-radius: 2px;
+}
+
+.Menu *::-webkit-scrollbar-track,
+.popup-content-inner *::-webkit-scrollbar-track {
+  background-color: #000000;
+}
+
 /* For html part 2 ############################################################*/
 .flex-container2 {
   display: flex;
@@ -532,7 +556,9 @@ input:checked+.slider:before {
   max-width: 90vw;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   max-height: 90vh;
-  overflow-y: auto;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 #group_type_box-popup .popup-content-inner {
@@ -540,8 +566,23 @@ input:checked+.slider:before {
   flex-wrap: wrap;
   gap: 10px;
   max-height: calc(90vh - 100px);
-  /* Adjust based on padding and header height */
   overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #ff0000 #000000;
+}
+
+/* Thin scrollbar for popup content - WebKit browsers */
+#group_type_box-popup .popup-content-inner::-webkit-scrollbar {
+  width: 4px;
+}
+
+#group_type_box-popup .popup-content-inner::-webkit-scrollbar-thumb {
+  background-color: #ff000f;
+  border-radius: 2px;
+}
+
+#group_type_box-popup .popup-content-inner::-webkit-scrollbar-track {
+  background-color: #000000;
 }
 
 .Menu .close-button,
