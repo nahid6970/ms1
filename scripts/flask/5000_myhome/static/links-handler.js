@@ -1459,8 +1459,8 @@ document.addEventListener('DOMContentLoaded', function () {
     draggedGroup = null;
   }
 
-  // Function to swap collapsible groups
-  async function swapCollapsibleGroups(group1Name, group2Name) {
+  // Function to reorder collapsible (top) groups - same logic as normal/box groups
+  async function swapCollapsibleGroups(draggedGroupName, targetGroupName) {
     try {
       const response = await fetch('/api/links');
       const links = await response.json();
@@ -1494,38 +1494,31 @@ document.addEventListener('DOMContentLoaded', function () {
         }
       });
 
-      // Find all links in both groups
-      const group1Links = [];
-      const group2Links = [];
-      const otherLinks = [];
+      // Get all unique group names in their current order
+      const groupNames = [...new Set(links.map(link => link.group || 'Ungrouped'))];
 
-      links.forEach((link, index) => {
-        const linkGroup = link.group || 'Ungrouped';
-        if (linkGroup === group1Name) {
-          group1Links.push({ link, index });
-        } else if (linkGroup === group2Name) {
-          group2Links.push({ link, index });
-        } else {
-          otherLinks.push({ link, index });
-        }
-      });
+      const draggedIndex = groupNames.indexOf(draggedGroupName);
+      const targetIndex = groupNames.indexOf(targetGroupName);
 
-      // Create new links array with swapped group positions
+      // Remove the dragged group from its current position
+      const [draggedGroup] = groupNames.splice(draggedIndex, 1);
+
+      // Insert the dragged group at the target position
+      groupNames.splice(targetIndex, 0, draggedGroup);
+
+      // Rebuild the links array based on the new group order
       const newLinks = [];
-
-      // Add other groups first (maintain their positions)
-      const processedGroups = new Set([group1Name, group2Name]);
-      const groupOrder = [...new Set(links.map(link => link.group || 'Ungrouped'))];
-
-      groupOrder.forEach(groupName => {
-        if (groupName === group1Name) {
-          group2Links.forEach(item => newLinks.push(item.link));
-        } else if (groupName === group2Name) {
-          group1Links.forEach(item => newLinks.push(item.link));
-        } else {
-          const groupLinks = links.filter(link => (link.group || 'Ungrouped') === groupName);
-          groupLinks.forEach(link => newLinks.push(link));
+      const linksByGroup = links.reduce((acc, link) => {
+        const group = link.group || 'Ungrouped';
+        if (!acc[group]) {
+          acc[group] = [];
         }
+        acc[group].push(link);
+        return acc;
+      }, {});
+
+      groupNames.forEach(group => {
+        newLinks.push(...(linksByGroup[group] || []));
       });
 
       // Update all links with their respective group properties
@@ -1553,7 +1546,7 @@ document.addEventListener('DOMContentLoaded', function () {
       fetchAndDisplayLinks();
 
     } catch (error) {
-      console.error('Error swapping collapsible groups:', error);
+      console.error('Error reordering collapsible groups:', error);
     }
   }
 
