@@ -361,7 +361,9 @@ document.addEventListener('DOMContentLoaded', function () {
           if (link.height) dimensionStyles.push(`height: ${link.height.includes('px') || link.height.includes('%') || link.height === 'auto' ? link.height : link.height + 'px'}`);
           const dimensionStyle = dimensionStyles.length > 0 ? dimensionStyles.join('; ') + '; ' : '';
 
-          if (link.default_type === 'nerd-font' && link.icon_class) {
+          if (link.default_type === 'svg' && link.svg_code) {
+            linkContent = `<a href="${linkUrl}" ${clickHandler} ${targetAttr} style="text-decoration: none; ${dimensionStyle}display: inline-flex; align-items: center; justify-content: center;" title="${link.title || link.name}">${link.svg_code}</a>`;
+          } else if (link.default_type === 'nerd-font' && link.icon_class) {
             linkContent = `<a href="${linkUrl}" ${clickHandler} ${targetAttr} style="text-decoration: none; ${dimensionStyle}color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''} ${link.font_family ? `font-family: ${link.font_family};` : ''} ${link.font_size ? `font-size: ${link.font_size};` : ''} display: inline-flex; align-items: center; justify-content: center;" title="${link.title || link.name}"><i class="${link.icon_class}"></i></a>`;
           } else if (link.default_type === 'img' && link.img_src) {
             const width = link.width || '50';
@@ -1942,6 +1944,20 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
+  // Handle SVG textarea visibility for add form
+  const addLinkTypeRadios = document.querySelectorAll('input[name="link-default-type"]');
+  const addSvgTextarea = document.getElementById('link-svg-code');
+
+  addLinkTypeRadios.forEach(radio => {
+    radio.addEventListener('change', function () {
+      if (this.value === 'svg') {
+        addSvgTextarea.style.display = 'block';
+      } else {
+        addSvgTextarea.style.display = 'none';
+      }
+    });
+  });
+
   if (addLinkForm) {
     addLinkForm.addEventListener('submit', async function (event) {
       event.preventDefault();
@@ -1956,6 +1972,7 @@ document.addEventListener('DOMContentLoaded', function () {
         color: document.getElementById('link-color').value || undefined,
         img_src: document.getElementById('link-img-src').value || undefined,
         text: document.getElementById('link-text').value || undefined,
+        svg_code: document.getElementById('link-svg-code').value || undefined,
         width: document.getElementById('link-width').value || undefined,
         height: document.getElementById('link-height').value || undefined,
         default_type: document.querySelector('input[name="link-default-type"]:checked').value || 'text',
@@ -1994,6 +2011,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (response.ok) {
           alert('Link added successfully!');
           addLinkForm.reset(); // Clear form
+          addSvgTextarea.style.display = 'none'; // Hide SVG textarea after reset
           await fetchAndDisplayLinks(); // Refresh links
 
           // Re-open the popup if it was open (for both top groups and box groups)
@@ -2021,6 +2039,20 @@ document.addEventListener('DOMContentLoaded', function () {
   const editLinkForm = document.getElementById('edit-link-form');
   const editLinkIndexInput = document.getElementById('edit-link-index');
 
+  // Handle SVG textarea visibility for edit form
+  const editLinkTypeRadios = document.querySelectorAll('input[name="edit-link-default-type"]');
+  const editSvgTextarea = document.getElementById('edit-link-svg-code');
+
+  editLinkTypeRadios.forEach(radio => {
+    radio.addEventListener('change', function () {
+      if (this.value === 'svg') {
+        editSvgTextarea.style.display = 'block';
+      } else {
+        editSvgTextarea.style.display = 'none';
+      }
+    });
+  });
+
   function openEditLinkPopup(link, index) {
     editLinkIndexInput.value = index;
     document.getElementById('edit-link-name').value = link.name || '';
@@ -2032,10 +2064,18 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('edit-link-width').value = link.width || '';
     document.getElementById('edit-link-height').value = link.height || '';
     document.getElementById('edit-link-text').value = link.text || '';
+    document.getElementById('edit-link-svg-code').value = link.svg_code || '';
 
     // Set default type radio buttons
     const defaultType = link.default_type || 'text';
     document.querySelector(`input[name="edit-link-default-type"][value="${defaultType}"]`).checked = true;
+
+    // Show/hide SVG textarea based on default type
+    if (defaultType === 'svg') {
+      editSvgTextarea.style.display = 'block';
+    } else {
+      editSvgTextarea.style.display = 'none';
+    }
 
     document.getElementById('edit-link-background-color').value = link.background_color || '';
     document.getElementById('edit-link-border-radius').value = link.border_radius || '';
@@ -2083,6 +2123,7 @@ document.addEventListener('DOMContentLoaded', function () {
           width: document.getElementById('edit-link-width').value || undefined,
           height: document.getElementById('edit-link-height').value || undefined,
           text: document.getElementById('edit-link-text').value || undefined,
+          svg_code: document.getElementById('edit-link-svg-code').value || undefined,
           default_type: document.querySelector('input[name="edit-link-default-type"]:checked').value || 'text',
           background_color: document.getElementById('edit-link-background-color').value || undefined,
           border_radius: document.getElementById('edit-link-border-radius').value || undefined,

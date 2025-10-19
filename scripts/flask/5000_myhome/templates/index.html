@@ -369,12 +369,17 @@
                 <input type="radio" name="link-default-type" id="link-type-img" value="img">
                 Image
               </label>
+              <label style="display: flex; align-items: center; gap: 5px;">
+                <input type="radio" name="link-default-type" id="link-type-svg" value="svg">
+                SVG
+              </label>
             </div>
             <div style="display: flex; gap: 10px;">
               <input type="text" id="link-text" placeholder="Text (primary option)">
               <input type="text" id="link-icon-class" placeholder="Icon Class (e.g., nf nf-cod-mail)">
               <input type="url" id="link-img-src" placeholder="Image URL (if no text/icon)">
             </div>
+            <textarea id="link-svg-code" placeholder="SVG Code (paste full <svg>...</svg> code here)" rows="3" style="resize: vertical; font-family: monospace; display: none;"></textarea>
             <div style="display: flex; gap: 10px;">
               <input type="text" id="link-width" placeholder="Width (e.g., 50px or auto)">
               <input type="text" id="link-height" placeholder="Height (e.g., 50px or auto)">
@@ -462,12 +467,17 @@
                 <input type="radio" name="edit-link-default-type" id="edit-link-type-img" value="img">
                 Image
               </label>
+              <label style="display: flex; align-items: center; gap: 5px;">
+                <input type="radio" name="edit-link-default-type" id="edit-link-type-svg" value="svg">
+                SVG
+              </label>
             </div>
             <div style="display: flex; gap: 10px;">
               <input type="text" id="edit-link-text" placeholder="Text (primary option)">
               <input type="text" id="edit-link-icon-class" placeholder="Icon Class (e.g., nf nf-cod-mail)">
               <input type="url" id="edit-link-img-src" placeholder="Image URL (if no text/icon)">
             </div>
+            <textarea id="edit-link-svg-code" placeholder="SVG Code (paste full <svg>...</svg> code here)" rows="3" style="resize: vertical; font-family: monospace; display: none;"></textarea>
             <div style="display: flex; gap: 10px;">
               <input type="text" id="edit-link-width" placeholder="Width (e.g., 50)">
               <input type="text" id="edit-link-height" placeholder="Height (e.g., 50)">
