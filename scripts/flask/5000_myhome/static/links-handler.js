@@ -2074,6 +2074,45 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
+  // Function to delete a group (removes all links in that group)
+  async function deleteGroup(groupName) {
+    const confirmDelete = confirm(`Are you sure you want to delete the group "${groupName}" and all its links?`);
+    if (!confirmDelete) {
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/links');
+      const links = await response.json();
+
+      // Filter out all links that belong to this group
+      const remainingLinks = links.filter(link => {
+        const linkGroupName = link.group || 'Ungrouped';
+        return linkGroupName !== groupName;
+      });
+
+      // Update the entire list on the server
+      const updateResponse = await fetch('/api/links', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(remainingLinks),
+      });
+
+      if (!updateResponse.ok) {
+        throw new Error('Failed to delete group on the server.');
+      }
+
+      // Refresh the display
+      await fetchAndDisplayLinks();
+      alert(`Group "${groupName}" has been deleted.`);
+    } catch (error) {
+      console.error('Error deleting group:', error);
+      alert('Failed to delete group.');
+    }
+  }
+
   // Handle SVG textarea visibility for add form
   const addLinkTypeRadios = document.querySelectorAll('input[name="link-default-type"]');
   const addSvgTextarea = document.getElementById('link-svg-code');
