@@ -1865,16 +1865,48 @@ document.addEventListener('DOMContentLoaded', function () {
           updatedLink.horizontal_hover_color = horizontalHoverColor || '#3a3a3a';
 
           // Handle top group size and font options
-          if (topWidth) updatedLink.top_width = topWidth;
-          if (topHeight) updatedLink.top_height = topHeight;
-          if (topFontFamily) updatedLink.top_font_family = topFontFamily;
-          if (topFontSize) updatedLink.top_font_size = topFontSize;
+          if (topWidth && topWidth.trim() !== '') {
+            updatedLink.top_width = topWidth;
+          } else {
+            delete updatedLink.top_width;
+          }
+          if (topHeight && topHeight.trim() !== '') {
+            updatedLink.top_height = topHeight;
+          } else {
+            delete updatedLink.top_height;
+          }
+          if (topFontFamily && topFontFamily.trim() !== '') {
+            updatedLink.top_font_family = topFontFamily;
+          } else {
+            delete updatedLink.top_font_family;
+          }
+          if (topFontSize && topFontSize.trim() !== '') {
+            updatedLink.top_font_size = topFontSize;
+          } else {
+            delete updatedLink.top_font_size;
+          }
 
           // Handle horizontal stack size and font options
-          if (horizontalWidth) updatedLink.horizontal_width = horizontalWidth;
-          if (horizontalHeight) updatedLink.horizontal_height = horizontalHeight;
-          if (horizontalFontFamily) updatedLink.horizontal_font_family = horizontalFontFamily;
-          if (horizontalFontSize) updatedLink.horizontal_font_size = horizontalFontSize;
+          if (horizontalWidth && horizontalWidth.trim() !== '') {
+            updatedLink.horizontal_width = horizontalWidth;
+          } else {
+            delete updatedLink.horizontal_width;
+          }
+          if (horizontalHeight && horizontalHeight.trim() !== '') {
+            updatedLink.horizontal_height = horizontalHeight;
+          } else {
+            delete updatedLink.horizontal_height;
+          }
+          if (horizontalFontFamily && horizontalFontFamily.trim() !== '') {
+            updatedLink.horizontal_font_family = horizontalFontFamily;
+          } else {
+            delete updatedLink.horizontal_font_family;
+          }
+          if (horizontalFontSize && horizontalFontSize.trim() !== '') {
+            updatedLink.horizontal_font_size = horizontalFontSize;
+          } else {
+            delete updatedLink.horizontal_font_size;
+          }
 
           return updatedLink;
         }
