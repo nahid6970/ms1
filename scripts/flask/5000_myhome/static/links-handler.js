@@ -981,6 +981,23 @@ document.addEventListener('DOMContentLoaded', function () {
     addLinkItem.appendChild(addLinkSpan);
     content.appendChild(addLinkItem);
 
+    // Add context menu for group
+    collapsibleGroup.addEventListener('contextmenu', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      const items = [
+        {
+          label: 'Edit',
+          action: () => openEditGroupPopup(groupName)
+        },
+        {
+          label: 'Delete',
+          action: () => deleteGroup(groupName)
+        }
+      ];
+      showContextMenu(event, items);
+    });
+
     // Click handler - works like box group (opens popup)
     collapsibleGroup.onclick = (e) => {
       // Don't trigger if clicking on edit button
