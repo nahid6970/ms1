@@ -639,6 +639,22 @@ document.addEventListener('DOMContentLoaded', function () {
       if (linkData.popup_border_radius) {
         collapsibleGroup.style.setProperty('--popup-border-radius', linkData.popup_border_radius);
       }
+
+      // Apply size and font styling
+      if (linkData.top_width) {
+        collapsibleGroup.style.width = linkData.top_width;
+        collapsibleGroup.style.minWidth = linkData.top_width;
+      }
+      if (linkData.top_height) {
+        collapsibleGroup.style.height = linkData.top_height;
+        collapsibleGroup.style.minHeight = linkData.top_height;
+      }
+      if (linkData.top_font_family) {
+        title.style.fontFamily = linkData.top_font_family;
+      }
+      if (linkData.top_font_size) {
+        title.style.fontSize = linkData.top_font_size;
+      }
     }
 
     // Add edit buttons container
@@ -1024,6 +1040,22 @@ document.addEventListener('DOMContentLoaded', function () {
         groupDiv.style.setProperty('--horizontal-hover-color', linkData.horizontal_hover_color);
       }
 
+      // Apply size and font styling for horizontal stack
+      if (linkData.horizontal_width) {
+        groupDiv.style.width = linkData.horizontal_width;
+        groupDiv.style.minWidth = linkData.horizontal_width;
+      }
+      if (linkData.horizontal_height) {
+        groupDiv.style.height = linkData.horizontal_height;
+        groupDiv.style.minHeight = linkData.horizontal_height;
+      }
+      if (linkData.horizontal_font_family) {
+        groupDiv.style.fontFamily = linkData.horizontal_font_family;
+      }
+      if (linkData.horizontal_font_size) {
+        groupDiv.style.fontSize = linkData.horizontal_font_size;
+      }
+
       groupDiv.onclick = () => {
         const isPasswordProtected = firstLinkInGroup.link.password_protect;
         if (isPasswordProtected) {
@@ -1255,6 +1287,14 @@ document.addEventListener('DOMContentLoaded', function () {
     const editGroupHorizontalTextColorInput = document.getElementById('edit-group-horizontal-text-color');
     const editGroupHorizontalBorderColorInput = document.getElementById('edit-group-horizontal-border-color');
     const editGroupHorizontalHoverColorInput = document.getElementById('edit-group-horizontal-hover-color');
+    const editGroupTopWidthInput = document.getElementById('edit-group-top-width');
+    const editGroupTopHeightInput = document.getElementById('edit-group-top-height');
+    const editGroupTopFontFamilyInput = document.getElementById('edit-group-top-font-family');
+    const editGroupTopFontSizeInput = document.getElementById('edit-group-top-font-size');
+    const editGroupHorizontalWidthInput = document.getElementById('edit-group-horizontal-width');
+    const editGroupHorizontalHeightInput = document.getElementById('edit-group-horizontal-height');
+    const editGroupHorizontalFontFamilyInput = document.getElementById('edit-group-horizontal-font-family');
+    const editGroupHorizontalFontSizeInput = document.getElementById('edit-group-horizontal-font-size');
     const collapsibleRenameSection = document.getElementById('collapsible-rename-section');
 
     editGroupNameInput.value = currentGroupName === 'Ungrouped' ? '' : currentGroupName;
@@ -1282,6 +1322,14 @@ document.addEventListener('DOMContentLoaded', function () {
       editGroupHorizontalTextColorInput.value = linksInGroup[0].horizontal_text_color || '#ffffff';
       editGroupHorizontalBorderColorInput.value = linksInGroup[0].horizontal_border_color || '#0056b3';
       editGroupHorizontalHoverColorInput.value = linksInGroup[0].horizontal_hover_color || '#3a3a3a';
+      editGroupTopWidthInput.value = linksInGroup[0].top_width || '';
+      editGroupTopHeightInput.value = linksInGroup[0].top_height || '';
+      editGroupTopFontFamilyInput.value = linksInGroup[0].top_font_family || '';
+      editGroupTopFontSizeInput.value = linksInGroup[0].top_font_size || '';
+      editGroupHorizontalWidthInput.value = linksInGroup[0].horizontal_width || '';
+      editGroupHorizontalHeightInput.value = linksInGroup[0].horizontal_height || '';
+      editGroupHorizontalFontFamilyInput.value = linksInGroup[0].horizontal_font_family || '';
+      editGroupHorizontalFontSizeInput.value = linksInGroup[0].horizontal_font_size || '';
     } else {
       editGroupDisplaySelect.value = 'flex'; // Default if no links in group
       editGroupCollapsibleCheckbox.checked = false;
@@ -1477,7 +1525,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   // Function to update group name for all links in that group
-  async function updateGroupName(originalGroupName, newGroupName, newDisplayStyle, isCollapsible, isHorizontalStack, isPasswordProtected, topName, topBgColor, topTextColor, topBorderColor, topHoverColor, popupBgColor, popupTextColor, popupBorderColor, popupBorderRadius, horizontalBgColor, horizontalTextColor, horizontalBorderColor, horizontalHoverColor) {
+  async function updateGroupName(originalGroupName, newGroupName, newDisplayStyle, isCollapsible, isHorizontalStack, isPasswordProtected, topName, topBgColor, topTextColor, topBorderColor, topHoverColor, popupBgColor, popupTextColor, popupBorderColor, popupBorderRadius, horizontalBgColor, horizontalTextColor, horizontalBorderColor, horizontalHoverColor, topWidth, topHeight, topFontFamily, topFontSize, horizontalWidth, horizontalHeight, horizontalFontFamily, horizontalFontSize) {
     try {
       const response = await fetch('/api/links');
       const links = await response.json();
@@ -1520,6 +1568,18 @@ document.addEventListener('DOMContentLoaded', function () {
           updatedLink.horizontal_text_color = horizontalTextColor || '#ffffff';
           updatedLink.horizontal_border_color = horizontalBorderColor || '#0056b3';
           updatedLink.horizontal_hover_color = horizontalHoverColor || '#3a3a3a';
+
+          // Handle top group size and font options
+          if (topWidth) updatedLink.top_width = topWidth;
+          if (topHeight) updatedLink.top_height = topHeight;
+          if (topFontFamily) updatedLink.top_font_family = topFontFamily;
+          if (topFontSize) updatedLink.top_font_size = topFontSize;
+
+          // Handle horizontal stack size and font options
+          if (horizontalWidth) updatedLink.horizontal_width = horizontalWidth;
+          if (horizontalHeight) updatedLink.horizontal_height = horizontalHeight;
+          if (horizontalFontFamily) updatedLink.horizontal_font_family = horizontalFontFamily;
+          if (horizontalFontSize) updatedLink.horizontal_font_size = horizontalFontSize;
 
           return updatedLink;
         }
@@ -1835,9 +1895,17 @@ document.addEventListener('DOMContentLoaded', function () {
         const horizontalTextColor = document.getElementById('edit-group-horizontal-text-color').value;
         const horizontalBorderColor = document.getElementById('edit-group-horizontal-border-color').value;
         const horizontalHoverColor = document.getElementById('edit-group-horizontal-hover-color').value;
+        const topWidth = document.getElementById('edit-group-top-width').value;
+        const topHeight = document.getElementById('edit-group-top-height').value;
+        const topFontFamily = document.getElementById('edit-group-top-font-family').value;
+        const topFontSize = document.getElementById('edit-group-top-font-size').value;
+        const horizontalWidth = document.getElementById('edit-group-horizontal-width').value;
+        const horizontalHeight = document.getElementById('edit-group-horizontal-height').value;
+        const horizontalFontFamily = document.getElementById('edit-group-horizontal-font-family').value;
+        const horizontalFontSize = document.getElementById('edit-group-horizontal-font-size').value;
 
         try {
-          const success = await updateGroupName(originalGroupName, newGroupName, newDisplayStyle, isCollapsible, isHorizontalStack, isPasswordProtected, topName, topBgColor, topTextColor, topBorderColor, topHoverColor, popupBgColor, popupTextColor, popupBorderColor, popupBorderRadius, horizontalBgColor, horizontalTextColor, horizontalBorderColor, horizontalHoverColor);
+          const success = await updateGroupName(originalGroupName, newGroupName, newDisplayStyle, isCollapsible, isHorizontalStack, isPasswordProtected, topName, topBgColor, topTextColor, topBorderColor, topHoverColor, popupBgColor, popupTextColor, popupBorderColor, popupBorderRadius, horizontalBgColor, horizontalTextColor, horizontalBorderColor, horizontalHoverColor, topWidth, topHeight, topFontFamily, topFontSize, horizontalWidth, horizontalHeight, horizontalFontFamily, horizontalFontSize);
           if (success) {
             document.getElementById('edit-group-popup').classList.add('hidden');
             fetchAndDisplayLinks();
