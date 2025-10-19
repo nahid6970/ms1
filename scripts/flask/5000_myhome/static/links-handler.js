@@ -1583,9 +1583,19 @@ document.addEventListener('DOMContentLoaded', function () {
         // Prevent body scroll when popup is open
         document.body.style.overflow = 'hidden';
       };
-    } else {
-      // Add context menu for regular (non-box) groups
-      groupDiv.addEventListener('contextmenu', (event) => {
+    }
+
+    const groupHeaderContainer = document.createElement('div');
+    groupHeaderContainer.className = 'group-header-container';
+
+    const groupTitle = document.createElement('h3');
+    groupTitle.textContent = groupName;
+    groupTitle.className = 'group-title';
+    groupHeaderContainer.appendChild(groupTitle);
+
+    // Add context menu to header only for regular (non-box) groups
+    if (!firstLinkInGroup || !firstLinkInGroup.link.horizontal_stack) {
+      groupHeaderContainer.addEventListener('contextmenu', (event) => {
         event.preventDefault();
         event.stopPropagation();
         const items = [
@@ -1601,14 +1611,6 @@ document.addEventListener('DOMContentLoaded', function () {
         showContextMenu(event, items);
       });
     }
-
-    const groupHeaderContainer = document.createElement('div');
-    groupHeaderContainer.className = 'group-header-container';
-
-    const groupTitle = document.createElement('h3');
-    groupTitle.textContent = groupName;
-    groupTitle.className = 'group-title';
-    groupHeaderContainer.appendChild(groupTitle);
 
     const isPasswordProtected = firstLinkInGroup.link.password_protect;
 
