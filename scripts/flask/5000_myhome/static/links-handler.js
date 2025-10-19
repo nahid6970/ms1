@@ -13,7 +13,7 @@ function generateGradientAnimation(parsed, animName, randomDelay, property = 'ba
       }
     }
     keyframes += `100% { ${property}: ${parsed.colors[0]}; }\n`;
-    
+
     return {
       animation: `${animName} ${numColors * 2}s ease-in-out infinite; animation-delay: -${randomDelay}s;`,
       keyframes: keyframes
@@ -38,12 +38,12 @@ function generateGradientAnimation(parsed, animName, randomDelay, property = 'ba
 // Returns: { colors: [...], animationType: 'slide' or 'rotate', angle: '45deg' }
 function parseColors(colorString) {
   if (!colorString) return { colors: [], animationType: 'slide', angle: '45deg' };
-  
+
   // Check for animation type prefix and angle
   let animationType = 'slide'; // default
   let angle = '45deg'; // default
   let workingString = colorString;
-  
+
   if (colorString.toLowerCase().startsWith('rotate:')) {
     animationType = 'rotate';
     workingString = colorString.substring(7).trim(); // Remove 'rotate:' prefix
@@ -51,33 +51,33 @@ function parseColors(colorString) {
     animationType = 'slide';
     workingString = colorString.substring(6).trim(); // Remove 'slide:' prefix
   }
-  
+
   // Check for angle specification (e.g., "90deg:" or "180:" at the start)
   const angleMatch = workingString.match(/^(\d+)(deg)?:\s*/);
   if (angleMatch) {
     angle = angleMatch[1] + 'deg';
     workingString = workingString.substring(angleMatch[0].length).trim();
   }
-  
+
   // Match rgb/rgba patterns and other colors
   const rgbPattern = /rgba?\([^)]+\)/g;
   const matches = workingString.match(rgbPattern);
-  
+
   if (matches) {
     // Has RGB/RGBA colors - extract them and the rest
     let remaining = workingString;
     const colors = [];
-    
+
     matches.forEach(match => {
       colors.push(match.trim());
       remaining = remaining.replace(match, '|||SPLIT|||');
     });
-    
+
     // Split remaining by comma and filter out empty/split markers
     const otherColors = remaining.split(',')
       .map(c => c.trim())
       .filter(c => c && c !== '|||SPLIT|||');
-    
+
     // Combine all colors
     return { colors: [...colors, ...otherColors].filter(c => c), animationType, angle };
   } else {
@@ -106,10 +106,10 @@ document.addEventListener('DOMContentLoaded', function () {
       links.forEach(link => {
         const groupName = link.group || 'Ungrouped';
         if (!groupStyles[groupName]) {
-            const groupLink = links.find(l => (l.group || 'Ungrouped') === groupName && l.display_style);
-            if (groupLink) {
-                groupStyles[groupName] = groupLink.display_style;
-            }
+          const groupLink = links.find(l => (l.group || 'Ungrouped') === groupName && l.display_style);
+          if (groupLink) {
+            groupStyles[groupName] = groupLink.display_style;
+          }
         }
       });
 
@@ -129,78 +129,78 @@ document.addEventListener('DOMContentLoaded', function () {
         let elementToAdd;
 
         if (displayStyle === 'list-item') {
-            const simpleListItem = document.createElement('li');
-            simpleListItem.className = 'simple-link-item';
+          const simpleListItem = document.createElement('li');
+          simpleListItem.className = 'simple-link-item';
 
-            const simpleLink = document.createElement('a');
-            const clickAction = link.click_action || 'url';
-            
-            if (clickAction === 'note') {
-              simpleLink.href = '#';
-              simpleLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                openNotePreview(encodeURIComponent(link.note || ''));
-              });
-            } else {
-              simpleLink.href = link.url;
-              simpleLink.target = '_blank';
-            }
+          const simpleLink = document.createElement('a');
+          const clickAction = link.click_action || 'url';
 
-            if (link.name && link.name.trim() !== '') {
-                const truncatedName = link.name.length > 25 ? link.name.substring(0, 25) + '...' : link.name;
-                const truncatedUrl = link.url.length > 25 ? link.url.substring(0, 25) + '...' : link.url;
-                simpleLink.innerHTML = `<span class="link-name">${truncatedName}</span><span class="link-separator"> </span><span class="link-url">${truncatedUrl}</span>`;
-            } else {
-                const truncatedUrl = link.url.length > 25 ? link.url.substring(0, 25) + '...' : link.url;
-                simpleLink.textContent = truncatedUrl;
-            }
-            
-            simpleListItem.appendChild(simpleLink);
-
-            // Add context menu
-            simpleListItem.addEventListener('contextmenu', (event) => {
-                const items = [
-                    { label: 'New-Tab', action: () => window.open(link.url, '_blank') },
-                    { label: 'Edit', action: () => openEditLinkPopup(link, index) },
-                    { label: 'Copy', action: () => copyLink(link, index) },
-                    { label: 'Copy Note', action: () => copyNote(link) },
-                    { label: 'Delete', action: () => deleteLink(index) }
-                ];
-                showContextMenu(event, items);
+          if (clickAction === 'note') {
+            simpleLink.href = '#';
+            simpleLink.addEventListener('click', (e) => {
+              e.preventDefault();
+              openNotePreview(encodeURIComponent(link.note || ''));
             });
-            
-            elementToAdd = simpleListItem;
+          } else {
+            simpleLink.href = link.url;
+            simpleLink.target = '_blank';
+          }
+
+          if (link.name && link.name.trim() !== '') {
+            const truncatedName = link.name.length > 25 ? link.name.substring(0, 25) + '...' : link.name;
+            const truncatedUrl = link.url.length > 25 ? link.url.substring(0, 25) + '...' : link.url;
+            simpleLink.innerHTML = `<span class="link-name">${truncatedName}</span><span class="link-separator"> </span><span class="link-url">${truncatedUrl}</span>`;
+          } else {
+            const truncatedUrl = link.url.length > 25 ? link.url.substring(0, 25) + '...' : link.url;
+            simpleLink.textContent = truncatedUrl;
+          }
+
+          simpleListItem.appendChild(simpleLink);
+
+          // Add context menu
+          simpleListItem.addEventListener('contextmenu', (event) => {
+            const items = [
+              { label: 'New-Tab', action: () => window.open(link.url, '_blank') },
+              { label: 'Edit', action: () => openEditLinkPopup(link, index) },
+              { label: 'Copy', action: () => copyLink(link, index) },
+              { label: 'Copy Note', action: () => copyNote(link) },
+              { label: 'Delete', action: () => deleteLink(index) }
+            ];
+            showContextMenu(event, items);
+          });
+
+          elementToAdd = simpleListItem;
         } else {
-            const listItem = document.createElement('li');
-            listItem.className = `link-item ${link.default_type ? 'link-type-' + link.default_type : 'link-type-default'}`;
-            listItem.draggable = true;
-            listItem.dataset.linkIndex = index;
+          const listItem = document.createElement('li');
+          listItem.className = `link-item ${link.default_type ? 'link-type-' + link.default_type : 'link-type-default'}`;
+          listItem.draggable = true;
+          listItem.dataset.linkIndex = index;
 
-            // Add drag event listeners
-            listItem.addEventListener('dragstart', handleDragStart);
-            listItem.addEventListener('dragover', handleDragOver);
-            listItem.addEventListener('drop', handleDrop);
-            listItem.addEventListener('dragend', handleDragEnd);
+          // Add drag event listeners
+          listItem.addEventListener('dragstart', handleDragStart);
+          listItem.addEventListener('dragover', handleDragOver);
+          listItem.addEventListener('drop', handleDrop);
+          listItem.addEventListener('dragend', handleDragEnd);
 
-            // Add visual indicator for hidden items in edit mode
-            if (link.hidden && document.querySelector('.flex-container2').classList.contains('edit-mode')) {
-              listItem.classList.add('hidden-item');
-              listItem.style.opacity = '0.5';
-              listItem.style.border = '2px dashed #666';
-            }
+          // Add visual indicator for hidden items in edit mode
+          if (link.hidden && document.querySelector('.flex-container2').classList.contains('edit-mode')) {
+            listItem.classList.add('hidden-item');
+            listItem.style.opacity = '0.5';
+            listItem.style.border = '2px dashed #666';
+          }
 
-            if (link.li_bg_color) {
-              const parsed = parseColors(link.li_bg_color);
-              if (parsed.colors.length > 1) {
-                const style = document.createElement('style');
-                const uniqueId = 'bg-gradient-' + Math.random().toString(36).substr(2, 9);
-                const animName = 'bgGradientShift-' + uniqueId;
-                const randomDelay = (Math.random() * 3).toFixed(2);
-                listItem.dataset.bgGradientId = uniqueId;
-                listItem.classList.add('animated-gradient-bg');
-                
-                const anim = generateGradientAnimation(parsed, animName, randomDelay);
-                style.textContent = `
+          if (link.li_bg_color) {
+            const parsed = parseColors(link.li_bg_color);
+            if (parsed.colors.length > 1) {
+              const style = document.createElement('style');
+              const uniqueId = 'bg-gradient-' + Math.random().toString(36).substr(2, 9);
+              const animName = 'bgGradientShift-' + uniqueId;
+              const randomDelay = (Math.random() * 3).toFixed(2);
+              listItem.dataset.bgGradientId = uniqueId;
+              listItem.classList.add('animated-gradient-bg');
+
+              const anim = generateGradientAnimation(parsed, animName, randomDelay);
+              style.textContent = `
                   .link-item.animated-gradient-bg[data-bg-gradient-id="${uniqueId}"] {
                     ${anim.baseStyle || ''}
                     animation: ${anim.animation}
@@ -209,23 +209,23 @@ document.addEventListener('DOMContentLoaded', function () {
                     ${anim.keyframes}
                   }
                 `;
-                document.head.appendChild(style);
-              } else {
-                listItem.style.backgroundColor = link.li_bg_color;
-              }
+              document.head.appendChild(style);
+            } else {
+              listItem.style.backgroundColor = link.li_bg_color;
             }
-            if (link.li_hover_color) {
-              const parsed = parseColors(link.li_hover_color);
-              if (parsed.colors.length > 1) {
-                const style = document.createElement('style');
-                const uniqueId = 'hover-gradient-' + Math.random().toString(36).substr(2, 9);
-                const animName = 'hoverGradientShift-' + uniqueId;
-                const randomDelay = (Math.random() * 3).toFixed(2);
-                listItem.dataset.hoverGradientId = uniqueId;
-                listItem.classList.add('animated-gradient-hover');
-                
-                const anim = generateGradientAnimation(parsed, animName, randomDelay);
-                style.textContent = `
+          }
+          if (link.li_hover_color) {
+            const parsed = parseColors(link.li_hover_color);
+            if (parsed.colors.length > 1) {
+              const style = document.createElement('style');
+              const uniqueId = 'hover-gradient-' + Math.random().toString(36).substr(2, 9);
+              const animName = 'hoverGradientShift-' + uniqueId;
+              const randomDelay = (Math.random() * 3).toFixed(2);
+              listItem.dataset.hoverGradientId = uniqueId;
+              listItem.classList.add('animated-gradient-hover');
+
+              const anim = generateGradientAnimation(parsed, animName, randomDelay);
+              style.textContent = `
                   .link-item.animated-gradient-hover[data-hover-gradient-id="${uniqueId}"]:hover {
                     ${anim.baseStyle || ''}
                     animation: ${anim.animation} !important;
@@ -234,68 +234,68 @@ document.addEventListener('DOMContentLoaded', function () {
                     ${anim.keyframes}
                   }
                 `;
-                document.head.appendChild(style);
-              } else {
-                listItem.addEventListener('mouseover', () => {
-                  listItem.style.backgroundColor = link.li_hover_color;
-                });
-                listItem.addEventListener('mouseout', () => {
-                  listItem.style.backgroundColor = link.li_bg_color || '';
-                });
-              }
+              document.head.appendChild(style);
+            } else {
+              listItem.addEventListener('mouseover', () => {
+                listItem.style.backgroundColor = link.li_hover_color;
+              });
+              listItem.addEventListener('mouseout', () => {
+                listItem.style.backgroundColor = link.li_bg_color || '';
+              });
             }
+          }
 
-            // Apply minimum width and height constraints
-            if (link.li_width) {
-              const widthValue = link.li_width.includes('px') || link.li_width.includes('%') || link.li_width === 'auto' ? link.li_width : link.li_width + 'px';
-              listItem.style.minWidth = widthValue;
-            }
-            if (link.li_height) {
-              const heightValue = link.li_height.includes('px') || link.li_height.includes('%') || link.li_height === 'auto' ? link.li_height : link.li_height + 'px';
-              listItem.style.minHeight = heightValue;
-            }
-            // Apply border radius first
-            let borderRadiusValue = '5px';
-            if (link.li_border_radius) {
-              borderRadiusValue = link.li_border_radius.includes('px') || link.li_border_radius.includes('%') ? link.li_border_radius : link.li_border_radius + 'px';
-              listItem.style.borderRadius = borderRadiusValue;
-            }
+          // Apply minimum width and height constraints
+          if (link.li_width) {
+            const widthValue = link.li_width.includes('px') || link.li_width.includes('%') || link.li_width === 'auto' ? link.li_width : link.li_width + 'px';
+            listItem.style.minWidth = widthValue;
+          }
+          if (link.li_height) {
+            const heightValue = link.li_height.includes('px') || link.li_height.includes('%') || link.li_height === 'auto' ? link.li_height : link.li_height + 'px';
+            listItem.style.minHeight = heightValue;
+          }
+          // Apply border radius first
+          let borderRadiusValue = '5px';
+          if (link.li_border_radius) {
+            borderRadiusValue = link.li_border_radius.includes('px') || link.li_border_radius.includes('%') ? link.li_border_radius : link.li_border_radius + 'px';
+            listItem.style.borderRadius = borderRadiusValue;
+          }
 
-            if (link.li_border_color) {
-              // Check if it's a gradient (contains comma-separated colors)
-              const parsed = parseColors(link.li_border_color);
-              if (parsed.colors.length > 1) {
-                // Multiple colors - create animated gradient border
-                const borderWidth = '4px';
-                const style = document.createElement('style');
-                const uniqueId = 'gradient-' + Math.random().toString(36).substr(2, 9);
-                const animName = 'gradientBorderShift-' + uniqueId;
-                const randomDelay = (Math.random() * 3).toFixed(2);
-                listItem.dataset.gradientId = uniqueId;
-                listItem.classList.add('animated-gradient-border');
-                
-                // Set position relative
-                listItem.style.position = 'relative';
-                listItem.style.border = 'none';
-                
-                // Get background color for the inner area
-                const bgColor = link.li_bg_color ? (link.li_bg_color.includes(',') ? 'transparent' : link.li_bg_color) : '#474747';
-                
-                if (parsed.animationType === 'rotate') {
-                  // Rotate mode - solid border colors fade in/out
-                  const numColors = parsed.colors.length;
-                  let keyframes = '';
-                  for (let i = 0; i < numColors; i++) {
-                    const startPercent = (i / numColors * 100).toFixed(2);
-                    const endPercent = ((i + 1) / numColors * 100).toFixed(2);
-                    keyframes += `${startPercent}% { background: ${parsed.colors[i]}; }\n`;
-                    if (i < numColors - 1) {
-                      keyframes += `${endPercent}% { background: ${parsed.colors[i]}; }\n`;
-                    }
+          if (link.li_border_color) {
+            // Check if it's a gradient (contains comma-separated colors)
+            const parsed = parseColors(link.li_border_color);
+            if (parsed.colors.length > 1) {
+              // Multiple colors - create animated gradient border
+              const borderWidth = '4px';
+              const style = document.createElement('style');
+              const uniqueId = 'gradient-' + Math.random().toString(36).substr(2, 9);
+              const animName = 'gradientBorderShift-' + uniqueId;
+              const randomDelay = (Math.random() * 3).toFixed(2);
+              listItem.dataset.gradientId = uniqueId;
+              listItem.classList.add('animated-gradient-border');
+
+              // Set position relative
+              listItem.style.position = 'relative';
+              listItem.style.border = 'none';
+
+              // Get background color for the inner area
+              const bgColor = link.li_bg_color ? (link.li_bg_color.includes(',') ? 'transparent' : link.li_bg_color) : '#474747';
+
+              if (parsed.animationType === 'rotate') {
+                // Rotate mode - solid border colors fade in/out
+                const numColors = parsed.colors.length;
+                let keyframes = '';
+                for (let i = 0; i < numColors; i++) {
+                  const startPercent = (i / numColors * 100).toFixed(2);
+                  const endPercent = ((i + 1) / numColors * 100).toFixed(2);
+                  keyframes += `${startPercent}% { background: ${parsed.colors[i]}; }\n`;
+                  if (i < numColors - 1) {
+                    keyframes += `${endPercent}% { background: ${parsed.colors[i]}; }\n`;
                   }
-                  keyframes += `100% { background: ${parsed.colors[0]}; }\n`;
-                  
-                  style.textContent = `
+                }
+                keyframes += `100% { background: ${parsed.colors[0]}; }\n`;
+
+                style.textContent = `
                     .link-item.animated-gradient-border[data-gradient-id="${uniqueId}"] {
                       position: relative;
                       padding: ${borderWidth};
@@ -313,11 +313,11 @@ document.addEventListener('DOMContentLoaded', function () {
                       ${keyframes}
                     }
                   `;
-                } else {
-                  // Slide mode - gradient slides
-                  const angle = parsed.angle || '45deg';
-                  const gradientColors = parsed.colors.join(', ');
-                  style.textContent = `
+              } else {
+                // Slide mode - gradient slides
+                const angle = parsed.angle || '45deg';
+                const gradientColors = parsed.colors.join(', ');
+                style.textContent = `
                     .link-item.animated-gradient-border[data-gradient-id="${uniqueId}"] {
                       position: relative;
                       background: linear-gradient(${angle}, ${gradientColors});
@@ -339,66 +339,66 @@ document.addEventListener('DOMContentLoaded', function () {
                       100% { background-position: 0% 50%; }
                     }
                   `;
-                }
-                document.head.appendChild(style);
-              } else {
-                // Single color - normal border
-                listItem.style.border = `2px solid ${link.li_border_color}`;
               }
+              document.head.appendChild(style);
+            } else {
+              // Single color - normal border
+              listItem.style.border = `2px solid ${link.li_border_color}`;
             }
+          }
 
-            let linkContent;
+          let linkContent;
 
-            // Determine what to do on click based on click_action
-            const clickAction = link.click_action || 'url';
-            const linkUrl = clickAction === 'note' ? '#' : link.url;
-            const clickHandler = clickAction === 'note' ? `onclick="openNotePreview('${encodeURIComponent(link.note || '')}'); return false;"` : '';
-            const targetAttr = clickAction === 'url' ? 'target="_blank"' : '';
-            
-            // Build width and height styles for non-image elements
-            const dimensionStyles = [];
-            if (link.width) dimensionStyles.push(`width: ${link.width.includes('px') || link.width.includes('%') || link.width === 'auto' ? link.width : link.width + 'px'}`);
-            if (link.height) dimensionStyles.push(`height: ${link.height.includes('px') || link.height.includes('%') || link.height === 'auto' ? link.height : link.height + 'px'}`);
-            const dimensionStyle = dimensionStyles.length > 0 ? dimensionStyles.join('; ') + '; ' : '';
+          // Determine what to do on click based on click_action
+          const clickAction = link.click_action || 'url';
+          const linkUrl = clickAction === 'note' ? '#' : link.url;
+          const clickHandler = clickAction === 'note' ? `onclick="openNotePreview('${encodeURIComponent(link.note || '')}'); return false;"` : '';
+          const targetAttr = clickAction === 'url' ? 'target="_blank"' : '';
 
-            if (link.default_type === 'nerd-font' && link.icon_class) {
+          // Build width and height styles for non-image elements
+          const dimensionStyles = [];
+          if (link.width) dimensionStyles.push(`width: ${link.width.includes('px') || link.width.includes('%') || link.width === 'auto' ? link.width : link.width + 'px'}`);
+          if (link.height) dimensionStyles.push(`height: ${link.height.includes('px') || link.height.includes('%') || link.height === 'auto' ? link.height : link.height + 'px'}`);
+          const dimensionStyle = dimensionStyles.length > 0 ? dimensionStyles.join('; ') + '; ' : '';
+
+          if (link.default_type === 'nerd-font' && link.icon_class) {
+            linkContent = `<a href="${linkUrl}" ${clickHandler} ${targetAttr} style="text-decoration: none; ${dimensionStyle}color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''} ${link.font_family ? `font-family: ${link.font_family};` : ''} ${link.font_size ? `font-size: ${link.font_size};` : ''} display: inline-flex; align-items: center; justify-content: center;" title="${link.title || link.name}"><i class="${link.icon_class}"></i></a>`;
+          } else if (link.default_type === 'img' && link.img_src) {
+            const width = link.width || '50';
+            const height = link.height || '50';
+            linkContent = `<a href="${linkUrl}" ${clickHandler} ${targetAttr} title="${link.title || link.name}"><img src="${link.img_src}" width="${width}" height="${height}"></a>`;
+          } else if (link.default_type === 'text' && link.text) {
+            linkContent = `<a href="${linkUrl}" ${clickHandler} ${targetAttr} style="text-decoration: none; ${dimensionStyle}color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''} ${link.font_family ? `font-family: ${link.font_family};` : ''} ${link.font_size ? `font-size: ${link.font_size};` : ''} display: inline-flex; align-items: center; justify-content: center; text-align: center; overflow: hidden;" title="${link.title || link.name}">${link.text}</a>`;
+          } else {
+            // Fallback if default_type is not set or doesn't match available content
+            if (link.icon_class) {
               linkContent = `<a href="${linkUrl}" ${clickHandler} ${targetAttr} style="text-decoration: none; ${dimensionStyle}color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''} ${link.font_family ? `font-family: ${link.font_family};` : ''} ${link.font_size ? `font-size: ${link.font_size};` : ''} display: inline-flex; align-items: center; justify-content: center;" title="${link.title || link.name}"><i class="${link.icon_class}"></i></a>`;
-            } else if (link.default_type === 'img' && link.img_src) {
+            } else if (link.img_src) {
               const width = link.width || '50';
               const height = link.height || '50';
               linkContent = `<a href="${linkUrl}" ${clickHandler} ${targetAttr} title="${link.title || link.name}"><img src="${link.img_src}" width="${width}" height="${height}"></a>`;
-            } else if (link.default_type === 'text' && link.text) {
-              linkContent = `<a href="${linkUrl}" ${clickHandler} ${targetAttr} style="text-decoration: none; ${dimensionStyle}color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''} ${link.font_family ? `font-family: ${link.font_family};` : ''} ${link.font_size ? `font-size: ${link.font_size};` : ''} display: inline-flex; align-items: center; justify-content: center; text-align: center; overflow: hidden;" title="${link.title || link.name}">${link.text}</a>`;
             } else {
-              // Fallback if default_type is not set or doesn't match available content
-              if (link.icon_class) {
-                linkContent = `<a href="${linkUrl}" ${clickHandler} ${targetAttr} style="text-decoration: none; ${dimensionStyle}color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''} ${link.font_family ? `font-family: ${link.font_family};` : ''} ${link.font_size ? `font-size: ${link.font_size};` : ''} display: inline-flex; align-items: center; justify-content: center;" title="${link.title || link.name}"><i class="${link.icon_class}"></i></a>`;
-              } else if (link.img_src) {
-                const width = link.width || '50';
-                const height = link.height || '50';
-                linkContent = `<a href="${linkUrl}" ${clickHandler} ${targetAttr} title="${link.title || link.name}"><img src="${link.img_src}" width="${width}" height="${height}"></a>`;
-              } else {
-                linkContent = `<a href="${linkUrl}" ${clickHandler} ${targetAttr} style="text-decoration: none; ${dimensionStyle}color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''} ${link.font_family ? `font-family: ${link.font_family};` : ''} ${link.font_size ? `font-size: ${link.font_size};` : ''} display: inline-flex; align-items: center; justify-content: center; text-align: center; overflow: hidden;" title="${link.title || link.name}">${link.name}</a>`;
-              }
+              linkContent = `<a href="${linkUrl}" ${clickHandler} ${targetAttr} style="text-decoration: none; ${dimensionStyle}color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''} ${link.font_family ? `font-family: ${link.font_family};` : ''} ${link.font_size ? `font-size: ${link.font_size};` : ''} display: inline-flex; align-items: center; justify-content: center; text-align: center; overflow: hidden;" title="${link.title || link.name}">${link.name}</a>`;
             }
+          }
 
-            listItem.innerHTML = linkContent;
+          listItem.innerHTML = linkContent;
 
-            // Apply gradient to inner link element if background_color has multiple colors
-            if (link.background_color) {
-              const parsed = parseColors(link.background_color);
-              if (parsed.colors.length > 1) {
-                const linkElement = listItem.querySelector('a');
-                if (linkElement) {
-                  const style = document.createElement('style');
-                  const uniqueId = 'link-bg-gradient-' + Math.random().toString(36).substr(2, 9);
-                  const animName = 'linkBgGradientShift-' + uniqueId;
-                  const randomDelay = (Math.random() * 3).toFixed(2);
-                  linkElement.dataset.linkBgGradientId = uniqueId;
-                  linkElement.classList.add('animated-link-gradient-bg');
-                  
-                  const anim = generateGradientAnimation(parsed, animName, randomDelay);
-                  style.textContent = `
+          // Apply gradient to inner link element if background_color has multiple colors
+          if (link.background_color) {
+            const parsed = parseColors(link.background_color);
+            if (parsed.colors.length > 1) {
+              const linkElement = listItem.querySelector('a');
+              if (linkElement) {
+                const style = document.createElement('style');
+                const uniqueId = 'link-bg-gradient-' + Math.random().toString(36).substr(2, 9);
+                const animName = 'linkBgGradientShift-' + uniqueId;
+                const randomDelay = (Math.random() * 3).toFixed(2);
+                linkElement.dataset.linkBgGradientId = uniqueId;
+                linkElement.classList.add('animated-link-gradient-bg');
+
+                const anim = generateGradientAnimation(parsed, animName, randomDelay);
+                style.textContent = `
                     a.animated-link-gradient-bg[data-link-bg-gradient-id="${uniqueId}"] {
                       ${anim.baseStyle || ''}
                       animation: ${anim.animation} !important;
@@ -407,39 +407,39 @@ document.addEventListener('DOMContentLoaded', function () {
                       ${anim.keyframes}
                     }
                   `;
-                  document.head.appendChild(style);
-                }
+                document.head.appendChild(style);
               }
             }
+          }
 
-            // Apply gradient to text color if color has multiple colors
-            if (link.color) {
-              const parsed = parseColors(link.color);
-              if (parsed.colors.length > 1) {
-                const linkElement = listItem.querySelector('a');
-                if (linkElement) {
-                  const style = document.createElement('style');
-                  const uniqueId = 'link-text-gradient-' + Math.random().toString(36).substr(2, 9);
-                  const animName = 'linkTextGradientShift-' + uniqueId;
-                  const randomDelay = (Math.random() * 3).toFixed(2);
-                  linkElement.dataset.linkTextGradientId = uniqueId;
-                  linkElement.classList.add('animated-link-gradient-text');
-                  
-                  if (parsed.animationType === 'rotate') {
-                    // For text, rotate mode cycles text color
-                    const numColors = parsed.colors.length;
-                    let keyframes = '';
-                    for (let i = 0; i < numColors; i++) {
-                      const startPercent = (i / numColors * 100).toFixed(2);
-                      const endPercent = ((i + 1) / numColors * 100).toFixed(2);
-                      keyframes += `${startPercent}% { color: ${parsed.colors[i]}; }\n`;
-                      if (i < numColors - 1) {
-                        keyframes += `${endPercent}% { color: ${parsed.colors[i]}; }\n`;
-                      }
+          // Apply gradient to text color if color has multiple colors
+          if (link.color) {
+            const parsed = parseColors(link.color);
+            if (parsed.colors.length > 1) {
+              const linkElement = listItem.querySelector('a');
+              if (linkElement) {
+                const style = document.createElement('style');
+                const uniqueId = 'link-text-gradient-' + Math.random().toString(36).substr(2, 9);
+                const animName = 'linkTextGradientShift-' + uniqueId;
+                const randomDelay = (Math.random() * 3).toFixed(2);
+                linkElement.dataset.linkTextGradientId = uniqueId;
+                linkElement.classList.add('animated-link-gradient-text');
+
+                if (parsed.animationType === 'rotate') {
+                  // For text, rotate mode cycles text color
+                  const numColors = parsed.colors.length;
+                  let keyframes = '';
+                  for (let i = 0; i < numColors; i++) {
+                    const startPercent = (i / numColors * 100).toFixed(2);
+                    const endPercent = ((i + 1) / numColors * 100).toFixed(2);
+                    keyframes += `${startPercent}% { color: ${parsed.colors[i]}; }\n`;
+                    if (i < numColors - 1) {
+                      keyframes += `${endPercent}% { color: ${parsed.colors[i]}; }\n`;
                     }
-                    keyframes += `100% { color: ${parsed.colors[0]}; }\n`;
-                    
-                    style.textContent = `
+                  }
+                  keyframes += `100% { color: ${parsed.colors[0]}; }\n`;
+
+                  style.textContent = `
                       a.animated-link-gradient-text[data-link-text-gradient-id="${uniqueId}"] {
                         animation: ${animName} ${numColors * 2}s ease-in-out infinite;
                         animation-delay: -${randomDelay}s;
@@ -448,11 +448,11 @@ document.addEventListener('DOMContentLoaded', function () {
                         ${keyframes}
                       }
                     `;
-                  } else {
-                    // Slide mode - gradient text
-                    const angle = parsed.angle || '45deg';
-                    const gradientColors = parsed.colors.join(', ');
-                    style.textContent = `
+                } else {
+                  // Slide mode - gradient text
+                  const angle = parsed.angle || '45deg';
+                  const gradientColors = parsed.colors.join(', ');
+                  style.textContent = `
                       a.animated-link-gradient-text[data-link-text-gradient-id="${uniqueId}"] {
                         background: linear-gradient(${angle}, ${gradientColors});
                         background-size: 400% 400%;
@@ -468,38 +468,38 @@ document.addEventListener('DOMContentLoaded', function () {
                         100% { background-position: 0% 50%; }
                       }
                     `;
-                  }
-                  document.head.appendChild(style);
                 }
+                document.head.appendChild(style);
               }
             }
+          }
 
-            listItem.addEventListener('contextmenu', (event) => {
-                const items = [
-                    {
-                        label: 'New-Tab',
-                        action: () => window.open(link.url, '_blank')
-                    },
-                    {
-                        label: 'Edit',
-                        action: () => openEditLinkPopup(link, index)
-                    },
-                    {
-                        label: 'Copy',
-                        action: () => copyLink(link, index)
-                    },
-                    {
-                        label: 'Copy Note',
-                        action: () => copyNote(link)
-                    },
-                    {
-                        label: 'Delete',
-                        action: () => deleteLink(index)
-                    }
-                ];
-                showContextMenu(event, items);
-            });
-            elementToAdd = listItem;
+          listItem.addEventListener('contextmenu', (event) => {
+            const items = [
+              {
+                label: 'New-Tab',
+                action: () => window.open(link.url, '_blank')
+              },
+              {
+                label: 'Edit',
+                action: () => openEditLinkPopup(link, index)
+              },
+              {
+                label: 'Copy',
+                action: () => copyLink(link, index)
+              },
+              {
+                label: 'Copy Note',
+                action: () => copyNote(link)
+              },
+              {
+                label: 'Delete',
+                action: () => deleteLink(index)
+              }
+            ];
+            showContextMenu(event, items);
+          });
+          elementToAdd = listItem;
         }
 
         groupedElements[groupName].push(elementToAdd);
@@ -657,26 +657,26 @@ document.addEventListener('DOMContentLoaded', function () {
       const linkInfo = links[index];
       clonedElement.addEventListener('contextmenu', (event) => {
         const items = [
-            {
-                label: 'New-Tab',
-                action: () => window.open(linkInfo.link.url, '_blank')
-            },
-            {
-                label: 'Edit',
-                action: () => openEditLinkPopup(linkInfo.link, linkInfo.index)
-            },
-            {
-                label: 'Copy',
-                action: () => copyLink(linkInfo.link, linkInfo.index)
-            },
-            {
-                label: 'Copy Note',
-                action: () => copyNote(linkInfo.link)
-            },
-            {
-                label: 'Delete',
-                action: () => deleteLink(linkInfo.index)
-            }
+          {
+            label: 'New-Tab',
+            action: () => window.open(linkInfo.link.url, '_blank')
+          },
+          {
+            label: 'Edit',
+            action: () => openEditLinkPopup(linkInfo.link, linkInfo.index)
+          },
+          {
+            label: 'Copy',
+            action: () => copyLink(linkInfo.link, linkInfo.index)
+          },
+          {
+            label: 'Copy Note',
+            action: () => copyNote(linkInfo.link)
+          },
+          {
+            label: 'Delete',
+            action: () => deleteLink(linkInfo.index)
+          }
         ];
         showContextMenu(event, items);
       });
@@ -944,138 +944,138 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-    function createMultiColumnList(elements, groupName, linksInGroup) {
+  function createMultiColumnList(elements, groupName, linksInGroup) {
     const container = document.createElement('div');
     container.className = 'multi-column-container';
-    
+
     // Store original elements with their associated link data for context menu
     const elementData = elements.map((element, index) => {
-        // For list-item elements, get the link data from linksInGroup
-        const linkInfo = linksInGroup[index];
-        return { element, linkData: linkInfo?.link, linkIndex: linkInfo?.index };
+      // For list-item elements, get the link data from linksInGroup
+      const linkInfo = linksInGroup[index];
+      return { element, linkData: linkInfo?.link, linkIndex: linkInfo?.index };
     });
-    
+
     function buildColumns() {
-        // Clear existing content
-        container.innerHTML = '';
-        
-        const isSmallScreen = window.innerWidth <= 600;
-        
-        if (isSmallScreen) {
-            // Single column for small screens
-            container.style.display = 'flex';
-            container.style.flexDirection = 'column';
-            
-            const column = document.createElement('div');
-            column.style.display = 'flex';
-            column.style.flexDirection = 'column';
-            
-            elementData.forEach(({ element, linkData, linkIndex }) => {
-                const clonedElement = element.cloneNode(true);
-                // Re-add context menu to cloned element
-                if (linkData) {
-                    clonedElement.addEventListener('contextmenu', (event) => {
-                        const items = [
-                            { label: 'New-Tab', action: () => window.open(linkData.url, '_blank') },
-                            { label: 'Edit', action: () => openEditLinkPopup(linkData, linkIndex) },
-                            { label: 'Copy', action: () => copyLink(linkData, linkIndex) },
-                            { label: 'Copy Note', action: () => copyNote(linkData) },
-                            { label: 'Delete', action: () => deleteLink(linkIndex) }
-                        ];
-                        showContextMenu(event, items);
-                    });
-                }
-                column.appendChild(clonedElement);
+      // Clear existing content
+      container.innerHTML = '';
+
+      const isSmallScreen = window.innerWidth <= 600;
+
+      if (isSmallScreen) {
+        // Single column for small screens
+        container.style.display = 'flex';
+        container.style.flexDirection = 'column';
+
+        const column = document.createElement('div');
+        column.style.display = 'flex';
+        column.style.flexDirection = 'column';
+
+        elementData.forEach(({ element, linkData, linkIndex }) => {
+          const clonedElement = element.cloneNode(true);
+          // Re-add context menu to cloned element
+          if (linkData) {
+            clonedElement.addEventListener('contextmenu', (event) => {
+              const items = [
+                { label: 'New-Tab', action: () => window.open(linkData.url, '_blank') },
+                { label: 'Edit', action: () => openEditLinkPopup(linkData, linkIndex) },
+                { label: 'Copy', action: () => copyLink(linkData, linkIndex) },
+                { label: 'Copy Note', action: () => copyNote(linkData) },
+                { label: 'Delete', action: () => deleteLink(linkIndex) }
+              ];
+              showContextMenu(event, items);
             });
-            
-            container.appendChild(column);
-        } else {
-            // Multi-column for larger screens
-            container.style.display = 'flex';
-            container.style.flexDirection = 'row';
-            container.style.gap = '20px';
-            
-            let currentColumn = document.createElement('div');
+          }
+          column.appendChild(clonedElement);
+        });
+
+        container.appendChild(column);
+      } else {
+        // Multi-column for larger screens
+        container.style.display = 'flex';
+        container.style.flexDirection = 'row';
+        container.style.gap = '20px';
+
+        let currentColumn = document.createElement('div');
+        currentColumn.style.display = 'flex';
+        currentColumn.style.flexDirection = 'column';
+        container.appendChild(currentColumn);
+
+        elementData.forEach(({ element, linkData, linkIndex }, index) => {
+          if (index > 0 && index % 5 === 0) {
+            currentColumn = document.createElement('div');
             currentColumn.style.display = 'flex';
             currentColumn.style.flexDirection = 'column';
             container.appendChild(currentColumn);
-            
-            elementData.forEach(({ element, linkData, linkIndex }, index) => {
-                if (index > 0 && index % 5 === 0) {
-                    currentColumn = document.createElement('div');
-                    currentColumn.style.display = 'flex';
-                    currentColumn.style.flexDirection = 'column';
-                    container.appendChild(currentColumn);
-                }
-                const clonedElement = element.cloneNode(true);
-                // Re-add context menu to cloned element
-                if (linkData) {
-                    clonedElement.addEventListener('contextmenu', (event) => {
-                        const items = [
-                            { label: 'New-Tab', action: () => window.open(linkData.url, '_blank') },
-                            { label: 'Edit', action: () => openEditLinkPopup(linkData, linkIndex) },
-                            { label: 'Copy', action: () => copyLink(linkData, linkIndex) },
-                            { label: 'Copy Note', action: () => copyNote(linkData) },
-                            { label: 'Delete', action: () => deleteLink(linkIndex) }
-                        ];
-                        showContextMenu(event, items);
-                    });
-                }
-                currentColumn.appendChild(clonedElement);
+          }
+          const clonedElement = element.cloneNode(true);
+          // Re-add context menu to cloned element
+          if (linkData) {
+            clonedElement.addEventListener('contextmenu', (event) => {
+              const items = [
+                { label: 'New-Tab', action: () => window.open(linkData.url, '_blank') },
+                { label: 'Edit', action: () => openEditLinkPopup(linkData, linkIndex) },
+                { label: 'Copy', action: () => copyLink(linkData, linkIndex) },
+                { label: 'Copy Note', action: () => copyNote(linkData) },
+                { label: 'Delete', action: () => deleteLink(linkIndex) }
+              ];
+              showContextMenu(event, items);
             });
-        }
-        
-        // Add the '+' button to the last column
-        const addLinkItem = document.createElement('li');
-        addLinkItem.className = 'link-item add-link-item';
-        addLinkItem.style.width = 'auto';
-        addLinkItem.style.height = '30px';
-        addLinkItem.style.minWidth = '30px';
-        addLinkItem.style.minHeight = '30px';
-
-        const addLinkSpan = document.createElement('span');
-        addLinkSpan.textContent = '+';
-        addLinkSpan.style.cursor = 'pointer';
-        addLinkSpan.style.fontSize = '20px';
-        addLinkSpan.style.display = 'flex';
-        addLinkSpan.style.alignItems = 'center';
-        addLinkSpan.style.justifyContent = 'center';
-        addLinkSpan.style.width = '100%';
-        addLinkSpan.style.height = '100%';
-
-        addLinkItem.addEventListener('click', () => {
-            document.getElementById('link-group').value = groupName === 'Ungrouped' ? '' : groupName;
-            const addLinkPopup = document.getElementById('add-link-popup');
-            addLinkPopup.classList.remove('hidden');
-            applyPopupStyling(groupName);
+          }
+          currentColumn.appendChild(clonedElement);
         });
+      }
 
-        addLinkItem.appendChild(addLinkSpan);
-        
-        // Add to the last column
-        const lastColumn = container.lastElementChild;
-        if (lastColumn) {
-            lastColumn.appendChild(addLinkItem);
-        }
+      // Add the '+' button to the last column
+      const addLinkItem = document.createElement('li');
+      addLinkItem.className = 'link-item add-link-item';
+      addLinkItem.style.width = 'auto';
+      addLinkItem.style.height = '30px';
+      addLinkItem.style.minWidth = '30px';
+      addLinkItem.style.minHeight = '30px';
+
+      const addLinkSpan = document.createElement('span');
+      addLinkSpan.textContent = '+';
+      addLinkSpan.style.cursor = 'pointer';
+      addLinkSpan.style.fontSize = '20px';
+      addLinkSpan.style.display = 'flex';
+      addLinkSpan.style.alignItems = 'center';
+      addLinkSpan.style.justifyContent = 'center';
+      addLinkSpan.style.width = '100%';
+      addLinkSpan.style.height = '100%';
+
+      addLinkItem.addEventListener('click', () => {
+        document.getElementById('link-group').value = groupName === 'Ungrouped' ? '' : groupName;
+        const addLinkPopup = document.getElementById('add-link-popup');
+        addLinkPopup.classList.remove('hidden');
+        applyPopupStyling(groupName);
+      });
+
+      addLinkItem.appendChild(addLinkSpan);
+
+      // Add to the last column
+      const lastColumn = container.lastElementChild;
+      if (lastColumn) {
+        lastColumn.appendChild(addLinkItem);
+      }
     }
-    
+
     // Initial build
     buildColumns();
-    
+
     // Add resize listener to rebuild columns when window is resized
     const resizeHandler = () => {
-        buildColumns();
+      buildColumns();
     };
-    
+
     window.addEventListener('resize', resizeHandler);
-    
+
     // Store the resize handler so it can be removed if needed
     container._resizeHandler = resizeHandler;
-    
-    return container;
-}
 
-    function createRegularGroup(groupName, elements, linksInGroup) {
+    return container;
+  }
+
+  function createRegularGroup(groupName, elements, linksInGroup) {
     const groupDiv = document.createElement('div');
     groupDiv.className = 'link-group';
     groupDiv.dataset.groupName = groupName;
@@ -1090,7 +1090,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const firstLinkInGroup = linksInGroup[0];
     if (firstLinkInGroup && firstLinkInGroup.link.horizontal_stack) {
       groupDiv.classList.add('group_type_box');
-      
+
       // Apply custom horizontal stack styling
       const linkData = firstLinkInGroup.link;
       if (linkData.horizontal_bg_color) {
@@ -1132,29 +1132,29 @@ document.addEventListener('DOMContentLoaded', function () {
           // Re-add context menu
           if (linkData) {
             clonedElement.addEventListener('contextmenu', (event) => {
-                const items = [
-                    {
-                        label: 'New-Tab',
-                        action: () => window.open(linkData.link.url, '_blank')
-                    },
-                    {
-                        label: 'Edit',
-                        action: () => openEditLinkPopup(linkData.link, linkData.index)
-                    },
-                    {
-                        label: 'Copy',
-                        action: () => copyLink(linkData.link, linkData.index)
-                    },
-                    {
-                        label: 'Copy Note',
-                        action: () => copyNote(linkData.link)
-                    },
-                    {
-                        label: 'Delete',
-                        action: () => deleteLink(linkData.index)
-                    }
-                ];
-                showContextMenu(event, items);
+              const items = [
+                {
+                  label: 'New-Tab',
+                  action: () => window.open(linkData.link.url, '_blank')
+                },
+                {
+                  label: 'Edit',
+                  action: () => openEditLinkPopup(linkData.link, linkData.index)
+                },
+                {
+                  label: 'Copy',
+                  action: () => copyLink(linkData.link, linkData.index)
+                },
+                {
+                  label: 'Copy Note',
+                  action: () => copyNote(linkData.link)
+                },
+                {
+                  label: 'Delete',
+                  action: () => deleteLink(linkData.index)
+                }
+              ];
+              showContextMenu(event, items);
             });
           }
 
@@ -1388,7 +1388,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Show/hide styling sections based on group type
     function toggleStylingSections() {
       const horizontalStackStylingSection = document.getElementById('horizontal-stack-styling-section');
-      
+
       // Show horizontal stack styling for horizontal stack groups, but not for collapsible groups
       if (editGroupHorizontalStackCheckbox.checked && !editGroupCollapsibleCheckbox.checked) {
         horizontalStackStylingSection.style.display = 'block';
@@ -1406,7 +1406,7 @@ document.addEventListener('DOMContentLoaded', function () {
       toggleRenameSection();
       toggleStylingSections();
     });
-    
+
     editGroupHorizontalStackCheckbox.addEventListener('change', toggleStylingSections);
 
     editGroupPopup.classList.remove('hidden');
@@ -1418,8 +1418,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function handleGroupDragStart(e) {
     if (!document.querySelector('.flex-container2').classList.contains('edit-mode')) {
-        e.preventDefault();
-        return;
+      e.preventDefault();
+      return;
     }
     draggedGroup = this;
     this.style.opacity = '0.5';
@@ -1443,11 +1443,12 @@ document.addEventListener('DOMContentLoaded', function () {
     if (draggedGroup !== this) {
       const draggedGroupName = draggedGroup.dataset.groupName;
       const targetGroupName = this.dataset.groupName;
-      
+
       if (draggedGroup.classList.contains('group_type_top')) {
         swapCollapsibleGroups(draggedGroupName, targetGroupName);
       } else {
-        moveGroup(draggedGroupName, targetGroupName);
+        // For normal and box groups, use the new reordering logic
+        reorderGroup(draggedGroupName, targetGroupName);
       }
     }
     return false;
@@ -1466,7 +1467,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
       // Preserve group-level properties for ALL groups
       const groupProperties = {};
-      
+
       // Collect properties for all groups
       links.forEach(link => {
         const group = link.group || 'Ungrouped';
@@ -1724,16 +1725,16 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('edit-link-width').value = link.width || '';
     document.getElementById('edit-link-height').value = link.height || '';
     document.getElementById('edit-link-text').value = link.text || '';
-    
+
     // Set default type radio buttons
     const defaultType = link.default_type || 'text';
     document.querySelector(`input[name="edit-link-default-type"][value="${defaultType}"]`).checked = true;
-    
+
     document.getElementById('edit-link-background-color').value = link.background_color || '';
     document.getElementById('edit-link-border-radius').value = link.border_radius || '';
     document.getElementById('edit-link-title').value = link.title || '';
     document.getElementById('edit-link-note').value = link.note || '';
-    
+
     // Set click action radio buttons
     const clickAction = link.click_action || 'url';
     if (clickAction === 'note') {
@@ -1741,7 +1742,7 @@ document.addEventListener('DOMContentLoaded', function () {
     } else {
       document.getElementById('edit-link-action-url').checked = true;
     }
-    
+
     document.getElementById('edit-link-font-family').value = link.font_family || '';
     document.getElementById('edit-link-font-size').value = link.font_size || '';
     document.getElementById('edit-link-li-width').value = link.li_width || '';
@@ -1818,7 +1819,7 @@ document.addEventListener('DOMContentLoaded', function () {
           try {
             const response = await fetch('/api/links');
             const allLinks = await response.json();
-            
+
             // Look for an existing link in the new group to copy properties from
             const newGroupLink = allLinks.find(link => (link.group || 'Ungrouped') === newGroupName);
             if (newGroupLink) {
@@ -1894,7 +1895,7 @@ document.addEventListener('DOMContentLoaded', function () {
                   moveToExpandedRow(newGroupElement);
                 }
               }
-              
+
               // Check if the new group is horizontal stack
               const newGroupDiv = document.querySelector(`.link-group[data-group-name="${newGroupName}"]`);
               if (newGroupDiv && newGroupDiv.classList.contains('group_type_box')) {
@@ -1989,7 +1990,7 @@ document.addEventListener('DOMContentLoaded', function () {
     document.body.appendChild(textArea);
     textArea.focus();
     textArea.select();
-    
+
     try {
       const successful = document.execCommand('copy');
       if (successful) {
@@ -2000,12 +2001,12 @@ document.addEventListener('DOMContentLoaded', function () {
     } catch (err) {
       showNotification('Failed to copy note', 'error');
     }
-    
+
     document.body.removeChild(textArea);
   }
 
   // Function to open note preview
-  window.openNotePreview = function(noteContent) {
+  window.openNotePreview = function (noteContent) {
     const decodedContent = decodeURIComponent(noteContent);
     if (!decodedContent || !decodedContent.trim()) {
       alert('No note content to preview');
@@ -2014,7 +2015,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const encodedContent = encodeURIComponent(decodedContent);
     const previewUrl = `/preview-note?content=${encodedContent}`;
-    
+
     // Open in new window
     const previewWindow = window.open(
       previewUrl,
@@ -2039,15 +2040,15 @@ document.addEventListener('DOMContentLoaded', function () {
     const notification = document.createElement('div');
     notification.className = `copy-notification ${type}`;
     notification.textContent = message;
-    
+
     // Add to page
     document.body.appendChild(notification);
-    
+
     // Show notification
     setTimeout(() => {
       notification.classList.add('show');
     }, 10);
-    
+
     // Hide and remove notification after 3 seconds
     setTimeout(() => {
       notification.classList.remove('show');
@@ -2065,50 +2066,50 @@ document.addEventListener('DOMContentLoaded', function () {
     newLink.name = `${newLink.name} (copy)`;
 
     try {
-        const groupName = linkToCopy.group || 'Ungrouped';
-        
-        const response = await fetch('/api/links');
-        const links = await response.json();
+      const groupName = linkToCopy.group || 'Ungrouped';
 
-        links.splice(index + 1, 0, newLink);
+      const response = await fetch('/api/links');
+      const links = await response.json();
 
-        // Update the entire list on the server
-        const updateResponse = await fetch('/api/links', {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(links),
-        });
+      links.splice(index + 1, 0, newLink);
 
-        if (!updateResponse.ok) {
-            throw new Error('Failed to update links on the server.');
+      // Update the entire list on the server
+      const updateResponse = await fetch('/api/links', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(links),
+      });
+
+      if (!updateResponse.ok) {
+        throw new Error('Failed to update links on the server.');
+      }
+
+      await fetchAndDisplayLinks();
+
+      // Re-open the top group if it was open
+      const groupElement = document.querySelector(`.group_type_top[data-group-name="${groupName}"]`);
+      if (groupElement) {
+        const content = groupElement.querySelector('.group_type_top-content');
+        const toggleBtn = groupElement.querySelector('.group_type_top-toggle-btn');
+        if (content && toggleBtn) {
+          content.classList.add('expanded');
+          toggleBtn.textContent = '▲';
+          groupElement.classList.add('expanded');
+          moveToExpandedRow(groupElement);
         }
+      }
 
-        await fetchAndDisplayLinks();
-
-        // Re-open the top group if it was open
-        const groupElement = document.querySelector(`.group_type_top[data-group-name="${groupName}"]`);
-        if (groupElement) {
-          const content = groupElement.querySelector('.group_type_top-content');
-          const toggleBtn = groupElement.querySelector('.group_type_top-toggle-btn');
-          if (content && toggleBtn) {
-            content.classList.add('expanded');
-            toggleBtn.textContent = '▲';
-            groupElement.classList.add('expanded');
-            moveToExpandedRow(groupElement);
-          }
-        }
-
-        // Re-open the box popup if it was open
-        const groupDiv = document.querySelector(`.link-group[data-group-name="${groupName}"]`);
-        if (groupDiv && groupDiv.classList.contains('group_type_box')) {
-          groupDiv.click();
-        }
+      // Re-open the box popup if it was open
+      const groupDiv = document.querySelector(`.link-group[data-group-name="${groupName}"]`);
+      if (groupDiv && groupDiv.classList.contains('group_type_box')) {
+        groupDiv.click();
+      }
 
     } catch (error) {
-        console.error('Error copying link:', error);
-        alert('Error copying link.');
+      console.error('Error copying link:', error);
+      alert('Error copying link.');
     }
   }
 
@@ -2275,7 +2276,98 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
-  // Move entire group up or down
+  // Reorder groups - move dragged group to target position, shifting others
+  async function reorderGroup(draggedGroupName, targetGroupName) {
+    try {
+      const response = await fetch('/api/links');
+      const links = await response.json();
+
+      // Preserve group-level properties for ALL groups
+      const groupProperties = {};
+
+      // Collect properties for all groups
+      links.forEach(link => {
+        const group = link.group || 'Ungrouped';
+        if (!groupProperties[group]) {
+          groupProperties[group] = {
+            collapsible: link.collapsible,
+            display_style: link.display_style,
+            horizontal_stack: link.horizontal_stack,
+            password_protect: link.password_protect,
+            top_name: link.top_name,
+            top_bg_color: link.top_bg_color,
+            top_text_color: link.top_text_color,
+            top_border_color: link.top_border_color,
+            top_hover_color: link.top_hover_color,
+            popup_bg_color: link.popup_bg_color,
+            popup_text_color: link.popup_text_color,
+            popup_border_color: link.popup_border_color,
+            popup_border_radius: link.popup_border_radius,
+            horizontal_bg_color: link.horizontal_bg_color,
+            horizontal_text_color: link.horizontal_text_color,
+            horizontal_border_color: link.horizontal_border_color,
+            horizontal_hover_color: link.horizontal_hover_color
+          };
+        }
+      });
+
+      // Get all unique group names in their current order
+      const groupNames = [...new Set(links.map(link => link.group || 'Ungrouped'))];
+
+      const draggedIndex = groupNames.indexOf(draggedGroupName);
+      const targetIndex = groupNames.indexOf(targetGroupName);
+
+      // Remove the dragged group from its current position
+      const [draggedGroup] = groupNames.splice(draggedIndex, 1);
+
+      // Insert the dragged group at the target position
+      groupNames.splice(targetIndex, 0, draggedGroup);
+
+      // Rebuild the links array based on the new group order
+      const newLinks = [];
+      const linksByGroup = links.reduce((acc, link) => {
+        const group = link.group || 'Ungrouped';
+        if (!acc[group]) {
+          acc[group] = [];
+        }
+        acc[group].push(link);
+        return acc;
+      }, {});
+
+      groupNames.forEach(group => {
+        newLinks.push(...(linksByGroup[group] || []));
+      });
+
+      // Update all links with their respective group properties
+      newLinks.forEach(link => {
+        const group = link.group || 'Ungrouped';
+        if (groupProperties[group]) {
+          // Only copy properties that exist in the groupProperties
+          Object.keys(groupProperties[group]).forEach(prop => {
+            if (groupProperties[group][prop] !== undefined) {
+              link[prop] = groupProperties[group][prop];
+            }
+          });
+        }
+      });
+
+      // Update the entire list of links on the server
+      await fetch('/api/links', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newLinks),
+      });
+
+      fetchAndDisplayLinks();
+
+    } catch (error) {
+      console.error('Error reordering group:', error);
+    }
+  }
+
+  // Move entire group up or down (kept for backward compatibility)
   async function moveGroup(draggedGroupName, direction) {
     try {
       const response = await fetch('/api/links');
@@ -2283,7 +2375,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
       // Get all unique group names in their current order
       const groupNames = [...new Set(links.map(link => link.group || 'Ungrouped'))];
-      
+
       const draggedIndex = groupNames.indexOf(draggedGroupName);
       const targetIndex = draggedIndex + (direction > 0 ? 1 : -1);
 
@@ -2338,7 +2430,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
       // Preserve group-level properties for ALL groups, not just the one being reordered
       const groupProperties = {};
-      
+
       // Collect properties for all groups
       currentLinks.forEach(link => {
         const group = link.group || 'Ungrouped';
