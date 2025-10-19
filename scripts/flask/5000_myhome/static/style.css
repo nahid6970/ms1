@@ -542,6 +542,7 @@ input:checked+.slider:before {
 }
 
 
+/* Base popup styling */
 .Menu,
 .group_type_box.expanded {
   background-color: var(--popup-bg-color, #31343a);
@@ -557,9 +558,33 @@ input:checked+.slider:before {
   max-width: 90vw;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   max-height: 90vh;
-  overflow: hidden;
   display: flex;
   flex-direction: column;
+}
+
+/* Form popups need scrollbar */
+.Menu {
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #ff0000 #000000;
+}
+
+.Menu::-webkit-scrollbar {
+  width: 4px;
+}
+
+.Menu::-webkit-scrollbar-thumb {
+  background-color: #ff000f;
+  border-radius: 2px;
+}
+
+.Menu::-webkit-scrollbar-track {
+  background-color: #000000;
+}
+
+/* Box popup doesn't need outer scrollbar */
+.group_type_box.expanded {
+  overflow: hidden;
 }
 
 #group_type_box-popup .popup-content-inner {
