@@ -595,27 +595,49 @@ document.addEventListener('DOMContentLoaded', function () {
 
       // Apply background color
       if (linkData.top_bg_color) {
+        collapsibleGroup.style.setProperty('--top-bg-color', linkData.top_bg_color);
         collapsibleGroup.style.backgroundColor = linkData.top_bg_color;
       }
 
       // Apply text color
       if (linkData.top_text_color) {
+        collapsibleGroup.style.setProperty('--top-text-color', linkData.top_text_color);
         title.style.color = linkData.top_text_color;
       }
 
       // Apply border color
       if (linkData.top_border_color) {
+        collapsibleGroup.style.setProperty('--top-border-color', linkData.top_border_color);
         collapsibleGroup.style.border = `1px solid ${linkData.top_border_color}`;
       }
 
       // Apply hover color
       if (linkData.top_hover_color) {
+        collapsibleGroup.style.setProperty('--top-hover-color', linkData.top_hover_color);
         collapsibleGroup.addEventListener('mouseenter', () => {
-          collapsibleGroup.style.backgroundColor = linkData.top_hover_color;
+          if (!collapsibleGroup.classList.contains('expanded')) {
+            collapsibleGroup.style.backgroundColor = linkData.top_hover_color;
+          }
         });
         collapsibleGroup.addEventListener('mouseleave', () => {
-          collapsibleGroup.style.backgroundColor = linkData.top_bg_color || '';
+          if (!collapsibleGroup.classList.contains('expanded')) {
+            collapsibleGroup.style.backgroundColor = linkData.top_bg_color || '';
+          }
         });
+      }
+
+      // Apply popup styling for expanded state
+      if (linkData.popup_bg_color) {
+        collapsibleGroup.style.setProperty('--popup-bg-color', linkData.popup_bg_color);
+      }
+      if (linkData.popup_text_color) {
+        collapsibleGroup.style.setProperty('--popup-text-color', linkData.popup_text_color);
+      }
+      if (linkData.popup_border_color) {
+        collapsibleGroup.style.setProperty('--popup-border-color', linkData.popup_border_color);
+      }
+      if (linkData.popup_border_radius) {
+        collapsibleGroup.style.setProperty('--popup-border-radius', linkData.popup_border_radius);
       }
     }
 
@@ -721,228 +743,117 @@ document.addEventListener('DOMContentLoaded', function () {
     addLinkItem.appendChild(addLinkSpan);
     content.appendChild(addLinkItem);
 
-    // Add toggle functionality with repositioning
-    let isDragging = false;
-    let dragTimeout = null;
-
-    // Create a more robust drag state management
-    const setDragState = (dragging) => {
-      isDragging = dragging;
-      if (dragging) {
-        collapsibleGroup.classList.add('drag-active');
-        // Clear any existing timeout
-        if (dragTimeout) {
-          clearTimeout(dragTimeout);
-        }
-      } else {
-        // Use a longer timeout to ensure drag operations are complete
-        dragTimeout = setTimeout(() => {
-          isDragging = false;
-          collapsibleGroup.classList.remove('drag-active');
-        }, 300);
+    // Click handler - works like box group (opens popup)
+    collapsibleGroup.onclick = (e) => {
+      // Don't trigger if clicking on edit button
+      if (e.target.classList.contains('group_type_top-edit-btn')) {
+        e.stopPropagation();
+        return;
       }
+
+      const popup = document.getElementById('group_type_box-popup');
+      const popupContent = popup.querySelector('.popup-content-inner');
+      popupContent.innerHTML = '';
+
+      // Clone all elements into the popup
+      elements.forEach((element, index) => {
+        const clonedElement = element.cloneNode(true);
+        const linkIndex = parseInt(clonedElement.dataset.linkIndex);
+        const linkData = links.find(l => l.index === linkIndex);
+
+        clonedElement.addEventListener('dragstart', handleDragStart);
+        clonedElement.addEventListener('dragover', handleDragOver);
+        clonedElement.addEventListener('drop', handleDrop);
+        clonedElement.addEventListener('dragend', handleDragEnd);
+
+        // Re-add context menu
+        if (linkData) {
+          clonedElement.addEventListener('contextmenu', (event) => {
+            const items = [
+              {
+                label: 'New-Tab',
+                action: () => window.open(linkData.link.url, '_blank')
+              },
+              {
+                label: 'Edit',
+                action: () => openEditLinkPopup(linkData.link, linkData.index)
+              },
+              {
+                label: 'Copy',
+                action: () => copyLink(linkData.link, linkData.index)
+              },
+              {
+                label: 'Copy Note',
+                action: () => copyNote(linkData.link)
+              },
+              {
+                label: 'Delete',
+                action: () => deleteLink(linkData.index)
+              }
+            ];
+            showContextMenu(event, items);
+          });
+        }
+
+        if (linkData && linkData.link.li_bg_color) {
+          clonedElement.style.backgroundColor = linkData.link.li_bg_color;
+        }
+        if (linkData && linkData.link.li_hover_color) {
+          clonedElement.addEventListener('mouseover', () => {
+            clonedElement.style.backgroundColor = linkData.link.li_hover_color;
+          });
+          clonedElement.addEventListener('mouseout', () => {
+            clonedElement.style.backgroundColor = linkData.link.li_bg_color || '';
+          });
+        }
+
+        const editButton = clonedElement.querySelector('.edit-button');
+        if (editButton && linkData) {
+          editButton.onclick = () => openEditLinkPopup(linkData.link, linkIndex);
+        }
+
+        const deleteButton = clonedElement.querySelector('.delete-button');
+        if (deleteButton) {
+          deleteButton.onclick = () => deleteLink(linkIndex);
+        }
+
+        popupContent.appendChild(clonedElement);
+      });
+
+      // Add the '+' button
+      const addLinkItemPopup = document.createElement('li');
+      addLinkItemPopup.className = 'link-item add-link-item';
+      addLinkItemPopup.draggable = false;
+
+      const addLinkSpanPopup = document.createElement('span');
+      addLinkSpanPopup.textContent = '+';
+      addLinkSpanPopup.style.fontFamily = 'jetbrainsmono nfp';
+      addLinkSpanPopup.style.fontSize = '25px';
+      addLinkSpanPopup.style.width = '100%';
+      addLinkSpanPopup.style.height = '100%';
+      addLinkSpanPopup.style.display = 'flex';
+      addLinkSpanPopup.style.alignItems = 'center';
+      addLinkSpanPopup.style.justifyContent = 'center';
+
+      addLinkItemPopup.addEventListener('click', () => {
+        document.getElementById('link-group').value = groupName === 'Ungrouped' ? '' : groupName;
+        const addLinkPopup = document.getElementById('add-link-popup');
+        addLinkPopup.classList.remove('hidden');
+        applyPopupStyling(groupName);
+      });
+      addLinkItemPopup.appendChild(addLinkSpanPopup);
+      popupContent.appendChild(addLinkItemPopup);
+
+      popup.classList.remove('hidden');
+      applyPopupStyling(groupName);
     };
 
-    // Track drag state on the content area
-    content.addEventListener('dragstart', (e) => {
-      setDragState(true);
-      e.stopPropagation();
-    });
-
-    content.addEventListener('dragend', (e) => {
-      setDragState(false);
-    });
-
-    // Prevent all drag-related events from bubbling to header
-    content.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-    });
-
-    content.addEventListener('drop', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      // Reset drag state after drop
-      setDragState(false);
-    });
-
-    // Also listen for mouse events during drag to prevent accidental clicks
-    content.addEventListener('mousedown', (e) => {
-      if (e.target.closest('.link-item')) {
-        // Small delay to detect if this is start of a drag
-        setTimeout(() => {
-          if (document.querySelector('.link-item.dragging')) {
-            setDragState(true);
-          }
-        }, 50);
-      }
-    });
-
-    header.addEventListener('click', (e) => {
-      // Don't trigger if clicking on edit button or during drag operations
-      if (e.target.classList.contains('group_type_top-edit-btn') ||
-        isDragging ||
-        collapsibleGroup.classList.contains('drag-active')) {
-        e.preventDefault();
-        e.stopPropagation();
-        return false;
-      }
-
-      const wasExpanded = content.classList.contains('expanded');
-
-      // Close all other expanded groups first and properly restore them
-      const allGroups = document.querySelectorAll('.group_type_top');
-      const groupsToRestore = [];
-
-      allGroups.forEach(group => {
-        const groupContent = group.querySelector('.group_type_top-content');
-        const groupToggle = group.querySelector('.group_type_top-toggle-btn');
-        if (group !== collapsibleGroup) {
-          // Always ensure proper state cleanup for all other groups
-          groupContent.classList.remove('expanded');
-          groupToggle.textContent = '▼';
-          group.classList.remove('expanded');
-
-          // Collect groups that need to be moved back
-          if (group.closest('.expanded-row')) {
-            groupsToRestore.push(group);
-          }
-        }
-      });
-
-      // Move all groups back to regular row in their original order
-      groupsToRestore.forEach(group => {
-        moveToRegularRowInOrder(group);
-      });
-
-      // Clean up empty expanded rows
-      cleanupEmptyRows();
-
-      // Toggle current group
-      content.classList.toggle('expanded');
-      toggleBtn.textContent = content.classList.contains('expanded') ? '▲' : '▼';
-
-      // Move expanded group to top by adding expanded class
-      if (content.classList.contains('expanded')) {
-        collapsibleGroup.classList.add('expanded');
-        // Move to expanded row
-        moveToExpandedRow(collapsibleGroup);
-      } else {
-        collapsibleGroup.classList.remove('expanded');
-        // Move back to regular row
-        moveToRegularRow(collapsibleGroup);
-        // Clean up empty rows after moving
-        cleanupEmptyRows();
-      }
-    });
-
     collapsibleGroup.appendChild(header);
-    collapsibleGroup.appendChild(content);
 
     return collapsibleGroup;
   }
 
-  // Function to move group to expanded row (top)
-  function moveToExpandedRow(group) {
-    const container = document.querySelector('.group_type_top-container');
-    let expandedRow = container.querySelector('.expanded-row');
 
-    if (!expandedRow) {
-      expandedRow = document.createElement('div');
-      expandedRow.className = 'group_type_top-row expanded-row';
-      container.insertBefore(expandedRow, container.firstChild);
-    }
-
-    expandedRow.appendChild(group);
-  }
-
-  // Function to move group back to regular row (maintain original position)
-  function moveToRegularRow(group) {
-    const container = document.querySelector('.group_type_top-container');
-    let regularRow = container.querySelector('.regular-row');
-
-    if (!regularRow) {
-      regularRow = document.createElement('div');
-      regularRow.className = 'group_type_top-row regular-row';
-      container.appendChild(regularRow);
-    }
-
-    // Get the original index to maintain position
-    const originalIndex = parseInt(group.dataset.originalIndex) || 0;
-    const existingGroups = Array.from(regularRow.children);
-
-    // Find the correct position to insert based on original index
-    let insertPosition = 0;
-    for (let i = 0; i < existingGroups.length; i++) {
-      const existingIndex = parseInt(existingGroups[i].dataset.originalIndex) || 0;
-      if (originalIndex < existingIndex) {
-        insertPosition = i;
-        break;
-      }
-      insertPosition = i + 1;
-    }
-
-    // Insert at the correct position
-    if (insertPosition >= existingGroups.length) {
-      regularRow.appendChild(group);
-    } else {
-      regularRow.insertBefore(group, existingGroups[insertPosition]);
-    }
-  }
-
-  // Function to move group back to regular row maintaining original order
-  function moveToRegularRowInOrder(group) {
-    const container = document.querySelector('.group_type_top-container');
-    let regularRow = container.querySelector('.regular-row');
-
-    if (!regularRow) {
-      regularRow = document.createElement('div');
-      regularRow.className = 'group_type_top-row regular-row';
-      container.appendChild(regularRow);
-    }
-
-    // Get the original index to maintain position
-    const originalIndex = parseInt(group.dataset.originalIndex) || 0;
-    const existingGroups = Array.from(regularRow.children);
-
-    // Find the correct position to insert based on original index
-    let insertPosition = 0;
-    for (let i = 0; i < existingGroups.length; i++) {
-      const existingIndex = parseInt(existingGroups[i].dataset.originalIndex) || 0;
-      if (originalIndex < existingIndex) {
-        insertPosition = i;
-        break;
-      }
-      insertPosition = i + 1;
-    }
-
-    // Insert at the correct position
-    if (insertPosition >= existingGroups.length) {
-      regularRow.appendChild(group);
-    } else {
-      regularRow.insertBefore(group, existingGroups[insertPosition]);
-    }
-  }
-
-  // Function to clean up empty rows
-  function cleanupEmptyRows() {
-    const container = document.querySelector('.collapsible-groups-container');
-    if (!container) return;
-
-    const expandedRows = container.querySelectorAll('.expanded-row');
-    expandedRows.forEach(row => {
-      if (row.children.length === 0) {
-        row.remove();
-      }
-    });
-
-    const regularRows = container.querySelectorAll('.regular-row');
-    regularRows.forEach(row => {
-      if (row.children.length === 0) {
-        row.remove();
-      }
-    });
-  }
 
   function createMultiColumnList(elements, groupName, linksInGroup) {
     const container = document.createElement('div');

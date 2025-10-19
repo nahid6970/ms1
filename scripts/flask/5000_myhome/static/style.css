@@ -721,15 +721,15 @@ div.toggle-container {
   /* Adjust toggle position for new sidebar */
 }
 
-/* Top groups styling */
+/* Top groups styling - Box group style */
 .group_type_top-container {
   display: flex;
   flex-direction: column;
   gap: 10px;
   margin-bottom: 20px;
-  padding: 10px;
-  background-color: #1e1e1e;
-  border-radius: 10px;
+  padding: 0;
+  background-color: transparent;
+  border-radius: 0;
 }
 
 .group_type_top-row {
@@ -739,28 +739,32 @@ div.toggle-container {
 }
 
 .group_type_top {
-  background-color: #2d2d2d;
-  border-radius: 8px;
+  background-color: var(--top-bg-color, #2d2d2d);
+  border: var(--top-border-color, #0056b3) solid 1px;
+  border-radius: 0px;
   padding: 10px;
   min-width: 200px;
   max-width: 300px;
   transition: all 0.3s ease;
+  font-family: jetbrainsmono nfp;
+  color: var(--top-text-color, #ffffff);
+  cursor: pointer;
+  flex: 1 1 auto;
 }
 
-.group_type_top.expanded {
-  width: 100%;
-  max-width: 100%;
-  order: -1;
+.group_type_top:hover {
+  background-color: var(--top-hover-color, #3a3a3a);
 }
 
 .group_type_top-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   cursor: pointer;
   padding: 5px 0;
-  border-bottom: 1px solid #444;
-  margin-bottom: 10px;
+  border-bottom: none;
+  margin-bottom: 0;
+  height: 100%;
 }
 
 .group_type_top-header .edit-buttons {
@@ -774,87 +778,15 @@ div.toggle-container {
 }
 
 .group_type_top-title {
-  color: #ffffff;
+  color: inherit;
   margin: 0;
   font-size: 16px;
   flex-grow: 1;
+  text-align: center;
 }
 
 .group_type_top-toggle-btn {
-  background: none;
-  border: none;
-  color: #ffffff;
-  font-size: 18px;
-  cursor: pointer;
-  padding: 0;
-  width: 20px;
-  height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.group_type_top-content {
   display: none;
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.group_type_top-content.expanded {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.group_type_top-content .link-item {
-  margin: 5px 0;
-  padding: 0;
-  background-color: #3a3a3a;
-  flex: 0 0 auto;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
-  width: 80px;
-  height: 80px;
-  min-width: 80px;
-  min-height: 80px;
-  cursor: pointer !important;
-}
-
-.group_type_top-content .link-item * {
-  cursor: pointer !important;
-}
-
-/* Text links in top groups should be flexible */
-.group_type_top-content .link-item.link-type-text {
-  width: auto;
-  height: auto;
-  min-width: 80px;
-  min-height: 40px;
-  max-width: 200px;
-  padding: 8px 12px;
-}
-
-.group_type_top-content .link-item::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-  transition: left 0.5s;
-}
-
-.group_type_top-content .link-item:hover {
-  background-color: #4a4a4a;
-  transform: translateY(-5px) scale(1.02);
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
-}
-
-.group_type_top-content .link-item:hover::before {
-  left: 100%;
 }
 
 .group_type_top-edit-btn {
@@ -879,40 +811,6 @@ div.toggle-container {
 
 .group_type_top {
   cursor: move;
-}
-
-.group_type_top-header {
-  cursor: pointer;
-}
-
-/* Prevent header clicks during drag operations */
-.group_type_top.drag-active .group_type_top-header {
-  pointer-events: none;
-}
-
-.group_type_top.drag-active .group_type_top-content {
-  pointer-events: auto;
-}
-
-/* Enhanced styling for expanded groups */
-.group_type_top-row.expanded-row {
-  order: -1;
-  margin-bottom: 15px;
-  padding-bottom: 15px;
-  border-bottom: 2px solid #444;
-}
-
-.group_type_top-row.expanded-row .group_type_top {
-  width: 100%;
-  max-width: 100%;
-}
-
-/* Ensure expanded row is properly cleaned up */
-.group_type_top-row:empty {
-  display: none;
-  margin: 0;
-  padding: 0;
-  border: none;
 }
 
 /* Drag over effect */
