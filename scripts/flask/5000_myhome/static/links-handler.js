@@ -1010,6 +1010,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
       popup.classList.remove('hidden');
       applyPopupStyling(groupName);
+
+      // Prevent body scroll when popup is open
+      document.body.style.overflow = 'hidden';
     };
 
     collapsibleGroup.appendChild(header);
@@ -1461,6 +1464,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
         popup.classList.remove('hidden');
         applyPopupStyling(groupName);
+
+        // Prevent body scroll when popup is open
+        document.body.style.overflow = 'hidden';
       };
     }
 
@@ -2776,6 +2782,27 @@ document.addEventListener('DOMContentLoaded', function () {
       console.error('Error reordering link:', error);
     }
   }
+
+  // Add global close button handler to restore body scroll
+  document.addEventListener('click', (e) => {
+    if (e.target.classList.contains('close-button')) {
+      // Find the popup container and hide it
+      const popupContainer = e.target.closest('.popup-container');
+      if (popupContainer) {
+        popupContainer.classList.add('hidden');
+        // Restore body scroll
+        document.body.style.overflow = '';
+      }
+    }
+  });
+
+  // Also restore scroll when clicking backdrop
+  document.addEventListener('click', (e) => {
+    if (e.target.classList.contains('popup-container')) {
+      e.target.classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+  });
 });
 
 // Functions from original index.js
