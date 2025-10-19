@@ -1452,6 +1452,23 @@ document.addEventListener('DOMContentLoaded', function () {
         groupDiv.style.fontSize = linkData.horizontal_font_size;
       }
 
+      // Add context menu for box group
+      groupDiv.addEventListener('contextmenu', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        const items = [
+          {
+            label: 'Edit',
+            action: () => openEditGroupPopup(groupName)
+          },
+          {
+            label: 'Delete',
+            action: () => deleteGroup(groupName)
+          }
+        ];
+        showContextMenu(event, items);
+      });
+
       groupDiv.onclick = () => {
         const isPasswordProtected = firstLinkInGroup.link.password_protect;
         if (isPasswordProtected) {
@@ -1566,6 +1583,23 @@ document.addEventListener('DOMContentLoaded', function () {
         // Prevent body scroll when popup is open
         document.body.style.overflow = 'hidden';
       };
+    } else {
+      // Add context menu for regular (non-box) groups
+      groupDiv.addEventListener('contextmenu', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        const items = [
+          {
+            label: 'Edit',
+            action: () => openEditGroupPopup(groupName)
+          },
+          {
+            label: 'Delete',
+            action: () => deleteGroup(groupName)
+          }
+        ];
+        showContextMenu(event, items);
+      });
     }
 
     const groupHeaderContainer = document.createElement('div');
