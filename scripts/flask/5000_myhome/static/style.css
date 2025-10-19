@@ -591,13 +591,14 @@ input:checked+.slider:before {
   min-height: 400px;
 }
 
-/* Close button positioning for two-column layouts */
+/* Close button positioning for two-column layouts - absolute so it doesn't take space */
 #add-link-popup .close-button,
 #edit-link-popup .close-button {
-  position: static;
-  margin-left: 10px;
-  flex-shrink: 0;
-  align-self: flex-start;
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 10;
+  margin: 20px;
 }
 
 /* Form popups need scrollbar */
@@ -1296,13 +1297,13 @@ a.add-button.custom-sidebar-button[style*="background-color"] {
     padding: 15px;
   }
 
-  /* Move close button to top on mobile */
+  /* Close button stays absolute positioned on mobile too */
   #add-link-popup .close-button,
   #edit-link-popup .close-button {
-    order: -1;
-    align-self: flex-end;
-    margin-left: 0;
-    margin-bottom: 10px;
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 15px;
   }
 
   /* Make form fields full width on mobile */
