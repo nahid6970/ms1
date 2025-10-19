@@ -572,7 +572,23 @@ input:checked+.slider:before {
 #add-link-popup .Menu,
 #edit-link-popup .Menu {
   flex-direction: row;
-  align-items: flex-start;
+  align-items: stretch;
+}
+
+/* Form and note panels should stretch to same height */
+#add-link-popup .form-panel,
+#edit-link-popup .form-panel,
+#add-link-note-panel,
+#edit-link-note-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Note textarea should grow to fill available space */
+#add-link-note-panel textarea,
+#edit-link-note-panel textarea {
+  flex: 1;
+  min-height: 400px;
 }
 
 /* Close button positioning for two-column layouts */
