@@ -1764,46 +1764,29 @@ document.addEventListener('DOMContentLoaded', function () {
             editLinkPopup.classList.add('hidden');
             await fetchAndDisplayLinks();
 
-            // Re-open the top group if it was open
-            // Check both original and new group names
-            if (originalLink.collapsible) {
+            // Re-open the popup if it was open (for both top groups and box groups)
+            if (originalLink.collapsible || originalLink.horizontal_stack) {
               const groupElement = document.querySelector(`.group_type_top[data-group-name="${originalGroupName}"]`);
               if (groupElement) {
-                const content = groupElement.querySelector('.group_type_top-content');
-                const toggleBtn = groupElement.querySelector('.group_type_top-toggle-btn');
-                if (content && toggleBtn) {
-                  content.classList.add('expanded');
-                  toggleBtn.textContent = '▲';
-                  groupElement.classList.add('expanded');
-                  moveToExpandedRow(groupElement);
+                groupElement.click();
+              } else {
+                const groupDiv = document.querySelector(`.link-group[data-group-name="${originalGroupName}"]`);
+                if (groupDiv) {
+                  groupDiv.click();
                 }
-              }
-            } else if (originalLink.horizontal_stack) {
-              const groupDiv = document.querySelector(`.link-group[data-group-name="${originalGroupName}"]`);
-              if (groupDiv) {
-                groupDiv.click();
               }
             }
 
-            // Also re-open the new group if it's collapsible or horizontal stack and has changed
+            // Also re-open the new group if it has changed
             if (newGroupName !== originalGroupName) {
-              // Check if the new group is collapsible
               const newGroupElement = document.querySelector(`.group_type_top[data-group-name="${newGroupName}"]`);
               if (newGroupElement) {
-                const content = newGroupElement.querySelector('.group_type_top-content');
-                const toggleBtn = newGroupElement.querySelector('.group_type_top-toggle-btn');
-                if (content && toggleBtn) {
-                  content.classList.add('expanded');
-                  toggleBtn.textContent = '▲';
-                  newGroupElement.classList.add('expanded');
-                  moveToExpandedRow(newGroupElement);
+                newGroupElement.click();
+              } else {
+                const newGroupDiv = document.querySelector(`.link-group[data-group-name="${newGroupName}"]`);
+                if (newGroupDiv && newGroupDiv.classList.contains('group_type_box')) {
+                  newGroupDiv.click();
                 }
-              }
-
-              // Check if the new group is horizontal stack
-              const newGroupDiv = document.querySelector(`.link-group[data-group-name="${newGroupName}"]`);
-              if (newGroupDiv && newGroupDiv.classList.contains('group_type_box')) {
-                newGroupDiv.click();
               }
             }
 
@@ -2391,23 +2374,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
       await fetchAndDisplayLinks(); // Re-render the UI
 
-      // Re-open the collapsible group if it was open
+      // Re-open the popup if it was open (for both top groups and box groups)
       const groupElement = document.querySelector(`.group_type_top[data-group-name="${groupName}"]`);
       if (groupElement) {
-        const content = groupElement.querySelector('.group_type_top-content');
-        const toggleBtn = groupElement.querySelector('.group_type_top-toggle-btn');
-        if (content && toggleBtn) {
-          content.classList.add('expanded');
-          toggleBtn.textContent = '▲';
-          groupElement.classList.add('expanded');
-          moveToExpandedRow(groupElement);
+        groupElement.click();
+      } else {
+        const groupDiv = document.querySelector(`.link-group[data-group-name="${groupName}"]`);
+        if (groupDiv && groupDiv.classList.contains('group_type_box')) {
+          groupDiv.click();
         }
-      }
-
-      // Re-open the popup if it was open
-      const groupDiv = document.querySelector(`.link-group[data-group-name="${groupName}"]`);
-      if (groupDiv && groupDiv.classList.contains('group_type_box')) {
-        groupDiv.click();
       }
 
     } catch (error) {
