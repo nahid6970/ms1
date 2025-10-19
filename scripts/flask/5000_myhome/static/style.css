@@ -600,7 +600,7 @@ input:checked+.slider:before {
     position: absolute;
     left: 15px;
     top: 50%;
-    transform: translateY(-50%);
+    transform: translateY(-50%) rotate(180deg);
     writing-mode: vertical-rl;
     text-orientation: mixed;
     padding: 30px 12px;
@@ -624,14 +624,14 @@ input:checked+.slider:before {
   #edit-link-form button[type="submit"]:hover,
   #edit-group-form button[type="submit"]:hover {
     background-color: #45a049;
-    transform: translateY(-50%) scale(1.05);
+    transform: translateY(-50%) rotate(180deg) scale(1.05);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
   }
 
   #add-link-form button[type="submit"]:active,
   #edit-link-form button[type="submit"]:active,
   #edit-group-form button[type="submit"]:active {
-    transform: translateY(-50%) scale(0.98);
+    transform: translateY(-50%) rotate(180deg) scale(0.98);
   }
 }
 
