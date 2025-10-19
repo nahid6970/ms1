@@ -751,6 +751,8 @@ widgets:
           models:
             - name: "gemma3:1b"
               label: "Gemma3"
+            - name: "gpt-oss:20b-cloud"
+              label: "gpt-oss:20b-cloud"
       container_padding:
         top: 0
         left: 10
