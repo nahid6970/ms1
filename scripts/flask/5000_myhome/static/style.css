@@ -572,6 +572,16 @@ input:checked+.slider:before {
 #add-link-popup .Menu,
 #edit-link-popup .Menu {
   flex-direction: row;
+  align-items: flex-start;
+}
+
+/* Close button positioning for two-column layouts */
+#add-link-popup .close-button,
+#edit-link-popup .close-button {
+  position: static;
+  margin-left: 10px;
+  flex-shrink: 0;
+  align-self: flex-start;
 }
 
 /* Form popups need scrollbar */
@@ -1268,6 +1278,15 @@ a.add-button.custom-sidebar-button[style*="background-color"] {
     max-width: 95vw;
     max-height: 95vh;
     padding: 15px;
+  }
+
+  /* Move close button to top on mobile */
+  #add-link-popup .close-button,
+  #edit-link-popup .close-button {
+    order: -1;
+    align-self: flex-end;
+    margin-left: 0;
+    margin-bottom: 10px;
   }
 
   /* Make form fields full width on mobile */
