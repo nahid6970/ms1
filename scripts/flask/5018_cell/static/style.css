@@ -270,11 +270,13 @@ td input:focus {
     align-items: center;
     gap: 5px;
     flex: 1;
+    min-width: 0;
 }
 
 .sheet-selector {
     position: relative;
     flex: 1;
+    min-width: 150px;
     max-width: 300px;
 }
 
@@ -289,8 +291,16 @@ td input:focus {
     border-radius: 4px;
     cursor: pointer;
     font-size: 14px;
-    min-width: 200px;
+    width: 100%;
     transition: all 0.2s;
+}
+
+#currentSheetName {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-align: left;
 }
 
 .sheet-current:hover {
@@ -301,6 +311,7 @@ td input:focus {
 .dropdown-arrow {
     color: #666;
     font-size: 12px;
+    flex-shrink: 0;
 }
 
 .sheet-list {
@@ -375,6 +386,7 @@ td input:focus {
     background: white;
     border: 1px solid #ddd;
     border-radius: 4px;
+    min-width: 36px;
     width: 36px;
     height: 36px;
     font-size: 16px;
