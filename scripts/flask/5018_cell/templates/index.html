@@ -57,10 +57,12 @@
     <div id="columnModal" class="modal">
         <div class="modal-content column-modal">
             <div class="modal-header">
-                <h2>Add Column</h2>
+                <h2 id="columnModalTitle">Add Column</h2>
                 <span class="close" onclick="closeColumnModal()">&times;</span>
             </div>
             <form id="columnForm">
+                <input type="hidden" id="editingColumnIndex" value="-1">
+                
                 <div class="form-group">
                     <label for="columnName">Column Name</label>
                     <input type="text" id="columnName" class="form-input" placeholder="Enter column name" required autofocus>
@@ -93,7 +95,7 @@
                 
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" onclick="closeColumnModal()">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Add Column</button>
+                    <button type="submit" class="btn btn-primary" id="columnSubmitBtn">Add Column</button>
                 </div>
             </form>
         </div>

@@ -89,6 +89,27 @@ async function autoSaveActiveSheet() {
 }
 
 function addColumn() {
+    document.getElementById('editingColumnIndex').value = '-1';
+    document.getElementById('columnModalTitle').textContent = 'Add Column';
+    document.getElementById('columnSubmitBtn').textContent = 'Add Column';
+    document.getElementById('columnForm').reset();
+    document.getElementById('columnColor').value = '#ffffff';
+    document.getElementById('columnColorText').value = '#FFFFFF';
+    document.getElementById('columnModal').style.display = 'block';
+}
+
+function editColumn(index) {
+    const sheet = tableData.sheets[currentSheet];
+    const col = sheet.columns[index];
+    
+    document.getElementById('editingColumnIndex').value = index;
+    document.getElementById('columnModalTitle').textContent = 'Edit Column';
+    document.getElementById('columnSubmitBtn').textContent = 'Update Column';
+    document.getElementById('columnName').value = col.name;
+    document.getElementById('columnType').value = col.type;
+    document.getElementById('columnWidth').value = col.width;
+    document.getElementById('columnColor').value = col.color;
+    document.getElementById('columnColorText').value = col.color.toUpperCase();
     document.getElementById('columnModal').style.display = 'block';
 }
 
@@ -109,6 +130,7 @@ function closeSettingsModal() {
 async function handleColumnFormSubmit(e) {
     e.preventDefault();
     
+    const editingIndex = parseInt(document.getElementById('editingColumnIndex').value);
     const column = {
         name: document.getElementById('columnName').value,
         type: document.getElementById('columnType').value,
@@ -116,22 +138,34 @@ async function handleColumnFormSubmit(e) {
         color: document.getElementById('columnColor').value
     };
 
-    try {
-        const response = await fetch('/api/columns', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ column, sheetIndex: currentSheet })
-        });
-        
-        if (response.ok) {
-            const sheet = tableData.sheets[currentSheet];
-            sheet.columns.push(column);
-            sheet.rows.forEach(row => row.push(''));
-            renderTable();
-            closeColumnModal();
+    const sheet = tableData.sheets[currentSheet];
+    
+    if (editingIndex >= 0) {
+        // Update existing column
+        sheet.columns[editingIndex] = column;
+        renderTable();
+        closeColumnModal();
+        showToast('Column updated successfully!', 'success');
+    } else {
+        // Add new column
+        try {
+            const response = await fetch('/api/columns', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ column, sheetIndex: currentSheet })
+            });
+            
+            if (response.ok) {
+                sheet.columns.push(column);
+                sheet.rows.forEach(row => row.push(''));
+                renderTable();
+                closeColumnModal();
+                showToast('Column added successfully!', 'success');
+            }
+        } catch (error) {
+            console.error('Error adding column:', error);
+            showToast('Error adding column!', 'error');
         }
-    } catch (error) {
-        console.error('Error adding column:', error);
     }
 }
 
@@ -331,13 +365,41 @@ function renderTable() {
         columnName.className = 'column-name';
         columnName.textContent = col.name;
         
-        const deleteBtn = document.createElement('button');
-        deleteBtn.className = 'btn btn-danger';
-        deleteBtn.textContent = '×';
-        deleteBtn.onclick = () => deleteColumn(index);
+        const menuWrapper = document.createElement('div');
+        menuWrapper.className = 'column-menu-wrapper';
+        
+        const menuBtn = document.createElement('button');
+        menuBtn.className = 'column-menu-btn';
+        menuBtn.textContent = '⋮';
+        menuBtn.onclick = (e) => toggleColumnMenu(e, index);
+        
+        const menu = document.createElement('div');
+        menu.className = 'column-menu';
+        menu.id = `column-menu-${index}`;
+        
+        const editItem = document.createElement('div');
+        editItem.className = 'column-menu-item';
+        editItem.innerHTML = '<span>✏️</span> Edit';
+        editItem.onclick = () => {
+            editColumn(index);
+            closeAllColumnMenus();
+        };
+        
+        const deleteItem = document.createElement('div');
+        deleteItem.className = 'column-menu-item delete';
+        deleteItem.innerHTML = '<span>🗑️</span> Delete';
+        deleteItem.onclick = () => {
+            deleteColumn(index);
+            closeAllColumnMenus();
+        };
+        
+        menu.appendChild(editItem);
+        menu.appendChild(deleteItem);
+        menuWrapper.appendChild(menuBtn);
+        menuWrapper.appendChild(menu);
         
         headerCell.appendChild(columnName);
-        headerCell.appendChild(deleteBtn);
+        headerCell.appendChild(menuWrapper);
         th.appendChild(headerCell);
         headerRow.appendChild(th);
     });
@@ -388,6 +450,23 @@ function renderTable() {
     });
 }
 
+function toggleColumnMenu(event, index) {
+    event.stopPropagation();
+    
+    // Close all other menus
+    closeAllColumnMenus();
+    
+    // Toggle current menu
+    const menu = document.getElementById(`column-menu-${index}`);
+    menu.classList.toggle('show');
+}
+
+function closeAllColumnMenus() {
+    document.querySelectorAll('.column-menu').forEach(menu => {
+        menu.classList.remove('show');
+    });
+}
+
 // Close modal and dropdowns when clicking outside
 window.onclick = function(event) {
     const columnModal = document.getElementById('columnModal');
@@ -408,5 +487,10 @@ window.onclick = function(event) {
     // Close sheet list when clicking outside
     if (!event.target.closest('.sheet-selector')) {
         sheetList.classList.remove('show');
+    }
+    
+    // Close column menus when clicking outside
+    if (!event.target.closest('.column-menu-wrapper')) {
+        closeAllColumnMenus();
     }
 };

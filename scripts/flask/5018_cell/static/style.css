@@ -509,3 +509,75 @@ td input:focus {
     font-family: 'Courier New', monospace;
     text-transform: uppercase;
 }
+
+/* Column Menu */
+.column-menu-wrapper {
+    position: relative;
+}
+
+.column-menu-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px 8px;
+    font-size: 18px;
+    color: #666;
+    border-radius: 4px;
+    transition: all 0.2s;
+    line-height: 1;
+}
+
+.column-menu-btn:hover {
+    background: rgba(0,0,0,0.1);
+    color: #333;
+}
+
+.column-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 1000;
+    min-width: 140px;
+    margin-top: 5px;
+}
+
+.column-menu.show {
+    display: block;
+}
+
+.column-menu-item {
+    padding: 10px 15px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #333;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background 0.2s;
+}
+
+.column-menu-item:last-child {
+    border-bottom: none;
+}
+
+.column-menu-item:hover {
+    background: #f8f9fa;
+}
+
+.column-menu-item.delete {
+    color: #dc3545;
+}
+
+.column-menu-item.delete:hover {
+    background: #fff5f5;
+}
+
+.column-menu-item span {
+    font-size: 16px;
+}
