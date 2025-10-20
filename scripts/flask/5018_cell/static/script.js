@@ -11,8 +11,19 @@ function initializeApp() {
     document.getElementById('columnForm').onsubmit = handleColumnFormSubmit;
     document.getElementById('renameForm').onsubmit = handleRenameFormSubmit;
     
+    // Set up keyboard shortcuts
+    document.addEventListener('keydown', handleKeyboardShortcuts);
+    
     // Load initial data
     loadData();
+}
+
+function handleKeyboardShortcuts(e) {
+    // Ctrl+S or Cmd+S to save
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        saveData();
+    }
 }
 
 async function loadData() {
