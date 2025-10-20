@@ -497,9 +497,16 @@ function renderTable() {
         menu.className = 'column-menu';
         menu.id = `column-menu-${index}`;
         
+        const sortItem = document.createElement('div');
+        sortItem.className = 'column-menu-item has-submenu';
+        sortItem.innerHTML = '<span>⇅</span> Sort <span class="submenu-arrow">›</span>';
+        
+        const sortSubmenu = document.createElement('div');
+        sortSubmenu.className = 'column-submenu';
+        
         const sortAscItem = document.createElement('div');
         sortAscItem.className = 'column-menu-item';
-        sortAscItem.innerHTML = '<span>↑</span> Sort A-Z';
+        sortAscItem.innerHTML = '<span>↑</span> Ascending';
         sortAscItem.onclick = () => {
             sortColumn(index, 'asc');
             closeAllColumnMenus();
@@ -507,11 +514,15 @@ function renderTable() {
         
         const sortDescItem = document.createElement('div');
         sortDescItem.className = 'column-menu-item';
-        sortDescItem.innerHTML = '<span>↓</span> Sort Z-A';
+        sortDescItem.innerHTML = '<span>↓</span> Descending';
         sortDescItem.onclick = () => {
             sortColumn(index, 'desc');
             closeAllColumnMenus();
         };
+        
+        sortSubmenu.appendChild(sortAscItem);
+        sortSubmenu.appendChild(sortDescItem);
+        sortItem.appendChild(sortSubmenu);
         
         const editItem = document.createElement('div');
         editItem.className = 'column-menu-item';
@@ -529,8 +540,7 @@ function renderTable() {
             closeAllColumnMenus();
         };
         
-        menu.appendChild(sortAscItem);
-        menu.appendChild(sortDescItem);
+        menu.appendChild(sortItem);
         menu.appendChild(editItem);
         menu.appendChild(deleteItem);
         menuWrapper.appendChild(menuBtn);

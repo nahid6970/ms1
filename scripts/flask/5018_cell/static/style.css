@@ -582,6 +582,36 @@ td input:focus {
     font-size: 16px;
 }
 
+.column-menu-item.has-submenu {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.submenu-arrow {
+    margin-left: auto;
+    font-size: 18px;
+    color: #999;
+}
+
+.column-submenu {
+    display: none;
+    position: absolute;
+    left: 100%;
+    top: 0;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    min-width: 120px;
+    margin-left: 5px;
+}
+
+.column-menu-item.has-submenu:hover .column-submenu {
+    display: block;
+}
+
 /* Cell Context Menu */
 .context-menu {
     display: none;
