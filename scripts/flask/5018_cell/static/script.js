@@ -579,9 +579,9 @@ function renderTable() {
             closeAllColumnMenus();
         };
         
+        menu.appendChild(editItem);
         menu.appendChild(sortItem);
         menu.appendChild(moveItem);
-        menu.appendChild(editItem);
         menu.appendChild(deleteItem);
         menuWrapper.appendChild(menuBtn);
         menuWrapper.appendChild(menu);
