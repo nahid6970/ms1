@@ -16,8 +16,9 @@
     "ls",
     "cd d:song/wwe",
     "shutdown",
-    "pkill qbit"
+    "pkill qbit",
+    "pkill dnpl"
   ],
-  "last_updated": "2025-10-12T21:53:36.068973",
+  "last_updated": "2025-10-20T15:10:35.688110",
   "current_directory": "C:\\Users\\nahid"
 }
