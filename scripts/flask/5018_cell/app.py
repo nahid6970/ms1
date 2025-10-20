@@ -10,7 +10,12 @@ def load_data():
     if os.path.exists(DATA_FILE):
         with open(DATA_FILE, 'r') as f:
             return json.load(f)
-    return {'columns': [], 'rows': []}
+    return {
+        'sheets': [
+            {'name': 'Sheet1', 'columns': [], 'rows': []}
+        ],
+        'activeSheet': 0
+    }
 
 def save_data(data):
     with open(DATA_FILE, 'w') as f:
@@ -30,37 +35,69 @@ def save_table_data():
     save_data(data)
     return jsonify({'success': True})
 
+@app.route('/api/sheets', methods=['POST'])
+def add_sheet():
+    data = load_data()
+    sheet_name = request.json.get('name', f'Sheet{len(data["sheets"]) + 1}')
+    data['sheets'].append({'name': sheet_name, 'columns': [], 'rows': []})
+    save_data(data)
+    return jsonify({'success': True, 'sheetIndex': len(data['sheets']) - 1})
+
+@app.route('/api/sheets/<int:index>', methods=['DELETE'])
+def delete_sheet(index):
+    data = load_data()
+    if len(data['sheets']) > 1 and 0 <= index < len(data['sheets']):
+        data['sheets'].pop(index)
+        if data['activeSheet'] >= len(data['sheets']):
+            data['activeSheet'] = len(data['sheets']) - 1
+        save_data(data)
+    return jsonify({'success': True})
+
+@app.route('/api/sheets/<int:index>/rename', methods=['POST'])
+def rename_sheet(index):
+    data = load_data()
+    new_name = request.json.get('name')
+    if 0 <= index < len(data['sheets']) and new_name:
+        data['sheets'][index]['name'] = new_name
+        save_data(data)
+    return jsonify({'success': True})
+
 @app.route('/api/columns', methods=['POST'])
 def add_column():
     data = load_data()
-    column = request.json
-    data['columns'].append(column)
+    sheet_index = request.json.get('sheetIndex', data['activeSheet'])
+    column = request.json.get('column')
+    data['sheets'][sheet_index]['columns'].append(column)
     save_data(data)
     return jsonify({'success': True})
 
-@app.route('/api/columns/<int:index>', methods=['DELETE'])
-def delete_column(index):
+@app.route('/api/columns/<int:sheet_index>/<int:col_index>', methods=['DELETE'])
+def delete_column(sheet_index, col_index):
     data = load_data()
-    if 0 <= index < len(data['columns']):
-        data['columns'].pop(index)
-        for row in data['rows']:
-            if len(row) > index:
-                row.pop(index)
+    sheet = data['sheets'][sheet_index]
+    if 0 <= col_index < len(sheet['columns']):
+        sheet['columns'].pop(col_index)
+        for row in sheet['rows']:
+            if len(row) > col_index:
+                row.pop(col_index)
         save_data(data)
     return jsonify({'success': True})
 
 @app.route('/api/rows', methods=['POST'])
 def add_row():
     data = load_data()
-    data['rows'].append(['' for _ in data['columns']])
+    sheet_index = request.json.get('sheetIndex', data['activeSheet'])
+    sheet = data['sheets'][sheet_index]
+    sheet['rows'].append(['' for _ in sheet['columns']])
     save_data(data)
     return jsonify({'success': True})
 
-@app.route('/api/rows/<int:index>', methods=['DELETE'])
-def delete_row(index):
+@app.route('/api/rows/<int:sheet_index>/<int:row_index>', methods=['DELETE'])
+def delete_row(sheet_index, row_index):
     data = load_data()
-    if 0 <= index < len(data['rows']):
-        data['rows'].pop(index)
+    sheet = data['sheets'][sheet_index]
+    if 0 <= row_index < len(sheet['rows']):
+        sheet['rows'].pop(row_index)
         save_data(data)
     return jsonify({'success': True})
 

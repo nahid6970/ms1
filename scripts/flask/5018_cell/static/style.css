@@ -14,21 +14,19 @@ body {
     max-width: 100%;
     margin: 0 auto;
     background: white;
-    padding: 20px;
     border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-}
-
-h1 {
-    color: #333;
-    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 40px);
 }
 
 .toolbar {
-    margin-bottom: 20px;
+    padding: 15px 20px;
     display: flex;
     gap: 10px;
     flex-wrap: wrap;
+    border-bottom: 1px solid #ddd;
 }
 
 .btn {
@@ -79,9 +77,9 @@ h1 {
 }
 
 .table-container {
-    overflow-x: auto;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+    flex: 1;
+    overflow: auto;
+    padding: 0 20px;
 }
 
 table {
@@ -201,4 +199,144 @@ td input:focus {
     font-weight: 600;
     text-align: center;
     min-width: 50px;
+}
+
+/* Sheet Tabs */
+.sheet-tabs {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 20px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #ddd;
+}
+
+.sheet-selector {
+    position: relative;
+    flex: 1;
+}
+
+.sheet-current {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 8px 15px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    min-width: 200px;
+    transition: all 0.2s;
+}
+
+.sheet-current:hover {
+    background: #f8f9fa;
+    border-color: #007bff;
+}
+
+.dropdown-arrow {
+    color: #666;
+    font-size: 12px;
+}
+
+.sheet-list {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 1000;
+    margin-top: 5px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.sheet-list.show {
+    display: block;
+}
+
+.sheet-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 15px;
+    cursor: pointer;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background 0.2s;
+}
+
+.sheet-item:last-child {
+    border-bottom: none;
+}
+
+.sheet-item:hover {
+    background: #f8f9fa;
+}
+
+.sheet-item.active {
+    background: #e7f3ff;
+    color: #007bff;
+    font-weight: 600;
+}
+
+.sheet-item-name {
+    flex: 1;
+    font-size: 14px;
+}
+
+.sheet-item-actions {
+    display: flex;
+    gap: 5px;
+}
+
+.sheet-action-btn {
+    background: none;
+    border: none;
+    padding: 4px 8px;
+    cursor: pointer;
+    font-size: 12px;
+    border-radius: 3px;
+    transition: all 0.2s;
+}
+
+.sheet-action-btn:hover {
+    background: #e0e0e0;
+}
+
+.sheet-action-btn.rename {
+    color: #007bff;
+}
+
+.sheet-action-btn.delete {
+    color: #dc3545;
+}
+
+.sheet-action-btn.delete:hover {
+    background: #ffe0e0;
+}
+
+.btn-add-sheet {
+    background: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    width: 32px;
+    height: 32px;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.btn-add-sheet:hover {
+    background: #218838;
 }

@@ -1,14 +1,26 @@
-let tableData = { columns: [], rows: [] };
+let tableData = { sheets: [], activeSheet: 0 };
+let currentSheet = 0;
 
 // Load data on page load
 window.onload = function() {
-    loadData();
+    initializeApp();
 };
+
+function initializeApp() {
+    // Set up form handlers
+    document.getElementById('columnForm').onsubmit = handleColumnFormSubmit;
+    document.getElementById('renameForm').onsubmit = handleRenameFormSubmit;
+    
+    // Load initial data
+    loadData();
+}
 
 async function loadData() {
     try {
         const response = await fetch('/api/data');
         tableData = await response.json();
+        currentSheet = tableData.activeSheet || 0;
+        renderSheetTabs();
         renderTable();
     } catch (error) {
         console.error('Error loading data:', error);
@@ -17,6 +29,7 @@ async function loadData() {
 
 async function saveData() {
     try {
+        tableData.activeSheet = currentSheet;
         const response = await fetch('/api/data', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -36,12 +49,17 @@ function addColumn() {
     document.getElementById('columnModal').style.display = 'block';
 }
 
-function closeModal() {
+function closeColumnModal() {
     document.getElementById('columnModal').style.display = 'none';
     document.getElementById('columnForm').reset();
 }
 
-document.getElementById('columnForm').onsubmit = async function(e) {
+function closeRenameModal() {
+    document.getElementById('renameModal').style.display = 'none';
+    document.getElementById('renameForm').reset();
+}
+
+async function handleColumnFormSubmit(e) {
     e.preventDefault();
     
     const column = {
@@ -55,28 +73,52 @@ document.getElementById('columnForm').onsubmit = async function(e) {
         const response = await fetch('/api/columns', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(column)
+            body: JSON.stringify({ column, sheetIndex: currentSheet })
         });
         
         if (response.ok) {
-            tableData.columns.push(column);
-            tableData.rows.forEach(row => row.push(''));
+            const sheet = tableData.sheets[currentSheet];
+            sheet.columns.push(column);
+            sheet.rows.forEach(row => row.push(''));
             renderTable();
-            closeModal();
+            closeColumnModal();
         }
     } catch (error) {
         console.error('Error adding column:', error);
     }
-};
+}
+
+async function handleRenameFormSubmit(e) {
+    e.preventDefault();
+    
+    const newName = document.getElementById('sheetName').value;
+    
+    try {
+        const response = await fetch(`/api/sheets/${currentSheet}/rename`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: newName })
+        });
+        
+        if (response.ok) {
+            tableData.sheets[currentSheet].name = newName;
+            renderSheetTabs();
+            closeRenameModal();
+        }
+    } catch (error) {
+        console.error('Error renaming sheet:', error);
+    }
+}
 
 async function deleteColumn(index) {
     if (!confirm('Delete this column?')) return;
     
     try {
-        const response = await fetch(`/api/columns/${index}`, { method: 'DELETE' });
+        const response = await fetch(`/api/columns/${currentSheet}/${index}`, { method: 'DELETE' });
         if (response.ok) {
-            tableData.columns.splice(index, 1);
-            tableData.rows.forEach(row => row.splice(index, 1));
+            const sheet = tableData.sheets[currentSheet];
+            sheet.columns.splice(index, 1);
+            sheet.rows.forEach(row => row.splice(index, 1));
             renderTable();
         }
     } catch (error) {
@@ -86,9 +128,14 @@ async function deleteColumn(index) {
 
 async function addRow() {
     try {
-        const response = await fetch('/api/rows', { method: 'POST' });
+        const response = await fetch('/api/rows', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sheetIndex: currentSheet })
+        });
         if (response.ok) {
-            tableData.rows.push(new Array(tableData.columns.length).fill(''));
+            const sheet = tableData.sheets[currentSheet];
+            sheet.rows.push(new Array(sheet.columns.length).fill(''));
             renderTable();
         }
     } catch (error) {
@@ -100,9 +147,9 @@ async function deleteRow(index) {
     if (!confirm('Delete this row?')) return;
     
     try {
-        const response = await fetch(`/api/rows/${index}`, { method: 'DELETE' });
+        const response = await fetch(`/api/rows/${currentSheet}/${index}`, { method: 'DELETE' });
         if (response.ok) {
-            tableData.rows.splice(index, 1);
+            tableData.sheets[currentSheet].rows.splice(index, 1);
             renderTable();
         }
     } catch (error) {
@@ -111,7 +158,129 @@ async function deleteRow(index) {
 }
 
 function updateCell(rowIndex, colIndex, value) {
-    tableData.rows[rowIndex][colIndex] = value;
+    tableData.sheets[currentSheet].rows[rowIndex][colIndex] = value;
+}
+
+async function addSheet() {
+    const sheetName = prompt('Enter sheet name:', `Sheet${tableData.sheets.length + 1}`);
+    if (!sheetName) return;
+    
+    try {
+        const response = await fetch('/api/sheets', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: sheetName })
+        });
+        
+        if (response.ok) {
+            const result = await response.json();
+            tableData.sheets.push({ name: sheetName, columns: [], rows: [] });
+            currentSheet = result.sheetIndex;
+            renderSheetTabs();
+            renderTable();
+        }
+    } catch (error) {
+        console.error('Error adding sheet:', error);
+    }
+}
+
+async function deleteSheet(index) {
+    if (tableData.sheets.length <= 1) {
+        alert('Cannot delete the last sheet!');
+        return;
+    }
+    
+    if (!confirm(`Delete sheet "${tableData.sheets[index].name}"?`)) return;
+    
+    try {
+        const response = await fetch(`/api/sheets/${index}`, { method: 'DELETE' });
+        if (response.ok) {
+            tableData.sheets.splice(index, 1);
+            if (currentSheet >= tableData.sheets.length) {
+                currentSheet = tableData.sheets.length - 1;
+            }
+            renderSheetTabs();
+            renderTable();
+        }
+    } catch (error) {
+        console.error('Error deleting sheet:', error);
+    }
+}
+
+function switchSheet(index) {
+    currentSheet = index;
+    renderSheetTabs();
+    renderTable();
+}
+
+function showRenameModal(index) {
+    currentSheet = index;
+    document.getElementById('sheetName').value = tableData.sheets[index].name;
+    document.getElementById('renameModal').style.display = 'block';
+}
+
+
+
+function renderSheetTabs() {
+    // Update current sheet name
+    const currentSheetNameEl = document.getElementById('currentSheetName');
+    if (tableData.sheets[currentSheet]) {
+        currentSheetNameEl.textContent = tableData.sheets[currentSheet].name;
+    }
+    
+    // Render sheet list
+    const sheetList = document.getElementById('sheetList');
+    sheetList.innerHTML = '';
+    
+    tableData.sheets.forEach((sheet, index) => {
+        const item = document.createElement('div');
+        item.className = `sheet-item ${index === currentSheet ? 'active' : ''}`;
+        
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'sheet-item-name';
+        nameSpan.textContent = sheet.name;
+        nameSpan.onclick = () => {
+            switchSheet(index);
+            toggleSheetList();
+        };
+        
+        const actions = document.createElement('div');
+        actions.className = 'sheet-item-actions';
+        
+        const renameBtn = document.createElement('button');
+        renameBtn.className = 'sheet-action-btn rename';
+        renameBtn.textContent = '✏️';
+        renameBtn.title = 'Rename';
+        renameBtn.onclick = (e) => {
+            e.stopPropagation();
+            showRenameModal(index);
+            toggleSheetList();
+        };
+        
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'sheet-action-btn delete';
+        deleteBtn.textContent = '🗑️';
+        deleteBtn.title = 'Delete';
+        deleteBtn.onclick = (e) => {
+            e.stopPropagation();
+            deleteSheet(index);
+            toggleSheetList();
+        };
+        
+        actions.appendChild(renameBtn);
+        if (tableData.sheets.length > 1) {
+            actions.appendChild(deleteBtn);
+        }
+        
+        item.appendChild(nameSpan);
+        item.appendChild(actions);
+        sheetList.appendChild(item);
+    });
+}
+
+function toggleSheetList() {
+    const sheetList = document.getElementById('sheetList');
+    sheetList.classList.toggle('show');
 }
 
 function renderTable() {
@@ -120,9 +289,12 @@ function renderTable() {
     
     headerRow.innerHTML = '<th class="row-number">#</th>';
     tableBody.innerHTML = '';
+    
+    const sheet = tableData.sheets[currentSheet];
+    if (!sheet) return;
 
     // Render headers
-    tableData.columns.forEach((col, index) => {
+    sheet.columns.forEach((col, index) => {
         const th = document.createElement('th');
         th.style.width = col.width + 'px';
         th.style.backgroundColor = col.color;
@@ -142,7 +314,7 @@ function renderTable() {
     headerRow.appendChild(actionsHeader);
     
     // Render rows
-    tableData.rows.forEach((row, rowIndex) => {
+    sheet.rows.forEach((row, rowIndex) => {
         const tr = document.createElement('tr');
         
         // Row number
@@ -154,7 +326,7 @@ function renderTable() {
         // Data cells
         row.forEach((cellValue, colIndex) => {
             const td = document.createElement('td');
-            const col = tableData.columns[colIndex];
+            const col = sheet.columns[colIndex];
             td.style.backgroundColor = col.color;
             
             const input = document.createElement('input');
@@ -178,10 +350,21 @@ function renderTable() {
     });
 }
 
-// Close modal when clicking outside
+// Close modal and dropdowns when clicking outside
 window.onclick = function(event) {
-    const modal = document.getElementById('columnModal');
-    if (event.target === modal) {
-        closeModal();
+    const columnModal = document.getElementById('columnModal');
+    const renameModal = document.getElementById('renameModal');
+    const sheetList = document.getElementById('sheetList');
+    
+    if (event.target === columnModal) {
+        closeColumnModal();
+    }
+    if (event.target === renameModal) {
+        closeRenameModal();
+    }
+    
+    // Close sheet list when clicking outside
+    if (!event.target.closest('.sheet-selector')) {
+        sheetList.classList.remove('show');
     }
 };

@@ -8,8 +8,17 @@
 </head>
 <body>
     <div class="container">
-        <h1>Excel-like Data Table</h1>
-        
+        <div class="sheet-tabs">
+            <div class="sheet-selector">
+                <button class="sheet-current" id="currentSheetBtn" onclick="toggleSheetList()">
+                    <span id="currentSheetName">Sheet1</span>
+                    <span class="dropdown-arrow">▼</span>
+                </button>
+                <div class="sheet-list" id="sheetList"></div>
+            </div>
+            <button onclick="addSheet()" class="btn-add-sheet" title="Add Sheet">+</button>
+        </div>
+
         <div class="toolbar">
             <button onclick="addColumn()" class="btn btn-primary">Add Column</button>
             <button onclick="addRow()" class="btn btn-primary">Add Row</button>
@@ -30,7 +39,7 @@
     <!-- Column Settings Modal -->
     <div id="columnModal" class="modal">
         <div class="modal-content">
-            <span class="close" onclick="closeModal()">&times;</span>
+            <span class="close" onclick="closeColumnModal()">&times;</span>
             <h2>Column Settings</h2>
             <form id="columnForm">
                 <label>Column Name:</label>
@@ -51,6 +60,19 @@
                 <input type="color" id="columnColor" value="#ffffff">
                 
                 <button type="submit" class="btn btn-primary">Add Column</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Rename Sheet Modal -->
+    <div id="renameModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeRenameModal()">&times;</span>
+            <h2>Rename Sheet</h2>
+            <form id="renameForm">
+                <label>Sheet Name:</label>
+                <input type="text" id="sheetName" required>
+                <button type="submit" class="btn btn-primary">Rename</button>
             </form>
         </div>
     </div>
