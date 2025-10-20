@@ -14,12 +14,20 @@ function initializeApp() {
     // Set up keyboard shortcuts
     document.addEventListener('keydown', handleKeyboardShortcuts);
     
-    // Set up color picker sync
+    // Set up color picker sync for background color
     const colorInput = document.getElementById('columnColor');
     const colorText = document.getElementById('columnColorText');
     
     colorInput.addEventListener('input', (e) => {
         colorText.value = e.target.value.toUpperCase();
+    });
+    
+    // Set up color picker sync for text color
+    const textColorInput = document.getElementById('columnTextColor');
+    const textColorText = document.getElementById('columnTextColorText');
+    
+    textColorInput.addEventListener('input', (e) => {
+        textColorText.value = e.target.value.toUpperCase();
     });
     
     // Load initial data
@@ -95,6 +103,8 @@ function addColumn() {
     document.getElementById('columnForm').reset();
     document.getElementById('columnColor').value = '#ffffff';
     document.getElementById('columnColorText').value = '#FFFFFF';
+    document.getElementById('columnTextColor').value = '#000000';
+    document.getElementById('columnTextColorText').value = '#000000';
     document.getElementById('columnModal').style.display = 'block';
 }
 
@@ -110,6 +120,8 @@ function editColumn(index) {
     document.getElementById('columnWidth').value = col.width;
     document.getElementById('columnColor').value = col.color;
     document.getElementById('columnColorText').value = col.color.toUpperCase();
+    document.getElementById('columnTextColor').value = col.textColor || '#000000';
+    document.getElementById('columnTextColorText').value = (col.textColor || '#000000').toUpperCase();
     document.getElementById('columnModal').style.display = 'block';
 }
 
@@ -135,7 +147,8 @@ async function handleColumnFormSubmit(e) {
         name: document.getElementById('columnName').value,
         type: document.getElementById('columnType').value,
         width: document.getElementById('columnWidth').value,
-        color: document.getElementById('columnColor').value
+        color: document.getElementById('columnColor').value,
+        textColor: document.getElementById('columnTextColor').value
     };
 
     const sheet = tableData.sheets[currentSheet];
@@ -364,6 +377,7 @@ function renderTable() {
         const columnName = document.createElement('span');
         columnName.className = 'column-name';
         columnName.textContent = col.name;
+        columnName.style.color = col.textColor || '#000000';
         
         const menuWrapper = document.createElement('div');
         menuWrapper.className = 'column-menu-wrapper';
@@ -428,6 +442,7 @@ function renderTable() {
             const input = document.createElement('input');
             input.type = col.type;
             input.value = row[colIndex] || '';
+            input.style.color = col.textColor || '#000000';
             input.onchange = (e) => updateCell(rowIndex, colIndex, e.target.value);
             
             td.appendChild(input);

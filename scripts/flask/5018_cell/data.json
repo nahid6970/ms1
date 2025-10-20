@@ -10,10 +10,11 @@
           "width": "150"
         },
         {
-          "color": "#ffffff",
           "name": "day",
           "type": "text",
-          "width": "150"
+          "width": "150",
+          "color": "#b12f2f",
+          "textColor": "#ffffff"
         }
       ],
       "name": "S1",

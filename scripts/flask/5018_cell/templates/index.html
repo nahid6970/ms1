@@ -78,18 +78,24 @@
                     </select>
                 </div>
                 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="columnWidth">Width (px)</label>
-                        <input type="number" id="columnWidth" class="form-input" value="150" min="50">
+                <div class="form-group">
+                    <label for="columnWidth">Width (px)</label>
+                    <input type="number" id="columnWidth" class="form-input" value="150" min="50">
+                </div>
+                
+                <div class="form-group">
+                    <label for="columnColor">Background Color</label>
+                    <div class="color-picker-wrapper">
+                        <input type="color" id="columnColor" class="color-input" value="#ffffff">
+                        <input type="text" id="columnColorText" class="form-input color-text" value="#FFFFFF" readonly>
                     </div>
-                    
-                    <div class="form-group">
-                        <label for="columnColor">Background Color</label>
-                        <div class="color-picker-wrapper">
-                            <input type="color" id="columnColor" class="color-input" value="#ffffff">
-                            <input type="text" id="columnColorText" class="form-input color-text" value="#ffffff" readonly>
-                        </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="columnTextColor">Text Color</label>
+                    <div class="color-picker-wrapper">
+                        <input type="color" id="columnTextColor" class="color-input" value="#000000">
+                        <input type="text" id="columnTextColorText" class="form-input color-text" value="#000000" readonly>
                     </div>
                 </div>
                 
