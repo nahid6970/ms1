@@ -2,6 +2,13 @@
   "activeSheet": 0,
   "sheets": [
     {
+      "cellStyles": {
+        "0-0": {
+          "bold": true,
+          "center": true,
+          "italic": true
+        }
+      },
       "columns": [
         {
           "color": "#ffffff",
@@ -10,11 +17,11 @@
           "width": "150"
         },
         {
-          "name": "day",
-          "type": "text",
-          "width": "150",
           "color": "#b12f2f",
-          "textColor": "#ffffff"
+          "name": "day",
+          "textColor": "#ffffff",
+          "type": "text",
+          "width": "150"
         }
       ],
       "name": "S1",
@@ -32,7 +39,11 @@
           "\u09eb \u09a1\u09bf\u09b8\u09c7\u09ae\u09cd\u09ac\u09b0"
         ],
         [],
-        []
+        [],
+        [
+          "",
+          ""
+        ]
       ]
     }
   ]

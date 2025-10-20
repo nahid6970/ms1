@@ -1,5 +1,6 @@
 let tableData = { sheets: [], activeSheet: 0 };
 let currentSheet = 0;
+let contextMenuCell = null;
 
 // Load data on page load
 window.onload = function() {
@@ -252,7 +253,101 @@ async function deleteRow(index) {
 }
 
 function updateCell(rowIndex, colIndex, value) {
-    tableData.sheets[currentSheet].rows[rowIndex][colIndex] = value;
+    const sheet = tableData.sheets[currentSheet];
+    if (!sheet.cellStyles) {
+        sheet.cellStyles = {};
+    }
+    
+    // Store value
+    sheet.rows[rowIndex][colIndex] = value;
+}
+
+function getCellKey(rowIndex, colIndex) {
+    return `${rowIndex}-${colIndex}`;
+}
+
+function getCellStyle(rowIndex, colIndex) {
+    const sheet = tableData.sheets[currentSheet];
+    if (!sheet.cellStyles) {
+        sheet.cellStyles = {};
+    }
+    const key = getCellKey(rowIndex, colIndex);
+    return sheet.cellStyles[key] || {};
+}
+
+function setCellStyle(rowIndex, colIndex, styleProperty, value) {
+    const sheet = tableData.sheets[currentSheet];
+    if (!sheet.cellStyles) {
+        sheet.cellStyles = {};
+    }
+    const key = getCellKey(rowIndex, colIndex);
+    if (!sheet.cellStyles[key]) {
+        sheet.cellStyles[key] = {};
+    }
+    sheet.cellStyles[key][styleProperty] = value;
+}
+
+function showCellContextMenu(e, rowIndex, colIndex, inputElement) {
+    e.preventDefault();
+    
+    contextMenuCell = { rowIndex, colIndex, inputElement };
+    
+    const menu = document.getElementById('cellContextMenu');
+    const style = getCellStyle(rowIndex, colIndex);
+    
+    // Update checkmarks
+    document.getElementById('ctxBold').classList.toggle('checked', style.bold === true);
+    document.getElementById('ctxItalic').classList.toggle('checked', style.italic === true);
+    document.getElementById('ctxCenter').classList.toggle('checked', style.center === true);
+    
+    // Position menu
+    menu.style.left = e.pageX + 'px';
+    menu.style.top = e.pageY + 'px';
+    menu.classList.add('show');
+}
+
+function toggleCellBold() {
+    if (!contextMenuCell) return;
+    
+    const { rowIndex, colIndex, inputElement } = contextMenuCell;
+    const style = getCellStyle(rowIndex, colIndex);
+    const newValue = !style.bold;
+    
+    setCellStyle(rowIndex, colIndex, 'bold', newValue);
+    inputElement.style.fontWeight = newValue ? 'bold' : 'normal';
+    
+    document.getElementById('ctxBold').classList.toggle('checked', newValue);
+}
+
+function toggleCellItalic() {
+    if (!contextMenuCell) return;
+    
+    const { rowIndex, colIndex, inputElement } = contextMenuCell;
+    const style = getCellStyle(rowIndex, colIndex);
+    const newValue = !style.italic;
+    
+    setCellStyle(rowIndex, colIndex, 'italic', newValue);
+    inputElement.style.fontStyle = newValue ? 'italic' : 'normal';
+    
+    document.getElementById('ctxItalic').classList.toggle('checked', newValue);
+}
+
+function toggleCellCenter() {
+    if (!contextMenuCell) return;
+    
+    const { rowIndex, colIndex, inputElement } = contextMenuCell;
+    const style = getCellStyle(rowIndex, colIndex);
+    const newValue = !style.center;
+    
+    setCellStyle(rowIndex, colIndex, 'center', newValue);
+    inputElement.style.textAlign = newValue ? 'center' : 'left';
+    
+    document.getElementById('ctxCenter').classList.toggle('checked', newValue);
+}
+
+function closeCellContextMenu() {
+    document.getElementById('cellContextMenu').classList.remove('show');
+    contextMenuCell = null;
 }
 
 async function addSheet() {
@@ -445,6 +540,15 @@ function renderTable() {
             input.style.color = col.textColor || '#000000';
             input.onchange = (e) => updateCell(rowIndex, colIndex, e.target.value);
             
+            // Apply cell-specific styles
+            const cellStyle = getCellStyle(rowIndex, colIndex);
+            if (cellStyle.bold) input.style.fontWeight = 'bold';
+            if (cellStyle.italic) input.style.fontStyle = 'italic';
+            if (cellStyle.center) input.style.textAlign = 'center';
+            
+            // Add context menu
+            input.oncontextmenu = (e) => showCellContextMenu(e, rowIndex, colIndex, input);
+            
             td.appendChild(input);
             tr.appendChild(td);
         });
@@ -507,5 +611,10 @@ window.onclick = function(event) {
     // Close column menus when clicking outside
     if (!event.target.closest('.column-menu-wrapper')) {
         closeAllColumnMenus();
+    }
+    
+    // Close cell context menu when clicking outside
+    if (!event.target.closest('#cellContextMenu')) {
+        closeCellContextMenu();
     }
 };

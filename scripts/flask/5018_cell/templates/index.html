@@ -10,6 +10,22 @@
     <!-- Toast Notification -->
     <div id="toast" class="toast"></div>
 
+    <!-- Cell Context Menu -->
+    <div id="cellContextMenu" class="context-menu">
+        <div class="context-menu-item" id="ctxBold" onclick="toggleCellBold()">
+            <span class="checkmark">✓</span>
+            <span>Bold</span>
+        </div>
+        <div class="context-menu-item" id="ctxItalic" onclick="toggleCellItalic()">
+            <span class="checkmark">✓</span>
+            <span>Italic</span>
+        </div>
+        <div class="context-menu-item" id="ctxCenter" onclick="toggleCellCenter()">
+            <span class="checkmark">✓</span>
+            <span>Center Align</span>
+        </div>
+    </div>
+
     <div class="container">
         <div class="sheet-tabs">
             <button onclick="addSheet()" class="btn-add-sheet" title="Add Sheet">+</button>
