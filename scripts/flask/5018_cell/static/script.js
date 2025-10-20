@@ -45,6 +45,20 @@ async function saveData() {
     }
 }
 
+// Auto-save active sheet when switching
+async function autoSaveActiveSheet() {
+    try {
+        tableData.activeSheet = currentSheet;
+        await fetch('/api/data', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(tableData)
+        });
+    } catch (error) {
+        console.error('Error auto-saving:', error);
+    }
+}
+
 function addColumn() {
     document.getElementById('columnModal').style.display = 'block';
 }
@@ -211,6 +225,7 @@ function switchSheet(index) {
     currentSheet = index;
     renderSheetTabs();
     renderTable();
+    autoSaveActiveSheet();
 }
 
 function showRenameModal(index) {

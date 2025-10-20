@@ -38,41 +38,63 @@
 
     <!-- Column Settings Modal -->
     <div id="columnModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeColumnModal()">&times;</span>
-            <h2>Column Settings</h2>
+        <div class="modal-content column-modal">
+            <div class="modal-header">
+                <h2>Add Column</h2>
+                <span class="close" onclick="closeColumnModal()">&times;</span>
+            </div>
             <form id="columnForm">
-                <label>Column Name:</label>
-                <input type="text" id="columnName" required>
+                <div class="form-group">
+                    <label for="columnName">Column Name</label>
+                    <input type="text" id="columnName" class="form-input" placeholder="Enter column name" required autofocus>
+                </div>
                 
-                <label>Data Type:</label>
-                <select id="columnType">
-                    <option value="text">Text</option>
-                    <option value="number">Number</option>
-                    <option value="date">Date</option>
-                    <option value="email">Email</option>
-                </select>
+                <div class="form-group">
+                    <label for="columnType">Data Type</label>
+                    <select id="columnType" class="form-input">
+                        <option value="text">Text</option>
+                        <option value="number">Number</option>
+                        <option value="date">Date</option>
+                        <option value="email">Email</option>
+                    </select>
+                </div>
                 
-                <label>Width (px):</label>
-                <input type="number" id="columnWidth" value="150" min="50">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="columnWidth">Width (px)</label>
+                        <input type="number" id="columnWidth" class="form-input" value="150" min="50">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="columnColor">Background Color</label>
+                        <input type="color" id="columnColor" class="form-input" value="#ffffff">
+                    </div>
+                </div>
                 
-                <label>Background Color:</label>
-                <input type="color" id="columnColor" value="#ffffff">
-                
-                <button type="submit" class="btn btn-primary">Add Column</button>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeColumnModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Column</button>
+                </div>
             </form>
         </div>
     </div>
 
     <!-- Rename Sheet Modal -->
     <div id="renameModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeRenameModal()">&times;</span>
-            <h2>Rename Sheet</h2>
+        <div class="modal-content rename-modal">
+            <div class="modal-header">
+                <h2>Rename Sheet</h2>
+                <span class="close" onclick="closeRenameModal()">&times;</span>
+            </div>
             <form id="renameForm">
-                <label>Sheet Name:</label>
-                <input type="text" id="sheetName" required>
-                <button type="submit" class="btn btn-primary">Rename</button>
+                <div class="form-group">
+                    <label for="sheetName">Sheet Name</label>
+                    <input type="text" id="sheetName" class="form-input" placeholder="Enter sheet name" required autofocus>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeRenameModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Rename</button>
+                </div>
             </form>
         </div>
     </div>
