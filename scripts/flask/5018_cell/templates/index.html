@@ -7,6 +7,9 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
     <div class="container">
         <div class="sheet-tabs">
             <button onclick="addSheet()" class="btn-add-sheet" title="Add Sheet">+</button>
@@ -81,7 +84,10 @@
                     
                     <div class="form-group">
                         <label for="columnColor">Background Color</label>
-                        <input type="color" id="columnColor" class="form-input" value="#ffffff">
+                        <div class="color-picker-wrapper">
+                            <input type="color" id="columnColor" class="color-input" value="#ffffff">
+                            <input type="text" id="columnColorText" class="form-input color-text" value="#ffffff" readonly>
+                        </div>
                     </div>
                 </div>
                 

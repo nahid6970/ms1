@@ -14,6 +14,14 @@ function initializeApp() {
     // Set up keyboard shortcuts
     document.addEventListener('keydown', handleKeyboardShortcuts);
     
+    // Set up color picker sync
+    const colorInput = document.getElementById('columnColor');
+    const colorText = document.getElementById('columnColorText');
+    
+    colorInput.addEventListener('input', (e) => {
+        colorText.value = e.target.value.toUpperCase();
+    });
+    
     // Load initial data
     loadData();
 }
@@ -48,12 +56,22 @@ async function saveData() {
         });
         const result = await response.json();
         if (result.success) {
-            alert('Data saved successfully!');
+            showToast('Data saved successfully!', 'success');
         }
     } catch (error) {
         console.error('Error saving data:', error);
-        alert('Error saving data!');
+        showToast('Error saving data!', 'error');
     }
+}
+
+function showToast(message, type = 'success') {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.className = `toast ${type} show`;
+    
+    setTimeout(() => {
+        toast.classList.remove('show');
+    }, 3000);
 }
 
 // Auto-save active sheet when switching
