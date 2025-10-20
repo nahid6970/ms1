@@ -39,7 +39,16 @@ function handleKeyboardShortcuts(e) {
     // Ctrl+S or Cmd+S to save
     if ((e.ctrlKey || e.metaKey) && e.key === 's') {
         e.preventDefault();
-        saveData();
+        
+        // Blur the currently focused element to trigger onchange
+        if (document.activeElement && document.activeElement.tagName === 'INPUT') {
+            document.activeElement.blur();
+        }
+        
+        // Small delay to ensure onchange fires before saving
+        setTimeout(() => {
+            saveData();
+        }, 50);
     }
 }
 
