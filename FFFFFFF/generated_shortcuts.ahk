@@ -482,6 +482,15 @@ LAlt & c:: {
     }
 }
 
+;! komorebi stop/start
+^+k:: {
+    komo_start_stop()
+    komo_start_stop() {
+    RunWait "powershell.exe -Command Stop-Process -Name komorebi -ErrorAction SilentlyContinue", , "Hide"
+    Run "komorebic.exe start", , "Hide"
+    }
+}
+
 ;! === TEXT SHORTCUTS ===
 ;! AutoHotkey Version 1
 ;! Inserts AHK v1 header requirement

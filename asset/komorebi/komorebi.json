@@ -238,6 +238,11 @@
             "kind": "Class",
             "id": "VbaWindow",
             "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Class",
+            "id": "wndclass_desked_gsk",
+            "matching_strategy": "Equals"
         }
     ],
     "tray_and_multi_window_applications": [
