@@ -73,6 +73,10 @@ function closeRenameModal() {
     document.getElementById('renameForm').reset();
 }
 
+function closeSettingsModal() {
+    document.getElementById('settingsModal').style.display = 'none';
+}
+
 async function handleColumnFormSubmit(e) {
     e.preventDefault();
     
@@ -271,6 +275,10 @@ function toggleSheetList() {
     sheetList.classList.toggle('show');
 }
 
+function openSettings() {
+    document.getElementById('settingsModal').style.display = 'block';
+}
+
 function renderTable() {
     const headerRow = document.getElementById('headerRow');
     const tableBody = document.getElementById('tableBody');
@@ -342,6 +350,7 @@ function renderTable() {
 window.onclick = function(event) {
     const columnModal = document.getElementById('columnModal');
     const renameModal = document.getElementById('renameModal');
+    const settingsModal = document.getElementById('settingsModal');
     const sheetList = document.getElementById('sheetList');
     
     if (event.target === columnModal) {
@@ -349,6 +358,9 @@ window.onclick = function(event) {
     }
     if (event.target === renameModal) {
         closeRenameModal();
+    }
+    if (event.target === settingsModal) {
+        closeSettingsModal();
     }
     
     // Close sheet list when clicking outside

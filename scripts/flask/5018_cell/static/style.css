@@ -265,9 +265,17 @@ td input:focus {
     border-bottom: 1px solid #ddd;
 }
 
+.sheet-controls {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex: 1;
+}
+
 .sheet-selector {
     position: relative;
     flex: 1;
+    max-width: 300px;
 }
 
 .sheet-current {
@@ -387,4 +395,26 @@ td input:focus {
 .btn-sheet-action.btn-delete:hover {
     background: #fff5f5;
     border-color: #dc3545;
+}
+
+.btn-settings {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+    margin-left: auto;
+}
+
+.btn-settings:hover {
+    background: #f8f9fa;
+    border-color: #6c757d;
+    transform: rotate(45deg) scale(1.05);
 }
