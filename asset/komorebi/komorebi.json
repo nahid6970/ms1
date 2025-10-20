@@ -233,6 +233,11 @@
             "kind": "Title",
             "id": "WHKD Keybinds",
             "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Class",
+            "id": "VbaWindow",
+            "matching_strategy": "Equals"
         }
     ],
     "tray_and_multi_window_applications": [
