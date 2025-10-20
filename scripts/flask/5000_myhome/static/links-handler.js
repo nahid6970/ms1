@@ -1434,6 +1434,15 @@ document.addEventListener('DOMContentLoaded', function () {
       // Apply hover color
       if (linkData.horizontal_hover_color) {
         groupDiv.style.setProperty('--horizontal-hover-color', linkData.horizontal_hover_color);
+        const originalBgColor = linkData.horizontal_bg_color || '';
+
+        groupDiv.addEventListener('mouseenter', () => {
+          groupDiv.style.backgroundColor = linkData.horizontal_hover_color;
+        });
+
+        groupDiv.addEventListener('mouseleave', () => {
+          groupDiv.style.backgroundColor = originalBgColor;
+        });
       }
 
       // Apply size and font styling for horizontal stack
