@@ -497,6 +497,22 @@ function renderTable() {
         menu.className = 'column-menu';
         menu.id = `column-menu-${index}`;
         
+        const sortAscItem = document.createElement('div');
+        sortAscItem.className = 'column-menu-item';
+        sortAscItem.innerHTML = '<span>↑</span> Sort A-Z';
+        sortAscItem.onclick = () => {
+            sortColumn(index, 'asc');
+            closeAllColumnMenus();
+        };
+        
+        const sortDescItem = document.createElement('div');
+        sortDescItem.className = 'column-menu-item';
+        sortDescItem.innerHTML = '<span>↓</span> Sort Z-A';
+        sortDescItem.onclick = () => {
+            sortColumn(index, 'desc');
+            closeAllColumnMenus();
+        };
+        
         const editItem = document.createElement('div');
         editItem.className = 'column-menu-item';
         editItem.innerHTML = '<span>✏️</span> Edit';
@@ -513,6 +529,8 @@ function renderTable() {
             closeAllColumnMenus();
         };
         
+        menu.appendChild(sortAscItem);
+        menu.appendChild(sortDescItem);
         menu.appendChild(editItem);
         menu.appendChild(deleteItem);
         menuWrapper.appendChild(menuBtn);
@@ -604,6 +622,70 @@ function closeAllColumnMenus() {
     document.querySelectorAll('.column-menu').forEach(menu => {
         menu.classList.remove('show');
     });
+}
+
+function sortColumn(colIndex, direction) {
+    const sheet = tableData.sheets[currentSheet];
+    const col = sheet.columns[colIndex];
+    
+    // Create array of row indices with their values
+    const rowsWithIndices = sheet.rows.map((row, index) => ({
+        index: index,
+        value: row[colIndex] || '',
+        row: row,
+        cellStyles: sheet.cellStyles ? Object.keys(sheet.cellStyles)
+            .filter(key => key.startsWith(`${index}-`))
+            .reduce((obj, key) => {
+                obj[key] = sheet.cellStyles[key];
+                return obj;
+            }, {}) : {}
+    }));
+    
+    // Sort based on column type
+    rowsWithIndices.sort((a, b) => {
+        let valA = a.value;
+        let valB = b.value;
+        
+        // Handle different data types
+        if (col.type === 'number') {
+            valA = parseFloat(valA) || 0;
+            valB = parseFloat(valB) || 0;
+        } else if (col.type === 'date') {
+            valA = new Date(valA).getTime() || 0;
+            valB = new Date(valB).getTime() || 0;
+        } else {
+            // Text comparison (case-insensitive)
+            valA = String(valA).toLowerCase();
+            valB = String(valB).toLowerCase();
+        }
+        
+        if (direction === 'asc') {
+            return valA > valB ? 1 : valA < valB ? -1 : 0;
+        } else {
+            return valA < valB ? 1 : valA > valB ? -1 : 0;
+        }
+    });
+    
+    // Rebuild rows and cell styles with new order
+    const newRows = rowsWithIndices.map(item => item.row);
+    const newCellStyles = {};
+    
+    rowsWithIndices.forEach((item, newIndex) => {
+        // Map old cell styles to new row indices
+        Object.keys(item.cellStyles).forEach(oldKey => {
+            const colIdx = oldKey.split('-')[1];
+            const newKey = `${newIndex}-${colIdx}`;
+            newCellStyles[newKey] = item.cellStyles[oldKey];
+        });
+    });
+    
+    sheet.rows = newRows;
+    if (Object.keys(newCellStyles).length > 0) {
+        sheet.cellStyles = newCellStyles;
+    }
+    
+    renderTable();
+    showToast(`Sorted by ${col.name} (${direction === 'asc' ? 'A-Z' : 'Z-A'})`, 'success');
 }
 
 // Close modal and dropdowns when clicking outside
