@@ -123,6 +123,7 @@ function editColumn(index) {
     document.getElementById('columnColorText').value = col.color.toUpperCase();
     document.getElementById('columnTextColor').value = col.textColor || '#000000';
     document.getElementById('columnTextColorText').value = (col.textColor || '#000000').toUpperCase();
+    document.getElementById('columnFont').value = col.font || '';
     document.getElementById('columnModal').style.display = 'block';
 }
 
@@ -149,7 +150,8 @@ async function handleColumnFormSubmit(e) {
         type: document.getElementById('columnType').value,
         width: document.getElementById('columnWidth').value,
         color: document.getElementById('columnColor').value,
-        textColor: document.getElementById('columnTextColor').value
+        textColor: document.getElementById('columnTextColor').value,
+        font: document.getElementById('columnFont').value
     };
 
     const sheet = tableData.sheets[currentSheet];
@@ -538,6 +540,12 @@ function renderTable() {
             input.type = col.type;
             input.value = row[colIndex] || '';
             input.style.color = col.textColor || '#000000';
+            
+            // Apply column font
+            if (col.font && col.font !== '') {
+                input.style.fontFamily = `'${col.font}', monospace`;
+            }
+            
             input.onchange = (e) => updateCell(rowIndex, colIndex, e.target.value);
             
             // Apply cell-specific styles
@@ -545,9 +553,12 @@ function renderTable() {
             if (cellStyle.bold) input.style.fontWeight = 'bold';
             if (cellStyle.italic) input.style.fontStyle = 'italic';
             if (cellStyle.center) input.style.textAlign = 'center';
+            if (cellStyle.border) {
+                td.style.border = '2px solid #007bff';
+            }
             
             // Add context menu
-            input.oncontextmenu = (e) => showCellContextMenu(e, rowIndex, colIndex, input);
+            input.oncontextmenu = (e) => showCellContextMenu(e, rowIndex, colIndex, input, td);
             
             td.appendChild(input);
             tr.appendChild(td);
