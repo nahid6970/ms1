@@ -9,6 +9,8 @@
 <body>
     <div class="container">
         <div class="sheet-tabs">
+            <button onclick="addSheet()" class="btn-add-sheet" title="Add Sheet">+</button>
+            
             <div class="sheet-selector">
                 <button class="sheet-current" id="currentSheetBtn" onclick="toggleSheetList()">
                     <span id="currentSheetName">Sheet1</span>
@@ -16,7 +18,13 @@
                 </button>
                 <div class="sheet-list" id="sheetList"></div>
             </div>
-            <button onclick="addSheet()" class="btn-add-sheet" title="Add Sheet">+</button>
+            
+            <button onclick="showRenameModal(currentSheet)" class="btn-sheet-action" title="Rename Sheet">
+                <span>✏️</span>
+            </button>
+            <button onclick="deleteSheet(currentSheet)" class="btn-sheet-action btn-delete" title="Delete Sheet">
+                <span>🗑️</span>
+            </button>
         </div>
 
         <div class="toolbar">

@@ -204,7 +204,8 @@ async function deleteSheet(index) {
         return;
     }
     
-    if (!confirm(`Delete sheet "${tableData.sheets[index].name}"?`)) return;
+    const sheetName = tableData.sheets[index].name;
+    if (!confirm(`Delete sheet "${sheetName}"?`)) return;
     
     try {
         const response = await fetch(`/api/sheets/${index}`, { method: 'DELETE' });
@@ -215,6 +216,7 @@ async function deleteSheet(index) {
             }
             renderSheetTabs();
             renderTable();
+            autoSaveActiveSheet();
         }
     } catch (error) {
         console.error('Error deleting sheet:', error);
@@ -243,7 +245,7 @@ function renderSheetTabs() {
         currentSheetNameEl.textContent = tableData.sheets[currentSheet].name;
     }
     
-    // Render sheet list
+    // Render sheet list (simplified - just for switching)
     const sheetList = document.getElementById('sheetList');
     sheetList.innerHTML = '';
     
@@ -259,36 +261,7 @@ function renderSheetTabs() {
             toggleSheetList();
         };
         
-        const actions = document.createElement('div');
-        actions.className = 'sheet-item-actions';
-        
-        const renameBtn = document.createElement('button');
-        renameBtn.className = 'sheet-action-btn rename';
-        renameBtn.textContent = '✏️';
-        renameBtn.title = 'Rename';
-        renameBtn.onclick = (e) => {
-            e.stopPropagation();
-            showRenameModal(index);
-            toggleSheetList();
-        };
-        
-        const deleteBtn = document.createElement('button');
-        deleteBtn.className = 'sheet-action-btn delete';
-        deleteBtn.textContent = '🗑️';
-        deleteBtn.title = 'Delete';
-        deleteBtn.onclick = (e) => {
-            e.stopPropagation();
-            deleteSheet(index);
-            toggleSheetList();
-        };
-        
-        actions.appendChild(renameBtn);
-        if (tableData.sheets.length > 1) {
-            actions.appendChild(deleteBtn);
-        }
-        
         item.appendChild(nameSpan);
-        item.appendChild(actions);
         sheetList.appendChild(item);
     });
 }

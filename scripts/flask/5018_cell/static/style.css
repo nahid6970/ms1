@@ -316,10 +316,7 @@ td input:focus {
 }
 
 .sheet-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 15px;
+    padding: 12px 15px;
     cursor: pointer;
     border-bottom: 1px solid #f0f0f0;
     transition: background 0.2s;
@@ -340,39 +337,9 @@ td input:focus {
 }
 
 .sheet-item-name {
-    flex: 1;
     font-size: 14px;
-}
-
-.sheet-item-actions {
-    display: flex;
-    gap: 5px;
-}
-
-.sheet-action-btn {
-    background: none;
-    border: none;
-    padding: 4px 8px;
-    cursor: pointer;
-    font-size: 12px;
-    border-radius: 3px;
-    transition: all 0.2s;
-}
-
-.sheet-action-btn:hover {
-    background: #e0e0e0;
-}
-
-.sheet-action-btn.rename {
-    color: #007bff;
-}
-
-.sheet-action-btn.delete {
-    color: #dc3545;
-}
-
-.sheet-action-btn.delete:hover {
-    background: #ffe0e0;
+    display: block;
+    width: 100%;
 }
 
 .btn-add-sheet {
@@ -380,8 +347,8 @@ td input:focus {
     color: white;
     border: none;
     border-radius: 4px;
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
     font-size: 20px;
     cursor: pointer;
     display: flex;
@@ -393,4 +360,31 @@ td input:focus {
 
 .btn-add-sheet:hover {
     background: #218838;
+    transform: scale(1.05);
+}
+
+.btn-sheet-action {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.btn-sheet-action:hover {
+    background: #f8f9fa;
+    border-color: #007bff;
+    transform: scale(1.05);
+}
+
+.btn-sheet-action.btn-delete:hover {
+    background: #fff5f5;
+    border-color: #dc3545;
 }
