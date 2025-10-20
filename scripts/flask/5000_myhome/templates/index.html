@@ -216,8 +216,16 @@
         </div>
         <form id="edit-group-form" style="display: flex; flex-direction: column; gap: 10px; width: 400px;">
           <input type="hidden" id="edit-group-original-name">
-          <label for="edit-group-name">Group Name:</label>
-          <input type="text" id="edit-group-name" placeholder="Enter group name (leave empty for 'Ungrouped')" required>
+          <div style="display: flex; gap: 10px;">
+            <div style="flex: 1;">
+              <label for="edit-group-name">Group Name:</label>
+              <input type="text" id="edit-group-name" placeholder="Enter group name (leave empty for 'Ungrouped')" required style="width: 100%;">
+            </div>
+            <div style="flex: 1;">
+              <label for="edit-group-top-name">Display Name (optional):</label>
+              <input type="text" id="edit-group-top-name" placeholder="Custom name for display" style="width: 100%;">
+            </div>
+          </div>
           <div style="display: flex; gap: 20px; align-items: center; margin: 10px 0;">
             <label style="font-weight: 500;">Display Style:</label>
             <label style="display: flex; align-items: center; gap: 5px;">
@@ -250,10 +258,6 @@
           <div id="collapsible-rename-section" style="display: none;">
             <h4 style="color: white; margin: 15px 0 10px 0; border-bottom: 1px solid #555; padding-bottom: 5px;">Top
               Group Display Settings</h4>
-
-            <label for="edit-group-top-name">Display Name (optional):</label>
-            <input type="text" id="edit-group-top-name"
-              placeholder="Custom name for top display (leave empty to use group name)">
 
             <h4 style="color: white; margin: 15px 0 10px 0; border-bottom: 1px solid #555; padding-bottom: 5px;">Top
               Group Color Settings</h4>
