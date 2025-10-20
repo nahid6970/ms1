@@ -294,12 +294,22 @@ function renderTable() {
         const th = document.createElement('th');
         th.style.width = col.width + 'px';
         th.style.backgroundColor = col.color;
-        th.innerHTML = `
-            <div class="header-cell">
-                <span class="column-name">${col.name}</span>
-                <button class="btn btn-danger" onclick="deleteColumn(${index})">×</button>
-            </div>
-        `;
+        
+        const headerCell = document.createElement('div');
+        headerCell.className = 'header-cell';
+        
+        const columnName = document.createElement('span');
+        columnName.className = 'column-name';
+        columnName.textContent = col.name;
+        
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'btn btn-danger';
+        deleteBtn.textContent = '×';
+        deleteBtn.onclick = () => deleteColumn(index);
+        
+        headerCell.appendChild(columnName);
+        headerCell.appendChild(deleteBtn);
+        th.appendChild(headerCell);
         headerRow.appendChild(th);
     });
     
@@ -319,15 +329,14 @@ function renderTable() {
         rowNumCell.textContent = rowIndex + 1;
         tr.appendChild(rowNumCell);
         
-        // Data cells
-        row.forEach((cellValue, colIndex) => {
+        // Data cells - only render cells for existing columns
+        sheet.columns.forEach((col, colIndex) => {
             const td = document.createElement('td');
-            const col = sheet.columns[colIndex];
             td.style.backgroundColor = col.color;
             
             const input = document.createElement('input');
             input.type = col.type;
-            input.value = cellValue;
+            input.value = row[colIndex] || '';
             input.onchange = (e) => updateCell(rowIndex, colIndex, e.target.value);
             
             td.appendChild(input);
@@ -337,9 +346,13 @@ function renderTable() {
         // Actions cell
         const actionsCell = document.createElement('td');
         actionsCell.className = 'row-actions';
-        actionsCell.innerHTML = `
-            <button class="btn btn-danger" onclick="deleteRow(${rowIndex})">Delete</button>
-        `;
+        
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'btn btn-danger';
+        deleteBtn.textContent = 'Delete';
+        deleteBtn.onclick = () => deleteRow(rowIndex);
+        
+        actionsCell.appendChild(deleteBtn);
         tr.appendChild(actionsCell);
         
         tableBody.appendChild(tr);
