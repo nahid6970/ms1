@@ -1,0 +1,11 @@
+{
+  "columns": [
+    {
+      "name": "Geng",
+      "type": "text",
+      "width": "150",
+      "color": "#ffffff"
+    }
+  ],
+  "rows": []
+}
