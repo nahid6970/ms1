@@ -526,6 +526,43 @@ function renderTable() {
         sortSubmenu.appendChild(sortDescItem);
         sortItem.appendChild(sortSubmenu);
         
+        const moveItem = document.createElement('div');
+        moveItem.className = 'column-menu-item has-submenu';
+        moveItem.innerHTML = '<span>↔</span> Move <span class="submenu-arrow">›</span>';
+        
+        const moveSubmenu = document.createElement('div');
+        moveSubmenu.className = 'column-submenu';
+        
+        const moveLeftItem = document.createElement('div');
+        moveLeftItem.className = 'column-menu-item';
+        moveLeftItem.innerHTML = '<span>←</span> Left';
+        if (index === 0) {
+            moveLeftItem.classList.add('disabled');
+        } else {
+            moveLeftItem.onclick = (e) => {
+                e.stopPropagation();
+                moveColumn(index, 'left');
+                closeAllColumnMenus();
+            };
+        }
+        
+        const moveRightItem = document.createElement('div');
+        moveRightItem.className = 'column-menu-item';
+        moveRightItem.innerHTML = '<span>→</span> Right';
+        if (index === sheet.columns.length - 1) {
+            moveRightItem.classList.add('disabled');
+        } else {
+            moveRightItem.onclick = (e) => {
+                e.stopPropagation();
+                moveColumn(index, 'right');
+                closeAllColumnMenus();
+            };
+        }
+        
+        moveSubmenu.appendChild(moveLeftItem);
+        moveSubmenu.appendChild(moveRightItem);
+        moveItem.appendChild(moveSubmenu);
+        
         const editItem = document.createElement('div');
         editItem.className = 'column-menu-item';
         editItem.innerHTML = '<span>✏️</span> Edit';
@@ -543,6 +580,7 @@ function renderTable() {
         };
         
         menu.appendChild(sortItem);
+        menu.appendChild(moveItem);
         menu.appendChild(editItem);
         menu.appendChild(deleteItem);
         menuWrapper.appendChild(menuBtn);
@@ -698,6 +736,45 @@ function sortColumn(colIndex, direction) {
     
     renderTable();
     showToast(`Sorted by ${col.name} (${direction === 'asc' ? 'A-Z' : 'Z-A'})`, 'success');
+}
+
+function moveColumn(colIndex, direction) {
+    const sheet = tableData.sheets[currentSheet];
+    const newIndex = direction === 'left' ? colIndex - 1 : colIndex + 1;
+    
+    // Check bounds
+    if (newIndex < 0 || newIndex >= sheet.columns.length) {
+        return;
+    }
+    
+    // Swap columns
+    [sheet.columns[colIndex], sheet.columns[newIndex]] = [sheet.columns[newIndex], sheet.columns[colIndex]];
+    
+    // Swap column data in all rows
+    sheet.rows.forEach(row => {
+        [row[colIndex], row[newIndex]] = [row[newIndex], row[colIndex]];
+    });
+    
+    // Swap cell styles
+    if (sheet.cellStyles) {
+        const newCellStyles = {};
+        Object.keys(sheet.cellStyles).forEach(key => {
+            const [rowIdx, colIdx] = key.split('-').map(Number);
+            let newColIdx = colIdx;
+            
+            if (colIdx === colIndex) {
+                newColIdx = newIndex;
+            } else if (colIdx === newIndex) {
+                newColIdx = colIndex;
+            }
+            
+            newCellStyles[`${rowIdx}-${newColIdx}`] = sheet.cellStyles[key];
+        });
+        sheet.cellStyles = newCellStyles;
+    }
+    
+    renderTable();
+    showToast(`Column moved ${direction}`, 'success');
 }
 
 // Close modal and dropdowns when clicking outside

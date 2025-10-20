@@ -612,6 +612,12 @@ td input:focus {
     display: block;
 }
 
+.column-menu-item.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
 /* Cell Context Menu */
 .context-menu {
     display: none;
