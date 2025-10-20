@@ -506,16 +506,18 @@ function renderTable() {
         
         const sortAscItem = document.createElement('div');
         sortAscItem.className = 'column-menu-item';
-        sortAscItem.innerHTML = '<span>↑</span> Ascending';
-        sortAscItem.onclick = () => {
+        sortAscItem.innerHTML = '<span>↑</span> A-Z';
+        sortAscItem.onclick = (e) => {
+            e.stopPropagation();
             sortColumn(index, 'asc');
             closeAllColumnMenus();
         };
         
         const sortDescItem = document.createElement('div');
         sortDescItem.className = 'column-menu-item';
-        sortDescItem.innerHTML = '<span>↓</span> Descending';
-        sortDescItem.onclick = () => {
+        sortDescItem.innerHTML = '<span>↓</span> Z-A';
+        sortDescItem.onclick = (e) => {
+            e.stopPropagation();
             sortColumn(index, 'desc');
             closeAllColumnMenus();
         };
