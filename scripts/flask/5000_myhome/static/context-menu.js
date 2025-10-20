@@ -30,15 +30,58 @@ function createContextMenu(items) {
 
 function showContextMenu(event, items) {
     event.preventDefault();
+    event.stopPropagation();
     hideContextMenu(); // Hide any existing context menu
 
     const contextMenu = createContextMenu(items);
-    contextMenu.style.top = `${event.clientY}px`;
-    contextMenu.style.left = `${event.clientX}px`;
-
+    
+    // Add to DOM invisibly to measure dimensions
+    contextMenu.style.visibility = 'hidden';
+    contextMenu.style.position = 'fixed';
     document.body.appendChild(contextMenu);
 
-    document.addEventListener('click', hideContextMenu);
+    // Get menu dimensions
+    const menuRect = contextMenu.getBoundingClientRect();
+    const menuWidth = menuRect.width;
+    const menuHeight = menuRect.height;
+    
+    // Get viewport dimensions
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    
+    // Calculate initial position
+    let left = event.clientX;
+    let top = event.clientY;
+    
+    // Adjust if menu would go off right edge
+    if (left + menuWidth > viewportWidth - 5) {
+        left = Math.max(5, event.clientX - menuWidth);
+    }
+    
+    // Adjust if menu would go off bottom edge
+    if (top + menuHeight > viewportHeight - 5) {
+        top = Math.max(5, event.clientY - menuHeight);
+    }
+    
+    // Ensure menu doesn't go off left edge
+    if (left < 5) {
+        left = 5;
+    }
+    
+    // Ensure menu doesn't go off top edge
+    if (top < 5) {
+        top = 5;
+    }
+    
+    // Apply final position and make visible
+    contextMenu.style.top = `${top}px`;
+    contextMenu.style.left = `${left}px`;
+    contextMenu.style.visibility = 'visible';
+
+    // Delay adding click listener to prevent immediate closing
+    setTimeout(() => {
+        document.addEventListener('click', hideContextMenu);
+    }, 10);
 }
 
 function hideContextMenu() {
