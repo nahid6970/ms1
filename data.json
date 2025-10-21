@@ -7,16 +7,20 @@
           "bold": true,
           "center": true,
           "italic": false
+        },
+        "0-0": {
+          "bgColor": "#154789",
+          "textColor": "#fff"
         }
       },
       "columns": [
         {
-          "name": "Word",
-          "type": "text",
-          "width": "150",
           "color": "#ffffff",
+          "font": "JetBrains Mono",
+          "name": "Word",
           "textColor": "#000000",
-          "font": "JetBrains Mono"
+          "type": "text",
+          "width": "150"
         },
         {
           "color": "#9effa0",

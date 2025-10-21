@@ -506,6 +506,40 @@ function unmergeCell() {
     showToast('Cell unmerged', 'success');
 }
 
+function setCellBgColor() {
+    if (!contextMenuCell) return;
+    
+    const {rowIndex, colIndex, tdElement} = contextMenuCell;
+    const currentColor = tdElement.style.backgroundColor || '#ffffff';
+    
+    const color = prompt('Enter background color (hex code):', currentColor);
+    if (color) {
+        const cellStyle = getCellStyle(rowIndex, colIndex);
+        cellStyle.bgColor = color;
+        setCellStyle(rowIndex, colIndex, 'bgColor', color);
+        tdElement.style.backgroundColor = color;
+        closeCellContextMenu();
+        showToast('Background color updated', 'success');
+    }
+}
+
+function setCellTextColor() {
+    if (!contextMenuCell) return;
+    
+    const {rowIndex, colIndex, inputElement} = contextMenuCell;
+    const currentColor = inputElement.style.color || '#000000';
+    
+    const color = prompt('Enter text color (hex code):', currentColor);
+    if (color) {
+        const cellStyle = getCellStyle(rowIndex, colIndex);
+        cellStyle.textColor = color;
+        setCellStyle(rowIndex, colIndex, 'textColor', color);
+        inputElement.style.color = color;
+        closeCellContextMenu();
+        showToast('Text color updated', 'success');
+    }
+}
+
 async function addSheet() {
     const sheetName = prompt('Enter sheet name:', `Sheet${tableData.sheets.length + 1}`);
     if (!sheetName) return;
@@ -796,6 +830,12 @@ function renderTable() {
             if (cellStyle.border) {
                 td.style.border = '2px solid #007bff';
             }
+            if (cellStyle.bgColor) {
+                td.style.backgroundColor = cellStyle.bgColor;
+            }
+            if (cellStyle.textColor) {
+                input.style.color = cellStyle.textColor;
+            }
             
             // Add context menu
             input.oncontextmenu = (e) => showCellContextMenu(e, rowIndex, colIndex, input, td);
@@ -853,6 +893,12 @@ function renderTable() {
                     if (cellStyle.bold) textarea.style.fontWeight = 'bold';
                     if (cellStyle.italic) textarea.style.fontStyle = 'italic';
                     if (cellStyle.center) textarea.style.textAlign = 'center';
+                    if (cellStyle.bgColor) {
+                        td.style.backgroundColor = cellStyle.bgColor;
+                    }
+                    if (cellStyle.textColor) {
+                        textarea.style.color = cellStyle.textColor;
+                    }
                     
                     textarea.oncontextmenu = (e) => showCellContextMenu(e, rowIndex, colIndex, textarea, td);
                     
