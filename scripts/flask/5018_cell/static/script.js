@@ -388,8 +388,17 @@ function showCellContextMenu(e, rowIndex, colIndex, inputElement, tdElement) {
     
     // Show/hide merge options
     const isMerged = mergeInfo && (mergeInfo.colspan || mergeInfo.rowspan || mergeInfo.hidden);
-    document.getElementById('ctxMerge').style.display = selectedCells.length >= 2 ? 'flex' : 'none';
-    document.getElementById('ctxUnmerge').style.display = isMerged ? 'flex' : 'none';
+    const showMerge = selectedCells.length >= 2;
+    const showUnmerge = isMerged;
+    
+    document.getElementById('ctxMerge').style.display = showMerge ? 'flex' : 'none';
+    document.getElementById('ctxUnmerge').style.display = showUnmerge ? 'flex' : 'none';
+    
+    // Hide the separator before merge options if both are hidden
+    const mergeSeparators = document.querySelectorAll('.context-menu-separator');
+    if (mergeSeparators.length >= 2) {
+        mergeSeparators[1].style.display = (showMerge || showUnmerge) ? 'block' : 'none';
+    }
     
     // Position menu
     menu.style.left = e.pageX + 'px';

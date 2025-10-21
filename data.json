@@ -3,14 +3,14 @@
   "sheets": [
     {
       "cellStyles": {
+        "0-0": {
+          "bgColor": "#154789",
+          "textColor": "#fff"
+        },
         "1-0": {
           "bold": true,
           "center": true,
           "italic": false
-        },
-        "0-0": {
-          "bgColor": "#154789",
-          "textColor": "#fff"
         }
       },
       "columns": [
