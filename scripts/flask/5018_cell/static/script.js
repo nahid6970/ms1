@@ -1017,23 +1017,16 @@ function renderTable() {
     sheet.rows.forEach((row, rowIndex) => {
         const tr = document.createElement('tr');
 
-        // Row number with delete dot
+        // Row number with delete X and number together
         const rowNumCell = document.createElement('td');
         rowNumCell.className = 'row-number';
         
-        const rowNumSpan = document.createElement('span');
-        rowNumSpan.textContent = rowIndex + 1;
-        rowNumSpan.style.float = 'left';
+        const contentSpan = document.createElement('span');
+        contentSpan.innerHTML = '<span class="delete-x" style="display: inline-block; width: 12px; height: 12px; line-height: 12px; text-align: center;">×</span> ' + (rowIndex + 1);
+        contentSpan.style.cursor = 'pointer';
+        contentSpan.onclick = () => deleteRow(rowIndex);
         
-        const deleteDot = document.createElement('span');
-        deleteDot.className = 'delete-dot';
-        deleteDot.title = 'Delete row';
-        deleteDot.onclick = () => deleteRow(rowIndex);
-        deleteDot.style.float = 'right';
-        deleteDot.style.marginTop = '4px';
-        
-        rowNumCell.appendChild(rowNumSpan);
-        rowNumCell.appendChild(deleteDot);
+        rowNumCell.appendChild(contentSpan);
         tr.appendChild(rowNumCell);
 
         // Data cells - only render cells for existing columns

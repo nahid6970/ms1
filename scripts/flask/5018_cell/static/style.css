@@ -139,19 +139,17 @@ td input::-moz-selection {
     color: inherit;
 }
 
-:root {
-    --rownum-width: 50px;
-}
-
 .row-number {
     background: #f8f9fa;
     font-weight: 600;
-    text-align: center;
+    text-align: left;
     white-space: nowrap;
-    width: var(--rownum-width);
-    min-width: var(--rownum-width);
-    max-width: var(--rownum-width);
-    padding: 0 8px;
+    width: 20px;
+    min-width: 20px;
+    max-width: 20px;
+    padding: 0 2px;
+    font-family: monospace;
+    font-size: 12px;
 }
 
 /* Modal Styles */
@@ -269,20 +267,21 @@ td input::-moz-selection {
     background: #5a6268;
 }
 
-.delete-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
+.delete-x {
     background-color: #dc3545;
+    color: white;
+    font-size: 10px;
+    font-weight: bold;
+    font-family: Arial, sans-serif;
     cursor: pointer;
-    opacity: 0.7;
+    opacity: 0.8;
     transition: opacity 0.2s;
-    flex-shrink: 0;
+    border-radius: 2px;
+    vertical-align: middle;
 }
 
-.delete-dot:hover {
+.delete-x:hover {
     opacity: 1;
-    transform: scale(1.2);
 }
 
 /* Sheet Tabs */
