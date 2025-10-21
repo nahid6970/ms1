@@ -517,74 +517,123 @@ function unmergeCell() {
 
 function setCellBgColor() {
     if (!contextMenuCell) return;
-
-    const { rowIndex, colIndex, tdElement } = contextMenuCell;
-    const currentStyle = getCellStyle(rowIndex, colIndex);
-    const currentColor = currentStyle.bgColor || tdElement.style.backgroundColor || '#ffffff';
-
-    // Create color picker input
-    const colorInput = document.createElement('input');
-    colorInput.type = 'color';
-    colorInput.value = rgbToHex(currentColor);
-    colorInput.style.position = 'absolute';
-    colorInput.style.opacity = '0';
-    colorInput.style.pointerEvents = 'none';
-    document.body.appendChild(colorInput);
-
-    colorInput.onchange = (e) => {
-        const color = e.target.value;
-        setCellStyle(rowIndex, colIndex, 'bgColor', color);
-        tdElement.style.backgroundColor = color;
-        showToast('Background color updated', 'success');
-        document.body.removeChild(colorInput);
-    };
-
-    colorInput.onblur = () => {
-        setTimeout(() => {
-            if (document.body.contains(colorInput)) {
-                document.body.removeChild(colorInput);
-            }
-        }, 100);
-    };
-
-    colorInput.click();
+    showColorPicker('background');
     closeCellContextMenu();
 }
 
 function setCellTextColor() {
     if (!contextMenuCell) return;
+    showColorPicker('text');
+    closeCellContextMenu();
+}
 
-    const { rowIndex, colIndex, inputElement } = contextMenuCell;
+function showColorPicker(type) {
+    const { rowIndex, colIndex, tdElement, inputElement } = contextMenuCell;
+
+    // Create modal overlay
+    const overlay = document.createElement('div');
+    overlay.className = 'color-picker-overlay';
+
+    // Create color picker popup
+    const popup = document.createElement('div');
+    popup.className = 'color-picker-popup';
+
+    const title = document.createElement('h3');
+    title.textContent = type === 'background' ? 'Choose Background Color' : 'Choose Text Color';
+    popup.appendChild(title);
+
+    // Preset colors
+    const presetColors = [
+        '#FFFFFF', '#F8F9FA', '#E9ECEF', '#DEE2E6', '#CED4DA', '#ADB5BD', '#6C757D', '#495057', '#343A40', '#212529',
+        '#FFE5E5', '#FFB3B3', '#FF8080', '#FF4D4D', '#FF1A1A', '#E60000', '#B30000', '#800000', '#4D0000', '#1A0000',
+        '#FFF4E5', '#FFE0B3', '#FFCC80', '#FFB84D', '#FFA31A', '#E68A00', '#B36B00', '#804D00', '#4D2E00', '#1A0F00',
+        '#FFFBE5', '#FFF7B3', '#FFF380', '#FFEF4D', '#FFEB1A', '#E6D400', '#B3A500', '#807600', '#4D4700', '#1A1800',
+        '#F0FFE5', '#D9FFB3', '#C2FF80', '#ABFF4D', '#94FF1A', '#7AE600', '#5FB300', '#448000', '#294D00', '#0F1A00',
+        '#E5FFF4', '#B3FFE0', '#80FFCC', '#4DFFB8', '#1AFFA3', '#00E68A', '#00B36B', '#00804D', '#004D2E', '#001A0F',
+        '#E5F9FF', '#B3EFFF', '#80E5FF', '#4DDBFF', '#1AD1FF', '#00BCE6', '#0093B3', '#006A80', '#00404D', '#00171A',
+        '#E5F0FF', '#B3D9FF', '#80C2FF', '#4DABFF', '#1A94FF', '#007AE6', '#005FB3', '#004480', '#00294D', '#000F1A',
+        '#F0E5FF', '#D9B3FF', '#C280FF', '#AB4DFF', '#941AFF', '#7A00E6', '#5F00B3', '#440080', '#29004D', '#0F001A',
+        '#FFE5F9', '#FFB3EF', '#FF80E5', '#FF4DDB', '#FF1AD1', '#E600BC', '#B30093', '#80006A', '#4D0040', '#1A0017'
+    ];
+
+    const colorsGrid = document.createElement('div');
+    colorsGrid.className = 'color-picker-grid';
+
+    presetColors.forEach(color => {
+        const colorSwatch = document.createElement('div');
+        colorSwatch.className = 'color-swatch';
+        colorSwatch.style.backgroundColor = color;
+        colorSwatch.title = color;
+        colorSwatch.onclick = () => {
+            applyColor(type, color, rowIndex, colIndex, tdElement, inputElement);
+            document.body.removeChild(overlay);
+        };
+        colorsGrid.appendChild(colorSwatch);
+    });
+
+    popup.appendChild(colorsGrid);
+
+    // Custom color section
+    const customSection = document.createElement('div');
+    customSection.className = 'color-picker-custom';
+
+    const customLabel = document.createElement('span');
+    customLabel.textContent = 'Custom Color:';
+
+    const customInput = document.createElement('input');
+    customInput.type = 'color';
+    customInput.className = 'custom-color-input';
     const currentStyle = getCellStyle(rowIndex, colIndex);
-    const currentColor = currentStyle.textColor || inputElement.style.color || '#000000';
+    if (type === 'background') {
+        customInput.value = rgbToHex(currentStyle.bgColor || tdElement.style.backgroundColor || '#ffffff');
+    } else {
+        customInput.value = rgbToHex(currentStyle.textColor || inputElement.style.color || '#000000');
+    }
 
-    // Create color picker input
-    const colorInput = document.createElement('input');
-    colorInput.type = 'color';
-    colorInput.value = rgbToHex(currentColor);
-    colorInput.style.position = 'absolute';
-    colorInput.style.opacity = '0';
-    colorInput.style.pointerEvents = 'none';
-    document.body.appendChild(colorInput);
+    customInput.onchange = (e) => {
+        applyColor(type, e.target.value, rowIndex, colIndex, tdElement, inputElement);
+        document.body.removeChild(overlay);
+    };
 
-    colorInput.onchange = (e) => {
-        const color = e.target.value;
+    const customBtn = document.createElement('button');
+    customBtn.className = 'btn btn-primary';
+    customBtn.textContent = 'Pick Custom';
+    customBtn.onclick = () => customInput.click();
+
+    customSection.appendChild(customLabel);
+    customSection.appendChild(customBtn);
+    customSection.appendChild(customInput);
+
+    popup.appendChild(customSection);
+
+    // Close button
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'color-picker-close';
+    closeBtn.textContent = '×';
+    closeBtn.onclick = () => document.body.removeChild(overlay);
+
+    popup.appendChild(closeBtn);
+    overlay.appendChild(popup);
+    document.body.appendChild(overlay);
+
+    // Close on overlay click
+    overlay.onclick = (e) => {
+        if (e.target === overlay) {
+            document.body.removeChild(overlay);
+        }
+    };
+}
+
+function applyColor(type, color, rowIndex, colIndex, tdElement, inputElement) {
+    if (type === 'background') {
+        setCellStyle(rowIndex, colIndex, 'bgColor', color);
+        tdElement.style.backgroundColor = color;
+        showToast('Background color updated', 'success');
+    } else {
         setCellStyle(rowIndex, colIndex, 'textColor', color);
         inputElement.style.color = color;
         showToast('Text color updated', 'success');
-        document.body.removeChild(colorInput);
-    };
-
-    colorInput.onblur = () => {
-        setTimeout(() => {
-            if (document.body.contains(colorInput)) {
-                document.body.removeChild(colorInput);
-            }
-        }, 100);
-    };
-
-    colorInput.click();
-    closeCellContextMenu();
+    }
 }
 
 // Helper function to convert RGB to Hex
