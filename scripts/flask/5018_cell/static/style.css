@@ -126,7 +126,17 @@ td input {
 
 td input:focus {
     outline: 2px solid #007bff;
-    background: #f0f8ff;
+    background: rgba(0, 123, 255, 0.1);
+}
+
+td input::selection {
+    background: rgba(0, 123, 255, 0.3);
+    color: inherit;
+}
+
+td input::-moz-selection {
+    background: rgba(0, 123, 255, 0.3);
+    color: inherit;
 }
 
 :root {
