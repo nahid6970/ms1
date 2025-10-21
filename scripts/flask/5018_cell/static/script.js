@@ -549,6 +549,21 @@ function setCellTextColor() {
     }
 }
 
+function setCellFontSize() {
+    if (!contextMenuCell) return;
+    
+    const {rowIndex, colIndex, inputElement} = contextMenuCell;
+    const currentSize = inputElement.style.fontSize || '14px';
+    
+    const size = prompt('Enter font size (e.g., 16px, 20px):', currentSize);
+    if (size) {
+        setCellStyle(rowIndex, colIndex, 'fontSize', size);
+        inputElement.style.fontSize = size;
+        closeCellContextMenu();
+        showToast('Font size updated', 'success');
+    }
+}
+
 async function addSheet() {
     const sheetName = prompt('Enter sheet name:', `Sheet${tableData.sheets.length + 1}`);
     if (!sheetName) return;
@@ -845,6 +860,9 @@ function renderTable() {
             if (cellStyle.textColor) {
                 input.style.color = cellStyle.textColor;
             }
+            if (cellStyle.fontSize) {
+                input.style.fontSize = cellStyle.fontSize;
+            }
             
             // Add context menu
             input.oncontextmenu = (e) => showCellContextMenu(e, rowIndex, colIndex, input, td);
@@ -907,6 +925,9 @@ function renderTable() {
                     }
                     if (cellStyle.textColor) {
                         textarea.style.color = cellStyle.textColor;
+                    }
+                    if (cellStyle.fontSize) {
+                        textarea.style.fontSize = cellStyle.fontSize;
                     }
                     
                     textarea.oncontextmenu = (e) => showCellContextMenu(e, rowIndex, colIndex, textarea, td);
