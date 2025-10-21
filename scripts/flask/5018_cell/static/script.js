@@ -31,9 +31,22 @@ function initializeApp() {
         textColorText.value = e.target.value.toUpperCase();
     });
     
+    // Load saved column widths
+    loadColumnWidths();
+    
     // Load initial data
     loadData();
 }
+
+function loadColumnWidths() {
+    const actionsWidth = localStorage.getItem('actionsWidth') || '75px';
+    const rownumWidth = localStorage.getItem('rownumWidth') || '75px';
+    
+    document.documentElement.style.setProperty('--actions-width', actionsWidth);
+    document.documentElement.style.setProperty('--rownum-width', rownumWidth);
+}
+
+
 
 function handleKeyboardShortcuts(e) {
     // Ctrl+S or Cmd+S to save
@@ -465,11 +478,23 @@ function renderTable() {
     const headerRow = document.getElementById('headerRow');
     const tableBody = document.getElementById('tableBody');
     
-    headerRow.innerHTML = '<th class="row-number">#</th>';
+    headerRow.innerHTML = '';
     tableBody.innerHTML = '';
     
     const sheet = tableData.sheets[currentSheet];
     if (!sheet) return;
+    
+    // Add actions column first
+    const actionsHeader = document.createElement('th');
+    actionsHeader.className = 'actions-header';
+    actionsHeader.textContent = 'Actions';
+    headerRow.appendChild(actionsHeader);
+    
+    // Add row number column
+    const rowNumHeader = document.createElement('th');
+    rowNumHeader.className = 'row-number';
+    rowNumHeader.textContent = '#';
+    headerRow.appendChild(rowNumHeader);
 
     // Render headers
     sheet.columns.forEach((col, index) => {
@@ -592,15 +617,21 @@ function renderTable() {
         headerRow.appendChild(th);
     });
     
-    // Add actions column
-    const actionsHeader = document.createElement('th');
-    actionsHeader.className = 'actions-header';
-    actionsHeader.textContent = 'Actions';
-    headerRow.appendChild(actionsHeader);
-    
     // Render rows
     sheet.rows.forEach((row, rowIndex) => {
         const tr = document.createElement('tr');
+        
+        // Actions cell first
+        const actionsCell = document.createElement('td');
+        actionsCell.className = 'row-actions';
+        
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'btn btn-danger';
+        deleteBtn.textContent = '×';
+        deleteBtn.onclick = () => deleteRow(rowIndex);
+        
+        actionsCell.appendChild(deleteBtn);
+        tr.appendChild(actionsCell);
         
         // Row number
         const rowNumCell = document.createElement('td');
@@ -641,18 +672,6 @@ function renderTable() {
             tr.appendChild(td);
         });
         
-        // Actions cell
-        const actionsCell = document.createElement('td');
-        actionsCell.className = 'row-actions';
-        
-        const deleteBtn = document.createElement('button');
-        deleteBtn.className = 'btn btn-danger';
-        deleteBtn.textContent = 'Delete';
-        deleteBtn.onclick = () => deleteRow(rowIndex);
-        
-        actionsCell.appendChild(deleteBtn);
-        tr.appendChild(actionsCell);
-        
         tableBody.appendChild(tr);
     });
 }
@@ -667,6 +686,8 @@ function toggleColumnMenu(event, index) {
     const menu = document.getElementById(`column-menu-${index}`);
     menu.classList.toggle('show');
 }
+
+
 
 function closeAllColumnMenus() {
     document.querySelectorAll('.column-menu').forEach(menu => {
