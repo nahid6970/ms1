@@ -1,0 +1,45 @@
+{
+  "activeSheet": 0,
+  "sheets": [
+    {
+      "columns": [
+        {
+          "name": "date",
+          "type": "text",
+          "width": "150",
+          "color": "#ffffff",
+          "textColor": "#000000",
+          "font": ""
+        },
+        {
+          "name": "GG",
+          "type": "text",
+          "width": "150",
+          "color": "#ffffff",
+          "textColor": "#000000",
+          "font": ""
+        }
+      ],
+      "name": "Sheet1",
+      "rows": [
+        [
+          "",
+          ""
+        ],
+        [
+          "",
+          ""
+        ],
+        [
+          "",
+          ""
+        ],
+        [
+          "",
+          ""
+        ]
+      ],
+      "cellStyles": {}
+    }
+  ]
+}
