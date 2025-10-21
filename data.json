@@ -5,12 +5,12 @@
       "cellStyles": {},
       "columns": [
         {
-          "name": "English",
-          "type": "text",
-          "width": "150",
           "color": "#ffffff",
+          "font": "",
+          "name": "English",
           "textColor": "#000000",
-          "font": ""
+          "type": "text",
+          "width": "150"
         },
         {
           "color": "#ffffff",
@@ -38,22 +38,6 @@
         [],
         [],
         [],
-        [
-          "",
-          ""
-        ],
-        [
-          "",
-          ""
-        ],
-        [
-          "",
-          ""
-        ],
-        [
-          "",
-          ""
-        ],
         [
           "",
           ""

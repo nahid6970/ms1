@@ -130,7 +130,7 @@ td input:focus {
 }
 
 :root {
-    --actions-width: 75px;
+    --actions-width: 50px;
     --rownum-width: 75px;
 }
 

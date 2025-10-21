@@ -31,8 +31,9 @@ function initializeApp() {
         textColorText.value = e.target.value.toUpperCase();
     });
     
-    // Load saved column widths
-    loadColumnWidths();
+    // Clear old localStorage values and set new defaults
+    localStorage.removeItem('actionsWidth');
+    localStorage.removeItem('rownumWidth');
     
     // Load initial data
     loadData();
