@@ -1224,7 +1224,7 @@ function renderTable() {
         rowNumCell.className = 'row-number';
 
         const contentSpan = document.createElement('span');
-        contentSpan.innerHTML = '<span class="delete-x" title="Delete row">×</span> ' + (rowIndex + 1);
+        contentSpan.innerHTML = '<span class="delete-x" title="Delete row">×</span>&nbsp;' + (rowIndex + 1);
         contentSpan.style.cursor = 'pointer';
         contentSpan.onclick = () => deleteRow(rowIndex);
 

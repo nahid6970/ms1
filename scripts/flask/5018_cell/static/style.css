@@ -150,6 +150,8 @@ td input::-moz-selection {
     font-family: monospace;
     font-size: 12px;
     vertical-align: middle;
+    display: table-cell;
+    line-height: 1.2;
 }
 
 /* Modal Styles */
@@ -294,6 +296,9 @@ td input::-moz-selection {
     height: 14px;
     line-height: 14px;
     text-align: center;
+    position: relative;
+    top: -1px;
+    margin-right: 3px;
 }
 
 .delete-x:hover {
