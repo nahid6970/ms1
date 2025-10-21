@@ -597,7 +597,7 @@ def convert_markdown_to_html(text):
         if line == '':
             # Empty line - end current paragraph/list if any
             if current_paragraph:
-                paragraph_text = ' '.join(current_paragraph)
+                paragraph_text = '<br>'.join(current_paragraph)
                 result.append(f'<p>{paragraph_text}</p>')
                 current_paragraph = []
             if current_list:
@@ -608,7 +608,7 @@ def convert_markdown_to_html(text):
         elif line.startswith('<h') or line.startswith('<pre') or line.startswith('<blockquote'):
             # Block element - end current paragraph/list and add the block
             if current_paragraph:
-                paragraph_text = ' '.join(current_paragraph)
+                paragraph_text = '<br>'.join(current_paragraph)
                 result.append(f'<p>{paragraph_text}</p>')
                 current_paragraph = []
             if current_list:
@@ -620,7 +620,7 @@ def convert_markdown_to_html(text):
         elif line.startswith('<li>'):
             # List item - add to current list
             if current_paragraph:
-                paragraph_text = ' '.join(current_paragraph)
+                paragraph_text = '<br>'.join(current_paragraph)
                 result.append(f'<p>{paragraph_text}</p>')
                 current_paragraph = []
             current_list.append(line)
@@ -637,7 +637,7 @@ def convert_markdown_to_html(text):
     
     # Don't forget the last paragraph/list
     if current_paragraph:
-        paragraph_text = ' '.join(current_paragraph)
+        paragraph_text = '<br>'.join(current_paragraph)
         result.append(f'<p>{paragraph_text}</p>')
     if current_list:
         list_tag = 'ul' if list_type == 'unordered' else 'ol'
