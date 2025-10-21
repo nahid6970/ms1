@@ -1,8 +1,23 @@
 let tableData = { sheets: [], activeSheet: 0 };
 let currentSheet = 0;
 let contextMenuCell = null;
-let selectedCells = [];
+let selectedCells = []; // Array of {row, col, td} objects for multi-cell operations
 let isSelecting = false;
+
+/**
+ * MULTI-CELL OPERATION PATTERN:
+ * When adding new context menu operations, use this pattern to support multiple cells:
+ * 
+ * if (selectedCells.length > 0) {
+ *     selectedCells.forEach(cell => {
+ *         const cellInput = cell.td.querySelector('input, textarea');
+ *         // Apply operation to cell.row, cell.col, cellInput
+ *     });
+ *     showToast(`Operation applied to ${selectedCells.length} cells`, 'success');
+ * } else {
+ *     // Apply operation to single cell (contextMenuCell)
+ * }
+ */
 
 // Load data on page load
 window.onload = function () {
@@ -340,8 +355,21 @@ function toggleCellBold() {
     const style = getCellStyle(rowIndex, colIndex);
     const newValue = !style.bold;
 
-    setCellStyle(rowIndex, colIndex, 'bold', newValue);
-    inputElement.style.fontWeight = newValue ? 'bold' : 'normal';
+    // Apply to multiple cells if selected
+    if (selectedCells.length > 0) {
+        selectedCells.forEach(cell => {
+            const cellInput = cell.td.querySelector('input, textarea');
+            setCellStyle(cell.row, cell.col, 'bold', newValue);
+            if (cellInput) {
+                cellInput.style.fontWeight = newValue ? 'bold' : 'normal';
+            }
+        });
+        showToast(`Bold ${newValue ? 'applied' : 'removed'} for ${selectedCells.length} cells`, 'success');
+    } else {
+        // Apply to single cell
+        setCellStyle(rowIndex, colIndex, 'bold', newValue);
+        inputElement.style.fontWeight = newValue ? 'bold' : 'normal';
+    }
 
     document.getElementById('ctxBold').classList.toggle('checked', newValue);
 }
@@ -353,8 +381,21 @@ function toggleCellItalic() {
     const style = getCellStyle(rowIndex, colIndex);
     const newValue = !style.italic;
 
-    setCellStyle(rowIndex, colIndex, 'italic', newValue);
-    inputElement.style.fontStyle = newValue ? 'italic' : 'normal';
+    // Apply to multiple cells if selected
+    if (selectedCells.length > 0) {
+        selectedCells.forEach(cell => {
+            const cellInput = cell.td.querySelector('input, textarea');
+            setCellStyle(cell.row, cell.col, 'italic', newValue);
+            if (cellInput) {
+                cellInput.style.fontStyle = newValue ? 'italic' : 'normal';
+            }
+        });
+        showToast(`Italic ${newValue ? 'applied' : 'removed'} for ${selectedCells.length} cells`, 'success');
+    } else {
+        // Apply to single cell
+        setCellStyle(rowIndex, colIndex, 'italic', newValue);
+        inputElement.style.fontStyle = newValue ? 'italic' : 'normal';
+    }
 
     document.getElementById('ctxItalic').classList.toggle('checked', newValue);
 }
@@ -366,8 +407,21 @@ function toggleCellCenter() {
     const style = getCellStyle(rowIndex, colIndex);
     const newValue = !style.center;
 
-    setCellStyle(rowIndex, colIndex, 'center', newValue);
-    inputElement.style.textAlign = newValue ? 'center' : 'left';
+    // Apply to multiple cells if selected
+    if (selectedCells.length > 0) {
+        selectedCells.forEach(cell => {
+            const cellInput = cell.td.querySelector('input, textarea');
+            setCellStyle(cell.row, cell.col, 'center', newValue);
+            if (cellInput) {
+                cellInput.style.textAlign = newValue ? 'center' : 'left';
+            }
+        });
+        showToast(`Center align ${newValue ? 'applied' : 'removed'} for ${selectedCells.length} cells`, 'success');
+    } else {
+        // Apply to single cell
+        setCellStyle(rowIndex, colIndex, 'center', newValue);
+        inputElement.style.textAlign = newValue ? 'center' : 'left';
+    }
 
     document.getElementById('ctxCenter').classList.toggle('checked', newValue);
 }
@@ -792,10 +846,24 @@ function setCellFontSize() {
 
     const size = prompt('Enter font size (e.g., 16px, 20px):', currentSize);
     if (size) {
-        setCellStyle(rowIndex, colIndex, 'fontSize', size);
-        inputElement.style.fontSize = size;
-        closeCellContextMenu();
-        showToast('Font size updated', 'success');
+        // Apply to multiple cells if selected
+        if (selectedCells.length > 0) {
+            selectedCells.forEach(cell => {
+                const cellInput = cell.td.querySelector('input, textarea');
+                setCellStyle(cell.row, cell.col, 'fontSize', size);
+                if (cellInput) {
+                    cellInput.style.fontSize = size;
+                }
+            });
+            closeCellContextMenu();
+            showToast(`Font size updated for ${selectedCells.length} cells`, 'success');
+        } else {
+            // Apply to single cell
+            setCellStyle(rowIndex, colIndex, 'fontSize', size);
+            inputElement.style.fontSize = size;
+            closeCellContextMenu();
+            showToast('Font size updated', 'success');
+        }
     }
 }
 

@@ -5,24 +5,31 @@
       "cellStyles": {
         "0-0": {
           "bgColor": "#DEE2E6",
+          "center": true,
           "textColor": "rgb(0, 0, 0)",
-          "center": true
+          "italic": true,
+          "bold": true
         },
         "1-0": {
           "bgColor": "#DEE2E6",
-          "bold": false,
-          "textColor": "rgb(0, 0, 0)"
+          "bold": true,
+          "center": true,
+          "textColor": "rgb(0, 0, 0)",
+          "italic": true
         },
         "2-0": {
           "bgColor": "#DEE2E6",
-          "bold": false,
-          "center": false,
-          "italic": false,
+          "bold": true,
+          "center": true,
+          "italic": true,
           "textColor": "rgb(0, 0, 0)"
         },
         "3-0": {
           "bgColor": "#DEE2E6",
-          "textColor": "rgb(0, 0, 0)"
+          "center": true,
+          "textColor": "rgb(0, 0, 0)",
+          "italic": true,
+          "bold": true
         }
       },
       "columns": [
