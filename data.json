@@ -2,52 +2,7 @@
   "activeSheet": 0,
   "sheets": [
     {
-      "cellStyles": {
-        "0-0": {
-          "bgColor": "#DEE2E6",
-          "bold": true,
-          "center": true,
-          "italic": true,
-          "textColor": "rgb(0, 0, 0)"
-        },
-        "0-1": {
-          "bold": true,
-          "italic": true
-        },
-        "1-0": {
-          "bgColor": "#DEE2E6",
-          "bold": true,
-          "center": true,
-          "italic": true,
-          "textColor": "rgb(0, 0, 0)"
-        },
-        "1-1": {
-          "bold": true,
-          "italic": true
-        },
-        "2-0": {
-          "bgColor": "#DEE2E6",
-          "bold": true,
-          "center": true,
-          "italic": true,
-          "textColor": "rgb(0, 0, 0)"
-        },
-        "2-1": {
-          "bold": true,
-          "italic": true
-        },
-        "3-0": {
-          "bgColor": "#DEE2E6",
-          "bold": true,
-          "center": true,
-          "italic": true,
-          "textColor": "rgb(0, 0, 0)"
-        },
-        "3-1": {
-          "bold": true,
-          "italic": true
-        }
-      },
+      "cellStyles": {},
       "columns": [
         {
           "color": "#ffffff",
@@ -58,12 +13,12 @@
           "width": "150"
         },
         {
-          "color": "#9effa0",
-          "font": "",
           "name": "Meaning",
-          "textColor": "#000000",
           "type": "text",
-          "width": "150"
+          "width": "150",
+          "color": "#8bfd8d",
+          "textColor": "#000000",
+          "font": ""
         }
       ],
       "mergedCells": {},
@@ -84,6 +39,18 @@
         [
           "Propaganda",
           "\u09aa\u09cd\u09b0\u099a\u09be\u09b0\u09a3\u09be"
+        ],
+        [
+          "",
+          ""
+        ],
+        [
+          "",
+          ""
+        ],
+        [
+          "",
+          ""
         ]
       ]
     },

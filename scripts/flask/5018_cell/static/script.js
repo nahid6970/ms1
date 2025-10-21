@@ -867,6 +867,67 @@ function setCellFontSize() {
     }
 }
 
+function clearCellFormatting() {
+    if (!contextMenuCell) return;
+
+    const { rowIndex, colIndex, tdElement, inputElement } = contextMenuCell;
+
+    // Apply to multiple cells if selected
+    if (selectedCells.length > 0) {
+        selectedCells.forEach(cell => {
+            const cellTd = cell.td;
+            const cellInput = cellTd.querySelector('input, textarea');
+            const sheet = tableData.sheets[currentSheet];
+            const col = sheet.columns[cell.col];
+
+            // Remove all cell-specific styles
+            const cellKey = `${cell.row}-${cell.col}`;
+            if (sheet.cellStyles && sheet.cellStyles[cellKey]) {
+                delete sheet.cellStyles[cellKey];
+            }
+
+            // Reset to column defaults
+            if (cellInput) {
+                cellInput.style.fontWeight = 'normal';
+                cellInput.style.fontStyle = 'normal';
+                cellInput.style.textAlign = 'left';
+                cellInput.style.fontSize = '';
+                cellInput.style.color = col.textColor || '#000000';
+            }
+
+            if (cellTd) {
+                cellTd.style.backgroundColor = col.color || '#ffffff';
+                cellTd.style.border = '';
+            }
+        });
+        closeCellContextMenu();
+        showToast(`Formatting cleared for ${selectedCells.length} cells`, 'success');
+    } else {
+        // Apply to single cell
+        const sheet = tableData.sheets[currentSheet];
+        const col = sheet.columns[colIndex];
+
+        // Remove all cell-specific styles
+        const cellKey = `${rowIndex}-${colIndex}`;
+        if (sheet.cellStyles && sheet.cellStyles[cellKey]) {
+            delete sheet.cellStyles[cellKey];
+        }
+
+        // Reset to column defaults
+        inputElement.style.fontWeight = 'normal';
+        inputElement.style.fontStyle = 'normal';
+        inputElement.style.textAlign = 'left';
+        inputElement.style.fontSize = '';
+        inputElement.style.color = col.textColor || '#000000';
+
+        tdElement.style.backgroundColor = col.color || '#ffffff';
+        tdElement.style.border = '';
+
+        closeCellContextMenu();
+        showToast('Cell formatting cleared', 'success');
+    }
+}
+
 async function addSheet() {
     const sheetName = prompt('Enter sheet name:', `Sheet${tableData.sheets.length + 1}`);
     if (!sheetName) return;
