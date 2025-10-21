@@ -1104,7 +1104,8 @@ function renderTable() {
 
         // Apply header text alignment
         if (col.headerCenter) {
-            headerCell.style.justifyContent = 'center';
+            columnName.style.textAlign = 'center';
+            columnName.style.flex = '1';
         }
 
         const menuWrapper = document.createElement('div');
