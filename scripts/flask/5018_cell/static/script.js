@@ -1082,137 +1082,139 @@ function renderTable() {
     rowNumHeader.textContent = '#';
     headerRow.appendChild(rowNumHeader);
 
-    // Render headers
-    sheet.columns.forEach((col, index) => {
-        const th = document.createElement('th');
-        th.style.width = col.width + 'px';
-
-        // Apply header background color (separate from cell color)
-        th.style.backgroundColor = col.headerBgColor || col.color || '#f8f9fa';
-
-        const headerCell = document.createElement('div');
-        headerCell.className = 'header-cell';
-
-        const columnName = document.createElement('span');
-        columnName.className = 'column-name';
-        columnName.textContent = col.name;
-
-        // Apply header text styling
-        columnName.style.color = col.headerTextColor || col.textColor || '#333333';
-        columnName.style.fontWeight = (col.headerBold !== false) ? 'bold' : 'normal'; // Default bold
-        columnName.style.fontStyle = col.headerItalic ? 'italic' : 'normal';
-
-        // Apply header text alignment
-        if (col.headerCenter) {
-            columnName.style.textAlign = 'center';
-            columnName.style.flex = '1';
-        }
-
-        const menuWrapper = document.createElement('div');
-        menuWrapper.className = 'column-menu-wrapper';
-
-        const menuBtn = document.createElement('button');
-        menuBtn.className = 'column-menu-btn';
-        menuBtn.textContent = '⋮';
-        menuBtn.onclick = (e) => toggleColumnMenu(e, index);
-
-        const menu = document.createElement('div');
-        menu.className = 'column-menu';
-        menu.id = `column-menu-${index}`;
-
-        const sortItem = document.createElement('div');
-        sortItem.className = 'column-menu-item has-submenu';
-        sortItem.innerHTML = '<span>⇅</span> Sort <span class="submenu-arrow">›</span>';
-
-        const sortSubmenu = document.createElement('div');
-        sortSubmenu.className = 'column-submenu';
-
-        const sortAscItem = document.createElement('div');
-        sortAscItem.className = 'column-menu-item';
-        sortAscItem.innerHTML = '<span>↑</span> A-Z';
-        sortAscItem.onclick = (e) => {
-            e.stopPropagation();
-            sortColumn(index, 'asc');
-            closeAllColumnMenus();
-        };
-
-        const sortDescItem = document.createElement('div');
-        sortDescItem.className = 'column-menu-item';
-        sortDescItem.innerHTML = '<span>↓</span> Z-A';
-        sortDescItem.onclick = (e) => {
-            e.stopPropagation();
-            sortColumn(index, 'desc');
-            closeAllColumnMenus();
-        };
-
-        sortSubmenu.appendChild(sortAscItem);
-        sortSubmenu.appendChild(sortDescItem);
-        sortItem.appendChild(sortSubmenu);
-
-        const moveItem = document.createElement('div');
-        moveItem.className = 'column-menu-item has-submenu';
-        moveItem.innerHTML = '<span>↔</span> Move <span class="submenu-arrow">›</span>';
-
-        const moveSubmenu = document.createElement('div');
-        moveSubmenu.className = 'column-submenu';
-
-        const moveLeftItem = document.createElement('div');
-        moveLeftItem.className = 'column-menu-item';
-        moveLeftItem.innerHTML = '<span>←</span> Left';
-        if (index === 0) {
-            moveLeftItem.classList.add('disabled');
-        } else {
-            moveLeftItem.onclick = (e) => {
-                e.stopPropagation();
-                moveColumn(index, 'left');
-                closeAllColumnMenus();
-            };
-        }
-
-        const moveRightItem = document.createElement('div');
-        moveRightItem.className = 'column-menu-item';
-        moveRightItem.innerHTML = '<span>→</span> Right';
-        if (index === sheet.columns.length - 1) {
-            moveRightItem.classList.add('disabled');
-        } else {
-            moveRightItem.onclick = (e) => {
-                e.stopPropagation();
-                moveColumn(index, 'right');
-                closeAllColumnMenus();
-            };
-        }
-
-        moveSubmenu.appendChild(moveLeftItem);
-        moveSubmenu.appendChild(moveRightItem);
-        moveItem.appendChild(moveSubmenu);
-
-        const editItem = document.createElement('div');
-        editItem.className = 'column-menu-item';
-        editItem.innerHTML = '<span>✏️</span> Edit';
-        editItem.onclick = () => {
-            editColumn(index);
-            closeAllColumnMenus();
-        };
-
-        const deleteItem = document.createElement('div');
-        deleteItem.className = 'column-menu-item delete';
-        deleteItem.innerHTML = '<span>🗑️</span> Delete';
-        deleteItem.onclick = () => {
-            deleteColumn(index);
-            closeAllColumnMenus();
-        };
-
-        menu.appendChild(editItem);
-        menu.appendChild(sortItem);
-        menu.appendChild(moveItem);
-        menu.appendChild(deleteItem);
-        menuWrapper.appendChild(menuBtn);
-        menuWrapper.appendChild(menu);
-
-        headerCell.appendChild(columnName);
-        headerCell.appendChild(menuWrapper);
-        th.appendChild(headerCell);
-        headerRow.appendChild(th);
+    // Render headers
+    sheet.columns.forEach((col, index) => {
+        const th = document.createElement('th');
+        th.style.width = col.width + 'px';
+        th.style.minWidth = col.width + 'px';
+        th.style.maxWidth = col.width + 'px';
+
+        // Apply header background color (separate from cell color)
+        th.style.backgroundColor = col.headerBgColor || col.color || '#f8f9fa';
+
+        const headerCell = document.createElement('div');
+        headerCell.className = 'header-cell';
+
+        const columnName = document.createElement('span');
+        columnName.className = 'column-name';
+        columnName.textContent = col.name;
+
+        // Apply header text styling
+        columnName.style.color = col.headerTextColor || col.textColor || '#333333';
+        columnName.style.fontWeight = (col.headerBold !== false) ? 'bold' : 'normal'; // Default bold
+        columnName.style.fontStyle = col.headerItalic ? 'italic' : 'normal';
+
+        // Apply header text alignment
+        if (col.headerCenter) {
+            columnName.style.textAlign = 'center';
+            columnName.style.flex = '1';
+        }
+
+        const menuWrapper = document.createElement('div');
+        menuWrapper.className = 'column-menu-wrapper';
+
+        const menuBtn = document.createElement('button');
+        menuBtn.className = 'column-menu-btn';
+        menuBtn.textContent = '⋮';
+        menuBtn.onclick = (e) => toggleColumnMenu(e, index);
+
+        const menu = document.createElement('div');
+        menu.className = 'column-menu';
+        menu.id = `column-menu-${index}`;
+
+        const sortItem = document.createElement('div');
+        sortItem.className = 'column-menu-item has-submenu';
+        sortItem.innerHTML = '<span>⇅</span> Sort <span class="submenu-arrow">›</span>';
+
+        const sortSubmenu = document.createElement('div');
+        sortSubmenu.className = 'column-submenu';
+
+        const sortAscItem = document.createElement('div');
+        sortAscItem.className = 'column-menu-item';
+        sortAscItem.innerHTML = '<span>↑</span> A-Z';
+        sortAscItem.onclick = (e) => {
+            e.stopPropagation();
+            sortColumn(index, 'asc');
+            closeAllColumnMenus();
+        };
+
+        const sortDescItem = document.createElement('div');
+        sortDescItem.className = 'column-menu-item';
+        sortDescItem.innerHTML = '<span>↓</span> Z-A';
+        sortDescItem.onclick = (e) => {
+            e.stopPropagation();
+            sortColumn(index, 'desc');
+            closeAllColumnMenus();
+        };
+
+        sortSubmenu.appendChild(sortAscItem);
+        sortSubmenu.appendChild(sortDescItem);
+        sortItem.appendChild(sortSubmenu);
+
+        const moveItem = document.createElement('div');
+        moveItem.className = 'column-menu-item has-submenu';
+        moveItem.innerHTML = '<span>↔</span> Move <span class="submenu-arrow">›</span>';
+
+        const moveSubmenu = document.createElement('div');
+        moveSubmenu.className = 'column-submenu';
+
+        const moveLeftItem = document.createElement('div');
+        moveLeftItem.className = 'column-menu-item';
+        moveLeftItem.innerHTML = '<span>←</span> Left';
+        if (index === 0) {
+            moveLeftItem.classList.add('disabled');
+        } else {
+            moveLeftItem.onclick = (e) => {
+                e.stopPropagation();
+                moveColumn(index, 'left');
+                closeAllColumnMenus();
+            };
+        }
+
+        const moveRightItem = document.createElement('div');
+        moveRightItem.className = 'column-menu-item';
+        moveRightItem.innerHTML = '<span>→</span> Right';
+        if (index === sheet.columns.length - 1) {
+            moveRightItem.classList.add('disabled');
+        } else {
+            moveRightItem.onclick = (e) => {
+                e.stopPropagation();
+                moveColumn(index, 'right');
+                closeAllColumnMenus();
+            };
+        }
+
+        moveSubmenu.appendChild(moveLeftItem);
+        moveSubmenu.appendChild(moveRightItem);
+        moveItem.appendChild(moveSubmenu);
+
+        const editItem = document.createElement('div');
+        editItem.className = 'column-menu-item';
+        editItem.innerHTML = '<span>✏️</span> Edit';
+        editItem.onclick = () => {
+            editColumn(index);
+            closeAllColumnMenus();
+        };
+
+        const deleteItem = document.createElement('div');
+        deleteItem.className = 'column-menu-item delete';
+        deleteItem.innerHTML = '<span>🗑️</span> Delete';
+        deleteItem.onclick = () => {
+            deleteColumn(index);
+            closeAllColumnMenus();
+        };
+
+        menu.appendChild(editItem);
+        menu.appendChild(sortItem);
+        menu.appendChild(moveItem);
+        menu.appendChild(deleteItem);
+        menuWrapper.appendChild(menuBtn);
+        menuWrapper.appendChild(menu);
+
+        headerCell.appendChild(columnName);
+        headerCell.appendChild(menuWrapper);
+        th.appendChild(headerCell);
+        headerRow.appendChild(th);
     });
 
     // Render rows
@@ -1231,135 +1233,138 @@ function renderTable() {
         rowNumCell.appendChild(contentSpan);
         tr.appendChild(rowNumCell);
 
-        // Data cells - only render cells for existing columns
-        sheet.columns.forEach((col, colIndex) => {
-            const td = document.createElement('td');
-            td.style.backgroundColor = col.color;
-
-            const input = document.createElement('input');
-            input.type = col.type;
-            input.value = row[colIndex] || '';
-            input.style.color = col.textColor || '#000000';
-
-            // Apply column font
-            if (col.font && col.font !== '') {
-                input.style.fontFamily = `'${col.font}', monospace`;
-            }
-
-            input.onchange = (e) => updateCell(rowIndex, colIndex, e.target.value);
-
-            // Apply cell-specific styles
-            const cellStyle = getCellStyle(rowIndex, colIndex);
-            if (cellStyle.bold) input.style.fontWeight = 'bold';
-            if (cellStyle.italic) input.style.fontStyle = 'italic';
-            if (cellStyle.center) input.style.textAlign = 'center';
-            if (cellStyle.border) {
-                td.style.border = '2px solid #007bff';
-            }
-            if (cellStyle.bgColor) {
-                td.style.backgroundColor = cellStyle.bgColor;
-            }
-            if (cellStyle.textColor) {
-                input.style.color = cellStyle.textColor;
-            }
-            if (cellStyle.fontSize) {
-                input.style.fontSize = cellStyle.fontSize;
-            }
-
-            // Add context menu
-            input.oncontextmenu = (e) => showCellContextMenu(e, rowIndex, colIndex, input, td);
-
-            // Cell selection for merging - add to both td and input
-            td.dataset.row = rowIndex;
-            td.dataset.col = colIndex;
-
-            const handleMouseDown = (e) => {
-                if (e.button === 0 && e.shiftKey) {
-                    e.preventDefault();
-                    startCellSelection(rowIndex, colIndex, td);
-                }
-            };
-
-            const handleMouseEnter = () => {
-                if (isSelecting) {
-                    addToSelection(rowIndex, colIndex, td);
-                }
-            };
-
-            td.onmousedown = handleMouseDown;
-            input.onmousedown = (e) => {
-                if (e.shiftKey) {
-                    handleMouseDown(e);
-                }
-            };
-            td.onmouseenter = handleMouseEnter;
-            input.onmouseenter = handleMouseEnter;
-
-            // Check if merged
-            const mergeInfo = getCellMerge(rowIndex, colIndex);
-            if (mergeInfo) {
-                if (mergeInfo.hidden) {
-                    td.style.display = 'none';
-                    tr.appendChild(td);
-                    return; // Skip adding input for hidden cells
-                } else if (mergeInfo.colspan || mergeInfo.rowspan) {
-                    td.colSpan = mergeInfo.colspan || 1;
-                    td.rowSpan = mergeInfo.rowspan || 1;
-                    td.classList.add('merged-cell');
-
-                    // Use textarea for merged cells
-                    const textarea = document.createElement('textarea');
-                    textarea.value = row[colIndex] || '';
-                    textarea.style.color = col.textColor || '#000000';
-
-                    if (col.font && col.font !== '') {
-                        textarea.style.fontFamily = `'${col.font}', monospace`;
-                    }
-
-                    textarea.onchange = (e) => updateCell(rowIndex, colIndex, e.target.value);
-
-                    const cellStyle = getCellStyle(rowIndex, colIndex);
-                    if (cellStyle.bold) textarea.style.fontWeight = 'bold';
-                    if (cellStyle.italic) textarea.style.fontStyle = 'italic';
-                    if (cellStyle.center) textarea.style.textAlign = 'center';
-                    if (cellStyle.bgColor) {
-                        td.style.backgroundColor = cellStyle.bgColor;
-                    }
-                    if (cellStyle.textColor) {
-                        textarea.style.color = cellStyle.textColor;
-                    }
-                    if (cellStyle.fontSize) {
-                        textarea.style.fontSize = cellStyle.fontSize;
-                    }
-
-                    textarea.oncontextmenu = (e) => showCellContextMenu(e, rowIndex, colIndex, textarea, td);
-
-                    const handleMouseDown = (e) => {
-                        if (e.button === 0 && e.shiftKey) {
-                            e.preventDefault();
-                            startCellSelection(rowIndex, colIndex, td);
-                        }
-                    };
-
-                    textarea.onmousedown = (e) => {
-                        if (e.shiftKey) {
-                            handleMouseDown(e);
-                        }
-                    };
-                    textarea.onmouseenter = () => {
-                        if (isSelecting) {
-                            addToSelection(rowIndex, colIndex, td);
-                        }
-                    };
-
-                    td.appendChild(textarea);
-                    tr.appendChild(td);
-                    return;
-                }
-            }
-
-            td.appendChild(input);
-            tr.appendChild(td);
+        // Data cells - only render cells for existing columns
+        sheet.columns.forEach((col, colIndex) => {
+            const td = document.createElement('td');
+            td.style.width = col.width + 'px';
+            td.style.minWidth = col.width + 'px';
+            td.style.maxWidth = col.width + 'px';
+            td.style.backgroundColor = col.color;
+
+            const input = document.createElement('input');
+            input.type = col.type;
+            input.value = row[colIndex] || '';
+            input.style.color = col.textColor || '#000000';
+
+            // Apply column font
+            if (col.font && col.font !== '') {
+                input.style.fontFamily = `'${col.font}', monospace`;
+            }
+
+            input.onchange = (e) => updateCell(rowIndex, colIndex, e.target.value);
+
+            // Apply cell-specific styles
+            const cellStyle = getCellStyle(rowIndex, colIndex);
+            if (cellStyle.bold) input.style.fontWeight = 'bold';
+            if (cellStyle.italic) input.style.fontStyle = 'italic';
+            if (cellStyle.center) input.style.textAlign = 'center';
+            if (cellStyle.border) {
+                td.style.border = '2px solid #007bff';
+            }
+            if (cellStyle.bgColor) {
+                td.style.backgroundColor = cellStyle.bgColor;
+            }
+            if (cellStyle.textColor) {
+                input.style.color = cellStyle.textColor;
+            }
+            if (cellStyle.fontSize) {
+                input.style.fontSize = cellStyle.fontSize;
+            }
+
+            // Add context menu
+            input.oncontextmenu = (e) => showCellContextMenu(e, rowIndex, colIndex, input, td);
+
+            // Cell selection for merging - add to both td and input
+            td.dataset.row = rowIndex;
+            td.dataset.col = colIndex;
+
+            const handleMouseDown = (e) => {
+                if (e.button === 0 && e.shiftKey) {
+                    e.preventDefault();
+                    startCellSelection(rowIndex, colIndex, td);
+                }
+            };
+
+            const handleMouseEnter = () => {
+                if (isSelecting) {
+                    addToSelection(rowIndex, colIndex, td);
+                }
+            };
+
+            td.onmousedown = handleMouseDown;
+            input.onmousedown = (e) => {
+                if (e.shiftKey) {
+                    handleMouseDown(e);
+                }
+            };
+            td.onmouseenter = handleMouseEnter;
+            input.onmouseenter = handleMouseEnter;
+
+            // Check if merged
+            const mergeInfo = getCellMerge(rowIndex, colIndex);
+            if (mergeInfo) {
+                if (mergeInfo.hidden) {
+                    td.style.display = 'none';
+                    tr.appendChild(td);
+                    return; // Skip adding input for hidden cells
+                } else if (mergeInfo.colspan || mergeInfo.rowspan) {
+                    td.colSpan = mergeInfo.colspan || 1;
+                    td.rowSpan = mergeInfo.rowspan || 1;
+                    td.classList.add('merged-cell');
+
+                    // Use textarea for merged cells
+                    const textarea = document.createElement('textarea');
+                    textarea.value = row[colIndex] || '';
+                    textarea.style.color = col.textColor || '#000000';
+
+                    if (col.font && col.font !== '') {
+                        textarea.style.fontFamily = `'${col.font}', monospace`;
+                    }
+
+                    textarea.onchange = (e) => updateCell(rowIndex, colIndex, e.target.value);
+
+                    const cellStyle = getCellStyle(rowIndex, colIndex);
+                    if (cellStyle.bold) textarea.style.fontWeight = 'bold';
+                    if (cellStyle.italic) textarea.style.fontStyle = 'italic';
+                    if (cellStyle.center) textarea.style.textAlign = 'center';
+                    if (cellStyle.bgColor) {
+                        td.style.backgroundColor = cellStyle.bgColor;
+                    }
+                    if (cellStyle.textColor) {
+                        textarea.style.color = cellStyle.textColor;
+                    }
+                    if (cellStyle.fontSize) {
+                        textarea.style.fontSize = cellStyle.fontSize;
+                    }
+
+                    textarea.oncontextmenu = (e) => showCellContextMenu(e, rowIndex, colIndex, textarea, td);
+
+                    const handleMouseDown = (e) => {
+                        if (e.button === 0 && e.shiftKey) {
+                            e.preventDefault();
+                            startCellSelection(rowIndex, colIndex, td);
+                        }
+                    };
+
+                    textarea.onmousedown = (e) => {
+                        if (e.shiftKey) {
+                            handleMouseDown(e);
+                        }
+                    };
+                    textarea.onmouseenter = () => {
+                        if (isSelecting) {
+                            addToSelection(rowIndex, colIndex, td);
+                        }
+                    };
+
+                    td.appendChild(textarea);
+                    tr.appendChild(td);
+                    return;
+                }
+            }
+
+            td.appendChild(input);
+            tr.appendChild(td);
         });
 
         tableBody.appendChild(tr);
