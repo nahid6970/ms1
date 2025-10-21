@@ -796,6 +796,7 @@ tr {
     font-size: 18px;
     font-weight: 600;
     color: #333;
+    text-align: center;
 }
 
 .color-picker-grid {
@@ -872,4 +873,22 @@ tr {
 .color-picker-close:hover {
     background: #f0f0f0;
     color: #333;
+}
+
+/* Radio buttons for color type selection */
+.color-type-selector input[type="radio"] {
+    margin: 0;
+    width: 16px;
+    height: 16px;
+}
+
+.color-type-selector label {
+    font-weight: 500;
+    color: #333;
+    user-select: none;
+}
+
+.color-preview {
+    font-weight: bold;
+    transition: all 0.2s;
 }

@@ -4,8 +4,9 @@
     {
       "cellStyles": {
         "0-0": {
-          "bgColor": "#154789",
-          "textColor": "#00171A"
+          "bgColor": "#1A94FF",
+          "textColor": "#FFFFFF",
+          "bold": true
         },
         "1-0": {
           "bold": true,
