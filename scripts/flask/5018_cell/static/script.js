@@ -385,7 +385,6 @@ function showCellContextMenu(e, rowIndex, colIndex, inputElement, tdElement) {
     document.getElementById('ctxBold').classList.toggle('checked', style.bold === true);
     document.getElementById('ctxItalic').classList.toggle('checked', style.italic === true);
     document.getElementById('ctxCenter').classList.toggle('checked', style.center === true);
-    document.getElementById('ctxBorder').classList.toggle('checked', style.border === true);
     
     // Show/hide merge options
     const isMerged = mergeInfo && (mergeInfo.colspan || mergeInfo.rowspan || mergeInfo.hidden);
