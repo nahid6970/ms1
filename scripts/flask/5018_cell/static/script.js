@@ -886,12 +886,6 @@ function renderTable() {
     const sheet = tableData.sheets[currentSheet];
     if (!sheet) return;
 
-    // Add actions column first
-    const actionsHeader = document.createElement('th');
-    actionsHeader.className = 'actions-header';
-    actionsHeader.textContent = 'Actions';
-    headerRow.appendChild(actionsHeader);
-
     // Add row number column
     const rowNumHeader = document.createElement('th');
     rowNumHeader.className = 'row-number';
@@ -1023,22 +1017,23 @@ function renderTable() {
     sheet.rows.forEach((row, rowIndex) => {
         const tr = document.createElement('tr');
 
-        // Actions cell first
-        const actionsCell = document.createElement('td');
-        actionsCell.className = 'row-actions';
-
-        const deleteBtn = document.createElement('button');
-        deleteBtn.className = 'btn btn-danger';
-        deleteBtn.textContent = '×';
-        deleteBtn.onclick = () => deleteRow(rowIndex);
-
-        actionsCell.appendChild(deleteBtn);
-        tr.appendChild(actionsCell);
-
-        // Row number
+        // Row number with delete dot
         const rowNumCell = document.createElement('td');
         rowNumCell.className = 'row-number';
-        rowNumCell.textContent = rowIndex + 1;
+        
+        const rowNumSpan = document.createElement('span');
+        rowNumSpan.textContent = rowIndex + 1;
+        rowNumSpan.style.float = 'left';
+        
+        const deleteDot = document.createElement('span');
+        deleteDot.className = 'delete-dot';
+        deleteDot.title = 'Delete row';
+        deleteDot.onclick = () => deleteRow(rowIndex);
+        deleteDot.style.float = 'right';
+        deleteDot.style.marginTop = '4px';
+        
+        rowNumCell.appendChild(rowNumSpan);
+        rowNumCell.appendChild(deleteDot);
         tr.appendChild(rowNumCell);
 
         // Data cells - only render cells for existing columns
