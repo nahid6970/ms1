@@ -5,7 +5,7 @@ let selectedCells = [];
 let isSelecting = false;
 
 // Load data on page load
-window.onload = function() {
+window.onload = function () {
     initializeApp();
 };
 
@@ -13,30 +13,30 @@ function initializeApp() {
     // Set up form handlers
     document.getElementById('columnForm').onsubmit = handleColumnFormSubmit;
     document.getElementById('renameForm').onsubmit = handleRenameFormSubmit;
-    
+
     // Set up keyboard shortcuts
     document.addEventListener('keydown', handleKeyboardShortcuts);
-    
+
     // Set up color picker sync for background color
     const colorInput = document.getElementById('columnColor');
     const colorText = document.getElementById('columnColorText');
-    
+
     colorInput.addEventListener('input', (e) => {
         colorText.value = e.target.value.toUpperCase();
     });
-    
+
     // Set up color picker sync for text color
     const textColorInput = document.getElementById('columnTextColor');
     const textColorText = document.getElementById('columnTextColorText');
-    
+
     textColorInput.addEventListener('input', (e) => {
         textColorText.value = e.target.value.toUpperCase();
     });
-    
+
     // Clear old localStorage values and set new defaults
     localStorage.removeItem('actionsWidth');
     localStorage.removeItem('rownumWidth');
-    
+
     // Load initial data
     loadData();
 }
@@ -44,7 +44,7 @@ function initializeApp() {
 function loadColumnWidths() {
     const actionsWidth = localStorage.getItem('actionsWidth') || '75px';
     const rownumWidth = localStorage.getItem('rownumWidth') || '75px';
-    
+
     document.documentElement.style.setProperty('--actions-width', actionsWidth);
     document.documentElement.style.setProperty('--rownum-width', rownumWidth);
 }
@@ -55,12 +55,12 @@ function handleKeyboardShortcuts(e) {
     // Ctrl+S or Cmd+S to save
     if ((e.ctrlKey || e.metaKey) && e.key === 's') {
         e.preventDefault();
-        
+
         // Blur the currently focused element to trigger onchange
         if (document.activeElement && document.activeElement.tagName === 'INPUT') {
             document.activeElement.blur();
         }
-        
+
         // Small delay to ensure onchange fires before saving
         setTimeout(() => {
             saveData();
@@ -102,7 +102,7 @@ function showToast(message, type = 'success') {
     const toast = document.getElementById('toast');
     toast.textContent = message;
     toast.className = `toast ${type} show`;
-    
+
     setTimeout(() => {
         toast.classList.remove('show');
     }, 3000);
@@ -137,7 +137,7 @@ function addColumn() {
 function editColumn(index) {
     const sheet = tableData.sheets[currentSheet];
     const col = sheet.columns[index];
-    
+
     document.getElementById('editingColumnIndex').value = index;
     document.getElementById('columnModalTitle').textContent = 'Edit Column';
     document.getElementById('columnSubmitBtn').textContent = 'Update Column';
@@ -168,7 +168,7 @@ function closeSettingsModal() {
 
 async function handleColumnFormSubmit(e) {
     e.preventDefault();
-    
+
     const editingIndex = parseInt(document.getElementById('editingColumnIndex').value);
     const column = {
         name: document.getElementById('columnName').value,
@@ -180,7 +180,7 @@ async function handleColumnFormSubmit(e) {
     };
 
     const sheet = tableData.sheets[currentSheet];
-    
+
     if (editingIndex >= 0) {
         // Update existing column
         sheet.columns[editingIndex] = column;
@@ -195,7 +195,7 @@ async function handleColumnFormSubmit(e) {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ column, sheetIndex: currentSheet })
             });
-            
+
             if (response.ok) {
                 sheet.columns.push(column);
                 sheet.rows.forEach(row => row.push(''));
@@ -212,16 +212,16 @@ async function handleColumnFormSubmit(e) {
 
 async function handleRenameFormSubmit(e) {
     e.preventDefault();
-    
+
     const newName = document.getElementById('sheetName').value;
-    
+
     try {
         const response = await fetch(`/api/sheets/${currentSheet}/rename`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name: newName })
         });
-        
+
         if (response.ok) {
             tableData.sheets[currentSheet].name = newName;
             renderSheetTabs();
@@ -234,7 +234,7 @@ async function handleRenameFormSubmit(e) {
 
 async function deleteColumn(index) {
     if (!confirm('Delete this column?')) return;
-    
+
     try {
         const response = await fetch(`/api/columns/${currentSheet}/${index}`, { method: 'DELETE' });
         if (response.ok) {
@@ -267,7 +267,7 @@ async function addRow() {
 
 async function deleteRow(index) {
     if (!confirm('Delete this row?')) return;
-    
+
     try {
         const response = await fetch(`/api/rows/${currentSheet}/${index}`, { method: 'DELETE' });
         if (response.ok) {
@@ -284,7 +284,7 @@ function updateCell(rowIndex, colIndex, value) {
     if (!sheet.cellStyles) {
         sheet.cellStyles = {};
     }
-    
+
     // Store value
     sheet.rows[rowIndex][colIndex] = value;
 }
@@ -316,17 +316,17 @@ function setCellStyle(rowIndex, colIndex, styleProperty, value) {
 
 function showCellContextMenu(e, rowIndex, colIndex, inputElement) {
     e.preventDefault();
-    
+
     contextMenuCell = { rowIndex, colIndex, inputElement };
-    
+
     const menu = document.getElementById('cellContextMenu');
     const style = getCellStyle(rowIndex, colIndex);
-    
+
     // Update checkmarks
     document.getElementById('ctxBold').classList.toggle('checked', style.bold === true);
     document.getElementById('ctxItalic').classList.toggle('checked', style.italic === true);
     document.getElementById('ctxCenter').classList.toggle('checked', style.center === true);
-    
+
     // Position menu
     menu.style.left = e.pageX + 'px';
     menu.style.top = e.pageY + 'px';
@@ -335,71 +335,71 @@ function showCellContextMenu(e, rowIndex, colIndex, inputElement) {
 
 function toggleCellBold() {
     if (!contextMenuCell) return;
-    
+
     const { rowIndex, colIndex, inputElement } = contextMenuCell;
     const style = getCellStyle(rowIndex, colIndex);
     const newValue = !style.bold;
-    
+
     setCellStyle(rowIndex, colIndex, 'bold', newValue);
     inputElement.style.fontWeight = newValue ? 'bold' : 'normal';
-    
+
     document.getElementById('ctxBold').classList.toggle('checked', newValue);
 }
 
 function toggleCellItalic() {
     if (!contextMenuCell) return;
-    
+
     const { rowIndex, colIndex, inputElement } = contextMenuCell;
     const style = getCellStyle(rowIndex, colIndex);
     const newValue = !style.italic;
-    
+
     setCellStyle(rowIndex, colIndex, 'italic', newValue);
     inputElement.style.fontStyle = newValue ? 'italic' : 'normal';
-    
+
     document.getElementById('ctxItalic').classList.toggle('checked', newValue);
 }
 
 function toggleCellCenter() {
     if (!contextMenuCell) return;
-    
+
     const { rowIndex, colIndex, inputElement } = contextMenuCell;
     const style = getCellStyle(rowIndex, colIndex);
     const newValue = !style.center;
-    
+
     setCellStyle(rowIndex, colIndex, 'center', newValue);
     inputElement.style.textAlign = newValue ? 'center' : 'left';
-    
+
     document.getElementById('ctxCenter').classList.toggle('checked', newValue);
 }
 
 function showCellContextMenu(e, rowIndex, colIndex, inputElement, tdElement) {
     e.preventDefault();
-    
+
     contextMenuCell = { rowIndex, colIndex, inputElement, tdElement };
-    
+
     const menu = document.getElementById('cellContextMenu');
     const style = getCellStyle(rowIndex, colIndex);
     const mergeInfo = getCellMerge(rowIndex, colIndex);
-    
+
     // Update checkmarks
     document.getElementById('ctxBold').classList.toggle('checked', style.bold === true);
     document.getElementById('ctxItalic').classList.toggle('checked', style.italic === true);
     document.getElementById('ctxCenter').classList.toggle('checked', style.center === true);
-    
+
     // Show/hide merge options
     const isMerged = mergeInfo && (mergeInfo.colspan || mergeInfo.rowspan || mergeInfo.hidden);
     const showMerge = selectedCells.length >= 2;
     const showUnmerge = isMerged;
-    
+
     document.getElementById('ctxMerge').style.display = showMerge ? 'flex' : 'none';
     document.getElementById('ctxUnmerge').style.display = showUnmerge ? 'flex' : 'none';
-    
+
     // Hide the separator before merge options if both are hidden
     const mergeSeparators = document.querySelectorAll('.context-menu-separator');
     if (mergeSeparators.length >= 2) {
         mergeSeparators[1].style.display = (showMerge || showUnmerge) ? 'block' : 'none';
     }
-    
+
     // Position menu
     menu.style.left = e.pageX + 'px';
     menu.style.top = e.pageY + 'px';
@@ -414,7 +414,7 @@ function closeCellContextMenu() {
 function startCellSelection(rowIndex, colIndex, td) {
     isSelecting = true;
     clearSelection();
-    selectedCells = [{row: rowIndex, col: colIndex, td: td}];
+    selectedCells = [{ row: rowIndex, col: colIndex, td: td }];
     td.classList.add('selected-cell');
     showToast('Hold Shift and drag to select more cells', 'info');
 }
@@ -422,7 +422,7 @@ function startCellSelection(rowIndex, colIndex, td) {
 function addToSelection(rowIndex, colIndex, td) {
     const exists = selectedCells.find(c => c.row === rowIndex && c.col === colIndex);
     if (!exists) {
-        selectedCells.push({row: rowIndex, col: colIndex, td: td});
+        selectedCells.push({ row: rowIndex, col: colIndex, td: td });
         td.classList.add('selected-cell');
     }
 }
@@ -455,27 +455,27 @@ function mergeCells() {
         showToast('Select at least 2 cells to merge', 'error');
         return;
     }
-    
+
     let minRow = Math.min(...selectedCells.map(c => c.row));
     let maxRow = Math.max(...selectedCells.map(c => c.row));
     let minCol = Math.min(...selectedCells.map(c => c.col));
     let maxCol = Math.max(...selectedCells.map(c => c.col));
-    
+
     const colspan = maxCol - minCol + 1;
     const rowspan = maxRow - minRow + 1;
-    
+
     // Set main cell
-    setCellMerge(minRow, minCol, {colspan, rowspan});
-    
+    setCellMerge(minRow, minCol, { colspan, rowspan });
+
     // Hide other cells
     for (let r = minRow; r <= maxRow; r++) {
         for (let c = minCol; c <= maxCol; c++) {
             if (r !== minRow || c !== minCol) {
-                setCellMerge(r, c, {hidden: true, mainRow: minRow, mainCol: minCol});
+                setCellMerge(r, c, { hidden: true, mainRow: minRow, mainCol: minCol });
             }
         }
     }
-    
+
     clearSelection();
     renderTable();
     closeCellContextMenu();
@@ -484,24 +484,24 @@ function mergeCells() {
 
 function unmergeCell() {
     if (!contextMenuCell) return;
-    
-    let {rowIndex, colIndex} = contextMenuCell;
+
+    let { rowIndex, colIndex } = contextMenuCell;
     let mergeInfo = getCellMerge(rowIndex, colIndex);
-    
+
     if (!mergeInfo) return;
-    
+
     // Find main cell
     if (mergeInfo.hidden) {
         rowIndex = mergeInfo.mainRow;
         colIndex = mergeInfo.mainCol;
         mergeInfo = getCellMerge(rowIndex, colIndex);
     }
-    
+
     if (!mergeInfo) return;
-    
+
     const colspan = mergeInfo.colspan || 1;
     const rowspan = mergeInfo.rowspan || 1;
-    
+
     // Remove all merge info
     const sheet = tableData.sheets[currentSheet];
     for (let r = rowIndex; r < rowIndex + rowspan; r++) {
@@ -509,7 +509,7 @@ function unmergeCell() {
             delete sheet.mergedCells[`${r}-${c}`];
         }
     }
-    
+
     renderTable();
     closeCellContextMenu();
     showToast('Cell unmerged', 'success');
@@ -517,44 +517,102 @@ function unmergeCell() {
 
 function setCellBgColor() {
     if (!contextMenuCell) return;
-    
-    const {rowIndex, colIndex, tdElement} = contextMenuCell;
-    const currentColor = tdElement.style.backgroundColor || '#ffffff';
-    
-    const color = prompt('Enter background color (hex code):', currentColor);
-    if (color) {
-        const cellStyle = getCellStyle(rowIndex, colIndex);
-        cellStyle.bgColor = color;
+
+    const { rowIndex, colIndex, tdElement } = contextMenuCell;
+    const currentStyle = getCellStyle(rowIndex, colIndex);
+    const currentColor = currentStyle.bgColor || tdElement.style.backgroundColor || '#ffffff';
+
+    // Create color picker input
+    const colorInput = document.createElement('input');
+    colorInput.type = 'color';
+    colorInput.value = rgbToHex(currentColor);
+    colorInput.style.position = 'absolute';
+    colorInput.style.opacity = '0';
+    colorInput.style.pointerEvents = 'none';
+    document.body.appendChild(colorInput);
+
+    colorInput.onchange = (e) => {
+        const color = e.target.value;
         setCellStyle(rowIndex, colIndex, 'bgColor', color);
         tdElement.style.backgroundColor = color;
-        closeCellContextMenu();
         showToast('Background color updated', 'success');
-    }
+        document.body.removeChild(colorInput);
+    };
+
+    colorInput.onblur = () => {
+        setTimeout(() => {
+            if (document.body.contains(colorInput)) {
+                document.body.removeChild(colorInput);
+            }
+        }, 100);
+    };
+
+    colorInput.click();
+    closeCellContextMenu();
 }
 
 function setCellTextColor() {
     if (!contextMenuCell) return;
-    
-    const {rowIndex, colIndex, inputElement} = contextMenuCell;
-    const currentColor = inputElement.style.color || '#000000';
-    
-    const color = prompt('Enter text color (hex code):', currentColor);
-    if (color) {
-        const cellStyle = getCellStyle(rowIndex, colIndex);
-        cellStyle.textColor = color;
+
+    const { rowIndex, colIndex, inputElement } = contextMenuCell;
+    const currentStyle = getCellStyle(rowIndex, colIndex);
+    const currentColor = currentStyle.textColor || inputElement.style.color || '#000000';
+
+    // Create color picker input
+    const colorInput = document.createElement('input');
+    colorInput.type = 'color';
+    colorInput.value = rgbToHex(currentColor);
+    colorInput.style.position = 'absolute';
+    colorInput.style.opacity = '0';
+    colorInput.style.pointerEvents = 'none';
+    document.body.appendChild(colorInput);
+
+    colorInput.onchange = (e) => {
+        const color = e.target.value;
         setCellStyle(rowIndex, colIndex, 'textColor', color);
         inputElement.style.color = color;
-        closeCellContextMenu();
         showToast('Text color updated', 'success');
+        document.body.removeChild(colorInput);
+    };
+
+    colorInput.onblur = () => {
+        setTimeout(() => {
+            if (document.body.contains(colorInput)) {
+                document.body.removeChild(colorInput);
+            }
+        }, 100);
+    };
+
+    colorInput.click();
+    closeCellContextMenu();
+}
+
+// Helper function to convert RGB to Hex
+function rgbToHex(color) {
+    // If already hex, return it
+    if (color.startsWith('#')) {
+        return color.length === 7 ? color : '#000000';
     }
+
+    // If rgb/rgba format
+    const rgbMatch = color.match(/\d+/g);
+    if (rgbMatch && rgbMatch.length >= 3) {
+        const r = parseInt(rgbMatch[0]).toString(16).padStart(2, '0');
+        const g = parseInt(rgbMatch[1]).toString(16).padStart(2, '0');
+        const b = parseInt(rgbMatch[2]).toString(16).padStart(2, '0');
+        return `#${r}${g}${b}`;
+    }
+
+    // Default fallback
+    return '#000000';
 }
 
 function setCellFontSize() {
     if (!contextMenuCell) return;
-    
-    const {rowIndex, colIndex, inputElement} = contextMenuCell;
+
+    const { rowIndex, colIndex, inputElement } = contextMenuCell;
     const currentSize = inputElement.style.fontSize || '14px';
-    
+
     const size = prompt('Enter font size (e.g., 16px, 20px):', currentSize);
     if (size) {
         setCellStyle(rowIndex, colIndex, 'fontSize', size);
@@ -567,14 +625,14 @@ function setCellFontSize() {
 async function addSheet() {
     const sheetName = prompt('Enter sheet name:', `Sheet${tableData.sheets.length + 1}`);
     if (!sheetName) return;
-    
+
     try {
         const response = await fetch('/api/sheets', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name: sheetName })
         });
-        
+
         if (response.ok) {
             const result = await response.json();
             tableData.sheets.push({ name: sheetName, columns: [], rows: [] });
@@ -592,10 +650,10 @@ async function deleteSheet(index) {
         alert('Cannot delete the last sheet!');
         return;
     }
-    
+
     const sheetName = tableData.sheets[index].name;
     if (!confirm(`Delete sheet "${sheetName}"?`)) return;
-    
+
     try {
         const response = await fetch(`/api/sheets/${index}`, { method: 'DELETE' });
         if (response.ok) {
@@ -633,15 +691,15 @@ function renderSheetTabs() {
     if (tableData.sheets[currentSheet]) {
         currentSheetNameEl.textContent = tableData.sheets[currentSheet].name;
     }
-    
+
     // Render sheet list (simplified - just for switching)
     const sheetList = document.getElementById('sheetList');
     sheetList.innerHTML = '';
-    
+
     tableData.sheets.forEach((sheet, index) => {
         const item = document.createElement('div');
         item.className = `sheet-item ${index === currentSheet ? 'active' : ''}`;
-        
+
         const nameSpan = document.createElement('span');
         nameSpan.className = 'sheet-item-name';
         nameSpan.textContent = sheet.name;
@@ -649,7 +707,7 @@ function renderSheetTabs() {
             switchSheet(index);
             toggleSheetList();
         };
-        
+
         item.appendChild(nameSpan);
         sheetList.appendChild(item);
     });
@@ -667,19 +725,19 @@ function openSettings() {
 function renderTable() {
     const headerRow = document.getElementById('headerRow');
     const tableBody = document.getElementById('tableBody');
-    
+
     headerRow.innerHTML = '';
     tableBody.innerHTML = '';
-    
+
     const sheet = tableData.sheets[currentSheet];
     if (!sheet) return;
-    
+
     // Add actions column first
     const actionsHeader = document.createElement('th');
     actionsHeader.className = 'actions-header';
     actionsHeader.textContent = 'Actions';
     headerRow.appendChild(actionsHeader);
-    
+
     // Add row number column
     const rowNumHeader = document.createElement('th');
     rowNumHeader.className = 'row-number';
@@ -691,34 +749,34 @@ function renderTable() {
         const th = document.createElement('th');
         th.style.width = col.width + 'px';
         th.style.backgroundColor = col.color;
-        
+
         const headerCell = document.createElement('div');
         headerCell.className = 'header-cell';
-        
+
         const columnName = document.createElement('span');
         columnName.className = 'column-name';
         columnName.textContent = col.name;
         columnName.style.color = col.textColor || '#000000';
-        
+
         const menuWrapper = document.createElement('div');
         menuWrapper.className = 'column-menu-wrapper';
-        
+
         const menuBtn = document.createElement('button');
         menuBtn.className = 'column-menu-btn';
         menuBtn.textContent = '⋮';
         menuBtn.onclick = (e) => toggleColumnMenu(e, index);
-        
+
         const menu = document.createElement('div');
         menu.className = 'column-menu';
         menu.id = `column-menu-${index}`;
-        
+
         const sortItem = document.createElement('div');
         sortItem.className = 'column-menu-item has-submenu';
         sortItem.innerHTML = '<span>⇅</span> Sort <span class="submenu-arrow">›</span>';
-        
+
         const sortSubmenu = document.createElement('div');
         sortSubmenu.className = 'column-submenu';
-        
+
         const sortAscItem = document.createElement('div');
         sortAscItem.className = 'column-menu-item';
         sortAscItem.innerHTML = '<span>↑</span> A-Z';
@@ -727,7 +785,7 @@ function renderTable() {
             sortColumn(index, 'asc');
             closeAllColumnMenus();
         };
-        
+
         const sortDescItem = document.createElement('div');
         sortDescItem.className = 'column-menu-item';
         sortDescItem.innerHTML = '<span>↓</span> Z-A';
@@ -736,18 +794,18 @@ function renderTable() {
             sortColumn(index, 'desc');
             closeAllColumnMenus();
         };
-        
+
         sortSubmenu.appendChild(sortAscItem);
         sortSubmenu.appendChild(sortDescItem);
         sortItem.appendChild(sortSubmenu);
-        
+
         const moveItem = document.createElement('div');
         moveItem.className = 'column-menu-item has-submenu';
         moveItem.innerHTML = '<span>↔</span> Move <span class="submenu-arrow">›</span>';
-        
+
         const moveSubmenu = document.createElement('div');
         moveSubmenu.className = 'column-submenu';
-        
+
         const moveLeftItem = document.createElement('div');
         moveLeftItem.className = 'column-menu-item';
         moveLeftItem.innerHTML = '<span>←</span> Left';
@@ -760,7 +818,7 @@ function renderTable() {
                 closeAllColumnMenus();
             };
         }
-        
+
         const moveRightItem = document.createElement('div');
         moveRightItem.className = 'column-menu-item';
         moveRightItem.innerHTML = '<span>→</span> Right';
@@ -773,11 +831,11 @@ function renderTable() {
                 closeAllColumnMenus();
             };
         }
-        
+
         moveSubmenu.appendChild(moveLeftItem);
         moveSubmenu.appendChild(moveRightItem);
         moveItem.appendChild(moveSubmenu);
-        
+
         const editItem = document.createElement('div');
         editItem.className = 'column-menu-item';
         editItem.innerHTML = '<span>✏️</span> Edit';
@@ -785,7 +843,7 @@ function renderTable() {
             editColumn(index);
             closeAllColumnMenus();
         };
-        
+
         const deleteItem = document.createElement('div');
         deleteItem.className = 'column-menu-item delete';
         deleteItem.innerHTML = '<span>🗑️</span> Delete';
@@ -793,59 +851,59 @@ function renderTable() {
             deleteColumn(index);
             closeAllColumnMenus();
         };
-        
+
         menu.appendChild(editItem);
         menu.appendChild(sortItem);
         menu.appendChild(moveItem);
         menu.appendChild(deleteItem);
         menuWrapper.appendChild(menuBtn);
         menuWrapper.appendChild(menu);
-        
+
         headerCell.appendChild(columnName);
         headerCell.appendChild(menuWrapper);
         th.appendChild(headerCell);
         headerRow.appendChild(th);
     });
-    
+
     // Render rows
     sheet.rows.forEach((row, rowIndex) => {
         const tr = document.createElement('tr');
-        
+
         // Actions cell first
         const actionsCell = document.createElement('td');
         actionsCell.className = 'row-actions';
-        
+
         const deleteBtn = document.createElement('button');
         deleteBtn.className = 'btn btn-danger';
         deleteBtn.textContent = '×';
         deleteBtn.onclick = () => deleteRow(rowIndex);
-        
+
         actionsCell.appendChild(deleteBtn);
         tr.appendChild(actionsCell);
-        
+
         // Row number
         const rowNumCell = document.createElement('td');
         rowNumCell.className = 'row-number';
         rowNumCell.textContent = rowIndex + 1;
         tr.appendChild(rowNumCell);
-        
+
         // Data cells - only render cells for existing columns
         sheet.columns.forEach((col, colIndex) => {
             const td = document.createElement('td');
             td.style.backgroundColor = col.color;
-            
+
             const input = document.createElement('input');
             input.type = col.type;
             input.value = row[colIndex] || '';
             input.style.color = col.textColor || '#000000';
-            
+
             // Apply column font
             if (col.font && col.font !== '') {
                 input.style.fontFamily = `'${col.font}', monospace`;
             }
-            
+
             input.onchange = (e) => updateCell(rowIndex, colIndex, e.target.value);
-            
+
             // Apply cell-specific styles
             const cellStyle = getCellStyle(rowIndex, colIndex);
             if (cellStyle.bold) input.style.fontWeight = 'bold';
@@ -863,27 +921,27 @@ function renderTable() {
             if (cellStyle.fontSize) {
                 input.style.fontSize = cellStyle.fontSize;
             }
-            
+
             // Add context menu
             input.oncontextmenu = (e) => showCellContextMenu(e, rowIndex, colIndex, input, td);
-            
+
             // Cell selection for merging - add to both td and input
             td.dataset.row = rowIndex;
             td.dataset.col = colIndex;
-            
+
             const handleMouseDown = (e) => {
                 if (e.button === 0 && e.shiftKey) {
                     e.preventDefault();
                     startCellSelection(rowIndex, colIndex, td);
                 }
             };
-            
+
             const handleMouseEnter = () => {
                 if (isSelecting) {
                     addToSelection(rowIndex, colIndex, td);
                 }
             };
-            
+
             td.onmousedown = handleMouseDown;
             input.onmousedown = (e) => {
                 if (e.shiftKey) {
@@ -892,7 +950,7 @@ function renderTable() {
             };
             td.onmouseenter = handleMouseEnter;
             input.onmouseenter = handleMouseEnter;
-            
+
             // Check if merged
             const mergeInfo = getCellMerge(rowIndex, colIndex);
             if (mergeInfo) {
@@ -904,18 +962,18 @@ function renderTable() {
                     td.colSpan = mergeInfo.colspan || 1;
                     td.rowSpan = mergeInfo.rowspan || 1;
                     td.classList.add('merged-cell');
-                    
+
                     // Use textarea for merged cells
                     const textarea = document.createElement('textarea');
                     textarea.value = row[colIndex] || '';
                     textarea.style.color = col.textColor || '#000000';
-                    
+
                     if (col.font && col.font !== '') {
                         textarea.style.fontFamily = `'${col.font}', monospace`;
                     }
-                    
+
                     textarea.onchange = (e) => updateCell(rowIndex, colIndex, e.target.value);
-                    
+
                     const cellStyle = getCellStyle(rowIndex, colIndex);
                     if (cellStyle.bold) textarea.style.fontWeight = 'bold';
                     if (cellStyle.italic) textarea.style.fontStyle = 'italic';
@@ -929,16 +987,16 @@ function renderTable() {
                     if (cellStyle.fontSize) {
                         textarea.style.fontSize = cellStyle.fontSize;
                     }
-                    
+
                     textarea.oncontextmenu = (e) => showCellContextMenu(e, rowIndex, colIndex, textarea, td);
-                    
+
                     const handleMouseDown = (e) => {
                         if (e.button === 0 && e.shiftKey) {
                             e.preventDefault();
                             startCellSelection(rowIndex, colIndex, td);
                         }
                     };
-                    
+
                     textarea.onmousedown = (e) => {
                         if (e.shiftKey) {
                             handleMouseDown(e);
@@ -949,27 +1007,27 @@ function renderTable() {
                             addToSelection(rowIndex, colIndex, td);
                         }
                     };
-                    
+
                     td.appendChild(textarea);
                     tr.appendChild(td);
                     return;
                 }
             }
-            
+
             td.appendChild(input);
             tr.appendChild(td);
         });
-        
+
         tableBody.appendChild(tr);
     });
 }
 
 function toggleColumnMenu(event, index) {
     event.stopPropagation();
-    
+
     // Close all other menus
     closeAllColumnMenus();
-    
+
     // Toggle current menu
     const menu = document.getElementById(`column-menu-${index}`);
     menu.classList.toggle('show');
@@ -986,7 +1044,7 @@ function closeAllColumnMenus() {
 function sortColumn(colIndex, direction) {
     const sheet = tableData.sheets[currentSheet];
     const col = sheet.columns[colIndex];
-    
+
     // Create array of row indices with their values
     const rowsWithIndices = sheet.rows.map((row, index) => ({
         index: index,
@@ -999,12 +1057,12 @@ function sortColumn(colIndex, direction) {
                 return obj;
             }, {}) : {}
     }));
-    
+
     // Sort based on column type
     rowsWithIndices.sort((a, b) => {
         let valA = a.value;
         let valB = b.value;
-        
+
         // Handle different data types
         if (col.type === 'number') {
             valA = parseFloat(valA) || 0;
@@ -1017,18 +1075,18 @@ function sortColumn(colIndex, direction) {
             valA = String(valA).toLowerCase();
             valB = String(valB).toLowerCase();
         }
-        
+
         if (direction === 'asc') {
             return valA > valB ? 1 : valA < valB ? -1 : 0;
         } else {
             return valA < valB ? 1 : valA > valB ? -1 : 0;
         }
     });
-    
+
     // Rebuild rows and cell styles with new order
     const newRows = rowsWithIndices.map(item => item.row);
     const newCellStyles = {};
-    
+
     rowsWithIndices.forEach((item, newIndex) => {
         // Map old cell styles to new row indices
         Object.keys(item.cellStyles).forEach(oldKey => {
@@ -1037,12 +1095,12 @@ function sortColumn(colIndex, direction) {
             newCellStyles[newKey] = item.cellStyles[oldKey];
         });
     });
-    
+
     sheet.rows = newRows;
     if (Object.keys(newCellStyles).length > 0) {
         sheet.cellStyles = newCellStyles;
     }
-    
+
     renderTable();
     showToast(`Sorted by ${col.name} (${direction === 'asc' ? 'A-Z' : 'Z-A'})`, 'success');
 }
@@ -1050,49 +1108,49 @@ function sortColumn(colIndex, direction) {
 function moveColumn(colIndex, direction) {
     const sheet = tableData.sheets[currentSheet];
     const newIndex = direction === 'left' ? colIndex - 1 : colIndex + 1;
-    
+
     // Check bounds
     if (newIndex < 0 || newIndex >= sheet.columns.length) {
         return;
     }
-    
+
     // Swap columns
     [sheet.columns[colIndex], sheet.columns[newIndex]] = [sheet.columns[newIndex], sheet.columns[colIndex]];
-    
+
     // Swap column data in all rows
     sheet.rows.forEach(row => {
         [row[colIndex], row[newIndex]] = [row[newIndex], row[colIndex]];
     });
-    
+
     // Swap cell styles
     if (sheet.cellStyles) {
         const newCellStyles = {};
         Object.keys(sheet.cellStyles).forEach(key => {
             const [rowIdx, colIdx] = key.split('-').map(Number);
             let newColIdx = colIdx;
-            
+
             if (colIdx === colIndex) {
                 newColIdx = newIndex;
             } else if (colIdx === newIndex) {
                 newColIdx = colIndex;
             }
-            
+
             newCellStyles[`${rowIdx}-${newColIdx}`] = sheet.cellStyles[key];
         });
         sheet.cellStyles = newCellStyles;
     }
-    
+
     renderTable();
     showToast(`Column moved ${direction}`, 'success');
 }
 
 // Close modal and dropdowns when clicking outside
-window.onclick = function(event) {
+window.onclick = function (event) {
     const columnModal = document.getElementById('columnModal');
     const renameModal = document.getElementById('renameModal');
     const settingsModal = document.getElementById('settingsModal');
     const sheetList = document.getElementById('sheetList');
-    
+
     if (event.target === columnModal) {
         closeColumnModal();
     }
@@ -1102,17 +1160,17 @@ window.onclick = function(event) {
     if (event.target === settingsModal) {
         closeSettingsModal();
     }
-    
+
     // Close sheet list when clicking outside
     if (!event.target.closest('.sheet-selector')) {
         sheetList.classList.remove('show');
     }
-    
+
     // Close column menus when clicking outside
     if (!event.target.closest('.column-menu-wrapper')) {
         closeAllColumnMenus();
     }
-    
+
     // Close cell context menu when clicking outside
     if (!event.target.closest('#cellContextMenu')) {
         closeCellContextMenu();
