@@ -594,8 +594,8 @@ function renderTable() {
     
     // Add actions column
     const actionsHeader = document.createElement('th');
+    actionsHeader.className = 'actions-header';
     actionsHeader.textContent = 'Actions';
-    actionsHeader.style.width = '100px';
     headerRow.appendChild(actionsHeader);
     
     // Render rows

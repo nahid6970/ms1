@@ -131,6 +131,15 @@ td input:focus {
 
 .row-actions {
     white-space: nowrap;
+    width: 15px;
+    max-width: 15px;
+    min-width: 15px;
+}
+
+.actions-header {
+    width: 15px;
+    max-width: 15px;
+    min-width: 15px;
 }
 
 /* Modal Styles */
@@ -252,9 +261,9 @@ td input:focus {
     background: #f8f9fa;
     font-weight: 600;
     text-align: center;
-    width: 50px;
-    max-width: 50px;
-    min-width: 50px;
+    width: 15px;
+    max-width: 15px;
+    min-width: 15px;
 }
 
 /* Sheet Tabs */
