@@ -700,3 +700,20 @@ td input::-moz-selection {
 .context-menu-item.checked .checkmark {
     opacity: 1;
 }
+
+.context-menu-separator {
+    height: 1px;
+    background: #e0e0e0;
+    margin: 4px 0;
+}
+
+.selected-cell {
+    outline: 3px solid #007bff !important;
+    outline-offset: -3px;
+    background: rgba(0, 123, 255, 0.15) !important;
+}
+
+td.merged-cell {
+    text-align: center;
+    vertical-align: middle;
+}

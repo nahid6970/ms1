@@ -1,6 +1,8 @@
 let tableData = { sheets: [], activeSheet: 0 };
 let currentSheet = 0;
 let contextMenuCell = null;
+let selectedCells = [];
+let isSelecting = false;
 
 // Load data on page load
 window.onload = function() {
@@ -370,9 +372,139 @@ function toggleCellCenter() {
     document.getElementById('ctxCenter').classList.toggle('checked', newValue);
 }
 
+function showCellContextMenu(e, rowIndex, colIndex, inputElement, tdElement) {
+    e.preventDefault();
+    
+    contextMenuCell = { rowIndex, colIndex, inputElement, tdElement };
+    
+    const menu = document.getElementById('cellContextMenu');
+    const style = getCellStyle(rowIndex, colIndex);
+    const mergeInfo = getCellMerge(rowIndex, colIndex);
+    
+    // Update checkmarks
+    document.getElementById('ctxBold').classList.toggle('checked', style.bold === true);
+    document.getElementById('ctxItalic').classList.toggle('checked', style.italic === true);
+    document.getElementById('ctxCenter').classList.toggle('checked', style.center === true);
+    document.getElementById('ctxBorder').classList.toggle('checked', style.border === true);
+    
+    // Show/hide merge options
+    const isMerged = mergeInfo && (mergeInfo.colspan || mergeInfo.rowspan || mergeInfo.hidden);
+    document.getElementById('ctxMerge').style.display = selectedCells.length >= 2 ? 'flex' : 'none';
+    document.getElementById('ctxUnmerge').style.display = isMerged ? 'flex' : 'none';
+    
+    // Position menu
+    menu.style.left = e.pageX + 'px';
+    menu.style.top = e.pageY + 'px';
+    menu.classList.add('show');
+}
+
 function closeCellContextMenu() {
     document.getElementById('cellContextMenu').classList.remove('show');
     contextMenuCell = null;
+}
+
+function startCellSelection(rowIndex, colIndex, td) {
+    isSelecting = true;
+    clearSelection();
+    selectedCells = [{row: rowIndex, col: colIndex, td: td}];
+    td.classList.add('selected-cell');
+    showToast('Hold Shift and drag to select more cells', 'info');
+}
+
+function addToSelection(rowIndex, colIndex, td) {
+    const exists = selectedCells.find(c => c.row === rowIndex && c.col === colIndex);
+    if (!exists) {
+        selectedCells.push({row: rowIndex, col: colIndex, td: td});
+        td.classList.add('selected-cell');
+    }
+}
+
+function clearSelection() {
+    selectedCells.forEach(cell => {
+        if (cell.td) cell.td.classList.remove('selected-cell');
+    });
+    selectedCells = [];
+}
+
+document.addEventListener('mouseup', () => {
+    isSelecting = false;
+});
+
+function getCellMerge(rowIndex, colIndex) {
+    const sheet = tableData.sheets[currentSheet];
+    if (!sheet.mergedCells) return null;
+    return sheet.mergedCells[`${rowIndex}-${colIndex}`];
+}
+
+function setCellMerge(rowIndex, colIndex, info) {
+    const sheet = tableData.sheets[currentSheet];
+    if (!sheet.mergedCells) sheet.mergedCells = {};
+    sheet.mergedCells[`${rowIndex}-${colIndex}`] = info;
+}
+
+function mergeCells() {
+    if (selectedCells.length < 2) {
+        showToast('Select at least 2 cells to merge', 'error');
+        return;
+    }
+    
+    let minRow = Math.min(...selectedCells.map(c => c.row));
+    let maxRow = Math.max(...selectedCells.map(c => c.row));
+    let minCol = Math.min(...selectedCells.map(c => c.col));
+    let maxCol = Math.max(...selectedCells.map(c => c.col));
+    
+    const colspan = maxCol - minCol + 1;
+    const rowspan = maxRow - minRow + 1;
+    
+    // Set main cell
+    setCellMerge(minRow, minCol, {colspan, rowspan});
+    
+    // Hide other cells
+    for (let r = minRow; r <= maxRow; r++) {
+        for (let c = minCol; c <= maxCol; c++) {
+            if (r !== minRow || c !== minCol) {
+                setCellMerge(r, c, {hidden: true, mainRow: minRow, mainCol: minCol});
+            }
+        }
+    }
+    
+    clearSelection();
+    renderTable();
+    closeCellContextMenu();
+    showToast('Cells merged', 'success');
+}
+
+function unmergeCell() {
+    if (!contextMenuCell) return;
+    
+    let {rowIndex, colIndex} = contextMenuCell;
+    let mergeInfo = getCellMerge(rowIndex, colIndex);
+    
+    if (!mergeInfo) return;
+    
+    // Find main cell
+    if (mergeInfo.hidden) {
+        rowIndex = mergeInfo.mainRow;
+        colIndex = mergeInfo.mainCol;
+        mergeInfo = getCellMerge(rowIndex, colIndex);
+    }
+    
+    if (!mergeInfo) return;
+    
+    const colspan = mergeInfo.colspan || 1;
+    const rowspan = mergeInfo.rowspan || 1;
+    
+    // Remove all merge info
+    const sheet = tableData.sheets[currentSheet];
+    for (let r = rowIndex; r < rowIndex + rowspan; r++) {
+        for (let c = colIndex; c < colIndex + colspan; c++) {
+            delete sheet.mergedCells[`${r}-${c}`];
+        }
+    }
+    
+    renderTable();
+    closeCellContextMenu();
+    showToast('Cell unmerged', 'success');
 }
 
 async function addSheet() {
@@ -668,6 +800,44 @@ function renderTable() {
             
             // Add context menu
             input.oncontextmenu = (e) => showCellContextMenu(e, rowIndex, colIndex, input, td);
+            
+            // Cell selection for merging - add to both td and input
+            td.dataset.row = rowIndex;
+            td.dataset.col = colIndex;
+            
+            const handleMouseDown = (e) => {
+                if (e.button === 0 && e.shiftKey) {
+                    e.preventDefault();
+                    startCellSelection(rowIndex, colIndex, td);
+                }
+            };
+            
+            const handleMouseEnter = () => {
+                if (isSelecting) {
+                    addToSelection(rowIndex, colIndex, td);
+                }
+            };
+            
+            td.onmousedown = handleMouseDown;
+            input.onmousedown = (e) => {
+                if (e.shiftKey) {
+                    handleMouseDown(e);
+                }
+            };
+            td.onmouseenter = handleMouseEnter;
+            input.onmouseenter = handleMouseEnter;
+            
+            // Check if merged
+            const mergeInfo = getCellMerge(rowIndex, colIndex);
+            if (mergeInfo) {
+                if (mergeInfo.hidden) {
+                    td.style.display = 'none';
+                } else if (mergeInfo.colspan || mergeInfo.rowspan) {
+                    td.colSpan = mergeInfo.colspan || 1;
+                    td.rowSpan = mergeInfo.rowspan || 1;
+                    td.classList.add('merged-cell');
+                }
+            }
             
             td.appendChild(input);
             tr.appendChild(td);
