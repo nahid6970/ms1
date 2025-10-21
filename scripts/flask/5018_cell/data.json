@@ -2,55 +2,272 @@
   "activeSheet": 0,
   "sheets": [
     {
-      "cellStyles": {
-        "1-0": {
-          "bold": false,
-          "center": false,
-          "italic": false
-        }
-      },
+      "cellStyles": {},
       "columns": [
         {
           "color": "#ffffff",
           "font": "JetBrains Mono",
-          "name": "date",
+          "headerBgColor": "#ffffff",
+          "headerBold": true,
+          "headerCenter": true,
+          "headerItalic": true,
+          "headerTextColor": "#000000",
+          "name": "Word",
           "textColor": "#000000",
           "type": "text",
           "width": "150"
         },
         {
-          "color": "#e2d4d4",
+          "color": "#8bfd8d",
           "font": "",
-          "name": "day",
-          "textColor": "#000000",
-          "type": "text",
-          "width": "150"
-        },
-        {
-          "color": "#ffffff",
-          "font": "",
-          "name": "XX",
+          "headerBgColor": "#ffffff",
+          "headerBold": true,
+          "headerCenter": true,
+          "headerItalic": true,
+          "headerTextColor": "#333333",
+          "name": "Meaning",
           "textColor": "#000000",
           "type": "text",
           "width": "150"
         }
       ],
-      "name": "S1",
+      "mergedCells": {},
+      "name": "Word-Meaning",
       "rows": [
         [
-          "\u0986\u09a8\u09cd\u09a4\u09b0\u09cd\u099c\u09be\u09a4\u09bf\u0995 \u0985\u09ad\u09bf\u09ac\u09be\u09b8\u09c0 \u09a6\u09bf\u09ac\u09b8",
-          "11",
-          null
+          "Brochure",
+          "\u09aa\u09c1\u09b8\u09cd\u09a4\u09bf\u0995\u09be"
         ],
         [
-          "\u09a1\u09bf\u099c\u09bf\u099f\u09be\u09b2 \u09ac\u09be\u0982\u09b2\u09be\u09a6\u09c7\u09b6 \u09a6\u09bf\u09ac\u09b8",
-          "12",
-          null
+          "Domicile",
+          "\u09b8\u09cd\u09a5\u09be\u09df\u09c0 \u09a8\u09bf\u09ac\u09be\u09b8"
         ],
         [
-          "\u09ac\u09bf\u09b6\u09cd\u09ac \u09ae\u09c3\u09a4\u09cd\u09a4\u09bf\u0995\u09be \u09a6\u09bf\u09ac\u09b8",
-          "5",
-          null
+          "Gazette",
+          "\u0998\u09cb\u09b7\u09a3\u09be\u09aa\u09a4\u09cd\u09b0"
+        ],
+        [
+          "Propaganda",
+          "\u09aa\u09cd\u09b0\u099a\u09be\u09b0\u09a3\u09be"
+        ],
+        [
+          "",
+          ""
+        ],
+        [
+          "",
+          ""
+        ],
+        [
+          "",
+          ""
+        ],
+        [
+          "",
+          ""
+        ],
+        [
+          "",
+          ""
+        ],
+        [
+          "",
+          ""
+        ],
+        [
+          "",
+          ""
+        ]
+      ]
+    },
+    {
+      "cellStyles": {},
+      "columns": [
+        {
+          "color": "#ffffff",
+          "font": "",
+          "headerBgColor": "#f8f9fa",
+          "headerBold": true,
+          "headerCenter": false,
+          "headerItalic": false,
+          "headerTextColor": "#333333",
+          "name": "asdasdasd",
+          "textColor": "#000000",
+          "type": "text",
+          "width": "150"
+        },
+        {
+          "color": "#ffffff",
+          "font": "",
+          "headerBgColor": "#f8f9fa",
+          "headerBold": true,
+          "headerCenter": false,
+          "headerItalic": false,
+          "headerTextColor": "#333333",
+          "name": "asdasdasd",
+          "textColor": "#000000",
+          "type": "text",
+          "width": "150"
+        },
+        {
+          "color": "#ffffff",
+          "font": "",
+          "headerBgColor": "#f8f9fa",
+          "headerBold": true,
+          "headerCenter": false,
+          "headerItalic": false,
+          "headerTextColor": "#333333",
+          "name": "asdasdasd",
+          "textColor": "#000000",
+          "type": "text",
+          "width": "150"
+        },
+        {
+          "color": "#ffffff",
+          "font": "",
+          "headerBgColor": "#f8f9fa",
+          "headerBold": true,
+          "headerCenter": false,
+          "headerItalic": false,
+          "headerTextColor": "#333333",
+          "name": "asdasdasd",
+          "textColor": "#000000",
+          "type": "text",
+          "width": "150"
+        },
+        {
+          "color": "#ffffff",
+          "font": "",
+          "headerBgColor": "#f8f9fa",
+          "headerBold": true,
+          "headerCenter": false,
+          "headerItalic": false,
+          "headerTextColor": "#333333",
+          "name": "asdasdasdasdsadad",
+          "textColor": "#000000",
+          "type": "text",
+          "width": "150"
+        },
+        {
+          "color": "#ffffff",
+          "font": "",
+          "headerBgColor": "#f8f9fa",
+          "headerBold": true,
+          "headerCenter": false,
+          "headerItalic": false,
+          "headerTextColor": "#333333",
+          "name": "asdasdasda",
+          "textColor": "#000000",
+          "type": "text",
+          "width": "150"
+        },
+        {
+          "color": "#ffffff",
+          "font": "",
+          "headerBgColor": "#f8f9fa",
+          "headerBold": true,
+          "headerCenter": false,
+          "headerItalic": false,
+          "headerTextColor": "#333333",
+          "name": "asdasdasdasdasd",
+          "textColor": "#000000",
+          "type": "text",
+          "width": "150"
+        },
+        {
+          "color": "#ffffff",
+          "font": "",
+          "headerBgColor": "#f8f9fa",
+          "headerBold": true,
+          "headerCenter": false,
+          "headerItalic": false,
+          "headerTextColor": "#333333",
+          "name": "ssssssssssssssssssssssssssssss",
+          "textColor": "#000000",
+          "type": "text",
+          "width": "150"
+        },
+        {
+          "color": "#ffffff",
+          "font": "",
+          "headerBgColor": "#f8f9fa",
+          "headerBold": true,
+          "headerCenter": false,
+          "headerItalic": false,
+          "headerTextColor": "#333333",
+          "name": "sssssssssssssssssssssssssssssssssssssssssssss",
+          "textColor": "#000000",
+          "type": "text",
+          "width": "150"
+        },
+        {
+          "color": "#ffffff",
+          "font": "",
+          "headerBgColor": "#f8f9fa",
+          "headerBold": true,
+          "headerCenter": false,
+          "headerItalic": false,
+          "headerTextColor": "#333333",
+          "name": "asdasdasdasdasdasdasd",
+          "textColor": "#000000",
+          "type": "text",
+          "width": "150"
+        },
+        {
+          "color": "#ffffff",
+          "font": "",
+          "headerBgColor": "#f8f9fa",
+          "headerBold": true,
+          "headerCenter": false,
+          "headerItalic": false,
+          "headerTextColor": "#333333",
+          "name": "asdasdasdasdasdasd",
+          "textColor": "#000000",
+          "type": "text",
+          "width": "150"
+        }
+      ],
+      "name": "\u09b8\u09ae\u09be\u09b8",
+      "rows": [
+        [
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
         ]
       ]
     }
