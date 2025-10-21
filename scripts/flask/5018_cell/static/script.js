@@ -831,10 +831,52 @@ function renderTable() {
             if (mergeInfo) {
                 if (mergeInfo.hidden) {
                     td.style.display = 'none';
+                    tr.appendChild(td);
+                    return; // Skip adding input for hidden cells
                 } else if (mergeInfo.colspan || mergeInfo.rowspan) {
                     td.colSpan = mergeInfo.colspan || 1;
                     td.rowSpan = mergeInfo.rowspan || 1;
                     td.classList.add('merged-cell');
+                    
+                    // Use textarea for merged cells
+                    const textarea = document.createElement('textarea');
+                    textarea.value = row[colIndex] || '';
+                    textarea.style.color = col.textColor || '#000000';
+                    
+                    if (col.font && col.font !== '') {
+                        textarea.style.fontFamily = `'${col.font}', monospace`;
+                    }
+                    
+                    textarea.onchange = (e) => updateCell(rowIndex, colIndex, e.target.value);
+                    
+                    const cellStyle = getCellStyle(rowIndex, colIndex);
+                    if (cellStyle.bold) textarea.style.fontWeight = 'bold';
+                    if (cellStyle.italic) textarea.style.fontStyle = 'italic';
+                    if (cellStyle.center) textarea.style.textAlign = 'center';
+                    
+                    textarea.oncontextmenu = (e) => showCellContextMenu(e, rowIndex, colIndex, textarea, td);
+                    
+                    const handleMouseDown = (e) => {
+                        if (e.button === 0 && e.shiftKey) {
+                            e.preventDefault();
+                            startCellSelection(rowIndex, colIndex, td);
+                        }
+                    };
+                    
+                    textarea.onmousedown = (e) => {
+                        if (e.shiftKey) {
+                            handleMouseDown(e);
+                        }
+                    };
+                    textarea.onmouseenter = () => {
+                        if (isSelecting) {
+                            addToSelection(rowIndex, colIndex, td);
+                        }
+                    };
+                    
+                    td.appendChild(textarea);
+                    tr.appendChild(td);
+                    return;
                 }
             }
             
