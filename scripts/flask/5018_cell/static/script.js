@@ -529,15 +529,15 @@ let colorPickerElements = { tdElement: null, inputElement: null };
 
 function showUnifiedColorPickerModal() {
     const { rowIndex, colIndex, tdElement, inputElement } = contextMenuCell;
-    
+
     // Store elements for later use
     colorPickerElements = { tdElement, inputElement };
-    
+
     // Get current colors
     const currentStyle = getCellStyle(rowIndex, colIndex);
     selectedBgColor = currentStyle.bgColor || tdElement.style.backgroundColor || '#ffffff';
     selectedTextColor = currentStyle.textColor || inputElement.style.color || '#000000';
-    
+
     // Create modal overlay
     const overlay = document.createElement('div');
     overlay.className = 'color-picker-overlay';
@@ -549,7 +549,8 @@ function showUnifiedColorPickerModal() {
     popup.id = 'unifiedColorPickerPopup';
 
     const title = document.createElement('h3');
-    title.textContent = 'Cell Colors';
+    const cellCount = selectedCells.length > 0 ? selectedCells.length : 1;
+    title.textContent = cellCount > 1 ? `Cell Colors (${cellCount} cells selected)` : 'Cell Colors';
     popup.appendChild(title);
 
     // Radio buttons for color type selection
@@ -566,7 +567,7 @@ function showUnifiedColorPickerModal() {
     bgRadioLabel.style.gap = '5px';
     bgRadioLabel.style.cursor = 'pointer';
     bgRadioLabel.innerHTML = '<input type="radio" name="colorType" value="background" checked> Background';
-    
+
     const textRadioLabel = document.createElement('label');
     textRadioLabel.style.display = 'flex';
     textRadioLabel.style.alignItems = 'center';
@@ -659,7 +660,7 @@ function showUnifiedColorPickerModal() {
     okBtn.style.marginTop = '20px';
     okBtn.style.width = '100%';
     okBtn.onclick = () => applyUnifiedColors(rowIndex, colIndex);
-    
+
     popup.appendChild(okBtn);
 
     // Close button
@@ -675,7 +676,7 @@ function showUnifiedColorPickerModal() {
     // Set up radio button event listeners
     const bgRadio = bgRadioLabel.querySelector('input');
     const textRadio = textRadioLabel.querySelector('input');
-    
+
     bgRadio.addEventListener('change', updateColorPickerState);
     textRadio.addEventListener('change', updateColorPickerState);
 
@@ -685,7 +686,7 @@ function showUnifiedColorPickerModal() {
             document.body.removeChild(overlay);
         }
     };
-    
+
     // Initialize the color picker state
     updateColorPickerState();
 }
@@ -695,7 +696,7 @@ function updateColorPickerState() {
     const textRadio = document.querySelector('input[name="colorType"][value="text"]');
     const customInput = document.getElementById('customColorInput');
     const previewArea = document.getElementById('colorPreviewArea');
-    
+
     if (bgRadio && bgRadio.checked) {
         currentColorType = 'background';
         if (customInput) customInput.value = rgbToHex(selectedBgColor);
@@ -703,7 +704,7 @@ function updateColorPickerState() {
         currentColorType = 'text';
         if (customInput) customInput.value = rgbToHex(selectedTextColor);
     }
-    
+
     // Update preview
     if (previewArea) {
         previewArea.style.backgroundColor = selectedBgColor;
@@ -717,28 +718,50 @@ function selectColor(color) {
     } else {
         selectedTextColor = color;
     }
-    
+
     updateColorPickerState();
 }
 
 function applyUnifiedColors(rowIndex, colIndex) {
-    const { tdElement, inputElement } = colorPickerElements;
-    
-    // Apply background color
-    setCellStyle(rowIndex, colIndex, 'bgColor', selectedBgColor);
-    tdElement.style.backgroundColor = selectedBgColor;
-    
-    // Apply text color
-    setCellStyle(rowIndex, colIndex, 'textColor', selectedTextColor);
-    inputElement.style.color = selectedTextColor;
-    
+    // Check if multiple cells are selected
+    if (selectedCells.length > 0) {
+        // Apply colors to all selected cells
+        selectedCells.forEach(cell => {
+            const cellTd = cell.td;
+            const cellInput = cellTd.querySelector('input, textarea');
+
+            // Apply background color
+            setCellStyle(cell.row, cell.col, 'bgColor', selectedBgColor);
+            cellTd.style.backgroundColor = selectedBgColor;
+
+            // Apply text color
+            if (cellInput) {
+                setCellStyle(cell.row, cell.col, 'textColor', selectedTextColor);
+                cellInput.style.color = selectedTextColor;
+            }
+        });
+
+        showToast(`Colors updated for ${selectedCells.length} cells`, 'success');
+    } else {
+        // Apply to single cell
+        const { tdElement, inputElement } = colorPickerElements;
+
+        // Apply background color
+        setCellStyle(rowIndex, colIndex, 'bgColor', selectedBgColor);
+        tdElement.style.backgroundColor = selectedBgColor;
+
+        // Apply text color
+        setCellStyle(rowIndex, colIndex, 'textColor', selectedTextColor);
+        inputElement.style.color = selectedTextColor;
+
+        showToast('Colors updated', 'success');
+    }
+
     // Close the picker
     const overlay = document.getElementById('unifiedColorPickerOverlay');
     if (overlay) {
         document.body.removeChild(overlay);
     }
-    
-    showToast('Colors updated', 'success');
 }
 
 // Helper function to convert RGB to Hex
@@ -1020,12 +1043,12 @@ function renderTable() {
         // Row number with delete X and number together
         const rowNumCell = document.createElement('td');
         rowNumCell.className = 'row-number';
-        
+
         const contentSpan = document.createElement('span');
         contentSpan.innerHTML = '<span class="delete-x" style="display: inline-block; width: 12px; height: 12px; line-height: 12px; text-align: center;">×</span> ' + (rowIndex + 1);
         contentSpan.style.cursor = 'pointer';
         contentSpan.onclick = () => deleteRow(rowIndex);
-        
+
         rowNumCell.appendChild(contentSpan);
         tr.appendChild(rowNumCell);
 

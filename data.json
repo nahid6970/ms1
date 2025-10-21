@@ -3,16 +3,25 @@
   "sheets": [
     {
       "cellStyles": {
+        "0-0": {
+          "bgColor": "#DEE2E6",
+          "textColor": "rgb(0, 0, 0)",
+          "center": true
+        },
         "1-0": {
-          "bgColor": "#1A94FF",
-          "bold": true,
-          "textColor": "#FFFFFF"
+          "bgColor": "#DEE2E6",
+          "bold": false,
+          "textColor": "rgb(0, 0, 0)"
         },
         "2-0": {
-          "bgColor": "#FFFFFF",
+          "bgColor": "#DEE2E6",
           "bold": false,
           "center": false,
           "italic": false,
+          "textColor": "rgb(0, 0, 0)"
+        },
+        "3-0": {
+          "bgColor": "#DEE2E6",
           "textColor": "rgb(0, 0, 0)"
         }
       },
