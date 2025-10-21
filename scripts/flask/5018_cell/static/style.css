@@ -129,17 +129,24 @@ td input:focus {
     background: #f0f8ff;
 }
 
+.row-number {
+    background: #f8f9fa;
+    font-weight: 600;
+    text-align: center;
+    width: auto !important;
+    white-space: nowrap;
+    padding: 8px 12px !important;
+    min-width: 60px !important;
+}
+
 .row-actions {
     white-space: nowrap;
-    width: 15px;
-    max-width: 15px;
-    min-width: 15px;
+    width: auto;
 }
 
 .actions-header {
-    width: 15px;
-    max-width: 15px;
-    min-width: 15px;
+    width: auto;
+    white-space: nowrap;
 }
 
 /* Modal Styles */
