@@ -1076,10 +1076,10 @@ function renderTable() {
     const sheet = tableData.sheets[currentSheet];
     if (!sheet) return;
 
-    // Add row number column
-    const rowNumHeader = document.createElement('th');
-    rowNumHeader.className = 'row-number';
-    rowNumHeader.textContent = '#';
+    // Add row number column
+    const rowNumHeader = document.createElement('th');
+    rowNumHeader.className = 'row-number';
+    rowNumHeader.textContent = '#';
     headerRow.appendChild(rowNumHeader);
 
     // Render headers
@@ -1219,15 +1219,15 @@ function renderTable() {
     sheet.rows.forEach((row, rowIndex) => {
         const tr = document.createElement('tr');
 
-        // Row number with delete X and number together
-        const rowNumCell = document.createElement('td');
-        rowNumCell.className = 'row-number';
-
-        const contentSpan = document.createElement('span');
-        contentSpan.innerHTML = '<span class="delete-x" style="display: inline-block; width: 12px; height: 12px; line-height: 12px; text-align: center;">×</span> ' + (rowIndex + 1);
-        contentSpan.style.cursor = 'pointer';
-        contentSpan.onclick = () => deleteRow(rowIndex);
-
+        // Row number with delete X and number together
+        const rowNumCell = document.createElement('td');
+        rowNumCell.className = 'row-number';
+
+        const contentSpan = document.createElement('span');
+        contentSpan.innerHTML = '<span class="delete-x" title="Delete row">×</span> ' + (rowIndex + 1);
+        contentSpan.style.cursor = 'pointer';
+        contentSpan.onclick = () => deleteRow(rowIndex);
+
         rowNumCell.appendChild(contentSpan);
         tr.appendChild(rowNumCell);
 

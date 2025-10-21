@@ -139,17 +139,17 @@ td input::-moz-selection {
     color: inherit;
 }
 
-.row-number {
-    background: #f8f9fa;
-    font-weight: 600;
-    text-align: left;
-    white-space: nowrap;
-    width: 20px;
-    min-width: 20px;
-    max-width: 20px;
-    padding: 0 2px;
-    font-family: monospace;
-    font-size: 12px;
+.row-number {
+    background: #f8f9fa;
+    font-weight: 600;
+    text-align: left;
+    white-space: nowrap;
+    width: 60px;
+    min-width: 60px;
+    padding: 0 5px;
+    font-family: monospace;
+    font-size: 12px;
+    vertical-align: middle;
 }
 
 /* Modal Styles */
@@ -278,17 +278,22 @@ td input::-moz-selection {
     background: #5a6268;
 }
 
-.delete-x {
-    background-color: #dc3545;
-    color: white;
-    font-size: 10px;
-    font-weight: bold;
-    font-family: Arial, sans-serif;
-    cursor: pointer;
-    opacity: 0.8;
-    transition: opacity 0.2s;
-    border-radius: 2px;
-    vertical-align: middle;
+.delete-x {
+    background-color: #dc3545;
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+    font-family: Arial, sans-serif;
+    cursor: pointer;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+    border-radius: 3px;
+    vertical-align: middle;
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    line-height: 14px;
+    text-align: center;
 }
 
 .delete-x:hover {
