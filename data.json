@@ -5,20 +5,25 @@
       "cellStyles": {},
       "columns": [
         {
-          "color": "#ffffff",
-          "font": "JetBrains Mono",
           "name": "Word",
+          "type": "text",
+          "width": "150",
+          "color": "#ffffff",
+          "textColor": "#000000",
+          "font": "JetBrains Mono",
+          "headerBgColor": "#42a1ff",
+          "headerTextColor": "#333333",
+          "headerBold": true,
+          "headerItalic": false,
+          "headerCenter": true
+        },
+        {
+          "color": "#8bfd8d",
+          "font": "",
+          "name": "Meaning",
           "textColor": "#000000",
           "type": "text",
           "width": "150"
-        },
-        {
-          "name": "Meaning",
-          "type": "text",
-          "width": "150",
-          "color": "#8bfd8d",
-          "textColor": "#000000",
-          "font": ""
         }
       ],
       "mergedCells": {},

@@ -166,12 +166,15 @@ td input::-moz-selection {
 
 .modal-content {
     background: white;
-    margin: 8% auto;
+    margin: 5% auto;
     border-radius: 12px;
     width: 90%;
     max-width: 500px;
+    max-height: 85vh;
     box-shadow: 0 8px 32px rgba(0,0,0,0.2);
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
 .modal-header {
@@ -213,6 +216,8 @@ td input::-moz-selection {
 
 .modal-content form {
     padding: 24px;
+    overflow-y: auto;
+    flex: 1;
 }
 
 .form-group {
@@ -254,8 +259,14 @@ td input::-moz-selection {
     justify-content: flex-end;
     gap: 10px;
     margin-top: 24px;
-    padding-top: 20px;
+    padding: 20px 24px;
     border-top: 1px solid #e9ecef;
+    background: white;
+    position: sticky;
+    bottom: 0;
+    margin-left: -24px;
+    margin-right: -24px;
+    margin-bottom: -24px;
 }
 
 .btn-secondary {
@@ -535,6 +546,46 @@ td input::-moz-selection {
     flex: 1;
     font-family: 'Courier New', monospace;
     text-transform: uppercase;
+}
+
+.form-section-header {
+    margin-top: 24px;
+    margin-bottom: 16px;
+    padding-top: 20px;
+    border-top: 2px solid #e9ecef;
+}
+
+.form-section-header h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #495057;
+    margin: 0;
+}
+
+.checkbox-group {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #495057;
+    user-select: none;
+}
+
+.checkbox-label input[type="checkbox"] {
+    cursor: pointer;
+    width: 18px;
+    height: 18px;
+}
+
+.checkbox-label:hover {
+    color: #007bff;
 }
 
 /* Column Menu */

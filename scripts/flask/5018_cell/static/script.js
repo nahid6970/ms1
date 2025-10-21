@@ -48,6 +48,22 @@ function initializeApp() {
         textColorText.value = e.target.value.toUpperCase();
     });
 
+    // Set up color picker sync for header background color
+    const headerBgInput = document.getElementById('headerBgColor');
+    const headerBgText = document.getElementById('headerBgColorText');
+
+    headerBgInput.addEventListener('input', (e) => {
+        headerBgText.value = e.target.value.toUpperCase();
+    });
+
+    // Set up color picker sync for header text color
+    const headerTextInput = document.getElementById('headerTextColor');
+    const headerTextText = document.getElementById('headerTextColorText');
+
+    headerTextInput.addEventListener('input', (e) => {
+        headerTextText.value = e.target.value.toUpperCase();
+    });
+
     // Clear old localStorage values and set new defaults
     localStorage.removeItem('actionsWidth');
     localStorage.removeItem('rownumWidth');
@@ -146,6 +162,13 @@ function addColumn() {
     document.getElementById('columnColorText').value = '#FFFFFF';
     document.getElementById('columnTextColor').value = '#000000';
     document.getElementById('columnTextColorText').value = '#000000';
+    document.getElementById('headerBgColor').value = '#f8f9fa';
+    document.getElementById('headerBgColorText').value = '#F8F9FA';
+    document.getElementById('headerTextColor').value = '#333333';
+    document.getElementById('headerTextColorText').value = '#333333';
+    document.getElementById('headerBold').checked = true;
+    document.getElementById('headerItalic').checked = false;
+    document.getElementById('headerCenter').checked = false;
     document.getElementById('columnModal').style.display = 'block';
 }
 
@@ -164,6 +187,16 @@ function editColumn(index) {
     document.getElementById('columnTextColor').value = col.textColor || '#000000';
     document.getElementById('columnTextColorText').value = (col.textColor || '#000000').toUpperCase();
     document.getElementById('columnFont').value = col.font || '';
+
+    // Load header styling
+    document.getElementById('headerBgColor').value = col.headerBgColor || '#f8f9fa';
+    document.getElementById('headerBgColorText').value = (col.headerBgColor || '#f8f9fa').toUpperCase();
+    document.getElementById('headerTextColor').value = col.headerTextColor || '#333333';
+    document.getElementById('headerTextColorText').value = (col.headerTextColor || '#333333').toUpperCase();
+    document.getElementById('headerBold').checked = col.headerBold !== false; // Default true
+    document.getElementById('headerItalic').checked = col.headerItalic || false;
+    document.getElementById('headerCenter').checked = col.headerCenter || false;
+
     document.getElementById('columnModal').style.display = 'block';
 }
 
@@ -191,7 +224,12 @@ async function handleColumnFormSubmit(e) {
         width: document.getElementById('columnWidth').value,
         color: document.getElementById('columnColor').value,
         textColor: document.getElementById('columnTextColor').value,
-        font: document.getElementById('columnFont').value
+        font: document.getElementById('columnFont').value,
+        headerBgColor: document.getElementById('headerBgColor').value,
+        headerTextColor: document.getElementById('headerTextColor').value,
+        headerBold: document.getElementById('headerBold').checked,
+        headerItalic: document.getElementById('headerItalic').checked,
+        headerCenter: document.getElementById('headerCenter').checked
     };
 
     const sheet = tableData.sheets[currentSheet];
@@ -1048,7 +1086,9 @@ function renderTable() {
     sheet.columns.forEach((col, index) => {
         const th = document.createElement('th');
         th.style.width = col.width + 'px';
-        th.style.backgroundColor = col.color;
+
+        // Apply header background color (separate from cell color)
+        th.style.backgroundColor = col.headerBgColor || col.color || '#f8f9fa';
 
         const headerCell = document.createElement('div');
         headerCell.className = 'header-cell';
@@ -1056,7 +1096,16 @@ function renderTable() {
         const columnName = document.createElement('span');
         columnName.className = 'column-name';
         columnName.textContent = col.name;
-        columnName.style.color = col.textColor || '#000000';
+
+        // Apply header text styling
+        columnName.style.color = col.headerTextColor || col.textColor || '#333333';
+        columnName.style.fontWeight = (col.headerBold !== false) ? 'bold' : 'normal'; // Default bold
+        columnName.style.fontStyle = col.headerItalic ? 'italic' : 'normal';
+
+        // Apply header text alignment
+        if (col.headerCenter) {
+            headerCell.style.justifyContent = 'center';
+        }
 
         const menuWrapper = document.createElement('div');
         menuWrapper.className = 'column-menu-wrapper';
