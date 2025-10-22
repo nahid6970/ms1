@@ -1,11 +1,19 @@
 {
   "activeDocument": 0,
-  "documents": [
-    {
-      "content": "<div style=\"text-align: center;\"><h1 style=\"text-align: left;\">Heading 1</h1></div>",
-      "created": "",
-      "modified": "2025-10-22 19:39:42",
-      "name": "Document1"
-    }
-  ]
+  "documents": [],
+  "headingStyles": {
+    "h1": {
+      "backgroundColor": "#080808",
+      "border": "1px solid blue",
+      "color": "#ff0000",
+      "fontFamily": "Times New Roman",
+      "fontSize": "2em",
+      "fontWeight": "normal",
+      "margin": "0.5em 0",
+      "padding": "0.3em 0 0.5em 0",
+      "textAlign": "left"
+    },
+    "h2": {},
+    "h3": {}
+  }
 }
