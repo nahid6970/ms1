@@ -327,8 +327,8 @@ function updateFormatButtons() {
         }
     });
 
-    // Check heading states
-    const headings = ['h1', 'h2', 'h3'];
+    // Check heading states (including normal paragraph)
+    const headings = ['p', 'h1', 'h2', 'h3'];
     headings.forEach(heading => {
         const button = document.querySelector(`[onclick="formatHeading('${heading}')"]`);
         if (button) {
@@ -340,22 +340,41 @@ function updateFormatButtons() {
                 
                 // Check if current element or its parent is the heading we're checking
                 let currentElement = element;
-                let isHeading = false;
+                let isCurrentFormat = false;
                 while (currentElement && currentElement !== document.getElementById('editor')) {
                     if (currentElement.tagName && currentElement.tagName.toLowerCase() === heading) {
-                        isHeading = true;
+                        isCurrentFormat = true;
                         break;
                     }
                     currentElement = currentElement.parentNode;
                 }
                 
-                if (isHeading) {
+                // Special case for normal text - check if we're not in any heading
+                if (heading === 'p') {
+                    let inHeading = false;
+                    let checkElement = element;
+                    while (checkElement && checkElement !== document.getElementById('editor')) {
+                        if (checkElement.tagName && ['H1', 'H2', 'H3', 'H4', 'H5', 'H6'].includes(checkElement.tagName)) {
+                            inHeading = true;
+                            break;
+                        }
+                        checkElement = checkElement.parentNode;
+                    }
+                    isCurrentFormat = !inHeading;
+                }
+                
+                if (isCurrentFormat) {
                     button.classList.add('active');
                 } else {
                     button.classList.remove('active');
                 }
             } else {
-                button.classList.remove('active');
+                // Default to normal text when no selection
+                if (heading === 'p') {
+                    button.classList.add('active');
+                } else {
+                    button.classList.remove('active');
+                }
             }
         }
     });
