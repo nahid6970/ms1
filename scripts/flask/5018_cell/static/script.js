@@ -972,7 +972,9 @@ function showUnifiedBorderOptionsModal() {
 
     toggleInput.id = 'borderToggle';
 
-    toggleInput.checked = currentStyle.border !== false; // Default to true if not explicitly false
+    // Check if border is actually applied - only check if border is explicitly true AND has border properties
+    const hasBorder = currentStyle.border === true && (currentStyle.borderWidth || currentStyle.borderStyle || currentStyle.borderColor);
+    toggleInput.checked = hasBorder;
 
     toggleInput.style.transform = 'scale(1.3)';
 

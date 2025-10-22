@@ -2,7 +2,20 @@
   "activeSheet": 0,
   "sheets": [
     {
-      "cellStyles": {},
+      "cellStyles": {
+        "3-0": {
+          "border": false,
+          "borderColor": "#000000",
+          "borderStyle": "solid",
+          "borderWidth": "1px"
+        },
+        "0-0": {
+          "border": true,
+          "borderWidth": "5px",
+          "borderStyle": "double",
+          "borderColor": "#00ad4b"
+        }
+      },
       "columns": [
         {
           "color": "#ffffff",
