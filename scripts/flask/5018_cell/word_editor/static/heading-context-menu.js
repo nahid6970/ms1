@@ -67,41 +67,66 @@ function openHeadingStyleModal(headingType) {
                 <span class="close" onclick="closeHeadingStyleModal()">&times;</span>
             </div>
             <div class="modal-body">
-                <div class="form-group">
-                    <label>Font Family</label>
-                    <select id="headingFontFamily" class="form-input">
-                        <option value="Inter" ${currentStyles.fontFamily === 'Inter' ? 'selected' : ''}>Inter</option>
-                        <option value="Arial" ${currentStyles.fontFamily === 'Arial' ? 'selected' : ''}>Arial</option>
-                        <option value="Times New Roman" ${currentStyles.fontFamily === 'Times New Roman' ? 'selected' : ''}>Times New Roman</option>
-                        <option value="Courier New" ${currentStyles.fontFamily === 'Courier New' ? 'selected' : ''}>Courier New</option>
-                        <option value="Georgia" ${currentStyles.fontFamily === 'Georgia' ? 'selected' : ''}>Georgia</option>
-                        <option value="Verdana" ${currentStyles.fontFamily === 'Verdana' ? 'selected' : ''}>Verdana</option>
-                    </select>
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label>Font Family</label>
+                            <select id="headingFontFamily" class="form-input">
+                                <option value="Inter" ${currentStyles.fontFamily === 'Inter' ? 'selected' : ''}>Inter</option>
+                                <option value="Arial" ${currentStyles.fontFamily === 'Arial' ? 'selected' : ''}>Arial</option>
+                                <option value="Times New Roman" ${currentStyles.fontFamily === 'Times New Roman' ? 'selected' : ''}>Times New Roman</option>
+                                <option value="Courier New" ${currentStyles.fontFamily === 'Courier New' ? 'selected' : ''}>Courier New</option>
+                                <option value="Georgia" ${currentStyles.fontFamily === 'Georgia' ? 'selected' : ''}>Georgia</option>
+                                <option value="Verdana" ${currentStyles.fontFamily === 'Verdana' ? 'selected' : ''}>Verdana</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label>Font Size</label>
+                            <input type="text" id="headingFontSize" class="form-input" value="${currentStyles.fontSize || getDefaultFontSize(headingType)}" placeholder="e.g., 24px">
+                        </div>
+                    </div>
                 </div>
                 
-                <div class="form-group">
-                    <label>Font Size</label>
-                    <input type="text" id="headingFontSize" class="form-input" value="${currentStyles.fontSize || getDefaultFontSize(headingType)}" placeholder="e.g., 24px">
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label>Font Weight</label>
+                            <select id="headingFontWeight" class="form-input">
+                                <option value="normal" ${currentStyles.fontWeight === 'normal' ? 'selected' : ''}>Normal</option>
+                                <option value="bold" ${currentStyles.fontWeight === 'bold' ? 'selected' : ''}>Bold</option>
+                                <option value="600" ${currentStyles.fontWeight === '600' ? 'selected' : ''}>Semi-Bold</option>
+                                <option value="700" ${currentStyles.fontWeight === '700' ? 'selected' : ''}>Bold</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label>Text Alignment</label>
+                            <select id="headingTextAlign" class="form-input">
+                                <option value="left" ${currentStyles.textAlign === 'left' ? 'selected' : ''}>Left</option>
+                                <option value="center" ${currentStyles.textAlign === 'center' ? 'selected' : ''}>Center</option>
+                                <option value="right" ${currentStyles.textAlign === 'right' ? 'selected' : ''}>Right</option>
+                                <option value="justify" ${currentStyles.textAlign === 'justify' ? 'selected' : ''}>Justify</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
                 
-                <div class="form-group">
-                    <label>Font Weight</label>
-                    <select id="headingFontWeight" class="form-input">
-                        <option value="normal" ${currentStyles.fontWeight === 'normal' ? 'selected' : ''}>Normal</option>
-                        <option value="bold" ${currentStyles.fontWeight === 'bold' ? 'selected' : ''}>Bold</option>
-                        <option value="600" ${currentStyles.fontWeight === '600' ? 'selected' : ''}>Semi-Bold</option>
-                        <option value="700" ${currentStyles.fontWeight === '700' ? 'selected' : ''}>Bold</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label>Text Color</label>
-                    <input type="color" id="headingColor" class="form-input" value="${currentStyles.color || getDefaultColor(headingType)}">
-                </div>
-                
-                <div class="form-group">
-                    <label>Background Color</label>
-                    <input type="color" id="headingBgColor" class="form-input" value="${currentStyles.backgroundColor || '#ffffff'}">
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label>Text Color</label>
+                            <input type="color" id="headingColor" class="form-input" value="${currentStyles.color || getDefaultColor(headingType)}">
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label>Background Color</label>
+                            <input type="color" id="headingBgColor" class="form-input" value="${currentStyles.backgroundColor || '#ffffff'}">
+                        </div>
+                    </div>
                 </div>
                 
                 <div class="form-group">
@@ -109,24 +134,19 @@ function openHeadingStyleModal(headingType) {
                     <input type="text" id="headingBorder" class="form-input" value="${currentStyles.border || ''}" placeholder="e.g., 1px solid #000">
                 </div>
                 
-                <div class="form-group">
-                    <label>Padding</label>
-                    <input type="text" id="headingPadding" class="form-input" value="${currentStyles.padding || getDefaultPadding(headingType)}" placeholder="e.g., 10px 0">
-                </div>
-                
-                <div class="form-group">
-                    <label>Margin</label>
-                    <input type="text" id="headingMargin" class="form-input" value="${currentStyles.margin || getDefaultMargin(headingType)}" placeholder="e.g., 20px 0 10px 0">
-                </div>
-                
-                <div class="form-group">
-                    <label>Text Alignment</label>
-                    <select id="headingTextAlign" class="form-input">
-                        <option value="left" ${currentStyles.textAlign === 'left' ? 'selected' : ''}>Left</option>
-                        <option value="center" ${currentStyles.textAlign === 'center' ? 'selected' : ''}>Center</option>
-                        <option value="right" ${currentStyles.textAlign === 'right' ? 'selected' : ''}>Right</option>
-                        <option value="justify" ${currentStyles.textAlign === 'justify' ? 'selected' : ''}>Justify</option>
-                    </select>
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label>Padding</label>
+                            <input type="text" id="headingPadding" class="form-input" value="${currentStyles.padding || getDefaultPadding(headingType)}" placeholder="e.g., 10px 0">
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label>Margin</label>
+                            <input type="text" id="headingMargin" class="form-input" value="${currentStyles.margin || getDefaultMargin(headingType)}" placeholder="e.g., 20px 0 10px 0">
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">

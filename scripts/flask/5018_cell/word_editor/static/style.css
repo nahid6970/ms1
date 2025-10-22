@@ -517,6 +517,21 @@ body {
     padding: 5px;
 }
 
+/* Two-column form layout */
+.form-row {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.form-col {
+    flex: 1;
+}
+
+.form-col .form-group {
+    margin-bottom: 0;
+}
+
 .modal-footer {
     display: flex;
     justify-content: flex-end;
