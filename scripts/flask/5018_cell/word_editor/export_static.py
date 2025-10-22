@@ -210,7 +210,33 @@ def generate_static_html(data):
             margin-bottom: 1em;
         }
 
-        .editor h1, .editor h2, .editor h3, .editor h4, .editor h5, .editor h6 {
+        .editor h1 {
+            font-size: 2em;
+            font-weight: 700;
+            margin-bottom: 0.5em;
+            margin-top: 0.5em;
+            color: #1a1a1a;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 0.3em;
+        }
+
+        .editor h2 {
+            font-size: 1.5em;
+            font-weight: 600;
+            margin-bottom: 0.4em;
+            margin-top: 0.8em;
+            color: #2a2a2a;
+        }
+
+        .editor h3 {
+            font-size: 1.25em;
+            font-weight: 600;
+            margin-bottom: 0.3em;
+            margin-top: 0.6em;
+            color: #3a3a3a;
+        }
+
+        .editor h4, .editor h5, .editor h6 {
             margin-bottom: 0.5em;
             font-weight: 600;
         }

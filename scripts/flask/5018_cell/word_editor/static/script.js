@@ -303,6 +303,17 @@ function formatText(command, value = null) {
     handleEditorChange();
 }
 
+function formatHeading(headingTag) {
+    // Use formatBlock to apply heading
+    document.execCommand('formatBlock', false, headingTag);
+    
+    // Update button states
+    updateFormatButtons();
+    
+    // Mark as modified
+    handleEditorChange();
+}
+
 function updateFormatButtons() {
     const commands = ['bold', 'italic', 'underline'];
     commands.forEach(cmd => {
@@ -310,6 +321,39 @@ function updateFormatButtons() {
         if (button) {
             if (document.queryCommandState(cmd)) {
                 button.classList.add('active');
+            } else {
+                button.classList.remove('active');
+            }
+        }
+    });
+
+    // Check heading states
+    const headings = ['h1', 'h2', 'h3'];
+    headings.forEach(heading => {
+        const button = document.querySelector(`[onclick="formatHeading('${heading}')"]`);
+        if (button) {
+            const selection = window.getSelection();
+            if (selection.rangeCount > 0) {
+                const range = selection.getRangeAt(0);
+                const container = range.commonAncestorContainer;
+                const element = container.nodeType === Node.TEXT_NODE ? container.parentNode : container;
+                
+                // Check if current element or its parent is the heading we're checking
+                let currentElement = element;
+                let isHeading = false;
+                while (currentElement && currentElement !== document.getElementById('editor')) {
+                    if (currentElement.tagName && currentElement.tagName.toLowerCase() === heading) {
+                        isHeading = true;
+                        break;
+                    }
+                    currentElement = currentElement.parentNode;
+                }
+                
+                if (isHeading) {
+                    button.classList.add('active');
+                } else {
+                    button.classList.remove('active');
+                }
             } else {
                 button.classList.remove('active');
             }
