@@ -84,7 +84,8 @@ body {
 
 table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
     background: white;
     table-layout: fixed;
 }
@@ -94,6 +95,7 @@ th, td {
     padding: 8px;
     text-align: left;
     position: relative;
+    box-sizing: border-box;
 }
 
 th {
