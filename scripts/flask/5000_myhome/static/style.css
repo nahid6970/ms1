@@ -4,21 +4,13 @@
 /* Sidebar container - always expanded */
 
 .sidebar-container {
-
   position: relative;
-
   width: 100%;
-
   z-index: 1000;
-
   background-color: rgba(0, 0, 0, 0.8);
-
   padding: 10px;
-
   box-sizing: border-box;
-
   margin-top: 0;
-
 }
 
 
@@ -26,23 +18,15 @@
 /* Always show sidebar content */
 
 .sidebar-container .top-center-controls {
-
   display: flex;
-
   flex-direction: row;
-
   justify-content: center; /* Center the content */
-
   align-items: center;
-
   gap: 8px;
-
   width: 100%;
-
   overflow-x: auto;
-
   overflow-y: hidden;
-
+  padding-top:5px;
 }
 
 
@@ -50,11 +34,8 @@
 /* Adjust main content to make space for sidebar */
 
 .flex-container2 {
-
-  margin-top: 60px; /* Space for the sidebar */
-
+  margin-top: 0px; /* Space for the sidebar */
   padding-top: 20px; /* Additional padding */
-
 }
 
 /* Adjust button styling for sidebar - keep original styling */
@@ -202,6 +183,7 @@ body::-webkit-scrollbar-track {
   font-size: auto;
   color: rgb(255, 255, 255);
   padding: 1cm;
+  padding-top: 15px;
   border-radius: 1cm;
   position: relative;
   /* Added for positioning context */
