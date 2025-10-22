@@ -1,0 +1,26 @@
+{
+  "activeDocument": 0,
+  "documents": [
+    {
+      "content": "<h1>asdasdasd</h1>",
+      "created": "",
+      "modified": "2025-10-22 20:05:20",
+      "name": "Document1"
+    }
+  ],
+  "headingStyles": {
+    "h1": {
+      "fontFamily": "Inter",
+      "fontSize": "2em",
+      "fontWeight": "normal",
+      "color": "#121111",
+      "backgroundColor": "#ff8080",
+      "border": "3px solid blue",
+      "padding": "0.3em 0 0.5em 0",
+      "margin": "0.5em 0",
+      "textAlign": "left"
+    },
+    "h2": {},
+    "h3": {}
+  }
+}
