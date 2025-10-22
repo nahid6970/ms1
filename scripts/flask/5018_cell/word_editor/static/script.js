@@ -37,6 +37,12 @@ function handleKeyboardShortcuts(e) {
         e.preventDefault();
         saveData();
     }
+    
+    // Ctrl+Space to clear formatting
+    if ((e.ctrlKey || e.metaKey) && e.key === ' ') {
+        e.preventDefault();
+        clearFormatting();
+    }
 
     // Formatting shortcuts
     if ((e.ctrlKey || e.metaKey) && !e.shiftKey) {
@@ -410,23 +416,68 @@ function changeFontSize() {
     if (selection.rangeCount > 0) {
         const range = selection.getRangeAt(0);
         if (!range.collapsed) {
-            // Always use the extract and wrap approach for consistency
-            // Extract the selected content
-            const contents = range.extractContents();
+            // Check if we're already inside a span with font-size
+            const container = range.commonAncestorContainer;
+            let parentElement = container.nodeType === Node.TEXT_NODE ? container.parentNode : container;
             
-            // Create a new span with the font size
-            const span = document.createElement('span');
-            span.style.fontSize = fontSize;
+            // Look for existing span with font-size in the selection
+            let existingSpan = null;
+            while (parentElement && parentElement !== document.getElementById('editor')) {
+                if (parentElement.tagName === 'SPAN' && parentElement.style.fontSize) {
+                    existingSpan = parentElement;
+                    break;
+                }
+                parentElement = parentElement.parentNode;
+            }
             
-            // Wrap all the content in our span
-            span.appendChild(contents);
+            if (existingSpan && range.toString() === existingSpan.textContent) {
+                // If we're changing the font size of the entire existing span, just update it
+                existingSpan.style.fontSize = fontSize;
+            } else {
+                // Create a new span with the font size
+                const span = document.createElement('span');
+                span.style.fontSize = fontSize;
+                
+                // Extract the selected content
+                const contents = range.extractContents();
+                
+                // Wrap all the content in our span
+                span.appendChild(contents);
+                
+                // Insert the span at the start of the original range
+                range.insertNode(span);
+                
+                // Reselect the content we just inserted
+                const newRange = document.createRange();
+                newRange.selectNodeContents(span);
+                selection.removeAllRanges();
+                selection.addRange(newRange);
+            }
+        }
+    }
+    
+    // Mark as modified
+    handleEditorChange();
+}
+
+function clearFormatting() {
+    const selection = window.getSelection();
+    if (selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0);
+        if (!range.collapsed) {
+            // Get the selected text
+            const selectedText = range.toString();
             
-            // Insert the span at the start of the original range
-            range.insertNode(span);
+            // Delete the selected content
+            range.deleteContents();
             
-            // Reselect the content we just inserted
+            // Insert plain text node with the same content
+            const textNode = document.createTextNode(selectedText);
+            range.insertNode(textNode);
+            
+            // Reselect the inserted text
             const newRange = document.createRange();
-            newRange.selectNodeContents(span);
+            newRange.selectNodeContents(textNode);
             selection.removeAllRanges();
             selection.addRange(newRange);
         }
