@@ -2180,6 +2180,43 @@ document.addEventListener('DOMContentLoaded', function () {
       });
 
       try {
+        // If adding to an existing group, inherit group styling properties
+        if (groupName !== 'Ungrouped') {
+          const response = await fetch('/api/links');
+          const allLinks = await response.json();
+          
+          // Look for an existing link in the same group to copy properties from
+          const existingGroupLink = allLinks.find(link => (link.group || 'Ungrouped') === groupName);
+          if (existingGroupLink) {
+            // Copy group-level properties from existing group link
+            newLink.collapsible = existingGroupLink.collapsible;
+            newLink.display_style = existingGroupLink.display_style;
+            newLink.horizontal_stack = existingGroupLink.horizontal_stack;
+            newLink.password_protect = existingGroupLink.password_protect;
+            newLink.top_name = existingGroupLink.top_name;
+            newLink.top_bg_color = existingGroupLink.top_bg_color;
+            newLink.top_text_color = existingGroupLink.top_text_color;
+            newLink.top_border_color = existingGroupLink.top_border_color;
+            newLink.top_hover_color = existingGroupLink.top_hover_color;
+            newLink.popup_bg_color = existingGroupLink.popup_bg_color;
+            newLink.popup_text_color = existingGroupLink.popup_text_color;
+            newLink.popup_border_color = existingGroupLink.popup_border_color;
+            newLink.popup_border_radius = existingGroupLink.popup_border_radius;
+            newLink.horizontal_bg_color = existingGroupLink.horizontal_bg_color;
+            newLink.horizontal_text_color = existingGroupLink.horizontal_text_color;
+            newLink.horizontal_border_color = existingGroupLink.horizontal_border_color;
+            newLink.horizontal_hover_color = existingGroupLink.horizontal_hover_color;
+            newLink.top_width = existingGroupLink.top_width;
+            newLink.top_height = existingGroupLink.top_height;
+            newLink.top_font_family = existingGroupLink.top_font_family;
+            newLink.top_font_size = existingGroupLink.top_font_size;
+            newLink.horizontal_width = existingGroupLink.horizontal_width;
+            newLink.horizontal_height = existingGroupLink.horizontal_height;
+            newLink.horizontal_font_family = existingGroupLink.horizontal_font_family;
+            newLink.horizontal_font_size = existingGroupLink.horizontal_font_size;
+          }
+        }
+
         const response = await fetch('/api/add_link', {
           method: 'POST',
           headers: {
@@ -2321,9 +2358,9 @@ document.addEventListener('DOMContentLoaded', function () {
           hidden: document.getElementById('edit-link-hidden').checked || undefined,
         };
 
-        // Only preserve group-level properties if the link stays in the same group
-        // If moving to a different group, don't copy group-level properties
-        if (originalLink && originalGroupName === newGroupName) {
+        // Always preserve group-level properties to prevent them from being reset
+        // This ensures that editing any link in a group doesn't affect group styling
+        if (originalLink) {
           updatedLink.collapsible = originalLink.collapsible;
           updatedLink.display_style = originalLink.display_style;
           updatedLink.horizontal_stack = originalLink.horizontal_stack;
@@ -2341,38 +2378,14 @@ document.addEventListener('DOMContentLoaded', function () {
           updatedLink.horizontal_text_color = originalLink.horizontal_text_color;
           updatedLink.horizontal_border_color = originalLink.horizontal_border_color;
           updatedLink.horizontal_hover_color = originalLink.horizontal_hover_color;
-        } else if (originalLink) {
-          // When moving to a different group, inherit properties from the new group
-          // First, we need to get the current links to find an existing link in the new group
-          try {
-            const response = await fetch('/api/links');
-            const allLinks = await response.json();
-
-            // Look for an existing link in the new group to copy properties from
-            const newGroupLink = allLinks.find(link => (link.group || 'Ungrouped') === newGroupName);
-            if (newGroupLink) {
-              // Copy group-level properties from the new group
-              updatedLink.collapsible = newGroupLink.collapsible;
-              updatedLink.display_style = newGroupLink.display_style;
-              updatedLink.horizontal_stack = newGroupLink.horizontal_stack;
-              updatedLink.password_protect = newGroupLink.password_protect;
-              updatedLink.top_name = newGroupLink.top_name;
-              updatedLink.top_bg_color = newGroupLink.top_bg_color;
-              updatedLink.top_text_color = newGroupLink.top_text_color;
-              updatedLink.top_border_color = newGroupLink.top_border_color;
-              updatedLink.top_hover_color = newGroupLink.top_hover_color;
-              updatedLink.popup_bg_color = newGroupLink.popup_bg_color;
-              updatedLink.popup_text_color = newGroupLink.popup_text_color;
-              updatedLink.popup_border_color = newGroupLink.popup_border_color;
-              updatedLink.popup_border_radius = newGroupLink.popup_border_radius;
-              updatedLink.horizontal_bg_color = newGroupLink.horizontal_bg_color;
-              updatedLink.horizontal_text_color = newGroupLink.horizontal_text_color;
-              updatedLink.horizontal_border_color = newGroupLink.horizontal_border_color;
-              updatedLink.horizontal_hover_color = newGroupLink.horizontal_hover_color;
-            }
-          } catch (error) {
-            console.error('Error fetching links for group properties:', error);
-          }
+          updatedLink.top_width = originalLink.top_width;
+          updatedLink.top_height = originalLink.top_height;
+          updatedLink.top_font_family = originalLink.top_font_family;
+          updatedLink.top_font_size = originalLink.top_font_size;
+          updatedLink.horizontal_width = originalLink.horizontal_width;
+          updatedLink.horizontal_height = originalLink.horizontal_height;
+          updatedLink.horizontal_font_family = originalLink.horizontal_font_family;
+          updatedLink.horizontal_font_size = originalLink.horizontal_font_size;
         }
 
         try {
@@ -2589,6 +2602,35 @@ document.addEventListener('DOMContentLoaded', function () {
 
       const response = await fetch('/api/links');
       const links = await response.json();
+
+      // Preserve group styling properties when copying
+      if (linkToCopy) {
+        newLink.collapsible = linkToCopy.collapsible;
+        newLink.display_style = linkToCopy.display_style;
+        newLink.horizontal_stack = linkToCopy.horizontal_stack;
+        newLink.password_protect = linkToCopy.password_protect;
+        newLink.top_name = linkToCopy.top_name;
+        newLink.top_bg_color = linkToCopy.top_bg_color;
+        newLink.top_text_color = linkToCopy.top_text_color;
+        newLink.top_border_color = linkToCopy.top_border_color;
+        newLink.top_hover_color = linkToCopy.top_hover_color;
+        newLink.popup_bg_color = linkToCopy.popup_bg_color;
+        newLink.popup_text_color = linkToCopy.popup_text_color;
+        newLink.popup_border_color = linkToCopy.popup_border_color;
+        newLink.popup_border_radius = linkToCopy.popup_border_radius;
+        newLink.horizontal_bg_color = linkToCopy.horizontal_bg_color;
+        newLink.horizontal_text_color = linkToCopy.horizontal_text_color;
+        newLink.horizontal_border_color = linkToCopy.horizontal_border_color;
+        newLink.horizontal_hover_color = linkToCopy.horizontal_hover_color;
+        newLink.top_width = linkToCopy.top_width;
+        newLink.top_height = linkToCopy.top_height;
+        newLink.top_font_family = linkToCopy.top_font_family;
+        newLink.top_font_size = linkToCopy.top_font_size;
+        newLink.horizontal_width = linkToCopy.horizontal_width;
+        newLink.horizontal_height = linkToCopy.horizontal_height;
+        newLink.horizontal_font_family = linkToCopy.horizontal_font_family;
+        newLink.horizontal_font_size = linkToCopy.horizontal_font_size;
+      }
 
       links.splice(index + 1, 0, newLink);
 
