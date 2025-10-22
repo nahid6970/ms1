@@ -433,6 +433,13 @@ body {
     flex-direction: column;
 }
 
+.modal-body {
+    padding: 0 24px;
+    overflow-y: auto;
+    flex: 1;
+    max-height: 60vh;
+}
+
 .modal-header {
     display: flex;
     justify-content: space-between;
@@ -496,6 +503,7 @@ body {
     font-size: 14px;
     transition: all 0.2s;
     font-family: inherit;
+    box-sizing: border-box;
 }
 
 .form-input:focus {
@@ -504,9 +512,29 @@ body {
     box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
 }
 
+.form-input[type="color"] {
+    height: 40px;
+    padding: 5px;
+}
+
+/* Two-column form layout */
+.form-row {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.form-col {
+    flex: 1;
+}
+
+.form-col .form-group {
+    margin-bottom: 0;
+}
+
 .modal-footer {
     display: flex;
-    justify-content: flex-end;
+    justify-content: center;
     gap: 10px;
     margin-top: 24px;
     padding: 20px 24px;
@@ -561,148 +589,37 @@ body {
 
 /* Context Menu */
 .context-menu {
-    display: none;
-    position: fixed;
+    position: absolute;
     background: white;
     border: 1px solid #ddd;
     border-radius: 6px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    z-index: 2000;
-    min-width: 200px;
-    padding: 4px 0;
-}
-
-.context-menu.show {
-    display: block;
+    z-index: 1000;
+    min-width: 180px;
+    display: none;
 }
 
 .context-menu-item {
     padding: 10px 15px;
     cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 10px;
     font-size: 14px;
-    color: #333;
     transition: background 0.2s;
-    user-select: none;
 }
 
 .context-menu-item:hover {
     background: #f8f9fa;
 }
 
-.context-menu-separator {
-    height: 1px;
-    background: #e0e0e0;
-    margin: 4px 0;
+.context-menu-item:first-child {
+    border-radius: 6px 6px 0 0;
 }
 
-/* Color Picker */
-.color-picker-wrapper {
-    display: flex;
-    gap: 10px;
-    align-items: center;
+.context-menu-item:last-child {
+    border-radius: 0 0 6px 6px;
 }
 
-.color-input {
-    width: 60px;
-    height: 42px;
-    border: 1px solid #ced4da;
-    border-radius: 6px;
-    cursor: pointer;
-    padding: 2px;
-    background: white;
-}
-
-.color-input::-webkit-color-swatch-wrapper {
-    padding: 2px;
-}
-
-.color-input::-webkit-color-swatch {
-    border: none;
-    border-radius: 4px;
-}
-
-.color-input::-moz-color-swatch {
-    border: none;
-    border-radius: 4px;
-}
-
-.color-text {
-    flex: 1;
-    font-family: 'Courier New', monospace;
-    text-transform: uppercase;
-}
-
-.form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
-}
-
-.checkbox-group {
-    display: flex;
-    gap: 20px;
-    flex-wrap: wrap;
-}
-
-.checkbox-label {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-    font-size: 14px;
-    color: #495057;
-    user-select: none;
-}
-
-.checkbox-label input[type="checkbox"] {
-    cursor: pointer;
-    width: 18px;
-    height: 18px;
-}
-
-.checkbox-label:hover {
-    color: #007bff;
-}
-
-/* Custom heading button styles */
-.btn-format.custom-heading {
-    position: relative;
-    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important;
-    color: white !important;
-    border-color: #0056b3 !important;
-}
-
-.btn-format.custom-heading::after {
-    content: '✨';
-    position: absolute;
-    top: -2px;
-    right: -2px;
-    font-size: 8px;
-    background: #ffc107;
-    border-radius: 50%;
-    width: 12px;
-    height: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    line-height: 1;
-}
-
-.btn-format.custom-heading:hover {
-    background: linear-gradient(135deg, #0056b3 0%, #004085 100%) !important;
-    transform: scale(1.05);
-}
-
-/* Enhanced context menu for ribbon */
-.context-menu-item.ribbon-item {
-    font-weight: 500;
-}
-
-.context-menu-item.ribbon-item:hover {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+.context-menu-item + .context-menu-item {
+    border-top: 1px solid #eee;
 }
 
 /* Responsive Design */
@@ -722,9 +639,5 @@ body {
     
     .document-selector {
         min-width: 150px;
-    }
-    
-    .form-row {
-        grid-template-columns: 1fr;
     }
 }

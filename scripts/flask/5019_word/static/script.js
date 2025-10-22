@@ -1,6 +1,11 @@
 let documentData = { documents: [], activeDocument: 0 };
 let currentDocument = 0;
 let isModified = false;
+let headingStyles = {
+    h1: {},
+    h2: {},
+    h3: {}
+};
 
 // Load data on page load
 window.onload = function () {
@@ -18,12 +23,9 @@ function initializeApp() {
     const editor = document.getElementById('editor');
     editor.addEventListener('input', handleEditorChange);
     editor.addEventListener('keydown', handleEditorKeydown);
-
-    // Initialize custom heading styles
-    initializeCustomHeadingStyles();
-
-    // Setup ribbon heading right-click (ensure it's called after DOM is ready)
-    setupRibbonHeadingRightClick();
+    
+    // Set up context menu for heading buttons
+    setupHeadingContextMenu();
 
     // Load initial data
     loadData();
@@ -34,6 +36,12 @@ function handleKeyboardShortcuts(e) {
     if ((e.ctrlKey || e.metaKey) && e.key === 's') {
         e.preventDefault();
         saveData();
+    }
+    
+    // Ctrl+Space to clear formatting
+    if ((e.ctrlKey || e.metaKey) && e.key === ' ') {
+        e.preventDefault();
+        clearFormatting();
     }
 
     // Formatting shortcuts
@@ -58,10 +66,10 @@ function handleKeyboardShortcuts(e) {
 function handleEditorChange() {
     const editor = document.getElementById('editor');
     const content = editor.innerHTML;
-
+    
     // Update document content
     documentData.documents[currentDocument].content = content;
-
+    
     // Mark as modified
     isModified = true;
     updateDocumentInfo();
@@ -78,9 +86,9 @@ function handleEditorKeydown(e) {
             if (selection.rangeCount > 0) {
                 const range = selection.getRangeAt(0);
                 const container = range.commonAncestorContainer;
-
+                
                 // If we're not in a paragraph, wrap in one
-                if (container.nodeType === Node.TEXT_NODE &&
+                if (container.nodeType === Node.TEXT_NODE && 
                     container.parentNode === editor) {
                     document.execCommand('formatBlock', false, 'p');
                 }
@@ -94,9 +102,16 @@ async function loadData() {
         const response = await fetch('/api/data');
         documentData = await response.json();
         currentDocument = documentData.activeDocument || 0;
+        
+        // Load heading styles if they exist
+        if (documentData.headingStyles) {
+            headingStyles = documentData.headingStyles;
+        }
+        
         renderDocumentTabs();
         renderEditor();
         updateDocumentInfo();
+        applyHeadingStyles();
     } catch (error) {
         console.error('Error loading data:', error);
     }
@@ -105,6 +120,8 @@ async function loadData() {
 async function saveData() {
     try {
         documentData.activeDocument = currentDocument;
+        // Save heading styles with document data
+        documentData.headingStyles = headingStyles;
         const response = await fetch('/api/data', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -146,11 +163,11 @@ async function addDocument() {
         if (response.ok) {
             const result = await response.json();
             const now = new Date().toLocaleString();
-            documentData.documents.push({
-                name: docName,
-                content: '',
-                created: now,
-                modified: now
+            documentData.documents.push({ 
+                name: docName, 
+                content: '', 
+                created: now, 
+                modified: now 
             });
             currentDocument = result.documentIndex;
             renderDocumentTabs();
@@ -268,13 +285,13 @@ function toggleDocumentList() {
 function renderEditor() {
     const editor = document.getElementById('editor');
     const doc = documentData.documents[currentDocument];
-
+    
     if (doc) {
         editor.innerHTML = doc.content || '';
     } else {
         editor.innerHTML = '';
     }
-
+    
     // Focus the editor
     editor.focus();
 }
@@ -282,7 +299,7 @@ function renderEditor() {
 function updateDocumentInfo() {
     const infoEl = document.getElementById('documentInfo');
     const doc = documentData.documents[currentDocument];
-
+    
     if (doc) {
         const status = isModified ? 'Modified' : 'Saved';
         const wordCount = getWordCount(doc.content);
@@ -301,10 +318,10 @@ function getWordCount(html) {
 
 function formatText(command, value = null) {
     document.execCommand(command, false, value);
-
+    
     // Update button states
     updateFormatButtons();
-
+    
     // Mark as modified
     handleEditorChange();
 }
@@ -312,10 +329,10 @@ function formatText(command, value = null) {
 function formatHeading(headingTag) {
     // Use formatBlock to apply heading
     document.execCommand('formatBlock', false, headingTag);
-
+    
     // Update button states
     updateFormatButtons();
-
+    
     // Mark as modified
     handleEditorChange();
 }
@@ -343,7 +360,7 @@ function updateFormatButtons() {
                 const range = selection.getRangeAt(0);
                 const container = range.commonAncestorContainer;
                 const element = container.nodeType === Node.TEXT_NODE ? container.parentNode : container;
-
+                
                 // Check if current element or its parent is the heading we're checking
                 let currentElement = element;
                 let isCurrentFormat = false;
@@ -354,7 +371,7 @@ function updateFormatButtons() {
                     }
                     currentElement = currentElement.parentNode;
                 }
-
+                
                 // Special case for normal text - check if we're not in any heading
                 if (heading === 'p') {
                     let inHeading = false;
@@ -368,7 +385,7 @@ function updateFormatButtons() {
                     }
                     isCurrentFormat = !inHeading;
                 }
-
+                
                 if (isCurrentFormat) {
                     button.classList.add('active');
                 } else {
@@ -393,604 +410,97 @@ function changeFontFamily() {
 
 function changeFontSize() {
     const fontSize = document.getElementById('fontSize').value;
-    // Convert px to pt for execCommand
-    const sizeInPt = parseInt(fontSize) * 0.75;
-    formatText('fontSize', Math.round(sizeInPt / 2)); // execCommand uses 1-7 scale
-
-    // Also apply direct CSS for better control
+    
+    // Apply direct CSS for better control
     const selection = window.getSelection();
     if (selection.rangeCount > 0) {
         const range = selection.getRangeAt(0);
         if (!range.collapsed) {
-            const span = document.createElement('span');
-            span.style.fontSize = fontSize;
-            try {
-                range.surroundContents(span);
-            } catch (e) {
-                // If can't surround, apply to selection differently
-                formatText('fontSize', fontSize);
+            // Check if we're already inside a span with font-size
+            const container = range.commonAncestorContainer;
+            let parentElement = container.nodeType === Node.TEXT_NODE ? container.parentNode : container;
+            
+            // Look for existing span with font-size in the selection
+            let existingSpan = null;
+            while (parentElement && parentElement !== document.getElementById('editor')) {
+                if (parentElement.tagName === 'SPAN' && parentElement.style.fontSize) {
+                    existingSpan = parentElement;
+                    break;
+                }
+                parentElement = parentElement.parentNode;
+            }
+            
+            if (existingSpan && range.toString() === existingSpan.textContent) {
+                // If we're changing the font size of the entire existing span, just update it
+                existingSpan.style.fontSize = fontSize;
+            } else {
+                // Create a new span with the font size
+                const span = document.createElement('span');
+                span.style.fontSize = fontSize;
+                
+                // Extract the selected content
+                const contents = range.extractContents();
+                
+                // Wrap all the content in our span
+                span.appendChild(contents);
+                
+                // Insert the span at the start of the original range
+                range.insertNode(span);
+                
+                // Reselect the content we just inserted
+                const newRange = document.createRange();
+                newRange.selectNodeContents(span);
+                selection.removeAllRanges();
+                selection.addRange(newRange);
             }
         }
     }
+    
+    // Mark as modified
+    handleEditorChange();
+}
+
+function clearFormatting() {
+    const selection = window.getSelection();
+    if (selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0);
+        if (!range.collapsed) {
+            // Get the selected text
+            const selectedText = range.toString();
+            
+            // Delete the selected content
+            range.deleteContents();
+            
+            // Insert plain text node with the same content
+            const textNode = document.createTextNode(selectedText);
+            range.insertNode(textNode);
+            
+            // Reselect the inserted text
+            const newRange = document.createRange();
+            newRange.selectNodeContents(textNode);
+            selection.removeAllRanges();
+            selection.addRange(newRange);
+        }
+    }
+    
+    // Mark as modified
+    handleEditorChange();
 }
 
 // Close dropdown when clicking outside
-document.addEventListener('click', function (event) {
+document.addEventListener('click', function(event) {
     const documentSelector = document.querySelector('.document-selector');
     const documentList = document.getElementById('documentList');
     if (!documentSelector.contains(event.target)) {
         documentList.classList.remove('show');
     }
+    
+    // Close context menu when clicking outside
+    const contextMenu = document.getElementById('headingContextMenu');
+    if (contextMenu && !contextMenu.contains(event.target)) {
+        contextMenu.style.display = 'none';
+    }
 });
 
 // Update format buttons on selection change
 document.addEventListener('selectionchange', updateFormatButtons);
-
-// Heading context menu functionality
-let currentHeadingElement = null;
-let currentHeadingType = null;
-
-// Add right-click event listener to editor and ribbon heading buttons
-document.addEventListener('DOMContentLoaded', function () {
-    const editor = document.getElementById('editor');
-    if (editor) {
-        editor.addEventListener('contextmenu', handleEditorRightClick);
-    }
-
-    // Setup ribbon heading right-click immediately
-    setupRibbonHeadingRightClick();
-});
-
-function handleEditorRightClick(e) {
-    const target = e.target;
-
-    // Check if we're right-clicking on a heading
-    let headingElement = target;
-    while (headingElement && headingElement !== document.getElementById('editor')) {
-        if (headingElement.tagName && ['H1', 'H2', 'H3'].includes(headingElement.tagName)) {
-            e.preventDefault();
-            showHeadingContextMenu(e, headingElement);
-            return;
-        }
-        headingElement = headingElement.parentNode;
-    }
-}
-
-function showHeadingContextMenu(e, headingElement) {
-    currentHeadingElement = headingElement;
-    currentHeadingType = headingElement.tagName.toLowerCase();
-
-    const menu = document.getElementById('headingContextMenu');
-    menu.style.left = e.pageX + 'px';
-    menu.style.top = e.pageY + 'px';
-    menu.classList.add('show');
-}
-
-function closeHeadingContextMenu() {
-    document.getElementById('headingContextMenu').classList.remove('show');
-    currentHeadingElement = null;
-    currentHeadingType = null;
-}
-
-function showHeadingStyleModal() {
-    if (!currentHeadingElement) return;
-
-    closeHeadingContextMenu();
-
-    // Set modal title
-    const title = document.getElementById('headingStyleTitle');
-    title.textContent = `Customize ${currentHeadingType.toUpperCase()} Style`;
-
-    // Load current styles
-    loadCurrentHeadingStyles();
-
-    // Show modal
-    document.getElementById('headingStyleModal').style.display = 'block';
-
-    // Set up form handler
-    document.getElementById('headingStyleForm').onsubmit = handleHeadingStyleSubmit;
-}
-
-function closeHeadingStyleModal() {
-    document.getElementById('headingStyleModal').style.display = 'none';
-    document.getElementById('headingStyleForm').reset();
-}
-
-function loadCurrentHeadingStyles() {
-    if (!currentHeadingElement) return;
-
-    const computedStyle = window.getComputedStyle(currentHeadingElement);
-
-    // Load current values
-    document.getElementById('headingFontSize').value = computedStyle.fontSize || '1.5em';
-    document.getElementById('headingFontWeight').value = computedStyle.fontWeight || '600';
-    document.getElementById('headingTextColor').value = rgbToHex(computedStyle.color) || '#1a1a1a';
-    document.getElementById('headingTextColorText').value = (rgbToHex(computedStyle.color) || '#1a1a1a').toUpperCase();
-    document.getElementById('headingAlignment').value = computedStyle.textAlign || 'left';
-    document.getElementById('headingLineHeight').value = computedStyle.lineHeight || '1.2';
-
-    // Parse margin values (convert px to em approximately)
-    const marginTop = parseFloat(computedStyle.marginTop) / 16 || 0.5;
-    const marginBottom = parseFloat(computedStyle.marginBottom) / 16 || 0.5;
-    document.getElementById('headingMarginTop').value = marginTop.toFixed(1);
-    document.getElementById('headingMarginBottom').value = marginBottom.toFixed(1);
-
-    // Check border settings
-    const borderBottom = computedStyle.borderBottomWidth !== '0px';
-    const borderTop = computedStyle.borderTopWidth !== '0px';
-    document.getElementById('headingBorderBottom').checked = borderBottom;
-    document.getElementById('headingBorderTop').checked = borderTop;
-
-    if (borderBottom || borderTop) {
-        document.getElementById('borderColorRow').style.display = 'grid';
-        document.getElementById('headingBorderColor').value = rgbToHex(computedStyle.borderBottomColor) || '#e0e0e0';
-        document.getElementById('headingBorderColorText').value = (rgbToHex(computedStyle.borderBottomColor) || '#e0e0e0').toUpperCase();
-        document.getElementById('headingBorderWidth').value = computedStyle.borderBottomWidth || '2px';
-    }
-
-    // Set up color picker sync
-    setupColorPickerSync();
-    setupBorderToggle();
-}
-
-function setupColorPickerSync() {
-    const textColorInput = document.getElementById('headingTextColor');
-    const textColorText = document.getElementById('headingTextColorText');
-    const borderColorInput = document.getElementById('headingBorderColor');
-    const borderColorText = document.getElementById('headingBorderColorText');
-
-    textColorInput.addEventListener('input', (e) => {
-        textColorText.value = e.target.value.toUpperCase();
-    });
-
-    borderColorInput.addEventListener('input', (e) => {
-        borderColorText.value = e.target.value.toUpperCase();
-    });
-}
-
-function setupBorderToggle() {
-    const borderBottom = document.getElementById('headingBorderBottom');
-    const borderTop = document.getElementById('headingBorderTop');
-    const borderColorRow = document.getElementById('borderColorRow');
-
-    function toggleBorderOptions() {
-        if (borderBottom.checked || borderTop.checked) {
-            borderColorRow.style.display = 'grid';
-        } else {
-            borderColorRow.style.display = 'none';
-        }
-    }
-
-    borderBottom.addEventListener('change', toggleBorderOptions);
-    borderTop.addEventListener('change', toggleBorderOptions);
-}
-
-function handleHeadingStyleSubmit(e) {
-    e.preventDefault();
-
-    if (!currentHeadingElement) return;
-
-    // Get form values
-    const fontSize = document.getElementById('headingFontSize').value;
-    const fontWeight = document.getElementById('headingFontWeight').value;
-    const textColor = document.getElementById('headingTextColor').value;
-    const alignment = document.getElementById('headingAlignment').value;
-    const lineHeight = document.getElementById('headingLineHeight').value;
-    const marginTop = document.getElementById('headingMarginTop').value + 'em';
-    const marginBottom = document.getElementById('headingMarginBottom').value + 'em';
-    const borderBottom = document.getElementById('headingBorderBottom').checked;
-    const borderTop = document.getElementById('headingBorderTop').checked;
-    const borderColor = document.getElementById('headingBorderColor').value;
-    const borderWidth = document.getElementById('headingBorderWidth').value;
-
-    // Apply styles to the heading element
-    currentHeadingElement.style.fontSize = fontSize;
-    currentHeadingElement.style.fontWeight = fontWeight;
-    currentHeadingElement.style.color = textColor;
-    currentHeadingElement.style.textAlign = alignment;
-    currentHeadingElement.style.lineHeight = lineHeight;
-    currentHeadingElement.style.marginTop = marginTop;
-    currentHeadingElement.style.marginBottom = marginBottom;
-
-    // Apply borders
-    if (borderBottom) {
-        currentHeadingElement.style.borderBottom = `${borderWidth} solid ${borderColor}`;
-        currentHeadingElement.style.paddingBottom = '0.3em';
-    } else {
-        currentHeadingElement.style.borderBottom = 'none';
-        currentHeadingElement.style.paddingBottom = '';
-    }
-
-    if (borderTop) {
-        currentHeadingElement.style.borderTop = `${borderWidth} solid ${borderColor}`;
-        currentHeadingElement.style.paddingTop = '0.3em';
-    } else {
-        currentHeadingElement.style.borderTop = 'none';
-        currentHeadingElement.style.paddingTop = '';
-    }
-
-    // Mark as modified
-    handleEditorChange();
-
-    // Close modal
-    closeHeadingStyleModal();
-
-    showToast('Heading style updated!', 'success');
-}
-
-function resetHeadingStyle() {
-    if (!currentHeadingElement) return;
-
-    closeHeadingContextMenu();
-
-    // Reset to default styles based on heading type
-    const headingType = currentHeadingElement.tagName.toLowerCase();
-
-    // Clear all inline styles
-    currentHeadingElement.removeAttribute('style');
-
-    // Mark as modified
-    handleEditorChange();
-
-    showToast(`${headingType.toUpperCase()} style reset to default`, 'success');
-}
-
-// Helper function to convert RGB to Hex
-function rgbToHex(rgb) {
-    if (!rgb) return '#000000';
-
-    // If already hex, return it
-    if (rgb.startsWith('#')) {
-        return rgb.length === 7 ? rgb : '#000000';
-    }
-
-    // If rgb/rgba format
-    const rgbMatch = rgb.match(/\d+/g);
-    if (rgbMatch && rgbMatch.length >= 3) {
-        const r = parseInt(rgbMatch[0]).toString(16).padStart(2, '0');
-        const g = parseInt(rgbMatch[1]).toString(16).padStart(2, '0');
-        const b = parseInt(rgbMatch[2]).toString(16).padStart(2, '0');
-        return `#${r}${g}${b}`;
-    }
-
-    return '#000000';
-}
-
-// Setup right-click functionality for ribbon heading buttons
-function setupRibbonHeadingRightClick() {
-    // Get all heading buttons by their onclick attribute
-    const h1Button = document.querySelector('[onclick="formatHeading(\'h1\')"]');
-    const h2Button = document.querySelector('[onclick="formatHeading(\'h2\')"]');
-    const h3Button = document.querySelector('[onclick="formatHeading(\'h3\')"]');
-
-    if (h1Button) {
-        h1Button.addEventListener('contextmenu', function (e) {
-            e.preventDefault();
-            showRibbonHeadingContextMenu(e, 'h1', h1Button);
-        });
-    }
-
-    if (h2Button) {
-        h2Button.addEventListener('contextmenu', function (e) {
-            e.preventDefault();
-            showRibbonHeadingContextMenu(e, 'h2', h2Button);
-        });
-    }
-
-    if (h3Button) {
-        h3Button.addEventListener('contextmenu', function (e) {
-            e.preventDefault();
-            showRibbonHeadingContextMenu(e, 'h3', h3Button);
-        });
-    }
-}
-
-function showRibbonHeadingContextMenu(e, headingType, buttonElement) {
-    currentHeadingType = headingType;
-    currentHeadingElement = null; // We're customizing the default style, not a specific element
-    currentRibbonButton = buttonElement;
-
-    const menu = document.getElementById('headingContextMenu');
-
-    // Update context menu content for ribbon customization
-    menu.innerHTML = `
-        <div class="context-menu-item" onclick="openHeadingCustomizer('${headingType}')">
-            <span>🎨</span>
-            <span>Customize Default ${headingType.toUpperCase()} Style</span>
-        </div>
-        <div class="context-menu-separator"></div>
-        <div class="context-menu-item" onclick="resetRibbonHeadingStyle()">
-            <span>🔄</span>
-            <span>Reset ${headingType.toUpperCase()} to Default</span>
-        </div>
-        <div class="context-menu-separator"></div>
-        <div class="context-menu-item" onclick="applyHeadingToSelection()">
-            <span>📝</span>
-            <span>Apply ${headingType.toUpperCase()} to Selection</span>
-        </div>
-    `;
-
-    menu.style.left = e.pageX + 'px';
-    menu.style.top = e.pageY + 'px';
-    menu.classList.add('show');
-}
-
-// New simplified function to open heading customizer
-function openHeadingCustomizer(headingType) {
-    currentHeadingType = headingType;
-    currentHeadingElement = null;
-    
-    closeHeadingContextMenu();
-
-    // Set modal title
-    const title = document.getElementById('headingStyleTitle');
-    title.textContent = `Customize Default ${headingType.toUpperCase()} Style`;
-
-    // Load default styles for this heading type
-    loadDefaultHeadingStyles();
-
-    // Show modal
-    const modal = document.getElementById('headingStyleModal');
-    modal.style.display = 'block';
-
-    // Set up form handler for ribbon customization
-    const form = document.getElementById('headingStyleForm');
-    form.onsubmit = handleRibbonHeadingStyleSubmit;
-}
-
-function loadDefaultHeadingStyles() {
-    if (!currentHeadingType) return;
-
-    // Get existing custom styles or use defaults
-    const customStyles = getCustomHeadingStyles(currentHeadingType);
-
-    // Set default values based on heading type
-    let defaults = {};
-    switch (currentHeadingType) {
-        case 'h1':
-            defaults = {
-                fontSize: '2em',
-                fontWeight: '700',
-                color: '#1a1a1a',
-                marginTop: '0.5',
-                marginBottom: '0.5',
-                borderBottom: true,
-                borderColor: '#e0e0e0',
-                borderWidth: '2px'
-            };
-            break;
-        case 'h2':
-            defaults = {
-                fontSize: '1.5em',
-                fontWeight: '600',
-                color: '#2a2a2a',
-                marginTop: '0.8',
-                marginBottom: '0.4',
-                borderBottom: false,
-                borderColor: '#e0e0e0',
-                borderWidth: '1px'
-            };
-            break;
-        case 'h3':
-            defaults = {
-                fontSize: '1.25em',
-                fontWeight: '600',
-                color: '#3a3a3a',
-                marginTop: '0.6',
-                marginBottom: '0.3',
-                borderBottom: false,
-                borderColor: '#e0e0e0',
-                borderWidth: '1px'
-            };
-            break;
-    }
-
-    // Merge with custom styles
-    const styles = { ...defaults, ...customStyles };
-
-    // Load values into form
-    document.getElementById('headingFontSize').value = styles.fontSize;
-    document.getElementById('headingFontWeight').value = styles.fontWeight;
-    document.getElementById('headingTextColor').value = styles.color;
-    document.getElementById('headingTextColorText').value = styles.color.toUpperCase();
-    document.getElementById('headingAlignment').value = styles.alignment || 'left';
-    document.getElementById('headingLineHeight').value = styles.lineHeight || '1.2';
-    document.getElementById('headingMarginTop').value = styles.marginTop;
-    document.getElementById('headingMarginBottom').value = styles.marginBottom;
-    document.getElementById('headingBorderBottom').checked = styles.borderBottom || false;
-    document.getElementById('headingBorderTop').checked = styles.borderTop || false;
-    document.getElementById('headingBorderColor').value = styles.borderColor;
-    document.getElementById('headingBorderColorText').value = styles.borderColor.toUpperCase();
-    document.getElementById('headingBorderWidth').value = styles.borderWidth;
-
-    // Show/hide border options
-    const borderColorRow = document.getElementById('borderColorRow');
-    if (styles.borderBottom || styles.borderTop) {
-        borderColorRow.style.display = 'grid';
-    } else {
-        borderColorRow.style.display = 'none';
-    }
-
-    // Set up color picker sync and border toggle
-    setupColorPickerSync();
-    setupBorderToggle();
-}
-
-function handleRibbonHeadingStyleSubmit(e) {
-    e.preventDefault();
-
-    if (!currentHeadingType) return;
-
-    // Get form values
-    const styles = {
-        fontSize: document.getElementById('headingFontSize').value,
-        fontWeight: document.getElementById('headingFontWeight').value,
-        color: document.getElementById('headingTextColor').value,
-        alignment: document.getElementById('headingAlignment').value,
-        lineHeight: document.getElementById('headingLineHeight').value,
-        marginTop: document.getElementById('headingMarginTop').value,
-        marginBottom: document.getElementById('headingMarginBottom').value,
-        borderBottom: document.getElementById('headingBorderBottom').checked,
-        borderTop: document.getElementById('headingBorderTop').checked,
-        borderColor: document.getElementById('headingBorderColor').value,
-        borderWidth: document.getElementById('headingBorderWidth').value
-    };
-
-    // Save custom styles
-    saveCustomHeadingStyles(currentHeadingType, styles);
-
-    // Apply styles to CSS
-    updateHeadingCSS(currentHeadingType, styles);
-
-    // Update ribbon button appearance
-    updateRibbonButtonStyle(currentHeadingType);
-
-    // Close modal
-    closeHeadingStyleModal();
-
-    showToast(`Default ${currentHeadingType.toUpperCase()} style updated!`, 'success');
-}
-
-function resetRibbonHeadingStyle() {
-    if (!currentHeadingType) return;
-
-    closeHeadingContextMenu();
-
-    // Remove custom styles
-    removeCustomHeadingStyles(currentHeadingType);
-
-    // Reset CSS to default
-    resetHeadingCSS(currentHeadingType);
-
-    // Update ribbon button appearance
-    updateRibbonButtonStyle(currentHeadingType);
-
-    showToast(`${currentHeadingType.toUpperCase()} style reset to default`, 'success');
-}
-
-function applyHeadingToSelection() {
-    if (!currentHeadingType) return;
-
-    closeHeadingContextMenu();
-
-    // Apply the heading format to current selection
-    formatHeading(currentHeadingType);
-
-    showToast(`${currentHeadingType.toUpperCase()} applied to selection`, 'success');
-}
-
-// Custom styles storage and management
-function getCustomHeadingStyles(headingType) {
-    const stored = localStorage.getItem(`customHeadingStyles_${headingType}`);
-    return stored ? JSON.parse(stored) : {};
-}
-
-function saveCustomHeadingStyles(headingType, styles) {
-    localStorage.setItem(`customHeadingStyles_${headingType}`, JSON.stringify(styles));
-}
-
-function removeCustomHeadingStyles(headingType) {
-    localStorage.removeItem(`customHeadingStyles_${headingType}`);
-}
-
-// CSS manipulation functions
-function updateHeadingCSS(headingType, styles) {
-    // Remove existing custom style if any
-    const existingStyle = document.getElementById(`custom-${headingType}-style`);
-    if (existingStyle) {
-        existingStyle.remove();
-    }
-
-    // Create new style element
-    const styleElement = document.createElement('style');
-    styleElement.id = `custom-${headingType}-style`;
-
-    let css = `.editor ${headingType} {
-        font-size: ${styles.fontSize} !important;
-        font-weight: ${styles.fontWeight} !important;
-        color: ${styles.color} !important;
-        text-align: ${styles.alignment} !important;
-        line-height: ${styles.lineHeight} !important;
-        margin-top: ${styles.marginTop}em !important;
-        margin-bottom: ${styles.marginBottom}em !important;`;
-
-    if (styles.borderBottom) {
-        css += `
-        border-bottom: ${styles.borderWidth} solid ${styles.borderColor} !important;
-        padding-bottom: 0.3em !important;`;
-    } else {
-        css += `
-        border-bottom: none !important;
-        padding-bottom: 0 !important;`;
-    }
-
-    if (styles.borderTop) {
-        css += `
-        border-top: ${styles.borderWidth} solid ${styles.borderColor} !important;
-        padding-top: 0.3em !important;`;
-    } else {
-        css += `
-        border-top: none !important;
-        padding-top: 0 !important;`;
-    }
-
-    css += `
-    }`;
-
-    styleElement.textContent = css;
-    document.head.appendChild(styleElement);
-}
-
-function resetHeadingCSS(headingType) {
-    const existingStyle = document.getElementById(`custom-${headingType}-style`);
-    if (existingStyle) {
-        existingStyle.remove();
-    }
-}
-
-function updateRibbonButtonStyle(headingType) {
-    const button = document.querySelector(`[onclick*="formatHeading('${headingType}')"]`);
-    if (button) {
-        const customStyles = getCustomHeadingStyles(headingType);
-        if (Object.keys(customStyles).length > 0) {
-            // Add visual indicator that this heading has custom styling
-            button.style.background = 'linear-gradient(135deg, #007bff 0%, #0056b3 100%)';
-            button.style.color = 'white';
-            button.style.borderColor = '#0056b3';
-            button.title = `${headingType.toUpperCase()} (Custom Style) - Right-click to customize`;
-        } else {
-            // Reset to default appearance
-            button.style.background = '';
-            button.style.color = '';
-            button.style.borderColor = '';
-            button.title = `${headingType.toUpperCase()} - Right-click to customize`;
-        }
-    }
-}
-
-// Initialize custom styles on page load
-function initializeCustomHeadingStyles() {
-    ['h1', 'h2', 'h3'].forEach(headingType => {
-        const customStyles = getCustomHeadingStyles(headingType);
-        if (Object.keys(customStyles).length > 0) {
-            updateHeadingCSS(headingType, customStyles);
-            updateRibbonButtonStyle(headingType);
-        } else {
-            // Set default tooltip
-            const button = document.querySelector(`[onclick*="formatHeading('${headingType}')"]`);
-            if (button) {
-                button.title = `${headingType.toUpperCase()} - Right-click to customize`;
-            }
-        }
-    });
-}
-
-let currentRibbonButton = null;
-
-// Close context menu when clicking elsewhere
-document.addEventListener('click', function (event) {
-    const contextMenu = document.getElementById('headingContextMenu');
-    if (!contextMenu.contains(event.target)) {
-        closeHeadingContextMenu();
-    }
-});
