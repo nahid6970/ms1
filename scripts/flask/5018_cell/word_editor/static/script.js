@@ -419,3 +419,238 @@ document.addEventListener('click', function(event) {
 
 // Update format buttons on selection change
 document.addEventListener('selectionchange', updateFormatButtons);
+
+// Heading context menu functionality
+let currentHeadingElement = null;
+let currentHeadingType = null;
+
+// Add right-click event listener to editor
+document.addEventListener('DOMContentLoaded', function() {
+    const editor = document.getElementById('editor');
+    if (editor) {
+        editor.addEventListener('contextmenu', handleEditorRightClick);
+    }
+});
+
+function handleEditorRightClick(e) {
+    const target = e.target;
+    
+    // Check if we're right-clicking on a heading
+    let headingElement = target;
+    while (headingElement && headingElement !== document.getElementById('editor')) {
+        if (headingElement.tagName && ['H1', 'H2', 'H3'].includes(headingElement.tagName)) {
+            e.preventDefault();
+            showHeadingContextMenu(e, headingElement);
+            return;
+        }
+        headingElement = headingElement.parentNode;
+    }
+}
+
+function showHeadingContextMenu(e, headingElement) {
+    currentHeadingElement = headingElement;
+    currentHeadingType = headingElement.tagName.toLowerCase();
+    
+    const menu = document.getElementById('headingContextMenu');
+    menu.style.left = e.pageX + 'px';
+    menu.style.top = e.pageY + 'px';
+    menu.classList.add('show');
+}
+
+function closeHeadingContextMenu() {
+    document.getElementById('headingContextMenu').classList.remove('show');
+    currentHeadingElement = null;
+    currentHeadingType = null;
+}
+
+function showHeadingStyleModal() {
+    if (!currentHeadingElement) return;
+    
+    closeHeadingContextMenu();
+    
+    // Set modal title
+    const title = document.getElementById('headingStyleTitle');
+    title.textContent = `Customize ${currentHeadingType.toUpperCase()} Style`;
+    
+    // Load current styles
+    loadCurrentHeadingStyles();
+    
+    // Show modal
+    document.getElementById('headingStyleModal').style.display = 'block';
+    
+    // Set up form handler
+    document.getElementById('headingStyleForm').onsubmit = handleHeadingStyleSubmit;
+}
+
+function closeHeadingStyleModal() {
+    document.getElementById('headingStyleModal').style.display = 'none';
+    document.getElementById('headingStyleForm').reset();
+}
+
+function loadCurrentHeadingStyles() {
+    if (!currentHeadingElement) return;
+    
+    const computedStyle = window.getComputedStyle(currentHeadingElement);
+    
+    // Load current values
+    document.getElementById('headingFontSize').value = computedStyle.fontSize || '1.5em';
+    document.getElementById('headingFontWeight').value = computedStyle.fontWeight || '600';
+    document.getElementById('headingTextColor').value = rgbToHex(computedStyle.color) || '#1a1a1a';
+    document.getElementById('headingTextColorText').value = (rgbToHex(computedStyle.color) || '#1a1a1a').toUpperCase();
+    document.getElementById('headingAlignment').value = computedStyle.textAlign || 'left';
+    document.getElementById('headingLineHeight').value = computedStyle.lineHeight || '1.2';
+    
+    // Parse margin values (convert px to em approximately)
+    const marginTop = parseFloat(computedStyle.marginTop) / 16 || 0.5;
+    const marginBottom = parseFloat(computedStyle.marginBottom) / 16 || 0.5;
+    document.getElementById('headingMarginTop').value = marginTop.toFixed(1);
+    document.getElementById('headingMarginBottom').value = marginBottom.toFixed(1);
+    
+    // Check border settings
+    const borderBottom = computedStyle.borderBottomWidth !== '0px';
+    const borderTop = computedStyle.borderTopWidth !== '0px';
+    document.getElementById('headingBorderBottom').checked = borderBottom;
+    document.getElementById('headingBorderTop').checked = borderTop;
+    
+    if (borderBottom || borderTop) {
+        document.getElementById('borderColorRow').style.display = 'grid';
+        document.getElementById('headingBorderColor').value = rgbToHex(computedStyle.borderBottomColor) || '#e0e0e0';
+        document.getElementById('headingBorderColorText').value = (rgbToHex(computedStyle.borderBottomColor) || '#e0e0e0').toUpperCase();
+        document.getElementById('headingBorderWidth').value = computedStyle.borderBottomWidth || '2px';
+    }
+    
+    // Set up color picker sync
+    setupColorPickerSync();
+    setupBorderToggle();
+}
+
+function setupColorPickerSync() {
+    const textColorInput = document.getElementById('headingTextColor');
+    const textColorText = document.getElementById('headingTextColorText');
+    const borderColorInput = document.getElementById('headingBorderColor');
+    const borderColorText = document.getElementById('headingBorderColorText');
+    
+    textColorInput.addEventListener('input', (e) => {
+        textColorText.value = e.target.value.toUpperCase();
+    });
+    
+    borderColorInput.addEventListener('input', (e) => {
+        borderColorText.value = e.target.value.toUpperCase();
+    });
+}
+
+function setupBorderToggle() {
+    const borderBottom = document.getElementById('headingBorderBottom');
+    const borderTop = document.getElementById('headingBorderTop');
+    const borderColorRow = document.getElementById('borderColorRow');
+    
+    function toggleBorderOptions() {
+        if (borderBottom.checked || borderTop.checked) {
+            borderColorRow.style.display = 'grid';
+        } else {
+            borderColorRow.style.display = 'none';
+        }
+    }
+    
+    borderBottom.addEventListener('change', toggleBorderOptions);
+    borderTop.addEventListener('change', toggleBorderOptions);
+}
+
+function handleHeadingStyleSubmit(e) {
+    e.preventDefault();
+    
+    if (!currentHeadingElement) return;
+    
+    // Get form values
+    const fontSize = document.getElementById('headingFontSize').value;
+    const fontWeight = document.getElementById('headingFontWeight').value;
+    const textColor = document.getElementById('headingTextColor').value;
+    const alignment = document.getElementById('headingAlignment').value;
+    const lineHeight = document.getElementById('headingLineHeight').value;
+    const marginTop = document.getElementById('headingMarginTop').value + 'em';
+    const marginBottom = document.getElementById('headingMarginBottom').value + 'em';
+    const borderBottom = document.getElementById('headingBorderBottom').checked;
+    const borderTop = document.getElementById('headingBorderTop').checked;
+    const borderColor = document.getElementById('headingBorderColor').value;
+    const borderWidth = document.getElementById('headingBorderWidth').value;
+    
+    // Apply styles to the heading element
+    currentHeadingElement.style.fontSize = fontSize;
+    currentHeadingElement.style.fontWeight = fontWeight;
+    currentHeadingElement.style.color = textColor;
+    currentHeadingElement.style.textAlign = alignment;
+    currentHeadingElement.style.lineHeight = lineHeight;
+    currentHeadingElement.style.marginTop = marginTop;
+    currentHeadingElement.style.marginBottom = marginBottom;
+    
+    // Apply borders
+    if (borderBottom) {
+        currentHeadingElement.style.borderBottom = `${borderWidth} solid ${borderColor}`;
+        currentHeadingElement.style.paddingBottom = '0.3em';
+    } else {
+        currentHeadingElement.style.borderBottom = 'none';
+        currentHeadingElement.style.paddingBottom = '';
+    }
+    
+    if (borderTop) {
+        currentHeadingElement.style.borderTop = `${borderWidth} solid ${borderColor}`;
+        currentHeadingElement.style.paddingTop = '0.3em';
+    } else {
+        currentHeadingElement.style.borderTop = 'none';
+        currentHeadingElement.style.paddingTop = '';
+    }
+    
+    // Mark as modified
+    handleEditorChange();
+    
+    // Close modal
+    closeHeadingStyleModal();
+    
+    showToast('Heading style updated!', 'success');
+}
+
+function resetHeadingStyle() {
+    if (!currentHeadingElement) return;
+    
+    closeHeadingContextMenu();
+    
+    // Reset to default styles based on heading type
+    const headingType = currentHeadingElement.tagName.toLowerCase();
+    
+    // Clear all inline styles
+    currentHeadingElement.removeAttribute('style');
+    
+    // Mark as modified
+    handleEditorChange();
+    
+    showToast(`${headingType.toUpperCase()} style reset to default`, 'success');
+}
+
+// Helper function to convert RGB to Hex
+function rgbToHex(rgb) {
+    if (!rgb) return '#000000';
+    
+    // If already hex, return it
+    if (rgb.startsWith('#')) {
+        return rgb.length === 7 ? rgb : '#000000';
+    }
+    
+    // If rgb/rgba format
+    const rgbMatch = rgb.match(/\d+/g);
+    if (rgbMatch && rgbMatch.length >= 3) {
+        const r = parseInt(rgbMatch[0]).toString(16).padStart(2, '0');
+        const g = parseInt(rgbMatch[1]).toString(16).padStart(2, '0');
+        const b = parseInt(rgbMatch[2]).toString(16).padStart(2, '0');
+        return `#${r}${g}${b}`;
+    }
+    
+    return '#000000';
+}
+
+// Close context menu when clicking elsewhere
+document.addEventListener('click', function(event) {
+    const contextMenu = document.getElementById('headingContextMenu');
+    if (!contextMenu.contains(event.target)) {
+        closeHeadingContextMenu();
+    }
+});

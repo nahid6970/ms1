@@ -559,6 +559,114 @@ body {
     color: #333;
 }
 
+/* Context Menu */
+.context-menu {
+    display: none;
+    position: fixed;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 2000;
+    min-width: 200px;
+    padding: 4px 0;
+}
+
+.context-menu.show {
+    display: block;
+}
+
+.context-menu-item {
+    padding: 10px 15px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    color: #333;
+    transition: background 0.2s;
+    user-select: none;
+}
+
+.context-menu-item:hover {
+    background: #f8f9fa;
+}
+
+.context-menu-separator {
+    height: 1px;
+    background: #e0e0e0;
+    margin: 4px 0;
+}
+
+/* Color Picker */
+.color-picker-wrapper {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.color-input {
+    width: 60px;
+    height: 42px;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    cursor: pointer;
+    padding: 2px;
+    background: white;
+}
+
+.color-input::-webkit-color-swatch-wrapper {
+    padding: 2px;
+}
+
+.color-input::-webkit-color-swatch {
+    border: none;
+    border-radius: 4px;
+}
+
+.color-input::-moz-color-swatch {
+    border: none;
+    border-radius: 4px;
+}
+
+.color-text {
+    flex: 1;
+    font-family: 'Courier New', monospace;
+    text-transform: uppercase;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.checkbox-group {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #495057;
+    user-select: none;
+}
+
+.checkbox-label input[type="checkbox"] {
+    cursor: pointer;
+    width: 18px;
+    height: 18px;
+}
+
+.checkbox-label:hover {
+    color: #007bff;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .toolbar {
@@ -576,5 +684,9 @@ body {
     
     .document-selector {
         min-width: 150px;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
     }
 }
