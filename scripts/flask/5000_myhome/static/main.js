@@ -207,40 +207,7 @@ document.addEventListener('keydown', (event) => {
   }
 });
 
-// Arrow key listener for sidebar toggle
-document.addEventListener('keydown', (event) => {
-  // Check for up/down arrow keys
-  if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
-    // Only toggle if focused on body or no input is focused
-    if (document.activeElement === document.body || 
-        document.activeElement.tagName === 'BODY') {
-      event.preventDefault();
-      const sidebarContainer = document.getElementById('sidebar-container');
-      const flexContainer2 = document.querySelector('.flex-container2');
-      const sidebarToggle = document.getElementById('sidebar-toggle');
-      
-      if (sidebarContainer && flexContainer2 && sidebarToggle) {
-        const isExpanded = sidebarContainer.classList.contains('expanded');
-        const toggleIcon = sidebarToggle.querySelector('i');
-        
-        // Toggle state
-        if (isExpanded) {
-          sidebarContainer.classList.remove('expanded');
-          flexContainer2.classList.add('sidebar-collapsed');
-          toggleIcon.className = 'nf nf-fa-chevron_down';
-          sidebarToggle.title = 'Expand Sidebar';
-          sessionStorage.setItem('sidebar-expanded', 'false');
-        } else {
-          sidebarContainer.classList.add('expanded');
-          flexContainer2.classList.remove('sidebar-collapsed');
-          toggleIcon.className = 'nf nf-fa-chevron_up';
-          sidebarToggle.title = 'Collapse Sidebar';
-          sessionStorage.setItem('sidebar-expanded', 'true');
-        }
-      }
-    }
-  }
-});
+// Removed arrow key listener for sidebar toggle to simplify mobile experience
 
   // Add title attribute to inputs with placeholders for tooltips
   const inputs = document.querySelectorAll('input[placeholder]');

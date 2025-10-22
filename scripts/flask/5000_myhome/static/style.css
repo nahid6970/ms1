@@ -1,93 +1,61 @@
 /* Import the JetBrains Mono font */
 @import url("https://www.nerdfonts.com/assets/css/webfont.css");
 
-/* Sidebar container - initially expanded with toggle */
-.sidebar-container {
-  position: relative;
-  width: 100%;
-  z-index: 1000;
-  background-color: rgba(0, 0, 0, 0.8);
-  padding: 10px;
-  box-sizing: border-box;
-  margin-top: 0;
-  transition: all 0.3s ease;
-}
-
-/* Collapsed state - only show toggle arrow */
-.sidebar-container:not(.expanded) {
-  height: 30px;
-  padding: 5px;
-}
-
-/* Sidebar toggle button - at the top center */
-.sidebar-toggle {
-  position: absolute;
-  top: 5px;
-  right: 10px;
-  background: rgba(255, 255, 255, 0.2);
-  border: none;
-  padding: 2px 6px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  z-index: 1001;
-  width: 20px;
-  height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 4px;
-}
-
-.sidebar-toggle:hover {
-  background: rgba(255, 255, 255, 0.3);
-}
-
-.sidebar-toggle i {
-  font-size: 14px;
-  color: #ffffff;
-  transition: all 0.3s ease;
-}
-
-/* Sidebar content - hidden when collapsed */
-.sidebar-container:not(.expanded) .top-center-controls {
-  display: none;
-}
-
-/* Always show sidebar content when expanded */
-.sidebar-container.expanded .top-center-controls {
-  display: flex;
-  flex-direction: row;
-  justify-content: center; /* Center the content */
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-  transition: all 0.3s ease;
-  overflow-x: auto;
-  overflow-y: hidden;
-}
-
-/* Hide sidebar content when collapsed */
-.sidebar-container:not(.expanded) .top-center-controls {
-  display: none;
-}
-
-/* Adjust main content to make space for sidebar */
-.flex-container2 {
-  margin-top: 60px; /* Space for the sidebar when expanded */
-  padding-top: 20px; /* Additional padding */
-  transition: margin-top 0.3s ease;
-}
-
-.flex-container2.sidebar-collapsed {
-  margin-top: 30px; /* Space for the toggle when collapsed */
+/* Sidebar container - always expanded */
+
+.sidebar-container {
+
+  position: relative;
+
+  width: 100%;
+
+  z-index: 1000;
+
+  background-color: rgba(0, 0, 0, 0.8);
+
+  padding: 10px;
+
+  box-sizing: border-box;
+
+  margin-top: 0;
+
 }
 
-/* Move toggle button to right side when expanded - position set by JavaScript */
-.sidebar-container.expanded .sidebar-toggle {
-  /* Position will be set dynamically by JavaScript */
+
+
+/* Always show sidebar content */
+
+.sidebar-container .top-center-controls {
+
+  display: flex;
+
+  flex-direction: row;
+
+  justify-content: center; /* Center the content */
+
+  align-items: center;
+
+  gap: 8px;
+
+  width: 100%;
+
+  overflow-x: auto;
+
+  overflow-y: hidden;
+
 }
 
-/* Icon changes are handled by JavaScript, no rotation needed */
+
+
+/* Adjust main content to make space for sidebar */
+
+.flex-container2 {
+
+  margin-top: 60px; /* Space for the sidebar */
+
+  padding-top: 20px; /* Additional padding */
+
+}
 
 /* Adjust button styling for sidebar - keep original styling */
 .top-center-controls .add-button {
@@ -100,11 +68,7 @@
   background-color: #e0e0e0 !important;
 }
 
-/* Make sure the toggle button is always visible */
-.sidebar-toggle {
-  opacity: 1 !important;
-  visibility: visible !important;
-}
+
 
 .add-button {
   color: #000000 !important;
@@ -1392,10 +1356,33 @@ a.add-button.custom-sidebar-button[style*="background-color"] {
   
   /* Mobile adjustments for sidebar */
   .sidebar-container {
-    height: 50px;
+    height: auto;
+    min-height: 50px;
+    padding: 5px;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+  
+  /* Ensure sidebar buttons are visible on mobile */
+  .top-center-controls {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    padding: 5px 0 !important;
+  }
+  
+  .top-center-controls .notification-button-container {
+    flex-shrink: 0;
+    margin: 2px;
   }
   
   .flex-container2 {
-    margin-top: 50px; /* Height of the mobile sidebar */
+    margin-top: 60px; /* Height of the mobile sidebar */
   }
 }
