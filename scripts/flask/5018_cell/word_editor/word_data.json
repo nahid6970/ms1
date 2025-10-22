@@ -4,8 +4,14 @@
     {
       "content": "<h1>asdasdasd</h1>",
       "created": "",
-      "modified": "2025-10-22 20:07:17",
+      "modified": "2025-10-22 20:12:13",
       "name": "Document1"
+    },
+    {
+      "name": "Document2",
+      "content": "<h1>Xmen</h1>",
+      "created": "22/10/2025, 20:11:02",
+      "modified": "22/10/2025, 20:11:02"
     }
   ],
   "headingStyles": {
@@ -14,13 +20,22 @@
       "fontSize": "2em",
       "fontWeight": "normal",
       "color": "#121111",
-      "backgroundColor": "#ff8080",
+      "backgroundColor": "#4258ff",
       "border": "3px solid blue",
       "padding": "0.3em 0 0.5em 0",
       "margin": "0.5em 0",
       "textAlign": "center"
     },
-    "h2": {},
+    "h2": {
+      "backgroundColor": "#a78686",
+      "color": "#723b3b",
+      "fontFamily": "Inter",
+      "fontSize": "1.5em",
+      "fontWeight": "normal",
+      "margin": "0.8em 0 0.4em 0",
+      "padding": "0.4em 0 0.4em 0",
+      "textAlign": "left"
+    },
     "h3": {}
   }
 }

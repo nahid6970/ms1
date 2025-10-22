@@ -35,9 +35,6 @@ function showHeadingContextMenu(event, headingType) {
         <div class="context-menu-item" onclick="openHeadingStyleModal('${headingType}')">
             Modify Style
         </div>
-        <div class="context-menu-item" onclick="applyHeadingStyleToAll('${headingType}')">
-            Apply to All Sheets
-        </div>
     `;
     
     contextMenu.style.display = 'block';
@@ -152,7 +149,6 @@ function openHeadingStyleModal(headingType) {
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" onclick="closeHeadingStyleModal()">Cancel</button>
                 <button type="button" class="btn btn-primary" onclick="saveHeadingStyle('${headingType}')">Save</button>
-                <button type="button" class="btn btn-success" onclick="saveHeadingStyle('${headingType}', true)">Save & Apply to All</button>
             </div>
         </div>
     `;
@@ -201,7 +197,7 @@ function getDefaultMargin(headingType) {
     }
 }
 
-function saveHeadingStyle(headingType, applyToAll = false) {
+function saveHeadingStyle(headingType) {
     // Get values from form
     const fontFamily = document.getElementById('headingFontFamily').value;
     const fontSize = document.getElementById('headingFontSize').value;
@@ -239,13 +235,10 @@ function saveHeadingStyle(headingType, applyToAll = false) {
     // Apply styles
     applyHeadingStyles();
     
-    // Apply to all sheets if requested
-    if (applyToAll) {
-        saveData();
-        showToast(`Style saved and applied to all sheets!`, 'success');
-    } else {
-        showToast(`Style saved for ${headingType.toUpperCase()}!`, 'success');
-    }
+    // Save data (this applies to all sheets)
+    saveData();
+    
+    showToast(`Style saved for ${headingType.toUpperCase()}!`, 'success');
     
     // Mark as modified
     isModified = true;
@@ -282,18 +275,4 @@ function applyHeadingStyles() {
     
     styleElement.textContent = cssRules;
     document.head.appendChild(styleElement);
-}
-
-function applyHeadingStyleToAll(headingType) {
-    // Hide context menu
-    const contextMenu = document.getElementById('headingContextMenu');
-    if (contextMenu) contextMenu.style.display = 'none';
-    
-    // Apply the current style to all sheets
-    applyHeadingStyles();
-    
-    // Save data to apply to all sheets
-    saveData();
-    
-    showToast(`Style applied to all sheets!`, 'success');
 }
