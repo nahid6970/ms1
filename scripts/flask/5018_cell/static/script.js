@@ -352,7 +352,9 @@ function getCellStyle(rowIndex, colIndex) {
         sheet.cellStyles = {};
     }
     const key = getCellKey(rowIndex, colIndex);
-    return sheet.cellStyles[key] || {};
+    const style = sheet.cellStyles[key] || {};
+    console.log('Get cell style:', key, style);
+    return style;
 }
 
 function setCellStyle(rowIndex, colIndex, styleProperty, value) {
@@ -851,294 +853,611 @@ function applyUnifiedColors(rowIndex, colIndex) {
         showToast('Colors updated', 'success');
     }
 
-    // Close the picker
-    const overlay = document.getElementById('unifiedColorPickerOverlay');
-    if (overlay) {
-        document.body.removeChild(overlay);
-    }
-}
-
-// Unified border options modal
-function showUnifiedBorderOptions() {
-    if (!contextMenuCell) return;
-    showUnifiedBorderOptionsModal();
-    closeCellContextMenu();
-}
-
-// Unified border options state
-let selectedBorderWidth = '1px';
-let selectedBorderStyle = 'solid';
-let selectedBorderColor = '#000000';
-
-function showUnifiedBorderOptionsModal() {
-    const { rowIndex, colIndex, tdElement } = contextMenuCell;
-
-    // Get current border settings
-    const currentStyle = getCellStyle(rowIndex, colIndex);
-    selectedBorderWidth = currentStyle.borderWidth || '1px';
-    selectedBorderStyle = currentStyle.borderStyle || 'solid';
-    selectedBorderColor = currentStyle.borderColor || '#000000';
-
-    // Create modal overlay
-    const overlay = document.createElement('div');
-    overlay.className = 'color-picker-overlay';
-    overlay.id = 'unifiedBorderOptionsOverlay';
-
-    // Create border options popup
-    const popup = document.createElement('div');
-    popup.className = 'color-picker-popup';
-    popup.id = 'unifiedBorderOptionsPopup';
-
-    const title = document.createElement('h3');
-    const cellCount = selectedCells.length > 0 ? selectedCells.length : 1;
-    title.textContent = cellCount > 1 ? `Border Options (${cellCount} cells selected)` : 'Border Options';
-    popup.appendChild(title);
-
-    // Border toggle
-    const toggleContainer = document.createElement('div');
-    toggleContainer.style.display = 'flex';
-    toggleContainer.style.alignItems = 'center';
-    toggleContainer.style.marginBottom = '15px';
-    toggleContainer.style.justifyContent = 'center';
-
-    const toggleLabel = document.createElement('span');
-    toggleLabel.textContent = 'Border: ';
-    toggleLabel.style.marginRight = '10px';
-    toggleLabel.style.fontWeight = '500';
-
-    const toggleInput = document.createElement('input');
-    toggleInput.type = 'checkbox';
-    toggleInput.id = 'borderToggle';
-    toggleInput.checked = currentStyle.border !== false; // Default to true if not explicitly false
-    toggleInput.style.transform = 'scale(1.3)';
-
-    toggleContainer.appendChild(toggleLabel);
-    toggleContainer.appendChild(toggleInput);
-    popup.appendChild(toggleContainer);
-
-    // Border width options
-    const widthContainer = document.createElement('div');
-    widthContainer.style.marginBottom = '15px';
-
-    const widthLabel = document.createElement('label');
-    widthLabel.textContent = 'Border Width:';
-    widthLabel.style.display = 'block';
-    widthLabel.style.marginBottom = '8px';
-    widthLabel.style.fontWeight = '500';
-    widthLabel.style.textAlign = 'center';
-
-    const widthSelect = document.createElement('select');
-    widthSelect.id = 'borderWidthSelect';
-    widthSelect.style.width = '100%';
-    widthSelect.style.padding = '8px';
-    widthSelect.style.borderRadius = '6px';
-    widthSelect.style.border = '1px solid #ced4da';
-
-    const widthOptions = ['1px', '2px', '3px', '4px', '5px'];
-    widthOptions.forEach(width => {
-        const option = document.createElement('option');
-        option.value = width;
-        option.textContent = width;
-        if (width === selectedBorderWidth) {
-            option.selected = true;
-        }
-        widthSelect.appendChild(option);
-    });
-
-    widthContainer.appendChild(widthLabel);
-    widthContainer.appendChild(widthSelect);
-    popup.appendChild(widthContainer);
-
-    // Border style options
-    const styleContainer = document.createElement('div');
-    styleContainer.style.marginBottom = '15px';
-
-    const styleLabel = document.createElement('label');
-    styleLabel.textContent = 'Border Style:';
-    styleLabel.style.display = 'block';
-    styleLabel.style.marginBottom = '8px';
-    styleLabel.style.fontWeight = '500';
-    styleLabel.style.textAlign = 'center';
-
-    const styleSelect = document.createElement('select');
-    styleSelect.id = 'borderStyleSelect';
-    styleSelect.style.width = '100%';
-    styleSelect.style.padding = '8px';
-    styleSelect.style.borderRadius = '6px';
-    styleSelect.style.border = '1px solid #ced4da';
-
-    const styleOptions = ['solid', 'dashed', 'dotted', 'double'];
-    styleOptions.forEach(style => {
-        const option = document.createElement('option');
-        option.value = style;
-        option.textContent = style.charAt(0).toUpperCase() + style.slice(1);
-        if (style === selectedBorderStyle) {
-            option.selected = true;
-        }
-        styleSelect.appendChild(option);
-    });
-
-    styleContainer.appendChild(styleLabel);
-    styleContainer.appendChild(styleSelect);
-    popup.appendChild(styleContainer);
-
-    // Border color picker
-    const colorContainer = document.createElement('div');
-    colorContainer.style.marginBottom = '20px';
-
-    const colorLabel = document.createElement('label');
-    colorLabel.textContent = 'Border Color:';
-    colorLabel.style.display = 'block';
-    colorLabel.style.marginBottom = '8px';
-    colorLabel.style.fontWeight = '500';
-    colorLabel.style.textAlign = 'center';
-
-    const colorInput = document.createElement('input');
-    colorInput.type = 'color';
-    colorInput.id = 'borderColorInput';
-    colorInput.value = selectedBorderColor;
-    colorInput.style.width = '100%';
-    colorInput.style.height = '40px';
-    colorInput.style.borderRadius = '6px';
-    colorInput.style.border = '1px solid #ced4da';
-
-    colorContainer.appendChild(colorLabel);
-    colorContainer.appendChild(colorInput);
-    popup.appendChild(colorContainer);
-
-    // Preview area
-    const previewContainer = document.createElement('div');
-    previewContainer.className = 'color-preview';
-    previewContainer.style.margin = '15px 0';
-    previewContainer.style.padding = '15px';
-    previewContainer.style.borderRadius = '6px';
-    previewContainer.style.border = '1px solid #ddd';
-    previewContainer.style.backgroundColor = '#f8f9fa';
-    previewContainer.style.fontWeight = 'bold';
-    previewContainer.style.textAlign = 'center';
-    previewContainer.textContent = 'Border Preview';
-    previewContainer.id = 'borderPreviewArea';
-    popup.appendChild(previewContainer);
-
-    // Update preview when options change
-    toggleInput.addEventListener('change', updateBorderPreview);
-    widthSelect.addEventListener('change', updateBorderPreview);
-    styleSelect.addEventListener('change', updateBorderPreview);
-    colorInput.addEventListener('input', updateBorderPreview);
-
-    // Initialize preview
-    updateBorderPreview();
-
-    function updateBorderPreview() {
-        const preview = document.getElementById('borderPreviewArea');
-        if (preview) {
-            const isEnabled = toggleInput.checked;
-            if (isEnabled) {
-                const width = widthSelect.value;
-                const style = styleSelect.value;
-                const color = colorInput.value;
-                preview.style.border = `${width} ${style} ${color}`;
-            } else {
-                preview.style.border = '1px solid #ddd';
-            }
-        }
-    }
-
-    // OK button
-    const okBtn = document.createElement('button');
-    okBtn.className = 'btn btn-primary';
-    okBtn.textContent = 'Apply';
-    okBtn.style.marginTop = '10px';
-    okBtn.style.width = '100%';
-    okBtn.onclick = () => applyUnifiedBorderOptions(rowIndex, colIndex);
-
-    popup.appendChild(okBtn);
-
-    // Close button
-    const closeBtn = document.createElement('button');
-    closeBtn.className = 'color-picker-close';
-    closeBtn.textContent = '×';
-    closeBtn.onclick = () => document.body.removeChild(overlay);
-
-    popup.appendChild(closeBtn);
-    overlay.appendChild(popup);
-    document.body.appendChild(overlay);
-
-    // Close on overlay click
-    overlay.onclick = (e) => {
-        if (e.target === overlay) {
-            document.body.removeChild(overlay);
-        }
-    };
-}
-
-function applyUnifiedBorderOptions(rowIndex, colIndex) {
-    const toggleInput = document.getElementById('borderToggle');
-    const widthSelect = document.getElementById('borderWidthSelect');
-    const styleSelect = document.getElementById('borderStyleSelect');
-    const colorInput = document.getElementById('borderColorInput');
-
-    const isEnabled = toggleInput.checked;
-    const width = widthSelect.value;
-    const style = styleSelect.value;
-    const color = colorInput.value;
-
-    // Update state variables
-    selectedBorderWidth = width;
-    selectedBorderStyle = style;
-    selectedBorderColor = color;
-
-    // Apply to selected cells or single cell
-    if (selectedCells.length > 0) {
-        selectedCells.forEach(cell => {
-            const cellTd = cell.td;
-            
-            if (isEnabled) {
-                setCellStyle(cell.row, cell.col, 'border', true);
-                setCellStyle(cell.row, cell.col, 'borderWidth', width);
-                setCellStyle(cell.row, cell.col, 'borderStyle', style);
-                setCellStyle(cell.row, cell.col, 'borderColor', color);
-                
-                if (cellTd) {
-                    cellTd.style.border = `${width} ${style} ${color}`;
-                }
-            } else {
-                setCellStyle(cell.row, cell.col, 'border', false);
-                if (cellTd) {
-                    cellTd.style.border = '1px solid #ddd';
-                }
-            }
-        });
-        showToast(`Border options applied to ${selectedCells.length} cells`, 'success');
-    } else {
-        const { tdElement } = contextMenuCell;
-        
-        if (isEnabled) {
-            setCellStyle(rowIndex, colIndex, 'border', true);
-            setCellStyle(rowIndex, colIndex, 'borderWidth', width);
-            setCellStyle(rowIndex, colIndex, 'borderStyle', style);
-            setCellStyle(rowIndex, colIndex, 'borderColor', color);
-            
-            if (tdElement) {
-                tdElement.style.border = `${width} ${style} ${color}`;
-            }
-        } else {
-            setCellStyle(rowIndex, colIndex, 'border', false);
-            if (tdElement) {
-                tdElement.style.border = '1px solid #ddd';
-            }
-        }
-        showToast('Border options applied', 'success');
-    }
-
-    // Close the modal
-    const overlay = document.getElementById('unifiedBorderOptionsOverlay');
-    if (overlay) {
-        document.body.removeChild(overlay);
-    }
-}
-
-// Helper function to convert RGB to Hex
+    // Close the picker
+
+    const overlay = document.getElementById('unifiedColorPickerOverlay');
+
+    if (overlay) {
+
+        document.body.removeChild(overlay);
+
+    }
+
+}
+
+
+
+// Unified border options modal
+
+function showUnifiedBorderOptions() {
+
+    if (!contextMenuCell) return;
+
+    showUnifiedBorderOptionsModal();
+
+    closeCellContextMenu();
+
+}
+
+
+
+// Unified border options state
+
+let selectedBorderWidth = '1px';
+
+let selectedBorderStyle = 'solid';
+
+let selectedBorderColor = '#000000';
+
+
+
+function showUnifiedBorderOptionsModal() {
+
+    const { rowIndex, colIndex, tdElement } = contextMenuCell;
+
+    // Store the cell info for later use since contextMenuCell will be null when button is clicked
+    const cellInfo = { rowIndex, colIndex, tdElement };
+
+
+
+    // Get current border settings
+
+    const currentStyle = getCellStyle(rowIndex, colIndex);
+
+    selectedBorderWidth = currentStyle.borderWidth || '1px';
+
+    selectedBorderStyle = currentStyle.borderStyle || 'solid';
+
+    selectedBorderColor = currentStyle.borderColor || '#000000';
+
+
+
+    // Create modal overlay
+
+    const overlay = document.createElement('div');
+
+    overlay.className = 'color-picker-overlay';
+
+    overlay.id = 'unifiedBorderOptionsOverlay';
+
+
+
+    // Create border options popup
+
+    const popup = document.createElement('div');
+
+    popup.className = 'color-picker-popup';
+
+    popup.id = 'unifiedBorderOptionsPopup';
+
+
+
+    const title = document.createElement('h3');
+
+    const cellCount = selectedCells.length > 0 ? selectedCells.length : 1;
+
+    title.textContent = cellCount > 1 ? `Border Options (${cellCount} cells selected)` : 'Border Options';
+
+    popup.appendChild(title);
+
+
+
+    // Border toggle
+
+    const toggleContainer = document.createElement('div');
+
+    toggleContainer.style.display = 'flex';
+
+    toggleContainer.style.alignItems = 'center';
+
+    toggleContainer.style.marginBottom = '15px';
+
+    toggleContainer.style.justifyContent = 'center';
+
+
+
+    const toggleLabel = document.createElement('span');
+
+    toggleLabel.textContent = 'Border: ';
+
+    toggleLabel.style.marginRight = '10px';
+
+    toggleLabel.style.fontWeight = '500';
+
+
+
+    const toggleInput = document.createElement('input');
+
+    toggleInput.type = 'checkbox';
+
+    toggleInput.id = 'borderToggle';
+
+    toggleInput.checked = currentStyle.border !== false; // Default to true if not explicitly false
+
+    toggleInput.style.transform = 'scale(1.3)';
+
+
+
+    toggleContainer.appendChild(toggleLabel);
+
+    toggleContainer.appendChild(toggleInput);
+
+    popup.appendChild(toggleContainer);
+
+
+
+    // Border width options
+
+    const widthContainer = document.createElement('div');
+
+    widthContainer.style.marginBottom = '15px';
+
+
+
+    const widthLabel = document.createElement('label');
+
+    widthLabel.textContent = 'Border Width:';
+
+    widthLabel.style.display = 'block';
+
+    widthLabel.style.marginBottom = '8px';
+
+    widthLabel.style.fontWeight = '500';
+
+    widthLabel.style.textAlign = 'center';
+
+
+
+    const widthSelect = document.createElement('select');
+
+    widthSelect.id = 'borderWidthSelect';
+
+    widthSelect.style.width = '100%';
+
+    widthSelect.style.padding = '8px';
+
+    widthSelect.style.borderRadius = '6px';
+
+    widthSelect.style.border = '1px solid #ced4da';
+
+
+
+    const widthOptions = ['1px', '2px', '3px', '4px', '5px'];
+
+    widthOptions.forEach(width => {
+
+        const option = document.createElement('option');
+
+        option.value = width;
+
+        option.textContent = width;
+
+        if (width === selectedBorderWidth) {
+
+            option.selected = true;
+
+        }
+
+        widthSelect.appendChild(option);
+
+    });
+
+
+
+    widthContainer.appendChild(widthLabel);
+
+    widthContainer.appendChild(widthSelect);
+
+    popup.appendChild(widthContainer);
+
+
+
+    // Border style options
+
+    const styleContainer = document.createElement('div');
+
+    styleContainer.style.marginBottom = '15px';
+
+
+
+    const styleLabel = document.createElement('label');
+
+    styleLabel.textContent = 'Border Style:';
+
+    styleLabel.style.display = 'block';
+
+    styleLabel.style.marginBottom = '8px';
+
+    styleLabel.style.fontWeight = '500';
+
+    styleLabel.style.textAlign = 'center';
+
+
+
+    const styleSelect = document.createElement('select');
+
+    styleSelect.id = 'borderStyleSelect';
+
+    styleSelect.style.width = '100%';
+
+    styleSelect.style.padding = '8px';
+
+    styleSelect.style.borderRadius = '6px';
+
+    styleSelect.style.border = '1px solid #ced4da';
+
+
+
+    const styleOptions = ['solid', 'dashed', 'dotted', 'double'];
+
+    styleOptions.forEach(style => {
+
+        const option = document.createElement('option');
+
+        option.value = style;
+
+        option.textContent = style.charAt(0).toUpperCase() + style.slice(1);
+
+        if (style === selectedBorderStyle) {
+
+            option.selected = true;
+
+        }
+
+        styleSelect.appendChild(option);
+
+    });
+
+
+
+    styleContainer.appendChild(styleLabel);
+
+    styleContainer.appendChild(styleSelect);
+
+    popup.appendChild(styleContainer);
+
+
+
+    // Border color picker
+
+    const colorContainer = document.createElement('div');
+
+    colorContainer.style.marginBottom = '20px';
+
+
+
+    const colorLabel = document.createElement('label');
+
+    colorLabel.textContent = 'Border Color:';
+
+    colorLabel.style.display = 'block';
+
+    colorLabel.style.marginBottom = '8px';
+
+    colorLabel.style.fontWeight = '500';
+
+    colorLabel.style.textAlign = 'center';
+
+
+
+    const colorInput = document.createElement('input');
+
+    colorInput.type = 'color';
+
+    colorInput.id = 'borderColorInput';
+
+    colorInput.value = selectedBorderColor;
+
+    colorInput.style.width = '100%';
+
+    colorInput.style.height = '40px';
+
+    colorInput.style.borderRadius = '6px';
+
+    colorInput.style.border = '1px solid #ced4da';
+
+
+
+    colorContainer.appendChild(colorLabel);
+
+    colorContainer.appendChild(colorInput);
+
+    popup.appendChild(colorContainer);
+
+
+
+    // Preview area
+
+    const previewContainer = document.createElement('div');
+
+    previewContainer.className = 'color-preview';
+
+    previewContainer.style.margin = '15px 0';
+
+    previewContainer.style.padding = '15px';
+
+    previewContainer.style.borderRadius = '6px';
+
+    previewContainer.style.border = '1px solid #ddd';
+
+    previewContainer.style.backgroundColor = '#f8f9fa';
+
+    previewContainer.style.fontWeight = 'bold';
+
+    previewContainer.style.textAlign = 'center';
+
+    previewContainer.textContent = 'Border Preview';
+
+    previewContainer.id = 'borderPreviewArea';
+
+    popup.appendChild(previewContainer);
+
+
+
+    // Update preview when options change
+
+    toggleInput.addEventListener('change', updateBorderPreview);
+
+    widthSelect.addEventListener('change', updateBorderPreview);
+
+    styleSelect.addEventListener('change', updateBorderPreview);
+
+    colorInput.addEventListener('input', updateBorderPreview);
+
+
+
+    // Initialize preview
+
+    updateBorderPreview();
+
+
+
+    function updateBorderPreview() {
+
+        const preview = document.getElementById('borderPreviewArea');
+
+        if (preview) {
+
+            const isEnabled = toggleInput.checked;
+
+            if (isEnabled) {
+
+                const width = widthSelect.value;
+
+                const style = styleSelect.value;
+
+                const color = colorInput.value;
+
+                preview.style.border = `${width} ${style} ${color}`;
+
+            } else {
+
+                preview.style.border = '1px solid #ddd';
+
+            }
+
+        }
+
+    }
+
+
+
+    // OK button
+
+    const okBtn = document.createElement('button');
+
+    okBtn.className = 'btn btn-primary';
+
+    okBtn.textContent = 'Apply';
+
+    okBtn.style.marginTop = '10px';
+
+    okBtn.style.width = '100%';
+
+    okBtn.style.padding = '10px 20px';
+
+    okBtn.style.backgroundColor = '#007bff';
+
+    okBtn.style.color = 'white';
+
+    okBtn.style.border = 'none';
+
+    okBtn.style.borderRadius = '4px';
+
+    okBtn.style.cursor = 'pointer';
+
+    okBtn.style.fontSize = '14px';
+
+    okBtn.style.zIndex = '9999';
+
+    okBtn.style.pointerEvents = 'auto';
+
+    okBtn.style.position = 'relative';
+
+    okBtn.onclick = () => {
+        applyUnifiedBorderOptions(cellInfo.rowIndex, cellInfo.colIndex, cellInfo.tdElement);
+    };
+
+    okBtn.onmouseover = () => {
+        okBtn.style.backgroundColor = '#0056b3';
+    };
+
+    okBtn.onmouseout = () => {
+        okBtn.style.backgroundColor = '#007bff';
+    };
+
+
+
+    popup.appendChild(okBtn);
+
+
+
+    // Close button
+
+    const closeBtn = document.createElement('button');
+
+    closeBtn.className = 'color-picker-close';
+
+    closeBtn.textContent = '×';
+
+    closeBtn.onclick = () => document.body.removeChild(overlay);
+
+
+
+    popup.appendChild(closeBtn);
+
+    overlay.appendChild(popup);
+
+    document.body.appendChild(overlay);
+
+
+
+    // Close on overlay click
+
+    overlay.onclick = (e) => {
+
+        if (e.target === overlay) {
+
+            document.body.removeChild(overlay);
+
+        }
+
+    };
+
+}
+
+
+
+function applyUnifiedBorderOptions(rowIndex, colIndex, tdElement) {
+
+    const toggleInput = document.getElementById('borderToggle');
+
+    const widthSelect = document.getElementById('borderWidthSelect');
+
+    const styleSelect = document.getElementById('borderStyleSelect');
+
+    const colorInput = document.getElementById('borderColorInput');
+
+
+
+    const isEnabled = toggleInput.checked;
+
+    const width = widthSelect.value;
+
+    const style = styleSelect.value;
+
+    const color = colorInput.value;
+
+
+
+    // Update state variables
+
+    selectedBorderWidth = width;
+
+    selectedBorderStyle = style;
+
+    selectedBorderColor = color;
+
+
+
+    // Apply to selected cells or single cell
+
+    if (selectedCells.length > 0) {
+
+        selectedCells.forEach(cell => {
+
+            const cellTd = cell.td;
+
+
+
+            if (isEnabled) {
+
+                setCellStyle(cell.row, cell.col, 'border', true);
+
+                setCellStyle(cell.row, cell.col, 'borderWidth', width);
+
+                setCellStyle(cell.row, cell.col, 'borderStyle', style);
+
+                setCellStyle(cell.row, cell.col, 'borderColor', color);
+
+
+
+                if (cellTd) {
+
+                    cellTd.style.border = `${width} ${style} ${color}`;
+
+                }
+
+            } else {
+
+                setCellStyle(cell.row, cell.col, 'border', false);
+
+                if (cellTd) {
+
+                    cellTd.style.border = '1px solid #ddd';
+
+                }
+
+            }
+
+        });
+
+        showToast(`Border options applied to ${selectedCells.length} cells`, 'success');
+
+    } else {
+
+        if (isEnabled) {
+
+            setCellStyle(rowIndex, colIndex, 'border', true);
+
+            setCellStyle(rowIndex, colIndex, 'borderWidth', width);
+
+            setCellStyle(rowIndex, colIndex, 'borderStyle', style);
+
+            setCellStyle(rowIndex, colIndex, 'borderColor', color);
+
+
+
+            if (tdElement) {
+
+                tdElement.style.border = `${width} ${style} ${color}`;
+
+            }
+
+        } else {
+
+            setCellStyle(rowIndex, colIndex, 'border', false);
+
+            if (tdElement) {
+
+                tdElement.style.border = '1px solid #ddd';
+
+            }
+
+        }
+
+        showToast('Border options applied', 'success');
+
+    }
+
+
+
+    // Close the modal
+
+    const overlay = document.getElementById('unifiedBorderOptionsOverlay');
+
+    if (overlay) {
+
+        document.body.removeChild(overlay);
+
+    }
+
+}
+
+
+
+// Helper function to convert RGB to Hex
+
 function rgbToHex(color) {
     // If already hex, return it
     if (color.startsWith('#')) {
