@@ -404,25 +404,36 @@ function changeFontFamily() {
 
 function changeFontSize() {
     const fontSize = document.getElementById('fontSize').value;
-    // Convert px to pt for execCommand
-    const sizeInPt = parseInt(fontSize) * 0.75;
-    formatText('fontSize', Math.round(sizeInPt / 2)); // execCommand uses 1-7 scale
     
-    // Also apply direct CSS for better control
+    // Apply direct CSS for better control
     const selection = window.getSelection();
     if (selection.rangeCount > 0) {
         const range = selection.getRangeAt(0);
         if (!range.collapsed) {
+            // Always use the extract and wrap approach for consistency
+            // Extract the selected content
+            const contents = range.extractContents();
+            
+            // Create a new span with the font size
             const span = document.createElement('span');
             span.style.fontSize = fontSize;
-            try {
-                range.surroundContents(span);
-            } catch (e) {
-                // If can't surround, apply to selection differently
-                formatText('fontSize', fontSize);
-            }
+            
+            // Wrap all the content in our span
+            span.appendChild(contents);
+            
+            // Insert the span at the start of the original range
+            range.insertNode(span);
+            
+            // Reselect the content we just inserted
+            const newRange = document.createRange();
+            newRange.selectNodeContents(span);
+            selection.removeAllRanges();
+            selection.addRange(newRange);
         }
     }
+    
+    // Mark as modified
+    handleEditorChange();
 }
 
 // Close dropdown when clicking outside
