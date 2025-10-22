@@ -2703,44 +2703,14 @@ document.addEventListener('DOMContentLoaded', function () {
   // Initial fetch and display of links
   fetchAndDisplayLinks();
 
-  // Edit Mode Toggle functionality
-  const editModeToggle = document.getElementById('edit-mode-toggle');
-  const flexContainer2 = document.querySelector('.flex-container2');
-
-  if (editModeToggle && flexContainer2) {
-    editModeToggle.addEventListener('change', async function () {
-      const expandedGroups = [];
-      // Capture currently expanded groups before re-rendering
-      document.querySelectorAll('.group_type_top.expanded').forEach(group => {
-        expandedGroups.push(group.dataset.groupName);
-      });
-
-      if (this.checked) {
-        flexContainer2.classList.add('edit-mode');
-      } else {
-        flexContainer2.classList.remove('edit-mode');
-      }
-
-      // Refresh the display when edit mode is toggled to show/hide items
-      await fetchAndDisplayLinks();
-
-      // Re-expand previously expanded groups
-      expandedGroups.forEach(groupName => {
-        const groupElement = document.querySelector(`.group_type_top[data-group-name="${groupName}"]`);
-        if (groupElement) {
-          const content = groupElement.querySelector('.group_type_top-content');
-          const toggleBtn = groupElement.querySelector('.group_type_top-toggle-btn');
-          if (content && toggleBtn) {
-            content.classList.add('expanded');
-            toggleBtn.textContent = '▲';
-            groupElement.classList.add('expanded');
-            // Move to expanded row if it's a top group
-            moveToExpandedRow(groupElement);
-          }
-        }
-      });
-    });
-  }
+  // Edit Mode Toggle functionality (now handled by F1 key in main.js)
+  const flexContainer2 = document.querySelector('.flex-container2');
+
+  // Listen for edit mode changes from main.js
+  document.addEventListener('editModeChanged', async (event) => {
+    // Refresh the display when edit mode is toggled to show/hide items
+    await fetchAndDisplayLinks();
+  });
 
   // Drag and Drop functionality for links
   let draggedElement = null;

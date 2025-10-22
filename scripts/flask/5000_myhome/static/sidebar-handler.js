@@ -558,79 +558,66 @@ function handleNotificationButtonClick(button) {
     }
 }
 
-// Setup sidebar toggle functionality
-function setupSidebarToggle() {
-    const sidebarContainer = document.getElementById('sidebar-container');
-    const sidebarToggle = document.getElementById('sidebar-toggle');
-    const toggleIcon = sidebarToggle.querySelector('i');
-    let isExpanded = false;
-    
-    // Load saved state from localStorage (per-window basis)
-    const windowId = Date.now() + Math.random(); // Unique ID for this window
-    const savedState = sessionStorage.getItem('sidebar-expanded'); // Use sessionStorage instead of localStorage
-    if (savedState === 'true') {
-        isExpanded = true;
-        sidebarContainer.classList.add('expanded');
-    }
-    
-    // Update toggle icon based on state
-    function updateToggleIcon() {
-        if (isExpanded) {
-            toggleIcon.className = 'nf nf-fa-chevron_left';
-            sidebarToggle.title = 'Close Sidebar';
-        } else {
-            toggleIcon.className = 'nf nf-fa-chevron_right';
-            sidebarToggle.title = 'Open Sidebar';
-        }
-    }
-    
-    // Calculate dynamic toggle button position
-    function updateTogglePosition() {
-        setTimeout(() => {
-            if (isExpanded) {
-                const sidebarContent = document.getElementById('sidebar-buttons-container');
-                if (sidebarContent) {
-                    const sidebarWidth = sidebarContent.offsetWidth;
-                    sidebarToggle.style.left = (sidebarWidth + 10) + 'px';
-                }
-            } else {
-                sidebarToggle.style.left = '5px';
-            }
-        }, 50); // Small delay to ensure DOM is updated
-    }
-    
-    // Toggle sidebar on button click only
-    sidebarToggle.addEventListener('click', function(e) {
-        e.stopPropagation();
-        isExpanded = !isExpanded;
-        
-        if (isExpanded) {
-            sidebarContainer.classList.add('expanded');
-        } else {
-            sidebarContainer.classList.remove('expanded');
-        }
-        
-        updateToggleIcon();
-        updateTogglePosition();
-        
-        // Save state to sessionStorage (per-window)
-        sessionStorage.setItem('sidebar-expanded', isExpanded.toString());
-    });
-    
-    // Close sidebar when clicking outside
-    document.addEventListener('click', function(e) {
-        if (isExpanded && !sidebarContainer.contains(e.target) && !sidebarToggle.contains(e.target)) {
-            isExpanded = false;
-            sidebarContainer.classList.remove('expanded');
-            updateToggleIcon();
-            updateTogglePosition();
-            sessionStorage.setItem('sidebar-expanded', 'false');
-        }
-    });
-    
-    // Initialize icon and position after a delay to ensure buttons are rendered
-    setTimeout(() => {
-        updateToggleIcon();
-        updateTogglePosition();
-    }, 200);
+// Setup sidebar toggle functionality
+function setupSidebarToggle() {
+    const sidebarContainer = document.getElementById('sidebar-container');
+    const sidebarToggle = document.getElementById('sidebar-toggle');
+    const toggleIcon = sidebarToggle.querySelector('i');
+    let isExpanded = false;
+    
+    // Load saved state from localStorage (per-window basis)
+    const windowId = Date.now() + Math.random(); // Unique ID for this window
+    const savedState = sessionStorage.getItem('sidebar-expanded'); // Use sessionStorage instead of localStorage
+    if (savedState === 'true') {
+        isExpanded = true;
+        sidebarContainer.classList.add('expanded');
+    }
+    
+    // Update toggle icon based on state
+    function updateToggleIcon() {
+        if (isExpanded) {
+            toggleIcon.className = 'nf nf-fa-chevron_up';
+            sidebarToggle.title = 'Close Sidebar';
+        } else {
+            toggleIcon.className = 'nf nf-fa-chevron_down';
+            sidebarToggle.title = 'Open Sidebar';
+        }
+    }
+    
+    // Toggle sidebar on button click only
+    sidebarToggle.addEventListener('click', function(e) {
+        e.stopPropagation();
+        isExpanded = !isExpanded;
+        
+        if (isExpanded) {
+            sidebarContainer.classList.add('expanded');
+        } else {
+            sidebarContainer.classList.remove('expanded');
+        }
+        
+        updateToggleIcon();
+        
+        // Save state to sessionStorage (per-window)
+        sessionStorage.setItem('sidebar-expanded', isExpanded.toString());
+    });
+    
+    // Close sidebar when clicking outside
+    document.addEventListener('click', function(e) {
+        // Don't close sidebar when clicking on popup elements or their children
+        if (e.target.closest('.popup-container') || e.target.closest('.Menu')) {
+            return;
+        }
+        
+        if (isExpanded && !sidebarContainer.contains(e.target) && !sidebarToggle.contains(e.target)) {
+            isExpanded = false;
+            sidebarContainer.classList.remove('expanded');
+            updateToggleIcon();
+            sessionStorage.setItem('sidebar-expanded', 'false');
+        }
+    });
+    
+    // Initialize icon and position after a delay to ensure buttons are rendered
+    setTimeout(() => {
+        updateToggleIcon();
+    }, 200);
 }

@@ -186,28 +186,26 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // F1 key listener
-  document.addEventListener('keydown', (event) => {
-    if (event.key === 'F1') {
-      event.preventDefault();
-      const toggle = document.getElementById('edit-mode-toggle');
-      if (toggle) {
-        toggle.checked = !toggle.checked;
-        const changeEvent = new Event('change');
-        toggle.dispatchEvent(changeEvent);
-      }
-    }
+  // F1 key listener
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'F1') {
+      event.preventDefault();
+      // Toggle edit mode class on flex-container2 directly
+      const flexContainer2 = document.querySelector('.flex-container2');
+      if (flexContainer2) {
+        flexContainer2.classList.toggle('edit-mode');
+        // Also toggle edit mode in sidebar if the function exists
+        if (typeof toggleSidebarEditMode === 'function') {
+          toggleSidebarEditMode(flexContainer2.classList.contains('edit-mode'));
+        }
+        // Dispatch custom event for other modules to listen to
+        const editModeEvent = new CustomEvent('editModeChanged', {
+          detail: { isEditMode: flexContainer2.classList.contains('edit-mode') }
+        });
+        document.dispatchEvent(editModeEvent);
+      }
+    }
   });
-
-  // Edit mode toggle listener
-  const editModeToggle = document.getElementById('edit-mode-toggle');
-  if (editModeToggle) {
-    editModeToggle.addEventListener('change', function() {
-      if (typeof toggleSidebarEditMode === 'function') {
-        toggleSidebarEditMode(this.checked);
-      }
-    });
-  }
 
   // Add title attribute to inputs with placeholders for tooltips
   const inputs = document.querySelectorAll('input[placeholder]');

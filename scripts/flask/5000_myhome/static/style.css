@@ -1,22 +1,27 @@
 /* Import the JetBrains Mono font */
 @import url("https://www.nerdfonts.com/assets/css/webfont.css");
 
-/* Sidebar container */
+/* Sidebar container - now positioned at the top */
 .sidebar-container {
   position: fixed;
-  top: 50%;
+  top: 0;
   left: 0;
-  transform: translateY(-50%);
+  right: 0;
   z-index: 1000;
   display: flex;
   align-items: center;
-  width: auto;
+  width: 100%;
+  height: 60px;
+  background-color: rgba(0, 0, 0, 0.8);
+  padding: 0 10px;
+  box-sizing: border-box;
+  transition: all 0.3s ease;
 }
 
-/* Sidebar toggle button - transparent with white arrow */
+/* Sidebar toggle button - now at the top right */
 .sidebar-toggle {
-  position: fixed;
-  left: 5px;
+  position: absolute;
+  right: 10px;
   top: 50%;
   transform: translateY(-50%);
   background: none;
@@ -43,27 +48,30 @@
   transition: all 0.3s ease;
 }
 
-/* Sidebar content - transparent background */
+/* Sidebar content - now horizontal at the top */
 .top-center-controls {
-  position: fixed;
-  left: 0;
-  top: 50%;
-  transform: translate(-100%, -50%);
-  background: none;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: flex-start;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
   gap: 8px;
-  padding: 15px 8px;
-  transition: transform 0.3s ease;
-  width: auto;
-  z-index: 1000;
+  width: 100%;
+  padding: 0 10px;
+  transition: all 0.3s ease;
+  overflow-x: auto;
+  overflow-y: hidden;
+  height: 100%;
 }
 
-/* Sidebar expanded state */
-.sidebar-container.expanded .top-center-controls {
-  transform: translate(0, -50%);
+/* Hide sidebar content when collapsed */
+.sidebar-container:not(.expanded) .top-center-controls {
+  display: none;
+}
+
+/* Adjust main content to account for top sidebar */
+.flex-container2 {
+  margin-top: 60px; /* Height of the sidebar */
+  padding-top: 20px; /* Additional padding */
 }
 
 /* Move toggle button to right side when expanded - position set by JavaScript */
@@ -381,103 +389,7 @@ img {
   /* Green color on hover */
 }
 
-.toggle-container span {
-  /* Reset properties for the toggle label span */
-  display: inline;
-  padding: 0;
-  background-color: transparent;
-  border-radius: 0;
-  box-shadow: none;
-  transition: none;
-  margin: 0;
-  width: auto;
-  height: auto;
-  font-family: Calibri;
-  /* Or your preferred default font */
-  font-size: 16px;
-  /* Or your preferred default font size */
-  align-content: center;
-}
-
-.toggle-container span:hover {
-  transform: none;
-  background-color: transparent;
-}
-
-.toggle-container {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  transform: none;
-  display: flex;
-  align-items: center;
-  z-index: 1000;
-}
-
-/* The switch - the box around the slider */
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 60px;
-  height: 34px;
-}
-
-/* Hide default HTML checkbox */
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-/* The slider */
-.slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #ccc;
-  -webkit-transition: .4s;
-  transition: .4s;
-}
-
-.slider:before {
-  position: absolute;
-  content: "";
-  height: 26px;
-  width: 26px;
-  left: 4px;
-  bottom: 4px;
-  background-color: white;
-  -webkit-transition: .4s;
-  transition: .4s;
-}
-
-input:checked+.slider {
-  background-color: #2196F3;
-}
-
-input:focus+.slider {
-  box-shadow: 0 0 1px #2196F3;
-}
-
-input:checked+.slider:before {
-  -webkit-transform: translateX(26px);
-  -ms-transform: translateX(26px);
-  transform: translateX(26px);
-}
-
-/* Rounded sliders */
-.slider.round {
-  border-radius: 34px;
-}
-
-.slider.round:before {
-  border-radius: 50%;
-}
-
-.edit-button,
+  .edit-button,
 .delete-button {
   display: none;
   /* Hidden by default */
@@ -489,6 +401,7 @@ input:checked+.slider:before {
   display: inline-block;
   /* Show when edit mode is active */
 }
+
 
 /* Popup styles - Enhanced centering */
 .popup-container {
@@ -882,14 +795,13 @@ div.group-header-container {
 }
 
 html body {
-  margin-top: 20px;
-  margin-left: 20px;
-  /* Reduced margin since sidebar is now collapsible */
+  margin: 0;
+  padding: 0;
 }
 
 div.toggle-container {
-  margin-top: -16px;
-  margin-left: -15px;
+  margin-top: 10px;
+  margin-left: 10px;
   /* Adjust toggle position for new sidebar */
 }
 
@@ -1179,6 +1091,11 @@ div.toggle-container {
   border-radius: var(--custom-border-radius, 4px) !important;
   font-size: var(--custom-font-size, 16px) !important;
   transition: background-color 0.2s ease, transform 0.2s ease !important;
+  min-width: 40px;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .top-center-controls .notification-button-container .custom-sidebar-button.add-button:hover {
@@ -1197,6 +1114,11 @@ a.add-button.custom-sidebar-button[style*="background-color"] {
   background-color: #000000 !important;
   color: #ffffff !important;
   border: 1px solid #333333 !important;
+  min-width: 40px;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .top-center-controls .add-button.sidebar-add-button:hover {
@@ -1389,13 +1311,14 @@ a.add-button.custom-sidebar-button[style*="background-color"] {
 
   html,
   body {
-    margin: 5px;
-    margin-left: -3%;
+    margin: 0;
+    padding: 0;
   }
 
   .flex-container2 {
     padding: 0px;
     border-radius: 15px;
+    margin-top: 60px; /* Height of the sidebar */
   }
 
   .toggle-container span {
@@ -1457,5 +1380,14 @@ a.add-button.custom-sidebar-button[style*="background-color"] {
   .popup-container {
     align-items: flex-start !important;
     padding-top: 20px;
+  }
+  
+  /* Mobile adjustments for sidebar */
+  .sidebar-container {
+    height: 50px;
+  }
+  
+  .flex-container2 {
+    margin-top: 50px; /* Height of the mobile sidebar */
   }
 }
