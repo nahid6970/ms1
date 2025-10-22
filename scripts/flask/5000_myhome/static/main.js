@@ -187,25 +187,60 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // F1 key listener
-  document.addEventListener('keydown', (event) => {
-    if (event.key === 'F1') {
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'F1') {
+    event.preventDefault();
+    // Toggle edit mode class on flex-container2 directly
+    const flexContainer2 = document.querySelector('.flex-container2');
+    if (flexContainer2) {
+      flexContainer2.classList.toggle('edit-mode');
+      // Also toggle edit mode in sidebar if the function exists
+      if (typeof toggleSidebarEditMode === 'function') {
+        toggleSidebarEditMode(flexContainer2.classList.contains('edit-mode'));
+      }
+      // Dispatch custom event for other modules to listen to
+      const editModeEvent = new CustomEvent('editModeChanged', {
+        detail: { isEditMode: flexContainer2.classList.contains('edit-mode') }
+      });
+      document.dispatchEvent(editModeEvent);
+    }
+  }
+});
+
+// Arrow key listener for sidebar toggle
+document.addEventListener('keydown', (event) => {
+  // Check for up/down arrow keys
+  if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+    // Only toggle if focused on body or no input is focused
+    if (document.activeElement === document.body || 
+        document.activeElement.tagName === 'BODY') {
       event.preventDefault();
-      // Toggle edit mode class on flex-container2 directly
+      const sidebarContainer = document.getElementById('sidebar-container');
       const flexContainer2 = document.querySelector('.flex-container2');
-      if (flexContainer2) {
-        flexContainer2.classList.toggle('edit-mode');
-        // Also toggle edit mode in sidebar if the function exists
-        if (typeof toggleSidebarEditMode === 'function') {
-          toggleSidebarEditMode(flexContainer2.classList.contains('edit-mode'));
+      const sidebarToggle = document.getElementById('sidebar-toggle');
+      
+      if (sidebarContainer && flexContainer2 && sidebarToggle) {
+        const isExpanded = sidebarContainer.classList.contains('expanded');
+        const toggleIcon = sidebarToggle.querySelector('i');
+        
+        // Toggle state
+        if (isExpanded) {
+          sidebarContainer.classList.remove('expanded');
+          flexContainer2.classList.add('sidebar-collapsed');
+          toggleIcon.className = 'nf nf-fa-chevron_down';
+          sidebarToggle.title = 'Expand Sidebar';
+          sessionStorage.setItem('sidebar-expanded', 'false');
+        } else {
+          sidebarContainer.classList.add('expanded');
+          flexContainer2.classList.remove('sidebar-collapsed');
+          toggleIcon.className = 'nf nf-fa-chevron_up';
+          sidebarToggle.title = 'Collapse Sidebar';
+          sessionStorage.setItem('sidebar-expanded', 'true');
         }
-        // Dispatch custom event for other modules to listen to
-        const editModeEvent = new CustomEvent('editModeChanged', {
-          detail: { isEditMode: flexContainer2.classList.contains('edit-mode') }
-        });
-        document.dispatchEvent(editModeEvent);
       }
     }
-  });
+  }
+});
 
   // Add title attribute to inputs with placeholders for tooltips
   const inputs = document.querySelectorAll('input[placeholder]');

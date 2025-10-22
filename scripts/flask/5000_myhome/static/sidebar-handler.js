@@ -1,13 +1,93 @@
-// Sidebar buttons management
-let sidebarButtons = [];
-let sidebarEditMode = false;
-
-// Load sidebar buttons on page load
-document.addEventListener('DOMContentLoaded', function() {
-    setupSidebarToggle(); // Setup toggle first
-    loadSidebarButtons(); // Then load buttons
-    setupSidebarEventListeners(); // Finally setup other listeners
-});
+// Sidebar buttons management
+let sidebarButtons = [];
+let sidebarEditMode = false;
+
+// Load sidebar buttons on page load
+document.addEventListener('DOMContentLoaded', function() {
+    setupSidebarToggle(); // Setup toggle first
+    loadSidebarButtons(); // Then load buttons
+    setupSidebarEventListeners(); // Finally setup other listeners
+});
+
+// Load sidebar buttons from API
+function loadSidebarButtons() {
+    fetch('/api/sidebar-buttons')
+        .then(response => response.json())
+        .then(buttons => {
+            sidebarButtons = buttons;
+            renderSidebarButtons();
+            setupNotificationUpdates();
+        })
+        .catch(error => {
+            console.error('Error loading sidebar buttons:', error);
+        });
+}
+
+// Setup sidebar toggle functionality
+function setupSidebarToggle() {
+    const sidebarContainer = document.getElementById('sidebar-container');
+    const sidebarToggle = document.getElementById('sidebar-toggle');
+    const toggleIcon = sidebarToggle.querySelector('i');
+    const flexContainer = document.querySelector('.flex-container2');
+    let isExpanded = true; // Start expanded by default
+    
+    // Load saved state from sessionStorage
+    const savedState = sessionStorage.getItem('sidebar-expanded');
+    if (savedState === 'false') {
+        isExpanded = false;
+        sidebarContainer.classList.remove('expanded');
+        flexContainer.classList.add('sidebar-collapsed');
+    }
+    
+    // Update toggle icon based on state
+    function updateToggleIcon() {
+        if (isExpanded) {
+            toggleIcon.className = 'nf nf-fa-chevron_up';
+            sidebarToggle.title = 'Collapse Sidebar';
+        } else {
+            toggleIcon.className = 'nf nf-fa-chevron_down';
+            sidebarToggle.title = 'Expand Sidebar';
+        }
+    }
+    
+    // Toggle sidebar on button click only
+    sidebarToggle.addEventListener('click', function(e) {
+        e.stopPropagation();
+        isExpanded = !isExpanded;
+        
+        if (isExpanded) {
+            sidebarContainer.classList.add('expanded');
+            flexContainer.classList.remove('sidebar-collapsed');
+        } else {
+            sidebarContainer.classList.remove('expanded');
+            flexContainer.classList.add('sidebar-collapsed');
+        }
+        
+        updateToggleIcon();
+        
+        // Save state to sessionStorage
+        sessionStorage.setItem('sidebar-expanded', isExpanded.toString());
+    });
+    
+    // Initialize icon and position after a delay to ensure buttons are rendered
+    setTimeout(() => {
+        updateToggleIcon();
+    }, 200);
+}
+
+// Load sidebar buttons from API
+function loadSidebarButtons() {
+    fetch('/api/sidebar-buttons')
+        .then(response => response.json())
+        .then(buttons => {
+            sidebarButtons = buttons;
+            renderSidebarButtons();
+            setupNotificationUpdates();
+        })
+        .catch(error => {
+            console.error('Error loading sidebar buttons:', error);
+        });
+}
 
 // Load sidebar buttons from API
 function loadSidebarButtons() {
@@ -463,19 +543,19 @@ function updateSidebarEditMode() {
     });
 }
 
-// Toggle sidebar edit mode (called from main edit mode toggle)
-function toggleSidebarEditMode(enabled) {
-    sidebarEditMode = enabled;
-    updateSidebarEditMode();
-}
-
-// Setup notification updates for buttons with notifications
-function setupNotificationUpdates() {
-    sidebarButtons.forEach((button, index) => {
-        if (button.has_notification && button.notification_api) {
-            setupButtonNotifications(button);
-        }
-    });
+// Toggle sidebar edit mode (called from main edit mode toggle)
+function toggleSidebarEditMode(enabled) {
+    sidebarEditMode = enabled;
+    updateSidebarEditMode();
+}
+
+// Setup notification updates for buttons with notifications
+function setupNotificationUpdates() {
+    sidebarButtons.forEach((button, index) => {
+        if (button.has_notification && button.notification_api) {
+            setupButtonNotifications(button);
+        }
+    });
 }
 
 // Setup notifications for a specific button
@@ -563,15 +643,28 @@ function setupSidebarToggle() {
     const sidebarContainer = document.getElementById('sidebar-container');
     const sidebarToggle = document.getElementById('sidebar-toggle');
     const toggleIcon = sidebarToggle.querySelector('i');
+    const flexContainer = document.querySelector('.flex-container2');
     let isExpanded = false;
     
-    // Load saved state from localStorage (per-window basis)
-    const windowId = Date.now() + Math.random(); // Unique ID for this window
-    const savedState = sessionStorage.getItem('sidebar-expanded'); // Use sessionStorage instead of localStorage
+    // Load saved state from sessionStorage
+    const savedState = sessionStorage.getItem('sidebar-expanded');
     if (savedState === 'true') {
         isExpanded = true;
         sidebarContainer.classList.add('expanded');
+        flexContainer.classList.add('sidebar-expanded');
     }
+    
+    // Check if edit mode is active and expand sidebar if needed
+    setTimeout(() => {
+        const flexContainer2 = document.querySelector('.flex-container2');
+        if (flexContainer2 && flexContainer2.classList.contains('edit-mode') && !isExpanded) {
+            isExpanded = true;
+            sidebarContainer.classList.add('expanded');
+            flexContainer.classList.add('sidebar-expanded');
+            updateToggleIcon();
+            sessionStorage.setItem('sidebar-expanded', 'true');
+        }
+    }, 300);
     
     // Update toggle icon based on state
     function updateToggleIcon() {
@@ -591,28 +684,46 @@ function setupSidebarToggle() {
         
         if (isExpanded) {
             sidebarContainer.classList.add('expanded');
+            flexContainer.classList.add('sidebar-expanded');
+            // Save state to sessionStorage when manually expanded
+            sessionStorage.setItem('sidebar-expanded', 'true');
         } else {
+            // Check if edit mode is active, if so don't collapse
+            const flexContainer2 = document.querySelector('.flex-container2');
+            if (flexContainer2 && flexContainer2.classList.contains('edit-mode')) {
+                // Don't collapse if edit mode is active
+                return;
+            }
             sidebarContainer.classList.remove('expanded');
+            flexContainer.classList.remove('sidebar-expanded');
+            // Save state to sessionStorage when manually collapsed
+            sessionStorage.setItem('sidebar-expanded', 'false');
         }
         
         updateToggleIcon();
-        
-        // Save state to sessionStorage (per-window)
-        sessionStorage.setItem('sidebar-expanded', isExpanded.toString());
     });
     
-    // Close sidebar when clicking outside
-    document.addEventListener('click', function(e) {
-        // Don't close sidebar when clicking on popup elements or their children
-        if (e.target.closest('.popup-container') || e.target.closest('.Menu')) {
-            return;
-        }
-        
-        if (isExpanded && !sidebarContainer.contains(e.target) && !sidebarToggle.contains(e.target)) {
-            isExpanded = false;
-            sidebarContainer.classList.remove('expanded');
+    // Listen for edit mode changes
+    document.addEventListener('editModeChanged', (event) => {
+        const flexContainer2 = document.querySelector('.flex-container2');
+        if (event.detail.isEditMode && !isExpanded) {
+            // Expand sidebar when entering edit mode if not already expanded
+            isExpanded = true;
+            sidebarContainer.classList.add('expanded');
+            flexContainer.classList.add('sidebar-expanded');
             updateToggleIcon();
-            sessionStorage.setItem('sidebar-expanded', 'false');
+            // Save state
+            sessionStorage.setItem('sidebar-expanded', 'true');
+        } else if (!event.detail.isEditMode && isExpanded) {
+            // Check if sidebar was manually expanded or expanded for edit mode
+            const savedState = sessionStorage.getItem('sidebar-expanded');
+            if (savedState !== 'true') {
+                // Collapse sidebar when exiting edit mode if it was only expanded for edit mode
+                isExpanded = false;
+                sidebarContainer.classList.remove('expanded');
+                flexContainer.classList.remove('sidebar-expanded');
+                updateToggleIcon();
+            }
         }
     });
     
