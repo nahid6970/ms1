@@ -20,6 +20,23 @@ def load_data():
 def save_data(data):
     with open(DATA_FILE, 'w') as f:
         json.dump(data, f, indent=2)
+    
+    # Auto-export static HTML after saving data
+    try:
+        import subprocess
+        import sys
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        export_script_path = os.path.join(script_dir, 'export_static.py')
+        result = subprocess.run([sys.executable, export_script_path], 
+                              capture_output=True, text=True, cwd=script_dir)
+        if result.returncode == 0:
+            print("Auto-exported static HTML")
+            if result.stdout.strip():
+                print(result.stdout.strip())
+        else:
+            print(f"Auto-export failed: {result.stderr}")
+    except Exception as e:
+        print(f"Auto-export failed: {e}")
 
 @app.route('/')
 def index():
@@ -100,6 +117,8 @@ def delete_row(sheet_index, row_index):
         sheet['rows'].pop(row_index)
         save_data(data)
     return jsonify({'success': True})
+
+
 
 if __name__ == '__main__':
     app.run(debug=True, port=5018)

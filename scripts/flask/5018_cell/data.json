@@ -3,17 +3,45 @@
   "sheets": [
     {
       "cellStyles": {
-        "3-0": {
-          "border": false,
-          "borderColor": "#000000",
-          "borderStyle": "solid",
-          "borderWidth": "1px"
-        },
         "0-0": {
-          "border": true,
-          "borderWidth": "5px",
-          "borderStyle": "double",
-          "borderColor": "#00ad4b"
+          "bold": true,
+          "italic": true,
+          "center": true
+        },
+        "0-1": {
+          "bold": true,
+          "italic": true,
+          "center": true
+        },
+        "1-1": {
+          "bold": true,
+          "italic": true,
+          "center": true
+        },
+        "2-1": {
+          "bold": true,
+          "italic": true,
+          "center": true
+        },
+        "3-1": {
+          "bold": true,
+          "italic": true,
+          "center": true
+        },
+        "3-0": {
+          "bold": true,
+          "italic": true,
+          "center": true
+        },
+        "2-0": {
+          "bold": true,
+          "italic": true,
+          "center": true
+        },
+        "1-0": {
+          "bold": true,
+          "italic": true,
+          "center": true
         }
       },
       "columns": [
@@ -62,26 +90,6 @@
         [
           "Propaganda",
           "\u09aa\u09cd\u09b0\u099a\u09be\u09b0\u09a3\u09be"
-        ],
-        [
-          "",
-          ""
-        ],
-        [
-          "",
-          ""
-        ],
-        [
-          "",
-          ""
-        ],
-        [
-          "",
-          ""
-        ],
-        [
-          "",
-          ""
         ],
         [
           "",
