@@ -738,6 +738,10 @@ document.addEventListener('DOMContentLoaded', function () {
           collapsibleGroup.classList.add('animated-top-gradient-bg');
 
           const anim = generateGradientAnimation(parsed, animName, randomDelay);
+          
+          // Debug: Log what animation is being generated for top groups
+          console.log('Top group animation:', anim);
+          
           style.textContent = `
             .group_type_top.animated-top-gradient-bg[data-top-bg-gradient-id="${uniqueId}"] {
               ${anim.baseStyle || ''}
@@ -1376,16 +1380,20 @@ document.addEventListener('DOMContentLoaded', function () {
           groupDiv.classList.add('animated-horiz-gradient-bg');
 
           const anim = generateGradientAnimation(parsed, animName, randomDelay);
+          // Debug: Log what animation is being generated
+          console.log('Box group animation:', anim);
+          
           style.textContent = `
-            .group_type_box.animated-horiz-gradient-bg[data-horiz-bg-gradient-id="${uniqueId}"] {
+            .link-group.group_type_box.animated-horiz-gradient-bg[data-horiz-bg-gradient-id="${uniqueId}"] {
               ${anim.baseStyle || ''}
-              animation: ${anim.animation}
+              animation: ${anim.animation} !important;
             }
             @keyframes ${animName} {
               ${anim.keyframes}
             }
           `;
           document.head.appendChild(style);
+          
         } else {
           groupDiv.style.setProperty('--horizontal-bg-color', linkData.horizontal_bg_color);
           groupDiv.style.backgroundColor = linkData.horizontal_bg_color;
