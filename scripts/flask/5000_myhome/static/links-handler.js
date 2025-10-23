@@ -1,4 +1,56 @@
 
+// Helper function to render display name (handles text, NF icons, and SVG)
+function renderDisplayName(element, displayName) {
+  // Clear existing content
+  element.innerHTML = '';
+  
+  // Handle different display types
+  if (displayName.startsWith('nf nf-')) {
+    // NerdFont icon
+    const icon = document.createElement('i');
+    icon.className = displayName;
+    element.appendChild(icon);
+  } else if (displayName.startsWith('<svg') && displayName.includes('</svg>')) {
+    // SVG code - parse and insert directly
+    try {
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = displayName;
+      const svgElement = tempDiv.querySelector('svg');
+      if (svgElement) {
+        // Make SVG responsive to font size
+        if (!svgElement.style.width && !svgElement.getAttribute('width')) {
+          svgElement.style.width = '1em';
+        }
+        if (!svgElement.style.height && !svgElement.getAttribute('height')) {
+          svgElement.style.height = '1em';
+        }
+        svgElement.style.display = 'inline-block';
+        svgElement.style.verticalAlign = 'middle';
+        
+        // Remove any existing fill attributes to allow CSS styling
+        svgElement.removeAttribute('fill');
+        const paths = svgElement.querySelectorAll('path, circle, rect, polygon, ellipse');
+        paths.forEach(path => {
+          path.removeAttribute('fill');
+        });
+        
+        // Set fill to currentColor so it inherits from CSS
+        svgElement.style.fill = 'currentColor';
+        
+        element.appendChild(svgElement);
+      } else {
+        element.textContent = displayName;
+      }
+    } catch (error) {
+      console.warn('Invalid SVG code:', error);
+      element.textContent = displayName;
+    }
+  } else {
+    // Regular text
+    element.textContent = displayName;
+  }
+}
+
 // Helper function to generate gradient animation CSS
 function generateGradientAnimation(parsed, animName, randomDelay, property = 'background') {
   if (parsed.animationType === 'rotate') {
@@ -667,51 +719,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const firstLink = links[0];
     const displayName = (firstLink && firstLink.link.top_name) ? firstLink.link.top_name : groupName;
     
-    // Handle different display types for the title
-    if (displayName.startsWith('nf nf-')) {
-      // NerdFont icon
-      const icon = document.createElement('i');
-      icon.className = displayName;
-      title.appendChild(icon);
-    } else if (displayName.startsWith('<svg') && displayName.includes('</svg>')) {
-      // SVG code - parse and insert directly
-      try {
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = displayName;
-        const svgElement = tempDiv.querySelector('svg');
-        if (svgElement) {
-          // Make SVG responsive to font size - use 1em as default size so it scales with font-size
-          if (!svgElement.style.width && !svgElement.getAttribute('width')) {
-            svgElement.style.width = '1em';
-          }
-          if (!svgElement.style.height && !svgElement.getAttribute('height')) {
-            svgElement.style.height = '1em';
-          }
-          svgElement.style.display = 'inline-block';
-          svgElement.style.verticalAlign = 'middle';
-          
-          // Remove any existing fill attributes to allow CSS styling
-          svgElement.removeAttribute('fill');
-          const paths = svgElement.querySelectorAll('path, circle, rect, polygon, ellipse');
-          paths.forEach(path => {
-            path.removeAttribute('fill');
-          });
-          
-          // Set fill to currentColor so it inherits from CSS
-          svgElement.style.fill = 'currentColor';
-          
-          title.appendChild(svgElement);
-        } else {
-          title.textContent = displayName;
-        }
-      } catch (error) {
-        console.warn('Invalid SVG code:', error);
-        title.textContent = displayName;
-      }
-    } else {
-      // Regular text
-      title.textContent = displayName;
-    }
+    // Render the display name (handles text, NF icons, and SVG)
+    renderDisplayName(title, displayName);
 
     // Apply custom styling if available
     if (firstLink && firstLink.link) {
@@ -1096,10 +1105,10 @@ document.addEventListener('DOMContentLoaded', function () {
       const popupContent = popup.querySelector('.popup-content-inner');
       popupContent.innerHTML = '';
 
-      // Update popup title
+      // Update popup title with proper display name rendering
       const popupTitle = popupBox.querySelector('h3');
       if (popupTitle) {
-        popupTitle.textContent = displayName;
+        renderDisplayName(popupTitle, displayName);
       }
 
       // Clone all elements into the popup
@@ -1578,10 +1587,13 @@ document.addEventListener('DOMContentLoaded', function () {
         const popupContent = popup.querySelector('.popup-content-inner');
         popupContent.innerHTML = '';
 
-        // Update popup title
+        // Update popup title with proper display name rendering
         const popupTitle = popupBox.querySelector('h3');
         if (popupTitle) {
-          popupTitle.textContent = groupName;
+          // Get the display name from the first link in the group
+          const firstLink = linksInGroup[0];
+          const displayName = (firstLink && firstLink.top_name) ? firstLink.top_name : groupName;
+          renderDisplayName(popupTitle, displayName);
         }
 
         elements.forEach(element => {
