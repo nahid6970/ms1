@@ -1416,19 +1416,47 @@ document.addEventListener('DOMContentLoaded', function () {
             }
             keyframes += `100% { color: ${parsed.colors[0]}; }\n`;
 
+            // Create SVG keyframes for rotate animation
+            let svgKeyframes = '';
+            for (let i = 0; i < numColors; i++) {
+              const startPercent = (i / numColors * 100).toFixed(2);
+              const endPercent = ((i + 1) / numColors * 100).toFixed(2);
+              svgKeyframes += `${startPercent}% { color: ${parsed.colors[i]}; }\n`;
+              if (i < numColors - 1) {
+                svgKeyframes += `${endPercent}% { color: ${parsed.colors[i]}; }\n`;
+              }
+            }
+            svgKeyframes += `100% { color: ${parsed.colors[0]}; }\n`;
+
             style.textContent = `
               .group_type_box.animated-horiz-gradient-text[data-horiz-text-gradient-id="${uniqueId}"],
               .group_type_box.animated-horiz-gradient-text[data-horiz-text-gradient-id="${uniqueId}"] .group-title {
                 animation: ${animName} ${numColors * 2}s ease-in-out infinite;
                 animation-delay: -${randomDelay}s;
               }
+              .group_type_box.animated-horiz-gradient-text[data-horiz-text-gradient-id="${uniqueId}"] .group-title svg {
+                animation: ${animName}-svg ${numColors * 2}s ease-in-out infinite;
+                animation-delay: -${randomDelay}s;
+              }
               @keyframes ${animName} {
                 ${keyframes}
+              }
+              @keyframes ${animName}-svg {
+                ${svgKeyframes}
               }
             `;
           } else {
             const angle = parsed.angle || '45deg';
             const gradientColors = parsed.colors.join(', ');
+            
+            // For slide gradients, create color cycling animation for SVG
+            const numColors = parsed.colors.length;
+            let svgSlideKeyframes = '';
+            for (let i = 0; i < numColors; i++) {
+              const percent = (i / (numColors - 1) * 100).toFixed(2);
+              svgSlideKeyframes += `${percent}% { color: ${parsed.colors[i]}; }\n`;
+            }
+            
             style.textContent = `
               .group_type_box.animated-horiz-gradient-text[data-horiz-text-gradient-id="${uniqueId}"],
               .group_type_box.animated-horiz-gradient-text[data-horiz-text-gradient-id="${uniqueId}"] .group-title {
@@ -1440,10 +1468,18 @@ document.addEventListener('DOMContentLoaded', function () {
                 animation: ${animName} 3s ease infinite;
                 animation-delay: -${randomDelay}s;
               }
+              .group_type_box.animated-horiz-gradient-text[data-horiz-text-gradient-id="${uniqueId}"] .group-title svg {
+                animation: ${animName}-svg 3s ease infinite;
+                animation-delay: -${randomDelay}s;
+              }
               @keyframes ${animName} {
                 0% { background-position: 0% 50%; }
                 50% { background-position: 100% 50%; }
                 100% { background-position: 0% 50%; }
+              }
+              @keyframes ${animName}-svg {
+                ${svgSlideKeyframes}
+                100% { color: ${parsed.colors[0]}; }
               }
             `;
           }
@@ -1451,6 +1487,9 @@ document.addEventListener('DOMContentLoaded', function () {
         } else {
           groupDiv.style.setProperty('--horizontal-text-color', linkData.horizontal_text_color);
           groupDiv.style.color = linkData.horizontal_text_color;
+          
+          // For multi-color animations, ensure SVG elements are properly styled
+          // The CSS animations will handle the color changes via currentColor
         }
       }
 
@@ -1700,6 +1739,20 @@ document.addEventListener('DOMContentLoaded', function () {
     // Use custom display name if available, otherwise use group name
     const displayName = (firstLinkInGroup && firstLinkInGroup.link.top_name) ? firstLinkInGroup.link.top_name : groupName;
     renderDisplayName(groupTitle, displayName);
+    
+    // Apply color styling to SVG elements in the title if this is a box group
+    if (firstLinkInGroup && firstLinkInGroup.link.horizontal_stack && firstLinkInGroup.link.horizontal_text_color) {
+      const parsed = parseColors(firstLinkInGroup.link.horizontal_text_color);
+      if (parsed.colors.length === 1) {
+        // Single color - ensure SVG elements inherit the color
+        const svgElements = groupTitle.querySelectorAll('svg');
+        svgElements.forEach(svg => {
+          // SVG elements will inherit color via currentColor, which is already set on the groupDiv
+        });
+      }
+      // Multi-color animations are handled by the CSS classes applied to the groupDiv
+    }
+    
     groupHeaderContainer.appendChild(groupTitle);
 
     // Add context menu to header only for regular (non-box) groups
