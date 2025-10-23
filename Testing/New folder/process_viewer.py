@@ -5,6 +5,7 @@ from PyQt6.QtWidgets import (
     QLineEdit, QTableWidget, QTableWidgetItem, QLabel, QHeaderView, QPushButton
 )
 from PyQt6.QtCore import QTimer, Qt
+from PyQt6.QtGui import QColor
 
 
 class ProcessViewer(QWidget):
@@ -216,8 +217,11 @@ class ProcessViewer(QWidget):
             row_position = self.process_table.rowCount()
             self.process_table.insertRow(row_position)
 
-            # Add process name
-            self.process_table.setItem(row_position, 0, QTableWidgetItem(proc['name']))
+            # Add process name with custom colors
+            name_item = QTableWidgetItem(proc['name'])
+            name_item.setForeground(QColor('#25251b'))
+            name_item.setBackground(QColor('#aaec24'))
+            self.process_table.setItem(row_position, 0, name_item)
 
             # Add command path
             self.process_table.setItem(row_position, 1, QTableWidgetItem(proc['exe']))
