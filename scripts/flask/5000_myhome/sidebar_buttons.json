@@ -1,7 +1,7 @@
 [
   {
     "bg_color": "transparent",
-    "border_color": "red",
+    "border_color": "transparent",
     "border_radius": "50%",
     "display_type": "image",
     "font_size": "16px",
@@ -18,7 +18,7 @@
   },
   {
     "bg_color": "white",
-    "border_color": "#cccccc",
+    "border_color": "transparent",
     "border_radius": "50%",
     "display_type": "image",
     "font_size": "16px",
@@ -36,6 +36,7 @@
   {
     "bg_color": "transparent",
     "display_type": "image",
+    "font_size": "16px",
     "has_notification": false,
     "hover_color": "red",
     "icon_class": "nf nf-fa-hard_drive",
@@ -44,13 +45,15 @@
     "name": "Drive",
     "text_color": "#000000",
     "url": "http://192.168.0.101:5003/",
-    "font_size": "16px"
+    "border_color": "transparent",
+    "border_radius": "4px"
   },
   {
     "bg_color": "transparent",
-    "border_color": "#cccccc",
+    "border_color": "transparent",
     "border_radius": "4px",
     "display_type": "image",
+    "font_size": "16px",
     "has_notification": false,
     "hover_color": "red",
     "icon_class": "nf nf-md-book_education",
@@ -58,12 +61,11 @@
     "img_src": "https://cdn-icons-png.flaticon.com/512/3588/3588110.png",
     "name": "Education",
     "text_color": "white",
-    "url": "http://192.168.0.101:5015/",
-    "font_size": "16px"
+    "url": "http://192.168.0.101:5015/"
   },
   {
     "bg_color": "transparent",
-    "border_color": "#cccccc",
+    "border_color": "transparent",
     "border_radius": "4px",
     "display_type": "icon",
     "font_size": "25px",
@@ -78,7 +80,7 @@
   },
   {
     "bg_color": "transparent",
-    "border_color": "#cccccc",
+    "border_color": "transparent",
     "border_radius": "4px",
     "display_type": "icon",
     "font_size": "25px",
@@ -93,7 +95,7 @@
   },
   {
     "bg_color": "transparent",
-    "border_color": "#cccccc",
+    "border_color": "transparent",
     "border_radius": "4px",
     "display_type": "icon",
     "font_size": "25px",
