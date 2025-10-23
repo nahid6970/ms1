@@ -215,11 +215,83 @@
           <div style="display: flex; gap: 10px;">
             <div style="flex: 1;">
               <label for="edit-group-name">Group Name:</label>
-              <input type="text" id="edit-group-name" placeholder="Enter group name (leave empty for 'Ungrouped')" required style="width: 100%;">
+              <input type="text" id="edit-group-name" placeholder="Enter group name (leave empty for 'Ungrouped')"
+                required style="width: 100%;">
             </div>
             <div style="flex: 1;">
               <label for="edit-group-top-name">Display Name (optional):</label>
-              <input type="text" id="edit-group-top-name" placeholder="Custom name for display" style="width: 100%;">
+              <div style="position: relative;">
+                <input type="text" id="edit-group-top-name" placeholder="Custom name for display" style="width: 100%;"
+                  list="display-name-options">
+                <datalist id="display-name-options">
+                  <option value="">Custom text</option>
+                  <option value="nf nf-fa-home">🏠 Home (nf nf-fa-home)</option>
+                  <option value="nf nf-fa-folder">📁 Folder (nf nf-fa-folder)</option>
+                  <option value="nf nf-fa-file">📄 File (nf nf-fa-file)</option>
+                  <option value="nf nf-fa-star">⭐ Star (nf nf-fa-star)</option>
+                  <option value="nf nf-fa-heart">❤️ Heart (nf nf-fa-heart)</option>
+                  <option value="nf nf-fa-user">👤 User (nf nf-fa-user)</option>
+                  <option value="nf nf-fa-cog">⚙️ Settings (nf nf-fa-cog)</option>
+                  <option value="nf nf-fa-search">🔍 Search (nf nf-fa-search)</option>
+                  <option value="nf nf-fa-plus">➕ Plus (nf nf-fa-plus)</option>
+                  <option value="nf nf-fa-minus">➖ Minus (nf nf-fa-minus)</option>
+                  <option value="nf nf-fa-edit">✏️ Edit (nf nf-fa-edit)</option>
+                  <option value="nf nf-fa-trash">🗑️ Trash (nf nf-fa-trash)</option>
+                  <option value="nf nf-fa-download">⬇️ Download (nf nf-fa-download)</option>
+                  <option value="nf nf-fa-upload">⬆️ Upload (nf nf-fa-upload)</option>
+                  <option value="nf nf-fa-link">🔗 Link (nf nf-fa-link)</option>
+                  <option value="nf nf-fa-mail">📧 Mail (nf nf-fa-mail)</option>
+                  <option value="nf nf-fa-phone">📞 Phone (nf nf-fa-phone)</option>
+                  <option value="nf nf-fa-calendar">📅 Calendar (nf nf-fa-calendar)</option>
+                  <option value="nf nf-fa-clock">🕐 Clock (nf nf-fa-clock)</option>
+                  <option value="nf nf-fa-bookmark">🔖 Bookmark (nf nf-fa-bookmark)</option>
+                  <option value="nf nf-fa-tag">🏷️ Tag (nf nf-fa-tag)</option>
+                  <option value="nf nf-fa-flag">🚩 Flag (nf nf-fa-flag)</option>
+                  <option value="nf nf-fa-bell">🔔 Bell (nf nf-fa-bell)</option>
+                  <option value="nf nf-fa-lock">🔒 Lock (nf nf-fa-lock)</option>
+                  <option value="nf nf-fa-unlock">🔓 Unlock (nf nf-fa-unlock)</option>
+                  <option value="nf nf-fa-key">🔑 Key (nf nf-fa-key)</option>
+                  <option value="nf nf-fa-shield">🛡️ Shield (nf nf-fa-shield)</option>
+                  <option value="nf nf-fa-eye">👁️ Eye (nf nf-fa-eye)</option>
+                  <option value="nf nf-fa-eye_slash">🙈 Eye Slash (nf nf-fa-eye_slash)</option>
+                  <option value="nf nf-fa-thumbs_up">👍 Thumbs Up (nf nf-fa-thumbs_up)</option>
+                  <option value="nf nf-fa-thumbs_down">👎 Thumbs Down (nf nf-fa-thumbs_down)</option>
+                  <option value="nf nf-fa-check">✅ Check (nf nf-fa-check)</option>
+                  <option value="nf nf-fa-times">❌ Times (nf nf-fa-times)</option>
+                  <option value="nf nf-fa-question">❓ Question (nf nf-fa-question)</option>
+                  <option value="nf nf-fa-info">ℹ️ Info (nf nf-fa-info)</option>
+                  <option value="nf nf-fa-warning">⚠️ Warning (nf nf-fa-warning)</option>
+                  <option value="nf nf-fa-exclamation">❗ Exclamation (nf nf-fa-exclamation)</option>
+                  <option value="nf nf-dev-terminal">💻 Terminal (nf nf-dev-terminal)</option>
+                  <option value="nf nf-dev-code">💾 Code (nf nf-dev-code)</option>
+                  <option value="nf nf-dev-git">🌿 Git (nf nf-dev-git)</option>
+                  <option value="nf nf-dev-github">🐙 GitHub (nf nf-dev-github)</option>
+                  <option value="nf nf-dev-database">🗄️ Database (nf nf-dev-database)</option>
+                  <option value="nf nf-dev-server">🖥️ Server (nf nf-dev-server)</option>
+                  <option value="nf nf-md-television_classic">📺 TV (nf nf-md-television_classic)</option>
+                  <option value="nf nf-md-movie_roll">🎬 Movie (nf nf-md-movie_roll)</option>
+                  <option value="nf nf-md-book_education">📚 Education (nf nf-md-book_education)</option>
+                  <option value="nf nf-fa-rocket">🚀 Rocket (nf nf-fa-rocket)</option>
+                  <option value="nf nf-oct-apps">📱 Apps (nf nf-oct-apps)</option>
+                  <option value="nf nf-fa-hard_drive">💽 Hard Drive (nf nf-fa-hard_drive)</option>
+                  <option value="svg:arrow-right">➡️ Arrow Right</option>
+                  <option value="svg:arrow-left">⬅️ Arrow Left</option>
+                  <option value="svg:arrow-up">⬆️ Arrow Up</option>
+                  <option value="svg:arrow-down">⬇️ Arrow Down</option>
+                  <option value="svg:circle">⭕ Circle</option>
+                  <option value="svg:square">⬜ Square</option>
+                  <option value="svg:triangle">🔺 Triangle</option>
+                  <option value="svg:diamond">💎 Diamond</option>
+                  <option value="svg:star">⭐ Star</option>
+                  <option value="svg:heart">❤️ Heart</option>
+                  <option value="svg:check">✅ Check</option>
+                  <option value="svg:cross">❌ Cross</option>
+                  <option value="svg:plus">➕ Plus</option>
+                  <option value="svg:minus">➖ Minus</option>
+                  <option value="svg:gear">⚙️ Gear</option>
+                  <option value="svg:menu">☰ Menu</option>
+                </datalist>
+              </div>
             </div>
           </div>
           <div style="display: flex; gap: 20px; align-items: center; margin: 10px 0;">
