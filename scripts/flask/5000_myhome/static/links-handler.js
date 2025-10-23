@@ -680,9 +680,13 @@ document.addEventListener('DOMContentLoaded', function () {
         tempDiv.innerHTML = displayName;
         const svgElement = tempDiv.querySelector('svg');
         if (svgElement) {
-          // Set some default styling for the SVG
-          svgElement.style.width = svgElement.style.width || '20px';
-          svgElement.style.height = svgElement.style.height || '20px';
+          // Make SVG responsive to font size - use 1em as default size so it scales with font-size
+          if (!svgElement.style.width && !svgElement.getAttribute('width')) {
+            svgElement.style.width = '1em';
+          }
+          if (!svgElement.style.height && !svgElement.getAttribute('height')) {
+            svgElement.style.height = '1em';
+          }
           svgElement.style.display = 'inline-block';
           svgElement.style.verticalAlign = 'middle';
           title.appendChild(svgElement);
@@ -904,6 +908,16 @@ document.addEventListener('DOMContentLoaded', function () {
       }
       if (linkData.top_font_size) {
         title.style.fontSize = linkData.top_font_size;
+        // Also update any SVG elements inside the title to scale with font size
+        const svgElements = title.querySelectorAll('svg');
+        svgElements.forEach(svg => {
+          if (!svg.getAttribute('width') && !svg.style.width) {
+            svg.style.width = '1em';
+          }
+          if (!svg.getAttribute('height') && !svg.style.height) {
+            svg.style.height = '1em';
+          }
+        });
       }
     }
 
