@@ -83,7 +83,12 @@ body {
     background: #c82333;
 }
 
-/* Responsive table wrapper */
+/* Responsive column width variables */
+:root {
+    --base-column-width: 150px;
+    --row-number-width: 60px;
+}
+
 .table-container {
     flex: 1;
     overflow: auto;
@@ -96,89 +101,105 @@ table {
     border-spacing: 0;
     background: white;
     table-layout: fixed;
-    min-width: 100%;
 }
 
-/* Responsive column widths */
-.column-responsive {
-    transition: width 0.3s ease;
-}
-
+/* Mobile responsive adjustments */
 @media (max-width: 768px) {
+    :root {
+        --base-column-width: 120px;
+        --row-number-width: 50px;
+    }
+
     body {
-        padding: 5px;
+        padding: 10px;
     }
-    
+
+    .container {
+        height: calc(100vh - 20px);
+    }
+
     .table-container {
-        padding: 0 5px;
+        padding: 0 10px;
         overflow-x: auto;
-        overflow-y: auto;
         -webkit-overflow-scrolling: touch;
+        min-width: 100%;
     }
-    
+
     table {
-        min-width: 600px; /* Minimum width to prevent cramping */
+        min-width: 600px;
     }
-    
-    /* Mobile column width adjustments */
-    .column-responsive {
-        min-width: 120px !important;
-        width: auto !important;
+
+    /* Make columns more flexible on mobile */
+    th, td {
+        min-width: 80px !important;
+        padding: 6px 4px;
     }
-    
-    /* Better row numbers on mobile */
+
     .row-number {
-        width: 50px !important;
-        min-width: 50px !important;
-        font-size: 12px !important;
-        padding: 0 4px !important;
-        text-align: center !important;
-        background: #f8f9fa !important;
-        border-right: 2px solid #ddd !important;
+        width: var(--row-number-width) !important;
+        min-width: var(--row-number-width) !important;
+        font-size: 11px;
+        padding: 0 3px;
     }
-    
-    /* Smaller buttons on mobile */
+
+    /* Adjust toolbar for mobile */
+    .toolbar {
+        padding: 10px 15px;
+        gap: 8px;
+    }
+
     .btn {
         padding: 8px 12px;
-        font-size: 12px;
+        font-size: 13px;
     }
-    
-    /* Compact toolbar on mobile */
-    .toolbar {
-        padding: 10px;
-        gap: 5px;
+
+    /* Adjust sheet tabs for mobile */
+    .sheet-tabs {
+        padding: 8px 15px;
+        gap: 8px;
     }
-    
-    /* Mobile input styling */
-    td input, td textarea {
+
+    .btn-add-sheet,
+    .btn-sheet-action,
+    .btn-settings {
+        width: 32px;
+        height: 32px;
         font-size: 14px;
+    }
+
+    /* Make inputs more touch-friendly */
+    td input,
+    td textarea {
         padding: 6px;
-    }
-    
-    /* Mobile context menu adjustments */
-    .context-menu {
-        min-width: 140px;
         font-size: 14px;
+        min-height: 32px;
     }
-    
-    .context-menu-item {
-        padding: 12px 15px;
+
+    /* Adjust column headers */
+    .header-cell {
+        padding-right: 20px;
     }
-    
-    /* Ensure row numbers stay visible during horizontal scroll */
-    th.row-number, td.row-number {
-        position: sticky !important;
-        left: 0 !important;
-        z-index: 10 !important;
-        background: #f8f9fa !important;
-        box-shadow: 2px 0 4px rgba(0,0,0,0.1);
+
+    .column-menu-btn {
+        width: 20px;
+        height: 20px;
+        font-size: 14px;
     }
 }
 
-/* Tablet adjustments */
+/* Tablet responsive adjustments */
 @media (min-width: 769px) and (max-width: 1024px) {
-    .column-responsive {
-        min-width: 140px !important;
+    :root {
+        --base-column-width: 130px;
+        --row-number-width: 55px;
+    }
+}
+
+/* Large screen adjustments */
+@media (min-width: 1200px) {
+    :root {
+        --base-column-width: 180px;
+        --row-number-width: 70px;
     }
 }
 
@@ -269,20 +290,16 @@ td input::-moz-selection {
 .row-number {
     background: #f8f9fa;
     font-weight: 600;
-    text-align: center;
+    text-align: left;
     white-space: nowrap;
-    width: 60px;
-    min-width: 60px;
+    width: var(--row-number-width);
+    min-width: var(--row-number-width);
     padding: 0 5px;
     font-family: monospace;
     font-size: 12px;
     vertical-align: middle;
     display: table-cell;
-    line-height: 1.4;
-    border-right: 2px solid #ddd;
-    position: sticky;
-    left: 0;
-    z-index: 5;
+    line-height: 1.2;
 }
 
 /* Modal Styles */
