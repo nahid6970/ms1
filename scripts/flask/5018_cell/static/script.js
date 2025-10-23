@@ -64,20 +64,78 @@ function initializeApp() {
         headerTextText.value = e.target.value.toUpperCase();
     });
 
-    // Clear old localStorage values and set new defaults
-    localStorage.removeItem('actionsWidth');
-    localStorage.removeItem('rownumWidth');
+    // Set up responsive width handling
+    loadColumnWidths();
+    
+    // Update widths on window resize
+    window.addEventListener('resize', updateResponsiveWidths);
 
     // Load initial data
     loadData();
 }
 
-function loadColumnWidths() {
-    const actionsWidth = localStorage.getItem('actionsWidth') || '75px';
-    const rownumWidth = localStorage.getItem('rownumWidth') || '75px';
+function getResponsiveColumnWidth(baseWidth) {
+    const screenWidth = window.innerWidth;
+    
+    // Mobile: reduce width by 30%
+    if (screenWidth <= 768) {
+        return Math.max(80, Math.floor(baseWidth * 0.7));
+    }
+    // Tablet: reduce width by 15%
+    else if (screenWidth <= 1024) {
+        return Math.max(100, Math.floor(baseWidth * 0.85));
+    }
+    // Desktop: use full width or increase slightly for large screens
+    else if (screenWidth >= 1200) {
+        return Math.floor(baseWidth * 1.2);
+    }
+    // Default desktop
+    return baseWidth;
+}
 
-    document.documentElement.style.setProperty('--actions-width', actionsWidth);
-    document.documentElement.style.setProperty('--rownum-width', rownumWidth);
+function loadColumnWidths() {
+    // Remove old localStorage values as they're now handled responsively
+    localStorage.removeItem('actionsWidth');
+    localStorage.removeItem('rownumWidth');
+    
+    // Set responsive CSS variables
+    updateResponsiveWidths();
+}
+
+function updateResponsiveWidths() {
+    const screenWidth = window.innerWidth;
+    let baseColumnWidth = 150;
+    let rowNumberWidth = 60;
+    let deviceType = 'Desktop';
+    
+    if (screenWidth <= 768) {
+        baseColumnWidth = 120;
+        rowNumberWidth = 50;
+        deviceType = 'Mobile';
+    } else if (screenWidth <= 1024) {
+        baseColumnWidth = 130;
+        rowNumberWidth = 55;
+        deviceType = 'Tablet';
+    } else if (screenWidth >= 1200) {
+        baseColumnWidth = 180;
+        rowNumberWidth = 70;
+        deviceType = 'Large Desktop';
+    }
+    
+    document.documentElement.style.setProperty('--base-column-width', baseColumnWidth + 'px');
+    document.documentElement.style.setProperty('--row-number-width', rowNumberWidth + 'px');
+    
+    // Update responsive info if modal is open
+    const responsiveInfo = document.getElementById('responsiveWidthInfo');
+    if (responsiveInfo) {
+        const multiplier = getResponsiveMultiplier();
+        responsiveInfo.textContent = `Current: ${deviceType} (${Math.round(multiplier * 100)}% of base width)`;
+    }
+    
+    // Re-render table if it exists to apply new widths
+    if (tableData.sheets && tableData.sheets[currentSheet]) {
+        renderTable();
+    }
 }
 
 
@@ -160,6 +218,11 @@ function addColumn() {
     document.getElementById('columnModalTitle').textContent = 'Add Column';
     document.getElementById('columnSubmitBtn').textContent = 'Add Column';
     document.getElementById('columnForm').reset();
+    
+    // Set responsive default width based on current screen size
+    const defaultWidth = getResponsiveColumnWidth(150);
+    document.getElementById('columnWidth').value = Math.floor(defaultWidth / getResponsiveMultiplier());
+    
     document.getElementById('columnColor').value = '#ffffff';
     document.getElementById('columnColorText').value = '#FFFFFF';
     document.getElementById('columnTextColor').value = '#000000';
@@ -172,6 +235,14 @@ function addColumn() {
     document.getElementById('headerItalic').checked = false;
     document.getElementById('headerCenter').checked = false;
     document.getElementById('columnModal').style.display = 'block';
+}
+
+function getResponsiveMultiplier() {
+    const screenWidth = window.innerWidth;
+    if (screenWidth <= 768) return 0.7;
+    if (screenWidth <= 1024) return 0.85;
+    if (screenWidth >= 1200) return 1.2;
+    return 1.0;
 }
 
 function editColumn(index) {
@@ -1690,9 +1761,10 @@ function renderTable() {
     // Render headers
     sheet.columns.forEach((col, index) => {
         const th = document.createElement('th');
-        th.style.width = col.width + 'px';
-        th.style.minWidth = col.width + 'px';
-        th.style.maxWidth = col.width + 'px';
+        const responsiveWidth = getResponsiveColumnWidth(col.width || 150);
+        th.style.width = responsiveWidth + 'px';
+        th.style.minWidth = responsiveWidth + 'px';
+        th.style.maxWidth = responsiveWidth + 'px';
 
         // Apply header background color (separate from cell color)
         th.style.backgroundColor = col.headerBgColor || col.color || '#f8f9fa';
@@ -1841,9 +1913,10 @@ function renderTable() {
         // Data cells - only render cells for existing columns
         sheet.columns.forEach((col, colIndex) => {
             const td = document.createElement('td');
-            td.style.width = col.width + 'px';
-            td.style.minWidth = col.width + 'px';
-            td.style.maxWidth = col.width + 'px';
+            const responsiveWidth = getResponsiveColumnWidth(col.width || 150);
+            td.style.width = responsiveWidth + 'px';
+            td.style.minWidth = responsiveWidth + 'px';
+            td.style.maxWidth = responsiveWidth + 'px';
             td.style.backgroundColor = col.color;
 
             const input = document.createElement('input');
