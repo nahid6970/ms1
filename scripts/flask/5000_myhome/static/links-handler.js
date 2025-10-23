@@ -689,6 +689,17 @@ document.addEventListener('DOMContentLoaded', function () {
           }
           svgElement.style.display = 'inline-block';
           svgElement.style.verticalAlign = 'middle';
+          
+          // Remove any existing fill attributes to allow CSS styling
+          svgElement.removeAttribute('fill');
+          const paths = svgElement.querySelectorAll('path, circle, rect, polygon, ellipse');
+          paths.forEach(path => {
+            path.removeAttribute('fill');
+          });
+          
+          // Set fill to currentColor so it inherits from CSS
+          svgElement.style.fill = 'currentColor';
+          
           title.appendChild(svgElement);
         } else {
           title.textContent = displayName;
@@ -748,28 +759,48 @@ document.addEventListener('DOMContentLoaded', function () {
           if (parsed.animationType === 'rotate') {
             const numColors = parsed.colors.length;
             let keyframes = '';
+            let svgKeyframes = '';
             for (let i = 0; i < numColors; i++) {
               const startPercent = (i / numColors * 100).toFixed(2);
               const endPercent = ((i + 1) / numColors * 100).toFixed(2);
               keyframes += `${startPercent}% { color: ${parsed.colors[i]}; }\n`;
+              svgKeyframes += `${startPercent}% { color: ${parsed.colors[i]}; }\n`;
               if (i < numColors - 1) {
                 keyframes += `${endPercent}% { color: ${parsed.colors[i]}; }\n`;
+                svgKeyframes += `${endPercent}% { color: ${parsed.colors[i]}; }\n`;
               }
             }
             keyframes += `100% { color: ${parsed.colors[0]}; }\n`;
+            svgKeyframes += `100% { color: ${parsed.colors[0]}; }\n`;
 
             style.textContent = `
               .animated-top-gradient-text[data-top-text-gradient-id="${uniqueId}"] {
                 animation: ${animName} ${numColors * 2}s ease-in-out infinite;
                 animation-delay: -${randomDelay}s;
               }
+              .animated-top-gradient-text[data-top-text-gradient-id="${uniqueId}"] svg {
+                animation: ${animName}-svg ${numColors * 2}s ease-in-out infinite;
+                animation-delay: -${randomDelay}s;
+              }
               @keyframes ${animName} {
                 ${keyframes}
+              }
+              @keyframes ${animName}-svg {
+                ${svgKeyframes}
               }
             `;
           } else {
             const angle = parsed.angle || '45deg';
             const gradientColors = parsed.colors.join(', ');
+            
+            // For slide gradients, we'll use a rotating color animation for SVG since SVG gradients are complex
+            const numColors = parsed.colors.length;
+            let svgSlideKeyframes = '';
+            for (let i = 0; i < numColors; i++) {
+              const percent = (i / (numColors - 1) * 100).toFixed(2);
+              svgSlideKeyframes += `${percent}% { color: ${parsed.colors[i]}; }\n`;
+            }
+            
             style.textContent = `
               .animated-top-gradient-text[data-top-text-gradient-id="${uniqueId}"] {
                 background: linear-gradient(${angle}, ${gradientColors});
@@ -780,17 +811,29 @@ document.addEventListener('DOMContentLoaded', function () {
                 animation: ${animName} 3s ease infinite;
                 animation-delay: -${randomDelay}s;
               }
+              .animated-top-gradient-text[data-top-text-gradient-id="${uniqueId}"] svg {
+                animation: ${animName}-svg 3s ease infinite;
+                animation-delay: -${randomDelay}s;
+              }
               @keyframes ${animName} {
                 0% { background-position: 0% 50%; }
                 50% { background-position: 100% 50%; }
                 100% { background-position: 0% 50%; }
               }
+              @keyframes ${animName}-svg {
+                ${svgSlideKeyframes}
+                100% { color: ${parsed.colors[0]}; }
+              }
             `;
           }
           document.head.appendChild(style);
+          
+          // For multi-color animations, ensure SVG elements are properly styled
+          // The CSS animations will handle the color changes via currentColor
         } else {
           collapsibleGroup.style.setProperty('--top-text-color', linkData.top_text_color);
           title.style.color = linkData.top_text_color;
+          // SVG elements will inherit color via currentColor, no need to set fill directly
         }
       }
 
