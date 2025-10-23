@@ -538,3 +538,6 @@ LAlt & c:: {
 
 ;! Changes for Ai to know that i made on my files
 ::;change::ok i have made some changes from last time  so keep that in mind now
+
+;! Percentage %
+::;%::℅

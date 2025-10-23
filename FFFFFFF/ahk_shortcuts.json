@@ -271,6 +271,14 @@
             "description": "",
             "trigger": ";change",
             "replacement": "ok i have made some changes from last time  so keep that in mind now"
+        },
+        {
+            "name": "Percentage %",
+            "category": "Text",
+            "description": "",
+            "trigger": ";%",
+            "replacement": "℅",
+            "enabled": true
         }
     ]
 }
