@@ -32,23 +32,18 @@ function showContextMenu(event, items) {
     event.preventDefault();
     event.stopPropagation();
 
-    // Add class to prevent touch actions globally
-    document.body.classList.add('context-menu-active');
-
-    // Additional mobile touch event prevention
+    // Additional mobile touch event prevention (but not click events)
     if (event.type === 'contextmenu') {
-        // Prevent any touch events from bubbling up
+        // Prevent touch events from bubbling up, but allow clicks
         document.addEventListener('touchstart', preventTouchBubbling, { passive: false, capture: true });
         document.addEventListener('touchmove', preventTouchBubbling, { passive: false, capture: true });
         document.addEventListener('touchend', preventTouchBubbling, { passive: false, capture: true });
-        document.addEventListener('click', preventTouchBubbling, { passive: false, capture: true });
 
         // Remove these listeners after a short delay
         setTimeout(() => {
             document.removeEventListener('touchstart', preventTouchBubbling, { capture: true });
             document.removeEventListener('touchmove', preventTouchBubbling, { capture: true });
             document.removeEventListener('touchend', preventTouchBubbling, { capture: true });
-            document.removeEventListener('click', preventTouchBubbling, { capture: true });
         }, 300);
     }
 
@@ -110,13 +105,16 @@ function hideContextMenu() {
     if (contextMenu) {
         contextMenu.remove();
         document.removeEventListener('click', hideContextMenu);
-        // Remove the context menu active class
-        document.body.classList.remove('context-menu-active');
     }
 }
 
 // Helper function to prevent touch event bubbling during context menu display
 function preventTouchBubbling(event) {
+    // Allow events on context menu and its children
+    if (event.target.closest('.context-menu')) {
+        return;
+    }
+
     event.preventDefault();
     event.stopPropagation();
     event.stopImmediatePropagation();
@@ -143,9 +141,6 @@ function addMobileContextMenu(element, items) {
         // Start long press timer
         touchTimer = setTimeout(() => {
             if (touchStarted && !touchMoved) {
-                // Add class to prevent touch actions
-                document.body.classList.add('context-menu-active');
-
                 // Remove visual feedback
                 element.classList.remove('long-press-active');
 
@@ -165,16 +160,11 @@ function addMobileContextMenu(element, items) {
                 // Show context menu
                 showContextMenu(syntheticEvent, items);
 
-                // Prevent default touch behavior and remove class after delay
+                // Prevent default touch behavior
                 document.addEventListener('touchend', function preventTouch(e) {
                     e.preventDefault();
                     e.stopPropagation();
                     document.removeEventListener('touchend', preventTouch);
-
-                    // Remove the class after a short delay
-                    setTimeout(() => {
-                        document.body.classList.remove('context-menu-active');
-                    }, 200);
                 }, { once: true, passive: false });
             }
         }, 500); // 500ms long press

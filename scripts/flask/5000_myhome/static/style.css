@@ -1203,15 +1203,11 @@ a.add-button.custom-sidebar-button[style*="background-color"] {
   transition: transform 0.1s ease, opacity 0.1s ease !important;
 }
 
-/* Prevent touch action during context menu */
-.context-menu-active {
-  touch-action: none !important;
-  pointer-events: none !important;
-}
-
-.context-menu-active * {
-  touch-action: none !important;
-  pointer-events: none !important;
+/* Context menu should always be clickable */
+.context-menu,
+.context-menu * {
+  pointer-events: auto !important;
+  touch-action: auto !important;
 }
 
 /* Mobile styles */
