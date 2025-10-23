@@ -157,17 +157,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
           simpleListItem.appendChild(simpleLink);
 
-          // Add context menu
-          simpleListItem.addEventListener('contextmenu', (event) => {
-            const items = [
-              { label: 'New-Tab', action: () => window.open(link.url, '_blank') },
-              { label: 'Edit', action: () => openEditLinkPopup(link, index) },
-              { label: 'Copy', action: () => copyLink(link, index) },
-              { label: 'Copy Note', action: () => copyNote(link) },
-              { label: 'Delete', action: () => deleteLink(index) }
-            ];
-            showContextMenu(event, items);
-          });
+          // Add mobile-friendly context menu
+          const items = [
+            { label: 'New-Tab', action: () => window.open(link.url, '_blank') },
+            { label: 'Edit', action: () => openEditLinkPopup(link, index) },
+            { label: 'Copy', action: () => copyLink(link, index) },
+            { label: 'Copy Note', action: () => copyNote(link) },
+            { label: 'Delete', action: () => deleteLink(index) }
+          ];
+          addMobileContextMenu(simpleListItem, items);
 
           elementToAdd = simpleListItem;
         } else {
@@ -555,31 +553,30 @@ document.addEventListener('DOMContentLoaded', function () {
             }
           }
 
-          listItem.addEventListener('contextmenu', (event) => {
-            const items = [
-              {
-                label: 'New-Tab',
-                action: () => window.open(link.url, '_blank')
-              },
-              {
-                label: 'Edit',
-                action: () => openEditLinkPopup(link, index)
-              },
-              {
-                label: 'Copy',
-                action: () => copyLink(link, index)
-              },
-              {
-                label: 'Copy Note',
-                action: () => copyNote(link)
-              },
-              {
-                label: 'Delete',
-                action: () => deleteLink(index)
-              }
-            ];
-            showContextMenu(event, items);
-          });
+          // Add mobile-friendly context menu
+          const items = [
+            {
+              label: 'New-Tab',
+              action: () => window.open(link.url, '_blank')
+            },
+            {
+              label: 'Edit',
+              action: () => openEditLinkPopup(link, index)
+            },
+            {
+              label: 'Copy',
+              action: () => copyLink(link, index)
+            },
+            {
+              label: 'Copy Note',
+              action: () => copyNote(link)
+            },
+            {
+              label: 'Delete',
+              action: () => deleteLink(index)
+            }
+          ];
+          addMobileContextMenu(listItem, items);
           elementToAdd = listItem;
         }
 
@@ -2703,13 +2700,20 @@ document.addEventListener('DOMContentLoaded', function () {
   // Initial fetch and display of links
   fetchAndDisplayLinks();
 
-  // Edit Mode Toggle functionality (now handled by F1 key in main.js)
-  const flexContainer2 = document.querySelector('.flex-container2');
-
-  // Listen for edit mode changes from main.js
-  document.addEventListener('editModeChanged', async (event) => {
-    // Refresh the display when edit mode is toggled to show/hide items
-    await fetchAndDisplayLinks();
+  // Edit Mode Toggle functionality (now handled by F1 key in main.js)
+
+  const flexContainer2 = document.querySelector('.flex-container2');
+
+
+
+  // Listen for edit mode changes from main.js
+
+  document.addEventListener('editModeChanged', async (event) => {
+
+    // Refresh the display when edit mode is toggled to show/hide items
+
+    await fetchAndDisplayLinks();
+
   });
 
   // Drag and Drop functionality for links

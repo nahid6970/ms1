@@ -1186,6 +1186,34 @@ a.add-button.custom-sidebar-button[style*="background-color"] {
   color: yellow;
 }
 
+/* Mobile touch improvements */
+.link-item, .group_type_top, .group_type_box {
+  -webkit-touch-callout: none; /* Disable iOS callout */
+  -webkit-user-select: none; /* Disable text selection */
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent; /* Remove tap highlight */
+}
+
+/* Long press visual feedback */
+.long-press-active {
+  transform: scale(0.95) !important;
+  opacity: 0.8 !important;
+  transition: transform 0.1s ease, opacity 0.1s ease !important;
+}
+
+/* Prevent touch action during context menu */
+.context-menu-active {
+  touch-action: none !important;
+  pointer-events: none !important;
+}
+
+.context-menu-active * {
+  touch-action: none !important;
+  pointer-events: none !important;
+}
+
 /* Mobile styles */
 @media (max-width: 768px) {
   /* Popup container adjustments for mobile */
