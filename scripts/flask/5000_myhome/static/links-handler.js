@@ -27,15 +27,26 @@ function renderDisplayName(element, displayName) {
         svgElement.style.display = 'inline-block';
         svgElement.style.verticalAlign = 'middle';
         
-        // Remove any existing fill attributes to allow CSS styling
-        svgElement.removeAttribute('fill');
+        // Only remove fill attributes if they are generic colors, keep specific colors
+        // Remove fill from root SVG only if it's a generic color
+        const rootFill = svgElement.getAttribute('fill');
+        if (rootFill && (rootFill === '#000000' || rootFill === '#000' || rootFill === 'black' || rootFill === 'currentColor')) {
+          svgElement.removeAttribute('fill');
+          svgElement.style.fill = 'currentColor';
+        }
+        
+        // For child elements, only remove fill if it's a generic color or if parent has no specific fill
         const paths = svgElement.querySelectorAll('path, circle, rect, polygon, ellipse');
         paths.forEach(path => {
-          path.removeAttribute('fill');
+          const pathFill = path.getAttribute('fill');
+          if (pathFill && (pathFill === '#000000' || pathFill === '#000' || pathFill === 'black' || pathFill === 'currentColor')) {
+            path.removeAttribute('fill');
+          }
+          // If no specific fill and parent doesn't have specific colors, set to currentColor
+          if (!pathFill && (!rootFill || rootFill === '#000000' || rootFill === '#000' || rootFill === 'black')) {
+            path.style.fill = 'currentColor';
+          }
         });
-        
-        // Set fill to currentColor so it inherits from CSS
-        svgElement.style.fill = 'currentColor';
         
         element.appendChild(svgElement);
       } else {
