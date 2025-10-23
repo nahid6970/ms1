@@ -126,12 +126,15 @@ table {
         width: auto !important;
     }
     
-    /* Smaller row numbers on mobile */
+    /* Better row numbers on mobile */
     .row-number {
-        width: 40px !important;
-        min-width: 40px !important;
-        font-size: 11px;
-        padding: 0 3px;
+        width: 50px !important;
+        min-width: 50px !important;
+        font-size: 12px !important;
+        padding: 0 4px !important;
+        text-align: center !important;
+        background: #f8f9fa !important;
+        border-right: 2px solid #ddd !important;
     }
     
     /* Smaller buttons on mobile */
@@ -160,6 +163,15 @@ table {
     
     .context-menu-item {
         padding: 12px 15px;
+    }
+    
+    /* Ensure row numbers stay visible during horizontal scroll */
+    th.row-number, td.row-number {
+        position: sticky !important;
+        left: 0 !important;
+        z-index: 10 !important;
+        background: #f8f9fa !important;
+        box-shadow: 2px 0 4px rgba(0,0,0,0.1);
     }
 }
 
@@ -255,31 +267,22 @@ td input::-moz-selection {
 }
 
 .row-number {
-
     background: #f8f9fa;
-
     font-weight: 600;
-
-    text-align: left;
-
+    text-align: center;
     white-space: nowrap;
-
     width: 60px;
-
     min-width: 60px;
-
     padding: 0 5px;
-
     font-family: monospace;
-
     font-size: 12px;
-
     vertical-align: middle;
-
     display: table-cell;
-
-    line-height: 1.2;
-
+    line-height: 1.4;
+    border-right: 2px solid #ddd;
+    position: sticky;
+    left: 0;
+    z-index: 5;
 }
 
 /* Modal Styles */
