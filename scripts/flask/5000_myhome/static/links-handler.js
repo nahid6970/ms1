@@ -1,77 +1,3 @@
-// Function to create SVG icons for display names
-function createSVGIcon(iconType) {
-  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  svg.setAttribute('width', '20');
-  svg.setAttribute('height', '20');
-  svg.setAttribute('viewBox', '0 0 24 24');
-  svg.setAttribute('fill', 'currentColor');
-  svg.style.display = 'inline-block';
-  svg.style.verticalAlign = 'middle';
-  
-  let path = '';
-  
-  switch (iconType) {
-    case 'arrow-right':
-      path = 'M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z';
-      break;
-    case 'arrow-left':
-      path = 'M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z';
-      break;
-    case 'arrow-up':
-      path = 'M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6 1.41 1.41z';
-      break;
-    case 'arrow-down':
-      path = 'M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z';
-      break;
-    case 'circle':
-      path = 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z';
-      break;
-    case 'square':
-      path = 'M3 3h18v18H3V3z';
-      break;
-    case 'triangle':
-      path = 'M12 2l9 20H3L12 2z';
-      break;
-    case 'diamond':
-      path = 'M12 2l5.09 5.09L12 12l-5.09-4.91L12 2zm0 8l4.91 4.91L12 22l-4.91-7.09L12 10z';
-      break;
-    case 'star':
-      path = 'M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z';
-      break;
-    case 'heart':
-      path = 'M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z';
-      break;
-    case 'check':
-      path = 'M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z';
-      break;
-    case 'cross':
-      path = 'M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z';
-      break;
-    case 'plus':
-      path = 'M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z';
-      break;
-    case 'minus':
-      path = 'M19 13H5v-2h14v2z';
-      break;
-    case 'gear':
-      path = 'M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z';
-      break;
-    case 'menu':
-      path = 'M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z';
-      break;
-    default:
-      return null;
-  }
-  
-  if (path) {
-    const pathElement = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    pathElement.setAttribute('d', path);
-    svg.appendChild(pathElement);
-    return svg;
-  }
-  
-  return null;
-}
 
 // Helper function to generate gradient animation CSS
 function generateGradientAnimation(parsed, animName, randomDelay, property = 'background') {
@@ -747,13 +673,24 @@ document.addEventListener('DOMContentLoaded', function () {
       const icon = document.createElement('i');
       icon.className = displayName;
       title.appendChild(icon);
-    } else if (displayName.startsWith('svg:')) {
-      // SVG icon
-      const svgType = displayName.replace('svg:', '');
-      const svgIcon = createSVGIcon(svgType);
-      if (svgIcon) {
-        title.appendChild(svgIcon);
-      } else {
+    } else if (displayName.startsWith('<svg') && displayName.includes('</svg>')) {
+      // SVG code - parse and insert directly
+      try {
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = displayName;
+        const svgElement = tempDiv.querySelector('svg');
+        if (svgElement) {
+          // Set some default styling for the SVG
+          svgElement.style.width = svgElement.style.width || '20px';
+          svgElement.style.height = svgElement.style.height || '20px';
+          svgElement.style.display = 'inline-block';
+          svgElement.style.verticalAlign = 'middle';
+          title.appendChild(svgElement);
+        } else {
+          title.textContent = displayName;
+        }
+      } catch (error) {
+        console.warn('Invalid SVG code:', error);
         title.textContent = displayName;
       }
     } else {
