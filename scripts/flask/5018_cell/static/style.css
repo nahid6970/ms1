@@ -10,6 +10,13 @@ body {
     padding: 20px;
 }
 
+/* Mobile-first responsive design */
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+}
+
 .container {
     max-width: 100%;
     margin: 0 auto;
@@ -76,6 +83,7 @@ body {
     background: #c82333;
 }
 
+/* Responsive table wrapper */
 .table-container {
     flex: 1;
     overflow: auto;
@@ -83,16 +91,83 @@ body {
 }
 
 table {
-
     width: 100%;
-
     border-collapse: separate;
     border-spacing: 0;
-
     background: white;
-
     table-layout: fixed;
+    min-width: 100%;
+}
 
+/* Responsive column widths */
+.column-responsive {
+    transition: width 0.3s ease;
+}
+
+@media (max-width: 768px) {
+    body {
+        padding: 5px;
+    }
+    
+    .table-container {
+        padding: 0 5px;
+        overflow-x: auto;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    table {
+        min-width: 600px; /* Minimum width to prevent cramping */
+    }
+    
+    /* Mobile column width adjustments */
+    .column-responsive {
+        min-width: 120px !important;
+        width: auto !important;
+    }
+    
+    /* Smaller row numbers on mobile */
+    .row-number {
+        width: 40px !important;
+        min-width: 40px !important;
+        font-size: 11px;
+        padding: 0 3px;
+    }
+    
+    /* Smaller buttons on mobile */
+    .btn {
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+    
+    /* Compact toolbar on mobile */
+    .toolbar {
+        padding: 10px;
+        gap: 5px;
+    }
+    
+    /* Mobile input styling */
+    td input, td textarea {
+        font-size: 14px;
+        padding: 6px;
+    }
+    
+    /* Mobile context menu adjustments */
+    .context-menu {
+        min-width: 140px;
+        font-size: 14px;
+    }
+    
+    .context-menu-item {
+        padding: 12px 15px;
+    }
+}
+
+/* Tablet adjustments */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .column-responsive {
+        min-width: 140px !important;
+    }
 }
 
 th, td {

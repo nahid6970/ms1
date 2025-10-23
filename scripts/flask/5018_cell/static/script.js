@@ -32,6 +32,15 @@ function initializeApp() {
     // Set up keyboard shortcuts
     document.addEventListener('keydown', handleKeyboardShortcuts);
 
+    // Set up responsive resize handler
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+            renderTable(); // Re-render table with new responsive widths
+        }, 250);
+    });
+
     // Set up color picker sync for background color
     const colorInput = document.getElementById('columnColor');
     const colorText = document.getElementById('columnColorText');
@@ -1699,6 +1708,17 @@ function openSettings() {
     document.getElementById('settingsModal').style.display = 'block';
 }
 
+// Helper function to get responsive column width
+function getResponsiveColumnWidth(baseWidth) {
+    const isMobile = window.innerWidth <= 768;
+    if (isMobile) {
+        // On mobile, use a minimum width but allow flexibility
+        const minWidth = Math.max(120, parseInt(baseWidth) * 0.8);
+        return minWidth;
+    }
+    return parseInt(baseWidth);
+}
+
 function renderTable() {
     const headerRow = document.getElementById('headerRow');
     const tableBody = document.getElementById('tableBody');
@@ -1718,9 +1738,12 @@ function renderTable() {
     // Render headers
     sheet.columns.forEach((col, index) => {
         const th = document.createElement('th');
-        th.style.width = col.width + 'px';
-        th.style.minWidth = col.width + 'px';
-        th.style.maxWidth = col.width + 'px';
+        const responsiveWidth = getResponsiveColumnWidth(col.width);
+
+        th.className = 'column-responsive';
+        th.style.width = responsiveWidth + 'px';
+        th.style.minWidth = responsiveWidth + 'px';
+        th.style.maxWidth = responsiveWidth + 'px';
 
         // Apply header background color (separate from cell color)
         th.style.backgroundColor = col.headerBgColor || col.color || '#f8f9fa';
@@ -1869,9 +1892,12 @@ function renderTable() {
         // Data cells - only render cells for existing columns
         sheet.columns.forEach((col, colIndex) => {
             const td = document.createElement('td');
-            td.style.width = col.width + 'px';
-            td.style.minWidth = col.width + 'px';
-            td.style.maxWidth = col.width + 'px';
+            const responsiveWidth = getResponsiveColumnWidth(col.width);
+
+            td.className = 'column-responsive';
+            td.style.width = responsiveWidth + 'px';
+            td.style.minWidth = responsiveWidth + 'px';
+            td.style.maxWidth = responsiveWidth + 'px';
             td.style.backgroundColor = col.color;
 
             const input = document.createElement('input');
