@@ -781,8 +781,7 @@ div.toggle-container {
   border: var(--top-border-color, #0056b3) solid 1px;
   border-radius: 0px;
   padding: 10px;
-  min-width: 200px;
-  max-width: 300px;
+  min-width: 50px;
   transition: all 0.3s ease;
   font-family: jetbrainsmono nfp;
   color: var(--top-text-color, #ffffff);
