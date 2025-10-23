@@ -211,45 +211,6 @@ class ProcessViewer(QWidget):
         # Clear the table
         self.process_table.setRowCount(0)
 
-        # Get search terms for highlighting
-        search_text = self.search_bar.text().strip()
-        search_terms = search_text.lower().split() if search_text else []
-
-        # Add processes to the table
-        for proc in processes:
-            row_position = self.process_table.rowCount()
-            self.process_table.insertRow(row_position)
-
-            # Add process name with highlighting
-            name_item = QTableWidgetItem(proc['name'])
-            if search_terms:
-                # Simple highlighting by making the item bold if it matches
-                name_lower = proc['name'].lower()
-                for term in search_terms:
-                    if term in name_lower:
-                        font = name_item.font()
-                        font.setBold(True)
-                        name_item.setFont(font)
-                        break
-            self.process_table.setItem(row_position, 0, name_item)
-
-            # Add command path with highlighting
-            exe_item = QTableWidgetItem(proc['exe'])
-            if search_terms:
-                # Simple highlighting by making the item bold if it matches
-                exe_lower = proc['exe'].lower()
-                for term in search_terms:
-                    if term in exe_lower:
-                        font = exe_item.font()
-                        font.setBold(True)
-                        exe_item.setFont(font)
-                        break
-            self.process_table.setItem(row_position, 1, exe_item)
-
-    def update_table(self, processes):
-        # Clear the table
-        self.process_table.setRowCount(0)
-
         # Add processes to the table
         for proc in processes:
             row_position = self.process_table.rowCount()
@@ -258,33 +219,38 @@ class ProcessViewer(QWidget):
             # Add process name
             self.process_table.setItem(row_position, 0, QTableWidgetItem(proc['name']))
 
-            # Add command path
-            self.process_table.setItem(row_position, 1, QTableWidgetItem(proc['exe']))
-
-    def on_search_enter(self):
-        # If there are results, select the first one
-        if self.process_table.rowCount() > 0:
-            self.process_table.selectRow(0)
-            self.process_table.setFocus()
-
-    def table_key_press_event(self, event):
-        # Handle key presses in the table
-        if event.key() == Qt.Key.Key_Return or event.key() == Qt.Key.Key_Enter:
-            # Get selected row
-            selected_row = self.process_table.currentRow()
-            if selected_row >= 0 and selected_row < self.process_table.rowCount():
-                # Get the process PID from the selected row
-                # Note: We don't display PID in the table, so we need to find it
-                # This would require storing the mapping between table rows and processes
-                pass
-        elif event.key() == Qt.Key.Key_Escape:
-            # Return focus to search bar
-            self.search_bar.setFocus()
-        else:
-            # Default behavior for other keys
-            QTableWidget.keyPressEvent(self.process_table, event)
-
-
+            # Add command path
+            self.process_table.setItem(row_position, 1, QTableWidgetItem(proc['exe']))
+
+
+
+    def on_search_enter(self):
+        # If there are results, select the first one
+        if self.process_table.rowCount() > 0:
+            self.process_table.selectRow(0)
+            self.process_table.setFocus()
+
+    def table_key_press_event(self, event):
+        # Handle key presses in the table
+        if event.key() == Qt.Key.Key_Return or event.key() == Qt.Key.Key_Enter:
+            # Get selected row
+            selected_row = self.process_table.currentRow()
+            if selected_row >= 0 and selected_row < self.process_table.rowCount():
+                # Get the process PID from the selected row
+                # Note: We don't display PID in the table, so we need to find it
+                # This would require storing the mapping between table rows and processes
+                pass
+        elif event.key() == Qt.Key.Key_Escape:
+            # Return focus to search bar
+            self.search_bar.setFocus()
+        else:
+            # Default behavior for other keys
+            QTableWidget.keyPressEvent(self.process_table, event)
+
+
+
+
+
 def main():
     app = QApplication(sys.argv)
     viewer = ProcessViewer()
