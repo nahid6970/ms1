@@ -340,8 +340,14 @@ function updateCell(rowIndex, colIndex, value) {
         sheet.cellStyles = {};
     }
 
-    // Store value
+    // Store value - ensure line breaks are preserved
     sheet.rows[rowIndex][colIndex] = value;
+
+    // Auto-save after a short delay to preserve changes
+    clearTimeout(window.autoSaveTimeout);
+    window.autoSaveTimeout = setTimeout(() => {
+        saveData();
+    }, 1000);
 }
 
 function getCellKey(rowIndex, colIndex) {
@@ -498,10 +504,32 @@ function showCellContextMenu(e, rowIndex, colIndex, inputElement, tdElement) {
         mergeSeparators[1].style.display = (showMerge || showUnmerge) ? 'block' : 'none';
     }
 
-    // Position menu
-    menu.style.left = e.pageX + 'px';
-    menu.style.top = e.pageY + 'px';
-    menu.classList.add('show');
+    // Position menu with boundary detection
+    menu.classList.add('show'); // Show first to get dimensions
+
+    const menuRect = menu.getBoundingClientRect();
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+
+    let left = e.pageX;
+    let top = e.pageY;
+
+    // Adjust horizontal position if menu would go off-screen
+    if (left + menuRect.width > viewportWidth) {
+        left = viewportWidth - menuRect.width - 10; // 10px margin
+    }
+
+    // Adjust vertical position if menu would go off-screen
+    if (top + menuRect.height > viewportHeight) {
+        top = viewportHeight - menuRect.height - 10; // 10px margin
+    }
+
+    // Ensure menu doesn't go above or to the left of viewport
+    left = Math.max(10, left);
+    top = Math.max(10, top);
+
+    menu.style.left = left + 'px';
+    menu.style.top = top + 'px';
 }
 
 function closeCellContextMenu() {
@@ -1927,11 +1955,18 @@ function renderTable() {
                     textarea.value = row[colIndex] || '';
                     textarea.style.color = col.textColor || '#000000';
 
+                    // Ensure textarea preserves whitespace and line breaks
+                    textarea.style.whiteSpace = 'pre-wrap';
+                    textarea.style.wordWrap = 'break-word';
+
                     if (col.font && col.font !== '') {
                         textarea.style.fontFamily = `'${col.font}', monospace`;
                     }
 
                     textarea.onchange = (e) => updateCell(rowIndex, colIndex, e.target.value);
+
+                    // Also handle input event for real-time updates
+                    textarea.oninput = (e) => updateCell(rowIndex, colIndex, e.target.value);
 
                     const cellStyle = getCellStyle(rowIndex, colIndex);
                     if (cellStyle.bold) textarea.style.fontWeight = 'bold';
