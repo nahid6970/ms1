@@ -4,7 +4,7 @@ from PyQt6.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QHBoxLayout,
     QLineEdit, QTableWidget, QTableWidgetItem, QLabel, QHeaderView, QPushButton
 )
-from PyQt6.QtCore import QTimer, Qt, QPropertyAnimation, QRect
+from PyQt6.QtCore import QTimer, Qt, QPropertyAnimation, QRect, QEasingCurve
 from PyQt6.QtGui import QColor
 
 
@@ -149,9 +149,10 @@ class ProcessViewer(QWidget):
         new_x = (screen.width() - self.expanded_width) // 2
         new_y = (screen.height() - self.expanded_height) // 2
         
-        # Animate the resize
+        # Animate the resize with smooth easing
         self.animation = QPropertyAnimation(self, b"geometry")
-        self.animation.setDuration(200)
+        self.animation.setDuration(300)  # Increased duration for smoother animation
+        self.animation.setEasingCurve(QEasingCurve.Type.OutCubic)  # Smooth deceleration
         self.animation.setStartValue(current_geo)
         self.animation.setEndValue(QRect(new_x, new_y, self.expanded_width, self.expanded_height))
         self.animation.start()
@@ -169,9 +170,10 @@ class ProcessViewer(QWidget):
         new_x = (screen.width() - compact_width) // 2
         new_y = (screen.height() - compact_height) // 2
         
-        # Animate the resize
+        # Animate the resize with smooth easing
         self.animation = QPropertyAnimation(self, b"geometry")
-        self.animation.setDuration(200)
+        self.animation.setDuration(300)  # Increased duration for smoother animation
+        self.animation.setEasingCurve(QEasingCurve.Type.InOutCubic)  # Smooth acceleration and deceleration
         self.animation.setStartValue(current_geo)
         self.animation.setEndValue(QRect(new_x, new_y, compact_width, compact_height))
         self.animation.finished.connect(lambda: self.process_table.hide())
