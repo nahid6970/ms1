@@ -1695,8 +1695,11 @@ document.addEventListener('DOMContentLoaded', function () {
     groupHeaderContainer.className = 'group-header-container';
 
     const groupTitle = document.createElement('h3');
-    groupTitle.textContent = groupName;
     groupTitle.className = 'group-title';
+    
+    // Use custom display name if available, otherwise use group name
+    const displayName = (firstLinkInGroup && firstLinkInGroup.link.top_name) ? firstLinkInGroup.link.top_name : groupName;
+    renderDisplayName(groupTitle, displayName);
     groupHeaderContainer.appendChild(groupTitle);
 
     // Add context menu to header only for regular (non-box) groups
