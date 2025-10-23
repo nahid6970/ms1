@@ -826,6 +826,13 @@
         "winget_path": "C:\\Program Files\\Highresolution Enterprises\\X-Mouse Button Control\\XMouseButtonControl.exe"
     },
     {
+        "name": "xodo pdf reader",
+        "scoop_name": "",
+        "scoop_path": "",
+        "winget_name": "Apryse.XodoPDFReader",
+        "winget_path": "C:\\Program Files\\Apryse Software\\Xodo PDF Reader\\xodopdfreader.exe"
+    },
+    {
         "name": "yt-dlp",
         "scoop_name": "yt-dlp",
         "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\yt-dlp\\current\\yt-dlp.exe",
@@ -840,10 +847,10 @@
         "winget_path": ""
     },
     {
-        "name": "xodo pdf reader",
-        "scoop_name": "",
+        "name": "Everything",
+        "scoop_name": "everything",
         "scoop_path": "",
-        "winget_name": "Apryse.XodoPDFReader",
-        "winget_path": "C:\\Program Files\\Apryse Software\\Xodo PDF Reader\\xodopdfreader.exe"
+        "winget_name": "voidtools.Everything",
+        "winget_path": ""
     }
 ]
