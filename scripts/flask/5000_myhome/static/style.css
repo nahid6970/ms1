@@ -178,9 +178,7 @@ body::-webkit-scrollbar-track {
   gap: 3px;
   flex-wrap: wrap;
   text-align: left;
-  line-height: auto;
   align-items: flex-start;
-  font-size: auto;
   color: rgb(255, 255, 255);
   padding: 1cm;
   padding-top: 15px;
