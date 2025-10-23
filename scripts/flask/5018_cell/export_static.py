@@ -267,7 +267,6 @@ def generate_static_html(data):
         }
 
         td.merged-cell {
-            text-align: center;
             vertical-align: middle;
             padding: 0 !important;
             position: relative;
