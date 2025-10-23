@@ -25,7 +25,7 @@ class ProcessViewer(QWidget):
         # Start with compact size centered on screen
         screen = QApplication.primaryScreen().geometry()
         compact_width = 600
-        compact_height = 80
+        compact_height = 100  # Increased to accommodate bigger search box
         x = (screen.width() - compact_width) // 2
         y = (screen.height() - compact_height) // 2
         self.setGeometry(x, y, compact_width, compact_height)
@@ -41,6 +41,8 @@ class ProcessViewer(QWidget):
         search_layout = QHBoxLayout()
         search_layout.addWidget(QLabel('Search:'))
         self.search_bar = QLineEdit()
+        self.search_bar.setMinimumHeight(40)  # Make search box taller
+        self.search_bar.setStyleSheet("font-size: 14px; padding: 5px;")  # Bigger font and padding
         self.search_bar.textChanged.connect(self.on_search_changed)
         search_layout.addWidget(self.search_bar)
 
@@ -166,7 +168,7 @@ class ProcessViewer(QWidget):
         # Calculate new position to keep window centered
         screen = QApplication.primaryScreen().geometry()
         compact_width = 600
-        compact_height = 80
+        compact_height = 100  # Match the increased compact height
         new_x = (screen.width() - compact_width) // 2
         new_y = (screen.height() - compact_height) // 2
         
