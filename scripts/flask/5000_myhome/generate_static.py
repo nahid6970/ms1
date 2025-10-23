@@ -24,6 +24,7 @@ CSS_FILE = os.path.join(PROJECT_ROOT, 'static', 'style.css')
 MAIN_JS_FILE = os.path.join(PROJECT_ROOT, 'static', 'main.js')
 LINKS_HANDLER_JS_FILE = os.path.join(PROJECT_ROOT, 'static', 'links-handler.js')
 SIDEBAR_HANDLER_JS_FILE = os.path.join(PROJECT_ROOT, 'static', 'sidebar-handler.js')
+CONTEXT_MENU_JS_FILE = os.path.join(PROJECT_ROOT, 'static', 'context-menu.js')
 
 # Path to the output files
 OUTPUT_HTML_FILE = r"C:\Users\nahid\ms\db\5000_myhome\myhome.html"
@@ -72,6 +73,7 @@ def generate_static_html():
     main_js_content = read_file(MAIN_JS_FILE)
     links_handler_js_content = read_file(LINKS_HANDLER_JS_FILE)
     sidebar_handler_js_content = read_file(SIDEBAR_HANDLER_JS_FILE)
+    context_menu_js_content = read_file(CONTEXT_MENU_JS_FILE)
 
     # Read the data
     links_data = read_data()
@@ -165,6 +167,7 @@ def generate_static_html():
     static_html = template_html.replace('<link rel="stylesheet" href="../static/style.css">', f'<style>{css_content}</style>')
 
     # Replace JS files with embedded scripts
+    static_html = static_html.replace('<script src="../static/context-menu.js"></script>', f'<script>{context_menu_js_content}</script>')
     static_html = static_html.replace('<script src="../static/links-handler.js"></script>', f'<script>{links_handler_js_content}</script>')
     static_html = static_html.replace('<script src="../static/sidebar-handler.js"></script>', f'<script>{sidebar_handler_js_content}</script>')
     static_html = static_html.replace('<script src="../static/main.js"></script>', f'<script>{main_js_content}</script>')
