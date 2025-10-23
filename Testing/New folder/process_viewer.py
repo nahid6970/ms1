@@ -4,15 +4,16 @@ from PyQt6.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QHBoxLayout,
     QLineEdit, QTableWidget, QTableWidgetItem, QLabel, QHeaderView, QPushButton
 )
-from PyQt6.QtCore import QTimer, Qt
+from PyQt6.QtCore import QTimer, Qt, QPropertyAnimation, QRect
 from PyQt6.QtGui import QColor
 
 
 class ProcessViewer(QWidget):
     def __init__(self):
         super().__init__()
-        self.init_ui()
         self.processes = []
+        self.is_expanded = False
+        self.init_ui()
         self.load_processes()
         # Update processes every 2 seconds
         self.timer = QTimer(self)
@@ -21,7 +22,17 @@ class ProcessViewer(QWidget):
 
     def init_ui(self):
         self.setWindowTitle('Process Viewer')
-        self.setGeometry(100, 100, 1000, 600)
+        # Start with compact size centered on screen
+        screen = QApplication.primaryScreen().geometry()
+        compact_width = 600
+        compact_height = 80
+        x = (screen.width() - compact_width) // 2
+        y = (screen.height() - compact_height) // 2
+        self.setGeometry(x, y, compact_width, compact_height)
+        
+        # Store expanded dimensions
+        self.expanded_width = 1000
+        self.expanded_height = 600
 
         # Main layout
         layout = QVBoxLayout()
@@ -30,7 +41,7 @@ class ProcessViewer(QWidget):
         search_layout = QHBoxLayout()
         search_layout.addWidget(QLabel('Search:'))
         self.search_bar = QLineEdit()
-        self.search_bar.textChanged.connect(self.filter_processes)
+        self.search_bar.textChanged.connect(self.on_search_changed)
         search_layout.addWidget(self.search_bar)
 
         # Add red round button to kill matching processes
@@ -68,6 +79,8 @@ class ProcessViewer(QWidget):
         self.process_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)  # Command Path column
         self.process_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self.process_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
+        # Hide table initially
+        self.process_table.hide()
         layout.addWidget(self.process_table)
 
         # Focus on search bar by default
@@ -105,18 +118,70 @@ class ProcessViewer(QWidget):
                 # Process might have terminated or we don't have access
                 pass
 
-        # Update the table with filtered processes if there's a search term,
-        # otherwise show all processes
+        # Don't auto-update table, only update when user searches
         if search_text:
             self.update_table_with_filter(search_text)
-        else:
-            self.update_table(self.processes)
+
+    def on_search_changed(self):
+        search_text = self.search_bar.text().strip()
+        
+        if not search_text:
+            # Collapse window when search is empty
+            if self.is_expanded:
+                self.collapse_window()
+            return
+        
+        # Expand window when user starts typing
+        if not self.is_expanded:
+            self.expand_window()
+        
+        self.filter_processes()
+    
+    def expand_window(self):
+        self.is_expanded = True
+        self.process_table.show()
+        
+        # Get current geometry
+        current_geo = self.geometry()
+        
+        # Calculate new position to keep window centered
+        screen = QApplication.primaryScreen().geometry()
+        new_x = (screen.width() - self.expanded_width) // 2
+        new_y = (screen.height() - self.expanded_height) // 2
+        
+        # Animate the resize
+        self.animation = QPropertyAnimation(self, b"geometry")
+        self.animation.setDuration(200)
+        self.animation.setStartValue(current_geo)
+        self.animation.setEndValue(QRect(new_x, new_y, self.expanded_width, self.expanded_height))
+        self.animation.start()
+    
+    def collapse_window(self):
+        self.is_expanded = False
+        
+        # Get current geometry
+        current_geo = self.geometry()
+        
+        # Calculate new position to keep window centered
+        screen = QApplication.primaryScreen().geometry()
+        compact_width = 600
+        compact_height = 80
+        new_x = (screen.width() - compact_width) // 2
+        new_y = (screen.height() - compact_height) // 2
+        
+        # Animate the resize
+        self.animation = QPropertyAnimation(self, b"geometry")
+        self.animation.setDuration(200)
+        self.animation.setStartValue(current_geo)
+        self.animation.setEndValue(QRect(new_x, new_y, compact_width, compact_height))
+        self.animation.finished.connect(lambda: self.process_table.hide())
+        self.animation.start()
 
     def filter_processes(self):
         search_text = self.search_bar.text().strip()
         if not search_text:
-            # If search bar is empty, show all processes
-            self.update_table(self.processes)
+            # If search bar is empty, clear table
+            self.update_table([])
             return
 
         # Split search text into multiple words
