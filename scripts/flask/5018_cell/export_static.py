@@ -52,6 +52,13 @@ def generate_static_html(data):
             padding: 20px;
         }
 
+        /* Mobile-first responsive design */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+        }
+
         .container {
             max-width: 100%;
             margin: 0 auto;
@@ -178,6 +185,12 @@ def generate_static_html(data):
             border-radius: 4px;
         }
 
+        /* Responsive column width variables */
+        :root {
+            --base-column-width: 150px;
+            --row-number-width: 60px;
+        }
+
         .table-container {
             flex: 1;
             overflow: auto;
@@ -233,8 +246,8 @@ def generate_static_html(data):
             font-weight: 600;
             text-align: left;
             white-space: nowrap;
-            width: 60px;
-            min-width: 60px;
+            width: var(--row-number-width);
+            min-width: var(--row-number-width);
             padding: 0 5px;
             font-family: monospace;
             font-size: 12px;
@@ -273,6 +286,9 @@ def generate_static_html(data):
             font-family: inherit;
             overflow: auto;
             box-sizing: border-box;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            line-height: 1.4;
         }
 
         tr {
@@ -284,6 +300,73 @@ def generate_static_html(data):
             color: #666;
             font-style: italic;
             padding: 40px;
+        }
+
+        /* Mobile responsive adjustments */
+        @media (max-width: 768px) {
+            :root {
+                --base-column-width: 120px;
+                --row-number-width: 50px;
+            }
+
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                height: calc(100vh - 20px);
+            }
+
+            .table-container {
+                padding: 0 10px;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                min-width: 100%;
+            }
+
+            table {
+                min-width: 600px;
+            }
+
+            /* Make columns more flexible on mobile */
+            th, td {
+                min-width: 80px !important;
+                padding: 6px 4px;
+            }
+
+            .row-number {
+                width: var(--row-number-width) !important;
+                min-width: var(--row-number-width) !important;
+                font-size: 11px;
+                padding: 0 3px;
+            }
+
+            /* Adjust sheet tabs for mobile */
+            .sheet-tabs {
+                padding: 8px 15px;
+                gap: 8px;
+            }
+
+            /* Adjust column headers */
+            .header-cell {
+                padding-right: 20px;
+            }
+        }
+
+        /* Tablet responsive adjustments */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            :root {
+                --base-column-width: 130px;
+                --row-number-width: 55px;
+            }
+        }
+
+        /* Large screen adjustments */
+        @media (min-width: 1200px) {
+            :root {
+                --base-column-width: 180px;
+                --row-number-width: 70px;
+            }
         }
 
         @media print {
@@ -407,7 +490,15 @@ def generate_static_html(data):
 
                     const cellContent = document.createElement('div');
                     cellContent.className = 'cell-content';
-                    cellContent.textContent = row[colIndex] || '';
+                    
+                    // Handle newlines properly for merged cells and regular cells
+                    const cellValue = row[colIndex] || '';
+                    if (cellValue.includes('\\n')) {
+                        cellContent.innerHTML = cellValue.replace(/\\n/g, '<br>');
+                    } else {
+                        cellContent.textContent = cellValue;
+                    }
+                    
                     cellContent.style.color = col.textColor || '#000000';
 
                     if (col.font && col.font !== '') {
@@ -419,12 +510,17 @@ def generate_static_html(data):
                     if (cellStyle.bold) cellContent.style.fontWeight = 'bold';
                     if (cellStyle.italic) cellContent.style.fontStyle = 'italic';
                     if (cellStyle.center) cellContent.style.textAlign = 'center';
-                    if (cellStyle.border !== false && (cellStyle.borderWidth || cellStyle.borderStyle || cellStyle.borderColor)) {
+                    
+                    // Handle borders properly
+                    if (cellStyle.border === true) {
                         const borderWidth = cellStyle.borderWidth || '1px';
                         const borderStyle = cellStyle.borderStyle || 'solid';
                         const borderColor = cellStyle.borderColor || '#000000';
                         td.style.border = `${borderWidth} ${borderStyle} ${borderColor}`;
+                    } else {
+                        td.style.border = '1px solid #ddd';
                     }
+                    
                     if (cellStyle.bgColor) {
                         td.style.backgroundColor = cellStyle.bgColor;
                     }
