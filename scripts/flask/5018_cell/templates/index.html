@@ -59,6 +59,19 @@
         <div class="sheet-tabs">
             <button onclick="addSheet()" class="btn-add-sheet" title="Add Sheet">+</button>
             
+            <div class="category-controls">
+                <div class="category-selector">
+                    <button class="category-current" id="currentCategoryBtn" onclick="toggleCategoryList()">
+                        <span id="currentCategoryName">All Sheets</span>
+                        <span class="dropdown-arrow">▼</span>
+                    </button>
+                    <div class="category-list" id="categoryList"></div>
+                </div>
+                <button onclick="showAddCategoryModal()" class="btn-category-action" title="Add Category">
+                    <span>➕</span>
+                </button>
+            </div>
+            
             <div class="sheet-controls">
                 <div class="sheet-selector">
                     <button class="sheet-current" id="currentSheetBtn" onclick="toggleSheetList()">
@@ -70,6 +83,9 @@
                 
                 <button onclick="showRenameModal(currentSheet)" class="btn-sheet-action" title="Rename Sheet">
                     <span>✏️</span>
+                </button>
+                <button onclick="showMoveToCategoryModal(currentSheet)" class="btn-sheet-action" title="Move to Category">
+                    <span>📁</span>
                 </button>
                 <button onclick="moveSheetUp(currentSheet)" class="btn-sheet-action" title="Move Sheet Up">
                     <span>⬆️</span>
@@ -237,6 +253,48 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" onclick="closeRenameModal()">Cancel</button>
                     <button type="submit" class="btn btn-primary">Rename</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Category Modal -->
+    <div id="addCategoryModal" class="modal">
+        <div class="modal-content rename-modal">
+            <div class="modal-header">
+                <h2>Add Category</h2>
+                <span class="close" onclick="closeAddCategoryModal()">&times;</span>
+            </div>
+            <form id="addCategoryForm">
+                <div class="form-group">
+                    <label for="categoryName">Category Name</label>
+                    <input type="text" id="categoryName" class="form-input" placeholder="e.g., Bengali, English, History" required autofocus>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeAddCategoryModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Category</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Move to Category Modal -->
+    <div id="moveToCategoryModal" class="modal">
+        <div class="modal-content rename-modal">
+            <div class="modal-header">
+                <h2>Move Sheet to Category</h2>
+                <span class="close" onclick="closeMoveToCategoryModal()">&times;</span>
+            </div>
+            <form id="moveToCategoryForm">
+                <div class="form-group">
+                    <label for="targetCategory">Select Category</label>
+                    <select id="targetCategory" class="form-input" required>
+                        <option value="">Uncategorized</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeMoveToCategoryModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Move</button>
                 </div>
             </form>
         </div>

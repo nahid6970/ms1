@@ -1,5 +1,6 @@
-let tableData = { sheets: [], activeSheet: 0 };
+let tableData = { sheets: [], activeSheet: 0, categories: [], sheetCategories: {} };
 let currentSheet = 0;
+let currentCategory = null; // null means "All Sheets"
 let contextMenuCell = null;
 let selectedCells = []; // Array of {row, col, td} objects for multi-cell operations
 let isSelecting = false;
@@ -148,6 +149,8 @@ async function loadData() {
         const response = await fetch('/api/data');
         tableData = await response.json();
         currentSheet = tableData.activeSheet || 0;
+        initializeCategories();
+        renderCategoryTabs();
         renderSheetTabs();
         renderTable();
     } catch (error) {
@@ -1877,23 +1880,37 @@ function showRenameModal(index) {
 
 
 function renderSheetTabs() {
+    initializeCategories();
+
     // Update current sheet name
     const currentSheetNameEl = document.getElementById('currentSheetName');
     if (tableData.sheets[currentSheet]) {
         currentSheetNameEl.textContent = tableData.sheets[currentSheet].name;
     }
 
-    // Render sheet list (simplified - just for switching)
+    // Render sheet list (filtered by category)
     const sheetList = document.getElementById('sheetList');
     sheetList.innerHTML = '';
 
     tableData.sheets.forEach((sheet, index) => {
+        // Filter by category
+        const sheetCategory = tableData.sheetCategories[index] || null;
+        if (currentCategory !== null && sheetCategory !== currentCategory) {
+            return; // Skip sheets not in current category
+        }
+
         const item = document.createElement('div');
         item.className = `sheet-item ${index === currentSheet ? 'active' : ''}`;
 
         const nameSpan = document.createElement('span');
         nameSpan.className = 'sheet-item-name';
         nameSpan.textContent = sheet.name;
+
+        // Show category badge if viewing "All Sheets"
+        if (currentCategory === null && sheetCategory) {
+            nameSpan.textContent += ` [${sheetCategory}]`;
+        }
+
         nameSpan.onclick = () => {
             switchSheet(index);
             toggleSheetList();
@@ -1911,6 +1928,155 @@ function toggleSheetList() {
 
 function openSettings() {
     document.getElementById('settingsModal').style.display = 'block';
+}
+
+// Category Management Functions
+function toggleCategoryList() {
+    const categoryList = document.getElementById('categoryList');
+    categoryList.classList.toggle('show');
+}
+
+function showAddCategoryModal() {
+    document.getElementById('categoryName').value = '';
+    document.getElementById('addCategoryModal').style.display = 'block';
+}
+
+function closeAddCategoryModal() {
+    document.getElementById('addCategoryModal').style.display = 'none';
+}
+
+function showMoveToCategoryModal(sheetIndex) {
+    const select = document.getElementById('targetCategory');
+    select.innerHTML = '<option value="">Uncategorized</option>';
+
+    // Populate with existing categories
+    if (tableData.categories) {
+        tableData.categories.forEach(category => {
+            const option = document.createElement('option');
+            option.value = category;
+            option.textContent = category;
+            select.appendChild(option);
+        });
+    }
+
+    // Set current category if exists
+    const currentCat = tableData.sheetCategories?.[sheetIndex] || '';
+    select.value = currentCat;
+
+    document.getElementById('moveToCategoryModal').style.display = 'block';
+}
+
+function closeMoveToCategoryModal() {
+    document.getElementById('moveToCategoryModal').style.display = 'none';
+}
+
+// Initialize category data structure if not exists
+function initializeCategories() {
+    if (!tableData.categories) {
+        tableData.categories = [];
+    }
+    if (!tableData.sheetCategories) {
+        tableData.sheetCategories = {};
+    }
+}
+
+// Add category form handler
+document.getElementById('addCategoryForm').onsubmit = async function (e) {
+    e.preventDefault();
+    const categoryName = document.getElementById('categoryName').value.trim();
+
+    if (!categoryName) return;
+
+    initializeCategories();
+
+    if (tableData.categories.includes(categoryName)) {
+        showToast('Category already exists', 'warning');
+        return;
+    }
+
+    tableData.categories.push(categoryName);
+    await saveData();
+    renderCategoryTabs();
+    closeAddCategoryModal();
+    showToast(`Category "${categoryName}" added`, 'success');
+};
+
+// Move to category form handler
+document.getElementById('moveToCategoryForm').onsubmit = async function (e) {
+    e.preventDefault();
+    const targetCategory = document.getElementById('targetCategory').value;
+
+    initializeCategories();
+
+    if (targetCategory) {
+        tableData.sheetCategories[currentSheet] = targetCategory;
+    } else {
+        delete tableData.sheetCategories[currentSheet];
+    }
+
+    await saveData();
+    renderCategoryTabs();
+    renderSheetTabs();
+    closeMoveToCategoryModal();
+    showToast('Sheet moved to category', 'success');
+};
+
+function renderCategoryTabs() {
+    initializeCategories();
+
+    const currentCategoryNameEl = document.getElementById('currentCategoryName');
+    currentCategoryNameEl.textContent = currentCategory || 'All Sheets';
+
+    const categoryList = document.getElementById('categoryList');
+    categoryList.innerHTML = '';
+
+    // Add "All Sheets" option
+    const allItem = document.createElement('div');
+    allItem.className = `category-item ${currentCategory === null ? 'active' : ''}`;
+
+    const allName = document.createElement('span');
+    allName.className = 'category-item-name';
+    allName.textContent = 'All Sheets';
+    allName.onclick = () => {
+        currentCategory = null;
+        renderCategoryTabs();
+        renderSheetTabs();
+        toggleCategoryList();
+    };
+
+    const allCount = document.createElement('span');
+    allCount.className = 'category-item-count';
+    allCount.textContent = tableData.sheets.length;
+
+    allItem.appendChild(allName);
+    allItem.appendChild(allCount);
+    categoryList.appendChild(allItem);
+
+    // Add each category
+    tableData.categories.forEach(category => {
+        const count = Object.values(tableData.sheetCategories).filter(c => c === category).length;
+
+        const item = document.createElement('div');
+        item.className = `category-item ${currentCategory === category ? 'active' : ''}`;
+
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'category-item-name';
+        nameSpan.textContent = category;
+        nameSpan.onclick = () => {
+            currentCategory = category;
+            renderCategoryTabs();
+            renderSheetTabs();
+            toggleCategoryList();
+        };
+
+        const countSpan = document.createElement('span');
+        countSpan.className = 'category-item-count';
+        countSpan.textContent = count;
+
+        item.appendChild(nameSpan);
+        item.appendChild(countSpan);
+        categoryList.appendChild(item);
+    });
 }
 
 function searchTable() {
