@@ -470,17 +470,48 @@ function applyMarkdownFormatting(rowIndex, colIndex, value) {
 function parseMarkdown(text) {
     if (!text) return '';
 
-    // Split by lines
+    // Handle code blocks first (multiline)
+    let inCodeBlock = false;
     const lines = text.split('\n');
     const formattedLines = lines.map(line => {
         let formatted = line;
 
+        // Code block: ```text``` -> <code>text</code>
+        if (formatted.trim() === '```') {
+            inCodeBlock = !inCodeBlock;
+            return ''; // Remove the ``` markers
+        }
+
+        if (inCodeBlock) {
+            return `<code>${formatted}</code>`;
+        }
+
+        // Heading: ##text## -> larger text
+        formatted = formatted.replace(/##(.+?)##/g, '<span style="font-size: 1.3em; font-weight: 600;">$1</span>');
+
         // Bold: **text** -> <strong>text</strong>
         formatted = formatted.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+
+        // Italic: __text__ -> <em>text</em>
+        formatted = formatted.replace(/__(.+?)__/g, '<em>$1</em>');
+
+        // Strikethrough: ~~text~~ -> <del>text</del>
+        formatted = formatted.replace(/~~(.+?)~~/g, '<del>$1</del>');
+
+        // Inline code: `text` -> <code>text</code>
+        formatted = formatted.replace(/`(.+?)`/g, '<code>$1</code>');
+
+        // Highlight: ==text== -> <mark>text</mark>
+        formatted = formatted.replace(/==(.+?)==/g, '<mark>$1</mark>');
 
         // Bullet list: - item -> • item
         if (formatted.trim().startsWith('- ')) {
             formatted = formatted.replace(/^(\s*)- /, '$1• ');
+        }
+
+        // Numbered list: 1. item -> 1. item (keep as is, just format)
+        if (/^\d+\.\s/.test(formatted.trim())) {
+            formatted = formatted; // Keep numbered lists as is
         }
 
         return formatted;

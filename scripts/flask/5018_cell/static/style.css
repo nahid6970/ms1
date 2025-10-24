@@ -409,6 +409,33 @@ td input {
     color: inherit;
 }
 
+.markdown-preview em {
+    font-style: italic;
+    color: inherit;
+}
+
+.markdown-preview code {
+    background: #f4f4f4;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    padding: 2px 5px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9em;
+    color: #c7254e;
+}
+
+.markdown-preview mark {
+    background: #ffeb3b;
+    padding: 2px 4px;
+    border-radius: 2px;
+    color: inherit;
+}
+
+.markdown-preview del {
+    text-decoration: line-through;
+    color: #999;
+}
+
 /* Show preview when cell is not focused */
 td:not(:focus-within) .markdown-preview {
     display: block;
