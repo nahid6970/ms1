@@ -1215,11 +1215,15 @@ a.add-button.custom-sidebar-button[style*="background-color"] {
   #add-link-popup .Menu,
   #edit-link-popup .Menu {
     flex-direction: column !important;
-    width: calc(100vw - 20px) !important;
-    max-width: calc(100vw - 20px) !important;
-    max-height: calc(100vh - 20px) !important;
+    width: calc(100vw - 30px) !important;
+    max-width: calc(100vw - 30px) !important;
+    max-height: calc(100vh - 40px) !important;
     padding: 10px !important;
-    margin: 10px !important;
+    margin: 0 !important;
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    transform: none !important;
   }
 
   /* Close button stays absolute positioned on mobile too */
@@ -1310,11 +1314,15 @@ a.add-button.custom-sidebar-button[style*="background-color"] {
   /* Adjust popup positioning for mobile */
   .Menu,
   .group_type_box.expanded {
-    width: calc(100vw - 20px) !important;
-    max-width: calc(100vw - 20px) !important;
-    max-height: calc(100vh - 20px) !important;
+    width: calc(100vw - 30px) !important;
+    max-width: calc(100vw - 30px) !important;
+    max-height: calc(100vh - 40px) !important;
     padding: 10px !important;
     box-sizing: border-box;
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    transform: none !important;
   }
 
   html,
@@ -1386,8 +1394,10 @@ a.add-button.custom-sidebar-button[style*="background-color"] {
   
   /* Ensure popup doesn't go beyond screen */
   .popup-container {
-    align-items: flex-start !important;
-    padding-top: 20px;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 15px !important;
+    box-sizing: border-box;
   }
   
   /* Mobile adjustments for sidebar */
