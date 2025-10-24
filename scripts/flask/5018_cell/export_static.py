@@ -175,6 +175,37 @@ def generate_static_html(data):
             width: 100%;
         }
 
+        .wrap-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s;
+        }
+
+        .wrap-toggle:hover {
+            background: #e9ecef;
+            border-color: #007bff;
+        }
+
+        .wrap-toggle input[type="checkbox"] {
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+            margin: 0;
+        }
+
+        .wrap-toggle span {
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+        }
+
         .export-info {
             margin-left: auto;
             color: #666;
@@ -264,6 +295,21 @@ def generate_static_html(data):
             background: transparent;
             box-sizing: border-box;
             pointer-events: none;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Text wrapping enabled */
+        .wrap-enabled .cell-content {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            overflow: visible;
+            text-overflow: clip;
+        }
+
+        .wrap-enabled tr {
+            height: auto;
         }
 
         td.merged-cell {
@@ -552,6 +598,19 @@ def generate_static_html(data):
             });
         }
 
+        function toggleRowWrap() {
+            const wrapToggle = document.getElementById('wrapToggle');
+            const table = document.getElementById('dataTable');
+            
+            if (wrapToggle.checked) {
+                table.classList.add('wrap-enabled');
+                localStorage.setItem('rowWrapEnabled', 'true');
+            } else {
+                table.classList.remove('wrap-enabled');
+                localStorage.setItem('rowWrapEnabled', 'false');
+            }
+        }
+
         // Close dropdown when clicking outside
         document.addEventListener('click', function(event) {
             const sheetSelector = document.querySelector('.sheet-selector');
@@ -565,6 +624,16 @@ def generate_static_html(data):
         window.onload = function() {
             renderSheetTabs();
             renderTable();
+            
+            // Restore wrap toggle state
+            const wrapEnabled = localStorage.getItem('rowWrapEnabled') === 'true';
+            const wrapToggle = document.getElementById('wrapToggle');
+            if (wrapToggle) {
+                wrapToggle.checked = wrapEnabled;
+                if (wrapEnabled) {
+                    document.getElementById('dataTable').classList.add('wrap-enabled');
+                }
+            }
         };
     </script>
 </head>
@@ -580,6 +649,11 @@ def generate_static_html(data):
                     <div class="sheet-list" id="sheetList"></div>
                 </div>
             </div>
+
+            <label class="wrap-toggle">
+                <input type="checkbox" id="wrapToggle" onchange="toggleRowWrap()">
+                <span>Wrap Text</span>
+            </label>
 
             <div class="export-info">
                 Static export - ''' + export_time + '''

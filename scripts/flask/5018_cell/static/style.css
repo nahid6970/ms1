@@ -33,7 +33,40 @@ body {
     display: flex;
     gap: 10px;
     flex-wrap: wrap;
+    align-items: center;
     border-bottom: 1px solid #ddd;
+}
+
+.wrap-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.2s;
+    margin-left: auto;
+}
+
+.wrap-toggle:hover {
+    background: #e9ecef;
+    border-color: #007bff;
+}
+
+.wrap-toggle input[type="checkbox"] {
+    cursor: pointer;
+    width: 18px;
+    height: 18px;
+    margin: 0;
+}
+
+.wrap-toggle span {
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
 }
 
 .btn {
@@ -152,6 +185,18 @@ table {
         padding: 8px 12px;
         font-size: 13px;
     }
+    
+    .wrap-toggle {
+        padding: 6px 10px;
+        font-size: 13px;
+        margin-left: 0;
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .wrap-toggle span {
+        font-size: 13px;
+    }
 
     /* Adjust sheet tabs for mobile */
     .sheet-tabs {
@@ -257,19 +302,51 @@ th {
 }
 
 td input {
-
     width: 100%;
-
     border: none;
-
     padding: 4px;
-
     font-size: 14px;
-
     background: transparent;
-
     box-sizing: border-box;
+}
 
+td {
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+/* Text wrapping enabled */
+.wrap-enabled td {
+    white-space: normal;
+    overflow: visible;
+    word-wrap: break-word;
+    word-break: break-word;
+    vertical-align: top;
+}
+
+.wrap-enabled td textarea:not(.merged-cell textarea) {
+    width: 100%;
+    border: none;
+    padding: 4px;
+    font-size: 14px;
+    background: transparent;
+    box-sizing: border-box;
+    resize: none;
+    overflow: hidden;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-family: inherit;
+    line-height: 1.4;
+    min-height: 24px;
+}
+
+.wrap-enabled td textarea:not(.merged-cell textarea):focus {
+    outline: 2px solid #007bff;
+    background: rgba(0, 123, 255, 0.1);
+}
+
+.wrap-enabled tr {
+    height: auto !important;
 }
 
 td input:focus {

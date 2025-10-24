@@ -72,6 +72,19 @@ function initializeApp() {
 
     // Load initial data
     loadData();
+
+    // Restore wrap toggle state
+    const wrapEnabled = localStorage.getItem('rowWrapEnabled') === 'true';
+    const wrapToggle = document.getElementById('wrapToggle');
+    if (wrapToggle) {
+        wrapToggle.checked = wrapEnabled;
+        if (wrapEnabled) {
+            const table = document.getElementById('dataTable');
+            if (table) {
+                table.classList.add('wrap-enabled');
+            }
+        }
+    }
 }
 
 function loadColumnWidths() {
@@ -1701,6 +1714,108 @@ function openSettings() {
     document.getElementById('settingsModal').style.display = 'block';
 }
 
+function toggleRowWrap() {
+    const wrapToggle = document.getElementById('wrapToggle');
+    const table = document.getElementById('dataTable');
+
+    if (wrapToggle.checked) {
+        table.classList.add('wrap-enabled');
+        localStorage.setItem('rowWrapEnabled', 'true');
+
+        // Convert all inputs to textareas for wrapping
+        const inputs = table.querySelectorAll('td input:not([type="date"]):not([type="email"])');
+        inputs.forEach(input => {
+            const textarea = document.createElement('textarea');
+            textarea.value = input.value;
+            textarea.style.cssText = input.style.cssText;
+            textarea.className = input.className;
+            textarea.rows = 1;
+
+            // Get row and col from parent td
+            const td = input.closest('td');
+            const rowIndex = parseInt(td.dataset.row);
+            const colIndex = parseInt(td.dataset.col);
+
+            if (!isNaN(rowIndex) && !isNaN(colIndex)) {
+                textarea.onchange = (e) => updateCell(rowIndex, colIndex, e.target.value);
+                textarea.oninput = (e) => {
+                    autoResizeTextarea(e.target);
+                    updateCell(rowIndex, colIndex, e.target.value);
+                };
+                textarea.oncontextmenu = (e) => showCellContextMenu(e, rowIndex, colIndex, textarea, td);
+
+                // Mouse events for cell selection
+                textarea.onmousedown = (e) => {
+                    if (e.shiftKey) {
+                        e.preventDefault();
+                        startCellSelection(rowIndex, colIndex, td);
+                    }
+                };
+                textarea.onmouseenter = () => {
+                    if (isSelecting) {
+                        addToSelection(rowIndex, colIndex, td);
+                    }
+                };
+            }
+
+            input.replaceWith(textarea);
+            autoResizeTextarea(textarea);
+        });
+
+        showToast('Text wrapping enabled', 'success');
+    } else {
+        table.classList.remove('wrap-enabled');
+        localStorage.setItem('rowWrapEnabled', 'false');
+
+        // Convert textareas back to inputs
+        const textareas = table.querySelectorAll('td textarea');
+        textareas.forEach(textarea => {
+            // Skip merged cell textareas
+            if (textarea.closest('td.merged-cell')) {
+                return;
+            }
+
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = textarea.value;
+            input.style.cssText = textarea.style.cssText;
+            input.className = textarea.className;
+
+            // Get row and col from parent td
+            const td = textarea.closest('td');
+            const rowIndex = parseInt(td.dataset.row);
+            const colIndex = parseInt(td.dataset.col);
+
+            if (!isNaN(rowIndex) && !isNaN(colIndex)) {
+                input.onchange = (e) => updateCell(rowIndex, colIndex, e.target.value);
+                input.oncontextmenu = (e) => showCellContextMenu(e, rowIndex, colIndex, input, td);
+
+                // Mouse events for cell selection
+                input.onmousedown = (e) => {
+                    if (e.shiftKey) {
+                        e.preventDefault();
+                        startCellSelection(rowIndex, colIndex, td);
+                    }
+                };
+                input.onmouseenter = () => {
+                    if (isSelecting) {
+                        addToSelection(rowIndex, colIndex, td);
+                    }
+                };
+            }
+
+            textarea.replaceWith(input);
+        });
+
+        showToast('Text wrapping disabled', 'success');
+    }
+}
+
+function autoResizeTextarea(textarea) {
+    textarea.style.height = 'auto';
+    textarea.style.height = Math.max(24, textarea.scrollHeight) + 'px';
+}
+
 
 
 function renderTable() {
@@ -1878,17 +1993,42 @@ function renderTable() {
             td.style.maxWidth = col.width + 'px';
             td.style.backgroundColor = col.color;
 
-            const input = document.createElement('input');
-            input.type = col.type;
-            input.value = row[colIndex] || '';
-            input.style.color = col.textColor || '#000000';
+            // Check if wrap is enabled
+            const wrapEnabled = localStorage.getItem('rowWrapEnabled') === 'true';
+            const isTextType = col.type === 'text' || !col.type;
 
-            // Apply column font
-            if (col.font && col.font !== '') {
-                input.style.fontFamily = `'${col.font}', monospace`;
+            let inputElement;
+            if (wrapEnabled && isTextType) {
+                // Create textarea for wrapping
+                inputElement = document.createElement('textarea');
+                inputElement.rows = 1;
+                inputElement.value = row[colIndex] || '';
+                inputElement.style.color = col.textColor || '#000000';
+
+                if (col.font && col.font !== '') {
+                    inputElement.style.fontFamily = `'${col.font}', monospace`;
+                }
+
+                inputElement.onchange = (e) => updateCell(rowIndex, colIndex, e.target.value);
+                inputElement.oninput = (e) => {
+                    autoResizeTextarea(e.target);
+                    updateCell(rowIndex, colIndex, e.target.value);
+                };
+            } else {
+                // Create regular input
+                inputElement = document.createElement('input');
+                inputElement.type = col.type;
+                inputElement.value = row[colIndex] || '';
+                inputElement.style.color = col.textColor || '#000000';
+
+                if (col.font && col.font !== '') {
+                    inputElement.style.fontFamily = `'${col.font}', monospace`;
+                }
+
+                inputElement.onchange = (e) => updateCell(rowIndex, colIndex, e.target.value);
             }
 
-            input.onchange = (e) => updateCell(rowIndex, colIndex, e.target.value);
+            const input = inputElement;
 
             // Apply cell-specific styles
             const cellStyle = getCellStyle(rowIndex, colIndex);
@@ -2026,6 +2166,12 @@ function renderTable() {
 
         tableBody.appendChild(tr);
     });
+
+    // Auto-resize textareas if wrap is enabled
+    if (localStorage.getItem('rowWrapEnabled') === 'true') {
+        const textareas = tableBody.querySelectorAll('textarea:not(.merged-cell textarea)');
+        textareas.forEach(textarea => autoResizeTextarea(textarea));
+    }
 }
 
 function toggleColumnMenu(event, index) {
