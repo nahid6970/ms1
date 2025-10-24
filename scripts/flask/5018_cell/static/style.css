@@ -382,7 +382,6 @@ td input {
 
 /* Markdown formatting indicator */
 .has-markdown {
-    font-style: italic;
     opacity: 0.9;
 }
 
