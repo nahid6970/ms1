@@ -1949,6 +1949,12 @@ function searchTable() {
                 if (strippedValue.includes(searchTerm)) {
                     rowMatches = true;
                     cell.classList.add('search-highlight');
+
+                    // Also highlight markdown preview if it exists
+                    const preview = cell.querySelector('.markdown-preview');
+                    if (preview) {
+                        preview.classList.add('search-highlight');
+                    }
                 }
             }
         });

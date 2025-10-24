@@ -1209,6 +1209,12 @@ td input::-moz-selection {
     animation: highlightPulse 0.5s ease-in-out;
 }
 
+/* Search highlight for markdown preview */
+.markdown-preview.search-highlight {
+    background: rgba(255, 235, 59, 0.5) !important;
+    z-index: 2;
+}
+
 @keyframes highlightPulse {
     0% {
         background: rgba(255, 235, 59, 0.8) !important;
