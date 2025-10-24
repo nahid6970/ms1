@@ -1291,11 +1291,11 @@ a.add-button.custom-sidebar-button[style*="background-color"] {
     margin-right: 0 !important;
   }
 
-  /* Stack Click Action and Type sections vertically on mobile */
+  /* Keep Click Action and Type sections side by side on mobile */
   #add-link-form > div[style*="gap: 20px"],
   #edit-link-form > div[style*="gap: 20px"] {
-    flex-direction: column !important;
-    gap: 15px !important;
+    flex-direction: row !important;
+    gap: 10px !important;
   }
 
   /* Make radio button sections full width on mobile */
