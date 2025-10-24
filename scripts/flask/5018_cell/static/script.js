@@ -149,6 +149,11 @@ async function loadData() {
         const response = await fetch('/api/data');
         tableData = await response.json();
         currentSheet = tableData.activeSheet || 0;
+
+        // Set currentCategory to match the active sheet's category
+        const sheetCategory = tableData.sheetCategories[currentSheet] || tableData.sheetCategories[String(currentSheet)] || null;
+        currentCategory = sheetCategory;
+
         initializeCategories();
         renderCategoryTabs();
         renderSheetTabs();
@@ -1905,12 +1910,12 @@ function renderSheetTabs() {
     tableData.sheets.forEach((sheet, index) => {
         // Filter by category - handle both string and numeric keys
         const sheetCategory = tableData.sheetCategories[index] || tableData.sheetCategories[String(index)] || null;
-        
+
         // When viewing "Uncategorized", only show sheets without a category
         if (currentCategory === null && sheetCategory) {
             return; // Skip sheets that have a category
         }
-        
+
         // When viewing a specific category, only show sheets in that category
         if (currentCategory !== null && sheetCategory !== currentCategory) {
             return; // Skip sheets not in current category

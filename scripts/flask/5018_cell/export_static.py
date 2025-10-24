@@ -621,8 +621,10 @@ def generate_static_html(data):
     </style>
     <script>
         let currentSheet = ''' + str(active_sheet) + ''';
-        let currentCategory = null; // null means "Uncategorized"
         let tableData = ''' + json.dumps(data) + ''';
+        
+        // Set currentCategory to match the active sheet's category
+        let currentCategory = tableData.sheetCategories[currentSheet] || tableData.sheetCategories[String(currentSheet)] || null;
 
         function initializeCategories() {
             if (!tableData.categories) {
