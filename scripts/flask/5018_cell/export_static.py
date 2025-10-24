@@ -178,6 +178,10 @@ def generate_static_html(data):
             display: flex;
             align-items: center;
             gap: 5px;
+            padding: 4px 8px;
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 4px;
             flex: 1;
             min-width: 0;
         }
