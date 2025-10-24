@@ -269,7 +269,6 @@ table {
         flex: 1;
     }
 
-    .btn-add-sheet,
     .btn-sheet-action,
     .btn-settings {
         width: 32px;
@@ -928,27 +927,6 @@ td input::-moz-selection {
     font-size: 14px;
     display: block;
     width: 100%;
-}
-
-.btn-add-sheet {
-    background: #28a745;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    width: 36px;
-    height: 36px;
-    font-size: 20px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s;
-    flex-shrink: 0;
-}
-
-.btn-add-sheet:hover {
-    background: #218838;
-    transform: scale(1.05);
 }
 
 .btn-sheet-action {

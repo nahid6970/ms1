@@ -57,8 +57,6 @@
 
     <div class="container">
         <div class="sheet-tabs">
-            <button onclick="addSheet()" class="btn-add-sheet" title="Add Sheet">+</button>
-            
             <div class="category-controls">
                 <div class="category-selector">
                     <button class="category-current" id="currentCategoryBtn" onclick="toggleCategoryList()">
@@ -80,7 +78,9 @@
                     </button>
                     <div class="sheet-list" id="sheetList"></div>
                 </div>
-                
+                <button onclick="addSheet()" class="btn-sheet-action" title="Add Sheet">
+                    <span>➕</span>
+                </button>
                 <button onclick="showRenameModal(currentSheet)" class="btn-sheet-action" title="Rename Sheet">
                     <span>✏️</span>
                 </button>
@@ -93,7 +93,7 @@
                 <button onclick="moveSheetDown(currentSheet)" class="btn-sheet-action" title="Move Sheet Down">
                     <span>⬇️</span>
                 </button>
-                <button onclick="deleteSheet(currentSheet)" class="btn-sheet-action btn-delete" title="Delete Sheet">
+                <button onclick="deleteSheet(currentSheet)" class="btn-sheet-action" title="Delete Sheet">
                     <span>🗑️</span>
                 </button>
             </div>
