@@ -216,6 +216,7 @@ function addColumn() {
     document.getElementById('columnColorText').value = '#FFFFFF';
     document.getElementById('columnTextColor').value = '#000000';
     document.getElementById('columnTextColorText').value = '#000000';
+    document.getElementById('columnFontSize').value = '14';
     document.getElementById('headerBgColor').value = '#f8f9fa';
     document.getElementById('headerBgColorText').value = '#F8F9FA';
     document.getElementById('headerTextColor').value = '#333333';
@@ -241,6 +242,7 @@ function editColumn(index) {
     document.getElementById('columnTextColor').value = col.textColor || '#000000';
     document.getElementById('columnTextColorText').value = (col.textColor || '#000000').toUpperCase();
     document.getElementById('columnFont').value = col.font || '';
+    document.getElementById('columnFontSize').value = col.fontSize || '14';
 
     // Load header styling
     document.getElementById('headerBgColor').value = col.headerBgColor || '#f8f9fa';
@@ -279,6 +281,7 @@ async function handleColumnFormSubmit(e) {
         color: document.getElementById('columnColor').value,
         textColor: document.getElementById('columnTextColor').value,
         font: document.getElementById('columnFont').value,
+        fontSize: document.getElementById('columnFontSize').value,
         headerBgColor: document.getElementById('headerBgColor').value,
         headerTextColor: document.getElementById('headerTextColor').value,
         headerBold: document.getElementById('headerBold').checked,
@@ -2645,6 +2648,10 @@ function renderTable() {
                     inputElement.style.fontFamily = `'${col.font}', monospace`;
                 }
 
+                if (col.fontSize && col.fontSize !== '') {
+                    inputElement.style.fontSize = col.fontSize + 'px';
+                }
+
                 inputElement.onchange = (e) => updateCell(rowIndex, colIndex, e.target.value);
                 inputElement.oninput = (e) => {
                     autoResizeTextarea(e.target);
@@ -2664,6 +2671,10 @@ function renderTable() {
 
                 if (col.font && col.font !== '') {
                     inputElement.style.fontFamily = `'${col.font}', monospace`;
+                }
+
+                if (col.fontSize && col.fontSize !== '') {
+                    inputElement.style.fontSize = col.fontSize + 'px';
                 }
 
                 inputElement.onchange = (e) => {
@@ -2753,6 +2764,10 @@ function renderTable() {
 
                     if (col.font && col.font !== '') {
                         textarea.style.fontFamily = `'${col.font}', monospace`;
+                    }
+
+                    if (col.fontSize && col.fontSize !== '') {
+                        textarea.style.fontSize = col.fontSize + 'px';
                     }
 
                     textarea.onchange = (e) => updateCell(rowIndex, colIndex, e.target.value);
