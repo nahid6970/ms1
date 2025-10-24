@@ -1759,6 +1759,7 @@ function toggleRowWrap() {
             }
 
             input.replaceWith(textarea);
+            td.classList.add('has-textarea');
             autoResizeTextarea(textarea);
         });
 
@@ -1805,6 +1806,7 @@ function toggleRowWrap() {
             }
 
             textarea.replaceWith(input);
+            td.classList.remove('has-textarea');
         });
 
         showToast('Text wrapping disabled', 'success');
@@ -2014,6 +2016,9 @@ function renderTable() {
                     autoResizeTextarea(e.target);
                     updateCell(rowIndex, colIndex, e.target.value);
                 };
+
+                // Mark td as having textarea for vertical alignment
+                td.classList.add('has-textarea');
             } else {
                 // Create regular input
                 inputElement = document.createElement('input');

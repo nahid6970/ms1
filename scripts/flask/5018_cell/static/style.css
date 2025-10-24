@@ -316,11 +316,20 @@ td {
 }
 
 /* Text wrapping enabled */
-.wrap-enabled td {
+.wrap-enabled td:not(.row-number) {
     white-space: normal;
     overflow: visible;
     word-wrap: break-word;
     word-break: break-word;
+}
+
+/* Only apply vertical-align top to cells with textareas */
+.wrap-enabled td:has(textarea) {
+    vertical-align: top;
+}
+
+/* Fallback for browsers that don't support :has() */
+.wrap-enabled td.has-textarea {
     vertical-align: top;
 }
 
@@ -347,6 +356,11 @@ td {
 
 .wrap-enabled tr {
     height: auto !important;
+}
+
+/* Keep row numbers centered vertically */
+.wrap-enabled .row-number {
+    vertical-align: middle;
 }
 
 td input:focus {
