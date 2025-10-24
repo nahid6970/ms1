@@ -700,9 +700,10 @@ def generate_static_html(data):
                     nameSpan.onclick = () => {
                         currentCategory = category;
                         
-                        // Switch to first sheet in this category
+                        // Switch to first sheet in this category - handle both string and numeric keys
                         const firstSheetInCategory = tableData.sheets.findIndex((sheet, index) => {
-                            return tableData.sheetCategories[index] === category;
+                            const sheetCat = tableData.sheetCategories[index] || tableData.sheetCategories[String(index)];
+                            return sheetCat === category;
                         });
                         
                         if (firstSheetInCategory !== -1) {
@@ -749,8 +750,15 @@ def generate_static_html(data):
             sheetList.innerHTML = '';
 
             tableData.sheets.forEach((sheet, index) => {
-                // Filter by category
-                const sheetCategory = tableData.sheetCategories[index] || null;
+                // Filter by category - handle both string and numeric keys
+                const sheetCategory = tableData.sheetCategories[index] || tableData.sheetCategories[String(index)] || null;
+                
+                // When viewing "Uncategorized", only show sheets without a category
+                if (currentCategory === null && sheetCategory) {
+                    return; // Skip sheets that have a category
+                }
+                
+                // When viewing a specific category, only show sheets in that category
                 if (currentCategory !== null && sheetCategory !== currentCategory) {
                     return; // Skip sheets not in current category
                 }
@@ -761,9 +769,6 @@ def generate_static_html(data):
                 const nameSpan = document.createElement('span');
                 nameSpan.className = 'sheet-item-name';
                 nameSpan.textContent = sheet.name;
-                
-                // Don't show sheets with categories when viewing "Uncategorized"
-                // (They're already filtered out above)
                 
                 nameSpan.onclick = () => {
                     switchSheet(index);
