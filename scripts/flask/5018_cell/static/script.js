@@ -1805,50 +1805,114 @@ async function addSheet() {
 }
 
 async function moveSheetUp(index) {
-    if (index <= 0) {
-        showToast('Sheet is already at the top', 'info');
+    // Get current sheet's category
+    const currentSheetCategory = tableData.sheetCategories[index] || tableData.sheetCategories[String(index)] || null;
+
+    // Find the previous sheet in the same category
+    let prevIndex = -1;
+    for (let i = index - 1; i >= 0; i--) {
+        const sheetCategory = tableData.sheetCategories[i] || tableData.sheetCategories[String(i)] || null;
+        if (sheetCategory === currentSheetCategory) {
+            prevIndex = i;
+            break;
+        }
+    }
+
+    if (prevIndex === -1) {
+        showToast('Sheet is already at the top of this category', 'info');
         return;
     }
 
     // Swap sheets
     const temp = tableData.sheets[index];
-    tableData.sheets[index] = tableData.sheets[index - 1];
-    tableData.sheets[index - 1] = temp;
+    tableData.sheets[index] = tableData.sheets[prevIndex];
+    tableData.sheets[prevIndex] = temp;
+
+    // Swap category assignments so they follow the sheets
+    const tempCategory = tableData.sheetCategories[index] || tableData.sheetCategories[String(index)];
+    const prevCategory = tableData.sheetCategories[prevIndex] || tableData.sheetCategories[String(prevIndex)];
+
+    // Clear old entries
+    delete tableData.sheetCategories[index];
+    delete tableData.sheetCategories[String(index)];
+    delete tableData.sheetCategories[prevIndex];
+    delete tableData.sheetCategories[String(prevIndex)];
+
+    // Swap: sheet at index goes to prevIndex, sheet at prevIndex goes to index
+    if (tempCategory) {
+        tableData.sheetCategories[prevIndex] = tempCategory;
+    }
+    if (prevCategory) {
+        tableData.sheetCategories[index] = prevCategory;
+    }
 
     // Update current sheet index if needed
     if (currentSheet === index) {
-        currentSheet = index - 1;
-    } else if (currentSheet === index - 1) {
+        currentSheet = prevIndex;
+    } else if (currentSheet === prevIndex) {
         currentSheet = index;
     }
 
     // Save and re-render
     await saveData();
+    renderCategoryTabs();
     renderSheetTabs();
     renderTable();
     showToast('Sheet moved up', 'success');
 }
 
 async function moveSheetDown(index) {
-    if (index >= tableData.sheets.length - 1) {
-        showToast('Sheet is already at the bottom', 'info');
+    // Get current sheet's category
+    const currentSheetCategory = tableData.sheetCategories[index] || tableData.sheetCategories[String(index)] || null;
+
+    // Find the next sheet in the same category
+    let nextIndex = -1;
+    for (let i = index + 1; i < tableData.sheets.length; i++) {
+        const sheetCategory = tableData.sheetCategories[i] || tableData.sheetCategories[String(i)] || null;
+        if (sheetCategory === currentSheetCategory) {
+            nextIndex = i;
+            break;
+        }
+    }
+
+    if (nextIndex === -1) {
+        showToast('Sheet is already at the bottom of this category', 'info');
         return;
     }
 
     // Swap sheets
     const temp = tableData.sheets[index];
-    tableData.sheets[index] = tableData.sheets[index + 1];
-    tableData.sheets[index + 1] = temp;
+    tableData.sheets[index] = tableData.sheets[nextIndex];
+    tableData.sheets[nextIndex] = temp;
+
+    // Swap category assignments so they follow the sheets
+    const tempCategory = tableData.sheetCategories[index] || tableData.sheetCategories[String(index)];
+    const nextCategory = tableData.sheetCategories[nextIndex] || tableData.sheetCategories[String(nextIndex)];
+
+    // Clear old entries
+    delete tableData.sheetCategories[index];
+    delete tableData.sheetCategories[String(index)];
+    delete tableData.sheetCategories[nextIndex];
+    delete tableData.sheetCategories[String(nextIndex)];
+
+    // Swap: sheet at index goes to nextIndex, sheet at nextIndex goes to index
+    if (tempCategory) {
+        tableData.sheetCategories[nextIndex] = tempCategory;
+    }
+    if (nextCategory) {
+        tableData.sheetCategories[index] = nextCategory;
+    }
 
     // Update current sheet index if needed
     if (currentSheet === index) {
-        currentSheet = index + 1;
-    } else if (currentSheet === index + 1) {
+        currentSheet = nextIndex;
+    } else if (currentSheet === nextIndex) {
         currentSheet = index;
     }
 
     // Save and re-render
     await saveData();
+    renderCategoryTabs();
     renderSheetTabs();
     renderTable();
     showToast('Sheet moved down', 'success');
