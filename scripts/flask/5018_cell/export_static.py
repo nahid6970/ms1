@@ -182,8 +182,6 @@ def generate_static_html(data):
             background: #f5f5f5;
             border: 1px solid #ddd;
             border-radius: 4px;
-            flex: 1;
-            min-width: 0;
         }
 
         .sheet-selector {
