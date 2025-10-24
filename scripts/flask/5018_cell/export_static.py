@@ -878,7 +878,15 @@ def generate_static_html(data):
                     
                     // Handle markdown formatting and newlines
                     const cellValue = row[colIndex] || '';
-                    const hasMarkdown = cellValue.includes('**') || cellValue.includes('\\n- ') || cellValue.trim().startsWith('- ');
+                    const hasMarkdown = cellValue.includes('**') || 
+                        cellValue.includes('__') || 
+                        cellValue.includes('##') || 
+                        cellValue.includes('```') || 
+                        cellValue.includes('`') || 
+                        cellValue.includes('~~') || 
+                        cellValue.includes('==') || 
+                        cellValue.includes('\\n- ') || 
+                        cellValue.trim().startsWith('- ');
                     
                     if (hasMarkdown) {
                         // Apply markdown formatting
@@ -894,6 +902,10 @@ def generate_static_html(data):
 
                     if (col.font && col.font !== '') {
                         cellContent.style.fontFamily = `'${col.font}', monospace`;
+                    }
+                    
+                    if (col.fontSize && col.fontSize !== '') {
+                        cellContent.style.fontSize = col.fontSize + 'px';
                     }
 
                     // Apply cell-specific styles

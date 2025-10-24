@@ -424,7 +424,17 @@ function applyMarkdownFormatting(rowIndex, colIndex, value) {
     if (!inputElement) return;
 
     // Parse markdown-style formatting
-    const hasMarkdown = value && (value.includes('**') || value.includes('\n- ') || value.trim().startsWith('- '));
+    const hasMarkdown = value && (
+        value.includes('**') ||
+        value.includes('__') ||
+        value.includes('##') ||
+        value.includes('```') ||
+        value.includes('`') ||
+        value.includes('~~') ||
+        value.includes('==') ||
+        value.includes('\n- ') ||
+        value.trim().startsWith('- ')
+    );
 
     // Remove existing preview
     const existingPreview = cell.querySelector('.markdown-preview');
