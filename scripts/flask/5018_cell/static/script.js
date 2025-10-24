@@ -372,11 +372,89 @@ function updateCell(rowIndex, colIndex, value) {
     // Store value - ensure line breaks are preserved
     sheet.rows[rowIndex][colIndex] = value;
 
+    // Apply markdown-style formatting to the cell
+    applyMarkdownFormatting(rowIndex, colIndex, value);
+
     // Auto-save after a short delay to preserve changes
     clearTimeout(window.autoSaveTimeout);
     window.autoSaveTimeout = setTimeout(() => {
         saveData();
     }, 1000);
+}
+
+function applyMarkdownFormatting(rowIndex, colIndex, value) {
+    // Find the cell element
+    const table = document.getElementById('dataTable');
+    if (!table) return;
+
+    const rows = table.querySelectorAll('tbody tr');
+    if (!rows[rowIndex]) return;
+
+    const cells = rows[rowIndex].querySelectorAll('td:not(.row-number)');
+    if (!cells[colIndex]) return;
+
+    const cell = cells[colIndex];
+    const inputElement = cell.querySelector('input, textarea');
+    if (!inputElement) return;
+
+    // Parse markdown-style formatting
+    const hasMarkdown = value && (value.includes('**') || value.includes('\n- ') || value.trim().startsWith('- '));
+
+    // Remove existing preview
+    const existingPreview = cell.querySelector('.markdown-preview');
+    if (existingPreview) {
+        existingPreview.remove();
+    }
+
+    if (hasMarkdown) {
+        // Store the formatted HTML in a data attribute
+        const formattedHTML = parseMarkdown(value);
+        inputElement.dataset.formattedHtml = formattedHTML;
+
+        // Apply visual indicator
+        inputElement.classList.add('has-markdown');
+
+        // Create preview overlay
+        const preview = document.createElement('div');
+        preview.className = 'markdown-preview';
+        preview.innerHTML = formattedHTML;
+
+        // Copy styles from input
+        preview.style.color = inputElement.style.color;
+        preview.style.fontFamily = inputElement.style.fontFamily;
+        preview.style.fontSize = inputElement.style.fontSize;
+        preview.style.fontWeight = inputElement.style.fontWeight;
+        preview.style.fontStyle = inputElement.style.fontStyle;
+        preview.style.textAlign = inputElement.style.textAlign;
+
+        cell.style.position = 'relative';
+        cell.appendChild(preview);
+    } else {
+        delete inputElement.dataset.formattedHtml;
+        inputElement.classList.remove('has-markdown');
+    }
+}
+
+function parseMarkdown(text) {
+    if (!text) return '';
+
+    // Split by lines
+    const lines = text.split('\n');
+    const formattedLines = lines.map(line => {
+        let formatted = line;
+
+        // Bold: **text** -> <strong>text</strong>
+        formatted = formatted.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+
+        // Bullet list: - item -> • item
+        if (formatted.trim().startsWith('- ')) {
+            formatted = formatted.replace(/^(\s*)- /, '$1• ');
+        }
+
+        return formatted;
+    });
+
+    return formattedLines.join('\n');
 }
 
 function getCellKey(rowIndex, colIndex) {
@@ -2292,6 +2370,15 @@ function renderTable() {
         const textareas = tableBody.querySelectorAll('textarea:not(.merged-cell textarea)');
         textareas.forEach(textarea => autoResizeTextarea(textarea));
     }
+
+    // Apply markdown formatting to all cells
+    sheet.rows.forEach((row, rowIndex) => {
+        row.forEach((cellValue, colIndex) => {
+            if (cellValue && (cellValue.includes('**') || cellValue.includes('\n- ') || cellValue.trim().startsWith('- '))) {
+                applyMarkdownFormatting(rowIndex, colIndex, cellValue);
+            }
+        });
+    });
 }
 
 function toggleColumnMenu(event, index) {
