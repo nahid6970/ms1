@@ -618,6 +618,37 @@ def generate_static_html(data):
                 display: none;
             }
         }
+
+        /* Markdown formatting styles */
+        strong {
+            font-weight: bold;
+        }
+
+        em {
+            font-style: italic;
+        }
+
+        code {
+            background: #f4f4f4;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            padding: 2px 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            color: #c7254e;
+            display: inline-block;
+        }
+
+        mark {
+            background: #ffeb3b;
+            padding: 2px 4px;
+            border-radius: 2px;
+        }
+
+        del {
+            text-decoration: line-through;
+            color: #999;
+        }
     </style>
     <script>
         let currentSheet = ''' + str(active_sheet) + ''';
@@ -926,17 +957,48 @@ def generate_static_html(data):
         function parseMarkdown(text) {
             if (!text) return '';
 
-            // Split by lines
+            // Handle code blocks first (multiline)
+            let inCodeBlock = false;
             const lines = text.split('\\n');
             const formattedLines = lines.map(line => {
                 let formatted = line;
 
+                // Code block: ```text``` -> <code>text</code>
+                if (formatted.trim() === '```') {
+                    inCodeBlock = !inCodeBlock;
+                    return ''; // Remove the ``` markers
+                }
+
+                if (inCodeBlock) {
+                    return `<code>${formatted}</code>`;
+                }
+
+                // Heading: ##text## -> larger text
+                formatted = formatted.replace(/##(.+?)##/g, '<span style="font-size: 1.3em; font-weight: 600;">$1</span>');
+
                 // Bold: **text** -> <strong>text</strong>
                 formatted = formatted.replace(/\\*\\*(.+?)\\*\\*/g, '<strong>$1</strong>');
+
+                // Italic: __text__ -> <em>text</em>
+                formatted = formatted.replace(/__(.+?)__/g, '<em>$1</em>');
+
+                // Strikethrough: ~~text~~ -> <del>text</del>
+                formatted = formatted.replace(/~~(.+?)~~/g, '<del>$1</del>');
+
+                // Inline code: `text` -> <code>text</code>
+                formatted = formatted.replace(/`(.+?)`/g, '<code>$1</code>');
+
+                // Highlight: ==text== -> <mark>text</mark>
+                formatted = formatted.replace(/==(.+?)==/g, '<mark>$1</mark>');
 
                 // Bullet list: - item -> • item
                 if (formatted.trim().startsWith('- ')) {
                     formatted = formatted.replace(/^(\\s*)- /, '$1• ');
+                }
+
+                // Numbered list: 1. item -> 1. item (keep as is, just format)
+                if (/^\\d+\\.\\s/.test(formatted.trim())) {
+                    formatted = formatted; // Keep numbered lists as is
                 }
 
                 return formatted;
