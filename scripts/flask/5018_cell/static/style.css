@@ -210,6 +210,12 @@ table {
         width: 32px;
         height: 32px;
         font-size: 14px;
+        min-width: 32px;
+    }
+    
+    .sheet-controls {
+        flex-wrap: wrap;
+        gap: 4px;
     }
 
     /* Make inputs more touch-friendly */

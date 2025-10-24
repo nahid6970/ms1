@@ -1637,6 +1637,56 @@ async function addSheet() {
     }
 }
 
+async function moveSheetUp(index) {
+    if (index <= 0) {
+        showToast('Sheet is already at the top', 'info');
+        return;
+    }
+
+    // Swap sheets
+    const temp = tableData.sheets[index];
+    tableData.sheets[index] = tableData.sheets[index - 1];
+    tableData.sheets[index - 1] = temp;
+
+    // Update current sheet index if needed
+    if (currentSheet === index) {
+        currentSheet = index - 1;
+    } else if (currentSheet === index - 1) {
+        currentSheet = index;
+    }
+
+    // Save and re-render
+    await saveData();
+    renderSheetTabs();
+    renderTable();
+    showToast('Sheet moved up', 'success');
+}
+
+async function moveSheetDown(index) {
+    if (index >= tableData.sheets.length - 1) {
+        showToast('Sheet is already at the bottom', 'info');
+        return;
+    }
+
+    // Swap sheets
+    const temp = tableData.sheets[index];
+    tableData.sheets[index] = tableData.sheets[index + 1];
+    tableData.sheets[index + 1] = temp;
+
+    // Update current sheet index if needed
+    if (currentSheet === index) {
+        currentSheet = index + 1;
+    } else if (currentSheet === index + 1) {
+        currentSheet = index;
+    }
+
+    // Save and re-render
+    await saveData();
+    renderSheetTabs();
+    renderTable();
+    showToast('Sheet moved down', 'success');
+}
+
 async function deleteSheet(index) {
     if (tableData.sheets.length <= 1) {
         alert('Cannot delete the last sheet!');
