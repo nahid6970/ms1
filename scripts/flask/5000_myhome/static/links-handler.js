@@ -2628,6 +2628,37 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
+  // Helper function to convert local file paths to file:// URLs
+  function normalizeUrl(url) {
+    if (!url) return url;
+    
+    // Check if it's a Windows file path first (before checking for protocols)
+    // Windows: C:\path\to\file or C:/path/to/file
+    const isWindowsPath = /^[a-zA-Z]:[\\\/]/.test(url);
+    
+    if (isWindowsPath) {
+      // Convert backslashes to forward slashes
+      let filePath = url.replace(/\\/g, '/');
+      // For Windows paths, ensure proper format: file:///C:/path
+      return 'file:///' + filePath;
+    }
+    
+    // Check for Unix file paths
+    const isUnixPath = /^\/[^\/]/.test(url);
+    if (isUnixPath) {
+      // For Unix paths: file:///path
+      return 'file://' + url;
+    }
+    
+    // If already a proper URL (http, https, file, etc.), return as-is
+    if (/^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(url)) {
+      return url;
+    }
+    
+    // Return as-is if we can't determine the type
+    return url;
+  }
+
   // Handle link clicks with multiple URLs
   function handleLinkClick(event, link) {
     event.preventDefault();
@@ -2657,7 +2688,24 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     
     if (urlToOpen) {
-      window.open(urlToOpen, '_blank');
+      // Normalize the URL (convert file paths to file:// URLs)
+      urlToOpen = normalizeUrl(urlToOpen);
+      
+      // Try to open the URL - use different methods for file:// URLs
+      if (urlToOpen.startsWith('file://')) {
+        // For file:// URLs, create a temporary link and click it
+        // This sometimes bypasses browser security restrictions
+        const tempLink = document.createElement('a');
+        tempLink.href = urlToOpen;
+        tempLink.target = '_blank';
+        tempLink.style.display = 'none';
+        document.body.appendChild(tempLink);
+        tempLink.click();
+        document.body.removeChild(tempLink);
+      } else {
+        // For regular URLs, use window.open
+        window.open(urlToOpen, '_blank');
+      }
     }
   }
 
