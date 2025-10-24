@@ -621,7 +621,7 @@ def generate_static_html(data):
     </style>
     <script>
         let currentSheet = ''' + str(active_sheet) + ''';
-        let currentCategory = null; // null means "All Sheets"
+        let currentCategory = null; // null means "Uncategorized"
         let tableData = ''' + json.dumps(data) + ''';
 
         function initializeCategories() {
@@ -642,28 +642,43 @@ def generate_static_html(data):
             initializeCategories();
             
             const currentCategoryNameEl = document.getElementById('currentCategoryName');
-            currentCategoryNameEl.textContent = currentCategory || 'All Sheets';
+            currentCategoryNameEl.textContent = currentCategory || 'Uncategorized';
             
             const categoryList = document.getElementById('categoryList');
             categoryList.innerHTML = '';
             
-            // Add "All Sheets" option
+            // Add "Uncategorized" option
+            const uncategorizedCount = tableData.sheets.filter((sheet, index) => {
+                return !tableData.sheetCategories[index] && !tableData.sheetCategories[String(index)];
+            }).length;
+            
             const allItem = document.createElement('div');
             allItem.className = `category-item ${currentCategory === null ? 'active' : ''}`;
             
             const allName = document.createElement('span');
             allName.className = 'category-item-name';
-            allName.textContent = 'All Sheets';
+            allName.textContent = 'Uncategorized';
             allName.onclick = () => {
                 currentCategory = null;
+                
+                // Switch to first uncategorized sheet
+                const firstUncategorized = tableData.sheets.findIndex((sheet, index) => {
+                    return !tableData.sheetCategories[index] && !tableData.sheetCategories[String(index)];
+                });
+                
+                if (firstUncategorized !== -1) {
+                    currentSheet = firstUncategorized;
+                }
+                
                 renderCategoryTabs();
                 renderSheetTabs();
+                renderTable();
                 toggleCategoryList();
             };
             
             const allCount = document.createElement('span');
             allCount.className = 'category-item-count';
-            allCount.textContent = tableData.sheets.length;
+            allCount.textContent = uncategorizedCount;
             
             allItem.appendChild(allName);
             allItem.appendChild(allCount);
@@ -745,10 +760,8 @@ def generate_static_html(data):
                 nameSpan.className = 'sheet-item-name';
                 nameSpan.textContent = sheet.name;
                 
-                // Show category badge if viewing "All Sheets"
-                if (currentCategory === null && sheetCategory) {
-                    nameSpan.textContent += ` [${sheetCategory}]`;
-                }
+                // Don't show sheets with categories when viewing "Uncategorized"
+                // (They're already filtered out above)
                 
                 nameSpan.onclick = () => {
                     switchSheet(index);
@@ -1073,7 +1086,7 @@ def generate_static_html(data):
             <div class="category-controls">
                 <div class="category-selector">
                     <button class="category-current" id="currentCategoryBtn" onclick="toggleCategoryList()">
-                        <span id="currentCategoryName">All Sheets</span>
+                        <span id="currentCategoryName">Uncategorized</span>
                         <span class="dropdown-arrow">▼</span>
                     </button>
                     <div class="category-list" id="categoryList"></div>

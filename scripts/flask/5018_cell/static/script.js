@@ -1,6 +1,6 @@
 let tableData = { sheets: [], activeSheet: 0, categories: [], sheetCategories: {} };
 let currentSheet = 0;
-let currentCategory = null; // null means "All Sheets"
+let currentCategory = null; // null means "Uncategorized"
 let contextMenuCell = null;
 let selectedCells = []; // Array of {row, col, td} objects for multi-cell operations
 let isSelecting = false;
@@ -1903,8 +1903,15 @@ function renderSheetTabs() {
     sheetList.innerHTML = '';
 
     tableData.sheets.forEach((sheet, index) => {
-        // Filter by category
-        const sheetCategory = tableData.sheetCategories[index] || null;
+        // Filter by category - handle both string and numeric keys
+        const sheetCategory = tableData.sheetCategories[index] || tableData.sheetCategories[String(index)] || null;
+        
+        // When viewing "Uncategorized", only show sheets without a category
+        if (currentCategory === null && sheetCategory) {
+            return; // Skip sheets that have a category
+        }
+        
+        // When viewing a specific category, only show sheets in that category
         if (currentCategory !== null && sheetCategory !== currentCategory) {
             return; // Skip sheets not in current category
         }
@@ -1915,11 +1922,6 @@ function renderSheetTabs() {
         const nameSpan = document.createElement('span');
         nameSpan.className = 'sheet-item-name';
         nameSpan.textContent = sheet.name;
-
-        // Show category badge if viewing "All Sheets"
-        if (currentCategory === null && sheetCategory) {
-            nameSpan.textContent += ` [${sheetCategory}]`;
-        }
 
         nameSpan.onclick = () => {
             switchSheet(index);
@@ -2035,29 +2037,43 @@ function renderCategoryTabs() {
     initializeCategories();
 
     const currentCategoryNameEl = document.getElementById('currentCategoryName');
-    currentCategoryNameEl.textContent = currentCategory || 'All Sheets';
+    currentCategoryNameEl.textContent = currentCategory || 'Uncategorized';
 
     const categoryList = document.getElementById('categoryList');
     categoryList.innerHTML = '';
 
-    // Add "All Sheets" option
+    // Add "Uncategorized" option
+    const uncategorizedCount = tableData.sheets.filter((sheet, index) => {
+        return !tableData.sheetCategories[index] && !tableData.sheetCategories[String(index)];
+    }).length;
+
     const allItem = document.createElement('div');
     allItem.className = `category-item ${currentCategory === null ? 'active' : ''}`;
 
     const allName = document.createElement('span');
     allName.className = 'category-item-name';
-    allName.textContent = 'All Sheets';
+    allName.textContent = 'Uncategorized';
     allName.onclick = () => {
         currentCategory = null;
+
+        // Switch to first uncategorized sheet
+        const firstUncategorized = tableData.sheets.findIndex((sheet, index) => {
+            return !tableData.sheetCategories[index] && !tableData.sheetCategories[String(index)];
+        });
+
+        if (firstUncategorized !== -1) {
+            currentSheet = firstUncategorized;
+        }
+
         renderCategoryTabs();
         renderSheetTabs();
+        renderTable();
         toggleCategoryList();
-        // Keep current sheet when switching to "All Sheets"
     };
 
     const allCount = document.createElement('span');
     allCount.className = 'category-item-count';
-    allCount.textContent = tableData.sheets.length;
+    allCount.textContent = uncategorizedCount;
 
     allItem.appendChild(allName);
     allItem.appendChild(allCount);
