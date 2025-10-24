@@ -103,7 +103,7 @@ function handleKeyboardShortcuts(e) {
         e.preventDefault();
 
         // Blur the currently focused element to trigger onchange
-        if (document.activeElement && document.activeElement.tagName === 'INPUT') {
+        if (document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA')) {
             document.activeElement.blur();
         }
 
@@ -111,6 +111,20 @@ function handleKeyboardShortcuts(e) {
         setTimeout(() => {
             saveData();
         }, 50);
+    }
+
+    // Handle Enter key in textareas when wrap is enabled
+    if (e.key === 'Enter' && document.activeElement.tagName === 'TEXTAREA') {
+        const textarea = document.activeElement;
+        // Check if it's not a merged cell textarea (those already handle Enter properly)
+        if (!textarea.closest('td.merged-cell')) {
+            // Allow Enter to create new line in wrapped cells
+            // The default behavior is what we want, so we don't prevent it
+            // Just trigger auto-resize after a short delay
+            setTimeout(() => {
+                autoResizeTextarea(textarea);
+            }, 10);
+        }
     }
 }
 
@@ -1776,7 +1790,8 @@ function toggleRowWrap() {
         const inputs = table.querySelectorAll('td input:not([type="date"]):not([type="email"])');
         inputs.forEach(input => {
             const textarea = document.createElement('textarea');
-            textarea.value = input.value;
+            // Use stored original value if available (preserves newlines), otherwise use current value
+            textarea.value = input.dataset.originalValue || input.value || '';
             textarea.style.cssText = input.style.cssText;
             textarea.className = input.className;
             textarea.rows = 1;
@@ -1793,6 +1808,9 @@ function toggleRowWrap() {
                     updateCell(rowIndex, colIndex, e.target.value);
                 };
                 textarea.oncontextmenu = (e) => showCellContextMenu(e, rowIndex, colIndex, textarea, td);
+
+                // Enter key creates new line (default textarea behavior)
+                // No need to prevent default - textareas naturally support multi-line
 
                 // Mouse events for cell selection
                 textarea.onmousedown = (e) => {
@@ -1828,9 +1846,13 @@ function toggleRowWrap() {
 
             const input = document.createElement('input');
             input.type = 'text';
-            input.value = textarea.value;
+            // Preserve the value - inputs will show newlines as spaces but data is preserved
+            input.value = textarea.value || '';
             input.style.cssText = textarea.style.cssText;
             input.className = textarea.className;
+
+            // Store original value with newlines in dataset for later restoration
+            input.dataset.originalValue = textarea.value;
 
             // Get row and col from parent td
             const td = textarea.closest('td');
@@ -2081,11 +2103,14 @@ function renderTable() {
             const isTextType = col.type === 'text' || !col.type;
 
             let inputElement;
+            const cellValue = row[colIndex] || '';
+
             if (wrapEnabled && isTextType) {
                 // Create textarea for wrapping
                 inputElement = document.createElement('textarea');
                 inputElement.rows = 1;
-                inputElement.value = row[colIndex] || '';
+                // Preserve newlines in the value
+                inputElement.value = cellValue;
                 inputElement.style.color = col.textColor || '#000000';
 
                 if (col.font && col.font !== '') {
@@ -2104,14 +2129,20 @@ function renderTable() {
                 // Create regular input
                 inputElement = document.createElement('input');
                 inputElement.type = col.type;
-                inputElement.value = row[colIndex] || '';
+                // Store the original value (with newlines) in dataset for later restoration
+                inputElement.value = cellValue;
+                inputElement.dataset.originalValue = cellValue;
                 inputElement.style.color = col.textColor || '#000000';
 
                 if (col.font && col.font !== '') {
                     inputElement.style.fontFamily = `'${col.font}', monospace`;
                 }
 
-                inputElement.onchange = (e) => updateCell(rowIndex, colIndex, e.target.value);
+                inputElement.onchange = (e) => {
+                    updateCell(rowIndex, colIndex, e.target.value);
+                    // Update the stored original value
+                    e.target.dataset.originalValue = e.target.value;
+                };
             }
 
             const input = inputElement;
