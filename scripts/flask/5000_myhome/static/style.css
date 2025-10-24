@@ -1215,27 +1215,29 @@ a.add-button.custom-sidebar-button[style*="background-color"] {
   #add-link-popup .Menu,
   #edit-link-popup .Menu {
     flex-direction: column !important;
-    width: 95vw;
-    max-width: 95vw;
-    max-height: 95vh;
-    padding: 15px;
+    width: calc(100vw - 20px) !important;
+    max-width: calc(100vw - 20px) !important;
+    max-height: calc(100vh - 20px) !important;
+    padding: 10px !important;
+    margin: 10px !important;
   }
 
   /* Close button stays absolute positioned on mobile too */
   #add-link-popup .close-button,
   #edit-link-popup .close-button {
     position: absolute;
-    top: 0;
-    right: 0;
-    margin: 15px;
+    top: 5px;
+    right: 5px;
+    margin: 0;
   }
 
   /* Make form fields full width on mobile */
   .popup-container input[type="text"],
   .popup-container input[type="url"],
   .popup-container textarea {
-    width: 100%;
-    min-width: auto;
+    width: 100% !important;
+    min-width: auto !important;
+    box-sizing: border-box;
   }
 
   /* Stack name and group fields on mobile */
@@ -1271,17 +1273,48 @@ a.add-button.custom-sidebar-button[style*="background-color"] {
   .form-panel,
   .note-panel {
     width: 100% !important;
+    max-width: 100% !important;
     margin-right: 0 !important;
+    margin-left: 0 !important;
     margin-bottom: 20px;
+    box-sizing: border-box;
+  }
+
+  /* Override inline styles for form panels on mobile */
+  #add-link-popup .form-panel,
+  #edit-link-popup .form-panel {
+    width: 100% !important;
+    margin-right: 0 !important;
+  }
+
+  /* Stack Click Action and Type sections vertically on mobile */
+  #add-link-form > div[style*="gap: 20px"],
+  #edit-link-form > div[style*="gap: 20px"] {
+    flex-direction: column !important;
+    gap: 15px !important;
+  }
+
+  /* Make radio button sections full width on mobile */
+  #add-link-form > div[style*="gap: 20px"] > div,
+  #edit-link-form > div[style*="gap: 20px"] > div {
+    width: 100% !important;
+  }
+
+  /* Ensure all form divs with flex are full width */
+  #add-link-form > div[style*="display: flex"],
+  #edit-link-form > div[style*="display: flex"] {
+    width: 100% !important;
+    box-sizing: border-box;
   }
 
   /* Adjust popup positioning for mobile */
   .Menu,
   .group_type_box.expanded {
-    width: 95vw;
-    max-width: 95vw;
-    max-height: 95vh;
-    padding: 15px;
+    width: calc(100vw - 20px) !important;
+    max-width: calc(100vw - 20px) !important;
+    max-height: calc(100vh - 20px) !important;
+    padding: 10px !important;
+    box-sizing: border-box;
   }
 
   html,
