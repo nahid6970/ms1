@@ -2180,10 +2180,61 @@ function renderCategoryTabs() {
         countSpan.className = 'category-item-count';
         countSpan.textContent = count;
 
+        const deleteBtn = document.createElement('span');
+        deleteBtn.className = 'category-delete-btn';
+        deleteBtn.textContent = '×';
+        deleteBtn.title = 'Delete category';
+        deleteBtn.onclick = (e) => {
+            e.stopPropagation();
+            deleteCategory(category);
+        };
+
         item.appendChild(nameSpan);
         item.appendChild(countSpan);
+        item.appendChild(deleteBtn);
         categoryList.appendChild(item);
     });
+}
+
+async function deleteCategory(categoryName) {
+    const count = Object.values(tableData.sheetCategories).filter(c => c === categoryName).length;
+
+    if (!confirm(`Delete category "${categoryName}"?\n\n${count} sheet(s) will be moved to Uncategorized.`)) {
+        return;
+    }
+
+    // Remove category from list
+    const categoryIndex = tableData.categories.indexOf(categoryName);
+    if (categoryIndex > -1) {
+        tableData.categories.splice(categoryIndex, 1);
+    }
+
+    // Move all sheets in this category to uncategorized
+    Object.keys(tableData.sheetCategories).forEach(key => {
+        if (tableData.sheetCategories[key] === categoryName) {
+            delete tableData.sheetCategories[key];
+        }
+    });
+
+    // If we're currently viewing this category, switch to Uncategorized
+    if (currentCategory === categoryName) {
+        currentCategory = null;
+
+        // Switch to first uncategorized sheet
+        const firstUncategorized = tableData.sheets.findIndex((sheet, index) => {
+            return !tableData.sheetCategories[index] && !tableData.sheetCategories[String(index)];
+        });
+
+        if (firstUncategorized !== -1) {
+            currentSheet = firstUncategorized;
+        }
+    }
+
+    await saveData();
+    renderCategoryTabs();
+    renderSheetTabs();
+    renderTable();
+    showToast(`Category "${categoryName}" deleted`, 'success');
 }
 
 function searchTable() {
