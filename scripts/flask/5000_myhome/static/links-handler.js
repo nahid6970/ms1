@@ -206,8 +206,12 @@ document.addEventListener('DOMContentLoaded', function () {
               openNotePreview(encodeURIComponent(link.note || ''));
             });
           } else {
-            simpleLink.href = link.url;
-            simpleLink.target = '_blank';
+            // Handle multiple URLs
+            simpleLink.href = '#';
+            simpleLink.addEventListener('click', (e) => {
+              e.preventDefault();
+              handleLinkClick(e, link);
+            });
           }
 
           if (link.name && link.name.trim() !== '') {
@@ -2309,10 +2313,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
       const groupName = document.getElementById('link-group').value || 'Ungrouped';
 
+      // Get all URLs and selected URL index
+      const allUrls = getAllUrls(false);
+      const selectedUrlIndex = getSelectedUrlIndex(false);
+      const selectedClickAction = document.querySelector('input[name="link-click-action"]:checked').value;
+
       const newLink = {
         name: document.getElementById('link-name').value,
         group: document.getElementById('link-group').value || undefined,
-        url: document.getElementById('link-url').value,
+        url: allUrls.length > 0 ? allUrls[0] : document.getElementById('link-url').value, // Primary URL for backward compatibility
+        urls: allUrls.length > 1 ? allUrls : undefined, // Store all URLs if multiple
+        selected_url_index: allUrls.length > 1 ? selectedUrlIndex : undefined,
         icon_class: document.getElementById('link-icon-class').value || undefined,
         color: document.getElementById('link-color').value || undefined,
         img_src: document.getElementById('link-img-src').value || undefined,
@@ -2327,7 +2338,7 @@ document.addEventListener('DOMContentLoaded', function () {
         font_size: document.getElementById('link-font-size').value || undefined,
         title: document.getElementById('link-title').value || undefined,
         note: document.getElementById('link-note').value || undefined,
-        click_action: document.querySelector('input[name="link-click-action"]:checked').value || 'url',
+        click_action: selectedClickAction,
         li_width: document.getElementById('link-li-width').value || undefined,
         li_height: document.getElementById('link-li-height').value || undefined,
         li_bg_color: document.getElementById('link-li-bg-color').value || undefined,
@@ -2435,11 +2446,223 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 
+  // Multiple URL functionality
+  function addUrlField() {
+    const container = document.getElementById('urls-container');
+    const urlCount = container.querySelectorAll('.url-input-group').length;
+    const newIndex = urlCount + 1;
+    
+    const urlGroup = document.createElement('div');
+    urlGroup.className = 'url-input-group';
+    urlGroup.style.cssText = 'display: flex; gap: 5px; align-items: center; margin-bottom: 5px;';
+    
+    urlGroup.innerHTML = `
+      <input type="url" id="link-url-${newIndex}" placeholder="URL ${newIndex}" style="flex: 1;">
+      <button type="button" onclick="removeUrlField(this)" style="background: #f44336; color: white; border: none; border-radius: 3px; padding: 5px 8px; cursor: pointer; font-size: 14px;" title="Remove URL">−</button>
+    `;
+    
+    container.appendChild(urlGroup);
+    updateClickActionOptions();
+  }
+
+  function addEditUrlField() {
+    const container = document.getElementById('edit-urls-container');
+    const urlCount = container.querySelectorAll('.url-input-group').length;
+    const newIndex = urlCount + 1;
+    
+    const urlGroup = document.createElement('div');
+    urlGroup.className = 'url-input-group';
+    urlGroup.style.cssText = 'display: flex; gap: 5px; align-items: center; margin-bottom: 5px;';
+    
+    urlGroup.innerHTML = `
+      <input type="url" id="edit-link-url-${newIndex}" placeholder="URL ${newIndex}" style="flex: 1;">
+      <button type="button" onclick="removeUrlField(this)" style="background: #f44336; color: white; border: none; border-radius: 3px; padding: 5px 8px; cursor: pointer; font-size: 14px;" title="Remove URL">−</button>
+    `;
+    
+    container.appendChild(urlGroup);
+    updateEditClickActionOptions();
+  }
+
+  function removeUrlField(button) {
+    const urlGroup = button.parentElement;
+    const container = urlGroup.parentElement;
+    
+    // Don't remove if it's the only URL field
+    if (container.querySelectorAll('.url-input-group').length > 1) {
+      urlGroup.remove();
+      
+      // Update click action options
+      if (container.id === 'urls-container') {
+        updateClickActionOptions();
+      } else {
+        updateEditClickActionOptions();
+      }
+    }
+  }
+
+  function updateClickActionOptions() {
+    const container = document.getElementById('urls-container');
+    const urlGroups = container.querySelectorAll('.url-input-group');
+    const optionsContainer = document.getElementById('click-action-options');
+    
+    // Clear existing URL options
+    const existingUrlOptions = optionsContainer.querySelectorAll('label:not([data-type="note"])');
+    existingUrlOptions.forEach(option => option.remove());
+    
+    // Add URL options for each URL field
+    urlGroups.forEach((group, index) => {
+      const label = document.createElement('label');
+      label.style.cssText = 'display: flex; align-items: center; gap: 5px;';
+      label.innerHTML = `
+        <input type="radio" name="link-click-action" id="link-action-url-${index + 1}" value="url-${index + 1}" ${index === 0 ? 'checked' : ''}>
+        Open URL${index + 1}
+      `;
+      
+      // Insert before the note option
+      const noteOption = optionsContainer.querySelector('[data-type="note"]') || optionsContainer.lastElementChild;
+      optionsContainer.insertBefore(label, noteOption);
+    });
+  }
+
+  function updateEditClickActionOptions() {
+    const container = document.getElementById('edit-urls-container');
+    const urlGroups = container.querySelectorAll('.url-input-group');
+    const optionsContainer = document.getElementById('edit-click-action-options');
+    
+    // Clear existing URL options
+    const existingUrlOptions = optionsContainer.querySelectorAll('label:not([data-type="note"])');
+    existingUrlOptions.forEach(option => option.remove());
+    
+    // Add URL options for each URL field
+    urlGroups.forEach((group, index) => {
+      const label = document.createElement('label');
+      label.style.cssText = 'display: flex; align-items: center; gap: 5px;';
+      label.innerHTML = `
+        <input type="radio" name="edit-link-click-action" id="edit-link-action-url-${index + 1}" value="url-${index + 1}" ${index === 0 ? 'checked' : ''}>
+        Open URL${index + 1}
+      `;
+      
+      // Insert before the note option
+      const noteOption = optionsContainer.querySelector('[data-type="note"]') || optionsContainer.lastElementChild;
+      optionsContainer.insertBefore(label, noteOption);
+    });
+  }
+
+  function getAllUrls(isEdit = false) {
+    const prefix = isEdit ? 'edit-' : '';
+    const container = document.getElementById(`${prefix}urls-container`);
+    const urlInputs = container.querySelectorAll('input[type="url"]');
+    const urls = [];
+    
+    urlInputs.forEach(input => {
+      if (input.value.trim()) {
+        urls.push(input.value.trim());
+      }
+    });
+    
+    return urls;
+  }
+
+  function getSelectedUrlIndex(isEdit = false) {
+    const prefix = isEdit ? 'edit-' : '';
+    const actionName = `${prefix}link-click-action`;
+    const selectedAction = document.querySelector(`input[name="${actionName}"]:checked`);
+    
+    if (selectedAction && selectedAction.value.startsWith('url')) {
+      const match = selectedAction.value.match(/url-?(\d+)?/);
+      return match ? (parseInt(match[1]) || 1) - 1 : 0;
+    }
+    
+    return 0;
+  }
+
+  function populateEditUrlFields(link) {
+    const container = document.getElementById('edit-urls-container');
+    
+    if (!container) {
+      console.error('edit-urls-container not found');
+      return;
+    }
+    
+    // Clear existing URL fields
+    container.innerHTML = '';
+    
+    // Get URLs (either from urls array or single url)
+    const urls = link.urls || [link.url || ''];
+    const selectedIndex = link.selected_url_index || 0;
+    
+    // Create URL fields
+    urls.forEach((url, index) => {
+      const urlGroup = document.createElement('div');
+      urlGroup.className = 'url-input-group';
+      urlGroup.style.cssText = 'display: flex; gap: 5px; align-items: center; margin-bottom: 5px;';
+      
+      if (index === 0) {
+        // First URL field (main one)
+        urlGroup.innerHTML = `
+          <input type="url" id="edit-link-url" placeholder="URL" style="flex: 1;" value="${url}">
+          <button type="button" class="add-url-btn" onclick="addEditUrlField()" style="background: #4CAF50; color: white; border: none; border-radius: 3px; padding: 5px 8px; cursor: pointer; font-size: 16px;" title="Add another URL">+</button>
+        `;
+      } else {
+        // Additional URL fields
+        urlGroup.innerHTML = `
+          <input type="url" id="edit-link-url-${index + 1}" placeholder="URL ${index + 1}" style="flex: 1;" value="${url}">
+          <button type="button" onclick="removeUrlField(this)" style="background: #f44336; color: white; border: none; border-radius: 3px; padding: 5px 8px; cursor: pointer; font-size: 14px;" title="Remove URL">−</button>
+        `;
+      }
+      
+      container.appendChild(urlGroup);
+    });
+    
+    // Update click action options
+    updateEditClickActionOptions();
+    
+    // Set the selected click action
+    if (link.click_action && link.click_action.startsWith('url')) {
+      const actionElement = document.querySelector(`input[name="edit-link-click-action"][value="${link.click_action}"]`);
+      if (actionElement) {
+        actionElement.checked = true;
+      }
+    } else if (link.click_action === 'note') {
+      document.getElementById('edit-link-action-note').checked = true;
+    }
+  }
+
+  // Handle link clicks with multiple URLs
+  function handleLinkClick(event, link) {
+    event.preventDefault();
+    
+    if (link.click_action === 'note' && link.note) {
+      // Open note
+      openNotePreview(link.note);
+      return;
+    }
+    
+    // Handle URL clicks
+    let urlToOpen = link.url; // Default to primary URL
+    
+    if (link.urls && link.urls.length > 1) {
+      // Multiple URLs - use selected index
+      const selectedIndex = link.selected_url_index || 0;
+      urlToOpen = link.urls[selectedIndex] || link.urls[0];
+    }
+    
+    if (urlToOpen) {
+      window.open(urlToOpen, '_blank');
+    }
+  }
+
+  // Make functions globally available
+  window.addUrlField = addUrlField;
+  window.addEditUrlField = addEditUrlField;
+  window.removeUrlField = removeUrlField;
+
   function openEditLinkPopup(link, index) {
     editLinkIndexInput.value = index;
     document.getElementById('edit-link-name').value = link.name || '';
     document.getElementById('edit-link-group').value = link.group || '';
-    document.getElementById('edit-link-url').value = link.url || '';
+    // Handle multiple URLs
+    populateEditUrlFields(link);
     document.getElementById('edit-link-icon-class').value = link.icon_class || '';
     document.getElementById('edit-link-color').value = link.color || '';
     document.getElementById('edit-link-img-src').value = link.img_src || '';
@@ -2464,13 +2687,7 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('edit-link-title').value = link.title || '';
     document.getElementById('edit-link-note').value = link.note || '';
 
-    // Set click action radio buttons
-    const clickAction = link.click_action || 'url';
-    if (clickAction === 'note') {
-      document.getElementById('edit-link-action-note').checked = true;
-    } else {
-      document.getElementById('edit-link-action-url').checked = true;
-    }
+    // Click action is already set by populateEditUrlFields, no need to set it again here
 
     document.getElementById('edit-link-font-family').value = link.font_family || '';
     document.getElementById('edit-link-font-size').value = link.font_size || '';
@@ -2495,10 +2712,17 @@ document.addEventListener('DOMContentLoaded', function () {
         const originalGroupName = originalLink.group || 'Ungrouped';
         const newGroupName = document.getElementById('edit-link-group').value || 'Ungrouped';
 
+        // Get all URLs and selected URL index for edit form
+        const allUrls = getAllUrls(true);
+        const selectedUrlIndex = getSelectedUrlIndex(true);
+        const selectedClickAction = document.querySelector('input[name="edit-link-click-action"]:checked').value;
+
         const updatedLink = {
           name: document.getElementById('edit-link-name').value,
           group: document.getElementById('edit-link-group').value || undefined,
-          url: document.getElementById('edit-link-url').value,
+          url: allUrls.length > 0 ? allUrls[0] : document.getElementById('edit-link-url').value, // Primary URL for backward compatibility
+          urls: allUrls.length > 1 ? allUrls : undefined, // Store all URLs if multiple
+          selected_url_index: allUrls.length > 1 ? selectedUrlIndex : undefined,
           icon_class: document.getElementById('edit-link-icon-class').value || undefined,
           color: document.getElementById('edit-link-color').value || undefined,
           img_src: document.getElementById('edit-link-img-src').value || undefined,
@@ -2511,7 +2735,7 @@ document.addEventListener('DOMContentLoaded', function () {
           border_radius: document.getElementById('edit-link-border-radius').value || undefined,
           title: document.getElementById('edit-link-title').value || undefined,
           note: document.getElementById('edit-link-note').value || undefined,
-          click_action: document.querySelector('input[name="edit-link-click-action"]:checked').value || 'url',
+          click_action: selectedClickAction,
           font_family: document.getElementById('edit-link-font-family').value || undefined,
           font_size: document.getElementById('edit-link-font-size').value || undefined,
           li_width: document.getElementById('edit-link-li-width').value || undefined,

@@ -407,18 +407,27 @@
               <input type="text" id="link-name" placeholder="Name" style="flex: 1;">
               <input type="text" id="link-group" placeholder="Group (optional)" style="flex: 1;">
             </div>
-            <input type="url" id="link-url" placeholder="URL">
+            <div id="urls-container">
+              <div class="url-input-group" style="display: flex; gap: 5px; align-items: center; margin-bottom: 5px;">
+                <input type="url" id="link-url" placeholder="URL" style="flex: 1;">
+                <button type="button" class="add-url-btn" onclick="addUrlField()"
+                  style="background: #4CAF50; color: white; border: none; border-radius: 3px; padding: 5px 8px; cursor: pointer; font-size: 16px;"
+                  title="Add another URL">+</button>
+              </div>
+            </div>
 
             <div style="display: flex; gap: 20px; align-items: center; margin: 10px 0;">
               <label style="font-weight: 500;">Click Action:</label>
-              <label style="display: flex; align-items: center; gap: 5px;">
-                <input type="radio" name="link-click-action" id="link-action-url" value="url" checked>
-                Open URL
-              </label>
-              <label style="display: flex; align-items: center; gap: 5px;">
+              <div id="click-action-options">
+                <label style="display: flex; align-items: center; gap: 5px;">
+                  <input type="radio" name="link-click-action" id="link-action-url" value="url" checked>
+                  Open URL1
+                </label>
+                <label style="display: flex; align-items: center; gap: 5px;" data-type="note"></label>
                 <input type="radio" name="link-click-action" id="link-action-note" value="note">
                 Open Note
-              </label>
+                </label>
+              </div>
             </div>
 
             <div style="display: flex; gap: 20px; align-items: center; margin: 10px 0;">
@@ -510,18 +519,27 @@
               <input type="text" id="edit-link-name" placeholder="Name" style="flex: 1;">
               <input type="text" id="edit-link-group" placeholder="Group (optional)" style="flex: 1;">
             </div>
-            <input type="url" id="edit-link-url" placeholder="URL">
+            <div id="edit-urls-container">
+              <div class="url-input-group" style="display: flex; gap: 5px; align-items: center; margin-bottom: 5px;">
+                <input type="url" id="edit-link-url" placeholder="URL" style="flex: 1;">
+                <button type="button" class="add-url-btn" onclick="addEditUrlField()"
+                  style="background: #4CAF50; color: white; border: none; border-radius: 3px; padding: 5px 8px; cursor: pointer; font-size: 16px;"
+                  title="Add another URL">+</button>
+              </div>
+            </div>
 
             <div style="display: flex; gap: 20px; align-items: center; margin: 10px 0;">
               <label style="font-weight: 500;">Click Action:</label>
-              <label style="display: flex; align-items: center; gap: 5px;">
-                <input type="radio" name="edit-link-click-action" id="edit-link-action-url" value="url" checked>
-                Open URL
-              </label>
-              <label style="display: flex; align-items: center; gap: 5px;">
+              <div id="edit-click-action-options">
+                <label style="display: flex; align-items: center; gap: 5px;">
+                  <input type="radio" name="edit-link-click-action" id="edit-link-action-url" value="url" checked>
+                  Open URL1
+                </label>
+                <label style="display: flex; align-items: center; gap: 5px;" data-type="note"></label>
                 <input type="radio" name="edit-link-click-action" id="edit-link-action-note" value="note">
                 Open Note
-              </label>
+                </label>
+              </div>
             </div>
 
             <div style="display: flex; gap: 20px; align-items: center; margin: 10px 0;">
