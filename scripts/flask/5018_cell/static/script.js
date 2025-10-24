@@ -2880,7 +2880,17 @@ function renderTable() {
     // Apply markdown formatting to all cells
     sheet.rows.forEach((row, rowIndex) => {
         row.forEach((cellValue, colIndex) => {
-            if (cellValue && (cellValue.includes('**') || cellValue.includes('\n- ') || cellValue.trim().startsWith('- '))) {
+            if (cellValue && (
+                cellValue.includes('**') ||
+                cellValue.includes('__') ||
+                cellValue.includes('##') ||
+                cellValue.includes('```') ||
+                cellValue.includes('`') ||
+                cellValue.includes('~~') ||
+                cellValue.includes('==') ||
+                cellValue.includes('\n- ') ||
+                cellValue.trim().startsWith('- ')
+            )) {
                 applyMarkdownFormatting(rowIndex, colIndex, cellValue);
             }
         });
