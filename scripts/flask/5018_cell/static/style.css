@@ -346,7 +346,9 @@ td {
     word-wrap: break-word;
     font-family: inherit;
     line-height: 1.4;
-    min-height: 24px;
+    min-height: 22px;
+    height: 22px; /* Match input height exactly */
+    vertical-align: middle;
 }
 
 .wrap-enabled td textarea:not(.merged-cell textarea):focus {
@@ -354,13 +356,33 @@ td {
     background: rgba(0, 123, 255, 0.1);
 }
 
+/* Default row height when wrap is enabled - keep same as normal */
 .wrap-enabled tr {
+    height: 40px;
+}
+
+/* Only expand rows that actually have wrapped content */
+.wrap-enabled tr.has-wrapped-content {
     height: auto !important;
 }
 
 /* Keep row numbers centered vertically */
 .wrap-enabled .row-number {
     vertical-align: middle;
+}
+
+/* For rows without wrapped content, keep textareas at exact input height */
+.wrap-enabled tr:not(.has-wrapped-content) td textarea {
+    height: 22px !important;
+    min-height: 22px !important;
+    overflow: hidden;
+    line-height: 1.2;
+}
+
+/* Ensure cells without wrapped content don't expand */
+.wrap-enabled tr:not(.has-wrapped-content) td:not(.row-number) {
+    vertical-align: middle;
+    height: 40px;
 }
 
 td input:focus {

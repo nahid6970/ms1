@@ -1814,8 +1814,39 @@ function toggleRowWrap() {
 }
 
 function autoResizeTextarea(textarea) {
+    // Skip if it's a merged cell textarea
+    if (textarea.closest('td.merged-cell')) {
+        return;
+    }
+
+    // Reset height to measure actual content
     textarea.style.height = 'auto';
-    textarea.style.height = Math.max(24, textarea.scrollHeight) + 'px';
+
+    // Get the actual content height
+    const scrollHeight = textarea.scrollHeight;
+    const minHeight = 22; // Match input height exactly
+
+    // Set height based on content
+    const newHeight = Math.max(minHeight, scrollHeight);
+    textarea.style.height = newHeight + 'px';
+
+    // Mark the row if it has expanded content
+    const tr = textarea.closest('tr');
+    if (tr) {
+        // Check if any textarea in this row actually needs more height
+        const hasExpandedContent = Array.from(tr.querySelectorAll('textarea:not(.merged-cell textarea)')).some(ta => {
+            ta.style.height = 'auto';
+            const needsHeight = ta.scrollHeight > minHeight + 2; // Small threshold
+            ta.style.height = Math.max(minHeight, ta.scrollHeight) + 'px';
+            return needsHeight;
+        });
+
+        if (hasExpandedContent) {
+            tr.classList.add('has-wrapped-content');
+        } else {
+            tr.classList.remove('has-wrapped-content');
+        }
+    }
 }
 
 
