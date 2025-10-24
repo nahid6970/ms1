@@ -378,11 +378,18 @@ td {
 }
 
 /* For rows without wrapped content, keep textareas at exact input height */
-.wrap-enabled tr:not(.has-wrapped-content) td textarea {
+.wrap-enabled tr:not(.has-wrapped-content) td textarea:not(.merged-cell textarea) {
     height: 22px !important;
     min-height: 22px !important;
     overflow: hidden;
     line-height: 1.2;
+}
+
+/* Ensure merged cell textareas are not affected by wrap mode */
+.wrap-enabled td.merged-cell textarea {
+    height: 100% !important;
+    min-height: auto !important;
+    overflow: auto !important;
 }
 
 /* Ensure cells without wrapped content don't expand */

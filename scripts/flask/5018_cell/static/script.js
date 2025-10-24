@@ -2211,6 +2211,9 @@ function renderTable() {
                     td.rowSpan = mergeInfo.rowspan || 1;
                     td.classList.add('merged-cell');
 
+                    // Mark row as having wrapped content if it has merged cells
+                    tr.classList.add('has-wrapped-content');
+
                     // Use textarea for merged cells
                     const textarea = document.createElement('textarea');
                     textarea.value = row[colIndex] || '';
