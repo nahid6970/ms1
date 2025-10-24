@@ -419,13 +419,19 @@ function applyMarkdownFormatting(rowIndex, colIndex, value) {
         preview.className = 'markdown-preview';
         preview.innerHTML = formattedHTML;
 
-        // Copy styles from input
-        preview.style.color = inputElement.style.color;
-        preview.style.fontFamily = inputElement.style.fontFamily;
-        preview.style.fontSize = inputElement.style.fontSize;
-        preview.style.fontWeight = inputElement.style.fontWeight;
-        preview.style.fontStyle = inputElement.style.fontStyle;
-        preview.style.textAlign = inputElement.style.textAlign;
+        // Copy ALL styles from input/textarea and cell
+        const computedInput = window.getComputedStyle(inputElement);
+        const computedCell = window.getComputedStyle(cell);
+
+        preview.style.color = inputElement.style.color || computedInput.color;
+        preview.style.fontFamily = inputElement.style.fontFamily || computedInput.fontFamily;
+        preview.style.fontSize = inputElement.style.fontSize || computedInput.fontSize;
+        preview.style.fontWeight = inputElement.style.fontWeight || computedInput.fontWeight;
+        preview.style.fontStyle = inputElement.style.fontStyle || computedInput.fontStyle;
+        preview.style.textAlign = inputElement.style.textAlign || computedInput.textAlign;
+
+        // Copy background from cell (not input, as input is transparent)
+        preview.style.backgroundColor = computedCell.backgroundColor;
 
         cell.style.position = 'relative';
         cell.appendChild(preview);
@@ -517,6 +523,11 @@ function toggleCellBold() {
             setCellStyle(cell.row, cell.col, 'bold', newValue);
             if (cellInput) {
                 cellInput.style.fontWeight = newValue ? 'bold' : 'normal';
+                // Update markdown preview if exists
+                const preview = cell.td.querySelector('.markdown-preview');
+                if (preview) {
+                    preview.style.fontWeight = newValue ? 'bold' : 'normal';
+                }
             }
         });
         showToast(`Bold ${newValue ? 'applied' : 'removed'} for ${selectedCells.length} cells`, 'success');
@@ -524,6 +535,12 @@ function toggleCellBold() {
         // Apply to single cell
         setCellStyle(rowIndex, colIndex, 'bold', newValue);
         inputElement.style.fontWeight = newValue ? 'bold' : 'normal';
+        // Update markdown preview if exists
+        const cell = inputElement.closest('td');
+        const preview = cell ? cell.querySelector('.markdown-preview') : null;
+        if (preview) {
+            preview.style.fontWeight = newValue ? 'bold' : 'normal';
+        }
     }
 
     document.getElementById('ctxBold').classList.toggle('checked', newValue);
@@ -543,6 +560,11 @@ function toggleCellItalic() {
             setCellStyle(cell.row, cell.col, 'italic', newValue);
             if (cellInput) {
                 cellInput.style.fontStyle = newValue ? 'italic' : 'normal';
+                // Update markdown preview if exists
+                const preview = cell.td.querySelector('.markdown-preview');
+                if (preview) {
+                    preview.style.fontStyle = newValue ? 'italic' : 'normal';
+                }
             }
         });
         showToast(`Italic ${newValue ? 'applied' : 'removed'} for ${selectedCells.length} cells`, 'success');
@@ -550,6 +572,12 @@ function toggleCellItalic() {
         // Apply to single cell
         setCellStyle(rowIndex, colIndex, 'italic', newValue);
         inputElement.style.fontStyle = newValue ? 'italic' : 'normal';
+        // Update markdown preview if exists
+        const cell = inputElement.closest('td');
+        const preview = cell ? cell.querySelector('.markdown-preview') : null;
+        if (preview) {
+            preview.style.fontStyle = newValue ? 'italic' : 'normal';
+        }
     }
 
     document.getElementById('ctxItalic').classList.toggle('checked', newValue);
@@ -972,6 +1000,13 @@ function applyUnifiedColors(rowIndex, colIndex) {
                 setCellStyle(cell.row, cell.col, 'textColor', selectedTextColor);
                 cellInput.style.color = selectedTextColor;
             }
+
+            // Update markdown preview if exists
+            const preview = cellTd.querySelector('.markdown-preview');
+            if (preview) {
+                preview.style.backgroundColor = selectedBgColor;
+                preview.style.color = selectedTextColor;
+            }
         });
 
         showToast(`Colors updated for ${selectedCells.length} cells`, 'success');
@@ -986,6 +1021,13 @@ function applyUnifiedColors(rowIndex, colIndex) {
         // Apply text color
         setCellStyle(rowIndex, colIndex, 'textColor', selectedTextColor);
         inputElement.style.color = selectedTextColor;
+
+        // Update markdown preview if exists
+        const preview = tdElement.querySelector('.markdown-preview');
+        if (preview) {
+            preview.style.backgroundColor = selectedBgColor;
+            preview.style.color = selectedTextColor;
+        }
 
         showToast('Colors updated', 'success');
     }
