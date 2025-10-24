@@ -301,15 +301,45 @@ def generate_static_html(data):
         }
 
         /* Text wrapping enabled */
+        .wrap-enabled td:not(.row-number) {
+            white-space: normal;
+            overflow: visible;
+            word-wrap: break-word;
+            word-break: break-word;
+        }
+
+        /* Only apply vertical-align top to cells with wrapped content */
+        .wrap-enabled tr.has-wrapped-content td:not(.row-number) {
+            vertical-align: top;
+        }
+
         .wrap-enabled .cell-content {
             white-space: pre-wrap;
             word-wrap: break-word;
             overflow: visible;
             text-overflow: clip;
+            line-height: 1.4;
         }
 
+        /* Default row height when wrap is enabled - keep same as normal */
         .wrap-enabled tr {
-            height: auto;
+            height: 40px;
+        }
+
+        /* Only expand rows that actually have wrapped content */
+        .wrap-enabled tr.has-wrapped-content {
+            height: auto !important;
+        }
+
+        /* Keep row numbers centered vertically */
+        .wrap-enabled .row-number {
+            vertical-align: middle;
+        }
+
+        /* For rows without wrapped content, keep normal alignment */
+        .wrap-enabled tr:not(.has-wrapped-content) td:not(.row-number) {
+            vertical-align: middle;
+            height: 40px;
         }
 
         td.merged-cell {
@@ -605,9 +635,37 @@ def generate_static_html(data):
             if (wrapToggle.checked) {
                 table.classList.add('wrap-enabled');
                 localStorage.setItem('rowWrapEnabled', 'true');
+                
+                // Convert all text content to wrapped display
+                const cells = table.querySelectorAll('td:not(.row-number) .cell-content');
+                cells.forEach(cellContent => {
+                    const text = cellContent.textContent || cellContent.innerHTML;
+                    if (text && text.length > 0) {
+                        // Check if content needs wrapping (longer than typical cell width)
+                        const tempSpan = document.createElement('span');
+                        tempSpan.style.visibility = 'hidden';
+                        tempSpan.style.position = 'absolute';
+                        tempSpan.style.whiteSpace = 'nowrap';
+                        tempSpan.textContent = text;
+                        document.body.appendChild(tempSpan);
+                        
+                        const textWidth = tempSpan.offsetWidth;
+                        const cellWidth = cellContent.closest('td').offsetWidth;
+                        
+                        document.body.removeChild(tempSpan);
+                        
+                        if (textWidth > cellWidth - 20) { // 20px padding
+                            cellContent.closest('tr').classList.add('has-wrapped-content');
+                        }
+                    }
+                });
             } else {
                 table.classList.remove('wrap-enabled');
                 localStorage.setItem('rowWrapEnabled', 'false');
+                
+                // Remove wrapped content classes
+                const rows = table.querySelectorAll('tr.has-wrapped-content');
+                rows.forEach(row => row.classList.remove('has-wrapped-content'));
             }
         }
 
