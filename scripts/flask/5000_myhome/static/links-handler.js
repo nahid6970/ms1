@@ -2512,10 +2512,10 @@ document.addEventListener('DOMContentLoaded', function () {
     // Add URL options for each URL field
     urlGroups.forEach((group, index) => {
       const label = document.createElement('label');
-      label.style.cssText = 'display: flex; align-items: center; gap: 5px;';
+      label.style.cssText = 'display: flex; align-items: center; gap: 5px; justify-content: space-between;';
       label.innerHTML = `
+        <span>Open URL${index + 1}</span>
         <input type="radio" name="link-click-action" id="link-action-url-${index + 1}" value="url-${index + 1}" ${index === 0 ? 'checked' : ''}>
-        Open URL${index + 1}
       `;
       
       // Insert before the note option
@@ -2536,10 +2536,10 @@ document.addEventListener('DOMContentLoaded', function () {
     // Add URL options for each URL field
     urlGroups.forEach((group, index) => {
       const label = document.createElement('label');
-      label.style.cssText = 'display: flex; align-items: center; gap: 5px;';
+      label.style.cssText = 'display: flex; align-items: center; gap: 5px; justify-content: space-between;';
       label.innerHTML = `
+        <span>Open URL${index + 1}</span>
         <input type="radio" name="edit-link-click-action" id="edit-link-action-url-${index + 1}" value="url-${index + 1}" ${index === 0 ? 'checked' : ''}>
-        Open URL${index + 1}
       `;
       
       // Insert before the note option
