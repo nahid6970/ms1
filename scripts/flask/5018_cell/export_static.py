@@ -175,6 +175,56 @@ def generate_static_html(data):
             width: 100%;
         }
 
+        .search-box {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 8px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .search-box:focus-within {
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+        }
+
+        .search-box input {
+            border: none;
+            outline: none;
+            padding: 6px 8px;
+            font-size: 14px;
+            width: 200px;
+            background: transparent;
+        }
+
+        .btn-clear-search {
+            background: none;
+            border: none;
+            color: #999;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 0 4px;
+            line-height: 1;
+            transition: color 0.2s;
+            display: none;
+        }
+
+        .btn-clear-search:hover {
+            color: #dc3545;
+        }
+
+        .search-box input:not(:placeholder-shown) ~ .btn-clear-search {
+            display: block;
+        }
+
+        /* Search highlight */
+        .search-highlight {
+            background: rgba(255, 235, 59, 0.5) !important;
+        }
+
         .wrap-toggle {
             display: flex;
             align-items: center;
@@ -646,6 +696,16 @@ def generate_static_html(data):
             });
         }
 
+        function stripMarkdown(text) {
+            if (!text) return '';
+            let stripped = String(text);
+            // Remove bold markers: **text** -> text
+            stripped = stripped.replace(/\\*\\*(.+?)\\*\\*/g, '$1');
+            // Remove bullet markers: - item -> item
+            stripped = stripped.replace(/^\\s*-\\s+/gm, '');
+            return stripped;
+        }
+
         function parseMarkdown(text) {
             if (!text) return '';
 
@@ -666,6 +726,61 @@ def generate_static_html(data):
             });
 
             return formattedLines.join('<br>');
+        }
+
+        function searchTable() {
+            const searchInput = document.getElementById('searchInput');
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            const table = document.getElementById('dataTable');
+            const tbody = table.querySelector('tbody');
+            const rows = tbody.querySelectorAll('tr');
+
+            // Remove previous highlights
+            document.querySelectorAll('.search-highlight').forEach(el => {
+                el.classList.remove('search-highlight');
+            });
+
+            if (!searchTerm) {
+                // Show all rows if search is empty
+                rows.forEach(row => {
+                    row.style.display = '';
+                });
+                return;
+            }
+
+            let foundCount = 0;
+
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td:not(.row-number)');
+                let rowMatches = false;
+
+                cells.forEach(cell => {
+                    const cellContent = cell.querySelector('.cell-content');
+                    if (cellContent) {
+                        const cellValue = cellContent.textContent.toLowerCase();
+                        // Strip markdown for searching
+                        const strippedValue = stripMarkdown(cellValue);
+
+                        if (strippedValue.includes(searchTerm)) {
+                            rowMatches = true;
+                            cell.classList.add('search-highlight');
+                        }
+                    }
+                });
+
+                if (rowMatches) {
+                    row.style.display = '';
+                    foundCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        function clearSearch() {
+            const searchInput = document.getElementById('searchInput');
+            searchInput.value = '';
+            searchTable(); // This will show all rows and remove highlights
         }
 
         function toggleRowWrap() {
@@ -709,6 +824,24 @@ def generate_static_html(data):
             }
         }
 
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Ctrl+F or Cmd+F to focus search
+            if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+                e.preventDefault();
+                const searchInput = document.getElementById('searchInput');
+                if (searchInput) {
+                    searchInput.focus();
+                    searchInput.select();
+                }
+            }
+            
+            // Escape to clear search
+            if (e.key === 'Escape' && document.activeElement.id === 'searchInput') {
+                clearSearch();
+            }
+        });
+
         // Close dropdown when clicking outside
         document.addEventListener('click', function(event) {
             const sheetSelector = document.querySelector('.sheet-selector');
@@ -746,6 +879,11 @@ def generate_static_html(data):
                     </button>
                     <div class="sheet-list" id="sheetList"></div>
                 </div>
+            </div>
+
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Search..." onkeyup="searchTable()" title="Search in all cells">
+                <button onclick="clearSearch()" class="btn-clear-search" title="Clear search">×</button>
             </div>
 
             <label class="wrap-toggle">
