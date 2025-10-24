@@ -2632,6 +2632,10 @@ document.addEventListener('DOMContentLoaded', function () {
   function handleLinkClick(event, link) {
     event.preventDefault();
     
+    console.log('handleLinkClick called with:', link);
+    console.log('click_action:', link.click_action);
+    console.log('urls:', link.urls);
+    
     if (link.click_action === 'note' && link.note) {
       // Open note
       openNotePreview(link.note);
@@ -2642,9 +2646,20 @@ document.addEventListener('DOMContentLoaded', function () {
     let urlToOpen = link.url; // Default to primary URL
     
     if (link.urls && link.urls.length > 1) {
-      // Multiple URLs - use selected index
-      const selectedIndex = link.selected_url_index || 0;
+      // Multiple URLs - determine which one to open based on click_action
+      let selectedIndex = 0;
+      
+      if (link.click_action && link.click_action.startsWith('url-')) {
+        // Extract the URL index from click_action (e.g., "url-2" -> index 1)
+        const match = link.click_action.match(/url-(\d+)/);
+        if (match) {
+          selectedIndex = parseInt(match[1]) - 1; // Convert to 0-based index
+        }
+      }
+      
+      console.log('Selected index:', selectedIndex);
       urlToOpen = link.urls[selectedIndex] || link.urls[0];
+      console.log('URL to open:', urlToOpen);
     }
     
     if (urlToOpen) {
@@ -3089,6 +3104,24 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
+  // Add global click handler for all link items to handle multiple URLs
+  document.addEventListener('click', function(event) {
+    // Check if the clicked element is a link item or inside a link item
+    const linkItem = event.target.closest('.link-item:not(.add-link-item)');
+    
+    if (linkItem && linkItem.dataset.linkIndex !== undefined) {
+      const linkIndex = parseInt(linkItem.dataset.linkIndex);
+      const link = links[linkIndex];
+      
+      if (link && link.urls && link.urls.length > 1) {
+        // This link has multiple URLs, intercept the click
+        event.preventDefault();
+        event.stopPropagation();
+        handleLinkClick(event, link);
+      }
+    }
+  });
+
   // Initial fetch and display of links
   fetchAndDisplayLinks();
 
@@ -3485,8 +3518,16 @@ function updateDateTime() {
   const now = new Date();
   const optionsDate = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
   const optionsTime = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
-  document.getElementById('currentDate').innerText = now.toLocaleDateString('en-US', optionsDate);
-  document.getElementById('currentTime').innerText = now.toLocaleTimeString('en-US', optionsTime);
+  
+  const dateElement = document.getElementById('currentDate');
+  const timeElement = document.getElementById('currentTime');
+  
+  if (dateElement) {
+    dateElement.innerText = now.toLocaleDateString('en-US', optionsDate);
+  }
+  if (timeElement) {
+    timeElement.innerText = now.toLocaleTimeString('en-US', optionsTime);
+  }
 }
 
 // Update the date and time on page load
