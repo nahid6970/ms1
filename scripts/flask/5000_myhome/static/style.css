@@ -1320,18 +1320,16 @@ a.add-button.custom-sidebar-button[style*="background-color"] {
     box-sizing: border-box;
   }
 
-  /* Align radio buttons properly on mobile */
+  /* Align radio buttons properly on mobile - radio on left */
   #click-action-options label,
   #edit-click-action-options label {
     display: flex !important;
     align-items: center !important;
-    justify-content: space-between !important;
     gap: 10px !important;
   }
 
   #click-action-options label span,
   #edit-click-action-options label span {
-    flex: 1;
     text-align: left;
   }
 
@@ -1341,19 +1339,17 @@ a.add-button.custom-sidebar-button[style*="background-color"] {
     margin: 0;
   }
 
-  /* Align Type radio buttons - more specific selectors */
+  /* Align Type radio buttons - more specific selectors - radio on left */
   #add-link-form > div[style*="gap: 20px"] label,
   #edit-link-form > div[style*="gap: 20px"] label {
     display: flex !important;
     align-items: center !important;
-    justify-content: space-between !important;
     gap: 10px !important;
     width: 100% !important;
   }
 
   #add-link-form > div[style*="gap: 20px"] label span,
   #edit-link-form > div[style*="gap: 20px"] label span {
-    flex: 1 !important;
     text-align: left !important;
     min-width: 0 !important;
   }
@@ -1371,7 +1367,6 @@ a.add-button.custom-sidebar-button[style*="background-color"] {
   #edit-link-form > div[style*="gap: 20px"] > div[style*="flex: 1"] label {
     display: flex !important;
     align-items: center !important;
-    justify-content: space-between !important;
   }
 
   /* Adjust popup positioning for mobile */
