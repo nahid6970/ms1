@@ -2632,10 +2632,6 @@ document.addEventListener('DOMContentLoaded', function () {
   function handleLinkClick(event, link) {
     event.preventDefault();
     
-    console.log('handleLinkClick called with:', link);
-    console.log('click_action:', link.click_action);
-    console.log('urls:', link.urls);
-    
     if (link.click_action === 'note' && link.note) {
       // Open note
       openNotePreview(link.note);
@@ -2657,9 +2653,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
       }
       
-      console.log('Selected index:', selectedIndex);
       urlToOpen = link.urls[selectedIndex] || link.urls[0];
-      console.log('URL to open:', urlToOpen);
     }
     
     if (urlToOpen) {
