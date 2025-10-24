@@ -298,6 +298,13 @@ def generate_static_html(data):
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            line-height: 1.4;
+        }
+
+        /* Markdown formatting in static export */
+        .cell-content strong {
+            font-weight: bold;
+            color: inherit;
         }
 
         /* Text wrapping enabled */
@@ -319,6 +326,11 @@ def generate_static_html(data):
             overflow: visible;
             text-overflow: clip;
             line-height: 1.4;
+        }
+
+        /* Markdown formatting works with wrap mode */
+        .wrap-enabled .cell-content strong {
+            font-weight: bold;
         }
 
         /* Default row height when wrap is enabled - keep same as normal */
@@ -566,9 +578,15 @@ def generate_static_html(data):
                     const cellContent = document.createElement('div');
                     cellContent.className = 'cell-content';
                     
-                    // Handle newlines properly for merged cells and regular cells
+                    // Handle markdown formatting and newlines
                     const cellValue = row[colIndex] || '';
-                    if (cellValue.includes('\\n')) {
+                    const hasMarkdown = cellValue.includes('**') || cellValue.includes('\\n- ') || cellValue.trim().startsWith('- ');
+                    
+                    if (hasMarkdown) {
+                        // Apply markdown formatting
+                        cellContent.innerHTML = parseMarkdown(cellValue);
+                    } else if (cellValue.includes('\\n')) {
+                        // Just handle newlines
                         cellContent.innerHTML = cellValue.replace(/\\n/g, '<br>');
                     } else {
                         cellContent.textContent = cellValue;
@@ -626,6 +644,28 @@ def generate_static_html(data):
 
                 tableBody.appendChild(tr);
             });
+        }
+
+        function parseMarkdown(text) {
+            if (!text) return '';
+
+            // Split by lines
+            const lines = text.split('\\n');
+            const formattedLines = lines.map(line => {
+                let formatted = line;
+
+                // Bold: **text** -> <strong>text</strong>
+                formatted = formatted.replace(/\\*\\*(.+?)\\*\\*/g, '<strong>$1</strong>');
+
+                // Bullet list: - item -> • item
+                if (formatted.trim().startsWith('- ')) {
+                    formatted = formatted.replace(/^(\\s*)- /, '$1• ');
+                }
+
+                return formatted;
+            });
+
+            return formattedLines.join('<br>');
         }
 
         function toggleRowWrap() {
