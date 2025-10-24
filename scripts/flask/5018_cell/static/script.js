@@ -2442,6 +2442,16 @@ function closeAllColumnMenus() {
     });
 }
 
+function stripMarkdown(text) {
+    if (!text) return '';
+    let stripped = String(text);
+    // Remove bold markers: **text** -> text
+    stripped = stripped.replace(/\*\*(.+?)\*\*/g, '$1');
+    // Remove bullet markers: - item -> item
+    stripped = stripped.replace(/^\s*-\s+/gm, '');
+    return stripped;
+}
+
 function sortColumn(colIndex, direction) {
     const sheet = tableData.sheets[currentSheet];
     const col = sheet.columns[colIndex];
@@ -2463,6 +2473,10 @@ function sortColumn(colIndex, direction) {
     rowsWithIndices.sort((a, b) => {
         let valA = a.value;
         let valB = b.value;
+
+        // Strip markdown formatting for comparison
+        valA = stripMarkdown(valA);
+        valB = stripMarkdown(valB);
 
         // Handle different data types
         if (col.type === 'number') {
