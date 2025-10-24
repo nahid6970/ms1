@@ -113,6 +113,21 @@ function handleKeyboardShortcuts(e) {
         }, 50);
     }
 
+    // Ctrl+F or Cmd+F to focus search
+    if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+        e.preventDefault();
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.focus();
+            searchInput.select();
+        }
+    }
+
+    // Escape to clear search
+    if (e.key === 'Escape' && document.activeElement.id === 'searchInput') {
+        clearSearch();
+    }
+
     // Handle Enter key in textareas when wrap is enabled
     if (e.key === 'Enter' && document.activeElement.tagName === 'TEXTAREA') {
         const textarea = document.activeElement;
@@ -1896,6 +1911,69 @@ function toggleSheetList() {
 
 function openSettings() {
     document.getElementById('settingsModal').style.display = 'block';
+}
+
+function searchTable() {
+    const searchInput = document.getElementById('searchInput');
+    const searchTerm = searchInput.value.toLowerCase().trim();
+    const table = document.getElementById('dataTable');
+    const tbody = table.querySelector('tbody');
+    const rows = tbody.querySelectorAll('tr');
+
+    // Remove previous highlights
+    document.querySelectorAll('.search-highlight').forEach(el => {
+        el.classList.remove('search-highlight');
+    });
+
+    if (!searchTerm) {
+        // Show all rows if search is empty
+        rows.forEach(row => {
+            row.style.display = '';
+        });
+        return;
+    }
+
+    let foundCount = 0;
+
+    rows.forEach(row => {
+        const cells = row.querySelectorAll('td:not(.row-number)');
+        let rowMatches = false;
+
+        cells.forEach(cell => {
+            const input = cell.querySelector('input, textarea');
+            if (input) {
+                const cellValue = input.value.toLowerCase();
+                // Strip markdown for searching
+                const strippedValue = stripMarkdown(cellValue);
+
+                if (strippedValue.includes(searchTerm)) {
+                    rowMatches = true;
+                    cell.classList.add('search-highlight');
+                }
+            }
+        });
+
+        if (rowMatches) {
+            row.style.display = '';
+            foundCount++;
+        } else {
+            row.style.display = 'none';
+        }
+    });
+
+    // Show toast with results
+    if (searchTerm && foundCount === 0) {
+        showToast('No results found', 'info');
+    } else if (searchTerm) {
+        showToast(`Found ${foundCount} row(s)`, 'success');
+    }
+}
+
+function clearSearch() {
+    const searchInput = document.getElementById('searchInput');
+    searchInput.value = '';
+    searchTable(); // This will show all rows and remove highlights
+    showToast('Search cleared', 'info');
 }
 
 function toggleRowWrap() {

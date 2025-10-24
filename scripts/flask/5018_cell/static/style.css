@@ -37,6 +37,51 @@ body {
     border-bottom: 1px solid #ddd;
 }
 
+.search-box {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 8px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.search-box:focus-within {
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.search-box input {
+    border: none;
+    outline: none;
+    padding: 6px 8px;
+    font-size: 14px;
+    width: 200px;
+    background: transparent;
+}
+
+.btn-clear-search {
+    background: none;
+    border: none;
+    color: #999;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 0 4px;
+    line-height: 1;
+    transition: color 0.2s;
+    display: none;
+}
+
+.btn-clear-search:hover {
+    color: #dc3545;
+}
+
+.search-box input:not(:placeholder-shown) ~ .btn-clear-search {
+    display: block;
+}
+
 .wrap-toggle {
     display: flex;
     align-items: center;
@@ -184,6 +229,16 @@ table {
     .btn {
         padding: 8px 12px;
         font-size: 13px;
+    }
+    
+    .search-box {
+        width: 100%;
+        order: 10;
+    }
+    
+    .search-box input {
+        width: 100%;
+        flex: 1;
     }
     
     .wrap-toggle {
@@ -1146,6 +1201,21 @@ td input::-moz-selection {
     outline: 3px solid #007bff !important;
     outline-offset: -3px;
     background: rgba(0, 123, 255, 0.15) !important;
+}
+
+/* Search highlight */
+.search-highlight {
+    background: rgba(255, 235, 59, 0.5) !important;
+    animation: highlightPulse 0.5s ease-in-out;
+}
+
+@keyframes highlightPulse {
+    0% {
+        background: rgba(255, 235, 59, 0.8) !important;
+    }
+    100% {
+        background: rgba(255, 235, 59, 0.5) !important;
+    }
 }
 
 td.merged-cell {

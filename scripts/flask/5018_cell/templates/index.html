@@ -93,6 +93,11 @@
             <button onclick="saveData()" class="btn btn-success">Save Data</button>
             <button onclick="loadData()" class="btn btn-info">Refresh</button>
             
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Search..." onkeyup="searchTable()" title="Search in all cells">
+                <button onclick="clearSearch()" class="btn-clear-search" title="Clear search">×</button>
+            </div>
+            
             <label class="wrap-toggle" title="Enable text wrapping - Press Enter for new lines">
                 <input type="checkbox" id="wrapToggle" onchange="toggleRowWrap()">
                 <span>Wrap Text</span>
