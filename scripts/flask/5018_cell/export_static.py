@@ -77,6 +77,101 @@ def generate_static_html(data):
             padding: 10px 20px;
             background: #f8f9fa;
             border-bottom: 1px solid #ddd;
+            flex-wrap: wrap;
+        }
+
+        .category-controls {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 8px;
+            background: #e3f2fd;
+            border: 1px solid #90caf9;
+            border-radius: 4px;
+        }
+
+        .category-selector {
+            position: relative;
+            min-width: 150px;
+        }
+
+        .category-current {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            padding: 6px 12px;
+            background: white;
+            border: 1px solid #90caf9;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            width: 100%;
+            transition: all 0.2s;
+            font-weight: 500;
+            color: #1976d2;
+        }
+
+        .category-current:hover {
+            background: #f5f5f5;
+            border-color: #1976d2;
+        }
+
+        .category-list {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #90caf9;
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+            margin-top: 5px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .category-list.show {
+            display: block;
+        }
+
+        .category-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .category-item:last-child {
+            border-bottom: none;
+        }
+
+        .category-item:hover {
+            background: #e3f2fd;
+        }
+
+        .category-item.active {
+            background: #bbdefb;
+            color: #1976d2;
+            font-weight: 600;
+        }
+
+        .category-item-name {
+            font-size: 13px;
+            flex: 1;
+        }
+
+        .category-item-count {
+            font-size: 11px;
+            color: #666;
+            background: #e0e0e0;
+            padding: 2px 6px;
+            border-radius: 10px;
         }
 
         .sheet-controls {
@@ -524,7 +619,93 @@ def generate_static_html(data):
     </style>
     <script>
         let currentSheet = ''' + str(active_sheet) + ''';
+        let currentCategory = null; // null means "All Sheets"
         let tableData = ''' + json.dumps(data) + ''';
+
+        function initializeCategories() {
+            if (!tableData.categories) {
+                tableData.categories = [];
+            }
+            if (!tableData.sheetCategories) {
+                tableData.sheetCategories = {};
+            }
+        }
+
+        function toggleCategoryList() {
+            const categoryList = document.getElementById('categoryList');
+            categoryList.classList.toggle('show');
+        }
+
+        function renderCategoryTabs() {
+            initializeCategories();
+            
+            const currentCategoryNameEl = document.getElementById('currentCategoryName');
+            currentCategoryNameEl.textContent = currentCategory || 'All Sheets';
+            
+            const categoryList = document.getElementById('categoryList');
+            categoryList.innerHTML = '';
+            
+            // Add "All Sheets" option
+            const allItem = document.createElement('div');
+            allItem.className = `category-item ${currentCategory === null ? 'active' : ''}`;
+            
+            const allName = document.createElement('span');
+            allName.className = 'category-item-name';
+            allName.textContent = 'All Sheets';
+            allName.onclick = () => {
+                currentCategory = null;
+                renderCategoryTabs();
+                renderSheetTabs();
+                toggleCategoryList();
+            };
+            
+            const allCount = document.createElement('span');
+            allCount.className = 'category-item-count';
+            allCount.textContent = tableData.sheets.length;
+            
+            allItem.appendChild(allName);
+            allItem.appendChild(allCount);
+            categoryList.appendChild(allItem);
+            
+            // Add each category
+            if (tableData.categories) {
+                tableData.categories.forEach(category => {
+                    const count = Object.values(tableData.sheetCategories || {}).filter(c => c === category).length;
+                    
+                    const item = document.createElement('div');
+                    item.className = `category-item ${currentCategory === category ? 'active' : ''}`;
+                    
+                    const nameSpan = document.createElement('span');
+                    nameSpan.className = 'category-item-name';
+                    nameSpan.textContent = category;
+                    nameSpan.onclick = () => {
+                        currentCategory = category;
+                        
+                        // Switch to first sheet in this category
+                        const firstSheetInCategory = tableData.sheets.findIndex((sheet, index) => {
+                            return tableData.sheetCategories[index] === category;
+                        });
+                        
+                        if (firstSheetInCategory !== -1) {
+                            currentSheet = firstSheetInCategory;
+                        }
+                        
+                        renderCategoryTabs();
+                        renderSheetTabs();
+                        renderTable();
+                        toggleCategoryList();
+                    };
+                    
+                    const countSpan = document.createElement('span');
+                    countSpan.className = 'category-item-count';
+                    countSpan.textContent = count;
+                    
+                    item.appendChild(nameSpan);
+                    item.appendChild(countSpan);
+                    categoryList.appendChild(item);
+                });
+            }
+        }
 
         function switchSheet(index) {
             currentSheet = index;
@@ -538,6 +719,8 @@ def generate_static_html(data):
         }
 
         function renderSheetTabs() {
+            initializeCategories();
+            
             const currentSheetNameEl = document.getElementById('currentSheetName');
             if (tableData.sheets[currentSheet]) {
                 currentSheetNameEl.textContent = tableData.sheets[currentSheet].name;
@@ -547,12 +730,24 @@ def generate_static_html(data):
             sheetList.innerHTML = '';
 
             tableData.sheets.forEach((sheet, index) => {
+                // Filter by category
+                const sheetCategory = tableData.sheetCategories[index] || null;
+                if (currentCategory !== null && sheetCategory !== currentCategory) {
+                    return; // Skip sheets not in current category
+                }
+                
                 const item = document.createElement('div');
                 item.className = `sheet-item ${index === currentSheet ? 'active' : ''}`;
 
                 const nameSpan = document.createElement('span');
                 nameSpan.className = 'sheet-item-name';
                 nameSpan.textContent = sheet.name;
+                
+                // Show category badge if viewing "All Sheets"
+                if (currentCategory === null && sheetCategory) {
+                    nameSpan.textContent += ` [${sheetCategory}]`;
+                }
+                
                 nameSpan.onclick = () => {
                     switchSheet(index);
                     toggleSheetList();
@@ -853,6 +1048,8 @@ def generate_static_html(data):
 
         // Initialize on load
         window.onload = function() {
+            initializeCategories();
+            renderCategoryTabs();
             renderSheetTabs();
             renderTable();
             
@@ -871,6 +1068,16 @@ def generate_static_html(data):
 <body>
     <div class="container">
         <div class="sheet-tabs">
+            <div class="category-controls">
+                <div class="category-selector">
+                    <button class="category-current" id="currentCategoryBtn" onclick="toggleCategoryList()">
+                        <span id="currentCategoryName">All Sheets</span>
+                        <span class="dropdown-arrow">▼</span>
+                    </button>
+                    <div class="category-list" id="categoryList"></div>
+                </div>
+            </div>
+
             <div class="sheet-controls">
                 <div class="sheet-selector">
                     <button class="sheet-current" id="currentSheetBtn" onclick="toggleSheetList()">

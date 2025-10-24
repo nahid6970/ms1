@@ -1781,6 +1781,16 @@ async function addSheet() {
             const result = await response.json();
             tableData.sheets.push({ name: sheetName, columns: [], rows: [] });
             currentSheet = result.sheetIndex;
+
+            // Auto-assign to current category if one is selected
+            if (currentCategory !== null) {
+                initializeCategories();
+                tableData.sheetCategories[currentSheet] = currentCategory;
+                await saveData();
+                showToast(`Sheet added to "${currentCategory}" category`, 'success');
+            }
+
+            renderCategoryTabs();
             renderSheetTabs();
             renderTable();
         }
@@ -2042,6 +2052,7 @@ function renderCategoryTabs() {
         renderCategoryTabs();
         renderSheetTabs();
         toggleCategoryList();
+        // Keep current sheet when switching to "All Sheets"
     };
 
     const allCount = document.createElement('span');
@@ -2064,8 +2075,19 @@ function renderCategoryTabs() {
         nameSpan.textContent = category;
         nameSpan.onclick = () => {
             currentCategory = category;
+
+            // Switch to first sheet in this category
+            const firstSheetInCategory = tableData.sheets.findIndex((sheet, index) => {
+                return tableData.sheetCategories[index] === category;
+            });
+
+            if (firstSheetInCategory !== -1) {
+                currentSheet = firstSheetInCategory;
+            }
+
             renderCategoryTabs();
             renderSheetTabs();
+            renderTable();
             toggleCategoryList();
         };
 
