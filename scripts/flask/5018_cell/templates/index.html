@@ -104,25 +104,27 @@
         </div>
 
         <div class="toolbar">
-            <button onclick="addColumn()" class="btn btn-primary">Add Column</button>
-            <button onclick="addRow()" class="btn btn-primary">Add Row</button>
-            <button onclick="saveData()" class="btn btn-success">Save Data</button>
-            <button onclick="loadData()" class="btn btn-info">Refresh</button>
-            
             <div class="search-box">
                 <input type="text" id="searchInput" placeholder="Search..." onkeyup="searchTable()" title="Search in all cells">
                 <button onclick="clearSearch()" class="btn-clear-search" title="Clear search">×</button>
             </div>
             
-            <label class="wrap-toggle" title="Enable text wrapping - Press Enter for new lines">
-                <input type="checkbox" id="wrapToggle" onchange="toggleRowWrap()">
-                <span>Wrap Text</span>
-            </label>
-            
-            <label class="wrap-toggle" title="Show or hide row numbers">
-                <input type="checkbox" id="rowToggle" onchange="toggleRowNumbers()" checked>
-                <span>Row #</span>
-            </label>
+            <div class="button-group">
+                <button onclick="addColumn()" class="btn-icon" title="Add Column">⬇️</button>
+                <button onclick="addRow()" class="btn-icon" title="Add Row">➡️</button>
+                <button onclick="saveData()" class="btn-icon" title="Save Data">💾</button>
+                <button onclick="loadData()" class="btn-icon" title="Refresh">🔄</button>
+                
+                <label class="btn-icon-toggle" title="Enable text wrapping - Press Enter for new lines">
+                    <input type="checkbox" id="wrapToggle" onchange="toggleRowWrap()">
+                    <span>↩️</span>
+                </label>
+                
+                <label class="btn-icon-toggle" title="Show or hide row numbers">
+                    <input type="checkbox" id="rowToggle" onchange="toggleRowNumbers()" checked>
+                    <span>#️⃣</span>
+                </label>
+            </div>
         </div>
 
         <div class="table-container">
