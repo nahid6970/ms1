@@ -2717,8 +2717,8 @@ function renderTable() {
         menuWrapper.appendChild(menuBtn);
         menuWrapper.appendChild(menu);
 
-        headerCell.appendChild(columnName);
         headerCell.appendChild(menuWrapper);
+        headerCell.appendChild(columnName);
         th.appendChild(headerCell);
         headerRow.appendChild(th);
     });

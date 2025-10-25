@@ -423,7 +423,7 @@ th {
 
     position: relative;
 
-    padding-right: 25px;
+    padding-left: 30px;
 
     min-width: 0;
 
@@ -1228,7 +1228,7 @@ td input::-moz-selection {
 
     position: absolute;
 
-    right: 5px;
+    left: 5px;
 
     top: 50%;
 
@@ -1292,7 +1292,7 @@ td input::-moz-selection {
     display: none;
     position: absolute;
     top: 100%;
-    right: 0;
+    left: 0;
     background: white;
     border: 1px solid #ddd;
     border-radius: 6px;
