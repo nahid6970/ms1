@@ -1030,25 +1030,36 @@ def generate_static_html(data):
                 // Strikethrough: ~~text~~ -> <del>text</del>
                 formatted = formatted.replace(/~~(.+?)~~/g, '<del>$1</del>');
 
+                // Sublist: -- item -> ◦ item with more indent (white circle)
+                if (formatted.trim().startsWith('-- ')) {
+                    const content = formatted.replace(/^(\\s*)-- (.+)$/, '$2');
+                    formatted = formatted.replace(/^(\\s*)-- .+$/, '$1<span style="display: inline-flex; align-items: flex-start; width: 100%; margin-left: 1em;"><span style="margin-right: 0.5em; flex-shrink: 0;">◦</span><span style="flex: 1;">◦CONTENT◦</span></span>');
+                    formatted = formatted.replace('◦CONTENT◦', content);
+                }
+                // Bullet list: - item -> • item with hanging indent (black circle)
+                else if (formatted.trim().startsWith('- ')) {
+                    const content = formatted.replace(/^(\\s*)- (.+)$/, '$2');
+                    formatted = formatted.replace(/^(\\s*)- .+$/, '$1<span style="display: inline-flex; align-items: flex-start; width: 100%;"><span style="margin-right: 0.5em; flex-shrink: 0;">•</span><span style="flex: 1;">•CONTENT•</span></span>');
+                    formatted = formatted.replace('•CONTENT•', content);
+                }
+
+                // Numbered list: 1. item -> 1. item with hanging indent
+                if (/^\\d+\\.\\s/.test(formatted.trim())) {
+                    const match = formatted.match(/^(\\s*)(\\d+\\.\\s)(.+)$/);
+                    if (match) {
+                        const spaces = match[1];
+                        const number = match[2];
+                        const content = match[3];
+                        formatted = `${spaces}<span style="display: inline-flex; align-items: flex-start; width: 100%;"><span style="margin-right: 0.5em; flex-shrink: 0;">${number}</span><span style="flex: 1;">NUMCONTENT</span></span>`;
+                        formatted = formatted.replace('NUMCONTENT', content);
+                    }
+                }
+
                 // Inline code: `text` -> <code>text</code>
                 formatted = formatted.replace(/`(.+?)`/g, '<code>$1</code>');
 
                 // Highlight: ==text== -> <mark>text</mark>
                 formatted = formatted.replace(/==(.+?)==/g, '<mark>$1</mark>');
-
-                // Sublist: -- item -> ◦ item with more indent (white circle)
-                if (formatted.trim().startsWith('-- ')) {
-                    formatted = formatted.replace(/^(\\s*)-- (.+)$/, '$1<span style="display: inline-block; width: 100%; text-indent: -1em; padding-left: 2em;">◦ $2</span>');
-                }
-                // Bullet list: - item -> • item with hanging indent (black circle)
-                else if (formatted.trim().startsWith('- ')) {
-                    formatted = formatted.replace(/^(\\s*)- (.+)$/, '$1<span style="display: inline-block; width: 100%; text-indent: -1em; padding-left: 1em;">• $2</span>');
-                }
-
-                // Numbered list: 1. item -> 1. item with hanging indent
-                if (/^\\d+\\.\\s/.test(formatted.trim())) {
-                    formatted = formatted.replace(/^(\\s*)(\\d+\\.\\s)(.+)$/, '$1<span style="display: inline-block; width: 100%; text-indent: -1.5em; padding-left: 1.5em;">$2$3</span>');
-                }
 
                 return formatted;
             });
