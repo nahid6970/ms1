@@ -77,7 +77,8 @@ def generate_static_html(data):
             padding: 10px 20px;
             background: #f8f9fa;
             border-bottom: 1px solid #ddd;
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
+            overflow-x: auto;
         }
 
         .category-controls {
@@ -322,33 +323,99 @@ def generate_static_html(data):
             background: rgba(255, 235, 59, 0.5) !important;
         }
 
-        .wrap-toggle {
+        .button-group {
             display: flex;
+            gap: 4px;
             align-items: center;
-            gap: 8px;
-            padding: 8px 12px;
+            padding: 4px;
             background: #f8f9fa;
             border: 1px solid #ddd;
             border-radius: 4px;
+        }
+
+        .btn-icon-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 32px;
+            height: 32px;
             cursor: pointer;
             user-select: none;
             transition: all 0.2s;
+            position: relative;
         }
 
-        .wrap-toggle:hover {
+        .btn-icon-toggle:hover {
             background: #e9ecef;
             border-color: #007bff;
         }
 
-        .wrap-toggle input[type="checkbox"] {
+        .btn-icon-toggle input[type="checkbox"] {
+            position: absolute;
+            opacity: 0;
             cursor: pointer;
-            width: 18px;
-            height: 18px;
+            width: 100%;
+            height: 100%;
             margin: 0;
         }
 
-        .wrap-toggle span {
-            font-size: 14px;
+        .btn-icon-toggle span {
+            font-size: 16px;
+            pointer-events: none;
+        }
+
+        .btn-icon-toggle input[type="checkbox"]:checked + span {
+            opacity: 1;
+        }
+
+        .btn-icon-toggle input[type="checkbox"]:not(:checked) + span {
+            opacity: 0.4;
+        }
+
+        .font-size-control {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 8px;
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .font-size-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .btn-font-size {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 28px;
+            height: 28px;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .btn-font-size:hover {
+            background: #e9ecef;
+            border-color: #007bff;
+            transform: scale(1.05);
+        }
+
+        .font-size-display {
+            min-width: 40px;
+            text-align: center;
+            font-size: 13px;
             font-weight: 500;
             color: #333;
         }
@@ -581,13 +648,47 @@ def generate_static_html(data):
 
             /* Adjust sheet tabs for mobile */
             .sheet-tabs {
-                padding: 8px 15px;
-                gap: 8px;
+                padding: 8px 10px;
+                gap: 5px;
+                flex-wrap: nowrap;
+                overflow-x: auto;
+            }
+
+            .category-controls {
+                flex-shrink: 0;
+            }
+
+            .sheet-controls {
+                flex-shrink: 0;
+            }
+
+            .category-selector {
+                min-width: 120px;
+            }
+
+            .sheet-selector {
+                min-width: 120px;
+            }
+
+            .search-box {
+                min-width: 150px;
+            }
+
+            .button-group {
+                flex-shrink: 0;
+            }
+
+            .font-size-control {
+                flex-shrink: 0;
+            }
+
+            .export-info {
+                display: none;
             }
 
             /* Adjust column headers */
             .header-cell {
-                padding-right: 20px;
+                padding-left: 20px;
             }
         }
 
@@ -1297,21 +1398,23 @@ def generate_static_html(data):
                 <button onclick="clearSearch()" class="btn-clear-search" title="Clear search">×</button>
             </div>
 
-            <label class="wrap-toggle">
-                <input type="checkbox" id="wrapToggle" onchange="toggleRowWrap()">
-                <span>Wrap Text</span>
-            </label>
-            
-            <label class="wrap-toggle" title="Show or hide row numbers">
-                <input type="checkbox" id="rowToggle" onchange="toggleRowNumbers()" checked>
-                <span>Row #</span>
-            </label>
+            <div class="button-group">
+                <label class="btn-icon-toggle" title="Enable text wrapping - Press Enter for new lines">
+                    <input type="checkbox" id="wrapToggle" onchange="toggleRowWrap()">
+                    <span>↩️</span>
+                </label>
+                
+                <label class="btn-icon-toggle" title="Show or hide row numbers">
+                    <input type="checkbox" id="rowToggle" onchange="toggleRowNumbers()" checked>
+                    <span>#️⃣</span>
+                </label>
+            </div>
 
-            <div class="wrap-toggle" title="Adjust font size">
-                <span>Font Size:</span>
-                <button onclick="adjustFontSize(-1)" style="background: white; border: 1px solid #ddd; border-radius: 4px; width: 28px; height: 28px; cursor: pointer; margin: 0 2px;">−</button>
-                <span id="fontSizeDisplay" style="min-width: 30px; text-align: center; display: inline-block;">100%</span>
-                <button onclick="adjustFontSize(1)" style="background: white; border: 1px solid #ddd; border-radius: 4px; width: 28px; height: 28px; cursor: pointer; margin: 0 2px;">+</button>
+            <div class="font-size-control">
+                <span class="font-size-label">Font:</span>
+                <button onclick="adjustFontSize(-1)" class="btn-font-size" title="Decrease font size">−</button>
+                <span id="fontSizeDisplay" class="font-size-display">100%</span>
+                <button onclick="adjustFontSize(1)" class="btn-font-size" title="Increase font size">+</button>
             </div>
 
             <div class="export-info">
