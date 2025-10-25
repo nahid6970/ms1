@@ -320,9 +320,101 @@
                 <span class="close" onclick="closeSettingsModal()">&times;</span>
             </div>
             <div class="settings-content">
-                <p style="text-align: center; color: #6c757d; padding: 40px 20px;">
-                    Settings features will be added here in future updates.
-                </p>
+                <button class="btn btn-primary" onclick="showMarkdownGuide()" style="width: 100%; padding: 15px; font-size: 16px;">
+                    📝 Markdown Guide
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Markdown Guide Modal -->
+    <div id="markdownGuideModal" class="modal">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h2>Markdown Formatting Guide</h2>
+                <span class="close" onclick="closeMarkdownGuide()">&times;</span>
+            </div>
+            <div style="padding: 24px; max-height: 70vh; overflow-y: auto;">
+                <div style="margin-bottom: 20px;">
+                    <h3 style="color: #007bff; margin-bottom: 10px;">Text Formatting</h3>
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <tr style="border-bottom: 1px solid #ddd;">
+                            <td style="padding: 8px; font-family: monospace; background: #f8f9fa;">**bold text**</td>
+                            <td style="padding: 8px;"><strong>bold text</strong></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #ddd;">
+                            <td style="padding: 8px; font-family: monospace; background: #f8f9fa;">__italic text__</td>
+                            <td style="padding: 8px;"><em>italic text</em></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #ddd;">
+                            <td style="padding: 8px; font-family: monospace; background: #f8f9fa;">~~strikethrough~~</td>
+                            <td style="padding: 8px;"><del>strikethrough</del></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #ddd;">
+                            <td style="padding: 8px; font-family: monospace; background: #f8f9fa;">##heading##</td>
+                            <td style="padding: 8px;"><span style="font-size: 1.3em; font-weight: 600;">heading</span></td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <h3 style="color: #007bff; margin-bottom: 10px;">Code & Highlights</h3>
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <tr style="border-bottom: 1px solid #ddd;">
+                            <td style="padding: 8px; font-family: monospace; background: #f8f9fa;">`inline code`</td>
+                            <td style="padding: 8px;"><code>inline code</code></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #ddd;">
+                            <td style="padding: 8px; font-family: monospace; background: #f8f9fa;">==highlight==</td>
+                            <td style="padding: 8px;"><mark>highlight</mark></td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <h3 style="color: #007bff; margin-bottom: 10px;">Lists</h3>
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <tr style="border-bottom: 1px solid #ddd;">
+                            <td style="padding: 8px; font-family: monospace; background: #f8f9fa;">- item</td>
+                            <td style="padding: 8px;">• item</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #ddd;">
+                            <td style="padding: 8px; font-family: monospace; background: #f8f9fa;">1. item</td>
+                            <td style="padding: 8px;">1. item</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <h3 style="color: #007bff; margin-bottom: 10px;">Custom Colors</h3>
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <tr style="border-bottom: 1px solid #ddd;">
+                            <td style="padding: 8px; font-family: monospace; background: #f8f9fa; font-size: 12px;">{fg:red}red text{/}</td>
+                            <td style="padding: 8px;"><span style="color: red; padding: 2px 6px; border-radius: 4px; display: inline-block;">red text</span></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #ddd;">
+                            <td style="padding: 8px; font-family: monospace; background: #f8f9fa; font-size: 12px;">{bg:yellow}highlighted{/}</td>
+                            <td style="padding: 8px;"><span style="background-color: yellow; padding: 2px 6px; border-radius: 4px; display: inline-block;">highlighted</span></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #ddd;">
+                            <td style="padding: 8px; font-family: monospace; background: #f8f9fa; font-size: 12px;">{fg:white;bg:blue}badge{/}</td>
+                            <td style="padding: 8px;"><span style="color: white; background-color: blue; padding: 2px 6px; border-radius: 4px; display: inline-block;">badge</span></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #ddd;">
+                            <td style="padding: 8px; font-family: monospace; background: #f8f9fa; font-size: 12px;">{fg:#28cb5d}hex color{/}</td>
+                            <td style="padding: 8px;"><span style="color: #28cb5d; padding: 2px 6px; border-radius: 4px; display: inline-block;">hex color</span></td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div style="background: #e7f3ff; padding: 15px; border-radius: 6px; border-left: 4px solid #007bff;">
+                    <strong>💡 Tips:</strong>
+                    <ul style="margin: 10px 0 0 20px;">
+                        <li>You can combine multiple formats</li>
+                        <li>Colors support: named colors (red, blue), hex (#ff0000), rgb(255,0,0)</li>
+                        <li>Use wrap mode for multi-line content</li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>

@@ -292,6 +292,15 @@ function closeSettingsModal() {
     document.getElementById('settingsModal').style.display = 'none';
 }
 
+function showMarkdownGuide() {
+    closeSettingsModal();
+    document.getElementById('markdownGuideModal').style.display = 'block';
+}
+
+function closeMarkdownGuide() {
+    document.getElementById('markdownGuideModal').style.display = 'none';
+}
+
 async function handleColumnFormSubmit(e) {
     e.preventDefault();
 
