@@ -46,6 +46,7 @@ body {
     border: 1px solid #ddd;
     border-radius: 4px;
     transition: all 0.2s;
+    margin-left: auto;
 }
 
 .search-box:focus-within {
@@ -90,7 +91,6 @@ body {
     background: #f8f9fa;
     border: 1px solid #ddd;
     border-radius: 4px;
-    margin-left: auto;
 }
 
 .btn-icon {
