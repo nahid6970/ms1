@@ -86,6 +86,19 @@ function initializeApp() {
             }
         }
     }
+
+    // Restore row numbers toggle state
+    const rowNumbersVisible = localStorage.getItem('rowNumbersVisible') !== 'false'; // Default true
+    const rowToggle = document.getElementById('rowToggle');
+    if (rowToggle) {
+        rowToggle.checked = rowNumbersVisible;
+        if (!rowNumbersVisible) {
+            const table = document.getElementById('dataTable');
+            if (table) {
+                table.classList.add('hide-row-numbers');
+            }
+        }
+    }
 }
 
 function loadColumnWidths() {
@@ -2454,6 +2467,21 @@ function toggleRowWrap() {
         });
 
         showToast('Text wrapping disabled', 'success');
+    }
+}
+
+function toggleRowNumbers() {
+    const rowToggle = document.getElementById('rowToggle');
+    const table = document.getElementById('dataTable');
+
+    if (rowToggle.checked) {
+        table.classList.remove('hide-row-numbers');
+        localStorage.setItem('rowNumbersVisible', 'true');
+        showToast('Row numbers shown', 'success');
+    } else {
+        table.classList.add('hide-row-numbers');
+        localStorage.setItem('rowNumbersVisible', 'false');
+        showToast('Row numbers hidden', 'success');
     }
 }
 

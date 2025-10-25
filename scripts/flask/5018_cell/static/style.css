@@ -564,6 +564,11 @@ td input::-moz-selection {
     line-height: 1.2;
 }
 
+/* Hide row numbers when toggle is off */
+.hide-row-numbers .row-number {
+    display: none;
+}
+
 /* Modal Styles */
 .modal {
     display: none;
