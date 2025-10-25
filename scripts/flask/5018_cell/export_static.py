@@ -1034,14 +1034,14 @@ def generate_static_html(data):
                 // Highlight: ==text== -> <mark>text</mark>
                 formatted = formatted.replace(/==(.+?)==/g, '<mark>$1</mark>');
 
-                // Bullet list: - item -> • item
+                // Bullet list: - item -> • item with hanging indent
                 if (formatted.trim().startsWith('- ')) {
-                    formatted = formatted.replace(/^(\\s*)- /, '$1• ');
+                    formatted = formatted.replace(/^(\\s*)- (.+)$/, '$1<span style="display: block; text-indent: -1em; padding-left: 1em;">• $2</span>');
                 }
 
-                // Numbered list: 1. item -> 1. item (keep as is, just format)
+                // Numbered list: 1. item -> 1. item with hanging indent
                 if (/^\\d+\\.\\s/.test(formatted.trim())) {
-                    formatted = formatted; // Keep numbered lists as is
+                    formatted = formatted.replace(/^(\\s*)(\\d+\\.\\s)(.+)$/, '$1<span style="display: block; text-indent: -1.5em; padding-left: 1.5em;">$2$3</span>');
                 }
 
                 return formatted;
