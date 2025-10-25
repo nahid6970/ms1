@@ -454,6 +454,8 @@ function applyMarkdownFormatting(rowIndex, colIndex, value) {
         value.includes('`') ||
         value.includes('~~') ||
         value.includes('==') ||
+        value.includes('{fg:') ||
+        value.includes('{bg:') ||
         value.includes('\n- ') ||
         value.trim().startsWith('- ')
     );
@@ -517,6 +519,19 @@ function parseMarkdown(text) {
         if (inCodeBlock) {
             return `<code>${formatted}</code>`;
         }
+
+        // Custom colors: {fg:color;bg:color}text{/} or {fg:color}text{/} or {bg:color}text{/}
+        formatted = formatted.replace(/\{((?:fg:[^;}\s]+)?(?:;)?(?:bg:[^;}\s]+)?)\}(.+?)\{\/\}/g, (match, styles, text) => {
+            const styleObj = {};
+            const parts = styles.split(';').filter(p => p.trim());
+            parts.forEach(part => {
+                const [key, value] = part.split(':').map(s => s.trim());
+                if (key === 'fg') styleObj.color = value;
+                if (key === 'bg') styleObj.backgroundColor = value;
+            });
+            const styleStr = Object.entries(styleObj).map(([k, v]) => `${k.replace('backgroundColor', 'background-color')}: ${v}`).join('; ');
+            return `<span style="${styleStr}">${text}</span>`;
+        });
 
         // Heading: ##text## -> larger text
         formatted = formatted.replace(/##(.+?)##/g, '<span style="font-size: 1.3em; font-weight: 600;">$1</span>');
@@ -2930,6 +2945,8 @@ function renderTable() {
                 cellValue.includes('`') ||
                 cellValue.includes('~~') ||
                 cellValue.includes('==') ||
+                cellValue.includes('{fg:') ||
+                cellValue.includes('{bg:') ||
                 cellValue.includes('\n- ') ||
                 cellValue.trim().startsWith('- ')
             )) {
