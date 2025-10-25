@@ -33,6 +33,15 @@ function initializeApp() {
     // Set up keyboard shortcuts
     document.addEventListener('keydown', handleKeyboardShortcuts);
 
+    // Save scroll position on scroll
+    const tableContainer = document.querySelector('.table-container');
+    if (tableContainer) {
+        tableContainer.addEventListener('scroll', () => {
+            localStorage.setItem('scrollTop', tableContainer.scrollTop);
+            localStorage.setItem('scrollLeft', tableContainer.scrollLeft);
+        });
+    }
+
 
 
     // Set up color picker sync for background color
@@ -2526,6 +2535,11 @@ function autoResizeTextarea(textarea) {
 function renderTable() {
     const headerRow = document.getElementById('headerRow');
     const tableBody = document.getElementById('tableBody');
+    const tableContainer = document.querySelector('.table-container');
+
+    // Save current scroll position
+    const scrollTop = tableContainer ? tableContainer.scrollTop : 0;
+    const scrollLeft = tableContainer ? tableContainer.scrollLeft : 0;
 
     headerRow.innerHTML = '';
     tableBody.innerHTML = '';
@@ -2923,6 +2937,23 @@ function renderTable() {
             }
         });
     });
+
+    // Restore scroll position after rendering
+    if (tableContainer) {
+        requestAnimationFrame(() => {
+            // First try to restore from saved position during this render
+            if (scrollTop > 0 || scrollLeft > 0) {
+                tableContainer.scrollTop = scrollTop;
+                tableContainer.scrollLeft = scrollLeft;
+            } else {
+                // Otherwise restore from localStorage (after page refresh)
+                const savedScrollTop = parseInt(localStorage.getItem('scrollTop') || '0');
+                const savedScrollLeft = parseInt(localStorage.getItem('scrollLeft') || '0');
+                tableContainer.scrollTop = savedScrollTop;
+                tableContainer.scrollLeft = savedScrollLeft;
+            }
+        });
+    }
 }
 
 function toggleColumnMenu(event, index) {
