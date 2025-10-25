@@ -573,12 +573,12 @@ function parseMarkdown(text) {
 
         // Bullet list: - item -> • item with hanging indent
         if (formatted.trim().startsWith('- ')) {
-            formatted = formatted.replace(/^(\s*)- (.+)$/, '$1<span style="display: block; text-indent: -1em; padding-left: 1em;">• $2</span>');
+            formatted = formatted.replace(/^(\s*)- (.+)$/, '$1<span style="display: inline-block; width: 100%; text-indent: -1em; padding-left: 1em;">• $2</span>');
         }
 
         // Numbered list: 1. item -> 1. item with hanging indent
         if (/^\d+\.\s/.test(formatted.trim())) {
-            formatted = formatted.replace(/^(\s*)(\d+\.\s)(.+)$/, '$1<span style="display: block; text-indent: -1.5em; padding-left: 1.5em;">$2$3</span>');
+            formatted = formatted.replace(/^(\s*)(\d+\.\s)(.+)$/, '$1<span style="display: inline-block; width: 100%; text-indent: -1.5em; padding-left: 1.5em;">$2$3</span>');
         }
 
         return formatted;
