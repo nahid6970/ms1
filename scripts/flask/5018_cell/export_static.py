@@ -443,7 +443,6 @@ def generate_static_html(data):
             width: 100%;
             border: none;
             padding: 4px;
-            font-size: 14px;
             background: transparent;
             box-sizing: border-box;
             pointer-events: none;
@@ -1203,6 +1202,39 @@ def generate_static_html(data):
             }
         }
 
+        let fontSizeScale = parseFloat(localStorage.getItem('fontSizeScale')) || 1.0;
+
+        function adjustFontSize(delta) {
+            fontSizeScale += delta * 0.1;
+            fontSizeScale = Math.max(0.5, Math.min(2.0, fontSizeScale)); // Limit between 50% and 200%
+            
+            localStorage.setItem('fontSizeScale', fontSizeScale);
+            
+            // Update display
+            document.getElementById('fontSizeDisplay').textContent = Math.round(fontSizeScale * 100) + '%';
+            
+            // Apply to all cell content
+            const cells = document.querySelectorAll('.cell-content');
+            cells.forEach(cell => {
+                const currentFontSize = parseFloat(window.getComputedStyle(cell).fontSize);
+                const baseFontSize = currentFontSize / (parseFloat(cell.dataset.fontScale) || 1.0);
+                cell.style.fontSize = (baseFontSize * fontSizeScale) + 'px';
+                cell.dataset.fontScale = fontSizeScale;
+            });
+        }
+
+        function applyFontSizeScale() {
+            const cells = document.querySelectorAll('.cell-content');
+            cells.forEach(cell => {
+                const currentFontSize = parseFloat(window.getComputedStyle(cell).fontSize);
+                if (currentFontSize && fontSizeScale !== 1.0) {
+                    cell.style.fontSize = (currentFontSize * fontSizeScale) + 'px';
+                    cell.dataset.fontScale = fontSizeScale;
+                }
+            });
+            document.getElementById('fontSizeDisplay').textContent = Math.round(fontSizeScale * 100) + '%';
+        }
+
         // Initialize on load
         window.onload = function() {
             initializeCategories();
@@ -1229,6 +1261,11 @@ def generate_static_html(data):
                     document.getElementById('dataTable').classList.add('hide-row-numbers');
                 }
             }
+            
+            // Apply saved font size scale
+            setTimeout(() => {
+                applyFontSizeScale();
+            }, 100);
         };
     </script>
 </head>
@@ -1269,6 +1306,13 @@ def generate_static_html(data):
                 <input type="checkbox" id="rowToggle" onchange="toggleRowNumbers()" checked>
                 <span>Row #</span>
             </label>
+
+            <div class="wrap-toggle" title="Adjust font size">
+                <span>Font Size:</span>
+                <button onclick="adjustFontSize(-1)" style="background: white; border: 1px solid #ddd; border-radius: 4px; width: 28px; height: 28px; cursor: pointer; margin: 0 2px;">−</button>
+                <span id="fontSizeDisplay" style="min-width: 30px; text-align: center; display: inline-block;">100%</span>
+                <button onclick="adjustFontSize(1)" style="background: white; border: 1px solid #ddd; border-radius: 4px; width: 28px; height: 28px; cursor: pointer; margin: 0 2px;">+</button>
+            </div>
 
             <div class="export-info">
                 Static export - ''' + export_time + '''
