@@ -471,7 +471,27 @@ async function addRow() {
         if (response.ok) {
             const sheet = tableData.sheets[currentSheet];
             sheet.rows.push(new Array(sheet.columns.length).fill(''));
+            const newRowIndex = sheet.rows.length - 1;
             renderTable();
+            
+            // Scroll to and focus on the new row
+            setTimeout(() => {
+                const table = document.getElementById('dataTable');
+                const tbody = table.querySelector('tbody');
+                const rows = tbody.querySelectorAll('tr');
+                const newRow = rows[newRowIndex];
+                
+                if (newRow) {
+                    // Scroll the row into view
+                    newRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    
+                    // Focus on the first input/textarea in the new row
+                    const firstInput = newRow.querySelector('td:not(.row-number) input, td:not(.row-number) textarea');
+                    if (firstInput) {
+                        firstInput.focus();
+                    }
+                }
+            }, 100);
         }
     } catch (error) {
         console.error('Error adding row:', error);
