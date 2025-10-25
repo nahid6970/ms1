@@ -1001,7 +1001,14 @@ def generate_static_html(data):
                         if (key === 'fg') styleObj.color = value;
                         if (key === 'bg') styleObj.backgroundColor = value;
                     });
-                    const styleStr = Object.entries(styleObj).map(([k, v]) => `${k.replace('backgroundColor', 'background-color')}: ${v}`).join('; ');
+                    // Add padding and border-radius for better appearance
+                    styleObj.padding = '2px 6px';
+                    styleObj.borderRadius = '4px';
+                    styleObj.display = 'inline-block';
+                    const styleStr = Object.entries(styleObj).map(([k, v]) => {
+                        const cssKey = k.replace(/([A-Z])/g, '-$1').toLowerCase();
+                        return `${cssKey}: ${v}`;
+                    }).join('; ');
                     return `<span style="${styleStr}">${text}</span>`;
                 });
 
