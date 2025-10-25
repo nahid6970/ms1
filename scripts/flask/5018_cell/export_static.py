@@ -885,6 +885,7 @@ def generate_static_html(data):
                     const cellValue = row[colIndex] || '';
                     const hasMarkdown = cellValue.includes('**') || 
                         cellValue.includes('__') || 
+                        cellValue.includes('@@') || 
                         cellValue.includes('##') || 
                         cellValue.includes('```') || 
                         cellValue.includes('`') || 
@@ -1018,8 +1019,11 @@ def generate_static_html(data):
                 // Bold: **text** -> <strong>text</strong>
                 formatted = formatted.replace(/\\*\\*(.+?)\\*\\*/g, '<strong>$1</strong>');
 
-                // Italic: __text__ -> <em>text</em>
-                formatted = formatted.replace(/__(.+?)__/g, '<em>$1</em>');
+                // Italic: @@text@@ -> <em>text</em>
+                formatted = formatted.replace(/@@(.+?)@@/g, '<em>$1</em>');
+
+                // Underline: __text__ -> <u>text</u>
+                formatted = formatted.replace(/__(.+?)__/g, '<u>$1</u>');
 
                 // Strikethrough: ~~text~~ -> <del>text</del>
                 formatted = formatted.replace(/~~(.+?)~~/g, '<del>$1</del>');
