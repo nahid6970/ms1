@@ -434,6 +434,11 @@ def generate_static_html(data):
             line-height: 1.2;
         }
 
+        /* Hide row numbers when toggle is off */
+        .hide-row-numbers .row-number {
+            display: none;
+        }
+
         .cell-content {
             width: 100%;
             border: none;
@@ -1142,6 +1147,19 @@ def generate_static_html(data):
             }
         });
 
+        function toggleRowNumbers() {
+            const rowToggle = document.getElementById('rowToggle');
+            const table = document.getElementById('dataTable');
+
+            if (rowToggle.checked) {
+                table.classList.remove('hide-row-numbers');
+                localStorage.setItem('rowNumbersVisible', 'true');
+            } else {
+                table.classList.add('hide-row-numbers');
+                localStorage.setItem('rowNumbersVisible', 'false');
+            }
+        }
+
         // Initialize on load
         window.onload = function() {
             initializeCategories();
@@ -1156,6 +1174,16 @@ def generate_static_html(data):
                 wrapToggle.checked = wrapEnabled;
                 if (wrapEnabled) {
                     document.getElementById('dataTable').classList.add('wrap-enabled');
+                }
+            }
+            
+            // Restore row numbers toggle state
+            const rowNumbersVisible = localStorage.getItem('rowNumbersVisible') !== 'false'; // Default true
+            const rowToggle = document.getElementById('rowToggle');
+            if (rowToggle) {
+                rowToggle.checked = rowNumbersVisible;
+                if (!rowNumbersVisible) {
+                    document.getElementById('dataTable').classList.add('hide-row-numbers');
                 }
             }
         };
@@ -1192,6 +1220,11 @@ def generate_static_html(data):
             <label class="wrap-toggle">
                 <input type="checkbox" id="wrapToggle" onchange="toggleRowWrap()">
                 <span>Wrap Text</span>
+            </label>
+            
+            <label class="wrap-toggle" title="Show or hide row numbers">
+                <input type="checkbox" id="rowToggle" onchange="toggleRowNumbers()" checked>
+                <span>Row #</span>
             </label>
 
             <div class="export-info">
