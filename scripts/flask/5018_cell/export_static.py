@@ -68,6 +68,7 @@ def generate_static_html(data):
             display: flex;
             flex-direction: column;
             height: calc(100vh - 40px);
+            overflow: hidden;
         }
 
         .sheet-tabs {
@@ -79,6 +80,7 @@ def generate_static_html(data):
             border-bottom: 1px solid #ddd;
             flex-wrap: nowrap;
             overflow-x: auto;
+            overflow-y: visible;
         }
 
         .category-controls {
@@ -94,6 +96,7 @@ def generate_static_html(data):
         .category-selector {
             position: relative;
             min-width: 150px;
+            z-index: 100;
         }
 
         .category-current {
@@ -120,16 +123,12 @@ def generate_static_html(data):
 
         .category-list {
             display: none;
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
+            position: fixed;
             background: white;
             border: 1px solid #90caf9;
             border-radius: 4px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            z-index: 1000;
-            margin-top: 5px;
+            z-index: 2000;
             max-height: 300px;
             overflow-y: auto;
         }
@@ -190,6 +189,7 @@ def generate_static_html(data):
             flex: 1;
             min-width: 150px;
             max-width: 300px;
+            z-index: 100;
         }
 
         .sheet-current {
@@ -228,16 +228,12 @@ def generate_static_html(data):
 
         .sheet-list {
             display: none;
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
+            position: fixed;
             background: white;
             border: 1px solid #ddd;
             border-radius: 4px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            z-index: 1000;
-            margin-top: 5px;
+            z-index: 2000;
             max-height: 300px;
             overflow-y: auto;
         }
@@ -773,7 +769,19 @@ def generate_static_html(data):
 
         function toggleCategoryList() {
             const categoryList = document.getElementById('categoryList');
-            categoryList.classList.toggle('show');
+            const button = document.getElementById('currentCategoryBtn');
+            
+            if (categoryList.classList.contains('show')) {
+                categoryList.classList.remove('show');
+            } else {
+                // Position the dropdown
+                const rect = button.getBoundingClientRect();
+                categoryList.style.position = 'fixed';
+                categoryList.style.top = (rect.bottom + 5) + 'px';
+                categoryList.style.left = rect.left + 'px';
+                categoryList.style.width = rect.width + 'px';
+                categoryList.classList.add('show');
+            }
         }
 
         function renderCategoryTabs() {
@@ -871,7 +879,19 @@ def generate_static_html(data):
 
         function toggleSheetList() {
             const sheetList = document.getElementById('sheetList');
-            sheetList.classList.toggle('show');
+            const button = document.getElementById('currentSheetBtn');
+            
+            if (sheetList.classList.contains('show')) {
+                sheetList.classList.remove('show');
+            } else {
+                // Position the dropdown
+                const rect = button.getBoundingClientRect();
+                sheetList.style.position = 'fixed';
+                sheetList.style.top = (rect.bottom + 5) + 'px';
+                sheetList.style.left = rect.left + 'px';
+                sheetList.style.width = rect.width + 'px';
+                sheetList.classList.add('show');
+            }
         }
 
         function renderSheetTabs() {
