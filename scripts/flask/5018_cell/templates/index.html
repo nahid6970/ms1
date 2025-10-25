@@ -1,14 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Excel-like Data Table</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
+
 <body>
     <!-- Toast Notification -->
     <div id="toast" class="toast"></div>
@@ -69,7 +73,7 @@
                     <span>➕</span>
                 </button>
             </div>
-            
+
             <div class="sheet-controls">
                 <div class="sheet-selector">
                     <button class="sheet-current" id="currentSheetBtn" onclick="toggleSheetList()">
@@ -84,7 +88,8 @@
                 <button onclick="showRenameModal(currentSheet)" class="btn-sheet-action" title="Rename Sheet">
                     <span>✏️</span>
                 </button>
-                <button onclick="showMoveToCategoryModal(currentSheet)" class="btn-sheet-action" title="Move to Category">
+                <button onclick="showMoveToCategoryModal(currentSheet)" class="btn-sheet-action"
+                    title="Move to Category">
                     <span>📁</span>
                 </button>
                 <button onclick="moveSheetUp(currentSheet)" class="btn-sheet-action" title="Move Sheet Up">
@@ -108,23 +113,31 @@
                 <button onclick="addRow()" class="btn-icon" title="Add Row">➡️</button>
                 <button onclick="saveData()" class="btn-icon" title="Save Data">💾</button>
                 <button onclick="loadData()" class="btn-icon" title="Refresh">🔄</button>
-                
+
                 <label class="btn-icon-toggle" title="Enable text wrapping - Press Enter for new lines">
                     <input type="checkbox" id="wrapToggle" onchange="toggleRowWrap()">
                     <span>↩️</span>
                 </label>
-                
+
                 <label class="btn-icon-toggle" title="Show or hide row numbers">
                     <input type="checkbox" id="rowToggle" onchange="toggleRowNumbers()" checked>
                     <span>#️⃣</span>
                 </label>
             </div>
-            
+
             <div class="search-box">
-                <input type="text" id="searchInput" placeholder="Search..." onkeyup="searchTable()" title="Search in all cells">
+                <input type="text" id="searchInput" placeholder="Search..." onkeyup="searchTable()"
+                    title="Search in all cells">
                 <button onclick="clearSearch()" class="btn-clear-search" title="Clear search">×</button>
             </div>
-        </div>
+
+            <div class="font-size-control">
+                <span class="font-size-label">Font:</span>
+                <button onclick="adjustFontSize(-1)" class="btn-font-size" title="Decrease font size">−</button>
+                <span id="fontSizeDisplay" class="font-size-display">100%</span>
+                <button onclick="adjustFontSize(1)" class="btn-font-size" title="Increase font size">+</button>
+            </div>
+        </div>span>
 
         <div class="table-container">
             <table id="dataTable">
@@ -145,12 +158,13 @@
             </div>
             <form id="columnForm">
                 <input type="hidden" id="editingColumnIndex" value="-1">
-                
+
                 <div class="form-group">
                     <label for="columnName">Column Name</label>
-                    <input type="text" id="columnName" class="form-input" placeholder="Enter column name" required autofocus>
+                    <input type="text" id="columnName" class="form-input" placeholder="Enter column name" required
+                        autofocus>
                 </div>
-                
+
                 <div class="form-row">
                     <div class="form-group">
                         <label for="columnType">Data Type</label>
@@ -161,13 +175,13 @@
                             <option value="email">Email</option>
                         </select>
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="columnWidth">Width (px)</label>
                         <input type="number" id="columnWidth" class="form-input" value="150" min="1">
                     </div>
                 </div>
-                
+
                 <div class="form-row">
                     <div class="form-group">
                         <label for="columnFont">Font</label>
@@ -183,13 +197,13 @@
                             <option value="Comic Sans MS">Comic Sans MS</option>
                         </select>
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="columnFontSize">Font Size (px)</label>
                         <input type="number" id="columnFontSize" class="form-input" value="14" min="8" max="72">
                     </div>
                 </div>
-                
+
                 <div class="form-group">
                     <label for="columnColor">Background Color</label>
                     <div class="color-picker-wrapper">
@@ -197,12 +211,13 @@
                         <input type="text" id="columnColorText" class="form-input color-text" value="#FFFFFF" readonly>
                     </div>
                 </div>
-                
+
                 <div class="form-group">
                     <label for="columnTextColor">Text Color</label>
                     <div class="color-picker-wrapper">
                         <input type="color" id="columnTextColor" class="color-input" value="#000000">
-                        <input type="text" id="columnTextColorText" class="form-input color-text" value="#000000" readonly>
+                        <input type="text" id="columnTextColorText" class="form-input color-text" value="#000000"
+                            readonly>
                     </div>
                 </div>
 
@@ -215,7 +230,8 @@
                     <label for="headerBgColor">Header Background Color</label>
                     <div class="color-picker-wrapper">
                         <input type="color" id="headerBgColor" class="color-input" value="#f8f9fa">
-                        <input type="text" id="headerBgColorText" class="form-input color-text" value="#F8F9FA" readonly>
+                        <input type="text" id="headerBgColorText" class="form-input color-text" value="#F8F9FA"
+                            readonly>
                     </div>
                 </div>
 
@@ -223,7 +239,8 @@
                     <label for="headerTextColor">Header Text Color</label>
                     <div class="color-picker-wrapper">
                         <input type="color" id="headerTextColor" class="color-input" value="#333333">
-                        <input type="text" id="headerTextColorText" class="form-input color-text" value="#333333" readonly>
+                        <input type="text" id="headerTextColorText" class="form-input color-text" value="#333333"
+                            readonly>
                     </div>
                 </div>
 
@@ -244,7 +261,7 @@
                         </label>
                     </div>
                 </div>
-                
+
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" onclick="closeColumnModal()">Cancel</button>
                     <button type="submit" class="btn btn-primary" id="columnSubmitBtn">Add Column</button>
@@ -263,7 +280,8 @@
             <form id="renameForm">
                 <div class="form-group">
                     <label for="sheetName">Sheet Name</label>
-                    <input type="text" id="sheetName" class="form-input" placeholder="Enter sheet name" required autofocus>
+                    <input type="text" id="sheetName" class="form-input" placeholder="Enter sheet name" required
+                        autofocus>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" onclick="closeRenameModal()">Cancel</button>
@@ -283,7 +301,8 @@
             <form id="addCategoryForm">
                 <div class="form-group">
                     <label for="categoryName">Category Name</label>
-                    <input type="text" id="categoryName" class="form-input" placeholder="e.g., Bengali, English, History" required autofocus>
+                    <input type="text" id="categoryName" class="form-input"
+                        placeholder="e.g., Bengali, English, History" required autofocus>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" onclick="closeAddCategoryModal()">Cancel</button>
@@ -323,7 +342,8 @@
                 <span class="close" onclick="closeSettingsModal()">&times;</span>
             </div>
             <div class="settings-content">
-                <button class="btn btn-primary" onclick="showMarkdownGuide()" style="width: 100%; padding: 15px; font-size: 16px;">
+                <button class="btn btn-primary" onclick="showMarkdownGuide()"
+                    style="width: 100%; padding: 15px; font-size: 16px;">
                     📝 Markdown Guide
                 </button>
             </div>
@@ -354,12 +374,14 @@
                             <td style="padding: 8px;"><u>underline</u></td>
                         </tr>
                         <tr style="border-bottom: 1px solid #ddd;">
-                            <td style="padding: 8px; font-family: monospace; background: #f8f9fa;">~~strikethrough~~</td>
+                            <td style="padding: 8px; font-family: monospace; background: #f8f9fa;">~~strikethrough~~
+                            </td>
                             <td style="padding: 8px;"><del>strikethrough</del></td>
                         </tr>
                         <tr style="border-bottom: 1px solid #ddd;">
                             <td style="padding: 8px; font-family: monospace; background: #f8f9fa;">##heading##</td>
-                            <td style="padding: 8px;"><span style="font-size: 1.3em; font-weight: 600;">heading</span></td>
+                            <td style="padding: 8px;"><span style="font-size: 1.3em; font-weight: 600;">heading</span>
+                            </td>
                         </tr>
                     </table>
                 </div>
@@ -400,20 +422,32 @@
                     <h3 style="color: #007bff; margin-bottom: 10px;">Custom Colors</h3>
                     <table style="width: 100%; border-collapse: collapse;">
                         <tr style="border-bottom: 1px solid #ddd;">
-                            <td style="padding: 8px; font-family: monospace; background: #f8f9fa; font-size: 12px;">{fg:red}red text{/}</td>
-                            <td style="padding: 8px;"><span style="color: red; padding: 2px 6px; border-radius: 4px; display: inline-block;">red text</span></td>
+                            <td style="padding: 8px; font-family: monospace; background: #f8f9fa; font-size: 12px;">
+                                {fg:red}red text{/}</td>
+                            <td style="padding: 8px;"><span
+                                    style="color: red; padding: 2px 6px; border-radius: 4px; display: inline-block;">red
+                                    text</span></td>
                         </tr>
                         <tr style="border-bottom: 1px solid #ddd;">
-                            <td style="padding: 8px; font-family: monospace; background: #f8f9fa; font-size: 12px;">{bg:yellow}highlighted{/}</td>
-                            <td style="padding: 8px;"><span style="background-color: yellow; padding: 2px 6px; border-radius: 4px; display: inline-block;">highlighted</span></td>
+                            <td style="padding: 8px; font-family: monospace; background: #f8f9fa; font-size: 12px;">
+                                {bg:yellow}highlighted{/}</td>
+                            <td style="padding: 8px;"><span
+                                    style="background-color: yellow; padding: 2px 6px; border-radius: 4px; display: inline-block;">highlighted</span>
+                            </td>
                         </tr>
                         <tr style="border-bottom: 1px solid #ddd;">
-                            <td style="padding: 8px; font-family: monospace; background: #f8f9fa; font-size: 12px;">{fg:white;bg:blue}badge{/}</td>
-                            <td style="padding: 8px;"><span style="color: white; background-color: blue; padding: 2px 6px; border-radius: 4px; display: inline-block;">badge</span></td>
+                            <td style="padding: 8px; font-family: monospace; background: #f8f9fa; font-size: 12px;">
+                                {fg:white;bg:blue}badge{/}</td>
+                            <td style="padding: 8px;"><span
+                                    style="color: white; background-color: blue; padding: 2px 6px; border-radius: 4px; display: inline-block;">badge</span>
+                            </td>
                         </tr>
                         <tr style="border-bottom: 1px solid #ddd;">
-                            <td style="padding: 8px; font-family: monospace; background: #f8f9fa; font-size: 12px;">{fg:#28cb5d}hex color{/}</td>
-                            <td style="padding: 8px;"><span style="color: #28cb5d; padding: 2px 6px; border-radius: 4px; display: inline-block;">hex color</span></td>
+                            <td style="padding: 8px; font-family: monospace; background: #f8f9fa; font-size: 12px;">
+                                {fg:#28cb5d}hex color{/}</td>
+                            <td style="padding: 8px;"><span
+                                    style="color: #28cb5d; padding: 2px 6px; border-radius: 4px; display: inline-block;">hex
+                                    color</span></td>
                         </tr>
                     </table>
                 </div>
@@ -432,4 +466,5 @@
 
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
+
 </html>

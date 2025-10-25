@@ -48,6 +48,51 @@ body {
     transition: all 0.2s;
 }
 
+.font-size-control {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 8px;
+    background: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.font-size-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #333;
+}
+
+.btn-font-size {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    width: 28px;
+    height: 28px;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.btn-font-size:hover {
+    background: #e9ecef;
+    border-color: #007bff;
+    transform: scale(1.05);
+}
+
+.font-size-display {
+    min-width: 40px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 500;
+    color: #333;
+}
+
 .search-box:focus-within {
     border-color: #007bff;
     box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);

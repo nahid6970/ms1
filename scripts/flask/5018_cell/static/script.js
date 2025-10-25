@@ -108,6 +108,11 @@ function initializeApp() {
             }
         }
     }
+
+    // Initialize font size scale
+    setTimeout(() => {
+        applyFontSizeScale();
+    }, 100);
 }
 
 function loadColumnWidths() {
@@ -116,6 +121,63 @@ function loadColumnWidths() {
 
     document.documentElement.style.setProperty('--actions-width', actionsWidth);
     document.documentElement.style.setProperty('--rownum-width', rownumWidth);
+}
+
+let fontSizeScale = parseFloat(localStorage.getItem('fontSizeScale')) || 1.0;
+
+function adjustFontSize(delta) {
+    fontSizeScale += delta * 0.1;
+    fontSizeScale = Math.max(0.5, Math.min(2.0, fontSizeScale)); // Limit between 50% and 200%
+    
+    localStorage.setItem('fontSizeScale', fontSizeScale);
+    
+    // Update display
+    document.getElementById('fontSizeDisplay').textContent = Math.round(fontSizeScale * 100) + '%';
+    
+    // Apply to all inputs and textareas in cells
+    const table = document.getElementById('dataTable');
+    if (table) {
+        const cells = table.querySelectorAll('td:not(.row-number) input, td:not(.row-number) textarea');
+        cells.forEach(cell => {
+            const currentFontSize = parseFloat(window.getComputedStyle(cell).fontSize);
+            const baseFontSize = currentFontSize / (parseFloat(cell.dataset.fontScale) || 1.0);
+            cell.style.fontSize = (baseFontSize * fontSizeScale) + 'px';
+            cell.dataset.fontScale = fontSizeScale;
+        });
+
+        // Also apply to markdown previews
+        const previews = table.querySelectorAll('.markdown-preview');
+        previews.forEach(preview => {
+            const currentFontSize = parseFloat(window.getComputedStyle(preview).fontSize);
+            const baseFontSize = currentFontSize / (parseFloat(preview.dataset.fontScale) || 1.0);
+            preview.style.fontSize = (baseFontSize * fontSizeScale) + 'px';
+            preview.dataset.fontScale = fontSizeScale;
+        });
+    }
+}
+
+function applyFontSizeScale() {
+    const table = document.getElementById('dataTable');
+    if (table && fontSizeScale !== 1.0) {
+        const cells = table.querySelectorAll('td:not(.row-number) input, td:not(.row-number) textarea');
+        cells.forEach(cell => {
+            const currentFontSize = parseFloat(window.getComputedStyle(cell).fontSize);
+            if (currentFontSize) {
+                cell.style.fontSize = (currentFontSize * fontSizeScale) + 'px';
+                cell.dataset.fontScale = fontSizeScale;
+            }
+        });
+
+        const previews = table.querySelectorAll('.markdown-preview');
+        previews.forEach(preview => {
+            const currentFontSize = parseFloat(window.getComputedStyle(preview).fontSize);
+            if (currentFontSize) {
+                preview.style.fontSize = (currentFontSize * fontSizeScale) + 'px';
+                preview.dataset.fontScale = fontSizeScale;
+            }
+        });
+    }
+    document.getElementById('fontSizeDisplay').textContent = Math.round(fontSizeScale * 100) + '%';
 }
 
 
