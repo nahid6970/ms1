@@ -2538,13 +2538,12 @@ function autoResizeTextarea(textarea) {
     // Reset height to measure actual content
     textarea.style.height = 'auto';
 
-    // Get the actual content height with buffer for proper display
+    // Get the actual content height
     const scrollHeight = textarea.scrollHeight;
     const minHeight = 22; // Match input height exactly
-    const buffer = 4; // Extra buffer to prevent last line cutoff
 
-    // Set height based on content with buffer
-    const newHeight = Math.max(minHeight, scrollHeight + buffer);
+    // Set height based on content
+    const newHeight = Math.max(minHeight, scrollHeight);
     textarea.style.height = newHeight + 'px';
 
     // Mark the row if it has expanded content
@@ -2554,7 +2553,7 @@ function autoResizeTextarea(textarea) {
         const hasExpandedContent = Array.from(tr.querySelectorAll('textarea:not(.merged-cell textarea)')).some(ta => {
             ta.style.height = 'auto';
             const needsHeight = ta.scrollHeight > minHeight + 2; // Small threshold
-            ta.style.height = Math.max(minHeight, ta.scrollHeight + buffer) + 'px';
+            ta.style.height = Math.max(minHeight, ta.scrollHeight) + 'px';
             return needsHeight;
         });
 

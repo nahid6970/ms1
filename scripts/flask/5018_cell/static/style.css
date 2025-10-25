@@ -565,7 +565,6 @@ td {
     min-height: 22px;
     height: 22px; /* Match input height exactly */
     vertical-align: middle;
-    padding-bottom: 6px; /* Extra padding to prevent cutoff */
 }
 
 .wrap-enabled td textarea:not(.merged-cell textarea):focus {
