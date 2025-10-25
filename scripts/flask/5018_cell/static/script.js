@@ -143,6 +143,11 @@ function adjustFontSize(delta) {
             const baseFontSize = currentFontSize / (parseFloat(cell.dataset.fontScale) || 1.0);
             cell.style.fontSize = (baseFontSize * fontSizeScale) + 'px';
             cell.dataset.fontScale = fontSizeScale;
+            
+            // Auto-resize textareas if wrap is enabled
+            if (cell.tagName === 'TEXTAREA' && table.classList.contains('wrap-enabled')) {
+                autoResizeTextarea(cell);
+            }
         });
 
         // Also apply to markdown previews
@@ -165,6 +170,11 @@ function applyFontSizeScale() {
             if (currentFontSize) {
                 cell.style.fontSize = (currentFontSize * fontSizeScale) + 'px';
                 cell.dataset.fontScale = fontSizeScale;
+                
+                // Auto-resize textareas if wrap is enabled
+                if (cell.tagName === 'TEXTAREA' && table.classList.contains('wrap-enabled')) {
+                    autoResizeTextarea(cell);
+                }
             }
         });
 
