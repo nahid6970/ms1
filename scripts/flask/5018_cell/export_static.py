@@ -1416,10 +1416,6 @@ def generate_static_html(data):
                 <span id="fontSizeDisplay" class="font-size-display">100%</span>
                 <button onclick="adjustFontSize(1)" class="btn-font-size" title="Increase font size">+</button>
             </div>
-
-            <div class="export-info">
-                Static export - ''' + export_time + '''
-            </div>
         </div>
 
         <div class="table-container">
