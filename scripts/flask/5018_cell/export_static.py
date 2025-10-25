@@ -894,7 +894,9 @@ def generate_static_html(data):
                         cellValue.includes('{fg:') || 
                         cellValue.includes('{bg:') || 
                         cellValue.includes('\\n- ') || 
-                        cellValue.trim().startsWith('- ');
+                        cellValue.includes('\\n-- ') || 
+                        cellValue.trim().startsWith('- ') || 
+                        cellValue.trim().startsWith('-- ');
                     
                     if (hasMarkdown) {
                         // Apply markdown formatting
@@ -1034,8 +1036,12 @@ def generate_static_html(data):
                 // Highlight: ==text== -> <mark>text</mark>
                 formatted = formatted.replace(/==(.+?)==/g, '<mark>$1</mark>');
 
-                // Bullet list: - item -> • item with hanging indent
-                if (formatted.trim().startsWith('- ')) {
+                // Sublist: -- item -> ◦ item with more indent (white circle)
+                if (formatted.trim().startsWith('-- ')) {
+                    formatted = formatted.replace(/^(\\s*)-- (.+)$/, '$1<span style="display: inline-block; width: 100%; text-indent: -1em; padding-left: 2em;">◦ $2</span>');
+                }
+                // Bullet list: - item -> • item with hanging indent (black circle)
+                else if (formatted.trim().startsWith('- ')) {
                     formatted = formatted.replace(/^(\\s*)- (.+)$/, '$1<span style="display: inline-block; width: 100%; text-indent: -1em; padding-left: 1em;">• $2</span>');
                 }
 
