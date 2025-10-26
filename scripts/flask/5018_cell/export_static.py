@@ -2,6 +2,16 @@
 """
 Static HTML Export Script
 Generates a standalone HTML file from the current table data
+
+IMPORTANT: When adding new markdown syntax, update these 3 locations:
+1. hasMarkdown detection (around line 1020) - add cellValue.includes() check
+2. parseMarkdown() function (around line 1100) - add regex replacement pattern
+3. CSS styles (around line 750) - add styling for new HTML elements if needed
+
+These must match the implementation in:
+- static/script.js (applyMarkdownFormatting and parseMarkdown functions)
+- static/style.css (markdown-preview styles)
+- templates/index.html (Markdown Guide modal)
 """
 
 import json
@@ -751,6 +761,8 @@ def generate_static_html(data):
             color: #999;
         }
 
+        /* IMPORTANT: When adding new markdown syntax, add CSS styling here */
+        /* These styles must match static/style.css .markdown-preview styles */
         sup {
             vertical-align: super;
             font-size: 0.75em;
@@ -1018,6 +1030,8 @@ def generate_static_html(data):
                     cellContent.className = 'cell-content';
                     
                     // Handle markdown formatting and newlines
+                    // IMPORTANT: When adding new markdown syntax, add detection here
+                    // This must match the hasMarkdown check in static/script.js
                     const cellValue = row[colIndex] || '';
                     const hasMarkdown = cellValue.includes('**') || 
                         cellValue.includes('__') || 
@@ -1114,6 +1128,28 @@ def generate_static_html(data):
             return stripped;
         }
 
+        /**
+         * Parse markdown syntax and convert to HTML
+         * 
+         * IMPORTANT: When adding new markdown syntax, add regex replacement here
+         * This must match the parseMarkdown() function in static/script.js
+         * 
+         * Supported syntax:
+         * - **bold** -> <strong>
+         * - @@italic@@ -> <em>
+         * - __underline__ -> <u>
+         * - ~~strikethrough~~ -> <del>
+         * - ^superscript^ -> <sup>
+         * - ~subscript~ -> <sub>
+         * - ##heading## -> larger text
+         * - `code` -> <code>
+         * - ==highlight== -> <mark>
+         * - {fg:color}text{/} or {bg:color}text{/} or {fg:color;bg:color}text{/} -> colored text
+         * - - item -> bullet list
+         * - -- subitem -> sub-bullet list
+         * - 1. item -> numbered list
+         * - ``` code block ```
+         */
         function parseMarkdown(text) {
             if (!text) return '';
 
