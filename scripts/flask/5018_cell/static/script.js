@@ -272,6 +272,16 @@ async function loadData() {
         const sheetCategory = tableData.sheetCategories[currentSheet] || tableData.sheetCategories[String(currentSheet)] || null;
         currentCategory = sheetCategory;
 
+        // Restore sheet history from localStorage for Alt+M toggle
+        const savedHistory = localStorage.getItem('sheetHistory');
+        if (savedHistory) {
+            try {
+                sheetHistory = JSON.parse(savedHistory);
+            } catch (e) {
+                sheetHistory = [];
+            }
+        }
+
         initializeCategories();
         renderCategoryTabs();
         renderSheetTabs();
@@ -2227,6 +2237,8 @@ function switchSheet(index) {
         if (sheetHistory.length > 2) {
             sheetHistory.shift();
         }
+        // Save to localStorage for persistence across page refreshes
+        localStorage.setItem('sheetHistory', JSON.stringify(sheetHistory));
     }
 
     currentSheet = index;
