@@ -2166,6 +2166,11 @@ async function deleteSheet(index) {
 
 function switchSheet(index) {
     currentSheet = index;
+    
+    // Update currentCategory to match the sheet's category
+    const sheetCategory = tableData.sheetCategories[index] || tableData.sheetCategories[String(index)] || null;
+    currentCategory = sheetCategory;
+    
     renderSheetTabs();
     renderTable();
     autoSaveActiveSheet();
