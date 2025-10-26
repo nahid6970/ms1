@@ -2198,6 +2198,7 @@ function switchSheet(index) {
     const sheetCategory = tableData.sheetCategories[index] || tableData.sheetCategories[String(index)] || null;
     currentCategory = sheetCategory;
     
+    renderCategoryTabs();
     renderSheetTabs();
     renderTable();
     autoSaveActiveSheet();
