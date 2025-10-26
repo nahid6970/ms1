@@ -464,6 +464,29 @@
         </div>
     </div>
 
+    <!-- F1 Quick Navigation Popup -->
+    <div id="f1Popup" class="f1-popup-overlay">
+        <div class="f1-popup">
+            <div class="f1-popup-header">
+                <h3>Quick Navigation</h3>
+                <button class="f1-close" onclick="closeF1Popup()">&times;</button>
+            </div>
+            <div class="f1-search-box">
+                <input type="text" id="f1SearchInput" placeholder="Search sheets..." onkeyup="filterF1Sheets()">
+            </div>
+            <div class="f1-content">
+                <div class="f1-categories">
+                    <div class="f1-category-title">Categories</div>
+                    <div id="f1CategoryList" class="f1-category-list"></div>
+                </div>
+                <div class="f1-sheets">
+                    <div class="f1-sheets-title">Sheets</div>
+                    <div id="f1SheetList" class="f1-sheet-list"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 

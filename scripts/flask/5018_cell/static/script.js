@@ -223,6 +223,17 @@ function handleKeyboardShortcuts(e) {
         clearSearch();
     }
 
+    // F1 to open quick navigation popup
+    if (e.key === 'F1') {
+        e.preventDefault();
+        openF1Popup();
+    }
+
+    // Escape to close F1 popup
+    if (e.key === 'Escape' && document.getElementById('f1Popup').classList.contains('show')) {
+        closeF1Popup();
+    }
+
     // Handle Enter key in textareas when wrap is enabled
     if (e.key === 'Enter' && document.activeElement.tagName === 'TEXTAREA') {
         const textarea = document.activeElement;
@@ -3271,3 +3282,164 @@ window.onclick = function (event) {
         closeCellContextMenu();
     }
 };
+
+// F1 Quick Navigation Popup Functions
+let selectedF1Category = null;
+
+function openF1Popup() {
+    const popup = document.getElementById('f1Popup');
+    popup.classList.add('show');
+    
+    // Set selected category to current category
+    selectedF1Category = currentCategory;
+    
+    // Populate categories and sheets
+    populateF1Categories();
+    populateF1Sheets();
+    
+    // Focus search input
+    setTimeout(() => {
+        const searchInput = document.getElementById('f1SearchInput');
+        if (searchInput) {
+            searchInput.focus();
+        }
+    }, 100);
+}
+
+function closeF1Popup() {
+    const popup = document.getElementById('f1Popup');
+    popup.classList.remove('show');
+    
+    // Clear search
+    const searchInput = document.getElementById('f1SearchInput');
+    if (searchInput) {
+        searchInput.value = '';
+    }
+    
+    // Reset filter
+    filterF1Sheets();
+}
+
+function populateF1Categories() {
+    const categoryList = document.getElementById('f1CategoryList');
+    if (!categoryList) return;
+    
+    categoryList.innerHTML = '';
+    
+    // Add "Uncategorized" option
+    const uncategorizedSheets = tableData.sheets.filter((sheet, index) => {
+        const category = tableData.sheetCategories[index] || tableData.sheetCategories[String(index)];
+        return !category;
+    });
+    
+    const uncategorizedItem = document.createElement('div');
+    uncategorizedItem.className = 'f1-category-item' + (selectedF1Category === null ? ' active' : '');
+    uncategorizedItem.innerHTML = `
+        <input type="radio" name="f1Category" class="f1-category-radio" ${selectedF1Category === null ? 'checked' : ''}>
+        <span class="f1-category-name">Uncategorized</span>
+        <span class="f1-category-count">${uncategorizedSheets.length}</span>
+    `;
+    uncategorizedItem.onclick = () => selectF1Category(null);
+    categoryList.appendChild(uncategorizedItem);
+    
+    // Add other categories
+    tableData.categories.forEach(category => {
+        const categorySheets = tableData.sheets.filter((sheet, index) => {
+            const sheetCategory = tableData.sheetCategories[index] || tableData.sheetCategories[String(index)];
+            return sheetCategory === category;
+        });
+        
+        const item = document.createElement('div');
+        item.className = 'f1-category-item' + (selectedF1Category === category ? ' active' : '');
+        item.innerHTML = `
+            <input type="radio" name="f1Category" class="f1-category-radio" ${selectedF1Category === category ? 'checked' : ''}>
+            <span class="f1-category-name">${category}</span>
+            <span class="f1-category-count">${categorySheets.length}</span>
+        `;
+        item.onclick = () => selectF1Category(category);
+        categoryList.appendChild(item);
+    });
+}
+
+function selectF1Category(category) {
+    selectedF1Category = category;
+    
+    // Update active state
+    const items = document.querySelectorAll('.f1-category-item');
+    items.forEach(item => item.classList.remove('active'));
+    
+    const radios = document.querySelectorAll('.f1-category-radio');
+    radios.forEach(radio => radio.checked = false);
+    
+    event.currentTarget.classList.add('active');
+    event.currentTarget.querySelector('.f1-category-radio').checked = true;
+    
+    // Repopulate sheets
+    populateF1Sheets();
+}
+
+function populateF1Sheets() {
+    const sheetList = document.getElementById('f1SheetList');
+    if (!sheetList) return;
+    
+    sheetList.innerHTML = '';
+    
+    // Filter sheets by selected category
+    tableData.sheets.forEach((sheet, index) => {
+        const sheetCategory = tableData.sheetCategories[index] || tableData.sheetCategories[String(index)];
+        
+        // Check if sheet belongs to selected category
+        if (selectedF1Category === null && sheetCategory) return;
+        if (selectedF1Category !== null && sheetCategory !== selectedF1Category) return;
+        
+        const item = document.createElement('div');
+        item.className = 'f1-sheet-item' + (index === currentSheet ? ' active' : '');
+        item.innerHTML = `
+            <span class="f1-sheet-icon">📄</span>
+            <span class="f1-sheet-name">${sheet.name}</span>
+        `;
+        item.onclick = () => switchToSheetFromF1(index);
+        sheetList.appendChild(item);
+    });
+    
+    // Show message if no sheets
+    if (sheetList.children.length === 0) {
+        const emptyMsg = document.createElement('div');
+        emptyMsg.style.padding = '20px';
+        emptyMsg.style.textAlign = 'center';
+        emptyMsg.style.color = '#999';
+        emptyMsg.textContent = 'No sheets in this category';
+        sheetList.appendChild(emptyMsg);
+    }
+}
+
+function filterF1Sheets() {
+    const searchInput = document.getElementById('f1SearchInput');
+    const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+    
+    const sheetItems = document.querySelectorAll('.f1-sheet-item');
+    sheetItems.forEach(item => {
+        const sheetName = item.querySelector('.f1-sheet-name').textContent.toLowerCase();
+        if (sheetName.includes(searchTerm)) {
+            item.classList.remove('hidden');
+        } else {
+            item.classList.add('hidden');
+        }
+    });
+}
+
+function switchToSheetFromF1(sheetIndex) {
+    // Switch to the sheet
+    switchSheet(sheetIndex);
+    
+    // Close the popup
+    closeF1Popup();
+}
+
+// Close F1 popup when clicking outside
+document.addEventListener('click', (event) => {
+    const popup = document.getElementById('f1Popup');
+    if (popup && event.target === popup) {
+        closeF1Popup();
+    }
+});
