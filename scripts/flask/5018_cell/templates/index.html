@@ -472,7 +472,8 @@
                 <button class="f1-close" onclick="closeF1Popup()">&times;</button>
             </div>
             <div class="f1-search-box">
-                <input type="text" id="f1SearchInput" placeholder="Search sheets..." onkeyup="filterF1Sheets()">
+                <input type="text" id="f1SearchInput" placeholder="Search sheets..." onkeyup="filterF1Sheets()"
+                    onkeydown="handleF1SearchKeydown(event)">
             </div>
             <div class="f1-content">
                 <div class="f1-categories">

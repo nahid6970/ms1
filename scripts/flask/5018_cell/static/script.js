@@ -3439,6 +3439,22 @@ function filterF1Sheets() {
     });
 }
 
+function handleF1SearchKeydown(e) {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        
+        // Find the first visible (non-hidden) sheet item
+        const sheetItems = document.querySelectorAll('.f1-sheet-item');
+        for (let item of sheetItems) {
+            if (!item.classList.contains('hidden')) {
+                // Click the first visible item
+                item.click();
+                break;
+            }
+        }
+    }
+}
+
 function switchToSheetFromF1(sheetIndex) {
     // Switch to the sheet
     switchSheet(sheetIndex);
