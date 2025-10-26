@@ -555,6 +555,16 @@ function updateCell(rowIndex, colIndex, value) {
     }, 1000);
 }
 
+/**
+ * Apply markdown formatting to a cell
+ * 
+ * IMPORTANT: When adding new markdown syntax:
+ * 1. Add the detection pattern here in hasMarkdown check
+ * 2. Add the parsing logic in parseMarkdown() function
+ * 3. Update the detection in renderTable() function (search for "Apply markdown formatting to all cells")
+ * 4. Update the Markdown Guide modal in templates/index.html
+ * 5. Add CSS styling if needed in static/style.css
+ */
 function applyMarkdownFormatting(rowIndex, colIndex, value) {
     // Find the cell element
     const table = document.getElementById('dataTable');
@@ -631,6 +641,25 @@ function applyMarkdownFormatting(rowIndex, colIndex, value) {
     }
 }
 
+/**
+ * Parse markdown syntax and convert to HTML
+ * 
+ * Supported syntax:
+ * - **bold** -> <strong>
+ * - @@italic@@ -> <em>
+ * - __underline__ -> <u>
+ * - ~~strikethrough~~ -> <del>
+ * - ^superscript^ -> <sup>
+ * - ~subscript~ -> <sub>
+ * - ##heading## -> larger text
+ * - `code` -> <code>
+ * - ==highlight== -> <mark>
+ * - {fg:color}text{/} or {bg:color}text{/} or {fg:color;bg:color}text{/} -> colored text
+ * - - item -> bullet list
+ * - -- subitem -> sub-bullet list
+ * - 1. item -> numbered list
+ * - ``` code block ```
+ */
 function parseMarkdown(text) {
     if (!text) return '';
 
@@ -3116,6 +3145,8 @@ function renderTable() {
     }
 
     // Apply markdown formatting to all cells
+    // IMPORTANT: When adding new markdown syntax, update this detection check
+    // to match the one in applyMarkdownFormatting() function
     sheet.rows.forEach((row, rowIndex) => {
         row.forEach((cellValue, colIndex) => {
             if (cellValue && (
