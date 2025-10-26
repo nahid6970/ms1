@@ -4,6 +4,7 @@ let currentCategory = null; // null means "Uncategorized"
 let contextMenuCell = null;
 let selectedCells = []; // Array of {row, col, td} objects for multi-cell operations
 let isSelecting = false;
+let sheetHistory = []; // Track recently visited sheets for Alt+M toggle
 
 /**
  * MULTI-CELL OPERATION PATTERN:
@@ -238,6 +239,12 @@ function handleKeyboardShortcuts(e) {
     if (e.altKey && e.key === 'n') {
         e.preventDefault();
         addRow();
+    }
+
+    // Alt+M to toggle between most recent 2 sheets
+    if (e.altKey && e.key === 'm') {
+        e.preventDefault();
+        toggleRecentSheets();
     }
 
     // Handle Enter key in textareas when wrap is enabled
@@ -2171,6 +2178,20 @@ async function deleteSheet(index) {
 }
 
 function switchSheet(index) {
+    // Track sheet history for Alt+M toggle
+    if (currentSheet !== index) {
+        // Remove the index if it already exists in history
+        sheetHistory = sheetHistory.filter(i => i !== index);
+        // Add current sheet to history before switching
+        if (sheetHistory[sheetHistory.length - 1] !== currentSheet) {
+            sheetHistory.push(currentSheet);
+        }
+        // Keep only last 2 sheets in history
+        if (sheetHistory.length > 2) {
+            sheetHistory.shift();
+        }
+    }
+    
     currentSheet = index;
     
     // Update currentCategory to match the sheet's category
@@ -3470,3 +3491,16 @@ document.addEventListener('click', (event) => {
         closeF1Popup();
     }
 });
+
+// Toggle between the 2 most recent sheets (Alt+M)
+function toggleRecentSheets() {
+    // If we have at least one sheet in history, switch to it
+    if (sheetHistory.length > 0) {
+        const previousSheet = sheetHistory[sheetHistory.length - 1];
+        
+        // Make sure the sheet index is valid
+        if (previousSheet >= 0 && previousSheet < tableData.sheets.length) {
+            switchSheet(previousSheet);
+        }
+    }
+}
