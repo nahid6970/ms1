@@ -234,6 +234,12 @@ function handleKeyboardShortcuts(e) {
         closeF1Popup();
     }
 
+    // Alt+N to add new row
+    if (e.altKey && e.key === 'n') {
+        e.preventDefault();
+        addRow();
+    }
+
     // Handle Enter key in textareas when wrap is enabled
     if (e.key === 'Enter' && document.activeElement.tagName === 'TEXTAREA') {
         const textarea = document.activeElement;

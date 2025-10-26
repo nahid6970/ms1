@@ -443,9 +443,6 @@ LAlt & c:: {
     }
 }
 
-;! autofill job field
-!n::Run("C:\Users\nahid\ms\msBackups\@JOB\autofill.ahk", "", "Hide")
-
 ;! Open With Preferred Editor
 ^!n:: {
     OpenWithEditor()

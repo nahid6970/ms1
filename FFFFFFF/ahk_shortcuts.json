@@ -187,7 +187,7 @@
             "description": "",
             "hotkey": "!n",
             "action": "Run(\"C:\\Users\\nahid\\ms\\msBackups\\@JOB\\autofill.ahk\", \"\", \"Hide\")",
-            "enabled": true
+            "enabled": false
         },
         {
             "name": "Open With Preferred Editor",
