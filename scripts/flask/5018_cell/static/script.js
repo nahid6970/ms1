@@ -129,12 +129,12 @@ let fontSizeScale = parseFloat(localStorage.getItem('fontSizeScale')) || 1.0;
 function adjustFontSize(delta) {
     fontSizeScale += delta * 0.1;
     fontSizeScale = Math.max(0.5, Math.min(2.0, fontSizeScale)); // Limit between 50% and 200%
-    
+
     localStorage.setItem('fontSizeScale', fontSizeScale);
-    
+
     // Update display
     document.getElementById('fontSizeDisplay').textContent = Math.round(fontSizeScale * 100) + '%';
-    
+
     // Apply to all inputs and textareas in cells
     const table = document.getElementById('dataTable');
     if (table) {
@@ -144,7 +144,7 @@ function adjustFontSize(delta) {
             const baseFontSize = currentFontSize / (parseFloat(cell.dataset.fontScale) || 1.0);
             cell.style.fontSize = (baseFontSize * fontSizeScale) + 'px';
             cell.dataset.fontScale = fontSizeScale;
-            
+
             // Auto-resize textareas if wrap is enabled
             if (cell.tagName === 'TEXTAREA' && table.classList.contains('wrap-enabled')) {
                 autoResizeTextarea(cell);
@@ -171,7 +171,7 @@ function applyFontSizeScale() {
             if (currentFontSize) {
                 cell.style.fontSize = (currentFontSize * fontSizeScale) + 'px';
                 cell.dataset.fontScale = fontSizeScale;
-                
+
                 // Auto-resize textareas if wrap is enabled
                 if (cell.tagName === 'TEXTAREA' && table.classList.contains('wrap-enabled')) {
                     autoResizeTextarea(cell);
@@ -497,18 +497,18 @@ async function addRow() {
             sheet.rows.push(new Array(sheet.columns.length).fill(''));
             const newRowIndex = sheet.rows.length - 1;
             renderTable();
-            
+
             // Scroll to and focus on the new row
             setTimeout(() => {
                 const table = document.getElementById('dataTable');
                 const tbody = table.querySelector('tbody');
                 const rows = tbody.querySelectorAll('tr');
                 const newRow = rows[newRowIndex];
-                
+
                 if (newRow) {
                     // Scroll the row into view
                     newRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    
+
                     // Focus on the first input/textarea in the new row
                     const firstInput = newRow.querySelector('td:not(.row-number) input, td:not(.row-number) textarea');
                     if (firstInput) {
@@ -580,6 +580,8 @@ function applyMarkdownFormatting(rowIndex, colIndex, value) {
         value.includes('`') ||
         value.includes('~~') ||
         value.includes('==') ||
+        value.includes('^') ||
+        value.includes('~') ||
         value.includes('{fg:') ||
         value.includes('{bg:') ||
         value.includes('\n- ') ||
@@ -682,6 +684,12 @@ function parseMarkdown(text) {
 
         // Strikethrough: ~~text~~ -> <del>text</del>
         formatted = formatted.replace(/~~(.+?)~~/g, '<del>$1</del>');
+
+        // Superscript: ^text^ -> <sup>text</sup>
+        formatted = formatted.replace(/\^(.+?)\^/g, '<sup>$1</sup>');
+
+        // Subscript: ~text~ -> <sub>text</sub> (single tilde, not double)
+        formatted = formatted.replace(/(?<!~)~([^~]+?)~(?!~)/g, '<sub>$1</sub>');
 
         // Sublist: -- item -> ◦ item with more indent (white circle)
         if (formatted.trim().startsWith('-- ')) {
@@ -2191,13 +2199,13 @@ function switchSheet(index) {
             sheetHistory.shift();
         }
     }
-    
+
     currentSheet = index;
-    
+
     // Update currentCategory to match the sheet's category
     const sheetCategory = tableData.sheetCategories[index] || tableData.sheetCategories[String(index)] || null;
     currentCategory = sheetCategory;
-    
+
     renderCategoryTabs();
     renderSheetTabs();
     renderTable();
@@ -3322,14 +3330,14 @@ let selectedF1Category = null;
 function openF1Popup() {
     const popup = document.getElementById('f1Popup');
     popup.classList.add('show');
-    
+
     // Set selected category to current category
     selectedF1Category = currentCategory;
-    
+
     // Populate categories and sheets
     populateF1Categories();
     populateF1Sheets();
-    
+
     // Focus search input
     setTimeout(() => {
         const searchInput = document.getElementById('f1SearchInput');
@@ -3342,13 +3350,13 @@ function openF1Popup() {
 function closeF1Popup() {
     const popup = document.getElementById('f1Popup');
     popup.classList.remove('show');
-    
+
     // Clear search
     const searchInput = document.getElementById('f1SearchInput');
     if (searchInput) {
         searchInput.value = '';
     }
-    
+
     // Reset filter
     filterF1Sheets();
 }
@@ -3356,15 +3364,15 @@ function closeF1Popup() {
 function populateF1Categories() {
     const categoryList = document.getElementById('f1CategoryList');
     if (!categoryList) return;
-    
+
     categoryList.innerHTML = '';
-    
+
     // Add "Uncategorized" option
     const uncategorizedSheets = tableData.sheets.filter((sheet, index) => {
         const category = tableData.sheetCategories[index] || tableData.sheetCategories[String(index)];
         return !category;
     });
-    
+
     const uncategorizedItem = document.createElement('div');
     uncategorizedItem.className = 'f1-category-item' + (selectedF1Category === null ? ' active' : '');
     uncategorizedItem.innerHTML = `
@@ -3374,14 +3382,14 @@ function populateF1Categories() {
     `;
     uncategorizedItem.onclick = () => selectF1Category(null);
     categoryList.appendChild(uncategorizedItem);
-    
+
     // Add other categories
     tableData.categories.forEach(category => {
         const categorySheets = tableData.sheets.filter((sheet, index) => {
             const sheetCategory = tableData.sheetCategories[index] || tableData.sheetCategories[String(index)];
             return sheetCategory === category;
         });
-        
+
         const item = document.createElement('div');
         item.className = 'f1-category-item' + (selectedF1Category === category ? ' active' : '');
         item.innerHTML = `
@@ -3396,17 +3404,17 @@ function populateF1Categories() {
 
 function selectF1Category(category) {
     selectedF1Category = category;
-    
+
     // Update active state
     const items = document.querySelectorAll('.f1-category-item');
     items.forEach(item => item.classList.remove('active'));
-    
+
     const radios = document.querySelectorAll('.f1-category-radio');
     radios.forEach(radio => radio.checked = false);
-    
+
     event.currentTarget.classList.add('active');
     event.currentTarget.querySelector('.f1-category-radio').checked = true;
-    
+
     // Repopulate sheets
     populateF1Sheets();
 }
@@ -3414,26 +3422,26 @@ function selectF1Category(category) {
 function populateF1Sheets(searchAllCategories = false) {
     const sheetList = document.getElementById('f1SheetList');
     if (!sheetList) return;
-    
+
     sheetList.innerHTML = '';
-    
+
     // Filter sheets by selected category (unless searching all categories)
     tableData.sheets.forEach((sheet, index) => {
         const sheetCategory = tableData.sheetCategories[index] || tableData.sheetCategories[String(index)];
-        
+
         // If not searching all categories, check if sheet belongs to selected category
         if (!searchAllCategories) {
             if (selectedF1Category === null && sheetCategory) return;
             if (selectedF1Category !== null && sheetCategory !== selectedF1Category) return;
         }
-        
+
         const item = document.createElement('div');
         item.className = 'f1-sheet-item' + (index === currentSheet ? ' active' : '');
         item.dataset.sheetIndex = index;
-        
+
         // Show category name if searching all categories
         const categoryLabel = searchAllCategories && sheetCategory ? ` <span style="color: #999; font-size: 12px;">(${sheetCategory})</span>` : '';
-        
+
         item.innerHTML = `
             <span class="f1-sheet-icon">📄</span>
             <span class="f1-sheet-name">${sheet.name}${categoryLabel}</span>
@@ -3441,7 +3449,7 @@ function populateF1Sheets(searchAllCategories = false) {
         item.onclick = () => switchToSheetFromF1(index);
         sheetList.appendChild(item);
     });
-    
+
     // Show message if no sheets
     if (sheetList.children.length === 0) {
         const emptyMsg = document.createElement('div');
@@ -3456,13 +3464,13 @@ function populateF1Sheets(searchAllCategories = false) {
 function filterF1Sheets() {
     const searchInput = document.getElementById('f1SearchInput');
     let searchTerm = searchInput ? searchInput.value : '';
-    
+
     // Check for special search prefixes
     if (searchTerm.startsWith('*')) {
         // Search all categories by sheet name
         const actualSearch = searchTerm.substring(1).toLowerCase();
         populateF1Sheets(true); // Show all sheets from all categories
-        
+
         // Filter by name
         const sheetItems = document.querySelectorAll('.f1-sheet-item');
         sheetItems.forEach(item => {
@@ -3478,14 +3486,14 @@ function filterF1Sheets() {
         const actualSearch = searchTerm.substring(1).toLowerCase();
         const sheetList = document.getElementById('f1SheetList');
         if (!sheetList) return;
-        
+
         sheetList.innerHTML = '';
-        
+
         // Search through all sheets' content
         let foundSheets = [];
         tableData.sheets.forEach((sheet, index) => {
             let hasMatch = false;
-            
+
             // Search in all rows and columns
             if (sheet.rows && sheet.rows.length > 0) {
                 for (let row of sheet.rows) {
@@ -3498,19 +3506,19 @@ function filterF1Sheets() {
                     if (hasMatch) break;
                 }
             }
-            
+
             if (hasMatch) {
                 foundSheets.push(index);
             }
         });
-        
+
         // Display matching sheets
         if (foundSheets.length > 0) {
             foundSheets.forEach(index => {
                 const sheet = tableData.sheets[index];
                 const sheetCategory = tableData.sheetCategories[index] || tableData.sheetCategories[String(index)];
                 const categoryLabel = sheetCategory ? ` <span style="color: #999; font-size: 12px;">(${sheetCategory})</span>` : '';
-                
+
                 const item = document.createElement('div');
                 item.className = 'f1-sheet-item' + (index === currentSheet ? ' active' : '');
                 item.dataset.sheetIndex = index;
@@ -3532,7 +3540,7 @@ function filterF1Sheets() {
     } else {
         // Normal search - filter current category sheets by name
         populateF1Sheets(false); // Show sheets from selected category only
-        
+
         const searchLower = searchTerm.toLowerCase();
         const sheetItems = document.querySelectorAll('.f1-sheet-item');
         sheetItems.forEach(item => {
@@ -3549,7 +3557,7 @@ function filterF1Sheets() {
 function handleF1SearchKeydown(e) {
     if (e.key === 'Enter') {
         e.preventDefault();
-        
+
         // Find the first visible (non-hidden) sheet item
         const sheetItems = document.querySelectorAll('.f1-sheet-item');
         for (let item of sheetItems) {
@@ -3565,7 +3573,7 @@ function handleF1SearchKeydown(e) {
 function switchToSheetFromF1(sheetIndex) {
     // Switch to the sheet
     switchSheet(sheetIndex);
-    
+
     // Close the popup
     closeF1Popup();
 }
@@ -3583,7 +3591,7 @@ function toggleRecentSheets() {
     // If we have at least one sheet in history, switch to it
     if (sheetHistory.length > 0) {
         const previousSheet = sheetHistory[sheetHistory.length - 1];
-        
+
         // Make sure the sheet index is valid
         if (previousSheet >= 0 && previousSheet < tableData.sheets.length) {
             switchSheet(previousSheet);
