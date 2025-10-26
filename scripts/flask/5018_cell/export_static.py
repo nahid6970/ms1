@@ -750,6 +750,22 @@ def generate_static_html(data):
             text-decoration: line-through;
             color: #999;
         }
+
+        sup {
+            vertical-align: super;
+            font-size: 0.75em;
+            line-height: 0;
+        }
+
+        sub {
+            vertical-align: sub;
+            font-size: 0.75em;
+            line-height: 0;
+        }
+
+        u {
+            text-decoration: underline;
+        }
     </style>
     <script>
         let currentSheet = ''' + str(active_sheet) + ''';
@@ -1011,6 +1027,8 @@ def generate_static_html(data):
                         cellValue.includes('`') || 
                         cellValue.includes('~~') || 
                         cellValue.includes('==') || 
+                        cellValue.includes('^') || 
+                        cellValue.includes('~') || 
                         cellValue.includes('{fg:') || 
                         cellValue.includes('{bg:') || 
                         cellValue.includes('\\n- ') || 
@@ -1149,6 +1167,12 @@ def generate_static_html(data):
 
                 // Strikethrough: ~~text~~ -> <del>text</del>
                 formatted = formatted.replace(/~~(.+?)~~/g, '<del>$1</del>');
+
+                // Superscript: ^text^ -> <sup>text</sup>
+                formatted = formatted.replace(/\\^(.+?)\\^/g, '<sup>$1</sup>');
+
+                // Subscript: ~text~ -> <sub>text</sub> (single tilde only, after strikethrough is processed)
+                formatted = formatted.replace(/~([^~\\s]+?)~/g, '<sub>$1</sub>');
 
                 // Sublist: -- item -> ◦ item with more indent (white circle)
                 if (formatted.trim().startsWith('-- ')) {
