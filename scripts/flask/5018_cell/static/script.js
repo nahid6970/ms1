@@ -682,14 +682,14 @@ function parseMarkdown(text) {
         // Underline: __text__ -> <u>text</u>
         formatted = formatted.replace(/__(.+?)__/g, '<u>$1</u>');
 
-        // Strikethrough: ~~text~~ -> <del>text</del>
+        // Strikethrough: ~~text~~ -> <del>text</del> (process first to avoid conflict with subscript)
         formatted = formatted.replace(/~~(.+?)~~/g, '<del>$1</del>');
 
         // Superscript: ^text^ -> <sup>text</sup>
         formatted = formatted.replace(/\^(.+?)\^/g, '<sup>$1</sup>');
 
-        // Subscript: ~text~ -> <sub>text</sub> (single tilde, not double)
-        formatted = formatted.replace(/(?<!~)~([^~]+?)~(?!~)/g, '<sub>$1</sub>');
+        // Subscript: ~text~ -> <sub>text</sub> (single tilde only, after strikethrough is processed)
+        formatted = formatted.replace(/~([^~\s]+?)~/g, '<sub>$1</sub>');
 
         // Sublist: -- item -> ◦ item with more indent (white circle)
         if (formatted.trim().startsWith('-- ')) {
@@ -3127,6 +3127,8 @@ function renderTable() {
                 cellValue.includes('`') ||
                 cellValue.includes('~~') ||
                 cellValue.includes('==') ||
+                cellValue.includes('^') ||
+                cellValue.includes('~') ||
                 cellValue.includes('{fg:') ||
                 cellValue.includes('{bg:') ||
                 cellValue.includes('\n- ') ||

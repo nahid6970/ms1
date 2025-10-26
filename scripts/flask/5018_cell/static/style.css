@@ -555,6 +555,23 @@ td input {
     color: #999;
 }
 
+.markdown-preview sup {
+    vertical-align: super;
+    font-size: 0.75em;
+    line-height: 0;
+}
+
+.markdown-preview sub {
+    vertical-align: sub;
+    font-size: 0.75em;
+    line-height: 0;
+}
+
+.markdown-preview u {
+    text-decoration: underline;
+    color: inherit;
+}
+
 /* Show preview when cell is not focused */
 td:not(:focus-within) .markdown-preview {
     display: block;
