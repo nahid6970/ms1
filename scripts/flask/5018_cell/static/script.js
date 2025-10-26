@@ -3411,25 +3411,32 @@ function selectF1Category(category) {
     populateF1Sheets();
 }
 
-function populateF1Sheets() {
+function populateF1Sheets(searchAllCategories = false) {
     const sheetList = document.getElementById('f1SheetList');
     if (!sheetList) return;
     
     sheetList.innerHTML = '';
     
-    // Filter sheets by selected category
+    // Filter sheets by selected category (unless searching all categories)
     tableData.sheets.forEach((sheet, index) => {
         const sheetCategory = tableData.sheetCategories[index] || tableData.sheetCategories[String(index)];
         
-        // Check if sheet belongs to selected category
-        if (selectedF1Category === null && sheetCategory) return;
-        if (selectedF1Category !== null && sheetCategory !== selectedF1Category) return;
+        // If not searching all categories, check if sheet belongs to selected category
+        if (!searchAllCategories) {
+            if (selectedF1Category === null && sheetCategory) return;
+            if (selectedF1Category !== null && sheetCategory !== selectedF1Category) return;
+        }
         
         const item = document.createElement('div');
         item.className = 'f1-sheet-item' + (index === currentSheet ? ' active' : '');
+        item.dataset.sheetIndex = index;
+        
+        // Show category name if searching all categories
+        const categoryLabel = searchAllCategories && sheetCategory ? ` <span style="color: #999; font-size: 12px;">(${sheetCategory})</span>` : '';
+        
         item.innerHTML = `
             <span class="f1-sheet-icon">📄</span>
-            <span class="f1-sheet-name">${sheet.name}</span>
+            <span class="f1-sheet-name">${sheet.name}${categoryLabel}</span>
         `;
         item.onclick = () => switchToSheetFromF1(index);
         sheetList.appendChild(item);
@@ -3441,24 +3448,102 @@ function populateF1Sheets() {
         emptyMsg.style.padding = '20px';
         emptyMsg.style.textAlign = 'center';
         emptyMsg.style.color = '#999';
-        emptyMsg.textContent = 'No sheets in this category';
+        emptyMsg.textContent = 'No sheets found';
         sheetList.appendChild(emptyMsg);
     }
 }
 
 function filterF1Sheets() {
     const searchInput = document.getElementById('f1SearchInput');
-    const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+    let searchTerm = searchInput ? searchInput.value : '';
     
-    const sheetItems = document.querySelectorAll('.f1-sheet-item');
-    sheetItems.forEach(item => {
-        const sheetName = item.querySelector('.f1-sheet-name').textContent.toLowerCase();
-        if (sheetName.includes(searchTerm)) {
-            item.classList.remove('hidden');
+    // Check for special search prefixes
+    if (searchTerm.startsWith('*')) {
+        // Search all categories by sheet name
+        const actualSearch = searchTerm.substring(1).toLowerCase();
+        populateF1Sheets(true); // Show all sheets from all categories
+        
+        // Filter by name
+        const sheetItems = document.querySelectorAll('.f1-sheet-item');
+        sheetItems.forEach(item => {
+            const sheetName = item.querySelector('.f1-sheet-name').textContent.toLowerCase();
+            if (sheetName.includes(actualSearch)) {
+                item.classList.remove('hidden');
+            } else {
+                item.classList.add('hidden');
+            }
+        });
+    } else if (searchTerm.startsWith('#')) {
+        // Search by content inside sheets
+        const actualSearch = searchTerm.substring(1).toLowerCase();
+        const sheetList = document.getElementById('f1SheetList');
+        if (!sheetList) return;
+        
+        sheetList.innerHTML = '';
+        
+        // Search through all sheets' content
+        let foundSheets = [];
+        tableData.sheets.forEach((sheet, index) => {
+            let hasMatch = false;
+            
+            // Search in all rows and columns
+            if (sheet.rows && sheet.rows.length > 0) {
+                for (let row of sheet.rows) {
+                    for (let cell of row) {
+                        if (cell && String(cell).toLowerCase().includes(actualSearch)) {
+                            hasMatch = true;
+                            break;
+                        }
+                    }
+                    if (hasMatch) break;
+                }
+            }
+            
+            if (hasMatch) {
+                foundSheets.push(index);
+            }
+        });
+        
+        // Display matching sheets
+        if (foundSheets.length > 0) {
+            foundSheets.forEach(index => {
+                const sheet = tableData.sheets[index];
+                const sheetCategory = tableData.sheetCategories[index] || tableData.sheetCategories[String(index)];
+                const categoryLabel = sheetCategory ? ` <span style="color: #999; font-size: 12px;">(${sheetCategory})</span>` : '';
+                
+                const item = document.createElement('div');
+                item.className = 'f1-sheet-item' + (index === currentSheet ? ' active' : '');
+                item.dataset.sheetIndex = index;
+                item.innerHTML = `
+                    <span class="f1-sheet-icon">🔍</span>
+                    <span class="f1-sheet-name">${sheet.name}${categoryLabel}</span>
+                `;
+                item.onclick = () => switchToSheetFromF1(index);
+                sheetList.appendChild(item);
+            });
         } else {
-            item.classList.add('hidden');
+            const emptyMsg = document.createElement('div');
+            emptyMsg.style.padding = '20px';
+            emptyMsg.style.textAlign = 'center';
+            emptyMsg.style.color = '#999';
+            emptyMsg.textContent = actualSearch ? 'No sheets contain this text' : 'Type to search sheet content';
+            sheetList.appendChild(emptyMsg);
         }
-    });
+    } else {
+        // Normal search - filter current category sheets by name
+        populateF1Sheets(false); // Show sheets from selected category only
+        
+        const searchLower = searchTerm.toLowerCase();
+        const sheetItems = document.querySelectorAll('.f1-sheet-item');
+        sheetItems.forEach(item => {
+            const sheetName = item.querySelector('.f1-sheet-name').textContent.toLowerCase();
+            if (sheetName.includes(searchLower)) {
+                item.classList.remove('hidden');
+            } else {
+                item.classList.add('hidden');
+            }
+        });
+    }
 }
 
 function handleF1SearchKeydown(e) {
