@@ -1828,6 +1828,30 @@ tr {
     text-transform: uppercase;
     letter-spacing: 0.5px;
     border-bottom: 1px solid #e9ecef;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.f1-category-actions {
+    display: flex;
+    gap: 4px;
+}
+
+.f1-category-action-btn {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 4px 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.f1-category-action-btn:hover {
+    background: #007bff;
+    border-color: #007bff;
+    transform: scale(1.1);
 }
 
 .f1-category-list {

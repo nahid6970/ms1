@@ -73,7 +73,7 @@
                     <span>➕</span>
                 </button>
                 <button onclick="showRenameCategoryModal()" class="btn-category-action"
-                    title="Rename Category (Alt+Up/Down to reorder)">
+                    title="Rename Category (F1 then Alt+Up/Down to reorder)">
                     <span>✏️</span>
                 </button>
             </div>
@@ -504,7 +504,15 @@
             </div>
             <div class="f1-content">
                 <div class="f1-categories">
-                    <div class="f1-category-title">Categories</div>
+                    <div class="f1-category-title">
+                        <span>Categories</span>
+                        <div class="f1-category-actions">
+                            <button class="f1-category-action-btn" onclick="moveCategoryUpInF1()"
+                                title="Move selected category up">⬆️</button>
+                            <button class="f1-category-action-btn" onclick="moveCategoryDownInF1()"
+                                title="Move selected category down">⬇️</button>
+                        </div>
+                    </div>
                     <div id="f1CategoryList" class="f1-category-list"></div>
                 </div>
                 <div class="f1-sheets">

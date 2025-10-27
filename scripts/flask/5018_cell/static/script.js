@@ -247,18 +247,6 @@ function handleKeyboardShortcuts(e) {
         toggleRecentSheets();
     }
 
-    // Alt+Up to move category up (only when not in a textarea for multi-cursor)
-    if (e.altKey && e.key === 'ArrowUp' && !e.ctrlKey && document.activeElement.tagName !== 'TEXTAREA') {
-        e.preventDefault();
-        moveCategoryUp();
-    }
-
-    // Alt+Down to move category down (only when not in a textarea for multi-cursor)
-    if (e.altKey && e.key === 'ArrowDown' && !e.ctrlKey && document.activeElement.tagName !== 'TEXTAREA') {
-        e.preventDefault();
-        moveCategoryDown();
-    }
-
     // Handle Enter key in textareas when wrap is enabled
     if (e.key === 'Enter' && document.activeElement.tagName === 'TEXTAREA') {
         const textarea = document.activeElement;
@@ -2616,6 +2604,13 @@ async function moveCategoryUp() {
 
     await saveData();
     renderCategoryTabs();
+    
+    // Refresh F1 popup if it's open
+    const f1Popup = document.getElementById('f1Popup');
+    if (f1Popup && f1Popup.classList.contains('show')) {
+        populateF1Categories();
+    }
+    
     showToast(`Category "${currentCategory}" moved up`, 'success');
 }
 
@@ -2637,6 +2632,13 @@ async function moveCategoryDown() {
 
     await saveData();
     renderCategoryTabs();
+    
+    // Refresh F1 popup if it's open
+    const f1Popup = document.getElementById('f1Popup');
+    if (f1Popup && f1Popup.classList.contains('show')) {
+        populateF1Categories();
+    }
+    
     showToast(`Category "${currentCategory}" moved down`, 'success');
 }
 
@@ -3549,19 +3551,87 @@ function populateF1Categories() {
 
 function selectF1Category(category) {
     selectedF1Category = category;
+    currentCategory = category; // Update currentCategory so Alt+Up/Down works
 
     // Update active state
     const items = document.querySelectorAll('.f1-category-item');
-    items.forEach(item => item.classList.remove('active'));
+    items.forEach(item => {
+        item.classList.remove('active');
+        const radio = item.querySelector('.f1-category-radio');
+        if (radio) radio.checked = false;
+    });
 
-    const radios = document.querySelectorAll('.f1-category-radio');
-    radios.forEach(radio => radio.checked = false);
-
-    event.currentTarget.classList.add('active');
-    event.currentTarget.querySelector('.f1-category-radio').checked = true;
+    // Find and activate the selected category item
+    items.forEach(item => {
+        const categoryName = item.querySelector('.f1-category-name');
+        if (categoryName) {
+            const itemCategory = categoryName.textContent === 'Uncategorized' ? null : categoryName.textContent;
+            if (itemCategory === category) {
+                item.classList.add('active');
+                const radio = item.querySelector('.f1-category-radio');
+                if (radio) radio.checked = true;
+            }
+        }
+    });
 
     // Repopulate sheets
     populateF1Sheets();
+}
+
+async function moveCategoryUpInF1() {
+    // Get the currently selected category in F1
+    const categoryToMove = selectedF1Category;
+    
+    if (!categoryToMove) {
+        showToast('Cannot move Uncategorized', 'error');
+        return;
+    }
+
+    const index = tableData.categories.indexOf(categoryToMove);
+    if (index <= 0) {
+        showToast('Category is already at the top', 'warning');
+        return;
+    }
+
+    // Swap with previous category
+    [tableData.categories[index - 1], tableData.categories[index]] = 
+    [tableData.categories[index], tableData.categories[index - 1]];
+
+    await saveData();
+    renderCategoryTabs();
+    
+    // Refresh F1 popup
+    populateF1Categories();
+    
+    showToast(`Category "${categoryToMove}" moved up`, 'success');
+}
+
+async function moveCategoryDownInF1() {
+    // Get the currently selected category in F1
+    const categoryToMove = selectedF1Category;
+    
+    if (!categoryToMove) {
+        showToast('Cannot move Uncategorized', 'error');
+        return;
+    }
+
+    const index = tableData.categories.indexOf(categoryToMove);
+    if (index === -1 || index >= tableData.categories.length - 1) {
+        showToast('Category is already at the bottom', 'warning');
+        return;
+    }
+
+    // Swap with next category
+    [tableData.categories[index], tableData.categories[index + 1]] = 
+    [tableData.categories[index + 1], tableData.categories[index]];
+
+    await saveData();
+    renderCategoryTabs();
+    
+    // Refresh F1 popup
+    populateF1Categories();
+    
+    showToast(`Category "${categoryToMove}" moved down`, 'success');
 }
 
 function populateF1Sheets(searchAllCategories = false) {
@@ -3743,6 +3813,18 @@ function handleF1SearchKeydown(e) {
                 break;
             }
         }
+    }
+    
+    // Alt+Up to move category up (only when F1 is open)
+    if (e.altKey && e.key === 'ArrowUp') {
+        e.preventDefault();
+        moveCategoryUpInF1();
+    }
+    
+    // Alt+Down to move category down (only when F1 is open)
+    if (e.altKey && e.key === 'ArrowDown') {
+        e.preventDefault();
+        moveCategoryDownInF1();
     }
 }
 
