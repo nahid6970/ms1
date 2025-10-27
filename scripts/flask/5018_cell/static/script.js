@@ -3808,8 +3808,13 @@ function handleF1SearchKeydown(e) {
         const sheetItems = document.querySelectorAll('.f1-sheet-item');
         for (let item of sheetItems) {
             if (!item.classList.contains('hidden')) {
-                // Click the first visible item
-                item.click();
+                // Try to click the name wrapper first (for normal sheets), otherwise click the item itself (for search results)
+                const nameWrapper = item.querySelector('.f1-sheet-name-wrapper');
+                if (nameWrapper) {
+                    nameWrapper.click();
+                } else {
+                    item.click();
+                }
                 break;
             }
         }
