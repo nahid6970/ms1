@@ -247,6 +247,18 @@ function handleKeyboardShortcuts(e) {
         toggleRecentSheets();
     }
 
+    // Alt+Up to move category up (only when not in a textarea for multi-cursor)
+    if (e.altKey && e.key === 'ArrowUp' && !e.ctrlKey && document.activeElement.tagName !== 'TEXTAREA') {
+        e.preventDefault();
+        moveCategoryUp();
+    }
+
+    // Alt+Down to move category down (only when not in a textarea for multi-cursor)
+    if (e.altKey && e.key === 'ArrowDown' && !e.ctrlKey && document.activeElement.tagName !== 'TEXTAREA') {
+        e.preventDefault();
+        moveCategoryDown();
+    }
+
     // Handle Enter key in textareas when wrap is enabled
     if (e.key === 'Enter' && document.activeElement.tagName === 'TEXTAREA') {
         const textarea = document.activeElement;
@@ -2329,6 +2341,19 @@ function closeAddCategoryModal() {
     document.getElementById('addCategoryModal').style.display = 'none';
 }
 
+function showRenameCategoryModal() {
+    if (!currentCategory) {
+        showToast('Select a category to rename (not Uncategorized)', 'error');
+        return;
+    }
+    document.getElementById('newCategoryName').value = currentCategory;
+    document.getElementById('renameCategoryModal').style.display = 'block';
+}
+
+function closeRenameCategoryModal() {
+    document.getElementById('renameCategoryModal').style.display = 'none';
+}
+
 function showMoveToCategoryModal(sheetIndex) {
     const select = document.getElementById('targetCategory');
     select.innerHTML = '<option value="">Uncategorized</option>';
@@ -2383,6 +2408,39 @@ document.getElementById('addCategoryForm').onsubmit = async function (e) {
     renderCategoryTabs();
     closeAddCategoryModal();
     showToast(`Category "${categoryName}" added`, 'success');
+};
+
+// Rename category form handler
+document.getElementById('renameCategoryForm').onsubmit = async function (e) {
+    e.preventDefault();
+    const newName = document.getElementById('newCategoryName').value.trim();
+    const oldName = currentCategory;
+
+    if (!newName || !oldName) return;
+
+    if (tableData.categories.includes(newName)) {
+        showToast('Category name already exists', 'warning');
+        return;
+    }
+
+    // Update category name in categories array
+    const index = tableData.categories.indexOf(oldName);
+    if (index !== -1) {
+        tableData.categories[index] = newName;
+    }
+
+    // Update all sheets that use this category
+    Object.keys(tableData.sheetCategories).forEach(sheetIndex => {
+        if (tableData.sheetCategories[sheetIndex] === oldName) {
+            tableData.sheetCategories[sheetIndex] = newName;
+        }
+    });
+
+    currentCategory = newName;
+    await saveData();
+    renderCategoryTabs();
+    closeRenameCategoryModal();
+    showToast(`Category renamed to "${newName}"`, 'success');
 };
 
 // Move to category form handler
@@ -2538,6 +2596,48 @@ async function deleteCategory(categoryName) {
     renderSheetTabs();
     renderTable();
     showToast(`Category "${categoryName}" deleted`, 'success');
+}
+
+async function moveCategoryUp() {
+    if (!currentCategory) {
+        showToast('Select a category to move (not Uncategorized)', 'error');
+        return;
+    }
+
+    const index = tableData.categories.indexOf(currentCategory);
+    if (index <= 0) {
+        showToast('Category is already at the top', 'warning');
+        return;
+    }
+
+    // Swap with previous category
+    [tableData.categories[index - 1], tableData.categories[index]] = 
+    [tableData.categories[index], tableData.categories[index - 1]];
+
+    await saveData();
+    renderCategoryTabs();
+    showToast(`Category "${currentCategory}" moved up`, 'success');
+}
+
+async function moveCategoryDown() {
+    if (!currentCategory) {
+        showToast('Select a category to move (not Uncategorized)', 'error');
+        return;
+    }
+
+    const index = tableData.categories.indexOf(currentCategory);
+    if (index === -1 || index >= tableData.categories.length - 1) {
+        showToast('Category is already at the bottom', 'warning');
+        return;
+    }
+
+    // Swap with next category
+    [tableData.categories[index], tableData.categories[index + 1]] = 
+    [tableData.categories[index + 1], tableData.categories[index]];
+
+    await saveData();
+    renderCategoryTabs();
+    showToast(`Category "${currentCategory}" moved down`, 'success');
 }
 
 function searchTable() {
@@ -3487,11 +3587,42 @@ function populateF1Sheets(searchAllCategories = false) {
         // Show category name if searching all categories
         const categoryLabel = searchAllCategories && sheetCategory ? ` <span style="color: #999; font-size: 12px;">(${sheetCategory})</span>` : '';
 
-        item.innerHTML = `
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'f1-sheet-name-wrapper';
+        nameSpan.innerHTML = `
             <span class="f1-sheet-icon">📄</span>
             <span class="f1-sheet-name">${sheet.name}${categoryLabel}</span>
         `;
-        item.onclick = () => switchToSheetFromF1(index);
+        nameSpan.onclick = () => switchToSheetFromF1(index);
+
+        const actions = document.createElement('div');
+        actions.className = 'f1-sheet-actions';
+        
+        const upBtn = document.createElement('button');
+        upBtn.className = 'f1-sheet-action-btn';
+        upBtn.innerHTML = '⬆️';
+        upBtn.title = 'Move sheet up';
+        upBtn.onclick = (e) => {
+            e.stopPropagation();
+            moveSheetUp(index);
+            setTimeout(() => populateF1Sheets(searchAllCategories), 100);
+        };
+        
+        const downBtn = document.createElement('button');
+        downBtn.className = 'f1-sheet-action-btn';
+        downBtn.innerHTML = '⬇️';
+        downBtn.title = 'Move sheet down';
+        downBtn.onclick = (e) => {
+            e.stopPropagation();
+            moveSheetDown(index);
+            setTimeout(() => populateF1Sheets(searchAllCategories), 100);
+        };
+
+        actions.appendChild(upBtn);
+        actions.appendChild(downBtn);
+        
+        item.appendChild(nameSpan);
+        item.appendChild(actions);
         sheetList.appendChild(item);
     });
 

@@ -72,7 +72,11 @@
                 <button onclick="showAddCategoryModal()" class="btn-category-action" title="Add Category">
                     <span>➕</span>
                 </button>
-            </div>
+                <button onclick="showRenameCategoryModal()" class="btn-category-action"
+                    title="Rename Category (Alt+Up/Down to reorder)">
+                    <span>✏️</span>
+                </button>
+            </div>""
 
             <div class="sheet-controls">
                 <div class="sheet-selector">
@@ -91,12 +95,6 @@
                 <button onclick="showMoveToCategoryModal(currentSheet)" class="btn-sheet-action"
                     title="Move to Category">
                     <span>📁</span>
-                </button>
-                <button onclick="moveSheetUp(currentSheet)" class="btn-sheet-action" title="Move Sheet Up">
-                    <span>⬆️</span>
-                </button>
-                <button onclick="moveSheetDown(currentSheet)" class="btn-sheet-action" title="Move Sheet Down">
-                    <span>⬇️</span>
                 </button>
                 <button onclick="deleteSheet(currentSheet)" class="btn-sheet-action" title="Delete Sheet">
                     <span>🗑️</span>
@@ -307,6 +305,27 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" onclick="closeAddCategoryModal()">Cancel</button>
                     <button type="submit" class="btn btn-primary">Add Category</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Rename Category Modal -->
+    <div id="renameCategoryModal" class="modal">
+        <div class="modal-content rename-modal">
+            <div class="modal-header">
+                <h2>Rename Category</h2>
+                <span class="close" onclick="closeRenameCategoryModal()">&times;</span>
+            </div>
+            <form id="renameCategoryForm">
+                <div class="form-group">
+                    <label for="newCategoryName">New Category Name</label>
+                    <input type="text" id="newCategoryName" class="form-input" placeholder="Enter new category name"
+                        required autofocus>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeRenameCategoryModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Rename</button>
                 </div>
             </form>
         </div>

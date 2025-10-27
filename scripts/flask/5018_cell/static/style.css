@@ -1898,12 +1898,12 @@ tr {
     padding: 14px 16px;
     margin-bottom: 6px;
     border-radius: 6px;
-    cursor: pointer;
     transition: all 0.2s;
     border: 1px solid #e9ecef;
     background: white;
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 12px;
 }
 
@@ -1920,6 +1920,14 @@ tr {
     color: #007bff;
 }
 
+.f1-sheet-name-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    cursor: pointer;
+}
+
 .f1-sheet-icon {
     font-size: 18px;
 }
@@ -1927,6 +1935,33 @@ tr {
 .f1-sheet-name {
     flex: 1;
     font-size: 14px;
+}
+
+.f1-sheet-actions {
+    display: flex;
+    gap: 4px;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.f1-sheet-item:hover .f1-sheet-actions {
+    opacity: 1;
+}
+
+.f1-sheet-action-btn {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 4px 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.f1-sheet-action-btn:hover {
+    background: #007bff;
+    border-color: #007bff;
+    transform: scale(1.1);
 }
 
 .f1-sheet-item.hidden {
