@@ -546,7 +546,7 @@ td input {
 .markdown-preview mark {
     background: #ffeb3b;
     padding: 2px 4px;
-    border-radius: 2px;
+    border-radius: 4px;
     color: inherit;
 }
 
