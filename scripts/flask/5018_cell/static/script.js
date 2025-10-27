@@ -3814,18 +3814,6 @@ function handleF1SearchKeydown(e) {
             }
         }
     }
-    
-    // Alt+Up to move category up (only when F1 is open)
-    if (e.altKey && e.key === 'ArrowUp') {
-        e.preventDefault();
-        moveCategoryUpInF1();
-    }
-    
-    // Alt+Down to move category down (only when F1 is open)
-    if (e.altKey && e.key === 'ArrowDown') {
-        e.preventDefault();
-        moveCategoryDownInF1();
-    }
 }
 
 function switchToSheetFromF1(sheetIndex) {
