@@ -446,6 +446,22 @@ body.modal-open {
     display: block;
 }
 
+.completed-checkmark {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 5em;
+    color: rgba(29, 185, 84, 0.8);
+    z-index: 5;
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+    display: none;
+}
+
+html.show-completed-checkmarks .completed-checkmark {
+    display: block;
+}
+
 .card-overlay {
     position: absolute;
     top: 0;
