@@ -59,7 +59,7 @@ bars:
         - "whkd"
         - "notifications"
       right:
-        - "countdown_timer"
+        # - "countdown_timer"
         - "scoop_updates"
         - "winget_updates"
 widgets:
