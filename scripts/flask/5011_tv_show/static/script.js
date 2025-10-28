@@ -185,16 +185,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Load show completed checkmarks preference from localStorage
     const showCompletedCheckmarks = localStorage.getItem('showCompletedCheckmarks') === 'true';
+    console.log('Loaded showCompletedCheckmarks setting:', showCompletedCheckmarks);
     if (showCompletedCheckmarks) {
         html.classList.add('show-completed-checkmarks');
         showCompletedCheckmarksToggle.checked = true;
+        console.log('Added show-completed-checkmarks class to HTML');
+    } else {
+        html.classList.remove('show-completed-checkmarks');
+        showCompletedCheckmarksToggle.checked = false;
+        console.log('Removed show-completed-checkmarks class from HTML');
     }
 
     // Load show hidden shows preference from localStorage
     const showHiddenShows = localStorage.getItem('showHiddenShows') === 'true';
+    console.log('Loaded showHiddenShows setting:', showHiddenShows);
     if (showHiddenShows) {
         html.classList.add('show-hidden-shows');
         showHiddenShowsToggle.checked = true;
+        console.log('Added show-hidden-shows class to HTML');
+    } else {
+        html.classList.remove('show-hidden-shows');
+        showHiddenShowsToggle.checked = false;
+        console.log('Removed show-hidden-shows class from HTML');
     }
 
     // Save default home page preference to localStorage on change
@@ -207,9 +219,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (showCompletedCheckmarksToggle.checked) {
             html.classList.add('show-completed-checkmarks');
             localStorage.setItem('showCompletedCheckmarks', 'true');
+            console.log('Enabled show-completed-checkmarks');
         } else {
             html.classList.remove('show-completed-checkmarks');
             localStorage.setItem('showCompletedCheckmarks', 'false');
+            console.log('Disabled show-completed-checkmarks');
         }
     });
 
@@ -218,9 +232,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (showHiddenShowsToggle.checked) {
             html.classList.add('show-hidden-shows');
             localStorage.setItem('showHiddenShows', 'true');
+            console.log('Enabled show-hidden-shows');
         } else {
             html.classList.remove('show-hidden-shows');
             localStorage.setItem('showHiddenShows', 'false');
+            console.log('Disabled show-hidden-shows');
         }
     });
 
