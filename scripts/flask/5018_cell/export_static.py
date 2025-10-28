@@ -783,6 +783,9 @@ def generate_static_html(data):
             color: #007bff;
             text-decoration: underline;
             cursor: pointer;
+            pointer-events: auto;
+            position: relative;
+            z-index: 2;
         }
 
         a:hover {
