@@ -1,0 +1,2 @@
+1. always add some important notes in the beginning of the files so next time i try to implement anything new u can read those information and findout important things faster
+2. initially before doing anything read the initial important notes to see if anything is important
