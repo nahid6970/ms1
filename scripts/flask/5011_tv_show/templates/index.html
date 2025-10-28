@@ -6,11 +6,6 @@
     <title>My TV Shows</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <script>
-        // Apply table view immediately if enabled to prevent flash
-        if (localStorage.getItem('tableViewEnabled') === 'true') {
-            document.documentElement.classList.add('table-view-active');
-        }
-        
         // Check default home page preference and redirect immediately if needed
         const urlParams = new URLSearchParams(window.location.search);
         const currentSortBy = urlParams.get('sort_by');
@@ -91,9 +86,6 @@
                         </div>
                     </div>
                 </div>
-                <h3>{{ show.title }}</h3>
-                <p>{{ show.year }}</p>
-                <p class="rating-text">{% if show.rating %}{{ show.rating }}/5{% else %}~/5{% endif %}</p>
             </div>
         {% endfor %}
     </div>
@@ -178,13 +170,6 @@
         <div class="modal-content">
             <span class="close" onclick="closeSettingsModal()">&times;</span>
             <h2>Settings</h2>
-            <div class="setting-item">
-                <label for="tableViewToggle">Table View</label>
-                <label class="switch">
-                    <input type="checkbox" id="tableViewToggle">
-                    <span class="slider round"></span>
-                </label>
-            </div>
             <div class="setting-item">
                 <label for="defaultHomePage">Default Home Page</label>
                 <select id="defaultHomePage" class="setting-select">

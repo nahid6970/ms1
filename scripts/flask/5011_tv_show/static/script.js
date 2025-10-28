@@ -110,33 +110,13 @@ if (savedScrollPosition !== null) {
     localStorage.removeItem('scrollPosition');
 }
 
-// Toggle Table View and Default Home Page
+// Toggle Default Home Page
 document.addEventListener('DOMContentLoaded', () => {
-    const tableViewToggle = document.getElementById('tableViewToggle');
     const defaultHomePageSelect = document.getElementById('defaultHomePage');
-    const html = document.documentElement;
-
-    // Load table view preference from localStorage
-    const isTableViewEnabled = localStorage.getItem('tableViewEnabled') === 'true';
-    if (isTableViewEnabled) {
-        html.classList.add('table-view-active');
-        tableViewToggle.checked = true;
-    }
 
     // Load default home page preference from localStorage
     const defaultHomePage = localStorage.getItem('defaultHomePage') || 'default';
     defaultHomePageSelect.value = defaultHomePage;
-
-    // Save table view preference to localStorage on change
-    tableViewToggle.addEventListener('change', () => {
-        if (tableViewToggle.checked) {
-            html.classList.add('table-view-active');
-            localStorage.setItem('tableViewEnabled', 'true');
-        } else {
-            html.classList.remove('table-view-active');
-            localStorage.setItem('tableViewEnabled', 'false');
-        }
-    });
 
     // Save default home page preference to localStorage on change
     defaultHomePageSelect.addEventListener('change', () => {

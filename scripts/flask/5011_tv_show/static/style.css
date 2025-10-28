@@ -534,8 +534,6 @@ body.modal-open {
     margin-top: 10px;
     height: 4em;
     align-content: end;
-    display: none;
-    /* Hide title in card view */
 }
 
 .show-card p {
@@ -543,11 +541,6 @@ body.modal-open {
     color: white;
     margin: 5px 0;
     /* Reduced margin for tighter spacing */
-}
-
-.show-card p:first-of-type {
-    display: none;
-    /* Hide year in card view */
 }
 
 .show-card p:last-of-type {
@@ -939,133 +932,7 @@ input:checked+.slider:before {
     color: #e0e0e0;
 }
 
-/* Table View Styles */
-html.table-view-active .show-grid {
-    display: block;
-    /* Override flex for grid */
-}
 
-html.table-view-active .show-card {
-    width: auto;
-    /* Take full width */
-    display: grid;
-    grid-template-columns: 2fr 1fr 1.5fr 1fr 1.2fr 1fr 0.5fr 0.5fr;
-    /* Name, Year, Watched/Total, Rating, Last Episode, Status, Edit, Delete */
-    gap: 10px;
-    align-items: center;
-    padding: 10px;
-    border: 1px solid #444;
-    /* Set all borders to #444 */
-    background-color: #282828;
-    margin-bottom: 5px;
-}
-
-html.table-view-active .show-card.completed {
-    background-color: rgba(29, 185, 84, 0.1);
-    /* Green tint for completed shows in table view */
-    border-color: rgba(29, 185, 84, 0.3);
-}
-
-html.table-view-active .show-card:hover {
-    transform: none;
-    /* Disable hover transform */
-    border: 1px solid #bbb;
-    /* Reset border */
-    box-shadow: none;
-    background-color: #333;
-    /* Darker background on hover */
-}
-
-html.table-view-active .show-card.completed:hover {
-    background-color: rgba(29, 185, 84, 0.25);
-    /* Green hover for completed shows in table view */
-    border-color: rgba(29, 185, 84, 0.5);
-}
-
-html.table-view-active .show-card .img-wrapper {
-    display: none;
-    /* Hide images */
-}
-
-html.table-view-active .card-overlay {
-    display: none;
-    /* Hide card overlay in table view */
-}
-
-html.table-view-active .show-card h3 {
-    margin: 0;
-    height: auto;
-    text-align: left;
-    grid-column: 1;
-    /* Name in first column */
-    display: block;
-    /* Show title in table view */
-}
-
-html.table-view-active .show-card p {
-    margin: 0;
-    text-align: center;
-}
-
-html.table-view-active .show-card p:nth-of-type(1) {
-    grid-column: 2;
-    /* Year in second column */
-    display: block;
-    /* Show year in table view */
-}
-
-html.table-view-active .show-card p:nth-of-type(2) {
-    grid-column: 4;
-    /* Rating text in fourth column */
-}
-
-html.table-view-active .episode-count {
-    grid-column: 3;
-    /* Watched/Total in third column */
-    display: block !important;
-}
-
-/* Hide the rating stars container in table view */
-html.table-view-active .stars-container {
-    display: none;
-}
-
-/* Rating text for table view */
-.show-card p.rating-text {
-    display: none;
-    /* Hidden in card view */
-}
-
-html.table-view-active .show-card p.rating-text {
-    grid-column: 4;
-    /* Rating in fourth column */
-    display: block;
-    /* Show in table view */
-    margin: 0;
-    text-align: center;
-}
-
-html.table-view-active .show-card .last-episode-added {
-    grid-column: 5;
-    /* Last episode in fifth column */
-    display: block !important;
-}
-
-html.table-view-active .show-card .show-status {
-    grid-column: 6;
-    /* Status in sixth column */
-    display: block !important;
-}
-
-html.table-view-active .show-card .btn-edit {
-    grid-column: 7;
-    /* Edit button in seventh column */
-}
-
-html.table-view-active .show-card .btn-delete {
-    grid-column: 8;
-    /* Delete button in eighth column */
-}
 
 
 
