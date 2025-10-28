@@ -2057,3 +2057,93 @@ tr {
 .f1-sheet-list::-webkit-scrollbar-thumb:hover {
     background: #a8a8a8;
 }
+/* 
+Markdown Table Styles */
+.markdown-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 4px 0;          /* breathing room inside the cell */
+    font-size: inherit;     /* respect column font-size */
+    font-family: inherit;
+}
+
+.markdown-table th,
+.markdown-table td {
+    border: 1px solid #ced4da;
+    padding: 4px 6px;
+    text-align: left;
+    vertical-align: top;
+}
+
+.markdown-table th {
+    background: #f8f9fa;
+    font-weight: 600;
+}
+
+/* let coloured text / background css you already have shine through */
+.markdown-table strong {
+    font-weight: bold;
+}
+
+.markdown-table em {
+    font-style: italic;
+}
+
+.markdown-table code {
+    background: #f4f4f4;
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9em;
+}
+
+.markdown-table a {
+    color: #007bff;
+    text-decoration: underline;
+}
+
+/* Markdown Grid Table Styles (CSS Grid - no <table> elements) */
+.md-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--cols), 1fr);
+    gap: 4px;
+    margin: 4px 0;
+    font-size: inherit;
+    font-family: inherit;
+    width: 100%;
+}
+
+.md-cell {
+    padding: 4px 6px;
+    border: 1px solid #ced4da;
+    background: #fff;
+    overflow: hidden;
+    word-break: break-word;
+}
+
+.md-header {
+    background: #f8f9fa;
+    font-weight: 600;
+}
+
+/* Let coloured text / background css shine through */
+.md-grid strong {
+    font-weight: bold;
+}
+
+.md-grid em {
+    font-style: italic;
+}
+
+.md-grid code {
+    background: #f4f4f4;
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9em;
+}
+
+.md-grid a {
+    color: #007bff;
+    text-decoration: underline;
+}

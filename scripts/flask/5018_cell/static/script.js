@@ -424,13 +424,13 @@ async function handleColumnFormSubmit(e) {
 
     const editingIndex = parseInt(document.getElementById('editingColumnIndex').value);
     let columnName = document.getElementById('columnName').value.trim();
-    
+
     // Auto-generate column name if empty (only for new columns)
     if (!columnName && editingIndex < 0) {
         const sheet = tableData.sheets[currentSheet];
         columnName = getExcelColumnName(sheet.columns.length);
     }
-    
+
     const column = {
         name: columnName,
         type: document.getElementById('columnType').value,
@@ -628,7 +628,8 @@ function applyMarkdownFormatting(rowIndex, colIndex, value) {
         value.includes('\n- ') ||
         value.includes('\n-- ') ||
         value.trim().startsWith('- ') ||
-        value.trim().startsWith('-- ')
+        value.trim().startsWith('-- ') ||
+        value.trim().startsWith('|')
     );
 
     // Remove existing preview
@@ -672,6 +673,35 @@ function applyMarkdownFormatting(rowIndex, colIndex, value) {
     }
 }
 
+/* ----------  PIPE-TABLE → CSS-GRID  ---------- */
+function parseGridTable(lines) {
+    const rows = lines.map(l =>
+        l.trim().replace(/^\||\|$/g, '').split('|').map(c => c.trim()));
+    const cols = rows[0].length;
+    const grid = rows.map(r =>
+        r.map(c => parseMarkdownInline(c))   // bold, italic, links …
+    );
+
+    /*  build a single <div> that looks like a table  */
+    let html = `<div class="md-grid" style="--cols:${cols}">`;
+    grid.forEach((row, i) => {
+        row.forEach(cell => {
+            html += `<div class="md-cell ${i ? '' : 'md-header'}">${cell}</div>`;
+        });
+    });
+    html += '</div>';
+    return html;
+}
+
+/*  tiny inline parser (bold, italic, links, code)  */
+function parseMarkdownInline(text) {
+    return text
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/@@(.+?)@@/g, '<em>$1</em>')
+        .replace(/\{link:(.+?)\}(.+?)\{\/\}/g, '<a href="$1" target="_blank">$2</a>')
+        .replace(/`(.+?)`/g, '<code>$1</code>');
+}
+
 /**
  * Parse markdown syntax and convert to HTML
  * 
@@ -690,14 +720,48 @@ function applyMarkdownFormatting(rowIndex, colIndex, value) {
  * - -- subitem -> sub-bullet list
  * - 1. item -> numbered list
  * - ``` code block ```
+ * - | table | syntax | -> HTML table
  */
 function parseMarkdown(text) {
     if (!text) return '';
 
+    /* -----  GRID-TABLE DETECTION  ----- */
+    const lines = text.split('\n');
+    const hasGrid = lines.some(l => l.trim().startsWith('|'));
+
+    if (hasGrid) {
+        const blocks = [];
+        let cur = [], inGrid = false;
+
+        lines.forEach(l => {
+            const isGrid = l.trim().startsWith('|');
+            if (isGrid !== inGrid) {
+                if (cur.length) blocks.push({ grid: inGrid, lines: cur });
+                cur = [];
+                inGrid = isGrid;
+            }
+            cur.push(l);
+        });
+        if (cur.length) blocks.push({ grid: inGrid, lines: cur });
+
+        return blocks.map(b =>
+            b.grid ? parseGridTable(b.lines) : oldParseMarkdownBody(b.lines)
+        ).join('\n');
+    }
+
+    // If no grid table, process as normal markdown
+    return oldParseMarkdownBody(lines);
+}
+
+function oldParseMarkdownBody(lines) {
+    /* copy the *body* of the existing parser (bold, italic, lists …)
+       but skip the table-splitting logic we just added. */
+    let txt = lines.join('\n');
+
     // Handle code blocks first (multiline)
     let inCodeBlock = false;
-    const lines = text.split('\n');
-    const formattedLines = lines.map(line => {
+    const codeLines = txt.split('\n');
+    const formattedLines = codeLines.map(line => {
         let formatted = line;
 
         // Code block: ```text``` -> <code>text</code>
@@ -724,7 +788,6 @@ function parseMarkdown(text) {
                 if (key === 'fg') styleObj.color = value;
                 if (key === 'bg') styleObj.backgroundColor = value;
             });
-            // Add padding and border-radius for better appearance
             styleObj.padding = '2px 6px';
             styleObj.borderRadius = '4px';
             styleObj.display = 'inline-block';
@@ -747,13 +810,13 @@ function parseMarkdown(text) {
         // Underline: __text__ -> <u>text</u>
         formatted = formatted.replace(/__(.+?)__/g, '<u>$1</u>');
 
-        // Strikethrough: ~~text~~ -> <del>text</del> (process first to avoid conflict with subscript)
+        // Strikethrough: ~~text~~ -> <del>text</del>
         formatted = formatted.replace(/~~(.+?)~~/g, '<del>$1</del>');
 
         // Superscript: ^text^ -> <sup>text</sup>
         formatted = formatted.replace(/\^(.+?)\^/g, '<sup>$1</sup>');
 
-        // Subscript: ~text~ -> <sub>text</sub> (single tilde only, after strikethrough is processed)
+        // Subscript: ~text~ -> <sub>text</sub>
         formatted = formatted.replace(/~([^~\s]+?)~/g, '<sub>$1</sub>');
 
         // Sublist: -- item -> ◦ item with more indent (white circle)
@@ -2625,18 +2688,18 @@ async function moveCategoryUp() {
     }
 
     // Swap with previous category
-    [tableData.categories[index - 1], tableData.categories[index]] = 
-    [tableData.categories[index], tableData.categories[index - 1]];
+    [tableData.categories[index - 1], tableData.categories[index]] =
+        [tableData.categories[index], tableData.categories[index - 1]];
 
     await saveData();
     renderCategoryTabs();
-    
+
     // Refresh F1 popup if it's open
     const f1Popup = document.getElementById('f1Popup');
     if (f1Popup && f1Popup.classList.contains('show')) {
         populateF1Categories();
     }
-    
+
     showToast(`Category "${currentCategory}" moved up`, 'success');
 }
 
@@ -2653,18 +2716,18 @@ async function moveCategoryDown() {
     }
 
     // Swap with next category
-    [tableData.categories[index], tableData.categories[index + 1]] = 
-    [tableData.categories[index + 1], tableData.categories[index]];
+    [tableData.categories[index], tableData.categories[index + 1]] =
+        [tableData.categories[index + 1], tableData.categories[index]];
 
     await saveData();
     renderCategoryTabs();
-    
+
     // Refresh F1 popup if it's open
     const f1Popup = document.getElementById('f1Popup');
     if (f1Popup && f1Popup.classList.contains('show')) {
         populateF1Categories();
     }
-    
+
     showToast(`Category "${currentCategory}" moved down`, 'success');
 }
 
@@ -3290,6 +3353,7 @@ function renderTable() {
     sheet.rows.forEach((row, rowIndex) => {
         row.forEach((cellValue, colIndex) => {
             if (cellValue && (
+                cellValue.trim().startsWith('|') ||
                 cellValue.includes('**') ||
                 cellValue.includes('__') ||
                 cellValue.includes('@@') ||
@@ -3608,7 +3672,7 @@ function selectF1Category(category) {
 async function moveCategoryUpInF1() {
     // Get the currently selected category in F1
     const categoryToMove = selectedF1Category;
-    
+
     if (!categoryToMove) {
         showToast('Cannot move Uncategorized', 'error');
         return;
@@ -3621,22 +3685,22 @@ async function moveCategoryUpInF1() {
     }
 
     // Swap with previous category
-    [tableData.categories[index - 1], tableData.categories[index]] = 
-    [tableData.categories[index], tableData.categories[index - 1]];
+    [tableData.categories[index - 1], tableData.categories[index]] =
+        [tableData.categories[index], tableData.categories[index - 1]];
 
     await saveData();
     renderCategoryTabs();
-    
+
     // Refresh F1 popup
     populateF1Categories();
-    
+
     showToast(`Category "${categoryToMove}" moved up`, 'success');
 }
 
 async function moveCategoryDownInF1() {
     // Get the currently selected category in F1
     const categoryToMove = selectedF1Category;
-    
+
     if (!categoryToMove) {
         showToast('Cannot move Uncategorized', 'error');
         return;
@@ -3649,15 +3713,15 @@ async function moveCategoryDownInF1() {
     }
 
     // Swap with next category
-    [tableData.categories[index], tableData.categories[index + 1]] = 
-    [tableData.categories[index + 1], tableData.categories[index]];
+    [tableData.categories[index], tableData.categories[index + 1]] =
+        [tableData.categories[index + 1], tableData.categories[index]];
 
     await saveData();
     renderCategoryTabs();
-    
+
     // Refresh F1 popup
     populateF1Categories();
-    
+
     showToast(`Category "${categoryToMove}" moved down`, 'success');
 }
 
@@ -3694,7 +3758,7 @@ function populateF1Sheets(searchAllCategories = false) {
 
         const actions = document.createElement('div');
         actions.className = 'f1-sheet-actions';
-        
+
         const upBtn = document.createElement('button');
         upBtn.className = 'f1-sheet-action-btn';
         upBtn.innerHTML = '⬆️';
@@ -3704,7 +3768,7 @@ function populateF1Sheets(searchAllCategories = false) {
             moveSheetUp(index);
             setTimeout(() => populateF1Sheets(searchAllCategories), 100);
         };
-        
+
         const downBtn = document.createElement('button');
         downBtn.className = 'f1-sheet-action-btn';
         downBtn.innerHTML = '⬇️';
@@ -3717,7 +3781,7 @@ function populateF1Sheets(searchAllCategories = false) {
 
         actions.appendChild(upBtn);
         actions.appendChild(downBtn);
-        
+
         item.appendChild(nameSpan);
         item.appendChild(actions);
         sheetList.appendChild(item);
