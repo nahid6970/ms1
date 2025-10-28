@@ -541,3 +541,6 @@ LAlt & c:: {
 
 ;! not equal
 ::;notequal::≠
+
+;! Theta Sign
+::;theta::θ

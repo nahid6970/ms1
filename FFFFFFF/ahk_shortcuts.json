@@ -287,6 +287,14 @@
             "trigger": ";notequal",
             "replacement": "≠",
             "enabled": true
+        },
+        {
+            "name": "Theta Sign",
+            "category": "Math Sign",
+            "description": "",
+            "trigger": ";theta",
+            "replacement": "θ",
+            "enabled": true
         }
     ]
 }
