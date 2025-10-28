@@ -86,16 +86,92 @@ body {
     background: #e0e0e0;
 }
 
-/* Scan button specific styles */
-.scan-button {
-    background-color: #007bff !important;
-    /* Blue background for scan */
+/* Hidden shows button specific styles */
+.hidden-shows-button {
+    background-color: #28a745 !important;
+    /* Green background for hidden shows */
     color: white !important;
 }
 
-.scan-button:hover {
-    background-color: #0056b3 !important;
-    /* Darker blue on hover */
+.hidden-shows-button:hover {
+    background-color: #218838 !important;
+    /* Darker green on hover */
+}
+
+/* Hidden Shows Modal Styles */
+#hiddenShowsModal {
+    display: none;
+    position: fixed;
+    z-index: 200;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+#hiddenShowsModal .modal-content {
+    background-color: #282828;
+    margin: 5% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 800px;
+    border-radius: 8px;
+    position: relative;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+#hiddenShowsModal .close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+#hiddenShowsModal .close:hover,
+#hiddenShowsModal .close:focus {
+    color: #e0e0e0;
+}
+
+#hiddenShowsModal h2 {
+    color: #1db954;
+    text-align: center;
+    margin-top: 0;
+}
+
+.hidden-shows-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.hidden-show-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.hidden-show-item img {
+    width: 100%;
+    max-width: 150px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.hidden-show-item h4 {
+    margin: 5px 0;
+    color: #e0e0e0;
+}
+
+.hidden-show-item p {
+    margin: 2px 0;
+    color: #bbb;
+    font-size: 0.9em;
 }
 
 
@@ -405,6 +481,12 @@ body.modal-open {
 
 html.show-hidden-shows .show-card.ended-completed {
     display: flex;
+}
+
+.show-card.completed {
+    background-color: rgba(29, 185, 84, 0.15);
+    /* Green tint for completed shows */
+    border-color: rgba(29, 185, 84, 0.4);
 }
 
 .show-card.completed:hover {
@@ -1016,6 +1098,15 @@ input:checked+.slider:before {
     min-width: 150px;
     overflow: hidden;
     pointer-events: auto;
+}
+
+/* Hidden shows functionality */
+.show-card.ended-completed {
+    display: none;
+}
+
+html.show-hidden-shows .show-card.ended-completed {
+    display: flex;
 }
 
 .context-menu-item {

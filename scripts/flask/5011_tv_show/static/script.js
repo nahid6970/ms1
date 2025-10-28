@@ -8,6 +8,68 @@ function closeAddShowModal() {
     document.body.classList.remove('modal-open');
 }
 
+function showHiddenShows() {
+    console.log('Show hidden shows button clicked');
+    
+    // Get all hidden shows (ended and completed)
+    const hiddenShows = document.querySelectorAll('.show-card.ended-completed');
+    console.log('Found hidden shows:', hiddenShows.length);
+    
+    const hiddenShowsList = document.getElementById('hiddenShowsList');
+    const hiddenShowsModal = document.getElementById('hiddenShowsModal');
+    
+    if (!hiddenShowsList || !hiddenShowsModal) {
+        console.error('Hidden shows modal elements not found');
+        return;
+    }
+    
+    hiddenShowsList.innerHTML = '';
+    
+    if (hiddenShows.length === 0) {
+        hiddenShowsList.innerHTML = '<p>No hidden shows found.</p>';
+    } else {
+        hiddenShows.forEach(card => {
+            const titleElement = card.querySelector('h3');
+            const title = titleElement ? titleElement.textContent : 'Unknown Title';
+            
+            const yearElement = card.querySelector('.card-info p:nth-child(1)');
+            const year = yearElement ? yearElement.textContent : 'Unknown Year';
+            
+            const statusElement = card.querySelector('.show-status');
+            const status = statusElement ? statusElement.textContent : 'Unknown Status';
+            
+            const imgElement = card.querySelector('img');
+            const coverImage = imgElement ? imgElement.src : '';
+            
+            console.log('Show info:', {title, year, status, coverImage});
+            
+            const showItem = document.createElement('div');
+            showItem.className = 'hidden-show-item';
+            showItem.innerHTML = `
+                <img src="${coverImage}" alt="${title}">
+                <h4>${title}</h4>
+                <p>${year}</p>
+                <p>${status}</p>
+            `;
+            
+            hiddenShowsList.appendChild(showItem);
+        });
+    }
+    
+    hiddenShowsModal.style.display = 'block';
+    document.body.classList.add('modal-open');
+}
+
+function closeHiddenShowsModal() {
+    document.getElementById('hiddenShowsModal').style.display = 'none';
+    document.body.classList.remove('modal-open');
+}
+
+function closeHiddenShowsModal() {
+    document.getElementById('hiddenShowsModal').style.display = 'none';
+    document.body.classList.remove('modal-open');
+}
+
 async function openEditShowModal(showId) {
     const response = await fetch(`/edit_show/${showId}`);
     const show = await response.json();
@@ -287,6 +349,7 @@ window.onclick = function(event) {
     const editShowModal = document.getElementById('editShowModal');
     const editEpisodeModal = document.getElementById('editEpisodeModal');
     const settingsModal = document.getElementById('settingsModal');
+    const hiddenShowsModal = document.getElementById('hiddenShowsModal');
 
     if (event.target == addModal) {
         addModal.style.display = 'none';
@@ -299,6 +362,9 @@ window.onclick = function(event) {
         document.body.classList.remove('modal-open');
     } else if (event.target == settingsModal) {
         settingsModal.style.display = 'none';
+        document.body.classList.remove('modal-open');
+    } else if (event.target == hiddenShowsModal) {
+        hiddenShowsModal.style.display = 'none';
         document.body.classList.remove('modal-open');
     }
 }
