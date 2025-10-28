@@ -344,7 +344,7 @@ function addColumn() {
     document.getElementById('columnColorText').value = '#FFFFFF';
     document.getElementById('columnTextColor').value = '#000000';
     document.getElementById('columnTextColorText').value = '#000000';
-    document.getElementById('columnFontSize').value = '14';
+    document.getElementById('columnFontSize').value = '18';
     document.getElementById('headerBgColor').value = '#f8f9fa';
     document.getElementById('headerBgColorText').value = '#F8F9FA';
     document.getElementById('headerTextColor').value = '#333333';
@@ -370,7 +370,7 @@ function editColumn(index) {
     document.getElementById('columnTextColor').value = col.textColor || '#000000';
     document.getElementById('columnTextColorText').value = (col.textColor || '#000000').toUpperCase();
     document.getElementById('columnFont').value = col.font || '';
-    document.getElementById('columnFontSize').value = col.fontSize || '14';
+    document.getElementById('columnFontSize').value = col.fontSize || '18';
 
     // Load header styling
     document.getElementById('headerBgColor').value = col.headerBgColor || '#f8f9fa';
