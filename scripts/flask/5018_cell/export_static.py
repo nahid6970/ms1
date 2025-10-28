@@ -1238,13 +1238,62 @@ def generate_static_html(data):
             return html;
         }
 
-        /*  tiny inline parser (bold, italic, links, code)  */
+        /*  inline parser for table cells - supports all markdown except lists  */
         function parseMarkdownInline(text) {
-            return text
-                .replace(/\\*\\*(.+?)\\*\\*/g, '<strong>$1</strong>')
-                .replace(/@@(.+?)@@/g, '<em>$1</em>')
-                .replace(/\\{link:(.+?)\\}(.+?)\\{\\/\\}/g, '<a href="$1" target="_blank">$2</a>')
-                .replace(/`(.+?)`/g, '<code>$1</code>');
+            let formatted = text;
+
+            // Links: {link:url}text{/} -> <a href="url">text</a>
+            formatted = formatted.replace(/\\{link:([^}]+)\\}(.+?)\\{\\/\\}/g, (match, url, text) => {
+                return `<a href="${url}" target="_blank" rel="noopener noreferrer">${text}</a>`;
+            });
+
+            // Custom colors: {fg:color;bg:color}text{/} or {fg:color}text{/} or {bg:color}text{/}
+            formatted = formatted.replace(/\\{((?:fg:[^;\\}\\s]+)?(?:;)?(?:bg:[^;\\}\\s]+)?)\\}(.+?)\\{\\/\\}/g, (match, styles, text) => {
+                const styleObj = {};
+                const parts = styles.split(';').filter(p => p.trim());
+                parts.forEach(part => {
+                    const [key, value] = part.split(':').map(s => s.trim());
+                    if (key === 'fg') styleObj.color = value;
+                    if (key === 'bg') styleObj.backgroundColor = value;
+                });
+                styleObj.padding = '2px 6px';
+                styleObj.borderRadius = '4px';
+                styleObj.display = 'inline-block';
+                const styleStr = Object.entries(styleObj).map(([k, v]) => {
+                    const cssKey = k.replace(/([A-Z])/g, '-$1').toLowerCase();
+                    return cssKey + ': ' + v;
+                }).join('; ');
+                return '<span style="' + styleStr + '">' + text + '</span>';
+            });
+
+            // Heading: ##text## -> larger text
+            formatted = formatted.replace(/##(.+?)##/g, '<span style="font-size: 1.3em; font-weight: 600;">$1</span>');
+
+            // Bold: **text** -> <strong>text</strong>
+            formatted = formatted.replace(/\\*\\*(.+?)\\*\\*/g, '<strong>$1</strong>');
+
+            // Italic: @@text@@ -> <em>text</em>
+            formatted = formatted.replace(/@@(.+?)@@/g, '<em>$1</em>');
+
+            // Underline: __text__ -> <u>text</u>
+            formatted = formatted.replace(/__(.+?)__/g, '<u>$1</u>');
+
+            // Strikethrough: ~~text~~ -> <del>text</del>
+            formatted = formatted.replace(/~~(.+?)~~/g, '<del>$1</del>');
+
+            // Superscript: ^text^ -> <sup>text</sup>
+            formatted = formatted.replace(/\\^(.+?)\\^/g, '<sup>$1</sup>');
+
+            // Subscript: ~text~ -> <sub>text</sub>
+            formatted = formatted.replace(/~([^~\\s]+?)~/g, '<sub>$1</sub>');
+
+            // Inline code: `text` -> <code>text</code>
+            formatted = formatted.replace(/`(.+?)`/g, '<code>$1</code>');
+
+            // Highlight: ==text== -> <mark>text</mark>
+            formatted = formatted.replace(/==(.+?)==/g, '<mark>$1</mark>');
+
+            return formatted;
         }
 
         function oldParseMarkdownBody(lines) {
