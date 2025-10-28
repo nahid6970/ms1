@@ -792,6 +792,56 @@ def generate_static_html(data):
             color: #0056b3;
             text-decoration: none;
         }
+
+        /* Markdown Grid Table Styles (CSS Grid - no <table> elements) */
+        .md-grid {
+            display: grid;
+            grid-template-columns: repeat(var(--cols), auto);
+            gap: 4px;
+            margin: 4px 0;
+            font-size: 0.85em;
+            font-family: inherit;
+            width: fit-content;
+            max-width: 100%;
+        }
+
+        .md-cell {
+            padding: 4px 6px;
+            border: 1px solid #ced4da;
+            background: #fff;
+            overflow: visible;
+            word-break: normal;
+            white-space: nowrap;
+            min-width: fit-content;
+        }
+
+        .md-header {
+            background: #f8f9fa;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        /* Let coloured text / background css shine through */
+        .md-grid strong {
+            font-weight: bold;
+        }
+
+        .md-grid em {
+            font-style: italic;
+        }
+
+        .md-grid code {
+            background: #f4f4f4;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        .md-grid a {
+            color: #007bff;
+            text-decoration: underline;
+        }
     </style>
     <script>
         let currentSheet = ''' + str(active_sheet) + ''';
@@ -1063,7 +1113,9 @@ def generate_static_html(data):
                         cellValue.includes('\\n- ') || 
                         cellValue.includes('\\n-- ') || 
                         cellValue.trim().startsWith('- ') || 
-                        cellValue.trim().startsWith('-- ');
+                        cellValue.trim().startsWith('-- ') ||
+                        cellValue.trim().startsWith('|') ||
+                        (cellValue.includes('|') && cellValue.split('|').length >= 2);
                     
                     if (hasMarkdown) {
                         // Apply markdown formatting
@@ -1166,13 +1218,44 @@ def generate_static_html(data):
          * - 1. item -> numbered list
          * - ``` code block ```
          */
-        function parseMarkdown(text) {
-            if (!text) return '';
+        /* ----------  PIPE-TABLE → CSS-GRID  ---------- */
+        function parseGridTable(lines) {
+            const rows = lines.map(l =>
+                l.trim().replace(/^\\|\\|$/g, '').split('|').map(c => c.trim()));
+            const cols = rows[0].length;
+            const grid = rows.map(r =>
+                r.map(c => parseMarkdownInline(c))   // bold, italic, links …
+            );
+
+            /*  build a single <div> that looks like a table  */
+            let html = `<div class="md-grid" style="--cols:${cols}">`;
+            grid.forEach((row, i) => {
+                row.forEach(cell => {
+                    html += `<div class="md-cell ${i ? '' : 'md-header'}">${cell}</div>`;
+                });
+            });
+            html += '</div>';
+            return html;
+        }
+
+        /*  tiny inline parser (bold, italic, links, code)  */
+        function parseMarkdownInline(text) {
+            return text
+                .replace(/\\*\\*(.+?)\\*\\*/g, '<strong>$1</strong>')
+                .replace(/@@(.+?)@@/g, '<em>$1</em>')
+                .replace(/\\{link:(.+?)\\}(.+?)\\{\\/\\}/g, '<a href="$1" target="_blank">$2</a>')
+                .replace(/`(.+?)`/g, '<code>$1</code>');
+        }
+
+        function oldParseMarkdownBody(lines) {
+            /* copy the *body* of the existing parser (bold, italic, lists …)
+               but skip the table-splitting logic we just added. */
+            let txt = lines.join('\\n');
 
             // Handle code blocks first (multiline)
             let inCodeBlock = false;
-            const lines = text.split('\\n');
-            const formattedLines = lines.map(line => {
+            const codeLines = txt.split('\\n');
+            const formattedLines = codeLines.map(line => {
                 let formatted = line;
 
                 // Code block: ```text``` -> <code>text</code>
@@ -1266,6 +1349,44 @@ def generate_static_html(data):
             });
 
             return formattedLines.join('<br>');
+        }
+
+        function parseMarkdown(text) {
+            if (!text) return '';
+
+            /* -----  GRID-TABLE DETECTION  ----- */
+            const lines = text.split('\\n');
+            
+            // Detect table lines: either starts with | or contains | (for inline format like "Name | Age")
+            const isTableLine = (line) => {
+                const trimmed = line.trim();
+                return trimmed.startsWith('|') || (trimmed.includes('|') && trimmed.split('|').length >= 2);
+            };
+            
+            const hasGrid = lines.some(l => isTableLine(l));
+
+            if (hasGrid) {
+                const blocks = [];
+                let cur = [], inGrid = false;
+
+                lines.forEach(l => {
+                    const isGrid = isTableLine(l);
+                    if (isGrid !== inGrid) {
+                        if (cur.length) blocks.push({ grid: inGrid, lines: cur });
+                        cur = [];
+                        inGrid = isGrid;
+                    }
+                    cur.push(l);
+                });
+                if (cur.length) blocks.push({ grid: inGrid, lines: cur });
+
+                return blocks.map(b =>
+                    b.grid ? parseGridTable(b.lines) : oldParseMarkdownBody(b.lines)
+                ).join('<br>');
+            }
+
+            // If no grid table, process as normal markdown
+            return oldParseMarkdownBody(lines);
         }
 
         function searchTable() {
