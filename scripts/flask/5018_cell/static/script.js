@@ -624,6 +624,7 @@ function applyMarkdownFormatting(rowIndex, colIndex, value) {
         value.includes('~') ||
         value.includes('{fg:') ||
         value.includes('{bg:') ||
+        value.includes('{link:') ||
         value.includes('\n- ') ||
         value.includes('\n-- ') ||
         value.trim().startsWith('- ') ||
@@ -708,6 +709,11 @@ function parseMarkdown(text) {
         if (inCodeBlock) {
             return `<code>${formatted}</code>`;
         }
+
+        // Links: {link:url}text{/} -> <a href="url">text</a>
+        formatted = formatted.replace(/\{link:([^}]+)\}(.+?)\{\/\}/g, (match, url, text) => {
+            return `<a href="${url}" target="_blank" rel="noopener noreferrer">${text}</a>`;
+        });
 
         // Custom colors: {fg:color;bg:color}text{/} or {fg:color}text{/} or {bg:color}text{/}
         formatted = formatted.replace(/\{((?:fg:[^;}\s]+)?(?:;)?(?:bg:[^;}\s]+)?)\}(.+?)\{\/\}/g, (match, styles, text) => {
@@ -3296,6 +3302,7 @@ function renderTable() {
                 cellValue.includes('~') ||
                 cellValue.includes('{fg:') ||
                 cellValue.includes('{bg:') ||
+                cellValue.includes('{link:') ||
                 cellValue.includes('\n- ') ||
                 cellValue.trim().startsWith('- ')
             )) {

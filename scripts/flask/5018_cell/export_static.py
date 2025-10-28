@@ -778,6 +778,17 @@ def generate_static_html(data):
         u {
             text-decoration: underline;
         }
+
+        a {
+            color: #007bff;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        a:hover {
+            color: #0056b3;
+            text-decoration: none;
+        }
     </style>
     <script>
         let currentSheet = ''' + str(active_sheet) + ''';
@@ -1045,6 +1056,7 @@ def generate_static_html(data):
                         cellValue.includes('~') || 
                         cellValue.includes('{fg:') || 
                         cellValue.includes('{bg:') || 
+                        cellValue.includes('{link:') || 
                         cellValue.includes('\\n- ') || 
                         cellValue.includes('\\n-- ') || 
                         cellValue.trim().startsWith('- ') || 
@@ -1144,6 +1156,7 @@ def generate_static_html(data):
          * - ##heading## -> larger text
          * - `code` -> <code>
          * - ==highlight== -> <mark>
+         * - {link:url}text{/} -> clickable link
          * - {fg:color}text{/} or {bg:color}text{/} or {fg:color;bg:color}text{/} -> colored text
          * - - item -> bullet list
          * - -- subitem -> sub-bullet list
@@ -1168,6 +1181,11 @@ def generate_static_html(data):
                 if (inCodeBlock) {
                     return `<code>${formatted}</code>`;
                 }
+
+                // Links: {link:url}text{/} -> <a href="url">text</a>
+                formatted = formatted.replace(/\\{link:([^}]+)\\}(.+?)\\{\\/\\}/g, (match, url, text) => {
+                    return `<a href="${url}" target="_blank" rel="noopener noreferrer">${text}</a>`;
+                });
 
                 // Custom colors: {fg:color;bg:color}text{/} or {fg:color}text{/} or {bg:color}text{/}
                 formatted = formatted.replace(/\\{((?:fg:[^;\\}\\s]+)?(?:;)?(?:bg:[^;\\}\\s]+)?)\\}(.+?)\\{\\/\\}/g, (match, styles, text) => {
