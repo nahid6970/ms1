@@ -66,7 +66,7 @@
 
     <div class="show-grid">
         {% for show in shows %}
-            <div class="show-card{% if show.watched_count == show.total_count and show.total_count > 0 %} completed{% endif %}" data-show-id="{{ show.id }}">
+            <div class="show-card{% if show.watched_count == show.total_count and show.total_count > 0 %} completed{% endif %}{% if show.status == 'Ended' and show.watched_count == show.total_count and show.total_count > 0 %} ended-completed{% endif %}" data-show-id="{{ show.id }}">
                 <div class="img-wrapper">
                     <img src="{{ show.cover_image }}" alt="{{ show.title }}">
                     <div class="card-overlay">
@@ -186,6 +186,13 @@
                 <label for="showCompletedCheckmarks">Show Completed Checkmarks</label>
                 <label class="switch">
                     <input type="checkbox" id="showCompletedCheckmarks">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+            <div class="setting-item">
+                <label for="showHiddenShows">Show Hidden Shows</label>
+                <label class="switch">
+                    <input type="checkbox" id="showHiddenShows">
                     <span class="slider round"></span>
                 </label>
             </div>

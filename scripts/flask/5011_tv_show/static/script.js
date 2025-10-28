@@ -114,6 +114,7 @@ if (savedScrollPosition !== null) {
 document.addEventListener('DOMContentLoaded', () => {
     const defaultHomePageSelect = document.getElementById('defaultHomePage');
     const showCompletedCheckmarksToggle = document.getElementById('showCompletedCheckmarks');
+    const showHiddenShowsToggle = document.getElementById('showHiddenShows');
     const html = document.documentElement;
 
     // Load default home page preference from localStorage
@@ -125,6 +126,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (showCompletedCheckmarks) {
         html.classList.add('show-completed-checkmarks');
         showCompletedCheckmarksToggle.checked = true;
+    }
+
+    // Load show hidden shows preference from localStorage
+    const showHiddenShows = localStorage.getItem('showHiddenShows') === 'true';
+    if (showHiddenShows) {
+        html.classList.add('show-hidden-shows');
+        showHiddenShowsToggle.checked = true;
     }
 
     // Save default home page preference to localStorage on change
@@ -140,6 +148,17 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             html.classList.remove('show-completed-checkmarks');
             localStorage.setItem('showCompletedCheckmarks', 'false');
+        }
+    });
+
+    // Save show hidden shows preference to localStorage on change
+    showHiddenShowsToggle.addEventListener('change', () => {
+        if (showHiddenShowsToggle.checked) {
+            html.classList.add('show-hidden-shows');
+            localStorage.setItem('showHiddenShows', 'true');
+        } else {
+            html.classList.remove('show-hidden-shows');
+            localStorage.setItem('showHiddenShows', 'false');
         }
     });
 

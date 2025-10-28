@@ -399,10 +399,12 @@ body.modal-open {
     /* Distribute space to push buttons to bottom */
 }
 
-.show-card.completed {
-    background-color: rgba(29, 185, 84, 0.15);
-    /* Green tint for completed shows */
-    border-color: rgba(29, 185, 84, 0.4);
+.show-card.ended-completed {
+    display: none;
+}
+
+html.show-hidden-shows .show-card.ended-completed {
+    display: flex;
 }
 
 .show-card.completed:hover {
