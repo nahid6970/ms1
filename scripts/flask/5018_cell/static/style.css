@@ -2108,7 +2108,7 @@ Markdown Table Styles */
     grid-template-columns: repeat(var(--cols), 1fr);
     gap: 4px;
     margin: 4px 0;
-    font-size: inherit;
+    font-size: 0.85em;  /* Smaller font size for tables */
     font-family: inherit;
     width: 100%;
 }

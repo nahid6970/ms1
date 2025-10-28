@@ -629,7 +629,8 @@ function applyMarkdownFormatting(rowIndex, colIndex, value) {
         value.includes('\n-- ') ||
         value.trim().startsWith('- ') ||
         value.trim().startsWith('-- ') ||
-        value.trim().startsWith('|')
+        value.trim().startsWith('|') ||
+        (value.includes('|') && value.split('|').length >= 2)  // Inline pipe format
     );
 
     // Remove existing preview
@@ -727,14 +728,21 @@ function parseMarkdown(text) {
 
     /* -----  GRID-TABLE DETECTION  ----- */
     const lines = text.split('\n');
-    const hasGrid = lines.some(l => l.trim().startsWith('|'));
+
+    // Detect table lines: either starts with | or contains | (for inline format like "Name | Age")
+    const isTableLine = (line) => {
+        const trimmed = line.trim();
+        return trimmed.startsWith('|') || (trimmed.includes('|') && trimmed.split('|').length >= 2);
+    };
+
+    const hasGrid = lines.some(l => isTableLine(l));
 
     if (hasGrid) {
         const blocks = [];
         let cur = [], inGrid = false;
 
         lines.forEach(l => {
-            const isGrid = l.trim().startsWith('|');
+            const isGrid = isTableLine(l);
             if (isGrid !== inGrid) {
                 if (cur.length) blocks.push({ grid: inGrid, lines: cur });
                 cur = [];
@@ -3354,6 +3362,7 @@ function renderTable() {
         row.forEach((cellValue, colIndex) => {
             if (cellValue && (
                 cellValue.trim().startsWith('|') ||
+                (cellValue.includes('|') && cellValue.split('|').length >= 2) ||
                 cellValue.includes('**') ||
                 cellValue.includes('__') ||
                 cellValue.includes('@@') ||
