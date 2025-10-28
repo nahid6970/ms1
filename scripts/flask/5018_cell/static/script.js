@@ -407,12 +407,32 @@ function closeMarkdownGuide() {
     document.getElementById('markdownGuideModal').style.display = 'none';
 }
 
+function getExcelColumnName(index) {
+    // Convert 0-based index to Excel-style column name (A, B, C, ... Z, AA, AB, ...)
+    let name = '';
+    index++; // Make it 1-based
+    while (index > 0) {
+        index--;
+        name = String.fromCharCode(65 + (index % 26)) + name;
+        index = Math.floor(index / 26);
+    }
+    return name;
+}
+
 async function handleColumnFormSubmit(e) {
     e.preventDefault();
 
     const editingIndex = parseInt(document.getElementById('editingColumnIndex').value);
+    let columnName = document.getElementById('columnName').value.trim();
+    
+    // Auto-generate column name if empty (only for new columns)
+    if (!columnName && editingIndex < 0) {
+        const sheet = tableData.sheets[currentSheet];
+        columnName = getExcelColumnName(sheet.columns.length);
+    }
+    
     const column = {
-        name: document.getElementById('columnName').value,
+        name: columnName,
         type: document.getElementById('columnType').value,
         width: document.getElementById('columnWidth').value,
         color: document.getElementById('columnColor').value,

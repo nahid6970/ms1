@@ -538,3 +538,6 @@ LAlt & c:: {
 
 ;! Percentage %
 ::;%::℅
+
+;! not equal
+::;notequal::≠
