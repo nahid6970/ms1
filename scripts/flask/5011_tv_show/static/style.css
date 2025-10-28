@@ -451,15 +451,25 @@ body.modal-open {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 5em;
-    color: rgba(29, 185, 84, 0.8);
     z-index: 5;
-    text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
     display: none;
+    width: 80px;
+    height: 80px;
+    background-color: rgba(29, 185, 84, 0.95);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+}
+
+.completed-checkmark i {
+    font-size: 3em;
+    color: white;
 }
 
 html.show-completed-checkmarks .completed-checkmark {
-    display: block;
+    display: flex;
 }
 
 .card-overlay {
