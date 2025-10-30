@@ -17,7 +17,7 @@
     "url": "http://192.168.0.101:5011/"
   },
   {
-    "bg_color": "white",
+    "bg_color": "gray",
     "border_color": "transparent",
     "border_radius": "50%",
     "display_type": "image",
