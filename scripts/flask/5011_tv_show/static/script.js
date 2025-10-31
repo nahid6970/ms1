@@ -29,14 +29,9 @@ function showHiddenShows() {
         hiddenShowsList.innerHTML = '<p>No hidden shows found.</p>';
     } else {
         hiddenShows.forEach(card => {
-            const titleElement = card.querySelector('h3');
-            const title = titleElement ? titleElement.textContent : 'Unknown Title';
-            
-            const yearElement = card.querySelector('.card-info p:nth-child(1)');
-            const year = yearElement ? yearElement.textContent : 'Unknown Year';
-            
-            const statusElement = card.querySelector('.show-status');
-            const status = statusElement ? statusElement.textContent : 'Unknown Status';
+            const title = card.dataset.title || 'Unknown Title';
+            const year = card.dataset.year || 'Unknown Year';
+            const status = card.dataset.status || 'Unknown Status';
             
             const imgElement = card.querySelector('img');
             const coverImage = imgElement ? imgElement.src : '';

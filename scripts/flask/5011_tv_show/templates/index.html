@@ -67,7 +67,7 @@
 
     <div class="show-grid">
         {% for show in shows %}
-            <div class="show-card{% if show.watched_count == show.total_count and show.total_count > 0 %} completed{% endif %}{% if show.status == 'Ended' and show.watched_count == show.total_count and show.total_count > 0 %} ended-completed{% endif %}" data-show-id="{{ show.id }}">
+            <div class="show-card{% if show.watched_count == show.total_count and show.total_count > 0 %} completed{% endif %}{% if show.status == 'Ended' and show.watched_count == show.total_count and show.total_count > 0 %} ended-completed{% endif %}" data-show-id="{{ show.id }}" data-title="{{ show.title }}" data-year="{{ show.year }}" data-status="{{ show.status or 'Continuing' }}">
                 <div class="img-wrapper">
                     <img src="{{ show.cover_image }}" alt="{{ show.title }}">
                     <div class="card-overlay">
