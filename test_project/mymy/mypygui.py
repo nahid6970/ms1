@@ -516,6 +516,35 @@ Update.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\
 tools_window = None
 tools_visible = False
 
+# Configuration for tool button styling
+TOOL_BUTTON_CONFIG = {
+    "bg": "#2c2f38",
+    "fg": "#ffffff",
+    "font": ("JetBrainsMono NFP", 12, "bold"),
+    "hover_bg": "#444857",
+    "hover_fg": "#ffffff",
+    "active_bg": "#555a6b",
+    "active_fg": "#ffffff",
+    "border": "flat",
+    "anchor": "w",
+    "padx": 5,
+    "pady": 2,
+    "window_bg": "#1e2127",
+    "frame_bg": "#252830"
+}
+
+# Specific colors for individual buttons
+BUTTON_COLORS = {
+    "Tools": {"bg": "#3a506b", "fg": "#ffffff"},
+    "Startup": {"bg": "#0b3954", "fg": "#ffffff"},
+    "App Management": {"bg": "#006d77", "fg": "#ffffff"},
+    "Rclone": {"bg": "#1d3557", "fg": "#ffffff"},
+    "Folder": {"bg": "#457b9d", "fg": "#ffffff"},
+    "Position XY": {"bg": "#8d99ae", "fg": "#000000"},
+    "Color Tool": {"bg": "#e63946", "fg": "#ffffff"},
+    "Info": {"bg": "#2a9d8f", "fg": "#ffffff"}
+}
+
 def toggle_tools_window():
     global tools_window, tools_visible
     
@@ -537,7 +566,7 @@ def create_tools_window():
     tools_window = tk.Toplevel(ROOT)
     tools_window.title("Tools")
     tools_window.geometry("300x400")
-    tools_window.configure(bg="#282c34")
+    tools_window.configure(bg=TOOL_BUTTON_CONFIG["window_bg"])
     tools_window.resizable(False, False)
     
     # Position window near the main window
@@ -549,7 +578,7 @@ def create_tools_window():
     tools_window.attributes('-topmost', True)
     
     # Create a frame for the tools
-    tools_frame = tk.Frame(tools_window, bg="#1D2027")
+    tools_frame = tk.Frame(tools_window, bg=TOOL_BUTTON_CONFIG["frame_bg"])
     tools_frame.pack(fill="both", expand=True, padx=10, pady=10)
     
     # Add all the tools from Tools_bt to Info_lb in the new window
@@ -564,23 +593,37 @@ def create_tools_window():
         ("Info", "\udb80\udefc", lambda: subprocess.Popen(["cmd /c C:\\Users\\nahid\\ms\\ms1\\scripts\\info.py"], shell=True))
     ]
     
-    # Create buttons for each tool
+    # Create buttons for each tool with customizable styling
     for i, (name, icon, command) in enumerate(tools):
-        tool_btn = HoverButton(
+        # Get specific colors for this button, or use default colors
+        button_colors = BUTTON_COLORS.get(name, {
+            "bg": TOOL_BUTTON_CONFIG["bg"],
+            "fg": TOOL_BUTTON_CONFIG["fg"]
+        })
+        
+        tool_btn = tk.Button(
             tools_frame,
             text=f"{icon} {name}",
-            font=("JetBrainsMono NFP", 12, "bold"),
-            bg="#1d2027",
-            fg="#ffffff",
-            hover_color="#3d4047",
-            hover_fg="#ffffff",
-            activebackground="#3d4047",
-            activeforeground="#ffffff",
-            relief="flat",
-            anchor="w",
+            font=TOOL_BUTTON_CONFIG["font"],
+            bg=button_colors["bg"],
+            fg=button_colors["fg"],
+            activebackground=TOOL_BUTTON_CONFIG["active_bg"],
+            activeforeground=TOOL_BUTTON_CONFIG["active_fg"],
+            relief=TOOL_BUTTON_CONFIG["border"],
+            anchor=TOOL_BUTTON_CONFIG["anchor"],
             command=command
         )
-        tool_btn.pack(fill="x", padx=5, pady=2)
+        tool_btn.pack(fill="x", padx=TOOL_BUTTON_CONFIG["padx"], pady=TOOL_BUTTON_CONFIG["pady"])
+        
+        # Bind hover effects
+        def on_enter(event, btn=tool_btn, default_bg=button_colors["bg"]):
+            btn.configure(bg=TOOL_BUTTON_CONFIG["hover_bg"], fg=TOOL_BUTTON_CONFIG["hover_fg"])
+        
+        def on_leave(event, btn=tool_btn, default_bg=button_colors["bg"], default_fg=button_colors["fg"]):
+            btn.configure(bg=default_bg, fg=default_fg)
+        
+        tool_btn.bind("<Enter>", on_enter)
+        tool_btn.bind("<Leave>", on_leave)
         
         # Bind right-click for code editing
         if name == "Tools":
