@@ -473,6 +473,26 @@ body.modal-open {
     flex-direction: column;
     justify-content: space-between;
     /* Distribute space to push buttons to bottom */
+    position: relative;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.show-card.completed .img-wrapper::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(29, 185, 84, 0.4);
+    z-index: 3;
+    pointer-events: none;
+    border-radius: 10px;
+}
+
+.show-card.completed .img-wrapper:hover::after {
+    background-color: rgba(29, 185, 84, 0.5);
 }
 
 .completed-checkmark {
