@@ -498,7 +498,7 @@ body.modal-open {
     z-index: 4;
     pointer-events: none;
     transform: translate(-50%, -50%);
-    animation: typhoonPulse 1s infinite ease-in-out;
+    animation: typhoonPulse 2s infinite ease-in-out;
 }
 
 .show-card.completed .img-wrapper::after {
@@ -521,7 +521,7 @@ body.modal-open {
     z-index: 4;
     pointer-events: none;
     transform: translate(-50%, -50%);
-    animation: typhoonPulse 1s infinite ease-in-out 0.15s;
+    animation: typhoonPulse 2s infinite ease-in-out 0.3s;
 }
 
 @keyframes typhoonPulse {
