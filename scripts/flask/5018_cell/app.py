@@ -74,8 +74,10 @@ def delete_sheet(index):
 def rename_sheet(index):
     data = load_data()
     new_name = request.json.get('name')
+    new_nickname = request.json.get('nickname', '')
     if 0 <= index < len(data['sheets']) and new_name:
         data['sheets'][index]['name'] = new_name
+        data['sheets'][index]['nickname'] = new_nickname
         save_data(data)
     return jsonify({'success': True})
 

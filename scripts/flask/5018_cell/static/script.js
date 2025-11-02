@@ -505,16 +505,18 @@ async function handleRenameFormSubmit(e) {
     e.preventDefault();
 
     const newName = document.getElementById('sheetName').value;
+    const newNickname = document.getElementById('sheetNickname').value.trim();
 
     try {
         const response = await fetch(`/api/sheets/${currentSheet}/rename`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name: newName })
+            body: JSON.stringify({ name: newName, nickname: newNickname })
         });
 
         if (response.ok) {
             tableData.sheets[currentSheet].name = newName;
+            tableData.sheets[currentSheet].nickname = newNickname;
             renderSheetTabs();
             closeRenameModal();
         }
@@ -2425,7 +2427,9 @@ function switchSheet(index) {
 
 function showRenameModal(index) {
     currentSheet = index;
-    document.getElementById('sheetName').value = tableData.sheets[index].name;
+    const sheet = tableData.sheets[index];
+    document.getElementById('sheetName').value = sheet.name;
+    document.getElementById('sheetNickname').value = sheet.nickname || '';
     document.getElementById('renameModal').style.display = 'block';
 }
 
@@ -4144,15 +4148,19 @@ function filterF1Sheets() {
 
     // Check for special search prefixes
     if (searchTerm.startsWith('*')) {
-        // Search all categories by sheet name
+        // Search all categories by sheet name or nickname
         const actualSearch = searchTerm.substring(1).toLowerCase();
         populateF1Sheets(true); // Show all sheets from all categories
 
-        // Filter by name
+        // Filter by name or nickname
         const sheetItems = document.querySelectorAll('.f1-sheet-item');
         sheetItems.forEach(item => {
-            const sheetName = item.querySelector('.f1-sheet-name').textContent.toLowerCase();
-            if (sheetName.includes(actualSearch)) {
+            const sheetIndex = parseInt(item.dataset.sheetIndex);
+            const sheet = tableData.sheets[sheetIndex];
+            const sheetName = sheet.name.toLowerCase();
+            const sheetNickname = (sheet.nickname || '').toLowerCase();
+
+            if (sheetName.includes(actualSearch) || sheetNickname.includes(actualSearch)) {
                 item.classList.remove('hidden');
             } else {
                 item.classList.add('hidden');
@@ -4215,14 +4223,18 @@ function filterF1Sheets() {
             sheetList.appendChild(emptyMsg);
         }
     } else {
-        // Normal search - filter current category sheets by name
+        // Normal search - filter current category sheets by name or nickname
         populateF1Sheets(false); // Show sheets from selected category only
 
         const searchLower = searchTerm.toLowerCase();
         const sheetItems = document.querySelectorAll('.f1-sheet-item');
         sheetItems.forEach(item => {
-            const sheetName = item.querySelector('.f1-sheet-name').textContent.toLowerCase();
-            if (sheetName.includes(searchLower)) {
+            const sheetIndex = parseInt(item.dataset.sheetIndex);
+            const sheet = tableData.sheets[sheetIndex];
+            const sheetName = sheet.name.toLowerCase();
+            const sheetNickname = (sheet.nickname || '').toLowerCase();
+
+            if (sheetName.includes(searchLower) || sheetNickname.includes(searchLower)) {
                 item.classList.remove('hidden');
             } else {
                 item.classList.add('hidden');

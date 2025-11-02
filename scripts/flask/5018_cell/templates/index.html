@@ -286,9 +286,14 @@
                     <input type="text" id="sheetName" class="form-input" placeholder="Enter sheet name" required
                         autofocus>
                 </div>
+                <div class="form-group">
+                    <label for="sheetNickname">Nickname (optional, for easier searching)</label>
+                    <input type="text" id="sheetNickname" class="form-input" placeholder="e.g., English name for Bangla sheet">
+                    <small style="color: #666; font-size: 12px;">Nickname won't be displayed but can be used to search with *</small>
+                </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" onclick="closeRenameModal()">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Rename</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
                 </div>
             </form>
         </div>
