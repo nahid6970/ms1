@@ -1,3 +1,7 @@
+:root {
+    --grid-line-color: #dddddd;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -439,7 +443,7 @@ table {
 
 th,
 td {
-    border: 1px solid #ddd;
+    border: 1px solid var(--grid-line-color);
     padding: 8px 8px 20px 8px;
     text-align: left;
     position: relative;

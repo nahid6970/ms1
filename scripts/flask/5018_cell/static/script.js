@@ -88,6 +88,11 @@ function initializeApp() {
         headerTextText.value = e.target.value.toUpperCase();
     });
 
+    // Set up grid line color picker (will be initialized when settings modal opens)
+    // Apply saved grid line color on page load
+    const savedGridColor = localStorage.getItem('gridLineColor') || '#dddddd';
+    document.documentElement.style.setProperty('--grid-line-color', savedGridColor);
+
     // Clear old localStorage values and set new defaults
     localStorage.removeItem('actionsWidth');
     localStorage.removeItem('rownumWidth');
@@ -2051,7 +2056,7 @@ function applyUnifiedBorderOptions(rowIndex, colIndex, tdElement) {
 
                 if (cellTd) {
 
-                    cellTd.style.border = '1px solid #ddd';
+                    cellTd.style.border = `1px solid ${getGridLineColor()}`;
 
                 }
 
@@ -2087,7 +2092,7 @@ function applyUnifiedBorderOptions(rowIndex, colIndex, tdElement) {
 
             if (tdElement) {
 
-                tdElement.style.border = '1px solid #ddd';
+                tdElement.style.border = `1px solid ${getGridLineColor()}`;
 
             }
 
@@ -2485,7 +2490,42 @@ function toggleSheetList() {
 }
 
 function openSettings() {
+    // Load current grid line color
+    const savedColor = localStorage.getItem('gridLineColor') || '#dddddd';
+    document.getElementById('gridLineColor').value = savedColor;
+    document.getElementById('gridLineColorText').value = savedColor.toUpperCase();
+
     document.getElementById('settingsModal').style.display = 'block';
+}
+
+function syncGridLineColor(value) {
+    // Sync between color picker and text input
+    if (value.startsWith('#') && (value.length === 4 || value.length === 7)) {
+        document.getElementById('gridLineColor').value = value;
+        document.getElementById('gridLineColorText').value = value.toUpperCase();
+        applyGridLineColor(value);
+    }
+}
+
+function applyGridLineColor(color) {
+    // Apply the color to CSS variables
+    document.documentElement.style.setProperty('--grid-line-color', color);
+    localStorage.setItem('gridLineColor', color);
+
+    // Re-render table to apply new color to all cells
+    renderTable();
+}
+
+function getGridLineColor() {
+    return getComputedStyle(document.documentElement).getPropertyValue('--grid-line-color').trim() || '#dddddd';
+}
+
+function resetGridLineColor() {
+    const defaultColor = '#dddddd';
+    document.getElementById('gridLineColor').value = defaultColor;
+    document.getElementById('gridLineColorText').value = defaultColor.toUpperCase();
+    applyGridLineColor(defaultColor);
+    showToast('Grid line color reset to default', 'success');
 }
 
 // Category Management Functions
@@ -3563,7 +3603,7 @@ function renderTable() {
                 const borderColor = cellStyle.borderColor || '#000000';
                 td.style.border = `${borderWidth} ${borderStyle} ${borderColor}`;
             } else {
-                td.style.border = '1px solid #ddd';
+                td.style.border = `1px solid ${getGridLineColor()}`;
             }
             if (cellStyle.bgColor) {
                 td.style.backgroundColor = cellStyle.bgColor;
@@ -3660,7 +3700,7 @@ function renderTable() {
                         const borderColor = cellStyle.borderColor || '#000000';
                         td.style.border = `${borderWidth} ${borderStyle} ${borderColor}`;
                     } else {
-                        td.style.border = '1px solid #ddd';
+                        td.style.border = `1px solid ${getGridLineColor()}`;
                     }
                     if (cellStyle.bgColor) {
                         td.style.backgroundColor = cellStyle.bgColor;

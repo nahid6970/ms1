@@ -371,6 +371,19 @@
                 <span class="close" onclick="closeSettingsModal()">&times;</span>
             </div>
             <div class="settings-content">
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label for="gridLineColor">Grid Line Color</label>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <input type="color" id="gridLineColor" value="#dddddd" style="width: 60px; height: 40px;"
+                            oninput="syncGridLineColor(this.value)">
+                        <input type="text" id="gridLineColorText" value="#DDDDDD" 
+                            style="width: 100px; padding: 8px; font-family: monospace;"
+                            oninput="syncGridLineColor(this.value)">
+                        <button class="btn btn-secondary" onclick="resetGridLineColor()" style="padding: 8px 12px;">Reset</button>
+                    </div>
+                    <small style="color: #666; font-size: 12px;">Changes the color of table borders and cell separators</small>
+                </div>
+                
                 <button class="btn btn-primary" onclick="showMarkdownGuide()"
                     style="width: 100%; padding: 15px; font-size: 16px;">
                     📝 Markdown Guide
