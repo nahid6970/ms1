@@ -2985,6 +2985,9 @@ function autoResizeTextarea(textarea) {
         return;
     }
 
+    // Save current scroll position
+    const savedScrollTop = textarea.scrollTop;
+
     // Reset height to measure actual content
     textarea.style.height = 'auto';
 
@@ -2996,14 +2999,19 @@ function autoResizeTextarea(textarea) {
     const newHeight = Math.max(minHeight, scrollHeight);
     textarea.style.height = newHeight + 'px';
 
+    // Restore scroll position
+    textarea.scrollTop = savedScrollTop;
+
     // Mark the row if it has expanded content
     const tr = textarea.closest('tr');
     if (tr) {
         // Check if any textarea in this row actually needs more height
         const hasExpandedContent = Array.from(tr.querySelectorAll('textarea:not(.merged-cell textarea)')).some(ta => {
+            const savedScroll = ta.scrollTop;
             ta.style.height = 'auto';
             const needsHeight = ta.scrollHeight > minHeight + 2; // Small threshold
             ta.style.height = Math.max(minHeight, ta.scrollHeight) + 'px';
+            ta.scrollTop = savedScroll;
             return needsHeight;
         });
 
@@ -3222,8 +3230,32 @@ function renderTable() {
 
                 inputElement.onchange = (e) => updateCell(rowIndex, colIndex, e.target.value);
                 inputElement.oninput = (e) => {
-                    autoResizeTextarea(e.target);
-                    updateCell(rowIndex, colIndex, e.target.value);
+                    const textarea = e.target;
+                    const cursorPos = textarea.selectionStart;
+                    autoResizeTextarea(textarea);
+                    updateCell(rowIndex, colIndex, textarea.value);
+
+                    // Maintain scroll position at cursor after input
+                    setTimeout(() => {
+                        const textBeforeCursor = textarea.value.substring(0, cursorPos);
+                        const lines = textBeforeCursor.split('\n');
+                        const lineHeight = parseInt(window.getComputedStyle(textarea).lineHeight) || 20;
+                        const scrollTop = (lines.length - 1) * lineHeight;
+                        textarea.scrollTop = Math.max(0, scrollTop - textarea.clientHeight / 2);
+                    }, 0);
+                };
+
+                // Scroll to cursor position when clicking in textarea
+                inputElement.onclick = (e) => {
+                    setTimeout(() => {
+                        const textarea = e.target;
+                        const cursorPos = textarea.selectionStart;
+                        const textBeforeCursor = textarea.value.substring(0, cursorPos);
+                        const lines = textBeforeCursor.split('\n');
+                        const lineHeight = parseInt(window.getComputedStyle(textarea).lineHeight) || 20;
+                        const scrollTop = (lines.length - 1) * lineHeight;
+                        textarea.scrollTop = Math.max(0, scrollTop - textarea.clientHeight / 2);
+                    }, 0);
                 };
 
                 // Mark td as having textarea for vertical alignment
@@ -3341,7 +3373,33 @@ function renderTable() {
                     textarea.onchange = (e) => updateCell(rowIndex, colIndex, e.target.value);
 
                     // Also handle input event for real-time updates
-                    textarea.oninput = (e) => updateCell(rowIndex, colIndex, e.target.value);
+                    textarea.oninput = (e) => {
+                        const textarea = e.target;
+                        const cursorPos = textarea.selectionStart;
+                        updateCell(rowIndex, colIndex, textarea.value);
+
+                        // Maintain scroll position at cursor after input
+                        setTimeout(() => {
+                            const textBeforeCursor = textarea.value.substring(0, cursorPos);
+                            const lines = textBeforeCursor.split('\n');
+                            const lineHeight = parseInt(window.getComputedStyle(textarea).lineHeight) || 20;
+                            const scrollTop = (lines.length - 1) * lineHeight;
+                            textarea.scrollTop = Math.max(0, scrollTop - textarea.clientHeight / 2);
+                        }, 0);
+                    };
+
+                    // Scroll to cursor position when clicking in merged cell textarea
+                    textarea.onclick = (e) => {
+                        setTimeout(() => {
+                            const textarea = e.target;
+                            const cursorPos = textarea.selectionStart;
+                            const textBeforeCursor = textarea.value.substring(0, cursorPos);
+                            const lines = textBeforeCursor.split('\n');
+                            const lineHeight = parseInt(window.getComputedStyle(textarea).lineHeight) || 20;
+                            const scrollTop = (lines.length - 1) * lineHeight;
+                            textarea.scrollTop = Math.max(0, scrollTop - textarea.clientHeight / 2);
+                        }, 0);
+                    };
 
                     const cellStyle = getCellStyle(rowIndex, colIndex);
                     if (cellStyle.bold) textarea.style.fontWeight = 'bold';
