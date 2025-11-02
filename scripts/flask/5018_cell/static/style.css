@@ -644,6 +644,9 @@ td {
     height: 22px;
     /* Match input height exactly */
     vertical-align: middle;
+    /* Stop browser from auto-scrolling to top on Enter */
+    overflow-anchor: none;
+    scroll-behavior: auto !important;
 }
 
 .wrap-enabled td textarea:not(.merged-cell textarea):focus {
@@ -1574,6 +1577,10 @@ td.merged-cell textarea {
     word-wrap: break-word;
 
     line-height: 1.4;
+
+    /* Stop browser from auto-scrolling to top on Enter */
+    overflow-anchor: none;
+    scroll-behavior: auto !important;
 
 }
 

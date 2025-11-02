@@ -34,6 +34,17 @@ function initializeApp() {
     // Set up keyboard shortcuts
     document.addEventListener('keydown', handleKeyboardShortcuts);
 
+    // Keep the caret line centered when the user presses Enter
+    document.addEventListener('beforeinput', e => {
+        if (e.inputType !== 'insertLineBreak') return;   // Enter key
+        const ta = e.target;
+        if (ta.tagName !== 'TEXTAREA') return;
+        // Let the browser insert the newline first
+        requestAnimationFrame(() => {
+            keepCursorCentered(ta);   // The helper function
+        });
+    });
+
     // Save scroll position on scroll
     const tableContainer = document.querySelector('.table-container');
     if (tableContainer) {
@@ -3051,6 +3062,16 @@ function autoResizeTextarea(textarea) {
     }
 }
 
+// Keep the line that contains the cursor vertically centered
+function keepCursorCentered(textarea) {
+    requestAnimationFrame(() => {
+        const lineHeight = parseFloat(getComputedStyle(textarea).lineHeight) || 20;
+        const lines = textarea.value.substr(0, textarea.selectionStart).split('\n');
+        const wantedTop = (lines.length - 1) * lineHeight;
+        textarea.scrollTop = wantedTop - textarea.clientHeight / 2 + lineHeight / 2;
+    });
+}
+
 
 
 function renderTable() {
@@ -3259,31 +3280,14 @@ function renderTable() {
                 inputElement.onchange = (e) => updateCell(rowIndex, colIndex, e.target.value);
                 inputElement.oninput = (e) => {
                     const textarea = e.target;
-                    const cursorPos = textarea.selectionStart;
                     autoResizeTextarea(textarea);
                     updateCell(rowIndex, colIndex, textarea.value);
-
-                    // Maintain scroll position at cursor after input
-                    setTimeout(() => {
-                        const textBeforeCursor = textarea.value.substring(0, cursorPos);
-                        const lines = textBeforeCursor.split('\n');
-                        const lineHeight = parseInt(window.getComputedStyle(textarea).lineHeight) || 20;
-                        const scrollTop = (lines.length - 1) * lineHeight;
-                        textarea.scrollTop = Math.max(0, scrollTop - textarea.clientHeight / 2);
-                    }, 0);
+                    keepCursorCentered(textarea);
                 };
 
                 // Scroll to cursor position when clicking in textarea
                 inputElement.onclick = (e) => {
-                    setTimeout(() => {
-                        const textarea = e.target;
-                        const cursorPos = textarea.selectionStart;
-                        const textBeforeCursor = textarea.value.substring(0, cursorPos);
-                        const lines = textBeforeCursor.split('\n');
-                        const lineHeight = parseInt(window.getComputedStyle(textarea).lineHeight) || 20;
-                        const scrollTop = (lines.length - 1) * lineHeight;
-                        textarea.scrollTop = Math.max(0, scrollTop - textarea.clientHeight / 2);
-                    }, 0);
+                    keepCursorCentered(e.target);
                 };
 
                 // Mark td as having textarea for vertical alignment
@@ -3403,30 +3407,13 @@ function renderTable() {
                     // Also handle input event for real-time updates
                     textarea.oninput = (e) => {
                         const textarea = e.target;
-                        const cursorPos = textarea.selectionStart;
                         updateCell(rowIndex, colIndex, textarea.value);
-
-                        // Maintain scroll position at cursor after input
-                        setTimeout(() => {
-                            const textBeforeCursor = textarea.value.substring(0, cursorPos);
-                            const lines = textBeforeCursor.split('\n');
-                            const lineHeight = parseInt(window.getComputedStyle(textarea).lineHeight) || 20;
-                            const scrollTop = (lines.length - 1) * lineHeight;
-                            textarea.scrollTop = Math.max(0, scrollTop - textarea.clientHeight / 2);
-                        }, 0);
+                        keepCursorCentered(textarea);
                     };
 
                     // Scroll to cursor position when clicking in merged cell textarea
                     textarea.onclick = (e) => {
-                        setTimeout(() => {
-                            const textarea = e.target;
-                            const cursorPos = textarea.selectionStart;
-                            const textBeforeCursor = textarea.value.substring(0, cursorPos);
-                            const lines = textBeforeCursor.split('\n');
-                            const lineHeight = parseInt(window.getComputedStyle(textarea).lineHeight) || 20;
-                            const scrollTop = (lines.length - 1) * lineHeight;
-                            textarea.scrollTop = Math.max(0, scrollTop - textarea.clientHeight / 2);
-                        }, 0);
+                        keepCursorCentered(e.target);
                     };
 
                     const cellStyle = getCellStyle(rowIndex, colIndex);
