@@ -2833,6 +2833,11 @@ function searchTable() {
         }
     });
 
+    // Remove previous text highlight overlays
+    document.querySelectorAll('.text-highlight-overlay').forEach(overlay => {
+        overlay.remove();
+    });
+
     if (!searchTerm) {
         // Show all rows if search is empty
         rows.forEach(row => {
@@ -2869,6 +2874,9 @@ function searchTable() {
                         }
                         const highlightedHtml = highlightTextInHtml(preview.innerHTML, searchTerm);
                         preview.innerHTML = highlightedHtml;
+                    } else {
+                        // For cells without markdown preview, create a temporary overlay with highlighted text
+                        createTextHighlightOverlay(cell, input, searchTerm);
                     }
                 }
             }
@@ -2888,6 +2896,119 @@ function searchTable() {
     } else if (searchTerm) {
         showToast(`Found ${foundCount} row(s)`, 'success');
     }
+}
+
+// Create a text highlight overlay for cells without markdown preview
+function createTextHighlightOverlay(cell, input, searchTerm) {
+    // Remove existing overlay if any
+    const existingOverlay = cell.querySelector('.text-highlight-overlay');
+    if (existingOverlay) {
+        existingOverlay.remove();
+    }
+
+    const text = input.value;
+    const lowerText = text.toLowerCase();
+    const lowerSearch = searchTerm.toLowerCase();
+
+    if (!lowerText.includes(lowerSearch)) return;
+
+    // Get computed styles from input
+    const computedStyle = window.getComputedStyle(input);
+
+    // Get input position within cell
+    const cellRect = cell.getBoundingClientRect();
+    const inputRect = input.getBoundingClientRect();
+    const topOffset = inputRect.top - cellRect.top;
+    const leftOffset = inputRect.left - cellRect.left;
+
+    // Create overlay div
+    const overlay = document.createElement('div');
+    overlay.className = 'text-highlight-overlay';
+
+    // Copy exact styles from input/textarea
+    overlay.style.position = 'absolute';
+    overlay.style.top = topOffset + 'px';
+    overlay.style.left = leftOffset + 'px';
+    overlay.style.width = computedStyle.width;
+    overlay.style.height = computedStyle.height;
+    overlay.style.pointerEvents = 'none';
+    overlay.style.overflow = 'hidden';
+    overlay.style.color = 'transparent';
+    overlay.style.background = 'transparent';
+
+    // Copy text-related styles exactly
+    overlay.style.fontFamily = computedStyle.fontFamily;
+    overlay.style.fontSize = computedStyle.fontSize;
+    overlay.style.fontWeight = computedStyle.fontWeight;
+    overlay.style.fontStyle = computedStyle.fontStyle;
+    overlay.style.lineHeight = computedStyle.lineHeight;
+    overlay.style.letterSpacing = computedStyle.letterSpacing;
+    overlay.style.wordSpacing = computedStyle.wordSpacing;
+    overlay.style.textAlign = computedStyle.textAlign;
+    overlay.style.textIndent = computedStyle.textIndent;
+    overlay.style.whiteSpace = computedStyle.whiteSpace;
+    overlay.style.wordWrap = computedStyle.wordWrap;
+    overlay.style.padding = computedStyle.padding;
+    overlay.style.paddingTop = computedStyle.paddingTop;
+    overlay.style.paddingRight = computedStyle.paddingRight;
+    overlay.style.paddingBottom = computedStyle.paddingBottom;
+    overlay.style.paddingLeft = computedStyle.paddingLeft;
+    overlay.style.border = computedStyle.border;
+    overlay.style.borderWidth = computedStyle.borderWidth;
+    overlay.style.borderColor = 'transparent';
+    overlay.style.margin = '0';
+    overlay.style.boxSizing = computedStyle.boxSizing;
+
+    // Build highlighted HTML
+    let html = '';
+    let lastIndex = 0;
+    let index = lowerText.indexOf(lowerSearch);
+
+    while (index !== -1) {
+        // Add text before match (invisible)
+        if (index > lastIndex) {
+            html += escapeHtml(text.substring(lastIndex, index));
+        }
+
+        // Add highlighted match
+        const matchLength = findActualMatchLength(text, index, lowerSearch);
+        html += '<span class="text-match-highlight" style="color: transparent;">' +
+            escapeHtml(text.substring(index, index + matchLength)) + '</span>';
+
+        lastIndex = index + matchLength;
+        index = lowerText.indexOf(lowerSearch, lastIndex);
+    }
+
+    // Add remaining text
+    if (lastIndex < text.length) {
+        html += escapeHtml(text.substring(lastIndex));
+    }
+
+    overlay.innerHTML = html;
+
+    // Make cell position relative
+    cell.style.position = 'relative';
+    cell.appendChild(overlay);
+}
+
+// Helper to escape HTML
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Helper to find actual match length (handles Unicode properly)
+function findActualMatchLength(text, startIndex, lowerSearch) {
+    // For Unicode safety, extract the substring and check if it matches
+    for (let len = lowerSearch.length; len <= text.length - startIndex && len <= lowerSearch.length + 10; len++) {
+        const substr = text.substring(startIndex, startIndex + len);
+        if (substr.toLowerCase() === lowerSearch) {
+            return len;
+        }
+    }
+    // Fallback to search term length
+    return lowerSearch.length;
 }
 
 // Helper function to highlight matching text within HTML content
@@ -2916,13 +3037,14 @@ function highlightTextInHtml(html, searchTerm) {
                         parts.push(document.createTextNode(text.substring(lastIndex, index)));
                     }
 
-                    // Add highlighted match
+                    // Add highlighted match - use actual length from original text
+                    const matchLength = findActualMatchLength(text, index, lowerSearch);
                     const span = document.createElement('span');
                     span.className = 'text-match-highlight';
-                    span.textContent = text.substring(index, index + searchTerm.length);
+                    span.textContent = text.substring(index, index + matchLength);
                     parts.push(span);
 
-                    lastIndex = index + searchTerm.length;
+                    lastIndex = index + matchLength;
                     index = lowerText.indexOf(lowerSearch, lastIndex);
                 }
 
@@ -2957,6 +3079,11 @@ function clearSearch() {
             preview.innerHTML = originalHtml;
             delete preview.dataset.originalHtml;
         }
+    });
+
+    // Remove text highlight overlays
+    document.querySelectorAll('.text-highlight-overlay').forEach(overlay => {
+        overlay.remove();
     });
 
     searchTable(); // This will show all rows and remove highlights
