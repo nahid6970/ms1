@@ -2491,7 +2491,28 @@ function openSettings() {
 // Category Management Functions
 function toggleCategoryList() {
     const categoryList = document.getElementById('categoryList');
-    categoryList.classList.toggle('show');
+    const isShowing = categoryList.classList.toggle('show');
+
+    if (isShowing) {
+        // Add click-outside handler when opening
+        setTimeout(() => {
+            document.addEventListener('click', closeCategoryListOnClickOutside);
+        }, 0);
+    } else {
+        // Remove handler when closing
+        document.removeEventListener('click', closeCategoryListOnClickOutside);
+    }
+}
+
+function closeCategoryListOnClickOutside(e) {
+    const categoryList = document.getElementById('categoryList');
+    const categorySelector = document.querySelector('.category-selector');
+
+    // Check if click is outside the category selector
+    if (categorySelector && !categorySelector.contains(e.target)) {
+        categoryList.classList.remove('show');
+        document.removeEventListener('click', closeCategoryListOnClickOutside);
+    }
 }
 
 function showAddCategoryModal() {
