@@ -2824,6 +2824,15 @@ function searchTable() {
         el.classList.remove('search-highlight');
     });
 
+    // Remove previous text match highlights from markdown previews
+    document.querySelectorAll('.markdown-preview').forEach(preview => {
+        const originalHtml = preview.dataset.originalHtml;
+        if (originalHtml) {
+            preview.innerHTML = originalHtml;
+            delete preview.dataset.originalHtml;
+        }
+    });
+
     if (!searchTerm) {
         // Show all rows if search is empty
         rows.forEach(row => {
@@ -2849,10 +2858,17 @@ function searchTable() {
                     rowMatches = true;
                     cell.classList.add('search-highlight');
 
-                    // Also highlight markdown preview if it exists
+                    // Highlight markdown preview if it exists
                     const preview = cell.querySelector('.markdown-preview');
                     if (preview) {
                         preview.classList.add('search-highlight');
+
+                        // Highlight exact matching text in preview
+                        if (!preview.dataset.originalHtml) {
+                            preview.dataset.originalHtml = preview.innerHTML;
+                        }
+                        const highlightedHtml = highlightTextInHtml(preview.innerHTML, searchTerm);
+                        preview.innerHTML = highlightedHtml;
                     }
                 }
             }
@@ -2874,9 +2890,75 @@ function searchTable() {
     }
 }
 
+// Helper function to highlight matching text within HTML content
+function highlightTextInHtml(html, searchTerm) {
+    if (!searchTerm) return html;
+
+    // Create a temporary div to parse HTML
+    const temp = document.createElement('div');
+    temp.innerHTML = html;
+
+    // Function to highlight text in text nodes
+    function highlightInNode(node) {
+        if (node.nodeType === Node.TEXT_NODE) {
+            const text = node.textContent;
+            const lowerText = text.toLowerCase();
+            const lowerSearch = searchTerm.toLowerCase();
+
+            if (lowerText.includes(lowerSearch)) {
+                const parts = [];
+                let lastIndex = 0;
+                let index = lowerText.indexOf(lowerSearch);
+
+                while (index !== -1) {
+                    // Add text before match
+                    if (index > lastIndex) {
+                        parts.push(document.createTextNode(text.substring(lastIndex, index)));
+                    }
+
+                    // Add highlighted match
+                    const span = document.createElement('span');
+                    span.className = 'text-match-highlight';
+                    span.textContent = text.substring(index, index + searchTerm.length);
+                    parts.push(span);
+
+                    lastIndex = index + searchTerm.length;
+                    index = lowerText.indexOf(lowerSearch, lastIndex);
+                }
+
+                // Add remaining text
+                if (lastIndex < text.length) {
+                    parts.push(document.createTextNode(text.substring(lastIndex)));
+                }
+
+                // Replace the text node with highlighted parts
+                const parent = node.parentNode;
+                parts.forEach(part => parent.insertBefore(part, node));
+                parent.removeChild(node);
+            }
+        } else if (node.nodeType === Node.ELEMENT_NODE) {
+            // Recursively process child nodes
+            Array.from(node.childNodes).forEach(child => highlightInNode(child));
+        }
+    }
+
+    highlightInNode(temp);
+    return temp.innerHTML;
+}
+
 function clearSearch() {
     const searchInput = document.getElementById('searchInput');
     searchInput.value = '';
+
+    // Remove text match highlights from markdown previews
+    document.querySelectorAll('.markdown-preview').forEach(preview => {
+        const originalHtml = preview.dataset.originalHtml;
+        if (originalHtml) {
+            preview.innerHTML = originalHtml;
+            delete preview.dataset.originalHtml;
+        }
+    });
+
     searchTable(); // This will show all rows and remove highlights
     showToast('Search cleared', 'info');
 }
