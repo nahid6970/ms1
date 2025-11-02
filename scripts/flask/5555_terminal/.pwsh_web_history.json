@@ -24,8 +24,10 @@
     "cd ~",
     "cd",
     "z ms1",
-    "ls"
+    "ls",
+    "get-process",
+    "get-process| grep -i rob"
   ],
-  "last_updated": "2025-10-24T13:20:36.356885",
+  "last_updated": "2025-11-01T19:01:11.878504",
   "current_directory": "C:\\Users\\nahid"
 }
