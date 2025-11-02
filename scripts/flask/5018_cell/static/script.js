@@ -2493,17 +2493,23 @@ function openSettings() {
     // Load current grid line color
     const savedColor = localStorage.getItem('gridLineColor') || '#dddddd';
     document.getElementById('gridLineColor').value = savedColor;
-    document.getElementById('gridLineColorText').value = savedColor.toUpperCase();
+    document.getElementById('gridLineColorText').value = savedColor.substring(1).toUpperCase(); // Remove # prefix
 
     document.getElementById('settingsModal').style.display = 'block';
 }
 
 function syncGridLineColor(value) {
-    // Sync between color picker and text input
-    if (value.startsWith('#') && (value.length === 4 || value.length === 7)) {
-        document.getElementById('gridLineColor').value = value;
-        document.getElementById('gridLineColorText').value = value.toUpperCase();
-        applyGridLineColor(value);
+    // Handle input with or without # prefix
+    let colorValue = value;
+    if (!colorValue.startsWith('#')) {
+        colorValue = '#' + colorValue;
+    }
+
+    // Validate hex color
+    if (/^#[0-9A-Fa-f]{6}$/.test(colorValue) || /^#[0-9A-Fa-f]{3}$/.test(colorValue)) {
+        document.getElementById('gridLineColor').value = colorValue;
+        document.getElementById('gridLineColorText').value = colorValue.substring(1).toUpperCase();
+        applyGridLineColor(colorValue);
     }
 }
 
@@ -2523,7 +2529,7 @@ function getGridLineColor() {
 function resetGridLineColor() {
     const defaultColor = '#dddddd';
     document.getElementById('gridLineColor').value = defaultColor;
-    document.getElementById('gridLineColorText').value = defaultColor.toUpperCase();
+    document.getElementById('gridLineColorText').value = defaultColor.substring(1).toUpperCase();
     applyGridLineColor(defaultColor);
     showToast('Grid line color reset to default', 'success');
 }
