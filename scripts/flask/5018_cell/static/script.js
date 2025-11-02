@@ -110,6 +110,19 @@ function initializeApp() {
         }
     }
 
+    // Restore markdown preview toggle state
+    const markdownPreviewEnabled = localStorage.getItem('markdownPreviewEnabled') !== 'false'; // Default true
+    const markdownToggle = document.getElementById('markdownToggle');
+    if (markdownToggle) {
+        markdownToggle.checked = markdownPreviewEnabled;
+        if (!markdownPreviewEnabled) {
+            const table = document.getElementById('dataTable');
+            if (table) {
+                table.classList.add('hide-markdown-preview');
+            }
+        }
+    }
+
     // Initialize font size scale
     setTimeout(() => {
         applyFontSizeScale();
@@ -2976,6 +2989,21 @@ function toggleRowNumbers() {
         table.classList.add('hide-row-numbers');
         localStorage.setItem('rowNumbersVisible', 'false');
         showToast('Row numbers hidden', 'success');
+    }
+}
+
+function toggleMarkdownPreview() {
+    const markdownToggle = document.getElementById('markdownToggle');
+    const table = document.getElementById('dataTable');
+
+    if (markdownToggle.checked) {
+        table.classList.remove('hide-markdown-preview');
+        localStorage.setItem('markdownPreviewEnabled', 'true');
+        showToast('Markdown preview enabled', 'success');
+    } else {
+        table.classList.add('hide-markdown-preview');
+        localStorage.setItem('markdownPreviewEnabled', 'false');
+        showToast('Markdown preview disabled', 'success');
     }
 }
 
