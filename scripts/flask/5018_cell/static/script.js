@@ -34,11 +34,20 @@ function initializeApp() {
     // Set up keyboard shortcuts
     document.addEventListener('keydown', handleKeyboardShortcuts);
 
-    // Keep the caret line centered when the user presses Enter
+    // Prevent scroll jump on Enter, Cut, and other operations in textareas
     document.addEventListener('beforeinput', e => {
-        if (e.inputType !== 'insertLineBreak') return;   // Enter key
         const ta = e.target;
         if (ta.tagName !== 'TEXTAREA') return;
+
+        // Handle operations that might cause scroll jump
+        const scrollTriggeringOps = [
+            'insertLineBreak',           // Enter key
+            'deleteByCut',               // Cut operation
+            'deleteContentBackward',     // Backspace
+            'deleteContentForward'       // Delete key
+        ];
+
+        if (!scrollTriggeringOps.includes(e.inputType)) return;
 
         // Prevent the container from scrolling
         const tableContainer = document.querySelector('.table-container');
@@ -51,7 +60,10 @@ function initializeApp() {
                 tableContainer.scrollTop = savedScrollTop;
                 tableContainer.scrollLeft = savedScrollLeft;
 
-                keepCursorCentered(ta);
+                // Only call keepCursorCentered for Enter key
+                if (e.inputType === 'insertLineBreak') {
+                    keepCursorCentered(ta);
+                }
 
                 requestAnimationFrame(() => {
                     tableContainer.scrollTop = savedScrollTop;
@@ -63,7 +75,7 @@ function initializeApp() {
                     });
                 });
             });
-        } else {
+        } else if (e.inputType === 'insertLineBreak') {
             requestAnimationFrame(() => {
                 keepCursorCentered(ta);
             });
