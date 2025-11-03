@@ -4227,7 +4227,8 @@ function initMultiSelection(input, searchText) {
         searchText: searchText,
         matches: matches,
         currentIndex: 0,
-        selectedMatches: [matches[0]]
+        selectedMatches: [matches[0]],
+        listenerSetup: false
     };
 
     // Highlight first match
@@ -4236,8 +4237,7 @@ function initMultiSelection(input, searchText) {
         showMultiSelectionIndicator(input, 1, matches.length);
     }
 
-    // Set up input listener for multi-replace
-    setupMultiReplaceListener(input);
+    // Don't set up listener yet - wait until user starts typing or selects all
 }
 
 function selectNextMatch(input) {
@@ -4248,6 +4248,12 @@ function selectNextMatch(input) {
         // All selected, show message
         showToast(`All ${multiSelectionData.matches.length} occurrences selected. Type to replace all.`, 'info');
         multiSelectionData.allSelected = true;
+
+        // Now set up the listener for replacement
+        if (!multiSelectionData.listenerSetup) {
+            setupMultiReplaceListener(input);
+            multiSelectionData.listenerSetup = true;
+        }
         return;
     }
 
@@ -4288,56 +4294,84 @@ function showMultiSelectionIndicator(input, current, total) {
 }
 
 function setupMultiReplaceListener(input) {
-    // Remove old listener if exists
-    if (input.multiReplaceListener) {
-        input.removeEventListener('input', input.multiReplaceListener);
+    // Store the original text
+    multiSelectionData.originalText = input.value;
+    multiSelectionData.replacementText = '';
+
+    // Remove old listeners if exist
+    if (input.multiReplaceKeyListener) {
+        input.removeEventListener('keydown', input.multiReplaceKeyListener);
     }
 
-    // Create new listener
-    input.multiReplaceListener = function (e) {
+    // Keydown listener to handle typing/deleting
+    input.multiReplaceKeyListener = function (e) {
         if (!multiSelectionData || multiSelectionData.input !== input) return;
 
-        // User started typing, replace all selected occurrences
-        const newText = input.value;
-        const oldSearchText = multiSelectionData.searchText;
+        // Handle character input, backspace, and delete
+        if (e.key.length === 1 || e.key === 'Backspace' || e.key === 'Delete') {
+            e.preventDefault();
 
-        // Find what was typed (difference from original)
-        const selStart = input.selectionStart;
-        const beforeCursor = newText.substring(0, selStart);
-        const expectedBefore = input.value.substring(0, multiSelectionData.selectedMatches[0].start);
+            const oldSearchText = multiSelectionData.searchText;
+            let replacementText = multiSelectionData.replacementText;
 
-        // Check if user is replacing the selection
-        if (beforeCursor.length >= expectedBefore.length) {
-            const typedText = beforeCursor.substring(expectedBefore.length);
+            // Update replacement text based on key
+            if (e.key === 'Backspace' && replacementText.length > 0) {
+                replacementText = replacementText.slice(0, -1);
+            } else if (e.key === 'Delete') {
+                // Delete doesn't change replacement text, just ignore
+                return;
+            } else if (e.key.length === 1) {
+                replacementText += e.key;
+            }
+
+            multiSelectionData.replacementText = replacementText;
 
             // Replace all occurrences
-            let result = input.value;
+            let result = multiSelectionData.originalText;
             const regex = new RegExp(escapeRegExp(oldSearchText), 'g');
-            result = result.replace(regex, typedText);
+            result = result.replace(regex, replacementText);
 
             input.value = result;
 
-            // Position cursor after the replacement
-            const newCursorPos = expectedBefore.length + typedText.length;
+            // Find position of first replacement
+            const firstMatch = multiSelectionData.matches[0];
+            const newCursorPos = firstMatch.start + replacementText.length;
             input.setSelectionRange(newCursorPos, newCursorPos);
 
             // Trigger change event
             const changeEvent = new Event('input', { bubbles: true });
             input.dispatchEvent(changeEvent);
 
-            // Clean up
+            // Update visual markers if any
+            if (replacementText.length > 0) {
+                // Update matches with new positions
+                const newMatches = [];
+                let searchPos = 0;
+                while ((searchPos = result.indexOf(replacementText, searchPos)) !== -1) {
+                    newMatches.push({ start: searchPos, end: searchPos + replacementText.length });
+                    searchPos += replacementText.length;
+                }
+                if (newMatches.length > 0) {
+                    showSelectionMarkers(input, newMatches);
+                }
+            }
+        } else if (e.key === 'Enter' || e.key === 'Escape') {
+            // Finish editing
             clearMultiSelection();
             showToast(`Replaced ${multiSelectionData.matches.length} occurrences`, 'success');
         }
     };
 
-    input.addEventListener('input', input.multiReplaceListener);
+    input.addEventListener('keydown', input.multiReplaceKeyListener);
 
     // Clear on blur
     input.addEventListener('blur', function clearOnBlur() {
         setTimeout(() => {
+            if (multiSelectionData) {
+                showToast(`Replaced ${multiSelectionData.matches.length} occurrences`, 'success');
+            }
             clearMultiSelection();
-            input.removeEventListener('blur', clearOnBlur);
+            input.removeEventListener('keydown', input.multiReplaceKeyListener);
         }, 100);
     }, { once: true });
 }
