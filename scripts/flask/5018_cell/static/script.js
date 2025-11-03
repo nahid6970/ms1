@@ -4120,7 +4120,92 @@ function applyQuickFormat(prefix, suffix) {
 
 function showColorPicker() {
     const colorSection = document.getElementById('colorPickerSection');
-    colorSection.style.display = colorSection.style.display === 'none' ? 'block' : 'none';
+    const isShowing = colorSection.style.display === 'none';
+    colorSection.style.display = isShowing ? 'block' : 'none';
+
+    if (isShowing) {
+        loadColorSwatches();
+    }
+}
+
+// Load and display color swatches
+function loadColorSwatches() {
+    const swatchesContainer = document.getElementById('colorSwatches');
+    swatchesContainer.innerHTML = '';
+
+    // Default presets
+    const defaultSwatches = [
+        { fg: '#000000', bg: '#ffff00' }, // Black on Yellow
+        { fg: '#ffffff', bg: '#ff0000' }, // White on Red
+        { fg: '#000000', bg: '#00ff00' }, // Black on Green
+        { fg: '#ffffff', bg: '#0000ff' }, // White on Blue
+        { fg: '#000000', bg: '#ffa500' }, // Black on Orange
+        { fg: '#ffffff', bg: '#800080' }, // White on Purple
+    ];
+
+    // Load saved swatches from localStorage
+    const savedSwatches = JSON.parse(localStorage.getItem('colorSwatches') || '[]');
+    const allSwatches = [...savedSwatches, ...defaultSwatches];
+
+    allSwatches.forEach((swatch, index) => {
+        const swatchBtn = document.createElement('button');
+        swatchBtn.className = 'color-swatch';
+        swatchBtn.style.background = swatch.bg;
+        swatchBtn.style.color = swatch.fg;
+        swatchBtn.textContent = 'Aa';
+        swatchBtn.title = `Text: ${swatch.fg}, Background: ${swatch.bg}`;
+        swatchBtn.onclick = () => {
+            document.getElementById('quickFgColor').value = swatch.fg;
+            document.getElementById('quickBgColor').value = swatch.bg;
+        };
+
+        // Add delete button for saved swatches
+        if (index < savedSwatches.length) {
+            const deleteBtn = document.createElement('span');
+            deleteBtn.className = 'swatch-delete';
+            deleteBtn.textContent = '×';
+            deleteBtn.onclick = (e) => {
+                e.stopPropagation();
+                deleteSwatch(index);
+            };
+            swatchBtn.appendChild(deleteBtn);
+        }
+
+        swatchesContainer.appendChild(swatchBtn);
+    });
+}
+
+function addCurrentColorToSwatches() {
+    const fgColor = document.getElementById('quickFgColor').value;
+    const bgColor = document.getElementById('quickBgColor').value;
+
+    const savedSwatches = JSON.parse(localStorage.getItem('colorSwatches') || '[]');
+
+    // Check if already exists
+    const exists = savedSwatches.some(s => s.fg === fgColor && s.bg === bgColor);
+    if (exists) {
+        showToast('Color combination already saved', 'info');
+        return;
+    }
+
+    savedSwatches.unshift({ fg: fgColor, bg: bgColor });
+
+    // Keep only last 6 custom swatches
+    if (savedSwatches.length > 6) {
+        savedSwatches.pop();
+    }
+
+    localStorage.setItem('colorSwatches', JSON.stringify(savedSwatches));
+    loadColorSwatches();
+    showToast('Color saved to presets', 'success');
+}
+
+function deleteSwatch(index) {
+    const savedSwatches = JSON.parse(localStorage.getItem('colorSwatches') || '[]');
+    savedSwatches.splice(index, 1);
+    localStorage.setItem('colorSwatches', JSON.stringify(savedSwatches));
+    loadColorSwatches();
+    showToast('Color preset deleted', 'success');
 }
 
 function applyColorFormat() {

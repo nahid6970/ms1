@@ -607,6 +607,13 @@
             </button>
         </div>
         <div id="colorPickerSection" class="color-picker-section" style="display: none;">
+            <div class="color-swatches-container">
+                <div class="color-swatches-header">
+                    <span>Presets</span>
+                    <button class="btn-add-swatch" onclick="addCurrentColorToSwatches()" title="Save current colors">+</button>
+                </div>
+                <div id="colorSwatches" class="color-swatches"></div>
+            </div>
             <div class="color-picker-row">
                 <label>Text:</label>
                 <input type="color" id="quickFgColor" value="#000000">
