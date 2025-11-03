@@ -502,6 +502,13 @@ td input {
     font-size: 14px;
     background: transparent;
     box-sizing: border-box;
+    /* Use Vrinda for Bangla characters, fallback to default for others */
+    font-family: Vrinda, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+td textarea {
+    /* Use Vrinda for Bangla characters, fallback to default for others */
+    font-family: Vrinda, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 /* Markdown formatting indicator */
@@ -642,7 +649,7 @@ td {
     overflow: hidden;
     white-space: pre-wrap;
     word-wrap: break-word;
-    font-family: inherit;
+    font-family: Vrinda, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     line-height: 1.455;
     min-height: 22px;
     height: 22px;
@@ -1578,7 +1585,7 @@ td.merged-cell textarea {
 
     resize: none;
 
-    font-family: inherit;
+    font-family: Vrinda, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 
     overflow: auto;
 
