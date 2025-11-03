@@ -39,10 +39,35 @@ function initializeApp() {
         if (e.inputType !== 'insertLineBreak') return;   // Enter key
         const ta = e.target;
         if (ta.tagName !== 'TEXTAREA') return;
-        // Let the browser insert the newline first
-        requestAnimationFrame(() => {
-            keepCursorCentered(ta);   // The helper function
-        });
+
+        // Prevent the container from scrolling
+        const tableContainer = document.querySelector('.table-container');
+        if (tableContainer) {
+            const savedScrollTop = tableContainer.scrollTop;
+            const savedScrollLeft = tableContainer.scrollLeft;
+
+            // Use multiple requestAnimationFrame to ensure scroll is locked
+            requestAnimationFrame(() => {
+                tableContainer.scrollTop = savedScrollTop;
+                tableContainer.scrollLeft = savedScrollLeft;
+
+                keepCursorCentered(ta);
+
+                requestAnimationFrame(() => {
+                    tableContainer.scrollTop = savedScrollTop;
+                    tableContainer.scrollLeft = savedScrollLeft;
+
+                    requestAnimationFrame(() => {
+                        tableContainer.scrollTop = savedScrollTop;
+                        tableContainer.scrollLeft = savedScrollLeft;
+                    });
+                });
+            });
+        } else {
+            requestAnimationFrame(() => {
+                keepCursorCentered(ta);
+            });
+        }
     });
 
     // Save scroll position on scroll
