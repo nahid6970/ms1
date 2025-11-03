@@ -4070,21 +4070,17 @@ function showQuickFormatter(inputElement) {
     const colorSection = document.getElementById('colorPickerSection');
     colorSection.style.display = 'none';
 
-    // Position the formatter near the cursor
-    const rect = inputElement.getBoundingClientRect();
+    // Show formatter first to get its dimensions
     formatter.style.display = 'block';
-    formatter.style.left = rect.left + 'px';
-    formatter.style.top = (rect.bottom + 10) + 'px';
 
-    // Adjust if off-screen
+    // Center it on the screen
     setTimeout(() => {
         const formatterRect = formatter.getBoundingClientRect();
-        if (formatterRect.right > window.innerWidth) {
-            formatter.style.left = (window.innerWidth - formatterRect.width - 20) + 'px';
-        }
-        if (formatterRect.bottom > window.innerHeight) {
-            formatter.style.top = (rect.top - formatterRect.height - 10) + 'px';
-        }
+        const centerX = (window.innerWidth - formatterRect.width) / 2;
+        const centerY = (window.innerHeight - formatterRect.height) / 2;
+
+        formatter.style.left = Math.max(20, centerX) + 'px';
+        formatter.style.top = Math.max(20, centerY) + 'px';
     }, 0);
 }
 
