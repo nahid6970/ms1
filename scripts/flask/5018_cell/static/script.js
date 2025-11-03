@@ -4257,6 +4257,9 @@ function selectNextMatch(input) {
     // Select the next match
     input.setSelectionRange(nextMatch.start, nextMatch.end);
     showMultiSelectionIndicator(input, multiSelectionData.currentIndex + 1, multiSelectionData.matches.length);
+
+    // Show visual markers for all selections
+    showSelectionMarkers(input, multiSelectionData.selectedMatches);
 }
 
 function showMultiSelectionIndicator(input, current, total) {
@@ -4345,6 +4348,136 @@ function clearMultiSelection() {
     if (indicator) {
         indicator.style.display = 'none';
     }
+    clearVisualMarkers();
+}
+
+// Visual markers for multi-selection and multi-cursor
+function measureText(text, font) {
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    context.font = font;
+    return context.measureText(text).width;
+}
+
+function showSelectionMarkers(input, selections) {
+    clearVisualMarkers();
+
+    const cell = input.closest('td');
+    if (!cell) return;
+
+    // Create overlay container
+    let overlay = document.createElement('div');
+    overlay.className = 'multi-cursor-overlay';
+    overlay.id = 'multiCursorOverlay';
+
+    // Copy input styles
+    const computedStyle = window.getComputedStyle(input);
+    const inputRect = input.getBoundingClientRect();
+    const cellRect = cell.getBoundingClientRect();
+
+    overlay.style.position = 'absolute';
+    overlay.style.top = (inputRect.top - cellRect.top) + 'px';
+    overlay.style.left = (inputRect.left - cellRect.left) + 'px';
+    overlay.style.width = input.offsetWidth + 'px';
+    overlay.style.height = input.offsetHeight + 'px';
+
+    const text = input.value;
+    const lineHeight = parseFloat(computedStyle.lineHeight) || 20;
+    const paddingLeft = parseFloat(computedStyle.paddingLeft) || 4;
+    const paddingTop = parseFloat(computedStyle.paddingTop) || 4;
+    const font = `${computedStyle.fontSize} ${computedStyle.fontFamily}`;
+
+    // Create markers for each selection
+    selections.forEach((sel, index) => {
+        if (index === selections.length - 1) return; // Skip last one (native selection shows it)
+
+        const beforeText = text.substring(0, sel.start);
+        const selectedText = text.substring(sel.start, sel.end);
+
+        // Calculate position
+        const lines = beforeText.split('\n');
+        const lineNum = lines.length - 1;
+        const lineText = lines[lines.length - 1];
+
+        // Measure actual text width
+        const x = paddingLeft + measureText(lineText, font);
+        const y = paddingTop + lineNum * lineHeight;
+        const width = measureText(selectedText, font);
+
+        // Create selection marker
+        const marker = document.createElement('div');
+        marker.className = 'selection-marker';
+        marker.style.left = x + 'px';
+        marker.style.top = y + 'px';
+        marker.style.width = width + 'px';
+        marker.style.height = lineHeight + 'px';
+
+        overlay.appendChild(marker);
+    });
+
+    cell.style.position = 'relative';
+    cell.appendChild(overlay);
+}
+
+function showCursorMarkers(textarea, cursors) {
+    clearVisualMarkers();
+
+    const cell = textarea.closest('td');
+    if (!cell) return;
+
+    // Create overlay container
+    let overlay = document.createElement('div');
+    overlay.className = 'multi-cursor-overlay';
+    overlay.id = 'multiCursorOverlay';
+
+    // Copy textarea styles
+    const computedStyle = window.getComputedStyle(textarea);
+    const textareaRect = textarea.getBoundingClientRect();
+    const cellRect = cell.getBoundingClientRect();
+
+    overlay.style.position = 'absolute';
+    overlay.style.top = (textareaRect.top - cellRect.top) + 'px';
+    overlay.style.left = (textareaRect.left - cellRect.left) + 'px';
+    overlay.style.width = textarea.offsetWidth + 'px';
+    overlay.style.height = textarea.offsetHeight + 'px';
+
+    const text = textarea.value;
+    const lines = text.split('\n');
+    const lineHeight = parseFloat(computedStyle.lineHeight) || 20;
+    const paddingLeft = parseFloat(computedStyle.paddingLeft) || 4;
+    const paddingTop = parseFloat(computedStyle.paddingTop) || 4;
+    const font = `${computedStyle.fontSize} ${computedStyle.fontFamily}`;
+
+    // Create markers for each cursor
+    cursors.forEach((cursor, index) => {
+        if (index === cursors.length - 1) return; // Skip last one (native cursor shows it)
+
+        const lineNum = cursor.line - 1;
+        if (lineNum < lines.length) {
+            const lineText = lines[lineNum].substring(0, cursor.column);
+            const x = paddingLeft + measureText(lineText, font);
+            const y = paddingTop + lineNum * lineHeight;
+
+            // Create cursor marker
+            const marker = document.createElement('div');
+            marker.className = 'cursor-marker';
+            marker.style.left = x + 'px';
+            marker.style.top = y + 'px';
+            marker.style.height = lineHeight + 'px';
+
+            overlay.appendChild(marker);
+        }
+    });
+
+    cell.style.position = 'relative';
+    cell.appendChild(overlay);
+}
+
+function clearVisualMarkers() {
+    const overlay = document.getElementById('multiCursorOverlay');
+    if (overlay) {
+        overlay.remove();
+    }
 }
 
 function escapeRegExp(string) {
@@ -4392,6 +4525,7 @@ function addCursorBelow(textarea) {
         textarea.setSelectionRange(nextCursorPos, nextCursorPos);
 
         showMultiCursorIndicator(textarea, multiLineCursorData.cursors.length);
+        showCursorMarkers(textarea, multiLineCursorData.cursors);
         setupMultiLineCursorListener(textarea);
     }
 }
@@ -4433,6 +4567,7 @@ function addCursorAbove(textarea) {
         textarea.setSelectionRange(prevCursorPos, prevCursorPos);
 
         showMultiCursorIndicator(textarea, multiLineCursorData.cursors.length);
+        showCursorMarkers(textarea, multiLineCursorData.cursors);
         setupMultiLineCursorListener(textarea);
     }
 }
@@ -4536,6 +4671,9 @@ function setupMultiLineCursorListener(textarea) {
                 const newCursorPos = lineStart + lastCursor.column;
                 textarea.setSelectionRange(newCursorPos, newCursorPos);
             }
+
+            // Update visual markers
+            showCursorMarkers(textarea, cursors);
         }
     };
 
@@ -4558,6 +4696,7 @@ function clearMultiLineCursor() {
     if (indicator) {
         indicator.style.display = 'none';
     }
+    clearVisualMarkers();
 }
 
 function populateF1Categories() {

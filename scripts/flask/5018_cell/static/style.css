@@ -2507,3 +2507,28 @@ Markdown Table Styles */
     animation: indicatorPulse 0.3s ease-out;
     pointer-events: none;
 }
+
+/* Multi-Cursor Visual Overlays */
+.multi-cursor-overlay {
+    position: absolute;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.cursor-marker {
+    position: absolute;
+    width: 2px;
+    background: #007bff;
+    animation: cursorBlink 1s infinite;
+}
+
+.selection-marker {
+    position: absolute;
+    background: rgba(0, 123, 255, 0.3);
+    border: 1px solid rgba(0, 123, 255, 0.5);
+}
+
+@keyframes cursorBlink {
+    0%, 49% { opacity: 1; }
+    50%, 100% { opacity: 0; }
+}
