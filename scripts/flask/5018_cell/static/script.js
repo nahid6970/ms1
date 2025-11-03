@@ -143,6 +143,13 @@ function initializeApp() {
     setTimeout(() => {
         applyFontSizeScale();
     }, 100);
+
+    // Initialize Vrinda font setting
+    const vrindaEnabled = localStorage.getItem('vrindaFontEnabled') !== 'false'; // Default true
+    const table = document.getElementById('dataTable');
+    if (!vrindaEnabled && table) {
+        table.classList.add('disable-vrinda');
+    }
 }
 
 function loadColumnWidths() {
@@ -2540,7 +2547,24 @@ function openSettings() {
     document.getElementById('gridLineColor').value = savedColor;
     document.getElementById('gridLineColorText').value = savedColor.substring(1).toUpperCase(); // Remove # prefix
 
+    // Load Vrinda font toggle state
+    const vrindaEnabled = localStorage.getItem('vrindaFontEnabled') !== 'false'; // Default true
+    document.getElementById('vrindaFontToggle').checked = vrindaEnabled;
+
     document.getElementById('settingsModal').style.display = 'block';
+}
+
+function toggleVrindaFont(enabled) {
+    localStorage.setItem('vrindaFontEnabled', enabled);
+
+    const table = document.getElementById('dataTable');
+    if (enabled) {
+        table.classList.remove('disable-vrinda');
+        showToast('Vrinda font enabled for Bangla', 'success');
+    } else {
+        table.classList.add('disable-vrinda');
+        showToast('Vrinda font disabled', 'success');
+    }
 }
 
 function syncGridLineColor(value) {
