@@ -264,6 +264,24 @@ function handleKeyboardShortcuts(e) {
         closeF1Popup();
     }
 
+    // F3 to open quick markdown formatter
+    if (e.key === 'F3') {
+        e.preventDefault();
+        const activeElement = document.activeElement;
+        if ((activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA') &&
+            activeElement.selectionStart !== activeElement.selectionEnd) {
+            showQuickFormatter(activeElement);
+        }
+    }
+
+    // Escape to close quick formatter
+    if (e.key === 'Escape') {
+        const formatter = document.getElementById('quickFormatter');
+        if (formatter && formatter.style.display === 'block') {
+            closeQuickFormatter();
+        }
+    }
+
     // Alt+N to add new row
     if (e.altKey && e.key === 'n') {
         e.preventDefault();
@@ -4008,6 +4026,120 @@ function closeF1Popup() {
 
     // Reset filter
     filterF1Sheets();
+}
+
+// Quick Markdown Formatter (F3)
+let quickFormatterTarget = null;
+let quickFormatterSelection = { start: 0, end: 0 };
+
+function showQuickFormatter(inputElement) {
+    quickFormatterTarget = inputElement;
+    quickFormatterSelection = {
+        start: inputElement.selectionStart,
+        end: inputElement.selectionEnd
+    };
+
+    const formatter = document.getElementById('quickFormatter');
+    const colorSection = document.getElementById('colorPickerSection');
+    colorSection.style.display = 'none';
+
+    // Position the formatter near the cursor
+    const rect = inputElement.getBoundingClientRect();
+    formatter.style.display = 'block';
+    formatter.style.left = rect.left + 'px';
+    formatter.style.top = (rect.bottom + 10) + 'px';
+
+    // Adjust if off-screen
+    setTimeout(() => {
+        const formatterRect = formatter.getBoundingClientRect();
+        if (formatterRect.right > window.innerWidth) {
+            formatter.style.left = (window.innerWidth - formatterRect.width - 20) + 'px';
+        }
+        if (formatterRect.bottom > window.innerHeight) {
+            formatter.style.top = (rect.top - formatterRect.height - 10) + 'px';
+        }
+    }, 0);
+}
+
+function closeQuickFormatter() {
+    const formatter = document.getElementById('quickFormatter');
+    formatter.style.display = 'none';
+    quickFormatterTarget = null;
+}
+
+function applyQuickFormat(prefix, suffix) {
+    if (!quickFormatterTarget) return;
+
+    const input = quickFormatterTarget;
+    const start = quickFormatterSelection.start;
+    const end = quickFormatterSelection.end;
+    const selectedText = input.value.substring(start, end);
+
+    // Insert the markdown syntax
+    const newText = input.value.substring(0, start) +
+        prefix + selectedText + suffix +
+        input.value.substring(end);
+
+    input.value = newText;
+
+    // Trigger change event to update cell
+    const event = new Event('input', { bubbles: true });
+    input.dispatchEvent(event);
+
+    // Set cursor position after the inserted text
+    const newCursorPos = start + prefix.length + selectedText.length + suffix.length;
+    input.setSelectionRange(newCursorPos, newCursorPos);
+    input.focus();
+
+    closeQuickFormatter();
+    showToast('Format applied', 'success');
+}
+
+function showColorPicker() {
+    const colorSection = document.getElementById('colorPickerSection');
+    colorSection.style.display = colorSection.style.display === 'none' ? 'block' : 'none';
+}
+
+function applyColorFormat() {
+    if (!quickFormatterTarget) return;
+
+    const fgColor = document.getElementById('quickFgColor').value;
+    const bgColor = document.getElementById('quickBgColor').value;
+
+    const input = quickFormatterTarget;
+    const start = quickFormatterSelection.start;
+    const end = quickFormatterSelection.end;
+    const selectedText = input.value.substring(start, end);
+
+    // Build color syntax
+    let colorSyntax = '{';
+    if (fgColor !== '#000000') {
+        colorSyntax += `fg:${fgColor}`;
+    }
+    if (bgColor !== '#ffff00') {
+        if (colorSyntax.length > 1) colorSyntax += ';';
+        colorSyntax += `bg:${bgColor}`;
+    }
+    colorSyntax += '}';
+
+    // Insert the color syntax
+    const newText = input.value.substring(0, start) +
+        colorSyntax + selectedText + '{/}' +
+        input.value.substring(end);
+
+    input.value = newText;
+
+    // Trigger change event
+    const event = new Event('input', { bubbles: true });
+    input.dispatchEvent(event);
+
+    // Set cursor position
+    const newCursorPos = start + colorSyntax.length + selectedText.length + 3;
+    input.setSelectionRange(newCursorPos, newCursorPos);
+    input.focus();
+
+    closeQuickFormatter();
+    showToast('Color format applied', 'success');
 }
 
 function populateF1Categories() {
