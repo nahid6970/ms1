@@ -2461,3 +2461,49 @@ Markdown Table Styles */
     width: 100%;
     margin-top: 8px;
 }
+
+/* Multi-Selection Indicator (Ctrl+D) */
+.multi-selection-indicator {
+    position: fixed;
+    display: none;
+    background: #007bff;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    z-index: 10001;
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.4);
+    animation: indicatorPulse 0.3s ease-out;
+    pointer-events: none;
+}
+
+@keyframes indicatorPulse {
+    0% {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Multi-Line Cursor Indicator (Ctrl+Alt+Down/Up) */
+.multi-cursor-indicator {
+    position: fixed;
+    display: none;
+    background: #28a745;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    z-index: 10001;
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+    animation: indicatorPulse 0.3s ease-out;
+    pointer-events: none;
+}

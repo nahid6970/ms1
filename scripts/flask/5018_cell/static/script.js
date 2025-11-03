@@ -282,6 +282,33 @@ function handleKeyboardShortcuts(e) {
         }
     }
 
+    // Ctrl+Shift+D to select next occurrence (multi-cursor simulation)
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'D') {
+        const activeElement = document.activeElement;
+        if (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA') {
+            e.preventDefault();
+            selectNextOccurrence(activeElement);
+        }
+    }
+
+    // Ctrl+Alt+Down to add cursor below (multi-line cursor)
+    if (e.ctrlKey && e.altKey && e.key === 'ArrowDown') {
+        const activeElement = document.activeElement;
+        if (activeElement.tagName === 'TEXTAREA') {
+            e.preventDefault();
+            addCursorBelow(activeElement);
+        }
+    }
+
+    // Ctrl+Alt+Up to add cursor above (multi-line cursor)
+    if (e.ctrlKey && e.altKey && e.key === 'ArrowUp') {
+        const activeElement = document.activeElement;
+        if (activeElement.tagName === 'TEXTAREA') {
+            e.preventDefault();
+            addCursorAbove(activeElement);
+        }
+    }
+
     // Alt+N to add new row
     if (e.altKey && e.key === 'n') {
         e.preventDefault();
@@ -4140,6 +4167,397 @@ function applyColorFormat() {
 
     closeQuickFormatter();
     showToast('Color format applied', 'success');
+}
+
+// Multi-Selection (Ctrl+D) - Select Next Occurrence
+let multiSelectionData = null;
+
+function selectNextOccurrence(input) {
+    const text = input.value;
+    const selStart = input.selectionStart;
+    const selEnd = input.selectionEnd;
+
+    // If no selection, select the word under cursor
+    if (selStart === selEnd) {
+        const wordBoundary = /\W/;
+        let start = selStart;
+        let end = selStart;
+
+        // Find word start
+        while (start > 0 && !wordBoundary.test(text[start - 1])) {
+            start--;
+        }
+
+        // Find word end
+        while (end < text.length && !wordBoundary.test(text[end])) {
+            end++;
+        }
+
+        if (start < end) {
+            input.setSelectionRange(start, end);
+            initMultiSelection(input, text.substring(start, end));
+            return;
+        }
+    }
+
+    const selectedText = text.substring(selStart, selEnd);
+    if (!selectedText) return;
+
+    // Initialize or continue multi-selection
+    if (!multiSelectionData || multiSelectionData.input !== input || multiSelectionData.searchText !== selectedText) {
+        initMultiSelection(input, selectedText);
+    } else {
+        selectNextMatch(input);
+    }
+}
+
+function initMultiSelection(input, searchText) {
+    const text = input.value;
+    const matches = [];
+    let index = 0;
+
+    // Find all occurrences
+    while ((index = text.indexOf(searchText, index)) !== -1) {
+        matches.push({ start: index, end: index + searchText.length });
+        index += searchText.length;
+    }
+
+    multiSelectionData = {
+        input: input,
+        searchText: searchText,
+        matches: matches,
+        currentIndex: 0,
+        selectedMatches: [matches[0]]
+    };
+
+    // Highlight first match
+    if (matches.length > 0) {
+        input.setSelectionRange(matches[0].start, matches[0].end);
+        showMultiSelectionIndicator(input, 1, matches.length);
+    }
+
+    // Set up input listener for multi-replace
+    setupMultiReplaceListener(input);
+}
+
+function selectNextMatch(input) {
+    if (!multiSelectionData || multiSelectionData.matches.length === 0) return;
+
+    multiSelectionData.currentIndex++;
+    if (multiSelectionData.currentIndex >= multiSelectionData.matches.length) {
+        // All selected, show message
+        showToast(`All ${multiSelectionData.matches.length} occurrences selected. Type to replace all.`, 'info');
+        multiSelectionData.allSelected = true;
+        return;
+    }
+
+    const nextMatch = multiSelectionData.matches[multiSelectionData.currentIndex];
+    multiSelectionData.selectedMatches.push(nextMatch);
+
+    // Select the next match
+    input.setSelectionRange(nextMatch.start, nextMatch.end);
+    showMultiSelectionIndicator(input, multiSelectionData.currentIndex + 1, multiSelectionData.matches.length);
+}
+
+function showMultiSelectionIndicator(input, current, total) {
+    // Create or update indicator
+    let indicator = document.getElementById('multiSelectionIndicator');
+    if (!indicator) {
+        indicator = document.createElement('div');
+        indicator.id = 'multiSelectionIndicator';
+        indicator.className = 'multi-selection-indicator';
+        document.body.appendChild(indicator);
+    }
+
+    indicator.textContent = `${current} of ${total} selected`;
+    indicator.style.display = 'block';
+
+    // Position near the input
+    const rect = input.getBoundingClientRect();
+    indicator.style.left = rect.right + 10 + 'px';
+    indicator.style.top = rect.top + 'px';
+
+    // Auto-hide after 2 seconds
+    clearTimeout(indicator.hideTimeout);
+    indicator.hideTimeout = setTimeout(() => {
+        indicator.style.display = 'none';
+    }, 2000);
+}
+
+function setupMultiReplaceListener(input) {
+    // Remove old listener if exists
+    if (input.multiReplaceListener) {
+        input.removeEventListener('input', input.multiReplaceListener);
+    }
+
+    // Create new listener
+    input.multiReplaceListener = function (e) {
+        if (!multiSelectionData || multiSelectionData.input !== input) return;
+
+        // User started typing, replace all selected occurrences
+        const newText = input.value;
+        const oldSearchText = multiSelectionData.searchText;
+
+        // Find what was typed (difference from original)
+        const selStart = input.selectionStart;
+        const beforeCursor = newText.substring(0, selStart);
+        const expectedBefore = input.value.substring(0, multiSelectionData.selectedMatches[0].start);
+
+        // Check if user is replacing the selection
+        if (beforeCursor.length >= expectedBefore.length) {
+            const typedText = beforeCursor.substring(expectedBefore.length);
+
+            // Replace all occurrences
+            let result = input.value;
+            const regex = new RegExp(escapeRegExp(oldSearchText), 'g');
+            result = result.replace(regex, typedText);
+
+            input.value = result;
+
+            // Position cursor after the replacement
+            const newCursorPos = expectedBefore.length + typedText.length;
+            input.setSelectionRange(newCursorPos, newCursorPos);
+
+            // Trigger change event
+            const changeEvent = new Event('input', { bubbles: true });
+            input.dispatchEvent(changeEvent);
+
+            // Clean up
+            clearMultiSelection();
+            showToast(`Replaced ${multiSelectionData.matches.length} occurrences`, 'success');
+        }
+    };
+
+    input.addEventListener('input', input.multiReplaceListener);
+
+    // Clear on blur
+    input.addEventListener('blur', function clearOnBlur() {
+        setTimeout(() => {
+            clearMultiSelection();
+            input.removeEventListener('blur', clearOnBlur);
+        }, 100);
+    }, { once: true });
+}
+
+function clearMultiSelection() {
+    multiSelectionData = null;
+    const indicator = document.getElementById('multiSelectionIndicator');
+    if (indicator) {
+        indicator.style.display = 'none';
+    }
+}
+
+function escapeRegExp(string) {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+// Multi-Line Cursor (Ctrl+Alt+Down/Up)
+let multiLineCursorData = null;
+
+function addCursorBelow(textarea) {
+    const text = textarea.value;
+    const cursorPos = textarea.selectionStart;
+
+    // Find current line
+    const beforeCursor = text.substring(0, cursorPos);
+    const currentLineStart = beforeCursor.lastIndexOf('\n') + 1;
+    const afterCursor = text.substring(cursorPos);
+    const currentLineEnd = afterCursor.indexOf('\n');
+    const nextLineStart = currentLineEnd === -1 ? text.length : cursorPos + currentLineEnd + 1;
+
+    // Calculate column position
+    const columnPos = cursorPos - currentLineStart;
+
+    // Initialize or add to multi-cursor
+    if (!multiLineCursorData || multiLineCursorData.textarea !== textarea) {
+        multiLineCursorData = {
+            textarea: textarea,
+            cursors: [{ line: getCurrentLineNumber(text, cursorPos), column: columnPos, pos: cursorPos }]
+        };
+    }
+
+    // Find next line
+    if (nextLineStart < text.length) {
+        const nextLineEnd = text.indexOf('\n', nextLineStart);
+        const nextLineLength = nextLineEnd === -1 ? text.length - nextLineStart : nextLineEnd - nextLineStart;
+        const nextCursorPos = nextLineStart + Math.min(columnPos, nextLineLength);
+
+        multiLineCursorData.cursors.push({
+            line: getCurrentLineNumber(text, nextCursorPos),
+            column: columnPos,
+            pos: nextCursorPos
+        });
+
+        // Move cursor to new position
+        textarea.setSelectionRange(nextCursorPos, nextCursorPos);
+
+        showMultiCursorIndicator(textarea, multiLineCursorData.cursors.length);
+        setupMultiLineCursorListener(textarea);
+    }
+}
+
+function addCursorAbove(textarea) {
+    const text = textarea.value;
+    const cursorPos = textarea.selectionStart;
+
+    // Find current line
+    const beforeCursor = text.substring(0, cursorPos);
+    const currentLineStart = beforeCursor.lastIndexOf('\n') + 1;
+
+    // Calculate column position
+    const columnPos = cursorPos - currentLineStart;
+
+    // Initialize or add to multi-cursor
+    if (!multiLineCursorData || multiLineCursorData.textarea !== textarea) {
+        multiLineCursorData = {
+            textarea: textarea,
+            cursors: [{ line: getCurrentLineNumber(text, cursorPos), column: columnPos, pos: cursorPos }]
+        };
+    }
+
+    // Find previous line
+    if (currentLineStart > 0) {
+        const prevLineEnd = currentLineStart - 1;
+        const prevLineText = text.substring(0, prevLineEnd);
+        const prevLineStart = prevLineText.lastIndexOf('\n') + 1;
+        const prevLineLength = prevLineEnd - prevLineStart;
+        const prevCursorPos = prevLineStart + Math.min(columnPos, prevLineLength);
+
+        multiLineCursorData.cursors.unshift({
+            line: getCurrentLineNumber(text, prevCursorPos),
+            column: columnPos,
+            pos: prevCursorPos
+        });
+
+        // Move cursor to new position
+        textarea.setSelectionRange(prevCursorPos, prevCursorPos);
+
+        showMultiCursorIndicator(textarea, multiLineCursorData.cursors.length);
+        setupMultiLineCursorListener(textarea);
+    }
+}
+
+function getCurrentLineNumber(text, pos) {
+    return text.substring(0, pos).split('\n').length;
+}
+
+function showMultiCursorIndicator(textarea, count) {
+    let indicator = document.getElementById('multiCursorIndicator');
+    if (!indicator) {
+        indicator = document.createElement('div');
+        indicator.id = 'multiCursorIndicator';
+        indicator.className = 'multi-cursor-indicator';
+        document.body.appendChild(indicator);
+    }
+
+    indicator.textContent = `${count} cursors`;
+    indicator.style.display = 'block';
+
+    // Position near the textarea
+    const rect = textarea.getBoundingClientRect();
+    indicator.style.left = rect.right + 10 + 'px';
+    indicator.style.top = rect.top + 'px';
+}
+
+function setupMultiLineCursorListener(textarea) {
+    // Store original text for comparison
+    if (!multiLineCursorData.originalText) {
+        multiLineCursorData.originalText = textarea.value;
+    }
+
+    // Remove old listener if exists
+    if (textarea.multiLineCursorListener) {
+        textarea.removeEventListener('input', textarea.multiLineCursorListener);
+    }
+
+    // Remove old keydown listener if exists
+    if (textarea.multiLineCursorKeyListener) {
+        textarea.removeEventListener('keydown', textarea.multiLineCursorKeyListener);
+    }
+
+    // Keydown listener to capture what will be typed/deleted
+    textarea.multiLineCursorKeyListener = function (e) {
+        if (!multiLineCursorData || multiLineCursorData.textarea !== textarea) return;
+
+        // Prevent default to handle manually
+        if (e.key.length === 1 || e.key === 'Backspace' || e.key === 'Delete') {
+            e.preventDefault();
+
+            const cursors = multiLineCursorData.cursors;
+            let newText = textarea.value;
+
+            // Sort cursors by position (descending) to avoid position shifts
+            const sortedCursors = [...cursors].sort((a, b) => b.pos - a.pos);
+
+            // Process each cursor from end to start
+            sortedCursors.forEach((cursor) => {
+                const lines = newText.split('\n');
+
+                if (cursor.line - 1 < lines.length) {
+                    // Calculate actual position in current text
+                    const lineStart = lines.slice(0, cursor.line - 1).join('\n').length + (cursor.line > 1 ? 1 : 0);
+                    const currentLine = lines[cursor.line - 1];
+                    const insertPos = lineStart + Math.min(cursor.column, currentLine.length);
+
+                    if (e.key === 'Backspace' && cursor.column > 0) {
+                        // Delete character before cursor
+                        newText = newText.substring(0, insertPos - 1) + newText.substring(insertPos);
+                    } else if (e.key === 'Delete' && cursor.column < currentLine.length) {
+                        // Delete character after cursor
+                        newText = newText.substring(0, insertPos) + newText.substring(insertPos + 1);
+                    } else if (e.key.length === 1) {
+                        // Insert character
+                        newText = newText.substring(0, insertPos) + e.key + newText.substring(insertPos);
+                    }
+                }
+            });
+
+            // Update textarea
+            textarea.value = newText;
+
+            // Update cursor positions for all cursors
+            multiLineCursorData.cursors.forEach(cursor => {
+                if (e.key.length === 1) {
+                    cursor.column++;
+                } else if (e.key === 'Backspace' && cursor.column > 0) {
+                    cursor.column--;
+                }
+            });
+
+            // Trigger change event
+            const changeEvent = new Event('input', { bubbles: true });
+            textarea.dispatchEvent(changeEvent);
+
+            // Move cursor to last position (in original order)
+            const lastCursor = cursors[cursors.length - 1];
+            const lines = newText.split('\n');
+            if (lastCursor.line - 1 < lines.length) {
+                const lineStart = lines.slice(0, lastCursor.line - 1).join('\n').length + (lastCursor.line > 1 ? 1 : 0);
+                const newCursorPos = lineStart + lastCursor.column;
+                textarea.setSelectionRange(newCursorPos, newCursorPos);
+            }
+        }
+    };
+
+    textarea.addEventListener('keydown', textarea.multiLineCursorKeyListener);
+
+    // Clear on blur or escape
+    const clearOnBlur = function () {
+        setTimeout(() => {
+            clearMultiLineCursor();
+            textarea.removeEventListener('keydown', textarea.multiLineCursorKeyListener);
+        }, 100);
+    };
+
+    textarea.addEventListener('blur', clearOnBlur, { once: true });
+}
+
+function clearMultiLineCursor() {
+    multiLineCursorData = null;
+    const indicator = document.getElementById('multiCursorIndicator');
+    if (indicator) {
+        indicator.style.display = 'none';
+    }
 }
 
 function populateF1Categories() {
