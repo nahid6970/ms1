@@ -4135,6 +4135,7 @@ function loadColorSwatches() {
 
     // Default presets
     const defaultSwatches = [
+        { fg: '#ffffff', bg: '#000000' }, // White on Black
         { fg: '#000000', bg: '#ffff00' }, // Black on Yellow
         { fg: '#ffffff', bg: '#ff0000' }, // White on Red
         { fg: '#000000', bg: '#00ff00' }, // Black on Green
