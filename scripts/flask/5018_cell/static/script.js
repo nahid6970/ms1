@@ -3595,7 +3595,7 @@ function renderTable() {
                 inputElement.style.color = col.textColor || '#000000';
 
                 if (col.font && col.font !== '') {
-                    inputElement.style.fontFamily = `'${col.font}', monospace`;
+                    inputElement.style.fontFamily = `'${col.font}', Vrinda, monospace`;
                 }
 
                 if (col.fontSize && col.fontSize !== '') {
@@ -3627,7 +3627,7 @@ function renderTable() {
                 inputElement.style.color = col.textColor || '#000000';
 
                 if (col.font && col.font !== '') {
-                    inputElement.style.fontFamily = `'${col.font}', monospace`;
+                    inputElement.style.fontFamily = `'${col.font}', Vrinda, monospace`;
                 }
 
                 if (col.fontSize && col.fontSize !== '') {
@@ -3720,7 +3720,7 @@ function renderTable() {
                     textarea.style.wordWrap = 'break-word';
 
                     if (col.font && col.font !== '') {
-                        textarea.style.fontFamily = `'${col.font}', monospace`;
+                        textarea.style.fontFamily = `'${col.font}', Vrinda, monospace`;
                     }
 
                     if (col.fontSize && col.fontSize !== '') {
