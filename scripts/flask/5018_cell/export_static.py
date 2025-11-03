@@ -1223,15 +1223,37 @@ def generate_static_html(data):
             const rows = lines.map(l =>
                 l.trim().replace(/^\\|\\|$/g, '').split('|').map(c => c.trim()));
             const cols = rows[0].length;
+            
+            // Process each cell and check for alignment markers
             const grid = rows.map(r =>
-                r.map(c => parseMarkdownInline(c))   // bold, italic, links …
+                r.map(c => {
+                    let align = 'left';
+                    let content = c;
+                    
+                    // Check for center alignment :text:
+                    if (content.startsWith(':') && content.endsWith(':') && content.length > 2) {
+                        align = 'center';
+                        content = content.slice(1, -1).trim();
+                    }
+                    // Check for right alignment text:
+                    else if (content.endsWith(':') && !content.startsWith(':')) {
+                        align = 'right';
+                        content = content.slice(0, -1).trim();
+                    }
+                    
+                    return {
+                        content: parseMarkdownInline(content),
+                        align: align
+                    };
+                })
             );
 
             /*  build a single <div> that looks like a table  */
             let html = `<div class="md-grid" style="--cols:${cols}">`;
             grid.forEach((row, i) => {
                 row.forEach(cell => {
-                    html += `<div class="md-cell ${i ? '' : 'md-header'}">${cell}</div>`;
+                    const alignStyle = cell.align !== 'left' ? ` style="text-align: ${cell.align}"` : '';
+                    html += `<div class="md-cell ${i ? '' : 'md-header'}"${alignStyle}>${cell.content}</div>`;
                 });
             });
             html += '</div>';
