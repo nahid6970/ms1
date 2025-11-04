@@ -2417,6 +2417,7 @@ Markdown Table Styles */
     justify-content: center;
     transition: all 0.2s;
     font-weight: 600;
+    position: relative;
 }
 
 .format-btn:hover {
@@ -2428,6 +2429,24 @@ Markdown Table Styles */
 
 .format-btn:active {
     transform: scale(0.95);
+}
+
+.format-checkmark {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background: #28a745;
+    color: white;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+    pointer-events: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
 .format-btn-color {
