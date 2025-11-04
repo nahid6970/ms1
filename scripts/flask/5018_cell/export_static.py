@@ -742,7 +742,9 @@ def generate_static_html(data):
             font-family: 'Courier New', monospace;
             font-size: 0.9em;
             color: #c7254e;
-            display: inline;
+            line-height: 1.8;
+            box-decoration-break: clone;
+            -webkit-box-decoration-break: clone;
         }
 
         mark {
@@ -1275,7 +1277,9 @@ def generate_static_html(data):
                 });
                 styleObj.padding = '2px 6px';
                 styleObj.borderRadius = '4px';
-                styleObj.display = 'inline';
+                styleObj.lineHeight = '1.8';
+                styleObj.boxDecorationBreak = 'clone';
+                styleObj.WebkitBoxDecorationBreak = 'clone';
                 const styleStr = Object.entries(styleObj).map(([k, v]) => {
                     const cssKey = k.replace(/([A-Z])/g, '-$1').toLowerCase();
                     return cssKey + ': ' + v;
@@ -1351,7 +1355,9 @@ def generate_static_html(data):
                     // Add padding and border-radius for better appearance
                     styleObj.padding = '2px 6px';
                     styleObj.borderRadius = '4px';
-                    styleObj.display = 'inline';
+                    styleObj.lineHeight = '1.8';
+                    styleObj.boxDecorationBreak = 'clone';
+                    styleObj.WebkitBoxDecorationBreak = 'clone';
                     const styleStr = Object.entries(styleObj).map(([k, v]) => {
                         const cssKey = k.replace(/([A-Z])/g, '-$1').toLowerCase();
                         return `${cssKey}: ${v}`;

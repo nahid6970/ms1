@@ -856,7 +856,9 @@ function parseMarkdownInline(text) {
         });
         styleObj.padding = '2px 6px';
         styleObj.borderRadius = '4px';
-        styleObj.display = 'inline';
+        styleObj.lineHeight = '1.8';
+        styleObj.boxDecorationBreak = 'clone';
+        styleObj.WebkitBoxDecorationBreak = 'clone';
         const styleStr = Object.entries(styleObj).map(([k, v]) => {
             const cssKey = k.replace(/([A-Z])/g, '-$1').toLowerCase();
             return `${cssKey}: ${v}`;
@@ -989,7 +991,9 @@ function oldParseMarkdownBody(lines) {
             });
             styleObj.padding = '2px 6px';
             styleObj.borderRadius = '4px';
-            styleObj.display = 'inline';
+            styleObj.lineHeight = '1.8';
+            styleObj.boxDecorationBreak = 'clone';
+            styleObj.WebkitBoxDecorationBreak = 'clone';
             const styleStr = Object.entries(styleObj).map(([k, v]) => {
                 const cssKey = k.replace(/([A-Z])/g, '-$1').toLowerCase();
                 return `${cssKey}: ${v}`;
