@@ -3954,10 +3954,49 @@ function closeAllColumnMenus() {
 function stripMarkdown(text) {
     if (!text) return '';
     let stripped = String(text);
+
+    // Remove color/style markers: {fg:#fff;bg:#000}text{/} -> text
+    stripped = stripped.replace(/\{[^}]*\}(.+?)\{\/\}/g, '$1');
+
     // Remove bold markers: **text** -> text
     stripped = stripped.replace(/\*\*(.+?)\*\*/g, '$1');
+
+    // Remove underline markers: __text__ -> text
+    stripped = stripped.replace(/__(.+?)__/g, '$1');
+
+    // Remove highlight markers: @@text@@ -> text
+    stripped = stripped.replace(/@@(.+?)@@/g, '$1');
+
+    // Remove header markers: ##text## -> text
+    stripped = stripped.replace(/##(.+?)##/g, '$1');
+
+    // Remove code block markers: ```text``` -> text
+    stripped = stripped.replace(/```(.+?)```/gs, '$1');
+
+    // Remove inline code markers: `text` -> text
+    stripped = stripped.replace(/`(.+?)`/g, '$1');
+
+    // Remove strikethrough markers: ~~text~~ -> text
+    stripped = stripped.replace(/~~(.+?)~~/g, '$1');
+
+    // Remove mark/highlight markers: ==text== -> text
+    stripped = stripped.replace(/==(.+?)==/g, '$1');
+
+    // Remove superscript markers: ^text^ -> text
+    stripped = stripped.replace(/\^(.+?)\^/g, '$1');
+
+    // Remove subscript markers: ~text~ -> text
+    stripped = stripped.replace(/~(.+?)~/g, '$1');
+
+    // Remove link markers: {link:url}text{/} -> text
+    stripped = stripped.replace(/\{link:[^}]*\}(.+?)\{\/\}/g, '$1');
+
     // Remove bullet markers: - item -> item
     stripped = stripped.replace(/^\s*-\s+/gm, '');
+
+    // Remove sub-bullet markers: -- item -> item
+    stripped = stripped.replace(/^\s*--\s+/gm, '');
+
     return stripped;
 }
 
