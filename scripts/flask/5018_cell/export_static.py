@@ -1270,14 +1270,19 @@ def generate_static_html(data):
             formatted = formatted.replace(/\\{((?:fg:[^;\\}\\s]+)?(?:;)?(?:bg:[^;\\}\\s]+)?)\\}(.+?)\\{\\/\\}/g, (match, styles, text) => {
                 const styleObj = {};
                 const parts = styles.split(';').filter(p => p.trim());
+                let hasBg = false;
                 parts.forEach(part => {
                     const [key, value] = part.split(':').map(s => s.trim());
                     if (key === 'fg') styleObj.color = value;
-                    if (key === 'bg') styleObj.backgroundColor = value;
+                    if (key === 'bg') {
+                        styleObj.backgroundColor = value;
+                        hasBg = true;
+                    }
                 });
                 styleObj.padding = '2px 6px';
                 styleObj.borderRadius = '4px';
-                styleObj.lineHeight = '1.8';
+                // Only use extra spacing if there's a background color
+                styleObj.lineHeight = hasBg ? '1.8' : '1.3';
                 styleObj.boxDecorationBreak = 'clone';
                 styleObj.WebkitBoxDecorationBreak = 'clone';
                 const styleStr = Object.entries(styleObj).map(([k, v]) => {
@@ -1347,15 +1352,20 @@ def generate_static_html(data):
                 formatted = formatted.replace(/\\{((?:fg:[^;\\}\\s]+)?(?:;)?(?:bg:[^;\\}\\s]+)?)\\}(.+?)\\{\\/\\}/g, (match, styles, text) => {
                     const styleObj = {};
                     const parts = styles.split(';').filter(p => p.trim());
+                    let hasBg = false;
                     parts.forEach(part => {
                         const [key, value] = part.split(':').map(s => s.trim());
                         if (key === 'fg') styleObj.color = value;
-                        if (key === 'bg') styleObj.backgroundColor = value;
+                        if (key === 'bg') {
+                            styleObj.backgroundColor = value;
+                            hasBg = true;
+                        }
                     });
                     // Add padding and border-radius for better appearance
                     styleObj.padding = '2px 6px';
                     styleObj.borderRadius = '4px';
-                    styleObj.lineHeight = '1.8';
+                    // Only use extra spacing if there's a background color
+                    styleObj.lineHeight = hasBg ? '1.8' : '1.3';
                     styleObj.boxDecorationBreak = 'clone';
                     styleObj.WebkitBoxDecorationBreak = 'clone';
                     const styleStr = Object.entries(styleObj).map(([k, v]) => {
