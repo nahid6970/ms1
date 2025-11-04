@@ -553,7 +553,7 @@ td textarea {
     font-family: 'Courier New', monospace;
     font-size: 0.9em;
     color: #c7254e;
-    display: inline-block;
+    display: inline;
 }
 
 .markdown-preview mark {

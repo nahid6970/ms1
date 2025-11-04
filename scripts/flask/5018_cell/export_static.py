@@ -742,7 +742,7 @@ def generate_static_html(data):
             font-family: 'Courier New', monospace;
             font-size: 0.9em;
             color: #c7254e;
-            display: inline-block;
+            display: inline;
         }
 
         mark {
@@ -1275,7 +1275,7 @@ def generate_static_html(data):
                 });
                 styleObj.padding = '2px 6px';
                 styleObj.borderRadius = '4px';
-                styleObj.display = 'inline-block';
+                styleObj.display = 'inline';
                 const styleStr = Object.entries(styleObj).map(([k, v]) => {
                     const cssKey = k.replace(/([A-Z])/g, '-$1').toLowerCase();
                     return cssKey + ': ' + v;
@@ -1351,7 +1351,7 @@ def generate_static_html(data):
                     // Add padding and border-radius for better appearance
                     styleObj.padding = '2px 6px';
                     styleObj.borderRadius = '4px';
-                    styleObj.display = 'inline-block';
+                    styleObj.display = 'inline';
                     const styleStr = Object.entries(styleObj).map(([k, v]) => {
                         const cssKey = k.replace(/([A-Z])/g, '-$1').toLowerCase();
                         return `${cssKey}: ${v}`;
