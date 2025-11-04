@@ -858,8 +858,11 @@ function parseMarkdownInline(text) {
                 hasBg = true;
             }
         });
-        styleObj.padding = '2px 6px';
-        styleObj.borderRadius = '4px';
+        // Only add padding and border-radius if there's a background
+        if (hasBg) {
+            styleObj.padding = '2px 6px';
+            styleObj.borderRadius = '4px';
+        }
         // Only use extra spacing if there's a background color
         styleObj.lineHeight = hasBg ? '1.8' : '1.3';
         styleObj.boxDecorationBreak = 'clone';
@@ -998,8 +1001,11 @@ function oldParseMarkdownBody(lines) {
                     hasBg = true;
                 }
             });
-            styleObj.padding = '2px 6px';
-            styleObj.borderRadius = '4px';
+            // Only add padding and border-radius if there's a background
+            if (hasBg) {
+                styleObj.padding = '2px 6px';
+                styleObj.borderRadius = '4px';
+            }
             // Only use extra spacing if there's a background color
             styleObj.lineHeight = hasBg ? '1.8' : '1.3';
             styleObj.boxDecorationBreak = 'clone';
