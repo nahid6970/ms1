@@ -537,10 +537,6 @@ def generate_static_html(data):
             overflow: visible;
             word-wrap: break-word;
             word-break: break-word;
-        }
-
-        /* Only apply vertical-align top to cells with wrapped content */
-        .wrap-enabled tr.has-wrapped-content td:not(.row-number) {
             vertical-align: top;
         }
 
@@ -572,9 +568,8 @@ def generate_static_html(data):
             vertical-align: middle;
         }
 
-        /* For rows without wrapped content, keep normal alignment */
+        /* For rows without wrapped content, keep normal height */
         .wrap-enabled tr:not(.has-wrapped-content) td:not(.row-number) {
-            vertical-align: middle;
             height: 40px;
         }
 
