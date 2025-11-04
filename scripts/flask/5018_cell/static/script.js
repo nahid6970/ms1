@@ -4395,13 +4395,24 @@ function loadColorSwatches() {
     allSwatches.forEach((swatch, index) => {
         const swatchBtn = document.createElement('button');
         swatchBtn.className = 'color-swatch';
-        swatchBtn.style.background = swatch.bg;
+
+        // Show visual indicator if noBg is set
+        if (swatch.noBg) {
+            swatchBtn.style.background = 'transparent';
+            swatchBtn.style.border = '2px dashed #999';
+        } else {
+            swatchBtn.style.background = swatch.bg;
+        }
         swatchBtn.style.color = swatch.fg;
         swatchBtn.textContent = 'Aa';
-        swatchBtn.title = `Text: ${swatch.fg}, Background: ${swatch.bg}`;
+
+        const bgText = swatch.noBg ? 'No BG' : swatch.bg;
+        swatchBtn.title = `Text: ${swatch.fg}, Background: ${bgText}`;
+
         swatchBtn.onclick = () => {
             document.getElementById('quickFgColor').value = swatch.fg;
             document.getElementById('quickBgColor').value = swatch.bg;
+            document.getElementById('noBgCheckbox').checked = swatch.noBg || false;
         };
 
         // Add delete button for saved swatches
@@ -4423,17 +4434,19 @@ function loadColorSwatches() {
 function addCurrentColorToSwatches() {
     const fgColor = document.getElementById('quickFgColor').value;
     const bgColor = document.getElementById('quickBgColor').value;
+    const noBgCheckbox = document.getElementById('noBgCheckbox');
+    const noBg = noBgCheckbox.checked;
 
     const savedSwatches = JSON.parse(localStorage.getItem('colorSwatches') || '[]');
 
     // Check if already exists
-    const exists = savedSwatches.some(s => s.fg === fgColor && s.bg === bgColor);
+    const exists = savedSwatches.some(s => s.fg === fgColor && s.bg === bgColor && s.noBg === noBg);
     if (exists) {
         showToast('Color combination already saved', 'info');
         return;
     }
 
-    savedSwatches.unshift({ fg: fgColor, bg: bgColor });
+    savedSwatches.unshift({ fg: fgColor, bg: bgColor, noBg: noBg });
 
     // Keep only last 6 custom swatches
     if (savedSwatches.length > 6) {
