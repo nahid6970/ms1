@@ -4316,6 +4316,38 @@ function applyQuickFormat(prefix, suffix, event) {
     showToast('Format applied', 'success');
 }
 
+function applyLinkFormat(event) {
+    if (!quickFormatterTarget) return;
+
+    const input = quickFormatterTarget;
+    const start = quickFormatterSelection.start;
+    const end = quickFormatterSelection.end;
+    const selectedUrl = input.value.substring(start, end);
+
+    // Use default placeholder text
+    const linkText = 'Link text';
+
+    // Insert the link syntax: {link:url}Link text{/}
+    const newText = input.value.substring(0, start) +
+        `{link:${selectedUrl}}` + linkText + '{/}' +
+        input.value.substring(end);
+
+    input.value = newText;
+
+    // Trigger change event to update cell
+    const changeEvent = new Event('input', { bubbles: true });
+    input.dispatchEvent(changeEvent);
+
+    // Set cursor position after the inserted text
+    const linkPrefix = `{link:${selectedUrl}}`;
+    const newCursorPos = start + linkPrefix.length + linkText.length + 3;
+    input.setSelectionRange(newCursorPos, newCursorPos);
+    input.focus();
+
+    closeQuickFormatter();
+    showToast('Link applied', 'success');
+}
+
 function applyMultipleFormats(lastPrefix, lastSuffix) {
     if (!quickFormatterTarget) return;
 
