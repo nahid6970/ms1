@@ -4986,7 +4986,7 @@ function addCursorBelow(textarea) {
         textarea.setSelectionRange(nextCursorPos, nextCursorPos);
 
         showMultiCursorIndicator(textarea, multiLineCursorData.cursors.length);
-        showCursorMarkers(textarea, multiLineCursorData.cursors);
+        // showCursorMarkers(textarea, multiLineCursorData.cursors); // Disabled - only show main cursor
         setupMultiLineCursorListener(textarea);
     }
 }
@@ -5028,7 +5028,7 @@ function addCursorAbove(textarea) {
         textarea.setSelectionRange(prevCursorPos, prevCursorPos);
 
         showMultiCursorIndicator(textarea, multiLineCursorData.cursors.length);
-        showCursorMarkers(textarea, multiLineCursorData.cursors);
+        // showCursorMarkers(textarea, multiLineCursorData.cursors); // Disabled - only show main cursor
         setupMultiLineCursorListener(textarea);
     }
 }
@@ -5134,7 +5134,7 @@ function setupMultiLineCursorListener(textarea) {
             }
 
             // Update visual markers
-            showCursorMarkers(textarea, cursors);
+            // showCursorMarkers(textarea, cursors); // Disabled - only show main cursor
         }
     };
 
