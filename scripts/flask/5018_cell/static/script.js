@@ -4216,7 +4216,10 @@ function showQuickFormatter(inputElement) {
 
     const formatter = document.getElementById('quickFormatter');
     const colorSection = document.getElementById('colorPickerSection');
-    colorSection.style.display = 'none';
+    
+    // Show color section by default
+    colorSection.style.display = 'block';
+    loadColorSwatches();
 
     // Show formatter first to get its dimensions
     formatter.style.display = 'block';
