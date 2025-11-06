@@ -1404,13 +1404,13 @@ def generate_static_html(data):
                 // Sublist: -- item -> ◦ item with more indent (white circle)
                 if (formatted.trim().startsWith('-- ')) {
                     const content = formatted.replace(/^(\\s*)-- (.+)$/, '$2');
-                    formatted = formatted.replace(/^(\\s*)-- .+$/, '$1<span style="display: inline-flex; align-items: baseline; width: 100%; margin-left: 1em;"><span style="margin-right: 0.5em; flex-shrink: 0; position: relative; top: 0.1em;">◦</span><span style="flex: 1;">◦CONTENT◦</span></span>');
+                    formatted = formatted.replace(/^(\\s*)-- .+$/, '$1<span style="display: inline-flex; align-items: center; width: 100%; margin-left: 1em;"><span style="margin-right: 0.5em; flex-shrink: 0; line-height: 1; font-size: 0.9em;">◦</span><span style="flex: 1;">◦CONTENT◦</span></span>');
                     formatted = formatted.replace('◦CONTENT◦', content);
                 }
                 // Bullet list: - item -> • item with hanging indent (black circle)
                 else if (formatted.trim().startsWith('- ')) {
                     const content = formatted.replace(/^(\\s*)- (.+)$/, '$2');
-                    formatted = formatted.replace(/^(\\s*)- .+$/, '$1<span style="display: inline-flex; align-items: baseline; width: 100%;"><span style="margin-right: 0.5em; flex-shrink: 0; position: relative; top: 0.1em;">•</span><span style="flex: 1;">•CONTENT•</span></span>');
+                    formatted = formatted.replace(/^(\\s*)- .+$/, '$1<span style="display: inline-flex; align-items: center; width: 100%;"><span style="margin-right: 0.5em; flex-shrink: 0; line-height: 1; font-size: 0.9em;">•</span><span style="flex: 1;">•CONTENT•</span></span>');
                     formatted = formatted.replace('•CONTENT•', content);
                 }
 
