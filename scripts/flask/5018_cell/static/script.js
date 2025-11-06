@@ -4325,9 +4325,9 @@ function applyLinkFormat(event) {
     const selectedUrl = input.value.substring(start, end);
 
     // Use default placeholder text
-    const linkText = 'Link text';
+    const linkText = 'Link';
 
-    // Insert the link syntax: {link:url}Link text{/}
+    // Insert the link syntax: {link:url}Link{/}
     const newText = input.value.substring(0, start) +
         `{link:${selectedUrl}}` + linkText + '{/}' +
         input.value.substring(end);
