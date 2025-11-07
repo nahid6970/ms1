@@ -2423,6 +2423,20 @@ Markdown Table Styles */
     position: relative;
 }
 
+.format-btn sup {
+    position: relative;
+    top: -0.4em;
+    font-size: 0.65em;
+    line-height: 0;
+}
+
+.format-btn sub {
+    position: relative;
+    top: 0.3em;
+    font-size: 0.65em;
+    line-height: 0;
+}
+
 .format-btn:hover {
     background: #007bff;
     color: white;
