@@ -1314,7 +1314,7 @@ def generate_static_html(data):
             formatted = formatted.replace(/\\^(.+?)\\^/g, '<sup>$1</sup>');
 
             // Subscript: ~text~ -> <sub>text</sub>
-            formatted = formatted.replace(/~([^~\\s]+?)~/g, '<sub>$1</sub>');
+            formatted = formatted.replace(/~(.+?)~/g, '<sub>$1</sub>');
 
             // Inline code: `text` -> <code>text</code>
             formatted = formatted.replace(/`(.+?)`/g, '<code>$1</code>');
@@ -1399,18 +1399,18 @@ def generate_static_html(data):
                 formatted = formatted.replace(/\\^(.+?)\\^/g, '<sup>$1</sup>');
 
                 // Subscript: ~text~ -> <sub>text</sub> (single tilde only, after strikethrough is processed)
-                formatted = formatted.replace(/~([^~\\s]+?)~/g, '<sub>$1</sub>');
+                formatted = formatted.replace(/~(.+?)~/g, '<sub>$1</sub>');
 
                 // Sublist: -- item -> ◦ item with more indent (white circle)
                 if (formatted.trim().startsWith('-- ')) {
                     const content = formatted.replace(/^(\\s*)-- (.+)$/, '$2');
-                    formatted = formatted.replace(/^(\\s*)-- .+$/, '$1<span style="display: inline-flex; align-items: center; width: 100%; margin-left: 1em;"><span style="margin-right: 0.5em; flex-shrink: 0; line-height: 1; font-size: 0.9em;">◦</span><span style="flex: 1;">◦CONTENT◦</span></span>');
+                    formatted = formatted.replace(/^(\\s*)-- .+$/, '$1<span style="display: inline-flex; align-items: flex-start; width: 100%; margin-left: 1em;"><span style="margin-right: 0.5em; flex-shrink: 0; line-height: 1; font-size: 0.9em; position: relative; top: 0.35em;">◦</span><span style="flex: 1;">◦CONTENT◦</span></span>');
                     formatted = formatted.replace('◦CONTENT◦', content);
                 }
                 // Bullet list: - item -> • item with hanging indent (black circle)
                 else if (formatted.trim().startsWith('- ')) {
                     const content = formatted.replace(/^(\\s*)- (.+)$/, '$2');
-                    formatted = formatted.replace(/^(\\s*)- .+$/, '$1<span style="display: inline-flex; align-items: center; width: 100%;"><span style="margin-right: 0.5em; flex-shrink: 0; line-height: 1; font-size: 0.9em;">•</span><span style="flex: 1;">•CONTENT•</span></span>');
+                    formatted = formatted.replace(/^(\\s*)- .+$/, '$1<span style="display: inline-flex; align-items: flex-start; width: 100%;"><span style="margin-right: 0.5em; flex-shrink: 0; line-height: 1; font-size: 0.9em; position: relative; top: 0.35em;">•</span><span style="flex: 1;">•CONTENT•</span></span>');
                     formatted = formatted.replace('•CONTENT•', content);
                 }
 

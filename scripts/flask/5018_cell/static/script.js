@@ -893,7 +893,7 @@ function parseMarkdownInline(text) {
     formatted = formatted.replace(/\^(.+?)\^/g, '<sup>$1</sup>');
 
     // Subscript: ~text~ -> <sub>text</sub>
-    formatted = formatted.replace(/~([^~\s]+?)~/g, '<sub>$1</sub>');
+    formatted = formatted.replace(/~(.+?)~/g, '<sub>$1</sub>');
 
     // Inline code: `text` -> <code>text</code>
     formatted = formatted.replace(/`(.+?)`/g, '<code>$1</code>');
@@ -1036,7 +1036,7 @@ function oldParseMarkdownBody(lines) {
         formatted = formatted.replace(/\^(.+?)\^/g, '<sup>$1</sup>');
 
         // Subscript: ~text~ -> <sub>text</sub>
-        formatted = formatted.replace(/~([^~\s]+?)~/g, '<sub>$1</sub>');
+        formatted = formatted.replace(/~(.+?)~/g, '<sub>$1</sub>');
 
         // Sublist: -- item -> ◦ item with more indent (white circle)
         if (formatted.trim().startsWith('-- ')) {
