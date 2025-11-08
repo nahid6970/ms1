@@ -133,10 +133,11 @@
         return;
       }
       
-      const totalSeconds = Math.floor(diff / 1000);
+      // Round up to nearest second to avoid losing time
+      const totalSeconds = Math.ceil(diff / 1000);
       const days = Math.floor(totalSeconds / 86400);
       const hours = Math.floor((totalSeconds % 86400) / 3600);
-      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const minutes = Math.ceil((totalSeconds % 3600) / 60);
       
       // Use custom URL scheme to open Android app
       const url = `coctimer://set?days=${days}&hours=${hours}&minutes=${minutes}&name=${encodeURIComponent(eventName)}&speed=1`;
