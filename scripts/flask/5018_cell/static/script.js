@@ -4361,8 +4361,11 @@ function searchGoogle(event) {
         return;
     }
 
+    // Strip markdown formatting before searching
+    const cleanText = stripMarkdown(selectedText);
+
     // Open Google search in new tab
-    const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(selectedText)}`;
+    const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(cleanText)}`;
     window.open(searchUrl, '_blank');
 
     closeQuickFormatter();
