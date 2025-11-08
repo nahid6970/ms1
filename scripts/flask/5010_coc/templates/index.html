@@ -70,6 +70,29 @@
     }
     setInterval(updateCountdowns, 60000);
     window.onload = updateCountdowns;
+
+    function applySpeedMultiplier(eventId) {
+      const input = document.getElementById('durationInput' + eventId);
+      const multiplier = parseFloat(document.getElementById('speedMultiplier' + eventId).value);
+      const duration = input.value.trim();
+      
+      const dMatch = duration.match(/(\d+)\s*d/);
+      const hMatch = duration.match(/(\d+)\s*h/);
+      const mMatch = duration.match(/(\d+)\s*m/);
+      
+      let days = dMatch ? parseInt(dMatch[1]) : 0;
+      let hours = hMatch ? parseInt(hMatch[1]) : 0;
+      let minutes = mMatch ? parseInt(mMatch[1]) : 0;
+      
+      let totalMinutes = (days * 24 * 60) + (hours * 60) + minutes;
+      let newTotalMinutes = Math.floor(totalMinutes / multiplier);
+      
+      let newDays = Math.floor(newTotalMinutes / (24 * 60));
+      let newHours = Math.floor((newTotalMinutes % (24 * 60)) / 60);
+      let newMinutes = newTotalMinutes % 60;
+      
+      input.value = `${newDays}d ${newHours}h ${newMinutes}m`;
+    }
   </script>
 </head>
 
@@ -106,9 +129,14 @@
     <div class="modal-content">
       <div class="modal-body text-center" style="padding: 1.5rem;">
         <form action="{{ url_for('edit_event', event_id=event.id) }}" method="POST" style="width: 100%;">
-          <div class="mb-3 d-flex justify-content-center">
-            <input style="font-size: 2rem; width: 100%; padding: 1rem; min-width: 250px; overflow-x: auto;" type="text" class="form-control text-center" id="durationInput{{ event.id }}" name="duration"
+          <div class="mb-3 d-flex justify-content-center align-items-center gap-2">
+            <input style="font-size: 2rem; flex: 1; padding: 1rem; min-width: 200px; overflow-x: auto;" type="text" class="form-control text-center" id="durationInput{{ event.id }}" name="duration"
               value="{{ event.duration_str_for_modal }}" placeholder="0d 0h 0m" required>
+            <select style="font-size: 1.5rem; padding: 1rem; width: auto;" class="form-select" id="speedMultiplier{{ event.id }}" onchange="applySpeedMultiplier({{ event.id }})">
+              <option value="1">1X</option>
+              <option value="10">10X</option>
+              <option value="24">24X</option>
+            </select>
           </div>
           <div class="d-flex justify-content-center">
             <button type="submit" class="btn btn-primary" style="font-size: 1.5rem; padding: 0.75rem 2rem;">Save</button>
