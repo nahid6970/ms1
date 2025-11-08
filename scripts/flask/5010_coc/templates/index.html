@@ -114,14 +114,43 @@
             // Auto-apply speed when input changes
             const eventId = input.id.replace('durationInput', '');
             const speedSelect = document.getElementById('speedMultiplier' + eventId);
+            const form = document.getElementById('eventForm' + eventId);
             
             // Store original value when modal opens
             input.dataset.originalValue = input.value;
+            input.dataset.speedApplied = 'false';
+            
+            // Reset speedApplied flag when input changes
+            input.addEventListener('input', function() {
+              input.dataset.speedApplied = 'false';
+            });
             
             input.addEventListener('blur', function() {
               // Only apply if value changed and speed is not 1X
-              if (speedSelect && speedSelect.value !== '1' && input.value !== input.dataset.originalValue) {
+              if (speedSelect && speedSelect.value !== '1' && input.value !== input.dataset.originalValue && input.dataset.speedApplied === 'false') {
                 applySpeedMultiplier(eventId);
+                input.dataset.speedApplied = 'true';
+              }
+            });
+            
+            // Handle Enter key press - apply speed then trigger Save button
+            input.addEventListener('keydown', function(e) {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                
+                // Apply speed if needed
+                if (speedSelect && speedSelect.value !== '1' && input.dataset.speedApplied === 'false') {
+                  applySpeedMultiplier(eventId);
+                  input.dataset.speedApplied = 'true';
+                }
+                
+                // Click Save button after a short delay
+                setTimeout(() => {
+                  const saveButton = modal.querySelector('button[type="submit"]');
+                  if (saveButton) {
+                    saveButton.click();
+                  }
+                }, 150);
               }
             });
           }
