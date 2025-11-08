@@ -102,6 +102,7 @@
     setInterval(updateCountdowns, 1000);
     window.onload = function() {
       updateCountdowns();
+      restoreSpeedSelections();
       
       document.querySelectorAll('.modal').forEach(modal => {
         modal.addEventListener('shown.bs.modal', function(e) {
@@ -109,6 +110,20 @@
           if (input) {
             input.focus();
             input.select();
+            
+            // Auto-apply speed when input changes
+            const eventId = input.id.replace('durationInput', '');
+            const speedSelect = document.getElementById('speedMultiplier' + eventId);
+            
+            // Store original value when modal opens
+            input.dataset.originalValue = input.value;
+            
+            input.addEventListener('blur', function() {
+              // Only apply if value changed and speed is not 1X
+              if (speedSelect && speedSelect.value !== '1' && input.value !== input.dataset.originalValue) {
+                applySpeedMultiplier(eventId);
+              }
+            });
           }
         });
       });
@@ -116,8 +131,12 @@
 
     function applySpeedMultiplier(eventId) {
       const input = document.getElementById('durationInput' + eventId);
-      const multiplier = parseFloat(document.getElementById('speedMultiplier' + eventId).value);
+      const speedSelect = document.getElementById('speedMultiplier' + eventId);
+      const multiplier = parseFloat(speedSelect.value);
       const duration = input.value.trim();
+      
+      // Save the selected speed to localStorage
+      localStorage.setItem('speed_' + eventId, multiplier);
       
       const dMatch = duration.match(/(\d+)\s*d/);
       const hMatch = duration.match(/(\d+)\s*h/);
@@ -140,6 +159,16 @@
       result += `${newMinutes}m`;
       
       input.value = result.trim();
+    }
+    
+    function restoreSpeedSelections() {
+      document.querySelectorAll('[id^="speedMultiplier"]').forEach(select => {
+        const eventId = select.id.replace('speedMultiplier', '');
+        const savedSpeed = localStorage.getItem('speed_' + eventId);
+        if (savedSpeed) {
+          select.value = savedSpeed;
+        }
+      });
     }
 
     function sendToGoogleTimer(e, eventName, eventTime) {
