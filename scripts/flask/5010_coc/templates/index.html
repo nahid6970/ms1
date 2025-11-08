@@ -106,6 +106,16 @@
     window.onload = function() {
       requestNotificationPermission();
       updateCountdowns();
+      
+      document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('shown.bs.modal', function(e) {
+          const input = modal.querySelector('input[type="text"]');
+          if (input) {
+            input.focus();
+            input.select();
+          }
+        });
+      });
     };
 
     function applySpeedMultiplier(eventId) {
