@@ -31,7 +31,13 @@ def index():
             hours = remaining.seconds // 3600
             minutes = (remaining.seconds % 3600) // 60
 
-            event_obj.duration_str_for_modal = f"{days}d {hours}h {minutes}m" if (days or hours or minutes) else ""
+            result = ""
+            if days > 0:
+                result += f"{days}d "
+            if hours > 0 or days > 0:
+                result += f"{hours}h "
+            result += f"{minutes}m"
+            event_obj.duration_str_for_modal = result.strip() if (days or hours or minutes) else ""
         else:
             event_obj.duration_str_for_modal = ""
 
@@ -109,8 +115,19 @@ def edit_event(event_id):
         return redirect(url_for('index'))
 
     teams = Team.query.order_by(Team.name).all()
-    duration = f"{(event.event_time - datetime.now()).days}d {((event.event_time - datetime.now()).seconds // 3600)}h {(((event.event_time - datetime.now()).seconds % 3600) // 60)}m"
-    return render_template('event_form.html', event=event, teams=teams, action='Edit', duration=duration)
+    remaining = event.event_time - datetime.now()
+    days = remaining.days
+    hours = remaining.seconds // 3600
+    minutes = (remaining.seconds % 3600) // 60
+    
+    duration = ""
+    if days > 0:
+        duration += f"{days}d "
+    if hours > 0 or days > 0:
+        duration += f"{hours}h "
+    duration += f"{minutes}m"
+    
+    return render_template('event_form.html', event=event, teams=teams, action='Edit', duration=duration.strip())
 
 if __name__ == '__main__':
     with app.app_context():
