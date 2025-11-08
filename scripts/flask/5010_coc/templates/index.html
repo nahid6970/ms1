@@ -19,7 +19,6 @@
     .countdown {
       font-size: 1.5rem !important;
       font-weight: bold;
-      padding: 5px 10px;
       border-radius: 5px;
       background-color: #ff6f61;
       color: rgb(113, 255, 137);
@@ -27,6 +26,11 @@
       margin-left: 10px;
       margin-bottom: 0px;
       text-transform: lowercase;
+    }
+    
+    .countdown-text {
+      font-size: 1.5rem !important;
+      font-weight: bold;
     }
 
     .countdown.expired {
@@ -54,13 +58,19 @@
         const time = new Date(el.dataset.time);
         const now = new Date();
         const diff = time - now;
+        const eventId = el.dataset.eventId;
+        const textSpan = el.querySelector('.countdown-text');
+        const originalDurationSeconds = parseInt(el.dataset.originalDuration) || 0;
         
         if (diff <= 0) {
-          el.innerText = "✔️";
+          if (textSpan) textSpan.innerText = "✔️";
           el.classList.add('expired');
           el.classList.remove('live');
+          const progressBar = document.getElementById('progress' + eventId);
+          if (progressBar) progressBar.style.width = '100%';
           return;
         }
+        
         const d = Math.floor(diff / (1000 * 60 * 60 * 24));
         const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
         const m = Math.floor((diff / (1000 * 60)) % 60);
@@ -72,9 +82,21 @@
         result += `${m}m`;
         if (d === 0 && h === 0) result += ` ${s}s`;
         
-        el.innerText = result.trim();
+        if (textSpan) textSpan.innerText = result.trim();
         el.classList.add('live');
         el.classList.remove('expired');
+        
+        // Calculate progress based on original duration from server
+        if (originalDurationSeconds > 0) {
+          const remainingSeconds = diff / 1000;
+          const elapsedSeconds = originalDurationSeconds - remainingSeconds;
+          const progress = Math.min(Math.max((elapsedSeconds / originalDurationSeconds) * 100, 0), 100);
+          
+          const progressBar = document.getElementById('progress' + eventId);
+          if (progressBar) {
+            progressBar.style.width = progress + '%';
+          }
+        }
       });
     }
     setInterval(updateCountdowns, 1000);
@@ -161,7 +183,12 @@
             <div><strong>{{ event.team1.name }}</strong></div>
           </div>
           <div class="d-flex flex-row gap-2 align-items-center">
-            <span class="countdown" data-time="{{ event.event_time.isoformat() }}" style="border-radius: 0;"></span>
+            <span class="countdown" data-time="{{ event.event_time.isoformat() }}" data-event-id="{{ event.id }}" data-original-duration="{{ event.original_duration_seconds }}" style="border-radius: 5px; display: inline-flex; flex-direction: column; overflow: hidden;">
+              <span class="countdown-text" style="padding: 5px 10px 2px 10px;"></span>
+              <div style="width: 100%; height: 3px; background-color: rgba(0,0,0,0.2); position: relative;">
+                <div class="countdown-progress" id="progress{{ event.id }}" style="position: absolute; top: 0; left: 0; height: 100%; background: linear-gradient(90deg, #bad6c1 0%, #71ff89 100%); width: 0%; transition: width 1s linear;"></div>
+              </div>
+            </span>
           </div>
         </div>
       </div>

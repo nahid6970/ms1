@@ -16,6 +16,7 @@ class Event(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     team1_id = db.Column(db.Integer, db.ForeignKey('team.id'), nullable=False)
     event_time = db.Column(db.DateTime, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.now)
     team1 = db.relationship('Team', foreign_keys=[team1_id])
 
 @app.route('/')
@@ -38,8 +39,16 @@ def index():
                 result += f"{hours}h "
             result += f"{minutes}m"
             event_obj.duration_str_for_modal = result.strip() if (days or hours or minutes) else ""
+            
+            # Calculate original duration for progress bar
+            if event_obj.created_at:
+                original_duration = event_obj.event_time - event_obj.created_at
+                event_obj.original_duration_seconds = int(original_duration.total_seconds())
+            else:
+                event_obj.original_duration_seconds = int(remaining.total_seconds())
         else:
             event_obj.duration_str_for_modal = ""
+            event_obj.original_duration_seconds = 0
 
         processed_events.append(event_obj)
 
@@ -111,6 +120,7 @@ def edit_event(event_id):
         if m_match: minutes = int(m_match.group(1))
 
         event.event_time = datetime.now() + timedelta(days=days, hours=hours, minutes=minutes)
+        event.created_at = datetime.now()  # Reset created_at when timer is edited
         db.session.commit()
         return redirect(url_for('index'))
 
