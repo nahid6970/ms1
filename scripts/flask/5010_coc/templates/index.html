@@ -161,11 +161,11 @@
             <div class="mt-2"><strong>{{ event.team1.name }}</strong></div>
           </div>
           <div class="d-flex flex-row gap-2 align-items-center">
-            <button class="btn btn-sm btn-primary" onclick="sendToGoogleTimer(event, '{{ event.team1.name }}', '{{ event.event_time.isoformat() }}');" style="padding: 0.25rem 0.5rem; font-size: 1.2rem;">⏰</button>
             <small>
-              <span class="countdown" data-time="{{ event.event_time.isoformat() }}"></span>
+              <span class="countdown" data-time="{{ event.event_time.isoformat() }}" style="border-radius: 0;"></span>
             </small>
-            <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editEventModal{{ event.id }}">
+            <button class="btn btn-primary btn-sm" onclick="sendToGoogleTimer(event, '{{ event.team1.name }}', '{{ event.event_time.isoformat() }}');" style="border-radius: 0;">A</button>
+            <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editEventModal{{ event.id }}" style="border-radius: 0;">
               Edit
             </button>
           </div>
