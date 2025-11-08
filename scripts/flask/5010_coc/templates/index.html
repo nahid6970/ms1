@@ -49,41 +49,16 @@
     }
   </style>
   <script>
-    let notifiedEvents = new Set();
-
-    function requestNotificationPermission() {
-      if ('Notification' in window && Notification.permission === 'default') {
-        Notification.requestPermission();
-      }
-    }
-
-    function sendNotification(eventName) {
-      if ('Notification' in window && Notification.permission === 'granted') {
-        new Notification('Clash of Clans Timer', {
-          body: `${eventName} is ready!`,
-          icon: 'https://wallpapers.com/images/hd/clash-of-clans-character-logo-jntfmwifvnxhgrwg-2.png',
-          vibrate: [200, 100, 200]
-        });
-      }
-    }
-
     function updateCountdowns() {
       document.querySelectorAll('.countdown').forEach(el => {
         const time = new Date(el.dataset.time);
         const now = new Date();
         const diff = time - now;
-        const eventId = el.dataset.eventId;
-        const eventName = el.dataset.eventName;
         
         if (diff <= 0) {
           el.innerText = "✔️";
           el.classList.add('expired');
           el.classList.remove('live');
-          
-          if (!notifiedEvents.has(eventId)) {
-            sendNotification(eventName);
-            notifiedEvents.add(eventId);
-          }
           return;
         }
         const d = Math.floor(diff / (1000 * 60 * 60 * 24));
@@ -104,7 +79,6 @@
     }
     setInterval(updateCountdowns, 1000);
     window.onload = function() {
-      requestNotificationPermission();
       updateCountdowns();
       
       document.querySelectorAll('.modal').forEach(modal => {
@@ -163,7 +137,7 @@
           </div>
           <div class="d-flex flex-row gap-2 align-items-center">
             <small>
-              <span class="countdown" data-time="{{ event.event_time.isoformat() }}" data-event-id="{{ event.id }}" data-event-name="{{ event.team1.name }}"></span>
+              <span class="countdown" data-time="{{ event.event_time.isoformat() }}"></span>
             </small>
           </div>
         </div>
