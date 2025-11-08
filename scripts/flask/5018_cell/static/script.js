@@ -4348,6 +4348,27 @@ function applyLinkFormat(event) {
     showToast('Link applied', 'success');
 }
 
+function searchGoogle(event) {
+    if (!quickFormatterTarget) return;
+
+    const input = quickFormatterTarget;
+    const start = quickFormatterSelection.start;
+    const end = quickFormatterSelection.end;
+    const selectedText = input.value.substring(start, end);
+
+    if (!selectedText) {
+        showToast('No text selected', 'warning');
+        return;
+    }
+
+    // Open Google search in new tab
+    const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(selectedText)}`;
+    window.open(searchUrl, '_blank');
+
+    closeQuickFormatter();
+    showToast('Searching in Google', 'success');
+}
+
 function applyMultipleFormats(lastPrefix, lastSuffix) {
     if (!quickFormatterTarget) return;
 
