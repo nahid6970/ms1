@@ -125,14 +125,14 @@
     <!-- Edit Event Modal -->
 <div class="modal fade" id="editEventModal{{ event.id }}" tabindex="-1"
   aria-labelledby="editEventModalLabel{{ event.id }}" aria-hidden="true">
-  <div class="modal-dialog" style="max-width: 90vw; width: 600px; margin-top: 2rem;">
+  <div class="modal-dialog" style="max-width: 95vw; width: auto; min-width: 500px; margin-top: 2rem;">
     <div class="modal-content">
       <div class="modal-body text-center" style="padding: 1.5rem;">
         <form action="{{ url_for('edit_event', event_id=event.id) }}" method="POST" style="width: 100%;">
-          <div class="mb-3 d-flex justify-content-center align-items-center gap-2">
-            <input style="font-size: 2rem; flex: 1; padding: 1rem; min-width: 200px; overflow-x: auto;" type="text" class="form-control text-center" id="durationInput{{ event.id }}" name="duration"
+          <div class="mb-3 d-flex justify-content-center align-items-stretch gap-2" style="flex-wrap: nowrap;">
+            <input style="font-size: 2rem; padding: 1rem; width: auto; min-width: 300px;" type="text" class="form-control text-center" id="durationInput{{ event.id }}" name="duration"
               value="{{ event.duration_str_for_modal }}" placeholder="0d 0h 0m" required>
-            <select style="font-size: 1.5rem; padding: 1rem; width: auto;" class="form-select" id="speedMultiplier{{ event.id }}" onchange="applySpeedMultiplier({{ event.id }})">
+            <select style="font-size: 1.5rem; padding: 1rem; width: 150px; flex-shrink: 0;" class="form-select" id="speedMultiplier{{ event.id }}" onchange="applySpeedMultiplier({{ event.id }})">
               <option value="1">1X</option>
               <option value="10">10X</option>
               <option value="24">24X</option>
