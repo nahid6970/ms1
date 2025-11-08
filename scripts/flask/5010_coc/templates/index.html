@@ -183,11 +183,9 @@
             <div><strong>{{ event.team1.name }}</strong></div>
           </div>
           <div class="d-flex flex-row gap-2 align-items-center">
-            <span class="countdown" data-time="{{ event.event_time.isoformat() }}" data-event-id="{{ event.id }}" data-original-duration="{{ event.original_duration_seconds }}" style="border-radius: 5px; display: inline-flex; flex-direction: column; overflow: hidden;">
-              <span class="countdown-text" style="padding: 5px 10px 2px 10px;"></span>
-              <div style="width: 100%; height: 3px; background-color: rgba(0,0,0,0.2); position: relative;">
-                <div class="countdown-progress" id="progress{{ event.id }}" style="position: absolute; top: 0; left: 0; height: 100%; background: linear-gradient(90deg, #bad6c1 0%, #71ff89 100%); width: 0%; transition: width 1s linear;"></div>
-              </div>
+            <span class="countdown" data-time="{{ event.event_time.isoformat() }}" data-event-id="{{ event.id }}" data-original-duration="{{ event.original_duration_seconds }}" style="border-radius: 5px; display: inline-block; position: relative; overflow: hidden;">
+              <div class="countdown-progress" id="progress{{ event.id }}" style="position: absolute; top: 0; left: 0; height: 100%; background: linear-gradient(90deg, rgba(186, 214, 193, 0.6) 0%, rgba(113, 255, 137, 0.4) 100%); width: 0%; transition: width 1s linear; z-index: 0;"></div>
+              <span class="countdown-text" style="padding: 5px 10px; position: relative; z-index: 1; display: block;"></span>
             </span>
           </div>
         </div>
