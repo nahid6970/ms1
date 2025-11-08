@@ -2727,3 +2727,65 @@ Markdown Table Styles */
 .toggle-switch input:checked + .toggle-slider:before {
     transform: translateX(24px);
 }
+
+/* F2 Recent Sheets Popup */
+.f2-sheets-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px;
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.f2-sheet-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    outline: none;
+}
+
+.f2-sheet-item:hover {
+    background: #f5f5f5;
+    border-color: #007bff;
+    transform: translateX(4px);
+}
+
+.f2-sheet-item:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.f2-sheet-item.active {
+    background: #e7f3ff;
+    border-color: #007bff;
+    font-weight: 600;
+}
+
+.f2-sheet-number {
+    font-size: 12px;
+    color: #666;
+    background: #f0f0f0;
+    padding: 4px 8px;
+    border-radius: 4px;
+    min-width: 30px;
+    text-align: center;
+    font-weight: 600;
+}
+
+.f2-sheet-item.active .f2-sheet-number {
+    background: #007bff;
+    color: white;
+}
+
+.f2-sheet-name {
+    flex: 1;
+    font-size: 14px;
+    color: #333;
+}

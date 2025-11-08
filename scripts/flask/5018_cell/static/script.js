@@ -308,6 +308,17 @@ function handleKeyboardShortcuts(e) {
         closeF1Popup();
     }
 
+    // F2 to open recent sheets popup
+    if (e.key === 'F2') {
+        e.preventDefault();
+        openF2Popup();
+    }
+
+    // Escape to close F2 popup
+    if (e.key === 'Escape' && document.getElementById('f2Popup') && document.getElementById('f2Popup').classList.contains('show')) {
+        closeF2Popup();
+    }
+
     // F3 to open quick markdown formatter
     if (e.key === 'F3') {
         e.preventDefault();
@@ -2533,7 +2544,7 @@ async function deleteSheet(index) {
 }
 
 function switchSheet(index) {
-    // Track sheet history for Alt+M toggle
+    // Track sheet history for Alt+M toggle and F2 recent sheets
     if (currentSheet !== index) {
         // Remove the index if it already exists in history
         sheetHistory = sheetHistory.filter(i => i !== index);
@@ -2541,8 +2552,8 @@ function switchSheet(index) {
         if (sheetHistory[sheetHistory.length - 1] !== currentSheet) {
             sheetHistory.push(currentSheet);
         }
-        // Keep only last 2 sheets in history
-        if (sheetHistory.length > 2) {
+        // Keep last 20 sheets in history (for F2 popup)
+        if (sheetHistory.length > 20) {
             sheetHistory.shift();
         }
         // Save to localStorage for persistence across page refreshes
@@ -2683,15 +2694,19 @@ function resetGridLineColor() {
 }
 
 // Category Management Functions
-function toggleCategoryList() {
+function toggleCategoryList(event) {
+    if (event) {
+        event.stopPropagation();
+    }
+    
     const categoryList = document.getElementById('categoryList');
     const isShowing = categoryList.classList.toggle('show');
 
     if (isShowing) {
-        // Add click-outside handler when opening
+        // Add click-outside handler when opening with longer delay
         setTimeout(() => {
             document.addEventListener('click', closeCategoryListOnClickOutside);
-        }, 0);
+        }, 100);
     } else {
         // Remove handler when closing
         document.removeEventListener('click', closeCategoryListOnClickOutside);
@@ -4195,6 +4210,115 @@ function closeF1Popup() {
 
     // Reset filter
     filterF1Sheets();
+}
+
+// F2 Popup - Recent Sheets
+function openF2Popup() {
+    const popup = document.getElementById('f2Popup');
+    popup.classList.add('show');
+
+    // Populate recent sheets
+    populateF2RecentSheets();
+
+    // Focus on first sheet
+    setTimeout(() => {
+        const firstSheet = popup.querySelector('.f2-sheet-item');
+        if (firstSheet) {
+            firstSheet.focus();
+        }
+    }, 100);
+}
+
+function closeF2Popup() {
+    const popup = document.getElementById('f2Popup');
+    popup.classList.remove('show');
+}
+
+function populateF2RecentSheets() {
+    const container = document.getElementById('f2SheetsList');
+    container.innerHTML = '';
+
+    // Get recent sheets from history (stored by Alt+M toggle)
+    const savedHistory = localStorage.getItem('sheetHistory');
+    let recentSheets = [];
+    let allSheetIndices = [];
+    
+    // Get all sheet indices
+    tableData.sheets.forEach((sheet, index) => {
+        allSheetIndices.push(index);
+    });
+    
+    if (savedHistory) {
+        try {
+            const history = JSON.parse(savedHistory);
+            // Filter out invalid sheet indices and reverse to show most recent first
+            recentSheets = history.filter(idx => idx >= 0 && idx < tableData.sheets.length).reverse();
+            
+            // Add current sheet at the beginning if not already there
+            if (!recentSheets.includes(currentSheet)) {
+                recentSheets.unshift(currentSheet);
+            } else {
+                // Move current sheet to the beginning
+                recentSheets = recentSheets.filter(idx => idx !== currentSheet);
+                recentSheets.unshift(currentSheet);
+            }
+            
+            // Add any sheets not in history to the end
+            allSheetIndices.forEach(idx => {
+                if (!recentSheets.includes(idx)) {
+                    recentSheets.push(idx);
+                }
+            });
+        } catch (e) {
+            recentSheets = allSheetIndices;
+        }
+    } else {
+        // No history, show current sheet first, then all others
+        recentSheets = [currentSheet, ...allSheetIndices.filter(idx => idx !== currentSheet)];
+    }
+
+    // Display all sheets ordered by recency
+    recentSheets.forEach((sheetIndex, index) => {
+        const sheet = tableData.sheets[sheetIndex];
+        if (!sheet) return;
+
+        const item = document.createElement('div');
+        item.className = 'f2-sheet-item';
+        item.tabIndex = 0;
+        
+        if (sheetIndex === currentSheet) {
+            item.classList.add('active');
+        }
+
+        const number = document.createElement('div');
+        number.className = 'f2-sheet-number';
+        number.textContent = `#${index + 1}`;
+
+        const name = document.createElement('div');
+        name.className = 'f2-sheet-name';
+        name.textContent = sheet.name; // Use real name, not nickname
+
+        item.appendChild(number);
+        item.appendChild(name);
+
+        item.onclick = () => {
+            switchSheet(sheetIndex);
+            closeF2Popup();
+        };
+
+        item.onkeydown = (e) => {
+            if (e.key === 'Enter') {
+                switchSheet(sheetIndex);
+                closeF2Popup();
+            }
+        };
+
+        container.appendChild(item);
+    });
+
+    if (container.children.length === 0) {
+        container.innerHTML = '<div style="padding: 20px; text-align: center; color: #999;">No sheets available</div>';
+    }
 }
 
 // Quick Markdown Formatter (F3)
