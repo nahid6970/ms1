@@ -155,7 +155,7 @@
   <div class="row justify-content-center">
     {% for event in upcoming_events %}
     <div class="col-12 mb-4">
-      <div class="card w-100">
+      <div class="card w-100" style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#editEventModal{{ event.id }}">
         <div class="card-body d-flex justify-content-between align-items-center">
           <div class="d-flex flex-row align-items-center">
             <div class="mt-2"><strong>{{ event.team1.name }}</strong></div>
@@ -164,9 +164,6 @@
             <small>
               <span class="countdown" data-time="{{ event.event_time.isoformat() }}" style="border-radius: 0;"></span>
             </small>
-            <button class="btn btn-primary btn-sm" onclick="sendToGoogleTimer(event, '{{ event.team1.name }}', '{{ event.event_time.isoformat() }}');" style="border-radius: 5px; padding: 5px 15px; font-size: 1rem; border: none; line-height: 1; height: 30px;"></button>
-            <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editEventModal{{ event.id }}" style="border-radius: 5px; padding: 5px 15px; font-size: 1rem; border: none; line-height: 1; height: 30px;">
-            </button>
           </div>
         </div>
       </div>
@@ -188,7 +185,8 @@
               <option value="24">24X</option>
             </select>
           </div>
-          <div class="d-flex justify-content-center">
+          <div class="d-flex justify-content-center gap-3">
+            <button type="button" class="btn btn-success" onclick="sendToGoogleTimer(event, '{{ event.team1.name }}', '{{ event.event_time.isoformat() }}');" style="font-size: 1.5rem; padding: 0.75rem 2rem;">⏰</button>
             <button type="submit" class="btn btn-primary" style="font-size: 1.5rem; padding: 0.75rem 2rem;">Save</button>
           </div>
         </form>
