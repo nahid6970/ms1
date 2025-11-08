@@ -337,6 +337,12 @@ function handleKeyboardShortcuts(e) {
         }
     }
 
+    // F4 to toggle top ribbons
+    if (e.key === 'F4') {
+        e.preventDefault();
+        toggleTopRibbons();
+    }
+
     // Ctrl+Shift+D to select next occurrence (multi-cursor simulation)
     if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'D') {
         const activeElement = document.activeElement;
@@ -5657,3 +5663,37 @@ function toggleRecentSheets() {
         }
     }
 }
+
+
+// Toggle top ribbons (toolbar and sheet tabs) with F4
+function toggleTopRibbons() {
+    const toolbar = document.querySelector('.toolbar');
+    const sheetTabs = document.querySelector('.sheet-tabs');
+    
+    const isHidden = toolbar.style.display === 'none';
+    
+    if (isHidden) {
+        // Show ribbons
+        toolbar.style.display = 'flex';
+        sheetTabs.style.display = 'flex';
+        localStorage.setItem('ribbonsHidden', 'false');
+        showToast('Top ribbons shown', 'info');
+    } else {
+        // Hide ribbons
+        toolbar.style.display = 'none';
+        sheetTabs.style.display = 'none';
+        localStorage.setItem('ribbonsHidden', 'true');
+        showToast('Top ribbons hidden (F4 to show)', 'info');
+    }
+}
+
+// Restore ribbons state on page load
+window.addEventListener('load', () => {
+    const ribbonsHidden = localStorage.getItem('ribbonsHidden') === 'true';
+    if (ribbonsHidden) {
+        const toolbar = document.querySelector('.toolbar');
+        const sheetTabs = document.querySelector('.sheet-tabs');
+        toolbar.style.display = 'none';
+        sheetTabs.style.display = 'none';
+    }
+});
