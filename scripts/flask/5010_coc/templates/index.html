@@ -269,7 +269,10 @@
           <div class="d-flex justify-content-center gap-3">
             <button type="button" class="btn btn-success" onclick="sendToGoogleTimer(event, '{{ event.team1.name }}', '{{ event.event_time.isoformat() }}');" style="font-size: 1.5rem; padding: 0.75rem 2rem;">⏰</button>
             <button type="submit" class="btn btn-primary" style="font-size: 1.5rem; padding: 0.75rem 2rem;">Save</button>
+            <button type="button" class="btn btn-danger" onclick="if(confirm('Delete this timer?')) { document.getElementById('deleteForm{{ event.id }}').submit(); }" style="font-size: 1.5rem; padding: 0.75rem 2rem;">Delete</button>
           </div>
+        </form>
+        <form id="deleteForm{{ event.id }}" action="{{ url_for('delete_event', id=event.id) }}" method="POST" style="display: none;"></form>
         </form>
       </div>
     </div>
