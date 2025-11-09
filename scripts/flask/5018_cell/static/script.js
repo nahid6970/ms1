@@ -5722,3 +5722,58 @@ window.addEventListener('load', () => {
             break;
     }
 });
+
+
+// Adjust cell height to fit both markdown preview and raw text
+function adjustCellHeightForMarkdown(cell) {
+    const input = cell.querySelector('input, textarea');
+    const preview = cell.querySelector('.markdown-preview');
+    
+    if (!input || !preview || !input.classList.contains('has-markdown')) {
+        return;
+    }
+    
+    // Temporarily show both to measure
+    const originalInputDisplay = input.style.display;
+    const originalPreviewDisplay = preview.style.display;
+    
+    input.style.display = 'block';
+    preview.style.display = 'block';
+    
+    // Measure heights
+    const inputHeight = input.scrollHeight;
+    const previewHeight = preview.scrollHeight;
+    
+    // Use the larger height
+    const maxHeight = Math.max(inputHeight, previewHeight);
+    
+    // Apply to both
+    if (input.tagName === 'TEXTAREA') {
+        input.style.minHeight = maxHeight + 'px';
+    }
+    preview.style.minHeight = maxHeight + 'px';
+    
+    // Restore display
+    input.style.display = originalInputDisplay;
+    preview.style.display = originalPreviewDisplay;
+}
+
+// Apply to all cells with markdown after rendering
+function adjustAllMarkdownCells() {
+    const cells = document.querySelectorAll('td .has-markdown');
+    cells.forEach(input => {
+        const cell = input.closest('td');
+        if (cell) {
+            adjustCellHeightForMarkdown(cell);
+        }
+    });
+}
+
+// Call after table renders
+const originalRenderTable = renderTable;
+renderTable = function() {
+    originalRenderTable.apply(this, arguments);
+    setTimeout(() => {
+        adjustAllMarkdownCells();
+    }, 100);
+};

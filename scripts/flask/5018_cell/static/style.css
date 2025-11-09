@@ -2804,3 +2804,13 @@ Markdown Table Styles */
     font-size: 14px;
     color: #333;
 }
+
+
+/* Ensure markdown cells can expand to fit content */
+td .has-markdown {
+    min-height: fit-content;
+}
+
+td .markdown-preview {
+    min-height: fit-content;
+}
