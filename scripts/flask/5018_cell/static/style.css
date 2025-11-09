@@ -522,7 +522,6 @@ td textarea {
     top: 0;
     left: 0;
     width: 100%;
-    height: 100%;
     padding: 4px 8px;
     font-size: 14px;
     background: transparent;
@@ -532,7 +531,6 @@ td textarea {
     z-index: 1;
     display: none;
     line-height: 1.4;
-    overflow: hidden;
 }
 
 .markdown-preview strong {
@@ -605,11 +603,14 @@ td textarea {
 /* Show preview when cell is not focused */
 td:not(:focus-within) .markdown-preview {
     display: block;
+    position: relative;
+    height: auto;
 }
 
 /* Hide input when showing preview */
 td:not(:focus-within) .has-markdown {
     opacity: 0;
+    position: absolute;
 }
 
 /* For merged cells with markdown */
@@ -621,6 +622,20 @@ td.merged-cell .markdown-preview {
 td {
     white-space: nowrap;
     overflow: hidden;
+    position: relative;
+    vertical-align: top;
+}
+
+/* When showing markdown preview, make cell height adapt */
+td:not(:focus-within):has(.markdown-preview) {
+    height: auto;
+    min-height: 40px;
+}
+
+/* Fallback for browsers without :has() support */
+td:not(:focus-within).has-markdown-preview {
+    height: auto;
+    min-height: 40px;
 }
 
 /* Text wrapping enabled */
