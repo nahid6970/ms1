@@ -42,7 +42,10 @@
   </style>
 </head>
 <body class="container">
-  <h1 class="mb-4">Manage Teams</h1>
+  <div class="d-flex align-items-center mb-4">
+    <h1 class="mb-0">Manage Teams</h1>
+    <a href="{{ url_for('index') }}" class="btn btn-secondary ms-3" style="font-size: 1.5rem;">🏠</a>
+  </div>
   <div class="mb-3">
     <h2>Add New Team</h2>
     <form method="POST">
@@ -73,8 +76,6 @@
     <p>No teams added yet.</p>
     {% endif %}
   </div>
-  <div class="mt-4">
-    <a href="{{ url_for('index') }}" class="btn btn-secondary">Back to Event Schedule</a>
-  </div>
+
 </body>
 </html>

@@ -31,7 +31,10 @@
   </style>
 </head>
 <body class="container">
-  <h1 class="mb-4">{{ action }} Event</h1>
+  <div class="d-flex align-items-center mb-4">
+    <h1 class="mb-0">{{ action }} Event</h1>
+    <a href="{{ url_for('index') }}" class="btn btn-secondary ms-3" style="font-size: 1.5rem;">🏠</a>
+  </div>
   <form method="POST">
     <div class="mb-3">
       <label for="team1" class="form-label">Team:</label>
@@ -53,8 +56,6 @@
     </div>
     <button type="submit" class="btn btn-primary">{{ action }} Event</button>
   </form>
-  <div class="mt-4">
-    <a href="{{ url_for('index') }}" class="btn btn-secondary">Back to Event Schedule</a>
-  </div>
+
 </body>
 </html>
