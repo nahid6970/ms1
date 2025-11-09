@@ -62,5 +62,13 @@
     "text_color": "#ffffff",
     "hover_bg_color": "#ff9800",
     "hover_text_color": "#000000"
+  },
+  {
+    "path": "C:/Users/nahid/ms/msBackups/@JOB/From_dnplayer/math_then_done",
+    "name": "math_then_done",
+    "bg_color": "#4d9aff",
+    "text_color": "#000000",
+    "hover_bg_color": "#ff9800",
+    "hover_text_color": "#000000"
   }
 ]
