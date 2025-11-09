@@ -816,6 +816,7 @@ def generate_static_html(data):
             background: #f8f9fa;
             font-weight: 600;
             white-space: nowrap;
+            border: 1px solid #495057;
         }
 
         /* Let coloured text / background css shine through */
