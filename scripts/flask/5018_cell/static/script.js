@@ -4351,6 +4351,9 @@ function showQuickFormatter(inputElement) {
     colorSection.style.display = 'block';
     loadColorSwatches();
 
+    // Update selection stats
+    updateSelectionStats(inputElement);
+
     // Show formatter first to get its dimensions
     formatter.style.display = 'block';
 
@@ -4363,6 +4366,30 @@ function showQuickFormatter(inputElement) {
         formatter.style.left = Math.max(20, centerX) + 'px';
         formatter.style.top = Math.max(20, centerY) + 'px';
     }, 0);
+}
+
+function updateSelectionStats(inputElement) {
+    const selectedText = inputElement.value.substring(
+        inputElement.selectionStart,
+        inputElement.selectionEnd
+    );
+
+    // Count lines
+    const lines = selectedText.split('\n');
+    const lineCount = lines.length;
+
+    // Count words (split by whitespace and filter empty strings)
+    const words = selectedText.trim().split(/\s+/).filter(word => word.length > 0);
+    const wordCount = words.length;
+
+    // Count characters
+    const charCount = selectedText.length;
+
+    // Update the stats display
+    const statsElement = document.getElementById('selectionStats');
+    if (statsElement) {
+        statsElement.textContent = `${lineCount} line${lineCount !== 1 ? 's' : ''} • ${wordCount} word${wordCount !== 1 ? 's' : ''} • ${charCount} char${charCount !== 1 ? 's' : ''}`;
+    }
 }
 
 function closeQuickFormatter() {

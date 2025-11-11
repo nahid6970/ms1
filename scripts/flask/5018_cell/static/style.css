@@ -2417,6 +2417,18 @@ Markdown Table Styles */
     letter-spacing: 0.5px;
 }
 
+.selection-stats {
+    font-size: 11px;
+    color: #666;
+    text-align: center;
+    margin-bottom: 12px;
+    padding: 6px 10px;
+    background: #f8f9fa;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    border: 1px solid #e9ecef;
+}
+
 .quick-formatter-options {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
