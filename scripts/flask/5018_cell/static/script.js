@@ -5698,21 +5698,54 @@ function handleF1Drop(e) {
     if (draggedF1Item !== this && this.classList.contains('f1-sheet-item')) {
         const targetIndex = parseInt(this.dataset.sheetIndex);
         
-        // Swap sheets in the array
-        const temp = tableData.sheets[draggedSheetIndex];
-        tableData.sheets[draggedSheetIndex] = tableData.sheets[targetIndex];
-        tableData.sheets[targetIndex] = temp;
-
-        // Swap categories
-        const tempCat = tableData.sheetCategories[draggedSheetIndex];
-        tableData.sheetCategories[draggedSheetIndex] = tableData.sheetCategories[targetIndex];
-        tableData.sheetCategories[targetIndex] = tempCat;
-
-        // Update current sheet index if needed
+        // Remove the dragged sheet from its current position
+        const movedSheet = tableData.sheets.splice(draggedSheetIndex, 1)[0];
+        const movedCategory = tableData.sheetCategories[draggedSheetIndex];
+        
+        // Remove the category entry for the old position
+        delete tableData.sheetCategories[draggedSheetIndex];
+        
+        // Rebuild sheetCategories with updated indices
+        const newCategories = {};
+        Object.keys(tableData.sheetCategories).forEach(key => {
+            const idx = parseInt(key);
+            if (idx > draggedSheetIndex) {
+                // Shift down indices that were after the dragged item
+                newCategories[idx - 1] = tableData.sheetCategories[key];
+            } else {
+                newCategories[idx] = tableData.sheetCategories[key];
+            }
+        });
+        tableData.sheetCategories = newCategories;
+        
+        // Insert the sheet at the target position
+        tableData.sheets.splice(targetIndex, 0, movedSheet);
+        
+        // Rebuild sheetCategories again to account for the insertion
+        const finalCategories = {};
+        Object.keys(tableData.sheetCategories).forEach(key => {
+            const idx = parseInt(key);
+            if (idx >= targetIndex) {
+                // Shift up indices at or after the target position
+                finalCategories[idx + 1] = tableData.sheetCategories[key];
+            } else {
+                finalCategories[idx] = tableData.sheetCategories[key];
+            }
+        });
+        
+        // Set the category for the moved sheet
+        if (movedCategory) {
+            finalCategories[targetIndex] = movedCategory;
+        }
+        tableData.sheetCategories = finalCategories;
+        
+        // Update current sheet index
         if (currentSheet === draggedSheetIndex) {
             currentSheet = targetIndex;
-        } else if (currentSheet === targetIndex) {
-            currentSheet = draggedSheetIndex;
+        } else if (draggedSheetIndex < targetIndex && currentSheet > draggedSheetIndex && currentSheet <= targetIndex) {
+            currentSheet--;
+        } else if (draggedSheetIndex > targetIndex && currentSheet >= targetIndex && currentSheet < draggedSheetIndex) {
+            currentSheet++;
         }
 
         // Save and refresh
