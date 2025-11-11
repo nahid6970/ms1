@@ -703,6 +703,45 @@ async function deleteRow(index) {
     }
 }
 
+async function deleteEmptyRows() {
+    const sheet = tableData.sheets[currentSheet];
+    
+    // Find all empty rows (rows where all cells are empty or whitespace)
+    const emptyRowIndices = [];
+    sheet.rows.forEach((row, index) => {
+        const isEmpty = row.every(cell => !cell || cell.trim() === '');
+        if (isEmpty) {
+            emptyRowIndices.push(index);
+        }
+    });
+
+    if (emptyRowIndices.length === 0) {
+        showToast('No empty rows found', 'info');
+        return;
+    }
+
+    if (!confirm(`Delete ${emptyRowIndices.length} empty row${emptyRowIndices.length !== 1 ? 's' : ''}?`)) {
+        return;
+    }
+
+    try {
+        // Delete rows in reverse order to maintain correct indices
+        for (let i = emptyRowIndices.length - 1; i >= 0; i--) {
+            const rowIndex = emptyRowIndices[i];
+            const response = await fetch(`/api/rows/${currentSheet}/${rowIndex}`, { method: 'DELETE' });
+            if (response.ok) {
+                sheet.rows.splice(rowIndex, 1);
+            }
+        }
+        
+        renderTable();
+        showToast(`Deleted ${emptyRowIndices.length} empty row${emptyRowIndices.length !== 1 ? 's' : ''}`, 'success');
+    } catch (error) {
+        console.error('Error deleting empty rows:', error);
+        showToast('Error deleting empty rows', 'error');
+    }
+}
+
 function updateCell(rowIndex, colIndex, value) {
     const sheet = tableData.sheets[currentSheet];
     if (!sheet.cellStyles) {

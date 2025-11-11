@@ -162,6 +162,19 @@ body {
     transform: scale(1.05);
 }
 
+.btn-delete-empty {
+    background: #fff5f5;
+    border-color: #dc3545;
+    color: #dc3545;
+}
+
+.btn-delete-empty:hover {
+    background: #dc3545;
+    border-color: #dc3545;
+    color: white;
+    transform: scale(1.05);
+}
+
 .btn-icon-toggle {
     display: flex;
     align-items: center;
