@@ -2849,27 +2849,29 @@ td .markdown-preview {
 
 /* F1 Quick Navigation - Grid Layout */
 .f1-sheet-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
     padding: 10px;
     max-height: 400px;
     overflow-y: auto;
+    align-items: flex-start;
+    align-content: flex-start;
 }
 
 .f1-sheet-item {
-    display: flex;
-    flex-direction: column;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 12px 8px;
+    padding: 8px 12px;
     background: white;
     border: 2px solid #dee2e6;
-    border-radius: 8px;
+    border-radius: 6px;
     cursor: pointer;
     transition: all 0.2s;
-    min-height: 70px;
     position: relative;
+    width: fit-content;
+    max-width: 200px;
 }
 
 .f1-sheet-item:hover {
@@ -2887,15 +2889,14 @@ td .markdown-preview {
 
 .f1-sheet-name-wrapper {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: 4px;
     width: 100%;
     text-align: center;
+    justify-content: center;
 }
 
 .f1-sheet-icon {
-    font-size: 24px;
+    display: none;
 }
 
 .f1-sheet-name {
@@ -2940,11 +2941,12 @@ td .markdown-preview {
 
 /* F1 Sheet Separator */
 .f1-sheet-separator {
-    grid-column: 1 / -1;
+    width: 100%;
     height: 2px;
     background: linear-gradient(to right, transparent, #dee2e6 20%, #dee2e6 80%, transparent);
     margin: 8px 0;
     position: relative;
+    flex-basis: 100%;
 }
 
 .f1-sheet-separator::before {
