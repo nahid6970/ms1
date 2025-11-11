@@ -3013,3 +3013,56 @@ td .markdown-preview {
     border-color: #dc3545;
     color: white;
 }
+
+/* F1 Sheets Title with Separator Button */
+.f1-sheets-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+    font-weight: 600;
+    font-size: 14px;
+    color: #495057;
+}
+
+.f1-add-separator-btn {
+    background: white;
+    border: 2px solid #007bff;
+    color: #007bff;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.f1-add-separator-btn:hover {
+    background: #007bff;
+    color: white;
+    transform: scale(1.05);
+}
+
+.f1-add-separator-btn:active {
+    transform: scale(0.95);
+}
+
+/* Separator mode visual indicator */
+.f1-sheet-item.separator-mode {
+    border-style: dashed;
+    animation: pulse-border 1s infinite;
+}
+
+@keyframes pulse-border {
+    0%, 100% {
+        border-color: #007bff;
+    }
+    50% {
+        border-color: #0056b3;
+    }
+}

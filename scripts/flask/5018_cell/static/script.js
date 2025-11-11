@@ -5625,23 +5625,22 @@ function populateF1Sheets(searchAllCategories = false) {
         `;
         nameSpan.onclick = () => switchToSheetFromF1(index);
 
-        const actions = document.createElement('div');
-        actions.className = 'f1-sheet-actions';
-
-        const separatorBtn = document.createElement('button');
-        separatorBtn.className = 'f1-sheet-action-btn';
-        separatorBtn.innerHTML = '➕';
-        separatorBtn.title = 'Add separator above';
-        separatorBtn.onclick = (e) => {
-            e.stopPropagation();
-            addSeparatorAboveSheet(index);
-            setTimeout(() => populateF1Sheets(searchAllCategories), 100);
-        };
-
-        actions.appendChild(separatorBtn);
-
         item.appendChild(nameSpan);
-        item.appendChild(actions);
+
+        // Add click handler for separator mode
+        item.addEventListener('click', (e) => {
+            if (window.f1SeparatorMode) {
+                e.stopPropagation();
+                addSeparatorAboveSheet(index);
+                window.f1SeparatorMode = false;
+                document.body.style.cursor = '';
+                document.querySelectorAll('.f1-sheet-item').forEach(el => {
+                    el.style.cursor = '';
+                    el.classList.remove('separator-mode');
+                });
+                populateF1Sheets(searchAllCategories);
+            }
+        });
 
         // Drag and drop event handlers
         item.addEventListener('dragstart', handleF1DragStart);
@@ -5778,6 +5777,19 @@ function addSeparatorAboveSheet(sheetIndex) {
     
     saveData();
     showToast('Separator added', 'success');
+}
+
+function addSeparatorAtCursor() {
+    window.f1SeparatorMode = true;
+    document.body.style.cursor = 'crosshair';
+    
+    // Add visual indicator to all sheets
+    document.querySelectorAll('.f1-sheet-item').forEach(item => {
+        item.style.cursor = 'crosshair';
+        item.classList.add('separator-mode');
+    });
+    
+    showToast('Click before any sheet to add separator', 'info');
 }
 
 function filterF1Sheets() {
