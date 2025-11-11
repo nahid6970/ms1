@@ -5568,6 +5568,11 @@ function populateF1Sheets(searchAllCategories = false) {
 
     sheetList.innerHTML = '';
 
+    // Initialize separators if not exists
+    if (!tableData.sheetSeparators) {
+        tableData.sheetSeparators = {};
+    }
+
     // Filter sheets by selected category (unless searching all categories)
     tableData.sheets.forEach((sheet, index) => {
         const sheetCategory = tableData.sheetCategories[index] || tableData.sheetCategories[String(index)];
@@ -5576,6 +5581,32 @@ function populateF1Sheets(searchAllCategories = false) {
         if (!searchAllCategories) {
             if (selectedF1Category === null && sheetCategory) return;
             if (selectedF1Category !== null && sheetCategory !== selectedF1Category) return;
+        }
+
+        // Check if there's a separator before this sheet
+        const separatorKey = `${selectedF1Category || 'uncategorized'}_${index}`;
+        if (tableData.sheetSeparators[separatorKey]) {
+            const separator = document.createElement('div');
+            separator.className = 'f1-sheet-separator has-actions';
+            separator.dataset.separatorKey = separatorKey;
+
+            const actions = document.createElement('div');
+            actions.className = 'f1-separator-actions';
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'f1-separator-btn';
+            deleteBtn.innerHTML = '×';
+            deleteBtn.title = 'Remove separator';
+            deleteBtn.onclick = (e) => {
+                e.stopPropagation();
+                delete tableData.sheetSeparators[separatorKey];
+                saveData();
+                populateF1Sheets(searchAllCategories);
+            };
+
+            actions.appendChild(deleteBtn);
+            separator.appendChild(actions);
+            sheetList.appendChild(separator);
         }
 
         const item = document.createElement('div');
@@ -5616,6 +5647,17 @@ function populateF1Sheets(searchAllCategories = false) {
             setTimeout(() => populateF1Sheets(searchAllCategories), 100);
         };
 
+        const separatorBtn = document.createElement('button');
+        separatorBtn.className = 'f1-sheet-action-btn';
+        separatorBtn.innerHTML = '➕';
+        separatorBtn.title = 'Add separator above';
+        separatorBtn.onclick = (e) => {
+            e.stopPropagation();
+            addSeparatorAboveSheet(index);
+            setTimeout(() => populateF1Sheets(searchAllCategories), 100);
+        };
+
+        actions.appendChild(separatorBtn);
         actions.appendChild(upBtn);
         actions.appendChild(downBtn);
 
@@ -5633,6 +5675,18 @@ function populateF1Sheets(searchAllCategories = false) {
         emptyMsg.textContent = 'No sheets found';
         sheetList.appendChild(emptyMsg);
     }
+}
+
+function addSeparatorAboveSheet(sheetIndex) {
+    if (!tableData.sheetSeparators) {
+        tableData.sheetSeparators = {};
+    }
+
+    const separatorKey = `${selectedF1Category || 'uncategorized'}_${sheetIndex}`;
+    tableData.sheetSeparators[separatorKey] = true;
+    
+    saveData();
+    showToast('Separator added', 'success');
 }
 
 function filterF1Sheets() {
