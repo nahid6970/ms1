@@ -4502,6 +4502,43 @@ function searchGoogle(event) {
     showToast('Searching in Google', 'success');
 }
 
+function sortLines(event) {
+    if (!quickFormatterTarget) return;
+
+    const input = quickFormatterTarget;
+    const start = quickFormatterSelection.start;
+    const end = quickFormatterSelection.end;
+    const selectedText = input.value.substring(start, end);
+
+    if (!selectedText) {
+        showToast('No text selected', 'warning');
+        return;
+    }
+
+    // Split into lines, sort them, and rejoin
+    const lines = selectedText.split('\n');
+    const sortedLines = lines.sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+    const sortedText = sortedLines.join('\n');
+
+    // Replace the selected text with sorted text
+    const newText = input.value.substring(0, start) +
+        sortedText +
+        input.value.substring(end);
+
+    input.value = newText;
+
+    // Trigger change event to update cell
+    const changeEvent = new Event('input', { bubbles: true });
+    input.dispatchEvent(changeEvent);
+
+    // Select the sorted text
+    input.setSelectionRange(start, start + sortedText.length);
+    input.focus();
+
+    closeQuickFormatter();
+    showToast(`Sorted ${lines.length} lines`, 'success');
+}
+
 function applyMultipleFormats(lastPrefix, lastSuffix) {
     if (!quickFormatterTarget) return;
 
