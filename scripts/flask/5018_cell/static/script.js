@@ -5612,6 +5612,7 @@ function populateF1Sheets(searchAllCategories = false) {
         const item = document.createElement('div');
         item.className = 'f1-sheet-item' + (index === currentSheet ? ' active' : '');
         item.dataset.sheetIndex = index;
+        item.draggable = true;
 
         // Show category name if searching all categories
         const categoryLabel = searchAllCategories && sheetCategory ? ` <span style="color: #999; font-size: 12px;">(${sheetCategory})</span>` : '';
@@ -5627,26 +5628,6 @@ function populateF1Sheets(searchAllCategories = false) {
         const actions = document.createElement('div');
         actions.className = 'f1-sheet-actions';
 
-        const upBtn = document.createElement('button');
-        upBtn.className = 'f1-sheet-action-btn';
-        upBtn.innerHTML = '⬆️';
-        upBtn.title = 'Move sheet up';
-        upBtn.onclick = (e) => {
-            e.stopPropagation();
-            moveSheetUp(index);
-            setTimeout(() => populateF1Sheets(searchAllCategories), 100);
-        };
-
-        const downBtn = document.createElement('button');
-        downBtn.className = 'f1-sheet-action-btn';
-        downBtn.innerHTML = '⬇️';
-        downBtn.title = 'Move sheet down';
-        downBtn.onclick = (e) => {
-            e.stopPropagation();
-            moveSheetDown(index);
-            setTimeout(() => populateF1Sheets(searchAllCategories), 100);
-        };
-
         const separatorBtn = document.createElement('button');
         separatorBtn.className = 'f1-sheet-action-btn';
         separatorBtn.innerHTML = '➕';
@@ -5658,11 +5639,16 @@ function populateF1Sheets(searchAllCategories = false) {
         };
 
         actions.appendChild(separatorBtn);
-        actions.appendChild(upBtn);
-        actions.appendChild(downBtn);
 
         item.appendChild(nameSpan);
         item.appendChild(actions);
+
+        // Drag and drop event handlers
+        item.addEventListener('dragstart', handleF1DragStart);
+        item.addEventListener('dragover', handleF1DragOver);
+        item.addEventListener('drop', handleF1Drop);
+        item.addEventListener('dragend', handleF1DragEnd);
+
         sheetList.appendChild(item);
     });
 
@@ -5675,6 +5661,78 @@ function populateF1Sheets(searchAllCategories = false) {
         emptyMsg.textContent = 'No sheets found';
         sheetList.appendChild(emptyMsg);
     }
+}
+
+// Drag and drop variables
+let draggedF1Item = null;
+let draggedSheetIndex = null;
+
+function handleF1DragStart(e) {
+    draggedF1Item = this;
+    draggedSheetIndex = parseInt(this.dataset.sheetIndex);
+    this.style.opacity = '0.4';
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/html', this.innerHTML);
+}
+
+function handleF1DragOver(e) {
+    if (e.preventDefault) {
+        e.preventDefault();
+    }
+    e.dataTransfer.dropEffect = 'move';
+
+    // Add visual indicator
+    if (this !== draggedF1Item && this.classList.contains('f1-sheet-item')) {
+        this.style.borderColor = '#007bff';
+        this.style.borderWidth = '3px';
+    }
+
+    return false;
+}
+
+function handleF1Drop(e) {
+    if (e.stopPropagation) {
+        e.stopPropagation();
+    }
+
+    if (draggedF1Item !== this && this.classList.contains('f1-sheet-item')) {
+        const targetIndex = parseInt(this.dataset.sheetIndex);
+        
+        // Swap sheets in the array
+        const temp = tableData.sheets[draggedSheetIndex];
+        tableData.sheets[draggedSheetIndex] = tableData.sheets[targetIndex];
+        tableData.sheets[targetIndex] = temp;
+
+        // Swap categories
+        const tempCat = tableData.sheetCategories[draggedSheetIndex];
+        tableData.sheetCategories[draggedSheetIndex] = tableData.sheetCategories[targetIndex];
+        tableData.sheetCategories[targetIndex] = tempCat;
+
+        // Update current sheet index if needed
+        if (currentSheet === draggedSheetIndex) {
+            currentSheet = targetIndex;
+        } else if (currentSheet === targetIndex) {
+            currentSheet = draggedSheetIndex;
+        }
+
+        // Save and refresh
+        saveData();
+        renderSheetTabs();
+        populateF1Sheets();
+        showToast('Sheet moved', 'success');
+    }
+
+    return false;
+}
+
+function handleF1DragEnd(e) {
+    this.style.opacity = '1';
+    
+    // Remove all drag indicators
+    document.querySelectorAll('.f1-sheet-item').forEach(item => {
+        item.style.borderColor = '';
+        item.style.borderWidth = '';
+    });
 }
 
 function addSeparatorAboveSheet(sheetIndex) {

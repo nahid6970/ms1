@@ -2867,11 +2867,16 @@ td .markdown-preview {
     background: white;
     border: 2px solid #dee2e6;
     border-radius: 6px;
-    cursor: pointer;
+    cursor: move;
     transition: all 0.2s;
     position: relative;
     width: fit-content;
     max-width: 200px;
+    user-select: none;
+}
+
+.f1-sheet-item:active {
+    cursor: grabbing;
 }
 
 .f1-sheet-item:hover {
