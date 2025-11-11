@@ -4515,9 +4515,28 @@ function sortLines(event) {
         return;
     }
 
-    // Split into lines, sort them, and rejoin
+    // Split into lines, sort them with smart numerical sorting, and rejoin
     const lines = selectedText.split('\n');
-    const sortedLines = lines.sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+    const sortedLines = lines.sort((a, b) => {
+        // Extract leading numbers from both strings
+        const numA = a.match(/^\d+/);
+        const numB = b.match(/^\d+/);
+
+        // If both start with numbers, compare numerically
+        if (numA && numB) {
+            const diff = parseInt(numA[0], 10) - parseInt(numB[0], 10);
+            if (diff !== 0) return diff;
+            // If numbers are equal, compare the rest of the string
+            return a.localeCompare(b, undefined, { sensitivity: 'base' });
+        }
+
+        // If only one starts with a number, numbers come first
+        if (numA) return -1;
+        if (numB) return 1;
+
+        // Otherwise, alphabetical comparison
+        return a.localeCompare(b, undefined, { sensitivity: 'base' });
+    });
     const sortedText = sortedLines.join('\n');
 
     // Replace the selected text with sorted text
