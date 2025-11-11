@@ -2867,7 +2867,7 @@ td .markdown-preview {
     background: white;
     border: 2px solid #dee2e6;
     border-radius: 6px;
-    cursor: move;
+    cursor: pointer;
     transition: all 0.2s;
     position: relative;
     width: fit-content;
@@ -2875,8 +2875,9 @@ td .markdown-preview {
     user-select: none;
 }
 
-.f1-sheet-item:active {
+.f1-sheet-item.dragging {
     cursor: grabbing;
+    opacity: 0.4;
 }
 
 .f1-sheet-item:hover {

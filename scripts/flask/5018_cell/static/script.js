@@ -5623,27 +5623,44 @@ function populateF1Sheets(searchAllCategories = false) {
             <span class="f1-sheet-icon">📄</span>
             <span class="f1-sheet-name">${sheet.name}${categoryLabel}</span>
         `;
-        nameSpan.onclick = () => switchToSheetFromF1(index);
 
         item.appendChild(nameSpan);
 
-        // Add click handler for separator mode
+        // Track if user is dragging or clicking
+        let isDragging = false;
+        let dragStartTime = 0;
+
+        item.addEventListener('mousedown', (e) => {
+            isDragging = false;
+            dragStartTime = Date.now();
+        });
+
+        item.addEventListener('dragstart', (e) => {
+            isDragging = true;
+            handleF1DragStart.call(item, e);
+        });
+
         item.addEventListener('click', (e) => {
-            if (window.f1SeparatorMode) {
-                e.stopPropagation();
-                addSeparatorAboveSheet(index);
-                window.f1SeparatorMode = false;
-                document.body.style.cursor = '';
-                document.querySelectorAll('.f1-sheet-item').forEach(el => {
-                    el.style.cursor = '';
-                    el.classList.remove('separator-mode');
-                });
-                populateF1Sheets(searchAllCategories);
+            // Only handle click if not dragging
+            if (!isDragging) {
+                if (window.f1SeparatorMode) {
+                    e.stopPropagation();
+                    addSeparatorAboveSheet(index);
+                    window.f1SeparatorMode = false;
+                    document.body.style.cursor = '';
+                    document.querySelectorAll('.f1-sheet-item').forEach(el => {
+                        el.style.cursor = '';
+                        el.classList.remove('separator-mode');
+                    });
+                    populateF1Sheets(searchAllCategories);
+                } else {
+                    switchToSheetFromF1(index);
+                }
             }
+            isDragging = false;
         });
 
         // Drag and drop event handlers
-        item.addEventListener('dragstart', handleF1DragStart);
         item.addEventListener('dragover', handleF1DragOver);
         item.addEventListener('drop', handleF1Drop);
         item.addEventListener('dragend', handleF1DragEnd);
@@ -5669,7 +5686,7 @@ let draggedSheetIndex = null;
 function handleF1DragStart(e) {
     draggedF1Item = this;
     draggedSheetIndex = parseInt(this.dataset.sheetIndex);
-    this.style.opacity = '0.4';
+    this.classList.add('dragging');
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/html', this.innerHTML);
 }
@@ -5758,7 +5775,7 @@ function handleF1Drop(e) {
 }
 
 function handleF1DragEnd(e) {
-    this.style.opacity = '1';
+    this.classList.remove('dragging');
     
     // Remove all drag indicators
     document.querySelectorAll('.f1-sheet-item').forEach(item => {
