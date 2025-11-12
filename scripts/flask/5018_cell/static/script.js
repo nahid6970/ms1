@@ -5085,8 +5085,6 @@ function handleMultiCursorEdit(input, action, char) {
     // Sort matches from right to left to maintain positions during replacement
     const sortedMatches = [...multiSelectionData.matches].sort((a, b) => b.start - a.start);
     
-    console.log('Before edit:', { action, char, matches: JSON.stringify(multiSelectionData.matches), text: text.substring(0, 100) });
-    
     // Apply the edit to each match (processing right to left)
     for (const match of sortedMatches) {
         if (action === 'insert') {
@@ -5167,8 +5165,6 @@ function handleMultiCursorEdit(input, action, char) {
     }
     
     multiSelectionData.matches = newMatches;
-    
-    console.log('After edit:', { newMatches: JSON.stringify(newMatches), result: result.substring(0, 100) });
     
     // Position cursor at the last match
     const lastMatch = newMatches[newMatches.length - 1];

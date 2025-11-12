@@ -1916,6 +1916,24 @@ tr {
     align-items: center;
 }
 
+.f1-add-separator-btn {
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 12px;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: none;
+    font-weight: 500;
+}
+
+.f1-add-separator-btn:hover {
+    background: #0056b3;
+    transform: scale(1.05);
+}
+
 .f1-category-actions {
     display: flex;
     gap: 4px;
@@ -1999,11 +2017,58 @@ tr {
     flex: 1;
     overflow-y: auto;
     padding: 8px 16px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-content: flex-start;
+}
+
+.f1-sheet-separator {
+    width: 100%;
+    height: 2px;
+    background: #dee2e6;
+    margin: 8px 0;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.f1-sheet-separator.has-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: auto;
+    background: transparent;
+}
+
+.f1-separator-actions {
+    background: white;
+    padding: 4px;
+    border-radius: 4px;
+    border: 1px solid #dee2e6;
+}
+
+.f1-separator-btn {
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.f1-separator-btn:hover {
+    background: #c82333;
+    transform: scale(1.1);
 }
 
 .f1-sheet-item {
     padding: 14px 16px;
-    margin-bottom: 6px;
     border-radius: 6px;
     transition: all 0.2s;
     border: 1px solid #e9ecef;
@@ -2012,6 +2077,8 @@ tr {
     align-items: center;
     justify-content: space-between;
     gap: 12px;
+    flex: 1 1 auto;
+    min-width: fit-content;
 }
 
 .f1-sheet-item:hover {
