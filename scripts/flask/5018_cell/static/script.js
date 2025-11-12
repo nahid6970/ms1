@@ -5009,11 +5009,8 @@ function setupMultiReplaceListener(input) {
     if (input.multiReplaceKeyListener) {
         input.removeEventListener('keydown', input.multiReplaceKeyListener);
     }
-    if (input.multiReplaceInputListener) {
-        input.removeEventListener('input', input.multiReplaceInputListener);
-    }
 
-    // Keydown listener to handle special keys
+    // Keydown listener to handle all keys
     input.multiReplaceKeyListener = function (e) {
         if (!multiSelectionData || multiSelectionData.input !== input) return;
 
@@ -5054,28 +5051,15 @@ function setupMultiReplaceListener(input) {
             return;
         }
 
-        // Let regular character input be handled by the input event
-    };
-
-    // Input listener to handle character typing
-    input.multiReplaceInputListener = function (e) {
-        if (!multiSelectionData || multiSelectionData.input !== input) return;
-        
-        // Only handle insertText events (regular typing)
-        if (e.inputType === 'insertText' && e.data) {
+        // Handle regular character input
+        if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
             e.preventDefault();
-            e.stopPropagation();
-            
-            // Restore the text before this input event
-            input.value = multiSelectionData.currentText;
-            
-            // Apply the character to all cursors
-            handleMultiCursorEdit(input, 'insert', e.data);
+            handleMultiCursorEdit(input, 'insert', e.key);
+            return;
         }
     };
 
     input.addEventListener('keydown', input.multiReplaceKeyListener);
-    input.addEventListener('input', input.multiReplaceInputListener);
 
     // Clear on blur
     input.addEventListener('blur', function clearOnBlur() {
@@ -5085,9 +5069,6 @@ function setupMultiReplaceListener(input) {
                 clearMultiSelection();
                 if (input.multiReplaceKeyListener) {
                     input.removeEventListener('keydown', input.multiReplaceKeyListener);
-                }
-                if (input.multiReplaceInputListener) {
-                    input.removeEventListener('input', input.multiReplaceInputListener);
                 }
                 showToast(`Edited ${count} locations`, 'success');
             }
@@ -5101,14 +5082,16 @@ function handleMultiCursorEdit(input, action, char) {
     const text = input.value;
     let result = text;
     
-    // Sort matches from right to left to maintain positions
+    // Sort matches from right to left to maintain positions during replacement
     const sortedMatches = [...multiSelectionData.matches].sort((a, b) => b.start - a.start);
     
-    // Apply the edit to each match
+    console.log('Before edit:', { action, char, matches: JSON.stringify(multiSelectionData.matches), text: text.substring(0, 100) });
+    
+    // Apply the edit to each match (processing right to left)
     for (const match of sortedMatches) {
         if (action === 'insert') {
-            // Insert character at each cursor
-            result = result.substring(0, match.start) + char + result.substring(match.start, match.end) + result.substring(match.end);
+            // Insert character and replace selection
+            result = result.substring(0, match.start) + char + result.substring(match.end);
         } else if (action === 'backspace') {
             // Delete selection or character before cursor
             if (match.start === match.end) {
@@ -5137,26 +5120,41 @@ function handleMultiCursorEdit(input, action, char) {
     input.value = result;
     multiSelectionData.currentText = result;
 
-    // Recalculate match positions
+    // Recalculate match positions (process in original order, left to right)
     let offset = 0;
     const newMatches = [];
     
     for (let i = 0; i < multiSelectionData.matches.length; i++) {
         const oldMatch = multiSelectionData.matches[i];
         const oldLength = oldMatch.end - oldMatch.start;
-        let newLength = oldLength;
+        let newLength = 0;
+        let offsetChange = 0;
         
         if (action === 'insert') {
-            newLength = oldLength + char.length;
+            // Cursor moves to after inserted text  
+            const newPos = oldMatch.start + offset + char.length;
+            newMatches.push({ start: newPos, end: newPos });
+            offsetChange = char.length - oldLength;
+            offset += offsetChange;
+            continue;
         } else if (action === 'backspace') {
             if (oldLength === 0) {
-                newLength = 0;
-                offset -= 1; // Deleted one char before cursor
+                // Deleted one char before cursor
+                offsetChange = -1;
             } else {
-                newLength = 0; // Deleted selection
+                // Deleted selection
+                offsetChange = -oldLength;
             }
+            newLength = 0;
         } else if (action === 'delete') {
-            newLength = 0; // Always results in no selection
+            if (oldLength === 0) {
+                // Deleted one char after cursor (position stays same)
+                offsetChange = -1;
+            } else {
+                // Deleted selection
+                offsetChange = -oldLength;
+            }
+            newLength = 0;
         }
         
         const newStart = oldMatch.start + offset;
@@ -5165,14 +5163,16 @@ function handleMultiCursorEdit(input, action, char) {
         newMatches.push({ start: newStart, end: newEnd });
         
         // Update offset for next match
-        offset += (newLength - oldLength);
+        offset += offsetChange;
     }
     
     multiSelectionData.matches = newMatches;
     
+    console.log('After edit:', { newMatches: JSON.stringify(newMatches), result: result.substring(0, 100) });
+    
     // Position cursor at the last match
     const lastMatch = newMatches[newMatches.length - 1];
-    input.setSelectionRange(lastMatch.start, lastMatch.end);
+    input.setSelectionRange(lastMatch.end, lastMatch.end);
     
     // Show visual markers
     showSelectionMarkers(input, newMatches);
