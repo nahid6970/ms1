@@ -6077,11 +6077,23 @@ function filterF1Sheets() {
     const searchInput = document.getElementById('f1SearchInput');
     let searchTerm = searchInput ? searchInput.value : '';
 
+    // Hide all separators when searching
+    const separators = document.querySelectorAll('.f1-sheet-separator');
+    if (searchTerm) {
+        separators.forEach(sep => sep.style.display = 'none');
+    } else {
+        separators.forEach(sep => sep.style.display = '');
+    }
+
     // Check for special search prefixes
     if (searchTerm.startsWith('*')) {
         // Search all categories by sheet name or nickname
         const actualSearch = searchTerm.substring(1).toLowerCase();
         populateF1Sheets(true); // Show all sheets from all categories
+
+        // Hide separators when searching
+        const separators = document.querySelectorAll('.f1-sheet-separator');
+        separators.forEach(sep => sep.style.display = 'none');
 
         // Filter by name or nickname
         const sheetItems = document.querySelectorAll('.f1-sheet-item');
@@ -6159,6 +6171,13 @@ function filterF1Sheets() {
 
         const searchLower = searchTerm.toLowerCase();
         const sheetItems = document.querySelectorAll('.f1-sheet-item');
+        
+        // Hide separators when searching
+        if (searchLower) {
+            const separators = document.querySelectorAll('.f1-sheet-separator');
+            separators.forEach(sep => sep.style.display = 'none');
+        }
+        
         sheetItems.forEach(item => {
             const sheetIndex = parseInt(item.dataset.sheetIndex);
             const sheet = tableData.sheets[sheetIndex];
