@@ -4997,86 +4997,257 @@ function showMultiSelectionIndicator(input, current, total) {
 }
 
 function setupMultiReplaceListener(input) {
-    // Store the original text
-    multiSelectionData.originalText = input.value;
-    multiSelectionData.replacementText = '';
+    // Store the original ranges (these stay constant as reference points)
+    multiSelectionData.originalRanges = multiSelectionData.matches.map(m => ({
+        start: m.start,
+        end: m.end,
+        originalText: input.value.substring(m.start, m.end)
+    }));
+    multiSelectionData.currentText = input.value;
 
     // Remove old listeners if exist
     if (input.multiReplaceKeyListener) {
         input.removeEventListener('keydown', input.multiReplaceKeyListener);
     }
+    if (input.multiReplaceInputListener) {
+        input.removeEventListener('input', input.multiReplaceInputListener);
+    }
 
-    // Keydown listener to handle typing/deleting
+    // Keydown listener to handle special keys
     input.multiReplaceKeyListener = function (e) {
         if (!multiSelectionData || multiSelectionData.input !== input) return;
 
-        // Handle character input, backspace, and delete
-        if (e.key.length === 1 || e.key === 'Backspace' || e.key === 'Delete') {
+        // Handle selection extension keys (Shift+End, Shift+Home, etc.)
+        if (e.shiftKey && (e.key === 'End' || e.key === 'Home' || e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
             e.preventDefault();
+            handleMultiSelectionExtension(input, e.key);
+            return;
+        }
 
-            const oldSearchText = multiSelectionData.searchText;
-            let replacementText = multiSelectionData.replacementText;
-
-            // Update replacement text based on key
-            if (e.key === 'Backspace' && replacementText.length > 0) {
-                replacementText = replacementText.slice(0, -1);
-            } else if (e.key === 'Delete') {
-                // Delete doesn't change replacement text, just ignore
-                return;
-            } else if (e.key.length === 1) {
-                replacementText += e.key;
-            }
-
-            multiSelectionData.replacementText = replacementText;
-
-            // Replace all occurrences
-            let result = multiSelectionData.originalText;
-            const regex = new RegExp(escapeRegExp(oldSearchText), 'g');
-            result = result.replace(regex, replacementText);
-
-            input.value = result;
-
-            // Find position of first replacement
-            const firstMatch = multiSelectionData.matches[0];
-            const newCursorPos = firstMatch.start + replacementText.length;
-            input.setSelectionRange(newCursorPos, newCursorPos);
-
-            // Trigger change event
-            const changeEvent = new Event('input', { bubbles: true });
-            input.dispatchEvent(changeEvent);
-
-            // Update visual markers if any
-            if (replacementText.length > 0) {
-                // Update matches with new positions
-                const newMatches = [];
-                let searchPos = 0;
-                while ((searchPos = result.indexOf(replacementText, searchPos)) !== -1) {
-                    newMatches.push({ start: searchPos, end: searchPos + replacementText.length });
-                    searchPos += replacementText.length;
-                }
-                if (newMatches.length > 0) {
-                    showSelectionMarkers(input, newMatches);
-                }
-            }
-        } else if (e.key === 'Enter' || e.key === 'Escape') {
-            // Finish editing
+        // Allow other navigation keys to clear multi-selection
+        const navigationKeys = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End', 'PageUp', 'PageDown'];
+        if (navigationKeys.includes(e.key)) {
+            // Clear multi-selection mode when navigating without shift
             clearMultiSelection();
-            showToast(`Replaced ${multiSelectionData.matches.length} occurrences`, 'success');
+            return;
+        }
+
+        // Handle Backspace and Delete
+        if (e.key === 'Backspace' || e.key === 'Delete') {
+            e.preventDefault();
+            handleMultiCursorEdit(input, e.key === 'Backspace' ? 'backspace' : 'delete', '');
+            return;
+        }
+
+        // Handle Enter
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            handleMultiCursorEdit(input, 'insert', '\n');
+            return;
+        }
+
+        // Handle Escape to finish
+        if (e.key === 'Escape') {
+            const count = multiSelectionData.matches.length;
+            clearMultiSelection();
+            showToast(`Edited ${count} locations`, 'success');
+            return;
+        }
+
+        // Let regular character input be handled by the input event
+    };
+
+    // Input listener to handle character typing
+    input.multiReplaceInputListener = function (e) {
+        if (!multiSelectionData || multiSelectionData.input !== input) return;
+        
+        // Only handle insertText events (regular typing)
+        if (e.inputType === 'insertText' && e.data) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Restore the text before this input event
+            input.value = multiSelectionData.currentText;
+            
+            // Apply the character to all cursors
+            handleMultiCursorEdit(input, 'insert', e.data);
         }
     };
 
     input.addEventListener('keydown', input.multiReplaceKeyListener);
+    input.addEventListener('input', input.multiReplaceInputListener);
 
     // Clear on blur
     input.addEventListener('blur', function clearOnBlur() {
         setTimeout(() => {
             if (multiSelectionData) {
-                showToast(`Replaced ${multiSelectionData.matches.length} occurrences`, 'success');
+                const count = multiSelectionData.matches.length;
+                clearMultiSelection();
+                if (input.multiReplaceKeyListener) {
+                    input.removeEventListener('keydown', input.multiReplaceKeyListener);
+                }
+                if (input.multiReplaceInputListener) {
+                    input.removeEventListener('input', input.multiReplaceInputListener);
+                }
+                showToast(`Edited ${count} locations`, 'success');
             }
-            clearMultiSelection();
-            input.removeEventListener('keydown', input.multiReplaceKeyListener);
         }, 100);
     }, { once: true });
+}
+
+function handleMultiCursorEdit(input, action, char) {
+    if (!multiSelectionData) return;
+
+    const text = input.value;
+    let result = text;
+    
+    // Sort matches from right to left to maintain positions
+    const sortedMatches = [...multiSelectionData.matches].sort((a, b) => b.start - a.start);
+    
+    // Apply the edit to each match
+    for (const match of sortedMatches) {
+        if (action === 'insert') {
+            // Insert character at each cursor
+            result = result.substring(0, match.start) + char + result.substring(match.start, match.end) + result.substring(match.end);
+        } else if (action === 'backspace') {
+            // Delete selection or character before cursor
+            if (match.start === match.end) {
+                // No selection, delete character before
+                if (match.start > 0) {
+                    result = result.substring(0, match.start - 1) + result.substring(match.start);
+                }
+            } else {
+                // Delete selection
+                result = result.substring(0, match.start) + result.substring(match.end);
+            }
+        } else if (action === 'delete') {
+            // Delete selection or character after cursor
+            if (match.start === match.end) {
+                // No selection, delete character after
+                if (match.end < result.length) {
+                    result = result.substring(0, match.start) + result.substring(match.start + 1);
+                }
+            } else {
+                // Delete selection
+                result = result.substring(0, match.start) + result.substring(match.end);
+            }
+        }
+    }
+
+    input.value = result;
+    multiSelectionData.currentText = result;
+
+    // Recalculate match positions
+    let offset = 0;
+    const newMatches = [];
+    
+    for (let i = 0; i < multiSelectionData.matches.length; i++) {
+        const oldMatch = multiSelectionData.matches[i];
+        const oldLength = oldMatch.end - oldMatch.start;
+        let newLength = oldLength;
+        
+        if (action === 'insert') {
+            newLength = oldLength + char.length;
+        } else if (action === 'backspace') {
+            if (oldLength === 0) {
+                newLength = 0;
+                offset -= 1; // Deleted one char before cursor
+            } else {
+                newLength = 0; // Deleted selection
+            }
+        } else if (action === 'delete') {
+            newLength = 0; // Always results in no selection
+        }
+        
+        const newStart = oldMatch.start + offset;
+        const newEnd = newStart + newLength;
+        
+        newMatches.push({ start: newStart, end: newEnd });
+        
+        // Update offset for next match
+        offset += (newLength - oldLength);
+    }
+    
+    multiSelectionData.matches = newMatches;
+    
+    // Position cursor at the last match
+    const lastMatch = newMatches[newMatches.length - 1];
+    input.setSelectionRange(lastMatch.start, lastMatch.end);
+    
+    // Show visual markers
+    showSelectionMarkers(input, newMatches);
+    
+    // Trigger change event
+    const changeEvent = new Event('input', { bubbles: true });
+    input.dispatchEvent(changeEvent);
+}
+
+function handleMultiSelectionExtension(input, key) {
+    if (!multiSelectionData || !multiSelectionData.allSelected) return;
+
+    const text = input.value;
+    const lines = text.split('\n');
+    let currentPos = 0;
+    const lineStarts = [0];
+    
+    // Build line start positions
+    for (let i = 0; i < lines.length - 1; i++) {
+        currentPos += lines[i].length + 1; // +1 for newline
+        lineStarts.push(currentPos);
+    }
+
+    // Extend each match based on the key
+    const newMatches = multiSelectionData.matches.map(match => {
+        let newEnd = match.end;
+        let newStart = match.start;
+
+        if (key === 'End') {
+            // Find which line this match is on
+            const lineIndex = lineStarts.findIndex((start, idx) => {
+                const nextStart = lineStarts[idx + 1] || text.length;
+                return match.start >= start && match.start < nextStart;
+            });
+            
+            if (lineIndex !== -1) {
+                const nextLineStart = lineStarts[lineIndex + 1];
+                newEnd = nextLineStart ? nextLineStart - 1 : text.length;
+            }
+        } else if (key === 'Home') {
+            // Find which line this match is on
+            const lineIndex = lineStarts.findIndex((start, idx) => {
+                const nextStart = lineStarts[idx + 1] || text.length;
+                return match.start >= start && match.start < nextStart;
+            });
+            
+            if (lineIndex !== -1) {
+                newStart = lineStarts[lineIndex];
+            }
+        } else if (key === 'ArrowRight') {
+            newEnd = Math.min(text.length, match.end + 1);
+        } else if (key === 'ArrowLeft') {
+            newStart = Math.max(0, match.start - 1);
+        }
+
+        return { start: newStart, end: newEnd };
+    });
+
+    // Update the matches
+    multiSelectionData.matches = newMatches;
+    multiSelectionData.selectedMatches = newMatches;
+
+    // Update search text to the new extended selection (use first match as reference)
+    const firstMatch = newMatches[0];
+    multiSelectionData.searchText = text.substring(firstMatch.start, firstMatch.end);
+    multiSelectionData.originalText = text;
+    multiSelectionData.replacementText = '';
+
+    // Visually select the last match
+    const lastMatch = newMatches[newMatches.length - 1];
+    input.setSelectionRange(lastMatch.start, lastMatch.end);
+
+    // Show visual markers for all selections
+    showSelectionMarkers(input, newMatches);
+    showMultiSelectionIndicator(input, newMatches.length, newMatches.length);
 }
 
 function clearMultiSelection() {
