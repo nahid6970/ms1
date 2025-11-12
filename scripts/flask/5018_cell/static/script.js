@@ -4438,6 +4438,32 @@ function closeQuickFormatter() {
     selectedFormats = [];
 }
 
+function selectAllMatchingFromFormatter(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    if (!quickFormatterTarget) {
+        console.log('No quickFormatterTarget');
+        return;
+    }
+    
+    // Store the target and selection
+    const target = quickFormatterTarget;
+    const selection = quickFormatterSelection;
+    
+    // Keep the input focused and restore selection
+    target.focus();
+    target.setSelectionRange(selection.start, selection.end);
+    
+    // Select all matching occurrences
+    selectAllMatchingOccurrences(target);
+    
+    // Close the formatter after selection is done
+    setTimeout(() => {
+        closeQuickFormatter();
+    }, 50);
+}
+
 function toggleFormatSelection(prefix, suffix, event) {
     event.preventDefault();
 
@@ -4874,6 +4900,77 @@ function applyMultipleFormatsWithColor(colorSyntax) {
 
 // Multi-Selection (Ctrl+D) - Select Next Occurrence
 let multiSelectionData = null;
+
+function selectAllMatchingOccurrences(input) {
+    const text = input.value;
+    const selStart = input.selectionStart;
+    const selEnd = input.selectionEnd;
+    let selectedText;
+
+    // If no selection, select the word under cursor
+    if (selStart === selEnd) {
+        const wordBoundary = /\W/;
+        let start = selStart;
+        let end = selStart;
+
+        // Find word start
+        while (start > 0 && !wordBoundary.test(text[start - 1])) {
+            start--;
+        }
+
+        // Find word end
+        while (end < text.length && !wordBoundary.test(text[end])) {
+            end++;
+        }
+
+        if (start < end) {
+            selectedText = text.substring(start, end);
+            input.setSelectionRange(start, end);
+        } else {
+            return;
+        }
+    } else {
+        selectedText = text.substring(selStart, selEnd);
+    }
+
+    if (!selectedText) return;
+
+    // Find all occurrences
+    const matches = [];
+    let index = 0;
+    while ((index = text.indexOf(selectedText, index)) !== -1) {
+        matches.push({ start: index, end: index + selectedText.length });
+        index += selectedText.length;
+    }
+
+    if (matches.length === 0) return;
+
+    // Initialize multi-selection with all matches selected
+    multiSelectionData = {
+        input: input,
+        searchText: selectedText,
+        matches: matches,
+        currentIndex: matches.length - 1,
+        selectedMatches: matches,
+        allSelected: true,
+        listenerSetup: false
+    };
+
+    // Select the last match visually
+    const lastMatch = matches[matches.length - 1];
+    input.setSelectionRange(lastMatch.start, lastMatch.end);
+    
+    // Show indicator
+    showMultiSelectionIndicator(input, matches.length, matches.length);
+    showToast(`All ${matches.length} occurrences selected. Type to replace all.`, 'info');
+    
+    // Show visual markers for all selections
+    showSelectionMarkers(input, matches);
+    
+    // Set up the listener for replacement
+    setupMultiReplaceListener(input);
+    multiSelectionData.listenerSetup = true;
+}
 
 function selectNextOccurrence(input) {
     const text = input.value;
