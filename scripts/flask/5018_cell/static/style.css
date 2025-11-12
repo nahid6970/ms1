@@ -2025,26 +2025,43 @@ tr {
 
 .f1-sheet-separator {
     width: 100%;
-    height: 2px;
-    background: #dee2e6;
-    margin: 8px 0;
+    height: 4px;
+    background: #007bff;
+    margin: 12px 0;
     position: relative;
     flex-shrink: 0;
+    border-radius: 2px;
+    box-shadow: 0 2px 4px rgba(0, 123, 255, 0.4);
 }
 
 .f1-sheet-separator.has-actions {
     display: flex;
     align-items: center;
     justify-content: center;
-    height: auto;
-    background: transparent;
+    height: 4px;
+    background: #007bff;
+    margin: 16px 0;
+}
+
+.f1-sheet-separator.has-actions::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: #007bff;
+    border-radius: 2px;
+    z-index: 0;
 }
 
 .f1-separator-actions {
     background: white;
-    padding: 4px;
-    border-radius: 4px;
-    border: 1px solid #dee2e6;
+    padding: 6px;
+    border-radius: 6px;
+    border: 2px solid #007bff;
+    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.2);
+    position: relative;
+    z-index: 1;
 }
 
 .f1-separator-btn {
