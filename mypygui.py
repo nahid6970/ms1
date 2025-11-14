@@ -657,11 +657,13 @@ AHKPY_BT = tk.Label(ROOT1, text="AHK", bg="#1d2027", fg="#84ff8e",
                       highlightbackground="#ffffff", anchor="w",
                       font=("JetBrainsMono NFP", 16, "bold"))
 AHKPY_BT.pack(side="left", padx=(0, 0), pady=(0, 0))
-AHKPY_BT.bind("<Button-1>", lambda event=None: subprocess.Popen(
-    r'cmd /c C:\Users\nahid\ms\ms1\FFFFFFF\ahk_gui_pyqt.py',
-    cwd=r'C:\Users\nahid\ms\ms1\FFFFFFF',
-    shell=True
-))
+AHKPY_BT.bind(
+    "<Button-1>",
+    lambda event=None: subprocess.Popen(
+        [sys.executable, r'C:\Users\nahid\ms\ms1\FFFFFFF\ahk_gui_pyqt.py'],
+        cwd=r'C:\Users\nahid\ms\ms1\FFFFFFF'
+    )
+)
 AHKPY_BT.bind("<Control-Button-1>", lambda event=None: subprocess.Popen(
     r'code C:\Users\nahid\ms\ms1\FFFFFFF\ahk_gui_pyqt.py',
     cwd=r'C:\Users\nahid\ms\ms1\FFFFFFF',
