@@ -803,8 +803,9 @@ def generate_static_html(data):
         }
 
         .md-cell {
-            padding: 4px 0;
+            padding: 4px 12px;
             border: none;
+            border-right: 2px solid #666;
             background: transparent;
             overflow: hidden;
             word-break: break-word;
