@@ -885,7 +885,10 @@ function parseGridTable(lines) {
     grid.forEach((row, i) => {
         row.forEach(cell => {
             const alignStyle = cell.align !== 'left' ? ` style="text-align: ${cell.align}"` : '';
-            html += `<div class="md-cell ${i ? '' : 'md-header'}"${alignStyle}>${cell.content}</div>`;
+            // Check if cell content is only "-" (empty cell marker)
+            const isEmpty = cell.content.trim() === '-';
+            const emptyClass = isEmpty ? ' md-empty' : '';
+            html += `<div class="md-cell ${i ? '' : 'md-header'}${emptyClass}"${alignStyle}>${cell.content}</div>`;
         });
     });
     html += '</div>';

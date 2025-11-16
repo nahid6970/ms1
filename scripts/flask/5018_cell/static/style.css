@@ -2298,36 +2298,33 @@ Markdown Table Styles */
     text-decoration: underline;
 }
 
-/* Updated Grid Table Styles - Minimal borderless design */
+/* Updated Grid Table Styles */
 .md-grid {
     display: grid;
-    grid-template-columns: repeat(var(--cols), auto) !important;
-    gap: 12px 20px;
-    margin: 8px 0;
+    grid-template-columns: repeat(var(--cols), minmax(80px, 1fr)) !important;
+    gap: 4px;
+    margin: 4px 0;
     font-size: inherit;
     font-family: inherit;
-    width: fit-content;
+    width: 100%;
     max-width: 100%;
 }
 
 .md-cell {
-    padding: 4px 12px !important;
-    border: none !important;
-    border-right: 2px solid #666 !important;
-    background: transparent !important;
+    padding: 4px 6px !important;
+    border: 1px solid #ced4da !important;
+    background: #fff !important;
     overflow: hidden !important;
     word-break: break-word !important;
     white-space: normal !important;
-    min-width: fit-content;
-    max-width: 400px;
+    min-width: 80px;
+    max-width: 100%;
 }
 
 .md-header {
-    background: transparent !important;
-    font-weight: 700 !important;
-    border: none !important;
-    border-bottom: 2px solid #333 !important;
-    padding-bottom: 6px !important;
+    background: #f8f9fa !important;
+    font-weight: 600 !important;
+    border: 2px solid #495057 !important;
     white-space: normal !important;
     word-break: break-word !important;
 }

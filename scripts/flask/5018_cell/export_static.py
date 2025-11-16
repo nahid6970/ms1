@@ -793,33 +793,30 @@ def generate_static_html(data):
         /* Markdown Grid Table Styles (CSS Grid - no <table> elements) */
         .md-grid {
             display: grid;
-            grid-template-columns: repeat(var(--cols), auto);
-            gap: 12px 20px;
-            margin: 8px 0;
+            grid-template-columns: repeat(var(--cols), minmax(80px, 1fr));
+            gap: 4px;
+            margin: 4px 0;
             font-size: inherit;
             font-family: inherit;
-            width: fit-content;
+            width: 100%;
             max-width: 100%;
         }
 
         .md-cell {
-            padding: 4px 12px;
-            border: none;
-            border-right: 2px solid #666;
-            background: transparent;
+            padding: 4px 6px;
+            border: 1px solid #ced4da;
+            background: #fff;
             overflow: hidden;
             word-break: break-word;
             white-space: normal;
-            min-width: fit-content;
-            max-width: 400px;
+            min-width: 80px;
+            max-width: 100%;
         }
 
         .md-header {
-            background: transparent;
-            font-weight: 700;
-            border: none;
-            border-bottom: 2px solid #333;
-            padding-bottom: 6px;
+            background: #f8f9fa;
+            font-weight: 600;
+            border: 2px solid #495057;
             white-space: normal;
             word-break: break-word;
         }
