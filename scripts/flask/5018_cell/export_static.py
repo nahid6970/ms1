@@ -794,18 +794,18 @@ def generate_static_html(data):
         .md-grid {
             display: grid;
             grid-template-columns: repeat(var(--cols), minmax(80px, 1fr));
-            gap: 4px;
-            margin: 4px 0;
-            font-size: 0.85em;
+            gap: 12px 20px;
+            margin: 8px 0;
+            font-size: inherit;
             font-family: inherit;
             width: 100%;
             max-width: 100%;
         }
 
         .md-cell {
-            padding: 4px 6px;
-            border: 1px solid #ced4da;
-            background: #fff;
+            padding: 4px 0;
+            border: none;
+            background: transparent;
             overflow: hidden;
             word-break: break-word;
             white-space: normal;
@@ -814,11 +814,13 @@ def generate_static_html(data):
         }
 
         .md-header {
-            background: #f8f9fa;
-            font-weight: 600;
+            background: transparent;
+            font-weight: 700;
+            border: none;
+            border-bottom: 2px solid #333;
+            padding-bottom: 6px;
             white-space: normal;
             word-break: break-word;
-            border: 2px solid #495057;
         }
 
         /* Let coloured text / background css shine through */

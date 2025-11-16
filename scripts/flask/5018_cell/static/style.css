@@ -2298,22 +2298,22 @@ Markdown Table Styles */
     text-decoration: underline;
 }
 
-/* Updated Grid Table Styles - Auto-sizing columns */
+/* Updated Grid Table Styles - Minimal borderless design */
 .md-grid {
     display: grid;
     grid-template-columns: repeat(var(--cols), minmax(80px, 1fr)) !important;
-    gap: 4px;
-    margin: 4px 0;
-    font-size: 0.85em;
+    gap: 12px 20px;
+    margin: 8px 0;
+    font-size: inherit;
     font-family: inherit;
     width: 100%;
     max-width: 100%;
 }
 
 .md-cell {
-    padding: 4px 6px !important;
-    border: 1px solid #ced4da !important;
-    background: #fff !important;
+    padding: 4px 0 !important;
+    border: none !important;
+    background: transparent !important;
     overflow: hidden !important;
     word-break: break-word !important;
     white-space: normal !important;
@@ -2322,9 +2322,11 @@ Markdown Table Styles */
 }
 
 .md-header {
-    background: #f8f9fa !important;
-    font-weight: 600 !important;
-    border: 2px solid #495057 !important;
+    background: transparent !important;
+    font-weight: 700 !important;
+    border: none !important;
+    border-bottom: 2px solid #333 !important;
+    padding-bottom: 6px !important;
     white-space: normal !important;
     word-break: break-word !important;
 }
