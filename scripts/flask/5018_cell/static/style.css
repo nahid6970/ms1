@@ -2220,6 +2220,9 @@ Markdown Table Styles */
     padding: 4px 6px;
     text-align: left;
     vertical-align: top;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    max-width: 300px;
 }
 
 .markdown-table th {
@@ -2298,12 +2301,12 @@ Markdown Table Styles */
 /* Updated Grid Table Styles - Auto-sizing columns */
 .md-grid {
     display: grid;
-    grid-template-columns: repeat(var(--cols), auto) !important;
+    grid-template-columns: repeat(var(--cols), minmax(80px, 1fr)) !important;
     gap: 4px;
     margin: 4px 0;
     font-size: 0.85em;
     font-family: inherit;
-    width: fit-content !important;
+    width: 100%;
     max-width: 100%;
 }
 
@@ -2311,17 +2314,19 @@ Markdown Table Styles */
     padding: 4px 6px !important;
     border: 1px solid #ced4da !important;
     background: #fff !important;
-    overflow: visible !important;
-    word-break: normal !important;
-    white-space: nowrap;
-    min-width: fit-content;
+    overflow: hidden !important;
+    word-break: break-word !important;
+    white-space: normal !important;
+    min-width: 80px;
+    max-width: 100%;
 }
 
 .md-header {
     background: #f8f9fa !important;
     font-weight: 600 !important;
     border: 2px solid #495057 !important;
-    white-space: nowrap;
+    white-space: normal !important;
+    word-break: break-word !important;
 }
 
 /* Hide markdown preview when toggle is off */
