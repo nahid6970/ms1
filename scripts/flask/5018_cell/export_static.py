@@ -821,6 +821,15 @@ def generate_static_html(data):
             word-break: break-word;
         }
 
+        .md-empty {
+            color: #aaa;
+            background: #f5f5f5;
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: bold;
+            opacity: 0.6;
+        }
+
         /* Let coloured text / background css shine through */
         .md-grid strong {
             font-weight: bold;
@@ -1253,7 +1262,10 @@ def generate_static_html(data):
             grid.forEach((row, i) => {
                 row.forEach(cell => {
                     const alignStyle = cell.align !== 'left' ? ` style="text-align: ${cell.align}"` : '';
-                    html += `<div class="md-cell ${i ? '' : 'md-header'}"${alignStyle}>${cell.content}</div>`;
+                    // Check if cell content is only "-" (empty cell marker)
+                    const isEmpty = cell.content.trim() === '-';
+                    const emptyClass = isEmpty ? ' md-empty' : '';
+                    html += `<div class="md-cell ${i ? '' : 'md-header'}${emptyClass}"${alignStyle}>${cell.content}</div>`;
                 });
             });
             html += '</div>';
