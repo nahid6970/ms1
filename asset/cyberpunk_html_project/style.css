@@ -1,0 +1,41 @@
+body {
+    background-color: #0d0d0d;
+    color: #00ff41; /* Neon green for cyberpunk feel */
+    font-family: 'Consolas', 'Monaco', 'Lucida Console', monospace;
+    font-size: 1em;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    overflow: hidden; /* Hide scrollbar for a cleaner look */
+}
+
+.terminal-container {
+    background-color: #0d0d0d;
+    border: 2px solid #00ff41; /* Neon green border */
+    box-shadow: 0 0 15px #00ff41; /* Neon glow effect */
+    padding: 20px;
+    width: 80%;
+    max-width: 900px;
+    overflow-y: auto;
+    max-height: 80vh;
+}
+
+pre {
+    margin: 0;
+    white-space: pre-wrap; /* Wrap text to prevent horizontal scroll */
+    word-wrap: break-word;
+}
+
+/* Blinking cursor effect */
+.typing-finished::after {
+    content: '_';
+    animation: blink-caret .75s step-end infinite;
+}
+
+@keyframes blink-caret {
+    from, to { border-color: transparent }
+    50% { border-color: #00ff41; }
+}

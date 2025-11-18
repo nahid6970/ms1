@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyberpunk Terminal</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="terminal-container">
+        <pre id="cyberpunk-text"></pre>
+    </div>
+
+    <script>
+        const textElement = document.getElementById('cyberpunk-text');
+        const codeLines = [
+            "INITIATING CYBERPUNK PROTOCOL...",
+            "CONNECTING TO NEURAL NETWORK [STATUS: OPTIMAL]",
+            "DECRYPTING DATA STREAM: //CLASSIFIED//",
+            "ACCESSING ROOT DIRECTORY OF 'MEGACORP_SERVER_07'",
+            "",
+            "> SELECT * FROM user_profiles WHERE access_level = 'ADMIN';",
+            "FETCHING RECORDS...",
+            "",
+            "// ENCRYPTED CREDENTIALS FOUND //",
+            "ATTEMPTING BRUTE FORCE DECRYPTION [PROGRESS: 0.01%]",
+            "...",
+            "ERROR: FIREWALL DETECTED. RETRYING WITH NEW PROXY.",
+            ""
+        ];
+        let lineIndex = 0;
+        let charIndex = 0;
+        let typingSpeed = 50; // milliseconds per character
+
+        function typeWriter() {
+            if (lineIndex < codeLines.length) {
+                const currentLine = codeLines[lineIndex];
+                if (charIndex < currentLine.length) {
+                    textElement.textContent += currentLine.charAt(charIndex);
+                    charIndex++;
+                    setTimeout(typeWriter, typingSpeed);
+                } else {
+                    textElement.textContent += "\n"; // Add a newline character
+                    lineIndex++;
+                    charIndex = 0;
+                    setTimeout(typeWriter, typingSpeed * 5); // Pause before next line
+                }
+            } else {
+                // All lines typed, add "SYSTEM STATUS: READY FOR INPUT" and a class for cursor
+                textElement.textContent += "SYSTEM STATUS: READY FOR INPUT";
+                textElement.classList.add('typing-finished'); // Add class to show cursor
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(typeWriter, 500); // Start typing after a short delay
+        });
+    </script>
+</body>
+</html>
