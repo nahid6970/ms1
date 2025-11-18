@@ -1,0 +1,211 @@
+{
+  "name": "Ai Helper",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -608,
+        16
+      ],
+      "id": "5bd10bd0-21c8-4820-b440-fe9a95a831c8",
+      "name": "When chat message received",
+      "webhookId": "b8da5920-3de8-4b2d-bb0e-234dddb7b63d"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}\nYour Job is to access my local machine and do various task on my command.\nIf i have any problem with anything try to use different types of command to solve them or ask me first if i accept tehn execute them",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        -328,
+        16
+      ],
+      "id": "75bb7231-f034-4604-85bd-48f63244d02a",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -384,
+        240
+      ],
+      "id": "755e1104-3daf-48dd-9914-cde4cfa1984b",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Suz35PLbBoAKIgx6",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "5WuliCiAprhFBqqN",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/5WuliCiAprhFBqqN",
+          "cachedResultName": "ssh_win6970"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "command": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('command', ``, 'string') }}"
+          },
+          "matchingColumns": [
+            "command"
+          ],
+          "schema": [
+            {
+              "id": "command",
+              "displayName": "command",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        -128,
+        240
+      ],
+      "id": "5fd6a792-31f5-4db4-b2a0-30b407f4a8a1",
+      "name": "Call 'ssh_win6970'"
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -256,
+        240
+      ],
+      "id": "53c5d69d-4147-419e-86b0-d9331963bd8a",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "model": "gpt-oss:120b-cloud",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        -608,
+        240
+      ],
+      "id": "f79e4883-1f2b-453b-b83d-a79658586964",
+      "name": "Ollama Chat Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "vtD445WmVRdyzrlh",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Prompt 1\n{{ $json.chatInput }}\nYour Job is to access my local machine and do various task on my command.\nIf i have any problem with anything try to use different types of command to solve them or ask me first if i accept tehn execute them",
+        "height": 192,
+        "width": 416
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        48,
+        32
+      ],
+      "id": "5eee06c3-9ed7-45a0-8a86-5f7449efcd5f",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "AI Agent": {
+      "main": [
+        []
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'ssh_win6970'": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "5b52dabf-07ff-463a-af4b-02c0fd12ce5d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e6a115b488d21da875e867ce89d1e2409b4df7d4a4e03e5578c1a3e9aa7c49fa"
+  },
+  "id": "5yGEFZjxKx8iple6",
+  "tags": []
+}
