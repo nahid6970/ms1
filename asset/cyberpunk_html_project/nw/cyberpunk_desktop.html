@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CYBERPUNK INTERFACE</title>
+    <style>
+        body {
+            background-color: #0a0a0d;
+            color: #00ffcc; /* Neon green */
+            font-family: 'Consolas', 'Monaco', monospace;
+            margin: 0;
+            padding: 20px;
+            overflow: hidden; /* Hide scrollbars if content is slightly larger */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 800px;
+            padding: 30px;
+            border: 2px solid #00ffcc;
+            box-shadow: 0 0 20px #00ffcc, inset 0 0 10px #00ffcc;
+            background-color: rgba(10, 10, 13, 0.8);
+            text-align: center;
+            animation: flicker 1.5s infinite alternate;
+            position: relative;
+            z-index: 1;
+        }
+
+        .container::before, .container::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            border: 2px solid #ff00ff; /* Neon pink */
+            box-shadow: 0 0 20px #ff00ff, inset 0 0 10px #ff00ff;
+            opacity: 0.3;
+            animation: glitch-border 2s infinite alternate;
+            z-index: -1;
+        }
+
+        .container::after {
+            border-color: #00ccff; /* Neon blue */
+            box-shadow: 0 0 20px #00ccff, inset 0 0 10px #00ccff;
+            opacity: 0.3;
+            animation: glitch-border 2.5s infinite alternate reverse;
+        }
+
+        h1 {
+            color: #ff00ff; /* Neon pink */
+            text-shadow: 0 0 15px #ff00ff, 0 0 25px #ff00ff;
+            font-size: 3em;
+            margin-bottom: 10px;
+            letter-spacing: 5px;
+            position: relative; /* Needed for glitch effect */
+            display: inline-block; /* Needed for glitch effect */
+        }
+
+        h2 {
+            color: #00ccff; /* Neon blue */
+            text-shadow: 0 0 10px #00ccff;
+            font-size: 1.5em;
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+
+        p {
+            color: #00ffcc;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .terminal-output {
+            background-color: rgba(0, 0, 0, 0.7);
+            border: 1px solid #00ffcc;
+            padding: 15px;
+            margin-top: 25px;
+            text-align: left;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            color: #00ffcc;
+            box-shadow: 0 0 5px #00ffcc;
+        }
+
+        .terminal-output span {
+            color: #ff00ff; /* Highlighted text */
+        }
+
+        @keyframes flicker {
+            0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+                box-shadow: 0 0 20px #00ffcc, inset 0 0 10px #00ffcc;
+                opacity: 1;
+            }
+            20%, 24%, 55% {
+                box-shadow: none;
+                opacity: 0.8;
+            }
+        }
+
+        @keyframes glitch-border {
+            0%, 30%, 32%, 34%, 60%, 62%, 100% {
+                transform: translate(0, 0);
+            }
+            31% {
+                transform: translate(-2px, 2px);
+            }
+            33% {
+                transform: translate(2px, -2px);
+            }
+            61% {
+                transform: translate(-1px, 1px);
+            }
+        }
+
+        /* Glitch text effect for main title */
+        h1::before, h1::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0a0a0d;
+            overflow: hidden;
+            clip: rect(0, 9999px, 0, 0); /* Initial state for clip */
+        }
+
+        h1::before {
+            left: 2px;
+            text-shadow: -2px 0 #ff00ff;
+            animation: glitch-text 4s infinite alternate-reverse;
+        }
+
+        h1::after {
+            left: -2px;
+            text-shadow: -2px 0 #00ccff;
+            animation: glitch-text 4s infinite alternate;
+        }
+
+        @keyframes glitch-text {
+            0% {
+                clip: rect(32px, 9999px, 5px, 0);
+            }
+            10% {
+                clip: rect(25px, 9999px, 99px, 0);
+            }
+            20% {
+                clip: rect(50px, 9999px, 10px, 0);
+            }
+            30% {
+                clip: rect(15px, 9999px, 80px, 0);
+            }
+            40% {
+                clip: rect(60px, 9999px, 20px, 0);
+            }
+            50% {
+                clip: rect(10px, 9999px, 45px, 0);
+            }
+            60% {
+                clip: rect(70px, 9999px, 30px, 0);
+            }
+            70% {
+                clip: rect(5px, 9999px, 90px, 0);
+            }
+            80% {
+                clip: rect(85px, 9999px, 15px, 0);
+            }
+            90% {
+                clip: rect(40px, 9999px, 75px, 0);
+            }
+            100% {
+                clip: rect(95px, 9999px, 25px, 0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 data-text="WELCOME TO NIGHT CITY">WELCOME TO NIGHT CITY</h1>
+        <h2>SYSTEM STATUS: ONLINE</h2>
+        <p>Initializing neural interface... establishing connection protocols.</p>
+        <p>Accessing local machine data...</p>
+        <div class="terminal-output">
+            <span>[LOG]:</span> Initiating file system scan on D: drive.<br>
+            <span>[LOG]:</span> Identifying active processes and network ports.<br>
+            <span>[WARNING]:</span> High CPU usage detected by multiple Chrome instances. Optimize immediately.<br>
+            <span>[INFO]:</span> Numerous Flask applications active. Monitoring for unauthorized access.<br>
+            <span>[SECURE]:</span> Host file clear of known blacklisted entries. Tailscale and Docker entries verified.<br>
+            <span>[STATUS]:</span> All systems nominal. Proceed with caution, netrunner.
+        </div>
+    </div>
+</body>
+</html>
