@@ -856,22 +856,22 @@ Set-Alias trim C:\Users\nahid\ms\ms1\scripts\ffmpeg\trim.ps1
 #! Run in PowerShell remove ( Warning: PowerShell detected that you might be using a 
 #! screen reader and has disabled PSReadLine for compatibility purposes. If you want
 #! to re-enable it, run 'Import-Module PSReadLine'. )
-(Add-Type -PassThru -Name ScreenReaderUtil -Namespace WinApiHelper -MemberDefinition @'
-  const int SPIF_SENDCHANGE = 0x0002;
-  const int SPI_SETSCREENREADER = 0x0047;
+# (Add-Type -PassThru -Name ScreenReaderUtil -Namespace WinApiHelper -MemberDefinition @'
+#   const int SPIF_SENDCHANGE = 0x0002;
+#   const int SPI_SETSCREENREADER = 0x0047;
 
-  [DllImport("user32", SetLastError = true, CharSet = CharSet.Unicode)]
-  private static extern bool SystemParametersInfo(uint uiAction, uint uiParam, IntPtr pvParam, uint fWinIni);
+#   [DllImport("user32", SetLastError = true, CharSet = CharSet.Unicode)]
+#   private static extern bool SystemParametersInfo(uint uiAction, uint uiParam, IntPtr pvParam, uint fWinIni);
 
-  public static void EnableScreenReader(bool enable)
-  {
-    var ok = SystemParametersInfo(SPI_SETSCREENREADER, enable ? 1u : 0u, IntPtr.Zero, SPIF_SENDCHANGE);
-    if (!ok)
-    {
-      throw new System.ComponentModel.Win32Exception(Marshal.GetLastWin32Error());
-    }
-  }
-'@)::EnableScreenReader($false)
+#   public static void EnableScreenReader(bool enable)
+#   {
+#     var ok = SystemParametersInfo(SPI_SETSCREENREADER, enable ? 1u : 0u, IntPtr.Zero, SPIF_SENDCHANGE);
+#     if (!ok)
+#     {
+#       throw new System.ComponentModel.Win32Exception(Marshal.GetLastWin32Error());
+#     }
+#   }
+# '@)::EnableScreenReader($false)
 
 
 function pkill {
