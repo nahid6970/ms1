@@ -1,0 +1,272 @@
+{
+  "name": "RSS",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -608,
+        112
+      ],
+      "id": "c44d2676-1326-437b-bf22-2c67f10142d3",
+      "name": "Start"
+    },
+    {
+      "parameters": {
+        "url": "https://arstechnica.com/feed/",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        -608,
+        -64
+      ],
+      "id": "7be45b37-a771-4c62-aa2b-d48aa5a203b8",
+      "name": "RSS Read"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Summarize these article & be precise also use markdown\n{{ $json['content:encoded'] }}",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        48,
+        -64
+      ],
+      "id": "c372022b-560e-4a85-a8c1-0cd879355ae5",
+      "name": "Basic LLM Chain",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "model": "gpt-oss:120b-cloud",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        48,
+        176
+      ],
+      "id": "3878a3ef-225b-4d10-9f5c-bfcea7e154ca",
+      "name": "Ollama Chat Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "vtD445WmVRdyzrlh",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "content": "=\n##{{ $json.creator }}##\n**{{ $json.pubDate }}**\n{{ $json['content:encodedSnippet'] }}\n{{ $('RSS Read').item.json.link }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        432,
+        160
+      ],
+      "id": "d379c198-8a16-453e-b4a8-a98cf22b0752",
+      "name": "Discord",
+      "webhookId": "82a36700-dfab-4184-9828-f975167d57c9",
+      "alwaysOutputData": false,
+      "credentials": {
+        "discordWebhookApi": {
+          "id": "qaTMJSyrSi976h8B",
+          "name": "Discord Webhook account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5807c0da-ca2f-4b4e-827d-24b7f0cb3632",
+              "name": "creator",
+              "value": "={{ $('RSS Read').item.json.creator.replace(/\\s+/g, ' ') }}",
+              "type": "string"
+            },
+            {
+              "id": "a9a368e6-951f-43f7-ae86-92c6c9fbed71",
+              "name": "pubDate",
+              "value": "={{\n  (() => {\n    const d = new Date($('RSS Read').item.json.pubDate);\n    const options = { month: \"long\", day: \"numeric\", year: \"numeric\" };\n    const datePart = d.toLocaleDateString(\"en-US\", options);\n    const weekday = d.toLocaleString(\"en-US\", { weekday: \"long\" });\n    const time = d.toLocaleString(\"en-US\", { hour: \"numeric\", minute: \"2-digit\", hour12: true }).toLowerCase();\n    return `${datePart} ${weekday} ${time}`;\n  })()\n}}",
+              "type": "string"
+            },
+            {
+              "id": "70a670ab-4f7f-4141-b688-467fc503c756",
+              "name": "content:encodedSnippet",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        368,
+        -64
+      ],
+      "id": "9a3555c6-1953-4bbc-b4f6-f20278c12667",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        176,
+        96
+      ],
+      "id": "0f02ca23-8064-425f-accb-38b5f0195ede",
+      "name": "Gemini Chat",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Suz35PLbBoAKIgx6",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "removeItemsSeenInPreviousExecutions",
+        "dedupeValue": "={{ $json.pubDate }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.removeDuplicates",
+      "typeVersion": 2,
+      "position": [
+        -400,
+        -64
+      ],
+      "id": "7f32b8a6-c552-4f69-b677-b79686a89890",
+      "name": "Remove Duplicates"
+    },
+    {
+      "parameters": {
+        "maxItems": 5
+      },
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        -176,
+        -64
+      ],
+      "id": "60f36eef-9e0e-4b84-883a-71073477d1ea",
+      "name": "Limit"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "RSS Read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read": {
+      "main": [
+        [
+          {
+            "node": "Remove Duplicates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Discord": {
+      "main": [
+        []
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Discord",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini Chat": {
+      "ai_languageModel": [
+        []
+      ]
+    },
+    "Remove Duplicates": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "abc0c2e8-5b20-47eb-834e-1b07087f127a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e6a115b488d21da875e867ce89d1e2409b4df7d4a4e03e5578c1a3e9aa7c49fa"
+  },
+  "id": "pigM0ub0yZjVymX0",
+  "tags": []
+}
