@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cyberpunk Interface</title>
+<link href="https://fonts.googleapis.com/css2?family=Major+Mono+Display&display=swap" rel="stylesheet">
+<style>
+    body {
+        font-family: 'Major Mono Display', monospace;
+        background-color: #0d0d0d;
+        color: #00ffcc;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        overflow: hidden;
+    }
+    .container {
+        background-color: #1a1a1a;
+        border: 2px solid #ff00ff;
+        box-shadow: 0 0 15px #ff00ff, 0 0 25px #00ffcc;
+        padding: 40px 60px;
+        text-align: center;
+        max-width: 700px;
+        border-radius: 8px;
+        position: relative;
+        animation: glow-border 1.5s infinite alternate;
+    }
+    @keyframes glow-border {
+        from { border-color: #ff00ff; box-shadow: 0 0 15px #ff00ff, 0 0 25px #00ffcc; }
+        to { border-color: #00ffcc; box-shadow: 0 0 20px #00ffcc, 0 0 30px #ff00ff; }
+    }
+    h1 {
+        font-size: 3em;
+        margin-bottom: 20px;
+        color: #00ffcc;
+        text-shadow: 0 0 8px #00ffcc, 0 0 15px #00ffcc, 0 0 20px #ff00ff;
+        animation: glitch 1.5s infinite alternate;
+    }
+    @keyframes glitch {
+        0% { text-shadow: 0 0 8px #00ffcc, 0 0 15px #00ffcc, 0 0 20px #ff00ff; transform: skew(0deg); }
+        20% { text-shadow: 0 0 8px #00ffcc, 0 0 15px #00ffcc, 0 0 20px #ff00ff; transform: skew(-3deg); }
+        40% { text-shadow: 0 0 8px #00ffcc, 0 0 15px #00ffcc, 0 0 20px #ff00ff; transform: skew(3deg); }
+        60% { text-shadow: 0 0 8px #00ffcc, 0 0 15px #00ffcc, 0 0 20px #ff00ff; transform: skew(-2deg); }
+        80% { text-shadow: 0 0 8px #00ffcc, 0 0 15px #00ffcc, 0 0 20px #ff00ff; transform: skew(2deg); }
+        100% { text-shadow: 0 0 8px #00ffcc, 0 0 15px #00ffcc, 0 0 20px #ff00ff; transform: skew(0deg); }
+    }
+    p {
+        font-size: 1.2em;
+        margin-bottom: 30px;
+        line-height: 1.5;
+        text-shadow: 0 0 5px #00ffcc;
+    }
+    .cyber-button {
+        background-color: #ff00ff;
+        color: #0d0d0d;
+        border: 2px solid #00ffcc;
+        padding: 15px 30px;
+        font-size: 1.3em;
+        font-family: 'Major Mono Display', monospace;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 0 10px #ff00ff;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        border-radius: 4px;
+        text-shadow: none;
+    }
+    .cyber-button:hover {
+        background-color: #00ffcc;
+        color: #0d0d0d;
+        border-color: #ff00ff;
+        box-shadow: 0 0 15px #00ffcc, 0 0 25px #ff00ff;
+        transform: scale(1.05);
+    }
+    .cyber-button:active {
+        transform: scale(0.98);
+        box-shadow: 0 0 5px #ff00ff;
+    }
+</style>
+</head>
+<body>
+    <div class="container">
+        <h1>NEO-TOKYO INTERFACE</h1>
+        <p>Welcome, netrunner. The digital frontier awaits your command. Prepare to dive into the neon-drenched reality of tomorrow.</p>
+        <button class="cyber-button">ACCESS THE GRID</button>
+    </div>
+</body>
+</html>
