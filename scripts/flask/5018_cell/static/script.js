@@ -852,15 +852,22 @@ function applyMarkdownFormatting(rowIndex, colIndex, value) {
 }
 
 /* ----------  COMMA-TABLE → CSS-GRID  ---------- */
-function parseCommaTable(cols, text) {
+function parseCommaTable(cols, text, borderColor, borderWidth) {
     const items = text.split(',').map(c => c.trim());
 
-    let html = `<div class="md-grid" style="--cols:${cols}">`;
+    let gridStyle = `--cols:${cols};`;
+
+    // Explicitly calculate border style to ensure it applies
+    const bColor = borderColor || '#ced4da';
+    const bWidth = borderWidth || '1px';
+    const cellStyle = `border: ${bWidth} solid ${bColor} !important;`;
+
+    let html = `<div class="md-grid" style="${gridStyle}">`;
     items.forEach((item, i) => {
         // Skip empty last item if it's just a trailing comma
         if (i === items.length - 1 && item === '') return;
 
-        html += `<div class="md-cell">${parseMarkdownInline(item)}</div>`;
+        html += `<div class="md-cell" style="${cellStyle}">${parseMarkdownInline(item)}</div>`;
     });
     html += '</div>';
     return html;
@@ -981,31 +988,34 @@ function parseMarkdownInline(text) {
 
 /**
  * Parse markdown syntax and convert to HTML
- * 
- * Supported syntax:
- * - **bold** -> <strong>
- * - @@italic@@ -> <em>
- * - __underline__ -> <u>
- * - ~~strikethrough~~ -> <del>
- * - ^superscript^ -> <sup>
- * - ~subscript~ -> <sub>
- * - ##heading## -> larger text
- * - `code` -> <code>
- * - ==highlight== -> <mark>
- * - {fg:color}text{/} or {bg:color}text{/} or {fg:color;bg:color}text{/} -> colored text
- * - - item -> bullet list
- * - -- subitem -> sub-bullet list
- * - 1. item -> numbered list
- * - ``` code block ```
- * - | table | syntax | -> HTML table
  */
 function parseMarkdown(text) {
     if (!text) return '';
 
     // Table*N detection
-    const tableMatch = text.match(/^Table\*(\d+)(?:[\n\s,]+)([\s\S]*)/i);
+    const tableMatch = text.match(/^Table\*(\d+)(?:\s*_\s*([^\s\n,]+))?(?:\s*_\s*([^\s\n,]+))?(?:[\n\s,]+)([\s\S]*)/i);
     if (tableMatch) {
-        return parseCommaTable(parseInt(tableMatch[1]), tableMatch[2]);
+        const cols = parseInt(tableMatch[1]);
+        const param1 = tableMatch[2];
+        const param2 = tableMatch[3];
+        const content = tableMatch[4];
+
+        let borderColor = null;
+        let borderWidth = null;
+
+        // Helper to check if string is a size (ends in px, em, rem, %)
+        const isSize = (s) => s && /^\d+(?:px|em|rem|%)$/i.test(s);
+
+        if (param1) {
+            if (isSize(param1)) borderWidth = param1;
+            else borderColor = param1;
+        }
+        if (param2) {
+            if (isSize(param2)) borderWidth = param2;
+            else if (!borderColor) borderColor = param2;
+        }
+
+        return parseCommaTable(cols, content, borderColor, borderWidth);
     }
 
     /* -----  GRID-TABLE DETECTION  ----- */
@@ -4104,7 +4114,7 @@ function stripMarkdown(text) {
     stripped = stripped.replace(/^\s*--\s+/gm, '');
 
     // Remove Table*N marker
-    stripped = stripped.replace(/^Table\*\d+(?:[\n\s,]+)/i, '');
+    stripped = stripped.replace(/^Table\*\d+(?:_[^\s\n,]+)?(?:_[^\s\n,]+)?(?:[\n\s,]+)/i, '');
 
     return stripped;
 }

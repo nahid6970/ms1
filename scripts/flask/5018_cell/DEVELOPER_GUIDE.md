@@ -53,25 +53,6 @@ if (cellValue && (
 **Purpose:** Removes your syntax so that sorting and searching work on the *content*, not the *markup*.
 **Action:** Add a regex replace to strip your syntax tags.
 ```javascript
-// Remove YourSyntax markers
-stripped = stripped.replace(/YourSyntaxWrapper/g, '');
-```
-
----
-
-## Case Study: Implementing `Table*N`
-
-To implement the feature where typing `Table*5` creates a 5-column grid:
-
-1.  **Parsing (`parseMarkdown`)**: Added regex `^Table\*(\d+)` to detect the line. Created `parseCommaTable` function to split the following text by commas and generate `<div class="md-grid">` HTML.
-2.  **Detection (`applyMarkdownFormatting`)**: Added `value.trim().match(/^Table\*\d+/i)` to the `hasMarkdown` condition.
-3.  **Persistence (`renderTable`)**: Added the same regex check to the loop in `renderTable` so it renders correctly on load.
-4.  **Cleanup (`stripMarkdown`)**: Added `stripped.replace(/^Table\*\d+(?:[\n\s,]+)/i, '')` to ignore the "Table*5" text during sorts.
-5.  **Styling (`style.css`)**: Added `.md-grid`, `.md-cell` classes to handle the CSS Grid layout.
-
-## Important Code Snippets
-
-### Markdown Grid CSS
 The grid system relies on CSS variables for dynamic column counts:
 ```css
 .md-grid {
