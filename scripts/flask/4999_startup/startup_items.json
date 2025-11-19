@@ -520,5 +520,14 @@
     ],
     "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5018_cell\\app.py",
     "ExecutableType": "pythonw"
+  },
+  {
+    "name": "n8n",
+    "type": "Command",
+    "paths": [
+      "C:\\Program Files\\AutoHotkey\\v2\\AutoHotkey.exe"
+    ],
+    "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\Autohtokey\\Command\\n8n.ahk",
+    "ExecutableType": "ahk_v2"
   }
 ]
