@@ -705,7 +705,7 @@ async function deleteRow(index) {
 
 async function deleteEmptyRows() {
     const sheet = tableData.sheets[currentSheet];
-    
+
     // Find all empty rows (rows where all cells are empty or whitespace)
     const emptyRowIndices = [];
     sheet.rows.forEach((row, index) => {
@@ -733,7 +733,7 @@ async function deleteEmptyRows() {
                 sheet.rows.splice(rowIndex, 1);
             }
         }
-        
+
         renderTable();
         showToast(`Deleted ${emptyRowIndices.length} empty row${emptyRowIndices.length !== 1 ? 's' : ''}`, 'success');
     } catch (error) {
@@ -805,6 +805,7 @@ function applyMarkdownFormatting(rowIndex, colIndex, value) {
         value.includes('\n-- ') ||
         value.trim().startsWith('- ') ||
         value.trim().startsWith('-- ') ||
+        value.trim().match(/^Table\*\d+/i) ||
         value.trim().startsWith('|') ||
         (value.includes('|') && value.split('|').length >= 2)  // Inline pipe format
     );
@@ -848,6 +849,21 @@ function applyMarkdownFormatting(rowIndex, colIndex, value) {
         delete inputElement.dataset.formattedHtml;
         inputElement.classList.remove('has-markdown');
     }
+}
+
+/* ----------  COMMA-TABLE → CSS-GRID  ---------- */
+function parseCommaTable(cols, text) {
+    const items = text.split(',').map(c => c.trim());
+
+    let html = `<div class="md-grid" style="--cols:${cols}">`;
+    items.forEach((item, i) => {
+        // Skip empty last item if it's just a trailing comma
+        if (i === items.length - 1 && item === '') return;
+
+        html += `<div class="md-cell">${parseMarkdownInline(item)}</div>`;
+    });
+    html += '</div>';
+    return html;
 }
 
 /* ----------  PIPE-TABLE → CSS-GRID  ---------- */
@@ -985,6 +1001,12 @@ function parseMarkdownInline(text) {
  */
 function parseMarkdown(text) {
     if (!text) return '';
+
+    // Table*N detection
+    const tableMatch = text.match(/^Table\*(\d+)(?:[\n\s,]+)([\s\S]*)/i);
+    if (tableMatch) {
+        return parseCommaTable(parseInt(tableMatch[1]), tableMatch[2]);
+    }
 
     /* -----  GRID-TABLE DETECTION  ----- */
     const lines = text.split('\n');
@@ -2746,7 +2768,7 @@ function toggleCategoryList(event) {
     if (event) {
         event.stopPropagation();
     }
-    
+
     const categoryList = document.getElementById('categoryList');
     const isShowing = categoryList.classList.toggle('show');
 
@@ -3990,7 +4012,8 @@ function renderTable() {
                 cellValue.includes('{bg:') ||
                 cellValue.includes('{link:') ||
                 cellValue.includes('\n- ') ||
-                cellValue.trim().startsWith('- ')
+                cellValue.trim().startsWith('- ') ||
+                cellValue.trim().match(/^Table\*\d+/i)
             )) {
                 applyMarkdownFormatting(rowIndex, colIndex, cellValue);
             }
@@ -4079,6 +4102,9 @@ function stripMarkdown(text) {
 
     // Remove sub-bullet markers: -- item -> item
     stripped = stripped.replace(/^\s*--\s+/gm, '');
+
+    // Remove Table*N marker
+    stripped = stripped.replace(/^Table\*\d+(?:[\n\s,]+)/i, '');
 
     return stripped;
 }
@@ -4290,18 +4316,18 @@ function populateF2RecentSheets() {
     const savedHistory = localStorage.getItem('sheetHistory');
     let recentSheets = [];
     let allSheetIndices = [];
-    
+
     // Get all sheet indices
     tableData.sheets.forEach((sheet, index) => {
         allSheetIndices.push(index);
     });
-    
+
     if (savedHistory) {
         try {
             const history = JSON.parse(savedHistory);
             // Filter out invalid sheet indices and reverse to show most recent first
             recentSheets = history.filter(idx => idx >= 0 && idx < tableData.sheets.length).reverse();
-            
+
             // Add current sheet at the beginning if not already there
             if (!recentSheets.includes(currentSheet)) {
                 recentSheets.unshift(currentSheet);
@@ -4310,7 +4336,7 @@ function populateF2RecentSheets() {
                 recentSheets = recentSheets.filter(idx => idx !== currentSheet);
                 recentSheets.unshift(currentSheet);
             }
-            
+
             // Add any sheets not in history to the end
             allSheetIndices.forEach(idx => {
                 if (!recentSheets.includes(idx)) {
@@ -4333,7 +4359,7 @@ function populateF2RecentSheets() {
         const item = document.createElement('div');
         item.className = 'f2-sheet-item';
         item.tabIndex = 0;
-        
+
         if (sheetIndex === currentSheet) {
             item.classList.add('active');
         }
@@ -4388,7 +4414,7 @@ function showQuickFormatter(inputElement) {
 
     const formatter = document.getElementById('quickFormatter');
     const colorSection = document.getElementById('colorPickerSection');
-    
+
     // Show color section by default
     colorSection.style.display = 'block';
     loadColorSwatches();
@@ -4444,23 +4470,23 @@ function closeQuickFormatter() {
 function selectAllMatchingFromFormatter(event) {
     event.preventDefault();
     event.stopPropagation();
-    
+
     if (!quickFormatterTarget) {
         console.log('No quickFormatterTarget');
         return;
     }
-    
+
     // Store the target and selection
     const target = quickFormatterTarget;
     const selection = quickFormatterSelection;
-    
+
     // Keep the input focused and restore selection
     target.focus();
     target.setSelectionRange(selection.start, selection.end);
-    
+
     // Select all matching occurrences
     selectAllMatchingOccurrences(target);
-    
+
     // Close the formatter after selection is done
     setTimeout(() => {
         closeQuickFormatter();
@@ -4962,14 +4988,14 @@ function selectAllMatchingOccurrences(input) {
     // Select the last match visually
     const lastMatch = matches[matches.length - 1];
     input.setSelectionRange(lastMatch.start, lastMatch.end);
-    
+
     // Show indicator
     showMultiSelectionIndicator(input, matches.length, matches.length);
     showToast(`All ${matches.length} occurrences selected. Type to replace all.`, 'info');
-    
+
     // Show visual markers for all selections
     showSelectionMarkers(input, matches);
-    
+
     // Set up the listener for replacement
     setupMultiReplaceListener(input);
     multiSelectionData.listenerSetup = true;
@@ -5181,10 +5207,10 @@ function handleMultiCursorEdit(input, action, char) {
 
     const text = input.value;
     let result = text;
-    
+
     // Sort matches from right to left to maintain positions during replacement
     const sortedMatches = [...multiSelectionData.matches].sort((a, b) => b.start - a.start);
-    
+
     // Apply the edit to each match (processing right to left)
     for (const match of sortedMatches) {
         if (action === 'insert') {
@@ -5221,13 +5247,13 @@ function handleMultiCursorEdit(input, action, char) {
     // Recalculate match positions (process in original order, left to right)
     let offset = 0;
     const newMatches = [];
-    
+
     for (let i = 0; i < multiSelectionData.matches.length; i++) {
         const oldMatch = multiSelectionData.matches[i];
         const oldLength = oldMatch.end - oldMatch.start;
         let newLength = 0;
         let offsetChange = 0;
-        
+
         if (action === 'insert') {
             // Cursor moves to after inserted text  
             const newPos = oldMatch.start + offset + char.length;
@@ -5254,25 +5280,25 @@ function handleMultiCursorEdit(input, action, char) {
             }
             newLength = 0;
         }
-        
+
         const newStart = oldMatch.start + offset;
         const newEnd = newStart + newLength;
-        
+
         newMatches.push({ start: newStart, end: newEnd });
-        
+
         // Update offset for next match
         offset += offsetChange;
     }
-    
+
     multiSelectionData.matches = newMatches;
-    
+
     // Position cursor at the last match
     const lastMatch = newMatches[newMatches.length - 1];
     input.setSelectionRange(lastMatch.end, lastMatch.end);
-    
+
     // Show visual markers
     showSelectionMarkers(input, newMatches);
-    
+
     // Trigger change event
     const changeEvent = new Event('input', { bubbles: true });
     input.dispatchEvent(changeEvent);
@@ -5285,7 +5311,7 @@ function handleMultiSelectionExtension(input, key) {
     const lines = text.split('\n');
     let currentPos = 0;
     const lineStarts = [0];
-    
+
     // Build line start positions
     for (let i = 0; i < lines.length - 1; i++) {
         currentPos += lines[i].length + 1; // +1 for newline
@@ -5303,7 +5329,7 @@ function handleMultiSelectionExtension(input, key) {
                 const nextStart = lineStarts[idx + 1] || text.length;
                 return match.start >= start && match.start < nextStart;
             });
-            
+
             if (lineIndex !== -1) {
                 const nextLineStart = lineStarts[lineIndex + 1];
                 newEnd = nextLineStart ? nextLineStart - 1 : text.length;
@@ -5314,7 +5340,7 @@ function handleMultiSelectionExtension(input, key) {
                 const nextStart = lineStarts[idx + 1] || text.length;
                 return match.start >= start && match.start < nextStart;
             });
-            
+
             if (lineIndex !== -1) {
                 newStart = lineStarts[lineIndex];
             }
@@ -5980,14 +6006,14 @@ function handleF1Drop(e) {
 
     if (draggedF1Item !== this && this.classList.contains('f1-sheet-item')) {
         const targetIndex = parseInt(this.dataset.sheetIndex);
-        
+
         // Remove the dragged sheet from its current position
         const movedSheet = tableData.sheets.splice(draggedSheetIndex, 1)[0];
         const movedCategory = tableData.sheetCategories[draggedSheetIndex];
-        
+
         // Remove the category entry for the old position
         delete tableData.sheetCategories[draggedSheetIndex];
-        
+
         // Rebuild sheetCategories with updated indices
         const newCategories = {};
         Object.keys(tableData.sheetCategories).forEach(key => {
@@ -6000,10 +6026,10 @@ function handleF1Drop(e) {
             }
         });
         tableData.sheetCategories = newCategories;
-        
+
         // Insert the sheet at the target position
         tableData.sheets.splice(targetIndex, 0, movedSheet);
-        
+
         // Rebuild sheetCategories again to account for the insertion
         const finalCategories = {};
         Object.keys(tableData.sheetCategories).forEach(key => {
@@ -6015,13 +6041,13 @@ function handleF1Drop(e) {
                 finalCategories[idx] = tableData.sheetCategories[key];
             }
         });
-        
+
         // Set the category for the moved sheet
         if (movedCategory) {
             finalCategories[targetIndex] = movedCategory;
         }
         tableData.sheetCategories = finalCategories;
-        
+
         // Update current sheet index
         if (currentSheet === draggedSheetIndex) {
             currentSheet = targetIndex;
@@ -6043,7 +6069,7 @@ function handleF1Drop(e) {
 
 function handleF1DragEnd(e) {
     this.classList.remove('dragging');
-    
+
     // Remove all drag indicators
     document.querySelectorAll('.f1-sheet-item').forEach(item => {
         item.style.borderColor = '';
@@ -6058,7 +6084,7 @@ function addSeparatorAboveSheet(sheetIndex) {
 
     const separatorKey = `${selectedF1Category || 'uncategorized'}_${sheetIndex}`;
     tableData.sheetSeparators[separatorKey] = true;
-    
+
     saveData();
     showToast('Separator added', 'success');
 }
@@ -6066,13 +6092,13 @@ function addSeparatorAboveSheet(sheetIndex) {
 function addSeparatorAtCursor() {
     window.f1SeparatorMode = true;
     document.body.style.cursor = 'crosshair';
-    
+
     // Add visual indicator to all sheets
     document.querySelectorAll('.f1-sheet-item').forEach(item => {
         item.style.cursor = 'crosshair';
         item.classList.add('separator-mode');
     });
-    
+
     showToast('Click before any sheet to add separator', 'info');
 }
 
@@ -6174,13 +6200,13 @@ function filterF1Sheets() {
 
         const searchLower = searchTerm.toLowerCase();
         const sheetItems = document.querySelectorAll('.f1-sheet-item');
-        
+
         // Hide separators when searching
         if (searchLower) {
             const separators = document.querySelectorAll('.f1-sheet-separator');
             separators.forEach(sep => sep.style.display = 'none');
         }
-        
+
         sheetItems.forEach(item => {
             const sheetIndex = parseInt(item.dataset.sheetIndex);
             const sheet = tableData.sheets[sheetIndex];
@@ -6251,15 +6277,15 @@ function toggleRecentSheets() {
 function toggleTopRibbons() {
     const toolbar = document.querySelector('.toolbar');
     const sheetTabs = document.querySelector('.sheet-tabs');
-    
+
     // Get current state (0=all shown, 1=sheets hidden, 2=toolbar hidden, 3=both hidden)
     let currentState = parseInt(localStorage.getItem('ribbonsState') || '0');
-    
+
     // Cycle to next state
     currentState = (currentState + 1) % 4;
-    
+
     // Apply state
-    switch(currentState) {
+    switch (currentState) {
         case 0: // Show all
             toolbar.style.display = 'flex';
             sheetTabs.style.display = 'flex';
@@ -6281,7 +6307,7 @@ function toggleTopRibbons() {
             showToast('All ribbons hidden (F4 to cycle)', 'info');
             break;
     }
-    
+
     localStorage.setItem('ribbonsState', currentState.toString());
 }
 
@@ -6290,8 +6316,8 @@ window.addEventListener('load', () => {
     const ribbonsState = parseInt(localStorage.getItem('ribbonsState') || '0');
     const toolbar = document.querySelector('.toolbar');
     const sheetTabs = document.querySelector('.sheet-tabs');
-    
-    switch(ribbonsState) {
+
+    switch (ribbonsState) {
         case 1: // Hide sheet tabs only
             sheetTabs.style.display = 'none';
             break;
@@ -6310,31 +6336,31 @@ window.addEventListener('load', () => {
 function adjustCellHeightForMarkdown(cell) {
     const input = cell.querySelector('input, textarea');
     const preview = cell.querySelector('.markdown-preview');
-    
+
     if (!input || !preview || !input.classList.contains('has-markdown')) {
         return;
     }
-    
+
     // Temporarily show both to measure
     const originalInputDisplay = input.style.display;
     const originalPreviewDisplay = preview.style.display;
-    
+
     input.style.display = 'block';
     preview.style.display = 'block';
-    
+
     // Measure heights
     const inputHeight = input.scrollHeight;
     const previewHeight = preview.scrollHeight;
-    
+
     // Use the larger height
     const maxHeight = Math.max(inputHeight, previewHeight);
-    
+
     // Apply to both
     if (input.tagName === 'TEXTAREA') {
         input.style.minHeight = maxHeight + 'px';
     }
     preview.style.minHeight = maxHeight + 'px';
-    
+
     // Restore display
     input.style.display = originalInputDisplay;
     preview.style.display = originalPreviewDisplay;
@@ -6353,7 +6379,7 @@ function adjustAllMarkdownCells() {
 
 // Call after table renders
 const originalRenderTable = renderTable;
-renderTable = function() {
+renderTable = function () {
     originalRenderTable.apply(this, arguments);
     setTimeout(() => {
         adjustAllMarkdownCells();
