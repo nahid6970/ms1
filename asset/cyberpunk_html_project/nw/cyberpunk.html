@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyberpunk Interface</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #050505;
+            --neon-cyan: #00f3ff;
+            --neon-pink: #ff00ff;
+            --neon-yellow: #fcee0a;
+            --glass-bg: rgba(20, 20, 20, 0.6);
+            --border-color: rgba(0, 243, 255, 0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: #fff;
+            font-family: 'Rajdhani', sans-serif;
+            overflow-x: hidden;
+            min-height: 100vh;
+            background-image: 
+                linear-gradient(0deg, transparent 24%, rgba(0, 243, 255, .03) 25%, rgba(0, 243, 255, .03) 26%, transparent 27%, transparent 74%, rgba(0, 243, 255, .03) 75%, rgba(0, 243, 255, .03) 76%, transparent 77%, transparent),
+                linear-gradient(90deg, transparent 24%, rgba(0, 243, 255, .03) 25%, rgba(0, 243, 255, .03) 26%, transparent 27%, transparent 74%, rgba(0, 243, 255, .03) 75%, rgba(0, 243, 255, .03) 76%, transparent 77%, transparent);
+            background-size: 50px 50px;
+        }
+
+        /* Scanline effect */
+        body::after {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        h1, h2, h3, .cyber-font {
+            font-family: 'Orbitron', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 2rem 0;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 4rem;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: 900;
+            color: var(--neon-cyan);
+            text-shadow: 0 0 10px var(--neon-cyan);
+        }
+
+        .nav-link {
+            color: #fff;
+            text-decoration: none;
+            margin-left: 2rem;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-link:hover {
+            color: var(--neon-pink);
+            text-shadow: 0 0 8px var(--neon-pink);
+        }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--neon-pink);
+            transition: width 0.3s ease;
+            box-shadow: 0 0 10px var(--neon-pink);
+        }
+
+        .nav-link:hover::before {
+            width: 100%;
+        }
+
+        /* Hero Section */
+        .hero {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 4rem 0;
+        }
+
+        .glitch-wrapper {
+            position: relative;
+        }
+
+        .hero-title {
+            font-size: 5rem;
+            line-height: 1.1;
+            margin-bottom: 1rem;
+            position: relative;
+            color: #fff;
+            text-shadow: 2px 2px var(--neon-pink), -2px -2px var(--neon-cyan);
+            animation: glitch-anim 3s infinite linear alternate-reverse;
+        }
+
+        @keyframes glitch-anim {
+            0% { text-shadow: 2px 2px var(--neon-pink), -2px -2px var(--neon-cyan); }
+            25% { text-shadow: -2px 2px var(--neon-pink), 2px -2px var(--neon-cyan); }
+            50% { text-shadow: 2px -2px var(--neon-pink), -2px 2px var(--neon-cyan); }
+            75% { text-shadow: -2px -2px var(--neon-pink), 2px 2px var(--neon-cyan); }
+            100% { text-shadow: 2px 2px var(--neon-pink), -2px -2px var(--neon-cyan); }
+        }
+
+        .hero-subtitle {
+            font-size: 1.5rem;
+            color: var(--neon-yellow);
+            margin-bottom: 3rem;
+            max-width: 600px;
+            border-left: 3px solid var(--neon-yellow);
+            padding-left: 1rem;
+        }
+
+        /* Cyber Button */
+        .cyber-btn {
+            background: transparent;
+            color: var(--neon-cyan);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
+            padding: 1rem 3rem;
+            border: 2px solid var(--neon-cyan);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.2);
+            clip-path: polygon(10% 0, 100% 0, 100% 70%, 90% 100%, 0 100%, 0 30%);
+        }
+
+        .cyber-btn:hover {
+            background: var(--neon-cyan);
+            color: #000;
+            box-shadow: 0 0 20px var(--neon-cyan);
+        }
+
+        .cyber-btn::after {
+            content: ">>";
+            position: absolute;
+            right: 10px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .cyber-btn:hover::after {
+            opacity: 1;
+        }
+
+        /* Grid Section */
+        .grid-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 6rem;
+        }
+
+        .cyber-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--border-color);
+            padding: 2rem;
+            position: relative;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .cyber-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.2);
+            border-color: var(--neon-cyan);
+        }
+
+        .cyber-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent);
+        }
+
+        .card-icon {
+            font-size: 2rem;
+            color: var(--neon-pink);
+            margin-bottom: 1rem;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #fff;
+        }
+
+        .card-text {
+            color: #aaa;
+            line-height: 1.6;
+        }
+
+        /* Footer */
+        footer {
+            margin-top: 6rem;
+            padding: 2rem 0;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        /* Decorative Elements */
+        .corner-decoration {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--neon-cyan);
+            transition: all 0.3s;
+        }
+
+        .top-left { top: -2px; left: -2px; border-right: none; border-bottom: none; }
+        .top-right { top: -2px; right: -2px; border-left: none; border-bottom: none; }
+        .bottom-left { bottom: -2px; left: -2px; border-right: none; border-top: none; }
+        .bottom-right { bottom: -2px; right: -2px; border-left: none; border-top: none; }
+
+        .cyber-card:hover .corner-decoration {
+            width: 30px;
+            height: 30px;
+            box-shadow: 0 0 10px var(--neon-cyan);
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">NEO_SYS</div>
+            <nav>
+                <a href="#" class="nav-link">ACCESS</a>
+                <a href="#" class="nav-link">DATA</a>
+                <a href="#" class="nav-link">NETWORK</a>
+            </nav>
+        </header>
+
+        <main>
+            <section class="hero">
+                <div class="glitch-wrapper">
+                    <h1 class="hero-title">FUTURE<br>IS NOW</h1>
+                </div>
+                <p class="hero-subtitle">System initialized. Welcome to the neural network interface v2.0.77. Secure connection established.</p>
+                <button class="cyber-btn">INITIALIZE</button>
+            </section>
+
+            <section class="grid-section">
+                <div class="cyber-card">
+                    <div class="corner-decoration top-left"></div>
+                    <div class="corner-decoration top-right"></div>
+                    <div class="corner-decoration bottom-left"></div>
+                    <div class="corner-decoration bottom-right"></div>
+                    <div class="card-icon">⚡</div>
+                    <h3 class="card-title">HIGH VOLTAGE</h3>
+                    <p class="card-text">Optimized for maximum power throughput. Neural link stability at 99.9%.</p>
+                </div>
+
+                <div class="cyber-card">
+                    <div class="corner-decoration top-left"></div>
+                    <div class="corner-decoration top-right"></div>
+                    <div class="corner-decoration bottom-left"></div>
+                    <div class="corner-decoration bottom-right"></div>
+                    <div class="card-icon">🔒</div>
+                    <h3 class="card-title">ENCRYPTED</h3>
+                    <p class="card-text">Military grade encryption protocols active. Your data is safe from netrunners.</p>
+                </div>
+
+                <div class="cyber-card">
+                    <div class="corner-decoration top-left"></div>
+                    <div class="corner-decoration top-right"></div>
+                    <div class="corner-decoration bottom-left"></div>
+                    <div class="corner-decoration bottom-right"></div>
+                    <div class="card-icon">🌐</div>
+                    <h3 class="card-title">GLOBAL NET</h3>
+                    <p class="card-text">Connected to the worldwide mainframe. Access information at the speed of light.</p>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>SYSTEM STATUS: ONLINE // © 2077 NEO_SYS CORP</p>
+        </footer>
+    </div>
+</body>
+</html>
