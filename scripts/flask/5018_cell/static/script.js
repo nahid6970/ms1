@@ -807,6 +807,7 @@ function applyMarkdownFormatting(rowIndex, colIndex, value) {
         value.trim().startsWith('-- ') ||
         value.trim().match(/^Table\*\d+/i) ||
         value.trim().startsWith('|') ||
+        value.includes('\\(') || // Math detection
         (value.includes('|') && value.split('|').length >= 2)  // Inline pipe format
     );
 
@@ -921,6 +922,20 @@ function parseGridTable(lines) {
 /*  inline parser for table cells - supports all markdown except lists  */
 function parseMarkdownInline(text) {
     let formatted = text;
+
+    // Math: \( ... \) -> KaTeX (process first to avoid conflicts)
+    if (window.katex) {
+        formatted = formatted.replace(/\\\((.*?)\\\)/g, (match, math) => {
+            try {
+                return katex.renderToString(math, {
+                    throwOnError: false,
+                    displayMode: false
+                });
+            } catch (e) {
+                return match;
+            }
+        });
+    }
 
     // Links: {link:url}text{/} -> <a href="url">text</a>
     formatted = formatted.replace(/\{link:([^}]+)\}(.+?)\{\/\}/g, (match, url, text) => {
@@ -1072,6 +1087,20 @@ function oldParseMarkdownBody(lines) {
 
         if (inCodeBlock) {
             return `<code>${formatted}</code>`;
+        }
+
+        // Math: \( ... \) -> KaTeX (process first to avoid conflicts)
+        if (window.katex) {
+            formatted = formatted.replace(/\\\((.*?)\\\)/g, (match, math) => {
+                try {
+                    return katex.renderToString(math, {
+                        throwOnError: false,
+                        displayMode: false
+                    });
+                } catch (e) {
+                    return match;
+                }
+            });
         }
 
         // Links: {link:url}text{/} -> <a href="url">text</a>
@@ -4023,7 +4052,8 @@ function renderTable() {
                 cellValue.includes('{link:') ||
                 cellValue.includes('\n- ') ||
                 cellValue.trim().startsWith('- ') ||
-                cellValue.trim().match(/^Table\*\d+/i)
+                cellValue.trim().match(/^Table\*\d+/i) ||
+                cellValue.includes('\\(') // Math detection
             )) {
                 applyMarkdownFormatting(rowIndex, colIndex, cellValue);
             }
@@ -4115,6 +4145,9 @@ function stripMarkdown(text) {
 
     // Remove Table*N marker
     stripped = stripped.replace(/^Table\*\d+(?:_[^\s\n,]+)?(?:_[^\s\n,]+)?(?:[\n\s,]+)/i, '');
+
+    // Remove Math markers: \( ... \) -> ...
+    stripped = stripped.replace(/\\\((.*?)\\\)/g, '$1');
 
     return stripped;
 }

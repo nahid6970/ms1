@@ -11,6 +11,12 @@
         href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <!-- KaTeX for Math Rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"
+        integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"
+        integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8"
+        crossorigin="anonymous"></script>
 </head>
 
 <body>
@@ -127,7 +133,8 @@
                     <span>📝</span>
                 </label>
 
-                <button onclick="deleteEmptyRows()" class="btn-icon-toggle btn-delete-empty" title="Delete all empty rows">
+                <button onclick="deleteEmptyRows()" class="btn-icon-toggle btn-delete-empty"
+                    title="Delete all empty rows">
                     <span>#️⃣</span>
                 </button>
             </div>
@@ -168,8 +175,8 @@
 
                 <div class="form-group">
                     <label for="columnName">Column Name</label>
-                    <input type="text" id="columnName" class="form-input" placeholder="Leave empty for auto (A, B, C...)"
-                        autofocus>
+                    <input type="text" id="columnName" class="form-input"
+                        placeholder="Leave empty for auto (A, B, C...)" autofocus>
                 </div>
 
                 <div class="form-row">
@@ -292,8 +299,10 @@
                 </div>
                 <div class="form-group">
                     <label for="sheetNickname">Nickname (optional, for easier searching)</label>
-                    <input type="text" id="sheetNickname" class="form-input" placeholder="e.g., English name for Bangla sheet">
-                    <small style="color: #666; font-size: 12px;">Nickname won't be displayed but can be used to search with *</small>
+                    <input type="text" id="sheetNickname" class="form-input"
+                        placeholder="e.g., English name for Bangla sheet">
+                    <small style="color: #666; font-size: 12px;">Nickname won't be displayed but can be used to search
+                        with *</small>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" onclick="closeRenameModal()">Cancel</button>
@@ -377,7 +386,7 @@
             <div class="settings-content">
                 <div class="settings-section">
                     <h3 class="settings-section-title">🎨 Appearance</h3>
-                    
+
                     <div class="settings-item">
                         <div class="settings-item-header">
                             <label for="gridLineColor" class="settings-label">Grid Line Color</label>
@@ -385,32 +394,33 @@
                         </div>
                         <div class="color-picker-group">
                             <div class="color-picker-wrapper">
-                                <input type="color" id="gridLineColor" value="#dddddd" 
+                                <input type="color" id="gridLineColor" value="#dddddd"
                                     oninput="syncGridLineColor(this.value)">
                                 <span class="color-picker-label">Pick Color</span>
                             </div>
                             <div class="color-input-wrapper">
                                 <span class="color-input-prefix">#</span>
-                                <input type="text" id="gridLineColorText" value="DDDDDD" 
-                                    maxlength="6" placeholder="DDDDDD"
-                                    oninput="syncGridLineColor('#' + this.value)">
+                                <input type="text" id="gridLineColorText" value="DDDDDD" maxlength="6"
+                                    placeholder="DDDDDD" oninput="syncGridLineColor('#' + this.value)">
                             </div>
                         </div>
                         <p class="settings-description">Customize the color of table borders and cell separators</p>
                     </div>
-                    
+
                     <div class="settings-item" style="margin-top: 20px;">
                         <div class="settings-item-header">
                             <label for="vrindaFontToggle" class="settings-label">Use Vrinda Font for Bangla</label>
                             <label class="toggle-switch">
-                                <input type="checkbox" id="vrindaFontToggle" onchange="toggleVrindaFont(this.checked)" checked>
+                                <input type="checkbox" id="vrindaFontToggle" onchange="toggleVrindaFont(this.checked)"
+                                    checked>
                                 <span class="toggle-slider"></span>
                             </label>
                         </div>
-                        <p class="settings-description">Enable Vrinda font for better Bangla text rendering. Disable if you prefer larger default fonts.</p>
+                        <p class="settings-description">Enable Vrinda font for better Bangla text rendering. Disable if
+                            you prefer larger default fonts.</p>
                     </div>
                 </div>
-                
+
                 <div class="settings-section">
                     <h3 class="settings-section-title">📚 Help & Documentation</h3>
                     <button class="btn btn-primary btn-full-width" onclick="showMarkdownGuide()">
@@ -503,7 +513,8 @@
                         <tr style="border-bottom: 1px solid #ddd;">
                             <td style="padding: 8px; font-family: monospace; background: #f8f9fa; font-size: 12px;">
                                 {link:https://google.com}Google{/}</td>
-                            <td style="padding: 8px;"><a href="https://google.com" target="_blank" style="color: #007bff; text-decoration: underline;">Google</a></td>
+                            <td style="padding: 8px;"><a href="https://google.com" target="_blank"
+                                    style="color: #007bff; text-decoration: underline;">Google</a></td>
                         </tr>
                     </table>
                 </div>
@@ -571,7 +582,8 @@
                         </tr>
                     </table>
                     <p style="font-size: 12px; color: #666; margin-top: 5px;">
-                        Syntax: <code>Table*Columns_Color_Width</code> (e.g., <code>Table*5_blue_2px</code>). Color and Width are optional.
+                        Syntax: <code>Table*Columns_Color_Width</code> (e.g., <code>Table*5_blue_2px</code>). Color and
+                        Width are optional.
                     </p>
                 </div>
 
@@ -614,7 +626,8 @@
                 <div class="f1-sheets">
                     <div class="f1-sheets-title">
                         <span>Sheets</span>
-                        <button class="f1-add-separator-btn" onclick="addSeparatorAtCursor()" title="Add separator (click then click between sheets)">
+                        <button class="f1-add-separator-btn" onclick="addSeparatorAtCursor()"
+                            title="Add separator (click then click between sheets)">
                             ➕ Separator
                         </button>
                     </div>
@@ -639,34 +652,48 @@
 
     <!-- Quick Markdown Formatter (F3) -->
     <div id="quickFormatter" class="quick-formatter">
-        <div class="quick-formatter-title">Quick Format <span style="font-size: 11px; color: #666;">(Right-click to select multiple)</span></div>
+        <div class="quick-formatter-title">Quick Format <span style="font-size: 11px; color: #666;">(Right-click to
+                select multiple)</span></div>
         <div id="selectionStats" class="selection-stats">0 lines • 0 words • 0 chars</div>
         <div class="quick-formatter-options">
-            <button class="format-btn" onclick="applyQuickFormat('**', '**', event)" oncontextmenu="return toggleFormatSelection('**', '**', event)" title="Bold (Right-click to select)">
+            <button class="format-btn" onclick="applyQuickFormat('**', '**', event)"
+                oncontextmenu="return toggleFormatSelection('**', '**', event)" title="Bold (Right-click to select)">
                 <strong>B</strong>
             </button>
-            <button class="format-btn" onclick="applyQuickFormat('@@', '@@', event)" oncontextmenu="return toggleFormatSelection('@@', '@@', event)" title="Italic (Right-click to select)">
+            <button class="format-btn" onclick="applyQuickFormat('@@', '@@', event)"
+                oncontextmenu="return toggleFormatSelection('@@', '@@', event)" title="Italic (Right-click to select)">
                 <em>I</em>
             </button>
-            <button class="format-btn" onclick="applyQuickFormat('__', '__', event)" oncontextmenu="return toggleFormatSelection('__', '__', event)" title="Underline (Right-click to select)">
+            <button class="format-btn" onclick="applyQuickFormat('__', '__', event)"
+                oncontextmenu="return toggleFormatSelection('__', '__', event)"
+                title="Underline (Right-click to select)">
                 <u>U</u>
             </button>
-            <button class="format-btn" onclick="applyQuickFormat('~~', '~~', event)" oncontextmenu="return toggleFormatSelection('~~', '~~', event)" title="Strikethrough (Right-click to select)">
+            <button class="format-btn" onclick="applyQuickFormat('~~', '~~', event)"
+                oncontextmenu="return toggleFormatSelection('~~', '~~', event)"
+                title="Strikethrough (Right-click to select)">
                 <del>S</del>
             </button>
-            <button class="format-btn" onclick="applyQuickFormat('==', '==', event)" oncontextmenu="return toggleFormatSelection('==', '==', event)" title="Highlight (Right-click to select)">
+            <button class="format-btn" onclick="applyQuickFormat('==', '==', event)"
+                oncontextmenu="return toggleFormatSelection('==', '==', event)"
+                title="Highlight (Right-click to select)">
                 <mark>H</mark>
             </button>
-            <button class="format-btn" onclick="applyQuickFormat('##', '##', event)" oncontextmenu="return toggleFormatSelection('##', '##', event)" title="Heading (Right-click to select)">
+            <button class="format-btn" onclick="applyQuickFormat('##', '##', event)"
+                oncontextmenu="return toggleFormatSelection('##', '##', event)" title="Heading (Right-click to select)">
                 <span style="font-size: 1.2em; font-weight: 600;">H</span>
             </button>
-            <button class="format-btn" onclick="applyQuickFormat('`', '`', event)" oncontextmenu="return toggleFormatSelection('`', '`', event)" title="Code (Right-click to select)">
+            <button class="format-btn" onclick="applyQuickFormat('`', '`', event)"
+                oncontextmenu="return toggleFormatSelection('`', '`', event)" title="Code (Right-click to select)">
                 <code>C</code>
             </button>
-            <button class="format-btn" onclick="applyQuickFormat('^', '^', event)" oncontextmenu="return toggleFormatSelection('^', '^', event)" title="Superscript (Right-click to select)">
+            <button class="format-btn" onclick="applyQuickFormat('^', '^', event)"
+                oncontextmenu="return toggleFormatSelection('^', '^', event)"
+                title="Superscript (Right-click to select)">
                 X<sup>2</sup>
             </button>
-            <button class="format-btn" onclick="applyQuickFormat('~', '~', event)" oncontextmenu="return toggleFormatSelection('~', '~', event)" title="Subscript (Right-click to select)">
+            <button class="format-btn" onclick="applyQuickFormat('~', '~', event)"
+                oncontextmenu="return toggleFormatSelection('~', '~', event)" title="Subscript (Right-click to select)">
                 X<sub>2</sub>
             </button>
             <button class="format-btn" onclick="applyLinkFormat(event)" title="Link">
@@ -678,10 +705,12 @@
             <button class="format-btn" onclick="sortLines(event)" title="Sort Lines Alphabetically">
                 🔤
             </button>
-            <button class="format-btn" onclick="selectAllMatchingFromFormatter(event)" title="Select All Matching - Edit all occurrences at once">
+            <button class="format-btn" onclick="selectAllMatchingFromFormatter(event)"
+                title="Select All Matching - Edit all occurrences at once">
                 🎯
             </button>
-            <button class="format-btn format-btn-color" onclick="showColorPicker(event)" oncontextmenu="return toggleColorSelection(event)" title="Custom Color (Right-click to select)">
+            <button class="format-btn format-btn-color" onclick="showColorPicker(event)"
+                oncontextmenu="return toggleColorSelection(event)" title="Custom Color (Right-click to select)">
                 🎨
             </button>
         </div>
@@ -689,7 +718,8 @@
             <div class="color-swatches-container">
                 <div class="color-swatches-header">
                     <span>Presets</span>
-                    <button class="btn-add-swatch" onclick="addCurrentColorToSwatches()" title="Save current colors">+</button>
+                    <button class="btn-add-swatch" onclick="addCurrentColorToSwatches()"
+                        title="Save current colors">+</button>
                 </div>
                 <div id="colorSwatches" class="color-swatches"></div>
             </div>
@@ -700,7 +730,8 @@
             <div class="color-picker-row">
                 <label>Background:</label>
                 <input type="color" id="quickBgColor" value="#ffff00">
-                <label style="margin-left: 10px; display: flex; align-items: center; gap: 5px; font-size: 12px; cursor: pointer;">
+                <label
+                    style="margin-left: 10px; display: flex; align-items: center; gap: 5px; font-size: 12px; cursor: pointer;">
                     <input type="checkbox" id="noBgCheckbox" style="cursor: pointer;">
                     <span>Don't use BG</span>
                 </label>
