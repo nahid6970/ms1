@@ -6428,3 +6428,390 @@ renderTable = function () {
         adjustAllMarkdownCells();
     }, 100);
 };
+
+// Quick Formatter Functions (F3)
+
+function applyQuickFormat(prefix, suffix, event) {
+    if (!quickFormatterTarget) return;
+
+    const input = quickFormatterTarget;
+    const start = quickFormatterSelection.start;
+    const end = quickFormatterSelection.end;
+    const selectedText = input.value.substring(start, end);
+
+    // Insert the formatting
+    const newText = input.value.substring(0, start) +
+        prefix + selectedText + suffix +
+        input.value.substring(end);
+
+    input.value = newText;
+
+    // Trigger change event to update cell
+    const changeEvent = new Event('input', { bubbles: true });
+    input.dispatchEvent(changeEvent);
+
+    // Set cursor position after the inserted text
+    const newCursorPos = start + prefix.length + selectedText.length + suffix.length;
+    input.setSelectionRange(newCursorPos, newCursorPos);
+    input.focus();
+
+    closeQuickFormatter();
+    showToast('Format applied', 'success');
+}
+
+function applyLinkFormat(event) {
+    if (!quickFormatterTarget) return;
+
+    const input = quickFormatterTarget;
+    const start = quickFormatterSelection.start;
+    const end = quickFormatterSelection.end;
+    const selectedUrl = input.value.substring(start, end);
+
+    // Use default placeholder text with italic formatting
+    const linkText = '@@Link@@';
+
+    // Insert the link syntax: {link:url}@@Link@@{/}
+    const newText = input.value.substring(0, start) +
+        `{link:${selectedUrl}}` + linkText + '{/}' +
+        input.value.substring(end);
+
+    input.value = newText;
+
+    // Trigger change event to update cell
+    const changeEvent = new Event('input', { bubbles: true });
+    input.dispatchEvent(changeEvent);
+
+    // Set cursor position after the inserted text
+    const linkPrefix = `{link:${selectedUrl}}`;
+    const newCursorPos = start + linkPrefix.length + linkText.length + 3;
+    input.setSelectionRange(newCursorPos, newCursorPos);
+    input.focus();
+
+    closeQuickFormatter();
+    showToast('Link applied', 'success');
+}
+
+function searchGoogle(event) {
+    if (!quickFormatterTarget) return;
+
+    const input = quickFormatterTarget;
+    const start = quickFormatterSelection.start;
+    const end = quickFormatterSelection.end;
+    const selectedText = input.value.substring(start, end);
+
+    if (!selectedText) {
+        showToast('No text selected', 'warning');
+        return;
+    }
+
+    // Strip markdown formatting before searching
+    const cleanText = stripMarkdown(selectedText);
+
+    // Open Google search in new tab
+    const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(cleanText)}`;
+    window.open(searchUrl, '_blank');
+
+    closeQuickFormatter();
+    showToast('Searching in Google', 'success');
+}
+
+function sortLines(event) {
+    if (!quickFormatterTarget) return;
+
+    const input = quickFormatterTarget;
+    const start = quickFormatterSelection.start;
+    const end = quickFormatterSelection.end;
+    const selectedText = input.value.substring(start, end);
+
+    if (!selectedText) {
+        showToast('No text selected', 'warning');
+        return;
+    }
+
+    // Parse lines into blocks (parent + children)
+    const lines = selectedText.split('\n');
+    const blocks = [];
+    let currentBlock = null;
+
+    for (const line of lines) {
+        // Check if this is a list item (starts with - or --)
+        const isListItem = line.trim().startsWith('- ') || line.trim().startsWith('-- ');
+
+        if (isListItem) {
+            // This is a child line, add to current block
+            if (currentBlock) {
+                currentBlock.children.push(line);
+            } else {
+                // Orphan list item, treat as its own block
+                blocks.push({
+                    parent: line,
+                    children: [],
+                    isListItem: true
+                });
+            }
+        } else {
+            // This is a parent line, start a new block
+            if (currentBlock) {
+                blocks.push(currentBlock);
+            }
+            currentBlock = {
+                parent: line,
+                children: [],
+                isListItem: false
+            };
+        }
+    }
+
+    // Don't forget the last block
+    if (currentBlock) {
+        blocks.push(currentBlock);
+    }
+
+    // Sort blocks by their parent line with smart numerical sorting
+    const sortedBlocks = blocks.sort((a, b) => {
+        const lineA = a.parent;
+        const lineB = b.parent;
+
+        // Extract leading numbers from both strings
+        const numA = lineA.match(/^\d+/);
+        const numB = lineB.match(/^\d+/);
+
+        // If both start with numbers, compare numerically
+        if (numA && numB) {
+            const diff = parseInt(numA[0], 10) - parseInt(numB[0], 10);
+            if (diff !== 0) return diff;
+            // If numbers are equal, compare the rest of the string
+            return lineA.localeCompare(lineB, undefined, { sensitivity: 'base' });
+        }
+
+        // If only one starts with a number, numbers come first
+        if (numA) return -1;
+        if (numB) return 1;
+
+        // Otherwise, alphabetical comparison
+        return lineA.localeCompare(lineB, undefined, { sensitivity: 'base' });
+    });
+
+    // Reconstruct the sorted text
+    const sortedLines = [];
+    for (const block of sortedBlocks) {
+        sortedLines.push(block.parent);
+        sortedLines.push(...block.children);
+    }
+
+    const sortedText = sortedLines.join('\n');
+
+    // Replace the selected text with sorted text
+    const newText = input.value.substring(0, start) +
+        sortedText +
+        input.value.substring(end);
+
+    input.value = newText;
+
+    // Trigger change event to update cell
+    const changeEvent = new Event('input', { bubbles: true });
+    input.dispatchEvent(changeEvent);
+
+    // Set cursor position at the end of the sorted text
+    const newCursorPos = start + sortedText.length;
+    input.setSelectionRange(newCursorPos, newCursorPos);
+    input.focus();
+
+    closeQuickFormatter();
+    showToast('Lines sorted (keeping lists with parents)', 'success');
+}
+
+function selectAllMatchingFromFormatter(event) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (!quickFormatterTarget) {
+        console.log('No quickFormatterTarget');
+        return;
+    }
+
+    // Store the target and selection
+    const target = quickFormatterTarget;
+    const selection = quickFormatterSelection;
+
+    // Keep the input focused and restore selection
+    target.focus();
+    target.setSelectionRange(selection.start, selection.end);
+
+    // Select all matching occurrences
+    selectAllMatchingOccurrences(target);
+
+    // Close the formatter after selection is done
+    closeQuickFormatter();
+}
+
+function showColorPicker(event) {
+    if (event) {
+        event.preventDefault();
+    }
+
+    const colorSection = document.getElementById('colorPickerSection');
+    const isShowing = colorSection.style.display === 'none';
+    colorSection.style.display = isShowing ? 'block' : 'none';
+
+    if (isShowing) {
+        loadColorSwatches();
+    }
+}
+
+function toggleColorSelection(event) {
+    event.preventDefault();
+
+    // Toggle color picker visibility for selection
+    showColorPicker(event);
+
+    return false;
+}
+
+function applyColorFormat() {
+    if (!quickFormatterTarget) return;
+
+    const input = quickFormatterTarget;
+    const start = quickFormatterSelection.start;
+    const end = quickFormatterSelection.end;
+    const selectedText = input.value.substring(start, end);
+
+    const fgColor = document.getElementById('quickFgColor').value;
+    const bgColor = document.getElementById('quickBgColor').value;
+    const noBg = document.getElementById('noBgCheckbox').checked;
+
+    // Build color syntax
+    let colorSyntax = '';
+    if (noBg) {
+        colorSyntax = `{fg:${fgColor}}`;
+    } else {
+        colorSyntax = `{fg:${fgColor};bg:${bgColor}}`;
+    }
+
+    // Insert the formatting
+    const newText = input.value.substring(0, start) +
+        colorSyntax + selectedText + '{/}' +
+        input.value.substring(end);
+
+    input.value = newText;
+
+    // Trigger change event to update cell
+    const changeEvent = new Event('input', { bubbles: true });
+    input.dispatchEvent(changeEvent);
+
+    // Set cursor position after the inserted text
+    const newCursorPos = start + colorSyntax.length + selectedText.length + 3;
+    input.setSelectionRange(newCursorPos, newCursorPos);
+    input.focus();
+
+    closeQuickFormatter();
+    showToast('Color applied', 'success');
+}
+
+function toggleFormatSelection(prefix, suffix, event) {
+    event.preventDefault();
+    // This function can be implemented for multi-format selection if needed
+    return false;
+}
+
+// Load and display color swatches
+function loadColorSwatches() {
+    const swatchesContainer = document.getElementById('colorSwatches');
+    if (!swatchesContainer) return;
+
+    swatchesContainer.innerHTML = '';
+
+    // Default presets
+    const defaultSwatches = [
+        { fg: '#ffffff', bg: '#000000' }, // White on Black
+        { fg: '#000000', bg: '#ffff00' }, // Black on Yellow
+        { fg: '#ffffff', bg: '#ff0000' }, // White on Red
+        { fg: '#000000', bg: '#00ff00' }, // Black on Green
+        { fg: '#ffffff', bg: '#0000ff' }, // White on Blue
+        { fg: '#000000', bg: '#ffa500' }, // Black on Orange
+        { fg: '#ffffff', bg: '#800080' }, // White on Purple
+    ];
+
+    // Load saved swatches from localStorage
+    const savedSwatches = JSON.parse(localStorage.getItem('colorSwatches') || '[]');
+    const allSwatches = [...savedSwatches, ...defaultSwatches];
+
+    allSwatches.forEach((swatch, index) => {
+        const swatchBtn = document.createElement('button');
+        swatchBtn.className = 'color-swatch';
+
+        // Show visual indicator if noBg is set
+        if (swatch.noBg) {
+            swatchBtn.style.background = 'transparent';
+            swatchBtn.style.border = '2px dashed #999';
+        } else {
+            swatchBtn.style.background = swatch.bg;
+        }
+        swatchBtn.style.color = swatch.fg;
+        swatchBtn.textContent = 'Aa';
+
+        const bgText = swatch.noBg ? 'No BG' : swatch.bg;
+        swatchBtn.title = `Text: ${swatch.fg}, Background: ${bgText}`;
+
+        swatchBtn.onclick = () => {
+            document.getElementById('quickFgColor').value = swatch.fg;
+            document.getElementById('quickBgColor').value = swatch.bg;
+            document.getElementById('noBgCheckbox').checked = swatch.noBg || false;
+        };
+
+        // Add delete button for saved swatches
+        if (index < savedSwatches.length) {
+            const deleteBtn = document.createElement('span');
+            deleteBtn.className = 'swatch-delete';
+            deleteBtn.textContent = '×';
+            deleteBtn.onclick = (e) => {
+                e.stopPropagation();
+                deleteSwatch(index);
+            };
+            swatchBtn.appendChild(deleteBtn);
+        }
+
+        swatchesContainer.appendChild(swatchBtn);
+    });
+}
+
+function addCurrentColorToSwatches() {
+    const fgColor = document.getElementById('quickFgColor').value;
+    const bgColor = document.getElementById('quickBgColor').value;
+    const noBg = document.getElementById('noBgCheckbox').checked;
+
+    const newSwatch = {
+        fg: fgColor,
+        bg: bgColor,
+        noBg: noBg
+    };
+
+    // Load existing swatches
+    const savedSwatches = JSON.parse(localStorage.getItem('colorSwatches') || '[]');
+
+    // Check if this combination already exists
+    const exists = savedSwatches.some(s =>
+        s.fg === fgColor && s.bg === bgColor && s.noBg === noBg
+    );
+
+    if (!exists) {
+        savedSwatches.unshift(newSwatch); // Add to beginning
+        // Keep only last 10 custom swatches
+        if (savedSwatches.length > 10) {
+            savedSwatches.pop();
+        }
+        localStorage.setItem('colorSwatches', JSON.stringify(savedSwatches));
+        loadColorSwatches();
+        showToast('Color saved to swatches', 'success');
+    } else {
+        showToast('This color combination already exists', 'info');
+    }
+}
+
+function deleteSwatch(index) {
+    const savedSwatches = JSON.parse(localStorage.getItem('colorSwatches') || '[]');
+    savedSwatches.splice(index, 1);
+    localStorage.setItem('colorSwatches', JSON.stringify(savedSwatches));
+    loadColorSwatches();
+    showToast('Swatch deleted', 'success');
+}
