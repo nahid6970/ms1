@@ -6439,24 +6439,66 @@ function applyQuickFormat(prefix, suffix, event) {
     const end = quickFormatterSelection.end;
     const selectedText = input.value.substring(start, end);
 
-    // Insert the formatting
-    const newText = input.value.substring(0, start) +
-        prefix + selectedText + suffix +
-        input.value.substring(end);
+    // Check if there are multiple formats selected (from right-clicks)
+    if (selectedFormats.length > 0) {
+        // Add the current format to the list
+        selectedFormats.push({ prefix, suffix });
 
-    input.value = newText;
+        // Apply all selected formats
+        let allPrefixes = '';
+        let allSuffixes = '';
 
-    // Trigger change event to update cell
-    const changeEvent = new Event('input', { bubbles: true });
-    input.dispatchEvent(changeEvent);
+        // Apply all selected formats (nesting them)
+        selectedFormats.forEach(format => {
+            allPrefixes += format.prefix;
+            allSuffixes = format.suffix + allSuffixes;
+        });
 
-    // Set cursor position after the inserted text
-    const newCursorPos = start + prefix.length + selectedText.length + suffix.length;
-    input.setSelectionRange(newCursorPos, newCursorPos);
-    input.focus();
+        // Insert the formatting
+        const newText = input.value.substring(0, start) +
+            allPrefixes + selectedText + allSuffixes +
+            input.value.substring(end);
 
-    closeQuickFormatter();
-    showToast('Format applied', 'success');
+        input.value = newText;
+
+        // Trigger change event to update cell
+        const changeEvent = new Event('input', { bubbles: true });
+        input.dispatchEvent(changeEvent);
+
+        // Set cursor position after the inserted text
+        const newCursorPos = start + allPrefixes.length + selectedText.length + allSuffixes.length;
+        input.setSelectionRange(newCursorPos, newCursorPos);
+        input.focus();
+
+        // Store count before clearing
+        const formatCount = selectedFormats.length;
+
+        // Clear selected formats
+        selectedFormats = [];
+        updateFormatCheckmarks();
+
+        closeQuickFormatter();
+        showToast(`Applied ${formatCount} formats`, 'success');
+    } else {
+        // Single format application
+        const newText = input.value.substring(0, start) +
+            prefix + selectedText + suffix +
+            input.value.substring(end);
+
+        input.value = newText;
+
+        // Trigger change event to update cell
+        const changeEvent = new Event('input', { bubbles: true });
+        input.dispatchEvent(changeEvent);
+
+        // Set cursor position after the inserted text
+        const newCursorPos = start + prefix.length + selectedText.length + suffix.length;
+        input.setSelectionRange(newCursorPos, newCursorPos);
+        input.focus();
+
+        closeQuickFormatter();
+        showToast('Format applied', 'success');
+    }
 }
 
 function applyLinkFormat(event) {
@@ -6708,10 +6750,101 @@ function applyColorFormat() {
     showToast('Color applied', 'success');
 }
 
+// Multi-format selection support (variable declared earlier in file)
+
 function toggleFormatSelection(prefix, suffix, event) {
     event.preventDefault();
-    // This function can be implemented for multi-format selection if needed
+
+    // Find the format in selectedFormats
+    const formatIndex = selectedFormats.findIndex(f => f.prefix === prefix && f.suffix === suffix);
+
+    if (formatIndex >= 0) {
+        // Remove from selection
+        selectedFormats.splice(formatIndex, 1);
+    } else {
+        // Add to selection
+        selectedFormats.push({ prefix, suffix });
+    }
+
+    // Update visual checkmarks
+    updateFormatCheckmarks();
+
     return false;
+}
+
+function updateFormatCheckmarks() {
+    // Remove all existing checkmarks
+    document.querySelectorAll('.format-btn .format-checkmark').forEach(el => el.remove());
+
+    // Add checkmarks to selected formats
+    selectedFormats.forEach(format => {
+        const buttons = document.querySelectorAll('.format-btn');
+        buttons.forEach(btn => {
+            const onclick = btn.getAttribute('onclick');
+            if (onclick && onclick.includes(`'${format.prefix}'`) && onclick.includes(`'${format.suffix}'`)) {
+                // Add checkmark if not already present
+                if (!btn.querySelector('.format-checkmark')) {
+                    const checkmark = document.createElement('span');
+                    checkmark.className = 'format-checkmark';
+                    checkmark.textContent = '✓';
+                    checkmark.style.position = 'absolute';
+                    checkmark.style.top = '2px';
+                    checkmark.style.right = '2px';
+                    checkmark.style.fontSize = '10px';
+                    checkmark.style.color = '#4CAF50';
+                    checkmark.style.fontWeight = 'bold';
+                    btn.style.position = 'relative';
+                    btn.appendChild(checkmark);
+                }
+            }
+        });
+    });
+}
+
+function applyMultipleFormats(event) {
+    if (!quickFormatterTarget || selectedFormats.length === 0) {
+        showToast('No formats selected', 'warning');
+        return;
+    }
+
+    const input = quickFormatterTarget;
+    const start = quickFormatterSelection.start;
+    const end = quickFormatterSelection.end;
+    const selectedText = input.value.substring(start, end);
+
+    // Build nested formatting
+    let formattedText = selectedText;
+    let allPrefixes = '';
+    let allSuffixes = '';
+
+    // Apply all selected formats (nesting them)
+    selectedFormats.forEach(format => {
+        allPrefixes += format.prefix;
+        allSuffixes = format.suffix + allSuffixes;
+    });
+
+    // Insert the formatting
+    const newText = input.value.substring(0, start) +
+        allPrefixes + selectedText + allSuffixes +
+        input.value.substring(end);
+
+    input.value = newText;
+
+    // Trigger change event to update cell
+    const changeEvent = new Event('input', { bubbles: true });
+    input.dispatchEvent(changeEvent);
+
+    // Set cursor position after the inserted text
+    const newCursorPos = start + allPrefixes.length + selectedText.length + allSuffixes.length;
+    input.setSelectionRange(newCursorPos, newCursorPos);
+    input.focus();
+
+    // Clear selected formats
+    selectedFormats = [];
+    updateFormatCheckmarks();
+
+    closeQuickFormatter();
+    showToast('Multiple formats applied', 'success');
 }
 
 // Load and display color swatches
