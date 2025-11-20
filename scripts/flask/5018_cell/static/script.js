@@ -6663,6 +6663,42 @@ function sortLines(event) {
     showToast('Lines sorted (keeping lists with parents)', 'success');
 }
 
+function removeFormatting(event) {
+    if (!quickFormatterTarget) return;
+
+    const input = quickFormatterTarget;
+    const start = quickFormatterSelection.start;
+    const end = quickFormatterSelection.end;
+    const selectedText = input.value.substring(start, end);
+
+    if (!selectedText) {
+        showToast('No text selected', 'warning');
+        return;
+    }
+
+    // Use the stripMarkdown function to remove all formatting
+    const cleanText = stripMarkdown(selectedText);
+
+    // Replace the selected text with clean text
+    const newText = input.value.substring(0, start) +
+        cleanText +
+        input.value.substring(end);
+
+    input.value = newText;
+
+    // Trigger change event to update cell
+    const changeEvent = new Event('input', { bubbles: true });
+    input.dispatchEvent(changeEvent);
+
+    // Set cursor position at the end of the clean text
+    const newCursorPos = start + cleanText.length;
+    input.setSelectionRange(newCursorPos, newCursorPos);
+    input.focus();
+
+    closeQuickFormatter();
+    showToast('Formatting removed', 'success');
+}
+
 function selectAllMatchingFromFormatter(event) {
     event.preventDefault();
     event.stopPropagation();
