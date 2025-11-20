@@ -6925,10 +6925,25 @@ function loadColorSwatches() {
         const bgText = swatch.noBg ? 'No BG' : swatch.bg;
         swatchBtn.title = `Text: ${swatch.fg}, Background: ${bgText}`;
 
-        swatchBtn.onclick = () => {
-            document.getElementById('quickFgColor').value = swatch.fg;
-            document.getElementById('quickBgColor').value = swatch.bg;
-            document.getElementById('noBgCheckbox').checked = swatch.noBg || false;
+        // Build color syntax for this swatch
+        let colorSyntax = '';
+        if (swatch.noBg) {
+            colorSyntax = `{fg:${swatch.fg}}`;
+        } else {
+            colorSyntax = `{fg:${swatch.fg};bg:${swatch.bg}}`;
+        }
+
+        // Left-click: Apply color (with any selected formats)
+        swatchBtn.onclick = (e) => {
+            e.preventDefault();
+            applySwatchColor(colorSyntax);
+        };
+
+        // Right-click: Add to multi-selection
+        swatchBtn.oncontextmenu = (e) => {
+            e.preventDefault();
+            toggleSwatchSelection(colorSyntax, swatch);
+            return false;
         };
 
         // Add delete button for saved swatches
@@ -6943,11 +6958,91 @@ function loadColorSwatches() {
             swatchBtn.appendChild(deleteBtn);
         }
 
+        // Check if this swatch is in selectedFormats and add checkmark
+        const isSelected = selectedFormats.some(f => f.prefix === colorSyntax && f.suffix === '{/}');
+        if (isSelected) {
+            const checkmark = document.createElement('span');
+            checkmark.className = 'format-checkmark swatch-checkmark';
+            checkmark.textContent = '✓';
+            checkmark.style.position = 'absolute';
+            checkmark.style.top = '2px';
+            checkmark.style.right = '2px';
+            checkmark.style.fontSize = '10px';
+            checkmark.style.color = '#4CAF50';
+            checkmark.style.fontWeight = 'bold';
+            checkmark.style.zIndex = '10';
+            swatchBtn.appendChild(checkmark);
+        }
+
         swatchesContainer.appendChild(swatchBtn);
     });
 }
 
-function addCurrentColorToSwatches() {
+function applySwatchColor(colorSyntax) {
+    if (!quickFormatterTarget) return;
+
+    const input = quickFormatterTarget;
+    const start = quickFormatterSelection.start;
+    const end = quickFormatterSelection.end;
+    const selectedText = input.value.substring(start, end);
+
+    // Check if there are other formats selected (from right-clicks)
+    if (selectedFormats.length > 0) {
+        // Apply all selected formats along with color
+        let allPrefixes = colorSyntax; // Color goes first
+        let allSuffixes = '{/}'; // Color closing tag
+
+        // Add other formats (nesting them)
+        selectedFormats.forEach(format => {
+            allPrefixes += format.prefix;
+            allSuffixes = format.suffix + allSuffixes;
+        });
+
+        // Insert the formatting
+        const newText = input.value.substring(0, start) +
+            allPrefixes + selectedText + allSuffixes +
+            input.value.substring(end);
+
+        input.value = newText;
+
+        // Trigger change event to update cell
+        const changeEvent = new Event('input', { bubbles: true });
+        input.dispatchEvent(changeEvent);
+
+        // Set cursor position after the inserted text
+        const newCursorPos = start + allPrefixes.length + selectedText.length + allSuffixes.length;
+        input.setSelectionRange(newCursorPos, newCursorPos);
+        input.focus();
+
+        // Store count before clearing
+        const formatCount = selectedFormats.length + 1; // +1 for color
+
+        // Clear selected formats
+        selectedFormats = [];
+        updateFormatCheckmarks();
+
+        closeQuickFormatter();
+        showToast(`Applied ${formatCount} formats (including color)`, 'success');
+    } else {
+        // Just color formatting
+        const newText = input.value.substring(0, start) +
+            colorSyntax + selectedText + '{/}' +
+            input.value.substring(end);
+
+        input.value = newText;
+
+        // Trigger change event to update cell
+        const changeEvent = new Event('input', { bubbles: true });
+        input.dispatchEvent(changeEvent);
+
+        // Set cursor position after the inserted text
+        const newCursorPos = start + colorSyntax.length + selectedText.length + 3;
+        input.setSelectionRange(newCursorPos, newCursorPos);
+        input.focus();
+
+        closeQuickFormatter();
+        showToast('Color applied', 'success');
+    }
     const fgColor = document.getElementById('quickFgColor').value;
     const bgColor = document.getElementById('quickBgColor').value;
     const noBg = document.getElementById('noBgCheckbox').checked;
@@ -6986,4 +7081,24 @@ function deleteSwatch(index) {
     localStorage.setItem('colorSwatches', JSON.stringify(savedSwatches));
     loadColorSwatches();
     showToast('Swatch deleted', 'success');
+}
+
+function toggleSwatchSelection(colorSyntax, swatch) {
+    // Find the format in selectedFormats
+    const formatIndex = selectedFormats.findIndex(f => f.prefix === colorSyntax && f.suffix === '{/}');
+
+    if (formatIndex >= 0) {
+        // Remove from selection (deselecting this color)
+        selectedFormats.splice(formatIndex, 1);
+    } else {
+        // Remove any other color selections first (only one color allowed)
+        selectedFormats = selectedFormats.filter(f => !f.isColor);
+
+        // Add this color to selection
+        selectedFormats.push({ prefix: colorSyntax, suffix: '{/}', isColor: true, swatch: swatch });
+    }
+
+    // Update visual checkmarks on both format buttons and swatches
+    updateFormatCheckmarks();
+    loadColorSwatches(); // Reload to show/hide checkmarks on swatches
 }
