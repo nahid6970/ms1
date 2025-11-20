@@ -2640,6 +2640,22 @@ async function deleteSheet(index) {
         const response = await fetch(`/api/sheets/${index}`, { method: 'DELETE' });
         if (response.ok) {
             tableData.sheets.splice(index, 1);
+            
+            // Reindex sheetCategories after deletion
+            const newSheetCategories = {};
+            Object.keys(tableData.sheetCategories).forEach(key => {
+                const sheetIndex = parseInt(key);
+                if (sheetIndex < index) {
+                    // Sheets before deleted sheet keep their index
+                    newSheetCategories[sheetIndex] = tableData.sheetCategories[key];
+                } else if (sheetIndex > index) {
+                    // Sheets after deleted sheet shift down by 1
+                    newSheetCategories[sheetIndex - 1] = tableData.sheetCategories[key];
+                }
+                // Skip the deleted sheet (sheetIndex === index)
+            });
+            tableData.sheetCategories = newSheetCategories;
+            
             if (currentSheet >= tableData.sheets.length) {
                 currentSheet = tableData.sheets.length - 1;
             }
