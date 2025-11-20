@@ -6730,24 +6730,63 @@ function applyColorFormat() {
         colorSyntax = `{fg:${fgColor};bg:${bgColor}}`;
     }
 
-    // Insert the formatting
-    const newText = input.value.substring(0, start) +
-        colorSyntax + selectedText + '{/}' +
-        input.value.substring(end);
+    // Check if there are other formats selected (from right-clicks)
+    if (selectedFormats.length > 0) {
+        // Apply all selected formats along with color
+        let allPrefixes = colorSyntax; // Color goes first
+        let allSuffixes = '{/}'; // Color closing tag
 
-    input.value = newText;
+        // Add other formats (nesting them)
+        selectedFormats.forEach(format => {
+            allPrefixes += format.prefix;
+            allSuffixes = format.suffix + allSuffixes;
+        });
 
-    // Trigger change event to update cell
-    const changeEvent = new Event('input', { bubbles: true });
-    input.dispatchEvent(changeEvent);
+        // Insert the formatting
+        const newText = input.value.substring(0, start) +
+            allPrefixes + selectedText + allSuffixes +
+            input.value.substring(end);
 
-    // Set cursor position after the inserted text
-    const newCursorPos = start + colorSyntax.length + selectedText.length + 3;
-    input.setSelectionRange(newCursorPos, newCursorPos);
-    input.focus();
+        input.value = newText;
 
-    closeQuickFormatter();
-    showToast('Color applied', 'success');
+        // Trigger change event to update cell
+        const changeEvent = new Event('input', { bubbles: true });
+        input.dispatchEvent(changeEvent);
+
+        // Set cursor position after the inserted text
+        const newCursorPos = start + allPrefixes.length + selectedText.length + allSuffixes.length;
+        input.setSelectionRange(newCursorPos, newCursorPos);
+        input.focus();
+
+        // Store count before clearing
+        const formatCount = selectedFormats.length + 1; // +1 for color
+
+        // Clear selected formats
+        selectedFormats = [];
+        updateFormatCheckmarks();
+
+        closeQuickFormatter();
+        showToast(`Applied ${formatCount} formats (including color)`, 'success');
+    } else {
+        // Just color formatting
+        const newText = input.value.substring(0, start) +
+            colorSyntax + selectedText + '{/}' +
+            input.value.substring(end);
+
+        input.value = newText;
+
+        // Trigger change event to update cell
+        const changeEvent = new Event('input', { bubbles: true });
+        input.dispatchEvent(changeEvent);
+
+        // Set cursor position after the inserted text
+        const newCursorPos = start + colorSyntax.length + selectedText.length + 3;
+        input.setSelectionRange(newCursorPos, newCursorPos);
+        input.focus();
+
+        closeQuickFormatter();
+        showToast('Color applied', 'success');
+    }
 }
 
 // Multi-format selection support (variable declared earlier in file)
