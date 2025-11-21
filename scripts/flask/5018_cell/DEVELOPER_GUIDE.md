@@ -19,8 +19,15 @@ When adding new **Markdown Syntax** or **Cell Formatting Features**, you **MUST*
 **Location:** `static/script.js` ~ line 980+
 **Purpose:** Converts the raw text syntax into HTML.
 **Action:** Add your regex or parsing logic here.
-*   *Example:* For `Table*N`, we added detection for `^Table\*(\d+)` and a helper function `parseCommaTable`.
+*   *Example:* For `Table*N`, we added detection for `(?:^|\n)Table\*(\d+)` (allowing text before it) and a helper function `parseCommaTable`.
 *   *Example:* For bold `**text**`, we use `.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')`.
+
+### 5. Table Syntax Enhancements (New)
+We have enhanced the `Table*N` syntax to support more complex layouts:
+- **Flexible Placement:** Tables can now be placed anywhere in the cell, not just at the beginning.
+- **Explicit Termination (`Table*end`):** Users can explicitly close a table using `Table*end`. This is crucial for placing text *after* a table or stacking multiple tables in one cell.
+- **Multiple Tables:** The parser now recursively handles multiple tables within a single cell.
+- **Empty Line Preservation:** We use `white-space: pre-wrap` in the preview to ensure empty lines between tables and text are respected.
 
 ### 2. `applyMarkdownFormatting(rowIndex, colIndex, value)`
 **Location:** `static/script.js` ~ line 764+
