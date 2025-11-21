@@ -829,6 +829,7 @@ function applyMarkdownFormatting(rowIndex, colIndex, value) {
         const preview = document.createElement('div');
         preview.className = 'markdown-preview';
         preview.innerHTML = formattedHTML;
+        preview.style.whiteSpace = 'pre-wrap'; // Preserve newlines and spaces
 
         // Copy ALL styles from input/textarea and cell
         const computedInput = window.getComputedStyle(inputElement);
@@ -1039,7 +1040,8 @@ function parseMarkdown(text) {
         }
 
         // Check for explicit table end: Table*end
-        const endRegex = /(?:^|\n)Table\*end(?:[\n\s]*)/i;
+        // Only consume the marker and optional immediate newline, preserving subsequent empty lines
+        const endRegex = /(?:^|\n)Table\*end[ \t]*(?:\n)?/i;
         const endMatch = content.match(endRegex);
 
         if (endMatch) {
