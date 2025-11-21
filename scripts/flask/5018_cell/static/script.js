@@ -3215,9 +3215,9 @@ async function moveCategoryDown() {
     showToast(`Category "${currentCategory}" moved down`, 'success');
 }
 
-
 let searchMatches = [];
 let currentMatchIndex = -1;
+let lastSearchTerm = '';
 
 function nextSearchMatch() {
     if (searchMatches.length === 0) return;
@@ -3247,6 +3247,13 @@ function nextSearchMatch() {
 function searchTable() {
     const searchInput = document.getElementById('searchInput');
     const searchTerm = searchInput.value.toLowerCase().trim();
+
+    // Prevent reset if search term hasn't changed (e.g. Enter key release)
+    if (searchTerm === lastSearchTerm) {
+        return;
+    }
+    lastSearchTerm = searchTerm;
+
     const table = document.getElementById('dataTable');
     const tbody = table.querySelector('tbody');
     const rows = tbody.querySelectorAll('tr');
