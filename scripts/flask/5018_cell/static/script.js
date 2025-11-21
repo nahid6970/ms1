@@ -297,6 +297,12 @@ function handleKeyboardShortcuts(e) {
         clearSearch();
     }
 
+    // Enter to next match
+    if (e.key === 'Enter' && document.activeElement.id === 'searchInput') {
+        e.preventDefault();
+        nextSearchMatch();
+    }
+
     // F1 to open quick navigation popup
     if (e.key === 'F1') {
         e.preventDefault();
@@ -3209,12 +3215,45 @@ async function moveCategoryDown() {
     showToast(`Category "${currentCategory}" moved down`, 'success');
 }
 
+
+let searchMatches = [];
+let currentMatchIndex = -1;
+
+function nextSearchMatch() {
+    if (searchMatches.length === 0) return;
+
+    // Remove active class from previous
+    if (currentMatchIndex >= 0 && currentMatchIndex < searchMatches.length) {
+        searchMatches[currentMatchIndex].classList.remove('active-search-match');
+    }
+
+    // Increment index
+    currentMatchIndex++;
+    if (currentMatchIndex >= searchMatches.length) {
+        currentMatchIndex = 0; // Wrap around
+    }
+
+    // Highlight new match
+    const match = searchMatches[currentMatchIndex];
+    match.classList.add('active-search-match');
+
+    // Scroll into view
+    match.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+
+    // Update toast to show position
+    showToast(`Match ${currentMatchIndex + 1} of ${searchMatches.length}`, 'info');
+}
+
 function searchTable() {
     const searchInput = document.getElementById('searchInput');
     const searchTerm = searchInput.value.toLowerCase().trim();
     const table = document.getElementById('dataTable');
     const tbody = table.querySelector('tbody');
     const rows = tbody.querySelectorAll('tr');
+
+    // Reset matches
+    searchMatches = [];
+    currentMatchIndex = -1;
 
     // Remove previous highlights
     document.querySelectorAll('.search-highlight').forEach(el => {
@@ -3271,9 +3310,18 @@ function searchTable() {
                         }
                         const highlightedHtml = highlightTextInHtml(preview.innerHTML, searchTerm);
                         preview.innerHTML = highlightedHtml;
+
+                        // Collect matches
+                        preview.querySelectorAll('.text-match-highlight').forEach(el => searchMatches.push(el));
                     } else {
                         // For cells without markdown preview, create a temporary overlay with highlighted text
                         createTextHighlightOverlay(cell, input, searchTerm);
+
+                        // Collect matches from overlay
+                        const overlay = cell.querySelector('.text-highlight-overlay');
+                        if (overlay) {
+                            overlay.querySelectorAll('.text-match-highlight').forEach(el => searchMatches.push(el));
+                        }
                     }
                 }
             }

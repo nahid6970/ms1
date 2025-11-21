@@ -3165,3 +3165,21 @@ td .markdown-preview {
         border-color: #0056b3;
     }
 }
+
+/* Search Highlights */
+.search-highlight {
+    background-color: rgba(255, 255, 0, 0.2) !important;
+}
+
+.text-match-highlight {
+    background-color: yellow;
+    color: black;
+}
+
+.active-search-match {
+    background-color: #ff9900;
+    color: black;
+    outline: 2px solid #cc3300;
+    z-index: 100;
+    position: relative;
+}
