@@ -1007,9 +1007,17 @@ function parseMarkdownInline(text) {
 function parseMarkdown(text) {
     if (!text) return '';
 
-    // Table*N detection
-    const tableMatch = text.match(/^Table\*(\d+)(?:\s*_\s*([^\s\n,]+))?(?:\s*_\s*([^\s\n,]+))?(?:[\n\s,]+)([\s\S]*)/i);
+    // Table*N detection (allow text before table)
+    const tableRegex = /(?:^|\n)Table\*(\d+)(?:\s*_\s*([^\s\n,]+))?(?:\s*_\s*([^\s\n,]+))?(?:[\n\s,]+)([\s\S]*)/i;
+    const tableMatch = text.match(tableRegex);
     if (tableMatch) {
+        // Render text before the table
+        let preText = '';
+        if (tableMatch.index > 0) {
+            const textBefore = text.substring(0, tableMatch.index);
+            preText = oldParseMarkdownBody(textBefore.split('\n'));
+        }
+
         const cols = parseInt(tableMatch[1]);
         const param1 = tableMatch[2];
         const param2 = tableMatch[3];
@@ -1030,7 +1038,35 @@ function parseMarkdown(text) {
             else if (!borderColor) borderColor = param2;
         }
 
-        return parseCommaTable(cols, content, borderColor, borderWidth);
+        // Check for explicit table end: Table*end
+        const endRegex = /(?:^|\n)Table\*end(?:[\n\s]*)/i;
+        const endMatch = content.match(endRegex);
+
+        if (endMatch) {
+            const splitIndex = endMatch.index;
+            const currentTableContent = content.substring(0, splitIndex);
+            // The remaining content starts AFTER the "Table*end" marker
+            const remainingContent = content.substring(splitIndex + endMatch[0].length);
+
+            const currentTableHtml = parseCommaTable(cols, currentTableContent, borderColor, borderWidth);
+
+            // Recursively parse the rest
+            return preText + currentTableHtml + parseMarkdown(remainingContent);
+        }
+
+        // Check if there's another table definition in the content (fallback)
+        const nextTableMatch = content.match(tableRegex);
+        if (nextTableMatch) {
+            const splitIndex = nextTableMatch.index;
+            const currentTableContent = content.substring(0, splitIndex);
+            const remainingContent = content.substring(splitIndex);
+
+            const currentTableHtml = parseCommaTable(cols, currentTableContent, borderColor, borderWidth);
+
+            return preText + currentTableHtml + parseMarkdown(remainingContent);
+        }
+
+        return preText + parseCommaTable(cols, content, borderColor, borderWidth);
     }
 
     /* -----  GRID-TABLE DETECTION  ----- */
@@ -2640,7 +2676,7 @@ async function deleteSheet(index) {
         const response = await fetch(`/api/sheets/${index}`, { method: 'DELETE' });
         if (response.ok) {
             tableData.sheets.splice(index, 1);
-            
+
             // Reindex sheetCategories after deletion
             const newSheetCategories = {};
             Object.keys(tableData.sheetCategories).forEach(key => {
@@ -2655,7 +2691,7 @@ async function deleteSheet(index) {
                 // Skip the deleted sheet (sheetIndex === index)
             });
             tableData.sheetCategories = newSheetCategories;
-            
+
             if (currentSheet >= tableData.sheets.length) {
                 currentSheet = tableData.sheets.length - 1;
             }
