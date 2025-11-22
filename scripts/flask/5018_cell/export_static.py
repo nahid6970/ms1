@@ -851,6 +851,34 @@ def generate_static_html(data):
             color: #007bff;
             text-decoration: underline;
         }
+
+        /* Collapsible text styling */
+        .collapsible-wrapper {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .collapsible-toggle {
+            background: #f0f0f0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 2px 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+            line-height: 1;
+        }
+
+        .collapsible-toggle:hover {
+            background: #007bff;
+            border-color: #007bff;
+            transform: scale(1.1);
+        }
+
+        .collapsible-content {
+            display: inline;
+        }
     </style>
     <script>
         let currentSheet = ''' + str(active_sheet) + ''';
@@ -1447,6 +1475,15 @@ def generate_static_html(data):
                 // Highlight: ==text== -> <mark>text</mark>
                 formatted = formatted.replace(/==(.+?)==/g, '<mark>$1</mark>');
 
+                // Collapsible text: {{text}} -> hidden text with toggle button
+                formatted = formatted.replace(/\\{\\{(.+?)\\}\\}/g, (match, content) => {
+                    const id = 'collapse-' + Math.random().toString(36).substr(2, 9);
+                    return `<span class="collapsible-wrapper">
+                        <button class="collapsible-toggle" onclick="toggleCollapsible('${id}')" title="Click to show/hide">👁️</button>
+                        <span id="${id}" class="collapsible-content" style="display: none;">${content}</span>
+                    </span>`;
+                });
+
                 return formatted;
             });
 
@@ -1660,6 +1697,33 @@ def generate_static_html(data):
             document.getElementById('fontSizeDisplay').textContent = Math.round(fontSizeScale * 100) + '%';
         }
 
+        function toggleCollapsible(id) {
+            const element = document.getElementById(id);
+            if (element) {
+                if (element.style.display === 'none') {
+                    element.style.display = 'inline';
+                } else {
+                    element.style.display = 'none';
+                }
+            }
+        }
+
+        function toggleAllCollapsibles() {
+            const allCollapsibles = document.querySelectorAll('.collapsible-content');
+            if (allCollapsibles.length === 0) {
+                alert('No collapsible text found');
+                return;
+            }
+
+            // Check if any are visible
+            const anyVisible = Array.from(allCollapsibles).some(el => el.style.display !== 'none');
+            
+            // Toggle all to opposite state
+            allCollapsibles.forEach(el => {
+                el.style.display = anyVisible ? 'none' : 'inline';
+            });
+        }
+
         // Initialize on load
         window.onload = function() {
             initializeCategories();
@@ -1732,6 +1796,10 @@ def generate_static_html(data):
                     <input type="checkbox" id="rowToggle" onchange="toggleRowNumbers()" checked>
                     <span>#️⃣</span>
                 </label>
+
+                <button onclick="toggleAllCollapsibles()" class="btn-icon-toggle" title="Show/hide all collapsible text">
+                    <span>👁️</span>
+                </button>
             </div>
 
             <div class="font-size-control">

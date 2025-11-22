@@ -807,6 +807,7 @@ function applyMarkdownFormatting(rowIndex, colIndex, value) {
         value.includes('{fg:') ||
         value.includes('{bg:') ||
         value.includes('{link:') ||
+        value.includes('{{') ||  // Collapsible text
         value.includes('\n- ') ||
         value.includes('\n-- ') ||
         value.trim().startsWith('- ') ||
@@ -1232,6 +1233,15 @@ function oldParseMarkdownBody(lines) {
 
         // Highlight: ==text== -> <mark>text</mark>
         formatted = formatted.replace(/==(.+?)==/g, '<mark>$1</mark>');
+
+        // Collapsible text: {{text}} -> hidden text with toggle button
+        formatted = formatted.replace(/\{\{(.+?)\}\}/g, (match, content) => {
+            const id = 'collapse-' + Math.random().toString(36).substr(2, 9);
+            return `<span class="collapsible-wrapper">
+                <button class="collapsible-toggle" onclick="toggleCollapsible('${id}')" title="Click to show/hide">👁️</button>
+                <span id="${id}" class="collapsible-content" style="display: none;">${content}</span>
+            </span>`;
+        });
 
         return formatted;
     });
@@ -3679,6 +3689,35 @@ function toggleMarkdownPreview() {
     }
 }
 
+function toggleCollapsible(id) {
+    const element = document.getElementById(id);
+    if (element) {
+        if (element.style.display === 'none') {
+            element.style.display = 'inline';
+        } else {
+            element.style.display = 'none';
+        }
+    }
+}
+
+function toggleAllCollapsibles() {
+    const allCollapsibles = document.querySelectorAll('.collapsible-content');
+    if (allCollapsibles.length === 0) {
+        showToast('No collapsible text found', 'info');
+        return;
+    }
+
+    // Check if any are visible
+    const anyVisible = Array.from(allCollapsibles).some(el => el.style.display !== 'none');
+    
+    // Toggle all to opposite state
+    allCollapsibles.forEach(el => {
+        el.style.display = anyVisible ? 'none' : 'inline';
+    });
+
+    showToast(anyVisible ? 'All collapsibles hidden' : 'All collapsibles shown', 'success');
+}
+
 function autoResizeTextarea(textarea) {
     // Skip if it's a merged cell textarea
     if (textarea.closest('td.merged-cell')) {
@@ -4159,6 +4198,7 @@ function renderTable() {
                 cellValue.includes('{fg:') ||
                 cellValue.includes('{bg:') ||
                 cellValue.includes('{link:') ||
+                cellValue.includes('{{') ||  // Collapsible text
                 cellValue.includes('\n- ') ||
                 cellValue.trim().startsWith('- ') ||
                 cellValue.trim().match(/^Table\*\d+/i) ||
