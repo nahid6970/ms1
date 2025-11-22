@@ -4626,6 +4626,21 @@ function showQuickFormatter(inputElement) {
         formatter.style.left = Math.max(20, centerX) + 'px';
         formatter.style.top = Math.max(20, centerY) + 'px';
     }, 0);
+
+    // Add click-outside-to-close listener
+    setTimeout(() => {
+        document.addEventListener('click', closeQuickFormatterOnClickOutside);
+    }, 100);
+}
+
+function closeQuickFormatterOnClickOutside(event) {
+    const formatter = document.getElementById('quickFormatter');
+    if (formatter && formatter.style.display === 'block') {
+        if (!formatter.contains(event.target)) {
+            closeQuickFormatter();
+            document.removeEventListener('click', closeQuickFormatterOnClickOutside);
+        }
+    }
 }
 
 function updateSelectionStats(inputElement) {
@@ -4657,6 +4672,7 @@ function closeQuickFormatter() {
     formatter.style.display = 'none';
     quickFormatterTarget = null;
     selectedFormats = [];
+    document.removeEventListener('click', closeQuickFormatterOnClickOutside);
 }
 
 function selectAllMatchingFromFormatter(event) {
@@ -4725,6 +4741,11 @@ function updateFormatCheckmarks() {
 }
 
 function applyQuickFormat(prefix, suffix, event) {
+    if (event && event.preventDefault) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+    
     if (!quickFormatterTarget) return;
 
     // If there are selected formats, apply all of them plus this one
