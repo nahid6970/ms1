@@ -4496,11 +4496,27 @@ function openF2Popup() {
             firstSheet.focus();
         }
     }, 100);
+
+    // Add click-outside-to-close listener
+    setTimeout(() => {
+        document.addEventListener('click', closeF2PopupOnClickOutside);
+    }, 100);
 }
 
 function closeF2Popup() {
     const popup = document.getElementById('f2Popup');
     popup.classList.remove('show');
+    document.removeEventListener('click', closeF2PopupOnClickOutside);
+}
+
+function closeF2PopupOnClickOutside(event) {
+    const overlay = document.getElementById('f2Popup');
+    if (overlay && overlay.classList.contains('show')) {
+        // Close if clicking on the overlay itself (not the inner popup)
+        if (event.target === overlay) {
+            closeF2Popup();
+        }
+    }
 }
 
 function populateF2RecentSheets() {
