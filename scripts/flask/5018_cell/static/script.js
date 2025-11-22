@@ -4286,6 +4286,9 @@ function stripMarkdown(text) {
     // Remove link markers: {link:url}text{/} -> text
     stripped = stripped.replace(/\{link:[^}]*\}(.+?)\{\/\}/g, '$1');
 
+    // Remove collapsible text markers: {{text}} -> text
+    stripped = stripped.replace(/\{\{(.+?)\}\}/g, '$1');
+
     // Remove bullet markers: - item -> item
     stripped = stripped.replace(/^\s*-\s+/gm, '');
 
