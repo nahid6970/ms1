@@ -1147,6 +1147,7 @@ def generate_static_html(data):
                         cellValue.includes('{fg:') || 
                         cellValue.includes('{bg:') || 
                         cellValue.includes('{link:') || 
+                        cellValue.includes('{{') ||
                         cellValue.includes('\\n- ') || 
                         cellValue.includes('\\n-- ') || 
                         cellValue.trim().startsWith('- ') || 
@@ -1365,6 +1366,12 @@ def generate_static_html(data):
             // Highlight: ==text== -> <mark>text</mark>
             formatted = formatted.replace(/==(.+?)==/g, '<mark>$1</mark>');
 
+            // Collapsible text: {{text}} -> hidden text with toggle button
+            formatted = formatted.replace(/\\{\\{(.+?)\\}\\}/g, function(match, content) {
+                var id = 'collapse-' + Math.random().toString(36).substr(2, 9);
+                return '<span class="collapsible-wrapper"><button class="collapsible-toggle" onclick="toggleCollapsible(\\'' + id + '\\')" title="Click to show/hide">👁️</button><span id="' + id + '" class="collapsible-content" style="display: none;">' + content + '</span></span>';
+            });
+
             return formatted;
         }
 
@@ -1476,12 +1483,9 @@ def generate_static_html(data):
                 formatted = formatted.replace(/==(.+?)==/g, '<mark>$1</mark>');
 
                 // Collapsible text: {{text}} -> hidden text with toggle button
-                formatted = formatted.replace(/\\{\\{(.+?)\\}\\}/g, (match, content) => {
-                    const id = 'collapse-' + Math.random().toString(36).substr(2, 9);
-                    return `<span class="collapsible-wrapper">
-                        <button class="collapsible-toggle" onclick="toggleCollapsible('${id}')" title="Click to show/hide">👁️</button>
-                        <span id="${id}" class="collapsible-content" style="display: none;">${content}</span>
-                    </span>`;
+                formatted = formatted.replace(/\\{\\{(.+?)\\}\\}/g, function(match, content) {
+                    var id = 'collapse-' + Math.random().toString(36).substr(2, 9);
+                    return '<span class="collapsible-wrapper"><button class="collapsible-toggle" onclick="toggleCollapsible(\\'' + id + '\\')" title="Click to show/hide">👁️</button><span id="' + id + '" class="collapsible-content" style="display: none;">' + content + '</span></span>';
                 });
 
                 return formatted;
