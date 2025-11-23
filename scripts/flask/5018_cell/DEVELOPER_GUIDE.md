@@ -34,7 +34,20 @@ When adding new **Markdown Syntax** or **Cell Formatting Features**, you **MUST*
 - **Quick Formatter:** Added a 👁️ button to wrap selected text with `{{}}`.
 - **Static Export:** Updated `export_static.py` with the same parsing logic in both `parseMarkdownInline()` and `oldParseMarkdownBody()`.
 
-### 6. Table Syntax Enhancements
+### 6. Multi-Term Search Feature
+**Syntax:** `term1, term2, term3` (comma-separated)
+**Purpose:** Search for multiple terms at once. Shows rows containing ANY of the search terms.
+**Implementation:**
+- **Search Logic:** In `searchTable()`, the search input is split by commas: `searchTerm.split(',').map(term => term.trim().toLowerCase())`
+- **Matching:** Each cell is checked against all terms, and if any term matches, the row is shown.
+- **Highlighting:** All matching terms are highlighted using `highlightMultipleTermsInHtml()` which:
+  - Finds all matches for all terms
+  - Sorts and merges overlapping matches
+  - Creates highlights in a single pass to avoid conflicts
+- **Overlay:** For cells without markdown preview, `createTextHighlightOverlayMulti()` creates an overlay that exactly matches the input's position and styling.
+- **Feedback:** Toast message shows which terms were found, e.g., "Found 5 row(s) matching: johnny, donny"
+
+### 7. Table Syntax Enhancements
 We have enhanced the `Table*N` syntax to support more complex layouts:
 - **Flexible Placement:** Tables can now be placed anywhere in the cell, not just at the beginning.
 - **Explicit Termination (`Table*end`):** Users can explicitly close a table using `Table*end`. This is crucial for placing text *after* a table or stacking multiple tables in one cell.
