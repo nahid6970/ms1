@@ -21,8 +21,20 @@ When adding new **Markdown Syntax** or **Cell Formatting Features**, you **MUST*
 **Action:** Add your regex or parsing logic here.
 *   *Example:* For `Table*N`, we added detection for `(?:^|\n)Table\*(\d+)` (allowing text before it) and a helper function `parseCommaTable`.
 *   *Example:* For bold `**text**`, we use `.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')`.
+*   *Example:* For collapsible text `{{text}}`, we use `.replace(/\{\{(.+?)\}\}/g, ...)` to create a toggle button with hidden content.
 
-### 5. Table Syntax Enhancements (New)
+### 5. Collapsible Text Feature (New)
+**Syntax:** `{{hidden text}}`
+**Purpose:** Hides text behind a toggle button (👁️) that can be clicked to show/hide the content.
+**Implementation:**
+- **Parsing:** In `parseMarkdown()`, the regex `/\{\{(.+?)\}\}/g` detects the syntax and generates HTML with a button and hidden span.
+- **Detection:** Added `value.includes('{{')` to the `hasMarkdown` checks in both `applyMarkdownFormatting()` and `renderTable()`.
+- **Stripping:** Added `.replace(/\{\{(.+?)\}\}/g, '$1')` to `stripMarkdown()` to remove the markers when clearing formatting.
+- **CSS:** Added `.collapsible-wrapper`, `.collapsible-toggle`, and `.collapsible-content` styles with baseline alignment.
+- **Quick Formatter:** Added a 👁️ button to wrap selected text with `{{}}`.
+- **Static Export:** Updated `export_static.py` with the same parsing logic in both `parseMarkdownInline()` and `oldParseMarkdownBody()`.
+
+### 6. Table Syntax Enhancements
 We have enhanced the `Table*N` syntax to support more complex layouts:
 - **Flexible Placement:** Tables can now be placed anywhere in the cell, not just at the beginning.
 - **Explicit Termination (`Table*end`):** Users can explicitly close a table using `Table*end`. This is crucial for placing text *after* a table or stacking multiple tables in one cell.
