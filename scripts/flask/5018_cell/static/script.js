@@ -4187,6 +4187,9 @@ function renderTable() {
 
                 // Apply styles to merged cell
                 const cellStyle = getCellStyle(rowIndex, colIndex);
+                if (col.color) {
+                    td.style.backgroundColor = col.color;
+                }
                 if (cellStyle.bold) textarea.style.fontWeight = 'bold';
                 if (cellStyle.italic) textarea.style.fontStyle = 'italic';
                 if (cellStyle.center) textarea.style.textAlign = 'center';
@@ -4294,6 +4297,9 @@ function renderTable() {
 
             // Apply cell-specific styles
             const cellStyle = getCellStyle(rowIndex, colIndex);
+            if (col.color) {
+                td.style.backgroundColor = col.color;
+            }
             if (cellStyle.bold) input.style.fontWeight = 'bold';
             if (cellStyle.italic) input.style.fontStyle = 'italic';
             if (cellStyle.center) input.style.textAlign = 'center';

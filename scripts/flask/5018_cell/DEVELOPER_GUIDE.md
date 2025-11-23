@@ -107,6 +107,12 @@ let tableData = {
 };
 ```
 
+### Column Styling
+Column-wide styles (like background color, font, text color) are stored in the `columns` array.
+**Implementation Rule:** In `renderTable()`, these styles must be applied to the `<td>` or `<input>`/`<textarea>` elements *before* applying cell-specific styles (`cellStyles`). This ensures that:
+1.  Column defaults are applied to all cells in the column.
+2.  Individual cell styles (e.g., from context menu) can override the column defaults.
+
 ## Future Improvements Checklist
 - [ ] When adding new syntax, update the "Markdown Guide" modal in `templates/index.html` so users know it exists.
 - [ ] Check `style.css` for dark mode compatibility if adding new UI elements.
