@@ -1614,6 +1614,22 @@ td input::-moz-selection {
     border-radius: 2px;
 }
 
+/* Text highlight overlay for search */
+.text-highlight-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: 2;
+    padding: 8px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
 @keyframes highlightPulse {
     0% {
         background: rgba(255, 235, 59, 0.8) !important;

@@ -3256,7 +3256,7 @@ function nextSearchMatch() {
 
 function searchTable() {
     const searchInput = document.getElementById('searchInput');
-    const searchTerm = searchInput.value.toLowerCase().trim();
+    const searchTerm = searchInput.value.trim();
 
     // Prevent reset if search term hasn't changed (e.g. Enter key release)
     if (searchTerm === lastSearchTerm) {
@@ -3299,7 +3299,18 @@ function searchTable() {
         return;
     }
 
+    // Split search terms by comma and trim each term
+    const searchTerms = searchTerm.split(',').map(term => term.trim().toLowerCase()).filter(term => term.length > 0);
+    
+    if (searchTerms.length === 0) {
+        rows.forEach(row => {
+            row.style.display = '';
+        });
+        return;
+    }
+
     let foundCount = 0;
+    const foundTerms = new Set();
 
     rows.forEach(row => {
         const cells = row.querySelectorAll('td:not(.row-number)');
@@ -3308,12 +3319,17 @@ function searchTable() {
         cells.forEach(cell => {
             const input = cell.querySelector('input, textarea');
             if (input) {
-                const cellValue = input.value.toLowerCase();
+                const cellValue = input.value;
+                const cellValueLower = cellValue.toLowerCase();
                 // Strip markdown for searching
-                const strippedValue = stripMarkdown(cellValue);
+                const strippedValue = stripMarkdown(cellValueLower);
 
-                if (strippedValue.includes(searchTerm)) {
+                // Check if any search term matches
+                const matchingTerms = searchTerms.filter(term => strippedValue.includes(term));
+                
+                if (matchingTerms.length > 0) {
                     rowMatches = true;
+                    matchingTerms.forEach(term => foundTerms.add(term));
                     cell.classList.add('search-highlight');
 
                     // Highlight markdown preview if it exists
@@ -3321,18 +3337,19 @@ function searchTable() {
                     if (preview) {
                         preview.classList.add('search-highlight');
 
-                        // Highlight exact matching text in preview
+                        // Highlight exact matching text in preview for all matching terms
                         if (!preview.dataset.originalHtml) {
                             preview.dataset.originalHtml = preview.innerHTML;
                         }
-                        const highlightedHtml = highlightTextInHtml(preview.innerHTML, searchTerm);
+                        // Highlight all terms at once using the original HTML
+                        const highlightedHtml = highlightMultipleTermsInHtml(preview.dataset.originalHtml, matchingTerms);
                         preview.innerHTML = highlightedHtml;
 
                         // Collect matches
                         preview.querySelectorAll('.text-match-highlight').forEach(el => searchMatches.push(el));
                     } else {
                         // For cells without markdown preview, create a temporary overlay with highlighted text
-                        createTextHighlightOverlay(cell, input, searchTerm);
+                        createTextHighlightOverlayMulti(cell, input, matchingTerms);
 
                         // Collect matches from overlay
                         const overlay = cell.querySelector('.text-highlight-overlay');
@@ -3353,9 +3370,12 @@ function searchTable() {
     });
 
     // Show toast with results
-    if (searchTerm && foundCount === 0) {
+    if (searchTerms.length > 0 && foundCount === 0) {
         showToast('No results found', 'info');
-    } else if (searchTerm) {
+    } else if (searchTerms.length > 1 && foundCount > 0) {
+        const foundList = Array.from(foundTerms).join(', ');
+        showToast(`Found ${foundCount} row(s) matching: ${foundList}`, 'success');
+    } else if (searchTerms.length === 1 && foundCount > 0) {
         showToast(`Found ${foundCount} row(s)`, 'success');
     }
 }
@@ -3528,6 +3548,145 @@ function highlightTextInHtml(html, searchTerm) {
 
     highlightInNode(temp);
     return temp.innerHTML;
+}
+
+// Helper function to highlight multiple search terms at once
+function highlightMultipleTermsInHtml(html, searchTerms) {
+    if (!searchTerms || searchTerms.length === 0) return html;
+
+    // Create a temporary div to parse HTML
+    const temp = document.createElement('div');
+    temp.innerHTML = html;
+
+    // Function to highlight text in text nodes
+    function highlightInNode(node) {
+        if (node.nodeType === Node.TEXT_NODE) {
+            const text = node.textContent;
+            const lowerText = text.toLowerCase();
+
+            // Find all matches for all terms
+            const matches = [];
+            searchTerms.forEach(term => {
+                const lowerTerm = term.toLowerCase();
+                let index = lowerText.indexOf(lowerTerm);
+                while (index !== -1) {
+                    matches.push({ start: index, length: lowerTerm.length });
+                    index = lowerText.indexOf(lowerTerm, index + 1);
+                }
+            });
+
+            if (matches.length > 0) {
+                // Sort matches by start position
+                matches.sort((a, b) => a.start - b.start);
+
+                // Merge overlapping matches
+                const merged = [];
+                let current = matches[0];
+                for (let i = 1; i < matches.length; i++) {
+                    const next = matches[i];
+                    if (next.start <= current.start + current.length) {
+                        // Overlapping or adjacent, merge them
+                        current.length = Math.max(current.start + current.length, next.start + next.length) - current.start;
+                    } else {
+                        merged.push(current);
+                        current = next;
+                    }
+                }
+                merged.push(current);
+
+                // Build highlighted content
+                const parts = [];
+                let lastIndex = 0;
+                merged.forEach(match => {
+                    // Add text before match
+                    if (match.start > lastIndex) {
+                        parts.push(document.createTextNode(text.substring(lastIndex, match.start)));
+                    }
+                    // Add highlighted match
+                    const span = document.createElement('span');
+                    span.className = 'text-match-highlight';
+                    span.textContent = text.substring(match.start, match.start + match.length);
+                    parts.push(span);
+                    lastIndex = match.start + match.length;
+                });
+                // Add remaining text
+                if (lastIndex < text.length) {
+                    parts.push(document.createTextNode(text.substring(lastIndex)));
+                }
+
+                // Replace the text node with highlighted parts
+                const parent = node.parentNode;
+                parts.forEach(part => parent.insertBefore(part, node));
+                parent.removeChild(node);
+            }
+        } else if (node.nodeType === Node.ELEMENT_NODE) {
+            // Recursively process child nodes
+            Array.from(node.childNodes).forEach(child => highlightInNode(child));
+        }
+    }
+
+    highlightInNode(temp);
+    return temp.innerHTML;
+}
+
+// Helper function to create overlay with multiple highlighted terms
+function createTextHighlightOverlayMulti(cell, input, searchTerms) {
+    // Remove existing overlay if any
+    const existingOverlay = cell.querySelector('.text-highlight-overlay');
+    if (existingOverlay) {
+        existingOverlay.remove();
+    }
+
+    // Get computed styles from input
+    const computedStyle = window.getComputedStyle(input);
+
+    // Get input position within cell
+    const cellRect = cell.getBoundingClientRect();
+    const inputRect = input.getBoundingClientRect();
+    const topOffset = inputRect.top - cellRect.top;
+    const leftOffset = inputRect.left - cellRect.left;
+
+    // Create overlay div
+    const overlay = document.createElement('div');
+    overlay.className = 'text-highlight-overlay';
+
+    // Copy exact styles from input/textarea
+    overlay.style.position = 'absolute';
+    overlay.style.top = topOffset + 'px';
+    overlay.style.left = leftOffset + 'px';
+    overlay.style.width = computedStyle.width;
+    overlay.style.height = computedStyle.height;
+    overlay.style.pointerEvents = 'none';
+    overlay.style.overflow = 'hidden';
+    overlay.style.color = 'transparent';
+    overlay.style.background = 'transparent';
+
+    // Copy text-related styles exactly
+    overlay.style.fontFamily = computedStyle.fontFamily;
+    overlay.style.fontSize = computedStyle.fontSize;
+    overlay.style.fontWeight = computedStyle.fontWeight;
+    overlay.style.fontStyle = computedStyle.fontStyle;
+    overlay.style.lineHeight = computedStyle.lineHeight;
+    overlay.style.letterSpacing = computedStyle.letterSpacing;
+    overlay.style.wordSpacing = computedStyle.wordSpacing;
+    overlay.style.textAlign = computedStyle.textAlign;
+    overlay.style.textIndent = computedStyle.textIndent;
+    overlay.style.padding = computedStyle.padding;
+    overlay.style.paddingTop = computedStyle.paddingTop;
+    overlay.style.paddingRight = computedStyle.paddingRight;
+    overlay.style.paddingBottom = computedStyle.paddingBottom;
+    overlay.style.paddingLeft = computedStyle.paddingLeft;
+    overlay.style.border = computedStyle.border;
+    overlay.style.boxSizing = computedStyle.boxSizing;
+    overlay.style.whiteSpace = computedStyle.whiteSpace;
+    overlay.style.wordWrap = computedStyle.wordWrap;
+    overlay.style.overflowWrap = computedStyle.overflowWrap;
+
+    // Highlight all terms in the text
+    const highlightedHtml = highlightMultipleTermsInHtml(input.value.replace(/\n/g, '<br>'), searchTerms);
+    overlay.innerHTML = highlightedHtml;
+
+    cell.appendChild(overlay);
 }
 
 function clearSearch() {
