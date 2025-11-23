@@ -489,7 +489,7 @@
                         </tr>
                         <tr style="border-bottom: 1px solid #ddd;">
                             <td style="padding: 8px; font-family: monospace; background: #f8f9fa;">==highlight==</td>
-                            <td style="padding: 8px;"><mark>highlight</mark></td>
+                            <td style="padding: 8px;"><span style="background: black; color: white; padding: 2px 4px; border-radius: 3px;">highlight</span></td>
                         </tr>
                     </table>
                 </div>
@@ -691,8 +691,8 @@
             </button>
             <button class="format-btn" onclick="applyQuickFormat('==', '==', event)"
                 oncontextmenu="return toggleFormatSelection('==', '==', event)"
-                title="Highlight (Right-click to select)">
-                <mark>H</mark>
+                title="Black Highlight (Right-click to select)">
+                <span style="background: black; color: white; padding: 2px 4px; border-radius: 3px;">H</span>
             </button>
             <button class="format-btn" onclick="applyQuickFormat('##', '##', event)"
                 oncontextmenu="return toggleFormatSelection('##', '##', event)" title="Heading (Right-click to select)">
