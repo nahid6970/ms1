@@ -855,8 +855,9 @@ def generate_static_html(data):
         /* Collapsible text styling */
         .collapsible-wrapper {
             display: inline-flex;
-            align-items: center;
+            align-items: baseline;
             gap: 4px;
+            vertical-align: baseline;
         }
 
         .collapsible-toggle {
@@ -868,6 +869,7 @@ def generate_static_html(data):
             font-size: 14px;
             transition: all 0.2s;
             line-height: 1;
+            vertical-align: baseline;
         }
 
         .collapsible-toggle:hover {
@@ -878,6 +880,7 @@ def generate_static_html(data):
 
         .collapsible-content {
             display: inline;
+            vertical-align: baseline;
         }
     </style>
     <script>
