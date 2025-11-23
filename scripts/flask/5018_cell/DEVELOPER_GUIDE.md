@@ -54,31 +54,28 @@ We have enhanced the `Table*N` syntax to support more complex layouts:
 - **Multiple Tables:** The parser now recursively handles multiple tables within a single cell.
 - **Empty Line Preservation:** We use `white-space: pre-wrap` in the preview to ensure empty lines between tables and text are respected.
 
-### 2. `applyMarkdownFormatting(rowIndex, colIndex, value)`
-**Location:** `static/script.js` ~ line 764+
-**Purpose:** Detects if a cell *currently being edited* or *viewed* contains your syntax so it can render the preview overlay immediately.
-**Action:** Add your syntax pattern to the `hasMarkdown` check.
+### 2. `checkHasMarkdown(value)`
+**Location:** `static/script.js` ~ line 780+
+**Purpose:** Centralized helper function to detect if a string contains any supported Markdown syntax.
+**Action:** Add your syntax pattern to the return statement.
 ```javascript
-const hasMarkdown = value && (
-    value.includes('**') ||
-    // ... your new syntax detection
-    value.trim().match(/^YourSyntax/)
-);
+function checkHasMarkdown(value) {
+    // ...
+    return (
+        // ... existing checks
+        str.includes('**') ||
+        str.includes('YourSyntax') // <--- ADD THIS
+    );
+}
 ```
 
 ### 3. `renderTable()`
-**Location:** `static/script.js` ~ line 3590+ (specifically inside the `sheet.rows.forEach` loop)
-**Purpose:** Ensures that when the table is re-rendered (e.g., after sorting, filtering, or loading), the cell knows it contains markdown and renders the preview instead of raw text.
-**Action:** Add the same detection check as in step 2 to the `if` condition that calls `applyMarkdownFormatting`.
-```javascript
-if (cellValue && (
-    // ... existing checks
-    cellValue.trim().match(/^YourSyntax/) // <--- ADD THIS
-)) {
-    applyMarkdownFormatting(rowIndex, colIndex, cellValue);
-}
-```
-*Failure to do this results in the feature "disappearing" when you click away or reload.*
+**Location:** `static/script.js` ~ line 3947+
+**Purpose:** Renders the table rows and cells.
+**Action:** **NO ACTION REQUIRED.**
+*   The `renderTable()` function has been optimized to automatically call `applyMarkdownFormatting()` for every cell.
+*   `applyMarkdownFormatting()` internally calls `checkHasMarkdown()` to decide whether to render a preview.
+*   Therefore, you only need to update `checkHasMarkdown()` (Step 2) and `parseMarkdown()` (Step 1).
 
 ### 4. `stripMarkdown(text)`
 **Location:** `static/script.js` ~ line 4060+

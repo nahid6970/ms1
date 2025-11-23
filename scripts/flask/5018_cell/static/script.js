@@ -187,6 +187,15 @@ function initializeApp() {
     if (!vrindaEnabled && table) {
         table.classList.add('disable-vrinda');
     }
+    // Restore hidden text toggle state
+    const hiddenTextVisible = localStorage.getItem('hiddenTextVisible') === 'true';
+    const hiddenTextToggle = document.getElementById('hiddenTextToggle');
+    if (hiddenTextToggle) {
+        hiddenTextToggle.checked = hiddenTextVisible;
+        if (hiddenTextVisible) {
+            document.body.classList.add('show-hidden-text');
+        }
+    }
 }
 
 function loadColumnWidths() {
@@ -771,52 +780,67 @@ function updateCell(rowIndex, colIndex, value) {
  * Apply markdown formatting to a cell
  * 
  * IMPORTANT: When adding new markdown syntax:
- * 1. Add the detection pattern here in hasMarkdown check
+ * 1. Add the detection pattern here in checkHasMarkdown function
  * 2. Add the parsing logic in parseMarkdown() function
- * 3. Update the detection in renderTable() function (search for "Apply markdown formatting to all cells")
- * 4. Update the Markdown Guide modal in templates/index.html
- * 5. Add CSS styling if needed in static/style.css
+ * 3. Update the Markdown Guide modal in templates/index.html
+ * 4. Add CSS styling if needed in static/style.css
+ * 
+ * Note: renderTable() automatically calls applyMarkdownFormatting(), so no update needed there.
  */
-function applyMarkdownFormatting(rowIndex, colIndex, value) {
-    // Find the cell element
-    const table = document.getElementById('dataTable');
-    if (!table) return;
+function checkHasMarkdown(value) {
+    if (!value && value !== 0) return false;
+    const str = String(value);
+    return (
+        str.includes('||') ||
+        str.includes('**') ||
+        str.includes('__') ||
+        str.includes('@@') ||
+        str.includes('##') ||
+        str.includes('```') ||
+        str.includes('`') ||
+        str.includes('~~') ||
+        str.includes('==') ||
+        str.includes('^') ||
+        str.includes('~') ||
+        str.includes('{fg:') ||
+        str.includes('{bg:') ||
+        str.includes('{link:') ||
+        str.includes('{{') ||
+        str.includes('\n- ') ||
+        str.includes('\n-- ') ||
+        str.trim().startsWith('- ') ||
+        str.trim().startsWith('-- ') ||
+        str.match(/(?:^|\n)Table\*\d+/i) ||
+        str.trim().startsWith('|') ||
+        str.includes('\\(') ||
+        (str.includes('|') && str.split('|').length >= 2)
+    );
+}
 
-    const rows = table.querySelectorAll('tbody tr');
-    if (!rows[rowIndex]) return;
+function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null) {
+    let cell;
 
-    const cells = rows[rowIndex].querySelectorAll('td:not(.row-number)');
-    if (!cells[colIndex]) return;
+    if (inputElement) {
+        cell = inputElement.closest('td');
+    } else {
+        // Find the cell element (fallback for single updates)
+        const table = document.getElementById('dataTable');
+        if (!table) return;
 
-    const cell = cells[colIndex];
-    const inputElement = cell.querySelector('input, textarea');
+        const rows = table.querySelectorAll('tbody tr');
+        if (!rows[rowIndex]) return;
+
+        const cells = rows[rowIndex].querySelectorAll('td:not(.row-number)');
+        if (!cells[colIndex]) return;
+
+        cell = cells[colIndex];
+        inputElement = cell.querySelector('input, textarea');
+    }
+
     if (!inputElement) return;
 
     // Parse markdown-style formatting
-    const hasMarkdown = value && (
-        value.includes('**') ||
-        value.includes('__') ||
-        value.includes('@@') ||
-        value.includes('##') ||
-        value.includes('```') ||
-        value.includes('`') ||
-        value.includes('~~') ||
-        value.includes('==') ||
-        value.includes('^') ||
-        value.includes('~') ||
-        value.includes('{fg:') ||
-        value.includes('{bg:') ||
-        value.includes('{link:') ||
-        value.includes('{{') ||  // Collapsible text
-        value.includes('\n- ') ||
-        value.includes('\n-- ') ||
-        value.trim().startsWith('- ') ||
-        value.trim().startsWith('-- ') ||
-        value.trim().match(/^Table\*\d+/i) ||
-        value.trim().startsWith('|') ||
-        value.includes('\\(') || // Math detection
-        (value.includes('|') && value.split('|').length >= 2)  // Inline pipe format
-    );
+    const hasMarkdown = checkHasMarkdown(value);
 
     // Remove existing preview
     const existingPreview = cell.querySelector('.markdown-preview');
@@ -838,19 +862,16 @@ function applyMarkdownFormatting(rowIndex, colIndex, value) {
         preview.innerHTML = formattedHTML;
         preview.style.whiteSpace = 'pre-wrap'; // Preserve newlines and spaces
 
-        // Copy ALL styles from input/textarea and cell
-        const computedInput = window.getComputedStyle(inputElement);
-        const computedCell = window.getComputedStyle(cell);
+        // Copy styles from input/textarea (use inline styles to avoid reflows)
+        preview.style.color = inputElement.style.color;
+        preview.style.fontFamily = inputElement.style.fontFamily;
+        preview.style.fontSize = inputElement.style.fontSize;
+        preview.style.fontWeight = inputElement.style.fontWeight;
+        preview.style.fontStyle = inputElement.style.fontStyle;
+        preview.style.textAlign = inputElement.style.textAlign;
 
-        preview.style.color = inputElement.style.color || computedInput.color;
-        preview.style.fontFamily = inputElement.style.fontFamily || computedInput.fontFamily;
-        preview.style.fontSize = inputElement.style.fontSize || computedInput.fontSize;
-        preview.style.fontWeight = inputElement.style.fontWeight || computedInput.fontWeight;
-        preview.style.fontStyle = inputElement.style.fontStyle || computedInput.fontStyle;
-        preview.style.textAlign = inputElement.style.textAlign || computedInput.textAlign;
-
-        // Copy background from cell (not input, as input is transparent)
-        preview.style.backgroundColor = computedCell.backgroundColor;
+        // Copy background from cell
+        preview.style.backgroundColor = cell.style.backgroundColor;
 
         cell.style.position = 'relative';
         cell.appendChild(preview);
@@ -3301,7 +3322,7 @@ function searchTable() {
 
     // Split search terms by comma and trim each term
     const searchTerms = searchTerm.split(',').map(term => term.trim().toLowerCase()).filter(term => term.length > 0);
-    
+
     if (searchTerms.length === 0) {
         rows.forEach(row => {
             row.style.display = '';
@@ -3326,7 +3347,7 @@ function searchTable() {
 
                 // Check if any search term matches
                 const matchingTerms = searchTerms.filter(term => strippedValue.includes(term));
-                
+
                 if (matchingTerms.length > 0) {
                     rowMatches = true;
                     matchingTerms.forEach(term => foundTerms.add(term));
@@ -3868,7 +3889,7 @@ function toggleAllCollapsibles() {
 
     // Check if any are visible
     const anyVisible = Array.from(allCollapsibles).some(el => el.style.display !== 'none');
-    
+
     // Toggle all to opposite state
     allCollapsibles.forEach(el => {
         el.style.display = anyVisible ? 'none' : 'inline';
@@ -3947,6 +3968,9 @@ function renderTable() {
 
     const sheet = tableData.sheets[currentSheet];
     if (!sheet) return;
+
+    // Use DocumentFragment for better performance
+    const fragment = document.createDocumentFragment();
 
     // Add row number column
     const rowNumHeader = document.createElement('th');
@@ -4089,6 +4113,8 @@ function renderTable() {
         headerRow.appendChild(th);
     });
 
+    const wrapEnabled = localStorage.getItem('rowWrapEnabled') === 'true';
+
     // Render rows
     sheet.rows.forEach((row, rowIndex) => {
         const tr = document.createElement('tr');
@@ -4102,42 +4128,134 @@ function renderTable() {
         contentSpan.style.cursor = 'pointer';
         contentSpan.onclick = () => deleteRow(rowIndex);
 
+        // Add row context menu
+        rowNumCell.oncontextmenu = (e) => {
+            e.preventDefault();
+            showRowContextMenu(e, rowIndex);
+        };
+
         rowNumCell.appendChild(contentSpan);
         tr.appendChild(rowNumCell);
 
-        // Data cells - only render cells for existing columns
+        // Data cells
         sheet.columns.forEach((col, colIndex) => {
-            const td = document.createElement('td');
-            td.style.width = col.width + 'px';
-            td.style.minWidth = col.width + 'px';
-            td.style.maxWidth = col.width + 'px';
-            td.style.backgroundColor = col.color;
-
-            // Check if wrap is enabled
-            const wrapEnabled = localStorage.getItem('rowWrapEnabled') === 'true';
-            const isTextType = col.type === 'text' || !col.type;
-
-            let inputElement;
             const cellValue = row[colIndex] || '';
+            const td = document.createElement('td');
 
-            if (wrapEnabled && isTextType) {
-                // Create textarea for wrapping
-                inputElement = document.createElement('textarea');
-                inputElement.rows = 1;
-                // Preserve newlines in the value
-                inputElement.value = cellValue;
-                inputElement.style.color = col.textColor || '#000000';
+            // Handle merged cells
+            const mergeInfo = getCellMerge(rowIndex, colIndex);
+            if (mergeInfo) {
+                if (mergeInfo.hidden) {
+                    td.style.display = 'none';
+                    tr.appendChild(td);
+                    return; // Skip rendering this cell
+                }
+                if (mergeInfo.colspan) td.colSpan = mergeInfo.colspan;
+                if (mergeInfo.rowspan) td.rowSpan = mergeInfo.rowspan;
+                td.classList.add('merged-cell');
+
+                // For merged cells, always use textarea to support multiline
+                const textarea = document.createElement('textarea');
+                textarea.value = row[colIndex] || '';
+                textarea.style.color = col.textColor || '#000000';
+
+                // Ensure textarea preserves whitespace and line breaks
+                textarea.style.whiteSpace = 'pre-wrap';
+                textarea.style.wordWrap = 'break-word';
 
                 if (col.font && col.font !== '') {
-                    inputElement.style.fontFamily = `'${col.font}', Vrinda, monospace`;
+                    textarea.style.fontFamily = `'${col.font}', Vrinda, monospace`;
                 }
 
                 if (col.fontSize && col.fontSize !== '') {
-                    inputElement.style.fontSize = col.fontSize + 'px';
+                    textarea.style.fontSize = col.fontSize + 'px';
                 }
 
-                inputElement.onchange = (e) => updateCell(rowIndex, colIndex, e.target.value);
-                inputElement.oninput = (e) => {
+                textarea.onchange = (e) => updateCell(rowIndex, colIndex, e.target.value);
+
+                // Also handle input event for real-time updates
+                textarea.oninput = (e) => {
+                    const textarea = e.target;
+                    updateCell(rowIndex, colIndex, textarea.value);
+                    keepCursorCentered(textarea);
+                };
+
+                // Scroll to cursor position when clicking in merged cell textarea
+                textarea.onclick = (e) => {
+                    keepCursorCentered(e.target);
+                };
+
+                // Apply styles to merged cell
+                const cellStyle = getCellStyle(rowIndex, colIndex);
+                if (cellStyle.bold) textarea.style.fontWeight = 'bold';
+                if (cellStyle.italic) textarea.style.fontStyle = 'italic';
+                if (cellStyle.center) textarea.style.textAlign = 'center';
+                if (cellStyle.border) {
+                    const borderWidth = cellStyle.borderWidth || '1px';
+                    const borderStyle = cellStyle.borderStyle || 'solid';
+                    const borderColor = cellStyle.borderColor || '#000000';
+                    td.style.border = `${borderWidth} ${borderStyle} ${borderColor}`;
+                } else {
+                    td.style.border = `1px solid ${getGridLineColor()}`;
+                }
+                if (cellStyle.bgColor) {
+                    td.style.backgroundColor = cellStyle.bgColor;
+                }
+                if (cellStyle.textColor) {
+                    textarea.style.color = cellStyle.textColor;
+                }
+                if (cellStyle.fontSize) {
+                    textarea.style.fontSize = cellStyle.fontSize;
+                }
+
+                textarea.oncontextmenu = (e) => showCellContextMenu(e, rowIndex, colIndex, textarea, td);
+
+                const handleMouseDown = (e) => {
+                    if (e.button === 0 && e.shiftKey) {
+                        e.preventDefault();
+                        startCellSelection(rowIndex, colIndex, td);
+                    }
+                };
+
+                textarea.onmousedown = (e) => {
+                    if (e.shiftKey) {
+                        handleMouseDown(e);
+                    }
+                };
+                textarea.onmouseenter = () => {
+                    if (isSelecting) {
+                        addToSelection(rowIndex, colIndex, td);
+                    }
+                };
+
+                td.appendChild(textarea);
+
+                // Apply markdown formatting
+                applyMarkdownFormatting(rowIndex, colIndex, row[colIndex], textarea);
+                tr.appendChild(td);
+                return;
+            }
+
+            const isTextType = col.type === 'text' || !col.type;
+            let input;
+
+            if (wrapEnabled && isTextType) {
+                input = document.createElement('textarea');
+                input.rows = 1;
+                // Preserve newlines in the value
+                input.value = cellValue;
+                input.style.color = col.textColor || '#000000';
+
+                if (col.font && col.font !== '') {
+                    input.style.fontFamily = `'${col.font}', Vrinda, monospace`;
+                }
+
+                if (col.fontSize && col.fontSize !== '') {
+                    input.style.fontSize = col.fontSize + 'px';
+                }
+
+                input.onchange = (e) => updateCell(rowIndex, colIndex, e.target.value);
+                input.oninput = (e) => {
                     const textarea = e.target;
                     autoResizeTextarea(textarea);
                     updateCell(rowIndex, colIndex, textarea.value);
@@ -4145,37 +4263,34 @@ function renderTable() {
                 };
 
                 // Scroll to cursor position when clicking in textarea
-                inputElement.onclick = (e) => {
+                input.onclick = (e) => {
                     keepCursorCentered(e.target);
                 };
 
                 // Mark td as having textarea for vertical alignment
                 td.classList.add('has-textarea');
             } else {
-                // Create regular input
-                inputElement = document.createElement('input');
-                inputElement.type = col.type;
+                input = document.createElement('input');
+                input.type = col.type;
                 // Store the original value (with newlines) in dataset for later restoration
-                inputElement.value = cellValue;
-                inputElement.dataset.originalValue = cellValue;
-                inputElement.style.color = col.textColor || '#000000';
+                input.value = cellValue;
+                input.dataset.originalValue = cellValue;
+                input.style.color = col.textColor || '#000000';
 
                 if (col.font && col.font !== '') {
-                    inputElement.style.fontFamily = `'${col.font}', Vrinda, monospace`;
+                    input.style.fontFamily = `'${col.font}', Vrinda, monospace`;
                 }
 
                 if (col.fontSize && col.fontSize !== '') {
-                    inputElement.style.fontSize = col.fontSize + 'px';
+                    input.style.fontSize = col.fontSize + 'px';
                 }
 
-                inputElement.onchange = (e) => {
+                input.onchange = (e) => {
                     updateCell(rowIndex, colIndex, e.target.value);
                     // Update the stored original value
                     e.target.dataset.originalValue = e.target.value;
                 };
             }
-
-            const input = inputElement;
 
             // Apply cell-specific styles
             const cellStyle = getCellStyle(rowIndex, colIndex);
@@ -4200,17 +4315,18 @@ function renderTable() {
                 input.style.fontSize = cellStyle.fontSize;
             }
 
-            // Add context menu
             input.oncontextmenu = (e) => showCellContextMenu(e, rowIndex, colIndex, input, td);
 
-            // Cell selection for merging - add to both td and input
+            // Selection handling
             td.dataset.row = rowIndex;
             td.dataset.col = colIndex;
 
             const handleMouseDown = (e) => {
-                if (e.button === 0 && e.shiftKey) {
-                    e.preventDefault();
-                    startCellSelection(rowIndex, colIndex, td);
+                if (e.button === 0) { // Left click
+                    if (e.shiftKey) {
+                        e.preventDefault(); // Prevent text selection
+                        startCellSelection(rowIndex, colIndex, td);
+                    }
                 }
             };
 
@@ -4220,153 +4336,35 @@ function renderTable() {
                 }
             };
 
+            // Attach to TD for better hit area, but also input for direct clicks
             td.onmousedown = handleMouseDown;
             input.onmousedown = (e) => {
                 if (e.shiftKey) {
                     handleMouseDown(e);
                 }
             };
+
+            // Mouse enter for drag selection
             td.onmouseenter = handleMouseEnter;
             input.onmouseenter = handleMouseEnter;
 
-            // Check if merged
-            const mergeInfo = getCellMerge(rowIndex, colIndex);
-            if (mergeInfo) {
-                if (mergeInfo.hidden) {
-                    td.style.display = 'none';
-                    tr.appendChild(td);
-                    return; // Skip adding input for hidden cells
-                } else if (mergeInfo.colspan || mergeInfo.rowspan) {
-                    td.colSpan = mergeInfo.colspan || 1;
-                    td.rowSpan = mergeInfo.rowspan || 1;
-                    td.classList.add('merged-cell');
-
-                    // Mark row as having wrapped content if it has merged cells
-                    tr.classList.add('has-wrapped-content');
-
-                    // Use textarea for merged cells
-                    const textarea = document.createElement('textarea');
-                    textarea.value = row[colIndex] || '';
-                    textarea.style.color = col.textColor || '#000000';
-
-                    // Ensure textarea preserves whitespace and line breaks
-                    textarea.style.whiteSpace = 'pre-wrap';
-                    textarea.style.wordWrap = 'break-word';
-
-                    if (col.font && col.font !== '') {
-                        textarea.style.fontFamily = `'${col.font}', Vrinda, monospace`;
-                    }
-
-                    if (col.fontSize && col.fontSize !== '') {
-                        textarea.style.fontSize = col.fontSize + 'px';
-                    }
-
-                    textarea.onchange = (e) => updateCell(rowIndex, colIndex, e.target.value);
-
-                    // Also handle input event for real-time updates
-                    textarea.oninput = (e) => {
-                        const textarea = e.target;
-                        updateCell(rowIndex, colIndex, textarea.value);
-                        keepCursorCentered(textarea);
-                    };
-
-                    // Scroll to cursor position when clicking in merged cell textarea
-                    textarea.onclick = (e) => {
-                        keepCursorCentered(e.target);
-                    };
-
-                    const cellStyle = getCellStyle(rowIndex, colIndex);
-                    if (cellStyle.bold) textarea.style.fontWeight = 'bold';
-                    if (cellStyle.italic) textarea.style.fontStyle = 'italic';
-                    if (cellStyle.center) textarea.style.textAlign = 'center';
-                    if (cellStyle.border) {
-                        const borderWidth = cellStyle.borderWidth || '1px';
-                        const borderStyle = cellStyle.borderStyle || 'solid';
-                        const borderColor = cellStyle.borderColor || '#000000';
-                        td.style.border = `${borderWidth} ${borderStyle} ${borderColor}`;
-                    } else {
-                        td.style.border = `1px solid ${getGridLineColor()}`;
-                    }
-                    if (cellStyle.bgColor) {
-                        td.style.backgroundColor = cellStyle.bgColor;
-                    }
-                    if (cellStyle.textColor) {
-                        textarea.style.color = cellStyle.textColor;
-                    }
-                    if (cellStyle.fontSize) {
-                        textarea.style.fontSize = cellStyle.fontSize;
-                    }
-
-                    textarea.oncontextmenu = (e) => showCellContextMenu(e, rowIndex, colIndex, textarea, td);
-
-                    const handleMouseDown = (e) => {
-                        if (e.button === 0 && e.shiftKey) {
-                            e.preventDefault();
-                            startCellSelection(rowIndex, colIndex, td);
-                        }
-                    };
-
-                    textarea.onmousedown = (e) => {
-                        if (e.shiftKey) {
-                            handleMouseDown(e);
-                        }
-                    };
-                    textarea.onmouseenter = () => {
-                        if (isSelecting) {
-                            addToSelection(rowIndex, colIndex, td);
-                        }
-                    };
-
-                    td.appendChild(textarea);
-                    tr.appendChild(td);
-                    return;
-                }
-            }
-
             td.appendChild(input);
+
+            // Apply markdown formatting
+            applyMarkdownFormatting(rowIndex, colIndex, cellValue, input);
             tr.appendChild(td);
         });
 
-        tableBody.appendChild(tr);
+        fragment.appendChild(tr);
     });
+
+    tableBody.appendChild(fragment);
 
     // Auto-resize textareas if wrap is enabled
     if (localStorage.getItem('rowWrapEnabled') === 'true') {
         const textareas = tableBody.querySelectorAll('textarea:not(.merged-cell textarea)');
         textareas.forEach(textarea => autoResizeTextarea(textarea));
     }
-
-    // Apply markdown formatting to all cells
-    // IMPORTANT: When adding new markdown syntax, update this detection check
-    // to match the one in applyMarkdownFormatting() function
-    sheet.rows.forEach((row, rowIndex) => {
-        row.forEach((cellValue, colIndex) => {
-            if (cellValue && (
-                cellValue.trim().startsWith('|') ||
-                (cellValue.includes('|') && cellValue.split('|').length >= 2) ||
-                cellValue.includes('**') ||
-                cellValue.includes('__') ||
-                cellValue.includes('@@') ||
-                cellValue.includes('##') ||
-                cellValue.includes('```') ||
-                cellValue.includes('`') ||
-                cellValue.includes('~~') ||
-                cellValue.includes('==') ||
-                cellValue.includes('^') ||
-                cellValue.includes('~') ||
-                cellValue.includes('{fg:') ||
-                cellValue.includes('{bg:') ||
-                cellValue.includes('{link:') ||
-                cellValue.includes('{{') ||  // Collapsible text
-                cellValue.includes('\n- ') ||
-                cellValue.trim().startsWith('- ') ||
-                cellValue.trim().match(/^Table\*\d+/i) ||
-                cellValue.includes('\\(') // Math detection
-            )) {
-                applyMarkdownFormatting(rowIndex, colIndex, cellValue);
-            }
-        });
-    });
 
     // Restore scroll position after rendering
     if (tableContainer) {
@@ -4923,7 +4921,7 @@ function applyQuickFormat(prefix, suffix, event) {
         event.preventDefault();
         event.stopPropagation();
     }
-    
+
     if (!quickFormatterTarget) return;
 
     // If there are selected formats, apply all of them plus this one
@@ -7485,4 +7483,17 @@ function toggleSwatchSelection(colorSyntax, swatch) {
     // Update visual checkmarks on both format buttons and swatches
     updateFormatCheckmarks();
     loadColorSwatches(); // Reload to show/hide checkmarks on swatches
+}
+
+function toggleHiddenText() {
+    const toggle = document.getElementById('hiddenTextToggle');
+    if (toggle && toggle.checked) {
+        document.body.classList.add('show-hidden-text');
+        localStorage.setItem('hiddenTextVisible', 'true');
+        showToast('Hidden text shown', 'success');
+    } else {
+        document.body.classList.remove('show-hidden-text');
+        localStorage.setItem('hiddenTextVisible', 'false');
+        showToast('Hidden text hidden', 'success');
+    }
 }
