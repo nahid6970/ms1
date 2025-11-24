@@ -71,6 +71,11 @@ function stripMarkdown(text) {
 - **CSS:** Added `.collapsible-wrapper`, `.collapsible-toggle`, and `.collapsible-content` styles with baseline alignment.
 - **Quick Formatter:** Added a 👁️ button to wrap selected text with `{{}}`.
 - **Static Export:** Updated `export_static.py` with the same parsing logic.
+- **Key Functions:**
+  - `parseMarkdown()` - Converts `{{text}}` to HTML
+  - `checkHasMarkdown()` - Detects the syntax
+  - `stripMarkdown()` - Removes syntax for sorting/searching
+  - `toggleAllCollapsibles()` - Shows/hides all collapsible text at once
 
 ### Color Highlight Shortcuts
 **Syntax:** 
@@ -85,6 +90,10 @@ function stripMarkdown(text) {
 - **Stripping:** Added `.replace(/!!(.+?)!!/g, '$1')` and `.replace(/\?\?(.+?)\?\?/g, '$1')` to `stripMarkdown()`.
 - **Quick Formatter:** Added Black, Red, and Blue buttons in a separate "Quick Highlights" section.
 - **Static Export:** Updated `export_static.py` with the same parsing logic.
+- **Key Functions:**
+  - `parseMarkdown()` - Converts highlight syntax to HTML
+  - `checkHasMarkdown()` - Detects the syntax
+  - `stripMarkdown()` - Removes syntax for sorting/searching
 
 ### Multi-Term Search Feature
 **Syntax:** `term1, term2, term3` (comma-separated)
@@ -99,6 +108,11 @@ function stripMarkdown(text) {
   - Creates highlights in a single pass to avoid conflicts
 - **Overlay:** For cells without markdown preview, `createTextHighlightOverlayMulti()` creates an overlay that exactly matches the input's position and styling.
 - **Feedback:** Toast message shows which terms were found, e.g., "Found 5 row(s) matching: johnny, donny"
+- **Key Functions:**
+  - `searchTable()` - Main search logic with comma-splitting
+  - `highlightMultipleTermsInHtml()` - Highlights all matching terms in HTML
+  - `createTextHighlightOverlayMulti()` - Creates overlay for input/textarea elements
+  - `stripMarkdown()` - Removes markdown from search terms
 
 ### Line Conversion Tools
 **Purpose:** Convert between line-separated text and comma-separated text.
@@ -109,14 +123,21 @@ function stripMarkdown(text) {
   - "Lines → Comma" button converts selected text from lines to comma-separated
   - "Comma → Lines" button converts selected text from comma-separated to lines
 - **Usage:** Select text in a cell, press F2, and click the appropriate conversion button.
+- **Key Functions:**
+  - `linesToComma()` - Converts line breaks to commas
+  - `commaToLines()` - Converts commas to line breaks
 
 ### Page Load Time Indicator
 **Purpose:** Shows how long the page took to load, helping with performance monitoring.
 **Implementation:**
-- **Calculation:** Measures from page navigation start to when the table finishes rendering: `(performance.now() - navigationStart) / 1000`
+- **Calculation:** Uses `performance.now()` which returns milliseconds since page load started, divided by 1000 and formatted to 2 decimals
 - **Display:** Shows in the sheet controls area as "⏱️ X.XXs"
-- **Timing:** Calculated and displayed after `renderTable()` completes in `loadData()`, using `requestAnimationFrame` to ensure DOM updates are finished
+- **Location:** In `loadData()` function, after `renderTable()` completes
+- **Timing:** Uses `requestAnimationFrame` to ensure DOM updates are finished before measuring
 - **Accuracy:** Captures the full user-perceived load time including data fetching, parsing, and table rendering
+- **Key Functions:**
+  - `loadData()` - Where the timer is calculated and displayed
+  - `renderTable()` - Must complete before timer is shown
 
 ### Quick Formatter Enhancements
 **Improvements:**
@@ -125,6 +146,10 @@ function stripMarkdown(text) {
 - **Better Layout:** Organized buttons into logical groups with clear visual separation.
 - **Click-Outside-to-Close:** Added event listener to close the formatter popup when clicking outside of it.
 - **Improved UX:** Streamlined workflow - select text, press F2, click format button, done.
+- **Key Functions:**
+  - `showQuickFormatter()` - Opens the formatter popup (F2 shortcut)
+  - `applyQuickFormat()` - Applies formatting instantly without Apply button
+  - Various format functions: `makeBold()`, `makeItalic()`, `makeUnderline()`, etc.
 
 ### Table Syntax Enhancements
 We have enhanced the `Table*N` syntax to support more complex layouts:
