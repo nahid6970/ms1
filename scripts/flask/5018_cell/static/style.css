@@ -609,8 +609,8 @@ td textarea {
 .markdown-preview mark {
     background: black;
     color: white!important;
-    padding: 2px 4px;
-    border-radius: 6px;
+    padding: 0px 4px 2px 4px;
+    border-radius: 3px;
     color: inherit;
 }
 
