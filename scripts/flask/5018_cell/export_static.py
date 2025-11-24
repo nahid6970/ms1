@@ -1147,10 +1147,13 @@ def generate_static_html(data):
                         cellValue.includes('__') || 
                         cellValue.includes('@@') || 
                         cellValue.includes('##') || 
+                        cellValue.includes('..') ||
                         cellValue.includes('```') || 
                         cellValue.includes('`') || 
                         cellValue.includes('~~') || 
                         cellValue.includes('==') || 
+                        cellValue.includes('!!') ||
+                        cellValue.includes('??') ||
                         cellValue.includes('^') || 
                         cellValue.includes('~') || 
                         cellValue.includes('{fg:') || 
@@ -1161,7 +1164,9 @@ def generate_static_html(data):
                         cellValue.includes('\\n-- ') || 
                         cellValue.trim().startsWith('- ') || 
                         cellValue.trim().startsWith('-- ') ||
+                        cellValue.match(/Table\\*\\d+/i) ||
                         cellValue.trim().startsWith('|') ||
+                        cellValue.match(/^-{5,}$/m) ||
                         (cellValue.includes('|') && cellValue.split('|').length >= 2);
                     
                     if (hasMarkdown) {

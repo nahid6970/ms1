@@ -23,20 +23,23 @@ This is a Flask-based web application that provides a dynamic, spreadsheet-like 
 - **Quick Formatter** (F2) for instant text formatting
 - **Static export** for sharing spreadsheets as standalone HTML files
 
-## ⚡ Critical Implementation Rule: "The Rule of 4"
+## ⚡ Critical Implementation Rule: "The Rule of 6"
 
-When adding new **Markdown Syntax** or **Cell Formatting Features**, you **MUST** implement logic in at least **4 specific locations** in `static/script.js` to ensure the feature works consistently (persists on reload, renders correctly, and doesn't break sorting).
+When adding new **Markdown Syntax** or **Cell Formatting Features**, you **MUST** implement logic in at least **6 specific locations** to ensure the feature works consistently across both the live app and static export.
 
-### 1. `parseMarkdown(text)` & Parsing Logic
-**Location:** `static/script.js` ~ line 980+
+### Main App (static/script.js)
+
+#### 1. `parseMarkdown(text)` & Parsing Logic
+**Location:** `static/script.js` ~ line 980+ (both `parseMarkdownInline()` and `oldParseMarkdownBody()`)
 **Purpose:** Converts the raw text syntax into HTML.
 **Action:** Add your regex or parsing logic here.
 *   *Example:* For `Table*N`, we added detection for `(?:^|\n)Table\*(\d+)` (allowing text before it) and a helper function `parseCommaTable`.
 *   *Example:* For bold `**text**`, we use `.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')`.
 *   *Example:* For collapsible text `{{text}}`, we use `.replace(/\{\{(.+?)\}\}/g, ...)` to create a toggle button with hidden content.
+*   **Note:** Add to BOTH `parseMarkdownInline()` and `oldParseMarkdownBody()` functions!
 
-### 2. `checkHasMarkdown(value)`
-**Location:** `static/script.js` ~ line 780+
+#### 2. `checkHasMarkdown(value)`
+**Location:** `static/script.js` ~ line 857+
 **Purpose:** Centralized helper function to detect if a string contains any supported Markdown syntax.
 **Action:** Add your syntax pattern to the return statement.
 ```javascript
@@ -50,7 +53,7 @@ function checkHasMarkdown(value) {
 }
 ```
 
-### 3. `renderTable()`
+#### 3. `renderTable()`
 **Location:** `static/script.js` ~ line 3947+
 **Purpose:** Renders the table rows and cells.
 **Action:** **NO ACTION REQUIRED.**
@@ -59,8 +62,8 @@ function checkHasMarkdown(value) {
 *   `applyMarkdownFormatting()` internally calls `checkHasMarkdown()` to decide whether to render a preview.
 *   Therefore, you only need to update `checkHasMarkdown()` (Step 2) and `parseMarkdown()` (Step 1).
 
-### 4. `stripMarkdown(text)`
-**Location:** `static/script.js` ~ line 4060+
+#### 4. `stripMarkdown(text)`
+**Location:** `static/script.js` ~ line 4539+
 **Purpose:** Removes your syntax so that sorting and searching work on the *content*, not the *markup*.
 **Action:** Add a regex replace to strip your syntax tags.
 ```javascript
@@ -70,6 +73,26 @@ function stripMarkdown(text) {
     return text;
 }
 ```
+
+### Static Export (export_static.py)
+
+#### 5. `hasMarkdown` Detection
+**Location:** `export_static.py` ~ line 1146+
+**Purpose:** Detects if a cell contains markdown to trigger parsing in static HTML.
+**Action:** Add your syntax pattern to the detection chain.
+```javascript
+const hasMarkdown = cellValue.includes('**') || 
+    // ... existing checks
+    cellValue.includes('YourSyntax') || // <--- ADD THIS
+```
+**CRITICAL:** If you forget this step, your syntax will NOT work in static export even if it works in the live app!
+
+#### 6. `parseMarkdown()` in Static Export
+**Location:** `export_static.py` ~ line 1350+ and 1450+
+**Purpose:** Converts syntax to HTML in the static export (same as main app but in Python string format).
+**Action:** Add the same regex replacement as in script.js, but with proper Python string escaping.
+*   **Note:** There are TWO parseMarkdown functions in export_static.py - update BOTH!
+*   **Escaping:** Use `\\` for backslashes in Python strings (e.g., `\\*\\*` for `**`, `\\?\\?` for `??`)
 
 ## New Features & Enhancements
 
