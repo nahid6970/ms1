@@ -829,6 +829,7 @@ function checkHasMarkdown(value) {
         str.match(/(?:^|\n)Table\*\d+/i) ||
         str.trim().startsWith('|') ||
         str.includes('\\(') ||
+        str.match(/^-{5,}$/m) ||
         (str.includes('|') && str.split('|').length >= 2)
     );
 }
@@ -1021,6 +1022,9 @@ function parseMarkdownInline(text) {
 
     // Small text: ..text.. -> smaller text
     formatted = formatted.replace(/\.\.(.+?)\.\./g, '<span style="font-size: 0.75em;">$1</span>');
+
+    // Horizontal separator: ----- (5 or more dashes on a line) -> <hr>
+    formatted = formatted.replace(/^-{5,}$/gm, '<hr style="border: none; border-top: 2px solid #ccc; margin: 8px 0;">');
 
     // Bold: **text** -> <strong>text</strong>
     formatted = formatted.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
@@ -1227,6 +1231,9 @@ function oldParseMarkdownBody(lines) {
 
         // Small text: ..text.. -> smaller text
         formatted = formatted.replace(/\.\.(.+?)\.\./g, '<span style="font-size: 0.75em;">$1</span>');
+
+        // Horizontal separator: ----- (5 or more dashes on a line) -> <hr>
+        formatted = formatted.replace(/^-{5,}$/gm, '<hr style="border: none; border-top: 2px solid #ccc; margin: 8px 0;">');
 
         // Bold: **text** -> <strong>text</strong>
         formatted = formatted.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
@@ -4460,6 +4467,9 @@ function stripMarkdown(text) {
 
     // Remove small text markers: ..text.. -> text
     stripped = stripped.replace(/\.\.(.+?)\.\./g, '$1');
+
+    // Remove horizontal separator: ----- -> (empty)
+    stripped = stripped.replace(/^-{5,}$/gm, '');
 
     // Remove code block markers: ```text``` -> text
     stripped = stripped.replace(/```(.+?)```/gs, '$1');

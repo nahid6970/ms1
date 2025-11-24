@@ -167,7 +167,7 @@ function stripMarkdown(text) {
 **Syntax:** `..small text..`
 **Purpose:** Makes text smaller (75% of normal size), useful for footnotes, captions, or de-emphasizing text.
 **Implementation:**
-- **Parsing:** In `parseMarkdown()`, the regex `/\.\.(.+?)\.\./g` converts to `<span style="font-size: 0.85em;">$1</span>`
+- **Parsing:** In `parseMarkdown()`, the regex `/\.\.(.+?)\.\./g` converts to `<span style="font-size: 0.75em;">$1</span>`
 - **Detection:** Added `str.includes('..')` to `checkHasMarkdown()`
 - **Stripping:** Added `.replace(/\.\.(.+?)\.\./g, '$1')` to `stripMarkdown()`
 - **Markdown Guide:** Added to the Text Formatting section showing the syntax and preview
@@ -176,6 +176,21 @@ function stripMarkdown(text) {
   - `parseMarkdown()` - Converts `..text..` to smaller HTML
   - `checkHasMarkdown()` - Detects the syntax
   - `stripMarkdown()` - Removes syntax for sorting/searching
+
+### Horizontal Separator Feature
+**Syntax:** `-----` (5 or more dashes on a single line)
+**Purpose:** Creates a horizontal separator line to visually divide content sections.
+**Implementation:**
+- **Parsing:** In `parseMarkdown()`, the regex `/^-{5,}$/gm` converts to `<hr>` with custom styling
+- **Detection:** Added `str.match(/^-{5,}$/m)` to `checkHasMarkdown()`
+- **Stripping:** Added `.replace(/^-{5,}$/gm, '')` to `stripMarkdown()` to remove for sorting/searching
+- **Styling:** 2px solid gray line with 8px vertical margin
+- **Markdown Guide:** Added to the Code & Highlights section
+- **Static Export:** Updated `export_static.py` with the same parsing logic
+- **Key Functions:**
+  - `parseMarkdown()` - Converts `-----` to `<hr>` element
+  - `checkHasMarkdown()` - Detects 5+ dashes on a line
+  - `stripMarkdown()` - Removes separator for sorting/searching
 
 ### Table Syntax Enhancements
 We have enhanced the `Table*N` syntax to support more complex layouts:

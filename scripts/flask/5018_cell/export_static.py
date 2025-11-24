@@ -1252,6 +1252,7 @@ def generate_static_html(data):
          * - ~subscript~ -> <sub>
          * - ##heading## -> larger text
          * - ..small text.. -> smaller text
+         * - ----- -> horizontal separator line
          * - `code` -> <code>
          * - ==highlight== -> <mark>
          * - {link:url}text{/} -> clickable link
@@ -1350,6 +1351,9 @@ def generate_static_html(data):
             // Small text: ..text.. -> smaller text
             formatted = formatted.replace(/\\.\\.(.+?)\\.\\./g, '<span style="font-size: 0.75em;">$1</span>');
 
+            // Horizontal separator: ----- (5 or more dashes on a line) -> <hr>
+            formatted = formatted.replace(/^-{5,}$/gm, '<hr style="border: none; border-top: 2px solid #ccc; margin: 8px 0;">');
+
             // Bold: **text** -> <strong>text</strong>
             formatted = formatted.replace(/\\*\\*(.+?)\\*\\*/g, '<strong>$1</strong>');
 
@@ -1443,6 +1447,9 @@ def generate_static_html(data):
 
                 // Small text: ..text.. -> smaller text
                 formatted = formatted.replace(/\\.\\.(.+?)\\.\\./g, '<span style="font-size: 0.75em;">$1</span>');
+
+                // Horizontal separator: ----- (5 or more dashes on a line) -> <hr>
+                formatted = formatted.replace(/^-{5,}$/gm, '<hr style="border: none; border-top: 2px solid #ccc; margin: 8px 0;">');
 
                 // Bold: **text** -> <strong>text</strong>
                 formatted = formatted.replace(/\\*\\*(.+?)\\*\\*/g, '<strong>$1</strong>');
