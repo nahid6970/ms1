@@ -1352,7 +1352,7 @@ def generate_static_html(data):
             formatted = formatted.replace(/\\.\\.(.+?)\\.\\./g, '<span style="font-size: 0.75em;">$1</span>');
 
             // Horizontal separator: ----- (5 or more dashes on a line) -> separator div
-            formatted = formatted.replace(/^-{5,}$/gm, '<div style="width: 100%; height: 2px; background: #ccc; margin: 12px 0 6px 0; padding: 0; display: block; border: none; line-height: 0; font-size: 0;"></div>');
+            formatted = formatted.replace(/^-{5,}$/gm, '<div class="md-separator" style="width: 100%; height: 4px; background: #ccc; margin: 12px 0; padding: 0; display: block; border: none; line-height: 0; font-size: 0;"></div>');
 
             // Bold: **text** -> <strong>text</strong>
             formatted = formatted.replace(/\\*\\*(.+?)\\*\\*/g, '<strong>$1</strong>');
@@ -1449,7 +1449,7 @@ def generate_static_html(data):
                 formatted = formatted.replace(/\\.\\.(.+?)\\.\\./g, '<span style="font-size: 0.75em;">$1</span>');
 
                 // Horizontal separator: ----- (5 or more dashes on a line) -> separator div
-                formatted = formatted.replace(/^-{5,}$/gm, '<div style="width: 100%; height: 2px; background: #ccc; margin: 12px 0 6px 0; padding: 0; display: block; border: none; line-height: 0; font-size: 0;"></div>');
+                formatted = formatted.replace(/^-{5,}$/gm, '<div class="md-separator" style="width: 100%; height: 4px; background: #ccc; margin: 12px 0; padding: 0; display: block; border: none; line-height: 0; font-size: 0;"></div>');
 
                 // Bold: **text** -> <strong>text</strong>
                 formatted = formatted.replace(/\\*\\*(.+?)\\*\\*/g, '<strong>$1</strong>');
@@ -1515,7 +1515,18 @@ def generate_static_html(data):
                 return formatted;
             });
 
-            return formattedLines.join('<br>');
+            return formattedLines.reduce(function(acc, line, i) {
+                if (i === 0) return line;
+                var prev = formattedLines[i - 1];
+                // Check for separator to avoid double line breaks
+                var isSeparator = line.includes('md-separator');
+                var prevIsSeparator = prev.includes('md-separator');
+                
+                if (isSeparator || prevIsSeparator) {
+                    return acc + line;
+                }
+                return acc + '<br>' + line;
+            }, '');
         }
 
         function parseMarkdown(text) {

@@ -608,7 +608,7 @@ td textarea {
 
 .markdown-preview mark {
     background: black;
-    color: white!important;
+    color: white !important;
     padding: 0px 4px 2px 4px;
     border-radius: 3px;
     color: inherit;
@@ -2269,13 +2269,16 @@ tr {
 .f1-sheet-list::-webkit-scrollbar-thumb:hover {
     background: #a8a8a8;
 }
+
 /* 
 Markdown Table Styles */
 .markdown-table {
     width: 100%;
     border-collapse: collapse;
-    margin: 4px 0;          /* breathing room inside the cell */
-    font-size: inherit;     /* respect column font-size */
+    margin: 4px 0;
+    /* breathing room inside the cell */
+    font-size: inherit;
+    /* respect column font-size */
     font-family: inherit;
 }
 
@@ -2323,7 +2326,8 @@ Markdown Table Styles */
     grid-template-columns: repeat(var(--cols), 1fr);
     gap: 4px;
     margin: 4px 0;
-    font-size: 0.85em;  /* Smaller font size for tables */
+    font-size: 0.85em;
+    /* Smaller font size for tables */
     font-family: inherit;
     width: 100%;
 }
@@ -2583,6 +2587,7 @@ Markdown Table Styles */
         opacity: 0;
         transform: translateY(-10px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -2679,7 +2684,7 @@ Markdown Table Styles */
     font-size: 12px;
     font-weight: bold;
     pointer-events: none;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .format-btn-color {
@@ -2742,9 +2747,11 @@ Markdown Table Styles */
         transform: scale(0.8);
         opacity: 0;
     }
+
     50% {
         transform: scale(1.1);
     }
+
     100% {
         transform: scale(1);
         opacity: 1;
@@ -2788,8 +2795,16 @@ Markdown Table Styles */
 }
 
 @keyframes cursorBlink {
-    0%, 49% { opacity: 1; }
-    50%, 100% { opacity: 0; }
+
+    0%,
+    49% {
+        opacity: 1;
+    }
+
+    50%,
+    100% {
+        opacity: 0;
+    }
 }
 
 /* Color Swatches for Quick Formatter */
@@ -2936,11 +2951,11 @@ Markdown Table Styles */
     border-radius: 50%;
 }
 
-.toggle-switch input:checked + .toggle-slider {
+.toggle-switch input:checked+.toggle-slider {
     background-color: #007bff;
 }
 
-.toggle-switch input:checked + .toggle-slider:before {
+.toggle-switch input:checked+.toggle-slider:before {
     transform: translateX(24px);
 }
 
@@ -3053,7 +3068,7 @@ td .markdown-preview {
     background: #f8f9fa;
     border-color: #007bff;
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .f1-sheet-item.active {
@@ -3229,9 +3244,12 @@ td .markdown-preview {
 }
 
 @keyframes pulse-border {
-    0%, 100% {
+
+    0%,
+    100% {
         border-color: #007bff;
     }
+
     50% {
         border-color: #0056b3;
     }
@@ -3258,9 +3276,9 @@ td .markdown-preview {
 /* Horizontal Separator (-----) */
 .md-separator {
     width: 100%;
-    height: 2px;
+    height: 4px;
     background: #ccc;
-    margin: 8px 0 !important;
+    margin: 12px 0 !important;
     padding: 0 !important;
     display: block;
     border: none;

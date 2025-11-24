@@ -181,16 +181,18 @@ function stripMarkdown(text) {
 **Syntax:** `-----` (5 or more dashes on a single line)
 **Purpose:** Creates a horizontal separator line to visually divide content sections.
 **Implementation:**
-- **Parsing:** In `parseMarkdown()`, the regex `/^-{5,}$/gm` converts to `<hr>` with custom styling
+- **Parsing:** In `parseMarkdown()`, the regex `/^-{5,}$/gm` converts to `<div class="md-separator"></div>`
 - **Detection:** Added `str.match(/^-{5,}$/m)` to `checkHasMarkdown()`
 - **Stripping:** Added `.replace(/^-{5,}$/gm, '')` to `stripMarkdown()` to remove for sorting/searching
-- **Styling:** 2px solid gray line with 8px vertical margin
+- **Styling:** 2px solid gray div with 12px equal vertical margin (CSS class `.md-separator`)
+- **Spacing Fix:** In `oldParseMarkdownBody()`, uses `reduce()` instead of `join('\n')` to skip newlines before/after separators, preventing double spacing
 - **Markdown Guide:** Added to the Code & Highlights section
 - **Static Export:** Updated `export_static.py` with the same parsing logic
 - **Key Functions:**
-  - `parseMarkdown()` - Converts `-----` to `<hr>` element
+  - `parseMarkdown()` - Converts `-----` to separator div
   - `checkHasMarkdown()` - Detects 5+ dashes on a line
   - `stripMarkdown()` - Removes separator for sorting/searching
+  - `oldParseMarkdownBody()` - Uses reduce to control newlines around separators
 
 ### Table Syntax Enhancements
 We have enhanced the `Table*N` syntax to support more complex layouts:
