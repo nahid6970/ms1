@@ -319,3 +319,35 @@ The grid system relies on CSS variables for dynamic column counts:
 - [ ] Check `style.css` for dark mode compatibility if adding new UI elements.
 - [ ] Update `export_static.py` when adding new markdown syntax or JavaScript features.
 - [ ] Test features in both live Flask app and exported static HTML.
+
+
+## Recent Bug Fixes & Improvements
+
+### Cell Style Reindexing After Row Deletion
+**Issue:** When deleting rows, cell styles (colors, borders, etc.) would shift to wrong cells because the row indices in `cellStyles` keys weren't updated.
+
+**Solution:** Added `reindexCellStylesAfterRowDeletion()` function that:
+- Takes deleted row indices and recalculates new row positions
+- Updates all `cellStyles` and `mergedCells` keys to reflect new row numbers
+- Skips styles for deleted rows
+- Called automatically after `deleteEmptyRows()`
+
+**Key Functions:**
+- `reindexCellStylesAfterRowDeletion()` - Reindexes cell styles after deletion
+- `deleteEmptyRows()` - Calls reindexing after deleting rows
+
+### Color Highlight Spacing Fix (Static Export)
+**Issue:** In static HTML export, colored text boxes (`==text==`, `!!text!!`, `??text??`, `{fg:...;bg:...}`) had inconsistent vertical spacing between lines.
+
+**Solution:** Applied specific styling to reduce spacing:
+- **Padding:** Reduced to `0px` top/bottom (from `2px`)
+- **Margin-top:** Set to `-2px` to pull boxes closer together
+- **Line-height:** Reduced to `1.3` (from `1.8`)
+- **Display:** Set to `inline-block` with `vertical-align: baseline`
+- **Margin-right:** Added `2px` for spacing between adjacent highlights
+
+**Note:** Main app uses slightly different values (`1px` padding, `-1px` margin-top) which work better in the live environment. Static export needs more aggressive spacing reduction.
+
+**Files Modified:**
+- `export_static.py` - Updated all color highlight styling
+- CSS for `mark` tag in embedded styles
