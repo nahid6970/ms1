@@ -5074,6 +5074,86 @@ function sortLines(event) {
     showToast(`Sorted ${lines.length} lines`, 'success');
 }
 
+function linesToComma(event) {
+    if (!quickFormatterTarget) return;
+
+    const input = quickFormatterTarget;
+    const start = quickFormatterSelection.start;
+    const end = quickFormatterSelection.end;
+    const selectedText = input.value.substring(start, end);
+
+    if (!selectedText) {
+        showToast('No text selected', 'warning');
+        return;
+    }
+
+    // Split into lines, remove leading dashes and trim, filter empty lines
+    const lines = selectedText.split('\n')
+        .map(line => line.replace(/^[-–—•]\s*/, '').trim())
+        .filter(line => line.length > 0);
+
+    // Join with comma and space
+    const commaText = lines.join(', ');
+
+    // Replace the selected text
+    const newText = input.value.substring(0, start) +
+        commaText +
+        input.value.substring(end);
+
+    input.value = newText;
+
+    // Trigger change event to update cell
+    const changeEvent = new Event('input', { bubbles: true });
+    input.dispatchEvent(changeEvent);
+
+    // Select the result
+    input.setSelectionRange(start, start + commaText.length);
+    input.focus();
+
+    closeQuickFormatter();
+    showToast(`Converted ${lines.length} lines to comma-separated`, 'success');
+}
+
+function commaToLines(event) {
+    if (!quickFormatterTarget) return;
+
+    const input = quickFormatterTarget;
+    const start = quickFormatterSelection.start;
+    const end = quickFormatterSelection.end;
+    const selectedText = input.value.substring(start, end);
+
+    if (!selectedText) {
+        showToast('No text selected', 'warning');
+        return;
+    }
+
+    // Split by comma, trim each item, filter empty items
+    const items = selectedText.split(',')
+        .map(item => item.trim())
+        .filter(item => item.length > 0);
+
+    // Join with newlines
+    const linesText = items.join('\n');
+
+    // Replace the selected text
+    const newText = input.value.substring(0, start) +
+        linesText +
+        input.value.substring(end);
+
+    input.value = newText;
+
+    // Trigger change event to update cell
+    const changeEvent = new Event('input', { bubbles: true });
+    input.dispatchEvent(changeEvent);
+
+    // Select the result
+    input.setSelectionRange(start, start + linesText.length);
+    input.focus();
+
+    closeQuickFormatter();
+    showToast(`Converted to ${items.length} lines`, 'success');
+}
+
 function applyMultipleFormats(lastPrefix, lastSuffix) {
     if (!quickFormatterTarget) return;
 
