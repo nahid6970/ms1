@@ -748,9 +748,10 @@ def generate_static_html(data):
         }
 
         mark {
-            background: #ffeb3b;
+            background: #000000;
+            color: #ffffff;
             padding: 2px 4px;
-            border-radius: 6px;
+            border-radius: 3px;
         }
 
         del {
