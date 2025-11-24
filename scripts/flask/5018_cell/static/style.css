@@ -3285,3 +3285,12 @@ td .markdown-preview {
     line-height: 0;
     font-size: 0;
 }
+/* M
+arkdown highlight (==text==) */
+mark {
+    background: #000000;
+    color: #ffffff;
+    padding: 1px 4px;
+    border-radius: 3px;
+    line-height: 1.5;
+}
