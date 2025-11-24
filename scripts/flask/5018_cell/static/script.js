@@ -24,7 +24,7 @@ let sheetHistory = []; // Track recently visited sheets for Alt+M toggle
 // Load data on page load
 window.onload = function () {
     const loadStartTime = performance.timing.navigationStart;
-    
+
     initializeApp();
 };
 
@@ -438,7 +438,7 @@ async function loadData() {
         renderCategoryTabs();
         renderSheetTabs();
         renderTable();
-        
+
         // Display load time after everything is rendered
         requestAnimationFrame(() => {
             // performance.now() gives time in milliseconds since page load started
@@ -1023,8 +1023,8 @@ function parseMarkdownInline(text) {
     // Small text: ..text.. -> smaller text
     formatted = formatted.replace(/\.\.(.+?)\.\./g, '<span style="font-size: 0.75em;">$1</span>');
 
-    // Horizontal separator: ----- (5 or more dashes on a line) -> <hr>
-    formatted = formatted.replace(/^-{5,}$/gm, '<hr style="border: none; border-top: 2px solid #ccc; margin: 8px 0;">');
+    // Horizontal separator: ----- (5 or more dashes on a line) -> separator div
+    formatted = formatted.replace(/^-{5,}$/gm, '<div class="md-separator"></div>');
 
     // Bold: **text** -> <strong>text</strong>
     formatted = formatted.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
@@ -1232,8 +1232,8 @@ function oldParseMarkdownBody(lines) {
         // Small text: ..text.. -> smaller text
         formatted = formatted.replace(/\.\.(.+?)\.\./g, '<span style="font-size: 0.75em;">$1</span>');
 
-        // Horizontal separator: ----- (5 or more dashes on a line) -> <hr>
-        formatted = formatted.replace(/^-{5,}$/gm, '<hr style="border: none; border-top: 2px solid #ccc; margin: 8px 0;">');
+        // Horizontal separator: ----- (5 or more dashes on a line) -> separator div
+        formatted = formatted.replace(/^-{5,}$/gm, '<div class="md-separator"></div>');
 
         // Bold: **text** -> <strong>text</strong>
         formatted = formatted.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
@@ -1302,7 +1302,18 @@ function oldParseMarkdownBody(lines) {
         return formatted;
     });
 
-    return formattedLines.join('\n');
+    return formattedLines.reduce((acc, line, i) => {
+        if (i === 0) return line;
+        const prev = formattedLines[i - 1];
+        // Check for separator to avoid double line breaks (newline + block element break)
+        const isSeparator = line.includes('class="md-separator"');
+        const prevIsSeparator = prev.includes('class="md-separator"');
+
+        if (isSeparator || prevIsSeparator) {
+            return acc + line;
+        }
+        return acc + '\n' + line;
+    }, '');
 }
 
 function getCellKey(rowIndex, colIndex) {

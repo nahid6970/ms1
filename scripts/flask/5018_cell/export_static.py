@@ -1351,8 +1351,8 @@ def generate_static_html(data):
             // Small text: ..text.. -> smaller text
             formatted = formatted.replace(/\\.\\.(.+?)\\.\\./g, '<span style="font-size: 0.75em;">$1</span>');
 
-            // Horizontal separator: ----- (5 or more dashes on a line) -> <hr>
-            formatted = formatted.replace(/^-{5,}$/gm, '<hr style="border: none; border-top: 2px solid #ccc; margin: 8px 0;">');
+            // Horizontal separator: ----- (5 or more dashes on a line) -> separator div
+            formatted = formatted.replace(/^-{5,}$/gm, '<div style="width: 100%; height: 2px; background: #ccc; margin: 12px 0 6px 0; padding: 0; display: block; border: none; line-height: 0; font-size: 0;"></div>');
 
             // Bold: **text** -> <strong>text</strong>
             formatted = formatted.replace(/\\*\\*(.+?)\\*\\*/g, '<strong>$1</strong>');
@@ -1448,8 +1448,8 @@ def generate_static_html(data):
                 // Small text: ..text.. -> smaller text
                 formatted = formatted.replace(/\\.\\.(.+?)\\.\\./g, '<span style="font-size: 0.75em;">$1</span>');
 
-                // Horizontal separator: ----- (5 or more dashes on a line) -> <hr>
-                formatted = formatted.replace(/^-{5,}$/gm, '<hr style="border: none; border-top: 2px solid #ccc; margin: 8px 0;">');
+                // Horizontal separator: ----- (5 or more dashes on a line) -> separator div
+                formatted = formatted.replace(/^-{5,}$/gm, '<div style="width: 100%; height: 2px; background: #ccc; margin: 12px 0 6px 0; padding: 0; display: block; border: none; line-height: 0; font-size: 0;"></div>');
 
                 // Bold: **text** -> <strong>text</strong>
                 formatted = formatted.replace(/\\*\\*(.+?)\\*\\*/g, '<strong>$1</strong>');
