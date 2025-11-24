@@ -1486,6 +1486,12 @@ def generate_static_html(data):
                 // Highlight: ==text== -> <mark>text</mark>
                 formatted = formatted.replace(/==(.+?)==/g, '<mark>$1</mark>');
 
+                // Red highlight: !!text!! -> red background with white text
+                formatted = formatted.replace(/!!(.+?)!!/g, '<span style="background: #ff0000; color: #ffffff; padding: 2px 4px; border-radius: 3px;">$1</span>');
+
+                // Blue highlight: ??text?? -> blue background with white text
+                formatted = formatted.replace(/\\?\\?(.+?)\\?\\?/g, '<span style="background: #0000ff; color: #ffffff; padding: 2px 4px; border-radius: 3px;">$1</span>');
+
                 // Collapsible text: {{text}} -> hidden text with toggle button
                 formatted = formatted.replace(/\\{\\{(.+?)\\}\\}/g, function(match, content) {
                     var id = 'collapse-' + Math.random().toString(36).substr(2, 9);

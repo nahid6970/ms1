@@ -800,6 +800,8 @@ function checkHasMarkdown(value) {
         str.includes('`') ||
         str.includes('~~') ||
         str.includes('==') ||
+        str.includes('!!') ||
+        str.includes('??') ||
         str.includes('^') ||
         str.includes('~') ||
         str.includes('{fg:') ||
@@ -1254,6 +1256,12 @@ function oldParseMarkdownBody(lines) {
 
         // Highlight: ==text== -> <mark>text</mark>
         formatted = formatted.replace(/==(.+?)==/g, '<mark>$1</mark>');
+
+        // Red highlight: !!text!! -> red background with white text
+        formatted = formatted.replace(/!!(.+?)!!/g, '<span style="background: #ff0000; color: #ffffff; padding: 2px 4px; border-radius: 3px;">$1</span>');
+
+        // Blue highlight: ??text?? -> blue background with white text
+        formatted = formatted.replace(/\?\?(.+?)\?\?/g, '<span style="background: #0000ff; color: #ffffff; padding: 2px 4px; border-radius: 3px;">$1</span>');
 
         // Collapsible text: {{text}} -> hidden text with toggle button
         formatted = formatted.replace(/\{\{(.+?)\}\}/g, (match, content) => {
@@ -4441,6 +4449,12 @@ function stripMarkdown(text) {
 
     // Remove mark/highlight markers: ==text== -> text
     stripped = stripped.replace(/==(.+?)==/g, '$1');
+
+    // Remove red highlight markers: !!text!! -> text
+    stripped = stripped.replace(/!!(.+?)!!/g, '$1');
+
+    // Remove blue highlight markers: ??text?? -> text
+    stripped = stripped.replace(/\?\?(.+?)\?\?/g, '$1');
 
     // Remove superscript markers: ^text^ -> text
     stripped = stripped.replace(/\^(.+?)\^/g, '$1');
