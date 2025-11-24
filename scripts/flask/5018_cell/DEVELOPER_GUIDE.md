@@ -66,17 +66,32 @@ function stripMarkdown(text) {
 **Purpose:** Hides text behind a toggle button (👁️) that can be clicked to show/hide the content.
 **Implementation:**
 - **Parsing:** In `parseMarkdown()`, the regex `/\{\{(.+?)\}\}/g` detects the syntax and generates HTML with a button and hidden span.
-- **Detection:** Added `value.includes('{{')` to the `hasMarkdown` checks in both `applyMarkdownFormatting()` and `renderTable()`.
-- **Stripping:** Added `.replace(/\{\{(.+?)\}\}/g, '$1')` to `stripMarkdown()` to remove the markers when clearing formatting.
+- **Detection:** Added `value.includes('{{')` to the `hasMarkdown` checks.
+- **Stripping:** Added `.replace(/\{\{(.+?)\}\}/g, '$1')` to `stripMarkdown()`.
 - **CSS:** Added `.collapsible-wrapper`, `.collapsible-toggle`, and `.collapsible-content` styles with baseline alignment.
 - **Quick Formatter:** Added a 👁️ button to wrap selected text with `{{}}`.
-- **Static Export:** Updated `export_static.py` with the same parsing logic in both `parseMarkdownInline()` and `oldParseMarkdownBody()`.
+- **Static Export:** Updated `export_static.py` with the same parsing logic.
+
+### Color Highlight Shortcuts
+**Syntax:** 
+- `==text==` → Black background with white text
+- `!!text!!` → Red background with white text  
+- `??text??` → Blue background with white text
+
+**Purpose:** Quick color highlighting without using the full `{fg:color;bg:color}text{/}` syntax.
+**Implementation:**
+- **Parsing:** Added regex replacements in `parseMarkdown()`: `.replace(/==(.+?)==/g, '<mark>$1</mark>')` and similar for `!!` and `??`.
+- **Detection:** Added `value.includes('!!')` and `value.includes('??')` to `hasMarkdown` checks.
+- **Stripping:** Added `.replace(/!!(.+?)!!/g, '$1')` and `.replace(/\?\?(.+?)\?\?/g, '$1')` to `stripMarkdown()`.
+- **Quick Formatter:** Added Black, Red, and Blue buttons in a separate "Quick Highlights" section.
+- **Static Export:** Updated `export_static.py` with the same parsing logic.
 
 ### Multi-Term Search Feature
 **Syntax:** `term1, term2, term3` (comma-separated)
 **Purpose:** Search for multiple terms at once. Shows rows containing ANY of the search terms.
 **Implementation:**
 - **Search Logic:** In `searchTable()`, the search input is split by commas: `searchTerm.split(',').map(term => term.trim().toLowerCase())`
+- **Markdown Stripping:** Search terms are processed through `stripMarkdown()` to ignore markdown syntax when searching.
 - **Matching:** Each cell is checked against all terms, and if any term matches, the row is shown.
 - **Highlighting:** All matching terms are highlighted using `highlightMultipleTermsInHtml()` which:
   - Finds all matches for all terms
@@ -84,6 +99,32 @@ function stripMarkdown(text) {
   - Creates highlights in a single pass to avoid conflicts
 - **Overlay:** For cells without markdown preview, `createTextHighlightOverlayMulti()` creates an overlay that exactly matches the input's position and styling.
 - **Feedback:** Toast message shows which terms were found, e.g., "Found 5 row(s) matching: johnny, donny"
+
+### Line Conversion Tools
+**Purpose:** Convert between line-separated text and comma-separated text.
+**Implementation:**
+- **Lines to Comma:** `linesToComma()` function converts newline-separated text to comma-separated format.
+- **Comma to Lines:** `commaToLines()` function converts comma-separated text to newline-separated format.
+- **Quick Formatter:** Added two buttons in the formatter popup:
+  - "Lines → Comma" button converts selected text from lines to comma-separated
+  - "Comma → Lines" button converts selected text from comma-separated to lines
+- **Usage:** Select text in a cell, press F2, and click the appropriate conversion button.
+
+### Page Load Time Indicator
+**Purpose:** Shows how long the page took to load, helping with performance monitoring.
+**Implementation:**
+- **Calculation:** Uses `performance.timing` API to calculate load time: `(loadEventEnd - navigationStart) / 1000`
+- **Display:** Shows in bottom-right corner as "Loaded in X.XXs" with fade-in animation
+- **Styling:** Gray text with subtle appearance, positioned absolutely in the bottom-right
+- **Timing:** Calculated and displayed after the window `load` event completes
+
+### Quick Formatter Enhancements
+**Improvements:**
+- **Instant Application:** Removed the "Apply" button. All formatting is now applied instantly when buttons are clicked.
+- **Color Highlights:** Added dedicated buttons for quick color highlighting (Black, Red, Blue) in a separate section.
+- **Better Layout:** Organized buttons into logical groups with clear visual separation.
+- **Click-Outside-to-Close:** Added event listener to close the formatter popup when clicking outside of it.
+- **Improved UX:** Streamlined workflow - select text, press F2, click format button, done.
 
 ### Table Syntax Enhancements
 We have enhanced the `Table*N` syntax to support more complex layouts:
