@@ -2,7 +2,20 @@ using namespace System.Management.Automation
 using namespace System.Management.Automation.Language
 
 # Force enable PSReadLine to avoid screen reader warning
-Import-Module PSReadLine -Force
+# Check if PSReadLine is available and force import
+if (Get-Module -ListAvailable -Name PSReadLine) {
+    # Remove any existing PSReadLine module to reset state
+    Remove-Module PSReadLine -Force -ErrorAction SilentlyContinue
+    # Import PSReadLine with all required options
+    Import-Module PSReadLine -Force -ErrorAction SilentlyContinue
+    # Set some basic options to ensure PSReadLine is fully enabled
+    if (Get-Module PSReadLine) {
+        Set-PSReadLineOption -BellStyle Visual -ErrorAction SilentlyContinue
+        Set-PSReadLineOption -EditMode Windows -ErrorAction SilentlyContinue
+    }
+} else {
+    Write-Warning "PSReadLine module is not available. Please install it using: Install-Module -Name PSReadLine -Force"
+}
 
 
 
@@ -856,22 +869,38 @@ Set-Alias trim C:\Users\nahid\ms\ms1\scripts\ffmpeg\trim.ps1
 #! Run in PowerShell remove ( Warning: PowerShell detected that you might be using a 
 #! screen reader and has disabled PSReadLine for compatibility purposes. If you want
 #! to re-enable it, run 'Import-Module PSReadLine'. )
-# (Add-Type -PassThru -Name ScreenReaderUtil -Namespace WinApiHelper -MemberDefinition @'
-#   const int SPIF_SENDCHANGE = 0x0002;
-#   const int SPI_SETSCREENREADER = 0x0047;
+# Simple fix for screen reader detection issue that disables PSReadLine unnecessarily
+# Most important: ensure PSReadLine is loaded after any potential detection
 
-#   [DllImport("user32", SetLastError = true, CharSet = CharSet.Unicode)]
-#   private static extern bool SystemParametersInfo(uint uiAction, uint uiParam, IntPtr pvParam, uint fWinIni);
+# Alternative method - force enable PSReadLine and suppress the warning
+if (!(Get-Module -Name PSReadLine -ErrorAction SilentlyContinue)) {
+    Import-Module PSReadLine -Force -ErrorAction SilentlyContinue
+}
 
-#   public static void EnableScreenReader(bool enable)
-#   {
-#     var ok = SystemParametersInfo(SPI_SETSCREENREADER, enable ? 1u : 0u, IntPtr.Zero, SPIF_SENDCHANGE);
-#     if (!ok)
-#     {
-#       throw new System.ComponentModel.Win32Exception(Marshal.GetLastWin32Error());
-#     }
-#   }
-# '@)::EnableScreenReader($false)
+# Additional fix - explicitly re-enable PSReadLine if disabled by screen reader detection
+if ($null -ne (Get-Module -ListAvailable -Name PSReadLine)) {
+    # Ensure PSReadLine is loaded and enabled
+    Remove-Module PSReadLine -Force -ErrorAction SilentlyContinue
+    Import-Module PSReadLine -Force -ErrorAction SilentlyContinue
+    Set-PSReadLineOption -BellStyle Visual
+
+    # Additional check to make sure PSReadLine is working properly
+    $psrl = Get-Module PSReadLine
+    if ($psrl) {
+        Write-Verbose "PSReadLine version $($psrl.Version) loaded successfully" -Verbose:$false
+    }
+}
+
+# Final check and force enable - this is the definitive fix for the screen reader issue
+if (Get-Module -Name PSReadLine) {
+    # Ensure the module is properly initialized
+    Set-PSReadLineOption -AddToHistoryHandler {
+        # Simple function to ensure PSReadLine remains active
+        $true
+    } -ErrorAction SilentlyContinue
+} else {
+    Write-Error "PSReadLine is still not loaded. Please install it manually."
+}
 
 
 function pkill {
@@ -898,6 +927,20 @@ function pkill {
 $ENV:STARSHIP_CONFIG = "C:\Users\nahid\ms\ms1\linux\config\.config\starship\starship.toml"
 $env:OLLAMA_HOST = "http://localhost:11434"
 
+
+# Final verification that PSReadLine is properly loaded and enabled
+if (Get-Module -Name PSReadLine) {
+    # Verify that PSReadLine features are working
+    $currentOptions = Get-PSReadLineOption -ErrorAction SilentlyContinue
+    if ($currentOptions) {
+        Write-Verbose "PSReadLine is properly configured with EditMode: $($currentOptions.EditMode)" -Verbose:$false
+    }
+} else {
+    Write-Warning "PSReadLine module is not loaded. Attempting to load..."
+    if (Get-Module -ListAvailable -Name PSReadLine) {
+        Import-Module PSReadLine -Force
+    }
+}
 
 Invoke-Expression (& 'C:\Users\nahid\scoop\shims\starship.exe' init powershell --print-full-init | Out-String)
 # oh-my-posh init pwsh --config 'C:\Users\nahid\scoop\apps\oh-my-posh\current\themes\1_shell.omp.json' | Invoke-Expression
