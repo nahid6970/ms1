@@ -184,15 +184,16 @@ function stripMarkdown(text) {
 - **Parsing:** In `parseMarkdown()`, the regex `/^-{5,}$/gm` converts to `<div class="md-separator"></div>`
 - **Detection:** Added `str.match(/^-{5,}$/m)` to `checkHasMarkdown()`
 - **Stripping:** Added `.replace(/^-{5,}$/gm, '')` to `stripMarkdown()` to remove for sorting/searching
-- **Styling:** 2px solid gray div with 12px equal vertical margin (CSS class `.md-separator`)
+- **Styling:** 4px solid gray div with 12px equal vertical margin (CSS class `.md-separator`)
 - **Spacing Fix:** In `oldParseMarkdownBody()`, uses `reduce()` instead of `join('\n')` to skip newlines before/after separators, preventing double spacing
 - **Markdown Guide:** Added to the Code & Highlights section
-- **Static Export:** Updated `export_static.py` with the same parsing logic
+- **Static Export:** Updated `export_static.py` with the same parsing logic and reduce() for proper spacing
 - **Key Functions:**
   - `parseMarkdown()` - Converts `-----` to separator div
   - `checkHasMarkdown()` - Detects 5+ dashes on a line
   - `stripMarkdown()` - Removes separator for sorting/searching
   - `oldParseMarkdownBody()` - Uses reduce to control newlines around separators
+  - `export_static.py` - Also uses reduce() to skip `<br>` tags around separators
 
 ### Table Syntax Enhancements
 We have enhanced the `Table*N` syntax to support more complex layouts:
