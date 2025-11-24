@@ -2599,6 +2599,12 @@ Markdown Table Styles */
     gap: 8px;
 }
 
+.quick-formatter-separator {
+    height: 1px;
+    background: #dee2e6;
+    margin: 12px 0;
+}
+
 .format-btn {
     width: 50px;
     height: 50px;

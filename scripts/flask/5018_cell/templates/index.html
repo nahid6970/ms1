@@ -689,21 +689,6 @@
                 title="Strikethrough (Right-click to select)">
                 <del>S</del>
             </button>
-            <button class="format-btn" onclick="applyQuickFormat('==', '==', event)"
-                oncontextmenu="return toggleFormatSelection('==', '==', event)"
-                title="Black Highlight (Right-click to select)">
-                <span style="background: black; color: white; padding: 2px 4px; border-radius: 3px;">H</span>
-            </button>
-            <button class="format-btn" onclick="applyQuickFormat('!!', '!!', event)"
-                oncontextmenu="return toggleFormatSelection('!!', '!!', event)"
-                title="Red Highlight (Right-click to select)">
-                <span style="background: #ff0000; color: white; padding: 2px 4px; border-radius: 3px;">R</span>
-            </button>
-            <button class="format-btn" onclick="applyQuickFormat('??', '??', event)"
-                oncontextmenu="return toggleFormatSelection('??', '??', event)"
-                title="Blue Highlight (Right-click to select)">
-                <span style="background: #0000ff; color: white; padding: 2px 4px; border-radius: 3px;">B</span>
-            </button>
             <button class="format-btn" onclick="applyQuickFormat('##', '##', event)"
                 oncontextmenu="return toggleFormatSelection('##', '##', event)" title="Heading (Right-click to select)">
                 <span style="font-size: 1.2em; font-weight: 600;">H</span>
@@ -746,6 +731,29 @@
             <button class="format-btn" onclick="applyQuickFormat('{% raw %}{{{% endraw %}', '{% raw %}}}{% endraw %}', event)"
                 oncontextmenu="return toggleFormatSelection('{% raw %}{{{% endraw %}', '{% raw %}}}{% endraw %}', event)" title="Hide Text (Right-click to select)">
                 👁️
+            </button>
+        </div>
+        
+        <div class="quick-formatter-separator"></div>
+        <div class="quick-formatter-title" style="font-size: 12px; margin-top: 8px;">Quick Highlights</div>
+        <div class="quick-formatter-options">
+            <button class="format-btn" onclick="applyQuickFormat('==', '==', event)"
+                oncontextmenu="return toggleFormatSelection('==', '==', event)"
+                title="Black Highlight (Right-click to select)"
+                style="background: black; color: white; font-size: 12px; font-weight: 600;">
+                Black
+            </button>
+            <button class="format-btn" onclick="applyQuickFormat('!!', '!!', event)"
+                oncontextmenu="return toggleFormatSelection('!!', '!!', event)"
+                title="Red Highlight (Right-click to select)"
+                style="background: #ff0000; color: white; font-size: 12px; font-weight: 600;">
+                Red
+            </button>
+            <button class="format-btn" onclick="applyQuickFormat('??', '??', event)"
+                oncontextmenu="return toggleFormatSelection('??', '??', event)"
+                title="Blue Highlight (Right-click to select)"
+                style="background: #0000ff; color: white; font-size: 12px; font-weight: 600;">
+                Blue
             </button>
             <button class="format-btn format-btn-color" onclick="showColorPicker(event)"
                 oncontextmenu="return toggleColorSelection(event)" title="Custom Color (Right-click to select)">
