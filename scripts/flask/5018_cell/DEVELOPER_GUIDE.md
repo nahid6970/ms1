@@ -163,6 +163,20 @@ function stripMarkdown(text) {
   - `applyQuickFormat()` - Applies formatting instantly without Apply button
   - Various format functions: `makeBold()`, `makeItalic()`, `makeUnderline()`, etc.
 
+### Small Text Feature
+**Syntax:** `..small text..`
+**Purpose:** Makes text smaller (75% of normal size), useful for footnotes, captions, or de-emphasizing text.
+**Implementation:**
+- **Parsing:** In `parseMarkdown()`, the regex `/\.\.(.+?)\.\./g` converts to `<span style="font-size: 0.85em;">$1</span>`
+- **Detection:** Added `str.includes('..')` to `checkHasMarkdown()`
+- **Stripping:** Added `.replace(/\.\.(.+?)\.\./g, '$1')` to `stripMarkdown()`
+- **Markdown Guide:** Added to the Text Formatting section showing the syntax and preview
+- **Static Export:** Updated `export_static.py` with the same parsing logic
+- **Key Functions:**
+  - `parseMarkdown()` - Converts `..text..` to smaller HTML
+  - `checkHasMarkdown()` - Detects the syntax
+  - `stripMarkdown()` - Removes syntax for sorting/searching
+
 ### Table Syntax Enhancements
 We have enhanced the `Table*N` syntax to support more complex layouts:
 - **Flexible Placement:** Tables can now be placed anywhere in the cell, not just at the beginning.

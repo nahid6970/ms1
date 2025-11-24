@@ -1251,6 +1251,7 @@ def generate_static_html(data):
          * - ^superscript^ -> <sup>
          * - ~subscript~ -> <sub>
          * - ##heading## -> larger text
+         * - ..small text.. -> smaller text
          * - `code` -> <code>
          * - ==highlight== -> <mark>
          * - {link:url}text{/} -> clickable link
@@ -1346,6 +1347,9 @@ def generate_static_html(data):
             // Heading: ##text## -> larger text
             formatted = formatted.replace(/##(.+?)##/g, '<span style="font-size: 1.3em; font-weight: 600;">$1</span>');
 
+            // Small text: ..text.. -> smaller text
+            formatted = formatted.replace(/\\.\\.(.+?)\\.\\./g, '<span style="font-size: 0.75em;">$1</span>');
+
             // Bold: **text** -> <strong>text</strong>
             formatted = formatted.replace(/\\*\\*(.+?)\\*\\*/g, '<strong>$1</strong>');
 
@@ -1436,6 +1440,9 @@ def generate_static_html(data):
 
                 // Heading: ##text## -> larger text
                 formatted = formatted.replace(/##(.+?)##/g, '<span style="font-size: 1.3em; font-weight: 600;">$1</span>');
+
+                // Small text: ..text.. -> smaller text
+                formatted = formatted.replace(/\\.\\.(.+?)\\.\\./g, '<span style="font-size: 0.75em;">$1</span>');
 
                 // Bold: **text** -> <strong>text</strong>
                 formatted = formatted.replace(/\\*\\*(.+?)\\*\\*/g, '<strong>$1</strong>');

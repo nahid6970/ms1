@@ -809,6 +809,7 @@ function checkHasMarkdown(value) {
         str.includes('__') ||
         str.includes('@@') ||
         str.includes('##') ||
+        str.includes('..') ||
         str.includes('```') ||
         str.includes('`') ||
         str.includes('~~') ||
@@ -1018,6 +1019,9 @@ function parseMarkdownInline(text) {
     // Heading: ##text## -> larger text
     formatted = formatted.replace(/##(.+?)##/g, '<span style="font-size: 1.3em; font-weight: 600;">$1</span>');
 
+    // Small text: ..text.. -> smaller text
+    formatted = formatted.replace(/\.\.(.+?)\.\./g, '<span style="font-size: 0.75em;">$1</span>');
+
     // Bold: **text** -> <strong>text</strong>
     formatted = formatted.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
 
@@ -1220,6 +1224,9 @@ function oldParseMarkdownBody(lines) {
 
         // Heading: ##text## -> larger text
         formatted = formatted.replace(/##(.+?)##/g, '<span style="font-size: 1.3em; font-weight: 600;">$1</span>');
+
+        // Small text: ..text.. -> smaller text
+        formatted = formatted.replace(/\.\.(.+?)\.\./g, '<span style="font-size: 0.75em;">$1</span>');
 
         // Bold: **text** -> <strong>text</strong>
         formatted = formatted.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
@@ -4450,6 +4457,9 @@ function stripMarkdown(text) {
 
     // Remove header markers: ##text## -> text
     stripped = stripped.replace(/##(.+?)##/g, '$1');
+
+    // Remove small text markers: ..text.. -> text
+    stripped = stripped.replace(/\.\.(.+?)\.\./g, '$1');
 
     // Remove code block markers: ```text``` -> text
     stripped = stripped.replace(/```(.+?)```/gs, '$1');
