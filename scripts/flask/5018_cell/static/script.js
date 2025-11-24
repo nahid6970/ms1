@@ -24,20 +24,8 @@ let sheetHistory = []; // Track recently visited sheets for Alt+M toggle
 // Load data on page load
 window.onload = function () {
     const loadStartTime = performance.timing.navigationStart;
-    const loadEndTime = performance.timing.loadEventEnd || performance.now();
-    const loadTime = loadEndTime - loadStartTime;
     
     initializeApp();
-    
-    // Display load time after initialization
-    setTimeout(() => {
-        const finalLoadTime = performance.timing.loadEventEnd - performance.timing.navigationStart;
-        const seconds = (finalLoadTime / 1000).toFixed(2);
-        const loadTimeElement = document.getElementById('loadTimeValue');
-        if (loadTimeElement) {
-            loadTimeElement.textContent = `${seconds}s`;
-        }
-    }, 100);
 };
 
 function initializeApp() {
@@ -450,6 +438,17 @@ async function loadData() {
         renderCategoryTabs();
         renderSheetTabs();
         renderTable();
+        
+        // Display load time after everything is rendered
+        requestAnimationFrame(() => {
+            // performance.now() gives time in milliseconds since page load started
+            const totalLoadTime = performance.now();
+            const seconds = (totalLoadTime / 1000).toFixed(2);
+            const loadTimeElement = document.getElementById('loadTimeValue');
+            if (loadTimeElement) {
+                loadTimeElement.textContent = `${seconds}s`;
+            }
+        });
     } catch (error) {
         console.error('Error loading data:', error);
     }

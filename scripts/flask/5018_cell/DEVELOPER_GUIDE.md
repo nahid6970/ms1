@@ -113,10 +113,10 @@ function stripMarkdown(text) {
 ### Page Load Time Indicator
 **Purpose:** Shows how long the page took to load, helping with performance monitoring.
 **Implementation:**
-- **Calculation:** Uses `performance.timing` API to calculate load time: `(loadEventEnd - navigationStart) / 1000`
-- **Display:** Shows in bottom-right corner as "Loaded in X.XXs" with fade-in animation
-- **Styling:** Gray text with subtle appearance, positioned absolutely in the bottom-right
-- **Timing:** Calculated and displayed after the window `load` event completes
+- **Calculation:** Measures from page navigation start to when the table finishes rendering: `(performance.now() - navigationStart) / 1000`
+- **Display:** Shows in the sheet controls area as "⏱️ X.XXs"
+- **Timing:** Calculated and displayed after `renderTable()` completes in `loadData()`, using `requestAnimationFrame` to ensure DOM updates are finished
+- **Accuracy:** Captures the full user-perceived load time including data fetching, parsing, and table rendering
 
 ### Quick Formatter Enhancements
 **Improvements:**
