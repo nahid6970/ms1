@@ -750,11 +750,11 @@ def generate_static_html(data):
         mark {
             background: #000000;
             color: #ffffff;
-            padding: 0px 4px 2px 4px;
+            padding: 1px 4px;
             border-radius: 3px;
             display: inline-block;
             vertical-align: baseline;
-            margin-top: -3px;
+            margin-top: -2px;
             margin-right: 2px;
             line-height: 1.3;
         }
@@ -1336,11 +1336,11 @@ def generate_static_html(data):
                 });
                 // Only add padding and border-radius if there's a background
                 if (hasBg) {
-                    styleObj.padding = '0px 6px 2px 6px';
+                    styleObj.padding = '1px 6px 1px 6px';
                     styleObj.borderRadius = '4px';
                     styleObj.display = 'inline-block';
                     styleObj.verticalAlign = 'baseline';
-                    styleObj.marginTop = '-3px';
+                    styleObj.marginTop = '-2px';
                     styleObj.marginRight = '2px';
                 }
                 // Only use extra spacing if there's a background color
@@ -1437,11 +1437,11 @@ def generate_static_html(data):
                     });
                     // Only add padding and border-radius if there's a background
                     if (hasBg) {
-                        styleObj.padding = '0px 6px 2px 6px';
+                        styleObj.padding = '1px 6px 1px 6px';
                         styleObj.borderRadius = '4px';
                         styleObj.display = 'inline-block';
                         styleObj.verticalAlign = 'baseline';
-                        styleObj.marginTop = '-3px';
+                        styleObj.marginTop = '-2px';
                         styleObj.marginRight = '2px';
                     }
                     // Only use extra spacing if there's a background color
@@ -1514,10 +1514,10 @@ def generate_static_html(data):
                 formatted = formatted.replace(/==(.+?)==/g, '<mark>$1</mark>');
 
                 // Red highlight: !!text!! -> red background with white text
-                formatted = formatted.replace(/!!(.+?)!!/g, '<span style="background: #ff0000; color: #ffffff; padding: 0px 4px 2px 4px; border-radius: 3px; display: inline-block; vertical-align: baseline; margin-top: -3px; margin-right: 2px; line-height: 1.3;">$1</span>');
+                formatted = formatted.replace(/!!(.+?)!!/g, '<span style="background: #ff0000; color: #ffffff; padding: 1px 4px; border-radius: 3px; display: inline-block; vertical-align: baseline; margin-top: -2px; margin-right: 2px; line-height: 1.3;">$1</span>');
 
                 // Blue highlight: ??text?? -> blue background with white text
-                formatted = formatted.replace(/\\?\\?(.+?)\\?\\?/g, '<span style="background: #0000ff; color: #ffffff; padding: 0px 4px 2px 4px; border-radius: 3px; display: inline-block; vertical-align: baseline; margin-top: -3px; margin-right: 2px; line-height: 1.3;">$1</span>');
+                formatted = formatted.replace(/\\?\\?(.+?)\\?\\?/g, '<span style="background: #0000ff; color: #ffffff; padding: 1px 4px; border-radius: 3px; display: inline-block; vertical-align: baseline; margin-top: -2px; margin-right: 2px; line-height: 1.3;">$1</span>');
 
                 // Collapsible text: {{text}} -> hidden text with toggle button
                 formatted = formatted.replace(/\\{\\{(.+?)\\}\\}/g, function(match, content) {
