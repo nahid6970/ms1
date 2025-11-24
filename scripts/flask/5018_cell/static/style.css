@@ -3292,5 +3292,8 @@ mark {
     color: #ffffff;
     padding: 1px 4px;
     border-radius: 3px;
-    line-height: 1.5;
+    display: inline-block;
+    vertical-align: baseline;
+    margin-top: -1px;
+    line-height: 1.3;
 }
