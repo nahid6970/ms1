@@ -7,9 +7,21 @@ This is a Flask-based web application that provides a dynamic, spreadsheet-like 
 
 ### Key Files
 - **`app.py`**: Flask backend handling routes, API endpoints for data persistence (loading/saving JSON), and serving static files.
-- **`static/script.js`**: The core logic engine. Handles state management (`tableData`), rendering (`renderTable`), event listeners, and Markdown parsing.
+- **`static/script.js`**: The core logic engine (~6800+ lines). Handles state management (`tableData`), rendering (`renderTable`), event listeners, and Markdown parsing.
 - **`static/style.css`**: Custom styling for the grid, modals, and markdown elements.
-- **`templates/index.html`**: The main application shell.
+- **`templates/index.html`**: The main application shell with modals and UI structure.
+- **`export_static.py`**: Python script to generate a standalone HTML file with all features embedded (no Flask needed).
+- **`data.json`**: JSON file storing all spreadsheet data, sheets, categories, and cell styles.
+
+### Core Features
+- **Multi-sheet support** with categories for organization
+- **Rich markdown formatting** in cells (bold, italic, colors, tables, math, collapsible text, etc.)
+- **Cell styling** (borders, colors, fonts, alignment, merging)
+- **Column customization** (width, type, styling, header styling)
+- **Search functionality** with multi-term support and highlighting
+- **Keyboard shortcuts** (F1-F4, Alt+M, Ctrl+S, etc.)
+- **Quick Formatter** (F2) for instant text formatting
+- **Static export** for sharing spreadsheets as standalone HTML files
 
 ## ⚡ Critical Implementation Rule: "The Rule of 4"
 
@@ -159,20 +171,60 @@ We have enhanced the `Table*N` syntax to support more complex layouts:
 - **Empty Line Preservation:** We use `white-space: pre-wrap` in the preview to ensure empty lines between tables and text are respected.
 
 ## Data Structure
-The application state is held in `tableData`:
+The application state is held in `tableData` and persisted to `data.json`:
 ```javascript
 let tableData = {
     sheets: [
         {
             name: "Sheet1",
+            nickname: "Optional search nickname",
             rows: [ ["cell1", "cell2"], ... ],
-            columns: [ { width: 100, type: 'text' }, ... ],
-            cellStyles: { "0-0": { bold: true } } // Key is "row-col"
+            columns: [ 
+                { 
+                    name: "A", 
+                    width: 150, 
+                    type: 'text',
+                    font: 'JetBrains Mono',
+                    fontSize: 18,
+                    bgColor: '#ffffff',
+                    textColor: '#000000',
+                    headerBgColor: '#f8f9fa',
+                    headerTextColor: '#333333',
+                    headerBold: false,
+                    headerItalic: false,
+                    headerCenter: false
+                }, 
+                ... 
+            ],
+            cellStyles: { 
+                "0-0": { 
+                    bold: true, 
+                    italic: false,
+                    center: false,
+                    fontSize: 20,
+                    bgColor: '#ffff00',
+                    textColor: '#000000',
+                    border: 'all' // or 'top', 'bottom', 'left', 'right', 'none'
+                } 
+            }, // Key is "row-col"
+            mergedCells: {
+                "0-0": { rowspan: 2, colspan: 3 }
+            }
         }
     ],
-    activeSheet: 0
+    activeSheet: 0,
+    categories: ["Uncategorized", "Bengali", "English", ...],
+    sheetCategories: { "0": "Bengali", "1": "English", ... } // Maps sheet index to category
 };
 ```
+
+### Key Global Variables
+- `tableData` - Main data structure (synced with data.json)
+- `currentSheet` - Index of currently active sheet
+- `currentCategory` - Currently selected category filter
+- `sheetHistory` - Array tracking recently viewed sheets (for Alt+M toggle)
+- `isMarkdownEnabled` - Boolean for markdown preview toggle
+- `isRowNumbersEnabled` - Boolean for row number visibility
 
 ### Column Styling
 Column-wide styles (like background color, font, text color) are stored in the `columns` array.
@@ -190,6 +242,48 @@ The grid system relies on CSS variables for dynamic column counts:
 }
 ```
 
+## Important Keyboard Shortcuts
+- **F1** - Reorder categories
+- **F2** - Quick Formatter (format selected text)
+- **F3** - Column settings for current column
+- **F4** - Toggle ribbons (hide/show toolbar and sheet tabs)
+- **Alt+M** - Toggle between current and previous sheet
+- **Ctrl+S** - Save data
+- **Ctrl+F** - Focus search box
+- **\*** in search - Search by sheet nickname
+
+## Common Development Tasks
+
+### Adding a New Markdown Syntax
+1. Add parsing logic to `parseMarkdown()` (~line 980+)
+2. Add detection to `checkHasMarkdown()` (~line 780+)
+3. Add stripping logic to `stripMarkdown()` (~line 4060+)
+4. Update `export_static.py` with same parsing logic
+5. Add to Markdown Guide modal in `templates/index.html`
+6. Test: Create cell with syntax, check preview, search, sort, and static export
+
+### Modifying the Table Rendering
+- Main function: `renderTable()` (~line 3947+)
+- Uses `DocumentFragment` for performance
+- Calls `applyMarkdownFormatting()` for each cell
+- Apply column styles before cell styles (order matters!)
+
+### Adding a New Feature to Quick Formatter
+1. Add button to the formatter popup HTML (created in `showQuickFormatter()`)
+2. Create formatting function (e.g., `makeYourFormat()`)
+3. Wire button click to call the function
+4. Function should wrap selected text with your syntax
+5. Test with F2 shortcut
+
+### Debugging Tips
+- Check browser console for errors
+- Use `console.log(tableData)` to inspect state
+- Check `data.json` to see persisted data structure
+- Use browser DevTools to inspect cell elements and styles
+- Test static export with `python export_static.py` to ensure feature works offline
+
 ## Future Improvements Checklist
 - [ ] When adding new syntax, update the "Markdown Guide" modal in `templates/index.html` so users know it exists.
 - [ ] Check `style.css` for dark mode compatibility if adding new UI elements.
+- [ ] Update `export_static.py` when adding new markdown syntax or JavaScript features.
+- [ ] Test features in both live Flask app and exported static HTML.
