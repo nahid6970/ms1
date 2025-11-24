@@ -529,5 +529,14 @@
     ],
     "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\Autohtokey\\Command\\n8n.ahk",
     "ExecutableType": "ahk_v2"
+  },
+  {
+    "name": "web host",
+    "type": "Command",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\Users\\nahid\\ms\\ms1\\web_host.py",
+    "ExecutableType": "pythonw"
   }
 ]
