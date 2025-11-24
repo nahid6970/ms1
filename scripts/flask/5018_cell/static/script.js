@@ -731,6 +731,57 @@ async function deleteRow(index) {
     }
 }
 
+// Helper function to reindex cell styles and merged cells after row deletion
+function reindexCellStylesAfterRowDeletion(sheet, deletedRowIndices) {
+    if (!sheet.cellStyles) return;
+    
+    const newCellStyles = {};
+    const newMergedCells = {};
+    
+    // Sort deleted indices for easier checking
+    const sortedDeleted = [...deletedRowIndices].sort((a, b) => a - b);
+    
+    // Process each cell style
+    Object.keys(sheet.cellStyles).forEach(key => {
+        const [oldRow, col] = key.split('-').map(Number);
+        
+        // Skip if this row was deleted
+        if (sortedDeleted.includes(oldRow)) {
+            return;
+        }
+        
+        // Calculate how many rows were deleted before this row
+        const rowsDeletedBefore = sortedDeleted.filter(idx => idx < oldRow).length;
+        const newRow = oldRow - rowsDeletedBefore;
+        
+        // Store with new key
+        newCellStyles[`${newRow}-${col}`] = sheet.cellStyles[key];
+    });
+    
+    // Process merged cells if they exist
+    if (sheet.mergedCells) {
+        Object.keys(sheet.mergedCells).forEach(key => {
+            const [oldRow, col] = key.split('-').map(Number);
+            
+            // Skip if this row was deleted
+            if (sortedDeleted.includes(oldRow)) {
+                return;
+            }
+            
+            // Calculate how many rows were deleted before this row
+            const rowsDeletedBefore = sortedDeleted.filter(idx => idx < oldRow).length;
+            const newRow = oldRow - rowsDeletedBefore;
+            
+            // Store with new key
+            newMergedCells[`${newRow}-${col}`] = sheet.mergedCells[key];
+        });
+        
+        sheet.mergedCells = newMergedCells;
+    }
+    
+    sheet.cellStyles = newCellStyles;
+}
+
 async function deleteEmptyRows() {
     const sheet = tableData.sheets[currentSheet];
 
@@ -761,6 +812,9 @@ async function deleteEmptyRows() {
                 sheet.rows.splice(rowIndex, 1);
             }
         }
+
+        // Reindex cell styles and merged cells after deletion
+        reindexCellStylesAfterRowDeletion(sheet, emptyRowIndices);
 
         renderTable();
         showToast(`Deleted ${emptyRowIndices.length} empty row${emptyRowIndices.length !== 1 ? 's' : ''}`, 'success');
