@@ -3320,8 +3320,10 @@ function searchTable() {
         return;
     }
 
-    // Split search terms by comma and trim each term
-    const searchTerms = searchTerm.split(',').map(term => term.trim().toLowerCase()).filter(term => term.length > 0);
+    // Split search terms by comma, strip markdown, and trim each term
+    const searchTerms = searchTerm.split(',')
+        .map(term => stripMarkdown(term.trim()).toLowerCase())
+        .filter(term => term.length > 0);
 
     if (searchTerms.length === 0) {
         rows.forEach(row => {
