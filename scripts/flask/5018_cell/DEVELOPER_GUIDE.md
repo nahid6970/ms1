@@ -374,3 +374,85 @@ The grid system relies on CSS variables for dynamic column counts:
 **Files Modified:**
 - `export_static.py` - Updated all color highlight styling
 - CSS for `mark` tag in embedded styles
+
+
+## Font System
+
+### Default Font Configuration
+
+The application uses a **dual-font system** to support both English and Bangla text:
+
+**Default Font Stack:**
+```css
+font-family: Vrinda, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+```
+
+- **Vrinda** - Primary font for Bangla characters (Windows system font)
+- **Segoe UI, Tahoma, etc.** - Fallback fonts for English and other languages
+
+### Where Fonts Are Applied
+
+1. **Table Cells (td input)** - Line ~556 in `style.css`
+2. **Textareas (td textarea)** - Line ~561 in `style.css`
+3. **Markdown Preview** - Line ~720 in `style.css`
+4. **Merged Cell Textareas** - Line ~1690 in `style.css`
+
+### Vrinda Font Toggle
+
+Users can disable Vrinda font via **Settings → Use Vrinda Font for Bangla**
+
+**How it works:**
+- **Enabled (default):** Uses `Vrinda` as first font in the stack
+- **Disabled:** Adds `.disable-vrinda` class to table, which overrides with `!important`:
+  ```css
+  .disable-vrinda td input,
+  .disable-vrinda td textarea {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+  }
+  ```
+
+**State Management:**
+- Stored in `localStorage` as `vrindaFontEnabled` (default: `true`)
+- Function: `toggleVrindaFont(enabled)` in `script.js` ~line 2953
+- Initialized on page load ~line 187
+
+### Column-Specific Fonts
+
+Users can set custom fonts per column via **Column Settings (F3)**:
+
+**Available Fonts:**
+- Default (uses Vrinda stack)
+- JetBrains Mono (loaded from Google Fonts)
+- Arial
+- Courier New
+- Georgia
+- Times New Roman
+- Verdana
+- Agency FB
+- Comic Sans MS
+
+**Implementation:**
+- Column font is stored in `tableData.sheets[n].columns[n].font`
+- Applied as inline style during `renderTable()`
+- Takes precedence over default Vrinda font stack
+
+### Font Loading
+
+**JetBrains Mono** is loaded from Google Fonts in `index.html`:
+```html
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
+```
+
+### Mobile/Cross-Platform Considerations
+
+**Issue:** System fonts like Vrinda, Comic Sans, and custom fonts may not be available on all devices (especially mobile).
+
+**Solutions:**
+1. **Vrinda (Bangla):** Only available on Windows. On other platforms, falls back to system default.
+2. **JetBrains Mono:** Loaded from Google Fonts, works cross-platform.
+3. **Other fonts:** System-dependent. Consider adding web font fallbacks for critical fonts.
+
+**For Static Export:**
+- JetBrains Mono is included via Google Fonts link
+- Other system fonts (Vrinda, Comic Sans, etc.) will only work if installed on the viewing device
+- Consider adding web font alternatives (e.g., Noto Sans Bengali for Bangla) if cross-platform support is critical
