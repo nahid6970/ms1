@@ -890,8 +890,15 @@ def generate_static_html(data):
         }
     </style>
     <script>
-        let currentSheet = ''' + str(active_sheet) + ''';
         let tableData = ''' + json.dumps(data) + ''';
+        
+        // Try to restore last viewed sheet from localStorage, fallback to embedded activeSheet
+        let currentSheet = parseInt(localStorage.getItem('staticExportActiveSheet')) || ''' + str(active_sheet) + ''';
+        
+        // Validate the sheet index
+        if (currentSheet < 0 || currentSheet >= tableData.sheets.length) {
+            currentSheet = ''' + str(active_sheet) + ''';
+        }
         
         // Set currentCategory to match the active sheet's category
         let currentCategory = tableData.sheetCategories[currentSheet] || tableData.sheetCategories[String(currentSheet)] || null;
@@ -1011,6 +1018,9 @@ def generate_static_html(data):
 
         function switchSheet(index) {
             currentSheet = index;
+            
+            // Save to localStorage so it persists across refreshes
+            localStorage.setItem('staticExportActiveSheet', index);
             renderSheetTabs();
             renderTable();
         }
