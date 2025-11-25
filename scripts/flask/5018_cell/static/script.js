@@ -5138,61 +5138,7 @@ function searchGoogle(event) {
     showToast('Searching in Google', 'success');
 }
 
-function sortLines(event) {
-    if (!quickFormatterTarget) return;
 
-    const input = quickFormatterTarget;
-    const start = quickFormatterSelection.start;
-    const end = quickFormatterSelection.end;
-    const selectedText = input.value.substring(start, end);
-
-    if (!selectedText) {
-        showToast('No text selected', 'warning');
-        return;
-    }
-
-    // Split into lines, sort them with smart numerical sorting, and rejoin
-    const lines = selectedText.split('\n');
-    const sortedLines = lines.sort((a, b) => {
-        // Extract leading numbers from both strings
-        const numA = a.match(/^\d+/);
-        const numB = b.match(/^\d+/);
-
-        // If both start with numbers, compare numerically
-        if (numA && numB) {
-            const diff = parseInt(numA[0], 10) - parseInt(numB[0], 10);
-            if (diff !== 0) return diff;
-            // If numbers are equal, compare the rest of the string
-            return a.localeCompare(b, undefined, { sensitivity: 'base' });
-        }
-
-        // If only one starts with a number, numbers come first
-        if (numA) return -1;
-        if (numB) return 1;
-
-        // Otherwise, alphabetical comparison
-        return a.localeCompare(b, undefined, { sensitivity: 'base' });
-    });
-    const sortedText = sortedLines.join('\n');
-
-    // Replace the selected text with sorted text
-    const newText = input.value.substring(0, start) +
-        sortedText +
-        input.value.substring(end);
-
-    input.value = newText;
-
-    // Trigger change event to update cell
-    const changeEvent = new Event('input', { bubbles: true });
-    input.dispatchEvent(changeEvent);
-
-    // Select the sorted text
-    input.setSelectionRange(start, start + sortedText.length);
-    input.focus();
-
-    closeQuickFormatter();
-    showToast(`Sorted ${lines.length} lines`, 'success');
-}
 
 function linesToComma(event) {
     if (!quickFormatterTarget) return;
@@ -7127,20 +7073,64 @@ function sortLines(event) {
     const blocks = [];
     let currentBlock = null;
 
-    for (const line of lines) {
-        // Check if this is a list item (starts with - or --)
-        const isListItem = line.trim().startsWith('- ') || line.trim().startsWith('-- ');
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        const trimmed = line.trim();
+        
+        // Check dash patterns
+        const isDoubleDash = trimmed.startsWith('-- ');
+        const isSingleDash = trimmed.startsWith('- ') && !trimmed.startsWith('-- ');
+        const hasNoDash = !trimmed.startsWith('- ');
+        
+        // Determine if this is a child line by looking at context
+        let isChildLine = false;
+        
+        if (isDoubleDash) {
+            // -- is always a child
+            isChildLine = true;
+        } else if (isSingleDash) {
+            // - could be parent or child depending on what came before
+            if (currentBlock && currentBlock.children.length === 0) {
+                // Previous line was a parent with no children yet
+                // Check if previous parent has no dash (then this - is a child)
+                // or if previous parent has - (then this - is also a parent)
+                const prevParentTrimmed = currentBlock.parent.trim();
+                if (prevParentTrimmed.startsWith('- ')) {
+                    // Previous parent also starts with -, so this is a new parent
+                    isChildLine = false;
+                } else {
+                    // Previous parent has no dash, so this - is a child
+                    isChildLine = true;
+                }
+            } else if (currentBlock && currentBlock.children.length > 0) {
+                // Previous line(s) were children, check the last child's format
+                const lastChild = currentBlock.children[currentBlock.children.length - 1];
+                if (lastChild.trim().startsWith('-- ')) {
+                    // Last child was --, so this - is a new parent
+                    isChildLine = false;
+                } else {
+                    // Last child was -, so this - is also a child
+                    isChildLine = true;
+                }
+            } else {
+                // No current block, this - starts a new parent
+                isChildLine = false;
+            }
+        } else {
+            // No dash = parent line
+            isChildLine = false;
+        }
 
-        if (isListItem) {
+        if (isChildLine) {
             // This is a child line, add to current block
             if (currentBlock) {
                 currentBlock.children.push(line);
             } else {
-                // Orphan list item, treat as its own block
+                // Orphan child line, treat as its own block
                 blocks.push({
                     parent: line,
                     children: [],
-                    isListItem: true
+                    isOrphan: true
                 });
             }
         } else {
@@ -7150,8 +7140,7 @@ function sortLines(event) {
             }
             currentBlock = {
                 parent: line,
-                children: [],
-                isListItem: false
+                children: []
             };
         }
     }
@@ -7161,29 +7150,43 @@ function sortLines(event) {
         blocks.push(currentBlock);
     }
 
-    // Sort blocks by their parent line with smart numerical sorting
+    // Sort blocks by their parent line with dash priority and smart numerical sorting
     const sortedBlocks = blocks.sort((a, b) => {
-        const lineA = a.parent;
-        const lineB = b.parent;
+        const lineA = a.parent.trim();
+        const lineB = b.parent.trim();
+
+        // Check dash prefixes for priority (no dash > single dash > double dash)
+        const dashPriorityA = lineA.startsWith('-- ') ? 2 : (lineA.startsWith('- ') ? 1 : 0);
+        const dashPriorityB = lineB.startsWith('-- ') ? 2 : (lineB.startsWith('- ') ? 1 : 0);
+
+        // If different dash priorities, sort by priority (lower number = higher priority)
+        if (dashPriorityA !== dashPriorityB) {
+            return dashPriorityA - dashPriorityB;
+        }
+
+        // Same dash priority, now compare content
+        // Remove dash prefix for comparison
+        const contentA = lineA.replace(/^-+\s*/, '');
+        const contentB = lineB.replace(/^-+\s*/, '');
 
         // Extract leading numbers from both strings
-        const numA = lineA.match(/^\d+/);
-        const numB = lineB.match(/^\d+/);
+        const numA = contentA.match(/^\d+/);
+        const numB = contentB.match(/^\d+/);
 
         // If both start with numbers, compare numerically
         if (numA && numB) {
             const diff = parseInt(numA[0], 10) - parseInt(numB[0], 10);
             if (diff !== 0) return diff;
             // If numbers are equal, compare the rest of the string
-            return lineA.localeCompare(lineB, undefined, { sensitivity: 'base' });
+            return contentA.toLowerCase().localeCompare(contentB.toLowerCase());
         }
 
         // If only one starts with a number, numbers come first
         if (numA) return -1;
         if (numB) return 1;
 
-        // Otherwise, alphabetical comparison
-        return lineA.localeCompare(lineB, undefined, { sensitivity: 'base' });
+        // Otherwise, alphabetical comparison (case-insensitive)
+        return contentA.toLowerCase().localeCompare(contentB.toLowerCase());
     });
 
     // Reconstruct the sorted text

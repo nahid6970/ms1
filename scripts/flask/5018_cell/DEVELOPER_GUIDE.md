@@ -190,6 +190,43 @@ const hasMarkdown = cellValue.includes('**') ||
 5. **Clear Format:** 🧹 Remove All Formatting (always last before separator)
 6. **Quick Highlights Section:** Black, Red, Blue, Custom Color
 
+### Sort Lines Feature
+**Purpose:** Intelligently sorts selected lines while preserving parent-child relationships in lists.
+
+**Sorting Priority:**
+1. Lines without dashes (highest priority)
+2. Lines with single dash `-`
+3. Lines with double dash `--`
+4. Within same priority: alphabetical or numerical sorting
+
+**Parent-Child Detection:**
+- **Format 1:** `Parent` followed by `- child`
+- **Format 2:** `- Parent` followed by `-- child`
+- **Mixed Format:** Automatically detects and handles both formats in the same selection
+
+**Smart Grouping:**
+- Children stay with their parents during sorting
+- Parents are sorted, and their children move with them
+- When multiple `- ` lines appear together, they're treated as separate parents (not children of each other)
+
+**Examples:**
+```
+Before:          After:
+B-List           A-List
+- BB             - AA
+A-List           B-List
+- AA             - BB
+
+Before:          After:
+- B-List         - A-List
+-- BB            -- AA
+- A-List         - B-List
+-- AA            -- BB
+```
+
+**Key Function:**
+- `sortLines()` - Located in `static/script.js` ~ line 7057+
+
 **⚠️ IMPORTANT - Button Order Rule:**
 When adding new buttons to the Quick Formatter, the **Clear Format button (🧹 Remove All Formatting)** MUST always be:
 - **Last button** in the main formatting section
