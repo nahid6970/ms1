@@ -741,9 +741,6 @@
             <button class="format-btn" onclick="commaToLines(event)" title="Convert Comma-Separated to Lines">
                 ⬇️
             </button>
-            <button class="format-btn" onclick="removeFormatting(event)" title="Remove All Formatting">
-                🧹
-            </button>
             <button class="format-btn" onclick="selectAllMatchingFromFormatter(event)"
                 title="Select All Matching - Edit all occurrences at once">
                 🎯
@@ -751,6 +748,9 @@
             <button class="format-btn" onclick="applyQuickFormat('{% raw %}{{{% endraw %}', '{% raw %}}}{% endraw %}', event)"
                 oncontextmenu="return toggleFormatSelection('{% raw %}{{{% endraw %}', '{% raw %}}}{% endraw %}', event)" title="Hide Text (Right-click to select)">
                 👁️
+            </button>
+            <button class="format-btn" onclick="removeFormatting(event)" title="Remove All Formatting">
+                🧹
             </button>
         </div>
         

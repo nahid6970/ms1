@@ -180,10 +180,28 @@ const hasMarkdown = cellValue.includes('**') ||
 - **Color Highlights:** Added dedicated buttons for quick color highlighting (Black, Red, Blue) in a separate section.
 - **Better Layout:** Organized buttons into logical groups with clear visual separation.
 - **Click-Outside-to-Close:** Added event listener to close the formatter popup when clicking outside of it.
-- **Improved UX:** Streamlined workflow - select text, press F2, click format button, done.
-- **Key Functions:**
-  - `showQuickFormatter()` - Opens the formatter popup (F2 shortcut)
+- **Improved UX:** Streamlined workflow - select text, press F3, click format button, done.
+
+**Button Order (F3 Popup):**
+1. **Text Formatting:** Bold, Italic, Underline, Strikethrough, Heading, Small Text, Code
+2. **Special Formatting:** Superscript, Subscript
+3. **Utilities:** Link, Search Google, Sort Lines, Lines↔Comma conversion
+4. **Advanced:** Select All Matching, Hide Text (collapsible)
+5. **Clear Format:** 🧹 Remove All Formatting (always last before separator)
+6. **Quick Highlights Section:** Black, Red, Blue, Custom Color
+
+**⚠️ IMPORTANT - Button Order Rule:**
+When adding new buttons to the Quick Formatter, the **Clear Format button (🧹 Remove All Formatting)** MUST always be:
+- **Last button** in the main formatting section
+- **Immediately before** the `<div class="quick-formatter-separator"></div>`
+- **Before** the Quick Highlights section
+
+This ensures users can easily find the clear button at the end of all formatting options.
+
+**Key Functions:**
+  - `showQuickFormatter()` - Opens the formatter popup (F3 shortcut)
   - `applyQuickFormat()` - Applies formatting instantly without Apply button
+  - `removeFormatting()` - Clears all markdown syntax from selected text
   - Various format functions: `makeBold()`, `makeItalic()`, `makeUnderline()`, etc.
 
 ### Small Text Feature
