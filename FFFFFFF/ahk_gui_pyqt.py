@@ -547,11 +547,12 @@ class AHKShortcutEditor(QMainWindow):
                     margin: 20px;
                     background: #2b2b2b;
                     color: #ffffff;
+                    font-size: 16px; /* Increased base font size */
                 }
                 .container { display: flex; gap: 20px; }
                 .column { flex: 1; }
                 .section-title {
-                    font-size: 18px;
+                    font-size: 20px; /* Increased */
                     font-weight: bold;
                     margin: 25px 0 8px 0;
                     color: #61dafb;
@@ -560,7 +561,7 @@ class AHKShortcutEditor(QMainWindow):
                     margin-top: 5px;
                 }
                 .category-header {
-                    font-size: 16px;
+                    font-size: 18px; /* Increased */
                     font-weight: bold;
                     margin: 25px 0 5px 0;
                     padding: 5px 10px;
@@ -571,8 +572,8 @@ class AHKShortcutEditor(QMainWindow):
                     margin-top: 8px;
                 }
                 .shortcut-item {
-                    padding: 8px 12px;
-                    margin: 2px 0;
+                    padding: 10px 14px; /* Increased padding */
+                    margin: 3px 0; /* Slightly increased margin */
                     border-radius: 5px;
                     cursor: pointer;
                     transition: background 0.2s;
@@ -591,18 +592,21 @@ class AHKShortcutEditor(QMainWindow):
                 .shortcut-key {
                     color: #ffffff;
                     font-weight: bold;
+                    font-size: 16px; /* Increased */
                 }
                 .shortcut-separator {
                     color: #32CD32;
                     font-weight: bold;
                     margin: 0 8px;
+                    font-size: 16px; /* Increased */
                 }
                 .shortcut-name {
                     color: #ffffff;
+                    font-size: 16px; /* Increased */
                 }
                 .shortcut-desc {
                     color: #888;
-                    font-size: 12px;
+                    font-size: 14px; /* Increased from 12px */
                 }
                 .status-enabled { color: #27ae60; }
                 .status-disabled {
