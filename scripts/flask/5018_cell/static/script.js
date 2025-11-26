@@ -680,41 +680,74 @@ async function deleteColumn(index) {
     }
 }
 
-async function addRow() {
+async function addRow(count = 1) {
     try {
-        const response = await fetch('/api/rows', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ sheetIndex: currentSheet })
-        });
-        if (response.ok) {
-            const sheet = tableData.sheets[currentSheet];
-            sheet.rows.push(new Array(sheet.columns.length).fill(''));
-            const newRowIndex = sheet.rows.length - 1;
-            renderTable();
+        const sheet = tableData.sheets[currentSheet];
+        const rowsToAdd = [];
+        
+        for (let i = 0; i < count; i++) {
+            rowsToAdd.push(new Array(sheet.columns.length).fill(''));
+        }
 
-            // Scroll to and focus on the new row
-            setTimeout(() => {
-                const table = document.getElementById('dataTable');
-                const tbody = table.querySelector('tbody');
-                const rows = tbody.querySelectorAll('tr');
-                const newRow = rows[newRowIndex];
+        // Add all rows at once via API
+        for (let i = 0; i < count; i++) {
+            const response = await fetch('/api/rows', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ sheetIndex: currentSheet })
+            });
+            if (response.ok) {
+                sheet.rows.push(new Array(sheet.columns.length).fill(''));
+            }
+        }
 
-                if (newRow) {
-                    // Scroll the row into view
-                    newRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        const newRowIndex = sheet.rows.length - 1;
+        renderTable();
 
-                    // Focus on the first input/textarea in the new row
-                    const firstInput = newRow.querySelector('td:not(.row-number) input, td:not(.row-number) textarea');
-                    if (firstInput) {
-                        firstInput.focus();
-                    }
+        // Scroll to and focus on the first new row
+        setTimeout(() => {
+            const table = document.getElementById('dataTable');
+            const tbody = table.querySelector('tbody');
+            const rows = tbody.querySelectorAll('tr');
+            const newRow = rows[newRowIndex - count + 1]; // First of the new rows
+
+            if (newRow) {
+                // Scroll the row into view
+                newRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                // Focus on the first input/textarea in the new row
+                const firstInput = newRow.querySelector('td:not(.row-number) input, td:not(.row-number) textarea');
+                if (firstInput) {
+                    firstInput.focus();
                 }
-            }, 100);
+            }
+        }, 100);
+
+        if (count > 1) {
+            showToast(`Added ${count} rows`, 'success');
         }
     } catch (error) {
         console.error('Error adding row:', error);
     }
+}
+
+async function addRowWithPrompt() {
+    const count = prompt('How many rows do you want to add?', '1');
+    if (count === null) return; // User cancelled
+    
+    const numRows = parseInt(count);
+    if (isNaN(numRows) || numRows < 1) {
+        showToast('Please enter a valid number', 'warning');
+        return;
+    }
+    
+    if (numRows > 100) {
+        if (!confirm(`Are you sure you want to add ${numRows} rows? This might take a moment.`)) {
+            return;
+        }
+    }
+    
+    await addRow(numRows);
 }
 
 async function deleteRow(index) {

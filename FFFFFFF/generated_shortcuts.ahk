@@ -488,6 +488,19 @@ LAlt & c:: {
     }
 }
 
+;! Quick Shortcut
+;! Quick Shortcut to make some task easier
+^q:: {
+    KeySequence()
+    KeySequence() {
+        Send "^!{Numpad2}"
+        Sleep 250
+        Send ", "
+        Sleep 250
+        Send "^!{Numpad1}"
+    }
+}
+
 ;! === TEXT SHORTCUTS ===
 ;! AutoHotkey Version 1
 ;! Inserts AHK v1 header requirement

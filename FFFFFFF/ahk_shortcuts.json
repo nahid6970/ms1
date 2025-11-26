@@ -204,6 +204,14 @@
             "hotkey": "^+k",
             "action": "komo_start_stop()\nkomo_start_stop() {\nRunWait \"powershell.exe -Command Stop-Process -Name komorebi -ErrorAction SilentlyContinue\", , \"Hide\"\nRun \"komorebic.exe start\", , \"Hide\"\n}",
             "enabled": true
+        },
+        {
+            "name": "Quick Shortcut",
+            "category": "Text",
+            "description": "Quick Shortcut to make some task easier",
+            "hotkey": "^q",
+            "action": "KeySequence()\nKeySequence() {\n    Send \"^!{Numpad2}\"\n    Sleep 250\n    Send \", \"\n    Sleep 250\n    Send \"^!{Numpad1}\"\n}",
+            "enabled": true
         }
     ],
     "text_shortcuts": [
