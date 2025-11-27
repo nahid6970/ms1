@@ -120,6 +120,22 @@ const hasMarkdown = cellValue.includes('**') ||
 - **Styling:** `.correct-answer` is transparent by default. `.correct-answer.revealed` has green background.
 - **Toggling:** `toggleAllCollapsibles()` toggles the `.revealed` class on these elements.
 
+### Single Row View Mode
+**Purpose:** Allows viewing and editing one row at a time, useful for focused review or quiz/flashcard-style workflows.
+**UI Controls:**
+- 📖 Toggle button to enable/disable Single Row Mode
+- ⬅️ Previous row button (disabled at first row)
+- ➡️ Next row button (disabled at last row)
+**Implementation:**
+- **State Variables:** `singleRowMode` (boolean), `singleRowIndex` (current row index)
+- **Functions:**
+  - `toggleSingleRowMode()` - Toggles mode on/off, updates UI
+  - `prevSingleRow()` - Decrements index and re-renders
+  - `nextSingleRow()` - Increments index and re-renders
+  - `updateSingleRowButtons()` - Manages button disabled states
+- **Rendering:** `renderTable()` conditionally renders only `sheet.rows[singleRowIndex]` when mode is active
+- **Styling:** `.btn-icon-toggle.active` for active state, disabled button styles
+
 ### Color Highlight Shortcuts
 **Syntax:** 
 - `==text==` → Black background with white text
