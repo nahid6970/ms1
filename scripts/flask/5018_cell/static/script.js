@@ -5,6 +5,8 @@ let contextMenuCell = null;
 let selectedCells = []; // Array of {row, col, td} objects for multi-cell operations
 let isSelecting = false;
 let sheetHistory = []; // Track recently visited sheets for Alt+M toggle
+let singleRowMode = false;
+let singleRowIndex = 0;
 
 /**
  * MULTI-CELL OPERATION PATTERN:
@@ -3987,6 +3989,64 @@ function toggleRowWrap() {
     }
 }
 
+function toggleSingleRowMode() {
+    singleRowMode = !singleRowMode;
+    const btn = document.getElementById('btnSingleRowMode');
+    const prevBtn = document.getElementById('btnPrevRow');
+    const nextBtn = document.getElementById('btnNextRow');
+
+    if (singleRowMode) {
+        btn.classList.add('active');
+        prevBtn.disabled = false;
+        nextBtn.disabled = false;
+        showToast('Single Row Mode Enabled', 'info');
+    } else {
+        btn.classList.remove('active');
+        prevBtn.disabled = true;
+        nextBtn.disabled = true;
+        showToast('Single Row Mode Disabled', 'info');
+    }
+
+    if (singleRowIndex < 0) singleRowIndex = 0;
+
+    renderTable();
+    updateSingleRowButtons();
+}
+
+function prevSingleRow() {
+    if (!singleRowMode) return;
+    if (singleRowIndex > 0) {
+        singleRowIndex--;
+        renderTable();
+        updateSingleRowButtons();
+    }
+}
+
+function nextSingleRow() {
+    if (!singleRowMode) return;
+    const sheet = tableData.sheets[currentSheet];
+    if (singleRowIndex < sheet.rows.length - 1) {
+        singleRowIndex++;
+        renderTable();
+        updateSingleRowButtons();
+    }
+}
+
+function updateSingleRowButtons() {
+    const sheet = tableData.sheets[currentSheet];
+    const prevBtn = document.getElementById('btnPrevRow');
+    const nextBtn = document.getElementById('btnNextRow');
+
+    if (!singleRowMode) {
+        prevBtn.disabled = true;
+        nextBtn.disabled = true;
+        return;
+    }
+
+    prevBtn.disabled = singleRowIndex <= 0;
+    nextBtn.disabled = singleRowIndex >= sheet.rows.length - 1;
+}
+
 function toggleRowNumbers() {
     const rowToggle = document.getElementById('rowToggle');
     const table = document.getElementById('dataTable');
@@ -4276,8 +4336,23 @@ function renderTable() {
 
     const wrapEnabled = localStorage.getItem('rowWrapEnabled') === 'true';
 
+    // Determine which rows to render based on Single Row Mode
+    let rowsToRender, rowIndexOffset;
+    if (singleRowMode) {
+        // Clamp singleRowIndex to valid range
+        if (singleRowIndex >= sheet.rows.length) singleRowIndex = sheet.rows.length - 1;
+        if (singleRowIndex < 0) singleRowIndex = 0;
+
+        rowsToRender = [sheet.rows[singleRowIndex]];
+        rowIndexOffset = singleRowIndex;
+    } else {
+        rowsToRender = sheet.rows;
+        rowIndexOffset = 0;
+    }
+
     // Render rows
-    sheet.rows.forEach((row, rowIndex) => {
+    rowsToRender.forEach((row, loopIndex) => {
+        const rowIndex = singleRowMode ? singleRowIndex : loopIndex;
         const tr = document.createElement('tr');
 
         // Row number with delete X and number together

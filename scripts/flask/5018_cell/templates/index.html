@@ -146,6 +146,19 @@
                     title="Show/hide all collapsible text">
                     <span>👁️</span>
                 </button>
+
+                <div class="separator"></div>
+
+                <button onclick="prevSingleRow()" class="btn-icon" id="btnPrevRow" title="Previous Row" disabled>
+                    <span>⬅️</span>
+                </button>
+                <button onclick="toggleSingleRowMode()" class="btn-icon-toggle" id="btnSingleRowMode"
+                    title="Toggle Single Row View">
+                    <span>📖</span>
+                </button>
+                <button onclick="nextSingleRow()" class="btn-icon" id="btnNextRow" title="Next Row" disabled>
+                    <span>➡️</span>
+                </button>
             </div>
 
             <div class="search-box">
@@ -498,11 +511,15 @@
                         </tr>
                         <tr style="border-bottom: 1px solid #ddd;">
                             <td style="padding: 8px; font-family: monospace; background: #f8f9fa;">==highlight==</td>
-                            <td style="padding: 8px;"><span style="background: black; color: white; padding: 2px 4px; border-radius: 3px;">highlight</span></td>
+                            <td style="padding: 8px;"><span
+                                    style="background: black; color: white; padding: 2px 4px; border-radius: 3px;">highlight</span>
+                            </td>
                         </tr>
                         <tr style="border-bottom: 1px solid #ddd;">
                             <td style="padding: 8px; font-family: monospace; background: #f8f9fa;">-----</td>
-                            <td style="padding: 8px;"><hr style="border: none; border-top: 2px solid #ccc; margin: 4px 0; width: 100%;"></td>
+                            <td style="padding: 8px;">
+                                <hr style="border: none; border-top: 2px solid #ccc; margin: 4px 0; width: 100%;">
+                            </td>
                         </tr>
                     </table>
                     <p style="font-size: 12px; color: #666; margin-top: 5px;">
@@ -542,7 +559,8 @@
                                 {% raw %}{{hidden text}}{% endraw %}</td>
                             <td style="padding: 8px;">
                                 <span style="display: inline-flex; align-items: center; gap: 4px;">
-                                    <button style="background: #f0f0f0; border: 1px solid #ccc; border-radius: 4px; padding: 2px 6px; font-size: 14px;">👁️</button>
+                                    <button
+                                        style="background: #f0f0f0; border: 1px solid #ccc; border-radius: 4px; padding: 2px 6px; font-size: 14px;">👁️</button>
                                     <span style="color: #666;">(click eye to show/hide)</span>
                                 </span>
                             </td>
@@ -710,7 +728,8 @@
                 <span style="font-size: 1.2em; font-weight: 600;">H</span>
             </button>
             <button class="format-btn" onclick="applyQuickFormat('..', '..', event)"
-                oncontextmenu="return toggleFormatSelection('..', '..', event)" title="Small Text (Right-click to select)">
+                oncontextmenu="return toggleFormatSelection('..', '..', event)"
+                title="Small Text (Right-click to select)">
                 <span style="font-size: 0.75em;">S</span>
             </button>
             <button class="format-btn" onclick="applyQuickFormat('`', '`', event)"
@@ -745,15 +764,17 @@
                 title="Select All Matching - Edit all occurrences at once">
                 🎯
             </button>
-            <button class="format-btn" onclick="applyQuickFormat('{% raw %}{{{% endraw %}', '{% raw %}}}{% endraw %}', event)"
-                oncontextmenu="return toggleFormatSelection('{% raw %}{{{% endraw %}', '{% raw %}}}{% endraw %}', event)" title="Hide Text (Right-click to select)">
+            <button class="format-btn"
+                onclick="applyQuickFormat('{% raw %}{{{% endraw %}', '{% raw %}}}{% endraw %}', event)"
+                oncontextmenu="return toggleFormatSelection('{% raw %}{{{% endraw %}', '{% raw %}}}{% endraw %}', event)"
+                title="Hide Text (Right-click to select)">
                 👁️
             </button>
             <button class="format-btn" onclick="removeFormatting(event)" title="Remove All Formatting">
                 🧹
             </button>
         </div>
-        
+
         <div class="quick-formatter-separator"></div>
         <div class="quick-formatter-title" style="font-size: 12px; margin-top: 8px;">Quick Highlights</div>
         <div class="quick-formatter-options">
