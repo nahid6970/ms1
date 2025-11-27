@@ -96,29 +96,53 @@ const hasMarkdown = cellValue.includes('**') ||
 
 ## New Features & Enhancements
 
-### Collapsible Text Feature
-**Syntax:** `{{hidden text}}`
-**Purpose:** Hides text behind a toggle button (👁️) that can be clicked to show/hide the content.
-**Implementation:**
-- **Parsing:** In `parseMarkdown()`, the regex `/\{\{(.+?)\}\}/g` detects the syntax and generates HTML with a button and hidden span.
-- **Detection:** Added `value.includes('{{')` to the `hasMarkdown` checks.
-- **Stripping:** Added `.replace(/\{\{(.+?)\}\}/g, '$1')` to `stripMarkdown()`.
-- **CSS:** Added `.collapsible-wrapper`, `.collapsible-toggle`, and `.collapsible-content` styles with baseline alignment.
-- **Quick Formatter:** Added a 👁️ button to wrap selected text with `{{}}`.
-- **Static Export:** Updated `export_static.py` with the same parsing logic.
-- **Key Functions:**
-  - `parseMarkdown()` - Converts `{{text}}` to HTML
-  - `checkHasMarkdown()` - Detects the syntax
-  - `stripMarkdown()` - Removes syntax for sorting/searching
-  - `toggleAllCollapsibles()` - Shows/hides all collapsible text at once
+### Hidden Content Features (Collapsible & Correct Answer)
 
-### Correct Answer Highlight (MCQ)
-**Syntax:** `[[text]]`
-**Purpose:** Highlights text (e.g., correct answer in MCQ) with a green background only when the global "Show Hidden Text" toggle is active.
+These two markdown syntaxes work together and are controlled by the same 👁️ button in the toolbar.
+
+#### Collapsible Text: `{{hidden text}}`
+**Purpose:** Hides text behind individual toggle buttons that can be clicked to show/hide the content.
+**Behavior:**
+- Each `{{text}}` gets its own 👁️ toggle button
+- Click the button to show/hide that specific text
+- Useful for hints, explanations, or spoilers
+
 **Implementation:**
-- **Parsing:** `[[text]]` -> `<span class="correct-answer">text</span>`
-- **Styling:** `.correct-answer` is transparent by default. `.correct-answer.revealed` has green background.
-- **Toggling:** `toggleAllCollapsibles()` toggles the `.revealed` class on these elements.
+- **Parsing:** In `parseMarkdown()`, the regex `/\{\{(.+?)\}\}/g` generates HTML with a button and hidden span
+- **Detection:** Added `value.includes('{{')` to `hasMarkdown` checks
+- **Stripping:** Added `.replace(/\{\{(.+?)\}\}/g, '$1')` to `stripMarkdown()`
+- **CSS:** `.collapsible-wrapper`, `.collapsible-toggle`, `.collapsible-content` styles
+- **Quick Formatter:** Added a 👁️ button to wrap selected text with `{{}}`
+- **Static Export:** Full support in `export_static.py`
+
+#### Correct Answer: `[[correct answer]]`
+**Purpose:** Marks correct answers in MCQ tests. Text appears normal until clicked, then reveals with green background.
+**Behavior:**
+- Text looks completely normal (no visual difference)
+- Click the text itself to reveal green background
+- Prevents students from identifying correct answers visually
+
+**Implementation:**
+- **Parsing:** `[[text]]` -> `<span class="correct-answer">$1</span>`
+- **Styling:** Transparent by default, green (#29e372) when `.revealed` class is added
+- **Detection:** Added `str.includes('[[')` to `checkHasMarkdown()`
+- **Stripping:** Added `.replace(/\[\[(.+?)\]\]/g, '$1')` to `stripMarkdown()`
+- **Static Export:** Full support with click-to-reveal behavior
+
+#### Global Toggle Button (👁️)
+**Location:** Toolbar, next to row numbers and wrap toggles
+**Function:** `toggleAllCollapsibles()`
+**Behavior:**
+- Shows/hides ALL collapsible text (`{{}}`) at once
+- Reveals/hides ALL correct answers (`[[]]`) at once
+- If any content is visible, clicking hides everything
+- If all content is hidden, clicking reveals everything
+- Shows alert "No hidden content found" if no `{{}}` or `[[]]` syntax exists
+
+**Key Functions:**
+- `toggleAllCollapsibles()` - Global toggle for both syntaxes
+- `toggleCollapsible(id)` - Individual toggle for `{{}}` buttons
+- Click event listener - Individual toggle for `[[]]` spans
 
 ### Single Row View Mode
 **Purpose:** Allows viewing and editing one row at a time, useful for focused review or quiz/flashcard-style workflows.
@@ -280,21 +304,7 @@ This ensures users can easily find the clear button at the end of all formatting
 **Key Function:**
 - `changeTextCase(caseType, event)` - Converts text based on caseType ('upper', 'lower', 'proper')
 
-### Correct Answer (MCQ) Feature
-**Syntax:** `[[correct answer]]`
-**Purpose:** Marks correct answers in multiple-choice questions with green background and toggle visibility.
 
-**Implementation:**
-- **Parsing:** In `parseMarkdown()`, the regex `/\[\[(.+?)\]\]/g` creates a collapsible span with green background (#00cc00) and black text
-- **Detection:** Added `str.includes('[[')` to `checkHasMarkdown()`
-- **Stripping:** Added `.replace(/\[\[(.+?)\]\]/g, '$1')` to `stripMarkdown()`
-- **Toggle:** Uses the same `toggleCollapsible()` function as hidden text feature
-- **Styling:** Green background (#00cc00), black text, with eye icon toggle button
-
-**Key Functions:**
-  - `parseMarkdown()` - Converts `[[text]]` to green collapsible HTML
-  - `toggleCollapsible()` - Shows/hides the answer
-  - `toggleAllCollapsibles()` - Shows/hides all collapsible content including correct answers
 
 ### Small Text Feature
 **Syntax:** `..small text..`
@@ -453,6 +463,39 @@ The grid system relies on CSS variables for dynamic column counts:
 - [ ] Update `export_static.py` when adding new markdown syntax or JavaScript features.
 - [ ] Test features in both live Flask app and exported static HTML.
 
+
+### Grid Line Color Customization
+**Purpose:** Allows users to customize the color of table borders and cell separators.
+
+**Implementation:**
+- **CSS Variable:** Uses `--grid-line-color` CSS variable (default: `#dddddd`)
+- **Settings UI:** Added settings modal with color picker and hex input
+- **Storage:** Color preference saved to `localStorage` as `gridLineColor`
+- **Application:** Applied to all `th` and `td` borders via CSS variable
+- **Custom Borders:** Cells with custom borders (via cell styling) override the grid line color
+
+**Settings Modal Features:**
+- Color picker for visual selection
+- Hex code input for precise color entry
+- Reset button to restore default color (#dddddd)
+- Real-time preview (changes apply immediately)
+
+**Static Export Support:**
+- Settings button (⚙️) added to toolbar
+- Full settings modal included in static HTML
+- Loads saved color from localStorage on page load
+- All JavaScript functions included for color management
+
+**Key Functions:**
+- `openSettings()` - Opens settings modal and loads current color
+- `closeSettings()` - Closes settings modal
+- `syncGridLineColor(value)` - Syncs color picker and hex input
+- `applyGridLineColor(color)` - Applies color to CSS variable and saves to localStorage
+- `resetGridLineColor()` - Resets to default #dddddd
+
+**Files Modified:**
+- `export_static.py` - Added CSS variable, settings modal HTML, and JavaScript functions
+- CSS styles for modal, color picker, and input fields
 
 ## Recent Bug Fixes & Improvements
 
