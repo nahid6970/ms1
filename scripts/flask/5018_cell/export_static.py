@@ -892,19 +892,17 @@ def generate_static_html(data):
         /* Correct Answer Highlight */
         .correct-answer {
             background-color: transparent;
-            color: transparent;
+            color: inherit;
             border-radius: 3px;
             cursor: pointer;
-            user-select: none;
             transition: all 0.3s ease;
-            border: 1px solid #ccc;
-            padding: 0 4px;
+            padding: 0 2px;
         }
 
         .correct-answer.revealed {
             background-color: #29e372;
             color: black;
-            border-color: #22bd5e;
+            padding: 0 4px;
         }
     </style>
     <script>
