@@ -5351,6 +5351,55 @@ function commaToLines(event) {
     showToast(`Converted to ${items.length} lines`, 'success');
 }
 
+function changeTextCase(caseType, event) {
+    if (!quickFormatterTarget) return;
+
+    const input = quickFormatterTarget;
+    const start = quickFormatterSelection.start;
+    const end = quickFormatterSelection.end;
+    const selectedText = input.value.substring(start, end);
+
+    if (!selectedText) {
+        showToast('No text selected', 'warning');
+        return;
+    }
+
+    let convertedText;
+    switch (caseType) {
+        case 'upper':
+            convertedText = selectedText.toUpperCase();
+            break;
+        case 'lower':
+            convertedText = selectedText.toLowerCase();
+            break;
+        case 'proper':
+            // Proper case: capitalize first letter of each word
+            convertedText = selectedText.toLowerCase().replace(/\b\w/g, char => char.toUpperCase());
+            break;
+        default:
+            return;
+    }
+
+    // Replace the selected text
+    const newText = input.value.substring(0, start) +
+        convertedText +
+        input.value.substring(end);
+
+    input.value = newText;
+
+    // Trigger change event to update cell
+    const changeEvent = new Event('input', { bubbles: true });
+    input.dispatchEvent(changeEvent);
+
+    // Select the converted text
+    input.setSelectionRange(start, start + convertedText.length);
+    input.focus();
+
+    closeQuickFormatter();
+    const caseNames = { upper: 'UPPERCASE', lower: 'lowercase', proper: 'Proper Case' };
+    showToast(`Converted to ${caseNames[caseType]}`, 'success');
+}
+
 function applyMultipleFormats(lastPrefix, lastSuffix) {
     if (!quickFormatterTarget) return;
 

@@ -210,9 +210,10 @@ const hasMarkdown = cellValue.includes('**') ||
 1. **Text Formatting:** Bold, Italic, Underline, Strikethrough, Heading, Small Text, Code
 2. **Special Formatting:** Superscript, Subscript
 3. **Utilities:** Link, Search Google, Sort Lines, Lines↔Comma conversion
-4. **Advanced:** Select All Matching, Hide Text (collapsible)
+4. **Advanced:** Select All Matching, Hide Text (collapsible), Correct Answer (MCQ)
 5. **Clear Format:** 🧹 Remove All Formatting (always last before separator)
-6. **Quick Highlights Section:** Black, Red, Blue, Custom Color
+6. **Text Case Section:** UPPERCASE, lowercase, Proper Case
+7. **Quick Highlights Section:** Black, Red, Blue, Custom Color
 
 ### Sort Lines Feature
 **Purpose:** Intelligently sorts selected lines while preserving parent-child relationships in lists.
@@ -263,7 +264,37 @@ This ensures users can easily find the clear button at the end of all formatting
   - `showQuickFormatter()` - Opens the formatter popup (F3 shortcut)
   - `applyQuickFormat()` - Applies formatting instantly without Apply button
   - `removeFormatting()` - Clears all markdown syntax from selected text
+  - `changeTextCase()` - Converts selected text to UPPERCASE, lowercase, or Proper Case
   - Various format functions: `makeBold()`, `makeItalic()`, `makeUnderline()`, etc.
+
+### Text Case Conversion Feature
+**Purpose:** Quickly convert selected text to different cases without retyping.
+
+**Available Cases:**
+1. **UPPERCASE** - Converts all letters to capitals (ABC)
+2. **lowercase** - Converts all letters to lowercase (abc)
+3. **Proper Case** - Capitalizes first letter of each word (Abc)
+
+**Usage:** Select text in a cell, press F3, click the desired case button.
+
+**Key Function:**
+- `changeTextCase(caseType, event)` - Converts text based on caseType ('upper', 'lower', 'proper')
+
+### Correct Answer (MCQ) Feature
+**Syntax:** `[[correct answer]]`
+**Purpose:** Marks correct answers in multiple-choice questions with green background and toggle visibility.
+
+**Implementation:**
+- **Parsing:** In `parseMarkdown()`, the regex `/\[\[(.+?)\]\]/g` creates a collapsible span with green background (#00cc00) and black text
+- **Detection:** Added `str.includes('[[')` to `checkHasMarkdown()`
+- **Stripping:** Added `.replace(/\[\[(.+?)\]\]/g, '$1')` to `stripMarkdown()`
+- **Toggle:** Uses the same `toggleCollapsible()` function as hidden text feature
+- **Styling:** Green background (#00cc00), black text, with eye icon toggle button
+
+**Key Functions:**
+  - `parseMarkdown()` - Converts `[[text]]` to green collapsible HTML
+  - `toggleCollapsible()` - Shows/hides the answer
+  - `toggleAllCollapsibles()` - Shows/hides all collapsible content including correct answers
 
 ### Small Text Feature
 **Syntax:** `..small text..`
