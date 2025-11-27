@@ -50,6 +50,10 @@ def generate_static_html(data):
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --grid-line-color: #dddddd;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -457,7 +461,7 @@ def generate_static_html(data):
         }
 
         th, td {
-            border: 1px solid #ddd;
+            border: 1px solid var(--grid-line-color);
             padding: 8px;
             text-align: left;
             position: relative;
@@ -904,6 +908,157 @@ def generate_static_html(data):
             color: black;
             padding: 0 4px;
         }
+
+        /* Settings Modal */
+        .modal {
+            position: fixed;
+            z-index: 3000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .close {
+            font-size: 28px;
+            font-weight: bold;
+            color: #999;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .close:hover {
+            color: #333;
+        }
+
+        .settings-content {
+            padding: 20px;
+        }
+
+        .settings-section {
+            margin-bottom: 20px;
+        }
+
+        .settings-section-title {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .settings-item {
+            margin-bottom: 20px;
+        }
+
+        .settings-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .settings-label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .btn-reset {
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 4px 12px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+
+        .btn-reset:hover {
+            background: #e0e0e0;
+        }
+
+        .color-picker-group {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+        }
+
+        .color-picker-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            align-items: center;
+        }
+
+        .color-picker-wrapper input[type="color"] {
+            width: 60px;
+            height: 40px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .color-picker-label {
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .color-input-wrapper {
+            display: flex;
+            align-items: center;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 8px 12px;
+            background: white;
+            height: 40px;
+        }
+
+        .color-input-prefix {
+            font-weight: bold;
+            color: #666;
+            margin-right: 4px;
+        }
+
+        .color-input-wrapper input {
+            border: none;
+            outline: none;
+            width: 80px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+
+        .settings-description {
+            font-size: 13px;
+            color: #666;
+            margin-top: 8px;
+        }
     </style>
     <script>
         let tableData = ''' + json.dumps(data) + ''';
@@ -1229,7 +1384,8 @@ def generate_static_html(data):
                         const borderColor = cellStyle.borderColor || '#000000';
                         td.style.border = `${borderWidth} ${borderStyle} ${borderColor}`;
                     } else {
-                        td.style.border = '1px solid #ddd';
+                        const gridColor = getComputedStyle(document.documentElement).getPropertyValue('--grid-line-color').trim() || '#dddddd';
+                        td.style.border = `1px solid ${gridColor}`;
                     }
                     
                     if (cellStyle.bgColor) {
@@ -1830,8 +1986,66 @@ def generate_static_html(data):
             });
         }
 
+        function openSettings() {
+            const modal = document.getElementById('settingsModal');
+            modal.style.display = 'flex';
+            
+            // Load current grid line color
+            const savedColor = localStorage.getItem('gridLineColor') || '#dddddd';
+            document.getElementById('gridLineColor').value = savedColor;
+            document.getElementById('gridLineColorText').value = savedColor.substring(1).toUpperCase();
+        }
+
+        function closeSettings() {
+            const modal = document.getElementById('settingsModal');
+            modal.style.display = 'none';
+        }
+
+        function syncGridLineColor(value) {
+            // Handle input with or without # prefix
+            let colorValue = value;
+            if (!colorValue.startsWith('#')) {
+                colorValue = '#' + colorValue;
+            }
+
+            // Validate hex color
+            if (/^#[0-9A-Fa-f]{6}$/.test(colorValue) || /^#[0-9A-Fa-f]{3}$/.test(colorValue)) {
+                document.getElementById('gridLineColor').value = colorValue;
+                document.getElementById('gridLineColorText').value = colorValue.substring(1).toUpperCase();
+                applyGridLineColor(colorValue);
+            }
+        }
+
+        function applyGridLineColor(color) {
+            // Apply the color to CSS variables
+            document.documentElement.style.setProperty('--grid-line-color', color);
+            localStorage.setItem('gridLineColor', color);
+            
+            // Re-render table to apply new color
+            renderTable();
+        }
+
+        function resetGridLineColor() {
+            const defaultColor = '#dddddd';
+            document.getElementById('gridLineColor').value = defaultColor;
+            document.getElementById('gridLineColorText').value = defaultColor.substring(1).toUpperCase();
+            applyGridLineColor(defaultColor);
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('settingsModal');
+            if (event.target === modal) {
+                closeSettings();
+            }
+        }
+
         // Initialize on load
         window.onload = function() {
+            // Apply saved grid line color
+            const savedGridColor = localStorage.getItem('gridLineColor') || '#dddddd';
+            document.documentElement.style.setProperty('--grid-line-color', savedGridColor);
+            
             initializeCategories();
             renderCategoryTabs();
             renderSheetTabs();
@@ -1914,6 +2128,10 @@ def generate_static_html(data):
                 <span id="fontSizeDisplay" class="font-size-display">100%</span>
                 <button onclick="adjustFontSize(1)" class="btn-font-size" title="Increase font size">+</button>
             </div>
+
+            <button onclick="openSettings()" class="btn-icon-toggle" title="Settings" style="margin-left: 5px;">
+                <span>⚙️</span>
+            </button>
         </div>
 
         <div class="table-container">
@@ -1923,6 +2141,38 @@ def generate_static_html(data):
                 </thead>
                 <tbody id="tableBody"></tbody>
             </table>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal" style="display: none;">
+        <div class="modal-content settings-modal">
+            <div class="modal-header">
+                <h2>Settings</h2>
+                <span class="close" onclick="closeSettings()">&times;</span>
+            </div>
+            <div class="settings-content">
+                <div class="settings-section">
+                    <h3 class="settings-section-title">🎨 Appearance</h3>
+                    <div class="settings-item">
+                        <div class="settings-item-header">
+                            <label for="gridLineColor" class="settings-label">Grid Line Color</label>
+                            <button class="btn-reset" onclick="resetGridLineColor()">Reset to Default</button>
+                        </div>
+                        <div class="color-picker-group">
+                            <div class="color-picker-wrapper">
+                                <input type="color" id="gridLineColor" value="#dddddd" oninput="syncGridLineColor(this.value)">
+                                <span class="color-picker-label">Pick Color</span>
+                            </div>
+                            <div class="color-input-wrapper">
+                                <span class="color-input-prefix">#</span>
+                                <input type="text" id="gridLineColorText" value="DDDDDD" maxlength="6" placeholder="DDDDDD" oninput="syncGridLineColor('#' + this.value)">
+                            </div>
+                        </div>
+                        <p class="settings-description">Customize the color of table borders and cell separators</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </body>
