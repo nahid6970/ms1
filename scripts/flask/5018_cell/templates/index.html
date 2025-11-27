@@ -770,6 +770,12 @@
                 title="Hide Text (Right-click to select)">
                 👁️
             </button>
+            <button class="format-btn" onclick="applyQuickFormat('[[', ']]', event)"
+                oncontextmenu="return toggleFormatSelection('[[', ']]', event)"
+                title="Correct Answer - Green when revealed (Right-click to select)"
+                style="background: #29e372; color: black; font-size: 11px; font-weight: 600;">
+                ✓
+            </button>
             <button class="format-btn" onclick="removeFormatting(event)" title="Remove All Formatting">
                 🧹
             </button>
