@@ -684,7 +684,7 @@ async function addRow(count = 1) {
     try {
         const sheet = tableData.sheets[currentSheet];
         const rowsToAdd = [];
-        
+
         for (let i = 0; i < count; i++) {
             rowsToAdd.push(new Array(sheet.columns.length).fill(''));
         }
@@ -734,19 +734,19 @@ async function addRow(count = 1) {
 async function addRowWithPrompt() {
     const count = prompt('How many rows do you want to add?', '1');
     if (count === null) return; // User cancelled
-    
+
     const numRows = parseInt(count);
     if (isNaN(numRows) || numRows < 1) {
         showToast('Please enter a valid number', 'warning');
         return;
     }
-    
+
     if (numRows > 100) {
         if (!confirm(`Are you sure you want to add ${numRows} rows? This might take a moment.`)) {
             return;
         }
     }
-    
+
     await addRow(numRows);
 }
 
@@ -767,51 +767,51 @@ async function deleteRow(index) {
 // Helper function to reindex cell styles and merged cells after row deletion
 function reindexCellStylesAfterRowDeletion(sheet, deletedRowIndices) {
     if (!sheet.cellStyles) return;
-    
+
     const newCellStyles = {};
     const newMergedCells = {};
-    
+
     // Sort deleted indices for easier checking
     const sortedDeleted = [...deletedRowIndices].sort((a, b) => a - b);
-    
+
     // Process each cell style
     Object.keys(sheet.cellStyles).forEach(key => {
         const [oldRow, col] = key.split('-').map(Number);
-        
+
         // Skip if this row was deleted
         if (sortedDeleted.includes(oldRow)) {
             return;
         }
-        
+
         // Calculate how many rows were deleted before this row
         const rowsDeletedBefore = sortedDeleted.filter(idx => idx < oldRow).length;
         const newRow = oldRow - rowsDeletedBefore;
-        
+
         // Store with new key
         newCellStyles[`${newRow}-${col}`] = sheet.cellStyles[key];
     });
-    
+
     // Process merged cells if they exist
     if (sheet.mergedCells) {
         Object.keys(sheet.mergedCells).forEach(key => {
             const [oldRow, col] = key.split('-').map(Number);
-            
+
             // Skip if this row was deleted
             if (sortedDeleted.includes(oldRow)) {
                 return;
             }
-            
+
             // Calculate how many rows were deleted before this row
             const rowsDeletedBefore = sortedDeleted.filter(idx => idx < oldRow).length;
             const newRow = oldRow - rowsDeletedBefore;
-            
+
             // Store with new key
             newMergedCells[`${newRow}-${col}`] = sheet.mergedCells[key];
         });
-        
+
         sheet.mergedCells = newMergedCells;
     }
-    
+
     sheet.cellStyles = newCellStyles;
 }
 
@@ -892,6 +892,7 @@ function checkHasMarkdown(value) {
     const str = String(value);
     return (
         str.includes('||') ||
+        str.includes('[[') ||
         str.includes('**') ||
         str.includes('__') ||
         str.includes('@@') ||
@@ -1139,6 +1140,9 @@ function parseMarkdownInline(text) {
 
     // Highlight: ==text== -> <mark>text</mark>
     formatted = formatted.replace(/==(.+?)==/g, '<mark>$1</mark>');
+
+    // Correct Answer: [[text]] -> text with hidden green highlight
+    formatted = formatted.replace(/\[\[(.+?)\]\]/g, '<span class="correct-answer">$1</span>');
 
     return formatted;
 }
@@ -1391,6 +1395,9 @@ function oldParseMarkdownBody(lines) {
                 <span id="${id}" class="collapsible-content" style="display: none;">${content}</span>
             </span>`;
         });
+
+        // Correct Answer: [[text]] -> text with hidden green highlight
+        formatted = formatted.replace(/\[\[(.+?)\]\]/g, '<span class="correct-answer">$1</span>');
 
         return formatted;
     });
@@ -4022,21 +4029,34 @@ function toggleCollapsible(id) {
 }
 
 function toggleAllCollapsibles() {
-    const allCollapsibles = document.querySelectorAll('.collapsible-content');
-    if (allCollapsibles.length === 0) {
-        showToast('No collapsible text found', 'info');
+    const collapsibles = document.querySelectorAll('.collapsible-content');
+    const correctAnswers = document.querySelectorAll('.correct-answer');
+
+    if (collapsibles.length === 0 && correctAnswers.length === 0) {
+        showToast('No hidden content found', 'info');
         return;
     }
 
-    // Check if any are visible
-    const anyVisible = Array.from(allCollapsibles).some(el => el.style.display !== 'none');
+    // Determine state based on collapsibles first, then correctAnswers
+    let anyVisible = false;
+    if (collapsibles.length > 0) {
+        anyVisible = Array.from(collapsibles).some(el => el.style.display !== 'none');
+    } else if (correctAnswers.length > 0) {
+        anyVisible = Array.from(correctAnswers).some(el => el.classList.contains('revealed'));
+    }
 
-    // Toggle all to opposite state
-    allCollapsibles.forEach(el => {
+    // Toggle collapsibles
+    collapsibles.forEach(el => {
         el.style.display = anyVisible ? 'none' : 'inline';
     });
 
-    showToast(anyVisible ? 'All collapsibles hidden' : 'All collapsibles shown', 'success');
+    // Toggle correct answers
+    correctAnswers.forEach(el => {
+        if (anyVisible) el.classList.remove('revealed');
+        else el.classList.add('revealed');
+    });
+
+    showToast(anyVisible ? 'All hidden content hidden' : 'All hidden content shown', 'success');
 }
 
 function autoResizeTextarea(textarea) {
@@ -4553,6 +4573,9 @@ function closeAllColumnMenus() {
 function stripMarkdown(text) {
     if (!text) return '';
     let stripped = String(text);
+
+    // Remove correct answer markers: [[text]] -> text
+    stripped = stripped.replace(/\[\[(.+?)\]\]/g, '$1');
 
     // Remove color/style markers: {fg:#fff;bg:#000}text{/} -> text
     stripped = stripped.replace(/\{[^}]*\}(.+?)\{\/\}/g, '$1');
@@ -7109,15 +7132,15 @@ function sortLines(event) {
     for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
         const trimmed = line.trim();
-        
+
         // Check dash patterns
         const isDoubleDash = trimmed.startsWith('-- ');
         const isSingleDash = trimmed.startsWith('- ') && !trimmed.startsWith('-- ');
         const hasNoDash = !trimmed.startsWith('- ');
-        
+
         // Determine if this is a child line by looking at context
         let isChildLine = false;
-        
+
         if (isDoubleDash) {
             // -- is always a child
             isChildLine = true;

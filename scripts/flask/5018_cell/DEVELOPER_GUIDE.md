@@ -112,6 +112,14 @@ const hasMarkdown = cellValue.includes('**') ||
   - `stripMarkdown()` - Removes syntax for sorting/searching
   - `toggleAllCollapsibles()` - Shows/hides all collapsible text at once
 
+### Correct Answer Highlight (MCQ)
+**Syntax:** `[[text]]`
+**Purpose:** Highlights text (e.g., correct answer in MCQ) with a green background only when the global "Show Hidden Text" toggle is active.
+**Implementation:**
+- **Parsing:** `[[text]]` -> `<span class="correct-answer">text</span>`
+- **Styling:** `.correct-answer` is transparent by default. `.correct-answer.revealed` has green background.
+- **Toggling:** `toggleAllCollapsibles()` toggles the `.revealed` class on these elements.
+
 ### Color Highlight Shortcuts
 **Syntax:** 
 - `==text==` → Black background with white text
