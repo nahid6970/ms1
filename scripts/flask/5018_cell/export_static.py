@@ -888,6 +888,24 @@ def generate_static_html(data):
             display: inline;
             vertical-align: baseline;
         }
+
+        /* Correct Answer Highlight */
+        .correct-answer {
+            background-color: transparent;
+            color: transparent;
+            border-radius: 3px;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.3s ease;
+            border: 1px solid #ccc;
+            padding: 0 4px;
+        }
+
+        .correct-answer.revealed {
+            background-color: #29e372;
+            color: black;
+            border-color: #22bd5e;
+        }
     </style>
     <script>
         let tableData = ''' + json.dumps(data) + ''';
@@ -1153,7 +1171,8 @@ def generate_static_html(data):
                     // IMPORTANT: When adding new markdown syntax, add detection here
                     // This must match the hasMarkdown check in static/script.js
                     const cellValue = row[colIndex] || '';
-                    const hasMarkdown = cellValue.includes('**') || 
+                    const hasMarkdown = cellValue.includes('[[') || 
+                        cellValue.includes('**') || 
                         cellValue.includes('__') || 
                         cellValue.includes('@@') || 
                         cellValue.includes('##') || 
@@ -1252,6 +1271,8 @@ def generate_static_html(data):
             let stripped = String(text);
             // Remove bold markers: **text** -> text
             stripped = stripped.replace(/\\*\\*(.+?)\\*\\*/g, '$1');
+            // Remove correct answer markers: [[text]] -> text
+            stripped = stripped.replace(/\[\[(.+?)\]\]/g, '$1');
             // Remove bullet markers: - item -> item
             stripped = stripped.replace(/^\\s*-\\s+/gm, '');
             return stripped;
@@ -1402,6 +1423,9 @@ def generate_static_html(data):
             // Highlight: ==text== -> <mark>text</mark>
             formatted = formatted.replace(/==(.+?)==/g, '<mark>$1</mark>');
 
+            // Correct Answer: [[text]] -> hidden text with green highlight on click
+            formatted = formatted.replace(/\[\[(.+?)\]\]/g, '<span class="correct-answer">$1</span>');
+
             // Collapsible text: {{text}} -> hidden text with toggle button
             formatted = formatted.replace(/\\{\\{(.+?)\\}\\}/g, function(match, content) {
                 var id = 'collapse-' + Math.random().toString(36).substr(2, 9);
@@ -1533,6 +1557,9 @@ def generate_static_html(data):
 
                 // Blue highlight: ??text?? -> blue background with white text
                 formatted = formatted.replace(/\\?\\?(.+?)\\?\\?/g, '<span style="background: #0000ff; color: #ffffff; padding: 1px 4px; border-radius: 3px; display: inline-block; vertical-align: baseline; margin-top: -2px; margin-right: 2px; line-height: 1.3;">$1</span>');
+
+                // Correct Answer: [[text]] -> hidden text with green highlight on click
+                formatted = formatted.replace(/\[\[(.+?)\]\]/g, '<span class="correct-answer">$1</span>');
 
                 // Collapsible text: {{text}} -> hidden text with toggle button
                 formatted = formatted.replace(/\\{\\{(.+?)\\}\\}/g, function(match, content) {
@@ -1716,6 +1743,11 @@ def generate_static_html(data):
             if (!sheetSelector.contains(event.target)) {
                 sheetList.classList.remove('show');
             }
+
+            // Toggle correct answer on click
+            if (event.target.classList.contains('correct-answer')) {
+                event.target.classList.toggle('revealed');
+            }
         });
 
         function toggleRowNumbers() {
@@ -1776,18 +1808,27 @@ def generate_static_html(data):
         }
 
         function toggleAllCollapsibles() {
-            const allCollapsibles = document.querySelectorAll('.collapsible-content');
-            if (allCollapsibles.length === 0) {
-                alert('No collapsible text found');
+            const collapsibles = document.querySelectorAll('.collapsible-content');
+            const correctAnswers = document.querySelectorAll('.correct-answer');
+            if (collapsibles.length === 0 && correctAnswers.length === 0) {
+                alert('No hidden content found');
                 return;
             }
 
-            // Check if any are visible
-            const anyVisible = Array.from(allCollapsibles).some(el => el.style.display !== 'none');
-            
+            // Check if any are visible/revealed
+            const anyVisible = Array.from(collapsibles).some(el => el.style.display !== 'none') ||
+                Array.from(correctAnswers).some(el => el.classList.contains('revealed'));
+
             // Toggle all to opposite state
-            allCollapsibles.forEach(el => {
+            collapsibles.forEach(el => {
                 el.style.display = anyVisible ? 'none' : 'inline';
+            });
+            correctAnswers.forEach(el => {
+                if (anyVisible) {
+                    el.classList.remove('revealed');
+                } else {
+                    el.classList.add('revealed');
+                }
             });
         }
 
