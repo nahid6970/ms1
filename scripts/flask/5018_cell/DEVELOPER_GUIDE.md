@@ -778,6 +778,58 @@ The grid system relies on CSS variables for dynamic column counts:
 - `export_static.py` - Updated all color highlight styling
 - CSS for `mark` tag in embedded styles
 
+### Colored Text Wrapping Fix
+**Issue:** Colored text using `mark` tags (==text==, !!text!!, ??text??) was forced to stay on one line, causing large empty gaps when text should wrap to the next line.
+
+**Solution:** Changed CSS display property and added wrapping support:
+- **Changed `display: inline-block` to `display: inline`** - Allows natural text wrapping
+- **Removed `margin-top: -1px`** - No longer needed with inline display
+- **Added `box-decoration-break: clone`** - Ensures background color and border-radius continue properly on wrapped lines
+- **Removed duplicate CSS blocks** - Cleaned up 4 duplicate `mark` style definitions
+
+**Files Modified:**
+- `static/style.css` - Updated mark styles, removed duplicates
+- `export_static.py` - Updated mark styles to match
+
+**CSS Changes:**
+```css
+mark {
+    display: inline;  /* was: inline-block */
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+}
+```
+
+### Sub-Sheet Parent Reference Fix (F1 Drag & Drop)
+**Issue:** When dragging sheets to reorder them in the F1 popup, sub-sheets would lose their parent references or point to wrong parents, breaking the hierarchy.
+
+**Solution:** Updated `handleF1Drop()` to properly maintain parent-child relationships:
+- Mark sub-sheets whose parent is being moved (temporary marker: -1)
+- Adjust all `parentSheet` indices after sheet removal
+- Adjust all `parentSheet` indices after sheet insertion
+- Update marked sub-sheets to point to parent's new position
+
+**Key Function:**
+- `handleF1Drop()` - Handles drag and drop in F1 popup (~line 7050)
+
+**Files Modified:**
+- `static/script.js` - Updated drag and drop logic with parent reference tracking
+
+### Move to Category Sheet Index Fix
+**Issue:** When right-clicking a sheet in the tree and selecting "Move to Category", it would move the currently active sheet instead of the right-clicked sheet. This caused confusion and required multiple manual moves.
+
+**Solution:** Store the sheet index when opening the modal:
+- Added `moveToCategorySheetIndex` variable to track which sheet was right-clicked
+- `showMoveToCategoryModal(sheetIndex)` now stores the passed index
+- Form handler uses stored index instead of `currentSheet`
+- Correctly moves the right-clicked sheet and all its sub-sheets in one action
+
+**Key Functions:**
+- `showMoveToCategoryModal()` - Stores sheet index (~line 3362)
+- `moveToCategoryForm.onsubmit` - Uses stored index (~line 3452)
+
+**Files Modified:**
+- `static/script.js` - Added index tracking, updated form handler
 
 ## Font System
 
