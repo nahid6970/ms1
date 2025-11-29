@@ -753,11 +753,11 @@ def generate_static_html(data):
             color: #ffffff;
             padding: 1px 4px;
             border-radius: 3px;
-            display: inline-block;
+            display: inline;
             vertical-align: baseline;
-            margin-top: -2px;
-            margin-right: 2px;
             line-height: 1.3;
+            box-decoration-break: clone;
+            -webkit-box-decoration-break: clone;
         }
 
         del {
