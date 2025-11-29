@@ -563,40 +563,6 @@ def generate_static_html(data):
             left: 0;
         }
 
-        .sidebar-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 20px;
-            border-bottom: 1px solid #ddd;
-            background: #f8f9fa;
-        }
-
-        .sidebar-header h3 {
-            margin: 0;
-            font-size: 18px;
-            color: #333;
-        }
-
-        .btn-close-sidebar {
-            background: none;
-            border: none;
-            font-size: 28px;
-            color: #999;
-            cursor: pointer;
-            padding: 0;
-            width: 30px;
-            height: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: color 0.2s;
-        }
-
-        .btn-close-sidebar:hover {
-            color: #333;
-        }
-
         .sidebar-tree {
             flex: 1;
             overflow-y: auto;
@@ -2140,10 +2106,6 @@ def generate_static_html(data):
     <!-- Sidebar Navigation -->
     <div id="sidebarOverlay" class="sidebar-overlay" onclick="toggleSidebar()"></div>
     <div id="sidebar" class="sidebar">
-        <div class="sidebar-header">
-            <h3>Explorer</h3>
-            <button class="btn-close-sidebar" onclick="toggleSidebar()">×</button>
-        </div>
         <div id="sidebarTree" class="sidebar-tree">
             <!-- Tree content will be rendered here -->
         </div>

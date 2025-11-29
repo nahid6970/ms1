@@ -4557,42 +4557,8 @@ mark {
     left: 0;
 }
 
-.sidebar-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px 20px;
-    border-bottom: 1px solid #ddd;
-    background: #f8f9fa;
-}
-
-.sidebar-header h3 {
-    margin: 0;
-    font-size: 18px;
-    color: #333;
-}
-
-.btn-close-sidebar {
-    background: none;
-    border: none;
-    font-size: 28px;
-    color: #999;
-    cursor: pointer;
-    padding: 0;
-    width: 30px;
-    height: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: color 0.2s;
-}
-
-.btn-close-sidebar:hover {
-    color: #333;
-}
-
 .sidebar-toolbar {
-    padding: 10px 15px;
+    padding: 12px 15px;
     border-bottom: 1px solid #eee;
 }
 
