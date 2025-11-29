@@ -1619,11 +1619,27 @@ function showCellContextMenu(e, rowIndex, colIndex, inputElement, tdElement) {
 
     menu.style.left = left + 'px';
     menu.style.top = top + 'px';
+
+    // Add click-outside-to-close listener
+    setTimeout(() => {
+        document.addEventListener('click', closeCellContextMenuOnClickOutside);
+    }, 10);
 }
 
 function closeCellContextMenu() {
     document.getElementById('cellContextMenu').classList.remove('show');
+    document.removeEventListener('click', closeCellContextMenuOnClickOutside);
     contextMenuCell = null;
+}
+
+function closeCellContextMenuOnClickOutside(event) {
+    const menu = document.getElementById('cellContextMenu');
+    if (menu && menu.classList.contains('show')) {
+        // Close if clicking outside the menu
+        if (!menu.contains(event.target)) {
+            closeCellContextMenu();
+        }
+    }
 }
 
 function startCellSelection(rowIndex, colIndex, td) {
