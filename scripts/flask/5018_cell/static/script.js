@@ -8266,31 +8266,34 @@ function renderSidebar() {
         const sheets = categoryMap[catName];
 
         const catDiv = document.createElement('div');
-        catDiv.className = 'tree-category'; // Start expanded
+        catDiv.className = 'tree-category collapsed'; // Start collapsed
 
         const header = document.createElement('div');
         header.className = 'tree-category-header tree-item';
         header.onclick = (e) => {
-            // Toggle collapse
+            // Toggle collapse and icon
             catDiv.classList.toggle('collapsed');
+            const icon = header.querySelector('.tree-icon');
+            icon.textContent = catDiv.classList.contains('collapsed') ? '📁' : '📂';
         };
         header.oncontextmenu = (e) => showTreeContextMenu(e, 'category', catName);
 
         header.innerHTML = `
             <span class="tree-toggle">▼</span>
-            <span class="tree-icon">📂</span>
+            <span class="tree-icon">📁</span>
             <span class="tree-label">${catName}</span>
         `;
 
         const content = document.createElement('div');
         content.className = 'tree-category-content';
 
-        sheets.forEach(sheet => {
+        sheets.forEach((sheet, idx) => {
+            const isLast = idx === sheets.length - 1;
             const sheetDiv = document.createElement('div');
-            sheetDiv.className = `tree-sheet tree-item ${sheet.originalIndex === currentSheet ? 'active' : ''}`;
+            sheetDiv.className = `tree-sheet tree-item ${sheet.originalIndex === currentSheet ? 'active' : ''} ${isLast ? 'last' : ''}`;
             sheetDiv.onclick = () => {
                 switchSheet(sheet.originalIndex);
-                toggleSidebar(); // Close on select? Maybe optional.
+                toggleSidebar();
             };
             sheetDiv.oncontextmenu = (e) => showTreeContextMenu(e, 'sheet', sheet.originalIndex);
 

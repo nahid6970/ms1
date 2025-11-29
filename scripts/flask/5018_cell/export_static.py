@@ -707,12 +707,42 @@ def generate_static_html(data):
         }
 
         .tree-sheet {
-            padding-left: 36px;
+            padding-left: 32px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             border-radius: 4px;
-            margin: 2px 0;
+            margin: 0;
+            position: relative;
+            padding-top: 6px;
+            padding-bottom: 6px;
+        }
+
+        /* Vertical line connecting items */
+        .tree-sheet::before {
+            content: '';
+            position: absolute;
+            left: 20px;
+            top: 0;
+            bottom: 50%;
+            width: 1px;
+            background: #ccc;
+        }
+
+        /* Horizontal line (L shape) */
+        .tree-sheet::after {
+            content: '';
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            width: 12px;
+            height: 1px;
+            background: #ccc;
+        }
+
+        /* Last item - only show L corner, no line below */
+        .tree-sheet.last::before {
+            bottom: 50%;
         }
 
         .tree-icon {
@@ -1196,26 +1226,30 @@ def generate_static_html(data):
                 const sheets = categoryMap[catName];
 
                 const catDiv = document.createElement('div');
-                catDiv.className = 'tree-category'; // Start expanded
+                catDiv.className = 'tree-category collapsed'; // Start collapsed
 
                 const header = document.createElement('div');
                 header.className = 'tree-category-header tree-item';
                 header.onclick = (e) => {
+                    // Toggle collapse and icon
                     catDiv.classList.toggle('collapsed');
+                    const icon = header.querySelector('.tree-icon');
+                    icon.textContent = catDiv.classList.contains('collapsed') ? '📁' : '📂';
                 };
 
                 header.innerHTML = `
                     <span class="tree-toggle">▼</span>
-                    <span class="tree-icon">📂</span>
+                    <span class="tree-icon">📁</span>
                     <span class="tree-label">${catName}</span>
                 `;
 
                 const content = document.createElement('div');
                 content.className = 'tree-category-content';
 
-                sheets.forEach(sheet => {
+                sheets.forEach((sheet, idx) => {
+                    const isLast = idx === sheets.length - 1;
                     const sheetDiv = document.createElement('div');
-                    sheetDiv.className = `tree-sheet tree-item ${sheet.originalIndex === currentSheet ? 'active' : ''}`;
+                    sheetDiv.className = `tree-sheet tree-item ${sheet.originalIndex === currentSheet ? 'active' : ''} ${isLast ? 'last' : ''}`;
                     sheetDiv.onclick = () => {
                         switchSheet(sheet.originalIndex);
                         toggleSidebar();

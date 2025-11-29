@@ -4486,13 +4486,42 @@ mark {
 }
 
 .tree-sheet {
-    padding-left: 36px;
-    /* Indent for sheets */
+    padding-left: 32px;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     border-radius: 4px;
-    margin: 2px 0;
+    margin: 0;
+    position: relative;
+    padding-top: 6px;
+    padding-bottom: 6px;
+}
+
+/* Vertical line connecting items */
+.tree-sheet::before {
+    content: '';
+    position: absolute;
+    left: 20px;
+    top: 0;
+    bottom: 50%;
+    width: 1px;
+    background: #ccc;
+}
+
+/* Horizontal line (L shape) */
+.tree-sheet::after {
+    content: '';
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    width: 12px;
+    height: 1px;
+    background: #ccc;
+}
+
+/* Last item - only show L corner, no line below */
+.tree-sheet.last::before {
+    bottom: 50%;
 }
 
 .tree-icon {
