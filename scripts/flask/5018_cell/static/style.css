@@ -3210,6 +3210,13 @@ Markdown Table Styles */
     color: #333;
 }
 
+.f2-parent-name {
+    font-size: 12px;
+    color: #999;
+    font-weight: normal;
+    margin-left: 4px;
+}
+
 
 /* Ensure markdown cells can expand to fit content */
 td .has-markdown {

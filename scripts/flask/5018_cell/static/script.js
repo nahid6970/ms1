@@ -5209,7 +5209,18 @@ function populateF2RecentSheets() {
 
         const name = document.createElement('div');
         name.className = 'f2-sheet-name';
-        name.textContent = sheet.name; // Use real name, not nickname
+        
+        // Show sub-sheets with parent name: "Subsheet [Parent]"
+        if (sheet.parentSheet !== undefined && sheet.parentSheet !== null) {
+            const parentSheet = tableData.sheets[sheet.parentSheet];
+            if (parentSheet) {
+                name.innerHTML = `${sheet.name} <span class="f2-parent-name">[${parentSheet.name}]</span>`;
+            } else {
+                name.textContent = sheet.name;
+            }
+        } else {
+            name.textContent = sheet.name;
+        }
 
         item.appendChild(number);
         item.appendChild(name);
