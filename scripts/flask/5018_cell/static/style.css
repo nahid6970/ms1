@@ -113,6 +113,38 @@ body {
     transform: scale(1.05);
 }
 
+/* Sub-Sheet Context Menu */
+.subsheet-context-menu {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 10000;
+    min-width: 150px;
+    overflow: hidden;
+}
+
+.subsheet-context-menu .context-menu-item {
+    padding: 10px 15px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background 0.2s;
+}
+
+.subsheet-context-menu .context-menu-item:hover {
+    background: #f8f9fa;
+}
+
+.subsheet-context-menu .context-menu-item span:first-child {
+    font-size: 16px;
+}
+
+.subsheet-context-menu .context-menu-item span:last-child {
+    font-size: 14px;
+}
+
 .search-box {
     display: flex;
     align-items: center;

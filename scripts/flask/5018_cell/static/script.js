@@ -2897,34 +2897,67 @@ async function deleteSheet(index) {
     }
 
     const sheetName = tableData.sheets[index].name;
-    if (!confirm(`Delete sheet "${sheetName}"?`)) return;
+    
+    // Check if this sheet has sub-sheets
+    const hasSubSheets = tableData.sheets.some(sheet => sheet.parentSheet === index);
+    if (hasSubSheets) {
+        if (!confirm(`"${sheetName}" has sub-sheets. Deleting it will also delete all its sub-sheets. Continue?`)) {
+            return;
+        }
+    } else {
+        if (!confirm(`Delete sheet "${sheetName}"?`)) return;
+    }
 
     try {
         const response = await fetch(`/api/sheets/${index}`, { method: 'DELETE' });
         if (response.ok) {
-            tableData.sheets.splice(index, 1);
+            // Delete the sheet and all its sub-sheets
+            const sheetsToDelete = [index];
+            tableData.sheets.forEach((sheet, idx) => {
+                if (sheet.parentSheet === index) {
+                    sheetsToDelete.push(idx);
+                }
+            });
+            
+            // Sort in descending order to delete from end to start (prevents index shifting issues)
+            sheetsToDelete.sort((a, b) => b - a);
+            sheetsToDelete.forEach(idx => {
+                tableData.sheets.splice(idx, 1);
+            });
 
             // Reindex sheetCategories after deletion
             const newSheetCategories = {};
+            const deletedCount = sheetsToDelete.length;
             Object.keys(tableData.sheetCategories).forEach(key => {
                 const sheetIndex = parseInt(key);
-                if (sheetIndex < index) {
-                    // Sheets before deleted sheet keep their index
-                    newSheetCategories[sheetIndex] = tableData.sheetCategories[key];
-                } else if (sheetIndex > index) {
-                    // Sheets after deleted sheet shift down by 1
-                    newSheetCategories[sheetIndex - 1] = tableData.sheetCategories[key];
+                // Count how many deleted sheets are before this index
+                const deletedBefore = sheetsToDelete.filter(delIdx => delIdx < sheetIndex).length;
+                
+                if (!sheetsToDelete.includes(sheetIndex)) {
+                    // This sheet wasn't deleted, reindex it
+                    newSheetCategories[sheetIndex - deletedBefore] = tableData.sheetCategories[key];
                 }
-                // Skip the deleted sheet (sheetIndex === index)
             });
             tableData.sheetCategories = newSheetCategories;
+
+            // Reindex parentSheet references
+            tableData.sheets.forEach((sheet, idx) => {
+                if (sheet.parentSheet !== undefined && sheet.parentSheet !== null) {
+                    // Count how many deleted sheets are before the parent
+                    const deletedBeforeParent = sheetsToDelete.filter(delIdx => delIdx < sheet.parentSheet).length;
+                    sheet.parentSheet = sheet.parentSheet - deletedBeforeParent;
+                }
+            });
 
             if (currentSheet >= tableData.sheets.length) {
                 currentSheet = tableData.sheets.length - 1;
             }
+            
+            await saveData();
             renderSheetTabs();
             renderTable();
             autoSaveActiveSheet();
+            showToast('Sheet deleted', 'success');
         }
     } catch (error) {
         console.error('Error deleting sheet:', error);
@@ -3049,6 +3082,7 @@ function renderSubSheetBar() {
     // Add parent sheet tab
     const parentTab = document.createElement('div');
     parentTab.className = `subsheet-tab ${currentSheet === parentIndex ? 'active' : ''}`;
+    parentTab.dataset.sheetIndex = parentIndex;
     
     const parentName = document.createElement('span');
     parentName.className = 'subsheet-tab-name';
@@ -3056,6 +3090,13 @@ function renderSubSheetBar() {
     
     parentTab.appendChild(parentName);
     parentTab.onclick = () => switchSheet(parentIndex);
+    
+    // Add right-click context menu for parent sheet
+    parentTab.oncontextmenu = (e) => {
+        e.preventDefault();
+        showSubSheetContextMenu(e, parentIndex);
+    };
+    
     subsheetTabs.appendChild(parentTab);
 
     // Add sub-sheets
@@ -3063,6 +3104,7 @@ function renderSubSheetBar() {
         if (sheet.parentSheet === parentIndex) {
             const tab = document.createElement('div');
             tab.className = `subsheet-tab ${currentSheet === index ? 'active' : ''}`;
+            tab.dataset.sheetIndex = index;
             
             const name = document.createElement('span');
             name.className = 'subsheet-tab-name';
@@ -3070,6 +3112,13 @@ function renderSubSheetBar() {
             
             tab.appendChild(name);
             tab.onclick = () => switchSheet(index);
+            
+            // Add right-click context menu for sub-sheet
+            tab.oncontextmenu = (e) => {
+                e.preventDefault();
+                showSubSheetContextMenu(e, index);
+            };
+            
             subsheetTabs.appendChild(tab);
         }
     });
@@ -3081,6 +3130,53 @@ function renderSubSheetBar() {
     addBtn.title = 'Add sub-sheet';
     addBtn.onclick = () => addSubSheet(parentIndex);
     subsheetTabs.appendChild(addBtn);
+}
+
+function showSubSheetContextMenu(event, sheetIndex) {
+    // Remove any existing context menu
+    const existingMenu = document.getElementById('subsheetContextMenu');
+    if (existingMenu) {
+        existingMenu.remove();
+    }
+
+    // Create context menu
+    const menu = document.createElement('div');
+    menu.id = 'subsheetContextMenu';
+    menu.className = 'subsheet-context-menu';
+    menu.style.position = 'fixed';
+    menu.style.left = event.clientX + 'px';
+    menu.style.top = event.clientY + 'px';
+
+    // Rename option
+    const renameItem = document.createElement('div');
+    renameItem.className = 'context-menu-item';
+    renameItem.innerHTML = '<span>✏️</span><span>Rename</span>';
+    renameItem.onclick = () => {
+        showRenameModal(sheetIndex);
+        menu.remove();
+    };
+
+    // Delete option
+    const deleteItem = document.createElement('div');
+    deleteItem.className = 'context-menu-item';
+    deleteItem.innerHTML = '<span>🗑️</span><span>Delete</span>';
+    deleteItem.onclick = () => {
+        deleteSheet(sheetIndex);
+        menu.remove();
+    };
+
+    menu.appendChild(renameItem);
+    menu.appendChild(deleteItem);
+    document.body.appendChild(menu);
+
+    // Close menu when clicking outside
+    const closeMenu = (e) => {
+        if (!menu.contains(e.target)) {
+            menu.remove();
+            document.removeEventListener('click', closeMenu);
+        }
+    };
+    setTimeout(() => document.addEventListener('click', closeMenu), 0);
 }
 
 function toggleSheetList() {
