@@ -501,15 +501,19 @@ The grid system relies on CSS variables for dynamic column counts:
 **Implementation Details:**
 - **Parent tracking:** Sub-sheets store `parentSheet` as the index of their parent
 - **Reindexing:** When sheets are deleted, all `parentSheet` references are updated
-- **Category inheritance:** Sub-sheets automatically inherit their parent's category
-- **Deletion cascade:** Deleting a parent deletes all its sub-sheets
+- **Category inheritance:** Sub-sheets automatically inherit their parent's category when created
+- **Category synchronization:** When moving a parent sheet to a new category, all sub-sheets automatically move with it
+- **Deletion cascade:** Deleting a parent deletes all its sub-sheets (with confirmation warning)
 - **Navigation:** Clicking any tab switches to that sheet
+- **F1 Window filtering:** Sub-sheets are hidden from the F1 reorder window - only parent sheets are shown
 
 **Key Functions:**
 - `renderSubSheetBar()` - Renders the horizontal sub-sheet navigation bar
 - `addSubSheet(parentIndex)` - Creates a new sub-sheet under the specified parent
 - `showSubSheetContextMenu(event, sheetIndex)` - Shows right-click menu for rename/delete
-- `deleteSheet(index)` - Deletes sheet and reindexes all parent references
+- `deleteSheet(index)` - Deletes sheet, all its sub-sheets, and reindexes all parent references
+- `moveToCategoryForm.onsubmit` - Moves parent sheet and all sub-sheets to new category together
+- `populateF1Sheets()` - Filters out sub-sheets, only shows parent sheets in F1 window
 
 **CSS Classes:**
 - `.subsheet-bar` - Container for the navigation bar
@@ -521,9 +525,16 @@ The grid system relies on CSS variables for dynamic column counts:
 
 **Files Modified:**
 - `templates/index.html` - Added sub-sheet bar HTML
-- `static/script.js` - Added rendering, creation, and context menu logic
+- `static/script.js` - Added rendering, creation, context menu, category sync, and F1 filtering logic
 - `static/style.css` - Added sub-sheet bar and context menu styles
 - `app.py` - Updated API to accept `parentSheet` parameter
+- `export_static.py` - Added sub-sheet bar support for static HTML export
+
+**Important Behaviors:**
+1. **Category Movement:** When you move a parent sheet to a different category, all its sub-sheets automatically move with it
+2. **F1 Reorder Window:** Only parent sheets appear in the F1 window for reordering - sub-sheets are hidden to keep the interface clean
+3. **Deletion Warning:** Deleting a parent sheet shows a warning that all sub-sheets will also be deleted
+4. **Index Reindexing:** After any sheet deletion, all `parentSheet` references are automatically updated to maintain correct relationships
 
 ### Grid Line Color Customization
 **Purpose:** Allows users to customize the color of table borders and cell separators.
