@@ -67,41 +67,52 @@
 
     <div class="container">
         <div class="sheet-tabs">
-            <button class="btn-menu" onclick="toggleSidebar()" title="Open Navigation">☰</button>
-            <div class="current-sheet-info">
-                <span id="currentSheetTitle" class="current-sheet-title">Sheet1</span>
-                <span id="currentCategoryTitle" class="current-category-title">Uncategorized</span>
+            <div class="category-controls">
+                <div class="category-selector">
+                    <button class="category-current" id="currentCategoryBtn" onclick="toggleCategoryList(event)">
+                        <span id="currentCategoryName">Uncategorized</span>
+                        <span class="dropdown-arrow">▼</span>
+                    </button>
+                    <div class="category-list" id="categoryList"></div>
+                </div>
+                <button onclick="showAddCategoryModal()" class="btn-category-action" title="Add Category">
+                    <span>➕</span>
+                </button>
+                <button onclick="showRenameCategoryModal()" class="btn-category-action"
+                    title="Rename Category (F1 to reorder)">
+                    <span>✏️</span>
+                </button>
             </div>
 
             <div class="sheet-controls">
-                <button onclick="openSettings()" class="btn-sheet-action" title="Settings">⚙️</button>
+                <div class="sheet-selector">
+                    <button class="sheet-current" id="currentSheetBtn" onclick="toggleSheetList()">
+                        <span id="currentSheetName">Sheet1</span>
+                        <span class="dropdown-arrow">▼</span>
+                    </button>
+                    <div class="sheet-list" id="sheetList"></div>
+                </div>
+                <button onclick="addSheet()" class="btn-sheet-action" title="Add Sheet">
+                    <span>➕</span>
+                </button>
+                <button onclick="showRenameModal(currentSheet)" class="btn-sheet-action" title="Rename Sheet">
+                    <span>✏️</span>
+                </button>
+                <button onclick="showMoveToCategoryModal(currentSheet)" class="btn-sheet-action"
+                    title="Move to Category">
+                    <span>📁</span>
+                </button>
+                <button onclick="deleteSheet(currentSheet)" class="btn-sheet-action" title="Delete Sheet">
+                    <span>🗑️</span>
+                </button>
+                <button onclick="openSettings()" class="btn-sheet-action" title="Settings">
+                    <span>⚙️</span>
+                </button>
                 <div id="loadTime" class="load-time-indicator" title="Page load time">
                     <span>⏱️</span>
                     <span id="loadTimeValue">--</span>
                 </div>
             </div>
-        </div>
-
-        <!--Sidebar Navigation -->
-        <div id="sidebarOverlay" class="sidebar-overlay" onclick="toggleSidebar()"></div>
-        <div id="sidebar" class="sidebar">
-            <div class="sidebar-header">
-                <h3>Explorer</h3>
-                <button class="btn-close-sidebar" onclick="toggleSidebar()">×</button>
-            </div>
-            <div class="sidebar-toolbar">
-                <button onclick="showAddCategoryModal()" class="btn-sidebar-action" title="Add Category">
-                    <span>📁+</span> Add Category
-                </button>
-            </div>
-            <div id="sidebarTree" class="sidebar-tree">
-                <!-- Tree content will be rendered here -->
-            </div>
-        </div>
-
-        <!-- Tree Context Menu -->
-        <div id="treeContextMenu" class="context-menu">
-            <!-- Content will be dynamically populated -->
         </div>
 
         <!-- Sub-Sheet Navigation Bar -->

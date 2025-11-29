@@ -437,8 +437,7 @@ async function loadData() {
         }
 
         initializeCategories();
-        renderCategoryTabs();
-        renderSheetTabs();
+        renderSidebar();
         renderTable();
 
         // Display load time after everything is rendered
@@ -658,7 +657,7 @@ async function handleRenameFormSubmit(e) {
         if (response.ok) {
             tableData.sheets[currentSheet].name = newName;
             tableData.sheets[currentSheet].nickname = newNickname;
-            renderSheetTabs();
+            renderSidebar();
             closeRenameModal();
         }
     } catch (error) {
@@ -2727,8 +2726,7 @@ async function addSheet() {
                 showToast(`Sheet added to "${currentCategory}" category`, 'success');
             }
 
-            renderCategoryTabs();
-            renderSheetTabs();
+            renderSidebar();
             renderTable();
         }
     } catch (error) {
@@ -2750,9 +2748,9 @@ async function addSubSheet(parentIndex) {
 
         if (response.ok) {
             const result = await response.json();
-            tableData.sheets.push({ 
-                name: subSheetName, 
-                columns: [], 
+            tableData.sheets.push({
+                name: subSheetName,
+                columns: [],
                 rows: [],
                 parentSheet: parentIndex
             });
@@ -2766,8 +2764,7 @@ async function addSubSheet(parentIndex) {
             }
 
             await saveData();
-            renderCategoryTabs();
-            renderSheetTabs();
+            renderSidebar();
             renderTable();
             showToast(`Sub-sheet added under "${parentSheet.name}"`, 'success');
         }
@@ -2827,8 +2824,8 @@ async function moveSheetUp(index) {
 
     // Save and re-render
     await saveData();
-    renderCategoryTabs();
-    renderSheetTabs();
+    renderSidebar();
+    renderSidebar();
     renderTable();
     showToast('Sheet moved up', 'success');
 }
@@ -2884,8 +2881,8 @@ async function moveSheetDown(index) {
 
     // Save and re-render
     await saveData();
-    renderCategoryTabs();
-    renderSheetTabs();
+    renderSidebar();
+    renderSidebar();
     renderTable();
     showToast('Sheet moved down', 'success');
 }
@@ -2897,7 +2894,7 @@ async function deleteSheet(index) {
     }
 
     const sheetName = tableData.sheets[index].name;
-    
+
     // Check if this sheet has sub-sheets
     const hasSubSheets = tableData.sheets.some(sheet => sheet.parentSheet === index);
     if (hasSubSheets) {
@@ -2918,7 +2915,7 @@ async function deleteSheet(index) {
                     sheetsToDelete.push(idx);
                 }
             });
-            
+
             // Sort in descending order to delete from end to start (prevents index shifting issues)
             sheetsToDelete.sort((a, b) => b - a);
             sheetsToDelete.forEach(idx => {
@@ -2932,7 +2929,7 @@ async function deleteSheet(index) {
                 const sheetIndex = parseInt(key);
                 // Count how many deleted sheets are before this index
                 const deletedBefore = sheetsToDelete.filter(delIdx => delIdx < sheetIndex).length;
-                
+
                 if (!sheetsToDelete.includes(sheetIndex)) {
                     // This sheet wasn't deleted, reindex it
                     newSheetCategories[sheetIndex - deletedBefore] = tableData.sheetCategories[key];
@@ -2952,9 +2949,9 @@ async function deleteSheet(index) {
             if (currentSheet >= tableData.sheets.length) {
                 currentSheet = tableData.sheets.length - 1;
             }
-            
+
             await saveData();
-            renderSheetTabs();
+            renderSidebar();
             renderTable();
             autoSaveActiveSheet();
             showToast('Sheet deleted', 'success');
@@ -2987,8 +2984,8 @@ function switchSheet(index) {
     const sheetCategory = tableData.sheetCategories[index] || tableData.sheetCategories[String(index)] || null;
     currentCategory = sheetCategory;
 
-    renderCategoryTabs();
-    renderSheetTabs();
+    renderSidebar();
+    renderSidebar();
     renderTable();
     autoSaveActiveSheet();
 }
@@ -3069,7 +3066,7 @@ function renderSheetTabs() {
 function renderSubSheetBar() {
     const subsheetTabs = document.getElementById('subsheetTabs');
     if (!subsheetTabs) return;
-    
+
     subsheetTabs.innerHTML = '';
 
     // Get current sheet's parent (if it's a sub-sheet) or use current sheet as parent
@@ -3083,20 +3080,20 @@ function renderSubSheetBar() {
     const parentTab = document.createElement('div');
     parentTab.className = `subsheet-tab ${currentSheet === parentIndex ? 'active' : ''}`;
     parentTab.dataset.sheetIndex = parentIndex;
-    
+
     const parentName = document.createElement('span');
     parentName.className = 'subsheet-tab-name';
     parentName.textContent = parentSheet.name;
-    
+
     parentTab.appendChild(parentName);
     parentTab.onclick = () => switchSheet(parentIndex);
-    
+
     // Add right-click context menu for parent sheet
     parentTab.oncontextmenu = (e) => {
         e.preventDefault();
         showSubSheetContextMenu(e, parentIndex);
     };
-    
+
     subsheetTabs.appendChild(parentTab);
 
     // Add sub-sheets
@@ -3105,20 +3102,20 @@ function renderSubSheetBar() {
             const tab = document.createElement('div');
             tab.className = `subsheet-tab ${currentSheet === index ? 'active' : ''}`;
             tab.dataset.sheetIndex = index;
-            
+
             const name = document.createElement('span');
             name.className = 'subsheet-tab-name';
             name.textContent = sheet.name;
-            
+
             tab.appendChild(name);
             tab.onclick = () => switchSheet(index);
-            
+
             // Add right-click context menu for sub-sheet
             tab.oncontextmenu = (e) => {
                 e.preventDefault();
                 showSubSheetContextMenu(e, index);
             };
-            
+
             subsheetTabs.appendChild(tab);
         }
     });
@@ -3350,7 +3347,7 @@ document.getElementById('addCategoryForm').onsubmit = async function (e) {
 
     tableData.categories.push(categoryName);
     await saveData();
-    renderCategoryTabs();
+    renderSidebar();
     closeAddCategoryModal();
     showToast(`Category "${categoryName}" added`, 'success');
 };
@@ -3383,7 +3380,7 @@ document.getElementById('renameCategoryForm').onsubmit = async function (e) {
 
     currentCategory = newName;
     await saveData();
-    renderCategoryTabs();
+    renderSidebar();
     closeRenameCategoryModal();
     showToast(`Category renamed to "${newName}"`, 'success');
 };
@@ -3414,8 +3411,8 @@ document.getElementById('moveToCategoryForm').onsubmit = async function (e) {
     });
 
     await saveData();
-    renderCategoryTabs();
-    renderSheetTabs();
+    renderSidebar();
+    renderSidebar();
     closeMoveToCategoryModal();
     showToast('Sheet and sub-sheets moved to category', 'success');
 };
@@ -3452,8 +3449,8 @@ function renderCategoryTabs() {
             currentSheet = firstUncategorized;
         }
 
-        renderCategoryTabs();
-        renderSheetTabs();
+        renderSidebar();
+        renderSidebar();
         renderTable();
         toggleCategoryList();
     };
@@ -3488,8 +3485,8 @@ function renderCategoryTabs() {
                 currentSheet = firstSheetInCategory;
             }
 
-            renderCategoryTabs();
-            renderSheetTabs();
+            renderSidebar();
+            renderSidebar();
             renderTable();
             toggleCategoryList();
         };
@@ -3549,8 +3546,8 @@ async function deleteCategory(categoryName) {
     }
 
     await saveData();
-    renderCategoryTabs();
-    renderSheetTabs();
+    renderSidebar();
+    renderSidebar();
     renderTable();
     showToast(`Category "${categoryName}" deleted`, 'success');
 }
@@ -3572,7 +3569,7 @@ async function moveCategoryUp() {
         [tableData.categories[index], tableData.categories[index - 1]];
 
     await saveData();
-    renderCategoryTabs();
+    renderSidebar();
 
     // Refresh F1 popup if it's open
     const f1Popup = document.getElementById('f1Popup');
@@ -3600,7 +3597,7 @@ async function moveCategoryDown() {
         [tableData.categories[index + 1], tableData.categories[index]];
 
     await saveData();
-    renderCategoryTabs();
+    renderSidebar();
 
     // Refresh F1 popup if it's open
     const f1Popup = document.getElementById('f1Popup');
@@ -6757,7 +6754,7 @@ async function moveCategoryUpInF1() {
         [tableData.categories[index], tableData.categories[index - 1]];
 
     await saveData();
-    renderCategoryTabs();
+    renderSidebar();
 
     // Refresh F1 popup
     populateF1Categories();
@@ -6785,7 +6782,7 @@ async function moveCategoryDownInF1() {
         [tableData.categories[index + 1], tableData.categories[index]];
 
     await saveData();
-    renderCategoryTabs();
+    renderSidebar();
 
     // Refresh F1 popup
     populateF1Categories();
@@ -7002,7 +6999,7 @@ function handleF1Drop(e) {
 
         // Save and refresh
         saveData();
-        renderSheetTabs();
+        renderSidebar();
         populateF1Sheets();
         showToast('Sheet moved', 'success');
     }
@@ -8107,4 +8104,226 @@ function toggleHiddenText() {
         localStorage.setItem('hiddenTextVisible', 'false');
         showToast('Hidden text hidden', 'success');
     }
+}
+
+// Sidebar Logic
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    sidebar.classList.toggle('open');
+    overlay.classList.toggle('show');
+}
+
+function renderSidebar() {
+    const treeContainer = document.getElementById('sidebarTree');
+    if (!treeContainer) return;
+
+    treeContainer.innerHTML = '';
+
+    // Group sheets by category
+    const categoryMap = {};
+
+    // Initialize categories
+    if (tableData.categories) {
+        tableData.categories.forEach(cat => {
+            categoryMap[cat] = [];
+        });
+    }
+    // Ensure Uncategorized exists
+    if (!categoryMap['Uncategorized']) {
+        categoryMap['Uncategorized'] = [];
+    }
+
+    // Distribute sheets
+    tableData.sheets.forEach((sheet, index) => {
+        // Skip sub-sheets (they are shown under parents in the main view, 
+        // but for the tree, maybe we should show them? 
+        // The user said "more like tree", so maybe nested?
+        // But the current app has a specific sub-sheet bar. 
+        // For now, let's list all top-level sheets in the tree.
+        // If a sheet is a sub-sheet (has parentSheet), maybe we hide it from the top level?
+        // The developer guide says: "Sub-sheets are hidden from the F1 reorder window - only parent sheets are shown"
+        // So I should probably only show parent sheets in the tree, or show them nested.
+        // Let's show them nested if possible, or just list parents for now to match existing logic.
+
+        if (sheet.parentSheet !== undefined && sheet.parentSheet !== null) {
+            return; // Skip sub-sheets for now, or handle them later
+        }
+
+        const catName = tableData.sheetCategories[index] || 'Uncategorized';
+        if (!categoryMap[catName]) categoryMap[catName] = [];
+        categoryMap[catName].push({ ...sheet, originalIndex: index });
+    });
+
+    // Render Categories
+    Object.keys(categoryMap).forEach(catName => {
+        const sheets = categoryMap[catName];
+
+        const catDiv = document.createElement('div');
+        catDiv.className = 'tree-category';
+        // Restore collapsed state if we track it, for now default expanded
+
+        const header = document.createElement('div');
+        header.className = 'tree-category-header tree-item';
+        header.onclick = (e) => {
+            // Toggle collapse
+            catDiv.classList.toggle('collapsed');
+        };
+        header.oncontextmenu = (e) => showTreeContextMenu(e, 'category', catName);
+
+        header.innerHTML = `
+            <span class="tree-toggle">▼</span>
+            <span class="tree-icon">📁</span>
+            <span class="tree-label">${catName}</span>
+        `;
+
+        const content = document.createElement('div');
+        content.className = 'tree-category-content';
+
+        sheets.forEach(sheet => {
+            const sheetDiv = document.createElement('div');
+            sheetDiv.className = `tree-sheet tree-item ${sheet.originalIndex === currentSheet ? 'active' : ''}`;
+            sheetDiv.onclick = () => {
+                switchSheet(sheet.originalIndex);
+                toggleSidebar(); // Close on select? Maybe optional.
+            };
+            sheetDiv.oncontextmenu = (e) => showTreeContextMenu(e, 'sheet', sheet.originalIndex);
+
+            sheetDiv.innerHTML = `
+                <span class="tree-icon">📄</span>
+                <span class="tree-label">${sheet.name}</span>
+            `;
+            content.appendChild(sheetDiv);
+        });
+
+        catDiv.appendChild(header);
+        catDiv.appendChild(content);
+        treeContainer.appendChild(catDiv);
+    });
+
+    // Update Header Info
+    const currentSheetObj = tableData.sheets[currentSheet];
+    if (currentSheetObj) {
+        document.getElementById('currentSheetTitle').textContent = currentSheetObj.name;
+        const currentCat = tableData.sheetCategories[currentSheet] || 'Uncategorized';
+        document.getElementById('currentCategoryTitle').textContent = currentCat;
+    }
+}
+
+// Context Menu
+function showTreeContextMenu(e, type, id) {
+    e.preventDefault();
+    const menu = document.getElementById('treeContextMenu');
+    menu.innerHTML = '';
+
+    if (type === 'category') {
+        menu.innerHTML = `
+            <div class="context-menu-item" onclick="showAddSheetToCategory('${id}')">
+                <span>📄</span> Add Sheet Here
+            </div>
+            <div class="context-menu-item" onclick="showRenameCategoryModal('${id}')">
+                <span>✏️</span> Rename
+            </div>
+            <div class="context-menu-item danger" onclick="deleteCategory('${id}')">
+                <span>🗑️</span> Delete
+            </div>
+        `;
+    } else if (type === 'sheet') {
+        menu.innerHTML = `
+            <div class="context-menu-item" onclick="showRenameModal(${id})">
+                <span>✏️</span> Rename
+            </div>
+            <div class="context-menu-item" onclick="showMoveToCategoryModal(${id})">
+                <span>📁</span> Move to Category
+            </div>
+            <div class="context-menu-item danger" onclick="deleteSheet(${id})">
+                <span>🗑️</span> Delete
+            </div>
+        `;
+    }
+
+    // Position and show
+    menu.style.display = 'block';
+    menu.style.left = e.pageX + 'px';
+    menu.style.top = e.pageY + 'px';
+
+    // Close on click outside
+    const closeMenu = () => {
+        menu.style.display = 'none';
+        document.removeEventListener('click', closeMenu);
+    };
+    setTimeout(() => document.addEventListener('click', closeMenu), 0);
+}
+
+// Helper to add sheet to specific category
+async function showAddSheetToCategory(category) {
+    // Call existing addSheet but then move it? 
+    // Or create a new API endpoint?
+    // For now, add sheet then move it.
+
+    // We can't use addSheet() directly because it prompts and uses currentCategory.
+    // We need a custom logic here.
+
+    const sheetName = prompt('Enter sheet name:', `Sheet${tableData.sheets.length + 1}`);
+    if (!sheetName) return;
+
+    try {
+        const response = await fetch('/api/sheets', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: sheetName })
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            tableData.sheets.push({ name: sheetName, columns: [], rows: [] });
+            const newIndex = result.sheetIndex;
+            currentSheet = newIndex;
+
+            // Assign to category
+            if (category !== 'Uncategorized') {
+                initializeCategories();
+                tableData.sheetCategories[newIndex] = category;
+                await saveData();
+                showToast(`Sheet added to "${category}" category`, 'success');
+            } else {
+                // Explicitly set to Uncategorized (remove from map if exists, though it shouldn't)
+                delete tableData.sheetCategories[newIndex];
+                await saveData();
+            }
+
+            renderSidebar();
+            renderTable();
+        }
+    } catch (error) {
+        console.error('Error adding sheet:', error);
+    }
+}
+
+async function deleteCategory(categoryName) {
+    if (categoryName === 'Uncategorized') {
+        alert('Cannot delete the Uncategorized category.');
+        return;
+    }
+
+    if (!confirm(`Delete category "${categoryName}"? Sheets in this category will be moved to Uncategorized.`)) {
+        return;
+    }
+
+    // Remove category from list
+    const index = tableData.categories.indexOf(categoryName);
+    if (index > -1) {
+        tableData.categories.splice(index, 1);
+    }
+
+    // Move sheets to Uncategorized
+    Object.keys(tableData.sheetCategories).forEach(key => {
+        if (tableData.sheetCategories[key] === categoryName) {
+            delete tableData.sheetCategories[key];
+        }
+    });
+
+    await saveData();
+    renderSidebar();
+    showToast('Category deleted', 'success');
 }

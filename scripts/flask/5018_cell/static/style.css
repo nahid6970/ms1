@@ -4053,6 +4053,200 @@ mark {
     opacity: 1;
 }
 
+.f1-sheet-separator.has-actions {
+    cursor: pointer;
+}
+
+.f1-sheet-separator.has-actions:hover {
+    background: linear-gradient(to right, transparent, #007bff 20%, #007bff 80%, transparent);
+}
+
+.f1-sheet-separator.has-actions:hover::before {
+    color: #007bff;
+}
+
+.f1-separator-actions {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    gap: 4px;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.f1-sheet-separator:hover .f1-separator-actions {
+    opacity: 1;
+}
+
+.f1-separator-btn {
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    width: 24px;
+    height: 24px;
+    font-size: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.f1-separator-btn:hover {
+    background: #dc3545;
+    border-color: #dc3545;
+    color: white;
+}
+
+/* F1 Sheets Title with Separator Button */
+.f1-sheets-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+    font-weight: 600;
+    font-size: 14px;
+    color: #495057;
+}
+
+.f1-add-separator-btn {
+    background: white;
+    border: 2px solid #007bff;
+    color: #007bff;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.f1-add-separator-btn:hover {
+    background: #007bff;
+    color: white;
+    transform: scale(1.05);
+}
+
+.f1-add-separator-btn:active {
+    transform: scale(0.95);
+}
+
+/* Separator mode visual indicator */
+.f1-sheet-item.separator-mode {
+    border-style: dashed;
+    animation: pulse-border 1s infinite;
+}
+
+@keyframes pulse-border {
+
+    0%,
+    100% {
+        border-color: #007bff;
+    }
+
+    50% {
+        border-color: #0056b3;
+    }
+}
+
+/* Search Highlights */
+.search-highlight {
+    background-color: rgba(255, 255, 0, 0.2) !important;
+}
+
+.text-match-highlight {
+    background-color: yellow;
+    color: black;
+}
+
+.active-search-match {
+    background-color: #ff9900;
+    color: black;
+    outline: 2px solid #cc3300;
+    z-index: 100;
+    position: relative;
+}
+
+/* Horizontal Separator (-----) */
+.md-separator {
+    width: 100%;
+    height: 4px;
+    background: #ccc;
+    margin: 12px 0 !important;
+    padding: 0 !important;
+    display: block;
+    border: none;
+    line-height: 0;
+    font-size: 0;
+}
+
+/* Markdown highlight (==text==) */
+mark {
+    background: #000000;
+    color: #ffffff;
+    padding: 1px 4px;
+    border-radius: 3px;
+    display: inline-block;
+    vertical-align: baseline;
+    margin-top: -1px;
+    line-height: 1.3;
+}
+
+/* Correct Answer Highlight ([[text]]) */
+.correct-answer {
+    background-color: transparent;
+    color: inherit;
+    padding: 0 2px;
+    border-radius: 3px;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.correct-answer.revealed {
+    background-color: #29e372;
+    /* Lighter Green */
+    color: black;
+    font-weight: 500;
+}
+
+/* Toolbar Separator */
+.button-group .separator {
+    width: 1px;
+    height: 24px;
+    background: #dee2e6;
+    margin: 0 8px;
+}
+
+/* Active state for toggle buttons */
+.btn-icon-toggle.active {
+    background: #007bff;
+    border-color: #007bff;
+}
+
+.btn-icon-toggle.active span {
+    color: white;
+    opacity: 1 !important;
+}
+
+/* Disabled button state */
+.btn-icon:disabled,
+.btn-icon-toggle:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.btn-delete-empty span {
+    color: #dc3545;
+    opacity: 1;
+}
+
 .btn-delete-empty:hover {
     background: #dc3545;
     border-color: #dc3545;
@@ -4060,4 +4254,239 @@ mark {
 
 .btn-delete-empty:hover span {
     color: white;
+}
+
+/* Sidebar Navigation */
+.sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.sidebar-overlay.show {
+    display: block;
+    opacity: 1;
+}
+
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: -300px;
+    width: 300px;
+    height: 100%;
+    background: white;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    transition: left 0.3s ease-in-out;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar.open {
+    left: 0;
+}
+
+.sidebar-header {
+    padding: 15px 20px;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f8f9fa;
+}
+
+.sidebar-header h3 {
+    margin: 0;
+    font-size: 18px;
+    color: #333;
+}
+
+.btn-close-sidebar {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #666;
+    padding: 0;
+    line-height: 1;
+}
+
+.btn-close-sidebar:hover {
+    color: #333;
+}
+
+.sidebar-toolbar {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.btn-sidebar-action {
+    width: 100%;
+    padding: 8px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-weight: 500;
+    transition: background 0.2s;
+}
+
+.btn-sidebar-action:hover {
+    background: #0056b3;
+}
+
+.sidebar-tree {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px 0;
+}
+
+/* Tree Items */
+.tree-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 15px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.2s;
+    color: #333;
+    font-size: 14px;
+}
+
+.tree-item:hover {
+    background: #f0f0f0;
+}
+
+.tree-item.active {
+    background: #e7f3ff;
+    color: #007bff;
+    border-right: 3px solid #007bff;
+}
+
+.tree-category-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    color: #555;
+    padding: 8px 15px;
+}
+
+.tree-category-header:hover {
+    background: #f8f9fa;
+}
+
+.tree-toggle {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    transition: transform 0.2s;
+    color: #999;
+}
+
+.tree-category.collapsed .tree-toggle {
+    transform: rotate(-90deg);
+}
+
+.tree-category-content {
+    padding-left: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+}
+
+.tree-category.collapsed .tree-category-content {
+    display: none;
+}
+
+.tree-sheet {
+    padding-left: 44px;
+    /* Indent for sheets */
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.tree-icon {
+    font-size: 16px;
+    width: 20px;
+    text-align: center;
+}
+
+.tree-label {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Updated Header Styles */
+.btn-menu {
+    background: none;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    width: 36px;
+    height: 36px;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 15px;
+    transition: all 0.2s;
+}
+
+.btn-menu:hover {
+    background: #f0f0f0;
+    border-color: #ccc;
+}
+
+.current-sheet-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.current-sheet-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+}
+
+.current-category-title {
+    font-size: 12px;
+    color: #666;
+}
+
+/* Hide old sheet tabs styles that might conflict */
+.sheet-tabs {
+    justify-content: flex-start;
+    padding: 10px 20px;
+    background: white;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    align-items: center;
+}
+
+/* Context Menu specific for Tree */
+.context-menu-item.danger {
+    color: #dc3545;
+}
+
+.context-menu-item.danger:hover {
+    background: #fff5f5;
 }
