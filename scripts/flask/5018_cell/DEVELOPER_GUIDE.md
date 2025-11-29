@@ -536,6 +536,36 @@ The grid system relies on CSS variables for dynamic column counts:
 3. **Deletion Warning:** Deleting a parent sheet shows a warning that all sub-sheets will also be deleted
 4. **Index Reindexing:** After any sheet deletion, all `parentSheet` references are automatically updated to maintain correct relationships
 
+### Sidebar Navigation & Tree View
+**Purpose:** Replaces the legacy dropdown menus with a modern, collapsible sidebar for easier navigation of categories and sheets.
+
+**Features:**
+- **Tree Structure:** Displays categories as collapsible folders containing their sheets.
+- **Search:** Built-in search bar to filter sheets and categories instantly.
+- **Context Menus:** Right-click on categories or sheets in the tree to access actions (Rename, Delete, Add Sheet, etc.).
+- **Sub-sheet Handling:** Sub-sheets are hidden from the main tree to reduce clutter. They are accessed via the Sub-Sheet Bar when the parent sheet is selected.
+
+**UI Components:**
+1. **Hamburger Button (☰):** Toggles the sidebar open/closed.
+2. **Sidebar Panel:**
+   - **Header:** Title and Close button.
+   - **Toolbar:** Search input and "Collapse All" / "Expand All" buttons.
+   - **Tree Container:** The scrollable area containing the category/sheet tree.
+3. **Tree Items:**
+   - **Categories:** Folders that can be expanded/collapsed.
+   - **Sheets:** File icons representing individual sheets.
+
+**Key Functions:**
+- `toggleSidebar()` - Opens/closes the sidebar.
+- `renderSidebar()` - Renders the tree structure based on `tableData`.
+- `filterSidebar(searchTerm)` - Filters the tree based on user input.
+- `showTreeContextMenu(event, type, id)` - Shows the custom context menu for tree items.
+
+**Files Modified:**
+- `templates/index.html` - Added sidebar HTML structure.
+- `static/style.css` - Added sidebar, tree view, and transition styles.
+- `static/script.js` - Added rendering and event handling logic for the sidebar.
+
 ### Grid Line Color Customization
 **Purpose:** Allows users to customize the color of table borders and cell separators.
 
