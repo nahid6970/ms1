@@ -909,6 +909,54 @@ def generate_static_html(data):
             padding: 0 4px;
         }
 
+        /* Sub-Sheet Navigation Bar */
+        .subsheet-bar {
+            padding: 10px 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #ddd;
+            min-height: 50px;
+        }
+
+        .subsheet-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .subsheet-tab {
+            padding: 8px 16px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        .subsheet-tab:hover {
+            background: #e9ecef;
+            border-color: #007bff;
+        }
+
+        .subsheet-tab.active {
+            background: #007bff;
+            color: white;
+            border-color: #007bff;
+            font-weight: 600;
+        }
+
+        .subsheet-tab-name {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
         /* Settings Modal */
         .modal {
             position: fixed;
@@ -1267,6 +1315,51 @@ def generate_static_html(data):
             tableData.sheets.forEach((sheet, index) => {
                 if (!sheet.parentSheet && sheet.parentSheet !== 0) {
                     renderSheetItem(sheet, index, 0);
+                }
+            });
+
+            // Render sub-sheet bar
+            renderSubSheetBar();
+        }
+
+        function renderSubSheetBar() {
+            const subsheetTabs = document.getElementById('subsheetTabs');
+            if (!subsheetTabs) return;
+            
+            subsheetTabs.innerHTML = '';
+
+            // Get current sheet's parent (if it's a sub-sheet) or use current sheet as parent
+            const currentSheetData = tableData.sheets[currentSheet];
+            const parentIndex = currentSheetData?.parentSheet !== undefined ? currentSheetData.parentSheet : currentSheet;
+            const parentSheet = tableData.sheets[parentIndex];
+
+            if (!parentSheet) return;
+
+            // Add parent sheet tab
+            const parentTab = document.createElement('div');
+            parentTab.className = `subsheet-tab ${currentSheet === parentIndex ? 'active' : ''}`;
+            
+            const parentName = document.createElement('span');
+            parentName.className = 'subsheet-tab-name';
+            parentName.textContent = parentSheet.name;
+            
+            parentTab.appendChild(parentName);
+            parentTab.onclick = () => switchSheet(parentIndex);
+            subsheetTabs.appendChild(parentTab);
+
+            // Add sub-sheets
+            tableData.sheets.forEach((sheet, index) => {
+                if (sheet.parentSheet === parentIndex) {
+                    const tab = document.createElement('div');
+                    tab.className = `subsheet-tab ${currentSheet === index ? 'active' : ''}`;
+                    
+                    const name = document.createElement('span');
+                    name.className = 'subsheet-tab-name';
+                    name.textContent = sheet.name;
+                    
+                    tab.appendChild(name);
+                    tab.onclick = () => switchSheet(index);
+                    subsheetTabs.appendChild(tab);
                 }
             });
         }
@@ -2148,6 +2241,13 @@ def generate_static_html(data):
             <button onclick="openSettings()" class="btn-icon-toggle" title="Settings" style="margin-left: 5px;">
                 <span>⚙️</span>
             </button>
+        </div>
+
+        <!-- Sub-Sheet Navigation Bar -->
+        <div class="subsheet-bar" id="subsheetBar">
+            <div class="subsheet-tabs" id="subsheetTabs">
+                <!-- Sub-sheets will be rendered here -->
+            </div>
         </div>
 
         <div class="table-container">
