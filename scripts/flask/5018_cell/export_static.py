@@ -97,191 +97,7 @@ def generate_static_html(data):
             overflow-y: visible;
         }
 
-        .category-controls {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            padding: 4px 8px;
-            background: #e3f2fd;
-            border: 1px solid #90caf9;
-            border-radius: 4px;
-        }
 
-        .category-selector {
-            position: relative;
-            min-width: 150px;
-            z-index: 100;
-        }
-
-        .category-current {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 8px;
-            padding: 6px 12px;
-            background: white;
-            border: 1px solid #90caf9;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 13px;
-            width: 100%;
-            transition: all 0.2s;
-            font-weight: 500;
-            color: #1976d2;
-        }
-
-        .category-current:hover {
-            background: #f5f5f5;
-            border-color: #1976d2;
-        }
-
-        .category-list {
-            display: none;
-            position: fixed;
-            background: white;
-            border: 1px solid #90caf9;
-            border-radius: 4px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            z-index: 2000;
-            max-height: 300px;
-            overflow-y: auto;
-        }
-
-        .category-list.show {
-            display: block;
-        }
-
-        .category-item {
-            padding: 10px 15px;
-            cursor: pointer;
-            border-bottom: 1px solid #f0f0f0;
-            transition: background 0.2s;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .category-item:last-child {
-            border-bottom: none;
-        }
-
-        .category-item:hover {
-            background: #e3f2fd;
-        }
-
-        .category-item.active {
-            background: #bbdefb;
-            color: #1976d2;
-            font-weight: 600;
-        }
-
-        .category-item-name {
-            font-size: 13px;
-            flex: 1;
-        }
-
-        .category-item-count {
-            font-size: 11px;
-            color: #666;
-            background: #e0e0e0;
-            padding: 2px 6px;
-            border-radius: 10px;
-        }
-
-        .sheet-controls {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            padding: 4px 8px;
-            background: #f5f5f5;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-
-        .sheet-selector {
-            position: relative;
-            flex: 1;
-            min-width: 150px;
-            max-width: 300px;
-            z-index: 100;
-        }
-
-        .sheet-current {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
-            padding: 8px 15px;
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            width: 100%;
-            transition: all 0.2s;
-        }
-
-        .sheet-current:hover {
-            background: #f8f9fa;
-            border-color: #007bff;
-        }
-
-        #currentSheetName {
-            flex: 1;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            text-align: left;
-        }
-
-        .dropdown-arrow {
-            color: #666;
-            font-size: 12px;
-            flex-shrink: 0;
-        }
-
-        .sheet-list {
-            display: none;
-            position: fixed;
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            z-index: 2000;
-            max-height: 300px;
-            overflow-y: auto;
-        }
-
-        .sheet-list.show {
-            display: block;
-        }
-
-        .sheet-item {
-            padding: 12px 15px;
-            cursor: pointer;
-            border-bottom: 1px solid #f0f0f0;
-            transition: background 0.2s;
-        }
-
-        .sheet-item:last-child {
-            border-bottom: none;
-        }
-
-        .sheet-item:hover {
-            background: #f8f9fa;
-        }
-
-        .sheet-item.active {
-            background: #e7f3ff;
-            color: #007bff;
-            font-weight: 600;
-        }
-
-        .sheet-item-name {
-            font-size: 14px;
-            flex: 1;
-            cursor: pointer;
-        }
 
         .search-box {
             display: flex;
@@ -713,6 +529,206 @@ def generate_static_html(data):
             }
         }
 
+        /* Sidebar Navigation */
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            display: none;
+        }
+
+        .sidebar-overlay.show {
+            display: block;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -300px;
+            width: 300px;
+            height: 100%;
+            background: white;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            transition: left 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar.show {
+            left: 0;
+        }
+
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            border-bottom: 1px solid #ddd;
+            background: #f8f9fa;
+        }
+
+        .sidebar-header h3 {
+            margin: 0;
+            font-size: 18px;
+            color: #333;
+        }
+
+        .btn-close-sidebar {
+            background: none;
+            border: none;
+            font-size: 28px;
+            color: #999;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s;
+        }
+
+        .btn-close-sidebar:hover {
+            color: #333;
+        }
+
+        .sidebar-tree {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px 0;
+        }
+
+        .btn-menu {
+            background: none;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 36px;
+            height: 36px;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            transition: all 0.2s;
+        }
+
+        .btn-menu:hover {
+            background: #f0f0f0;
+            border-color: #007bff;
+        }
+
+        .current-sheet-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            flex: 1;
+        }
+
+        .current-sheet-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .current-category-title {
+            font-size: 12px;
+            color: #666;
+        }
+
+        /* Tree Items */
+        .tree-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 15px;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.2s;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .tree-item:hover {
+            background: #f0f0f0;
+        }
+
+        .tree-item.active {
+            background: #e7f3ff;
+            color: #007bff;
+            border-right: 3px solid #007bff;
+        }
+
+        .tree-category {
+            margin-bottom: 4px;
+        }
+
+        .tree-category-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            color: #555;
+            padding: 8px 12px;
+            border-radius: 4px;
+        }
+
+        .tree-category-header:hover {
+            background: #f8f9fa;
+        }
+
+        .tree-toggle {
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            transition: transform 0.2s;
+            color: #999;
+        }
+
+        .tree-category.collapsed .tree-toggle {
+            transform: rotate(-90deg);
+        }
+
+        .tree-category-content {
+            padding-left: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+
+        .tree-category.collapsed .tree-category-content {
+            display: none;
+        }
+
+        .tree-sheet {
+            padding-left: 36px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-radius: 4px;
+            margin: 2px 0;
+        }
+
+        .tree-icon {
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .tree-label {
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
         @media print {
             body {
                 background: white;
@@ -1131,108 +1147,102 @@ def generate_static_html(data):
             }
         }
 
-        function toggleCategoryList() {
-            const categoryList = document.getElementById('categoryList');
-            const button = document.getElementById('currentCategoryBtn');
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
             
-            if (categoryList.classList.contains('show')) {
-                categoryList.classList.remove('show');
+            if (sidebar.classList.contains('show')) {
+                sidebar.classList.remove('show');
+                overlay.classList.remove('show');
             } else {
-                // Position the dropdown
-                const rect = button.getBoundingClientRect();
-                categoryList.style.position = 'fixed';
-                categoryList.style.top = (rect.bottom + 5) + 'px';
-                categoryList.style.left = rect.left + 'px';
-                categoryList.style.width = rect.width + 'px';
-                categoryList.classList.add('show');
+                sidebar.classList.add('show');
+                overlay.classList.add('show');
             }
         }
 
-        function renderCategoryTabs() {
-            initializeCategories();
-            
-            const currentCategoryNameEl = document.getElementById('currentCategoryName');
-            currentCategoryNameEl.textContent = currentCategory || 'Uncategorized';
-            
-            const categoryList = document.getElementById('categoryList');
-            categoryList.innerHTML = '';
-            
-            // Add "Uncategorized" option
-            const uncategorizedCount = tableData.sheets.filter((sheet, index) => {
-                return !tableData.sheetCategories[index] && !tableData.sheetCategories[String(index)];
-            }).length;
-            
-            const allItem = document.createElement('div');
-            allItem.className = `category-item ${currentCategory === null ? 'active' : ''}`;
-            
-            const allName = document.createElement('span');
-            allName.className = 'category-item-name';
-            allName.textContent = 'Uncategorized';
-            allName.onclick = () => {
-                currentCategory = null;
-                
-                // Switch to first uncategorized sheet
-                const firstUncategorized = tableData.sheets.findIndex((sheet, index) => {
-                    return !tableData.sheetCategories[index] && !tableData.sheetCategories[String(index)];
-                });
-                
-                if (firstUncategorized !== -1) {
-                    currentSheet = firstUncategorized;
-                }
-                
-                renderCategoryTabs();
-                renderSheetTabs();
-                renderTable();
-                toggleCategoryList();
-            };
-            
-            const allCount = document.createElement('span');
-            allCount.className = 'category-item-count';
-            allCount.textContent = uncategorizedCount;
-            
-            allItem.appendChild(allName);
-            allItem.appendChild(allCount);
-            categoryList.appendChild(allItem);
-            
-            // Add each category
+        function renderSidebar() {
+            const treeContainer = document.getElementById('sidebarTree');
+            if (!treeContainer) return;
+
+            treeContainer.innerHTML = '';
+
+            // Group sheets by category
+            const categoryMap = {};
+
+            // Initialize categories
             if (tableData.categories) {
-                tableData.categories.forEach(category => {
-                    const count = Object.values(tableData.sheetCategories || {}).filter(c => c === category).length;
-                    
-                    const item = document.createElement('div');
-                    item.className = `category-item ${currentCategory === category ? 'active' : ''}`;
-                    
-                    const nameSpan = document.createElement('span');
-                    nameSpan.className = 'category-item-name';
-                    nameSpan.textContent = category;
-                    nameSpan.onclick = () => {
-                        currentCategory = category;
-                        
-                        // Switch to first sheet in this category - handle both string and numeric keys
-                        const firstSheetInCategory = tableData.sheets.findIndex((sheet, index) => {
-                            const sheetCat = tableData.sheetCategories[index] || tableData.sheetCategories[String(index)];
-                            return sheetCat === category;
-                        });
-                        
-                        if (firstSheetInCategory !== -1) {
-                            currentSheet = firstSheetInCategory;
-                        }
-                        
-                        renderCategoryTabs();
-                        renderSheetTabs();
-                        renderTable();
-                        toggleCategoryList();
-                    };
-                    
-                    const countSpan = document.createElement('span');
-                    countSpan.className = 'category-item-count';
-                    countSpan.textContent = count;
-                    
-                    item.appendChild(nameSpan);
-                    item.appendChild(countSpan);
-                    categoryList.appendChild(item);
+                tableData.categories.forEach(cat => {
+                    categoryMap[cat] = [];
                 });
             }
+            // Ensure Uncategorized exists
+            if (!categoryMap['Uncategorized']) {
+                categoryMap['Uncategorized'] = [];
+            }
+
+            // Distribute sheets (only parent sheets, skip sub-sheets)
+            tableData.sheets.forEach((sheet, index) => {
+                if (sheet.parentSheet !== undefined && sheet.parentSheet !== null) {
+                    return; // Skip sub-sheets
+                }
+
+                const catName = tableData.sheetCategories[index] || tableData.sheetCategories[String(index)] || 'Uncategorized';
+                if (!categoryMap[catName]) categoryMap[catName] = [];
+                categoryMap[catName].push({ ...sheet, originalIndex: index });
+            });
+
+            // Render Categories
+            Object.keys(categoryMap).forEach(catName => {
+                const sheets = categoryMap[catName];
+
+                const catDiv = document.createElement('div');
+                catDiv.className = 'tree-category'; // Start expanded
+
+                const header = document.createElement('div');
+                header.className = 'tree-category-header tree-item';
+                header.onclick = (e) => {
+                    catDiv.classList.toggle('collapsed');
+                };
+
+                header.innerHTML = `
+                    <span class="tree-toggle">▼</span>
+                    <span class="tree-icon">📂</span>
+                    <span class="tree-label">${catName}</span>
+                `;
+
+                const content = document.createElement('div');
+                content.className = 'tree-category-content';
+
+                sheets.forEach(sheet => {
+                    const sheetDiv = document.createElement('div');
+                    sheetDiv.className = `tree-sheet tree-item ${sheet.originalIndex === currentSheet ? 'active' : ''}`;
+                    sheetDiv.onclick = () => {
+                        switchSheet(sheet.originalIndex);
+                        toggleSidebar();
+                    };
+
+                    sheetDiv.innerHTML = `
+                        <span class="tree-icon">📄</span>
+                        <span class="tree-label">${sheet.name}</span>
+                    `;
+                    content.appendChild(sheetDiv);
+                });
+
+                catDiv.appendChild(header);
+                catDiv.appendChild(content);
+                treeContainer.appendChild(catDiv);
+            });
+
+            // Update Header Info
+            const currentSheetObj = tableData.sheets[currentSheet];
+            if (currentSheetObj) {
+                document.getElementById('currentSheetTitle').textContent = currentSheetObj.name;
+                const currentCat = tableData.sheetCategories[currentSheet] || tableData.sheetCategories[String(currentSheet)] || 'Uncategorized';
+                document.getElementById('currentCategoryTitle').textContent = currentCat;
+            }
+
+            // Update sub-sheet bar
+            renderSubSheetBar();
         }
 
         function switchSheet(index) {
@@ -1240,86 +1250,8 @@ def generate_static_html(data):
             
             // Save to localStorage so it persists across refreshes
             localStorage.setItem('staticExportActiveSheet', index);
-            renderSheetTabs();
+            renderSidebar();
             renderTable();
-        }
-
-        function toggleSheetList() {
-            const sheetList = document.getElementById('sheetList');
-            const button = document.getElementById('currentSheetBtn');
-            
-            if (sheetList.classList.contains('show')) {
-                sheetList.classList.remove('show');
-            } else {
-                // Position the dropdown
-                const rect = button.getBoundingClientRect();
-                sheetList.style.position = 'fixed';
-                sheetList.style.top = (rect.bottom + 5) + 'px';
-                sheetList.style.left = rect.left + 'px';
-                sheetList.style.width = rect.width + 'px';
-                sheetList.classList.add('show');
-            }
-        }
-
-        function renderSheetTabs() {
-            initializeCategories();
-            
-            const currentSheetNameEl = document.getElementById('currentSheetName');
-            if (tableData.sheets[currentSheet]) {
-                currentSheetNameEl.textContent = tableData.sheets[currentSheet].name;
-            }
-
-            const sheetList = document.getElementById('sheetList');
-            sheetList.innerHTML = '';
-
-            // Helper function to render a sheet and its sub-sheets recursively
-            function renderSheetItem(sheet, index, level = 0) {
-                // Filter by category - handle both string and numeric keys
-                const sheetCategory = tableData.sheetCategories[index] || tableData.sheetCategories[String(index)] || null;
-                
-                // When viewing "Uncategorized", only show sheets without a category
-                if (currentCategory === null && sheetCategory) {
-                    return; // Skip sheets that have a category
-                }
-                
-                // When viewing a specific category, only show sheets in that category
-                if (currentCategory !== null && sheetCategory !== currentCategory) {
-                    return; // Skip sheets not in current category
-                }
-                
-                const item = document.createElement('div');
-                item.className = `sheet-item ${index === currentSheet ? 'active' : ''}`;
-                item.style.paddingLeft = (level * 20 + 15) + 'px';
-
-                const nameSpan = document.createElement('span');
-                nameSpan.className = 'sheet-item-name';
-                nameSpan.textContent = sheet.name;
-                
-                nameSpan.onclick = () => {
-                    switchSheet(index);
-                    toggleSheetList();
-                };
-
-                item.appendChild(nameSpan);
-                sheetList.appendChild(item);
-
-                // Render sub-sheets
-                tableData.sheets.forEach((subSheet, subIndex) => {
-                    if (subSheet.parentSheet === index) {
-                        renderSheetItem(subSheet, subIndex, level + 1);
-                    }
-                });
-            }
-
-            // Render only top-level sheets (those without a parent)
-            tableData.sheets.forEach((sheet, index) => {
-                if (!sheet.parentSheet && sheet.parentSheet !== 0) {
-                    renderSheetItem(sheet, index, 0);
-                }
-            });
-
-            // Render sub-sheet bar
-            renderSubSheetBar();
         }
 
         function renderSubSheetBar() {
@@ -2156,8 +2088,7 @@ def generate_static_html(data):
             document.documentElement.style.setProperty('--grid-line-color', savedGridColor);
             
             initializeCategories();
-            renderCategoryTabs();
-            renderSheetTabs();
+            renderSidebar();
             renderTable();
             
             // Restore wrap toggle state
@@ -2188,26 +2119,24 @@ def generate_static_html(data):
     </script>
 </head>
 <body>
+    <!-- Sidebar Navigation -->
+    <div id="sidebarOverlay" class="sidebar-overlay" onclick="toggleSidebar()"></div>
+    <div id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+            <h3>Explorer</h3>
+            <button class="btn-close-sidebar" onclick="toggleSidebar()">×</button>
+        </div>
+        <div id="sidebarTree" class="sidebar-tree">
+            <!-- Tree content will be rendered here -->
+        </div>
+    </div>
+
     <div class="container">
         <div class="sheet-tabs">
-            <div class="category-controls">
-                <div class="category-selector">
-                    <button class="category-current" id="currentCategoryBtn" onclick="toggleCategoryList()">
-                        <span id="currentCategoryName">Uncategorized</span>
-                        <span class="dropdown-arrow">▼</span>
-                    </button>
-                    <div class="category-list" id="categoryList"></div>
-                </div>
-            </div>
-
-            <div class="sheet-controls">
-                <div class="sheet-selector">
-                    <button class="sheet-current" id="currentSheetBtn" onclick="toggleSheetList()">
-                        <span id="currentSheetName">''' + (sheets[active_sheet]['name'] if sheets and active_sheet < len(sheets) else 'Sheet1') + '''</span>
-                        <span class="dropdown-arrow">▼</span>
-                    </button>
-                    <div class="sheet-list" id="sheetList"></div>
-                </div>
+            <button class="btn-menu" onclick="toggleSidebar()" title="Open Navigation">☰</button>
+            <div class="current-sheet-info">
+                <span id="currentSheetTitle" class="current-sheet-title">Sheet1</span>
+                <span id="currentCategoryTitle" class="current-category-title">Uncategorized</span>
             </div>
 
             <div class="search-box">

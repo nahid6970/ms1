@@ -8266,7 +8266,7 @@ function renderSidebar() {
         const sheets = categoryMap[catName];
 
         const catDiv = document.createElement('div');
-        catDiv.className = 'tree-category collapsed'; // Default to collapsed
+        catDiv.className = 'tree-category'; // Start expanded
 
         const header = document.createElement('div');
         header.className = 'tree-category-header tree-item';
@@ -8278,7 +8278,7 @@ function renderSidebar() {
 
         header.innerHTML = `
             <span class="tree-toggle">▼</span>
-            <span class="tree-icon">📁</span>
+            <span class="tree-icon">📂</span>
             <span class="tree-label">${catName}</span>
         `;
 
