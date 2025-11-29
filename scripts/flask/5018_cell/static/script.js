@@ -8266,8 +8266,7 @@ function renderSidebar() {
         const sheets = categoryMap[catName];
 
         const catDiv = document.createElement('div');
-        catDiv.className = 'tree-category';
-        // Restore collapsed state if we track it, for now default expanded
+        catDiv.className = 'tree-category collapsed'; // Default to collapsed
 
         const header = document.createElement('div');
         header.className = 'tree-category-header tree-item';
