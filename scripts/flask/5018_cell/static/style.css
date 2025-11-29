@@ -64,12 +64,10 @@ body {
     cursor: pointer;
     transition: all 0.2s;
     font-size: 14px;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 8px;
-    flex-grow: 1;
-    min-width: 120px;
-    max-width: 250px;
+    white-space: nowrap;
 }
 
 .subsheet-tab:hover {
