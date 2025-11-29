@@ -3395,17 +3395,29 @@ document.getElementById('moveToCategoryForm').onsubmit = async function (e) {
 
     initializeCategories();
 
+    // Move the current sheet
     if (targetCategory) {
         tableData.sheetCategories[currentSheet] = targetCategory;
     } else {
         delete tableData.sheetCategories[currentSheet];
     }
 
+    // Also move all sub-sheets to the same category
+    tableData.sheets.forEach((sheet, index) => {
+        if (sheet.parentSheet === currentSheet) {
+            if (targetCategory) {
+                tableData.sheetCategories[index] = targetCategory;
+            } else {
+                delete tableData.sheetCategories[index];
+            }
+        }
+    });
+
     await saveData();
     renderCategoryTabs();
     renderSheetTabs();
     closeMoveToCategoryModal();
-    showToast('Sheet moved to category', 'success');
+    showToast('Sheet and sub-sheets moved to category', 'success');
 };
 
 function renderCategoryTabs() {
@@ -6794,6 +6806,11 @@ function populateF1Sheets(searchAllCategories = false) {
 
     // Filter sheets by selected category (unless searching all categories)
     tableData.sheets.forEach((sheet, index) => {
+        // Skip sub-sheets - only show parent sheets in F1 window
+        if (sheet.parentSheet !== undefined && sheet.parentSheet !== null) {
+            return;
+        }
+
         const sheetCategory = tableData.sheetCategories[index] || tableData.sheetCategories[String(index)];
 
         // If not searching all categories, check if sheet belongs to selected category
