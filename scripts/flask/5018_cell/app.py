@@ -56,7 +56,13 @@ def save_table_data():
 def add_sheet():
     data = load_data()
     sheet_name = request.json.get('name', f'Sheet{len(data["sheets"]) + 1}')
-    data['sheets'].append({'name': sheet_name, 'columns': [], 'rows': []})
+    parent_sheet = request.json.get('parentSheet', None)
+    
+    new_sheet = {'name': sheet_name, 'columns': [], 'rows': []}
+    if parent_sheet is not None:
+        new_sheet['parentSheet'] = parent_sheet
+    
+    data['sheets'].append(new_sheet)
     save_data(data)
     return jsonify({'success': True, 'sheetIndex': len(data['sheets']) - 1})
 

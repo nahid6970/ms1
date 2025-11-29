@@ -2736,6 +2736,46 @@ async function addSheet() {
     }
 }
 
+async function addSubSheet(parentIndex) {
+    const parentSheet = tableData.sheets[parentIndex];
+    const subSheetName = prompt('Enter sub-sheet name:', `${parentSheet.name} - Sub`);
+    if (!subSheetName) return;
+
+    try {
+        const response = await fetch('/api/sheets', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: subSheetName, parentSheet: parentIndex })
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            tableData.sheets.push({ 
+                name: subSheetName, 
+                columns: [], 
+                rows: [],
+                parentSheet: parentIndex
+            });
+            currentSheet = result.sheetIndex;
+
+            // Inherit parent's category
+            const parentCategory = tableData.sheetCategories[parentIndex] || tableData.sheetCategories[String(parentIndex)] || null;
+            if (parentCategory !== null) {
+                initializeCategories();
+                tableData.sheetCategories[currentSheet] = parentCategory;
+            }
+
+            await saveData();
+            renderCategoryTabs();
+            renderSheetTabs();
+            renderTable();
+            showToast(`Sub-sheet added under "${parentSheet.name}"`, 'success');
+        }
+    } catch (error) {
+        console.error('Error adding sub-sheet:', error);
+    }
+}
+
 async function moveSheetUp(index) {
     // Get current sheet's category
     const currentSheetCategory = tableData.sheetCategories[index] || tableData.sheetCategories[String(index)] || null;
@@ -2943,7 +2983,8 @@ function renderSheetTabs() {
     const sheetList = document.getElementById('sheetList');
     sheetList.innerHTML = '';
 
-    tableData.sheets.forEach((sheet, index) => {
+    // Helper function to render a sheet and its sub-sheets recursively
+    function renderSheetItem(sheet, index, level = 0) {
         // Filter by category - handle both string and numeric keys
         const sheetCategory = tableData.sheetCategories[index] || tableData.sheetCategories[String(index)] || null;
 
@@ -2959,6 +3000,7 @@ function renderSheetTabs() {
 
         const item = document.createElement('div');
         item.className = `sheet-item ${index === currentSheet ? 'active' : ''}`;
+        item.style.paddingLeft = (level * 20 + 15) + 'px';
 
         const nameSpan = document.createElement('span');
         nameSpan.className = 'sheet-item-name';
@@ -2971,7 +3013,74 @@ function renderSheetTabs() {
 
         item.appendChild(nameSpan);
         sheetList.appendChild(item);
+
+        // Render sub-sheets
+        tableData.sheets.forEach((subSheet, subIndex) => {
+            if (subSheet.parentSheet === index) {
+                renderSheetItem(subSheet, subIndex, level + 1);
+            }
+        });
+    }
+
+    // Render only top-level sheets (those without a parent)
+    tableData.sheets.forEach((sheet, index) => {
+        if (!sheet.parentSheet && sheet.parentSheet !== 0) {
+            renderSheetItem(sheet, index, 0);
+        }
     });
+
+    // Render sub-sheet bar
+    renderSubSheetBar();
+}
+
+function renderSubSheetBar() {
+    const subsheetTabs = document.getElementById('subsheetTabs');
+    if (!subsheetTabs) return;
+    
+    subsheetTabs.innerHTML = '';
+
+    // Get current sheet's parent (if it's a sub-sheet) or use current sheet as parent
+    const currentSheetData = tableData.sheets[currentSheet];
+    const parentIndex = currentSheetData?.parentSheet !== undefined ? currentSheetData.parentSheet : currentSheet;
+    const parentSheet = tableData.sheets[parentIndex];
+
+    if (!parentSheet) return;
+
+    // Add parent sheet tab
+    const parentTab = document.createElement('div');
+    parentTab.className = `subsheet-tab ${currentSheet === parentIndex ? 'active' : ''}`;
+    
+    const parentName = document.createElement('span');
+    parentName.className = 'subsheet-tab-name';
+    parentName.textContent = parentSheet.name;
+    
+    parentTab.appendChild(parentName);
+    parentTab.onclick = () => switchSheet(parentIndex);
+    subsheetTabs.appendChild(parentTab);
+
+    // Add sub-sheets
+    tableData.sheets.forEach((sheet, index) => {
+        if (sheet.parentSheet === parentIndex) {
+            const tab = document.createElement('div');
+            tab.className = `subsheet-tab ${currentSheet === index ? 'active' : ''}`;
+            
+            const name = document.createElement('span');
+            name.className = 'subsheet-tab-name';
+            name.textContent = sheet.name;
+            
+            tab.appendChild(name);
+            tab.onclick = () => switchSheet(index);
+            subsheetTabs.appendChild(tab);
+        }
+    });
+
+    // Add + button to create new sub-sheet
+    const addBtn = document.createElement('button');
+    addBtn.className = 'subsheet-add-btn';
+    addBtn.innerHTML = '+';
+    addBtn.title = 'Add sub-sheet';
+    addBtn.onclick = () => addSubSheet(parentIndex);
+    subsheetTabs.appendChild(addBtn);
 }
 
 function toggleSheetList() {

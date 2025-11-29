@@ -41,6 +41,78 @@ body {
     border-bottom: 1px solid #ddd;
 }
 
+/* Sub-Sheet Navigation Bar */
+.subsheet-bar {
+    padding: 10px 20px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #ddd;
+    min-height: 50px;
+}
+
+.subsheet-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.subsheet-tab {
+    padding: 8px 16px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-grow: 1;
+    min-width: 120px;
+    max-width: 250px;
+}
+
+.subsheet-tab:hover {
+    background: #e9ecef;
+    border-color: #007bff;
+}
+
+.subsheet-tab.active {
+    background: #007bff;
+    color: white;
+    border-color: #007bff;
+    font-weight: 600;
+}
+
+.subsheet-tab-name {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.subsheet-add-btn {
+    padding: 8px 16px;
+    background: #f0f0f0;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 18px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+}
+
+.subsheet-add-btn:hover {
+    background: #007bff;
+    color: white;
+    border-color: #007bff;
+    transform: scale(1.05);
+}
+
 .search-box {
     display: flex;
     align-items: center;
@@ -1183,6 +1255,10 @@ td input::-moz-selection {
     cursor: pointer;
     border-bottom: 1px solid #f0f0f0;
     transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
 }
 
 .sheet-item:last-child {
@@ -1201,8 +1277,37 @@ td input::-moz-selection {
 
 .sheet-item-name {
     font-size: 14px;
-    display: block;
-    width: 100%;
+    flex: 1;
+    cursor: pointer;
+}
+
+.add-subsheet-btn {
+    background: #f0f0f0;
+    border: 1px solid #ddd;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    margin-left: 8px;
+    flex-shrink: 0;
+    opacity: 0.6;
+}
+
+.sheet-item:hover .add-subsheet-btn {
+    opacity: 1;
+}
+
+.add-subsheet-btn:hover {
+    background: #007bff;
+    color: white;
+    border-color: #007bff;
+    transform: scale(1.1);
 }
 
 .btn-sheet-action {

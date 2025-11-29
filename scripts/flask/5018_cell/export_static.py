@@ -279,8 +279,8 @@ def generate_static_html(data):
 
         .sheet-item-name {
             font-size: 14px;
-            display: block;
-            width: 100%;
+            flex: 1;
+            cursor: pointer;
         }
 
         .search-box {
@@ -1224,7 +1224,8 @@ def generate_static_html(data):
             const sheetList = document.getElementById('sheetList');
             sheetList.innerHTML = '';
 
-            tableData.sheets.forEach((sheet, index) => {
+            // Helper function to render a sheet and its sub-sheets recursively
+            function renderSheetItem(sheet, index, level = 0) {
                 // Filter by category - handle both string and numeric keys
                 const sheetCategory = tableData.sheetCategories[index] || tableData.sheetCategories[String(index)] || null;
                 
@@ -1240,6 +1241,7 @@ def generate_static_html(data):
                 
                 const item = document.createElement('div');
                 item.className = `sheet-item ${index === currentSheet ? 'active' : ''}`;
+                item.style.paddingLeft = (level * 20 + 15) + 'px';
 
                 const nameSpan = document.createElement('span');
                 nameSpan.className = 'sheet-item-name';
@@ -1252,6 +1254,20 @@ def generate_static_html(data):
 
                 item.appendChild(nameSpan);
                 sheetList.appendChild(item);
+
+                // Render sub-sheets
+                tableData.sheets.forEach((subSheet, subIndex) => {
+                    if (subSheet.parentSheet === index) {
+                        renderSheetItem(subSheet, subIndex, level + 1);
+                    }
+                });
+            }
+
+            // Render only top-level sheets (those without a parent)
+            tableData.sheets.forEach((sheet, index) => {
+                if (!sheet.parentSheet && sheet.parentSheet !== 0) {
+                    renderSheetItem(sheet, index, 0);
+                }
             });
         }
 
