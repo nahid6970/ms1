@@ -8279,7 +8279,6 @@ function renderSidebar() {
         header.oncontextmenu = (e) => showTreeContextMenu(e, 'category', catName);
 
         header.innerHTML = `
-            <span class="tree-toggle">▼</span>
             <span class="tree-icon">📁</span>
             <span class="tree-label">${catName}</span>
         `;

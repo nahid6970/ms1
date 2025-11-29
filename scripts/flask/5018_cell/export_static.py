@@ -681,21 +681,6 @@ def generate_static_html(data):
             background: #f8f9fa;
         }
 
-        .tree-toggle {
-            width: 16px;
-            height: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 10px;
-            transition: transform 0.2s;
-            color: #999;
-        }
-
-        .tree-category.collapsed .tree-toggle {
-            transform: rotate(-90deg);
-        }
-
         .tree-category-content {
             padding-left: 0;
             overflow: hidden;
@@ -1238,7 +1223,6 @@ def generate_static_html(data):
                 };
 
                 header.innerHTML = `
-                    <span class="tree-toggle">▼</span>
                     <span class="tree-icon">📁</span>
                     <span class="tree-label">${catName}</span>
                 `;
