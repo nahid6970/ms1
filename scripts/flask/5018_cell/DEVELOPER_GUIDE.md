@@ -15,6 +15,7 @@ This is a Flask-based web application that provides a dynamic, spreadsheet-like 
 
 ### Core Features
 - **Multi-sheet support** with categories for organization
+- **Sub-sheet hierarchy** - Create nested sub-sheets under parent sheets with horizontal navigation bar
 - **Rich markdown formatting** in cells (bold, italic, colors, tables, math, collapsible text, etc.)
 - **Cell styling** (borders, colors, fonts, alignment, merging)
 - **Column customization** (width, type, styling, header styling)
@@ -463,6 +464,66 @@ The grid system relies on CSS variables for dynamic column counts:
 - [ ] Update `export_static.py` when adding new markdown syntax or JavaScript features.
 - [ ] Test features in both live Flask app and exported static HTML.
 
+
+### Sub-Sheet Hierarchy Feature
+**Purpose:** Organize related sheets in a parent-child hierarchy with visual navigation.
+
+**Features:**
+- **Create sub-sheets** under any parent sheet using the + button
+- **Horizontal navigation bar** below toolbar showing current sheet family
+- **Visual hierarchy** - Parent sheet + all its sub-sheets displayed as tabs
+- **Right-click context menu** on tabs for rename/delete operations
+- **Smart deletion** - Deleting a parent also deletes all its sub-sheets (with warning)
+- **Automatic reindexing** - Parent references update correctly when sheets are deleted
+
+**UI Components:**
+1. **Sub-Sheet Bar** - Horizontal bar below toolbar
+   - Shows parent sheet tab (always first)
+   - Shows all sub-sheet tabs
+   - + button at the end to add new sub-sheets
+   - Tabs wrap to multiple lines if needed
+   - Compact design - tabs fit their content
+
+2. **Context Menu** (Right-click on any tab)
+   - ✏️ Rename - Opens rename modal
+   - 🗑️ Delete - Deletes sheet with confirmation
+
+**Data Structure:**
+```javascript
+{
+    name: "Sheet Name",
+    parentSheet: 2,  // Index of parent sheet (undefined for top-level sheets)
+    columns: [...],
+    rows: [...]
+}
+```
+
+**Implementation Details:**
+- **Parent tracking:** Sub-sheets store `parentSheet` as the index of their parent
+- **Reindexing:** When sheets are deleted, all `parentSheet` references are updated
+- **Category inheritance:** Sub-sheets automatically inherit their parent's category
+- **Deletion cascade:** Deleting a parent deletes all its sub-sheets
+- **Navigation:** Clicking any tab switches to that sheet
+
+**Key Functions:**
+- `renderSubSheetBar()` - Renders the horizontal sub-sheet navigation bar
+- `addSubSheet(parentIndex)` - Creates a new sub-sheet under the specified parent
+- `showSubSheetContextMenu(event, sheetIndex)` - Shows right-click menu for rename/delete
+- `deleteSheet(index)` - Deletes sheet and reindexes all parent references
+
+**CSS Classes:**
+- `.subsheet-bar` - Container for the navigation bar
+- `.subsheet-tabs` - Flex container for tabs
+- `.subsheet-tab` - Individual sheet tab (compact, wraps naturally)
+- `.subsheet-tab.active` - Currently active sheet (blue background)
+- `.subsheet-add-btn` - + button to add sub-sheets
+- `.subsheet-context-menu` - Right-click context menu
+
+**Files Modified:**
+- `templates/index.html` - Added sub-sheet bar HTML
+- `static/script.js` - Added rendering, creation, and context menu logic
+- `static/style.css` - Added sub-sheet bar and context menu styles
+- `app.py` - Updated API to accept `parentSheet` parameter
 
 ### Grid Line Color Customization
 **Purpose:** Allows users to customize the color of table borders and cell separators.
