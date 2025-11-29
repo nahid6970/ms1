@@ -2275,6 +2275,11 @@ tr {
     flex-wrap: wrap;
     gap: 8px;
     align-content: flex-start;
+    align-items: flex-start;
+}
+
+.f1-sheet-group {
+    display: contents;
 }
 
 .f1-sheet-separator {
@@ -2348,14 +2353,50 @@ tr {
     align-items: center;
     justify-content: space-between;
     gap: 12px;
+    cursor: pointer;
+}
+
+.f1-parent-sheet {
     flex: 1 1 auto;
     min-width: fit-content;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    font-weight: 600;
+}
+
+.f1-sub-sheet {
+    padding: 10px 14px;
+    font-size: 13px;
+    background: #f0f4ff;
+    border: 1px solid #b8d4ff;
+    border-left: 3px solid #007bff;
+    flex: 1 1 auto;
+    min-width: fit-content;
+}
+
+.f1-sub-sheet .f1-sheet-icon {
+    font-size: 14px;
+    opacity: 0.8;
+}
+
+.f1-sub-sheet .f1-sheet-name {
+    font-size: 13px;
+    font-weight: 500;
 }
 
 .f1-sheet-item:hover {
     background: #f8f9fa;
     border-color: #007bff;
-    transform: translateX(4px);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 123, 255, 0.2);
+}
+
+.f1-parent-sheet:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.f1-sub-sheet:hover {
+    background: #e3f2fd;
+    border-left-width: 4px;
 }
 
 .f1-sheet-item.active {
@@ -2363,6 +2404,17 @@ tr {
     border-color: #007bff;
     font-weight: 600;
     color: #007bff;
+}
+
+.f1-parent-sheet.active {
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+}
+
+.f1-sub-sheet.active {
+    background: #cfe2ff;
+    border-left-color: #0056b3;
+    border-left-width: 4px;
+    font-weight: 600;
 }
 
 .f1-sheet-name-wrapper {

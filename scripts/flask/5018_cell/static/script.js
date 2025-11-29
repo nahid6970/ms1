@@ -6915,7 +6915,7 @@ function populateF1Sheets(searchAllCategories = false) {
 
     // Filter sheets by selected category (unless searching all categories)
     tableData.sheets.forEach((sheet, index) => {
-        // Skip sub-sheets - only show parent sheets in F1 window
+        // Skip sub-sheets in the main loop - they'll be rendered with their parents
         if (sheet.parentSheet !== undefined && sheet.parentSheet !== null) {
             return;
         }
@@ -6954,8 +6954,13 @@ function populateF1Sheets(searchAllCategories = false) {
             sheetList.appendChild(separator);
         }
 
+        // Create container for parent and its sub-sheets
+        const sheetGroup = document.createElement('div');
+        sheetGroup.className = 'f1-sheet-group';
+
+        // Create parent sheet item
         const item = document.createElement('div');
-        item.className = 'f1-sheet-item' + (index === currentSheet ? ' active' : '');
+        item.className = 'f1-sheet-item f1-parent-sheet' + (index === currentSheet ? ' active' : '');
         item.dataset.sheetIndex = index;
         item.draggable = true;
 
@@ -7010,7 +7015,35 @@ function populateF1Sheets(searchAllCategories = false) {
         item.addEventListener('drop', handleF1Drop);
         item.addEventListener('dragend', handleF1DragEnd);
 
-        sheetList.appendChild(item);
+        sheetGroup.appendChild(item);
+
+        // Find and add sub-sheets directly to the group
+        const subSheets = tableData.sheets
+            .map((s, idx) => ({ sheet: s, index: idx }))
+            .filter(({ sheet }) => sheet.parentSheet === index);
+
+        subSheets.forEach(({ sheet: subSheet, index: subIndex }) => {
+            const subItem = document.createElement('div');
+            subItem.className = 'f1-sheet-item f1-sub-sheet' + (subIndex === currentSheet ? ' active' : '');
+            subItem.dataset.sheetIndex = subIndex;
+
+            const subNameSpan = document.createElement('span');
+            subNameSpan.className = 'f1-sheet-name-wrapper';
+            subNameSpan.innerHTML = `
+                <span class="f1-sheet-icon">📃</span>
+                <span class="f1-sheet-name">${subSheet.name}</span>
+            `;
+
+            subItem.appendChild(subNameSpan);
+
+            subItem.addEventListener('click', (e) => {
+                switchToSheetFromF1(subIndex);
+            });
+
+            sheetGroup.appendChild(subItem);
+        });
+
+        sheetList.appendChild(sheetGroup);
     });
 
     // Show message if no sheets
