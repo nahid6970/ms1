@@ -3359,7 +3359,11 @@ function closeRenameCategoryModal() {
     document.getElementById('renameCategoryModal').style.display = 'none';
 }
 
+let moveToCategorySheetIndex = null;
+
 function showMoveToCategoryModal(sheetIndex) {
+    moveToCategorySheetIndex = sheetIndex; // Store the sheet index
+    
     const select = document.getElementById('targetCategory');
     select.innerHTML = '<option value="">Uncategorized</option>';
 
@@ -3452,19 +3456,20 @@ document.getElementById('renameCategoryForm').onsubmit = async function (e) {
 document.getElementById('moveToCategoryForm').onsubmit = async function (e) {
     e.preventDefault();
     const targetCategory = document.getElementById('targetCategory').value;
+    const sheetToMove = moveToCategorySheetIndex !== null ? moveToCategorySheetIndex : currentSheet;
 
     initializeCategories();
 
-    // Move the current sheet
+    // Move the selected sheet
     if (targetCategory) {
-        tableData.sheetCategories[currentSheet] = targetCategory;
+        tableData.sheetCategories[sheetToMove] = targetCategory;
     } else {
-        delete tableData.sheetCategories[currentSheet];
+        delete tableData.sheetCategories[sheetToMove];
     }
 
     // Also move all sub-sheets to the same category
     tableData.sheets.forEach((sheet, index) => {
-        if (sheet.parentSheet === currentSheet) {
+        if (sheet.parentSheet === sheetToMove) {
             if (targetCategory) {
                 tableData.sheetCategories[index] = targetCategory;
             } else {
