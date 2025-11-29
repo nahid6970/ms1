@@ -516,7 +516,7 @@ The grid system relies on CSS variables for dynamic column counts:
 - `showSubSheetContextMenu(event, sheetIndex)` - Shows right-click menu for rename/delete
 - `deleteSheet(index)` - Deletes sheet, all its sub-sheets, and reindexes all parent references
 - `moveToCategoryForm.onsubmit` - Moves parent sheet and all sub-sheets to new category together
-- `populateF1Sheets()` - Filters out sub-sheets, only shows parent sheets in F1 window
+- `populateF1Sheets()` - Renders both parent and sub-sheets in F1 window with color-coded backgrounds (green for main, blue for sub-sheets)
 
 **CSS Classes:**
 - `.subsheet-bar` - Container for the navigation bar
@@ -525,6 +525,9 @@ The grid system relies on CSS variables for dynamic column counts:
 - `.subsheet-tab.active` - Currently active sheet (blue background)
 - `.subsheet-add-btn` - + button to add sub-sheets
 - `.subsheet-context-menu` - Right-click context menu
+- `.f1-parent-sheet` - Main sheet styling in F1 window (green background)
+- `.f1-sub-sheet` - Sub-sheet styling in F1 window (blue background, smaller)
+- `.f1-sheet-group` - Container grouping parent and sub-sheets together (uses `display: contents` for seamless flow)
 
 **Files Modified:**
 - `templates/index.html` - Added sub-sheet bar HTML
@@ -535,7 +538,11 @@ The grid system relies on CSS variables for dynamic column counts:
 
 **Important Behaviors:**
 1. **Category Movement:** When you move a parent sheet to a different category, all its sub-sheets automatically move with it
-2. **F1 Reorder Window:** Only parent sheets appear in the F1 window for reordering - sub-sheets are hidden to keep the interface clean
+2. **F1 Window Display:** Both parent sheets AND sub-sheets are shown side-by-side in the F1 quick navigation window
+   - **Main sheets:** Green background (#d1fae5) with green left border (3px)
+   - **Sub-sheets:** Blue background (#dbeafe) with blue left border (3px), slightly smaller
+   - **Active sheet:** White background with colored border to highlight selection
+   - All sheets flow together in a grid layout for easy navigation
 3. **Deletion Warning:** Deleting a parent sheet shows a warning that all sub-sheets will also be deleted
 4. **Index Reindexing:** After any sheet deletion, all `parentSheet` references are automatically updated to maintain correct relationships
 
