@@ -537,34 +537,84 @@ The grid system relies on CSS variables for dynamic column counts:
 4. **Index Reindexing:** After any sheet deletion, all `parentSheet` references are automatically updated to maintain correct relationships
 
 ### Sidebar Navigation & Tree View
-**Purpose:** Replaces the legacy dropdown menus with a modern, collapsible sidebar for easier navigation of categories and sheets.
+**Purpose:** Modern sidebar navigation with collapsible category tree structure for organizing sheets.
 
 **Features:**
-- **Tree Structure:** Displays categories as collapsible folders containing their sheets.
-- **Search:** Built-in search bar to filter sheets and categories instantly.
-- **Context Menus:** Right-click on categories or sheets in the tree to access actions (Rename, Delete, Add Sheet, etc.).
-- **Sub-sheet Handling:** Sub-sheets are hidden from the main tree to reduce clutter. They are accessed via the Sub-Sheet Bar when the parent sheet is selected.
+- **Tree Structure:** Categories as folders, sheets as files with visual CSS tree lines
+- **Collapsible Categories:** Click folder icon to expand/collapse (no separate arrow)
+- **Visual Indicators:**
+  - 📁 Closed folder (collapsed category)
+  - 📂 Open folder (expanded category)
+  - 📄 Sheet file icon
+  - CSS-based tree lines (├─, └─, │) connecting sheets
+- **Context Menus:** Right-click on categories or sheets to access actions (Rename, Delete, Add Sheet, etc.)
+- **Sub-sheet Handling:** Sub-sheets hidden from tree (shown in Sub-Sheet Bar when parent selected)
+- **Active Sheet Highlight:** Current sheet shown with blue background
+- **Compact Design:** No header bar - maximizes space for tree content
 
 **UI Components:**
-1. **Hamburger Button (☰):** Toggles the sidebar open/closed.
+1. **Hamburger Button (☰):** Toggles sidebar open/closed from top-left
 2. **Sidebar Panel:**
-   - **Header:** Title and Close button.
-   - **Toolbar:** Search input and "Collapse All" / "Expand All" buttons.
-   - **Tree Container:** The scrollable area containing the category/sheet tree.
+   - **Toolbar:** "📁+ Add Category" button at top
+   - **Tree Container:** Scrollable area with category/sheet tree
 3. **Tree Items:**
-   - **Categories:** Folders that can be expanded/collapsed.
-   - **Sheets:** File icons representing individual sheets.
+   - **Categories:** Start collapsed by default, folder icon changes on expand/collapse
+   - **Sheets:** Indented with CSS tree lines (no text characters like ├─)
+
+**Tree Line Implementation:**
+- Tree lines created with CSS `::before` and `::after` pseudo-elements (not text characters)
+- Vertical line (│) connects items using `::before`
+- Horizontal line (─) extends from vertical using `::after`
+- Last item shows └─ corner (no line below)
+- Categories have NO tree lines (clean appearance)
+
+**CSS Tree Lines:**
+```css
+.tree-sheet::before {  /* Vertical line (│) */
+    content: '';
+    position: absolute;
+    left: 20px;
+    top: 0;
+    bottom: 50%;
+    width: 1px;
+    background: #ccc;
+}
+
+.tree-sheet::after {  /* Horizontal line (─) */
+    content: '';
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    width: 12px;
+    height: 1px;
+    background: #ccc;
+}
+
+.tree-sheet.last::before {  /* Last item: └─ instead of ├─ */
+    bottom: 50%;
+}
+```
 
 **Key Functions:**
-- `toggleSidebar()` - Opens/closes the sidebar.
-- `renderSidebar()` - Renders the tree structure based on `tableData`.
-- `filterSidebar(searchTerm)` - Filters the tree based on user input.
-- `showTreeContextMenu(event, type, id)` - Shows the custom context menu for tree items.
+- `toggleSidebar()` - Opens/closes sidebar with slide animation (~line 8200)
+- `renderSidebar()` - Renders category tree structure (~line 8224)
+- `showTreeContextMenu(event, type, id)` - Right-click menu for categories/sheets (~line 8320)
 
 **Files Modified:**
-- `templates/index.html` - Added sidebar HTML structure.
-- `static/style.css` - Added sidebar, tree view, and transition styles.
-- `static/script.js` - Added rendering and event handling logic for the sidebar.
+- `templates/index.html` - Sidebar HTML structure (no header, just toolbar + tree)
+- `static/style.css` - Sidebar, tree, and CSS tree line styles
+- `static/script.js` - Tree rendering with folder icon toggle logic
+- `export_static.py` - Full sidebar support (replaces dropdowns in static export)
+
+**Header Display:**
+- Current sheet name and category shown in top bar
+- Updates automatically when switching sheets
+- Format: `Sheet Name` / `Category Name`
+
+**Static Export:**
+- Full sidebar functionality included
+- Dropdowns removed (replaced by sidebar tree)
+- Same visual appearance and behavior as main app
 
 ### Grid Line Color Customization
 **Purpose:** Allows users to customize the color of table borders and cell separators.
