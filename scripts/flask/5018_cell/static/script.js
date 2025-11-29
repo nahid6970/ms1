@@ -3475,7 +3475,6 @@ document.getElementById('moveToCategoryForm').onsubmit = async function (e) {
 
     await saveData();
     renderSidebar();
-    renderSidebar();
     closeMoveToCategoryModal();
     showToast('Sheet and sub-sheets moved to category', 'success');
 };
@@ -7075,6 +7074,19 @@ function handleF1Drop(e) {
         });
         tableData.sheetCategories = newCategories;
 
+        // Update parentSheet references after removal
+        tableData.sheets.forEach((sheet, idx) => {
+            if (sheet.parentSheet !== undefined && sheet.parentSheet !== null) {
+                if (sheet.parentSheet === draggedSheetIndex) {
+                    // This sub-sheet's parent was moved, update later
+                    sheet.parentSheet = -1; // Temporary marker
+                } else if (sheet.parentSheet > draggedSheetIndex) {
+                    // Parent was after the moved sheet, shift down
+                    sheet.parentSheet--;
+                }
+            }
+        });
+
         // Insert the sheet at the target position
         tableData.sheets.splice(targetIndex, 0, movedSheet);
 
@@ -7095,6 +7107,19 @@ function handleF1Drop(e) {
             finalCategories[targetIndex] = movedCategory;
         }
         tableData.sheetCategories = finalCategories;
+
+        // Update parentSheet references after insertion
+        tableData.sheets.forEach((sheet, idx) => {
+            if (sheet.parentSheet !== undefined && sheet.parentSheet !== null) {
+                if (sheet.parentSheet === -1) {
+                    // This sub-sheet's parent was moved, update to new position
+                    sheet.parentSheet = targetIndex;
+                } else if (sheet.parentSheet >= targetIndex && idx !== targetIndex) {
+                    // Parent was at or after target, shift up
+                    sheet.parentSheet++;
+                }
+            }
+        });
 
         // Update current sheet index
         if (currentSheet === draggedSheetIndex) {
