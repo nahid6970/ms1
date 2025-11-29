@@ -2702,6 +2702,53 @@ function clearCellFormatting() {
     }
 }
 
+function setCellRank() {
+    if (!contextMenuCell) return;
+
+    const { rowIndex, colIndex } = contextMenuCell;
+    const sheet = tableData.sheets[currentSheet];
+    const cellKey = `${rowIndex}-${colIndex}`;
+
+    // Get current rank if exists
+    const currentRank = sheet.cellStyles?.[cellKey]?.rank || '';
+
+    // Prompt for rank (number or empty to remove)
+    const rankInput = prompt('Set sort rank (number, or leave empty to remove):', currentRank);
+    
+    if (rankInput === null) {
+        closeCellContextMenu();
+        return; // User cancelled
+    }
+
+    // Initialize cellStyles if needed
+    if (!sheet.cellStyles) {
+        sheet.cellStyles = {};
+    }
+    if (!sheet.cellStyles[cellKey]) {
+        sheet.cellStyles[cellKey] = {};
+    }
+
+    if (rankInput.trim() === '') {
+        // Remove rank
+        delete sheet.cellStyles[cellKey].rank;
+        closeCellContextMenu();
+        renderTable();
+        showToast('Rank removed', 'success');
+    } else {
+        const rank = parseInt(rankInput);
+        if (isNaN(rank)) {
+            showToast('Please enter a valid number', 'error');
+            return;
+        }
+
+        // Set rank
+        sheet.cellStyles[cellKey].rank = rank;
+        closeCellContextMenu();
+        renderTable();
+        showToast(`Rank set to ${rank}`, 'success');
+    }
+}
+
 async function addSheet() {
     const sheetName = prompt('Enter sheet name:', `Sheet${tableData.sheets.length + 1}`);
     if (!sheetName) return;
@@ -4661,6 +4708,16 @@ function renderTable() {
                     textarea.style.fontSize = cellStyle.fontSize;
                 }
 
+                // Add rank badge if cell has a rank
+                if (cellStyle.rank !== undefined) {
+                    td.style.position = 'relative';
+                    const rankBadge = document.createElement('div');
+                    rankBadge.className = 'cell-rank-badge';
+                    rankBadge.textContent = cellStyle.rank;
+                    rankBadge.title = `Sort rank: ${cellStyle.rank}`;
+                    td.appendChild(rankBadge);
+                }
+
                 textarea.oncontextmenu = (e) => showCellContextMenu(e, rowIndex, colIndex, textarea, td);
 
                 const handleMouseDown = (e) => {
@@ -4769,6 +4826,16 @@ function renderTable() {
             }
             if (cellStyle.fontSize) {
                 input.style.fontSize = cellStyle.fontSize;
+            }
+
+            // Add rank badge if cell has a rank
+            if (cellStyle.rank !== undefined) {
+                td.style.position = 'relative';
+                const rankBadge = document.createElement('div');
+                rankBadge.className = 'cell-rank-badge';
+                rankBadge.textContent = cellStyle.rank;
+                rankBadge.title = `Sort rank: ${cellStyle.rank}`;
+                td.appendChild(rankBadge);
             }
 
             input.oncontextmenu = (e) => showCellContextMenu(e, rowIndex, colIndex, input, td);
@@ -4937,20 +5004,34 @@ function sortColumn(colIndex, direction) {
     const col = sheet.columns[colIndex];
 
     // Create array of row indices with their values
-    const rowsWithIndices = sheet.rows.map((row, index) => ({
-        index: index,
-        value: row[colIndex] || '',
-        row: row,
-        cellStyles: sheet.cellStyles ? Object.keys(sheet.cellStyles)
-            .filter(key => key.startsWith(`${index}-`))
-            .reduce((obj, key) => {
-                obj[key] = sheet.cellStyles[key];
-                return obj;
-            }, {}) : {}
-    }));
+    const rowsWithIndices = sheet.rows.map((row, index) => {
+        const cellKey = `${index}-${colIndex}`;
+        const cellStyle = sheet.cellStyles?.[cellKey];
+        return {
+            index: index,
+            value: row[colIndex] || '',
+            row: row,
+            rank: cellStyle?.rank, // Get rank if exists
+            cellStyles: sheet.cellStyles ? Object.keys(sheet.cellStyles)
+                .filter(key => key.startsWith(`${index}-`))
+                .reduce((obj, key) => {
+                    obj[key] = sheet.cellStyles[key];
+                    return obj;
+                }, {}) : {}
+        };
+    });
 
-    // Sort based on column type
+    // Sort based on rank first, then column type
     rowsWithIndices.sort((a, b) => {
+        // If both have ranks, sort by rank
+        if (a.rank !== undefined && b.rank !== undefined) {
+            return direction === 'asc' ? a.rank - b.rank : b.rank - a.rank;
+        }
+        // If only one has rank, it comes first
+        if (a.rank !== undefined) return -1;
+        if (b.rank !== undefined) return 1;
+
+        // Neither has rank, sort normally
         let valA = a.value;
         let valB = b.value;
 

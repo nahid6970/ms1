@@ -4651,3 +4651,20 @@ mark {
 .context-menu-item.danger:hover {
     background: #fff5f5;
 }
+/* Ce
+ll Rank Badge */
+.cell-rank-badge {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background: #007bff;
+    color: white;
+    font-size: 9px;
+    font-weight: 600;
+    padding: 1px 4px;
+    border-radius: 3px;
+    line-height: 1;
+    pointer-events: none;
+    z-index: 10;
+    opacity: 0.85;
+}
