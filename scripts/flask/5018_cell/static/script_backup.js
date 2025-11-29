@@ -8106,112 +8106,6 @@ function toggleHiddenText() {
     }
 }
 
-// Sub-Sheet Bar Logic
-function renderSubSheetBar() {
-    const subsheetTabs = document.getElementById('subsheetTabs');
-    if (!subsheetTabs) return;
-
-    subsheetTabs.innerHTML = '';
-
-    // Get current sheet's parent (if it's a sub-sheet) or use current sheet as parent
-    const currentSheetData = tableData.sheets[currentSheet];
-    const parentIndex = currentSheetData?.parentSheet !== undefined ?
-        currentSheetData.parentSheet : currentSheet;
-    const parentSheet = tableData.sheets[parentIndex];
-
-    if (!parentSheet) return;
-
-    // Create parent tab
-    const parentTab = document.createElement('div');
-    parentTab.className = `subsheet-tab ${currentSheet === parentIndex ? 'active' : ''}`;
-    parentTab.dataset.sheetIndex = parentIndex;
-
-    const parentName = document.createElement('span');
-    parentName.className = 'subsheet-tab-name';
-    parentName.textContent = parentSheet.name;
-    parentTab.appendChild(parentName);
-    parentTab.onclick = () => switchSheet(parentIndex);
-
-    subsheetTabs.appendChild(parentTab);
-
-    // Find and render all sub-sheets
-    tableData.sheets.forEach((sheet, index) => {
-        if (sheet.parentSheet === parentIndex) {
-            const tab = document.createElement('div');
-            tab.className = `subsheet-tab ${currentSheet === index ? 'active' : ''}`;
-            tab.dataset.sheetIndex = index;
-
-            const name = document.createElement('span');
-            name.className = 'subsheet-tab-name';
-            name.textContent = sheet.name;
-
-            tab.appendChild(name);
-            tab.onclick = () => switchSheet(index);
-
-            // Add right-click context menu for sub-sheet
-            tab.oncontextmenu = (e) => {
-                e.preventDefault();
-                showSubSheetContextMenu(e, index);
-            };
-
-            subsheetTabs.appendChild(tab);
-        }
-    });
-
-    // Add "+" button to add new sub-sheet
-    const addBtn = document.createElement('button');
-    addBtn.className = 'subsheet-add-btn';
-    addBtn.innerHTML = '+';
-    addBtn.title = 'Add sub-sheet';
-    addBtn.onclick = () => addSubSheet(parentIndex);
-
-    subsheetTabs.appendChild(addBtn);
-}
-
-function showSubSheetContextMenu(event, sheetIndex) {
-    // Remove any existing context menu
-    const existingMenu = document.getElementById('subsheetContextMenu');
-    if (existingMenu) {
-        existingMenu.remove();
-    }
-
-    const menu = document.createElement('div');
-    menu.id = 'subsheetContextMenu';
-    menu.className = 'subsheet-context-menu';
-    menu.style.position = 'fixed';
-    menu.style.left = event.pageX + 'px';
-    menu.style.top = event.pageY + 'px';
-
-    const renameItem = document.createElement('div');
-    renameItem.className = 'context-menu-item';
-    renameItem.innerHTML = '<span>✏️</span><span>Rename</span>';
-    renameItem.onclick = () => {
-        menu.remove();
-        showRenameModal(sheetIndex);
-    };
-
-    const deleteItem = document.createElement('div');
-    deleteItem.className = 'context-menu-item';
-    deleteItem.innerHTML = '<span>🗑️</span><span>Delete</span>';
-    deleteItem.onclick = () => {
-        menu.remove();
-        deleteSheet(sheetIndex);
-    };
-
-    menu.appendChild(renameItem);
-    menu.appendChild(deleteItem);
-    document.body.appendChild(menu);
-
-    // Close menu on click outside
-    const closeMenu = (e) => {
-        if (!menu.contains(e.target)) {
-            menu.remove();
-            document.removeEventListener('click', closeMenu);
-        }
-    };
-    setTimeout(() => document.addEventListener('click', closeMenu), 0);
-}
-
 // Sidebar Logic
 function toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
@@ -8314,9 +8208,6 @@ function renderSidebar() {
         const currentCat = tableData.sheetCategories[currentSheet] || 'Uncategorized';
         document.getElementById('currentCategoryTitle').textContent = currentCat;
     }
-
-    // Update sub-sheet bar
-    renderSubSheetBar();
 }
 
 // Context Menu
