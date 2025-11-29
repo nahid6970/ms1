@@ -419,14 +419,17 @@ The grid system relies on CSS variables for dynamic column counts:
 ```
 
 ## Important Keyboard Shortcuts
-- **F1** - Reorder categories
-- **F2** - Quick Formatter (format selected text)
-- **F3** - Column settings for current column
-- **F4** - Toggle ribbons (hide/show toolbar and sheet tabs)
-- **Alt+M** - Toggle between current and previous sheet
-- **Ctrl+S** - Save data
-- **Ctrl+F** - Focus search box
+- **F1** - Reorder categories (~line 320 in script.js)
+- **F2** - Recent sheets popup (~line 330 in script.js, function at ~line 5112)
+- **F3** - Quick Formatter for selected text (~line 340 in script.js)
+- **F4** - Toggle ribbons (hide/show toolbar and sheet tabs) (~line 360 in script.js)
+- **Alt+M** - Toggle between current and previous sheet (~line 400 in script.js)
+- **Alt+N** - Add new row (~line 390 in script.js)
+- **Ctrl+S** - Save data (~line 300 in script.js)
+- **Ctrl+F** - Focus search box (~line 310 in script.js)
 - **\*** in search - Search by sheet nickname
+
+**Note:** Line numbers are approximate and may shift as code is updated. Search for the keyboard shortcut handler function `handleKeyboardShortcuts` to find all shortcuts.
 
 ## Common Development Tasks
 
@@ -535,6 +538,101 @@ The grid system relies on CSS variables for dynamic column counts:
 2. **F1 Reorder Window:** Only parent sheets appear in the F1 window for reordering - sub-sheets are hidden to keep the interface clean
 3. **Deletion Warning:** Deleting a parent sheet shows a warning that all sub-sheets will also be deleted
 4. **Index Reindexing:** After any sheet deletion, all `parentSheet` references are automatically updated to maintain correct relationships
+
+### Recent Sheets Popup (F2)
+**Purpose:** Quick navigation to recently viewed sheets with visual indicators for sub-sheets.
+
+**Features:**
+- **Keyboard Shortcut:** Press F2 to open recent sheets popup
+- **Recent First:** Shows sheets ordered by recency (most recent at top)
+- **Current Sheet Highlight:** Active sheet shown with blue background
+- **Sub-sheet Indicator:** Sub-sheets display as "Sheet Name [Parent Name]" with parent name greyed and smaller
+- **Quick Navigation:** Click or press Enter to switch to a sheet
+- **Click Outside to Close:** Popup closes when clicking outside or pressing Escape
+
+**Implementation:**
+- **Sheet History:** Tracked in `sheetHistory` array (max 20 sheets)
+- **Storage:** Persisted to localStorage for cross-session memory
+- **Sub-sheet Display:** Parent name shown in grey, smaller font (12px vs 14px)
+
+**Key Functions:**
+- `openF2Popup()` - Opens the popup (~line 5112)
+- `closeF2Popup()` - Closes the popup (~line 5134)
+- `populateF2RecentSheets()` - Renders sheet list with sub-sheet formatting (~line 5150)
+
+**Files Modified:**
+- `static/script.js` - F2 keyboard handler, popup functions, sub-sheet name formatting
+- `static/style.css` - F2 popup styles, parent name styling (~line 3151+)
+- `templates/index.html` - F2 popup HTML structure (if exists)
+
+**CSS Classes:**
+- `.f2-sheets-list` - Container for sheet items
+- `.f2-sheet-item` - Individual sheet row
+- `.f2-sheet-number` - Sheet position number (#1, #2, etc.)
+- `.f2-sheet-name` - Sheet name text
+- `.f2-parent-name` - Parent sheet name (greyed, smaller)
+
+### Cell Sort Ranking System
+**Purpose:** Pin important rows to the top when sorting by assigning custom sort ranks to cells.
+
+**Features:**
+- **Right-Click Menu:** "Set Sort Rank" option (🏆 icon) in cell context menu
+- **Rank Badge:** Small blue badge in top-right corner showing rank number
+- **Smart Sorting:** Ranked cells sort first (by rank), then unranked cells sort normally
+- **Visual Indicator:** Tiny badge (9px font) with semi-transparent blue background
+- **Easy Removal:** Set rank to empty to remove
+
+**How It Works:**
+1. Right-click on a cell → "Set Sort Rank"
+2. Enter a number (e.g., 1, 2, 3)
+3. Badge appears in top-right corner
+4. When sorting that column:
+   - Cells with rank 1 appear first
+   - Then rank 2, rank 3, etc.
+   - Then all unranked cells (sorted normally)
+
+**Data Storage:**
+- Stored in `cellStyles[rowIndex-colIndex].rank`
+- Persisted with other cell styles in data.json
+- Survives row reordering and sheet switching
+
+**Key Functions:**
+- `setCellRank()` - Prompts for rank and applies it (~line 2704)
+- `sortColumn()` - Modified to prioritize ranked cells (~line 5002)
+
+**Files Modified:**
+- `templates/index.html` - Added "Set Sort Rank" to context menu
+- `static/script.js` - Rank setting, badge rendering, sort logic
+- `static/style.css` - Badge styling (`.cell-rank-badge`)
+
+**CSS Styling:**
+```css
+.cell-rank-badge {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background: #007bff;
+    color: white;
+    font-size: 9px;
+    font-weight: 600;
+    padding: 1px 4px;
+    border-radius: 3px;
+    opacity: 0.85;
+}
+```
+
+### Context Menu Click-Outside-to-Close
+**Purpose:** Improved UX - context menu now closes when clicking outside of it.
+
+**Implementation:**
+- Added `closeCellContextMenuOnClickOutside()` listener
+- Attached on menu open, removed on menu close
+- 10ms delay to prevent immediate closure from the opening click
+
+**Key Functions:**
+- `showCellContextMenu()` - Adds click-outside listener (~line 1568)
+- `closeCellContextMenu()` - Removes listener (~line 1625)
+- `closeCellContextMenuOnClickOutside()` - Handles outside clicks (~line 1631)
 
 ### Sidebar Navigation & Tree View
 **Purpose:** Modern sidebar navigation with collapsible category tree structure for organizing sheets.
