@@ -880,12 +880,24 @@ mark {
 
 **Key Functions:**
 - `openF1Popup()` - Opens F1 popup (~line 5179 in script.js)
-- `closeF1Popup()` - Closes F1 popup (~line 5199 in script.js)
-- `filterF1Sheets()` - Filters sheets based on search input
+- `closeF1Popup()` - Closes F1 popup
+- `filterF1Sheets()` - Filters sheets based on search input (~line 7420)
+- `toggleF1SearchMode()` - Cycles through search modes (~line 7403)
 - `populateF1Categories()` - Renders category list
+
+**Search Mode Toggle Feature:**
+- **Button:** Left of search input, cycles through 3 modes on click
+- **Modes:** 
+  - 🔍 Normal (gray) - Search current category
+  - * All sheets (green #00ff9d) - Search all sheets by name
+  - # Content (cyan #00f3ff) - Search inside sheet content
+- **Persistence:** Mode saved to `localStorage.f1SearchMode`, persists across refreshes
+- **Auto-prefix:** Automatically prepends * or # to search queries based on mode
+- **Variable:** `f1SearchMode` stores current mode ('', '*', or '#')
 
 **Main CSS Classes:**
 - `.f1-popup` - Dark background (#0d0d0d), green border (#00ff9d)
+- `.f1-search-mode-toggle` - Toggle button with hover effects (~line 2136)
 - `.f1-category-title`, `.f1-sheets-title` - Combined definition at line ~2177
 - `.f1-category-radio` - Hidden with `display: none`
 - `.f1-parent-sheet.active` - Bright green (#00ff9d)
