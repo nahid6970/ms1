@@ -7469,14 +7469,16 @@ function filterF1Sheets() {
             foundSheets.forEach(index => {
                 const sheet = tableData.sheets[index];
                 const sheetCategory = tableData.sheetCategories[index] || tableData.sheetCategories[String(index)];
-                const categoryLabel = sheetCategory ? ` <span style="color: #999; font-size: 12px;">(${sheetCategory})</span>` : '';
+                const categoryLabel = sheetCategory ? ` <span style="color: #00ff9d; font-size: 11px; opacity: 0.7;">[${sheetCategory}]</span>` : '';
 
                 const item = document.createElement('div');
-                item.className = 'f1-sheet-item' + (index === currentSheet ? ' active' : '');
+                item.className = 'f1-sheet-item f1-parent-sheet' + (index === currentSheet ? ' active' : '');
                 item.dataset.sheetIndex = index;
                 item.innerHTML = `
-                    <span class="f1-sheet-icon">🔍</span>
-                    <span class="f1-sheet-name">${sheet.name}${categoryLabel}</span>
+                    <div class="f1-sheet-name-wrapper">
+                        <span class="f1-sheet-icon">🔍</span>
+                        <span class="f1-sheet-name">${sheet.name}${categoryLabel}</span>
+                    </div>
                 `;
                 item.onclick = () => switchToSheetFromF1(index);
                 sheetList.appendChild(item);
@@ -7485,7 +7487,7 @@ function filterF1Sheets() {
             const emptyMsg = document.createElement('div');
             emptyMsg.style.padding = '20px';
             emptyMsg.style.textAlign = 'center';
-            emptyMsg.style.color = '#999';
+            emptyMsg.style.color = '#666';
             emptyMsg.textContent = actualSearch ? 'No sheets contain this text' : 'Type to search sheet content';
             sheetList.appendChild(emptyMsg);
         }
