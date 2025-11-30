@@ -241,6 +241,8 @@ These two markdown syntaxes work together and are controlled by the same 👁️
 
 **Why needed:** Without this, switching between edit mode (raw text) and preview mode could cause content to be cut off if one is taller than the other.
 
+**Multi-line text handling:** Cells with newlines (`\n`) are automatically treated as markdown content (via `checkHasMarkdown()`) to ensure proper height calculation and line break rendering.
+
 ### Quick Formatter Enhancements
 **Improvements:**
 - **Instant Application:** Removed the "Apply" button. All formatting is now applied instantly when buttons are clicked.
