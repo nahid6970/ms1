@@ -701,11 +701,11 @@
     <!-- F2 Recent Sheets Popup -->
     <div id="f2Popup" class="f1-popup-overlay">
         <div class="f1-popup" style="max-width: 400px;">
-            <div class="f1-popup-header">
-                <h3>Recent Sheets</h3>
-                <button class="f1-close" onclick="closeF2Popup()">&times;</button>
+            <div class="f1-search-box" style="border-bottom: 1px solid #00ff9d;">
+                <span style="color: #00ff9d; font-weight: 700; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; font-family: 'JetBrains Mono', monospace;">Recent Sheets</span>
+                <button class="f1-close" onclick="closeF2Popup()" title="Close (Esc)">&times;</button>
             </div>
-            <div class="f1-content">
+            <div class="f1-content" style="min-height: 300px;">
                 <div id="f2SheetsList" class="f2-sheets-list"></div>
             </div>
         </div>
