@@ -876,97 +876,38 @@ mark {
 - `static/script.js` - Added index tracking, updated form handler
 
 ### F1 Popup Cyberpunk Styling
-**Purpose:** Redesigned the F1 Quick Navigation popup (opened with F1 key) with a clean cyberpunk/terminal aesthetic for better visual appeal and readability.
+**Purpose:** Redesigned F1 Quick Navigation popup with dark terminal/cyberpunk aesthetic.
 
-**Design Changes:**
-- **Dark Theme:** Changed from light theme to dark terminal-style background (#0d0d0d)
-- **Neon Green Accent:** Primary color changed to #00ff9d (Matrix-style green) for headers, borders, and active states
-- **Cyan for Sub-sheets:** Secondary color #00f3ff for sub-sheet highlighting
-- **Minimal Borders:** Clean 1px borders instead of thick shadows
-- **JetBrains Mono Font:** Monospace font for technical/coding aesthetic
-- **Custom Scrollbars:** Dark scrollbars with green hover effect
-- **No Header:** Removed "Quick Navigation" header for cleaner look, close button moved to search box
-- **Hidden Radio Buttons:** Radio buttons in category list hidden for cleaner cyberpunk aesthetic
+**Key Functions:**
+- `openF1Popup()` - Opens F1 popup (~line 5179 in script.js)
+- `closeF1Popup()` - Closes F1 popup (~line 5199 in script.js)
+- `filterF1Sheets()` - Filters sheets based on search input
+- `populateF1Categories()` - Renders category list
 
-**Key Styling Classes:**
-- `.f1-popup` - Main popup container with dark background and green border
-- `.f1-search-box` - Search box with flex layout, contains input and close button
-- `.f1-search-box input` - Dark input with green border on focus
-- `.f1-close` - Close button (×) in search box, rotates on hover
-- `.f1-category-radio` - Hidden with `display: none` for cleaner look
-- `.f1-category-item.active` - Active category with green accent and inset shadow
-- `.f1-parent-sheet` - Parent sheets with dark green background (#0a1f15)
-- `.f1-sub-sheet` - Sub-sheets with dark blue background (#0a1520)
-- `.f1-parent-sheet.active` - Active parent sheet with bright green background (#00ff9d)
-- `.f1-sub-sheet.active` - Active sub-sheet with bright cyan background (#00f3ff)
+**Main CSS Classes:**
+- `.f1-popup` - Dark background (#0d0d0d), green border (#00ff9d)
+- `.f1-category-title`, `.f1-sheets-title` - Combined definition at line ~2177
+- `.f1-category-radio` - Hidden with `display: none`
+- `.f1-parent-sheet.active` - Bright green (#00ff9d)
+- `.f1-sub-sheet.active` - Bright cyan (#00f3ff)
 
-**Scrollbar Styling:**
-```css
-.f1-category-list::-webkit-scrollbar,
-.f1-sheet-list::-webkit-scrollbar {
-    width: 8px;
-}
-.f1-category-list::-webkit-scrollbar-track,
-.f1-sheet-list::-webkit-scrollbar-track {
-    background: #000;
-}
-.f1-category-list::-webkit-scrollbar-thumb,
-.f1-sheet-list::-webkit-scrollbar-thumb {
-    background: #333;
-    border-radius: 4px;
-}
-.f1-category-list::-webkit-scrollbar-thumb:hover,
-.f1-sheet-list::-webkit-scrollbar-thumb:hover {
-    background: #00ff9d;
-}
-```
+**Critical Issues Encountered:**
 
-**Common Issues & Solutions:**
+**1. Duplicate CSS Causing Style Conflicts**
+- **Problem:** Found multiple `.f1-sheets-title` definitions at lines ~3519 and ~3715 overriding main styles
+- **Why it happened:** CSS file had accumulated duplicate sections over time
+- **Solution:** Used `strReplace` with unique context strings to remove duplicates
+- **Lesson:** When using `strReplace`, if string appears multiple times, include more surrounding context to make it unique
+- **Search tip:** Use `grepSearch` to find all occurrences and their line numbers first
 
-**Issue 1: Duplicate CSS Definitions**
-- **Problem:** Multiple `.f1-sheets-title` definitions in CSS file caused styling conflicts
-- **Solution:** Removed duplicate definitions (lines ~3519 and ~3715), kept only the main definition at line ~2177
-- **Location:** `static/style.css` lines 2177-2190
-
-**Issue 2: Inconsistent Title Styling**
-- **Problem:** `.f1-sheets-title` had different styling than `.f1-category-title`
-- **Solution:** Combined both selectors into one definition with consistent cyberpunk styling
-- **Result:** Both titles now use same dark background (#151515), gray text (#888), and thin borders
-
-**Issue 3: Missing Scrollbar Styling**
-- **Problem:** Default browser scrollbars didn't match cyberpunk theme
-- **Solution:** Added custom webkit scrollbar styling with dark colors and green hover
-- **Location:** `static/style.css` lines ~2510-2530
-
-**Issue 4: Unnecessary Header and Radio Buttons**
-- **Problem:** "Quick Navigation" header took up space and radio buttons didn't fit cyberpunk aesthetic
-- **Solution:** 
-  - Removed `.f1-popup-header` HTML element and CSS
-  - Moved close button (×) to search box with flex layout
-  - Hidden radio buttons with `display: none` in `.f1-category-radio`
-- **Location:** `templates/index.html` line ~650, `static/style.css` line ~2269
+**2. strReplace Failing with "found multiple times" Error**
+- **Problem:** Trying to replace duplicate sections kept failing because identical code existed in multiple places
+- **Solution:** Read more context (20-30 lines before/after) to find unique surrounding code, then include that in the replacement
+- **Example:** Instead of replacing just the duplicate block, include the unique function/comment before it
 
 **Files Modified:**
-- `static/style.css` - Complete F1 popup styling overhaul (~lines 2056-2530)
-  - Removed duplicate `.f1-sheets-title` definitions
-  - Added custom scrollbar styling
-  - Updated all F1-related classes with cyberpunk theme
-  - Removed `.f1-popup-header` CSS
-  - Hidden `.f1-category-radio` buttons
-  - Updated `.f1-search-box` with flex layout for close button
-- `templates/index.html` - Removed header, moved close button to search box (~line 650)
-
-**Testing Checklist:**
-- [ ] Press F1 to open popup - should show dark theme with green accents, no header
-- [ ] Close button - should be in search box on the right, rotate on hover
-- [ ] Radio buttons - should be hidden in category list
-- [ ] Hover over categories - should highlight with green border
-- [ ] Click category - should show green background with inset shadow
-- [ ] Scroll category/sheet lists - should show dark scrollbar with green hover
-- [ ] Active parent sheet - should have bright green background
-- [ ] Active sub-sheet - should have bright cyan background
-- [ ] Search input focus - should show green border
-- [ ] Press Escape - should close popup
+- `static/style.css` - Lines ~2056-2530 (F1 popup styles)
+- `templates/index.html` - Line ~650 (removed header, moved close button)
 
 ## Font System
 
