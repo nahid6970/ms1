@@ -875,6 +875,81 @@ mark {
 **Files Modified:**
 - `static/script.js` - Added index tracking, updated form handler
 
+### F1 Popup Cyberpunk Styling
+**Purpose:** Redesigned the F1 Quick Navigation popup (opened with F1 key) with a clean cyberpunk/terminal aesthetic for better visual appeal and readability.
+
+**Design Changes:**
+- **Dark Theme:** Changed from light theme to dark terminal-style background (#0d0d0d)
+- **Neon Green Accent:** Primary color changed to #00ff9d (Matrix-style green) for headers, borders, and active states
+- **Cyan for Sub-sheets:** Secondary color #00f3ff for sub-sheet highlighting
+- **Minimal Borders:** Clean 1px borders instead of thick shadows
+- **JetBrains Mono Font:** Monospace font for technical/coding aesthetic
+- **Custom Scrollbars:** Dark scrollbars with green hover effect
+
+**Key Styling Classes:**
+- `.f1-popup` - Main popup container with dark background and green border
+- `.f1-popup-header` - Header with green text and subtle glow effect
+- `.f1-search-box input` - Dark input with green border on focus
+- `.f1-category-item.active` - Active category with green accent and inset shadow
+- `.f1-parent-sheet` - Parent sheets with dark green background (#0a1f15)
+- `.f1-sub-sheet` - Sub-sheets with dark blue background (#0a1520)
+- `.f1-parent-sheet.active` - Active parent sheet with bright green background (#00ff9d)
+- `.f1-sub-sheet.active` - Active sub-sheet with bright cyan background (#00f3ff)
+
+**Scrollbar Styling:**
+```css
+.f1-category-list::-webkit-scrollbar,
+.f1-sheet-list::-webkit-scrollbar {
+    width: 8px;
+}
+.f1-category-list::-webkit-scrollbar-track,
+.f1-sheet-list::-webkit-scrollbar-track {
+    background: #000;
+}
+.f1-category-list::-webkit-scrollbar-thumb,
+.f1-sheet-list::-webkit-scrollbar-thumb {
+    background: #333;
+    border-radius: 4px;
+}
+.f1-category-list::-webkit-scrollbar-thumb:hover,
+.f1-sheet-list::-webkit-scrollbar-thumb:hover {
+    background: #00ff9d;
+}
+```
+
+**Common Issues & Solutions:**
+
+**Issue 1: Duplicate CSS Definitions**
+- **Problem:** Multiple `.f1-sheets-title` definitions in CSS file caused styling conflicts
+- **Solution:** Removed duplicate definitions (lines ~3519 and ~3715), kept only the main definition at line ~2177
+- **Location:** `static/style.css` lines 2177-2190
+
+**Issue 2: Inconsistent Title Styling**
+- **Problem:** `.f1-sheets-title` had different styling than `.f1-category-title`
+- **Solution:** Combined both selectors into one definition with consistent cyberpunk styling
+- **Result:** Both titles now use same dark background (#151515), gray text (#888), and thin borders
+
+**Issue 3: Missing Scrollbar Styling**
+- **Problem:** Default browser scrollbars didn't match cyberpunk theme
+- **Solution:** Added custom webkit scrollbar styling with dark colors and green hover
+- **Location:** `static/style.css` lines ~2510-2530
+
+**Files Modified:**
+- `static/style.css` - Complete F1 popup styling overhaul (~lines 2056-2530)
+  - Removed duplicate `.f1-sheets-title` definitions
+  - Added custom scrollbar styling
+  - Updated all F1-related classes with cyberpunk theme
+
+**Testing Checklist:**
+- [ ] Press F1 to open popup - should show dark theme with green accents
+- [ ] Hover over categories - should highlight with green border
+- [ ] Click category - should show green background with inset shadow
+- [ ] Scroll category/sheet lists - should show dark scrollbar with green hover
+- [ ] Active parent sheet - should have bright green background
+- [ ] Active sub-sheet - should have bright cyan background
+- [ ] Search input focus - should show green border
+- [ ] Close button hover - should rotate and show text shadow
+
 ## Font System
 
 ### Default Font Configuration
