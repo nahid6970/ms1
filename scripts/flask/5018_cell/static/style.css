@@ -3335,15 +3335,33 @@ Markdown Table Styles */
 
 .f2-parent-name {
     font-size: 11px;
-    color: #00ff9d;
-    opacity: 0.6;
+    color: #87ceeb;
+    opacity: 0.9;
     font-weight: normal;
     margin-left: 4px;
 }
 
 .f2-sheet-item.active .f2-parent-name {
-    color: #000;
-    opacity: 0.7;
+    color: #1e90ff;
+    opacity: 1;
+}
+
+/* F2 scrollbar - Green to match theme */
+.f2-sheets-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.f2-sheets-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.f2-sheets-list::-webkit-scrollbar-thumb {
+    background: rgba(0, 255, 157, 0.5);
+    border-radius: 3px;
+}
+
+.f2-sheets-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 255, 157, 0.8);
 }
 
 
