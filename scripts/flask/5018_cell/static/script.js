@@ -6795,7 +6795,11 @@ function populateF1Categories() {
         <span class="f1-category-name">Uncategorized</span>
         <span class="f1-category-count">${uncategorizedSheets.length}</span>
     `;
-    uncategorizedItem.onclick = () => selectF1Category(null);
+    
+    uncategorizedItem.addEventListener('click', (e) => {
+        selectF1Category(null);
+    });
+    
     categoryList.appendChild(uncategorizedItem);
 
     // Add other categories
@@ -6812,9 +6816,173 @@ function populateF1Categories() {
             <span class="f1-category-name">${category}</span>
             <span class="f1-category-count">${categorySheets.length}</span>
         `;
-        item.onclick = () => selectF1Category(category);
+        
+        // Add click handler
+        item.addEventListener('click', (e) => {
+            selectF1Category(category);
+        });
+        
+        // Add right-click context menu for categories
+        item.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            showF1CategoryContextMenu(e, category);
+        });
+        
         categoryList.appendChild(item);
     });
+}
+
+// F1 Category Context Menu
+function showF1CategoryContextMenu(event, categoryName) {
+    const menu = document.getElementById('f1CategoryContextMenu');
+    
+    menu.innerHTML = `
+        <div class="context-menu-item" onclick="showAddCategoryModal(); hideF1CategoryContextMenu();">
+            <span>➕</span>
+            <span>Add Category</span>
+        </div>
+        <div class="context-menu-item" onclick="renameF1Category('${categoryName}'); hideF1CategoryContextMenu();">
+            <span>✏️</span>
+            <span>Rename</span>
+        </div>
+        <div class="context-menu-separator"></div>
+        <div class="context-menu-item" onclick="deleteF1Category('${categoryName}'); hideF1CategoryContextMenu();">
+            <span>🗑️</span>
+            <span>Delete</span>
+        </div>
+    `;
+    
+    menu.classList.add('show');
+    menu.style.position = 'fixed';
+    menu.style.left = event.clientX + 'px';
+    menu.style.top = event.clientY + 'px';
+    menu.style.zIndex = '10000';
+    
+    // Close menu when clicking outside
+    setTimeout(() => {
+        document.addEventListener('click', hideF1CategoryContextMenu);
+    }, 10);
+}
+
+function hideF1CategoryContextMenu() {
+    const menu = document.getElementById('f1CategoryContextMenu');
+    menu.classList.remove('show');
+    document.removeEventListener('click', hideF1CategoryContextMenu);
+}
+
+function renameF1Category(categoryName) {
+    // Set the current category and show rename modal
+    currentCategory = categoryName;
+    showRenameCategoryModal();
+}
+
+async function deleteF1Category(categoryName) {
+    await deleteCategory(categoryName);
+    populateF1Categories();
+    populateF1Sheets();
+}
+
+// F1 Sheet Context Menu
+function showF1SheetContextMenu(event, sheetIndex, isSubSheet) {
+    const menu = document.getElementById('f1SheetContextMenu');
+    const sheet = tableData.sheets[sheetIndex];
+    
+    if (isSubSheet) {
+        // Sub-sheet menu: Rename, Delete
+        menu.innerHTML = `
+            <div class="context-menu-item" onclick="renameF1Sheet(${sheetIndex}); hideF1SheetContextMenu();">
+                <span>✏️</span>
+                <span>Rename</span>
+            </div>
+            <div class="context-menu-separator"></div>
+            <div class="context-menu-item" onclick="deleteF1Sheet(${sheetIndex}); hideF1SheetContextMenu();">
+                <span>🗑️</span>
+                <span>Delete</span>
+            </div>
+        `;
+    } else {
+        // Parent sheet menu: Rename, Move to Category, Delete
+        menu.innerHTML = `
+            <div class="context-menu-item" onclick="renameF1Sheet(${sheetIndex}); hideF1SheetContextMenu();">
+                <span>✏️</span>
+                <span>Rename</span>
+            </div>
+            <div class="context-menu-item" onclick="moveF1SheetToCategory(${sheetIndex}); hideF1SheetContextMenu();">
+                <span>📁</span>
+                <span>Move to Category</span>
+            </div>
+            <div class="context-menu-separator"></div>
+            <div class="context-menu-item" onclick="deleteF1Sheet(${sheetIndex}); hideF1SheetContextMenu();">
+                <span>🗑️</span>
+                <span>Delete</span>
+            </div>
+        `;
+    }
+    
+    menu.classList.add('show');
+    menu.style.position = 'fixed';
+    menu.style.left = event.clientX + 'px';
+    menu.style.top = event.clientY + 'px';
+    menu.style.zIndex = '10000';
+    
+    // Close menu when clicking outside
+    setTimeout(() => {
+        document.addEventListener('click', hideF1SheetContextMenu);
+    }, 10);
+}
+
+function hideF1SheetContextMenu() {
+    const menu = document.getElementById('f1SheetContextMenu');
+    menu.classList.remove('show');
+    document.removeEventListener('click', hideF1SheetContextMenu);
+}
+
+function renameF1Sheet(sheetIndex) {
+    // Switch to the sheet and show rename modal
+    currentSheet = sheetIndex;
+    renderTable();
+    document.getElementById('sheetName').value = tableData.sheets[sheetIndex].name;
+    document.getElementById('sheetNickname').value = tableData.sheets[sheetIndex].nickname || '';
+    document.getElementById('renameModal').style.display = 'block';
+}
+
+function moveF1SheetToCategory(sheetIndex) {
+    showMoveToCategoryModal(sheetIndex);
+}
+
+async function deleteF1Sheet(sheetIndex) {
+    await deleteSheet(sheetIndex);
+    populateF1Categories();
+    populateF1Sheets();
+}
+
+async function addF1Sheet() {
+    const sheetName = prompt('Enter sheet name:');
+    if (!sheetName) return;
+
+    const newSheet = {
+        name: sheetName,
+        columns: [],
+        rows: [],
+        cellStyles: {},
+        mergedCells: {}
+    };
+
+    tableData.sheets.push(newSheet);
+    const newIndex = tableData.sheets.length - 1;
+
+    // Assign to current category if one is selected
+    if (selectedF1Category) {
+        initializeCategories();
+        tableData.sheetCategories[newIndex] = selectedF1Category;
+    }
+
+    await saveData();
+    renderSidebar();
+    populateF1Categories();
+    populateF1Sheets();
+    showToast(`Sheet "${sheetName}" added`, 'success');
 }
 
 function selectF1Category(category) {
@@ -7014,6 +7182,14 @@ function populateF1Sheets(searchAllCategories = false) {
         item.addEventListener('dragover', handleF1DragOver);
         item.addEventListener('drop', handleF1Drop);
         item.addEventListener('dragend', handleF1DragEnd);
+        
+        // Add right-click context menu for parent sheets
+        item.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            showF1SheetContextMenu(e, index, false);
+            return false;
+        });
 
         sheetGroup.appendChild(item);
 
@@ -7038,6 +7214,14 @@ function populateF1Sheets(searchAllCategories = false) {
 
             subItem.addEventListener('click', (e) => {
                 switchToSheetFromF1(subIndex);
+            });
+            
+            // Add right-click context menu for sub-sheets
+            subItem.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                showF1SheetContextMenu(e, subIndex, true);
+                return false;
             });
 
             sheetGroup.appendChild(subItem);

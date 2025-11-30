@@ -431,6 +431,43 @@ The grid system relies on CSS variables for dynamic column counts:
 
 **Note:** Line numbers are approximate and may shift as code is updated. Search for the keyboard shortcut handler function `handleKeyboardShortcuts` to find all shortcuts.
 
+### F1 Quick Navigation Window - Context Menus
+The F1 window (opened with F1 key) provides comprehensive management through right-click context menus:
+
+**Category Context Menu** (Right-click on any category):
+- ➕ **Add Category** - Opens modal to create a new category
+- ✏️ **Rename** - Rename the selected category
+- 🗑️ **Delete** - Delete the category (moves sheets to Uncategorized)
+
+**Parent Sheet Context Menu** (Right-click on green main sheets):
+- ✏️ **Rename** - Rename the sheet
+- 📁 **Move to Category** - Move sheet and all sub-sheets to a different category
+- 🗑️ **Delete** - Delete sheet and all its sub-sheets (with warning)
+
+**Sub-Sheet Context Menu** (Right-click on blue sub-sheets):
+- ✏️ **Rename** - Rename the sub-sheet
+- 🗑️ **Delete** - Delete the sub-sheet only
+
+**Quick Action Buttons:**
+- **Categories section:** ➕ Add Category, ⬆️ Move Up, ⬇️ Move Down
+- **Sheets section:** ➕ Sheet (adds to current category), ➕ Separator
+
+**Key Functions:**
+- `showF1CategoryContextMenu(event, categoryName)` - Shows category context menu
+- `showF1SheetContextMenu(event, sheetIndex, isSubSheet)` - Shows sheet context menu (different options for parent vs sub-sheet)
+- `renameF1Category(categoryName)` - Opens rename modal for category
+- `renameF1Sheet(sheetIndex)` - Opens rename modal for sheet
+- `moveF1SheetToCategory(sheetIndex)` - Opens move to category modal
+- `deleteF1Category(categoryName)` - Deletes category
+- `deleteF1Sheet(sheetIndex)` - Deletes sheet
+- `addF1Sheet()` - Adds new sheet to current category
+
+**Implementation Notes:**
+- Context menus use the existing modal dialogs (rename, move to category, etc.)
+- All operations refresh both category and sheet lists in F1 window
+- Tree sidebar remains unchanged and continues to work independently
+- F1 window provides faster access to common operations without leaving the navigation view
+
 ## Common Development Tasks
 
 ### Adding a New Markdown Syntax

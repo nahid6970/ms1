@@ -660,6 +660,8 @@
                     <div class="f1-category-title">
                         <span>Categories</span>
                         <div class="f1-category-actions">
+                            <button class="f1-category-action-btn" onclick="showAddCategoryModal()"
+                                title="Add new category">➕</button>
                             <button class="f1-category-action-btn" onclick="moveCategoryUpInF1()"
                                 title="Move selected category up">⬆️</button>
                             <button class="f1-category-action-btn" onclick="moveCategoryDownInF1()"
@@ -671,15 +673,29 @@
                 <div class="f1-sheets">
                     <div class="f1-sheets-title">
                         <span>Sheets</span>
-                        <button class="f1-add-separator-btn" onclick="addSeparatorAtCursor()"
-                            title="Add separator (click then click between sheets)">
-                            ➕ Separator
-                        </button>
+                        <div style="display: flex; gap: 8px;">
+                            <button class="f1-add-separator-btn" onclick="addF1Sheet()"
+                                title="Add new sheet">
+                                ➕ Sheet
+                            </button>
+                            <button class="f1-add-separator-btn" onclick="addSeparatorAtCursor()"
+                                title="Add separator (click then click between sheets)">
+                                ➕ Separator
+                            </button>
+                        </div>
                     </div>
                     <div id="f1SheetList" class="f1-sheet-list"></div>
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- F1 Context Menus -->
+    <div id="f1CategoryContextMenu" class="context-menu">
+        <!-- Populated dynamically -->
+    </div>
+    <div id="f1SheetContextMenu" class="context-menu">
+        <!-- Populated dynamically -->
     </div>
 
     <!-- F2 Recent Sheets Popup -->
