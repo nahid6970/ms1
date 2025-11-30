@@ -885,11 +885,15 @@ mark {
 - **Minimal Borders:** Clean 1px borders instead of thick shadows
 - **JetBrains Mono Font:** Monospace font for technical/coding aesthetic
 - **Custom Scrollbars:** Dark scrollbars with green hover effect
+- **No Header:** Removed "Quick Navigation" header for cleaner look, close button moved to search box
+- **Hidden Radio Buttons:** Radio buttons in category list hidden for cleaner cyberpunk aesthetic
 
 **Key Styling Classes:**
 - `.f1-popup` - Main popup container with dark background and green border
-- `.f1-popup-header` - Header with green text and subtle glow effect
+- `.f1-search-box` - Search box with flex layout, contains input and close button
 - `.f1-search-box input` - Dark input with green border on focus
+- `.f1-close` - Close button (×) in search box, rotates on hover
+- `.f1-category-radio` - Hidden with `display: none` for cleaner look
 - `.f1-category-item.active` - Active category with green accent and inset shadow
 - `.f1-parent-sheet` - Parent sheets with dark green background (#0a1f15)
 - `.f1-sub-sheet` - Sub-sheets with dark blue background (#0a1520)
@@ -934,21 +938,35 @@ mark {
 - **Solution:** Added custom webkit scrollbar styling with dark colors and green hover
 - **Location:** `static/style.css` lines ~2510-2530
 
+**Issue 4: Unnecessary Header and Radio Buttons**
+- **Problem:** "Quick Navigation" header took up space and radio buttons didn't fit cyberpunk aesthetic
+- **Solution:** 
+  - Removed `.f1-popup-header` HTML element and CSS
+  - Moved close button (×) to search box with flex layout
+  - Hidden radio buttons with `display: none` in `.f1-category-radio`
+- **Location:** `templates/index.html` line ~650, `static/style.css` line ~2269
+
 **Files Modified:**
 - `static/style.css` - Complete F1 popup styling overhaul (~lines 2056-2530)
   - Removed duplicate `.f1-sheets-title` definitions
   - Added custom scrollbar styling
   - Updated all F1-related classes with cyberpunk theme
+  - Removed `.f1-popup-header` CSS
+  - Hidden `.f1-category-radio` buttons
+  - Updated `.f1-search-box` with flex layout for close button
+- `templates/index.html` - Removed header, moved close button to search box (~line 650)
 
 **Testing Checklist:**
-- [ ] Press F1 to open popup - should show dark theme with green accents
+- [ ] Press F1 to open popup - should show dark theme with green accents, no header
+- [ ] Close button - should be in search box on the right, rotate on hover
+- [ ] Radio buttons - should be hidden in category list
 - [ ] Hover over categories - should highlight with green border
 - [ ] Click category - should show green background with inset shadow
 - [ ] Scroll category/sheet lists - should show dark scrollbar with green hover
 - [ ] Active parent sheet - should have bright green background
 - [ ] Active sub-sheet - should have bright cyan background
 - [ ] Search input focus - should show green border
-- [ ] Close button hover - should rotate and show text shadow
+- [ ] Press Escape - should close popup
 
 ## Font System
 

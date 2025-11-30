@@ -647,13 +647,10 @@
     <!-- F1 Quick Navigation Popup -->
     <div id="f1Popup" class="f1-popup-overlay">
         <div class="f1-popup">
-            <div class="f1-popup-header">
-                <h3>Quick Navigation</h3>
-                <button class="f1-close" onclick="closeF1Popup()">&times;</button>
-            </div>
             <div class="f1-search-box">
                 <input type="text" id="f1SearchInput" placeholder="Search sheets... (* for all, # for content)"
                     onkeyup="filterF1Sheets()" onkeydown="handleF1SearchKeydown(event)">
+                <button class="f1-close" onclick="closeF1Popup()" title="Close (Esc)">&times;</button>
             </div>
             <div class="f1-content">
                 <div class="f1-categories">
