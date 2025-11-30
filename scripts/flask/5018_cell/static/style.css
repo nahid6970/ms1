@@ -2521,42 +2521,36 @@ tr {
     }
 }
 
-/* Scrollbar styling for F1 popup */
+/* Scrollbar styling for F1 popup - Cyberpunk */
 .f1-category-list::-webkit-scrollbar,
 .f1-sheet-list::-webkit-scrollbar {
-    width: 8px;
+    width: 6px;
 }
 
 .f1-category-list::-webkit-scrollbar-track,
 .f1-sheet-list::-webkit-scrollbar-track {
-    background: #000;
+    background: transparent;
 }
 
-.f1-category-list::-webkit-scrollbar-thumb,
+/* Category list - Lighter green */
+.f1-category-list::-webkit-scrollbar-thumb {
+    background: rgba(0, 255, 157, 0.5);
+    border-radius: 3px;
+}
+
+.f1-category-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 255, 157, 0.8);
+}
+
+/* Sheet list - Cyan (same as sub-sheets) */
 .f1-sheet-list::-webkit-scrollbar-thumb {
-    background: #333;
-    border-radius: 4px;
+    background: #00f3ff;
+    border-radius: 3px;
+    opacity: 0.5;
 }
 
-.f1-category-list::-webkit-scrollbar-thumb:hover,
 .f1-sheet-list::-webkit-scrollbar-thumb:hover {
-    background: #00ff9d;
-}
-
-.f1-category-list::-webkit-scrollbar-track,
-.f1-sheet-list::-webkit-scrollbar-track {
-    background: #f1f1f1;
-}
-
-.f1-category-list::-webkit-scrollbar-thumb,
-.f1-sheet-list::-webkit-scrollbar-thumb {
-    background: #c1c1c1;
-    border-radius: 4px;
-}
-
-.f1-category-list::-webkit-scrollbar-thumb:hover,
-.f1-sheet-list::-webkit-scrollbar-thumb:hover {
-    background: #a8a8a8;
+    opacity: 0.8;
 }
 
 /* 
