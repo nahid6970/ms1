@@ -3335,15 +3335,13 @@ Markdown Table Styles */
 
 .f2-parent-name {
     font-size: 11px;
-    color: #87ceeb;
-    opacity: 0.9;
+    color: #5dade2;
     font-weight: normal;
     margin-left: 4px;
 }
 
 .f2-sheet-item.active .f2-parent-name {
-    color: #1e90ff;
-    opacity: 1;
+    color: #3498db;
 }
 
 /* F2 scrollbar - Green to match theme */
