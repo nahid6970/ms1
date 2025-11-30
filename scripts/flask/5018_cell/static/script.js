@@ -919,7 +919,8 @@ function checkHasMarkdown(value) {
         str.trim().startsWith('|') ||
         str.includes('\\(') ||
         str.match(/^-{5,}$/m) ||
-        (str.includes('|') && str.split('|').length >= 2)
+        (str.includes('|') && str.split('|').length >= 2) ||
+        str.includes('\n') // Treat multi-line text as markdown for proper height handling
     );
 }
 

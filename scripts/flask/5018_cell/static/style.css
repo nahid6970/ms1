@@ -827,9 +827,10 @@ td.merged-cell .markdown-preview {
 
 td {
     white-space: nowrap;
-    overflow: hidden;
+    overflow: visible;
     position: relative;
     vertical-align: top;
+    height: auto;
 }
 
 /* When showing markdown preview, make cell height adapt */
