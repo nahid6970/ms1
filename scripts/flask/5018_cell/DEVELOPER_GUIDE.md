@@ -223,6 +223,24 @@ These two markdown syntaxes work together and are controlled by the same 👁️
   - `loadData()` - Where the timer is calculated and displayed
   - `renderTable()` - Must complete before timer is shown
 
+### Markdown Cell Height Adjustment
+**Purpose:** Ensures cells are sized to fit whichever is larger - the raw markdown text or the rendered preview.
+
+**Key Function:**
+- `adjustCellHeightForMarkdown(cell)` - Measures and applies max height (~line 7715)
+
+**How it works:**
+1. Gets both input/textarea and markdown preview elements
+2. Temporarily shows both to measure their `scrollHeight`
+3. Uses `Math.max(inputHeight, previewHeight)` to get larger height
+4. Applies that height to both elements via `minHeight`
+5. Ensures cell never cuts off content in either view
+
+**Called by:**
+- `adjustAllMarkdownCells()` - Applies to all cells after table render (~line 7745)
+
+**Why needed:** Without this, switching between edit mode (raw text) and preview mode could cause content to be cut off if one is taller than the other.
+
 ### Quick Formatter Enhancements
 **Improvements:**
 - **Instant Application:** Removed the "Apply" button. All formatting is now applied instantly when buttons are clicked.
