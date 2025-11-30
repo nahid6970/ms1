@@ -5180,16 +5180,27 @@ function openF1Popup() {
     const popup = document.getElementById('f1Popup');
     popup.classList.add('show');
 
-    // Reset search mode and clear search
-    f1SearchMode = '';
+    // Clear search input but keep the mode
     const searchInput = document.getElementById('f1SearchInput');
+    if (searchInput) searchInput.value = '';
+
+    // Restore the mode icon and color based on current mode
     const modeIcon = document.getElementById('f1SearchModeIcon');
     const toggle = document.getElementById('f1SearchModeToggle');
-    if (searchInput) searchInput.value = '';
-    if (modeIcon) modeIcon.textContent = '🔍';
-    if (toggle) {
-        toggle.style.color = '';
-        toggle.title = 'Normal search';
+    if (modeIcon && toggle) {
+        if (f1SearchMode === '*') {
+            modeIcon.textContent = '*';
+            toggle.style.color = '#00ff9d';
+            toggle.title = 'Search all sheets';
+        } else if (f1SearchMode === '#') {
+            modeIcon.textContent = '#';
+            toggle.style.color = '#00f3ff';
+            toggle.title = 'Search sheet content';
+        } else {
+            modeIcon.textContent = '🔍';
+            toggle.style.color = '';
+            toggle.title = 'Normal search';
+        }
     }
 
     // Set selected category to current category
@@ -7409,7 +7420,7 @@ function addSeparatorAtCursor() {
 }
 
 // F1 search mode: '' (normal), '*' (all sheets), '#' (content search)
-let f1SearchMode = '';
+let f1SearchMode = localStorage.getItem('f1SearchMode') || '';
 
 function toggleF1SearchMode() {
     const modeIcon = document.getElementById('f1SearchModeIcon');
@@ -7432,6 +7443,9 @@ function toggleF1SearchMode() {
         toggle.style.color = '';
         toggle.title = 'Normal search';
     }
+    
+    // Save to localStorage
+    localStorage.setItem('f1SearchMode', f1SearchMode);
     
     // Re-filter with new mode
     filterF1Sheets();
