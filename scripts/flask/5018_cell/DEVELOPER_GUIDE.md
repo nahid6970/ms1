@@ -903,6 +903,28 @@ mark {
 - `.f1-parent-sheet.active` - Bright green (#00ff9d)
 - `.f1-sub-sheet.active` - Bright cyan (#00f3ff)
 
+### F2 Popup Cyberpunk Styling
+**Purpose:** Recent Sheets popup (F2) styled to match F1 cyberpunk theme.
+
+**Key Functions:**
+- `openF2Popup()` - Opens F2 popup, clears search, focuses input (~line 5236)
+- `closeF2Popup()` - Closes F2 popup (~line 5257)
+- `filterF2Sheets()` - Filters recent sheets by name (~line 5273)
+- `populateF2RecentSheets()` - Renders recent sheets list (~line 5291)
+
+**Features:**
+- **Search box** - Real-time filtering of recent sheets
+- **Auto-focus** - Search input focused on open
+- **Cyberpunk styling** - Dark green theme matching F1
+- **Sky blue parent names** - Parent sheet names in brackets use #5dade2
+- **Green scrollbar** - Custom scrollbar matching theme
+
+**Main CSS Classes:**
+- `.f2-sheets-list` - Container with green scrollbar (~line 3268)
+- `.f2-sheet-item` - Dark green background, green left border (~line 3278)
+- `.f2-sheet-number` - Green bordered number badge (~line 3310)
+- `.f2-parent-name` - Sky blue color for parent sheet indicator (~line 3336)
+
 **Critical Issues Encountered:**
 
 **1. Duplicate CSS Causing Style Conflicts**
