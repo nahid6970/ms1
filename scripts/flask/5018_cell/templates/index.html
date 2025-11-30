@@ -648,7 +648,10 @@
     <div id="f1Popup" class="f1-popup-overlay">
         <div class="f1-popup">
             <div class="f1-search-box">
-                <input type="text" id="f1SearchInput" placeholder="Search sheets... (* for all, # for content)"
+                <button class="f1-search-mode-toggle" id="f1SearchModeToggle" onclick="toggleF1SearchMode()" title="Toggle search mode">
+                    <span id="f1SearchModeIcon">🔍</span>
+                </button>
+                <input type="text" id="f1SearchInput" placeholder="Search sheets..."
                     onkeyup="filterF1Sheets()" onkeydown="handleF1SearchKeydown(event)">
                 <button class="f1-close" onclick="closeF1Popup()" title="Close (Esc)">&times;</button>
             </div>

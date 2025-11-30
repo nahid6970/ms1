@@ -5180,6 +5180,18 @@ function openF1Popup() {
     const popup = document.getElementById('f1Popup');
     popup.classList.add('show');
 
+    // Reset search mode and clear search
+    f1SearchMode = '';
+    const searchInput = document.getElementById('f1SearchInput');
+    const modeIcon = document.getElementById('f1SearchModeIcon');
+    const toggle = document.getElementById('f1SearchModeToggle');
+    if (searchInput) searchInput.value = '';
+    if (modeIcon) modeIcon.textContent = '🔍';
+    if (toggle) {
+        toggle.style.color = '';
+        toggle.title = 'Normal search';
+    }
+
     // Set selected category to current category
     selectedF1Category = currentCategory;
 
@@ -5189,7 +5201,6 @@ function openF1Popup() {
 
     // Focus search input
     setTimeout(() => {
-        const searchInput = document.getElementById('f1SearchInput');
         if (searchInput) {
             searchInput.focus();
         }
@@ -7397,9 +7408,46 @@ function addSeparatorAtCursor() {
     showToast('Click before any sheet to add separator', 'info');
 }
 
+// F1 search mode: '' (normal), '*' (all sheets), '#' (content search)
+let f1SearchMode = '';
+
+function toggleF1SearchMode() {
+    const modeIcon = document.getElementById('f1SearchModeIcon');
+    const toggle = document.getElementById('f1SearchModeToggle');
+    
+    // Cycle through modes: '' -> '*' -> '#' -> ''
+    if (f1SearchMode === '') {
+        f1SearchMode = '*';
+        modeIcon.textContent = '*';
+        toggle.style.color = '#00ff9d';
+        toggle.title = 'Search all sheets';
+    } else if (f1SearchMode === '*') {
+        f1SearchMode = '#';
+        modeIcon.textContent = '#';
+        toggle.style.color = '#00f3ff';
+        toggle.title = 'Search sheet content';
+    } else {
+        f1SearchMode = '';
+        modeIcon.textContent = '🔍';
+        toggle.style.color = '';
+        toggle.title = 'Normal search';
+    }
+    
+    // Re-filter with new mode
+    filterF1Sheets();
+}
+
 function filterF1Sheets() {
     const searchInput = document.getElementById('f1SearchInput');
-    let searchTerm = searchInput ? searchInput.value : '';
+    let searchTerm = searchInput ? searchInput.value.trim() : '';
+    
+    // Prepend the search mode prefix if mode is active
+    if (f1SearchMode && searchTerm) {
+        searchTerm = f1SearchMode + searchTerm;
+    } else if (f1SearchMode && !searchTerm) {
+        // If mode is active but no search term, show normal sheets
+        searchTerm = '';
+    }
 
     // Hide all separators when searching
     const separators = document.querySelectorAll('.f1-sheet-separator');

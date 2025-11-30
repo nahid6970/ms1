@@ -2136,6 +2136,28 @@ tr {
     flex-shrink: 0;
 }
 
+.f1-search-mode-toggle {
+    background: rgba(0, 255, 157, 0.1);
+    border: 1px solid #333;
+    border-radius: 4px;
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    color: #666;
+    flex-shrink: 0;
+}
+
+.f1-search-mode-toggle:hover {
+    background: rgba(0, 255, 157, 0.2);
+    border-color: #00ff9d;
+    transform: scale(1.05);
+}
+
 .f1-search-box input:focus {
     outline: none;
     border-color: #00ff9d;
