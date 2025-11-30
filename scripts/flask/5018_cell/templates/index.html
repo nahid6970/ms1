@@ -705,6 +705,10 @@
                 <span style="color: #00ff9d; font-weight: 700; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; font-family: 'JetBrains Mono', monospace;">Recent Sheets</span>
                 <button class="f1-close" onclick="closeF2Popup()" title="Close (Esc)">&times;</button>
             </div>
+            <div class="f1-search-box">
+                <input type="text" id="f2SearchInput" placeholder="Filter recent sheets..."
+                    onkeyup="filterF2Sheets()" style="flex: 1;">
+            </div>
             <div class="f1-content" style="min-height: 300px;">
                 <div id="f2SheetsList" class="f2-sheets-list"></div>
             </div>

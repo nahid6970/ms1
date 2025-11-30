@@ -5237,14 +5237,17 @@ function openF2Popup() {
     const popup = document.getElementById('f2Popup');
     popup.classList.add('show');
 
+    // Clear search input
+    const searchInput = document.getElementById('f2SearchInput');
+    if (searchInput) searchInput.value = '';
+
     // Populate recent sheets
     populateF2RecentSheets();
 
-    // Focus on first sheet
+    // Focus on search input
     setTimeout(() => {
-        const firstSheet = popup.querySelector('.f2-sheet-item');
-        if (firstSheet) {
-            firstSheet.focus();
+        if (searchInput) {
+            searchInput.focus();
         }
     }, 100);
 
@@ -5268,6 +5271,23 @@ function closeF2PopupOnClickOutside(event) {
             closeF2Popup();
         }
     }
+}
+
+function filterF2Sheets() {
+    const searchInput = document.getElementById('f2SearchInput');
+    const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
+    const items = document.querySelectorAll('.f2-sheet-item');
+    
+    items.forEach(item => {
+        const sheetName = item.querySelector('.f2-sheet-name');
+        const name = sheetName ? sheetName.textContent.toLowerCase() : '';
+        
+        if (name.includes(searchTerm)) {
+            item.style.display = 'flex';
+        } else {
+            item.style.display = 'none';
+        }
+    });
 }
 
 function populateF2RecentSheets() {
