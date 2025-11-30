@@ -2536,80 +2536,6 @@ tr {
         max-height: 200px;
     }
 
-    .f1-sheets {
-        flex: 1;
-    }
-}
-
-/* Scrollbar styling for F1 popup */
-.f1-category-list::-webkit-scrollbar,
-.f1-sheet-list::-webkit-scrollbar {
-    width: 8px;
-}
-
-.f1-category-list::-webkit-scrollbar-track,
-.f1-sheet-list::-webkit-scrollbar-track {
-    background: #000;
-}
-
-.f1-category-list::-webkit-scrollbar-thumb,
-.f1-sheet-list::-webkit-scrollbar-thumb {
-    background: #333;
-    border-radius: 4px;
-}
-
-.f1-category-list::-webkit-scrollbar-thumb:hover,
-.f1-sheet-list::-webkit-scrollbar-thumb:hover {
-    background: #00ff9d;
-}
-
-.f1-category-list::-webkit-scrollbar-track,
-.f1-sheet-list::-webkit-scrollbar-track {
-    background: #f1f1f1;
-}
-
-.f1-category-list::-webkit-scrollbar-thumb,
-.f1-sheet-list::-webkit-scrollbar-thumb {
-    background: #c1c1c1;
-    border-radius: 4px;
-}
-
-.f1-category-list::-webkit-scrollbar-thumb:hover,
-.f1-sheet-list::-webkit-scrollbar-thumb:hover {
-    background: #a8a8a8;
-}
-
-/* 
-Markdown Table Styles */
-.markdown-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 4px 0;
-    /* breathing room inside the cell */
-    font-size: inherit;
-    /* respect column font-size */
-    font-family: inherit;
-}
-
-.markdown-table th,
-.markdown-table td {
-    border: 1px solid #ced4da;
-    padding: 4px 6px;
-    text-align: left;
-    vertical-align: top;
-    word-break: break-word;
-    overflow-wrap: break-word;
-    max-width: 300px;
-}
-
-.markdown-table th {
-    background: #f8f9fa;
-    font-weight: 600;
-}
-
-/* let coloured text / background css you already have shine through */
-.markdown-table strong {
-    font-weight: bold;
 }
 
 .markdown-table em {
@@ -4176,6 +4102,7 @@ mark {
 .context-menu-item.danger:hover {
     background: #fff5f5;
 }
+
 /* Ce
 ll Rank Badge */
 .cell-rank-badge {
