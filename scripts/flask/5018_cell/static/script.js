@@ -1095,12 +1095,10 @@ function parseMarkdownInline(text) {
         if (hasBg) {
             styleObj.padding = '1px 6px';
             styleObj.borderRadius = '4px';
-            styleObj.display = 'inline-block';
-            styleObj.verticalAlign = 'baseline';
-            styleObj.marginTop = '-1px';
         }
-        // Only use extra spacing if there's a background color
-        styleObj.lineHeight = hasBg ? '1.3' : '1.3';
+        styleObj.display = 'inline';
+        styleObj.verticalAlign = 'baseline';
+        styleObj.lineHeight = '1.3';
         styleObj.boxDecorationBreak = 'clone';
         styleObj.WebkitBoxDecorationBreak = 'clone';
         const styleStr = Object.entries(styleObj).map(([k, v]) => {
@@ -1316,12 +1314,10 @@ function oldParseMarkdownBody(lines) {
             if (hasBg) {
                 styleObj.padding = '1px 6px';
                 styleObj.borderRadius = '4px';
-                styleObj.display = 'inline-block';
-                styleObj.verticalAlign = 'baseline';
-                styleObj.marginTop = '-1px';
             }
-            // Only use extra spacing if there's a background color
-            styleObj.lineHeight = hasBg ? '1.3' : '1.3';
+            styleObj.display = 'inline';
+            styleObj.verticalAlign = 'baseline';
+            styleObj.lineHeight = '1.3';
             styleObj.boxDecorationBreak = 'clone';
             styleObj.WebkitBoxDecorationBreak = 'clone';
             const styleStr = Object.entries(styleObj).map(([k, v]) => {
@@ -1390,10 +1386,10 @@ function oldParseMarkdownBody(lines) {
         formatted = formatted.replace(/==(.+?)==/g, '<mark>$1</mark>');
 
         // Red highlight: !!text!! -> red background with white text
-        formatted = formatted.replace(/!!(.+?)!!/g, '<span style="background: #ff0000; color: #ffffff; padding: 1px 4px; border-radius: 3px; display: inline-block; vertical-align: baseline; margin-top: -1px; line-height: 1.3;">$1</span>');
+        formatted = formatted.replace(/!!(.+?)!!/g, '<span style="background: #ff0000; color: #ffffff; padding: 1px 4px; border-radius: 3px; display: inline; vertical-align: baseline; line-height: 1.3; box-decoration-break: clone; -webkit-box-decoration-break: clone;">$1</span>');
 
         // Blue highlight: ??text?? -> blue background with white text
-        formatted = formatted.replace(/\?\?(.+?)\?\?/g, '<span style="background: #0000ff; color: #ffffff; padding: 1px 4px; border-radius: 3px; display: inline-block; vertical-align: baseline; margin-top: -1px; line-height: 1.3;">$1</span>');
+        formatted = formatted.replace(/\?\?(.+?)\?\?/g, '<span style="background: #0000ff; color: #ffffff; padding: 1px 4px; border-radius: 3px; display: inline; vertical-align: baseline; line-height: 1.3; box-decoration-break: clone; -webkit-box-decoration-break: clone;">$1</span>');
 
         // Collapsible text: {{text}} -> hidden text with toggle button
         formatted = formatted.replace(/\{\{(.+?)\}\}/g, (match, content) => {
