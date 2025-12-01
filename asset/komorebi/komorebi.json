@@ -248,6 +248,11 @@
             "kind": "Exe",
             "id": "sniffnet.exe",
             "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Exe",
+            "id": "Qwen.exe",
+            "matching_strategy": "Equals"
         }
     ],
     "tray_and_multi_window_applications": [
