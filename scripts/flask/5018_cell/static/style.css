@@ -1915,7 +1915,7 @@ tr {
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 3000;
+    z-index: 6000;
     animation: fadeIn 0.2s ease;
 }
 
@@ -1937,6 +1937,7 @@ tr {
     max-width: 500px;
     width: 90%;
     position: relative;
+    z-index: 6001;
     animation: slideUp 0.3s ease;
 }
 

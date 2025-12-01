@@ -8941,15 +8941,15 @@ function renderCustomColorSyntaxList() {
             </div>
             <div class="custom-syntax-input-group">
                 <label>BG:</label>
-                <input type="color" value="${syntax.bgColor}" 
-                    onchange="updateCustomSyntax(${index}, 'bgColor', this.value)"
-                    title="Background Color">
+                <button onclick="showCustomSyntaxColorPicker(${index}, 'bgColor', event)" 
+                    style="width: 32px; height: 28px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; background: ${syntax.bgColor};"
+                    title="Background Color"></button>
             </div>
             <div class="custom-syntax-input-group">
                 <label>FG:</label>
-                <input type="color" value="${syntax.fgColor}" 
-                    onchange="updateCustomSyntax(${index}, 'fgColor', this.value)"
-                    title="Text Color">
+                <button onclick="showCustomSyntaxColorPicker(${index}, 'fgColor', event)" 
+                    style="width: 32px; height: 28px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; background: ${syntax.fgColor};"
+                    title="Text Color"></button>
             </div>
             <div class="custom-syntax-preview" style="background: ${syntax.bgColor}; color: ${syntax.fgColor};">
                 ${syntax.marker}text${syntax.marker}
@@ -8990,6 +8990,187 @@ function removeCustomSyntax(index) {
         renderCustomColorSyntaxList();
         renderTable(); // Re-render to remove syntax
     }
+}
+
+function showCustomSyntaxColorPicker(index, field, event) {
+    event.stopPropagation();
+    
+    let selectedBgColor = customColorSyntaxes[index].bgColor || '#ffffff';
+    let selectedFgColor = customColorSyntaxes[index].fgColor || '#000000';
+    let currentColorType = field === 'bgColor' ? 'background' : 'text';
+    
+    // Create overlay
+    const overlay = document.createElement('div');
+    overlay.className = 'color-picker-overlay';
+    overlay.id = 'customSyntaxColorPickerOverlay';
+    
+    // Create popup
+    const popup = document.createElement('div');
+    popup.className = 'color-picker-popup';
+    popup.id = 'customSyntaxColorPickerPopup';
+    
+    const title = document.createElement('h3');
+    title.textContent = `Custom Syntax Colors`;
+    popup.appendChild(title);
+    
+    // Radio buttons for BG/FG selection
+    const radioContainer = document.createElement('div');
+    radioContainer.className = 'color-type-selector';
+    radioContainer.style.display = 'flex';
+    radioContainer.style.gap = '15px';
+    radioContainer.style.marginBottom = '15px';
+    radioContainer.style.justifyContent = 'center';
+    
+    const bgRadioLabel = document.createElement('label');
+    bgRadioLabel.style.display = 'flex';
+    bgRadioLabel.style.alignItems = 'center';
+    bgRadioLabel.style.gap = '5px';
+    bgRadioLabel.style.cursor = 'pointer';
+    bgRadioLabel.innerHTML = `<input type="radio" name="syntaxColorType" value="background" ${currentColorType === 'background' ? 'checked' : ''}> Background`;
+    
+    const fgRadioLabel = document.createElement('label');
+    fgRadioLabel.style.display = 'flex';
+    fgRadioLabel.style.alignItems = 'center';
+    fgRadioLabel.style.gap = '5px';
+    fgRadioLabel.style.cursor = 'pointer';
+    fgRadioLabel.innerHTML = `<input type="radio" name="syntaxColorType" value="text" ${currentColorType === 'text' ? 'checked' : ''}> Text`;
+    
+    radioContainer.appendChild(bgRadioLabel);
+    radioContainer.appendChild(fgRadioLabel);
+    popup.appendChild(radioContainer);
+    
+    // Preview area
+    const previewContainer = document.createElement('div');
+    previewContainer.className = 'color-preview';
+    previewContainer.style.margin = '15px 0';
+    previewContainer.style.padding = '15px';
+    previewContainer.style.borderRadius = '6px';
+    previewContainer.style.border = '1px solid #ddd';
+    previewContainer.style.backgroundColor = selectedBgColor;
+    previewContainer.style.color = selectedFgColor;
+    previewContainer.style.fontWeight = 'bold';
+    previewContainer.style.textAlign = 'center';
+    previewContainer.style.fontFamily = 'monospace';
+    previewContainer.textContent = `${customColorSyntaxes[index].marker}text${customColorSyntaxes[index].marker}`;
+    previewContainer.id = 'syntaxColorPreviewArea';
+    popup.appendChild(previewContainer);
+    
+    // Transparent checkbox
+    const transparentContainer = document.createElement('div');
+    transparentContainer.style.marginBottom = '15px';
+    transparentContainer.style.textAlign = 'center';
+    
+    const transparentLabel = document.createElement('label');
+    transparentLabel.style.display = 'inline-flex';
+    transparentLabel.style.alignItems = 'center';
+    transparentLabel.style.gap = '8px';
+    transparentLabel.style.cursor = 'pointer';
+    transparentLabel.innerHTML = '<input type="checkbox" id="syntaxTransparentCheck"> Transparent';
+    
+    transparentContainer.appendChild(transparentLabel);
+    popup.appendChild(transparentContainer);
+    
+    // Preset colors (exact same as cell color picker)
+    const presetColors = [
+        '#FFFFFF', '#F8F9FA', '#E9ECEF', '#DEE2E6', '#CED4DA', '#ADB5BD', '#6C757D', '#495057', '#343A40', '#212529',
+        '#FFE5E5', '#FFB3B3', '#FF8080', '#FF4D4D', '#FF1A1A', '#E60000', '#B30000', '#800000', '#4D0000', '#1A0000',
+        '#FFF4E5', '#FFE0B3', '#FFCC80', '#FFB84D', '#FFA31A', '#E68A00', '#B36B00', '#804D00', '#4D2E00', '#1A0F00',
+        '#FFFBE5', '#FFF7B3', '#FFF380', '#FFEF4D', '#FFEB1A', '#E6D400', '#B3A500', '#807600', '#4D4700', '#1A1800',
+        '#F0FFE5', '#D9FFB3', '#C2FF80', '#ABFF4D', '#94FF1A', '#7AE600', '#5FB300', '#448000', '#294D00', '#0F1A00',
+        '#E5FFF4', '#B3FFE0', '#80FFCC', '#4DFFB8', '#1AFFA3', '#00E68A', '#00B36B', '#00804D', '#004D2E', '#001A0F',
+        '#E5F9FF', '#B3EFFF', '#80E5FF', '#4DDBFF', '#1AD1FF', '#00BCE6', '#0093B3', '#006A80', '#00404D', '#00171A',
+        '#E5F0FF', '#B3D9FF', '#80C2FF', '#4DABFF', '#1A94FF', '#007AE6', '#005FB3', '#004480', '#00294D', '#000F1A',
+        '#F0E5FF', '#D9B3FF', '#C280FF', '#AB4DFF', '#941AFF', '#7A00E6', '#5F00B3', '#440080', '#29004D', '#0F001A',
+        '#FFE5F9', '#FFB3EF', '#FF80E5', '#FF4DDB', '#FF1AD1', '#E600BC', '#B30093', '#80006A', '#4D0040', '#1A0017'
+    ];
+    
+    const colorGrid = document.createElement('div');
+    colorGrid.className = 'color-picker-grid';
+    
+    presetColors.forEach(color => {
+        const colorSwatch = document.createElement('div');
+        colorSwatch.className = 'color-swatch';
+        colorSwatch.style.backgroundColor = color;
+        colorSwatch.title = color;
+        colorSwatch.onclick = () => {
+            const bgRadio = popup.querySelector('input[name="syntaxColorType"][value="background"]');
+            const transparentCheck = popup.querySelector('#syntaxTransparentCheck');
+            
+            if (bgRadio && bgRadio.checked) {
+                selectedBgColor = color;
+                transparentCheck.checked = false;
+            } else {
+                selectedFgColor = color;
+            }
+            
+            updatePreview();
+        };
+        colorGrid.appendChild(colorSwatch);
+    });
+    
+    popup.appendChild(colorGrid);
+    
+    // Update preview function
+    function updatePreview() {
+        const preview = popup.querySelector('#syntaxColorPreviewArea');
+        const transparentCheck = popup.querySelector('#syntaxTransparentCheck');
+        const bgRadio = popup.querySelector('input[name="syntaxColorType"][value="background"]');
+        
+        if (bgRadio && bgRadio.checked && transparentCheck && transparentCheck.checked) {
+            preview.style.backgroundColor = 'transparent';
+            preview.style.backgroundImage = 'linear-gradient(45deg, #ccc 25%, transparent 25%, transparent 75%, #ccc 75%, #ccc), linear-gradient(45deg, #ccc 25%, white 25%, white 75%, #ccc 75%, #ccc)';
+            preview.style.backgroundSize = '10px 10px';
+            preview.style.backgroundPosition = '0 0, 5px 5px';
+        } else {
+            preview.style.backgroundColor = selectedBgColor;
+            preview.style.backgroundImage = 'none';
+        }
+        preview.style.color = selectedFgColor;
+    }
+    
+    // Radio change listeners
+    bgRadioLabel.querySelector('input').addEventListener('change', updatePreview);
+    fgRadioLabel.querySelector('input').addEventListener('change', updatePreview);
+    
+    // Transparent checkbox listener
+    transparentLabel.querySelector('input').addEventListener('change', (e) => {
+        if (e.target.checked) {
+            selectedBgColor = 'transparent';
+        } else {
+            selectedBgColor = '#ffffff';
+        }
+        updatePreview();
+    });
+    
+    // Set initial transparent state
+    if (selectedBgColor === 'transparent') {
+        transparentLabel.querySelector('input').checked = true;
+        updatePreview();
+    }
+    
+    // OK button
+    const okBtn = document.createElement('button');
+    okBtn.className = 'btn btn-primary';
+    okBtn.textContent = 'OK';
+    okBtn.style.marginTop = '15px';
+    okBtn.style.width = '100%';
+    okBtn.onclick = () => {
+        updateCustomSyntax(index, 'bgColor', selectedBgColor);
+        updateCustomSyntax(index, 'fgColor', selectedFgColor);
+        document.body.removeChild(overlay);
+    };
+    popup.appendChild(okBtn);
+    
+    // Close on overlay click
+    overlay.onclick = (e) => {
+        if (e.target === overlay) {
+            document.body.removeChild(overlay);
+        }
+    };
+    
+    // Append popup inside overlay, then overlay to body
+    overlay.appendChild(popup);
+    document.body.appendChild(overlay);
 }
 
 // Apply custom color syntaxes in parsing
