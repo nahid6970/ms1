@@ -8933,9 +8933,10 @@ function renderCustomColorSyntaxList() {
         item.className = 'custom-syntax-item';
         
         item.innerHTML = `
-            <input type="text" value="${syntax.marker}" 
+            <div class="custom-syntax-input-group">
+                <input type="text" value="${syntax.marker}" 
                     onchange="updateCustomSyntax(${index}, 'marker', this.value)" 
-                    placeholder="e.g., ++, $$, %%"
+                    placeholder="++, $$"
                     maxlength="4">
             </div>
             <div class="custom-syntax-input-group">
