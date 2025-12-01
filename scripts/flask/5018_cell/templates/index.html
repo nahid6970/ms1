@@ -405,24 +405,20 @@
                 <div class="settings-section">
                     <h3 class="settings-section-title">🎨 Appearance</h3>
 
-                    <div class="settings-item">
-                        <div class="settings-item-header">
-                            <label for="gridLineColor" class="settings-label">Grid Line Color</label>
-                            <button class="btn-reset" onclick="resetGridLineColor()">Reset to Default</button>
-                        </div>
-                        <div class="color-picker-group">
-                            <div class="color-picker-wrapper">
-                                <input type="color" id="gridLineColor" value="#dddddd"
-                                    oninput="syncGridLineColor(this.value)">
-                                <span class="color-picker-label">Pick Color</span>
-                            </div>
-                            <div class="color-input-wrapper">
-                                <span class="color-input-prefix">#</span>
+                    <div class="settings-item" style="padding: 12px 0;">
+                        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                            <label for="gridLineColor" class="settings-label" style="margin: 0; min-width: 100px;">Grid Line Color</label>
+                            <input type="color" id="gridLineColor" value="#dddddd"
+                                oninput="syncGridLineColor(this.value)"
+                                style="width: 40px; height: 32px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;">
+                            <div style="display: flex; align-items: center; gap: 2px;">
+                                <span style="color: #666; font-size: 13px;">#</span>
                                 <input type="text" id="gridLineColorText" value="DDDDDD" maxlength="6"
-                                    placeholder="DDDDDD" oninput="syncGridLineColor('#' + this.value)">
+                                    placeholder="DDDDDD" oninput="syncGridLineColor('#' + this.value)"
+                                    style="width: 70px; padding: 6px 8px; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 12px; text-transform: uppercase;">
                             </div>
+                            <button class="btn-reset" onclick="resetGridLineColor()" style="padding: 6px 12px; font-size: 12px;">Reset</button>
                         </div>
-                        <p class="settings-description">Customize the color of table borders and cell separators</p>
                     </div>
 
                     <div class="settings-item" style="margin-top: 20px;">

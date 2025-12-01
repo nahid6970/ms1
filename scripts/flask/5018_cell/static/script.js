@@ -9027,6 +9027,12 @@ function openSettings() {
     const modal = document.getElementById('settingsModal');
     if (modal) {
         modal.style.display = 'block';
+        
+        // Load current grid line color
+        const currentColor = getGridLineColor();
+        document.getElementById('gridLineColor').value = currentColor;
+        document.getElementById('gridLineColorText').value = currentColor.substring(1).toUpperCase();
+        
         renderCustomColorSyntaxList();
     }
 }
@@ -9048,19 +9054,7 @@ function toggleVrindaFont(enabled) {
     localStorage.setItem('vrindaFontEnabled', enabled);
 }
 
-function syncGridLineColor(value) {
-    // Implementation for grid line color if needed
-    document.documentElement.style.setProperty('--grid-line-color', value);
-    localStorage.setItem('gridLineColor', value);
-}
 
-function resetGridLineColor() {
-    const defaultColor = '#dddddd';
-    document.documentElement.style.setProperty('--grid-line-color', defaultColor);
-    document.getElementById('gridLineColor').value = defaultColor;
-    document.getElementById('gridLineColorText').value = defaultColor.substring(1).toUpperCase();
-    localStorage.setItem('gridLineColor', defaultColor);
-}
 
 function showMarkdownGuide() {
     const modal = document.getElementById('markdownGuideModal');
