@@ -20,6 +20,7 @@ from datetime import datetime
 
 # Paths
 DATA_FILE = r'C:\Users\nahid\ms\ms1\scripts\flask\5018_cell\data.json'
+CUSTOM_SYNTAXES_FILE = r'C:\Users\nahid\ms\ms1\scripts\flask\5018_cell\custom_syntaxes.json'
 OUTPUT_FILE = r'C:\Users\nahid\ms\db\5000_myhome\mycell.html'
 
 def load_data():
@@ -29,7 +30,14 @@ def load_data():
             return json.load(f)
     return {'sheets': [], 'activeSheet': 0}
 
-def generate_static_html(data):
+def load_custom_syntaxes():
+    """Load custom color syntaxes from JSON file"""
+    if os.path.exists(CUSTOM_SYNTAXES_FILE):
+        with open(CUSTOM_SYNTAXES_FILE, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    return []
+
+def generate_static_html(data, custom_syntaxes):
     """Generate static HTML from table data - matches main application exactly"""
     
     # Get current time for export info
@@ -1451,7 +1459,7 @@ def generate_static_html(data):
             // Remove bold markers: **text** -> text
             stripped = stripped.replace(/\\*\\*(.+?)\\*\\*/g, '$1');
             // Remove correct answer markers: [[text]] -> text
-            stripped = stripped.replace(/\[\[(.+?)\]\]/g, '$1');
+            stripped = stripped.replace(/\\[\\[(.+?)\\]\\]/g, '$1');
             // Remove bullet markers: - item -> item
             stripped = stripped.replace(/^\\s*-\\s+/gm, '');
             return stripped;
@@ -1606,13 +1614,16 @@ def generate_static_html(data):
             formatted = formatted.replace(/\\?\\?(.+?)\\?\\?/g, '<span style="background: #0000ff; color: #ffffff; padding: 1px 4px; border-radius: 3px; display: inline; vertical-align: baseline; line-height: 1.3; box-decoration-break: clone; -webkit-box-decoration-break: clone;">$1</span>');
 
             // Correct Answer: [[text]] -> hidden text with green highlight on click
-            formatted = formatted.replace(/\[\[(.+?)\]\]/g, '<span class="correct-answer">$1</span>');
+            formatted = formatted.replace(/\\[\\[(.+?)\\]\\]/g, '<span class="correct-answer">$1</span>');
 
             // Collapsible text: {{text}} -> hidden text with toggle button
             formatted = formatted.replace(/\\{\\{(.+?)\\}\\}/g, function(match, content) {
                 var id = 'collapse-' + Math.random().toString(36).substr(2, 9);
                 return '<span class="collapsible-wrapper"><button class="collapsible-toggle" onclick="toggleCollapsible(\\'' + id + '\\')" title="Click to show/hide">👁️</button><span id="' + id + '" class="collapsible-content" style="display: none;">' + content + '</span></span>';
             });
+
+            // Apply custom color syntaxes
+            formatted = applyCustomColorSyntaxes(formatted);
 
             return formatted;
         }
@@ -1738,13 +1749,16 @@ def generate_static_html(data):
                 formatted = formatted.replace(/\\?\\?(.+?)\\?\\?/g, '<span style="background: #0000ff; color: #ffffff; padding: 1px 4px; border-radius: 3px; display: inline; vertical-align: baseline; line-height: 1.3; box-decoration-break: clone; -webkit-box-decoration-break: clone;">$1</span>');
 
                 // Correct Answer: [[text]] -> hidden text with green highlight on click
-                formatted = formatted.replace(/\[\[(.+?)\]\]/g, '<span class="correct-answer">$1</span>');
+                formatted = formatted.replace(/\\[\\[(.+?)\\]\\]/g, '<span class="correct-answer">$1</span>');
 
                 // Collapsible text: {{text}} -> hidden text with toggle button
                 formatted = formatted.replace(/\\{\\{(.+?)\\}\\}/g, function(match, content) {
                     var id = 'collapse-' + Math.random().toString(36).substr(2, 9);
                     return '<span class="collapsible-wrapper"><button class="collapsible-toggle" onclick="toggleCollapsible(\\'' + id + '\\')" title="Click to show/hide">👁️</button><span id="' + id + '" class="collapsible-content" style="display: none;">' + content + '</span></span>';
                 });
+
+                // Apply custom color syntaxes
+                formatted = applyCustomColorSyntaxes(formatted);
 
                 return formatted;
             });
@@ -2065,8 +2079,29 @@ def generate_static_html(data):
             }
         }
 
+        // ==================== CUSTOM COLOR SYNTAX ====================
+        let customColorSyntaxes = ''' + json.dumps(custom_syntaxes) + ''';
+
+        function loadCustomColorSyntaxes() {
+            // Syntaxes are embedded from JSON file during export
+        }
+
+        function applyCustomColorSyntaxes(text) {
+            let formatted = text;
+            customColorSyntaxes.forEach(syntax => {
+                if (!syntax.marker) return;
+                const escapedMarker = syntax.marker.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&');
+                const regex = new RegExp(escapedMarker + '(.+?)' + escapedMarker, 'g');
+                formatted = formatted.replace(regex, (match, content) => {
+                    return '<span style="background: ' + syntax.bgColor + '; color: ' + syntax.fgColor + '; padding: 1px 4px; border-radius: 3px; display: inline; vertical-align: baseline; line-height: 1.3; box-decoration-break: clone; -webkit-box-decoration-break: clone;">' + content + '</span>';
+                });
+            });
+            return formatted;
+        }
+
         // Initialize on load
         window.onload = function() {
+            loadCustomColorSyntaxes();
             // Apply saved grid line color
             const savedGridColor = localStorage.getItem('gridLineColor') || '#dddddd';
             document.documentElement.style.setProperty('--grid-line-color', savedGridColor);
@@ -2217,8 +2252,12 @@ def export_to_static():
         data = load_data()
         print(f"Loaded data with {len(data.get('sheets', []))} sheets")
         
+        # Load custom syntaxes
+        custom_syntaxes = load_custom_syntaxes()
+        print(f"Loaded {len(custom_syntaxes)} custom color syntaxes")
+        
         # Generate HTML
-        html_content = generate_static_html(data)
+        html_content = generate_static_html(data, custom_syntaxes)
         
         # Ensure output directory exists
         output_dir = os.path.dirname(OUTPUT_FILE)

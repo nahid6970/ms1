@@ -1,0 +1,12 @@
+[
+  {
+    "bgColor": "#ff00ff",
+    "fgColor": "#ffffff",
+    "marker": "++"
+  },
+  {
+    "marker": "ffu",
+    "bgColor": "#f50076",
+    "fgColor": "#ffffff"
+  }
+]

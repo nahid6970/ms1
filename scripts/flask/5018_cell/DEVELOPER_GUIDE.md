@@ -197,17 +197,18 @@ These two markdown syntaxes work together and are controlled by the same 👁️
 
 **Access:** Settings Modal (⚙️) → 🎨 Custom Color Syntax section
 
-**Usage:** 
+**Usage:**
 - Add custom syntax with marker (e.g., `++`, `$$`, `%%`) and colors
 - Use in cells: `++highlighted text++`
 - Edit/delete syntaxes anytime - changes apply immediately
 
 **Implementation:**
-- **Storage:** `localStorage.customColorSyntaxes` - array of `{ marker, bgColor, fgColor }`
-- **Parsing:** `applyCustomColorSyntaxes(text)` applies all syntaxes (~line 8989)
-- **Integration:** Called in both `parseMarkdownInline()` and `oldParseMarkdownBody()`
+- **Storage:** `custom_syntaxes.json` - array of `{ marker, bgColor, fgColor }`
+- **API Endpoints:** `/api/custom-syntaxes` (GET/POST) in app.py
+- **Parsing:** `applyCustomColorSyntaxes(text)` applies all syntaxes (~line 8989 in script.js)
+- **Integration:** Called in both `parseMarkdownInline()` and `oldParseMarkdownBody()` in both script.js and export_static.py
 - **Key Functions:** `loadCustomColorSyntaxes()`, `saveCustomColorSyntaxes()`, `renderCustomColorSyntaxList()`, `addCustomColorSyntax()`, `updateCustomSyntax()`, `removeCustomSyntax()`
-- **Static Export:** Full support - syntaxes embedded in exported HTML
+- **Static Export:** ✅ Fully implemented - syntaxes embedded from JSON file into exported HTML
 
 ### Multi-Term Search Feature
 **Syntax:** `term1, term2, term3` (comma-separated)

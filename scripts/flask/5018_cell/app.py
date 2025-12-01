@@ -5,6 +5,7 @@ import os
 app = Flask(__name__)
 
 DATA_FILE = r'C:\Users\nahid\ms\ms1\scripts\flask\5018_cell\data.json'
+CUSTOM_SYNTAXES_FILE = r'C:\Users\nahid\ms\ms1\scripts\flask\5018_cell\custom_syntaxes.json'
 
 def load_data():
     if os.path.exists(DATA_FILE):
@@ -126,7 +127,31 @@ def delete_row(sheet_index, row_index):
         save_data(data)
     return jsonify({'success': True})
 
+@app.route('/api/custom-syntaxes', methods=['GET'])
+def get_custom_syntaxes():
+    if os.path.exists(CUSTOM_SYNTAXES_FILE):
+        with open(CUSTOM_SYNTAXES_FILE, 'r') as f:
+            return jsonify(json.load(f))
+    return jsonify([])
 
+@app.route('/api/custom-syntaxes', methods=['POST'])
+def save_custom_syntaxes():
+    syntaxes = request.json
+    with open(CUSTOM_SYNTAXES_FILE, 'w') as f:
+        json.dump(syntaxes, f, indent=2)
+    
+    # Auto-export static HTML after saving syntaxes
+    try:
+        import subprocess
+        import sys
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        export_script_path = os.path.join(script_dir, 'export_static.py')
+        subprocess.run([sys.executable, export_script_path], 
+                      capture_output=True, text=True, cwd=script_dir)
+    except Exception as e:
+        print(f"Auto-export failed: {e}")
+    
+    return jsonify({'success': True})
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", debug=True, port=5018)

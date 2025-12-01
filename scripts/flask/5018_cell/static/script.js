@@ -8890,22 +8890,31 @@ async function deleteCategory(categoryName) {
 
 // ==================== CUSTOM COLOR SYNTAX ====================
 
-// Load custom color syntaxes from localStorage
+// Load custom color syntaxes from JSON file
 let customColorSyntaxes = [];
 
-function loadCustomColorSyntaxes() {
-    const saved = localStorage.getItem('customColorSyntaxes');
-    if (saved) {
-        try {
-            customColorSyntaxes = JSON.parse(saved);
-        } catch (e) {
-            customColorSyntaxes = [];
+async function loadCustomColorSyntaxes() {
+    try {
+        const response = await fetch('/api/custom-syntaxes');
+        if (response.ok) {
+            customColorSyntaxes = await response.json();
         }
+    } catch (e) {
+        console.log('Could not load custom syntaxes:', e);
+        customColorSyntaxes = [];
     }
 }
 
-function saveCustomColorSyntaxes() {
-    localStorage.setItem('customColorSyntaxes', JSON.stringify(customColorSyntaxes));
+async function saveCustomColorSyntaxes() {
+    try {
+        await fetch('/api/custom-syntaxes', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(customColorSyntaxes)
+        });
+    } catch (e) {
+        console.log('Could not save custom syntaxes:', e);
+    }
 }
 
 function renderCustomColorSyntaxList() {
@@ -9004,7 +9013,13 @@ function applyCustomColorSyntaxes(text) {
 }
 
 // Initialize on page load
-loadCustomColorSyntaxes();
+(async function() {
+    await loadCustomColorSyntaxes();
+    // Re-render table after syntaxes are loaded
+    if (typeof renderTable === 'function') {
+        renderTable();
+    }
+})();
 
 
 // ==================== SETTINGS MODAL ====================
