@@ -28,6 +28,8 @@ This is a Flask-based web application that provides a dynamic, spreadsheet-like 
 
 When adding new **Markdown Syntax** or **Cell Formatting Features**, you **MUST** implement logic in at least **6 specific locations** to ensure the feature works consistently across both the live app and static export.
 
+**Note:** The Custom Color Syntax feature is an exception to this rule - it's a meta-feature that allows users to create their own syntaxes dynamically without code changes. See the "Custom Color Syntax Feature" section for details.
+
 ### Main App (static/script.js)
 
 #### 1. `parseMarkdown(text)` & Parsing Logic
@@ -189,6 +191,23 @@ These two markdown syntaxes work together and are controlled by the same 👁️
   - `oldParseMarkdownBody()` - Converts highlight syntax in regular cells
   - `checkHasMarkdown()` - Detects the syntax
   - `stripMarkdown()` - Removes syntax for sorting/searching
+
+### Custom Color Syntax Feature
+**Purpose:** Users can create unlimited custom color highlight syntaxes with any characters and colors.
+
+**Access:** Settings Modal (⚙️) → 🎨 Custom Color Syntax section
+
+**Usage:** 
+- Add custom syntax with marker (e.g., `++`, `$$`, `%%`) and colors
+- Use in cells: `++highlighted text++`
+- Edit/delete syntaxes anytime - changes apply immediately
+
+**Implementation:**
+- **Storage:** `localStorage.customColorSyntaxes` - array of `{ marker, bgColor, fgColor }`
+- **Parsing:** `applyCustomColorSyntaxes(text)` applies all syntaxes (~line 8989)
+- **Integration:** Called in both `parseMarkdownInline()` and `oldParseMarkdownBody()`
+- **Key Functions:** `loadCustomColorSyntaxes()`, `saveCustomColorSyntaxes()`, `renderCustomColorSyntaxList()`, `addCustomColorSyntax()`, `updateCustomSyntax()`, `removeCustomSyntax()`
+- **Static Export:** Full support - syntaxes embedded in exported HTML
 
 ### Multi-Term Search Feature
 **Syntax:** `term1, term2, term3` (comma-separated)
@@ -788,6 +807,38 @@ The F1 window (opened with F1 key) provides comprehensive management through rig
 - Full sidebar functionality included
 - Dropdowns removed (replaced by sidebar tree)
 - Same visual appearance and behavior as main app
+
+## Settings Modal (⚙️)
+
+The Settings Modal provides centralized access to application-wide customization options. Access it by clicking the ⚙️ button in the toolbar.
+
+### Settings Sections
+
+#### 🎨 Appearance
+- **Grid Line Color** - Customize table border colors
+- **Vrinda Font Toggle** - Enable/disable Vrinda font for Bangla text
+
+#### 🎨 Custom Color Syntax
+- **Dynamic Syntax Creation** - Add unlimited custom color highlight syntaxes
+- **Full Customization** - Choose any marker characters and colors
+- **Live Management** - Add, edit, or remove syntaxes with instant preview
+- See "Custom Color Syntax Feature" section for detailed documentation
+
+#### 📚 Help & Documentation
+- **Markdown Guide** - View comprehensive markdown formatting reference
+- **Interactive Examples** - See syntax and rendered output side-by-side
+
+### Key Features
+- **Persistent Settings** - All preferences saved to localStorage
+- **Real-time Updates** - Changes apply immediately without page reload
+- **Static Export Support** - Settings modal fully functional in exported HTML files
+- **Responsive Design** - Modal adapts to different screen sizes
+
+### Implementation
+- **Modal Structure:** Defined in `templates/index.html` (~line 420+)
+- **JavaScript Functions:** Located in `static/script.js` (~line 9020+)
+- **Styling:** Custom modal styles in `static/style.css`
+- **Static Export:** Full modal HTML and JS included in `export_static.py`
 
 ### Grid Line Color Customization
 **Purpose:** Allows users to customize the color of table borders and cell separators.
