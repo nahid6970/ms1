@@ -3975,30 +3975,31 @@ ll Rank Badge */
 
 .custom-syntax-item {
     background: #f8f9fa;
-    padding: 12px;
-    border-radius: 8px;
+    padding: 10px 12px;
+    border-radius: 6px;
     border: 1px solid #e9ecef;
     display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
+    flex-wrap: nowrap;
+    gap: 8px;
     align-items: center;
+    margin-bottom: 8px;
 }
 
 .custom-syntax-input-group {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 4px;
 }
 
 .custom-syntax-input-group label {
-    font-size: 12px;
-    font-weight: 600;
-    color: #495057;
-    min-width: 50px;
+    font-size: 11px;
+    font-weight: 500;
+    color: #666;
+    min-width: auto;
 }
 
 .custom-syntax-input-group input[type="text"] {
-    width: 80px;
+    width: 70px;
     padding: 6px 8px;
     border: 1px solid #ced4da;
     border-radius: 4px;
@@ -4007,11 +4008,12 @@ ll Rank Badge */
 }
 
 .custom-syntax-input-group input[type="color"] {
-    width: 35px;
-    height: 35px;
-    border: 2px solid #dee2e6;
+    width: 32px;
+    height: 28px;
+    border: 1px solid #dee2e6;
     border-radius: 4px;
     cursor: pointer;
+    padding: 2px;
 }
 
 .custom-syntax-controls {
@@ -4021,22 +4023,28 @@ ll Rank Badge */
 }
 
 .custom-syntax-preview {
-    padding: 4px 10px;
+    padding: 4px 8px;
     border-radius: 4px;
     font-size: 12px;
     font-weight: 500;
     white-space: nowrap;
+    font-family: monospace;
 }
 
 .btn-remove-syntax {
     background: #dc3545;
     color: white;
     border: none;
-    padding: 8px 12px;
-    border-radius: 6px;
+    padding: 6px 10px;
+    border-radius: 4px;
     cursor: pointer;
-    font-size: 12px;
+    font-size: 13px;
     transition: all 0.2s;
+    margin-left: auto;
+}
+
+.btn-remove-syntax:hover {
+    background: #c82333;
 }
 
 .btn-remove-syntax:hover {

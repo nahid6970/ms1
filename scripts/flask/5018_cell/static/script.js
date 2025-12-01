@@ -8933,21 +8933,19 @@ function renderCustomColorSyntaxList() {
         item.className = 'custom-syntax-item';
         
         item.innerHTML = `
-            <div class="custom-syntax-input-group">
-                <label>Syntax:</label>
-                <input type="text" value="${syntax.marker}" 
+            <input type="text" value="${syntax.marker}" 
                     onchange="updateCustomSyntax(${index}, 'marker', this.value)" 
                     placeholder="e.g., ++, $$, %%"
                     maxlength="4">
             </div>
             <div class="custom-syntax-input-group">
-                <label>Background:</label>
+                <label>BG:</label>
                 <input type="color" value="${syntax.bgColor}" 
                     onchange="updateCustomSyntax(${index}, 'bgColor', this.value)"
                     title="Background Color">
             </div>
             <div class="custom-syntax-input-group">
-                <label>Text Color:</label>
+                <label>FG:</label>
                 <input type="color" value="${syntax.fgColor}" 
                     onchange="updateCustomSyntax(${index}, 'fgColor', this.value)"
                     title="Text Color">
