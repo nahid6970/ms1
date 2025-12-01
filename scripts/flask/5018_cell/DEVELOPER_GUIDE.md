@@ -169,13 +169,15 @@ These two markdown syntaxes work together and are controlled by the same 👁️
 
 **Purpose:** Quick color highlighting without using the full `{fg:color;bg:color}text{/}` syntax.
 **Implementation:**
-- **Parsing:** Added regex replacements in `parseMarkdown()`: `.replace(/==(.+?)==/g, '<mark>$1</mark>')` and similar for `!!` and `??`.
+- **Parsing:** Added regex replacements in both `parseMarkdownInline()` (for table cells) and `oldParseMarkdownBody()` (for regular cells)
 - **Detection:** Added `value.includes('!!')` and `value.includes('??')` to `hasMarkdown` checks.
 - **Stripping:** Added `.replace(/!!(.+?)!!/g, '$1')` and `.replace(/\?\?(.+?)\?\?/g, '$1')` to `stripMarkdown()`.
 - **Quick Formatter:** Added Black, Red, and Blue buttons in a separate "Quick Highlights" section.
-- **Static Export:** Updated `export_static.py` with the same parsing logic.
+- **Static Export:** Updated `export_static.py` with the same parsing logic in both inline and body parsers.
+- **Table Support:** All three color syntaxes work inside `Table*N` markdown cells.
 - **Key Functions:**
-  - `parseMarkdown()` - Converts highlight syntax to HTML
+  - `parseMarkdownInline()` - Converts highlight syntax in table cells
+  - `oldParseMarkdownBody()` - Converts highlight syntax in regular cells
   - `checkHasMarkdown()` - Detects the syntax
   - `stripMarkdown()` - Removes syntax for sorting/searching
 

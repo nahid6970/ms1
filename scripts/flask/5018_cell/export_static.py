@@ -1602,6 +1602,12 @@ def generate_static_html(data):
             // Highlight: ==text== -> <mark>text</mark>
             formatted = formatted.replace(/==(.+?)==/g, '<mark>$1</mark>');
 
+            // Red highlight: !!text!! -> red background with white text
+            formatted = formatted.replace(/!!(.+?)!!/g, '<span style="background: #ff0000; color: #ffffff; padding: 1px 4px; border-radius: 3px; display: inline; vertical-align: baseline; line-height: 1.3; box-decoration-break: clone; -webkit-box-decoration-break: clone;">$1</span>');
+
+            // Blue highlight: ??text?? -> blue background with white text
+            formatted = formatted.replace(/\\?\\?(.+?)\\?\\?/g, '<span style="background: #0000ff; color: #ffffff; padding: 1px 4px; border-radius: 3px; display: inline; vertical-align: baseline; line-height: 1.3; box-decoration-break: clone; -webkit-box-decoration-break: clone;">$1</span>');
+
             // Correct Answer: [[text]] -> hidden text with green highlight on click
             formatted = formatted.replace(/\[\[(.+?)\]\]/g, '<span class="correct-answer">$1</span>');
 
