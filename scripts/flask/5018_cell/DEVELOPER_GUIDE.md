@@ -168,14 +168,23 @@ These two markdown syntaxes work together and are controlled by the same 👁️
 - `??text??` → Blue background with white text
 
 **Purpose:** Quick color highlighting without using the full `{fg:color;bg:color}text{/}` syntax.
+
 **Implementation:**
 - **Parsing:** Added regex replacements in both `parseMarkdownInline()` (for table cells) and `oldParseMarkdownBody()` (for regular cells)
-- **Detection:** Added `value.includes('!!')` and `value.includes('??')` to `hasMarkdown` checks.
-- **Stripping:** Added `.replace(/!!(.+?)!!/g, '$1')` and `.replace(/\?\?(.+?)\?\?/g, '$1')` to `stripMarkdown()`.
-- **Quick Formatter:** Added Black, Red, and Blue buttons in a separate "Quick Highlights" section.
-- **Static Export:** Updated `export_static.py` with the same parsing logic in both inline and body parsers.
-- **Table Support:** All three color syntaxes work inside `Table*N` markdown cells.
-- **Key Functions:**
+- **Detection:** Added `value.includes('!!')` and `value.includes('??')` to `hasMarkdown` checks
+- **Stripping:** Added `.replace(/!!(.+?)!!/g, '$1')` and `.replace(/\?\?(.+?)\?\?/g, '$1')` to `stripMarkdown()`
+- **Quick Formatter:** Added Black, Red, and Blue buttons in a separate "Quick Highlights" section
+- **Static Export:** Updated `export_static.py` with the same parsing logic in both inline and body parsers
+- **Table Support:** All three color syntaxes work inside `Table*N` markdown cells
+
+**Styling (applies to all color syntaxes):**
+- `display: inline` - Allows natural text wrapping without forcing line breaks
+- `box-decoration-break: clone` - Ensures background continues properly on wrapped lines
+- `padding: 1px 4px` - Consistent padding for all highlights
+- `border-radius: 3px` - Rounded corners
+- Same styling applied to custom color syntax `{fg:...;bg:...}text{/}`
+
+**Key Functions:**
   - `parseMarkdownInline()` - Converts highlight syntax in table cells
   - `oldParseMarkdownBody()` - Converts highlight syntax in regular cells
   - `checkHasMarkdown()` - Detects the syntax
@@ -828,43 +837,28 @@ The F1 window (opened with F1 key) provides comprehensive management through rig
 - `reindexCellStylesAfterRowDeletion()` - Reindexes cell styles after deletion
 - `deleteEmptyRows()` - Calls reindexing after deleting rows
 
-### Color Highlight Spacing Fix (Static Export)
-**Issue:** In static HTML export, colored text boxes (`==text==`, `!!text!!`, `??text??`, `{fg:...;bg:...}`) had inconsistent vertical spacing between lines.
+### Color Syntax Wrapping & Display Fix
+**Issue:** All color syntaxes (`==`, `!!`, `??`, and `{fg:...;bg:...}`) were using `display: inline-block`, which forced text to stay on one line and pushed subsequent text to the next line, creating large gaps and breaking text flow.
 
-**Solution:** Applied specific styling to reduce spacing:
-- **Padding:** Reduced to `0px` top/bottom (from `2px`)
-- **Margin-top:** Set to `-2px` to pull boxes closer together
-- **Line-height:** Reduced to `1.3` (from `1.8`)
-- **Display:** Set to `inline-block` with `vertical-align: baseline`
-- **Margin-right:** Added `2px` for spacing between adjacent highlights
+**Solution:** Unified styling across all color syntaxes for consistent inline behavior:
+- **Changed `display: inline-block` to `display: inline`** - Allows natural text wrapping and inline flow
+- **Removed `margin-top` and `margin-right`** - Not needed with inline display
+- **Added `box-decoration-break: clone`** - Ensures background color and border-radius continue properly when text wraps to multiple lines
+- **Consistent padding:** `1px 4px` for all color syntaxes
+- **Applied to all parsers:** Both `parseMarkdownInline()` (table cells) and `oldParseMarkdownBody()` (regular cells)
 
-**Note:** Main app uses slightly different values (`1px` padding, `-1px` margin-top) which work better in the live environment. Static export needs more aggressive spacing reduction.
-
-**Files Modified:**
-- `export_static.py` - Updated all color highlight styling
-- CSS for `mark` tag in embedded styles
-
-### Colored Text Wrapping Fix
-**Issue:** Colored text using `mark` tags (==text==, !!text!!, ??text??) was forced to stay on one line, causing large empty gaps when text should wrap to the next line.
-
-**Solution:** Changed CSS display property and added wrapping support:
-- **Changed `display: inline-block` to `display: inline`** - Allows natural text wrapping
-- **Removed `margin-top: -1px`** - No longer needed with inline display
-- **Added `box-decoration-break: clone`** - Ensures background color and border-radius continue properly on wrapped lines
-- **Removed duplicate CSS blocks** - Cleaned up 4 duplicate `mark` style definitions
+**Affected Syntaxes:**
+- `==text==` (black) - Uses `<mark>` tag with CSS
+- `!!text!!` (red) - Inline styles
+- `??text??` (blue) - Inline styles  
+- `{fg:color;bg:color}text{/}` - Custom colors with inline styles
 
 **Files Modified:**
-- `static/style.css` - Updated mark styles, removed duplicates
-- `export_static.py` - Updated mark styles to match
+- `static/script.js` - Updated all color syntax inline styles in both parsers
+- `static/style.css` - Updated `mark` tag CSS
+- `export_static.py` - Updated all color syntax inline styles in both parsers
 
-**CSS Changes:**
-```css
-mark {
-    display: inline;  /* was: inline-block */
-    box-decoration-break: clone;
-    -webkit-box-decoration-break: clone;
-}
-```
+**Result:** All color highlights now flow naturally with text, wrap properly across lines, and maintain consistent styling.
 
 ### Sub-Sheet Parent Reference Fix (F1 Drag & Drop)
 **Issue:** When dragging sheets to reorder them in the F1 popup, sub-sheets would lose their parent references or point to wrong parents, breaking the hierarchy.
