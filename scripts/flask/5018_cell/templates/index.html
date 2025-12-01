@@ -440,6 +440,19 @@
                 </div>
 
                 <div class="settings-section">
+                    <h3 class="settings-section-title">🎨 Custom Color Syntax</h3>
+                    <p class="settings-description" style="margin-bottom: 15px;">Add custom color highlight syntaxes. Use any characters (e.g., ++, $$, %%, etc.) with custom colors.</p>
+                    
+                    <div id="customColorSyntaxList" class="custom-syntax-list">
+                        <!-- Custom syntaxes will be rendered here -->
+                    </div>
+                    
+                    <button class="btn btn-secondary btn-full-width" onclick="addCustomColorSyntax()" style="margin-top: 10px;">
+                        ➕ Add Custom Syntax
+                    </button>
+                </div>
+
+                <div class="settings-section">
                     <h3 class="settings-section-title">📚 Help & Documentation</h3>
                     <button class="btn btn-primary btn-full-width" onclick="showMarkdownGuide()">
                         📝 View Markdown Guide

@@ -920,7 +920,8 @@ function checkHasMarkdown(value) {
         str.includes('\\(') ||
         str.match(/^-{5,}$/m) ||
         (str.includes('|') && str.split('|').length >= 2) ||
-        str.includes('\n') // Treat multi-line text as markdown for proper height handling
+        str.includes('\n') || // Treat multi-line text as markdown for proper height handling
+        customColorSyntaxes.some(syntax => str.includes(syntax.marker)) // Check custom syntaxes
     );
 }
 
@@ -1149,6 +1150,9 @@ function parseMarkdownInline(text) {
 
     // Correct Answer: [[text]] -> text with hidden green highlight
     formatted = formatted.replace(/\[\[(.+?)\]\]/g, '<span class="correct-answer">$1</span>');
+
+    // Apply custom color syntaxes
+    formatted = applyCustomColorSyntaxes(formatted);
 
     return formatted;
 }
@@ -1402,6 +1406,9 @@ function oldParseMarkdownBody(lines) {
 
         // Correct Answer: [[text]] -> text with hidden green highlight
         formatted = formatted.replace(/\[\[(.+?)\]\]/g, '<span class="correct-answer">$1</span>');
+
+        // Apply custom color syntaxes
+        formatted = applyCustomColorSyntaxes(formatted);
 
         return formatted;
     });
@@ -8879,3 +8886,191 @@ async function deleteCategory(categoryName) {
     renderSidebar();
     showToast('Category deleted', 'success');
 }
+
+
+// ==================== CUSTOM COLOR SYNTAX ====================
+
+// Load custom color syntaxes from localStorage
+let customColorSyntaxes = [];
+
+function loadCustomColorSyntaxes() {
+    const saved = localStorage.getItem('customColorSyntaxes');
+    if (saved) {
+        try {
+            customColorSyntaxes = JSON.parse(saved);
+        } catch (e) {
+            customColorSyntaxes = [];
+        }
+    }
+}
+
+function saveCustomColorSyntaxes() {
+    localStorage.setItem('customColorSyntaxes', JSON.stringify(customColorSyntaxes));
+}
+
+function renderCustomColorSyntaxList() {
+    const list = document.getElementById('customColorSyntaxList');
+    if (!list) return;
+    
+    list.innerHTML = '';
+    
+    if (customColorSyntaxes.length === 0) {
+        list.innerHTML = '<p style="color: #6c757d; font-size: 13px; text-align: center; padding: 20px;">No custom syntaxes added yet. Click "Add Custom Syntax" to create one.</p>';
+        return;
+    }
+    
+    customColorSyntaxes.forEach((syntax, index) => {
+        const item = document.createElement('div');
+        item.className = 'custom-syntax-item';
+        
+        item.innerHTML = `
+            <div class="custom-syntax-input-group">
+                <label>Syntax:</label>
+                <input type="text" value="${syntax.marker}" 
+                    onchange="updateCustomSyntax(${index}, 'marker', this.value)" 
+                    placeholder="e.g., ++, $$, %%"
+                    maxlength="4">
+            </div>
+            <div class="custom-syntax-input-group">
+                <label>Background:</label>
+                <input type="color" value="${syntax.bgColor}" 
+                    onchange="updateCustomSyntax(${index}, 'bgColor', this.value)"
+                    title="Background Color">
+            </div>
+            <div class="custom-syntax-input-group">
+                <label>Text Color:</label>
+                <input type="color" value="${syntax.fgColor}" 
+                    onchange="updateCustomSyntax(${index}, 'fgColor', this.value)"
+                    title="Text Color">
+            </div>
+            <div class="custom-syntax-preview" style="background: ${syntax.bgColor}; color: ${syntax.fgColor};">
+                ${syntax.marker}text${syntax.marker}
+            </div>
+            <button class="btn-remove-syntax" onclick="removeCustomSyntax(${index})">
+                🗑️
+            </button>
+        `;
+        
+        list.appendChild(item);
+    });
+}
+
+function addCustomColorSyntax() {
+    customColorSyntaxes.push({
+        marker: '++',
+        bgColor: '#ff00ff',
+        fgColor: '#ffffff'
+    });
+    saveCustomColorSyntaxes();
+    renderCustomColorSyntaxList();
+    renderTable(); // Re-render to apply new syntax
+}
+
+function updateCustomSyntax(index, field, value) {
+    if (customColorSyntaxes[index]) {
+        customColorSyntaxes[index][field] = value;
+        saveCustomColorSyntaxes();
+        renderCustomColorSyntaxList();
+        renderTable(); // Re-render to apply changes
+    }
+}
+
+function removeCustomSyntax(index) {
+    if (confirm('Remove this custom syntax?')) {
+        customColorSyntaxes.splice(index, 1);
+        saveCustomColorSyntaxes();
+        renderCustomColorSyntaxList();
+        renderTable(); // Re-render to remove syntax
+    }
+}
+
+// Apply custom color syntaxes in parsing
+function applyCustomColorSyntaxes(text) {
+    let formatted = text;
+    
+    customColorSyntaxes.forEach(syntax => {
+        if (!syntax.marker) return;
+        
+        // Escape special regex characters
+        const escapedMarker = syntax.marker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(`${escapedMarker}(.+?)${escapedMarker}`, 'g');
+        
+        formatted = formatted.replace(regex, (match, content) => {
+            return `<span style="background: ${syntax.bgColor}; color: ${syntax.fgColor}; padding: 1px 4px; border-radius: 3px; display: inline; vertical-align: baseline; line-height: 1.3; box-decoration-break: clone; -webkit-box-decoration-break: clone;">${content}</span>`;
+        });
+    });
+    
+    return formatted;
+}
+
+// Initialize on page load
+loadCustomColorSyntaxes();
+
+
+// ==================== SETTINGS MODAL ====================
+
+function openSettings() {
+    const modal = document.getElementById('settingsModal');
+    if (modal) {
+        modal.style.display = 'block';
+        renderCustomColorSyntaxList();
+    }
+}
+
+function closeSettingsModal() {
+    const modal = document.getElementById('settingsModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+function toggleVrindaFont(enabled) {
+    const table = document.getElementById('dataTable');
+    if (enabled) {
+        table.classList.remove('disable-vrinda');
+    } else {
+        table.classList.add('disable-vrinda');
+    }
+    localStorage.setItem('vrindaFontEnabled', enabled);
+}
+
+function syncGridLineColor(value) {
+    // Implementation for grid line color if needed
+    document.documentElement.style.setProperty('--grid-line-color', value);
+    localStorage.setItem('gridLineColor', value);
+}
+
+function resetGridLineColor() {
+    const defaultColor = '#dddddd';
+    document.documentElement.style.setProperty('--grid-line-color', defaultColor);
+    document.getElementById('gridLineColor').value = defaultColor;
+    document.getElementById('gridLineColorText').value = defaultColor.substring(1).toUpperCase();
+    localStorage.setItem('gridLineColor', defaultColor);
+}
+
+function showMarkdownGuide() {
+    const modal = document.getElementById('markdownGuideModal');
+    if (modal) {
+        modal.style.display = 'block';
+    }
+}
+
+function closeMarkdownGuide() {
+    const modal = document.getElementById('markdownGuideModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+// Close modals when clicking outside
+window.onclick = function(event) {
+    const settingsModal = document.getElementById('settingsModal');
+    const markdownModal = document.getElementById('markdownGuideModal');
+    
+    if (event.target === settingsModal) {
+        closeSettingsModal();
+    }
+    if (event.target === markdownModal) {
+        closeMarkdownGuide();
+    }
+};

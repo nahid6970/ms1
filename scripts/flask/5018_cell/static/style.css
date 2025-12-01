@@ -3965,3 +3965,80 @@ ll Rank Badge */
     z-index: 10;
     opacity: 0.85;
 }
+
+/* Custom Color Syntax Settings */
+.custom-syntax-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.custom-syntax-item {
+    background: #f8f9fa;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+}
+
+.custom-syntax-input-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.custom-syntax-input-group label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #495057;
+    min-width: 50px;
+}
+
+.custom-syntax-input-group input[type="text"] {
+    width: 80px;
+    padding: 6px 8px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 12px;
+    font-family: monospace;
+}
+
+.custom-syntax-input-group input[type="color"] {
+    width: 35px;
+    height: 35px;
+    border: 2px solid #dee2e6;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.custom-syntax-controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.custom-syntax-preview {
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.btn-remove-syntax {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s;
+}
+
+.btn-remove-syntax:hover {
+    background: #c82333;
+}
