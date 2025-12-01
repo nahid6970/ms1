@@ -198,16 +198,28 @@ These two markdown syntaxes work together and are controlled by the same 👁️
 **Access:** Settings Modal (⚙️) → 🎨 Custom Color Syntax section
 
 **Usage:**
-- Add custom syntax with marker (e.g., `++`, `$$`, `%%`) and colors
+- Add custom syntax with marker (e.g., `++`, `$$`, `%%`) up to 4 characters
+- Click BG/FG color buttons to open color picker with transparent option
 - Use in cells: `++highlighted text++`
-- Edit/delete syntaxes anytime - changes apply immediately
+- Edit/delete syntaxes anytime - changes apply immediately and auto-save
+
+**UI Features:**
+- Compact one-line layout: `[Syntax] BG: [Color] FG: [Color] [Preview] [🗑️]`
+- Color picker popup with BG/FG radio buttons, transparent checkbox, and live preview
+- Same color palette as cell color picker (100 colors)
+- Preview shows syntax with selected colors in real-time
 
 **Implementation:**
 - **Storage:** `custom_syntaxes.json` - array of `{ marker, bgColor, fgColor }`
-- **API Endpoints:** `/api/custom-syntaxes` (GET/POST) in app.py
-- **Parsing:** `applyCustomColorSyntaxes(text)` applies all syntaxes (~line 8989 in script.js)
+- **API Endpoints:** `/api/custom-syntaxes` (GET/POST) in app.py - auto-exports static HTML on save
+- **Parsing:** `applyCustomColorSyntaxes(text)` applies all syntaxes (~line 9100+ in script.js)
 - **Integration:** Called in both `parseMarkdownInline()` and `oldParseMarkdownBody()` in both script.js and export_static.py
-- **Key Functions:** `loadCustomColorSyntaxes()`, `saveCustomColorSyntaxes()`, `renderCustomColorSyntaxList()`, `addCustomColorSyntax()`, `updateCustomSyntax()`, `removeCustomSyntax()`
+- **Key Functions:** 
+  - `loadCustomColorSyntaxes()` - Loads from JSON file via API
+  - `saveCustomColorSyntaxes()` - Saves to JSON file via API
+  - `renderCustomColorSyntaxList()` - Renders compact UI list
+  - `showCustomSyntaxColorPicker()` - Shows color picker popup with BG/FG selection
+  - `addCustomColorSyntax()`, `updateCustomSyntax()`, `removeCustomSyntax()`
 - **Static Export:** ✅ Fully implemented - syntaxes embedded from JSON file into exported HTML
 
 ### Multi-Term Search Feature
