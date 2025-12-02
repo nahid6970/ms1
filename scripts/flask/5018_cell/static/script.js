@@ -3035,6 +3035,19 @@ async function deleteSheet(index) {
 }
 
 function switchSheet(index) {
+    // Save current scroll position before switching
+    if (currentSheet !== index) {
+        const tableContainer = document.querySelector('.table-container');
+        if (tableContainer) {
+            const scrollPositions = JSON.parse(localStorage.getItem('sheetScrollPositions') || '{}');
+            scrollPositions[currentSheet] = {
+                scrollTop: tableContainer.scrollTop,
+                scrollLeft: tableContainer.scrollLeft
+            };
+            localStorage.setItem('sheetScrollPositions', JSON.stringify(scrollPositions));
+        }
+    }
+    
     // Track sheet history for Alt+M toggle and F2 recent sheets
     if (currentSheet !== index) {
         // Remove the index if it already exists in history
@@ -3058,9 +3071,21 @@ function switchSheet(index) {
     currentCategory = sheetCategory;
 
     renderSidebar();
-    renderSidebar();
     renderTable();
     autoSaveActiveSheet();
+    
+    // Restore scroll position after rendering
+    setTimeout(() => {
+        const tableContainer = document.querySelector('.table-container');
+        if (tableContainer) {
+            const scrollPositions = JSON.parse(localStorage.getItem('sheetScrollPositions') || '{}');
+            const savedPosition = scrollPositions[index];
+            if (savedPosition) {
+                tableContainer.scrollTop = savedPosition.scrollTop || 0;
+                tableContainer.scrollLeft = savedPosition.scrollLeft || 0;
+            }
+        }
+    }, 0);
 }
 
 function showRenameModal(index) {
