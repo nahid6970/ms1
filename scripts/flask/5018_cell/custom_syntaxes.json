@@ -1,7 +1,7 @@
 [
   {
-    "bgColor": "#C2FF80",
-    "fgColor": "#212529",
+    "bgColor": "transparent",
+    "fgColor": "#FF4D4D",
     "marker": "++"
   }
 ]
