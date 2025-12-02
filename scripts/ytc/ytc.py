@@ -30,12 +30,32 @@ class YouTubeDownloader:
         self.audio_format_combo.pack(pady=5)
 
         # Cookies
-        self.cookies_label = ttk.Label(root, text="Cookies file (optional):")
+        self.cookies_label = ttk.Label(root, text="Authentication (for age-restricted videos):")
         self.cookies_label.pack(pady=5)
-        self.cookies_entry = ttk.Entry(root, width=70)
-        self.cookies_entry.pack(pady=5)
-        self.browse_button = ttk.Button(root, text="Browse", command=self.browse_cookies)
-        self.browse_button.pack(pady=5)
+        
+        # Cookie method selection
+        self.cookie_method_frame = ttk.Frame(root)
+        self.cookie_method_frame.pack(pady=5)
+        
+        self.cookie_method = tk.StringVar(value="none")
+        ttk.Radiobutton(self.cookie_method_frame, text="None", variable=self.cookie_method, value="none", command=self.toggle_cookie_input).pack(side=tk.LEFT, padx=5)
+        ttk.Radiobutton(self.cookie_method_frame, text="Browser Cookies", variable=self.cookie_method, value="browser", command=self.toggle_cookie_input).pack(side=tk.LEFT, padx=5)
+        ttk.Radiobutton(self.cookie_method_frame, text="Cookie File", variable=self.cookie_method, value="file", command=self.toggle_cookie_input).pack(side=tk.LEFT, padx=5)
+        
+        # Browser selection
+        self.browser_frame = ttk.Frame(root)
+        self.browser_combo = ttk.Combobox(self.browser_frame, width=30, values=["chrome", "firefox", "edge", "safari", "opera", "brave"])
+        self.browser_combo.set("chrome")
+        self.browser_combo.pack(side=tk.LEFT, padx=5)
+        
+        # Cookie file selection
+        self.cookies_file_frame = ttk.Frame(root)
+        self.cookies_entry = ttk.Entry(self.cookies_file_frame, width=40)
+        self.cookies_entry.pack(side=tk.LEFT, padx=5)
+        self.browse_button = ttk.Button(self.cookies_file_frame, text="Browse", command=self.browse_cookies)
+        self.browse_button.pack(side=tk.LEFT, padx=5)
+        self.help_button = ttk.Button(self.cookies_file_frame, text="Help", command=self.show_cookie_help)
+        self.help_button.pack(side=tk.LEFT, padx=5)
 
         # Download Button
         self.download_button = ttk.Button(root, text="Download", command=self.download_video)
@@ -48,7 +68,21 @@ class YouTubeDownloader:
         # Status Label
         self.status_label = ttk.Label(root, text="")
         self.status_label.pack(pady=5)
+        
+        # Initialize cookie input visibility
+        self.toggle_cookie_input()
 
+    def toggle_cookie_input(self):
+        # Hide all cookie input frames first
+        self.browser_frame.pack_forget()
+        self.cookies_file_frame.pack_forget()
+        
+        # Show appropriate frame based on selection
+        if self.cookie_method.get() == "browser":
+            self.browser_frame.pack(pady=5)
+        elif self.cookie_method.get() == "file":
+            self.cookies_file_frame.pack(pady=5)
+    
     def fetch_formats(self):
         url = self.url_entry.get()
         if not url:
@@ -60,12 +94,35 @@ class YouTubeDownloader:
 
     def _fetch_formats_thread(self, url):
         try:
-            command = ["yt-dlp", "--dump-json", url]
+            command = ["yt-dlp", "--dump-json"]
+            
+            # Add cookie authentication if specified
+            cookie_method = self.cookie_method.get()
+            if cookie_method == "browser":
+                browser = self.browser_combo.get()
+                command.extend(["--cookies-from-browser", browser])
+            elif cookie_method == "file":
+                cookies_file = self.cookies_entry.get()
+                if cookies_file:
+                    command.extend(["--cookies", cookies_file])
+            
+            # Add fallback for age-restricted videos
+            command.extend(["--extractor-args", "youtube:player_client=default"])
+            
+            command.append(url)
             process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
             stdout, stderr = process.communicate()
 
             if process.returncode != 0:
-                self.root.after(0, lambda: messagebox.showerror("Error", f"Failed to fetch formats:\n{stderr}"))
+                error_msg = stderr
+                # Add helpful hints for common errors
+                if "Could not copy Chrome cookie database" in stderr:
+                    error_msg += "\n\nTIP: Close ALL Chrome windows and try again, or use Firefox/Edge instead, or click 'Help' for cookie export instructions."
+                elif "Failed to decrypt with DPAPI" in stderr:
+                    error_msg += "\n\nTIP: Windows DPAPI decryption failed. You must export cookies manually using a browser extension. Click 'Help' for instructions."
+                elif "Sign in to confirm your age" in stderr or "age-restricted" in stderr:
+                    error_msg += "\n\nTIP: This video is age-restricted. You must use authentication. Click 'Help' for instructions."
+                self.root.after(0, lambda: messagebox.showerror("Error", f"Failed to fetch formats:\n{error_msg}"))
                 self.root.after(0, lambda: self.status_label.config(text=""))
                 return
 
@@ -93,10 +150,48 @@ class YouTubeDownloader:
         self.audio_format_combo.set("best")
 
     def browse_cookies(self):
-        filepath = filedialog.askopenfilename()
+        filepath = filedialog.askopenfilename(filetypes=[("Text files", "*.txt"), ("All files", "*.*")])
         if filepath:
             self.cookies_entry.delete(0, tk.END)
             self.cookies_entry.insert(0, filepath)
+    
+    def show_cookie_help(self):
+        help_text = """How to fix cookie authentication errors:
+
+⚠️ DPAPI ERROR? You MUST use METHOD 3 (manual export)
+
+METHOD 1: Close Chrome and try again
+- Close ALL Chrome windows completely
+- Then use "Browser Cookies" option
+- ❌ Won't work for DPAPI errors
+
+METHOD 2: Use Firefox instead
+- Select "firefox" from the browser dropdown
+- Make sure you're logged into YouTube in Firefox
+- ❌ May still have DPAPI errors
+
+METHOD 3: Export cookies manually (RECOMMENDED)
+1. Install browser extension:
+   Chrome: "Get cookies.txt LOCALLY" 
+   Firefox: "cookies.txt"
+   
+2. Go to youtube.com while logged in
+3. Click the extension icon
+4. Click "Export" or "Download"
+5. Save the cookies.txt file
+6. In this app:
+   - Select "Cookie File"
+   - Click "Browse" and select the .txt file
+
+METHOD 4: Try without authentication
+- Select "None" for authentication
+- May work for some videos (not age-restricted)
+
+EXTENSION LINKS:
+Chrome: Search "Get cookies.txt LOCALLY" in Chrome Web Store
+Firefox: Search "cookies.txt" in Firefox Add-ons"""
+        
+        messagebox.showinfo("Cookie Authentication Help", help_text)
 
     def download_video(self):
         url = self.url_entry.get()
@@ -140,8 +235,18 @@ class YouTubeDownloader:
     def _download_thread(self, url, format_selection, download_path, cookies_file):
         try:
             command = ["yt-dlp", "-f", format_selection, "-o", f"{download_path}/%(title)s.%(ext)s"]
-            if cookies_file:
+            
+            # Add cookie authentication
+            cookie_method = self.cookie_method.get()
+            if cookie_method == "browser":
+                browser = self.browser_combo.get()
+                command.extend(["--cookies-from-browser", browser])
+            elif cookie_method == "file" and cookies_file:
                 command.extend(["--cookies", cookies_file])
+            
+            # Add fallback for age-restricted videos
+            command.extend(["--extractor-args", "youtube:player_client=default"])
+            
             command.append(url)
 
             process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=subprocess.CREATE_NO_WINDOW)
