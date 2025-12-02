@@ -16,6 +16,7 @@ This is a Flask-based web application that provides a dynamic, spreadsheet-like 
 ### Core Features
 - **Multi-sheet support** with categories for organization
 - **Sub-sheet hierarchy** - Create nested sub-sheets under parent sheets with horizontal navigation bar
+- **Scroll position memory** - Each sheet remembers its scroll position when switching between sheets
 - **Rich markdown formatting** in cells (bold, italic, colors, tables, math, collapsible text, etc.)
 - **Cell styling** (borders, colors, fonts, alignment, merging)
 - **Column customization** (width, type, styling, header styling)
@@ -614,6 +615,17 @@ The F1 window (opened with F1 key) provides comprehensive management through rig
 - `renderSubSheetBar()` - Renders the horizontal sub-sheet navigation bar
 - `addSubSheet(parentIndex)` - Creates a new sub-sheet under the specified parent
 - `showSubSheetContextMenu(event, sheetIndex)` - Shows right-click menu for rename/delete
+
+### Scroll Position Memory
+**Purpose:** Remembers scroll position for each sheet when switching between sheets.
+
+**Implementation:**
+- **Storage:** `localStorage.sheetScrollPositions` - object mapping sheet index to `{ scrollTop, scrollLeft }`
+- **Save:** In `switchSheet()` before switching - saves current sheet's scroll position
+- **Restore:** In `switchSheet()` after rendering - restores target sheet's scroll position with `setTimeout()`
+- **Persistence:** Survives page refresh and works across all sheet navigation methods
+
+**Key Function:** `switchSheet(index)` - Handles both saving and restoring scroll positions (~line 3037)
 - `deleteSheet(index)` - Deletes sheet, all its sub-sheets, and reindexes all parent references
 - `moveToCategoryForm.onsubmit` - Moves parent sheet and all sub-sheets to new category together
 - `populateF1Sheets()` - Renders both parent and sub-sheets in F1 window with color-coded backgrounds (green for main, blue for sub-sheets)
