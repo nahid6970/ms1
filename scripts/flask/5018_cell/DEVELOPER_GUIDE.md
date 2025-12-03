@@ -385,6 +385,28 @@ This ensures users can easily find the clear button at the end of all formatting
   - `checkHasMarkdown()` - Detects the syntax
   - `stripMarkdown()` - Removes syntax for sorting/searching
 
+### Variable Font Size Heading Feature
+**Syntax:** `#2#text#/#` (any number: 0.5, 1.5, 2, 3, 10, etc.)
+**Purpose:** Creates headings with custom font sizes - flexible alternative to fixed `##heading##`.
+**Examples:**
+- `#2#Big Heading#/#` → 2x normal size
+- `#1.5#Medium Heading#/#` → 1.5x normal size
+- `#0.8#Small Heading#/#` → 0.8x normal size
+**Implementation:**
+- **Parsing:** Regex `/#([\d.]+)#(.+?)#\/#/g` converts to `<span style="font-size: {size}em; font-weight: 600;">`
+- **Detection:** Added `str.match(/#[\d.]+#.+?#\/#/)` to `checkHasMarkdown()`
+- **Stripping:** Added `.replace(/#[\d.]+#(.+?)#\/#/g, '$1')` to `stripMarkdown()`
+- **Static Export:** Full support in both parseMarkdown functions
+
+### Wavy Underline Feature
+**Syntax:** `_.text._`
+**Purpose:** Adds wavy underline to text (like spelling error indicators).
+**Implementation:**
+- **Parsing:** Regex `/_\.(.+?)\._/g` converts to `<span style="text-decoration: underline wavy;">`
+- **Detection:** Added `str.includes('_.')` to `checkHasMarkdown()`
+- **Stripping:** Added `.replace(/_\.(.+?)\._/g, '$1')` to `stripMarkdown()`
+- **Static Export:** Full support in both parseMarkdown functions
+
 ### Horizontal Separator Feature
 **Syntax:** `-----` (5 or more dashes on a single line)
 **Purpose:** Creates a horizontal separator line to visually divide content sections.
@@ -535,12 +557,14 @@ The F1 window (opened with F1 key) provides comprehensive management through rig
 ## Common Development Tasks
 
 ### Adding a New Markdown Syntax
-1. Add parsing logic to `parseMarkdown()` (~line 980+)
-2. Add detection to `checkHasMarkdown()` (~line 780+)
-3. Add stripping logic to `stripMarkdown()` (~line 4060+)
-4. Update `export_static.py` with same parsing logic
-5. Add to Markdown Guide modal in `templates/index.html`
+1. Add parsing logic to `parseMarkdownInline()` and `oldParseMarkdownBody()` in `static/script.js`
+2. Add detection to `checkHasMarkdown()` in `static/script.js`
+3. Add stripping logic to `stripMarkdown()` in `static/script.js`
+4. Update `export_static.py` - add to both `parseMarkdownInline()` and `oldParseMarkdownBody()`
+5. **IMPORTANT:** Add to Markdown Guide modal in `templates/index.html` (search for "Markdown Formatting Guide")
 6. Test: Create cell with syntax, check preview, search, sort, and static export
+
+**Note:** Always update the Markdown Guide modal when adding new syntax so users can discover the feature!
 
 ### Modifying the Table Rendering
 - Main function: `renderTable()` (~line 3947+)
