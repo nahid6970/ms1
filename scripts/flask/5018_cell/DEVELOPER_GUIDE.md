@@ -633,45 +633,9 @@ TimelineC*Event 2
 ```
 
 ### Word Connector Feature
-**Syntax:** 
-- `[1]Word` → Auto-colored connection (blue for [1], red for [2], etc.)
-- `[1-R]Word` → Custom color connection (R=Red, G=Green, B=Blue, Y=Yellow, O=Orange, P=Purple, C=Cyan, W=White, K=Black, GR=Gray)
-
-**Purpose:** Visually connect related words in a sentence with colored U-shaped bracket lines with arrows.
-
-**Visual:**
-```
-[1]Subject some words [1]Verb
- ↑                     ↑
- │                     │
- └─────────────────────┘
-```
-
-**Implementation:**
-- **Parsing:** Regex `/\[(\d+)(?:-([A-Z]+))?\](\S+)/g` in both `parseMarkdownInline()` and `oldParseMarkdownBody()`
-- **Detection:** Added `str.match(/\[\d+(?:-[A-Z]+)?\]\S+/)` to `checkHasMarkdown()`
-- **Stripping:** Added `.replace(/\[(\d+)(?:-[A-Z]+)?\](\S+)/g, '$2')` to `stripMarkdown()`
-- **Drawing:** `drawWordConnectors()` function uses SVG to draw U-shaped lines with arrow tips
-- **Styling:** CSS classes `.word-connector` and `.word-connector-line`
-- **Static Export:** Uses getBoundingClientRect() with 500ms delay for proper positioning
-- **Markdown Guide:** Added to templates/index.html with color code examples
-
-**Key Functions:**
-- `parseMarkdownInline()` - Converts `[1]Word` to `<span class="word-connector" data-conn-id="1" data-conn-color="#007bff">Word</span>`
-- `oldParseMarkdownBody()` - Same parsing
-- `drawWordConnectors(container)` - Draws SVG bracket lines between words with matching IDs
-- `checkHasMarkdown()` - Detects the syntax
-- `stripMarkdown()` - Removes markers for sorting/searching
-
-**Color Codes:**
-- R=Red, G=Green, B=Blue, Y=Yellow, O=Orange, P=Purple, C=Cyan, W=White, K=Black, GR=Gray
-
-**Usage Example:**
-```
-[1]Subject some words [1]Verb          → Blue connection
-[2-R]Object here [2-R]Related          → Red connection
-[1]A [1]B [2-G]C [2-G]D                → Multiple connections
-```
+**Syntax:** `[1]Word` or `[1-R]Word` (R/G/B/Y/O/P/C/W/K/GR for colors)
+**Implementation:** Regex `/\[(\d+)(?:-([A-Z]+))?\](\S+)/g` in parseMarkdownInline/oldParseMarkdownBody, `drawWordConnectors()` draws SVG U-shaped lines with arrows
+**Static Export:** 500ms delay for getBoundingClientRect() positioning
 
 ### Sub-Sheet Hierarchy Feature
 **Purpose:** Organize related sheets in a parent-child hierarchy with visual navigation.
