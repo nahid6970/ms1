@@ -898,6 +898,21 @@ def generate_static_html(data, custom_syntaxes):
             vertical-align: baseline;
         }
 
+        /* Word Connector */
+        .word-connector {
+            position: relative;
+            display: inline-block;
+            padding-bottom: 8px;
+        }
+
+        .word-connector-line {
+            position: absolute;
+            bottom: 0;
+            height: 10px;
+            pointer-events: none;
+            z-index: 1;
+        }
+
         /* Correct Answer Highlight */
         .correct-answer {
             background-color: transparent;
@@ -1385,6 +1400,7 @@ def generate_static_html(data, custom_syntaxes):
                         cellValue.trim().startsWith('|') ||
                         cellValue.match(/^-{5,}$/m) ||
                         cellValue.match(/^Timeline(?:C)?\\*/m) ||
+                        cellValue.match(/\\[\\d+\\]\\S+/) ||
                         (cellValue.includes('|') && cellValue.split('|').length >= 2);
                     
                     if (hasMarkdown) {
@@ -1471,6 +1487,8 @@ def generate_static_html(data, custom_syntaxes):
             stripped = stripped.replace(/^\\s*---\\s+/gm, '');
             // Remove Timeline markers: Timeline*Name or TimelineC*Name -> Name
             stripped = stripped.replace(/^Timeline(?:C)?\\*(.+?)$/gm, '$1');
+            // Remove word connector markers: [1]Word -> Word
+            stripped = stripped.replace(/\\[(\\d+)\\](\\S+)/g, '$2');
             return stripped;
         }
 
@@ -1633,6 +1651,14 @@ def generate_static_html(data, custom_syntaxes):
             // Correct Answer: [[text]] -> hidden text with green highlight on click
             formatted = formatted.replace(/\\[\\[(.+?)\\]\\]/g, '<span class="correct-answer">$1</span>');
 
+            // Word Connectors: [1]Word -> creates visual connection between words with same number
+            var connectorColors = ['#007bff', '#dc3545', '#28a745', '#fd7e14', '#6f42c1', '#20c997', '#e83e8c', '#17a2b8'];
+            formatted = formatted.replace(/\\[(\\d+)\\](\\S+)/g, function(match, connId, word) {
+                var colorIndex = (parseInt(connId) - 1) % connectorColors.length;
+                var color = connectorColors[colorIndex];
+                return '<span class="word-connector" data-conn-id="' + connId + '" data-conn-color="' + color + '">' + word + '</span>';
+            });
+
             // Collapsible text: {{text}} -> hidden text with toggle button
             formatted = formatted.replace(/\\{\\{(.+?)\\}\\}/g, function(match, content) {
                 var id = 'collapse-' + Math.random().toString(36).substr(2, 9);
@@ -1792,6 +1818,14 @@ def generate_static_html(data, custom_syntaxes):
 
                 // Correct Answer: [[text]] -> hidden text with green highlight on click
                 formatted = formatted.replace(/\\[\\[(.+?)\\]\\]/g, '<span class="correct-answer">$1</span>');
+
+                // Word Connectors: [1]Word -> creates visual connection between words with same number
+                var connectorColors = ['#007bff', '#dc3545', '#28a745', '#fd7e14', '#6f42c1', '#20c997', '#e83e8c', '#17a2b8'];
+                formatted = formatted.replace(/\\[(\\d+)\\](\\S+)/g, function(match, connId, word) {
+                    var colorIndex = (parseInt(connId) - 1) % connectorColors.length;
+                    var color = connectorColors[colorIndex];
+                    return '<span class="word-connector" data-conn-id="' + connId + '" data-conn-color="' + color + '">' + word + '</span>';
+                });
 
                 // Collapsible text: {{text}} -> hidden text with toggle button
                 formatted = formatted.replace(/\\{\\{(.+?)\\}\\}/g, function(match, content) {
@@ -2092,6 +2126,65 @@ def generate_static_html(data, custom_syntaxes):
             }
         }
 
+        function drawWordConnectors(container) {
+            if (!container) return;
+            
+            container.querySelectorAll('.word-connector-line').forEach(el => el.remove());
+            
+            const connectorGroups = {};
+            container.querySelectorAll('.word-connector').forEach(connector => {
+                const connId = connector.dataset.connId;
+                if (!connectorGroups[connId]) {
+                    connectorGroups[connId] = [];
+                }
+                connectorGroups[connId].push(connector);
+            });
+            
+            Object.entries(connectorGroups).forEach(([connId, connectors]) => {
+                if (connectors.length < 2) return;
+                
+                connectors.sort((a, b) => {
+                    const rectA = a.getBoundingClientRect();
+                    const rectB = b.getBoundingClientRect();
+                    return rectA.left - rectB.left;
+                });
+                
+                const color = connectors[0].dataset.connColor;
+                
+                for (let i = 0; i < connectors.length - 1; i++) {
+                    const start = connectors[i];
+                    const end = connectors[i + 1];
+                    
+                    const startRect = start.getBoundingClientRect();
+                    const endRect = end.getBoundingClientRect();
+                    const containerRect = container.getBoundingClientRect();
+                    
+                    const startX = startRect.left - containerRect.left + startRect.width / 2;
+                    const endX = endRect.left - containerRect.left + endRect.width / 2;
+                    const y = startRect.bottom - containerRect.top + 2;
+                    
+                    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                    svg.classList.add('word-connector-line');
+                    svg.style.left = Math.min(startX, endX) + 'px';
+                    svg.style.top = y + 'px';
+                    svg.style.width = Math.abs(endX - startX) + 'px';
+                    svg.style.height = '10px';
+                    svg.style.position = 'absolute';
+                    
+                    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    const width = Math.abs(endX - startX);
+                    const d = `M 0,0 L 0,7 L ${width},7 L ${width},0`;
+                    path.setAttribute('d', d);
+                    path.setAttribute('stroke', color);
+                    path.setAttribute('stroke-width', '1.5');
+                    path.setAttribute('fill', 'none');
+                    
+                    svg.appendChild(path);
+                    container.appendChild(svg);
+                }
+            });
+        }
+
         function toggleAllCollapsibles() {
             const collapsibles = document.querySelectorAll('.collapsible-content');
             const correctAnswers = document.querySelectorAll('.correct-answer');
@@ -2201,6 +2294,13 @@ def generate_static_html(data, custom_syntaxes):
             initializeCategories();
             renderSidebar();
             renderTable();
+            
+            // Draw word connectors after table is rendered
+            setTimeout(() => {
+                document.querySelectorAll('.cell-content').forEach(cell => {
+                    drawWordConnectors(cell);
+                });
+            }, 100);
             
             // Restore wrap toggle state
             const wrapEnabled = localStorage.getItem('rowWrapEnabled') === 'true';

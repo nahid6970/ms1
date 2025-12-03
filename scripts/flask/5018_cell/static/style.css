@@ -3587,6 +3587,21 @@ mark {
     font-weight: 500;
 }
 
+/* Word Connector */
+.word-connector {
+    position: relative;
+    display: inline-block;
+    padding-bottom: 8px;
+}
+
+.word-connector-line {
+    position: absolute;
+    bottom: 0;
+    height: 10px;
+    pointer-events: none;
+    z-index: 1;
+}
+
 /* Timeline/Flowchart Layout */
 .md-timeline {
     display: flex;

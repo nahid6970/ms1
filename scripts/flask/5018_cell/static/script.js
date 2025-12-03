@@ -926,6 +926,7 @@ function checkHasMarkdown(value) {
         str.match(/#[\d.]+#.+?#\/#/) || // Variable font size heading
         str.includes('_.') || // Wavy underline
         str.match(/^Timeline(?:C)?\*/m) || // Timeline syntax
+        str.match(/\[\d+\]\S+/) || // Word connector syntax
         customColorSyntaxes.some(syntax => str.includes(syntax.marker)) // Check custom syntaxes
     );
 }
@@ -988,10 +989,86 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
 
         cell.style.position = 'relative';
         cell.appendChild(preview);
+        
+        // Draw word connectors after preview is added
+        requestAnimationFrame(() => {
+            drawWordConnectors(preview);
+        });
     } else {
         delete inputElement.dataset.formattedHtml;
         inputElement.classList.remove('has-markdown');
     }
+}
+
+/**
+ * Draw connector lines between words with matching connection IDs
+ * Called after markdown preview is rendered
+ */
+function drawWordConnectors(previewElement) {
+    if (!previewElement) return;
+    
+    // Remove existing connector lines
+    previewElement.querySelectorAll('.word-connector-line').forEach(el => el.remove());
+    
+    // Group connectors by ID
+    const connectorGroups = {};
+    previewElement.querySelectorAll('.word-connector').forEach(connector => {
+        const connId = connector.dataset.connId;
+        if (!connectorGroups[connId]) {
+            connectorGroups[connId] = [];
+        }
+        connectorGroups[connId].push(connector);
+    });
+    
+    // Draw lines for each group
+    Object.entries(connectorGroups).forEach(([connId, connectors]) => {
+        if (connectors.length < 2) return; // Need at least 2 words to connect
+        
+        // Sort by position in document
+        connectors.sort((a, b) => {
+            const rectA = a.getBoundingClientRect();
+            const rectB = b.getBoundingClientRect();
+            return rectA.left - rectB.left;
+        });
+        
+        const color = connectors[0].dataset.connColor;
+        
+        // Connect consecutive pairs
+        for (let i = 0; i < connectors.length - 1; i++) {
+            const start = connectors[i];
+            const end = connectors[i + 1];
+            
+            const startRect = start.getBoundingClientRect();
+            const endRect = end.getBoundingClientRect();
+            const containerRect = previewElement.getBoundingClientRect();
+            
+            // Calculate positions relative to container
+            const startX = startRect.left - containerRect.left + startRect.width / 2;
+            const endX = endRect.left - containerRect.left + endRect.width / 2;
+            const y = startRect.bottom - containerRect.top + 2;
+            
+            // Create SVG line
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.classList.add('word-connector-line');
+            svg.style.left = Math.min(startX, endX) + 'px';
+            svg.style.top = y + 'px';
+            svg.style.width = Math.abs(endX - startX) + 'px';
+            svg.style.height = '10px';
+            svg.style.position = 'absolute';
+            
+            // Draw bracket line: └─────┘
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            const width = Math.abs(endX - startX);
+            const d = `M 0,0 L 0,7 L ${width},7 L ${width},0`;
+            path.setAttribute('d', d);
+            path.setAttribute('stroke', color);
+            path.setAttribute('stroke-width', '1.5');
+            path.setAttribute('fill', 'none');
+            
+            svg.appendChild(path);
+            previewElement.appendChild(svg);
+        }
+    });
 }
 
 /* ----------  COMMA-TABLE → CSS-GRID  ---------- */
@@ -1163,6 +1240,15 @@ function parseMarkdownInline(text) {
 
     // Correct Answer: [[text]] -> text with hidden green highlight
     formatted = formatted.replace(/\[\[(.+?)\]\]/g, '<span class="correct-answer">$1</span>');
+
+    // Word Connectors: [1]Word -> creates visual connection between words with same number
+    // Process connectors and create wrapper with data attributes
+    const connectorColors = ['#007bff', '#dc3545', '#28a745', '#fd7e14', '#6f42c1', '#20c997', '#e83e8c', '#17a2b8'];
+    formatted = formatted.replace(/\[(\d+)\](\S+)/g, (match, connId, word) => {
+        const colorIndex = (parseInt(connId) - 1) % connectorColors.length;
+        const color = connectorColors[colorIndex];
+        return `<span class="word-connector" data-conn-id="${connId}" data-conn-color="${color}">${word}</span>`;
+    });
 
     // Timeline: Timeline*Name or TimelineC*Name followed by list items
     // Timeline* = top-aligned, TimelineC* = center-aligned
@@ -1444,6 +1530,14 @@ function oldParseMarkdownBody(lines) {
 
         // Correct Answer: [[text]] -> text with hidden green highlight
         formatted = formatted.replace(/\[\[(.+?)\]\]/g, '<span class="correct-answer">$1</span>');
+
+        // Word Connectors: [1]Word -> creates visual connection between words with same number
+        const connectorColors = ['#007bff', '#dc3545', '#28a745', '#fd7e14', '#6f42c1', '#20c997', '#e83e8c', '#17a2b8'];
+        formatted = formatted.replace(/\[(\d+)\](\S+)/g, (match, connId, word) => {
+            const colorIndex = (parseInt(connId) - 1) % connectorColors.length;
+            const color = connectorColors[colorIndex];
+            return `<span class="word-connector" data-conn-id="${connId}" data-conn-color="${color}">${word}</span>`;
+        });
 
         // Timeline: Timeline*Name or TimelineC*Name followed by list items
         // Timeline* = top-aligned, TimelineC* = center-aligned
@@ -5150,6 +5244,9 @@ function stripMarkdown(text) {
 
     // Remove Timeline markers: Timeline*Name or TimelineC*Name -> Name
     stripped = stripped.replace(/^Timeline(?:C)?\*(.+?)$/gm, '$1');
+
+    // Remove word connector markers: [1]Word -> Word
+    stripped = stripped.replace(/\[(\d+)\](\S+)/g, '$2');
 
     return stripped;
 }
