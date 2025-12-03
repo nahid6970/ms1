@@ -1639,9 +1639,9 @@ def generate_static_html(data, custom_syntaxes):
                 var isCenter = type === 'TimelineC';
                 var alignStyle = isCenter ? 'align-items: center;' : 'align-items: flex-start;';
                 return '<div class="md-timeline" style="display: flex; gap: 12px; margin: 8px 0; ' + alignStyle + '">' +
-                    '<div class="md-timeline-left" style="flex: 0 0 150px; text-align: left; font-weight: 600;">' + name + '</div>' +
-                    '<div class="md-timeline-separator" style="width: 2px; background: #999; align-self: stretch;"></div>' +
-                    '<div class="md-timeline-right" style="flex: 1;">';
+                    '<div class="md-timeline-left" style="flex: 0 0 150px; text-align: left; font-weight: 600; line-height: 1.4;">' + name + '</div>' +
+                    '<div class="md-timeline-separator" style="width: 1px; background: #ccc; align-self: stretch; margin-top: 2px;"></div>' +
+                    '<div class="md-timeline-right" style="flex: 1; line-height: 1.4;">';
             });
 
             // Apply custom color syntaxes
@@ -1793,9 +1793,9 @@ def generate_static_html(data, custom_syntaxes):
                     var isCenter = type === 'TimelineC';
                     var alignStyle = isCenter ? 'align-items: center;' : 'align-items: flex-start;';
                     return '<div class="md-timeline" style="display: flex; gap: 12px; margin: 8px 0; ' + alignStyle + '">' +
-                        '<div class="md-timeline-left" style="flex: 0 0 150px; text-align: left; font-weight: 600;">' + name + '</div>' +
-                        '<div class="md-timeline-separator" style="width: 2px; background: #999; align-self: stretch;"></div>' +
-                        '<div class="md-timeline-right" style="flex: 1;">';
+                        '<div class="md-timeline-left" style="flex: 0 0 150px; text-align: left; font-weight: 600; line-height: 1.4;">' + name + '</div>' +
+                        '<div class="md-timeline-separator" style="width: 1px; background: #ccc; align-self: stretch; margin-top: 2px;"></div>' +
+                        '<div class="md-timeline-right" style="flex: 1; line-height: 1.4;">';
                 });
 
                 // Apply custom color syntaxes
@@ -1834,12 +1834,17 @@ def generate_static_html(data, custom_syntaxes):
 
             return processedLines.reduce(function(acc, line, i) {
                 if (i === 0) return line;
-                var prev = formattedLines[i - 1];
+                var prev = processedLines[i - 1];
                 // Check for separator to avoid double line breaks
                 var isSeparator = line.includes('md-separator');
                 var prevIsSeparator = prev.includes('md-separator');
                 
-                if (isSeparator || prevIsSeparator) {
+                // Don't add <br> after timeline opening or before timeline closing
+                var isTimelineStart = prev.includes('class="md-timeline"');
+                var isTimelineEnd = line === '</div></div>';
+                var isListItem = line.trim().indexOf('<span style="display: inline-flex') === 0;
+                
+                if (isSeparator || prevIsSeparator || (isTimelineStart && isListItem) || isTimelineEnd) {
                     return acc + line;
                 }
                 return acc + '<br>' + line;

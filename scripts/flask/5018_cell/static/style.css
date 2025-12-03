@@ -3592,22 +3592,37 @@ mark {
     display: flex;
     gap: 12px;
     margin: 8px 0;
+    align-items: flex-start;
 }
 
 .md-timeline-left {
     flex: 0 0 150px;
     text-align: left;
     font-weight: 600;
+    line-height: 1.4;
 }
 
 .md-timeline-separator {
-    width: 2px;
-    background: #999;
+    width: 1px;
+    background: #ccc;
     align-self: stretch;
+    margin-top: 2px;
 }
 
 .md-timeline-right {
     flex: 1;
+    line-height: 1.4;
+}
+
+/* Fix list item alignment in timeline */
+.md-timeline-right > span[style*="inline-flex"] {
+    align-items: flex-start !important;
+}
+
+.md-timeline-right > span[style*="inline-flex"] > span:first-child {
+    position: relative;
+    top: 0 !important;
+    line-height: 1.4;
 }
 
 /* Toolbar Separator */

@@ -1168,9 +1168,9 @@ function parseMarkdownInline(text) {
         const isCenter = type === 'TimelineC';
         const alignStyle = isCenter ? 'align-items: center;' : 'align-items: flex-start;';
         return `<div class="md-timeline" style="display: flex; gap: 12px; margin: 8px 0; ${alignStyle}">
-            <div class="md-timeline-left" style="flex: 0 0 150px; text-align: left; font-weight: 600;">${name}</div>
-            <div class="md-timeline-separator" style="width: 2px; background: #999; align-self: stretch;"></div>
-            <div class="md-timeline-right" style="flex: 1;">`;
+            <div class="md-timeline-left" style="flex: 0 0 150px; text-align: left; font-weight: 600; line-height: 1.4;">${name}</div>
+            <div class="md-timeline-separator" style="width: 1px; background: #ccc; align-self: stretch; margin-top: 2px;"></div>
+            <div class="md-timeline-right" style="flex: 1; line-height: 1.4;">`;
     });
 
     // Apply custom color syntaxes
@@ -1443,9 +1443,9 @@ function oldParseMarkdownBody(lines) {
             const isCenter = type === 'TimelineC';
             const alignStyle = isCenter ? 'align-items: center;' : 'align-items: flex-start;';
             return `<div class="md-timeline" style="display: flex; gap: 12px; margin: 8px 0; ${alignStyle}">
-            <div class="md-timeline-left" style="flex: 0 0 150px; text-align: left; font-weight: 600;">${name}</div>
-            <div class="md-timeline-separator" style="width: 2px; background: #999; align-self: stretch;"></div>
-            <div class="md-timeline-right" style="flex: 1;">`;
+            <div class="md-timeline-left" style="flex: 0 0 150px; text-align: left; font-weight: 600; line-height: 1.4;">${name}</div>
+            <div class="md-timeline-separator" style="width: 1px; background: #ccc; align-self: stretch; margin-top: 2px;"></div>
+            <div class="md-timeline-right" style="flex: 1; line-height: 1.4;">`;
         });
 
         // Apply custom color syntaxes
@@ -1484,12 +1484,17 @@ function oldParseMarkdownBody(lines) {
 
     return processedLines.reduce((acc, line, i) => {
         if (i === 0) return line;
-        const prev = formattedLines[i - 1];
+        const prev = processedLines[i - 1];
         // Check for separator to avoid double line breaks (newline + block element break)
         const isSeparator = line.includes('class="md-separator"');
         const prevIsSeparator = prev.includes('class="md-separator"');
+        
+        // Don't add newline after timeline opening or before timeline closing
+        const isTimelineStart = prev.includes('class="md-timeline"');
+        const isTimelineEnd = line === '</div></div>';
+        const isListItem = line.trim().startsWith('<span style="display: inline-flex');
 
-        if (isSeparator || prevIsSeparator) {
+        if (isSeparator || prevIsSeparator || (isTimelineStart && isListItem) || isTimelineEnd) {
             return acc + line;
         }
         return acc + '\n' + line;
