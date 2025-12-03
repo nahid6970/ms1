@@ -1172,7 +1172,7 @@ function parseGridTable(lines) {
                 styles.push(`text-align: ${cell.align}`);
             }
             if (cell.borderColor) {
-                styles.push(`border-right-color: ${cell.borderColor}`);
+                styles.push(`border-right-color: ${cell.borderColor} !important`);
             }
             const styleAttr = styles.length > 0 ? ` style="${styles.join('; ')}"` : '';
             
