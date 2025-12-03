@@ -6099,7 +6099,7 @@ function formatPipeTable(event) {
             return trimmed.split('|').map(cell => cell.trim());
         });
 
-        // Calculate max width for each column
+        // Calculate max width for each column (excluding separator rows)
         const colCount = Math.max(...rows.map(r => r.length));
         const colWidths = [];
         
@@ -6107,7 +6107,10 @@ function formatPipeTable(event) {
             let maxWidth = 0;
             for (let row of rows) {
                 if (row[col]) {
-                    maxWidth = Math.max(maxWidth, row[col].length);
+                    // Skip separator rows (all dashes) when calculating width
+                    if (!/^-+$/.test(row[col])) {
+                        maxWidth = Math.max(maxWidth, row[col].length);
+                    }
                 }
             }
             colWidths[col] = maxWidth;
