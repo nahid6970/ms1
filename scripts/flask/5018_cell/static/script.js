@@ -1111,26 +1111,54 @@ function parseGridTable(lines) {
     const dataRows = hasHeaderSeparator ? [rows[0], ...rows.slice(2)] : rows;
     const hasHeader = hasHeaderSeparator;
 
-    // Process each cell and check for alignment markers
+    // Color map for separator colors
+    const colorMap = {
+        'R': '#ff0000', 'G': '#00ff00', 'B': '#0000ff', 'Y': '#ffff00',
+        'O': '#ff8800', 'P': '#ff00ff', 'C': '#00ffff', 'W': '#ffffff',
+        'K': '#000000', 'GR': '#808080'
+    };
+
+    // Process each cell and check for alignment markers and color codes
     const grid = dataRows.map(r =>
         r.map(c => {
             let align = 'left';
             let content = c;
+            let borderColor = null;
 
-            // Check for center alignment :text:
-            if (content.startsWith(':') && content.endsWith(':') && content.length > 2) {
-                align = 'center';
-                content = content.slice(1, -1).trim();
-            }
-            // Check for right alignment text:
-            else if (content.endsWith(':') && !content.startsWith(':')) {
-                align = 'right';
-                content = content.slice(0, -1).trim();
+            // Check for color code with alignment: :R:text: or :G:text or :B:text:
+            const colorAlignMatch = content.match(/^:([A-Z]+):(.+)$/);
+            if (colorAlignMatch) {
+                const [, colorCode, rest] = colorAlignMatch;
+                if (colorMap[colorCode]) {
+                    borderColor = colorMap[colorCode];
+                    content = rest;
+                    
+                    // Check if content also has alignment markers
+                    if (content.startsWith(':') && content.endsWith(':') && content.length > 2) {
+                        align = 'center';
+                        content = content.slice(1, -1).trim();
+                    } else if (content.endsWith(':')) {
+                        align = 'right';
+                        content = content.slice(0, -1).trim();
+                    }
+                }
+            } else {
+                // Check for center alignment :text:
+                if (content.startsWith(':') && content.endsWith(':') && content.length > 2) {
+                    align = 'center';
+                    content = content.slice(1, -1).trim();
+                }
+                // Check for right alignment text:
+                else if (content.endsWith(':') && !content.startsWith(':')) {
+                    align = 'right';
+                    content = content.slice(0, -1).trim();
+                }
             }
 
             return {
                 content: parseMarkdownInline(content),
-                align: align
+                align: align,
+                borderColor: borderColor
             };
         })
     );
@@ -1138,14 +1166,22 @@ function parseGridTable(lines) {
     /*  build a single <div> that looks like a table  */
     let html = `<div class="md-grid" style="--cols:${cols}">`;
     grid.forEach((row, i) => {
-        row.forEach(cell => {
-            const alignStyle = cell.align !== 'left' ? ` style="text-align: ${cell.align}"` : '';
+        row.forEach((cell, colIndex) => {
+            let styles = [];
+            if (cell.align !== 'left') {
+                styles.push(`text-align: ${cell.align}`);
+            }
+            if (cell.borderColor) {
+                styles.push(`border-right-color: ${cell.borderColor}`);
+            }
+            const styleAttr = styles.length > 0 ? ` style="${styles.join('; ')}"` : '';
+            
             // Check if cell content is only "-" (empty cell marker)
             const isEmpty = cell.content.trim() === '-';
             const emptyClass = isEmpty ? ' md-empty' : '';
             // Only apply header class if we have a header separator and it's the first row
             const isHeader = hasHeader && i === 0;
-            html += `<div class="md-cell ${isHeader ? 'md-header' : ''}${emptyClass}"${alignStyle}>${cell.content}</div>`;
+            html += `<div class="md-cell ${isHeader ? 'md-header' : ''}${emptyClass}"${styleAttr}>${cell.content}</div>`;
         });
     });
     html += '</div>';

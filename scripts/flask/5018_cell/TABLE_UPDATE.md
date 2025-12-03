@@ -79,14 +79,60 @@ Result:
 - `text:` = right aligned
 - `text` = left aligned (default)
 
+## New Feature: Colored Column Separators
+
+You can now color the pipe separators between columns using color codes!
+
+### Syntax:
+```
+| :R:Name | :G:Age | :B:City |
+|---------|--------|---------|
+| John    | 25     | NYC     |
+| Jane    | 30     | LA      |
+```
+
+Result:
+- **Red** pipe after "Name" column
+- **Green** pipe after "Age" column  
+- **Blue** pipe after "City" column
+
+### Available Colors:
+- **:R:** = Red (#ff0000)
+- **:G:** = Green (#00ff00)
+- **:B:** = Blue (#0000ff)
+- **:Y:** = Yellow (#ffff00)
+- **:O:** = Orange (#ff8800)
+- **:P:** = Purple (#ff00ff)
+- **:C:** = Cyan (#00ffff)
+- **:W:** = White (#ffffff)
+- **:K:** = Black (#000000)
+- **:GR:** = Gray (#808080)
+
+### Combining Colors with Alignment:
+```
+| :R::Name: | :G:Age: | :B::City: |
+|-----------|---------|-----------|
+| John      | 25      | NYC       |
+```
+
+- `:R::text:` = Red separator + center aligned
+- `:G:text:` = Green separator + right aligned
+- `:B:text` = Blue separator + left aligned
+
+### Separator Width:
+- Changed from 1px to **3px** (matching Timeline feature)
+- More visible and easier to distinguish colors
+
 ## Files Updated
-1. `static/script.js` - parseGridTable() function
-2. `static/style.css` - .md-grid, .md-cell, .md-header styles
-3. `export_static.py` - parseGridTable() function and CSS
+1. `static/script.js` - parseGridTable() function with color support
+2. `static/style.css` - .md-grid, .md-cell (3px border width)
+3. `export_static.py` - parseGridTable() function with color support and CSS
 
 ## Benefits
 ✅ Cleaner, more minimal appearance
 ✅ Flexibility - use headers only when needed
 ✅ Better for simple data tables
+✅ Colored separators for visual organization
+✅ Thicker 3px separators (matching Timeline)
 ✅ Maintains all existing features (alignment, resizing, wrapping)
 ✅ Works in both live app and static export

@@ -2689,7 +2689,7 @@ Markdown Table Styles */
 .md-cell {
     padding: 4px 12px !important;
     border: none !important;
-    border-right: 1px solid #ced4da !important;
+    border-right: 3px solid #ced4da !important;
     background: transparent !important;
     overflow: hidden !important;
     word-break: break-word !important;
