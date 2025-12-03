@@ -145,11 +145,46 @@ Result:
 2. `static/style.css` - .md-grid, .md-cell (3px border width)
 3. `export_static.py` - parseGridTable() function with color support and CSS
 
+## New Feature: Table Formatter (F3)
+
+Automatically format and align your pipe tables with one click!
+
+### Usage:
+1. Select your messy table text
+2. Press **F3** (Quick Formatter)
+3. Click the **📊 Format Table** button
+
+### Example:
+
+**Before (messy):**
+```
+:R-A:Name | :G:Age | :B-A:City
+---------|--------|--------
+John | 25     | NYC
+Jane       | 30     | LA
+```
+
+**After (formatted):**
+```
+| :R-A:Name | :G:Age | :B-A:City |
+|-----------|--------|-----------|
+| John      | 25     | NYC       |
+| Jane      | 30     | LA        |
+```
+
+### What it does:
+✅ Aligns all pipes vertically
+✅ Pads cells with spaces to match column width
+✅ Handles separator rows (dashes)
+✅ Preserves color codes and alignment markers
+✅ Adds leading/trailing pipes if missing
+
 ## Benefits
 ✅ Cleaner, more minimal appearance
 ✅ Flexibility - use headers only when needed
 ✅ Better for simple data tables
 ✅ Colored separators for visual organization
 ✅ Thicker 3px separators (matching Timeline)
+✅ **Auto-formatting** with F3 → 📊 button
 ✅ Maintains all existing features (alignment, resizing, wrapping)
 ✅ Works in both live app and static export

@@ -6068,6 +6068,94 @@ function commaToLines(event) {
     showToast(`Converted to ${items.length} lines`, 'success');
 }
 
+function formatPipeTable(event) {
+    if (!quickFormatterTarget) return;
+
+    const input = quickFormatterTarget;
+    const start = quickFormatterSelection.start;
+    const end = quickFormatterSelection.end;
+    const selectedText = input.value.substring(start, end);
+
+    if (!selectedText) {
+        showToast('No text selected', 'warning');
+        return;
+    }
+
+    // Check if text contains pipes (basic table detection)
+    if (!selectedText.includes('|')) {
+        showToast('Not a pipe table', 'warning');
+        return;
+    }
+
+    try {
+        // Split into lines
+        const lines = selectedText.trim().split('\n');
+        
+        // Parse each line into columns (split by |, remove leading/trailing pipes)
+        const rows = lines.map(line => {
+            // Remove leading/trailing whitespace and pipes
+            const trimmed = line.trim().replace(/^\||\|$/g, '');
+            // Split by pipe and trim each cell
+            return trimmed.split('|').map(cell => cell.trim());
+        });
+
+        // Calculate max width for each column
+        const colCount = Math.max(...rows.map(r => r.length));
+        const colWidths = [];
+        
+        for (let col = 0; col < colCount; col++) {
+            let maxWidth = 0;
+            for (let row of rows) {
+                if (row[col]) {
+                    maxWidth = Math.max(maxWidth, row[col].length);
+                }
+            }
+            colWidths[col] = maxWidth;
+        }
+
+        // Rebuild table with proper alignment
+        const formatted = rows.map((row, rowIndex) => {
+            const cells = row.map((cell, colIndex) => {
+                const width = colWidths[colIndex] || 0;
+                
+                // Check if it's a separator row (all dashes)
+                if (/^-+$/.test(cell)) {
+                    return '-'.repeat(width);
+                }
+                
+                // Pad cell to column width
+                return cell.padEnd(width, ' ');
+            });
+            
+            // Join with pipes and add leading/trailing pipes
+            return '| ' + cells.join(' | ') + ' |';
+        });
+
+        const formattedText = formatted.join('\n');
+
+        // Replace the selected text
+        const newText = input.value.substring(0, start) +
+            formattedText +
+            input.value.substring(end);
+
+        input.value = newText;
+
+        // Trigger change event to update cell
+        const changeEvent = new Event('input', { bubbles: true });
+        input.dispatchEvent(changeEvent);
+
+        // Select the result
+        input.setSelectionRange(start, start + formattedText.length);
+        input.focus();
+
+        closeQuickFormatter();
+        showToast('Table formatted', 'success');
+    } catch (error) {
+        console.error('Error formatting table:', error);
+        showToast('Error formatting table', 'error');
+    }
+}
+
 function changeTextCase(caseType, event) {
     if (!quickFormatterTarget) return;
 

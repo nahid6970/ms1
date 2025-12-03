@@ -250,10 +250,52 @@ These two markdown syntaxes work together and are controlled by the same 👁️
 - **Quick Formatter:** Added two buttons in the formatter popup:
   - "Lines → Comma" button converts selected text from lines to comma-separated
   - "Comma → Lines" button converts selected text from comma-separated to lines
-- **Usage:** Select text in a cell, press F2, and click the appropriate conversion button.
+- **Usage:** Select text in a cell, press F3, and click the appropriate conversion button.
 - **Key Functions:**
   - `linesToComma()` - Converts line breaks to commas
   - `commaToLines()` - Converts commas to line breaks
+
+### Pipe Table Formatter
+**Purpose:** Automatically format and align pipe tables (like Vim/Emacs table formatting).
+**Syntax:** Select any pipe table text and click the 📊 button in Quick Formatter (F3).
+
+**Before:**
+```
+:R-A:Name | :G:Age | :B-A:City
+---------|--------|--------
+John | 25     | NYC
+Jane       | 30     | LA
+```
+
+**After:**
+```
+| :R-A:Name | :G:Age | :B-A:City |
+|-----------|--------|-----------|
+| John      | 25     | NYC       |
+| Jane      | 30     | LA        |
+```
+
+**Features:**
+- Aligns all pipes vertically
+- Pads cells with spaces to match column width
+- Handles separator rows (dashes)
+- Preserves color codes (`:R-A:`, etc.)
+- Preserves alignment markers (`:text:`, `text:`)
+- Adds leading/trailing pipes if missing
+- Works with any number of columns
+
+**Implementation:**
+- **Function:** `formatPipeTable()` in `static/script.js` (~line 6070)
+- **Algorithm:**
+  1. Parse table into rows and columns
+  2. Calculate maximum width for each column
+  3. Pad cells to match column width
+  4. Rebuild table with aligned pipes
+- **Button:** 📊 in Quick Formatter (F3) - Located in Utilities section
+- **Usage:** Select table text → Press F3 → Click 📊
+
+**Key Functions:**
+- `formatPipeTable(event)` - Main formatting function
 
 ### Page Load Time Indicator
 **Purpose:** Shows how long the page took to load, helping with performance monitoring.
