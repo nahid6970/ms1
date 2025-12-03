@@ -563,6 +563,7 @@ The F1 window (opened with F1 key) provides comprehensive management through rig
 4. Update `export_static.py` - add to both `parseMarkdownInline()` and `oldParseMarkdownBody()`
 5. Add to Markdown Guide modal in `templates/index.html` (search for "Markdown Formatting Guide")
 6. Test: Create cell with syntax, check preview, search, sort, and static export
+7. **Optional:** Add to Quick Formatter (F3) if users would benefit from quick-apply button
 
 ### Modifying the Table Rendering
 - Main function: `renderTable()` (~line 3947+)

@@ -762,10 +762,18 @@
                 oncontextmenu="return toggleFormatSelection('##', '##', event)" title="Heading (Right-click to select)">
                 <span style="font-size: 1.2em; font-weight: 600;">H</span>
             </button>
+            <button class="format-btn" onclick="applyVariableFontSize(event)" title="Variable Font Size - #2#text#/#">
+                <span style="font-size: 1.5em; font-weight: 600;">H+</span>
+            </button>
             <button class="format-btn" onclick="applyQuickFormat('..', '..', event)"
                 oncontextmenu="return toggleFormatSelection('..', '..', event)"
                 title="Small Text (Right-click to select)">
                 <span style="font-size: 0.75em;">S</span>
+            </button>
+            <button class="format-btn" onclick="applyQuickFormat('_.', '._', event)"
+                oncontextmenu="return toggleFormatSelection('_.', '._', event)"
+                title="Wavy Underline (Right-click to select)">
+                <span style="text-decoration: underline wavy;">W</span>
             </button>
             <button class="format-btn" onclick="applyQuickFormat('`', '`', event)"
                 oncontextmenu="return toggleFormatSelection('`', '`', event)" title="Code (Right-click to select)">

@@ -9312,3 +9312,49 @@ window.onclick = function(event) {
         closeMarkdownGuide();
     }
 };
+
+
+// Variable Font Size Quick Format Function
+function applyVariableFontSize(event) {
+    if (!quickFormatterTarget) return;
+
+    const input = quickFormatterTarget;
+    const start = quickFormatterSelection.start;
+    const end = quickFormatterSelection.end;
+    const selectedText = input.value.substring(start, end);
+
+    if (!selectedText) {
+        showToast('Please select text first', 'error');
+        return;
+    }
+
+    // Prompt for font size
+    const size = prompt('Enter font size multiplier (e.g., 2 for 2x, 1.5 for 1.5x, 0.8 for smaller):', '2');
+    
+    if (size === null) return; // User cancelled
+    
+    const sizeNum = parseFloat(size);
+    if (isNaN(sizeNum) || sizeNum <= 0) {
+        showToast('Invalid size. Please enter a positive number.', 'error');
+        return;
+    }
+
+    // Apply the variable font size syntax
+    const newText = input.value.substring(0, start) +
+        `#${sizeNum}#${selectedText}#/#` +
+        input.value.substring(end);
+
+    input.value = newText;
+
+    // Trigger change event
+    const changeEvent = new Event('input', { bubbles: true });
+    input.dispatchEvent(changeEvent);
+
+    // Set cursor after the formatted text
+    const newCursorPos = start + `#${sizeNum}#${selectedText}#/#`.length;
+    input.setSelectionRange(newCursorPos, newCursorPos);
+    input.focus();
+
+    closeQuickFormatter();
+    showToast(`Font size ${sizeNum}x applied`, 'success');
+}
