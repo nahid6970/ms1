@@ -1574,11 +1574,19 @@ def generate_static_html(data, custom_syntaxes):
                 return '<span style="' + styleStr + '">' + text + '</span>';
             });
 
+            // Variable font size heading: #2#text#/# -> custom size (2em, 1.5em, etc.)
+            formatted = formatted.replace(/#([\\d.]+)#(.+?)#\\/#/g, function(match, size, text) {
+                return '<span style="font-size: ' + size + 'em; font-weight: 600;">' + text + '</span>';
+            });
+
             // Heading: ##text## -> larger text
             formatted = formatted.replace(/##(.+?)##/g, '<span style="font-size: 1.3em; font-weight: 600;">$1</span>');
 
             // Small text: ..text.. -> smaller text
             formatted = formatted.replace(/\\.\\.(.+?)\\.\\./g, '<span style="font-size: 0.75em;">$1</span>');
+
+            // Wavy underline: _.text._ -> wavy underline
+            formatted = formatted.replace(/_\\.(.+?)\\._/g, '<span style="text-decoration: underline wavy;">$1</span>');
 
             // Horizontal separator: ----- (5 or more dashes on a line) -> separator div
             formatted = formatted.replace(/^-{5,}$/gm, '<div class="md-separator" style="width: 100%; height: 4px; background: #ccc; margin: 12px 0; padding: 0; display: block; border: none; line-height: 0; font-size: 0;"></div>');
@@ -1684,11 +1692,19 @@ def generate_static_html(data, custom_syntaxes):
                     return `<span style="${styleStr}">${text}</span>`;
                 });
 
+                // Variable font size heading: #2#text#/# -> custom size (2em, 1.5em, etc.)
+                formatted = formatted.replace(/#([\\d.]+)#(.+?)#\\/#/g, function(match, size, text) {
+                    return '<span style="font-size: ' + size + 'em; font-weight: 600;">' + text + '</span>';
+                });
+
                 // Heading: ##text## -> larger text
                 formatted = formatted.replace(/##(.+?)##/g, '<span style="font-size: 1.3em; font-weight: 600;">$1</span>');
 
                 // Small text: ..text.. -> smaller text
                 formatted = formatted.replace(/\\.\\.(.+?)\\.\\./g, '<span style="font-size: 0.75em;">$1</span>');
+
+                // Wavy underline: _.text._ -> wavy underline
+                formatted = formatted.replace(/_\\.(.+?)\\._/g, '<span style="text-decoration: underline wavy;">$1</span>');
 
                 // Horizontal separator: ----- (5 or more dashes on a line) -> separator div
                 formatted = formatted.replace(/^-{5,}$/gm, '<div class="md-separator" style="width: 100%; height: 4px; background: #ccc; margin: 12px 0; padding: 0; display: block; border: none; line-height: 0; font-size: 0;"></div>');

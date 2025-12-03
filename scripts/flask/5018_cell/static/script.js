@@ -921,6 +921,8 @@ function checkHasMarkdown(value) {
         str.match(/^-{5,}$/m) ||
         (str.includes('|') && str.split('|').length >= 2) ||
         str.includes('\n') || // Treat multi-line text as markdown for proper height handling
+        str.match(/#[\d.]+#.+?#\/#/) || // Variable font size heading
+        str.includes('_.') || // Wavy underline
         customColorSyntaxes.some(syntax => str.includes(syntax.marker)) // Check custom syntaxes
     );
 }
@@ -1109,11 +1111,19 @@ function parseMarkdownInline(text) {
         return `<span style="${styleStr}">${text}</span>`;
     });
 
+    // Variable font size heading: #2#text#/# -> custom size (2em, 1.5em, etc.)
+    formatted = formatted.replace(/#([\d.]+)#(.+?)#\/#/g, (match, size, text) => {
+        return `<span style="font-size: ${size}em; font-weight: 600;">${text}</span>`;
+    });
+
     // Heading: ##text## -> larger text
     formatted = formatted.replace(/##(.+?)##/g, '<span style="font-size: 1.3em; font-weight: 600;">$1</span>');
 
     // Small text: ..text.. -> smaller text
     formatted = formatted.replace(/\.\.(.+?)\.\./g, '<span style="font-size: 0.75em;">$1</span>');
+
+    // Wavy underline: _.text._ -> wavy underline
+    formatted = formatted.replace(/_\.(.+?)\._/g, '<span style="text-decoration: underline wavy;">$1</span>');
 
     // Horizontal separator: ----- (5 or more dashes on a line) -> separator div
     formatted = formatted.replace(/^-{5,}$/gm, '<div class="md-separator"></div>');
@@ -1331,11 +1341,19 @@ function oldParseMarkdownBody(lines) {
             return `<span style="${styleStr}">${text}</span>`;
         });
 
+        // Variable font size heading: #2#text#/# -> custom size (2em, 1.5em, etc.)
+        formatted = formatted.replace(/#([\d.]+)#(.+?)#\/#/g, (match, size, text) => {
+            return `<span style="font-size: ${size}em; font-weight: 600;">${text}</span>`;
+        });
+
         // Heading: ##text## -> larger text
         formatted = formatted.replace(/##(.+?)##/g, '<span style="font-size: 1.3em; font-weight: 600;">$1</span>');
 
         // Small text: ..text.. -> smaller text
         formatted = formatted.replace(/\.\.(.+?)\.\./g, '<span style="font-size: 0.75em;">$1</span>');
+
+        // Wavy underline: _.text._ -> wavy underline
+        formatted = formatted.replace(/_\.(.+?)\._/g, '<span style="text-decoration: underline wavy;">$1</span>');
 
         // Horizontal separator: ----- (5 or more dashes on a line) -> separator div
         formatted = formatted.replace(/^-{5,}$/gm, '<div class="md-separator"></div>');
@@ -5000,11 +5018,17 @@ function stripMarkdown(text) {
     // Remove highlight markers: @@text@@ -> text
     stripped = stripped.replace(/@@(.+?)@@/g, '$1');
 
+    // Remove variable font size heading markers: #2#text#/# -> text
+    stripped = stripped.replace(/#[\d.]+#(.+?)#\/#/g, '$1');
+
     // Remove header markers: ##text## -> text
     stripped = stripped.replace(/##(.+?)##/g, '$1');
 
     // Remove small text markers: ..text.. -> text
     stripped = stripped.replace(/\.\.(.+?)\.\./g, '$1');
+
+    // Remove wavy underline markers: _.text._ -> text
+    stripped = stripped.replace(/_\.(.+?)\._/g, '$1');
 
     // Remove horizontal separator: ----- -> (empty)
     stripped = stripped.replace(/^-{5,}$/gm, '');
