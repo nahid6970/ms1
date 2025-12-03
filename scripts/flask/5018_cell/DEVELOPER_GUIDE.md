@@ -592,6 +592,46 @@ The F1 window (opened with F1 key) provides comprehensive management through rig
 - [ ] Test features in both live Flask app and exported static HTML.
 
 
+### Timeline/Flowchart Layout Feature
+**Syntax:** 
+- `Timeline*Name` followed by list items → Top-aligned left text with vertical separator
+- `TimelineC*Name` followed by list items → Center-aligned left text with vertical separator
+
+**Purpose:** Create timeline or flowchart layouts with a left label, vertical separator, and right-side bullet list.
+
+**Layout:**
+```
+Left Text           |  • Item 1
+                    |  • Item 2
+                    |  • Item 3
+```
+
+**Implementation:**
+- **Parsing:** In both `parseMarkdownInline()` and `oldParseMarkdownBody()`, regex `/^(Timeline(?:C)?)\*(.+?)$/gm` converts to flexbox layout
+- **Post-processing:** Automatically closes timeline divs before non-list content
+- **Detection:** Added `str.match(/^Timeline(?:C)?\*/m)` to `checkHasMarkdown()`
+- **Stripping:** Added `.replace(/^Timeline(?:C)?\*(.+?)$/gm, '$1')` to `stripMarkdown()`
+- **Styling:** CSS classes `.md-timeline`, `.md-timeline-left`, `.md-timeline-separator`, `.md-timeline-right`
+- **Static Export:** Full support in both parseMarkdownInline and oldParseMarkdownBody functions
+- **Markdown Guide:** Added to templates/index.html with examples
+
+**Key Functions:**
+- `parseMarkdownInline()` - Converts Timeline syntax to HTML (inline parser for table cells)
+- `oldParseMarkdownBody()` - Converts Timeline syntax to HTML (body parser for regular cells)
+- `checkHasMarkdown()` - Detects the syntax
+- `stripMarkdown()` - Removes syntax for sorting/searching
+
+**Usage Example:**
+```
+Timeline*Event 1
+- First item
+- Second item
+
+TimelineC*Event 2
+- Centered item
+- Another item
+```
+
 ### Sub-Sheet Hierarchy Feature
 **Purpose:** Organize related sheets in a parent-child hierarchy with visual navigation.
 

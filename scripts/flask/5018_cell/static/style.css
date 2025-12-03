@@ -3587,6 +3587,29 @@ mark {
     font-weight: 500;
 }
 
+/* Timeline/Flowchart Layout */
+.md-timeline {
+    display: flex;
+    gap: 12px;
+    margin: 8px 0;
+}
+
+.md-timeline-left {
+    flex: 0 0 150px;
+    text-align: left;
+    font-weight: 600;
+}
+
+.md-timeline-separator {
+    width: 2px;
+    background: #999;
+    align-self: stretch;
+}
+
+.md-timeline-right {
+    flex: 1;
+}
+
 /* Toolbar Separator */
 .button-group .separator {
     width: 1px;

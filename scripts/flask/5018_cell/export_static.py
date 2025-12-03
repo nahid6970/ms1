@@ -1382,6 +1382,7 @@ def generate_static_html(data, custom_syntaxes):
                         cellValue.match(/Table\\*\\d+/i) ||
                         cellValue.trim().startsWith('|') ||
                         cellValue.match(/^-{5,}$/m) ||
+                        cellValue.match(/^Timeline(?:C)?\\*/m) ||
                         (cellValue.includes('|') && cellValue.split('|').length >= 2);
                     
                     if (hasMarkdown) {
@@ -1462,6 +1463,8 @@ def generate_static_html(data, custom_syntaxes):
             stripped = stripped.replace(/\\[\\[(.+?)\\]\\]/g, '$1');
             // Remove bullet markers: - item -> item
             stripped = stripped.replace(/^\\s*-\\s+/gm, '');
+            // Remove Timeline markers: Timeline*Name or TimelineC*Name -> Name
+            stripped = stripped.replace(/^Timeline(?:C)?\\*(.+?)$/gm, '$1');
             return stripped;
         }
 
@@ -1630,6 +1633,17 @@ def generate_static_html(data, custom_syntaxes):
                 return '<span class="collapsible-wrapper"><button class="collapsible-toggle" onclick="toggleCollapsible(\\'' + id + '\\')" title="Click to show/hide">👁️</button><span id="' + id + '" class="collapsible-content" style="display: none;">' + content + '</span></span>';
             });
 
+            // Timeline: Timeline*Name or TimelineC*Name followed by list items
+            // Timeline* = top-aligned, TimelineC* = center-aligned
+            formatted = formatted.replace(/^(Timeline(?:C)?)\\*(.+?)$/gm, function(match, type, name) {
+                var isCenter = type === 'TimelineC';
+                var alignStyle = isCenter ? 'align-items: center;' : 'align-items: flex-start;';
+                return '<div class="md-timeline" style="display: flex; gap: 12px; margin: 8px 0; ' + alignStyle + '">' +
+                    '<div class="md-timeline-left" style="flex: 0 0 150px; text-align: left; font-weight: 600;">' + name + '</div>' +
+                    '<div class="md-timeline-separator" style="width: 2px; background: #999; align-self: stretch;"></div>' +
+                    '<div class="md-timeline-right" style="flex: 1;">';
+            });
+
             // Apply custom color syntaxes
             formatted = applyCustomColorSyntaxes(formatted);
 
@@ -1773,13 +1787,52 @@ def generate_static_html(data, custom_syntaxes):
                     return '<span class="collapsible-wrapper"><button class="collapsible-toggle" onclick="toggleCollapsible(\\'' + id + '\\')" title="Click to show/hide">👁️</button><span id="' + id + '" class="collapsible-content" style="display: none;">' + content + '</span></span>';
                 });
 
+                // Timeline: Timeline*Name or TimelineC*Name followed by list items
+                // Timeline* = top-aligned, TimelineC* = center-aligned
+                formatted = formatted.replace(/^(Timeline(?:C)?)\\*(.+?)$/gm, function(match, type, name) {
+                    var isCenter = type === 'TimelineC';
+                    var alignStyle = isCenter ? 'align-items: center;' : 'align-items: flex-start;';
+                    return '<div class="md-timeline" style="display: flex; gap: 12px; margin: 8px 0; ' + alignStyle + '">' +
+                        '<div class="md-timeline-left" style="flex: 0 0 150px; text-align: left; font-weight: 600;">' + name + '</div>' +
+                        '<div class="md-timeline-separator" style="width: 2px; background: #999; align-self: stretch;"></div>' +
+                        '<div class="md-timeline-right" style="flex: 1;">';
+                });
+
                 // Apply custom color syntaxes
                 formatted = applyCustomColorSyntaxes(formatted);
 
                 return formatted;
             });
 
-            return formattedLines.reduce(function(acc, line, i) {
+            // Post-process to close timeline divs before non-list lines
+            var processedLines = [];
+            var inTimeline = false;
+            
+            for (var i = 0; i < formattedLines.length; i++) {
+                var line = formattedLines[i];
+                var isTimelineStart = line.indexOf('class="md-timeline"') !== -1;
+                var isListItem = line.trim().indexOf('<span style="display: inline-flex') === 0 && 
+                                 (line.indexOf('•') !== -1 || line.indexOf('◦') !== -1);
+                
+                if (isTimelineStart) {
+                    processedLines.push(line);
+                    inTimeline = true;
+                } else if (inTimeline && !isListItem && line.trim() !== '') {
+                    // Close timeline before non-list content
+                    processedLines.push('</div></div>');
+                    processedLines.push(line);
+                    inTimeline = false;
+                } else {
+                    processedLines.push(line);
+                }
+            }
+            
+            // Close timeline at end if still open
+            if (inTimeline) {
+                processedLines.push('</div></div>');
+            }
+
+            return processedLines.reduce(function(acc, line, i) {
                 if (i === 0) return line;
                 var prev = formattedLines[i - 1];
                 // Check for separator to avoid double line breaks

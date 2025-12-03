@@ -923,6 +923,7 @@ function checkHasMarkdown(value) {
         str.includes('\n') || // Treat multi-line text as markdown for proper height handling
         str.match(/#[\d.]+#.+?#\/#/) || // Variable font size heading
         str.includes('_.') || // Wavy underline
+        str.match(/^Timeline(?:C)?\*/m) || // Timeline syntax
         customColorSyntaxes.some(syntax => str.includes(syntax.marker)) // Check custom syntaxes
     );
 }
@@ -1160,6 +1161,17 @@ function parseMarkdownInline(text) {
 
     // Correct Answer: [[text]] -> text with hidden green highlight
     formatted = formatted.replace(/\[\[(.+?)\]\]/g, '<span class="correct-answer">$1</span>');
+
+    // Timeline: Timeline*Name or TimelineC*Name followed by list items
+    // Timeline* = top-aligned, TimelineC* = center-aligned
+    formatted = formatted.replace(/^(Timeline(?:C)?)\*(.+?)$/gm, (match, type, name) => {
+        const isCenter = type === 'TimelineC';
+        const alignStyle = isCenter ? 'align-items: center;' : 'align-items: flex-start;';
+        return `<div class="md-timeline" style="display: flex; gap: 12px; margin: 8px 0; ${alignStyle}">
+            <div class="md-timeline-left" style="flex: 0 0 150px; text-align: left; font-weight: 600;">${name}</div>
+            <div class="md-timeline-separator" style="width: 2px; background: #999; align-self: stretch;"></div>
+            <div class="md-timeline-right" style="flex: 1;">`;
+    });
 
     // Apply custom color syntaxes
     formatted = applyCustomColorSyntaxes(formatted);
@@ -1425,13 +1437,52 @@ function oldParseMarkdownBody(lines) {
         // Correct Answer: [[text]] -> text with hidden green highlight
         formatted = formatted.replace(/\[\[(.+?)\]\]/g, '<span class="correct-answer">$1</span>');
 
+        // Timeline: Timeline*Name or TimelineC*Name followed by list items
+        // Timeline* = top-aligned, TimelineC* = center-aligned
+        formatted = formatted.replace(/^(Timeline(?:C)?)\*(.+?)$/gm, (match, type, name) => {
+            const isCenter = type === 'TimelineC';
+            const alignStyle = isCenter ? 'align-items: center;' : 'align-items: flex-start;';
+            return `<div class="md-timeline" style="display: flex; gap: 12px; margin: 8px 0; ${alignStyle}">
+            <div class="md-timeline-left" style="flex: 0 0 150px; text-align: left; font-weight: 600;">${name}</div>
+            <div class="md-timeline-separator" style="width: 2px; background: #999; align-self: stretch;"></div>
+            <div class="md-timeline-right" style="flex: 1;">`;
+        });
+
         // Apply custom color syntaxes
         formatted = applyCustomColorSyntaxes(formatted);
 
         return formatted;
     });
 
-    return formattedLines.reduce((acc, line, i) => {
+    // Post-process to close timeline divs before non-list lines
+    const processedLines = [];
+    let inTimeline = false;
+    
+    for (let i = 0; i < formattedLines.length; i++) {
+        const line = formattedLines[i];
+        const isTimelineStart = line.includes('class="md-timeline"');
+        const isListItem = line.trim().startsWith('<span style="display: inline-flex') && 
+                           (line.includes('•') || line.includes('◦'));
+        
+        if (isTimelineStart) {
+            processedLines.push(line);
+            inTimeline = true;
+        } else if (inTimeline && !isListItem && line.trim() !== '') {
+            // Close timeline before non-list content
+            processedLines.push('</div></div>');
+            processedLines.push(line);
+            inTimeline = false;
+        } else {
+            processedLines.push(line);
+        }
+    }
+    
+    // Close timeline at end if still open
+    if (inTimeline) {
+        processedLines.push('</div></div>');
+    }
+
+    return processedLines.reduce((acc, line, i) => {
         if (i === 0) return line;
         const prev = formattedLines[i - 1];
         // Check for separator to avoid double line breaks (newline + block element break)
@@ -5074,6 +5125,9 @@ function stripMarkdown(text) {
 
     // Remove Math markers: \( ... \) -> ...
     stripped = stripped.replace(/\\\((.*?)\\\)/g, '$1');
+
+    // Remove Timeline markers: Timeline*Name or TimelineC*Name -> Name
+    stripped = stripped.replace(/^Timeline(?:C)?\*(.+?)$/gm, '$1');
 
     return stripped;
 }
