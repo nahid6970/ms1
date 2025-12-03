@@ -925,7 +925,7 @@ function checkHasMarkdown(value) {
         str.includes('\n') || // Treat multi-line text as markdown for proper height handling
         str.match(/#[\d.]+#.+?#\/#/) || // Variable font size heading
         str.includes('_.') || // Wavy underline
-        str.match(/^Timeline(?:C)?\*/m) || // Timeline syntax
+        str.match(/^Timeline(?:C)?(?:-[A-Z]+)?\*/m) || // Timeline syntax
         str.match(/\[\d+(?:-[A-Z]+)?\]\S+/) || // Word connector syntax
         customColorSyntaxes.some(syntax => str.includes(syntax.marker)) // Check custom syntaxes
     );
@@ -1264,14 +1264,20 @@ function parseMarkdownInline(text) {
         return `<span class="word-connector" data-conn-id="${connId}" data-conn-color="${color}">${word}</span>`;
     });
 
-    // Timeline: Timeline*Name or TimelineC*Name followed by list items
-    // Timeline* = top-aligned, TimelineC* = center-aligned
-    formatted = formatted.replace(/^(Timeline(?:C)?)\*(.+?)$/gm, (match, type, name) => {
+    // Timeline: Timeline*Name or Timeline-R*Name or TimelineC-B*Name followed by list items
+    // Timeline* = top-aligned, TimelineC* = center-aligned, -COLOR = custom separator color
+    formatted = formatted.replace(/^(Timeline(?:C)?)(?:-([A-Z]+))?\*(.+?)$/gm, (match, type, colorCode, name) => {
         const isCenter = type === 'TimelineC';
         const alignStyle = isCenter ? 'align-items: center;' : 'align-items: flex-start;';
+        const colorMap = {
+            'R': '#ff0000', 'G': '#00ff00', 'B': '#0000ff', 'Y': '#ffff00',
+            'O': '#ff8800', 'P': '#ff00ff', 'C': '#00ffff', 'W': '#ffffff',
+            'K': '#000000', 'GR': '#808080'
+        };
+        const separatorColor = (colorCode && colorMap[colorCode]) ? colorMap[colorCode] : '#ffffff';
         return `<div class="md-timeline" style="display: flex; gap: 12px; margin: 8px 0; ${alignStyle}">
             <div class="md-timeline-left" style="flex: 0 0 150px; text-align: left; font-weight: 600; line-height: 1.4;">${name}</div>
-            <div class="md-timeline-separator" style="width: 3px; background: #ffffff; align-self: stretch; margin-top: 2px;"></div>
+            <div class="md-timeline-separator" style="width: 3px; background: ${separatorColor}; align-self: stretch; margin-top: 2px;"></div>
             <div class="md-timeline-right" style="flex: 1; line-height: 1.4;">`;
     });
 
@@ -1563,14 +1569,20 @@ function oldParseMarkdownBody(lines) {
             return `<span class="word-connector" data-conn-id="${connId}" data-conn-color="${color}">${word}</span>`;
         });
 
-        // Timeline: Timeline*Name or TimelineC*Name followed by list items
-        // Timeline* = top-aligned, TimelineC* = center-aligned
-        formatted = formatted.replace(/^(Timeline(?:C)?)\*(.+?)$/gm, (match, type, name) => {
+        // Timeline: Timeline*Name or Timeline-R*Name or TimelineC-B*Name followed by list items
+        // Timeline* = top-aligned, TimelineC* = center-aligned, -COLOR = custom separator color
+        formatted = formatted.replace(/^(Timeline(?:C)?)(?:-([A-Z]+))?\*(.+?)$/gm, (match, type, colorCode, name) => {
             const isCenter = type === 'TimelineC';
             const alignStyle = isCenter ? 'align-items: center;' : 'align-items: flex-start;';
+            const colorMap = {
+                'R': '#ff0000', 'G': '#00ff00', 'B': '#0000ff', 'Y': '#ffff00',
+                'O': '#ff8800', 'P': '#ff00ff', 'C': '#00ffff', 'W': '#ffffff',
+                'K': '#000000', 'GR': '#808080'
+            };
+            const separatorColor = (colorCode && colorMap[colorCode]) ? colorMap[colorCode] : '#ffffff';
             return `<div class="md-timeline" style="display: flex; gap: 12px; margin: 8px 0; ${alignStyle}">
             <div class="md-timeline-left" style="flex: 0 0 150px; text-align: left; font-weight: 600; line-height: 1.4;">${name}</div>
-            <div class="md-timeline-separator" style="width: 3px; background: #ffffff; align-self: stretch; margin-top: 2px;"></div>
+            <div class="md-timeline-separator" style="width: 3px; background: ${separatorColor}; align-self: stretch; margin-top: 2px;"></div>
             <div class="md-timeline-right" style="flex: 1; line-height: 1.4;">`;
         });
 
@@ -5266,8 +5278,8 @@ function stripMarkdown(text) {
     // Remove Math markers: \( ... \) -> ...
     stripped = stripped.replace(/\\\((.*?)\\\)/g, '$1');
 
-    // Remove Timeline markers: Timeline*Name or TimelineC*Name -> Name
-    stripped = stripped.replace(/^Timeline(?:C)?\*(.+?)$/gm, '$1');
+    // Remove Timeline markers: Timeline*Name or Timeline-R*Name -> Name
+    stripped = stripped.replace(/^Timeline(?:C)?(?:-[A-Z]+)?\*(.+?)$/gm, '$1');
 
     // Remove word connector markers: [1]Word or [1-R]Word -> Word
     stripped = stripped.replace(/\[(\d+)(?:-[A-Z]+)?\](\S+)/g, '$2');

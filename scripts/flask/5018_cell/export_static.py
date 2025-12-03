@@ -1402,7 +1402,7 @@ def generate_static_html(data, custom_syntaxes):
                         cellValue.match(/Table\\*\\d+/i) ||
                         cellValue.trim().startsWith('|') ||
                         cellValue.match(/^-{5,}$/m) ||
-                        cellValue.match(/^Timeline(?:C)?\\*/m) ||
+                        cellValue.match(/^Timeline(?:C)?(?:-[A-Z]+)?\\*/m) ||
                         cellValue.match(/\\[\\d+(?:-[A-Z]+)?\\]\\S+/) ||
                         (cellValue.includes('|') && cellValue.split('|').length >= 2);
                     
@@ -1488,8 +1488,8 @@ def generate_static_html(data, custom_syntaxes):
             stripped = stripped.replace(/^\\s*--\\s+/gm, '');
             // Remove sub-sub-bullet markers: --- item -> item
             stripped = stripped.replace(/^\\s*---\\s+/gm, '');
-            // Remove Timeline markers: Timeline*Name or TimelineC*Name -> Name
-            stripped = stripped.replace(/^Timeline(?:C)?\\*(.+?)$/gm, '$1');
+            // Remove Timeline markers: Timeline*Name or Timeline-R*Name -> Name
+            stripped = stripped.replace(/^Timeline(?:C)?(?:-[A-Z]+)?\\*(.+?)$/gm, '$1');
             // Remove word connector markers: [1]Word or [1-R]Word -> Word
             stripped = stripped.replace(/\\[(\\d+)(?:-[A-Z]+)?\\](\\S+)/g, '$2');
             return stripped;
@@ -1678,14 +1678,20 @@ def generate_static_html(data, custom_syntaxes):
                 return '<span class="collapsible-wrapper"><button class="collapsible-toggle" onclick="toggleCollapsible(\\'' + id + '\\')" title="Click to show/hide">👁️</button><span id="' + id + '" class="collapsible-content" style="display: none;">' + content + '</span></span>';
             });
 
-            // Timeline: Timeline*Name or TimelineC*Name followed by list items
-            // Timeline* = top-aligned, TimelineC* = center-aligned
-            formatted = formatted.replace(/^(Timeline(?:C)?)\\*(.+?)$/gm, function(match, type, name) {
+            // Timeline: Timeline*Name or Timeline-R*Name or TimelineC-B*Name followed by list items
+            // Timeline* = top-aligned, TimelineC* = center-aligned, -COLOR = custom separator color
+            formatted = formatted.replace(/^(Timeline(?:C)?)(?:-([A-Z]+))?\\*(.+?)$/gm, function(match, type, colorCode, name) {
                 var isCenter = type === 'TimelineC';
                 var alignStyle = isCenter ? 'align-items: center;' : 'align-items: flex-start;';
+                var colorMap = {
+                    'R': '#ff0000', 'G': '#00ff00', 'B': '#0000ff', 'Y': '#ffff00',
+                    'O': '#ff8800', 'P': '#ff00ff', 'C': '#00ffff', 'W': '#ffffff',
+                    'K': '#000000', 'GR': '#808080'
+                };
+                var separatorColor = (colorCode && colorMap[colorCode]) ? colorMap[colorCode] : '#ffffff';
                 return '<div class="md-timeline" style="display: flex; gap: 12px; margin: 8px 0; ' + alignStyle + '">' +
                     '<div class="md-timeline-left" style="flex: 0 0 150px; text-align: left; font-weight: 600; line-height: 1.4;">' + name + '</div>' +
-                    '<div class="md-timeline-separator" style="width: 3px; background: #ffffff; align-self: stretch; margin-top: 2px;"></div>' +
+                    '<div class="md-timeline-separator" style="width: 3px; background: ' + separatorColor + '; align-self: stretch; margin-top: 2px;"></div>' +
                     '<div class="md-timeline-right" style="flex: 1; line-height: 1.4;">';
             });
 
@@ -1856,14 +1862,20 @@ def generate_static_html(data, custom_syntaxes):
                     return '<span class="collapsible-wrapper"><button class="collapsible-toggle" onclick="toggleCollapsible(\\'' + id + '\\')" title="Click to show/hide">👁️</button><span id="' + id + '" class="collapsible-content" style="display: none;">' + content + '</span></span>';
                 });
 
-                // Timeline: Timeline*Name or TimelineC*Name followed by list items
-                // Timeline* = top-aligned, TimelineC* = center-aligned
-                formatted = formatted.replace(/^(Timeline(?:C)?)\\*(.+?)$/gm, function(match, type, name) {
+                // Timeline: Timeline*Name or Timeline-R*Name or TimelineC-B*Name followed by list items
+                // Timeline* = top-aligned, TimelineC* = center-aligned, -COLOR = custom separator color
+                formatted = formatted.replace(/^(Timeline(?:C)?)(?:-([A-Z]+))?\\*(.+?)$/gm, function(match, type, colorCode, name) {
                     var isCenter = type === 'TimelineC';
                     var alignStyle = isCenter ? 'align-items: center;' : 'align-items: flex-start;';
+                    var colorMap = {
+                        'R': '#ff0000', 'G': '#00ff00', 'B': '#0000ff', 'Y': '#ffff00',
+                        'O': '#ff8800', 'P': '#ff00ff', 'C': '#00ffff', 'W': '#ffffff',
+                        'K': '#000000', 'GR': '#808080'
+                    };
+                    var separatorColor = (colorCode && colorMap[colorCode]) ? colorMap[colorCode] : '#ffffff';
                     return '<div class="md-timeline" style="display: flex; gap: 12px; margin: 8px 0; ' + alignStyle + '">' +
                         '<div class="md-timeline-left" style="flex: 0 0 150px; text-align: left; font-weight: 600; line-height: 1.4;">' + name + '</div>' +
-                        '<div class="md-timeline-separator" style="width: 3px; background: #ffffff; align-self: stretch; margin-top: 2px;"></div>' +
+                        '<div class="md-timeline-separator" style="width: 3px; background: ' + separatorColor + '; align-self: stretch; margin-top: 2px;"></div>' +
                         '<div class="md-timeline-right" style="flex: 1; line-height: 1.4;">';
                 });
 
