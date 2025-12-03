@@ -1047,23 +1047,27 @@ function drawWordConnectors(previewElement) {
             const endX = endRect.left - containerRect.left + endRect.width / 2;
             const y = startRect.bottom - containerRect.top + 2;
             
-            // Create SVG line
+            // Create SVG line with extra space for arrows
             const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
             svg.classList.add('word-connector-line');
-            svg.style.left = Math.min(startX, endX) + 'px';
+            svg.style.left = (Math.min(startX, endX) - 3) + 'px';
             svg.style.top = y + 'px';
-            svg.style.width = Math.abs(endX - startX) + 'px';
-            svg.style.height = '10px';
+            svg.style.width = (Math.abs(endX - startX) + 6) + 'px';
+            svg.style.height = '12px';
             svg.style.position = 'absolute';
+            svg.style.overflow = 'visible';
             
-            // Draw bracket line: └─────┘
+            // Draw U-shaped bracket line with arrows: ↑─────↑
             const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
             const width = Math.abs(endX - startX);
-            const d = `M 0,0 L 0,7 L ${width},7 L ${width},0`;
+            // Draw U-shape with arrow tips at top of both verticals (offset by 3 for padding)
+            const d = `M 3,9 L 3,2 M 3,9 L ${width+3},9 M ${width+3},9 L ${width+3},2 M 1.5,4 L 3,2 L 4.5,4 M ${width+1.5},4 L ${width+3},2 L ${width+4.5},4`;
             path.setAttribute('d', d);
             path.setAttribute('stroke', color);
-            path.setAttribute('stroke-width', '1.5');
+            path.setAttribute('stroke-width', '2');
             path.setAttribute('fill', 'none');
+            path.setAttribute('stroke-linecap', 'round');
+            path.setAttribute('stroke-linejoin', 'round');
             
             svg.appendChild(path);
             previewElement.appendChild(svg);

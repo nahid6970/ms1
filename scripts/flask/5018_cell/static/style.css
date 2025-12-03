@@ -3591,15 +3591,16 @@ mark {
 .word-connector {
     position: relative;
     display: inline-block;
-    padding-bottom: 8px;
+    padding-bottom: 12px;
 }
 
 .word-connector-line {
     position: absolute;
     bottom: 0;
-    height: 10px;
+    height: 12px;
     pointer-events: none;
     z-index: 1;
+    overflow: visible;
 }
 
 /* Timeline/Flowchart Layout */
