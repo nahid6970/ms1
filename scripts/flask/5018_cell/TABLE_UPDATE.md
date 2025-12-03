@@ -174,10 +174,34 @@ Jane       | 30     | LA
 
 ### What it does:
 ✅ Aligns all pipes vertically
+✅ Calculates optimal column width based on **content only**
+✅ Ignores separator rows when calculating width (prevents overly wide columns)
+✅ Regenerates separator rows to match content width
 ✅ Pads cells with spaces to match column width
-✅ Handles separator rows (dashes)
 ✅ Preserves color codes and alignment markers
 ✅ Adds leading/trailing pipes if missing
+
+### Smart Width Calculation:
+
+The formatter is smart about column widths:
+- **Ignores separator rows** (lines with only dashes) when calculating width
+- Only uses actual content (headers and data) to determine optimal width
+- Then regenerates separator rows to match
+
+**Example:**
+```
+Before:
+| Name | Age              | City |
+| ---- | ---------------- | ---- |
+| John | 25               | NYC  |
+
+After:
+| Name | Age | City |
+|------|-----|------|
+| John | 25  | NYC  |
+```
+
+The "Age" column is sized for "Age" and "25", not the long separator row!
 
 ## Benefits
 ✅ Cleaner, more minimal appearance

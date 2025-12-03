@@ -277,20 +277,28 @@ Jane       | 30     | LA
 
 **Features:**
 - Aligns all pipes vertically
+- Calculates optimal column width based on content (not separator rows)
 - Pads cells with spaces to match column width
-- Handles separator rows (dashes)
+- Regenerates separator rows to match content width
 - Preserves color codes (`:R-A:`, etc.)
 - Preserves alignment markers (`:text:`, `text:`)
 - Adds leading/trailing pipes if missing
 - Works with any number of columns
 
+**Smart Width Calculation:**
+- Separator rows (lines with only dashes) are **ignored** when calculating column widths
+- Only actual content (headers and data) determines optimal width
+- Separator rows are regenerated to match the content width
+- This prevents overly wide columns from long separator rows
+
 **Implementation:**
 - **Function:** `formatPipeTable()` in `static/script.js` (~line 6070)
 - **Algorithm:**
   1. Parse table into rows and columns
-  2. Calculate maximum width for each column
+  2. Calculate maximum width for each column (excluding separator rows)
   3. Pad cells to match column width
-  4. Rebuild table with aligned pipes
+  4. Regenerate separator rows with correct width
+  5. Rebuild table with aligned pipes
 - **Button:** 📊 in Quick Formatter (F3) - Located in Utilities section
 - **Usage:** Select table text → Press F3 → Click 📊
 
