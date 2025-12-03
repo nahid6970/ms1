@@ -3603,8 +3603,8 @@ mark {
 }
 
 .md-timeline-separator {
-    width: 1px;
-    background: #ccc;
+    width: 3px;
+    background: #ffffff;
     align-self: stretch;
     margin-top: 2px;
 }

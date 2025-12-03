@@ -1640,7 +1640,7 @@ def generate_static_html(data, custom_syntaxes):
                 var alignStyle = isCenter ? 'align-items: center;' : 'align-items: flex-start;';
                 return '<div class="md-timeline" style="display: flex; gap: 12px; margin: 8px 0; ' + alignStyle + '">' +
                     '<div class="md-timeline-left" style="flex: 0 0 150px; text-align: left; font-weight: 600; line-height: 1.4;">' + name + '</div>' +
-                    '<div class="md-timeline-separator" style="width: 1px; background: #ccc; align-self: stretch; margin-top: 2px;"></div>' +
+                    '<div class="md-timeline-separator" style="width: 3px; background: #ffffff; align-self: stretch; margin-top: 2px;"></div>' +
                     '<div class="md-timeline-right" style="flex: 1; line-height: 1.4;">';
             });
 
@@ -1794,7 +1794,7 @@ def generate_static_html(data, custom_syntaxes):
                     var alignStyle = isCenter ? 'align-items: center;' : 'align-items: flex-start;';
                     return '<div class="md-timeline" style="display: flex; gap: 12px; margin: 8px 0; ' + alignStyle + '">' +
                         '<div class="md-timeline-left" style="flex: 0 0 150px; text-align: left; font-weight: 600; line-height: 1.4;">' + name + '</div>' +
-                        '<div class="md-timeline-separator" style="width: 1px; background: #ccc; align-self: stretch; margin-top: 2px;"></div>' +
+                        '<div class="md-timeline-separator" style="width: 3px; background: #ffffff; align-self: stretch; margin-top: 2px;"></div>' +
                         '<div class="md-timeline-right" style="flex: 1; line-height: 1.4;">';
                 });
 
