@@ -913,8 +913,10 @@ function checkHasMarkdown(value) {
         str.includes('{{') ||
         str.includes('\n- ') ||
         str.includes('\n-- ') ||
+        str.includes('\n--- ') ||
         str.trim().startsWith('- ') ||
         str.trim().startsWith('-- ') ||
+        str.trim().startsWith('--- ') ||
         str.match(/(?:^|\n)Table\*\d+/i) ||
         str.trim().startsWith('|') ||
         str.includes('\\(') ||
@@ -1388,8 +1390,14 @@ function oldParseMarkdownBody(lines) {
         // Subscript: ~text~ -> <sub>text</sub>
         formatted = formatted.replace(/~(.+?)~/g, '<sub>$1</sub>');
 
+        // Sub-sublist: --- item -> ▪ item with more indent (small square)
+        if (formatted.trim().startsWith('--- ')) {
+            const content = formatted.replace(/^(\s*)--- (.+)$/, '$2');
+            formatted = formatted.replace(/^(\s*)--- .+$/, '$1<span style="display: inline-flex; align-items: baseline; width: 100%; margin-left: 2em;"><span style="margin-right: 0.5em; flex-shrink: 0; position: relative; top: -0.05em; font-size: 0.85em;">▪</span><span style="flex: 1;">▪CONTENT▪</span></span>');
+            formatted = formatted.replace('▪CONTENT▪', content);
+        }
         // Sublist: -- item -> ◦ item with more indent (white circle)
-        if (formatted.trim().startsWith('-- ')) {
+        else if (formatted.trim().startsWith('-- ')) {
             const content = formatted.replace(/^(\s*)-- (.+)$/, '$2');
             formatted = formatted.replace(/^(\s*)-- .+$/, '$1<span style="display: inline-flex; align-items: baseline; width: 100%; margin-left: 1em;"><span style="margin-right: 0.5em; flex-shrink: 0; position: relative; top: 0.1em;">◦</span><span style="flex: 1;">◦CONTENT◦</span></span>');
             formatted = formatted.replace('◦CONTENT◦', content);
@@ -1462,7 +1470,7 @@ function oldParseMarkdownBody(lines) {
         const line = formattedLines[i];
         const isTimelineStart = line.includes('class="md-timeline"');
         const isListItem = line.trim().startsWith('<span style="display: inline-flex') && 
-                           (line.includes('•') || line.includes('◦'));
+                           (line.includes('•') || line.includes('◦') || line.includes('▪'));
         const isEmpty = line.trim() === '';
         
         if (isTimelineStart) {
@@ -5130,6 +5138,9 @@ function stripMarkdown(text) {
 
     // Remove sub-bullet markers: -- item -> item
     stripped = stripped.replace(/^\s*--\s+/gm, '');
+
+    // Remove sub-sub-bullet markers: --- item -> item
+    stripped = stripped.replace(/^\s*---\s+/gm, '');
 
     // Remove Table*N marker
     stripped = stripped.replace(/^Table\*\d+(?:_[^\s\n,]+)?(?:_[^\s\n,]+)?(?:[\n\s,]+)/i, '');

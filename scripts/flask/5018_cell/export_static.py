@@ -1377,8 +1377,10 @@ def generate_static_html(data, custom_syntaxes):
                         cellValue.includes('{{') ||
                         cellValue.includes('\\n- ') || 
                         cellValue.includes('\\n-- ') || 
+                        cellValue.includes('\\n--- ') || 
                         cellValue.trim().startsWith('- ') || 
-                        cellValue.trim().startsWith('-- ') ||
+                        cellValue.trim().startsWith('-- ') || 
+                        cellValue.trim().startsWith('--- ') ||
                         cellValue.match(/Table\\*\\d+/i) ||
                         cellValue.trim().startsWith('|') ||
                         cellValue.match(/^-{5,}$/m) ||
@@ -1463,6 +1465,10 @@ def generate_static_html(data, custom_syntaxes):
             stripped = stripped.replace(/\\[\\[(.+?)\\]\\]/g, '$1');
             // Remove bullet markers: - item -> item
             stripped = stripped.replace(/^\\s*-\\s+/gm, '');
+            // Remove sub-bullet markers: -- item -> item
+            stripped = stripped.replace(/^\\s*--\\s+/gm, '');
+            // Remove sub-sub-bullet markers: --- item -> item
+            stripped = stripped.replace(/^\\s*---\\s+/gm, '');
             // Remove Timeline markers: Timeline*Name or TimelineC*Name -> Name
             stripped = stripped.replace(/^Timeline(?:C)?\\*(.+?)$/gm, '$1');
             return stripped;
@@ -1741,8 +1747,14 @@ def generate_static_html(data, custom_syntaxes):
                 // Subscript: ~text~ -> <sub>text</sub> (single tilde only, after strikethrough is processed)
                 formatted = formatted.replace(/~(.+?)~/g, '<sub>$1</sub>');
 
+                // Sub-sublist: --- item -> ▪ item with more indent (small square)
+                if (formatted.trim().startsWith('--- ')) {
+                    const content = formatted.replace(/^(\\s*)--- (.+)$/, '$2');
+                    formatted = formatted.replace(/^(\\s*)--- .+$/, '$1<span style="display: inline-flex; align-items: flex-start; width: 100%; margin-left: 2em;"><span style="margin-right: 0.5em; flex-shrink: 0; line-height: 1; font-size: 0.75em; position: relative; top: 0.4em;">▪</span><span style="flex: 1;">▪CONTENT▪</span></span>');
+                    formatted = formatted.replace('▪CONTENT▪', content);
+                }
                 // Sublist: -- item -> ◦ item with more indent (white circle)
-                if (formatted.trim().startsWith('-- ')) {
+                else if (formatted.trim().startsWith('-- ')) {
                     const content = formatted.replace(/^(\\s*)-- (.+)$/, '$2');
                     formatted = formatted.replace(/^(\\s*)-- .+$/, '$1<span style="display: inline-flex; align-items: flex-start; width: 100%; margin-left: 1em;"><span style="margin-right: 0.5em; flex-shrink: 0; line-height: 1; font-size: 0.9em; position: relative; top: 0.35em;">◦</span><span style="flex: 1;">◦CONTENT◦</span></span>');
                     formatted = formatted.replace('◦CONTENT◦', content);
@@ -1812,7 +1824,7 @@ def generate_static_html(data, custom_syntaxes):
                 var line = formattedLines[i];
                 var isTimelineStart = line.indexOf('class="md-timeline"') !== -1;
                 var isListItem = line.trim().indexOf('<span style="display: inline-flex') === 0 && 
-                                 (line.indexOf('•') !== -1 || line.indexOf('◦') !== -1);
+                                 (line.indexOf('•') !== -1 || line.indexOf('◦') !== -1 || line.indexOf('▪') !== -1);
                 var isEmpty = line.trim() === '';
                 
                 if (isTimelineStart) {
