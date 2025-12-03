@@ -559,12 +559,10 @@ The F1 window (opened with F1 key) provides comprehensive management through rig
 ### Adding a New Markdown Syntax
 1. Add parsing logic to `parseMarkdownInline()` and `oldParseMarkdownBody()` in `static/script.js`
 2. Add detection to `checkHasMarkdown()` in `static/script.js`
-3. Add stripping logic to `stripMarkdown()` in `static/script.js`
+3. **Add stripping to `stripMarkdown()` in `static/script.js`** - Required for search/sort to work
 4. Update `export_static.py` - add to both `parseMarkdownInline()` and `oldParseMarkdownBody()`
-5. **IMPORTANT:** Add to Markdown Guide modal in `templates/index.html` (search for "Markdown Formatting Guide")
+5. Add to Markdown Guide modal in `templates/index.html` (search for "Markdown Formatting Guide")
 6. Test: Create cell with syntax, check preview, search, sort, and static export
-
-**Note:** Always update the Markdown Guide modal when adding new syntax so users can discover the feature!
 
 ### Modifying the Table Rendering
 - Main function: `renderTable()` (~line 3947+)
