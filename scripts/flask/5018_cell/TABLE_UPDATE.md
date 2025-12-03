@@ -83,7 +83,25 @@ Result:
 
 You can now color the pipe separators between columns using color codes!
 
-### Syntax:
+### Syntax Option 1: Column-Wide Colors (Recommended)
+Use `-A` suffix to apply color to entire column - only specify once in header!
+
+```
+| :R-A:Name | :G-A:Age | :B-A:City |
+|-----------|----------|-----------|
+| John      | 25       | NYC       |
+| Jane      | 30       | LA        |
+| Bob       | 35       | SF        |
+```
+
+Result:
+- **Red** pipe after entire "Name" column (all rows)
+- **Green** pipe after entire "Age" column (all rows)
+- **Blue** pipe after entire "City" column (all rows)
+
+### Syntax Option 2: Per-Cell Colors
+Apply color to individual cells only:
+
 ```
 | :R:Name | :G:Age | :B:City |
 |---------|--------|---------|
@@ -92,32 +110,31 @@ You can now color the pipe separators between columns using color codes!
 ```
 
 Result:
-- **Red** pipe after "Name" column
-- **Green** pipe after "Age" column  
-- **Blue** pipe after "City" column
+- Colors only apply to header row
+- Other rows use default gray
 
 ### Available Colors:
-- **:R:** = Red (#ff0000)
-- **:G:** = Green (#00ff00)
-- **:B:** = Blue (#0000ff)
-- **:Y:** = Yellow (#ffff00)
-- **:O:** = Orange (#ff8800)
-- **:P:** = Purple (#ff00ff)
-- **:C:** = Cyan (#00ffff)
-- **:W:** = White (#ffffff)
-- **:K:** = Black (#000000)
-- **:GR:** = Gray (#808080)
+- **:R:** or **:R-A:** = Red (#ff0000)
+- **:G:** or **:G-A:** = Green (#00ff00)
+- **:B:** or **:B-A:** = Blue (#0000ff)
+- **:Y:** or **:Y-A:** = Yellow (#ffff00)
+- **:O:** or **:O-A:** = Orange (#ff8800)
+- **:P:** or **:P-A:** = Purple (#ff00ff)
+- **:C:** or **:C-A:** = Cyan (#00ffff)
+- **:W:** or **:W-A:** = White (#ffffff)
+- **:K:** or **:K-A:** = Black (#000000)
+- **:GR:** or **:GR-A:** = Gray (#808080)
 
 ### Combining Colors with Alignment:
 ```
-| :R::Name: | :G:Age: | :B::City: |
-|-----------|---------|-----------|
-| John      | 25      | NYC       |
+| :R-A::Name: | :G-A:Age: | :B-A::City: |
+|-------------|-----------|-------------|
+| John        | 25        | NYC         |
 ```
 
-- `:R::text:` = Red separator + center aligned
-- `:G:text:` = Green separator + right aligned
-- `:B:text` = Blue separator + left aligned
+- `:R-A::text:` = Red separator (all rows) + center aligned
+- `:G-A:text:` = Green separator (all rows) + right aligned
+- `:B-A:text` = Blue separator (all rows) + left aligned
 
 ### Separator Width:
 - Changed from 1px to **3px** (matching Timeline feature)

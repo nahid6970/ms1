@@ -1,6 +1,21 @@
 # Pipe Table Color Test
 
-## Test 1: Basic Colored Separators
+## Test 1: Column-Wide Colors (Recommended)
+```
+| :R-A:Name | :G-A:Age | :B-A:City |
+|-----------|----------|-----------|
+| John      | 25       | NYC       |
+| Jane      | 30       | LA        |
+| Bob       | 35       | SF        |
+```
+
+Expected:
+- Red pipe after "Name" column (ALL rows)
+- Green pipe after "Age" column (ALL rows)
+- Blue pipe after "City" column (ALL rows)
+- All headers bold with underline
+
+## Test 1b: Per-Cell Colors (Old Method)
 ```
 | :R:Name | :G:Age | :B:City |
 |---------|--------|---------|
@@ -10,48 +25,51 @@
 ```
 
 Expected:
-- Red pipe after "Name"
-- Green pipe after "Age"
-- Blue pipe after "City"
-- All headers bold with underline
+- Red pipe after "Name" (header row only)
+- Green pipe after "Age" (header row only)
+- Blue pipe after "City" (header row only)
+- Data rows use default gray pipes
 
-## Test 2: Without Headers (Just Data)
+## Test 2: Without Headers (Column-Wide Colors)
 ```
-| :Y:Apple  | :O:$1.50 | :P:100 |
-| :Y:Banana | :O:$0.80 | :P:150 |
-| :Y:Orange | :O:$2.00 | :P:80  |
+| :Y-A:Apple  | :O-A:$1.50 | :P-A:100 |
+| Banana      | $0.80      | 150      |
+| Orange      | $2.00      | 80       |
 ```
 
 Expected:
-- Yellow pipes after first column
-- Orange pipes after second column
-- Purple pipes after third column
+- Yellow pipes after first column (ALL rows)
+- Orange pipes after second column (ALL rows)
+- Purple pipes after third column (ALL rows)
 - No bold headers (no separator row)
+- Only first row needs color codes!
 
-## Test 3: Mixed Colors with Alignment
+## Test 3: Mixed Colors with Alignment (Column-Wide)
 ```
-| :R::Product: | :G:Price: | :B::Stock: |
-|--------------|-----------|------------|
-| Apple        | $1.50     | 100        |
-| Banana       | $0.80     | 150        |
+| :R-A::Product: | :G-A:Price: | :B-A::Stock: |
+|----------------|-------------|--------------|
+| Apple          | $1.50       | 100          |
+| Banana         | $0.80       | 150          |
 ```
 
 Expected:
-- Red pipe + center aligned "Product"
-- Green pipe + right aligned "Price"
-- Blue pipe + center aligned "Stock"
+- Red pipe + center aligned "Product" (ALL rows)
+- Green pipe + right aligned "Price" (ALL rows)
+- Blue pipe + center aligned "Stock" (ALL rows)
 
-## Test 4: All Available Colors
+## Test 4: All Available Colors (Column-Wide)
 ```
-| :R:Red | :G:Green | :B:Blue | :Y:Yellow | :O:Orange |
-|--------|----------|---------|-----------|-----------|
-| A      | B        | C       | D         | E         |
+| :R-A:Red | :G-A:Green | :B-A:Blue | :Y-A:Yellow | :O-A:Orange |
+|----------|------------|-----------|-------------|-------------|
+| A        | B          | C         | D           | E           |
+| A2       | B2         | C2        | D2          | E2          |
 ```
 
 ```
-| :P:Purple | :C:Cyan | :W:White | :K:Black | :GR:Gray |
-|-----------|---------|----------|----------|----------|
-| F         | G       | H        | I        | J        |
+| :P-A:Purple | :C-A:Cyan | :W-A:White | :K-A:Black | :GR-A:Gray |
+|-------------|-----------|------------|------------|------------|
+| F           | G         | H          | I          | J          |
+| F2          | G2        | H2         | I2         | J2         |
 ```
 
 ## Test 5: Default Gray (No Color Code)
@@ -67,16 +85,23 @@ Expected:
 ## Color Reference
 
 ### Color Codes:
-- **:R:** = Red (#ff0000)
-- **:G:** = Green (#00ff00)
-- **:B:** = Blue (#0000ff)
-- **:Y:** = Yellow (#ffff00)
-- **:O:** = Orange (#ff8800)
-- **:P:** = Purple (#ff00ff)
-- **:C:** = Cyan (#00ffff)
-- **:W:** = White (#ffffff)
-- **:K:** = Black (#000000)
-- **:GR:** = Gray (#808080)
+
+**Column-Wide (Recommended - use `-A` suffix):**
+- **:R-A:** = Red for entire column
+- **:G-A:** = Green for entire column
+- **:B-A:** = Blue for entire column
+- **:Y-A:** = Yellow for entire column
+- **:O-A:** = Orange for entire column
+- **:P-A:** = Purple for entire column
+- **:C-A:** = Cyan for entire column
+- **:W-A:** = White for entire column
+- **:K-A:** = Black for entire column
+- **:GR-A:** = Gray for entire column
+
+**Per-Cell (without `-A`):**
+- **:R:** = Red for single cell only
+- **:G:** = Green for single cell only
+- (etc.)
 
 ### Alignment Codes:
 - `:text:` = Center aligned
@@ -84,15 +109,24 @@ Expected:
 - `text` = Left aligned (default)
 
 ### Combining:
-- `:R::text:` = Red separator + center aligned
-- `:G:text:` = Green separator + right aligned
-- `:B:text` = Blue separator + left aligned
+- `:R-A::text:` = Red separator (all rows) + center aligned
+- `:G-A:text:` = Green separator (all rows) + right aligned
+- `:B-A:text` = Blue separator (all rows) + left aligned
 
 ## Implementation Notes
 
-✅ Color code must be at the start: `:R:Name`
-✅ Alignment can follow color: `:R::Name:` (red + center)
+✅ **Column-Wide Colors:** Use `:R-A:` in first row to apply to entire column
+✅ **Per-Cell Colors:** Use `:R:` to apply to single cell only
+✅ Color code must be at the start: `:R-A:Name` or `:R:Name`
+✅ Alignment can follow color: `:R-A::Name:` (red column + center)
 ✅ Works with or without headers
 ✅ 3px separator width (matching Timeline)
 ✅ Transparent backgrounds
 ✅ Full support in static export
+
+## Benefits of `-A` Syntax
+
+✅ **Less typing** - Only specify color once in first row
+✅ **Cleaner markup** - Data rows don't need color codes
+✅ **Easier to maintain** - Change color in one place
+✅ **More readable** - Less clutter in table cells

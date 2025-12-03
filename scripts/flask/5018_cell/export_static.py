@@ -1547,31 +1547,66 @@ def generate_static_html(data, custom_syntaxes):
                 'K': '#000000', 'GR': '#808080'
             };
             
+            // Track column-wide colors (from :R-A: syntax in first row)
+            const columnColors = [];
+            
             // Process each cell and check for alignment markers and color codes
-            const grid = dataRows.map(r =>
-                r.map(c => {
+            const grid = dataRows.map((r, rowIndex) =>
+                r.map((c, colIndex) => {
                     let align = 'left';
                     let content = c;
                     let borderColor = null;
                     
-                    // Check for color code with alignment: :R:text: or :G:text or :B:text:
-                    const colorAlignMatch = content.match(/^:([A-Z]+):(.+)$/);
-                    if (colorAlignMatch) {
-                        const [, colorCode, rest] = colorAlignMatch;
-                        if (colorMap[colorCode]) {
-                            borderColor = colorMap[colorCode];
-                            content = rest;
-                            
-                            // Check if content also has alignment markers
-                            if (content.startsWith(':') && content.endsWith(':') && content.length > 2) {
-                                align = 'center';
-                                content = content.slice(1, -1).trim();
-                            } else if (content.endsWith(':')) {
-                                align = 'right';
-                                content = content.slice(0, -1).trim();
+                    // Check for column-wide color code: :R-A:text or :G-A:text (only in first row)
+                    if (rowIndex === 0) {
+                        const columnColorMatch = content.match(/^:([A-Z]+)-A:(.+)$/);
+                        if (columnColorMatch) {
+                            const [, colorCode, rest] = columnColorMatch;
+                            if (colorMap[colorCode]) {
+                                columnColors[colIndex] = colorMap[colorCode];
+                                borderColor = colorMap[colorCode];
+                                content = rest;
+                                
+                                // Check if content also has alignment markers
+                                if (content.startsWith(':') && content.endsWith(':') && content.length > 2) {
+                                    align = 'center';
+                                    content = content.slice(1, -1).trim();
+                                } else if (content.endsWith(':')) {
+                                    align = 'right';
+                                    content = content.slice(0, -1).trim();
+                                }
                             }
                         }
-                    } else {
+                    }
+                    
+                    // If no column-wide color was set, check for single-cell color: :R:text
+                    if (!borderColor) {
+                        const colorAlignMatch = content.match(/^:([A-Z]+):(.+)$/);
+                        if (colorAlignMatch) {
+                            const [, colorCode, rest] = colorAlignMatch;
+                            if (colorMap[colorCode]) {
+                                borderColor = colorMap[colorCode];
+                                content = rest;
+                                
+                                // Check if content also has alignment markers
+                                if (content.startsWith(':') && content.endsWith(':') && content.length > 2) {
+                                    align = 'center';
+                                    content = content.slice(1, -1).trim();
+                                } else if (content.endsWith(':')) {
+                                    align = 'right';
+                                    content = content.slice(0, -1).trim();
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Apply column-wide color if set and no cell-specific color
+                    if (!borderColor && columnColors[colIndex]) {
+                        borderColor = columnColors[colIndex];
+                    }
+                    
+                    // Check for alignment without color codes
+                    if (!borderColor && !content.match(/^:[A-Z]+:/)) {
                         // Check for center alignment :text:
                         if (content.startsWith(':') && content.endsWith(':') && content.length > 2) {
                             align = 'center';
