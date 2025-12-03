@@ -926,7 +926,7 @@ function checkHasMarkdown(value) {
         str.match(/#[\d.]+#.+?#\/#/) || // Variable font size heading
         str.includes('_.') || // Wavy underline
         str.match(/^Timeline(?:C)?\*/m) || // Timeline syntax
-        str.match(/\[\d+\]\S+/) || // Word connector syntax
+        str.match(/\[\d+(?:-[A-Z]+)?\]\S+/) || // Word connector syntax
         customColorSyntaxes.some(syntax => str.includes(syntax.marker)) // Check custom syntaxes
     );
 }
@@ -1241,12 +1241,22 @@ function parseMarkdownInline(text) {
     // Correct Answer: [[text]] -> text with hidden green highlight
     formatted = formatted.replace(/\[\[(.+?)\]\]/g, '<span class="correct-answer">$1</span>');
 
-    // Word Connectors: [1]Word -> creates visual connection between words with same number
+    // Word Connectors: [1]Word or [1-R]Word -> creates visual connection between words with same number
     // Process connectors and create wrapper with data attributes
     const connectorColors = ['#007bff', '#dc3545', '#28a745', '#fd7e14', '#6f42c1', '#20c997', '#e83e8c', '#17a2b8'];
-    formatted = formatted.replace(/\[(\d+)\](\S+)/g, (match, connId, word) => {
-        const colorIndex = (parseInt(connId) - 1) % connectorColors.length;
-        const color = connectorColors[colorIndex];
+    const colorMap = {
+        'R': '#ff0000', 'G': '#00ff00', 'B': '#0000ff', 'Y': '#ffff00',
+        'O': '#ff8800', 'P': '#ff00ff', 'C': '#00ffff', 'W': '#ffffff',
+        'K': '#000000', 'GR': '#808080'
+    };
+    formatted = formatted.replace(/\[(\d+)(?:-([A-Z]+))?\](\S+)/g, (match, connId, colorCode, word) => {
+        let color;
+        if (colorCode && colorMap[colorCode]) {
+            color = colorMap[colorCode];
+        } else {
+            const colorIndex = (parseInt(connId) - 1) % connectorColors.length;
+            color = connectorColors[colorIndex];
+        }
         return `<span class="word-connector" data-conn-id="${connId}" data-conn-color="${color}">${word}</span>`;
     });
 
@@ -1531,11 +1541,21 @@ function oldParseMarkdownBody(lines) {
         // Correct Answer: [[text]] -> text with hidden green highlight
         formatted = formatted.replace(/\[\[(.+?)\]\]/g, '<span class="correct-answer">$1</span>');
 
-        // Word Connectors: [1]Word -> creates visual connection between words with same number
+        // Word Connectors: [1]Word or [1-R]Word -> creates visual connection between words with same number
         const connectorColors = ['#007bff', '#dc3545', '#28a745', '#fd7e14', '#6f42c1', '#20c997', '#e83e8c', '#17a2b8'];
-        formatted = formatted.replace(/\[(\d+)\](\S+)/g, (match, connId, word) => {
-            const colorIndex = (parseInt(connId) - 1) % connectorColors.length;
-            const color = connectorColors[colorIndex];
+        const colorMap = {
+            'R': '#ff0000', 'G': '#00ff00', 'B': '#0000ff', 'Y': '#ffff00',
+            'O': '#ff8800', 'P': '#ff00ff', 'C': '#00ffff', 'W': '#ffffff',
+            'K': '#000000', 'GR': '#808080'
+        };
+        formatted = formatted.replace(/\[(\d+)(?:-([A-Z]+))?\](\S+)/g, (match, connId, colorCode, word) => {
+            let color;
+            if (colorCode && colorMap[colorCode]) {
+                color = colorMap[colorCode];
+            } else {
+                const colorIndex = (parseInt(connId) - 1) % connectorColors.length;
+                color = connectorColors[colorIndex];
+            }
             return `<span class="word-connector" data-conn-id="${connId}" data-conn-color="${color}">${word}</span>`;
         });
 
@@ -5245,8 +5265,8 @@ function stripMarkdown(text) {
     // Remove Timeline markers: Timeline*Name or TimelineC*Name -> Name
     stripped = stripped.replace(/^Timeline(?:C)?\*(.+?)$/gm, '$1');
 
-    // Remove word connector markers: [1]Word -> Word
-    stripped = stripped.replace(/\[(\d+)\](\S+)/g, '$2');
+    // Remove word connector markers: [1]Word or [1-R]Word -> Word
+    stripped = stripped.replace(/\[(\d+)(?:-[A-Z]+)?\](\S+)/g, '$2');
 
     return stripped;
 }

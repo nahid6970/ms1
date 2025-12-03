@@ -2,11 +2,13 @@
 
 ## Syntax
 ```
-[number]Word
+[number]Word          - Auto-colored by number
+[number-COLOR]Word    - Custom color
 ```
 - Use `[1]`, `[2]`, `[3]`, etc. before words
 - Same number = words get connected with colored bracket line
 - Line appears below text, connecting from center of each word
+- Optional: Add `-COLOR` for custom colors (e.g., `[1-R]` for red)
 
 ## Test Cases
 
@@ -37,6 +39,8 @@ Expected: Blue lines connecting all three words in sequence
 Each number gets a different color automatically!
 
 ## Color Scheme
+
+### Auto Colors (by number)
 - [1] → Blue (#007bff)
 - [2] → Red (#dc3545)
 - [3] → Green (#28a745)
@@ -46,6 +50,25 @@ Each number gets a different color automatically!
 - [7] → Pink (#e83e8c)
 - [8] → Cyan (#17a2b8)
 - [9+] → Cycles back to blue
+
+### Custom Colors (with color code)
+- **R** = Red (#ff0000)
+- **G** = Green (#00ff00)
+- **B** = Blue (#0000ff)
+- **Y** = Yellow (#ffff00)
+- **O** = Orange (#ff8800)
+- **P** = Purple/Pink (#ff00ff)
+- **C** = Cyan (#00ffff)
+- **W** = White (#ffffff)
+- **K** = Black (#000000)
+- **GR** = Gray (#808080)
+
+### Examples with Custom Colors
+```
+[1-R]Subject some words [1-R]Verb     → Red connection
+[2-G]Word1 text here [2-G]Word2       → Green connection
+[3-Y]Start and [3-Y]End               → Yellow connection
+```
 
 ## Implementation Details
 

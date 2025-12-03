@@ -1400,7 +1400,7 @@ def generate_static_html(data, custom_syntaxes):
                         cellValue.trim().startsWith('|') ||
                         cellValue.match(/^-{5,}$/m) ||
                         cellValue.match(/^Timeline(?:C)?\\*/m) ||
-                        cellValue.match(/\\[\\d+\\]\\S+/) ||
+                        cellValue.match(/\\[\\d+(?:-[A-Z]+)?\\]\\S+/) ||
                         (cellValue.includes('|') && cellValue.split('|').length >= 2);
                     
                     if (hasMarkdown) {
@@ -1487,8 +1487,8 @@ def generate_static_html(data, custom_syntaxes):
             stripped = stripped.replace(/^\\s*---\\s+/gm, '');
             // Remove Timeline markers: Timeline*Name or TimelineC*Name -> Name
             stripped = stripped.replace(/^Timeline(?:C)?\\*(.+?)$/gm, '$1');
-            // Remove word connector markers: [1]Word -> Word
-            stripped = stripped.replace(/\\[(\\d+)\\](\\S+)/g, '$2');
+            // Remove word connector markers: [1]Word or [1-R]Word -> Word
+            stripped = stripped.replace(/\\[(\\d+)(?:-[A-Z]+)?\\](\\S+)/g, '$2');
             return stripped;
         }
 
@@ -1651,11 +1651,21 @@ def generate_static_html(data, custom_syntaxes):
             // Correct Answer: [[text]] -> hidden text with green highlight on click
             formatted = formatted.replace(/\\[\\[(.+?)\\]\\]/g, '<span class="correct-answer">$1</span>');
 
-            // Word Connectors: [1]Word -> creates visual connection between words with same number
+            // Word Connectors: [1]Word or [1-R]Word -> creates visual connection between words with same number
             var connectorColors = ['#007bff', '#dc3545', '#28a745', '#fd7e14', '#6f42c1', '#20c997', '#e83e8c', '#17a2b8'];
-            formatted = formatted.replace(/\\[(\\d+)\\](\\S+)/g, function(match, connId, word) {
-                var colorIndex = (parseInt(connId) - 1) % connectorColors.length;
-                var color = connectorColors[colorIndex];
+            var colorMap = {
+                'R': '#ff0000', 'G': '#00ff00', 'B': '#0000ff', 'Y': '#ffff00',
+                'O': '#ff8800', 'P': '#ff00ff', 'C': '#00ffff', 'W': '#ffffff',
+                'K': '#000000', 'GR': '#808080'
+            };
+            formatted = formatted.replace(/\\[(\\d+)(?:-([A-Z]+))?\\](\\S+)/g, function(match, connId, colorCode, word) {
+                var color;
+                if (colorCode && colorMap[colorCode]) {
+                    color = colorMap[colorCode];
+                } else {
+                    var colorIndex = (parseInt(connId) - 1) % connectorColors.length;
+                    color = connectorColors[colorIndex];
+                }
                 return '<span class="word-connector" data-conn-id="' + connId + '" data-conn-color="' + color + '">' + word + '</span>';
             });
 
@@ -1819,11 +1829,21 @@ def generate_static_html(data, custom_syntaxes):
                 // Correct Answer: [[text]] -> hidden text with green highlight on click
                 formatted = formatted.replace(/\\[\\[(.+?)\\]\\]/g, '<span class="correct-answer">$1</span>');
 
-                // Word Connectors: [1]Word -> creates visual connection between words with same number
+                // Word Connectors: [1]Word or [1-R]Word -> creates visual connection between words with same number
                 var connectorColors = ['#007bff', '#dc3545', '#28a745', '#fd7e14', '#6f42c1', '#20c997', '#e83e8c', '#17a2b8'];
-                formatted = formatted.replace(/\\[(\\d+)\\](\\S+)/g, function(match, connId, word) {
-                    var colorIndex = (parseInt(connId) - 1) % connectorColors.length;
-                    var color = connectorColors[colorIndex];
+                var colorMap = {
+                    'R': '#ff0000', 'G': '#00ff00', 'B': '#0000ff', 'Y': '#ffff00',
+                    'O': '#ff8800', 'P': '#ff00ff', 'C': '#00ffff', 'W': '#ffffff',
+                    'K': '#000000', 'GR': '#808080'
+                };
+                formatted = formatted.replace(/\\[(\\d+)(?:-([A-Z]+))?\\](\\S+)/g, function(match, connId, colorCode, word) {
+                    var color;
+                    if (colorCode && colorMap[colorCode]) {
+                        color = colorMap[colorCode];
+                    } else {
+                        var colorIndex = (parseInt(connId) - 1) % connectorColors.length;
+                        color = connectorColors[colorIndex];
+                    }
                     return '<span class="word-connector" data-conn-id="' + connId + '" data-conn-color="' + color + '">' + word + '</span>';
                 });
 
