@@ -348,9 +348,11 @@ def generate_static_html(data, custom_syntaxes):
             box-sizing: border-box;
             pointer-events: none;
             white-space: nowrap;
-            overflow: hidden;
+            overflow: visible;
             text-overflow: ellipsis;
             line-height: 1.4;
+            position: relative;
+            display: block;
         }
 
         /* Markdown formatting in static export */
@@ -2176,10 +2178,12 @@ def generate_static_html(data, custom_syntaxes):
                     const start = connectors[i];
                     const end = connectors[i + 1];
                     
+                    // Get bounding rectangles
                     const startRect = start.getBoundingClientRect();
                     const endRect = end.getBoundingClientRect();
                     const containerRect = container.getBoundingClientRect();
                     
+                    // Calculate positions relative to container
                     const startX = startRect.left - containerRect.left + startRect.width / 2;
                     const endX = endRect.left - containerRect.left + endRect.width / 2;
                     const y = startRect.bottom - containerRect.top + 2;
@@ -2322,10 +2326,17 @@ def generate_static_html(data, custom_syntaxes):
             
             // Draw word connectors after table is rendered
             setTimeout(() => {
-                document.querySelectorAll('.cell-content').forEach(cell => {
-                    drawWordConnectors(cell);
-                });
-            }, 100);
+                // For static export, draw connectors on the table cells directly
+                const table = document.getElementById('dataTable');
+                if (table) {
+                    table.querySelectorAll('td:not(.row-number)').forEach(cell => {
+                        const cellContent = cell.querySelector('.cell-content');
+                        if (cellContent && cellContent.querySelector('.word-connector')) {
+                            drawWordConnectors(cellContent);
+                        }
+                    });
+                }
+            }, 500);
             
             // Restore wrap toggle state
             const wrapEnabled = localStorage.getItem('rowWrapEnabled') === 'true';
