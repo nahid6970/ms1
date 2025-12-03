@@ -1198,3 +1198,37 @@ Users can set custom fonts per column via **Column Settings (F3)**:
 - JetBrains Mono is included via Google Fonts link
 - Other system fonts (Vrinda, Comic Sans, etc.) will only work if installed on the viewing device
 - Consider adding web font alternatives (e.g., Noto Sans Bengali for Bangla) if cross-platform support is critical
+
+
+## Quick Function Reference - Table Features
+
+### Pipe Table Parsing & Rendering
+- **`parseGridTable(lines)`** - Main function that parses pipe tables into HTML grid (~line 1100 in script.js)
+  - Handles color codes (`:R-A:`, `:G:`, etc.)
+  - Handles alignment (`:text:`, `text:`)
+  - Removes leading/trailing pipes
+  - Generates separator rows
+  - Location: `static/script.js` ~line 1100, `export_static.py` ~line 1524
+
+### Table Formatter (F3 → 📊)
+- **`formatPipeTable(event)`** - Auto-formats and aligns pipe tables (~line 6070 in script.js)
+  - Calculates optimal column widths (ignores separator rows)
+  - Pads cells with spaces
+  - Regenerates separator rows
+  - Adds leading/trailing pipes if missing
+  - Location: `static/script.js` ~line 6070
+
+### Table Detection
+- **`isTableLine(line)`** - Detects if a line is part of a pipe table (~line 1451 in script.js)
+  - Checks for pipes and minimum column count
+  - Location: `static/script.js` ~line 1451
+
+### Color & Alignment Processing
+- **Column-wide colors**: Processed in `parseGridTable()` with `:COLOR-A:` syntax
+- **Per-cell colors**: Processed in `parseGridTable()` with `:COLOR:` syntax
+- **Alignment markers**: `:text:` (center), `text:` (right) processed in `parseGridTable()`
+
+### CSS Styling
+- **`.md-grid`** - Grid container with CSS Grid layout (~line 2678 in style.css)
+- **`.md-cell`** - Individual table cells with 3px right border (~line 2689 in style.css)
+- **`.md-header`** - Header row styling with bottom border (~line 2699 in style.css)
