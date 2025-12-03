@@ -1463,10 +1463,16 @@ function oldParseMarkdownBody(lines) {
         const isTimelineStart = line.includes('class="md-timeline"');
         const isListItem = line.trim().startsWith('<span style="display: inline-flex') && 
                            (line.includes('•') || line.includes('◦'));
+        const isEmpty = line.trim() === '';
         
         if (isTimelineStart) {
             processedLines.push(line);
             inTimeline = true;
+        } else if (inTimeline && isEmpty) {
+            // Close timeline before empty line (separates timeline blocks)
+            processedLines.push('</div></div>');
+            processedLines.push(line);
+            inTimeline = false;
         } else if (inTimeline && !isListItem && line.trim() !== '') {
             // Close timeline before non-list content
             processedLines.push('</div></div>');

@@ -1813,10 +1813,16 @@ def generate_static_html(data, custom_syntaxes):
                 var isTimelineStart = line.indexOf('class="md-timeline"') !== -1;
                 var isListItem = line.trim().indexOf('<span style="display: inline-flex') === 0 && 
                                  (line.indexOf('•') !== -1 || line.indexOf('◦') !== -1);
+                var isEmpty = line.trim() === '';
                 
                 if (isTimelineStart) {
                     processedLines.push(line);
                     inTimeline = true;
+                } else if (inTimeline && isEmpty) {
+                    // Close timeline before empty line (separates timeline blocks)
+                    processedLines.push('</div></div>');
+                    processedLines.push(line);
+                    inTimeline = false;
                 } else if (inTimeline && !isListItem && line.trim() !== '') {
                     // Close timeline before non-list content
                     processedLines.push('</div></div>');
