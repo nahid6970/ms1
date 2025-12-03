@@ -1103,8 +1103,16 @@ function parseGridTable(lines) {
         l.trim().replace(/^\||\|$/g, '').split('|').map(c => c.trim()));
     const cols = rows[0].length;
 
+    // Check if first row is a header separator (e.g., |---|---|)
+    const hasHeaderSeparator = rows.length > 1 && 
+        rows[1].every(cell => /^-+$/.test(cell.trim()));
+    
+    // If header separator exists, skip it from rendering
+    const dataRows = hasHeaderSeparator ? [rows[0], ...rows.slice(2)] : rows;
+    const hasHeader = hasHeaderSeparator;
+
     // Process each cell and check for alignment markers
-    const grid = rows.map(r =>
+    const grid = dataRows.map(r =>
         r.map(c => {
             let align = 'left';
             let content = c;
@@ -1135,7 +1143,9 @@ function parseGridTable(lines) {
             // Check if cell content is only "-" (empty cell marker)
             const isEmpty = cell.content.trim() === '-';
             const emptyClass = isEmpty ? ' md-empty' : '';
-            html += `<div class="md-cell ${i ? '' : 'md-header'}${emptyClass}"${alignStyle}>${cell.content}</div>`;
+            // Only apply header class if we have a header separator and it's the first row
+            const isHeader = hasHeader && i === 0;
+            html += `<div class="md-cell ${isHeader ? 'md-header' : ''}${emptyClass}"${alignStyle}>${cell.content}</div>`;
         });
     });
     html += '</div>';

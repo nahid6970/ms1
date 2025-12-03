@@ -811,7 +811,7 @@ def generate_static_html(data, custom_syntaxes):
         .md-grid {
             display: grid;
             grid-template-columns: repeat(var(--cols), auto);
-            gap: 4px;
+            gap: 0;
             margin: 4px 0;
             font-size: inherit;
             font-family: inherit;
@@ -820,9 +820,10 @@ def generate_static_html(data, custom_syntaxes):
         }
 
         .md-cell {
-            padding: 4px 6px;
-            border: 1px solid #ced4da;
-            background: #fff;
+            padding: 4px 12px;
+            border: none;
+            border-right: 1px solid #ced4da;
+            background: transparent;
             overflow: hidden;
             word-break: break-word;
             white-space: normal;
@@ -830,17 +831,22 @@ def generate_static_html(data, custom_syntaxes):
             max-width: 100%;
         }
 
+        /* Remove right border from last cell in each row */
+        .md-cell:nth-child(var(--cols)n) {
+            border-right: none;
+        }
+
         .md-header {
-            background: #f8f9fa;
+            background: transparent;
             font-weight: 600;
-            border: 2px solid #495057;
+            border-bottom: 2px solid #495057;
             white-space: normal;
             word-break: break-word;
         }
 
         .md-empty {
             color: #aaa;
-            background: #f5f5f5;
+            background: transparent;
             text-align: center;
             font-size: 1.2em;
             font-weight: bold;
@@ -1526,8 +1532,16 @@ def generate_static_html(data, custom_syntaxes):
                 l.trim().replace(/^\\|\\|$/g, '').split('|').map(c => c.trim()));
             const cols = rows[0].length;
             
+            // Check if first row is a header separator (e.g., |---|---|)
+            const hasHeaderSeparator = rows.length > 1 && 
+                rows[1].every(cell => /^-+$/.test(cell.trim()));
+            
+            // If header separator exists, skip it from rendering
+            const dataRows = hasHeaderSeparator ? [rows[0], ...rows.slice(2)] : rows;
+            const hasHeader = hasHeaderSeparator;
+            
             // Process each cell and check for alignment markers
-            const grid = rows.map(r =>
+            const grid = dataRows.map(r =>
                 r.map(c => {
                     let align = 'left';
                     let content = c;
@@ -1558,7 +1572,9 @@ def generate_static_html(data, custom_syntaxes):
                     // Check if cell content is only "-" (empty cell marker)
                     const isEmpty = cell.content.trim() === '-';
                     const emptyClass = isEmpty ? ' md-empty' : '';
-                    html += `<div class="md-cell ${i ? '' : 'md-header'}${emptyClass}"${alignStyle}>${cell.content}</div>`;
+                    // Only apply header class if we have a header separator and it's the first row
+                    const isHeader = hasHeader && i === 0;
+                    html += `<div class="md-cell ${isHeader ? 'md-header' : ''}${emptyClass}"${alignStyle}>${cell.content}</div>`;
                 });
             });
             html += '</div>';
