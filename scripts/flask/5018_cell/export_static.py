@@ -1528,8 +1528,13 @@ def generate_static_html(data, custom_syntaxes):
          */
         /* ----------  PIPE-TABLE → CSS-GRID  ---------- */
         function parseGridTable(lines) {
-            const rows = lines.map(l =>
-                l.trim().replace(/^\\|\\|$/g, '').split('|').map(c => c.trim()));
+            const rows = lines.map(l => {
+                // Remove leading/trailing whitespace and pipes
+                const trimmed = l.trim().replace(/^\\||\\|$/g, '');
+                // Split by pipe and trim each cell
+                const cells = trimmed.split('|').map(c => c.trim());
+                return cells;
+            });
             const cols = rows[0].length;
             
             // Check if first row is a header separator (e.g., |---|---|)

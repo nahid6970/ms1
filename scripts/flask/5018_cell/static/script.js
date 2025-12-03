@@ -1099,8 +1099,15 @@ function parseCommaTable(cols, text, borderColor, borderWidth) {
 
 /* ----------  PIPE-TABLE → CSS-GRID  ---------- */
 function parseGridTable(lines) {
-    const rows = lines.map(l =>
-        l.trim().replace(/^\||\|$/g, '').split('|').map(c => c.trim()));
+    const rows = lines.map(l => {
+        // Remove leading/trailing whitespace and pipes
+        const trimmed = l.trim().replace(/^\||\|$/g, '');
+        // Split by pipe and trim each cell
+        const cells = trimmed.split('|').map(c => c.trim());
+        // Filter out completely empty cells only if they're at the edges (from double pipes)
+        // Keep intentionally empty cells (marked with -)
+        return cells;
+    });
     const cols = rows[0].length;
 
     // Check if first row is a header separator (e.g., |---|---|)
