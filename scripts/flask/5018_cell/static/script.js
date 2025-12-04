@@ -924,6 +924,7 @@ function checkHasMarkdown(value) {
         (str.includes('|') && str.split('|').length >= 2) ||
         str.includes('\n') || // Treat multi-line text as markdown for proper height handling
         str.match(/#[\d.]+#.+?#\/#/) || // Variable font size heading
+        str.match(/#[A-Z]+#.+?#\/#/) || // Border box syntax
         str.includes('_.') || // Wavy underline
         str.match(/^Timeline(?:C)?(?:-[A-Z]+)?\*/m) || // Timeline syntax
         str.match(/\[\d+(?:-[A-Z]+)?\]\S+/) || // Word connector syntax
@@ -1283,6 +1284,19 @@ function parseMarkdownInline(text) {
         return `<span style="${styleStr}">${text}</span>`;
     });
 
+    // Border box: #R#text#/# -> colored border (letters only)
+    formatted = formatted.replace(/#([A-Z]+)#(.+?)#\/#/g, (match, colorCode, text) => {
+        const colorMap = {
+            'R': '#ff0000', 'G': '#00ff00', 'B': '#0000ff', 'Y': '#ffff00',
+            'O': '#ff8800', 'P': '#ff00ff', 'C': '#00ffff', 'W': '#ffffff',
+            'K': '#000000', 'GR': '#808080'
+        };
+        if (colorMap[colorCode]) {
+            return `<span style="border: 2px solid ${colorMap[colorCode]}; padding: 2px 6px; border-radius: 4px; display: inline; box-decoration-break: clone; -webkit-box-decoration-break: clone;">${text}</span>`;
+        }
+        return match; // Not a valid color, leave unchanged
+    });
+
     // Variable font size heading: #2#text#/# -> custom size (2em, 1.5em, etc.)
     formatted = formatted.replace(/#([\d.]+)#(.+?)#\/#/g, (match, size, text) => {
         return `<span style="font-size: ${size}em; font-weight: 600;">${text}</span>`;
@@ -1547,6 +1561,19 @@ function oldParseMarkdownBody(lines) {
                 return `${cssKey}: ${v}`;
             }).join('; ');
             return `<span style="${styleStr}">${text}</span>`;
+        });
+
+        // Border box: #R#text#/# -> colored border (letters only)
+        formatted = formatted.replace(/#([A-Z]+)#(.+?)#\/#/g, (match, colorCode, text) => {
+            const colorMap = {
+                'R': '#ff0000', 'G': '#00ff00', 'B': '#0000ff', 'Y': '#ffff00',
+                'O': '#ff8800', 'P': '#ff00ff', 'C': '#00ffff', 'W': '#ffffff',
+                'K': '#000000', 'GR': '#808080'
+            };
+            if (colorMap[colorCode]) {
+                return `<span style="border: 2px solid ${colorMap[colorCode]}; padding: 2px 6px; border-radius: 4px; display: inline; box-decoration-break: clone; -webkit-box-decoration-break: clone;">${text}</span>`;
+            }
+            return match; // Not a valid color, leave unchanged
         });
 
         // Variable font size heading: #2#text#/# -> custom size (2em, 1.5em, etc.)
@@ -5310,6 +5337,9 @@ function stripMarkdown(text) {
 
     // Remove variable font size heading markers: #2#text#/# -> text
     stripped = stripped.replace(/#[\d.]+#(.+?)#\/#/g, '$1');
+    
+    // Remove border box markers: #R#text#/# -> text
+    stripped = stripped.replace(/#[A-Z]+#(.+?)#\/#/g, '$1');
 
     // Remove header markers: ##text## -> text
     stripped = stripped.replace(/##(.+?)##/g, '$1');

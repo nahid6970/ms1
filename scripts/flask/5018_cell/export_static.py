@@ -1699,6 +1699,19 @@ def generate_static_html(data, custom_syntaxes):
                 return '<span style="' + styleStr + '">' + text + '</span>';
             });
 
+            // Border box: #R#text#/# -> colored border (letters only)
+            formatted = formatted.replace(/#([A-Z]+)#(.+?)#\\/#/g, function(match, colorCode, text) {
+                const colorMap = {
+                    'R': '#ff0000', 'G': '#00ff00', 'B': '#0000ff', 'Y': '#ffff00',
+                    'O': '#ff8800', 'P': '#ff00ff', 'C': '#00ffff', 'W': '#ffffff',
+                    'K': '#000000', 'GR': '#808080'
+                };
+                if (colorMap[colorCode]) {
+                    return '<span style="border: 2px solid ' + colorMap[colorCode] + '; padding: 2px 6px; border-radius: 4px; display: inline; box-decoration-break: clone; -webkit-box-decoration-break: clone;">' + text + '</span>';
+                }
+                return match;
+            });
+
             // Variable font size heading: #2#text#/# -> custom size (2em, 1.5em, etc.)
             formatted = formatted.replace(/#([\\d.]+)#(.+?)#\\/#/g, function(match, size, text) {
                 return '<span style="font-size: ' + size + 'em; font-weight: 600;">' + text + '</span>';
@@ -1850,6 +1863,19 @@ def generate_static_html(data, custom_syntaxes):
                         return `${cssKey}: ${v}`;
                     }).join('; ');
                     return `<span style="${styleStr}">${text}</span>`;
+                });
+
+                // Border box: #R#text#/# -> colored border (letters only)
+                formatted = formatted.replace(/#([A-Z]+)#(.+?)#\\/#/g, function(match, colorCode, text) {
+                    const colorMap = {
+                        'R': '#ff0000', 'G': '#00ff00', 'B': '#0000ff', 'Y': '#ffff00',
+                        'O': '#ff8800', 'P': '#ff00ff', 'C': '#00ffff', 'W': '#ffffff',
+                        'K': '#000000', 'GR': '#808080'
+                    };
+                    if (colorMap[colorCode]) {
+                        return '<span style="border: 2px solid ' + colorMap[colorCode] + '; padding: 2px 6px; border-radius: 4px; display: inline; box-decoration-break: clone; -webkit-box-decoration-break: clone;">' + text + '</span>';
+                    }
+                    return match;
                 });
 
                 // Variable font size heading: #2#text#/# -> custom size (2em, 1.5em, etc.)

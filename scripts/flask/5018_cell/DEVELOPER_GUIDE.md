@@ -449,6 +449,13 @@ This ensures users can easily find the clear button at the end of all formatting
 - **Stripping:** Added `.replace(/#[\d.]+#(.+?)#\/#/g, '$1')` to `stripMarkdown()`
 - **Static Export:** Full support in both parseMarkdown functions
 
+### Border Box Feature
+**Syntax:** `#R#text#/#` (color codes: R, G, B, Y, O, P, C, W, K, GR)
+**Purpose:** Adds colored border around text - uses same colors as Timeline/Table features.
+**Examples:** `#R#Important#/#` → Red border, `#G#Success#/#` → Green border, `#B#Note#/#` → Blue border
+**Implementation:** Regex `/#([A-Z]+)#(.+?)#\/#/g` - parsed before font size (letters vs numbers). 2px solid border, 4px radius, wraps properly.
+**Note:** Does NOT conflict with font size `#2#text#/#` (numbers) - border uses letters only.
+
 ### Wavy Underline Feature
 **Syntax:** `_.text._`
 **Purpose:** Adds wavy underline to text (like spelling error indicators).
