@@ -699,17 +699,13 @@
                                 | John | 25  | NYC  |
                             </td>
                             <td style="padding: 8px;">
-                                <div style="display: inline-block;">
-                                    <div style="display: flex; border-bottom: 2px solid #495057;">
-                                        <span style="padding: 4px 12px; border-right: 3px solid #ced4da; font-weight: 600;">Name</span>
-                                        <span style="padding: 4px 12px; border-right: 3px solid #ced4da; font-weight: 600;">Age</span>
-                                        <span style="padding: 4px 12px; font-weight: 600;">City</span>
-                                    </div>
-                                    <div style="display: flex;">
-                                        <span style="padding: 4px 12px; border-right: 3px solid #ced4da;">John</span>
-                                        <span style="padding: 4px 12px; border-right: 3px solid #ced4da;">25</span>
-                                        <span style="padding: 4px 12px;">NYC</span>
-                                    </div>
+                                <div class="md-grid" style="--cols: 3;">
+                                    <div class="md-cell md-header">Name</div>
+                                    <div class="md-cell md-header">Age</div>
+                                    <div class="md-cell md-header">City</div>
+                                    <div class="md-cell">John</div>
+                                    <div class="md-cell">25</div>
+                                    <div class="md-cell">NYC</div>
                                 </div>
                             </td>
                         </tr>
@@ -720,15 +716,11 @@
                                 | John      | 25       |
                             </td>
                             <td style="padding: 8px;">
-                                <div style="display: inline-block;">
-                                    <div style="display: flex; border-bottom: 2px solid #495057;">
-                                        <span style="padding: 4px 12px; border-right: 3px solid #ff0000; font-weight: 600;">Name</span>
-                                        <span style="padding: 4px 12px; font-weight: 600;">Age</span>
-                                    </div>
-                                    <div style="display: flex;">
-                                        <span style="padding: 4px 12px; border-right: 3px solid #ff0000;">John</span>
-                                        <span style="padding: 4px 12px; border-right: 3px solid #00ff00;">25</span>
-                                    </div>
+                                <div class="md-grid" style="--cols: 2;">
+                                    <div class="md-cell md-header" style="border-right-color: #ff0000 !important;">Name</div>
+                                    <div class="md-cell md-header">Age</div>
+                                    <div class="md-cell" style="border-right-color: #ff0000 !important;">John</div>
+                                    <div class="md-cell" style="border-right-color: #00ff00 !important;">25</div>
                                 </div>
                             </td>
                         </tr>
