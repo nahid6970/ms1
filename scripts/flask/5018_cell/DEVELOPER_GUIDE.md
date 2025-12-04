@@ -236,8 +236,9 @@ These two markdown syntaxes work together and are controlled by the same 👁️
   - Creates highlights in a single pass to avoid conflicts
 - **Overlay:** For cells without markdown preview, `createTextHighlightOverlayMulti()` creates an overlay that exactly matches the input's position and styling.
 - **Feedback:** Toast message shows which terms were found, e.g., "Found 5 row(s) matching: johnny, donny"
+- **Cell Highlighting:** Search does NOT add `.search-highlight` class to cells - preserves custom cell background colors. Only matching text gets yellow highlight.
 - **Key Functions:**
-  - `searchTable()` - Main search logic with comma-splitting
+  - `searchTable()` - Main search logic with comma-splitting (~line 4120)
   - `highlightMultipleTermsInHtml()` - Highlights all matching terms in HTML
   - `createTextHighlightOverlayMulti()` - Creates overlay for input/textarea elements
   - `stripMarkdown()` - Removes markdown from search terms
