@@ -1726,6 +1726,19 @@ def generate_static_html(data, custom_syntaxes):
             // Wavy underline: _.text._ -> wavy underline
             formatted = formatted.replace(/_\\.(.+?)\\._/g, '<span style="text-decoration: underline wavy;">$1</span>');
 
+            // Colored horizontal separator: R----- (color prefix + 5 dashes) -> colored separator
+            formatted = formatted.replace(/^([A-Z]+)-{5,}$/gm, function(match, colorCode) {
+                const colorMap = {
+                    'R': '#ff0000', 'G': '#00ff00', 'B': '#0000ff', 'Y': '#ffff00',
+                    'O': '#ff8800', 'P': '#ff00ff', 'C': '#00ffff', 'W': '#ffffff',
+                    'K': '#000000', 'GR': '#808080'
+                };
+                if (colorMap[colorCode]) {
+                    return '<div class="md-separator" style="width: 100%; height: 4px; background: ' + colorMap[colorCode] + '; margin: 12px 0; padding: 0; display: block; border: none; line-height: 0; font-size: 0;"></div>';
+                }
+                return match;
+            });
+
             // Horizontal separator: ----- (5 or more dashes on a line) -> separator div
             formatted = formatted.replace(/^-{5,}$/gm, '<div class="md-separator" style="width: 100%; height: 4px; background: #ccc; margin: 12px 0; padding: 0; display: block; border: none; line-height: 0; font-size: 0;"></div>');
 
@@ -1904,6 +1917,19 @@ def generate_static_html(data, custom_syntaxes):
 
                 // Wavy underline: _.text._ -> wavy underline
                 formatted = formatted.replace(/_\\.(.+?)\\._/g, '<span style="text-decoration: underline wavy;">$1</span>');
+
+                // Colored horizontal separator: R----- (color prefix + 5 dashes) -> colored separator
+                formatted = formatted.replace(/^([A-Z]+)-{5,}$/gm, function(match, colorCode) {
+                    const colorMap = {
+                        'R': '#ff0000', 'G': '#00ff00', 'B': '#0000ff', 'Y': '#ffff00',
+                        'O': '#ff8800', 'P': '#ff00ff', 'C': '#00ffff', 'W': '#ffffff',
+                        'K': '#000000', 'GR': '#808080'
+                    };
+                    if (colorMap[colorCode]) {
+                        return '<div class="md-separator" style="width: 100%; height: 4px; background: ' + colorMap[colorCode] + '; margin: 12px 0; padding: 0; display: block; border: none; line-height: 0; font-size: 0;"></div>';
+                    }
+                    return match;
+                });
 
                 // Horizontal separator: ----- (5 or more dashes on a line) -> separator div
                 formatted = formatted.replace(/^-{5,}$/gm, '<div class="md-separator" style="width: 100%; height: 4px; background: #ccc; margin: 12px 0; padding: 0; display: block; border: none; line-height: 0; font-size: 0;"></div>');

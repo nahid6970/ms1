@@ -921,6 +921,7 @@ function checkHasMarkdown(value) {
         str.trim().startsWith('|') ||
         str.includes('\\(') ||
         str.match(/^-{5,}$/m) ||
+        str.match(/^[A-Z]+-{5,}$/m) || // Colored separator
         (str.includes('|') && str.split('|').length >= 2) ||
         str.includes('\n') || // Treat multi-line text as markdown for proper height handling
         str.match(/#[\d.]+#.+?#\/#/) || // Variable font size heading
@@ -1311,6 +1312,19 @@ function parseMarkdownInline(text) {
     // Wavy underline: _.text._ -> wavy underline
     formatted = formatted.replace(/_\.(.+?)\._/g, '<span style="text-decoration: underline wavy;">$1</span>');
 
+    // Colored horizontal separator: R----- (color prefix + 5 dashes) -> colored separator
+    formatted = formatted.replace(/^([A-Z]+)-{5,}$/gm, (match, colorCode) => {
+        const colorMap = {
+            'R': '#ff0000', 'G': '#00ff00', 'B': '#0000ff', 'Y': '#ffff00',
+            'O': '#ff8800', 'P': '#ff00ff', 'C': '#00ffff', 'W': '#ffffff',
+            'K': '#000000', 'GR': '#808080'
+        };
+        if (colorMap[colorCode]) {
+            return `<div class="md-separator" style="background: ${colorMap[colorCode]} !important;"></div>`;
+        }
+        return match; // Not a valid color, leave unchanged
+    });
+
     // Horizontal separator: ----- (5 or more dashes on a line) -> separator div
     formatted = formatted.replace(/^-{5,}$/gm, '<div class="md-separator"></div>');
 
@@ -1602,6 +1616,19 @@ function oldParseMarkdownBody(lines) {
 
         // Wavy underline: _.text._ -> wavy underline
         formatted = formatted.replace(/_\.(.+?)\._/g, '<span style="text-decoration: underline wavy;">$1</span>');
+
+        // Colored horizontal separator: R----- (color prefix + 5 dashes) -> colored separator
+        formatted = formatted.replace(/^([A-Z]+)-{5,}$/gm, (match, colorCode) => {
+            const colorMap = {
+                'R': '#ff0000', 'G': '#00ff00', 'B': '#0000ff', 'Y': '#ffff00',
+                'O': '#ff8800', 'P': '#ff00ff', 'C': '#00ffff', 'W': '#ffffff',
+                'K': '#000000', 'GR': '#808080'
+            };
+            if (colorMap[colorCode]) {
+                return `<div class="md-separator" style="background: ${colorMap[colorCode]} !important;"></div>`;
+            }
+            return match; // Not a valid color, leave unchanged
+        });
 
         // Horizontal separator: ----- (5 or more dashes on a line) -> separator div
         formatted = formatted.replace(/^-{5,}$/gm, '<div class="md-separator"></div>');
@@ -5379,6 +5406,9 @@ function stripMarkdown(text) {
     // Remove wavy underline markers: _.text._ -> text
     stripped = stripped.replace(/_\.(.+?)\._/g, '$1');
 
+    // Remove colored horizontal separator: R----- -> (empty)
+    stripped = stripped.replace(/^[A-Z]+-{5,}$/gm, '');
+    
     // Remove horizontal separator: ----- -> (empty)
     stripped = stripped.replace(/^-{5,}$/gm, '');
 
