@@ -9807,3 +9807,52 @@ function applyVariableFontSize(event) {
     closeQuickFormatter();
     showToast(`Font size ${sizeNum}x applied`, 'success');
 }
+
+
+// Border Box Quick Format Function
+function applyBorderBox(event) {
+    if (!quickFormatterTarget) return;
+
+    const input = quickFormatterTarget;
+    const start = quickFormatterSelection.start;
+    const end = quickFormatterSelection.end;
+    const selectedText = input.value.substring(start, end);
+
+    if (!selectedText) {
+        showToast('Please select text first', 'error');
+        return;
+    }
+
+    // Prompt for color
+    const colorOptions = 'R (Red), G (Green), B (Blue), Y (Yellow), O (Orange), P (Purple), C (Cyan), W (White), K (Black), GR (Gray)';
+    const color = prompt(`Enter border color:\n${colorOptions}`, 'R');
+    
+    if (color === null) return; // User cancelled
+    
+    const colorUpper = color.trim().toUpperCase();
+    const validColors = ['R', 'G', 'B', 'Y', 'O', 'P', 'C', 'W', 'K', 'GR'];
+    
+    if (!validColors.includes(colorUpper)) {
+        showToast('Invalid color. Use: R, G, B, Y, O, P, C, W, K, or GR', 'error');
+        return;
+    }
+
+    // Apply the border box syntax
+    const newText = input.value.substring(0, start) +
+        `#${colorUpper}#${selectedText}#/#` +
+        input.value.substring(end);
+
+    input.value = newText;
+
+    // Trigger change event
+    const changeEvent = new Event('input', { bubbles: true });
+    input.dispatchEvent(changeEvent);
+
+    // Set cursor after the formatted text
+    const newCursorPos = start + `#${colorUpper}#${selectedText}#/#`.length;
+    input.setSelectionRange(newCursorPos, newCursorPos);
+    input.focus();
+
+    closeQuickFormatter();
+    showToast(`${colorUpper} border applied`, 'success');
+}
