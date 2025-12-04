@@ -2696,6 +2696,9 @@ Markdown Table Styles */
     white-space: normal !important;
     min-width: 80px;
     max-width: 100%;
+    /* Hanging indent for wrapped text - like lists */
+    text-indent: -1em !important;
+    padding-left: calc(12px + 1em) !important;
 }
 
 /* Remove right border from last cell in each row */

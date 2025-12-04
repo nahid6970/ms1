@@ -829,6 +829,9 @@ def generate_static_html(data, custom_syntaxes):
             white-space: normal;
             min-width: 80px;
             max-width: 100%;
+            /* Hanging indent for wrapped text - like lists */
+            text-indent: -1em;
+            padding-left: calc(12px + 1em);
         }
 
         /* Remove right border from last cell in each row */
