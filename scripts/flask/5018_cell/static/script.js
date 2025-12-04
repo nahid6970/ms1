@@ -1320,6 +1320,19 @@ function parseMarkdownInline(text) {
     // Italic: @@text@@ -> <em>text</em>
     formatted = formatted.replace(/@@(.+?)@@/g, '<em>$1</em>');
 
+    // Colored underline: _R_text__ -> colored underline (must come before regular underline)
+    formatted = formatted.replace(/_([A-Z]+)_(.+?)__/g, (match, colorCode, text) => {
+        const colorMap = {
+            'R': '#ff0000', 'G': '#00ff00', 'B': '#0000ff', 'Y': '#ffff00',
+            'O': '#ff8800', 'P': '#ff00ff', 'C': '#00ffff', 'W': '#ffffff',
+            'K': '#000000', 'GR': '#808080'
+        };
+        if (colorMap[colorCode]) {
+            return `<u style="text-decoration-color: ${colorMap[colorCode]}; text-decoration-thickness: 2px;">${text}</u>`;
+        }
+        return match; // Not a valid color, leave unchanged
+    });
+
     // Underline: __text__ -> <u>text</u>
     formatted = formatted.replace(/__(.+?)__/g, '<u>$1</u>');
 
@@ -1598,6 +1611,19 @@ function oldParseMarkdownBody(lines) {
 
         // Italic: @@text@@ -> <em>text</em>
         formatted = formatted.replace(/@@(.+?)@@/g, '<em>$1</em>');
+
+        // Colored underline: _R_text__ -> colored underline (must come before regular underline)
+        formatted = formatted.replace(/_([A-Z]+)_(.+?)__/g, (match, colorCode, text) => {
+            const colorMap = {
+                'R': '#ff0000', 'G': '#00ff00', 'B': '#0000ff', 'Y': '#ffff00',
+                'O': '#ff8800', 'P': '#ff00ff', 'C': '#00ffff', 'W': '#ffffff',
+                'K': '#000000', 'GR': '#808080'
+            };
+            if (colorMap[colorCode]) {
+                return `<u style="text-decoration-color: ${colorMap[colorCode]}; text-decoration-thickness: 2px;">${text}</u>`;
+            }
+            return match; // Not a valid color, leave unchanged
+        });
 
         // Underline: __text__ -> <u>text</u>
         formatted = formatted.replace(/__(.+?)__/g, '<u>$1</u>');
@@ -5329,6 +5355,9 @@ function stripMarkdown(text) {
     // Remove bold markers: **text** -> text
     stripped = stripped.replace(/\*\*(.+?)\*\*/g, '$1');
 
+    // Remove colored underline markers: _R_text__ -> text
+    stripped = stripped.replace(/_[A-Z]+_(.+?)__/g, '$1');
+    
     // Remove underline markers: __text__ -> text
     stripped = stripped.replace(/__(.+?)__/g, '$1');
 

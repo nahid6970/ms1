@@ -456,6 +456,13 @@ This ensures users can easily find the clear button at the end of all formatting
 **Implementation:** Regex `/#([A-Z]+)#(.+?)#\/#/g` - parsed before font size (letters vs numbers). 2px solid border, 4px radius, wraps properly.
 **Note:** Does NOT conflict with font size `#2#text#/#` (numbers) - border uses letters only.
 
+### Colored Underline Feature
+**Syntax:** `_R_text__` (color codes: R, G, B, Y, O, P, C, W, K, GR)
+**Purpose:** Adds colored underline to text - uses same colors as Border/Timeline/Table.
+**Examples:** `_R_Important__` → Red underline, `_G_Success__` → Green underline, `_B_Note__` → Blue underline
+**Implementation:** Regex `/_([A-Z]+)_(.+?)__/g` - parsed before regular `__text__`. 2px thickness.
+**Note:** Regular underline `__text__` still works (no color code).
+
 ### Wavy Underline Feature
 **Syntax:** `_.text._`
 **Purpose:** Adds wavy underline to text (like spelling error indicators).
