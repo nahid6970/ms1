@@ -98,6 +98,18 @@ const hasMarkdown = cellValue.includes('**') ||
 *   **Note:** There are TWO parseMarkdown functions in export_static.py - update BOTH!
 *   **Escaping:** Use `\\` for backslashes in Python strings (e.g., `\\*\\*` for `**`, `\\?\\?` for `??`)
 
+### Documentation (Often Forgotten!)
+
+#### 7. Markdown Formatting Guide Modal
+**Location:** `templates/index.html` - Search for "Markdown Formatting Guide"
+**Purpose:** Users need to know the syntax exists and how to use it!
+**Action:** Add example with syntax and preview to the appropriate section.
+
+#### 8. DEVELOPER_GUIDE.md
+**Location:** This file - Add under "New Features & Enhancements"
+**Purpose:** Document implementation details for future reference.
+**Action:** Add concise section with syntax, examples, and key implementation notes.
+
 ## New Features & Enhancements
 
 ### Hidden Content Features (Collapsible & Correct Answer)
@@ -626,9 +638,12 @@ The F1 window (opened with F1 key) provides comprehensive management through rig
 2. Add detection to `checkHasMarkdown()` in `static/script.js`
 3. **Add stripping to `stripMarkdown()` in `static/script.js`** - Required for search/sort to work
 4. Update `export_static.py` - add to both `parseMarkdownInline()` and `oldParseMarkdownBody()`
-5. Add to Markdown Guide modal in `templates/index.html` (search for "Markdown Formatting Guide")
-6. Test: Create cell with syntax, check preview, search, sort, and static export
-7. **Optional:** Add to Quick Formatter (F3) if users would benefit from quick-apply button
+5. **Add to Markdown Guide modal** in `templates/index.html` (search for "Markdown Formatting Guide") - Users need to know the syntax exists!
+6. **Add to DEVELOPER_GUIDE.md** - Document the feature with examples and implementation details
+7. Test: Create cell with syntax, check preview, search, sort, and static export
+8. **Optional:** Add to Quick Formatter (F3) if users would benefit from quick-apply button
+
+**⚠️ IMPORTANT:** Steps 5 & 6 are often forgotten but critical - users can't use features they don't know about!
 
 ### Modifying the Table Rendering
 - Main function: `renderTable()` (~line 3947+)
