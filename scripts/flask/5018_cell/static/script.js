@@ -5825,8 +5825,8 @@ function showQuickFormatter(inputElement) {
     const formatter = document.getElementById('quickFormatter');
     const colorSection = document.getElementById('colorPickerSection');
 
-    // Show color section by default
-    colorSection.style.display = 'block';
+    // Hide color section by default (collapsed)
+    colorSection.style.display = 'none';
     loadColorSwatches();
 
     // Update selection stats
