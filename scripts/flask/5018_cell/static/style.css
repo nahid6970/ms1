@@ -3007,9 +3007,38 @@ Markdown Table Styles */
 }
 
 .color-picker-section {
-    margin-top: 12px;
-    padding-top: 12px;
-    border-top: 2px solid #e9ecef;
+    position: absolute;
+    left: 100%;
+    top: 0;
+    width: 280px;
+    margin-left: 20px;
+    background: white;
+    border: 2px solid #007bff;
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    opacity: 0;
+    transform: translateX(50px);
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.color-picker-section[style*="display: block"] {
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: auto;
+}
+
+/* Shift formatter left when color picker is open */
+.quick-formatter.with-color-picker {
+    transform: translateX(-150px);
+    transition: transform 0.3s ease;
+}
+
+/* Make quick formatter relative for absolute positioning of color picker */
+.quick-formatter {
+    position: fixed;
+    transition: transform 0.3s ease;
 }
 
 .color-picker-row {

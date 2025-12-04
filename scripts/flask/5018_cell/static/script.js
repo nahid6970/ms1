@@ -6324,11 +6324,17 @@ function showColorPicker(event) {
     }
 
     const colorSection = document.getElementById('colorPickerSection');
+    const formatter = document.getElementById('quickFormatter');
     const isShowing = colorSection.style.display === 'none';
+    
     colorSection.style.display = isShowing ? 'block' : 'none';
-
+    
+    // Add/remove class to shift formatter left
     if (isShowing) {
+        formatter.classList.add('with-color-picker');
         loadColorSwatches();
+    } else {
+        formatter.classList.remove('with-color-picker');
     }
 }
 
@@ -8630,11 +8636,17 @@ function showColorPicker(event) {
     }
 
     const colorSection = document.getElementById('colorPickerSection');
+    const formatter = document.getElementById('quickFormatter');
     const isShowing = colorSection.style.display === 'none';
+    
     colorSection.style.display = isShowing ? 'block' : 'none';
-
+    
+    // Add/remove class to shift formatter left
     if (isShowing) {
+        formatter.classList.add('with-color-picker');
         loadColorSwatches();
+    } else {
+        formatter.classList.remove('with-color-picker');
     }
 }
 
