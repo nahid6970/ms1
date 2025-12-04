@@ -690,6 +690,57 @@
                 </div>
 
                 <div style="margin-bottom: 20px;">
+                    <h3 style="color: #007bff; margin-bottom: 10px;">Pipe Tables</h3>
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <tr style="border-bottom: 1px solid #ddd;">
+                            <td style="padding: 8px; font-family: monospace; background: #f8f9fa; font-size: 11px;">
+                                | Name | Age | City |<br>
+                                |------|-----|------|<br>
+                                | John | 25  | NYC  |
+                            </td>
+                            <td style="padding: 8px;">
+                                <div style="display: inline-block;">
+                                    <div style="display: flex; border-bottom: 2px solid #495057;">
+                                        <span style="padding: 4px 12px; border-right: 3px solid #ced4da; font-weight: 600;">Name</span>
+                                        <span style="padding: 4px 12px; border-right: 3px solid #ced4da; font-weight: 600;">Age</span>
+                                        <span style="padding: 4px 12px; font-weight: 600;">City</span>
+                                    </div>
+                                    <div style="display: flex;">
+                                        <span style="padding: 4px 12px; border-right: 3px solid #ced4da;">John</span>
+                                        <span style="padding: 4px 12px; border-right: 3px solid #ced4da;">25</span>
+                                        <span style="padding: 4px 12px;">NYC</span>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #ddd;">
+                            <td style="padding: 8px; font-family: monospace; background: #f8f9fa; font-size: 11px;">
+                                | :R-A:Name | :G-A:Age |<br>
+                                |-----------|----------|<br>
+                                | John      | 25       |
+                            </td>
+                            <td style="padding: 8px;">
+                                <div style="display: inline-block;">
+                                    <div style="display: flex; border-bottom: 2px solid #495057;">
+                                        <span style="padding: 4px 12px; border-right: 3px solid #ff0000; font-weight: 600;">Name</span>
+                                        <span style="padding: 4px 12px; font-weight: 600;">Age</span>
+                                    </div>
+                                    <div style="display: flex;">
+                                        <span style="padding: 4px 12px; border-right: 3px solid #ff0000;">John</span>
+                                        <span style="padding: 4px 12px; border-right: 3px solid #00ff00;">25</span>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                    <p style="font-size: 12px; color: #666; margin-top: 5px;">
+                        Use pipes <code>|</code> to separate columns. Add <code>|---|---|</code> separator for headers.
+                        Use <code>:R-A:</code> for colored column separators (R, G, B, Y, O, P, C, W, K, GR).
+                        Press <strong>F3 → 📊</strong> to auto-format tables.
+                    </p>
+                </div>
+
+                <div style="margin-bottom: 20px;">
                     <h3 style="color: #007bff; margin-bottom: 10px;">Timeline/Flowchart</h3>
                     <table style="width: 100%; border-collapse: collapse;">
                         <tr style="border-bottom: 1px solid #ddd;">
