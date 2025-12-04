@@ -4123,12 +4123,14 @@ function searchTable() {
                 if (matchingTerms.length > 0) {
                     rowMatches = true;
                     matchingTerms.forEach(term => foundTerms.add(term));
-                    cell.classList.add('search-highlight');
+                    // Don't add search-highlight to cell - preserve cell background color
+                    // cell.classList.add('search-highlight');
 
                     // Highlight markdown preview if it exists
                     const preview = cell.querySelector('.markdown-preview');
                     if (preview) {
-                        preview.classList.add('search-highlight');
+                        // Don't add search-highlight to preview - preserve cell background
+                        // preview.classList.add('search-highlight');
 
                         // Highlight exact matching text in preview for all matching terms
                         if (!preview.dataset.originalHtml) {
