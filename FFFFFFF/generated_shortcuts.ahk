@@ -495,7 +495,7 @@ LAlt & c:: {
     KeySequence() {
         Send "^!{Numpad2}"
         Sleep 250
-        Send ", "
+        Send "| "
         Sleep 250
         Send "^!{Numpad1}"
     }
