@@ -498,6 +498,41 @@ This ensures users can easily find the clear button at the end of all formatting
 - **Key Functions:**
   - `parseMarkdown()` - Converts `-----` to separator div
   - `checkHasMarkdown()` - Detects 5+ dashes on a line
+
+### Square Root Feature
+**Syntax:** `√{value}`
+**Purpose:** Displays mathematical square root notation with an overline over the value.
+**Examples:** `√{25}` → √‾2‾5‾, `√{x+y}` → √‾x‾+‾y‾
+**Implementation:**
+- **Parsing:** Regex `/√\{(.+?)\}/g` converts to `<span style="font-size: 1.2em;">√</span><span style="text-decoration: overline;">$1</span>`
+- **Detection:** Added `str.includes('√{')` to `checkHasMarkdown()`
+- **Stripping:** Added `.replace(/√\{(.+?)\}/g, '$1')` to `stripMarkdown()`
+- **Quick Formatter:** Added √ button in F3 menu - wraps selected text with `√{}`
+- **Static Export:** Full support in both `parseMarkdownInline()` and `oldParseMarkdownBody()` in export_static.py
+- **Key Functions:**
+  - `applySqrtFormat(event)` - Applies square root syntax from F3 formatter
+  - `parseMarkdownInline()` - Converts syntax to HTML
+  - `checkHasMarkdown()` - Detects the syntax
+  - `stripMarkdown()` - Removes syntax for sorting/searching
+
+### Hat Notation Feature
+**Syntax:** `^{above}_{below}text`
+**Purpose:** Displays text with values positioned above and below (like mathematical notation for limits, derivatives, etc.).
+**Examples:** 
+- `^{n}_{i=1}Σ` → displays Σ with n above and i=1 below
+- `^{∞}_{0}∫` → displays ∫ with ∞ above and 0 below
+**Implementation:**
+- **Parsing:** Regex `/\^{(.+?)}_\{(.+?)\}(.+?)(?=\s|$|[^\w])/g` creates positioned spans with absolute positioning
+- **Detection:** Added `str.match(/\^{.+?}_\{.+?\}/)` to `checkHasMarkdown()`
+- **Stripping:** Added `.replace(/\^{.+?}_\{.+?\}(.+?)(?=\s|$|[^\w])/g, '$1')` to `stripMarkdown()`
+- **Quick Formatter:** Added ^ button with a/b icon in F3 menu - prompts for above/below values
+- **Styling:** Uses relative positioning with 12px vertical padding, 0.7em font size for above/below values
+- **Static Export:** Full support in both `parseMarkdownInline()` and `oldParseMarkdownBody()` in export_static.py
+- **Key Functions:**
+  - `applyHatFormat(event)` - Prompts for above/below values and applies syntax from F3 formatter
+  - `parseMarkdownInline()` - Converts syntax to HTML with positioned spans
+  - `checkHasMarkdown()` - Detects the syntax
+  - `stripMarkdown()` - Removes syntax for sorting/searching
   - `stripMarkdown()` - Removes separator for sorting/searching
   - `oldParseMarkdownBody()` - Uses reduce to control newlines around separators
   - `export_static.py` - Also uses reduce() to skip `<br>` tags around separators

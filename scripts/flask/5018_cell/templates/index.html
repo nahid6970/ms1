@@ -499,6 +499,20 @@
                             <td style="padding: 8px;">text<sub>subscript</sub></td>
                         </tr>
                         <tr style="border-bottom: 1px solid #ddd;">
+                            <td style="padding: 8px; font-family: monospace; background: #f8f9fa;">√{25}</td>
+                            <td style="padding: 8px;"><span style="font-size: 1.2em;">√</span><span style="text-decoration: overline;">25</span></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #ddd;">
+                            <td style="padding: 8px; font-family: monospace; background: #f8f9fa;">^{n}_{i=1}Σ</td>
+                            <td style="padding: 8px;">
+                                <span style="position: relative; display: inline-block; padding: 12px 4px;">
+                                    <span style="position: absolute; top: -2px; left: 50%; transform: translateX(-50%); font-size: 0.7em;">n</span>
+                                    <span>Σ</span>
+                                    <span style="position: absolute; bottom: -2px; left: 50%; transform: translateX(-50%); font-size: 0.7em;">i=1</span>
+                                </span>
+                            </td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #ddd;">
                             <td style="padding: 8px; font-family: monospace; background: #f8f9fa;">##heading##</td>
                             <td style="padding: 8px;"><span style="font-size: 1.3em; font-weight: 600;">heading</span>
                             </td>
@@ -903,6 +917,16 @@
             <button class="format-btn" onclick="applyQuickFormat('~', '~', event)"
                 oncontextmenu="return toggleFormatSelection('~', '~', event)" title="Subscript (Right-click to select)">
                 X<sub>2</sub>
+            </button>
+            <button class="format-btn" onclick="applySqrtFormat(event)" title="Square Root - √{value}">
+                √
+            </button>
+            <button class="format-btn" onclick="applyHatFormat(event)" title="Hat (Above/Below) - ^{above}_{below}text">
+                <span style="position: relative; display: inline-block;">
+                    <span style="position: absolute; top: -8px; left: 50%; transform: translateX(-50%); font-size: 8px;">a</span>
+                    <span>^</span>
+                    <span style="position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); font-size: 8px;">b</span>
+                </span>
             </button>
             <button class="format-btn" onclick="applyLinkFormat(event)" title="Link">
                 🔗

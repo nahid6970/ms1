@@ -905,6 +905,8 @@ function checkHasMarkdown(value) {
         str.includes('==') ||
         str.includes('!!') ||
         str.includes('??') ||
+        str.includes('√{') || // Square root
+        str.match(/\^{.+?}_\{.+?\}/) || // Hat notation
         str.includes('^') ||
         str.includes('~') ||
         str.includes('{fg:') ||
@@ -1352,6 +1354,18 @@ function parseMarkdownInline(text) {
 
     // Strikethrough: ~~text~~ -> <del>text</del>
     formatted = formatted.replace(/~~(.+?)~~/g, '<del>$1</del>');
+
+    // Square root: √{value} -> √ with value
+    formatted = formatted.replace(/√\{(.+?)\}/g, '<span style="font-size: 1.2em;">√</span><span style="text-decoration: overline;">$1</span>');
+
+    // Hat notation: ^{above}_{below}text -> text with values above and below
+    formatted = formatted.replace(/\^{(.+?)}_\{(.+?)\}(.+?)(?=\s|$|[^\w])/g, (match, above, below, text) => {
+        return `<span style="position: relative; display: inline-block; padding: 12px 4px 12px 4px;">
+            <span style="position: absolute; top: -2px; left: 50%; transform: translateX(-50%); font-size: 0.7em;">${above}</span>
+            <span>${text}</span>
+            <span style="position: absolute; bottom: -2px; left: 50%; transform: translateX(-50%); font-size: 0.7em;">${below}</span>
+        </span>`;
+    });
 
     // Superscript: ^text^ -> <sup>text</sup>
     formatted = formatted.replace(/\^(.+?)\^/g, '<sup>$1</sup>');
@@ -5435,6 +5449,12 @@ function stripMarkdown(text) {
     // Remove blue highlight markers: ??text?? -> text
     stripped = stripped.replace(/\?\?(.+?)\?\?/g, '$1');
 
+    // Remove square root markers: √{value} -> value
+    stripped = stripped.replace(/√\{(.+?)\}/g, '$1');
+
+    // Remove hat notation markers: ^{above}_{below}text -> text
+    stripped = stripped.replace(/\^{.+?}_\{.+?\}(.+?)(?=\s|$|[^\w])/g, '$1');
+
     // Remove superscript markers: ^text^ -> text
     stripped = stripped.replace(/\^(.+?)\^/g, '$1');
 
@@ -6309,6 +6329,75 @@ function changeTextCase(caseType, event) {
     closeQuickFormatter();
     const caseNames = { upper: 'UPPERCASE', lower: 'lowercase', proper: 'Proper Case' };
     showToast(`Converted to ${caseNames[caseType]}`, 'success');
+}
+
+function applySqrtFormat(event) {
+    if (!quickFormatterTarget) return;
+
+    const input = quickFormatterTarget;
+    const start = quickFormatterSelection.start;
+    const end = quickFormatterSelection.end;
+    const selectedText = input.value.substring(start, end);
+
+    if (!selectedText) {
+        showToast('No text selected', 'warning');
+        return;
+    }
+
+    // Insert the square root syntax: √{value}
+    const newText = input.value.substring(0, start) +
+        `√{${selectedText}}` +
+        input.value.substring(end);
+
+    input.value = newText;
+
+    // Trigger change event to update cell
+    const changeEvent = new Event('input', { bubbles: true });
+    input.dispatchEvent(changeEvent);
+
+    // Set cursor position after the inserted text
+    const newCursorPos = start + 2 + selectedText.length + 1;
+    input.setSelectionRange(newCursorPos, newCursorPos);
+    input.focus();
+
+    closeQuickFormatter();
+    showToast('Square root applied', 'success');
+}
+
+function applyHatFormat(event) {
+    if (!quickFormatterTarget) return;
+
+    const input = quickFormatterTarget;
+    const start = quickFormatterSelection.start;
+    const end = quickFormatterSelection.end;
+    const selectedText = input.value.substring(start, end);
+
+    // Prompt for above and below values
+    const above = prompt('Enter value to display above:', 'a');
+    if (above === null) return; // User cancelled
+
+    const below = prompt('Enter value to display below:', 'b');
+    if (below === null) return; // User cancelled
+
+    // Insert the hat syntax: ^{above}_{below}text
+    const hatSyntax = `^{${above}}_{${below}}${selectedText}`;
+    const newText = input.value.substring(0, start) +
+        hatSyntax +
+        input.value.substring(end);
+
+    input.value = newText;
+
+    // Trigger change event to update cell
+    const changeEvent = new Event('input', { bubbles: true });
+    input.dispatchEvent(changeEvent);
+
+    // Set cursor position after the inserted text
+    const newCursorPos = start + hatSyntax.length;
+    input.setSelectionRange(newCursorPos, newCursorPos);
+    input.focus();
+
+    closeQuickFormatter();
+    showToast('Hat notation applied', 'success');
 }
 
 function applyMultipleFormats(lastPrefix, lastSuffix) {

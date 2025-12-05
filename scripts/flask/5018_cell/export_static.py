@@ -1401,6 +1401,8 @@ def generate_static_html(data, custom_syntaxes):
                         cellValue.includes('==') || 
                         cellValue.includes('!!') ||
                         cellValue.includes('??') ||
+                        cellValue.includes('√{') ||
+                        cellValue.match(/\\^\\{.+?\\}_\\{.+?\\}/) ||
                         cellValue.includes('^') || 
                         cellValue.includes('~') || 
                         cellValue.includes('{fg:') || 
@@ -1772,6 +1774,18 @@ def generate_static_html(data, custom_syntaxes):
             // Strikethrough: ~~text~~ -> <del>text</del>
             formatted = formatted.replace(/~~(.+?)~~/g, '<del>$1</del>');
 
+            // Square root: √{value} -> √ with value
+            formatted = formatted.replace(/√\\{(.+?)\\}/g, '<span style="font-size: 1.2em;">√</span><span style="text-decoration: overline;">$1</span>');
+
+            // Hat notation: ^{above}_{below}text -> text with values above and below
+            formatted = formatted.replace(/\\^\\{(.+?)\\}_\\{(.+?)\\}(.+?)(?=\\s|$|[^\\w])/g, function(match, above, below, text) {
+                return '<span style="position: relative; display: inline-block; padding: 12px 4px 12px 4px;">' +
+                    '<span style="position: absolute; top: -2px; left: 50%; transform: translateX(-50%); font-size: 0.7em;">' + above + '</span>' +
+                    '<span>' + text + '</span>' +
+                    '<span style="position: absolute; bottom: -2px; left: 50%; transform: translateX(-50%); font-size: 0.7em;">' + below + '</span>' +
+                    '</span>';
+            });
+
             // Superscript: ^text^ -> <sup>text</sup>
             formatted = formatted.replace(/\\^(.+?)\\^/g, '<sup>$1</sup>');
 
@@ -1963,6 +1977,18 @@ def generate_static_html(data, custom_syntaxes):
 
                 // Strikethrough: ~~text~~ -> <del>text</del>
                 formatted = formatted.replace(/~~(.+?)~~/g, '<del>$1</del>');
+
+                // Square root: √{value} -> √ with value
+                formatted = formatted.replace(/√\\{(.+?)\\}/g, '<span style="font-size: 1.2em;">√</span><span style="text-decoration: overline;">$1</span>');
+
+                // Hat notation: ^{above}_{below}text -> text with values above and below
+                formatted = formatted.replace(/\\^\\{(.+?)\\}_\\{(.+?)\\}(.+?)(?=\\s|$|[^\\w])/g, function(match, above, below, text) {
+                    return '<span style="position: relative; display: inline-block; padding: 12px 4px 12px 4px;">' +
+                        '<span style="position: absolute; top: -2px; left: 50%; transform: translateX(-50%); font-size: 0.7em;">' + above + '</span>' +
+                        '<span>' + text + '</span>' +
+                        '<span style="position: absolute; bottom: -2px; left: 50%; transform: translateX(-50%); font-size: 0.7em;">' + below + '</span>' +
+                        '</span>';
+                });
 
                 // Superscript: ^text^ -> <sup>text</sup>
                 formatted = formatted.replace(/\\^(.+?)\\^/g, '<sup>$1</sup>');
