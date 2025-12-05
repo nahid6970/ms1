@@ -499,18 +499,20 @@
                             <td style="padding: 8px;">text<sub>subscript</sub></td>
                         </tr>
                         <tr style="border-bottom: 1px solid #ddd;">
-                            <td style="padding: 8px; font-family: monospace; background: #f8f9fa;">√{25}</td>
-                            <td style="padding: 8px;"><span style="font-size: 1.2em;">√</span><span style="text-decoration: overline;">25</span></td>
+                            <td style="padding: 8px; font-family: monospace; background: #f8f9fa; font-size: 11px;">\(\sqrt{25}\)</td>
+                            <td style="padding: 8px;"><span id="sqrtPreview"></span></td>
                         </tr>
                         <tr style="border-bottom: 1px solid #ddd;">
-                            <td style="padding: 8px; font-family: monospace; background: #f8f9fa;">^{n}_{i=1}Σ</td>
-                            <td style="padding: 8px;">
-                                <span style="position: relative; display: inline-block; padding: 12px 4px;">
-                                    <span style="position: absolute; top: -2px; left: 50%; transform: translateX(-50%); font-size: 0.7em;">n</span>
-                                    <span>Σ</span>
-                                    <span style="position: absolute; bottom: -2px; left: 50%; transform: translateX(-50%); font-size: 0.7em;">i=1</span>
-                                </span>
-                            </td>
+                            <td style="padding: 8px; font-family: monospace; background: #f8f9fa; font-size: 11px;">Select: a/b → Click button</td>
+                            <td style="padding: 8px;"><span id="fracPreview"></span></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #ddd;">
+                            <td style="padding: 8px; font-family: monospace; background: #f8f9fa; font-size: 11px;">Select: a*b/c → Click button</td>
+                            <td style="padding: 8px;"><span id="fracPreview2"></span></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #ddd;">
+                            <td style="padding: 8px; font-family: monospace; background: #f8f9fa; font-size: 11px;">Select: (a+b)/(c+d) → Click button</td>
+                            <td style="padding: 8px;"><span id="fracPreview3"></span></td>
                         </tr>
                         <tr style="border-bottom: 1px solid #ddd;">
                             <td style="padding: 8px; font-family: monospace; background: #f8f9fa;">##heading##</td>
@@ -538,6 +540,10 @@
                             </td>
                         </tr>
                     </table>
+                    <p style="font-size: 12px; color: #666; margin-top: 10px; padding: 10px; background: #e7f3ff; border-left: 3px solid #007bff;">
+                        <strong>💡 Smart Math Tip:</strong> Select text like <code>a/b</code>, <code>a*b/c</code>, or <code>(a+b)/(c+d)</code>, 
+                        press <strong>F3</strong>, and click the fraction button to automatically convert to proper math notation!
+                    </p>
                 </div>
 
                 <div style="margin-bottom: 20px;">
@@ -918,13 +924,13 @@
                 oncontextmenu="return toggleFormatSelection('~', '~', event)" title="Subscript (Right-click to select)">
                 X<sub>2</sub>
             </button>
-            <button class="format-btn" onclick="applySqrtFormat(event)" title="Square Root - √{value}">
+            <button class="format-btn" onclick="applySqrtFormat(event)" title="Square Root - \(\sqrt{value}\)">
                 √
             </button>
-            <button class="format-btn" onclick="applyHatFormat(event)" title="Hat (Above/Below) - ^{above}_{below}text">
+            <button class="format-btn" onclick="applyHatFormat(event)" title="Smart Math - Converts a/b, a*b/c, (a+b)/(c+d) to LaTeX">
                 <span style="position: relative; display: inline-block;">
                     <span style="position: absolute; top: -8px; left: 50%; transform: translateX(-50%); font-size: 8px;">a</span>
-                    <span>^</span>
+                    <span style="font-size: 16px;">―</span>
                     <span style="position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); font-size: 8px;">b</span>
                 </span>
             </button>
@@ -1033,6 +1039,61 @@
     </div>
 
     <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script>
+        // Render KaTeX examples in Markdown Guide when modal is opened
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add event listener to render KaTeX when guide is shown
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    const modal = document.getElementById('markdownGuideModal');
+                    if (modal && modal.style.display === 'block') {
+                        // Render square root example
+                        const sqrtPreview = document.getElementById('sqrtPreview');
+                        if (sqrtPreview && window.katex) {
+                            try {
+                                katex.render('\\sqrt{25}', sqrtPreview, { throwOnError: false });
+                            } catch (e) {
+                                sqrtPreview.textContent = '√25';
+                            }
+                        }
+                        
+                        // Render fraction examples
+                        const fracPreview = document.getElementById('fracPreview');
+                        if (fracPreview && window.katex) {
+                            try {
+                                katex.render('\\frac{a}{b}', fracPreview, { throwOnError: false });
+                            } catch (e) {
+                                fracPreview.textContent = 'a/b';
+                            }
+                        }
+                        
+                        const fracPreview2 = document.getElementById('fracPreview2');
+                        if (fracPreview2 && window.katex) {
+                            try {
+                                katex.render('\\frac{a\\times b}{c}', fracPreview2, { throwOnError: false });
+                            } catch (e) {
+                                fracPreview2.textContent = 'a×b/c';
+                            }
+                        }
+                        
+                        const fracPreview3 = document.getElementById('fracPreview3');
+                        if (fracPreview3 && window.katex) {
+                            try {
+                                katex.render('\\frac{(a+b)}{(c+d)}', fracPreview3, { throwOnError: false });
+                            } catch (e) {
+                                fracPreview3.textContent = '(a+b)/(c+d)';
+                            }
+                        }
+                    }
+                });
+            });
+            
+            const modal = document.getElementById('markdownGuideModal');
+            if (modal) {
+                observer.observe(modal, { attributes: true, attributeFilter: ['style'] });
+            }
+        });
+    </script>
 </body>
 
 </html>

@@ -905,8 +905,6 @@ function checkHasMarkdown(value) {
         str.includes('==') ||
         str.includes('!!') ||
         str.includes('??') ||
-        str.includes('√{') || // Square root
-        str.match(/\^{.+?}_\{.+?\}/) || // Hat notation
         str.includes('^') ||
         str.includes('~') ||
         str.includes('{fg:') ||
@@ -1354,18 +1352,6 @@ function parseMarkdownInline(text) {
 
     // Strikethrough: ~~text~~ -> <del>text</del>
     formatted = formatted.replace(/~~(.+?)~~/g, '<del>$1</del>');
-
-    // Square root: √{value} -> √ with value
-    formatted = formatted.replace(/√\{(.+?)\}/g, '<span style="font-size: 1.2em;">√</span><span style="text-decoration: overline;">$1</span>');
-
-    // Hat notation: ^{above}_{below}text -> text with values above and below
-    formatted = formatted.replace(/\^{(.+?)}_\{(.+?)\}(.+?)(?=\s|$|[^\w])/g, (match, above, below, text) => {
-        return `<span style="position: relative; display: inline-block; padding: 12px 4px 12px 4px;">
-            <span style="position: absolute; top: -2px; left: 50%; transform: translateX(-50%); font-size: 0.7em;">${above}</span>
-            <span>${text}</span>
-            <span style="position: absolute; bottom: -2px; left: 50%; transform: translateX(-50%); font-size: 0.7em;">${below}</span>
-        </span>`;
-    });
 
     // Superscript: ^text^ -> <sup>text</sup>
     formatted = formatted.replace(/\^(.+?)\^/g, '<sup>$1</sup>');
@@ -5449,11 +5435,8 @@ function stripMarkdown(text) {
     // Remove blue highlight markers: ??text?? -> text
     stripped = stripped.replace(/\?\?(.+?)\?\?/g, '$1');
 
-    // Remove square root markers: √{value} -> value
-    stripped = stripped.replace(/√\{(.+?)\}/g, '$1');
-
-    // Remove hat notation markers: ^{above}_{below}text -> text
-    stripped = stripped.replace(/\^{.+?}_\{.+?\}(.+?)(?=\s|$|[^\w])/g, '$1');
+    // Remove Math markers: \( ... \) -> ...
+    stripped = stripped.replace(/\\\((.*?)\\\)/g, '$1');
 
     // Remove superscript markers: ^text^ -> text
     stripped = stripped.replace(/\^(.+?)\^/g, '$1');
@@ -6344,9 +6327,9 @@ function applySqrtFormat(event) {
         return;
     }
 
-    // Insert the square root syntax: √{value}
+    // Insert the square root syntax: \(\sqrt{value}\)
     const newText = input.value.substring(0, start) +
-        `√{${selectedText}}` +
+        `\\(\\sqrt{${selectedText}}\\)` +
         input.value.substring(end);
 
     input.value = newText;
@@ -6356,7 +6339,8 @@ function applySqrtFormat(event) {
     input.dispatchEvent(changeEvent);
 
     // Set cursor position after the inserted text
-    const newCursorPos = start + 2 + selectedText.length + 1;
+    const sqrtSyntax = `\\(\\sqrt{${selectedText}}\\)`;
+    const newCursorPos = start + sqrtSyntax.length;
     input.setSelectionRange(newCursorPos, newCursorPos);
     input.focus();
 
@@ -6372,17 +6356,64 @@ function applyHatFormat(event) {
     const end = quickFormatterSelection.end;
     const selectedText = input.value.substring(start, end);
 
-    // Prompt for above and below values
-    const above = prompt('Enter value to display above:', 'a');
-    if (above === null) return; // User cancelled
+    if (!selectedText) {
+        showToast('No text selected', 'warning');
+        return;
+    }
 
-    const below = prompt('Enter value to display below:', 'b');
-    if (below === null) return; // User cancelled
+    // Smart parsing: detect if text contains fraction patterns
+    // Pattern 1: Simple fraction a/b
+    // Pattern 2: Complex fraction with parentheses: (a+b)/(c+d)
+    // Pattern 3: Multiple operations: a*b/c or a/b*c
+    // Pattern 4: Nested: 5555/(1550+10)/150
+    
+    let fracSyntax;
+    
+    // Check if it's a simple fraction pattern (no * outside parentheses)
+    if (selectedText.includes('/')) {
+        // Try to intelligently parse the fraction
+        // Replace * with \cdot for multiplication in LaTeX
+        let processed = selectedText;
+        
+        // Find the main division (last / that's not inside parentheses)
+        let depth = 0;
+        let mainDivIndex = -1;
+        
+        for (let i = selectedText.length - 1; i >= 0; i--) {
+            if (selectedText[i] === ')') depth++;
+            else if (selectedText[i] === '(') depth--;
+            else if (selectedText[i] === '/' && depth === 0) {
+                mainDivIndex = i;
+                break;
+            }
+        }
+        
+        if (mainDivIndex !== -1) {
+            // Split at the main division
+            let numerator = selectedText.substring(0, mainDivIndex).trim();
+            let denominator = selectedText.substring(mainDivIndex + 1).trim();
+            
+            // Replace * with \times (cross sign) in both parts
+            numerator = numerator.replace(/\*/g, '\\times ');
+            denominator = denominator.replace(/\*/g, '\\times ');
+            
+            fracSyntax = `\\(\\frac{${numerator}}{${denominator}}\\)`;
+        } else {
+            // No division found, just wrap it
+            processed = processed.replace(/\*/g, '\\cdot ');
+            fracSyntax = `\\(${processed}\\)`;
+        }
+    } else if (selectedText.includes('*')) {
+        // Just multiplication, no division
+        const processed = selectedText.replace(/\*/g, '\\times ');
+        fracSyntax = `\\(${processed}\\)`;
+    } else {
+        // No special operators, just wrap it
+        fracSyntax = `\\(${selectedText}\\)`;
+    }
 
-    // Insert the hat syntax: ^{above}_{below}text
-    const hatSyntax = `^{${above}}_{${below}}${selectedText}`;
     const newText = input.value.substring(0, start) +
-        hatSyntax +
+        fracSyntax +
         input.value.substring(end);
 
     input.value = newText;
@@ -6392,12 +6423,12 @@ function applyHatFormat(event) {
     input.dispatchEvent(changeEvent);
 
     // Set cursor position after the inserted text
-    const newCursorPos = start + hatSyntax.length;
+    const newCursorPos = start + fracSyntax.length;
     input.setSelectionRange(newCursorPos, newCursorPos);
     input.focus();
 
     closeQuickFormatter();
-    showToast('Hat notation applied', 'success');
+    showToast('Math notation applied', 'success');
 }
 
 function applyMultipleFormats(lastPrefix, lastSuffix) {
