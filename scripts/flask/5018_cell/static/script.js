@@ -3460,6 +3460,11 @@ function switchSheet(index) {
     renderTable();
     autoSaveActiveSheet();
     
+    // Apply font size scale after rendering
+    setTimeout(() => {
+        applyFontSizeScale();
+    }, 0);
+    
     // Restore scroll position after rendering
     setTimeout(() => {
         const tableContainer = document.querySelector('.table-container');

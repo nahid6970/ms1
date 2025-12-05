@@ -1271,6 +1271,11 @@ def generate_static_html(data, custom_syntaxes):
             localStorage.setItem('staticExportActiveSheet', index);
             renderSidebar();
             renderTable();
+            
+            // Apply font size scale after rendering
+            setTimeout(() => {
+                applyFontSizeScale();
+            }, 0);
         }
 
         function renderSubSheetBar() {
