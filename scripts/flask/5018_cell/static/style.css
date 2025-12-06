@@ -1932,15 +1932,12 @@ tr {
     background: white;
     border-radius: 12px;
     padding: 24px;
-    padding-right: 0;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-    max-width: 600px;
+    max-width: 500px;
     width: 90%;
     position: relative;
     z-index: 6001;
     animation: slideUp 0.3s ease;
-    display: flex;
-    gap: 0;
 }
 
 @keyframes slideUp {
@@ -2054,15 +2051,20 @@ tr {
 
 /* Cell Color History Sidebar */
 .color-history-sidebar {
+    position: absolute;
+    left: 100%;
+    top: 0;
+    bottom: 0;
     width: 100px;
+    margin-left: 16px;
     background: #f8f9fa;
-    border-left: 2px solid #e0e0e0;
-    border-radius: 0 12px 12px 0;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
     padding: 16px 12px;
     display: flex;
     flex-direction: column;
     gap: 12px;
-    flex-shrink: 0;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
 }
 
 .color-history-sidebar-title {
@@ -2109,7 +2111,7 @@ tr {
     border-radius: 6px;
     cursor: pointer;
     border: 2px solid #dee2e6;
-    transition: all 0.2s;
+    transition: all 0.15s ease;
     position: relative;
     display: flex;
     align-items: center;
@@ -2120,10 +2122,8 @@ tr {
 }
 
 .cell-color-history-item:hover {
-    transform: scale(1.05);
     border-color: #28a745;
-    box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
-    z-index: 1;
+    box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.2);
 }
 
 .cell-history-delete {
@@ -2150,13 +2150,7 @@ tr {
     background: #c82333;
 }
 
-/* Main content area of color picker */
-.color-picker-main-content {
-    flex: 1;
-    padding-right: 24px;
-    display: flex;
-    flex-direction: column;
-}
+
 
 .color-preview {
     font-weight: bold;

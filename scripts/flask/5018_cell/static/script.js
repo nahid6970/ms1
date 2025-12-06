@@ -2175,14 +2175,10 @@ function showUnifiedColorPickerModal() {
     popup.className = 'color-picker-popup';
     popup.id = 'unifiedColorPickerPopup';
 
-    // Create main content container
-    const mainContent = document.createElement('div');
-    mainContent.className = 'color-picker-main-content';
-
     const title = document.createElement('h3');
     const cellCount = selectedCells.length > 0 ? selectedCells.length : 1;
     title.textContent = cellCount > 1 ? `Cell Colors (${cellCount} cells selected)` : 'Cell Colors';
-    mainContent.appendChild(title);
+    popup.appendChild(title);
 
     // Radio buttons for color type selection
     const radioContainer = document.createElement('div');
@@ -2208,7 +2204,7 @@ function showUnifiedColorPickerModal() {
 
     radioContainer.appendChild(bgRadioLabel);
     radioContainer.appendChild(textRadioLabel);
-    mainContent.appendChild(radioContainer);
+    popup.appendChild(radioContainer);
 
     // Preview area
     const previewContainer = document.createElement('div');
@@ -2223,7 +2219,7 @@ function showUnifiedColorPickerModal() {
     previewContainer.style.textAlign = 'center';
     previewContainer.textContent = 'Preview Text';
     previewContainer.id = 'colorPreviewArea';
-    mainContent.appendChild(previewContainer);
+    popup.appendChild(previewContainer);
 
     // Preset colors
     const presetColors = [
@@ -2251,7 +2247,7 @@ function showUnifiedColorPickerModal() {
         colorsGrid.appendChild(colorSwatch);
     });
 
-    mainContent.appendChild(colorsGrid);
+    popup.appendChild(colorsGrid);
 
     // Custom color section
     const customSection = document.createElement('div');
@@ -2282,7 +2278,7 @@ function showUnifiedColorPickerModal() {
     customSection.appendChild(customInput);
     customSection.appendChild(customBtn);
 
-    mainContent.appendChild(customSection);
+    popup.appendChild(customSection);
 
     // OK button
     const okBtn = document.createElement('button');
@@ -2292,7 +2288,7 @@ function showUnifiedColorPickerModal() {
     okBtn.style.width = '100%';
     okBtn.onclick = () => applyUnifiedColors(rowIndex, colIndex);
 
-    mainContent.appendChild(okBtn);
+    popup.appendChild(okBtn);
 
     // Close button
     const closeBtn = document.createElement('button');
@@ -2300,10 +2296,7 @@ function showUnifiedColorPickerModal() {
     closeBtn.textContent = '×';
     closeBtn.onclick = () => document.body.removeChild(overlay);
 
-    mainContent.appendChild(closeBtn);
-
-    // Append main content to popup
-    popup.appendChild(mainContent);
+    popup.appendChild(closeBtn);
 
     // Create color history sidebar (right panel)
     const historySidebar = document.createElement('div');
