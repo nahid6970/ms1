@@ -917,9 +917,39 @@ The F1 window (opened with F1 key) provides comprehensive management through rig
 - 10ms delay to prevent immediate closure from the opening click
 
 **Key Functions:**
-- `showCellContextMenu()` - Adds click-outside listener (~line 1568)
-- `closeCellContextMenu()` - Removes listener (~line 1625)
-- `closeCellContextMenuOnClickOutside()` - Handles outside clicks (~line 1631)
+- `showCellContextMenu()` - Opens context menu (~line 1843)
+- `closeCellContextMenu()` - Removes listener
+- `closeCellContextMenuOnClickOutside()` - Handles outside clicks
+
+### Cell Color History Feature
+**Purpose:** Track and display most frequently used cell color combinations for quick reuse.
+
+**Location:** Right-click cell → "🎨 Cell Colors" → Right sidebar panel
+
+**Features:**
+- **Automatic Tracking:** Every color application is tracked in localStorage
+- **Most Used Display:** Shows top 10 color combinations sorted by usage count
+- **Vertical Sidebar:** 100px wide panel positioned outside main modal on the right
+- **Hover to Delete:** × button appears on hover to remove colors from history
+- **Visual Preview:** Each item shows "Aa" with actual background and text colors
+- **Usage Tooltip:** Hover shows hex colors and usage count
+
+**Key Functions:**
+- `showUnifiedColorPickerModal()` - Creates modal with sidebar (~line 2157)
+- `loadCellColorHistory()` - Loads and displays history (~line 2445)
+- `trackCellColorUsage(bg, fg)` - Tracks color usage (~line 2500)
+- `deleteCellColorHistory(index)` - Removes color from history (~line 2490)
+
+**Data Storage:**
+- Stored in `localStorage` as `cellColorHistory`
+- Format: `[{ bg: '#hex', fg: '#hex', count: number }]`
+- Sorted by count (descending) when displayed
+
+**CSS Classes:**
+- `.color-history-sidebar` - Right panel container (~line 2040 in style.css)
+- `.color-history-list` - Vertical scrollable list
+- `.cell-color-history-item` - Individual color item (50px height)
+- `.cell-history-delete` - Delete button (appears on hover)
 
 ### Sidebar Navigation & Tree View
 **Purpose:** Modern sidebar navigation with collapsible category tree structure for organizing sheets.
