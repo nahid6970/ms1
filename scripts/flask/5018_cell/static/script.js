@@ -2175,10 +2175,14 @@ function showUnifiedColorPickerModal() {
     popup.className = 'color-picker-popup';
     popup.id = 'unifiedColorPickerPopup';
 
+    // Create main content container
+    const mainContent = document.createElement('div');
+    mainContent.className = 'color-picker-main-content';
+
     const title = document.createElement('h3');
     const cellCount = selectedCells.length > 0 ? selectedCells.length : 1;
     title.textContent = cellCount > 1 ? `Cell Colors (${cellCount} cells selected)` : 'Cell Colors';
-    popup.appendChild(title);
+    mainContent.appendChild(title);
 
     // Radio buttons for color type selection
     const radioContainer = document.createElement('div');
@@ -2204,7 +2208,7 @@ function showUnifiedColorPickerModal() {
 
     radioContainer.appendChild(bgRadioLabel);
     radioContainer.appendChild(textRadioLabel);
-    popup.appendChild(radioContainer);
+    mainContent.appendChild(radioContainer);
 
     // Preview area
     const previewContainer = document.createElement('div');
@@ -2219,7 +2223,7 @@ function showUnifiedColorPickerModal() {
     previewContainer.style.textAlign = 'center';
     previewContainer.textContent = 'Preview Text';
     previewContainer.id = 'colorPreviewArea';
-    popup.appendChild(previewContainer);
+    mainContent.appendChild(previewContainer);
 
     // Preset colors
     const presetColors = [
@@ -2247,29 +2251,7 @@ function showUnifiedColorPickerModal() {
         colorsGrid.appendChild(colorSwatch);
     });
 
-    popup.appendChild(colorsGrid);
-
-    // Color history section
-    const historySection = document.createElement('div');
-    historySection.className = 'cell-color-history-section';
-    historySection.style.marginTop = '15px';
-    historySection.style.paddingTop = '15px';
-    historySection.style.borderTop = '1px solid #e0e0e0';
-
-    const historyTitle = document.createElement('div');
-    historyTitle.textContent = 'Most Used Colors';
-    historyTitle.style.fontSize = '13px';
-    historyTitle.style.fontWeight = '600';
-    historyTitle.style.marginBottom = '10px';
-    historyTitle.style.color = '#495057';
-    historySection.appendChild(historyTitle);
-
-    const historyGrid = document.createElement('div');
-    historyGrid.className = 'cell-color-history-grid';
-    historyGrid.id = 'cellColorHistoryGrid';
-    historySection.appendChild(historyGrid);
-
-    popup.appendChild(historySection);
+    mainContent.appendChild(colorsGrid);
 
     // Custom color section
     const customSection = document.createElement('div');
@@ -2300,7 +2282,7 @@ function showUnifiedColorPickerModal() {
     customSection.appendChild(customInput);
     customSection.appendChild(customBtn);
 
-    popup.appendChild(customSection);
+    mainContent.appendChild(customSection);
 
     // OK button
     const okBtn = document.createElement('button');
@@ -2310,7 +2292,7 @@ function showUnifiedColorPickerModal() {
     okBtn.style.width = '100%';
     okBtn.onclick = () => applyUnifiedColors(rowIndex, colIndex);
 
-    popup.appendChild(okBtn);
+    mainContent.appendChild(okBtn);
 
     // Close button
     const closeBtn = document.createElement('button');
@@ -2318,7 +2300,28 @@ function showUnifiedColorPickerModal() {
     closeBtn.textContent = '×';
     closeBtn.onclick = () => document.body.removeChild(overlay);
 
-    popup.appendChild(closeBtn);
+    mainContent.appendChild(closeBtn);
+
+    // Append main content to popup
+    popup.appendChild(mainContent);
+
+    // Create color history sidebar (right panel)
+    const historySidebar = document.createElement('div');
+    historySidebar.className = 'color-history-sidebar';
+    historySidebar.id = 'colorHistorySidebar';
+
+    const historyTitle = document.createElement('div');
+    historyTitle.className = 'color-history-sidebar-title';
+    historyTitle.textContent = 'Most Used';
+    historySidebar.appendChild(historyTitle);
+
+    const historyList = document.createElement('div');
+    historyList.className = 'color-history-list';
+    historyList.id = 'cellColorHistoryGrid';
+    historySidebar.appendChild(historyList);
+
+    popup.appendChild(historySidebar);
+
     overlay.appendChild(popup);
     document.body.appendChild(overlay);
 
