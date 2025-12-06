@@ -2249,6 +2249,28 @@ function showUnifiedColorPickerModal() {
 
     popup.appendChild(colorsGrid);
 
+    // Color history section
+    const historySection = document.createElement('div');
+    historySection.className = 'cell-color-history-section';
+    historySection.style.marginTop = '15px';
+    historySection.style.paddingTop = '15px';
+    historySection.style.borderTop = '1px solid #e0e0e0';
+
+    const historyTitle = document.createElement('div');
+    historyTitle.textContent = 'Most Used Colors';
+    historyTitle.style.fontSize = '13px';
+    historyTitle.style.fontWeight = '600';
+    historyTitle.style.marginBottom = '10px';
+    historyTitle.style.color = '#495057';
+    historySection.appendChild(historyTitle);
+
+    const historyGrid = document.createElement('div');
+    historyGrid.className = 'cell-color-history-grid';
+    historyGrid.id = 'cellColorHistoryGrid';
+    historySection.appendChild(historyGrid);
+
+    popup.appendChild(historySection);
+
     // Custom color section
     const customSection = document.createElement('div');
     customSection.className = 'color-picker-custom';
@@ -2300,6 +2322,9 @@ function showUnifiedColorPickerModal() {
     overlay.appendChild(popup);
     document.body.appendChild(overlay);
 
+    // Load cell color history AFTER adding to DOM
+    loadCellColorHistory();
+
     // Set up radio button event listeners
     const bgRadio = bgRadioLabel.querySelector('input');
     const textRadio = textRadioLabel.querySelector('input');
@@ -2350,6 +2375,9 @@ function selectColor(color) {
 }
 
 function applyUnifiedColors(rowIndex, colIndex) {
+    // Track cell color usage
+    trackCellColorUsage(selectedBgColor, selectedTextColor);
+
     // Check if multiple cells are selected
     if (selectedCells.length > 0) {
         // Apply colors to all selected cells
@@ -2408,6 +2436,101 @@ function applyUnifiedColors(rowIndex, colIndex) {
 
     }
 
+}
+
+// Load and display cell color history
+function loadCellColorHistory() {
+    const historyGrid = document.getElementById('cellColorHistoryGrid');
+    if (!historyGrid) {
+        console.log('History grid not found!');
+        return;
+    }
+
+    historyGrid.innerHTML = '';
+
+    // Load cell color usage history from localStorage
+    const cellColorHistory = JSON.parse(localStorage.getItem('cellColorHistory') || '[]');
+    console.log('Loading cell color history, found', cellColorHistory.length, 'colors');
+
+    // Sort by usage count (most used first)
+    cellColorHistory.sort((a, b) => b.count - a.count);
+
+    // Display top 10 most used colors
+    const topColors = cellColorHistory.slice(0, 10);
+
+    if (topColors.length === 0) {
+        historyGrid.innerHTML = '<div style="padding: 8px; text-align: center; color: #999; font-size: 12px;">No history yet</div>';
+        console.log('No color history to display');
+        return;
+    }
+
+    console.log('Displaying', topColors.length, 'colors in history');
+
+    topColors.forEach((item, index) => {
+        const historyItem = document.createElement('div');
+        historyItem.className = 'cell-color-history-item';
+        historyItem.style.backgroundColor = item.bg;
+        historyItem.style.color = item.fg;
+        historyItem.style.position = 'relative';
+        historyItem.textContent = 'Aa';
+        historyItem.title = `BG: ${item.bg}, Text: ${item.fg}\nUsed ${item.count} time${item.count > 1 ? 's' : ''}`;
+
+        historyItem.onclick = () => {
+            selectedBgColor = item.bg;
+            selectedTextColor = item.fg;
+            updateColorPickerState();
+        };
+
+        // Add delete button that appears on hover
+        const deleteBtn = document.createElement('span');
+        deleteBtn.className = 'cell-history-delete';
+        deleteBtn.textContent = '×';
+        deleteBtn.onclick = (e) => {
+            e.stopPropagation();
+            deleteCellColorHistory(index);
+        };
+        historyItem.appendChild(deleteBtn);
+
+        historyGrid.appendChild(historyItem);
+    });
+}
+
+function deleteCellColorHistory(index) {
+    const cellColorHistory = JSON.parse(localStorage.getItem('cellColorHistory') || '[]');
+    cellColorHistory.sort((a, b) => b.count - a.count);
+    cellColorHistory.splice(index, 1);
+    localStorage.setItem('cellColorHistory', JSON.stringify(cellColorHistory));
+    loadCellColorHistory();
+    showToast('Color removed from history', 'success');
+}
+
+function trackCellColorUsage(bg, fg) {
+    const cellColorHistory = JSON.parse(localStorage.getItem('cellColorHistory') || '[]');
+
+    // Normalize colors to hex format
+    const bgHex = rgbToHex(bg);
+    const fgHex = rgbToHex(fg);
+
+    console.log('Tracking color usage:', { bg, fg, bgHex, fgHex });
+
+    // Find if this color combination already exists
+    const existingIndex = cellColorHistory.findIndex(item =>
+        item.bg.toLowerCase() === bgHex.toLowerCase() && 
+        item.fg.toLowerCase() === fgHex.toLowerCase()
+    );
+
+    if (existingIndex >= 0) {
+        // Increment count
+        cellColorHistory[existingIndex].count++;
+        console.log('Incremented existing color, new count:', cellColorHistory[existingIndex].count);
+    } else {
+        // Add new entry
+        cellColorHistory.push({ bg: bgHex, fg: fgHex, count: 1 });
+        console.log('Added new color to history');
+    }
+
+    localStorage.setItem('cellColorHistory', JSON.stringify(cellColorHistory));
+    console.log('Saved to localStorage, total colors:', cellColorHistory.length);
 }
 
 
@@ -6559,6 +6682,95 @@ function loadColorSwatches() {
 
         swatchesContainer.appendChild(swatchBtn);
     });
+
+    // Load color history
+    loadColorHistory();
+}
+
+// Load and display color history (most used colors)
+function loadColorHistory() {
+    const historyContainer = document.getElementById('colorHistory');
+    if (!historyContainer) return;
+
+    historyContainer.innerHTML = '';
+
+    // Load color usage history from localStorage
+    const colorHistory = JSON.parse(localStorage.getItem('colorHistory') || '[]');
+
+    // Sort by usage count (most used first)
+    colorHistory.sort((a, b) => b.count - a.count);
+
+    // Display top 10 most used colors
+    const topColors = colorHistory.slice(0, 10);
+
+    if (topColors.length === 0) {
+        historyContainer.innerHTML = '<div style="padding: 8px; text-align: center; color: #999; font-size: 11px;">No history yet</div>';
+        return;
+    }
+
+    topColors.forEach((item, index) => {
+        const historyBtn = document.createElement('button');
+        historyBtn.className = 'color-history-item';
+
+        // Show visual indicator if noBg is set
+        if (item.noBg) {
+            historyBtn.style.background = 'transparent';
+            historyBtn.style.border = '2px dashed #999';
+        } else {
+            historyBtn.style.background = item.bg;
+        }
+        historyBtn.style.color = item.fg;
+        historyBtn.textContent = 'Aa';
+
+        const bgText = item.noBg ? 'No BG' : item.bg;
+        historyBtn.title = `Text: ${item.fg}, Background: ${bgText}\nUsed ${item.count} time${item.count > 1 ? 's' : ''}`;
+
+        historyBtn.onclick = () => {
+            document.getElementById('quickFgColor').value = item.fg;
+            document.getElementById('quickBgColor').value = item.bg;
+            document.getElementById('noBgCheckbox').checked = item.noBg || false;
+        };
+
+        // Add delete button that appears on hover
+        const deleteBtn = document.createElement('span');
+        deleteBtn.className = 'history-delete';
+        deleteBtn.textContent = '×';
+        deleteBtn.onclick = (e) => {
+            e.stopPropagation();
+            deleteColorHistory(index);
+        };
+        historyBtn.appendChild(deleteBtn);
+
+        historyContainer.appendChild(historyBtn);
+    });
+}
+
+function deleteColorHistory(index) {
+    const colorHistory = JSON.parse(localStorage.getItem('colorHistory') || '[]');
+    colorHistory.sort((a, b) => b.count - a.count);
+    colorHistory.splice(index, 1);
+    localStorage.setItem('colorHistory', JSON.stringify(colorHistory));
+    loadColorHistory();
+    showToast('Color removed from history', 'success');
+}
+
+function trackColorUsage(fg, bg, noBg) {
+    const colorHistory = JSON.parse(localStorage.getItem('colorHistory') || '[]');
+
+    // Find if this color combination already exists
+    const existingIndex = colorHistory.findIndex(item =>
+        item.fg === fg && item.bg === bg && item.noBg === noBg
+    );
+
+    if (existingIndex >= 0) {
+        // Increment count
+        colorHistory[existingIndex].count++;
+    } else {
+        // Add new entry
+        colorHistory.push({ fg, bg, noBg, count: 1 });
+    }
+
+    localStorage.setItem('colorHistory', JSON.stringify(colorHistory));
 }
 
 function addCurrentColorToSwatches() {
@@ -6603,6 +6815,9 @@ function applyColorFormat() {
     const bgColor = document.getElementById('quickBgColor').value;
     const noBgCheckbox = document.getElementById('noBgCheckbox');
     const useBg = !noBgCheckbox.checked;
+
+    // Track color usage
+    trackColorUsage(fgColor, bgColor, noBgCheckbox.checked);
 
     // Build color syntax
     let colorSyntax = '{';
