@@ -449,6 +449,9 @@ async function loadData() {
             if (loadTimeElement) {
                 loadTimeElement.textContent = `${seconds}s`;
             }
+
+            // Display row count if >= 100
+            updateRowCountDisplay();
         });
     } catch (error) {
         console.error('Error loading data:', error);
@@ -470,6 +473,22 @@ async function saveData() {
     } catch (error) {
         console.error('Error saving data:', error);
         showToast('Error saving data!', 'error');
+    }
+}
+
+// Helper function to update row count display
+function updateRowCountDisplay() {
+    const sheet = tableData.sheets[currentSheet];
+    const rowCount = sheet ? sheet.rows.length : 0;
+    const rowCountElement = document.getElementById('rowCountValue');
+    const rowCountContainer = document.getElementById('rowCount');
+    if (rowCountElement && rowCountContainer) {
+        if (rowCount >= 100) {
+            rowCountElement.textContent = rowCount;
+            rowCountContainer.style.display = 'flex';
+        } else {
+            rowCountContainer.style.display = 'none';
+        }
     }
 }
 
@@ -704,6 +723,7 @@ async function addRow(count = 1) {
 
         const newRowIndex = sheet.rows.length - 1;
         renderTable();
+        updateRowCountDisplay();
 
         // Scroll to and focus on the first new row
         setTimeout(() => {
@@ -759,6 +779,7 @@ async function deleteRow(index) {
         if (response.ok) {
             tableData.sheets[currentSheet].rows.splice(index, 1);
             renderTable();
+            updateRowCountDisplay();
         }
     } catch (error) {
         console.error('Error deleting row:', error);
@@ -5465,6 +5486,9 @@ function renderTable() {
             }
         });
     }
+
+    // Update row count display
+    updateRowCountDisplay();
 }
 
 function toggleColumnMenu(event, index) {

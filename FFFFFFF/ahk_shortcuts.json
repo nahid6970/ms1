@@ -210,7 +210,7 @@
             "category": "Text",
             "description": "Quick Shortcut to make some task easier",
             "hotkey": "^q",
-            "action": "KeySequence()\nKeySequence() {\n    Send \"^!{Numpad2}\"\n    Sleep 250\n    Send \"| \"\n    Sleep 250\n    Send \"^!{Numpad1}\"\n}",
+            "action": "KeySequence()\nKeySequence() {\n    Send \"^!{Numpad2}\"\n    Sleep 250\n    Send \", \"\n    Sleep 250\n    Send \"^!{Numpad1}\"\n}",
             "enabled": true
         }
     ],
