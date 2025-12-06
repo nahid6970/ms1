@@ -2175,11 +2175,6 @@ function showUnifiedColorPickerModal() {
     popup.className = 'color-picker-popup';
     popup.id = 'unifiedColorPickerPopup';
 
-    const title = document.createElement('h3');
-    const cellCount = selectedCells.length > 0 ? selectedCells.length : 1;
-    title.textContent = cellCount > 1 ? `Cell Colors (${cellCount} cells selected)` : 'Cell Colors';
-    popup.appendChild(title);
-
     // Radio buttons for color type selection
     const radioContainer = document.createElement('div');
     radioContainer.className = 'color-type-selector';
@@ -2274,21 +2269,19 @@ function showUnifiedColorPickerModal() {
     customBtn.style.marginLeft = '10px';
     customBtn.onclick = () => customInput.click();
 
+    // OK button
+    const okBtn = document.createElement('button');
+    okBtn.className = 'btn btn-success';
+    okBtn.textContent = 'OK';
+    okBtn.style.marginLeft = 'auto';
+    okBtn.onclick = () => applyUnifiedColors(rowIndex, colIndex);
+
     customSection.appendChild(customLabel);
     customSection.appendChild(customInput);
     customSection.appendChild(customBtn);
+    customSection.appendChild(okBtn);
 
     popup.appendChild(customSection);
-
-    // OK button
-    const okBtn = document.createElement('button');
-    okBtn.className = 'btn btn-primary';
-    okBtn.textContent = 'OK';
-    okBtn.style.marginTop = '20px';
-    okBtn.style.width = '100%';
-    okBtn.onclick = () => applyUnifiedColors(rowIndex, colIndex);
-
-    popup.appendChild(okBtn);
 
     // Close button
     const closeBtn = document.createElement('button');

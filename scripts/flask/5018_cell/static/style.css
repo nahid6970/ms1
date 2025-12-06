@@ -1952,13 +1952,7 @@ tr {
     }
 }
 
-.color-picker-popup h3 {
-    margin: 0 0 20px 0;
-    font-size: 18px;
-    font-weight: 600;
-    color: #333;
-    text-align: center;
-}
+
 
 .color-picker-grid {
     display: grid;
@@ -1990,6 +1984,7 @@ tr {
     gap: 12px;
     padding-top: 16px;
     border-top: 1px solid #e0e0e0;
+    flex-wrap: wrap;
 }
 
 .color-picker-custom span {
@@ -2010,6 +2005,19 @@ tr {
 .color-picker-custom .btn {
     padding: 8px 16px;
     font-size: 14px;
+}
+
+.color-picker-custom .btn-success {
+    background: #28a745;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.color-picker-custom .btn-success:hover {
+    background: #218838;
 }
 
 .color-picker-close {
