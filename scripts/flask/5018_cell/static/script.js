@@ -9791,11 +9791,40 @@ async function loadCustomColorSyntaxes() {
         const response = await fetch('/api/custom-syntaxes');
         if (response.ok) {
             customColorSyntaxes = await response.json();
+            renderCustomSyntaxButtons(); // Render buttons after loading
         }
     } catch (e) {
         console.log('Could not load custom syntaxes:', e);
         customColorSyntaxes = [];
     }
+}
+
+function renderCustomSyntaxButtons() {
+    const colorPickerBtn = document.getElementById('customColorPickerBtn');
+    if (!colorPickerBtn) return;
+    
+    // Remove any existing custom syntax buttons
+    const existingButtons = document.querySelectorAll('.format-btn.custom-syntax-btn');
+    existingButtons.forEach(btn => btn.remove());
+    
+    // Insert custom syntax buttons before the color picker button
+    customColorSyntaxes.forEach((syntax) => {
+        if (!syntax.marker) return;
+        
+        const button = document.createElement('button');
+        button.className = 'format-btn custom-syntax-btn';
+        button.onclick = (event) => applyQuickFormat(syntax.marker, syntax.marker, event);
+        button.oncontextmenu = (event) => toggleFormatSelection(syntax.marker, syntax.marker, event);
+        button.title = `${syntax.marker}text${syntax.marker} (Right-click to select)`;
+        button.style.background = syntax.bgColor;
+        button.style.color = syntax.fgColor;
+        button.style.fontSize = '12px';
+        button.style.fontWeight = '600';
+        button.textContent = syntax.marker;
+        
+        // Insert before the color picker button
+        colorPickerBtn.parentNode.insertBefore(button, colorPickerBtn);
+    });
 }
 
 async function saveCustomColorSyntaxes() {
@@ -9859,32 +9888,7 @@ function renderCustomColorSyntaxList() {
     renderCustomSyntaxButtons();
 }
 
-function renderCustomSyntaxButtons() {
-    const container = document.getElementById('customSyntaxButtons');
-    if (!container) return;
-    
-    container.innerHTML = '';
-    
-    customColorSyntaxes.forEach((syntax) => {
-        if (!syntax.marker) return;
-        
-        const button = document.createElement('button');
-        button.className = 'format-btn';
-        button.onclick = (event) => applyQuickFormat(syntax.marker, syntax.marker, event);
-        button.oncontextmenu = (event) => toggleFormatSelection(syntax.marker, syntax.marker, event);
-        button.title = `${syntax.marker}text${syntax.marker} (Right-click to select)`;
-        button.style.background = syntax.bgColor;
-        button.style.color = syntax.fgColor;
-        button.style.fontSize = '12px';
-        button.style.fontWeight = '600';
-        button.style.display = 'inline-flex';
-        button.style.alignItems = 'center';
-        button.style.justifyContent = 'center';
-        button.textContent = syntax.marker;
-        
-        container.appendChild(button);
-    });
-}
+
 
 function addCustomColorSyntax() {
     customColorSyntaxes.push({
