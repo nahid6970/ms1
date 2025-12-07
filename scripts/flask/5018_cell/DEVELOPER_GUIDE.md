@@ -227,10 +227,17 @@ These two markdown syntaxes work together and are controlled by the same 👁️
 - **API Endpoints:** `/api/custom-syntaxes` (GET/POST) in app.py - auto-exports static HTML on save
 - **Parsing:** `applyCustomColorSyntaxes(text)` applies all syntaxes (~line 9100+ in script.js)
 - **Integration:** Called in both `parseMarkdownInline()` and `oldParseMarkdownBody()` in both script.js and export_static.py
+- **Quick Highlights Integration:** Custom syntaxes automatically appear as buttons in F3 Quick Formatter
+  - Buttons are dynamically generated and inserted before the 🎨 color picker button
+  - Each button shows the marker with its configured colors
+  - Click to apply syntax, right-click to add to multi-format selection
+  - Grid layout maintains 5 buttons per row (same as other F3 sections)
+  - Updates automatically when syntaxes are added/edited/deleted
 - **Key Functions:** 
   - `loadCustomColorSyntaxes()` - Loads from JSON file via API
   - `saveCustomColorSyntaxes()` - Saves to JSON file via API
-  - `renderCustomColorSyntaxList()` - Renders compact UI list
+  - `renderCustomColorSyntaxList()` - Renders compact UI list in settings
+  - `renderCustomSyntaxButtons()` - Renders buttons in F3 Quick Highlights section
   - `showCustomSyntaxColorPicker()` - Shows color picker popup with BG/FG selection
   - `addCustomColorSyntax()`, `updateCustomSyntax()`, `removeCustomSyntax()`
 - **Static Export:** ✅ Fully implemented - syntaxes embedded from JSON file into exported HTML

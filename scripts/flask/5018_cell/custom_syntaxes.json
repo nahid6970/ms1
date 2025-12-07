@@ -3,5 +3,10 @@
     "bgColor": "transparent",
     "fgColor": "#E60000",
     "marker": "++"
+  },
+  {
+    "marker": "%%",
+    "bgColor": "#C2FF80",
+    "fgColor": "#212529"
   }
 ]
