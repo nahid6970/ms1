@@ -9854,6 +9854,36 @@ function renderCustomColorSyntaxList() {
         
         list.appendChild(item);
     });
+    
+    // Also update the Quick Highlights section in F3 formatter
+    renderCustomSyntaxButtons();
+}
+
+function renderCustomSyntaxButtons() {
+    const container = document.getElementById('customSyntaxButtons');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    customColorSyntaxes.forEach((syntax) => {
+        if (!syntax.marker) return;
+        
+        const button = document.createElement('button');
+        button.className = 'format-btn';
+        button.onclick = (event) => applyQuickFormat(syntax.marker, syntax.marker, event);
+        button.oncontextmenu = (event) => toggleFormatSelection(syntax.marker, syntax.marker, event);
+        button.title = `${syntax.marker}text${syntax.marker} (Right-click to select)`;
+        button.style.background = syntax.bgColor;
+        button.style.color = syntax.fgColor;
+        button.style.fontSize = '12px';
+        button.style.fontWeight = '600';
+        button.style.display = 'inline-flex';
+        button.style.alignItems = 'center';
+        button.style.justifyContent = 'center';
+        button.textContent = syntax.marker;
+        
+        container.appendChild(button);
+    });
 }
 
 function addCustomColorSyntax() {
@@ -10088,6 +10118,8 @@ function applyCustomColorSyntaxes(text) {
 // Initialize on page load
 (async function() {
     await loadCustomColorSyntaxes();
+    // Render custom syntax buttons in F3 formatter
+    renderCustomSyntaxButtons();
     // Re-render table after syntaxes are loaded
     if (typeof renderTable === 'function') {
         renderTable();
