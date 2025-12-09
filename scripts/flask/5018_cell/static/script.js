@@ -1878,12 +1878,16 @@ function oldParseMarkdownBody(lines) {
         const isSeparator = line.includes('class="md-separator"');
         const prevIsSeparator = prev.includes('class="md-separator"');
         
+        // Check for background section wrapper
+        const isBgWrapper = line.includes('background-color:') && line.trim().startsWith('<div style=');
+        const prevIsBgWrapper = prev.includes('background-color:') && prev.trim().startsWith('<div style=');
+        
         // Don't add newline after timeline opening or before timeline closing
         const isTimelineStart = prev.includes('class="md-timeline"');
         const isTimelineEnd = line === '</div></div>';
         const isListItem = line.trim().startsWith('<span style="display: inline-flex');
 
-        if (isSeparator || prevIsSeparator || (isTimelineStart && isListItem) || isTimelineEnd) {
+        if (isSeparator || prevIsSeparator || isBgWrapper || prevIsBgWrapper || (isTimelineStart && isListItem) || isTimelineEnd) {
             return acc + line;
         }
         return acc + '\n' + line;

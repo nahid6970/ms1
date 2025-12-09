@@ -3732,7 +3732,7 @@ td .markdown-preview {
     width: 100%;
     height: 4px;
     background: #ccc;
-    margin: 12px 0 !important;
+    margin: 6px 0 !important;
     padding: 0 !important;
     display: block;
     border: none;
@@ -3775,19 +3775,6 @@ mark {
     outline: 2px solid #cc3300;
     z-index: 100;
     position: relative;
-}
-
-/* Horizontal Separator (-----) */
-.md-separator {
-    width: 100%;
-    height: 4px;
-    background: #ccc;
-    margin: 12px 0 !important;
-    padding: 0 !important;
-    display: block;
-    border: none;
-    line-height: 0;
-    font-size: 0;
 }
 
 /* Markdown highlight (==text==) */

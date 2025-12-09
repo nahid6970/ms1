@@ -2189,12 +2189,16 @@ def generate_static_html(data, custom_syntaxes):
                 var isSeparator = line.includes('md-separator');
                 var prevIsSeparator = prev.includes('md-separator');
                 
+                // Check for background section wrapper
+                var isBgWrapper = line.includes('background-color:') && line.trim().indexOf('<div style=') === 0;
+                var prevIsBgWrapper = prev.includes('background-color:') && prev.trim().indexOf('<div style=') === 0;
+                
                 // Don't add <br> after timeline opening or before timeline closing
                 var isTimelineStart = prev.includes('class="md-timeline"');
                 var isTimelineEnd = line === '</div></div>';
                 var isListItem = line.trim().indexOf('<span style="display: inline-flex') === 0;
                 
-                if (isSeparator || prevIsSeparator || (isTimelineStart && isListItem) || isTimelineEnd) {
+                if (isSeparator || prevIsSeparator || isBgWrapper || prevIsBgWrapper || (isTimelineStart && isListItem) || isTimelineEnd) {
                     return acc + line;
                 }
                 return acc + '<br>' + line;
