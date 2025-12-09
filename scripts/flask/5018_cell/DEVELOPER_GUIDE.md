@@ -559,7 +559,12 @@ This ensures users can easily find the clear button at the end of all formatting
 **Implementation:**
 - Regex: `/\\\((.*?)\\\)/g` matches delimiters, `katex.renderToString()` renders
 - `stripMarkdown()` removes `\( ... \)` for search/sort
-- Static export: Proper Python string escaping for JSON-embedded data
+- Static export: 
+  - Regex: `/\\\((.*?)\\\)/g` with Python string escaping (`\\\\\\(` in source)
+  - Removes newlines from KaTeX output to prevent `<br>` insertion into SVG paths
+  - Includes integrity hashes for CDN security
+
+**Documentation:** See `md/KATEX_MATH.md` for complete guide with examples and troubleshooting
   - `stripMarkdown()` - Removes separator for sorting/searching
   - `oldParseMarkdownBody()` - Uses reduce to control newlines around separators
   - `export_static.py` - Also uses reduce() to skip `<br>` tags around separators

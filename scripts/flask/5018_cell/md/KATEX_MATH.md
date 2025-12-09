@@ -234,18 +234,22 @@ y &= c + d
 
 ### Files Involved
 - **templates/index.html** - Loads KaTeX CSS and JS from CDN
-- **static/script.js** - Parses and renders math expressions
-- **export_static.py** - Includes KaTeX in static exports
+- **static/script.js** - Parses and renders math expressions (regex: `/\\\((.*?)\\\)/g`)
+- **export_static.py** - Includes KaTeX in static exports with special handling:
+  - Regex: `/\\\((.*?)\\\)/g` (with proper Python string escaping)
+  - Removes newlines from KaTeX output to prevent `<br>` tag insertion
+  - Adds integrity hashes for security
 
 ### CDN Version
 - **KaTeX v0.16.9** from jsdelivr CDN
-- Includes integrity hash for security
-- Loaded with `defer` for performance
+- Includes integrity hash for security (SHA-384)
+- Loaded synchronously to ensure availability during parsing
 
 ### Performance
 - KaTeX is extremely fast (faster than MathJax)
 - Renders math synchronously
 - No page reflow or flashing
+- SVG-based rendering for crisp display at any size
 
 ## Troubleshooting
 
@@ -259,6 +263,15 @@ y &= c + d
 - **Missing closing delimiter:** `\(x^2` → Add `\)`
 - **Invalid LaTeX:** `\(x^^2\)` → Use `\(x^2\)` or `\(x^{2}\)`
 - **Unescaped characters:** Use `\\` for backslash in strings
+
+### Static Export Issues (Fixed)
+**Issue:** Square root and other complex symbols showed only the content (e.g., just "3" instead of √3)
+
+**Cause:** KaTeX generates SVG with newlines in the path data. The export script was converting these newlines to `<br>` tags, breaking the SVG syntax.
+
+**Solution:** The export script now removes newlines from KaTeX output before processing, preventing `<br>` tag insertion into SVG paths.
+
+**Status:** ✅ Fixed - All KaTeX expressions now render correctly in static HTML exports
 
 ## Resources
 
