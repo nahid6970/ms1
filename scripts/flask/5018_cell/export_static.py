@@ -58,8 +58,8 @@ def generate_static_html(data, custom_syntaxes):
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
     <!-- KaTeX for Math Rendering -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous"></script>
     <style>
         :root {
             --grid-line-color: #dddddd;
@@ -1682,11 +1682,16 @@ def generate_static_html(data, custom_syntaxes):
             if (window.katex) {
                 formatted = formatted.replace(/\\\\\\((.*?)\\\\\\)/g, (match, math) => {
                     try {
-                        return katex.renderToString(math, {
+                        console.log('KaTeX input:', math);
+                        const result = katex.renderToString(math, {
                             throwOnError: false,
                             displayMode: false
                         });
+                        console.log('KaTeX output:', result);
+                        // Remove newlines in KaTeX output to prevent br insertion
+                        return result.replace(/\\n/g, '');
                     } catch (e) {
+                        console.error('KaTeX error:', e, 'Input was:', math);
                         return match;
                     }
                 });
@@ -1894,11 +1899,16 @@ def generate_static_html(data, custom_syntaxes):
             if (window.katex) {
                 txt = txt.replace(/\\\\\\((.*?)\\\\\\)/g, (match, math) => {
                     try {
-                        return katex.renderToString(math, {
+                        console.log('KaTeX input (body):', math);
+                        const result = katex.renderToString(math, {
                             throwOnError: false,
                             displayMode: false
                         });
+                        console.log('KaTeX output (body):', result);
+                        // Remove newlines in KaTeX output to prevent br insertion
+                        return result.replace(/\\n/g, '');
                     } catch (e) {
+                        console.error('KaTeX error (body):', e, 'Input was:', math);
                         return match;
                     }
                 });
@@ -2233,12 +2243,15 @@ def generate_static_html(data, custom_syntaxes):
                 var isBgWrapper = line.includes('background-color:') && line.trim().indexOf('<div style=') === 0;
                 var prevIsBgWrapper = prev.includes('background-color:') && prev.trim().indexOf('<div style=') === 0;
                 
+                // Check for KaTeX output (don't add br inside KaTeX spans)
+                var isKatex = line.includes('class="katex"') || prev.includes('class="katex"');
+                
                 // Don't add <br> after timeline opening or before timeline closing
                 var isTimelineStart = prev.includes('class="md-timeline"');
                 var isTimelineEnd = line === '</div></div>';
                 var isListItem = line.trim().indexOf('<span style="display: inline-flex') === 0;
                 
-                if (isSeparator || prevIsSeparator || isBgWrapper || prevIsBgWrapper || (isTimelineStart && isListItem) || isTimelineEnd) {
+                if (isSeparator || prevIsSeparator || isBgWrapper || prevIsBgWrapper || isKatex || (isTimelineStart && isListItem) || isTimelineEnd) {
                     return acc + line;
                 }
                 return acc + '<br>' + line;
