@@ -6,6 +6,7 @@ This folder contains feature documentation, test cases, and specifications for t
 
 ### Feature Documentation
 - **SEPARATOR_BACKGROUND_COLOR.md** - Separator background color feature guide with examples
+- **KATEX_MATH.md** - Complete guide to mathematical expressions using KaTeX/LaTeX syntax
 
 ### Test Files
 - **SEPARATOR_BG_TEST.md** - Test cases for separator background colors
