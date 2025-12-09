@@ -1420,6 +1420,9 @@ def generate_static_html(data, custom_syntaxes):
                         cellValue.match(/Table\\*\\d+/i) ||
                         cellValue.trim().startsWith('|') ||
                         cellValue.match(/^-{5,}$/m) ||
+                        cellValue.match(/^[A-Z]+-{5,}$/m) ||
+                        cellValue.match(/^-{5,}[A-Z]+$/m) ||
+                        cellValue.match(/^[A-Z]+-{5,}[A-Z]+$/m) ||
                         cellValue.match(/^Timeline(?:C)?(?:-[A-Z]+)?\\*/m) ||
                         cellValue.match(/\\[\\d+(?:-[A-Z]+)?\\]\\S+/) ||
                         (cellValue.includes('|') && cellValue.split('|').length >= 2);
@@ -1749,21 +1752,27 @@ def generate_static_html(data, custom_syntaxes):
             // Wavy underline: _.text._ -> wavy underline
             formatted = formatted.replace(/_\\.(.+?)\\._/g, '<span style="text-decoration: underline wavy;">$1</span>');
 
-            // Colored horizontal separator: R----- (color prefix + 5 dashes) -> colored separator
-            formatted = formatted.replace(/^([A-Z]+)-{5,}$/gm, function(match, colorCode) {
+            // Colored horizontal separator with optional background color for content below
+            formatted = formatted.replace(/^([A-Z]+)?-{5,}([A-Z]+)?$/gm, function(match, prefixColor, suffixColor) {
                 const colorMap = {
                     'R': '#ff0000', 'G': '#00ff00', 'B': '#0000ff', 'Y': '#ffff00',
                     'O': '#ff8800', 'P': '#ff00ff', 'C': '#00ffff', 'W': '#ffffff',
                     'K': '#000000', 'GR': '#808080'
                 };
-                if (colorMap[colorCode]) {
-                    return '<div class="md-separator" style="width: 100%; height: 4px; background: ' + colorMap[colorCode] + '; margin: 12px 0; padding: 0; display: block; border: none; line-height: 0; font-size: 0;"></div>';
+                
+                let separatorStyle = 'width: 100%; height: 4px; background: #ccc; margin: 12px 0; padding: 0; display: block; border: none; line-height: 0; font-size: 0;';
+                if (prefixColor && colorMap[prefixColor]) {
+                    separatorStyle = 'width: 100%; height: 4px; background: ' + colorMap[prefixColor] + '; margin: 12px 0; padding: 0; display: block; border: none; line-height: 0; font-size: 0;';
                 }
-                return match;
+                
+                let result = '<div class="md-separator" style="' + separatorStyle + '"></div>';
+                
+                if (suffixColor && colorMap[suffixColor]) {
+                    result += '<div class="md-bg-section" data-bg-color="' + colorMap[suffixColor] + '">';
+                }
+                
+                return result;
             });
-
-            // Horizontal separator: ----- (5 or more dashes on a line) -> separator div
-            formatted = formatted.replace(/^-{5,}$/gm, '<div class="md-separator" style="width: 100%; height: 4px; background: #ccc; margin: 12px 0; padding: 0; display: block; border: none; line-height: 0; font-size: 0;"></div>');
 
             // Bold: **text** -> <strong>text</strong>
             formatted = formatted.replace(/\\*\\*(.+?)\\*\\*/g, '<strong>$1</strong>');
@@ -1955,21 +1964,27 @@ def generate_static_html(data, custom_syntaxes):
                 // Wavy underline: _.text._ -> wavy underline
                 formatted = formatted.replace(/_\\.(.+?)\\._/g, '<span style="text-decoration: underline wavy;">$1</span>');
 
-                // Colored horizontal separator: R----- (color prefix + 5 dashes) -> colored separator
-                formatted = formatted.replace(/^([A-Z]+)-{5,}$/gm, function(match, colorCode) {
+                // Colored horizontal separator with optional background color for content below
+                formatted = formatted.replace(/^([A-Z]+)?-{5,}([A-Z]+)?$/gm, function(match, prefixColor, suffixColor) {
                     const colorMap = {
                         'R': '#ff0000', 'G': '#00ff00', 'B': '#0000ff', 'Y': '#ffff00',
                         'O': '#ff8800', 'P': '#ff00ff', 'C': '#00ffff', 'W': '#ffffff',
                         'K': '#000000', 'GR': '#808080'
                     };
-                    if (colorMap[colorCode]) {
-                        return '<div class="md-separator" style="width: 100%; height: 4px; background: ' + colorMap[colorCode] + '; margin: 12px 0; padding: 0; display: block; border: none; line-height: 0; font-size: 0;"></div>';
+                    
+                    let separatorStyle = 'width: 100%; height: 4px; background: #ccc; margin: 12px 0; padding: 0; display: block; border: none; line-height: 0; font-size: 0;';
+                    if (prefixColor && colorMap[prefixColor]) {
+                        separatorStyle = 'width: 100%; height: 4px; background: ' + colorMap[prefixColor] + '; margin: 12px 0; padding: 0; display: block; border: none; line-height: 0; font-size: 0;';
                     }
-                    return match;
+                    
+                    let result = '<div class="md-separator" style="' + separatorStyle + '"></div>';
+                    
+                    if (suffixColor && colorMap[suffixColor]) {
+                        result += '<div class="md-bg-section" data-bg-color="' + colorMap[suffixColor] + '">';
+                    }
+                    
+                    return result;
                 });
-
-                // Horizontal separator: ----- (5 or more dashes on a line) -> separator div
-                formatted = formatted.replace(/^-{5,}$/gm, '<div class="md-separator" style="width: 100%; height: 4px; background: #ccc; margin: 12px 0; padding: 0; display: block; border: none; line-height: 0; font-size: 0;"></div>');
 
                 // Bold: **text** -> <strong>text</strong>
                 formatted = formatted.replace(/\\*\\*(.+?)\\*\\*/g, '<strong>$1</strong>');
@@ -2095,9 +2110,11 @@ def generate_static_html(data, custom_syntaxes):
                 return formatted;
             });
 
-            // Post-process to close timeline divs before non-list lines
+            // Post-process to close timeline divs and handle background sections
             var processedLines = [];
             var inTimeline = false;
+            var inBgSection = false;
+            var bgColor = '';
             
             for (var i = 0; i < formattedLines.length; i++) {
                 var line = formattedLines[i];
@@ -2106,20 +2123,51 @@ def generate_static_html(data, custom_syntaxes):
                                  (line.indexOf('•') !== -1 || line.indexOf('◦') !== -1 || line.indexOf('▪') !== -1);
                 var isEmpty = line.trim() === '';
                 
+                // Check for background section markers
+                var bgSectionMatch = line.match(/<div class="md-bg-section" data-bg-color="([^"]+)">/);
+                var isSeparator = line.includes('class="md-separator"');
+                
+                // If line has both separator and bg-section marker, handle both
+                if (isSeparator && bgSectionMatch) {
+                    if (inBgSection) {
+                        processedLines.push('</div>');
+                    }
+                    processedLines.push(line);
+                    // Open the background wrapper div
+                    bgColor = bgSectionMatch[1];
+                    processedLines.push('<div style="background-color: ' + bgColor + '; padding: 2px 6px; margin: 0;">');
+                    inBgSection = true;
+                    continue;
+                }
+                
+                // If we hit a separator without bg marker and we're in a background section, close it
+                if (isSeparator && inBgSection) {
+                    processedLines.push('</div>');
+                    inBgSection = false;
+                    bgColor = '';
+                    processedLines.push(line);
+                    continue;
+                }
+                
+                // If we hit a separator and not in bg section, just push it
+                if (isSeparator) {
+                    processedLines.push(line);
+                    continue;
+                }
+                
                 if (isTimelineStart) {
                     processedLines.push(line);
                     inTimeline = true;
                 } else if (inTimeline && isEmpty) {
-                    // Close timeline before empty line (separates timeline blocks)
                     processedLines.push('</div></div>');
                     processedLines.push(line);
                     inTimeline = false;
                 } else if (inTimeline && !isListItem && line.trim() !== '') {
-                    // Close timeline before non-list content
                     processedLines.push('</div></div>');
                     processedLines.push(line);
                     inTimeline = false;
                 } else {
+                    // Just push the line as-is (it's already inside the bg wrapper if inBgSection is true)
                     processedLines.push(line);
                 }
             }
@@ -2127,6 +2175,11 @@ def generate_static_html(data, custom_syntaxes):
             // Close timeline at end if still open
             if (inTimeline) {
                 processedLines.push('</div></div>');
+            }
+            
+            // Close background section at end if still open
+            if (inBgSection) {
+                processedLines.push('</div>');
             }
 
             return processedLines.reduce(function(acc, line, i) {
