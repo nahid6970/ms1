@@ -57,6 +57,10 @@ def generate_static_html(data, custom_syntaxes):
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
+    <!-- KaTeX for Math Rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"></script>
     <style>
         :root {
             --grid-line-color: #dddddd;
@@ -1669,6 +1673,20 @@ def generate_static_html(data, custom_syntaxes):
         function parseMarkdownInline(text) {
             let formatted = text;
 
+            // Math: \\( ... \\) -> KaTeX (process first to avoid conflicts)
+            if (window.katex) {
+                formatted = formatted.replace(/\\\\\\((.*?)\\\\\\)/g, (match, math) => {
+                    try {
+                        return katex.renderToString(math, {
+                            throwOnError: false,
+                            displayMode: false
+                        });
+                    } catch (e) {
+                        return match;
+                    }
+                });
+            }
+
             // Links: {link:url}text{/} -> <a href="url">text</a>
             formatted = formatted.replace(/\\{link:([^}]+)\\}(.+?)\\{\\/\\}/g, (match, url, text) => {
                 return `<a href="${url}" target="_blank" rel="noopener noreferrer">${text}</a>`;
@@ -1844,6 +1862,20 @@ def generate_static_html(data, custom_syntaxes):
             /* copy the *body* of the existing parser (bold, italic, lists …)
                but skip the table-splitting logic we just added. */
             let txt = lines.join('\\n');
+
+            // Math: \\( ... \\) -> KaTeX (process first to avoid conflicts)
+            if (window.katex) {
+                txt = txt.replace(/\\\\\\((.*?)\\\\\\)/g, (match, math) => {
+                    try {
+                        return katex.renderToString(math, {
+                            throwOnError: false,
+                            displayMode: false
+                        });
+                    } catch (e) {
+                        return match;
+                    }
+                });
+            }
 
             // Handle code blocks first (multiline)
             let inCodeBlock = false;
