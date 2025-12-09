@@ -1423,6 +1423,8 @@ def generate_static_html(data, custom_syntaxes):
                         cellValue.match(/^[A-Z]+-{5,}$/m) ||
                         cellValue.match(/^-{5,}[A-Z]+$/m) ||
                         cellValue.match(/^[A-Z]+-{5,}[A-Z]+$/m) ||
+                        cellValue.match(/^-{5,}#[0-9a-fA-F]{6}/m) ||
+                        cellValue.match(/^[A-Z]+-{5,}#[0-9a-fA-F]{6}/m) ||
                         cellValue.match(/^Timeline(?:C)?(?:-[A-Z]+)?\\*/m) ||
                         cellValue.match(/\\[\\d+(?:-[A-Z]+)?\\]\\S+/) ||
                         (cellValue.includes('|') && cellValue.split('|').length >= 2);
@@ -1752,23 +1754,39 @@ def generate_static_html(data, custom_syntaxes):
             // Wavy underline: _.text._ -> wavy underline
             formatted = formatted.replace(/_\\.(.+?)\\._/g, '<span style="text-decoration: underline wavy;">$1</span>');
 
-            // Colored horizontal separator with optional background color for content below
-            formatted = formatted.replace(/^([A-Z]+)?-{5,}([A-Z]+)?$/gm, function(match, prefixColor, suffixColor) {
+            // Colored horizontal separator with optional background/text color for content below
+            formatted = formatted.replace(/^([A-Z]+)?-{5,}((?:[A-Z]+)|(?:#[0-9a-fA-F]{6}(?:-#[0-9a-fA-F]{6})?))?$/gm, function(match, prefixColor, suffixColor) {
                 const colorMap = {
                     'R': '#ff0000', 'G': '#00ff00', 'B': '#0000ff', 'Y': '#ffff00',
                     'O': '#ff8800', 'P': '#ff00ff', 'C': '#00ffff', 'W': '#ffffff',
                     'K': '#000000', 'GR': '#808080'
                 };
                 
-                let separatorStyle = 'width: 100%; height: 4px; background: #ccc; margin: 12px 0; padding: 0; display: block; border: none; line-height: 0; font-size: 0;';
+                let separatorStyle = 'width: 100%; height: 4px; background: #ccc; margin: 6px 0; padding: 0; display: block; border: none; line-height: 0; font-size: 0;';
                 if (prefixColor && colorMap[prefixColor]) {
-                    separatorStyle = 'width: 100%; height: 4px; background: ' + colorMap[prefixColor] + '; margin: 12px 0; padding: 0; display: block; border: none; line-height: 0; font-size: 0;';
+                    separatorStyle = 'width: 100%; height: 4px; background: ' + colorMap[prefixColor] + '; margin: 6px 0; padding: 0; display: block; border: none; line-height: 0; font-size: 0;';
                 }
                 
                 let result = '<div class="md-separator" style="' + separatorStyle + '"></div>';
                 
-                if (suffixColor && colorMap[suffixColor]) {
-                    result += '<div class="md-bg-section" data-bg-color="' + colorMap[suffixColor] + '">';
+                // Parse suffix color (can be color code or hex with optional text color)
+                if (suffixColor) {
+                    let bgColor = '';
+                    let textColor = '';
+                    
+                    if (suffixColor.indexOf('#') === 0) {
+                        // Hex color format: #RRGGBB or #RRGGBB-#RRGGBB
+                        const hexParts = suffixColor.split('-');
+                        bgColor = hexParts[0];
+                        textColor = hexParts[1] || '';
+                    } else if (colorMap[suffixColor]) {
+                        // Color code format: R, G, B, etc.
+                        bgColor = colorMap[suffixColor];
+                    }
+                    
+                    if (bgColor) {
+                        result += '<div class="md-bg-section" data-bg-color="' + bgColor + '" data-text-color="' + textColor + '">';
+                    }
                 }
                 
                 return result;
@@ -1964,23 +1982,39 @@ def generate_static_html(data, custom_syntaxes):
                 // Wavy underline: _.text._ -> wavy underline
                 formatted = formatted.replace(/_\\.(.+?)\\._/g, '<span style="text-decoration: underline wavy;">$1</span>');
 
-                // Colored horizontal separator with optional background color for content below
-                formatted = formatted.replace(/^([A-Z]+)?-{5,}([A-Z]+)?$/gm, function(match, prefixColor, suffixColor) {
+                // Colored horizontal separator with optional background/text color for content below
+                formatted = formatted.replace(/^([A-Z]+)?-{5,}((?:[A-Z]+)|(?:#[0-9a-fA-F]{6}(?:-#[0-9a-fA-F]{6})?))?$/gm, function(match, prefixColor, suffixColor) {
                     const colorMap = {
                         'R': '#ff0000', 'G': '#00ff00', 'B': '#0000ff', 'Y': '#ffff00',
                         'O': '#ff8800', 'P': '#ff00ff', 'C': '#00ffff', 'W': '#ffffff',
                         'K': '#000000', 'GR': '#808080'
                     };
                     
-                    let separatorStyle = 'width: 100%; height: 4px; background: #ccc; margin: 12px 0; padding: 0; display: block; border: none; line-height: 0; font-size: 0;';
+                    let separatorStyle = 'width: 100%; height: 4px; background: #ccc; margin: 6px 0; padding: 0; display: block; border: none; line-height: 0; font-size: 0;';
                     if (prefixColor && colorMap[prefixColor]) {
-                        separatorStyle = 'width: 100%; height: 4px; background: ' + colorMap[prefixColor] + '; margin: 12px 0; padding: 0; display: block; border: none; line-height: 0; font-size: 0;';
+                        separatorStyle = 'width: 100%; height: 4px; background: ' + colorMap[prefixColor] + '; margin: 6px 0; padding: 0; display: block; border: none; line-height: 0; font-size: 0;';
                     }
                     
                     let result = '<div class="md-separator" style="' + separatorStyle + '"></div>';
                     
-                    if (suffixColor && colorMap[suffixColor]) {
-                        result += '<div class="md-bg-section" data-bg-color="' + colorMap[suffixColor] + '">';
+                    // Parse suffix color (can be color code or hex with optional text color)
+                    if (suffixColor) {
+                        let bgColor = '';
+                        let textColor = '';
+                        
+                        if (suffixColor.indexOf('#') === 0) {
+                            // Hex color format: #RRGGBB or #RRGGBB-#RRGGBB
+                            const hexParts = suffixColor.split('-');
+                            bgColor = hexParts[0];
+                            textColor = hexParts[1] || '';
+                        } else if (colorMap[suffixColor]) {
+                            // Color code format: R, G, B, etc.
+                            bgColor = colorMap[suffixColor];
+                        }
+                        
+                        if (bgColor) {
+                            result += '<div class="md-bg-section" data-bg-color="' + bgColor + '" data-text-color="' + textColor + '">';
+                        }
                     }
                     
                     return result;
@@ -2115,6 +2149,7 @@ def generate_static_html(data, custom_syntaxes):
             var inTimeline = false;
             var inBgSection = false;
             var bgColor = '';
+            var textColor = '';
             
             for (var i = 0; i < formattedLines.length; i++) {
                 var line = formattedLines[i];
@@ -2123,8 +2158,8 @@ def generate_static_html(data, custom_syntaxes):
                                  (line.indexOf('•') !== -1 || line.indexOf('◦') !== -1 || line.indexOf('▪') !== -1);
                 var isEmpty = line.trim() === '';
                 
-                // Check for background section markers
-                var bgSectionMatch = line.match(/<div class="md-bg-section" data-bg-color="([^"]+)">/);
+                // Check for background section markers (now with optional text color)
+                var bgSectionMatch = line.match(/<div class="md-bg-section" data-bg-color="([^"]+)" data-text-color="([^"]*)">/);
                 var isSeparator = line.includes('class="md-separator"');
                 
                 // If line has both separator and bg-section marker, handle both
@@ -2133,9 +2168,14 @@ def generate_static_html(data, custom_syntaxes):
                         processedLines.push('</div>');
                     }
                     processedLines.push(line);
-                    // Open the background wrapper div
+                    // Open the background wrapper div with optional text color
                     bgColor = bgSectionMatch[1];
-                    processedLines.push('<div style="background-color: ' + bgColor + '; padding: 2px 6px; margin: 0;">');
+                    textColor = bgSectionMatch[2];
+                    var styleStr = 'background-color: ' + bgColor + '; padding: 2px 6px; margin: 0;';
+                    if (textColor) {
+                        styleStr += ' color: ' + textColor + ';';
+                    }
+                    processedLines.push('<div style="' + styleStr + '">');
                     inBgSection = true;
                     continue;
                 }

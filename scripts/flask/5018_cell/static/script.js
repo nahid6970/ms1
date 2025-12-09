@@ -945,6 +945,8 @@ function checkHasMarkdown(value) {
         str.match(/^[A-Z]+-{5,}$/m) || // Colored separator (prefix)
         str.match(/^-{5,}[A-Z]+$/m) || // Colored separator (suffix for bg)
         str.match(/^[A-Z]+-{5,}[A-Z]+$/m) || // Colored separator (both)
+        str.match(/^-{5,}#[0-9a-fA-F]{6}/m) || // Hex color bg
+        str.match(/^[A-Z]+-{5,}#[0-9a-fA-F]{6}/m) || // Colored sep + hex bg
         (str.includes('|') && str.split('|').length >= 2) ||
         str.includes('\n') || // Treat multi-line text as markdown for proper height handling
         str.match(/#[\d.]+#.+?#\/#/) || // Variable font size heading
@@ -1335,10 +1337,11 @@ function parseMarkdownInline(text) {
     // Wavy underline: _.text._ -> wavy underline
     formatted = formatted.replace(/_\.(.+?)\._/g, '<span style="text-decoration: underline wavy;">$1</span>');
 
-    // Colored horizontal separator with optional background color for content below
-    // Pattern: [COLOR1]-----[COLOR2] where COLOR1 = separator line color, COLOR2 = background for content below
-    // Examples: R----- (red line), -----G (green bg below), R-----G (red line + green bg below)
-    formatted = formatted.replace(/^([A-Z]+)?-{5,}([A-Z]+)?$/gm, (match, prefixColor, suffixColor) => {
+    // Colored horizontal separator with optional background/text color for content below
+    // Pattern: [COLOR1]-----[COLOR2/HEX] where COLOR1 = separator line color, COLOR2 = bg/text color
+    // Examples: R----- (red line), -----G (green bg), R-----G (red line + green bg)
+    //           -----#ff0000-#000000 (bg #ff0000, text #000000), G-----#514522-#000000
+    formatted = formatted.replace(/^([A-Z]+)?-{5,}((?:[A-Z]+)|(?:#[0-9a-fA-F]{6}(?:-#[0-9a-fA-F]{6})?))?$/gm, (match, prefixColor, suffixColor) => {
         const colorMap = {
             'R': '#ff0000', 'G': '#00ff00', 'B': '#0000ff', 'Y': '#ffff00',
             'O': '#ff8800', 'P': '#ff00ff', 'C': '#00ffff', 'W': '#ffffff',
@@ -1352,9 +1355,24 @@ function parseMarkdownInline(text) {
         
         let result = `<div class="md-separator"${separatorStyle}></div>`;
         
-        // If suffix color exists and is valid, add a marker to start background coloring
-        if (suffixColor && colorMap[suffixColor]) {
-            result += `<div class="md-bg-section" data-bg-color="${colorMap[suffixColor]}">`;
+        // Parse suffix color (can be color code or hex with optional text color)
+        if (suffixColor) {
+            let bgColor = '';
+            let textColor = '';
+            
+            if (suffixColor.startsWith('#')) {
+                // Hex color format: #RRGGBB or #RRGGBB-#RRGGBB
+                const hexParts = suffixColor.split('-');
+                bgColor = hexParts[0];
+                textColor = hexParts[1] || '';
+            } else if (colorMap[suffixColor]) {
+                // Color code format: R, G, B, etc.
+                bgColor = colorMap[suffixColor];
+            }
+            
+            if (bgColor) {
+                result += `<div class="md-bg-section" data-bg-color="${bgColor}" data-text-color="${textColor}">`;
+            }
         }
         
         return result;
@@ -1649,9 +1667,9 @@ function oldParseMarkdownBody(lines) {
         // Wavy underline: _.text._ -> wavy underline
         formatted = formatted.replace(/_\.(.+?)\._/g, '<span style="text-decoration: underline wavy;">$1</span>');
 
-        // Colored horizontal separator with optional background color for content below
-        // Pattern: [COLOR1]-----[COLOR2] where COLOR1 = separator line color, COLOR2 = background for content below
-        formatted = formatted.replace(/^([A-Z]+)?-{5,}([A-Z]+)?$/gm, (match, prefixColor, suffixColor) => {
+        // Colored horizontal separator with optional background/text color for content below
+        // Pattern: [COLOR1]-----[COLOR2/HEX] where COLOR1 = separator line color, COLOR2 = bg/text color
+        formatted = formatted.replace(/^([A-Z]+)?-{5,}((?:[A-Z]+)|(?:#[0-9a-fA-F]{6}(?:-#[0-9a-fA-F]{6})?))?$/gm, (match, prefixColor, suffixColor) => {
             const colorMap = {
                 'R': '#ff0000', 'G': '#00ff00', 'B': '#0000ff', 'Y': '#ffff00',
                 'O': '#ff8800', 'P': '#ff00ff', 'C': '#00ffff', 'W': '#ffffff',
@@ -1665,8 +1683,24 @@ function oldParseMarkdownBody(lines) {
             
             let result = `<div class="md-separator"${separatorStyle}></div>`;
             
-            if (suffixColor && colorMap[suffixColor]) {
-                result += `<div class="md-bg-section" data-bg-color="${colorMap[suffixColor]}">`;
+            // Parse suffix color (can be color code or hex with optional text color)
+            if (suffixColor) {
+                let bgColor = '';
+                let textColor = '';
+                
+                if (suffixColor.startsWith('#')) {
+                    // Hex color format: #RRGGBB or #RRGGBB-#RRGGBB
+                    const hexParts = suffixColor.split('-');
+                    bgColor = hexParts[0];
+                    textColor = hexParts[1] || '';
+                } else if (colorMap[suffixColor]) {
+                    // Color code format: R, G, B, etc.
+                    bgColor = colorMap[suffixColor];
+                }
+                
+                if (bgColor) {
+                    result += `<div class="md-bg-section" data-bg-color="${bgColor}" data-text-color="${textColor}">`;
+                }
             }
             
             return result;
@@ -1804,6 +1838,7 @@ function oldParseMarkdownBody(lines) {
     let inTimeline = false;
     let inBgSection = false;
     let bgColor = '';
+    let textColor = '';
     
     for (let i = 0; i < formattedLines.length; i++) {
         const line = formattedLines[i];
@@ -1812,8 +1847,8 @@ function oldParseMarkdownBody(lines) {
                            (line.includes('•') || line.includes('◦') || line.includes('▪'));
         const isEmpty = line.trim() === '';
         
-        // Check for background section markers
-        const bgSectionMatch = line.match(/<div class="md-bg-section" data-bg-color="([^"]+)">/);
+        // Check for background section markers (now with optional text color)
+        const bgSectionMatch = line.match(/<div class="md-bg-section" data-bg-color="([^"]+)" data-text-color="([^"]*)">/);
         const isSeparator = line.includes('class="md-separator"');
         
         // If line has both separator and bg-section marker, handle both
@@ -1822,9 +1857,14 @@ function oldParseMarkdownBody(lines) {
                 processedLines.push('</div>');
             }
             processedLines.push(line);
-            // Open the background wrapper div
+            // Open the background wrapper div with optional text color
             bgColor = bgSectionMatch[1];
-            processedLines.push(`<div style="background-color: ${bgColor}; padding: 2px 6px; margin: 0;">`);
+            textColor = bgSectionMatch[2];
+            let styleStr = `background-color: ${bgColor}; padding: 2px 6px; margin: 0;`;
+            if (textColor) {
+                styleStr += ` color: ${textColor};`;
+            }
+            processedLines.push(`<div style="${styleStr}">`);
             inBgSection = true;
             continue;
         }
@@ -5607,8 +5647,8 @@ function stripMarkdown(text) {
     // Remove wavy underline markers: _.text._ -> text
     stripped = stripped.replace(/_\.(.+?)\._/g, '$1');
 
-    // Remove colored horizontal separator: R-----, -----G, R-----G -> (empty)
-    stripped = stripped.replace(/^[A-Z]*-{5,}[A-Z]*$/gm, '');
+    // Remove colored horizontal separator: R-----, -----G, R-----G, -----#ff0000, etc. -> (empty)
+    stripped = stripped.replace(/^[A-Z]*-{5,}(?:[A-Z]+|#[0-9a-fA-F]{6}(?:-#[0-9a-fA-F]{6})?)?$/gm, '');
 
     // Remove code block markers: ```text``` -> text
     stripped = stripped.replace(/```(.+?)```/gs, '$1');

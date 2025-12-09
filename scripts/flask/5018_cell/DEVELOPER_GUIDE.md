@@ -498,13 +498,47 @@ This ensures users can easily find the clear button at the end of all formatting
 - **Parsing:** In `parseMarkdown()`, the regex `/^-{5,}$/gm` converts to `<div class="md-separator"></div>`
 - **Detection:** Added `str.match(/^-{5,}$/m)` to `checkHasMarkdown()`
 - **Stripping:** Added `.replace(/^-{5,}$/gm, '')` to `stripMarkdown()` to remove for sorting/searching
-- **Styling:** 4px solid gray div with 12px equal vertical margin (CSS class `.md-separator`)
+- **Styling:** 4px solid gray div with 6px vertical margin (CSS class `.md-separator`)
 - **Spacing Fix:** In `oldParseMarkdownBody()`, uses `reduce()` instead of `join('\n')` to skip newlines before/after separators, preventing double spacing
 - **Markdown Guide:** Added to the Code & Highlights section
 - **Static Export:** Updated `export_static.py` with the same parsing logic and reduce() for proper spacing
 - **Key Functions:**
   - `parseMarkdown()` - Converts `-----` to separator div
   - `checkHasMarkdown()` - Detects 5+ dashes on a line
+
+### Separator Background Color Feature
+**Syntax:** `[COLOR1]-----[COLOR2]` where COLOR1 = separator line color, COLOR2 = background for content below
+**Purpose:** Apply background colors to content after a separator, useful for highlighting sections, creating visual blocks, or color-coding information.
+
+**Examples:**
+- `-----R` → Normal separator + RED background for content below
+- `R-----` → RED separator line (no background change)
+- `R-----G` → Red separator line + GREEN background for content below
+- `-----` → Ends background color section (returns to normal)
+
+**Color Codes:** R (red), G (green), B (blue), Y (yellow), O (orange), P (purple), C (cyan), W (white), K (black), GR (gray)
+
+**Implementation:**
+- **Parsing:** Regex `/^([A-Z]+)?-{5,}([A-Z]+)?$/gm` captures both prefix (line color) and suffix (background color)
+- **Post-processing:** Wraps content after colored separator in `<div>` with background color until another separator is encountered
+- **Detection:** Added patterns to `checkHasMarkdown()`: `/^[A-Z]+-{5,}$/m`, `/^-{5,}[A-Z]+$/m`, `/^[A-Z]+-{5,}[A-Z]+$/m`
+- **Stripping:** Unified regex `/^[A-Z]*-{5,}[A-Z]*$/gm` removes all separator variations
+- **Styling:** Background wrapper has `padding: 2px 6px; margin: 0;` for natural flow
+- **Spacing:** No newlines added after separator or wrapper div to prevent gaps
+- **Static Export:** Full support in `export_static.py` with same logic
+
+**Behavior:**
+- Background color continues until another separator or end of cell
+- Plain `-----` separator closes any active background section
+- Multiple color sections can exist in one cell
+- Works with all markdown features (bold, tables, etc.)
+
+**Key Functions:**
+- `parseMarkdownInline()` and `oldParseMarkdownBody()` - Parse separator with colors
+- Post-processing loop - Wraps content in background divs
+- `reduce()` function - Skips newlines after separator and wrapper to prevent gaps
+
+**Documentation:** See `md/SEPARATOR_BACKGROUND_COLOR.md` for detailed examples and test cases
 
 ### Math Expressions (KaTeX)
 **Syntax:** `\(LaTeX expression\)` - Supports square roots, fractions, superscripts, and all LaTeX math
