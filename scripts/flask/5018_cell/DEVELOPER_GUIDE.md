@@ -506,60 +506,19 @@ This ensures users can easily find the clear button at the end of all formatting
   - `parseMarkdown()` - Converts `-----` to separator div
   - `checkHasMarkdown()` - Detects 5+ dashes on a line
 
-### Square Root Feature (KaTeX)
-**Syntax:** `\(\sqrt{value}\)`
-**Purpose:** Displays mathematical square root notation using KaTeX rendering.
-**Examples:** 
-- `\(\sqrt{25}\)` → √25 (rendered with KaTeX)
-- `\(\sqrt{x+y}\)` → √(x+y) (rendered with KaTeX)
-**Implementation:**
-- **Rendering:** Uses KaTeX library (already loaded) to render `\( ... \)` math notation
-- **Stripping:** Math markers `\( ... \)` are stripped in `stripMarkdown()` for search/sort
-- **Quick Formatter:** Added √ button in F3 menu - wraps selected text with `\(\sqrt{...}\)`
-- **Static Export:** KaTeX is included in static export, so math notation works automatically
-- **Key Functions:**
-  - `applySqrtFormat(event)` - Wraps selected text with `\(\sqrt{...}\)` syntax
-  - KaTeX library handles all rendering automatically
-  - `stripMarkdown()` - Removes `\( ... \)` syntax for sorting/searching
+### Math Expressions (KaTeX)
+**Syntax:** `\(LaTeX expression\)` - Supports square roots, fractions, superscripts, and all LaTeX math
 
-### Smart Math Notation Feature (KaTeX)
-**Syntax:** Select text with math operators, click button to convert to KaTeX
-**Purpose:** Intelligently converts plain text math expressions to proper KaTeX notation.
+**Examples:** `\(\sqrt{25}\)` → √25 | `\(\frac{a}{b}\)` → fraction | `\(x^2\)` → superscript
 
-**Supported Patterns:**
-1. **Simple fraction:** `a/b` → `\(\frac{a}{b}\)`
-2. **Multiplication + division:** `a*b/c` → `\(\frac{a\times b}{c}\)`
-3. **Complex fractions:** `(a+b)/(c+d)` → `\(\frac{(a+b)}{(c+d)}\)`
-4. **Nested operations:** `5555/(1550+10)/150` → `\(\frac{5555/(1550+10)}{150}\)`
-5. **Just multiplication:** `a*b*c` → `\(a\times b\times c\)`
-
-**How It Works:**
-- Finds the main division operator (rightmost `/` not inside parentheses)
-- Splits expression into numerator and denominator
-- Replaces `*` with `\times` (cross/times multiplication symbol)
-- Wraps in `\(\frac{numerator}{denominator}\)` format
-- If no division, just converts `*` to `\times` and wraps in `\(...\)`
+**Quick Formatters (F3):**
+- **√ button:** Wraps selection with `\(\sqrt{...}\)`
+- **a/b button:** Smart converter - `a*b/c` → `\(\frac{a\times b}{c}\)` (handles nested parentheses)
 
 **Implementation:**
-- **Rendering:** Uses KaTeX library to render all math notation
-- **Stripping:** Math markers `\( ... \)` are stripped in `stripMarkdown()` for search/sort
-- **Quick Formatter:** Fraction button in F3 menu - intelligently parses selected text
-- **Static Export:** KaTeX is included in static export, so all math works automatically
-- **Key Functions:**
-  - `applyHatFormat(event)` - Smart parser that detects patterns and converts to KaTeX
-  - Handles parentheses depth tracking to find correct division point
-  - Converts `*` to `\times` (× cross sign) for proper multiplication display
-  - KaTeX library handles all rendering automatically
-  - `stripMarkdown()` - Removes `\( ... \)` syntax for sorting/searching
-
-**Usage:**
-1. Type or paste math expression: `a*b/c+d`
-2. Select the text
-3. Press F3
-4. Click the fraction button (a/b icon)
-5. Expression is automatically converted to proper KaTeX format with × for multiplication
-
-**Note:** Both square root and smart math features use KaTeX notation format, which is the same format used by Google, LaTeX, and other math rendering systems. Any valid KaTeX syntax within `\( ... \)` will be rendered properly.
+- Regex: `/\\\((.*?)\\\)/g` matches delimiters, `katex.renderToString()` renders
+- `stripMarkdown()` removes `\( ... \)` for search/sort
+- Static export: Proper Python string escaping for JSON-embedded data
   - `stripMarkdown()` - Removes separator for sorting/searching
   - `oldParseMarkdownBody()` - Uses reduce to control newlines around separators
   - `export_static.py` - Also uses reduce() to skip `<br>` tags around separators
