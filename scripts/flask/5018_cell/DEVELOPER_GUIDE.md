@@ -507,23 +507,30 @@ This ensures users can easily find the clear button at the end of all formatting
   - `checkHasMarkdown()` - Detects 5+ dashes on a line
 
 ### Separator Background Color Feature
-**Syntax:** `[COLOR1]-----[COLOR2]` where COLOR1 = separator line color, COLOR2 = background for content below
-**Purpose:** Apply background colors to content after a separator, useful for highlighting sections, creating visual blocks, or color-coding information.
+**Syntax:** `[COLOR1]-----[COLOR2/HEX]` where COLOR1 = separator line color, COLOR2 = background/text color
+**Purpose:** Apply background and text colors to content after a separator, useful for highlighting sections, creating visual blocks, or color-coding information.
 
 **Examples:**
 - `-----R` → Normal separator + RED background for content below
 - `R-----` → RED separator line (no background change)
 - `R-----G` → Red separator line + GREEN background for content below
+- `-----#514522` → Normal separator + custom hex background
+- `-----#514522-#000000` → Custom hex background + black text
+- `G-----#514522-#ffffff` → Green separator + custom bg/text colors
 - `-----` → Ends background color section (returns to normal)
 
 **Color Codes:** R (red), G (green), B (blue), Y (yellow), O (orange), P (purple), C (cyan), W (white), K (black), GR (gray)
 
+**Hex Colors:** Use 6-digit hex format `#RRGGBB` for custom colors, optionally add `-#RRGGBB` for text color
+
 **Implementation:**
-- **Parsing:** Regex `/^([A-Z]+)?-{5,}([A-Z]+)?$/gm` captures both prefix (line color) and suffix (background color)
-- **Post-processing:** Wraps content after colored separator in `<div>` with background color until another separator is encountered
-- **Detection:** Added patterns to `checkHasMarkdown()`: `/^[A-Z]+-{5,}$/m`, `/^-{5,}[A-Z]+$/m`, `/^[A-Z]+-{5,}[A-Z]+$/m`
-- **Stripping:** Unified regex `/^[A-Z]*-{5,}[A-Z]*$/gm` removes all separator variations
-- **Styling:** Background wrapper has `padding: 2px 6px; margin: 0;` for natural flow
+- **Parsing:** Regex `/^([A-Z]+)?-{5,}((?:[A-Z]+)|(?:#[0-9a-fA-F]{6}(?:-#[0-9a-fA-F]{6})?))?$/gm` captures:
+  - Optional prefix color (separator line): `[A-Z]+`
+  - Optional suffix: color code OR hex color(s) in format `#RRGGBB` or `#RRGGBB-#RRGGBB`
+- **Post-processing:** Wraps content after colored separator in `<div>` with background and optional text color until another separator is encountered
+- **Detection:** Added patterns to `checkHasMarkdown()`: color codes + hex patterns `/^-{5,}#[0-9a-fA-F]{6}/m`, `/^[A-Z]+-{5,}#[0-9a-fA-F]{6}/m`
+- **Stripping:** Unified regex `/^[A-Z]*-{5,}(?:[A-Z]+|#[0-9a-fA-F]{6}(?:-#[0-9a-fA-F]{6})?)?$/gm` removes all separator variations
+- **Styling:** Background wrapper has `padding: 2px 6px; margin: 0;` + optional `color` for text
 - **Spacing:** No newlines added after separator or wrapper div to prevent gaps
 - **Static Export:** Full support in `export_static.py` with same logic
 

@@ -8,8 +8,11 @@ Enhance the horizontal separator feature to apply background colors to content t
 ### Basic Patterns
 - `-----` = Normal gray separator (existing)
 - `R-----` = Red separator line (existing)
-- `-----R` = Normal separator + RED background for content below (NEW)
-- `R-----G` = Red separator line + GREEN background for content below (NEW)
+- `-----R` = Normal separator + RED background for content below
+- `R-----G` = Red separator line + GREEN background for content below
+- `-----#514522` = Normal separator + custom hex background color
+- `-----#514522-#000000` = Normal separator + custom hex background + custom text color
+- `G-----#514522-#000000` = Green separator + custom hex background + custom text color
 
 ### Color Codes
 - **R** = Red (#ff0000)
@@ -22,6 +25,12 @@ Enhance the horizontal separator feature to apply background colors to content t
 - **W** = White (#ffffff)
 - **K** = Black (#000000)
 - **GR** = Gray (#808080)
+
+### Custom Hex Colors
+- Use 6-digit hex colors (without #) for custom colors
+- Format: `-----#RRGGBB` for background only
+- Format: `-----#RRGGBB-#RRGGBB` for background + text color
+- Can combine with separator line colors: `R-----#RRGGBB-#RRGGBB`
 
 ## Usage Examples
 
@@ -84,12 +93,52 @@ Just a red separator line (no background change)
 Normal text continues
 ```
 
+### Example 7: Custom Hex Background Color
+```
+Normal text
+-----#ffcc00
+This has custom yellow background (#ffcc00)
+More custom colored text
+```
+
+### Example 8: Custom Hex Background + Text Color
+```
+Normal text
+-----#2c3e50-#ecf0f1
+Dark blue background with light gray text
+Custom colors for better readability
+```
+
+### Example 9: Colored Separator + Custom Hex Colors
+```
+Normal text
+R-----#1a1a1a-#ffffff
+Red separator line
+Black background with white text below
+High contrast section
+-----
+Back to normal
+```
+
+### Example 10: Multiple Custom Colors
+```
+-----#ffebee-#c62828
+Light red background with dark red text
+-----#e8f5e9-#2e7d32
+Light green background with dark green text
+-----#e3f2fd-#1565c0
+Light blue background with dark blue text
+-----
+End
+```
+
 ## How It Works
 
 ### Pattern Breakdown
 - **Color BEFORE dashes** (`R-----`) = Changes the separator line color
-- **Color AFTER dashes** (`-----R`) = Applies background color to content below
-- **Both** (`R-----G`) = Colored separator line + background for content below
+- **Color AFTER dashes** (`-----R` or `-----#RRGGBB`) = Applies background color to content below
+- **Both** (`R-----G` or `G-----#RRGGBB`) = Colored separator line + background for content below
+- **With text color** (`-----#RRGGBB-#RRGGBB`) = Background color + text color
 - **Plain separator** (`-----`) = Ends any active background color section
 
 ### Behavior
@@ -119,12 +168,14 @@ Normal text continues
    - Removed duplicate CSS definitions
 
 ### Technical Implementation
-- Regex pattern: `/^([A-Z]+)?-{5,}([A-Z]+)?$/gm`
-  - Captures optional prefix color (separator line color)
-  - Captures optional suffix color (background color)
-- Post-processing wraps all content after colored separator in a `<div>` with background color
+- Regex pattern: `/^([A-Z]+)?-{5,}((?:[A-Z]+)|(?:#[0-9a-fA-F]{6}(?:-#[0-9a-fA-F]{6})?))?$/gm`
+  - Captures optional prefix color (separator line color): `[A-Z]+`
+  - Captures optional suffix: color code OR hex color(s)
+  - Hex format: `#RRGGBB` or `#RRGGBB-#RRGGBB` (bg-text)
+- Post-processing wraps all content after colored separator in a `<div>` with background and optional text color
 - Background wrapper has minimal padding (2px 6px) and no margin for natural flow
 - No newlines added after separator or wrapper div to prevent gaps
+- Text color is applied when hex format includes second color: `#bg-#text`
 
 ## Styling
 - **Background wrapper**: `padding: 2px 6px; margin: 0;`

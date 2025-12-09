@@ -184,6 +184,77 @@ Normal
 
 ---
 
+## Test 13: Custom Hex Background
+```
+Normal text
+-----#ffcc00
+Custom yellow background
+More custom colored text
+-----
+Normal
+```
+
+**Expected:** Content has custom hex background color #ffcc00.
+
+---
+
+## Test 14: Custom Hex Background + Text Color
+```
+Normal text
+-----#2c3e50-#ecf0f1
+Dark blue background with light gray text
+Custom colors for readability
+-----
+Normal
+```
+
+**Expected:** Dark blue background (#2c3e50) with light gray text (#ecf0f1).
+
+---
+
+## Test 15: Colored Separator + Custom Hex
+```
+R-----#1a1a1a-#ffffff
+Red separator line
+Black background with white text
+High contrast
+-----
+Normal
+```
+
+**Expected:** Red separator line, then black background with white text.
+
+---
+
+## Test 16: Multiple Custom Hex Colors
+```
+-----#ffebee-#c62828
+Light red bg, dark red text
+-----#e8f5e9-#2e7d32
+Light green bg, dark green text
+-----#e3f2fd-#1565c0
+Light blue bg, dark blue text
+-----
+End
+```
+
+**Expected:** Each section has its custom background and text colors.
+
+---
+
+## Test 17: Hex Without Text Color
+```
+-----#ff9800
+Orange background only
+Text color unchanged
+-----
+Normal
+```
+
+**Expected:** Orange background, default text color.
+
+---
+
 ## Color Reference
 - **R** = Red (#ff0000)
 - **G** = Green (#00ff00)
