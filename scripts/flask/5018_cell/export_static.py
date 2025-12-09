@@ -59,8 +59,7 @@ def generate_static_html(data, custom_syntaxes):
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
     <!-- KaTeX for Math Rendering -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous"></script>
     <style>
         :root {
             --grid-line-color: #dddddd;
@@ -1393,7 +1392,8 @@ def generate_static_html(data, custom_syntaxes):
                     // IMPORTANT: When adding new markdown syntax, add detection here
                     // This must match the hasMarkdown check in static/script.js
                     const cellValue = row[colIndex] || '';
-                    const hasMarkdown = cellValue.includes('[[') || 
+                    const hasMarkdown = cellValue.includes('\\\\(') || 
+                        cellValue.includes('[[') || 
                         cellValue.includes('**') || 
                         cellValue.includes('__') || 
                         cellValue.includes('@@') || 
