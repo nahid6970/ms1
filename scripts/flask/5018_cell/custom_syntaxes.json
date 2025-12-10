@@ -5,8 +5,13 @@
     "marker": "++"
   },
   {
-    "marker": "%%",
     "bgColor": "#ABFF4D",
-    "fgColor": "#212529"
+    "fgColor": "#212529",
+    "marker": "%%"
+  },
+  {
+    "bgColor": "#FF4D4D",
+    "fgColor": "#212529",
+    "marker": "\u00bf\u00bf"
   }
 ]

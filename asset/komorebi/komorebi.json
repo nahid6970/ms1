@@ -253,6 +253,11 @@
             "kind": "Exe",
             "id": "Qwen.exe",
             "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Title",
+            "id": "Character Map UWP",
+            "matching_strategy": "Equals"
         }
     ],
     "tray_and_multi_window_applications": [
