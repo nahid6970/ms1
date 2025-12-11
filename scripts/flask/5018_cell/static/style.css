@@ -2833,8 +2833,8 @@ Markdown Table Styles */
     opacity: 0.6 !important;
 }
 
-/* Rowspan borders - add thin black line above and below cells with rowspan */
-.md-cell[rowspan] {
+/* Rowspan borders - add thin black line above and below ALL cells in rows that contain rowspan */
+.md-cell.md-rowspan-row {
     border-top: 1px solid #000000 !important;
     border-bottom: 1px solid #000000 !important;
 }

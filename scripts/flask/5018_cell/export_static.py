@@ -859,8 +859,8 @@ def generate_static_html(data, custom_syntaxes):
             opacity: 0.6;
         }
 
-        /* Rowspan borders - add thin black line above and below cells with rowspan */
-        .md-cell[rowspan] {
+        /* Rowspan borders - add thin black line above and below ALL cells in rows that contain rowspan */
+        .md-cell.md-rowspan-row {
             border-top: 1px solid #000000;
             border-bottom: 1px solid #000000;
         }
@@ -1673,6 +1673,18 @@ def generate_static_html(data, custom_syntaxes):
                 });
             });
 
+            // Second pass: identify which rows contain rowspan cells (for border styling)
+            const rowsWithRowspan = new Set();
+            Object.entries(rowspans).forEach(([key, span]) => {
+                if (span > 1) {
+                    const [row, col] = key.split('-').map(Number);
+                    // Mark the starting row and all rows it spans
+                    for (let r = row; r < row + span; r++) {
+                        rowsWithRowspan.add(r);
+                    }
+                }
+            });
+
             /*  build a single <div> that looks like a table  */
             let html = `<div class="md-grid" style="--cols:${cols}">`;
             grid.forEach((row, i) => {
@@ -1684,6 +1696,7 @@ def generate_static_html(data, custom_syntaxes):
 
                     const key = `${i}-${colIndex}`;
                     const rowspan = rowspans[key] || 1;
+                    const isInRowspanRow = rowsWithRowspan.has(i);
 
                     let styles = [];
                     if (cell.align !== 'left') {
@@ -1703,7 +1716,8 @@ def generate_static_html(data, custom_syntaxes):
                     // Only apply header class if we have a header separator and it's the first row
                     const isHeader = hasHeader && i === 0;
                     const rowspanAttr = rowspan > 1 ? ` rowspan="${rowspan}"` : '';
-                    html += `<div class="md-cell ${isHeader ? 'md-header' : ''}${emptyClass}"${rowspanAttr}${styleAttr}>${cell.content}</div>`;
+                    const rowspanRowClass = isInRowspanRow ? ' md-rowspan-row' : '';
+                    html += `<div class="md-cell ${isHeader ? 'md-header' : ''}${emptyClass}${rowspanRowClass}"${rowspanAttr}${styleAttr}>${cell.content}</div>`;
                 });
             });
             html += '</div>';

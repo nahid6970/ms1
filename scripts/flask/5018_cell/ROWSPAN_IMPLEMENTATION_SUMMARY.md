@@ -19,7 +19,9 @@ Two-pass approach for both table types:
    - Apply `grid-row: span N` CSS for cells with rowspan > 1
    - Add `rowspan` attribute for semantic HTML
 
-**Key Feature**: When multiple `^^` cells are stacked vertically, the algorithm correctly finds the original cell at the top of the chain, allowing proper multi-row spanning.
+**Key Features**: 
+- When multiple `^^` cells are stacked vertically, the algorithm correctly finds the original cell at the top of the chain, allowing proper multi-row spanning.
+- All cells in rows that contain rowspan get the `.md-rowspan-row` class for consistent border styling across the entire row group.
 
 ### Files Modified
 
@@ -62,8 +64,9 @@ Comprehensive test suite with 10 test cases:
 
 ## CSS Support
 Uses CSS Grid's native `grid-row: span N` property:
-- Added `.md-cell[rowspan]` CSS rule for visual borders
-- Black 1px solid borders above and below spanning cells
+- Added `.md-cell.md-rowspan-row` CSS rule for visual borders
+- Black 1px solid borders above and below **all cells** in rows containing rowspan
+- Creates a visual box around the entire merged row group
 - Works with existing `.md-grid` and `.md-cell` styles
 - Compatible with all table features (colors, alignment, borders)
 

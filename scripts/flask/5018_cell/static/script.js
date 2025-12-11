@@ -1135,7 +1135,19 @@ function parseCommaTable(cols, text, borderColor, borderWidth) {
         }
     });
 
-    // Second pass: render with rowspan attributes
+    // Second pass: identify which rows contain rowspan cells (for border styling)
+    const rowsWithRowspan = new Set();
+    Object.entries(rowspans).forEach(([key, span]) => {
+        if (span > 1) {
+            const [row, col] = key.split('-').map(Number);
+            // Mark the starting row and all rows it spans
+            for (let r = row; r < row + span; r++) {
+                rowsWithRowspan.add(r);
+            }
+        }
+    });
+
+    // Third pass: render with rowspan attributes
     let html = `<div class="md-grid" style="${gridStyle}">`;
     items.forEach((item, i) => {
         // Skip empty last item if it's just a trailing comma
@@ -1151,9 +1163,11 @@ function parseCommaTable(cols, text, borderColor, borderWidth) {
         }
 
         const rowspan = rowspans[key] || 1;
+        const isInRowspanRow = rowsWithRowspan.has(row);
+        const rowspanRowClass = isInRowspanRow ? ' md-rowspan-row' : '';
         const rowspanAttr = rowspan > 1 ? ` rowspan="${rowspan}" style="grid-row: span ${rowspan}; ${cellStyle}"` : ` style="${cellStyle}"`;
 
-        html += `<div class="md-cell"${rowspanAttr}>${parseMarkdownInline(item)}</div>`;
+        html += `<div class="md-cell${rowspanRowClass}"${rowspanAttr}>${parseMarkdownInline(item)}</div>`;
     });
     html += '</div>';
     return html;
@@ -1285,6 +1299,18 @@ function parseGridTable(lines) {
         });
     });
 
+    // Second pass: identify which rows contain rowspan cells (for border styling)
+    const rowsWithRowspan = new Set();
+    Object.entries(rowspans).forEach(([key, span]) => {
+        if (span > 1) {
+            const [row, col] = key.split('-').map(Number);
+            // Mark the starting row and all rows it spans
+            for (let r = row; r < row + span; r++) {
+                rowsWithRowspan.add(r);
+            }
+        }
+    });
+
     /*  build a single <div> that looks like a table  */
     let html = `<div class="md-grid" style="--cols:${cols}">`;
     grid.forEach((row, i) => {
@@ -1296,6 +1322,7 @@ function parseGridTable(lines) {
 
             const key = `${i}-${colIndex}`;
             const rowspan = rowspans[key] || 1;
+            const isInRowspanRow = rowsWithRowspan.has(i);
 
             let styles = [];
             if (cell.align !== 'left') {
@@ -1315,7 +1342,8 @@ function parseGridTable(lines) {
             // Only apply header class if we have a header separator and it's the first row
             const isHeader = hasHeader && i === 0;
             const rowspanAttr = rowspan > 1 ? ` rowspan="${rowspan}"` : '';
-            html += `<div class="md-cell ${isHeader ? 'md-header' : ''}${emptyClass}"${rowspanAttr}${styleAttr}>${cell.content}</div>`;
+            const rowspanRowClass = isInRowspanRow ? ' md-rowspan-row' : '';
+            html += `<div class="md-cell ${isHeader ? 'md-header' : ''}${emptyClass}${rowspanRowClass}"${rowspanAttr}${styleAttr}>${cell.content}</div>`;
         });
     });
     html += '</div>';

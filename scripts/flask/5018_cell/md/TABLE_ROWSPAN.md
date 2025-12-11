@@ -58,10 +58,13 @@ Row2Col1, Row2Col2, ^^, ^^
 
 ## Visual Styling
 
-Cells with rowspan have thin black borders above and below to clearly indicate the span:
-- **Top border**: 1px solid black line above the spanning cell
-- **Bottom border**: 1px solid black line below the spanning cell
-- This makes it easy to see which rows are merged together
+Rows that contain rowspan cells have thin black borders above and below **all cells in those rows**:
+- **Top border**: 1px solid black line above all cells in the row group
+- **Bottom border**: 1px solid black line below all cells in the row group
+- This creates a visual box around the entire merged row section
+- Makes it easy to see which rows are grouped together
+
+Example: If columns 3-4 span rows 1-3, then **all cells** in rows 1-3 (including columns 1-2) will have the black borders.
 
 ## Rules
 
