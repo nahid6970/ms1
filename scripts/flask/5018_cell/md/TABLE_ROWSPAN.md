@@ -56,12 +56,38 @@ Row2Col1, Row2Col2, ^^, ^^
 - B1 spans rows 1-2
 - C2 spans rows 2-3
 
+## Visual Styling
+
+Cells with rowspan have thin black borders above and below to clearly indicate the span:
+- **Top border**: 1px solid black line above the spanning cell
+- **Bottom border**: 1px solid black line below the spanning cell
+- This makes it easy to see which rows are merged together
+
 ## Rules
 
 1. `^^` must have a cell directly above it to merge with
 2. You can chain multiple `^^` cells vertically to span more than 2 rows
-3. Works with all table features: colors, alignment, borders
-4. The content of `^^` cells is ignored (they're hidden)
+3. When chaining `^^`, the algorithm finds the first non-`^^` cell above and extends its span
+4. Works with all table features: colors, alignment, borders
+5. The content of `^^` cells is ignored (they're hidden)
+6. Spanning cells get black top/bottom borders for visual clarity
+
+## How Chaining Works
+
+When you have multiple `^^` in the same column:
+```
+|Col1|Col2|
+|---|---|
+|A1|B1|
+|A2|^^|
+|A3|^^|
+```
+
+The algorithm:
+- Row 2 `^^` → finds B1 (first non-`^^` above) → B1 rowspan = 2
+- Row 3 `^^` → finds B1 (skips Row 2's `^^`) → B1 rowspan = 3
+
+Result: B1 spans all 3 rows!
 
 ## The Rule of 6
 

@@ -1119,10 +1119,19 @@ function parseCommaTable(cols, text, borderColor, borderWidth) {
         if (item.trim() === '^^') {
             const col = i % cols;
             const row = Math.floor(i / cols);
-            // Find cell above and increment its rowspan
-            const aboveRow = row - 1;
-            const aboveKey = `${aboveRow}-${col}`;
-            rowspans[aboveKey] = (rowspans[aboveKey] || 1) + 1;
+            // Find the first non-^^ cell above this one
+            let targetRow = row - 1;
+            while (targetRow >= 0) {
+                const targetIndex = targetRow * cols + col;
+                if (targetIndex < items.length && items[targetIndex].trim() !== '^^') {
+                    break;
+                }
+                targetRow--;
+            }
+            if (targetRow >= 0) {
+                const targetKey = `${targetRow}-${col}`;
+                rowspans[targetKey] = (rowspans[targetKey] || 1) + 1;
+            }
         }
     });
 
@@ -1263,10 +1272,15 @@ function parseGridTable(lines) {
     grid.forEach((row, rowIndex) => {
         row.forEach((cell, colIndex) => {
             if (cell.content.trim() === '^^') {
-                // Find cell above and increment its rowspan
-                const aboveRow = rowIndex - 1;
-                const aboveKey = `${aboveRow}-${colIndex}`;
-                rowspans[aboveKey] = (rowspans[aboveKey] || 1) + 1;
+                // Find the first non-^^ cell above this one
+                let targetRow = rowIndex - 1;
+                while (targetRow >= 0 && grid[targetRow][colIndex].content.trim() === '^^') {
+                    targetRow--;
+                }
+                if (targetRow >= 0) {
+                    const targetKey = `${targetRow}-${colIndex}`;
+                    rowspans[targetKey] = (rowspans[targetKey] || 1) + 1;
+                }
             }
         });
     });

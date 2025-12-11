@@ -11,12 +11,15 @@ Two-pass approach for both table types:
 1. **First Pass**: Identify `^^` cells and calculate rowspans
    - Track which cells need to span multiple rows
    - Store rowspan counts in a map keyed by "row-col"
-   - Increment count for each `^^` found below a cell
+   - For each `^^`, find the first non-`^^` cell above it (handles chaining)
+   - Increment count for the target cell
 
 2. **Second Pass**: Render with rowspan attributes
    - Skip cells marked with `^^` (they're hidden)
    - Apply `grid-row: span N` CSS for cells with rowspan > 1
    - Add `rowspan` attribute for semantic HTML
+
+**Key Feature**: When multiple `^^` cells are stacked vertically, the algorithm correctly finds the original cell at the top of the chain, allowing proper multi-row spanning.
 
 ### Files Modified
 
@@ -26,12 +29,16 @@ Two-pass approach for both table types:
 
 #### 2. export_static.py
 - **parseGridTable()** (~line 1547): Added rowspan logic for static export
+- **CSS section** (~line 850): Added `.md-cell[rowspan]` border styling
 
-#### 3. DEVELOPER_GUIDE.md
+#### 3. static/style.css
+- **CSS section** (~line 2830): Added `.md-cell[rowspan]` border styling
+
+#### 4. DEVELOPER_GUIDE.md
 - Added "Table Rowspan Feature" section with implementation details
 - Updated "Pipe Table Parsing & Rendering" section to mention rowspan
 
-#### 4. md/README.md
+#### 5. md/README.md
 - Added TABLE_ROWSPAN.md to the test files list
 
 ### Files Created
@@ -55,7 +62,8 @@ Comprehensive test suite with 10 test cases:
 
 ## CSS Support
 Uses CSS Grid's native `grid-row: span N` property:
-- No additional CSS needed
+- Added `.md-cell[rowspan]` CSS rule for visual borders
+- Black 1px solid borders above and below spanning cells
 - Works with existing `.md-grid` and `.md-cell` styles
 - Compatible with all table features (colors, alignment, borders)
 
@@ -67,6 +75,7 @@ Uses CSS Grid's native `grid-row: span N` property:
 ✅ Works with color codes (:R-A:, :G:, etc.)
 ✅ Works with alignment markers (:text:, text:)
 ✅ Works with empty cell markers (-)
+✅ Visual borders (black lines above/below spanning cells)
 ✅ Static export compatibility
 ✅ No syntax errors
 
