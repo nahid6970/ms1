@@ -1649,16 +1649,40 @@ def generate_static_html(data, custom_syntaxes):
                 })
             );
 
+            // First pass: identify ^^ cells and calculate rowspans
+            const rowspans = {}; // key: "row-col", value: span count
+            grid.forEach((row, rowIndex) => {
+                row.forEach((cell, colIndex) => {
+                    if (cell.content.trim() === '^^') {
+                        // Find cell above and increment its rowspan
+                        const aboveRow = rowIndex - 1;
+                        const aboveKey = `${aboveRow}-${colIndex}`;
+                        rowspans[aboveKey] = (rowspans[aboveKey] || 1) + 1;
+                    }
+                });
+            });
+
             /*  build a single <div> that looks like a table  */
             let html = `<div class="md-grid" style="--cols:${cols}">`;
             grid.forEach((row, i) => {
                 row.forEach((cell, colIndex) => {
+                    // Skip cells with ^^ (they're merged)
+                    if (cell.content.trim() === '^^') {
+                        return;
+                    }
+
+                    const key = `${i}-${colIndex}`;
+                    const rowspan = rowspans[key] || 1;
+
                     let styles = [];
                     if (cell.align !== 'left') {
                         styles.push(`text-align: ${cell.align}`);
                     }
                     if (cell.borderColor) {
                         styles.push(`border-right-color: ${cell.borderColor} !important`);
+                    }
+                    if (rowspan > 1) {
+                        styles.push(`grid-row: span ${rowspan}`);
                     }
                     const styleAttr = styles.length > 0 ? ` style="${styles.join('; ')}"` : '';
                     
@@ -1667,7 +1691,8 @@ def generate_static_html(data, custom_syntaxes):
                     const emptyClass = isEmpty ? ' md-empty' : '';
                     // Only apply header class if we have a header separator and it's the first row
                     const isHeader = hasHeader && i === 0;
-                    html += `<div class="md-cell ${isHeader ? 'md-header' : ''}${emptyClass}"${styleAttr}>${cell.content}</div>`;
+                    const rowspanAttr = rowspan > 1 ? ` rowspan="${rowspan}"` : '';
+                    html += `<div class="md-cell ${isHeader ? 'md-header' : ''}${emptyClass}"${rowspanAttr}${styleAttr}>${cell.content}</div>`;
                 });
             });
             html += '</div>';

@@ -1113,12 +1113,38 @@ function parseCommaTable(cols, text, borderColor, borderWidth) {
     const bWidth = borderWidth || '1px';
     const cellStyle = `border: ${bWidth} solid ${bColor} !important;`;
 
+    // First pass: identify ^^ cells and calculate rowspans
+    const rowspans = {}; // key: "row-col", value: span count
+    items.forEach((item, i) => {
+        if (item.trim() === '^^') {
+            const col = i % cols;
+            const row = Math.floor(i / cols);
+            // Find cell above and increment its rowspan
+            const aboveRow = row - 1;
+            const aboveKey = `${aboveRow}-${col}`;
+            rowspans[aboveKey] = (rowspans[aboveKey] || 1) + 1;
+        }
+    });
+
+    // Second pass: render with rowspan attributes
     let html = `<div class="md-grid" style="${gridStyle}">`;
     items.forEach((item, i) => {
         // Skip empty last item if it's just a trailing comma
         if (i === items.length - 1 && item === '') return;
 
-        html += `<div class="md-cell" style="${cellStyle}">${parseMarkdownInline(item)}</div>`;
+        const col = i % cols;
+        const row = Math.floor(i / cols);
+        const key = `${row}-${col}`;
+
+        // Skip cells with ^^ (they're merged)
+        if (item.trim() === '^^') {
+            return;
+        }
+
+        const rowspan = rowspans[key] || 1;
+        const rowspanAttr = rowspan > 1 ? ` rowspan="${rowspan}" style="grid-row: span ${rowspan}; ${cellStyle}"` : ` style="${cellStyle}"`;
+
+        html += `<div class="md-cell"${rowspanAttr}>${parseMarkdownInline(item)}</div>`;
     });
     html += '</div>';
     return html;
@@ -1232,16 +1258,40 @@ function parseGridTable(lines) {
         })
     );
 
+    // First pass: identify ^^ cells and calculate rowspans
+    const rowspans = {}; // key: "row-col", value: span count
+    grid.forEach((row, rowIndex) => {
+        row.forEach((cell, colIndex) => {
+            if (cell.content.trim() === '^^') {
+                // Find cell above and increment its rowspan
+                const aboveRow = rowIndex - 1;
+                const aboveKey = `${aboveRow}-${colIndex}`;
+                rowspans[aboveKey] = (rowspans[aboveKey] || 1) + 1;
+            }
+        });
+    });
+
     /*  build a single <div> that looks like a table  */
     let html = `<div class="md-grid" style="--cols:${cols}">`;
     grid.forEach((row, i) => {
         row.forEach((cell, colIndex) => {
+            // Skip cells with ^^ (they're merged)
+            if (cell.content.trim() === '^^') {
+                return;
+            }
+
+            const key = `${i}-${colIndex}`;
+            const rowspan = rowspans[key] || 1;
+
             let styles = [];
             if (cell.align !== 'left') {
                 styles.push(`text-align: ${cell.align}`);
             }
             if (cell.borderColor) {
                 styles.push(`border-right-color: ${cell.borderColor} !important`);
+            }
+            if (rowspan > 1) {
+                styles.push(`grid-row: span ${rowspan}`);
             }
             const styleAttr = styles.length > 0 ? ` style="${styles.join('; ')}"` : '';
             
@@ -1250,7 +1300,8 @@ function parseGridTable(lines) {
             const emptyClass = isEmpty ? ' md-empty' : '';
             // Only apply header class if we have a header separator and it's the first row
             const isHeader = hasHeader && i === 0;
-            html += `<div class="md-cell ${isHeader ? 'md-header' : ''}${emptyClass}"${styleAttr}>${cell.content}</div>`;
+            const rowspanAttr = rowspan > 1 ? ` rowspan="${rowspan}"` : '';
+            html += `<div class="md-cell ${isHeader ? 'md-header' : ''}${emptyClass}"${rowspanAttr}${styleAttr}>${cell.content}</div>`;
         });
     });
     html += '</div>';

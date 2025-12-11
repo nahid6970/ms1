@@ -1333,9 +1333,22 @@ Users can set custom fonts per column via **Column Settings (F3)**:
 - **`parseGridTable(lines)`** - Main function that parses pipe tables into HTML grid (~line 1100 in script.js)
   - Handles color codes (`:R-A:`, `:G:`, etc.)
   - Handles alignment (`:text:`, `text:`)
+  - Handles rowspan with `^^` syntax (cells merge with cell above)
   - Removes leading/trailing pipes
   - Generates separator rows
   - Location: `static/script.js` ~line 1100, `export_static.py` ~line 1524
+
+### Table Rowspan Feature
+- **Syntax:** `^^` in a cell merges it with the cell directly above
+- **Implementation:** Two-pass algorithm:
+  1. First pass: Identify `^^` cells and calculate rowspan counts
+  2. Second pass: Render cells with `grid-row: span N` style, skip `^^` cells
+- **Functions:**
+  - `parseGridTable()` - Handles rowspan for pipe tables (~line 1100)
+  - `parseCommaTable()` - Handles rowspan for comma tables (~line 1106)
+- **CSS:** Uses CSS Grid's `grid-row: span N` property for spanning
+- **Works with:** Colors, alignment, borders, all table features
+- **Documentation:** See `md/TABLE_ROWSPAN.md` for examples
 
 ### Table Formatter (F3 → 📊)
 - **`formatPipeTable(event)`** - Auto-formats and aligns pipe tables (~line 6070 in script.js)

@@ -1,0 +1,74 @@
+# Table Rowspan Feature
+
+The `^^` syntax allows cells to span multiple rows in both comma tables and pipe tables.
+
+## Syntax
+
+Use `^^` in a cell to merge it with the cell directly above it.
+
+## Examples
+
+### Example 1: Pipe Table with Rowspan
+
+```
+|Header1|Header2|Header3|Header4|
+|---|---|---|---|
+|Row1Col1|Row1Col2|Row1Col3|Row1Col4|
+|Row2Col1|Row2Col2|^^|^^|
+```
+
+**Result:** Columns 3 and 4 of Row1 will span both Row1 and Row2.
+
+### Example 2: Comma Table with Rowspan
+
+```
+Table*4
+Header1, Header2, Header3, Header4,
+Row1Col1, Row1Col2, Row1Col3, Row1Col4,
+Row2Col1, Row2Col2, ^^, ^^
+```
+
+**Result:** Same as above - columns 3 and 4 span two rows.
+
+### Example 3: Multiple Rowspans
+
+```
+|Name|Age|City|Country|
+|---|---|---|---|
+|Alice|25|NYC|USA|
+|Bob|30|^^|^^|
+|Charlie|35|^^|^^|
+```
+
+**Result:** The "NYC" and "USA" cells span three rows (Alice, Bob, and Charlie).
+
+### Example 4: Mixed Rowspans
+
+```
+|Col1|Col2|Col3|
+|---|---|---|
+|A1|B1|C1|
+|A2|^^|C2|
+|A3|B3|^^|
+```
+
+**Result:** 
+- B1 spans rows 1-2
+- C2 spans rows 2-3
+
+## Rules
+
+1. `^^` must have a cell directly above it to merge with
+2. You can chain multiple `^^` cells vertically to span more than 2 rows
+3. Works with all table features: colors, alignment, borders
+4. The content of `^^` cells is ignored (they're hidden)
+
+## The Rule of 6
+
+This feature follows "The Rule of 6" for markdown syntax:
+- **Simple**: Just type `^^` to merge cells
+- **Intuitive**: The `^^` symbol visually suggests "pointing up"
+- **Consistent**: Works the same in both comma and pipe tables
+- **Minimal**: Only 2 characters needed
+- **Readable**: Easy to see merged cells in source
+- **Powerful**: Enables complex table layouts

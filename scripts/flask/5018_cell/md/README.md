@@ -12,6 +12,7 @@ This folder contains feature documentation, test cases, and specifications for t
 - **SEPARATOR_BG_TEST.md** - Test cases for separator background colors
 - **TABLE_COLOR_TEST.md** - Table color feature tests
 - **TABLE_FORMATTER_TEST.md** - Pipe table formatter tests
+- **TABLE_ROWSPAN.md** - Table rowspan feature with `^^` syntax
 - **TIMELINE_TEST.md** - Timeline/flowchart layout tests
 - **WORD_CONNECTOR_TEST.md** - Word connector feature tests
 
