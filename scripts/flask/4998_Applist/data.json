@@ -84,6 +84,13 @@
         "winget_path": "C:\\Bazarr\\bazarr.py"
     },
     {
+        "name": "beyond-compare",
+        "scoop_name": "beyondcompare",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\beyondcompare\\current\\BCompare.exe",
+        "winget_name": "",
+        "winget_path": ""
+    },
+    {
         "name": "Bitwarden",
         "scoop_name": "bitwarden",
         "scoop_path": "",
@@ -193,6 +200,13 @@
         "scoop_name": "emacs",
         "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\emacs\\current\\bin\\emacs.exe",
         "winget_name": "",
+        "winget_path": ""
+    },
+    {
+        "name": "Everything",
+        "scoop_name": "everything",
+        "scoop_path": "",
+        "winget_name": "voidtools.Everything",
         "winget_path": ""
     },
     {
@@ -406,7 +420,7 @@
         "winget_path": ""
     },
     {
-        "name": "Meld",
+        "name": "Meld - File Compare",
         "scoop_name": "meld",
         "scoop_path": "",
         "winget_name": "Meld.Meld",
@@ -844,13 +858,6 @@
         "scoop_name": "zoxide",
         "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\zoxide\\current\\zoxide.exe",
         "winget_name": "",
-        "winget_path": ""
-    },
-    {
-        "name": "Everything",
-        "scoop_name": "everything",
-        "scoop_path": "",
-        "winget_name": "voidtools.Everything",
         "winget_path": ""
     }
 ]
