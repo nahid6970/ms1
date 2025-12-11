@@ -6418,7 +6418,56 @@ function searchGoogle(event) {
     showToast('Searching in Google', 'success');
 }
 
+function searchGoogleWithExtra(event) {
+    event.preventDefault();
+    event.stopPropagation();
 
+    if (!quickFormatterTarget) return;
+
+    const input = quickFormatterTarget;
+    const start = quickFormatterSelection.start;
+    const end = quickFormatterSelection.end;
+    const selectedText = input.value.substring(start, end);
+
+    if (!selectedText) {
+        showToast('No text selected', 'warning');
+        return;
+    }
+
+    // Get the extra text from localStorage (default: "make this text bengali as its in bengali phonetic")
+    const extraText = localStorage.getItem('searchExtraText') || 'make this text bengali as its in bengali phonetic';
+
+    // Strip markdown formatting before searching
+    const cleanText = stripMarkdown(selectedText);
+
+    // Combine selected text with extra text
+    const fullSearchQuery = `${cleanText} ${extraText}`;
+
+    // Open Google search in new tab
+    const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(fullSearchQuery)}`;
+    window.open(searchUrl, '_blank');
+
+    closeQuickFormatter();
+    showToast('Searching with extra text', 'success');
+}
+
+function editSearchExtraText(event) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    // Get current extra text
+    const currentText = localStorage.getItem('searchExtraText') || 'make this text bengali as its in bengali phonetic';
+
+    // Prompt user to edit
+    const newText = prompt('Edit the extra text to add to searches:', currentText);
+
+    if (newText !== null && newText.trim() !== '') {
+        localStorage.setItem('searchExtraText', newText.trim());
+        showToast('Search extra text updated', 'success');
+    }
+
+    return false; // Prevent context menu
+}
 
 function linesToComma(event) {
     if (!quickFormatterTarget) return;
