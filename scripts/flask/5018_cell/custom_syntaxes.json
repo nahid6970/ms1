@@ -10,8 +10,13 @@
     "marker": "%%"
   },
   {
-    "bgColor": "#FF4D4D",
+    "bgColor": "#FF8080",
     "fgColor": "#212529",
     "marker": "\u00bf\u00bf"
+  },
+  {
+    "marker": "\u00a1\u00a1",
+    "bgColor": "#4DABFF",
+    "fgColor": "#212529"
   }
 ]
