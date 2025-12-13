@@ -427,12 +427,13 @@
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>GEMINI CLI TERMINAL</h1>
-            <p>Neural interface for Google's Gemini AI models</p>
+        <div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+            <button class="btn btn-secondary" onclick="toggleStats()" id="statsToggle">
+                Show Statistics ▼
+            </button>
         </div>
 
-        <div class="grid">
+        <div class="grid" id="statsGrid" style="display: none;">
             <div class="card">
                 <h2>📊 Token Usage</h2>
                 <div class="stat">
@@ -798,6 +799,19 @@ System Information:
         document.getElementById('maxTokensInput').addEventListener('change', function(e) {
             document.getElementById('maxTokens').textContent = e.target.value;
         });
+
+        function toggleStats() {
+            const statsGrid = document.getElementById('statsGrid');
+            const toggleBtn = document.getElementById('statsToggle');
+            
+            if (statsGrid.style.display === 'none') {
+                statsGrid.style.display = 'grid';
+                toggleBtn.textContent = 'Hide Statistics ▲';
+            } else {
+                statsGrid.style.display = 'none';
+                toggleBtn.textContent = 'Show Statistics ▼';
+            }
+        }
 
         // Initial welcome message
         addMessage('system', 'Welcome to Gemini CLI Terminal! Ready to chat.');
