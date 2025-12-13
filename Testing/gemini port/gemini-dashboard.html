@@ -517,6 +517,12 @@
                     <input type="number" id="defaultMaxTokensInput" step="100" min="100" max="8192" style="width: 100%; padding: 12px; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); font-family: 'JetBrains Mono', monospace; font-size: 0.9em;" placeholder="2048">
                 </div>
 
+                <div style="margin-bottom: 25px;">
+                    <label style="display: block; color: var(--text-secondary); margin-bottom: 8px; font-size: 0.9em; text-transform: uppercase; letter-spacing: 0.5px;">System Prompt (Instructions for AI)</label>
+                    <textarea id="systemPromptInput" style="width: 100%; padding: 12px; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); font-family: 'JetBrains Mono', monospace; font-size: 0.85em; min-height: 200px; resize: vertical;" placeholder="Loading..."></textarea>
+                    <small style="color: var(--text-secondary); display: block; margin-top: 6px; font-size: 0.85em;">Edit system_prompt.md to control AI behavior and save tokens</small>
+                </div>
+
                 <div style="display: flex; gap: 12px; margin-top: 30px;">
                     <button class="btn btn-primary" onclick="saveSettings()" style="flex: 1;">Save Settings</button>
                     <button class="btn btn-secondary" onclick="closeSettings()" style="flex: 1;">Cancel</button>
@@ -947,7 +953,7 @@ System Information:
             document.getElementById('actionsModal').style.display = 'none';
         }
 
-        function openSettings() {
+        async function openSettings() {
             // Load current settings
             const settings = JSON.parse(localStorage.getItem('geminiSettings') || '{}');
             
@@ -955,6 +961,17 @@ System Information:
             document.getElementById('defaultModelInput').value = settings.defaultModel || 'gemini-pro';
             document.getElementById('defaultTempInput').value = settings.defaultTemp || '0.7';
             document.getElementById('defaultMaxTokensInput').value = settings.defaultMaxTokens || '2048';
+            
+            // Load system prompt
+            try {
+                const response = await fetch('http://localhost:4785/api/system-prompt');
+                const data = await response.json();
+                if (data.status === 'success') {
+                    document.getElementById('systemPromptInput').value = data.prompt;
+                }
+            } catch (error) {
+                document.getElementById('systemPromptInput').value = 'Error loading system prompt';
+            }
             
             document.getElementById('settingsModal').style.display = 'flex';
         }
@@ -985,7 +1002,21 @@ System Information:
                 });
                 
                 if (response.ok) {
-                    addMessage('system', '✓ Settings saved successfully!');
+                    // Save system prompt
+                    const systemPrompt = document.getElementById('systemPromptInput').value;
+                    const promptResponse = await fetch('http://localhost:4785/api/system-prompt', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ prompt: systemPrompt })
+                    });
+                    
+                    if (promptResponse.ok) {
+                        addMessage('system', '✓ Settings and system prompt saved!');
+                    } else {
+                        addMessage('system', '✓ Settings saved, but system prompt failed');
+                    }
                     
                     // Apply settings to UI
                     document.getElementById('modelSelect').value = settings.defaultModel;

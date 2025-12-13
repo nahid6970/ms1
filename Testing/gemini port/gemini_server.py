@@ -14,6 +14,13 @@ CORS(app)
 WORKING_DIR = r"C:\Users\nahid\ms\ms1\Testing\geminiTesting"
 os.makedirs(WORKING_DIR, exist_ok=True)
 
+# Load system prompt
+SYSTEM_PROMPT_FILE = 'system_prompt.md'
+SYSTEM_PROMPT = ""
+if os.path.exists(SYSTEM_PROMPT_FILE):
+    with open(SYSTEM_PROMPT_FILE, 'r', encoding='utf-8') as f:
+        SYSTEM_PROMPT = f.read().strip()
+
 # Store session data
 session_data = {
     'messages': [],
@@ -85,14 +92,18 @@ def chat():
         # python -m gemini "your message"
         
         try:
+            # Prepend system prompt to message (keep it short)
+            full_message = message
+            if SYSTEM_PROMPT:
+                full_message = f"{SYSTEM_PROMPT} {message}"
+            
             # Try different CLI command formats
             # For npm @google/gemini-cli with YOLO mode (auto-approve tools)
+            # Using positional argument for one-shot mode (non-interactive by default)
             commands = [
-                ['gemini', '--yolo', message],  # npm with auto-approve
-                ['gemini', '--approval-mode', 'yolo', message],  # explicit approval mode
-                ['gemini', message],  # npm global install (fallback)
-                ['npx', '@google/gemini-cli', '--yolo', message],  # npx version
-                ['node_modules/.bin/gemini', '--yolo', message],  # local install
+                ['gemini', '--yolo', full_message],  # npm with auto-approve, one-shot
+                ['gemini', '--approval-mode', 'yolo', full_message],  # explicit approval mode
+                ['gemini', full_message],  # npm global install (fallback)
             ]
             
             result = None
@@ -100,23 +111,46 @@ def chat():
             
             for cmd in commands:
                 try:
-                    result = subprocess.run(
-                        cmd,
-                        capture_output=True,
+                    # Create the command string properly for shell execution
+                    # Escape quotes in the message
+                    escaped_msg = cmd[2].replace('"', '\\"') if len(cmd) == 3 else ''
+                    cmd_str = f'{cmd[0]} {cmd[1]} "{escaped_msg}"' if len(cmd) == 3 else ' '.join(cmd)
+                    
+                    # Use Popen for better control
+                    process = subprocess.Popen(
+                        cmd_str,
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                        stdin=subprocess.PIPE,
                         text=True,
-                        timeout=60,
-                        shell=True,  # Enable shell for Windows compatibility
-                        cwd=WORKING_DIR  # Set working directory
+                        shell=True,
+                        cwd=WORKING_DIR
                     )
-                    if result.returncode == 0 and result.stdout.strip():
+                    
+                    # Send empty input and close stdin immediately
+                    try:
+                        stdout, stderr = process.communicate(input='', timeout=30)
+                    except subprocess.TimeoutExpired:
+                        process.kill()
+                        stdout, stderr = process.communicate()
+                        error_messages.append(f"{cmd_str[:50]}: Timeout")
+                        continue
+                    
+                    if process.returncode == 0 and stdout.strip():
+                        result = subprocess.CompletedProcess(
+                            args=cmd_str,
+                            returncode=process.returncode,
+                            stdout=stdout,
+                            stderr=stderr
+                        )
                         break
                     else:
-                        error_messages.append(f"{' '.join(cmd)}: {result.stderr[:100]}")
+                        error_messages.append(f"{cmd_str[:50]}: {stderr[:100]}")
                 except FileNotFoundError as e:
-                    error_messages.append(f"{' '.join(cmd)}: Not found")
+                    error_messages.append(f"{cmd_str[:50]}: Not found")
                     continue
                 except Exception as e:
-                    error_messages.append(f"{' '.join(cmd)}: {str(e)[:100]}")
+                    error_messages.append(f"{cmd_str[:50]}: {str(e)[:100]}")
                     continue
             
             if result is None or result.returncode != 0 or not result.stdout.strip():
@@ -212,6 +246,54 @@ def update_settings():
             'status': 'success',
             'message': 'Settings updated',
             'workingDir': WORKING_DIR
+        })
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
+
+@app.route('/api/system-prompt', methods=['GET'])
+def get_system_prompt():
+    """Get current system prompt"""
+    try:
+        if os.path.exists(SYSTEM_PROMPT_FILE):
+            with open(SYSTEM_PROMPT_FILE, 'r', encoding='utf-8') as f:
+                content = f.read()
+            return jsonify({
+                'status': 'success',
+                'prompt': content,
+                'file': SYSTEM_PROMPT_FILE
+            })
+        else:
+            return jsonify({
+                'status': 'error',
+                'message': 'System prompt file not found'
+            }), 404
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
+
+@app.route('/api/system-prompt', methods=['POST'])
+def update_system_prompt():
+    """Update system prompt"""
+    global SYSTEM_PROMPT
+    try:
+        data = request.json
+        new_prompt = data.get('prompt', '')
+        
+        # Save to file
+        with open(SYSTEM_PROMPT_FILE, 'w', encoding='utf-8') as f:
+            f.write(new_prompt)
+        
+        # Update in memory
+        SYSTEM_PROMPT = new_prompt.strip()
+        
+        return jsonify({
+            'status': 'success',
+            'message': 'System prompt updated'
         })
     except Exception as e:
         return jsonify({
