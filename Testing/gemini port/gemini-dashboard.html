@@ -734,14 +734,12 @@
         }
 
         async function testConnection() {
-            addMessage('system', 'Testing connection to Gemini CLI...');
-            
             try {
                 const response = await fetch('http://localhost:4785/api/test');
                 const data = await response.json();
                 
                 if (data.status === 'success') {
-                    addMessage('system', '✓ ' + data.message + (data.version ? '\nVersion: ' + data.version : ''));
+                    addMessage('system', '✓ ' + data.message);
                     document.getElementById('modelStatus').textContent = 'Connected';
                     document.getElementById('modelStatus').className = 'badge badge-success';
                 } else {
@@ -801,9 +799,8 @@ System Information:
             document.getElementById('maxTokens').textContent = e.target.value;
         });
 
-        // Initial welcome message and connection test
-        addMessage('system', 'Welcome to Gemini CLI Dashboard! Checking connection...');
-        testConnection();
+        // Initial welcome message
+        addMessage('system', 'Welcome to Gemini CLI Terminal! Ready to chat.');
     </script>
 </body>
 </html>

@@ -199,38 +199,40 @@ def reset_stats():
 def test_connection():
     """Test if Gemini CLI is available"""
     try:
-        # Try npm version first
-        commands = [
-            ['gemini', '--version'],
-            ['gemini', '--help'],
-            ['npx', '@google/gemini-cli', '--version'],
-        ]
+        # Test with a simple echo command that should work
+        cmd = ['gemini', '--yolo', 'say "test"']
         
-        for cmd in commands:
-            try:
-                result = subprocess.run(
-                    cmd,
-                    capture_output=True,
-                    text=True,
-                    timeout=5,
-                    shell=True
-                )
-                
-                if result.returncode == 0:
-                    version_info = result.stdout.strip() or result.stderr.strip()
-                    return jsonify({
-                        'status': 'success',
-                        'message': 'Gemini CLI is available',
-                        'version': version_info[:200] if version_info else 'Version info not available',
-                        'command': ' '.join(cmd)
-                    })
-            except:
-                continue
-        
-        return jsonify({
-            'status': 'error',
-            'message': 'Gemini CLI not found. Install with: npm install -g @google/gemini-cli'
-        }), 404
+        try:
+            result = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                timeout=10,
+                shell=True,
+                cwd=WORKING_DIR
+            )
+            
+            if result.returncode == 0:
+                return jsonify({
+                    'status': 'success',
+                    'message': 'Gemini CLI is connected and working',
+                    'version': 'YOLO mode enabled'
+                })
+            else:
+                return jsonify({
+                    'status': 'error',
+                    'message': f'Gemini CLI error: {result.stderr[:200]}'
+                }), 500
+        except subprocess.TimeoutExpired:
+            return jsonify({
+                'status': 'error',
+                'message': 'Connection test timed out'
+            }), 504
+        except FileNotFoundError:
+            return jsonify({
+                'status': 'error',
+                'message': 'Gemini CLI not found. Install with: npm install -g @google/gemini-cli'
+            }), 404
             
     except Exception as e:
         return jsonify({
