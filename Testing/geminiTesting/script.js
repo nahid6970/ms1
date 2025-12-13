@@ -43,4 +43,18 @@ document.addEventListener('DOMContentLoaded', function() {
     const existingMessages = dataStream.querySelectorAll('p');
     existingMessages.forEach(msg => msg.remove());
     setTimeout(typeMessage, 1000);
-});
+
+function add(a, b) {
+    return a + b;
+}
+
+// Test case for add function
+function testAdd() {
+    console.assert(add(2, 3) === 5, "add(2, 3) should return 5");
+    console.assert(add(-1, 1) === 0, "add(-1, 1) should return 0");
+    console.assert(add(0, 0) === 0, "add(0, 0) should return 0");
+    console.log("All add tests passed!");
+}
+
+// Run tests
+testAdd();

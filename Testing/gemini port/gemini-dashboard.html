@@ -439,6 +439,28 @@
             </button>
         </div>
 
+        <div class="grid" id="historyGrid" style="display: none; grid-template-columns: 1fr;">
+            <div class="card">
+                <h2>📜 Chat History</h2>
+                <div id="historyList" style="max-height: 300px; overflow-y: auto;">
+                    <p style="color: #999; text-align: center; padding: 20px;">No history yet</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid" id="actionsGrid" style="display: none; grid-template-columns: 1fr;">
+            <div class="card">
+                <h2>🔧 Quick Actions</h2>
+                <button class="btn btn-primary" onclick="testConnection()" style="width: 100%; margin-bottom: 10px;">Test Connection</button>
+                <button class="btn btn-primary" onclick="showSystemInfo()" style="width: 100%; margin-bottom: 10px;">System Info</button>
+                <button class="btn btn-primary" onclick="resetStats()" style="width: 100%; margin-bottom: 10px;">Reset Statistics</button>
+                <div style="margin-top: 15px; padding: 12px; background: rgba(0, 240, 255, 0.1); border-radius: 6px; border-left: 3px solid var(--accent-cyan);">
+                    <div style="font-size: 0.85em; color: var(--text-secondary); margin-bottom: 5px;">⚡ YOLO MODE ACTIVE</div>
+                    <div style="font-size: 0.8em; color: var(--text-secondary);">Tools auto-approved. Files saved to working directory.</div>
+                </div>
+            </div>
+        </div>
+
         <div class="grid" id="statsGrid" style="display: none;">
             <div class="card">
                 <h2>📊 Token Usage</h2>
@@ -532,28 +554,6 @@
             <div class="input-group">
                 <textarea id="userInput" placeholder="Type your message here... (Shift+Enter for new line, Enter to send)"></textarea>
                 <button class="btn btn-primary" onclick="sendMessage()" id="sendBtn">Send</button>
-            </div>
-        </div>
-
-        <div class="grid" id="historyGrid" style="display: none; grid-template-columns: 1fr;">
-            <div class="card">
-                <h2>📜 Chat History</h2>
-                <div id="historyList" style="max-height: 300px; overflow-y: auto;">
-                    <p style="color: #999; text-align: center; padding: 20px;">No history yet</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="grid" id="actionsGrid" style="display: none; grid-template-columns: 1fr;">
-            <div class="card">
-                <h2>🔧 Quick Actions</h2>
-                <button class="btn btn-primary" onclick="testConnection()" style="width: 100%; margin-bottom: 10px;">Test Connection</button>
-                <button class="btn btn-primary" onclick="showSystemInfo()" style="width: 100%; margin-bottom: 10px;">System Info</button>
-                <button class="btn btn-primary" onclick="resetStats()" style="width: 100%; margin-bottom: 10px;">Reset Statistics</button>
-                <div style="margin-top: 15px; padding: 12px; background: rgba(0, 240, 255, 0.1); border-radius: 6px; border-left: 3px solid var(--accent-cyan);">
-                    <div style="font-size: 0.85em; color: var(--text-secondary); margin-bottom: 5px;">⚡ YOLO MODE ACTIVE</div>
-                    <div style="font-size: 0.8em; color: var(--text-secondary);">Tools auto-approved. Files saved to working directory.</div>
-                </div>
             </div>
         </div>
     </div>
