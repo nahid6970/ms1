@@ -195,6 +195,30 @@ def reset_stats():
     session_data['response_times'] = []
     return jsonify({'status': 'success'})
 
+@app.route('/api/settings', methods=['POST'])
+def update_settings():
+    """Update server settings"""
+    global WORKING_DIR
+    try:
+        data = request.json
+        new_working_dir = data.get('workingDir')
+        
+        if new_working_dir:
+            # Update working directory
+            WORKING_DIR = new_working_dir
+            os.makedirs(WORKING_DIR, exist_ok=True)
+            
+        return jsonify({
+            'status': 'success',
+            'message': 'Settings updated',
+            'workingDir': WORKING_DIR
+        })
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
+
 @app.route('/api/test', methods=['GET'])
 def test_connection():
     """Test if Gemini CLI is available"""

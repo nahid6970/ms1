@@ -427,16 +427,62 @@
 </head>
 <body>
     <div class="container">
-        <div style="margin-bottom: 20px; display: flex; gap: 12px; flex-wrap: wrap;">
-            <button class="btn btn-secondary" onclick="toggleStats()" id="statsToggle">
-                Show Statistics ▼
+        <div style="margin-bottom: 20px; display: flex; gap: 12px; flex-wrap: wrap; justify-content: space-between; align-items: center;">
+            <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                <button class="btn btn-secondary" onclick="toggleStats()" id="statsToggle">
+                    Show Statistics ▼
+                </button>
+                <button class="btn btn-secondary" onclick="toggleHistory()" id="historyToggle">
+                    Show History ▼
+                </button>
+                <button class="btn btn-secondary" onclick="toggleActions()" id="actionsToggle">
+                    Show Quick Actions ▼
+                </button>
+            </div>
+            <button class="btn btn-secondary" onclick="openSettings()" style="padding: 14px 20px;">
+                ⚙️ Settings
             </button>
-            <button class="btn btn-secondary" onclick="toggleHistory()" id="historyToggle">
-                Show History ▼
-            </button>
-            <button class="btn btn-secondary" onclick="toggleActions()" id="actionsToggle">
-                Show Quick Actions ▼
-            </button>
+        </div>
+
+        <!-- Settings Modal -->
+        <div id="settingsModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.8); z-index: 1000; align-items: center; justify-content: center;">
+            <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 12px; padding: 30px; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto;">
+                <h2 style="color: var(--text-primary); margin-bottom: 25px; font-size: 1.5em; display: flex; align-items: center; gap: 10px;">
+                    <span style="color: var(--accent-cyan);">⚙️</span> Settings
+                </h2>
+                
+                <div style="margin-bottom: 25px;">
+                    <label style="display: block; color: var(--text-secondary); margin-bottom: 8px; font-size: 0.9em; text-transform: uppercase; letter-spacing: 0.5px;">Working Directory</label>
+                    <input type="text" id="workingDirInput" style="width: 100%; padding: 12px; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); font-family: 'JetBrains Mono', monospace; font-size: 0.9em;" placeholder="C:\path\to\directory">
+                    <small style="color: var(--text-secondary); display: block; margin-top: 6px; font-size: 0.85em;">Files created by Gemini will be saved here</small>
+                </div>
+
+                <div style="margin-bottom: 25px;">
+                    <label style="display: block; color: var(--text-secondary); margin-bottom: 8px; font-size: 0.9em; text-transform: uppercase; letter-spacing: 0.5px;">Default Model</label>
+                    <select id="defaultModelInput" style="width: 100%; padding: 12px; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); font-family: 'JetBrains Mono', monospace; font-size: 0.9em;">
+                        <option value="gemini-pro">Gemini Pro</option>
+                        <option value="gemini-pro-vision">Gemini Pro Vision</option>
+                        <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+                        <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+                    </select>
+                </div>
+
+                <div style="margin-bottom: 25px;">
+                    <label style="display: block; color: var(--text-secondary); margin-bottom: 8px; font-size: 0.9em; text-transform: uppercase; letter-spacing: 0.5px;">Default Temperature</label>
+                    <input type="number" id="defaultTempInput" step="0.1" min="0" max="2" style="width: 100%; padding: 12px; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); font-family: 'JetBrains Mono', monospace; font-size: 0.9em;" placeholder="0.7">
+                    <small style="color: var(--text-secondary); display: block; margin-top: 6px; font-size: 0.85em;">Higher = more creative, Lower = more focused (0-2)</small>
+                </div>
+
+                <div style="margin-bottom: 25px;">
+                    <label style="display: block; color: var(--text-secondary); margin-bottom: 8px; font-size: 0.9em; text-transform: uppercase; letter-spacing: 0.5px;">Default Max Tokens</label>
+                    <input type="number" id="defaultMaxTokensInput" step="100" min="100" max="8192" style="width: 100%; padding: 12px; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); font-family: 'JetBrains Mono', monospace; font-size: 0.9em;" placeholder="2048">
+                </div>
+
+                <div style="display: flex; gap: 12px; margin-top: 30px;">
+                    <button class="btn btn-primary" onclick="saveSettings()" style="flex: 1;">Save Settings</button>
+                    <button class="btn btn-secondary" onclick="closeSettings()" style="flex: 1;">Cancel</button>
+                </div>
+            </div>
         </div>
 
         <div class="grid" id="historyGrid" style="display: none; grid-template-columns: 1fr;">
@@ -847,7 +893,90 @@ System Information:
             }
         }
 
-        // Initial welcome message
+        function openSettings() {
+            // Load current settings
+            const settings = JSON.parse(localStorage.getItem('geminiSettings') || '{}');
+            
+            document.getElementById('workingDirInput').value = settings.workingDir || 'C:\\Users\\nahid\\ms\\ms1\\Testing\\geminiTesting';
+            document.getElementById('defaultModelInput').value = settings.defaultModel || 'gemini-pro';
+            document.getElementById('defaultTempInput').value = settings.defaultTemp || '0.7';
+            document.getElementById('defaultMaxTokensInput').value = settings.defaultMaxTokens || '2048';
+            
+            document.getElementById('settingsModal').style.display = 'flex';
+        }
+
+        function closeSettings() {
+            document.getElementById('settingsModal').style.display = 'none';
+        }
+
+        async function saveSettings() {
+            const settings = {
+                workingDir: document.getElementById('workingDirInput').value,
+                defaultModel: document.getElementById('defaultModelInput').value,
+                defaultTemp: document.getElementById('defaultTempInput').value,
+                defaultMaxTokens: document.getElementById('defaultMaxTokensInput').value
+            };
+            
+            // Save to localStorage
+            localStorage.setItem('geminiSettings', JSON.stringify(settings));
+            
+            // Update server with new working directory
+            try {
+                const response = await fetch('http://localhost:4785/api/settings', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(settings)
+                });
+                
+                if (response.ok) {
+                    addMessage('system', '✓ Settings saved successfully!');
+                    
+                    // Apply settings to UI
+                    document.getElementById('modelSelect').value = settings.defaultModel;
+                    document.getElementById('tempInput').value = settings.defaultTemp;
+                    document.getElementById('maxTokensInput').value = settings.defaultMaxTokens;
+                    document.getElementById('currentModel').textContent = settings.defaultModel;
+                    document.getElementById('temperature').textContent = settings.defaultTemp;
+                    document.getElementById('maxTokens').textContent = settings.defaultMaxTokens;
+                    
+                    closeSettings();
+                } else {
+                    addMessage('system', '✗ Failed to save settings to server');
+                }
+            } catch (error) {
+                addMessage('system', '✗ Error saving settings: ' + error.message);
+            }
+        }
+
+        // Load settings on startup
+        function loadSettings() {
+            const settings = JSON.parse(localStorage.getItem('geminiSettings') || '{}');
+            
+            if (settings.defaultModel) {
+                document.getElementById('modelSelect').value = settings.defaultModel;
+                document.getElementById('currentModel').textContent = settings.defaultModel;
+            }
+            if (settings.defaultTemp) {
+                document.getElementById('tempInput').value = settings.defaultTemp;
+                document.getElementById('temperature').textContent = settings.defaultTemp;
+            }
+            if (settings.defaultMaxTokens) {
+                document.getElementById('maxTokensInput').value = settings.defaultMaxTokens;
+                document.getElementById('maxTokens').textContent = settings.defaultMaxTokens;
+            }
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('settingsModal')?.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeSettings();
+            }
+        });
+
+        // Load settings and show welcome message
+        loadSettings();
         addMessage('system', 'Welcome to Gemini CLI Terminal! Ready to chat.');
     </script>
 </body>
