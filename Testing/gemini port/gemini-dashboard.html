@@ -427,9 +427,15 @@
 </head>
 <body>
     <div class="container">
-        <div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+        <div style="margin-bottom: 20px; display: flex; gap: 12px; flex-wrap: wrap;">
             <button class="btn btn-secondary" onclick="toggleStats()" id="statsToggle">
                 Show Statistics ▼
+            </button>
+            <button class="btn btn-secondary" onclick="toggleHistory()" id="historyToggle">
+                Show History ▼
+            </button>
+            <button class="btn btn-secondary" onclick="toggleActions()" id="actionsToggle">
+                Show Quick Actions ▼
             </button>
         </div>
 
@@ -529,14 +535,16 @@
             </div>
         </div>
 
-        <div class="grid">
+        <div class="grid" id="historyGrid" style="display: none; grid-template-columns: 1fr;">
             <div class="card">
                 <h2>📜 Chat History</h2>
                 <div id="historyList" style="max-height: 300px; overflow-y: auto;">
                     <p style="color: #999; text-align: center; padding: 20px;">No history yet</p>
                 </div>
             </div>
+        </div>
 
+        <div class="grid" id="actionsGrid" style="display: none; grid-template-columns: 1fr;">
             <div class="card">
                 <h2>🔧 Quick Actions</h2>
                 <button class="btn btn-primary" onclick="testConnection()" style="width: 100%; margin-bottom: 10px;">Test Connection</button>
@@ -810,6 +818,32 @@ System Information:
             } else {
                 statsGrid.style.display = 'none';
                 toggleBtn.textContent = 'Show Statistics ▼';
+            }
+        }
+
+        function toggleHistory() {
+            const historyGrid = document.getElementById('historyGrid');
+            const toggleBtn = document.getElementById('historyToggle');
+            
+            if (historyGrid.style.display === 'none') {
+                historyGrid.style.display = 'grid';
+                toggleBtn.textContent = 'Hide History ▲';
+            } else {
+                historyGrid.style.display = 'none';
+                toggleBtn.textContent = 'Show History ▼';
+            }
+        }
+
+        function toggleActions() {
+            const actionsGrid = document.getElementById('actionsGrid');
+            const toggleBtn = document.getElementById('actionsToggle');
+            
+            if (actionsGrid.style.display === 'none') {
+                actionsGrid.style.display = 'grid';
+                toggleBtn.textContent = 'Hide Quick Actions ▲';
+            } else {
+                actionsGrid.style.display = 'none';
+                toggleBtn.textContent = 'Show Quick Actions ▼';
             }
         }
 
