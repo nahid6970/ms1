@@ -4,10 +4,15 @@ import subprocess
 import json
 import time
 import re
+import os
 from datetime import datetime
 
 app = Flask(__name__)
 CORS(app)
+
+# Set working directory for Gemini CLI
+WORKING_DIR = r"C:\Users\nahid\ms\ms1\Testing\geminiTesting"
+os.makedirs(WORKING_DIR, exist_ok=True)
 
 # Store session data
 session_data = {
@@ -27,10 +32,13 @@ def parse_gemini_output(output):
     lines = output.strip().split('\n')
     response_text = []
     tokens_info = {}
+    skip_patterns = [
+        '[STARTUP]', 'Loaded cached', 'Recording metric', 'StartupProfiler'
+    ]
     
     for line in lines:
-        # Skip startup profiler and debug lines
-        if any(skip in line for skip in ['[STARTUP]', 'Loaded cached', 'Recording metric', 'StartupProfiler']):
+        # Skip only startup profiler and debug lines
+        if any(skip in line for skip in skip_patterns):
             continue
         
         # Look for token usage patterns
@@ -47,7 +55,10 @@ def parse_gemini_output(output):
             if line.strip():
                 response_text.append(line.strip())
     
-    return '\n'.join(response_text).strip(), tokens_info
+    # Clean up response
+    cleaned = '\n'.join(response_text).strip()
+    
+    return cleaned, tokens_info
 
 @app.route('/')
 def index():
@@ -75,14 +86,13 @@ def chat():
         
         try:
             # Try different CLI command formats
-            # For npm @google/gemini-cli
+            # For npm @google/gemini-cli with YOLO mode (auto-approve tools)
             commands = [
-                ['gemini', message],  # npm global install
-                ['npx', '@google/gemini-cli', message],  # npx version
-                ['node_modules/.bin/gemini', message],  # local install
-                ['gemini', 'chat', message],  # alternative format
-                ['gemini-cli', '--prompt', message],  # Python version
-                ['python', '-m', 'gemini', message],  # Python module
+                ['gemini', '--yolo', message],  # npm with auto-approve
+                ['gemini', '--approval-mode', 'yolo', message],  # explicit approval mode
+                ['gemini', message],  # npm global install (fallback)
+                ['npx', '@google/gemini-cli', '--yolo', message],  # npx version
+                ['node_modules/.bin/gemini', '--yolo', message],  # local install
             ]
             
             result = None
@@ -95,7 +105,8 @@ def chat():
                         capture_output=True,
                         text=True,
                         timeout=60,
-                        shell=True  # Enable shell for Windows compatibility
+                        shell=True,  # Enable shell for Windows compatibility
+                        cwd=WORKING_DIR  # Set working directory
                     )
                     if result.returncode == 0 and result.stdout.strip():
                         break

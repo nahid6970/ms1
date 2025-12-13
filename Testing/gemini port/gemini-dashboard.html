@@ -474,6 +474,10 @@
                     <span class="stat-label">Max Tokens:</span>
                     <span class="stat-value" id="maxTokens">2048</span>
                 </div>
+                <div class="stat">
+                    <span class="stat-label">Working Dir:</span>
+                    <span class="stat-value" style="font-size: 0.75em; word-break: break-all;">C:\Users\nahid\ms\ms1\Testing\geminiTesting</span>
+                </div>
             </div>
 
             <div class="card">
@@ -536,7 +540,11 @@
                 <h2>🔧 Quick Actions</h2>
                 <button class="btn btn-primary" onclick="testConnection()" style="width: 100%; margin-bottom: 10px;">Test Connection</button>
                 <button class="btn btn-primary" onclick="showSystemInfo()" style="width: 100%; margin-bottom: 10px;">System Info</button>
-                <button class="btn btn-primary" onclick="resetStats()" style="width: 100%;">Reset Statistics</button>
+                <button class="btn btn-primary" onclick="resetStats()" style="width: 100%; margin-bottom: 10px;">Reset Statistics</button>
+                <div style="margin-top: 15px; padding: 12px; background: rgba(0, 240, 255, 0.1); border-radius: 6px; border-left: 3px solid var(--accent-cyan);">
+                    <div style="font-size: 0.85em; color: var(--text-secondary); margin-bottom: 5px;">⚡ YOLO MODE ACTIVE</div>
+                    <div style="font-size: 0.8em; color: var(--text-secondary);">Tools auto-approved. Files saved to working directory.</div>
+                </div>
             </div>
         </div>
     </div>
