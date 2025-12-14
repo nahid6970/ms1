@@ -1811,11 +1811,21 @@ def generate_static_html(data, custom_syntaxes):
 
             // Colored horizontal separator with optional background/text color for content below
             // Pattern: [COLOR1]-----[COLOR2] or [COLOR1]-----[COLOR2-COLOR3] or -----#HEX-#HEX
-            formatted = formatted.replace(/^([A-Z]+)?-{5,}((?:[A-Z]+(?:-[A-Z]+)?)|(?:#[0-9a-fA-F]{6}(?:-#[0-9a-fA-F]{6})?))?$/gm, function(match, prefixColor, suffixColor) {
+            formatted = formatted.replace(/^([A-Z]+)?-{5,}((?:[A-Z]+(?:-[A-Z]+)?)|(?:#[0-9a-fA-F]{3,6}(?:-#[0-9a-fA-F]{3,6})?))?$/gm, function(match, prefixColor, suffixColor) {
                 const colorMap = {
                     'R': '#ff0000', 'G': '#00ff00', 'B': '#0000ff', 'Y': '#ffff00',
                     'O': '#ff8800', 'P': '#ff00ff', 'C': '#00ffff', 'W': '#ffffff',
                     'K': '#000000', 'GR': '#808080'
+                };
+                
+                // Helper to expand 3-digit hex to 6-digit
+                var expandHex = function(hex) {
+                    if (!hex || hex.indexOf('#') !== 0) return hex;
+                    var color = hex.substring(1);
+                    if (color.length === 3) {
+                        return '#' + color[0] + color[0] + color[1] + color[1] + color[2] + color[2];
+                    }
+                    return hex;
                 };
                 
                 let separatorStyle = 'width: 100%; height: 4px; background: #ccc; margin: 6px 0; padding: 0; display: block; border: none; line-height: 0; font-size: 0;';
@@ -1831,10 +1841,10 @@ def generate_static_html(data, custom_syntaxes):
                     let textColor = '';
                     
                     if (suffixColor.indexOf('#') === 0) {
-                        // Hex color format: #RRGGBB or #RRGGBB-#RRGGBB
+                        // Hex color format: #RRGGBB or #RGB or #RRGGBB-#RRGGBB or #RGB-#RGB
                         const hexParts = suffixColor.split('-');
-                        bgColor = hexParts[0];
-                        textColor = hexParts[1] || '';
+                        bgColor = expandHex(hexParts[0]);
+                        textColor = hexParts[1] ? expandHex(hexParts[1]) : '';
                     } else if (suffixColor.indexOf('-') !== -1) {
                         // Color code with text color: R-W, G-K, etc.
                         const parts = suffixColor.split('-');
@@ -2050,11 +2060,21 @@ def generate_static_html(data, custom_syntaxes):
 
                 // Colored horizontal separator with optional background/text color for content below
                 // Pattern: [COLOR1]-----[COLOR2] or [COLOR1]-----[COLOR2-COLOR3] or -----#HEX-#HEX
-                formatted = formatted.replace(/^([A-Z]+)?-{5,}((?:[A-Z]+(?:-[A-Z]+)?)|(?:#[0-9a-fA-F]{6}(?:-#[0-9a-fA-F]{6})?))?$/gm, function(match, prefixColor, suffixColor) {
+                formatted = formatted.replace(/^([A-Z]+)?-{5,}((?:[A-Z]+(?:-[A-Z]+)?)|(?:#[0-9a-fA-F]{3,6}(?:-#[0-9a-fA-F]{3,6})?))?$/gm, function(match, prefixColor, suffixColor) {
                     const colorMap = {
                         'R': '#ff0000', 'G': '#00ff00', 'B': '#0000ff', 'Y': '#ffff00',
                         'O': '#ff8800', 'P': '#ff00ff', 'C': '#00ffff', 'W': '#ffffff',
                         'K': '#000000', 'GR': '#808080'
+                    };
+                    
+                    // Helper to expand 3-digit hex to 6-digit
+                    var expandHex = function(hex) {
+                        if (!hex || hex.indexOf('#') !== 0) return hex;
+                        var color = hex.substring(1);
+                        if (color.length === 3) {
+                            return '#' + color[0] + color[0] + color[1] + color[1] + color[2] + color[2];
+                        }
+                        return hex;
                     };
                     
                     let separatorStyle = 'width: 100%; height: 4px; background: #ccc; margin: 6px 0; padding: 0; display: block; border: none; line-height: 0; font-size: 0;';
@@ -2070,10 +2090,10 @@ def generate_static_html(data, custom_syntaxes):
                         let textColor = '';
                         
                         if (suffixColor.indexOf('#') === 0) {
-                            // Hex color format: #RRGGBB or #RRGGBB-#RRGGBB
+                            // Hex color format: #RRGGBB or #RGB or #RRGGBB-#RRGGBB or #RGB-#RGB
                             const hexParts = suffixColor.split('-');
-                            bgColor = hexParts[0];
-                            textColor = hexParts[1] || '';
+                            bgColor = expandHex(hexParts[0]);
+                            textColor = hexParts[1] ? expandHex(hexParts[1]) : '';
                         } else if (suffixColor.indexOf('-') !== -1) {
                             // Color code with text color: R-W, G-K, etc.
                             const parts = suffixColor.split('-');

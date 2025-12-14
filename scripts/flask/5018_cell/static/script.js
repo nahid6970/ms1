@@ -1434,12 +1434,22 @@ function parseMarkdownInline(text) {
     // Pattern: [COLOR1]-----[COLOR2] or [COLOR1]-----[COLOR2-COLOR3] or -----#HEX-#HEX
     // Examples: R----- (red line), -----G (green bg), R-----G (red line + green bg)
     //           R-----K (red line + black bg), -----R-W (red bg + white text)
-    //           -----#ff0000-#000000 (bg #ff0000, text #000000), G-----#514522-#000000
-    formatted = formatted.replace(/^([A-Z]+)?-{5,}((?:[A-Z]+(?:-[A-Z]+)?)|(?:#[0-9a-fA-F]{6}(?:-#[0-9a-fA-F]{6})?))?$/gm, (match, prefixColor, suffixColor) => {
+    //           -----#ff0000-#000000 (6-digit hex), -----#f00-#000 (3-digit hex)
+    formatted = formatted.replace(/^([A-Z]+)?-{5,}((?:[A-Z]+(?:-[A-Z]+)?)|(?:#[0-9a-fA-F]{3,6}(?:-#[0-9a-fA-F]{3,6})?))?$/gm, (match, prefixColor, suffixColor) => {
         const colorMap = {
             'R': '#ff0000', 'G': '#00ff00', 'B': '#0000ff', 'Y': '#ffff00',
             'O': '#ff8800', 'P': '#ff00ff', 'C': '#00ffff', 'W': '#ffffff',
             'K': '#000000', 'GR': '#808080'
+        };
+        
+        // Helper to expand 3-digit hex to 6-digit
+        const expandHex = (hex) => {
+            if (!hex || !hex.startsWith('#')) return hex;
+            const color = hex.substring(1);
+            if (color.length === 3) {
+                return '#' + color[0] + color[0] + color[1] + color[1] + color[2] + color[2];
+            }
+            return hex;
         };
         
         let separatorStyle = '';
@@ -1455,10 +1465,10 @@ function parseMarkdownInline(text) {
             let textColor = '';
             
             if (suffixColor.startsWith('#')) {
-                // Hex color format: #RRGGBB or #RRGGBB-#RRGGBB
+                // Hex color format: #RRGGBB or #RGB or #RRGGBB-#RRGGBB or #RGB-#RGB
                 const hexParts = suffixColor.split('-');
-                bgColor = hexParts[0];
-                textColor = hexParts[1] || '';
+                bgColor = expandHex(hexParts[0]);
+                textColor = hexParts[1] ? expandHex(hexParts[1]) : '';
             } else if (suffixColor.includes('-')) {
                 // Color code with text color: R-W, G-K, etc.
                 const [bgCode, textCode] = suffixColor.split('-');
@@ -1768,11 +1778,21 @@ function oldParseMarkdownBody(lines) {
 
         // Colored horizontal separator with optional background/text color for content below
         // Pattern: [COLOR1]-----[COLOR2] or [COLOR1]-----[COLOR2-COLOR3] or -----#HEX-#HEX
-        formatted = formatted.replace(/^([A-Z]+)?-{5,}((?:[A-Z]+(?:-[A-Z]+)?)|(?:#[0-9a-fA-F]{6}(?:-#[0-9a-fA-F]{6})?))?$/gm, (match, prefixColor, suffixColor) => {
+        formatted = formatted.replace(/^([A-Z]+)?-{5,}((?:[A-Z]+(?:-[A-Z]+)?)|(?:#[0-9a-fA-F]{3,6}(?:-#[0-9a-fA-F]{3,6})?))?$/gm, (match, prefixColor, suffixColor) => {
             const colorMap = {
                 'R': '#ff0000', 'G': '#00ff00', 'B': '#0000ff', 'Y': '#ffff00',
                 'O': '#ff8800', 'P': '#ff00ff', 'C': '#00ffff', 'W': '#ffffff',
                 'K': '#000000', 'GR': '#808080'
+            };
+            
+            // Helper to expand 3-digit hex to 6-digit
+            const expandHex = (hex) => {
+                if (!hex || !hex.startsWith('#')) return hex;
+                const color = hex.substring(1);
+                if (color.length === 3) {
+                    return '#' + color[0] + color[0] + color[1] + color[1] + color[2] + color[2];
+                }
+                return hex;
             };
             
             let separatorStyle = '';
@@ -1788,10 +1808,10 @@ function oldParseMarkdownBody(lines) {
                 let textColor = '';
                 
                 if (suffixColor.startsWith('#')) {
-                    // Hex color format: #RRGGBB or #RRGGBB-#RRGGBB
+                    // Hex color format: #RRGGBB or #RGB or #RRGGBB-#RRGGBB or #RGB-#RGB
                     const hexParts = suffixColor.split('-');
-                    bgColor = hexParts[0];
-                    textColor = hexParts[1] || '';
+                    bgColor = expandHex(hexParts[0]);
+                    textColor = hexParts[1] ? expandHex(hexParts[1]) : '';
                 } else if (suffixColor.includes('-')) {
                     // Color code with text color: R-W, G-K, etc.
                     const [bgCode, textCode] = suffixColor.split('-');
@@ -5751,8 +5771,8 @@ function stripMarkdown(text) {
     // Remove wavy underline markers: _.text._ -> text
     stripped = stripped.replace(/_\.(.+?)\._/g, '$1');
 
-    // Remove colored horizontal separator: R-----, -----G, R-----G, R-----K, -----R-W, -----#ff0000, etc. -> (empty)
-    stripped = stripped.replace(/^[A-Z]*-{5,}(?:[A-Z]+(?:-[A-Z]+)?|#[0-9a-fA-F]{6}(?:-#[0-9a-fA-F]{6})?)?$/gm, '');
+    // Remove colored horizontal separator: R-----, -----G, R-----G, R-----K, -----R-W, -----#ff0000, -----#f00, etc. -> (empty)
+    stripped = stripped.replace(/^[A-Z]*-{5,}(?:[A-Z]+(?:-[A-Z]+)?|#[0-9a-fA-F]{3,6}(?:-#[0-9a-fA-F]{3,6})?)?$/gm, '');
 
     // Remove code block markers: ```text``` -> text
     stripped = stripped.replace(/```(.+?)```/gs, '$1');
