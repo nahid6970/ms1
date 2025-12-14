@@ -1431,10 +1431,11 @@ function parseMarkdownInline(text) {
     formatted = formatted.replace(/_\.(.+?)\._/g, '<span style="text-decoration: underline wavy;">$1</span>');
 
     // Colored horizontal separator with optional background/text color for content below
-    // Pattern: [COLOR1]-----[COLOR2/HEX] where COLOR1 = separator line color, COLOR2 = bg/text color
+    // Pattern: [COLOR1]-----[COLOR2] or [COLOR1]-----[COLOR2-COLOR3] or -----#HEX-#HEX
     // Examples: R----- (red line), -----G (green bg), R-----G (red line + green bg)
+    //           R-----K (red line + black bg), -----R-W (red bg + white text)
     //           -----#ff0000-#000000 (bg #ff0000, text #000000), G-----#514522-#000000
-    formatted = formatted.replace(/^([A-Z]+)?-{5,}((?:[A-Z]+)|(?:#[0-9a-fA-F]{6}(?:-#[0-9a-fA-F]{6})?))?$/gm, (match, prefixColor, suffixColor) => {
+    formatted = formatted.replace(/^([A-Z]+)?-{5,}((?:[A-Z]+(?:-[A-Z]+)?)|(?:#[0-9a-fA-F]{6}(?:-#[0-9a-fA-F]{6})?))?$/gm, (match, prefixColor, suffixColor) => {
         const colorMap = {
             'R': '#ff0000', 'G': '#00ff00', 'B': '#0000ff', 'Y': '#ffff00',
             'O': '#ff8800', 'P': '#ff00ff', 'C': '#00ffff', 'W': '#ffffff',
@@ -1458,8 +1459,13 @@ function parseMarkdownInline(text) {
                 const hexParts = suffixColor.split('-');
                 bgColor = hexParts[0];
                 textColor = hexParts[1] || '';
+            } else if (suffixColor.includes('-')) {
+                // Color code with text color: R-W, G-K, etc.
+                const [bgCode, textCode] = suffixColor.split('-');
+                bgColor = colorMap[bgCode] || '';
+                textColor = colorMap[textCode] || '';
             } else if (colorMap[suffixColor]) {
-                // Color code format: R, G, B, etc.
+                // Single color code format: R, G, B, etc.
                 bgColor = colorMap[suffixColor];
             }
             
@@ -1761,8 +1767,8 @@ function oldParseMarkdownBody(lines) {
         formatted = formatted.replace(/_\.(.+?)\._/g, '<span style="text-decoration: underline wavy;">$1</span>');
 
         // Colored horizontal separator with optional background/text color for content below
-        // Pattern: [COLOR1]-----[COLOR2/HEX] where COLOR1 = separator line color, COLOR2 = bg/text color
-        formatted = formatted.replace(/^([A-Z]+)?-{5,}((?:[A-Z]+)|(?:#[0-9a-fA-F]{6}(?:-#[0-9a-fA-F]{6})?))?$/gm, (match, prefixColor, suffixColor) => {
+        // Pattern: [COLOR1]-----[COLOR2] or [COLOR1]-----[COLOR2-COLOR3] or -----#HEX-#HEX
+        formatted = formatted.replace(/^([A-Z]+)?-{5,}((?:[A-Z]+(?:-[A-Z]+)?)|(?:#[0-9a-fA-F]{6}(?:-#[0-9a-fA-F]{6})?))?$/gm, (match, prefixColor, suffixColor) => {
             const colorMap = {
                 'R': '#ff0000', 'G': '#00ff00', 'B': '#0000ff', 'Y': '#ffff00',
                 'O': '#ff8800', 'P': '#ff00ff', 'C': '#00ffff', 'W': '#ffffff',
@@ -1786,8 +1792,13 @@ function oldParseMarkdownBody(lines) {
                     const hexParts = suffixColor.split('-');
                     bgColor = hexParts[0];
                     textColor = hexParts[1] || '';
+                } else if (suffixColor.includes('-')) {
+                    // Color code with text color: R-W, G-K, etc.
+                    const [bgCode, textCode] = suffixColor.split('-');
+                    bgColor = colorMap[bgCode] || '';
+                    textColor = colorMap[textCode] || '';
                 } else if (colorMap[suffixColor]) {
-                    // Color code format: R, G, B, etc.
+                    // Single color code format: R, G, B, etc.
                     bgColor = colorMap[suffixColor];
                 }
                 
@@ -5740,8 +5751,8 @@ function stripMarkdown(text) {
     // Remove wavy underline markers: _.text._ -> text
     stripped = stripped.replace(/_\.(.+?)\._/g, '$1');
 
-    // Remove colored horizontal separator: R-----, -----G, R-----G, -----#ff0000, etc. -> (empty)
-    stripped = stripped.replace(/^[A-Z]*-{5,}(?:[A-Z]+|#[0-9a-fA-F]{6}(?:-#[0-9a-fA-F]{6})?)?$/gm, '');
+    // Remove colored horizontal separator: R-----, -----G, R-----G, R-----K, -----R-W, -----#ff0000, etc. -> (empty)
+    stripped = stripped.replace(/^[A-Z]*-{5,}(?:[A-Z]+(?:-[A-Z]+)?|#[0-9a-fA-F]{6}(?:-#[0-9a-fA-F]{6})?)?$/gm, '');
 
     // Remove code block markers: ```text``` -> text
     stripped = stripped.replace(/```(.+?)```/gs, '$1');
