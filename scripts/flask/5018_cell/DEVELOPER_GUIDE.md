@@ -512,24 +512,39 @@ This ensures users can easily find the clear button at the end of all formatting
 
 **Examples:**
 - `-----R` → Normal separator + RED background for content below
+- `-----R-W` → Normal separator + RED background with WHITE text (NEW!)
 - `R-----` → RED separator line (no background change)
 - `R-----G` → Red separator line + GREEN background for content below
+- `R-----K-W` → Red separator + BLACK background with WHITE text (NEW!)
 - `-----#514522` → Normal separator + custom hex background
+- `-----#f00` → Normal separator + red background (3-digit hex, NEW!)
 - `-----#514522-#000000` → Custom hex background + black text
+- `-----#f00-#fff` → Red background + white text (3-digit hex, NEW!)
 - `G-----#514522-#ffffff` → Green separator + custom bg/text colors
 - `-----` → Ends background color section (returns to normal)
 
 **Color Codes:** R (red), G (green), B (blue), Y (yellow), O (orange), P (purple), C (cyan), W (white), K (black), GR (gray)
 
-**Hex Colors:** Use 6-digit hex format `#RRGGBB` for custom colors, optionally add `-#RRGGBB` for text color
+**Hex Colors:** 
+- 6-digit: `#RRGGBB` (e.g., `#ff0000`)
+- 3-digit: `#RGB` (e.g., `#f00` = `#ff0000`) - NEW!
+- With text color: `#RRGGBB-#RRGGBB` or `#RGB-#RGB`
+
+**Color Code Combinations:** NEW!
+- `R-W` = Red background with white text
+- `G-K` = Green background with black text
+- `B-Y` = Blue background with yellow text
 
 **Implementation:**
-- **Parsing:** Regex `/^([A-Z]+)?-{5,}((?:[A-Z]+)|(?:#[0-9a-fA-F]{6}(?:-#[0-9a-fA-F]{6})?))?$/gm` captures:
+- **Parsing:** Regex `/^([A-Z]+)?-{5,}((?:[A-Z]+(?:-[A-Z]+)?)|(?:#[0-9a-fA-F]{3,6}(?:-#[0-9a-fA-F]{3,6})?))?$/gm` captures:
   - Optional prefix color (separator line): `[A-Z]+`
-  - Optional suffix: color code OR hex color(s) in format `#RRGGBB` or `#RRGGBB-#RRGGBB`
+  - Optional suffix: color code(s) OR hex color(s)
+  - Color code format: `R`, `G`, `B` OR `R-W`, `G-K` (bg-text)
+  - Hex format: `#RGB` or `#RRGGBB` or `#RGB-#RGB` or `#RRGGBB-#RRGGBB`
+  - 3-digit hex auto-expanded: `#f00` → `#ff0000`
 - **Post-processing:** Wraps content after colored separator in `<div>` with background and optional text color until another separator is encountered
-- **Detection:** Added patterns to `checkHasMarkdown()`: color codes + hex patterns `/^-{5,}#[0-9a-fA-F]{6}/m`, `/^[A-Z]+-{5,}#[0-9a-fA-F]{6}/m`
-- **Stripping:** Unified regex `/^[A-Z]*-{5,}(?:[A-Z]+|#[0-9a-fA-F]{6}(?:-#[0-9a-fA-F]{6})?)?$/gm` removes all separator variations
+- **Detection:** Added patterns to `checkHasMarkdown()`: color codes + hex patterns `/^-{5,}#[0-9a-fA-F]{3,6}/m`, `/^[A-Z]+-{5,}#[0-9a-fA-F]{3,6}/m`
+- **Stripping:** Unified regex `/^[A-Z]*-{5,}(?:[A-Z]+(?:-[A-Z]+)?|#[0-9a-fA-F]{3,6}(?:-#[0-9a-fA-F]{3,6})?)?$/gm` removes all separator variations
 - **Styling:** Background wrapper has `padding: 2px 6px; margin: 0;` + optional `color` for text
 - **Spacing:** No newlines added after separator or wrapper div to prevent gaps
 - **Static Export:** Full support in `export_static.py` with same logic
@@ -542,6 +557,7 @@ This ensures users can easily find the clear button at the end of all formatting
 
 **Key Functions:**
 - `parseMarkdownInline()` and `oldParseMarkdownBody()` - Parse separator with colors
+- `expandHex()` helper - Expands 3-digit hex to 6-digit (inline in replace callback)
 - Post-processing loop - Wraps content in background divs
 - `reduce()` function - Skips newlines after separator and wrapper to prevent gaps
 
