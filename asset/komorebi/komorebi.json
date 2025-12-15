@@ -258,6 +258,11 @@
             "kind": "Title",
             "id": "Character Map UWP",
             "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Exe",
+            "id": "Photos.exe",
+            "matching_strategy": "Legacy"
         }
     ],
     "tray_and_multi_window_applications": [
