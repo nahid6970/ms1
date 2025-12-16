@@ -958,6 +958,119 @@ function checkHasMarkdown(value) {
     );
 }
 
+
+function handlePreviewClick(e) {
+    // Only handle left clicks
+    if (e.button !== 0) return;
+
+    // Don't interfere with links or check boxes inside the preview
+    if (e.target.tagName === 'A' || e.target.tagName === 'INPUT') return;
+
+    // Stop propagation so the cell click handler doesn't override us immediately
+    e.stopPropagation();
+
+    // We prevent default to handle focus manually
+    // This effectively stops the "click through" behavior because we are handling it
+    // But since pointer-events is auto, the element beneath (input) won't get the click event
+    // So we MUST handle focus transfer here.
+
+    const preview = e.currentTarget;
+    const cell = preview.closest('td');
+    if (!cell) return;
+
+    const input = cell.querySelector('input, textarea');
+    if (!input) return;
+
+    // 1. Get Click Position in the Preview
+    let range;
+    if (document.caretRangeFromPoint) {
+        range = document.caretRangeFromPoint(e.clientX, e.clientY);
+    } else if (document.caretPositionFromPoint) {
+        // Firefox fallback
+        const pos = document.caretPositionFromPoint(e.clientX, e.clientY);
+        if (pos) {
+            range = document.createRange();
+            range.setStart(pos.offsetNode, pos.offset);
+        }
+    }
+
+    // If we couldn't determine range, just focus normally
+    if (!range) {
+        input.focus();
+        return;
+    }
+
+    const clickedNode = range.startContainer;
+    const clickOffset = range.startOffset;
+
+    // If clicked on an element boundary or non-text, just focus
+    if (clickedNode.nodeType !== Node.TEXT_NODE) {
+        input.focus();
+        return;
+    }
+
+    const searchPhrase = clickedNode.textContent;
+    const rawText = input.value; // formatted value
+
+    // 2. Count occurrences of this phrase before the click in Preview
+    let found = false;
+    let count = 0;
+
+    function countOccurrencesBefore(node) {
+        if (node === clickedNode) {
+            found = true;
+            return;
+        }
+
+        if (node.nodeType === Node.TEXT_NODE) {
+            const text = node.textContent;
+            // We need to count disjoint occurrences of searchPhrase
+            let pos = text.indexOf(searchPhrase);
+            while (pos !== -1) {
+                count++;
+                pos = text.indexOf(searchPhrase, pos + 1);
+            }
+        }
+
+        if (node.childNodes) {
+            for (let i = 0; i < node.childNodes.length; i++) {
+                if (found) return;
+                countOccurrencesBefore(node.childNodes[i]);
+            }
+        }
+    }
+
+    countOccurrencesBefore(preview);
+
+    // 3. Find the (count + 1)th instance in Raw Text
+    let rawSearchPos = -1;
+    for (let i = 0; i <= count; i++) {
+        rawSearchPos = rawText.indexOf(searchPhrase, rawSearchPos + 1);
+        if (rawSearchPos === -1) break;
+    }
+
+    // 4. Calculate final position
+    let finalPos = rawText.length; // Default to end
+    if (rawSearchPos !== -1) {
+        finalPos = rawSearchPos + clickOffset;
+    }
+
+    // 5. Apply focus and selection
+    input.focus();
+
+    // Use requestAnimationFrame to ensure focus behavior completes before setting range
+    requestAnimationFrame(() => {
+        try {
+            input.setSelectionRange(finalPos, finalPos);
+        } catch (e) {
+            console.error('Selection set failed', e);
+        }
+    });
+
+    // Also trigger update to ensure styles for edit mode are applied
+    // (Focus should already do this via CSS :focus-within)
+}
+
 function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null) {
     let cell;
 
@@ -1000,6 +1113,7 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
         // Create preview overlay
         const preview = document.createElement('div');
         preview.className = 'markdown-preview';
+        preview.onclick = handlePreviewClick; // Handle clicks to position cursor
         preview.innerHTML = formattedHTML;
         preview.style.whiteSpace = 'pre-wrap'; // Preserve newlines and spaces
 
@@ -1016,7 +1130,7 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
 
         cell.style.position = 'relative';
         cell.appendChild(preview);
-        
+
         // Draw word connectors after preview is added
         requestAnimationFrame(() => {
             drawWordConnectors(preview);
@@ -1033,10 +1147,10 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
  */
 function drawWordConnectors(previewElement) {
     if (!previewElement) return;
-    
+
     // Remove existing connector lines
     previewElement.querySelectorAll('.word-connector-line').forEach(el => el.remove());
-    
+
     // Group connectors by ID
     const connectorGroups = {};
     previewElement.querySelectorAll('.word-connector').forEach(connector => {
@@ -1046,34 +1160,34 @@ function drawWordConnectors(previewElement) {
         }
         connectorGroups[connId].push(connector);
     });
-    
+
     // Draw lines for each group
     Object.entries(connectorGroups).forEach(([connId, connectors]) => {
         if (connectors.length < 2) return; // Need at least 2 words to connect
-        
+
         // Sort by position in document
         connectors.sort((a, b) => {
             const rectA = a.getBoundingClientRect();
             const rectB = b.getBoundingClientRect();
             return rectA.left - rectB.left;
         });
-        
+
         const color = connectors[0].dataset.connColor;
-        
+
         // Connect consecutive pairs
         for (let i = 0; i < connectors.length - 1; i++) {
             const start = connectors[i];
             const end = connectors[i + 1];
-            
+
             const startRect = start.getBoundingClientRect();
             const endRect = end.getBoundingClientRect();
             const containerRect = previewElement.getBoundingClientRect();
-            
+
             // Calculate positions relative to container
             const startX = startRect.left - containerRect.left + startRect.width / 2;
             const endX = endRect.left - containerRect.left + endRect.width / 2;
             const y = startRect.bottom - containerRect.top + 2;
-            
+
             // Create SVG line with extra space for arrows
             const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
             svg.classList.add('word-connector-line');
@@ -1083,19 +1197,19 @@ function drawWordConnectors(previewElement) {
             svg.style.height = '12px';
             svg.style.position = 'absolute';
             svg.style.overflow = 'visible';
-            
+
             // Draw U-shaped bracket line with arrows: ↑─────↑
             const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
             const width = Math.abs(endX - startX);
             // Draw U-shape with arrow tips at top of both verticals (offset by 3 for padding)
-            const d = `M 3,9 L 3,2 M 3,9 L ${width+3},9 M ${width+3},9 L ${width+3},2 M 1.5,4 L 3,2 L 4.5,4 M ${width+1.5},4 L ${width+3},2 L ${width+4.5},4`;
+            const d = `M 3,9 L 3,2 M 3,9 L ${width + 3},9 M ${width + 3},9 L ${width + 3},2 M 1.5,4 L 3,2 L 4.5,4 M ${width + 1.5},4 L ${width + 3},2 L ${width + 4.5},4`;
             path.setAttribute('d', d);
             path.setAttribute('stroke', color);
             path.setAttribute('stroke-width', '2');
             path.setAttribute('fill', 'none');
             path.setAttribute('stroke-linecap', 'round');
             path.setAttribute('stroke-linejoin', 'round');
-            
+
             svg.appendChild(path);
             previewElement.appendChild(svg);
         }
@@ -1187,9 +1301,9 @@ function parseGridTable(lines) {
     const cols = rows[0].length;
 
     // Check if first row is a header separator (e.g., |---|---|)
-    const hasHeaderSeparator = rows.length > 1 && 
+    const hasHeaderSeparator = rows.length > 1 &&
         rows[1].every(cell => /^-+$/.test(cell.trim()));
-    
+
     // If header separator exists, skip it from rendering
     const dataRows = hasHeaderSeparator ? [rows[0], ...rows.slice(2)] : rows;
     const hasHeader = hasHeaderSeparator;
@@ -1220,7 +1334,7 @@ function parseGridTable(lines) {
                         columnColors[colIndex] = colorMap[colorCode];
                         borderColor = colorMap[colorCode];
                         content = rest;
-                        
+
                         // Check if content also has alignment markers
                         if (content.startsWith(':') && content.endsWith(':') && content.length > 2) {
                             align = 'center';
@@ -1241,7 +1355,7 @@ function parseGridTable(lines) {
                     if (colorMap[colorCode]) {
                         borderColor = colorMap[colorCode];
                         content = rest;
-                        
+
                         // Check if content also has alignment markers
                         if (content.startsWith(':') && content.endsWith(':') && content.length > 2) {
                             align = 'center';
@@ -1335,7 +1449,7 @@ function parseGridTable(lines) {
                 styles.push(`grid-row: span ${rowspan}`);
             }
             const styleAttr = styles.length > 0 ? ` style="${styles.join('; ')}"` : '';
-            
+
             // Check if cell content is only "-" (empty cell marker)
             const isEmpty = cell.content.trim() === '-';
             const emptyClass = isEmpty ? ' md-empty' : '';
@@ -1441,7 +1555,7 @@ function parseMarkdownInline(text) {
             'O': '#ff8800', 'P': '#ff00ff', 'C': '#00ffff', 'W': '#ffffff',
             'K': '#000000', 'GR': '#808080'
         };
-        
+
         // Helper to expand 3-digit hex to 6-digit
         const expandHex = (hex) => {
             if (!hex || !hex.startsWith('#')) return hex;
@@ -1451,19 +1565,19 @@ function parseMarkdownInline(text) {
             }
             return hex;
         };
-        
+
         let separatorStyle = '';
         if (prefixColor && colorMap[prefixColor]) {
             separatorStyle = ` style="background: ${colorMap[prefixColor]} !important;"`;
         }
-        
+
         let result = `<div class="md-separator"${separatorStyle}></div>`;
-        
+
         // Parse suffix color (can be color code or hex with optional text color)
         if (suffixColor) {
             let bgColor = '';
             let textColor = '';
-            
+
             if (suffixColor.startsWith('#')) {
                 // Hex color format: #RRGGBB or #RGB or #RRGGBB-#RRGGBB or #RGB-#RGB
                 const hexParts = suffixColor.split('-');
@@ -1478,12 +1592,12 @@ function parseMarkdownInline(text) {
                 // Single color code format: R, G, B, etc.
                 bgColor = colorMap[suffixColor];
             }
-            
+
             if (bgColor) {
                 result += `<div class="md-bg-section" data-bg-color="${bgColor}" data-text-color="${textColor}">`;
             }
         }
-        
+
         return result;
     });
 
@@ -1784,7 +1898,7 @@ function oldParseMarkdownBody(lines) {
                 'O': '#ff8800', 'P': '#ff00ff', 'C': '#00ffff', 'W': '#ffffff',
                 'K': '#000000', 'GR': '#808080'
             };
-            
+
             // Helper to expand 3-digit hex to 6-digit
             const expandHex = (hex) => {
                 if (!hex || !hex.startsWith('#')) return hex;
@@ -1794,19 +1908,19 @@ function oldParseMarkdownBody(lines) {
                 }
                 return hex;
             };
-            
+
             let separatorStyle = '';
             if (prefixColor && colorMap[prefixColor]) {
                 separatorStyle = ` style="background: ${colorMap[prefixColor]} !important;"`;
             }
-            
+
             let result = `<div class="md-separator"${separatorStyle}></div>`;
-            
+
             // Parse suffix color (can be color code or hex with optional text color)
             if (suffixColor) {
                 let bgColor = '';
                 let textColor = '';
-                
+
                 if (suffixColor.startsWith('#')) {
                     // Hex color format: #RRGGBB or #RGB or #RRGGBB-#RRGGBB or #RGB-#RGB
                     const hexParts = suffixColor.split('-');
@@ -1821,12 +1935,12 @@ function oldParseMarkdownBody(lines) {
                     // Single color code format: R, G, B, etc.
                     bgColor = colorMap[suffixColor];
                 }
-                
+
                 if (bgColor) {
                     result += `<div class="md-bg-section" data-bg-color="${bgColor}" data-text-color="${textColor}">`;
                 }
             }
-            
+
             return result;
         });
 
@@ -1963,18 +2077,18 @@ function oldParseMarkdownBody(lines) {
     let inBgSection = false;
     let bgColor = '';
     let textColor = '';
-    
+
     for (let i = 0; i < formattedLines.length; i++) {
         const line = formattedLines[i];
         const isTimelineStart = line.includes('class="md-timeline"');
-        const isListItem = line.trim().startsWith('<span style="display: inline-flex') && 
-                           (line.includes('•') || line.includes('◦') || line.includes('▪'));
+        const isListItem = line.trim().startsWith('<span style="display: inline-flex') &&
+            (line.includes('•') || line.includes('◦') || line.includes('▪'));
         const isEmpty = line.trim() === '';
-        
+
         // Check for background section markers (now with optional text color)
         const bgSectionMatch = line.match(/<div class="md-bg-section" data-bg-color="([^"]+)" data-text-color="([^"]*)">/);
         const isSeparator = line.includes('class="md-separator"');
-        
+
         // If line has both separator and bg-section marker, handle both
         if (isSeparator && bgSectionMatch) {
             if (inBgSection) {
@@ -1992,7 +2106,7 @@ function oldParseMarkdownBody(lines) {
             inBgSection = true;
             continue;
         }
-        
+
         // If we hit a separator without bg marker and we're in a background section, close it
         if (isSeparator && inBgSection) {
             processedLines.push('</div>');
@@ -2001,13 +2115,13 @@ function oldParseMarkdownBody(lines) {
             processedLines.push(line);
             continue;
         }
-        
+
         // If we hit a separator and not in bg section, just push it
         if (isSeparator) {
             processedLines.push(line);
             continue;
         }
-        
+
         if (isTimelineStart) {
             processedLines.push(line);
             inTimeline = true;
@@ -2024,12 +2138,12 @@ function oldParseMarkdownBody(lines) {
             processedLines.push(line);
         }
     }
-    
+
     // Close timeline at end if still open
     if (inTimeline) {
         processedLines.push('</div></div>');
     }
-    
+
     // Close background section at end if still open
     if (inBgSection) {
         processedLines.push('</div>');
@@ -2041,11 +2155,11 @@ function oldParseMarkdownBody(lines) {
         // Check for separator to avoid double line breaks (newline + block element break)
         const isSeparator = line.includes('class="md-separator"');
         const prevIsSeparator = prev.includes('class="md-separator"');
-        
+
         // Check for background section wrapper
         const isBgWrapper = line.includes('background-color:') && line.trim().startsWith('<div style=');
         const prevIsBgWrapper = prev.includes('background-color:') && prev.trim().startsWith('<div style=');
-        
+
         // Don't add newline after timeline opening or before timeline closing
         const isTimelineStart = prev.includes('class="md-timeline"');
         const isTimelineEnd = line === '</div></div>';
@@ -2749,7 +2863,7 @@ function trackCellColorUsage(bg, fg) {
 
     // Find if this color combination already exists
     const existingIndex = cellColorHistory.findIndex(item =>
-        item.bg.toLowerCase() === bgHex.toLowerCase() && 
+        item.bg.toLowerCase() === bgHex.toLowerCase() &&
         item.fg.toLowerCase() === fgHex.toLowerCase()
     );
 
@@ -3483,7 +3597,7 @@ function setCellRank() {
 
     // Prompt for rank (number or empty to remove)
     const rankInput = prompt('Set sort rank (number, or leave empty to remove):', currentRank);
-    
+
     if (rankInput === null) {
         closeCellContextMenu();
         return; // User cancelled
@@ -3790,7 +3904,7 @@ function switchSheet(index) {
             localStorage.setItem('sheetScrollPositions', JSON.stringify(scrollPositions));
         }
     }
-    
+
     // Track sheet history for Alt+M toggle and F2 recent sheets
     if (currentSheet !== index) {
         // Remove the index if it already exists in history
@@ -3816,12 +3930,12 @@ function switchSheet(index) {
     renderSidebar();
     renderTable();
     autoSaveActiveSheet();
-    
+
     // Apply font size scale after rendering
     setTimeout(() => {
         applyFontSizeScale();
     }, 0);
-    
+
     // Restore scroll position after rendering
     setTimeout(() => {
         const tableContainer = document.querySelector('.table-container');
@@ -4146,7 +4260,7 @@ let moveToCategorySheetIndex = null;
 
 function showMoveToCategoryModal(sheetIndex) {
     moveToCategorySheetIndex = sheetIndex; // Store the sheet index
-    
+
     const select = document.getElementById('targetCategory');
     select.innerHTML = '<option value="">Uncategorized</option>';
 
@@ -5749,7 +5863,7 @@ function stripMarkdown(text) {
 
     // Remove colored underline markers: _R_text__ -> text
     stripped = stripped.replace(/_[A-Z]+_(.+?)__/g, '$1');
-    
+
     // Remove underline markers: __text__ -> text
     stripped = stripped.replace(/__(.+?)__/g, '$1');
 
@@ -5758,7 +5872,7 @@ function stripMarkdown(text) {
 
     // Remove variable font size heading markers: #2#text#/# -> text
     stripped = stripped.replace(/#[\d.]+#(.+?)#\/#/g, '$1');
-    
+
     // Remove border box markers: #R#text#/# -> text
     stripped = stripped.replace(/#[A-Z]+#(.+?)#\/#/g, '$1');
 
@@ -6089,11 +6203,11 @@ function filterF2Sheets() {
     const searchInput = document.getElementById('f2SearchInput');
     const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
     const items = document.querySelectorAll('.f2-sheet-item');
-    
+
     items.forEach(item => {
         const sheetName = item.querySelector('.f2-sheet-name');
         const name = sheetName ? sheetName.textContent.toLowerCase() : '';
-        
+
         if (name.includes(searchTerm)) {
             item.style.display = 'flex';
         } else {
@@ -6164,7 +6278,7 @@ function populateF2RecentSheets() {
 
         const name = document.createElement('div');
         name.className = 'f2-sheet-name';
-        
+
         // Show sub-sheets with parent name: "Subsheet [Parent]"
         if (sheet.parentSheet !== undefined && sheet.parentSheet !== null) {
             const parentSheet = tableData.sheets[sheet.parentSheet];
@@ -6602,7 +6716,7 @@ function formatPipeTable(event) {
     try {
         // Split into lines
         const lines = selectedText.trim().split('\n');
-        
+
         // Parse each line into columns (split by |, remove leading/trailing pipes)
         const rows = lines.map(line => {
             // Remove leading/trailing whitespace and pipes
@@ -6614,7 +6728,7 @@ function formatPipeTable(event) {
         // Calculate max width for each column (excluding separator rows)
         const colCount = Math.max(...rows.map(r => r.length));
         const colWidths = [];
-        
+
         for (let col = 0; col < colCount; col++) {
             let maxWidth = 0;
             for (let row of rows) {
@@ -6632,16 +6746,16 @@ function formatPipeTable(event) {
         const formatted = rows.map((row, rowIndex) => {
             const cells = row.map((cell, colIndex) => {
                 const width = colWidths[colIndex] || 0;
-                
+
                 // Check if it's a separator row (all dashes)
                 if (/^-+$/.test(cell)) {
                     return '-'.repeat(width);
                 }
-                
+
                 // Pad cell to column width
                 return cell.padEnd(width, ' ');
             });
-            
+
             // Join with pipes and add leading/trailing pipes
             return '| ' + cells.join(' | ') + ' |';
         });
@@ -6772,19 +6886,19 @@ function applyHatFormat(event) {
     // Pattern 2: Complex fraction with parentheses: (a+b)/(c+d)
     // Pattern 3: Multiple operations: a*b/c or a/b*c
     // Pattern 4: Nested: 5555/(1550+10)/150
-    
+
     let fracSyntax;
-    
+
     // Check if it's a simple fraction pattern (no * outside parentheses)
     if (selectedText.includes('/')) {
         // Try to intelligently parse the fraction
         // Replace * with \cdot for multiplication in LaTeX
         let processed = selectedText;
-        
+
         // Find the main division (last / that's not inside parentheses)
         let depth = 0;
         let mainDivIndex = -1;
-        
+
         for (let i = selectedText.length - 1; i >= 0; i--) {
             if (selectedText[i] === ')') depth++;
             else if (selectedText[i] === '(') depth--;
@@ -6793,16 +6907,16 @@ function applyHatFormat(event) {
                 break;
             }
         }
-        
+
         if (mainDivIndex !== -1) {
             // Split at the main division
             let numerator = selectedText.substring(0, mainDivIndex).trim();
             let denominator = selectedText.substring(mainDivIndex + 1).trim();
-            
+
             // Replace * with \times (cross sign) in both parts
             numerator = numerator.replace(/\*/g, '\\times ');
             denominator = denominator.replace(/\*/g, '\\times ');
-            
+
             fracSyntax = `\\(\\frac{${numerator}}{${denominator}}\\)`;
         } else {
             // No division found, just wrap it
@@ -6887,9 +7001,9 @@ function showColorPicker(event) {
     const colorSection = document.getElementById('colorPickerSection');
     const formatter = document.getElementById('quickFormatter');
     const isShowing = colorSection.style.display === 'none';
-    
+
     colorSection.style.display = isShowing ? 'block' : 'none';
-    
+
     // Add/remove class to shift formatter left
     if (isShowing) {
         formatter.classList.add('with-color-picker');
@@ -8004,11 +8118,11 @@ function populateF1Categories() {
         <span class="f1-category-name">Uncategorized</span>
         <span class="f1-category-count">${uncategorizedSheets.length}</span>
     `;
-    
+
     uncategorizedItem.addEventListener('click', (e) => {
         selectF1Category(null);
     });
-    
+
     categoryList.appendChild(uncategorizedItem);
 
     // Add other categories
@@ -8025,19 +8139,19 @@ function populateF1Categories() {
             <span class="f1-category-name">${category}</span>
             <span class="f1-category-count">${categorySheets.length}</span>
         `;
-        
+
         // Add click handler
         item.addEventListener('click', (e) => {
             selectF1Category(category);
         });
-        
+
         // Add right-click context menu for categories
         item.addEventListener('contextmenu', (e) => {
             e.preventDefault();
             e.stopPropagation();
             showF1CategoryContextMenu(e, category);
         });
-        
+
         categoryList.appendChild(item);
     });
 }
@@ -8045,7 +8159,7 @@ function populateF1Categories() {
 // F1 Category Context Menu
 function showF1CategoryContextMenu(event, categoryName) {
     const menu = document.getElementById('f1CategoryContextMenu');
-    
+
     menu.innerHTML = `
         <div class="context-menu-item" onclick="showAddCategoryModal(); hideF1CategoryContextMenu();">
             <span>➕</span>
@@ -8061,13 +8175,13 @@ function showF1CategoryContextMenu(event, categoryName) {
             <span>Delete</span>
         </div>
     `;
-    
+
     menu.classList.add('show');
     menu.style.position = 'fixed';
     menu.style.left = event.clientX + 'px';
     menu.style.top = event.clientY + 'px';
     menu.style.zIndex = '10000';
-    
+
     // Close menu when clicking outside
     setTimeout(() => {
         document.addEventListener('click', hideF1CategoryContextMenu);
@@ -8096,7 +8210,7 @@ async function deleteF1Category(categoryName) {
 function showF1SheetContextMenu(event, sheetIndex, isSubSheet) {
     const menu = document.getElementById('f1SheetContextMenu');
     const sheet = tableData.sheets[sheetIndex];
-    
+
     if (isSubSheet) {
         // Sub-sheet menu: Rename, Delete
         menu.innerHTML = `
@@ -8128,13 +8242,13 @@ function showF1SheetContextMenu(event, sheetIndex, isSubSheet) {
             </div>
         `;
     }
-    
+
     menu.classList.add('show');
     menu.style.position = 'fixed';
     menu.style.left = event.clientX + 'px';
     menu.style.top = event.clientY + 'px';
     menu.style.zIndex = '10000';
-    
+
     // Close menu when clicking outside
     setTimeout(() => {
         document.addEventListener('click', hideF1SheetContextMenu);
@@ -8391,7 +8505,7 @@ function populateF1Sheets(searchAllCategories = false) {
         item.addEventListener('dragover', handleF1DragOver);
         item.addEventListener('drop', handleF1Drop);
         item.addEventListener('dragend', handleF1DragEnd);
-        
+
         // Add right-click context menu for parent sheets
         item.addEventListener('contextmenu', (e) => {
             e.preventDefault();
@@ -8424,7 +8538,7 @@ function populateF1Sheets(searchAllCategories = false) {
             subItem.addEventListener('click', (e) => {
                 switchToSheetFromF1(subIndex);
             });
-            
+
             // Add right-click context menu for sub-sheets
             subItem.addEventListener('contextmenu', (e) => {
                 e.preventDefault();
@@ -8612,7 +8726,7 @@ let f1SearchMode = localStorage.getItem('f1SearchMode') || '';
 function toggleF1SearchMode() {
     const modeIcon = document.getElementById('f1SearchModeIcon');
     const toggle = document.getElementById('f1SearchModeToggle');
-    
+
     // Cycle through modes: '' -> '*' -> '#' -> ''
     if (f1SearchMode === '') {
         f1SearchMode = '*';
@@ -8630,10 +8744,10 @@ function toggleF1SearchMode() {
         toggle.style.color = '';
         toggle.title = 'Normal search';
     }
-    
+
     // Save to localStorage
     localStorage.setItem('f1SearchMode', f1SearchMode);
-    
+
     // Re-filter with new mode
     filterF1Sheets();
 }
@@ -8641,7 +8755,7 @@ function toggleF1SearchMode() {
 function filterF1Sheets() {
     const searchInput = document.getElementById('f1SearchInput');
     let searchTerm = searchInput ? searchInput.value.trim() : '';
-    
+
     // Prepend the search mode prefix if mode is active
     if (f1SearchMode && searchTerm) {
         searchTerm = f1SearchMode + searchTerm;
@@ -9291,9 +9405,9 @@ function showColorPicker(event) {
     const colorSection = document.getElementById('colorPickerSection');
     const formatter = document.getElementById('quickFormatter');
     const isShowing = colorSection.style.display === 'none';
-    
+
     colorSection.style.display = isShowing ? 'block' : 'none';
-    
+
     // Add/remove class to shift formatter left
     if (isShowing) {
         formatter.classList.add('with-color-picker');
@@ -10072,15 +10186,15 @@ async function loadCustomColorSyntaxes() {
 function renderCustomSyntaxButtons() {
     const colorPickerBtn = document.getElementById('customColorPickerBtn');
     if (!colorPickerBtn) return;
-    
+
     // Remove any existing custom syntax buttons
     const existingButtons = document.querySelectorAll('.format-btn.custom-syntax-btn');
     existingButtons.forEach(btn => btn.remove());
-    
+
     // Insert custom syntax buttons before the color picker button
     customColorSyntaxes.forEach((syntax) => {
         if (!syntax.marker) return;
-        
+
         const button = document.createElement('button');
         button.className = 'format-btn custom-syntax-btn';
         button.onclick = (event) => applyQuickFormat(syntax.marker, syntax.marker, event);
@@ -10091,7 +10205,7 @@ function renderCustomSyntaxButtons() {
         button.style.fontSize = '12px';
         button.style.fontWeight = '600';
         button.textContent = syntax.marker;
-        
+
         // Insert before the color picker button
         colorPickerBtn.parentNode.insertBefore(button, colorPickerBtn);
     });
@@ -10112,18 +10226,18 @@ async function saveCustomColorSyntaxes() {
 function renderCustomColorSyntaxList() {
     const list = document.getElementById('customColorSyntaxList');
     if (!list) return;
-    
+
     list.innerHTML = '';
-    
+
     if (customColorSyntaxes.length === 0) {
         list.innerHTML = '<p style="color: #6c757d; font-size: 13px; text-align: center; padding: 20px;">No custom syntaxes added yet. Click "Add Custom Syntax" to create one.</p>';
         return;
     }
-    
+
     customColorSyntaxes.forEach((syntax, index) => {
         const item = document.createElement('div');
         item.className = 'custom-syntax-item';
-        
+
         item.innerHTML = `
             <div class="custom-syntax-input-group">
                 <input type="text" value="${syntax.marker}" 
@@ -10150,10 +10264,10 @@ function renderCustomColorSyntaxList() {
                 🗑️
             </button>
         `;
-        
+
         list.appendChild(item);
     });
-    
+
     // Also update the Quick Highlights section in F3 formatter
     renderCustomSyntaxButtons();
 }
@@ -10191,25 +10305,25 @@ function removeCustomSyntax(index) {
 
 function showCustomSyntaxColorPicker(index, field, event) {
     event.stopPropagation();
-    
+
     let selectedBgColor = customColorSyntaxes[index].bgColor || '#ffffff';
     let selectedFgColor = customColorSyntaxes[index].fgColor || '#000000';
     let currentColorType = field === 'bgColor' ? 'background' : 'text';
-    
+
     // Create overlay
     const overlay = document.createElement('div');
     overlay.className = 'color-picker-overlay';
     overlay.id = 'customSyntaxColorPickerOverlay';
-    
+
     // Create popup
     const popup = document.createElement('div');
     popup.className = 'color-picker-popup';
     popup.id = 'customSyntaxColorPickerPopup';
-    
+
     const title = document.createElement('h3');
     title.textContent = `Custom Syntax Colors`;
     popup.appendChild(title);
-    
+
     // Radio buttons for BG/FG selection
     const radioContainer = document.createElement('div');
     radioContainer.className = 'color-type-selector';
@@ -10217,25 +10331,25 @@ function showCustomSyntaxColorPicker(index, field, event) {
     radioContainer.style.gap = '15px';
     radioContainer.style.marginBottom = '15px';
     radioContainer.style.justifyContent = 'center';
-    
+
     const bgRadioLabel = document.createElement('label');
     bgRadioLabel.style.display = 'flex';
     bgRadioLabel.style.alignItems = 'center';
     bgRadioLabel.style.gap = '5px';
     bgRadioLabel.style.cursor = 'pointer';
     bgRadioLabel.innerHTML = `<input type="radio" name="syntaxColorType" value="background" ${currentColorType === 'background' ? 'checked' : ''}> Background`;
-    
+
     const fgRadioLabel = document.createElement('label');
     fgRadioLabel.style.display = 'flex';
     fgRadioLabel.style.alignItems = 'center';
     fgRadioLabel.style.gap = '5px';
     fgRadioLabel.style.cursor = 'pointer';
     fgRadioLabel.innerHTML = `<input type="radio" name="syntaxColorType" value="text" ${currentColorType === 'text' ? 'checked' : ''}> Text`;
-    
+
     radioContainer.appendChild(bgRadioLabel);
     radioContainer.appendChild(fgRadioLabel);
     popup.appendChild(radioContainer);
-    
+
     // Preview area
     const previewContainer = document.createElement('div');
     previewContainer.className = 'color-preview';
@@ -10251,22 +10365,22 @@ function showCustomSyntaxColorPicker(index, field, event) {
     previewContainer.textContent = `${customColorSyntaxes[index].marker}text${customColorSyntaxes[index].marker}`;
     previewContainer.id = 'syntaxColorPreviewArea';
     popup.appendChild(previewContainer);
-    
+
     // Transparent checkbox
     const transparentContainer = document.createElement('div');
     transparentContainer.style.marginBottom = '15px';
     transparentContainer.style.textAlign = 'center';
-    
+
     const transparentLabel = document.createElement('label');
     transparentLabel.style.display = 'inline-flex';
     transparentLabel.style.alignItems = 'center';
     transparentLabel.style.gap = '8px';
     transparentLabel.style.cursor = 'pointer';
     transparentLabel.innerHTML = '<input type="checkbox" id="syntaxTransparentCheck"> Transparent';
-    
+
     transparentContainer.appendChild(transparentLabel);
     popup.appendChild(transparentContainer);
-    
+
     // Preset colors (exact same as cell color picker)
     const presetColors = [
         '#FFFFFF', '#F8F9FA', '#E9ECEF', '#DEE2E6', '#CED4DA', '#ADB5BD', '#6C757D', '#495057', '#343A40', '#212529',
@@ -10280,10 +10394,10 @@ function showCustomSyntaxColorPicker(index, field, event) {
         '#F0E5FF', '#D9B3FF', '#C280FF', '#AB4DFF', '#941AFF', '#7A00E6', '#5F00B3', '#440080', '#29004D', '#0F001A',
         '#FFE5F9', '#FFB3EF', '#FF80E5', '#FF4DDB', '#FF1AD1', '#E600BC', '#B30093', '#80006A', '#4D0040', '#1A0017'
     ];
-    
+
     const colorGrid = document.createElement('div');
     colorGrid.className = 'color-picker-grid';
-    
+
     presetColors.forEach(color => {
         const colorSwatch = document.createElement('div');
         colorSwatch.className = 'color-swatch';
@@ -10292,27 +10406,27 @@ function showCustomSyntaxColorPicker(index, field, event) {
         colorSwatch.onclick = () => {
             const bgRadio = popup.querySelector('input[name="syntaxColorType"][value="background"]');
             const transparentCheck = popup.querySelector('#syntaxTransparentCheck');
-            
+
             if (bgRadio && bgRadio.checked) {
                 selectedBgColor = color;
                 transparentCheck.checked = false;
             } else {
                 selectedFgColor = color;
             }
-            
+
             updatePreview();
         };
         colorGrid.appendChild(colorSwatch);
     });
-    
+
     popup.appendChild(colorGrid);
-    
+
     // Update preview function
     function updatePreview() {
         const preview = popup.querySelector('#syntaxColorPreviewArea');
         const transparentCheck = popup.querySelector('#syntaxTransparentCheck');
         const bgRadio = popup.querySelector('input[name="syntaxColorType"][value="background"]');
-        
+
         if (bgRadio && bgRadio.checked && transparentCheck && transparentCheck.checked) {
             preview.style.backgroundColor = 'transparent';
             preview.style.backgroundImage = 'linear-gradient(45deg, #ccc 25%, transparent 25%, transparent 75%, #ccc 75%, #ccc), linear-gradient(45deg, #ccc 25%, white 25%, white 75%, #ccc 75%, #ccc)';
@@ -10324,11 +10438,11 @@ function showCustomSyntaxColorPicker(index, field, event) {
         }
         preview.style.color = selectedFgColor;
     }
-    
+
     // Radio change listeners
     bgRadioLabel.querySelector('input').addEventListener('change', updatePreview);
     fgRadioLabel.querySelector('input').addEventListener('change', updatePreview);
-    
+
     // Transparent checkbox listener
     transparentLabel.querySelector('input').addEventListener('change', (e) => {
         if (e.target.checked) {
@@ -10338,13 +10452,13 @@ function showCustomSyntaxColorPicker(index, field, event) {
         }
         updatePreview();
     });
-    
+
     // Set initial transparent state
     if (selectedBgColor === 'transparent') {
         transparentLabel.querySelector('input').checked = true;
         updatePreview();
     }
-    
+
     // OK button
     const okBtn = document.createElement('button');
     okBtn.className = 'btn btn-primary';
@@ -10357,14 +10471,14 @@ function showCustomSyntaxColorPicker(index, field, event) {
         document.body.removeChild(overlay);
     };
     popup.appendChild(okBtn);
-    
+
     // Close on overlay click
     overlay.onclick = (e) => {
         if (e.target === overlay) {
             document.body.removeChild(overlay);
         }
     };
-    
+
     // Append popup inside overlay, then overlay to body
     overlay.appendChild(popup);
     document.body.appendChild(overlay);
@@ -10373,24 +10487,24 @@ function showCustomSyntaxColorPicker(index, field, event) {
 // Apply custom color syntaxes in parsing
 function applyCustomColorSyntaxes(text) {
     let formatted = text;
-    
+
     customColorSyntaxes.forEach(syntax => {
         if (!syntax.marker) return;
-        
+
         // Escape special regex characters
         const escapedMarker = syntax.marker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         const regex = new RegExp(`${escapedMarker}(.+?)${escapedMarker}`, 'g');
-        
+
         formatted = formatted.replace(regex, (match, content) => {
             return `<span style="background: ${syntax.bgColor}; color: ${syntax.fgColor}; padding: 1px 4px; border-radius: 3px; display: inline; vertical-align: baseline; line-height: 1.3; box-decoration-break: clone; -webkit-box-decoration-break: clone;">${content}</span>`;
         });
     });
-    
+
     return formatted;
 }
 
 // Initialize on page load
-(async function() {
+(async function () {
     await loadCustomColorSyntaxes();
     // Render custom syntax buttons in F3 formatter
     renderCustomSyntaxButtons();
@@ -10407,12 +10521,12 @@ function openSettings() {
     const modal = document.getElementById('settingsModal');
     if (modal) {
         modal.style.display = 'block';
-        
+
         // Load current grid line color
         const currentColor = getGridLineColor();
         document.getElementById('gridLineColor').value = currentColor;
         document.getElementById('gridLineColorText').value = currentColor.substring(1).toUpperCase();
-        
+
         renderCustomColorSyntaxList();
     }
 }
@@ -10451,10 +10565,10 @@ function closeMarkdownGuide() {
 }
 
 // Close modals when clicking outside
-window.onclick = function(event) {
+window.onclick = function (event) {
     const settingsModal = document.getElementById('settingsModal');
     const markdownModal = document.getElementById('markdownGuideModal');
-    
+
     if (event.target === settingsModal) {
         closeSettingsModal();
     }
@@ -10480,9 +10594,9 @@ function applyVariableFontSize(event) {
 
     // Prompt for font size
     const size = prompt('Enter font size multiplier (e.g., 2 for 2x, 1.5 for 1.5x, 0.8 for smaller):', '2');
-    
+
     if (size === null) return; // User cancelled
-    
+
     const sizeNum = parseFloat(size);
     if (isNaN(sizeNum) || sizeNum <= 0) {
         showToast('Invalid size. Please enter a positive number.', 'error');
@@ -10527,12 +10641,12 @@ function applyBorderBox(event) {
     // Prompt for color
     const colorOptions = 'R (Red), G (Green), B (Blue), Y (Yellow), O (Orange), P (Purple), C (Cyan), W (White), K (Black), GR (Gray)';
     const color = prompt(`Enter border color:\n${colorOptions}`, 'R');
-    
+
     if (color === null) return; // User cancelled
-    
+
     const colorUpper = color.trim().toUpperCase();
     const validColors = ['R', 'G', 'B', 'Y', 'O', 'P', 'C', 'W', 'K', 'GR'];
-    
+
     if (!validColors.includes(colorUpper)) {
         showToast('Invalid color. Use: R, G, B, Y, O, P, C, W, K, or GR', 'error');
         return;

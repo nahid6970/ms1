@@ -1,0 +1,160 @@
+function handlePreviewClick(e) {
+    // Only handle left clicks
+    if (e.button !== 0) return;
+
+    // Don't interfere with links or check boxes inside the preview
+    if (e.target.tagName === 'A' || e.target.tagName === 'INPUT') return;
+
+    // Stop propagation so the cell click handler (which might just set focus loosely) doesn't override us immediately
+    // although capturing phase might be issue? No, bubbling.
+    e.stopPropagation();
+    
+    // We prevent default to handle focus manually
+    // e.preventDefault(); // actually, don't prevent default, as that might stop some useful browser behaviors?
+    // But we want to prevent the browser from putting the cursor in the input at a WRONG location.
+    
+    const preview = e.currentTarget;
+    const cell = preview.closest('td');
+    if (!cell) return;
+    
+    const input = cell.querySelector('input, textarea');
+    if (!input) return;
+
+    // 1. Get Click Position in the Preview
+    let range;
+    if (document.caretRangeFromPoint) {
+        range = document.caretRangeFromPoint(e.clientX, e.clientY);
+    } else if (document.caretPositionFromPoint) {
+        // Firefox fallback
+        const pos = document.caretPositionFromPoint(e.clientX, e.clientY);
+        if (pos) {
+            range = document.createRange();
+            range.setStart(pos.offsetNode, pos.offset);
+        }
+    }
+
+    // If we couldn't determine range, just focus normally
+    if (!range) { 
+        input.focus();
+        return; 
+    }
+
+    const clickedNode = range.startContainer;
+    const clickOffset = range.startOffset;
+
+    // If clicked on an element boundary or non-text, just focus
+    if (clickedNode.nodeType !== Node.TEXT_NODE) {
+        input.focus();
+        return;
+    }
+
+    const searchPhrase = clickedNode.textContent;
+    const rawText = input.value; // formatted value
+
+    // 2. Count occurrences of this phrase before the click in Preview
+    let occurrenceIndex = 0;
+
+    function walk(node) {
+        if (node === clickedNode) return true; // Found target, stop
+        
+        if (node.nodeType === Node.TEXT_NODE) {
+            const text = node.textContent;
+            // Simple count of substring in this text node
+            // Note: This logic assumes 'searchPhrase' (the full content of clicked node) 
+            // doesn't overlap weirdly. Since it's the *full* content, it's safer.
+            let pos = text.indexOf(searchPhrase);
+            while (pos !== -1) {
+                // If we found the phrase (and it's not the one we clicked yet because we stop at clickedNode),
+                // increment count.
+                // Wait, if node IS clickedNode, we return true BEFORE matching.
+                // Correct. We only count occurrences in PREVIOUS nodes.
+                
+                // Oops, my logic above in thought phase mixed this up.
+                // "if (node === clickedNode) return true;" means we DON'T count occurrences within the clicked node itself.
+                // But what if the clicked node has the phrase multiple times?
+                // TextNode content IS the phrase. So it appears ONCE in itself.
+                
+                // So we are looking for how many times this phrase appeared in previous nodes.
+                occurrenceIndex++;
+                pos = text.indexOf(searchPhrase, pos + 1);
+            }
+        }
+        
+        if (node.childNodes) {
+            for (let i = 0; i < node.childNodes.length; i++) {
+                if (walk(node.childNodes[i])) return true;
+            }
+        }
+        return false;
+    }
+    
+    // Reset walk logic:
+    // We want to count occurrences in *preceding* nodes.
+    // The recursive walk stops at clickedNode.
+    // So 'occurrenceIndex' will imply "Nth instance". 
+    // Example: A (clicked) -> occurrenceIndex = 0. We want 1st instance.
+    // A ... A (clicked) -> occurrenceIndex = 1. We want 2nd instance.
+    
+    // Let's refine the walk function to be correct.
+    let found = false;
+    let count = 0;
+    
+    function countOccurrencesBefore(node) {
+        if (node === clickedNode) {
+            found = true;
+            return;
+        }
+        
+        if (node.nodeType === Node.TEXT_NODE) {
+            const text = node.textContent;
+            // We need to count disjoint occurrences of searchPhrase
+            let pos = text.indexOf(searchPhrase);
+            while (pos !== -1) {
+                count++;
+                pos = text.indexOf(searchPhrase, pos + 1);
+            }
+        }
+        
+        if (node.childNodes) {
+            for (let i = 0; i < node.childNodes.length; i++) {
+                if (found) return;
+                countOccurrencesBefore(node.childNodes[i]);
+            }
+        }
+    }
+    
+    countOccurrencesBefore(preview);
+    
+    // Now 'count' is the number of times searchingPhrase appeared completely in previous nodes.
+    
+    // 3. Find the (count + 1)th instance in Raw Text
+    let rawSearchPos = -1;
+    // We need to find the (count + 1)th match
+    for (let i = 0; i <= count; i++) {
+        rawSearchPos = rawText.indexOf(searchPhrase, rawSearchPos + 1);
+        if (rawSearchPos === -1) break;
+    }
+
+    // 4. Calculate final position
+    let finalPos = rawText.length; // Default to end
+    if (rawSearchPos !== -1) {
+        finalPos = rawSearchPos + clickOffset;
+    } else {
+        // Fallback: If strict match fails, maybe try ignoring spaces? 
+        // Or just focus on end.
+        console.warn('Could not map preview position to raw text');
+    }
+
+    // 5. Apply focus and selection
+    input.focus();
+    
+    // Use requestAnimationFrame to ensure focus behavior completes before setting range
+    requestAnimationFrame(() => {
+        try {
+            input.setSelectionRange(finalPos, finalPos);
+        } catch (e) {
+            console.error('Selection set failed', e);
+        }
+    });
+}
+

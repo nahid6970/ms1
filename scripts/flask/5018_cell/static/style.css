@@ -731,7 +731,8 @@ td textarea {
     padding: 4px 8px;
     font-size: 14px;
     background: transparent;
-    pointer-events: none;
+    pointer-events: auto;
+    cursor: text;
     white-space: pre-wrap;
     word-wrap: break-word;
     z-index: 1;
@@ -3843,11 +3844,11 @@ mark {
 }
 
 /* Fix list item alignment in timeline */
-.md-timeline-right > span[style*="inline-flex"] {
+.md-timeline-right>span[style*="inline-flex"] {
     align-items: flex-start !important;
 }
 
-.md-timeline-right > span[style*="inline-flex"] > span:first-child {
+.md-timeline-right>span[style*="inline-flex"]>span:first-child {
     position: relative;
     top: 0 !important;
     line-height: 1.4;
@@ -4215,6 +4216,7 @@ mark {
 .context-menu-item.danger:hover {
     background: #fff5f5;
 }
+
 /* Ce
 ll Rank Badge */
 .cell-rank-badge {
