@@ -726,7 +726,10 @@ td textarea {
     position: absolute;
     width: 5px;
     /* Thicker cursor */
-    background-color: black;
+    background-color: white;
+    /* Base color for mixing */
+    mix-blend-mode: difference;
+    /* Invert background color */
     pointer-events: none;
     z-index: 100;
     display: none;
