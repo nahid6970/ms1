@@ -710,11 +710,33 @@ td input {
     box-sizing: border-box;
     /* Use Vrinda for Bangla characters, fallback to default for others */
     font-family: Vrinda, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    caret-color: transparent;
+    /* Hide native cursor */
 }
 
 td textarea {
     /* Use Vrinda for Bangla characters, fallback to default for others */
     font-family: Vrinda, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    caret-color: transparent;
+    /* Hide native cursor */
+}
+
+/* Custom Thick Cursor */
+.custom-cursor {
+    position: absolute;
+    width: 5px;
+    /* Thicker cursor */
+    background-color: black;
+    pointer-events: none;
+    z-index: 100;
+    display: none;
+    animation: blink-animation 1s steps(2, start) infinite;
+}
+
+@keyframes blink-animation {
+    to {
+        visibility: hidden;
+    }
 }
 
 /* Markdown formatting indicator */
