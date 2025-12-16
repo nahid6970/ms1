@@ -959,20 +959,19 @@ function checkHasMarkdown(value) {
 }
 
 
-function handlePreviewClick(e) {
+function handlePreviewMouseDown(e) {
     // Only handle left clicks
     if (e.button !== 0) return;
 
     // Don't interfere with links or check boxes inside the preview
     if (e.target.tagName === 'A' || e.target.tagName === 'INPUT') return;
 
-    // Stop propagation so the cell click handler doesn't override us immediately
+    // Stop propagation
     e.stopPropagation();
 
-    // We prevent default to handle focus manually
-    // This effectively stops the "click through" behavior because we are handling it
-    // But since pointer-events is auto, the element beneath (input) won't get the click event
-    // So we MUST handle focus transfer here.
+    // Prevent default to stop immediate browser focus handling
+    // We will handle focus manually
+    e.preventDefault();
 
     const preview = e.currentTarget;
     const cell = preview.closest('td');
@@ -994,81 +993,75 @@ function handlePreviewClick(e) {
         }
     }
 
-    // If we couldn't determine range, just focus normally
-    if (!range) {
-        input.focus();
-        return;
-    }
+    // Default to end if detection fails
+    let finalPos = input.value.length;
 
-    const clickedNode = range.startContainer;
-    const clickOffset = range.startOffset;
+    if (range) {
+        const clickedNode = range.startContainer;
+        const clickOffset = range.startOffset;
 
-    // If clicked on an element boundary or non-text, just focus
-    if (clickedNode.nodeType !== Node.TEXT_NODE) {
-        input.focus();
-        return;
-    }
+        if (clickedNode.nodeType === Node.TEXT_NODE) {
+            const searchPhrase = clickedNode.textContent;
+            const rawText = input.value;
 
-    const searchPhrase = clickedNode.textContent;
-    const rawText = input.value; // formatted value
+            // 2. Count occurrences of this phrase before the click in Preview
+            let found = false;
+            let count = 0;
 
-    // 2. Count occurrences of this phrase before the click in Preview
-    let found = false;
-    let count = 0;
+            function countOccurrencesBefore(node) {
+                if (node === clickedNode) {
+                    found = true;
+                    return;
+                }
 
-    function countOccurrencesBefore(node) {
-        if (node === clickedNode) {
-            found = true;
-            return;
-        }
+                if (node.nodeType === Node.TEXT_NODE) {
+                    const text = node.textContent;
+                    let pos = text.indexOf(searchPhrase);
+                    while (pos !== -1) {
+                        count++;
+                        pos = text.indexOf(searchPhrase, pos + 1);
+                    }
+                }
 
-        if (node.nodeType === Node.TEXT_NODE) {
-            const text = node.textContent;
-            // We need to count disjoint occurrences of searchPhrase
-            let pos = text.indexOf(searchPhrase);
-            while (pos !== -1) {
-                count++;
-                pos = text.indexOf(searchPhrase, pos + 1);
+                if (node.childNodes) {
+                    for (let i = 0; i < node.childNodes.length; i++) {
+                        if (found) return;
+                        countOccurrencesBefore(node.childNodes[i]);
+                    }
+                }
+            }
+
+            countOccurrencesBefore(preview);
+
+            // 3. Find the (count + 1)th instance in Raw Text
+            let rawSearchPos = -1;
+            for (let i = 0; i <= count; i++) {
+                rawSearchPos = rawText.indexOf(searchPhrase, rawSearchPos + 1);
+                if (rawSearchPos === -1) break;
+            }
+
+            // 4. Calculate final position
+            if (rawSearchPos !== -1) {
+                finalPos = rawSearchPos + clickOffset;
             }
         }
-
-        if (node.childNodes) {
-            for (let i = 0; i < node.childNodes.length; i++) {
-                if (found) return;
-                countOccurrencesBefore(node.childNodes[i]);
-            }
-        }
     }
 
-    countOccurrencesBefore(preview);
+    // 5. Apply focus and selection synchronously
+    // Use preventScroll to stop browser from jumping around
+    input.focus({ preventScroll: true });
 
-    // 3. Find the (count + 1)th instance in Raw Text
-    let rawSearchPos = -1;
-    for (let i = 0; i <= count; i++) {
-        rawSearchPos = rawText.indexOf(searchPhrase, rawSearchPos + 1);
-        if (rawSearchPos === -1) break;
+    try {
+        input.setSelectionRange(finalPos, finalPos);
+    } catch (e) {
+        console.error('Selection set failed', e);
     }
 
-    // 4. Calculate final position
-    let finalPos = rawText.length; // Default to end
-    if (rawSearchPos !== -1) {
-        finalPos = rawSearchPos + clickOffset;
+    // 6. Manual scroll to ensure visibility
+    if (input.tagName === 'TEXTAREA' && typeof keepCursorCentered === 'function') {
+        keepCursorCentered(input);
+        requestAnimationFrame(() => keepCursorCentered(input));
     }
-
-    // 5. Apply focus and selection
-    input.focus();
-
-    // Use requestAnimationFrame to ensure focus behavior completes before setting range
-    requestAnimationFrame(() => {
-        try {
-            input.setSelectionRange(finalPos, finalPos);
-        } catch (e) {
-            console.error('Selection set failed', e);
-        }
-    });
-
-    // Also trigger update to ensure styles for edit mode are applied
-    // (Focus should already do this via CSS :focus-within)
 }
 
 function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null) {
@@ -1113,7 +1106,7 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
         // Create preview overlay
         const preview = document.createElement('div');
         preview.className = 'markdown-preview';
-        preview.onclick = handlePreviewClick; // Handle clicks to position cursor
+        preview.onmousedown = handlePreviewMouseDown; // Handle clicks to position cursor
         preview.innerHTML = formattedHTML;
         preview.style.whiteSpace = 'pre-wrap'; // Preserve newlines and spaces
 
