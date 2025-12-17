@@ -17,20 +17,49 @@ print("Importing libraries...")
 from faster_whisper import WhisperModel
 
 def find_wipp_file():
-    """Find wipp.mp3 or wipp.mp4 in home directory"""
-    home_dir = Path.home()
+    """Find wipp.mp3 or wipp.mp4 in multiple locations including Google Drive"""
+    # Check if Google Drive is already mounted
+    drive_mounted = Path('/content/drive/MyDrive').exists()
     
-    # Look for both mp3 and mp4 files
+    # Search locations in order of preference
+    search_dirs = [Path.cwd()]  # Current directory first
+    
+    if drive_mounted:
+        # Add common Google Drive locations
+        drive_locations = [
+            Path('/content/drive/MyDrive'),
+            Path('/content/drive/MyDrive/Colab Notebooks'),
+            Path('/content/drive/MyDrive/Videos'),
+            Path('/content/drive/MyDrive/Audio'),
+        ]
+        search_dirs.extend(drive_locations)
+    
+    # Add home directory as fallback
+    search_dirs.append(Path.home())
+    
+    # Look for audio/video files
     patterns = ['wipp.mp3', 'wipp.mp4', 'wipp.wav', 'wipp.m4a']
     
-    for pattern in patterns:
-        file_path = home_dir / pattern
-        if file_path.exists():
-            print(f"Found file: {file_path}")
-            return str(file_path)
+    print("Searching for wipp files...")
+    for search_dir in search_dirs:
+        if search_dir.exists():
+            print(f"Checking: {search_dir}")
+            for pattern in patterns:
+                file_path = search_dir / pattern
+                if file_path.exists():
+                    file_size = file_path.stat().st_size / (1024*1024)  # MB
+                    print(f"✅ Found file: {file_path}")
+                    print(f"📏 File size: {file_size:.1f} MB")
+                    return str(file_path)
     
-    print("No wipp.mp3 or wipp.mp4 found in home directory")
-    print(f"Looking in: {home_dir}")
+    print("❌ No wipp.mp3 or wipp.mp4 found in any location")
+    print("📁 Searched locations:")
+    for d in search_dirs:
+        print(f"   - {d}")
+    print("\n💡 Tips:")
+    print("   - Upload your file to Google Drive")
+    print("   - Name it 'wipp.mp4' or 'wipp.mp3'")
+    print("   - Place it in MyDrive root or MyDrive/Videos folder")
     return None
 
 def transcribe_with_faster_whisper(audio_file):
@@ -61,13 +90,22 @@ def transcribe_with_faster_whisper(audio_file):
         language=None  # Auto-detect
     )
     
-    # Save transcript
-    base_name = Path(audio_file).stem
-    transcript_file = Path.home() / f"{base_name}_faster_whisper_transcript.txt"
+    # Save transcript in same directory as input file
+    audio_path = Path(audio_file)
+    base_name = audio_path.stem
+    transcript_file = audio_path.parent / f"{base_name}_faster_whisper_transcript.txt"
+    
+    # Convert segments to list and count them
+    segment_list = list(segments)
+    total_segments = len(segment_list)
+    
+    print(f"Processing {total_segments} segments...")
     
     with open(transcript_file, 'w', encoding='utf-8') as f:
-        for segment in segments:
+        for i, segment in enumerate(segment_list):
             f.write(f"[{segment.start:.2f}s -> {segment.end:.2f}s] {segment.text}\n")
+            if (i + 1) % 50 == 0:  # Progress update every 50 segments
+                print(f"Processed {i + 1}/{total_segments} segments...")
     
     end_time = time.time()
     duration = end_time - start_time
@@ -75,14 +113,28 @@ def transcribe_with_faster_whisper(audio_file):
     print(f"\n✅ Transcription completed!")
     print(f"⏱️  Time taken: {duration:.2f} seconds")
     print(f"🌍 Language detected: {info.language}")
+    print(f"📊 Total segments: {total_segments}")
     print(f"📄 Transcript saved to: {transcript_file}")
     
-    # Display first few lines
-    print("\n📝 First few lines of transcript:")
-    print("-" * 50)
+    # Check file size and line count
+    file_size = transcript_file.stat().st_size
     with open(transcript_file, 'r', encoding='utf-8') as f:
-        lines = f.readlines()[:5]
-        for line in lines:
+        all_lines = f.readlines()
+        total_lines = len(all_lines)
+    
+    print(f"📏 File size: {file_size:,} bytes")
+    print(f"📝 Total lines: {total_lines}")
+    
+    # Display first and last few lines
+    print("\n📝 First 10 lines of transcript:")
+    print("-" * 50)
+    for line in all_lines[:10]:
+        print(line.strip())
+    
+    if total_lines > 20:
+        print("\n📝 Last 5 lines of transcript:")
+        print("-" * 50)
+        for line in all_lines[-5:]:
             print(line.strip())
     
     return transcript_file
