@@ -288,6 +288,11 @@ function showColorChangeMenu(highlightElement) {
     customPickerLabel.style.backgroundColor = '#fff';
     customPickerLabel.style.color = '#333';
     customPickerLabel.style.margin = '2px';
+    customPickerLabel.style.display = 'flex';
+    customPickerLabel.style.alignItems = 'center';
+    customPickerLabel.style.justifyContent = 'center';
+    customPickerLabel.style.fontSize = '14px';
+    customPickerLabel.style.cursor = 'pointer';
 
     let customInput = document.createElement('input');
     customInput.type = 'color';
