@@ -102,10 +102,10 @@ COLORS.forEach(color => {
     menu.appendChild(btn);
 });
 
-// Add Color Picker Button (+) via Label
+// Add Color Picker Button (rainbow) via Label
 let pickerLabel = document.createElement('label');
 pickerLabel.className = 'web-highlighter-color-btn web-highlighter-plus-btn';
-pickerLabel.textContent = '+';
+pickerLabel.textContent = '🎨';
 
 // Native Color Input
 let colorInput = document.createElement('input');
@@ -276,7 +276,7 @@ function showColorChangeMenu(highlightElement) {
     // Add custom color picker
     let customPickerLabel = document.createElement('label');
     customPickerLabel.className = 'web-highlighter-color-btn web-highlighter-plus-btn';
-    customPickerLabel.textContent = '+';
+    customPickerLabel.textContent = '🎨';
 
     let customInput = document.createElement('input');
     customInput.type = 'color';
