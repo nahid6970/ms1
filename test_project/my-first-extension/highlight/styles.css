@@ -39,3 +39,51 @@
 .web-highlighter-span:hover {
     filter: brightness(0.95);
 }
+
+.web-highlighter-context-menu {
+    position: absolute;
+    z-index: 999999;
+    background: #fff;
+    border: 2px solid #333;
+    border-radius: 6px;
+    padding: 5px;
+    display: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    flex-direction: column;
+    gap: 4px;
+    min-width: 140px;
+}
+
+.web-highlighter-context-btn {
+    padding: 8px 12px;
+    border: none;
+    background: #f5f5f5;
+    cursor: pointer;
+    font-size: 13px;
+    border-radius: 4px;
+    text-align: left;
+    transition: background-color 0.2s;
+    font-family: system-ui, -apple-system, sans-serif;
+}
+
+.web-highlighter-context-btn:hover {
+    background: #e0e0e0;
+}
+
+.web-highlighter-context-btn.delete-btn {
+    background: #ffebee;
+    color: #c62828;
+}
+
+.web-highlighter-context-btn.delete-btn:hover {
+    background: #ffcdd2;
+}
+
+.web-highlighter-context-btn.link-btn {
+    background: #e3f2fd;
+    color: #1565c0;
+}
+
+.web-highlighter-context-btn.link-btn:hover {
+    background: #bbdefb;
+}

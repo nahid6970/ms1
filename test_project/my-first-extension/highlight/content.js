@@ -142,14 +142,152 @@ document.addEventListener('mouseup', (e) => {
     menu.style.display = 'none';
 });
 
+// Context Menu for Highlighted Text
+let contextMenu = document.createElement('div');
+contextMenu.className = 'web-highlighter-context-menu';
+document.body.appendChild(contextMenu);
+
+let currentHighlightTarget = null;
+
 // Handle clicking on existing highlight
 document.addEventListener('click', (e) => {
+    // Close context menu if clicking elsewhere
+    if (!contextMenu.contains(e.target) && !e.target.classList.contains('web-highlighter-span')) {
+        contextMenu.style.display = 'none';
+        currentHighlightTarget = null;
+        return;
+    }
+
     if (e.target.classList.contains('web-highlighter-span')) {
-        if (confirm("Remove this highlight?")) {
-            removeHighlight(e.target);
+        e.preventDefault();
+        e.stopPropagation();
+
+        currentHighlightTarget = e.target;
+        const rect = e.target.getBoundingClientRect();
+
+        // Clear previous buttons
+        contextMenu.innerHTML = '';
+
+        // Change Color Button
+        let changeColorBtn = document.createElement('button');
+        changeColorBtn.className = 'web-highlighter-context-btn';
+        changeColorBtn.textContent = '🎨 Change Color';
+        changeColorBtn.onclick = (evt) => {
+            evt.stopPropagation();
+            showColorChangeMenu(currentHighlightTarget);
+        };
+        contextMenu.appendChild(changeColorBtn);
+
+        // Delete Button
+        let deleteBtn = document.createElement('button');
+        deleteBtn.className = 'web-highlighter-context-btn delete-btn';
+        deleteBtn.textContent = '🗑️ Delete';
+        deleteBtn.onclick = (evt) => {
+            evt.stopPropagation();
+            removeHighlight(currentHighlightTarget);
+            contextMenu.style.display = 'none';
+            currentHighlightTarget = null;
+        };
+        contextMenu.appendChild(deleteBtn);
+
+        // Check if this highlight contains or is within a link
+        let linkElement = findLinkElement(e.target);
+        if (linkElement) {
+            let openLinkBtn = document.createElement('button');
+            openLinkBtn.className = 'web-highlighter-context-btn link-btn';
+            openLinkBtn.textContent = '🔗 Open Link';
+            openLinkBtn.onclick = (evt) => {
+                evt.stopPropagation();
+                window.open(linkElement.href, '_blank');
+                contextMenu.style.display = 'none';
+            };
+            contextMenu.appendChild(openLinkBtn);
         }
+
+        // Position the menu
+        contextMenu.style.top = (window.scrollY + rect.bottom + 5) + 'px';
+        contextMenu.style.left = (window.scrollX + rect.left) + 'px';
+        contextMenu.style.display = 'flex';
     }
 });
+
+function findLinkElement(element) {
+    // Check if element is inside a link
+    let current = element;
+    while (current && current !== document.body) {
+        if (current.tagName === 'A' && current.href) {
+            return current;
+        }
+        current = current.parentElement;
+    }
+
+    // Check if element contains a link
+    let link = element.querySelector('a[href]');
+    return link;
+}
+
+function showColorChangeMenu(highlightElement) {
+    // Clear and show color picker
+    contextMenu.innerHTML = '';
+
+    // Add preset colors
+    COLORS.forEach(color => {
+        let colorBtn = document.createElement('div');
+        colorBtn.className = 'web-highlighter-color-btn';
+        colorBtn.style.backgroundColor = color;
+        colorBtn.style.margin = '2px';
+        colorBtn.onclick = (e) => {
+            e.stopPropagation();
+            changeHighlightColor(highlightElement, color);
+            contextMenu.style.display = 'none';
+        };
+        contextMenu.appendChild(colorBtn);
+    });
+
+    // Add custom color picker
+    let customPickerLabel = document.createElement('label');
+    customPickerLabel.className = 'web-highlighter-color-btn web-highlighter-plus-btn';
+    customPickerLabel.textContent = '+';
+    customPickerLabel.style.backgroundColor = '#fff';
+    customPickerLabel.style.color = '#333';
+    customPickerLabel.style.margin = '2px';
+
+    let customInput = document.createElement('input');
+    customInput.type = 'color';
+    customInput.style.opacity = '0';
+    customInput.style.position = 'absolute';
+    customInput.style.width = '0';
+    customInput.style.height = '0';
+
+    customInput.addEventListener('change', (e) => {
+        changeHighlightColor(highlightElement, e.target.value);
+        contextMenu.style.display = 'none';
+    });
+
+    customPickerLabel.appendChild(customInput);
+    contextMenu.appendChild(customPickerLabel);
+
+    contextMenu.style.flexDirection = 'row';
+    contextMenu.style.flexWrap = 'wrap';
+    contextMenu.style.maxWidth = '160px';
+}
+
+function changeHighlightColor(element, newColor) {
+    const id = element.dataset.highlightId;
+    element.style.backgroundColor = newColor;
+
+    // Update storage
+    chrome.storage.local.get([currentURL], (result) => {
+        let items = result[currentURL] || [];
+        items = items.map(h => {
+            if (h.id === id) {
+                h.color = newColor;
+            }
+            return h;
+        });
+        chrome.storage.local.set({ [currentURL]: items });
+    });
+}
 
 function highlightSelection(color) {
     const selection = window.getSelection();
