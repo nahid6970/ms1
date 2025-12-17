@@ -1,6 +1,15 @@
-const COLORS = ['#ffff00', '#aaffaa', '#aaddff', '#ffaaaa'];
+let COLORS = ['#ffff00', '#aaffaa', '#aaddff', '#ffaaaa'];
 // Use hostname to share highlights across the entire domain
 let currentURL = window.location.hostname;
+
+// Load custom colors from storage
+chrome.storage.local.get(['customColors'], (result) => {
+    if (result.customColors && result.customColors.length === 4) {
+        COLORS = result.customColors;
+        // Rebuild the menu with new colors
+        rebuildColorMenu();
+    }
+});
 
 // --- UTILS ---
 
@@ -43,8 +52,36 @@ chrome.storage.local.get([currentURL], (result) => {
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "refresh_highlights") {
         location.reload();
+    } else if (request.action === "reload_colors") {
+        chrome.storage.local.get(['customColors'], (result) => {
+            if (result.customColors && result.customColors.length === 4) {
+                COLORS = result.customColors;
+                rebuildColorMenu();
+            }
+        });
     }
 });
+
+function rebuildColorMenu() {
+    // Clear existing color buttons (keep the plus button)
+    const colorButtons = menu.querySelectorAll('.web-highlighter-color-btn:not(.web-highlighter-plus-btn)');
+    colorButtons.forEach(btn => btn.remove());
+
+    // Re-add color buttons with new colors
+    const plusBtn = menu.querySelector('.web-highlighter-plus-btn');
+    COLORS.forEach(color => {
+        let btn = document.createElement('div');
+        btn.className = 'web-highlighter-color-btn';
+        btn.style.backgroundColor = color;
+        btn.onmousedown = (e) => {
+            e.preventDefault();
+            highlightSelection(color);
+            menu.style.display = 'none';
+            window.getSelection().removeAllRanges();
+        };
+        menu.insertBefore(btn, plusBtn);
+    });
+}
 
 // UI: Floating Menu
 let menu = document.createElement('div');

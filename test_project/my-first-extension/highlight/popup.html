@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <style>
     body {
@@ -8,17 +9,20 @@
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background-color: #f4f4f9;
     }
+
     h2 {
       margin-top: 0;
       color: #333;
       font-size: 18px;
       text-align: center;
     }
+
     .btn-group {
       display: flex;
       flex-direction: column;
       gap: 10px;
     }
+
     button {
       padding: 10px;
       border: none;
@@ -27,27 +31,34 @@
       font-weight: 600;
       transition: background-color 0.2s;
     }
+
     .export-btn {
       background-color: #4CAF50;
       color: white;
     }
+
     .export-btn:hover {
       background-color: #45a049;
     }
+
     .import-btn {
       background-color: #2196F3;
       color: white;
     }
+
     .import-btn:hover {
       background-color: #0b7dda;
     }
+
     .clear-btn {
       background-color: #f44336;
       color: white;
     }
+
     .clear-btn:hover {
       background-color: #da190b;
     }
+
     textarea {
       width: 100%;
       height: 100px;
@@ -58,6 +69,7 @@
       resize: vertical;
       display: none;
     }
+
     #status {
       margin-top: 10px;
       font-size: 12px;
@@ -66,18 +78,52 @@
     }
   </style>
 </head>
+
 <body>
   <h2>Highlighter Tools</h2>
+
+  <!-- Color Settings -->
+  <div style="margin-bottom: 15px;">
+    <h3 style="font-size: 14px; margin-bottom: 8px; color: #555;">Preset Colors</h3>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+      <div>
+        <label style="font-size: 11px; color: #777;">Color 1</label>
+        <input type="color" id="color1" value="#ffff00"
+          style="width: 100%; height: 30px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;">
+      </div>
+      <div>
+        <label style="font-size: 11px; color: #777;">Color 2</label>
+        <input type="color" id="color2" value="#aaffaa"
+          style="width: 100%; height: 30px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;">
+      </div>
+      <div>
+        <label style="font-size: 11px; color: #777;">Color 3</label>
+        <input type="color" id="color3" value="#aaddff"
+          style="width: 100%; height: 30px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;">
+      </div>
+      <div>
+        <label style="font-size: 11px; color: #777;">Color 4</label>
+        <input type="color" id="color4" value="#ffaaaa"
+          style="width: 100%; height: 30px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;">
+      </div>
+    </div>
+    <button id="saveColors"
+      style="width: 100%; margin-top: 8px; padding: 6px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">Save
+      Colors</button>
+  </div>
+
   <div class="btn-group">
     <button id="exportBtn" class="export-btn">Export Data (JSON)</button>
     <button id="importBtn" class="import-btn">Import Data</button>
     <div id="importContainer" style="display:none;">
       <textarea id="importData" placeholder="Paste JSON here..."></textarea>
-      <button id="confirmImportBtn" style="width:100%; margin-top:5px; background-color:#555; color:white;">Load Data</button>
+      <button id="confirmImportBtn" style="width:100%; margin-top:5px; background-color:#555; color:white;">Load
+        Data</button>
     </div>
     <button id="clearBtn" class="clear-btn">Clear All Data</button>
   </div>
   <div id="status"></div>
   <script src="popup.js"></script>
 </body>
+
 </html>
