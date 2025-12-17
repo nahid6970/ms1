@@ -55,6 +55,37 @@ Use this specific markdown format for all organized content:
 
 ---
 
+## MCQ Processing Rules
+
+When you encounter Multiple Choice Questions (MCQ) with the format:
+- Question with 4 options (A, B, C, D)
+- Correct answer marked with `[[ans]]`
+
+**Your task:**
+1. **Extract the factual information** from the question and the correct answer
+2. **Discard the MCQ format** (don't save the options A, B, C, D)
+3. **Convert to a statement** using the question and correct answer
+4. **Organize the extracted fact** into the appropriate subject folder
+
+**Example:**
+
+**Input:**
+```
+What is the capital of Bangladesh?
+A) Chittagong
+B) Dhaka [[ans]]
+C) Sylhet
+D) Rajshahi
+```
+
+**Extract and Save:**
+```
+##Capital of Bangladesh##
+The capital of Bangladesh is Dhaka.
+```
+
+---
+
 ## Duplicate Detection Rules
 
 - **Exact Match**: If content is identical, discard the duplicate
