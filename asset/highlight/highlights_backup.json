@@ -1,0 +1,58 @@
+{
+  "bdgovtjob.net": [
+    {
+      "color": "#d91212",
+      "id": "0j914zql8",
+      "path": "html > body > div:nth-of-type(4) > div:nth-of-type(4)",
+      "text": ""
+    },
+    {
+      "color": "#d91212",
+      "id": "xjn37xnjb",
+      "path": "html > body > div:nth-of-type(4) > div:nth-of-type(4)",
+      "text": ""
+    },
+    {
+      "color": "#d91212",
+      "id": "tkua04skk",
+      "path": "article#post-26304 > div > header > h1",
+      "text": "Al-Arafah Islami Bank Job Circular 2025"
+    },
+    {
+      "color": "#d91212",
+      "id": "tfamk7jl8",
+      "path": "article#post-17631 > div > header > h1",
+      "text": "Midland Bank Ltd Job Circular 2025 – Midland Bank Career"
+    },
+    {
+      "color": "#d91212",
+      "id": "1dns2c7dy",
+      "path": "article#post-1425 > div > header > h2 > a",
+      "text": "IFIC Bank Limited Job Circular 2025"
+    },
+    {
+      "color": "#d91212",
+      "id": "pqql3jl82",
+      "path": "article#post-4773 > div > header > h1",
+      "text": "NRB Bank Limited Job Circular 2025"
+    },
+    {
+      "color": "#d91212",
+      "id": "rm4ao0o4c",
+      "path": "article#post-27859 > div > header > h1",
+      "text": "Meghna Bank Job Circular 2025 – career.meghnabank.com.bd"
+    },
+    {
+      "color": "#d91212",
+      "id": "xioarjmm5",
+      "path": "article#post-6733 > div > header > h1",
+      "text": "Trust Bank Limited Job Circular 2025"
+    }
+  ],
+  "customColors": [
+    "#ffff00",
+    "#aaffaa",
+    "#aaddff",
+    "#d91212"
+  ]
+}
