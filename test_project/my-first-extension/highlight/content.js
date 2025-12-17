@@ -211,7 +211,7 @@ document.addEventListener('click', (e) => {
         // Delete Button
         let deleteBtn = document.createElement('button');
         deleteBtn.className = 'web-highlighter-context-btn delete-btn';
-        deleteBtn.textContent = '🗑️';
+        deleteBtn.textContent = '×';
         deleteBtn.onclick = (evt) => {
             evt.stopPropagation();
             removeHighlight(currentHighlightTarget);
@@ -225,7 +225,7 @@ document.addEventListener('click', (e) => {
         if (linkElement) {
             let openLinkBtn = document.createElement('button');
             openLinkBtn.className = 'web-highlighter-context-btn link-btn';
-            openLinkBtn.textContent = '🔗';
+            openLinkBtn.textContent = '↗';
             openLinkBtn.onclick = (evt) => {
                 evt.stopPropagation();
                 window.open(linkElement.href, '_blank');

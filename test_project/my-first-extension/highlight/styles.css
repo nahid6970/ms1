@@ -108,6 +108,10 @@
 .web-highlighter-context-btn.delete-btn {
     background: rgba(255, 107, 107, 0.95);
     color: white;
+    font-size: 24px;
+    font-weight: bold;
+    line-height: 0.8;
+    padding-bottom: 2px;
 }
 
 .web-highlighter-context-btn.delete-btn:hover {
@@ -119,6 +123,8 @@
 .web-highlighter-context-btn.link-btn {
     background: rgba(74, 144, 226, 0.95);
     color: white;
+    font-size: 20px;
+    font-weight: bold;
 }
 
 .web-highlighter-context-btn.link-btn:hover {
