@@ -65,42 +65,60 @@ COLORS.forEach(color => {
     menu.appendChild(btn);
 });
 
-// Add Color Picker Button (+)
-let plusBtn = document.createElement('div');
-plusBtn.className = 'web-highlighter-color-btn web-highlighter-plus-btn';
-plusBtn.textContent = '+';
-plusBtn.style.backgroundColor = '#fff';
-plusBtn.style.color = '#333';
-plusBtn.style.display = 'flex';
-plusBtn.style.alignItems = 'center';
-plusBtn.style.justifyContent = 'center';
-plusBtn.style.fontSize = '14px';
+// Add Color Picker Button (+) via Label
+let pickerLabel = document.createElement('label');
+pickerLabel.className = 'web-highlighter-color-btn web-highlighter-plus-btn';
+pickerLabel.textContent = '+';
+pickerLabel.style.backgroundColor = '#fff';
+pickerLabel.style.color = '#333';
+pickerLabel.style.display = 'flex';
+pickerLabel.style.alignItems = 'center';
+pickerLabel.style.justifyContent = 'center';
+pickerLabel.style.fontSize = '14px';
+pickerLabel.style.cursor = 'pointer';
 
-// Hidden color input
+// Native Color Input
 let colorInput = document.createElement('input');
 colorInput.type = 'color';
-colorInput.style.display = 'none';
-menu.appendChild(colorInput);
+// We hide it but keep it functional
+colorInput.style.opacity = '0';
+colorInput.style.position = 'absolute';
+colorInput.style.width = '0';
+colorInput.style.height = '0';
+colorInput.style.padding = '0';
+colorInput.style.margin = '0';
+colorInput.style.border = '0';
 
-plusBtn.onmousedown = (e) => {
-    e.preventDefault();
-    // Delay click to ensure menu doesn't close immediately (scoping issue with selection clearing)
-    // We open the native picker.
-    setTimeout(() => colorInput.click(), 10);
+pickerLabel.appendChild(colorInput);
+
+pickerLabel.onmousedown = (e) => {
+    // Stop propagation so we don't trigger document clikcs
+    e.stopPropagation();
+    // We do NOT preventDefault here because we want the Label to trigger the Input
 };
 
 // Handle color selection
-colorInput.oninput = (e) => {
+colorInput.addEventListener('input', (e) => {
     const color = e.target.value;
     highlightSelection(color);
     menu.style.display = 'none';
     window.getSelection().removeAllRanges();
-};
+});
 
-// Handle Color Picker cancel/close? 
-// The input doesn't always fire cancel. But clicking away cleans up menu via mousedown listener elsewhere.
+// Since input change/input events might happen, we rely on 'input' for real-time or 'change' for final.
+// 'change' ensures the user closed the picker (usually). 'input' is live.
+// Let's use 'change' to be safe about the final color decision? 
+// Actually 'input' is cooler (live preview?) but we close the menu immediately.
+// If we close menu immediately on 'input', dragging the color wheel might flicker?
+// Better to use 'change' which fires when dismissal happens or complete.
+colorInput.addEventListener('change', (e) => {
+    const color = e.target.value;
+    highlightSelection(color);
+    menu.style.display = 'none';
+    window.getSelection().removeAllRanges();
+});
 
-menu.appendChild(plusBtn);
+menu.appendChild(pickerLabel);
 
 // Event Listeners
 document.addEventListener('mouseup', (e) => {
