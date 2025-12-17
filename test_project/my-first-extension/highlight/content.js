@@ -73,7 +73,6 @@ function rebuildColorMenu() {
         let btn = document.createElement('div');
         btn.className = 'web-highlighter-color-btn';
         btn.style.backgroundColor = color;
-        btn.style.margin = '2px';
         btn.onmousedown = (e) => {
             e.preventDefault();
             highlightSelection(color);
@@ -94,7 +93,6 @@ COLORS.forEach(color => {
     let btn = document.createElement('div');
     btn.className = 'web-highlighter-color-btn';
     btn.style.backgroundColor = color;
-    btn.style.margin = '2px';
     btn.onmousedown = (e) => {
         e.preventDefault();
         highlightSelection(color);
@@ -108,14 +106,6 @@ COLORS.forEach(color => {
 let pickerLabel = document.createElement('label');
 pickerLabel.className = 'web-highlighter-color-btn web-highlighter-plus-btn';
 pickerLabel.textContent = '+';
-pickerLabel.style.backgroundColor = '#fff';
-pickerLabel.style.color = '#333';
-pickerLabel.style.display = 'flex';
-pickerLabel.style.alignItems = 'center';
-pickerLabel.style.justifyContent = 'center';
-pickerLabel.style.fontSize = '14px';
-pickerLabel.style.cursor = 'pointer';
-pickerLabel.style.margin = '2px';
 
 // Native Color Input
 let colorInput = document.createElement('input');
@@ -173,8 +163,8 @@ document.addEventListener('mouseup', (e) => {
 
         // Show menu above selection
         if (rect.width > 0 && rect.height > 0) {
-            menu.style.top = (window.scrollY + rect.top - 40) + 'px'; // -40 to be above
-            menu.style.left = (window.scrollX + rect.left + (rect.width / 2)) + 'px';
+            menu.style.top = (window.scrollY + rect.top - 45) + 'px';
+            menu.style.left = (window.scrollX + rect.left + (rect.width / 2) - 90) + 'px';
             menu.style.display = 'flex';
             return;
         }
@@ -275,7 +265,6 @@ function showColorChangeMenu(highlightElement) {
         let colorBtn = document.createElement('div');
         colorBtn.className = 'web-highlighter-color-btn';
         colorBtn.style.backgroundColor = color;
-        colorBtn.style.margin = '2px';
         colorBtn.onclick = (e) => {
             e.stopPropagation();
             changeHighlightColor(highlightElement, color);
@@ -288,14 +277,6 @@ function showColorChangeMenu(highlightElement) {
     let customPickerLabel = document.createElement('label');
     customPickerLabel.className = 'web-highlighter-color-btn web-highlighter-plus-btn';
     customPickerLabel.textContent = '+';
-    customPickerLabel.style.backgroundColor = '#fff';
-    customPickerLabel.style.color = '#333';
-    customPickerLabel.style.margin = '2px';
-    customPickerLabel.style.display = 'flex';
-    customPickerLabel.style.alignItems = 'center';
-    customPickerLabel.style.justifyContent = 'center';
-    customPickerLabel.style.fontSize = '14px';
-    customPickerLabel.style.cursor = 'pointer';
 
     let customInput = document.createElement('input');
     customInput.type = 'color';
@@ -312,9 +293,7 @@ function showColorChangeMenu(highlightElement) {
     customPickerLabel.appendChild(customInput);
     contextMenu.appendChild(customPickerLabel);
 
-    contextMenu.style.flexDirection = 'row';
-    contextMenu.style.flexWrap = 'wrap';
-    contextMenu.style.maxWidth = '220px';
+    // Position stays the same as when context menu was opened
 }
 
 function changeHighlightColor(element, newColor) {
