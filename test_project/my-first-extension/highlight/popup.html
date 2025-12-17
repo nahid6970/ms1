@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body {
+      width: 300px;
+      padding: 15px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f4f9;
+    }
+    h2 {
+      margin-top: 0;
+      color: #333;
+      font-size: 18px;
+      text-align: center;
+    }
+    .btn-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    button {
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background-color 0.2s;
+    }
+    .export-btn {
+      background-color: #4CAF50;
+      color: white;
+    }
+    .export-btn:hover {
+      background-color: #45a049;
+    }
+    .import-btn {
+      background-color: #2196F3;
+      color: white;
+    }
+    .import-btn:hover {
+      background-color: #0b7dda;
+    }
+    .clear-btn {
+      background-color: #f44336;
+      color: white;
+    }
+    .clear-btn:hover {
+      background-color: #da190b;
+    }
+    textarea {
+      width: 100%;
+      height: 100px;
+      margin-top: 10px;
+      box-sizing: border-box;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      resize: vertical;
+      display: none;
+    }
+    #status {
+      margin-top: 10px;
+      font-size: 12px;
+      text-align: center;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <h2>Highlighter Tools</h2>
+  <div class="btn-group">
+    <button id="exportBtn" class="export-btn">Export Data (JSON)</button>
+    <button id="importBtn" class="import-btn">Import Data</button>
+    <div id="importContainer" style="display:none;">
+      <textarea id="importData" placeholder="Paste JSON here..."></textarea>
+      <button id="confirmImportBtn" style="width:100%; margin-top:5px; background-color:#555; color:white;">Load Data</button>
+    </div>
+    <button id="clearBtn" class="clear-btn">Clear All Data</button>
+  </div>
+  <div id="status"></div>
+  <script src="popup.js"></script>
+</body>
+</html>
