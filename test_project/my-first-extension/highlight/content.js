@@ -171,7 +171,7 @@ document.addEventListener('click', (e) => {
         // Change Color Button
         let changeColorBtn = document.createElement('button');
         changeColorBtn.className = 'web-highlighter-context-btn';
-        changeColorBtn.textContent = '🎨 Change Color';
+        changeColorBtn.textContent = '🎨';
         changeColorBtn.onclick = (evt) => {
             evt.stopPropagation();
             showColorChangeMenu(currentHighlightTarget);
@@ -181,7 +181,7 @@ document.addEventListener('click', (e) => {
         // Delete Button
         let deleteBtn = document.createElement('button');
         deleteBtn.className = 'web-highlighter-context-btn delete-btn';
-        deleteBtn.textContent = '🗑️ Delete';
+        deleteBtn.textContent = '🗑️';
         deleteBtn.onclick = (evt) => {
             evt.stopPropagation();
             removeHighlight(currentHighlightTarget);
@@ -195,7 +195,7 @@ document.addEventListener('click', (e) => {
         if (linkElement) {
             let openLinkBtn = document.createElement('button');
             openLinkBtn.className = 'web-highlighter-context-btn link-btn';
-            openLinkBtn.textContent = '🔗 Open Link';
+            openLinkBtn.textContent = '🔗';
             openLinkBtn.onclick = (evt) => {
                 evt.stopPropagation();
                 window.open(linkElement.href, '_blank');
