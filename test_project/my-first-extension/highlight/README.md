@@ -101,16 +101,18 @@ let currentURL = window.location.hostname; // Domain-based storage key
 #### UI Components
 
 **Highlight Menu** (`menu`)
-- Floating color picker
-- Appears above selected text
-- Contains preset color buttons + custom color picker
+- Floating color picker with purple gradient background
+- Appears centered above selected text
+- Contains 4 preset color buttons (28px circular)
+- Rainbow gradient custom color picker button (🎨)
 
 **Context Menu** (`contextMenu`)
-- Appears when clicking existing highlights
+- Appears below existing highlights when clicked
+- Purple gradient background matching highlight menu
 - Three actions:
-  - 🎨 Change Color
-  - 🗑️ Delete
-  - 🔗 Open Link (if applicable)
+  - 🎨 Change Color (white button)
+  - × Delete (red button with white text)
+  - ↗ Open Link (blue button with white text, if applicable)
 
 #### Event Listeners
 
@@ -144,10 +146,11 @@ Minimal implementation - only logs installation event.
 
 ### 5. Styles (styles.css)
 Modern UI styling with:
-- Glassmorphism effects
-- Gradient backgrounds
-- Smooth animations
-- Responsive hover states
+- Purple gradient backgrounds (#667eea to #764ba2)
+- Rainbow gradient custom color picker button
+- Smooth animations and hover effects
+- Compact, circular button design (28-32px)
+- White text on colored backgrounds for visibility
 
 ## Data Storage
 
@@ -191,10 +194,14 @@ Modern UI styling with:
 
 **Limitation**: Multiple identical text strings may cause ambiguity. First match wins.
 
-### 4. Icon-Only Context Menu
-**Why**: Cleaner, more modern UX with minimal visual clutter.
+### 4. Compact Icon-Based UI
+**Why**: Cleaner, more modern UX with minimal visual clutter and clear visual hierarchy.
 
-**Implementation**: Circular buttons with emoji icons and gradient background.
+**Implementation**: 
+- Circular buttons (28-32px) with purple gradient background
+- Rainbow gradient for custom color picker (visual indicator)
+- Text symbols (×, ↗) instead of emojis for proper white coloring
+- Consistent styling across both menus
 
 ## Extension Workflow
 
