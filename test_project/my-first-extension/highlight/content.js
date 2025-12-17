@@ -73,6 +73,7 @@ function rebuildColorMenu() {
         let btn = document.createElement('div');
         btn.className = 'web-highlighter-color-btn';
         btn.style.backgroundColor = color;
+        btn.style.margin = '2px';
         btn.onmousedown = (e) => {
             e.preventDefault();
             highlightSelection(color);
@@ -93,6 +94,7 @@ COLORS.forEach(color => {
     let btn = document.createElement('div');
     btn.className = 'web-highlighter-color-btn';
     btn.style.backgroundColor = color;
+    btn.style.margin = '2px';
     btn.onmousedown = (e) => {
         e.preventDefault();
         highlightSelection(color);
@@ -113,6 +115,7 @@ pickerLabel.style.alignItems = 'center';
 pickerLabel.style.justifyContent = 'center';
 pickerLabel.style.fontSize = '14px';
 pickerLabel.style.cursor = 'pointer';
+pickerLabel.style.margin = '2px';
 
 // Native Color Input
 let colorInput = document.createElement('input');
@@ -311,7 +314,7 @@ function showColorChangeMenu(highlightElement) {
 
     contextMenu.style.flexDirection = 'row';
     contextMenu.style.flexWrap = 'wrap';
-    contextMenu.style.maxWidth = '160px';
+    contextMenu.style.maxWidth = '220px';
 }
 
 function changeHighlightColor(element, newColor) {
