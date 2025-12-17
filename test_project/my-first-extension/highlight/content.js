@@ -1,6 +1,6 @@
 const COLORS = ['#ffff00', '#aaffaa', '#aaddff', '#ffaaaa'];
-// Use origin + pathname to be more robust against query param changes
-let currentURL = window.location.origin + window.location.pathname;
+// Use hostname to share highlights across the entire domain
+let currentURL = window.location.hostname;
 
 // --- UTILS ---
 
@@ -211,42 +211,70 @@ function removeHighlight(element) {
 
 function applyHighlight(h) {
     try {
-        const parent = document.querySelector(h.path);
-        if (!parent) return;
-
-        // Search for text in this parent
-        // We use a helper to wrap ONLY the text node that matches.
-
-        const walker = document.createTreeWalker(parent, NodeFilter.SHOW_TEXT, null, false);
-        let node;
-        while (node = walker.nextNode()) {
-            const index = node.nodeValue.indexOf(h.text);
-            if (index >= 0) {
-                // Check if already highlighted (avoid double wrapping same id? No, id is unique)
-                // But check if already wrapped in a span of our class?
-                if (node.parentElement.classList.contains('web-highlighter-span')) continue;
-
-                const range = document.createRange();
-                range.setStart(node, index);
-                range.setEnd(node, index + h.text.length);
-
-                const span = document.createElement('span');
-                span.className = 'web-highlighter-span';
-                span.style.backgroundColor = h.color;
-                span.dataset.highlightId = h.id;
-                span.textContent = h.text; // Ensure content match
-
-                range.deleteContents();
-                range.insertNode(span);
-
-                // Normalize parent to keep clean DOM
-                parent.normalize();
-                break; // Assume one match per saved item record in this block? 
-                // If we have multiple same words saved, we rely on the order of applying?
-                // It's tricky. But for MVP this works: finding the first unwrapped instance.
-            }
+        let parent = null;
+        try {
+            parent = document.querySelector(h.path);
+        } catch (e) {
+            // Invalid selector or not found
         }
+
+        let found = false;
+
+        // Strategy 1: Try exact path
+        if (parent) {
+            found = wrapTextInParent(parent, h);
+        }
+
+        // Strategy 2: Fallback to Body (if path search failed to find text)
+        if (!found) {
+            // Only if text is long enough to avoid massive noise, or just do it?
+            // Let's rely on the text being somewhat unique or user intent.
+            wrapTextInParent(document.body, h);
+        }
+
     } catch (e) {
         // console.log("Restoration error", e);
     }
+}
+
+function wrapTextInParent(parent, h) {
+    let success = false;
+    const walker = document.createTreeWalker(parent, NodeFilter.SHOW_TEXT, null, false);
+    let node;
+    while (node = walker.nextNode()) {
+        const index = node.nodeValue.indexOf(h.text);
+        if (index >= 0) {
+            // Check if already covered by OUR highlight
+            // We need to be careful. If the text is inside a highlight already?
+            if (node.parentElement.classList.contains('web-highlighter-span')) {
+                // It's already highlighted.
+                // If it has the same ID, we are good.
+                if (node.parentElement.dataset.highlightId === h.id) return true;
+                // If different ID, maybe overlapping or duplicate?
+                continue;
+            }
+
+            const range = document.createRange();
+            range.setStart(node, index);
+            range.setEnd(node, index + h.text.length);
+
+            const span = document.createElement('span');
+            span.className = 'web-highlighter-span';
+            span.style.backgroundColor = h.color;
+            span.dataset.highlightId = h.id;
+            span.textContent = h.text;
+
+            try {
+                range.deleteContents();
+                range.insertNode(span);
+                parent.normalize();
+                success = true;
+                // For MVP, we highlight the first match we find in fallback mode too.
+                return true;
+            } catch (err) {
+                console.error(err);
+            }
+        }
+    }
+    return success;
 }
