@@ -1,18 +1,15 @@
 # Topic Tags
 
-## High Frequency Topics (10+ occurrences)
-- (None)
+## High Frequency Topics (5+ occurrences)
+- **সংবিধান (Constitution)**: 10+ occurrences → Bangladesh/facts.md
+- **World War**: 5+ occurrences → History/world_history.md
+- **Revolutions**: 5+ occurrences → History/world_history.md
+- **United Nations (জাতিসংঘ)**: 5+ occurrences → Organizations/international_organizations.md
 
-## Medium Frequency Topics (5-9 occurrences)
-- (None)
-
-## Emerging Topics (2-4 occurrences)
-- **SAARC**: 3 occurrences
-- **ASEAN**: 2 occurrences
-- **Maldives**: 2 occurrences
-- **Benazir Bhutto**: 1 occurrences
-- **Isabela Peron**: 1 occurrences
-- **Sirimavo Bandaranaike**: 2 occurrences
-- **South Africa**: 1 occurrences
+## Medium Frequency Topics (2-4 occurrences)
+- **Shakespeare**: 3 occurrences → English/literature.md
+- **SAARC (সার্ক)**: 3 occurrences → Organizations/international_organizations.md
+- **চর্যাপদ (Charyapada)**: 4 occurrences → Bangla Literature/literature.md
+- **Computer Networking**: 4 occurrences → ICT/ict_basics.md
 
 ## Last Updated: 18 December 2025
