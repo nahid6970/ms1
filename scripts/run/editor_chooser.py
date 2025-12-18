@@ -24,6 +24,12 @@ def open_with_editor(file_paths, editor):
                 subprocess.run(f'zed "{file_path}"', shell=True)
         else:
             subprocess.run(f'zed "{file_paths}"', shell=True)
+    elif editor == "emacs":
+        if isinstance(file_paths, list):
+            for file_path in file_paths:
+                subprocess.run(f'emacs "{file_path}"', shell=True)
+        else:
+            subprocess.run(f'emacs "{file_paths}"', shell=True)
 
 def create_editor_chooser(file_paths):
     """Create a GUI window to choose editor"""
@@ -73,6 +79,7 @@ def create_editor_chooser(file_paths):
     editors = [
         ("nvim", "#19d600", ""),
         ("VSCode", "#7e96ff", ""),
+        ("Emacs", "#8458b7", ""),
         ("Zed", "#ff6b6b", ""),
     ]
     
