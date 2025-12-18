@@ -1,0 +1,1449 @@
+মানুষের লোহিত কণিকার আয়ু প্রায় চার মাস অর্থাৎ ১২০ দিন। উল্লেখ্য, শ্বেত রক্ত কণিকার গড় আয়ু ১-১৫ দিন।
+
+সূর্যের নিকটতম নক্ষত্রের নাম-
+
+প্রক্সিমা সেন্টাউরি
+
+ওজোন স্তর বায়ুমণ্ডলের কোন স্তরে অবস্থিত?
+
+স্ট্রাটোমণ্ডল
+
+ওজোন স্তর সূর্যের আলোর বেশির ভাগ অতিবেগুনি রশ্মি শুষে নেয়।
+
+কাঁদুনে গ্যাসের অপর নাম কী?
+
+ক্লোরোপিক্রিন
+
+কাঁদুনে গ্যাসের রাসায়নিক নাম ক্লোরোপিক্রিন। এর সংকেত CCl3-NO₂। এটি তৈল জাতীয় পদার্থ এবং অশ্রু উৎপাদক গ্যাস।
+
+API হলো Application Programming Interface, যার মাধ্যমে একটি প্রোগ্রাম আরেকটি প্রোগ্রামের ডেটা শেয়ার করতে পারে।
+
+একটি সিস্টেম যেখানে আইটেমগুলো এক প্রান্তে সংযোজিত হয় কিন্তু অন্য প্রান্ত থেকে সরানো হয় তার নাম-
+
+Queue
+
+একটি কম্পিউটার boot করতে পারে না যদি তাতে না থাকে-
+
+operating system
+
+মাইক্রোসফ্ট IIS হচ্ছে একটি-
+
+ওয়েব সার্ভার
+
+IIS-এর পূর্ণরূপ Internet Information Services | Microsoft IIS হলো মাইক্রোসফটের তৈরি একটি এক্সটেনসিবল ওয়েব সার্ভার সফ্টওয়্যার।
+
+ব্লুটুথ কত দূরত্ব পর্যন্ত কাজ করে?
+
+১০-১০০ মিটার
+
+বুটুথের কভারেজ এরিয়া সাধারণত ১০-১০০ মিটার। ব্লুটুথ 2.45 GHz ফ্রিকোয়েন্সিতে কাজ করে। ব্লুটুথের স্ট্যান্ডার্ড 802.15।
+
+কোন নেটওয়ার্ক টপোলজিতে হাব (hub) ব্যবহার করা হয়?
+
+স্টার টপোলজি
+
+স্টার টপোলজিতে কেন্দ্রীয় ডিভাইস হিসেবে হাব বা সুইচ যুক্ত থাকে। সুইচকে বুদ্ধিমান ডিভাইস বলা হয়ে থাকে।
+
+বুলিয়ান ফাংশন সরলীকরণ করার জন্য ডি-মরগ্যান দুটি সূত্র আবিষ্কার করেন। দুই চলকের জন্য ডি-মরগ্যানের উপপাদ্য-
+
+১. A+B= A.Β
+
+২. A.B = A+B
+
+Bluetooth-এর কভারেজ এরিয়া সাধারণত 10-100 মিটার। Wi-Fi বা Wireless Fidelity-এর কভারেজ এরিয়া 50 - 200 মিটার। Wi-Max বা Worldwide Interoperability for Microwave Access-এর কভারেজ এরিয়া 50 কিমি পর্যন্ত হয়ে থাকে।
+
+১০০ এর ১-এর কমপ্লিমেন্ট ০১১। শূন্য এর পরিবর্তে ১ এবং ১ এর পরিবর্তে ০ বসিয়ে ১'এর কমপ্লিমেন্ট পাওয়া যায়।
+
+RFID বলতে বুঝায়-
+
+Radio Frequency Identification
+
+C:\ms1\scripts\clipboard.py
+
+"তিনি আমার কথা রাখলেন না, তিনি রাখলেন ভুট্টো সাহেবের কথা।"
+
+কে 'কর্তব্যের নৈতিকতা'র ধারণা প্রবর্তন করেন?
+
+ইমানুয়েল কান্ট
+
+প্লেটো 'সদগুণ' বলতে বুঝিয়েছেন-
+
+প্রজ্ঞা, সাহস, আত্মনিয়ন্ত্রণ ও ন্যায়খ
+
+Political Ideals' গ্রন্থের লেখক কে?
+
+রাসেল
+
+Political Ideals' গ্রন্থের লেখক ব্রিটিশ দার্শনিক, যুক্তিবিদ, গণিতবিদ, ইতিহাসবেত্তা এবং সমাজ সমালোচক বারট্রান্ড রাসেল। এটি ১৯১৭ সালে প্রথম প্রকাশিত হয়। তার অন্যান্য গ্রন্থ হলো- The Problems of Philosophy, The History of Western Philosophy, Why I am not a Christian, The Conquest of Happiness, etc. I
+
+গণপ্রজাতন্ত্রী বাংলাদেশের সংবিধানের কোন অনুচ্ছেদে জনস্বাস্থ্য ও নৈতিকতার বিষয়টি আলোচিত হয়েছে?
+
+অনুচ্ছেদ ১৮
+
+সভ্যতার অন্যতম প্রতিচ্ছবি হলো-
+
+ঘসমাজ
+
+সুশাসন চারটি স্তম্ভের ওপর নির্ভরশীল'।-এই অভিমত কোন সংস্থা প্রকাশ করে?
+
+বিশ্বব্যাংক
+
+বিশ্বব্যাংকের মতে, সুশাসন চারটি প্রধান স্তম্ভের উপর নির্ভরশীল। আর এ চারটি স্তম্ভ হলো-দায়িত্বশীলতা, স্বচ্ছতা, আইনি কাঠামো এবং অংশগ্রহণ।
+
+মূল্যবোধ দৃঢ় হয়-
+
+শিক্ষার মাধ্যমে
+
+দ্বারা, দিয়া, কর্তৃক তৃতীয়া বিভক্তি। ০ (শূন্য) অ, এ, তে প্রথমা বিভক্তি। কে, রে দ্বিতীয়া বিভক্তি।
+
+শিব রাত্রির সলতে-বাগধারাটির অর্থ কী?
+
+একমাত্র সন্তান
+
+বাংলা কৃৎ-প্রত্যয় সাধিত শব্দ কোনটি?
+
+খেলনা
+
+বাংলা ভাষায় কিছু সংস্কৃত শব্দ কিঞ্চিৎ পরিবর্তিত আকারে ব্যবহৃত হয়। এগুলোকে বলে অর্ধ-তৎসম শব্দ। যেমন জোছনা, ছেরাদ্দ, গিন্নি, বোষ্টম, কুচ্ছিত এ শব্দগুলো যথাক্রমে সংস্কৃত জ্যোৎস্না, শ্রাদ্ধ, গৃহিণী, বৈষ্ণব, কুৎসিত শব্দ থেকে আগত। যেসব শব্দ সংস্কৃত ভাষা থেকে সোজাসুজি বাংলায় এসেছে এবং যাদের রূপ অপরিবর্তিত রয়েছে, তাদেরকে তৎসম শব্দ বলে। যেমন- চন্দ্র, সূর্য, নক্ষত্র, ভবন, ধর্ম, পাত্র, মনুষ্য ইত্যাদি। বাংলাদেশের আদিম অধিবাসীদের ভাষা ও সংস্কৃতির কিছু কিছু উপাদান বাংলায় রক্ষিত আছে। এসব শব্দকে দেশি বলা হয়। যেমন- কুলা, গঞ্জ, চোঙ্গা, টোপর, ডাব, ডাগর, ঢেঁকি ইত্যাদি। যেসব শব্দের ব্যুৎপত্তিগত অর্থ ও ব্যবহারিক অর্থ একই রকম, সেগুলোকে যৌগিক শব্দ বলে। যেমন গায়ক, কর্তব্য, বাবুয়ানা, মধুর, দৌহিত্র, চিকামারা ইত্যাদি।
+
+জিজীবিষা' শব্দটি দিয়ে বোঝায়-
+
+বেঁচে থাকার ইচ্ছা
+
+সর্বাঙ্গীণ' শব্দের সঠিক প্রকৃতি-প্রত্যয়- সর্বাঙ্গ + ঈন
+
+প্রকৃতি-প্রত্যয়
+
+ঊর্ণনাভ' সংস্কৃত শব্দ, বিশেষ্য পদ, অর্থ মাকড়সা।
+টিকটিকি শব্দটি আলংকারিক অর্থে গোয়েন্দা বোঝায়। 
+আরশোলার প্রতিশব্দ তেলাপোকা। 
+বল্মীক অর্থ উইপোকা।
+
+চর্যাপদে কোন ধর্মমতের কথা আছে?
+
+বৌদ্ধধর্ম
+
+উল্লিখিতদের মধ্যে কে প্রাচীন যুগের কবি নন?
+
+রমনীপাদ
+
+বাংলা সাহিত্যের প্রাচীন যুগের নিদর্শন চর্যাপদের প্রথম কবি লুইপাদ এবং সবচেয়ে বেশি পদ (১৩টি) রচনা করেন কাহ্নপাদ। শান্তিপাদও দুটি পদ রচনা করেন।
+
+উল্লিখিত কোন রচনাটি পুঁথি সাহিত্যের অন্তর্গত নয়?
+
+ময়মনসিংহ গীতিকা
+
+জীবনীকাব্য রচনার জন্য বিখ্যাত :
+
+বৃন্দাবন দাস
+
+বৈষ্ণব পদাবলির সঙ্গে কোন ভাষা সম্পর্কিত?
+
+ব্রজবুলি
+
+বাংলা আধুনিক উপন্যাস-এর প্রবর্তক ছিলেন-
+
+বঙ্কিমচন্দ্র চট্টোপাধ্যায়
+
+কিন্তু আরম্ভের পূর্বেও আরম্ভ আছে। সন্ধ্যাবেলায় দীপ জ্বালার আগে সকালবেলায় সলতে পাকানো'-বাক্যদ্বয় কোন রচনা থেকে উদ্ধৃত?
+
+যোগাযোগ
+
+মুক্তিযুদ্ধভিত্তিক উপন্যাস কোনটি?
+
+একটি কালো মেয়ের কথা
+
+কালো বরফ' উপন্যাসটির বিষয়:
+
+দেশভাগ
+
+ঢাকা প্রকাশ' সাপ্তাহিক পত্রিকাটির সম্পাদক কে?
+
+কৃষ্ণচন্দ্র মজুমদার
+
+জীবনস্মৃতি' কার রচনা?
+
+রবীন্দ্রনাথ ঠাকুর
+
+দীনবন্ধু মিত্রের 'নীলদর্পণ' নাটকটি ইংরেজিতে অনুবাদ করেন কে?
+
+মাইকেল মধুসূদন দত্ত
+
+সকালে উঠিয়া আমি মনে মনে বলি, সারাদিন আমি যেন ভালো হয়ে চলি' চরণ দুটির রচয়িতা কে?
+
+মদনমোহন তর্কালঙ্কার
+
+কিন্তু মানুষ্য কখনো পাষাণ হয় না'-উক্তিটি কোন উপন্যাসের?
+
+বঙ্কিমচন্দ্রের 'রাজসিংহ'
+
+ইয়ংবেঙ্গল গোষ্ঠীভুক্ত ছিলেন কে?
+
+মাইকেল মধুসূদন দত্ত
+
+হিন্দু কলেজের তরুণ শিক্ষক ডিরোজিওর (১৮০৯-১৮৩১) শিষ্যরাই মূলত ইয়ংবেঙ্গল নামে পরিচিত
+
+বিদ্রোহী" কবিতাটি প্রথম প্রকাশিত হয় ১৯২২ সালের ৬ জানুয়ারি, সাপ্তাহিক বিজলী পত্রিকায়।
+
+আগুন পাখি'-উপন্যাসটির রচয়িতা কে?
+
+হাসান আজিজুল হক
+
+একুশে ফেব্রুয়ারি'র বিখ্যাত গানটির সুরকার কে?
+
+আলতাফ মাহমুদ
+
+Break in' phrasal verb-এর অর্থ কথার কথা বলা; চলমান কোনো কিছুতে হস্তক্ষেপ করা
+
+ভুল বানান বিশিষ্ট শব্দ হলো consciencious/শব্দটির শেষের কে। তে রূপান্তর করলে wordটি সঠিক হবে। Conscientious শব্দটির অর্থ বিবেকবুদ্ধিসম্পন্ন। 
+perseverance অর্থ অধ্যবসায়, 
+convalescence অর্থ রোগমুক্তির পর স্বাস্থ্যের ক্রমোন্নতি
+
+Someone who is capricious is-
+
+known for sudden changes in attitude or behaviour
+
+A man whose wife has died is called a -
+
+widower
+
+যে ব্যক্তির স্ত্রী মারা গেছে তাকে বলে widower (বিপত্নীক)। তাছাড়া widow অর্থ বিধবা, spinster অর্থ অবিবাহিতা মহিলা এবং bachelor অর্থ অবিবাহিত পুরুষ।
+
+Appal অর্থ আতঙ্কিত করা; মর্মাহত করা এবং dismay অর্থ হতাশ করা; আতঙ্কিত করা। সুতরাং appal আর dismay শব্দ দুটি similar. অন্যদিকে deceive অর্থ প্রতারণা করা, confuse অর্থ গুলিয়ে ফেলা এবং solicit অর্থ সনির্বন্ধ আবেদন করা।
+
+Dearth (অভাব; আকাল)
+
+Identify the word which remains the same in its plural form:
+
+aircraft
+
+A lost opportunity never returns.' Here 'losť is a
+
+participle
+
+Verb-এর যে রূপ একই সাথে verb এবং adjective-এর কাজ করে তাকে participle বলে। প্রদত্ত বাক্যে lost (lose-এর past participle) একই সাথে verb এবং adjective-এর কাজ সম্পন্ন করায় lost শব্দটি past৫৬. participle অর্থাৎ participle হিসেবে কাজ করছে।
+
+Compound Sentence সাধারণত একের অধিক principal clause or, but, yet, else, therefore, otherwise ইত্যাদি co-ordinating conjunction দ্বারা যুক্ত থাকে। সুতরাং else conjunction দ্বারা যুক্ত বাক্যটি compound sentence 
+
+চিঠিতে স্বাক্ষরের পরে যুক্ত অতিরিক্ত বার্তা বা বাক্যাবলিকে বলা হয় postscript (পুনশ্চ)। অন্যদিকে corrigendum অর্থ শুদ্ধিপত্র, সংশোধনীয় বিষয়। NB (nota bene) অর্থ সতর্কতার সাথে লক্ষ করুন, লক্ষণীয় আর RSVP অর্থ দয়া করে জবাব দিন (please reply) যা আমন্ত্রণ কার্ডের নিচ প্রান্তে লেখা হয়।
+
+The Rape of the Lock' by Alexander Pope is a/an-
+
+mock-heroic poem
+
+Which of the following is not an American poet?
+
+W.B.Yeats
+
+W. B. Yeats হলেন Irish poet, dramatist
+
+William Shakespeare was born in -
+
+1564
+
+Bard of Avon এবং Father of English Drama হিসেবে খ্যাত William Shakespeare
+
+Tennyson's 'In Memoriam' is an elegy on the death of -
+
+Arthur Henry Hallam
+
+Sweet Helen' make me immortal with a kiss.' The sentence has been taken from the play -
+
+Doctor Faustus
+
+276, 264, 823, 667
+
+touch
+
+2000
+
+823, 667
+
+touch 1030 847 1441 537 , 2000
+
+#* ███████╗ █████╗ ███╗   ███╗███████╗
+#* ██╔════╝██╔══██╗████╗ ████║██╔════╝
+#* █████╗  ███████║██╔████╔██║█████╗
+#* ██╔══╝  ██╔══██║██║╚██╔╝██║██╔══╝
+#* ██║     ██║  ██║██║ ╚═╝ ██║███████╗
+#* ╚═╝     ╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝
+# #* Fame Fame Fame Fame
+def FameFunction(button):
+    """Toggles the two-region attack functionality."""
+    # Use a dictionary to manage thread state and reference inside the function
+    state = getattr(FameFunction, "state", {"thread": None, "stop_flag": True})
+
+    if state["thread"] and state["thread"].is_alive():
+        # Stop the thread
+        state["stop_flag"] = True
+        state["thread"].join()
+        button.config(text="Fame", bg="#bda24a", fg="#000000")
+    else:
+        # Start the thread
+        state["stop_flag"] = False
+
+        def AdditionalFunction():
+            window = focus_window(window_title)
+            if not window:
+                print(f"Window '{window_title}' not found.")
+                return
+            try:
+                while not state["stop_flag"]:
+                    focus_window(window_title)
+                    # Example logic
+                    if find_image(Resume, confidence=0.8): press_key(window, 'r')
+                    elif find_image(SPACE, confidence=0.8): press_key(window, ' ')
+                    elif find_image(StartFame): press_key(window, 'p')
+                    elif find_image(WorldIcon, confidence=0.8): press_key(window, 'o')
+                    elif find_image(e_image, region=e_image_region): press_key(window, 'e')
+                    elif find_image(GoBack, confidence=0.8): press_key(window, 'b')
+                    # elif any(find_image(image) for image in continueF): press_key(window, 'c')
+                    # elif any(find_image(image) for image in continueF): press_keys_with_delays(window, 'c', 2,  "e", 0 )
+                    elif any(find_image(image, region=contF_Region) for image in continueF): press_keys_with_delays(window, 'c', 2, "e", 0)
+
+                    # elif find_image(r"C:\Users\nahid\ms\msBackups\shadowfight3\fame\Lost_2nd_Round.png", confidence=1, region=(1079, 178, 1095, 196)): press_global_screen_with_delays(( 450, 65, 10)) #! not working duel still ranking lost
+                    # # elif find_image(r"C:\Users\nahid\ms\msBackups\shadowfight3\fame\Lost_2nd_Round.png", confidence=0.8, region=(804, 176, 1101, 199)): press_global_screen_with_delays(( 960, 540, 3)) #! not working duel still ranking lost
+
+                    # elif (find_image(default_ads, confidence=0.8, region=(177, 83, 263, 158)) and 
+                    #     find_image(default_sbs, confidence=0.8, region=(177, 83, 500, 500))):
+                    #     press_global_screen_with_delays((215, 118, 2))
+
+                   
+                   
+                    # elif any(find_image(image) for image in notifyF):
+                    #     subprocess.run(['python', r'C:\ms1\SH3\whatsapp.py'])
+                    #     time.sleep(60)
+                    time.sleep(2)
+            except KeyboardInterrupt: print("Script stopped by user.")
+        # Create and start the thread
+        thread = threading.Thread(target=AdditionalFunction)
+        thread.daemon = True
+        thread.start()
+        # Save the thread in the state dictionary
+        state["thread"] = thread
+        button.config(text="Stop", bg="#1d2027", fg="#fc0000")
+    # Save state to the function attribute for persistence
+    FameFunction.state = state
+# Button logic
+Fame_BT = Button( ROOT, text="Fame", bg="#bda24a", fg="#000000", width=5, height=0, command=lambda: FameFunction(Fame_BT), font=("Jetbrainsmono nfp", 10, "bold"), relief="flat" )
+Fame_BT.pack( side="left",padx=(1, 1), pady=(1, 1))
+
+Builder
+
+                    elif find_image(r"C:\Users\nahid\ms\msBackups\CoC\MainBase\okay.png", confidence=0.8, region=(757, 758, 1158, 951)): press_global_screen_with_delays((961, 855,1))
+                    elif find_image(r"C:\Users\nahid\ms\msBackups\CoC\MainBase\return.png", confidence=0.8, region=(819, 786, 1087, 920)): press_global_screen_with_delays((961, 855,5))
+
+                    #! GateKeeper in order for other to happen this image first need to be found
+                    elif find_image(r"C:\Users\nahid\ms\msBackups\CoC\MainBase\attack.png", confidence=0.8, region=(1452, 639, 1759, 804)):
+                        # Step 3: Execute attack sequence
+                        press_keys_with_delays(window, '', 1)
+                        # Step 1: Store all matched positions
+
+                    if find_image(r"C:\Users\nahid\ms\msBackups\CoC\MainBase\Train.png", confidence=0.8, region=(169, 684, 279, 790)):
+                        gold_found = find_image(r"C:\Users\nahid\ms\msBackups\CoC\MainBase\full_gold.png", confidence=0.95, region=(1410, 103, 1455, 245))
+                        elixir_found = find_image(r"C:\Users\nahid\ms\msBackups\CoC\MainBase\full_elixir.png", confidence=0.95, region=(1410, 103, 1455, 245))
+
+                        if gold_found or elixir_found:
+                            run_command('signal-cli --trust-new-identities always -a +8801533876178 send -m \""Storage Full"\" +8801779787186')
+                            time.sleep(30)
+                        else:
+                            press_global_screen_with_delays((265, 878, 1), (1313, 591, 1))
+
+
+                    # elif find_image(r"C:\Users\nahid\ms\msBackups\CoC\MainBase\attack.png", confidence=0.8, region=(1452, 639, 1759, 804)):
+                    #     # Step 3: Execute attack sequence
+                    #     press_keys_with_delays(window, troop_vars["jump_spell_key"].get(), 1)
+                    #     press_global_screen_with_delays((1230, 426, 1), (1227, 626, 1))
+                    #     press_keys_with_delays(window,
+                    #         troop_vars["warden_key"].get(), 1, 'p', 0,
+                    #         troop_vars["MinionPrince_key"].get(), 1, 'p', 0,
+                    #         troop_vars["queen_key"].get(), 1, 'p', 0,
+                    #         troop_vars["king_key"].get(), 1, 'p', 0
+                    #     )
+                    #     press_keys_with_delays(window, troop_vars["valkyrie_key"].get(), 0, 'f12', 3)
+                    #     press_keys_with_delays(window, troop_vars["rage_spell_key"].get(), 1)
+                    #     press_global_screen_with_delays((1230, 426, 0), (1227, 626, 3), (1086, 508, 0))
+                    #     press_keys_with_delays(window, troop_vars["goblin_key"].get(), 1, 'f12', 1)
+
+                    elif find_image(r"C:\Users\nahid\ms\msBackups\CoC\MainBase\okay.png", confidence=0.8, region=(757, 758, 1158, 951)): press_global_screen_with_delays((961, 855,1))
+                    elif find_image(r"C:\Users\nahid\ms\msBackups\CoC\MainBase\return.png", confidence=0.8, region=(819, 786, 1087, 920)): press_global_screen_with_delays((961, 855,5))
+
+                    #! GateKeeper in order for other to happen this image first need to be found
+                    elif find_image(r"C:\Users\nahid\ms\msBackups\CoC\MainBase\attack.png", confidence=0.8, region=(1452, 639, 1759, 804)):
+                        # Step 3: Execute attack sequence
+                        press_keys_with_delays(window, '', 1)
+                        # Step 1: Store all matched positions
+
+                    #! GateKeeper in order for other to happen this image first need to be found
+                    elif find_image(r"C:\Users\nahid\ms\msBackups\CoC\MainBase\attack.png", confidence=0.8, region=(1452, 639, 1759, 804)):
+                        # Step 3: Execute attack sequence
+                        press_keys_with_delays(window, '', 1)
+                        # Step 1: Store all matched positions
+
+                    if find_image(Resume, confidence=0.8): press_key(window, 'r')
+                    elif find_image(SPACE, confidence=0.8): press_key(window, ' ')
+                    elif find_image(StartFame): press_key(window, 'p')
+                    elif find_image(WorldIcon, confidence=0.8): press_key(window, 'o')
+                    elif find_image(e_image, region=e_image_region): press_key(window, 'e')
+                    elif find_image(GoBack, confidence=0.8): press_key(window, 'b')
+                    # elif any(find_image(image) for image in continueF): press_key(window, 'c')
+                    # elif any(find_image(image) for image in continueF): press_keys_with_delays(window, 'c', 2,  "e", 0 )
+                    elif any(find_image(image, region=contF_Region) for image in continueF): press_keys_with_delays(window, 'c', 2, "e", 0)
+
+                    # elif find_image(r"C:\Users\nahid\ms\msBackups\shadowfight3\fame\Lost_2nd_Round.png", confidence=1, region=(1079, 178, 1095, 196)): press_global_screen_with_delays(( 450, 65, 10)) #! not working duel still ranking lost
+                    # # elif find_image(r"C:\Users\nahid\ms\msBackups\shadowfight3\fame\Lost_2nd_Round.png", confidence=0.8, region=(804, 176, 1101, 199)): press_global_screen_with_delays(( 960, 540, 3)) #! not working duel still ranking lost
+
+                    # elif (find_image(default_ads, confidence=0.8, region=(177, 83, 263, 158)) and 
+                    #     find_image(default_sbs, confidence=0.8, region=(177, 83, 500, 500))):
+                    #     press_global_screen_with_delays((215, 118, 2))
+
+                   
+                   
+                    # elif any(find_image(image) for image in notifyF):
+                    #     subprocess.run(['python', r'C:\ms1\SH3\whatsapp.py'])
+                    #     time.sleep(60)
+
+C:\Users\nahid\ms\msBackups\CoC\builder\Chat.png
+
+173, 420, 279, 547
+
+1276, 200
+
+1339, 846
+
+268, 875
+
+(268, 875,1)
+
+1355, 671
+
+C:\Users\nahid\ms\msBackups\CoC\builder\return.png
+
+797, 772, 1115, 920
+
+960, 840
+
+164, 812, 1646, 979
+
+170, 667, 383, 754
+
+                    #! first troops
+
+170, 667, 383, 754
+
+C:\Users\nahid\ms\msBackups\CoC\builder\phase2.png
+
+C:\Users\nahid\ms\msBackups\CoC\builder\phase1.png
+
+359, 657, 652, 761
+
+'x',1, 'y',1, 'z',1
+
+                    if find_image(r"C:\Users\nahid\ms\msBackups\CoC\builder\phase2.png", confidence=0.8, region=(170, 667, 383, 754)): 
+                        press_global_screen_with_delays((960, 840,1))
+
+1151, 816, 1273, 978
+
+phase2
+
+C:\Users\nahid\ms\msBackups\CoC\builder\phase1.png
+
+                        press_keys_with_delays(window, 't',4)
+                        press_keys_with_delays(window, '0',1, 'x',0, 'y',0, 'z',0)
+                        press_keys_with_delays(window, '3',1, 'y',1, 'y',1)
+                        press_keys_with_delays(window, '4',1, 'x',0, 'z',0)
+
+'6',1,
+
+                       press_keys_with_delays(window, '0',1, 'x',0, 'y',0, 'z',0)
+                        press_keys_with_delays(window, '3',1, 'y',1, '3',1)
+                        press_keys_with_delays(window, '4',1, 'x',0, 'z',0)
+
+'4',1,
+
+'0',1,
+
+'0',1,
+
+to 
+
+function killp  {
+    $processName = (Get-Process | Select-Object Name, CPU | Sort-Object CPU -Descending | Format-Table -AutoSize | Out-String | fzf) -split '\s{2,}' | Select-Object -First 1; if ($processName) { Stop-Process -Name $processName -Force; Write-Host "Process $processName terminated." } else { Write-Host "No process selected." }
+}
+
+function filterfzf {
+    param(
+        [string]$Command,
+        [string]$Text
+    )
+
+    $output = Invoke-Expression "$Command" | Out-String
+    $filteredOutput = $output -split "`n" | fzf --query="$Text"
+    Write-Output $filteredOutput
+}
+
+pwsh_alias
+
+"C:\ms1\asset\Powershell\pwsh_alias.ps1" 
+
+killp
+
+"C:\ms1\asset\Powershell\pwsh_alias.ps1" 
+
+What's in a name? That which we call a rose By any other name would smell as sweet'-Who said this?
+
+Juliet
+
+Man's love is of man's life a thing apart, 'Tis woman's whole existence.'- This is taken from the poem of
+
+Lord Byron
+
+Who translated the 'Rubaiyat of Omar Khayyam' into English?
+
+Edward FitzGerald
+
+Ulysses' is a novel written by -
+
+James Joyce
+
+Ulysses' নামে দুটি সাহিত্যকর্ম রয়েছে। একটি কবিতা আর অন্যটি উপন্যাস। 'Ulysses' কবিতাটি লিখেছেন Alfred Lord Tennyson। অন্যদিকে 'Ulysses' নামক উপন্যাস (novel) টি লিখেছেন Irish কবি, ছোটগল্প লেখক এবং ঔপন্যাসিক James Joyce | James Joyce 'Ulysses' উপন্যাসটির জন্য সমধিক পরিচিত।
+
+The short story 'The Diamond Necklace' was written by-
+
+Guy de Maupassant
+
+All the perfumes of Arabia will not sweeten this little hand.'-Who said this?
+
+Lady Macbeth
+
+Where are the songs of Spring? Aye, where are they? Think not of them, thou hast thy music too.' Who wrote this?
+
+John Keats
+
+Who is the central character of 'Wuthering Heights' by Emily Bronte?
+
+Heathcliff
+
+Who worte the poem 'The Good-Morrow?
+
+John Donne
+
+আলাউদ্দিন হোসেন শাহ্ কখন বৃহত্তর বাংলা শাসন করেন?
+
+১৪৯৮-১৫১৯ খ্রিস্টাব্দ
+
+প্রাচীন বাংলা মৌর্য শাসনের প্রতিষ্ঠাতা কে?
+
+চন্দ্রগুপ্ত মৌর্য
+
+প্রাচীন বাংলায় মৌর্য শাসনের প্রতিষ্ঠাতা চন্দ্রগুপ্ত মৌর্য।
+
+মৌর্য বংশের রাজত্বকাল ছিল ৩২৪ খ্রিস্টপূর্বাব্দ থেকে ১৮৬ খ্রিস্টপূর্বাব্দ পর্যন্ত। এ রাজবংশের প্রতিষ্ঠাতা চন্দ্রগুপ্ত মৌর্যের শাসনকাল ছিল ৩২৪-৩০০ খ্রিস্টপূর্বাব্দ। তিনিই সর্বপ্রথম প্রাচীন ভারতে সর্বভারতীয় ঐক্য রাষ্ট্র প্রতিষ্ঠা করেন। সম্রাট অশোক মৌর্য সাম্রাজ্যের তৃতীয় শাসক ছিলেন। তিনি সিংহাসনে আরোহণ করেন ২৭৩ খ্রিস্টপূর্বাব্দে। প্রথম চন্দ্রগুপ্ত কর্তৃক প্রতিষ্ঠিত গুপ্তশাসনের শ্রেষ্ঠ রাজা ছিলেন সমুদ্র গুপ্ত। তিনি ভারতের নেপোলিয়ন নামে পরিচিত।
+
+ইউরোপীয় বণিকদের মধ্যে বাংলায় প্রথম এসেছিলেন-
+
+পর্তুগিজরা
+
+
+১৯৭১ সালে মুক্তিযুদ্ধের সময় জাতিসংঘে কোন দেশ বাংলাদেশের পক্ষে 'ভেটো' প্রদান করেছিল?
+
+সোভিয়েত ইউনিয়ন
+
+বাংলাদেশের কোন বনভূমি শালবৃক্ষের জন্য বিখ্যাত?
+
+ভাওয়াল ও মধুপুরের বনভূমি
+
+বাংলাদেশে সবচেয়ে বেশি পাট উৎপন্ন হয় কোন জেলায়?
+
+ফরিদপুর
+
+বিবিএস প্রকাশিত কৃষি পরিসংখ্যান বর্ষগ্রন্থ অনুযায়ী বাংলাদেশে মোট আবাদযোগ্য জমির পরিমাণ ৮৫.৭৭ লক্ষ হেক্টর অথবা ২ কোটি ১১ লক্ষ একর।
+
+Warning: PowerShell detected that you might be using a screen reader and has disabled PSReadLine for compatibility purposes. If you want to re-enable it, run 'Import-Module PSReadLine'.
+
+গারো উপজাতি' কোন জেলায় বাস করে?
+
+ময়মনসিংহ
+
+পার্বত্য চট্টগ্রাম জেলায় চাকমা, মারমা, মুরং, ত্রিপুরাসহ মোট ১১টি উপজাতি বাস করে।
+
+তাছাড়া শেরপুর, নেত্রকোনা, রংপুর, জামালপুর, সিলেট ও মৌলভীবাজার জেলায়ও গারোরা বাস করে।
+
+Computer\HKEY_CURRENT_USER\Control Panel\Accessibility\Blind Access
+
+Warning: PowerShell detected that you might be using a screen reader and has disabled PSReadLine for compatibility purposes. If you want to re-enable it, run 'Import-Module PSReadLine'.
+
+HKEY_CURRENT_USER\Control Panel\Accessibility\ScreenReader
+
+HKEY_CURRENT_USER\Control Panel\Desktop
+
+HKEY_CURRENT_USER\Control Panel\Accessibility\ScreenReader
+
+HKEY_CURRENT_USER\Control Panel\Accessibility
+
+"C:\ms1\asset\Powershell\pwsh_alias.ps1" 
+
+"C:\ms1\asset\Powershell\pwsh_alias.ps1" 
+
+https://jobs.bdjobs.com/jobdetails.asp?id=1375145&fcatId=2&ln=1 
+
+Demon Slayer: Kimetsu no Yaiba Infinity Castle
+
+Per capita GDP
+
+Per capita GNI
+
+বাংলাদেশের প্রথম আদমশুমারি অনুষ্ঠিত হয়
+
+১৯৭৪ সালে
+
+পরিসংখ্যান আইন, ২০১৩ অনুযায়ী আদমশুমারির নাম পরিবর্তন করে জনশুমারি করা হয়।
+
+Inclusive Development Index (IDI)-এর ভিত্তিতে দক্ষিণ এশিয়ায় বাংলাদেশের স্থান কত?
+
+দ্বিতীয় স্থান
+
+২০১৮ সালে বাংলাদেশের মোট রপ্তানি আয় কত?
+
+$৪১ বিলিয়ন মার্কিন ডলার
+
+বাংলাদেশে প্রথম ভ্যাট (VAT) চালু হয়-
+
+১৯৯১ সালে
+
+সংবিধানের কোন সংশোধনকে 'first distortion of constitution' বলে আখ্যায়িত করা হয়?
+
+৫ম সংশোধন
+
+স্বাধীনতার ঘোষণাপত্র সংবিধানের কততম তফসিলে সংযোজন করা হয়েছে?
+
+সপ্তম
+
+গণপ্রজাতন্ত্রী বাংলাদেশের সংবিধান প্রবর্তিত হয়-
+
+১৬ ডিসেম্বর ১৯৭২
+
+সংবিধানের কোন অনুচ্ছেদে 'সরকারি কর্ম কমিশন' (PSC) গঠনের উল্লেখ আছে?
+
+১৩৭ নং অনুচ্ছেদে
+
+Almond ও Powel চাপ সৃষ্টিকারী গোষ্ঠীকে বিভক্ত করেছেন-
+
+৪ ভাগে
+
+যথা-1. Institutional Interest Groups 2. The Associational Interest Groups 3. Anomic Interest Groups 4. Non-Associational Interest Groups.
+
+বাংলাদেশ জাতিসংঘের ১৩৬তম সদস্য
+
+বাংলাদেশ জাতিসংঘের ১৩৬তম সদস্য। ১৭সেপ্টেম্বর ১৯৭৪ জাতিসংঘের ২৯তম অধিবেশনে ৩টি দেশ সদস্যপদ লাভ করে। এগুলো হচ্ছে বাংলাদেশ, গ্রানাডা এবং গিনি বিসাউ। বর্ণক্রমানুসারে নাম আসায় বাংলাদেশ ১৩৬তম, গ্রানাডা ১৩৭তম এবং গিনি বিসাউ ১৩৮তম সদস্যপদ লাভ করে।
+
+বাংলাদেশে প্রথম জাতীয় সংসদের নির্বাচন হয় -
+
+৭ মার্চ, ১৯৭৩
+
+Let there be Light'-বিখ্যাত ছবিটি পরিচালনা করেন-
+
+জহির রায়হান
+
+যুক্তরাষ্ট্রের Guantanamo Bay Detention Camp কোথায় অবস্থিত?
+
+কিউবা
+
+জাতিসংঘ কোন সালে মানবাধিকার সংক্রান্ত বৈশ্বিক ঘোষণার ঐতিহাসিক নথিটি গ্রহণ করে?
+
+১৯৪৮
+
+মিনস্ক নিচের কোন দেশের রাজধানী?
+
+বেলারুশ
+
+জাতিসংঘ সমুদ্র আইন কত সালে স্বাক্ষরিত হয়েছিল?
+
+১৯৮২ সালে
+
+বিশ্বের সর্বশেষ জলবায়ু সম্মেলন (ডিসেম্বর, ২০১৮) কোথায় অনুষ্ঠিত হয়?
+
+কাটোউইস, পোল্যান্ড
+
+Sunshine Policy (বৈদেশিক নীতির)-এর সাথে কোন দুটি দেশ জড়িত
+
+উত্তর কোরিয়া, দক্ষিণ কোরিয়া
+
+BRICS কর্তৃক প্রতিষ্ঠিত ব্যাংকের নাম হচ্ছে-
+
+New Development Bank (NDB)
+
+চীন নিচের কোন আফ্রিকান দেশটিতে সামরিক ঘাঁটি স্থাপনের মাধ্যমে কৌশলগত সম্পর্ক স্থাপন করেছে?
+
+জিবুতি
+
+শ্রীলংকার কোন সমুদ্রবন্দর চীনের নিকট ৯৯ বছরের জন্য লীজ দেয়া হয়েছে?
+
+হাম্বানটোটা
+
+দ্যা আইডিয়া অব জাস্টিস' গ্রন্থের রচয়িতা কে?
+
+অমর্ত্য সেন
+
+দক্ষিণ ও দক্ষিণ-পূর্ব এশিয়ার ৭টি দেশকে নিয়ে ১৯৯৭ সালে গঠিত একটি আঞ্চলিক অর্থনৈতিক সংস্থা হলো BIMSTEC। সংস্থাটির সদর দপ্তর বাংলাদেশের রাজধানী ঢাকায় অবস্থিত। Conference on Interaction and Confidence-Building Measures in Asia বা CICA-এর সচিবালয় কাজাখস্তানের রাজধানী নুরসুলতানে অবস্থিত। Indian Ocean Rim Association বা IORA-এর সদর দপ্তর মরিশাসের এবেনে শহরে অবস্থিত। আর সার্কের সদর দপ্তর অবস্থিত নেপালের কাঠমান্ডুতে।
+
+নিচের কোন সংস্থাটির স্থায়ী সদর দপ্তর নেই?
+
+NAM
+
+Non-Aligned Movement (NAM)
+
+বর্তমানে ১২০ সদস্যবিশিষ্ট সংস্থাটির কোনো সদর দপ্তর নেই। অপরদিকে NATO ও EU-এর সদর দপ্তর বেলজিয়ামের ব্রাসেলসে আর ASEAN-এর সদর দপ্তর ইন্দোনেশিয়ার জাকার্তায় অবস্থিত।
+
+জাতিসংঘ বিষয়ক আলোচনায় পি৫ (P5) বলতে কি বুঝায়?
+
+নিরাপত্তা পরিষদের পাঁচটি স্থায়ী সদস্য রাষ্ট্র
+
+কোন দেশটি ইউরোপের বাল্টিক অঞ্চলে অবস্থিত নয়?
+
+অস্ট্রিয়া
+
+কোন দেশটি ইউরোপের বাল্টিক অঞ্চলে অবস্থিত?
+ফিনল্যান্ড
+পোল্যান্ড
+সুইডেন
+
+নিচের কোনটি পাললিক শিলা?
+
+কয়লা
+
+সার্ক দুর্যোগ ব্যবস্থাপনা কেন্দ্র কোথায় অবস্থিত?
+
+নয়াদিল্লি
+
+বাংলাদেশের অর্থনৈতিক সেক্টরগুলোর মধ্যে কোন খাতে বেশি কর্মসংস্থান হয়?
+
+কৃষি খাত
+
+কোনো কঠিন পদার্থ বিশুদ্ধ নাকি অবিশুদ্ধ তা কিসের মাধ্যমে নির্ণয় করা যায়? গলনাঙ্ক
+
+অ্যানোডে কোন বিক্রিয়া সম্পন্ন হয়? জারণ
+
+তড়িৎ রাসায়নিক কোষ গঠনে দুটি তড়িৎদ্বার প্রয়োজন। একটি হলো অ্যানোড ও অপরটি ক্যাথোড
+
+ক্যাথোডে বিজারণ বিক্রিয়া সংঘটিত হয়। 
+
+একটি বাল্বে '60W-220V' লেখা আছে। বাল্বটির রোধ কত ওহম (Ohm)?
+
+আমরা জানি,
+P = (V ^ 2)/R
+Rightarrow R= V ^ 2 / P
+
+= (220V * 220V)/(60W)
+
+এখানে,
+বিভব পার্থক্য, V = 220V
+ক্ষমতা, P = 60W
+রোধ, R  = 806.67O mega
+
+কার্বোহাইড্রেট C, H এবং ০-এর অনুপাত কত?
+
+১:২:১
+
+কার্বোহাইড্রেট হলো কার্বন, হাইড্রোজেন অক্সিজেনের সমন্বয়ে গঠিত এক প্রকার জৈব রাসায়নি
+
+AC কে DC করার যন্ত্র
+
+রেকটিফায়ার
+
+ডিসি (DC) বিদ্যুৎকে এসিতে (AC) রূপান্তর করার জন্য ইনভার্টার (Inverter) নামক যন্ত্র ব্যবহার করা হয়
+
+বাতাসের আর্দ্রতা মাপার যন্ত্র হলো হাইগ্রোমিটার
+
+কোথায় সাঁতার কাটা সহজ? সাগরে
+
+ডিমে ভিটামিন সি নেই। ডিমের মধ্যে ভিটামিন-A, B, D ও E বিদ্যমান রয়েছে।
+
+ভিটামিন-সি রয়েছে টাটকা টক জাতীয় ফল ও তরিতরকারি যেমন-কমলালেবু, বাতাবিলেবু, পাতিলেবু, আনারস, আঙ্গুর, আম, জাম, আমলকি, টমেটো, শাক, বরবটি প্রভৃতিতে।
+
+সোডিয়াম এসিটেটের সংকেত
+
+CH3COONa
+
+ক্যান্সার চিকিৎসায় ব্যবহৃত গামা বিকিরণের উৎস কি?
+
+আইসোটোপ
+
+মুদ্রিত লেখা সরাসরি ইনপুট নেয়ার জন্য নিচের কোন্টি ব্যবহৃত হয়? MICR
+
+OCR মুদ্রিত বা হাতে লেখা টেক্সটকে মেশিন পাঠযোগ্য টেক্সট-এ রূপান্তরিত করে। আর Scanner লেখা, ছবি বা বস্তুর আকৃতিকে ডিজিটাল ছবিতে রূপান্তরিত করে
+
+অক্টাল সংখ্যা পদ্ধতিতে ০, ১, ২, ৩, ৪, ৫, ৬ ও ৭-এ ৮টি অংক (digit) ব্যবহৃত হয়
+
+একটি রিলেশনাল ডাটাবেস মডেলে নিচের কোনটি দ্বারা Relation প্রকাশ করা হয়?
+
+Tables
+
+Time-shared OS-এর জন্য কোন scheduling policy সবচেয়ে ভাল?
+
+Round-robin
+
+০, ১, ২, ৩, ৪, ৫, ৬, ৭, ৮, ৯, A, B, C, D, E ও F- হেক্সাডেসিমাল সংখ্যায় ব্যবহৃত এ ১৬টি অঙ্কের প্রতিটি অঙ্ক তার সমতুল্য চার বিটের একটি বাইনারি সংখ্যাকে প্রতিনিধিত্ব করে।
+
+প্রথম WorldWideWeb নামে ওয়েব ব্রাউজার তৈরি করেন, যা পরবর্তীতে Nexus নামকরণ করা হয়। প্রায় একই সময়ে তিনি ইন্টারনেটের মাধ্যমে পরস্পরের সাথে যুক্ত হাইপার টেক্সট ডকুমেন্টগুলো নিয়ে কাজ করার প্রক্রিয়া World Wide Web (WWW) উদ্ভাবন করেন। অন্যদিকে Netscape Navigator ১৯৯৪ সালে, Internet Explorer ১৯৯৫ সালে এবং Safari ২০০৩ সালে বাজারে অবমুক্ত হয়।
+
+বাংলাদেশে 'নব-নৈতিকতা'র প্রবর্তক হলেন-
+
+আরজ আলী মাতুব্বর
+
+I understand. You want a qtile-like status bar that docks to the edge of the screen and reserves its space,
+  so other windows don't overlap it.
+
+সভ্য সমাজের মানদণ্ড হলো-
+
+আইনের শাসন
+
+মূল্যবোধের চালিকা শক্তি হলো-
+
+সংস্কৃতি
+
+অর্থনৈতিক ক্ষেত্রে সুশাসন প্রতিষ্ঠিত হলে
+
+বিনিয়োগ বৃদ্ধি পায়
+
+here i have 2 display and the 2nd one is also same as primary one which is in the right side so can
+  u update the script so i can use it for both display
+
+সমুদ্রতীরে কোনটির প্রাচুর্য থাকে?
+
+নাইট্রোজেন
+
+বায়ুমণ্ডলে নাইট্রোজেন ৭৮.০৮% এবং অক্সিজেন ২০.৯%। এ দুটি গ্যাস বাদে বাকি বায়ুমণ্ডলীয় উপাদানগুলো অল্প পরিমাণেই থাকে। সমুদ্রতীরে এর সামান্য ব্যত্যয় হলেও নাইট্রোজেনের প্রাচুর্যই বেশি।
+
+মীর মশারফ হোসেন রচিত গ্রন্থ হচ্ছে :
+
+গাজী মিয়াঁর বস্তানী
+
+বেদান্তগ্রন্থ' ও 'বেদান্তসার' কার রচনা?
+
+রাজা রামমোহন রায়
+
+মুক্তিযুদ্ধভিত্তিক উপন্যাস 'আগুনের পরশমণি' কার রচনা?
+
+হুমায়ূন আহমেদ
+
+জীবন থেকে নেয়া' চলচ্চিত্রটির পরিচালক কে?
+
+জহির রায়হান
+
+জিরোসাম গেম (Zero-Sum Game) আন্তর্জাতিক সম্পর্কে কোন তত্ত্বের সঙ্গে সংশ্লিষ্ট?
+
+উদারতাবাদ
+
+মুক্তিযুদ্ধের সময় নৌ-কমান্ড গঠিত হয় কোন সেক্টর নিয়ে?
+
+১০ নং সেক্টর
+
+জীবনানন্দ দাশকে 'নির্জনতম কবি' বলে আখ্যায়িত করেন কে?
+
+বুদ্ধদেব বসু
+
+পলাশির যুদ্ধ কবে সংঘটিত হয়েছিল?
+
+জুন ২৩, ১৭৫৭
+
+নবাব সিরাজউদ্দৌলা এবং ইস্ট ইন্ডিয়া কোম্পানির মধ্যে ভাগীরথী নদীর তীরে অবস্থিত পলাশীর প্রান্তরে ২৩ জুন ১৭৫৭ যে যুদ্ধ সংঘটিত হয় তা পলাশীর যুদ্ধ হিসেবে পরিচিত। এ যুদ্ধে প্রধান সেনাপতি মীর জাফর আলী খানের বিশ্বাসঘাতকতায় বাংলার শেষ স্বাধীন নবাব সিরাজউদ্দৌলা পরাজয়বরণ করেন।
+
+যুক্তরাষ্ট্রে রপ্তানি বাণিজ্যের বৃহত্তম বাজার কোথায়?
+
+কানাডা
+
+সর্বপ্রথম কোথায় ওপেক এর সদর দপ্তর স্থাপিত হয়?
+
+জেনেভা
+
+Organization of the Petroleum Exporting Countries (OPEC)। প্রতিষ্ঠাকালীন এ সংস্থার সদর দপ্তর ছিল সুইজারল্যান্ডের জেনেভায়। পরবর্তীতে ১৯৬৫ সালে সদর দপ্তর স্থানান্তরিত হয় অস্ট্রিয়ার ভিয়েনায়।
+
+soporific speech - চোখে ঘুম নিয়ে আসে
+
+বঙ্গভঙ্গ রদ হয় কোন সালে?
+
+১৯১১ সালে
+
+মেসোপটেমীয় সভ্যতা গড়ে উঠেছিল কোথায়?
+
+ট্রাইগ্রিস ও ইউফ্রেটিস নদীর তীরে
+
+ইরাক, ইরান, সিরিয়া এবং তুরস্ক অঞ্চল জুড়ে বিস্তৃত ছিল বিশ্বের সবচেয়ে প্রাচীন সভ্যতা মেসোপটেমিয়া। সেচ নির্ভর প্রাচীন এ সভ্যতাটি গড়ে উঠেছিল ইউফ্রেটিস ও টাইগ্রিস (ফোরাত ও দজলা) নদীর তীরে।
+
+বাংলাদেশের প্রধান বিচারপতি নিয়োগ দেন কে?
+
+রাষ্ট্রপতি
+
+Plutocracy
+
+ধনিকতন্ত্র
+
+ফলকেটিং (Folketing) কোন দেশের আইন
+
+সভা?
+
+ডেনমার্ক
+
+স্ক্যানডিনেভিয়ান অঞ্চলের দেশ ডেনমার্কের আইনসভা ফকেটিং (Folketing), নরওয়ের আইনসভা স্টরটিং ও ফিনল্যান্ডের আইনসভা এডুসকুন্তা। আর পশ্চিম ইউরোপের দেশ বেলজিয়ামের আইনসভার নাম ফেডারেল পার্লামেন্ট।
+
+The + verb + ing + of দ্বারা verbal noun গঠিত হয়। সুতরাং প্রদত্ত বাক্যের warning শব্দটি noun
+
+culinary is related to cooking
+
+১৯৪৫ সালে প্রতিষ্ঠাকালীন সময়ে জাতিসংঘের মোট কতটি সদস্য রাষ্ট্র ছিল? ৫১
+
+বেগম রোকেয়া সাখাওয়াত হোসেন রচিত গ্রন্থ কোনটি?
+
+পদ্মরাগ
+
+তার রচিত আরেকটি উপন্যাস 'সুলতানার স্বপ্ন'। 'পদ্মাবতী' নামে কাব্য ও নাটক লিখেন যথাক্রমে আলাওল ও মাইকেল মধুসূদন দত্ত। 'পদ্ম-গোখরো' গল্পের রচয়িতা কাজী নজরুল ইসলাম।
+
+বিভক্তহীন নাম-শব্দকে কী বলে?
+
+প্রাতিপদিক
+
+Panacea' means cure of all disseases
+
+What is the plural number of 'ovum'?
+
+ova
+
+বাংলাদেশের সংবিধানে মোট কয়টি তফসিল আছে?
+
+৭টি
+
+গণপ্রজাতন্ত্রী বাংলাদেশের সংবিধানের তফসিল বর্তমানে সাতটি। এ তফসিলগুলো সংবিধানের মূল কিছু অনুচ্ছেদের বিবরণ হিসেবে কাজ করে থাকে। সাতটি তফসিলের শিরোনামগুলো নিম্নরূপ:
+
+১. অন্যান্য বিধান সত্ত্বেও কার্যকর আইন (অনুচ্ছেদ ৪৭);
+২. দ্বিতীয় তফসিল বিলুপ্ত;
+৩. শপথ ও ঘোষণা (১৪৮ অনুচ্ছেদ);
+৪. ক্রান্তিকালীন ও অস্থায়ী বিধানাবলী (১৫০(১) অনুচ্ছেদ];
+৫. বঙ্গবন্ধুর ৭ মার্চের ভাষণ [১৫০ (২) অনুচ্ছেদ);
+৬. বঙ্গবন্ধু কর্তৃক বাংলাদেশের স্বাধীনতা ঘোষণা [১৫০(২) অনুচ্ছেদ]
+৭. ১৯৭১ সালের ১০ এপ্রিলে মুজিবনগর সরকারের জারিকৃত স্বাধীনতার ঘোষণাপত্র (১৫০(২) অনুচ্ছেদ
+
+তুমি তো ভারি সুন্দর ছবি আঁক!'- বাক্যটিতে কোন প্রকারের অব্যয় পদ ব্যবহৃত হয়েছে?
+
+অনন্বয়ী অব্যয়
+
+এখানে 'তো' অনন্বয়ী অব্যয়। যেসব অব্যয় অব্যক্ত রব, শব্দ বা ধ্বনির অনুকরণে গঠিত হয়, সেগুলোকে অনুকার অব্যয় বলে। যেমন- মেঘের গর্জন গুড় গুড়। যেসব অব্যয় শব্দ বিশেষ্য ও সর্বনাম পদের বিভক্তির ন্যায় বসে কারকবাচকতা প্রকাশ করে, তাদের অনুসর্গ অব্যয় বলে যেমন- ওকে দিয়ে এ কাজ হবে না। এখানে 'দিয়ে' অনুসর্গ অব্যয়। উল্লেখ্য অনুসর্গ অব্যয় 'পদান্বয়ী অব্যয়' নামেও পরিচিত।
+
+Charles Dickens-এর লেখা novella বা short novel হলো 'A Christmas Carol'
+
+কোনটি অপাদান কারক?
+
+ট্রেন স্টেশন ছেড়েছে
+
+যা থেকে কিছু বিচ্যুত, গৃহীত, জাত, বিরত, আরম্ভ, দূরীভূত ও রক্ষিত হয় এবং যা দেখে কেউ ভীত হয়, তাকেই অপাদান কারক বলে। যেমন- ট্রেন ঢাকা ছাড়ল। অন্য অপশনগুলোতে (ক) গৃহহীনে গৃহ দাও – সম্প্রদান কারক; 
+(খ) জিজ্ঞাসিব জনে জনে – কর্মকারক; 
+(ঘ) বনে বাঘ আছে – অধিকরণ কারক।
+
+বাঁধন হারা' কাজী নজরুল ইসলামের কোন ধরনের রচনা?
+
+উপন্যাস
+
+এ উপন্যাসের প্রধান চরিত্র: নুরুল হুদা, রাবেয়া, মাহবুবা। তার রচিত আরো দুটি উপন্যাস: মৃত্যুক্ষুধা ও কুহেলিকা।
+
+২০১৮ সালের বিশ্ব পরিবেশ দিবসের প্রতিপাদ্য বিষয় কোনটি?
+
+প্লাস্টিক (plastic) দূষণকে পরাজিত করি
+
+৫ জুন ২০১৮ বিশ্বব্যাপী পালিত পরিবেশ দিবসের প্রতিপাদ্য ছিল 'আসুন প্লাস্টিক দূষণ বন্ধ করি'। আর স্লোগান ছিল 'প্লাস্টিক পুনঃব্যবহার করি, না পারলে বর্জন করি'। ২০১৯ সালের প্রতিপাদ্য 'বায়ু দূষণ'। ২০২১ সালের প্রতিপাদ্য হলো 'প্রতিবেশ পুনরুদ্ধার, হোক সবার অঙ্গীকার'।
+
+যে বহুব্রীহি সমাসে দুটি একরূপ বিশেষ্য দিয়ে এক জাতীয় কাজ বোঝায় তাকে ব্যতিহার বহুব্রীহি সমাস বলে। যেমন : কানে কানে যে কথা = কানাকানি। আরো কয়েকটি ব্যতিহার বহুব্রীহি সমাস: হাতাহাতি, হাসাহাসি, লাঠালাঠি, কোলাকুলি, চুলাচুলি। অন্যদিকে অজানা, দোতলা ও আশীবিষ যথাক্রমে নঞ, প্রত্যয়ান্ত ও ব্যধিকরণ বহুব্রীহি সমাস।
+
+বানানটি মনে রাখার একটি জনপ্রিয় কৌশল হলো 'মিথ্যা (Lie), তুমি
+
+(u), দশ (ten),
+
+পিঁপড়া (ant)'।
+
+নির্বাহী বিভাগ থেকে বিচার বিভাগ পৃথক করার বিষয়টি সংবিধানের কোন অনুচ্ছেদে উল্লেখ রয়েছে?
+
+অনুচ্ছেদ ২২০
+
+বাংলাদেশের ২০১৮-১৯ অর্থবছরে বাজেটে জিডিপির প্রক্ষেপিত প্রবৃদ্ধির হার কত?
+
+To be, or not to be that is the question', - is a famous soliloquy from-
+
+Hamlet
+
+গাছের ছোট ডাল বা উপ-শাখায় (Twig)।
+
+প্রতাপ আদিত্য কে ছিলেন?
+
+বাংলার বারো ভূইঞাদের একজন
+
+বাংলা ভাষায় উপসর্গ তিন প্রকার। যথা: বাংলা, তৎসম বা সংস্কৃত ও বিদেশি উপসর্গ। বাংলা উপসর্গ ২১টি এবং তৎসম উপসর্গ ২০টি। আ, সু, বি, নিএ চারটি উপসর্গ বাংলা ও সংস্কৃত উভয় ক্ষেত্রে রয়েছে। 'আনন' শব্দটি সংস্কৃত 'আ' উপসর্গ যোগে গঠিত। এর গঠন হলো: আ + √অনু + অন = আনন। 'আঘাটা' শব্দটি বাংলা 'আ' উপসর্গ যোগে গঠিত। এর গঠন হলো: আ + ঘাট আঘাট > আঘাটা।।
+
+Hand out'-এর শুদ্ধ বাংলা পরিভাষা হচ্ছে:
+
+জ্ঞাপনপত্র
+
+সাধু ও চলিত ভাষার মূল পার্থক্য কোন পদে বেশি বেশি দেখা যায়?
+
+ক্রিয়া ও সর্বনাম
+
+শুদ্ধ ➔ ত্রিভুজ শূন্য পুণ্য ভুবন স্বায়ত্তশাসন
+
+প্রদত্ত 'একত্রিত' শব্দটি প্রত্যয়ের অপপ্রয়োগজনিত অশুদ্ধ। এর শুদ্ধ প্রয়োগ একত্র।
+
+উৎকর্ষতা শব্দের শুদ্ধরূপ উৎকর্ষ,
+
+বাংলা বর্ণমালায় স্বরবর্ণ, অর্ধমাত্রা ও স্বরবর্ণে পূর্ণমাত্রার বর্ণ যথাক্রমে ১১, ৮ ও ৬টি
+
+গিন্নি' কোন শ্রেণির শব্দ?
+
+অর্ধ-তৎসম
+
+শ্রদ্ধা' শব্দের সঠিক প্রকৃতি-প্রত্যয় কোনটি? শ্রুৎ+√ধা + অ + আ
+
+পুষ্পসৌরভ' কোন সমাসের উদাহরণ?
+
+তৎপুরুষ
+
+সূর্য শব্দের প্রতিশব্দ: অর্ক, ভানু, তপন, দিবাকর, ভাস্কর, প্রভাকর, মার্তণ্ড, সবিতা, দিনেশ, রবি, অংশুমালী, আফতাব। অর্ণব শব্দের অর্থ: সমুদ্র, অম্বুধি, পয়োধি, পাথার, সাগর, জলধি, রত্নাকর, সিন্ধু। প্রসূন অর্থ পুষ্প, ফুল, কুসুম। পল্লব অর্থ গাছের পাতা, কিশলয়, কচি পাতা
+
+সদ্যোজাত' শব্দের শুদ্ধ সন্ধিবিচ্ছেদ কোনটি
+
+সদ্যঃ + জাত
+
+গঠনরীতিতে 'শ্রীকৃষ্ণকীর্তন' কাব্য মূলত-
+
+নাটগীতি (নাট্যগীতি)
+
+দৌলত উজির বাহরাম খান কোন অঞ্চলের অধিবাসী ছিলেন?
+
+চট্টগ্রাম
+
+কোনটি বিদ্যাসাগরের আত্মজীবনীমূলক লেখা?
+
+আত্মচরিত
+
+কাজী নজরুল ইসলামের 'অগ্নিবীণা' কাব্যের প্রথম কবিতা কোনটি?
+
+প্রলয়োল্লাস
+
+বীরবল' কোন লেখকের ছদ্মনাম?
+
+প্রমথ চৌধুরী
+
+পূর্বাশা' পত্রিকার সম্পাদক কে ছিলেন?
+
+সঞ্জয় ভট্টাচার্য
+
+কে ফোর্ট উইলিয়াম কলেজের শিক্ষক ছিলেন?
+
+রামরাম বসু
+
+মেঘনাদবধ কাব্য' প্রথম প্রকাশিত হয়?
+
+১৮৬১
+
+The most famous satirist in English literature is
+
+Jonathan Swift
+
+What is the plural form of the word 'louse'?
+
+lice
+
+ইংরেজি সাহিত্যে Jacobean Period বলতে বোঝায় 1603-1625 সময়কালকে। 1558-1603 সময়কালকে বলা হয় Elizabethan Age, 1625-1649 সময়কালকে বলা হয় Caroline Age; আর Commonwealth Period-এর সময়কাল 1649-1660/
+
+Verb-এর Past participle form (retire+d) যদি on বাক্যে adjective-এর কাজ সম্পন্ন করে তাকে Past participle বলে। বাক্যে retired (অবসরপ্রাপ্ত) শব্দটি adjective হিসেবে কাজ করছে। সুতরাং সঠিক উত্তর participle /
+
+spendthrift (অমিতব্যয়ী, অপব্যয়ী)
+
+'Take the bull by the horns'.
+
+To challenge the enemy with courage
+
+2025-07-01 09:50 AM
+Ollama Web UI
+
+2025-07-01 09:55 AM
+For God's sake hold your tongue, and let me love!
+
+This line is written by
+
+2025-07-01 09:55 AM
+John Donne
+
+2025-07-01 09:55 AM
+had better এর পর verb-এর base form বসে।
+
+2025-07-01 09:57 AM
+প্রদত্ত optionগুলোর মধ্যে singular form হলো radius, যার plural radiuses/radii / Option-এর বাকি তিনটি শব্দ plural, যাদের singular formগুলো হলো যথাক্রমে agendum, oasis এবং formula |
+
+2025-07-01 09:59 AM
+রবীন্দ্র কাছারি বাড়ি, শাহজাদপুরে দুস্কৃতকারীদের হামলায় ভাঙচুরের ঘটনার তদন্ত সংক্রান্ত
+
+2025-07-01 09:59 AM
+Of the following authors, who wrote an epic?
+
+2025-07-01 09:59 AM
+John Milton
+
+2025-07-01 10:00 AM
+‘জাতীয় মৎস্য সপ্তাহ-২০২৫’ উদ্‌যাপন উপলক্ষ্যে অনুষ্ঠিত প্রস্তুতিমূলক সভার সিদ্ধান্ত বাস্তবায়ন সংক্রান্ত।
+
+2025-07-01 10:00 AM
+আসন্ন উচ্চমাধ্যমিক সার্টিফিকেট (এইচএসসি) ও সমমান পরীক্ষা-২০২৫ সুষ্ঠু ও সুশৃঙ্খল পরিবেশে অনুষ্ঠানের লক্ষ্যে মনিটরিং ও আইনশৃঙ্খলা কমিটির সভার সিদ্ধান্ত বাস্তবায়ন
+
+2025-07-01 10:02 AM
+এইচএসসি (বিএম/বিএমটি), এইচএসসি (ভোকেশনাল) ও ডিপ্লোমা-ইন-কমার্স পরীক্ষা-২০২৫ এবং আলিম পরীক্ষা, ২০২৫ গ্রহণের বিষয়ে জেলা প্রশাসকগণকে প্রয়োজনীয় নির্দেশনা প্রদান।
+
+2025-07-01 10:02 AM
+বন্ধ ইউনিয়ন ডিজিটাল সেন্টার (ইউডিসি) সংক্রান্ত
+
+2025-07-01 10:03 AM
+ঈদ-উল-আযহা ২০২৫ উপলক্ষ্যে কাঁচা চামড়ার মূল্য নির্ধারণ, সুষ্ঠু ব্যবস্থাপনাসহ সংশ্লিষ্ট বিষয়ে প্রয়োজনীয় ব্যবস্থা গ্রহণ
+
+2025-07-01 10:05 AM
+মহাসড়কের ওপর বা তার পাশে অস্থায়ী পশুর হাট ইজারা প্রদান না করা
+
+2025-07-01 10:06 AM
+বিশ্ব পরিবেশ দিবস, ২০২৫ উদ্‌যাপন।
+
+2025-07-01 10:06 AM
+সকল কমিশনার, জেলা প্রশাসক এবং উপজেলা নির্বাহী অফিসার বরাবর পত্র প্রেরণ;
+
+2025-07-01 10:08 AM
+Verb-এর সাথে ing যুক্ত হয়ে যদি তা বাক্যে noun হিসেবে কাজ করে তখন তাকে Gerund বলে। Underlined word, reading শব্দটি বাক্যে subject তথা noun হিসেবে কাজ করছে। সুতরাং শব্দটি Gerund।
+
+2025-07-01 10:15 AM
+The play 'The Spanish Tragedy' is written by -
+
+2025-07-01 10:15 AM
+Thomas Kyd
+
+2025-07-01 10:16 AM
+R. K. Narayan। তার উল্লেখযোগ্য কয়েকটি উপন্যাস হলো- The Bachelor of Arts, The Dark Room, The Man-Eater of Malgudi /
+
+2025-07-01 10:18 AM
+The word 'Panegyric' means-
+
+2025-07-01 10:18 AM
+elaborate praise
+
+2025-07-01 10:18 AM
+Select the correctly spelt word
+
+2025-07-01 10:18 AM
+heterogeneous
+
+2025-07-01 10:19 AM
+Which period is known as 'The golden age of English literature'?
+
+2025-07-01 10:19 AM
+The Elizabeth I age
+
+2025-07-01 10:48 AM
+প্রাচীন বাংলার হরিকেল জনপদ অঞ্চলভুক্ত এলাকা-
+
+2025-07-01 10:48 AM
+চট্টগ্রাম
+
+2025-07-01 10:48 AM
+নিচের মোগল সম্রাটদের মধ্যে কে প্রথম আত্মজীবনী লিখেছিলেন?
+
+2025-07-01 10:48 AM
+বাবর
+
+2025-07-01 05:46 PM
+জুম চাষ হয়-
+
+2025-07-01 05:46 PM
+খাগড়াছড়িতে
+
+2025-07-01 05:49 PM
+বাংলাদেশের প্রথম আদমশুমারি হয়-
+
+2025-07-01 05:49 PM
+১৯৭৪ সালে
+
+2025-07-01 05:53 PM
+বাংলাদেশের অন্যতম বিশেষায়িত ব্যাংক-
+
+2025-07-01 05:53 PM
+বাংলাদেশ কৃষি ব্যাংক
+
+2025-07-01 05:55 PM
+গণপ্রজাতন্ত্রী বাংলাদেশের সংবিধানের তৃতীয় ভাগের ২০০২৭ নম্বর ধারায় বলা হয়েছে, 'সকল নাগরিক আইনের দৃষ্টিতে সমান এবং আইনের সমান আশ্রয় লাভের অধিকারী'। আন্তর্জাতিক শান্তি নিরাপত্তা ও সংহতির উন্নয়নের কথা বলা হয়েছে ২৫ নম্বর অনুচ্ছেদে। সংবিধানের ২৯ অনুচ্ছেদ সরকারি নিয়োগ লাভে সুযোগের সমতা সম্পর্কিত। ৩১ ধারায়। বলা হয়েছে আইনের আশ্রয় লাভের অধিকার সম্পর্কে।
+
+2025-07-01 05:58 PM
+বাংলাদেশে বিদ্যুৎ উৎপাদনে জ্বালানি হিসেবে সর্বাধিক ব্যবহৃত হয়-
+
+2025-07-01 05:58 PM
+প্রাকৃতিক গ্যাস
+
+2025-07-01 06:24 PM
+give me some enclyopedia info
+
+2025-07-01 06:24 PM
+আইন প্রণয়নের ক্ষমতা-
+
+2025-07-01 06:24 PM
+জাতীয় সংসদের
+
+2025-07-01 06:26 PM
+গণপ্রজাতন্ত্রী বাংলাদেশের রাষ্ট্রপতি পদে নির্বাচিত হবার ন্যূনতম বয়স-
+
+2025-07-01 06:26 PM
+৩৫ বছর
+
+2025-07-01 06:30 PM
+বাংলাদেশের জাতীয় আয় গণনায় দেশের অর্থনীতিকে ক'টি খাতে ভাগ করা হয়?
+
+2025-07-01 06:30 PM
+১৫
+
+2025-07-01 06:39 PM
+দেশের মোট ৩২টি জেলার সাথে এ দুটি দেশের সীমানা রয়েছে। তন্মধ্যে ভারতের সাথে ৩০টি জেলা এবং মিয়ানমারের সাথে রয়েছে তিনটি জেলার সংযোগ।
+
+2025-07-01 06:58 PM
+বাংলাদেশ বর্তমানে সর্বাধিক পরিমাণ অর্থের বিভিন্ন পণ্য আমদানি করে-
+
+2025-07-01 06:58 PM
+চীন থেকে
+
+fifa year and in which country future?
+2025-07-01 07:58 PM
+অক্টোবর বিপ্লবের নেতৃত্ব দিয়েছেন:
+
+2025-07-01 07:58 PM
+ভি. আই. লেনিন
+
+2025-07-01 07:58 PM
+বিশ্বব্যাপী মেহনতি মানুষের মুক্তির নতুন দিগন্ত উন্মোচনকারী ২৫ অক্টোবর ১৯১৭ (জুলিয়ান পঞ্জিকা) আর ৭ নভেম্বরে (গ্রেগরিয়ান পঞ্জিকা) রাশিয়ার জারের বিরুদ্ধে সংঘটিত হওয়া অক্টোবর বিপ্লব বা রুশ বিপ্লবের নেতৃত্ব দিয়েছিলেন সোভিয়েত ইউনিয়নের বলশেভিক পার্টির নেতা ভ্লাদিমির ইলিচ-উলিয়ানোভ লেনিন বা ভি আই লেনিন।
+
+2025-07-01 08:02 PM
+বিশ্বব্যাপী মেহনতি মানুষের মুক্তির নতুন দিগন্ত উন্মোচনকারী ২৫ অক্টোবর ১৯১৭ (জুলিয়ান পঞ্জিকা) আর ৭ নভেম্বরে (গ্রেগরিয়ান পঞ্জিকা) রাশিয়ার জারের বিরুদ্ধে সংঘটিত হওয়া অক্টোবর বিপ্লব বা রুশ বিপ্লবের নেতৃত্ব দিয়েছিলেন সোভিয়েত ইউনিয়নের বলশেভিক পার্টির নেতা ভ্লাদিমির ইলিচ-উলিয়ানোভ লেনিন বা ভি আই লেনিন।
+
+2025-07-01 08:07 PM
+পিং পং এর অর্থ হচ্ছে
+
+2025-07-01 08:07 PM
+টেবিল টেনিস
+
+2025-07-01 08:17 PM
+সার্কের সদর দপ্তর কোথায়? কাঠমান্ডু
+
+সার্কের (SAARC - South Asian Association for Regional Cooperation) সদর দপ্তর কাঠমান্ডু, নেপাল-এ অবস্থিত।
+এখানে আরও কিছু গুরুত্বপূর্ণ আন্তর্জাতিক সংস্থা এবং তাদের সদর দপ্তর দেওয়া হলো:
+জাতিসংঘ (United Nations - UN): নিউ ইয়র্ক, মার্কিন যুক্তরাষ্ট্র
+জাতিসংঘ শিশু তহবিল (UNICEF): নিউ ইয়র্ক, মার্কিন যুক্তরাষ্ট্র
+বিশ্ব স্বাস্থ্য সংস্থা (World Health Organization - WHO): জেনেভা, সুইজারল্যান্ড
+আন্তর্জাতিক শ্রম সংস্থা (International Labour Organization - ILO): জেনেভা, সুইজারল্যান্ড
+বিশ্ব বাণিজ্য সংস্থা (World Trade Organization - WTO): জেনেভা, সুইজারল্যান্ড
+আন্তর্জাতিক মুদ্রা তহবিল (International Monetary Fund - IMF): ওয়াশিংটন ডি.সি., মার্কিন যুক্তরাষ্ট্র
+বিশ্ব ব্যাংক (World Bank): ওয়াশিংটন ডি.সি., মার্কিন যুক্তরাষ্ট্র
+ইউনেস্কো (UNESCO - United Nations Educational, Scientific and Cultural Organization): প্যারিস, ফ্রান্স
+ন্যাটো (NATO - North Atlantic Treaty Organization): ব্রাসেলস, বেলজিয়াম
+ইউরোপীয় ইউনিয়ন (European Union - EU): ব্রাসেলস, বেলজিয়াম
+অ্যাসোসিয়েশন অফ সাউথ-ইস্ট এশিয়ান নেশনস (ASEAN): জাকার্তা, ইন্দোনেশিয়া
+অর্গানাইজেশন অফ দ্য পেট্রোলিয়াম এক্সপোর্টিং কান্ট্রিস (OPEC): ভিয়েনা, অস্ট্রিয়া
+আন্তর্জাতিক রেড ক্রস এবং রেড ক্রিসেন্ট আন্দোলন (International Red Cross and Red Crescent Movement): জেনেভা, সুইজারল্যান্ড
+আন্তর্জাতিক অলিম্পিক কমিটি (International Olympic Committee - IOC): লসান, সুইজারল্যান্ড
+
+2025-07-01 08:32 PM
+ভারতের সবচেয়ে প্রাচীন রাজনৈতিক দল কোনটি
+
+2025-07-01 08:32 PM
+ইন্ডিয়ান ন্যাশনাল কংগ্রেস
+
+2025-07-01 08:36 PM
+প্রাকৃতিক আইনের উদ্ভব হয় :
+থমাস হবসন, হুগো, গ্রোসিয়াস ও জন লক-এর লেখনী থেকে
+
+2025-07-01 08:40 PM
+ভূতাত্ত্বিকভাবে বাংলাদেশের সবচেয়ে পুরাতন ভূমিরূপ গঠিত হয়।
+
+2025-07-01 08:40 PM
+টারশিয়ারী যুগে
+
+2025-07-01 08:49 PM
+বাংলাদেশের জলবায়ু কী ধরনের? ক্রান্তীয় মৌসুমী জলবায়
+
+2025-07-01 08:59 PM
+বাংলাদেশের মাঝামাঝি স্থান দিয়ে কর্কটক্রান্তি রেখা অতিক্রম করায় এখানে ক্রান্তীয় জলবায়ু বিরাজমান।
+
+2025-07-01 09:01 PM
+আফ্রিকার সাব-সাহারা অঞ্চলকে কী নামে অভিহিত করা হয়?
+
+2025-07-01 09:01 PM
+সাহেল
+
+2025-07-01 09:04 PM
+রামসার সাইট' হিসেবে স্বীকৃত?
+
+2025-07-01 09:04 PM
+টাঙ্গুয়ার হাওর
+
+2025-07-01 09:17 PM
+সেন্দাই ফ্রেমওয়ার্ক ২০১৫-৩০' হচ্ছে একটি-
+
+2025-07-01 09:17 PM
+দুর্যোগের ঝুঁকি হ্রাস কৌশল
+
+2025-07-01 09:20 PM
+কোনটি জলজ আবহাওয়াজনিত (hydro-meteorological) দুর্যোগ নয়
+
+2025-07-01 09:20 PM
+ভূমিকম্প
+
+2025-07-01 09:21 PM
+কোন গ্যাসটি 'ড্রাই আইস' তৈরিতে ব্যবহার করা হয়?
+
+2025-07-01 09:21 PM
+কার্বন ডাই-অক্সাইড
+
+2025-07-01 09:42 PM
+নিচের কোন উদ্ভিদ কেবল ম্যানগ্রোভ বনাঞ্চলে দেখা যায়? নিপা পাম
+
+2025-07-01 10:28 PM
+স্টিফেন হকিং একজন-
+
+2025-07-01 10:28 PM
+পদার্থবিদ
+
+2025-07-01 10:29 PM
+প্রাকৃতিক গ্যাসের উপাদানগুলো হলো: মিথেন ৮০%-৯০%, ইথেন ১৩%, প্রোপেন ৩%। এছাড়া বিউটেন, ইথিলিন ও নাইট্রোজেনও কিছু পরিমাণ থাকে। আমাদের বাংলাদেশে প্রাপ্ত প্রাকৃতিক গ্যাসে মিথেনের পরিমাণ ৯৫% – ৯৯%।
+
+2025-07-01 10:40 PM
+1 byte = 8 bit
+
+2025-07-01 10:42 PM
+show some complex js
+
+2025-07-01 11:16 PM
+OSI (Open System Interconnection) মডেলের সাতটি (৭) স্তর আছে। প্রশ্নে 'OST'-এর স্থলে 'OSI' ও মডেমের স্থলে মডেল হলে উত্তর হতো অপশন (ক) ৭।]
+
+2025-07-01 11:16 PM
+কোন বছর ইউএনডিপি (UNDP) সুশাসনের সংজ্ঞা প্রবর্তন করে?
+
+2025-07-01 11:16 PM
+১৯৯৭
+
+2025-07-01 11:20 PM
+সুশাসনের কোন নীতি সংগঠনের স্বাধীনতাকে নিশ্চিত করে? স্বচ্ছতা
+
+2025-07-03 10:05 AM
+নিচের কোন বানানগুচ্ছের সবগুলো বানানই অশুদ্ধ?
+a.নিক্কণ, সূচগ্র, অনুর্ধ্ব
+b.অনূর্বর ঊর্ধ্বগামী, শুদ্ধ্যশুদ্ধি
+c.ভূরিভূরি, ভুঁড়িওয়ালা, মাতৃস্বসা
+d.রানি, বিকিরণ, দুরতিক্রম্য
+(ক) অপশনের সবগুলো বানানই অশুদ্ধ। শুদ্ধরূপ: নিকুণ, সূচ্যগ্র ও অনূর্ধ্ব। অন্যদিকে
+(খ) অপশনের অনূর্বর ও
+(গ) অপশনের ভুঁড়িওয়ালা শব্দের শুদ্ধরূপ যথাক্রমে অনুর্বর ও ভুঁড়িওয়ালা।
+(ঘ) অপশনের সবগুলো বানানই শুদ্ধ।
+
+2025-07-03 10:08 AM
+বাংলাদেশে 'গ্রাম থিয়েটার'-এর প্রবর্তক কে? সেলিম আল দীন
+
+2025-07-03 10:11 AM
+সমভিব্যাহারে' শব্দটির অর্থ কী? একযোগে
+
+2025-07-03 10:15 AM
+মুহম্মদ শহীদুল্লাহ্ সম্পাদিত চর্যাপদ বিষয়ক গ্রন্থের নাম কী? Buddhist Mystic Songs
+	তার কয়েকটি উল্লেখযোগ্য অনুবাদ গ্রন্থ: দীওয়ানে হাফিজ, অমিয়শতক, রুবাইয়াত-ই-ওমর খ্যায়াম, বিদ্যাপতি শতক, মহররম শরীফ, Hundred Sayings of the Holy Prophet। তার ভাষাতত্ত্ব বিষয়ক উল্লেখযোগ্য গ্রন্থ: ভাষা ও সাহিত্য, বাংলা ব্যাকরণ এবং বাংলা ভাষার ইতিবৃত্ত। তার সম্পাদনায় রচিত হয় বাংলাদেশের আঞ্চলিক ভাষার অভিধান।
+
+2025-07-03 10:19 AM
+পূর্ববঙ্গ গীতিকা'র লোকপালাসমূহের সংগ্রাহক কে? চন্দ্রকুমার দে
+
+2025-07-03 10:29 AM
+গোরক্ষ বিজয়' কাব্য কোন ধর্মমতের কাহিনি অবলম্বনে লেখা?
+
+2025-07-03 10:29 AM
+নাথধর্ম
+
+2025-07-03 11:14 AM
+অলৌকিক ইস্টিমার' গ্রন্থের রচয়িতা কে?
+
+হুমায়ুন আজাদ
+
+2025-07-03 11:24 AM
+প্রদীপ নিবিয়া গেল! '-এ বিখ্যাত বর্ণনা কোন উপন্যাসের?
+
+2025-07-03 11:24 AM
+বঙ্কিমচন্দ্রের 'কপালকুণ্ডলা'
+
+2025-07-03 11:33 AM
+মাতৃভাষায় যাহার ভক্তি নাই সে মানুষ নহে।'-কার উক্তি?
+
+2025-07-03 11:33 AM
+মীর মশাররফ হোসেনের
+
+2025-07-03 11:37 AM
+বাংলা ভাষায় খাঁটি বাংলা উপসর্গের সংখ্যা ২১টি। যথা: অ, অঘা, অজ, অনা, আ, আড়, আন, আব, ইতি, উন (ঊনা), কদ, কু, নি, পাতি, বি, ভর, রাম, স, সা, সুহা।
+
+2025-07-03 11:38 AM
+যুক্তাক্ষর এক মাত্রা এবং বদ্ধাক্ষরও এক মাত্রা গণনা করা হয় কোন ছন্দে? স্বরবৃত্ত
+
+2025-07-03 11:40 AM
+ভাষার প্রধান উপাদান চারটি
+
+2025-07-03 11:40 AM
+সারা বিশ্বে বর্তমানে কত মানুষের বসবাস রয়েছে?
+
+2025-07-03 11:47 AM
+কল্লোল' পত্রিকার প্রথম সম্পাদকের নাম কী? ীনেশরঞ্জন দাশ
+
+2025-07-03 11:51 AM
+ধর্ম সাধারণ লোকের সংস্কৃতি, আর সংস্কৃতি শিক্ষিত মার্জিত লোকের ধর্ম।'- কে বলেছেন? মোতাহের হোসেন চৌধুরী
+
+2025-07-03 11:54 AM
+কোন বাক্যটি শুদ্ধ?
+a.আপনি স্বপরিবারে আমন্ত্রিত।
+b.তার কথা শুনে আমি আশ্চর্যান্বিত হলাম।
+c.তোমার পরশ্রীকাতরতায় আমি মুগ্ধ।
+d.সেদিন থেকে তিনি সেখানে আর যায় না।
+	প্রদত্ত অপশনগুলোর মধ্যে একমাত্র (খ)-তে প্রদত্ত বাক্যটিই নির্ভুল। (ক) অপশনে 'স্বপরিবারে'-এর স্থলে 'সপরিবারে', (গ) অপশনে 'পরশ্রীকাতরতা' শব্দের অর্থ অপরের উন্নতিতে ঈর্ষা প্রকাশ। তাই এখানে 'মুগ্ধ' শব্দটি অপপ্রয়োগ এবং (ঘ) অপশনে 'যায়'-এর স্থলে 'যান' হবে
+
+2025-07-03 11:56 AM
+Ode কী? কোরাসগান
+	Ode-এর আভিধানিক অর্থ গীতিকবিতা বা গাথাকবিতা। অনেকে Ode-কে স্তোত্র কবিতা বা স্মৃতি বা গুণকীর্তন জাতীয় কবিতা বলেছেন। গ্রিক Ode এক বা একাধিক কণ্ঠে গাওয়ার জন্য কোরাস ও নৃত্যের লয় অনুসরণ করে রচনা করা হতো। যেহেতু এটি কোরাস করে গাওয়া হতো তাই (ঘ) সঠিক। 
+	Elegy অর্থ শোককবিতা।
+
+2025-07-03 11:59 AM
+মুহম্মদ আবদুল হাই রচিত ধ্বনিবিজ্ঞান বিষয়ক গ্রন্থের নাম কী? ধ্বনিবিজ্ঞান ও বাংলা ধ্বনিতত্ত্ব
+
+2025-07-03 12:01 PM
+জলে-স্থলে' কী সমাস? অলুক দ্বন্দ্ব
+
+2025-07-03 12:09 PM
+obj
+
+2025-07-03 12:15 PM
+মুসলিম মহাকবি কায়কোবাদের (১৮৪৮ - ১৯৫২) শ্রেষ্ঠ মহাকাব্য 'মহাশ্মশান' (১৯০৪) । কাব্যটির ঐতিহাসিক পটভূমি হলো তৃতীয় পানিপথের যুদ্ধ (১৭৬১)। 
+
+2025-07-03 12:19 PM
+রবীন্দ্রনাথ ঠাকুরের 'গীতাঞ্জলি' কাব্য প্রকাশিত হয় কত সনে?
+
+2025-07-03 12:19 PM
+১৯১০
+
+2025-07-03 12:20 PM
+রবীন্দ্রনাথ ঠাকুর তার 'গীতাঞ্জলি' কাব্য ও 8881্যের কিছু কবিতা 'Song Offerings' নামে প্রকাশ করে ১৯১৩ সালে নোবেল পুরস্কার পান।
+
+2025-07-03 12:43 PM
+past perfect tense <--- Before ---> past indefinite tense
+past indefinite tense <--- after ---> past perfect tens
+piapp
+ppbpi
+
+2025-07-03 01:37 PM
+Either of + sub-এর verb singular হয়।
+Subject-এ both থাকলে verb plural হয়
+
+2025-07-03 01:42 PM
+One of the robbers-এর verb singular হবে,
+
+2025-07-03 01:46 PM
+My uncle was - businessman to fall into that trap ? too shrewd a
+	Too/so/as/how/this/that + adjective + a/an + noun
+2025-07-03 01:54 PM
+Sheep, pair, swine, deer, dozen, gross এ শব্দগুলোর singular plural form একই। এগুলোর সাথে s/es বসে না
+
