@@ -160,6 +160,15 @@ These two markdown syntaxes work together and are controlled by the same 👁️
 - `toggleCollapsible(id)` - Individual toggle for `{{}}` buttons
 - Click event listener - Individual toggle for `[[]]` spans
 
+### Cell Complete Checkmark Feature
+**Purpose:** Mark cells as complete with a green checkmark for task tracking.
+**Access:** Right-click context menu → "Mark Complete"
+**Implementation:** 
+- `toggleCellComplete()` function follows same pattern as other toggle functions (Bold, Italic, Center)
+- CSS: `.cell-complete::before` pseudo-element shows green ✓ in top-left corner
+- Data stored via `setCellStyle(row, col, 'complete', boolean)`
+- Applied in `renderTable()` and supported in static export
+
 ### Single Row View Mode
 **Purpose:** Allows viewing and editing one row at a time, useful for focused review or quiz/flashcard-style workflows.
 **UI Controls:**
