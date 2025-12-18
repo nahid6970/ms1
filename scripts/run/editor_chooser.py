@@ -27,8 +27,13 @@ def open_with_editor(file_paths, editor):
             subprocess.run(f'zed "{file_paths}"', shell=True)
     elif editor == "emacs":
         # Ensure HOME is set for Emacs to find config
+        # Emacs on Windows often defaults to APPDATA for config if HOME is not set,
+        # but if we are running from a context where HOME might be confused or unset,
+        # we explicitly point it to APPDATA where the user's config likely resides.
         env = os.environ.copy()
-        if 'HOME' not in env:
+        if 'APPDATA' in env:
+             env['HOME'] = env['APPDATA']
+        elif 'HOME' not in env:
              env['HOME'] = env['USERPROFILE']
         
         # Use runemacs for Windows GUI to avoid console and better env handling
