@@ -295,6 +295,26 @@ def generate_static_html(data, custom_syntaxes):
             box-sizing: border-box;
         }
 
+        /* Cell complete checkmark */
+        td.cell-complete::before {
+            content: "✓";
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            background: #28a745;
+            color: white;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+            z-index: 10;
+            pointer-events: none;
+        }
+
         th {
             background: #f8f9fa;
             font-weight: 600;
@@ -1460,6 +1480,7 @@ def generate_static_html(data, custom_syntaxes):
                     if (cellStyle.bold) cellContent.style.fontWeight = 'bold';
                     if (cellStyle.italic) cellContent.style.fontStyle = 'italic';
                     if (cellStyle.center) cellContent.style.textAlign = 'center';
+                    if (cellStyle.complete) td.classList.add('cell-complete');
                     
                     // Handle borders properly
                     if (cellStyle.border === true) {

@@ -2311,6 +2311,37 @@ function toggleCellCenter() {
     document.getElementById('ctxCenter').classList.toggle('checked', newValue);
 }
 
+function toggleCellComplete() {
+    if (!contextMenuCell) return;
+
+    const { rowIndex, colIndex, tdElement } = contextMenuCell;
+    const style = getCellStyle(rowIndex, colIndex);
+    const newValue = !style.complete;
+
+    // Apply to multiple cells if selected
+    if (selectedCells.length > 0) {
+        selectedCells.forEach(cell => {
+            setCellStyle(cell.row, cell.col, 'complete', newValue);
+            if (newValue) {
+                cell.td.classList.add('cell-complete');
+            } else {
+                cell.td.classList.remove('cell-complete');
+            }
+        });
+        showToast(`${newValue ? 'Marked' : 'Unmarked'} ${selectedCells.length} cells as complete`, 'success');
+    } else {
+        // Apply to single cell
+        setCellStyle(rowIndex, colIndex, 'complete', newValue);
+        if (newValue) {
+            tdElement.classList.add('cell-complete');
+        } else {
+            tdElement.classList.remove('cell-complete');
+        }
+    }
+
+    document.getElementById('ctxComplete').classList.toggle('checked', newValue);
+}
+
 // Border options will be handled by unified border modal
 
 function showCellContextMenu(e, rowIndex, colIndex, inputElement, tdElement) {
@@ -2326,6 +2357,7 @@ function showCellContextMenu(e, rowIndex, colIndex, inputElement, tdElement) {
     document.getElementById('ctxBold').classList.toggle('checked', style.bold === true);
     document.getElementById('ctxItalic').classList.toggle('checked', style.italic === true);
     document.getElementById('ctxCenter').classList.toggle('checked', style.center === true);
+    document.getElementById('ctxComplete').classList.toggle('checked', style.complete === true);
 
     // Show/hide merge options
     const isMerged = mergeInfo && (mergeInfo.colspan || mergeInfo.rowspan || mergeInfo.hidden);
@@ -5602,6 +5634,7 @@ function renderTable() {
                 if (cellStyle.bold) textarea.style.fontWeight = 'bold';
                 if (cellStyle.italic) textarea.style.fontStyle = 'italic';
                 if (cellStyle.center) textarea.style.textAlign = 'center';
+                if (cellStyle.complete) td.classList.add('cell-complete');
                 if (cellStyle.border) {
                     const borderWidth = cellStyle.borderWidth || '1px';
                     const borderStyle = cellStyle.borderStyle || 'solid';
@@ -5722,6 +5755,7 @@ function renderTable() {
             if (cellStyle.bold) input.style.fontWeight = 'bold';
             if (cellStyle.italic) input.style.fontStyle = 'italic';
             if (cellStyle.center) input.style.textAlign = 'center';
+            if (cellStyle.complete) td.classList.add('cell-complete');
             if (cellStyle.border) {
                 const borderWidth = cellStyle.borderWidth || '1px';
                 const borderStyle = cellStyle.borderStyle || 'solid';

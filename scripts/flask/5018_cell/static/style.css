@@ -834,6 +834,26 @@ td {
     height: auto;
 }
 
+/* Cell complete checkmark */
+td.cell-complete::before {
+    content: "✓";
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    background: #28a745;
+    color: white;
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: bold;
+    z-index: 10;
+    pointer-events: none;
+}
+
 /* When showing markdown preview, make cell height adapt */
 td:not(:focus-within):has(.markdown-preview) {
     height: auto;
