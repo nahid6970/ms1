@@ -208,6 +208,16 @@ document.addEventListener('click', (e) => {
         };
         contextMenu.appendChild(changeColorBtn);
 
+        // Note Button
+        let noteBtn = document.createElement('button');
+        noteBtn.className = 'web-highlighter-context-btn note-btn';
+        noteBtn.textContent = '📝';
+        noteBtn.onclick = (evt) => {
+            evt.stopPropagation();
+            showNoteDialog(currentHighlightTarget);
+        };
+        contextMenu.appendChild(noteBtn);
+
         // Delete Button
         let deleteBtn = document.createElement('button');
         deleteBtn.className = 'web-highlighter-context-btn delete-btn';
@@ -313,6 +323,80 @@ function changeHighlightColor(element, newColor) {
     });
 }
 
+function showNoteDialog(highlightElement) {
+    const id = highlightElement.dataset.highlightId;
+    
+    // Get current note from storage
+    chrome.storage.local.get([currentURL], (result) => {
+        let items = result[currentURL] || [];
+        let highlight = items.find(h => h.id === id);
+        let currentNote = highlight ? (highlight.note || '') : '';
+        
+        // Create note dialog
+        let noteDialog = document.createElement('div');
+        noteDialog.className = 'web-highlighter-note-dialog';
+        noteDialog.innerHTML = `
+            <div class="web-highlighter-note-content">
+                <h3>Add Note</h3>
+                <textarea placeholder="Add your note here..." rows="4">${currentNote}</textarea>
+                <div class="web-highlighter-note-buttons">
+                    <button class="save-note-btn">Save</button>
+                    <button class="cancel-note-btn">Cancel</button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(noteDialog);
+        
+        let textarea = noteDialog.querySelector('textarea');
+        let saveBtn = noteDialog.querySelector('.save-note-btn');
+        let cancelBtn = noteDialog.querySelector('.cancel-note-btn');
+        
+        // Focus textarea and select existing text
+        textarea.focus();
+        if (currentNote) textarea.select();
+        
+        saveBtn.onclick = () => {
+            let noteText = textarea.value.trim();
+            
+            // Update storage
+            chrome.storage.local.get([currentURL], (result) => {
+                let items = result[currentURL] || [];
+                items = items.map(h => {
+                    if (h.id === id) {
+                        h.note = noteText;
+                    }
+                    return h;
+                });
+                chrome.storage.local.set({ [currentURL]: items });
+            });
+            
+            // Update visual indicator
+            if (noteText) {
+                highlightElement.setAttribute('title', noteText);
+                highlightElement.style.borderBottom = '2px dotted rgba(0,0,0,0.3)';
+            } else {
+                highlightElement.removeAttribute('title');
+                highlightElement.style.borderBottom = 'none';
+            }
+            
+            document.body.removeChild(noteDialog);
+            contextMenu.style.display = 'none';
+        };
+        
+        cancelBtn.onclick = () => {
+            document.body.removeChild(noteDialog);
+        };
+        
+        // Close on outside click
+        noteDialog.onclick = (e) => {
+            if (e.target === noteDialog) {
+                document.body.removeChild(noteDialog);
+            }
+        };
+    });
+}
+
 function highlightSelection(color) {
     const selection = window.getSelection();
     if (!selection.rangeCount) return;
@@ -354,7 +438,8 @@ function highlightSelection(color) {
             id: span.dataset.highlightId,
             text: text,
             color: color,
-            path: parentPath
+            path: parentPath,
+            note: ''
         });
 
     } catch (e) {
@@ -443,6 +528,12 @@ function wrapTextInParent(parent, h) {
             span.style.backgroundColor = h.color;
             span.dataset.highlightId = h.id;
             span.textContent = h.text;
+            
+            // Add note indicator if note exists
+            if (h.note && h.note.trim()) {
+                span.setAttribute('title', h.note);
+                span.style.borderBottom = '2px dotted rgba(0,0,0,0.3)';
+            }
 
             try {
                 range.deleteContents();
