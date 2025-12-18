@@ -1,0 +1,46 @@
+## Literary Periods ##
+- **The Elizabethan I age (1558-1603)**: Known as 'The golden age of English literature'.
+- **Jacobean Period (1603-125)**.
+- **Caroline Age (1625-1649)**.
+- **Commonwealth Period (1649-1660)**.
+-----
+## Authors & Works ##
+- **William Shakespeare**:
+-- Born in 1564. Known as the "Bard of Avon".
+-- **Hamlet**: Famous soliloquy "To be, or not to be, that is the question".
+-- **Macbeth**: Quote "All the perfumes of Arabia will not sweeten this little hand" is said by Lady Macbeth.
+-- **Romeo and Juliet**: Quote "What's in a name? That which we call a rose By any other name would smell as sweet" is said by Juliet.
+- **Alexander Pope**:
+-- Wrote the mock-heroic poem 'The Rape of the Lock'.
+- **Jonathan Swift**:
+-- Regarded as the most famous satirist in English literature.
+- **John Milton**:
+-- Wrote the epic 'Paradise Lost'.
+- **John Donne**:
+-- Wrote the poem 'The Good-Morrow'.
+-- Famous line: "For God's sake hold your tongue, and let me love!"
+- **Christopher Marlowe**:
+-- **Doctor Faustus**: Contains the line "Sweet Helen, make me immortal with a kiss."
+- **Alfred, Lord Tennyson**:
+-- His poem 'In Memoriam' is an elegy on the death of Arthur Henry Hallam.
+- **Lord Byron**:
+-- Wrote the lines: "Man's love is of man's life a thing apart, 'Tis woman's whole existence."
+- **John Keats**:
+-- Wrote the lines: "Where are the songs of Spring? Aye, where are they? Think not of them, thou hast thy music too."
+- **Emily Brontë**:
+-- Wrote 'Wuthering Heights', where the central character is Heathcliff.
+- **Charles Dickens**:
+-- Wrote the novella 'A Christmas Carol'.
+- **James Joyce**:
+-- Wrote the novel 'Ulysses'. (Note: The poem 'Ulysses' was written by Alfred Lord Tennyson).
+- **Guy de Maupassant**:
+-- Wrote the short story 'The Diamond Necklace'.
+- **Edward FitzGerald**:
+-- Translated the 'Rubaiyat of Omar Khayyam' into English.
+- **Thomas Kyd**:
+-- Wrote 'The Spanish Tragedy'.
+- **R. K. Narayan**:
+-- Indian writer. Notable novels include 'The Bachelor of Arts', 'The Dark Room', 'The Man-Eater of Malgudi'.
+- **W.B. Yeats**:
+-- An Irish poet and dramatist.
+-----

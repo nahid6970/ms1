@@ -1,0 +1,37 @@
+## Vocabulary & Grammar ##
+- **Capricious**: Known for sudden changes in attitude or behaviour.
+- **Widower**: A man whose wife has died.
+- **Spinster**: An unmarried woman.
+- **Bachelor**: An unmarried man.
+- **Appal**: To horrify or shock. Similar to **Dismay**.
+- **Dearth**: A scarcity or lack of something.
+- **Spendthrift**: A person who spends money in an extravagant, irresponsible way.
+- **Panacea**: A solution or remedy for all difficulties or diseases.
+- **Soporific speech**: A speech that tends to induce drowsiness or sleep.
+- **Culinary**: Related to cooking.
+- **Postscript (P.S.)**: An additional remark at the end of a letter, after the signature.
+- **Corrigendum**: A thing to be corrected, typically an error in a printed book.
+- **NB (Nota Bene)**: Mark well; take careful note.
+- **RSVP (Répondez s'il vous plaît)**: Please reply.
+- **Panegyric**: A public speech or published text in praise of someone or something.
+- **Heterogeneous**: Diverse in character or content.
+-----
+## Phrases & Idioms ##
+- **Break in**: To interrupt a conversation.
+- **Take the bull by the horns**: To face a difficulty with courage.
+-----
+## Grammar & Spelling ##
+- **Spelling**: `Conscientious`, `Perseverance`, `Convalescence`, `Lieutenant`.
+- **Plural Forms**:
+-- **Aircraft**: Remains the same.
+-- **Ovum**: -> `ova`.
+-- **Radius**: -> `radii` or `radiuses`.
+-- **Louse**: -> `lice`.
+-- Words like `Sheep`, `pair`, `swine`, `deer`, `dozen`, `gross` have the same singular and plural form.
+- **Participle**: A verb form that can be used as an adjective. In "A lost opportunity never returns," `lost` is a participle.
+- **Gerund**: A verb form ending in `-ing` that functions as a noun. In "Reading is an excellent habit," `reading` is a gerund.
+- **Compound Sentence**: Contains two or more independent clauses, often joined by conjunctions like `or`, `but`, `yet`, `else`.
+- **Verbal Noun**: A noun formed from a verb. Can be formed with `The + verb-ing + of`.
+- **`had better`**: Followed by the base form of a verb (e.g., "You had better go").
+- **`Too/so/as/how/this/that + adjective + a/an + noun`**: A common grammatical structure (e.g., "too shrewd a businessman").
+-----
