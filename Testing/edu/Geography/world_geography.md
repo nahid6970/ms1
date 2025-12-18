@@ -1,61 +1,162 @@
-##1. Geography & World Map##
-
-**Continents & Area:**
-- **Largest Continent:** Asia.
-- **Continent Ranking by Area:**
-1. Asia
-2. Africa
-3. North America
-4. South America
-5. Antarctica
-6. Europe
-7. Australia (Oceania)
-- **Smallest Continent:** Australia.
-
-**Countries:**
-- **Largest Country (Area):** Russia (1/8th of Earth's landmass).
-- **Largest Country in Asia:** China.
-- **Largest Country (Population):** India.
-- **Highest Population Density:** Monaco.
-- **Smallest Country (Area & Population):** Vatican City (Pope-ruled).
-
-**Geographical Nicknames & Facts:**
-- **Land of Thousand Islands:** Indonesia.
-- **Land of Thousand Lakes:** Finland.
-- **City of Seven Hills:** Rome.
-- **Largest Delta:** Bangladesh (Sundarbans).
-- **Queen of Islands (BD):** Bhola.
-- **Roof of the World:** Pamir Plateau.
-- **Playground of Europe (Cockpit):** Belgium.
-- **Land of Midnight Sun:** Norway.
-- **Land of Rising Sun:** Japan.
-- **Land of Sunset:** Norway.
-- **Land of Fire & Ice:** Iceland.
-- **Dark Continent:** Africa.
-- **Horn of Africa:** Somalia, Ethiopia, Eritrea, Djibouti.
+##সাধারণ তথ্য##
+বান্দা আচেহ ইন্দোনেশিয়া তে অবস্থিত।
 
 -----
 
-##2. International Borders & Disputes##
+##সাংস্কৃতিক বিপ্লব##
+সাংস্কৃতিক বিপ্লব চীন তে সংঘটিত হয়।
 
-**Disputed Areas:**
-- **Siachen Glacier:** Disputed between __India & Pakistan__.
-- **Kalapani, Lipulekh, Limpiyadhura:** Disputed between __India & Nepal__.
-- **Nagorno-Karabakh:** Disputed between __Armenia & Azerbaijan__.
-- **Patagonian Shelf:** Argentina vs UK (Falkland Islands war, 1982).
+-----
 
-**Border Lines:**
-- **Line of Control (LoC):** Between India & Pakistan (Kashmir).
-- **Line of Actual Control (LAC):** Between India & China (Kashmir).
-- **Durand Line:** Between Pakistan & Afghanistan.
-- **Green Line:** Between Israel & Neighbors (1949 Armistice).
-- **Maginot Line:** France's defensive line against Germany.
-- **Siegfried Line:** Germany's defensive line against France.
-- **Radcliffe Line:** India & Pakistan (and BD).
+##হো চি মিন নামটি যে দেশের স্বাধীনতা সংগ্রামের সাথে জড়িত##
+হো চি মিন নামটি যে দেশের স্বাধীনতা সংগ্রামের সাথে জড়িত ভিয়েতনাম।
 
-**Straits (Pranali):**
-- **Palk Strait:** Separates India & Sri Lanka.
-- **Strait of Gibraltar:** Separates Africa (Morocco) & Europe (Spain); Connects Atlantic & Mediterranean.
-- **Bab-el-Mandeb:** Separates Asia (Yemen) & Africa (Djibouti); Connects Red Sea & Gulf of Aden.
-- **Dover Strait:** Separates UK & France.
-- **Bosphorus Strait:** Separates Europe & Asia (in Turkey); Connects Black Sea & Sea of Marmara.
+-----
+
+##ইন্তিফাদা##
+ইন্তিফাদা বলতে অভ্যুত্থান বুঝায়।
+
+-----
+
+##স্বাধীন ফিলিস্তিন রাষ্ট্রকে সর্বপ্রথম স্বীকৃতি##
+স্বাধীন ফিলিস্তিন রাষ্ট্রকে সর্বপ্রথম স্বীকৃতি দেয় আলজেরিয়া (1988, Also Bangladesh Same Year give to Palestine)।
+
+-----
+
+##বেলফোর' ঘোষণা কোন রাষ্ট্রের প্রতিষ্ঠার সঙ্গে সম্পর্কিত##
+বেলফোর' ঘোষণা কোন রাষ্ট্রের প্রতিষ্ঠার সঙ্গে সম্পর্কিত ইসরায়েল।
+
+-----
+
+##ফিলিস্তিনি মাতৃভূমিতে কখন ইসরাইল রাষ্ট্র প্রতিষ্ঠিত হয়##
+ফিলিস্তিনি মাতৃভূমিতে কখন ইসরাইল রাষ্ট্র প্রতিষ্ঠিত হয় ১৯৪৮ সালে।
+
+-----
+
+##ইসরাইলকে স্বীকৃতি দানকারী প্রথম মুসলিম দেশ কোনটি##
+ইসরাইলকে স্বীকৃতি দানকারী প্রথম মুসলিম দেশ তুরস্ক।
+
+-----
+
+##আবু গারিব##
+আবু গারিব বলতে একটি জেলখানা বুঝায়।
+
+-----
+
+##সাধারণ তথ্য##
+কোন দেশ এশিয়া ও ইউরোপ উভয় মহাদেশ বিস্তৃত তুরস্ক।
+
+-----
+
+##ইতিহাস বিখ্যাত ট্রয় নগরী কোথায়##
+ইতিহাস বিখ্যাত ট্রয় নগরী তুরস্কে।
+
+-----
+
+##মনুষ্য নির্মিত সর্ববৃহৎ স্থাপনা কোনটি##
+মনুষ্য নির্মিত সর্ববৃহৎ স্থাপনা চীনের মহাপ্রাচীর।
+
+-----
+
+##কনফুসিয়াস##
+কনফুসিয়াস দার্শনিক (Chinese)।
+
+-----
+
+##আয়তনে ইউরোপ মহাদেশের ক্ষুদ্রতম দেশ কোনটি##
+আয়তনে ইউরোপ মহাদেশের ক্ষুদ্রতম দেশ ভ্যাটিকান সিটি।
+
+-----
+
+##লন্ডনের ১১ নং ডাউনিং স্ট্রিটে কে বাস করেন##
+লন্ডনের ১১ নং ডাউনিং স্ট্রিটে কে বাস করেন ব্রিটিশ চ্যান্সেলর অব এক্সচেকার।
+
+-----
+
+##ব্রিটিশ প্রধানমন্ত্রী সরকারি বাসভবন কোনটি##
+ব্রিটিশ প্রধানমন্ত্রী সরকারি বাসভবন ১০ নং ডাউনিং স্ট্রিট।
+
+-----
+
+##জনসংখ্যার দিক দিয়ে আফ্রিকার বৃহত্তম দেশ##
+জনসংখ্যার দিক দিয়ে আফ্রিকার বৃহত্তম দেশ নাইজেরিয়া।
+
+-----
+
+##বেনগাজী' শহর কোথায় অবস্থিত##
+বেনগাজী' শহর লিবিয়া তে অবস্থিত।
+
+-----
+
+##গ্রেট বেরিয়ার রীফ কোথায় অবস্থিত##
+গ্রেট বেরিয়ার রীফ প্রশান্ত মহাসাগরে তে অবস্থিত।
+
+-----
+
+##হাওয়াই দ্বীপপুঞ্জ কোথায় অবস্থিত##
+হাওয়াই দ্বীপপুঞ্জ প্রশান্ত মহাসাগর তে অবস্থিত।
+
+-----
+
+##অস্ট্রেলিয়ার রাজধানী##
+অস্ট্রেলিয়ার রাজধানী ক্যানবেরা (The capital city of Australia is Canberra)।
+
+-----
+
+##নিউজিল্যান্ডের রাজধানী##
+নিউজিল্যান্ডের রাজধানী ওয়েলিংটন।
+
+-----
+
+##নিচের কোন দেশটি মেলোনেশিয়া অঞ্চলের অন্তর্ভুক্ত##
+নিচের কোন দেশটি মেলোনেশিয়া অঞ্চলের অন্তর্ভুক্ত ফিজি।
+
+-----
+
+##মার্কিন যুক্তরাষ্ট্রের কংগ্রেসের উচ্চকক্ষের নাম##
+মার্কিন যুক্তরাষ্ট্রের কংগ্রেসের উচ্চকক্ষের নাম সিনেট।
+
+-----
+
+##যুক্তরাষ্ট্রের কোন স্টেটটি ফ্রান্সের নিকট থেকে ক্রয় করা হয়েছিল##
+যুক্তরাষ্ট্রের কোন স্টেটটি ফ্রান্সের নিকট থেকে ক্রয় করা হয়েছিল লুইসিয়ানা।
+
+-----
+
+##মার্কিন প্রেসিডেন্ট উড্রো উইলসন বিখ্যাত হয়েছিলেন কেন##
+মার্কিন প্রেসিডেন্ট উড্রো উইলসন বিখ্যাত হয়েছিলেন ১৪ দফা ঘোষণা।
+
+-----
+
+##আমেরিকা কার কাছ থেকে স্বাধীনতা লাভ করে##
+আমেরিকা কার কাছ থেকে স্বাধীনতা লাভ করে ব্রিটেন।
+
+-----
+
+##যুক্তরাষ্ট্রে নির্বাচনি কলেজ (Electoral College) ভোটের সংখ্যা কত##
+যুক্তরাষ্ট্রে নির্বাচনি কলেজ (Electoral College) ভোটের সংখ্যা ৫৩৮।
+
+-----
+
+##যুক্তরাষ্ট্রকে 'স্ট্যাচু অব লিবার্টি নিম্নের কোন দেশ উপহার দেয়##
+যুক্তরাষ্ট্রকে 'স্ট্যাচু অব লিবার্টি নিম্নের কোন দেশ উপহার দেয় ফ্রান্স।
+
+-----
+
+##মার্কিন যুক্তরাষ্ট্রের পতাকায় কয়টি রেখা আছে##
+মার্কিন যুক্তরাষ্ট্রের পতাকায় কয়টি রেখা আছে ১৩ টি।
+
+-----
+
+##কোন দেশের সংবিধান সবচেয়ে ছোট##
+কোন দেশের সংবিধান সবচেয়ে ছোট যুক্তরাষ্ট্রের (Largest is India) (Peaceful is Japan)।
+
+-----
+
+##আমেরিকার ডেমোক্রেটিক পার্টির প্রতীক##
+আমেরিকার ডেমোক্রেটিক পার্টির প্রতীক গাধা (Republic Party -> Elephant)।
+
+-----
+
+##যুক্তরাষ্ট্রের সবচেয়ে জনবহুল অঙ্গরাজ্য কোনটি##
+যুক্তরাষ্ট্রের সবচেয়ে জনবহুল অঙ্গরাজ্য ক্যালিফোর্নিয়া।
