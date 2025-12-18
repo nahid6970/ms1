@@ -205,6 +205,12 @@ Start-Sleep -Milliseconds 500
             toggle_script.write(toggle_script_content)
             toggle_script_file = toggle_script.name
 
+        # Get absolute paths for bookmark scripts
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        add_bookmark_script = os.path.join(script_dir, "add_bookmark.py")
+        view_bookmarks_script = os.path.join(script_dir, "view_bookmarks.py")
+        editor_chooser_script = os.path.join(script_dir, "editor_chooser.py")
+
         # Create the menu handler Python script
         menu_script_content = '''
 import sys
@@ -261,9 +267,7 @@ def show_fzf_menu():
     pad = "  "
     menu_options = [
         f"{pad}{esc('#9efa49')}  Run\x1b[0m\t{len(file_paths)}",
-        f"{pad}{esc('#19d600')}  nvim\x1b[0m\t{len(file_paths)}",
-        f"{pad}{esc('#8458b7')}  emacs\x1b[0m\t{len(file_paths)}",
-        f"{pad}{esc('#7e96ff')}  VSCode\x1b[0m\t{len(file_paths)}",
+        f"{pad}{esc('#19d600')}  Editor\x1b[0m\t{len(file_paths)}",
         f"{pad}{esc('#faf069')}  Folder\x1b[0m\t{len(file_paths)}",
         f"{pad}{esc('#ffffff')}  Terminal\x1b[0m\t{len(file_paths)}",
         f"{pad}{esc('#ffffff')} 󰴠 Copy path\x1b[0m\t{len(file_paths)}",
@@ -298,20 +302,13 @@ def show_fzf_menu():
         
         if stdout and process.returncode == 0:
             selection = stdout.strip()
-            #! Open all files in VSCode
-            if selection.startswith(''):
-                for file_path in file_paths:
-                    subprocess.run(f'code "{os.path.abspath(file_path)}"', shell=True)
-            #! Open all files in emacs
-            if selection.startswith(''):
-                for file_path in file_paths:
-                    subprocess.run(f'emacs "{os.path.abspath(file_path)}"', shell=True)
-            #! Open all files in nvim
+            #! Open files with Editor Chooser
             if selection.startswith(''):
-                if file_paths:
-                    # Open all files in tabs explicitly
-                    files_args = ' '.join([f'"{os.path.abspath(fp)}"' for fp in file_paths])
-                    subprocess.run(f'nvim -p {files_args}', shell=True)
+                if len(sys.argv) > 2:
+                    editor_chooser_script = sys.argv[2]
+                    # We need to run the editor chooser with the python interpreter
+                    subprocess.run(['python', editor_chooser_script] + file_paths)
+
 
             #! Open all folder locations
             elif selection.startswith(''):
@@ -370,18 +367,14 @@ goto writeloop
 :done
 
 rem Call the Python menu script
-python "{menu_script_path}" "!temp_file!"
+python "{menu_script_path}" "!temp_file!" "{editor_chooser_script}"
 '''
 
         with tempfile.NamedTemporaryFile(mode='w', delete=False, encoding='utf-8', suffix='.bat') as batch_temp:
             batch_temp.write(batch_content)
             batch_file = batch_temp.name
 
-        # Get absolute paths for bookmark scripts
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        add_bookmark_script = os.path.join(script_dir, "add_bookmark.py")
-        view_bookmarks_script = os.path.join(script_dir, "view_bookmarks.py")
-        editor_chooser_script = os.path.join(script_dir, "editor_chooser.py")
+
         
         # Prepare fzf arguments with PowerShell preview for images and F2 toggle
         fzf_args = [
