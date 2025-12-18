@@ -1409,8 +1409,7 @@ Users can set custom fonts per column via **Column Settings (F3)**:
     - **Result:** Clicking a word in the preview places the cursor exactly at that word in the raw markdown.
 
 2.  **Custom Block Cursor:**
-    - **Visuals:** Replaces the native thin cursor (hidden via `caret-color: transparent`) with a **5px thick blinking block** (`.custom-cursor`).
-    - **Adaptive Color:** Uses `mix-blend-mode: difference` with a white background. This ensures high contrast: it appears **Black on White** backgrounds and **White on Black** backgrounds automatically.
+    - **Visuals:** Replaces the native thin cursor (hidden via `caret-color: transparent`) with a **5px thick black blinking block** (`.custom-cursor`).
     - **Positioning (`updateCustomCursor`):**
         - Uses a "Mirror Element" technique: Creates an invisible duplicate of the textarea with identical font/wrapping styles.
         - Inserts text up to the cursor position into the mirror.
