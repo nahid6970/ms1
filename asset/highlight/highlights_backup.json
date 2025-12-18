@@ -44,12 +44,6 @@
     },
     {
       "color": "#d91212",
-      "id": "xioarjmm5",
-      "path": "article#post-6733 > div > header > h1",
-      "text": "Trust Bank Limited Job Circular 2025"
-    },
-    {
-      "color": "#d91212",
       "id": "3nqbfssme",
       "path": "article#post-6324 > div > header > h1",
       "text": "Bank Asia Limited Job Circular 2025"
@@ -93,8 +87,86 @@
     {
       "color": "#d91212",
       "id": "2l5exhqby",
+      "note": "1 December, 2025",
       "path": "article#post-8405 > div > header > h1",
       "text": "Bangladesh Institute of Bank Management BIBM Job Circular 2025"
+    },
+    {
+      "color": "#d91212",
+      "id": "k7v1f84w0",
+      "note": "1 December, 2025",
+      "path": "article#post-6246 > div > header > h1",
+      "text": "Eastern Bank Limited EBL Job Circular 2025"
+    },
+    {
+      "color": "#d91212",
+      "id": "4237dfs8o",
+      "note": "1 December, 2025",
+      "path": "article#post-856 > div > header > h1",
+      "text": "Shahjalal Islami Bank Job Circular 2025 – www.sjiblbd.com"
+    },
+    {
+      "color": "#d91212",
+      "id": "ef4jyb4fa",
+      "note": "1 December, 2025",
+      "path": "article#post-911 > div > header > h1",
+      "text": "BRAC Bank Limited Job Circular 2025"
+    },
+    {
+      "color": "#d91212",
+      "id": "d2mnq48tc",
+      "note": "30 November, 2025",
+      "path": "article#post-1687 > div > header > h1",
+      "text": "Bangladesh Bank Job Circular 2025 – erecruitment.bb.org.bd Apply"
+    },
+    {
+      "color": "#d91212",
+      "id": "jc4255w2z",
+      "note": "1 December, 2025",
+      "path": "article#post-8442 > div > header > h1",
+      "text": "Mutual Trust Bank Limited Job Circular 2025"
+    },
+    {
+      "color": "#d91212",
+      "id": "htocelyll",
+      "note": "9 December, 2025",
+      "path": "article#post-6733 > div > header > h1",
+      "text": "Trust Bank Limited Job Circular 2025"
+    },
+    {
+      "color": "#d91212",
+      "id": "k56lrtl3t",
+      "note": "29 November, 2025",
+      "path": "article#post-18318 > div > header > h1",
+      "text": "Bangladesh Commerce Bank Job Circular 2025"
+    },
+    {
+      "color": "#d91212",
+      "id": "ym3klry5y",
+      "note": "6 November, 2025",
+      "path": "article#post-6537 > div > header > h1",
+      "text": "One Bank Job Circular 2025"
+    },
+    {
+      "color": "#d91212",
+      "id": "nrguc7e1u",
+      "note": "27 November, 2025",
+      "path": "article#post-21397 > div > header > h1",
+      "text": "ICB Islamic Bank Limited job Circular 2025"
+    },
+    {
+      "color": "#d91212",
+      "id": "8aiwuxpbp",
+      "note": "26 November, 2025",
+      "path": "article#post-4793 > div > header > h1",
+      "text": "Woori Bank Job Circular 2025"
+    },
+    {
+      "color": "#ffff00",
+      "id": "yjat80nib",
+      "note": "",
+      "path": "article#post-14316 > div > header > h1",
+      "text": "50th BCS Circular 2025 PDF – bpsc.teletalk.com.bd Apply"
     }
   ],
   "customColors": [
