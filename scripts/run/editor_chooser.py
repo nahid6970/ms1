@@ -104,7 +104,7 @@ def create_editor_chooser(file_paths):
 
     
     # Track current selection
-    current_index = [1]  # Start with VSCode (middle button)
+    current_index = [0]  # Start with first button (nvim)
     buttons = []
     
     def adjust_color(hex_color, factor):

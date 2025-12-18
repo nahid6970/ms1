@@ -447,8 +447,6 @@ LAlt & c:: {
 ^!n:: {
     OpenWithEditor()
     OpenWithEditor() {
-    ; Configuration - Change this to switch editors easily
-    EDITOR := "nvim"  ; Options: "nvim", "vscode", "zed"
         ; Backup current clipboard content
         ClipboardBackup := ClipboardAll()
         ; Clear clipboard and copy the selected file path
@@ -461,16 +459,8 @@ LAlt & c:: {
         }
         ClipBoardContent := A_Clipboard
         if InStr(ClipBoardContent, "\") {
-            switch EDITOR {
-                case "nvim":
-                    Run('wt.exe nvim "' . ClipBoardContent . '"')
-                case "vscode":
-                    Run('"C:\Users\nahid\AppData\Local\Programs\Microsoft VS Code\Code.exe" "' . ClipBoardContent . '"')
-                case "zed":
-                    Run('zed "' . ClipBoardContent . '"')
-                default:
-                    MsgBox("Unknown editor: " . EDITOR)
-            }
+            ; Call editor_chooser.py with the copied file path
+            Run('python "C:\Users\nahid\ms\ms1\scripts\run\editor_chooser.py" "' . ClipBoardContent . '"')
         } else {
             MsgBox("No valid file path found.")
         }
