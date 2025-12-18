@@ -404,48 +404,36 @@ function highlightSelection(color) {
     const range = selection.getRangeAt(0);
     const text = selection.toString();
 
-    // MVP Limit: Single block check
-    // We will attempt to wrap. If it fails (cross-block), we warn.
-    const span = document.createElement('span');
-    span.className = 'web-highlighter-span';
-    span.style.backgroundColor = color;
-    span.dataset.highlightId = generateId();
-    span.textContent = text;
+    if (!text.trim()) {
+        menu.style.display = 'none';
+        return;
+    }
 
-    // Determine context BEFORE mutation
+    // Determine context for robust re-highlighting on page load
     const parent = range.commonAncestorContainer.nodeType === 1 ? range.commonAncestorContainer : range.commonAncestorContainer.parentNode;
     const parentPath = getDomPath(parent);
 
-    // Calculate start offset in the text content of the parent
-    // This allows differentiation between multiple same words in one paragraph.
-    // Note: 'textContent' of parent includes the text we are selecting.
-    const fullText = parent.textContent;
-    // We need the start index relative to parent text.
-    // range.startContainer might be a text node, range.startOffset is relative to that node.
-    // We need to walk up from startContainer to parent to count previous characters.
+    const highlightData = {
+        id: generateId(),
+        text: text,
+        color: color,
+        path: parentPath,
+        note: ''
+    };
 
-    let offset = 0;
-    let node = parent;
-    // Simple recursive offset finder
-    // (A bit complex to implement perfectly in one go, relying on simple string index for now as fallback)
-    // Fallback: First occurrence of 'text' in parent? No, that's weak.
+    saveToStorage(highlightData);
 
-    try {
-        range.surroundContents(span);
-
-        // Save to storage
-        saveToStorage({
-            id: span.dataset.highlightId,
-            text: text,
-            color: color,
-            path: parentPath,
-            note: ''
-        });
-
-    } catch (e) {
-        alert("Cannot highlight across multiple main elements. Try selecting within a single paragraph.");
-        return;
+    const parentElement = document.querySelector(parentPath);
+    let found = false;
+    if (parentElement) {
+        found = wrapTextInParent(parentElement, highlightData);
     }
+    if (!found) {
+        wrapTextInParent(document.body, highlightData);
+    }
+    
+    menu.style.display = 'none';
+    window.getSelection().removeAllRanges();
 }
 
 function saveToStorage(data) {
@@ -505,31 +493,34 @@ function applyHighlight(h) {
 function wrapTextInParent(parent, h) {
     let success = false;
     const walker = document.createTreeWalker(parent, NodeFilter.SHOW_TEXT, null, false);
-    let node;
-    while (node = walker.nextNode()) {
-        const index = node.nodeValue.indexOf(h.text);
-        if (index >= 0) {
-            // Check if already covered by OUR highlight
-            // We need to be careful. If the text is inside a highlight already?
-            if (node.parentElement.classList.contains('web-highlighter-span')) {
-                // It's already highlighted.
-                // If it has the same ID, we are good.
-                if (node.parentElement.dataset.highlightId === h.id) return true;
-                // If different ID, maybe overlapping or duplicate?
-                continue;
-            }
+    
+    const nodes = [];
+    while(walker.nextNode()) {
+        if (walker.currentNode.parentElement.closest('.web-highlighter-span')) continue;
+        if (walker.currentNode.nodeValue.includes(h.text)) {
+            nodes.push(walker.currentNode);
+        }
+    }
+
+    nodes.forEach(node => {
+        let currentNode = node;
+        while (currentNode) {
+            const index = currentNode.nodeValue.indexOf(h.text);
+            if (index === -1) break;
+
+            // Infinite loop prevention for empty strings
+            if (h.text.length === 0) break;
 
             const range = document.createRange();
-            range.setStart(node, index);
-            range.setEnd(node, index + h.text.length);
+            range.setStart(currentNode, index);
+            range.setEnd(currentNode, index + h.text.length);
 
             const span = document.createElement('span');
             span.className = 'web-highlighter-span';
             span.style.backgroundColor = h.color;
             span.dataset.highlightId = h.id;
-            span.textContent = h.text;
-            
-            // Add note indicator if note exists
+            span.textContent = range.toString();
+
             if (h.note && h.note.trim()) {
                 span.setAttribute('title', h.note);
                 span.style.borderBottom = '2px dotted rgba(0,0,0,0.3)';
@@ -538,14 +529,21 @@ function wrapTextInParent(parent, h) {
             try {
                 range.deleteContents();
                 range.insertNode(span);
-                parent.normalize();
                 success = true;
-                // For MVP, we highlight the first match we find in fallback mode too.
-                return true;
-            } catch (err) {
-                console.error(err);
+                
+                // Safely advance to the next text node to prevent infinite loops
+                if (span.nextSibling && span.nextSibling.nodeType === Node.TEXT_NODE) {
+                    currentNode = span.nextSibling;
+                } else {
+                    currentNode = null;
+                }
+            } catch (e) {
+                console.error("Failed to wrap text:", e);
+                currentNode = null; 
             }
         }
-    }
+    });
+
+    parent.normalize();
     return success;
 }
