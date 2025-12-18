@@ -1,3 +1,4 @@
+import os
 import sys
 import subprocess
 import tkinter as tk
@@ -25,11 +26,18 @@ def open_with_editor(file_paths, editor):
         else:
             subprocess.run(f'zed "{file_paths}"', shell=True)
     elif editor == "emacs":
+        # Ensure HOME is set for Emacs to find config
+        env = os.environ.copy()
+        if 'HOME' not in env:
+             env['HOME'] = env['USERPROFILE']
+        
+        # Use runemacs for Windows GUI to avoid console and better env handling
+        # Join arguments properly
         if isinstance(file_paths, list):
-            for file_path in file_paths:
-                subprocess.run(f'emacs "{file_path}"', shell=True)
+            files_args = ' '.join([f'"{fp}"' for fp in file_paths])
+            subprocess.run(f'runemacs {files_args}', shell=True, env=env)
         else:
-            subprocess.run(f'emacs "{file_paths}"', shell=True)
+            subprocess.run(f'runemacs "{file_paths}"', shell=True, env=env)
 
 def create_editor_chooser(file_paths):
     """Create a GUI window to choose editor"""
@@ -37,6 +45,13 @@ def create_editor_chooser(file_paths):
     if not isinstance(file_paths, list):
         file_paths = [file_paths]
     
+    editors = [
+        ("nvim", "#19d600", ""),
+        ("VSCode", "#7e96ff", ""),
+        ("Emacs", "#8458b7", ""),
+        ("Zed", "#ff6b6b", ""),
+    ]
+
     root = tk.Tk()
     root.title("Choose Editor")
     root.configure(bg='#1e1e1e')
@@ -45,7 +60,12 @@ def create_editor_chooser(file_paths):
     root.overrideredirect(True)
     
     # Center window
-    window_width = 500
+    # Calculate width based on number of editors
+    # 120 (button width) + 20 (padding per button: 10 left + 10 right)
+    num_editors = len(editors)
+    content_width = num_editors * 140
+    window_width = max(500, content_width + 40) # Add some extra side padding
+    
     window_height = 150
     screen_width = root.winfo_screenwidth()
     screen_height = root.winfo_screenheight()
@@ -76,12 +96,7 @@ def create_editor_chooser(file_paths):
     # Button style
     button_font = tkfont.Font(family="Segoe UI", size=11, weight="bold")
     
-    editors = [
-        ("nvim", "#19d600", ""),
-        ("VSCode", "#7e96ff", ""),
-        ("Emacs", "#8458b7", ""),
-        ("Zed", "#ff6b6b", ""),
-    ]
+
     
     # Track current selection
     current_index = [1]  # Start with VSCode (middle button)
