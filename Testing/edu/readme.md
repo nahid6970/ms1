@@ -64,7 +64,11 @@ You are an intelligent content organizer for job exam preparation. Your task is 
 - If information is a duplicate, discard it
 - Maintain proper formatting using the custom markdown syntax (see below)
 
-### Step 3: Clean Up
+### Step 3: Update AI Helper Files
+- Update the content tracking system (see AI Helper Files section below)
+- Maintain topic tags and file location index
+
+### Step 4: Clean Up
 - After successfully organizing all content, **delete everything from `info.txt`**
 - Confirm completion of the task
 
@@ -131,6 +135,10 @@ The capital of Bangladesh is Dhaka.
 ```
 /
 ├── info.txt (input file - clear after processing)
+├── _ai_helpers/ (AI management files)
+│   ├── content_index.md
+│   ├── topic_tags.md
+│   └── processed_content.md
 ├── GK/
 ├── Bangla Grammar/
 ├── Bangla Literature/
@@ -144,7 +152,91 @@ The capital of Bangladesh is Dhaka.
 └── [Other subjects as needed]/
 ```
 
-**Note:** Folders marked as "created dynamically" will be created automatically when sufficient relevant content is identified.
+**Note:** 
+- Folders marked as "created dynamically" will be created automatically when sufficient relevant content is identified
+- The `_ai_helpers/` folder contains tracking files to help the AI manage growing content efficiently
+
+---
+
+## AI Helper Files System
+
+To help manage growing content and improve efficiency, maintain these helper files:
+
+### 1. Content Index (`_ai_helpers/content_index.md`)
+
+Track all topics and their locations:
+
+```markdown
+# Content Index
+
+## Topic Distribution
+
+### Bangladesh (45 items)
+- **Geography**: Bangladesh/geography.md (12 items)
+- **History**: Bangladesh/history.md (18 items)
+- **Culture**: Bangladesh/culture.md (15 items)
+
+### Organizations (32 items)
+- **International**: Organizations/International/un_agencies.md (20 items)
+- **Local**: Organizations/Local/government_bodies.md (12 items)
+
+### GK (67 items)
+- **World Geography**: GK/world_geography.md (25 items)
+- **Current Affairs**: GK/current_affairs.md (42 items)
+
+## Last Updated: [Date]
+```
+
+### 2. Topic Tags (`_ai_helpers/topic_tags.md`)
+
+Track frequently occurring topics for better organization:
+
+```markdown
+# Topic Tags
+
+## High Frequency Topics (10+ occurrences)
+- **Dhaka**: 15 occurrences → Bangladesh/geography.md, Bangladesh/history.md
+- **UN Organizations**: 12 occurrences → Organizations/International/
+- **Liberation War**: 18 occurrences → Bangladesh/history.md
+
+## Medium Frequency Topics (5-9 occurrences)
+- **Rivers of Bangladesh**: 8 occurrences → Bangladesh/geography.md
+- **Nobel Prize**: 6 occurrences → GK/awards.md
+
+## Emerging Topics (2-4 occurrences)
+- **Climate Change**: 3 occurrences → Science/environment.md
+- **Digital Bangladesh**: 4 occurrences → ICT/initiatives.md
+
+## Last Updated: [Date]
+```
+
+### 3. Duplicate Prevention (`_ai_helpers/processed_content.md`)
+
+Keep a log of processed content to prevent duplicates:
+
+```markdown
+# Processed Content Log
+
+## Recent Additions (Last 50 items)
+1. "Capital of Bangladesh is Dhaka" → Bangladesh/geography.md
+2. "WHO headquarters in Geneva" → Organizations/International/un_agencies.md
+3. "Noun definition" → Bangla Grammar/parts-of-speech.md
+
+## Content Hashes (for exact duplicate detection)
+- [hash1]: Bangladesh capital info
+- [hash2]: WHO headquarters
+- [hash3]: Noun definition
+
+## Last Updated: [Date]
+```
+
+### Helper Files Maintenance Rules
+
+1. **Always update** these files after processing content
+2. **Create the `_ai_helpers/` folder** if it doesn't exist
+3. **Update counters** when adding new content
+4. **Use these files** to check for duplicates and find existing content
+5. **Review topic frequency** to decide when to create new subject folders
 
 ---
 
