@@ -58,8 +58,8 @@ let currentURL = window.location.hostname; // Domain-based storage key
 
 ##### `highlightSelection(color)`
 - Main highlighting function
-- Creates `<span>` wrapper around selected text
 - Saves highlight data to storage
+- Triggers `wrapTextInParent` to find and highlight *all* occurrences of the selected text on the page immediately.
 - **Data Structure**:
   ```javascript
   {
@@ -79,9 +79,9 @@ let currentURL = window.location.hostname; // Domain-based storage key
 - Prevents double-highlighting via ID check
 
 ##### `wrapTextInParent(parent, h)`
-- Helper for `applyHighlight`
+- Helper for `applyHighlight` (and now `highlightSelection`)
 - Uses `TreeWalker` to find text nodes
-- Wraps matched text in styled span
+- Finds and wraps *all* occurrences of the matched text in styled spans within the parent.
 
 ##### `removeHighlight(element)`
 - Removes highlight from DOM
@@ -213,7 +213,7 @@ Modern UI styling with:
 ### 3. Text-Based Matching
 **Why**: DOM structure can vary, but text content is more stable.
 
-**Limitation**: Multiple identical text strings may cause ambiguity. First match wins.
+
 
 ### 4. Compact Icon-Based UI
 **Why**: Cleaner, more modern UX with minimal visual clutter and clear visual hierarchy.
