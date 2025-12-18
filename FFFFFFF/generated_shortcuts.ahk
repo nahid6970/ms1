@@ -489,13 +489,17 @@ LAlt & c:: {
 }
 
 ;! Quick Shortcut
-;! Quick Shortcut to make some task easier
+;! Sleep 250 //    Send " -> "
 ^q:: {
     KeySequence()
     KeySequence() {
+        Send "^!{Numpad3}"
+        Sleep 250
+        Send "{Enter}"
+        Sleep 250
         Send "^!{Numpad2}"
         Sleep 250
-        Send " -> "
+        Send "{Enter}"
         Sleep 250
         Send "^!{Numpad1}"
     }

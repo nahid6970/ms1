@@ -208,9 +208,9 @@
         {
             "name": "Quick Shortcut",
             "category": "Text",
-            "description": "Quick Shortcut to make some task easier",
+            "description": "Sleep 250 //    Send \" -> \"",
             "hotkey": "^q",
-            "action": "KeySequence()\nKeySequence() {\n    Send \"^!{Numpad2}\"\n    Sleep 250\n    Send \" -> \"\n    Sleep 250\n    Send \"^!{Numpad1}\"\n}",
+            "action": "KeySequence()\nKeySequence() {\n    Send \"^!{Numpad3}\"\n    Sleep 250\n    Send \"{Enter}\"\n    Sleep 250\n    Send \"^!{Numpad2}\"\n    Sleep 250\n    Send \"{Enter}\"\n    Sleep 250\n    Send \"^!{Numpad1}\"\n}",
             "enabled": true
         }
     ],
