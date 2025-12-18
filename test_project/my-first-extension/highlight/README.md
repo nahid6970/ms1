@@ -5,10 +5,11 @@ A Chrome extension that allows users to highlight text on any website with custo
 
 ## Features
 - 🎨 **Text Highlighting**: Select text and choose from preset or custom colors
-- 💾 **Persistence**: Highlights are saved per domain and restored on page reload
+- � **PNotes**: Add personal notes to any highlight with visual indicators
+- � **DPersistence**: Highlights and notes are saved per domain and restored on page reload
 - 🔄 **Domain-Wide**: Highlights appear on all pages of the same domain
-- 🎯 **Context Menu**: Click highlighted text to change color, delete, or open links
-- 📤 **Import/Export**: Backup and restore highlights via JSON
+- 🎯 **Context Menu**: Click highlighted text to change color, add notes, delete, or open links
+- � **Impkort/Export**: Backup and restore highlights with notes via JSON
 - 🔗 **Link Detection**: Automatically detects and provides quick link access
 
 ## Project Structure
@@ -65,7 +66,8 @@ let currentURL = window.location.hostname; // Domain-based storage key
     id: string,        // Unique identifier
     text: string,      // Highlighted text content
     color: string,     // Hex color code
-    path: string       // CSS selector for parent element
+    path: string,      // CSS selector for parent element
+    note: string       // Optional user note (added in v2.0)
   }
   ```
 
@@ -90,6 +92,16 @@ let currentURL = window.location.hostname; // Domain-based storage key
 - Updates highlight color in DOM and storage
 - Triggered from context menu
 
+##### `showNoteDialog(highlightElement)`
+- Displays modal dialog for adding/editing notes
+- Auto-focuses textarea with existing note selected
+- Updates storage and visual indicators on save
+
+**Note Visual Indicators:**
+- Highlights with notes show dotted underline
+- Hover tooltip displays note content
+- Notes persist across page reloads and exports
+
 ##### `findLinkElement(element)`
 - Checks if highlight is inside or contains a link
 - Used to show "Open Link" button
@@ -109,10 +121,18 @@ let currentURL = window.location.hostname; // Domain-based storage key
 **Context Menu** (`contextMenu`)
 - Appears below existing highlights when clicked
 - Purple gradient background matching highlight menu
-- Three actions:
+- Four actions:
   - 🎨 Change Color (white button)
+  - 📝 Add/Edit Note (yellow button)
   - × Delete (red button with white text)
   - ↗ Open Link (blue button with white text, if applicable)
+
+**Note Dialog** (`noteDialog`)
+- Modal dialog for adding/editing notes
+- Clean white background with purple accent
+- Auto-focus textarea with existing note pre-selected
+- Save/Cancel buttons with hover effects
+- Closes on outside click or ESC key
 
 #### Event Listeners
 
@@ -162,7 +182,8 @@ Modern UI styling with:
       id: "abc123",
       text: "highlighted text",
       color: "#ffff00",
-      path: "body > div:nth-of-type(1) > p:nth-of-type(2)"
+      path: "body > div:nth-of-type(1) > p:nth-of-type(2)",
+      note: "This is important for the project"
     },
     // ... more highlights
   ],
@@ -257,13 +278,14 @@ Modern UI styling with:
 
 ## Future Enhancement Ideas
 - Highlight categories/tags
-- Search within highlights
+- Search within highlights and notes
 - Sync across devices via Chrome sync storage
-- Note-taking on highlights
-- Export to PDF with highlights preserved
-- Collaborative highlighting
-- Keyboard shortcuts
+- Rich text notes with formatting
+- Export to PDF with highlights and notes preserved
+- Collaborative highlighting and note sharing
+- Keyboard shortcuts for quick actions
 - MutationObserver for dynamic content
+- Note templates and quick snippets
 
 ## Development Tips
 
