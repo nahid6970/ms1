@@ -4054,7 +4054,22 @@ function renderSubSheetBar() {
     parentName.textContent = parentSheet.name;
 
     parentTab.appendChild(parentName);
-    parentTab.onclick = () => switchSheet(parentIndex);
+
+    // Drag/Click protection
+    let isDraggingParent = false;
+    parentTab.addEventListener('mousedown', () => isDraggingParent = false);
+    parentTab.addEventListener('dragstart', (e) => {
+        isDraggingParent = true;
+        handleF1DragStart.call(parentTab, e);
+    });
+
+    parentTab.addEventListener('click', () => {
+        if (!isDraggingParent) switchSheet(parentIndex);
+    });
+
+    parentTab.addEventListener('dragover', handleF1DragOver);
+    parentTab.addEventListener('drop', handleF1Drop);
+    parentTab.addEventListener('dragend', handleF1DragEnd);
 
     // Add right-click context menu for parent sheet
     parentTab.oncontextmenu = (e) => {
@@ -4062,6 +4077,7 @@ function renderSubSheetBar() {
         showSubSheetContextMenu(e, parentIndex);
     };
 
+    parentTab.draggable = true;
     subsheetTabs.appendChild(parentTab);
 
     // Add sub-sheets
@@ -4076,13 +4092,30 @@ function renderSubSheetBar() {
             name.textContent = sheet.name;
 
             tab.appendChild(name);
-            tab.onclick = () => switchSheet(index);
+
+            // Drag/Click protection
+            let isDraggingTab = false;
+            tab.addEventListener('mousedown', () => isDraggingTab = false);
+            tab.addEventListener('dragstart', (e) => {
+                isDraggingTab = true;
+                handleF1DragStart.call(tab, e);
+            });
+
+            tab.addEventListener('click', () => {
+                if (!isDraggingTab) switchSheet(index);
+            });
 
             // Add right-click context menu for sub-sheet
             tab.oncontextmenu = (e) => {
                 e.preventDefault();
                 showSubSheetContextMenu(e, index);
             };
+
+            // Enable dragging for sub-sheet tabs
+            tab.draggable = true;
+            tab.addEventListener('dragover', handleF1DragOver);
+            tab.addEventListener('drop', handleF1Drop);
+            tab.addEventListener('dragend', handleF1DragEnd);
 
             subsheetTabs.appendChild(tab);
         }
@@ -8658,6 +8691,7 @@ function handleF1DragStart(e) {
     draggedSheetIndex = parseInt(this.dataset.sheetIndex);
     this.classList.add('dragging');
     e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', this.dataset.sheetIndex);
     e.dataTransfer.setData('text/html', this.innerHTML);
 }
 
@@ -8665,12 +8699,57 @@ function handleF1DragOver(e) {
     if (e.preventDefault) {
         e.preventDefault();
     }
-    e.dataTransfer.dropEffect = 'move';
 
-    // Add visual indicator
-    if (this !== draggedF1Item && this.classList.contains('f1-sheet-item')) {
-        this.style.borderColor = '#007bff';
-        this.style.borderWidth = '3px';
+    const targetSheetIndex = parseInt(this.dataset.sheetIndex);
+
+    // Safety check
+    if (draggedSheetIndex === null || isNaN(targetSheetIndex)) return false;
+
+    const draggedSheet = tableData.sheets[draggedSheetIndex];
+    const targetSheet = tableData.sheets[targetSheetIndex];
+
+    if (!draggedSheet || !targetSheet) return false;
+
+    // Check constraints
+    let canDrop = false;
+
+    const isDraggedSubSheet = draggedSheet.parentSheet !== undefined && draggedSheet.parentSheet !== null;
+    const isTargetSubSheet = targetSheet.parentSheet !== undefined && targetSheet.parentSheet !== null;
+
+    if (!isDraggedSubSheet && !isTargetSubSheet) {
+        // Parent -> Parent: Allow
+        canDrop = true;
+    } else if (isDraggedSubSheet && isTargetSubSheet) {
+        // Sub-sheet -> Sub-sheet: Allow ONLY if same parent
+        // Handle logic where parent index shifts are irrelevant because we just check values
+        // Note: draggedSheet.parentSheet is an index.
+        if (draggedSheet.parentSheet === targetSheet.parentSheet) {
+            canDrop = true;
+        }
+    } else if (isDraggedSubSheet && !isTargetSubSheet) {
+        // Sub-sheet -> Parent: Allow only if dropping on its own parent (reorder to top of sub-sheets?)
+        // Actually, dropping on parent usually inserts BEFORE parent, which would make it a parent?
+        // No, Drop logic is "Insert At".
+        // If we want to strictly rearrange sub-sheets, only allow Sibling drops.
+        if (draggedSheet.parentSheet === targetSheetIndex) {
+            canDrop = true;
+        }
+    } else if (!isDraggedSubSheet && isTargetSubSheet) {
+        // Parent -> Sub-sheet: Allow only if sub-sheet belongs to this parent
+        if (targetSheet.parentSheet === draggedSheetIndex) {
+            canDrop = true;
+        }
+    }
+
+    if (canDrop) {
+        e.dataTransfer.dropEffect = 'move';
+        // Add visual indicator
+        if (this !== draggedF1Item && (this.classList.contains('f1-sheet-item') || this.classList.contains('subsheet-tab'))) {
+            this.style.borderColor = '#007bff';
+            this.style.borderWidth = '3px';
+        }
+    } else {
+        e.dataTransfer.dropEffect = 'none';
     }
 
     return false;
@@ -8681,7 +8760,7 @@ function handleF1Drop(e) {
         e.stopPropagation();
     }
 
-    if (draggedF1Item !== this && this.classList.contains('f1-sheet-item')) {
+    if (draggedF1Item !== this && (this.classList.contains('f1-sheet-item') || this.classList.contains('subsheet-tab'))) {
         const targetIndex = parseInt(this.dataset.sheetIndex);
 
         // Remove the dragged sheet from its current position
@@ -8774,7 +8853,7 @@ function handleF1DragEnd(e) {
     this.classList.remove('dragging');
 
     // Remove all drag indicators
-    document.querySelectorAll('.f1-sheet-item').forEach(item => {
+    document.querySelectorAll('.f1-sheet-item, .subsheet-tab').forEach(item => {
         item.style.borderColor = '';
         item.style.borderWidth = '';
     });

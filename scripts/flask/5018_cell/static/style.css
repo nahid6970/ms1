@@ -128,13 +128,19 @@ body {
     background: white;
     border: 1px solid #ddd;
     border-radius: 6px;
-    cursor: pointer;
+    cursor: grab;
     transition: all 0.2s;
     font-size: 14px;
     display: inline-flex;
     align-items: center;
     gap: 8px;
     white-space: nowrap;
+    user-select: none;
+    -webkit-user-drag: element;
+}
+
+.subsheet-tab:active {
+    cursor: grabbing;
 }
 
 .subsheet-tab:hover {
@@ -151,6 +157,7 @@ body {
 
 .subsheet-tab-name {
     flex: 1;
+    pointer-events: none;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
