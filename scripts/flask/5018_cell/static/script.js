@@ -1058,9 +1058,9 @@ function handlePreviewMouseDown(e) {
     }
 
     // 6. Manual scroll to ensure visibility
-    if (input.tagName === 'TEXTAREA' && typeof keepCursorCentered === 'function') {
-        keepCursorCentered(input);
-        requestAnimationFrame(() => keepCursorCentered(input));
+    // 6. Manual scroll to ensure correct positioning (Solution 1: Position at Click)
+    if (input.tagName === 'TEXTAREA') {
+        positionCursorAtMouseClick(input, e);
     }
 }
 
@@ -5358,6 +5358,26 @@ function keepCursorCentered(textarea) {
         const lines = textarea.value.substr(0, textarea.selectionStart).split('\n');
         const wantedTop = (lines.length - 1) * lineHeight;
         textarea.scrollTop = wantedTop - textarea.clientHeight / 2 + lineHeight / 2;
+    });
+}
+
+function positionCursorAtMouseClick(textarea, mouseEvent) {
+    requestAnimationFrame(() => {
+        const lineHeight = parseFloat(getComputedStyle(textarea).lineHeight) || 20;
+        const lines = textarea.value.substr(0, textarea.selectionStart).split('\n');
+        const cursorLineIndex = lines.length - 1;
+        const cursorLineTop = cursorLineIndex * lineHeight;
+
+        // Get the mouse Y position relative to the textarea
+        const textareaRect = textarea.getBoundingClientRect();
+        const mouseY = mouseEvent.clientY - textareaRect.top;
+
+        // Calculate scroll position so cursor line appears exactly at mouse Y position
+        const targetScrollTop = cursorLineTop - mouseY;
+
+        // Ensure we don't scroll beyond the content bounds
+        const maxScrollTop = Math.max(0, textarea.scrollHeight - textarea.clientHeight);
+        textarea.scrollTop = Math.max(0, Math.min(targetScrollTop, maxScrollTop));
     });
 }
 
