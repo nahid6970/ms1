@@ -11014,3 +11014,78 @@ function captureAndGeneratePDF(container, filename) {
         });
     }, 200); // 200ms delay to ensure rendering
 }
+
+function copySheetContent() {
+    try {
+        const sheet = tableData.sheets[currentSheet];
+        if (!sheet || !sheet.rows || sheet.rows.length === 0) {
+            showToast("Sheet is empty", "info");
+            return;
+        }
+
+        let allText = [];
+
+        sheet.rows.forEach(row => {
+            let rowText = [];
+            row.forEach((cellValue) => {
+                if (cellValue !== null && cellValue !== undefined && cellValue !== '') {
+                    // Start of Selection
+                    const strValue = String(cellValue);
+                    rowText.push(strValue.trim());
+                    // End of Selection
+                }
+            });
+            // Only add row if it has content
+            if (rowText.length > 0) {
+                allText.push(rowText.join(' '));
+            }
+        });
+
+        const finalText = allText.join('\n\n');
+
+        if (!finalText) {
+            showToast("No content to copy", "info");
+            return;
+        }
+
+        // Try Clipboard API first
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(finalText).then(() => {
+                showToast("Sheet content copied!", "success");
+            }).catch(err => {
+                console.warn("Clipboard API failed, trying fallback...", err);
+                copyToClipboardFallback(finalText);
+            });
+        } else {
+            // Fallback for older browsers or insecure contexts
+            copyToClipboardFallback(finalText);
+        }
+    } catch (e) {
+        console.error("Error in copySheetContent:", e);
+        showToast("Error copying content", "error");
+    }
+}
+
+function copyToClipboardFallback(text) {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.style.position = 'fixed'; // Avoid scrolling to bottom
+    textarea.style.left = '-9999px';
+    document.body.appendChild(textarea);
+    textarea.focus();
+    textarea.select();
+
+    try {
+        const successful = document.execCommand('copy');
+        if (successful) {
+            showToast("Sheet content copied!", "success");
+        } else {
+            showToast("Failed to copy content", "error");
+        }
+    } catch (err) {
+        console.error("Fallback copy failed", err);
+        showToast("Failed to copy content", "error");
+    }
+
+    document.body.removeChild(textarea);
+}
