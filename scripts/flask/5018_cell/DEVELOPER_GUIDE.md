@@ -1432,3 +1432,29 @@ Users can set custom fonts per column via **Column Settings (F3)**:
 
 3.  **Scroll Stabilization:**
     - Uses `keepCursorCentered(textarea)` to manually scroll the textarea so the cursor line is always vertically centered after a click, ensuring the user immediately sees their edit point.
+
+### PDF Export Feature
+**Purpose:** Export individual cells (with maintained formatting/styling) to a downloadable PDF file.
+
+**Implementation:**
+- **Libraries:** Uses `jsPDF` for PDF generation and `html2canvas` for visual capture.
+- **Workflow:**
+    1.  User selects **Context Menu > Export Cell to PDF**.
+    2.  Prompts for filename.
+    3.  **Visual Capture:** Renders cell content into an off-screen container that mimics the exact styling (fonts, colors, markdown).
+    4.  **Scaling:** Automatically calculates PDF page height to fit *all* content (no cut-offs for long text).
+    5.  **Generation:** Captures container as high-quality image -> Adds to PDF -> Downloads.
+- **Key Function:** `captureAndGeneratePDF(container, filename)` in `static/script.js`.
+
+### Copy Sheet Content Feature
+**Purpose:** Quickly copy all text from the current sheet to the clipboard, formatted for easy reading.
+
+**Access:** 📋 Clipboard button in Toolbar (next to 👁️ toggle).
+
+**Behavior:**
+- Collects text from all non-empty cells.
+- **Row Separation:** Joins cells in a row with spaces.
+- **Gap Separation:** Joins different rows with **double newlines** (`\n\n`), creating a distinct one-line gap between each row's content.
+- **Types:** Safely handles strings, numbers, and empty cells.
+- **Fallback:** Uses ancient `document.execCommand('copy')` as a backup if the modern Clipboard API is blocked (e.g., non-secure HTTP).
+- **Key Function:** `copySheetContent()` in `static/script.js`.
