@@ -494,10 +494,6 @@ LAlt & c:: {
 ^q:: {
     KeySequence()
     KeySequence() {
-        Send "^!{Numpad3}"
-        Sleep 250
-        Send "{Enter}"
-        Sleep 250
         Send "^!{Numpad2}"
         Sleep 250
         Send "{Enter}"
