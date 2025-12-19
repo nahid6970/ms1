@@ -10698,3 +10698,286 @@ function applyBorderBox(event) {
     closeQuickFormatter();
     showToast(`${colorUpper} border applied`, 'success');
 }
+
+// ==========================================
+// PDF EXPORT FEATURE
+// ==========================================
+
+function exportCellToPDF() {
+    if (!contextMenuCell) return;
+
+    // Close context menu
+    const menu = document.getElementById('cellContextMenu');
+    if (menu) menu.classList.remove('show');
+
+    const { rowIndex, colIndex, inputElement, tdElement } = contextMenuCell;
+    const sheet = tableData.sheets[currentSheet];
+    const columnName = sheet.columns[colIndex]?.name || getExcelColumnName(colIndex);
+    const sheetName = sheet.name || 'Sheet';
+
+    // Prompt for filename
+    const defaultFilename = `${sheetName}_${columnName}_Row${rowIndex + 1}.pdf`;
+    const filename = prompt('Enter filename for PDF:', defaultFilename);
+    if (!filename) return;
+
+    showToast('Generating PDF...', 'info');
+
+    // Create temporary container for rendering
+    const tempContainer = createTempContainer();
+
+    // Add header
+    addPDFHeader(tempContainer, sheetName, columnName, rowIndex, colIndex);
+
+    // Extract and style content
+    const contentContainer = extractCellContent(tdElement, rowIndex, colIndex);
+    tempContainer.appendChild(contentContainer);
+
+    // Add footer
+    addPDFFooter(tempContainer);
+
+    // Capture and generate PDF
+    captureAndGeneratePDF(tempContainer, filename);
+}
+
+function createTempContainer() {
+    const container = document.createElement('div');
+    container.id = 'pdf-export-container';
+    container.style.position = 'fixed'; // Fixed to ensure it renders even if scrolled
+    container.style.left = '-9999px'; // Move off-screen
+    container.style.top = '0';
+    container.style.width = '800px'; // A4 width approx
+    container.style.minHeight = '100px';
+    container.style.backgroundColor = 'white';
+    container.style.padding = '40px';
+    container.style.fontFamily = getComputedStyle(document.body).fontFamily;
+    container.style.boxSizing = 'border-box';
+    container.style.zIndex = '-1'; // Behind everything
+    document.body.appendChild(container); // Must be in DOM to be rendered
+    return container;
+}
+
+function addPDFHeader(container, sheetName, columnName, rowIndex, colIndex) {
+    const header = document.createElement('div');
+    header.style.marginBottom = '20px';
+    header.style.borderBottom = '2px solid #333';
+    header.style.paddingBottom = '10px';
+    header.style.display = 'flex';
+    header.style.justifyContent = 'space-between';
+    header.style.alignItems = 'flex-end';
+
+    const titleDiv = document.createElement('div');
+    titleDiv.innerHTML = `<h2 style="margin:0; font-size: 24px; color: #333;">${sheetName}</h2>`;
+
+    const metaDiv = document.createElement('div');
+    metaDiv.style.textAlign = 'right';
+    metaDiv.style.fontSize = '12px';
+    metaDiv.style.color = '#666';
+    metaDiv.innerHTML = `
+        <div>Column: <strong>${columnName}</strong></div>
+        <div>Row: <strong>${rowIndex + 1}</strong></div>
+        <div>Date: ${new Date().toLocaleDateString()}</div>
+    `;
+
+    header.appendChild(titleDiv);
+    header.appendChild(metaDiv);
+    container.appendChild(header);
+}
+
+function extractCellContent(tdElement, rowIndex, colIndex) {
+    const contentContainer = document.createElement('div');
+
+    // Style container
+    contentContainer.style.padding = '20px';
+    contentContainer.style.border = '1px solid #ddd';
+    contentContainer.style.borderRadius = '4px';
+    contentContainer.style.backgroundColor = 'white';
+    contentContainer.style.marginBottom = '20px';
+
+    // Get content sources
+    const inputElement = tdElement.querySelector('input, textarea');
+    const previewElement = tdElement.querySelector('.markdown-preview');
+    const cellStyle = getCellStyle(rowIndex, colIndex) || {};
+
+    // Create content div
+    const contentDiv = document.createElement('div');
+    contentDiv.style.wordWrap = 'break-word';
+    contentDiv.style.whiteSpace = 'pre-wrap';
+    contentDiv.style.fontSize = '14px';
+    contentDiv.style.lineHeight = '1.5';
+    contentDiv.style.color = '#000'; // Default black text
+    contentDiv.style.fontFamily = 'inherit';
+
+    // Extract content
+    // Check if markdown preview is active and has content
+    if (previewElement && !tdElement.classList.contains('hide-markdown-preview') && previewElement.style.display !== 'none' && previewElement.innerHTML.trim() !== '') {
+        // Use markdown preview (clone and clean)
+        const previewClone = previewElement.cloneNode(true);
+
+        // Reset positioning constraints for PDF
+        previewClone.style.display = 'block';
+        previewClone.style.position = 'static';
+        previewClone.style.width = '100%';
+        previewClone.style.height = 'auto';
+        previewClone.style.maxHeight = 'none';
+        previewClone.style.overflow = 'visible';
+        previewClone.style.border = 'none';
+        previewClone.style.padding = '0';
+        previewClone.style.margin = '0';
+
+        // Remove edit buttons or other UI elements if they complicate 
+        // (Assuming standard math/markdown elements are clean enough)
+
+        contentDiv.appendChild(previewClone);
+    } else if (inputElement && inputElement.value) {
+        // Use raw text with styling
+        let textContent = inputElement.value;
+        // Escape HTML
+        textContent = textContent
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;");
+
+        // Convert newlines to breaks
+        textContent = textContent.replace(/\n/g, '<br>');
+
+        contentDiv.innerHTML = textContent;
+
+        // Copy basic input styles
+        if (inputElement.style.color) contentDiv.style.color = inputElement.style.color;
+        if (inputElement.style.fontWeight) contentDiv.style.fontWeight = inputElement.style.fontWeight;
+        if (inputElement.style.fontStyle) contentDiv.style.fontStyle = inputElement.style.fontStyle;
+        if (inputElement.style.textAlign) contentDiv.style.textAlign = inputElement.style.textAlign;
+        if (inputElement.style.textDecoration) contentDiv.style.textDecoration = inputElement.style.textDecoration;
+    } else {
+        // Empty cell
+        contentDiv.innerHTML = '<em style="color: #999;">Empty cell</em>';
+    }
+
+    // Apply container styling from cell style
+    if (cellStyle) {
+        if (cellStyle.bold && !contentDiv.style.fontWeight) contentDiv.style.fontWeight = 'bold';
+        if (cellStyle.italic && !contentDiv.style.fontStyle) contentDiv.style.fontStyle = 'italic';
+        if (cellStyle.center && !contentDiv.style.textAlign) contentDiv.style.textAlign = 'center';
+
+        if (cellStyle.bgColor) { // Assuming structure { bgColor: '#...', ... } from memory of user's custom impl or std
+            contentContainer.style.backgroundColor = cellStyle.bgColor;
+        } else if (cellStyle.backgroundColor) {
+            contentContainer.style.backgroundColor = cellStyle.backgroundColor;
+        }
+
+        if (cellStyle.textColor) {
+            contentDiv.style.color = cellStyle.textColor;
+        }
+    }
+
+    // Inherit from TD if not overridden
+    if (!contentContainer.style.backgroundColor && tdElement.style.backgroundColor) {
+        contentContainer.style.backgroundColor = tdElement.style.backgroundColor;
+    }
+
+    contentContainer.appendChild(contentDiv);
+    return contentContainer;
+}
+
+function addPDFFooter(container) {
+    const footer = document.createElement('div');
+    footer.style.marginTop = '40px';
+    footer.style.paddingTop = '10px';
+    footer.style.borderTop = '1px solid #eee';
+    footer.style.fontSize = '10px';
+    footer.style.color = '#999';
+    footer.style.textAlign = 'center';
+    footer.innerHTML = `Generated by Excel-like Data Table • ${new Date().toLocaleString()}`;
+    container.appendChild(footer);
+}
+
+function captureAndGeneratePDF(container, filename) {
+    // Wait for content to render/load (especially math/images)
+    setTimeout(() => {
+        // Use html2canvas
+        // Ensure html2canvas is loaded
+        if (typeof html2canvas === 'undefined') {
+            showToast('Library html2canvas not loaded!', 'error');
+            document.body.removeChild(container);
+            return;
+        }
+
+        html2canvas(container, {
+            scale: 2, // 2x scale for sharper text
+            useCORS: true,
+            allowTaint: true,
+            logging: false,
+            backgroundColor: '#ffffff',
+            windowWidth: container.scrollWidth,
+            windowHeight: container.scrollHeight
+        }).then(canvas => {
+            try {
+                // Ensure jsPDF is loaded
+                if (typeof window.jspdf === 'undefined') {
+                    showToast('Library jsPDF not loaded!', 'error');
+                    document.body.removeChild(container);
+                    return;
+                }
+
+                const { jsPDF } = window.jspdf;
+
+                // Calculate dimensions
+                const imgWidthPx = canvas.width;
+                const imgHeightPx = canvas.height;
+
+                // Standard A4 width in mm is 210. Margins 10mm each side => 190mm usable width.
+                const pageMargin = 10;
+                const usableWidthMm = 190;
+
+                // Calculate equivalent height in mm maintaining aspect ratio
+                const imgHeightMm = (imgHeightPx * usableWidthMm) / imgWidthPx;
+
+                // Add margins to total height needed
+                const totalHeightMm = imgHeightMm + (pageMargin * 2);
+
+                // Standard A4 height is 297mm
+                const a4HeightMm = 297;
+
+                // Initialize PDF
+                let doc;
+                if (totalHeightMm > a4HeightMm) {
+                    // Use custom page size (A4 width, sufficient height) to fit content
+                    doc = new jsPDF({
+                        orientation: 'p',
+                        unit: 'mm',
+                        format: [210, totalHeightMm] // A4 width, custom height
+                    });
+                } else {
+                    // Use standard A4
+                    doc = new jsPDF();
+                }
+
+                // Add image to PDF
+                const imgData = canvas.toDataURL('image/jpeg', 0.95);
+
+                // Add image exactly to fit width
+                doc.addImage(imgData, 'JPEG', pageMargin, pageMargin, usableWidthMm, imgHeightMm);
+
+                // Save PDF
+                const finalFilename = filename.endsWith('.pdf') ? filename : filename + '.pdf';
+                doc.save(finalFilename);
+
+                showToast(`PDF exported: ${finalFilename}`, 'success');
+            } catch (err) {
+                console.error("PDF Generation Error: ", err);
+                showToast("Failed to generate PDF", "error");
+            } finally {
+                // Cleanup
+                if (container && container.parentNode) {
+                    container.parentNode.removeChild(container);
+                }
+            }
+        }).catch(err => {
+            console.error("html2canvas Error: ", err);
+            showToast("Failed to capture cell content", "error");
+            if (container && container.parentNode) {
+                container.parentNode.removeChild(container);
+            }
+        });
+    }, 200); // 200ms delay to ensure rendering
+}

@@ -17,6 +17,10 @@
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"
         integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8"
         crossorigin="anonymous"></script>
+    <!-- jsPDF for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- html2canvas for visual capture -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 
 <body>
@@ -71,6 +75,11 @@
             <span>⊟</span>
             <span>Unmerge Cell</span>
         </div>
+        <div class="context-menu-separator"></div>
+        <div class="context-menu-item" onclick="exportCellToPDF()">
+            <span>📄</span>
+            <span>Export Cell to PDF</span>
+        </div>
     </div>
 
     <div class="container">
@@ -83,7 +92,8 @@
 
             <div class="sheet-controls">
                 <button onclick="openSettings()" class="btn-sheet-action" title="Settings">⚙️</button>
-                <div id="rowCount" class="load-time-indicator" title="Total number of rows in current sheet" style="display: none;">
+                <div id="rowCount" class="load-time-indicator" title="Total number of rows in current sheet"
+                    style="display: none;">
                     <span>#️⃣</span>
                     <span id="rowCountValue">--</span>
                 </div>
@@ -415,7 +425,8 @@
 
                     <div class="settings-item" style="padding: 12px 0;">
                         <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-                            <label for="gridLineColor" class="settings-label" style="margin: 0; min-width: 100px;">Grid Line Color</label>
+                            <label for="gridLineColor" class="settings-label" style="margin: 0; min-width: 100px;">Grid
+                                Line Color</label>
                             <input type="color" id="gridLineColor" value="#dddddd"
                                 oninput="syncGridLineColor(this.value)"
                                 style="width: 40px; height: 32px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;">
@@ -425,7 +436,8 @@
                                     placeholder="DDDDDD" oninput="syncGridLineColor('#' + this.value)"
                                     style="width: 70px; padding: 6px 8px; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 12px; text-transform: uppercase;">
                             </div>
-                            <button class="btn-reset" onclick="resetGridLineColor()" style="padding: 6px 12px; font-size: 12px;">Reset</button>
+                            <button class="btn-reset" onclick="resetGridLineColor()"
+                                style="padding: 6px 12px; font-size: 12px;">Reset</button>
                         </div>
                     </div>
 
@@ -445,13 +457,15 @@
 
                 <div class="settings-section">
                     <h3 class="settings-section-title">🎨 Custom Color Syntax</h3>
-                    <p class="settings-description" style="margin-bottom: 15px;">Add custom color highlight syntaxes. Use any characters (e.g., ++, $$, %%, etc.) with custom colors.</p>
-                    
+                    <p class="settings-description" style="margin-bottom: 15px;">Add custom color highlight syntaxes.
+                        Use any characters (e.g., ++, $$, %%, etc.) with custom colors.</p>
+
                     <div id="customColorSyntaxList" class="custom-syntax-list">
                         <!-- Custom syntaxes will be rendered here -->
                     </div>
-                    
-                    <button class="btn btn-secondary btn-full-width" onclick="addCustomColorSyntax()" style="margin-top: 10px;">
+
+                    <button class="btn btn-secondary btn-full-width" onclick="addCustomColorSyntax()"
+                        style="margin-top: 10px;">
                         ➕ Add Custom Syntax
                     </button>
                 </div>
@@ -490,8 +504,11 @@
                             <td style="padding: 8px;"><u>underline</u></td>
                         </tr>
                         <tr style="border-bottom: 1px solid #ddd;">
-                            <td style="padding: 8px; font-family: monospace; background: #f8f9fa;">_R_red underline__</td>
-                            <td style="padding: 8px;"><u style="text-decoration-color: #ff0000; text-decoration-thickness: 2px;">red underline</u></td>
+                            <td style="padding: 8px; font-family: monospace; background: #f8f9fa;">_R_red underline__
+                            </td>
+                            <td style="padding: 8px;"><u
+                                    style="text-decoration-color: #ff0000; text-decoration-thickness: 2px;">red
+                                    underline</u></td>
                         </tr>
                         <tr style="border-bottom: 1px solid #ddd;">
                             <td style="padding: 8px; font-family: monospace; background: #f8f9fa;">~~strikethrough~~
@@ -507,19 +524,23 @@
                             <td style="padding: 8px;">text<sub>subscript</sub></td>
                         </tr>
                         <tr style="border-bottom: 1px solid #ddd;">
-                            <td style="padding: 8px; font-family: monospace; background: #f8f9fa; font-size: 11px;">\(\sqrt{25}\)</td>
+                            <td style="padding: 8px; font-family: monospace; background: #f8f9fa; font-size: 11px;">
+                                \(\sqrt{25}\)</td>
                             <td style="padding: 8px;"><span id="sqrtPreview"></span></td>
                         </tr>
                         <tr style="border-bottom: 1px solid #ddd;">
-                            <td style="padding: 8px; font-family: monospace; background: #f8f9fa; font-size: 11px;">Select: a/b → Click button</td>
+                            <td style="padding: 8px; font-family: monospace; background: #f8f9fa; font-size: 11px;">
+                                Select: a/b → Click button</td>
                             <td style="padding: 8px;"><span id="fracPreview"></span></td>
                         </tr>
                         <tr style="border-bottom: 1px solid #ddd;">
-                            <td style="padding: 8px; font-family: monospace; background: #f8f9fa; font-size: 11px;">Select: a*b/c → Click button</td>
+                            <td style="padding: 8px; font-family: monospace; background: #f8f9fa; font-size: 11px;">
+                                Select: a*b/c → Click button</td>
                             <td style="padding: 8px;"><span id="fracPreview2"></span></td>
                         </tr>
                         <tr style="border-bottom: 1px solid #ddd;">
-                            <td style="padding: 8px; font-family: monospace; background: #f8f9fa; font-size: 11px;">Select: (a+b)/(c+d) → Click button</td>
+                            <td style="padding: 8px; font-family: monospace; background: #f8f9fa; font-size: 11px;">
+                                Select: (a+b)/(c+d) → Click button</td>
                             <td style="padding: 8px;"><span id="fracPreview3"></span></td>
                         </tr>
                         <tr style="border-bottom: 1px solid #ddd;">
@@ -538,19 +559,26 @@
                             </td>
                         </tr>
                         <tr style="border-bottom: 1px solid #ddd;">
-                            <td style="padding: 8px; font-family: monospace; background: #f8f9fa;">_.wavy underline._</td>
-                            <td style="padding: 8px;"><span style="text-decoration: underline wavy;">wavy underline</span>
+                            <td style="padding: 8px; font-family: monospace; background: #f8f9fa;">_.wavy underline._
+                            </td>
+                            <td style="padding: 8px;"><span style="text-decoration: underline wavy;">wavy
+                                    underline</span>
                             </td>
                         </tr>
                         <tr style="border-bottom: 1px solid #ddd;">
                             <td style="padding: 8px; font-family: monospace; background: #f8f9fa;">#R#border box#/#</td>
-                            <td style="padding: 8px;"><span style="border: 2px solid #ff0000; padding: 2px 6px; border-radius: 4px;">border box</span>
+                            <td style="padding: 8px;"><span
+                                    style="border: 2px solid #ff0000; padding: 2px 6px; border-radius: 4px;">border
+                                    box</span>
                             </td>
                         </tr>
                     </table>
-                    <p style="font-size: 12px; color: #666; margin-top: 10px; padding: 10px; background: #e7f3ff; border-left: 3px solid #007bff;">
-                        <strong>💡 Smart Math Tip:</strong> Select text like <code>a/b</code>, <code>a*b/c</code>, or <code>(a+b)/(c+d)</code>, 
-                        press <strong>F3</strong>, and click the fraction button to automatically convert to proper math notation!
+                    <p
+                        style="font-size: 12px; color: #666; margin-top: 10px; padding: 10px; background: #e7f3ff; border-left: 3px solid #007bff;">
+                        <strong>💡 Smart Math Tip:</strong> Select text like <code>a/b</code>, <code>a*b/c</code>, or
+                        <code>(a+b)/(c+d)</code>,
+                        press <strong>F3</strong>, and click the fraction button to automatically convert to proper math
+                        notation!
                     </p>
                 </div>
 
@@ -576,7 +604,8 @@
                     </table>
                     <p style="font-size: 12px; color: #666; margin-top: 5px;">
                         Use 5 or more dashes (-----) on a single line to create a horizontal separator.<br>
-                        <strong>With colors:</strong> <code>-----R</code> (red bg), <code>-----R-W</code> (red bg + white text), 
+                        <strong>With colors:</strong> <code>-----R</code> (red bg), <code>-----R-W</code> (red bg +
+                        white text),
                         <code>R-----G</code> (red line + green bg), <code>-----#f00-#fff</code> (hex colors)
                     </p>
                 </div>
@@ -647,7 +676,8 @@
                     </table>
                     <p style="font-size: 12px; color: #666; margin-top: 5px;">
                         <strong>Syntax:</strong> <code>[number]Word</code> or <code>[number-COLOR]Word</code><br>
-                        <strong>Colors:</strong> R=Red, G=Green, B=Blue, Y=Yellow, O=Orange, P=Purple, C=Cyan, W=White, K=Black, GR=Gray
+                        <strong>Colors:</strong> R=Red, G=Green, B=Blue, Y=Yellow, O=Orange, P=Purple, C=Cyan, W=White,
+                        K=Black, GR=Gray
                     </p>
                 </div>
 
@@ -726,7 +756,7 @@
                             <td style="padding: 8px; font-family: monospace; background: #f8f9fa; font-size: 11px;">
                                 | Name | Age | City |<br>
                                 |------|-----|------|<br>
-                                | John | 25  | NYC  |
+                                | John | 25 | NYC |
                             </td>
                             <td style="padding: 8px;">
                                 <div class="md-grid" style="--cols: 3;">
@@ -743,11 +773,12 @@
                             <td style="padding: 8px; font-family: monospace; background: #f8f9fa; font-size: 11px;">
                                 | :R-A:Name | :G-A:Age |<br>
                                 |-----------|----------|<br>
-                                | John      | 25       |
+                                | John | 25 |
                             </td>
                             <td style="padding: 8px;">
                                 <div class="md-grid" style="--cols: 2;">
-                                    <div class="md-cell md-header" style="border-right-color: #ff0000 !important;">Name</div>
+                                    <div class="md-cell md-header" style="border-right-color: #ff0000 !important;">Name
+                                    </div>
                                     <div class="md-cell md-header">Age</div>
                                     <div class="md-cell" style="border-right-color: #ff0000 !important;">John</div>
                                     <div class="md-cell" style="border-right-color: #00ff00 !important;">25</div>
@@ -789,7 +820,8 @@
                         </tr>
                     </table>
                     <p style="font-size: 12px; color: #666; margin-top: 5px;">
-                        <strong>Syntax:</strong> <code>Timeline*Name</code> (top) or <code>TimelineC*Name</code> (center)<br>
+                        <strong>Syntax:</strong> <code>Timeline*Name</code> (top) or <code>TimelineC*Name</code>
+                        (center)<br>
                         <strong>Colors:</strong> <code>Timeline-R*Name</code> for red separator (R/G/B/Y/O/P/C/W/K/GR)
                     </p>
                 </div>
@@ -810,11 +842,12 @@
     <div id="f1Popup" class="f1-popup-overlay">
         <div class="f1-popup">
             <div class="f1-search-box">
-                <button class="f1-search-mode-toggle" id="f1SearchModeToggle" onclick="toggleF1SearchMode()" title="Toggle search mode">
+                <button class="f1-search-mode-toggle" id="f1SearchModeToggle" onclick="toggleF1SearchMode()"
+                    title="Toggle search mode">
                     <span id="f1SearchModeIcon">🔍</span>
                 </button>
-                <input type="text" id="f1SearchInput" placeholder="Search sheets..."
-                    onkeyup="filterF1Sheets()" onkeydown="handleF1SearchKeydown(event)">
+                <input type="text" id="f1SearchInput" placeholder="Search sheets..." onkeyup="filterF1Sheets()"
+                    onkeydown="handleF1SearchKeydown(event)">
                 <button class="f1-close" onclick="closeF1Popup()" title="Close (Esc)">&times;</button>
             </div>
             <div class="f1-content">
@@ -836,8 +869,7 @@
                     <div class="f1-sheets-title">
                         <span>Sheets</span>
                         <div class="f1-button-group">
-                            <button class="f1-add-separator-btn" onclick="addF1Sheet()"
-                                title="Add new sheet">
+                            <button class="f1-add-separator-btn" onclick="addF1Sheet()" title="Add new sheet">
                                 ➕ Sheet
                             </button>
                             <button class="f1-add-separator-btn" onclick="addSeparatorAtCursor()"
@@ -864,12 +896,14 @@
     <div id="f2Popup" class="f1-popup-overlay">
         <div class="f1-popup" style="max-width: 400px;">
             <div class="f1-search-box" style="border-bottom: 1px solid #00ff9d;">
-                <span style="color: #00ff9d; font-weight: 700; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; font-family: 'JetBrains Mono', monospace;">Recent Sheets</span>
+                <span
+                    style="color: #00ff9d; font-weight: 700; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; font-family: 'JetBrains Mono', monospace;">Recent
+                    Sheets</span>
                 <button class="f1-close" onclick="closeF2Popup()" title="Close (Esc)">&times;</button>
             </div>
             <div class="f1-search-box">
-                <input type="text" id="f2SearchInput" placeholder="Filter recent sheets..."
-                    onkeyup="filterF2Sheets()" style="flex: 1;">
+                <input type="text" id="f2SearchInput" placeholder="Filter recent sheets..." onkeyup="filterF2Sheets()"
+                    style="flex: 1;">
             </div>
             <div class="f1-content" style="min-height: 300px;">
                 <div id="f2SheetsList" class="f2-sheets-list"></div>
@@ -937,11 +971,14 @@
             <button class="format-btn" onclick="applySqrtFormat(event)" title="Square Root - \(\sqrt{value}\)">
                 √
             </button>
-            <button class="format-btn" onclick="applyHatFormat(event)" title="Smart Math - Converts a/b, a*b/c, (a+b)/(c+d) to LaTeX">
+            <button class="format-btn" onclick="applyHatFormat(event)"
+                title="Smart Math - Converts a/b, a*b/c, (a+b)/(c+d) to LaTeX">
                 <span style="position: relative; display: inline-block;">
-                    <span style="position: absolute; top: -8px; left: 50%; transform: translateX(-50%); font-size: 8px;">a</span>
+                    <span
+                        style="position: absolute; top: -8px; left: 50%; transform: translateX(-50%); font-size: 8px;">a</span>
                     <span style="font-size: 16px;">―</span>
-                    <span style="position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); font-size: 8px;">b</span>
+                    <span
+                        style="position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); font-size: 8px;">b</span>
                 </span>
             </button>
             <button class="format-btn" onclick="applyLinkFormat(event)" title="Link">
@@ -950,7 +987,8 @@
             <button class="format-btn" onclick="searchGoogle(event)" title="Search in Google">
                 🔍
             </button>
-            <button class="format-btn" onclick="searchGoogleWithExtra(event)" oncontextmenu="return editSearchExtraText(event)" title="Search with Extra Text (Right-click to edit)">
+            <button class="format-btn" onclick="searchGoogleWithExtra(event)"
+                oncontextmenu="return editSearchExtraText(event)" title="Search with Extra Text (Right-click to edit)">
                 🔍+
             </button>
             <button class="format-btn" onclick="sortLines(event)" title="Sort Lines Alphabetically">
@@ -1023,7 +1061,8 @@
             </button>
             <!-- Custom syntax buttons will be inserted here dynamically -->
             <button class="format-btn format-btn-color" onclick="showColorPicker(event)"
-                oncontextmenu="return toggleColorSelection(event)" title="Custom Color (Right-click to select)" id="customColorPickerBtn">
+                oncontextmenu="return toggleColorSelection(event)" title="Custom Color (Right-click to select)"
+                id="customColorPickerBtn">
                 🎨
             </button>
         </div>
@@ -1061,10 +1100,10 @@
     <script src="{{ url_for('static', filename='script.js') }}"></script>
     <script>
         // Render KaTeX examples in Markdown Guide when modal is opened
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // Add event listener to render KaTeX when guide is shown
-            const observer = new MutationObserver(function(mutations) {
-                mutations.forEach(function(mutation) {
+            const observer = new MutationObserver(function (mutations) {
+                mutations.forEach(function (mutation) {
                     const modal = document.getElementById('markdownGuideModal');
                     if (modal && modal.style.display === 'block') {
                         // Render square root example
@@ -1076,7 +1115,7 @@
                                 sqrtPreview.textContent = '√25';
                             }
                         }
-                        
+
                         // Render fraction examples
                         const fracPreview = document.getElementById('fracPreview');
                         if (fracPreview && window.katex) {
@@ -1086,7 +1125,7 @@
                                 fracPreview.textContent = 'a/b';
                             }
                         }
-                        
+
                         const fracPreview2 = document.getElementById('fracPreview2');
                         if (fracPreview2 && window.katex) {
                             try {
@@ -1095,7 +1134,7 @@
                                 fracPreview2.textContent = 'a×b/c';
                             }
                         }
-                        
+
                         const fracPreview3 = document.getElementById('fracPreview3');
                         if (fracPreview3 && window.katex) {
                             try {
@@ -1107,7 +1146,7 @@
                     }
                 });
             });
-            
+
             const modal = document.getElementById('markdownGuideModal');
             if (modal) {
                 observer.observe(modal, { attributes: true, attributeFilter: ['style'] });
