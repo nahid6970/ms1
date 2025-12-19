@@ -676,7 +676,7 @@ async function handleRenameFormSubmit(e) {
         if (response.ok) {
             tableData.sheets[currentSheet].name = newName;
             tableData.sheets[currentSheet].nickname = newNickname;
-            renderSidebar();
+            renderSheetTabs();
             closeRenameModal();
         }
     } catch (error) {
@@ -3664,7 +3664,7 @@ async function addSheet() {
                 showToast(`Sheet added to "${currentCategory}" category`, 'success');
             }
 
-            renderSidebar();
+            renderSheetTabs();
             renderTable();
         }
     } catch (error) {
@@ -3702,7 +3702,7 @@ async function addSubSheet(parentIndex) {
             }
 
             await saveData();
-            renderSidebar();
+            renderSheetTabs();
             renderTable();
             showToast(`Sub-sheet added under "${parentSheet.name}"`, 'success');
         }
@@ -3762,8 +3762,8 @@ async function moveSheetUp(index) {
 
     // Save and re-render
     await saveData();
-    renderSidebar();
-    renderSidebar();
+    renderSheetTabs();
+    renderSheetTabs();
     renderTable();
     showToast('Sheet moved up', 'success');
 }
@@ -3819,8 +3819,8 @@ async function moveSheetDown(index) {
 
     // Save and re-render
     await saveData();
-    renderSidebar();
-    renderSidebar();
+    renderSheetTabs();
+    renderSheetTabs();
     renderTable();
     showToast('Sheet moved down', 'success');
 }
@@ -3889,7 +3889,7 @@ async function deleteSheet(index) {
             }
 
             await saveData();
-            renderSidebar();
+            renderSheetTabs();
             renderTable();
             autoSaveActiveSheet();
             showToast('Sheet deleted', 'success');
@@ -3935,7 +3935,7 @@ function switchSheet(index) {
     const sheetCategory = tableData.sheetCategories[index] || tableData.sheetCategories[String(index)] || null;
     currentCategory = sheetCategory;
 
-    renderSidebar();
+    renderSheetTabs();
     renderTable();
     autoSaveActiveSheet();
 
@@ -4319,7 +4319,7 @@ document.getElementById('addCategoryForm').onsubmit = async function (e) {
 
     tableData.categories.push(categoryName);
     await saveData();
-    renderSidebar();
+    renderSheetTabs();
     closeAddCategoryModal();
     showToast(`Category "${categoryName}" added`, 'success');
 };
@@ -4352,7 +4352,7 @@ document.getElementById('renameCategoryForm').onsubmit = async function (e) {
 
     currentCategory = newName;
     await saveData();
-    renderSidebar();
+    renderSheetTabs();
     closeRenameCategoryModal();
     showToast(`Category renamed to "${newName}"`, 'success');
 };
@@ -4384,7 +4384,7 @@ document.getElementById('moveToCategoryForm').onsubmit = async function (e) {
     });
 
     await saveData();
-    renderSidebar();
+    renderSheetTabs();
     closeMoveToCategoryModal();
     showToast('Sheet and sub-sheets moved to category', 'success');
 };
@@ -4421,8 +4421,8 @@ function renderCategoryTabs() {
             currentSheet = firstUncategorized;
         }
 
-        renderSidebar();
-        renderSidebar();
+        renderSheetTabs();
+        renderSheetTabs();
         renderTable();
         toggleCategoryList();
     };
@@ -4457,8 +4457,8 @@ function renderCategoryTabs() {
                 currentSheet = firstSheetInCategory;
             }
 
-            renderSidebar();
-            renderSidebar();
+            renderSheetTabs();
+            renderSheetTabs();
             renderTable();
             toggleCategoryList();
         };
@@ -4518,8 +4518,8 @@ async function deleteCategory(categoryName) {
     }
 
     await saveData();
-    renderSidebar();
-    renderSidebar();
+    renderSheetTabs();
+    renderSheetTabs();
     renderTable();
     showToast(`Category "${categoryName}" deleted`, 'success');
 }
@@ -4541,7 +4541,7 @@ async function moveCategoryUp() {
         [tableData.categories[index], tableData.categories[index - 1]];
 
     await saveData();
-    renderSidebar();
+    renderSheetTabs();
 
     // Refresh F1 popup if it's open
     const f1Popup = document.getElementById('f1Popup');
@@ -4569,7 +4569,7 @@ async function moveCategoryDown() {
         [tableData.categories[index + 1], tableData.categories[index]];
 
     await saveData();
-    renderSidebar();
+    renderSheetTabs();
 
     // Refresh F1 popup if it's open
     const f1Popup = document.getElementById('f1Popup');
@@ -8384,7 +8384,7 @@ async function addF1Sheet() {
     }
 
     await saveData();
-    renderSidebar();
+    renderSheetTabs();
     populateF1Categories();
     populateF1Sheets();
     showToast(`Sheet "${sheetName}" added`, 'success');
@@ -8439,7 +8439,7 @@ async function moveCategoryUpInF1() {
         [tableData.categories[index], tableData.categories[index - 1]];
 
     await saveData();
-    renderSidebar();
+    renderSheetTabs();
 
     // Refresh F1 popup
     populateF1Categories();
@@ -8467,7 +8467,7 @@ async function moveCategoryDownInF1() {
         [tableData.categories[index + 1], tableData.categories[index]];
 
     await saveData();
-    renderSidebar();
+    renderSheetTabs();
 
     // Refresh F1 popup
     populateF1Categories();
@@ -8807,6 +8807,27 @@ function handleF1Drop(e) {
                 }
             }
         });
+
+        // Update separators to maintain their relative positions
+        if (!tableData.sheetSeparators) tableData.sheetSeparators = {};
+        const newSeparators = {};
+        Object.keys(tableData.sheetSeparators).forEach(key => {
+            const parts = key.split('_');
+            const cat = parts.slice(0, -1).join('_');
+            const idx = parseInt(parts[parts.length - 1]);
+
+            let newIdx = idx;
+            // Shifting logic identical to how sheet indices themselves shift
+            if (idx > draggedSheetIndex) {
+                newIdx--;
+            }
+            if (newIdx > targetIndex) {
+                newIdx++;
+            }
+
+            newSeparators[`${cat}_${newIdx}`] = true;
+        });
+        tableData.sheetSeparators = newSeparators;
 
         // Update current sheet index
         if (currentSheet === draggedSheetIndex) {
@@ -10270,7 +10291,7 @@ async function showAddSheetToCategory(category) {
                 await saveData();
             }
 
-            renderSidebar();
+            renderSheetTabs();
             renderTable();
         }
     } catch (error) {
