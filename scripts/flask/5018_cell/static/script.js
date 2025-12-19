@@ -10748,7 +10748,7 @@ function createTempContainer() {
     container.style.width = '800px'; // A4 width approx
     container.style.minHeight = '100px';
     container.style.backgroundColor = 'white';
-    container.style.padding = '40px';
+    container.style.padding = '20px';
     container.style.fontFamily = getComputedStyle(document.body).fontFamily;
     container.style.boxSizing = 'border-box';
     container.style.zIndex = '-1'; // Behind everything
@@ -10787,7 +10787,7 @@ function extractCellContent(tdElement, rowIndex, colIndex) {
     const contentContainer = document.createElement('div');
 
     // Style container
-    contentContainer.style.padding = '20px';
+    contentContainer.style.padding = '10px';
     contentContainer.style.border = '1px solid #ddd';
     contentContainer.style.borderRadius = '4px';
     contentContainer.style.backgroundColor = 'white';
@@ -10925,9 +10925,9 @@ function captureAndGeneratePDF(container, filename) {
                 const imgWidthPx = canvas.width;
                 const imgHeightPx = canvas.height;
 
-                // Standard A4 width in mm is 210. Margins 10mm each side => 190mm usable width.
-                const pageMargin = 10;
-                const usableWidthMm = 190;
+                // Standard A4 width in mm is 210. Margins 5mm each side => 200mm usable width.
+                const pageMargin = 5;
+                const usableWidthMm = 200;
 
                 // Calculate equivalent height in mm maintaining aspect ratio
                 const imgHeightMm = (imgHeightPx * usableWidthMm) / imgWidthPx;
