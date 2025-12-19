@@ -25,6 +25,12 @@ def open_with_editor(file_paths, editor):
                 subprocess.run(f'zed "{file_path}"', shell=True)
         else:
             subprocess.run(f'zed "{file_paths}"', shell=True)
+    elif editor == "antigravity":
+        if isinstance(file_paths, list):
+            for file_path in file_paths:
+                subprocess.run(f'antigravity "{file_path}"', shell=True)
+        else:
+            subprocess.run(f'antigravity "{file_paths}"', shell=True)
     elif editor == "emacs":
         # Ensure HOME is set for Emacs to find config
         # Emacs on Windows often defaults to APPDATA for config if HOME is not set,
@@ -55,6 +61,7 @@ def create_editor_chooser(file_paths):
         ("VSCode", "#7e96ff", ""),
         ("Emacs", "#8458b7", ""),
         ("Zed", "#ff6b6b", ""),
+        ("Antigravity", "#00d9ff", ""),
     ]
 
     root = tk.Tk()
