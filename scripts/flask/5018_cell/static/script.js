@@ -5363,17 +5363,46 @@ function keepCursorCentered(textarea) {
 
 function positionCursorAtMouseClick(textarea, mouseEvent) {
     requestAnimationFrame(() => {
-        const lineHeight = parseFloat(getComputedStyle(textarea).lineHeight) || 20;
+        const style = window.getComputedStyle(textarea);
+
+        // Robust line-height calculation
+        let lineHeight = parseFloat(style.lineHeight);
+        if (isNaN(lineHeight)) {
+            // If 'normal' or invalid, measure it dynamically
+            const temp = document.createElement('div');
+            temp.style.position = 'absolute';
+            temp.style.visibility = 'hidden';
+            temp.style.whiteSpace = 'pre';
+            temp.style.font = style.font;
+            temp.style.fontFamily = style.fontFamily;
+            temp.style.fontSize = style.fontSize;
+            temp.style.fontWeight = style.fontWeight;
+            temp.style.padding = '0';
+            temp.style.border = '0';
+            temp.textContent = 'Mg';
+            document.body.appendChild(temp);
+            lineHeight = temp.clientHeight;
+            document.body.removeChild(temp);
+        }
+
+        // Get padding and border
+        const paddingTop = parseFloat(style.paddingTop) || 0;
+        const borderTop = parseFloat(style.borderTopWidth) || 0;
+
+        // Calculate cursor line position
         const lines = textarea.value.substr(0, textarea.selectionStart).split('\n');
         const cursorLineIndex = lines.length - 1;
-        const cursorLineTop = cursorLineIndex * lineHeight;
+        const cursorLineTop = paddingTop + (cursorLineIndex * lineHeight);
 
-        // Get the mouse Y position relative to the textarea
+        // Get the mouse Y position relative to the textarea border box
         const textareaRect = textarea.getBoundingClientRect();
         const mouseY = mouseEvent.clientY - textareaRect.top;
 
-        // Calculate scroll position so cursor line appears exactly at mouse Y position
-        const targetScrollTop = cursorLineTop - mouseY;
+        // Calculate scroll position so the center of the cursor line aligns with mouse Y
+        // We want: borderTop + cursorLineTop - scrollTop + (lineHeight/2) = mouseY
+        // So: scrollTop = borderTop + cursorLineTop + lineHeight/2 - mouseY
+
+        const targetScrollTop = borderTop + cursorLineTop + (lineHeight / 2) - mouseY;
 
         // Ensure we don't scroll beyond the content bounds
         const maxScrollTop = Math.max(0, textarea.scrollHeight - textarea.clientHeight);
