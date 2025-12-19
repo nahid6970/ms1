@@ -2192,24 +2192,7 @@ function setCellStyle(rowIndex, colIndex, styleProperty, value) {
     sheet.cellStyles[key][styleProperty] = value;
 }
 
-function showCellContextMenu(e, rowIndex, colIndex, inputElement) {
-    e.preventDefault();
 
-    contextMenuCell = { rowIndex, colIndex, inputElement };
-
-    const menu = document.getElementById('cellContextMenu');
-    const style = getCellStyle(rowIndex, colIndex);
-
-    // Update checkmarks
-    document.getElementById('ctxBold').classList.toggle('checked', style.bold === true);
-    document.getElementById('ctxItalic').classList.toggle('checked', style.italic === true);
-    document.getElementById('ctxCenter').classList.toggle('checked', style.center === true);
-
-    // Position menu
-    menu.style.left = e.pageX + 'px';
-    menu.style.top = e.pageY + 'px';
-    menu.classList.add('show');
-}
 
 function toggleCellBold() {
     if (!contextMenuCell) return;
@@ -5785,6 +5768,7 @@ function renderTable() {
             }
 
             input.oncontextmenu = (e) => showCellContextMenu(e, rowIndex, colIndex, input, td);
+            td.oncontextmenu = (e) => showCellContextMenu(e, rowIndex, colIndex, input, td);
 
             // Selection handling
             td.dataset.row = rowIndex;
