@@ -4054,22 +4054,7 @@ function renderSubSheetBar() {
     parentName.textContent = parentSheet.name;
 
     parentTab.appendChild(parentName);
-
-    // Drag/Click protection
-    let isDraggingParent = false;
-    parentTab.addEventListener('mousedown', () => isDraggingParent = false);
-    parentTab.addEventListener('dragstart', (e) => {
-        isDraggingParent = true;
-        handleF1DragStart.call(parentTab, e);
-    });
-
-    parentTab.addEventListener('click', () => {
-        if (!isDraggingParent) switchSheet(parentIndex);
-    });
-
-    parentTab.addEventListener('dragover', handleF1DragOver);
-    parentTab.addEventListener('drop', handleF1Drop);
-    parentTab.addEventListener('dragend', handleF1DragEnd);
+    parentTab.onclick = () => switchSheet(parentIndex);
 
     // Add right-click context menu for parent sheet
     parentTab.oncontextmenu = (e) => {
@@ -4077,7 +4062,6 @@ function renderSubSheetBar() {
         showSubSheetContextMenu(e, parentIndex);
     };
 
-    parentTab.draggable = true;
     subsheetTabs.appendChild(parentTab);
 
     // Add sub-sheets
@@ -4092,30 +4076,13 @@ function renderSubSheetBar() {
             name.textContent = sheet.name;
 
             tab.appendChild(name);
-
-            // Drag/Click protection
-            let isDraggingTab = false;
-            tab.addEventListener('mousedown', () => isDraggingTab = false);
-            tab.addEventListener('dragstart', (e) => {
-                isDraggingTab = true;
-                handleF1DragStart.call(tab, e);
-            });
-
-            tab.addEventListener('click', () => {
-                if (!isDraggingTab) switchSheet(index);
-            });
+            tab.onclick = () => switchSheet(index);
 
             // Add right-click context menu for sub-sheet
             tab.oncontextmenu = (e) => {
                 e.preventDefault();
                 showSubSheetContextMenu(e, index);
             };
-
-            // Enable dragging for sub-sheet tabs
-            tab.draggable = true;
-            tab.addEventListener('dragover', handleF1DragOver);
-            tab.addEventListener('drop', handleF1Drop);
-            tab.addEventListener('dragend', handleF1DragEnd);
 
             subsheetTabs.appendChild(tab);
         }
@@ -8652,6 +8619,17 @@ function populateF1Sheets(searchAllCategories = false) {
 
                 subItem.appendChild(subNameSpan);
 
+                // Enable dragging for sub-sheets
+                subItem.draggable = true;
+
+                subItem.addEventListener('dragstart', (e) => {
+                    handleF1DragStart.call(subItem, e);
+                });
+
+                subItem.addEventListener('dragover', handleF1DragOver);
+                subItem.addEventListener('drop', handleF1Drop);
+                subItem.addEventListener('dragend', handleF1DragEnd);
+
                 subItem.addEventListener('click', (e) => {
                     switchToSheetFromF1(subIndex);
                 });
@@ -8744,7 +8722,7 @@ function handleF1DragOver(e) {
     if (canDrop) {
         e.dataTransfer.dropEffect = 'move';
         // Add visual indicator
-        if (this !== draggedF1Item && (this.classList.contains('f1-sheet-item') || this.classList.contains('subsheet-tab'))) {
+        if (this !== draggedF1Item && this.classList.contains('f1-sheet-item')) {
             this.style.borderColor = '#007bff';
             this.style.borderWidth = '3px';
         }
@@ -8760,7 +8738,7 @@ function handleF1Drop(e) {
         e.stopPropagation();
     }
 
-    if (draggedF1Item !== this && (this.classList.contains('f1-sheet-item') || this.classList.contains('subsheet-tab'))) {
+    if (draggedF1Item !== this && this.classList.contains('f1-sheet-item')) {
         const targetIndex = parseInt(this.dataset.sheetIndex);
 
         // Remove the dragged sheet from its current position
@@ -8853,7 +8831,7 @@ function handleF1DragEnd(e) {
     this.classList.remove('dragging');
 
     // Remove all drag indicators
-    document.querySelectorAll('.f1-sheet-item, .subsheet-tab').forEach(item => {
+    document.querySelectorAll('.f1-sheet-item').forEach(item => {
         item.style.borderColor = '';
         item.style.borderWidth = '';
     });
