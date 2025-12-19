@@ -6161,6 +6161,7 @@ window.onclick = function (event) {
 
 // F1 Quick Navigation Popup Functions
 let selectedF1Category = null;
+let showSubSheetsInF1 = localStorage.getItem('showSubSheetsInF1') !== 'false'; // Default true
 
 function openF1Popup() {
     const popup = document.getElementById('f1Popup');
@@ -6196,6 +6197,13 @@ function openF1Popup() {
     populateF1Categories();
     populateF1Sheets();
 
+    // Set initial state of toggle button
+    const btn = document.getElementById('toggleSubSheetsBtn');
+    if (btn) {
+        btn.style.opacity = showSubSheetsInF1 ? '1' : '0.5';
+        btn.title = showSubSheetsInF1 ? 'Hide Sub-sheets' : 'Show Sub-sheets';
+    }
+
     // Focus search input
     setTimeout(() => {
         if (searchInput) {
@@ -6216,6 +6224,20 @@ function closeF1Popup() {
 
     // Reset filter
     filterF1Sheets();
+}
+
+function toggleF1SubSheets() {
+    showSubSheetsInF1 = !showSubSheetsInF1;
+    localStorage.setItem('showSubSheetsInF1', showSubSheetsInF1);
+
+    // Update button appearance
+    const btn = document.getElementById('toggleSubSheetsBtn');
+    if (btn) {
+        btn.style.opacity = showSubSheetsInF1 ? '1' : '0.5';
+        btn.title = showSubSheetsInF1 ? 'Hide Sub-sheets' : 'Show Sub-sheets';
+    }
+
+    populateF1Sheets(document.getElementById('f1SearchInput')?.value ? true : false);
 }
 
 // F2 Popup - Recent Sheets
@@ -8577,38 +8599,41 @@ function populateF1Sheets(searchAllCategories = false) {
         sheetGroup.appendChild(item);
 
         // Find and add sub-sheets directly to the group
-        const subSheets = tableData.sheets
-            .map((s, idx) => ({ sheet: s, index: idx }))
-            .filter(({ sheet }) => sheet.parentSheet === index);
+        // Only if showSubSheetsInF1 is true
+        if (showSubSheetsInF1) {
+            const subSheets = tableData.sheets
+                .map((s, idx) => ({ sheet: s, index: idx }))
+                .filter(({ sheet }) => sheet.parentSheet === index);
 
-        subSheets.forEach(({ sheet: subSheet, index: subIndex }) => {
-            const subItem = document.createElement('div');
-            subItem.className = 'f1-sheet-item f1-sub-sheet' + (subIndex === currentSheet ? ' active' : '');
-            subItem.dataset.sheetIndex = subIndex;
+            subSheets.forEach(({ sheet: subSheet, index: subIndex }) => {
+                const subItem = document.createElement('div');
+                subItem.className = 'f1-sheet-item f1-sub-sheet' + (subIndex === currentSheet ? ' active' : '');
+                subItem.dataset.sheetIndex = subIndex;
 
-            const subNameSpan = document.createElement('span');
-            subNameSpan.className = 'f1-sheet-name-wrapper';
-            subNameSpan.innerHTML = `
+                const subNameSpan = document.createElement('span');
+                subNameSpan.className = 'f1-sheet-name-wrapper';
+                subNameSpan.innerHTML = `
                 <span class="f1-sheet-icon">📃</span>
                 <span class="f1-sheet-name">${subSheet.name}</span>
             `;
 
-            subItem.appendChild(subNameSpan);
+                subItem.appendChild(subNameSpan);
 
-            subItem.addEventListener('click', (e) => {
-                switchToSheetFromF1(subIndex);
+                subItem.addEventListener('click', (e) => {
+                    switchToSheetFromF1(subIndex);
+                });
+
+                // Add right-click context menu for sub-sheets
+                subItem.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    showF1SheetContextMenu(e, subIndex, true);
+                    return false;
+                });
+
+                sheetGroup.appendChild(subItem);
             });
-
-            // Add right-click context menu for sub-sheets
-            subItem.addEventListener('contextmenu', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                showF1SheetContextMenu(e, subIndex, true);
-                return false;
-            });
-
-            sheetGroup.appendChild(subItem);
-        });
+        }
 
         sheetList.appendChild(sheetGroup);
     });
