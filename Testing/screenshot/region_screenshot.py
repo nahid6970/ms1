@@ -164,6 +164,19 @@ class FolderChooser:
         exit_btn.pack(side="bottom", pady=10)
 
         self.root.bind("<Escape>", lambda e: self.root.destroy())
+        
+        # Force focus so ESC works immediately without clicking
+        self.root.after(100, self.force_focus)
+
+    def force_focus(self):
+        self.root.focus_force()
+        self.root.lift()
+        self.root.focus_set()
+        # grab_set makes it modal and ensures it gets all events
+        try:
+            self.root.grab_set()
+        except:
+            pass
 
     def start_move(self, event):
         self.x = event.x
