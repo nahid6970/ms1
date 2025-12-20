@@ -502,6 +502,9 @@ LAlt & c:: {
     }
 }
 
+;! Take Screenshot
+PrintScreen::Run("C:\Users\nahid\ms\ms1\Testing\screenshot\region_screenshot.py", "", "Hide")
+
 ;! === TEXT SHORTCUTS ===
 ;! AutoHotkey Version 1
 ;! Inserts AHK v1 header requirement

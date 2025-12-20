@@ -212,6 +212,14 @@
             "hotkey": "^q",
             "action": "KeySequence()\nKeySequence() {\n    Send \"^!{Numpad2}\"\n    Sleep 250\n    Send \"{Enter}\"\n    Sleep 250\n    Send \"^!{Numpad1}\"\n}",
             "enabled": true
+        },
+        {
+            "name": "Take Screenshot",
+            "category": "General",
+            "description": "",
+            "hotkey": "PrintScreen",
+            "action": "Run(\"C:\\Users\\nahid\\ms\\ms1\\Testing\\screenshot\\region_screenshot.py\", \"\", \"Hide\")",
+            "enabled": true
         }
     ],
     "text_shortcuts": [
