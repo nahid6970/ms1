@@ -27,7 +27,8 @@ def load_folders():
 class RegionSelector:
     def __init__(self):
         self.root = tk.Tk()
-        self.root.attributes('-alpha', 0.3)
+        # Increased alpha for better contrast
+        self.root.attributes('-alpha', 0.5) 
         self.root.attributes('-fullscreen', True)
         self.root.attributes('-topmost', True)
         self.root.config(cursor="cross")
@@ -40,9 +41,9 @@ class RegionSelector:
         self.rect = None
         self.selection = None
         
-        # Crosshair lines
-        self.v_line = self.canvas.create_line(0, 0, 0, 0, fill="white", dash=(4, 4))
-        self.h_line = self.canvas.create_line(0, 0, 0, 0, fill="white", dash=(4, 4))
+        # Thicker, solid crosshairs for better visibility
+        self.v_line = self.canvas.create_line(0, 0, 0, 0, fill="#ffffff", width=1)
+        self.h_line = self.canvas.create_line(0, 0, 0, 0, fill="#ffffff", width=1)
 
         self.canvas.bind("<ButtonPress-1>", self.on_button_press)
         self.canvas.bind("<B1-Motion>", self.on_move_press)
@@ -58,9 +59,10 @@ class RegionSelector:
     def on_button_press(self, event):
         self.start_x = event.x
         self.start_y = event.y
+        # Solid, thicker neon border for high visibility
         self.rect = self.canvas.create_rectangle(
             self.start_x, self.start_y, self.start_x, self.start_y, 
-            outline='#00bfff', width=1, dash=(2, 2)
+            outline='#00ffff', width=2
         )
 
     def on_move_press(self, event):
