@@ -15,8 +15,8 @@
     "marker": "\u00bf\u00bf"
   },
   {
-    "marker": "\u00a1\u00a1",
-    "bgColor": "#4DABFF",
-    "fgColor": "#212529"
+    "bgColor": "#80E5FF",
+    "fgColor": "#212529",
+    "marker": "\u00a1\u00a1"
   }
 ]
