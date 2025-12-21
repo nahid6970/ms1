@@ -1,1 +1,10 @@
-[]
+[
+    {
+        "path": "C:/Users/nahid/Pictures",
+        "color": "#80ffff"
+    },
+    {
+        "path": "C:/Users/nahid/Pictures/edu",
+        "color": "#ff0000"
+    }
+]

@@ -15,17 +15,15 @@ def load_folders():
         if os.path.exists(CONFIG_FILE):
             with open(CONFIG_FILE, 'r') as f:
                 data = json.load(f)
-                if data and isinstance(data[0], str):
+                if not data:
+                    return []
+                if isinstance(data, list) and len(data) > 0 and isinstance(data[0], str):
                     return [{"path": p, "color": "#00ff41"} for p in data]
                 return data
     except Exception as e:
         print(f"Error loading config: {e}")
     
-    return [
-        {"path": r"C:\Users\nahid\ms\ms1\Testing", "color": "#00ff41"},
-        {"path": r"C:\Users\nahid\ms\ms1\tailscale", "color": "#00d4ff"},
-        {"path": r"C:\Users\nahid\Pictures", "color": "#ff007f"}
-    ]
+    return []
 
 def save_folders(folders):
     try:
