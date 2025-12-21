@@ -18,9 +18,5 @@
     {
         "path": "D:/example/static",
         "color": "#ff80ff"
-    },
-    {
-        "path": "C:/MinGW",
-        "color": "#c0c0c0"
     }
 ]

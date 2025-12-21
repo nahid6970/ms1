@@ -125,14 +125,16 @@ class FolderChooser:
         self.header.pack(fill="x", padx=15, pady=(15, 5))
         
         self.label_title = tk.Label(self.header, text="DESTINATION SELECTOR", 
-                              font=self.font_title, bg=self.bg_color, fg=self.accent_main)
+                              font=self.font_title, bg=self.bg_color, fg=self.accent_main,
+                              cursor="arrow") # Standard cursor for text
         self.label_title.pack(side="left")
 
         # Edit Toggle Button
         self.btn_edit_toggle = tk.Button(self.header, text="EDIT: OFF", command=self.toggle_edit_mode,
                                        font=self.font_small, bg="#1a1a1a", fg="#666666",
                                        activebackground=self.accent_edit, activeforeground="black",
-                                       relief="flat", bd=0, padx=10)
+                                       relief="flat", bd=0, padx=10,
+                                       cursor="hand2") # Hand cursor for button
         self.btn_edit_toggle.pack(side="right")
         
         self.header.bind("<ButtonPress-1>", self.start_move)
@@ -170,12 +172,11 @@ class FolderChooser:
 
     def update_window_size(self):
         self.list_container.update_idletasks()
-        # Each card is roughly 120+10 px wide. 5 cards = ~650px.
-        width = 660 
-        # Calculate height based on rows
-        total_items = 1 + len(self.folders) + 1 # Clipboard + Folders + Add Button
+        # Increased width to 740 to ensure 5 columns + container padding fit perfectly
+        width = 740 
+        total_items = 1 + len(self.folders) + 1
         rows = (total_items + 4) // 5
-        height = 110 + (rows * 125)
+        height = 100 + (rows * 105)
         
         screen_width = self.root.winfo_screenwidth()
         screen_height = self.root.winfo_screenheight()
@@ -184,61 +185,49 @@ class FolderChooser:
         self.root.geometry(f'{width}x{height}+{center_x}+{center_y}')
 
     def render_folders(self):
-        # Clear existing
         for widget in self.list_container.winfo_children():
             widget.destroy()
 
         all_items = []
-        
-        # 1. Clipboard
         all_items.append(('CLIPBOARD', "#00d4ff", True, -1))
-
-        # 2. Folders
         for i, f_data in enumerate(self.folders):
             all_items.append((f_data['path'], f_data['color'], False, i))
 
-        # Render items in grid (5 per row)
         for idx, (path, color, is_clip, f_idx) in enumerate(all_items):
             row = idx // 5
             col = idx % 5
             self.create_folder_card(path, color, row, col, f_idx, is_clip)
 
-        # 3. Add Button (always at the end)
         next_idx = len(all_items)
         self.create_add_button(next_idx // 5, next_idx % 5)
 
     def create_folder_card(self, path, color, row, col, index, is_clipboard):
-        # Container frame with FIXED size to prevent jumping
-        card = tk.Frame(self.list_container, bg="#1a1a1a", width=120, height=115)
-        card.grid(row=row, column=col, padx=5, pady=5)
-        card.pack_propagate(False) # Ensure it stays 120x115
+        # Card size: 128x85
+        card = tk.Frame(self.list_container, bg="#1a1a1a", width=128, height=85)
+        card.grid(row=row, column=col, padx=6, pady=6)
+        card.pack_propagate(False)
 
         name = "CLIPBOARD" if is_clipboard else os.path.basename(path)
         if not name: name = path
         
-        # Icon
         icon_char = "📋" if is_clipboard else "\ueaf7"
         icon_label = tk.Label(card, text=icon_char, font=self.font_icon, bg="#1a1a1a", fg=color)
-        icon_label.pack(pady=(15, 0))
+        icon_label.pack(pady=(8, 0))
 
         name_label = tk.Label(card, text=name.upper()[:12], font=self.font_main, bg="#1a1a1a", fg=self.fg_color)
         name_label.pack()
 
-        # Management Overlays (Placed using .place for absolute positioning)
         if self.edit_mode and not is_clipboard:
             card.config(highlightbackground=self.accent_edit, highlightthickness=1)
-            
-            # Delete button (Top Right)
+            # Safe positioning within 128x85
             del_label = tk.Label(card, text="✕", font=self.font_main, bg="#1a1a1a", fg="#ff4444", cursor="hand2")
-            del_label.place(x=95, y=5)
+            del_label.place(x=105, y=55)
             del_label.bind("<Button-1>", lambda e, i=index: self.remove_folder(i))
             
-            # Color button (Top Left)
             col_label = tk.Label(card, text="🎨", font=self.font_main, bg="#1a1a1a", fg=self.accent_edit, cursor="hand2")
-            col_label.place(x=5, y=5)
+            col_label.place(x=5, y=55)
             col_label.bind("<Button-1>", lambda e, i=index: self.change_folder_color(i))
 
-        # Bindings for interaction
         widgets = [card, icon_label, name_label]
         for w in widgets:
             if not self.edit_mode:
@@ -253,9 +242,10 @@ class FolderChooser:
             w.bind("<Leave>", lambda e, c=card: self.on_leave(c))
 
     def create_add_button(self, row, col):
-        card = tk.Frame(self.list_container, bg="#121212", padx=10, pady=10, width=120, height=115)
-        card.grid(row=row, column=col, padx=4, pady=4)
-        card.grid_propagate(False)
+        # SYNCED SIZE: Must be 128x85 exactly like other cards
+        card = tk.Frame(self.list_container, bg="#121212", width=128, height=85)
+        card.grid(row=row, column=col, padx=6, pady=6)
+        card.pack_propagate(False)
 
         icon_label = tk.Label(card, text="+", font=("JetBrains Mono", 24), bg="#121212", fg="#444444")
         icon_label.pack(expand=True)
