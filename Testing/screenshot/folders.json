@@ -1,4 +1,14 @@
 [
-    "C:\\Users\\nahid\\Pictures",
-    "C:\\Users\\nahid\\Pictures\\edu"
+    {
+        "path": "C:\\Users\\nahid\\ms\\ms1\\Testing",
+        "color": "#00ff41"
+    },
+    {
+        "path": "C:\\Users\\nahid\\ms\\ms1\\tailscale",
+        "color": "#00d4ff"
+    },
+    {
+        "path": "C:\\Users\\nahid\\Pictures",
+        "color": "#ff007f"
+    }
 ]
