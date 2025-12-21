@@ -368,7 +368,6 @@ LAlt & c:: {
     MergeAllExplorerWindows()
     MergeAllExplorerWindows() {
         ; Get the target window to merge everything into
-        ; Use the active explorer window, or the first one found
         mainWindow := WinActive("ahk_class CabinetWClass")
         if (!mainWindow)
             mainWindow := WinExist("ahk_class CabinetWClass")
@@ -377,14 +376,11 @@ LAlt & c:: {
             return
         }
         pathsToOpen := []
-        sourceHwnds := Map() ; Map to store unique HWNDs of windows we want to close
+        sourceHwnds := Map()
         ; Collect all paths from all explorer tabs
         shellApp := ComObject("Shell.Application")
-        ; We iterate through all shell windows (including every tab in Windows 11)
         for window in shellApp.Windows {
             try {
-                ; Only process windows that are actual File Explorer instances
-                ; Check both the internal name and if it has a Document/Folder structure
                 if (window.Name != "Windows Explorer" && window.Name != "File Explorer")
                     continue
                 thisHwnd := 0
@@ -395,10 +391,8 @@ LAlt & c:: {
                 }
                 if (!thisHwnd || thisHwnd == 0)
                     continue
-                ; If this tab belongs to any window OTHER than our main window
                 if (thisHwnd != mainWindow) {
                     path := ""
-                    ; Try multiple ways to get the folder path
                     try {
                         path := window.Document.Folder.Self.Path
                     } catch {
@@ -408,9 +402,8 @@ LAlt & c:: {
                             path := window.LocationName
                         }
                     }
-                    if (path != "") {
+                    if (path != "" && path != "This PC") {
                         pathsToOpen.Push(path)
-                        ; Add the HWND to our closing list (it's a Map so duplicates won't matter)
                         sourceHwnds[thisHwnd] := true
                     }
                 }
@@ -421,58 +414,55 @@ LAlt & c:: {
         if (pathsToOpen.Length == 0 && sourceHwnds.Count == 0) {
             return
         }
-        ; Backup clipboard to prevent data loss
+        ; Backup clipboard
         clipSaved := ClipboardAll()
-        ; Activate the main window
         WinActivate("ahk_id " . mainWindow)
         if (!WinWaitActive("ahk_id " . mainWindow, , 2)) {
             A_Clipboard := clipSaved
             return
         }
-        ; Open all collected paths as new tabs in the main window
+        ; --- DELIBERATE AND STABLE NAVIGATION ---
         for p in pathsToOpen {
             cleanPath := p
-            ; Sanitize path if it's a file URL
             if InStr(cleanPath, "file:///") {
                 cleanPath := StrReplace(cleanPath, "file:///", "")
                 cleanPath := StrReplace(cleanPath, "/", "\")
                 cleanPath := StrReplace(cleanPath, "%20", " ")
             }
-            ; Small delay to ensure Explorer is ready for the next command
-            Sleep(50)
-            ; Create a new tab
+            ; 1. Create a new tab and wait for animation to complete
             Send("^t")
-            Sleep(300) ; Wait for tab to appear
-            ; Focus address bar
+            Sleep(800) ; Increased for stability
+            ; 2. Focus address bar
             Send("^l")
-            Sleep(150)
-            ; Paste the path and enter
-            A_Clipboard := cleanPath
-            Send("^v")
+            Sleep(400)
+            ; 3. Clear existing text just in case
+            Send("^a") ; Select all
             Sleep(100)
+            Send("{BackSpace}")
+            Sleep(200)
+            ; 4. Update clipboard and PASTE
+            A_Clipboard := cleanPath
+            Sleep(200) ; Give OS time to register clipboard change
+            Send("^v")
+            Sleep(400) ; Crucial: Wait for the text to actually appear in the box
+            ; 5. Navigation
             Send("{Enter}")
-            ; Wait a bit for navigation to start
-            Sleep(300)
+            Sleep(1000) ; Wait for navigation to commit before moving to the next tab
         }
         ; Restore original clipboard
         A_Clipboard := clipSaved
-        ; Finalize: Close all the other windows
-        ; We do this at the very end to make sure we don't accidentally close 
-        ; the process while we are trying to copy from it
+        ; Close other windows
         for hwnd, _ in sourceHwnds {
             try {
-                ; Check if it still exists before trying to close
                 if WinExist("ahk_id " . hwnd) {
                     WinClose("ahk_id " . hwnd)
-                    ; If it's stubborn (like some Win11 windows), give it a nudge
                     if (WinExist("ahk_id " . hwnd)) {
-                        Sleep(200)
+                        Sleep(500)
                         WinKill("ahk_id " . hwnd)
                     }
                 }
             }
         }
-        ; Bring the main window back to focus
         WinActivate("ahk_id " . mainWindow)
     }
 }
