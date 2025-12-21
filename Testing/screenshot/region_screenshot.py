@@ -107,10 +107,12 @@ class FolderChooser:
         self.accent_main = "#00ff41" # Matrix Green
         self.accent_edit = "#ffcc00" # Warning/Edit Color
         
-        self.font_main = ("JetBrains Mono", 10)
-        self.font_icon = ("JetBrains Mono", 18)
-        self.font_small = ("JetBrains Mono", 8)
-        self.font_title = ("JetBrains Mono Bold", 11)
+        # Fonts - Force JetBrains Mono everywhere
+        self.font_name = "JetBrainsMono NFP"
+        self.font_main = (self.font_name, 10)
+        self.font_icon = (self.font_name, 36) # Increased size further
+        self.font_small = (self.font_name, 8)
+        self.font_title = (self.font_name + " Bold", 11)
         
         self.root.config(bg="#1a1a1a")
 
@@ -151,7 +153,7 @@ class FolderChooser:
         self.btn_close = tk.Button(self.footer, text="EXIT [ESC]", command=self.root.destroy,
                                  font=self.font_small, bg=self.bg_color, fg="#555555",
                                  activebackground="#ff0000", activeforeground="white",
-                                 relief="flat", bd=0, padx=20)
+                                 relief="flat", bd=0, padx=20, cursor="hand2")
         self.btn_close.pack()
 
         # Update initial size
@@ -170,11 +172,11 @@ class FolderChooser:
 
     def update_window_size(self):
         self.list_container.update_idletasks()
-        # Increased width to 740 to ensure 5 columns + container padding fit perfectly
-        width = 740 
+        # Increased dimensions for 36pt icons
+        width = 820 
         total_items = 1 + len(self.folders) + 1
         rows = (total_items + 4) // 5
-        height = 100 + (rows * 105)
+        height = 110 + (rows * 135)
         
         screen_width = self.root.winfo_screenwidth()
         screen_height = self.root.winfo_screenheight()
@@ -187,44 +189,52 @@ class FolderChooser:
             widget.destroy()
 
         all_items = []
-        all_items.append(('CLIPBOARD', "#00d4ff", True, -1))
+        all_items.append(('CLIPBOARD', "#00d4ff", "📋", True, -1))
         for i, f_data in enumerate(self.folders):
-            all_items.append((f_data['path'], f_data['color'], False, i))
+            icon = f_data.get('icon', "\ueaf7") # Get icon, default to folder if not present
+            all_items.append((f_data['path'], f_data['color'], icon, False, i))
 
-        for idx, (path, color, is_clip, f_idx) in enumerate(all_items):
+        for idx, (path, color, icon, is_clip, f_idx) in enumerate(all_items):
             row = idx // 5
             col = idx % 5
-            self.create_folder_card(path, color, row, col, f_idx, is_clip)
+            self.create_folder_card(path, color, icon, row, col, f_idx, is_clip)
 
         next_idx = len(all_items)
         self.create_add_button(next_idx // 5, next_idx % 5)
 
-    def create_folder_card(self, path, color, row, col, index, is_clipboard):
-        # Card size: 128x85
-        card = tk.Frame(self.list_container, bg="#1a1a1a", width=128, height=85)
-        card.grid(row=row, column=col, padx=6, pady=6)
+    def create_folder_card(self, path, color, icon, row, col, index, is_clipboard):
+        # Increased card size for 36pt icons
+        card = tk.Frame(self.list_container, bg="#1a1a1a", width=150, height=120)
+        card.grid(row=row, column=col, padx=5, pady=5)
         card.pack_propagate(False)
 
         name = "CLIPBOARD" if is_clipboard else os.path.basename(path)
         if not name: name = path
         
-        icon_char = "📋" if is_clipboard else "\ueaf7"
-        icon_label = tk.Label(card, text=icon_char, font=self.font_icon, bg="#1a1a1a", fg=color)
-        icon_label.pack(pady=(8, 0))
+        icon_label = tk.Label(card, text=icon, font=self.font_icon, bg="#1a1a1a", fg=color)
+        icon_label.pack(pady=(5, 0))
 
-        name_label = tk.Label(card, text=name.upper()[:12], font=self.font_main, bg="#1a1a1a", fg=self.fg_color)
+        name_label = tk.Label(card, text=name.upper()[:16], font=self.font_main, bg="#1a1a1a", fg=self.fg_color)
         name_label.pack()
 
         if self.edit_mode and not is_clipboard:
             card.config(highlightbackground=self.accent_edit, highlightthickness=1)
-            # Safe positioning within 128x85
-            del_label = tk.Label(card, text="✕", font=self.font_main, bg="#1a1a1a", fg="#ff4444", cursor="hand2")
-            del_label.place(x=105, y=55)
-            del_label.bind("<Button-1>", lambda e, i=index: self.remove_folder(i))
             
-            col_label = tk.Label(card, text="🎨", font=self.font_main, bg="#1a1a1a", fg=self.accent_edit, cursor="hand2")
-            col_label.place(x=5, y=55)
-            col_label.bind("<Button-1>", lambda e, i=index: self.change_folder_color(i))
+            # Management Buttons at bottom
+            # Color
+            col_l = tk.Label(card, text="🎨", font=self.font_main, bg="#1a1a1a", fg=self.accent_edit, cursor="hand2")
+            col_l.place(x=10, y=90)
+            col_l.bind("<Button-1>", lambda e, i=index: self.change_folder_color(i))
+            
+            # Icon 
+            ico_l = tk.Label(card, text="🔣", font=self.font_main, bg="#1a1a1a", fg=self.accent_edit, cursor="hand2")
+            ico_l.place(x=65, y=90)
+            ico_l.bind("<Button-1>", lambda e, i=index: self.change_folder_icon(i))
+
+            # Delete
+            del_l = tk.Label(card, text="✕", font=self.font_main, bg="#1a1a1a", fg="#ff4444", cursor="hand2")
+            del_l.place(x=125, y=90)
+            del_l.bind("<Button-1>", lambda e, i=index: self.remove_folder(i))
 
         widgets = [card, icon_label, name_label]
         for w in widgets:
@@ -241,11 +251,11 @@ class FolderChooser:
 
     def create_add_button(self, row, col):
         # SYNCED SIZE: Must be 128x85 exactly like other cards
-        card = tk.Frame(self.list_container, bg="#121212", width=128, height=85)
-        card.grid(row=row, column=col, padx=6, pady=6)
+        card = tk.Frame(self.list_container, bg="#121212", width=150, height=120)
+        card.grid(row=row, column=col, padx=5, pady=5)
         card.pack_propagate(False)
 
-        icon_label = tk.Label(card, text="+", font=("JetBrains Mono", 24), bg="#121212", fg="#444444")
+        icon_label = tk.Label(card, text="+", font=(self.font_name, 36), bg="#121212", fg="#444444")
         icon_label.pack(expand=True)
 
         for w in [card, icon_label]:
@@ -270,10 +280,14 @@ class FolderChooser:
         if os.path.exists(path):
             subprocess.run(["explorer", os.path.normpath(path)])
 
-    def change_folder_color(self, index):
-        color = colorchooser.askcolor(title="Choose Folder Color", initialcolor=self.folders[index]['color'])[1]
-        if color:
-            self.folders[index]['color'] = color
+    def change_folder_icon(self, index):
+        from tkinter import simpledialog
+        # Added parent=self.root to ensure it doesn't get buried
+        new_icon = simpledialog.askstring("Folder Icon", "Paste new icon glyph:", 
+                                         initialvalue=self.folders[index].get('icon', "\ueaf7"),
+                                         parent=self.root)
+        if new_icon:
+            self.folders[index]['icon'] = new_icon
             save_folders(self.folders)
             self.render_folders()
 
