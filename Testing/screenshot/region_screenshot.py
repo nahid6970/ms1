@@ -15,7 +15,6 @@ def load_folders():
         if os.path.exists(CONFIG_FILE):
             with open(CONFIG_FILE, 'r') as f:
                 data = json.load(f)
-                # Migration if it's just a list of strings
                 if data and isinstance(data[0], str):
                     return [{"path": p, "color": "#00ff41"} for p in data]
                 return data
@@ -102,15 +101,17 @@ class FolderChooser:
         self.choice = None
         self.folders = folders
         self.img = screenshot_img
+        self.edit_mode = False
 
         # Colors & Theme
         self.bg_color = "#0e0e0e"
         self.fg_color = "#ffffff"
         self.accent_main = "#00ff41" # Matrix Green
+        self.accent_edit = "#ffcc00" # Warning/Edit Color
         
-        # Font setup (JetBrains Mono if available)
         self.font_main = ("JetBrains Mono", 10)
         self.font_icon = ("JetBrains Mono", 18)
+        self.font_small = ("JetBrains Mono", 8)
         self.font_title = ("JetBrains Mono Bold", 11)
         
         self.root.config(bg="#1a1a1a")
@@ -119,44 +120,62 @@ class FolderChooser:
         self.container = tk.Frame(self.root, bg=self.bg_color)
         self.container.pack(fill="both", expand=True, padx=2, pady=2)
 
-        # Header (Horizontal title and controls)
+        # Header
         self.header = tk.Frame(self.container, bg=self.bg_color, cursor="fleur")
-        self.header.pack(fill="x", padx=15, pady=(10, 0))
+        self.header.pack(fill="x", padx=15, pady=(15, 5))
         
         self.label_title = tk.Label(self.header, text="DESTINATION SELECTOR", 
                               font=self.font_title, bg=self.bg_color, fg=self.accent_main)
         self.label_title.pack(side="left")
 
-        # Exit Button in title
-        self.btn_exit = tk.Button(self.header, text="✕", command=self.root.destroy,
-                                font=self.font_title, bg=self.bg_color, fg="#555555",
-                                activebackground="#ff0000", activeforeground="white",
-                                relief="flat", bd=0, padx=5)
-        self.btn_exit.pack(side="right")
+        # Edit Toggle Button
+        self.btn_edit_toggle = tk.Button(self.header, text="EDIT: OFF", command=self.toggle_edit_mode,
+                                       font=self.font_small, bg="#1a1a1a", fg="#666666",
+                                       activebackground=self.accent_edit, activeforeground="black",
+                                       relief="flat", bd=0, padx=10)
+        self.btn_edit_toggle.pack(side="right")
         
         self.header.bind("<ButtonPress-1>", self.start_move)
         self.header.bind("<B1-Motion>", self.do_move)
 
-        # Folder List Container (Horizontal)
-        self.scroll_canvas = tk.Canvas(self.container, bg=self.bg_color, highlightthickness=0, height=140)
-        self.scroll_canvas.pack(fill="x", padx=10, pady=10)
-        
-        self.folder_frame = tk.Frame(self.scroll_canvas, bg=self.bg_color)
-        self.scroll_canvas.create_window((0, 0), window=self.folder_frame, anchor="nw")
+        # Folder List Container (Grid-like with rows of 5)
+        self.list_container = tk.Frame(self.container, bg=self.bg_color)
+        self.list_container.pack(fill="both", expand=True, padx=10, pady=10)
         
         self.render_folders()
 
-        # Update window size based on folders
-        self.root.after(10, self.update_window_size)
+        # Footer
+        self.footer = tk.Frame(self.container, bg=self.bg_color)
+        self.footer.pack(fill="x", pady=(0, 10))
+        
+        self.btn_close = tk.Button(self.footer, text="EXIT [ESC]", command=self.root.destroy,
+                                 font=self.font_small, bg=self.bg_color, fg="#555555",
+                                 activebackground="#ff0000", activeforeground="white",
+                                 relief="flat", bd=0, padx=20)
+        self.btn_close.pack()
+
+        # Update initial size
+        self.update_window_size()
         
         # Focus
         self.root.bind("<Escape>", lambda e: self.root.destroy())
         self.root.after(100, self.force_focus)
 
+    def toggle_edit_mode(self):
+        self.edit_mode = not self.edit_mode
+        color = self.accent_edit if self.edit_mode else "#666666"
+        text = "EDIT: ON" if self.edit_mode else "EDIT: OFF"
+        self.btn_edit_toggle.config(fg=color, text=text)
+        self.render_folders()
+
     def update_window_size(self):
-        self.folder_frame.update_idletasks()
-        width = min(max(400, self.folder_frame.winfo_width() + 40), 1200)
-        height = 200
+        self.list_container.update_idletasks()
+        # Each card is roughly 120+10 px wide. 5 cards = ~650px.
+        width = 660 
+        # Calculate height based on rows
+        total_items = 1 + len(self.folders) + 1 # Clipboard + Folders + Add Button
+        rows = (total_items + 4) // 5
+        height = 110 + (rows * 125)
         
         screen_width = self.root.winfo_screenwidth()
         screen_height = self.root.winfo_screenheight()
@@ -166,86 +185,102 @@ class FolderChooser:
 
     def render_folders(self):
         # Clear existing
-        for widget in self.folder_frame.winfo_children():
+        for widget in self.list_container.winfo_children():
             widget.destroy()
 
-        # Clipboard Special
-        self.create_folder_card("CLIPBOARD", "#00d4ff", is_clipboard=True)
+        all_items = []
+        
+        # 1. Clipboard
+        all_items.append(('CLIPBOARD', "#00d4ff", True, -1))
 
+        # 2. Folders
         for i, f_data in enumerate(self.folders):
-            self.create_folder_card(f_data['path'], f_data['color'], index=i)
+            all_items.append((f_data['path'], f_data['color'], False, i))
 
-        # Add Folder Button
-        self.create_add_button()
+        # Render items in grid (5 per row)
+        for idx, (path, color, is_clip, f_idx) in enumerate(all_items):
+            row = idx // 5
+            col = idx % 5
+            self.create_folder_card(path, color, row, col, f_idx, is_clip)
 
-    def create_folder_card(self, path, color, index=None, is_clipboard=False):
-        card = tk.Frame(self.folder_frame, bg="#1a1a1a", padx=10, pady=10, width=120, height=110)
-        card.pack(side="left", padx=5)
-        card.pack_propagate(False)
+        # 3. Add Button (always at the end)
+        next_idx = len(all_items)
+        self.create_add_button(next_idx // 5, next_idx % 5)
+
+    def create_folder_card(self, path, color, row, col, index, is_clipboard):
+        # Container frame with FIXED size to prevent jumping
+        card = tk.Frame(self.list_container, bg="#1a1a1a", width=120, height=115)
+        card.grid(row=row, column=col, padx=5, pady=5)
+        card.pack_propagate(False) # Ensure it stays 120x115
 
         name = "CLIPBOARD" if is_clipboard else os.path.basename(path)
         if not name: name = path
-
-        # Icon Label (\ueaf7 is the folder icon usually in Nerd Fonts)
-        icon_char = "\ueaf7" if not is_clipboard else "📋"
+        
+        # Icon
+        icon_char = "📋" if is_clipboard else "\ueaf7"
         icon_label = tk.Label(card, text=icon_char, font=self.font_icon, bg="#1a1a1a", fg=color)
-        icon_label.pack(pady=(5, 2))
+        icon_label.pack(pady=(15, 0))
 
         name_label = tk.Label(card, text=name.upper()[:12], font=self.font_main, bg="#1a1a1a", fg=self.fg_color)
         name_label.pack()
 
-        # Hover and Click bindings
-        for widget in [card, icon_label, name_label]:
-            if is_clipboard:
-                widget.bind("<Button-1>", lambda e: self.set_choice("CLIPBOARD"))
-            else:
-                # Primary Actions
-                widget.bind("<Button-1>", lambda e, p=path: self.set_choice(p))
-                widget.bind("<Button-3>", lambda e, p=path: self.open_explorer(p))
-                
-                # Management Actions (Middle Click OR Shift+Right Click)
-                widget.bind("<Button-2>", lambda e, i=index: self.show_card_menu(e, i))
-                widget.bind("<Shift-Button-3>", lambda e, i=index: self.show_card_menu(e, i))
+        # Management Overlays (Placed using .place for absolute positioning)
+        if self.edit_mode and not is_clipboard:
+            card.config(highlightbackground=self.accent_edit, highlightthickness=1)
             
-            widget.bind("<Enter>", lambda e, c=card, col=color: self.on_hover(c, col))
-            widget.bind("<Leave>", lambda e, c=card: self.on_leave(c))
-            widget.config(cursor="hand2")
+            # Delete button (Top Right)
+            del_label = tk.Label(card, text="✕", font=self.font_main, bg="#1a1a1a", fg="#ff4444", cursor="hand2")
+            del_label.place(x=95, y=5)
+            del_label.bind("<Button-1>", lambda e, i=index: self.remove_folder(i))
+            
+            # Color button (Top Left)
+            col_label = tk.Label(card, text="🎨", font=self.font_main, bg="#1a1a1a", fg=self.accent_edit, cursor="hand2")
+            col_label.place(x=5, y=5)
+            col_label.bind("<Button-1>", lambda e, i=index: self.change_folder_color(i))
 
-    def create_add_button(self):
-        card = tk.Frame(self.folder_frame, bg="#121212", padx=10, pady=10, width=80, height=110)
-        card.pack(side="left", padx=5)
-        card.pack_propagate(False)
+        # Bindings for interaction
+        widgets = [card, icon_label, name_label]
+        for w in widgets:
+            if not self.edit_mode:
+                if is_clipboard:
+                    w.bind("<Button-1>", lambda e: self.set_choice("CLIPBOARD"))
+                else:
+                    w.bind("<Button-1>", lambda e, p=path: self.set_choice(p))
+                    w.bind("<Button-3>", lambda e, p=path: self.open_explorer(p))
+                w.config(cursor="hand2")
+            
+            w.bind("<Enter>", lambda e, c=card, col=color: self.on_hover(c, col))
+            w.bind("<Leave>", lambda e, c=card: self.on_leave(c))
+
+    def create_add_button(self, row, col):
+        card = tk.Frame(self.list_container, bg="#121212", padx=10, pady=10, width=120, height=115)
+        card.grid(row=row, column=col, padx=4, pady=4)
+        card.grid_propagate(False)
 
         icon_label = tk.Label(card, text="+", font=("JetBrains Mono", 24), bg="#121212", fg="#444444")
         icon_label.pack(expand=True)
 
-        for widget in [card, icon_label]:
-            widget.bind("<Button-1>", lambda e: self.add_new_folder())
-            widget.bind("<Enter>", lambda e, c=card: c.config(bg="#1a1a1a"))
-            widget.bind("<Leave>", lambda e, c=card: c.config(bg="#121212"))
-            widget.config(cursor="hand2")
+        for w in [card, icon_label]:
+            w.bind("<Button-1>", lambda e: self.add_new_folder())
+            w.bind("<Enter>", lambda e, c=card: c.config(bg="#1a1a1a"))
+            w.bind("<Leave>", lambda e, c=card: c.config(bg="#121212"))
+            w.config(cursor="hand2")
 
     def on_hover(self, card, color):
-        card.config(bg="#252525")
-        for w in card.winfo_children():
-            w.config(bg="#252525")
+        if not self.edit_mode:
+            card.config(bg="#252525")
+            for w in card.winfo_children():
+                w.config(bg="#252525")
 
     def on_leave(self, card):
-        card.config(bg="#1a1a1a")
-        for w in card.winfo_children():
-            w.config(bg="#1a1a1a")
+        if not self.edit_mode:
+            card.config(bg="#1a1a1a")
+            for w in card.winfo_children():
+                w.config(bg="#1a1a1a")
 
     def open_explorer(self, path):
         if os.path.exists(path):
-            subprocess.run(["explorer", path])
-        else:
-            messagebox.showwarning("Error", f"Folder does not exist: {path}")
-
-    def show_card_menu(self, event, index):
-        menu = tk.Menu(self.root, tearoff=0, bg="#1a1a1a", fg="white", activebackground=self.accent_main)
-        menu.add_command(label="Change Color", command=lambda: self.change_folder_color(index))
-        menu.add_command(label="Remove Folder", command=lambda: self.remove_folder(index))
-        menu.post(event.x_root, event.y_root)
+            subprocess.run(["explorer", os.path.normpath(path)])
 
     def change_folder_color(self, index):
         color = colorchooser.askcolor(title="Choose Folder Color", initialcolor=self.folders[index]['color'])[1]
@@ -316,34 +351,24 @@ def send_to_clipboard(img):
 def main():
     try:
         folders = load_folders()
-        
-        # 1. Select Region
         selector = RegionSelector()
         selection = selector.get_selection()
+        if not selection: return
 
-        if not selection:
-            return
-
-        # 2. Capture Screenshot
         import time
         time.sleep(0.1)
         img = ImageGrab.grab(bbox=selection, all_screens=True)
 
-        # 3. Choose Folder
         chooser = FolderChooser(folders, img)
         folder = chooser.get_choice()
+        if not folder: return
 
-        if not folder:
-            return
-
-        # 4. Handle Save or Clipboard
         if folder == "CLIPBOARD":
             send_to_clipboard(img)
         else:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             filename = f"screenshot_{timestamp}.png"
             filepath = os.path.join(folder, filename)
-
             if not os.path.exists(folder):
                 os.makedirs(folder, exist_ok=True)
             img.save(filepath)
