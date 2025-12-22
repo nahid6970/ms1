@@ -345,7 +345,7 @@ function toggleMode(enabled) {
     if (enabled) {
         showNotification('Image Checker: ON. Click items to mark/unmark.');
     } else {
-        showNotification('Image Checker: OFF.');
+        showNotification('Image Checker: OFF.', true); // true = isOff
     }
 }
 
@@ -386,8 +386,7 @@ chrome.runtime.onMessage.addListener((message) => {
 });
 
 // Utils
-function getTabId() { return 'global'; } // Keep mode persistent globally or per tab? User requested "work on other sites", global pref is usually better.
-// But for now, let's keep it simple. If valid URL, use it, else generic.
+function getTabId() { return 'global'; }
 
 function loadSettings() {
     chrome.storage.local.get(['imageCheckerSettings'], function (result) {
@@ -395,24 +394,29 @@ function loadSettings() {
     });
 }
 
-function showNotification(msg) {
+function showNotification(msg, isOff = false) {
+    // Remove existing
+    const existing = document.querySelector('.image-checker-notification');
+    if (existing) existing.remove();
+
     const n = document.createElement('div');
-    Object.assign(n.style, {
-        position: 'fixed',
-        top: '20px',
-        right: '20px',
-        background: '#333',
-        color: '#fff',
-        padding: '10px 20px',
-        borderRadius: '5px',
-        zIndex: 100000,
-        boxShadow: '0 2px 10px rgba(0,0,0,0.5)',
-        transition: 'opacity 0.5s'
-    });
+    n.className = 'image-checker-notification';
+    if (isOff) n.classList.add('off');
+
+    // Minimal inline styles for strict positioning, rest in CSS
+    n.style.position = 'fixed';
+    n.style.top = '30px';
+    n.style.left = '50%';
+    n.style.transform = 'translateX(-50%)'; // Center it
+    n.style.zIndex = '2147483647'; // Max Z-index
+
     n.textContent = msg;
     document.body.appendChild(n);
+
     setTimeout(() => {
         n.style.opacity = '0';
+        n.style.transform = 'translate(-50%, -20px)';
+        n.style.transition = 'all 0.5s ease-out';
         setTimeout(() => n.remove(), 500);
     }, 2500);
 }

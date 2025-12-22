@@ -21,27 +21,65 @@
         transform: scale(0);
         opacity: 0;
     }
+
     50% {
         transform: scale(1.2);
     }
+
     100% {
         transform: scale(1);
         opacity: 1;
     }
 }
 
+/* Notification Styling */
 .image-checker-notification {
-    font-family: Arial, sans-serif;
-    transition: all 0.3s ease;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    padding: 12px 24px;
+
+    /* Modern Green Gradient for Active state */
+    background: linear-gradient(135deg, #43a047, #2e7d32);
+    color: white;
+
+    border-radius: 50px;
+    /* Pill shape */
+    box-shadow: 0 8px 20px rgba(46, 125, 50, 0.4);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    transform: translateY(0);
+    animation: slideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+
+    /* Border highlight */
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.image-checker-notification:hover {
-    transform: translateY(-2px);
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-30px) scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.image-checker-notification.off {
+    /* Modern Red Gradient for Inactive state */
+    background: linear-gradient(135deg, #e53935, #c62828);
+    box-shadow: 0 8px 20px rgba(198, 40, 40, 0.4);
 }
 
 /* Highlight images when in checking mode */
 body[data-checking-mode="true"] img:hover,
 body[data-checking-mode="true"] video:hover {
-    outline: 2px solid #4CAF50;
-    outline-offset: 2px;
+    outline: 4px solid #4CAF50;
+    outline-offset: -4px;
+    cursor: help;
 }
