@@ -1,86 +1,81 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const toggleBtn = document.getElementById('toggleMode');
     const clearBtn = document.getElementById('clearAll');
     const status = document.getElementById('status');
-    
+
     // Function to refresh UI state
     function refreshUIState() {
-        chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-            const tabUrl = tabs[0].url; // Use URL instead of ID to match content script
-            
-            // Check current mode status
-            chrome.storage.local.get([`checkingMode_${tabUrl}`], function(result) {
-                const isActive = result[`checkingMode_${tabUrl}`] || false;
-                updateUI(isActive);
-            });
+        // Check global mode status
+        chrome.storage.local.get(['checkingMode_global'], function (result) {
+            const isActive = result.checkingMode_global || false;
+            updateUI(isActive);
         });
     }
-    
+
     // Initial load
     refreshUIState();
-    
+
     // Refresh state when popup becomes visible (in case ESC was pressed)
-    document.addEventListener('visibilitychange', function() {
+    document.addEventListener('visibilitychange', function () {
         if (!document.hidden) {
             refreshUIState();
         }
     });
-    
+
     // Also refresh periodically while popup is open
     const refreshInterval = setInterval(refreshUIState, 1000);
-    
+
     // Clean up interval when popup closes
-    window.addEventListener('beforeunload', function() {
+    window.addEventListener('beforeunload', function () {
         clearInterval(refreshInterval);
     });
-    
-    toggleBtn.addEventListener('click', function() {
-        chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-            const tabId = tabs[0].id;
-            const tabUrl = tabs[0].url; // Use URL for storage key
-            
-            chrome.storage.local.get([`checkingMode_${tabUrl}`], function(result) {
-                const currentMode = result[`checkingMode_${tabUrl}`] || false;
-                const newMode = !currentMode;
-                
-                // Save new mode
-                chrome.storage.local.set({[`checkingMode_${tabUrl}`]: newMode});
-                
-                // Send message to content script
-                chrome.tabs.sendMessage(tabId, {
-                    action: 'toggleCheckingMode',
-                    enabled: newMode
+
+    toggleBtn.addEventListener('click', function () {
+        chrome.storage.local.get(['checkingMode_global'], function (result) {
+            const currentMode = result.checkingMode_global || false;
+            const newMode = !currentMode;
+
+            // Save new mode globally
+            chrome.storage.local.set({ checkingMode_global: newMode });
+
+            // Send message to all tabs (or at least the active one)
+            chrome.tabs.query({}, function (tabs) {
+                tabs.forEach(tab => {
+                    chrome.tabs.sendMessage(tab.id, {
+                        action: 'toggleCheckingMode',
+                        enabled: newMode
+                    }).catch(() => { }); // Ignore errors for tabs where content script isn't running
                 });
-                
-                updateUI(newMode);
             });
+
+            updateUI(newMode);
         });
     });
-    
-    clearBtn.addEventListener('click', function() {
-        chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+
+    clearBtn.addEventListener('click', function () {
+        chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
             chrome.tabs.sendMessage(tabs[0].id, {
                 action: 'clearAllCheckmarks'
             });
         });
     });
-    
+
     const exportBtn = document.getElementById('exportData');
-    exportBtn.addEventListener('click', function() {
-        chrome.storage.local.get(['checkedElements'], function(result) {
-            const checkedElements = result.checkedElements || {};
-            
+    exportBtn.addEventListener('click', function () {
+        chrome.storage.local.get(['seenItems'], function (result) {
+            const seenItems = result.seenItems || {};
+
             // Create JSON data
             const exportData = {
                 exportDate: new Date().toISOString(),
-                totalPages: Object.keys(checkedElements).length,
-                data: checkedElements
+                totalItems: Object.keys(seenItems).length,
+                data: seenItems
             };
-            
+
             // Create and download file
-            const blob = new Blob([JSON.stringify(exportData, null, 2)], {type: 'application/json'});
+            const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
-            
+
             chrome.downloads.download({
                 url: url,
                 filename: `image-checker-data-${new Date().toISOString().split('T')[0]}.json`,
@@ -88,65 +83,52 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     });
-    
+
     // Import functionality
     const importBtn = document.getElementById('importData');
     const fileInput = document.getElementById('fileInput');
-    
-    importBtn.addEventListener('click', function() {
+
+    importBtn.addEventListener('click', function () {
         fileInput.click();
     });
-    
-    fileInput.addEventListener('change', function(event) {
+
+    fileInput.addEventListener('change', function (event) {
         const file = event.target.files[0];
         if (!file) return;
-        
+
         const reader = new FileReader();
-        reader.onload = function(e) {
+        reader.onload = function (e) {
             try {
                 const importData = JSON.parse(e.target.result);
-                
+
                 // Validate the data structure
                 if (importData.data && typeof importData.data === 'object') {
                     // Merge with existing data or replace
-                    chrome.storage.local.get(['checkedElements'], function(result) {
-                        const existingData = result.checkedElements || {};
-                        
+                    chrome.storage.local.get(['seenItems'], function (result) {
+                        const existingData = result.seenItems || {};
+
                         // Ask user if they want to merge or replace
                         const shouldMerge = confirm(
-                            `Import ${importData.totalPages || Object.keys(importData.data).length} pages of data?\n\n` +
+                            `Import ${importData.totalItems || Object.keys(importData.data).length} items?\n\n` +
                             'Click OK to MERGE with existing data\n' +
                             'Click Cancel to REPLACE all existing data'
                         );
-                        
+
                         let finalData;
                         if (shouldMerge) {
                             // Merge data
-                            finalData = { ...existingData };
-                            Object.keys(importData.data).forEach(pageUrl => {
-                                if (finalData[pageUrl]) {
-                                    // Merge page data, avoiding duplicates
-                                    const existingIds = new Set(finalData[pageUrl].map(item => item.id));
-                                    importData.data[pageUrl].forEach(item => {
-                                        if (!existingIds.has(item.id)) {
-                                            finalData[pageUrl].push(item);
-                                        }
-                                    });
-                                } else {
-                                    finalData[pageUrl] = importData.data[pageUrl];
-                                }
-                            });
+                            finalData = { ...existingData, ...importData.data };
                         } else {
                             // Replace all data
                             finalData = importData.data;
                         }
-                        
+
                         // Save to storage
-                        chrome.storage.local.set({ checkedElements: finalData }, function() {
+                        chrome.storage.local.set({ seenItems: finalData }, function () {
                             alert('Data imported successfully! Refresh the page to see restored checkmarks.');
-                            
+
                             // Refresh current tab to show imported checkmarks
-                            chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+                            chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
                                 chrome.tabs.reload(tabs[0].id);
                             });
                         });
@@ -158,9 +140,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 alert('Error reading file. Please make sure it\'s a valid JSON file.');
             }
         };
-        
+
         reader.readAsText(file);
-        
+
         // Reset file input
         fileInput.value = '';
     });
@@ -180,37 +162,37 @@ document.addEventListener('DOMContentLoaded', function() {
     const applySettings = document.getElementById('applySettings');
 
     // Toggle settings panel
-    settingsToggle.addEventListener('click', function() {
+    settingsToggle.addEventListener('click', function () {
         settingsContent.classList.toggle('show');
-        settingsToggle.textContent = settingsContent.classList.contains('show') ? 
+        settingsToggle.textContent = settingsContent.classList.contains('show') ?
             '⚙️ Hide Settings' : '⚙️ Settings';
     });
 
     // Load saved settings
-    chrome.storage.local.get(['imageCheckerSettings'], function(result) {
+    chrome.storage.local.get(['imageCheckerSettings'], function (result) {
         const settings = result.imageCheckerSettings || getDefaultSettings();
         loadSettingsToUI(settings);
     });
 
     // Update size value display
-    checkmarkSize.addEventListener('input', function() {
+    checkmarkSize.addEventListener('input', function () {
         sizeValue.textContent = this.value + '%';
     });
 
     // Update border width display
-    borderWidth.addEventListener('input', function() {
+    borderWidth.addEventListener('input', function () {
         borderValue.textContent = this.value + 'px';
     });
 
     // Reset to default settings
-    resetSettings.addEventListener('click', function() {
+    resetSettings.addEventListener('click', function () {
         const defaults = getDefaultSettings();
         loadSettingsToUI(defaults);
         saveSettings(defaults);
     });
 
     // Apply settings
-    applySettings.addEventListener('click', function() {
+    applySettings.addEventListener('click', function () {
         const settings = {
             checkmarkSize: parseInt(checkmarkSize.value),
             checkmarkColor: checkmarkColor.value,
@@ -219,17 +201,17 @@ document.addEventListener('DOMContentLoaded', function() {
             borderColor: borderColor.value,
             borderWidth: parseInt(borderWidth.value)
         };
-        
+
         saveSettings(settings);
-        
+
         // Send settings to content script
-        chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+        chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
             chrome.tabs.sendMessage(tabs[0].id, {
                 action: 'updateSettings',
                 settings: settings
             });
         });
-        
+
         // Show confirmation
         const originalText = applySettings.textContent;
         applySettings.textContent = 'Applied!';

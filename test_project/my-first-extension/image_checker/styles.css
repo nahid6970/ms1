@@ -1,6 +1,5 @@
 /* Image Checker Styles */
-
-.image-checker-checkmark {
+.ic-checkmark {
     width: 30px;
     height: 30px;
     background: #4CAF50;

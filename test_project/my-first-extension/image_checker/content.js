@@ -1,8 +1,8 @@
-// Image Checker Content Script
-console.log('Image Checker: Content script loaded');
+// Image Checker - Global Tracking Version
+console.log('Image Checker: Global tracking loaded');
+
 let checkingMode = false;
-let checkedImages = new Set();
-let pageUrl = window.location.href;
+let seenItems = new Set(); // Local cache of seen IDs
 let currentSettings = {
     checkmarkSize: 15,
     checkmarkColor: '#4CAF50',
@@ -12,563 +12,407 @@ let currentSettings = {
     borderWidth: 3
 };
 
-// URL change detection for single-page apps like YouTube
-let lastUrl = pageUrl;
-
-function handleUrlChange() {
-    const currentUrl = window.location.href;
-    if (currentUrl !== lastUrl) {
-        console.log('URL changed from', lastUrl, 'to', currentUrl);
-        lastUrl = currentUrl;
-        pageUrl = currentUrl;
-        
-        // Clear current checkmarks from display
-        clearCurrentCheckmarks();
-        checkedImages.clear();
-        
-        // Load checkmarks for new page after a short delay
-        setTimeout(() => {
-            loadSavedCheckmarks();
-        }, 1000); // Increased delay for YouTube to load content
-    }
-}
-
-// Listen for browser navigation events
-window.addEventListener('popstate', handleUrlChange);
-
-// Override pushState and replaceState to catch programmatic navigation
-const originalPushState = history.pushState;
-const originalReplaceState = history.replaceState;
-
-history.pushState = function() {
-    originalPushState.apply(history, arguments);
-    setTimeout(handleUrlChange, 100);
-};
-
-history.replaceState = function() {
-    originalReplaceState.apply(history, arguments);
-    setTimeout(handleUrlChange, 100);
-};
-
-// Also check periodically as backup (every 2 seconds)
-setInterval(handleUrlChange, 2000);
-
-// F2 key to toggle checking mode
-document.addEventListener('keydown', function(event) {
-    if (event.key === 'F2') {
-        // Toggle the mode
-        checkingMode = !checkingMode;
-        
-        if (checkingMode) {
-            enableImageChecking();
-            showNotification('Image checking mode started (F2 pressed)');
-        } else {
-            disableImageChecking();
-            showNotification('Image checking mode stopped (F2 pressed)');
-        }
-        
-        // Update storage to reflect the mode change
-        const tabId = getTabId();
-        chrome.storage.local.set({[`checkingMode_${tabId}`]: checkingMode});
-    }
-});
-
-// Listen for messages from popup
-chrome.runtime.onMessage.addListener((message) => {
-    if (message.action === 'toggleCheckingMode') {
-        checkingMode = message.enabled;
-        if (checkingMode) {
-            enableImageChecking();
-        } else {
-            disableImageChecking();
-        }
-    } else if (message.action === 'clearAllCheckmarks') {
-        clearAllCheckmarks();
-    } else if (message.action === 'updateSettings') {
-        currentSettings = message.settings;
-    }
-});
+// --- Initialization ---
 
 // Initialize on page load
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', init);
+if (document.readyState === 'interactive' || document.readyState === 'complete') {
+    init();
+}
+
+function init() {
     loadSettings();
-    loadSavedCheckmarks();
-    
-    // Check if checking mode was previously enabled for this tab
-    const tabId = getTabId();
-    chrome.storage.local.get([`checkingMode_${tabId}`], function(result) {
-        if (result[`checkingMode_${tabId}`]) {
-            checkingMode = true;
-            enableImageChecking();
-        }
-    });
-});
+    loadSeenItems().then(() => {
+        // Initial scan
+        scanPage();
 
-// Also initialize if DOM is already loaded
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function() {
-        loadSettings();
-        loadSavedCheckmarks();
-    });
-} else {
-    loadSettings();
-    loadSavedCheckmarks();
-}
+        // Watch for changes (YouTube/SPA navigation + Infinite Scroll)
+        setupObservers();
 
-function enableImageChecking() {
-    document.body.style.cursor = 'crosshair';
-    addImageClickListeners();
-    showNotification('Image checking mode enabled! Click on images to mark them.');
-}
-
-function disableImageChecking() {
-    document.body.style.cursor = 'default';
-    removeImageClickListeners();
-    showNotification('Image checking mode disabled.');
-}
-
-function addImageClickListeners() {
-    // Add click listeners to all images, videos, thumbnails, and clickable containers
-    const selectors = [
-        'img',
-        'video',
-        '[style*="background-image"]',
-        'a',
-        // YouTube specific selectors
-        'ytd-rich-grid-media',
-        'ytd-video-preview',
-        'ytd-thumbnail',
-        '#thumbnail',
-        '.ytd-thumbnail',
-        'a[href*="/shorts/"]',
-        'a[href*="/watch"]',
-        // Generic video thumbnail selectors
-        '[class*="thumbnail"]',
-        '[class*="video"]',
-        '[class*="short"]',
-        '[data-testid*="video"]',
-        '[data-testid*="thumbnail"]'
-    ];
-    
-    const elements = document.querySelectorAll(selectors.join(', '));
-    elements.forEach(element => {
-        element.addEventListener('click', handleImageClick, true);
-        element.style.cursor = 'pointer';
-        // Add visual indicator when hovering
-        element.addEventListener('mouseenter', () => {
-            if (checkingMode) {
-                element.style.outline = '2px solid #4CAF50';
-                element.style.outlineOffset = '2px';
+        // Check if mode should be active
+        const tabId = getTabId();
+        chrome.storage.local.get([`checkingMode_${tabId}`], function (result) {
+            if (result[`checkingMode_${tabId}`]) {
+                toggleMode(true);
             }
         });
-        element.addEventListener('mouseleave', () => {
-            element.style.outline = '';
-            element.style.outlineOffset = '';
+    });
+}
+
+// --- Data & Storage ---
+
+function loadSeenItems() {
+    return new Promise((resolve) => {
+        chrome.storage.local.get(['seenItems'], function (result) {
+            if (result.seenItems) {
+                // seenItems is expected to be an object: { "ID": timestamp, "ID2": timestamp }
+                // We just cache the keys for fast lookup
+                seenItems = new Set(Object.keys(result.seenItems));
+            }
+            resolve();
         });
     });
-    
-    // Also handle dynamically loaded content (important for YouTube)
-    const observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-            mutation.addedNodes.forEach((node) => {
-                if (node.nodeType === 1) { // Element node
-                    // Check if the node itself matches
-                    if (node.matches && node.matches(selectors.join(', '))) {
-                        addListenerToElement(node);
-                        // Check if this element should have a checkmark
-                        checkForSavedCheckmark(node);
-                    }
-                    // Check children too
-                    const childElements = node.querySelectorAll(selectors.join(', '));
-                    childElements.forEach(element => {
-                        addListenerToElement(element);
-                        // Check if this element should have a checkmark
-                        checkForSavedCheckmark(element);
-                    });
-                }
-            });
-        });
+}
+
+function markAsSeen(id) {
+    if (!id) return;
+
+    seenItems.add(id);
+
+    chrome.storage.local.get(['seenItems'], function (result) {
+        const store = result.seenItems || {};
+        store[id] = Date.now();
+        chrome.storage.local.set({ seenItems: store });
     });
-    
-    observer.observe(document.body, {
-        childList: true,
-        subtree: true
+
+    // Visually update immediately
+    applyCheckmarksToMatching(id);
+}
+
+function markAsUnseen(id) {
+    if (!id) return;
+
+    seenItems.delete(id);
+
+    chrome.storage.local.get(['seenItems'], function (result) {
+        const store = result.seenItems || {};
+        delete store[id];
+        chrome.storage.local.set({ seenItems: store });
     });
+
+    // Visually remove immediately
+    removeCheckmarksMatching(id);
 }
 
-function addListenerToElement(element) {
-    element.addEventListener('click', handleImageClick, true);
-    element.style.cursor = 'pointer';
-    element.addEventListener('mouseenter', () => {
-        if (checkingMode) {
-            element.style.outline = '2px solid #4CAF50';
-            element.style.outlineOffset = '2px';
-        }
-    });
-    element.addEventListener('mouseleave', () => {
-        element.style.outline = '';
-        element.style.outlineOffset = '';
-    });
-}
+// --- Identification Logic ---
 
-function removeImageClickListeners() {
-    const selectors = [
-        'img', 
-        'video', 
-        '[style*="background-image"]',
-        'a',
-        'ytd-rich-grid-media',
-        'ytd-video-preview',
-        'ytd-thumbnail',
-        '#thumbnail',
-        '.ytd-thumbnail',
-        'a[href*="/shorts/"]',
-        'a[href*="/watch"]',
-        '[class*="thumbnail"]',
-        '[class*="video"]',
-        '[class*="short"]',
-        '[data-testid*="video"]',
-        '[data-testid*="thumbnail"]'
-    ];
-    
-    const elements = document.querySelectorAll(selectors.join(', '));
-    elements.forEach(element => {
-        element.removeEventListener('click', handleImageClick, true);
-        element.style.cursor = 'default';
-        element.style.outline = '';
-        element.style.outlineOffset = '';
-    });
-}
+function getContentId(element) {
+    // 1. YouTube Specific Logic
+    // Try to find the closest valid endpoint for ID
+    const link = element.closest('a');
+    let url = link ? link.href : (element.currentSrc || element.src || element.href);
 
-function handleImageClick(event) {
-    if (!checkingMode) return;
-    
-    event.preventDefault();
-    event.stopPropagation();
-    
-    const element = event.target;
-    const elementData = getElementData(element);
-    
-    if (checkedImages.has(elementData.id)) {
-        // Remove checkmark
-        removeCheckmark(element);
-        checkedImages.delete(elementData.id);
-        removeFromStorage(elementData);
-    } else {
-        // Add checkmark
-        addCheckmark(element, currentSettings);
-        checkedImages.add(elementData.id);
-        saveToStorage(elementData);
-    }
-}
+    if (!url || url.startsWith('data:') || url.startsWith('blob:')) return null;
 
-function addCheckmark(element, settings) {
-    // Remove existing checkmark if any
-    removeCheckmark(element);
-    
-    const checkmark = document.createElement('div');
-    checkmark.className = 'image-checker-checkmark';
-    checkmark.innerHTML = '✓';
-    
-    // The element itself is the target
-    let targetElement = element;
-    
-    const checkmarkSettings = settings || currentSettings;
-
-    // Apply current settings to checkmark
-    applyCheckmarkStyles(checkmark, targetElement, checkmarkSettings);
-    
-    // Apply border if enabled
-    if (checkmarkSettings.enableBorder) {
-        targetElement.style.border = `${checkmarkSettings.borderWidth}px solid ${checkmarkSettings.borderColor}`;
-        targetElement.style.borderRadius = '4px';
-    }
-    
-    document.body.appendChild(checkmark);
-    
-    // Store reference to checkmark on the element
-    const checkmarkId = 'checkmark-' + Date.now() + '-' + Math.random().toString(36).substring(2, 11);
-    element.setAttribute('data-checkmark-id', checkmarkId);
-    checkmark.id = checkmarkId;
-    
-    // Update position on scroll
-    const updatePosition = () => {
-        const newRect = targetElement.getBoundingClientRect();
-        const size = Math.min(newRect.width, newRect.height) * (checkmarkSettings.checkmarkSize / 100);
-        checkmark.style.left = (newRect.left + window.scrollX + newRect.width / 2 - size / 2) + 'px';
-        checkmark.style.top = (newRect.top + window.scrollY + newRect.height / 2 - size / 2) + 'px';
-    };
-    
-    window.addEventListener('scroll', updatePosition);
-    window.addEventListener('resize', updatePosition);
-    
-    // Store cleanup function and target element reference
-    checkmark.cleanup = () => {
-        window.removeEventListener('scroll', updatePosition);
-        window.removeEventListener('resize', updatePosition);
-    };
-    checkmark.targetElement = targetElement;
-    checkmark.settings = checkmarkSettings;
-}
-
-function removeCheckmark(element) {
-    const checkmarkId = element.getAttribute('data-checkmark-id');
-    if (checkmarkId) {
-        const existingCheckmark = document.getElementById(checkmarkId);
-        if (existingCheckmark) {
-            // Remove border from target element
-            if (existingCheckmark.targetElement) {
-                existingCheckmark.targetElement.style.border = '';
-                existingCheckmark.targetElement.style.borderRadius = '';
-            }
-            
-            // Clean up event listeners
-            if (existingCheckmark.cleanup) {
-                existingCheckmark.cleanup();
-            }
-            existingCheckmark.remove();
-        }
-        element.removeAttribute('data-checkmark-id');
-    }
-}
-
-function clearAllCheckmarks() {
-    // Remove all checkmarks
-    clearCurrentCheckmarks();
-    checkedImages.clear();
-    
-    // Clear from storage for this page
-    clearPageFromStorage();
-    
-    showNotification('All checkmarks cleared!');
-}
-
-function clearCurrentCheckmarks() {
-    // Remove all checkmarks from display only (don't affect storage)
-    const checkmarks = document.querySelectorAll('.image-checker-checkmark');
-    checkmarks.forEach(checkmark => {
-        if (checkmark.cleanup) {
-            checkmark.cleanup();
-        }
-        checkmark.remove();
-    });
-    
-    // Clear all data attributes
-    const markedElements = document.querySelectorAll('[data-checkmark-id]');
-    markedElements.forEach(element => {
-        element.removeAttribute('data-checkmark-id');
-        // Remove borders too
-        element.style.border = '';
-        element.style.borderRadius = '';
-    });
-}
-
-function getElementData(element) {
-    let linkUrl = '';
-    let elementId = '';
-
-    // Prioritize getting a link URL if the element is a link or inside one
-    const linkElement = element.closest('a');
-    if (linkElement) {
-        linkUrl = linkElement.href;
+    // YouTube Video / Short ID extraction
+    if (url.includes('youtube.com') || url.includes('youtu.be')) {
+        const videoId = extractYouTubeId(url);
+        // Only mark if we actually found an ID, otherwise ignore (generic page, navigation links)
+        if (videoId) return `yt_${videoId}`;
     }
 
-    // Create a unique identifier for the element
-    if (linkUrl) {
-        elementId = linkUrl;
-    } else if (element.src) {
-        elementId = element.src;
-    } else if (element.id) {
-        elementId = element.id;
-    } else {
-        // Fallback for elements without a clear unique identifier
-        elementId = element.outerHTML.substring(0, 200); // Increased length for more uniqueness
-    }
-
-    return {
-        id: elementId,
-        linkUrl: linkUrl,
-        pageUrl: pageUrl,
-        timestamp: Date.now()
-    };
+    // 2. Fallback: Use the full URL as ID
+    return url;
 }
 
-function getTabId() {
-    // Simple way to identify current tab (not perfect but works for basic use)
-    return window.location.href;
-}
-
-function showNotification(message) {
-    // Create a temporary notification
-    const notification = document.createElement('div');
-    notification.className = 'image-checker-notification';
-    notification.textContent = message;
-    notification.style.position = 'fixed';
-    notification.style.top = '20px';
-    notification.style.right = '20px';
-    notification.style.background = '#4CAF50';
-    notification.style.color = 'white';
-    notification.style.padding = '10px 15px';
-    notification.style.borderRadius = '5px';
-    notification.style.zIndex = '10001';
-    notification.style.fontSize = '14px';
-    notification.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
-    
-    document.body.appendChild(notification);
-    
-    // Remove after 3 seconds
-    setTimeout(() => {
-        if (notification.parentNode) {
-            notification.remove();
-        }
-    }, 3000);
-}
-
-// Storage functions
-function saveToStorage(elementData) {
-    elementData.settings = currentSettings; // Add settings immediately
-    chrome.storage.local.get(['checkedElements'], function(result) {
-        const checkedElements = result.checkedElements || {};
-        
-        // Use page URL as key
-        if (!checkedElements[pageUrl]) {
-            checkedElements[pageUrl] = [];
-        }
-
-        // Check if element already exists
-        const existingIndex = checkedElements[pageUrl].findIndex(item => item.id === elementData.id);
-        if (existingIndex === -1) {
-            checkedElements[pageUrl].push(elementData);
-        }
-        
-        chrome.storage.local.set({ checkedElements: checkedElements });
-    });
-}
-
-function removeFromStorage(elementData) {
-    chrome.storage.local.get(['checkedElements'], function(result) {
-        const checkedElements = result.checkedElements || {};
-        
-        if (checkedElements[pageUrl]) {
-            checkedElements[pageUrl] = checkedElements[pageUrl].filter(item => item.id !== elementData.id);
-            
-            // Remove page entry if no elements left
-            if (checkedElements[pageUrl].length === 0) {
-                delete checkedElements[pageUrl];
-            }
-            
-            chrome.storage.local.set({ checkedElements: checkedElements });
-        }
-    });
-}
-
-function clearPageFromStorage() {
-    chrome.storage.local.get(['checkedElements'], function(result) {
-        const checkedElements = result.checkedElements || {};
-        delete checkedElements[pageUrl];
-        chrome.storage.local.set({ checkedElements: checkedElements });
-    });
-}
-
-function loadSavedCheckmarks() {
-    chrome.storage.local.get(['checkedElements'], function(result) {
-        const checkedElements = result.checkedElements || {};
-        const pageElements = checkedElements[pageUrl] || [];
-        
-        // Wait a bit for page to load, then restore checkmarks
-        setTimeout(() => {
-            pageElements.forEach(elementData => {
-                const element = findElementByData(elementData);
-                if (element) {
-                    addCheckmark(element, elementData.settings);
-                    checkedImages.add(elementData.id);
-                }
-            });
-        }, 1000);
-    });
-}
-
-function checkForSavedCheckmark(element) {
-    // Check if this specific element should have a checkmark
-    chrome.storage.local.get(['checkedElements'], function(result) {
-        const checkedElements = result.checkedElements || {};
-        const pageElements = checkedElements[pageUrl] || [];
-        
-        // Create element data for this element to compare
-        const elementData = getElementData(element);
-        
-        // Check if this element is in our saved list
-        const savedElementData = pageElements.find(saved => saved.id === elementData.id);
-        
-        if (savedElementData && !element.getAttribute('data-checkmark-id')) {
-            // Element should be marked but isn't yet
-            addCheckmark(element, savedElementData.settings);
-            checkedImages.add(elementData.id);
-        }
-    });
-}
-
-function findElementByData(elementData) {
-    // Try to find element by various methods
-    if (elementData.linkUrl) {
-        // Look for exact href match first
-        let linkElement = document.querySelector(`a[href="${elementData.linkUrl}"]`);
-        if (linkElement) return linkElement;
-        
-        // YouTube sometimes changes URLs slightly, so try partial match
-        const videoId = extractVideoId(elementData.linkUrl);
-        if (videoId) {
-            linkElement = document.querySelector(`a[href*="${videoId}"]`);
-            if (linkElement) return linkElement;
-        }
-    }
-    
-    if (elementData.id.startsWith('http')) {
-        const imgElement = document.querySelector(`img[src="${elementData.id}"]`);
-        if (imgElement) return imgElement;
-    }
-    
-    // Try to find by ID
-    const idElement = document.getElementById(elementData.id);
-    if (idElement) return idElement;
-    
-    return null;
-}
-
-function extractVideoId(url) {
-    // Extract video ID from YouTube URL for better matching
-    const match = url.match(/(?:shorts\/|watch\?v=)([a-zA-Z0-9_-]{11})/);
+function extractYouTubeId(url) {
+    const match = url.match(/(?:shorts\/|watch\?v=|youtu\.be\/|^)([a-zA-Z0-9_-]{11})/);
     return match ? match[1] : null;
 }
 
-function applyCheckmarkStyles(checkmark, targetElement, settings) {
-    const rect = targetElement.getBoundingClientRect();
-    const checkmarkSettings = settings || currentSettings;
-    const size = Math.min(rect.width, rect.height) * (checkmarkSettings.checkmarkSize / 100);
-    
-    checkmark.style.position = 'absolute';
-    checkmark.style.left = (rect.left + window.scrollX + rect.width / 2 - size / 2) + 'px';
-    checkmark.style.top = (rect.top + window.scrollY + rect.height / 2 - size / 2) + 'px';
-    checkmark.style.width = size + 'px';
-    checkmark.style.height = size + 'px';
-    checkmark.style.background = checkmarkSettings.checkmarkColor;
-    checkmark.style.color = checkmarkSettings.textColor;
-    checkmark.style.fontSize = (size * 0.6) + 'px';
-    checkmark.style.zIndex = '10000';
-    checkmark.style.borderRadius = '50%';
-    checkmark.style.display = 'flex';
-    checkmark.style.alignItems = 'center';
-    checkmark.style.justifyContent = 'center';
-    checkmark.style.fontWeight = 'bold';
-    checkmark.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.3)';
-    checkmark.style.border = '2px solid white';
+// --- UI & Interaction ---
+
+function getTargetContainer(element) {
+    // For YouTube, we strictly want the thumbnail container to avoid hitting titles/avatars
+    if (element.closest('ytd-thumbnail')) return element.closest('ytd-thumbnail');
+    if (element.closest('ytd-playlist-thumbnail')) return element.closest('ytd-playlist-thumbnail');
+    if (element.closest('.ytd-thumbnail')) return element.closest('.ytd-thumbnail');
+
+    // For generic sites
+    // If it's an IMG, we want the IMG itself to be the target for sizing,
+    // but we can't append to it. We'll handle that in renderCheckmark.
+    return element;
 }
 
-function loadSettings() {
-    chrome.storage.local.get(['imageCheckerSettings'], function(result) {
-        if (result.imageCheckerSettings) {
-            currentSettings = result.imageCheckerSettings;
+function scanPage() {
+    // YouTube: strictly target thumbnails to avoid title links
+    // Generic: target images directly
+    const selectors = [
+        'ytd-thumbnail',
+        'ytd-playlist-thumbnail',
+        'a#thumbnail', // YouTube alternative
+        'img',
+        // 'video' // Video elements can be tricky with overlays, sticking to IMG/Thumbnail for now
+    ];
+
+    const elements = document.querySelectorAll(selectors.join(','));
+    elements.forEach(processElement);
+}
+
+function processElement(element) {
+    if (element.dataset.icProcessed) return;
+
+    // --- De-duplication Logic ---
+    // If we are on YouTube, and this element is inside a known container we already track, skip it.
+    // e.g. IMG inside ytd-thumbnail.
+    if (location.hostname.includes('youtube.com')) {
+        if (element.tagName === 'IMG' && element.closest('ytd-thumbnail')) return;
+        if (element.tagName === 'A' && element.closest('ytd-thumbnail')) return;
+        // Exclude avatars
+        if (element.closest('#avatar') || element.closest('yt-img-shadow.ytd-channel-name')) return;
+    }
+
+    const id = getContentId(element);
+    if (!id) return;
+
+    element.dataset.icContentId = id;
+    element.dataset.icProcessed = 'true';
+
+    // Listeners
+    element.addEventListener('click', handleContentClick, true);
+    element.addEventListener('mouseenter', handleMouseEnter);
+    element.addEventListener('mouseleave', handleMouseLeave);
+
+    if (seenItems.has(id)) {
+        renderCheckmark(element);
+    }
+}
+
+function handleContentClick(event) {
+    if (!checkingMode) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    const element = event.currentTarget;
+    const id = element.dataset.icContentId;
+
+    if (seenItems.has(id)) {
+        markAsUnseen(id);
+    } else {
+        markAsSeen(id);
+    }
+}
+
+function handleMouseEnter(event) {
+    if (!checkingMode) return;
+    const element = event.currentTarget;
+    element.style.outline = `4px solid ${currentSettings.checkmarkColor}`;
+    element.style.outlineOffset = '-4px'; // Draw inside to avoid layout shifts/clipping
+    element.style.cursor = 'help'; // Distinct cursor
+}
+
+function handleMouseLeave(event) {
+    const element = event.currentTarget;
+    element.style.outline = '';
+    element.style.cursor = '';
+}
+
+// --- Checkmark Rendering ---
+
+function renderCheckmark(element) {
+    // Check if already has checkmark (on element or as sibling)
+    if (element.dataset.hasCheckmark === 'true') return;
+
+    const container = getTargetContainer(element);
+
+    const checkmark = document.createElement('div');
+    checkmark.className = 'ic-checkmark';
+    checkmark.innerHTML = '✓';
+    checkmark.dataset.forId = element.dataset.icContentId;
+
+    const s = currentSettings;
+    // Checkmark base styles
+    Object.assign(checkmark.style, {
+        position: 'absolute',
+        zIndex: '9999',
+        width: `${s.checkmarkSize}px`,
+        height: `${s.checkmarkSize}px`,
+        backgroundColor: s.checkmarkColor,
+        color: s.textColor,
+        borderRadius: '50%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: `${s.checkmarkSize * 0.6}px`,
+        fontWeight: 'bold',
+        pointerEvents: 'none',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.5)',
+        border: '2px solid white'
+    });
+
+    // --- Insertion Logic ---
+    // Case 1: Void elements (IMG, INPUT) - Cannot appendChild
+    const isVoidElement = ['IMG', 'INPUT', 'BR', 'HR'].includes(container.tagName);
+
+    if (isVoidElement) {
+        // We must insert as sibling and position relative to the element
+        const parent = container.offsetParent || container.parentNode;
+
+        // Ensure parent can hold absolute children anchored to it?
+        // Actually, we can just use offsetTop/Left relative to the parent.
+        // But if the parent isn't positioned, absolute children bubble up.
+        // Let's try to enforce position on parent if it's static.
+        const parentStyle = window.getComputedStyle(parent);
+        if (parentStyle.position === 'static') {
+            parent.style.position = 'relative';
+        }
+
+        // Calculate position relative to the parent
+        // container.offsetLeft/Top gives position relative to offsetParent.
+        // Since we force parent to be relative (or find offsetParent), we can use these directly.
+
+        checkmark.style.top = (container.offsetTop + 5) + 'px';
+        checkmark.style.left = (container.offsetLeft + 5) + 'px';
+
+        // Insert after container
+        if (container.nextSibling) {
+            parent.insertBefore(checkmark, container.nextSibling);
+        } else {
+            parent.appendChild(checkmark);
+        }
+
+    } else {
+        // Case 2: Normal Container (Div, A, etc) - Just append inside
+        const style = window.getComputedStyle(container);
+        if (style.position === 'static') {
+            container.style.position = 'relative';
+        }
+        checkmark.style.top = '5px';
+        checkmark.style.left = '5px';
+        container.appendChild(checkmark);
+    }
+
+    // Mark element as having checkmark
+    element.dataset.hasCheckmark = 'true';
+    checkmark.dataset.ownerElementRawId = element.dataset.icContentId; // For cleanup mapping
+
+    // Border option
+    if (s.enableBorder) {
+        container.dataset.originalBorder = container.style.border;
+        container.style.border = `${s.borderWidth}px solid ${s.borderColor}`;
+    }
+}
+
+function removeCheckmarksMatching(id) {
+    const checks = document.querySelectorAll(`.ic-checkmark`);
+    checks.forEach(check => {
+        if (check.dataset.forId === id) {
+            // Restore border if needed
+            const container = check.parentNode;
+            if (container && container.dataset.originalBorder !== undefined) {
+                container.style.border = container.dataset.originalBorder;
+            } else if (container) {
+                container.style.border = '';
+            }
+
+            // Clean up dataset on owner element
+            if (check.dataset.ownerElementRawId) {
+                const owners = document.querySelectorAll(`[data-ic-content-id="${check.dataset.ownerElementRawId}"]`);
+                owners.forEach(owner => delete owner.dataset.hasCheckmark);
+            }
+
+            check.remove();
         }
     });
 }
 
+function applyCheckmarksToMatching(id) {
+    // Find all elements on page with this ID and mark them
+    const elements = document.querySelectorAll(`[data-ic-content-id="${id}"]`);
+    elements.forEach(el => {
+        renderCheckmark(el);
+    });
+}
+
+// --- Observers ---
+
+function setupObservers() {
+    // Watch for new content (Infinite Scroll)
+    const observer = new MutationObserver((mutations) => {
+        let shouldScan = false;
+        mutations.forEach(m => {
+            if (m.addedNodes.length > 0) shouldScan = true;
+        });
+
+        if (shouldScan) {
+            // Debounce scan slightly
+            if (window.scanTimeout) clearTimeout(window.scanTimeout);
+            window.scanTimeout = setTimeout(scanPage, 500);
+        }
+    });
+
+    observer.observe(document.body, { childList: true, subtree: true });
+}
+
+// --- Toggles & Messages ---
+
+function toggleMode(enabled) {
+    checkingMode = enabled;
+    const tabId = getTabId();
+    chrome.storage.local.set({ [`checkingMode_${tabId}`]: checkingMode });
+
+    if (enabled) {
+        showNotification('Image Checker: ON. Click items to mark/unmark.');
+    } else {
+        showNotification('Image Checker: OFF.');
+    }
+}
+
+// F2 listener
+document.addEventListener('keydown', function (event) {
+    if (event.key === 'F2') {
+        toggleMode(!checkingMode);
+    }
+});
+
+// Messages
+chrome.runtime.onMessage.addListener((message) => {
+    if (message.action === 'toggleCheckingMode') {
+        toggleMode(message.enabled);
+    } else if (message.action === 'updateSettings') {
+        currentSettings = message.settings;
+        document.querySelectorAll('.ic-checkmark').forEach(c => {
+            // Cleanup owner
+            if (c.dataset.ownerElementRawId) {
+                const owners = document.querySelectorAll(`[data-ic-content-id="${c.dataset.ownerElementRawId}"]`);
+                owners.forEach(owner => delete owner.dataset.hasCheckmark);
+            }
+            c.remove();
+        });
+        seenItems.forEach(id => applyCheckmarksToMatching(id));
+    } else if (message.action === 'clearAllCheckmarks') {
+        seenItems.clear();
+        chrome.storage.local.remove('seenItems');
+        document.querySelectorAll('.ic-checkmark').forEach(c => {
+            if (c.dataset.ownerElementRawId) {
+                const owners = document.querySelectorAll(`[data-ic-content-id="${c.dataset.ownerElementRawId}"]`);
+                owners.forEach(owner => delete owner.dataset.hasCheckmark);
+            }
+            c.remove();
+        });
+        showNotification('All checkmarks cleared!');
+    }
+});
+
+// Utils
+function getTabId() { return 'global'; } // Keep mode persistent globally or per tab? User requested "work on other sites", global pref is usually better.
+// But for now, let's keep it simple. If valid URL, use it, else generic.
+
+function loadSettings() {
+    chrome.storage.local.get(['imageCheckerSettings'], function (result) {
+        if (result.imageCheckerSettings) currentSettings = result.imageCheckerSettings;
+    });
+}
+
+function showNotification(msg) {
+    const n = document.createElement('div');
+    Object.assign(n.style, {
+        position: 'fixed',
+        top: '20px',
+        right: '20px',
+        background: '#333',
+        color: '#fff',
+        padding: '10px 20px',
+        borderRadius: '5px',
+        zIndex: 100000,
+        boxShadow: '0 2px 10px rgba(0,0,0,0.5)',
+        transition: 'opacity 0.5s'
+    });
+    n.textContent = msg;
+    document.body.appendChild(n);
+    setTimeout(() => {
+        n.style.opacity = '0';
+        setTimeout(() => n.remove(), 500);
+    }, 2500);
+}
