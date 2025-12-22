@@ -196,27 +196,32 @@ class FolderChooser:
             widget.destroy()
 
         all_items = []
-        all_items.append(('CLIPBOARD', "#00d4ff", "📋", True, -1))
+        # (path/label, color, icon, card_type, index)
+        all_items.append(('CLIPBOARD', "#00d4ff", "📋", "CLIPBOARD", -1))
+        all_items.append(('CHROME', "#ff9900", "🌏", "BROWSER", -2))
+        
         for i, f_data in enumerate(self.folders):
-            icon = f_data.get('icon', "\ueaf7") # Get icon, default to folder if not present
-            all_items.append((f_data['path'], f_data['color'], icon, False, i))
+            icon = f_data.get('icon', "\ueaf7")
+            all_items.append((f_data['path'], f_data['color'], icon, "FOLDER", i))
 
-        for idx, (path, color, icon, is_clip, f_idx) in enumerate(all_items):
+        for idx, (path, color, icon, card_type, f_idx) in enumerate(all_items):
             row = idx // 5
             col = idx % 5
-            self.create_folder_card(path, color, icon, row, col, f_idx, is_clip)
+            self.create_folder_card(path, color, icon, row, col, f_idx, card_type)
 
         next_idx = len(all_items)
         self.create_add_button(next_idx // 5, next_idx % 5)
 
-    def create_folder_card(self, path, color, icon, row, col, index, is_clipboard):
+    def create_folder_card(self, path, color, icon, row, col, index, card_type):
         # Increased card size for 36pt icons
         card = tk.Frame(self.list_container, bg="#1a1a1a", width=150, height=120)
         card.grid(row=row, column=col, padx=5, pady=5)
         card.pack_propagate(False)
 
-        name = "CLIPBOARD" if is_clipboard else os.path.basename(path)
-        if not name: name = path
+        name = path # Default to content of path argument
+        if card_type == "FOLDER":
+            name = os.path.basename(path)
+            if not name: name = path
         
         icon_label = tk.Label(card, text=icon, font=self.font_icon, bg="#1a1a1a", fg=color)
         icon_label.pack(pady=(5, 0))
@@ -224,7 +229,7 @@ class FolderChooser:
         name_label = tk.Label(card, text=name.upper()[:16], font=self.font_main, bg="#1a1a1a", fg=self.fg_color)
         name_label.pack()
 
-        if self.edit_mode and not is_clipboard:
+        if self.edit_mode and card_type == "FOLDER":
             card.config(highlightbackground=self.accent_edit, highlightthickness=1)
             
             # Management Buttons at bottom
@@ -246,15 +251,33 @@ class FolderChooser:
         widgets = [card, icon_label, name_label]
         for w in widgets:
             if not self.edit_mode:
-                if is_clipboard:
+                if card_type == "CLIPBOARD":
                     w.bind("<Button-1>", lambda e: self.set_choice("CLIPBOARD"))
-                else:
+                elif card_type == "BROWSER":
+                    w.bind("<Button-1>", lambda e: self.open_in_browser())
+                else: # FOLDER
                     w.bind("<Button-1>", lambda e, p=path: self.set_choice(p))
                     w.bind("<Button-3>", lambda e, p=path: self.open_explorer(p))
                 w.config(cursor="hand2")
             
             w.bind("<Enter>", lambda e, c=card, col=color: self.on_hover(c, col))
             w.bind("<Leave>", lambda e, c=card: self.on_leave(c))
+
+    def open_in_browser(self):
+        import tempfile
+        try:
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            temp_dir = tempfile.gettempdir()
+            filename = f"screenshot_{timestamp}.png"
+            filepath = os.path.join(temp_dir, filename)
+            
+            self.img.save(filepath)
+            
+            # Open in Chrome (Windows)
+            subprocess.run(f'start chrome "{filepath}"', shell=True)
+            self.root.destroy()
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to open browser: {e}")
 
     def create_add_button(self, row, col):
         # SYNCED SIZE: Must be 128x85 exactly like other cards
