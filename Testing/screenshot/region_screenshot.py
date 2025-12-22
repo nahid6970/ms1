@@ -265,9 +265,17 @@ class FolderChooser:
 
         for w in [card, icon_label]:
             w.bind("<Button-1>", lambda e: self.add_new_folder())
-            w.bind("<Enter>", lambda e, c=card: c.config(bg="#1a1a1a"))
-            w.bind("<Leave>", lambda e, c=card: c.config(bg="#121212"))
+            w.bind("<Enter>", lambda e: self.on_add_hover(card, icon_label))
+            w.bind("<Leave>", lambda e: self.on_add_leave(card, icon_label))
             w.config(cursor="hand2")
+
+    def on_add_hover(self, card, label):
+        card.config(bg="#1a1a1a")
+        label.config(bg="#1a1a1a")
+
+    def on_add_leave(self, card, label):
+        card.config(bg="#121212")
+        label.config(bg="#121212")
 
     def on_hover(self, card, color):
         if not self.edit_mode:
