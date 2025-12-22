@@ -161,7 +161,12 @@ class FolderChooser:
         
         # Focus
         self.root.bind("<Escape>", lambda e: self.root.destroy())
+        self.root.bind("<FocusOut>", self.on_focus_out)
         self.root.after(100, self.force_focus)
+
+    def on_focus_out(self, event):
+        if self.root.focus_displayof() is None:
+             self.root.destroy()
 
     def toggle_edit_mode(self):
         self.edit_mode = not self.edit_mode
