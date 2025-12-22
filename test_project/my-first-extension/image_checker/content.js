@@ -88,21 +88,60 @@ function markAsUnseen(id) {
 
 function getContentId(element) {
     // 1. YouTube Specific Logic
-    // Try to find the closest valid endpoint for ID
-    const link = element.closest('a');
-    let url = link ? link.href : (element.currentSrc || element.src || element.href);
+    // We strictly prefer 'yt_' ID for global video tracking on YouTube
+    // Valid for both Links (Titles) and Thumbnails if we can extract ID.
+    // However, user wants separation.
+    // Let's keep strict YouTube ID ONLY for what looks like a video/thumbnail interaction.
+    if (location.hostname.includes('youtube.com')) {
+        const link = element.closest('a');
+        const urlPromise = link ? link.href : (element.src || element.href);
+        if (urlPromise && (urlPromise.includes('youtube.com') || urlPromise.includes('youtu.be'))) {
+            const videoId = extractYouTubeId(urlPromise);
+            // Return yt_ID only for visual elements to avoid checking Titles
+            if (videoId) {
+                const isVisual = element.tagName === 'IMG' ||
+                    element.tagName === 'VIDEO' ||
+                    element.tagName === 'YTD-THUMBNAIL' ||
+                    element.classList.contains('ytd-thumbnail') ||
+                    element.style.backgroundImage;
 
-    if (!url || url.startsWith('data:') || url.startsWith('blob:')) return null;
-
-    // YouTube Video / Short ID extraction
-    if (url.includes('youtube.com') || url.includes('youtu.be')) {
-        const videoId = extractYouTubeId(url);
-        // Only mark if we actually found an ID, otherwise ignore (generic page, navigation links)
-        if (videoId) return `yt_${videoId}`;
+                // If it is visual, return ID. If it's a Text Link (Title), fall through to generic link logic?
+                // Or we can return separate ID for YouTube Title? 
+                // Let's just return yt_ID for visuals.
+                if (isVisual) return `yt_${videoId}`;
+            }
+        }
     }
 
-    // 2. Fallback: Use the full URL as ID
-    return url;
+    // 2. Generic Sites: Strict Decoupling
+
+    // Case A: Visual Media (Image/Video/Background)
+    // ID = "media|" + source URL. Ignore parent Link!
+    if (element.tagName === 'IMG') {
+        return element.src ? `media|${element.src}` : null;
+    }
+    if (element.tagName === 'VIDEO') {
+        return element.currentSrc || element.src ? `media|${element.currentSrc || element.src}` : null;
+    }
+    if (element.style && element.style.backgroundImage && element.style.backgroundImage !== 'none') {
+        const bg = element.style.backgroundImage.slice(5, -2).replace(/['"]/g, "");
+        return bg ? `media|${bg}` : null;
+    }
+
+    // Case B: Navigation Links
+    // ID = "link|" + href.
+    const link = element.closest('a');
+    if (link && link.href) {
+        // Option: Make ID even more specific to avoid "Read More" matching "Title"?
+        // `link|${link.href}|${link.textContent.trim()}`
+        // This makes it VERY specific (Individual).
+        // Let's try adding text content hash to link ID to satisfy "Individual" request.
+        // Simple hash to avoid huge IDs
+        const textSnippet = link.textContent.trim().substring(0, 30).replace(/\s+/g, '');
+        return `link|${link.href}|${textSnippet}`;
+    }
+
+    return null;
 }
 
 function extractYouTubeId(url) {
@@ -113,26 +152,29 @@ function extractYouTubeId(url) {
 // --- UI & Interaction ---
 
 function getTargetContainer(element) {
-    // For YouTube, we strictly want the thumbnail container to avoid hitting titles/avatars
+    // For YouTube, we strictly want the thumbnail container
     if (element.closest('ytd-thumbnail')) return element.closest('ytd-thumbnail');
     if (element.closest('ytd-playlist-thumbnail')) return element.closest('ytd-playlist-thumbnail');
     if (element.closest('.ytd-thumbnail')) return element.closest('.ytd-thumbnail');
 
     // For generic sites
-    // If it's an IMG, we want the IMG itself to be the target for sizing,
-    // but we can't append to it. We'll handle that in renderCheckmark.
+    // If element is an IMG, return it (renderCheckmark handles sibling insertion)
+    // If element is a DIV with background-image, return it.
     return element;
 }
 
 function scanPage() {
-    // YouTube: strictly target thumbnails to avoid title links
-    // Generic: target images directly
+    // Expanded selectors for "Robustness"
     const selectors = [
         'ytd-thumbnail',
         'ytd-playlist-thumbnail',
-        'a#thumbnail', // YouTube alternative
+        'a#thumbnail',
         'img',
-        // 'video' // Video elements can be tricky with overlays, sticking to IMG/Thumbnail for now
+        'video',
+        '[style*="background-image"]', // Catch divs with backgrounds
+        'article a', // Links inside articles suitable for checking
+        '.card a',
+        '.post a'
     ];
 
     const elements = document.querySelectorAll(selectors.join(','));
@@ -143,13 +185,17 @@ function processElement(element) {
     if (element.dataset.icProcessed) return;
 
     // --- De-duplication Logic ---
-    // If we are on YouTube, and this element is inside a known container we already track, skip it.
-    // e.g. IMG inside ytd-thumbnail.
+    // If we are on YouTube, strictly ignore inner elements to prevent double-marking
     if (location.hostname.includes('youtube.com')) {
-        if (element.tagName === 'IMG' && element.closest('ytd-thumbnail')) return;
-        if (element.tagName === 'A' && element.closest('ytd-thumbnail')) return;
-        // Exclude avatars
-        if (element.closest('#avatar') || element.closest('yt-img-shadow.ytd-channel-name')) return;
+        const ytContainer = element.closest('ytd-thumbnail, ytd-playlist-thumbnail, .ytd-thumbnail');
+        if (ytContainer && element !== ytContainer) {
+            // If we found an inner element but we are tracking the container, stop.
+            // But wait, the loop might process the inner element BEFORE the container.
+            // We should only process the CONTAINER.
+            // If 'element' is NOT one of the containers, and it IS inside one, skip.
+            if (!['YTD-THUMBNAIL', 'YTD-PLAYLIST-THUMBNAIL'].includes(element.tagName) &&
+                !element.classList.contains('ytd-thumbnail')) return;
+        }
     }
 
     const id = getContentId(element);
@@ -215,7 +261,9 @@ function renderCheckmark(element) {
     // Checkmark base styles
     Object.assign(checkmark.style, {
         position: 'absolute',
-        zIndex: '9999',
+        top: '5px',
+        left: '5px',
+        zIndex: '2147483640', // Very high z-index to stay on top
         width: `${s.checkmarkSize}px`,
         height: `${s.checkmarkSize}px`,
         backgroundColor: s.checkmarkColor,
@@ -228,7 +276,11 @@ function renderCheckmark(element) {
         fontWeight: 'bold',
         pointerEvents: 'none',
         boxShadow: '0 2px 4px rgba(0,0,0,0.5)',
-        border: '2px solid white'
+        border: '2px solid white',
+        margin: '0',
+        padding: '0',
+        lineHeight: '1',
+        boxSizing: 'content-box'
     });
 
     // --- Insertion Logic ---
