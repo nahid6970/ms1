@@ -220,6 +220,14 @@
             "hotkey": "PrintScreen",
             "action": "Run(\"C:\\Users\\nahid\\ms\\ms1\\Testing\\screenshot\\region_screenshot.py\", \"\", \"Hide\")",
             "enabled": true
+        },
+        {
+            "name": "Open Folder gui",
+            "category": "General",
+            "description": "",
+            "hotkey": "#f",
+            "action": "Run(\"C:\\Users\\nahid\\ms\\ms1\\Testing\\screenshot\\folder_launcher\\launcher.py\", \"\", \"Hide\")",
+            "enabled": true
         }
     ],
     "text_shortcuts": [
