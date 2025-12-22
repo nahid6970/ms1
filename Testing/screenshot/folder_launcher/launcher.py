@@ -99,10 +99,14 @@ class FolderLauncher:
         self.root.after(100, self.force_focus)
 
     def on_focus_out(self, event):
-        # Only destroy if the focus actually left the root window
-        # (widget is None means it went to another app)
+        # Don't destroy if we are opening a dialog
+        if getattr(self, 'is_dialog_open', False):
+            return
+            
         if self.root.focus_displayof() is None:
              self.root.destroy()
+             
+    # ... (other methods) ...
 
     def toggle_edit_mode(self):
         self.edit_mode = not self.edit_mode
@@ -193,8 +197,11 @@ class FolderLauncher:
         icon_label = tk.Label(card, text="+", font=(self.font_name, 36), bg="#121212", fg="#444444")
         icon_label.pack(expand=True)
 
+        # Bind explicitly to ensure click works
+        card.bind("<Button-1>", lambda e: self.add_new_folder())
+        icon_label.bind("<Button-1>", lambda e: self.add_new_folder())
+        
         for w in [card, icon_label]:
-            w.bind("<Button-1>", lambda e: self.add_new_folder())
             w.bind("<Enter>", lambda e: self.on_add_hover(card, icon_label))
             w.bind("<Leave>", lambda e: self.on_add_leave(card, icon_label))
             w.config(cursor="hand2")
@@ -227,32 +234,50 @@ class FolderLauncher:
             messagebox.showwarning("Error", f"Folder does not exist: {path}")
 
     def change_folder_color(self, index):
+        self.is_dialog_open = True
         color = colorchooser.askcolor(title="Choose Folder Color", initialcolor=self.folders[index]['color'], parent=self.root)[1]
+        self.is_dialog_open = False
+        self.root.focus_force()
         if color:
             self.folders[index]['color'] = color
             save_folders(self.folders)
             self.render_folders()
 
     def change_folder_icon(self, index):
+        self.is_dialog_open = True
         new_icon = simpledialog.askstring("Folder Icon", "Paste new icon glyph:", 
                                          initialvalue=self.folders[index].get('icon', "\ueaf7"),
                                          parent=self.root)
+        self.is_dialog_open = False
+        self.root.focus_force()
         if new_icon:
             self.folders[index]['icon'] = new_icon
             save_folders(self.folders)
             self.render_folders()
 
     def remove_folder(self, index):
-        if messagebox.askyesno("Confirm", "Remove this folder?", parent=self.root):
+        self.is_dialog_open = True
+        confirm = messagebox.askyesno("Confirm", "Remove this folder?", parent=self.root)
+        self.is_dialog_open = False
+        self.root.focus_force()
+        if confirm:
             self.folders.pop(index)
             save_folders(self.folders)
             self.render_folders()
             self.update_window_size()
 
     def add_new_folder(self):
+        self.is_dialog_open = True
         path = filedialog.askdirectory(title="Select Folder to Add", parent=self.root)
+        self.is_dialog_open = False
+        self.root.focus_force()
+        
         if path:
+            self.is_dialog_open = True
             color = colorchooser.askcolor(title="Choose Folder Color", initialcolor="#00ff41", parent=self.root)[1]
+            self.is_dialog_open = False
+            self.root.focus_force()
+            
             if not color: color = "#00ff41"
             self.folders.append({"path": path, "color": color, "icon": "\ueaf7"})
             save_folders(self.folders)
