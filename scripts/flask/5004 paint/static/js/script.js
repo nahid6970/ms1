@@ -1,11 +1,18 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- Elements ---
     const canvas = document.getElementById('drawing-canvas');
-    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    const ctx = canvas.getContext('2d', { 
+        willReadFrequently: true,
+        alpha: false, // Disable alpha channel for better performance
+        desynchronized: true // Allow async rendering
+    });
 
     // Overlay Canvas for performance (shapes/preview)
     const overlayCanvas = document.getElementById('overlay-canvas');
-    const ctxOverlay = overlayCanvas.getContext('2d');
+    const ctxOverlay = overlayCanvas.getContext('2d', {
+        alpha: true, // Overlay needs transparency
+        desynchronized: true
+    });
 
     const viewport = document.getElementById('viewport');
 
@@ -48,15 +55,18 @@ document.addEventListener('DOMContentLoaded', () => {
         panX: 0,
         panY: 0,
         lastMouseX: 0,
-        lastMouseY: 0
+        lastMouseY: 0,
+
+        // Performance optimizations
+        lastDrawTime: 0,
+        pendingHistorySave: false
     };
 
     // Initialize
     function init() {
-        // Start with a reasonably large size, but not huge to prevent memory issues initially
-        // We will expand it dynamically.
-        canvas.width = 3000;
-        canvas.height = 3000;
+        // Start with a smaller, more reasonable size for better performance
+        canvas.width = 1500;
+        canvas.height = 1500;
 
         syncOverlay();
 
@@ -111,10 +121,10 @@ document.addEventListener('DOMContentLoaded', () => {
         ctxOverlay.strokeStyle = state.color; // Eraser doesn't use overlay usually
         ctxOverlay.fillStyle = state.color;
 
-        if (state.isPanning) {
-            viewport.style.cursor = 'grabbing';
-        } else {
-            viewport.style.cursor = 'crosshair';
+        // Update cursor only when needed
+        const newCursor = state.isPanning ? 'grabbing' : 'crosshair';
+        if (viewport.style.cursor !== newCursor) {
+            viewport.style.cursor = newCursor;
         }
     }
 
@@ -153,52 +163,46 @@ document.addEventListener('DOMContentLoaded', () => {
         canvasContainer.style.transform = `translate(${state.panX}px, ${state.panY}px) scale(${state.scale})`;
     }
 
-    // --- Dynamic Expansion ---
+    // --- Dynamic Expansion (Optimized) ---
     function checkBoundsAndExpand(x, y) {
+        // Only expand on mousedown, not during drawing to prevent lag
         // If x,y is close to edge or outside, expand canvas.
-        // We will expand by chunks, e.g., 1000px.
-        // This is a heavy operation, so we do it cautiously.
-        // Ideally we do this BEFORE drawing starts, or AFTER.
-        // Doing it during drag is tricky. We'll do it on mousedown if needed?
-        // Or if user pans too far?
-
         let newWidth = canvas.width;
         let newHeight = canvas.height;
         let shiftX = 0;
         let shiftY = 0;
-        const buffer = 500; // pixels buffer
+        const buffer = 300; // Reduced buffer for less aggressive expansion
         let expandInfo = "";
 
         // Check Right/Bottom
         if (x > canvas.width - buffer) {
-            newWidth += 1000;
+            newWidth += 800; // Smaller expansion chunks
             expandInfo = "right";
         }
         if (y > canvas.height - buffer) {
-            newHeight += 1000;
+            newHeight += 800;
             expandInfo = "down";
         }
+        
         // Check Left/Top (Harder because requires shifting context)
-        // For simplicity in this version, we will only expand Right and Bottom.
-        // To expand Left/Top we need to 'shift' the image data and state.panX/Y.
-
-        if (x < buffer && x < 0) { // Only expand left if actually outside or very close to left edge
-            // Expand Left
-            const add = 1000;
+        if (x < buffer && x < 0) {
+            const add = 800;
             newWidth += add;
             shiftX = add;
             expandInfo = "left";
         }
-        if (y < buffer && y < 0) { // Only expand top if actually outside or very close to top edge
-            // Expand Top
-            const add = 1000;
+        if (y < buffer && y < 0) {
+            const add = 800;
             newHeight += add;
             shiftY = add;
             expandInfo = "up";
         }
 
         if (newWidth !== canvas.width || newHeight !== canvas.height) {
-            resizeCanvas(newWidth, newHeight, shiftX, shiftY);
+            // Defer expansion to avoid blocking drawing
+            requestAnimationFrame(() => {
+                resizeCanvas(newWidth, newHeight, shiftX, shiftY);
+            });
             return { shiftX, shiftY };
         }
         return { shiftX: 0, shiftY: 0 };
@@ -237,18 +241,31 @@ document.addEventListener('DOMContentLoaded', () => {
         else showToast("Canvas expanded");
     }
 
-    // --- History System ---
+    // --- History System (Optimized) ---
     function saveHistory() {
-        if (state.historyStep < state.history.length - 1) {
-            state.history = state.history.slice(0, state.historyStep + 1);
-        }
+        // Debounce history saving to avoid excessive operations
+        if (state.pendingHistorySave) return;
+        
+        state.pendingHistorySave = true;
+        
+        // Use requestAnimationFrame to defer the expensive operation
+        requestAnimationFrame(() => {
+            if (state.historyStep < state.history.length - 1) {
+                state.history = state.history.slice(0, state.historyStep + 1);
+            }
 
-        state.history.push(canvas.toDataURL());
-        if (state.history.length > state.maxHistory) {
-            state.history.shift();
-        } else {
-            state.historyStep++;
-        }
+            // Only save smaller canvas regions when possible, or compress the data
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.8); // Use JPEG with compression
+            state.history.push(dataUrl);
+            
+            if (state.history.length > state.maxHistory) {
+                state.history.shift();
+            } else {
+                state.historyStep++;
+            }
+            
+            state.pendingHistorySave = false;
+        });
     }
 
     document.addEventListener('keydown', (e) => {
@@ -361,9 +378,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function startDrawing(e) {
         let pos = getPos(e);
 
-        // OPTIONAL: Check bounds on start and expand if user clicks in the void (conceptually)
-        // But since we can't click outside canvas div, we rely on canvas being large.
-        // However, if we implement "infinite", we should check if they are near edge.
+        // Check bounds and expand if needed
         const shift = checkBoundsAndExpand(pos.x, pos.y);
 
         // If shifted, update pos
@@ -393,7 +408,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (state.tool === 'brush' || state.tool === 'eraser') {
             ctx.beginPath();
             ctx.moveTo(pos.x, pos.y);
-            // Draw single dot
+            // Draw single dot for immediate feedback
             ctx.lineTo(pos.x, pos.y);
             ctx.stroke();
         } else {
@@ -405,18 +420,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function draw(e) {
         if (!state.isDrawing) return;
+        
+        // Light throttling for better performance (reduced from 16ms to 8ms for more responsiveness)
+        const now = performance.now();
+        if (now - state.lastDrawTime < 8) return;
+        state.lastDrawTime = now;
+        
         const pos = getPos(e);
-        // Note: if we expanded canvas in mousedown, our coordinate system is fine directly via getPos
-        // because getPos uses the current state.pan/scale which were updated in resizeCanvas.
 
         if (state.tool === 'brush' || state.tool === 'eraser') {
+            // Simple line drawing - keep it working!
             ctx.lineTo(pos.x, pos.y);
             ctx.stroke();
-            // Check dynamic expand during draw (throttled?)
-            // Doing this every frame is expensive (resizeCanvas copies data).
-            // A better infinite canvas implements tiled rendering.
-            // For now, let's just let them draw. If they hit edge, it clips.
-            // We expanded on mousedown, that helps.
+            ctx.beginPath();
+            ctx.moveTo(pos.x, pos.y);
         } else {
             // Shapes: Draw to Overlay
             ctxOverlay.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
@@ -453,7 +470,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (state.tool !== 'picker' && state.tool !== 'fill') {
-            saveHistory();
+            // Defer history saving to avoid blocking the UI
+            setTimeout(() => saveHistory(), 50);
         }
     }
 
