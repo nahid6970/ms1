@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,13 +9,14 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
+
 <body>
     <div class="app-container">
         <aside class="sidebar">
             <div class="logo">
                 <i class="fa-solid fa-palette"></i> NeoPaint
             </div>
-            
+
             <div class="tool-section">
                 <label>TOOLS</label>
                 <div class="tools-grid">
@@ -68,12 +70,10 @@
             <div class="spacer"></div>
 
             <div class="tool-section actions">
-                <button class="action-btn" id="btn-expand" title="Add more space to canvas">
-                    <i class="fa-solid fa-expand"></i> Expand
-                </button>
                 <button class="action-btn" id="btn-clear" title="Clear Canvas">
                     <i class="fa-solid fa-trash-can"></i> Clear
                 </button>
+                <!-- Expand button removed for infinite canvas feel -->
                 <div class="action-row">
                     <button class="action-btn secondary" id="btn-gallery">
                         <i class="fa-solid fa-folder-open"></i> Load
@@ -88,6 +88,7 @@
         <main class="canvas-viewport" id="viewport">
             <div class="canvas-container">
                 <canvas id="drawing-canvas"></canvas>
+                <canvas id="overlay-canvas"></canvas>
             </div>
         </main>
     </div>
@@ -111,4 +112,5 @@
 
     <script src="/static/js/script.js"></script>
 </body>
+
 </html>
