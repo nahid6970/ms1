@@ -638,17 +638,58 @@ document.addEventListener('DOMContentLoaded', () => {
                 images.forEach(src => {
                     const item = document.createElement('div');
                     item.className = 'gallery-item';
+
                     const img = document.createElement('img');
                     img.src = src;
-                    item.appendChild(img);
 
-                    item.addEventListener('click', () => {
+                    // Click on image to load
+                    img.addEventListener('click', () => {
                         loadFromGallery(src);
                     });
+
+                    // Delete button
+                    const actions = document.createElement('div');
+                    actions.className = 'gallery-actions';
+
+                    const delBtn = document.createElement('div');
+                    delBtn.className = 'delete-btn';
+                    delBtn.innerHTML = '<i class="fa-solid fa-trash"></i>';
+                    delBtn.title = "Delete Artwork";
+
+                    delBtn.addEventListener('click', (e) => {
+                        e.stopPropagation(); // prevent load
+                        deleteArtwork(src, item);
+                    });
+
+                    actions.appendChild(delBtn);
+                    item.appendChild(img);
+                    item.appendChild(actions);
 
                     galleryGrid.appendChild(item);
                 });
             });
+    }
+
+    function deleteArtwork(src, itemElement) {
+        if (!confirm('Delete this artwork permanently?')) return;
+
+        const filename = src.split('/').pop();
+
+        fetch('/delete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ filename: filename })
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    itemElement.remove();
+                    showToast('Artwork deleted.');
+                } else {
+                    showToast('Failed to delete: ' + data.error, 'error');
+                }
+            })
+            .catch(err => showToast('Error: ' + err, 'error'));
     }
 
     function loadFromGallery(src) {
@@ -658,12 +699,41 @@ document.addEventListener('DOMContentLoaded', () => {
         img.src = src;
         img.crossOrigin = "Anonymous";
         img.onload = () => {
+            // Resize canvas to match the saved image exactly so it fits perfectly
+            // This is safer than trying to center on a potentially huge canvas
+            canvas.width = img.width;
+            canvas.height = img.height;
+
+            // Sync overlay size
+            const overlayCanvas = document.getElementById('overlay-canvas');
+            if (overlayCanvas) {
+                overlayCanvas.width = canvas.width;
+                overlayCanvas.height = canvas.height;
+            }
+
+            // Reset view to center of new canvas
+            // We need to fetch viewport dimensions again since we are in a closure
+            const vW = document.getElementById('viewport').clientWidth;
+            const vH = document.getElementById('viewport').clientHeight;
+
+            state.panX = (vW - canvas.width) / 2;
+            state.panY = (vH - canvas.height) / 2;
+            state.scale = 0.8;
+            updateTransform();
+
             ctx.fillStyle = '#ffffff';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             ctx.drawImage(img, 0, 0);
+
+            // Re-apply context settings because resizing resets context
+            updateContext();
+
             saveHistory();
             modal.classList.remove('open');
             showToast('Artwork loaded!');
+        };
+        img.onerror = () => {
+            showToast('Failed to load image.', 'error');
         };
     }
 

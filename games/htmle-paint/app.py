@@ -51,5 +51,26 @@ def gallery():
     except Exception as e:
         return jsonify([])
 
+@app.route('/delete', methods=['POST'])
+def delete_art():
+    data = request.json
+    filename = data.get('filename')
+    
+    if not filename:
+        return jsonify({"success": False, "error": "No filename provided"})
+    
+    # Security check: ensure no directory traversal
+    safe_filename = os.path.basename(filename)
+    filepath = os.path.join(SAVE_DIR, safe_filename)
+    
+    if os.path.exists(filepath):
+        try:
+            os.remove(filepath)
+            return jsonify({"success": True})
+        except Exception as e:
+            return jsonify({"success": False, "error": str(e)})
+    else:
+        return jsonify({"success": False, "error": "File not found"})
+
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app.run(debug=True, port=5004)
