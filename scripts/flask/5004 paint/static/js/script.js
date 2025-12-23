@@ -405,6 +405,12 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        if (state.tool === 'text') {
+            addTextPrompt(e);
+            state.isDrawing = false;
+            return;
+        }
+
         if (state.tool === 'brush' || state.tool === 'eraser') {
             ctx.beginPath();
             ctx.moveTo(pos.x, pos.y);
@@ -469,7 +475,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.closePath();
         }
 
-        if (state.tool !== 'picker' && state.tool !== 'fill') {
+        if (state.tool !== 'picker' && state.tool !== 'fill' && state.tool !== 'text') {
             // Defer history saving to avoid blocking the UI
             setTimeout(() => saveHistory(), 50);
         }
@@ -779,8 +785,83 @@ document.addEventListener('DOMContentLoaded', () => {
             case 'e': setTool('eraser'); break;
             case 'f': setTool('fill'); break;
             case 'i': setTool('picker'); break;
+            case 't': setTool('text'); break;
         }
     });
+
+    function addTextPrompt(e) {
+        const pos = getPos(e);
+        const mouseX = e.clientX;
+        const mouseY = e.clientY;
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.style.position = 'fixed';
+        input.style.left = mouseX + 'px';
+        input.style.top = mouseY + 'px';
+        input.style.background = 'transparent';
+        input.style.border = '1px dashed ' + state.color;
+        input.style.color = state.color;
+
+        // Scale font size so 5px brush isnt invisible text
+        // Minimum 14px, otherwise brushSize * 2
+        const fontSize = Math.max(14, state.size * 2);
+        input.style.font = `${fontSize}px 'Outfit', sans-serif`;
+        input.style.zIndex = 1000;
+        input.style.padding = '0';
+        input.style.margin = '0';
+        input.style.outline = 'none';
+
+        document.body.appendChild(input);
+
+        // Auto focus
+        setTimeout(() => input.focus(), 10);
+
+        let active = true;
+
+        const cleanup = () => {
+            if (!active) return;
+            active = false;
+
+            const text = input.value;
+            if (text) {
+                ctx.font = `bold ${fontSize}px 'Outfit', sans-serif`;
+                ctx.fillStyle = state.color;
+                ctx.textBaseline = 'top';
+                ctx.fillText(text, pos.x, pos.y);
+                saveHistory();
+            }
+
+            input.remove();
+
+            // Restore tool if needed, or just keep as text
+            state.isDrawing = false;
+        };
+
+        input.addEventListener('keydown', (ev) => {
+            if (ev.key === 'Enter') {
+                cleanup();
+            }
+        });
+
+        input.addEventListener('blur', () => {
+            cleanup();
+        });
+    }
+
+    // Hook into startDrawing
+    const originalStartDrawing = startDrawing; // We can't easily wrap if we replace the whole func, 
+    // but here I'm replacing the function content via the tool. 
+    // Actually I will modify the startDrawing body in the next step or combine it here? 
+    // This tool replaces a block. I should inject addTextPrompt and modifying startDrawing call sites or body.
+    // Wait, the user wants me to edit existing file. The tool is replace_file_content.
+    // I need to add 'case t' to keydown AND add the 'addTextPrompt' function AND update startDrawing.
+    // This replace block targets the bottom keydown listener.
+    // I will add the function definition BEFORE init() or somewhere appropriate.
+    // BUT I also need to update startDrawing.
+    // I can do multiple edits if I use multi_replace.
+    // Let's switch to multi_replace for clarity and safety.
+
 
     init();
 });
