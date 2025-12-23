@@ -33,6 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const gridSnapToggle = document.getElementById('grid-snap');
     const gridSizeInput = document.getElementById('grid-size');
     const gridSizeVal = document.getElementById('grid-size-val');
+    const snapIndicator = document.getElementById('snap-indicator');
 
     // Canvas Container for Transforms
     const canvasContainer = document.querySelector('.canvas-container');
@@ -426,6 +427,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (state.isDrawing || state.tool === 'poly' || state.tool === 'curve') {
             draw(e);
+        }
+
+        // Show snap indicator if snapping is on
+        if (state.gridSnap) {
+            const pos = getPos(e);
+            snapIndicator.style.display = 'block';
+            snapIndicator.style.left = pos.x + 'px';
+            snapIndicator.style.top = pos.y + 'px';
+        } else {
+            snapIndicator.style.display = 'none';
         }
     });
 

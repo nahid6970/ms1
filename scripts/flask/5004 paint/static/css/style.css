@@ -252,16 +252,30 @@ input[type="color"] {
     height: 100%;
     pointer-events: none;
     z-index: 10;
-    /* Larger dots, shifted to center on intersections */
-    background-image: radial-gradient(rgba(0, 210, 255, 0.6) 1.5px, transparent 1.5px);
+    /* High contrast dots centered on snap points */
+    background-image: radial-gradient(circle at center, #00d2ff 1px, rgba(0, 210, 255, 0.6) 2.5px, transparent 2.5px);
     background-size: var(--grid-size, 40px) var(--grid-size, 40px);
-    background-position: -1.5px -1.5px;
+    /* Offset so dots align with snap points (0, 40, 80 etc) */
+    background-position: calc(var(--grid-size, 40px) / -2) calc(var(--grid-size, 40px) / -2);
     opacity: 0;
     transition: opacity 0.2s;
 }
 
 .canvas-container.grid-active::after {
     opacity: 1;
+}
+
+#snap-indicator {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border: 1.5px solid var(--accent);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 11;
+    display: none;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 5px var(--accent);
 }
 
 /* Switch UI */
