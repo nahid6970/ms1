@@ -46,6 +46,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const sidebar = document.querySelector('.sidebar');
     const toggleBtn = document.getElementById('sidebar-toggle');
 
+    // Symmetry Settings
+    const symRadialBtn = document.getElementById('sym-radial');
+    const symReflectBtn = document.getElementById('sym-reflect');
+
     toggleBtn.addEventListener('click', () => {
         sidebar.classList.toggle('collapsed');
         const isCollapsed = sidebar.classList.contains('collapsed');
@@ -83,6 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Mirror State
         mirrorCount: 4,
         reflectType: 'horizontal', // horizontal, vertical, both
+        symmetry: 'none', // none, radial, reflect
 
         // Curve State
         curvePoints: [],
@@ -171,23 +176,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function setTool(toolName) {
         state.tool = toolName;
-        if (toolName === 'mirror') {
-            const input = prompt("Enter number of mirror folders (e.g. 4, 6, 8, 12):", "4");
-            const val = parseInt(input);
-            if (val && val > 0) {
-                state.mirrorCount = val;
-            } else {
-                if (!state.mirrorCount) state.mirrorCount = 4;
-            }
-        }
-
-        if (toolName === 'reflect') {
-            const input = prompt("Mirror Type? (H)orizontal, (V)ertical, or (B)oth/Opposite:", "H");
-            const choice = (input || "").toLowerCase();
-            if (choice === 'v' || choice === 'vertical') state.reflectType = 'vertical';
-            else if (choice === 'b' || choice === 'both') state.reflectType = 'both';
-            else state.reflectType = 'horizontal';
-        }
 
         toolsBtns.forEach(b => {
             if (b.id === `tool-${toolName}`) b.classList.add('active');
@@ -205,6 +193,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
         updateContext();
     }
+
+    function setSymmetry(mode) {
+        if (state.symmetry === mode) {
+            state.symmetry = 'none';
+        } else {
+            state.symmetry = mode;
+            if (mode === 'radial') {
+                const input = prompt("Enter number of mirror folders (e.g. 4, 6, 8, 12):", state.mirrorCount);
+                const val = parseInt(input);
+                if (val && val > 0) state.mirrorCount = val;
+            } else if (mode === 'reflect') {
+                const input = prompt("Mirror Type? (H)orizontal, (V)ertical, or (B)oth/Opposite:", "H");
+                const choice = (input || "").toLowerCase();
+                if (choice === 'v' || choice === 'vertical') state.reflectType = 'vertical';
+                else if (choice === 'b' || choice === 'both') state.reflectType = 'both';
+                else state.reflectType = 'horizontal';
+            }
+        }
+
+        // Update UI
+        symRadialBtn.classList.toggle('active', state.symmetry === 'radial');
+        symReflectBtn.classList.toggle('active', state.symmetry === 'reflect');
+    }
+
+    symRadialBtn.addEventListener('click', () => setSymmetry('radial'));
+    symReflectBtn.addEventListener('click', () => setSymmetry('reflect'));
 
     function centerCanvas() {
         const vW = viewport.clientWidth;
@@ -464,6 +478,8 @@ document.addEventListener('DOMContentLoaded', () => {
         state.isDrawing = true;
         state.startX = pos.x;
         state.startY = pos.y;
+        state.lastX = pos.x;
+        state.lastY = pos.y;
 
         // Tools logic
         if (state.tool === 'fill') {
@@ -498,15 +514,56 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (state.tool === 'brush' || state.tool === 'eraser') {
-            ctx.beginPath();
-            ctx.moveTo(pos.x, pos.y);
-            // Draw single dot for immediate feedback
-            ctx.lineTo(pos.x, pos.y);
-            ctx.stroke();
+            drawSymmetric(ctx, state.tool, pos, pos);
         } else {
             // Shapes: Clear overlay
             ctxOverlay.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
-            ctxOverlay.beginPath();
+        }
+    }
+
+    function drawSymmetric(targetCtx, tool, pCur, pStart) {
+        const w = canvas.width;
+        const h = canvas.height;
+
+        const action = (c, s, e) => {
+            if (tool === 'brush' || tool === 'eraser' || tool === 'line') {
+                c.beginPath();
+                c.moveTo(s.x, s.y);
+                c.lineTo(e.x, e.y);
+                c.stroke();
+            } else if (tool === 'rect') {
+                c.beginPath();
+                c.strokeRect(s.x, s.y, e.x - s.x, e.y - s.y);
+            } else if (tool === 'circle') {
+                c.beginPath();
+                const r = Math.sqrt(Math.pow(e.x - s.x, 2) + Math.pow(e.y - s.y, 2));
+                c.arc(s.x, s.y, r, 0, 2 * Math.PI);
+                c.stroke();
+            }
+        };
+
+        if (state.symmetry === 'none') {
+            action(targetCtx, pStart, pCur);
+        } else if (state.symmetry === 'radial') {
+            const cx = w / 2;
+            const cy = h / 2;
+            const step = (Math.PI * 2) / state.mirrorCount;
+            targetCtx.save();
+            for (let i = 0; i < state.mirrorCount; i++) {
+                targetCtx.setTransform(1, 0, 0, 1, 0, 0);
+                targetCtx.translate(cx, cy);
+                targetCtx.rotate(step * i);
+                targetCtx.translate(-cx, -cy);
+                action(targetCtx, pStart, pCur);
+            }
+            targetCtx.restore();
+        } else if (state.symmetry === 'reflect') {
+            action(targetCtx, pStart, pCur);
+            let s2 = { ...pStart }, e2 = { ...pCur };
+            if (state.reflectType === 'horizontal') { s2.x = w - s2.x; e2.x = w - e2.x; }
+            else if (state.reflectType === 'vertical') { s2.y = h - s2.y; e2.y = h - e2.y; }
+            else { s2.x = w - s2.x; s2.y = h - s2.y; e2.x = w - e2.x; e2.y = h - e2.y; }
+            action(targetCtx, s2, e2);
         }
     }
 
@@ -589,91 +646,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (state.tool === 'brush' || state.tool === 'eraser') {
-            // Simple line drawing - keep it working!
-            ctx.lineTo(pos.x, pos.y);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(pos.x, pos.y);
-        } else if (state.tool === 'reflect') {
-            const w = canvas.width;
-            const h = canvas.height;
-
-            // Draw original
-            ctx.beginPath();
-            ctx.moveTo(state.startX, state.startY);
-            ctx.lineTo(pos.x, pos.y);
-            ctx.stroke();
-
-            // Draw reflected
-            ctx.beginPath();
-            let mStartX, mStartY, mPosX, mPosY;
-
-            if (state.reflectType === 'horizontal') {
-                mStartX = w - state.startX;
-                mStartY = state.startY;
-                mPosX = w - pos.x;
-                mPosY = pos.y;
-            } else if (state.reflectType === 'vertical') {
-                mStartX = state.startX;
-                mStartY = h - state.startY;
-                mPosX = pos.x;
-                mPosY = h - pos.y;
-            } else { // both / opposite
-                mStartX = w - state.startX;
-                mStartY = h - state.startY;
-                mPosX = w - pos.x;
-                mPosY = h - pos.y;
-            }
-
-            ctx.moveTo(mStartX, mStartY);
-            ctx.lineTo(mPosX, mPosY);
-            ctx.stroke();
-
-            // Update last pos
-            state.startX = pos.x;
-            state.startY = pos.y;
-        } else if (state.tool === 'mirror') {
-            const cx = canvas.width / 2;
-            const cy = canvas.height / 2;
-            const angleStep = (Math.PI * 2) / state.mirrorCount;
-
-            ctx.save();
-            for (let i = 0; i < state.mirrorCount; i++) {
-                ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transform
-                ctx.translate(cx, cy);
-                ctx.rotate(angleStep * i);
-                ctx.translate(-cx, -cy);
-
-                ctx.beginPath();
-                ctx.moveTo(state.startX, state.startY);
-                ctx.lineTo(pos.x, pos.y);
-                ctx.stroke();
-            }
-            ctx.restore();
-
-            // Update last pos
-            state.startX = pos.x;
-            state.startY = pos.y;
+            drawSymmetric(ctx, state.tool, pos, { x: state.lastX, y: state.lastY });
+            state.lastX = pos.x;
+            state.lastY = pos.y;
         } else {
             // Shapes: Draw to Overlay
             ctxOverlay.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
-
-            if (state.tool === 'line') {
-                ctxOverlay.beginPath();
-                ctxOverlay.moveTo(state.startX, state.startY);
-                ctxOverlay.lineTo(pos.x, pos.y);
-                ctxOverlay.stroke();
-            } else if (state.tool === 'rect') {
-                ctxOverlay.beginPath();
-                let w = pos.x - state.startX;
-                let h = pos.y - state.startY;
-                ctxOverlay.strokeRect(state.startX, state.startY, w, h);
-            } else if (state.tool === 'circle') {
-                ctxOverlay.beginPath();
-                let r = Math.sqrt(Math.pow(pos.x - state.startX, 2) + Math.pow(pos.y - state.startY, 2));
-                ctxOverlay.arc(state.startX, state.startY, r, 0, 2 * Math.PI);
-                ctxOverlay.stroke();
-            }
+            drawSymmetric(ctxOverlay, state.tool, pos, { x: state.startX, y: state.startY });
         }
     }
 
