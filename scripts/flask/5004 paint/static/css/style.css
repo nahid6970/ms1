@@ -107,6 +107,34 @@ html {
     margin-bottom: 10px;
 }
 
+.color-controls {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+#toggle-swatches {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+}
+
+#toggle-swatches:hover,
+#toggle-swatches.active {
+    background: rgba(0, 210, 255, 0.1);
+    color: var(--accent);
+    border-color: var(--accent);
+}
+
 .color-picker-wrapper {
     width: 36px;
     height: 36px;
@@ -134,7 +162,17 @@ input[type="color"] {
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
-    margin-bottom: 10px;
+    margin-bottom: 0px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out, margin 0.3s;
+    opacity: 0;
+}
+
+.swatches.visible {
+    max-height: 200px;
+    margin-bottom: 20px;
+    opacity: 1;
 }
 
 .swatch {

@@ -22,6 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const sizeValDisplay = document.getElementById('size-val');
     const colorPicker = document.getElementById('color-picker');
     const swatchesContainer = document.getElementById('color-swatches');
+    const toggleSwatchesBtn = document.getElementById('toggle-swatches');
 
     // Actions
     const btnClear = document.getElementById('btn-clear');
@@ -1114,6 +1115,11 @@ document.addEventListener('DOMContentLoaded', () => {
             saveHistory();
         }
     }
+
+    toggleSwatchesBtn.addEventListener('click', () => {
+        swatchesContainer.classList.toggle('visible');
+        toggleSwatchesBtn.classList.toggle('active');
+    });
 
     gridShowToggle.addEventListener('change', (e) => {
         state.gridShow = e.target.checked;
