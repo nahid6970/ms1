@@ -8,6 +8,10 @@
     --border: #333333;
 }
 
+* {
+    box-sizing: border-box;
+}
+
 body,
 html {
     margin: 0;
@@ -585,13 +589,15 @@ canvas {
 #sidebar-toggle {
     position: absolute;
     top: 20px;
-    left: 20px;
+    right: -45px;
+    /* Stick out from sidebar */
     z-index: 100;
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     background: var(--sidebar-bg);
     border: 1px solid var(--border);
-    border-radius: 8px;
+    border-radius: 0 8px 8px 0;
+    /* Rounded outer corners only */
     color: var(--text-muted);
     cursor: pointer;
     display: flex;
@@ -599,35 +605,32 @@ canvas {
     justify-content: center;
     transition: all 0.3s;
     backdrop-filter: blur(10px);
+    box-shadow: 5px 0 15px rgba(0, 0, 0, 0.3);
 }
 
 #sidebar-toggle:hover {
     color: var(--accent);
     border-color: var(--accent);
+    right: -48px;
+    /* Slight peek out on hover */
 }
 
 .sidebar {
-    transition: margin-left 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.3s;
+    position: relative;
+    transition: margin-left 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    overflow: visible;
 }
 
 .sidebar.collapsed {
-    margin-left: -280px;
-    opacity: 0;
-    pointer-events: none;
+    margin-left: -281px;
+    /* Extra 1px to hide the border-right */
+    box-shadow: none;
 }
 
-/* Adjust toggle position when sidebar is open */
-.sidebar:not(.collapsed)+#viewport #sidebar-toggle {
-    left: 20px;
-    /* actually it might be inside sidebar? no, let's put it on top */
-}
-
-/* Wait, if it's outside sidebar it needs to stay visible. */
-.sidebar.collapsed~#sidebar-toggle {
-    left: 20px;
-    opacity: 0.5;
-}
-
-.sidebar.collapsed~#sidebar-toggle:hover {
-    opacity: 1;
+/* Adjust the main viewport to fill space when needed */
+.canvas-viewport {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    background: #0a0a0a;
 }
