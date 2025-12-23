@@ -467,13 +467,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 ctxOverlay.lineTo(pos.x, pos.y);
                 ctxOverlay.stroke();
 
-                // Highlight start point if close
+                // Highlight start point
                 const start = state.polyPoints[0];
+
+                // 1. Always show start point (Big)
+                ctxOverlay.fillStyle = state.color;
+                ctxOverlay.beginPath();
+                ctxOverlay.arc(start.x, start.y, 8, 0, Math.PI * 2);
+                ctxOverlay.fill();
+
+                // 2. Show big closer indicator if nearby
                 const dist = Math.sqrt(Math.pow(pos.x - start.x, 2) + Math.pow(pos.y - start.y, 2));
-                if (dist < 10) {
-                    ctxOverlay.fillStyle = 'rgba(255, 0, 0, 0.5)';
+                if (dist < 20) {
+                    ctxOverlay.fillStyle = 'rgba(0, 255, 0, 0.3)';
                     ctxOverlay.beginPath();
-                    ctxOverlay.arc(start.x, start.y, 10, 0, Math.PI * 2);
+                    ctxOverlay.arc(start.x, start.y, 20, 0, Math.PI * 2);
                     ctxOverlay.fill();
                     ctxOverlay.fillStyle = state.color; // reset
                 }
@@ -902,7 +910,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (state.polyPoints.length > 2) {
             const start = state.polyPoints[0];
             const dist = Math.sqrt(Math.pow(pos.x - start.x, 2) + Math.pow(pos.y - start.y, 2));
-            if (dist < 15) {
+            if (dist < 20) {
                 // Close shape
                 ctx.beginPath();
                 ctx.moveTo(state.polyPoints[0].x, state.polyPoints[0].y);
@@ -931,6 +939,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 ctxOverlay.lineTo(state.polyPoints[i].x, state.polyPoints[i].y);
             }
             ctxOverlay.stroke();
+        }
+
+        // Always draw big start point so it's visible immediately
+        if (state.polyPoints.length > 0) {
+            ctxOverlay.fillStyle = state.color;
+            ctxOverlay.beginPath();
+            ctxOverlay.arc(state.polyPoints[0].x, state.polyPoints[0].y, 8, 0, Math.PI * 2);
+            ctxOverlay.fill();
         }
     }
 
