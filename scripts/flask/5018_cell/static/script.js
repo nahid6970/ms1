@@ -7503,49 +7503,72 @@ function initMultiSelection(input, searchText) {
         index += searchText.length;
     }
 
+    // Find match corresponding to current selection
+    const currentStart = input.selectionStart;
+    // Helper to see if a match is "close enough" or exactly matches current selection
+    let initialMatchIndex = matches.findIndex(m => m.start === currentStart);
+    if (initialMatchIndex === -1) {
+        // If not exact match, find closest one or default to 0
+        // For now, let's just pick the first one if exact match fails, 
+        // to avoid logic breakage, though exact match should exist if selectNextOccurrence called it.
+        initialMatchIndex = 0;
+    }
+
     multiSelectionData = {
         input: input,
         searchText: searchText,
         matches: matches,
-        currentIndex: 0,
-        selectedMatches: [matches[0]],
+        currentIndex: initialMatchIndex,
+        selectedMatches: [matches[initialMatchIndex]],
         listenerSetup: false
     };
 
-    // Highlight first match
+    // Highlight initial match (redundant if already same)
     if (matches.length > 0) {
-        input.setSelectionRange(matches[0].start, matches[0].end);
         showMultiSelectionIndicator(input, 1, matches.length);
     }
 
-    // Don't set up listener yet - wait until user starts typing or selects all
+    // Don't set up listener yet - wait until user starts typing or selects next
 }
 
 function selectNextMatch(input) {
     if (!multiSelectionData || multiSelectionData.matches.length === 0) return;
 
-    multiSelectionData.currentIndex++;
-    if (multiSelectionData.currentIndex >= multiSelectionData.matches.length) {
-        // All selected, show message
-        showToast(`All ${multiSelectionData.matches.length} occurrences selected. Type to replace all.`, 'info');
-        multiSelectionData.allSelected = true;
+    // Find next unselected match
+    let nextIndex = -1;
+    for (let i = 1; i < multiSelectionData.matches.length; i++) {
+        const checkIdx = (multiSelectionData.currentIndex + i) % multiSelectionData.matches.length;
+        const match = multiSelectionData.matches[checkIdx];
+        if (!multiSelectionData.selectedMatches.includes(match)) {
+            nextIndex = checkIdx;
+            break;
+        }
+    }
 
-        // Now set up the listener for replacement
+    if (nextIndex !== -1) {
+        multiSelectionData.currentIndex = nextIndex;
+        const nextMatch = multiSelectionData.matches[nextIndex];
+        multiSelectionData.selectedMatches.push(nextMatch);
+
+        // Select the next match
+        input.setSelectionRange(nextMatch.start, nextMatch.end);
+
+        // Setup listener immediately if > 1 selected
         if (!multiSelectionData.listenerSetup) {
             setupMultiReplaceListener(input);
             multiSelectionData.listenerSetup = true;
         }
-        return;
+    } else {
+        // All selected
+        showToast(`All ${multiSelectionData.matches.length} occurrences selected.`, 'info');
+        multiSelectionData.allSelected = true;
+        if (!multiSelectionData.listenerSetup) {
+            setupMultiReplaceListener(input);
+            multiSelectionData.listenerSetup = true;
+        }
     }
 
-    const nextMatch = multiSelectionData.matches[multiSelectionData.currentIndex];
-    multiSelectionData.selectedMatches.push(nextMatch);
-
-    // Select the next match
-    input.setSelectionRange(nextMatch.start, nextMatch.end);
-    showMultiSelectionIndicator(input, multiSelectionData.currentIndex + 1, multiSelectionData.matches.length);
-
-    // Show visual markers for all selections
+    showMultiSelectionIndicator(input, multiSelectionData.selectedMatches.length, multiSelectionData.matches.length);
     showSelectionMarkers(input, multiSelectionData.selectedMatches);
 }
 
@@ -7575,8 +7598,8 @@ function showMultiSelectionIndicator(input, current, total) {
 }
 
 function setupMultiReplaceListener(input) {
-    // Store the original ranges (these stay constant as reference points)
-    multiSelectionData.originalRanges = multiSelectionData.matches.map(m => ({
+    // Store the selected ranges for reference
+    multiSelectionData.originalRanges = multiSelectionData.selectedMatches.map(m => ({
         start: m.start,
         end: m.end,
         originalText: input.value.substring(m.start, m.end)
@@ -7660,34 +7683,27 @@ function handleMultiCursorEdit(input, action, char) {
     const text = input.value;
     let result = text;
 
-    // Sort matches from right to left to maintain positions during replacement
-    const sortedMatches = [...multiSelectionData.matches].sort((a, b) => b.start - a.start);
+    // Sort SELECTED matches from right to left to apply edits without breaking indices
+    const sortedSelected = [...multiSelectionData.selectedMatches].sort((a, b) => b.start - a.start);
 
-    // Apply the edit to each match (processing right to left)
-    for (const match of sortedMatches) {
+    // Apply the edit to each SELECTED match
+    for (const match of sortedSelected) {
         if (action === 'insert') {
-            // Insert character and replace selection
             result = result.substring(0, match.start) + char + result.substring(match.end);
         } else if (action === 'backspace') {
-            // Delete selection or character before cursor
             if (match.start === match.end) {
-                // No selection, delete character before
                 if (match.start > 0) {
                     result = result.substring(0, match.start - 1) + result.substring(match.start);
                 }
             } else {
-                // Delete selection
                 result = result.substring(0, match.start) + result.substring(match.end);
             }
         } else if (action === 'delete') {
-            // Delete selection or character after cursor
             if (match.start === match.end) {
-                // No selection, delete character after
                 if (match.end < result.length) {
                     result = result.substring(0, match.start) + result.substring(match.start + 1);
                 }
             } else {
-                // Delete selection
                 result = result.substring(0, match.start) + result.substring(match.end);
             }
         }
@@ -7696,60 +7712,67 @@ function handleMultiCursorEdit(input, action, char) {
     input.value = result;
     multiSelectionData.currentText = result;
 
-    // Recalculate match positions (process in original order, left to right)
+    // Recalculate match positions for ALL matches
     let offset = 0;
     const newMatches = [];
+    const newSelectedMatches = [];
 
     for (let i = 0; i < multiSelectionData.matches.length; i++) {
         const oldMatch = multiSelectionData.matches[i];
-        const oldLength = oldMatch.end - oldMatch.start;
-        let newLength = 0;
+        // Check if this match was one of the selected/edited ones
+        // We use reference comparison or finding based on start/end if refs changed (they shouldn't have yet)
+        const wasSelected = multiSelectionData.selectedMatches.includes(oldMatch);
+
+        let newStart = oldMatch.start + offset;
+        let newEnd = oldMatch.end + offset; // default if not edited
         let offsetChange = 0;
 
-        if (action === 'insert') {
-            // Cursor moves to after inserted text  
-            const newPos = oldMatch.start + offset + char.length;
-            newMatches.push({ start: newPos, end: newPos });
-            offsetChange = char.length - oldLength;
+        if (wasSelected) {
+            const oldLength = oldMatch.end - oldMatch.start;
+
+            if (action === 'insert') {
+                newEnd = newStart + char.length; // Replaced with char
+                offsetChange = char.length - oldLength;
+            } else if (action === 'backspace') {
+                if (oldLength > 0) {
+                    newEnd = newStart; // Deleted selection
+                    offsetChange = -oldLength;
+                } else {
+                    newStart--; // Deleted char before
+                    newEnd--;
+                    offsetChange = -1;
+                }
+            } else if (action === 'delete') {
+                if (oldLength > 0) {
+                    newEnd = newStart; // Deleted selection
+                    offsetChange = -oldLength;
+                } else {
+                    // Deleted char after, start/end stay same but text shifts left
+                    offsetChange = -1;
+                }
+            }
+
+            const newMatch = { start: newStart, end: newEnd };
+            newMatches.push(newMatch);
+            newSelectedMatches.push(newMatch);
+
             offset += offsetChange;
-            continue;
-        } else if (action === 'backspace') {
-            if (oldLength === 0) {
-                // Deleted one char before cursor
-                offsetChange = -1;
-            } else {
-                // Deleted selection
-                offsetChange = -oldLength;
-            }
-            newLength = 0;
-        } else if (action === 'delete') {
-            if (oldLength === 0) {
-                // Deleted one char after cursor (position stays same)
-                offsetChange = -1;
-            } else {
-                // Deleted selection
-                offsetChange = -oldLength;
-            }
-            newLength = 0;
+        } else {
+            // Not selected, just shift
+            newMatches.push({ start: newStart, end: newEnd });
         }
-
-        const newStart = oldMatch.start + offset;
-        const newEnd = newStart + newLength;
-
-        newMatches.push({ start: newStart, end: newEnd });
-
-        // Update offset for next match
-        offset += offsetChange;
     }
 
     multiSelectionData.matches = newMatches;
+    multiSelectionData.selectedMatches = newSelectedMatches;
 
-    // Position cursor at the last match
-    const lastMatch = newMatches[newMatches.length - 1];
-    input.setSelectionRange(lastMatch.end, lastMatch.end);
+    // Move cursor to the last selected match's new end
+    if (newSelectedMatches.length > 0) {
+        const lastSelected = newSelectedMatches[newSelectedMatches.length - 1];
+        input.setSelectionRange(lastSelected.end, lastSelected.end);
+    }
 
-    // Show visual markers
-    showSelectionMarkers(input, newMatches);
+    showSelectionMarkers(input, newSelectedMatches);
 
     // Trigger change event
     const changeEvent = new Event('input', { bubbles: true });
@@ -7757,7 +7780,7 @@ function handleMultiCursorEdit(input, action, char) {
 }
 
 function handleMultiSelectionExtension(input, key) {
-    if (!multiSelectionData || !multiSelectionData.allSelected) return;
+    if (!multiSelectionData) return;
 
     const text = input.value;
     const lines = text.split('\n');
@@ -7771,7 +7794,18 @@ function handleMultiSelectionExtension(input, key) {
     }
 
     // Extend each match based on the key
-    const newMatches = multiSelectionData.matches.map(match => {
+    const newMatches = [];
+    const newSelectedMatches = [];
+
+    for (let i = 0; i < multiSelectionData.matches.length; i++) {
+        const match = multiSelectionData.matches[i];
+        const isSelected = multiSelectionData.selectedMatches.includes(match);
+
+        if (!isSelected) {
+            newMatches.push(match);
+            continue;
+        }
+
         let newEnd = match.end;
         let newStart = match.start;
 
@@ -7797,31 +7831,37 @@ function handleMultiSelectionExtension(input, key) {
                 newStart = lineStarts[lineIndex];
             }
         } else if (key === 'ArrowRight') {
-            newEnd = Math.min(text.length, match.end + 1);
+            if (newEnd < text.length) newEnd++;
         } else if (key === 'ArrowLeft') {
-            newStart = Math.max(0, match.start - 1);
+            if (newStart > 0) newStart--;
         }
 
-        return { start: newStart, end: newEnd };
-    });
+        const newMatch = { start: newStart, end: newEnd };
+        newMatches.push(newMatch);
+        newSelectedMatches.push(newMatch);
+    }
 
     // Update the matches
     multiSelectionData.matches = newMatches;
-    multiSelectionData.selectedMatches = newMatches;
+    multiSelectionData.selectedMatches = newSelectedMatches;
 
     // Update search text to the new extended selection (use first match as reference)
-    const firstMatch = newMatches[0];
-    multiSelectionData.searchText = text.substring(firstMatch.start, firstMatch.end);
+    const firstMatch = newSelectedMatches[0];
+    if (firstMatch) {
+        multiSelectionData.searchText = text.substring(firstMatch.start, firstMatch.end);
+    }
     multiSelectionData.originalText = text;
     multiSelectionData.replacementText = '';
 
     // Visually select the last match
-    const lastMatch = newMatches[newMatches.length - 1];
-    input.setSelectionRange(lastMatch.start, lastMatch.end);
+    const lastMatch = newSelectedMatches[newSelectedMatches.length - 1];
+    if (lastMatch) {
+        input.setSelectionRange(lastMatch.start, lastMatch.end);
+    }
 
     // Show visual markers for all selections
-    showSelectionMarkers(input, newMatches);
-    showMultiSelectionIndicator(input, newMatches.length, newMatches.length);
+    showSelectionMarkers(input, newSelectedMatches);
+    showMultiSelectionIndicator(input, newSelectedMatches.length, multiSelectionData.matches.length);
 }
 
 function clearMultiSelection() {
