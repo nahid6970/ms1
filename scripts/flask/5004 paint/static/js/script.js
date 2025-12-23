@@ -517,36 +517,24 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (state.tool === 'brush' || state.tool === 'eraser') {
-            drawSymmetric(ctx, state.tool, pos, pos);
+            drawSymmetric(ctx, (c) => {
+                c.beginPath();
+                c.moveTo(pos.x, pos.y);
+                c.lineTo(pos.x, pos.y);
+                c.stroke();
+            });
         } else {
             // Shapes: Clear overlay
             ctxOverlay.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
         }
     }
 
-    function drawSymmetric(targetCtx, tool, pCur, pStart) {
+    function drawSymmetric(targetCtx, actionFn) {
         const w = canvas.width;
         const h = canvas.height;
 
-        const action = (c, s, e) => {
-            if (tool === 'brush' || tool === 'eraser' || tool === 'line') {
-                c.beginPath();
-                c.moveTo(s.x, s.y);
-                c.lineTo(e.x, e.y);
-                c.stroke();
-            } else if (tool === 'rect') {
-                c.beginPath();
-                c.strokeRect(s.x, s.y, e.x - s.x, e.y - s.y);
-            } else if (tool === 'circle') {
-                c.beginPath();
-                const r = Math.sqrt(Math.pow(e.x - s.x, 2) + Math.pow(e.y - s.y, 2));
-                c.arc(s.x, s.y, r, 0, 2 * Math.PI);
-                c.stroke();
-            }
-        };
-
         if (state.symmetry === 'none') {
-            action(targetCtx, pStart, pCur);
+            actionFn(targetCtx);
         } else if (state.symmetry === 'radial') {
             const cx = w / 2;
             const cy = h / 2;
@@ -557,16 +545,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 targetCtx.translate(cx, cy);
                 targetCtx.rotate(step * i);
                 targetCtx.translate(-cx, -cy);
-                action(targetCtx, pStart, pCur);
+                actionFn(targetCtx);
             }
             targetCtx.restore();
         } else if (state.symmetry === 'reflect') {
-            action(targetCtx, pStart, pCur);
-            let s2 = { ...pStart }, e2 = { ...pCur };
-            if (state.reflectType === 'horizontal') { s2.x = w - s2.x; e2.x = w - e2.x; }
-            else if (state.reflectType === 'vertical') { s2.y = h - s2.y; e2.y = h - e2.y; }
-            else { s2.x = w - s2.x; s2.y = h - s2.y; e2.x = w - e2.x; e2.y = h - e2.y; }
-            action(targetCtx, s2, e2);
+            // Original
+            actionFn(targetCtx);
+
+            // Reflected
+            targetCtx.save();
+            if (state.reflectType === 'horizontal') {
+                targetCtx.translate(w, 0);
+                targetCtx.scale(-1, 1);
+            } else if (state.reflectType === 'vertical') {
+                targetCtx.translate(0, h);
+                targetCtx.scale(1, -1);
+            } else if (state.reflectType === 'both') {
+                targetCtx.translate(w, h);
+                targetCtx.scale(-1, -1);
+            }
+            actionFn(targetCtx);
+            targetCtx.restore();
         }
     }
 
@@ -581,39 +580,33 @@ document.addEventListener('DOMContentLoaded', () => {
         const pos = getPos(e);
 
         if (state.tool === 'poly') {
-            // Draw preview line from last point to current mouse
             if (state.polyPoints.length > 0) {
                 ctxOverlay.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
-
-                // Redraw existing lines
-                ctxOverlay.beginPath();
-                ctxOverlay.moveTo(state.polyPoints[0].x, state.polyPoints[0].y);
-                for (let i = 1; i < state.polyPoints.length; i++) {
-                    ctxOverlay.lineTo(state.polyPoints[i].x, state.polyPoints[i].y);
-                }
-
-                // Draw preview line
                 const last = state.polyPoints[state.polyPoints.length - 1];
-                ctxOverlay.lineTo(pos.x, pos.y);
-                ctxOverlay.stroke();
 
-                // Highlight start point
+                drawSymmetric(ctxOverlay, (c) => {
+                    c.beginPath();
+                    c.moveTo(state.polyPoints[0].x, state.polyPoints[0].y);
+                    for (let i = 1; i < state.polyPoints.length; i++) {
+                        c.lineTo(state.polyPoints[i].x, state.polyPoints[i].y);
+                    }
+                    c.lineTo(pos.x, pos.y);
+                    c.stroke();
+                });
+
+                // Start point highlighter (draw normally, not symmetric for less clutter)
                 const start = state.polyPoints[0];
-
-                // 1. Always show start point (Big)
                 ctxOverlay.fillStyle = state.color;
                 ctxOverlay.beginPath();
                 ctxOverlay.arc(start.x, start.y, 8, 0, Math.PI * 2);
                 ctxOverlay.fill();
 
-                // 2. Show big closer indicator if nearby
                 const dist = Math.sqrt(Math.pow(pos.x - start.x, 2) + Math.pow(pos.y - start.y, 2));
                 if (dist < 20) {
                     ctxOverlay.fillStyle = 'rgba(0, 255, 0, 0.3)';
                     ctxOverlay.beginPath();
                     ctxOverlay.arc(start.x, start.y, 20, 0, Math.PI * 2);
                     ctxOverlay.fill();
-                    ctxOverlay.fillStyle = state.color; // reset
                 }
             }
             return;
@@ -622,22 +615,22 @@ document.addEventListener('DOMContentLoaded', () => {
         if (state.tool === 'curve') {
             if (state.curvePoints.length > 0) {
                 ctxOverlay.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
-                ctxOverlay.beginPath();
                 const p0 = state.curvePoints[0];
 
-                if (state.curvePoints.length === 1) {
-                    // Preview line towards end point
-                    ctxOverlay.moveTo(p0.x, p0.y);
-                    ctxOverlay.lineTo(pos.x, pos.y);
-                } else if (state.curvePoints.length === 2) {
-                    // Preview quadratic curve using mouse as control point
-                    const p1 = state.curvePoints[1];
-                    ctxOverlay.moveTo(p0.x, p0.y);
-                    ctxOverlay.quadraticCurveTo(pos.x, pos.y, p1.x, p1.y);
-                }
-                ctxOverlay.stroke();
+                drawSymmetric(ctxOverlay, (c) => {
+                    c.beginPath();
+                    if (state.curvePoints.length === 1) {
+                        c.moveTo(p0.x, p0.y);
+                        c.lineTo(pos.x, pos.y);
+                    } else if (state.curvePoints.length === 2) {
+                        const p1 = state.curvePoints[1];
+                        c.moveTo(p0.x, p0.y);
+                        c.quadraticCurveTo(pos.x, pos.y, p1.x, p1.y);
+                    }
+                    c.stroke();
+                });
 
-                // Draw helper dots
+                // Draw dots (unsymmetric)
                 ctxOverlay.fillStyle = state.color;
                 state.curvePoints.forEach(p => {
                     ctxOverlay.beginPath();
@@ -649,13 +642,31 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (state.tool === 'brush' || state.tool === 'eraser') {
-            drawSymmetric(ctx, state.tool, pos, { x: state.lastX, y: state.lastY });
+            const last = { x: state.lastX, y: state.lastY };
+            drawSymmetric(ctx, (c) => {
+                c.beginPath();
+                c.moveTo(last.x, last.y);
+                c.lineTo(pos.x, pos.y);
+                c.stroke();
+            });
             state.lastX = pos.x;
             state.lastY = pos.y;
         } else {
             // Shapes: Draw to Overlay
             ctxOverlay.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
-            drawSymmetric(ctxOverlay, state.tool, pos, { x: state.startX, y: state.startY });
+            drawSymmetric(ctxOverlay, (c) => {
+                c.beginPath();
+                if (state.tool === 'line') {
+                    c.moveTo(state.startX, state.startY);
+                    c.lineTo(pos.x, pos.y);
+                } else if (state.tool === 'rect') {
+                    c.strokeRect(state.startX, state.startY, pos.x - state.startX, pos.y - state.startY);
+                } else if (state.tool === 'circle') {
+                    const r = Math.sqrt(Math.pow(pos.x - state.startX, 2) + Math.pow(pos.y - state.startY, 2));
+                    c.arc(state.startX, state.startY, r, 0, 2 * Math.PI);
+                }
+                c.stroke();
+            });
         }
     }
 
@@ -1058,13 +1069,15 @@ document.addEventListener('DOMContentLoaded', () => {
             const dist = Math.sqrt(Math.pow(pos.x - start.x, 2) + Math.pow(pos.y - start.y, 2));
             if (dist < 20) {
                 // Close shape
-                ctx.beginPath();
-                ctx.moveTo(state.polyPoints[0].x, state.polyPoints[0].y);
-                for (let i = 1; i < state.polyPoints.length; i++) {
-                    ctx.lineTo(state.polyPoints[i].x, state.polyPoints[i].y);
-                }
-                ctx.closePath();
-                ctx.stroke();
+                drawSymmetric(ctx, (c) => {
+                    c.beginPath();
+                    c.moveTo(state.polyPoints[0].x, state.polyPoints[0].y);
+                    for (let i = 1; i < state.polyPoints.length; i++) {
+                        c.lineTo(state.polyPoints[i].x, state.polyPoints[i].y);
+                    }
+                    c.closePath();
+                    c.stroke();
+                });
 
                 state.polyPoints = [];
                 ctxOverlay.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
@@ -1078,13 +1091,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Draw current state on overlay
         ctxOverlay.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
-        ctxOverlay.beginPath();
         if (state.polyPoints.length > 0) {
-            ctxOverlay.moveTo(state.polyPoints[0].x, state.polyPoints[0].y);
-            for (let i = 1; i < state.polyPoints.length; i++) {
-                ctxOverlay.lineTo(state.polyPoints[i].x, state.polyPoints[i].y);
-            }
-            ctxOverlay.stroke();
+            drawSymmetric(ctxOverlay, (c) => {
+                c.beginPath();
+                c.moveTo(state.polyPoints[0].x, state.polyPoints[0].y);
+                for (let i = 1; i < state.polyPoints.length; i++) {
+                    c.lineTo(state.polyPoints[i].x, state.polyPoints[i].y);
+                }
+                c.stroke();
+            });
         }
 
         // Always draw big start point so it's visible immediately
@@ -1105,10 +1120,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const p1 = state.curvePoints[1];
             const p2 = state.curvePoints[2];
 
-            ctx.beginPath();
-            ctx.moveTo(p0.x, p0.y);
-            ctx.quadraticCurveTo(p2.x, p2.y, p1.x, p1.y);
-            ctx.stroke();
+            drawSymmetric(ctx, (c) => {
+                c.beginPath();
+                c.moveTo(p0.x, p0.y);
+                c.quadraticCurveTo(p2.x, p2.y, p1.x, p1.y);
+                c.stroke();
+            });
 
             state.curvePoints = [];
             ctxOverlay.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
