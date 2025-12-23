@@ -408,7 +408,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        if (state.isDrawing) {
+        if (state.isDrawing || state.tool === 'poly' || state.tool === 'curve') {
             draw(e);
         }
     });
@@ -484,7 +484,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function draw(e) {
-        if (!state.isDrawing) return;
+        if (!state.isDrawing && state.tool !== 'poly' && state.tool !== 'curve') return;
 
         // Light throttling for better performance (reduced from 16ms to 8ms for more responsiveness)
         const now = performance.now();
