@@ -1139,17 +1139,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function updateGridView() {
-        if (!state.gridShow) {
-            canvasContainer.style.backgroundImage = 'none';
-            return;
+        if (state.gridShow) {
+            canvasContainer.classList.add('grid-active');
+            canvasContainer.style.setProperty('--grid-size', state.gridSize + 'px');
+        } else {
+            canvasContainer.classList.remove('grid-active');
         }
-        const s = state.gridSize;
-        // Draw a simple grid using CSS linear gradients
-        canvasContainer.style.backgroundImage = `
-            linear-gradient(to right, rgba(0, 210, 255, 0.15) 1px, transparent 1px),
-            linear-gradient(to bottom, rgba(0, 210, 255, 0.15) 1px, transparent 1px)
-        `;
-        canvasContainer.style.backgroundSize = `${s}px ${s}px`;
     }
 
     init();

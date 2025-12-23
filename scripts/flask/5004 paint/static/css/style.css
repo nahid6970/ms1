@@ -238,13 +238,30 @@ input[type="color"] {
     box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
     line-height: 0;
     transform-origin: 0 0;
-    /* Important for zoom math */
     position: absolute;
-    /* Allow absolute positioning via transform */
     top: 0;
     left: 0;
-    transition: background-image 0.2s;
-    /* smooth grid toggle */
+}
+
+.canvas-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+    /* Larger dots, shifted to center on intersections */
+    background-image: radial-gradient(rgba(0, 210, 255, 0.6) 1.5px, transparent 1.5px);
+    background-size: var(--grid-size, 40px) var(--grid-size, 40px);
+    background-position: -1.5px -1.5px;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.canvas-container.grid-active::after {
+    opacity: 1;
 }
 
 /* Switch UI */
