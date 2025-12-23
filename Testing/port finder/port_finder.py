@@ -24,25 +24,25 @@ class PortCard(QFrame):
         self.port = port
         self.description = description
         self.setObjectName("PortCard")
-        self.setFixedHeight(80)
+        self.setFixedHeight(50)
         
         layout = QHBoxLayout(self)
-        layout.setContentsMargins(20, 10, 20, 10)
+        layout.setContentsMargins(15, 5, 15, 5)
         
         # Port Info
         info_layout = QHBoxLayout()
         port_label = QLabel(f"{port}")
-        port_label.setStyleSheet("font-size: 20px; font-weight: bold; color: #7C4DFF; min-width: 60px;")
+        port_label.setStyleSheet("font-size: 16px; font-weight: bold; color: #7C4DFF; min-width: 50px;")
         
         self.desc_input = QLineEdit(description)
-        self.desc_input.setPlaceholderText("Enter app name...")
+        self.desc_input.setPlaceholderText("App name...")
         self.desc_input.setStyleSheet("""
             QLineEdit {
                 background: transparent;
                 border: none;
                 border-bottom: 1px solid transparent;
                 color: #FFFFFF;
-                font-size: 15px;
+                font-size: 13px;
                 padding: 2px;
             }
             QLineEdit:focus {
@@ -128,15 +128,15 @@ class PortFinderApp(QMainWindow):
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
         main_layout = QVBoxLayout(central_widget)
-        main_layout.setContentsMargins(30, 40, 30, 30)
-        main_layout.setSpacing(25)
+        main_layout.setContentsMargins(20, 25, 20, 20)
+        main_layout.setSpacing(15)
 
         # Header
         header_layout = QVBoxLayout()
         title = QLabel("Port Explorer")
-        title.setStyleSheet("font-size: 32px; font-weight: 800; color: #FFFFFF;")
-        subtitle = QLabel("Manage and discover free ports for your apps")
-        subtitle.setStyleSheet("font-size: 14px; color: #888888;")
+        title.setStyleSheet("font-size: 24px; font-weight: 800; color: #FFFFFF;")
+        subtitle = QLabel("Manage and discover free ports")
+        subtitle.setStyleSheet("font-size: 12px; color: #888888;")
         header_layout.addWidget(title)
         header_layout.addWidget(subtitle)
         main_layout.addLayout(header_layout)
@@ -144,6 +144,7 @@ class PortFinderApp(QMainWindow):
         # Suggestion Section
         suggestion_box = QFrame()
         suggestion_box.setObjectName("SuggestionBox")
+        suggestion_box.setFixedHeight(120)
         
         # Add Shadow
         shadow = QGraphicsDropShadowEffect()
@@ -154,19 +155,20 @@ class PortFinderApp(QMainWindow):
         suggestion_box.setGraphicsEffect(shadow)
         
         sugg_layout = QVBoxLayout(suggestion_box)
-        sugg_layout.setContentsMargins(20, 20, 20, 20)
+        sugg_layout.setContentsMargins(15, 10, 15, 10)
+        sugg_layout.setSpacing(5)
         
-        sugg_header = QLabel("NEXT RECOMMENDED PORT")
-        sugg_header.setStyleSheet("font-size: 10px; font-weight: bold; color: #7C4DFF; letter-spacing: 1px;")
+        sugg_header = QLabel("NEXT RECOMMENDED")
+        sugg_header.setStyleSheet("font-size: 9px; font-weight: bold; color: #7C4DFF; letter-spacing: 1px;")
         
         self.recommended_port_label = QLabel("----")
-        self.recommended_port_label.setStyleSheet("font-size: 48px; font-weight: bold; color: #FFFFFF;")
+        self.recommended_port_label.setStyleSheet("font-size: 32px; font-weight: bold; color: #FFFFFF;")
         
         sugg_btn = QPushButton(" Suggest New Port")
         sugg_btn.setIcon(qta.icon('fa5s.redo-alt', color='white'))
         sugg_btn.setIconSize(QSize(14, 14))
         sugg_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        sugg_btn.setFixedHeight(45)
+        sugg_btn.setFixedHeight(35)
         sugg_btn.setObjectName("PrimaryButton")
         sugg_btn.clicked.connect(self.suggest_port)
         
@@ -183,13 +185,13 @@ class PortFinderApp(QMainWindow):
         
         row1 = QHBoxLayout()
         self.port_input = QLineEdit()
-        self.port_input.setPlaceholderText("Port (e.g. 8080)")
-        self.port_input.setFixedHeight(45)
+        self.port_input.setPlaceholderText("Port")
+        self.port_input.setFixedHeight(35)
         self.port_input.returnPressed.connect(self.add_manual_port)
         
         self.name_input = QLineEdit()
-        self.name_input.setPlaceholderText("App name (optional)")
-        self.name_input.setFixedHeight(45)
+        self.name_input.setPlaceholderText("App Name")
+        self.name_input.setFixedHeight(35)
         self.name_input.returnPressed.connect(self.add_manual_port)
         
         row1.addWidget(self.port_input)
@@ -198,7 +200,7 @@ class PortFinderApp(QMainWindow):
         add_btn = QPushButton(" Add Port")
         add_btn.setIcon(qta.icon('fa5s.plus', color='white'))
         add_btn.setIconSize(QSize(12, 12))
-        add_btn.setFixedHeight(45)
+        add_btn.setFixedHeight(35)
         add_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         add_btn.setObjectName("SecondaryButton")
         add_btn.clicked.connect(self.add_manual_port)
