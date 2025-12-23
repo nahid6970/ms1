@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
         isDrawing: false,
         isPanning: false,
         tool: 'brush', // brush, eraser, line, rect, circle, fill, picker
-        color: '#00d2ff',
+        color: '#000000',
         size: 5,
         startX: 0,
         startY: 0,
