@@ -360,7 +360,6 @@ canvas {
     border: 3px solid transparent;
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     background: #000;
-    group: gallery-item;
     /* purely for reference */
 }
 
@@ -472,4 +471,55 @@ canvas {
         transform: translateX(0) scale(1);
         opacity: 1;
     }
+}
+
+/* Sidebar Toggle */
+#sidebar-toggle {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 100;
+    width: 40px;
+    height: 40px;
+    background: var(--sidebar-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+    backdrop-filter: blur(10px);
+}
+
+#sidebar-toggle:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+}
+
+.sidebar {
+    transition: margin-left 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.3s;
+}
+
+.sidebar.collapsed {
+    margin-left: -280px;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Adjust toggle position when sidebar is open */
+.sidebar:not(.collapsed)+#viewport #sidebar-toggle {
+    left: 20px;
+    /* actually it might be inside sidebar? no, let's put it on top */
+}
+
+/* Wait, if it's outside sidebar it needs to stay visible. */
+.sidebar.collapsed~#sidebar-toggle {
+    left: 20px;
+    opacity: 0.5;
+}
+
+.sidebar.collapsed~#sidebar-toggle:hover {
+    opacity: 1;
 }

@@ -36,6 +36,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeModal = modal.querySelector('.close-modal');
     const galleryGrid = document.getElementById('gallery-grid');
 
+    const sidebar = document.querySelector('.sidebar');
+    const toggleBtn = document.getElementById('sidebar-toggle');
+
+    toggleBtn.addEventListener('click', () => {
+        sidebar.classList.toggle('collapsed');
+        const isCollapsed = sidebar.classList.contains('collapsed');
+        toggleBtn.innerHTML = isCollapsed ? '<i class="fa-solid fa-chevron-right"></i>' : '<i class="fa-solid fa-bars"></i>';
+    });
+
     // --- State ---
     const state = {
         isDrawing: false,
