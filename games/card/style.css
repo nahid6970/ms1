@@ -89,8 +89,9 @@ main {
     flex: 1;
     display: flex;
     flex-direction: column;
-    justify-content: space-around;
+    justify-content: space-between;
     align-items: center;
+    padding: 1rem 0;
 }
 
 .table-area {
@@ -98,7 +99,44 @@ main {
     display: flex;
     flex-direction: column;
     align-items: center;
+    gap: 0.5rem;
+}
+
+#players-container {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
     gap: 1rem;
+    align-items: flex-end;
+}
+
+.player-seat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    border-radius: 20px;
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+    position: relative;
+}
+
+.player-seat.active {
+    background: rgba(0, 212, 255, 0.1);
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
+    transform: translateY(-10px);
+}
+
+.bet-badge {
+    background: var(--accent-gold);
+    color: #000;
+    padding: 2px 8px;
+    border-radius: 5px;
+    font-weight: 800;
+    font-size: 0.8rem;
+    margin-top: 5px;
 }
 
 .hand-label {
@@ -120,22 +158,23 @@ main {
 
 .card-slot {
     display: flex;
-    gap: -40px; /* Overlap cards */
-    min-height: 180px;
+    margin-left: 30px;
+    /* offset for stacking */
+    min-height: 140px;
     justify-content: center;
     perspective: 1000px;
 }
 
 /* Card Styling */
 .card {
-    width: 120px;
-    height: 170px;
+    width: 80px;
+    height: 115px;
     background: var(--card-bg);
-    border-radius: 12px;
+    border-radius: 8px;
     position: relative;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
     color: #1a1a1a;
-    padding: 10px;
+    padding: 6px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -143,6 +182,12 @@ main {
     user-select: none;
     backface-visibility: hidden;
     transform-style: preserve-3d;
+    margin-left: -50px;
+    /* stack cards closer */
+}
+
+.card:first-child {
+    margin-left: 0;
 }
 
 /* Animation for dealing cards */
@@ -151,13 +196,11 @@ main {
 }
 
 .card.flipped {
-    background: repeating-linear-gradient(
-        45deg,
-        #2a4365,
-        #2a4365 10px,
-        #1a365d 10px,
-        #1a365d 20px
-    );
+    background: repeating-linear-gradient(45deg,
+            #2a4365,
+            #2a4365 10px,
+            #1a365d 10px,
+            #1a365d 20px);
     border: 4px solid white;
 }
 
@@ -166,13 +209,13 @@ main {
 }
 
 .card .rank {
-    font-size: 1.5rem;
+    font-size: 1rem;
     font-weight: 800;
     line-height: 1;
 }
 
 .card .suit {
-    font-size: 3rem;
+    font-size: 2rem;
     align-self: center;
 }
 
@@ -227,7 +270,7 @@ footer {
     width: 60px;
     height: 60px;
     border-radius: 50%;
-    border: 4px dashed rgba(255,255,255,0.3);
+    border: 4px dashed rgba(255, 255, 255, 0.3);
     color: white;
     font-weight: 800;
     cursor: pointer;
@@ -243,10 +286,21 @@ footer {
     border-color: white;
 }
 
-.chip-10 { background: #55acee; }
-.chip-50 { background: #34a853; }
-.chip-100 { background: #ea4335; }
-.chip-500 { background: #4285f4; }
+.chip-10 {
+    background: #55acee;
+}
+
+.chip-50 {
+    background: #34a853;
+}
+
+.chip-100 {
+    background: #ea4335;
+}
+
+.chip-500 {
+    background: #4285f4;
+}
 
 .btn {
     padding: 0.8rem 2rem;
@@ -295,7 +349,7 @@ footer {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0,0,0,0.8);
+    background: rgba(0, 0, 0, 0.8);
     backdrop-filter: blur(15px);
     display: flex;
     justify-content: center;
@@ -324,13 +378,25 @@ footer {
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 @keyframes slideUp {
-    from { transform: translateY(50px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
+    from {
+        transform: translateY(50px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }
 
 /* Responsive adjustments */
@@ -339,11 +405,23 @@ footer {
         padding: 1rem;
         border-radius: 0;
     }
+
     .card {
         width: 80px;
         height: 115px;
     }
-    .card .suit { font-size: 2rem; }
-    .card .rank { font-size: 1.2rem; }
-    .chip { width: 45px; height: 45px; font-size: 0.8rem; }
+
+    .card .suit {
+        font-size: 2rem;
+    }
+
+    .card .rank {
+        font-size: 1.2rem;
+    }
+
+    .chip {
+        width: 45px;
+        height: 45px;
+        font-size: 0.8rem;
+    }
 }
