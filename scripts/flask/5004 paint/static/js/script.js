@@ -28,6 +28,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnSave = document.getElementById('btn-save');
     const btnGallery = document.getElementById('btn-gallery');
 
+    // Grid Settings
+    const gridShowToggle = document.getElementById('grid-show');
+    const gridSnapToggle = document.getElementById('grid-snap');
+    const gridSizeInput = document.getElementById('grid-size');
+    const gridSizeVal = document.getElementById('grid-size-val');
+
     // Canvas Container for Transforms
     const canvasContainer = document.querySelector('.canvas-container');
 
@@ -78,7 +84,12 @@ document.addEventListener('DOMContentLoaded', () => {
         reflectType: 'horizontal', // horizontal, vertical, both
 
         // Curve State
-        curvePoints: []
+        curvePoints: [],
+
+        // Grid State
+        gridShow: false,
+        gridSnap: false,
+        gridSize: 40
     };
 
     // Initialize
@@ -349,10 +360,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const viewportMouseX = e.clientX - rect.left;
         const viewportMouseY = e.clientY - rect.top;
 
-        return {
-            x: (viewportMouseX - state.panX) / state.scale,
-            y: (viewportMouseY - state.panY) / state.scale
-        };
+        let x = (viewportMouseX - state.panX) / state.scale;
+        let y = (viewportMouseY - state.panY) / state.scale;
+
+        if (state.gridSnap) {
+            x = Math.round(x / state.gridSize) * state.gridSize;
+            y = Math.round(y / state.gridSize) * state.gridSize;
+        }
+
+        return { x, y };
     }
 
     // --- Input Handling ---
@@ -1105,6 +1121,35 @@ document.addEventListener('DOMContentLoaded', () => {
             ctxOverlay.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
             saveHistory();
         }
+    }
+
+    gridShowToggle.addEventListener('change', (e) => {
+        state.gridShow = e.target.checked;
+        updateGridView();
+    });
+
+    gridSnapToggle.addEventListener('change', (e) => {
+        state.gridSnap = e.target.checked;
+    });
+
+    gridSizeInput.addEventListener('input', (e) => {
+        state.gridSize = parseInt(e.target.value);
+        gridSizeVal.textContent = state.gridSize;
+        updateGridView();
+    });
+
+    function updateGridView() {
+        if (!state.gridShow) {
+            canvasContainer.style.backgroundImage = 'none';
+            return;
+        }
+        const s = state.gridSize;
+        // Draw a simple grid using CSS linear gradients
+        canvasContainer.style.backgroundImage = `
+            linear-gradient(to right, rgba(0, 210, 255, 0.15) 1px, transparent 1px),
+            linear-gradient(to bottom, rgba(0, 210, 255, 0.15) 1px, transparent 1px)
+        `;
+        canvasContainer.style.backgroundSize = `${s}px ${s}px`;
     }
 
     init();
