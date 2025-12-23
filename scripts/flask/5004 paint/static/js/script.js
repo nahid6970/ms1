@@ -178,8 +178,10 @@ document.addEventListener('DOMContentLoaded', () => {
         state.tool = toolName;
 
         toolsBtns.forEach(b => {
-            if (b.id === `tool-${toolName}`) b.classList.add('active');
-            else b.classList.remove('active');
+            if (b.id.startsWith('tool-')) {
+                if (b.id === `tool-${toolName}`) b.classList.add('active');
+                else b.classList.remove('active');
+            }
         });
 
         if (toolName !== 'poly') {
@@ -982,8 +984,8 @@ document.addEventListener('DOMContentLoaded', () => {
             case 'i': setTool('picker'); break;
             case 't': setTool('text'); break;
             case 'p': setTool('poly'); break;
-            case 'm': setTool('mirror'); break;
-            case 'v': setTool('reflect'); break;
+            case 'm': setSymmetry('radial'); break;
+            case 'v': setSymmetry('reflect'); break;
             case 'c': setTool('curve'); break;
         }
     });
