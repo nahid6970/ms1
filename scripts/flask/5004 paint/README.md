@@ -73,4 +73,4 @@ NeoPaint is a modern, high-performance web-based drawing application built with 
 - **Throttled Rendering**: 60+ FPS drawing with intelligent throttling
 - **Compressed History**: JPEG compression reduces memory usage by 60-80%
 - **Async Operations**: Non-blocking history saves and canvas expansions
-- **Optimized Context**: Hardware-accelerated rendering with `desynchronized` mode
+- **Optimized Context**: Hardware-accelerated rendering optimized for compatibility
