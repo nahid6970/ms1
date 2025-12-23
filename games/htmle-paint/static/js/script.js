@@ -363,11 +363,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Actions
     btnClear.addEventListener('click', () => {
-        if (confirm('Are you sure you want to clear the canvas?')) {
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            saveHistory();
-        }
+        // Removed confirm dialog for smoother UX and robustness
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Reset context to ensure state is consistent
+        updateContext();
+        saveHistory();
+        showToast('Canvas cleared!');
     });
 
     btnExpand.addEventListener('click', () => {
