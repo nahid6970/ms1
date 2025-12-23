@@ -71,7 +71,10 @@ document.addEventListener('DOMContentLoaded', () => {
         pendingHistorySave: false,
 
         // Polygon State
-        polyPoints: []
+        polyPoints: [],
+
+        // Mirror State
+        mirrorCount: 4
     };
 
     // Initialize
@@ -152,12 +155,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function setTool(toolName) {
         state.tool = toolName;
+        if (toolName === 'mirror') {
+            const input = prompt("Enter number of mirror folders (e.g. 4, 6, 8, 12):", "4");
+            const val = parseInt(input);
+            if (val && val > 0) {
+                state.mirrorCount = val;
+            } else {
+                if (!state.mirrorCount) state.mirrorCount = 4;
+            }
+        }
+
         toolsBtns.forEach(b => {
             if (b.id === `tool-${toolName}`) b.classList.add('active');
             else b.classList.remove('active');
         });
 
-        // Reset poly state when switching tools
         if (toolName !== 'poly') {
             state.polyPoints = [];
             ctxOverlay.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
@@ -504,6 +516,28 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.stroke();
             ctx.beginPath();
             ctx.moveTo(pos.x, pos.y);
+        } else if (state.tool === 'mirror') {
+            const cx = canvas.width / 2;
+            const cy = canvas.height / 2;
+            const angleStep = (Math.PI * 2) / state.mirrorCount;
+
+            ctx.save();
+            for (let i = 0; i < state.mirrorCount; i++) {
+                ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transform
+                ctx.translate(cx, cy);
+                ctx.rotate(angleStep * i);
+                ctx.translate(-cx, -cy);
+
+                ctx.beginPath();
+                ctx.moveTo(state.startX, state.startY);
+                ctx.lineTo(pos.x, pos.y);
+                ctx.stroke();
+            }
+            ctx.restore();
+
+            // Update last pos
+            state.startX = pos.x;
+            state.startY = pos.y;
         } else {
             // Shapes: Draw to Overlay
             ctxOverlay.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
@@ -539,8 +573,10 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.closePath();
         }
 
-        if (state.tool !== 'picker' && state.tool !== 'fill' && state.tool !== 'text' && state.tool !== 'poly') {
+        if (state.tool !== 'picker' && state.tool !== 'fill' && state.tool !== 'text' && state.tool !== 'poly' && state.tool !== 'mirror') {
             // Defer history saving to avoid blocking the UI
+            setTimeout(() => saveHistory(), 50);
+        } else if (state.tool === 'mirror') {
             setTimeout(() => saveHistory(), 50);
         }
     }
@@ -851,6 +887,7 @@ document.addEventListener('DOMContentLoaded', () => {
             case 'i': setTool('picker'); break;
             case 't': setTool('text'); break;
             case 'p': setTool('poly'); break;
+            case 'm': setTool('mirror'); break;
         }
     });
 
@@ -958,20 +995,6 @@ document.addEventListener('DOMContentLoaded', () => {
             ctxOverlay.fill();
         }
     }
-
-    // Hook into startDrawing
-    const originalStartDrawing = startDrawing; // We can't easily wrap if we replace the whole func, 
-    // but here I'm replacing the function content via the tool. 
-    // Actually I will modify the startDrawing body in the next step or combine it here? 
-    // This tool replaces a block. I should inject addTextPrompt and modifying startDrawing call sites or body.
-    // Wait, the user wants me to edit existing file. The tool is replace_file_content.
-    // I need to add 'case t' to keydown AND add the 'addTextPrompt' function AND update startDrawing.
-    // This replace block targets the bottom keydown listener.
-    // I will add the function definition BEFORE init() or somewhere appropriate.
-    // BUT I also need to update startDrawing.
-    // I can do multiple edits if I use multi_replace.
-    // Let's switch to multi_replace for clarity and safety.
-
 
     init();
 });
