@@ -74,7 +74,8 @@ document.addEventListener('DOMContentLoaded', () => {
         polyPoints: [],
 
         // Mirror State
-        mirrorCount: 4
+        mirrorCount: 4,
+        reflectType: 'horizontal' // horizontal, vertical, both
     };
 
     // Initialize
@@ -163,6 +164,14 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 if (!state.mirrorCount) state.mirrorCount = 4;
             }
+        }
+
+        if (toolName === 'reflect') {
+            const input = prompt("Mirror Type? (H)orizontal, (V)ertical, or (B)oth/Opposite:", "H");
+            const choice = (input || "").toLowerCase();
+            if (choice === 'v' || choice === 'vertical') state.reflectType = 'vertical';
+            else if (choice === 'b' || choice === 'both') state.reflectType = 'both';
+            else state.reflectType = 'horizontal';
         }
 
         toolsBtns.forEach(b => {
@@ -516,6 +525,44 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.stroke();
             ctx.beginPath();
             ctx.moveTo(pos.x, pos.y);
+        } else if (state.tool === 'reflect') {
+            const w = canvas.width;
+            const h = canvas.height;
+
+            // Draw original
+            ctx.beginPath();
+            ctx.moveTo(state.startX, state.startY);
+            ctx.lineTo(pos.x, pos.y);
+            ctx.stroke();
+
+            // Draw reflected
+            ctx.beginPath();
+            let mStartX, mStartY, mPosX, mPosY;
+
+            if (state.reflectType === 'horizontal') {
+                mStartX = w - state.startX;
+                mStartY = state.startY;
+                mPosX = w - pos.x;
+                mPosY = pos.y;
+            } else if (state.reflectType === 'vertical') {
+                mStartX = state.startX;
+                mStartY = h - state.startY;
+                mPosX = pos.x;
+                mPosY = h - pos.y;
+            } else { // both / opposite
+                mStartX = w - state.startX;
+                mStartY = h - state.startY;
+                mPosX = w - pos.x;
+                mPosY = h - pos.y;
+            }
+
+            ctx.moveTo(mStartX, mStartY);
+            ctx.lineTo(mPosX, mPosY);
+            ctx.stroke();
+
+            // Update last pos
+            state.startX = pos.x;
+            state.startY = pos.y;
         } else if (state.tool === 'mirror') {
             const cx = canvas.width / 2;
             const cy = canvas.height / 2;
@@ -573,10 +620,10 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.closePath();
         }
 
-        if (state.tool !== 'picker' && state.tool !== 'fill' && state.tool !== 'text' && state.tool !== 'poly' && state.tool !== 'mirror') {
+        if (state.tool !== 'picker' && state.tool !== 'fill' && state.tool !== 'text' && state.tool !== 'poly' && state.tool !== 'mirror' && state.tool !== 'reflect') {
             // Defer history saving to avoid blocking the UI
             setTimeout(() => saveHistory(), 50);
-        } else if (state.tool === 'mirror') {
+        } else if (state.tool === 'mirror' || state.tool === 'reflect') {
             setTimeout(() => saveHistory(), 50);
         }
     }
@@ -888,6 +935,7 @@ document.addEventListener('DOMContentLoaded', () => {
             case 't': setTool('text'); break;
             case 'p': setTool('poly'); break;
             case 'm': setTool('mirror'); break;
+            case 'v': setTool('reflect'); break;
         }
     });
 
