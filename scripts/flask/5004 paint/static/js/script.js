@@ -75,7 +75,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Mirror State
         mirrorCount: 4,
-        reflectType: 'horizontal' // horizontal, vertical, both
+        reflectType: 'horizontal', // horizontal, vertical, both
+
+        // Curve State
+        curvePoints: []
     };
 
     // Initialize
@@ -181,6 +184,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (toolName !== 'poly') {
             state.polyPoints = [];
+            ctxOverlay.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+        }
+        if (toolName !== 'curve') {
+            state.curvePoints = [];
             ctxOverlay.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
         }
 
@@ -457,6 +464,12 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        if (state.tool === 'curve') {
+            handleCurveClick(pos);
+            state.isDrawing = false;
+            return;
+        }
+
         if (state.tool === 'brush' || state.tool === 'eraser') {
             ctx.beginPath();
             ctx.moveTo(pos.x, pos.y);
@@ -515,6 +528,35 @@ document.addEventListener('DOMContentLoaded', () => {
                     ctxOverlay.fill();
                     ctxOverlay.fillStyle = state.color; // reset
                 }
+            }
+            return;
+        }
+
+        if (state.tool === 'curve') {
+            if (state.curvePoints.length > 0) {
+                ctxOverlay.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+                ctxOverlay.beginPath();
+                const p0 = state.curvePoints[0];
+
+                if (state.curvePoints.length === 1) {
+                    // Preview line towards end point
+                    ctxOverlay.moveTo(p0.x, p0.y);
+                    ctxOverlay.lineTo(pos.x, pos.y);
+                } else if (state.curvePoints.length === 2) {
+                    // Preview quadratic curve using mouse as control point
+                    const p1 = state.curvePoints[1];
+                    ctxOverlay.moveTo(p0.x, p0.y);
+                    ctxOverlay.quadraticCurveTo(pos.x, pos.y, p1.x, p1.y);
+                }
+                ctxOverlay.stroke();
+
+                // Draw helper dots
+                ctxOverlay.fillStyle = state.color;
+                state.curvePoints.forEach(p => {
+                    ctxOverlay.beginPath();
+                    ctxOverlay.arc(p.x, p.y, 4, 0, Math.PI * 2);
+                    ctxOverlay.fill();
+                });
             }
             return;
         }
@@ -620,7 +662,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.closePath();
         }
 
-        if (state.tool !== 'picker' && state.tool !== 'fill' && state.tool !== 'text' && state.tool !== 'poly' && state.tool !== 'mirror' && state.tool !== 'reflect') {
+        if (state.tool !== 'picker' && state.tool !== 'fill' && state.tool !== 'text' && state.tool !== 'poly' && state.tool !== 'mirror' && state.tool !== 'reflect' && state.tool !== 'curve') {
             // Defer history saving to avoid blocking the UI
             setTimeout(() => saveHistory(), 50);
         } else if (state.tool === 'mirror' || state.tool === 'reflect') {
@@ -936,6 +978,7 @@ document.addEventListener('DOMContentLoaded', () => {
             case 'p': setTool('poly'); break;
             case 'm': setTool('mirror'); break;
             case 'v': setTool('reflect'); break;
+            case 'c': setTool('curve'); break;
         }
     });
 
@@ -1041,6 +1084,26 @@ document.addEventListener('DOMContentLoaded', () => {
             ctxOverlay.beginPath();
             ctxOverlay.arc(state.polyPoints[0].x, state.polyPoints[0].y, 8, 0, Math.PI * 2);
             ctxOverlay.fill();
+        }
+    }
+
+    function handleCurveClick(pos) {
+        state.curvePoints.push(pos);
+
+        if (state.curvePoints.length === 3) {
+            // Finalize curve: P0=Start, P1=End, P2=Control
+            const p0 = state.curvePoints[0];
+            const p1 = state.curvePoints[1];
+            const p2 = state.curvePoints[2];
+
+            ctx.beginPath();
+            ctx.moveTo(p0.x, p0.y);
+            ctx.quadraticCurveTo(p2.x, p2.y, p1.x, p1.y);
+            ctx.stroke();
+
+            state.curvePoints = [];
+            ctxOverlay.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+            saveHistory();
         }
     }
 
