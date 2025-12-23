@@ -1,17 +1,17 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- Elements ---
     const canvas = document.getElementById('drawing-canvas');
-    const ctx = canvas.getContext('2d', { 
+    const ctx = canvas.getContext('2d', {
         willReadFrequently: true,
-        alpha: false, // Disable alpha channel for better performance
-        desynchronized: true // Allow async rendering
+        alpha: false // Disable alpha channel for better performance
+        // desynchronized: true removed to fix rendering sync issues
     });
 
     // Overlay Canvas for performance (shapes/preview)
     const overlayCanvas = document.getElementById('overlay-canvas');
     const ctxOverlay = overlayCanvas.getContext('2d', {
-        alpha: true, // Overlay needs transparency
-        desynchronized: true
+        alpha: true // Overlay needs transparency
+        // desynchronized: true removed
     });
 
     const viewport = document.getElementById('viewport');
@@ -183,7 +183,7 @@ document.addEventListener('DOMContentLoaded', () => {
             newHeight += 800;
             expandInfo = "down";
         }
-        
+
         // Check Left/Top (Harder because requires shifting context)
         if (x < buffer && x < 0) {
             const add = 800;
@@ -245,9 +245,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function saveHistory() {
         // Debounce history saving to avoid excessive operations
         if (state.pendingHistorySave) return;
-        
+
         state.pendingHistorySave = true;
-        
+
         // Use requestAnimationFrame to defer the expensive operation
         requestAnimationFrame(() => {
             if (state.historyStep < state.history.length - 1) {
@@ -257,13 +257,13 @@ document.addEventListener('DOMContentLoaded', () => {
             // Only save smaller canvas regions when possible, or compress the data
             const dataUrl = canvas.toDataURL('image/jpeg', 0.8); // Use JPEG with compression
             state.history.push(dataUrl);
-            
+
             if (state.history.length > state.maxHistory) {
                 state.history.shift();
             } else {
                 state.historyStep++;
             }
-            
+
             state.pendingHistorySave = false;
         });
     }
@@ -420,12 +420,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function draw(e) {
         if (!state.isDrawing) return;
-        
+
         // Light throttling for better performance (reduced from 16ms to 8ms for more responsiveness)
         const now = performance.now();
         if (now - state.lastDrawTime < 8) return;
         state.lastDrawTime = now;
-        
+
         const pos = getPos(e);
 
         if (state.tool === 'brush' || state.tool === 'eraser') {
