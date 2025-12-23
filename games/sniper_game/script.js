@@ -11,6 +11,7 @@ const state = {
     mouseY: window.innerHeight / 2,
     recoilY: 0,
     safeHouseHP: 100,
+    playerHP: 100, // New: Player health
     wave: 1,
     enemiesInWave: 1, // Total for current wave
     enemiesSpawned: 0, // Count spawned so far
@@ -29,7 +30,9 @@ const elements = {
     fireMode: document.getElementById('fire-mode'),
     muzzleFlash: document.getElementById('muzzle-flash'),
     feedbackLayer: document.getElementById('feedback-layer'),
-    safeHouseBar: document.getElementById('safe-house-hp-bar') // New Element
+    feedbackLayer: document.getElementById('feedback-layer'),
+    safeHouseBar: document.getElementById('safe-house-hp-bar'),
+    playerHpBar: document.getElementById('player-hp-bar') // New Element
 };
 
 // --- CONFIG ---
@@ -250,9 +253,14 @@ function renderHUD() {
     elements.ammoCurrent.innerText = state.ammo;
     elements.fireMode.innerText = state.fireMode + "-AUTO";
 
-    // HP Bar
+    // HP Bars
     if (elements.safeHouseBar) {
         elements.safeHouseBar.style.width = state.safeHouseHP + '%';
+    }
+    if (elements.playerHpBar) {
+        elements.playerHpBar.style.width = state.playerHP + '%';
+        // Color shift for low HP
+        elements.playerHpBar.style.backgroundColor = state.playerHP < 30 ? '#ff3333' : '#00ffcc';
     }
 }
 
@@ -306,10 +314,7 @@ function updateWorldView() {
 }
 
 // --- TARGET SPAWNING & UPDATE ---
-function getTacticalColor() {
-    const colors = ['#2f3542', '#57606f', '#1e272e', '#4b6584', '#3d3d3d'];
-    return colors[Math.floor(Math.random() * colors.length)];
-}
+
 
 function spawnTarget() {
     // Check removed to allow waves
@@ -345,24 +350,30 @@ function spawnTarget() {
     const speed = baseSpeed + Math.random() * variance;
     el.dataset.speed = speed;
 
-    const gearColor = getTacticalColor();
+    // Sniper Logic
+    const isSniper = Math.random() < 0.20; // 20% Chance for Sniper
+    let glintHTML = '';
+
+    if (isSniper) {
+        el.classList.add('sniper');
+        el.dataset.type = 'sniper';
+        el.dataset.stopPoint = 10 + Math.random() * 50; // Stop between 10% and 60%
+        glintHTML = '<div class="sniper-glint"></div>';
+    }
 
     el.innerHTML = `
-        <div class="t-head" style="background:#d1a3a4">
-            <div class="helmet" style="position:absolute; top:-5px; left:-2px; width:24px; height:12px; background:${gearColor}; border-radius:10px 10px 0 0;"></div>
-        </div>
-        <div class="t-body" style="background:${gearColor}">
-            <div class="vest" style="position:absolute; top:2px; left:2px; right:2px; bottom:10px; background:#111; border-radius:2px;"></div>
-        </div>
-        <div class="t-arm left" style="background:${gearColor}"></div>
-        <div class="t-arm right" style="background:${gearColor}">
+        <div class="t-head"></div>
+        <div class="t-body"></div>
+        <div class="t-arm left"></div>
+        <div class="t-arm right">
             <!-- Gun held by right arm -->
             <div class="t-gun">
                 <div class="enemy-muzzle-flash"></div>
             </div>
+            ${glintHTML}
         </div>
-        <div class="t-leg left" style="background:${gearColor}"></div>
-        <div class="t-leg right" style="background:${gearColor}"></div>
+        <div class="t-leg left"></div>
+        <div class="t-leg right"></div>
     `;
 
     elements.targetsLayer.appendChild(el);
@@ -379,22 +390,45 @@ function updateTargets() {
         let speed = parseFloat(t.dataset.speed);
 
         // Check if consistent range to attack Safe House (at ~85%)
-        if (left >= 75) {
-            // Stop and Shoot
-            if (t.dataset.state !== 'attacking') {
-                t.dataset.state = 'attacking';
-                t.classList.add('attacking'); // Trigger CSS
+        // Check limits
+        const isSniper = t.dataset.type === 'sniper';
+        const attackRange = isSniper ? (parseFloat(t.dataset.stopPoint) || 20) : 75;
 
-                // Stop walking anim
-                t.querySelectorAll('.t-leg').forEach(l => l.style.animation = 'none');
-            }
+        // Check if consistent range to attack
+        if (left >= attackRange) {
 
-            // Fire Interval
-            const lastFire = parseInt(t.dataset.lastFire || 0);
-            const now = Date.now();
-            if (now - lastFire > 1000) { // Fire every 1s
-                enemyFire(t);
-                t.dataset.lastFire = now;
+            if (isSniper) {
+                // Sniper Behavior
+                if (t.dataset.state !== 'aiming') {
+                    t.dataset.state = 'aiming'; // Stop Moving
+                    t.classList.add('aiming'); // Trigger Glint anim
+
+                    // Stop walking anim
+                    t.querySelectorAll('.t-leg').forEach(l => l.style.animation = 'none');
+
+                    // Aiming Timer (3s)
+                    setTimeout(() => {
+                        if (t.dataset.dead !== 'true') sniperFire(t);
+                    }, 3000);
+                }
+            } else {
+                // Normal Unit Behavior
+                // Stop and Shoot
+                if (t.dataset.state !== 'attacking') {
+                    t.dataset.state = 'attacking';
+                    t.classList.add('attacking'); // Trigger CSS
+
+                    // Stop walking anim
+                    t.querySelectorAll('.t-leg').forEach(l => l.style.animation = 'none');
+                }
+
+                // Fire Interval
+                const lastFire = parseInt(t.dataset.lastFire || 0);
+                const now = Date.now();
+                if (now - lastFire > 1000) { // Fire every 1s
+                    enemyFire(t);
+                    t.dataset.lastFire = now;
+                }
             }
         } else {
             // Keep Moving
@@ -404,6 +438,47 @@ function updateTargets() {
             // Walking anim is default in CSS, but if we resume?
             // Currently they never resume.
         }
+    }
+}
+
+function sniperFire(t) {
+    if (t.dataset.dead === 'true') return;
+
+    // SFX/Visuals
+    t.classList.add('firing');
+    setTimeout(() => t.classList.remove('firing'), 100);
+
+    // Huge damage to Player
+    playerHit(50);
+
+    // Reload/Re-aim? 
+    // Usually snipers shoot once then reload/wait.
+    // Let's make them wait 5s before next shot?
+    // Reset glint animation?
+    t.classList.remove('aiming');
+
+    // Force reflow/reset to restart css animation if we want continuous fire
+    void t.offsetWidth;
+
+    setTimeout(() => {
+        if (t.dataset.dead !== 'true') {
+            t.classList.add('aiming');
+            setTimeout(() => sniperFire(t), 3000);
+        }
+    }, 2000); // 2s Cooldown before starting aim again
+}
+
+function playerHit(damage) {
+    state.playerHP -= damage;
+    if (state.playerHP < 0) state.playerHP = 0;
+    renderHUD();
+
+    // Damage Overlay
+    document.body.classList.add('player-hit');
+    setTimeout(() => document.body.classList.remove('player-hit'), 500);
+
+    if (state.playerHP <= 0) {
+        gameOver("YOU WERE KILLED IN ACTION.");
     }
 }
 
@@ -423,8 +498,8 @@ function enemyFire(t) {
     }
 }
 
-function gameOver() {
-    alert("SAFE HOUSE COMPROMISED! MISSION FAILED.");
+function gameOver(msg) {
+    alert(msg || "SAFE HOUSE COMPROMISED! MISSION FAILED.");
     location.reload();
 }
 

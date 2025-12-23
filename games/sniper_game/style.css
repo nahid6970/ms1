@@ -111,7 +111,7 @@ body {
     height: 100px;
     transform-origin: bottom center;
     will-change: transform, left, opacity;
-    filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.8));
+    filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.4));
     pointer-events: auto;
 }
 
@@ -120,30 +120,32 @@ body {
 .t-arm,
 .t-leg {
     position: absolute;
-    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5);
+    background: #fff;
+    box-shadow: none;
 }
 
 .t-head {
-    width: 20px;
-    height: 22px;
-    top: 0;
-    left: 10px;
-    border-radius: 6px;
+    width: 16px;
+    height: 16px;
+    top: 4px;
+    left: 12px;
+    border-radius: 50%;
     z-index: 12;
 }
 
 .t-body {
-    width: 26px;
+    width: 4px;
     height: 38px;
     top: 20px;
-    left: 7px;
-    border-radius: 4px;
+    left: 18px;
+    border-radius: 2px;
     z-index: 11;
 }
 
 /* --- ENEMY WEAPON & POSE --- */
+/* --- ENEMY WEAPON & POSE --- */
 .t-arm {
-    width: 10px;
+    width: 4px;
     height: 32px;
     top: 24px;
     border-radius: 4px;
@@ -152,77 +154,65 @@ body {
 }
 
 .t-arm.left {
-    left: -4px;
+    left: 18px; /* Attached to body center-ish */
+    transform-origin: top center;
     transform: rotate(10deg);
 }
 
 .t-arm.right {
-    right: -4px;
+    right: 18px; /* Attached to body center-ish */
+    transform-origin: top center;
     transform: rotate(-10deg);
 }
 
-/* Hands */
+/* Hands - Removed for stickman */
 .t-arm::after {
-    content: '';
-    position: absolute;
-    bottom: -4px;
-    left: 0;
-    width: 10px;
-    height: 10px;
-    background: #d1a3a4;
-    /* Skin */
-    border-radius: 50%;
+    display: none;
 }
 
 .t-leg {
-    width: 11px;
+    width: 4px;
     height: 44px;
     top: 55px;
     border-radius: 4px;
 }
 
 .t-leg.left {
-    left: 7px;
+    left: 18px;
+    transform-origin: top center;
     transform: rotate(5deg);
     animation: legMoveLeft 0.8s infinite alternate ease-in-out;
 }
 
 .t-leg.right {
-    right: 7px;
+    right: 18px;
+    transform-origin: top center;
     transform: rotate(-5deg);
     animation: legMoveRight 0.8s infinite alternate ease-in-out;
 }
 
-/* Feet */
+/* Feet - Removed for stickman */
 .t-leg::after {
-    content: '';
-    position: absolute;
-    bottom: -2px;
-    left: -2px;
-    width: 16px;
-    height: 8px;
-    background: #111;
-    /* Boots */
-    border-radius: 2px;
+    display: none;
 }
 
 @keyframes legMoveLeft {
     from {
-        transform: rotate(20deg) translateY(-2px);
+        transform: rotate(20deg);
     }
 
     to {
-        transform: rotate(-20deg) translateY(0);
+        transform: rotate(-20deg);
     }
 }
 
 @keyframes legMoveRight {
     from {
-        transform: rotate(-20deg) translateY(0);
+        transform: rotate(-20deg);
     }
 
     to {
-        transform: rotate(20deg) translateY(-2px);
+        transform: rotate(20deg);
     }
 }
 
