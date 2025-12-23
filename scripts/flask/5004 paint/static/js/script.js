@@ -59,7 +59,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Performance optimizations
         lastDrawTime: 0,
-        pendingHistorySave: false
+        pendingHistorySave: false,
+
+        // Polygon State
+        polyPoints: []
     };
 
     // Initialize
@@ -144,6 +147,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (b.id === `tool-${toolName}`) b.classList.add('active');
             else b.classList.remove('active');
         });
+
+        // Reset poly state when switching tools
+        if (toolName !== 'poly') {
+            state.polyPoints = [];
+            ctxOverlay.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+        }
+
         updateContext();
     }
 
@@ -411,6 +421,12 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        if (state.tool === 'poly') {
+            handlePolyClick(pos);
+            state.isDrawing = false; // Poly is click-based, not drag-based
+            return;
+        }
+
         if (state.tool === 'brush' || state.tool === 'eraser') {
             ctx.beginPath();
             ctx.moveTo(pos.x, pos.y);
@@ -433,6 +449,37 @@ document.addEventListener('DOMContentLoaded', () => {
         state.lastDrawTime = now;
 
         const pos = getPos(e);
+
+        if (state.tool === 'poly') {
+            // Draw preview line from last point to current mouse
+            if (state.polyPoints.length > 0) {
+                ctxOverlay.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+
+                // Redraw existing lines
+                ctxOverlay.beginPath();
+                ctxOverlay.moveTo(state.polyPoints[0].x, state.polyPoints[0].y);
+                for (let i = 1; i < state.polyPoints.length; i++) {
+                    ctxOverlay.lineTo(state.polyPoints[i].x, state.polyPoints[i].y);
+                }
+
+                // Draw preview line
+                const last = state.polyPoints[state.polyPoints.length - 1];
+                ctxOverlay.lineTo(pos.x, pos.y);
+                ctxOverlay.stroke();
+
+                // Highlight start point if close
+                const start = state.polyPoints[0];
+                const dist = Math.sqrt(Math.pow(pos.x - start.x, 2) + Math.pow(pos.y - start.y, 2));
+                if (dist < 10) {
+                    ctxOverlay.fillStyle = 'rgba(255, 0, 0, 0.5)';
+                    ctxOverlay.beginPath();
+                    ctxOverlay.arc(start.x, start.y, 10, 0, Math.PI * 2);
+                    ctxOverlay.fill();
+                    ctxOverlay.fillStyle = state.color; // reset
+                }
+            }
+            return;
+        }
 
         if (state.tool === 'brush' || state.tool === 'eraser') {
             // Simple line drawing - keep it working!
@@ -475,7 +522,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.closePath();
         }
 
-        if (state.tool !== 'picker' && state.tool !== 'fill' && state.tool !== 'text') {
+        if (state.tool !== 'picker' && state.tool !== 'fill' && state.tool !== 'text' && state.tool !== 'poly') {
             // Defer history saving to avoid blocking the UI
             setTimeout(() => saveHistory(), 50);
         }
@@ -786,6 +833,7 @@ document.addEventListener('DOMContentLoaded', () => {
             case 'f': setTool('fill'); break;
             case 'i': setTool('picker'); break;
             case 't': setTool('text'); break;
+            case 'p': setTool('poly'); break;
         }
     });
 
@@ -847,6 +895,43 @@ document.addEventListener('DOMContentLoaded', () => {
         input.addEventListener('blur', () => {
             cleanup();
         });
+    }
+
+    function handlePolyClick(pos) {
+        // If clicking near first point (within 10px), close functionality
+        if (state.polyPoints.length > 2) {
+            const start = state.polyPoints[0];
+            const dist = Math.sqrt(Math.pow(pos.x - start.x, 2) + Math.pow(pos.y - start.y, 2));
+            if (dist < 15) {
+                // Close shape
+                ctx.beginPath();
+                ctx.moveTo(state.polyPoints[0].x, state.polyPoints[0].y);
+                for (let i = 1; i < state.polyPoints.length; i++) {
+                    ctx.lineTo(state.polyPoints[i].x, state.polyPoints[i].y);
+                }
+                ctx.closePath();
+                ctx.stroke();
+
+                state.polyPoints = [];
+                ctxOverlay.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+                saveHistory();
+                return;
+            }
+        }
+
+        // Add point
+        state.polyPoints.push(pos);
+
+        // Draw current state on overlay
+        ctxOverlay.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+        ctxOverlay.beginPath();
+        if (state.polyPoints.length > 0) {
+            ctxOverlay.moveTo(state.polyPoints[0].x, state.polyPoints[0].y);
+            for (let i = 1; i < state.polyPoints.length; i++) {
+                ctxOverlay.lineTo(state.polyPoints[i].x, state.polyPoints[i].y);
+            }
+            ctxOverlay.stroke();
+        }
     }
 
     // Hook into startDrawing
