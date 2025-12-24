@@ -538,5 +538,14 @@
     ],
     "Command": "C:\\Users\\nahid\\ms\\ms1\\web_host.py",
     "ExecutableType": "pythonw"
+  },
+  {
+    "name": "Flask - 5004 - Paint",
+    "type": "Command",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5004 paint\\app.py",
+    "ExecutableType": "pythonw"
   }
 ]
