@@ -407,6 +407,27 @@ class GalleryWindow(QMainWindow):
         except Exception as e:
             print(f"Error launching: {e}")
             
+    def wheelEvent(self, event):
+        # Allow default vertical scrolling if shift is pressed? 
+        # But we only have horizontal.
+        # Native QScrollArea wheel event scrolls vertically.
+        # We manually handle it to convert to horizontal + speed.
+        
+        delta = event.angleDelta().y()
+        if delta == 0:
+            delta = event.angleDelta().x()
+            
+        if delta != 0:
+            hbar = self.scroll.horizontalScrollBar()
+            # "Fast" scroll: multiply standard step 
+            # Standard click is often 120. 
+            step = 60 # Amount to scroll per tick
+            multiplier = 3 # Speed multiplier
+            
+            scroll_amount = int(-1 * (delta / 120) * step * multiplier)
+            hbar.setValue(hbar.value() + scroll_amount)
+            event.accept()
+
     # focusOutEvent removed in favor of QTimer check
 
 if __name__ == "__main__":
