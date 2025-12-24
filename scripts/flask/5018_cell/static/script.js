@@ -5747,6 +5747,12 @@ function renderTable() {
                     autoResizeTextarea(textarea);
                     updateCell(rowIndex, colIndex, textarea.value);
                     keepCursorCentered(textarea);
+
+                    // If this cell has markdown, also adjust for preview height
+                    const cell = textarea.closest('td');
+                    if (cell && textarea.classList.contains('has-markdown')) {
+                        adjustCellHeightForMarkdown(cell);
+                    }
                 };
 
                 // Scroll to cursor position when clicking in textarea
@@ -9208,20 +9214,33 @@ function adjustCellHeightForMarkdown(cell) {
     const originalInputDisplay = input.style.display;
     const originalPreviewDisplay = preview.style.display;
 
+    // Clear existing heights to measure natural scrollHeight
+    input.style.minHeight = '';
+    preview.style.minHeight = '';
+    if (input.tagName === 'TEXTAREA') input.style.height = 'auto';
+    preview.style.height = 'auto';
+
     input.style.display = 'block';
     preview.style.display = 'block';
+
+    // Force a reflow to ensure accurate scrollHeight measurement
+    void input.offsetHeight;
+    void preview.offsetHeight;
 
     // Measure heights
     const inputHeight = input.scrollHeight;
     const previewHeight = preview.scrollHeight;
 
-    // Use the larger height
-    const maxHeight = Math.max(inputHeight, previewHeight);
+    // Use the larger height with a healthy buffer (20px) to prevent cutoff
+    // especially for KaTeX and complex formatting
+    const maxHeight = Math.ceil(Math.max(inputHeight, previewHeight)) + 20;
 
-    // Apply to both
+    // Apply to both height and minHeight to ensure stability
     if (input.tagName === 'TEXTAREA') {
-        input.style.minHeight = maxHeight + 'px';
+        input.style.height = maxHeight + 'px';
     }
+    input.style.minHeight = maxHeight + 'px';
+    preview.style.height = maxHeight + 'px';
     preview.style.minHeight = maxHeight + 'px';
 
     // Restore display
@@ -9246,8 +9265,13 @@ renderTable = function () {
     originalRenderTable.apply(this, arguments);
     setTimeout(() => {
         adjustAllMarkdownCells();
-    }, 100);
+    }, 300);
 };
+
+// Add resize listener to handle window scaling
+window.addEventListener('resize', () => {
+    adjustAllMarkdownCells();
+});
 
 // Quick Formatter Functions (F3)
 

@@ -347,24 +347,23 @@ Jane       | 30     | LA
   - `renderTable()` - Must complete before timer is shown
 
 ### Markdown Cell Height Adjustment
-**Purpose:** Ensures cells are sized to fit whichever is larger - the raw markdown text or the rendered preview.
+**Purpose:** Ensures cells are sized to fit whichever is larger - the raw markdown text (edit mode) or the rendered preview. This prevents content from jumping or being cut off when switching between modes.
 
 **Key Function:**
-- `adjustCellHeightForMarkdown(cell)` - Measures and applies max height (~line 7715)
+- `adjustCellHeightForMarkdown(cell)` - Measures and applies max height (~line 9200)
 
 **How it works:**
-1. Gets both input/textarea and markdown preview elements
-2. Temporarily shows both to measure their `scrollHeight`
-3. Uses `Math.max(inputHeight, previewHeight)` to get larger height
-4. Applies that height to both elements via `minHeight`
-5. Ensures cell never cuts off content in either view
+1. Resets existing visibility and height constraints (`minHeight = ''`, `height = 'auto'`) to measure the true "natural" scrollHeight of both the input and the preview.
+2. Temporarily shows both elements to measure their full `scrollHeight`.
+3. Calculates `maxHeight = Math.max(inputHeight, previewHeight) + 5`.
+4. **Buffer (5px):** Adds a small extra padding to ensure the last line of text is never clipped, accounting for minor browser rendering variations.
+5. Applies the final `maxHeight` to both the `height` and `minHeight` of the input and preview.
 
-**Called by:**
-- `adjustAllMarkdownCells()` - Applies to all cells after table render (~line 7745)
+**Automatic Triggers:**
+- `adjustAllMarkdownCells()` - Runs after every table render to set initial balanced heights.
+- **Live Input Adjustment:** Hooked into the `oninput` event. As you type in a markdown-enabled cell, the height recalculates in real-time to expand or shrink as needed, preventing the "hidden text at end" bug.
 
-**Why needed:** Without this, switching between edit mode (raw text) and preview mode could cause content to be cut off if one is taller than the other.
-
-**Multi-line text handling:** Cells with newlines (`\n`) are automatically treated as markdown content (via `checkHasMarkdown()`) to ensure proper height calculation and line break rendering.
+**Why needed:** Without this, switching between edit mode (raw text) and preview mode could cause content to be cut off if one is taller than the other. The 5px buffer specifically resolves issues where fractional line-heights caused the final line of text to be difficult to see.
 
 ### Quick Formatter Enhancements
 **Improvements:**
