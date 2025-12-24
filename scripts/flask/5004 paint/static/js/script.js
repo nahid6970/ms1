@@ -9,10 +9,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Overlay Canvas for performance (shapes/preview)
     const overlayCanvas = document.getElementById('overlay-canvas');
-    const ctxOverlay = overlayCanvas.getContext('2d', {
-        alpha: true // Overlay needs transparency
-        // desynchronized: true removed
-    });
+    const ctxOverlay = overlayCanvas.getContext('2d');
+
+    const guideCanvas = document.getElementById('guide-canvas');
+    const ctxGuide = guideCanvas.getContext('2d');
 
     const viewport = document.getElementById('viewport');
 
@@ -122,6 +122,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function syncOverlay() {
         overlayCanvas.width = canvas.width;
         overlayCanvas.height = canvas.height;
+        guideCanvas.width = canvas.width;
+        guideCanvas.height = canvas.height;
         updateContext(); // Re-apply styles to both contexts
     }
 
@@ -247,7 +249,7 @@ document.addEventListener('DOMContentLoaded', () => {
         symReflectBtn.classList.toggle('active', state.symmetry === 'reflect');
 
         // Refresh guides
-        ctxOverlay.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+        ctxGuide.clearRect(0, 0, guideCanvas.width, guideCanvas.height);
         drawSymmetryGuides();
     }
 
@@ -491,10 +493,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (state.isDrawing || state.tool === 'poly' || state.tool === 'curve' || state.symmetry !== 'none') {
             if (state.isDrawing || state.tool === 'poly' || state.tool === 'curve') {
                 draw(e);
-            } else {
-                // If just moving but symmetry is on, clear and draw guides
-                ctxOverlay.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
             }
+
+            // Guides always live on the dedicated guide layer
+            ctxGuide.clearRect(0, 0, guideCanvas.width, guideCanvas.height);
             drawSymmetryGuides();
         }
 
@@ -630,39 +632,42 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function drawSymmetryGuides() {
-        if (state.symmetry === 'none') return;
+        if (state.symmetry === 'none') {
+            ctxGuide.clearRect(0, 0, guideCanvas.width, guideCanvas.height);
+            return;
+        }
 
         const w = canvas.width;
         const h = canvas.height;
         const cx = w / 2;
         const cy = h / 2;
 
-        ctxOverlay.save();
+        ctxGuide.save();
         // Reset transform to identity since canvas is transformed via CSS
-        ctxOverlay.setTransform(1, 0, 0, 1, 0, 0);
+        ctxGuide.setTransform(1, 0, 0, 1, 0, 0);
 
         // Barely visible dashed guides (light dark)
-        ctxOverlay.strokeStyle = 'rgba(0, 0, 0, 0.1)';
-        ctxOverlay.setLineDash([15, 15]); // Long dashes
-        ctxOverlay.lineWidth = 1 / state.scale;
+        ctxGuide.strokeStyle = 'rgba(0, 0, 0, 0.1)';
+        ctxGuide.setLineDash([15, 15]); // Long dashes
+        ctxGuide.lineWidth = 1 / state.scale;
 
         // Full crosshair
-        ctxOverlay.beginPath();
+        ctxGuide.beginPath();
         // Vertical
-        ctxOverlay.moveTo(cx, 0);
-        ctxOverlay.lineTo(cx, h);
+        ctxGuide.moveTo(cx, 0);
+        ctxGuide.lineTo(cx, h);
         // Horizontal
-        ctxOverlay.moveTo(0, cy);
-        ctxOverlay.lineTo(w, cy);
-        ctxOverlay.stroke();
+        ctxGuide.moveTo(0, cy);
+        ctxGuide.lineTo(w, cy);
+        ctxGuide.stroke();
 
         // Subtle center dot
-        ctxOverlay.fillStyle = 'rgba(0, 0, 0, 0.15)';
-        ctxOverlay.beginPath();
-        ctxOverlay.arc(cx, cy, 4 / state.scale, 0, Math.PI * 2);
-        ctxOverlay.fill();
+        ctxGuide.fillStyle = 'rgba(0, 0, 0, 0.15)';
+        ctxGuide.beginPath();
+        ctxGuide.arc(cx, cy, 4 / state.scale, 0, Math.PI * 2);
+        ctxGuide.fill();
 
-        ctxOverlay.restore();
+        ctxGuide.restore();
     }
 
     function draw(e) {

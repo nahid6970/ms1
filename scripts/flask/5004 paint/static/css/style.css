@@ -386,7 +386,8 @@ canvas {
     display: block;
 }
 
-#overlay-canvas {
+#overlay-canvas,
+#guide-canvas {
     position: absolute;
     top: 0;
     left: 0;
@@ -394,6 +395,11 @@ canvas {
     pointer-events: none;
     /* Let clicks pass through to main canvas */
     z-index: 2;
+}
+
+#guide-canvas {
+    z-index: 3;
+    /* Guide stays on very top */
 }
 
 /* Modal */
