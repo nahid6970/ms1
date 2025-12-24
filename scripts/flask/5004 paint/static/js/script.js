@@ -590,10 +590,12 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (state.tool === 'stamp') {
             ctxOverlay.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
             drawSymmetric(ctxOverlay, (c) => {
-                const w = Math.abs(pos.x - state.startX);
-                const h = Math.abs(pos.y - state.startY);
-                // Draw icon anchored at startX/startY, stretching to match mouse
-                drawStamp(c, state.selectedStamp, state.startX, state.startY, w * 2, h * 2, state.color);
+                const w = pos.x - state.startX;
+                const h = pos.y - state.startY;
+                // Anchor at center of drag area to match rect behavior
+                const cx = state.startX + w / 2;
+                const cy = state.startY + h / 2;
+                drawStamp(c, state.selectedStamp, cx, cy, Math.abs(w), Math.abs(h), state.color);
             });
         } else {
             ctxOverlay.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
