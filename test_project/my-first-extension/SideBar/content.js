@@ -107,7 +107,8 @@
   modalRoot.innerHTML = `
     <div id="qs-modal-overlay">
       <div id="qs-modal-content">
-        <h3>Add New Link</h3>
+        <h3 id="qs-modal-title">Add New Link</h3>
+        <input type="hidden" id="qs-edit-id">
         <input type="text" id="qs-title-input" placeholder="Title (e.g. GitHub)">
         <input type="text" id="qs-url-input" placeholder="URL (https://...)">
         <div class="qs-form-btns">
@@ -116,10 +117,20 @@
         </div>
       </div>
     </div>
+
+    <div id="qs-context-menu">
+      <div class="qs-context-item" id="qs-ctx-edit">Edit</div>
+      <div class="qs-context-item qs-danger" id="qs-ctx-delete">Delete</div>
+    </div>
   `;
 
   const linksList = document.getElementById('qs-links-list');
   const modalOverlay = document.getElementById('qs-modal-overlay');
+  const modalTitle = document.getElementById('qs-modal-title');
+  const editIdInput = document.getElementById('qs-edit-id');
+  const contextMenu = document.getElementById('qs-context-menu');
+  const ctxEdit = document.getElementById('qs-ctx-edit');
+  const ctxDelete = document.getElementById('qs-ctx-delete');
   const addToggle = document.getElementById('qs-add-toggle');
   const sideToggle = document.getElementById('qs-side-toggle');
   const expandToggle = document.getElementById('qs-expand-toggle');
@@ -138,6 +149,8 @@
 
   // Event Listeners
   addToggle.addEventListener('click', () => {
+    modalTitle.textContent = 'Add New Link';
+    editIdInput.value = '';
     modalOverlay.classList.add('visible');
     titleInput.focus();
   });
@@ -151,7 +164,13 @@
   modalOverlay.addEventListener('click', (e) => {
     if (e.target === modalOverlay) {
       modalOverlay.classList.remove('visible');
+      contextMenu.classList.remove('visible');
     }
+  });
+
+  // Close context menu on any click
+  document.addEventListener('click', () => {
+    contextMenu.classList.remove('visible');
   });
 
   sideToggle.addEventListener('click', () => {
@@ -168,24 +187,61 @@
   saveBtn.addEventListener('click', () => {
     const title = titleInput.value.trim();
     let url = urlInput.value.trim();
+    const editId = editIdInput.value;
 
     if (!url) return;
     if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
 
     const domain = new URL(url).hostname;
-    const newLink = {
-      id: Date.now().toString(),
-      title: title || domain,
-      url: url,
-      icon: `https://www.google.com/s2/favicons?domain=${domain}&sz=64`
-    };
 
-    links.push(newLink);
+    if (editId) {
+      // Update existing
+      links = links.map(l => l.id === editId ? {
+        ...l,
+        title: title || domain,
+        url: url,
+        icon: `https://www.google.com/s2/favicons?domain=${domain}&sz=64`
+      } : l);
+    } else {
+      // Add new
+      links.push({
+        id: Date.now().toString(),
+        title: title || domain,
+        url: url,
+        icon: `https://www.google.com/s2/favicons?domain=${domain}&sz=64`
+      });
+    }
+
     chrome.storage.sync.set({ sidebar_links: links });
     renderLinks();
     titleInput.value = '';
     urlInput.value = '';
+    editIdInput.value = '';
     modalOverlay.classList.remove('visible');
+  });
+
+  // Context Menu Actions
+  let currentTargetId = null;
+
+  ctxEdit.addEventListener('click', () => {
+    const link = links.find(l => l.id === currentTargetId);
+    if (link) {
+      modalTitle.textContent = 'Edit Link';
+      editIdInput.value = link.id;
+      titleInput.value = link.title;
+      urlInput.value = link.url;
+      modalOverlay.classList.add('visible');
+    }
+    contextMenu.classList.remove('visible');
+  });
+
+  ctxDelete.addEventListener('click', () => {
+    if (currentTargetId) {
+      links = links.filter(l => l.id !== currentTargetId);
+      chrome.storage.sync.set({ sidebar_links: links });
+      renderLinks();
+    }
+    contextMenu.classList.remove('visible');
   });
 
   function renderLinks() {
@@ -203,17 +259,16 @@
         </div>
         <div class="qs-link-text">${link.title}</div>
         <div class="qs-tooltip">${link.title}</div>
-        <div class="qs-delete-btn" data-id="${link.id}">×</div>
       `;
 
-      const delBtn = item.querySelector('.qs-delete-btn');
-      delBtn.addEventListener('click', (e) => {
+      item.addEventListener('contextmenu', (e) => {
         e.preventDefault();
-        e.stopPropagation();
-        const id = delBtn.getAttribute('data-id');
-        links = links.filter(l => l.id !== id);
-        chrome.storage.sync.set({ sidebar_links: links });
-        renderLinks();
+        currentTargetId = link.id;
+
+        contextMenu.style.top = `${e.clientY}px`;
+        const menuWidth = 100; // Expected width from CSS
+        contextMenu.style.left = isLeft ? `${e.clientX}px` : `${e.clientX - menuWidth}px`;
+        contextMenu.classList.add('visible');
       });
 
       linksList.appendChild(item);

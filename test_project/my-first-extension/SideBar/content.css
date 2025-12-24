@@ -270,25 +270,42 @@ html.qs-shift-right.qs-expanded body {
     display: block;
 }
 
-.qs-delete-btn {
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    width: 18px;
-    height: 18px;
-    background: #f43f5e;
-    color: white;
-    border-radius: 50%;
-    font-size: 10px;
+/* Context Menu */
+#qs-context-menu {
+    position: fixed;
+    background: #1e293b;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 4px;
+    width: 120px;
+    z-index: 2147483647;
     display: none;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    z-index: 2;
+    flex-direction: column;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+    visibility: visible !important;
 }
 
-.qs-link-item:hover .qs-delete-btn {
-    display: flex;
+#qs-context-menu.visible {
+    display: flex !important;
+}
+
+.qs-context-item {
+    padding: 8px 12px;
+    color: #f1f5f9;
+    font-size: 13px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+.qs-context-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: #38bdf8;
+}
+
+.qs-context-item.qs-danger:hover {
+    background: rgba(244, 63, 94, 0.1);
+    color: #f43f5e;
 }
 
 /* Tooltip */
