@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
         isDrawing: false,
         isPanning: false,
         tool: 'brush', // brush, eraser, line, rect, circle, fill, picker
-        brushType: 'marker', // marker, pen, pencil, calligraphy, airbrush
+        brushType: 'marker', // marker, highlighter, pen, pencil, calligraphy, airbrush
         color: '#000000',
         size: 5,
         startX: 0,
@@ -162,6 +162,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 ctx.shadowColor = state.color;
             } else if (state.brushType === 'pencil') {
                 ctx.globalAlpha = 0.5;
+            } else if (state.brushType === 'highlighter') {
+                ctx.globalAlpha = 0.4;
             } else if (state.brushType === 'pen') {
                 ctx.shadowBlur = 0; // Crisp
             }
@@ -248,7 +250,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function setBrushType(type) {
         state.brushType = type;
-        const types = ['marker', 'pen', 'pencil', 'calligraphy', 'airbrush'];
+        const types = ['marker', 'highlighter', 'pen', 'pencil', 'calligraphy', 'airbrush'];
         types.forEach(t => {
             const btn = document.getElementById(`type-${t}`);
             if (btn) btn.classList.toggle('active', t === type);
@@ -256,7 +258,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateContext();
     }
 
-    ['marker', 'pen', 'pencil', 'calligraphy', 'airbrush'].forEach(t => {
+    ['marker', 'highlighter', 'pen', 'pencil', 'calligraphy', 'airbrush'].forEach(t => {
         const btn = document.getElementById(`type-${t}`);
         if (btn) btn.addEventListener('click', () => setBrushType(t));
     });
@@ -555,7 +557,14 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        if (state.tool === 'brush' || state.tool === 'eraser') {
+        if (state.tool === 'brush') {
+            drawSymmetric(ctxOverlay, (c) => {
+                c.beginPath();
+                c.moveTo(pos.x, pos.y);
+                c.lineTo(pos.x, pos.y);
+                c.stroke();
+            });
+        } else if (state.tool === 'eraser') {
             drawSymmetric(ctx, (c) => {
                 c.beginPath();
                 c.moveTo(pos.x, pos.y);
@@ -680,63 +689,64 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        if (state.tool === 'brush' || state.tool === 'eraser') {
+        if (state.tool === 'brush') {
             state.points.push(pos);
             const pts = state.points;
+            ctxOverlay.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
 
-            if (state.brushType === 'marker' && state.tool !== 'eraser') {
-                if (pts.length > 2) {
-                    const p0 = pts[pts.length - 3];
-                    const p1 = pts[pts.length - 2];
-                    const p2 = pts[pts.length - 1];
-                    const mid1 = { x: (p0.x + p1.x) / 2, y: (p0.y + p1.y) / 2 };
-                    const mid2 = { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 };
-
-                    drawSymmetric(ctx, (c) => {
-                        c.beginPath();
-                        c.moveTo(mid1.x, mid1.y);
-                        c.quadraticCurveTo(p1.x, p1.y, mid2.x, mid2.y);
+            drawSymmetric(ctxOverlay, (c) => {
+                c.beginPath();
+                if (state.brushType === 'marker' || state.brushType === 'highlighter') {
+                    if (pts.length > 2) {
+                        c.moveTo(pts[0].x, pts[0].y);
+                        for (let i = 1; i < pts.length - 2; i++) {
+                            const mid = { x: (pts[i].x + pts[i + 1].x) / 2, y: (pts[i].y + pts[i + 1].y) / 2 };
+                            c.quadraticCurveTo(pts[i].x, pts[i].y, mid.x, mid.y);
+                        }
+                        // last segments
+                        const p1 = pts[pts.length - 2];
+                        const p2 = pts[pts.length - 1];
+                        c.quadraticCurveTo(p1.x, p1.y, p2.x, p2.y);
+                    } else if (pts.length === 2) {
+                        c.moveTo(pts[0].x, pts[0].y);
+                        c.lineTo(pts[1].x, pts[1].y);
+                    }
+                    c.stroke();
+                } else if (state.brushType === 'calligraphy') {
+                    const nibSize = state.size;
+                    const angle = -Math.PI / 4;
+                    const nx = Math.cos(angle) * nibSize;
+                    const ny = Math.sin(angle) * nibSize;
+                    for (let i = 1; i < pts.length; i++) {
+                        const pPrev = pts[i - 1];
+                        const pCurr = pts[i];
+                        c.moveTo(pPrev.x - nx, pPrev.y - ny);
+                        c.lineTo(pPrev.x + nx, pPrev.y + ny);
+                        c.lineTo(pCurr.x + nx, pCurr.y + ny);
+                        c.lineTo(pCurr.x - nx, pCurr.y - ny);
+                        c.closePath();
+                        c.fill();
                         c.stroke();
-                    });
+                    }
                 } else {
-                    const last = { x: state.lastX, y: state.lastY };
-                    drawSymmetric(ctx, (c) => {
-                        c.beginPath();
-                        c.moveTo(last.x, last.y);
-                        c.lineTo(pos.x, pos.y);
-                        c.stroke();
-                    });
+                    // Pen, Pencil, and everything else path-based
+                    c.moveTo(pts[0].x, pts[0].y);
+                    for (let i = 1; i < pts.length; i++) {
+                        c.lineTo(pts[i].x, pts[i].y);
+                    }
+                    c.stroke();
                 }
-            } else if (state.brushType === 'calligraphy' && state.tool !== 'eraser') {
-                const last = { x: state.lastX, y: state.lastY };
-                // Fixed-angle chisel nib (45 degrees)
-                const nibSize = state.size;
-                const angle = -Math.PI / 4; // 45 deg tilted nib
-
-                const nx = Math.cos(angle) * nibSize;
-                const ny = Math.sin(angle) * nibSize;
-
-                drawSymmetric(ctx, (c) => {
-                    c.beginPath();
-                    // Connect the previous nib state to the current nib state
-                    c.moveTo(last.x - nx, last.y - ny);
-                    c.lineTo(last.x + nx, last.y + ny);
-                    c.lineTo(pos.x + nx, pos.y + ny);
-                    c.lineTo(pos.x - nx, pos.y - ny);
-                    c.closePath();
-                    c.fill();
-                    // Also stroke the edges slightly to make them "bold"
-                    c.stroke();
-                });
-            } else {
-                const last = { x: state.lastX, y: state.lastY };
-                drawSymmetric(ctx, (c) => {
-                    c.beginPath();
-                    c.moveTo(last.x, last.y);
-                    c.lineTo(pos.x, pos.y);
-                    c.stroke();
-                });
-            }
+            });
+            state.lastX = pos.x;
+            state.lastY = pos.y;
+        } else if (state.tool === 'eraser') {
+            const last = { x: state.lastX, y: state.lastY };
+            drawSymmetric(ctx, (c) => {
+                c.beginPath();
+                c.moveTo(last.x, last.y);
+                c.lineTo(pos.x, pos.y);
+                c.stroke();
+            });
             state.lastX = pos.x;
             state.lastY = pos.y;
         } else {
@@ -763,9 +773,16 @@ document.addEventListener('DOMContentLoaded', () => {
         state.isDrawing = false;
         state.points = [];
 
-        if (['line', 'rect', 'circle'].includes(state.tool)) {
+        if (['line', 'rect', 'circle', 'brush'].includes(state.tool)) {
             // Commit overlay to main
+            // CRITICAL: Reset globalAlpha for the commit, otherwise 
+            // transparency is applied twice (once in overlay, once in drawImage)
+            ctx.save();
+            ctx.globalAlpha = 1.0;
+            ctx.globalCompositeOperation = 'source-over';
             ctx.drawImage(overlayCanvas, 0, 0);
+            ctx.restore();
+
             ctxOverlay.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
         } else {
             ctx.closePath();
