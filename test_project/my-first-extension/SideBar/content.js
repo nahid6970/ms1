@@ -114,6 +114,9 @@
         <div class="qs-input-group">
           <label for="qs-color-input">Tile Color:</label>
           <input type="color" id="qs-color-input" value="#38bdf8">
+          <label class="qs-checkbox-label">
+            <input type="checkbox" id="qs-solid-input"> Solid
+          </label>
         </div>
         <div class="qs-form-btns">
           <button id="qs-save-btn" class="qs-btn-primary">Save Link</button>
@@ -141,6 +144,7 @@
   const titleInput = document.getElementById('qs-title-input');
   const urlInput = document.getElementById('qs-url-input');
   const colorInput = document.getElementById('qs-color-input');
+  const solidInput = document.getElementById('qs-solid-input');
   const saveBtn = document.getElementById('qs-save-btn');
   const cancelBtn = document.getElementById('qs-cancel-btn');
 
@@ -193,6 +197,7 @@
     const title = titleInput.value.trim();
     let url = urlInput.value.trim();
     const color = colorInput.value;
+    const isSolid = solidInput.checked;
     const editId = editIdInput.value;
 
     if (!url) return;
@@ -206,6 +211,7 @@
         title: title || domain,
         url: url,
         color: color,
+        isSolid: isSolid,
         icon: `https://www.google.com/s2/favicons?domain=${domain}&sz=64`
       } : l);
     } else {
@@ -214,6 +220,7 @@
         title: title || domain,
         url: url,
         color: color,
+        isSolid: isSolid,
         icon: `https://www.google.com/s2/favicons?domain=${domain}&sz=64`
       });
     }
@@ -223,6 +230,7 @@
     titleInput.value = '';
     urlInput.value = '';
     colorInput.value = '#38bdf8';
+    solidInput.checked = false;
     editIdInput.value = '';
     modalOverlay.classList.remove('visible');
   });
@@ -238,6 +246,7 @@
       titleInput.value = link.title;
       urlInput.value = link.url;
       colorInput.value = link.color || '#38bdf8';
+      solidInput.checked = link.isSolid || false;
       modalOverlay.classList.add('visible');
     }
     contextMenu.classList.remove('visible');
@@ -262,8 +271,15 @@
       item.title = link.title;
 
       if (link.color) {
-        item.style.setProperty('background', `${link.color}33`, 'important'); // 20% opacity
+        const bg = link.isSolid ? link.color : `${link.color}33`;
+        item.style.setProperty('background', bg, 'important');
         item.style.setProperty('border-color', link.color, 'important');
+
+        if (link.isSolid) {
+          item.classList.add('qs-solid-item');
+        } else {
+          item.classList.remove('qs-solid-item');
+        }
       }
 
       item.innerHTML = `
