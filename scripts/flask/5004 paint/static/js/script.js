@@ -641,8 +641,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Reset transform to identity since canvas is transformed via CSS
         ctxOverlay.setTransform(1, 0, 0, 1, 0, 0);
 
-        // Barely visible dashed guides
-        ctxOverlay.strokeStyle = 'rgba(0, 210, 255, 0.08)';
+        // Barely visible dashed guides (light dark)
+        ctxOverlay.strokeStyle = 'rgba(0, 0, 0, 0.1)';
         ctxOverlay.setLineDash([15, 15]); // Long dashes
         ctxOverlay.lineWidth = 1 / state.scale;
 
@@ -657,7 +657,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ctxOverlay.stroke();
 
         // Subtle center dot
-        ctxOverlay.fillStyle = 'rgba(0, 210, 255, 0.15)';
+        ctxOverlay.fillStyle = 'rgba(0, 0, 0, 0.15)';
         ctxOverlay.beginPath();
         ctxOverlay.arc(cx, cy, 4 / state.scale, 0, Math.PI * 2);
         ctxOverlay.fill();
