@@ -2,10 +2,11 @@ import sys
 import os
 import json
 import subprocess
+import ctypes
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QHBoxLayout, 
-                             QLabel, QScrollArea, QFrame, QGraphicsDropShadowEffect, QSizePolicy)
+                             QLabel, QScrollArea, QFrame, QGraphicsDropShadowEffect, QSizePolicy, QMenu, QAction)
 from PyQt5.QtCore import Qt, QSize, QPoint, QRect, QPropertyAnimation, QEasingCurve, pyqtSignal
-from PyQt5.QtGui import QPixmap, QPainter, QPainterPath, QColor, QFont, QIcon, QBrush, QImage, QPen
+from PyQt5.QtGui import QPixmap, QPainter, QPainterPath, QColor, QFont, QIcon, QBrush, QImage, QPen, QCursor
 
 CONFIG_FILE = os.path.join(os.path.dirname(__file__), "gallery_config.json")
 
@@ -128,9 +129,63 @@ class CardWidget(QWidget):
             border_rect = QRect(pen_width//2, pen_width//2, self.w - pen_width, self.h - pen_width)
             painter.drawRoundedRect(border_rect, radius, radius)
 
+    def contextMenuEvent(self, event):
+        if not self.path or self.is_add_btn: return
+        
+        menu = QMenu(self)
+        menu.setStyleSheet("""
+            QMenu {
+                background-color: #2b2b2b;
+                color: #ffffff;
+                border: 1px solid #555555;
+                font-family: 'Segoe UI';
+                font-size: 10pt;
+            }
+            QMenu::item {
+                padding: 5px 20px;
+            }
+            QMenu::item:selected {
+                background-color: #3d3d3d;
+            }
+        """)
+        
+        edit_action = QAction("Edit with Microsoft Photos", self)
+        edit_action.triggered.connect(self.edit_image)
+        menu.addAction(edit_action)
+        
+        wallpaper_action = QAction("Set as Wallpaper", self)
+        wallpaper_action.triggered.connect(self.set_wallpaper)
+        menu.addAction(wallpaper_action)
+        
+        menu.exec_(event.globalPos())
+
+    def edit_image(self):
+        # Try to open explicitly with Microsoft Photos via protocol handler
+        try:
+            # This opens the image in Microsoft Photos Viewer where edit is one click away
+            subprocess.run(f'start ms-photos:viewer?fileName="{os.path.abspath(self.path)}"', shell=True)
+        except Exception as e:
+            print(f"Error opening photos: {e}")
+            # Fallback to default edit verb
+            try:
+                os.startfile(self.path, 'edit')
+            except:
+                pass
+
+    def set_wallpaper(self):
+        try:
+            full_path = os.path.abspath(self.path)
+            # SPI_SETDESKWALLPAPER = 20
+            # SPIF_UPDATEINIFILE = 0x01
+            # SPIF_SENDCHANGE = 0x02
+            ctypes.windll.user32.SystemParametersInfoW(20, 0, full_path, 3)
+        except Exception as e:
+            print(f"Error setting wallpaper: {e}")
+
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
             self.clicked.emit()
+
 
     def mouseDoubleClickEvent(self, event):
         if event.button() == Qt.LeftButton:
