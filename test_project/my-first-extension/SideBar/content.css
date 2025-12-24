@@ -2,6 +2,10 @@ html {
     transition: margin 0.3s ease, width 0.3s ease;
 }
 
+body {
+    transition: transform 0.3s ease, width 0.3s ease !important;
+}
+
 /* The root container for our injected sidebar */
 #qs-sidebar-root {
     all: initial;

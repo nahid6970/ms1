@@ -15,19 +15,15 @@
     const isHidden = root.classList.contains('qs-hidden');
     const width = isExpanded ? 280 : 60;
 
+    // Use transform on body to move fixed elements too
     if (isHidden) {
-      document.documentElement.style.width = '100%';
-      document.documentElement.style.marginLeft = '0';
-      document.documentElement.style.marginRight = '0';
+      document.body.style.transform = 'none';
+      document.body.style.width = '100%';
     } else {
-      document.documentElement.style.width = `calc(100% - ${width}px)`;
-      if (isLeft) {
-        document.documentElement.style.marginLeft = `${width}px`;
-        document.documentElement.style.marginRight = '0';
-      } else {
-        document.documentElement.style.marginLeft = '0';
-        document.documentElement.style.marginRight = `${width}px`;
-      }
+      const shiftX = isLeft ? width : -width;
+      document.body.style.transform = `translateX(${shiftX}px)`;
+      document.body.style.width = `calc(100% - ${width}px)`;
+      document.body.style.transformOrigin = 'top left';
     }
   }
 
