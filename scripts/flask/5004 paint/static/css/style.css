@@ -36,7 +36,7 @@ html {
     border-right: 1px solid var(--border);
     display: flex;
     flex-direction: column;
-    padding: 20px;
+    padding: 15px 12px;
     z-index: 10;
     box-shadow: 5px 0 30px rgba(0, 0, 0, 0.5);
     flex-shrink: 0;
@@ -45,15 +45,15 @@ html {
 
 
 .tool-section {
-    margin-bottom: 25px;
+    margin-bottom: 18px;
 }
 
 .tool-section label {
     display: block;
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     color: var(--text-muted);
-    letter-spacing: 1.5px;
-    margin-bottom: 12px;
+    letter-spacing: 1.2px;
+    margin-bottom: 8px;
     font-weight: 700;
     text-transform: uppercase;
 }
@@ -61,7 +61,7 @@ html {
 .tools-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
+    gap: 6px;
 }
 
 .tool-btn {
@@ -92,7 +92,7 @@ html {
 }
 
 .control-row {
-    margin-bottom: 15px;
+    margin-bottom: 10px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -175,7 +175,7 @@ input[type="color"] {
 
 .swatches.visible {
     max-height: 200px;
-    margin-bottom: 20px;
+    margin-bottom: 12px;
     opacity: 1;
 }
 

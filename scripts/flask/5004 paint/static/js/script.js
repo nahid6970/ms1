@@ -949,7 +949,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     btnSave.addEventListener('click', () => {
         const dataURL = canvas.toDataURL('image/png');
-        btnSave.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+        btnSave.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
 
         fetch('/save', {
             method: 'POST',
@@ -966,7 +966,7 @@ document.addEventListener('DOMContentLoaded', () => {
             })
             .catch(err => showToast('Error saving: ' + err, 'error'))
             .finally(() => {
-                btnSave.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save';
+                btnSave.innerHTML = '<i class="fa-solid fa-floppy-disk"></i>';
             });
     });
 
