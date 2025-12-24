@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
         isDrawing: false,
         isPanning: false,
         tool: 'brush', // brush, eraser, line, rect, circle, fill, picker
-        brushType: 'marker', // marker, pen, pencil, airbrush
+        brushType: 'marker', // marker, pen, pencil, calligraphy, airbrush
         color: '#000000',
         size: 5,
         startX: 0,
@@ -248,7 +248,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function setBrushType(type) {
         state.brushType = type;
-        const types = ['marker', 'pen', 'pencil', 'airbrush'];
+        const types = ['marker', 'pen', 'pencil', 'calligraphy', 'airbrush'];
         types.forEach(t => {
             const btn = document.getElementById(`type-${t}`);
             if (btn) btn.classList.toggle('active', t === type);
@@ -256,7 +256,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateContext();
     }
 
-    ['marker', 'pen', 'pencil', 'airbrush'].forEach(t => {
+    ['marker', 'pen', 'pencil', 'calligraphy', 'airbrush'].forEach(t => {
         const btn = document.getElementById(`type-${t}`);
         if (btn) btn.addEventListener('click', () => setBrushType(t));
     });
@@ -707,6 +707,27 @@ document.addEventListener('DOMContentLoaded', () => {
                         c.stroke();
                     });
                 }
+            } else if (state.brushType === 'calligraphy' && state.tool !== 'eraser') {
+                const last = { x: state.lastX, y: state.lastY };
+                // Fixed-angle chisel nib (45 degrees)
+                const nibSize = state.size;
+                const angle = -Math.PI / 4; // 45 deg tilted nib
+
+                const nx = Math.cos(angle) * nibSize;
+                const ny = Math.sin(angle) * nibSize;
+
+                drawSymmetric(ctx, (c) => {
+                    c.beginPath();
+                    // Connect the previous nib state to the current nib state
+                    c.moveTo(last.x - nx, last.y - ny);
+                    c.lineTo(last.x + nx, last.y + ny);
+                    c.lineTo(pos.x + nx, pos.y + ny);
+                    c.lineTo(pos.x - nx, pos.y - ny);
+                    c.closePath();
+                    c.fill();
+                    // Also stroke the edges slightly to make them "bold"
+                    c.stroke();
+                });
             } else {
                 const last = { x: state.lastX, y: state.lastY };
                 drawSymmetric(ctx, (c) => {
