@@ -245,6 +245,10 @@ document.addEventListener('DOMContentLoaded', () => {
         // Update UI
         symRadialBtn.classList.toggle('active', state.symmetry === 'radial');
         symReflectBtn.classList.toggle('active', state.symmetry === 'reflect');
+
+        // Refresh guides
+        ctxOverlay.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+        drawSymmetryGuides();
     }
 
     symRadialBtn.addEventListener('click', () => setSymmetry('radial'));
@@ -484,8 +488,14 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        if (state.isDrawing || state.tool === 'poly' || state.tool === 'curve') {
-            draw(e);
+        if (state.isDrawing || state.tool === 'poly' || state.tool === 'curve' || state.symmetry !== 'none') {
+            if (state.isDrawing || state.tool === 'poly' || state.tool === 'curve') {
+                draw(e);
+            } else {
+                // If just moving but symmetry is on, clear and draw guides
+                ctxOverlay.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+            }
+            drawSymmetryGuides();
         }
 
         // Show snap indicator if snapping is on
@@ -617,6 +627,42 @@ document.addEventListener('DOMContentLoaded', () => {
             actionFn(targetCtx);
             targetCtx.restore();
         }
+    }
+
+    function drawSymmetryGuides() {
+        if (state.symmetry === 'none') return;
+
+        const w = canvas.width;
+        const h = canvas.height;
+        const cx = w / 2;
+        const cy = h / 2;
+
+        ctxOverlay.save();
+        // Reset transform to identity since canvas is transformed via CSS
+        ctxOverlay.setTransform(1, 0, 0, 1, 0, 0);
+
+        // Barely visible dashed guides
+        ctxOverlay.strokeStyle = 'rgba(0, 210, 255, 0.08)';
+        ctxOverlay.setLineDash([15, 15]); // Long dashes
+        ctxOverlay.lineWidth = 1 / state.scale;
+
+        // Full crosshair
+        ctxOverlay.beginPath();
+        // Vertical
+        ctxOverlay.moveTo(cx, 0);
+        ctxOverlay.lineTo(cx, h);
+        // Horizontal
+        ctxOverlay.moveTo(0, cy);
+        ctxOverlay.lineTo(w, cy);
+        ctxOverlay.stroke();
+
+        // Subtle center dot
+        ctxOverlay.fillStyle = 'rgba(0, 210, 255, 0.15)';
+        ctxOverlay.beginPath();
+        ctxOverlay.arc(cx, cy, 4 / state.scale, 0, Math.PI * 2);
+        ctxOverlay.fill();
+
+        ctxOverlay.restore();
     }
 
     function draw(e) {
