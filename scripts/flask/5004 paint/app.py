@@ -12,6 +12,8 @@ SETTINGS_FILE = os.path.join(os.path.dirname(__file__), "settings.json")
 if not os.path.exists(SAVE_DIR):
     os.makedirs(SAVE_DIR)
 
+ICONS_FILE = os.path.join(os.path.dirname(__file__), "icons.json")
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -94,6 +96,27 @@ def get_settings():
         return jsonify({})
     except Exception as e:
         return jsonify({})
+
+@app.route('/save_icons', methods=['POST'])
+def save_icons():
+    try:
+        icons = request.json
+        with open(ICONS_FILE, 'w') as f:
+            json.dump(icons, f)
+        return jsonify({"success": True})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
+
+@app.route('/get_icons', methods=['GET'])
+def get_icons():
+    try:
+        if os.path.exists(ICONS_FILE):
+            with open(ICONS_FILE, 'r') as f:
+                icons = json.load(f)
+            return jsonify(icons)
+        return jsonify(["fa-star", "fa-heart", "fa-bolt", "fa-ghost"]) # Defaults
+    except Exception as e:
+        return jsonify([])
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0",debug=True, port=5004)

@@ -79,7 +79,9 @@ document.addEventListener('DOMContentLoaded', () => {
         gridSnap: false,
         gridSize: 40,
         points: [],
-        multiLineCount: 3
+        multiLineCount: 3,
+        stamps: [],
+        selectedStamp: ''
     };
 
     // --- Functions ---
@@ -95,6 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
         generateSwatches();
         centerCanvas();
         loadSettings();
+        loadIcons();
     }
 
     function syncOverlay() {
@@ -215,6 +218,43 @@ document.addEventListener('DOMContentLoaded', () => {
         ctxOverlay.globalAlpha = isEraser ? 1.0 : ctx.globalAlpha;
     }
 
+    function loadIcons() {
+        fetch('/get_icons')
+            .then(res => res.json())
+            .then(icons => {
+                state.stamps = icons;
+                renderStamps();
+            });
+    }
+
+    function saveIcons() {
+        fetch('/save_icons', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(state.stamps)
+        });
+    }
+
+    function renderStamps() {
+        const grid = document.getElementById('stamps-grid');
+        const addBtn = document.getElementById('btn-add-stamp');
+        grid.innerHTML = '';
+        grid.appendChild(addBtn);
+
+        state.stamps.forEach(iconClass => {
+            const btn = document.createElement('button');
+            btn.className = 'tool-btn stamp-btn';
+            if (state.tool === 'stamp' && state.selectedStamp === iconClass) btn.classList.add('active');
+            btn.innerHTML = `<i class="fa-solid ${iconClass}"></i>`;
+            btn.onclick = () => {
+                state.selectedStamp = iconClass;
+                setTool('stamp');
+                renderStamps();
+            };
+            grid.insertBefore(btn, addBtn);
+        });
+    }
+
     function setColor(color) {
         state.color = color;
         colorPicker.value = color;
@@ -229,6 +269,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (b.id.startsWith('tool-')) {
                 b.classList.toggle('active', b.id === `tool-${toolName}`);
             }
+        });
+        document.querySelectorAll('.stamp-btn').forEach(b => {
+            const icon = b.querySelector('i').className.split(' ').find(c => c.startsWith('fa-') && c !== 'fa-solid');
+            b.classList.toggle('active', toolName === 'stamp' && state.selectedStamp === icon);
         });
         if (toolName !== 'poly') {
             state.polyPoints = [];
@@ -398,6 +442,25 @@ document.addEventListener('DOMContentLoaded', () => {
             state.isDrawing = false;
         } else if (state.tool === 'curve') {
             handleCurveClick(pos);
+            state.isDrawing = false;
+        } else if (state.tool === 'stamp') {
+            if (state.selectedStamp) {
+                drawSymmetric(ctx, (c) => {
+                    const iconElement = document.createElement('i');
+                    iconElement.className = `fa-solid ${state.selectedStamp}`;
+                    document.body.appendChild(iconElement);
+                    const content = window.getComputedStyle(iconElement, ':before').content.replace(/"/g, '');
+                    document.body.removeChild(iconElement);
+
+                    const fontSize = state.size * 4;
+                    c.font = `900 ${fontSize}px "Font Awesome 6 Free"`;
+                    c.fillStyle = state.color;
+                    c.textAlign = 'center';
+                    c.textBaseline = 'middle';
+                    c.fillText(content, pos.x, pos.y);
+                });
+                saveHistory();
+            }
             state.isDrawing = false;
         } else if (state.tool === 'brush') {
             drawSymmetric(ctxOverlay, (c) => {
@@ -785,6 +848,20 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
     });
+
+    const btnAddStamp = document.getElementById('btn-add-stamp');
+    btnAddStamp.onclick = () => {
+        const iconClass = prompt("Enter FontAwesome icon class (e.g., fa-star, fa-heart, fa-ghost):", "fa-face-smile");
+        if (iconClass && iconClass.startsWith('fa-')) {
+            if (!state.stamps.includes(iconClass)) {
+                state.stamps.push(iconClass);
+                saveIcons();
+                renderStamps();
+            }
+        } else if (iconClass) {
+            alert("Invalid class. Must start with 'fa-'");
+        }
+    };
 
     brushSizeInput.oninput = (e) => { state.size = e.target.value; sizeValDisplay.textContent = state.size; updateContext(); };
     brushSizeInput.onchange = () => saveSettings();
