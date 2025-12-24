@@ -62,6 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
         isDrawing: false,
         isPanning: false,
         tool: 'brush', // brush, eraser, line, rect, circle, fill, picker
+        brushType: 'marker', // marker, pen, pencil, airbrush
         color: '#000000',
         size: 5,
         startX: 0,
@@ -96,7 +97,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Grid State
         gridShow: false,
         gridSnap: false,
-        gridSize: 40
+        gridSize: 40,
+        points: [] // stores points for smoothing
     };
 
     // Initialize
@@ -147,18 +149,39 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
         ctx.lineWidth = state.size;
-        ctx.strokeStyle = state.tool === 'eraser' ? '#ffffff' : state.color;
-        ctx.fillStyle = state.tool === 'eraser' ? '#ffffff' : state.color;
 
-        // Overlay (always same props, except eraser acts effectively as white brush for preview if needed, 
-        // but typically overlay is for shapes. For eraser trace we might want outline?)
+        // Reset effects
+        ctx.shadowBlur = 0;
+        ctx.globalAlpha = 1.0;
+
+        const isEraser = state.tool === 'eraser';
+
+        if (!isEraser) {
+            if (state.brushType === 'airbrush') {
+                ctx.shadowBlur = state.size;
+                ctx.shadowColor = state.color;
+            } else if (state.brushType === 'pencil') {
+                ctx.globalAlpha = 0.5;
+            } else if (state.brushType === 'pen') {
+                ctx.shadowBlur = 0; // Crisp
+            }
+        }
+
+        ctx.strokeStyle = isEraser ? '#ffffff' : state.color;
+        ctx.fillStyle = isEraser ? '#ffffff' : state.color;
+
+        // Overlay context should match current style 
         ctxOverlay.lineCap = 'round';
         ctxOverlay.lineJoin = 'round';
         ctxOverlay.lineWidth = state.size;
-        ctxOverlay.strokeStyle = state.color; // Eraser doesn't use overlay usually
+        ctxOverlay.strokeStyle = state.color;
         ctxOverlay.fillStyle = state.color;
+        ctxOverlay.shadowBlur = isEraser ? 0 : ctx.shadowBlur;
+        ctxOverlay.shadowColor = isEraser ? 'transparent' : ctx.shadowColor;
+        ctxOverlay.globalAlpha = isEraser ? 1.0 : ctx.globalAlpha;
+    }
 
-        // Update cursor only when needed
+    function updateCursor() {
         const newCursor = state.isPanning ? 'grabbing' : 'crosshair';
         if (viewport.style.cursor !== newCursor) {
             viewport.style.cursor = newCursor;
@@ -222,6 +245,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     symRadialBtn.addEventListener('click', () => setSymmetry('radial'));
     symReflectBtn.addEventListener('click', () => setSymmetry('reflect'));
+
+    function setBrushType(type) {
+        state.brushType = type;
+        const types = ['marker', 'pen', 'pencil', 'airbrush'];
+        types.forEach(t => {
+            const btn = document.getElementById(`type-${t}`);
+            if (btn) btn.classList.toggle('active', t === type);
+        });
+        updateContext();
+    }
+
+    ['marker', 'pen', 'pencil', 'airbrush'].forEach(t => {
+        const btn = document.getElementById(`type-${t}`);
+        if (btn) btn.addEventListener('click', () => setBrushType(t));
+    });
 
     function centerCanvas() {
         const vW = viewport.clientWidth;
@@ -483,6 +521,7 @@ document.addEventListener('DOMContentLoaded', () => {
         state.startY = pos.y;
         state.lastX = pos.x;
         state.lastY = pos.y;
+        state.points = [pos];
 
         // Tools logic
         if (state.tool === 'fill') {
@@ -642,13 +681,41 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (state.tool === 'brush' || state.tool === 'eraser') {
-            const last = { x: state.lastX, y: state.lastY };
-            drawSymmetric(ctx, (c) => {
-                c.beginPath();
-                c.moveTo(last.x, last.y);
-                c.lineTo(pos.x, pos.y);
-                c.stroke();
-            });
+            state.points.push(pos);
+            const pts = state.points;
+
+            if (state.brushType === 'marker' && state.tool !== 'eraser') {
+                if (pts.length > 2) {
+                    const p0 = pts[pts.length - 3];
+                    const p1 = pts[pts.length - 2];
+                    const p2 = pts[pts.length - 1];
+                    const mid1 = { x: (p0.x + p1.x) / 2, y: (p0.y + p1.y) / 2 };
+                    const mid2 = { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 };
+
+                    drawSymmetric(ctx, (c) => {
+                        c.beginPath();
+                        c.moveTo(mid1.x, mid1.y);
+                        c.quadraticCurveTo(p1.x, p1.y, mid2.x, mid2.y);
+                        c.stroke();
+                    });
+                } else {
+                    const last = { x: state.lastX, y: state.lastY };
+                    drawSymmetric(ctx, (c) => {
+                        c.beginPath();
+                        c.moveTo(last.x, last.y);
+                        c.lineTo(pos.x, pos.y);
+                        c.stroke();
+                    });
+                }
+            } else {
+                const last = { x: state.lastX, y: state.lastY };
+                drawSymmetric(ctx, (c) => {
+                    c.beginPath();
+                    c.moveTo(last.x, last.y);
+                    c.lineTo(pos.x, pos.y);
+                    c.stroke();
+                });
+            }
             state.lastX = pos.x;
             state.lastY = pos.y;
         } else {
@@ -673,6 +740,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function stopDrawing() {
         if (!state.isDrawing) return;
         state.isDrawing = false;
+        state.points = [];
 
         if (['line', 'rect', 'circle'].includes(state.tool)) {
             // Commit overlay to main
@@ -797,8 +865,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- UI Events ---
     toolsBtns.forEach(btn => {
         btn.addEventListener('click', (e) => {
-            const t = btn.id.replace('tool-', '');
-            setTool(t);
+            if (btn.id.startsWith('tool-')) {
+                const t = btn.id.replace('tool-', '');
+                setTool(t);
+            }
         });
     });
 
