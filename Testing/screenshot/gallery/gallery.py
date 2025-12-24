@@ -361,7 +361,7 @@ class GalleryWindow(QMainWindow):
 
     def keyPressEvent(self, event):
         if event.modifiers() & Qt.ControlModifier and event.key() == Qt.Key_A:
-            self.add_images_dialog()
+            self.show_add_menu()
             return
             
         if event.modifiers() & Qt.ControlModifier and event.key() == Qt.Key_D:
@@ -383,10 +383,46 @@ class GalleryWindow(QMainWindow):
             path = self.image_paths[self.current_idx]
             self.launch_chrome(path)
             
-    def add_images_dialog(self):
+    def show_add_menu(self):
+        # Prevent main window from closing when menu opens
+        if hasattr(self, 'block_close'):
+            self.block_close = True
+            
+        menu = QMenu(self)
+        menu.setStyleSheet("""
+            QMenu {
+                background-color: #2b2b2b;
+                color: #ffffff;
+                border: 1px solid #555555;
+                font-family: 'Segoe UI';
+                font-size: 10pt;
+            }
+            QMenu::item {
+                padding: 10px 20px;
+            }
+            QMenu::item:selected {
+                background-color: #3d3d3d;
+            }
+        """)
+        
+        file_act = QAction("Add Files...", self)
+        file_act.triggered.connect(self.add_files_dialog)
+        menu.addAction(file_act)
+        
+        folder_act = QAction("Add Folder...", self)
+        folder_act.triggered.connect(self.add_folder_dialog)
+        menu.addAction(folder_act)
+        
+        menu.exec_(QCursor.pos())
+        
+        if hasattr(self, 'block_close'):
+            self.block_close = False
+            self.activateWindow()
+
+    def add_files_dialog(self):
         from PyQt5.QtWidgets import QFileDialog
         self.block_close = True
-        files, _ = QFileDialog.getOpenFileNames(self, "Select Images", "", "Images (*.png *.jpg *.jpeg *.bmp)")
+        files, _ = QFileDialog.getOpenFileNames(self, "Select Images", "", "Images (*.png *.jpg *.jpeg *.bmp *.webp *.gif)")
         self.block_close = False
         self.activateWindow()
         
@@ -397,6 +433,33 @@ class GalleryWindow(QMainWindow):
             self.render_cards()
             # Select first new image
             self.set_index(len(self.cards) - len(new_paths))
+
+    def add_folder_dialog(self):
+        from PyQt5.QtWidgets import QFileDialog
+        self.block_close = True
+        folder = QFileDialog.getExistingDirectory(self, "Select Folder Containing Images")
+        self.block_close = False
+        self.activateWindow()
+        
+        if folder:
+            image_exts = {'.png', '.jpg', '.jpeg', '.bmp', '.webp', '.gif'}
+            new_paths = []
+            try:
+                # Scan top level files in folder
+                for f in os.listdir(folder):
+                    ext = os.path.splitext(f)[1].lower()
+                    if ext in image_exts:
+                        full_path = os.path.join(folder, f).replace("\\", "/")
+                        if full_path not in self.image_paths:
+                            new_paths.append(full_path)
+            except Exception as e:
+                print(f"Error scanning folder: {e}")
+                
+            if new_paths:
+                self.image_paths.extend(new_paths)
+                save_images(self.image_paths)
+                self.render_cards()
+                self.set_index(len(self.cards) - len(new_paths))
 
     def launch_chrome(self, path):
         try:
