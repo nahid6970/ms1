@@ -111,6 +111,10 @@
         <input type="hidden" id="qs-edit-id">
         <input type="text" id="qs-title-input" placeholder="Title (e.g. GitHub)">
         <input type="text" id="qs-url-input" placeholder="URL (https://...)">
+        <div class="qs-input-group">
+          <label for="qs-color-input">Tile Color:</label>
+          <input type="color" id="qs-color-input" value="#38bdf8">
+        </div>
         <div class="qs-form-btns">
           <button id="qs-save-btn" class="qs-btn-primary">Save Link</button>
           <button id="qs-cancel-btn" class="qs-btn-secondary">Cancel</button>
@@ -136,6 +140,7 @@
   const expandToggle = document.getElementById('qs-expand-toggle');
   const titleInput = document.getElementById('qs-title-input');
   const urlInput = document.getElementById('qs-url-input');
+  const colorInput = document.getElementById('qs-color-input');
   const saveBtn = document.getElementById('qs-save-btn');
   const cancelBtn = document.getElementById('qs-cancel-btn');
 
@@ -187,6 +192,7 @@
   saveBtn.addEventListener('click', () => {
     const title = titleInput.value.trim();
     let url = urlInput.value.trim();
+    const color = colorInput.value;
     const editId = editIdInput.value;
 
     if (!url) return;
@@ -195,19 +201,19 @@
     const domain = new URL(url).hostname;
 
     if (editId) {
-      // Update existing
       links = links.map(l => l.id === editId ? {
         ...l,
         title: title || domain,
         url: url,
+        color: color,
         icon: `https://www.google.com/s2/favicons?domain=${domain}&sz=64`
       } : l);
     } else {
-      // Add new
       links.push({
         id: Date.now().toString(),
         title: title || domain,
         url: url,
+        color: color,
         icon: `https://www.google.com/s2/favicons?domain=${domain}&sz=64`
       });
     }
@@ -216,6 +222,7 @@
     renderLinks();
     titleInput.value = '';
     urlInput.value = '';
+    colorInput.value = '#38bdf8';
     editIdInput.value = '';
     modalOverlay.classList.remove('visible');
   });
@@ -230,6 +237,7 @@
       editIdInput.value = link.id;
       titleInput.value = link.title;
       urlInput.value = link.url;
+      colorInput.value = link.color || '#38bdf8';
       modalOverlay.classList.add('visible');
     }
     contextMenu.classList.remove('visible');
@@ -252,6 +260,11 @@
       item.href = link.url;
       item.target = '_blank';
       item.title = link.title;
+
+      if (link.color) {
+        item.style.setProperty('background', `${link.color}33`, 'important'); // 20% opacity
+        item.style.setProperty('border-color', link.color, 'important');
+      }
 
       item.innerHTML = `
         <div class="qs-favicon">

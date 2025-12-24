@@ -154,6 +154,26 @@ html.qs-shift-right.qs-expanded body {
     box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
 }
 
+.qs-input-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    color: #94a3b8;
+    font-size: 14px;
+}
+
+#qs-color-input {
+    width: 44px !important;
+    height: 32px !important;
+    padding: 0 !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    background: transparent !important;
+    cursor: pointer;
+    margin: 0 !important;
+    border-radius: 4px !important;
+}
+
 .qs-btn-secondary {
     flex: 1;
     background: rgba(255, 255, 255, 0.05);
