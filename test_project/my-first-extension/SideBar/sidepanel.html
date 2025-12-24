@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quick Sidebar</title>
+  <link rel="stylesheet" href="sidepanel.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+
+<body>
+  <div class="sidebar-container">
+    <header>
+      <div class="logo-section">
+        <h1>Quick<span>Sidebar</span></h1>
+      </div>
+      <div class="header-actions">
+        <button id="view-toggle" class="icon-btn" title="Toggle View Mode">
+          <svg viewBox="0 0 24 24" width="20" height="20">
+            <path fill="currentColor"
+              d="M16,5V11H21V5M10,11H15V5H10M16,18H21V12H16M10,18H15V12H10M4,18H9V12H4M4,11H9V5H4V11Z" />
+          </svg>
+        </button>
+        <button id="add-btn" class="icon-btn" title="Add New Link">
+          <svg viewBox="0 0 24 24" width="24" height="24">
+            <path fill="currentColor" d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z" />
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <div id="add-form" class="hidden">
+      <div class="form-content">
+        <input type="text" id="link-title" placeholder="Title (e.g. GitHub)">
+        <input type="text" id="link-url" placeholder="URL (https://...)">
+        <div class="form-actions">
+          <button id="save-btn" class="primary-btn">Save Link</button>
+          <button id="cancel-btn" class="secondary-btn">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <main id="links-container" class="links-list">
+      <!-- Links will be injected here -->
+    </main>
+
+    <div class="empty-state" id="empty-state">
+      <div class="empty-icon">🚀</div>
+      <p>No links yet.<br>Click the + to get started!</p>
+    </div>
+  </div>
+  <script src="sidepanel.js"></script>
+</body>
+
+</html>
