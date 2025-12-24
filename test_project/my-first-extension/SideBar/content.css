@@ -1,3 +1,7 @@
+html {
+    transition: margin 0.3s ease, width 0.3s ease;
+}
+
 /* The root container for our injected sidebar */
 #qs-sidebar-root {
     all: initial;

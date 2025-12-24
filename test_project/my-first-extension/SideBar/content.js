@@ -1,22 +1,43 @@
 (function () {
-    // Prevent multiple injections
-    if (document.getElementById('qs-sidebar-root')) return;
+  // Prevent multiple injections
+  if (document.getElementById('qs-sidebar-root')) return;
 
-    let links = [];
-    let isLeft = false;
-    let isExpanded = false;
+  let links = [];
+  let isLeft = false;
+  let isExpanded = false;
 
-    const root = document.createElement('div');
-    root.id = 'qs-sidebar-root';
-    root.className = 'right'; // Default to right
-    document.documentElement.appendChild(root);
+  const root = document.createElement('div');
+  root.id = 'qs-sidebar-root';
+  root.className = 'right'; // Default to right
+  document.documentElement.appendChild(root);
 
-    function updateLayout() {
-        root.className = (isLeft ? 'left' : 'right') + (isExpanded ? ' expanded' : '');
+  function updatePageShift() {
+    const isHidden = root.classList.contains('qs-hidden');
+    const width = isExpanded ? 280 : 60;
+
+    if (isHidden) {
+      document.documentElement.style.width = '100%';
+      document.documentElement.style.marginLeft = '0';
+      document.documentElement.style.marginRight = '0';
+    } else {
+      document.documentElement.style.width = `calc(100% - ${width}px)`;
+      if (isLeft) {
+        document.documentElement.style.marginLeft = `${width}px`;
+        document.documentElement.style.marginRight = '0';
+      } else {
+        document.documentElement.style.marginLeft = '0';
+        document.documentElement.style.marginRight = `${width}px`;
+      }
     }
+  }
 
-    // Initial markup
-    root.innerHTML = `
+  function updateLayout() {
+    root.className = (isLeft ? 'left' : 'right') + (isExpanded ? ' expanded' : '');
+    updatePageShift();
+  }
+
+  // Initial markup
+  root.innerHTML = `
     <div class="qs-header">
       <div class="qs-logo">S</div>
       <div class="qs-actions">
@@ -43,76 +64,76 @@
     <div id="qs-links-list"></div>
   `;
 
-    const linksList = document.getElementById('qs-links-list');
-    const addForm = document.getElementById('qs-add-form');
-    const addToggle = document.getElementById('qs-add-toggle');
-    const sideToggle = document.getElementById('qs-side-toggle');
-    const expandToggle = document.getElementById('qs-expand-toggle');
-    const titleInput = document.getElementById('qs-title-input');
-    const urlInput = document.getElementById('qs-url-input');
-    const saveBtn = document.getElementById('qs-save-btn');
+  const linksList = document.getElementById('qs-links-list');
+  const addForm = document.getElementById('qs-add-form');
+  const addToggle = document.getElementById('qs-add-toggle');
+  const sideToggle = document.getElementById('qs-side-toggle');
+  const expandToggle = document.getElementById('qs-expand-toggle');
+  const titleInput = document.getElementById('qs-title-input');
+  const urlInput = document.getElementById('qs-url-input');
+  const saveBtn = document.getElementById('qs-save-btn');
 
-    // Load state
-    chrome.storage.sync.get(['sidebar_links', 'is_left'], (result) => {
-        if (result.sidebar_links) links = result.sidebar_links;
-        if (result.is_left !== undefined) isLeft = result.is_left;
-        updateLayout();
-        renderLinks();
-    });
+  // Load state
+  chrome.storage.sync.get(['sidebar_links', 'is_left'], (result) => {
+    if (result.sidebar_links) links = result.sidebar_links;
+    if (result.is_left !== undefined) isLeft = result.is_left;
+    updateLayout();
+    renderLinks();
+  });
 
-    // Event Listeners
-    addToggle.addEventListener('click', () => {
-        addForm.classList.toggle('visible');
-        if (addForm.classList.contains('visible') && !isExpanded) {
-            isExpanded = true;
-            updateLayout();
-        }
-    });
+  // Event Listeners
+  addToggle.addEventListener('click', () => {
+    addForm.classList.toggle('visible');
+    if (addForm.classList.contains('visible') && !isExpanded) {
+      isExpanded = true;
+      updateLayout();
+    }
+  });
 
-    sideToggle.addEventListener('click', () => {
-        isLeft = !isLeft;
-        chrome.storage.sync.set({ is_left: isLeft });
-        updateLayout();
-    });
+  sideToggle.addEventListener('click', () => {
+    isLeft = !isLeft;
+    chrome.storage.sync.set({ is_left: isLeft });
+    updateLayout();
+  });
 
-    expandToggle.addEventListener('click', () => {
-        isExpanded = !isExpanded;
-        updateLayout();
-    });
+  expandToggle.addEventListener('click', () => {
+    isExpanded = !isExpanded;
+    updateLayout();
+  });
 
-    saveBtn.addEventListener('click', () => {
-        const title = titleInput.value.trim();
-        let url = urlInput.value.trim();
+  saveBtn.addEventListener('click', () => {
+    const title = titleInput.value.trim();
+    let url = urlInput.value.trim();
 
-        if (!url) return;
-        if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+    if (!url) return;
+    if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
 
-        const domain = new URL(url).hostname;
-        const newLink = {
-            id: Date.now().toString(),
-            title: title || domain,
-            url: url,
-            icon: `https://www.google.com/s2/favicons?domain=${domain}&sz=64`
-        };
+    const domain = new URL(url).hostname;
+    const newLink = {
+      id: Date.now().toString(),
+      title: title || domain,
+      url: url,
+      icon: `https://www.google.com/s2/favicons?domain=${domain}&sz=64`
+    };
 
-        links.push(newLink);
-        chrome.storage.sync.set({ sidebar_links: links });
-        renderLinks();
-        titleInput.value = '';
-        urlInput.value = '';
-        addForm.classList.remove('visible');
-    });
+    links.push(newLink);
+    chrome.storage.sync.set({ sidebar_links: links });
+    renderLinks();
+    titleInput.value = '';
+    urlInput.value = '';
+    addForm.classList.remove('visible');
+  });
 
-    function renderLinks() {
-        linksList.innerHTML = '';
-        links.forEach(link => {
-            const item = document.createElement('a');
-            item.className = 'qs-link-item';
-            item.href = link.url;
-            item.target = '_blank';
-            item.title = link.title;
+  function renderLinks() {
+    linksList.innerHTML = '';
+    links.forEach(link => {
+      const item = document.createElement('a');
+      item.className = 'qs-link-item';
+      item.href = link.url;
+      item.target = '_blank';
+      item.title = link.title;
 
-            item.innerHTML = `
+      item.innerHTML = `
         <div class="qs-favicon">
           <img src="${link.icon}" onerror="this.src='https://www.google.com/s2/favicons?domain=google.com&sz=64'">
         </div>
@@ -121,33 +142,34 @@
         <div class="qs-delete-btn" data-id="${link.id}">×</div>
       `;
 
-            const delBtn = item.querySelector('.qs-delete-btn');
-            delBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                const id = delBtn.getAttribute('data-id');
-                links = links.filter(l => l.id !== id);
-                chrome.storage.sync.set({ sidebar_links: links });
-                renderLinks();
-            });
+      const delBtn = item.querySelector('.qs-delete-btn');
+      delBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const id = delBtn.getAttribute('data-id');
+        links = links.filter(l => l.id !== id);
+        chrome.storage.sync.set({ sidebar_links: links });
+        renderLinks();
+      });
 
-            linksList.appendChild(item);
-        });
-    }
-
-    // Toggle visibility message
-    chrome.runtime.onMessage.addListener((request) => {
-        if (request.action === "toggle_sidebar") {
-            const isHidden = root.classList.contains('qs-hidden');
-            if (isHidden) {
-                root.classList.remove('qs-hidden');
-                root.style.transform = "translateX(0)";
-            } else {
-                root.classList.add('qs-hidden');
-                root.style.transform = isLeft ? "translateX(-110%)" : "translateX(110%)";
-            }
-        }
+      linksList.appendChild(item);
     });
+  }
 
-    console.log("Quick Sidebar Pro: Injected successfully.");
+  // Toggle visibility message
+  chrome.runtime.onMessage.addListener((request) => {
+    if (request.action === "toggle_sidebar") {
+      const isHidden = root.classList.contains('qs-hidden');
+      if (isHidden) {
+        root.classList.remove('qs-hidden');
+        root.style.transform = "translateX(0)";
+      } else {
+        root.classList.add('qs-hidden');
+        root.style.transform = isLeft ? "translateX(-110%)" : "translateX(110%)";
+      }
+      updatePageShift();
+    }
+  });
+
+  console.log("Quick Sidebar Pro: Injected successfully.");
 })();
