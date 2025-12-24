@@ -29,6 +29,7 @@ def save_images(images):
 class CardWidget(QWidget):
     clicked = pyqtSignal()
     double_clicked = pyqtSignal()
+    delete_triggered = pyqtSignal()
 
     def __init__(self, path=None, is_add_btn=False, width=200, height=350, parent=None):
         super().__init__(parent)
@@ -157,6 +158,12 @@ class CardWidget(QWidget):
         wallpaper_action.triggered.connect(self.set_wallpaper)
         menu.addAction(wallpaper_action)
         
+        menu.addSeparator()
+        
+        delete_action = QAction("Delete from Gallery", self)
+        delete_action.triggered.connect(self.delete_triggered.emit)
+        menu.addAction(delete_action)
+        
         menu.exec_(event.globalPos())
 
     def edit_image(self):
@@ -267,11 +274,31 @@ class GalleryWindow(QMainWindow):
             idx = i
             card.clicked.connect(lambda index=idx: self.set_index(index))
             card.double_clicked.connect(lambda p=path: self.launch_chrome(p))
+            card.delete_triggered.connect(lambda p=path: self.delete_image(p))
             self.scroll_layout.addWidget(card)
             self.cards.append(card)
 
+    def delete_image(self, path):
+        if path in self.image_paths:
+            idx = self.image_paths.index(path)
+            self.image_paths.remove(path)
+            save_images(self.image_paths)
+            self.render_cards()
+            
+            # Smart Selection: try to stay at current index or go back one
+            if self.current_idx >= len(self.cards):
+                # We were at the last element which is now gone (or list is shorter)
+                # But self.cards is just rebuilt. So len(self.cards) matches current state.
+                # If we were at 5 and now there are 5 (0-4), we go to 4.
+                self.current_idx = max(0, len(self.cards) - 1)
+            # If we were at 3 and now there are 4 (0-3), 3 is still valid, so we stay.
+            
+            self.set_index(self.current_idx)
+
     def set_index(self, idx):
-        if not self.cards: return
+        if not self.cards: 
+            self.current_idx = -1
+            return
         if idx < 0: idx = 0
         if idx >= len(self.cards): idx = len(self.cards) - 1
         
@@ -279,32 +306,21 @@ class GalleryWindow(QMainWindow):
         self.update_selection()
         
     def update_selection(self):
+        # ... existing code ...
         for i, card in enumerate(self.cards):
             card.set_selected(i == self.current_idx)
             
-        # Scroll logic
         if not self.cards: return
         
         item_width = self.card_w + 20
         target_x = self.current_idx * item_width
         
-        # Center the selected item in the view if possible
-        # viewport_center = self.scroll.viewport().width() / 2
-        # scroll_target = target_x - viewport_center + (self.card_w / 2)
-        
-        # But user didn't want it starting in middle. 
-        # Standard behavior: scroll to keep item in view
-        
         hbar = self.scroll.horizontalScrollBar()
         current_scroll = hbar.value()
         viewport_w = self.scroll.viewport().width()
         
-        # Ensure visible
         card_start = target_x
         card_end = target_x + self.card_w
-        
-        # Simple Logic: If card is overlapping left edge, scroll to it.
-        # If card is overlapping right edge, scroll to it.
         
         target_val = current_scroll
         
@@ -312,16 +328,9 @@ class GalleryWindow(QMainWindow):
             target_val = card_start
         elif card_end > current_scroll + viewport_w:
             target_val = card_end - viewport_w
-        
-        # Also handle "Center focus" style if desired, but user complained about "starting from middle".
-        # "Starting from middle" likely meant the empty padding.
-        # I will enforce centering ONLY if it doesn't create empty space at start? 
-        # For now, let's stick to "ensure visible" minimum scrolling which is less jarring.
-        # Actually for a carousel, centering the active item is nicer.
-        # Let's try centering but clamp to bounds.
-        
-        center_target = target_x - (viewport_w / 2) + (self.card_w / 2)
-        target_val = max(0, min(center_target, hbar.maximum()))
+        else:
+            # If visible, don't auto scroll unless it's way off (user might have scrolled manually)
+            pass
 
         self.anim = QPropertyAnimation(hbar, b"value")
         self.anim.setDuration(300)
@@ -333,6 +342,11 @@ class GalleryWindow(QMainWindow):
     def keyPressEvent(self, event):
         if event.modifiers() & Qt.ControlModifier and event.key() == Qt.Key_A:
             self.add_images_dialog()
+            return
+            
+        if event.modifiers() & Qt.ControlModifier and event.key() == Qt.Key_D:
+            if 0 <= self.current_idx < len(self.image_paths):
+                self.delete_image(self.image_paths[self.current_idx])
             return
 
         if event.key() == Qt.Key_Left:
