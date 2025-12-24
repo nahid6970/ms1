@@ -78,7 +78,8 @@ document.addEventListener('DOMContentLoaded', () => {
         gridShow: false,
         gridSnap: false,
         gridSize: 40,
-        points: []
+        points: [],
+        multiLineCount: 3
     };
 
     // --- Functions ---
@@ -133,7 +134,8 @@ document.addEventListener('DOMContentLoaded', () => {
             tool: state.tool,
             symmetry: state.symmetry,
             mirrorCount: state.mirrorCount,
-            reflectType: state.reflectType
+            reflectType: state.reflectType,
+            multiLineCount: state.multiLineCount
         };
         fetch('/save_settings', {
             method: 'POST',
@@ -161,6 +163,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     state.symmetry = settings.symmetry;
                     state.mirrorCount = settings.mirrorCount || 4;
                     state.reflectType = settings.reflectType || 'horizontal';
+                    state.multiLineCount = settings.multiLineCount || 3;
                 }
 
                 gridShowToggle.checked = state.gridShow;
@@ -189,12 +192,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const isEraser = state.tool === 'eraser';
         if (!isEraser) {
             if (state.brushType === 'airbrush') {
-                ctx.shadowBlur = state.size;
+                ctx.globalAlpha = 0.02; // Removed solid center effect
+                ctx.shadowBlur = state.size * 2; // Increase bloom
                 ctx.shadowColor = state.color;
-            } else if (state.brushType === 'pencil') {
-                ctx.globalAlpha = 0.5; // Increased from 0.2 for better visibility
-                ctx.shadowBlur = 0.5;
-                ctx.shadowColor = state.color;
+            } else if (state.brushType === 'multiLine') {
+                ctx.globalAlpha = 0.8;
+                ctx.lineWidth = 1.5;
             } else if (state.brushType === 'highlighter') {
                 ctx.globalAlpha = 0.4;
             }
@@ -265,7 +268,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function setBrushType(type) {
         state.brushType = type;
-        const types = ['marker', 'highlighter', 'pen', 'pencil', 'calligraphy', 'airbrush'];
+        if (type === 'multiLine') {
+            const input = prompt("How many lines do you want to draw together? (2-10):", state.multiLineCount);
+            const val = parseInt(input);
+            if (val && val >= 2 && val <= 10) state.multiLineCount = val;
+        }
+        const types = ['marker', 'highlighter', 'pen', 'multiLine', 'calligraphy', 'airbrush'];
         types.forEach(t => {
             const btn = document.getElementById(`type-${t}`);
             if (btn) btn.classList.toggle('active', t === type);
@@ -464,20 +472,18 @@ document.addEventListener('DOMContentLoaded', () => {
                         c.moveTo(pts[0].x, pts[0].y);
                         c.lineTo(pts[1].x, pts[1].y);
                     }
-                } else if (state.brushType === 'pencil') {
-                    // Stable sketchy effect: multiple thin lines with fixed offsets
-                    const passes = 3;
-                    for (let j = 0; j < passes; j++) {
-                        c.save();
+                } else if (state.brushType === 'multiLine') {
+                    // Draw multiple parallel lines
+                    const count = state.multiLineCount;
+                    const spacing = state.size; // Space between lines scales with brush size
+                    for (let j = 0; j < count; j++) {
                         c.beginPath();
-                        c.lineWidth = 1; // Pencils are always thin
-                        const offset = (j - 1) * 1.5; // Stable offsets ( -1.5, 0, 1.5 )
+                        const offset = (j - (count - 1) / 2) * spacing;
                         c.moveTo(pts[0].x + offset, pts[0].y + offset);
                         for (let i = 1; i < pts.length; i++) {
                             c.lineTo(pts[i].x + offset, pts[i].y + offset);
                         }
                         c.stroke();
-                        c.restore();
                     }
                 } else if (state.brushType === 'calligraphy') {
                     const nib = state.size;
