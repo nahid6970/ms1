@@ -287,6 +287,42 @@ document.addEventListener('DOMContentLoaded', () => {
         canvasContainer.style.transform = `translate(${state.panX}px, ${state.panY}px) scale(${state.scale})`;
     }
 
+    function checkBoundsAndExpand(x, y) {
+        let newWidth = canvas.width, newHeight = canvas.height;
+        let shiftX = 0, shiftY = 0;
+        const buffer = 300;
+
+        if (x > canvas.width - buffer) newWidth += 800;
+        if (y > canvas.height - buffer) newHeight += 800;
+        if (x < buffer) { newWidth += 800; shiftX = 800; }
+        if (y < buffer) { newHeight += 800; shiftY = 800; }
+
+        if (newWidth !== canvas.width || newHeight !== canvas.height) {
+            resizeCanvas(newWidth, newHeight, shiftX, shiftY);
+            return { shiftX, shiftY };
+        }
+        return { shiftX: 0, shiftY: 0 };
+    }
+
+    function resizeCanvas(w, h, shiftX, shiftY) {
+        const copy = document.createElement('canvas');
+        copy.width = canvas.width; copy.height = canvas.height;
+        copy.getContext('2d').drawImage(canvas, 0, 0);
+
+        canvas.width = w; canvas.height = h;
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, w, h);
+        ctx.drawImage(copy, shiftX, shiftY);
+
+        syncOverlay();
+
+        if (shiftX !== 0 || shiftY !== 0) {
+            state.panX -= shiftX * state.scale;
+            state.panY -= shiftY * state.scale;
+            updateTransform();
+        }
+    }
+
     function saveHistory() {
         if (state.pendingHistorySave) return;
         state.pendingHistorySave = true;
@@ -326,7 +362,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function startDrawing(e) {
-        const pos = getPos(e);
+        let pos = getPos(e);
+        const shift = checkBoundsAndExpand(pos.x, pos.y);
+        if (shift.shiftX || shift.shiftY) {
+            pos.x += shift.shiftX;
+            pos.y += shift.shiftY;
+        }
+
         state.isDrawing = true;
         state.startX = pos.x;
         state.startY = pos.y;
@@ -723,14 +765,37 @@ document.addEventListener('DOMContentLoaded', () => {
         toggleBtn.innerHTML = sidebar.classList.contains('collapsed') ? '<i class="fa-solid fa-chevron-right"></i>' : '<i class="fa-solid fa-bars"></i>';
     };
 
-    toolsBtns.forEach(btn => btn.onclick = () => { if (btn.id.startsWith('tool-')) { setTool(btn.id.replace('tool-', '')); saveSettings(); } });
+    toolsBtns.forEach(btn => {
+        btn.onclick = () => {
+            if (btn.id.startsWith('tool-')) {
+                setTool(btn.id.replace('tool-', ''));
+                saveSettings();
+            } else if (btn.id.startsWith('type-')) {
+                setBrushType(btn.id.replace('type-', ''));
+            }
+        };
+    });
 
     brushSizeInput.oninput = (e) => { state.size = e.target.value; sizeValDisplay.textContent = state.size; updateContext(); };
     brushSizeInput.onchange = () => saveSettings();
 
     colorPicker.oninput = (e) => setColor(e.target.value);
 
-    btnClear.onclick = () => { ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, canvas.width, canvas.height); updateContext(); saveHistory(); };
+    toggleSwatchesBtn.onclick = () => {
+        swatchesContainer.classList.toggle('visible');
+        toggleSwatchesBtn.classList.toggle('active');
+    };
+
+    btnClear.onclick = () => {
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctxOverlay.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+        state.polyPoints = [];
+        state.curvePoints = [];
+        updateContext();
+        saveHistory();
+        showToast('Canvas cleared!');
+    };
     btnSave.onclick = () => {
         btnSave.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
         fetch('/save', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ image: canvas.toDataURL() }) })
