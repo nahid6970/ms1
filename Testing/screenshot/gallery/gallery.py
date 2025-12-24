@@ -167,8 +167,12 @@ class GalleryWindow(QMainWindow):
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
         
-        # Background Strip (Black)
-        self.central_widget.setStyleSheet("background-color: #000000; border-radius: 15px;")
+        # Background Strip (Gradient + Transparency + Border)
+        self.central_widget.setStyleSheet("""
+            background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 rgba(45, 45, 45, 230), stop:1 rgba(15, 15, 15, 240));
+            border: 1px solid rgba(150, 150, 150, 100);
+            border-radius: 15px;
+        """)
         
         self.layout_main = QHBoxLayout(self.central_widget)
         self.layout_main.setContentsMargins(20, 0, 20, 0)
