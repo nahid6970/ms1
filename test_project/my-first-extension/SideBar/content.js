@@ -15,15 +15,22 @@
     const isHidden = root.classList.contains('qs-hidden');
     const width = isExpanded ? 280 : 60;
 
-    // Use transform on body to move fixed elements too
     if (isHidden) {
       document.body.style.transform = 'none';
       document.body.style.width = '100%';
+      document.documentElement.style.overflowX = 'auto';
     } else {
-      const shiftX = isLeft ? width : -width;
-      document.body.style.transform = `translateX(${shiftX}px)`;
+      document.documentElement.style.overflowX = 'hidden'; // Prevent scrollbars during shift
       document.body.style.width = `calc(100% - ${width}px)`;
       document.body.style.transformOrigin = 'top left';
+
+      if (isLeft) {
+        // Space on left: Shift body right
+        document.body.style.transform = `translateX(${width}px)`;
+      } else {
+        // Space on right: Just shrink width, no translation needed
+        document.body.style.transform = 'none';
+      }
     }
   }
 
