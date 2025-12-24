@@ -256,7 +256,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function drawStamp(c, iconClass, x, y, size, color) {
+    function drawStamp(c, iconClass, x, y, width, height, color) {
         let content = state.unicodeCache[iconClass];
         if (!content) {
             const i = document.createElement('i');
@@ -267,12 +267,18 @@ document.addEventListener('DOMContentLoaded', () => {
             state.unicodeCache[iconClass] = content;
         }
 
-        const fontSize = size * 4;
-        c.font = `900 ${fontSize}px "Font Awesome 6 Free"`;
+        c.save();
+        c.translate(x, y);
+        // Base font size is 100, then we scale it
+        const baseSize = 100;
+        c.scale(width / baseSize, height / baseSize);
+
+        c.font = `900 ${baseSize}px "Font Awesome 6 Free"`;
         c.fillStyle = color;
         c.textAlign = 'center';
         c.textBaseline = 'middle';
-        c.fillText(content, x, y);
+        c.fillText(content, 0, 0);
+        c.restore();
     }
 
     function setColor(color) {
@@ -584,11 +590,10 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (state.tool === 'stamp') {
             ctxOverlay.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
             drawSymmetric(ctxOverlay, (c) => {
-                // Calculate size based on distance from start point
-                const dist = Math.hypot(pos.x - state.startX, pos.y - state.startY);
-                // Use distance as size, with a small minimum to keep it visible
-                const dynamicSize = Math.max(2, dist / 2);
-                drawStamp(c, state.selectedStamp, state.startX, state.startY, dynamicSize, state.color);
+                const w = Math.abs(pos.x - state.startX);
+                const h = Math.abs(pos.y - state.startY);
+                // Draw icon anchored at startX/startY, stretching to match mouse
+                drawStamp(c, state.selectedStamp, state.startX, state.startY, w * 2, h * 2, state.color);
             });
         } else {
             ctxOverlay.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
@@ -600,8 +605,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else if (state.tool === 'rect') {
                     c.strokeRect(state.startX, state.startY, pos.x - state.startX, pos.y - state.startY);
                 } else if (state.tool === 'circle') {
-                    const r = Math.sqrt(Math.pow(pos.x - state.startX, 2) + Math.pow(pos.y - state.startY, 2));
-                    c.arc(state.startX, state.startY, r, 0, 2 * Math.PI);
+                    const cx = (state.startX + pos.x) / 2;
+                    const cy = (state.startY + pos.y) / 2;
+                    const rx = Math.abs(pos.x - state.startX) / 2;
+                    const ry = Math.abs(pos.y - state.startY) / 2;
+                    c.ellipse(cx, cy, rx, ry, 0, 0, 2 * Math.PI);
                 }
                 c.stroke();
             });
