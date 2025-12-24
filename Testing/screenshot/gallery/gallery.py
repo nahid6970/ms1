@@ -1,11 +1,12 @@
-import tkinter as tk
-from tkinter import messagebox, filedialog
-from PIL import Image, ImageTk
+import sys
 import os
 import json
 import subprocess
+from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QHBoxLayout, 
+                             QLabel, QScrollArea, QFrame, QGraphicsDropShadowEffect, QSizePolicy)
+from PyQt5.QtCore import Qt, QSize, QPoint, QRect, QPropertyAnimation, QEasingCurve, pyqtSignal
+from PyQt5.QtGui import QPixmap, QPainter, QPainterPath, QColor, QFont, QIcon, QBrush, QImage, QPen
 
-# Config file path
 CONFIG_FILE = os.path.join(os.path.dirname(__file__), "gallery_config.json")
 
 def load_images():
@@ -22,219 +23,304 @@ def save_images(images):
         with open(CONFIG_FILE, 'w') as f:
             json.dump(images, f, indent=4)
     except Exception as e:
-        messagebox.showerror("Error", f"Could not save config: {e}")
+        print(f"Error saving config: {e}")
 
-class ImageGallery:
-    def __init__(self, image_paths):
-        self.root = tk.Tk()
-        self.root.overrideredirect(True)
-        self.root.attributes('-topmost', True)
-        self.image_paths = [p for p in image_paths if os.path.exists(p)]
-        self.current_idx = 0 if self.image_paths else -1
-        self.is_dialog_open = False
-        
-        # Cache for images to prevent lagginess
-        self.photo_cache = {}
-        
-        # Colors & Theme
-        self.bg_color = "#000000"
-        self.accent_color = "#00ffff"
-        
-        # Fonts
-        self.font_name = "JetBrains Mono"
-        self.font_icons = (self.font_name, 32)
-        self.font_small = (self.font_name, 9)
+class CardWidget(QWidget):
+    clicked = pyqtSignal()
+    double_clicked = pyqtSignal()
 
-        self.root.config(bg=self.bg_color)
+    def __init__(self, path=None, is_add_btn=False, width=200, height=350, parent=None):
+        super().__init__(parent)
+        self.path = path
+        self.is_add_btn = is_add_btn
+        self.w = width
+        self.h = height
+        self.is_selected = False
+        self.setFixedSize(self.w, self.h)
+        self.setCursor(Qt.PointingHandCursor)
+        
+        # Cache image if it's a file
+        self.pixmap = None
+        if not self.is_add_btn and self.path and os.path.exists(self.path):
+            self.load_image()
+
+    def load_image(self):
+        # Load and crop/resize to fill
+        img = QImage(self.path)
+        if img.isNull(): return
+        
+        # Calculate aspect ratios to crop center
+        target_ratio = self.w / self.h
+        img_ratio = img.width() / img.height()
+        
+        if img_ratio > target_ratio:
+            # Image is wider than target
+            new_h = self.h
+            new_w = int(new_h * img_ratio)
+        else:
+            # Image is taller/same
+            new_w = self.w
+            new_h = int(new_w / img_ratio)
+            
+        scaled = img.scaled(new_w, new_h, Qt.KeepAspectRatioByExpanding, Qt.SmoothTransformation)
+        
+        # Center crop
+        x = (scaled.width() - self.w) // 2
+        y = (scaled.height() - self.h) // 2
+        self.pixmap = QPixmap.fromImage(scaled.copy(x, y, self.w, self.h))
+
+    def set_selected(self, selected):
+        if self.is_selected != selected:
+            self.is_selected = selected
+            self.update()
+
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.Antialiasing)
+        
+        # Rounded Rect Path
+        path = QPainterPath()
+        radius = 20
+        rect = QRect(0, 0, self.w, self.h)
+        path.addRoundedRect(0, 0, self.w, self.h, radius, radius)
+        
+        # Clip
+        painter.setClipPath(path)
+        
+        if self.is_add_btn:
+            # Draw Add Button Background
+            painter.fillRect(rect, QColor("#151515"))
+            
+            # Draw + Symbol
+            painter.setPen(Qt.NoPen)
+            painter.setBrush(QColor("#00ffff")) # Cyan Accent
+            
+            # Plus dims
+            pw, ph = 6, 40
+            cx, cy = self.w // 2, self.h // 2
+            painter.drawRect(cx - pw//2, cy - ph//2, pw, ph) # Vert
+            painter.drawRect(cx - ph//2, cy - pw//2, ph, pw) # Horz
+            
+            # Text
+            painter.setPen(QColor("#888888"))
+            font = QFont("Segoe UI", 10, QFont.Bold)
+            painter.setFont(font)
+            text_rect = QRect(0, cy + 30, self.w, 30)
+            painter.drawText(text_rect, Qt.AlignCenter, "ADD IMAGE")
+            
+        else:
+            if self.pixmap:
+                painter.drawPixmap(0, 0, self.pixmap)
+            else:
+                painter.fillRect(rect, QColor("#220000"))
+                painter.setPen(QColor("#ff5555"))
+                painter.drawText(rect, Qt.AlignCenter, "ERROR")
+
+        # Draw Border if selected (Overlay)
+        painter.setClipping(False) # Disable clip to draw border 'on top' cleanly
+        
+        if self.is_selected:
+            painter.setBrush(Qt.NoBrush)
+            pen = QColor("#ffffff") # White border for selection
+            pen_width = 4
+            painter.setPen(QPen(pen, pen_width))
+            # Adjust rect for border width
+            border_rect = QRect(pen_width//2, pen_width//2, self.w - pen_width, self.h - pen_width)
+            painter.drawRoundedRect(border_rect, radius, radius)
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self.clicked.emit()
+
+    def mouseDoubleClickEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self.double_clicked.emit()
+
+class GalleryWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.image_paths = load_images()
+        self.cards = []
+        self.current_idx = 0 # 0 is Add Button
+        self.is_loading = False
+
+        # Window Setup
+        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.Tool)
+        self.setAttribute(Qt.WA_TranslucentBackground)
         
         # Dimensions
-        sw = self.root.winfo_screenwidth()
-        sh = self.root.winfo_screenheight()
+        screen = QApplication.primaryScreen().geometry()
+        self.sw, self.sh = screen.width(), screen.height()
         
-        # Reduced size
-        self.bar_h = int(sh * 0.35) 
-        self.win_w = int(sw * 0.9) # 90% width
-        self.card_w = int(self.bar_h * 0.55) 
-        self.card_h = int(self.bar_h * 0.8)
+        target_h = int(self.sh * 0.45)
+        # Reduced width to leave gaps on sides
+        self.win_w = int(self.sw * 0.94) 
+        self.win_h = target_h
         
-        # Center the window
-        self.root.geometry(f"{self.win_w}x{self.bar_h}+{int((sw-self.win_w)/2)}+{int((sh-self.bar_h)/2)}")
-
-        # Main Container
-        self.container = tk.Frame(self.root, bg=self.bg_color)
-        self.container.pack(fill="both", expand=True)
-
-        self.canvas = tk.Canvas(self.container, bg=self.bg_color, highlightthickness=0)
-        self.canvas.pack(fill="both", expand=True, padx=40)
+        self.setGeometry((self.sw - self.win_w) // 2, (self.sh - self.win_h) // 2, self.win_w, self.win_h)
         
-        self.inner_frame = tk.Frame(self.canvas, bg=self.bg_color)
-        self.inner_id = self.canvas.create_window((self.win_w/2, self.bar_h/2), window=self.inner_frame, anchor="center")
-
-        # Bindings
-        self.canvas.bind_all("<MouseWheel>", self.on_mousewheel)
-        self.root.bind("<Left>", lambda e: self.prev_image())
-        self.root.bind("<Right>", lambda e: self.next_image())
-        self.root.bind("<Escape>", lambda e: self.root.destroy())
-        self.root.bind("<FocusOut>", self.on_focus_out)
+        # Card Dims (Phone Ratio 9:16)
+        self.card_h = int(target_h * 0.75)
+        self.card_w = int(self.card_h * (9/16))
+        
+        # Main Layout
+        self.central_widget = QWidget()
+        self.setCentralWidget(self.central_widget)
+        
+        # Background Strip (Black)
+        self.central_widget.setStyleSheet("background-color: #000000; border-radius: 15px;")
+        
+        self.layout_main = QHBoxLayout(self.central_widget)
+        self.layout_main.setContentsMargins(20, 0, 20, 0)
+        self.layout_main.setAlignment(Qt.AlignCenter)
+        
+        # Scroll Area
+        self.scroll = QScrollArea()
+        self.scroll.setWidgetResizable(True)
+        self.scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.scroll.setStyleSheet("background: transparent; border: none;")
+        
+        self.scroll_content = QWidget()
+        self.scroll_content.setStyleSheet("background: transparent;")
+        self.scroll_layout = QHBoxLayout(self.scroll_content)
+        # Removed massive centering padding, just normal padding
+        self.scroll_layout.setContentsMargins(0, 0, 0, 0)
+        self.scroll_layout.setSpacing(20)
+        self.scroll_layout.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+        
+        self.scroll.setWidget(self.scroll_content)
+        self.layout_main.addWidget(self.scroll)
         
         self.render_cards()
-        self.root.after(100, self.force_focus)
-
-    def get_cached_image(self, path):
-        if path in self.photo_cache:
-            return self.photo_cache[path]
+        self.update_selection()
         
-        try:
-            img = Image.open(path)
-            # Center crop logic
-            t_w, t_h = self.card_w, self.card_h
-            img_ratio = img.width / img.height
-            target_ratio = t_w / t_h
-            
-            if img_ratio > target_ratio:
-                new_h = t_h
-                new_w = int(new_h * img_ratio)
-                img = img.resize((new_w, new_h), Image.Resampling.LANCZOS)
-                left = (new_w - t_w) / 2
-                img = img.crop((left, 0, left + t_w, t_h))
-            else:
-                new_w = t_w
-                new_h = int(new_w / img_ratio)
-                img = img.resize((new_w, new_h), Image.Resampling.LANCZOS)
-                top = (new_h - t_h) / 2
-                img = img.crop((0, top, t_w, top + t_h))
-
-            tk_img = ImageTk.PhotoImage(img)
-            self.photo_cache[path] = tk_img
-            return tk_img
-        except:
-            return None
-
     def render_cards(self):
-        # We only destroy if the number of items changed
-        # For performance, we'll keep it simple but optimized with caching
-        for widget in self.inner_frame.winfo_children():
-            widget.destroy()
-
-        # Add Card
-        self.create_add_card()
-
+        # Clear existing
+        for i in reversed(range(self.scroll_layout.count())): 
+            self.scroll_layout.itemAt(i).widget().setParent(None)
+        
+        self.cards = []
+        
         # Image Cards
         for i, path in enumerate(self.image_paths):
-            self.create_image_card(path, i)
+            card = CardWidget(path=path, width=self.card_w, height=self.card_h)
+            idx = i
+            card.clicked.connect(lambda index=idx: self.set_index(index))
+            card.double_clicked.connect(lambda p=path: self.launch_chrome(p))
+            self.scroll_layout.addWidget(card)
+            self.cards.append(card)
 
-        self.inner_frame.update_idletasks()
+    def set_index(self, idx):
+        if not self.cards: return
+        if idx < 0: idx = 0
+        if idx >= len(self.cards): idx = len(self.cards) - 1
         
-        # Center or Anchor
-        frame_w = self.inner_frame.winfo_reqwidth()
-        canvas_w = self.canvas.winfo_width() if self.canvas.winfo_width() > 1 else self.win_w - 80
-
-        if frame_w < canvas_w:
-            self.canvas.coords(self.inner_id, canvas_w/2, self.bar_h/2)
-            self.canvas.itemconfigure(self.inner_id, anchor="center")
-        else:
-            self.canvas.coords(self.inner_id, 0, self.bar_h/2)
-            self.canvas.itemconfigure(self.inner_id, anchor="w")
-
-        self.canvas.config(scrollregion=self.canvas.bbox("all"))
-        self.scroll_to_active()
-
-    def create_add_card(self):
-        f = tk.Frame(self.inner_frame, bg="#111111", width=self.card_w, height=self.card_h)
-        f.pack(side="left", padx=12)
-        f.pack_propagate(False)
-        
-        # Vertical stacking for better look
-        center = tk.Frame(f, bg="#111111")
-        center.pack(expand=True)
-        
-        tk.Label(center, text="+", font=self.font_icons, bg="#111111", fg=self.accent_color).pack()
-        tk.Label(center, text="ADD IMAGE", font=self.font_small, bg="#111111", fg="#444444").pack()
-        
-        for w in [f, center] + list(center.winfo_children()):
-            w.bind("<Button-1>", lambda e: self.add_image())
-            w.config(cursor="hand2")
-
-    def create_image_card(self, path, idx):
-        is_active = (idx == self.current_idx)
-        bd = 2 if is_active else 0
-        
-        f = tk.Frame(self.inner_frame, bg=self.accent_color if is_active else self.bg_color,
-                     width=self.card_w + (bd*2), height=self.card_h + (bd*2))
-        f.pack(side="left", padx=12)
-        f.pack_propagate(False)
-
-        tk_img = self.get_cached_image(path)
-        if tk_img:
-            lb = tk.Label(f, image=tk_img, bg=self.bg_color)
-            lb.pack(fill="both", expand=True, padx=bd, pady=bd)
-            
-            # Optimization: only change border on selection
-            lb.bind("<Button-1>", lambda e, i=idx: self.select_idx(i))
-            lb.bind("<Double-Button-1>", lambda e, p=path: self.open_in_chrome(p))
-            lb.config(cursor="hand2")
-        else:
-            tk.Label(f, text="ERR", fg="red", bg="black").pack(expand=True)
-
-    def select_idx(self, idx):
-        if self.current_idx == idx: return
         self.current_idx = idx
-        self.render_cards()
-
-    def next_image(self):
-        if not self.image_paths: return
-        self.current_idx = (self.current_idx + 1) % len(self.image_paths)
-        self.render_cards()
-
-    def prev_image(self):
-        if not self.image_paths: return
-        self.current_idx = (self.current_idx - 1) % len(self.image_paths)
-        self.render_cards()
-
-    def scroll_to_active(self):
-        self.root.update_idletasks()
-        total_w = self.inner_frame.winfo_width()
-        canvas_w = self.canvas.winfo_width()
-        if total_w <= canvas_w: return
+        self.update_selection()
         
-        # Calculate card center position
-        # (+1 for add button)
-        card_x = (self.current_idx + 1) * (self.card_w + 24) + (self.card_w / 2)
-        fraction = (card_x - (canvas_w / 2)) / total_w
-        self.canvas.xview_moveto(max(0, min(1, fraction)))
+    def update_selection(self):
+        for i, card in enumerate(self.cards):
+            card.set_selected(i == self.current_idx)
+            
+        # Scroll logic
+        if not self.cards: return
+        
+        item_width = self.card_w + 20
+        target_x = self.current_idx * item_width
+        
+        # Center the selected item in the view if possible
+        # viewport_center = self.scroll.viewport().width() / 2
+        # scroll_target = target_x - viewport_center + (self.card_w / 2)
+        
+        # But user didn't want it starting in middle. 
+        # Standard behavior: scroll to keep item in view
+        
+        hbar = self.scroll.horizontalScrollBar()
+        current_scroll = hbar.value()
+        viewport_w = self.scroll.viewport().width()
+        
+        # Ensure visible
+        card_start = target_x
+        card_end = target_x + self.card_w
+        
+        # Simple Logic: If card is overlapping left edge, scroll to it.
+        # If card is overlapping right edge, scroll to it.
+        
+        target_val = current_scroll
+        
+        if card_start < current_scroll:
+            target_val = card_start
+        elif card_end > current_scroll + viewport_w:
+            target_val = card_end - viewport_w
+        
+        # Also handle "Center focus" style if desired, but user complained about "starting from middle".
+        # "Starting from middle" likely meant the empty padding.
+        # I will enforce centering ONLY if it doesn't create empty space at start? 
+        # For now, let's stick to "ensure visible" minimum scrolling which is less jarring.
+        # Actually for a carousel, centering the active item is nicer.
+        # Let's try centering but clamp to bounds.
+        
+        center_target = target_x - (viewport_w / 2) + (self.card_w / 2)
+        target_val = max(0, min(center_target, hbar.maximum()))
 
-    def on_mousewheel(self, event):
-        self.canvas.xview_scroll(int(-1*(event.delta/120)), "units")
+        self.anim = QPropertyAnimation(hbar, b"value")
+        self.anim.setDuration(300)
+        self.anim.setStartValue(current_scroll)
+        self.anim.setEndValue(int(target_val))
+        self.anim.setEasingCurve(QEasingCurve.OutCubic)
+        self.anim.start()
 
-    def add_image(self):
-        self.is_dialog_open = True
-        paths = filedialog.askopenfilenames(parent=self.root)
-        self.is_dialog_open = False
-        self.root.focus_force()
-        if paths:
-            new_paths = [p for p in paths if p not in self.image_paths]
+    def keyPressEvent(self, event):
+        if event.modifiers() & Qt.ControlModifier and event.key() == Qt.Key_A:
+            self.add_images_dialog()
+            return
+
+        if event.key() == Qt.Key_Left:
+            self.set_index(self.current_idx - 1)
+        elif event.key() == Qt.Key_Right:
+            self.set_index(self.current_idx + 1)
+        elif event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter:
+            self.activate_current()
+        elif event.key() == Qt.Key_Escape:
+            self.close()
+            
+    def activate_current(self):
+        if 0 <= self.current_idx < len(self.image_paths):
+            path = self.image_paths[self.current_idx]
+            self.launch_chrome(path)
+            
+    def add_images_dialog(self):
+        from PyQt5.QtWidgets import QFileDialog
+        files, _ = QFileDialog.getOpenFileNames(self, "Select Images", "", "Images (*.png *.jpg *.jpeg *.bmp)")
+        if files:
+            new_paths = [f for f in files if f not in self.image_paths]
             self.image_paths.extend(new_paths)
             save_images(self.image_paths)
-            if self.current_idx == -1: self.current_idx = 0
             self.render_cards()
+            # Select first new image
+            self.set_index(len(self.cards) - len(new_paths))
 
-    def open_in_chrome(self, path):
-        subprocess.run(f'start chrome "{path}"', shell=True)
-        self.root.destroy()
+    def launch_chrome(self, path):
+        try:
+            # Use start commmand for windows for default browser or chrome specifically if path known
+            # 'start chrome "path"'
+            subprocess.run(f'start chrome "{path}"', shell=True)
+            self.close() # Close launcher on launch?
+        except Exception as e:
+            print(f"Error launching: {e}")
 
-    def on_focus_out(self, event):
-        if self.is_dialog_open: return
-        if self.root.focus_displayof() is None:
-            self.root.destroy()
-
-    def force_focus(self):
-        self.root.focus_force()
-        self.root.lift()
-        self.root.focus_set()
-        try: self.root.grab_set()
-        except: pass
+    def focusOutEvent(self, event):
+        # Close on focus loss (launcher behavior)
+        if not self.isActiveWindow():
+             self.close()
+        super().focusOutEvent(event)
 
 if __name__ == "__main__":
-    imgs = load_images()
-    gallery = ImageGallery(imgs)
-    gallery.root.mainloop()
+    app = QApplication(sys.argv)
+    window = GalleryWindow()
+    window.show()
+    # Force focus
+    window.activateWindow()
+    window.raise_()
+    sys.exit(app.exec_())
