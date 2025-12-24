@@ -532,6 +532,9 @@ PrintScreen::Run("C:\Users\nahid\ms\ms1\Testing\screenshot\region_screenshot.py"
 ;! Open Folder gui
 #f::Run("C:\Users\nahid\ms\ms1\Testing\screenshot\folder_launcher\launcher.py", "", "Hide")
 
+;! Gallery View
+#v::Run("C:\Users\nahid\ms\ms1\Testing\screenshot\gallery\gallery.py", "", "Hide")
+
 ;! === TEXT SHORTCUTS ===
 ;! AutoHotkey Version 1
 ;! Inserts AHK v1 header requirement

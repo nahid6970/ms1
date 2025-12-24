@@ -228,6 +228,14 @@
             "hotkey": "#f",
             "action": "Run(\"C:\\Users\\nahid\\ms\\ms1\\Testing\\screenshot\\folder_launcher\\launcher.py\", \"\", \"Hide\")",
             "enabled": true
+        },
+        {
+            "name": "Gallery View",
+            "category": "General",
+            "description": "",
+            "hotkey": "#v",
+            "action": "Run(\"C:\\Users\\nahid\\ms\\ms1\\Testing\\screenshot\\gallery\\gallery.py\", \"\", \"Hide\")",
+            "enabled": true
         }
     ],
     "text_shortcuts": [

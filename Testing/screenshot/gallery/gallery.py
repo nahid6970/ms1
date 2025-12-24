@@ -5,7 +5,7 @@ import subprocess
 import ctypes
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QHBoxLayout, 
                              QLabel, QScrollArea, QFrame, QGraphicsDropShadowEffect, QSizePolicy, QMenu, QAction)
-from PyQt5.QtCore import Qt, QSize, QPoint, QRect, QPropertyAnimation, QEasingCurve, pyqtSignal
+from PyQt5.QtCore import Qt, QSize, QPoint, QRect, QPropertyAnimation, QEasingCurve, pyqtSignal, QTimer
 from PyQt5.QtGui import QPixmap, QPainter, QPainterPath, QColor, QFont, QIcon, QBrush, QImage, QPen, QCursor
 
 CONFIG_FILE = os.path.join(os.path.dirname(__file__), "gallery_config.json")
@@ -133,6 +133,11 @@ class CardWidget(QWidget):
     def contextMenuEvent(self, event):
         if not self.path or self.is_add_btn: return
         
+        # Prevent main window from closing when menu opens
+        main_win = self.window()
+        if hasattr(main_win, 'block_close'):
+            main_win.block_close = True
+        
         menu = QMenu(self)
         menu.setStyleSheet("""
             QMenu {
@@ -165,6 +170,10 @@ class CardWidget(QWidget):
         menu.addAction(delete_action)
         
         menu.exec_(event.globalPos())
+        
+        if hasattr(main_win, 'block_close'):
+            main_win.block_close = False
+            main_win.activateWindow()
 
     def edit_image(self):
         # Try to open explicitly with Microsoft Photos via protocol handler
@@ -201,6 +210,7 @@ class CardWidget(QWidget):
 class GalleryWindow(QMainWindow):
     def __init__(self):
         super().__init__()
+        self.block_close = False
         self.image_paths = load_images()
         self.cards = []
         self.current_idx = 0 # 0 is Add Button
@@ -260,7 +270,18 @@ class GalleryWindow(QMainWindow):
         
         self.render_cards()
         self.update_selection()
-        
+
+        # Focus Check Timer (Replaces unreliable focusOutEvent)
+        self.focus_timer = QTimer(self)
+        self.focus_timer.timeout.connect(self.check_focus)
+        self.focus_timer.start(100)
+    
+    def check_focus(self):
+        if self.block_close: return
+        # If we are not active, close.
+        if not self.isActiveWindow():
+            self.close()
+
     def render_cards(self):
         # Clear existing
         for i in reversed(range(self.scroll_layout.count())): 
@@ -306,7 +327,6 @@ class GalleryWindow(QMainWindow):
         self.update_selection()
         
     def update_selection(self):
-        # ... existing code ...
         for i, card in enumerate(self.cards):
             card.set_selected(i == self.current_idx)
             
@@ -365,7 +385,11 @@ class GalleryWindow(QMainWindow):
             
     def add_images_dialog(self):
         from PyQt5.QtWidgets import QFileDialog
+        self.block_close = True
         files, _ = QFileDialog.getOpenFileNames(self, "Select Images", "", "Images (*.png *.jpg *.jpeg *.bmp)")
+        self.block_close = False
+        self.activateWindow()
+        
         if files:
             new_paths = [f for f in files if f not in self.image_paths]
             self.image_paths.extend(new_paths)
@@ -382,12 +406,8 @@ class GalleryWindow(QMainWindow):
             self.close() # Close launcher on launch?
         except Exception as e:
             print(f"Error launching: {e}")
-
-    def focusOutEvent(self, event):
-        # Close on focus loss (launcher behavior)
-        if not self.isActiveWindow():
-             self.close()
-        super().focusOutEvent(event)
+            
+    # focusOutEvent removed in favor of QTimer check
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
