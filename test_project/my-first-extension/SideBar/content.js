@@ -29,6 +29,29 @@
 
   function updateLayout() {
     root.className = (isLeft ? 'left' : 'right') + (isExpanded ? ' expanded' : '');
+
+    // Update Side Toggle Icon (Arrow pointing to the opposite side)
+    const sideToggle = document.getElementById('qs-side-toggle');
+    if (sideToggle) {
+      sideToggle.innerHTML = isLeft
+        ? `<svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" /></svg>` // Arrow Right
+        : `<svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z" /></svg>`; // Arrow Left
+    }
+
+    // Update Expand Toggle Icon (Chevrons pointing in the expansion direction)
+    const expandToggle = document.getElementById('qs-expand-toggle');
+    if (expandToggle) {
+      if (isLeft) {
+        expandToggle.innerHTML = isExpanded
+          ? `<svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M18.41,16.59L13.82,12L18.41,7.41L17,6L11,12L17,18L18.41,16.59M11.41,16.59L6.82,12L11.41,7.41L10,6L4,12L10,18L11.41,16.59Z" /></svg>` // Double Left
+          : `<svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M5.59,16.59L10.18,12L5.59,7.41L7,6L13,12L7,18L5.59,16.59M12.59,16.59L17.18,12L12.59,7.41L14,6L20,12L14,18L12.59,16.59Z" /></svg>`; // Double Right
+      } else {
+        expandToggle.innerHTML = isExpanded
+          ? `<svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M5.59,16.59L10.18,12L5.59,7.41L7,6L13,12L7,18L5.59,16.59M12.59,16.59L17.18,12L12.59,7.41L14,6L20,12L14,18L12.59,16.59Z" /></svg>` // Double Right
+          : `<svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M18.41,16.59L13.82,12L18.41,7.41L17,6L11,12L17,18L18.41,16.59M11.41,16.59L6.82,12L11.41,7.41L10,6L4,12L10,18L11.41,16.59Z" /></svg>`; // Double Left
+      }
+    }
+
     updatePageShift();
   }
 
