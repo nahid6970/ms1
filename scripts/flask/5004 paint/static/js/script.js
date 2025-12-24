@@ -81,7 +81,8 @@ document.addEventListener('DOMContentLoaded', () => {
         points: [],
         multiLineCount: 3,
         stamps: [],
-        selectedStamp: ''
+        selectedStamp: '',
+        unicodeCache: {}
     };
 
     // --- Functions ---
@@ -253,6 +254,25 @@ document.addEventListener('DOMContentLoaded', () => {
             };
             grid.insertBefore(btn, addBtn);
         });
+    }
+
+    function drawStamp(c, iconClass, x, y, size, color) {
+        let content = state.unicodeCache[iconClass];
+        if (!content) {
+            const i = document.createElement('i');
+            i.className = `fa-solid ${iconClass}`;
+            document.body.appendChild(i);
+            content = window.getComputedStyle(i, ':before').content.replace(/"/g, '');
+            document.body.removeChild(i);
+            state.unicodeCache[iconClass] = content;
+        }
+
+        const fontSize = size * 4;
+        c.font = `900 ${fontSize}px "Font Awesome 6 Free"`;
+        c.fillStyle = color;
+        c.textAlign = 'center';
+        c.textBaseline = 'middle';
+        c.fillText(content, x, y);
     }
 
     function setColor(color) {
@@ -444,24 +464,11 @@ document.addEventListener('DOMContentLoaded', () => {
             handleCurveClick(pos);
             state.isDrawing = false;
         } else if (state.tool === 'stamp') {
-            if (state.selectedStamp) {
-                drawSymmetric(ctx, (c) => {
-                    const iconElement = document.createElement('i');
-                    iconElement.className = `fa-solid ${state.selectedStamp}`;
-                    document.body.appendChild(iconElement);
-                    const content = window.getComputedStyle(iconElement, ':before').content.replace(/"/g, '');
-                    document.body.removeChild(iconElement);
-
-                    const fontSize = state.size * 4;
-                    c.font = `900 ${fontSize}px "Font Awesome 6 Free"`;
-                    c.fillStyle = state.color;
-                    c.textAlign = 'center';
-                    c.textBaseline = 'middle';
-                    c.fillText(content, pos.x, pos.y);
-                });
-                saveHistory();
-            }
-            state.isDrawing = false;
+            state.isDrawing = true;
+            ctxOverlay.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+            drawSymmetric(ctxOverlay, (c) => {
+                drawStamp(c, state.selectedStamp, pos.x, pos.y, state.size, state.color);
+            });
         } else if (state.tool === 'brush') {
             drawSymmetric(ctxOverlay, (c) => {
                 c.beginPath();
@@ -574,6 +581,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 c.lineTo(pos.x, pos.y);
                 c.stroke();
             });
+        } else if (state.tool === 'stamp') {
+            ctxOverlay.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+            drawSymmetric(ctxOverlay, (c) => {
+                // Calculate size based on distance from start point
+                const dist = Math.hypot(pos.x - state.startX, pos.y - state.startY);
+                // Use distance as size, with a small minimum to keep it visible
+                const dynamicSize = Math.max(2, dist / 2);
+                drawStamp(c, state.selectedStamp, state.startX, state.startY, dynamicSize, state.color);
+            });
         } else {
             ctxOverlay.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
             drawSymmetric(ctxOverlay, (c) => {
@@ -597,8 +613,13 @@ document.addEventListener('DOMContentLoaded', () => {
     function stopDrawing() {
         if (!state.isDrawing) return;
         state.isDrawing = false;
-        if (['line', 'rect', 'circle', 'brush'].includes(state.tool)) {
+        if (['line', 'rect', 'circle', 'brush', 'stamp'].includes(state.tool)) {
+            // Commit overlay to main
             ctx.save();
+            if (state.tool === 'stamp') {
+                // For stamp, we just want to draw the icon which is already text-based
+                // But overlay is a pixel-snapshot, so this works perfectly.
+            }
             ctx.globalAlpha = 1.0;
             ctx.drawImage(overlayCanvas, 0, 0);
             ctx.restore();
