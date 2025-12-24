@@ -1,9 +1,10 @@
 html {
-    transition: margin 0.3s ease, width 0.3s ease;
+    transition: all 0.3s ease !important;
+    box-sizing: border-box !important;
 }
 
 body {
-    transition: transform 0.3s ease, width 0.3s ease !important;
+    transition: margin 0.3s ease !important;
 }
 
 /* The root container for our injected sidebar */

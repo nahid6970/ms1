@@ -15,21 +15,32 @@
     const isHidden = root.classList.contains('qs-hidden');
     const width = isExpanded ? 280 : 60;
 
-    if (isHidden) {
-      document.body.style.transform = 'none';
-      document.body.style.width = '100%';
-      document.documentElement.style.overflowX = 'auto';
-    } else {
-      document.documentElement.style.overflowX = 'hidden'; // Prevent scrollbars during shift
-      document.body.style.width = `calc(100% - ${width}px)`;
-      document.body.style.transformOrigin = 'top left';
+    const html = document.documentElement;
+    const body = document.body;
 
+    if (isHidden) {
+      html.style.setProperty('margin-left', '0', 'important');
+      html.style.setProperty('margin-right', '0', 'important');
+      html.style.setProperty('width', '100%', 'important');
+      // Reset YouTube specific fixed header
+      const ytHeader = document.querySelector('#masthead-container');
+      if (ytHeader) ytHeader.style.setProperty('left', '0', 'important');
+    } else {
+      html.style.setProperty('width', `calc(100% - ${width}px)`, 'important');
       if (isLeft) {
-        // Space on left: Shift body right
-        document.body.style.transform = `translateX(${width}px)`;
+        html.style.setProperty('margin-left', `${width}px`, 'important');
+        html.style.setProperty('margin-right', '0', 'important');
+
+        // Push YouTube's fixed header
+        const ytHeader = document.querySelector('#masthead-container');
+        if (ytHeader) ytHeader.style.setProperty('left', `${width}px`, 'important');
       } else {
-        // Space on right: Just shrink width, no translation needed
-        document.body.style.transform = 'none';
+        html.style.setProperty('margin-left', '0', 'important');
+        html.style.setProperty('margin-right', `${width}px`, 'important');
+
+        // Reset YouTube header (it stays anchored to left normally)
+        const ytHeader = document.querySelector('#masthead-container');
+        if (ytHeader) ytHeader.style.setProperty('left', '0', 'important');
       }
     }
   }
