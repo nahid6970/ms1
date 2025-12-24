@@ -23,16 +23,33 @@
       if (isExpanded) html.classList.add('qs-expanded');
     }
 
-    // YouTube Specific Header Fix
+    // YouTube Specific Header & Player Fix
     const ytHeader = document.querySelector('#masthead-container');
-    if (ytHeader) {
-      if (!isHidden && isLeft) {
-        const width = isExpanded ? 280 : 60;
-        ytHeader.style.setProperty('left', `${width}px`, 'important');
+    const ytPlayer = document.querySelector('#content.ytd-app'); // Main content wrapper
+
+    if (!isHidden) {
+      const width = isExpanded ? 280 : 60;
+      if (isLeft) {
+        if (ytHeader) ytHeader.style.setProperty('left', `${width}px`, 'important');
+        if (ytPlayer) ytPlayer.style.setProperty('margin-left', `${width}px`, 'important');
       } else {
+        if (ytHeader) ytHeader.style.setProperty('left', '0', 'important');
+        if (ytHeader) ytHeader.style.setProperty('right', `${width}px`, 'important');
+        if (ytPlayer) ytPlayer.style.setProperty('margin-right', `${width}px`, 'important');
+      }
+    } else {
+      if (ytHeader) {
         ytHeader.style.setProperty('left', '0', 'important');
+        ytHeader.style.setProperty('right', '0', 'important');
+      }
+      if (ytPlayer) {
+        ytPlayer.style.setProperty('margin-left', '0', 'important');
+        ytPlayer.style.setProperty('margin-right', '0', 'important');
       }
     }
+
+    // Force a resize event so YouTube/Google Maps etc. recalculate their UI
+    window.dispatchEvent(new Event('resize'));
   }
 
   function updateLayout() {
