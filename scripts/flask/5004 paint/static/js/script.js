@@ -192,8 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const isEraser = state.tool === 'eraser';
         if (!isEraser) {
             if (state.brushType === 'airbrush') {
-                ctx.globalAlpha = 0.02; // Removed solid center effect
-                ctx.shadowBlur = state.size * 2; // Increase bloom
+                ctx.shadowBlur = state.size; // Solid center + normal glow
                 ctx.shadowColor = state.color;
             } else if (state.brushType === 'multiLine') {
                 ctx.globalAlpha = 0.8;
