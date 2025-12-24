@@ -13,9 +13,21 @@
 <body>
     <div class="app-container">
         <aside class="sidebar">
-            <button id="sidebar-toggle" title="Toggle Sidebar">
-                <i class="fa-solid fa-bars"></i>
-            </button>
+            <div class="sidebar-dock">
+                <button id="sidebar-toggle" title="Toggle Sidebar">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <div class="dock-separator"></div>
+                <button class="dock-btn primary" id="btn-save" title="Save Masterpiece">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                </button>
+                <button class="dock-btn" id="btn-gallery" title="Open Gallery">
+                    <i class="fa-solid fa-folder-open"></i>
+                </button>
+                <button class="dock-btn danger" id="btn-clear" title="Clear Canvas">
+                    <i class="fa-solid fa-trash-can"></i>
+                </button>
+            </div>
 
             <div class="tool-section">
                 <label>TOOLS</label>
@@ -139,22 +151,7 @@
                 </div>
             </div>
 
-            <div class="spacer"></div>
 
-            <div class="tool-section actions">
-                <button class="action-btn" id="btn-clear" title="Clear Canvas">
-                    <i class="fa-solid fa-trash-can"></i> Clear
-                </button>
-                <!-- Expand button removed for infinite canvas feel -->
-                <div class="action-row">
-                    <button class="action-btn secondary" id="btn-gallery">
-                        <i class="fa-solid fa-folder-open"></i> Load
-                    </button>
-                    <button class="action-btn primary" id="btn-save">
-                        <i class="fa-solid fa-floppy-disk"></i> Save
-                    </button>
-                </div>
-            </div>
         </aside>
 
         <main class="canvas-viewport" id="viewport">
