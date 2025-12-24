@@ -6,10 +6,16 @@
   let isLeft = false;
   let isExpanded = false;
 
+  // Create Sidebar
   const root = document.createElement('div');
   root.id = 'qs-sidebar-root';
   root.className = 'right'; // Default to right
   document.documentElement.appendChild(root);
+
+  // Create Modal (Separate from Sidebar)
+  const modalRoot = document.createElement('div');
+  modalRoot.id = 'qs-modal-root';
+  document.documentElement.appendChild(modalRoot);
 
   function updatePageShift() {
     const isHidden = root.classList.contains('qs-hidden');
@@ -83,7 +89,6 @@
   // Initial markup
   root.innerHTML = `
     <div class="qs-header">
-      <div class="qs-logo">S</div>
       <div class="qs-actions">
         <button id="qs-add-toggle" class="qs-icon-btn" title="Add Link">
           <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z" /></svg>
@@ -91,31 +96,37 @@
         <button id="qs-side-toggle" class="qs-icon-btn" title="Toggle Left/Right">
           <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M15,5V11H21V5M10,11H15V5H10M16,18H21V12H16M10,18H15V12H10M4,18H9V12H4M4,11H9V5H4V11Z" /></svg>
         </button>
-        <button id="qs-expand-toggle" class="qs-icon-btn" title="Expand/Collapse">
+        <button id="qs-expand-toggle" class="qs-icon-btn" title="Expand Labels">
           <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M14,14H19V16H14V14M14,10H19V12H14V10M14,6H19V8H14V6M5,6H9V8H5V6M5,10H9V12H5V10M5,14H9V16H5V14Z" /></svg>
         </button>
       </div>
     </div>
-    
-    <div id="qs-add-form">
-      <input type="text" id="qs-title-input" placeholder="Title">
-      <input type="text" id="qs-url-input" placeholder="URL">
-      <div class="qs-form-btns">
-        <button id="qs-save-btn" class="qs-btn-primary">Save</button>
-      </div>
-    </div>
-
     <div id="qs-links-list"></div>
   `;
 
+  modalRoot.innerHTML = `
+    <div id="qs-modal-overlay">
+      <div id="qs-modal-content">
+        <h3>Add New Link</h3>
+        <input type="text" id="qs-title-input" placeholder="Title (e.g. GitHub)">
+        <input type="text" id="qs-url-input" placeholder="URL (https://...)">
+        <div class="qs-form-btns">
+          <button id="qs-save-btn" class="qs-btn-primary">Save Link</button>
+          <button id="qs-cancel-btn" class="qs-btn-secondary">Cancel</button>
+        </div>
+      </div>
+    </div>
+  `;
+
   const linksList = document.getElementById('qs-links-list');
-  const addForm = document.getElementById('qs-add-form');
+  const modalOverlay = document.getElementById('qs-modal-overlay');
   const addToggle = document.getElementById('qs-add-toggle');
   const sideToggle = document.getElementById('qs-side-toggle');
   const expandToggle = document.getElementById('qs-expand-toggle');
   const titleInput = document.getElementById('qs-title-input');
   const urlInput = document.getElementById('qs-url-input');
   const saveBtn = document.getElementById('qs-save-btn');
+  const cancelBtn = document.getElementById('qs-cancel-btn');
 
   // Load state
   chrome.storage.sync.get(['sidebar_links', 'is_left'], (result) => {
@@ -127,10 +138,19 @@
 
   // Event Listeners
   addToggle.addEventListener('click', () => {
-    addForm.classList.toggle('visible');
-    if (addForm.classList.contains('visible') && !isExpanded) {
-      isExpanded = true;
-      updateLayout();
+    modalOverlay.classList.add('visible');
+    titleInput.focus();
+  });
+
+  cancelBtn.addEventListener('click', () => {
+    modalOverlay.classList.remove('visible');
+    titleInput.value = '';
+    urlInput.value = '';
+  });
+
+  modalOverlay.addEventListener('click', (e) => {
+    if (e.target === modalOverlay) {
+      modalOverlay.classList.remove('visible');
     }
   });
 
@@ -165,7 +185,7 @@
     renderLinks();
     titleInput.value = '';
     urlInput.value = '';
-    addForm.classList.remove('visible');
+    modalOverlay.classList.remove('visible');
   });
 
   function renderLinks() {

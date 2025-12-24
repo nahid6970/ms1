@@ -89,17 +89,80 @@ html.qs-shift-right.qs-expanded body {
     gap: 1rem;
 }
 
-.qs-logo {
-    width: 32px;
-    height: 32px;
-    background: linear-gradient(135deg, #38bdf8, #818cf8);
-    border-radius: 8px;
-    display: flex;
+/* Modal Styling */
+#qs-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    display: flex !important;
     align-items: center;
     justify-content: center;
-    font-weight: bold;
-    font-size: 18px;
+    z-index: 2147483647;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    visibility: visible !important;
+}
+
+#qs-modal-overlay.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+#qs-modal-content {
+    background: #1e293b;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 24px;
+    width: 320px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+    transform: scale(0.9);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     color: white;
+}
+
+#qs-modal-overlay.visible #qs-modal-content {
+    transform: scale(1);
+}
+
+#qs-modal-content h3 {
+    margin: 0 0 16px 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #38bdf8;
+}
+
+#qs-modal-content input {
+    width: 100%;
+    background: rgba(15, 23, 42, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 10px 12px;
+    color: white;
+    margin-bottom: 12px;
+    font-family: inherit;
+    font-size: 14px;
+}
+
+#qs-modal-content input:focus {
+    outline: none;
+    border-color: #38bdf8;
+    box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+}
+
+.qs-btn-secondary {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 8px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
 }
 
 /* Actions */
@@ -128,35 +191,6 @@ html.qs-shift-right.qs-expanded body {
     background: rgba(56, 189, 248, 0.2);
     border-color: #38bdf8;
     color: #38bdf8;
-}
-
-/* Form */
-#qs-add-form {
-    padding: 15px;
-    background: rgba(0, 0, 0, 0.2);
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    display: none;
-}
-
-#qs-add-form.visible {
-    display: block;
-}
-
-#qs-add-form input {
-    width: 100%;
-    padding: 8px 12px;
-    margin-bottom: 8px;
-    border-radius: 6px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(15, 23, 42, 0.8);
-    color: white;
-    font-size: 13px;
-}
-
-.qs-form-btns {
-    display: flex;
-    gap: 8px;
 }
 
 .qs-btn-primary {
