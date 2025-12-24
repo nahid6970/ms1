@@ -115,11 +115,7 @@
   <div class="btn-group">
     <button id="exportBtn" class="export-btn">Export Data (JSON)</button>
     <button id="importBtn" class="import-btn">Import Data</button>
-    <div id="importContainer" style="display:none;">
-      <textarea id="importData" placeholder="Paste JSON here..."></textarea>
-      <button id="confirmImportBtn" style="width:100%; margin-top:5px; background-color:#555; color:white;">Load
-        Data</button>
-    </div>
+    <input type="file" id="fileInput" accept=".json" style="display:none;">
     <button id="clearBtn" class="clear-btn">Clear All Data</button>
   </div>
   <div id="status"></div>

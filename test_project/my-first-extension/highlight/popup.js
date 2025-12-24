@@ -1,9 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
   const exportBtn = document.getElementById('exportBtn');
   const importBtn = document.getElementById('importBtn');
-  const importContainer = document.getElementById('importContainer');
-  const importData = document.getElementById('importData');
-  const confirmImportBtn = document.getElementById('confirmImportBtn');
   const clearBtn = document.getElementById('clearBtn');
   const status = document.getElementById('status');
   const saveColorsBtn = document.getElementById('saveColors');
@@ -70,23 +67,31 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  const fileInput = document.getElementById('fileInput');
+
   importBtn.addEventListener('click', () => {
-    importContainer.style.display = importContainer.style.display === 'none' ? 'block' : 'none';
+    fileInput.click();
   });
 
-  confirmImportBtn.addEventListener('click', () => {
-    try {
-      const data = JSON.parse(importData.value);
-      if (typeof data !== 'object') throw new Error('Invalid JSON');
+  fileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
 
-      chrome.storage.local.set(data, () => {
-        showStatus('Import successful! Refresh pages to see changes.');
-        importData.value = '';
-        importContainer.style.display = 'none';
-      });
-    } catch (e) {
-      showStatus('Error: Invalid JSON data');
-    }
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const data = JSON.parse(event.target.result);
+        if (typeof data !== 'object') throw new Error('Invalid JSON');
+
+        chrome.storage.local.set(data, () => {
+          showStatus('Import successful! Refresh pages to see changes.');
+          fileInput.value = ''; // Reset input
+        });
+      } catch (err) {
+        showStatus('Error: Invalid JSON file');
+      }
+    };
+    reader.readAsText(file);
   });
 
   clearBtn.addEventListener('click', () => {
