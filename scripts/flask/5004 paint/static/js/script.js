@@ -192,8 +192,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 ctx.shadowBlur = state.size;
                 ctx.shadowColor = state.color;
             } else if (state.brushType === 'pencil') {
-                ctx.globalAlpha = 0.2;
-                ctx.shadowBlur = 1;
+                ctx.globalAlpha = 0.5; // Increased from 0.2 for better visibility
+                ctx.shadowBlur = 0.5;
                 ctx.shadowColor = state.color;
             } else if (state.brushType === 'highlighter') {
                 ctx.globalAlpha = 0.4;
@@ -465,14 +465,19 @@ document.addEventListener('DOMContentLoaded', () => {
                         c.lineTo(pts[1].x, pts[1].y);
                     }
                 } else if (state.brushType === 'pencil') {
+                    // Stable sketchy effect: multiple thin lines with fixed offsets
                     const passes = 3;
                     for (let j = 0; j < passes; j++) {
+                        c.save();
                         c.beginPath();
-                        const offX = (Math.random() - 0.5) * state.size;
-                        const offY = (Math.random() - 0.5) * state.size;
-                        c.moveTo(pts[0].x + offX, pts[0].y + offY);
-                        pts.forEach(p => c.lineTo(p.x + offX, p.y + offY));
+                        c.lineWidth = 1; // Pencils are always thin
+                        const offset = (j - 1) * 1.5; // Stable offsets ( -1.5, 0, 1.5 )
+                        c.moveTo(pts[0].x + offset, pts[0].y + offset);
+                        for (let i = 1; i < pts.length; i++) {
+                            c.lineTo(pts[i].x + offset, pts[i].y + offset);
+                        }
                         c.stroke();
+                        c.restore();
                     }
                 } else if (state.brushType === 'calligraphy') {
                     const nib = state.size;
@@ -787,11 +792,21 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     btnClear.onclick = () => {
+        // Reset context state to ensure full opaque white clear
+        ctx.save();
+        ctx.globalAlpha = 1.0;
+        ctx.shadowBlur = 0;
+        ctx.globalCompositeOperation = 'source-over';
         ctx.fillStyle = '#ffffff';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.restore();
+
         ctxOverlay.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+        ctxGuide.clearRect(0, 0, guideCanvas.width, guideCanvas.height);
+
         state.polyPoints = [];
         state.curvePoints = [];
+
         updateContext();
         saveHistory();
         showToast('Canvas cleared!');
