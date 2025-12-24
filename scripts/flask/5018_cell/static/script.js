@@ -964,7 +964,7 @@ function handlePreviewMouseDown(e) {
     if (e.button !== 0) return;
 
     // Don't interfere with links or check boxes inside the preview
-    if (e.target.tagName === 'A' || e.target.tagName === 'INPUT') return;
+    if (e.target.closest('a') || e.target.tagName === 'INPUT') return;
 
     // Stop propagation
     e.stopPropagation();

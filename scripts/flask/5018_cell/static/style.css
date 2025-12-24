@@ -814,15 +814,15 @@ td textarea {
     text-decoration: none;
 }
 
-/* Show preview when cell is not focused */
-td:not(:focus-within) .markdown-preview {
+/* Show preview when input is not focused */
+.has-markdown:not(:focus)~.markdown-preview {
     display: block;
     position: relative;
     height: auto;
 }
 
-/* Hide input when showing preview */
-td:not(:focus-within) .has-markdown {
+/* Hide input when it is not focused */
+.has-markdown:not(:focus) {
     opacity: 0;
     position: absolute;
 }
