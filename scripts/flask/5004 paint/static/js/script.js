@@ -161,7 +161,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 ctx.shadowBlur = state.size;
                 ctx.shadowColor = state.color;
             } else if (state.brushType === 'pencil') {
-                ctx.globalAlpha = 0.5;
+                ctx.globalAlpha = 0.2; // Very faint for layering
+                ctx.shadowBlur = 1;
+                ctx.shadowColor = state.color;
             } else if (state.brushType === 'highlighter') {
                 ctx.globalAlpha = 0.4;
             } else if (state.brushType === 'pen') {
@@ -712,6 +714,23 @@ document.addEventListener('DOMContentLoaded', () => {
                         c.lineTo(pts[1].x, pts[1].y);
                     }
                     c.stroke();
+                } else if (state.brushType === 'pencil') {
+                    // Graphite texture: multiple thin jittered passes
+                    const passes = 3;
+                    for (let j = 0; j < passes; j++) {
+                        c.beginPath();
+                        c.lineWidth = 1;
+                        const offX = (Math.random() - 0.5) * state.size;
+                        const offY = (Math.random() - 0.5) * state.size;
+
+                        c.moveTo(pts[0].x + offX, pts[0].y + offY);
+                        for (let i = 1; i < pts.length; i++) {
+                            const jitterX = (Math.random() - 0.5) * (state.size / 3);
+                            const jitterY = (Math.random() - 0.5) * (state.size / 3);
+                            c.lineTo(pts[i].x + offX + jitterX, pts[i].y + offY + jitterY);
+                        }
+                        c.stroke();
+                    }
                 } else if (state.brushType === 'calligraphy') {
                     const nibSize = state.size;
                     const angle = -Math.PI / 4;
