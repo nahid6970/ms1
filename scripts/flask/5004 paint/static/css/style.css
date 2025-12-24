@@ -197,6 +197,111 @@ input[type="color"] {
     flex: 1;
 }
 
+/* Stamps Popover Style */
+#btn-stamps-popover {
+    position: relative;
+    /* Allow popover to anchor to button */
+}
+
+.stamps-popover {
+    position: absolute;
+    left: calc(100% + 20px);
+    /* Appear to the right of the sidebar button */
+    top: 50%;
+    transform: translateY(-50%) translateX(-10px);
+    background: rgba(20, 20, 25, 0.98);
+    backdrop-filter: blur(25px);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    width: 220px;
+    padding: 12px;
+    z-index: 1000;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+    cursor: default;
+    text-align: left;
+}
+
+.stamps-popover.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(-50%) translateX(0);
+    pointer-events: all;
+}
+
+/* Arrow for popover (pointing left) */
+.stamps-popover::before {
+    content: '';
+    position: absolute;
+    right: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 8px solid transparent;
+    border-right-color: var(--border);
+}
+
+.stamps-grid-inner {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    /* 4 columns like main grid */
+    gap: 6px;
+    max-height: 250px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+/* Custom scrollbar for popover */
+.stamps-grid-inner::-webkit-scrollbar {
+    width: 4px;
+}
+
+.stamps-grid-inner::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 2px;
+}
+
+.popover-footer {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+}
+
+#btn-add-stamp {
+    width: 100%;
+    padding: 10px;
+    background: rgba(0, 210, 255, 0.1);
+    border: 1px dashed var(--accent);
+    border-radius: 8px;
+    color: var(--accent);
+    cursor: pointer;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s;
+}
+
+#btn-add-stamp:hover {
+    background: var(--accent);
+    color: #000;
+    border-style: solid;
+}
+
+.stamp-btn {
+    font-size: 1.2rem !important;
+    background: rgba(255, 255, 255, 0.03) !important;
+}
+
+.stamp-btn:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+}
+
 /* Sidebar Dock (Floating Actions) */
 .sidebar-dock {
     position: absolute;

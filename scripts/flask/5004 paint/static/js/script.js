@@ -48,6 +48,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeModal = modal.querySelector('.close-modal');
     const galleryGrid = document.getElementById('gallery-grid');
 
+    const btnStampsPopover = document.getElementById('btn-stamps-popover');
+    const stampsPopover = document.getElementById('stamps-popover');
+
     // --- State ---
     const state = {
         isDrawing: false,
@@ -238,9 +241,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderStamps() {
         const grid = document.getElementById('stamps-grid');
-        const addBtn = document.getElementById('btn-add-stamp');
         grid.innerHTML = '';
-        grid.appendChild(addBtn);
 
         state.stamps.forEach(iconClass => {
             const btn = document.createElement('button');
@@ -251,8 +252,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 state.selectedStamp = iconClass;
                 setTool('stamp');
                 renderStamps();
+                stampsPopover.classList.remove('visible'); // Auto-close on select
             };
-            grid.insertBefore(btn, addBtn);
+            grid.appendChild(btn);
         });
     }
 
@@ -296,6 +298,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 b.classList.toggle('active', b.id === `tool-${toolName}`);
             }
         });
+
+        // Handle trigger button active state
+        btnStampsPopover.classList.toggle('active', toolName === 'stamp');
+
         document.querySelectorAll('.stamp-btn').forEach(b => {
             const icon = b.querySelector('i').className.split(' ').find(c => c.startsWith('fa-') && c !== 'fa-solid');
             b.classList.toggle('active', toolName === 'stamp' && state.selectedStamp === icon);
@@ -893,6 +899,18 @@ document.addEventListener('DOMContentLoaded', () => {
             alert("Invalid class. Must start with 'fa-'");
         }
     };
+
+    btnStampsPopover.onclick = (e) => {
+        e.stopPropagation();
+        stampsPopover.classList.toggle('visible');
+    };
+
+    // Close popover when clicking elsewhere
+    document.addEventListener('click', (e) => {
+        if (!stampsPopover.contains(e.target) && e.target !== btnStampsPopover) {
+            stampsPopover.classList.remove('visible');
+        }
+    });
 
     brushSizeInput.oninput = (e) => { state.size = e.target.value; sizeValDisplay.textContent = state.size; updateContext(); };
     brushSizeInput.onchange = () => saveSettings();
