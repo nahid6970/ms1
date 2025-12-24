@@ -11134,6 +11134,66 @@ function captureAndGeneratePDF(container, filename) {
                 // Add image exactly to fit width
                 doc.addImage(imgData, 'JPEG', pageMargin, pageMargin, usableWidthMm, imgHeightMm);
 
+                // --- ADD LINKS OVERLAY ---
+                // Find all links in the original container to map them to PDF coordinates
+                const links = container.querySelectorAll('a');
+                if (links.length > 0) {
+                    // Calculate scale factor: PDF width (mm) / Canvas width (px)
+                    const scaleFactor = usableWidthMm / imgWidthPx;
+
+                    // We need to account for the image position (margins)
+                    const xOffset = pageMargin;
+                    const yOffset = pageMargin;
+
+                    links.forEach(link => {
+                        const href = link.getAttribute('href');
+                        if (href) {
+                            // Get visual position relative to container
+                            // Since container is off-screen, we rely on its internal layout
+                            // We use the canvas dimensions to map back, but checking specific element positions
+                            // inside the container works if we haven't destroyed it yet.
+
+                            // Note: container is absolute positioned off-screen, but layout is computed.
+                            const rect = link.getBoundingClientRect();
+                            const containerRect = container.getBoundingClientRect();
+
+                            // Calculate relative position in pixels
+                            const linkX = rect.left - containerRect.left;
+                            const linkY = rect.top - containerRect.top;
+                            const linkW = rect.width;
+                            const linkH = rect.height;
+
+                            // Convert to PDF coordinates (mm)
+                            // We map the CSS pixel position (0 to scrollWidth) to the PDF mm position
+                            const cssWidth = container.scrollWidth;
+                            const cssHeight = container.scrollHeight;
+
+                            const pdfX = pageMargin + (linkX / cssWidth) * usableWidthMm;
+                            const pdfY = pageMargin + (linkY / cssHeight) * imgHeightMm;
+                            const pdfW = (linkW / cssWidth) * usableWidthMm;
+                            const pdfH = (linkH / cssHeight) * imgHeightMm;
+
+                            // Ensure URL is absolute for PDF
+                            let fullUrl = href;
+                            if (!href.startsWith('http://') && !href.startsWith('https://') && !href.startsWith('mailto:') && !href.startsWith('tel:')) {
+                                if (href.includes('.') && !href.includes(' ')) {
+                                    fullUrl = 'http://' + href;
+                                } else {
+                                    fullUrl = window.location.origin + (href.startsWith('/') ? '' : '/') + href;
+                                }
+                            }
+
+                            // Add clickable link to PDF
+                            doc.link(pdfX, pdfY, pdfW, pdfH, { url: fullUrl });
+
+                            // Optional: Debugging - draw rect around link (comment out for production)
+                            // doc.setDrawColor(255, 0, 0);
+                            // doc.rect(pdfX, pdfY, pdfW, pdfH);
+                        }
+                    });
+                }
+                // -------------------------
+
                 // Save PDF
                 const finalFilename = filename.endsWith('.pdf') ? filename : filename + '.pdf';
                 doc.save(finalFilename);
