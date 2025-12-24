@@ -1458,3 +1458,23 @@ Users can set custom fonts per column via **Column Settings (F3)**:
 - **Types:** Safely handles strings, numbers, and empty cells.
 - **Fallback:** Uses ancient `document.execCommand('copy')` as a backup if the modern Clipboard API is blocked (e.g., non-secure HTTP).
 - **Key Function:** `copySheetContent()` in `static/script.js`.
+
+### F1 Quick Navigation - Separator Enhancements
+**Purpose:** Improves the organization capability within the F1 Quick Navigation window.
+**Behavior:**
+- **Separators:** Can be dragged and dropped to reorganize sheet groups.
+- **Group Joining:** Dropping a sheet onto another sheet that is immediately below a separator will now correctly join that group (logic updated to `newIdx > targetIndex`).
+- **Logic:** `handleF1Drop` now rebuilds the separator map (`tableData.sheetSeparators`) dynamically based on the new sheet order, ensuring separators stick to their relative positions.
+
+### Multi-Cursor Selection (Ctrl+Shift+D)
+**Purpose:** Mimics VS Code's "Select Next Occurrence" or "Add Selection to Next Find Match" for powerful editing.
+**New Behavior:**
+- **Starts From Current Selection:** Instead of resetting to the first match, it now finds the match closest to your current cursor/selection.
+- **Immediate Activation:** You no longer need to select all occurrences. Multi-cursor editing activates immediately after selecting more than one instance.
+- **Partial Selection Support:** Correctly handles `Shift+Arrow` keys to extend selections even if they are partial or not identical to the full word.
+- **Selective Editing:** Edits only apply to the explicitly selected matches. Unselected matches in the document shift positions accordingly but remain unchanged.
+
+### Link Interaction Improvements
+**Purpose:** Ensures links in markdown cells are clickable even when they contain formatted text.
+**Issue Resolved:** Previously, clicking a formatted element (e.g., `**bold**`) inside a link would trigger the "click-to-edit" logic, hiding the link before the browser could navigate.
+**Implementation:** Updated `handlePreviewMouseDown` to use `.closest('a')`. This checks if the clicked element *or any of its parents* is a link, correctly preventing the edit-mode toggle when clicking deeply nested content within tags.
