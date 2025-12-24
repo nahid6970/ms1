@@ -3,9 +3,11 @@ import os
 import base64
 import time
 import uuid
+import json
 
 app = Flask(__name__)
 SAVE_DIR = os.path.join(os.path.dirname(__file__), "static", "saved_art")
+SETTINGS_FILE = os.path.join(os.path.dirname(__file__), "settings.json")
 
 if not os.path.exists(SAVE_DIR):
     os.makedirs(SAVE_DIR)
@@ -71,6 +73,27 @@ def delete_art():
             return jsonify({"success": False, "error": str(e)})
     else:
         return jsonify({"success": False, "error": "File not found"})
+
+@app.route('/save_settings', methods=['POST'])
+def save_settings():
+    try:
+        settings = request.json
+        with open(SETTINGS_FILE, 'w') as f:
+            json.dump(settings, f)
+        return jsonify({"success": True})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
+
+@app.route('/get_settings', methods=['GET'])
+def get_settings():
+    try:
+        if os.path.exists(SETTINGS_FILE):
+            with open(SETTINGS_FILE, 'r') as f:
+                settings = json.load(f)
+            return jsonify(settings)
+        return jsonify({})
+    except Exception as e:
+        return jsonify({})
 
 if __name__ == '__main__':
     app.run(debug=True, port=5004)
