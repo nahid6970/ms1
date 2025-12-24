@@ -112,11 +112,13 @@
         <input type="text" id="qs-title-input" placeholder="Title (e.g. GitHub)">
         <input type="text" id="qs-url-input" placeholder="URL (https://...)">
         <div class="qs-input-group">
-          <label for="qs-color-input">Tile Color:</label>
-          <input type="color" id="qs-color-input" value="#38bdf8">
-          <label class="qs-checkbox-label">
-            <input type="checkbox" id="qs-solid-input"> Solid
-          </label>
+          <span>Tile Style</span>
+          <div class="qs-color-controls">
+            <input type="color" id="qs-color-input" value="#38bdf8" title="Pick Color">
+            <label class="qs-checkbox-label">
+              <input type="checkbox" id="qs-solid-input"> Solid
+            </label>
+          </div>
         </div>
         <div class="qs-form-btns">
           <button id="qs-save-btn" class="qs-btn-primary">Save Link</button>

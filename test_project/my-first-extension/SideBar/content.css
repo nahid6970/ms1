@@ -114,81 +114,146 @@ html.qs-shift-right.qs-expanded body {
 }
 
 #qs-modal-content {
-    background: #1e293b;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 16px;
-    padding: 24px;
-    width: 320px;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
-    transform: scale(0.9);
-    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    background: rgba(30, 41, 59, 0.7);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 24px;
+    padding: 32px;
+    width: 340px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+    transform: scale(0.9) translateY(20px);
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     color: white;
 }
 
 #qs-modal-overlay.visible #qs-modal-content {
-    transform: scale(1);
+    transform: scale(1) translateY(0);
 }
 
 #qs-modal-content h3 {
-    margin: 0 0 16px 0;
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: #38bdf8;
+    margin: 0 0 24px 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #fff;
+    text-align: center;
+    letter-spacing: -0.02em;
 }
 
-#qs-modal-content input {
+#qs-modal-content input[type="text"] {
     width: 100%;
-    background: rgba(15, 23, 42, 0.8);
+    background: rgba(0, 0, 0, 0.2);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    padding: 10px 12px;
+    border-radius: 12px;
+    padding: 12px 16px;
     color: white;
-    margin-bottom: 12px;
+    margin-bottom: 16px;
     font-family: inherit;
     font-size: 14px;
+    transition: all 0.2s;
+    box-sizing: border-box;
 }
 
-#qs-modal-content input:focus {
+#qs-modal-content input[type="text"]:focus {
     outline: none;
+    background: rgba(0, 0, 0, 0.3);
     border-color: #38bdf8;
-    box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+    box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.15);
 }
 
 .qs-input-group {
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin-bottom: 20px;
+    justify-content: space-between;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 14px;
+    padding: 10px 16px;
+    margin-bottom: 24px;
     color: #94a3b8;
-    font-size: 14px;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.qs-color-controls {
+    display: flex;
+    align-items: center;
+    gap: 16px;
 }
 
 #qs-color-input {
-    width: 44px !important;
-    height: 32px !important;
+    appearance: none;
+    -webkit-appearance: none;
+    width: 28px !important;
+    height: 28px !important;
     padding: 0 !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    background: transparent !important;
+    border: 2px solid rgba(255, 255, 255, 0.2) !important;
+    background: none !important;
     cursor: pointer;
     margin: 0 !important;
-    border-radius: 4px !important;
+    border-radius: 8px !important;
+    overflow: hidden;
+    transition: transform 0.2s, border-color 0.2s;
+}
+
+#qs-color-input:hover {
+    transform: scale(1.1);
+    border-color: rgba(255, 255, 255, 0.4) !important;
+}
+
+#qs-color-input::-webkit-color-swatch-wrapper {
+    padding: 0;
+}
+
+#qs-color-input::-webkit-color-swatch {
+    border: none;
 }
 
 .qs-checkbox-label {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     cursor: pointer;
     user-select: none;
-    font-weight: 500;
+    font-size: 13px;
+    font-weight: 600;
     color: #f1f5f9;
+    transition: opacity 0.2s;
+}
+
+.qs-checkbox-label:hover {
+    opacity: 0.8;
 }
 
 .qs-checkbox-label input {
-    width: 16px !important;
-    height: 16px !important;
+    appearance: none;
+    -webkit-appearance: none;
+    width: 18px !important;
+    height: 18px !important;
+    background: rgba(0, 0, 0, 0.3) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 5px !important;
     margin: 0 !important;
     cursor: pointer;
+    position: relative;
+    transition: all 0.2s;
+}
+
+.qs-checkbox-label input:checked {
+    background: #38bdf8 !important;
+    border-color: #38bdf8 !important;
+}
+
+.qs-checkbox-label input:checked::after {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 2px;
+    width: 4px;
+    height: 8px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
 }
 
 /* Solid background text contrast */
@@ -197,15 +262,47 @@ html.qs-shift-right.qs-expanded body {
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
-.qs-btn-secondary {
-    flex: 1;
-    background: rgba(255, 255, 255, 0.05);
+.qs-form-btns {
+    display: flex;
+    gap: 12px;
+}
+
+.qs-btn-primary {
+    flex: 2;
+    background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
     color: white;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 8px;
-    border-radius: 6px;
+    border: none;
+    border-radius: 12px;
+    padding: 12px;
     font-weight: 600;
     cursor: pointer;
+    transition: all 0.2s;
+    font-size: 14px;
+    box-shadow: 0 4px 12px rgba(56, 189, 248, 0.25);
+}
+
+.qs-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(56, 189, 248, 0.35);
+    filter: brightness(1.1);
+}
+
+.qs-btn-secondary {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.08);
+    color: #f1f5f9;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 14px;
+}
+
+.qs-btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.2);
 }
 
 /* Actions */
