@@ -381,6 +381,17 @@ html.qs-shift-right.qs-expanded body {
     transform: scale(1.05);
 }
 
+.qs-link-item.qs-dragging {
+    opacity: 0.4;
+    cursor: grabbing;
+}
+
+.qs-link-item.qs-dragging-over {
+    border: 2px dashed #38bdf8 !important;
+    transform: scale(1.1);
+    background: rgba(56, 189, 248, 0.1) !important;
+}
+
 .qs-favicon {
     width: 44px;
     height: 44px;

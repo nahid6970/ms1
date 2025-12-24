@@ -269,8 +269,8 @@
       const item = document.createElement('a');
       item.className = 'qs-link-item';
       item.href = link.url;
-      item.target = '_blank';
       item.title = link.title;
+      item.draggable = true;
 
       if (link.color) {
         const bg = link.isSolid ? link.color : `${link.color}33`;
@@ -291,6 +291,46 @@
         <div class="qs-link-text">${link.title}</div>
         <div class="qs-tooltip">${link.title}</div>
       `;
+
+      // Drag and Drop Logic
+      item.addEventListener('dragstart', (e) => {
+        item.classList.add('qs-dragging');
+        e.dataTransfer.setData('text/plain', link.id);
+        e.dataTransfer.effectAllowed = 'move';
+      });
+
+      item.addEventListener('dragend', () => {
+        item.classList.remove('qs-dragging');
+        const draggingItems = document.querySelectorAll('.qs-dragging-over');
+        draggingItems.forEach(el => el.classList.remove('qs-dragging-over'));
+      });
+
+      item.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        item.classList.add('qs-dragging-over');
+      });
+
+      item.addEventListener('dragleave', () => {
+        item.classList.remove('qs-dragging-over');
+      });
+
+      item.addEventListener('drop', (e) => {
+        e.preventDefault();
+        item.classList.remove('qs-dragging-over');
+        const draggedId = e.dataTransfer.getData('text/plain');
+        if (draggedId === link.id) return;
+
+        const draggedIndex = links.findIndex(l => l.id === draggedId);
+        const targetIndex = links.findIndex(l => l.id === link.id);
+
+        if (draggedIndex !== -1 && targetIndex !== -1) {
+          const [draggedItem] = links.splice(draggedIndex, 1);
+          links.splice(targetIndex, 0, draggedItem);
+          chrome.storage.sync.set({ sidebar_links: links });
+          renderLinks();
+        }
+      });
 
       item.addEventListener('contextmenu', (e) => {
         e.preventDefault();
