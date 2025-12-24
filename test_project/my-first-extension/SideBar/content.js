@@ -13,34 +13,24 @@
 
   function updatePageShift() {
     const isHidden = root.classList.contains('qs-hidden');
-    const width = isExpanded ? 280 : 60;
-
     const html = document.documentElement;
-    const body = document.body;
 
-    if (isHidden) {
-      html.style.setProperty('margin-left', '0', 'important');
-      html.style.setProperty('margin-right', '0', 'important');
-      html.style.setProperty('width', '100%', 'important');
-      // Reset YouTube specific fixed header
-      const ytHeader = document.querySelector('#masthead-container');
-      if (ytHeader) ytHeader.style.setProperty('left', '0', 'important');
-    } else {
-      html.style.setProperty('width', `calc(100% - ${width}px)`, 'important');
-      if (isLeft) {
-        html.style.setProperty('margin-left', `${width}px`, 'important');
-        html.style.setProperty('margin-right', '0', 'important');
+    // Reset classes
+    html.classList.remove('qs-shift-left', 'qs-shift-right', 'qs-expanded');
 
-        // Push YouTube's fixed header
-        const ytHeader = document.querySelector('#masthead-container');
-        if (ytHeader) ytHeader.style.setProperty('left', `${width}px`, 'important');
+    if (!isHidden) {
+      html.classList.add(isLeft ? 'qs-shift-left' : 'qs-shift-right');
+      if (isExpanded) html.classList.add('qs-expanded');
+    }
+
+    // YouTube Specific Header Fix
+    const ytHeader = document.querySelector('#masthead-container');
+    if (ytHeader) {
+      if (!isHidden && isLeft) {
+        const width = isExpanded ? 280 : 60;
+        ytHeader.style.setProperty('left', `${width}px`, 'important');
       } else {
-        html.style.setProperty('margin-left', '0', 'important');
-        html.style.setProperty('margin-right', `${width}px`, 'important');
-
-        // Reset YouTube header (it stays anchored to left normally)
-        const ytHeader = document.querySelector('#masthead-container');
-        if (ytHeader) ytHeader.style.setProperty('left', '0', 'important');
+        ytHeader.style.setProperty('left', '0', 'important');
       }
     }
   }
