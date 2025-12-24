@@ -169,13 +169,17 @@ input[type="color"] {
     margin-bottom: 0px;
     max-height: 0;
     overflow: hidden;
-    transition: max-height 0.3s ease-out, margin 0.3s;
+    transition: all 0.3s ease-in-out;
     opacity: 0;
+    padding: 0 4px;
+    /* Room for hover scale */
 }
 
 .swatches.visible {
     max-height: 200px;
-    margin-bottom: 12px;
+    margin-bottom: 16px;
+    padding: 8px 4px;
+    /* More room when open */
     opacity: 1;
 }
 
@@ -185,12 +189,16 @@ input[type="color"] {
     border-radius: 50%;
     cursor: pointer;
     border: 2px solid rgba(255, 255, 255, 0.1);
-    transition: transform 0.2s;
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    z-index: 1;
 }
 
 .swatch:hover {
-    transform: scale(1.2);
+    transform: scale(1.25);
     border-color: #fff;
+    z-index: 10;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
 }
 
 .spacer {
