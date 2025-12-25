@@ -1,15 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SIERRA TACTICAL - SWAT OPERATOR</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
     <div id="game-container">
         <canvas id="gameCanvas"></canvas>
         <div id="ui-layer">
+            <!-- Pause Menu -->
+            <div id="main-menu" class="overlay">
+                <div class="menu-box">
+                    <h1>SIERRA TACTICAL</h1>
+                    <button class="menu-btn" onclick="UI.showMapList()">START MISSION</button>
+                    <button class="menu-btn" onclick="UI.startEditor()">LEVEL EDITOR</button>
+                    <button class="menu-btn" disabled>SETTINGS</button>
+                    <button class="menu-btn" onclick="UI.resume()">RESUME</button>
+                </div>
+            </div>
+
+            <!-- Map Selection -->
+            <div id="map-list-screen" class="overlay hidden">
+                <div class="menu-box">
+                    <h2>READY MISSION</h2>
+                    <div id="map-items">
+                        <!-- Dynamic maps here -->
+                    </div>
+                    <button class="menu-btn" onclick="UI.showMainMenu()">BACK</button>
+                </div>
+            </div>
+
+            <!-- Save Map Dialog -->
+            <div id="save-map-dialog" class="overlay hidden">
+                <div class="menu-box">
+                    <h2>SAVE SECTOR</h2>
+                    <input type="text" id="map-name-input" placeholder="SECTOR NAME...">
+                    <button class="menu-btn" onclick="UI.saveCustomMap()">COMMIT SAVE</button>
+                    <button class="menu-btn" onclick="UI.closeSaveDialog()">CANCEL</button>
+                </div>
+            </div>
+
             <div id="hud">
                 <div class="hud-item">
                     <span class="label">WEAPON:</span>
@@ -36,4 +70,5 @@
     </div>
     <script src="game.js"></script>
 </body>
+
 </html>
