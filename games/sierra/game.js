@@ -306,20 +306,21 @@ class Player {
             }
         });
 
-        // Slope Logic
+        // Slope Logic (Fixed)
         GAME.walls.forEach(wall => {
             if (this.x + this.w > wall.x && this.x < wall.x + wall.w) {
-                if (wall.type === 'RAMP_UP') {
-                    let relX = (this.x + this.w / 2) - wall.x;
-                    let floorY = wall.y + (wall.h - (relX / wall.w) * wall.h);
-                    if (this.y + this.h >= floorY - 5 && this.y + this.h <= floorY + 15) {
-                        this.y = floorY - this.h; this.vy = 0; this.grounded = true;
-                    }
-                } else if (wall.type === 'RAMP_DOWN') {
-                    let relX = (this.x + this.w / 2) - wall.x;
-                    let floorY = wall.y + (relX / wall.w) * wall.h;
-                    if (this.y + this.h >= floorY - 5 && this.y + this.h <= floorY + 15) {
-                        this.y = floorY - this.h; this.vy = 0; this.grounded = true;
+                let relX = (this.x + this.w / 2) - wall.x;
+                relX = Math.max(0, Math.min(wall.w, relX));
+
+                let floorY = null;
+                if (wall.type === 'RAMP_UP') floorY = wall.y + (wall.h - (relX / wall.w) * wall.h);
+                else if (wall.type === 'RAMP_DOWN') floorY = wall.y + (relX / wall.w) * wall.h;
+
+                if (floorY !== null) {
+                    if (this.y + this.h >= floorY - 10 && this.y + this.h <= floorY + 20 && this.vy >= 0) {
+                        this.y = floorY - this.h;
+                        this.vy = 0;
+                        this.grounded = true;
                     }
                 }
             }
@@ -537,20 +538,21 @@ class Enemy {
             }
         });
 
-        // Enemy Slope Logic
+        // Enemy Slope Logic (Fixed)
         GAME.walls.forEach(wall => {
             if (this.x + this.w > wall.x && this.x < wall.x + wall.w) {
-                if (wall.type === 'RAMP_UP') {
-                    let relX = (this.x + this.w / 2) - wall.x;
-                    let floorY = wall.y + (wall.h - (relX / wall.w) * wall.h);
-                    if (this.y + this.h >= floorY - 5 && this.y + this.h <= floorY + 15) {
-                        this.y = floorY - this.h; this.vy = 0; this.grounded = true;
-                    }
-                } else if (wall.type === 'RAMP_DOWN') {
-                    let relX = (this.x + this.w / 2) - wall.x;
-                    let floorY = wall.y + (relX / wall.w) * wall.h;
-                    if (this.y + this.h >= floorY - 5 && this.y + this.h <= floorY + 15) {
-                        this.y = floorY - this.h; this.vy = 0; this.grounded = true;
+                let relX = (this.x + this.w / 2) - wall.x;
+                relX = Math.max(0, Math.min(wall.w, relX));
+
+                let floorY = null;
+                if (wall.type === 'RAMP_UP') floorY = wall.y + (wall.h - (relX / wall.w) * wall.h);
+                else if (wall.type === 'RAMP_DOWN') floorY = wall.y + (relX / wall.w) * wall.h;
+
+                if (floorY !== null) {
+                    if (this.y + this.h >= floorY - 10 && this.y + this.h <= floorY + 20 && this.vy >= 0) {
+                        this.y = floorY - this.h;
+                        this.vy = 0;
+                        this.grounded = true;
                     }
                 }
             }
