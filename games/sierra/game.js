@@ -271,7 +271,7 @@ class Enemy {
         this.vx = 0; this.vy = 0; this.grounded = false;
     }
     update() {
-        if (this.health <= 0 || GAME.paused) return;
+        if (this.health <= 0 || GAME.paused || GAME.editorMode) return;
 
         // Gravity and Physics for Enemy
         this.vy += GAME.gravity;
@@ -416,13 +416,18 @@ canvas.addEventListener('mousedown', e => {
 });
 
 function update() {
-    if (!GAME.running || GAME.paused) {
-        if (GAME.editorMode) {
-            if (keys['KeyA']) GAME.cameraX -= 10;
-            if (keys['KeyD']) GAME.cameraX += 10;
-        }
-        return;
+    if (!GAME.running) return;
+
+    if (GAME.editorMode) {
+        if (keys['KeyA']) GAME.cameraX -= 15;
+        if (keys['KeyD']) GAME.cameraX += 15;
+        if (GAME.cameraX < 0) GAME.cameraX = 0;
+        if (GAME.cameraX > 2000) GAME.cameraX = 2000;
+        return; // Don't run game logic in editor
     }
+
+    if (GAME.paused) return;
+
     GAME.player.update();
     GAME.bullets.forEach(b => {
         if (b.owner === 'enemy' && b.active && b.x > GAME.player.x && b.x < GAME.player.x + GAME.player.w && b.y > GAME.player.y && b.y < GAME.player.y + GAME.player.h) {
