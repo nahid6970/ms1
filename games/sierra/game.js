@@ -48,6 +48,82 @@ const CLASSES = {
     HEAVY: { weapon: WEAPONS.LMG, health: 150, speed: 2.5, color: '#444' }
 };
 
+const DEFAULT_MAPS = {
+    "1: CQB TRAINING": {
+        walls: [
+            { x: -100, y: 550, w: 2000, h: 100, health: 1000, destructible: false },
+            { x: 300, y: 350, w: 20, h: 200, health: 1000, destructible: false },
+            { x: 600, y: 350, w: 20, h: 200, health: 1000, destructible: false },
+            { x: 300, y: 350, w: 320, h: 20, health: 1000, destructible: false },
+            { x: 450, y: 480, w: 50, h: 70, health: 60, destructible: true }
+        ],
+        enemies: [{ x: 500, y: 450, className: 'ASSAULT' }, { x: 350, y: 450, className: 'ASSAULT' }]
+    },
+    "2: WAREHOUSE ASSAULT": {
+        walls: [
+            { x: -100, y: 550, w: 3000, h: 100, health: 1000, destructible: false },
+            { x: 500, y: 480, w: 50, h: 70, health: 60, destructible: true },
+            { x: 550, y: 480, w: 50, h: 70, health: 60, destructible: true },
+            { x: 525, y: 410, w: 50, h: 70, health: 60, destructible: true },
+            { x: 1000, y: 480, w: 50, h: 70, health: 60, destructible: true },
+            { x: 1050, y: 480, w: 50, h: 70, health: 60, destructible: true },
+            { x: 1400, y: 350, w: 400, h: 30, health: 1000, destructible: false }
+        ],
+        enemies: [
+            { x: 600, y: 500, className: 'MERCENARY' },
+            { x: 1100, y: 500, className: 'MERCENARY' },
+            { x: 1500, y: 300, className: 'ASSAULT' },
+            { x: 2000, y: 500, className: 'HEAVY' }
+        ]
+    },
+    "3: SNIPER'S NEST": {
+        walls: [
+            { x: -100, y: 550, w: 4000, h: 100, health: 1000, destructible: false },
+            { x: 400, y: 350, w: 200, h: 20, health: 1000, destructible: false },
+            { x: 800, y: 250, w: 200, h: 20, health: 1000, destructible: false },
+            { x: 1200, y: 150, w: 200, h: 20, health: 1000, destructible: false },
+            { x: 1600, y: 250, w: 200, h: 20, health: 1000, destructible: false }
+        ],
+        enemies: [
+            { x: 450, y: 300, className: 'SNIPER' },
+            { x: 850, y: 200, className: 'SNIPER' },
+            { x: 1250, y: 100, className: 'SNIPER' },
+            { x: 1650, y: 200, className: 'SNIPER' }
+        ]
+    },
+    "4: THE HEAVY BUNKER": {
+        walls: [
+            { x: -100, y: 550, w: 3000, h: 100, health: 1000, destructible: false },
+            { x: 0, y: 100, w: 4000, h: 20, health: 1000, destructible: false }, // Low ceiling
+            { x: 500, y: 300, w: 20, h: 250, health: 1000, destructible: false },
+            { x: 1000, y: 120, w: 20, h: 250, health: 1000, destructible: false },
+            { x: 1500, y: 300, w: 20, h: 250, health: 1000, destructible: false },
+            { x: 2000, y: 120, w: 20, h: 430, health: 1000, destructible: false } // Exit gate
+        ],
+        enemies: [
+            { x: 700, y: 500, className: 'HEAVY' },
+            { x: 1200, y: 300, className: 'HEAVY' },
+            { x: 1800, y: 500, className: 'ASSAULT' }
+        ]
+    },
+    "5: COMPOUND BREACH": {
+        walls: [
+            { x: -100, y: 550, w: 4000, h: 100, health: 1000, destructible: false },
+            { x: 400, y: 400, w: 600, h: 20, health: 200, destructible: true },
+            { x: 1200, y: 400, w: 600, h: 20, health: 200, destructible: true },
+            { x: 800, y: 200, w: 400, h: 20, health: 200, destructible: true },
+            { x: 500, y: 480, w: 50, h: 70, health: 1000, destructible: false }
+        ],
+        enemies: [
+            { x: 500, y: 350, className: 'ASSAULT' },
+            { x: 900, y: 350, className: 'MERCENARY' },
+            { x: 1000, y: 150, className: 'SNIPER' },
+            { x: 1500, y: 500, className: 'HEAVY' },
+            { x: 2500, y: 500, className: 'ASSAULT' }
+        ]
+    }
+};
+
 // UI & Map Logic
 const UI = {
     showMainMenu: () => {
@@ -64,19 +140,22 @@ const UI = {
     renderMapList: () => {
         const container = document.getElementById('map-items');
         container.innerHTML = '';
+
+        // Built-in Maps
+        Object.keys(DEFAULT_MAPS).forEach(name => {
+            const item = document.createElement('div');
+            item.className = 'map-item default-map';
+            item.innerHTML = `<span style="color: #666;">[HQ]</span> ${name}`;
+            item.onclick = () => UI.loadMap(DEFAULT_MAPS[name]);
+            container.appendChild(item);
+        });
+
+        // Custom User Maps
         const maps = JSON.parse(localStorage.getItem('sierra_maps') || '{}');
-
-        // Add default map
-        const defaultItem = document.createElement('div');
-        defaultItem.className = 'map-item';
-        defaultItem.innerText = 'DEFAULT TRAINING GROUNDS';
-        defaultItem.onclick = () => UI.loadMap(null);
-        container.appendChild(defaultItem);
-
         Object.keys(maps).forEach(name => {
             const item = document.createElement('div');
             item.className = 'map-item';
-            item.innerText = name;
+            item.innerHTML = `<span style="color: #900;">[USER]</span> ${name}`;
             item.onclick = () => UI.loadMap(maps[name]);
             container.appendChild(item);
         });
