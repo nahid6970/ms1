@@ -193,6 +193,24 @@ canvas {
     /* Space for the scale effect */
 }
 
+/* Custom Tactical Scrollbar */
+#map-items::-webkit-scrollbar {
+    width: 6px;
+}
+
+#map-items::-webkit-scrollbar-track {
+    background: #0a0a0a;
+}
+
+#map-items::-webkit-scrollbar-thumb {
+    background: #333;
+    border-radius: 3px;
+}
+
+#map-items::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
 .map-item {
     background: #1a1a1a;
     border: 1px solid #222;
