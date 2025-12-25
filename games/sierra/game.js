@@ -50,16 +50,19 @@ const CLASSES = {
 
 let DEFAULT_MAPS = {};
 
-// Fetch built-in maps from the physical JSON file
+// Fetch maps from the unified JSON database via Flask
 async function loadHQMissions() {
     try {
-        const response = await fetch('maps.json');
+        const response = await fetch('/api/maps');
         DEFAULT_MAPS = await response.json();
+        return true;
     } catch (e) {
-        console.warn("Could not load maps.json, using local storage/internals only.");
+        // Fallback for local testing without Flask
+        const response = await fetch('maps.json?v=' + Date.now());
+        DEFAULT_MAPS = await response.json();
+        return true;
     }
 }
-loadHQMissions();
 
 // UI & Map Logic
 const UI = {
@@ -74,26 +77,20 @@ const UI = {
         document.getElementById('map-list-screen').classList.remove('hidden');
         UI.renderMapList();
     },
-    renderMapList: () => {
+    renderMapList: async () => {
         const container = document.getElementById('map-items');
+        container.innerHTML = 'LOADING TACTICAL DATABASE...';
+
+        await loadHQMissions();
         container.innerHTML = '';
 
-        // Built-in Maps
         Object.keys(DEFAULT_MAPS).forEach(name => {
             const item = document.createElement('div');
-            item.className = 'map-item default-map';
-            item.innerHTML = `<span style="color: #666;">[HQ]</span> ${name}`;
-            item.onclick = () => UI.loadMap(DEFAULT_MAPS[name]);
-            container.appendChild(item);
-        });
-
-        // Custom User Maps
-        const maps = JSON.parse(localStorage.getItem('sierra_maps') || '{}');
-        Object.keys(maps).forEach(name => {
-            const item = document.createElement('div');
             item.className = 'map-item';
-            item.innerHTML = `<span style="color: #900;">[USER]</span> ${name}`;
-            item.onclick = () => UI.loadMap(maps[name]);
+            // Mark default/hq maps if needed, but here we treat all as unified
+            const isHQ = name.includes(':');
+            item.innerHTML = `<span style="color: ${isHQ ? '#666' : '#900'};">[DATA]</span> ${name}`;
+            item.onclick = () => UI.loadMap(DEFAULT_MAPS[name]);
             container.appendChild(item);
         });
     },
@@ -124,17 +121,35 @@ const UI = {
     closeSaveDialog: () => {
         document.getElementById('save-map-dialog').classList.add('hidden');
     },
-    saveCustomMap: () => {
+    saveCustomMap: async () => {
         const name = document.getElementById('map-name-input').value.trim();
         if (!name) return alert("Enter sector name!");
-        const maps = JSON.parse(localStorage.getItem('sierra_maps') || '{}');
-        maps[name] = {
+
+        const mapData = {
             walls: GAME.walls,
             enemies: GAME.enemies.map(e => ({ x: e.x, y: e.y, className: e.className }))
         };
-        localStorage.setItem('sierra_maps', JSON.stringify(maps));
-        UI.closeSaveDialog();
-        alert("Sector committed to database.");
+
+        try {
+            const response = await fetch('/api/save_map', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: name, data: mapData })
+            });
+            const result = await response.json();
+            if (result.status === 'success') {
+                alert(result.message);
+                UI.closeSaveDialog();
+            } else {
+                throw new Error(result.error);
+            }
+        } catch (e) {
+            alert("SERVER ERROR: Could not save to disk. Make sure app.py is running!");
+            // Fallback to local storage if server is down
+            const maps = JSON.parse(localStorage.getItem('sierra_maps') || '{}');
+            maps[name] = mapData;
+            localStorage.setItem('sierra_maps', JSON.stringify(maps));
+        }
     }
 };
 
