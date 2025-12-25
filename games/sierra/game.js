@@ -90,6 +90,7 @@ const UI = {
     startEditor: () => {
         document.getElementById('main-menu').classList.add('hidden');
         document.getElementById('hud').classList.add('hidden');
+        document.getElementById('editor-ui').classList.remove('hidden');
         GAME.editorMode = true;
         GAME.running = true;
         GAME.paused = false;
@@ -377,13 +378,18 @@ function initLevel(mapData) {
 
 window.addEventListener('keydown', e => {
     if (e.code === 'Escape') {
-        if (GAME.editorMode) { GAME.editorMode = false; UI.showMainMenu(); }
+        if (GAME.editorMode) {
+            GAME.editorMode = false;
+            document.getElementById('editor-ui').classList.add('hidden');
+            UI.showMainMenu();
+        }
         else { GAME.paused = !GAME.paused; document.getElementById('main-menu').classList.toggle('hidden', !GAME.paused); }
     }
     if (e.code === 'Tab') {
         e.preventDefault();
         GAME.editorMode = !GAME.editorMode;
         document.getElementById('hud').classList.toggle('hidden', GAME.editorMode);
+        document.getElementById('editor-ui').classList.toggle('hidden', !GAME.editorMode);
         document.body.style.cursor = GAME.editorMode ? 'crosshair' : 'default';
     }
     if (GAME.editorMode) {
@@ -449,10 +455,17 @@ function draw() {
     if (GAME.player && !GAME.editorMode) GAME.player.draw();
     GAME.bullets.forEach(b => b.draw());
     GAME.particles.forEach(p => p.draw());
+
     if (GAME.editorMode) {
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.4)'; ctx.font = '20px Courier New';
-        ctx.fillText(`EDITOR: ${GAME.editorItem} | S: SAVE | DEL: CLEAR`, 20, 50);
-        ctx.strokeStyle = '#fff'; ctx.strokeRect(Math.floor((mouse.x + GAME.cameraX) / 50) * 50 - GAME.cameraX, Math.floor(mouse.y / 50) * 50, 50, 50);
+        // Update Editor UI Text
+        document.getElementById('ed-item').innerText = GAME.editorItem;
+        document.getElementById('ed-class').innerText = GAME.editorClass;
+
+        // Ghost placement
+        const gx = Math.floor((mouse.x + GAME.cameraX) / 50) * 50;
+        const gy = Math.floor(mouse.y / 50) * 50;
+        ctx.strokeStyle = '#fff';
+        ctx.strokeRect(gx - GAME.cameraX, gy, 50, 50);
     } else if (GAME.player) {
         ctx.fillStyle = '#300'; ctx.fillRect(20, 560, 200, 20);
         ctx.fillStyle = '#f00'; ctx.fillRect(20, 560, (GAME.player.health / GAME.player.maxHealth) * 200, 20);
