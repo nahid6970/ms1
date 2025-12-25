@@ -5925,7 +5925,7 @@ function closeAllColumnMenus() {
     });
 }
 
-function stripMarkdown(text) {
+function stripMarkdown(text, preserveLinks = false) {
     if (!text) return '';
     let stripped = String(text);
 
@@ -5992,11 +5992,13 @@ function stripMarkdown(text) {
     // Remove subscript markers: ~text~ -> text
     stripped = stripped.replace(/~(.+?)~/g, '$1');
 
-    // Remove link markers: {link:url}text{/} -> text
-    stripped = stripped.replace(/\{link:[^}]*\}(.+?)\{\/\}/g, '$1');
+    if (!preserveLinks) {
+        // Remove link markers: {link:url}text{/} -> text
+        stripped = stripped.replace(/\{link:[^}]*\}(.+?)\{\/\}/g, '$1');
 
-    // Remove new link markers: url[text] -> text
-    stripped = stripped.replace(/(https?:\/\/[^\s\[]+)\[(.+?)\]/g, '$2');
+        // Remove new link markers: url[text] -> text
+        stripped = stripped.replace(/(https?:\/\/[^\s\[]+)\[(.+?)\]/g, '$2');
+    }
 
     // Remove collapsible text markers: {{text}} -> text
     stripped = stripped.replace(/\{\{(.+?)\}\}/g, '$1');
@@ -6018,6 +6020,7 @@ function stripMarkdown(text) {
 
     // Remove Timeline markers: Timeline*Name or Timeline-R*Name -> Name
     stripped = stripped.replace(/^Timeline(?:C)?(?:-[A-Z]+)?\*(.+?)$/gm, '$1');
+
 
     // Remove word connector markers: [1]Word or [1-R]Word -> Word
     stripped = stripped.replace(/\[(\d+)(?:-[A-Z]+)?\](\S+)/g, '$2');
@@ -9591,8 +9594,8 @@ function removeFormatting(event) {
         return;
     }
 
-    // Use the stripMarkdown function to remove all formatting
-    const cleanText = stripMarkdown(selectedText);
+    // Use the stripMarkdown function to remove all formatting, but preserve links
+    const cleanText = stripMarkdown(selectedText, true);
 
     // Replace the selected text with clean text
     const newText = input.value.substring(0, start) +

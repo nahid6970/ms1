@@ -194,7 +194,8 @@ These two markdown syntaxes work together and are controlled by the same 👁️
 **Implementation:**
 - **Parsing:** Added regex replacements in both `parseMarkdownInline()` (for table cells) and `oldParseMarkdownBody()` (for regular cells)
 - **Detection:** Added `value.includes('!!')` and `value.includes('??')` to `hasMarkdown` checks
-- **Stripping:** Added `.replace(/!!(.+?)!!/g, '$1')` and `.replace(/\?\?(.+?)\?\?/g, '$1')` to `stripMarkdown()`
+- **Stripping:** Added `.replace(/!!(.+?)!!/g, '$1')` and `.replace(/\?\?(.+?)\?\?/g, '$1')` to `stripMarkdown()`.
+- **Preserving Links:** `stripMarkdown(text, preserveLinks)` now accepts an optional parameter. When `true` (used in "Remove Formatting"), it clears all styles but keeps the `{link:url}text{/}` or `url[text]` syntax, preventing links from being lost during cleanup.
 - **Quick Formatter:** Added Black, Red, and Blue buttons in a separate "Quick Highlights" section
 
 ### Alternative Link Syntax: `URL[TEXT]`

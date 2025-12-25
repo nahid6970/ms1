@@ -1526,7 +1526,7 @@ def generate_static_html(data, custom_syntaxes):
             });
         }
 
-        function stripMarkdown(text) {
+        function stripMarkdown(text, preserveLinks = false) {
             if (!text) return '';
             let stripped = String(text);
             // Remove bold markers: **text** -> text
@@ -1543,8 +1543,13 @@ def generate_static_html(data, custom_syntaxes):
             stripped = stripped.replace(/^Timeline(?:C)?(?:-[A-Z]+)?\\*(.+?)$/gm, '$1');
             // Remove word connector markers: [1]Word or [1-R]Word -> Word
             stripped = stripped.replace(/\\[(\\d+)(?:-[A-Z]+)?\\](\\S+)/g, '$2');
-            // Remove new link markers: url[text] -> text
-            stripped = stripped.replace(/(https?:\/\/[^\\s\\[]+)\\[(.+?)\\]/g, '$2');
+
+            if (!preserveLinks) {
+                // Remove link markers: {link:url}text{/} -> text
+                stripped = stripped.replace(/\\{link:[^\\}]*\\}(.+?)\\{\\/\\}/g, '$1');
+                // Remove new link markers: url[text] -> text
+                stripped = stripped.replace(/(https?:\/\/[^\\s\\[]+)\\[(.+?)\\]/g, '$2');
+            }
             return stripped;
         }
 
