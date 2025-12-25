@@ -291,6 +291,8 @@
       item.className = 'qs-link-item';
       item.href = link.url;
       item.title = link.title;
+      item.target = '_blank';
+      item.rel = 'noopener noreferrer';
       item.draggable = true;
 
       if (link.color) {
