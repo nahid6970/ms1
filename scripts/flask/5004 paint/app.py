@@ -7,12 +7,16 @@ import json
 
 app = Flask(__name__)
 SAVE_DIR = os.path.join(os.path.dirname(__file__), "static", "saved_art")
-SETTINGS_FILE = os.path.join(os.path.dirname(__file__), "settings.json")
+# Configuration Paths
+CONFIG_DIR = r"C:\Users\nahid\script_output"
+if not os.path.exists(CONFIG_DIR):
+    os.makedirs(CONFIG_DIR)
+
+SETTINGS_FILE = os.path.join(CONFIG_DIR, "paint_setting.json")
+ICONS_FILE = os.path.join(CONFIG_DIR, "paint_icons.json")
 
 if not os.path.exists(SAVE_DIR):
     os.makedirs(SAVE_DIR)
-
-ICONS_FILE = os.path.join(os.path.dirname(__file__), "icons.json")
 
 @app.route('/')
 def index():
