@@ -185,8 +185,6 @@ These two markdown syntaxes work together and are controlled by the same 👁️
 - **Rendering:** `renderTable()` conditionally renders only `sheet.rows[singleRowIndex]` when mode is active
 - **Styling:** `.btn-icon-toggle.active` for active state, disabled button styles
 
-### Color Highlight Shortcuts
-**Syntax:** 
 - `==text==` → Black background with white text
 - `!!text!!` → Red background with white text  
 - `??text??` → Blue background with white text
@@ -198,6 +196,17 @@ These two markdown syntaxes work together and are controlled by the same 👁️
 - **Detection:** Added `value.includes('!!')` and `value.includes('??')` to `hasMarkdown` checks
 - **Stripping:** Added `.replace(/!!(.+?)!!/g, '$1')` and `.replace(/\?\?(.+?)\?\?/g, '$1')` to `stripMarkdown()`
 - **Quick Formatter:** Added Black, Red, and Blue buttons in a separate "Quick Highlights" section
+
+### Alternative Link Syntax: `URL[TEXT]`
+**Syntax:** `https://example.com[Link Text]` or `https://example.com[==Highlighted Link==]`
+**Purpose:** Provides a more traditional markdown-like link syntax that is shorter than `{link:URL}TEXT{/}` and supports nesting.
+
+**Implementation:**
+- **Parsing:** `(https?://[^\s\[]+)\[(.+?)\]` -> `<a href="URL">TEXT</a>`
+- **Nesting:** Since link parsing happens early, any markdown inside `[]` (like `==text==`) is correctly processed by subsequent replacement rules.
+- **Detection:** Added `(str.includes('http') && str.includes('['))` to `checkHasMarkdown()`.
+- **Stripping:** Added `.replace(/(https?:\/\/[^\s\[]+)\[(.+?)\]/g, '$2')` to `stripMarkdown()`.
+- **Static Export:** Implemented in `export_static.py` for both parsing and stripping.
 - **Static Export:** Updated `export_static.py` with the same parsing logic in both inline and body parsers
 - **Table Support:** All three color syntaxes work inside `Table*N` markdown cells
 

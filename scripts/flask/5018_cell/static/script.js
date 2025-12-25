@@ -931,6 +931,7 @@ function checkHasMarkdown(value) {
         str.includes('{fg:') ||
         str.includes('{bg:') ||
         str.includes('{link:') ||
+        (str.includes('http') && str.includes('[')) ||
         str.includes('{{') ||
         str.includes('\n- ') ||
         str.includes('\n-- ') ||
@@ -1480,6 +1481,11 @@ function parseMarkdownInline(text) {
         return `<a href="${url}" target="_blank" rel="noopener noreferrer">${text}</a>`;
     });
 
+    // New Links: url[text] -> <a href="url">text</a> (supports nested markdown)
+    formatted = formatted.replace(/(https?:\/\/[^\s\[]+)\[(.+?)\]/g, (match, url, text) => {
+        return `<a href="${url}" target="_blank" rel="noopener noreferrer">${text}</a>`;
+    });
+
     // Custom colors: {fg:color;bg:color}text{/} or {fg:color}text{/} or {bg:color}text{/}
     formatted = formatted.replace(/\{((?:fg:[^;}\s]+)?(?:;)?(?:bg:[^;}\s]+)?)\}(.+?)\{\/\}/g, (match, styles, text) => {
         const styleObj = {};
@@ -1823,6 +1829,11 @@ function oldParseMarkdownBody(lines) {
 
         // Links: {link:url}text{/} -> <a href="url">text</a>
         formatted = formatted.replace(/\{link:([^}]+)\}(.+?)\{\/\}/g, (match, url, text) => {
+            return `<a href="${url}" target="_blank" rel="noopener noreferrer">${text}</a>`;
+        });
+
+        // New Links: url[text] -> <a href="url">text</a> (supports nested markdown)
+        formatted = formatted.replace(/(https?:\/\/[^\s\[]+)\[(.+?)\]/g, (match, url, text) => {
             return `<a href="${url}" target="_blank" rel="noopener noreferrer">${text}</a>`;
         });
 
@@ -5983,6 +5994,9 @@ function stripMarkdown(text) {
 
     // Remove link markers: {link:url}text{/} -> text
     stripped = stripped.replace(/\{link:[^}]*\}(.+?)\{\/\}/g, '$1');
+
+    // Remove new link markers: url[text] -> text
+    stripped = stripped.replace(/(https?:\/\/[^\s\[]+)\[(.+?)\]/g, '$2');
 
     // Remove collapsible text markers: {{text}} -> text
     stripped = stripped.replace(/\{\{(.+?)\}\}/g, '$1');

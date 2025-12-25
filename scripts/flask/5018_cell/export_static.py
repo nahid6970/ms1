@@ -1436,6 +1436,7 @@ def generate_static_html(data, custom_syntaxes):
                         cellValue.includes('{fg:') || 
                         cellValue.includes('{bg:') || 
                         cellValue.includes('{link:') || 
+                        (cellValue.includes('http') && cellValue.includes('[')) ||
                         cellValue.includes('{{') ||
                         cellValue.includes('\\n- ') || 
                         cellValue.includes('\\n-- ') || 
@@ -1542,6 +1543,8 @@ def generate_static_html(data, custom_syntaxes):
             stripped = stripped.replace(/^Timeline(?:C)?(?:-[A-Z]+)?\\*(.+?)$/gm, '$1');
             // Remove word connector markers: [1]Word or [1-R]Word -> Word
             stripped = stripped.replace(/\\[(\\d+)(?:-[A-Z]+)?\\](\\S+)/g, '$2');
+            // Remove new link markers: url[text] -> text
+            stripped = stripped.replace(/(https?:\/\/[^\\s\\[]+)\\[(.+?)\\]/g, '$2');
             return stripped;
         }
 
@@ -1564,6 +1567,7 @@ def generate_static_html(data, custom_syntaxes):
          * - `code` -> <code>
          * - ==highlight== -> <mark>
          * - {link:url}text{/} -> clickable link
+         * - url[text] -> clickable link (supports nested markdown)
          * - {fg:color}text{/} or {bg:color}text{/} or {fg:color;bg:color}text{/} -> colored text
          * - - item -> bullet list
          * - -- subitem -> sub-bullet list
@@ -2019,6 +2023,11 @@ def generate_static_html(data, custom_syntaxes):
 
                 // Links: {link:url}text{/} -> <a href="url">text</a>
                 formatted = formatted.replace(/\\{link:([^}]+)\\}(.+?)\\{\\/\\}/g, (match, url, text) => {
+                    return `<a href="${url}" target="_blank" rel="noopener noreferrer">${text}</a>`;
+                });
+
+                // New Links: url[text] -> <a href="url">text</a> (supports nested markdown)
+                formatted = formatted.replace(/(https?:\/\/[^\\s\\[]+)\\[(.+?)\\]/g, (match, url, text) => {
                     return `<a href="${url}" target="_blank" rel="noopener noreferrer">${text}</a>`;
                 });
 
