@@ -259,6 +259,9 @@ class Player {
         this.speed = config.speed; this.color = config.color;
         this.lastFired = 0; this.reloading = false; this.crouching = false;
         this.facing = 1; this.grounded = false; this.jumpPower = -12;
+        this.planting = false;
+        this.plantProgress = 0;
+        this.activeC4 = null; // {x, y, timer, wallRef}
     }
     update() {
         if (GAME.death || GAME.editorMode || GAME.paused) return;
@@ -287,8 +290,40 @@ class Player {
         });
         if (keys['Digit1']) GAME.player = new Player(this.x, this.y, 'SNIPER');
         if (keys['Digit2']) GAME.player = new Player(this.x, this.y, 'ASSAULT');
-        if (keys['Digit3']) GAME.player = new Player(this.x, this.y, 'MERCENARY');
         if (keys['Digit4']) GAME.player = new Player(this.x, this.y, 'HEAVY');
+
+        // C4 Planting Logic
+        let nearWall = null;
+        const reach = 20;
+        GAME.walls.forEach(w => {
+            // Check if player is near any part of the wall rectangle
+            const closeX = Math.max(w.x, Math.min(this.x + this.w / 2, w.x + w.w));
+            const closeY = Math.max(w.y, Math.min(this.y + this.h / 2, w.y + w.h));
+            const dist = Math.sqrt((this.x + this.w / 2 - closeX) ** 2 + (this.y + this.h / 2 - closeY) ** 2);
+            if (dist < 50) nearWall = w;
+        });
+
+        if ((keys['KeyF'] || keys['F4']) && nearWall && this.grounded && !this.activeC4) {
+            this.planting = true;
+            this.plantProgress += 0.02;
+            if (this.plantProgress >= 1) {
+                this.activeC4 = { x: nearWall.x + nearWall.w / 2, y: nearWall.y + nearWall.h / 2, timer: 180, wall: nearWall };
+                this.planting = false;
+                this.plantProgress = 0;
+            }
+        } else {
+            this.planting = false;
+            this.plantProgress = 0;
+        }
+
+        // C4 Countdown Logic
+        if (this.activeC4) {
+            this.activeC4.timer--;
+            if (this.activeC4.timer <= 0) {
+                this.explodeC4();
+            }
+        }
+
         if (mouse.pressed && !this.reloading && this.ammo > 0) {
             let now = Date.now();
             if (now - this.lastFired > this.weapon.fireRate) { this.shoot(); this.lastFired = now; }
@@ -313,11 +348,44 @@ class Player {
         this.ammo--; this.y -= 2;
         for (let i = 0; i < 3; i++) GAME.particles.push(new Particle(this.x + this.w / 2, this.y + 15, '#aaaaaa'));
     }
+
+    explodeC4() {
+        if (!this.activeC4) return;
+
+        // Destroy target wall
+        const wall = this.activeC4.wall;
+        wall.health = -1; // Force destroy even if "indestructible"
+        wall.destructible = true;
+
+        // Big explosion effect
+        for (let i = 0; i < 30; i++) {
+            let p = new Particle(this.activeC4.x, this.activeC4.y, '#f60');
+            p.vx *= 3; p.vy *= 3;
+            GAME.particles.push(p);
+        }
+
+        // Damage nearby enemies
+        GAME.enemies.forEach(e => {
+            let d = Math.sqrt((e.x - this.activeC4.x) ** 2 + (e.y - this.activeC4.y) ** 2);
+            if (d < 200) e.health -= 200;
+        });
+
+        this.activeC4 = null;
+    }
     reload() {
         this.reloading = true;
         setTimeout(() => { this.ammo = this.weapon.magSize; this.reloading = false; }, this.weapon.reloadTime);
     }
     draw() {
+        // Redetect nearWall for drawing visuals in the draw scope
+        let nearWall = null;
+        GAME.walls.forEach(w => {
+            const closeX = Math.max(w.x, Math.min(this.x + this.w / 2, w.x + w.w));
+            const closeY = Math.max(w.y, Math.min(this.y + this.h / 2, w.y + w.h));
+            const dist = Math.sqrt((this.x + this.w / 2 - closeX) ** 2 + (this.y + this.h / 2 - closeY) ** 2);
+            if (dist < 50) nearWall = w;
+        });
+
         ctx.fillStyle = this.color; ctx.fillRect(this.x - GAME.cameraX, this.y, this.w, this.h);
         ctx.fillStyle = '#111'; ctx.fillRect(this.x - GAME.cameraX, this.y, this.w, 10);
         ctx.fillStyle = 'rgba(0,0,0,0.3)'; ctx.fillRect(this.x - GAME.cameraX, this.y + 15, this.w, 20);
@@ -336,6 +404,30 @@ class Player {
             ctx.moveTo(laserX - GAME.cameraX, laserY); ctx.lineTo(targetX - GAME.cameraX, targetY); ctx.stroke(); ctx.setLineDash([]);
         }
         ctx.save(); ctx.translate(this.x + this.w / 2 - GAME.cameraX, this.y + 20); ctx.rotate(angle); ctx.fillStyle = '#000'; ctx.fillRect(0, -2, 18, 4); ctx.restore();
+
+        // Draw Planting UI
+        if (nearWall && !this.activeC4 && !this.planting) {
+            ctx.fillStyle = '#fff'; ctx.font = '10px Courier New';
+            ctx.fillText("PRESS [F] TO BREACH", this.x - GAME.cameraX - 30, this.y - 10);
+        }
+
+        if (this.planting) {
+            ctx.fillStyle = '#444'; ctx.fillRect(this.x - GAME.cameraX - 15, this.y - 20, 50, 5);
+            ctx.fillStyle = '#0f0'; ctx.fillRect(this.x - GAME.cameraX - 15, this.y - 20, 50 * this.plantProgress, 5);
+            ctx.fillStyle = '#fff'; ctx.font = '10px Courier New'; ctx.fillText("PLANTING C4", this.x - GAME.cameraX - 15, this.y - 25);
+        }
+
+        // Draw Active C4
+        if (this.activeC4) {
+            ctx.fillStyle = '#f00';
+            let pulse = Math.sin(Date.now() / 100) * 2;
+            ctx.beginPath();
+            ctx.arc(this.activeC4.x - GAME.cameraX, this.activeC4.y, 4 + pulse, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 12px Courier New';
+            ctx.fillText(Math.ceil(this.activeC4.timer / 60), this.activeC4.x - GAME.cameraX - 4, this.activeC4.y - 10);
+        }
     }
 }
 
