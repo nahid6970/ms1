@@ -1,8 +1,0 @@
-[
-    {
-        "name": "test",
-        "target": "C:/Users/nahid/ms/ms1/Testing/mklink/test.txt",
-        "fake": "C:/Users/nahid/ms/ms1/Testing/mklink/fake.txt",
-        "type": "file"
-    }
-]

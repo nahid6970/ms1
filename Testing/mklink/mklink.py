@@ -256,14 +256,13 @@ class SymlinkManager(ctk.CTk):
             item_frame.grid_columnconfigure(1, weight=1)
 
             info_frame = ctk.CTkFrame(item_frame, fg_color="transparent")
-            info_frame.grid(row=0, column=0, columnspan=2, padx=15, pady=(10, 5), sticky="ew")
-            info_frame.grid_columnconfigure(0, weight=1)
+            info_frame.grid(row=0, column=0, columnspan=2, padx=15, pady=(10, 5), sticky="w")
 
             name_label = ctk.CTkLabel(info_frame, text=link["name"], font=ctk.CTkFont(size=14, weight="bold"))
             name_label.grid(row=0, column=0, sticky="w")
 
-            status_label = ctk.CTkLabel(info_frame, text=status, text_color=status_color, font=ctk.CTkFont(size=11, weight="bold"))
-            status_label.grid(row=0, column=1, sticky="e")
+            status_label = ctk.CTkLabel(info_frame, text=f"({status})", text_color=status_color, font=ctk.CTkFont(size=11, weight="bold"))
+            status_label.grid(row=0, column=1, padx=(10, 0), sticky="w")
 
             paths_text = f"Target: {link['target']}\nLink: {link['fake']}"
             paths_label = ctk.CTkLabel(item_frame, text=paths_text, font=ctk.CTkFont(size=11), justify="left", text_color="#bdc3c7")
