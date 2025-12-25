@@ -7,10 +7,12 @@
   let isExpanded = false;
   let isHidden = false;
 
-  // Create Sidebar
   const root = document.createElement('div');
   root.id = 'qs-sidebar-root';
   root.className = 'right'; // Default to right
+  // Prevent flash: hide initially and disable transitions
+  root.style.visibility = 'hidden';
+  root.style.transition = 'none';
   document.documentElement.appendChild(root);
 
   // Create Modal (Separate from Sidebar)
@@ -163,8 +165,18 @@
     if (result.sidebar_links) links = result.sidebar_links;
     if (result.is_left !== undefined) isLeft = result.is_left;
     if (result.is_hidden !== undefined) isHidden = result.is_hidden;
+
+    // Initial update
     updateLayout();
     renderLinks();
+
+    // After a tiny delay to allow the state to apply without animation
+    requestAnimationFrame(() => {
+      root.style.visibility = '';
+      setTimeout(() => {
+        root.style.transition = ''; // Restore transitions for user interaction
+      }, 50);
+    });
   });
 
   // Event Listeners
