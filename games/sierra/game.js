@@ -441,6 +441,31 @@ class Enemy {
         this.lastShot = 0; this.alertTimer = 0;
         this.vx = 0; this.vy = 0; this.grounded = false;
     }
+
+    hasLineOfSight() {
+        const startX = this.x + this.w / 2;
+        const startY = this.y + 15;
+        const endX = GAME.player.x + GAME.player.w / 2;
+        const endY = GAME.player.y + 25;
+
+        let dx = endX - startX;
+        let dy = endY - startY;
+        let dist = Math.sqrt(dx * dx + dy * dy);
+        let steps = dist / 15; // Raycast resolution
+
+        for (let i = 0; i < steps; i++) {
+            let px = startX + (dx / steps) * i;
+            let py = startY + (dy / steps) * i;
+
+            for (let wall of GAME.walls) {
+                if (px > wall.x && px < wall.x + wall.w && py > wall.y && py < wall.y + wall.h) {
+                    return false; // Wall blocked view
+                }
+            }
+        }
+        return true;
+    }
+
     update() {
         if (this.health <= 0 || GAME.paused || GAME.editorMode) return;
 
@@ -456,8 +481,19 @@ class Enemy {
         });
 
         let dist = Math.abs(this.x - GAME.player.x);
-        if (dist < 400 && Math.abs(this.y - GAME.player.y) < 200) this.state = 'COMBAT';
-        else if (this.state === 'COMBAT') { this.state = 'ALERT'; this.alertTimer = 180; }
+        let viewDist = this.className === 'SNIPER' ? 1000 : 500;
+
+        if (dist < viewDist && Math.abs(this.y - GAME.player.y) < 300) {
+            if (this.hasLineOfSight()) {
+                this.state = 'COMBAT';
+            } else if (this.state === 'COMBAT') {
+                this.state = 'ALERT';
+                this.alertTimer = 180;
+            }
+        } else if (this.state === 'COMBAT') {
+            this.state = 'ALERT';
+            this.alertTimer = 180;
+        }
 
         if (this.state === 'PATROL') {
             // Patrol movement
