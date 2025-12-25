@@ -5,6 +5,7 @@
   let links = [];
   let isLeft = false;
   let isExpanded = false;
+  let isHidden = false;
 
   // Create Sidebar
   const root = document.createElement('div');
@@ -59,7 +60,14 @@
   }
 
   function updateLayout() {
-    root.className = (isLeft ? 'left' : 'right') + (isExpanded ? ' expanded' : '');
+    root.className = (isLeft ? 'left' : 'right') + (isExpanded ? ' expanded' : '') + (isHidden ? ' qs-hidden' : '');
+
+    // Handle Transform for visibility
+    if (isHidden) {
+      root.style.transform = isLeft ? "translateX(-110%)" : "translateX(110%)";
+    } else {
+      root.style.transform = "translateX(0)";
+    }
 
     // Update Side Toggle Icon (Arrow pointing to the opposite side)
     const sideToggle = document.getElementById('qs-side-toggle');
@@ -151,9 +159,10 @@
   const cancelBtn = document.getElementById('qs-cancel-btn');
 
   // Load state
-  chrome.storage.sync.get(['sidebar_links', 'is_left'], (result) => {
+  chrome.storage.sync.get(['sidebar_links', 'is_left', 'is_hidden'], (result) => {
     if (result.sidebar_links) links = result.sidebar_links;
     if (result.is_left !== undefined) isLeft = result.is_left;
+    if (result.is_hidden !== undefined) isHidden = result.is_hidden;
     updateLayout();
     renderLinks();
   });
@@ -349,15 +358,9 @@
   // Toggle visibility message
   chrome.runtime.onMessage.addListener((request) => {
     if (request.action === "toggle_sidebar") {
-      const isHidden = root.classList.contains('qs-hidden');
-      if (isHidden) {
-        root.classList.remove('qs-hidden');
-        root.style.transform = "translateX(0)";
-      } else {
-        root.classList.add('qs-hidden');
-        root.style.transform = isLeft ? "translateX(-110%)" : "translateX(110%)";
-      }
-      updatePageShift();
+      isHidden = !isHidden;
+      chrome.storage.sync.set({ is_hidden: isHidden });
+      updateLayout();
     }
   });
 
