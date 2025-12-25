@@ -36,20 +36,28 @@ class AddLinkDialog(ctk.CTkToplevel):
         self.type_menu = ctk.CTkSegmentedButton(self, values=["folder", "file"], variable=self.type_var)
         self.type_menu.grid(row=3, column=0, padx=20, pady=(0, 10), sticky="ew")
 
-        self.target_entry = ctk.CTkEntry(self, placeholder_text="Target Path (Real)")
-        self.target_entry.grid(row=4, column=0, padx=20, pady=10, sticky="ew")
-        
-        self.target_btn = ctk.CTkButton(self, text="Browse Target", command=self.browse_target)
-        self.target_btn.grid(row=5, column=0, padx=20, pady=5)
+        self.target_frame = ctk.CTkFrame(self, fg_color="transparent")
+        self.target_frame.grid(row=4, column=0, padx=20, pady=10, sticky="ew")
+        self.target_frame.grid_columnconfigure(1, weight=1)
 
-        self.fake_entry = ctk.CTkEntry(self, placeholder_text="Fake Path (Shortcut)")
-        self.fake_entry.grid(row=6, column=0, padx=20, pady=10, sticky="ew")
+        self.target_btn = ctk.CTkButton(self.target_frame, text="Browse", width=80, command=self.browse_target)
+        self.target_btn.grid(row=0, column=0, padx=(0, 10))
 
-        self.fake_btn = ctk.CTkButton(self, text="Browse Link Location", command=self.browse_fake)
-        self.fake_btn.grid(row=7, column=0, padx=20, pady=5)
+        self.target_entry = ctk.CTkEntry(self.target_frame, placeholder_text="Target Path (Real)")
+        self.target_entry.grid(row=0, column=1, sticky="ew")
+
+        self.fake_frame = ctk.CTkFrame(self, fg_color="transparent")
+        self.fake_frame.grid(row=5, column=0, padx=20, pady=10, sticky="ew")
+        self.fake_frame.grid_columnconfigure(1, weight=1)
+
+        self.fake_btn = ctk.CTkButton(self.fake_frame, text="Browse", width=80, command=self.browse_fake)
+        self.fake_btn.grid(row=0, column=0, padx=(0, 10))
+
+        self.fake_entry = ctk.CTkEntry(self.fake_frame, placeholder_text="Fake Path (Shortcut)")
+        self.fake_entry.grid(row=0, column=1, sticky="ew")
 
         self.add_btn = ctk.CTkButton(self, text="Add Entry", command=self.add_link, fg_color="#2ecc71", hover_color="#27ae60")
-        self.add_btn.grid(row=8, column=0, padx=20, pady=20)
+        self.add_btn.grid(row=6, column=0, padx=20, pady=20)
 
     def browse_target(self):
         if self.type_var.get() == "folder":
