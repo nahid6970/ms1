@@ -183,10 +183,14 @@ canvas {
 #map-items {
     max-height: 300px;
     overflow-y: auto;
+    overflow-x: hidden;
+    /* Prevent horizontal scroll on hover scale */
     margin: 20px 0;
     display: flex;
     flex-direction: column;
     gap: 10px;
+    padding: 5px;
+    /* Space for the scale effect */
 }
 
 .map-item {
@@ -201,6 +205,18 @@ canvas {
 .map-item:hover {
     background: #222;
     border-color: #555;
+}
+
+.map-item.add-map {
+    border: 1px dashed #0f0;
+    color: #0f0;
+    text-align: center;
+    background: rgba(0, 255, 0, 0.05);
+}
+
+.map-item.add-map:hover {
+    background: rgba(0, 255, 0, 0.1);
+    transform: scale(1.02);
 }
 
 input[type="text"] {

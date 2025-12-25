@@ -102,6 +102,13 @@ const UI = {
 
             container.appendChild(item);
         });
+
+        // Add "Create New Mission" button at the end
+        const addItem = document.createElement('div');
+        addItem.className = 'map-item add-map';
+        addItem.innerHTML = `<span style="color: #0f0; font-size: 1.2rem;">+</span> CREATE NEW MISSION`;
+        addItem.onclick = () => UI.startEditor();
+        container.appendChild(addItem);
     },
     loadMap: (mapData) => {
         document.getElementById('map-list-screen').classList.add('hidden');
