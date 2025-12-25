@@ -118,6 +118,7 @@ const UI = {
     },
     startEditor: () => {
         document.getElementById('main-menu').classList.add('hidden');
+        document.getElementById('map-list-screen').classList.add('hidden'); // Fix: hide map list
         document.getElementById('hud').classList.add('hidden');
         document.getElementById('editor-ui').classList.remove('hidden');
         GAME.editorMode = true;
@@ -296,16 +297,41 @@ class Player {
         if (this.crouching) this.vx *= 0.5;
         this.vy += GAME.gravity; this.y += this.vy;
         this.grounded = false;
+        // Vertical Resolve
         GAME.walls.forEach(wall => {
             if (this.x < wall.x + wall.w && this.x + this.w > wall.x && this.y < wall.y + wall.h && this.y + this.h > wall.y) {
+                if (wall.type === 'RAMP_UP' || wall.type === 'RAMP_DOWN') return;
                 if (this.vy > 0) { this.y = wall.y - this.h; this.vy = 0; this.grounded = true; }
                 else if (this.vy < 0) { this.y = wall.y + wall.h; this.vy = 0; }
             }
         });
+
+        // Slope Logic
+        GAME.walls.forEach(wall => {
+            if (this.x + this.w > wall.x && this.x < wall.x + wall.w) {
+                if (wall.type === 'RAMP_UP') {
+                    let relX = (this.x + this.w / 2) - wall.x;
+                    let floorY = wall.y + (wall.h - (relX / wall.w) * wall.h);
+                    if (this.y + this.h >= floorY - 5 && this.y + this.h <= floorY + 15) {
+                        this.y = floorY - this.h; this.vy = 0; this.grounded = true;
+                    }
+                } else if (wall.type === 'RAMP_DOWN') {
+                    let relX = (this.x + this.w / 2) - wall.x;
+                    let floorY = wall.y + (relX / wall.w) * wall.h;
+                    if (this.y + this.h >= floorY - 5 && this.y + this.h <= floorY + 15) {
+                        this.y = floorY - this.h; this.vy = 0; this.grounded = true;
+                    }
+                }
+            }
+        });
+
         if ((keys['Space'] || keys['KeyW']) && this.grounded && !this.crouching) { this.vy = this.jumpPower; this.grounded = false; }
         this.x += this.vx;
+
+        // Horizontal Resolve
         GAME.walls.forEach(wall => {
             if (this.x < wall.x + wall.w && this.x + this.w > wall.x && this.y < wall.y + wall.h && this.y + this.h > wall.y) {
+                if (wall.type === 'RAMP_UP' || wall.type === 'RAMP_DOWN') return;
                 if (this.vx > 0) this.x = wall.x - this.w;
                 if (this.vx < 0) this.x = wall.x + wall.w;
             }
@@ -417,9 +443,17 @@ class Player {
         if (this.className === 'SNIPER') {
             let laserX = this.x + this.w / 2, laserY = this.y + 18, targetX = laserX + Math.cos(angle) * 1000, targetY = laserY + Math.sin(angle) * 1000;
             GAME.walls.forEach(wall => {
-                for (let d = 0; d < 1000; d += 15) {
+                for (let d = 0; d < 1000; d += 10) {
                     let px = laserX + Math.cos(angle) * d, py = laserY + Math.sin(angle) * d;
-                    if (px > wall.x && px < wall.x + wall.w && py > wall.y && py < wall.y + wall.h) { targetX = px; targetY = py; break; }
+                    let hit = false;
+                    if (wall.type === 'RAMP_UP') {
+                        if (px > wall.x && px < wall.x + wall.w && py > wall.y + (wall.h - (px - wall.x) / wall.w * wall.h) && py < wall.y + wall.h) hit = true;
+                    } else if (wall.type === 'RAMP_DOWN') {
+                        if (px > wall.x && px < wall.x + wall.w && py > wall.y + ((px - wall.x) / wall.w * wall.h) && py < wall.y + wall.h) hit = true;
+                    } else {
+                        if (px > wall.x && px < wall.x + wall.w && py > wall.y && py < wall.y + wall.h) hit = true;
+                    }
+                    if (hit) { targetX = px; targetY = py; break; }
                 }
             });
             ctx.strokeStyle = 'rgba(255, 0, 0, 0.4)'; ctx.lineWidth = 1; ctx.setLineDash([5, 5]); ctx.beginPath();
@@ -497,8 +531,28 @@ class Enemy {
         this.grounded = false;
         GAME.walls.forEach(wall => {
             if (this.x < wall.x + wall.w && this.x + this.w > wall.x && this.y < wall.y + wall.h && this.y + this.h > wall.y) {
+                if (wall.type === 'RAMP_UP' || wall.type === 'RAMP_DOWN') return;
                 if (this.vy > 0) { this.y = wall.y - this.h; this.vy = 0; this.grounded = true; }
                 else if (this.vy < 0) { this.y = wall.y + wall.h; this.vy = 0; }
+            }
+        });
+
+        // Enemy Slope Logic
+        GAME.walls.forEach(wall => {
+            if (this.x + this.w > wall.x && this.x < wall.x + wall.w) {
+                if (wall.type === 'RAMP_UP') {
+                    let relX = (this.x + this.w / 2) - wall.x;
+                    let floorY = wall.y + (wall.h - (relX / wall.w) * wall.h);
+                    if (this.y + this.h >= floorY - 5 && this.y + this.h <= floorY + 15) {
+                        this.y = floorY - this.h; this.vy = 0; this.grounded = true;
+                    }
+                } else if (wall.type === 'RAMP_DOWN') {
+                    let relX = (this.x + this.w / 2) - wall.x;
+                    let floorY = wall.y + (relX / wall.w) * wall.h;
+                    if (this.y + this.h >= floorY - 5 && this.y + this.h <= floorY + 15) {
+                        this.y = floorY - this.h; this.vy = 0; this.grounded = true;
+                    }
+                }
             }
         });
 
@@ -625,6 +679,8 @@ window.addEventListener('keydown', e => {
         if (e.code === 'KeyZ') GAME.editorItem = 'WALL';
         if (e.code === 'KeyX') GAME.editorItem = 'COVER';
         if (e.code === 'KeyC') GAME.editorItem = 'ENEMY';
+        if (e.code === 'KeyV') GAME.editorItem = 'RAMP_UP';
+        if (e.code === 'KeyB') GAME.editorItem = 'RAMP_DOWN';
         if (e.code === 'Digit1') GAME.editorClass = 'SNIPER';
         if (e.code === 'Digit2') GAME.editorClass = 'ASSAULT';
         if (e.code === 'Digit3') GAME.editorClass = 'MERCENARY';
@@ -642,6 +698,8 @@ canvas.addEventListener('mousedown', e => {
     if (GAME.editorItem === 'WALL') GAME.walls.push({ x: ex, y: ey, w: 50, h: 50, health: 1000, destructible: false });
     else if (GAME.editorItem === 'COVER') GAME.walls.push({ x: ex, y: ey, w: 50, h: 50, health: 100, destructible: true });
     else if (GAME.editorItem === 'ENEMY') GAME.enemies.push(new Enemy(ex + 15, ey, GAME.editorClass));
+    else if (GAME.editorItem === 'RAMP_UP') GAME.walls.push({ x: ex, y: ey, w: 50, h: 50, type: 'RAMP_UP', health: 1000, destructible: false });
+    else if (GAME.editorItem === 'RAMP_DOWN') GAME.walls.push({ x: ex, y: ey, w: 50, h: 50, type: 'RAMP_DOWN', health: 1000, destructible: false });
 });
 
 function update() {
@@ -681,9 +739,17 @@ function draw() {
     ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 1;
     for (let x = -GAME.cameraX % 50; x < canvas.width; x += 50) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke(); }
     GAME.walls.forEach(wall => {
-        ctx.fillStyle = (wall.destructible && wall.health < 50) ? '#1a1a1a' : '#222';
-        ctx.fillRect(wall.x - GAME.cameraX, wall.y, wall.w, wall.h);
-        ctx.strokeStyle = wall.destructible ? '#444' : '#333'; ctx.strokeRect(wall.x - GAME.cameraX, wall.y, wall.w, wall.h);
+        if (wall.type === 'RAMP_UP') {
+            ctx.fillStyle = '#222'; ctx.strokeStyle = '#333';
+            ctx.beginPath(); ctx.moveTo(wall.x - GAME.cameraX, wall.y + wall.h); ctx.lineTo(wall.x + wall.w - GAME.cameraX, wall.y); ctx.lineTo(wall.x + wall.w - GAME.cameraX, wall.y + wall.h); ctx.fill(); ctx.stroke();
+        } else if (wall.type === 'RAMP_DOWN') {
+            ctx.fillStyle = '#222'; ctx.strokeStyle = '#333';
+            ctx.beginPath(); ctx.moveTo(wall.x - GAME.cameraX, wall.y); ctx.lineTo(wall.x + wall.w - GAME.cameraX, wall.y + wall.h); ctx.lineTo(wall.x - GAME.cameraX, wall.y + wall.h); ctx.fill(); ctx.stroke();
+        } else {
+            ctx.fillStyle = (wall.destructible && wall.health < 50) ? '#1a1a1a' : '#222';
+            ctx.fillRect(wall.x - GAME.cameraX, wall.y, wall.w, wall.h);
+            ctx.strokeStyle = wall.destructible ? '#444' : '#333'; ctx.strokeRect(wall.x - GAME.cameraX, wall.y, wall.w, wall.h);
+        }
     });
     GAME.enemies.forEach(e => e.draw());
     if (GAME.player && !GAME.editorMode) GAME.player.draw();
