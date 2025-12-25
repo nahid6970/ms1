@@ -117,8 +117,11 @@ class SymlinkManager(ctk.CTk):
         self.header_frame.grid(row=0, column=0, padx=20, pady=10, sticky="ew")
         self.header_frame.grid_columnconfigure(0, weight=1)
 
-        self.list_label = ctk.CTkLabel(self.header_frame, text="Managed Symlinks", font=ctk.CTkFont(size=22, weight="bold"))
-        self.list_label.grid(row=0, column=0, sticky="w")
+        self.search_var = ctk.StringVar()
+        self.search_var.trace_add("write", lambda *args: self.refresh_ui())
+
+        self.search_entry = ctk.CTkEntry(self.header_frame, placeholder_text="Search symlinks...", textvariable=self.search_var)
+        self.search_entry.grid(row=0, column=0, padx=(0, 10), sticky="ew")
 
         self.add_plus_btn = ctk.CTkButton(self.header_frame, text="+", width=40, font=ctk.CTkFont(size=20, weight="bold"),
                                          fg_color="#2ecc71", hover_color="#27ae60", command=self.open_add_dialog)
@@ -141,6 +144,7 @@ class SymlinkManager(ctk.CTk):
             "fake": fake,
             "type": link_type
         })
+        self.search_var.set("") # Clear search when adding new
         self.save_data()
         self.refresh_ui()
 
@@ -195,12 +199,21 @@ class SymlinkManager(ctk.CTk):
 
     def delete_link(self, index):
         if messagebox.askyesno("Confirm", "Delete this entry?"):
-            self.links.pop(index)
+            # Find the actual object to remove if filtered
+            query = self.search_var.get().lower()
+            filtered_links = [l for l in self.links if query in l['name'].lower() or query in l['target'].lower() or query in l['fake'].lower()]
+            target_link = filtered_links[index]
+            self.links.remove(target_link)
+            
             self.save_data()
             self.refresh_ui()
 
     def create_link(self, index):
-        link = self.links[index]
+        # Find actual link if filtered
+        query = self.search_var.get().lower()
+        filtered_links = [l for l in self.links if query in l['name'].lower() or query in l['target'].lower() or query in l['fake'].lower()]
+        link = filtered_links[index]
+        
         target = link["target"]
         fake = link["fake"]
         link_type = link.get("type", "folder")
@@ -235,12 +248,16 @@ class SymlinkManager(ctk.CTk):
         for widget in self.scrollable_frame.winfo_children():
             widget.destroy()
 
-        if not self.links:
-            empty_label = ctk.CTkLabel(self.scrollable_frame, text="No symlinks added yet.", font=ctk.CTkFont(slant="italic"))
+        query = self.search_var.get().lower()
+        filtered_links = [l for l in self.links if query in l['name'].lower() or query in l['target'].lower() or query in l['fake'].lower()]
+
+        if not filtered_links:
+            text = "No symlinks added yet." if not self.links else "No matches found."
+            empty_label = ctk.CTkLabel(self.scrollable_frame, text=text, font=ctk.CTkFont(slant="italic"))
             empty_label.grid(row=0, column=0, padx=20, pady=20)
             return
 
-        for i, link in enumerate(self.links):
+        for i, link in enumerate(filtered_links):
             link_type = link.get("type", "folder") 
             status = self.check_status(link["target"], link["fake"], link_type)
             
