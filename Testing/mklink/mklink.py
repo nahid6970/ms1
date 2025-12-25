@@ -8,6 +8,9 @@ from tkinter import filedialog, messagebox
 ctk.set_appearance_mode("Dark")
 ctk.set_default_color_theme("blue")
 
+# Font configuration
+FONT_FAMILY = "JetBrainsMono NFP"
+
 class AddLinkDialog(ctk.CTkToplevel):
     def __init__(self, parent, on_save_callback, edit_data=None):
         super().__init__(parent)
@@ -24,42 +27,48 @@ class AddLinkDialog(ctk.CTkToplevel):
 
         self.grid_columnconfigure(0, weight=1)
 
-        self.label = ctk.CTkLabel(self, text=title_text, font=ctk.CTkFont(size=20, weight="bold"))
+        self.label = ctk.CTkLabel(self, text=title_text, font=ctk.CTkFont(family=FONT_FAMILY, size=20, weight="bold"))
         self.label.grid(row=0, column=0, padx=20, pady=(20, 10))
 
-        self.name_entry = ctk.CTkEntry(self, placeholder_text="Entry Name")
+        self.name_entry = ctk.CTkEntry(self, placeholder_text="Entry Name", font=ctk.CTkFont(family=FONT_FAMILY))
         self.name_entry.grid(row=1, column=0, padx=20, pady=10, sticky="ew")
 
         # Type Selection (Folder vs File)
         self.type_var = ctk.StringVar(value="folder")
-        self.type_label = ctk.CTkLabel(self, text="Select Type:", font=ctk.CTkFont(size=12))
+        self.type_label = ctk.CTkLabel(self, text="Select Type:", font=ctk.CTkFont(family=FONT_FAMILY, size=12))
         self.type_label.grid(row=2, column=0, padx=20, pady=(5, 0), sticky="w")
         
-        self.type_menu = ctk.CTkSegmentedButton(self, values=["folder", "file"], variable=self.type_var)
+        self.type_menu = ctk.CTkSegmentedButton(self, values=["folder", "file"], variable=self.type_var, font=ctk.CTkFont(family=FONT_FAMILY))
         self.type_menu.grid(row=3, column=0, padx=20, pady=(0, 10), sticky="ew")
 
         self.target_frame = ctk.CTkFrame(self, fg_color="transparent")
         self.target_frame.grid(row=4, column=0, padx=20, pady=10, sticky="ew")
         self.target_frame.grid_columnconfigure(1, weight=1)
 
-        self.target_btn = ctk.CTkButton(self.target_frame, text="Browse", width=80, command=self.browse_target)
+        self.target_btn = ctk.CTkButton(self.target_frame, text="📂 Browse", width=100, corner_radius=0, 
+                                       font=ctk.CTkFont(family=FONT_FAMILY), command=self.browse_target)
         self.target_btn.grid(row=0, column=0, padx=(0, 10))
 
-        self.target_entry = ctk.CTkEntry(self.target_frame, placeholder_text="Target Path (Real)")
+        self.target_entry = ctk.CTkEntry(self.target_frame, placeholder_text="Target Path (Real)", corner_radius=0, 
+                                        font=ctk.CTkFont(family=FONT_FAMILY))
         self.target_entry.grid(row=0, column=1, sticky="ew")
 
         self.fake_frame = ctk.CTkFrame(self, fg_color="transparent")
         self.fake_frame.grid(row=5, column=0, padx=20, pady=10, sticky="ew")
         self.fake_frame.grid_columnconfigure(1, weight=1)
 
-        self.fake_btn = ctk.CTkButton(self.fake_frame, text="Browse", width=80, command=self.browse_fake)
+        self.fake_btn = ctk.CTkButton(self.fake_frame, text="📂 Browse", width=100, corner_radius=0, 
+                                     font=ctk.CTkFont(family=FONT_FAMILY), command=self.browse_fake)
         self.fake_btn.grid(row=0, column=0, padx=(0, 10))
 
-        self.fake_entry = ctk.CTkEntry(self.fake_frame, placeholder_text="Fake Path (Shortcut)")
+        self.fake_entry = ctk.CTkEntry(self.fake_frame, placeholder_text="Fake Path (Shortcut)", corner_radius=0, 
+                                      font=ctk.CTkFont(family=FONT_FAMILY))
         self.fake_entry.grid(row=0, column=1, sticky="ew")
 
-        btn_text = "Save Changes" if edit_data else "Add Entry"
-        self.save_btn = ctk.CTkButton(self, text=btn_text, command=self.save_link, fg_color="#2ecc71", hover_color="#27ae60")
+        btn_text = "✅ Save Changes" if edit_data else "➕ Add Entry"
+        self.save_btn = ctk.CTkButton(self, text=btn_text, command=self.save_link, corner_radius=0, 
+                                     font=ctk.CTkFont(family=FONT_FAMILY, weight="bold"),
+                                     fg_color="#2ecc71", hover_color="#27ae60")
         self.save_btn.grid(row=6, column=0, padx=20, pady=20)
 
         # Pre-fill if editing
@@ -130,15 +139,19 @@ class SymlinkManager(ctk.CTk):
         self.search_var = ctk.StringVar()
         self.search_var.trace_add("write", lambda *args: self.refresh_ui())
 
-        self.search_entry = ctk.CTkEntry(self.header_frame, placeholder_text="Search symlinks...", textvariable=self.search_var)
+        self.search_entry = ctk.CTkEntry(self.header_frame, placeholder_text="Search symlinks...", 
+                                        font=ctk.CTkFont(family=FONT_FAMILY),
+                                        textvariable=self.search_var, corner_radius=0)
         self.search_entry.grid(row=0, column=0, padx=(0, 10), sticky="ew")
 
-        self.add_plus_btn = ctk.CTkButton(self.header_frame, text="+", width=40, font=ctk.CTkFont(size=20, weight="bold"),
-                                         fg_color="#2ecc71", hover_color="#27ae60", command=self.open_add_dialog)
+        self.add_plus_btn = ctk.CTkButton(self.header_frame, text="➕ Add Link", width=100, 
+                                         font=ctk.CTkFont(family=FONT_FAMILY, size=13, weight="bold"),
+                                         corner_radius=0, fg_color="#2ecc71", hover_color="#27ae60", command=self.open_add_dialog)
         self.add_plus_btn.grid(row=0, column=1, sticky="e")
 
         # Scrollable list of items
-        self.scrollable_frame = ctk.CTkScrollableFrame(self.main_frame, label_text="Symlink Entries")
+        self.scrollable_frame = ctk.CTkScrollableFrame(self.main_frame, label_text="Symlink Entries", 
+                                                       label_font=ctk.CTkFont(family=FONT_FAMILY, weight="bold"))
         self.scrollable_frame.grid(row=1, column=0, padx=20, pady=10, sticky="nsew")
         self.scrollable_frame.grid_columnconfigure(0, weight=1)
 
@@ -278,7 +291,7 @@ class SymlinkManager(ctk.CTk):
 
         if not filtered_links:
             text = "No symlinks added yet." if not self.links else "No matches found."
-            empty_label = ctk.CTkLabel(self.scrollable_frame, text=text, font=ctk.CTkFont(slant="italic"))
+            empty_label = ctk.CTkLabel(self.scrollable_frame, text=text, font=ctk.CTkFont(family=FONT_FAMILY, slant="italic"))
             empty_label.grid(row=0, column=0, padx=20, pady=20)
             return
 
@@ -300,14 +313,15 @@ class SymlinkManager(ctk.CTk):
             info_frame = ctk.CTkFrame(item_frame, fg_color="transparent")
             info_frame.grid(row=0, column=0, columnspan=2, padx=15, pady=(10, 5), sticky="w")
 
-            name_label = ctk.CTkLabel(info_frame, text=link["name"], font=ctk.CTkFont(size=14, weight="bold"))
+            name_label = ctk.CTkLabel(info_frame, text=link["name"], font=ctk.CTkFont(family=FONT_FAMILY, size=14, weight="bold"))
             name_label.grid(row=0, column=0, sticky="w")
 
-            status_label = ctk.CTkLabel(info_frame, text=f"({status})", text_color=status_color, font=ctk.CTkFont(size=11, weight="bold"))
+            status_label = ctk.CTkLabel(info_frame, text=f"({status})", text_color=status_color, font=ctk.CTkFont(family=FONT_FAMILY, size=11, weight="bold"))
             status_label.grid(row=0, column=1, padx=(10, 0), sticky="w")
 
+            # Paths
             paths_text = f"Target: {link['target']}\nLink: {link['fake']}"
-            paths_label = ctk.CTkLabel(item_frame, text=paths_text, font=ctk.CTkFont(size=11), justify="left", text_color="#bdc3c7")
+            paths_label = ctk.CTkLabel(item_frame, text=paths_text, font=ctk.CTkFont(family=FONT_FAMILY, size=11), justify="left", text_color="#bdc3c7")
             paths_label.grid(row=1, column=0, padx=15, pady=(0, 10), sticky="w")
 
             btn_frame = ctk.CTkFrame(item_frame, fg_color="transparent")
@@ -315,19 +329,22 @@ class SymlinkManager(ctk.CTk):
 
             # Fix/Create Button
             if status != "Working":
-                fix_btn = ctk.CTkButton(btn_frame, text="Fix/Link", width=60, height=28, 
+                fix_btn = ctk.CTkButton(btn_frame, text="🔗 Fix", width=75, height=28, 
+                                       corner_radius=0, font=ctk.CTkFont(family=FONT_FAMILY, size=11),
                                        fg_color="#3498db", hover_color="#2980b9",
                                        command=lambda idx=i: self.create_link(idx))
                 fix_btn.grid(row=0, column=0, padx=(0, 5))
 
             # Edit Button
-            edit_btn = ctk.CTkButton(btn_frame, text="Edit", width=60, height=28, 
+            edit_btn = ctk.CTkButton(btn_frame, text="📝 Edit", width=75, height=28, 
+                                    corner_radius=0, font=ctk.CTkFont(family=FONT_FAMILY, size=11),
                                     fg_color="#f39c12", hover_color="#e67e22",
                                     command=lambda idx=i: self.edit_link(idx))
             edit_btn.grid(row=0, column=1, padx=(0, 5))
 
             # Delete button
-            del_btn = ctk.CTkButton(btn_frame, text="Remove", width=60, height=28, 
+            del_btn = ctk.CTkButton(btn_frame, text="🗑️ Del", width=75, height=28, 
+                                   corner_radius=0, font=ctk.CTkFont(family=FONT_FAMILY, size=11),
                                    fg_color="#c0392b", hover_color="#e74c3c",
                                    command=lambda idx=i: self.delete_link(idx))
             del_btn.grid(row=0, column=2)
