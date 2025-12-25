@@ -16,7 +16,7 @@ class AddLinkDialog(ctk.CTkToplevel):
         super().__init__(parent)
         title_text = "Edit Symlink" if edit_data else "Add New Symlink"
         self.title(title_text)
-        self.geometry("400x450")
+        self.geometry("800x450")
         self.on_save_callback = on_save_callback
         self.edit_data = edit_data
         
@@ -30,7 +30,7 @@ class AddLinkDialog(ctk.CTkToplevel):
         self.label = ctk.CTkLabel(self, text=title_text, font=ctk.CTkFont(family=FONT_FAMILY, size=20, weight="bold"))
         self.label.grid(row=0, column=0, padx=20, pady=(20, 10))
 
-        self.name_entry = ctk.CTkEntry(self, placeholder_text="Entry Name", font=ctk.CTkFont(family=FONT_FAMILY))
+        self.name_entry = ctk.CTkEntry(self, placeholder_text="Entry Name", font=ctk.CTkFont(family=FONT_FAMILY), corner_radius=0)
         self.name_entry.grid(row=1, column=0, padx=20, pady=10, sticky="ew")
 
         # Type Selection (Folder vs File)
@@ -38,14 +38,15 @@ class AddLinkDialog(ctk.CTkToplevel):
         self.type_label = ctk.CTkLabel(self, text="Select Type:", font=ctk.CTkFont(family=FONT_FAMILY, size=12))
         self.type_label.grid(row=2, column=0, padx=20, pady=(5, 0), sticky="w")
         
-        self.type_menu = ctk.CTkSegmentedButton(self, values=["folder", "file"], variable=self.type_var, font=ctk.CTkFont(family=FONT_FAMILY))
+        self.type_menu = ctk.CTkSegmentedButton(self, values=["folder", "file"], variable=self.type_var, font=ctk.CTkFont(family=FONT_FAMILY), corner_radius=0)
         self.type_menu.grid(row=3, column=0, padx=20, pady=(0, 10), sticky="ew")
 
         self.target_frame = ctk.CTkFrame(self, fg_color="transparent")
         self.target_frame.grid(row=4, column=0, padx=20, pady=10, sticky="ew")
         self.target_frame.grid_columnconfigure(1, weight=1)
 
-        self.target_btn = ctk.CTkButton(self.target_frame, text="📂 Browse", width=100, corner_radius=0, 
+        self.target_btn = ctk.CTkButton(self.target_frame, text="📂 Target", width=100, corner_radius=0, 
+                                       fg_color="#3498db", hover_color="#2980b9",
                                        font=ctk.CTkFont(family=FONT_FAMILY), command=self.browse_target)
         self.target_btn.grid(row=0, column=0, padx=(0, 10))
 
@@ -57,7 +58,8 @@ class AddLinkDialog(ctk.CTkToplevel):
         self.fake_frame.grid(row=5, column=0, padx=20, pady=10, sticky="ew")
         self.fake_frame.grid_columnconfigure(1, weight=1)
 
-        self.fake_btn = ctk.CTkButton(self.fake_frame, text="📂 Browse", width=100, corner_radius=0, 
+        self.fake_btn = ctk.CTkButton(self.fake_frame, text="📂 Fake", width=100, corner_radius=0, 
+                                     fg_color="#9b59b6", hover_color="#8e44ad",
                                      font=ctk.CTkFont(family=FONT_FAMILY), command=self.browse_fake)
         self.fake_btn.grid(row=0, column=0, padx=(0, 10))
 
@@ -116,7 +118,7 @@ class SymlinkManager(ctk.CTk):
         super().__init__()
 
         self.title("Symlink Manager")
-        self.geometry("800x600")
+        self.geometry("1000x600")
 
         self.data_file = "links.json"
         self.links = self.load_data()
