@@ -18,7 +18,8 @@ const GAME = {
     death: false,
     editorMode: false,
     editorItem: 'WALL',
-    editorClass: 'ASSAULT'
+    editorClass: 'ASSAULT',
+    selectedMapName: null
 };
 
 const keys = {};
@@ -91,6 +92,14 @@ const UI = {
             const isHQ = name.includes(':');
             item.innerHTML = `<span style="color: ${isHQ ? '#666' : '#900'};">[DATA]</span> ${name}`;
             item.onclick = () => UI.loadMap(DEFAULT_MAPS[name]);
+
+            // Add Right-Click support
+            item.oncontextmenu = (e) => {
+                e.preventDefault();
+                e.stopPropagation(); // Stop click from reaching window immediately
+                UI.showContextMenu(e.clientX, e.clientY, name);
+            };
+
             container.appendChild(item);
         });
     },
@@ -152,6 +161,60 @@ const UI = {
         }
     }
 };
+
+// Global context menu handler
+UI.showContextMenu = (x, y, name) => {
+    const menu = document.getElementById('map-context-menu');
+    menu.style.left = x + 'px';
+    menu.style.top = y + 'px';
+    menu.classList.remove('hidden');
+    GAME.selectedMapName = name;
+};
+
+UI.contextEdit = () => {
+    const name = GAME.selectedMapName;
+    const mapData = DEFAULT_MAPS[name];
+    if (mapData) {
+        document.getElementById('map-list-screen').classList.add('hidden');
+        document.getElementById('map-context-menu').classList.add('hidden');
+        document.getElementById('editor-ui').classList.remove('hidden');
+        document.getElementById('hud').classList.add('hidden');
+        GAME.editorMode = true;
+        GAME.running = true;
+        GAME.paused = false;
+        initLevel(mapData);
+    }
+};
+
+UI.contextDelete = async () => {
+    const name = GAME.selectedMapName;
+    if (!confirm(`DELETE ${name}? THIS CANNOT BE UNDONE.`)) return;
+
+    try {
+        const response = await fetch('/api/delete_map', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: name })
+        });
+        const result = await response.json();
+        if (result.status === 'success') {
+            document.getElementById('map-context-menu').classList.add('hidden');
+            UI.renderMapList();
+        } else {
+            alert(result.error);
+        }
+    } catch (e) {
+        alert("SERVER ERROR: Could not delete from disk.");
+    }
+};
+
+// Close context menu on any click (with small timeout to allow menu interactions)
+window.addEventListener('mousedown', (e) => {
+    const menu = document.getElementById('map-context-menu');
+    if (!menu.contains(e.target)) {
+        menu.classList.add('hidden');
+    }
+});
 
 class Particle {
     constructor(x, y, color) {

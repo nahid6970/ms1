@@ -26,12 +26,16 @@
             <!-- Map Selection -->
             <div id="map-list-screen" class="overlay hidden">
                 <div class="menu-box">
-                    <h2>READY MISSION</h2>
-                    <div id="map-items">
-                        <!-- Dynamic maps here -->
-                    </div>
+                    <h2>SELECT SECTOR</h2>
+                    <div id="map-items"></div>
                     <button class="menu-btn" onclick="UI.showMainMenu()">BACK</button>
                 </div>
+            </div>
+
+            <!-- Context Menu for Maps -->
+            <div id="map-context-menu" class="hidden">
+                <button onclick="UI.contextEdit()">EDIT SECTOR</button>
+                <button onclick="UI.contextDelete()" class="delete-btn">DELETE SECTOR</button>
             </div>
 
             <!-- Save Map Dialog -->

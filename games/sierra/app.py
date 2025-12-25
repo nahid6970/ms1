@@ -42,6 +42,24 @@ def save_map():
 
     return jsonify({"status": "success", "message": f"Map '{name}' saved to disk."})
 
+@app.route('/api/delete_map', methods=['POST'])
+def delete_map():
+    name = request.json.get('name')
+    if not name:
+        return jsonify({"error": "Missing name"}), 400
+
+    if os.path.exists(MAPS_FILE):
+        with open(MAPS_FILE, 'r') as f:
+            maps = json.load(f)
+        
+        if name in maps:
+            del maps[name]
+            with open(MAPS_FILE, 'w') as f:
+                json.dump(maps, f, indent=4)
+            return jsonify({"status": "success", "message": f"Map '{name}' deleted."})
+    
+    return jsonify({"error": "Map not found"}), 404
+
 if __name__ == '__main__':
     print("Sierra Tactical Server running at http://localhost:5684")
     app.run(debug=True, port=5684)
