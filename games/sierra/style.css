@@ -1,0 +1,116 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+body {
+    background-color: #0a0a0a;
+    color: #e0e0e0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+}
+
+#game-container {
+    position: relative;
+    width: 1200px;
+    height: 600px;
+    border: 2px solid #333;
+    background-color: #121212;
+}
+
+canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+#ui-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+#hud {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    right: 20px;
+    display: flex;
+    justify-content: space-between;
+    pointer-events: none;
+}
+
+.hud-item {
+    background: rgba(0, 0, 0, 0.7);
+    padding: 10px 15px;
+    border-left: 4px solid #555;
+}
+
+.label {
+    color: #888;
+    font-size: 0.8rem;
+    margin-right: 10px;
+}
+
+#weapon-name, #ammo-count, #mission-status {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #fff;
+    letter-spacing: 1px;
+}
+
+.hidden {
+    display: none !important;
+}
+
+#death-screen, #win-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    pointer-events: all;
+    z-index: 100;
+}
+
+h1 {
+    font-size: 3rem;
+    margin-bottom: 30px;
+    letter-spacing: 5px;
+}
+
+#death-screen h1 {
+    color: #a00;
+}
+
+#win-screen h1 {
+    color: #0a0;
+}
+
+button {
+    background: transparent;
+    color: #fff;
+    border: 1px solid #fff;
+    padding: 15px 30px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+button:hover {
+    background: #fff;
+    color: #000;
+}

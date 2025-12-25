@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIERRA TACTICAL - SWAT OPERATOR</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="gameCanvas"></canvas>
+        <div id="ui-layer">
+            <div id="hud">
+                <div class="hud-item">
+                    <span class="label">WEAPON:</span>
+                    <span id="weapon-name">SIDEARM</span>
+                </div>
+                <div class="hud-item">
+                    <span class="label">AMMO:</span>
+                    <span id="ammo-count">15 / 45</span>
+                </div>
+                <div class="hud-item">
+                    <span class="label">MISSION:</span>
+                    <span id="mission-status">CLEAR SECTOR</span>
+                </div>
+            </div>
+            <div id="death-screen" class="hidden">
+                <h1>OPERATOR DOWN</h1>
+                <button onclick="location.reload()">RETRY MISSION</button>
+            </div>
+            <div id="win-screen" class="hidden">
+                <h1>MISSION ACCOMPLISHED</h1>
+                <button onclick="location.reload()">NEXT MISSION</button>
+            </div>
+        </div>
+    </div>
+    <script src="game.js"></script>
+</body>
+</html>
