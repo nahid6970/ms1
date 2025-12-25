@@ -9,11 +9,13 @@ ctk.set_appearance_mode("Dark")
 ctk.set_default_color_theme("blue")
 
 class AddLinkDialog(ctk.CTkToplevel):
-    def __init__(self, parent, on_add_callback):
+    def __init__(self, parent, on_save_callback, edit_data=None):
         super().__init__(parent)
-        self.title("Add New Symlink")
+        title_text = "Edit Symlink" if edit_data else "Add New Symlink"
+        self.title(title_text)
         self.geometry("400x450")
-        self.on_add_callback = on_add_callback
+        self.on_save_callback = on_save_callback
+        self.edit_data = edit_data
         
         # Make it modal-like
         self.after(10, self.lift)
@@ -22,7 +24,7 @@ class AddLinkDialog(ctk.CTkToplevel):
 
         self.grid_columnconfigure(0, weight=1)
 
-        self.label = ctk.CTkLabel(self, text="Add New Symlink", font=ctk.CTkFont(size=20, weight="bold"))
+        self.label = ctk.CTkLabel(self, text=title_text, font=ctk.CTkFont(size=20, weight="bold"))
         self.label.grid(row=0, column=0, padx=20, pady=(20, 10))
 
         self.name_entry = ctk.CTkEntry(self, placeholder_text="Entry Name")
@@ -56,8 +58,16 @@ class AddLinkDialog(ctk.CTkToplevel):
         self.fake_entry = ctk.CTkEntry(self.fake_frame, placeholder_text="Fake Path (Shortcut)")
         self.fake_entry.grid(row=0, column=1, sticky="ew")
 
-        self.add_btn = ctk.CTkButton(self, text="Add Entry", command=self.add_link, fg_color="#2ecc71", hover_color="#27ae60")
-        self.add_btn.grid(row=6, column=0, padx=20, pady=20)
+        btn_text = "Save Changes" if edit_data else "Add Entry"
+        self.save_btn = ctk.CTkButton(self, text=btn_text, command=self.save_link, fg_color="#2ecc71", hover_color="#27ae60")
+        self.save_btn.grid(row=6, column=0, padx=20, pady=20)
+
+        # Pre-fill if editing
+        if edit_data:
+            self.name_entry.insert(0, edit_data.get("name", ""))
+            self.target_entry.insert(0, edit_data.get("target", ""))
+            self.fake_entry.insert(0, edit_data.get("fake", ""))
+            self.type_var.set(edit_data.get("type", "folder"))
 
     def browse_target(self):
         if self.type_var.get() == "folder":
@@ -79,7 +89,7 @@ class AddLinkDialog(ctk.CTkToplevel):
             self.fake_entry.delete(0, "end")
             self.fake_entry.insert(0, path)
 
-    def add_link(self):
+    def save_link(self):
         name = self.name_entry.get().strip()
         target = self.target_entry.get().strip()
         fake = self.fake_entry.get().strip()
@@ -89,7 +99,7 @@ class AddLinkDialog(ctk.CTkToplevel):
             messagebox.showwarning("Incomplete Data", "Please fill all fields.")
             return
 
-        self.on_add_callback(name, target, fake, link_type)
+        self.on_save_callback(name, target, fake, link_type)
         self.destroy()
 
 class SymlinkManager(ctk.CTk):
@@ -97,7 +107,7 @@ class SymlinkManager(ctk.CTk):
         super().__init__()
 
         self.title("Symlink Manager")
-        self.geometry("700x600")
+        self.geometry("800x600")
 
         self.data_file = "links.json"
         self.links = self.load_data()
@@ -147,6 +157,21 @@ class SymlinkManager(ctk.CTk):
         self.search_var.set("") # Clear search when adding new
         self.save_data()
         self.refresh_ui()
+
+    def edit_link(self, index):
+        query = self.search_var.get().lower()
+        filtered_links = [l for l in self.links if query in l['name'].lower() or query in l['target'].lower() or query in l['fake'].lower()]
+        target_link = filtered_links[index]
+        
+        def on_save(name, target, fake, link_type):
+            target_link["name"] = name
+            target_link["target"] = target
+            target_link["fake"] = fake
+            target_link["type"] = link_type
+            self.save_data()
+            self.refresh_ui()
+
+        AddLinkDialog(self, on_save, edit_data=target_link)
 
     def load_data(self):
         script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -288,16 +313,24 @@ class SymlinkManager(ctk.CTk):
             btn_frame = ctk.CTkFrame(item_frame, fg_color="transparent")
             btn_frame.grid(row=0, column=2, rowspan=2, padx=15, pady=10, sticky="e")
 
+            # Fix/Create Button
             if status != "Working":
-                fix_btn = ctk.CTkButton(btn_frame, text="Fix/Link", width=70, height=28, 
+                fix_btn = ctk.CTkButton(btn_frame, text="Fix/Link", width=60, height=28, 
                                        fg_color="#3498db", hover_color="#2980b9",
                                        command=lambda idx=i: self.create_link(idx))
                 fix_btn.grid(row=0, column=0, padx=(0, 5))
 
-            del_btn = ctk.CTkButton(btn_frame, text="Remove", width=70, height=28, 
+            # Edit Button
+            edit_btn = ctk.CTkButton(btn_frame, text="Edit", width=60, height=28, 
+                                    fg_color="#f39c12", hover_color="#e67e22",
+                                    command=lambda idx=i: self.edit_link(idx))
+            edit_btn.grid(row=0, column=1, padx=(0, 5))
+
+            # Delete button
+            del_btn = ctk.CTkButton(btn_frame, text="Remove", width=60, height=28, 
                                    fg_color="#c0392b", hover_color="#e74c3c",
                                    command=lambda idx=i: self.delete_link(idx))
-            del_btn.grid(row=0, column=1)
+            del_btn.grid(row=0, column=2)
 
 if __name__ == "__main__":
     app = SymlinkManager()
