@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quick Sidebar Pro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">
+        <div class="logo-icon"></div>
+        <h1>Quick<span>Links</span></h1>
+      </div>
+      <button id="add-btn" class="icon-btn" title="Add New Link">
+        <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z" /></svg>
+      </button>
+    </header>
+
+    <main id="links-container">
+      <!-- Links will be injected here -->
+      <div id="links-list" class="links-list"></div>
+    </main>
+
+    <div id="empty-state" class="empty-state hidden">
+      <div class="empty-icon"></div>
+      <p>No links added yet.</p>
+      <button id="add-first-btn" class="btn-primary">Add Your First Link</button>
+    </div>
+
+    <!-- Add/Edit Modal Overlay -->
+    <div id="modal-overlay" class="modal-overlay">
+      <div class="modal">
+        <h3 id="modal-title">New Link</h3>
+        <div class="input-group">
+          <label for="title-input">Title</label>
+          <input type="text" id="title-input" placeholder="e.g. GitHub">
+        </div>
+        <div class="input-group">
+          <label for="url-input">URL</label>
+          <input type="text" id="url-input" placeholder="https://...">
+        </div>
+        
+        <div class="style-row">
+          <div class="style-group">
+            <label>Color</label>
+            <input type="color" id="color-input" value="#38bdf8">
+          </div>
+          <div class="style-group">
+            <label class="checkbox-container">
+              <input type="checkbox" id="solid-input">
+              <span class="checkmark"></span>
+              Solid
+            </label>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button id="cancel-btn" class="btn-secondary">Cancel</button>
+          <button id="save-btn" class="btn-primary">Save Link</button>
+        </div>
+        <input type="hidden" id="edit-id">
+      </div>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
