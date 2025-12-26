@@ -15,6 +15,12 @@ const colorInput = document.getElementById('color-input');
 const solidInput = document.getElementById('solid-input');
 const editIdInput = document.getElementById('edit-id');
 
+// Context Menu Elements
+const contextMenu = document.getElementById('context-menu');
+const ctxEdit = document.getElementById('ctx-edit');
+const ctxDelete = document.getElementById('ctx-delete');
+let currentRightClickedLinkId = null;
+
 // Initial Load
 function init() {
     chrome.storage.sync.get(['sidebar_links'], (result) => {
@@ -25,15 +31,31 @@ function init() {
             showEmptyState(true);
         }
     });
+
+    // Close context menu on any click
+    document.addEventListener('click', () => {
+        contextMenu.classList.remove('visible');
+    });
+
+    // Handle Context Menu Actions
+    ctxEdit.addEventListener('click', () => {
+        const link = links.find(l => l.id === currentRightClickedLinkId);
+        if (link) openModal(link);
+    });
+
+    ctxDelete.addEventListener('click', () => {
+        links = links.filter(l => l.id !== currentRightClickedLinkId);
+        saveLinks();
+    });
 }
 
 function showEmptyState(show) {
     if (show) {
         emptyState.classList.remove('hidden');
-        linksContainer.classList.add('hidden');
+        linksList.classList.add('hidden');
     } else {
         emptyState.classList.add('hidden');
-        linksContainer.classList.remove('hidden');
+        linksList.classList.remove('hidden');
     }
 }
 
@@ -52,39 +74,34 @@ function renderLinks() {
         item.className = 'link-item';
         item.draggable = true;
 
-
-
         item.innerHTML = `
             <div class="favicon-box">
                 <img src="${link.icon || ''}" onerror="this.src='https://www.google.com/s2/favicons?domain=google.com&sz=64'">
             </div>
-            <div class="item-actions">
-                <button class="action-btn edit-btn" title="Edit">
-                    <svg viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z" /></svg>
-                </button>
-                <button class="action-btn delete-btn delete" title="Delete">
-                    <svg viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19V4M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" /></svg>
-                </button>
-            </div>
         `;
 
-        // Click to Open
+        // Left Click to Open
         item.addEventListener('click', (e) => {
-            if (e.target.closest('.action-btn')) return;
             window.open(link.url, '_blank');
         });
 
-        // Edit button
-        item.querySelector('.edit-btn').addEventListener('click', (e) => {
-            e.stopPropagation();
-            openModal(link);
-        });
+        // Right Click for Context Menu
+        item.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            currentRightClickedLinkId = link.id;
 
-        // Delete button
-        item.querySelector('.delete-btn').addEventListener('click', (e) => {
-            e.stopPropagation();
-            links = links.filter(l => l.id !== link.id);
-            saveLinks();
+            contextMenu.style.left = `${e.clientX}px`;
+            contextMenu.style.top = `${e.clientY}px`;
+            contextMenu.classList.add('visible');
+
+            // Prevent menu from going off-screen
+            const menuBounds = contextMenu.getBoundingClientRect();
+            if (menuBounds.right > window.innerWidth) {
+                contextMenu.style.left = `${e.clientX - menuBounds.width}px`;
+            }
+            if (menuBounds.bottom > window.innerHeight) {
+                contextMenu.style.top = `${e.clientY - menuBounds.height}px`;
+            }
         });
 
         // Drag and Drop
@@ -94,7 +111,6 @@ function renderLinks() {
         });
 
         item.addEventListener('dragend', () => item.classList.remove('dragging'));
-
         item.addEventListener('dragover', (e) => e.preventDefault());
 
         item.addEventListener('drop', (e) => {

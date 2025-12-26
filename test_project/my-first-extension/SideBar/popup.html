@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="popup.css">
 </head>
+
 <body>
   <div class="container">
     <header>
@@ -17,7 +19,9 @@
         <h1>Quick<span>Links</span></h1>
       </div>
       <button id="add-btn" class="icon-btn" title="Add New Link">
-        <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z" /></svg>
+        <svg viewBox="0 0 24 24" width="20" height="20">
+          <path fill="currentColor" d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z" />
+        </svg>
       </button>
     </header>
 
@@ -44,7 +48,7 @@
           <label for="url-input">URL</label>
           <input type="text" id="url-input" placeholder="https://...">
         </div>
-        
+
         <div class="style-row">
           <div class="style-group">
             <label>Color</label>
@@ -66,8 +70,27 @@
         <input type="hidden" id="edit-id">
       </div>
     </div>
+
+    <!-- Context Menu -->
+    <div id="context-menu" class="context-menu">
+      <div id="ctx-edit" class="context-item">
+        <svg viewBox="0 0 24 24" width="16" height="16">
+          <path fill="currentColor"
+            d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z" />
+        </svg>
+        Edit
+      </div>
+      <div id="ctx-delete" class="context-item danger">
+        <svg viewBox="0 0 24 24" width="16" height="16">
+          <path fill="currentColor"
+            d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19V4M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" />
+        </svg>
+        Delete
+      </div>
+    </div>
   </div>
 
   <script src="popup.js"></script>
 </body>
+
 </html>

@@ -19,22 +19,24 @@
 }
 
 body {
-    width: 360px;
+    width: 400px;
+    /* Slightly wider to fit dynamic content better */
     background-color: var(--bg-color);
     color: var(--text-main);
     font-family: 'Outfit', -apple-system, system-ui, sans-serif;
     overflow-x: hidden;
+    min-height: 200px;
 }
 
 .container {
-    padding: 20px;
+    padding: 16px;
 }
 
 header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 24px;
+    margin-bottom: 20px;
 }
 
 .logo {
@@ -44,14 +46,14 @@ header {
 }
 
 .logo-icon {
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
     background: linear-gradient(135deg, var(--primary), #818cf8);
-    border-radius: 6px;
+    border-radius: 5px;
 }
 
 header h1 {
-    font-size: 1.25rem;
+    font-size: 1.1rem;
     font-weight: 700;
 }
 
@@ -64,30 +66,23 @@ header h1 span {
     background: var(--card-bg);
     border: 1px solid var(--border-color);
     color: var(--text-main);
-    width: 40px;
-    height: 40px;
-    border-radius: 12px;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 0.2s;
-}
-
-.icon-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: var(--primary);
-    color: var(--primary);
 }
 
 /* 5 Column Grid */
 .links-list {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
-    gap: 15px;
+    gap: 12px;
     max-height: 400px;
     overflow-y: auto;
-    padding: 5px;
+    padding: 4px;
 }
 
 .link-item {
@@ -96,28 +91,31 @@ header h1 span {
     flex-direction: column;
     align-items: center;
     text-decoration: none;
+    color: var(--text-main);
     transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     cursor: pointer;
-    padding: 5px;
+    padding: 4px;
+}
+
+.link-item:hover {
+    transform: scale(1.1);
 }
 
 .favicon-box {
-    width: 44px;
-    height: 44px;
+    width: 48px;
+    height: 48px;
     background: var(--card-bg);
     border: 1px solid var(--border-color);
     border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.2s;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .link-item:hover .favicon-box {
     border-color: var(--primary);
     background: rgba(56, 189, 248, 0.1);
-    box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
 }
 
 .favicon-box img {
@@ -126,84 +124,22 @@ header h1 span {
     object-fit: contain;
 }
 
-.link-item:hover {
-    transform: scale(1.1);
-}
-
-/* Simple Action Buttons */
-.item-actions {
-    position: absolute;
-    top: -6px;
-    right: -6px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    opacity: 0;
-    transition: opacity 0.2s;
-    z-index: 10;
-}
-
-.link-item:hover .item-actions {
-    opacity: 1;
-}
-
-.action-btn {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    border: none;
-    background: #1e293b;
-    color: var(--text-muted);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-.action-btn:hover {
-    background: var(--primary);
-    color: #000;
-}
-
-.action-btn.delete:hover {
-    background: var(--danger);
-    color: #fff;
-}
-
-/* Empty State */
-.empty-state {
-    text-align: center;
-    padding: 40px 20px;
-}
-
-.btn-primary {
-    background: var(--primary);
-    color: #000;
-    border: none;
-    padding: 12px 24px;
-    border-radius: 12px;
-    font-weight: 700;
-    cursor: pointer;
-    width: 100%;
-}
-
-/* Modal */
+/* Modal Styling - Improved for fit */
 .modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.85);
     backdrop-filter: blur(8px);
     display: flex;
     align-items: center;
     justify-content: center;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.3s;
-    z-index: 100;
+    transition: opacity 0.25s;
+    z-index: 1000;
 }
 
 .modal-overlay.visible {
@@ -214,9 +150,18 @@ header h1 span {
 .modal {
     background: #1e293b;
     border: 1px solid var(--border-color);
-    border-radius: 20px;
-    padding: 24px;
-    width: 300px;
+    border-radius: 16px;
+    padding: 20px;
+    width: 340px;
+    /* Wider modal for comfort */
+    max-width: 90vw;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+}
+
+.modal h3 {
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+    text-align: center;
 }
 
 .input-group {
@@ -225,23 +170,43 @@ header h1 span {
 
 .input-group label {
     display: block;
-    font-size: 12px;
+    font-size: 11px;
     color: var(--text-muted);
     margin-bottom: 6px;
 }
 
 .input-group input {
     width: 100%;
-    padding: 10px;
-    background: rgba(0, 0, 0, 0.2);
+    padding: 10px 12px;
+    background: rgba(0, 0, 0, 0.3);
     border: 1px solid var(--border-color);
-    border-radius: 10px;
+    border-radius: 8px;
     color: white;
+    font-family: inherit;
+    font-size: 13px;
+}
+
+.input-group input:focus {
+    outline: none;
+    border-color: var(--primary);
 }
 
 .modal-actions {
     display: flex;
     gap: 12px;
+    margin-top: 24px;
+}
+
+.btn-primary {
+    flex: 2;
+    background: var(--primary);
+    color: #000;
+    border: none;
+    padding: 11px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 13px;
 }
 
 .btn-secondary {
@@ -249,6 +214,60 @@ header h1 span {
     background: transparent;
     border: 1px solid var(--border-color);
     color: white;
-    border-radius: 10px;
+    border-radius: 8px;
     cursor: pointer;
+    font-size: 13px;
+}
+
+/* Context Menu */
+.context-menu {
+    position: fixed;
+    background: #1e293b;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 4px;
+    width: 140px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+    display: none;
+    z-index: 2000;
+}
+
+.context-menu.visible {
+    display: block;
+}
+
+.context-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    color: var(--text-main);
+    font-size: 13px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+.context-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--primary);
+}
+
+.context-item.danger:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--danger);
+}
+
+.context-item svg {
+    opacity: 0.7;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 40px 0;
+}
+
+.empty-state.hidden {
+    display: none;
 }
