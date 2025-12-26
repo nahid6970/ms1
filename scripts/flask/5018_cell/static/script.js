@@ -6801,21 +6801,48 @@ function commaToLines(event) {
 
 // Helper function to calculate visual width of text (handles Unicode/Bangla properly)
 function getVisualTextWidth(text) {
-    // Create a temporary element to measure actual text width
+    // For empty or whitespace-only text, return string length
+    if (!text || !text.trim()) {
+        return text.length;
+    }
+    
+    // Check if text contains non-ASCII characters (like Bangla)
+    const hasUnicode = /[^\x00-\x7F]/.test(text);
+    
+    if (!hasUnicode) {
+        // For ASCII-only text, use string length for better performance and accuracy
+        return text.length;
+    }
+    
+    // For Unicode text, measure actual width
     const tempSpan = document.createElement('span');
     tempSpan.style.visibility = 'hidden';
     tempSpan.style.position = 'absolute';
     tempSpan.style.whiteSpace = 'pre';
     tempSpan.style.fontFamily = 'Vrinda, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif';
-    tempSpan.style.fontSize = '14px'; // Match table font size
+    tempSpan.style.fontSize = '14px';
     tempSpan.textContent = text;
     
     document.body.appendChild(tempSpan);
-    const width = tempSpan.offsetWidth;
+    const pixelWidth = tempSpan.offsetWidth;
     document.body.removeChild(tempSpan);
     
-    // Convert pixel width to approximate character width (assuming ~8px per char for monospace-like alignment)
-    return Math.ceil(width / 8);
+    // Create reference measurement with ASCII characters
+    const refSpan = document.createElement('span');
+    refSpan.style.visibility = 'hidden';
+    refSpan.style.position = 'absolute';
+    refSpan.style.whiteSpace = 'pre';
+    refSpan.style.fontFamily = 'Vrinda, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif';
+    refSpan.style.fontSize = '14px';
+    refSpan.textContent = 'A'.repeat(text.length); // Same number of ASCII chars
+    
+    document.body.appendChild(refSpan);
+    const refWidth = refSpan.offsetWidth;
+    document.body.removeChild(refSpan);
+    
+    // Calculate relative width compared to ASCII
+    const ratio = pixelWidth / refWidth;
+    return Math.ceil(text.length * ratio);
 }
 
 // Helper function to pad text properly for Unicode characters
