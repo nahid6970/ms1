@@ -26,49 +26,12 @@
     </header>
 
     <main id="links-container">
-      <!-- Links will be injected here -->
       <div id="links-list" class="links-list"></div>
     </main>
 
     <div id="empty-state" class="empty-state hidden">
-      <div class="empty-icon"></div>
       <p>No links added yet.</p>
       <button id="add-first-btn" class="btn-primary">Add Your First Link</button>
-    </div>
-
-    <!-- Add/Edit Modal Overlay -->
-    <div id="modal-overlay" class="modal-overlay">
-      <div class="modal">
-        <h3 id="modal-title">New Link</h3>
-        <div class="input-group">
-          <label for="title-input">Title</label>
-          <input type="text" id="title-input" placeholder="e.g. GitHub">
-        </div>
-        <div class="input-group">
-          <label for="url-input">URL</label>
-          <input type="text" id="url-input" placeholder="https://...">
-        </div>
-
-        <div class="style-row">
-          <div class="style-group">
-            <label>Color</label>
-            <input type="color" id="color-input" value="#38bdf8">
-          </div>
-          <div class="style-group">
-            <label class="checkbox-container">
-              <input type="checkbox" id="solid-input">
-              <span class="checkmark"></span>
-              Solid
-            </label>
-          </div>
-        </div>
-
-        <div class="modal-actions">
-          <button id="cancel-btn" class="btn-secondary">Cancel</button>
-          <button id="save-btn" class="btn-primary">Save Link</button>
-        </div>
-        <input type="hidden" id="edit-id">
-      </div>
     </div>
 
     <!-- Context Menu -->

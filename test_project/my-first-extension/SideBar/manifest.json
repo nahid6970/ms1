@@ -10,6 +10,19 @@
         "default_title": "Quick Sidebar Pro",
         "default_popup": "popup.html"
     },
+    "content_scripts": [
+        {
+            "matches": [
+                "<all_urls>"
+            ],
+            "js": [
+                "content.js"
+            ],
+            "css": [
+                "content.css"
+            ]
+        }
+    ],
     "icons": {
         "16": "icons/icon16.png",
         "48": "icons/icon48.png",

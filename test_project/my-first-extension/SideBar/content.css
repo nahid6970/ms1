@@ -1,0 +1,100 @@
+/* Global Centered Modal Styles */
+#qs-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(8px);
+    z-index: 2147483647;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    font-family: 'Outfit', -apple-system, system-ui, sans-serif !important;
+}
+
+#qs-modal-overlay.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+#qs-modal-content {
+    background: #1e293b;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 30px;
+    width: 400px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    transform: scale(0.9);
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    color: white;
+}
+
+#qs-modal-overlay.visible #qs-modal-content {
+    transform: scale(1);
+}
+
+.qs-modal-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 24px;
+    text-align: center;
+}
+
+.qs-group {
+    margin-bottom: 16px;
+}
+
+.qs-label {
+    display: block;
+    font-size: 12px;
+    color: #94a3b8;
+    margin-bottom: 6px;
+}
+
+.qs-input {
+    width: 100%;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    color: white;
+    font-size: 14px;
+}
+
+.qs-input:focus {
+    outline: none;
+    border-color: #38bdf8;
+}
+
+.qs-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.qs-btn {
+    padding: 12px;
+    border-radius: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 14px;
+    border: none;
+}
+
+.qs-primary {
+    flex: 2;
+    background: #38bdf8;
+    color: #000;
+}
+
+.qs-secondary {
+    flex: 1;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+}

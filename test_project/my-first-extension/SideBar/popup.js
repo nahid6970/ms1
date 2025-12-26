@@ -5,15 +5,6 @@ const emptyState = document.getElementById('empty-state');
 const linksContainer = document.getElementById('links-container');
 const addBtn = document.getElementById('add-btn');
 const addFirstBtn = document.getElementById('add-first-btn');
-const modalOverlay = document.getElementById('modal-overlay');
-const modalTitle = document.getElementById('modal-title');
-const cancelBtn = document.getElementById('cancel-btn');
-const saveBtn = document.getElementById('save-btn');
-const titleInput = document.getElementById('title-input');
-const urlInput = document.getElementById('url-input');
-const colorInput = document.getElementById('color-input');
-const solidInput = document.getElementById('solid-input');
-const editIdInput = document.getElementById('edit-id');
 
 // Context Menu Elements
 const contextMenu = document.getElementById('context-menu');
@@ -40,7 +31,7 @@ function init() {
     // Handle Context Menu Actions
     ctxEdit.addEventListener('click', () => {
         const link = links.find(l => l.id === currentRightClickedLinkId);
-        if (link) openModal(link);
+        if (link) triggerBrowserModal(link);
     });
 
     ctxDelete.addEventListener('click', () => {
@@ -132,24 +123,18 @@ function renderLinks() {
     });
 }
 
-function openModal(editLink = null) {
-    if (editLink) {
-        modalTitle.textContent = 'Edit Link';
-        editIdInput.value = editLink.id;
-        titleInput.value = editLink.title;
-        urlInput.value = editLink.url;
-        colorInput.value = editLink.color || '#38bdf8';
-        solidInput.checked = editLink.isSolid || false;
-    } else {
-        modalTitle.textContent = 'New Link';
-        editIdInput.value = '';
-        titleInput.value = '';
-        urlInput.value = '';
-        colorInput.value = '#38bdf8';
-        solidInput.checked = false;
-    }
-    modalOverlay.classList.add('visible');
-    titleInput.focus();
+function triggerBrowserModal(editLink = null) {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        if (tabs[0]) {
+            chrome.tabs.sendMessage(tabs[0].id, {
+                action: 'open_modal',
+                link: editLink
+            }).catch(err => {
+                alert('Please visit a webpage (not a Chrome settings page) to use the Add/Edit form.');
+            });
+            window.close(); // Close popup when modal opens in browser
+        }
+    });
 }
 
 function saveLinks() {
@@ -158,51 +143,7 @@ function saveLinks() {
     });
 }
 
-addBtn.addEventListener('click', () => openModal());
-addFirstBtn.addEventListener('click', () => openModal());
-cancelBtn.addEventListener('click', () => modalOverlay.classList.remove('visible'));
-
-modalOverlay.addEventListener('click', (e) => {
-    if (e.target === modalOverlay) modalOverlay.classList.remove('visible');
-});
-
-saveBtn.addEventListener('click', () => {
-    const title = titleInput.value.trim();
-    let url = urlInput.value.trim();
-    const color = colorInput.value;
-    const isSolid = solidInput.checked;
-    const editId = editIdInput.value;
-
-    if (!url) return;
-    if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
-
-    let domain;
-    try {
-        domain = new URL(url).hostname;
-    } catch (e) {
-        alert('Please enter a valid URL');
-        return;
-    }
-
-    const linkData = {
-        title: title || domain,
-        url: url,
-        color: color,
-        isSolid: isSolid,
-        icon: `https://www.google.com/s2/favicons?domain=${domain}&sz=64`
-    };
-
-    if (editId) {
-        links = links.map(l => l.id === editId ? { ...l, ...linkData } : l);
-    } else {
-        links.push({
-            id: Date.now().toString(),
-            ...linkData
-        });
-    }
-
-    saveLinks();
-    modalOverlay.classList.remove('visible');
-});
+addBtn.addEventListener('click', () => triggerBrowserModal());
+addFirstBtn.addEventListener('click', () => triggerBrowserModal());
 
 init();
