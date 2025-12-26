@@ -954,14 +954,6 @@ td:not(:focus-within).has-markdown-preview {
     height: 40px;
 }
 
-/* Force monospaced font for aligned tables in edit mode */
-td textarea.monospaced-table {
-    font-family: 'Consolas', 'Monaco', 'JetBrains Mono', monospace !important;
-    letter-spacing: 0px;
-    tab-size: 2;
-    -moz-tab-size: 2;
-}
-
 td input:focus {
     outline: 2px solid #007bff;
     background: rgba(0, 123, 255, 0.1);

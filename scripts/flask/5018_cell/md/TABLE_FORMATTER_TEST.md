@@ -125,6 +125,27 @@ Orange | $2.00 | 80
 
 **Note:** Column width based on longest content, not separator.
 
+## Test 8: Bangla/Unicode Text Support
+**Before:**
+```
+| নাম | বয়স | শহর |
+|---|---|---|
+| রহিম | ২৫ | ঢাকা |
+| করিম | ৩০ | চট্টগ্রাম |
+| English | Mixed | Text |
+```
+
+**After (Expected):**
+```
+| নাম     | বয়স | শহর      |
+|---------|------|----------|
+| রহিম    | ২৫   | ঢাকা     |
+| করিম    | ৩০   | চট্টগ্রাম |
+| English | Mixed | Text     |
+```
+
+**Note:** Unicode characters (Bangla) are properly measured for visual width, ensuring correct alignment with mixed English/Bangla content.
+
 ## How to Test:
 
 1. Copy the "Before" text
@@ -144,3 +165,4 @@ Orange | $2.00 | 80
 ✅ Leading/trailing pipes added if missing
 ✅ Works with any number of columns
 ✅ Optimal width based on content only
+✅ **Unicode/Bangla text properly aligned** (visual width calculation)
