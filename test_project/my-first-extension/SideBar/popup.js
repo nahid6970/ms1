@@ -16,14 +16,16 @@ const solidInput = document.getElementById('solid-input');
 const editIdInput = document.getElementById('edit-id');
 
 // Initial Load
-chrome.storage.sync.get(['sidebar_links'], (result) => {
-    if (result.sidebar_links) {
-        links = result.sidebar_links;
-        renderLinks();
-    } else {
-        showEmptyState(true);
-    }
-});
+function init() {
+    chrome.storage.sync.get(['sidebar_links'], (result) => {
+        if (result.sidebar_links && result.sidebar_links.length > 0) {
+            links = result.sidebar_links;
+            renderLinks();
+        } else {
+            showEmptyState(true);
+        }
+    });
+}
 
 function showEmptyState(show) {
     if (show) {
@@ -45,43 +47,47 @@ function renderLinks() {
 
     showEmptyState(false);
 
-    links.forEach((link, index) => {
+    links.forEach((link) => {
         const item = document.createElement('div');
-        item.className = `link-item ${link.isSolid ? 'solid' : ''}`;
+        item.className = 'link-item';
         item.draggable = true;
 
-        if (link.color) {
-            const bg = link.isSolid ? link.color : `${link.color}15`;
-            item.style.backgroundColor = bg;
-            item.style.borderLeft = `4px solid ${link.color}`;
-            if (link.isSolid) {
-                item.style.color = '#fff';
-            }
-        }
+
 
         item.innerHTML = `
-      <div class="favicon-box">
-        <img src="${link.icon}" onerror="this.src='https://www.google.com/s2/favicons?domain=google.com&sz=64'">
-      </div>
-      <div class="link-info">
-        <div class="link-title">${link.title}</div>
-        <div class="link-url">${new URL(link.url).hostname}</div>
-      </div>
-      <div class="item-actions">
-        <button class="action-btn edit-btn" data-id="${link.id}">
-          <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z" /></svg>
-        </button>
-        <button class="action-btn delete-btn delete" data-id="${link.id}">
-          <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19V4M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" /></svg>
-        </button>
-      </div>
-    `;
+            <div class="favicon-box">
+                <img src="${link.icon || ''}" onerror="this.src='https://www.google.com/s2/favicons?domain=google.com&sz=64'">
+            </div>
+            <div class="link-info">
+                <div class="link-title">${link.title || 'Untitled'}</div>
+            </div>
+            <div class="item-actions">
+                <button class="action-btn edit-btn" title="Edit">
+                    <svg viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z" /></svg>
+                </button>
+                <button class="action-btn delete-btn delete" title="Delete">
+                    <svg viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19V4M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" /></svg>
+                </button>
+            </div>
+        `;
 
         // Click to Open
         item.addEventListener('click', (e) => {
-            // Don't open if clicking action buttons
             if (e.target.closest('.action-btn')) return;
             window.open(link.url, '_blank');
+        });
+
+        // Edit button
+        item.querySelector('.edit-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            openModal(link);
+        });
+
+        // Delete button
+        item.querySelector('.delete-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            links = links.filter(l => l.id !== link.id);
+            saveLinks();
         });
 
         // Drag and Drop
@@ -90,24 +96,12 @@ function renderLinks() {
             e.dataTransfer.setData('text/plain', link.id);
         });
 
-        item.addEventListener('dragend', () => {
-            item.classList.remove('dragging');
-            const draggedOver = document.querySelectorAll('.drag-over');
-            draggedOver.forEach(el => el.classList.remove('drag-over'));
-        });
+        item.addEventListener('dragend', () => item.classList.remove('dragging'));
 
-        item.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            item.classList.add('drag-over');
-        });
-
-        item.addEventListener('dragleave', () => {
-            item.classList.remove('drag-over');
-        });
+        item.addEventListener('dragover', (e) => e.preventDefault());
 
         item.addEventListener('drop', (e) => {
             e.preventDefault();
-            item.classList.remove('drag-over');
             const draggedId = e.dataTransfer.getData('text/plain');
             if (draggedId === link.id) return;
 
@@ -122,25 +116,6 @@ function renderLinks() {
         });
 
         linksList.appendChild(item);
-    });
-
-    // Attach button events
-    document.querySelectorAll('.edit-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const id = btn.getAttribute('data-id');
-            const link = links.find(l => l.id === id);
-            if (link) {
-                openModal(link);
-            }
-        });
-    });
-
-    document.querySelectorAll('.delete-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const id = btn.getAttribute('data-id');
-            links = links.filter(l => l.id !== id);
-            saveLinks();
-        });
     });
 }
 
@@ -216,3 +191,5 @@ saveBtn.addEventListener('click', () => {
     saveLinks();
     modalOverlay.classList.remove('visible');
 });
+
+init();
