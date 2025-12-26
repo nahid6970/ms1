@@ -4,6 +4,7 @@ const linksList = document.getElementById('links-list');
 const emptyState = document.getElementById('empty-state');
 const linksContainer = document.getElementById('links-container');
 const addBtn = document.getElementById('add-btn');
+const settingsBtn = document.getElementById('settings-btn');
 const addFirstBtn = document.getElementById('add-first-btn');
 
 // Context Menu Elements
@@ -143,6 +144,19 @@ function triggerBrowserModal(editLink = null) {
     });
 }
 
+function triggerSettingsModal() {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        if (tabs[0]) {
+            chrome.tabs.sendMessage(tabs[0].id, {
+                action: 'open_settings'
+            }).catch(err => {
+                alert('Please visit a webpage to use Settings.');
+            });
+            window.close();
+        }
+    });
+}
+
 function saveLinks() {
     chrome.storage.sync.set({ sidebar_links: links }, () => {
         renderLinks();
@@ -150,6 +164,7 @@ function saveLinks() {
 }
 
 addBtn.addEventListener('click', () => triggerBrowserModal());
+settingsBtn.addEventListener('click', () => triggerSettingsModal());
 addFirstBtn.addEventListener('click', () => triggerBrowserModal());
 
 init();

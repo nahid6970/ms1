@@ -45,6 +45,33 @@
   const saveBtn = document.getElementById('qs-save');
   const cancelBtn = document.getElementById('qs-cancel');
 
+  // Settings Modal
+  const settingsOverlay = document.createElement('div');
+  settingsOverlay.id = 'qs-settings-overlay';
+  settingsOverlay.classList.add('qs-modal-overlay-custom'); // Reusing some base styles if possible
+  settingsOverlay.innerHTML = `
+    <div id="qs-settings-content" class="qs-modal-content-custom">
+      <div class="qs-modal-title">Settings</div>
+      <div class="qs-settings-section">
+        <p class="qs-label">Backup & Restore</p>
+        <div class="qs-settings-btns">
+          <button id="qs-export-btn" class="qs-btn qs-secondary" style="margin-bottom: 10px; width: 100%;">Export Links (.json)</button>
+          <button id="qs-import-btn" class="qs-btn qs-secondary" style="width: 100%;">Import Links (.json)</button>
+          <input type="file" id="qs-import-file" style="display: none;" accept=".json">
+        </div>
+      </div>
+      <div class="qs-actions">
+        <button id="qs-settings-close" class="qs-btn qs-primary" style="width: 100%;">Close</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(settingsOverlay);
+
+  const settingsClose = document.getElementById('qs-settings-close');
+  const exportBtn = document.getElementById('qs-export-btn');
+  const importBtn = document.getElementById('qs-import-btn');
+  const importFile = document.getElementById('qs-import-file');
+
   chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === 'open_modal') {
       const link = request.link;
@@ -65,8 +92,51 @@
       }
       overlay.classList.add('visible');
       titleInput.focus();
+    } else if (request.action === 'open_settings') {
+      settingsOverlay.classList.add('visible');
     }
   });
+
+  // Export Logic
+  exportBtn.onclick = () => {
+    chrome.storage.sync.get(['sidebar_links'], (result) => {
+      const links = result.sidebar_links || [];
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(links, null, 2));
+      const downloadAnchorNode = document.createElement('a');
+      downloadAnchorNode.setAttribute("href", dataStr);
+      downloadAnchorNode.setAttribute("download", "quicklinks_backup.json");
+      document.body.appendChild(downloadAnchorNode);
+      downloadAnchorNode.click();
+      downloadAnchorNode.remove();
+    });
+  };
+
+  // Import Logic
+  importBtn.onclick = () => importFile.click();
+  importFile.onchange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const importedLinks = JSON.parse(event.target.result);
+        if (Array.isArray(importedLinks)) {
+          chrome.storage.sync.set({ sidebar_links: importedLinks }, () => {
+            alert('Links imported successfully!');
+            settingsOverlay.classList.remove('visible');
+          });
+        } else {
+          alert('Invalid backup file format.');
+        }
+      } catch (err) {
+        alert('Error parsing backup file.');
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  settingsClose.onclick = () => settingsOverlay.classList.remove('visible');
+  settingsOverlay.onclick = (e) => { if (e.target === settingsOverlay) settingsOverlay.classList.remove('visible'); };
 
   saveBtn.onclick = () => {
     const title = titleInput.value.trim();

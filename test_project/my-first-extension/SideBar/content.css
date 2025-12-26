@@ -1,5 +1,5 @@
-/* Global Centered Modal Styles */
-#qs-modal-overlay {
+#qs-modal-overlay,
+#qs-settings-overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -17,12 +17,14 @@
     font-family: 'Outfit', -apple-system, system-ui, sans-serif !important;
 }
 
-#qs-modal-overlay.visible {
+#qs-modal-overlay.visible,
+#qs-settings-overlay.visible {
     opacity: 1;
     pointer-events: auto;
 }
 
-#qs-modal-content {
+#qs-modal-content,
+#qs-settings-content {
     background: #1e293b;
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 20px;
@@ -34,8 +36,13 @@
     color: white;
 }
 
-#qs-modal-overlay.visible #qs-modal-content {
+#qs-modal-overlay.visible #qs-modal-content,
+#qs-settings-overlay.visible #qs-settings-content {
     transform: scale(1);
+}
+
+.qs-settings-section {
+    margin-bottom: 24px;
 }
 
 .qs-modal-title {
