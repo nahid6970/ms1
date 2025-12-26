@@ -262,6 +262,32 @@ class SymlinkManager(ctk.CTk):
             messagebox.showerror("Error", f"Target path does not exist:\n{target}")
             return
 
+        # Check if fake path already exists and is not a proper link
+        if os.path.exists(fake) or os.path.lexists(fake):
+            is_proper_link = os.path.islink(fake) or (link_type == "folder" and self.is_junction(fake))
+            
+            if not is_proper_link:
+                # File/folder exists but is not a symbolic link
+                response = messagebox.askyesnocancel(
+                    "File Already Exists", 
+                    f"A {link_type} already exists at:\n{fake}\n\nThis is not a symbolic link. Would you like to delete it and create the symbolic link?\n\nClick 'Yes' to delete and create link\nClick 'No' to cancel\nClick 'Cancel' to abort"
+                )
+                
+                if response is None:  # Cancel
+                    return
+                elif response:  # Yes - delete existing file/folder
+                    try:
+                        if link_type == "folder":
+                            import shutil
+                            shutil.rmtree(fake)
+                        else:
+                            os.remove(fake)
+                    except Exception as e:
+                        messagebox.showerror("Delete Error", f"Failed to delete existing {link_type}:\n{str(e)}")
+                        return
+                else:  # No - cancel operation
+                    return
+
         try:
             if link_type == "folder":
                 cmd = f'mklink /J "{fake}" "{target}"'
@@ -275,7 +301,10 @@ class SymlinkManager(ctk.CTk):
                 messagebox.showinfo("Success", f"Link created successfully:\n{fake}")
             else:
                 error_msg = result.stderr.strip() or result.stdout.strip()
-                if "Privilege" in error_msg or "access is denied" in error_msg.lower():
+                if "file already exists" in error_msg.lower():
+                    # This shouldn't happen now, but just in case
+                    messagebox.showerror("Error", f"File still exists after deletion attempt:\n{error_msg}")
+                elif "Privilege" in error_msg or "access is denied" in error_msg.lower():
                     messagebox.showerror("Permission Denied", "Creation failed. Please run this script as Administrator to create symlinks.")
                 else:
                     messagebox.showerror("Error", f"Failed to create link:\n{error_msg}")
