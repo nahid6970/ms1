@@ -58,9 +58,6 @@ function renderLinks() {
             <div class="favicon-box">
                 <img src="${link.icon || ''}" onerror="this.src='https://www.google.com/s2/favicons?domain=google.com&sz=64'">
             </div>
-            <div class="link-info">
-                <div class="link-title">${link.title || 'Untitled'}</div>
-            </div>
             <div class="item-actions">
                 <button class="action-btn edit-btn" title="Edit">
                     <svg viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z" /></svg>

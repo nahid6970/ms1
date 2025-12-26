@@ -96,25 +96,20 @@ header h1 span {
     flex-direction: column;
     align-items: center;
     text-decoration: none;
-    color: var(--text-main);
     transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     cursor: pointer;
-}
-
-.link-item:hover {
-    transform: scale(1.1);
+    padding: 5px;
 }
 
 .favicon-box {
-    width: 50px;
-    height: 50px;
+    width: 44px;
+    height: 44px;
     background: var(--card-bg);
     border: 1px solid var(--border-color);
-    border-radius: 14px;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 8px;
     transition: all 0.2s;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
@@ -131,19 +126,8 @@ header h1 span {
     object-fit: contain;
 }
 
-.link-title {
-    width: 100%;
-    font-size: 10px;
-    font-weight: 600;
-    text-align: center;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    color: var(--text-muted);
-}
-
-.link-item:hover .link-title {
-    color: var(--text-main);
+.link-item:hover {
+    transform: scale(1.1);
 }
 
 /* Simple Action Buttons */
