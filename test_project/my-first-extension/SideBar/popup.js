@@ -65,8 +65,14 @@ function renderLinks() {
         item.className = 'link-item';
         item.draggable = true;
 
+        // Define Icon Styles
+        const iconStyle = link.color ? (link.isSolid
+            ? `background: ${link.color}; border-color: ${link.color}; box-shadow: 0 4px 10px ${link.color}66;`
+            : `border-color: ${link.color}; box-shadow: 0 0 15px ${link.color}44; background: ${link.color}15;`)
+            : '';
+
         item.innerHTML = `
-            <div class="favicon-box">
+            <div class="favicon-box" style="${iconStyle}">
                 <img src="${link.icon || ''}" onerror="this.src='https://www.google.com/s2/favicons?domain=google.com&sz=64'">
             </div>
         `;

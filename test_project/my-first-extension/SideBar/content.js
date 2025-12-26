@@ -15,6 +15,19 @@
         <label class="qs-label">URL</label>
         <input type="text" id="qs-url-input" class="qs-input" placeholder="https://...">
       </div>
+      <div class="qs-group qs-style-row">
+        <div class="qs-style-field">
+          <label class="qs-label">Color</label>
+          <input type="color" id="qs-color-input" class="qs-color-btn" value="#38bdf8">
+        </div>
+        <div class="qs-style-field">
+          <label class="qs-checkbox">
+            <input type="checkbox" id="qs-solid-input">
+            <span class="qs-check-mark"></span>
+            Solid
+          </label>
+        </div>
+      </div>
       <div class="qs-actions">
         <button id="qs-cancel" class="qs-btn qs-secondary">Cancel</button>
         <button id="qs-save" class="qs-btn qs-primary">Save Link</button>
@@ -27,6 +40,8 @@
   const editIdInput = document.getElementById('qs-edit-id');
   const titleInput = document.getElementById('qs-title-input');
   const urlInput = document.getElementById('qs-url-input');
+  const colorInput = document.getElementById('qs-color-input');
+  const solidInput = document.getElementById('qs-solid-input');
   const saveBtn = document.getElementById('qs-save');
   const cancelBtn = document.getElementById('qs-cancel');
 
@@ -38,11 +53,15 @@
         editIdInput.value = link.id;
         titleInput.value = link.title;
         urlInput.value = link.url;
+        colorInput.value = link.color || '#38bdf8';
+        solidInput.checked = link.isSolid || false;
       } else {
         titleText.textContent = 'New Link';
         editIdInput.value = '';
         titleInput.value = '';
         urlInput.value = '';
+        colorInput.value = '#38bdf8';
+        solidInput.checked = false;
       }
       overlay.classList.add('visible');
       titleInput.focus();
@@ -52,6 +71,8 @@
   saveBtn.onclick = () => {
     const title = titleInput.value.trim();
     let url = urlInput.value.trim();
+    const color = colorInput.value;
+    const isSolid = solidInput.checked;
     const editId = editIdInput.value;
 
     if (!url) return;
@@ -65,6 +86,8 @@
       const linkData = {
         title: title || domain,
         url: url,
+        color: color,
+        isSolid: isSolid,
         icon: `https://www.google.com/s2/favicons?domain=${domain}&sz=64`
       };
 

@@ -49,6 +49,76 @@
     margin-bottom: 16px;
 }
 
+.qs-style-row {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+}
+
+.qs-style-field {
+    flex: 1;
+}
+
+.qs-color-btn {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 100%;
+    height: 40px;
+    background: none;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    cursor: pointer;
+    padding: 4px;
+}
+
+.qs-color-btn::-webkit-color-swatch {
+    border: none;
+    border-radius: 6px;
+}
+
+.qs-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 13px;
+    color: white;
+    user-select: none;
+    margin-top: 18px;
+    /* Offset for missing label */
+}
+
+.qs-checkbox input {
+    display: none;
+}
+
+.qs-check-mark {
+    width: 18px;
+    height: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 5px;
+    background: rgba(0, 0, 0, 0.2);
+    display: inline-block;
+    position: relative;
+}
+
+.qs-checkbox input:checked+.qs-check-mark {
+    background: #38bdf8;
+    border-color: #38bdf8;
+}
+
+.qs-checkbox input:checked+.qs-check-mark::after {
+    content: "";
+    position: absolute;
+    left: 6px;
+    top: 2px;
+    width: 4px;
+    height: 8px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
 .qs-label {
     display: block;
     font-size: 12px;
