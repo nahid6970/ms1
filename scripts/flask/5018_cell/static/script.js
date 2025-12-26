@@ -5925,6 +5925,85 @@ function closeAllColumnMenus() {
     });
 }
 
+/**
+ * Measures the exact pixel width of text in a given font.
+ * Used for "pixel-perfect" alignment in textareas.
+ */
+let canvasMeasureContext = null;
+function getTextPixelWidth(text, font) {
+    if (!canvasMeasureContext) {
+        canvasMeasureContext = document.createElement('canvas').getContext('2d');
+    }
+    canvasMeasureContext.font = font;
+    return canvasMeasureContext.measureText(text).width;
+}
+
+/**
+ * Gets the visual width of a string in "units" (Latin = 1, Bangla = 2).
+ * Still used for fallback and unit-based logic.
+ */
+function getStringVisualWidth(str, startOffset = 0) {
+    if (!str) return 0;
+
+    let width = startOffset;
+    try {
+        if (typeof Intl !== 'undefined' && typeof Intl.Segmenter !== 'undefined') {
+            const segmenter = new Intl.Segmenter(undefined, { granularity: 'grapheme' });
+            for (const segment of segmenter.segment(str)) {
+                const char = segment.segment;
+                if (char === '\t') width += (2 - (width % 2));
+                else if (/[\u0980-\u09FF]/.test(char)) width += 2;
+                else width += 1;
+            }
+            return width - startOffset;
+        }
+    } catch (e) { }
+
+    for (let i = 0; i < str.length; i++) {
+        const char = str[i];
+        if (char === '\t') width += (2 - (width % 2));
+        else if (str.charCodeAt(i) >= 0x0980 && str.charCodeAt(i) <= 0x09FF) width += 2;
+        else width += 1;
+    }
+    return width - startOffset;
+}
+
+/**
+ * Pads a string using Tabs and Spaces to reach a Target Pixel Width.
+ */
+function padStringPixelEnd(str, targetPixels, font, tabSize = 2, startPixels = 0) {
+    const spaceWidth = getTextPixelWidth(' ', font);
+    const tabWidth = spaceWidth * tabSize;
+
+    let currentPixels = getTextPixelWidth(str, font);
+    let result = str;
+    let needed = targetPixels - currentPixels;
+
+    // Use Tabs for pairs of units (2 slots) where possible
+    while (needed >= tabWidth) {
+        // Only add tab if we are aligned to a tab stop to prevent drift
+        const currentTotalPos = startPixels + getTextPixelWidth(result, font);
+        const distanceToNextStop = tabWidth - (currentTotalPos % tabWidth);
+
+        if (distanceToNextStop > 1 && distanceToNextStop < tabWidth) {
+            // Add space to align to next stop
+            result += ' ';
+            needed -= spaceWidth;
+        } else {
+            result += '\t';
+            needed -= tabWidth;
+        }
+    }
+
+    // Use Spaces for fine-tuning
+    while (needed >= spaceWidth / 2) {
+        result += ' ';
+        needed -= spaceWidth;
+    }
+
+    return result;
+}
+
 function stripMarkdown(text, preserveLinks = false) {
     if (!text) return '';
     let stripped = String(text);
@@ -6807,16 +6886,18 @@ function formatPipeTable(event) {
     const end = quickFormatterSelection.end;
     const selectedText = input.value.substring(start, end);
 
-    if (!selectedText) {
-        showToast('No text selected', 'warning');
+    if (!selectedText || !selectedText.includes('|')) {
+        showToast('Invalid selection', 'warning');
         return;
     }
 
-    // Check if text contains pipes (basic table detection)
-    if (!selectedText.includes('|')) {
-        showToast('Not a pipe table', 'warning');
-        return;
-    }
+    // Force monospaced font before measuring
+    input.classList.add('monospaced-table');
+    const computed = getComputedStyle(input);
+    const font = computed.fontFamily.includes('Consolas') || computed.fontFamily.includes('Mono')
+        ? computed.font
+        : '14px Consolas, Monaco, "JetBrains Mono", monospace';
+    const tabSize = parseInt(computed.tabSize) || 2;
 
     try {
         // Split into lines
@@ -6830,63 +6911,55 @@ function formatPipeTable(event) {
             return trimmed.split('|').map(cell => cell.trim());
         });
 
-        // Calculate max width for each column (excluding separator rows)
         const colCount = Math.max(...rows.map(r => r.length));
-        const colWidths = [];
+        const colMaxPixels = [];
 
+        // Determine max pixel width for each column
         for (let col = 0; col < colCount; col++) {
-            let maxWidth = 0;
+            let maxP = 0;
             for (let row of rows) {
-                if (row[col]) {
-                    // Skip separator rows (all dashes) when calculating width
-                    if (!/^-+$/.test(row[col])) {
-                        maxWidth = Math.max(maxWidth, row[col].length);
-                    }
+                if (row[col] && !/^-+$/.test(row[col])) {
+                    maxP = Math.max(maxP, getTextPixelWidth(row[col], font));
                 }
             }
-            colWidths[col] = maxWidth;
+            colMaxPixels[col] = maxP;
         }
 
-        // Rebuild table with proper alignment
-        const formatted = rows.map((row, rowIndex) => {
+        // Rebuild table using pixel-based padding
+        const formatted = rows.map(row => {
+            let currentLinePixels = getTextPixelWidth('| ', font);
             const cells = row.map((cell, colIndex) => {
-                const width = colWidths[colIndex] || 0;
+                const targetP = colMaxPixels[colIndex] || 0;
 
-                // Check if it's a separator row (all dashes)
+                let result;
                 if (/^-+$/.test(cell)) {
-                    return '-'.repeat(width);
+                    // Handle separator lines
+                    const dashWidth = getTextPixelWidth('-', font);
+                    const count = Math.ceil(targetP / dashWidth);
+                    result = '-'.repeat(count);
+                } else {
+                    result = padStringPixelEnd(cell, targetP, font, tabSize, currentLinePixels);
                 }
 
-                // Pad cell to column width
-                return cell.padEnd(width, ' ');
+                // Update tracker: width of cell + "| " bridge (which is 3 spaces visually)
+                currentLinePixels += targetP + getTextPixelWidth(' | ', font);
+                return result;
             });
 
-            // Join with pipes and add leading/trailing pipes
             return '| ' + cells.join(' | ') + ' |';
         });
 
         const formattedText = formatted.join('\n');
+        input.value = input.value.substring(0, start) + formattedText + input.value.substring(end);
 
-        // Replace the selected text
-        const newText = input.value.substring(0, start) +
-            formattedText +
-            input.value.substring(end);
-
-        input.value = newText;
-
-        // Trigger change event to update cell
-        const changeEvent = new Event('input', { bubbles: true });
-        input.dispatchEvent(changeEvent);
-
-        // Select the result
+        input.dispatchEvent(new Event('input', { bubbles: true }));
         input.setSelectionRange(start, start + formattedText.length);
         input.focus();
-
         closeQuickFormatter();
-        showToast('Table formatted', 'success');
+        showToast('Table aligned (Pixel-Perfect)', 'success');
     } catch (error) {
-        console.error('Error formatting table:', error);
-        showToast('Error formatting table', 'error');
+        console.error(error);
+        showToast('Formatting error', 'error');
     }
 }
 

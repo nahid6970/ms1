@@ -10,6 +10,7 @@
 **Actions:**
 - Aligns pipes vertically (`|`).
 - Calculates optimal column widths (ignoring separator rows).
+- **Unicode Support:** Uses grapheme cluster counting (`Intl.Segmenter`) to accurately align Bangla, English, and mixed-script text.
 - Adds missing leading/trailing pipes.
 - Regenerates separator lines (`---`).
 
