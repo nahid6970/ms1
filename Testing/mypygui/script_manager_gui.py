@@ -378,10 +378,10 @@ class ScriptLauncherApp:
             self.title_lbl.config(text=" SCRIPT MANAGER 🚀")
             self.back_btn.pack_forget()
 
+        # Initialize grid map for span logic
+        self.grid_occupied = set() # Stores (row, col) tuples
+
         for i, script in enumerate(scripts):
-            r = i // cols
-            c = i % cols
-            
             is_folder = script.get("type") == "folder"
             
             # Retrieve all style properties with defaults
@@ -411,10 +411,52 @@ class ScriptLauncherApp:
                 slant="italic" if is_italic else "roman"
             )
 
+            # Determine grid position with spanning logic
+            c_span = script.get("col_span", 1)
+            r_span = script.get("row_span", 1)
+            
+            # Find first available spot
+            place_r, place_c = 0, 0
+            found = False
+            
+            # Search limit to avoid infinite loops
+            for search_r in range(100): 
+                for search_c in range(cols):
+                    # Check if this cell is free
+                    if (search_r, search_c) in self.grid_occupied:
+                        continue
+                        
+                    # Check if the entire span fits
+                    fits = True
+                    for sr in range(r_span):
+                        for sc in range(c_span):
+                            # Boundary check (columns only, rows extend infinitely)
+                            if search_c + sc >= cols:
+                                fits = False
+                                break
+                            # Occupancy check
+                            if (search_r + sr, search_c + sc) in self.grid_occupied:
+                                fits = False
+                                break
+                        if not fits: break
+                    
+                    if fits:
+                        place_r, place_c = search_r, search_c
+                        found = True
+                        break
+                if found: break
+            
+            # Mark occupied
+            for sr in range(r_span):
+                for sc in range(c_span):
+                    self.grid_occupied.add((place_r + sr, place_c + sc))
+
             btn = ctk.CTkButton(
                 self.grid_frame, 
                 text=display_text,
-                width=160, height=45, corner_radius=corner_radius,
+                width=160 * c_span + (16 * (c_span - 1)), # Account for gaps
+                height=45 * r_span + (16 * (r_span - 1)),
+                corner_radius=corner_radius,
                 fg_color=b_color, 
                 text_color=t_color,
                 hover=False, 
@@ -422,7 +464,7 @@ class ScriptLauncherApp:
                 border_width=b_width,
                 border_color=b_border_color
             )
-            btn.grid(row=r, column=c, padx=8, pady=8, sticky="nsew")
+            btn.grid(row=place_r, column=place_c, rowspan=r_span, columnspan=c_span, padx=8, pady=8, sticky="nsew")
             
             # Manual hover implementation for better reliability
             def on_enter(e, b=btn, hc=h_color, htc=ht_color):
@@ -756,6 +798,18 @@ class ScriptLauncherApp:
         # Border Color Picker
         cp5 = ctk.CTkButton(shape_frame, text="Color", fg_color=script.get("border_color", "#fe1616"), width=60, height=25, hover=False, command=lambda: pick_color("border_color", cp5))
         cp5.pack(side="right", padx=10)
+        
+        # Grid Spanning
+        span_frame = tk.Frame(dialog, bg="#1d2027")
+        span_frame.pack(fill="x", padx=15, pady=(0, 10))
+        
+        tk.Label(span_frame, text="Column Span:", fg="gray", bg="#1d2027").pack(side="left", padx=(10, 5))
+        col_span_var = tk.StringVar(value=str(script.get("col_span", 1)))
+        tk.Entry(span_frame, textvariable=col_span_var, bg="#2b2f38", fg="white", insertbackground="white", bd=0, width=4).pack(side="left")
+        
+        tk.Label(span_frame, text="Row Span:", fg="gray", bg="#1d2027").pack(side="left", padx=(15, 5))
+        row_span_var = tk.StringVar(value=str(script.get("row_span", 1)))
+        tk.Entry(span_frame, textvariable=row_span_var, bg="#2b2f38", fg="white", insertbackground="white", bd=0, width=4).pack(side="left")
 
         def save_changes():
             script["name"] = name_var.get()
@@ -779,6 +833,16 @@ class ScriptLauncherApp:
                 script["corner_radius"] = int(radius_var.get())
             except:
                 script["corner_radius"] = 4
+                
+            try:
+                script["col_span"] = max(1, int(col_span_var.get()))
+            except:
+                script["col_span"] = 1
+                
+            try:
+                script["row_span"] = max(1, int(row_span_var.get()))
+            except:
+                script["row_span"] = 1
             
             script["is_bold"] = v_bold.get()
             script["is_italic"] = v_italic.get()
@@ -968,11 +1032,11 @@ class ScriptLauncherApp:
                 messagebox.showerror("Error", f"Failed to save settings: {e}", parent=dialog)
 
         def on_close():
-            dialog.destroy()
+            top.destroy()
             self.root.attributes("-topmost", True)
 
-        dialog.protocol("WM_DELETE_WINDOW", on_close)
-        ctk.CTkButton(dialog, text="SAVE", command=save, width=100, fg_color="#10b153").pack(pady=20)
+        # dialog.protocol("WM_DELETE_WINDOW", on_close) # Not needed for frame/overrideredirect
+        ctk.CTkButton(dialog, text="SAVE SETTINGS", command=save, width=150, height=40, fg_color="#10b153", hover_color="#0d8c42", font=(self.main_font, 12, "bold")).pack(pady=20)
 
     def start_drag(self, event):
         self.drag_data["x"] = event.x
