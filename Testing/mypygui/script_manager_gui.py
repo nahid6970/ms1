@@ -92,6 +92,7 @@ class ScriptLauncherApp:
         self.folder_labels = {}
         self.drag_data = {"x": 0, "y": 0}
         self.script_drag_data = {"index": None, "active": False, "ghost": None, "start_abs": (0, 0)}
+        self.view_stack = [] # Stack of (folder_name, script_list_reference)
         
         # Window sizing
         self.width = 950
@@ -170,17 +171,29 @@ class ScriptLauncherApp:
         self.header.bind("<ButtonPress-1>", self.start_drag)
         self.header.bind("<B1-Motion>", self.do_drag)
 
-        # Title
+        # Title & Breadcrumb
+        self.title_frame = tk.Frame(self.header, bg="#1d2027")
+        self.title_frame.pack(side="left", padx=15)
+        
+        self.back_btn = tk.Button(
+            self.title_frame, text=" ❮ ", command=self.exit_folder,
+            bg="#1d2027", fg="#fe1616", bd=0, font=("Segoe UI Symbol", 10, "bold"),
+            activebackground="#fe1616", activeforeground="white", cursor="hand2"
+        )
+        # Not packed initially
+        
         self.title_lbl = tk.Label(
-            self.header, 
+            self.title_frame, 
             text=" SCRIPT MANAGER 🚀", 
             fg=self.config["settings"]["accent_color"], 
             bg="#1d2027",
             font=(self.main_font, 12, "bold")
         )
-        self.title_lbl.pack(side="left", padx=15)
-        self.title_lbl.bind("<ButtonPress-1>", self.start_drag)
-        self.title_lbl.bind("<B1-Motion>", self.do_drag)
+        self.title_lbl.pack(side="left")
+        
+        for widget in [self.header, self.title_lbl, self.title_frame]:
+            widget.bind("<ButtonPress-1>", self.start_drag)
+            widget.bind("<B1-Motion>", self.do_drag)
 
         # Control Buttons Container (Right aligned)
         self.controls_container = tk.Frame(self.header, bg="#1d2027")
@@ -353,28 +366,41 @@ class ScriptLauncherApp:
             widget.destroy()
 
         cols = self.config["settings"]["columns"]
-        scripts = self.config["scripts"]
+        # Determine current folder level
+        if self.view_stack:
+            folder_name, scripts = self.view_stack[-1]
+            self.title_lbl.config(text=f" ❯ {folder_name.upper()}")
+            self.back_btn.pack(side="left", padx=(0, 5))
+        else:
+            scripts = self.config["scripts"]
+            self.title_lbl.config(text=" SCRIPT MANAGER 🚀")
+            self.back_btn.pack_forget()
 
         for i, script in enumerate(scripts):
             r = i // cols
             c = i % cols
             
+            is_folder = script.get("type") == "folder"
+            
             # Retrieve all style properties with defaults
-            b_color = script.get("color", "#2b2f38")
+            default_bg = "#2b2f38" if not is_folder else "#1a1c23"
+            b_color = script.get("color", default_bg)
             h_color = script.get("hover_color", self.config["settings"]["accent_color"])
-            t_color = script.get("text_color", "white")
+            t_color = script.get("text_color", "white" if not is_folder else "#ffd700")
             ht_color = script.get("hover_text_color", "white")
             f_size = script.get("font_size", self.config["settings"].get("font_size", 10))
             
+            display_text = f"📁 {script['name']}" if is_folder else script["name"]
+            
             btn = ctk.CTkButton(
                 self.grid_frame, 
-                text=script["name"],
+                text=display_text,
                 width=160, height=45, corner_radius=4,
                 fg_color=b_color, 
                 text_color=t_color,
-                hover=False, # Disable CTk built-in hover to use manual bindings
-                font=(self.main_font, f_size),
-                command=lambda p=script["path"]: self.launch_script(p)
+                hover=False, 
+                font=(self.main_font, f_size, "bold" if is_folder else "normal"),
+                command=lambda s=script: self.handle_script_click(s)
             )
             btn.grid(row=r, column=c, padx=8, pady=8, sticky="nsew")
             
@@ -400,6 +426,23 @@ class ScriptLauncherApp:
         for i in range(cols):
             self.grid_frame.grid_columnconfigure(i, weight=1)
 
+    def handle_script_click(self, script):
+        if script.get("type") == "folder":
+            self.enter_folder(script)
+        else:
+            self.launch_script(script["path"])
+
+    def enter_folder(self, folder):
+        if "scripts" not in folder:
+            folder["scripts"] = []
+        self.view_stack.append((folder["name"], folder["scripts"]))
+        self.refresh_grid()
+
+    def exit_folder(self):
+        if self.view_stack:
+            self.view_stack.pop()
+            self.refresh_grid()
+
     # --- Drag & Drop Sorting Logic ---
     def start_script_drag(self, event, index):
         self.script_drag_data["index"] = index
@@ -413,7 +456,8 @@ class ScriptLauncherApp:
         if not self.script_drag_data["active"] and (dx > 10 or dy > 10):
             self.script_drag_data["active"] = True
             # Create a ghost label for visual feedback
-            script = self.config["scripts"][self.script_drag_data["index"]]
+            scripts = self.view_stack[-1][1] if self.view_stack else self.config["scripts"]
+            script = scripts[self.script_drag_data["index"]]
             self.script_drag_data["ghost"] = tk.Label(
                 self.root, text=script["name"], 
                 bg=self.config["settings"]["accent_color"], fg="white",
@@ -434,7 +478,7 @@ class ScriptLauncherApp:
 
         if not self.script_drag_data["active"]:
             self.script_drag_data["active"] = False
-            return # Was a normal click, CTk handles the command
+            return # Was a normal click, handle_script_click takes over
         
         self.script_drag_data["active"] = False
         
@@ -446,15 +490,15 @@ class ScriptLauncherApp:
         # Figure out target index
         target_idx = None
         for i, child in enumerate(self.grid_frame.winfo_children()):
-            # Search children recursively because CTkButton has sub-widgets
             if child == target_widget or any(target_widget == sub for sub in child.winfo_children()):
                 target_idx = i
                 break
         
+        scripts = self.view_stack[-1][1] if self.view_stack else self.config["scripts"]
         if target_idx is not None and target_idx != self.script_drag_data["index"]:
-            # Move item in list
-            item = self.config["scripts"].pop(self.script_drag_data["index"])
-            self.config["scripts"].insert(target_idx, item)
+            # Move item in current list
+            item = scripts.pop(self.script_drag_data["index"])
+            scripts.insert(target_idx, item)
             self.save_config()
             self.refresh_grid()
 
@@ -575,21 +619,51 @@ class ScriptLauncherApp:
     def remove_script(self, script):
         self.root.attributes("-topmost", False)
         if messagebox.askyesno("Confirm", f"Remove script '{script['name']}'?", parent=self.root):
-            self.config["scripts"].remove(script)
+            scripts = self.view_stack[-1][1] if self.view_stack else self.config["scripts"]
+            scripts.remove(script)
             self.save_config()
             self.refresh_grid()
         self.root.attributes("-topmost", True)
 
     def add_script_dialog(self):
         self.root.attributes("-topmost", False)
-        name = simpledialog.askstring("Add Script", "Enter button label:", parent=self.root)
-        if name:
-            path = filedialog.askopenfilename(title="Select Script or Executable", parent=self.root)
-            if path:
-                self.config["scripts"].append({"name": name, "path": path})
-                self.save_config()
-                self.refresh_grid()
-        self.root.attributes("-topmost", True)
+        
+        # Simple choice dialog
+        choice_dialog = tk.Toplevel(self.root)
+        choice_dialog.title("Add New")
+        choice_dialog.geometry("250x150")
+        choice_dialog.configure(bg="#1d2027")
+        choice_dialog.attributes("-topmost", True)
+        
+        # Center choice dialog
+        cx = (choice_dialog.winfo_screenwidth() // 2) - 125
+        cy = (choice_dialog.winfo_screenheight() // 2) - 75
+        choice_dialog.geometry(f"+{cx}+{cy}")
+
+        tk.Label(choice_dialog, text="What to add?", fg="white", bg="#1d2027", font=(self.main_font, 10, "bold")).pack(pady=10)
+        
+        def start_add(t):
+            choice_dialog.destroy()
+            if t == "folder":
+                name = simpledialog.askstring("Add Folder", "Enter folder name:", parent=self.root)
+                if name:
+                    scripts = self.view_stack[-1][1] if self.view_stack else self.config["scripts"]
+                    scripts.append({"name": name, "type": "folder", "scripts": []})
+                    self.save_config()
+                    self.refresh_grid()
+            else:
+                name = simpledialog.askstring("Add Script", "Enter button label:", parent=self.root)
+                if name:
+                    path = filedialog.askopenfilename(title="Select Script or Executable", parent=self.root)
+                    if path:
+                        scripts = self.view_stack[-1][1] if self.view_stack else self.config["scripts"]
+                        scripts.append({"name": name, "path": path, "type": "script"})
+                        self.save_config()
+                        self.refresh_grid()
+            self.root.attributes("-topmost", True)
+
+        ctk.CTkButton(choice_dialog, text="📄 Script", width=100, command=lambda: start_add("script")).pack(side="left", padx=20)
+        ctk.CTkButton(choice_dialog, text="📁 Folder", width=100, command=lambda: start_add("folder")).pack(side="right", padx=20)
 
     def open_settings(self):
         self.root.attributes("-topmost", False)
