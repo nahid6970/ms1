@@ -607,7 +607,8 @@ class ScriptLauncherApp:
 
         # Font Size
         tk.Label(dialog, text="Font Size:", fg="gray", bg="#1d2027").pack(anchor="w", padx=30, pady=(10, 0))
-        fsize_var = tk.StringVar(value=str(script.get("font_size", 10)))
+        default_fs = self.config["settings"].get("font_size", 10)
+        fsize_var = tk.StringVar(value=str(script.get("font_size", default_fs)))
         tk.Entry(dialog, textvariable=fsize_var, bg="#2b2f38", fg="white", insertbackground="white", bd=0, width=10).pack(anchor="w", padx=30, pady=5)
 
         # Color Pickers with improved previews and centered layout
@@ -639,7 +640,7 @@ class ScriptLauncherApp:
             try:
                 script["font_size"] = int(fsize_var.get())
             except:
-                script["font_size"] = 10
+                script["font_size"] = self.config["settings"].get("font_size", 10)
             self.save_config()
             self.refresh_grid()
             dialog.destroy()

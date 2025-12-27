@@ -37,20 +37,6 @@
             "font_size": 20,
             "color": "#f0d50f",
             "text_color": "#000000"
-        },
-        {
-            "name": "gg",
-            "path": "C:/Users/nahid/ms/ms1/scripts/ffmpeg/trim.ps1",
-            "type": "script",
-            "hide_terminal": false,
-            "font_size": 20
-        },
-        {
-            "name": "da",
-            "path": "C:/Users/nahid/ms/ms1/scripts/ffmpeg/trim.ps1",
-            "type": "script",
-            "hide_terminal": false,
-            "font_size": 10
         }
     ],
     "github_repos": [
