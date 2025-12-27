@@ -91,6 +91,7 @@ class ScriptLauncherApp:
         self.repo_labels = {}
         self.folder_labels = {}
         self.drag_data = {"x": 0, "y": 0}
+        self.script_drag_data = {"index": None, "active": False, "ghost": None, "start_abs": (0, 0)}
         
         # Window sizing
         self.width = 950
@@ -390,9 +391,72 @@ class ScriptLauncherApp:
             # Context menu binding
             btn.bind("<Button-3>", lambda e, s=script: self.show_context_menu(e, s))
 
+            # Drag & Drop bindings for sorting
+            btn.bind("<ButtonPress-1>", lambda e, i=i: self.start_script_drag(e, i), add="+")
+            btn.bind("<B1-Motion>", self.do_script_drag, add="+")
+            btn.bind("<ButtonRelease-1>", self.stop_script_drag, add="+")
+
         # Equal weight for columns
         for i in range(cols):
             self.grid_frame.grid_columnconfigure(i, weight=1)
+
+    # --- Drag & Drop Sorting Logic ---
+    def start_script_drag(self, event, index):
+        self.script_drag_data["index"] = index
+        self.script_drag_data["active"] = False
+        self.script_drag_data["start_abs"] = (event.x_root, event.y_root)
+
+    def do_script_drag(self, event):
+        dx = abs(event.x_root - self.script_drag_data["start_abs"][0])
+        dy = abs(event.y_root - self.script_drag_data["start_abs"][1])
+        
+        if not self.script_drag_data["active"] and (dx > 10 or dy > 10):
+            self.script_drag_data["active"] = True
+            # Create a ghost label for visual feedback
+            script = self.config["scripts"][self.script_drag_data["index"]]
+            self.script_drag_data["ghost"] = tk.Label(
+                self.root, text=script["name"], 
+                bg=self.config["settings"]["accent_color"], fg="white",
+                font=(self.main_font, 10, "bold"), padx=10, pady=5,
+                relief="flat", highlightthickness=1, highlightbackground="white"
+            )
+            self.script_drag_data["ghost"].place(x=event.x_root - self.root.winfo_rootx(), y=event.y_root - self.root.winfo_rooty())
+            self.root.config(cursor="fleur")
+
+        if self.script_drag_data["active"] and self.script_drag_data["ghost"]:
+            self.script_drag_data["ghost"].place(x=event.x_root - self.root.winfo_rootx() + 10, y=event.y_root - self.root.winfo_rooty() + 10)
+
+    def stop_script_drag(self, event):
+        self.root.config(cursor="")
+        if self.script_drag_data["ghost"]:
+            self.script_drag_data["ghost"].destroy()
+            self.script_drag_data["ghost"] = None
+
+        if not self.script_drag_data["active"]:
+            self.script_drag_data["active"] = False
+            return # Was a normal click, CTk handles the command
+        
+        self.script_drag_data["active"] = False
+        
+        # Find widget at drop position
+        target_widget = self.grid_frame.winfo_containing(event.x_root, event.y_root)
+        if not target_widget:
+            return
+
+        # Figure out target index
+        target_idx = None
+        for i, child in enumerate(self.grid_frame.winfo_children()):
+            # Search children recursively because CTkButton has sub-widgets
+            if child == target_widget or any(target_widget == sub for sub in child.winfo_children()):
+                target_idx = i
+                break
+        
+        if target_idx is not None and target_idx != self.script_drag_data["index"]:
+            # Move item in list
+            item = self.config["scripts"].pop(self.script_drag_data["index"])
+            self.config["scripts"].insert(target_idx, item)
+            self.save_config()
+            self.refresh_grid()
 
     def launch_script(self, path):
         try:

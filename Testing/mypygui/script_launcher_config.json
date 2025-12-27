@@ -14,13 +14,13 @@
     },
     "scripts": [
         {
-            "name": "Explorer",
-            "path": "explorer.exe",
+            "name": "Task Manager",
+            "path": "taskmgr.exe",
             "font_size": 20
         },
         {
-            "name": "Task Manager",
-            "path": "taskmgr.exe",
+            "name": "Explorer",
+            "path": "explorer.exe",
             "font_size": 20
         }
     ],
