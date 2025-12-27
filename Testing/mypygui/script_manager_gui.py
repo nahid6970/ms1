@@ -647,6 +647,9 @@ class ScriptLauncherApp:
 
     def system_stats_loop(self):
         while not self.stop_threads:
+            if not self.config["settings"].get("show_system_stats", True):
+                time.sleep(1)
+                continue
             try:
                 cpu = psutil.cpu_percent()
                 ram = psutil.virtual_memory().percent
@@ -702,6 +705,9 @@ class ScriptLauncherApp:
 
     def github_monitor_loop(self):
         while not self.stop_threads:
+            if not self.config["settings"].get("show_github", True):
+                time.sleep(1)
+                continue
             for repo in self.config["github_repos"]:
                 path = repo["path"]
                 status = "unknown"
@@ -718,6 +724,9 @@ class ScriptLauncherApp:
 
     def rclone_monitor_loop(self, log_dir):
         while not self.stop_threads:
+            if not self.config["settings"].get("show_rclone", True):
+                time.sleep(10)
+                continue
             for folder in self.config["rclone_folders"]:
                 name = folder["name"]
                 cfg_cmd = folder.get("cmd", "rclone check src dst --fast-list --size-only")
