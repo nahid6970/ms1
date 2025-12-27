@@ -23,7 +23,8 @@ DEFAULT_CONFIG = {
         "danger_color": "#fe1616",
         "show_github": True,
         "show_rclone": True,
-        "show_system_stats": True
+        "show_system_stats": True,
+        "always_on_top": True
     },
     "scripts": [
         {"name": "Explorer", "path": "explorer.exe"},
@@ -143,6 +144,9 @@ class ScriptLauncherApp:
         
         merge(self.config, loaded_config)
         self.save_config()
+        
+        # Apply startup settings
+        self.root.attributes("-topmost", self.config["settings"].get("always_on_top", True))
 
     def save_config(self):
         with open(CONFIG_FILE, "w") as f:
@@ -711,7 +715,7 @@ class ScriptLauncherApp:
         dialog.title("Settings")
         
         # Center the settings dialog
-        width, height = 300, 350
+        width, height = 400, 550
         x = (dialog.winfo_screenwidth() // 2) - (width // 2)
         y = (dialog.winfo_screenheight() // 2) - (height // 2)
         dialog.geometry(f"{width}x{height}+{x}+{y}")
@@ -737,19 +741,26 @@ class ScriptLauncherApp:
         f_size_var = tk.StringVar(value=str(self.config["settings"].get("font_size", 10)))
         tk.Entry(row2, textvariable=f_size_var, width=5, justify="center").pack(side="left")
 
+        # Window Settings
+        tk.Label(dialog, text="Window Behavior:", fg=self.config["settings"]["accent_color"], bg="#1d2027", font=(self.main_font, 10, "bold")).pack(pady=(15, 5))
+        
+        v_topmost = tk.BooleanVar(value=self.config["settings"].get("always_on_top", True))
+        cb_topmost = tk.Checkbutton(dialog, text="Always on Top", variable=v_topmost, bg="#1d2027", fg="white", selectcolor="#2b2f38", activebackground="#1d2027", activeforeground="white")
+        cb_topmost.pack(anchor="w", padx=50)
+
         # Widget Toggles
         tk.Label(dialog, text="Toggle Widgets:", fg=self.config["settings"]["accent_color"], bg="#1d2027", font=(self.main_font, 10, "bold")).pack(pady=(15, 5))
         
         v_github = tk.BooleanVar(value=self.config["settings"].get("show_github", True))
-        cb_github = tk.Checkbutton(dialog, text="GitHub Status", variable=v_github, bg="#1d2027", fg="white", selectcolor="#2b2f38", activebackground="#1d2027", activeforeground="white")
+        cb_github = tk.Checkbutton(dialog, text="GitHub Status Monitoring", variable=v_github, bg="#1d2027", fg="white", selectcolor="#2b2f38", activebackground="#1d2027", activeforeground="white")
         cb_github.pack(anchor="w", padx=50)
 
         v_rclone = tk.BooleanVar(value=self.config["settings"].get("show_rclone", True))
-        cb_rclone = tk.Checkbutton(dialog, text="Rclone Status", variable=v_rclone, bg="#1d2027", fg="white", selectcolor="#2b2f38", activebackground="#1d2027", activeforeground="white")
+        cb_rclone = tk.Checkbutton(dialog, text="Rclone Status Monitoring", variable=v_rclone, bg="#1d2027", fg="white", selectcolor="#2b2f38", activebackground="#1d2027", activeforeground="white")
         cb_rclone.pack(anchor="w", padx=50)
 
         v_stats = tk.BooleanVar(value=self.config["settings"].get("show_system_stats", True))
-        cb_stats = tk.Checkbutton(dialog, text="System Stats", variable=v_stats, bg="#1d2027", fg="white", selectcolor="#2b2f38", activebackground="#1d2027", activeforeground="white")
+        cb_stats = tk.Checkbutton(dialog, text="System Stats Widget", variable=v_stats, bg="#1d2027", fg="white", selectcolor="#2b2f38", activebackground="#1d2027", activeforeground="white")
         cb_stats.pack(anchor="w", padx=50)
 
         def save():
@@ -762,7 +773,11 @@ class ScriptLauncherApp:
                     self.config["settings"]["show_github"] = v_github.get()
                     self.config["settings"]["show_rclone"] = v_rclone.get()
                     self.config["settings"]["show_system_stats"] = v_stats.get()
+                    self.config["settings"]["always_on_top"] = v_topmost.get()
                     self.save_config()
+                    
+                    # Apply topmost immediately
+                    self.root.attributes("-topmost", self.config["settings"]["always_on_top"])
                     
                     # Apply grid changes immediately (safe)
                     self.refresh_grid()
