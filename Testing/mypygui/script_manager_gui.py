@@ -301,29 +301,33 @@ class ScriptLauncherApp:
             r = i // cols
             c = i % cols
             
-            # Use script-specific colors or defaults
-            btn_color = script.get("color", "#2b2f38")
-            hover_color = script.get("hover_color", self.config["settings"]["accent_color"])
-            text_color = script.get("text_color", "white")
+            # Retrieve all style properties with defaults
+            b_color = script.get("color", "#2b2f38")
+            h_color = script.get("hover_color", self.config["settings"]["accent_color"])
+            t_color = script.get("text_color", "white")
+            ht_color = script.get("hover_text_color", "white")
             
             btn = ctk.CTkButton(
                 self.grid_frame, 
                 text=script["name"],
                 width=160, height=45, corner_radius=4,
-                fg_color=btn_color, 
-                hover_color=hover_color,
-                text_color=text_color,
-                hover=True,
+                fg_color=b_color, 
+                text_color=t_color,
+                hover=False, # Disable CTk built-in hover to use manual bindings
                 font=(self.main_font, 10),
                 command=lambda p=script["path"]: self.launch_script(p)
             )
             btn.grid(row=r, column=c, padx=8, pady=8, sticky="nsew")
             
-            # Simple workaround for hover text color if provided
-            if "hover_text_color" in script:
-                h_text = script["hover_text_color"]
-                btn.bind("<Enter>", lambda e, b=btn, ht=h_text: b.configure(text_color=ht), add="+")
-                btn.bind("<Leave>", lambda e, b=btn, st=text_color: b.configure(text_color=st), add="+")
+            # Manual hover implementation for better reliability
+            def on_enter(e, b=btn, hc=h_color, htc=ht_color):
+                b.configure(fg_color=hc, text_color=htc)
+            
+            def on_leave(e, b=btn, bc=b_color, tc=t_color):
+                b.configure(fg_color=bc, text_color=tc)
+
+            btn.bind("<Enter>", on_enter)
+            btn.bind("<Leave>", on_leave)
 
             # Context menu binding
             btn.bind("<Button-3>", lambda e, s=script: self.show_context_menu(e, s))
@@ -354,7 +358,13 @@ class ScriptLauncherApp:
         self.root.attributes("-topmost", False)
         dialog = tk.Toplevel(self.root)
         dialog.title(f"Edit {script['name']}")
-        dialog.geometry("400x550")
+        
+        # Center the dialog on screen
+        width, height = 400, 550
+        x = (dialog.winfo_screenwidth() // 2) - (width // 2)
+        y = (dialog.winfo_screenheight() // 2) - (height // 2)
+        dialog.geometry(f"{width}x{height}+{x}+{y}")
+        
         dialog.configure(bg="#1d2027")
         dialog.attributes("-topmost", True)
         dialog.transient(self.root)
@@ -450,7 +460,13 @@ class ScriptLauncherApp:
         dialog = tk.Toplevel(self.root)
         dialog.attributes("-topmost", True)
         dialog.title("Settings")
-        dialog.geometry("300x200")
+        
+        # Center the settings dialog
+        width, height = 300, 200
+        x = (dialog.winfo_screenwidth() // 2) - (width // 2)
+        y = (dialog.winfo_screenheight() // 2) - (height // 2)
+        dialog.geometry(f"{width}x{height}+{x}+{y}")
+        
         dialog.configure(bg="#1d2027")
         dialog.transient(self.root)
         dialog.grab_set()
