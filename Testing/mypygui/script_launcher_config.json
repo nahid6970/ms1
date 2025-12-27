@@ -55,7 +55,9 @@
             ],
             "font_size": 20,
             "color": "#f0d50f",
-            "text_color": "#000000"
+            "text_color": "#000000",
+            "border_width": 0,
+            "corner_radius": 0
         },
         {
             "name": "mklink",
@@ -63,19 +65,25 @@
             "font_size": 20,
             "hide_terminal": true,
             "color": "#ffffff",
-            "text_color": "#000000"
+            "text_color": "#000000",
+            "border_width": 0,
+            "corner_radius": 0
         },
         {
             "name": "Task Manager",
             "path": "taskmgr.exe",
             "font_size": 20,
             "hide_terminal": false,
-            "border_width": 0
+            "border_width": 0,
+            "corner_radius": 0
         },
         {
             "name": "Explorer",
             "path": "explorer.exe",
-            "font_size": 20
+            "font_size": 20,
+            "hide_terminal": false,
+            "border_width": 0,
+            "corner_radius": 0
         }
     ],
     "github_repos": [

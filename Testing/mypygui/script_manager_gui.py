@@ -398,10 +398,12 @@ class ScriptLauncherApp:
 
             display_text = script["name"]
             
+            corner_radius = script.get("corner_radius", 4)
+            
             btn = ctk.CTkButton(
                 self.grid_frame, 
                 text=display_text,
-                width=160, height=45, corner_radius=4,
+                width=160, height=45, corner_radius=corner_radius,
                 fg_color=b_color, 
                 text_color=t_color,
                 hover=False, 
@@ -643,19 +645,24 @@ class ScriptLauncherApp:
         cp4 = ctk.CTkButton(colors_frame, text="Hover Text", text_color=script.get("hover_text_color", "white"), fg_color="#2b2f38", hover=False, width=120, command=lambda: pick_color("hover_text_color", cp4))
         cp4.grid(row=1, column=1, padx=5, pady=5)
 
-        # Row 3: Border Settings
-        tk.Label(dialog, text="Border Settings:", fg="gray", bg="#1d2027", font=(self.main_font, 9, "bold")).pack(anchor="w", padx=30, pady=(15, 5))
+        # Row 3: Styling & Borders
+        tk.Label(dialog, text="Styling & Borders:", fg="gray", bg="#1d2027", font=(self.main_font, 9, "bold")).pack(anchor="w", padx=30, pady=(15, 5))
         
-        border_frame = tk.Frame(dialog, bg="#1d2027")
-        border_frame.pack(fill="x", padx=30, pady=5)
+        style_frame = tk.Frame(dialog, bg="#1d2027")
+        style_frame.pack(fill="x", padx=30, pady=5)
         
         # Border Width
-        tk.Label(border_frame, text="Border Width:", fg="gray", bg="#1d2027").pack(side="left")
+        tk.Label(style_frame, text="Border W:", fg="gray", bg="#1d2027").pack(side="left")
         border_width_var = tk.StringVar(value=str(script.get("border_width", 0)))
-        tk.Entry(border_frame, textvariable=border_width_var, bg="#2b2f38", fg="white", insertbackground="white", bd=0, width=5).pack(side="left", padx=(5, 15))
+        tk.Entry(style_frame, textvariable=border_width_var, bg="#2b2f38", fg="white", insertbackground="white", bd=0, width=4).pack(side="left", padx=(5, 10))
         
+        # Corner Radius
+        tk.Label(style_frame, text="Radius:", fg="gray", bg="#1d2027").pack(side="left")
+        radius_var = tk.StringVar(value=str(script.get("corner_radius", 4)))
+        tk.Entry(style_frame, textvariable=radius_var, bg="#2b2f38", fg="white", insertbackground="white", bd=0, width=4).pack(side="left", padx=(5, 10))
+
         # Border Color
-        cp5 = ctk.CTkButton(border_frame, text="Border Color", fg_color=script.get("border_color", "#fe1616"), hover=False, width=120, command=lambda: pick_color("border_color", cp5))
+        cp5 = ctk.CTkButton(style_frame, text="Border Color", fg_color=script.get("border_color", "#fe1616"), hover=False, width=100, command=lambda: pick_color("border_color", cp5))
         cp5.pack(side="left", padx=5)
 
         def save_changes():
@@ -672,6 +679,10 @@ class ScriptLauncherApp:
                 script["border_width"] = int(border_width_var.get())
             except:
                 script["border_width"] = 0
+            try:
+                script["corner_radius"] = int(radius_var.get())
+            except:
+                script["corner_radius"] = 4
             self.save_config()
             self.refresh_grid()
             dialog.destroy()
