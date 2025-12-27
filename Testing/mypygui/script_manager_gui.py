@@ -574,24 +574,67 @@ class ScriptLauncherApp:
 
     def open_edit_dialog(self, script):
         self.root.attributes("-topmost", False)
-        dialog = tk.Toplevel(self.root)
-        dialog.title(f"Edit {script['name']}")
+        top = tk.Toplevel(self.root)
+        top.overrideredirect(True)
         
-        # Center the dialog on screen
+        # Center the dialog
         width, height = 400, 600
-        x = (dialog.winfo_screenwidth() // 2) - (width // 2)
-        y = (dialog.winfo_screenheight() // 2) - (height // 2)
-        dialog.geometry(f"{width}x{height}+{x}+{y}")
+        x = (top.winfo_screenwidth() // 2) - (width // 2)
+        y = (top.winfo_screenheight() // 2) - (height // 2)
+        top.geometry(f"{width}x{height}+{x}+{y}")
         
-        dialog.configure(bg="#1d2027")
-        dialog.attributes("-topmost", True)
-        dialog.transient(self.root)
-        dialog.grab_set()
+        # Ensure dialog is visible above everything
+        top.attributes("-topmost", True)
+        
+        # Force focus
+        top.focus_force()
+
+        # Custom Border Frame
+        border_color = self.config["settings"].get("border_color", "#fe1616")
+        border_frame = tk.Frame(top, bg=border_color)
+        border_frame.pack(fill="both", expand=True)
+
+        # Content Frame (Inner)
+        dialog = tk.Frame(border_frame, bg="#1d2027")
+        dialog.pack(fill="both", expand=True, padx=2, pady=2)
+
+        # Custom Header
+        header = tk.Frame(dialog, bg="#1d2027", height=30)
+        header.pack(fill="x", padx=10, pady=5)
+        
+        # Header Title
+        tk.Label(header, text=f"Edit {script['name']}", fg=self.config["settings"]["accent_color"], bg="#1d2027", font=(self.main_font, 12, "bold")).pack(side="left")
+        
+        # Window Dragging Logic
+        def start_move(event):
+            top.x = event.x
+            top.y = event.y
+
+        def do_move(event):
+            deltax = event.x - top.x
+            deltay = event.y - top.y
+            x = top.winfo_x() + deltax
+            y = top.winfo_y() + deltay
+            top.geometry(f"+{x}+{y}")
+
+        header.bind("<ButtonPress-1>", start_move)
+        header.bind("<B1-Motion>", do_move)
+        # Also bind to the title label so dragging works there too
+        for child in header.winfo_children():
+            child.bind("<ButtonPress-1>", start_move)
+            child.bind("<B1-Motion>", do_move)
+
+        def on_close():
+            top.destroy()
+            self.root.attributes("-topmost", True)
+
+        # Close Button
+        ctk.CTkButton(header, text="✕", width=30, height=30, fg_color="transparent", hover_color="#c42b1c", text_color="white", command=on_close).pack(side="right")
 
         def pick_color(key, btn):
             from tkinter import colorchooser
             curr = script.get(key, "#2b2f38")
-            color = colorchooser.askcolor(initialcolor=curr, parent=dialog)
+            color = colorchooser.askcolor(initialcolor=curr, parent=top)
             if color[1]:
                 script[key] = color[1]
                 # Update preview button immediate appearance
@@ -703,15 +746,14 @@ class ScriptLauncherApp:
             
             self.save_config()
             self.refresh_grid()
-            dialog.destroy()
-            self.root.attributes("-topmost", True)
+            self.save_config()
+            self.refresh_grid()
+            on_close()
 
         ctk.CTkButton(dialog, text="APPLY CHANGES", fg_color="#10b153", hover_color="#0d8c42", command=save_changes).pack(pady=20)
         
-        def on_close():
-            dialog.destroy()
-            self.root.attributes("-topmost", True)
-        dialog.protocol("WM_DELETE_WINDOW", on_close)
+        # No WM protocol for overrideredirect, but keep cleanup separate
+        # dialog.protocol("WM_DELETE_WINDOW", on_close) not needed
 
     def remove_script(self, script):
         self.root.attributes("-topmost", False)

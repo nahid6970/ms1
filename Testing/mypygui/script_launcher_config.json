@@ -77,7 +77,10 @@
             "font_size": 20,
             "hide_terminal": false,
             "border_width": 0,
-            "corner_radius": 0
+            "corner_radius": 0,
+            "color": "#030561",
+            "is_bold": false,
+            "is_italic": false
         },
         {
             "name": "Explorer",
