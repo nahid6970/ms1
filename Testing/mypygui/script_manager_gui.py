@@ -451,11 +451,18 @@ class ScriptLauncherApp:
                 for sc in range(c_span):
                     self.grid_occupied.add((place_r + sr, place_c + sc))
 
+            # Determine dimensions
+            custom_w = script.get("width", 0)
+            custom_h = script.get("height", 0)
+            
+            final_w = custom_w if custom_w > 0 else (160 * c_span + (16 * (c_span - 1)))
+            final_h = custom_h if custom_h > 0 else (45 * r_span + (16 * (r_span - 1)))
+
             btn = ctk.CTkButton(
                 self.grid_frame, 
                 text=display_text,
-                width=160 * c_span + (16 * (c_span - 1)), # Account for gaps
-                height=45 * r_span + (16 * (r_span - 1)),
+                width=final_w,
+                height=final_h,
                 corner_radius=corner_radius,
                 fg_color=b_color, 
                 text_color=t_color,
@@ -789,33 +796,46 @@ class ScriptLauncherApp:
         cp4.grid(row=1, column=1, padx=10, pady=(0,10), sticky="ew")
 
         # --- Section 4: Shape & Borders ---
-        shape_frame = tk.LabelFrame(dialog, text="   SHAPE & BORDERS   ", bg="#1d2027", fg="gray", font=(self.main_font, 10, "bold"), bd=1, relief="groove")
-        shape_frame.pack(fill="x", padx=15, pady=5)
+        # --- Section 4: Layout & Borders ---
+        layout_frame = tk.LabelFrame(dialog, text="   LAYOUT & APPEARANCE   ", bg="#1d2027", fg="gray", font=(self.main_font, 10, "bold"), bd=1, relief="groove")
+        layout_frame.pack(fill="x", padx=15, pady=5)
+        
+        # Row 1: Dimensions
+        row1 = tk.Frame(layout_frame, bg="#1d2027")
+        row1.pack(fill="x", padx=10, pady=5)
+        tk.Label(row1, text="Width:", fg="gray", bg="#1d2027").pack(side="left")
+        width_var = tk.StringVar(value=str(script.get("width", 0)))
+        tk.Entry(row1, textvariable=width_var, bg="#2b2f38", fg="white", insertbackground="white", bd=0, width=5).pack(side="left", padx=5)
+        
+        tk.Label(row1, text="Height:", fg="gray", bg="#1d2027").pack(side="left", padx=(15,0))
+        height_var = tk.StringVar(value=str(script.get("height", 0)))
+        tk.Entry(row1, textvariable=height_var, bg="#2b2f38", fg="white", insertbackground="white", bd=0, width=5).pack(side="left", padx=5)
+        tk.Label(row1, text="(0 = Auto)", fg="#666666", bg="#1d2027", font=(self.main_font, 8)).pack(side="left", padx=5)
 
-        # Radius & Width
-        tk.Label(shape_frame, text="Radius:", fg="white", bg="#1d2027").pack(side="left", padx=(10, 5), pady=10)
-        radius_var = tk.StringVar(value=str(script.get("corner_radius", 4)))
-        tk.Entry(shape_frame, textvariable=radius_var, bg="#2b2f38", fg="white", insertbackground="white", bd=0, width=4).pack(side="left")
-
-        tk.Label(shape_frame, text="Border W:", fg="white", bg="#1d2027").pack(side="left", padx=(15, 5))
-        border_width_var = tk.StringVar(value=str(script.get("border_width", 0)))
-        tk.Entry(shape_frame, textvariable=border_width_var, bg="#2b2f38", fg="white", insertbackground="white", bd=0, width=4).pack(side="left")
-        
-        # Border Color Picker
-        cp5 = ctk.CTkButton(shape_frame, text="Color", fg_color=script.get("border_color", "#fe1616"), width=60, height=25, hover=False, command=lambda: pick_color("border_color", cp5))
-        cp5.pack(side="right", padx=10)
-        
-        # Grid Spanning
-        span_frame = tk.Frame(dialog, bg="#1d2027")
-        span_frame.pack(fill="x", padx=15, pady=(0, 10))
-        
-        tk.Label(span_frame, text="Column Span:", fg="gray", bg="#1d2027").pack(side="left", padx=(10, 5))
+        # Row 2: Spanning
+        row2 = tk.Frame(layout_frame, bg="#1d2027")
+        row2.pack(fill="x", padx=10, pady=5)
+        tk.Label(row2, text="Col Span:", fg="gray", bg="#1d2027").pack(side="left")
         col_span_var = tk.StringVar(value=str(script.get("col_span", 1)))
-        tk.Entry(span_frame, textvariable=col_span_var, bg="#2b2f38", fg="white", insertbackground="white", bd=0, width=4).pack(side="left")
+        tk.Entry(row2, textvariable=col_span_var, bg="#2b2f38", fg="white", insertbackground="white", bd=0, width=5).pack(side="left", padx=5)
         
-        tk.Label(span_frame, text="Row Span:", fg="gray", bg="#1d2027").pack(side="left", padx=(15, 5))
+        tk.Label(row2, text="Row Span:", fg="gray", bg="#1d2027").pack(side="left", padx=(15,0))
         row_span_var = tk.StringVar(value=str(script.get("row_span", 1)))
-        tk.Entry(span_frame, textvariable=row_span_var, bg="#2b2f38", fg="white", insertbackground="white", bd=0, width=4).pack(side="left")
+        tk.Entry(row2, textvariable=row_span_var, bg="#2b2f38", fg="white", insertbackground="white", bd=0, width=5).pack(side="left", padx=5)
+
+        # Row 3: Borders
+        row3 = tk.Frame(layout_frame, bg="#1d2027")
+        row3.pack(fill="x", padx=10, pady=(5, 10))
+        tk.Label(row3, text="Radius:", fg="gray", bg="#1d2027").pack(side="left")
+        radius_var = tk.StringVar(value=str(script.get("corner_radius", 4)))
+        tk.Entry(row3, textvariable=radius_var, bg="#2b2f38", fg="white", insertbackground="white", bd=0, width=4).pack(side="left", padx=5)
+
+        tk.Label(row3, text="Border W:", fg="gray", bg="#1d2027").pack(side="left", padx=(15,0))
+        border_width_var = tk.StringVar(value=str(script.get("border_width", 0)))
+        tk.Entry(row3, textvariable=border_width_var, bg="#2b2f38", fg="white", insertbackground="white", bd=0, width=4).pack(side="left", padx=5)
+        
+        cp5 = ctk.CTkButton(row3, text="Border Color", fg_color=script.get("border_color", "#fe1616"), width=100, height=24, hover=False, command=lambda: pick_color("border_color", cp5))
+        cp5.pack(side="right")
 
         def save_changes():
             script["name"] = name_var.get()
@@ -849,6 +869,16 @@ class ScriptLauncherApp:
                 script["row_span"] = max(1, int(row_span_var.get()))
             except:
                 script["row_span"] = 1
+                
+            try:
+                script["width"] = int(width_var.get())
+            except:
+                script["width"] = 0
+            
+            try:
+                script["height"] = int(height_var.get())
+            except:
+                script["height"] = 0
             
             script["is_bold"] = v_bold.get()
             script["is_italic"] = v_italic.get()
