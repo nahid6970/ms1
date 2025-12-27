@@ -656,11 +656,9 @@ class ScriptLauncherApp:
         log_dir = r"C:\Users\nahid\script_output\rclone"
         os.makedirs(log_dir, exist_ok=True)
 
-        # Stagger thread starts to prevent CPU spikes
+        # Start all monitoring loops immediately
         threading.Thread(target=self.system_stats_loop, daemon=True).start()
-        time.sleep(0.5)
         threading.Thread(target=self.github_monitor_loop, daemon=True).start()
-        time.sleep(0.5)
         threading.Thread(target=self.rclone_monitor_loop, args=(log_dir,), daemon=True).start()
 
     def system_stats_loop(self):
@@ -722,15 +720,12 @@ class ScriptLauncherApp:
         return "#14bcff" # Blue/Cyan
 
     def github_monitor_loop(self):
-        # Initial delay for smoother startup
-        time.sleep(1)
         while not self.stop_threads:
             if not self.config["settings"].get("show_github", True):
                 time.sleep(1)
                 continue
             for repo in self.config["github_repos"]:
                 path = repo["path"]
-                # Perform checks...
                 status = "unknown"
                 if os.path.exists(path):
                     try:
@@ -741,39 +736,35 @@ class ScriptLauncherApp:
                     except: status = "error"
                 else: status = "missing"
                 self.root.after(0, lambda name=repo["name"], s=status: self.update_repo_status_ui(name, s))
-                time.sleep(0.2) # Stagger individual repo checks
-            time.sleep(2) # GitHub check interval increased slightly
+            
+            time.sleep(2) # GitHub check interval
 
     def rclone_monitor_loop(self, log_dir):
-        # Initial delay to stay away from app boot-up
-        time.sleep(3)
+        def run_single_check(folder):
+            name = folder["name"]
+            cfg_cmd = folder.get("cmd", "rclone check src dst --fast-list --size-only")
+            actual_cmd = cfg_cmd.replace("src", folder["src"]).replace("dst", folder["dst"])
+            log_file = os.path.join(log_dir, f"{name}_check.log")
+            try:
+                with open(log_file, "w") as f:
+                    subprocess.run(actual_cmd, shell=True, stdout=f, stderr=f, timeout=60)
+                with open(log_file, "r") as f:
+                    content = f.read()
+                is_ok = "ERROR" not in content
+                self.root.after(0, lambda n=name, ok=is_ok: self.update_folder_status_ui(n, ok))
+            except:
+                self.root.after(0, lambda n=name: self.update_folder_status_ui(n, False))
+
         while not self.stop_threads:
             if not self.config["settings"].get("show_rclone", True):
-                time.sleep(10)
+                time.sleep(5)
                 continue
-            for folder in self.config["rclone_folders"]:
-                name = folder["name"]
-                # Perform check logic...
-                cfg_cmd = folder.get("cmd", "rclone check src dst --fast-list --size-only")
-                actual_cmd = cfg_cmd.replace("src", folder["src"]).replace("dst", folder["dst"])
-                log_file = os.path.join(log_dir, f"{name}_check.log")
-                
-                try:
-                    with open(log_file, "w") as f:
-                        subprocess.run(actual_cmd, shell=True, stdout=f, stderr=f, timeout=30)
-                    
-                    with open(log_file, "r") as f:
-                        content = f.read()
-                    
-                    # Match original script logic: only turn red if "ERROR" is found
-                    is_ok = "ERROR" not in content
-                    self.root.after(0, lambda n=name, ok=is_ok: self.update_folder_status_ui(n, ok))
-                except Exception as e:
-                    self.root.after(0, lambda n=name: self.update_folder_status_ui(n, False))
-                
-                time.sleep(1) # Stagger heavy rclone checks
             
-            time.sleep(600) # Rclone updates every 10 minutes
+            # Start all checks in parallel threads
+            for folder in self.config["rclone_folders"]:
+                threading.Thread(target=run_single_check, args=(folder,), daemon=True).start()
+            
+            time.sleep(600) # Wait 10 minutes before triggering next batch of parallel checks
 
     def update_repo_status_ui(self, name, status):
         if name in self.repo_labels:
