@@ -6,7 +6,7 @@ A powerful, premium Python-based GUI application designed to centralize your wor
 
 ### 🖥️ Script Launcher
 - **Customizable Buttons**: Add any script or executable with a dedicated button.
-- **Advanced Styling**: Individual control over background, hover background, text color, and hover text color.
+- **Advanced Styling**: Individual control over background, hover background, text color, hover text color, border width, and border color.
 - **Context Actions**: Right-click any button to **Edit / Stylize**, **Duplicate**, or **Delete** it.
 - **Dynamic Grid**: Adjust the number of columns in settings to fit your screen.
 

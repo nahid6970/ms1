@@ -391,19 +391,47 @@ class ScriptLauncherApp:
             t_color = script.get("text_color", "white" if not is_folder else "#ffd700")
             ht_color = script.get("hover_text_color", "white")
             f_size = script.get("font_size", self.config["settings"].get("font_size", 10))
+            border_width = script.get("border_width", 0)
+            border_color = script.get("border_color", "#fe1616")
             
             display_text = script["name"]
             
-            btn = ctk.CTkButton(
-                self.grid_frame, 
-                text=display_text,
-                width=160, height=45, corner_radius=4,
-                fg_color=b_color, 
-                text_color=t_color,
-                hover=False, 
-                font=(self.main_font, f_size, "bold" if is_folder else "normal")
-            )
-            btn.grid(row=r, column=c, padx=8, pady=8, sticky="nsew")
+            # Create border frame if border is enabled
+            if border_width > 0:
+                border_frame = tk.Frame(
+                    self.grid_frame,
+                    bg=border_color,
+                    highlightthickness=0
+                )
+                border_frame.grid(row=r, column=c, padx=8, pady=8, sticky="nsew")
+                
+                # Create button inside border frame with padding for border effect
+                btn = ctk.CTkButton(
+                    border_frame, 
+                    text=display_text,
+                    width=160-(border_width*2), height=45-(border_width*2), corner_radius=4,
+                    fg_color=b_color, 
+                    text_color=t_color,
+                    hover=False, 
+                    font=(self.main_font, f_size, "bold" if is_folder else "normal")
+                )
+                btn.pack(padx=border_width, pady=border_width, fill="both", expand=True)
+                
+                # Store reference to border frame for event binding
+                container = border_frame
+            else:
+                # No border - create button directly
+                btn = ctk.CTkButton(
+                    self.grid_frame, 
+                    text=display_text,
+                    width=160, height=45, corner_radius=4,
+                    fg_color=b_color, 
+                    text_color=t_color,
+                    hover=False, 
+                    font=(self.main_font, f_size, "bold" if is_folder else "normal")
+                )
+                btn.grid(row=r, column=c, padx=8, pady=8, sticky="nsew")
+                container = btn
             
             # Manual hover implementation for better reliability
             def on_enter(e, b=btn, hc=h_color, htc=ht_color):
@@ -415,13 +443,20 @@ class ScriptLauncherApp:
             btn.bind("<Enter>", on_enter)
             btn.bind("<Leave>", on_leave)
 
-            # Context menu binding
+            # Context menu binding - bind to both button and container
             btn.bind("<Button-3>", lambda e, s=script: self.show_context_menu(e, s))
+            if container != btn:
+                container.bind("<Button-3>", lambda e, s=script: self.show_context_menu(e, s))
 
-            # Drag & Drop bindings for sorting
+            # Drag & Drop bindings for sorting - bind to both button and container
             btn.bind("<ButtonPress-1>", lambda e, i=i, s=script: self.start_script_drag(e, i, s), add="+")
             btn.bind("<B1-Motion>", self.do_script_drag, add="+")
             btn.bind("<ButtonRelease-1>", self.stop_script_drag, add="+")
+            
+            if container != btn:
+                container.bind("<ButtonPress-1>", lambda e, i=i, s=script: self.start_script_drag(e, i, s), add="+")
+                container.bind("<B1-Motion>", self.do_script_drag, add="+")
+                container.bind("<ButtonRelease-1>", self.stop_script_drag, add="+")
 
         # Equal weight for columns
         for i in range(cols):
@@ -559,7 +594,7 @@ class ScriptLauncherApp:
         dialog.title(f"Edit {script['name']}")
         
         # Center the dialog on screen
-        width, height = 400, 550
+        width, height = 400, 600
         x = (dialog.winfo_screenwidth() // 2) - (width // 2)
         y = (dialog.winfo_screenheight() // 2) - (height // 2)
         dialog.geometry(f"{width}x{height}+{x}+{y}")
@@ -637,6 +672,21 @@ class ScriptLauncherApp:
         cp4 = ctk.CTkButton(colors_frame, text="Hover Text", text_color=script.get("hover_text_color", "white"), fg_color="#2b2f38", hover=False, width=120, command=lambda: pick_color("hover_text_color", cp4))
         cp4.grid(row=1, column=1, padx=5, pady=5)
 
+        # Row 3: Border Settings
+        tk.Label(dialog, text="Border Settings:", fg="gray", bg="#1d2027", font=(self.main_font, 9, "bold")).pack(anchor="w", padx=30, pady=(15, 5))
+        
+        border_frame = tk.Frame(dialog, bg="#1d2027")
+        border_frame.pack(fill="x", padx=30, pady=5)
+        
+        # Border Width
+        tk.Label(border_frame, text="Border Width:", fg="gray", bg="#1d2027").pack(side="left")
+        border_width_var = tk.StringVar(value=str(script.get("border_width", 0)))
+        tk.Entry(border_frame, textvariable=border_width_var, bg="#2b2f38", fg="white", insertbackground="white", bd=0, width=5).pack(side="left", padx=(5, 15))
+        
+        # Border Color
+        cp5 = ctk.CTkButton(border_frame, text="Border Color", fg_color=script.get("border_color", "#fe1616"), hover=False, width=120, command=lambda: pick_color("border_color", cp5))
+        cp5.pack(side="left", padx=5)
+
         def save_changes():
             script["name"] = name_var.get()
             if path_var:
@@ -647,6 +697,10 @@ class ScriptLauncherApp:
                 script["font_size"] = int(fsize_var.get())
             except:
                 script["font_size"] = self.config["settings"].get("font_size", 10)
+            try:
+                script["border_width"] = int(border_width_var.get())
+            except:
+                script["border_width"] = 0
             self.save_config()
             self.refresh_grid()
             dialog.destroy()

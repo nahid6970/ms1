@@ -61,13 +61,16 @@
             "name": "mklink",
             "path": "C:/Users/nahid/ms/ms1/Testing/mklink/mklink.py",
             "font_size": 20,
-            "hide_terminal": true
+            "hide_terminal": true,
+            "color": "#ffffff",
+            "text_color": "#000000"
         },
         {
             "name": "Task Manager",
             "path": "taskmgr.exe",
             "font_size": 20,
-            "hide_terminal": false
+            "hide_terminal": false,
+            "border_width": 2
         },
         {
             "name": "Explorer",
