@@ -2,7 +2,7 @@
     "settings": {
         "columns": 5,
         "font_family": "JetBrainsMono NFP",
-        "font_size": 20,
+        "font_size": 10,
         "bg_color": "#1d2027",
         "border_color": "#fe1616",
         "accent_color": "#26b2f3",
@@ -10,68 +10,16 @@
         "danger_color": "#fe1616",
         "show_github": true,
         "show_rclone": true,
-        "show_system_stats": false
+        "show_system_stats": true
     },
     "scripts": [
         {
-            "name": "Task Manager",
-            "path": "taskmgr.exe",
-            "font_size": 20,
-            "hide_terminal": false
-        },
-        {
             "name": "Explorer",
-            "path": "explorer.exe",
-            "font_size": 20
+            "path": "explorer.exe"
         },
         {
-            "name": "mklink",
-            "path": "C:/Users/nahid/ms/ms1/Testing/mklink/mklink.py",
-            "font_size": 20,
-            "hide_terminal": true
-        },
-        {
-            "name": "\uea83 FFMPEG",
-            "type": "folder",
-            "scripts": [
-                {
-                    "name": "Android Icon",
-                    "path": "C:/Users/nahid/ms/ms1/scripts/ffmpeg/android_icon_generator.ps1",
-                    "type": "script"
-                },
-                {
-                    "name": "Convert",
-                    "path": "C:/Users/nahid/ms/ms1/scripts/ffmpeg/convert.ps1",
-                    "type": "script"
-                },
-                {
-                    "name": "IMG-Dimension",
-                    "path": "C:/Users/nahid/ms/ms1/scripts/ffmpeg/image_dimension.ps1",
-                    "type": "script",
-                    "hide_terminal": false,
-                    "font_size": 20
-                },
-                {
-                    "name": "Merge",
-                    "path": "C:/Users/nahid/ms/ms1/scripts/ffmpeg/merge.ps1",
-                    "type": "script"
-                },
-                {
-                    "name": "Trim",
-                    "path": "C:/Users/nahid/ms/ms1/scripts/ffmpeg/trim.ps1",
-                    "type": "script"
-                },
-                {
-                    "name": "VID-Dimension",
-                    "path": "C:/Users/nahid/ms/ms1/scripts/ffmpeg/vid_dim.ps1",
-                    "type": "script",
-                    "hide_terminal": false,
-                    "font_size": 20
-                }
-            ],
-            "font_size": 20,
-            "color": "#f0d50f",
-            "text_color": "#000000"
+            "name": "Task Mgr",
+            "path": "taskmgr.exe"
         }
     ],
     "github_repos": [

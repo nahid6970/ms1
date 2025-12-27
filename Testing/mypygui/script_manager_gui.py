@@ -10,7 +10,7 @@ from datetime import datetime
 import psutil
 
 # Configuration
-CONFIG_FILE = "script_launcher_config.json"
+CONFIG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "script_launcher_config.json")
 DEFAULT_CONFIG = {
     "settings": {
         "columns": 5,
