@@ -376,12 +376,10 @@ class ScriptLauncherApp:
             color = colorchooser.askcolor(initialcolor=curr, parent=dialog)
             if color[1]:
                 script[key] = color[1]
-                # Update preview button appearance
-                if key == "color": btn.configure(fg_color=color[1])
-                elif key == "hover_color": btn.configure(hover_color=color[1])
-                elif key == "text_color": btn.configure(text_color=color[1])
-                elif key == "hover_text_color": 
-                    # To preview hover text, we can temporarily set text_color
+                # Update preview button immediate appearance
+                if key in ["color", "hover_color"]: 
+                    btn.configure(fg_color=color[1], hover_color=color[1])
+                elif key in ["text_color", "hover_text_color"]: 
                     btn.configure(text_color=color[1])
 
         # Form Layout
@@ -400,25 +398,24 @@ class ScriptLauncherApp:
         tk.Entry(path_frame, textvariable=path_var, bg="#2b2f38", fg="white", insertbackground="white", bd=0).pack(side="left", fill="x", expand=True)
         tk.Button(path_frame, text="...", command=lambda: path_var.set(filedialog.askopenfilename() or path_var.get()), bg="#3a3f4b", fg="white").pack(side="right", padx=5)
 
-        # Color Pickers with improved previews
+        # Color Pickers with improved previews and centered layout
         colors_frame = tk.Frame(dialog, bg="#1d2027")
         colors_frame.pack(fill="x", padx=30, pady=20)
+        colors_frame.grid_columnconfigure(0, weight=1)
+        colors_frame.grid_columnconfigure(1, weight=1)
 
-        # Row 1: Main BG & Hover BG
-        cp1 = ctk.CTkButton(colors_frame, text="Button BG", fg_color=script.get("color", "#2b2f38"), hover=False, width=100, command=lambda: pick_color("color", cp1))
+        # Row 1: Button BG & Text Color (Paired styles)
+        cp1 = ctk.CTkButton(colors_frame, text="Button BG", fg_color=script.get("color", "#2b2f38"), hover=False, width=120, command=lambda: pick_color("color", cp1))
         cp1.grid(row=0, column=0, padx=5, pady=5)
         
-        cp2 = ctk.CTkButton(colors_frame, text="Hover BG", fg_color="#3a3f4b", hover_color=script.get("hover_color", "#26b2f3"), width=100, command=lambda: pick_color("hover_color", cp2))
-        cp2.grid(row=0, column=1, padx=5, pady=5)
+        cp3 = ctk.CTkButton(colors_frame, text="Text Color", text_color=script.get("text_color", "white"), fg_color="#2b2f38", hover=False, width=120, command=lambda: pick_color("text_color", cp3))
+        cp3.grid(row=0, column=1, padx=5, pady=5)
 
-        # Row 2: Text & Hover Text
-        cp3 = ctk.CTkButton(colors_frame, text="Text Color", text_color=script.get("text_color", "white"), fg_color="#2b2f38", hover=False, width=100, command=lambda: pick_color("text_color", cp3))
-        cp3.grid(row=1, column=0, padx=5, pady=5)
+        # Row 2: Hover BG & Hover Text (Paired hover states)
+        cp2 = ctk.CTkButton(colors_frame, text="Hover BG", fg_color=script.get("hover_color", "#26b2f3"), hover=False, width=120, command=lambda: pick_color("hover_color", cp2))
+        cp2.grid(row=1, column=0, padx=5, pady=5)
         
-        cp4 = ctk.CTkButton(colors_frame, text="Hover Text", text_color="white", fg_color="#2b2f38", width=100, command=lambda: pick_color("hover_text_color", cp4))
-        # Logic to show what hover text looks like on the button
-        cp4.bind("<Enter>", lambda e, b=cp4: b.configure(text_color=script.get("hover_text_color", "white")), add="+")
-        cp4.bind("<Leave>", lambda e, b=cp4: b.configure(text_color="white"), add="+")
+        cp4 = ctk.CTkButton(colors_frame, text="Hover Text", text_color=script.get("hover_text_color", "white"), fg_color="#2b2f38", hover=False, width=120, command=lambda: pick_color("hover_text_color", cp4))
         cp4.grid(row=1, column=1, padx=5, pady=5)
 
         def save_changes():
