@@ -461,7 +461,7 @@ class ScriptLauncherApp:
             ui = self.repo_labels[name]
             color = "#555555"
             if status == "clean": color = self.config["settings"]["success_color"]
-            elif status == "dirty": color = "#ffcc00"
+            elif status == "dirty": color = self.config["settings"]["danger_color"]
             elif status in ["error", "missing", "no_git"]: color = self.config["settings"]["danger_color"]
             
             ui["indicator"].itemconfig(ui["circle"], fill=color)
