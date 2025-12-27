@@ -420,9 +420,17 @@ class ScriptLauncherApp:
     def show_context_menu(self, event, script):
         menu = tk.Menu(self.root, tearoff=0, bg="#2b2f38", fg="white", activebackground=self.config["settings"]["accent_color"])
         menu.add_command(label=f"Edit / Stylize", command=lambda: self.open_edit_dialog(script))
+        menu.add_command(label="Duplicate", command=lambda: self.duplicate_script(script))
         menu.add_separator()
         menu.add_command(label=f"Delete", command=lambda: self.remove_script(script))
         menu.post(event.x_root, event.y_root)
+
+    def duplicate_script(self, script):
+        new_script = script.copy()
+        new_script["name"] = f"{script['name']} (Copy)"
+        self.config["scripts"].append(new_script)
+        self.save_config()
+        self.refresh_grid()
 
     def open_edit_dialog(self, script):
         self.root.attributes("-topmost", False)
