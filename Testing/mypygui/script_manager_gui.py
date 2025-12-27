@@ -464,7 +464,7 @@ class ScriptLauncherApp:
                 border_width=b_width,
                 border_color=b_border_color
             )
-            btn.grid(row=place_r, column=place_c, rowspan=r_span, columnspan=c_span, padx=8, pady=8, sticky="nsew")
+            btn.grid(row=place_r, column=place_c, rowspan=r_span, columnspan=c_span, padx=8, pady=8, sticky="new")
             
             # Manual hover implementation for better reliability
             def on_enter(e, b=btn, hc=h_color, htc=ht_color):

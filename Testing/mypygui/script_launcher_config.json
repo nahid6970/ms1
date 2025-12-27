@@ -59,7 +59,7 @@
             "border_width": 0,
             "corner_radius": 0,
             "col_span": 1,
-            "row_span": 1,
+            "row_span": 3,
             "is_bold": false,
             "is_italic": false
         },
@@ -75,7 +75,9 @@
             "is_bold": false,
             "is_italic": false,
             "ctrl_left_cmd": "",
-            "ctrl_right_cmd": ""
+            "ctrl_right_cmd": "",
+            "col_span": 1,
+            "row_span": 1
         },
         {
             "name": "Task Manager",
@@ -92,6 +94,62 @@
         },
         {
             "name": "Explorer",
+            "path": "explorer.exe",
+            "font_size": 20,
+            "hide_terminal": false,
+            "border_width": 0,
+            "corner_radius": 0,
+            "ctrl_left_cmd": "",
+            "ctrl_right_cmd": "",
+            "col_span": 1,
+            "row_span": 1,
+            "is_bold": false,
+            "is_italic": false
+        },
+        {
+            "name": "Explorer (Copy)",
+            "path": "explorer.exe",
+            "font_size": 20,
+            "hide_terminal": false,
+            "border_width": 0,
+            "corner_radius": 0,
+            "ctrl_left_cmd": "",
+            "ctrl_right_cmd": "",
+            "col_span": 1,
+            "row_span": 1,
+            "is_bold": false,
+            "is_italic": false
+        },
+        {
+            "name": "Explorer (Copy) (Copy)",
+            "path": "explorer.exe",
+            "font_size": 20,
+            "hide_terminal": false,
+            "border_width": 0,
+            "corner_radius": 0,
+            "ctrl_left_cmd": "",
+            "ctrl_right_cmd": "",
+            "col_span": 1,
+            "row_span": 1,
+            "is_bold": false,
+            "is_italic": false
+        },
+        {
+            "name": "Explorer (Copy) (Copy) (Copy)",
+            "path": "explorer.exe",
+            "font_size": 20,
+            "hide_terminal": false,
+            "border_width": 0,
+            "corner_radius": 0,
+            "ctrl_left_cmd": "",
+            "ctrl_right_cmd": "",
+            "col_span": 1,
+            "row_span": 1,
+            "is_bold": false,
+            "is_italic": false
+        },
+        {
+            "name": "Explorer (Copy) (Copy) (Copy) (Copy)",
             "path": "explorer.exe",
             "font_size": 20,
             "hide_terminal": false,
