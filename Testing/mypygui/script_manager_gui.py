@@ -90,8 +90,8 @@ class ScriptLauncherApp:
         self.drag_data = {"x": 0, "y": 0}
         
         # Window sizing
-        self.width = 900
-        self.height = 500
+        self.width = 950
+        self.height = 650
         self.setup_window()
         
         self.setup_fonts()
@@ -314,6 +314,8 @@ class ScriptLauncherApp:
         self.last_net_sent = psutil.net_io_counters().bytes_sent
         self.last_net_recv = psutil.net_io_counters().bytes_recv
 
+        self.init_ui_continued()
+
     def create_stat_frame(self, parent, title, min_width):
         frame = tk.LabelFrame(
             parent, text=title, 
@@ -325,6 +327,7 @@ class ScriptLauncherApp:
         inner.pack(padx=2, pady=2)
         return inner
 
+    def init_ui_continued(self):
         # MIDDLE SECTION: Buttons Grid
         self.grid_scroll_container = tk.Frame(self.main_content, bg="#1d2027")
         self.grid_scroll_container.pack(fill="both", expand=True)
