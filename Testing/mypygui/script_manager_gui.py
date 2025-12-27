@@ -765,7 +765,8 @@ class ScriptLauncherApp:
                     with open(log_file, "r") as f:
                         content = f.read()
                     
-                    is_ok = "ERROR" not in content and "differences found" not in content.lower()
+                    # Match original script logic: only turn red if "ERROR" is found
+                    is_ok = "ERROR" not in content
                     self.root.after(0, lambda n=name, ok=is_ok: self.update_folder_status_ui(n, ok))
                 except Exception as e:
                     self.root.after(0, lambda n=name: self.update_folder_status_ui(n, False))
