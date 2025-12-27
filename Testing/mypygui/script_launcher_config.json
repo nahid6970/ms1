@@ -58,6 +58,20 @@
             "src": "C:/Users/nahid/ms/msBackups",
             "dst": "o0:/msBackups",
             "cmd": "rclone check src dst --fast-list --size-only"
+        },
+        {
+            "name": "software",
+            "label": "\uf40e",
+            "src": "D:/software",
+            "dst": "gu:/software",
+            "cmd": "rclone check src dst --fast-list --size-only"
+        },
+        {
+            "name": "song",
+            "label": "\uec1b",
+            "src": "D:/song",
+            "dst": "gu:/song",
+            "cmd": "rclone check src dst --fast-list --size-only"
         }
     ]
 }
