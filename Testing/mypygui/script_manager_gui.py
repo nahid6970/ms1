@@ -430,7 +430,7 @@ class ScriptLauncherApp:
         if script.get("type") == "folder":
             self.enter_folder(script)
         else:
-            self.launch_script(script["path"])
+            self.launch_script(script)
 
     def enter_folder(self, folder):
         if "scripts" not in folder:
@@ -502,14 +502,24 @@ class ScriptLauncherApp:
             self.save_config()
             self.refresh_grid()
 
-    def launch_script(self, path):
+    def launch_script(self, script_obj):
+        path = script_obj["path"]
+        hide = script_obj.get("hide_terminal", False)
+        
+        # Determine creation flags
+        # CREATE_NEW_CONSOLE (0x10) vs CREATE_NO_WINDOW (0x08000000)
+        cflags = subprocess.CREATE_NEW_CONSOLE
+        if hide:
+            cflags = 0x08000000 # CREATE_NO_WINDOW
+            
         try:
             # Handle expand vars like %USERPROFILE%
             path = os.path.expandvars(path)
             if path.endswith(".py"):
-                subprocess.Popen(["python", path], creationflags=subprocess.CREATE_NEW_CONSOLE)
+                python_exe = "pythonw" if hide else "python"
+                subprocess.Popen([python_exe, path], creationflags=cflags)
             else:
-                subprocess.Popen(path, shell=True, creationflags=subprocess.CREATE_NEW_CONSOLE)
+                subprocess.Popen(path, shell=True, creationflags=cflags)
         except Exception as e:
             messagebox.showerror("Error", f"Failed to launch:\n{path}\n\n{e}")
 
@@ -572,8 +582,19 @@ class ScriptLauncherApp:
             path_var = tk.StringVar(value=script.get("path", ""))
             tk.Entry(path_frame, textvariable=path_var, bg="#2b2f38", fg="white", insertbackground="white", bd=0).pack(side="left", fill="x", expand=True)
             tk.Button(path_frame, text="...", command=lambda: path_var.set(filedialog.askopenfilename() or path_var.get()), bg="#3a3f4b", fg="white").pack(side="right", padx=5)
+            
+            # Hide Terminal Option
+            hide_var = tk.BooleanVar(value=script.get("hide_terminal", False))
+            cb_hide = tk.Checkbutton(
+                dialog, text="Hide Terminal / Console", variable=hide_var,
+                bg="#1d2027", fg="#888888", selectcolor="#2b2f38",
+                activebackground="#1d2027", activeforeground="white",
+                font=(self.main_font, 9)
+            )
+            cb_hide.pack(anchor="w", padx=30, pady=(5, 0))
         else:
             path_var = None
+            hide_var = None
 
         # Font Size
         tk.Label(dialog, text="Font Size:", fg="gray", bg="#1d2027").pack(anchor="w", padx=30, pady=(10, 0))
@@ -604,6 +625,8 @@ class ScriptLauncherApp:
             script["name"] = name_var.get()
             if path_var:
                 script["path"] = path_var.get()
+            if hide_var is not None:
+                script["hide_terminal"] = hide_var.get()
             try:
                 script["font_size"] = int(fsize_var.get())
             except:
