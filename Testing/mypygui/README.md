@@ -4,11 +4,20 @@ A powerful, premium Python-based GUI application designed to centralize your wor
 
 ## ✨ Key Features
 
-### 🖥️ Script Launcher
-- **Customizable Buttons**: Add any script or executable with a dedicated button.
-- **Advanced Styling**: Individual control over background, hover background, text color, hover text color, border width, and border color.
-- **Context Actions**: Right-click any button to **Edit / Stylize**, **Duplicate**, or **Delete** it.
-- **Dynamic Grid**: Adjust the number of columns in settings to fit your screen.
+### 🖥️ Advanced Script Launcher
+- **Organization**: Group your scripts into **Folders** with intuitive breadcrumb navigation.
+- **Drag & Drop**: Easily reorder your buttons and folders by dragging them across the grid.
+- **PowerShell Ready**: Native support for `.ps1` scripts with bypass policies handled automatically.
+- **Stealth Mode**: "Hide Terminal" option to run scripts (including Python and PowerShell) silently in the background.
+
+### 🎨 Premium Customization
+- **Visual Editor**: A beautiful, borderless "Edit / Stylize" dialog to tweak every aspect of your buttons.
+- **Typography control**: Change font size and toggle **Bold** / *Italic* styles.
+- **Shape & Colors**:
+    - Custom **Corner Radius** for rounded or sharp buttons.
+    - Adjustable **Border Width** and color.
+    - Full control over button and text colors for both normal and hover states.
+- **Advanced Bindings**: Assign custom commands to **Ctrl + Left Click** and **Ctrl + Right Click** on any button for power-user multitasking.
 
 ### 📊 System Performance Widget
 - **CPU Monitoring**: Real-time percentage with individual core-by-core micro bars.
@@ -32,9 +41,11 @@ A powerful, premium Python-based GUI application designed to centralize your wor
     - **Ctrl + Right Click**: Sync Cloud ➔ Local.
 
 ## 🛠️ Configuration & Settings
-- **Toggle Widgets**: Enable or disable GitHub, Rclone, or System Stats widgets to declutter the UI.
-- **Topmost Window**: Frameless design that stays on top by default for quick access.
-- **Draggable UI**: Move the window anywhere by dragging the header.
+- **Global Settings**:
+    - **Window Behavior**: Toggle "Always on Top" instantly.
+    - **Grid Layout**: Adjust columns and default font size.
+    - **Widget Toggles**: Enable/disable GitHub, Rclone, or System Stats widgets.
+- **Portable**: Configuration is saved to `script_launcher_config.json` relative to the script, making it fully portable.
 
 ## 🚀 Getting Started
 
