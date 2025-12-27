@@ -845,58 +845,99 @@ class ScriptLauncherApp:
 
     def open_settings(self):
         self.root.attributes("-topmost", False)
-        dialog = tk.Toplevel(self.root)
-        dialog.attributes("-topmost", True)
-        dialog.title("Settings")
+        top = tk.Toplevel(self.root)
+        top.overrideredirect(True)
         
         # Center the settings dialog
-        width, height = 400, 550
-        x = (dialog.winfo_screenwidth() // 2) - (width // 2)
-        y = (dialog.winfo_screenheight() // 2) - (height // 2)
-        dialog.geometry(f"{width}x{height}+{x}+{y}")
+        width, height = 400, 500
+        x = (top.winfo_screenwidth() // 2) - (width // 2)
+        y = (top.winfo_screenheight() // 2) - (height // 2)
+        top.geometry(f"{width}x{height}+{x}+{y}")
         
-        dialog.configure(bg="#1d2027")
-        dialog.transient(self.root)
-        dialog.grab_set()
+        # Ensure dialog is visible above everything
+        top.attributes("-topmost", True)
+        top.focus_force()
 
-        # Grid settings
-        tk.Label(dialog, text="Grid Settings:", fg=self.config["settings"]["accent_color"], bg="#1d2027", font=(self.main_font, 10, "bold")).pack(pady=(10, 5))
+        # Custom Border Frame
+        border_color = self.config["settings"].get("border_color", "#fe1616")
+        border_frame = tk.Frame(top, bg=border_color)
+        border_frame.pack(fill="both", expand=True)
+
+        # Content Frame
+        dialog = tk.Frame(border_frame, bg="#1d2027")
+        dialog.pack(fill="both", expand=True, padx=2, pady=2)
+
+        # Custom Header
+        header = tk.Frame(dialog, bg="#1d2027", height=30)
+        header.pack(fill="x", padx=10, pady=5)
         
-        # Grid Settings Row 1: Columns
-        row1 = tk.Frame(dialog, bg="#1d2027")
-        row1.pack(pady=5)
+        tk.Label(header, text="SETTINGS", fg=self.config["settings"]["accent_color"], bg="#1d2027", font=(self.main_font, 12, "bold")).pack(side="left")
+
+        # Window Dragging Logic
+        def start_move(event):
+            top.x = event.x
+            top.y = event.y
+
+        def do_move(event):
+            deltax = event.x - top.x
+            deltay = event.y - top.y
+            x = top.winfo_x() + deltax
+            y = top.winfo_y() + deltay
+            top.geometry(f"+{x}+{y}")
+
+        header.bind("<ButtonPress-1>", start_move)
+        header.bind("<B1-Motion>", do_move)
+        for child in header.winfo_children():
+            child.bind("<ButtonPress-1>", start_move)
+            child.bind("<B1-Motion>", do_move)
+
+        def on_close():
+            top.destroy()
+            self.root.attributes("-topmost", True)
+
+        ctk.CTkButton(header, text="✕", width=30, height=30, fg_color="transparent", hover_color="#c42b1c", text_color="white", command=on_close).pack(side="right")
+
+        # --- Section 1: Grid Config ---
+        grid_frame = tk.LabelFrame(dialog, text="   GRID CONFIGURATION   ", bg="#1d2027", fg="gray", font=(self.main_font, 10, "bold"), bd=1, relief="groove")
+        grid_frame.pack(fill="x", padx=15, pady=10)
+
+        # Row 1: Columns
+        row1 = tk.Frame(grid_frame, bg="#1d2027")
+        row1.pack(pady=5, anchor="w", padx=10)
         tk.Label(row1, text="Buttons per Row:  ", fg="white", bg="#1d2027", font=(self.main_font, 9)).pack(side="left")
         val_var = tk.StringVar(value=str(self.config["settings"]["columns"]))
-        tk.Entry(row1, textvariable=val_var, width=5, justify="center").pack(side="left")
+        tk.Entry(row1, textvariable=val_var, width=5, justify="center", bg="#2b2f38", fg="white", insertbackground="white", bd=0).pack(side="left")
         
-        # Grid Settings Row 2: Default Font Size
-        row2 = tk.Frame(dialog, bg="#1d2027")
-        row2.pack(pady=5)
+        # Row 2: Default Font Size
+        row2 = tk.Frame(grid_frame, bg="#1d2027")
+        row2.pack(pady=5, anchor="w", padx=10)
         tk.Label(row2, text="Default Font Size: ", fg="white", bg="#1d2027", font=(self.main_font, 9)).pack(side="left")
         f_size_var = tk.StringVar(value=str(self.config["settings"].get("font_size", 10)))
-        tk.Entry(row2, textvariable=f_size_var, width=5, justify="center").pack(side="left")
+        tk.Entry(row2, textvariable=f_size_var, width=5, justify="center", bg="#2b2f38", fg="white", insertbackground="white", bd=0).pack(side="left")
 
-        # Window Settings
-        tk.Label(dialog, text="Window Behavior:", fg=self.config["settings"]["accent_color"], bg="#1d2027", font=(self.main_font, 10, "bold")).pack(pady=(15, 5))
+        # --- Section 2: Window Behavior ---
+        win_frame = tk.LabelFrame(dialog, text="   WINDOW BEHAVIOR   ", bg="#1d2027", fg="gray", font=(self.main_font, 10, "bold"), bd=1, relief="groove")
+        win_frame.pack(fill="x", padx=15, pady=5)
         
         v_topmost = tk.BooleanVar(value=self.config["settings"].get("always_on_top", True))
-        cb_topmost = tk.Checkbutton(dialog, text="Always on Top", variable=v_topmost, bg="#1d2027", fg="white", selectcolor="#2b2f38", activebackground="#1d2027", activeforeground="white")
-        cb_topmost.pack(anchor="w", padx=50)
+        cb_topmost = tk.Checkbutton(win_frame, text="Always on Top", variable=v_topmost, bg="#1d2027", fg="white", selectcolor="#2b2f38", activebackground="#1d2027", activeforeground="white")
+        cb_topmost.pack(anchor="w", padx=10, pady=5)
 
-        # Widget Toggles
-        tk.Label(dialog, text="Toggle Widgets:", fg=self.config["settings"]["accent_color"], bg="#1d2027", font=(self.main_font, 10, "bold")).pack(pady=(15, 5))
+        # --- Section 3: Widgets ---
+        widget_frame = tk.LabelFrame(dialog, text="   WIDGET TOGGLES   ", bg="#1d2027", fg="gray", font=(self.main_font, 10, "bold"), bd=1, relief="groove")
+        widget_frame.pack(fill="x", padx=15, pady=10)
         
         v_github = tk.BooleanVar(value=self.config["settings"].get("show_github", True))
-        cb_github = tk.Checkbutton(dialog, text="GitHub Status Monitoring", variable=v_github, bg="#1d2027", fg="white", selectcolor="#2b2f38", activebackground="#1d2027", activeforeground="white")
-        cb_github.pack(anchor="w", padx=50)
+        cb_github = tk.Checkbutton(widget_frame, text="GitHub Status Monitoring", variable=v_github, bg="#1d2027", fg="white", selectcolor="#2b2f38", activebackground="#1d2027", activeforeground="white")
+        cb_github.pack(anchor="w", padx=10, pady=2)
 
         v_rclone = tk.BooleanVar(value=self.config["settings"].get("show_rclone", True))
-        cb_rclone = tk.Checkbutton(dialog, text="Rclone Status Monitoring", variable=v_rclone, bg="#1d2027", fg="white", selectcolor="#2b2f38", activebackground="#1d2027", activeforeground="white")
-        cb_rclone.pack(anchor="w", padx=50)
+        cb_rclone = tk.Checkbutton(widget_frame, text="Rclone Status Monitoring", variable=v_rclone, bg="#1d2027", fg="white", selectcolor="#2b2f38", activebackground="#1d2027", activeforeground="white")
+        cb_rclone.pack(anchor="w", padx=10, pady=2)
 
         v_stats = tk.BooleanVar(value=self.config["settings"].get("show_system_stats", True))
-        cb_stats = tk.Checkbutton(dialog, text="System Stats Widget", variable=v_stats, bg="#1d2027", fg="white", selectcolor="#2b2f38", activebackground="#1d2027", activeforeground="white")
-        cb_stats.pack(anchor="w", padx=50)
+        cb_stats = tk.Checkbutton(widget_frame, text="System Stats Widget", variable=v_stats, bg="#1d2027", fg="white", selectcolor="#2b2f38", activebackground="#1d2027", activeforeground="white")
+        cb_stats.pack(anchor="w", padx=10, pady=2)
 
         def save():
             try:
