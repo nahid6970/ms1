@@ -301,11 +301,15 @@ class ScriptLauncherApp:
             r = i // cols
             c = i % cols
             
+            # Use script-specific color or default
+            btn_color = script.get("color", "#2b2f38")
+            
             btn = ctk.CTkButton(
                 self.grid_frame, 
                 text=script["name"],
                 width=160, height=45, corner_radius=4,
-                fg_color="#2b2f38", hover_color=self.config["settings"]["accent_color"],
+                fg_color=btn_color, 
+                hover_color=self.config["settings"]["accent_color"],
                 text_color="white",
                 font=(self.main_font, 10),
                 command=lambda p=script["path"]: self.launch_script(p)
@@ -332,8 +336,33 @@ class ScriptLauncherApp:
 
     def show_context_menu(self, event, script):
         menu = tk.Menu(self.root, tearoff=0, bg="#2b2f38", fg="white", activebackground=self.config["settings"]["accent_color"])
-        menu.add_command(label=f"Remove '{script['name']}'", command=lambda: self.remove_script(script))
+        menu.add_command(label=f"Edit '{script['name']}'", command=lambda: self.edit_script_dialog(script))
+        menu.add_command(label="Change Color", command=lambda: self.change_color_dialog(script))
+        menu.add_separator()
+        menu.add_command(label=f"Delete", command=lambda: self.remove_script(script))
         menu.post(event.x_root, event.y_root)
+
+    def edit_script_dialog(self, script):
+        self.root.attributes("-topmost", False)
+        new_name = simpledialog.askstring("Edit Script", "Edit button label:", initialvalue=script["name"], parent=self.root)
+        if new_name:
+            new_path = filedialog.askopenfilename(title="Select Script or Executable", initialfile=script["path"], parent=self.root)
+            if new_path:
+                script["name"] = new_name
+                script["path"] = new_path
+                self.save_config()
+                self.refresh_grid()
+        self.root.attributes("-topmost", True)
+
+    def change_color_dialog(self, script):
+        from tkinter import colorchooser
+        self.root.attributes("-topmost", False)
+        color = colorchooser.askcolor(title="Choose Button Color", initialcolor=script.get("color", "#2b2f38"), parent=self.root)
+        if color[1]:
+            script["color"] = color[1]
+            self.save_config()
+            self.refresh_grid()
+        self.root.attributes("-topmost", True)
 
     def remove_script(self, script):
         self.root.attributes("-topmost", False)

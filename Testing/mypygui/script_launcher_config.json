@@ -17,6 +17,11 @@
         {
             "name": "Task Mgr",
             "path": "taskmgr.exe"
+        },
+        {
+            "name": "ff",
+            "path": "C:/Users/nahid/ms/ms1/Testing/mklink/mklink.py",
+            "color": "#800080"
         }
     ],
     "github_repos": [
