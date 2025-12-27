@@ -1,0 +1,59 @@
+{
+    "settings": {
+        "columns": 5,
+        "font_family": "JetBrainsMono NFP",
+        "font_size": 10,
+        "bg_color": "#1d2027",
+        "border_color": "#fe1616",
+        "accent_color": "#26b2f3",
+        "success_color": "#00ff21",
+        "danger_color": "#fe1616",
+        "text_color": "#ffffff"
+    },
+    "scripts": [
+        {
+            "name": "SSk",
+            "path": "C:/Users/nahid/ms/ms1/Testing/mklink/mklink.py"
+        },
+        {
+            "name": "ff",
+            "path": "C:/Users/nahid/ms/ms1/Testing/mklink/mklink.py"
+        },
+        {
+            "name": "asd",
+            "path": "C:/Users/nahid/ms/ms1/Testing/mklink/mklink.py"
+        },
+        {
+            "name": "asd",
+            "path": "C:/Users/nahid/ms/ms1/Testing/mklink/mklink.py"
+        },
+        {
+            "name": "s",
+            "path": "C:/Users/nahid/ms/ms1/Testing/mklink/mklink.py"
+        },
+        {
+            "name": "s",
+            "path": "C:/Users/nahid/ms/ms1/Testing/mklink/mklink.py"
+        }
+    ],
+    "github_repos": [
+        {
+            "name": "ms1",
+            "path": "C:\\Users\\nahid\\ms\\ms1"
+        },
+        {
+            "name": "db",
+            "path": "C:\\Users\\nahid\\ms\\db"
+        }
+    ],
+    "rclone_folders": [
+        {
+            "name": "GDrive",
+            "path": "G:"
+        },
+        {
+            "name": "LocalBackup",
+            "path": "D:\\tt"
+        }
+    ]
+}
