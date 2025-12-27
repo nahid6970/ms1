@@ -257,6 +257,73 @@ class ScriptLauncherApp:
             lbl.bind("<Control-Button-3>", lambda e, f=folder: self.on_rclone_sync(e, f, "right"))
             
             self.folder_labels[folder["name"]] = {"lbl": lbl, "indicator": indicator, "circle": circle}
+        
+        # --- SECOND ROW: System Stats ---
+        self.sys_stats_container = tk.Frame(self.main_content, bg="#1d2027")
+        self.sys_stats_container.pack(fill="x", pady=(0, 10))
+
+        # CPU Widget
+        self.cpu_frame = self.create_stat_frame(self.sys_stats_container, " CPU ", 180)
+        self.cpu_usage_lbl = tk.Label(self.cpu_frame, text="0%", fg="#14bcff", bg="#1d2027", font=(self.main_font, 10, "bold"))
+        self.cpu_usage_lbl.pack(side="left", padx=5)
+        self.cpu_bar = ctk.CTkProgressBar(self.cpu_frame, width=80, height=8, fg_color="#333333", progress_color="#14bcff")
+        self.cpu_bar.pack(side="left", padx=5)
+        self.cpu_bar.set(0)
+        
+        # CPU Cores (Micro Bars)
+        self.cores_frame = tk.Frame(self.cpu_frame, bg="#1d2027")
+        self.cores_frame.pack(side="left", padx=5)
+        self.core_canvases = []
+        num_cores = psutil.cpu_count()
+        for _ in range(num_cores):
+            c = tk.Canvas(self.cores_frame, width=4, height=20, bg="#1d2027", highlightthickness=0)
+            c.pack(side="left", padx=1)
+            self.core_canvases.append(c)
+
+        # RAM Widget
+        self.ram_frame = self.create_stat_frame(self.sys_stats_container, " RAM ", 130)
+        self.ram_usage_lbl = tk.Label(self.ram_frame, text="0%", fg="#ff934b", bg="#1d2027", font=(self.main_font, 10, "bold"))
+        self.ram_usage_lbl.pack(side="left", padx=5)
+        self.ram_bar = ctk.CTkProgressBar(self.ram_frame, width=70, height=8, fg_color="#333333", progress_color="#ff934b")
+        self.ram_bar.pack(side="left", padx=5)
+        self.ram_bar.set(0)
+
+        # Disk C Widget
+        self.disk_c_frame = self.create_stat_frame(self.sys_stats_container, " Disk C ", 110)
+        self.disk_c_lbl = tk.Label(self.disk_c_frame, text="0%", fg="white", bg="#1d2027", font=(self.main_font, 9))
+        self.disk_c_lbl.pack(side="left", padx=5)
+        self.disk_c_bar = ctk.CTkProgressBar(self.disk_c_frame, width=50, height=8, fg_color="#333333", progress_color="#044568")
+        self.disk_c_bar.pack(side="left", padx=5)
+        self.disk_c_bar.set(0)
+
+        # Disk D Widget
+        self.disk_d_frame = self.create_stat_frame(self.sys_stats_container, " Disk D ", 110)
+        self.disk_d_lbl = tk.Label(self.disk_d_frame, text="0%", fg="white", bg="#1d2027", font=(self.main_font, 9))
+        self.disk_d_lbl.pack(side="left", padx=5)
+        self.disk_d_bar = ctk.CTkProgressBar(self.disk_d_frame, width=50, height=8, fg_color="#333333", progress_color="#044568")
+        self.disk_d_bar.pack(side="left", padx=5)
+        self.disk_d_bar.set(0)
+
+        # Network Speed Widget
+        self.net_frame = self.create_stat_frame(self.sys_stats_container, " Net Speed ", 150)
+        self.up_lbl = tk.Label(self.net_frame, text="▲ 0.0", fg="#00ff21", bg="#1d2027", font=(self.main_font, 9))
+        self.up_lbl.pack(side="left", padx=5)
+        self.down_lbl = tk.Label(self.net_frame, text="▼ 0.0", fg="#26b2f3", bg="#1d2027", font=(self.main_font, 9))
+        self.down_lbl.pack(side="left", padx=5)
+        
+        self.last_net_sent = psutil.net_io_counters().bytes_sent
+        self.last_net_recv = psutil.net_io_counters().bytes_recv
+
+    def create_stat_frame(self, parent, title, min_width):
+        frame = tk.LabelFrame(
+            parent, text=title, 
+            labelanchor="nw", fg="#666666", bg="#1d2027",
+            font=(self.main_font, 7, "bold"), bd=1, relief="flat", highlightthickness=1, highlightbackground="#333333"
+        )
+        frame.pack(side="left", fill="both", expand=True, padx=2)
+        inner = tk.Frame(frame, bg="#1d2027")
+        inner.pack(padx=2, pady=2)
+        return inner
 
         # MIDDLE SECTION: Buttons Grid
         self.grid_scroll_container = tk.Frame(self.main_content, bg="#1d2027")
@@ -549,6 +616,62 @@ class ScriptLauncherApp:
         # Separate threads for different update rates
         threading.Thread(target=self.github_monitor_loop, daemon=True).start()
         threading.Thread(target=self.rclone_monitor_loop, args=(log_dir,), daemon=True).start()
+        threading.Thread(target=self.system_stats_loop, daemon=True).start()
+
+    def system_stats_loop(self):
+        while not self.stop_threads:
+            try:
+                cpu = psutil.cpu_percent()
+                ram = psutil.virtual_memory().percent
+                disk_c = psutil.disk_usage('C:').percent
+                disk_d = psutil.disk_usage('D:').percent if os.path.exists('D:') else 0
+                
+                # Network
+                net_io = psutil.net_io_counters()
+                up = (net_io.bytes_sent - self.last_net_sent) / (1024 * 1024)
+                down = (net_io.bytes_recv - self.last_net_recv) / (1024 * 1024)
+                self.last_net_sent = net_io.bytes_sent
+                self.last_net_recv = net_io.bytes_recv
+                
+                # Cores
+                cores = psutil.cpu_percent(percpu=True)
+                
+                self.root.after(0, lambda: self.update_sys_ui(cpu, ram, disk_c, disk_d, up, down, cores))
+            except:
+                pass
+            time.sleep(1)
+
+    def update_sys_ui(self, cpu, ram, disk_c, disk_d, up, down, cores):
+        # Update Labels
+        self.cpu_usage_lbl.config(text=f"{int(cpu)}%", fg=self.get_stat_color(cpu))
+        self.cpu_bar.set(cpu / 100)
+        
+        self.ram_usage_lbl.config(text=f"{int(ram)}%", fg=self.get_stat_color(ram))
+        self.ram_bar.set(ram / 100)
+        
+        self.disk_c_lbl.config(text=f"{int(disk_c)}%")
+        self.disk_c_bar.set(disk_c / 100)
+        
+        self.disk_d_lbl.config(text=f"{int(disk_d)}%")
+        self.disk_d_bar.set(disk_d / 100)
+        
+        self.up_lbl.config(text=f"▲ {up:.1f}")
+        self.down_lbl.config(text=f"▼ {down:.1f}")
+        
+        # Update Core Micro Bars
+        for i, usage in enumerate(cores):
+            if i < len(self.core_canvases):
+                canv = self.core_canvases[i]
+                canv.delete("all")
+                h = (usage / 100) * 20
+                color = self.get_stat_color(usage)
+                # Draw from bottom
+                canv.create_rectangle(0, 20-h, 4, 20, fill=color, outline="")
+
+    def get_stat_color(self, val):
+        if val > 90: return "#fe1616"  # Red
+        if val > 70: return "#ff934b"  # Orange
+        return "#14bcff" # Blue/Cyan
 
     def github_monitor_loop(self):
         while not self.stop_threads:
