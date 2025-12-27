@@ -441,11 +441,13 @@ class ScriptLauncherApp:
     def status_monitor_thread(self):
         log_dir = r"C:\Users\nahid\script_output\rclone"
         os.makedirs(log_dir, exist_ok=True)
+        last_rclone_time = 0
 
         while not self.stop_threads:
-            # GitHub Check
+            current_time = time.time()
+            
+            # GitHub Check (Every 1 second)
             for repo in self.config["github_repos"]:
-                # ... (keep existing github logic)
                 path = repo["path"]
                 status = "unknown"
                 if os.path.exists(path):
@@ -458,26 +460,28 @@ class ScriptLauncherApp:
                 else: status = "missing"
                 self.root.after(0, lambda name=repo["name"], s=status: self.update_repo_status_ui(name, s))
 
-            # Rclone Check (using 'rclone check' as in mypygui.py)
-            for folder in self.config["rclone_folders"]:
-                name = folder["name"]
-                cfg_cmd = folder.get("cmd", "rclone check src dst --fast-list --size-only")
-                actual_cmd = cfg_cmd.replace("src", folder["src"]).replace("dst", folder["dst"])
-                log_file = os.path.join(log_dir, f"{name}_check.log")
-                
-                try:
-                    with open(log_file, "w") as f:
-                        subprocess.run(actual_cmd, shell=True, stdout=f, stderr=f, timeout=30)
+            # Rclone Check (Every 10 minutes)
+            if current_time - last_rclone_time > 600:
+                for folder in self.config["rclone_folders"]:
+                    name = folder["name"]
+                    cfg_cmd = folder.get("cmd", "rclone check src dst --fast-list --size-only")
+                    actual_cmd = cfg_cmd.replace("src", folder["src"]).replace("dst", folder["dst"])
+                    log_file = os.path.join(log_dir, f"{name}_check.log")
                     
-                    with open(log_file, "r") as f:
-                        content = f.read()
-                    
-                    is_ok = "ERROR" not in content and "differences found" not in content.lower()
-                    self.root.after(0, lambda n=name, ok=is_ok: self.update_folder_status_ui(n, ok))
-                except Exception as e:
-                    self.root.after(0, lambda n=name: self.update_folder_status_ui(n, False))
+                    try:
+                        with open(log_file, "w") as f:
+                            subprocess.run(actual_cmd, shell=True, stdout=f, stderr=f, timeout=30)
+                        
+                        with open(log_file, "r") as f:
+                            content = f.read()
+                        
+                        is_ok = "ERROR" not in content and "differences found" not in content.lower()
+                        self.root.after(0, lambda n=name, ok=is_ok: self.update_folder_status_ui(n, ok))
+                    except Exception as e:
+                        self.root.after(0, lambda n=name: self.update_folder_status_ui(n, False))
+                last_rclone_time = current_time
 
-            time.sleep(600) # Update every 10 minutes as in mypygui.py
+            time.sleep(1)
 
     def update_repo_status_ui(self, name, status):
         if name in self.repo_labels:
