@@ -301,21 +301,30 @@ class ScriptLauncherApp:
             r = i // cols
             c = i % cols
             
-            # Use script-specific color or default
+            # Use script-specific colors or defaults
             btn_color = script.get("color", "#2b2f38")
+            hover_color = script.get("hover_color", self.config["settings"]["accent_color"])
+            text_color = script.get("text_color", "white")
             
             btn = ctk.CTkButton(
                 self.grid_frame, 
                 text=script["name"],
                 width=160, height=45, corner_radius=4,
                 fg_color=btn_color, 
-                hover_color=self.config["settings"]["accent_color"],
-                text_color="white",
+                hover_color=hover_color,
+                text_color=text_color,
+                hover=True,
                 font=(self.main_font, 10),
                 command=lambda p=script["path"]: self.launch_script(p)
             )
             btn.grid(row=r, column=c, padx=8, pady=8, sticky="nsew")
             
+            # Simple workaround for hover text color if provided
+            if "hover_text_color" in script:
+                h_text = script["hover_text_color"]
+                btn.bind("<Enter>", lambda e, b=btn, ht=h_text: b.configure(text_color=ht), add="+")
+                btn.bind("<Leave>", lambda e, b=btn, st=text_color: b.configure(text_color=st), add="+")
+
             # Context menu binding
             btn.bind("<Button-3>", lambda e, s=script: self.show_context_menu(e, s))
 
@@ -336,33 +345,86 @@ class ScriptLauncherApp:
 
     def show_context_menu(self, event, script):
         menu = tk.Menu(self.root, tearoff=0, bg="#2b2f38", fg="white", activebackground=self.config["settings"]["accent_color"])
-        menu.add_command(label=f"Edit '{script['name']}'", command=lambda: self.edit_script_dialog(script))
-        menu.add_command(label="Change Color", command=lambda: self.change_color_dialog(script))
+        menu.add_command(label=f"Edit / Stylize", command=lambda: self.open_edit_dialog(script))
         menu.add_separator()
         menu.add_command(label=f"Delete", command=lambda: self.remove_script(script))
         menu.post(event.x_root, event.y_root)
 
-    def edit_script_dialog(self, script):
+    def open_edit_dialog(self, script):
         self.root.attributes("-topmost", False)
-        new_name = simpledialog.askstring("Edit Script", "Edit button label:", initialvalue=script["name"], parent=self.root)
-        if new_name:
-            new_path = filedialog.askopenfilename(title="Select Script or Executable", initialfile=script["path"], parent=self.root)
-            if new_path:
-                script["name"] = new_name
-                script["path"] = new_path
-                self.save_config()
-                self.refresh_grid()
-        self.root.attributes("-topmost", True)
+        dialog = tk.Toplevel(self.root)
+        dialog.title(f"Edit {script['name']}")
+        dialog.geometry("400x550")
+        dialog.configure(bg="#1d2027")
+        dialog.attributes("-topmost", True)
+        dialog.transient(self.root)
+        dialog.grab_set()
 
-    def change_color_dialog(self, script):
-        from tkinter import colorchooser
-        self.root.attributes("-topmost", False)
-        color = colorchooser.askcolor(title="Choose Button Color", initialcolor=script.get("color", "#2b2f38"), parent=self.root)
-        if color[1]:
-            script["color"] = color[1]
+        def pick_color(key, btn):
+            from tkinter import colorchooser
+            curr = script.get(key, "#2b2f38")
+            color = colorchooser.askcolor(initialcolor=curr, parent=dialog)
+            if color[1]:
+                script[key] = color[1]
+                # Update preview button appearance
+                if key == "color": btn.configure(fg_color=color[1])
+                elif key == "hover_color": btn.configure(hover_color=color[1])
+                elif key == "text_color": btn.configure(text_color=color[1])
+                elif key == "hover_text_color": 
+                    # To preview hover text, we can temporarily set text_color
+                    btn.configure(text_color=color[1])
+
+        # Form Layout
+        tk.Label(dialog, text="BUTTON SETTINGS", fg=self.config["settings"]["accent_color"], bg="#1d2027", font=(self.main_font, 12, "bold")).pack(pady=15)
+        
+        # Name
+        tk.Label(dialog, text="Label:", fg="gray", bg="#1d2027").pack(anchor="w", padx=30)
+        name_var = tk.StringVar(value=script["name"])
+        tk.Entry(dialog, textvariable=name_var, bg="#2b2f38", fg="white", insertbackground="white", bd=0).pack(fill="x", padx=30, pady=5)
+
+        # Path
+        tk.Label(dialog, text="Path / Command:", fg="gray", bg="#1d2027").pack(anchor="w", padx=30, pady=(10, 0))
+        path_frame = tk.Frame(dialog, bg="#1d2027")
+        path_frame.pack(fill="x", padx=30)
+        path_var = tk.StringVar(value=script["path"])
+        tk.Entry(path_frame, textvariable=path_var, bg="#2b2f38", fg="white", insertbackground="white", bd=0).pack(side="left", fill="x", expand=True)
+        tk.Button(path_frame, text="...", command=lambda: path_var.set(filedialog.askopenfilename() or path_var.get()), bg="#3a3f4b", fg="white").pack(side="right", padx=5)
+
+        # Color Pickers with improved previews
+        colors_frame = tk.Frame(dialog, bg="#1d2027")
+        colors_frame.pack(fill="x", padx=30, pady=20)
+
+        # Row 1: Main BG & Hover BG
+        cp1 = ctk.CTkButton(colors_frame, text="Button BG", fg_color=script.get("color", "#2b2f38"), hover=False, width=100, command=lambda: pick_color("color", cp1))
+        cp1.grid(row=0, column=0, padx=5, pady=5)
+        
+        cp2 = ctk.CTkButton(colors_frame, text="Hover BG", fg_color="#3a3f4b", hover_color=script.get("hover_color", "#26b2f3"), width=100, command=lambda: pick_color("hover_color", cp2))
+        cp2.grid(row=0, column=1, padx=5, pady=5)
+
+        # Row 2: Text & Hover Text
+        cp3 = ctk.CTkButton(colors_frame, text="Text Color", text_color=script.get("text_color", "white"), fg_color="#2b2f38", hover=False, width=100, command=lambda: pick_color("text_color", cp3))
+        cp3.grid(row=1, column=0, padx=5, pady=5)
+        
+        cp4 = ctk.CTkButton(colors_frame, text="Hover Text", text_color="white", fg_color="#2b2f38", width=100, command=lambda: pick_color("hover_text_color", cp4))
+        # Logic to show what hover text looks like on the button
+        cp4.bind("<Enter>", lambda e, b=cp4: b.configure(text_color=script.get("hover_text_color", "white")), add="+")
+        cp4.bind("<Leave>", lambda e, b=cp4: b.configure(text_color="white"), add="+")
+        cp4.grid(row=1, column=1, padx=5, pady=5)
+
+        def save_changes():
+            script["name"] = name_var.get()
+            script["path"] = path_var.get()
             self.save_config()
             self.refresh_grid()
-        self.root.attributes("-topmost", True)
+            dialog.destroy()
+            self.root.attributes("-topmost", True)
+
+        ctk.CTkButton(dialog, text="APPLY CHANGES", fg_color="#10b153", hover_color="#0d8c42", command=save_changes).pack(pady=20)
+        
+        def on_close():
+            dialog.destroy()
+            self.root.attributes("-topmost", True)
+        dialog.protocol("WM_DELETE_WINDOW", on_close)
 
     def remove_script(self, script):
         self.root.attributes("-topmost", False)
