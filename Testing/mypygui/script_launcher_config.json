@@ -1,6 +1,6 @@
 {
     "settings": {
-        "columns": 5,
+        "columns": 10,
         "font_family": "JetBrainsMono NFP",
         "font_size": 10,
         "bg_color": "#1d2027",
@@ -8,9 +8,9 @@
         "accent_color": "#26b2f3",
         "success_color": "#00ff21",
         "danger_color": "#fe1616",
-        "show_github": false,
-        "show_rclone": false,
-        "show_system_stats": false
+        "show_github": true,
+        "show_rclone": true,
+        "show_system_stats": true
     },
     "scripts": [
         {
@@ -19,26 +19,9 @@
             "font_size": 10
         },
         {
-            "name": "Task Mgr",
-            "path": "taskmgr.exe"
-        },
-        {
-            "name": "asd",
-            "path": "C:/Users/nahid/ms/ms1/Testing/mklink/mklink.py",
-            "hover_text_color": "#0080ff",
-            "color": "#ff00ff"
-        },
-        {
-            "name": "asd (Copy)",
-            "path": "C:/Users/nahid/ms/ms1/Testing/mklink/mklink.py",
-            "hover_text_color": "#0080ff",
-            "color": "#ff00ff"
-        },
-        {
-            "name": "asd (Copy) (Copy)",
-            "path": "C:/Users/nahid/ms/ms1/Testing/mklink/mklink.py",
-            "hover_text_color": "#0080ff",
-            "color": "#ff00ff"
+            "name": "Task Manager",
+            "path": "taskmgr.exe",
+            "font_size": 10
         }
     ],
     "github_repos": [
