@@ -376,6 +376,7 @@ class ScriptLauncherApp:
             h_color = script.get("hover_color", self.config["settings"]["accent_color"])
             t_color = script.get("text_color", "white")
             ht_color = script.get("hover_text_color", "white")
+            f_size = script.get("font_size", 10)
             
             btn = ctk.CTkButton(
                 self.grid_frame, 
@@ -384,7 +385,7 @@ class ScriptLauncherApp:
                 fg_color=b_color, 
                 text_color=t_color,
                 hover=False, # Disable CTk built-in hover to use manual bindings
-                font=(self.main_font, 10),
+                font=(self.main_font, f_size),
                 command=lambda p=script["path"]: self.launch_script(p)
             )
             btn.grid(row=r, column=c, padx=8, pady=8, sticky="nsew")
@@ -476,6 +477,11 @@ class ScriptLauncherApp:
         tk.Entry(path_frame, textvariable=path_var, bg="#2b2f38", fg="white", insertbackground="white", bd=0).pack(side="left", fill="x", expand=True)
         tk.Button(path_frame, text="...", command=lambda: path_var.set(filedialog.askopenfilename() or path_var.get()), bg="#3a3f4b", fg="white").pack(side="right", padx=5)
 
+        # Font Size
+        tk.Label(dialog, text="Font Size:", fg="gray", bg="#1d2027").pack(anchor="w", padx=30, pady=(10, 0))
+        fsize_var = tk.StringVar(value=str(script.get("font_size", 10)))
+        tk.Entry(dialog, textvariable=fsize_var, bg="#2b2f38", fg="white", insertbackground="white", bd=0, width=10).pack(anchor="w", padx=30, pady=5)
+
         # Color Pickers with improved previews and centered layout
         colors_frame = tk.Frame(dialog, bg="#1d2027")
         colors_frame.pack(fill="x", padx=30, pady=20)
@@ -499,6 +505,10 @@ class ScriptLauncherApp:
         def save_changes():
             script["name"] = name_var.get()
             script["path"] = path_var.get()
+            try:
+                script["font_size"] = int(fsize_var.get())
+            except:
+                script["font_size"] = 10
             self.save_config()
             self.refresh_grid()
             dialog.destroy()
