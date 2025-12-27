@@ -14,23 +14,6 @@
     },
     "scripts": [
         {
-            "name": "Task Manager",
-            "path": "taskmgr.exe",
-            "font_size": 20,
-            "hide_terminal": false
-        },
-        {
-            "name": "Explorer",
-            "path": "explorer.exe",
-            "font_size": 20
-        },
-        {
-            "name": "mklink",
-            "path": "C:/Users/nahid/ms/ms1/Testing/mklink/mklink.py",
-            "font_size": 20,
-            "hide_terminal": true
-        },
-        {
             "name": "\uea83 FFMPEG",
             "type": "folder",
             "scripts": [
@@ -72,6 +55,23 @@
             "font_size": 20,
             "color": "#f0d50f",
             "text_color": "#000000"
+        },
+        {
+            "name": "mklink",
+            "path": "C:/Users/nahid/ms/ms1/Testing/mklink/mklink.py",
+            "font_size": 20,
+            "hide_terminal": true
+        },
+        {
+            "name": "Task Manager",
+            "path": "taskmgr.exe",
+            "font_size": 20,
+            "hide_terminal": false
+        },
+        {
+            "name": "Explorer",
+            "path": "explorer.exe",
+            "font_size": 20
         }
     ],
     "github_repos": [
