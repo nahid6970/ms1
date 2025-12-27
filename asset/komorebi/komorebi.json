@@ -263,6 +263,11 @@
             "kind": "Exe",
             "id": "Photos.exe",
             "matching_strategy": "Legacy"
+        },
+        {
+            "kind": "Exe",
+            "id": "pythonw.exe",
+            "matching_strategy": "Equals"
         }
     ],
     "tray_and_multi_window_applications": [

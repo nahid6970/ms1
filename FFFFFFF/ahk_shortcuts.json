@@ -85,7 +85,8 @@
             "category": "Launch",
             "description": "",
             "hotkey": "#x",
-            "action": "Run(\"C:\\Users\\nahid\\ms\\ms1\\mypygui.py\", , \"Hide\")"
+            "action": "Run(\"C:\\Users\\nahid\\ms\\ms1\\Testing\\mypygui\\script_manager_gui.py\", , \"Hide\")",
+            "enabled": true
         },
         {
             "name": "Startup Setup",
