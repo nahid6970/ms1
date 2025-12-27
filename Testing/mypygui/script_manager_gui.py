@@ -571,10 +571,10 @@ class ScriptLauncherApp:
                     self.config["settings"]["show_system_stats"] = v_stats.get()
                     self.save_config()
                     
-                    # Restart UI to apply layout changes
-                    for widget in self.border_frame.winfo_children():
-                        widget.destroy()
-                    self.init_ui()
+                    # Apply grid changes immediately (safe)
+                    self.refresh_grid()
+                    
+                    messagebox.showinfo("Success", "Settings saved!\nWidget visibility changes will take effect on the next start.", parent=dialog)
                     
                     dialog.destroy()
                     self.root.attributes("-topmost", True)

@@ -10,7 +10,7 @@
         "danger_color": "#fe1616",
         "show_github": true,
         "show_rclone": true,
-        "show_system_stats": false
+        "show_system_stats": true
     },
     "scripts": [
         {
