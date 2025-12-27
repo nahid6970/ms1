@@ -491,6 +491,12 @@ class ScriptLauncherApp:
         for i in range(cols):
             self.grid_frame.grid_columnconfigure(i, weight=1)
 
+        # Ensure consistent row heights
+        if self.grid_occupied:
+            max_r = max(r for r, c in self.grid_occupied)
+            for r in range(max_r + 2): # +2 to cover current and maybe next empty row
+                self.grid_frame.grid_rowconfigure(r, minsize=61)
+
     def handle_script_click(self, script):
         if script.get("type") == "folder":
             self.enter_folder(script)
