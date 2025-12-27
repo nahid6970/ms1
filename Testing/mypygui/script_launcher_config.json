@@ -7,33 +7,16 @@
         "border_color": "#fe1616",
         "accent_color": "#26b2f3",
         "success_color": "#00ff21",
-        "danger_color": "#fe1616",
-        "text_color": "#ffffff"
+        "danger_color": "#fe1616"
     },
     "scripts": [
         {
-            "name": "SSk",
-            "path": "C:/Users/nahid/ms/ms1/Testing/mklink/mklink.py"
+            "name": "Explorer",
+            "path": "explorer.exe"
         },
         {
-            "name": "ff",
-            "path": "C:/Users/nahid/ms/ms1/Testing/mklink/mklink.py"
-        },
-        {
-            "name": "asd",
-            "path": "C:/Users/nahid/ms/ms1/Testing/mklink/mklink.py"
-        },
-        {
-            "name": "asd",
-            "path": "C:/Users/nahid/ms/ms1/Testing/mklink/mklink.py"
-        },
-        {
-            "name": "s",
-            "path": "C:/Users/nahid/ms/ms1/Testing/mklink/mklink.py"
-        },
-        {
-            "name": "s",
-            "path": "C:/Users/nahid/ms/ms1/Testing/mklink/mklink.py"
+            "name": "Task Mgr",
+            "path": "taskmgr.exe"
         }
     ],
     "github_repos": [
@@ -44,16 +27,37 @@
         {
             "name": "db",
             "path": "C:\\Users\\nahid\\ms\\db"
+        },
+        {
+            "name": "test",
+            "path": "C:\\Users\\nahid\\ms\\test"
         }
     ],
     "rclone_folders": [
         {
-            "name": "GDrive",
-            "path": "G:"
+            "name": "ms1",
+            "src": "C:/Users/nahid/ms/ms1/",
+            "dst": "o0:/ms1/",
+            "label": "ms1",
+            "cmd": "rclone check src dst --fast-list --size-only --exclude \".git/**\" --exclude \"__pycache__/**\"",
+            "left_click_cmd": "rclone sync src dst -P --fast-list --exclude \".git/**\" --exclude \"__pycache__/**\"  --log-level INFO",
+            "right_click_cmd": "rclone sync dst src -P --fast-list"
         },
         {
-            "name": "LocalBackup",
-            "path": "D:\\tt"
+            "name": "Photos",
+            "src": "C:/Users/nahid/Pictures/",
+            "dst": "o0:/Pictures/",
+            "label": "\uf03e",
+            "cmd": "rclone check src dst --fast-list --size-only --exclude \".globalTrash/**\" --exclude \".stfolder/**\" --exclude \".stfolder (1)/**\"",
+            "left_click_cmd": "rclone sync src dst -P --fast-list --track-renames --exclude \".globalTrash/**\" --exclude \".stfolder/**\" --log-level INFO",
+            "right_click_cmd": "rclone sync dst src -P --fast-list"
+        },
+        {
+            "name": "msBackups",
+            "label": "\udb85\ude32",
+            "src": "C:/Users/nahid/ms/msBackups",
+            "dst": "o0:/msBackups",
+            "cmd": "rclone check src dst --fast-list --size-only"
         }
     ]
 }

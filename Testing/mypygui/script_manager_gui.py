@@ -32,8 +32,31 @@ DEFAULT_CONFIG = {
         {"name": "test", "path": r"C:\Users\nahid\ms\test"}
     ],
     "rclone_folders": [
-        {"name": "GDrive", "path": r"G:"},
-        {"name": "LocalBackup", "path": r"D:\tt"}
+        {
+            "name": "ms1",
+            "src": "C:/Users/nahid/ms/ms1/",
+            "dst": "o0:/ms1/",
+            "label": "ms1",
+            "cmd": 'rclone check src dst --fast-list --size-only --exclude ".git/**" --exclude "__pycache__/**"',
+            "left_click_cmd": "rclone sync src dst -P --fast-list --exclude \".git/**\" --exclude \"__pycache__/**\"  --log-level INFO",
+            "right_click_cmd": "rclone sync dst src -P --fast-list"
+        },
+        {
+            "name": "Photos",
+            "src": "C:/Users/nahid/Pictures/",
+            "dst": "o0:/Pictures/",
+            "label": "\uf03e",
+            "cmd": 'rclone check src dst --fast-list --size-only --exclude \".globalTrash/**\" --exclude \".stfolder/**\" --exclude \".stfolder (1)/**\"',
+            "left_click_cmd": "rclone sync src dst -P --fast-list --track-renames --exclude \".globalTrash/**\" --exclude \".stfolder/**\" --log-level INFO",
+            "right_click_cmd": "rclone sync dst src -P --fast-list"
+        },
+        {
+            "name": "msBackups",
+            "label": "\udb85\ude32",
+            "src": "C:/Users/nahid/ms/msBackups",
+            "dst": "o0:/msBackups",
+            "cmd": "rclone check src dst --fast-list --size-only"
+        }
     ]
 }
 
@@ -203,8 +226,14 @@ class ScriptLauncherApp:
             indicator.pack(side="left", padx=(0, 5))
             circle = indicator.create_oval(2, 2, 8, 8, fill="#555555")
             
-            lbl = tk.Label(f_frame, text=folder["name"], fg="white", bg="#1d2027", font=(self.main_font, 9))
+            lbl_text = folder.get("label", folder["name"])
+            lbl = tk.Label(f_frame, text=lbl_text, fg="white", bg="#1d2027", font=(self.main_font, 12, "bold"), cursor="hand2")
             lbl.pack(side="left")
+            
+            # Click events
+            lbl.bind("<Button-1>", lambda e, f=folder: self.on_rclone_click(e, f))
+            lbl.bind("<Control-Button-1>", lambda e, f=folder: self.on_rclone_sync(e, f, "left"))
+            lbl.bind("<Control-Button-3>", lambda e, f=folder: self.on_rclone_sync(e, f, "right"))
             
             self.folder_labels[folder["name"]] = {"lbl": lbl, "indicator": indicator, "circle": circle}
 
@@ -351,41 +380,67 @@ class ScriptLauncherApp:
         y = self.root.winfo_y() + (event.y - self.drag_data["y"])
         self.root.geometry(f"+{x}+{y}")
 
+    # --- Rclone Action Handlers ---
+    def on_rclone_click(self, event, cfg):
+        # Open log (mimicking 'edit' command in new shell)
+        log_path = os.path.join(r"C:\Users\nahid\script_output\rclone", f"{cfg['name']}_check.log")
+        if os.path.exists(log_path):
+            try:
+                subprocess.Popen(["powershell", "-NoExit", "-Command", f'edit "{log_path}"'], creationflags=subprocess.CREATE_NEW_CONSOLE)
+            except:
+                os.startfile(log_path) # Fallback
+
+    def on_rclone_sync(self, event, cfg, side):
+        cmd_key = "left_click_cmd" if side == "left" else "right_click_cmd"
+        default_cmd = "rclone sync src dst -P --fast-list" if side == "left" else "rclone sync dst src -P --fast-list"
+        raw_cmd = cfg.get(cmd_key, default_cmd)
+        
+        actual_cmd = raw_cmd.replace("src", cfg["src"]).replace("dst", cfg["dst"])
+        try:
+            subprocess.Popen(f'start pwsh -NoExit -Command "{actual_cmd}"', shell=True)
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to run sync:\n{e}")
+
     def status_monitor_thread(self):
+        log_dir = r"C:\Users\nahid\script_output\rclone"
+        os.makedirs(log_dir, exist_ok=True)
+
         while not self.stop_threads:
             # GitHub Check
             for repo in self.config["github_repos"]:
+                # ... (keep existing github logic)
                 path = repo["path"]
                 status = "unknown"
                 if os.path.exists(path):
                     try:
-                        # Optimization: check if .git folder exists first
                         if os.path.isdir(os.path.join(path, ".git")):
-                            # Use git status --porcelain for faster parsing
-                            res = subprocess.run(
-                                ["git", "status", "--porcelain"], 
-                                cwd=path, capture_output=True, text=True, timeout=2
-                            )
-                            if res.returncode == 0:
-                                status = "clean" if not res.stdout.strip() else "dirty"
-                            else:
-                                status = "error"
-                        else:
-                            status = "no_git"
-                    except:
-                        status = "error"
-                else:
-                    status = "missing"
-                
+                            res = subprocess.run(["git", "status", "--porcelain"], cwd=path, capture_output=True, text=True, timeout=3)
+                            status = "clean" if not res.stdout.strip() else "dirty"
+                        else: status = "no_git"
+                    except: status = "error"
+                else: status = "missing"
                 self.root.after(0, lambda name=repo["name"], s=status: self.update_repo_status_ui(name, s))
 
-            # Rclone/Folder Check
+            # Rclone Check (using 'rclone check' as in mypygui.py)
             for folder in self.config["rclone_folders"]:
-                path = folder["path"]
-                exists = os.path.exists(path)
-                self.root.after(0, lambda name=folder["name"], ex=exists: self.update_folder_status_ui(name, ex))
+                name = folder["name"]
+                cfg_cmd = folder.get("cmd", "rclone check src dst --fast-list --size-only")
+                actual_cmd = cfg_cmd.replace("src", folder["src"]).replace("dst", folder["dst"])
+                log_file = os.path.join(log_dir, f"{name}_check.log")
+                
+                try:
+                    with open(log_file, "w") as f:
+                        subprocess.run(actual_cmd, shell=True, stdout=f, stderr=f, timeout=30)
+                    
+                    with open(log_file, "r") as f:
+                        content = f.read()
+                    
+                    is_ok = "ERROR" not in content and "differences found" not in content.lower()
+                    self.root.after(0, lambda n=name, ok=is_ok: self.update_folder_status_ui(n, ok))
+                except Exception as e:
+                    self.root.after(0, lambda n=name: self.update_folder_status_ui(n, False))
 
-            time.sleep(10) # Update every 10 seconds
+            time.sleep(600) # Update every 10 minutes as in mypygui.py
 
     def update_repo_status_ui(self, name, status):
         if name in self.repo_labels:
