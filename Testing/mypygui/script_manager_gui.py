@@ -216,8 +216,15 @@ class ScriptLauncherApp:
             indicator.pack(side="left", padx=(0, 5))
             circle = indicator.create_oval(2, 2, 8, 8, fill="#555555")
             
-            lbl = tk.Label(r_frame, text=repo["name"], fg="white", bg="#1d2027", font=(self.main_font, 9))
+            lbl = tk.Label(r_frame, text=repo["name"], fg="white", bg="#1d2027", font=(self.main_font, 12, "bold"), cursor="hand2")
             lbl.pack(side="left")
+            
+            # Click events for GitHub
+            repo_path = repo["path"]
+            lbl.bind("<Button-1>", lambda e, p=repo_path: self.on_git_click(e, p, "gitter"))
+            lbl.bind("<Control-Button-1>", lambda e, p=repo_path: self.on_git_click(e, p, "explorer"))
+            lbl.bind("<Button-3>", lambda e, p=repo_path: self.on_git_click(e, p, "lazygit"))
+            lbl.bind("<Control-Button-3>", lambda e, p=repo_path: self.on_git_click(e, p, "restore"))
             
             self.repo_labels[repo["name"]] = {"lbl": lbl, "indicator": indicator, "circle": circle}
 
@@ -414,6 +421,22 @@ class ScriptLauncherApp:
             subprocess.Popen(f'start pwsh -NoExit -Command "{actual_cmd}"', shell=True)
         except Exception as e:
             messagebox.showerror("Error", f"Failed to run sync:\n{e}")
+
+    # --- Git Action Handlers ---
+    def on_git_click(self, event, path, action):
+        try:
+            if action == "gitter":
+                cmd = f"& {{$host.UI.RawUI.WindowTitle='GiTSync' ; cd {path.replace(os.sep, '/')} ; gitter}}"
+                subprocess.Popen(["Start", "pwsh", "-NoExit", "-Command", cmd], shell=True)
+            elif action == "explorer":
+                subprocess.Popen(f'explorer "{path}"', shell=True)
+            elif action == "lazygit":
+                subprocess.Popen('start pwsh -NoExit -Command "lazygit"', cwd=path, shell=True)
+            elif action == "restore":
+                cmd = f"& {{$host.UI.RawUI.WindowTitle='Git Restore' ; cd {path.replace(os.sep, '/')} ; git restore . }}"
+                subprocess.Popen(["Start", "pwsh", "-NoExit", "-Command", cmd], shell=True)
+        except Exception as e:
+            print(f"Git action error: {e}")
 
     def status_monitor_thread(self):
         log_dir = r"C:\Users\nahid\script_output\rclone"
