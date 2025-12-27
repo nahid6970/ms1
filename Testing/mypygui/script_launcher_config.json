@@ -67,7 +67,9 @@
             "color": "#ffffff",
             "text_color": "#000000",
             "border_width": 0,
-            "corner_radius": 0
+            "corner_radius": 0,
+            "is_bold": false,
+            "is_italic": false
         },
         {
             "name": "Task Manager",

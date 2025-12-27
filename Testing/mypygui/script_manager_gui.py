@@ -400,6 +400,17 @@ class ScriptLauncherApp:
             
             corner_radius = script.get("corner_radius", 4)
             
+            # Font styling
+            is_bold = script.get("is_bold", False) or is_folder
+            is_italic = script.get("is_italic", False)
+            
+            font_spec = ctk.CTkFont(
+                family=self.main_font,
+                size=f_size,
+                weight="bold" if is_bold else "normal",
+                slant="italic" if is_italic else "roman"
+            )
+
             btn = ctk.CTkButton(
                 self.grid_frame, 
                 text=display_text,
@@ -407,7 +418,7 @@ class ScriptLauncherApp:
                 fg_color=b_color, 
                 text_color=t_color,
                 hover=False, 
-                font=(self.main_font, f_size, "bold" if is_folder else "normal"),
+                font=font_spec,
                 border_width=b_width,
                 border_color=b_border_color
             )
@@ -644,6 +655,18 @@ class ScriptLauncherApp:
         
         cp4 = ctk.CTkButton(colors_frame, text="Hover Text", text_color=script.get("hover_text_color", "white"), fg_color="#2b2f38", hover=False, width=120, command=lambda: pick_color("hover_text_color", cp4))
         cp4.grid(row=1, column=1, padx=5, pady=5)
+        
+        # Row 2.5: Font Styles
+        font_style_frame = tk.Frame(dialog, bg="#1d2027")
+        font_style_frame.pack(fill="x", padx=30, pady=5)
+        
+        v_bold = tk.BooleanVar(value=script.get("is_bold", False))
+        cb_bold = tk.Checkbutton(font_style_frame, text="Bold", variable=v_bold, bg="#1d2027", fg="white", selectcolor="#2b2f38", activebackground="#1d2027", activeforeground="white")
+        cb_bold.pack(side="left", padx=(0, 10))
+        
+        v_italic = tk.BooleanVar(value=script.get("is_italic", False))
+        cb_italic = tk.Checkbutton(font_style_frame, text="Italic", variable=v_italic, bg="#1d2027", fg="white", selectcolor="#2b2f38", activebackground="#1d2027", activeforeground="white")
+        cb_italic.pack(side="left")
 
         # Row 3: Styling & Borders
         tk.Label(dialog, text="Styling & Borders:", fg="gray", bg="#1d2027", font=(self.main_font, 9, "bold")).pack(anchor="w", padx=30, pady=(15, 5))
@@ -683,6 +706,10 @@ class ScriptLauncherApp:
                 script["corner_radius"] = int(radius_var.get())
             except:
                 script["corner_radius"] = 4
+            
+            script["is_bold"] = v_bold.get()
+            script["is_italic"] = v_italic.get()
+            
             self.save_config()
             self.refresh_grid()
             dialog.destroy()
