@@ -101,14 +101,17 @@
             "path": "explorer.exe",
             "font_size": 20,
             "hide_terminal": false,
-            "border_width": 0,
+            "border_width": 1,
             "corner_radius": 0,
             "ctrl_left_cmd": "",
             "ctrl_right_cmd": "",
             "col_span": 1,
             "row_span": 1,
             "is_bold": false,
-            "is_italic": false
+            "is_italic": false,
+            "width": 0,
+            "height": 0,
+            "border_color": "#4bfb42"
         }
     ],
     "github_repos": [

@@ -657,7 +657,7 @@ class ScriptLauncherApp:
         top.overrideredirect(True)
         
         # Center the dialog
-        width, height = 450, 650
+        width, height = 450, 750
         x = (top.winfo_screenwidth() // 2) - (width // 2)
         y = (top.winfo_screenheight() // 2) - (height // 2)
         top.geometry(f"{width}x{height}+{x}+{y}")
@@ -800,42 +800,39 @@ class ScriptLauncherApp:
         layout_frame = tk.LabelFrame(dialog, text="   LAYOUT & APPEARANCE   ", bg="#1d2027", fg="gray", font=(self.main_font, 10, "bold"), bd=1, relief="groove")
         layout_frame.pack(fill="x", padx=15, pady=5)
         
+        # Use Grid layout for alignment
+        layout_frame.grid_columnconfigure(1, weight=1)
+        layout_frame.grid_columnconfigure(3, weight=1)
+        
         # Row 1: Dimensions
-        row1 = tk.Frame(layout_frame, bg="#1d2027")
-        row1.pack(fill="x", padx=10, pady=5)
-        tk.Label(row1, text="Width:", fg="gray", bg="#1d2027").pack(side="left")
+        tk.Label(layout_frame, text="Width:", fg="gray", bg="#1d2027").grid(row=0, column=0, sticky="w", padx=(10, 5), pady=5)
         width_var = tk.StringVar(value=str(script.get("width", 0)))
-        tk.Entry(row1, textvariable=width_var, bg="#2b2f38", fg="white", insertbackground="white", bd=0, width=5).pack(side="left", padx=5)
+        tk.Entry(layout_frame, textvariable=width_var, bg="#2b2f38", fg="white", insertbackground="white", bd=0, width=5).grid(row=0, column=1, sticky="ew", padx=5, pady=5)
         
-        tk.Label(row1, text="Height:", fg="gray", bg="#1d2027").pack(side="left", padx=(15,0))
+        tk.Label(layout_frame, text="Height:", fg="gray", bg="#1d2027").grid(row=0, column=2, sticky="w", padx=(15, 5), pady=5)
         height_var = tk.StringVar(value=str(script.get("height", 0)))
-        tk.Entry(row1, textvariable=height_var, bg="#2b2f38", fg="white", insertbackground="white", bd=0, width=5).pack(side="left", padx=5)
-        tk.Label(row1, text="(0 = Auto)", fg="#666666", bg="#1d2027", font=(self.main_font, 8)).pack(side="left", padx=5)
-
-        # Row 2: Spanning
-        row2 = tk.Frame(layout_frame, bg="#1d2027")
-        row2.pack(fill="x", padx=10, pady=5)
-        tk.Label(row2, text="Col Span:", fg="gray", bg="#1d2027").pack(side="left")
-        col_span_var = tk.StringVar(value=str(script.get("col_span", 1)))
-        tk.Entry(row2, textvariable=col_span_var, bg="#2b2f38", fg="white", insertbackground="white", bd=0, width=5).pack(side="left", padx=5)
+        tk.Entry(layout_frame, textvariable=height_var, bg="#2b2f38", fg="white", insertbackground="white", bd=0, width=5).grid(row=0, column=3, sticky="ew", padx=5, pady=5)
         
-        tk.Label(row2, text="Row Span:", fg="gray", bg="#1d2027").pack(side="left", padx=(15,0))
+        # Row 2: Spanning
+        tk.Label(layout_frame, text="Col Span:", fg="gray", bg="#1d2027").grid(row=1, column=0, sticky="w", padx=(10, 5), pady=5)
+        col_span_var = tk.StringVar(value=str(script.get("col_span", 1)))
+        tk.Entry(layout_frame, textvariable=col_span_var, bg="#2b2f38", fg="white", insertbackground="white", bd=0, width=5).grid(row=1, column=1, sticky="ew", padx=5, pady=5)
+        
+        tk.Label(layout_frame, text="Row Span:", fg="gray", bg="#1d2027").grid(row=1, column=2, sticky="w", padx=(15, 5), pady=5)
         row_span_var = tk.StringVar(value=str(script.get("row_span", 1)))
-        tk.Entry(row2, textvariable=row_span_var, bg="#2b2f38", fg="white", insertbackground="white", bd=0, width=5).pack(side="left", padx=5)
+        tk.Entry(layout_frame, textvariable=row_span_var, bg="#2b2f38", fg="white", insertbackground="white", bd=0, width=5).grid(row=1, column=3, sticky="ew", padx=5, pady=5)
 
         # Row 3: Borders
-        row3 = tk.Frame(layout_frame, bg="#1d2027")
-        row3.pack(fill="x", padx=10, pady=(5, 10))
-        tk.Label(row3, text="Radius:", fg="gray", bg="#1d2027").pack(side="left")
+        tk.Label(layout_frame, text="Radius:", fg="gray", bg="#1d2027").grid(row=2, column=0, sticky="w", padx=(10, 5), pady=(5, 10))
         radius_var = tk.StringVar(value=str(script.get("corner_radius", 4)))
-        tk.Entry(row3, textvariable=radius_var, bg="#2b2f38", fg="white", insertbackground="white", bd=0, width=4).pack(side="left", padx=5)
+        tk.Entry(layout_frame, textvariable=radius_var, bg="#2b2f38", fg="white", insertbackground="white", bd=0, width=5).grid(row=2, column=1, sticky="ew", padx=5, pady=(5, 10))
 
-        tk.Label(row3, text="Border W:", fg="gray", bg="#1d2027").pack(side="left", padx=(15,0))
+        tk.Label(layout_frame, text="Border W:", fg="gray", bg="#1d2027").grid(row=2, column=2, sticky="w", padx=(15, 5), pady=(5, 10))
         border_width_var = tk.StringVar(value=str(script.get("border_width", 0)))
-        tk.Entry(row3, textvariable=border_width_var, bg="#2b2f38", fg="white", insertbackground="white", bd=0, width=4).pack(side="left", padx=5)
+        tk.Entry(layout_frame, textvariable=border_width_var, bg="#2b2f38", fg="white", insertbackground="white", bd=0, width=5).grid(row=2, column=3, sticky="ew", padx=5, pady=(5, 10))
         
-        cp5 = ctk.CTkButton(row3, text="Border Color", fg_color=script.get("border_color", "#fe1616"), width=100, height=24, hover=False, command=lambda: pick_color("border_color", cp5))
-        cp5.pack(side="right")
+        cp5 = ctk.CTkButton(layout_frame, text="Border Color", fg_color=script.get("border_color", "#fe1616"), width=100, height=24, hover=False, command=lambda: pick_color("border_color", cp5))
+        cp5.grid(row=3, column=0, columnspan=4, pady=(0, 10), sticky="ew", padx=10)
 
         def save_changes():
             script["name"] = name_var.get()
