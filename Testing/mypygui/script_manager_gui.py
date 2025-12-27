@@ -644,7 +644,7 @@ class ScriptLauncherApp:
         top.overrideredirect(True)
         
         # Center the dialog
-        width, height = 400, 600
+        width, height = 450, 650
         x = (top.winfo_screenwidth() // 2) - (width // 2)
         y = (top.winfo_screenheight() // 2) - (height // 2)
         top.geometry(f"{width}x{height}+{x}+{y}")
@@ -849,11 +849,9 @@ class ScriptLauncherApp:
             
             self.save_config()
             self.refresh_grid()
-            self.save_config()
-            self.refresh_grid()
             on_close()
 
-        ctk.CTkButton(dialog, text="APPLY CHANGES", fg_color="#10b153", hover_color="#0d8c42", command=save_changes).pack(pady=20)
+        ctk.CTkButton(dialog, text="Save", width=200, height=50, fg_color="#10b153", hover_color="#0d8c42", font=(self.main_font, 13, "bold"), command=save_changes).pack(pady=20)
         
         # No WM protocol for overrideredirect, but keep cleanup separate
         # dialog.protocol("WM_DELETE_WINDOW", on_close) not needed
