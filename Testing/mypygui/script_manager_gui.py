@@ -181,16 +181,39 @@ class ScriptLauncherApp:
         self.title_lbl.bind("<ButtonPress-1>", self.start_drag)
         self.title_lbl.bind("<B1-Motion>", self.do_drag)
 
-        # Control Buttons (Right aligned)
+        # Control Buttons Container (Right aligned)
+        self.controls_container = tk.Frame(self.header, bg="#1d2027")
+        self.controls_container.pack(side="right")
+
         self.close_btn = tk.Button(
-            self.header, text="✕", command=self.root.destroy,
-            bg="#1d2027", fg="#555555", bd=0, font=("Calibri", 14),
+            self.controls_container, text="✕", command=self.root.destroy,
+            bg="#1d2027", fg="#555555", bd=0, font=("Calibri", 12),
             activebackground="#fe1616", activeforeground="white",
             padx=10, cursor="hand2"
         )
         self.close_btn.pack(side="right")
         self.close_btn.bind("<Enter>", lambda e: self.close_btn.config(fg="white", bg="#fe1616"))
         self.close_btn.bind("<Leave>", lambda e: self.close_btn.config(fg="#555555", bg="#1d2027"))
+
+        self.settings_btn = tk.Button(
+            self.controls_container, text="⚙", command=self.open_settings,
+            bg="#1d2027", fg="#888888", bd=0, font=("Segoe UI Symbol", 12),
+            activeforeground="white", activebackground="#3a3f4b",
+            padx=10, cursor="hand2"
+        )
+        self.settings_btn.pack(side="right")
+        self.settings_btn.bind("<Enter>", lambda e: self.settings_btn.config(fg="white", bg="#3a3f4b"))
+        self.settings_btn.bind("<Leave>", lambda e: self.settings_btn.config(fg="#888888", bg="#1d2027"))
+
+        self.add_btn = tk.Button(
+            self.controls_container, text="+", command=self.add_script_dialog,
+            bg="#1d2027", fg="#888888", bd=0, font=("Segoe UI Symbol", 12, "bold"),
+            activeforeground="white", activebackground="#10b153",
+            padx=10, cursor="hand2"
+        )
+        self.add_btn.pack(side="right")
+        self.add_btn.bind("<Enter>", lambda e: self.add_btn.config(fg="white", bg="#10b153"))
+        self.add_btn.bind("<Leave>", lambda e: self.add_btn.config(fg="#888888", bg="#1d2027"))
 
         # Main Content Area
         self.main_content = tk.Frame(self.border_frame, bg="#1d2027")
@@ -321,27 +344,7 @@ class ScriptLauncherApp:
 
         self.refresh_grid()
 
-        # BOTTOM SECTION: Controls
-        self.footer = tk.Frame(self.border_frame, bg="#1d2027", height=50)
-        self.footer.pack(fill="x", side="bottom", padx=20, pady=10)
-
-        self.add_btn = ctk.CTkButton(
-            self.footer, text="+ ADD SCRIPT", 
-            width=140, height=35, corner_radius=5,
-            fg_color="#10b153", hover_color="#0d8c42",
-            font=(self.main_font, 10, "bold"),
-            command=self.add_script_dialog
-        )
-        self.add_btn.pack(side="left")
-
-        self.settings_btn = ctk.CTkButton(
-            self.footer, text="⚙ SETTINGS", 
-            width=120, height=35, corner_radius=5,
-            fg_color="#3a3f4b", hover_color="#4e5563",
-            font=(self.main_font, 10, "bold"),
-            command=self.open_settings
-        )
-        self.settings_btn.pack(side="right")
+        self.refresh_grid()
 
     def refresh_grid(self):
         # Clear
