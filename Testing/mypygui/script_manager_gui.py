@@ -360,7 +360,7 @@ class ScriptLauncherApp:
             h_color = script.get("hover_color", self.config["settings"]["accent_color"])
             t_color = script.get("text_color", "white")
             ht_color = script.get("hover_text_color", "white")
-            f_size = script.get("font_size", 10)
+            f_size = script.get("font_size", self.config["settings"].get("font_size", 10))
             
             btn = ctk.CTkButton(
                 self.grid_frame, 
@@ -542,9 +542,16 @@ class ScriptLauncherApp:
 
         # Grid settings
         tk.Label(dialog, text="Grid Settings:", fg=self.config["settings"]["accent_color"], bg="#1d2027", font=(self.main_font, 10, "bold")).pack(pady=(10, 5))
+        
+        # Grid Columns
         tk.Label(dialog, text="Buttons per Row:", fg="white", bg="#1d2027", font=(self.main_font, 9)).pack()
         val_var = tk.StringVar(value=str(self.config["settings"]["columns"]))
         tk.Entry(dialog, textvariable=val_var, width=10, justify="center").pack(pady=5)
+        
+        # Default Font Size
+        tk.Label(dialog, text="Default Font Size:", fg="white", bg="#1d2027", font=(self.main_font, 9)).pack()
+        f_size_var = tk.StringVar(value=str(self.config["settings"].get("font_size", 10)))
+        tk.Entry(dialog, textvariable=f_size_var, width=10, justify="center").pack(pady=5)
 
         # Widget Toggles
         tk.Label(dialog, text="Toggle Widgets:", fg=self.config["settings"]["accent_color"], bg="#1d2027", font=(self.main_font, 10, "bold")).pack(pady=(15, 5))
@@ -564,8 +571,10 @@ class ScriptLauncherApp:
         def save():
             try:
                 n = int(val_var.get())
+                fs = int(f_size_var.get())
                 if 1 <= n <= 10:
                     self.config["settings"]["columns"] = n
+                    self.config["settings"]["font_size"] = fs
                     self.config["settings"]["show_github"] = v_github.get()
                     self.config["settings"]["show_rclone"] = v_rclone.get()
                     self.config["settings"]["show_system_stats"] = v_stats.get()

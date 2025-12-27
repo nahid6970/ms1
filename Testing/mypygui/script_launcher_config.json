@@ -2,7 +2,7 @@
     "settings": {
         "columns": 10,
         "font_family": "JetBrainsMono NFP",
-        "font_size": 10,
+        "font_size": 20,
         "bg_color": "#1d2027",
         "border_color": "#fe1616",
         "accent_color": "#26b2f3",
@@ -22,6 +22,15 @@
             "name": "Task Manager",
             "path": "taskmgr.exe",
             "font_size": 10
+        },
+        {
+            "name": "Task Manager (Copy)",
+            "path": "taskmgr.exe",
+            "font_size": 10
+        },
+        {
+            "name": "asdasd",
+            "path": "C:/Users/nahid/ms/ms1/Testing/mklink/mklink.py"
         }
     ],
     "github_repos": [
