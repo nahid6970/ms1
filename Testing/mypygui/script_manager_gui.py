@@ -600,93 +600,84 @@ class ScriptLauncherApp:
                 elif key in ["text_color", "hover_text_color"]: 
                     btn.configure(text_color=color[1])
 
-        # Form Layout
-        tk.Label(dialog, text="BUTTON SETTINGS", fg=self.config["settings"]["accent_color"], bg="#1d2027", font=(self.main_font, 12, "bold")).pack(pady=15)
+        # --- Section 1: Basic Info ---
+        info_frame = tk.LabelFrame(dialog, text="   BASIC INFO   ", bg="#1d2027", fg="gray", font=(self.main_font, 10, "bold"), bd=1, relief="groove")
+        info_frame.pack(fill="x", padx=15, pady=10)
         
-        # Name
-        tk.Label(dialog, text="Label:", fg="gray", bg="#1d2027").pack(anchor="w", padx=30)
+        # Label Input
+        tk.Label(info_frame, text="Label Name:", fg="white", bg="#1d2027", font=(self.main_font, 9)).grid(row=0, column=0, sticky="w", padx=10, pady=5)
         name_var = tk.StringVar(value=script["name"])
-        tk.Entry(dialog, textvariable=name_var, bg="#2b2f38", fg="white", insertbackground="white", bd=0).pack(fill="x", padx=30, pady=5)
-
-        # Path (Only for scripts, not folders)
+        tk.Entry(info_frame, textvariable=name_var, bg="#2b2f38", fg="white", insertbackground="white", bd=0).grid(row=0, column=1, sticky="ew", padx=10, pady=5)
+        
+        # Path Input (if not folder)
         if script.get("type") != "folder":
-            tk.Label(dialog, text="Path / Command:", fg="gray", bg="#1d2027").pack(anchor="w", padx=30, pady=(10, 0))
-            path_frame = tk.Frame(dialog, bg="#1d2027")
-            path_frame.pack(fill="x", padx=30)
+            tk.Label(info_frame, text="Script Path:", fg="white", bg="#1d2027", font=(self.main_font, 9)).grid(row=1, column=0, sticky="w", padx=10, pady=5)
+            path_cnt = tk.Frame(info_frame, bg="#1d2027")
+            path_cnt.grid(row=1, column=1, sticky="ew", padx=10, pady=5)
             path_var = tk.StringVar(value=script.get("path", ""))
-            tk.Entry(path_frame, textvariable=path_var, bg="#2b2f38", fg="white", insertbackground="white", bd=0).pack(side="left", fill="x", expand=True)
-            tk.Button(path_frame, text="...", command=lambda: path_var.set(filedialog.askopenfilename() or path_var.get()), bg="#3a3f4b", fg="white").pack(side="right", padx=5)
+            tk.Entry(path_cnt, textvariable=path_var, bg="#2b2f38", fg="white", insertbackground="white", bd=0).pack(side="left", fill="x", expand=True)
+            tk.Button(path_cnt, text="..", command=lambda: path_var.set(filedialog.askopenfilename() or path_var.get()), bg="#3a3f4b", fg="white", width=2).pack(side="right", padx=(5,0))
             
-            # Hide Terminal Option
+            # Hide Terminal Checkbox
             hide_var = tk.BooleanVar(value=script.get("hide_terminal", False))
-            cb_hide = tk.Checkbutton(
-                dialog, text="Hide Terminal / Console", variable=hide_var,
-                bg="#1d2027", fg="#888888", selectcolor="#2b2f38",
-                activebackground="#1d2027", activeforeground="white",
-                font=(self.main_font, 9)
-            )
-            cb_hide.pack(anchor="w", padx=30, pady=(5, 0))
+            cb_hide = tk.Checkbutton(info_frame, text="Hide Terminal / Console", variable=hide_var, bg="#1d2027", fg="#aaaaaa", selectcolor="#2b2f38", activebackground="#1d2027", activeforeground="white")
+            cb_hide.grid(row=2, column=0, columnspan=2, sticky="w", padx=10, pady=(0,5))
         else:
             path_var = None
             hide_var = None
 
-        # Font Size
-        tk.Label(dialog, text="Font Size:", fg="gray", bg="#1d2027").pack(anchor="w", padx=30, pady=(10, 0))
+        info_frame.grid_columnconfigure(1, weight=1)
+
+        # --- Section 2: Typography ---
+        typo_frame = tk.LabelFrame(dialog, text="   TYPOGRAPHY   ", bg="#1d2027", fg="gray", font=(self.main_font, 10, "bold"), bd=1, relief="groove")
+        typo_frame.pack(fill="x", padx=15, pady=5)
+        
+        # Font Size & Styles Row
+        tk.Label(typo_frame, text="Size:", fg="white", bg="#1d2027").pack(side="left", padx=(10,5), pady=10)
         default_fs = self.config["settings"].get("font_size", 10)
         fsize_var = tk.StringVar(value=str(script.get("font_size", default_fs)))
-        tk.Entry(dialog, textvariable=fsize_var, bg="#2b2f38", fg="white", insertbackground="white", bd=0, width=10).pack(anchor="w", padx=30, pady=5)
-
-        # Color Pickers with improved previews and centered layout
-        colors_frame = tk.Frame(dialog, bg="#1d2027")
-        colors_frame.pack(fill="x", padx=30, pady=20)
-        colors_frame.grid_columnconfigure(0, weight=1)
-        colors_frame.grid_columnconfigure(1, weight=1)
-
-        # Row 1: Button BG & Text Color (Paired styles)
-        cp1 = ctk.CTkButton(colors_frame, text="Button BG", fg_color=script.get("color", "#2b2f38"), hover=False, width=120, command=lambda: pick_color("color", cp1))
-        cp1.grid(row=0, column=0, padx=5, pady=5)
-        
-        cp3 = ctk.CTkButton(colors_frame, text="Text Color", text_color=script.get("text_color", "white"), fg_color="#2b2f38", hover=False, width=120, command=lambda: pick_color("text_color", cp3))
-        cp3.grid(row=0, column=1, padx=5, pady=5)
-
-        # Row 2: Hover BG & Hover Text (Paired hover states)
-        cp2 = ctk.CTkButton(colors_frame, text="Hover BG", fg_color=script.get("hover_color", "#26b2f3"), hover=False, width=120, command=lambda: pick_color("hover_color", cp2))
-        cp2.grid(row=1, column=0, padx=5, pady=5)
-        
-        cp4 = ctk.CTkButton(colors_frame, text="Hover Text", text_color=script.get("hover_text_color", "white"), fg_color="#2b2f38", hover=False, width=120, command=lambda: pick_color("hover_text_color", cp4))
-        cp4.grid(row=1, column=1, padx=5, pady=5)
-        
-        # Row 2.5: Font Styles
-        font_style_frame = tk.Frame(dialog, bg="#1d2027")
-        font_style_frame.pack(fill="x", padx=30, pady=5)
+        tk.Entry(typo_frame, textvariable=fsize_var, bg="#2b2f38", fg="white", insertbackground="white", bd=0, width=4).pack(side="left")
         
         v_bold = tk.BooleanVar(value=script.get("is_bold", False))
-        cb_bold = tk.Checkbutton(font_style_frame, text="Bold", variable=v_bold, bg="#1d2027", fg="white", selectcolor="#2b2f38", activebackground="#1d2027", activeforeground="white")
-        cb_bold.pack(side="left", padx=(0, 10))
+        tk.Checkbutton(typo_frame, text="Bold", variable=v_bold, bg="#1d2027", fg="white", selectcolor="#2b2f38", activebackground="#1d2027", activeforeground="white").pack(side="left", padx=10)
         
         v_italic = tk.BooleanVar(value=script.get("is_italic", False))
-        cb_italic = tk.Checkbutton(font_style_frame, text="Italic", variable=v_italic, bg="#1d2027", fg="white", selectcolor="#2b2f38", activebackground="#1d2027", activeforeground="white")
-        cb_italic.pack(side="left")
+        tk.Checkbutton(typo_frame, text="Italic", variable=v_italic, bg="#1d2027", fg="white", selectcolor="#2b2f38", activebackground="#1d2027", activeforeground="white").pack(side="left", padx=5)
 
-        # Row 3: Styling & Borders
-        tk.Label(dialog, text="Styling & Borders:", fg="gray", bg="#1d2027", font=(self.main_font, 9, "bold")).pack(anchor="w", padx=30, pady=(15, 5))
+        # --- Section 3: Colors ---
+        color_frame = tk.LabelFrame(dialog, text="   COLORS   ", bg="#1d2027", fg="gray", font=(self.main_font, 10, "bold"), bd=1, relief="groove")
+        color_frame.pack(fill="x", padx=15, pady=10)
+        color_frame.grid_columnconfigure(0, weight=1)
+        color_frame.grid_columnconfigure(1, weight=1)
         
-        style_frame = tk.Frame(dialog, bg="#1d2027")
-        style_frame.pack(fill="x", padx=30, pady=5)
+        cp1 = ctk.CTkButton(color_frame, text="Button BG", fg_color=script.get("color", "#2b2f38"), height=30, hover=False, command=lambda: pick_color("color", cp1))
+        cp1.grid(row=0, column=0, padx=10, pady=10, sticky="ew")
         
-        # Border Width
-        tk.Label(style_frame, text="Border W:", fg="gray", bg="#1d2027").pack(side="left")
-        border_width_var = tk.StringVar(value=str(script.get("border_width", 0)))
-        tk.Entry(style_frame, textvariable=border_width_var, bg="#2b2f38", fg="white", insertbackground="white", bd=0, width=4).pack(side="left", padx=(5, 10))
+        cp3 = ctk.CTkButton(color_frame, text="Text Color", text_color=script.get("text_color", "white"), fg_color="#2b2f38", height=30, hover=False, command=lambda: pick_color("text_color", cp3))
+        cp3.grid(row=0, column=1, padx=10, pady=10, sticky="ew")
+
+        cp2 = ctk.CTkButton(color_frame, text="Hover BG", fg_color=script.get("hover_color", "#26b2f3"), height=30, hover=False, command=lambda: pick_color("hover_color", cp2))
+        cp2.grid(row=1, column=0, padx=10, pady=(0,10), sticky="ew")
         
-        # Corner Radius
-        tk.Label(style_frame, text="Radius:", fg="gray", bg="#1d2027").pack(side="left")
+        cp4 = ctk.CTkButton(color_frame, text="Hover Text", text_color=script.get("hover_text_color", "white"), fg_color="#2b2f38", height=30, hover=False, command=lambda: pick_color("hover_text_color", cp4))
+        cp4.grid(row=1, column=1, padx=10, pady=(0,10), sticky="ew")
+
+        # --- Section 4: Shape & Borders ---
+        shape_frame = tk.LabelFrame(dialog, text="   SHAPE & BORDERS   ", bg="#1d2027", fg="gray", font=(self.main_font, 10, "bold"), bd=1, relief="groove")
+        shape_frame.pack(fill="x", padx=15, pady=5)
+
+        # Radius & Width
+        tk.Label(shape_frame, text="Radius:", fg="white", bg="#1d2027").pack(side="left", padx=(10, 5), pady=10)
         radius_var = tk.StringVar(value=str(script.get("corner_radius", 4)))
-        tk.Entry(style_frame, textvariable=radius_var, bg="#2b2f38", fg="white", insertbackground="white", bd=0, width=4).pack(side="left", padx=(5, 10))
+        tk.Entry(shape_frame, textvariable=radius_var, bg="#2b2f38", fg="white", insertbackground="white", bd=0, width=4).pack(side="left")
 
-        # Border Color
-        cp5 = ctk.CTkButton(style_frame, text="Border Color", fg_color=script.get("border_color", "#fe1616"), hover=False, width=100, command=lambda: pick_color("border_color", cp5))
-        cp5.pack(side="left", padx=5)
+        tk.Label(shape_frame, text="Border W:", fg="white", bg="#1d2027").pack(side="left", padx=(15, 5))
+        border_width_var = tk.StringVar(value=str(script.get("border_width", 0)))
+        tk.Entry(shape_frame, textvariable=border_width_var, bg="#2b2f38", fg="white", insertbackground="white", bd=0, width=4).pack(side="left")
+        
+        # Border Color Picker
+        cp5 = ctk.CTkButton(shape_frame, text="Color", fg_color=script.get("border_color", "#fe1616"), width=60, height=25, hover=False, command=lambda: pick_color("border_color", cp5))
+        cp5.pack(side="right", padx=10)
 
         def save_changes():
             script["name"] = name_var.get()
