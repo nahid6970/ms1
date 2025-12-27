@@ -391,47 +391,25 @@ class ScriptLauncherApp:
             t_color = script.get("text_color", "white" if not is_folder else "#ffd700")
             ht_color = script.get("hover_text_color", "white")
             f_size = script.get("font_size", self.config["settings"].get("font_size", 10))
-            border_width = script.get("border_width", 0)
-            border_color = script.get("border_color", "#fe1616")
             
+            # Border settings
+            b_width = script.get("border_width", 0)
+            b_border_color = script.get("border_color", "#fe1616")
+
             display_text = script["name"]
             
-            # Create border frame if border is enabled
-            if border_width > 0:
-                border_frame = tk.Frame(
-                    self.grid_frame,
-                    bg=border_color,
-                    highlightthickness=0
-                )
-                border_frame.grid(row=r, column=c, padx=8, pady=8, sticky="nsew")
-                
-                # Create button inside border frame with padding for border effect
-                btn = ctk.CTkButton(
-                    border_frame, 
-                    text=display_text,
-                    width=160-(border_width*2), height=45-(border_width*2), corner_radius=4,
-                    fg_color=b_color, 
-                    text_color=t_color,
-                    hover=False, 
-                    font=(self.main_font, f_size, "bold" if is_folder else "normal")
-                )
-                btn.pack(padx=border_width, pady=border_width, fill="both", expand=True)
-                
-                # Store reference to border frame for event binding
-                container = border_frame
-            else:
-                # No border - create button directly
-                btn = ctk.CTkButton(
-                    self.grid_frame, 
-                    text=display_text,
-                    width=160, height=45, corner_radius=4,
-                    fg_color=b_color, 
-                    text_color=t_color,
-                    hover=False, 
-                    font=(self.main_font, f_size, "bold" if is_folder else "normal")
-                )
-                btn.grid(row=r, column=c, padx=8, pady=8, sticky="nsew")
-                container = btn
+            btn = ctk.CTkButton(
+                self.grid_frame, 
+                text=display_text,
+                width=160, height=45, corner_radius=4,
+                fg_color=b_color, 
+                text_color=t_color,
+                hover=False, 
+                font=(self.main_font, f_size, "bold" if is_folder else "normal"),
+                border_width=b_width,
+                border_color=b_border_color
+            )
+            btn.grid(row=r, column=c, padx=8, pady=8, sticky="nsew")
             
             # Manual hover implementation for better reliability
             def on_enter(e, b=btn, hc=h_color, htc=ht_color):
@@ -443,20 +421,13 @@ class ScriptLauncherApp:
             btn.bind("<Enter>", on_enter)
             btn.bind("<Leave>", on_leave)
 
-            # Context menu binding - bind to both button and container
+            # Context menu binding
             btn.bind("<Button-3>", lambda e, s=script: self.show_context_menu(e, s))
-            if container != btn:
-                container.bind("<Button-3>", lambda e, s=script: self.show_context_menu(e, s))
 
-            # Drag & Drop bindings for sorting - bind to both button and container
+            # Drag & Drop bindings for sorting
             btn.bind("<ButtonPress-1>", lambda e, i=i, s=script: self.start_script_drag(e, i, s), add="+")
             btn.bind("<B1-Motion>", self.do_script_drag, add="+")
             btn.bind("<ButtonRelease-1>", self.stop_script_drag, add="+")
-            
-            if container != btn:
-                container.bind("<ButtonPress-1>", lambda e, i=i, s=script: self.start_script_drag(e, i, s), add="+")
-                container.bind("<B1-Motion>", self.do_script_drag, add="+")
-                container.bind("<ButtonRelease-1>", self.stop_script_drag, add="+")
 
         # Equal weight for columns
         for i in range(cols):

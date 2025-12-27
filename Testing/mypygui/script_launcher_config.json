@@ -70,7 +70,7 @@
             "path": "taskmgr.exe",
             "font_size": 20,
             "hide_terminal": false,
-            "border_width": 2
+            "border_width": 0
         },
         {
             "name": "Explorer",
