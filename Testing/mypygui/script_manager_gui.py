@@ -543,15 +543,19 @@ class ScriptLauncherApp:
         # Grid settings
         tk.Label(dialog, text="Grid Settings:", fg=self.config["settings"]["accent_color"], bg="#1d2027", font=(self.main_font, 10, "bold")).pack(pady=(10, 5))
         
-        # Grid Columns
-        tk.Label(dialog, text="Buttons per Row:", fg="white", bg="#1d2027", font=(self.main_font, 9)).pack()
+        # Grid Settings Row 1: Columns
+        row1 = tk.Frame(dialog, bg="#1d2027")
+        row1.pack(pady=5)
+        tk.Label(row1, text="Buttons per Row:  ", fg="white", bg="#1d2027", font=(self.main_font, 9)).pack(side="left")
         val_var = tk.StringVar(value=str(self.config["settings"]["columns"]))
-        tk.Entry(dialog, textvariable=val_var, width=10, justify="center").pack(pady=5)
+        tk.Entry(row1, textvariable=val_var, width=5, justify="center").pack(side="left")
         
-        # Default Font Size
-        tk.Label(dialog, text="Default Font Size:", fg="white", bg="#1d2027", font=(self.main_font, 9)).pack()
+        # Grid Settings Row 2: Default Font Size
+        row2 = tk.Frame(dialog, bg="#1d2027")
+        row2.pack(pady=5)
+        tk.Label(row2, text="Default Font Size: ", fg="white", bg="#1d2027", font=(self.main_font, 9)).pack(side="left")
         f_size_var = tk.StringVar(value=str(self.config["settings"].get("font_size", 10)))
-        tk.Entry(dialog, textvariable=f_size_var, width=10, justify="center").pack(pady=5)
+        tk.Entry(row2, textvariable=f_size_var, width=5, justify="center").pack(side="left")
 
         # Widget Toggles
         tk.Label(dialog, text="Toggle Widgets:", fg=self.config["settings"]["accent_color"], bg="#1d2027", font=(self.main_font, 10, "bold")).pack(pady=(15, 5))
