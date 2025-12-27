@@ -441,47 +441,48 @@ class ScriptLauncherApp:
     def status_monitor_thread(self):
         log_dir = r"C:\Users\nahid\script_output\rclone"
         os.makedirs(log_dir, exist_ok=True)
-        last_rclone_time = 0
 
+        # Separate threads for different update rates
+        threading.Thread(target=self.github_monitor_loop, daemon=True).start()
+        threading.Thread(target=self.rclone_monitor_loop, args=(log_dir,), daemon=True).start()
+
+    def github_monitor_loop(self):
         while not self.stop_threads:
-            current_time = time.time()
-            
-            # GitHub Check (Every 1 second)
             for repo in self.config["github_repos"]:
                 path = repo["path"]
                 status = "unknown"
                 if os.path.exists(path):
                     try:
                         if os.path.isdir(os.path.join(path, ".git")):
-                            res = subprocess.run(["git", "status", "--porcelain"], cwd=path, capture_output=True, text=True, timeout=3)
+                            res = subprocess.run(["git", "status", "--porcelain"], cwd=path, capture_output=True, text=True, timeout=2)
                             status = "clean" if not res.stdout.strip() else "dirty"
                         else: status = "no_git"
                     except: status = "error"
                 else: status = "missing"
                 self.root.after(0, lambda name=repo["name"], s=status: self.update_repo_status_ui(name, s))
+            time.sleep(1) # GitHub updates every 1 second
 
-            # Rclone Check (Every 10 minutes)
-            if current_time - last_rclone_time > 600:
-                for folder in self.config["rclone_folders"]:
-                    name = folder["name"]
-                    cfg_cmd = folder.get("cmd", "rclone check src dst --fast-list --size-only")
-                    actual_cmd = cfg_cmd.replace("src", folder["src"]).replace("dst", folder["dst"])
-                    log_file = os.path.join(log_dir, f"{name}_check.log")
+    def rclone_monitor_loop(self, log_dir):
+        while not self.stop_threads:
+            for folder in self.config["rclone_folders"]:
+                name = folder["name"]
+                cfg_cmd = folder.get("cmd", "rclone check src dst --fast-list --size-only")
+                actual_cmd = cfg_cmd.replace("src", folder["src"]).replace("dst", folder["dst"])
+                log_file = os.path.join(log_dir, f"{name}_check.log")
+                
+                try:
+                    with open(log_file, "w") as f:
+                        subprocess.run(actual_cmd, shell=True, stdout=f, stderr=f, timeout=30)
                     
-                    try:
-                        with open(log_file, "w") as f:
-                            subprocess.run(actual_cmd, shell=True, stdout=f, stderr=f, timeout=30)
-                        
-                        with open(log_file, "r") as f:
-                            content = f.read()
-                        
-                        is_ok = "ERROR" not in content and "differences found" not in content.lower()
-                        self.root.after(0, lambda n=name, ok=is_ok: self.update_folder_status_ui(n, ok))
-                    except Exception as e:
-                        self.root.after(0, lambda n=name: self.update_folder_status_ui(n, False))
-                last_rclone_time = current_time
-
-            time.sleep(1)
+                    with open(log_file, "r") as f:
+                        content = f.read()
+                    
+                    is_ok = "ERROR" not in content and "differences found" not in content.lower()
+                    self.root.after(0, lambda n=name, ok=is_ok: self.update_folder_status_ui(n, ok))
+                except Exception as e:
+                    self.root.after(0, lambda n=name: self.update_folder_status_ui(n, False))
+            
+            time.sleep(600) # Rclone updates every 10 minutes
 
     def update_repo_status_ui(self, name, status):
         if name in self.repo_labels:
