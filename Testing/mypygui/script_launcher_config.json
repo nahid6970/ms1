@@ -16,21 +16,12 @@
         {
             "name": "Explorer",
             "path": "explorer.exe",
-            "font_size": 10
+            "font_size": 20
         },
         {
             "name": "Task Manager",
             "path": "taskmgr.exe",
-            "font_size": 10
-        },
-        {
-            "name": "Task Manager (Copy)",
-            "path": "taskmgr.exe",
-            "font_size": 10
-        },
-        {
-            "name": "asdasd",
-            "path": "C:/Users/nahid/ms/ms1/Testing/mklink/mklink.py"
+            "font_size": 20
         }
     ],
     "github_repos": [
