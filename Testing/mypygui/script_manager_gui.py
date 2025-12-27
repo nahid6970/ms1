@@ -20,7 +20,10 @@ DEFAULT_CONFIG = {
         "border_color": "#fe1616",
         "accent_color": "#26b2f3",
         "success_color": "#00ff21",
-        "danger_color": "#fe1616"
+        "danger_color": "#fe1616",
+        "show_github": True,
+        "show_rclone": True,
+        "show_system_stats": True
     },
     "scripts": [
         {"name": "Explorer", "path": "explorer.exe"},
@@ -193,9 +196,10 @@ class ScriptLauncherApp:
         self.main_content = tk.Frame(self.border_frame, bg="#1d2027")
         self.main_content.pack(fill="both", expand=True, padx=20, pady=5)
 
-        # TOP SECTION: Status Widgets
+        # TOP SECTION: Status Widgets Container
         self.status_container = tk.Frame(self.main_content, bg="#1d2027")
-        self.status_container.pack(fill="x", pady=(0, 15))
+        if self.config["settings"].get("show_github", True) or self.config["settings"].get("show_rclone", True):
+            self.status_container.pack(fill="x", pady=(0, 15))
 
         # GitHub Widget
         self.github_widget = tk.LabelFrame(
@@ -203,30 +207,24 @@ class ScriptLauncherApp:
             labelanchor="nw", fg="#888888", bg="#1d2027",
             font=(self.main_font, 8, "bold"), bd=1, relief="flat", highlightthickness=1, highlightbackground="#333333"
         )
-        self.github_widget.pack(side="left", fill="both", expand=True, padx=(0, 10))
-        
-        self.github_inner = tk.Frame(self.github_widget, bg="#1d2027")
-        self.github_inner.pack(padx=10, pady=5)
-
-        for repo in self.config["github_repos"]:
-            r_frame = tk.Frame(self.github_inner, bg="#1d2027")
-            r_frame.pack(side="left", padx=10)
-            
-            indicator = tk.Canvas(r_frame, width=10, height=10, bg="#1d2027", highlightthickness=0)
-            indicator.pack(side="left", padx=(0, 5))
-            circle = indicator.create_oval(2, 2, 8, 8, fill="#555555")
-            
-            lbl = tk.Label(r_frame, text=repo["name"], fg="white", bg="#1d2027", font=(self.main_font, 12, "bold"), cursor="hand2")
-            lbl.pack(side="left")
-            
-            # Click events for GitHub
-            repo_path = repo["path"]
-            lbl.bind("<Button-1>", lambda e, p=repo_path: self.on_git_click(e, p, "gitter"))
-            lbl.bind("<Control-Button-1>", lambda e, p=repo_path: self.on_git_click(e, p, "explorer"))
-            lbl.bind("<Button-3>", lambda e, p=repo_path: self.on_git_click(e, p, "lazygit"))
-            lbl.bind("<Control-Button-3>", lambda e, p=repo_path: self.on_git_click(e, p, "restore"))
-            
-            self.repo_labels[repo["name"]] = {"lbl": lbl, "indicator": indicator, "circle": circle}
+        if self.config["settings"].get("show_github", True):
+            self.github_widget.pack(side="left", fill="both", expand=True, padx=(0, 10))
+            self.github_inner = tk.Frame(self.github_widget, bg="#1d2027")
+            self.github_inner.pack(padx=10, pady=5)
+            for repo in self.config["github_repos"]:
+                r_frame = tk.Frame(self.github_inner, bg="#1d2027")
+                r_frame.pack(side="left", padx=10)
+                indicator = tk.Canvas(r_frame, width=10, height=10, bg="#1d2027", highlightthickness=0)
+                indicator.pack(side="left", padx=(0, 5))
+                circle = indicator.create_oval(2, 2, 8, 8, fill="#555555")
+                lbl = tk.Label(r_frame, text=repo["name"], fg="white", bg="#1d2027", font=(self.main_font, 12, "bold"), cursor="hand2")
+                lbl.pack(side="left")
+                repo_path = repo["path"]
+                lbl.bind("<Button-1>", lambda e, p=repo_path: self.on_git_click(e, p, "gitter"))
+                lbl.bind("<Control-Button-1>", lambda e, p=repo_path: self.on_git_click(e, p, "explorer"))
+                lbl.bind("<Button-3>", lambda e, p=repo_path: self.on_git_click(e, p, "lazygit"))
+                lbl.bind("<Control-Button-3>", lambda e, p=repo_path: self.on_git_click(e, p, "restore"))
+                self.repo_labels[repo["name"]] = {"lbl": lbl, "indicator": indicator, "circle": circle}
 
         # Rclone Widget
         self.rclone_widget = tk.LabelFrame(
@@ -234,85 +232,71 @@ class ScriptLauncherApp:
             labelanchor="nw", fg="#888888", bg="#1d2027",
             font=(self.main_font, 8, "bold"), bd=1, relief="flat", highlightthickness=1, highlightbackground="#333333"
         )
-        self.rclone_widget.pack(side="left", fill="both", expand=True)
-
-        self.rclone_inner = tk.Frame(self.rclone_widget, bg="#1d2027")
-        self.rclone_inner.pack(padx=10, pady=5)
-
-        for folder in self.config["rclone_folders"]:
-            f_frame = tk.Frame(self.rclone_inner, bg="#1d2027")
-            f_frame.pack(side="left", padx=10)
-            
-            indicator = tk.Canvas(f_frame, width=10, height=10, bg="#1d2027", highlightthickness=0)
-            indicator.pack(side="left", padx=(0, 5))
-            circle = indicator.create_oval(2, 2, 8, 8, fill="#555555")
-            
-            lbl_text = folder.get("label", folder["name"])
-            lbl = tk.Label(f_frame, text=lbl_text, fg="white", bg="#1d2027", font=(self.main_font, 12, "bold"), cursor="hand2")
-            lbl.pack(side="left")
-            
-            # Click events
-            lbl.bind("<Button-1>", lambda e, f=folder: self.on_rclone_click(e, f))
-            lbl.bind("<Control-Button-1>", lambda e, f=folder: self.on_rclone_sync(e, f, "left"))
-            lbl.bind("<Control-Button-3>", lambda e, f=folder: self.on_rclone_sync(e, f, "right"))
-            
-            self.folder_labels[folder["name"]] = {"lbl": lbl, "indicator": indicator, "circle": circle}
+        if self.config["settings"].get("show_rclone", True):
+            self.rclone_widget.pack(side="left", fill="both", expand=True)
+            self.rclone_inner = tk.Frame(self.rclone_widget, bg="#1d2027")
+            self.rclone_inner.pack(padx=10, pady=5)
+            for folder in self.config["rclone_folders"]:
+                f_frame = tk.Frame(self.rclone_inner, bg="#1d2027")
+                f_frame.pack(side="left", padx=10)
+                indicator = tk.Canvas(f_frame, width=10, height=10, bg="#1d2027", highlightthickness=0)
+                indicator.pack(side="left", padx=(0, 5))
+                circle = indicator.create_oval(2, 2, 8, 8, fill="#555555")
+                lbl_text = folder.get("label", folder["name"])
+                lbl = tk.Label(f_frame, text=lbl_text, fg="white", bg="#1d2027", font=(self.main_font, 12, "bold"), cursor="hand2")
+                lbl.pack(side="left")
+                lbl.bind("<Button-1>", lambda e, f=folder: self.on_rclone_click(e, f))
+                lbl.bind("<Control-Button-1>", lambda e, f=folder: self.on_rclone_sync(e, f, "left"))
+                lbl.bind("<Control-Button-3>", lambda e, f=folder: self.on_rclone_sync(e, f, "right"))
+                self.folder_labels[folder["name"]] = {"lbl": lbl, "indicator": indicator, "circle": circle}
         
         # --- SECOND ROW: System Stats ---
         self.sys_stats_container = tk.Frame(self.main_content, bg="#1d2027")
-        self.sys_stats_container.pack(fill="x", pady=(0, 10))
-
-        # CPU Widget
-        self.cpu_frame = self.create_stat_frame(self.sys_stats_container, " CPU ", 180)
-        self.cpu_usage_lbl = tk.Label(self.cpu_frame, text="0%", fg="#14bcff", bg="#1d2027", font=(self.main_font, 10, "bold"))
-        self.cpu_usage_lbl.pack(side="left", padx=5)
-        self.cpu_bar = ctk.CTkProgressBar(self.cpu_frame, width=80, height=8, fg_color="#333333", progress_color="#14bcff")
-        self.cpu_bar.pack(side="left", padx=5)
-        self.cpu_bar.set(0)
-        
-        # CPU Cores (Micro Bars)
-        self.cores_frame = tk.Frame(self.cpu_frame, bg="#1d2027")
-        self.cores_frame.pack(side="left", padx=5)
-        self.core_canvases = []
-        num_cores = psutil.cpu_count()
-        for _ in range(num_cores):
-            c = tk.Canvas(self.cores_frame, width=4, height=20, bg="#1d2027", highlightthickness=0)
-            c.pack(side="left", padx=1)
-            self.core_canvases.append(c)
-
-        # RAM Widget
-        self.ram_frame = self.create_stat_frame(self.sys_stats_container, " RAM ", 130)
-        self.ram_usage_lbl = tk.Label(self.ram_frame, text="0%", fg="#ff934b", bg="#1d2027", font=(self.main_font, 10, "bold"))
-        self.ram_usage_lbl.pack(side="left", padx=5)
-        self.ram_bar = ctk.CTkProgressBar(self.ram_frame, width=70, height=8, fg_color="#333333", progress_color="#ff934b")
-        self.ram_bar.pack(side="left", padx=5)
-        self.ram_bar.set(0)
-
-        # Disk C Widget
-        self.disk_c_frame = self.create_stat_frame(self.sys_stats_container, " Disk C ", 110)
-        self.disk_c_lbl = tk.Label(self.disk_c_frame, text="0%", fg="white", bg="#1d2027", font=(self.main_font, 9))
-        self.disk_c_lbl.pack(side="left", padx=5)
-        self.disk_c_bar = ctk.CTkProgressBar(self.disk_c_frame, width=50, height=8, fg_color="#333333", progress_color="#044568")
-        self.disk_c_bar.pack(side="left", padx=5)
-        self.disk_c_bar.set(0)
-
-        # Disk D Widget
-        self.disk_d_frame = self.create_stat_frame(self.sys_stats_container, " Disk D ", 110)
-        self.disk_d_lbl = tk.Label(self.disk_d_frame, text="0%", fg="white", bg="#1d2027", font=(self.main_font, 9))
-        self.disk_d_lbl.pack(side="left", padx=5)
-        self.disk_d_bar = ctk.CTkProgressBar(self.disk_d_frame, width=50, height=8, fg_color="#333333", progress_color="#044568")
-        self.disk_d_bar.pack(side="left", padx=5)
-        self.disk_d_bar.set(0)
-
-        # Network Speed Widget
-        self.net_frame = self.create_stat_frame(self.sys_stats_container, " Net Speed ", 150)
-        self.up_lbl = tk.Label(self.net_frame, text="▲ 0.0", fg="#00ff21", bg="#1d2027", font=(self.main_font, 9))
-        self.up_lbl.pack(side="left", padx=5)
-        self.down_lbl = tk.Label(self.net_frame, text="▼ 0.0", fg="#26b2f3", bg="#1d2027", font=(self.main_font, 9))
-        self.down_lbl.pack(side="left", padx=5)
-        
-        self.last_net_sent = psutil.net_io_counters().bytes_sent
-        self.last_net_recv = psutil.net_io_counters().bytes_recv
+        if self.config["settings"].get("show_system_stats", True):
+            self.sys_stats_container.pack(fill="x", pady=(0, 10))
+            # CPU Widget
+            self.cpu_frame = self.create_stat_frame(self.sys_stats_container, " CPU ", 180)
+            self.cpu_usage_lbl = tk.Label(self.cpu_frame, text="0%", fg="#14bcff", bg="#1d2027", font=(self.main_font, 10, "bold"))
+            self.cpu_usage_lbl.pack(side="left", padx=5)
+            self.cpu_bar = ctk.CTkProgressBar(self.cpu_frame, width=80, height=8, fg_color="#333333", progress_color="#14bcff")
+            self.cpu_bar.pack(side="left", padx=5)
+            self.cpu_bar.set(0)
+            self.cores_frame = tk.Frame(self.cpu_frame, bg="#1d2027")
+            self.cores_frame.pack(side="left", padx=5)
+            self.core_canvases = []
+            num_cores = psutil.cpu_count()
+            for _ in range(num_cores):
+                c = tk.Canvas(self.cores_frame, width=4, height=20, bg="#1d2027", highlightthickness=0)
+                c.pack(side="left", padx=1)
+                self.core_canvases.append(c)
+            # RAM Widget
+            self.ram_frame = self.create_stat_frame(self.sys_stats_container, " RAM ", 130)
+            self.ram_usage_lbl = tk.Label(self.ram_frame, text="0%", fg="#ff934b", bg="#1d2027", font=(self.main_font, 10, "bold"))
+            self.ram_usage_lbl.pack(side="left", padx=5)
+            self.ram_bar = ctk.CTkProgressBar(self.ram_frame, width=70, height=8, fg_color="#333333", progress_color="#ff934b")
+            self.ram_bar.pack(side="left", padx=5)
+            self.ram_bar.set(0)
+            # Disk Widgets
+            self.disk_c_frame = self.create_stat_frame(self.sys_stats_container, " Disk C ", 110)
+            self.disk_c_lbl = tk.Label(self.disk_c_frame, text="0%", fg="white", bg="#1d2027", font=(self.main_font, 9))
+            self.disk_c_lbl.pack(side="left", padx=5)
+            self.disk_c_bar = ctk.CTkProgressBar(self.disk_c_frame, width=50, height=8, fg_color="#333333", progress_color="#044568")
+            self.disk_c_bar.pack(side="left", padx=5)
+            self.disk_c_bar.set(0)
+            self.disk_d_frame = self.create_stat_frame(self.sys_stats_container, " Disk D ", 110)
+            self.disk_d_lbl = tk.Label(self.disk_d_frame, text="0%", fg="white", bg="#1d2027", font=(self.main_font, 9))
+            self.disk_d_lbl.pack(side="left", padx=5)
+            self.disk_d_bar = ctk.CTkProgressBar(self.disk_d_frame, width=50, height=8, fg_color="#333333", progress_color="#044568")
+            self.disk_d_bar.pack(side="left", padx=5)
+            self.disk_d_bar.set(0)
+            # Network
+            self.net_frame = self.create_stat_frame(self.sys_stats_container, " Net Speed ", 150)
+            self.up_lbl = tk.Label(self.net_frame, text="▲ 0.0", fg="#00ff21", bg="#1d2027", font=(self.main_font, 9))
+            self.up_lbl.pack(side="left", padx=5)
+            self.down_lbl = tk.Label(self.net_frame, text="▼ 0.0", fg="#26b2f3", bg="#1d2027", font=(self.main_font, 9))
+            self.down_lbl.pack(side="left", padx=5)
+            self.last_net_sent = psutil.net_io_counters().bytes_sent
+            self.last_net_recv = psutil.net_io_counters().bytes_recv
 
         self.init_ui_continued()
 
@@ -547,7 +531,7 @@ class ScriptLauncherApp:
         dialog.title("Settings")
         
         # Center the settings dialog
-        width, height = 300, 200
+        width, height = 300, 350
         x = (dialog.winfo_screenwidth() // 2) - (width // 2)
         y = (dialog.winfo_screenheight() // 2) - (height // 2)
         dialog.geometry(f"{width}x{height}+{x}+{y}")
@@ -556,32 +540,54 @@ class ScriptLauncherApp:
         dialog.transient(self.root)
         dialog.grab_set()
 
-        tk.Label(dialog, text="Buttons per Row:", fg="white", bg="#1d2027", font=(self.main_font, 10)).pack(pady=10)
-        
+        # Grid settings
+        tk.Label(dialog, text="Grid Settings:", fg=self.config["settings"]["accent_color"], bg="#1d2027", font=(self.main_font, 10, "bold")).pack(pady=(10, 5))
+        tk.Label(dialog, text="Buttons per Row:", fg="white", bg="#1d2027", font=(self.main_font, 9)).pack()
         val_var = tk.StringVar(value=str(self.config["settings"]["columns"]))
-        entry = tk.Entry(dialog, textvariable=val_var, width=10, justify="center")
-        entry.pack()
+        tk.Entry(dialog, textvariable=val_var, width=10, justify="center").pack(pady=5)
+
+        # Widget Toggles
+        tk.Label(dialog, text="Toggle Widgets:", fg=self.config["settings"]["accent_color"], bg="#1d2027", font=(self.main_font, 10, "bold")).pack(pady=(15, 5))
+        
+        v_github = tk.BooleanVar(value=self.config["settings"].get("show_github", True))
+        cb_github = tk.Checkbutton(dialog, text="GitHub Status", variable=v_github, bg="#1d2027", fg="white", selectcolor="#2b2f38", activebackground="#1d2027", activeforeground="white")
+        cb_github.pack(anchor="w", padx=50)
+
+        v_rclone = tk.BooleanVar(value=self.config["settings"].get("show_rclone", True))
+        cb_rclone = tk.Checkbutton(dialog, text="Rclone Status", variable=v_rclone, bg="#1d2027", fg="white", selectcolor="#2b2f38", activebackground="#1d2027", activeforeground="white")
+        cb_rclone.pack(anchor="w", padx=50)
+
+        v_stats = tk.BooleanVar(value=self.config["settings"].get("show_system_stats", True))
+        cb_stats = tk.Checkbutton(dialog, text="System Stats", variable=v_stats, bg="#1d2027", fg="white", selectcolor="#2b2f38", activebackground="#1d2027", activeforeground="white")
+        cb_stats.pack(anchor="w", padx=50)
 
         def save():
             try:
                 n = int(val_var.get())
                 if 1 <= n <= 10:
                     self.config["settings"]["columns"] = n
+                    self.config["settings"]["show_github"] = v_github.get()
+                    self.config["settings"]["show_rclone"] = v_rclone.get()
+                    self.config["settings"]["show_system_stats"] = v_stats.get()
                     self.save_config()
-                    self.refresh_grid()
+                    
+                    # Restart UI to apply layout changes
+                    for widget in self.border_frame.winfo_children():
+                        widget.destroy()
+                    self.init_ui()
+                    
                     dialog.destroy()
                     self.root.attributes("-topmost", True)
                 else:
                     messagebox.showwarning("Invalid", "Please enter a number between 1 and 10", parent=dialog)
-            except:
-                messagebox.showerror("Error", "Please enter a valid number", parent=dialog)
+            except Exception as e:
+                messagebox.showerror("Error", f"Failed to save settings: {e}", parent=dialog)
 
         def on_close():
             dialog.destroy()
             self.root.attributes("-topmost", True)
 
         dialog.protocol("WM_DELETE_WINDOW", on_close)
-
         ctk.CTkButton(dialog, text="SAVE", command=save, width=100, fg_color="#10b153").pack(pady=20)
 
     def start_drag(self, event):
