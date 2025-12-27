@@ -1,6 +1,6 @@
 {
     "settings": {
-        "columns": 5,
+        "columns": 4,
         "font_family": "JetBrainsMono NFP",
         "font_size": 20,
         "bg_color": "#1d2027",
@@ -11,7 +11,7 @@
         "show_github": true,
         "show_rclone": true,
         "show_system_stats": false,
-        "always_on_top": true
+        "always_on_top": false
     },
     "scripts": [
         {
