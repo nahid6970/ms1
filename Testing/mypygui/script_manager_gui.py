@@ -91,7 +91,7 @@ class ScriptLauncherApp:
         self.repo_labels = {}
         self.folder_labels = {}
         self.drag_data = {"x": 0, "y": 0}
-        self.script_drag_data = {"index": None, "active": False, "ghost": None, "start_abs": (0, 0)}
+        self.script_drag_data = {"index": None, "active": False, "ghost": None, "start_abs": (0, 0), "block_click": False}
         self.view_stack = [] # Stack of (folder_name, script_list_reference)
         
         # Window sizing
@@ -358,8 +358,6 @@ class ScriptLauncherApp:
 
         self.refresh_grid()
 
-        self.refresh_grid()
-
     def refresh_grid(self):
         # Clear
         for widget in self.grid_frame.winfo_children():
@@ -399,8 +397,7 @@ class ScriptLauncherApp:
                 fg_color=b_color, 
                 text_color=t_color,
                 hover=False, 
-                font=(self.main_font, f_size, "bold" if is_folder else "normal"),
-                command=lambda s=script: self.handle_script_click(s)
+                font=(self.main_font, f_size, "bold" if is_folder else "normal")
             )
             btn.grid(row=r, column=c, padx=8, pady=8, sticky="nsew")
             
@@ -418,7 +415,7 @@ class ScriptLauncherApp:
             btn.bind("<Button-3>", lambda e, s=script: self.show_context_menu(e, s))
 
             # Drag & Drop bindings for sorting
-            btn.bind("<ButtonPress-1>", lambda e, i=i: self.start_script_drag(e, i), add="+")
+            btn.bind("<ButtonPress-1>", lambda e, i=i, s=script: self.start_script_drag(e, i, s), add="+")
             btn.bind("<B1-Motion>", self.do_script_drag, add="+")
             btn.bind("<ButtonRelease-1>", self.stop_script_drag, add="+")
 
@@ -444,9 +441,10 @@ class ScriptLauncherApp:
             self.refresh_grid()
 
     # --- Drag & Drop Sorting Logic ---
-    def start_script_drag(self, event, index):
+    def start_script_drag(self, event, index, script):
         self.script_drag_data["index"] = index
         self.script_drag_data["active"] = False
+        self.script_drag_data["script"] = script
         self.script_drag_data["start_abs"] = (event.x_root, event.y_root)
 
     def do_script_drag(self, event):
@@ -476,11 +474,15 @@ class ScriptLauncherApp:
             self.script_drag_data["ghost"].destroy()
             self.script_drag_data["ghost"] = None
 
-        if not self.script_drag_data["active"]:
-            self.script_drag_data["active"] = False
-            return # Was a normal click, handle_script_click takes over
-        
+        was_dragging = self.script_drag_data["active"]
         self.script_drag_data["active"] = False
+        
+        if not was_dragging:
+            # IT WAS A CLICK
+            script = self.script_drag_data.get("script")
+            if script:
+                self.handle_script_click(script)
+            return 
         
         # Find widget at drop position
         target_widget = self.grid_frame.winfo_containing(event.x_root, event.y_root)
