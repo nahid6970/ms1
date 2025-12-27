@@ -22,6 +22,12 @@
             "name": "Explorer",
             "path": "explorer.exe",
             "font_size": 20
+        },
+        {
+            "name": "\uea83 GG",
+            "type": "folder",
+            "scripts": [],
+            "font_size": 20
         }
     ],
     "github_repos": [

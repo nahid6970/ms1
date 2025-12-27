@@ -390,7 +390,7 @@ class ScriptLauncherApp:
             ht_color = script.get("hover_text_color", "white")
             f_size = script.get("font_size", self.config["settings"].get("font_size", 10))
             
-            display_text = f"📁 {script['name']}" if is_folder else script["name"]
+            display_text = script["name"]
             
             btn = ctk.CTkButton(
                 self.grid_frame, 
@@ -564,13 +564,16 @@ class ScriptLauncherApp:
         name_var = tk.StringVar(value=script["name"])
         tk.Entry(dialog, textvariable=name_var, bg="#2b2f38", fg="white", insertbackground="white", bd=0).pack(fill="x", padx=30, pady=5)
 
-        # Path
-        tk.Label(dialog, text="Path / Command:", fg="gray", bg="#1d2027").pack(anchor="w", padx=30, pady=(10, 0))
-        path_frame = tk.Frame(dialog, bg="#1d2027")
-        path_frame.pack(fill="x", padx=30)
-        path_var = tk.StringVar(value=script["path"])
-        tk.Entry(path_frame, textvariable=path_var, bg="#2b2f38", fg="white", insertbackground="white", bd=0).pack(side="left", fill="x", expand=True)
-        tk.Button(path_frame, text="...", command=lambda: path_var.set(filedialog.askopenfilename() or path_var.get()), bg="#3a3f4b", fg="white").pack(side="right", padx=5)
+        # Path (Only for scripts, not folders)
+        if script.get("type") != "folder":
+            tk.Label(dialog, text="Path / Command:", fg="gray", bg="#1d2027").pack(anchor="w", padx=30, pady=(10, 0))
+            path_frame = tk.Frame(dialog, bg="#1d2027")
+            path_frame.pack(fill="x", padx=30)
+            path_var = tk.StringVar(value=script.get("path", ""))
+            tk.Entry(path_frame, textvariable=path_var, bg="#2b2f38", fg="white", insertbackground="white", bd=0).pack(side="left", fill="x", expand=True)
+            tk.Button(path_frame, text="...", command=lambda: path_var.set(filedialog.askopenfilename() or path_var.get()), bg="#3a3f4b", fg="white").pack(side="right", padx=5)
+        else:
+            path_var = None
 
         # Font Size
         tk.Label(dialog, text="Font Size:", fg="gray", bg="#1d2027").pack(anchor="w", padx=30, pady=(10, 0))
@@ -599,7 +602,8 @@ class ScriptLauncherApp:
 
         def save_changes():
             script["name"] = name_var.get()
-            script["path"] = path_var.get()
+            if path_var:
+                script["path"] = path_var.get()
             try:
                 script["font_size"] = int(fsize_var.get())
             except:
