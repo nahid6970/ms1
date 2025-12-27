@@ -27,7 +27,9 @@
             "name": "\uea83 GG",
             "type": "folder",
             "scripts": [],
-            "font_size": 20
+            "font_size": 20,
+            "color": "#f0d50f",
+            "text_color": "#000000"
         }
     ],
     "github_repos": [
