@@ -1,6 +1,6 @@
 {
     "settings": {
-        "columns": 10,
+        "columns": 5,
         "font_family": "JetBrainsMono NFP",
         "font_size": 20,
         "bg_color": "#1d2027",
@@ -16,7 +16,8 @@
         {
             "name": "Task Manager",
             "path": "taskmgr.exe",
-            "font_size": 20
+            "font_size": 20,
+            "hide_terminal": false
         },
         {
             "name": "Explorer",
@@ -36,6 +37,20 @@
             "font_size": 20,
             "color": "#f0d50f",
             "text_color": "#000000"
+        },
+        {
+            "name": "gg",
+            "path": "C:/Users/nahid/ms/ms1/scripts/ffmpeg/trim.ps1",
+            "type": "script",
+            "hide_terminal": false,
+            "font_size": 20
+        },
+        {
+            "name": "da",
+            "path": "C:/Users/nahid/ms/ms1/scripts/ffmpeg/trim.ps1",
+            "type": "script",
+            "hide_terminal": false,
+            "font_size": 10
         }
     ],
     "github_repos": [

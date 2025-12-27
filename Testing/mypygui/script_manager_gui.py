@@ -515,11 +515,20 @@ class ScriptLauncherApp:
         try:
             # Handle expand vars like %USERPROFILE%
             path = os.path.expandvars(path)
+            
             if path.endswith(".py"):
                 python_exe = "pythonw" if hide else "python"
                 subprocess.Popen([python_exe, path], creationflags=cflags)
+            elif path.lower().endswith(".ps1"):
+                # PowerShell execution
+                ps_args = ["powershell", "-ExecutionPolicy", "Bypass", "-File", path]
+                if hide:
+                    # Additional flag for PS to stay quiet
+                    ps_args = ["powershell", "-WindowStyle", "Hidden", "-ExecutionPolicy", "Bypass", "-NoProfile", "-File", path]
+                subprocess.Popen(ps_args, creationflags=cflags)
             else:
-                subprocess.Popen(path, shell=True, creationflags=cflags)
+                # Use shell start for .exe, .bat, or generic files
+                subprocess.Popen(f'start "" "{path}"', shell=True, creationflags=cflags)
         except Exception as e:
             messagebox.showerror("Error", f"Failed to launch:\n{path}\n\n{e}")
 
