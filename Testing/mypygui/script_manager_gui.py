@@ -640,10 +640,12 @@ class ScriptLauncherApp:
         log_dir = r"C:\Users\nahid\script_output\rclone"
         os.makedirs(log_dir, exist_ok=True)
 
-        # Separate threads for different update rates
-        threading.Thread(target=self.github_monitor_loop, daemon=True).start()
-        threading.Thread(target=self.rclone_monitor_loop, args=(log_dir,), daemon=True).start()
+        # Stagger thread starts to prevent CPU spikes
         threading.Thread(target=self.system_stats_loop, daemon=True).start()
+        time.sleep(0.5)
+        threading.Thread(target=self.github_monitor_loop, daemon=True).start()
+        time.sleep(0.5)
+        threading.Thread(target=self.rclone_monitor_loop, args=(log_dir,), daemon=True).start()
 
     def system_stats_loop(self):
         while not self.stop_threads:
@@ -704,12 +706,15 @@ class ScriptLauncherApp:
         return "#14bcff" # Blue/Cyan
 
     def github_monitor_loop(self):
+        # Initial delay for smoother startup
+        time.sleep(1)
         while not self.stop_threads:
             if not self.config["settings"].get("show_github", True):
                 time.sleep(1)
                 continue
             for repo in self.config["github_repos"]:
                 path = repo["path"]
+                # Perform checks...
                 status = "unknown"
                 if os.path.exists(path):
                     try:
@@ -720,15 +725,19 @@ class ScriptLauncherApp:
                     except: status = "error"
                 else: status = "missing"
                 self.root.after(0, lambda name=repo["name"], s=status: self.update_repo_status_ui(name, s))
-            time.sleep(1) # GitHub updates every 1 second
+                time.sleep(0.2) # Stagger individual repo checks
+            time.sleep(2) # GitHub check interval increased slightly
 
     def rclone_monitor_loop(self, log_dir):
+        # Initial delay to stay away from app boot-up
+        time.sleep(3)
         while not self.stop_threads:
             if not self.config["settings"].get("show_rclone", True):
                 time.sleep(10)
                 continue
             for folder in self.config["rclone_folders"]:
                 name = folder["name"]
+                # Perform check logic...
                 cfg_cmd = folder.get("cmd", "rclone check src dst --fast-list --size-only")
                 actual_cmd = cfg_cmd.replace("src", folder["src"]).replace("dst", folder["dst"])
                 log_file = os.path.join(log_dir, f"{name}_check.log")
@@ -744,6 +753,8 @@ class ScriptLauncherApp:
                     self.root.after(0, lambda n=name, ok=is_ok: self.update_folder_status_ui(n, ok))
                 except Exception as e:
                     self.root.after(0, lambda n=name: self.update_folder_status_ui(n, False))
+                
+                time.sleep(1) # Stagger heavy rclone checks
             
             time.sleep(600) # Rclone updates every 10 minutes
 
