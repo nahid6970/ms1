@@ -436,6 +436,9 @@ class ScriptLauncherApp:
 
             # Context menu binding
             btn.bind("<Button-3>", lambda e, s=script: self.show_context_menu(e, s))
+            
+            # Ctrl+Right Click binding
+            btn.bind("<Control-Button-3>", lambda e, s=script: self.handle_ctrl_right_click(e, s))
 
             # Drag & Drop bindings for sorting
             btn.bind("<ButtonPress-1>", lambda e, i=i, s=script: self.start_script_drag(e, i, s), add="+")
@@ -504,7 +507,16 @@ class ScriptLauncherApp:
             # IT WAS A CLICK
             script = self.script_drag_data.get("script")
             if script:
-                self.handle_script_click(script)
+                # Check for Ctrl+Left Click (State 4 is Ctrl)
+                if event.state & 0x0004 and script.get("ctrl_left_cmd"):
+                     # We can reuse launch_script by passing a temporary object or just the command
+                     # Let's create a temp script object to reuse logic
+                     temp_script = script.copy()
+                     temp_script["path"] = script["ctrl_left_cmd"]
+                     # You might want to force hide or inherit? Let's inherit normal hide settings or assume normal
+                     self.launch_script(temp_script)
+                else:
+                    self.handle_script_click(script)
             return 
         
         # Find widget at drop position
@@ -557,7 +569,19 @@ class ScriptLauncherApp:
         except Exception as e:
             messagebox.showerror("Error", f"Failed to launch:\n{path}\n\n{e}")
 
+    def handle_ctrl_right_click(self, event, script):
+        cmd = script.get("ctrl_right_cmd")
+        if cmd:
+            temp_script = script.copy()
+            temp_script["path"] = cmd
+            self.launch_script(temp_script)
+            return "break" # Attempt to prevent context menu
+
     def show_context_menu(self, event, script):
+        # If Ctrl is held, don't show menu (handled by ctrl_right_click, but safety check)
+        if event.state & 0x0004:
+            return
+
         menu = tk.Menu(self.root, tearoff=0, bg="#2b2f38", fg="white", activebackground=self.config["settings"]["accent_color"])
         menu.add_command(label=f"Edit / Stylize", command=lambda: self.open_edit_dialog(script))
         menu.add_command(label="Duplicate", command=lambda: self.duplicate_script(script))
@@ -665,9 +689,20 @@ class ScriptLauncherApp:
             hide_var = tk.BooleanVar(value=script.get("hide_terminal", False))
             cb_hide = tk.Checkbutton(info_frame, text="Hide Terminal / Console", variable=hide_var, bg="#1d2027", fg="#aaaaaa", selectcolor="#2b2f38", activebackground="#1d2027", activeforeground="white")
             cb_hide.grid(row=2, column=0, columnspan=2, sticky="w", padx=10, pady=(0,5))
+            
+            # Advanced Bindings
+            tk.Label(info_frame, text="Ctrl+Left Cmd:", fg="white", bg="#1d2027", font=(self.main_font, 9)).grid(row=3, column=0, sticky="w", padx=10, pady=5)
+            ctrl_left_var = tk.StringVar(value=script.get("ctrl_left_cmd", ""))
+            tk.Entry(info_frame, textvariable=ctrl_left_var, bg="#2b2f38", fg="white", insertbackground="white", bd=0).grid(row=3, column=1, sticky="ew", padx=10, pady=5)
+
+            tk.Label(info_frame, text="Ctrl+Right Cmd:", fg="white", bg="#1d2027", font=(self.main_font, 9)).grid(row=4, column=0, sticky="w", padx=10, pady=5)
+            ctrl_right_var = tk.StringVar(value=script.get("ctrl_right_cmd", ""))
+            tk.Entry(info_frame, textvariable=ctrl_right_var, bg="#2b2f38", fg="white", insertbackground="white", bd=0).grid(row=4, column=1, sticky="ew", padx=10, pady=5)
         else:
             path_var = None
             hide_var = None
+            ctrl_left_var = None
+            ctrl_right_var = None
 
         info_frame.grid_columnconfigure(1, weight=1)
 
@@ -728,6 +763,10 @@ class ScriptLauncherApp:
                 script["path"] = path_var.get()
             if hide_var is not None:
                 script["hide_terminal"] = hide_var.get()
+            if ctrl_left_var is not None:
+                script["ctrl_left_cmd"] = ctrl_left_var.get()
+            if ctrl_right_var is not None:
+                script["ctrl_right_cmd"] = ctrl_right_var.get()
             try:
                 script["font_size"] = int(fsize_var.get())
             except:
