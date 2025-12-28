@@ -490,24 +490,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function drawSymmetryPreview() {
         while (overlayLayer.childNodes.length > 1) overlayLayer.removeChild(overlayLayer.lastChild);
-        if (state.symmetry === 'none') return;
+        if (state.symmetry === 'none' || !overlayLayer.firstChild) return;
         const orig = overlayLayer.firstChild;
+        const origTr = orig.getAttribute('transform') || '';
         const cx = 1920 / 2, cy = 1080 / 2;
 
         if (state.symmetry === 'radial') {
             const step = 360 / state.mirrorCount;
             for (let i = 1; i < state.mirrorCount; i++) {
                 const c = orig.cloneNode(true);
-                c.setAttribute('transform', `rotate(${i * step}, ${cx}, ${cy})`);
+                c.setAttribute('transform', `rotate(${i * step}, ${cx}, ${cy}) ${origTr}`);
                 overlayLayer.appendChild(c);
             }
         } else if (state.symmetry === 'reflect') {
             const tps = state.reflectType === 'both' ? ['h', 'v', 'b'] : [state.reflectType[0]];
             tps.forEach(t => {
                 const c = orig.cloneNode(true);
-                if (t === 'h') c.setAttribute('transform', `scale(-1, 1) translate(${-1920}, 0)`);
-                else if (t === 'v') c.setAttribute('transform', `scale(1, -1) translate(0, ${-1080})`);
-                else if (t === 'b') c.setAttribute('transform', `scale(-1, -1) translate(${-1920}, ${-1080})`);
+                let symTr = '';
+                if (t === 'h') symTr = `scale(-1, 1) translate(${-1920}, 0)`;
+                else if (t === 'v') symTr = `scale(1, -1) translate(0, ${-1080})`;
+                else if (t === 'b') symTr = `scale(-1, -1) translate(${-1920}, ${-1080})`;
+                c.setAttribute('transform', `${symTr} ${origTr}`);
                 overlayLayer.appendChild(c);
             });
         }
