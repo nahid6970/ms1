@@ -93,6 +93,8 @@ document.addEventListener('DOMContentLoaded', () => {
         loadIcons();
         saveHistory(); // Initial state
         drawSymmetryGuides();
+        overlayLayer.style.pointerEvents = 'none';
+        guideLayer.style.pointerEvents = 'none';
     }
 
     function generateSwatches() {
@@ -215,6 +217,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         btnStampsPopover.classList.toggle('active', t === 'stamp');
         overlayLayer.innerHTML = '';
+        state.polyPoints = []; state.curvePoints = []; state.activeElement = null;
         saveSettings();
     }
 
@@ -300,16 +303,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function startDrawing(e) {
         if (state.tool === 'picker') {
-            const pos = getPos(e); pickColor(pos.x, pos.y); return;
+            pickColor(e); return;
         }
         if (state.tool === 'fill') {
             const t = e.target;
-            if (t.id === 'svg-bg') { bgRect.setAttribute('fill', state.color); saveHistory(); }
-            else if (t.parentNode === drawingLayer) {
-                t.setAttribute('fill', state.color);
-                t.setAttribute('stroke', (t.getAttribute('stroke') && t.getAttribute('stroke') !== 'none') ? state.color : 'none');
+            const el = t.id === 'svg-bg' ? bgRect : t.closest('#drawing-layer > *');
+            if (el) {
+                el.setAttribute('fill', el.tagName === 'text' ? state.color : (state.tool === 'fill' ? state.color : 'none'));
+                if (el.tagName !== 'text' && el.id !== 'svg-bg') el.setAttribute('stroke', state.color);
                 saveHistory();
             }
+            return;
+        }
+        if (state.tool === 'eraser') {
+            const el = e.target.closest('#drawing-layer > *');
+            if (el) { el.remove(); saveHistory(); }
             return;
         }
         if (state.tool === 'text') { addTextPrompt(e); return; }
@@ -339,11 +347,11 @@ document.addEventListener('DOMContentLoaded', () => {
             'stroke-linejoin': 'round'
         };
 
-        if (state.tool === 'brush') {
+        if (state.brushType === 'highlighter') common['stroke-opacity'] = 0.4;
+
+        if (state.tool === 'brush' || state.tool === 'poly' || state.tool === 'curve') {
             el = document.createElementNS(NS, 'path');
             el.setAttribute('d', `M ${pos.x} ${pos.y}`);
-            if (state.brushType === 'highlighter') common['stroke-opacity'] = 0.4;
-            if (state.brushType === 'airbrush') el.style.filter = 'blur(5px)';
         } else if (state.tool === 'line') {
             el = document.createElementNS(NS, 'line');
             el.setAttribute('x1', pos.x); el.setAttribute('y1', pos.y);
@@ -371,10 +379,9 @@ document.addEventListener('DOMContentLoaded', () => {
             el.setAttribute('dominant-baseline', 'middle');
             common['fill'] = state.color;
             common['stroke'] = 'none';
-        } else {
-            // Fallback
-            el = document.createElementNS(NS, 'path');
         }
+
+        if (state.brushType === 'airbrush' && el) el.style.filter = 'blur(5px)';
 
         for (const [k, v] of Object.entries(common)) {
             if (el) el.setAttribute(k, v);
@@ -384,35 +391,55 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function draw(e) {
-        if (!state.isDrawing || !state.activeElement) return;
+        if (!state.activeElement && !state.isDrawing) return;
         const pos = getPos(e);
 
-        if (state.tool === 'brush') {
-            state.points.push(pos);
-            const d = state.activeElement.getAttribute('d');
-            state.activeElement.setAttribute('d', d + ` L ${pos.x} ${pos.y}`);
-        } else if (state.tool === 'line') {
-            state.activeElement.setAttribute('x2', pos.x);
-            state.activeElement.setAttribute('y2', pos.y);
-        } else if (state.tool === 'rect') {
-            const x = Math.min(pos.x, state.startX), y = Math.min(pos.y, state.startY);
-            const w = Math.abs(pos.x - state.startX), h = Math.abs(pos.y - state.startY);
-            state.activeElement.setAttribute('x', x);
-            state.activeElement.setAttribute('y', y);
-            state.activeElement.setAttribute('width', w);
-            state.activeElement.setAttribute('height', h);
-        } else if (state.tool === 'circle') {
-            const cx = (state.startX + pos.x) / 2, cy = (state.startY + pos.y) / 2;
-            const rx = Math.abs(pos.x - state.startX) / 2, ry = Math.abs(pos.y - state.startY) / 2;
-            state.activeElement.setAttribute('cx', cx);
-            state.activeElement.setAttribute('cy', cy);
-            state.activeElement.setAttribute('rx', rx);
-            state.activeElement.setAttribute('ry', ry);
-        } else if (state.tool === 'stamp') {
-            const w = Math.abs(pos.x - state.startX), h = Math.abs(pos.y - state.startY);
-            state.activeElement.setAttribute('font-size', Math.max(w, h));
-            state.activeElement.setAttribute('x', state.startX + (pos.x - state.startX) / 2);
-            state.activeElement.setAttribute('y', state.startY + (pos.y - state.startY) / 2);
+        if (state.isDrawing) {
+            if (state.tool === 'brush') {
+                state.points.push(pos);
+                const d = state.activeElement.getAttribute('d');
+                state.activeElement.setAttribute('d', d + ` L ${pos.x} ${pos.y}`);
+            } else if (state.tool === 'line') {
+                state.activeElement.setAttribute('x2', pos.x);
+                state.activeElement.setAttribute('y2', pos.y);
+            } else if (state.tool === 'rect') {
+                const x = Math.min(pos.x, state.startX), y = Math.min(pos.y, state.startY);
+                const w = Math.abs(pos.x - state.startX), h = Math.abs(pos.y - state.startY);
+                state.activeElement.setAttribute('x', x);
+                state.activeElement.setAttribute('y', y);
+                state.activeElement.setAttribute('width', w);
+                state.activeElement.setAttribute('height', h);
+            } else if (state.tool === 'circle') {
+                const cx = (state.startX + pos.x) / 2, cy = (state.startY + pos.y) / 2;
+                const rx = Math.abs(pos.x - state.startX) / 2, ry = Math.abs(pos.y - state.startY) / 2;
+                state.activeElement.setAttribute('cx', cx);
+                state.activeElement.setAttribute('cy', cy);
+                state.activeElement.setAttribute('rx', rx);
+                state.activeElement.setAttribute('ry', ry);
+            } else if (state.tool === 'stamp') {
+                const w = Math.abs(pos.x - state.startX), h = Math.abs(pos.y - state.startY);
+                state.activeElement.setAttribute('font-size', Math.max(w, h));
+                state.activeElement.setAttribute('x', state.startX + (pos.x - state.startX) / 2);
+                state.activeElement.setAttribute('y', state.startY + (pos.y - state.startY) / 2);
+            }
+        } else {
+            // Previews for multi-click tools
+            if (state.tool === 'poly' && state.polyPoints.length > 0) {
+                let d = "";
+                state.polyPoints.forEach((p, i) => d += (i === 0 ? "M" : "L") + ` ${p.x} ${p.y}`);
+                d += ` L ${pos.x} ${pos.y}`;
+                state.activeElement.setAttribute('d', d);
+            } else if (state.tool === 'curve' && state.curvePoints.length > 0) {
+                let d = "";
+                if (state.curvePoints.length === 1) {
+                    // Point 1: Start. Currently defining Point 2: End.
+                    d = `M ${state.curvePoints[0].x} ${state.curvePoints[0].y} L ${pos.x} ${pos.y}`;
+                } else if (state.curvePoints.length === 2) {
+                    // Point 1 & 2: Start/End fixed. Currently defining Control Point (Flex).
+                    d = `M ${state.curvePoints[0].x} ${state.curvePoints[0].y} Q ${pos.x} ${pos.y} ${state.curvePoints[1].x} ${state.curvePoints[1].y}`;
+                }
+                state.activeElement.setAttribute('d', d);
+            }
         }
         drawSymmetryPreview();
     }
@@ -420,12 +447,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function handlePolyClick(pos) {
         if (state.polyPoints.length === 0) {
             overlayLayer.innerHTML = '';
-            state.activeElement = document.createElementNS(NS, 'path');
-            state.activeElement.setAttribute('stroke', state.color);
-            state.activeElement.setAttribute('stroke-width', state.size);
-            state.activeElement.setAttribute('fill', 'none');
-            state.activeElement.setAttribute('d', `M ${pos.x} ${pos.y}`);
-            overlayLayer.appendChild(state.activeElement);
+            state.activeElement = createSvgElement(pos);
         } else {
             const start = state.polyPoints[0];
             if (Math.hypot(pos.x - start.x, pos.y - start.y) < 20 / state.scale) {
@@ -442,20 +464,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleCurveClick(pos) {
-        state.curvePoints.push(pos);
-        if (state.curvePoints.length === 1) {
+        if (state.curvePoints.length === 0) {
             overlayLayer.innerHTML = '';
-            state.activeElement = document.createElementNS(NS, 'path');
-            state.activeElement.setAttribute('stroke', state.color);
-            state.activeElement.setAttribute('stroke-width', state.size);
-            state.activeElement.setAttribute('fill', 'none');
-            state.activeElement.setAttribute('d', `M ${pos.x} ${pos.y}`);
-            overlayLayer.appendChild(state.activeElement);
-        } else if (state.curvePoints.length === 2) {
-            const d = `M ${state.curvePoints[0].x} ${state.curvePoints[0].y} L ${pos.x} ${pos.y}`;
-            state.activeElement.setAttribute('d', d);
-        } else if (state.curvePoints.length === 3) {
-            const d = `M ${state.curvePoints[0].x} ${state.curvePoints[0].y} Q ${state.curvePoints[1].x} ${state.curvePoints[1].y} ${pos.x} ${pos.y}`;
+            state.activeElement = createSvgElement(pos);
+        }
+        state.curvePoints.push(pos);
+        if (state.curvePoints.length === 3) {
+            // state.curvePoints = [Start, End, Control]
+            const p0 = state.curvePoints[0], p2 = state.curvePoints[1], p1 = state.curvePoints[2];
+            const d = `M ${p0.x} ${p0.y} Q ${p1.x} ${p1.y} ${p2.x} ${p2.y}`;
             state.activeElement.setAttribute('d', d);
             drawingLayer.appendChild(state.activeElement);
             state.curvePoints = []; state.activeElement = null;
@@ -513,9 +530,8 @@ document.addEventListener('DOMContentLoaded', () => {
         guideLayer.appendChild(c);
     }
 
-    function pickColor(x, y) {
-        const r = viewport.getBoundingClientRect();
-        const el = document.elementFromPoint(x * state.scale + state.panX + r.left, y * state.scale + state.panY + r.top);
+    function pickColor(e) {
+        const el = document.elementFromPoint(e.clientX, e.clientY);
         if (el && el.getAttribute('stroke') && el.getAttribute('stroke') !== 'none') setColor(el.getAttribute('stroke'));
         else if (el && el.getAttribute('fill') && el.getAttribute('fill') !== 'none') setColor(el.getAttribute('fill'));
     }
@@ -592,9 +608,6 @@ document.addEventListener('DOMContentLoaded', () => {
     btnStampsPopover.onclick = (e) => { e.stopPropagation(); stampsPopover.classList.toggle('visible'); };
     document.addEventListener('click', (e) => {
         if (!stampsPopover.contains(e.target) && e.target !== btnStampsPopover) stampsPopover.classList.remove('visible');
-        if (state.tool === 'eraser' && e.target.parentNode === drawingLayer) {
-            e.target.remove(); saveHistory();
-        }
     });
 
     brushSizeInput.oninput = (e) => { state.size = e.target.value; sizeValDisplay.textContent = state.size; };
