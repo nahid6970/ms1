@@ -366,14 +366,20 @@ document.addEventListener('DOMContentLoaded', () => {
             el.setAttribute('rx', 0); el.setAttribute('ry', 0);
         } else if (state.tool === 'stamp') {
             el = document.createElementNS(NS, 'text');
-            const temp = document.createElement('i'); temp.className = `fa-solid ${state.selectedStamp}`;
+            const iconClass = state.selectedStamp;
+            const isBrand = iconClass.includes('fa-brands') || ['github', 'twitter', 'facebook', 'instagram', 'linkedin', 'github-alt'].some(b => iconClass.includes(b));
+
+            const temp = document.createElement('i');
+            temp.className = `${isBrand ? 'fa-brands' : 'fa-solid'} ${iconClass}`;
             document.body.appendChild(temp);
-            const content = window.getComputedStyle(temp, ':before').content.replace(/"/g, '');
+            const style = window.getComputedStyle(temp, ':before');
+            const content = style.content.replace(/"/g, '');
             document.body.removeChild(temp);
+
             el.textContent = content;
             el.setAttribute('x', pos.x); el.setAttribute('y', pos.y);
-            el.setAttribute('font-family', '"Font Awesome 6 Free"');
-            el.setAttribute('font-weight', '900');
+            el.setAttribute('font-family', isBrand ? '"Font Awesome 6 Brands"' : '"Font Awesome 6 Free"');
+            el.setAttribute('font-weight', isBrand ? '400' : '900');
             el.setAttribute('font-size', '1px');
             el.setAttribute('text-anchor', 'middle');
             el.setAttribute('dominant-baseline', 'middle');
@@ -599,9 +605,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     btnAddStamp.onclick = () => {
-        const i = prompt("Icon:", "fa-star");
-        if (i && i.startsWith('fa-') && !state.stamps.includes(i)) {
-            state.stamps.push(i); saveIcons(); renderStamps();
+        let i = prompt("Icon name (e.g., star, ghost, apple):", "star");
+        if (i) {
+            if (!i.startsWith('fa-')) i = 'fa-' + i;
+            if (!state.stamps.includes(i)) {
+                state.stamps.push(i); saveIcons(); renderStamps();
+            }
         }
     };
 
@@ -622,9 +631,21 @@ document.addEventListener('DOMContentLoaded', () => {
         saveHistory();
     };
     btnSave.onclick = () => {
-        const data = new XMLSerializer().serializeToString(svg);
+        const clone = svg.cloneNode(true);
+        const defs = document.createElementNS(NS, 'defs');
+        const style = document.createElementNS(NS, 'style');
+        style.textContent = `
+            @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
+            @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap');
+            text { white-space: pre; }
+        `;
+        defs.appendChild(style);
+        clone.insertBefore(defs, clone.firstChild);
+
+        const data = new XMLSerializer().serializeToString(clone);
         fetch('/save', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ image: data, type: 'svg' }) })
-            .then(() => alert('Saved!'));
+            .then(res => res.json())
+            .then(d => { if (d.success) alert('Saved successfully!'); });
     };
     btnGallery.onclick = () => { modal.classList.add('open'); loadGallery(); };
     closeModal.onclick = () => modal.classList.remove('open');
