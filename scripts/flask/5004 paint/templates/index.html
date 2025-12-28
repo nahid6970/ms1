@@ -168,11 +168,15 @@
         </aside>
 
         <main class="canvas-viewport" id="viewport">
-            <div class="canvas-container">
+            <div class="canvas-container" id="canvas-container">
                 <div id="snap-indicator"></div>
-                <canvas id="drawing-canvas"></canvas>
-                <canvas id="overlay-canvas"></canvas>
-                <canvas id="guide-canvas"></canvas>
+                <svg id="main-svg" width="1920" height="1080" viewBox="0 0 1920 1080"
+                    preserveAspectRatio="xMidYMid meet">
+                    <rect id="svg-bg" width="1920" height="1080" fill="#ffffff" />
+                    <g id="drawing-layer"></g>
+                    <g id="overlay-layer"></g>
+                    <g id="guide-layer"></g>
+                </svg>
             </div>
         </main>
     </div>

@@ -26,21 +26,27 @@ def index():
 def save_art():
     data = request.json
     image_data = data.get('image')
+    save_type = data.get('type', 'raster')
     
     if image_data:
         try:
-            # Remove header of base64 string
+            if save_type == 'svg':
+                filename = f"art_{int(time.time())}_{uuid.uuid4().hex[:8]}.svg"
+                filepath = os.path.join(SAVE_DIR, filename)
+                with open(filepath, 'w', encoding='utf-8') as f:
+                    f.write(image_data)
+                return jsonify({"success": True, "filename": filename, "url": f"/static/saved_art/{filename}"})
+            
+            # Base64 for canvas (backwards compatibility if needed)
             if ',' in image_data:
                 head, data_content = image_data.split(',', 1)
                 file_ext = head.split(';')[0].split('/')[1]
             else:
-                return jsonify({"success": False, "error": "Invalid image data"})
+                return jsonify({"success": False, "error": "Invalid data"})
 
             decoded_img = base64.b64decode(data_content)
-            
             filename = f"art_{int(time.time())}_{uuid.uuid4().hex[:8]}.{file_ext}"
             filepath = os.path.join(SAVE_DIR, filename)
-            
             with open(filepath, 'wb') as f:
                 f.write(decoded_img)
                 
@@ -53,8 +59,10 @@ def save_art():
 @app.route('/gallery')
 def gallery():
     try:
+        if not os.path.exists(SAVE_DIR):
+            return jsonify([])
         files = sorted(os.listdir(SAVE_DIR), key=lambda x: os.path.getmtime(os.path.join(SAVE_DIR, x)), reverse=True)
-        images = [f"/static/saved_art/{f}" for f in files if f.endswith(('.png', '.jpg', '.jpeg', '.webp'))]
+        images = [f"/static/saved_art/{f}" for f in files if f.endswith(('.png', '.jpg', '.jpeg', '.webp', '.svg'))]
         return jsonify(images)
     except Exception as e:
         return jsonify([])

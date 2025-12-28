@@ -1,19 +1,13 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- Elements ---
-    const canvas = document.getElementById('drawing-canvas');
-    const ctx = canvas.getContext('2d', {
-        willReadFrequently: true,
-        alpha: false
-    });
-
-    const overlayCanvas = document.getElementById('overlay-canvas');
-    const ctxOverlay = overlayCanvas.getContext('2d');
-
-    const guideCanvas = document.getElementById('guide-canvas');
-    const ctxGuide = guideCanvas.getContext('2d');
+    const svg = document.getElementById('main-svg');
+    const drawingLayer = document.getElementById('drawing-layer');
+    const overlayLayer = document.getElementById('overlay-layer');
+    const guideLayer = document.getElementById('guide-layer');
+    const bgRect = document.getElementById('svg-bg');
 
     const viewport = document.getElementById('viewport');
-    const canvasContainer = document.querySelector('.canvas-container');
+    const canvasContainer = document.getElementById('canvas-container');
 
     // Inputs
     const toolsBtns = document.querySelectorAll('.tool-btn');
@@ -50,6 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const btnStampsPopover = document.getElementById('btn-stamps-popover');
     const stampsPopover = document.getElementById('stamps-popover');
+    const btnAddStamp = document.getElementById('btn-add-stamp');
 
     // --- State ---
     const state = {
@@ -65,16 +60,12 @@ document.addEventListener('DOMContentLoaded', () => {
         lastY: 0,
         history: [],
         historyStep: -1,
-        maxHistory: 20,
+        maxHistory: 30,
         scale: 1,
         panX: 0,
         panY: 0,
         lastMouseX: 0,
         lastMouseY: 0,
-        lastDrawTime: 0,
-        pendingHistorySave: false,
-        polyPoints: [],
-        curvePoints: [],
         mirrorCount: 4,
         reflectType: 'horizontal',
         symmetry: 'none',
@@ -84,32 +75,24 @@ document.addEventListener('DOMContentLoaded', () => {
         points: [],
         multiLineCount: 3,
         stamps: [],
-        selectedStamp: '',
-        unicodeCache: {}
+        selectedStamp: 'fa-star',
+        unicodeCache: {},
+        activeElement: null,
+        polyPoints: [],
+        curvePoints: []
     };
+
+    const NS = "http://www.w3.org/2000/svg";
 
     // --- Functions ---
 
     function init() {
-        canvas.width = 1920;
-        canvas.height = 1080;
-        syncOverlay();
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        updateContext();
-        saveHistory();
-        generateSwatches();
         centerCanvas();
+        generateSwatches();
         loadSettings();
         loadIcons();
-    }
-
-    function syncOverlay() {
-        overlayCanvas.width = canvas.width;
-        overlayCanvas.height = canvas.height;
-        guideCanvas.width = canvas.width;
-        guideCanvas.height = canvas.height;
-        updateContext();
+        saveHistory(); // Initial state
+        drawSymmetryGuides();
     }
 
     function generateSwatches() {
@@ -124,8 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const el = document.createElement('div');
             el.className = 'swatch';
             el.style.backgroundColor = c;
-            el.dataset.color = c;
-            el.addEventListener('click', () => setColor(c));
+            el.onclick = () => setColor(c);
             swatchesContainer.appendChild(el);
         });
     }
@@ -154,24 +136,19 @@ document.addEventListener('DOMContentLoaded', () => {
     function loadSettings() {
         fetch('/get_settings')
             .then(res => res.json())
-            .then(settings => {
-                if (!settings || Object.keys(settings).length === 0) return;
-                if (settings.gridShow !== undefined) state.gridShow = settings.gridShow;
-                if (settings.gridSnap !== undefined) state.gridSnap = settings.gridSnap;
-                if (settings.gridSize !== undefined) state.gridSize = settings.gridSize;
-                if (settings.size !== undefined) state.size = settings.size;
-                if (settings.color !== undefined) {
-                    state.color = settings.color;
-                    colorPicker.value = settings.color;
-                }
-                if (settings.brushType !== undefined) state.brushType = settings.brushType;
-                if (settings.tool !== undefined) state.tool = settings.tool;
-                if (settings.symmetry !== undefined) {
-                    state.symmetry = settings.symmetry;
-                    state.mirrorCount = settings.mirrorCount || 4;
-                    state.reflectType = settings.reflectType || 'horizontal';
-                    state.multiLineCount = settings.multiLineCount || 3;
-                }
+            .then(s => {
+                if (!s || Object.keys(s).length === 0) return;
+                state.gridShow = s.gridShow ?? state.gridShow;
+                state.gridSnap = s.gridSnap ?? state.gridSnap;
+                state.gridSize = s.gridSize ?? state.gridSize;
+                state.size = s.size ?? state.size;
+                if (s.color) { state.color = s.color; colorPicker.value = s.color; }
+                state.brushType = s.brushType ?? state.brushType;
+                state.tool = s.tool ?? state.tool;
+                state.symmetry = s.symmetry ?? state.symmetry;
+                state.mirrorCount = s.mirrorCount ?? 4;
+                state.reflectType = s.reflectType ?? 'horizontal';
+                state.multiLineCount = s.multiLineCount ?? 3;
 
                 gridShowToggle.checked = state.gridShow;
                 gridSnapToggle.checked = state.gridSnap;
@@ -185,53 +162,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 symRadialBtn.classList.toggle('active', state.symmetry === 'radial');
                 symReflectBtn.classList.toggle('active', state.symmetry === 'reflect');
                 updateGridView();
-                updateContext();
+                drawSymmetryGuides();
             });
-    }
-
-    function updateContext() {
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
-        ctx.lineWidth = state.size;
-        ctx.shadowBlur = 0;
-        ctx.globalAlpha = 1.0;
-
-        const isEraser = state.tool === 'eraser';
-        if (!isEraser) {
-            if (state.brushType === 'airbrush') {
-                ctx.shadowBlur = state.size; // Solid center + normal glow
-                ctx.shadowColor = state.color;
-            } else if (state.brushType === 'multiLine') {
-                ctx.globalAlpha = 0.8;
-                ctx.lineWidth = 1.5;
-            } else if (state.brushType === 'highlighter') {
-                ctx.globalAlpha = 0.4;
-            }
-        }
-
-        ctx.strokeStyle = isEraser ? '#ffffff' : state.color;
-        ctx.fillStyle = isEraser ? '#ffffff' : state.color;
-
-        ctxOverlay.lineCap = 'round';
-        ctxOverlay.lineJoin = 'round';
-        ctxOverlay.lineWidth = state.size;
-        ctxOverlay.strokeStyle = state.color;
-        ctxOverlay.fillStyle = state.color;
-        ctxOverlay.shadowBlur = isEraser ? 0 : ctx.shadowBlur;
-        ctxOverlay.shadowColor = isEraser ? 'transparent' : ctx.shadowColor;
-        ctxOverlay.globalAlpha = isEraser ? 1.0 : ctx.globalAlpha;
-
-        ctxGuide.clearRect(0, 0, guideCanvas.width, guideCanvas.height);
-        drawSymmetryGuides();
     }
 
     function loadIcons() {
-        fetch('/get_icons')
-            .then(res => res.json())
-            .then(icons => {
-                state.stamps = icons;
-                renderStamps();
-            });
+        fetch('/get_icons').then(res => res.json()).then(icons => {
+            state.stamps = icons;
+            renderStamps();
+        });
     }
 
     function saveIcons() {
@@ -245,132 +184,81 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderStamps() {
         const grid = document.getElementById('stamps-grid');
         grid.innerHTML = '';
-
-        state.stamps.forEach(iconClass => {
-            const btn = document.createElement('button');
-            btn.className = 'tool-btn stamp-btn';
-            if (state.tool === 'stamp' && state.selectedStamp === iconClass) btn.classList.add('active');
-            btn.innerHTML = `<i class="fa-solid ${iconClass}"></i>`;
-            btn.onclick = () => {
-                state.selectedStamp = iconClass;
+        state.stamps.forEach(cl => {
+            const b = document.createElement('button');
+            b.className = 'tool-btn stamp-btn';
+            if (state.tool === 'stamp' && state.selectedStamp === cl) b.classList.add('active');
+            b.innerHTML = `<i class="fa-solid ${cl}"></i>`;
+            b.onclick = () => {
+                state.selectedStamp = cl;
                 setTool('stamp');
                 renderStamps();
-                stampsPopover.classList.remove('visible'); // Auto-close on select
+                stampsPopover.classList.remove('visible');
             };
-            grid.appendChild(btn);
+            grid.appendChild(b);
         });
     }
 
-    function drawStamp(c, iconClass, x, y, width, height, color) {
-        let content = state.unicodeCache[iconClass];
-        if (!content) {
-            const i = document.createElement('i');
-            i.className = `fa-solid ${iconClass}`;
-            document.body.appendChild(i);
-            content = window.getComputedStyle(i, ':before').content.replace(/"/g, '');
-            document.body.removeChild(i);
-            state.unicodeCache[iconClass] = content;
-        }
-
-        c.save();
-        c.translate(x, y);
-        // Base font size is 100, then we scale it
-        const baseSize = 100;
-        c.scale(width / baseSize, height / baseSize);
-
-        c.font = `900 ${baseSize}px "Font Awesome 6 Free"`;
-        c.fillStyle = color;
-        c.textAlign = 'center';
-        c.textBaseline = 'middle';
-        c.fillText(content, 0, 0);
-        c.restore();
-    }
-
-    function setColor(color) {
-        state.color = color;
-        colorPicker.value = color;
+    function setColor(c) {
+        state.color = c;
+        colorPicker.value = c;
         if (state.tool === 'eraser') setTool('brush');
-        updateContext();
         saveSettings();
     }
 
-    function setTool(toolName) {
-        state.tool = toolName;
+    function setTool(t) {
+        state.tool = t;
         toolsBtns.forEach(b => {
-            if (b.id.startsWith('tool-')) {
-                b.classList.toggle('active', b.id === `tool-${toolName}`);
+            if (b.id && b.id.startsWith('tool-')) {
+                b.classList.toggle('active', b.id === `tool-${t}`);
             }
         });
-
-        // Handle trigger button active state
-        btnStampsPopover.classList.toggle('active', toolName === 'stamp');
-
-        document.querySelectorAll('.stamp-btn').forEach(b => {
-            const icon = b.querySelector('i').className.split(' ').find(c => c.startsWith('fa-') && c !== 'fa-solid');
-            b.classList.toggle('active', toolName === 'stamp' && state.selectedStamp === icon);
-        });
-        if (toolName !== 'poly') {
-            state.polyPoints = [];
-            ctxOverlay.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
-        }
-        if (toolName !== 'curve') {
-            state.curvePoints = [];
-            ctxOverlay.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
-        }
-        updateContext();
+        btnStampsPopover.classList.toggle('active', t === 'stamp');
+        overlayLayer.innerHTML = '';
+        saveSettings();
     }
 
-    function setSymmetry(mode) {
-        if (state.symmetry === mode) {
-            state.symmetry = 'none';
-        } else {
-            state.symmetry = mode;
-            if (mode === 'radial') {
-                const input = prompt("Enter number of mirror folders:", state.mirrorCount);
-                const val = parseInt(input);
-                if (val && val > 0) state.mirrorCount = val;
-            } else if (mode === 'reflect') {
-                const input = prompt("Mirror Type? (H)orizontal, (V)ertical, or (B)oth:", "H");
-                const choice = (input || "").toLowerCase();
-                if (choice === 'v' || choice === 'vertical') state.reflectType = 'vertical';
-                else if (choice === 'b' || choice === 'both') state.reflectType = 'both';
+    function setSymmetry(m) {
+        if (state.symmetry === m) state.symmetry = 'none';
+        else {
+            state.symmetry = m;
+            if (m === 'radial') {
+                const i = prompt("Mirrors:", state.mirrorCount);
+                if (parseInt(i)) state.mirrorCount = parseInt(i);
+            } else if (m === 'reflect') {
+                const i = prompt("(H)orizontal, (V)ertical, (B)oth:", "H");
+                const c = (i || "").toLowerCase();
+                if (c === 'v') state.reflectType = 'vertical';
+                else if (c === 'b') state.reflectType = 'both';
                 else state.reflectType = 'horizontal';
             }
         }
         symRadialBtn.classList.toggle('active', state.symmetry === 'radial');
         symReflectBtn.classList.toggle('active', state.symmetry === 'reflect');
-        ctxGuide.clearRect(0, 0, guideCanvas.width, guideCanvas.height);
         drawSymmetryGuides();
         saveSettings();
     }
 
-    function setBrushType(type) {
-        state.brushType = type;
-        if (type === 'multiLine') {
-            const input = prompt("How many lines do you want to draw together? (2-10):", state.multiLineCount);
-            const val = parseInt(input);
-            if (val && val >= 2 && val <= 10) state.multiLineCount = val;
+    function setBrushType(t) {
+        state.brushType = t;
+        if (t === 'multiLine') {
+            const i = prompt("Line count (2-10):", state.multiLineCount);
+            if (parseInt(i)) state.multiLineCount = Math.min(10, Math.max(2, parseInt(i)));
         }
-        const types = ['marker', 'highlighter', 'pen', 'multiLine', 'calligraphy', 'airbrush'];
-        types.forEach(t => {
-            const btn = document.getElementById(`type-${t}`);
-            if (btn) btn.classList.toggle('active', t === type);
+        ['marker', 'highlighter', 'pen', 'multiLine', 'calligraphy', 'airbrush'].forEach(type => {
+            const b = document.getElementById(`type-${type}`);
+            if (b) b.classList.toggle('active', type === t);
         });
-        updateContext();
         saveSettings();
     }
 
     function centerCanvas() {
-        const vW = viewport.clientWidth;
-        const vH = viewport.clientHeight;
-
-        const scaleX = (vW - 80) / canvas.width;
-        const scaleY = (vH - 80) / canvas.height;
-        state.scale = Math.min(scaleX, scaleY, 1);
-
-        state.panX = (vW - canvas.width * state.scale) / 2;
-        state.panY = (vH - canvas.height * state.scale) / 2;
-
+        const vW = viewport.clientWidth, vH = viewport.clientHeight;
+        const sW = 1920, sH = 1080;
+        const sX = (vW - 80) / sW, sY = (vH - 80) / sH;
+        state.scale = Math.min(sX, sY, 1);
+        state.panX = (vW - sW * state.scale) / 2;
+        state.panY = (vH - sH * state.scale) / 2;
         updateTransform();
     }
 
@@ -378,79 +266,31 @@ document.addEventListener('DOMContentLoaded', () => {
         canvasContainer.style.transform = `translate(${state.panX}px, ${state.panY}px) scale(${state.scale})`;
     }
 
-    function checkBoundsAndExpand(x, y) {
-        let newWidth = canvas.width, newHeight = canvas.height;
-        let shiftX = 0, shiftY = 0;
-        const buffer = 300;
-        const expandAmount = 1000; // Total expansion per axis
-
-        // Expand symmetrically to keep the center in the same spot relative to the content
-        if (x > canvas.width - buffer || x < buffer) {
-            newWidth += expandAmount;
-            shiftX = expandAmount / 2;
-        }
-        if (y > canvas.height - buffer || y < buffer) {
-            newHeight += expandAmount;
-            shiftY = expandAmount / 2;
-        }
-
-        if (newWidth !== canvas.width || newHeight !== canvas.height) {
-            resizeCanvas(newWidth, newHeight, shiftX, shiftY);
-            return { shiftX, shiftY };
-        }
-        return { shiftX: 0, shiftY: 0 };
-    }
-
-    function resizeCanvas(w, h, shiftX, shiftY) {
-        const copy = document.createElement('canvas');
-        copy.width = canvas.width; copy.height = canvas.height;
-        copy.getContext('2d').drawImage(canvas, 0, 0);
-
-        canvas.width = w; canvas.height = h;
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, w, h);
-        ctx.drawImage(copy, shiftX, shiftY);
-
-        syncOverlay();
-
-        if (shiftX !== 0 || shiftY !== 0) {
-            state.panX -= shiftX * state.scale;
-            state.panY -= shiftY * state.scale;
-            updateTransform();
-        }
-    }
-
     function saveHistory() {
-        if (state.pendingHistorySave) return;
-        state.pendingHistorySave = true;
-        requestAnimationFrame(() => {
-            if (state.historyStep < state.history.length - 1) {
-                state.history = state.history.slice(0, state.historyStep + 1);
-            }
-            const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
-            state.history.push(dataUrl);
-            if (state.history.length > state.maxHistory) state.history.shift();
-            else state.historyStep++;
-            state.pendingHistorySave = false;
+        if (state.historyStep < state.history.length - 1) {
+            state.history = state.history.slice(0, state.historyStep + 1);
+        }
+        state.history.push({
+            drawing: drawingLayer.innerHTML,
+            bg: bgRect.getAttribute('fill')
         });
+        if (state.history.length > state.maxHistory) state.history.shift();
+        else state.historyStep++;
     }
 
     function undo() {
         if (state.historyStep > 0) {
             state.historyStep--;
-            const img = new Image();
-            img.src = state.history[state.historyStep];
-            img.onload = () => {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.drawImage(img, 0, 0);
-            };
+            const e = state.history[state.historyStep];
+            drawingLayer.innerHTML = e.drawing;
+            bgRect.setAttribute('fill', e.bg);
         }
     }
 
     function getPos(e) {
-        const rect = viewport.getBoundingClientRect();
-        let x = (e.clientX - rect.left - state.panX) / state.scale;
-        let y = (e.clientY - rect.top - state.panY) / state.scale;
+        const r = viewport.getBoundingClientRect();
+        let x = (e.clientX - r.left - state.panX) / state.scale;
+        let y = (e.clientY - r.top - state.panY) / state.scale;
         if (state.gridSnap) {
             x = Math.round(x / state.gridSize) * state.gridSize;
             y = Math.round(y / state.gridSize) * state.gridSize;
@@ -459,507 +299,319 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function startDrawing(e) {
-        let pos = getPos(e);
-        const shift = checkBoundsAndExpand(pos.x, pos.y);
-        if (shift.shiftX || shift.shiftY) {
-            pos.x += shift.shiftX;
-            pos.y += shift.shiftY;
+        if (state.tool === 'picker') {
+            const pos = getPos(e); pickColor(pos.x, pos.y); return;
+        }
+        if (state.tool === 'fill') {
+            const t = e.target;
+            if (t.id === 'svg-bg') { bgRect.setAttribute('fill', state.color); saveHistory(); }
+            else if (t.parentNode === drawingLayer) {
+                t.setAttribute('fill', state.color);
+                t.setAttribute('stroke', (t.getAttribute('stroke') && t.getAttribute('stroke') !== 'none') ? state.color : 'none');
+                saveHistory();
+            }
+            return;
+        }
+        if (state.tool === 'text') { addTextPrompt(e); return; }
+
+        const pos = getPos(e);
+        if (state.tool === 'poly') {
+            handlePolyClick(pos); return;
+        }
+        if (state.tool === 'curve') {
+            handleCurveClick(pos); return;
         }
 
         state.isDrawing = true;
-        state.startX = pos.x;
-        state.startY = pos.y;
-        state.lastX = pos.x;
-        state.lastY = pos.y;
+        state.startX = pos.x; state.startY = pos.y;
         state.points = [pos];
+        overlayLayer.innerHTML = '';
+        state.activeElement = createSvgElement(pos);
+    }
 
-        if (state.tool === 'fill') {
-            fill(pos.x, pos.y, state.color);
-            saveHistory();
-            state.isDrawing = false;
-        } else if (state.tool === 'picker') {
-            pickColor(pos.x, pos.y);
-            state.isDrawing = false;
-        } else if (state.tool === 'text') {
-            addTextPrompt(e);
-            state.isDrawing = false;
-        } else if (state.tool === 'poly') {
-            handlePolyClick(pos);
-            state.isDrawing = false;
-        } else if (state.tool === 'curve') {
-            handleCurveClick(pos);
-            state.isDrawing = false;
+    function createSvgElement(pos) {
+        let el;
+        const common = {
+            'stroke': state.color,
+            'stroke-width': state.size,
+            'fill': 'none',
+            'stroke-linecap': 'round',
+            'stroke-linejoin': 'round'
+        };
+
+        if (state.tool === 'brush') {
+            el = document.createElementNS(NS, 'path');
+            el.setAttribute('d', `M ${pos.x} ${pos.y}`);
+            if (state.brushType === 'highlighter') common['stroke-opacity'] = 0.4;
+            if (state.brushType === 'airbrush') el.style.filter = 'blur(5px)';
+        } else if (state.tool === 'line') {
+            el = document.createElementNS(NS, 'line');
+            el.setAttribute('x1', pos.x); el.setAttribute('y1', pos.y);
+            el.setAttribute('x2', pos.x); el.setAttribute('y2', pos.y);
+        } else if (state.tool === 'rect') {
+            el = document.createElementNS(NS, 'rect');
+            el.setAttribute('x', pos.x); el.setAttribute('y', pos.y);
+            el.setAttribute('width', 0); el.setAttribute('height', 0);
+        } else if (state.tool === 'circle') {
+            el = document.createElementNS(NS, 'ellipse');
+            el.setAttribute('cx', pos.x); el.setAttribute('cy', pos.y);
+            el.setAttribute('rx', 0); el.setAttribute('ry', 0);
         } else if (state.tool === 'stamp') {
-            state.isDrawing = true;
-            ctxOverlay.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
-            drawSymmetric(ctxOverlay, (c) => {
-                drawStamp(c, state.selectedStamp, pos.x, pos.y, state.size, state.color);
-            });
-        } else if (state.tool === 'brush') {
-            drawSymmetric(ctxOverlay, (c) => {
-                c.beginPath();
-                c.moveTo(pos.x, pos.y);
-                c.lineTo(pos.x, pos.y);
-                c.stroke();
-            });
-        } else if (state.tool === 'eraser') {
-            drawSymmetric(ctx, (c) => {
-                c.beginPath();
-                c.moveTo(pos.x, pos.y);
-                c.lineTo(pos.x, pos.y);
-                c.stroke();
-            });
+            el = document.createElementNS(NS, 'text');
+            const temp = document.createElement('i'); temp.className = `fa-solid ${state.selectedStamp}`;
+            document.body.appendChild(temp);
+            const content = window.getComputedStyle(temp, ':before').content.replace(/"/g, '');
+            document.body.removeChild(temp);
+            el.textContent = content;
+            el.setAttribute('x', pos.x); el.setAttribute('y', pos.y);
+            el.setAttribute('font-family', '"Font Awesome 6 Free"');
+            el.setAttribute('font-weight', '900');
+            el.setAttribute('font-size', '1px');
+            el.setAttribute('text-anchor', 'middle');
+            el.setAttribute('dominant-baseline', 'middle');
+            common['fill'] = state.color;
+            common['stroke'] = 'none';
+        } else {
+            // Fallback
+            el = document.createElementNS(NS, 'path');
         }
+
+        for (const [k, v] of Object.entries(common)) {
+            if (el) el.setAttribute(k, v);
+        }
+        overlayLayer.appendChild(el);
+        return el;
     }
 
     function draw(e) {
-        if (!state.isDrawing && state.tool !== 'poly' && state.tool !== 'curve') return;
-        const now = performance.now();
-        if (now - state.lastDrawTime < 8) return;
-        state.lastDrawTime = now;
+        if (!state.isDrawing || !state.activeElement) return;
         const pos = getPos(e);
 
-        if (state.tool === 'poly') {
-            if (state.polyPoints.length > 0) {
-                ctxOverlay.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
-                drawSymmetric(ctxOverlay, (c) => {
-                    c.beginPath();
-                    c.moveTo(state.polyPoints[0].x, state.polyPoints[0].y);
-                    state.polyPoints.forEach(p => c.lineTo(p.x, p.y));
-                    c.lineTo(pos.x, pos.y);
-                    c.stroke();
-                });
-                ctxOverlay.fillStyle = state.color;
-                ctxOverlay.beginPath();
-                ctxOverlay.arc(state.polyPoints[0].x, state.polyPoints[0].y, 8, 0, Math.PI * 2);
-                ctxOverlay.fill();
-            }
-        } else if (state.tool === 'curve') {
-            if (state.curvePoints.length > 0) {
-                ctxOverlay.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
-                drawSymmetric(ctxOverlay, (c) => {
-                    c.beginPath();
-                    if (state.curvePoints.length === 1) {
-                        c.moveTo(state.curvePoints[0].x, state.curvePoints[0].y);
-                        c.lineTo(pos.x, pos.y);
-                    } else if (state.curvePoints.length === 2) {
-                        c.moveTo(state.curvePoints[0].x, state.curvePoints[0].y);
-                        c.quadraticCurveTo(pos.x, pos.y, state.curvePoints[1].x, state.curvePoints[1].y);
-                    }
-                    c.stroke();
-                });
-            }
-        } else if (state.tool === 'brush') {
+        if (state.tool === 'brush') {
             state.points.push(pos);
-            ctxOverlay.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
-            drawSymmetric(ctxOverlay, (c) => {
-                const pts = state.points;
-                c.beginPath();
-                if (state.brushType === 'marker' || state.brushType === 'highlighter') {
-                    if (pts.length > 2) {
-                        c.moveTo(pts[0].x, pts[0].y);
-                        for (let i = 1; i < pts.length - 2; i++) {
-                            const mid = { x: (pts[i].x + pts[i + 1].x) / 2, y: (pts[i].y + pts[i + 1].y) / 2 };
-                            c.quadraticCurveTo(pts[i].x, pts[i].y, mid.x, mid.y);
-                        }
-                        c.quadraticCurveTo(pts[pts.length - 2].x, pts[pts.length - 2].y, pts[pts.length - 1].x, pts[pts.length - 1].y);
-                    } else if (pts.length === 2) {
-                        c.moveTo(pts[0].x, pts[0].y);
-                        c.lineTo(pts[1].x, pts[1].y);
-                    }
-                } else if (state.brushType === 'multiLine') {
-                    // Draw multiple parallel lines
-                    const count = state.multiLineCount;
-                    const spacing = state.size; // Space between lines scales with brush size
-                    for (let j = 0; j < count; j++) {
-                        c.beginPath();
-                        const offset = (j - (count - 1) / 2) * spacing;
-                        c.moveTo(pts[0].x + offset, pts[0].y + offset);
-                        for (let i = 1; i < pts.length; i++) {
-                            c.lineTo(pts[i].x + offset, pts[i].y + offset);
-                        }
-                        c.stroke();
-                    }
-                } else if (state.brushType === 'calligraphy') {
-                    const nib = state.size;
-                    const ang = -Math.PI / 4;
-                    const nx = Math.cos(ang) * nib, ny = Math.sin(ang) * nib;
-                    for (let i = 1; i < pts.length; i++) {
-                        const p1 = pts[i - 1], p2 = pts[i];
-                        c.beginPath();
-                        c.moveTo(p1.x - nx, p1.y - ny);
-                        c.lineTo(p1.x + nx, p1.y + ny);
-                        c.lineTo(p2.x + nx, p2.y + ny);
-                        c.lineTo(p2.x - nx, p2.y - ny);
-                        c.closePath();
-                        c.fill(); c.stroke();
-                    }
-                } else {
-                    c.moveTo(pts[0].x, pts[0].y);
-                    pts.forEach(p => c.lineTo(p.x, p.y));
-                }
-                c.stroke();
-            });
-        } else if (state.tool === 'eraser') {
-            drawSymmetric(ctx, (c) => {
-                c.beginPath();
-                c.moveTo(state.lastX, state.lastY);
-                c.lineTo(pos.x, pos.y);
-                c.stroke();
-            });
+            const d = state.activeElement.getAttribute('d');
+            state.activeElement.setAttribute('d', d + ` L ${pos.x} ${pos.y}`);
+        } else if (state.tool === 'line') {
+            state.activeElement.setAttribute('x2', pos.x);
+            state.activeElement.setAttribute('y2', pos.y);
+        } else if (state.tool === 'rect') {
+            const x = Math.min(pos.x, state.startX), y = Math.min(pos.y, state.startY);
+            const w = Math.abs(pos.x - state.startX), h = Math.abs(pos.y - state.startY);
+            state.activeElement.setAttribute('x', x);
+            state.activeElement.setAttribute('y', y);
+            state.activeElement.setAttribute('width', w);
+            state.activeElement.setAttribute('height', h);
+        } else if (state.tool === 'circle') {
+            const cx = (state.startX + pos.x) / 2, cy = (state.startY + pos.y) / 2;
+            const rx = Math.abs(pos.x - state.startX) / 2, ry = Math.abs(pos.y - state.startY) / 2;
+            state.activeElement.setAttribute('cx', cx);
+            state.activeElement.setAttribute('cy', cy);
+            state.activeElement.setAttribute('rx', rx);
+            state.activeElement.setAttribute('ry', ry);
         } else if (state.tool === 'stamp') {
-            ctxOverlay.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
-            drawSymmetric(ctxOverlay, (c) => {
-                const w = pos.x - state.startX;
-                const h = pos.y - state.startY;
-                // Anchor at center of drag area to match rect behavior
-                const cx = state.startX + w / 2;
-                const cy = state.startY + h / 2;
-                drawStamp(c, state.selectedStamp, cx, cy, Math.abs(w), Math.abs(h), state.color);
-            });
-        } else {
-            ctxOverlay.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
-            drawSymmetric(ctxOverlay, (c) => {
-                c.beginPath();
-                if (state.tool === 'line') {
-                    c.moveTo(state.startX, state.startY);
-                    c.lineTo(pos.x, pos.y);
-                } else if (state.tool === 'rect') {
-                    c.strokeRect(state.startX, state.startY, pos.x - state.startX, pos.y - state.startY);
-                } else if (state.tool === 'circle') {
-                    const cx = (state.startX + pos.x) / 2;
-                    const cy = (state.startY + pos.y) / 2;
-                    const rx = Math.abs(pos.x - state.startX) / 2;
-                    const ry = Math.abs(pos.y - state.startY) / 2;
-                    c.ellipse(cx, cy, rx, ry, 0, 0, 2 * Math.PI);
-                }
-                c.stroke();
-            });
+            const w = Math.abs(pos.x - state.startX), h = Math.abs(pos.y - state.startY);
+            state.activeElement.setAttribute('font-size', Math.max(w, h));
+            state.activeElement.setAttribute('x', state.startX + (pos.x - state.startX) / 2);
+            state.activeElement.setAttribute('y', state.startY + (pos.y - state.startY) / 2);
         }
-        state.lastX = pos.x;
-        state.lastY = pos.y;
-    }
-
-    function stopDrawing() {
-        if (!state.isDrawing) return;
-        state.isDrawing = false;
-        if (['line', 'rect', 'circle', 'brush', 'stamp'].includes(state.tool)) {
-            // Commit overlay to main
-            ctx.save();
-            if (state.tool === 'stamp') {
-                // For stamp, we just want to draw the icon which is already text-based
-                // But overlay is a pixel-snapshot, so this works perfectly.
-            }
-            ctx.globalAlpha = 1.0;
-            ctx.drawImage(overlayCanvas, 0, 0);
-            ctx.restore();
-            ctxOverlay.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
-        }
-        saveHistory();
-    }
-
-    function drawSymmetric(targetCtx, actionFn) {
-        if (state.symmetry === 'none') {
-            actionFn(targetCtx);
-        } else if (state.symmetry === 'radial') {
-            const step = (Math.PI * 2) / state.mirrorCount;
-            const cx = canvas.width / 2, cy = canvas.height / 2;
-            targetCtx.save();
-            for (let i = 0; i < state.mirrorCount; i++) {
-                targetCtx.setTransform(1, 0, 0, 1, 0, 0);
-                targetCtx.translate(cx, cy);
-                targetCtx.rotate(step * i);
-                targetCtx.translate(-cx, -cy);
-                actionFn(targetCtx);
-            }
-            targetCtx.restore();
-        } else if (state.symmetry === 'reflect') {
-            actionFn(targetCtx);
-            targetCtx.save();
-            if (state.reflectType === 'horizontal') { targetCtx.translate(canvas.width, 0); targetCtx.scale(-1, 1); }
-            else if (state.reflectType === 'vertical') { targetCtx.translate(0, canvas.height); targetCtx.scale(1, -1); }
-            else { targetCtx.translate(canvas.width, canvas.height); targetCtx.scale(-1, -1); }
-            actionFn(targetCtx);
-            targetCtx.restore();
-        }
-    }
-
-    function drawSymmetryGuides() {
-        if (state.symmetry === 'none') return;
-        const cx = canvas.width / 2, cy = canvas.height / 2;
-        ctxGuide.save();
-        ctxGuide.setTransform(1, 0, 0, 1, 0, 0);
-        ctxGuide.strokeStyle = 'rgba(0,0,0,0.1)';
-        ctxGuide.setLineDash([15, 15]);
-        ctxGuide.lineWidth = 1 / state.scale;
-        ctxGuide.beginPath();
-        ctxGuide.moveTo(cx, 0); ctxGuide.lineTo(cx, canvas.height);
-        ctxGuide.moveTo(0, cy); ctxGuide.lineTo(canvas.width, cy);
-        ctxGuide.stroke();
-        ctxGuide.fillStyle = 'rgba(0,0,0,0.15)';
-        ctxGuide.beginPath();
-        ctxGuide.arc(cx, cy, 4 / state.scale, 0, Math.PI * 2);
-        ctxGuide.fill();
-        ctxGuide.restore();
-    }
-
-    function pickColor(x, y) {
-        if (x < 0 || y < 0 || x >= canvas.width || y >= canvas.height) return;
-        const p = ctx.getImageData(x, y, 1, 1).data;
-        const hex = "#" + ("000000" + ((p[0] << 16) | (p[1] << 8) | p[2]).toString(16)).slice(-6);
-        setColor(hex);
-        setTool('brush');
-        showToast(`Color picked: ${hex}`, 'info');
-    }
-
-    function fill(x, y, fillColor) {
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const data = imageData.data;
-        x = Math.floor(x); y = Math.floor(y);
-        const startPos = (y * canvas.width + x) * 4;
-        const startR = data[startPos], startG = data[startPos + 1], startB = data[startPos + 2], startA = data[startPos + 3];
-
-        const temp = document.createElement('div'); temp.style.color = fillColor; document.body.appendChild(temp);
-        const rgb = window.getComputedStyle(temp).color.match(/\d+/g); document.body.removeChild(temp);
-        const r = parseInt(rgb[0]), g = parseInt(rgb[1]), b = parseInt(rgb[2]), a = 255;
-        if (startR === r && startG === g && startB === b && startA === a) return;
-
-        const stack = [[x, y]];
-        while (stack.length) {
-            let [cx, cy] = stack.pop();
-            let pos = (cy * canvas.width + cx) * 4;
-            while (cy >= 0 && data[pos] === startR && data[pos + 1] === startG && data[pos + 2] === startB && data[pos + 3] === startA) { cy--; pos -= canvas.width * 4; }
-            cy++; pos += canvas.width * 4;
-            let left = false, right = false;
-            while (cy < canvas.height && data[pos] === startR && data[pos + 1] === startG && data[pos + 2] === startB && data[pos + 3] === startA) {
-                data[pos] = r; data[pos + 1] = g; data[pos + 2] = b; data[pos + 3] = a;
-                if (cx > 0) {
-                    if (data[pos - 4] === startR && data[pos - 3] === startG && data[pos - 2] === startB && data[pos - 1] === startA) {
-                        if (!left) { stack.push([cx - 1, cy]); left = true; }
-                    } else left = false;
-                }
-                if (cx < canvas.width - 1) {
-                    if (data[pos + 4] === startR && data[pos + 5] === startG && data[pos + 6] === startB && data[pos + 7] === startA) {
-                        if (!right) { stack.push([cx + 1, cy]); right = true; }
-                    } else right = false;
-                }
-                cy++; pos += canvas.width * 4;
-            }
-        }
-        ctx.putImageData(imageData, 0, 0);
-    }
-
-    function loadGallery() {
-        galleryGrid.innerHTML = '<div class="loading-spinner"><i class="fa-solid fa-circle-notch fa-spin"></i> Loading...</div>';
-        fetch('/gallery').then(res => res.json()).then(images => {
-            galleryGrid.innerHTML = '';
-            if (images.length === 0) {
-                galleryGrid.innerHTML = '<div style="grid-column:1/-1;text-align:center;">No drawings yet.</div>';
-                return;
-            }
-            images.forEach(src => {
-                const item = document.createElement('div');
-                item.className = 'gallery-item';
-
-                const img = document.createElement('img');
-                img.src = src;
-                img.onclick = () => loadFromGallery(src);
-
-                const actions = document.createElement('div');
-                actions.className = 'gallery-actions';
-
-                const del = document.createElement('div');
-                del.className = 'delete-btn';
-                del.innerHTML = '<i class="fa-solid fa-trash"></i>';
-                del.onclick = (e) => { e.stopPropagation(); deleteArtwork(src, item); };
-
-                actions.append(del);
-                item.append(img, actions);
-                galleryGrid.append(item);
-            });
-        });
-    }
-
-    function deleteArtwork(src, item) {
-        if (!confirm('Delete?')) return;
-        fetch('/delete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ filename: src.split('/').pop() }) })
-            .then(res => res.json()).then(data => { if (data.success) item.remove(); });
-    }
-
-    function loadFromGallery(src) {
-        const img = new Image(); img.src = src; img.crossOrigin = "Anonymous";
-        img.onload = () => {
-            canvas.width = img.width; canvas.height = img.height;
-            syncOverlay();
-            centerCanvas();
-            ctx.drawImage(img, 0, 0);
-            saveHistory();
-            modal.classList.remove('open');
-        };
-    }
-
-    function showToast(msg, type = 'success') {
-        const t = document.createElement('div'); t.className = `toast ${type}`;
-        t.innerText = msg;
-        document.getElementById('toast-container').appendChild(t);
-        setTimeout(() => t.remove(), 3000);
-    }
-
-    function addTextPrompt(e) {
-        const pos = getPos(e);
-        const input = document.createElement('input');
-        input.type = 'text';
-        input.style.position = 'fixed';
-        input.style.left = e.clientX + 'px';
-        input.style.top = e.clientY + 'px';
-        input.style.background = 'transparent';
-        input.style.border = '1px dashed ' + state.color;
-        input.style.color = state.color;
-        const fontSize = Math.max(14, state.size * 2);
-        input.style.font = `bold ${fontSize}px 'Outfit', sans-serif`;
-        input.style.zIndex = 1000;
-        input.style.outline = 'none';
-        input.style.padding = '0';
-        input.style.margin = '0';
-
-        document.body.appendChild(input);
-        setTimeout(() => input.focus(), 10);
-
-        let done = false;
-        const cleanup = () => {
-            if (done) return;
-            done = true;
-            if (input.value) {
-                ctx.font = `bold ${fontSize}px 'Outfit', sans-serif`;
-                ctx.fillStyle = state.color;
-                ctx.textBaseline = 'top';
-                ctx.fillText(input.value, pos.x, pos.y);
-                saveHistory();
-            }
-            input.remove();
-        };
-        input.onblur = cleanup;
-        input.onkeydown = (ev) => { if (ev.key === 'Enter') cleanup(); };
+        drawSymmetryPreview();
     }
 
     function handlePolyClick(pos) {
-        if (state.polyPoints.length > 2) {
+        if (state.polyPoints.length === 0) {
+            overlayLayer.innerHTML = '';
+            state.activeElement = document.createElementNS(NS, 'path');
+            state.activeElement.setAttribute('stroke', state.color);
+            state.activeElement.setAttribute('stroke-width', state.size);
+            state.activeElement.setAttribute('fill', 'none');
+            state.activeElement.setAttribute('d', `M ${pos.x} ${pos.y}`);
+            overlayLayer.appendChild(state.activeElement);
+        } else {
             const start = state.polyPoints[0];
-            if (Math.hypot(pos.x - start.x, pos.y - start.y) < 20) {
-                drawSymmetric(ctx, (c) => {
-                    c.beginPath(); c.moveTo(start.x, start.y);
-                    state.polyPoints.forEach(p => c.lineTo(p.x, p.y));
-                    c.closePath(); c.stroke();
-                });
-                state.polyPoints = [];
-                ctxOverlay.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+            if (Math.hypot(pos.x - start.x, pos.y - start.y) < 20 / state.scale) {
+                const d = state.activeElement.getAttribute('d');
+                state.activeElement.setAttribute('d', d + ' Z');
+                drawingLayer.appendChild(state.activeElement);
+                state.polyPoints = []; state.activeElement = null;
                 saveHistory(); return;
             }
+            const d = state.activeElement.getAttribute('d');
+            state.activeElement.setAttribute('d', d + ` L ${pos.x} ${pos.y}`);
         }
         state.polyPoints.push(pos);
     }
 
     function handleCurveClick(pos) {
         state.curvePoints.push(pos);
-        if (state.curvePoints.length === 3) {
-            drawSymmetric(ctx, (c) => {
-                c.beginPath(); c.moveTo(state.curvePoints[0].x, state.curvePoints[0].y);
-                c.quadraticCurveTo(state.curvePoints[2].x, state.curvePoints[2].y, state.curvePoints[1].x, state.curvePoints[1].y);
-                c.stroke();
-            });
-            state.curvePoints = [];
-            ctxOverlay.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+        if (state.curvePoints.length === 1) {
+            overlayLayer.innerHTML = '';
+            state.activeElement = document.createElementNS(NS, 'path');
+            state.activeElement.setAttribute('stroke', state.color);
+            state.activeElement.setAttribute('stroke-width', state.size);
+            state.activeElement.setAttribute('fill', 'none');
+            state.activeElement.setAttribute('d', `M ${pos.x} ${pos.y}`);
+            overlayLayer.appendChild(state.activeElement);
+        } else if (state.curvePoints.length === 2) {
+            const d = `M ${state.curvePoints[0].x} ${state.curvePoints[0].y} L ${pos.x} ${pos.y}`;
+            state.activeElement.setAttribute('d', d);
+        } else if (state.curvePoints.length === 3) {
+            const d = `M ${state.curvePoints[0].x} ${state.curvePoints[0].y} Q ${state.curvePoints[1].x} ${state.curvePoints[1].y} ${pos.x} ${pos.y}`;
+            state.activeElement.setAttribute('d', d);
+            drawingLayer.appendChild(state.activeElement);
+            state.curvePoints = []; state.activeElement = null;
             saveHistory();
         }
+    }
+
+    function drawSymmetryPreview() {
+        while (overlayLayer.childNodes.length > 1) overlayLayer.removeChild(overlayLayer.lastChild);
+        if (state.symmetry === 'none') return;
+        const orig = overlayLayer.firstChild;
+        const cx = 1920 / 2, cy = 1080 / 2;
+
+        if (state.symmetry === 'radial') {
+            const step = 360 / state.mirrorCount;
+            for (let i = 1; i < state.mirrorCount; i++) {
+                const c = orig.cloneNode(true);
+                c.setAttribute('transform', `rotate(${i * step}, ${cx}, ${cy})`);
+                overlayLayer.appendChild(c);
+            }
+        } else if (state.symmetry === 'reflect') {
+            const tps = state.reflectType === 'both' ? ['h', 'v', 'b'] : [state.reflectType[0]];
+            tps.forEach(t => {
+                const c = orig.cloneNode(true);
+                if (t === 'h') c.setAttribute('transform', `scale(-1, 1) translate(${-1920}, 0)`);
+                else if (t === 'v') c.setAttribute('transform', `scale(1, -1) translate(0, ${-1080})`);
+                else if (t === 'b') c.setAttribute('transform', `scale(-1, -1) translate(${-1920}, ${-1080})`);
+                overlayLayer.appendChild(c);
+            });
+        }
+    }
+
+    function stopDrawing() {
+        if (!state.isDrawing) return;
+        state.isDrawing = false;
+        while (overlayLayer.firstChild) drawingLayer.appendChild(overlayLayer.firstChild);
+        state.activeElement = null;
+        saveHistory();
+    }
+
+    function drawSymmetryGuides() {
+        guideLayer.innerHTML = '';
+        if (state.symmetry === 'none') return;
+        const cx = 1920 / 2, cy = 1080 / 2;
+        const common = { 'stroke': 'rgba(0,0,0,0.1)', 'stroke-width': 1, 'stroke-dasharray': '10,10' };
+        const h = document.createElementNS(NS, 'line');
+        h.setAttribute('x1', 0); h.setAttribute('y1', cy); h.setAttribute('x2', 1920); h.setAttribute('y2', cy);
+        const v = document.createElementNS(NS, 'line');
+        v.setAttribute('x1', cx); v.setAttribute('y1', 0); v.setAttribute('x2', cx); v.setAttribute('y2', 1080);
+        for (const [k, v_val] of Object.entries(common)) { h.setAttribute(k, v_val); v.setAttribute(k, v_val); }
+        guideLayer.appendChild(h); guideLayer.appendChild(v);
+        const c = document.createElementNS(NS, 'circle');
+        c.setAttribute('cx', cx); c.setAttribute('cy', cy); c.setAttribute('r', 5);
+        c.setAttribute('fill', 'rgba(0,0,0,0.2)');
+        guideLayer.appendChild(c);
+    }
+
+    function pickColor(x, y) {
+        const r = viewport.getBoundingClientRect();
+        const el = document.elementFromPoint(x * state.scale + state.panX + r.left, y * state.scale + state.panY + r.top);
+        if (el && el.getAttribute('stroke') && el.getAttribute('stroke') !== 'none') setColor(el.getAttribute('stroke'));
+        else if (el && el.getAttribute('fill') && el.getAttribute('fill') !== 'none') setColor(el.getAttribute('fill'));
+    }
+
+    function loadGallery() {
+        galleryGrid.innerHTML = 'Loading...';
+        fetch('/gallery').then(res => res.json()).then(ims => {
+            galleryGrid.innerHTML = '';
+            ims.forEach(src => {
+                const it = document.createElement('div'); it.className = 'gallery-item';
+                const img = document.createElement('img'); img.src = src; img.onclick = () => loadFromGallery(src);
+                const del = document.createElement('div'); del.className = 'delete-btn';
+                del.innerHTML = '<i class="fa-solid fa-trash"></i>';
+                del.onclick = (e) => { e.stopPropagation(); deleteArtwork(src, it); };
+                it.append(img, del); galleryGrid.append(it);
+            });
+        });
+    }
+
+    function deleteArtwork(src, it) {
+        if (!confirm('Delete?')) return;
+        fetch('/delete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ filename: src.split('/').pop() }) })
+            .then(r => r.json()).then(d => { if (d.success) it.remove(); });
+    }
+
+    function loadFromGallery(src) {
+        fetch(src).then(res => res.text()).then(svgStr => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(svgStr, 'image/svg+xml');
+            const newDrawing = doc.getElementById('drawing-layer');
+            if (newDrawing) drawingLayer.innerHTML = newDrawing.innerHTML;
+            saveHistory(); modal.classList.remove('open');
+        });
+    }
+
+    function addTextPrompt(e) {
+        const t = prompt("Text:", "Hello");
+        if (!t) return;
+        const pos = getPos(e);
+        const el = document.createElementNS(NS, 'text');
+        el.textContent = t; el.setAttribute('x', pos.x); el.setAttribute('y', pos.y);
+        el.setAttribute('font-family', 'Outfit'); el.setAttribute('font-size', state.size * 5);
+        el.setAttribute('fill', state.color); drawingLayer.appendChild(el);
+        saveHistory();
     }
 
     function updateGridView() {
         if (state.gridShow) {
             canvasContainer.classList.add('grid-active');
             canvasContainer.style.setProperty('--grid-size', state.gridSize + 'px');
-        } else {
-            canvasContainer.classList.remove('grid-active');
-        }
+        } else canvasContainer.classList.remove('grid-active');
     }
 
     // --- Listeners ---
-
     toggleBtn.onclick = () => {
         sidebar.classList.toggle('collapsed');
         toggleBtn.innerHTML = sidebar.classList.contains('collapsed') ? '<i class="fa-solid fa-chevron-right"></i>' : '<i class="fa-solid fa-bars"></i>';
     };
 
-    toolsBtns.forEach(btn => {
-        btn.onclick = () => {
-            if (btn.id.startsWith('tool-')) {
-                setTool(btn.id.replace('tool-', ''));
-                saveSettings();
-            } else if (btn.id.startsWith('type-')) {
-                setBrushType(btn.id.replace('type-', ''));
-            }
+    toolsBtns.forEach(b => {
+        b.onclick = () => {
+            if (b.id.startsWith('tool-')) setTool(b.id.replace('tool-', ''));
+            else if (b.id.startsWith('type-')) setBrushType(b.id.replace('type-', ''));
         };
     });
 
-    const btnAddStamp = document.getElementById('btn-add-stamp');
     btnAddStamp.onclick = () => {
-        const iconClass = prompt("Enter FontAwesome icon class (e.g., fa-star, fa-heart, fa-ghost):", "fa-face-smile");
-        if (iconClass && iconClass.startsWith('fa-')) {
-            if (!state.stamps.includes(iconClass)) {
-                state.stamps.push(iconClass);
-                saveIcons();
-                renderStamps();
-            }
-        } else if (iconClass) {
-            alert("Invalid class. Must start with 'fa-'");
+        const i = prompt("Icon:", "fa-star");
+        if (i && i.startsWith('fa-') && !state.stamps.includes(i)) {
+            state.stamps.push(i); saveIcons(); renderStamps();
         }
     };
 
-    btnStampsPopover.onclick = (e) => {
-        e.stopPropagation();
-        stampsPopover.classList.toggle('visible');
-    };
-
-    // Close popover when clicking elsewhere
+    btnStampsPopover.onclick = (e) => { e.stopPropagation(); stampsPopover.classList.toggle('visible'); };
     document.addEventListener('click', (e) => {
-        if (!stampsPopover.contains(e.target) && e.target !== btnStampsPopover) {
-            stampsPopover.classList.remove('visible');
+        if (!stampsPopover.contains(e.target) && e.target !== btnStampsPopover) stampsPopover.classList.remove('visible');
+        if (state.tool === 'eraser' && e.target.parentNode === drawingLayer) {
+            e.target.remove(); saveHistory();
         }
     });
 
-    brushSizeInput.oninput = (e) => { state.size = e.target.value; sizeValDisplay.textContent = state.size; updateContext(); };
-    brushSizeInput.onchange = () => saveSettings();
-
+    brushSizeInput.oninput = (e) => { state.size = e.target.value; sizeValDisplay.textContent = state.size; };
     colorPicker.oninput = (e) => setColor(e.target.value);
-
     toggleSwatchesBtn.onclick = () => {
         swatchesContainer.classList.toggle('visible');
         toggleSwatchesBtn.classList.toggle('active');
     };
 
     btnClear.onclick = () => {
-        // Reset context state to ensure full opaque white clear
-        ctx.save();
-        ctx.globalAlpha = 1.0;
-        ctx.shadowBlur = 0;
-        ctx.globalCompositeOperation = 'source-over';
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.restore();
-
-        ctxOverlay.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
-        ctxGuide.clearRect(0, 0, guideCanvas.width, guideCanvas.height);
-
-        state.polyPoints = [];
-        state.curvePoints = [];
-
-        updateContext();
+        drawingLayer.innerHTML = ''; bgRect.setAttribute('fill', '#ffffff');
         saveHistory();
-        showToast('Canvas cleared!');
     };
     btnSave.onclick = () => {
-        btnSave.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
-        fetch('/save', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ image: canvas.toDataURL() }) })
-            .then(() => showToast('Saved!')).finally(() => btnSave.innerHTML = '<i class="fa-solid fa-floppy-disk"></i>');
+        const data = new XMLSerializer().serializeToString(svg);
+        fetch('/save', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ image: data, type: 'svg' }) })
+            .then(() => alert('Saved!'));
     };
     btnGallery.onclick = () => { modal.classList.add('open'); loadGallery(); };
     closeModal.onclick = () => modal.classList.remove('open');
@@ -974,20 +626,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     viewport.onwheel = (e) => {
         e.preventDefault();
-        const rect = viewport.getBoundingClientRect();
-        const mouseX = e.clientX - rect.left, mouseY = e.clientY - rect.top;
-        const worldX = (mouseX - state.panX) / state.scale, worldY = (mouseY - state.panY) / state.scale;
-        const zoom = e.deltaY < 0 ? 1.1 : 0.9;
-        state.scale *= zoom;
-        state.panX = mouseX - worldX * state.scale;
-        state.panY = mouseY - worldY * state.scale;
+        const r = viewport.getBoundingClientRect();
+        const mX = e.clientX - r.left, mY = e.clientY - r.top;
+        const wX = (mX - state.panX) / state.scale, wY = (mY - state.panY) / state.scale;
+        const z = e.deltaY < 0 ? 1.1 : 0.9;
+        state.scale *= z;
+        state.panX = mX - wX * state.scale;
+        state.panY = mY - wY * state.scale;
         updateTransform();
     };
 
     viewport.onmousedown = (e) => {
         if (e.button === 1 || (e.button === 0 && e.ctrlKey)) {
-            state.isPanning = true;
-            state.lastMouseX = e.clientX; state.lastMouseY = e.clientY;
+            state.isPanning = true; state.lastMouseX = e.clientX; state.lastMouseY = e.clientY;
             viewport.style.cursor = 'grabbing';
         } else if (e.button === 0) startDrawing(e);
     };
@@ -998,27 +649,15 @@ document.addEventListener('DOMContentLoaded', () => {
             state.panY += e.clientY - state.lastMouseY;
             state.lastMouseX = e.clientX; state.lastMouseY = e.clientY;
             updateTransform();
-        } else {
-            draw(e);
-            ctxGuide.clearRect(0, 0, guideCanvas.width, guideCanvas.height);
-            drawSymmetryGuides();
-            if (state.gridSnap) {
-                const pos = getPos(e);
-                snapIndicator.style.display = 'block';
-                snapIndicator.style.left = pos.x + 'px'; snapIndicator.style.top = pos.y + 'px';
-            } else snapIndicator.style.display = 'none';
-        }
+        } else draw(e);
     };
 
     window.onmouseup = () => { state.isPanning = false; viewport.style.cursor = 'crosshair'; stopDrawing(); };
-
     window.onkeydown = (e) => {
         if (e.target.tagName === 'INPUT') return;
         if (e.ctrlKey && e.key === 'z') { e.preventDefault(); undo(); }
-        const keys = { 'b': 'brush', 'e': 'eraser', 'f': 'fill', 'i': 'picker', 't': 'text', 'p': 'poly', 'c': 'curve' };
-        if (keys[e.key.toLowerCase()]) setTool(keys[e.key.toLowerCase()]);
-        if (e.key.toLowerCase() === 'm') setSymmetry('radial');
-        if (e.key.toLowerCase() === 'v') setSymmetry('reflect');
+        const k = { 'b': 'brush', 'e': 'eraser', 'f': 'fill', 'i': 'picker', 't': 'text' };
+        if (k[e.key.toLowerCase()]) setTool(k[e.key.toLowerCase()]);
     };
 
     init();
