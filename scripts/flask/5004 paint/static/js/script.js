@@ -697,8 +697,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function exportArtworkAsPng(src) {
         const w = parseInt(prompt("Export Width (px):", "1920"));
-        const h = parseInt(prompt("Export Height (px):", "1080"));
-        if (!w || !h) return;
+        if (!w) return;
+        const h = Math.round((w * 1080) / 1920);
 
         fetch(src).then(res => res.text()).then(svgStr => {
             const blob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
