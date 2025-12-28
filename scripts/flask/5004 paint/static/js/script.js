@@ -321,7 +321,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (el) { el.remove(); saveHistory(); }
             return;
         }
-        if (state.tool === 'text') { addTextPrompt(e); return; }
+        if (state.tool === 'text') {
+            // Now handled by drag logic
+        } else {
+            // Normal drag tools
+        }
 
         const pos = getPos(e);
         if (state.tool === 'poly') {
@@ -400,6 +404,18 @@ document.addEventListener('DOMContentLoaded', () => {
             el.setAttribute('transform', `translate(${pos.x}, ${pos.y}) scale(0,0)`);
             common['fill'] = state.color;
             common['stroke'] = 'none';
+        } else if (state.tool === 'text') {
+            el = document.createElementNS(NS, 'text');
+            el.textContent = "Text...";
+            el.setAttribute('x', 0); el.setAttribute('y', 0);
+            el.setAttribute('font-family', 'Outfit');
+            el.setAttribute('font-weight', '500');
+            el.setAttribute('font-size', '100');
+            el.setAttribute('text-anchor', 'middle');
+            el.setAttribute('dominant-baseline', 'middle');
+            el.setAttribute('transform', `translate(${pos.x}, ${pos.y}) scale(0,0)`);
+            common['fill'] = state.color;
+            common['stroke'] = 'none';
         }
 
         if (state.brushType === 'airbrush' && el) el.style.filter = 'blur(5px)';
@@ -458,10 +474,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 const topX = (x1 + x2) / 2;
                 const d = `M ${topX} ${y1} L ${x1} ${y2} L ${x2} ${y2} Z`;
                 state.activeElement.setAttribute('d', d);
-            } else if (state.tool === 'stamp') {
+            } else if (state.tool === 'stamp' || state.tool === 'text') {
                 const w = pos.x - state.startX, h = pos.y - state.startY;
                 const baseSize = 100;
-                // Flip and scale based on drag direction
                 const sx = w / baseSize, sy = h / baseSize;
                 state.activeElement.setAttribute('transform', `translate(${state.startX + w / 2}, ${state.startY + h / 2}) scale(${sx}, ${sy})`);
             }
@@ -562,6 +577,18 @@ document.addEventListener('DOMContentLoaded', () => {
     function stopDrawing() {
         if (!state.isDrawing) return;
         state.isDrawing = false;
+
+        if (state.tool === 'text' && state.activeElement) {
+            const txt = prompt("Enter text:", "");
+            if (!txt) {
+                overlayLayer.innerHTML = '';
+                state.activeElement = null;
+                return;
+            }
+            state.activeElement.textContent = txt;
+            drawSymmetryPreview(); // Refresh clones with the actual text
+        }
+
         commitShape();
     }
 
@@ -619,16 +646,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function addTextPrompt(e) {
-        const t = prompt("Text:", "Hello");
-        if (!t) return;
-        const pos = getPos(e);
-        const el = document.createElementNS(NS, 'text');
-        el.textContent = t; el.setAttribute('x', pos.x); el.setAttribute('y', pos.y);
-        el.setAttribute('font-family', 'Outfit'); el.setAttribute('font-size', state.size * 5);
-        el.setAttribute('fill', state.color); drawingLayer.appendChild(el);
-        saveHistory();
-    }
+    // Removed addTextPrompt - functionality merged into stopDrawing flow
 
     function updateGridView() {
         if (state.gridShow) {
