@@ -45,6 +45,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnStampsPopover = document.getElementById('btn-stamps-popover');
     const stampsPopover = document.getElementById('stamps-popover');
     const btnAddStamp = document.getElementById('btn-add-stamp');
+    const contextMenu = document.getElementById('context-menu');
+    const cmDelete = document.getElementById('cm-delete');
 
     // --- State ---
     const state = {
@@ -197,8 +199,28 @@ document.addEventListener('DOMContentLoaded', () => {
                 renderStamps();
                 stampsPopover.classList.remove('visible');
             };
+            b.oncontextmenu = (e) => {
+                e.preventDefault();
+                showContextMenu(e, cl);
+            };
             grid.appendChild(b);
         });
+    }
+
+    let currentContextStamp = null;
+    function showContextMenu(e, cl) {
+        currentContextStamp = cl;
+        contextMenu.style.display = 'block';
+        contextMenu.style.left = `${e.clientX}px`;
+        contextMenu.style.top = `${e.clientY}px`;
+    }
+
+    function deleteStamp(cl) {
+        if (!confirm(`Delete stamp ${cl}?`)) return;
+        state.stamps = state.stamps.filter(s => s !== cl);
+        if (state.selectedStamp === cl) state.selectedStamp = state.stamps[0] || '';
+        saveIcons();
+        renderStamps();
     }
 
     function setColor(c) {
@@ -694,7 +716,13 @@ document.addEventListener('DOMContentLoaded', () => {
     btnStampsPopover.onclick = (e) => { e.stopPropagation(); stampsPopover.classList.toggle('visible'); };
     document.addEventListener('click', (e) => {
         if (!stampsPopover.contains(e.target) && e.target !== btnStampsPopover) stampsPopover.classList.remove('visible');
+        contextMenu.style.display = 'none';
     });
+
+    cmDelete.onclick = () => {
+        if (currentContextStamp) deleteStamp(currentContextStamp);
+        contextMenu.style.display = 'none';
+    };
 
     brushSizeInput.oninput = (e) => { state.size = e.target.value; sizeValDisplay.textContent = state.size; };
     colorPicker.oninput = (e) => setColor(e.target.value);
