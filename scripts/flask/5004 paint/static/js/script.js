@@ -377,12 +377,13 @@ document.addEventListener('DOMContentLoaded', () => {
             document.body.removeChild(temp);
 
             el.textContent = content;
-            el.setAttribute('x', pos.x); el.setAttribute('y', pos.y);
+            el.setAttribute('x', 0); el.setAttribute('y', 0);
             el.setAttribute('font-family', isBrand ? '"Font Awesome 6 Brands"' : '"Font Awesome 6 Free"');
             el.setAttribute('font-weight', isBrand ? '400' : '900');
-            el.setAttribute('font-size', '1px');
+            el.setAttribute('font-size', '100');
             el.setAttribute('text-anchor', 'middle');
             el.setAttribute('dominant-baseline', 'middle');
+            el.setAttribute('transform', `translate(${pos.x}, ${pos.y}) scale(0,0)`);
             common['fill'] = state.color;
             common['stroke'] = 'none';
         }
@@ -423,10 +424,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 state.activeElement.setAttribute('rx', rx);
                 state.activeElement.setAttribute('ry', ry);
             } else if (state.tool === 'stamp') {
-                const w = Math.abs(pos.x - state.startX), h = Math.abs(pos.y - state.startY);
-                state.activeElement.setAttribute('font-size', Math.max(w, h));
-                state.activeElement.setAttribute('x', state.startX + (pos.x - state.startX) / 2);
-                state.activeElement.setAttribute('y', state.startY + (pos.y - state.startY) / 2);
+                const w = pos.x - state.startX, h = pos.y - state.startY;
+                const baseSize = 100;
+                // Flip and scale based on drag direction
+                const sx = w / baseSize, sy = h / baseSize;
+                state.activeElement.setAttribute('transform', `translate(${state.startX + w / 2}, ${state.startY + h / 2}) scale(${sx}, ${sy})`);
             }
         } else {
             // Previews for multi-click tools
