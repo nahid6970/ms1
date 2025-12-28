@@ -91,8 +91,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Functions ---
 
     function init() {
-        canvas.width = 1500;
-        canvas.height = 1500;
+        canvas.width = 1920;
+        canvas.height = 1080;
         syncOverlay();
         ctx.fillStyle = '#ffffff';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -220,6 +220,9 @@ document.addEventListener('DOMContentLoaded', () => {
         ctxOverlay.shadowBlur = isEraser ? 0 : ctx.shadowBlur;
         ctxOverlay.shadowColor = isEraser ? 'transparent' : ctx.shadowColor;
         ctxOverlay.globalAlpha = isEraser ? 1.0 : ctx.globalAlpha;
+
+        ctxGuide.clearRect(0, 0, guideCanvas.width, guideCanvas.height);
+        drawSymmetryGuides();
     }
 
     function loadIcons() {
@@ -360,9 +363,14 @@ document.addEventListener('DOMContentLoaded', () => {
     function centerCanvas() {
         const vW = viewport.clientWidth;
         const vH = viewport.clientHeight;
-        state.panX = (vW - canvas.width) / 2;
-        state.panY = (vH - canvas.height) / 2;
-        state.scale = 0.8;
+
+        const scaleX = (vW - 80) / canvas.width;
+        const scaleY = (vH - 80) / canvas.height;
+        state.scale = Math.min(scaleX, scaleY, 1);
+
+        state.panX = (vW - canvas.width * state.scale) / 2;
+        state.panY = (vH - canvas.height * state.scale) / 2;
+
         updateTransform();
     }
 
@@ -374,11 +382,17 @@ document.addEventListener('DOMContentLoaded', () => {
         let newWidth = canvas.width, newHeight = canvas.height;
         let shiftX = 0, shiftY = 0;
         const buffer = 300;
+        const expandAmount = 1000; // Total expansion per axis
 
-        if (x > canvas.width - buffer) newWidth += 800;
-        if (y > canvas.height - buffer) newHeight += 800;
-        if (x < buffer) { newWidth += 800; shiftX = 800; }
-        if (y < buffer) { newHeight += 800; shiftY = 800; }
+        // Expand symmetrically to keep the center in the same spot relative to the content
+        if (x > canvas.width - buffer || x < buffer) {
+            newWidth += expandAmount;
+            shiftX = expandAmount / 2;
+        }
+        if (y > canvas.height - buffer || y < buffer) {
+            newHeight += expandAmount;
+            shiftY = expandAmount / 2;
+        }
 
         if (newWidth !== canvas.width || newHeight !== canvas.height) {
             resizeCanvas(newWidth, newHeight, shiftX, shiftY);
