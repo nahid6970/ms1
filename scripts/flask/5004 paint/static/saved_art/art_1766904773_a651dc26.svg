@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" id="main-svg" width="1920" height="1080" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid meet"><defs><style>
+            @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
+            @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&amp;display=swap');
+            text { white-space: pre; }
+        </style></defs>
+                    <rect id="svg-bg" width="1920" height="1080" fill="#ffffff"/>
+                    <g id="drawing-layer"><path d="M 257.76247848537 718.4509466437177L 264.37177280550776 216.14457831325302L 651.0154905335628 718.4509466437177L 667.538726333907 202.9259896729776L 1701.8932874354562 229.3631669535284L 1672.1514629948365 682.0998278829604L 76.00688468158347 863.8554216867469L 171.84165232358004 57.52151462994836L 1721.7211703958692 143.4423407917384L 1840.6884681583476 143.4423407917384L 1814.251290877797 976.2134251290878L 211.4974182444062 999.3459552495697 L 254.45783132530119 718.4509466437177 Z" stroke="#e51f1f" stroke-width="48" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.4"/></g>
+                    <g id="overlay-layer" style="pointer-events: none;"/>
+                    <g id="guide-layer" style="pointer-events: none;"/>
+                </svg>

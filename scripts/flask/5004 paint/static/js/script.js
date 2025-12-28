@@ -218,6 +218,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         btnStampsPopover.classList.toggle('active', t === 'stamp');
         overlayLayer.innerHTML = '';
+        guideLayer.querySelectorAll('.poly-closer').forEach(e => e.remove());
         state.polyPoints = []; state.curvePoints = []; state.activeElement = null;
         saveSettings();
     }
@@ -506,11 +507,22 @@ document.addEventListener('DOMContentLoaded', () => {
         if (state.polyPoints.length === 0) {
             overlayLayer.innerHTML = '';
             state.activeElement = createSvgElement(pos);
+            // Show closure dot
+            const dot = document.createElementNS(NS, 'circle');
+            dot.className = 'poly-closer';
+            dot.setAttribute('cx', pos.x); dot.setAttribute('cy', pos.y);
+            dot.setAttribute('r', 8 / state.scale);
+            dot.setAttribute('fill', state.color);
+            dot.setAttribute('stroke', '#ffffff');
+            dot.setAttribute('stroke-width', 2 / state.scale);
+            dot.style.pointerEvents = 'none';
+            guideLayer.appendChild(dot);
         } else {
             const start = state.polyPoints[0];
             if (Math.hypot(pos.x - start.x, pos.y - start.y) < 20 / state.scale) {
                 const d = state.activeElement.getAttribute('d');
                 state.activeElement.setAttribute('d', d + ' Z');
+                guideLayer.querySelectorAll('.poly-closer').forEach(e => e.remove());
                 commitShape();
                 state.polyPoints = []; return;
             }
@@ -569,6 +581,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function commitShape() {
         if (!state.activeElement) return;
+        guideLayer.querySelectorAll('.poly-closer').forEach(e => e.remove());
         while (overlayLayer.firstChild) drawingLayer.appendChild(overlayLayer.firstChild);
         state.activeElement = null;
         saveHistory();
@@ -695,7 +708,13 @@ document.addEventListener('DOMContentLoaded', () => {
         saveHistory();
     };
     btnSave.onclick = () => {
+        if (state.activeElement) commitShape();
         const clone = svg.cloneNode(true);
+        const overlay = clone.getElementById('overlay-layer');
+        const guide = clone.getElementById('guide-layer');
+        if (overlay) overlay.innerHTML = '';
+        if (guide) guide.innerHTML = '';
+
         const defs = document.createElementNS(NS, 'defs');
         const style = document.createElementNS(NS, 'style');
         style.textContent = `
