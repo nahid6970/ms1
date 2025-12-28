@@ -209,6 +209,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function setTool(t) {
+        if (state.activeElement) commitShape();
         state.tool = t;
         toolsBtns.forEach(b => {
             if (b.id && b.id.startsWith('tool-')) {
@@ -461,14 +462,14 @@ document.addEventListener('DOMContentLoaded', () => {
             if (Math.hypot(pos.x - start.x, pos.y - start.y) < 20 / state.scale) {
                 const d = state.activeElement.getAttribute('d');
                 state.activeElement.setAttribute('d', d + ' Z');
-                drawingLayer.appendChild(state.activeElement);
-                state.polyPoints = []; state.activeElement = null;
-                saveHistory(); return;
+                commitShape();
+                state.polyPoints = []; return;
             }
             const d = state.activeElement.getAttribute('d');
             state.activeElement.setAttribute('d', d + ` L ${pos.x} ${pos.y}`);
         }
         state.polyPoints.push(pos);
+        drawSymmetryPreview();
     }
 
     function handleCurveClick(pos) {
@@ -482,9 +483,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const p0 = state.curvePoints[0], p2 = state.curvePoints[1], p1 = state.curvePoints[2];
             const d = `M ${p0.x} ${p0.y} Q ${p1.x} ${p1.y} ${p2.x} ${p2.y}`;
             state.activeElement.setAttribute('d', d);
-            drawingLayer.appendChild(state.activeElement);
-            state.curvePoints = []; state.activeElement = null;
-            saveHistory();
+            commitShape();
+            state.curvePoints = [];
+        } else {
+            drawSymmetryPreview();
         }
     }
 
@@ -516,12 +518,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function stopDrawing() {
-        if (!state.isDrawing) return;
-        state.isDrawing = false;
+    function commitShape() {
+        if (!state.activeElement) return;
         while (overlayLayer.firstChild) drawingLayer.appendChild(overlayLayer.firstChild);
         state.activeElement = null;
         saveHistory();
+    }
+
+    function stopDrawing() {
+        if (!state.isDrawing) return;
+        state.isDrawing = false;
+        commitShape();
     }
 
     function drawSymmetryGuides() {
