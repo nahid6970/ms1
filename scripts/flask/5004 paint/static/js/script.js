@@ -336,6 +336,7 @@ document.addEventListener('DOMContentLoaded', () => {
         state.points = [pos];
         overlayLayer.innerHTML = '';
         state.activeElement = createSvgElement(pos);
+        drawSymmetryPreview();
     }
 
     function createSvgElement(pos) {
@@ -352,7 +353,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (state.tool === 'brush' || state.tool === 'poly' || state.tool === 'curve') {
             el = document.createElementNS(NS, 'path');
-            el.setAttribute('d', `M ${pos.x} ${pos.y}`);
+            if (state.tool === 'brush' && state.brushType === 'multiLine') {
+                let d = "";
+                for (let i = 0; i < state.multiLineCount; i++) {
+                    const offset = (i - (state.multiLineCount - 1) / 2) * (state.size * 2.5);
+                    d += `M ${pos.x + offset} ${pos.y + offset} `;
+                }
+                el.setAttribute('d', d);
+            } else {
+                el.setAttribute('d', `M ${pos.x} ${pos.y}`);
+            }
         } else if (state.tool === 'line') {
             el = document.createElementNS(NS, 'line');
             el.setAttribute('x1', pos.x); el.setAttribute('y1', pos.y);
@@ -408,8 +418,23 @@ document.addEventListener('DOMContentLoaded', () => {
         if (state.isDrawing) {
             if (state.tool === 'brush') {
                 state.points.push(pos);
-                const d = state.activeElement.getAttribute('d');
-                state.activeElement.setAttribute('d', d + ` L ${pos.x} ${pos.y}`);
+                if (state.brushType === 'multiLine') {
+                    let d = "";
+                    const spacing = state.size * 2.5;
+                    for (let i = 0; i < state.multiLineCount; i++) {
+                        const offset = (i - (state.multiLineCount - 1) / 2) * spacing;
+                        // Start each multi-line segment with 'M'
+                        d += `M ${state.points[0].x + offset} ${state.points[0].y + offset} `;
+                        // Add 'L' segments for subsequent points
+                        for (let j = 1; j < state.points.length; j++) {
+                            d += `L ${state.points[j].x + offset} ${state.points[j].y + offset} `;
+                        }
+                    }
+                    state.activeElement.setAttribute('d', d);
+                } else {
+                    const d = state.activeElement.getAttribute('d');
+                    state.activeElement.setAttribute('d', d + ` L ${pos.x} ${pos.y}`);
+                }
             } else if (state.tool === 'line') {
                 state.activeElement.setAttribute('x2', pos.x);
                 state.activeElement.setAttribute('y2', pos.y);
