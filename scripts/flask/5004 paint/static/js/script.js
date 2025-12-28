@@ -365,6 +365,9 @@ document.addEventListener('DOMContentLoaded', () => {
             el = document.createElementNS(NS, 'ellipse');
             el.setAttribute('cx', pos.x); el.setAttribute('cy', pos.y);
             el.setAttribute('rx', 0); el.setAttribute('ry', 0);
+        } else if (state.tool === 'triangle') {
+            el = document.createElementNS(NS, 'path');
+            el.setAttribute('d', `M ${pos.x} ${pos.y} L ${pos.x} ${pos.y} L ${pos.x} ${pos.y} Z`);
         } else if (state.tool === 'stamp') {
             el = document.createElementNS(NS, 'text');
             const iconClass = state.selectedStamp;
@@ -424,6 +427,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 state.activeElement.setAttribute('cy', cy);
                 state.activeElement.setAttribute('rx', rx);
                 state.activeElement.setAttribute('ry', ry);
+            } else if (state.tool === 'triangle') {
+                const x1 = state.startX, y1 = state.startY;
+                const x2 = pos.x, y2 = pos.y;
+                const topX = (x1 + x2) / 2;
+                const d = `M ${topX} ${y1} L ${x1} ${y2} L ${x2} ${y2} Z`;
+                state.activeElement.setAttribute('d', d);
             } else if (state.tool === 'stamp') {
                 const w = pos.x - state.startX, h = pos.y - state.startY;
                 const baseSize = 100;
