@@ -734,8 +734,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.onmouseup = () => { state.isPanning = false; viewport.style.cursor = 'crosshair'; stopDrawing(); };
     window.onkeydown = (e) => {
+        if (state.activeElement && e.key === 'Escape') {
+            overlayLayer.innerHTML = '';
+            state.polyPoints = []; state.curvePoints = []; state.activeElement = null;
+            return;
+        }
         if (e.target.tagName === 'INPUT') return;
         if (e.ctrlKey && e.key === 'z') { e.preventDefault(); undo(); }
+        if (e.ctrlKey && (e.key === 's' || e.key === 'S')) { e.preventDefault(); btnSave.click(); }
         const k = { 'b': 'brush', 'e': 'eraser', 'f': 'fill', 'i': 'picker', 't': 'text' };
         if (k[e.key.toLowerCase()]) setTool(k[e.key.toLowerCase()]);
     };
