@@ -47,6 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnAddStamp = document.getElementById('btn-add-stamp');
     const contextMenu = document.getElementById('context-menu');
     const cmDelete = document.getElementById('cm-delete');
+    const cmExportPng = document.getElementById('cm-export-png');
 
     // --- State ---
     const state = {
@@ -201,15 +202,22 @@ document.addEventListener('DOMContentLoaded', () => {
             };
             b.oncontextmenu = (e) => {
                 e.preventDefault();
-                showContextMenu(e, cl);
+                showContextMenu(e, 'stamp', cl);
             };
             grid.appendChild(b);
         });
     }
 
-    let currentContextStamp = null;
-    function showContextMenu(e, cl) {
-        currentContextStamp = cl;
+    let currentContextType = null; // 'stamp' or 'artwork'
+    let currentContextData = null; // cl or src
+
+    function showContextMenu(e, type, data) {
+        currentContextType = type;
+        currentContextData = data;
+
+        // Only show Export option for artworks
+        if (cmExportPng) cmExportPng.style.display = type === 'artwork' ? 'flex' : 'none';
+
         contextMenu.style.display = 'block';
         contextMenu.style.left = `${e.clientX}px`;
         contextMenu.style.top = `${e.clientY}px`;
@@ -657,6 +665,10 @@ document.addEventListener('DOMContentLoaded', () => {
             ims.forEach(src => {
                 const it = document.createElement('div'); it.className = 'gallery-item';
                 const img = document.createElement('img'); img.src = src; img.onclick = () => loadFromGallery(src);
+                it.oncontextmenu = (e) => {
+                    e.preventDefault();
+                    showContextMenu(e, 'artwork', { src, element: it });
+                };
                 const del = document.createElement('div'); del.className = 'delete-btn';
                 del.innerHTML = '<i class="fa-solid fa-trash"></i>';
                 del.onclick = (e) => { e.stopPropagation(); deleteArtwork(src, it); };
@@ -676,8 +688,36 @@ document.addEventListener('DOMContentLoaded', () => {
             const parser = new DOMParser();
             const doc = parser.parseFromString(svgStr, 'image/svg+xml');
             const newDrawing = doc.getElementById('drawing-layer');
+            const newBg = doc.getElementById('svg-bg');
             if (newDrawing) drawingLayer.innerHTML = newDrawing.innerHTML;
+            if (newBg) bgRect.setAttribute('fill', newBg.getAttribute('fill'));
             saveHistory(); modal.classList.remove('open');
+        });
+    }
+
+    function exportArtworkAsPng(src) {
+        const w = parseInt(prompt("Export Width (px):", "1920"));
+        const h = parseInt(prompt("Export Height (px):", "1080"));
+        if (!w || !h) return;
+
+        fetch(src).then(res => res.text()).then(svgStr => {
+            const blob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = w;
+                canvas.height = h;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, w, h);
+                const pngUrl = canvas.toDataURL('image/png');
+                const link = document.createElement('a');
+                link.download = `export_${Date.now()}.png`;
+                link.href = pngUrl;
+                link.click();
+                URL.revokeObjectURL(url);
+            };
+            img.src = url;
         });
     }
 
@@ -720,7 +760,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     cmDelete.onclick = () => {
-        if (currentContextStamp) deleteStamp(currentContextStamp);
+        if (currentContextType === 'stamp') deleteStamp(currentContextData);
+        else if (currentContextType === 'artwork') deleteArtwork(currentContextData.src, currentContextData.element);
+        contextMenu.style.display = 'none';
+    };
+
+    cmExportPng.onclick = () => {
+        if (currentContextType === 'artwork') exportArtworkAsPng(currentContextData.src);
         contextMenu.style.display = 'none';
     };
 
