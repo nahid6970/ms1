@@ -699,17 +699,85 @@ document.addEventListener('DOMContentLoaded', () => {
         const w = parseInt(prompt("Export Width (px):", "1920"));
         if (!w) return;
         const h = Math.round((w * 1080) / 1920);
+        const scale = w / 1920;
 
         fetch(src).then(res => res.text()).then(svgStr => {
-            const blob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
+            const parser = new DOMParser();
+            const svgDoc = parser.parseFromString(svgStr, 'image/svg+xml');
+            const svgEl = svgDoc.documentElement;
+
+            // 1. Create a version without text to render paths/shapes
+            const pathsOnlyDoc = svgDoc.cloneNode(true);
+            const textNodes = pathsOnlyDoc.querySelectorAll('text');
+            textNodes.forEach(n => n.remove());
+            const pathsSvgStr = new XMLSerializer().serializeToString(pathsOnlyDoc);
+
+            const blob = new Blob([pathsSvgStr], { type: 'image/svg+xml;charset=utf-8' });
             const url = URL.createObjectURL(blob);
             const img = new Image();
+
             img.onload = () => {
                 const canvas = document.createElement('canvas');
                 canvas.width = w;
                 canvas.height = h;
                 const ctx = canvas.getContext('2d');
+
+                // Draw paths/shapes first
                 ctx.drawImage(img, 0, 0, w, h);
+
+                // 2. Manually draw fonts/icons to bypass blob isolation
+                const originalTextNodes = svgDoc.querySelectorAll('text');
+                originalTextNodes.forEach(node => {
+                    ctx.save();
+
+                    const fill = node.getAttribute('fill') || '#000000';
+                    const fontFamily = node.getAttribute('font-family') || 'Outfit';
+                    const fontWeight = node.getAttribute('font-weight') || '500';
+                    const fontSize = parseFloat(node.getAttribute('font-size') || '100');
+                    const text = node.textContent;
+                    const transformStr = node.getAttribute('transform') || '';
+
+                    ctx.fillStyle = fill;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+
+                    // Apply scale factor to the overall canvas context
+                    ctx.scale(scale, scale);
+
+                    // Robust transform parsing for multiple operations (rotate, scale, translate)
+                    if (transformStr) {
+                        const regex = /(\w+)\(([^)]+)\)/g;
+                        let match;
+                        while ((match = regex.exec(transformStr)) !== null) {
+                            const type = match[1];
+                            const args = match[2].split(/[,\s]+/).map(parseFloat);
+
+                            if (type === 'translate') {
+                                ctx.translate(args[0], args[1] || 0);
+                            } else if (type === 'scale') {
+                                ctx.scale(args[0], args[1] === undefined ? args[0] : args[1]);
+                            } else if (type === 'rotate') {
+                                if (args.length === 3) { // rotate(angle, cx, cy)
+                                    ctx.translate(args[1], args[2]);
+                                    ctx.rotate(args[0] * Math.PI / 180);
+                                    ctx.translate(-args[1], -args[2]);
+                                } else {
+                                    ctx.rotate(args[0] * Math.PI / 180);
+                                }
+                            }
+                        }
+                    } else {
+                        const x = parseFloat(node.getAttribute('x') || '0');
+                        const y = parseFloat(node.getAttribute('y') || '0');
+                        ctx.translate(x, y);
+                    }
+
+                    ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+                    ctx.fillText(text, 0, 0);
+
+                    ctx.restore();
+                });
+
                 const pngUrl = canvas.toDataURL('image/png');
                 const link = document.createElement('a');
                 link.download = `export_${Date.now()}.png`;
