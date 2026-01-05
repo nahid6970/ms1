@@ -1,7 +1,12 @@
 [
     {
         "name": "Test1",
-        "path": "C:/Users/nahid/ms/ms1/Testing/Test/SampleSource",
+        "path": "C:/Users/nahid/ms/ms1/Testing/Test/t1",
+        "active": false
+    },
+    {
+        "name": "Test2",
+        "path": "C:/Users/nahid/ms/ms1/Testing/Test/t2",
         "active": false
     }
 ]
