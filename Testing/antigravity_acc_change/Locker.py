@@ -9,9 +9,10 @@ class FileLockerApp(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("File Locker")
-        self.geometry("600x350")
+        self.geometry("600x450")
         self.configure(bg="#282c34")
         self.set_style()
+        self.selected_files = [] # Store files list separately
         self.create_widgets()
 
     def set_style(self):
@@ -68,13 +69,29 @@ class FileLockerApp(tk.Tk):
 
         # --- File Selection ---
         file_frame = ttk.Frame(main_frame)
-        file_frame.pack(fill="x", pady=(0, 10))
-        file_frame.columnconfigure(1, weight=1)
-
-        ttk.Label(file_frame, text="Select Files:").grid(row=0, column=0, sticky="w", padx=(0, 10))
-        self.file_entry = ttk.Entry(file_frame)
-        self.file_entry.grid(row=0, column=1, sticky="ew")
-        ttk.Button(file_frame, text="Browse", command=self.select_files, style="Browse.TButton").grid(row=0, column=2, sticky="e", padx=(10, 0))
+        file_frame.pack(fill="both", expand=True, pady=(0, 10))
+        
+        header_frame = ttk.Frame(file_frame)
+        header_frame.pack(fill="x", pady=(0, 5))
+        
+        ttk.Label(header_frame, text="Selected Files:").pack(side="left")
+        ttk.Button(header_frame, text="Browse Files", command=self.select_files, style="Browse.TButton").pack(side="right")
+        
+        # Listbox for files
+        self.file_listbox = tk.Listbox(
+            file_frame,
+            bg="#21252b",
+            fg="#abb2bf",
+            selectbackground="#41abff",
+            selectforeground="black",
+            font=("JetBrainsMono NF", 10),
+            borderwidth=1,
+            relief="flat",
+            highlightthickness=1,
+            highlightbackground="#333333",
+            highlightcolor="#41abff"
+        )
+        self.file_listbox.pack(fill="both", expand=True)
 
         # --- Password ---
         password_frame = ttk.Frame(main_frame)
@@ -101,22 +118,23 @@ class FileLockerApp(tk.Tk):
     def select_files(self):
         file_paths = filedialog.askopenfilenames()
         if file_paths:
-            self.file_entry.delete(0, tk.END)
-            self.file_entry.insert(0, ";".join(file_paths))
+            self.selected_files = list(file_paths)
+            self.file_listbox.delete(0, tk.END)
+            for path in self.selected_files:
+                self.file_listbox.insert(tk.END, path)
 
     def derive_key(self, password, salt, key_length=32):
         return PBKDF2(password.encode(), salt, dkLen=key_length)
 
     def encrypt_files(self):
-        file_paths = self.file_entry.get().split(";")
         password = self.password_entry.get()
 
-        if not all([file_paths, password]):
+        if not self.selected_files or not password:
             self.show_result("Please select files and enter a password.", "error")
             return
 
         processed_files = []
-        for file_path in file_paths:
+        for file_path in self.selected_files:
             if not file_path: continue
             try:
                 with open(file_path, 'rb') as f:
@@ -142,15 +160,14 @@ class FileLockerApp(tk.Tk):
 
 
     def decrypt_files(self):
-        file_paths = self.file_entry.get().split(";")
         password = self.password_entry.get()
 
-        if not all([file_paths, password]):
+        if not self.selected_files or not password:
             self.show_result("Please select files and enter a password.", "error")
             return
 
         processed_files = []
-        for file_path in file_paths:
+        for file_path in self.selected_files:
             if not file_path: continue
             try:
                 with open(file_path, 'rb') as f:
@@ -186,4 +203,3 @@ class FileLockerApp(tk.Tk):
 if __name__ == "__main__":
     app = FileLockerApp()
     app.mainloop()
-
