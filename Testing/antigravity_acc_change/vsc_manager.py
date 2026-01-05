@@ -2,29 +2,58 @@ import sys
 import json
 import os
 import shutil
+import tempfile
 from pathlib import Path
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, 
     QPushButton, QLabel, QScrollArea, QFrame, QLineEdit, QFileDialog,
-    QMessageBox, QDialog, QGraphicsDropShadowEffect
+    QMessageBox, QDialog, QGraphicsDropShadowEffect, QCheckBox
 )
 from PyQt6.QtCore import Qt, pyqtSignal, QSize
 from PyQt6.QtGui import QColor, QFont, QIcon
+
+# Crypto imports from Locker.py logic
+from Cryptodome.Cipher import AES
+from Cryptodome.Protocol.KDF import PBKDF2
 
 # Constants
 TARGET_DIR = r"C:\Users\nahid\ms\ms1\Testing\Test"
 FILES_TO_DELETE = ["state.vscdb", "state.vscdb.backup"]
 JSON_FILE = "profiles.json"
 
+def derive_key(password, salt, key_length=32):
+    return PBKDF2(password.encode(), salt, dkLen=key_length)
+
+def decrypt_file_data(file_path, password):
+    """Decrypts a file using the logic from Locker.py and returns the bytes."""
+    try:
+        with open(file_path, 'rb') as f:
+            salt, tag, nonce, ciphertext = [f.read(x) for x in (16, 16, 16, -1)]
+        
+        key = derive_key(password, salt)
+        cipher = AES.new(key, AES.MODE_EAX, nonce=nonce)
+        plaintext = cipher.decrypt_and_verify(ciphertext, tag)
+        return plaintext
+    except (ValueError, KeyError):
+        raise Exception("Decryption failed. Incorrect password or corrupted file.")
+    except Exception as e:
+        raise Exception(f"Decryption error: {str(e)}")
+
 class ProfileDialog(QDialog):
     def __init__(self, parent=None, profile=None):
         super().__init__(parent)
-        self.profile = profile or {"name": "", "path": "", "active": False}
+        self.profile = profile or {
+            "name": "", 
+            "path": "", 
+            "active": False,
+            "is_locked": False,
+            "password": ""
+        }
         self.init_ui()
 
     def init_ui(self):
         self.setWindowTitle("Edit Profile" if self.profile["name"] else "Add Profile")
-        self.setFixedWidth(400)
+        self.setFixedWidth(450)
         self.setStyleSheet("""
             QDialog {
                 background-color: #1e1e1e;
@@ -45,6 +74,11 @@ class ProfileDialog(QDialog):
             }
             QLineEdit:focus {
                 border: 1px solid #3d5afe;
+            }
+            QCheckBox {
+                color: #b0b0b0;
+                font-size: 14px;
+                margin-top: 10px;
             }
             QPushButton {
                 padding: 10px;
@@ -75,7 +109,7 @@ class ProfileDialog(QDialog):
 
         layout = QVBoxLayout(self)
         layout.setSpacing(10)
-        layout.setContentsMargins(20, 20, 20, 20)
+        layout.setContentsMargins(25, 25, 25, 25)
 
         layout.addWidget(QLabel("Profile Name"))
         self.name_input = QLineEdit(self.profile["name"])
@@ -91,6 +125,22 @@ class ProfileDialog(QDialog):
         path_layout.addWidget(self.browse_btn)
         layout.addLayout(path_layout)
 
+        # Locker Integration
+        self.lock_checkbox = QCheckBox("Files are encrypted (.enc)")
+        self.lock_checkbox.setChecked(self.profile.get("is_locked", False))
+        layout.addWidget(self.lock_checkbox)
+
+        self.password_label = QLabel("Encryption Password")
+        self.password_input = QLineEdit(self.profile.get("password", ""))
+        self.password_input.setEchoMode(QLineEdit.EchoMode.Password)
+        
+        layout.addWidget(self.password_label)
+        layout.addWidget(self.password_input)
+
+        # Toggle password visibility based on checkbox
+        self.lock_checkbox.toggled.connect(self.toggle_password_fields)
+        self.toggle_password_fields(self.lock_checkbox.isChecked())
+
         btn_layout = QHBoxLayout()
         btn_layout.setContentsMargins(0, 20, 0, 0)
         self.save_btn = QPushButton("Save Profile")
@@ -104,6 +154,10 @@ class ProfileDialog(QDialog):
         btn_layout.addWidget(self.save_btn)
         layout.addLayout(btn_layout)
 
+    def toggle_password_fields(self, checked):
+        self.password_label.setVisible(checked)
+        self.password_input.setVisible(checked)
+
     def browse_path(self):
         path = QFileDialog.getExistingDirectory(self, "Select Source Directory")
         if path:
@@ -111,11 +165,17 @@ class ProfileDialog(QDialog):
 
     def save(self):
         if not self.name_input.text() or not self.path_input.text():
-            QMessageBox.warning(self, "Error", "All fields are required!")
+            QMessageBox.warning(self, "Error", "Name and Path are required!")
             return
         
+        if self.lock_checkbox.isChecked() and not self.password_input.text():
+            QMessageBox.warning(self, "Error", "Password is required for encrypted files!")
+            return
+
         self.profile["name"] = self.name_input.text()
         self.profile["path"] = self.path_input.text()
+        self.profile["is_locked"] = self.lock_checkbox.isChecked()
+        self.profile["password"] = self.password_input.text() if self.lock_checkbox.isChecked() else ""
         self.accept()
 
     def get_data(self):
@@ -136,6 +196,7 @@ class ProfileCard(QFrame):
         self.setObjectName("profileCard")
         
         is_active = self.profile.get("active", False)
+        is_locked = self.profile.get("is_locked", False)
         
         active_style = """
             #profileCard {
@@ -164,6 +225,10 @@ class ProfileCard(QFrame):
             QLabel#pathLabel {
                 color: #808080;
                 font-size: 12px;
+            }
+            QLabel#lockIcon {
+                color: #e06c75;
+                font-size: 14px;
             }
             QPushButton#actionBtn {
                 background-color: transparent;
@@ -198,11 +263,23 @@ class ProfileCard(QFrame):
 
         # Info Layout
         info_layout = QVBoxLayout()
+        
+        name_row = QHBoxLayout()
         self.name_label = QLabel(self.profile["name"])
         self.name_label.setObjectName("nameLabel")
+        name_row.addWidget(self.name_label)
+        
+        if is_locked:
+            lock_label = QLabel("🔒 Locked")
+            lock_label.setObjectName("lockIcon")
+            name_row.addWidget(lock_label)
+        
+        name_row.addStretch()
+        
         self.path_label = QLabel(self.profile["path"])
         self.path_label.setObjectName("pathLabel")
-        info_layout.addWidget(self.name_label)
+        
+        info_layout.addLayout(name_row)
         info_layout.addWidget(self.path_label)
         
         layout.addLayout(info_layout, 1)
@@ -221,25 +298,14 @@ class ProfileCard(QFrame):
         # Edit/Delete Buttons
         self.edit_btn = QPushButton("✎")
         self.edit_btn.setObjectName("actionBtn")
-        self.edit_btn.setToolTip("Edit Profile")
         self.edit_btn.clicked.connect(lambda: self.edit_clicked.emit(self.profile))
         
         self.delete_btn = QPushButton("✕")
         self.delete_btn.setObjectName("actionBtn")
-        self.delete_btn.setToolTip("Delete Profile")
         self.delete_btn.clicked.connect(lambda: self.delete_clicked.emit(self.profile))
 
         layout.addWidget(self.edit_btn)
         layout.addWidget(self.delete_btn)
-
-        if not is_active:
-            # Add a subtle shadow to non-active cards
-            shadow = QGraphicsDropShadowEffect(self)
-            shadow.setBlurRadius(15)
-            shadow.setXOffset(0)
-            shadow.setYOffset(5)
-            shadow.setColor(QColor(0, 0, 0, 80))
-            self.setGraphicsEffect(shadow)
 
 class VSCodeStateManager(QMainWindow):
     def __init__(self):
@@ -263,8 +329,8 @@ class VSCodeStateManager(QMainWindow):
             json.dump(self.profiles, f, indent=4)
 
     def init_ui(self):
-        self.setWindowTitle("VS Code State Manager")
-        self.setMinimumSize(600, 700)
+        self.setWindowTitle("VS Code State Manager & Unlocker")
+        self.setMinimumSize(650, 750)
         self.setStyleSheet("""
             QMainWindow {
                 background-color: #121212;
@@ -286,9 +352,6 @@ class VSCodeStateManager(QMainWindow):
                 background: #333333;
                 min-height: 20px;
                 border-radius: 5px;
-            }
-            QScrollBar::handle:vertical:hover {
-                background: #444444;
             }
             #headerLabel {
                 color: white;
@@ -343,11 +406,9 @@ class VSCodeStateManager(QMainWindow):
         self.refresh_list()
 
     def refresh_list(self):
-        # Clear current list
         for i in reversed(range(self.scroll_layout.count())): 
             widget = self.scroll_layout.itemAt(i).widget()
-            if widget:
-                widget.setParent(None)
+            if widget: widget.setParent(None)
 
         if not self.profiles:
             empty_label = QLabel("No profiles added yet. Click '+ Add Profile' to start.")
@@ -367,8 +428,6 @@ class VSCodeStateManager(QMainWindow):
         dialog = ProfileDialog(self)
         if dialog.exec():
             new_profile = dialog.get_data()
-            # If it's the first profile, or if requested (though we don't handle that here yet)
-            # Default to inactive
             new_profile["active"] = False
             self.profiles.append(new_profile)
             self.save_profiles()
@@ -378,7 +437,6 @@ class VSCodeStateManager(QMainWindow):
         dialog = ProfileDialog(self, profile.copy())
         if dialog.exec():
             updated_profile = dialog.get_data()
-            # Update the original profile in the list
             index = self.profiles.index(profile)
             self.profiles[index] = updated_profile
             self.save_profiles()
@@ -396,10 +454,10 @@ class VSCodeStateManager(QMainWindow):
 
     def activate_profile(self, profile):
         try:
-            # 1. Perform file operations
-            self.execute_activation(profile["path"])
+            # Execute activation with decryption if needed
+            self.execute_activation(profile)
             
-            # 2. Update status in JSON
+            # Update status
             for p in self.profiles:
                 p["active"] = (p == profile)
             
@@ -408,14 +466,16 @@ class VSCodeStateManager(QMainWindow):
             
             QMessageBox.information(self, "Success", f"Profile '{profile['name']}' activated successfully!")
         except Exception as e:
-            QMessageBox.critical(self, "Error", f"Failed to activate profile: {str(e)}")
+            QMessageBox.critical(self, "Error", f"Failed to activate: {str(e)}")
 
-    def execute_activation(self, source_path):
-        # Check if source exists
+    def execute_activation(self, profile):
+        source_path = profile["path"]
+        is_locked = profile.get("is_locked", False)
+        password = profile.get("password", "")
+
         if not os.path.exists(source_path):
             raise Exception(f"Source path does not exist: {source_path}")
 
-        # Create target dir if it doesn't exist
         if not os.path.exists(TARGET_DIR):
             os.makedirs(TARGET_DIR)
 
@@ -424,28 +484,39 @@ class VSCodeStateManager(QMainWindow):
             target_file = os.path.join(TARGET_DIR, filename)
             if os.path.exists(target_file):
                 os.remove(target_file)
-                print(f"Deleted {target_file}")
 
-        # Copy files from source to target
-        # Assuming source_path is a directory containing the files
-        # Or if it's a folder, copy everything inside it to TARGET_DIR
+        # Copy and Decrypt if necessary
         for item in os.listdir(source_path):
             s = os.path.join(source_path, item)
-            d = os.path.join(TARGET_DIR, item)
+            
+            # Determine destination filename
+            d_name = item
+            is_encrypted_file = item.endswith(".enc")
+            
+            if is_locked and is_encrypted_file:
+                # Remove .enc extension for target
+                d_name = item[:-4]
+            
+            d = os.path.join(TARGET_DIR, d_name)
+
             if os.path.isfile(s):
-                shutil.copy2(s, d)
-                print(f"Copied {s} to {d}")
+                if is_locked and is_encrypted_file:
+                    # Decrypt in memory and write to target
+                    decrypted_data = decrypt_file_data(s, password)
+                    with open(d, 'wb') as f:
+                        f.write(decrypted_data)
+                else:
+                    # Normal copy
+                    shutil.copy2(s, d)
             elif os.path.isdir(s):
+                # Recursive directory copy (not decrypting within subdirs for now as per usual vscdb structure)
                 if os.path.exists(d):
                     shutil.rmtree(d)
                 shutil.copytree(s, d)
-                print(f"Copied directory {s} to {d}")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    app.setStyle("Fusion") # Better base for custom styling
-    
-    # Global font
+    app.setStyle("Fusion")
     font = QFont("Segoe UI", 10)
     app.setFont(font)
     

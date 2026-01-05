@@ -9,10 +9,11 @@ A modern, high-performance Python GUI application built with PyQt6 for managing 
     - **Add**: Create new profiles by selecting a source directory and giving it a name.
     - **Edit**: Modify existing profile names or paths.
     - **Delete**: Remove profiles you no longer need.
-- **Smart Activation**:
-    - Automatically cleans up target files (`state.vscdb` and `state.vscdb.backup`) from the VS Code testing directory.
+- **Smart Activation & Decryption**:
+    - Automatically cleans up target files (`state.vscdb` and `state.vscdb.backup`).
+    - **Integrated Locker**: If files are encrypted (`.enc`), the manager automatically decrypts them using your stored password before deployment.
     - Swaps in files from the selected profile source path.
-    - visual feedback: The active profile is highlighted with a distinct glowing gradient.
+    - visual feedback: The active profile is highlighted with a distinct glowing gradient and a lock icon if secured.
 - **Data Persistence**: Profiles are saved locally in a `profiles.json` file for persistence across sessions.
 
 ## 🛠️ Installation
@@ -35,10 +36,11 @@ pip install PyQt6
    ```
 2. **Add a Profile**:
    - Click the **+ Add Profile** button.
-   - Enter a name (e.g., "Web Dev State") and browse for the folder containing the `.vscdb` files you want to use.
+   - Enter a name and browse for the source folder.
+   - **Locker Settings**: If your files were encrypted using `Locker.py`, check the **"Files are encrypted (.enc)"** box and provide your password.
 3. **Activate a Profile**:
-   - Click the **Activate** button on any profile card.
-   - The application will delete the current state files in `C:\Users\nahid\ms\ms1\Testing\Test` and replace them with your profile's files.
+   - Click **Activate**.
+   - If the profile is locked, the app decrypts the `.enc` files on-the-fly and saves the clean versions to `C:\Users\nahid\ms\ms1\Testing\Test`.
    - Only one profile can be active at a time.
 
 ## 📂 Project Structure
