@@ -10,7 +10,7 @@
         "danger_color": "#fe1616",
         "show_github": true,
         "show_rclone": true,
-        "show_system_stats": true,
+        "show_system_stats": false,
         "always_on_top": true
     },
     "scripts": [
@@ -165,6 +165,23 @@
             "width": 0,
             "height": 0,
             "border_color": "#4bfb42"
+        },
+        {
+            "name": "AntiGravity",
+            "path": "C:/Users/nahid/ms/ms1/Testing/antigravity_acc_change/vsc_manager.py",
+            "type": "script",
+            "hide_terminal": true,
+            "ctrl_left_cmd": "",
+            "ctrl_right_cmd": "",
+            "font_size": 20,
+            "border_width": 0,
+            "corner_radius": 4,
+            "col_span": 1,
+            "row_span": 1,
+            "width": 0,
+            "height": 0,
+            "is_bold": false,
+            "is_italic": false
         }
     ],
     "github_repos": [

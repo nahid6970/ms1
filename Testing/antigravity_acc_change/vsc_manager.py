@@ -19,7 +19,7 @@ from Cryptodome.Protocol.KDF import PBKDF2
 # Constants
 TARGET_DIR = r"C:\Users\nahid\AppData\Roaming\Antigravity\User\globalStorage"
 FILES_TO_DELETE = ["state.vscdb", "state.vscdb.backup"]
-JSON_FILE = "profiles.json"
+JSON_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "profiles.json")
 
 def derive_key(password, salt, key_length=32):
     return PBKDF2(password.encode(), salt, dkLen=key_length)
