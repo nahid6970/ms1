@@ -157,6 +157,7 @@ class ProfileDialog(QDialog):
     def toggle_password_fields(self, checked):
         self.password_label.setVisible(checked)
         self.password_input.setVisible(checked)
+        self.adjustSize()
 
     def browse_path(self):
         path = QFileDialog.getExistingDirectory(self, "Select Source Directory")
