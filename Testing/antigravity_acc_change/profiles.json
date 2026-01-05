@@ -1,12 +1,16 @@
 [
     {
-        "name": "Test1",
-        "path": "C:/Users/nahid/ms/ms1/Testing/Test/t1",
-        "active": false
+        "name": "nahid6970",
+        "path": "C:/Users/nahid/ms/ms1/Testing/antigravity_acc_change/nahid6970",
+        "active": false,
+        "is_locked": false,
+        "password": ""
     },
     {
-        "name": "Test2",
-        "path": "C:/Users/nahid/ms/ms1/Testing/Test/t2",
-        "active": true
+        "name": "sahadat",
+        "path": "C:/Users/nahid/ms/ms1/Testing/antigravity_acc_change/sahadat",
+        "active": true,
+        "is_locked": false,
+        "password": ""
     }
 ]
