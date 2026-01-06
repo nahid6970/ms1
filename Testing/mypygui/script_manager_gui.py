@@ -367,14 +367,27 @@ class ScriptLauncherApp:
         for widget in self.grid_frame.winfo_children():
             widget.destroy()
 
-        cols = self.config["settings"]["columns"]
-        # Determine current folder level
+        # Determine current context and settings
         if self.view_stack:
-            folder_name, scripts = self.view_stack[-1]
+            current_folder = self.view_stack[-1]
+            folder_name = current_folder["name"]
+            scripts = current_folder["scripts"]
+            
+            # Folder-specific columns rule
+            c = current_folder.get("grid_columns", 0)
+            cols = c if c > 0 else self.config["settings"]["columns"]
+            
+            # Folder-specific child dimensions
+            def_w = current_folder.get("child_width", 0)
+            def_h = current_folder.get("child_height", 0)
+            
             self.title_lbl.config(text=f" ❯ {folder_name.upper()}")
             self.back_btn.pack(side="left", padx=(0, 5))
         else:
             scripts = self.config["scripts"]
+            cols = self.config["settings"]["columns"]
+            def_w, def_h = 0, 0
+            
             self.title_lbl.config(text=" SCRIPT MANAGER 🚀")
             self.back_btn.pack_forget()
 
@@ -455,8 +468,16 @@ class ScriptLauncherApp:
             custom_w = script.get("width", 0)
             custom_h = script.get("height", 0)
             
-            final_w = custom_w if custom_w > 0 else (160 * c_span + (16 * (c_span - 1)))
-            final_h = custom_h if custom_h > 0 else (45 * r_span + (16 * (r_span - 1)))
+            # Use folder-level child defaults if custom dimensions not set
+            if custom_w == 0 and def_w > 0:
+                final_w = def_w
+            else:
+                final_w = custom_w if custom_w > 0 else (160 * c_span + (16 * (c_span - 1)))
+            
+            if custom_h == 0 and def_h > 0:
+                final_h = def_h
+            else:
+                final_h = custom_h if custom_h > 0 else (45 * r_span + (16 * (r_span - 1)))
 
             btn = ctk.CTkButton(
                 self.grid_frame, 
@@ -513,7 +534,7 @@ class ScriptLauncherApp:
     def enter_folder(self, folder):
         if "scripts" not in folder:
             folder["scripts"] = []
-        self.view_stack.append((folder["name"], folder["scripts"]))
+        self.view_stack.append(folder)
         self.refresh_grid()
 
     def exit_folder(self):
@@ -535,7 +556,7 @@ class ScriptLauncherApp:
         if not self.script_drag_data["active"] and (dx > 10 or dy > 10):
             self.script_drag_data["active"] = True
             # Create a ghost label for visual feedback
-            scripts = self.view_stack[-1][1] if self.view_stack else self.config["scripts"]
+            scripts = self.view_stack[-1]["scripts"] if self.view_stack else self.config["scripts"]
             script = scripts[self.script_drag_data["index"]]
             self.script_drag_data["ghost"] = tk.Label(
                 self.root, text=script["name"], 
@@ -586,7 +607,7 @@ class ScriptLauncherApp:
                 target_idx = i
                 break
         
-        scripts = self.view_stack[-1][1] if self.view_stack else self.config["scripts"]
+        scripts = self.view_stack[-1]["scripts"] if self.view_stack else self.config["scripts"]
         if target_idx is not None and target_idx != self.script_drag_data["index"]:
             # Move item in current list
             item = scripts.pop(self.script_drag_data["index"])
@@ -767,6 +788,32 @@ class ScriptLauncherApp:
 
         info_frame.grid_columnconfigure(1, weight=1)
 
+        # --- Section 1.5: Folder Settings (If Folder) ---
+        if script.get("type") == "folder":
+            f_grid_frame = tk.LabelFrame(dialog, text="   FOLDER GRID SETTINGS   ", bg="#1d2027", fg="gray", font=(self.main_font, 10, "bold"), bd=1, relief="groove")
+            f_grid_frame.pack(fill="x", padx=15, pady=5)
+            f_grid_frame.grid_columnconfigure(1, weight=1)
+            f_grid_frame.grid_columnconfigure(3, weight=1)
+
+            # Folder Columns
+            tk.Label(f_grid_frame, text="Grid Cols:", fg="gray", bg="#1d2027").grid(row=0, column=0, sticky="w", padx=(10, 5), pady=5)
+            f_cols_var = tk.StringVar(value=str(script.get("grid_columns", 0)))
+            tk.Entry(f_grid_frame, textvariable=f_cols_var, bg="#2b2f38", fg="white", insertbackground="white", bd=0, width=5).grid(row=0, column=1, sticky="ew", padx=5, pady=5)
+            tk.Label(f_grid_frame, text="(0 = Global)", fg="#666666", bg="#1d2027", font=(self.main_font, 8)).grid(row=0, column=2, sticky="w", padx=5)
+
+            # Child Defaults
+            tk.Label(f_grid_frame, text="Child W:", fg="gray", bg="#1d2027").grid(row=1, column=0, sticky="w", padx=(10, 5), pady=5)
+            f_cw_var = tk.StringVar(value=str(script.get("child_width", 0)))
+            tk.Entry(f_grid_frame, textvariable=f_cw_var, bg="#2b2f38", fg="white", insertbackground="white", bd=0, width=5).grid(row=1, column=1, sticky="ew", padx=5, pady=5)
+
+            tk.Label(f_grid_frame, text="Child H:", fg="gray", bg="#1d2027").grid(row=1, column=2, sticky="w", padx=(10, 5), pady=5)
+            f_ch_var = tk.StringVar(value=str(script.get("child_height", 0)))
+            tk.Entry(f_grid_frame, textvariable=f_ch_var, bg="#2b2f38", fg="white", insertbackground="white", bd=0, width=5).grid(row=1, column=3, sticky="ew", padx=5, pady=5)
+        else:
+            f_cols_var = None
+            f_cw_var = None
+            f_ch_var = None
+
         # --- Section 2: Typography ---
         typo_frame = tk.LabelFrame(dialog, text="   TYPOGRAPHY   ", bg="#1d2027", fg="gray", font=(self.main_font, 10, "bold"), bd=1, relief="groove")
         typo_frame.pack(fill="x", padx=15, pady=5)
@@ -850,6 +897,18 @@ class ScriptLauncherApp:
                 script["ctrl_left_cmd"] = ctrl_left_var.get()
             if ctrl_right_var is not None:
                 script["ctrl_right_cmd"] = ctrl_right_var.get()
+            
+            # Save folder settings
+            if f_cols_var is not None:
+                try: script["grid_columns"] = int(f_cols_var.get())
+                except: script["grid_columns"] = 0
+            if f_cw_var is not None:
+                try: script["child_width"] = int(f_cw_var.get())
+                except: script["child_width"] = 0
+            if f_ch_var is not None:
+                try: script["child_height"] = int(f_ch_var.get())
+                except: script["child_height"] = 0
+                
             try:
                 script["font_size"] = int(fsize_var.get())
             except:
@@ -898,7 +957,7 @@ class ScriptLauncherApp:
     def remove_script(self, script):
         self.root.attributes("-topmost", False)
         if messagebox.askyesno("Confirm", f"Remove script '{script['name']}'?", parent=self.root):
-            scripts = self.view_stack[-1][1] if self.view_stack else self.config["scripts"]
+            scripts = self.view_stack[-1]["scripts"] if self.view_stack else self.config["scripts"]
             scripts.remove(script)
             self.save_config()
             self.refresh_grid()
@@ -926,7 +985,7 @@ class ScriptLauncherApp:
             if t == "folder":
                 name = simpledialog.askstring("Add Folder", "Enter folder name:", parent=self.root)
                 if name:
-                    scripts = self.view_stack[-1][1] if self.view_stack else self.config["scripts"]
+                    scripts = self.view_stack[-1]["scripts"] if self.view_stack else self.config["scripts"]
                     scripts.append({"name": name, "type": "folder", "scripts": []})
                     self.save_config()
                     self.refresh_grid()
@@ -935,7 +994,7 @@ class ScriptLauncherApp:
                 if name:
                     path = filedialog.askopenfilename(title="Select Script or Executable", parent=self.root)
                     if path:
-                        scripts = self.view_stack[-1][1] if self.view_stack else self.config["scripts"]
+                        scripts = self.view_stack[-1]["scripts"] if self.view_stack else self.config["scripts"]
                         scripts.append({"name": name, "path": path, "type": "script"})
                         self.save_config()
                         self.refresh_grid()

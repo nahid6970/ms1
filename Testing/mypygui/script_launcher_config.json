@@ -10,7 +10,7 @@
         "danger_color": "#fe1616",
         "show_github": false,
         "show_rclone": false,
-        "show_system_stats": false,
+        "show_system_stats": true,
         "always_on_top": false
     },
     "scripts": [
@@ -112,7 +112,10 @@
             "is_bold": false,
             "is_italic": false,
             "width": 0,
-            "height": 0
+            "height": 0,
+            "grid_columns": 0,
+            "child_width": 0,
+            "child_height": 0
         },
         {
             "name": "mklink",
