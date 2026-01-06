@@ -706,7 +706,8 @@ class ScriptLauncherApp:
     def duplicate_script(self, script):
         new_script = script.copy()
         new_script["name"] = f"{script['name']} (Copy)"
-        self.config["scripts"].append(new_script)
+        scripts = self.view_stack[-1]["scripts"] if self.view_stack else self.config["scripts"]
+        scripts.append(new_script)
         self.save_config()
         self.refresh_grid()
 
