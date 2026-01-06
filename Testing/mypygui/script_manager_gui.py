@@ -93,7 +93,9 @@ class ScriptLauncherApp:
         self.folder_labels = {}
         self.drag_data = {"x": 0, "y": 0}
         self.script_drag_data = {"index": None, "active": False, "ghost": None, "start_abs": (0, 0), "block_click": False}
+        self.script_drag_data = {"index": None, "active": False, "ghost": None, "start_abs": (0, 0), "block_click": False}
         self.view_stack = [] # Stack of (folder_name, script_list_reference)
+        self.clipboard_script = None # For Cut/Paste
         
         # Window sizing
         self.width = 950
@@ -632,10 +634,19 @@ class ScriptLauncherApp:
         if not target_widget:
             return
 
-        # Figure out target index
+        # Figure out target index using coordinate-based hit testing
+        # This is more robust than widget hierarchy for composite controls like CTkButton
         target_idx = None
-        for i, child in enumerate(self.grid_frame.winfo_children()):
-            if child == target_widget or any(target_widget == sub for sub in child.winfo_children()):
+        buttons = self.grid_frame.winfo_children()
+        
+        for i, btn in enumerate(buttons):
+            # Check if event coords are inside this button's bounding box
+            bx = btn.winfo_rootx()
+            by = btn.winfo_rooty()
+            bw = btn.winfo_width()
+            bh = btn.winfo_height()
+            
+            if bx <= event.x_root <= (bx + bw) and by <= event.y_root <= (by + bh):
                 target_idx = i
                 break
         
@@ -724,7 +735,9 @@ class ScriptLauncherApp:
 
         menu = tk.Menu(self.root, tearoff=0, bg="#2b2f38", fg="white", activebackground=self.config["settings"]["accent_color"])
         menu.add_command(label=f"Edit / Stylize", command=lambda: self.open_edit_dialog(script))
+        menu.add_command(label=f"Edit / Stylize", command=lambda: self.open_edit_dialog(script))
         menu.add_command(label="Duplicate", command=lambda: self.duplicate_script(script))
+        menu.add_command(label="Cut", command=lambda: self.cut_script(script))
         
         # Move Out Option (if inside a folder)
         if self.view_stack:
@@ -752,6 +765,25 @@ class ScriptLauncherApp:
             parent_list.append(script)
             self.save_config()
             self.refresh_grid()
+
+    def cut_script(self, script):
+        self.clipboard_script = script.copy()
+        # Remove from current location
+        scripts = self.view_stack[-1]["scripts"] if self.view_stack else self.config["scripts"]
+        if script in scripts:
+            scripts.remove(script)
+            self.save_config()
+            self.refresh_grid()
+            
+    def paste_script(self):
+        if not self.clipboard_script:
+            return
+        
+        scripts = self.view_stack[-1]["scripts"] if self.view_stack else self.config["scripts"]
+        scripts.append(self.clipboard_script.copy()) # Copy again to avoid ref issues if pasted multiple times
+        self.save_config()
+        self.refresh_grid()
+        self.root.attributes("-topmost", True)
 
     def duplicate_script(self, script):
         new_script = script.copy()
@@ -1083,8 +1115,19 @@ class ScriptLauncherApp:
                         self.refresh_grid()
             self.root.attributes("-topmost", True)
 
-        ctk.CTkButton(choice_dialog, text="📄 Script", width=100, command=lambda: start_add("script")).pack(side="left", padx=20)
-        ctk.CTkButton(choice_dialog, text="📁 Folder", width=100, command=lambda: start_add("folder")).pack(side="right", padx=20)
+        # Button Container
+        btn_frame = tk.Frame(choice_dialog, bg="#1d2027")
+        btn_frame.pack(pady=10)
+
+        ctk.CTkButton(btn_frame, text="📄 Script", width=100, command=lambda: start_add("script")).pack(side="left", padx=10)
+        ctk.CTkButton(btn_frame, text="📁 Folder", width=100, command=lambda: start_add("folder")).pack(side="left", padx=10)
+        
+        if self.clipboard_script:
+            # Resize for paste button
+            choice_dialog.geometry("280x200")
+            ctk.CTkButton(choice_dialog, text=f"📋 Paste '{self.clipboard_script['name']}'", fg_color="#e69138", hover_color="#b45f06", width=220, command=lambda: [choice_dialog.destroy(), self.paste_script()]).pack(side="bottom", pady=15)
+        else:
+             choice_dialog.geometry("280x150")
 
     def open_settings(self):
         self.root.attributes("-topmost", False)

@@ -20,8 +20,20 @@
             "scripts": [
                 {
                     "name": "Android Icon",
-                    "path": "C:/Users/nahid/ms/ms1/scripts/ffmpeg/android_icon_generator.ps1",
-                    "type": "script"
+                    "path": "C:\\Users\\nahid\\ms\\ms1\\scripts\\ffmpeg\\android_icon_generator.ps1",
+                    "type": "script",
+                    "hide_terminal": false,
+                    "ctrl_left_cmd": "",
+                    "ctrl_right_cmd": "",
+                    "font_size": 20,
+                    "border_width": 0,
+                    "corner_radius": 4,
+                    "col_span": 1,
+                    "row_span": 1,
+                    "width": 0,
+                    "height": 0,
+                    "is_bold": false,
+                    "is_italic": false
                 },
                 {
                     "name": "Convert",
@@ -66,77 +78,7 @@
         {
             "name": "System Info",
             "type": "folder",
-            "scripts": [
-                {
-                    "name": "Android Icon",
-                    "path": "C:/Users/nahid/ms/ms1/scripts/ffmpeg/android_icon_generator.ps1",
-                    "type": "script"
-                },
-                {
-                    "name": "Convert",
-                    "path": "C:/Users/nahid/ms/ms1/scripts/ffmpeg/convert.ps1",
-                    "type": "script"
-                },
-                {
-                    "name": "IMG-Dimension",
-                    "path": "C:/Users/nahid/ms/ms1/scripts/ffmpeg/image_dimension.ps1",
-                    "type": "script",
-                    "hide_terminal": false,
-                    "font_size": 20
-                },
-                {
-                    "name": "Merge",
-                    "path": "C:/Users/nahid/ms/ms1/scripts/ffmpeg/merge.ps1",
-                    "type": "script"
-                },
-                {
-                    "name": "Trim",
-                    "path": "C:/Users/nahid/ms/ms1/scripts/ffmpeg/trim.ps1",
-                    "type": "script"
-                },
-                {
-                    "name": "VID-Dimension",
-                    "path": "C:/Users/nahid/ms/ms1/scripts/ffmpeg/vid_dim.ps1",
-                    "type": "script",
-                    "hide_terminal": false,
-                    "font_size": 20
-                },
-                {
-                    "name": "GG",
-                    "type": "folder",
-                    "scripts": [],
-                    "hover_color": "#fbfd9f",
-                    "grid_columns": 0,
-                    "child_width": 0,
-                    "child_height": 0,
-                    "font_size": 20,
-                    "border_width": 0,
-                    "corner_radius": 4,
-                    "col_span": 1,
-                    "row_span": 1,
-                    "width": 0,
-                    "height": 0,
-                    "is_bold": false,
-                    "is_italic": false
-                },
-                {
-                    "name": "\udb80\udd1b",
-                    "path": "C:/Users/nahid/ms/ms1/scripts/ffmpeg/vid_dim.ps1",
-                    "type": "script",
-                    "hide_terminal": false,
-                    "font_size": 50,
-                    "ctrl_left_cmd": "",
-                    "ctrl_right_cmd": "",
-                    "border_width": 0,
-                    "corner_radius": 4,
-                    "col_span": 1,
-                    "row_span": 1,
-                    "width": 0,
-                    "height": 0,
-                    "is_bold": false,
-                    "is_italic": false
-                }
-            ],
+            "scripts": [],
             "font_size": 20,
             "color": "#f0d50f",
             "text_color": "#000000",
@@ -222,13 +164,14 @@
             "is_italic": false
         },
         {
-            "name": "\udb80\udd1b",
-            "path": "C:/Users/nahid/ms/ms1/scripts/ffmpeg/vid_dim.ps1",
-            "type": "script",
-            "hide_terminal": false,
-            "font_size": 50,
-            "ctrl_left_cmd": "",
-            "ctrl_right_cmd": "",
+            "name": "GG",
+            "type": "folder",
+            "scripts": [],
+            "hover_color": "#fbfd9f",
+            "grid_columns": 0,
+            "child_width": 0,
+            "child_height": 0,
+            "font_size": 20,
             "border_width": 0,
             "corner_radius": 4,
             "col_span": 1,
