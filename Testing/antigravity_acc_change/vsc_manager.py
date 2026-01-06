@@ -3,21 +3,24 @@ import json
 import os
 import shutil
 import tempfile
+from datetime import datetime
 from pathlib import Path
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, 
     QPushButton, QLabel, QScrollArea, QFrame, QLineEdit, QFileDialog,
-    QMessageBox, QDialog, QGraphicsDropShadowEffect, QCheckBox
+    QMessageBox, QDialog, QGraphicsDropShadowEffect, QCheckBox, 
+    QDateTimeEdit, QComboBox, QRadioButton, QButtonGroup
 )
-from PyQt6.QtCore import Qt, pyqtSignal, QSize
+from PyQt6.QtCore import Qt, pyqtSignal, QSize, QTimer, QDateTime, QDate, QTime
 from PyQt6.QtGui import QColor, QFont, QIcon
 
 # Crypto imports from Locker.py logic
+# Ensure pycryptodome is installed: pip install pycryptodome
 from Cryptodome.Cipher import AES
 from Cryptodome.Protocol.KDF import PBKDF2
 
 # Constants
-TARGET_DIR = r"C:\Users\nahid\AppData\Roaming\Antigravity\User\globalStorage"
+TARGET_DIR = r"C:\Users\nahid\ms\ms1\Testing\Test"
 FILES_TO_DELETE = ["state.vscdb", "state.vscdb.backup"]
 JSON_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "profiles.json")
 
@@ -47,13 +50,15 @@ class ProfileDialog(QDialog):
             "path": "", 
             "active": False,
             "is_locked": False,
-            "password": ""
+            "password": "",
+            "timer_enabled": False,
+            "target_time": None # ISO format string
         }
         self.init_ui()
 
     def init_ui(self):
         self.setWindowTitle("Edit Profile" if self.profile["name"] else "Add Profile")
-        self.setFixedWidth(450)
+        self.setFixedWidth(500)
         self.setStyleSheet("""
             QDialog {
                 background-color: #1e1e1e;
@@ -64,7 +69,7 @@ class ProfileDialog(QDialog):
                 font-size: 14px;
                 margin-top: 10px;
             }
-            QLineEdit {
+            QLineEdit, QDateTimeEdit, QComboBox {
                 background-color: #2d2d2d;
                 border: 1px solid #3d3d3d;
                 border-radius: 5px;
@@ -72,13 +77,13 @@ class ProfileDialog(QDialog):
                 color: white;
                 font-size: 14px;
             }
-            QLineEdit:focus {
+            QLineEdit:focus, QDateTimeEdit:focus {
                 border: 1px solid #3d5afe;
             }
-            QCheckBox {
+            QCheckBox, QRadioButton {
                 color: #b0b0b0;
                 font-size: 14px;
-                margin-top: 10px;
+                margin-top: 5px;
             }
             QPushButton {
                 padding: 10px;
@@ -125,7 +130,7 @@ class ProfileDialog(QDialog):
         path_layout.addWidget(self.browse_btn)
         layout.addLayout(path_layout)
 
-        # Locker Integration
+        # --- Locker Integration ---
         self.lock_checkbox = QCheckBox("Files are encrypted (.enc)")
         self.lock_checkbox.setChecked(self.profile.get("is_locked", False))
         layout.addWidget(self.lock_checkbox)
@@ -136,11 +141,53 @@ class ProfileDialog(QDialog):
         
         layout.addWidget(self.password_label)
         layout.addWidget(self.password_input)
+        
+        # --- Timer Integration ---
+        self.timer_checkbox = QCheckBox("Enable Countdown Timer")
+        self.timer_checkbox.setChecked(self.profile.get("timer_enabled", False))
+        layout.addWidget(self.timer_checkbox)
+        
+        self.timer_frame = QFrame()
+        timer_layout = QVBoxLayout(self.timer_frame)
+        timer_layout.setContentsMargins(0, 0, 0, 0)
+        
+        # 12/24 Hour format toggle
+        format_layout = QHBoxLayout()
+        self.radio_12h = QRadioButton("12-Hour")
+        self.radio_24h = QRadioButton("24-Hour")
+        self.radio_24h.setChecked(True) # Default
+        self.radio_group = QButtonGroup(self)
+        self.radio_group.addButton(self.radio_12h)
+        self.radio_group.addButton(self.radio_24h)
+        self.radio_group.buttonClicked.connect(self.update_time_format)
+        
+        format_layout.addWidget(QLabel("Format:"))
+        format_layout.addWidget(self.radio_12h)
+        format_layout.addWidget(self.radio_24h)
+        format_layout.addStretch()
+        timer_layout.addLayout(format_layout)
+        
+        timer_layout.addWidget(QLabel("Set Target Date & Time"))
+        self.dt_edit = QDateTimeEdit(QDateTime.currentDateTime())
+        self.dt_edit.setCalendarPopup(True)
+        if self.profile.get("target_time"):
+            self.dt_edit.setDateTime(QDateTime.fromString(self.profile["target_time"], Qt.DateFormat.ISODate))
+        else:
+            self.dt_edit.setDateTime(QDateTime.currentDateTime().addSecs(3600)) # Default +1h
 
-        # Toggle password visibility based on checkbox
+        timer_layout.addWidget(self.dt_edit)
+        layout.addWidget(self.timer_frame)
+
+        # Signal connections
         self.lock_checkbox.toggled.connect(self.toggle_password_fields)
+        self.timer_checkbox.toggled.connect(self.toggle_timer_fields)
+        
+        # Initial State
         self.toggle_password_fields(self.lock_checkbox.isChecked())
+        self.toggle_timer_fields(self.timer_checkbox.isChecked())
+        self.update_time_format()
 
+        # Action Buttons
         btn_layout = QHBoxLayout()
         btn_layout.setContentsMargins(0, 20, 0, 0)
         self.save_btn = QPushButton("Save Profile")
@@ -158,6 +205,16 @@ class ProfileDialog(QDialog):
         self.password_label.setVisible(checked)
         self.password_input.setVisible(checked)
         self.adjustSize()
+
+    def toggle_timer_fields(self, checked):
+        self.timer_frame.setVisible(checked)
+        self.adjustSize()
+
+    def update_time_format(self):
+        if self.radio_12h.isChecked():
+            self.dt_edit.setDisplayFormat("dd MMM yyyy h:mm ap")
+        else:
+            self.dt_edit.setDisplayFormat("dd MMM yyyy HH:mm")
 
     def browse_path(self):
         path = QFileDialog.getExistingDirectory(self, "Select Source Directory")
@@ -177,6 +234,14 @@ class ProfileDialog(QDialog):
         self.profile["path"] = self.path_input.text()
         self.profile["is_locked"] = self.lock_checkbox.isChecked()
         self.profile["password"] = self.password_input.text() if self.lock_checkbox.isChecked() else ""
+        
+        self.profile["timer_enabled"] = self.timer_checkbox.isChecked()
+        if self.timer_checkbox.isChecked():
+            # Save as ISO format
+            self.profile["target_time"] = self.dt_edit.dateTime().toString(Qt.DateFormat.ISODate)
+        else:
+            self.profile["target_time"] = None
+            
         self.accept()
 
     def get_data(self):
@@ -190,34 +255,154 @@ class ProfileCard(QFrame):
     def __init__(self, profile):
         super().__init__()
         self.profile = profile
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.update_countdown)
         self.init_ui()
+        
+        if self.profile.get("timer_enabled"):
+            self.timer.start(1000)
+            self.update_countdown() # Initial call
 
     def init_ui(self):
         self.setFrameShape(QFrame.Shape.StyledPanel)
         self.setObjectName("profileCard")
         
-        is_active = self.profile.get("active", False)
-        is_locked = self.profile.get("is_locked", False)
-        
-        active_style = """
-            #profileCard {
-                background-color: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #2a2e42, stop:1 #1e2235);
-                border: 2px solid #3d5afe;
-                border-radius: 12px;
-            }
-        """ if is_active else """
-            #profileCard {
-                background-color: #1e1e1e;
-                border: 1px solid #333333;
-                border-radius: 12px;
-            }
-            #profileCard:hover {
-                background-color: #252525;
-                border: 1px solid #444444;
-            }
-        """
+        # Initial styling call (will be updated by timer)
+        self.update_style()
 
-        self.setStyleSheet(active_style + """
+        layout = QHBoxLayout(self)
+        layout.setContentsMargins(15, 15, 15, 15)
+        layout.setSpacing(15)
+
+        # Info Layout
+        info_layout = QVBoxLayout()
+        
+        # Name Row
+        name_row = QHBoxLayout()
+        self.name_label = QLabel(self.profile["name"])
+        self.name_label.setObjectName("nameLabel")
+        name_row.addWidget(self.name_label)
+        
+        if self.profile.get("is_locked"):
+            lock_label = QLabel("🔒")
+            lock_label.setObjectName("lockIcon")
+            name_row.addWidget(lock_label)
+            
+        # Countdown Label
+        self.countdown_label = QLabel("")
+        self.countdown_label.setObjectName("countdownLabel")
+        self.countdown_label.setVisible(False)
+        name_row.addWidget(self.countdown_label)
+        
+        name_row.addStretch()
+        
+        # Path Label
+        self.path_label = QLabel(self.profile["path"])
+        self.path_label.setObjectName("pathLabel")
+        
+        info_layout.addLayout(name_row)
+        info_layout.addWidget(self.path_label)
+        
+        layout.addLayout(info_layout, 1)
+
+        # Right side Action
+        if self.profile.get("active", False):
+            status_label = QLabel("ACTIVE")
+            status_label.setObjectName("statusLabel")
+            layout.addWidget(status_label)
+        else:
+            self.activate_btn = QPushButton("Activate")
+            self.activate_btn.setObjectName("activateBtn")
+            self.activate_btn.clicked.connect(lambda: self.clicked.emit(self.profile))
+            layout.addWidget(self.activate_btn)
+
+        # Edit/Delete Buttons
+        self.edit_btn = QPushButton("✎")
+        self.edit_btn.setObjectName("actionBtn")
+        self.edit_btn.clicked.connect(lambda: self.edit_clicked.emit(self.profile))
+        
+        self.delete_btn = QPushButton("✕")
+        self.delete_btn.setObjectName("actionBtn")
+        self.delete_btn.clicked.connect(lambda: self.delete_clicked.emit(self.profile))
+
+        layout.addWidget(self.edit_btn)
+        layout.addWidget(self.delete_btn)
+
+    def update_countdown(self):
+        target_str = self.profile.get("target_time")
+        if not target_str:
+            self.countdown_label.setVisible(False)
+            return
+
+        target_dt = QDateTime.fromString(target_str, Qt.DateFormat.ISODate)
+        now_dt = QDateTime.currentDateTime()
+        
+        secs_left = now_dt.secsTo(target_dt)
+        
+        if secs_left > 0:
+            days = secs_left // 86400
+            hours = (secs_left % 86400) // 3600
+            minutes = (secs_left % 3600) // 60
+            
+            time_str = ""
+            if days > 0: time_str += f"{days}d "
+            if hours > 0: time_str += f"{hours}h "
+            time_str += f"{minutes}m" # Always show minutes, even if 0 if hours exist
+            if time_str == "": time_str = "< 1m" # Minimal representation
+            
+            self.countdown_label.setText(f"⏳ {time_str}")
+            self.countdown_label.setVisible(True)
+            self.update_style(active_timer=True)
+        else:
+            self.countdown_label.setText("⏰ Expired")
+            self.countdown_label.setVisible(True)
+            self.update_style(active_timer=False)
+            self.timer.stop()
+
+    def update_style(self, active_timer=False):
+        is_active = self.profile.get("active", False)
+        
+        # Base colors
+        card_bg = "#1e1e1e"
+        border = "1px solid #333333"
+        hover_bg = "#252525"
+        
+        if is_active:
+            # Blue Active Theme
+            style = """
+                #profileCard {
+                    background-color: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #2a2e42, stop:1 #1e2235);
+                    border: 2px solid #3d5afe;
+                    border-radius: 12px;
+                }
+            """
+        elif active_timer:
+            # Red Tint Theme for Active Counter
+            style = """
+                #profileCard {
+                    background-color: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #3c1e1e, stop:1 #2b1414);
+                    border: 1px solid #ff5252;
+                    border-radius: 12px;
+                }
+                #profileCard:hover {
+                    background-color: #4a2525;
+                }
+            """
+        else:
+            # Default
+            style = """
+                #profileCard {
+                    background-color: #1e1e1e;
+                    border: 1px solid #333333;
+                    border-radius: 12px;
+                }
+                #profileCard:hover {
+                    background-color: #252525;
+                    border: 1px solid #444444;
+                }
+            """
+            
+        self.setStyleSheet(style + """
             QLabel#nameLabel {
                 color: white;
                 font-size: 16px;
@@ -230,6 +415,16 @@ class ProfileCard(QFrame):
             QLabel#lockIcon {
                 color: #e06c75;
                 font-size: 14px;
+                margin-left: 5px;
+            }
+            QLabel#countdownLabel {
+                color: #ff5252;
+                font-weight: bold;
+                font-size: 13px;
+                margin-left: 10px;
+                background-color: #2b1414;
+                padding: 2px 6px;
+                border-radius: 4px;
             }
             QPushButton#actionBtn {
                 background-color: transparent;
@@ -257,56 +452,6 @@ class ProfileCard(QFrame):
                 font-size: 12px;
             }
         """)
-
-        layout = QHBoxLayout(self)
-        layout.setContentsMargins(15, 15, 15, 15)
-        layout.setSpacing(15)
-
-        # Info Layout
-        info_layout = QVBoxLayout()
-        
-        name_row = QHBoxLayout()
-        self.name_label = QLabel(self.profile["name"])
-        self.name_label.setObjectName("nameLabel")
-        name_row.addWidget(self.name_label)
-        
-        if is_locked:
-            lock_label = QLabel("🔒 Locked")
-            lock_label.setObjectName("lockIcon")
-            name_row.addWidget(lock_label)
-        
-        name_row.addStretch()
-        
-        self.path_label = QLabel(self.profile["path"])
-        self.path_label.setObjectName("pathLabel")
-        
-        info_layout.addLayout(name_row)
-        info_layout.addWidget(self.path_label)
-        
-        layout.addLayout(info_layout, 1)
-
-        # Status or Activate button
-        if is_active:
-            status_label = QLabel("ACTIVE")
-            status_label.setObjectName("statusLabel")
-            layout.addWidget(status_label)
-        else:
-            self.activate_btn = QPushButton("Activate")
-            self.activate_btn.setObjectName("activateBtn")
-            self.activate_btn.clicked.connect(lambda: self.clicked.emit(self.profile))
-            layout.addWidget(self.activate_btn)
-
-        # Edit/Delete Buttons
-        self.edit_btn = QPushButton("✎")
-        self.edit_btn.setObjectName("actionBtn")
-        self.edit_btn.clicked.connect(lambda: self.edit_clicked.emit(self.profile))
-        
-        self.delete_btn = QPushButton("✕")
-        self.delete_btn.setObjectName("actionBtn")
-        self.delete_btn.clicked.connect(lambda: self.delete_clicked.emit(self.profile))
-
-        layout.addWidget(self.edit_btn)
-        layout.addWidget(self.delete_btn)
 
 class VSCodeStateManager(QMainWindow):
     def __init__(self):
@@ -490,7 +635,6 @@ class VSCodeStateManager(QMainWindow):
         for item in os.listdir(source_path):
             s = os.path.join(source_path, item)
             
-            # Determine destination filename
             d_name = item
             is_encrypted_file = item.endswith(".enc")
             
@@ -502,15 +646,12 @@ class VSCodeStateManager(QMainWindow):
 
             if os.path.isfile(s):
                 if is_locked and is_encrypted_file:
-                    # Decrypt in memory and write to target
                     decrypted_data = decrypt_file_data(s, password)
                     with open(d, 'wb') as f:
                         f.write(decrypted_data)
                 else:
-                    # Normal copy
                     shutil.copy2(s, d)
             elif os.path.isdir(s):
-                # Recursive directory copy (not decrypting within subdirs for now as per usual vscdb structure)
                 if os.path.exists(d):
                     shutil.rmtree(d)
                 shutil.copytree(s, d)
