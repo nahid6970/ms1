@@ -641,7 +641,33 @@ class ScriptLauncherApp:
         
         scripts = self.view_stack[-1]["scripts"] if self.view_stack else self.config["scripts"]
         if target_idx is not None and target_idx != self.script_drag_data["index"]:
-            # Move item in current list
+            target_script = scripts[target_idx]
+            
+            # Feature: Drag ONTO a folder -> Move Into
+            if target_script.get("type") == "folder":
+                # Check if we dropped essentially "on" it? 
+                # For now, let's assume if you drop on a folder, you mean to move in.
+                # To distinguish reorder vs move-in, usually UI highlights. 
+                # Simplification: If target is folder, move in. Reordering folders requires dragging to non-folder or specific edge?
+                # Let's say: If target is folder, we move IN. (User request)
+                # But wait, how to reorder folders then? 
+                # Let's check dx/dy to see if we are 'centered' on it? No, winfo_containing is precise.
+                # Let's just implement explicit Move In.
+                
+                # Check for recursion (can't move folder into itself)
+                if script == target_script:
+                    return # Can't happen due to index check usually, but safely ignore
+                
+                if messagebox.askyesno("Move Item", f"Move '{script['name']}' into '{target_script['name']}'?", parent=self.root):
+                    item = scripts.pop(self.script_drag_data["index"])
+                    if "scripts" not in target_script:
+                        target_script["scripts"] = []
+                    target_script["scripts"].append(item)
+                    self.save_config()
+                    self.refresh_grid()
+                    return
+
+            # Normal Reorder
             item = scripts.pop(self.script_drag_data["index"])
             scripts.insert(target_idx, item)
             self.save_config()
@@ -699,9 +725,33 @@ class ScriptLauncherApp:
         menu = tk.Menu(self.root, tearoff=0, bg="#2b2f38", fg="white", activebackground=self.config["settings"]["accent_color"])
         menu.add_command(label=f"Edit / Stylize", command=lambda: self.open_edit_dialog(script))
         menu.add_command(label="Duplicate", command=lambda: self.duplicate_script(script))
+        
+        # Move Out Option (if inside a folder)
+        if self.view_stack:
+             menu.add_command(label="Move Up / Out", command=lambda: self.move_script_out(script))
+
         menu.add_separator()
         menu.add_command(label=f"Delete", command=lambda: self.remove_script(script))
         menu.post(event.x_root, event.y_root)
+
+    def move_script_out(self, script):
+        if not self.view_stack:
+            return
+
+        # Current container
+        current_list = self.view_stack[-1]["scripts"]
+        
+        # Parent container
+        if len(self.view_stack) > 1:
+            parent_list = self.view_stack[-2]["scripts"]
+        else:
+            parent_list = self.config["scripts"]
+            
+        if script in current_list:
+            current_list.remove(script)
+            parent_list.append(script)
+            self.save_config()
+            self.refresh_grid()
 
     def duplicate_script(self, script):
         new_script = script.copy()
