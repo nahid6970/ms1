@@ -687,6 +687,7 @@ class ScriptLauncherApp:
     def launch_script(self, script_obj):
         path = script_obj["path"]
         hide = script_obj.get("hide_terminal", False)
+        keep_open = script_obj.get("keep_open", False)
         
         # Determine creation flags
         # CREATE_NEW_CONSOLE (0x10) vs CREATE_NO_WINDOW (0x08000000)
@@ -702,21 +703,36 @@ class ScriptLauncherApp:
             if os.path.isfile(path):
                 if path.endswith(".py"):
                     python_exe = "pythonw" if hide else "python"
-                    subprocess.Popen([python_exe, path], creationflags=cflags)
+                    if not hide and keep_open:
+                         # Keep open means we probably want to see the output. 
+                         # Launching directly 'python script.py' usually closes immediately on finish.
+                         # We can use cmd /k python script.py
+                         subprocess.Popen(f'start cmd /k "{python_exe} "{path}""', shell=True, creationflags=cflags)
+                    else:
+                        subprocess.Popen([python_exe, path], creationflags=cflags)
                 elif path.lower().endswith(".ps1"):
                     # PowerShell execution
                     ps_args = ["powershell", "-ExecutionPolicy", "Bypass", "-File", path]
                     if hide:
                         # Additional flag for PS to stay quiet
                         ps_args = ["powershell", "-WindowStyle", "Hidden", "-ExecutionPolicy", "Bypass", "-NoProfile", "-File", path]
+                    elif keep_open:
+                         ps_args = ["powershell", "-NoExit", "-ExecutionPolicy", "Bypass", "-File", path]
                     subprocess.Popen(ps_args, creationflags=cflags)
                 else:
                     # Use shell start for .exe, .bat, or generic files
-                    subprocess.Popen(f'start "" "{path}"', shell=True, creationflags=cflags)
+                    if not hide and keep_open:
+                         # Try to keep cmd open
+                         subprocess.Popen(f'start cmd /k "{path}"', shell=True, creationflags=cflags)
+                    else:
+                         subprocess.Popen(f'start "" "{path}"', shell=True, creationflags=cflags)
             else:
                 # It's likely a command (e.g. 'code .', 'npm start')
                 # Run it directly in shell
-                subprocess.Popen(path, shell=True, creationflags=cflags)
+                if not hide and keep_open:
+                     subprocess.Popen(f'start cmd /k "{path}"', shell=True, creationflags=cflags)
+                else:
+                     subprocess.Popen(path, shell=True, creationflags=cflags)
         except Exception as e:
             messagebox.showerror("Error", f"Failed to launch:\n{path}\n\n{e}")
 
@@ -882,10 +898,17 @@ class ScriptLauncherApp:
             tk.Entry(path_cnt, textvariable=path_var, bg="#2b2f38", fg="white", insertbackground="white", bd=0).pack(side="left", fill="x", expand=True)
             tk.Button(path_cnt, text="..", command=lambda: path_var.set(filedialog.askopenfilename() or path_var.get()), bg="#3a3f4b", fg="white", width=2).pack(side="right", padx=(5,0))
             
-            # Hide Terminal Checkbox
+            # Checkboxes Frame
+            cb_frame = tk.Frame(info_frame, bg="#1d2027")
+            cb_frame.grid(row=2, column=0, columnspan=2, sticky="w", padx=10, pady=(0,5))
+            
             hide_var = tk.BooleanVar(value=script.get("hide_terminal", False))
-            cb_hide = tk.Checkbutton(info_frame, text="Hide Terminal / Console", variable=hide_var, bg="#1d2027", fg="#aaaaaa", selectcolor="#2b2f38", activebackground="#1d2027", activeforeground="white")
-            cb_hide.grid(row=2, column=0, columnspan=2, sticky="w", padx=10, pady=(0,5))
+            cb_hide = tk.Checkbutton(cb_frame, text="Hide", variable=hide_var, bg="#1d2027", fg="#aaaaaa", selectcolor="#2b2f38", activebackground="#1d2027", activeforeground="white")
+            cb_hide.pack(side="left", padx=(0, 10))
+            
+            keep_open_var = tk.BooleanVar(value=script.get("keep_open", False))
+            cb_keep = tk.Checkbutton(cb_frame, text="No Exit", variable=keep_open_var, bg="#1d2027", fg="#aaaaaa", selectcolor="#2b2f38", activebackground="#1d2027", activeforeground="white")
+            cb_keep.pack(side="left")
             
             # Advanced Bindings
             tk.Label(info_frame, text="Ctrl+Left Cmd:", fg="white", bg="#1d2027", font=(self.main_font, 9)).grid(row=3, column=0, sticky="w", padx=10, pady=5)
@@ -898,6 +921,7 @@ class ScriptLauncherApp:
         else:
             path_var = None
             hide_var = None
+            keep_open_var = None
             ctrl_left_var = None
             ctrl_right_var = None
 
@@ -1008,6 +1032,8 @@ class ScriptLauncherApp:
                 script["path"] = path_var.get()
             if hide_var is not None:
                 script["hide_terminal"] = hide_var.get()
+            if keep_open_var is not None:
+                script["keep_open"] = keep_open_var.get()
             if ctrl_left_var is not None:
                 script["ctrl_left_cmd"] = ctrl_left_var.get()
             if ctrl_right_var is not None:
