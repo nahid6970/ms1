@@ -115,7 +115,7 @@
             "height": 0,
             "grid_columns": 0,
             "child_width": 0,
-            "child_height": 0
+            "child_height": 150
         },
         {
             "name": "mklink",

@@ -353,14 +353,46 @@ class ScriptLauncherApp:
         return inner
 
     def init_ui_continued(self):
-        # MIDDLE SECTION: Buttons Grid
+        # MIDDLE SECTION: Buttons Grid (Scrollable)
         self.grid_scroll_container = tk.Frame(self.main_content, bg="#1d2027")
         self.grid_scroll_container.pack(fill="both", expand=True)
+
+        self.canvas = tk.Canvas(self.grid_scroll_container, bg="#1d2027", highlightthickness=0)
+        self.scrollbar = ctk.CTkScrollbar(self.grid_scroll_container, orientation="vertical", command=self.canvas.yview)
         
-        self.grid_frame = tk.Frame(self.grid_scroll_container, bg="#1d2027")
-        self.grid_frame.pack(fill="both", expand=True)
+        self.grid_frame = tk.Frame(self.canvas, bg="#1d2027")
+        
+        self.grid_frame.bind("<Configure>", self._on_frame_configure)
+        
+        self.canvas.create_window((0, 0), window=self.grid_frame, anchor="nw", tags="grid_frame_win")
+        self.canvas.configure(yscrollcommand=self.scrollbar.set)
+        
+        self.canvas.pack(side="left", fill="both", expand=True)
+        # self.scrollbar.pack(side="right", fill="y") # Hidden per request
+        
+        # Ensure frame fills canvas width
+        self.canvas.bind('<Configure>', lambda e: self.canvas.itemconfig("grid_frame_win", width=e.width))
 
         self.refresh_grid()
+        
+        # Bind scrolling on Enter AND Motion to ensure it catches initial state
+        self.grid_scroll_container.bind("<Enter>", self._bound_to_mousewheel)
+        self.grid_scroll_container.bind("<Motion>", self._bound_to_mousewheel)
+        self.grid_scroll_container.bind("<Leave>", self._unbound_to_mousewheel)
+
+    def _bound_to_mousewheel(self, event):
+        # Bind unconditionally, the check happens in _on_mousewheel
+        self.canvas.bind_all("<MouseWheel>", self._on_mousewheel)
+
+    def _unbound_to_mousewheel(self, event):
+        self.canvas.unbind_all("<MouseWheel>")
+
+    def _on_mousewheel(self, event):
+        if self.canvas.winfo_height() < self.grid_frame.winfo_height():
+            self.canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+    
+    def _on_frame_configure(self, event):
+        self.canvas.configure(scrollregion=self.canvas.bbox("all"))
 
     def refresh_grid(self):
         # Clear
