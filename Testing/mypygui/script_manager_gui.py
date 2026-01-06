@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox, simpledialog
 import customtkinter as ctk
+import shutil
 import json
 import os
 import subprocess
@@ -698,39 +699,43 @@ class ScriptLauncherApp:
         try:
             # Handle expand vars like %USERPROFILE%
             path = os.path.expandvars(path)
+            script_dir = os.path.dirname(path) if os.path.isfile(path) else None
             
             # Check if it is a file we should handle intelligently
             if os.path.isfile(path):
                 if path.endswith(".py"):
                     python_exe = "pythonw" if hide else "python"
                     if not hide and keep_open:
-                         # Keep open means we probably want to see the output. 
-                         # Launching directly 'python script.py' usually closes immediately on finish.
-                         # We can use cmd /k python script.py
-                         subprocess.Popen(f'start cmd /k "{python_exe} "{path}""', shell=True, creationflags=cflags)
+                         # Use quote-safe approach
+                         subprocess.Popen(f'start "" cmd /k "{python_exe}" "{path}"', shell=True, cwd=script_dir, creationflags=cflags)
                     else:
-                        subprocess.Popen([python_exe, path], creationflags=cflags)
+                        subprocess.Popen([python_exe, path], cwd=script_dir, creationflags=cflags)
                 elif path.lower().endswith(".ps1"):
                     # PowerShell execution
-                    ps_args = ["powershell", "-ExecutionPolicy", "Bypass", "-File", path]
+                    ps_bin = "pwsh" if shutil.which("pwsh") else "powershell"
+                    
                     if hide:
-                        # Additional flag for PS to stay quiet
-                        ps_args = ["powershell", "-WindowStyle", "Hidden", "-ExecutionPolicy", "Bypass", "-NoProfile", "-File", path]
-                    elif keep_open:
-                         ps_args = ["powershell", "-NoExit", "-ExecutionPolicy", "Bypass", "-File", path]
-                    subprocess.Popen(ps_args, creationflags=cflags)
+                        # Hidden: Use direct Popen list (no window)
+                        ps_args = [ps_bin, "-WindowStyle", "Hidden", "-ExecutionPolicy", "Bypass", "-NoProfile", "-File", path]
+                        subprocess.Popen(ps_args, cwd=script_dir, creationflags=cflags)
+                    else:
+                        # Visible: Use 'start' to ensure correct window environment
+                        no_exit = "-NoExit" if keep_open else ""
+                        # Use -Command "& 'path'" syntax which is often more robust for interactive scripts
+                        cmd_str = f'start "" "{ps_bin}" {no_exit} -ExecutionPolicy Bypass -Command "& \\"{path}\\""'
+                        subprocess.Popen(cmd_str, shell=True, cwd=script_dir, creationflags=cflags)
                 else:
                     # Use shell start for .exe, .bat, or generic files
                     if not hide and keep_open:
                          # Try to keep cmd open
-                         subprocess.Popen(f'start cmd /k "{path}"', shell=True, creationflags=cflags)
+                         subprocess.Popen(f'start "" cmd /k "{path}"', shell=True, cwd=script_dir, creationflags=cflags)
                     else:
-                         subprocess.Popen(f'start "" "{path}"', shell=True, creationflags=cflags)
+                         subprocess.Popen(f'start "" "{path}"', shell=True, cwd=script_dir, creationflags=cflags)
             else:
                 # It's likely a command (e.g. 'code .', 'npm start')
-                # Run it directly in shell
+                # Run it directly in shell with no specific cwd
                 if not hide and keep_open:
-                     subprocess.Popen(f'start cmd /k "{path}"', shell=True, creationflags=cflags)
+                     subprocess.Popen(f'start "" cmd /k "{path}"', shell=True, creationflags=cflags)
                 else:
                      subprocess.Popen(path, shell=True, creationflags=cflags)
         except Exception as e:
@@ -903,11 +908,11 @@ class ScriptLauncherApp:
             cb_frame.grid(row=2, column=0, columnspan=2, sticky="w", padx=10, pady=(0,5))
             
             hide_var = tk.BooleanVar(value=script.get("hide_terminal", False))
-            cb_hide = tk.Checkbutton(cb_frame, text="Hide", variable=hide_var, bg="#1d2027", fg="#aaaaaa", selectcolor="#2b2f38", activebackground="#1d2027", activeforeground="white")
+            cb_hide = tk.Checkbutton(cb_frame, text="Hide Terminal", variable=hide_var, bg="#1d2027", fg="#aaaaaa", selectcolor="#2b2f38", activebackground="#1d2027", activeforeground="white")
             cb_hide.pack(side="left", padx=(0, 10))
             
             keep_open_var = tk.BooleanVar(value=script.get("keep_open", False))
-            cb_keep = tk.Checkbutton(cb_frame, text="No Exit", variable=keep_open_var, bg="#1d2027", fg="#aaaaaa", selectcolor="#2b2f38", activebackground="#1d2027", activeforeground="white")
+            cb_keep = tk.Checkbutton(cb_frame, text="No Exit Terminal", variable=keep_open_var, bg="#1d2027", fg="#aaaaaa", selectcolor="#2b2f38", activebackground="#1d2027", activeforeground="white")
             cb_keep.pack(side="left")
             
             # Advanced Bindings
