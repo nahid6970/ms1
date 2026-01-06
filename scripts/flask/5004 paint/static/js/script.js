@@ -392,21 +392,24 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
 
-                // BFS Flood Fill
+                // BFS Flood Fill with tighter tolerance
                 const stack = [finalX, finalY];
-                const seen = new Uint8Array(w * h); // 0=unseen, 1=seen
-                const resultData = new Uint8ClampedArray(w * h * 4); // New image data
+                const seen = new Uint8Array(w * h);
+                const resultData = new Uint8ClampedArray(w * h * 4);
 
-                // Helper to check color match
+                // Tighter color match tolerance (reduced from 64 to 32)
+                const tolerance = 32;
                 function match(i) {
-                    return Math.abs(d[i] - tr) < 64 && Math.abs(d[i + 1] - tg) < 64 && Math.abs(d[i + 2] - tb) < 64 && Math.abs(d[i + 3] - ta) < 64;
+                    return Math.abs(d[i] - tr) < tolerance && 
+                           Math.abs(d[i + 1] - tg) < tolerance && 
+                           Math.abs(d[i + 2] - tb) < tolerance && 
+                           Math.abs(d[i + 3] - ta) < tolerance;
                 }
 
                 while (stack.length > 0) {
                     const y = stack.pop();
                     const x = stack.pop();
                     const idx = y * w + x;
-                    const resultIdx = idx * 4;
 
                     if (seen[idx]) continue;
 
@@ -421,7 +424,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         resultData[widx * 4 + 2] = fb;
                         resultData[widx * 4 + 3] = fa;
 
-                        // Check north/south
                         if (y > 0 && !seen[widx - w] && match((widx - w) * 4)) stack.push(wx, y - 1);
                         if (y < h - 1 && !seen[widx + w] && match((widx + w) * 4)) stack.push(wx, y + 1);
 
@@ -446,41 +448,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
 
-                // Dilate to cover anti-aliasing (1px expansion)
-                const dilatedData = new Uint8ClampedArray(resultData);
-                for (let i = 0; i < w * h; i++) {
-                    const idx = i * 4;
-                    if (resultData[idx + 3] > 0) { // If pixel is filled
-                        const neighbors = [
-                            i - 1, i + 1, i - w, i + w, // N, S, E, W
-                            i - w - 1, i - w + 1, i + w - 1, i + w + 1 // Diagonals
-                        ];
-                        for (const n of neighbors) {
-                            if (n >= 0 && n < w * h && resultData[n * 4 + 3] === 0) {
-                                const nIdx = n * 4;
-                                dilatedData[nIdx] = fr;
-                                dilatedData[nIdx + 1] = fg;
-                                dilatedData[nIdx + 2] = fb;
-                                dilatedData[nIdx + 3] = fa;
-                            }
-                        }
-                    }
-                }
-
-                // Create SVG Image from result
+                // Create SVG Image from result (no dilation - cleaner edges)
                 const resCvs = document.createElement('canvas');
                 resCvs.width = w; resCvs.height = h;
-                resCvs.getContext('2d').putImageData(new ImageData(dilatedData, w, h), 0, 0);
+                resCvs.getContext('2d').putImageData(new ImageData(resultData, w, h), 0, 0);
 
                 const resImg = document.createElementNS(NS, 'image');
                 resImg.setAttribute('x', 0); resImg.setAttribute('y', 0);
                 resImg.setAttribute('width', w); resImg.setAttribute('height', h);
                 resImg.setAttribute('href', resCvs.toDataURL());
 
-                // Add to SVG
+                // Add to SVG at the bottom so vector lines stay on top
                 const g = document.createElementNS(NS, 'g');
                 g.appendChild(resImg);
-                // Insert at the bottom of the stack so vector lines stay sharp and on top
                 if (drawingLayer.firstChild) {
                     drawingLayer.insertBefore(g, drawingLayer.firstChild);
                 } else {
