@@ -345,36 +345,74 @@ document.addEventListener('DOMContentLoaded', () => {
             pickColor(e); return;
         }
         if (state.tool === 'fill') {
+            const pos = getPos(e);
+            const clickedEl = e.target.closest('#drawing-layer > *');
+            
+            // If clicked on an existing shape/path, change its fill color
+            if (clickedEl && clickedEl !== bgRect) {
+                const tagName = clickedEl.tagName.toLowerCase();
+                
+                // For paths, rects, circles, ellipses - set fill
+                if (['path', 'rect', 'circle', 'ellipse', 'polygon'].includes(tagName)) {
+                    clickedEl.setAttribute('fill', state.color);
+                    saveHistory();
+                    return;
+                }
+                
+                // For lines - convert to path with stroke
+                if (tagName === 'line') {
+                    clickedEl.setAttribute('stroke', state.color);
+                    saveHistory();
+                    return;
+                }
+                
+                // For groups containing images (previous fills) - replace
+                if (tagName === 'g' || tagName === 'image') {
+                    const parent = clickedEl.tagName === 'image' ? clickedEl.parentElement : clickedEl;
+                    if (parent && parent.tagName === 'g') {
+                        parent.remove();
+                        // Continue to do a new fill at this location
+                    }
+                }
+            }
+            
+            // Pixel-based flood fill for empty areas
             document.body.style.cursor = 'wait';
             const w = 1920, h = 1080;
-            const clickX = Math.round(e.clientX - viewport.getBoundingClientRect().left - state.panX);
-            const clickY = Math.round(e.clientY - viewport.getBoundingClientRect().top - state.panY);
-
-            // Normalize coordinates for scale
-            const finalX = Math.round(clickX / state.scale);
-            const finalY = Math.round(clickY / state.scale);
+            const finalX = Math.round(pos.x);
+            const finalY = Math.round(pos.y);
 
             if (finalX < 0 || finalY < 0 || finalX >= w || finalY >= h) {
                 document.body.style.cursor = 'crosshair';
                 return;
             }
 
-            // Rasterize current state to canvas for reading pixels
-            const svgData = new XMLSerializer().serializeToString(svg);
+            // Rasterize SVG at higher resolution for better edge detection
+            const scale = 2; // 2x resolution
+            const sw = w * scale, sh = h * scale;
+            const svgClone = svg.cloneNode(true);
+            svgClone.setAttribute('width', sw);
+            svgClone.setAttribute('height', sh);
+            svgClone.setAttribute('viewBox', `0 0 ${w} ${h}`);
+            
+            const svgData = new XMLSerializer().serializeToString(svgClone);
             const img = new Image();
             const blob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
             const url = URL.createObjectURL(blob);
 
             img.onload = () => {
                 const cvs = document.createElement('canvas');
-                cvs.width = w; cvs.height = h;
+                cvs.width = sw; cvs.height = sh;
                 const ctx = cvs.getContext('2d', { willReadFrequently: true });
-                ctx.drawImage(img, 0, 0);
+                ctx.drawImage(img, 0, 0, sw, sh);
                 URL.revokeObjectURL(url);
 
-                const pixels = ctx.getImageData(0, 0, w, h);
+                const pixels = ctx.getImageData(0, 0, sw, sh);
                 const d = pixels.data;
-                const targetIdx = (finalY * w + finalX) * 4;
+                
+                // Scale click position
+                const sx = finalX * scale, sy = finalY * scale;
+                const targetIdx = (sy * sw + sx) * 4;
                 const tr = d[targetIdx], tg = d[targetIdx + 1], tb = d[targetIdx + 2], ta = d[targetIdx + 3];
 
                 // Parse fill color
@@ -386,80 +424,103 @@ document.addEventListener('DOMContentLoaded', () => {
                 const fData = fCtx.getImageData(0, 0, 1, 1).data;
                 const fr = fData[0], fg = fData[1], fb = fData[2], fa = 255;
 
-                // Don't fill if color is same
-                if (tr === fr && tg === fg && tb === fb && ta === fa) {
-                    document.body.style.cursor = 'crosshair';
-                    return;
-                }
+                // Flood fill at higher resolution
+                const stack = [sx, sy];
+                const seen = new Uint8Array(sw * sh);
+                const resultData = new Uint8ClampedArray(sw * sh * 4);
 
-                // BFS Flood Fill with tighter tolerance
-                const stack = [finalX, finalY];
-                const seen = new Uint8Array(w * h);
-                const resultData = new Uint8ClampedArray(w * h * 4);
-
-                // Tighter color match tolerance (reduced from 64 to 32)
-                const tolerance = 32;
+                // Match function with good tolerance
+                const tolerance = 40;
                 function match(i) {
                     return Math.abs(d[i] - tr) < tolerance && 
                            Math.abs(d[i + 1] - tg) < tolerance && 
-                           Math.abs(d[i + 2] - tb) < tolerance && 
-                           Math.abs(d[i + 3] - ta) < tolerance;
+                           Math.abs(d[i + 2] - tb) < tolerance;
                 }
 
                 while (stack.length > 0) {
                     const y = stack.pop();
                     const x = stack.pop();
-                    const idx = y * w + x;
+                    const idx = y * sw + x;
 
-                    if (seen[idx]) continue;
+                    if (x < 0 || x >= sw || y < 0 || y >= sh || seen[idx]) continue;
 
-                    // Walk west
                     let wx = x;
-                    while (wx >= 0) {
-                        const widx = y * w + wx;
-                        if (seen[widx] || !match(widx * 4)) break;
+                    while (wx >= 0 && !seen[y * sw + wx] && match((y * sw + wx) * 4)) {
+                        const widx = y * sw + wx;
                         seen[widx] = 1;
                         resultData[widx * 4] = fr;
                         resultData[widx * 4 + 1] = fg;
                         resultData[widx * 4 + 2] = fb;
                         resultData[widx * 4 + 3] = fa;
 
-                        if (y > 0 && !seen[widx - w] && match((widx - w) * 4)) stack.push(wx, y - 1);
-                        if (y < h - 1 && !seen[widx + w] && match((widx + w) * 4)) stack.push(wx, y + 1);
-
+                        if (y > 0 && !seen[widx - sw] && match((widx - sw) * 4)) stack.push(wx, y - 1);
+                        if (y < sh - 1 && !seen[widx + sw] && match((widx + sw) * 4)) stack.push(wx, y + 1);
                         wx--;
                     }
 
-                    // Walk east
                     let ex = x + 1;
-                    while (ex < w) {
-                        const eidx = y * w + ex;
-                        if (seen[eidx] || !match(eidx * 4)) break;
+                    while (ex < sw && !seen[y * sw + ex] && match((y * sw + ex) * 4)) {
+                        const eidx = y * sw + ex;
                         seen[eidx] = 1;
                         resultData[eidx * 4] = fr;
                         resultData[eidx * 4 + 1] = fg;
                         resultData[eidx * 4 + 2] = fb;
                         resultData[eidx * 4 + 3] = fa;
 
-                        if (y > 0 && !seen[eidx - w] && match((eidx - w) * 4)) stack.push(ex, y - 1);
-                        if (y < h - 1 && !seen[eidx + w] && match((eidx + w) * 4)) stack.push(ex, y + 1);
-
+                        if (y > 0 && !seen[eidx - sw] && match((eidx - sw) * 4)) stack.push(ex, y - 1);
+                        if (y < sh - 1 && !seen[eidx + sw] && match((eidx + sw) * 4)) stack.push(ex, y + 1);
                         ex++;
                     }
                 }
 
-                // Create SVG Image from result (no dilation - cleaner edges)
+                // Expand fill to cover anti-aliased edges (2 passes at high res)
+                for (let pass = 0; pass < 3; pass++) {
+                    for (let y = 1; y < sh - 1; y++) {
+                        for (let x = 1; x < sw - 1; x++) {
+                            const idx = (y * sw + x) * 4;
+                            if (resultData[idx + 3] === 0) {
+                                // Check 4 neighbors
+                                const hasFilledNeighbor = 
+                                    resultData[((y-1) * sw + x) * 4 + 3] > 0 ||
+                                    resultData[((y+1) * sw + x) * 4 + 3] > 0 ||
+                                    resultData[(y * sw + x-1) * 4 + 3] > 0 ||
+                                    resultData[(y * sw + x+1) * 4 + 3] > 0;
+                                
+                                if (hasFilledNeighbor) {
+                                    // Check if this pixel is not a hard edge (line)
+                                    const pr = d[idx], pg = d[idx+1], pb = d[idx+2];
+                                    const brightness = (pr + pg + pb) / 3;
+                                    // Don't expand into very dark pixels (lines) unless filling with dark color
+                                    const fillBrightness = (fr + fg + fb) / 3;
+                                    if (brightness > 30 || fillBrightness < 50) {
+                                        resultData[idx] = fr;
+                                        resultData[idx + 1] = fg;
+                                        resultData[idx + 2] = fb;
+                                        resultData[idx + 3] = fa;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Downscale result back to original size
                 const resCvs = document.createElement('canvas');
-                resCvs.width = w; resCvs.height = h;
-                resCvs.getContext('2d').putImageData(new ImageData(resultData, w, h), 0, 0);
+                resCvs.width = sw; resCvs.height = sh;
+                resCvs.getContext('2d').putImageData(new ImageData(resultData, sw, sh), 0, 0);
+                
+                const finalCvs = document.createElement('canvas');
+                finalCvs.width = w; finalCvs.height = h;
+                const finalCtx = finalCvs.getContext('2d');
+                finalCtx.drawImage(resCvs, 0, 0, w, h);
 
                 const resImg = document.createElementNS(NS, 'image');
                 resImg.setAttribute('x', 0); resImg.setAttribute('y', 0);
                 resImg.setAttribute('width', w); resImg.setAttribute('height', h);
-                resImg.setAttribute('href', resCvs.toDataURL());
+                resImg.setAttribute('href', finalCvs.toDataURL());
 
-                // Add to SVG at the bottom so vector lines stay on top
                 const g = document.createElementNS(NS, 'g');
+                g.classList.add('fill-layer');
                 g.appendChild(resImg);
                 if (drawingLayer.firstChild) {
                     drawingLayer.insertBefore(g, drawingLayer.firstChild);
