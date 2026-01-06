@@ -389,15 +389,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 } catch (err) { /* Matrix transform might fail on some elements */ }
             }
 
-            // 2. Raster Flood Fill (Fallback for empty spaces/intersections)
+            // 2. Raster Flood Fill (Fallback) with 2x Super-Sampling
             document.body.style.cursor = 'wait';
-            const w = 1920, h = 1080;
-            const clickX = Math.round(e.clientX - viewport.getBoundingClientRect().left - state.panX);
-            const clickY = Math.round(e.clientY - viewport.getBoundingClientRect().top - state.panY);
 
-            // Normalize coordinates for scale
-            const finalX = Math.round(clickX / state.scale);
-            const finalY = Math.round(clickY / state.scale);
+            // Super-sampling factor for smoother edges
+            const ss = 2;
+            const baseW = 1920;
+            const baseH = 1080;
+            const w = baseW * ss;
+            const h = baseH * ss;
+
+            const clickX = e.clientX - viewport.getBoundingClientRect().left - state.panX;
+            const clickY = e.clientY - viewport.getBoundingClientRect().top - state.panY;
+
+            // Normalize coordinates for scale and super-sampling
+            const finalX = Math.round((clickX / state.scale) * ss);
+            const finalY = Math.round((clickY / state.scale) * ss);
 
             if (finalX < 0 || finalY < 0 || finalX >= w || finalY >= h) {
                 document.body.style.cursor = 'crosshair';
@@ -414,7 +421,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 const cvs = document.createElement('canvas');
                 cvs.width = w; cvs.height = h;
                 const ctx = cvs.getContext('2d', { willReadFrequently: true });
-                ctx.drawImage(img, 0, 0);
+
+                // Draw scaled up for super-sampling
+                ctx.drawImage(img, 0, 0, w, h);
                 URL.revokeObjectURL(url);
 
                 const pixels = ctx.getImageData(0, 0, w, h);
@@ -431,7 +440,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const fData = fCtx.getImageData(0, 0, 1, 1).data;
                 const fr = fData[0], fg = fData[1], fb = fData[2], fa = 255;
 
-                // Don't fill if color is same
+                // Don't fill if color is same (approx)
                 if (Math.abs(tr - fr) < 10 && Math.abs(tg - fg) < 10 && Math.abs(tb - fb) < 10 && Math.abs(ta - fa) < 10) {
                     document.body.style.cursor = 'crosshair';
                     return;
@@ -439,10 +448,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // BFS Flood Fill
                 const stack = [finalX, finalY];
-                const seen = new Uint8Array(w * h); // 0=unseen, 1=seen
-                const resultData = new Uint8ClampedArray(w * h * 4); // New image data
+                const seen = new Uint8Array(w * h);
+                const resultData = new Uint8ClampedArray(w * h * 4);
 
-                // Helper to check color match
                 function match(i) {
                     return Math.abs(d[i] - tr) < 64 && Math.abs(d[i + 1] - tg) < 64 && Math.abs(d[i + 2] - tb) < 64 && Math.abs(d[i + 3] - ta) < 64;
                 }
@@ -491,11 +499,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
 
-                // Dilate to cover anti-aliasing (1px expansion)
+                // Dilate (1px at 2x scale = 0.5px visual dilation - finer control)
                 const dilatedData = new Uint8ClampedArray(resultData);
                 for (let i = 0; i < w * h; i++) {
                     const idx = i * 4;
-                    if (resultData[idx + 3] > 0) { // If pixel is filled
+                    if (resultData[idx + 3] > 0) {
                         const neighbors = [
                             i - 1, i + 1, i - w, i + w, // N, S, E, W
                             i - w - 1, i - w + 1, i + w - 1, i + w + 1 // Diagonals
@@ -519,14 +527,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const resImg = document.createElementNS(NS, 'image');
                 resImg.setAttribute('x', 0); resImg.setAttribute('y', 0);
-                resImg.setAttribute('width', w); resImg.setAttribute('height', h);
+                resImg.setAttribute('width', baseW); // Display at logical size
+                resImg.setAttribute('height', baseH);
                 resImg.setAttribute('href', resCvs.toDataURL());
+                resImg.style.imageRendering = 'optimizeQuality'; // Ensure good downscaling
 
                 // Add to SVG
                 const g = document.createElementNS(NS, 'g');
                 g.appendChild(resImg);
 
-                // Insert at the bottom of the stack so vector lines stay sharp and on top
+                // Insert at the bottom of the stack
                 if (drawingLayer.firstChild) {
                     drawingLayer.insertBefore(g, drawingLayer.firstChild);
                 } else {
