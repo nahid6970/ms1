@@ -345,6 +345,51 @@ document.addEventListener('DOMContentLoaded', () => {
             pickColor(e); return;
         }
         if (state.tool === 'fill') {
+            // 1. Vector Hit Test (Prioritize recoloring existing lines/shapes)
+            const pt = svg.createSVGPoint();
+            pt.x = e.clientX; pt.y = e.clientY;
+
+            // Get all candidate shapes (visual order is bottom-to-top, so checking reverse for top-most)
+            const elements = Array.from(drawingLayer.querySelectorAll('path, rect, circle, ellipse, line, polyline, polygon, text')).reverse();
+
+            for (const el of elements) {
+                if (el.style.display === 'none') continue;
+                try {
+                    const localPt = pt.matrixTransform(el.getScreenCTM().inverse());
+
+                    // Check Stroke Hit (Change Line Color)
+                    if (el.isPointInStroke && el.isPointInStroke(localPt)) {
+                        el.setAttribute('stroke', state.color);
+                        saveHistory();
+                        return;
+                    }
+
+                    // Check Fill Hit (Change Solid Fill Color)
+                    // We only vector-fill if the shape already has a color. 
+                    // Empty shapes usually imply "fill the void", which the raster tool handles better for intersections.
+                    const currentFill = el.getAttribute('fill');
+                    if (currentFill && currentFill !== 'none' && el.isPointInFill && el.isPointInFill(localPt)) {
+                        el.setAttribute('fill', state.color);
+                        if (el.tagName === 'text') el.setAttribute('stroke', 'none');
+                        saveHistory();
+                        return;
+                    }
+
+                    // Text special case
+                    if (el.tagName === 'text') {
+                        const bbox = el.getBBox();
+                        if (localPt.x >= bbox.x && localPt.x <= bbox.x + bbox.width &&
+                            localPt.y >= bbox.y && localPt.y <= bbox.y + bbox.height) {
+                            el.setAttribute('fill', state.color);
+                            saveHistory();
+                            return;
+                        }
+                    }
+
+                } catch (err) { /* Matrix transform might fail on some elements */ }
+            }
+
+            // 2. Raster Flood Fill (Fallback for empty spaces/intersections)
             document.body.style.cursor = 'wait';
             const w = 1920, h = 1080;
             const clickX = Math.round(e.clientX - viewport.getBoundingClientRect().left - state.panX);
@@ -387,7 +432,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const fr = fData[0], fg = fData[1], fb = fData[2], fa = 255;
 
                 // Don't fill if color is same
-                if (tr === fr && tg === fg && tb === fb && ta === fa) {
+                if (Math.abs(tr - fr) < 10 && Math.abs(tg - fg) < 10 && Math.abs(tb - fb) < 10 && Math.abs(ta - fa) < 10) {
                     document.body.style.cursor = 'crosshair';
                     return;
                 }
@@ -480,6 +525,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Add to SVG
                 const g = document.createElementNS(NS, 'g');
                 g.appendChild(resImg);
+
                 // Insert at the bottom of the stack so vector lines stay sharp and on top
                 if (drawingLayer.firstChild) {
                     drawingLayer.insertBefore(g, drawingLayer.firstChild);
