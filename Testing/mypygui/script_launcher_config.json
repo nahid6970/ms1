@@ -78,13 +78,7 @@
         {
             "name": "System Info",
             "type": "folder",
-            "scripts": [
-                {
-                    "name": "gg",
-                    "type": "folder",
-                    "scripts": []
-                }
-            ],
+            "scripts": [],
             "font_size": 20,
             "color": "#f0d50f",
             "text_color": "#000000",

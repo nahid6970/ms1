@@ -1487,7 +1487,7 @@ class ScriptLauncherApp:
         dlg.attributes("-topmost", True)
         
         # Center
-        w, h = 300, 150
+        w, h = 320, 180
         cx = (dlg.winfo_screenwidth() // 2) - (w // 2)
         cy = (dlg.winfo_screenheight() // 2) - (h // 2)
         dlg.geometry(f"{w}x{h}+{cx}+{cy}")
