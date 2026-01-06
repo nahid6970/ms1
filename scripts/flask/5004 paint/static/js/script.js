@@ -392,7 +392,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Helper to check color match
                 function match(i) {
-                    return Math.abs(d[i] - tr) < 30 && Math.abs(d[i + 1] - tg) < 30 && Math.abs(d[i + 2] - tb) < 30 && Math.abs(d[i + 3] - ta) < 30;
+                    return Math.abs(d[i] - tr) < 64 && Math.abs(d[i + 1] - tg) < 64 && Math.abs(d[i + 2] - tb) < 64 && Math.abs(d[i + 3] - ta) < 64;
                 }
 
                 while (stack.length > 0) {
@@ -439,10 +439,31 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
 
+                // Dilate to cover anti-aliasing (1px expansion)
+                const dilatedData = new Uint8ClampedArray(resultData);
+                for (let i = 0; i < w * h; i++) {
+                    const idx = i * 4;
+                    if (resultData[idx + 3] > 0) { // If pixel is filled
+                        const neighbors = [
+                            i - 1, i + 1, i - w, i + w, // N, S, E, W
+                            i - w - 1, i - w + 1, i + w - 1, i + w + 1 // Diagonals
+                        ];
+                        for (const n of neighbors) {
+                            if (n >= 0 && n < w * h && resultData[n * 4 + 3] === 0) {
+                                const nIdx = n * 4;
+                                dilatedData[nIdx] = fr;
+                                dilatedData[nIdx + 1] = fg;
+                                dilatedData[nIdx + 2] = fb;
+                                dilatedData[nIdx + 3] = fa;
+                            }
+                        }
+                    }
+                }
+
                 // Create SVG Image from result
                 const resCvs = document.createElement('canvas');
                 resCvs.width = w; resCvs.height = h;
-                resCvs.getContext('2d').putImageData(new ImageData(resultData, w, h), 0, 0);
+                resCvs.getContext('2d').putImageData(new ImageData(dilatedData, w, h), 0, 0);
 
                 const resImg = document.createElementNS(NS, 'image');
                 resImg.setAttribute('x', 0); resImg.setAttribute('y', 0);
