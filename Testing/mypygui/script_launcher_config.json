@@ -34,7 +34,7 @@
                     "height": 0,
                     "is_bold": false,
                     "is_italic": false,
-                    "keep_open": true
+                    "keep_open": false
                 },
                 {
                     "name": "Convert",
