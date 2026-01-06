@@ -1136,14 +1136,14 @@ class ScriptLauncherApp:
         def start_add(t):
             choice_dialog.destroy()
             if t == "folder":
-                name = simpledialog.askstring("Add Folder", "Enter folder name:", parent=self.root)
+                name = self.show_custom_input("NEW FOLDER", "Enter folder name:")
                 if name:
                     scripts = self.view_stack[-1]["scripts"] if self.view_stack else self.config["scripts"]
                     scripts.append({"name": name, "type": "folder", "scripts": []})
                     self.save_config()
                     self.refresh_grid()
             else:
-                name = simpledialog.askstring("Add Script", "Enter button label:", parent=self.root)
+                name = self.show_custom_input("NEW SCRIPT", "Enter button label:")
                 if name:
                     path = filedialog.askopenfilename(title="Select Script or Executable", parent=self.root)
                     if path:
@@ -1458,17 +1458,91 @@ class ScriptLauncherApp:
         if name in self.repo_labels:
             ui = self.repo_labels[name]
             color = "#555555"
-            if status == "clean": color = self.config["settings"]["success_color"]
-            elif status == "dirty": color = self.config["settings"]["danger_color"]
-            elif status in ["error", "missing", "no_git"]: color = self.config["settings"]["danger_color"]
+            text = "Unknown"
+            if status == "clean": color, text = "#1fb141", "Clean"
+            elif status == "dirty": color, text = "#e2b528", "Dirty"
+            elif status == "error": color, text = "#fe1616", "Error"
+            elif status == "no_git": color, text = "#666666", "Not Git"
             
-            ui["indicator"].itemconfig(ui["circle"], fill=color)
+            ui["status"].configure(text=text, fg=color)
+            ui["circle"].configure(fg=color)
 
-    def update_folder_status_ui(self, name, exists):
+    def update_folder_status_ui(self, name, is_ok):
         if name in self.folder_labels:
             ui = self.folder_labels[name]
-            color = self.config["settings"]["success_color"] if exists else self.config["settings"]["danger_color"]
-            ui["indicator"].itemconfig(ui["circle"], fill=color)
+            color = "#1fb141" if is_ok else "#fe1616"
+            text = "Synced" if is_ok else "Error"
+            ui["status"].configure(text=text, fg=color)
+            ui["circle"].configure(fg=color)
+
+    def show_custom_input(self, title, prompt):
+        result = [None]
+        
+        # Disable main window
+        self.root.attributes("-topmost", False)
+        
+        dlg = tk.Toplevel(self.root)
+        dlg.overrideredirect(True)
+        dlg.configure(bg="#1d2027")
+        dlg.attributes("-topmost", True)
+        
+        # Center
+        w, h = 300, 150
+        cx = (dlg.winfo_screenwidth() // 2) - (w // 2)
+        cy = (dlg.winfo_screenheight() // 2) - (h // 2)
+        dlg.geometry(f"{w}x{h}+{cx}+{cy}")
+        
+        border_color = self.config["settings"].get("border_color", "#fe1616")
+        border = tk.Frame(dlg, bg=border_color)
+        border.pack(fill="both", expand=True)
+        
+        # Header
+        header = tk.Frame(border, bg="#1d2027")
+        header.pack(fill="x", pady=(1,0))
+        tk.Label(header, text=title, fg="gray", bg="#1d2027", font=(self.main_font, 10, "bold")).pack(side="left", padx=10)
+        
+        # Dragging
+        def start_move(event):
+            dlg.x = event.x
+            dlg.y = event.y
+        def do_move(event):
+            x = dlg.winfo_x() + (event.x - dlg.x)
+            y = dlg.winfo_y() + (event.y - dlg.y)
+            dlg.geometry(f"+{x}+{y}")
+        header.bind("<ButtonPress-1>", start_move)
+        header.bind("<B1-Motion>", do_move)
+        
+        # Content
+        content = tk.Frame(border, bg="#1d2027")
+        content.pack(fill="both", expand=True, padx=1, pady=1)
+        
+        tk.Label(content, text=prompt, fg="white", bg="#1d2027", font=(self.main_font, 10)).pack(pady=(20, 5))
+        
+        entry = tk.Entry(content, bg="#2b2f38", fg="white", font=(self.main_font, 11), insertbackground="white", bd=0, justify="center")
+        entry.pack(fill="x", padx=30, pady=5)
+        entry.focus()
+        
+        def on_ok(e=None):
+            val = entry.get().strip()
+            if val:
+                result[0] = val
+            dlg.destroy()
+            
+        def on_cancel():
+            dlg.destroy()
+            
+        entry.bind("<Return>", on_ok)
+        entry.bind("<Escape>", lambda e: on_cancel())
+        
+        btn_frame = tk.Frame(content, bg="#1d2027")
+        btn_frame.pack(pady=15)
+        
+        ctk.CTkButton(btn_frame, text="OK", width=80, height=30, command=on_ok, fg_color="#10b153", hover_color="#0d8c42").pack(side="left", padx=5)
+        ctk.CTkButton(btn_frame, text="Cancel", width=80, height=30, command=on_cancel, fg_color="#555555", hover_color="#333333").pack(side="left", padx=5)
+        
+        self.root.wait_window(dlg)
+        self.root.attributes("-topmost", True)
+        return result[0]
 
 if __name__ == "__main__":
     ctk.set_appearance_mode("dark")
