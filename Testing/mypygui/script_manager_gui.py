@@ -1081,19 +1081,57 @@ class ScriptLauncherApp:
     def add_script_dialog(self):
         self.root.attributes("-topmost", False)
         
-        # Simple choice dialog
+        # Styled choice dialog
         choice_dialog = tk.Toplevel(self.root)
-        choice_dialog.title("Add New")
-        choice_dialog.geometry("250x150")
+        choice_dialog.overrideredirect(True) # Borderless
         choice_dialog.configure(bg="#1d2027")
         choice_dialog.attributes("-topmost", True)
         
-        # Center choice dialog
-        cx = (choice_dialog.winfo_screenwidth() // 2) - 125
-        cy = (choice_dialog.winfo_screenheight() // 2) - 75
-        choice_dialog.geometry(f"+{cx}+{cy}")
+        # Dimensions
+        w = 300
+        h = 220 if self.clipboard_script else 150
+        cx = (choice_dialog.winfo_screenwidth() // 2) - (w // 2)
+        cy = (choice_dialog.winfo_screenheight() // 2) - (h // 2)
+        choice_dialog.geometry(f"{w}x{h}+{cx}+{cy}")
 
-        tk.Label(choice_dialog, text="What to add?", fg="white", bg="#1d2027", font=(self.main_font, 10, "bold")).pack(pady=10)
+        # --- Custom UI Structure ---
+        border_color = self.config["settings"].get("border_color", "#fe1616")
+        border_frame = tk.Frame(choice_dialog, bg=border_color)
+        border_frame.pack(fill="both", expand=True)
+
+        # Header
+        header_frame = tk.Frame(border_frame, bg="#1d2027")
+        header_frame.pack(fill="x", pady=(1,0))
+        
+        tk.Label(header_frame, text="ADD NEW", fg="gray", bg="#1d2027", font=(self.main_font, 10, "bold")).pack(side="left", padx=10)
+        
+        def close_win():
+            self.root.attributes("-topmost", True)
+            choice_dialog.destroy()
+            
+        close_btn = tk.Button(header_frame, text="✕", bg="#1d2027", fg="gray", activebackground="#ff605c", activeforeground="white", bd=0, width=4, command=close_win)
+        close_btn.pack(side="right", padx=5, pady=5)
+
+        # Drag Logic
+        def start_move(event):
+            choice_dialog.x = event.x
+            choice_dialog.y = event.y
+
+        def do_move(event):
+            deltax = event.x - choice_dialog.x
+            deltay = event.y - choice_dialog.y
+            x = choice_dialog.winfo_x() + deltax
+            y = choice_dialog.winfo_y() + deltay
+            choice_dialog.geometry(f"+{x}+{y}")
+
+        header_frame.bind("<ButtonPress-1>", start_move)
+        header_frame.bind("<B1-Motion>", do_move)
+        
+        # Content
+        content_frame = tk.Frame(border_frame, bg="#1d2027")
+        content_frame.pack(fill="both", expand=True, padx=1, pady=1)
+
+        tk.Label(content_frame, text="Select Item Type:", fg="white", bg="#1d2027", font=(self.main_font, 10)).pack(pady=(15, 10))
         
         def start_add(t):
             choice_dialog.destroy()
@@ -1116,18 +1154,14 @@ class ScriptLauncherApp:
             self.root.attributes("-topmost", True)
 
         # Button Container
-        btn_frame = tk.Frame(choice_dialog, bg="#1d2027")
-        btn_frame.pack(pady=10)
+        btn_frame = tk.Frame(content_frame, bg="#1d2027")
+        btn_frame.pack(pady=5)
 
         ctk.CTkButton(btn_frame, text="📄 Script", width=100, command=lambda: start_add("script")).pack(side="left", padx=10)
         ctk.CTkButton(btn_frame, text="📁 Folder", width=100, command=lambda: start_add("folder")).pack(side="left", padx=10)
         
         if self.clipboard_script:
-            # Resize for paste button
-            choice_dialog.geometry("280x200")
-            ctk.CTkButton(choice_dialog, text=f"📋 Paste '{self.clipboard_script['name']}'", fg_color="#e69138", hover_color="#b45f06", width=220, command=lambda: [choice_dialog.destroy(), self.paste_script()]).pack(side="bottom", pady=15)
-        else:
-             choice_dialog.geometry("280x150")
+            ctk.CTkButton(content_frame, text=f"📋 Paste '{self.clipboard_script['name']}'", fg_color="#e69138", hover_color="#b45f06", width=220, command=lambda: [choice_dialog.destroy(), self.paste_script()]).pack(side="bottom", pady=20)
 
     def open_settings(self):
         self.root.attributes("-topmost", False)

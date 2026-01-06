@@ -78,7 +78,13 @@
         {
             "name": "System Info",
             "type": "folder",
-            "scripts": [],
+            "scripts": [
+                {
+                    "name": "gg",
+                    "type": "folder",
+                    "scripts": []
+                }
+            ],
             "font_size": 20,
             "color": "#f0d50f",
             "text_color": "#000000",
@@ -153,24 +159,6 @@
             "hide_terminal": true,
             "ctrl_left_cmd": "",
             "ctrl_right_cmd": "",
-            "font_size": 20,
-            "border_width": 0,
-            "corner_radius": 4,
-            "col_span": 1,
-            "row_span": 1,
-            "width": 0,
-            "height": 0,
-            "is_bold": false,
-            "is_italic": false
-        },
-        {
-            "name": "GG",
-            "type": "folder",
-            "scripts": [],
-            "hover_color": "#fbfd9f",
-            "grid_columns": 0,
-            "child_width": 0,
-            "child_height": 0,
             "font_size": 20,
             "border_width": 0,
             "corner_radius": 4,
