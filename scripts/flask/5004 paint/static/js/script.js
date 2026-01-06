@@ -338,38 +338,126 @@ document.addEventListener('DOMContentLoaded', () => {
             pickColor(e); return;
         }
         if (state.tool === 'fill') {
-            const pt = svg.createSVGPoint();
-            pt.x = e.clientX; pt.y = e.clientY;
+            document.body.style.cursor = 'wait';
+            const w = 1920, h = 1080;
+            const clickX = Math.round(e.clientX - viewport.getBoundingClientRect().left - state.panX);
+            const clickY = Math.round(e.clientY - viewport.getBoundingClientRect().top - state.panY);
 
-            // Smart hit-testing: check geometric containment even for empty fills
-            let targetEl = null;
-            const elements = Array.from(drawingLayer.children).reverse();
+            // Normalize coordinates for scale
+            const finalX = Math.round(clickX / state.scale);
+            const finalY = Math.round(clickY / state.scale);
 
-            for (const el of elements) {
-                if (el.style.display === 'none') continue;
-                // Get CT M inverse to map point to element's space
-                try {
-                    const localPt = pt.matrixTransform(el.getScreenCTM().inverse());
-                    if (el.tagName === 'text') {
-                        // Text bounding box check (approximate)
-                        const bbox = el.getBBox();
-                        if (localPt.x >= bbox.x && localPt.x <= bbox.x + bbox.width &&
-                            localPt.y >= bbox.y && localPt.y <= bbox.y + bbox.height) {
-                            targetEl = el; break;
-                        }
-                    } else if ((el.isPointInFill && el.isPointInFill(localPt)) || (el.isPointInStroke && el.isPointInStroke(localPt))) {
-                        targetEl = el; break;
+            if (finalX < 0 || finalY < 0 || finalX >= w || finalY >= h) {
+                document.body.style.cursor = 'crosshair';
+                return;
+            }
+
+            // Rasterize current state to canvas for reading pixels
+            const svgData = new XMLSerializer().serializeToString(svg);
+            const img = new Image();
+            const blob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+
+            img.onload = () => {
+                const cvs = document.createElement('canvas');
+                cvs.width = w; cvs.height = h;
+                const ctx = cvs.getContext('2d', { willReadFrequently: true });
+                ctx.drawImage(img, 0, 0);
+                URL.revokeObjectURL(url);
+
+                const pixels = ctx.getImageData(0, 0, w, h);
+                const d = pixels.data;
+                const targetIdx = (finalY * w + finalX) * 4;
+                const tr = d[targetIdx], tg = d[targetIdx + 1], tb = d[targetIdx + 2], ta = d[targetIdx + 3];
+
+                // Parse fill color
+                const fillCvs = document.createElement('canvas');
+                fillCvs.width = 1; fillCvs.height = 1;
+                const fCtx = fillCvs.getContext('2d');
+                fCtx.fillStyle = state.color;
+                fCtx.fillRect(0, 0, 1, 1);
+                const fData = fCtx.getImageData(0, 0, 1, 1).data;
+                const fr = fData[0], fg = fData[1], fb = fData[2], fa = 255;
+
+                // Don't fill if color is same
+                if (tr === fr && tg === fg && tb === fb && ta === fa) {
+                    document.body.style.cursor = 'crosshair';
+                    return;
+                }
+
+                // BFS Flood Fill
+                const stack = [finalX, finalY];
+                const seen = new Uint8Array(w * h); // 0=unseen, 1=seen
+                const resultData = new Uint8ClampedArray(w * h * 4); // New image data
+
+                // Helper to check color match
+                function match(i) {
+                    return Math.abs(d[i] - tr) < 30 && Math.abs(d[i + 1] - tg) < 30 && Math.abs(d[i + 2] - tb) < 30 && Math.abs(d[i + 3] - ta) < 30;
+                }
+
+                while (stack.length > 0) {
+                    const y = stack.pop();
+                    const x = stack.pop();
+                    const idx = y * w + x;
+                    const resultIdx = idx * 4;
+
+                    if (seen[idx]) continue;
+
+                    // Walk west
+                    let wx = x;
+                    while (wx >= 0) {
+                        const widx = y * w + wx;
+                        if (seen[widx] || !match(widx * 4)) break;
+                        seen[widx] = 1;
+                        resultData[widx * 4] = fr;
+                        resultData[widx * 4 + 1] = fg;
+                        resultData[widx * 4 + 2] = fb;
+                        resultData[widx * 4 + 3] = fa;
+
+                        // Check north/south
+                        if (y > 0 && !seen[widx - w] && match((widx - w) * 4)) stack.push(wx, y - 1);
+                        if (y < h - 1 && !seen[widx + w] && match((widx + w) * 4)) stack.push(wx, y + 1);
+
+                        wx--;
                     }
-                } catch (err) { continue; }
-            }
 
-            if (targetEl) {
-                targetEl.setAttribute('fill', state.color);
-                if (targetEl.tagName !== 'text') targetEl.setAttribute('stroke', state.color);
-            } else {
-                bgRect.setAttribute('fill', state.color);
-            }
-            saveHistory();
+                    // Walk east
+                    let ex = x + 1;
+                    while (ex < w) {
+                        const eidx = y * w + ex;
+                        if (seen[eidx] || !match(eidx * 4)) break;
+                        seen[eidx] = 1;
+                        resultData[eidx * 4] = fr;
+                        resultData[eidx * 4 + 1] = fg;
+                        resultData[eidx * 4 + 2] = fb;
+                        resultData[eidx * 4 + 3] = fa;
+
+                        if (y > 0 && !seen[eidx - w] && match((eidx - w) * 4)) stack.push(ex, y - 1);
+                        if (y < h - 1 && !seen[eidx + w] && match((eidx + w) * 4)) stack.push(ex, y + 1);
+
+                        ex++;
+                    }
+                }
+
+                // Create SVG Image from result
+                const resCvs = document.createElement('canvas');
+                resCvs.width = w; resCvs.height = h;
+                resCvs.getContext('2d').putImageData(new ImageData(resultData, w, h), 0, 0);
+
+                const resImg = document.createElementNS(NS, 'image');
+                resImg.setAttribute('x', 0); resImg.setAttribute('y', 0);
+                resImg.setAttribute('width', w); resImg.setAttribute('height', h);
+                resImg.setAttribute('href', resCvs.toDataURL());
+
+                // Add to SVG
+                const g = document.createElementNS(NS, 'g');
+                g.appendChild(resImg);
+                drawingLayer.appendChild(g); // Append to layer
+
+                saveHistory();
+                document.body.style.cursor = 'crosshair';
+            };
+            img.src = url;
             return;
         }
         if (state.tool === 'eraser') {
