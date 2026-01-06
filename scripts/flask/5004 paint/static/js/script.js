@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Grid Settings
     const gridShowToggle = document.getElementById('grid-show');
     const gridSnapToggle = document.getElementById('grid-snap');
+    const transparentBgToggle = document.getElementById('check-transparent-bg');
     const gridSizeInput = document.getElementById('grid-size');
     const gridSizeVal = document.getElementById('grid-size-val');
     const snapIndicator = document.getElementById('snap-indicator');
@@ -72,9 +73,11 @@ document.addEventListener('DOMContentLoaded', () => {
         mirrorCount: 4,
         reflectType: 'horizontal',
         symmetry: 'none',
+        symmetry: 'none',
         gridShow: false,
         gridSnap: false,
         gridSize: 40,
+        transparentBg: false,
         points: [],
         multiLineCount: 3,
         stamps: [],
@@ -129,7 +132,8 @@ document.addEventListener('DOMContentLoaded', () => {
             symmetry: state.symmetry,
             mirrorCount: state.mirrorCount,
             reflectType: state.reflectType,
-            multiLineCount: state.multiLineCount
+            multiLineCount: state.multiLineCount,
+            transparentBg: state.transparentBg
         };
         fetch('/save_settings', {
             method: 'POST',
@@ -154,9 +158,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 state.mirrorCount = s.mirrorCount ?? 4;
                 state.reflectType = s.reflectType ?? 'horizontal';
                 state.multiLineCount = s.multiLineCount ?? 3;
+                state.transparentBg = s.transparentBg ?? false;
 
                 gridShowToggle.checked = state.gridShow;
                 gridSnapToggle.checked = state.gridSnap;
+                transparentBgToggle.checked = state.transparentBg;
+                updateBgTransparency();
                 gridSizeInput.value = state.gridSize;
                 gridSizeVal.textContent = state.gridSize;
                 brushSizeInput.value = state.size;
@@ -937,6 +944,14 @@ document.addEventListener('DOMContentLoaded', () => {
         } else canvasContainer.classList.remove('grid-active');
     }
 
+    function updateBgTransparency() {
+        if (state.transparentBg) {
+            bgRect.setAttribute('fill', 'none');
+        } else {
+            bgRect.setAttribute('fill', '#ffffff'); // Or restore specific fill if needed
+        }
+    }
+
     // --- Listeners ---
     toggleBtn.onclick = () => {
         sidebar.classList.toggle('collapsed');
@@ -1016,6 +1031,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     gridShowToggle.onchange = (e) => { state.gridShow = e.target.checked; updateGridView(); saveSettings(); };
     gridSnapToggle.onchange = (e) => { state.gridSnap = e.target.checked; saveSettings(); };
+    transparentBgToggle.onchange = (e) => { state.transparentBg = e.target.checked; updateBgTransparency(); saveSettings(); };
     gridSizeInput.oninput = (e) => { state.gridSize = parseInt(e.target.value); gridSizeVal.textContent = state.gridSize; updateGridView(); };
     gridSizeInput.onchange = () => saveSettings();
 
