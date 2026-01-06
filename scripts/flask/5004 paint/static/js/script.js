@@ -473,7 +473,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Add to SVG
                 const g = document.createElementNS(NS, 'g');
                 g.appendChild(resImg);
-                drawingLayer.appendChild(g); // Append to layer
+                // Insert at the bottom of the stack so vector lines stay sharp and on top
+                if (drawingLayer.firstChild) {
+                    drawingLayer.insertBefore(g, drawingLayer.firstChild);
+                } else {
+                    drawingLayer.appendChild(g);
+                }
 
                 saveHistory();
                 document.body.style.cursor = 'crosshair';
