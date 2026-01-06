@@ -20,7 +20,7 @@ from Cryptodome.Cipher import AES
 from Cryptodome.Protocol.KDF import PBKDF2
 
 # Constants
-TARGET_DIR = r"C:\Users\nahid\ms\ms1\Testing\antigravity_acc_change"
+TARGET_DIR = r"C:\Users\nahid\AppData\Roaming\Antigravity\User\globalStorage"
 FILES_TO_DELETE = ["state.vscdb", "state.vscdb.backup"]
 JSON_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "profiles.json")
 
