@@ -11,6 +11,8 @@
         "path": "C:/Users/nahid/ms/ms1/Testing/antigravity_acc_change/sahadat",
         "active": false,
         "is_locked": true,
-        "password": "182358"
+        "password": "182358",
+        "timer_enabled": false,
+        "target_time": null
     }
 ]
