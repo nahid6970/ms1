@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" id="main-svg" width="1920" height="1080" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid meet"><defs><style>
+            @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
+            @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&amp;display=swap');
+            text { white-space: pre; }
+        </style></defs>
+                    <rect id="svg-bg" width="1920" height="1080" fill="#ffffff"/>
+                    <g id="drawing-layer"><path d="M 451.76470588235287 702.9667519181586L 861.9437340153452 707.1099744245524L 660.306905370844 893.5549872122762L 664.4501278772378 603.5294117647059 L 453.14578005115084 700.2046035805627 Z" stroke="#e538c6" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M 451.76470588235287 702.9667519181586L 861.9437340153452 707.1099744245524L 660.306905370844 893.5549872122762L 664.4501278772378 603.5294117647059 L 453.14578005115084 700.2046035805627" stroke="#e538c6" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round" transform="rotate(90, 960, 540) "/><path d="M 451.76470588235287 702.9667519181586L 861.9437340153452 707.1099744245524L 660.306905370844 893.5549872122762L 664.4501278772378 603.5294117647059 L 453.14578005115084 700.2046035805627" stroke="#e538c6" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round" transform="rotate(180, 960, 540) "/><path d="M 451.76470588235287 702.9667519181586L 861.9437340153452 707.1099744245524L 660.306905370844 893.5549872122762L 664.4501278772378 603.5294117647059 L 453.14578005115084 700.2046035805627" stroke="#e538c6" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round" transform="rotate(270, 960, 540) "/></g>
+                    <g id="overlay-layer" style="pointer-events: none;"/>
+                    <g id="guide-layer" style="pointer-events: none;"/>
+                </svg>

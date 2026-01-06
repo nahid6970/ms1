@@ -74,7 +74,12 @@
             "col_span": 1,
             "row_span": 1,
             "is_bold": false,
-            "is_italic": false
+            "is_italic": false,
+            "grid_columns": 5,
+            "child_width": 0,
+            "child_height": 100,
+            "width": 0,
+            "height": 0
         },
         {
             "name": "System Info",

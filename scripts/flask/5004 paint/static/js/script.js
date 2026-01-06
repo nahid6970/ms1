@@ -338,13 +338,38 @@ document.addEventListener('DOMContentLoaded', () => {
             pickColor(e); return;
         }
         if (state.tool === 'fill') {
-            const t = e.target;
-            const el = t.id === 'svg-bg' ? bgRect : t.closest('#drawing-layer > *');
-            if (el) {
-                el.setAttribute('fill', el.tagName === 'text' ? state.color : (state.tool === 'fill' ? state.color : 'none'));
-                if (el.tagName !== 'text' && el.id !== 'svg-bg') el.setAttribute('stroke', state.color);
-                saveHistory();
+            const pt = svg.createSVGPoint();
+            pt.x = e.clientX; pt.y = e.clientY;
+
+            // Smart hit-testing: check geometric containment even for empty fills
+            let targetEl = null;
+            const elements = Array.from(drawingLayer.children).reverse();
+
+            for (const el of elements) {
+                if (el.style.display === 'none') continue;
+                // Get CT M inverse to map point to element's space
+                try {
+                    const localPt = pt.matrixTransform(el.getScreenCTM().inverse());
+                    if (el.tagName === 'text') {
+                        // Text bounding box check (approximate)
+                        const bbox = el.getBBox();
+                        if (localPt.x >= bbox.x && localPt.x <= bbox.x + bbox.width &&
+                            localPt.y >= bbox.y && localPt.y <= bbox.y + bbox.height) {
+                            targetEl = el; break;
+                        }
+                    } else if ((el.isPointInFill && el.isPointInFill(localPt)) || (el.isPointInStroke && el.isPointInStroke(localPt))) {
+                        targetEl = el; break;
+                    }
+                } catch (err) { continue; }
             }
+
+            if (targetEl) {
+                targetEl.setAttribute('fill', state.color);
+                if (targetEl.tagName !== 'text') targetEl.setAttribute('stroke', state.color);
+            } else {
+                bgRect.setAttribute('fill', state.color);
+            }
+            saveHistory();
             return;
         }
         if (state.tool === 'eraser') {
