@@ -17,6 +17,13 @@ A powerful, premium Python-based GUI application designed to centralize your wor
     - **Hide Terminal**: Run scripts silently in the background (Python, PowerShell, etc.).
     - **No Exit Terminal**: Keep the console window open after execution to view errors or output.
 
+### 📝 Inline Script Editor
+- **Integrated Code Panel**: Write multi-line `cmd`, `pwsh`, or `powershell` scripts directly within the application.
+- **Dual Modes**: Toggle between executing a linked **File Path** or running your **Inline Script**.
+- **Smart Layout**: The "Edit" dialog automatically adapts:
+    - **Scripts**: Shows a side-by-side split view with the settings on the left and code editor on the right.
+    - **Folders**: Shows a compact, focused settings dialog.
+
 ### 🎨 Premium Customization
 - **Visual Editor**: A beautiful, borderless "Edit / Stylize" dialog to tweak every aspect of your buttons.
 - **Typography control**: Change font size and toggle **Bold** / *Italic* styles.

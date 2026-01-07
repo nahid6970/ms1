@@ -1033,11 +1033,6 @@ class ScriptLauncherApp:
             # Load existing inline script
             if script.get("inline_script"):
                 inline_script_text.insert("1.0", script["inline_script"])
-            else:
-                # Right panel doesn't exist (folder)
-                use_inline_var = None
-                inline_type_var = None
-                inline_script_text = None
         else:
             path_var = None
             hide_var = None
