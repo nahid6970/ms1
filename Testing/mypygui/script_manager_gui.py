@@ -744,6 +744,11 @@ class ScriptLauncherApp:
                      subprocess.Popen(f'start "" cmd /k "{path}"', shell=True, creationflags=cflags)
                 else:
                      subprocess.Popen(path, shell=True, creationflags=cflags)
+            
+            # Kill main window if requested
+            if script_obj.get("kill_window", False):
+                self.root.destroy()
+
         except Exception as e:
             messagebox.showerror("Error", f"Failed to launch:\\n{path}\\n\\n{e}")
 
@@ -785,6 +790,9 @@ class ScriptLauncherApp:
                     subprocess.Popen(f'start "" cmd /k "{temp_path}"', shell=True, creationflags=cflags)
                 else:
                     subprocess.Popen(f'start "" cmd /c "{temp_path}"', shell=True, creationflags=cflags)
+                    
+            if script_obj.get("kill_window", False):
+                self.root.destroy()
                     
         except Exception as e:
             messagebox.showerror("Error", f"Failed to execute inline script:\\n\\n{e}")
@@ -984,7 +992,11 @@ class ScriptLauncherApp:
             
             keep_open_var = tk.BooleanVar(value=script.get("keep_open", False))
             cb_keep = tk.Checkbutton(cb_frame, text="No Exit Terminal", variable=keep_open_var, bg="#1d2027", fg="#aaaaaa", selectcolor="#2b2f38", activebackground="#1d2027", activeforeground="white")
-            cb_keep.pack(side="left")
+            cb_keep.pack(side="left", padx=(0, 10))
+
+            kill_window_var = tk.BooleanVar(value=script.get("kill_window", False))
+            cb_kill = tk.Checkbutton(cb_frame, text="Kill Main Window", variable=kill_window_var, bg="#1d2027", fg="#aaaaaa", selectcolor="#2b2f38", activebackground="#1d2027", activeforeground="white")
+            cb_kill.pack(side="left")
             
             # Advanced Bindings
             tk.Label(info_frame, text="Ctrl+Left Cmd:", fg="white", bg="#1d2027", font=(self.main_font, 9)).grid(row=3, column=0, sticky="w", padx=10, pady=5)
@@ -1037,6 +1049,7 @@ class ScriptLauncherApp:
             path_var = None
             hide_var = None
             keep_open_var = None
+            kill_window_var = None
             ctrl_left_var = None
             ctrl_right_var = None
             use_inline_var = None
@@ -1152,6 +1165,8 @@ class ScriptLauncherApp:
                 script["hide_terminal"] = hide_var.get()
             if keep_open_var is not None:
                 script["keep_open"] = keep_open_var.get()
+            if kill_window_var is not None:
+                script["kill_window"] = kill_window_var.get()
             if ctrl_left_var is not None:
                 script["ctrl_left_cmd"] = ctrl_left_var.get()
             if ctrl_right_var is not None:
