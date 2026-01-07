@@ -154,9 +154,9 @@
         },
         {
             "name": "AntiGravity",
-            "path": "code C:/Users/nahid/ms/ms1/Testing/antigravity_acc_change/vsc_manager.py",
+            "path": "C:/Users/nahid/ms/ms1/Testing/antigravity_acc_change/vsc_manager.py",
             "type": "script",
-            "hide_terminal": true,
+            "hide_terminal": false,
             "ctrl_left_cmd": "",
             "ctrl_right_cmd": "",
             "font_size": 20,
@@ -168,10 +168,10 @@
             "height": 0,
             "is_bold": false,
             "is_italic": false,
-            "keep_open": false,
+            "keep_open": true,
             "use_inline": false,
-            "inline_type": "cmd",
-            "inline_script": ""
+            "inline_type": "pwsh",
+            "inline_script": "ls \"C:\\\\\"\nls \"d:\\\\\""
         }
     ],
     "github_repos": [

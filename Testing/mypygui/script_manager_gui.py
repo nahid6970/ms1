@@ -868,7 +868,9 @@ class ScriptLauncherApp:
         top.overrideredirect(True)
         
         # Center the dialog - WIDER for side-by-side layout
-        width, height = 900, 750
+        # Adjust width based on type: folders are narrower
+        width = 500 if script.get("type") == "folder" else 900
+        height = 750
         x = (top.winfo_screenwidth() // 2) - (width // 2)
         y = (top.winfo_screenheight() // 2) - (height // 2)
         top.geometry(f"{width}x{height}+{x}+{y}")
@@ -929,10 +931,18 @@ class ScriptLauncherApp:
         left_panel = tk.Frame(content_container, bg="#1d2027")
         left_panel.pack(side="left", fill="both", expand=True, padx=(0, 5))
         
-        # Right Panel - Inline Script Editor (slightly shorter, centered)
-        right_panel = tk.Frame(content_container, bg="#1d2027", width=400)
-        right_panel.pack(side="right", fill="y", pady=30)
-        right_panel.pack_propagate(False)
+        # Only show right panel for scripts (not folders)
+        if script.get("type") != "folder":
+            # Separator
+            separator = tk.Frame(content_container, bg="#10b153", width=2)
+            separator.pack(side="left", fill="y", padx=5)
+            
+            # Right Panel - Inline Script Editor (slightly shorter, centered)
+            right_panel = tk.Frame(content_container, bg="#1d2027", width=400)
+            right_panel.pack(side="right", fill="y", pady=30)
+            right_panel.pack_propagate(False)
+        else:
+            right_panel = None
 
         def pick_color(key, btn):
             from tkinter import colorchooser
@@ -986,8 +996,9 @@ class ScriptLauncherApp:
             tk.Entry(info_frame, textvariable=ctrl_right_var, bg="#2b2f38", fg="white", insertbackground="white", bd=0).grid(row=4, column=1, sticky="ew", padx=10, pady=5)
             
             # --- INLINE SCRIPT SECTION ---
-            inline_frame = tk.LabelFrame(right_panel, text="   INLINE SCRIPT EDITOR   ", bg="#1d2027", fg="gray", font=(self.main_font, 10, "bold"), bd=1, relief="groove")
-            inline_frame.pack(fill="both", expand=True, padx=15, pady=10)
+            if right_panel:  # Only show if right panel exists (not folder)
+                inline_frame = tk.LabelFrame(right_panel, text="   INLINE SCRIPT EDITOR   ", bg="#1d2027", fg="gray", font=(self.main_font, 10, "bold"), bd=1, relief="groove")
+                inline_frame.pack(fill="both", expand=True, padx=10, pady=10)
             
             # Execution Mode
             use_inline_var = tk.StringVar(value="inline" if script.get("use_inline", False) else "file")
@@ -1022,6 +1033,11 @@ class ScriptLauncherApp:
             # Load existing inline script
             if script.get("inline_script"):
                 inline_script_text.insert("1.0", script["inline_script"])
+            else:
+                # Right panel doesn't exist (folder)
+                use_inline_var = None
+                inline_type_var = None
+                inline_script_text = None
         else:
             path_var = None
             hide_var = None
