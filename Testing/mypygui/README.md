@@ -6,9 +6,16 @@ A powerful, premium Python-based GUI application designed to centralize your wor
 
 ### 🖥️ Advanced Script Launcher
 - **Organization**: Group your scripts into **Folders** with intuitive breadcrumb navigation.
+- **Cut & Paste**: Right-click any item to **Cut** it, then navigate to a folder and use the **Paste** button (appears in the Add dialog) to move it there.
+- **Move Out**: When inside a folder, use the context menu's **"Move Up / Out"** option to move items back to the parent.
 - **Drag & Drop**: Easily reorder your buttons and folders by dragging them across the grid.
-- **PowerShell Ready**: Native support for `.ps1` scripts with bypass policies handled automatically.
-- **Stealth Mode**: "Hide Terminal" option to run scripts (including Python and PowerShell) silently in the background.
+- **PowerShell Ready**: 
+    - Automatically detects and prefers `pwsh` (PowerShell Core) over legacy `powershell`.
+    - Uses robust `-Command` syntax for better compatibility with complex scripts.
+    - Scripts run from their own directory, ensuring relative paths work correctly.
+- **Terminal Control**:
+    - **Hide Terminal**: Run scripts silently in the background (Python, PowerShell, etc.).
+    - **No Exit Terminal**: Keep the console window open after execution to view errors or output.
 
 ### 🎨 Premium Customization
 - **Visual Editor**: A beautiful, borderless "Edit / Stylize" dialog to tweak every aspect of your buttons.
@@ -17,7 +24,9 @@ A powerful, premium Python-based GUI application designed to centralize your wor
     - Custom **Corner Radius** for rounded or sharp buttons.
     - Adjustable **Border Width** and color.
     - Full control over button and text colors for both normal and hover states.
+- **Per-Folder Grid Settings**: Customize grid columns and item dimensions for each folder independently.
 - **Advanced Bindings**: Assign custom commands to **Ctrl + Left Click** and **Ctrl + Right Click** on any button for power-user multitasking.
+- **Themed Dialogs**: All input prompts (add folder, add script) use the same dark theme and custom fonts as the main window.
 
 ### 📊 System Performance Widget
 - **CPU Monitoring**: Real-time percentage with individual core-by-core micro bars.
