@@ -170,8 +170,8 @@
             "is_italic": false,
             "keep_open": true,
             "use_inline": false,
-            "inline_type": "pwsh",
-            "inline_script": "ls \"c:\\\\\"\nls \"d:\\\\\""
+            "inline_type": "cmd",
+            "inline_script": ""
         }
     ],
     "github_repos": [
