@@ -1383,6 +1383,7 @@
     max-width: 500px;
     min-height: 600px;
     max-height: 600px;
+    font-family: "Segoe UI", "Noto Sans Bengali", "Nirmala UI", sans-serif;
 }
 .ai-chat-popup .chat-header {
     background-color: rgba(24, 25, 27, 0.4);
@@ -1398,6 +1399,7 @@
     color: #ffffff;
     margin-right: 8px;
     font-weight: 600;
+    font-family: "Segoe UI", sans-serif;
 }
 .ai-chat-popup .chat-header .provider-button,
 .ai-chat-popup .chat-header .model-button {
@@ -1410,6 +1412,7 @@
     max-width: 130px;
     border-radius: 6px;
     padding: 4px 10px;
+    font-family: "Segoe UI", sans-serif;
 }
 .ai-chat-popup .chat-header .provider-button:disabled,
 .ai-chat-popup .chat-header .model-button:disabled {
@@ -1423,6 +1426,7 @@
     padding: 4px 0px;
     font-size: 12px;
     color: #ffffff;
+    font-family: "Segoe UI", sans-serif;
 }
 .ai-chat-popup .context-menu::separator {
     height: 1px;
@@ -1464,6 +1468,7 @@
     color: rgba(255, 255, 255, 0.8);
     font-size: 48px;
     font-weight: 600;
+    font-family: "Segoe UI", "Noto Sans Bengali", "Nirmala UI", sans-serif;
 }
 .ai-chat-popup .chat-content .empty-chat .message {
     color: rgba(255, 255, 255, 0.4);
@@ -1473,13 +1478,17 @@
 .ai-chat-popup .chat-content .user-message,
 .ai-chat-popup .chat-content .assistant-message {
     color: #ffffff;
-    padding: 8px;
-    border-radius: 4px;
-    margin: 4px 0;
+    padding: 10px 12px;
+    border-radius: 6px;
+    margin: 6px 0;
     font-size: 14px;
+    font-family: "Segoe UI", "Noto Sans Bengali", "Nirmala UI", sans-serif;
+    line-height: 1.6;
 }
 .ai-chat-popup .chat-content .user-message {
     margin-left: 26px;
+    background-color: rgba(137, 180, 250, 0.15);
+    border: 1px solid rgba(137, 180, 250, 0.2);
 }
 .ai-chat-popup .chat-content .assistant-message {
     background-color: rgba(162, 168, 187, 0.1);
@@ -1497,6 +1506,7 @@
     border-radius: 4px;
     padding: 0 8px;
     font-size: 14px;
+    font-family: "Segoe UI", "Noto Sans Bengali", "Nirmala UI", sans-serif;
     color: #ffffff;
     margin-top: 8px;
     max-height: 28px;
