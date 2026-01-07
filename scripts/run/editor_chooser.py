@@ -31,6 +31,22 @@ def open_with_editor(file_paths, editor):
                 subprocess.run(f'antigravity "{file_path}"', shell=True)
         else:
             subprocess.run(f'antigravity "{file_paths}"', shell=True)
+    elif editor == "antigravity dir":
+        # Open parent directory/directories with Antigravity
+        if not isinstance(file_paths, list):
+            file_paths = [file_paths]
+        
+        # Collect unique directories
+        dirs_to_open = set()
+        for fp in file_paths:
+            if os.path.isfile(fp):
+                dirs_to_open.add(os.path.dirname(fp))
+            elif os.path.isdir(fp):
+                dirs_to_open.add(fp)
+                
+        # Open each unique directory
+        for d in dirs_to_open:
+            subprocess.run(f'antigravity "{d}"', shell=True)
     elif editor == "emacs":
         # Ensure HOME is set for Emacs to find config
         # Emacs on Windows often defaults to APPDATA for config if HOME is not set,
@@ -62,6 +78,7 @@ def create_editor_chooser(file_paths):
         ("Emacs", "#8458b7", ""),
         ("Zed", "#ff6b6b", ""),
         ("Antigravity", "#00d9ff", ""),
+        ("Antigravity Dir", "#00e6b8", ""),
     ]
 
     root = tk.Tk()
