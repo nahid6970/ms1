@@ -420,7 +420,7 @@ widgets:
         image_per_page: 8
         show_buttons: false
         orientation: "portrait"
-        image_spacing: 8
+        image_spacing: 24
         lazy_load: true
         lazy_load_delay: 80
         lazy_load_fadein: 400
