@@ -82,9 +82,32 @@
             "height": 0
         },
         {
-            "name": "System Info",
+            "name": "pip",
             "type": "folder",
-            "scripts": [],
+            "scripts": [
+                {
+                    "name": "pip",
+                    "path": "",
+                    "type": "script",
+                    "hide_terminal": false,
+                    "keep_open": true,
+                    "kill_window": false,
+                    "ctrl_left_cmd": "",
+                    "ctrl_right_cmd": "",
+                    "use_inline": true,
+                    "inline_type": "cmd",
+                    "inline_script": "pip install pillow cairosvg",
+                    "font_size": 20,
+                    "border_width": 0,
+                    "corner_radius": 4,
+                    "col_span": 1,
+                    "row_span": 1,
+                    "width": 0,
+                    "height": 0,
+                    "is_bold": false,
+                    "is_italic": false
+                }
+            ],
             "font_size": 20,
             "color": "#f0d50f",
             "text_color": "#000000",
