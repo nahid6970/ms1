@@ -686,9 +686,15 @@ class ScriptLauncherApp:
             self.refresh_grid()
 
     def launch_script(self, script_obj):
-        path = script_obj["path"]
         hide = script_obj.get("hide_terminal", False)
         keep_open = script_obj.get("keep_open", False)
+        
+        # Check if using inline script
+        if script_obj.get("use_inline", False) and script_obj.get("inline_script"):
+            self.launch_inline_script(script_obj)
+            return
+        
+        path = script_obj["path"]
         
         # Determine creation flags
         # CREATE_NEW_CONSOLE (0x10) vs CREATE_NO_WINDOW (0x08000000)
@@ -739,7 +745,49 @@ class ScriptLauncherApp:
                 else:
                      subprocess.Popen(path, shell=True, creationflags=cflags)
         except Exception as e:
-            messagebox.showerror("Error", f"Failed to launch:\n{path}\n\n{e}")
+            messagebox.showerror("Error", f"Failed to launch:\\n{path}\\n\\n{e}")
+
+    def launch_inline_script(self, script_obj):
+        """Execute an inline script by creating a temporary file"""
+        import tempfile
+        
+        inline_script = script_obj.get("inline_script", "")
+        inline_type = script_obj.get("inline_type", "cmd")
+        hide = script_obj.get("hide_terminal", False)
+        keep_open = script_obj.get("keep_open", False)
+        
+        cflags = subprocess.CREATE_NEW_CONSOLE
+        if hide:
+            cflags = 0x08000000
+        
+        try:
+            # Create temp file with appropriate extension
+            ext_map = {"cmd": ".bat", "pwsh": ".ps1", "powershell": ".ps1"}
+            ext = ext_map.get(inline_type, ".bat")
+            
+            with tempfile.NamedTemporaryFile(mode='w', suffix=ext, delete=False, encoding='utf-8') as f:
+                f.write(inline_script)
+                temp_path = f.name
+            
+            # Execute based on type
+            if inline_type in ["pwsh", "powershell"]:
+                ps_bin = "pwsh" if inline_type == "pwsh" and shutil.which("pwsh") else "powershell"
+                
+                if hide:
+                    ps_args = [ps_bin, "-WindowStyle", "Hidden", "-ExecutionPolicy", "Bypass", "-NoProfile", "-File", temp_path]
+                    subprocess.Popen(ps_args, creationflags=cflags)
+                else:
+                    no_exit = "-NoExit" if keep_open else ""
+                    cmd_str = f'start "" "{ps_bin}" {no_exit} -ExecutionPolicy Bypass -Command "& \\"{temp_path}\\""'
+                    subprocess.Popen(cmd_str, shell=True, creationflags=cflags)
+            else:  # cmd
+                if not hide and keep_open:
+                    subprocess.Popen(f'start "" cmd /k "{temp_path}"', shell=True, creationflags=cflags)
+                else:
+                    subprocess.Popen(f'start "" cmd /c "{temp_path}"', shell=True, creationflags=cflags)
+                    
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to execute inline script:\\n\\n{e}")
 
     def handle_ctrl_right_click(self, event, script):
         cmd = script.get("ctrl_right_cmd")
@@ -819,8 +867,8 @@ class ScriptLauncherApp:
         top = tk.Toplevel(self.root)
         top.overrideredirect(True)
         
-        # Center the dialog
-        width, height = 450, 750
+        # Center the dialog - WIDER for side-by-side layout
+        width, height = 900, 750
         x = (top.winfo_screenwidth() // 2) - (width // 2)
         y = (top.winfo_screenheight() // 2) - (height // 2)
         top.geometry(f"{width}x{height}+{x}+{y}")
@@ -873,6 +921,19 @@ class ScriptLauncherApp:
         # Close Button
         ctk.CTkButton(header, text="✕", width=30, height=30, fg_color="transparent", hover_color="#c42b1c", text_color="white", command=on_close).pack(side="right")
 
+        # Main Content Container - Side by Side Layout
+        content_container = tk.Frame(dialog, bg="#1d2027")
+        content_container.pack(fill="both", expand=True, padx=5, pady=5)
+        
+        # Left Panel - Main Edit Controls
+        left_panel = tk.Frame(content_container, bg="#1d2027")
+        left_panel.pack(side="left", fill="both", expand=True, padx=(0, 5))
+        
+        # Right Panel - Inline Script Editor (slightly shorter, centered)
+        right_panel = tk.Frame(content_container, bg="#1d2027", width=400)
+        right_panel.pack(side="right", fill="y", pady=30)
+        right_panel.pack_propagate(False)
+
         def pick_color(key, btn):
             from tkinter import colorchooser
             curr = script.get(key, "#2b2f38")
@@ -886,7 +947,7 @@ class ScriptLauncherApp:
                     btn.configure(text_color=color[1])
 
         # --- Section 1: Basic Info ---
-        info_frame = tk.LabelFrame(dialog, text="   BASIC INFO   ", bg="#1d2027", fg="gray", font=(self.main_font, 10, "bold"), bd=1, relief="groove")
+        info_frame = tk.LabelFrame(left_panel, text="   BASIC INFO   ", bg="#1d2027", fg="gray", font=(self.main_font, 10, "bold"), bd=1, relief="groove")
         info_frame.pack(fill="x", padx=15, pady=10)
         
         # Label Input
@@ -923,18 +984,59 @@ class ScriptLauncherApp:
             tk.Label(info_frame, text="Ctrl+Right Cmd:", fg="white", bg="#1d2027", font=(self.main_font, 9)).grid(row=4, column=0, sticky="w", padx=10, pady=5)
             ctrl_right_var = tk.StringVar(value=script.get("ctrl_right_cmd", ""))
             tk.Entry(info_frame, textvariable=ctrl_right_var, bg="#2b2f38", fg="white", insertbackground="white", bd=0).grid(row=4, column=1, sticky="ew", padx=10, pady=5)
+            
+            # --- INLINE SCRIPT SECTION ---
+            inline_frame = tk.LabelFrame(right_panel, text="   INLINE SCRIPT EDITOR   ", bg="#1d2027", fg="gray", font=(self.main_font, 10, "bold"), bd=1, relief="groove")
+            inline_frame.pack(fill="both", expand=True, padx=15, pady=10)
+            
+            # Execution Mode
+            use_inline_var = tk.StringVar(value="inline" if script.get("use_inline", False) else "file")
+            mode_frame = tk.Frame(inline_frame, bg="#1d2027")
+            mode_frame.pack(fill="x", padx=10, pady=5)
+            
+            tk.Radiobutton(mode_frame, text="Execute File Path", variable=use_inline_var, value="file", bg="#1d2027", fg="#aaaaaa", selectcolor="#2b2f38", activebackground="#1d2027", activeforeground="white").pack(side="left", padx=(0, 15))
+            tk.Radiobutton(mode_frame, text="Execute Inline Script", variable=use_inline_var, value="inline", bg="#1d2027", fg="#aaaaaa", selectcolor="#2b2f38", activebackground="#1d2027", activeforeground="white").pack(side="left")
+            
+            # Script Type Selector
+            type_frame = tk.Frame(inline_frame, bg="#1d2027")
+            type_frame.pack(fill="x", padx=10, pady=5)
+            tk.Label(type_frame, text="Script Type:", fg="white", bg="#1d2027", font=(self.main_font, 9)).pack(side="left", padx=(0, 10))
+            
+            inline_type_var = tk.StringVar(value=script.get("inline_type", "cmd"))
+            type_dropdown = ctk.CTkOptionMenu(type_frame, variable=inline_type_var, values=["cmd", "pwsh", "powershell"], width=120, fg_color="#2b2f38", button_color="#3a3f4b", button_hover_color="#4a4f5b")
+            type_dropdown.pack(side="left")
+            
+            # Script Editor
+            tk.Label(inline_frame, text="Script Content:", fg="white", bg="#1d2027", font=(self.main_font, 9)).pack(anchor="w", padx=10, pady=(5, 2))
+            
+            editor_container = tk.Frame(inline_frame, bg="#2b2f38")
+            editor_container.pack(fill="both", expand=True, padx=10, pady=(0, 10))
+            
+            inline_script_text = tk.Text(editor_container, bg="#2b2f38", fg="white", insertbackground="white", font=(self.main_font, 10), wrap="none", bd=0, height=12)
+            inline_script_text.pack(side="left", fill="both", expand=True)
+            
+            editor_scrollbar = tk.Scrollbar(editor_container, command=inline_script_text.yview)
+            editor_scrollbar.pack(side="right", fill="y")
+            inline_script_text.config(yscrollcommand=editor_scrollbar.set)
+            
+            # Load existing inline script
+            if script.get("inline_script"):
+                inline_script_text.insert("1.0", script["inline_script"])
         else:
             path_var = None
             hide_var = None
             keep_open_var = None
             ctrl_left_var = None
             ctrl_right_var = None
+            use_inline_var = None
+            inline_type_var = None
+            inline_script_text = None
 
         info_frame.grid_columnconfigure(1, weight=1)
 
         # --- Section 1.5: Folder Settings (If Folder) ---
         if script.get("type") == "folder":
-            f_grid_frame = tk.LabelFrame(dialog, text="   FOLDER GRID SETTINGS   ", bg="#1d2027", fg="gray", font=(self.main_font, 10, "bold"), bd=1, relief="groove")
+            f_grid_frame = tk.LabelFrame(left_panel, text="   FOLDER GRID SETTINGS   ", bg="#1d2027", fg="gray", font=(self.main_font, 10, "bold"), bd=1, relief="groove")
             f_grid_frame.pack(fill="x", padx=15, pady=5)
             f_grid_frame.grid_columnconfigure(1, weight=1)
             f_grid_frame.grid_columnconfigure(3, weight=1)
@@ -959,7 +1061,7 @@ class ScriptLauncherApp:
             f_ch_var = None
 
         # --- Section 2: Typography ---
-        typo_frame = tk.LabelFrame(dialog, text="   TYPOGRAPHY   ", bg="#1d2027", fg="gray", font=(self.main_font, 10, "bold"), bd=1, relief="groove")
+        typo_frame = tk.LabelFrame(left_panel, text="   TYPOGRAPHY   ", bg="#1d2027", fg="gray", font=(self.main_font, 10, "bold"), bd=1, relief="groove")
         typo_frame.pack(fill="x", padx=15, pady=5)
         
         # Font Size & Styles Row
@@ -975,7 +1077,7 @@ class ScriptLauncherApp:
         tk.Checkbutton(typo_frame, text="Italic", variable=v_italic, bg="#1d2027", fg="white", selectcolor="#2b2f38", activebackground="#1d2027", activeforeground="white").pack(side="left", padx=5)
 
         # --- Section 3: Colors ---
-        color_frame = tk.LabelFrame(dialog, text="   COLORS   ", bg="#1d2027", fg="gray", font=(self.main_font, 10, "bold"), bd=1, relief="groove")
+        color_frame = tk.LabelFrame(left_panel, text="   COLORS   ", bg="#1d2027", fg="gray", font=(self.main_font, 10, "bold"), bd=1, relief="groove")
         color_frame.pack(fill="x", padx=15, pady=10)
         color_frame.grid_columnconfigure(0, weight=1)
         color_frame.grid_columnconfigure(1, weight=1)
@@ -994,7 +1096,7 @@ class ScriptLauncherApp:
 
         # --- Section 4: Shape & Borders ---
         # --- Section 4: Layout & Borders ---
-        layout_frame = tk.LabelFrame(dialog, text="   LAYOUT & APPEARANCE   ", bg="#1d2027", fg="gray", font=(self.main_font, 10, "bold"), bd=1, relief="groove")
+        layout_frame = tk.LabelFrame(left_panel, text="   LAYOUT & APPEARANCE   ", bg="#1d2027", fg="gray", font=(self.main_font, 10, "bold"), bd=1, relief="groove")
         layout_frame.pack(fill="x", padx=15, pady=5)
         
         # Use Grid layout for alignment
@@ -1043,6 +1145,14 @@ class ScriptLauncherApp:
                 script["ctrl_left_cmd"] = ctrl_left_var.get()
             if ctrl_right_var is not None:
                 script["ctrl_right_cmd"] = ctrl_right_var.get()
+            
+            # Save inline script settings
+            if use_inline_var is not None:
+                script["use_inline"] = (use_inline_var.get() == "inline")
+            if inline_type_var is not None:
+                script["inline_type"] = inline_type_var.get()
+            if inline_script_text is not None:
+                script["inline_script"] = inline_script_text.get("1.0", "end-1c")
             
             # Save folder settings
             if f_cols_var is not None:
