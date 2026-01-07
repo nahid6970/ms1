@@ -713,7 +713,7 @@ class ScriptLauncherApp:
                     python_exe = "pythonw" if hide else "python"
                     if not hide and keep_open:
                          # Use quote-safe approach
-                         subprocess.Popen(f'start "" cmd /k "{python_exe}" "{path}"', shell=True, cwd=script_dir, creationflags=cflags)
+                         subprocess.Popen(f'start "" cmd /k {python_exe} "{path}"', shell=True, cwd=script_dir, creationflags=cflags)
                     else:
                         subprocess.Popen([python_exe, path], cwd=script_dir, creationflags=cflags)
                 elif path.lower().endswith(".ps1"):
