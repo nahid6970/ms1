@@ -378,11 +378,13 @@ class SpecialCharPicker(ctk.CTk):
         menu.add_command(label=f"Copy '{char}'", command=lambda: self.copy_char(char))
         menu.add_separator()
         menu.add_command(label="Delete", command=lambda: self.delete_char(char))
-        # Move to another category?
+        
+        # Move to another category
         menu.add_separator()
         move_menu = tk.Menu(menu, tearoff=0, bg="#2b2f38", fg="white", activebackground="#10b153", bd=0)
         for cat in self.data.keys():
-            if cat != self.current_category:
+            # Skip current category AND the internal _settings key
+            if cat != self.current_category and cat != "_settings":
                 move_menu.add_command(label=f"Move to {cat}", command=lambda c=char, t=cat: self.move_char(c, t))
         menu.add_cascade(label="Move to...", menu=move_menu)
 
@@ -391,9 +393,7 @@ class SpecialCharPicker(ctk.CTk):
 
     def show_category_context(self, event, cat):
         menu = tk.Menu(self, tearoff=0, bg="#2b2f38", fg="white", activebackground="#10b153", bd=0)
-        menu.add_command(label=f"Use '{cat}'", command=lambda: self.switch_category(cat))
-        menu.add_separator()
-        menu.add_command(label="Delete Category", command=lambda: self.delete_category(cat))
+        menu.add_command(label=f"Delete Category '{cat}'", command=lambda: self.delete_category(cat))
         
         try: menu.tk_popup(event.x_root, event.y_root)
         finally: menu.grab_release()
