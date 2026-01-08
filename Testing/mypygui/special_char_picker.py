@@ -92,6 +92,8 @@ class SpecialCharPicker(ctk.CTk):
             self.scroll_frame.grid_columnconfigure(i, weight=1)
 
     def refresh_grid(self):
+        self.current_card = None  # Reset tracked hover card
+        
         # Clear existing stuff
         for widget in self.scroll_frame.winfo_children():
             widget.destroy()
@@ -106,19 +108,44 @@ class SpecialCharPicker(ctk.CTk):
             card.grid(row=row, column=col, padx=5, pady=5, sticky="nsew")
             
             # Character Label
-            # Using Nirmala UI as it has good support for mixed scripts including Bangla
             lbl = ctk.CTkLabel(card, text=char, font=("Nirmala UI", 32), text_color="white")
             lbl.pack(expand=True, pady=15, padx=15)
             
-            # Hover Effect
-            card.bind("<Enter>", lambda e, c=card: c.configure(fg_color="#3a3f4b", border_width=1, border_color="#10b153"))
-            card.bind("<Leave>", lambda e, c=card: c.configure(fg_color="#2b2f38", border_width=0))
+            # Robust Singleton Hover Logic
+            def on_enter(e, c=card):
+                # Force-clear any other highlighted card
+                if self.current_card and self.current_card != c:
+                    try:
+                        self.current_card.configure(fg_color="#2b2f38", border_width=0)
+                    except:
+                        pass # Widget might have been destroyed
+                
+                # Highlight this one
+                c.configure(fg_color="#3a3f4b", border_width=1, border_color="#10b153")
+                self.current_card = c
+
+            def on_leave(e, c=card):
+                # Bounds check to prevent flickering inside the card
+                x, y = c.winfo_pointerxy()
+                widget_x = c.winfo_rootx()
+                widget_y = c.winfo_rooty()
+                
+                if not (widget_x <= x <= widget_x + c.winfo_width() and 
+                        widget_y <= y <= widget_y + c.winfo_height()):
+                    c.configure(fg_color="#2b2f38", border_width=0)
+                    if self.current_card == c:
+                        self.current_card = None
+
+            card.bind("<Enter>", on_enter)
+            card.bind("<Leave>", on_leave)
+            lbl.bind("<Enter>", on_enter)
+            lbl.bind("<Leave>", on_leave)
             
             # Context Menu Bindings
             card.bind("<Button-3>", lambda e, c=char: self.show_context_menu(e, c))
             lbl.bind("<Button-3>", lambda e, c=char: self.show_context_menu(e, c))
             
-            # Left Click to Copy (optional but handy)
+            # Left Click to Copy
             card.bind("<Button-1>", lambda e, c=char: self.copy_char(c))
             lbl.bind("<Button-1>", lambda e, c=char: self.copy_char(c))
 
