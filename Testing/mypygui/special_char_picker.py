@@ -377,6 +377,7 @@ class SpecialCharPicker(ctk.CTk):
         menu = tk.Menu(self, tearoff=0, bg="#2b2f38", fg="white", activebackground="#10b153", bd=0)
         menu.add_command(label=f"Copy '{char}'", command=lambda: self.copy_char(char))
         menu.add_separator()
+        menu.add_command(label="Edit Character", command=lambda: self.edit_char(char))
         menu.add_command(label="Delete", command=lambda: self.delete_char(char))
         
         # Move to another category
@@ -393,6 +394,8 @@ class SpecialCharPicker(ctk.CTk):
 
     def show_category_context(self, event, cat):
         menu = tk.Menu(self, tearoff=0, bg="#2b2f38", fg="white", activebackground="#10b153", bd=0)
+        menu.add_command(label=f"Rename Category", command=lambda: self.rename_category(cat))
+        menu.add_separator()
         menu.add_command(label=f"Delete Category '{cat}'", command=lambda: self.delete_category(cat))
         
         try: menu.tk_popup(event.x_root, event.y_root)
@@ -404,6 +407,31 @@ class SpecialCharPicker(ctk.CTk):
                 self.data[self.current_category].remove(char)
                 self.save_data()
                 self.refresh_grid()
+
+    def edit_char(self, old_char):
+        new_char = simpledialog.askstring("Edit Character", "Update character:", initialvalue=old_char)
+        if new_char:
+            new_char = new_char.strip()
+            if new_char and new_char != old_char:
+                idx = self.data[self.current_category].index(old_char)
+                self.data[self.current_category][idx] = new_char
+                self.save_data()
+                self.refresh_grid()
+
+    def rename_category(self, old_name):
+        new_name = simpledialog.askstring("Rename Category", "Enter new name:", initialvalue=old_name)
+        if new_name:
+            new_name = new_name.strip()
+            if new_name and new_name != old_name:
+                if new_name in self.data:
+                    messagebox.showerror("Error", "Category name already exists.")
+                    return
+                # Transfer data
+                self.data[new_name] = self.data.pop(old_name)
+                if self.current_category == old_name:
+                    self.current_category = new_name
+                self.save_data()
+                self.refresh_full_ui()
 
     def move_char(self, char, target_cat):
         if char in self.data[self.current_category]:
@@ -418,8 +446,9 @@ class SpecialCharPicker(ctk.CTk):
             del self.data[cat]
             if cat == self.current_category:
                 # Switch to another available or create empty
-                if self.data:
-                    self.current_category = list(self.data.keys())[0]
+                remaining = [k for k in self.data.keys() if k != "_settings"]
+                if remaining:
+                    self.current_category = remaining[0]
                 else:
                     self.data["General"] = []
                     self.current_category = "General"
