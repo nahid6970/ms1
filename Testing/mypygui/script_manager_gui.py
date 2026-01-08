@@ -302,7 +302,7 @@ class ScriptLauncherApp:
             self.cpu_frame = self.create_stat_frame(self.sys_stats_container, " CPU ", 180)
             self.cpu_usage_lbl = tk.Label(self.cpu_frame, text="0%", fg="#14bcff", bg="#1d2027", font=(self.main_font, 10, "bold"))
             self.cpu_usage_lbl.pack(side="left", padx=5)
-            self.cpu_bar = ctk.CTkProgressBar(self.cpu_frame, width=80, height=8, fg_color="#333333", progress_color="#14bcff")
+            self.cpu_bar = ctk.CTkProgressBar(self.cpu_frame, width=80, height=8, fg_color="#333333", progress_color="#14bcff", corner_radius=0)
             self.cpu_bar.pack(side="left", padx=5)
             self.cpu_bar.set(0)
             self.cores_frame = tk.Frame(self.cpu_frame, bg="#1d2027")
@@ -317,20 +317,20 @@ class ScriptLauncherApp:
             self.ram_frame = self.create_stat_frame(self.sys_stats_container, " RAM ", 130)
             self.ram_usage_lbl = tk.Label(self.ram_frame, text="0%", fg="#ff934b", bg="#1d2027", font=(self.main_font, 10, "bold"))
             self.ram_usage_lbl.pack(side="left", padx=5)
-            self.ram_bar = ctk.CTkProgressBar(self.ram_frame, width=70, height=8, fg_color="#333333", progress_color="#ff934b")
+            self.ram_bar = ctk.CTkProgressBar(self.ram_frame, width=70, height=8, fg_color="#333333", progress_color="#ff934b", corner_radius=0)
             self.ram_bar.pack(side="left", padx=5)
             self.ram_bar.set(0)
             # Disk Widgets
             self.disk_c_frame = self.create_stat_frame(self.sys_stats_container, " Disk C ", 110)
             self.disk_c_lbl = tk.Label(self.disk_c_frame, text="0%", fg="white", bg="#1d2027", font=(self.main_font, 9))
             self.disk_c_lbl.pack(side="left", padx=5)
-            self.disk_c_bar = ctk.CTkProgressBar(self.disk_c_frame, width=50, height=8, fg_color="#333333", progress_color="#044568")
+            self.disk_c_bar = ctk.CTkProgressBar(self.disk_c_frame, width=50, height=8, fg_color="#333333", progress_color="#044568", corner_radius=0)
             self.disk_c_bar.pack(side="left", padx=5)
             self.disk_c_bar.set(0)
             self.disk_d_frame = self.create_stat_frame(self.sys_stats_container, " Disk D ", 110)
             self.disk_d_lbl = tk.Label(self.disk_d_frame, text="0%", fg="white", bg="#1d2027", font=(self.main_font, 9))
             self.disk_d_lbl.pack(side="left", padx=5)
-            self.disk_d_bar = ctk.CTkProgressBar(self.disk_d_frame, width=50, height=8, fg_color="#333333", progress_color="#044568")
+            self.disk_d_bar = ctk.CTkProgressBar(self.disk_d_frame, width=50, height=8, fg_color="#333333", progress_color="#044568", corner_radius=0)
             self.disk_d_bar.pack(side="left", padx=5)
             self.disk_d_bar.set(0)
             # Network
@@ -361,7 +361,7 @@ class ScriptLauncherApp:
         self.grid_scroll_container.pack(fill="both", expand=True)
 
         self.canvas = tk.Canvas(self.grid_scroll_container, bg="#1d2027", highlightthickness=0)
-        self.scrollbar = ctk.CTkScrollbar(self.grid_scroll_container, orientation="vertical", command=self.canvas.yview)
+        self.scrollbar = ctk.CTkScrollbar(self.grid_scroll_container, orientation="vertical", command=self.canvas.yview, corner_radius=0)
         
         self.grid_frame = tk.Frame(self.canvas, bg="#1d2027")
         
@@ -446,7 +446,7 @@ class ScriptLauncherApp:
 
             display_text = script["name"]
             
-            corner_radius = script.get("corner_radius", 4)
+            corner_radius = script.get("corner_radius", 0)
             
             # Font styling
             is_bold = script.get("is_bold", False) or is_folder
@@ -1106,16 +1106,16 @@ class ScriptLauncherApp:
         color_frame.grid_columnconfigure(0, weight=1)
         color_frame.grid_columnconfigure(1, weight=1)
         
-        cp1 = ctk.CTkButton(color_frame, text="Button BG", fg_color=script.get("color", "#2b2f38"), height=30, hover=False, command=lambda: pick_color("color", cp1))
+        cp1 = ctk.CTkButton(color_frame, text="Button BG", fg_color=script.get("color", "#2b2f38"), height=30, hover=False, corner_radius=0, command=lambda: pick_color("color", cp1))
         cp1.grid(row=0, column=0, padx=10, pady=10, sticky="ew")
         
-        cp3 = ctk.CTkButton(color_frame, text="Text Color", text_color=script.get("text_color", "white"), fg_color="#2b2f38", height=30, hover=False, command=lambda: pick_color("text_color", cp3))
+        cp3 = ctk.CTkButton(color_frame, text="Text Color", text_color=script.get("text_color", "white"), fg_color="#2b2f38", height=30, hover=False, corner_radius=0, command=lambda: pick_color("text_color", cp3))
         cp3.grid(row=0, column=1, padx=10, pady=10, sticky="ew")
 
-        cp2 = ctk.CTkButton(color_frame, text="Hover BG", fg_color=script.get("hover_color", "#26b2f3"), height=30, hover=False, command=lambda: pick_color("hover_color", cp2))
+        cp2 = ctk.CTkButton(color_frame, text="Hover BG", fg_color=script.get("hover_color", "#26b2f3"), height=30, hover=False, corner_radius=0, command=lambda: pick_color("hover_color", cp2))
         cp2.grid(row=1, column=0, padx=10, pady=(0,10), sticky="ew")
         
-        cp4 = ctk.CTkButton(color_frame, text="Hover Text", text_color=script.get("hover_text_color", "white"), fg_color="#2b2f38", height=30, hover=False, command=lambda: pick_color("hover_text_color", cp4))
+        cp4 = ctk.CTkButton(color_frame, text="Hover Text", text_color=script.get("hover_text_color", "white"), fg_color="#2b2f38", height=30, hover=False, corner_radius=0, command=lambda: pick_color("hover_text_color", cp4))
         cp4.grid(row=1, column=1, padx=10, pady=(0,10), sticky="ew")
 
         # --- Section 4: Shape & Borders ---
@@ -1147,14 +1147,14 @@ class ScriptLauncherApp:
 
         # Row 3: Borders
         tk.Label(layout_frame, text="Radius:", fg="gray", bg="#1d2027").grid(row=2, column=0, sticky="w", padx=(10, 5), pady=(5, 10))
-        radius_var = tk.StringVar(value=str(script.get("corner_radius", 4)))
+        radius_var = tk.StringVar(value=str(script.get("corner_radius", 0)))
         tk.Entry(layout_frame, textvariable=radius_var, bg="#2b2f38", fg="white", insertbackground="white", bd=0, width=5).grid(row=2, column=1, sticky="ew", padx=5, pady=(5, 10))
 
         tk.Label(layout_frame, text="Border W:", fg="gray", bg="#1d2027").grid(row=2, column=2, sticky="w", padx=(15, 5), pady=(5, 10))
         border_width_var = tk.StringVar(value=str(script.get("border_width", 0)))
         tk.Entry(layout_frame, textvariable=border_width_var, bg="#2b2f38", fg="white", insertbackground="white", bd=0, width=5).grid(row=2, column=3, sticky="ew", padx=5, pady=(5, 10))
         
-        cp5 = ctk.CTkButton(layout_frame, text="Border Color", fg_color=script.get("border_color", "#fe1616"), width=100, height=24, hover=False, command=lambda: pick_color("border_color", cp5))
+        cp5 = ctk.CTkButton(layout_frame, text="Border Color", fg_color=script.get("border_color", "#fe1616"), width=100, height=24, hover=False, corner_radius=0, command=lambda: pick_color("border_color", cp5))
         cp5.grid(row=3, column=0, columnspan=4, pady=(0, 10), sticky="ew", padx=10)
 
         def save_changes():
@@ -1202,7 +1202,7 @@ class ScriptLauncherApp:
             try:
                 script["corner_radius"] = int(radius_var.get())
             except:
-                script["corner_radius"] = 4
+                script["corner_radius"] = 0
                 
             try:
                 script["col_span"] = max(1, int(col_span_var.get()))
@@ -1231,7 +1231,7 @@ class ScriptLauncherApp:
             self.refresh_grid()
             on_close()
 
-        ctk.CTkButton(dialog, text="Save", width=200, height=50, fg_color="#10b153", hover_color="#0d8c42", font=(self.main_font, 13, "bold"), command=save_changes).pack(pady=20)
+        ctk.CTkButton(dialog, text="Save", width=200, height=50, fg_color="#10b153", hover_color="#0d8c42", font=(self.main_font, 13, "bold"), corner_radius=0, command=save_changes).pack(pady=20)
         
         # No WM protocol for overrideredirect, but keep cleanup separate
         # dialog.protocol("WM_DELETE_WINDOW", on_close) not needed
@@ -1324,11 +1324,11 @@ class ScriptLauncherApp:
         btn_frame = tk.Frame(content_frame, bg="#1d2027")
         btn_frame.pack(pady=5)
 
-        ctk.CTkButton(btn_frame, text="📄 Script", width=100, command=lambda: start_add("script")).pack(side="left", padx=10)
-        ctk.CTkButton(btn_frame, text="📁 Folder", width=100, command=lambda: start_add("folder")).pack(side="left", padx=10)
+        ctk.CTkButton(btn_frame, text="📄 Script", width=100, corner_radius=0, command=lambda: start_add("script")).pack(side="left", padx=10)
+        ctk.CTkButton(btn_frame, text="📁 Folder", width=100, corner_radius=0, command=lambda: start_add("folder")).pack(side="left", padx=10)
         
         if self.clipboard_script:
-            ctk.CTkButton(content_frame, text=f"📋 Paste '{self.clipboard_script['name']}'", fg_color="#e69138", hover_color="#b45f06", width=220, command=lambda: [choice_dialog.destroy(), self.paste_script()]).pack(side="bottom", pady=20)
+            ctk.CTkButton(content_frame, text=f"📋 Paste '{self.clipboard_script['name']}'", fg_color="#e69138", hover_color="#b45f06", width=220, corner_radius=0, command=lambda: [choice_dialog.destroy(), self.paste_script()]).pack(side="bottom", pady=20)
 
     def open_settings(self):
         self.root.attributes("-topmost", False)
@@ -1382,7 +1382,7 @@ class ScriptLauncherApp:
             top.destroy()
             self.root.attributes("-topmost", True)
 
-        ctk.CTkButton(header, text="✕", width=30, height=30, fg_color="transparent", hover_color="#c42b1c", text_color="white", command=on_close).pack(side="right")
+        ctk.CTkButton(header, text="✕", width=30, height=30, fg_color="transparent", hover_color="#c42b1c", text_color="white", corner_radius=0, command=on_close).pack(side="right")
 
         # --- Section 1: Grid Config ---
         grid_frame = tk.LabelFrame(dialog, text="   GRID CONFIGURATION   ", bg="#1d2027", fg="gray", font=(self.main_font, 10, "bold"), bd=1, relief="groove")
@@ -1459,7 +1459,7 @@ class ScriptLauncherApp:
             self.root.attributes("-topmost", True)
 
         # dialog.protocol("WM_DELETE_WINDOW", on_close) # Not needed for frame/overrideredirect
-        ctk.CTkButton(dialog, text="SAVE SETTINGS", command=save, width=150, height=40, fg_color="#10b153", hover_color="#0d8c42", font=(self.main_font, 12, "bold")).pack(pady=20)
+        ctk.CTkButton(dialog, text="SAVE SETTINGS", command=save, width=150, height=40, fg_color="#10b153", hover_color="#0d8c42", font=(self.main_font, 12, "bold"), corner_radius=0).pack(pady=20)
 
     def start_drag(self, event):
         self.drag_data["x"] = event.x
@@ -1704,8 +1704,8 @@ class ScriptLauncherApp:
         btn_frame = tk.Frame(content, bg="#1d2027")
         btn_frame.pack(pady=15)
         
-        ctk.CTkButton(btn_frame, text="OK", width=80, height=30, command=on_ok, fg_color="#10b153", hover_color="#0d8c42").pack(side="left", padx=5)
-        ctk.CTkButton(btn_frame, text="Cancel", width=80, height=30, command=on_cancel, fg_color="#555555", hover_color="#333333").pack(side="left", padx=5)
+        ctk.CTkButton(btn_frame, text="OK", width=80, height=30, command=on_ok, fg_color="#10b153", hover_color="#0d8c42", corner_radius=0).pack(side="left", padx=5)
+        ctk.CTkButton(btn_frame, text="Cancel", width=80, height=30, command=on_cancel, fg_color="#555555", hover_color="#333333", corner_radius=0).pack(side="left", padx=5)
         
         self.root.wait_window(dlg)
         self.root.attributes("-topmost", True)

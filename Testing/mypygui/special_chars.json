@@ -59,6 +59,8 @@
     "§"
   ],
   "_settings": {
-    "cols": 5
+    "cols": 5,
+    "theme": "blue",
+    "mode": "Dark"
   }
 }

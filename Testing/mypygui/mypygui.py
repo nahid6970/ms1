@@ -493,7 +493,7 @@ ROOT2.pack(side="right", pady=(2,2),padx=(5,1), anchor="e", fill="x")
 #! ███████╗███████╗██║        ██║
 #! ╚══════╝╚══════╝╚═╝        ╚═╝
 
-uptime_label=CTkLabel(ROOT1, text="", corner_radius=3, width=100,height=20,  text_color="#6bc0f8",fg_color="#1d2027", font=("JetBrainsMono NFP" ,16,"bold"))
+uptime_label=CTkLabel(ROOT1, text="", corner_radius=0, width=100,height=20,  text_color="#6bc0f8",fg_color="#1d2027", font=("JetBrainsMono NFP" ,16,"bold"))
 uptime_label.pack(side="left",padx=(0,5),pady=(1,0))
 
 OS_LB = tk.Label(ROOT1,text="OS", bg="#1d2027", fg="#59e3a7", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
@@ -502,7 +502,7 @@ OS_LB.bind( "<Button-1>", lambda event=None: subprocess.Popen( r'cmd /c start wi
 OS_LB.bind("<Button-3>",lambda event:subprocess.Popen([r"cmd /c start C:\Users\nahid\ms\ms1\New folder\windows.py"], shell=True))
 OS_LB.bind("<Control-Button-1>",lambda event=None:subprocess.Popen(r'cmd /c code C:\Users\nahid\ms\ms1\New folder\windows.py'))
 
-Update=CTkLabel(ROOT1, text="\uf01b", bg_color="#1d2027",text_color="#16a2ff", corner_radius=5, anchor="w",font=("JetBrainsMono NFP",20,"bold"))
+Update=CTkLabel(ROOT1, text="\uf01b", bg_color="#1d2027",text_color="#16a2ff", corner_radius=0, anchor="w",font=("JetBrainsMono NFP",20,"bold"))
 Update.pack(side="left",padx=(0,0),pady=(1,0))
 Update.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c start C:\\Users\\nahid\\ms\\ms1\\scripts\\update.ps1"], shell=True))
 Update.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\Users\\nahid\\ms\\ms1\\scripts\\update.ps1"], shell=True))
@@ -512,7 +512,7 @@ Update.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\
 # Update.bind("<Button-1>",lambda event:subprocess.Popen(["C:\\Users\\nahid\\AppData\\Local\\Programs\\UniGetUI\\UniGetUI.exe"], shell=True))
 
 
-Tools_bt=CTkLabel(ROOT1, text="\ueb51", bg_color="#1d2027",text_color="#ffffff", corner_radius=5, anchor="w",font=("JetBrainsMono NFP",20,"bold"))
+Tools_bt=CTkLabel(ROOT1, text="\ueb51", bg_color="#1d2027",text_color="#ffffff", corner_radius=0, anchor="w",font=("JetBrainsMono NFP",20,"bold"))
 Tools_bt.pack(side="left",padx=(2,0),pady=(1,0))
 Tools_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\Users\\nahid\\ms\\ms1\\scripts\\mypygui_import\\tools.py"], shell=True))
 Tools_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\Users\\nahid\\ms\\ms1\\scripts\\mypygui_import\\tools.py"], shell=True))
@@ -1160,7 +1160,7 @@ create_gui()
 
 
 
-cpu_core_frame =CTkFrame(ROOT2,corner_radius=5,bg_color="#1d2027",border_width=1,border_color="#000000", fg_color="#fff")
+cpu_core_frame =CTkFrame(ROOT2,corner_radius=0,bg_color="#1d2027",border_width=1,border_color="#000000", fg_color="#fff")
 cpu_core_frame.pack(side="left",padx=(3,0),pady=(0,0))
 
 Download_lb=tk.Label(ROOT2,bg="#000000",fg="#080505",height=0,width =0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor ="w",font=("JetBrainsMono NFP",10,"bold"),text="")
@@ -1453,7 +1453,7 @@ def force_restart(event):
         subprocess.run(["shutdown", "/r", "/f", "/t", "0"])
         # subprocess.run(["shutdown", "/r", "/t", "0"])
 
-Shut_Reboot=CTkButton(ROOT2, text="\udb82\udc20",fg_color="#1d2027",text_color="#fa0000", corner_radius=5,height=10,width=0, anchor="center",font=("JetBrainsMono NFP",25,"bold"))
+Shut_Reboot=CTkButton(ROOT2, text="\udb82\udc20",fg_color="#1d2027",text_color="#fa0000", corner_radius=0,height=10,width=0, anchor="center",font=("JetBrainsMono NFP",25,"bold"))
 Shut_Reboot.pack(side="left",padx=(1,1),pady=(0,0))
 Shut_Reboot.bind("<Button-1>",force_shutdown)
 Shut_Reboot.bind("<Button-3>",force_restart)

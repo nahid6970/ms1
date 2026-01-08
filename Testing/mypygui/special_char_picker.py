@@ -112,6 +112,7 @@ class SpecialCharPicker(ctk.CTk):
             height=30,
             fg_color="#10b153", 
             hover_color="#0e9646",
+            corner_radius=0,
             command=self.add_new_char
         )
         self.add_btn.pack(side="right", padx=20, pady=10)
@@ -126,13 +127,14 @@ class SpecialCharPicker(ctk.CTk):
             width=60,
             height=28,
             values=[str(i) for i in range(3, 13)],
+            corner_radius=0,
             command=self.change_cols
         )
         self.col_option.set(str(self.cols))
         self.col_option.pack(side="left")
 
         # --- Main Body (Split View) ---
-        self.body_frame = ctk.CTkFrame(self, fg_color="transparent")
+        self.body_frame = ctk.CTkFrame(self, fg_color="transparent", corner_radius=0)
         self.body_frame.pack(fill="both", expand=True)
 
         # 1. Left Sidebar (Categories)
@@ -152,11 +154,11 @@ class SpecialCharPicker(ctk.CTk):
         # Category Buttons Container is self.sidebar itself
 
         # 2. Right Content (Grid)
-        self.content_area = ctk.CTkFrame(self.body_frame, fg_color="transparent")
+        self.content_area = ctk.CTkFrame(self.body_frame, fg_color="transparent", corner_radius=0)
         self.content_area.pack(side="right", fill="both", expand=True)
 
         # Top Bar of Content (Category Info)
-        self.cat_header = ctk.CTkFrame(self.content_area, height=40, fg_color="transparent")
+        self.cat_header = ctk.CTkFrame(self.content_area, height=40, fg_color="transparent", corner_radius=0)
         self.cat_header.pack(fill="x", padx=20, pady=(20, 0))
         
         self.current_cat_label = ctk.CTkLabel(self.cat_header, text="General", font=("Segoe UI", 20, "bold"))
@@ -169,6 +171,7 @@ class SpecialCharPicker(ctk.CTk):
         self.grid_frame = ctk.CTkScrollableFrame(
             self.content_area, 
             fg_color="transparent",
+            corner_radius=0,
             scrollbar_button_color="#2b2b2b",  # Minimal visibility or transparent
             scrollbar_button_hover_color="#3a3f4b"
         )
@@ -220,7 +223,7 @@ class SpecialCharPicker(ctk.CTk):
                 text=cat,
                 fg_color=fg,
                 hover_color=hover,
-                corner_radius=6,
+                corner_radius=0,
                 height=35,
                 anchor="w",
                 command=lambda c=cat: self.switch_category(c)
@@ -245,6 +248,7 @@ class SpecialCharPicker(ctk.CTk):
             text_color="gray",
             hover_color="#2b2f38",
             height=30,
+            corner_radius=0,
             command=self.add_category
         )
         new_btn.is_cat_item = True
@@ -276,7 +280,7 @@ class SpecialCharPicker(ctk.CTk):
             col = idx % self.cols
             
             # Card
-            card = ctk.CTkFrame(self.grid_frame, corner_radius=10, fg_color="#2b2f38")
+            card = ctk.CTkFrame(self.grid_frame, corner_radius=0, fg_color="#2b2f38")
             card.grid(row=row, column=col, padx=5, pady=5, sticky="nsew")
             
             # Label
