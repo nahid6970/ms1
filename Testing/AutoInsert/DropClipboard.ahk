@@ -38,10 +38,11 @@ DropClipboard() {
     filePath := tempDir "\" fileName
     
     try {
-        ; Write clipboard content to the new file
+        ; Write clipboard content to the new file with UTF-8 encoding (supports Bangla, etc.)
         if FileExist(filePath)
             FileDelete(filePath)
-        FileAppend(clipText, filePath)
+        ; "UTF-8" includes the BOM (Byte Order Mark), which helps Windows apps recognize the text as Unicode.
+        FileAppend(clipText, filePath, "UTF-8")
     } catch Error as err {
         MsgBox("Failed to create temporary file:`n" err.Message)
         return
