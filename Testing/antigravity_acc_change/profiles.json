@@ -14,7 +14,7 @@
         "active": true,
         "is_locked": true,
         "password": "182358",
-        "timer_enabled": false,
-        "target_time": null
+        "timer_enabled": true,
+        "target_time": "2026-01-13T01:28:42"
     }
 ]
