@@ -52,6 +52,7 @@ class SpecialCharPicker(ctk.CTk):
         }
 
         if not os.path.exists(CONFIG_FILE):
+            self.cols = 5
             return default_data
 
         try:
@@ -60,20 +61,31 @@ class SpecialCharPicker(ctk.CTk):
                 
             # Migration: List -> Dict
             if isinstance(content, list):
+                self.cols = 5
                 return {"General": content}
             
             # Retrieve as Dict
             if isinstance(content, dict):
+                # Extract settings if present
+                if "_settings" in content:
+                    self.cols = content["_settings"].get("cols", 5)
+                else:
+                    self.cols = 5
                 return content
                 
+            self.cols = 5
             return default_data
 
         except Exception as e:
             print(f"Error loading config: {e}")
+            self.cols = 5
             return default_data
 
     def save_data(self):
         try:
+            # Update settings in data
+            self.data["_settings"] = {"cols": self.cols}
+            
             with open(CONFIG_FILE, "w", encoding="utf-8") as f:
                 json.dump(self.data, f, ensure_ascii=False, indent=2)
         except Exception as e:
@@ -104,6 +116,21 @@ class SpecialCharPicker(ctk.CTk):
         )
         self.add_btn.pack(side="right", padx=20, pady=10)
 
+        # Column Config
+        self.col_frame = ctk.CTkFrame(self.header_frame, fg_color="transparent")
+        self.col_frame.pack(side="right", padx=(0, 10))
+        
+        ctk.CTkLabel(self.col_frame, text="Cols:", text_color="gray", font=("Segoe UI", 12)).pack(side="left", padx=(0, 5))
+        self.col_option = ctk.CTkComboBox(
+            self.col_frame,
+            width=60,
+            height=28,
+            values=[str(i) for i in range(3, 13)],
+            command=self.change_cols
+        )
+        self.col_option.set(str(self.cols))
+        self.col_option.pack(side="left")
+
         # --- Main Body (Split View) ---
         self.body_frame = ctk.CTkFrame(self, fg_color="transparent")
         self.body_frame.pack(fill="both", expand=True)
@@ -123,11 +150,6 @@ class SpecialCharPicker(ctk.CTk):
         ctk.CTkLabel(self.sidebar, text="CATEGORIES", font=("Segoe UI", 12, "bold"), text_color="gray").pack(pady=(20, 10), padx=20, anchor="w")
         
         # Category Buttons Container is self.sidebar itself
-
-        # Add Category Button at bottom of sidebar
-        # We'll repack this every refresh or keep it at bottom? 
-        # Easier to just append it in refresh loop or separate frame.
-        # Let's put it in refresh logic.
 
         # 2. Right Content (Grid)
         self.content_area = ctk.CTkFrame(self.body_frame, fg_color="transparent")
@@ -150,16 +172,30 @@ class SpecialCharPicker(ctk.CTk):
             scrollbar_button_color="#2b2b2b",  # Minimal visibility or transparent
             scrollbar_button_hover_color="#3a3f4b"
         )
-        # self.grid_frame._scrollbar.configure(width=0) # Removing unsafe access
-        # Hack to "hide" scrollbar visually if user requested
+        self.grid_frame._scrollbar.configure(width=0)
         self.grid_frame.configure(scrollbar_button_color=self.cget("fg_color"), scrollbar_button_hover_color=self.cget("fg_color"))
         
         self.grid_frame.pack(fill="both", expand=True, padx=10, pady=10)
         
-        # Grid Cols
-        self.cols = 5
+        # Grid Cols Setup
+        self.setup_grid_cols()
+
+    def setup_grid_cols(self):
+        # Reset column weights
+        for i in range(20): # clear old ones roughly
+            self.grid_frame.grid_columnconfigure(i, weight=0)
+            
         for i in range(self.cols):
             self.grid_frame.grid_columnconfigure(i, weight=1)
+
+    def change_cols(self, value):
+        try:
+            self.cols = int(value)
+            self.setup_grid_cols()
+            self.refresh_grid()
+            self.save_data()
+        except ValueError:
+            pass
 
     def refresh_full_ui(self):
         self.refresh_sidebar()
@@ -168,14 +204,13 @@ class SpecialCharPicker(ctk.CTk):
     def refresh_sidebar(self):
         # Clear sidebar
         for widget in self.sidebar.winfo_children():
-            # Don't delete the "CATEGORIES" header if I packed it... 
-            # I packed it in setup_ui inside sidebar. 
-            # Better to use a container inside sidebar for buttons to clear easily.
             if isinstance(widget, ctk.CTkButton) or getattr(widget, "is_cat_item", False):
                 widget.destroy()
 
         # List Categories
         for cat in self.data.keys():
+            if cat == "_settings": continue # Skip settings key
+            
             is_active = (cat == self.current_category)
             fg = "#2b2f38" if not is_active else "#10b153"
             hover = "#3a3f4b" if not is_active else "#10b153"
