@@ -6,11 +6,160 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QVBoxLayout, QHBoxLayout
                             QWidget, QPushButton, QLineEdit, QCheckBox, QDialog,
                             QDialogButtonBox, QLabel, QTextEdit, QComboBox, QMessageBox,
                             QSplitter, QFrame, QTextBrowser, QMenu)
-from PyQt6.QtCore import Qt, pyqtSignal, QSettings, QPoint
-from PyQt6.QtGui import QFont, QTextCursor
+from PyQt6.QtCore import Qt, pyqtSignal, QSettings, QPoint, QSize
+from PyQt6.QtGui import QFont, QTextCursor, QKeySequence
 
 AHK_SCRIPT_PATH = "ahk_v2.ahk"
 SHORTCUTS_JSON_PATH = "ahk_shortcuts.json"
+
+class ShortcutBuilderPopup(QDialog):
+    def __init__(self, parent=None, initial_value=""):
+        super().__init__(parent)
+        self.setWindowTitle("Shortcut Builder")
+        self.setModal(True)
+        self.setFixedWidth(400)
+        self.setStyleSheet("background-color: #2b2b2b; color: white;")
+        
+        self.result_hotkey = initial_value
+        self.mods = {"^": False, "!": False, "+": False, "#": False}
+        self.main_key = ""
+        
+        self.parse_initial(initial_value)
+        self.setup_ui()
+
+    def parse_initial(self, value):
+        if not value: return
+        
+        # Extract modifiers
+        for mod in self.mods:
+            if mod in value:
+                self.mods[mod] = True
+                value = value.replace(mod, "")
+        
+        self.main_key = value
+
+    def setup_ui(self):
+        layout = QVBoxLayout(self)
+        
+        # Preview
+        self.preview_label = QLabel(self.get_formatted_preview())
+        self.preview_label.setStyleSheet("font-size: 24px; font-weight: bold; color: #61dafb; margin: 10px; qproperty-alignment: AlignCenter;")
+        layout.addWidget(self.preview_label)
+        
+        # Modifiers
+        mod_layout = QHBoxLayout()
+        self.mod_buttons = {}
+        mod_info = [("^", "Ctrl"), ("!", "Alt"), ("+", "Shift"), ("#", "Win")]
+        for symbol, name in mod_info:
+            btn = QPushButton(name)
+            btn.setCheckable(True)
+            btn.setChecked(self.mods[symbol])
+            btn.setStyleSheet("""
+                QPushButton { background: #3d3d3d; border: 1px solid #555; padding: 10px; border-radius: 5px; }
+                QPushButton:checked { background: #61dafb; color: black; border-color: #61dafb; }
+            """)
+            btn.toggled.connect(lambda checked, s=symbol: self.update_mod(s, checked))
+            mod_layout.addWidget(btn)
+            self.mod_buttons[symbol] = btn
+        layout.addLayout(mod_layout)
+        
+        # Key Selector
+        layout.addWidget(QLabel("Select Key:"))
+        self.key_search = QLineEdit()
+        self.key_search.setPlaceholderText("Search keys...")
+        self.key_search.textChanged.connect(self.filter_keys)
+        layout.addWidget(self.key_search)
+        
+        self.key_grid = QWidget()
+        self.grid_layout = QHBoxLayout(self.key_grid) # We'll use a flow layout like behavior or just a scroll area
+        
+        # Use a list for easier selection if many keys
+        self.key_list = QComboBox()
+        self.key_list.setEditable(True)
+        self.common_keys = [
+            "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", 
+            "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z",
+            "0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
+            "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12",
+            "Space", "Enter", "Tab", "Esc", "Backspace", "Delete", "Insert", "Home", "End", "PgUp", "PgDn",
+            "Up", "Down", "Left", "Right", "LButton", "RButton", "MButton", "WheelUp", "WheelDown",
+            "[", "]", ";", "'", ",", ".", "/", "\\", "-", "=", "`"
+        ]
+        self.key_list.addItems(self.common_keys)
+        if self.main_key in self.common_keys:
+            self.key_list.setCurrentText(self.main_key)
+        self.key_list.currentTextChanged.connect(self.update_key)
+        layout.addWidget(self.key_list)
+        
+        # Common Action Keys Grid (Faster access)
+        quick_keys_layout = QHBoxLayout()
+        for k in ["Space", "Enter", "Tab", "Esc"]:
+            btn = QPushButton(k)
+            btn.clicked.connect(lambda checked, val=k: self.key_list.setCurrentText(val))
+            quick_keys_layout.addWidget(btn)
+        layout.addLayout(quick_keys_layout)
+
+        # OK/Cancel
+        buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
+        buttons.accepted.connect(self.accept)
+        buttons.rejected.connect(self.reject)
+        layout.addWidget(buttons)
+
+    def update_mod(self, symbol, state):
+        self.mods[symbol] = state
+        self.update_preview()
+
+    def update_key(self, key):
+        self.main_key = key
+        self.update_preview()
+
+    def update_preview(self):
+        self.preview_label.setText(self.get_formatted_preview())
+
+    def get_formatted_preview(self):
+        res = ""
+        if self.mods["^"]: res += "Ctrl+"
+        if self.mods["!"]: res += "Alt+"
+        if self.mods["+"]: res += "Shift+"
+        if self.mods["#"]: res += "Win+"
+        res += self.main_key if self.main_key else "?"
+        return res
+
+    def get_final_ahk(self):
+        res = ""
+        if self.mods["^"]: res += "^"
+        if self.mods["!"]: res += "!"
+        if self.mods["+"]: res += "+"
+        if self.mods["#"]: res += "#"
+        res += self.main_key
+        return res
+
+    def filter_keys(self, text):
+        # Optional: implementation of search in combo
+        pass
+
+class HotkeyLineEdit(QLineEdit):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.is_recording = False
+        self.record_button = None
+
+    def set_recording(self, state):
+        if not state:
+            return
+            
+        # Instead of recording, show the builder
+        builder = ShortcutBuilderPopup(self, self.text())
+        if builder.exec():
+            self.setText(builder.get_final_ahk())
+        
+        # Always uncheck the button after the dialog closes
+        if self.record_button:
+            self.record_button.setChecked(False)
+
+    def keyPressEvent(self, event):
+        # We might still want to capture normal typing for manual entry
+        super().keyPressEvent(event)
 
 class AddEditShortcutDialog(QDialog):
     def __init__(self, parent, shortcut_type, shortcut_data=None):
@@ -65,9 +214,39 @@ class AddEditShortcutDialog(QDialog):
         if self.shortcut_type == "script":
             # Hotkey
             form_layout.addWidget(QLabel("Hotkey:"))
-            self.hotkey_edit = QLineEdit()
+            hotkey_row = QHBoxLayout()
+            self.hotkey_edit = HotkeyLineEdit()
             self.hotkey_edit.setPlaceholderText("e.g., !Space, ^!n, #x")
-            form_layout.addWidget(self.hotkey_edit)
+            
+            self.record_hotkey_btn = QPushButton("⌨")
+            self.record_hotkey_btn.setCheckable(True)
+            self.record_hotkey_btn.setFixedWidth(40)
+            self.record_hotkey_btn.setStyleSheet("""
+                QPushButton {
+                    font-family: 'JetBrainsMono NFP', 'JetBrains Mono', monospace;
+                    background-color: #3d3d3d;
+                    border: 1px solid #555;
+                    border-radius: 5px;
+                    color: white;
+                    font-size: 18px;
+                }
+                QPushButton:checked {
+                    background-color: #61dafb;
+                    color: black;
+                    border-color: #61dafb;
+                }
+                QPushButton:hover {
+                    background-color: #4d4d4d;
+                    border-color: #61dafb;
+                }
+            """)
+            self.record_hotkey_btn.setToolTip("Open Shortcut Builder")
+            self.record_hotkey_btn.clicked.connect(lambda checked: self.hotkey_edit.set_recording(checked))
+            self.hotkey_edit.record_button = self.record_hotkey_btn
+            
+            hotkey_row.addWidget(self.hotkey_edit)
+            hotkey_row.addWidget(self.record_hotkey_btn)
+            form_layout.addLayout(hotkey_row)
         else:
             # Trigger
             form_layout.addWidget(QLabel("Trigger (without ::):"))
@@ -345,12 +524,49 @@ class AHKShortcutEditor(QMainWindow):
         self.colors_btn.setMaximumWidth(80)
         top_layout.addWidget(self.colors_btn)
 
-        self.search_edit = QLineEdit()
+        # Search with Record button
+        self.search_container = QWidget()
+        search_layout_inner = QHBoxLayout(self.search_container)
+        search_layout_inner.setContentsMargins(0, 0, 0, 0)
+        search_layout_inner.setSpacing(5)
+
+        self.search_edit = HotkeyLineEdit()
+        self.search_edit.setObjectName("search_edit")
         self.search_edit.setPlaceholderText("Search shortcuts...")
         self.search_edit.textChanged.connect(self.update_display)
         self.search_edit.setStyleSheet("border-radius: 10px; padding: 5px;")
         self.search_edit.setMinimumWidth(200)
-        top_layout.addWidget(self.search_edit)
+        
+        self.record_search_btn = QPushButton("⌨")
+        self.record_search_btn.setCheckable(True)
+        self.record_search_btn.setFixedWidth(40)
+        self.record_search_btn.setToolTip("Record keys to search")
+        self.record_search_btn.setStyleSheet("""
+            QPushButton {
+                font-family: 'JetBrainsMono NFP', 'JetBrains Mono', monospace;
+                background-color: #3d3d3d;
+                border: 1px solid #555;
+                border-radius: 10px;
+                color: white;
+                font-size: 18px;
+            }
+            QPushButton:checked {
+                background-color: #61dafb;
+                color: black;
+                border-color: #61dafb;
+            }
+            QPushButton:hover {
+                background-color: #4d4d4d;
+                border-color: #61dafb;
+            }
+        """)
+        self.record_search_btn.setToolTip("Open Shortcut Builder")
+        self.record_search_btn.clicked.connect(lambda checked: self.search_edit.set_recording(checked))
+        self.search_edit.record_button = self.record_search_btn
+
+        search_layout_inner.addWidget(self.search_edit)
+        search_layout_inner.addWidget(self.record_search_btn)
+        top_layout.addWidget(self.search_container)
 
         # Generate button
         generate_btn = QPushButton("Generate AHK Script")
