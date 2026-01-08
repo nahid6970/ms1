@@ -140,16 +140,13 @@ class SpecialCharPicker(ctk.CTk):
         # 1. Left Sidebar (Categories)
         self.sidebar = ctk.CTkScrollableFrame(
             self.body_frame, 
-            width=180, 
+            width=100, # Initial small width
             corner_radius=0, 
             fg_color="#21252b",
             scrollbar_button_color="#21252b",   # Hide Scrollbar (match bg)
             scrollbar_button_hover_color="#21252b"
         )
         self.sidebar.pack(side="left", fill="y")
-
-        # Sidebar Header
-        ctk.CTkLabel(self.sidebar, text="CATEGORIES", font=("Segoe UI", 12, "bold"), text_color="gray").pack(pady=(20, 10), padx=20, anchor="w")
         
         # Category Buttons Container is self.sidebar itself
 
@@ -204,10 +201,29 @@ class SpecialCharPicker(ctk.CTk):
         self.refresh_grid()
 
     def refresh_sidebar(self):
-        # Clear sidebar
+        # Calculate required width based on content
+        max_name_len = 0
+        from tkinter import font as tkfont
+        # Note: ctk buttons use specific fonts, we use Segoe UI 12 as a safe measure
+        f = tkfont.Font(family="Segoe UI", size=12)
+        
+        # Measure all category names
+        for cat in self.data.keys():
+            if cat == "_settings": continue
+            w = f.measure(cat)
+            if w > max_name_len:
+                max_name_len = w
+        
+        # Super tight width calculation
+        sidebar_width = max(90, max_name_len + 30) 
+        self.sidebar.configure(width=sidebar_width)
+
+        # Clear sidebar entirely (everything inside is destroyable now)
         for widget in self.sidebar.winfo_children():
-            if isinstance(widget, ctk.CTkButton) or getattr(widget, "is_cat_item", False):
-                widget.destroy()
+            widget.destroy()
+
+        # Sidebar Header (Smaller)
+        ctk.CTkLabel(self.sidebar, text="LIST", font=("Segoe UI", 10, "bold"), text_color="gray").pack(pady=(10, 5), padx=10, anchor="w")
 
         # List Categories
         for cat in self.data.keys():
@@ -223,35 +239,34 @@ class SpecialCharPicker(ctk.CTk):
                 fg_color=fg,
                 hover_color=hover,
                 corner_radius=0,
-                height=35,
+                height=30,  # Slightly shorter buttons
                 anchor="w",
+                font=("Segoe UI", 12),
                 command=lambda c=cat: self.switch_category(c)
             )
-            btn.is_cat_item = True
-            btn.pack(fill="x", padx=10, pady=2)
+            btn.pack(fill="x", padx=5, pady=1) # tighter padding
             
             # Context Menu for Category (Rename/Delete)
             btn.bind("<Button-3>", lambda e, c=cat: self.show_category_context(e, c))
 
         # New Category Button
-        sep = ctk.CTkFrame(self.sidebar, height=2, fg_color="#2b2b2b")
-        sep.is_cat_item = True
-        sep.pack(fill="x", padx=20, pady=15)
+        sep = ctk.CTkFrame(self.sidebar, height=1, fg_color="#2b2b2b")
+        sep.pack(fill="x", padx=8, pady=8)
 
         new_btn = ctk.CTkButton(
             self.sidebar,
-            text="+ New Category",
+            text="+ New",
             fg_color="transparent",
             border_width=1,
             border_color="gray",
             text_color="gray",
             hover_color="#2b2f38",
             corner_radius=0,
-            height=30,
+            height=28,
+            font=("Segoe UI", 11),
             command=self.add_category
         )
-        new_btn.is_cat_item = True
-        new_btn.pack(fill="x", padx=20, pady=(0, 20))
+        new_btn.pack(fill="x", padx=5, pady=(0, 20))
 
     def switch_category(self, cat):
         self.current_category = cat
