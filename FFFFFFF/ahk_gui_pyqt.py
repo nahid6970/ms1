@@ -64,16 +64,7 @@ class ShortcutBuilderPopup(QDialog):
         layout.addLayout(mod_layout)
         
         # Key Selector
-        layout.addWidget(QLabel("Select Key:"))
-        self.key_search = QLineEdit()
-        self.key_search.setPlaceholderText("Search keys...")
-        self.key_search.textChanged.connect(self.filter_keys)
-        layout.addWidget(self.key_search)
-        
-        self.key_grid = QWidget()
-        self.grid_layout = QHBoxLayout(self.key_grid) # We'll use a flow layout like behavior or just a scroll area
-        
-        # Use a list for easier selection if many keys
+        layout.addWidget(QLabel("Select Main Key:"))
         self.key_list = QComboBox()
         self.key_list.setEditable(True)
         self.common_keys = [
@@ -86,18 +77,31 @@ class ShortcutBuilderPopup(QDialog):
             "[", "]", ";", "'", ",", ".", "/", "\\", "-", "=", "`"
         ]
         self.key_list.addItems(self.common_keys)
-        if self.main_key in self.common_keys:
+        
+        # Search Box
+        self.key_search = QLineEdit()
+        self.key_search.setPlaceholderText("Search keys (e.g. 'space', 'f1', 'x')...")
+        self.key_search.textChanged.connect(self.filter_keys)
+        # Style search box
+        self.key_search.setStyleSheet("padding: 8px; border-radius: 5px; background: #3d3d3d;")
+        layout.addWidget(self.key_search)
+        
+        if self.main_key:
             self.key_list.setCurrentText(self.main_key)
         self.key_list.currentTextChanged.connect(self.update_key)
         layout.addWidget(self.key_list)
         
-        # Common Action Keys Grid (Faster access)
-        quick_keys_layout = QHBoxLayout()
-        for k in ["Space", "Enter", "Tab", "Esc"]:
+        # Quick access area (Flow layout style)
+        layout.addWidget(QLabel("Quick Keys:"))
+        quick_grid = QWidget()
+        quick_layout = QHBoxLayout(quick_grid)
+        quick_layout.setContentsMargins(0, 0, 0, 0)
+        for k in ["Space", "Enter", "Tab", "Esc", "Up", "Down"]:
             btn = QPushButton(k)
+            btn.setStyleSheet("padding: 5px; font-size: 12px;")
             btn.clicked.connect(lambda checked, val=k: self.key_list.setCurrentText(val))
-            quick_keys_layout.addWidget(btn)
-        layout.addLayout(quick_keys_layout)
+            quick_layout.addWidget(btn)
+        layout.addWidget(quick_grid)
 
         # OK/Cancel
         buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
@@ -135,8 +139,18 @@ class ShortcutBuilderPopup(QDialog):
         return res
 
     def filter_keys(self, text):
-        # Optional: implementation of search in combo
-        pass
+        text = text.lower().strip()
+        if not text:
+            # If search is cleared, don't change current selection unless it's empty
+            return
+
+        # Find all matching keys
+        matches = [k for k in self.common_keys if text in k.lower()]
+        
+        if matches:
+            # Automatically pick the best match (starts with text is better than just contains)
+            best_match = next((k for k in matches if k.lower().startswith(text)), matches[0])
+            self.key_list.setCurrentText(best_match)
 
 class HotkeyLineEdit(QLineEdit):
     def __init__(self, parent=None):
