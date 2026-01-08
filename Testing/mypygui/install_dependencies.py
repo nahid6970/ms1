@@ -1,20 +1,14 @@
 import subprocess
 import sys
 import os
-
-def check_pip():
-    try:
-        subprocess.check_call([sys.executable, "-m", "pip", "--version"])
-        return True
-    except subprocess.CalledProcessError:
-        return False
+import importlib.metadata
 
 def install_uv():
     print("--------------------------------------------------")
     print("Step 1: Installing/Upgrading 'uv' package manager...")
     print("--------------------------------------------------")
     try:
-        # Upgrade pip, wheel, and setuptools first to avoid build issues
+        # Upgrade pip, wheel, and setuptools first
         print("Upgrading pip, wheel, and setuptools...")
         subprocess.check_call([sys.executable, "-m", "pip", "install", "--upgrade", "pip", "wheel", "setuptools"])
         
@@ -26,43 +20,87 @@ def install_uv():
         print(f"Error installing uv: {e}")
         sys.exit(1)
 
-def install_packages_globally(packages):
+def get_installed_packages():
+    return {dist.metadata['Name'].lower() for dist in importlib.metadata.distributions()}
+
+def install_packages_smartly(packages):
     print("\n--------------------------------------------------")
-    print("Step 2: Installing packages globally using 'uv'...")
+    print("Step 2: Checking and Installing packages...")
     print("--------------------------------------------------")
     
     if not packages:
-        print("No packages specificed.")
+        print("No packages specified.")
         return
 
-    cmd = [sys.executable, "-m", "uv", "pip", "install", "--system"] + packages
+    installed_set = get_installed_packages()
     
-    print(f"Running: {' '.join(cmd)}")
+    pre_existing = []
+    installed_with_uv = []
+    failed = []
+
+    # Filter packages that need installation
+    to_install = []
+    for pkg in packages:
+        # Simple name check (ignores version specifiers for now for simplicity)
+        pkg_name = pkg.split("==")[0].split(">=")[0].lower()
+        
+        if pkg_name in installed_set:
+            pre_existing.append(pkg)
+            print(f"[SKIP] {pkg} is already installed.")
+        else:
+            to_install.append(pkg)
+
+    if to_install:
+        print(f"\nInstalling missing packages with 'uv': {', '.join(to_install)}")
+        # Install one by one or batch? Batch is faster with uv.
+        # But if one fails, we might want to know.
+        # Let's try batch first for speed.
+        cmd = [sys.executable, "-m", "uv", "pip", "install", "--system"] + to_install
+        try:
+            print(f"Running: {' '.join(cmd)}")
+            subprocess.check_call(cmd)
+            installed_with_uv.extend(to_install)
+        except subprocess.CalledProcessError:
+            print("\nBatch install failed. Trying individually...")
+            for pkg in to_install:
+                try:
+                    subprocess.check_call([sys.executable, "-m", "uv", "pip", "install", "--system", pkg])
+                    installed_with_uv.append(pkg)
+                except subprocess.CalledProcessError:
+                    print(f"[FAIL] Failed to install {pkg}")
+                    failed.append(pkg)
     
-    try:
-        subprocess.check_call(cmd)
-        print("\n--------------------------------------------------")
-        print("SUCCESS: All packages installed successfully.")
-        print("--------------------------------------------------")
-    except subprocess.CalledProcessError as e:
-        print(f"\nError installing packages: {e}")
-        print("Try running this script as Administrator if you encounter permission errors.")
-        sys.exit(1)
+    # Summary
+    print("\n" + "="*50)
+    print("INSTALLATION SUMMARY")
+    print("="*50)
+    
+    print(f"\nPre-existing packages (Skipped): {len(pre_existing)}")
+    for p in pre_existing:
+        print(f"  - {p}")
+        
+    print(f"\nNewly installed with 'uv': {len(installed_with_uv)}")
+    for p in installed_with_uv:
+        print(f"  - {p}")
+        
+    if failed:
+        print(f"\nFAILED to install: {len(failed)}")
+        for p in failed:
+            print(f"  - {p}")
 
 if __name__ == "__main__":
-    # List of packages to install
-    # Add any other modules you need here
+    # Extensive list of common/observed packages
     required_packages = [
-        "customtkinter",
-        "psutil",
-        "requests",
-        "pillow",
-        "pywin32"
+        "customtkinter", "psutil", "requests", "pillow", "pywin32",
+        "aiofiles", "aiohttp", "beautifulsoup4", "black", "click", 
+        "clipboard", "colorama", "flask-cors", "apscheduler",
+        "darkdetect", "packaging", "pyperclip", "winshell", 
+        "pypiwin32", "keyboard", "mouse", "screeninfo"
     ]
 
     print(f"Python Executable: {sys.executable}")
     
     install_uv()
-    install_packages_globally(required_packages)
+    install_packages_smartly(required_packages)
     
     input("\nPress Enter to exit...")
