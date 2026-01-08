@@ -120,9 +120,9 @@
             "path": "C:/Users/nahid/ms/ms1/Testing/mklink/mklink.py",
             "font_size": 20,
             "hide_terminal": true,
-            "color": "#ffffff",
-            "text_color": "#000000",
-            "border_width": 0,
+            "color": "#000000",
+            "text_color": "#ffffff",
+            "border_width": 1,
             "corner_radius": 0,
             "is_bold": false,
             "is_italic": false,
@@ -131,7 +131,12 @@
             "col_span": 1,
             "row_span": 1,
             "width": 0,
-            "height": 0
+            "height": 0,
+            "keep_open": false,
+            "kill_window": false,
+            "use_inline": false,
+            "inline_type": "cmd",
+            "inline_script": ""
         },
         {
             "name": "AntiGravity",
