@@ -112,6 +112,7 @@ class SpecialCharPicker(ctk.CTk):
             height=30,
             fg_color="#10b153", 
             hover_color="#0e9646",
+            corner_radius=0,
             command=self.add_new_char
         )
         self.add_btn.pack(side="right", padx=20, pady=10)
@@ -125,6 +126,7 @@ class SpecialCharPicker(ctk.CTk):
             self.col_frame,
             width=60,
             height=28,
+            corner_radius=0,
             values=[str(i) for i in range(3, 13)],
             command=self.change_cols
         )
@@ -220,7 +222,7 @@ class SpecialCharPicker(ctk.CTk):
                 text=cat,
                 fg_color=fg,
                 hover_color=hover,
-                corner_radius=6,
+                corner_radius=0,
                 height=35,
                 anchor="w",
                 command=lambda c=cat: self.switch_category(c)
@@ -244,6 +246,7 @@ class SpecialCharPicker(ctk.CTk):
             border_color="gray",
             text_color="gray",
             hover_color="#2b2f38",
+            corner_radius=0,
             height=30,
             command=self.add_category
         )
@@ -276,7 +279,7 @@ class SpecialCharPicker(ctk.CTk):
             col = idx % self.cols
             
             # Card
-            card = ctk.CTkFrame(self.grid_frame, corner_radius=10, fg_color="#2b2f38")
+            card = ctk.CTkFrame(self.grid_frame, corner_radius=0, fg_color="#2b2f38")
             card.grid(row=row, column=col, padx=5, pady=5, sticky="nsew")
             
             # Label
