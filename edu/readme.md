@@ -16,6 +16,7 @@
 - ##text## = **Big headings/titles**
 - **text** = **Bold text for emphasis**
 - @@text@@ = @@Italic text for special notes@@
+- ==text== = **Black Background**
 
 **List Formatting**
 - text = Primary list items
