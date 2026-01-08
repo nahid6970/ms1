@@ -296,6 +296,7 @@ class SpecialCharPicker(ctk.CTk):
             # Card
             card = ctk.CTkFrame(self.grid_frame, corner_radius=0, fg_color="#2b2f38")
             card.grid(row=row, column=col, padx=5, pady=5, sticky="nsew")
+            card.char_index = idx  # Store index for drag-drop
             
             # Label
             lbl = ctk.CTkLabel(card, text=char, font=("Nirmala UI", 32), text_color="white")
@@ -327,9 +328,18 @@ class SpecialCharPicker(ctk.CTk):
             lbl.bind("<Enter>", on_enter)
             lbl.bind("<Leave>", on_leave)
 
-            # Actions
-            card.bind("<Button-1>", lambda e, c=char: self.copy_char(c))
-            lbl.bind("<Button-1>", lambda e, c=char: self.copy_char(c))
+            # Actions - Combined Drag & Click
+            # Use Index to identify items
+            card.bind("<Button-1>", lambda e, i=idx: self.start_drag(e, i))
+            lbl.bind("<Button-1>", lambda e, i=idx: self.start_drag(e, i))
+            
+            card.bind("<B1-Motion>", self.do_drag)
+            lbl.bind("<B1-Motion>", self.do_drag)
+            
+            card.bind("<ButtonRelease-1>", self.stop_drag)
+            lbl.bind("<ButtonRelease-1>", self.stop_drag)
+
+            # Right Click still works
             card.bind("<Button-3>", lambda e, c=char: self.show_char_context(e, c))
             lbl.bind("<Button-3>", lambda e, c=char: self.show_char_context(e, c))
 
@@ -341,6 +351,75 @@ class SpecialCharPicker(ctk.CTk):
             self.clipboard_append(char)
             self.update()
         self.show_toast(f"Copied: {char}")
+
+    # --- Drag and Drop Sorting ---
+    def start_drag(self, event, index):
+        self.drag_data = {
+            "index": index,
+            "x": event.x_root,
+            "y": event.y_root,
+            "moved": False,
+            "char": self.data[self.current_category][index]
+        }
+
+    def do_drag(self, event):
+        if not hasattr(self, "drag_data"): return
+        
+        dx = abs(event.x_root - self.drag_data["x"])
+        dy = abs(event.y_root - self.drag_data["y"])
+        
+        # Threshold to differentiate between click (copy) and drag (move)
+        if not self.drag_data["moved"] and (dx > 10 or dy > 10):
+            self.drag_data["moved"] = True
+            # Create a ghost label that follows the mouse
+            self.ghost = ctk.CTkLabel(self, text=self.drag_data["char"], 
+                                     font=("Nirmala UI", 32), fg_color="#3a3f4b")
+            self.ghost.place(x=0, y=0)
+
+        if self.drag_data["moved"]:
+            # Ghost follows mouse with a small offset
+            self.ghost.place(x=event.x_root - self.winfo_rootx() + 10, 
+                             y=event.y_root - self.winfo_rooty() + 10)
+
+    def stop_drag(self, event):
+        if not hasattr(self, "drag_data"): return
+        
+        if not self.drag_data.get("moved"):
+            # It was just a quick click, not a drag -> Perform Copy
+            self.copy_char(self.drag_data["char"])
+        else:
+            # It was a drag -> Handle Reorder
+            self.ghost.destroy()
+            
+            # Find which item we dropped over
+            target_idx = self.find_drop_index(event.x_root, event.y_root)
+            
+            if target_idx is not None and target_idx != self.drag_data["index"]:
+                items = self.data[self.current_category]
+                char = items.pop(self.drag_data["index"])
+                items.insert(target_idx, char)
+                self.save_data()
+                self.refresh_grid()
+        
+        del self.drag_data
+
+    def find_drop_index(self, x_root, y_root):
+        # Convert global mouse coords to grid_frame local coords
+        lx = x_root - self.grid_frame.winfo_rootx()
+        ly = y_root - self.grid_frame.winfo_rooty()
+        
+        # Iterate children and check where the mouse landed
+        for widget in self.grid_frame.winfo_children():
+            if hasattr(widget, "char_index"):
+                wx = widget.winfo_x()
+                wy = widget.winfo_y()
+                ww = widget.winfo_width()
+                wh = widget.winfo_height()
+                
+                # Check if mouse is within card bounds
+                if wx <= lx <= wx + ww and wy <= ly <= wy + wh:
+                    return widget.char_index
+        return None
 
     def show_toast(self, message):
         self.title(f"{message}   ✔")
