@@ -89,13 +89,27 @@ def install_packages_smartly(packages):
             print(f"  - {p}")
 
 if __name__ == "__main__":
-    # Extensive list of common/observed packages
+    # Extensive list of common/observed packages in your environment
     required_packages = [
-        "customtkinter", "psutil", "requests", "pillow", "pywin32",
         "aiofiles", "aiohttp", "beautifulsoup4", "black", "click", 
-        "clipboard", "colorama", "flask-cors", "apscheduler",
-        "darkdetect", "packaging", "pyperclip", "winshell", 
-        "pypiwin32", "keyboard", "mouse", "screeninfo"
+        "clipboard", "colorama", "customtkinter", "flask-cors", 
+        "apscheduler", "darkdetect", "packaging", "pyperclip", 
+        "winshell", "pypiwin32", "keyboard", "mouse", "screeninfo",
+        "psutil", "requests", "pillow", "pywin32", "pandas",
+        "numpy", "scipy", "scikit-learn", "torch", "transformers",
+        "opencv-python", "selenium", "webdriver-manager",
+        "pyautogui", "pydirectinput", "pygetwindow", "pywinauto",
+        "pynput", "pygame", "sounddevice", "soundfile", "pyaudio",
+        "speechrecognition", "gtts", "openai", "anthropic",
+        "langchain", "tiktoken", "fastapi", "uvicorn", "flask",
+        "sqlalchemy", "alembic", "rich", "tqdm", "typer",
+        "watchdog", "python-dotenv", "pyyaml", "lxml",
+        "openpyxl", "reportlab", "pdf2image", "pymupdf", 
+        "pyqt6", "pyqt6-webengine", "pywebview", "flet",
+        "annotated-types", "anyio", "attrs", "certifi", "cffi",
+        "charset-normalizer", "distro", "dnspython", "h11",
+        "httpcore", "httpx", "idna", "sniffio", "typing-extensions",
+        "urllib3", "websockets", "wheel", "setuptools", "uv"
     ]
 
     print(f"Python Executable: {sys.executable}")
