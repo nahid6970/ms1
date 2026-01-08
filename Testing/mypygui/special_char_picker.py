@@ -22,182 +22,363 @@ class SpecialCharPicker(ctk.CTk):
         super().__init__()
 
         self.title("Special Character Picker")
-        self.geometry("500x700")
+        self.geometry("700x600")
         
-        # Load Data
-        self.chars = self.load_chars()
+        # Migration and Loading
+        self.data = self.load_data()
+        self.current_category = None
+        self.current_hover_card = None
+
+        # Determine initial category
+        if self.data:
+            self.current_category = list(self.data.keys())[0]
+        else:
+            self.data = {"General": []}
+            self.current_category = "General"
 
         # UI Layout
         self.setup_ui()
-        self.refresh_grid()
+        self.refresh_full_ui()
 
-    def load_chars(self):
+    def load_data(self):
+        default_data = {
+            "Favorites": ["★", "✓", "✗", "❤", "•"],
+            "Currency": ["€", "£", "¥", "৳", "₹", "₽"],
+            "Math": ["≈", "≠", "≤", "≥", "÷", "×", "±", "∞"],
+            "Arrows": ["←", "↑", "→", "↓", "↔", "▲", "▼"],
+            "Latin/Greek": ["ø", "æ", "å", "ß", "Ω", "π", "µ"],
+            "Bangla": ["ঁ", "ং", "ঃ", "অ", "আ", "ই", "ঈ"],
+            "Misc": ["©", "®", "™", "…", "§"]
+        }
+
         if not os.path.exists(CONFIG_FILE):
-             # A preset of useful obscure characters + some Bangla examples
-            return [
-                "ø", "æ", "å", "ß", "€", "£", "¥", "©", "®", "™", 
-                "•", "→", "←", "↑", "↓", "★", "✗", "✓", 
-                "৳", "ঁ", "ং", "ঃ", "অ" 
-            ]
+            return default_data
+
         try:
             with open(CONFIG_FILE, "r", encoding="utf-8") as f:
-                return json.load(f)
+                content = json.load(f)
+                
+            # Migration: List -> Dict
+            if isinstance(content, list):
+                return {"General": content}
+            
+            # Retrieve as Dict
+            if isinstance(content, dict):
+                return content
+                
+            return default_data
+
         except Exception as e:
             print(f"Error loading config: {e}")
-            return []
+            return default_data
 
-    def save_chars(self):
+    def save_data(self):
         try:
             with open(CONFIG_FILE, "w", encoding="utf-8") as f:
-                json.dump(self.chars, f, ensure_ascii=False, indent=2)
+                json.dump(self.data, f, ensure_ascii=False, indent=2)
         except Exception as e:
             messagebox.showerror("Error", f"Failed to save: {e}")
 
     def setup_ui(self):
-        # --- Header ---
-        self.header_frame = ctk.CTkFrame(self, height=60, corner_radius=0, fg_color="#1d2027")
+        # --- Top Header ---
+        self.header_frame = ctk.CTkFrame(self, height=50, corner_radius=0, fg_color="#1d2027")
         self.header_frame.pack(fill="x")
         
         self.title_label = ctk.CTkLabel(
             self.header_frame, 
-            text="Character Picker", 
-            font=("Segoe UI", 20, "bold"),
+            text="CharPicker", 
+            font=("Segoe UI", 18, "bold"),
             text_color="white"
         )
-        self.title_label.pack(side="left", padx=20, pady=15)
+        self.title_label.pack(side="left", padx=20, pady=10)
 
-        # Add Button
+        # Global Add Button (Adds to current Category)
         self.add_btn = ctk.CTkButton(
             self.header_frame, 
-            text="+ Add Character", 
-            width=120, 
-            height=35,
+            text="+ Add Char", 
+            width=100, 
+            height=30,
             fg_color="#10b153", 
             hover_color="#0e9646",
             command=self.add_new_char
         )
-        self.add_btn.pack(side="right", padx=20, pady=15)
+        self.add_btn.pack(side="right", padx=20, pady=10)
 
-        # Hint Label
-        self.hint_label = ctk.CTkLabel(self, text="Right-click directly on a character to Copy", text_color="gray", font=("Segoe UI", 12))
-        self.hint_label.pack(pady=(10, 0))
+        # --- Main Body (Split View) ---
+        self.body_frame = ctk.CTkFrame(self, fg_color="transparent")
+        self.body_frame.pack(fill="both", expand=True)
 
-        # --- Grid Area ---
-        self.scroll_frame = ctk.CTkScrollableFrame(self, fg_color="transparent")
-        self.scroll_frame.pack(fill="both", expand=True, padx=20, pady=20)
+        # 1. Left Sidebar (Categories)
+        self.sidebar = ctk.CTkScrollableFrame(
+            self.body_frame, 
+            width=180, 
+            corner_radius=0, 
+            fg_color="#21252b",
+            scrollbar_button_color="#21252b",   # Hide Scrollbar (match bg)
+            scrollbar_button_hover_color="#21252b"
+        )
+        self.sidebar.pack(side="left", fill="y")
+
+        # Sidebar Header
+        ctk.CTkLabel(self.sidebar, text="CATEGORIES", font=("Segoe UI", 12, "bold"), text_color="gray").pack(pady=(20, 10), padx=20, anchor="w")
         
-        # Configure columns for responsive-like grid
+        # Category Buttons Container is self.sidebar itself
+
+        # Add Category Button at bottom of sidebar
+        # We'll repack this every refresh or keep it at bottom? 
+        # Easier to just append it in refresh loop or separate frame.
+        # Let's put it in refresh logic.
+
+        # 2. Right Content (Grid)
+        self.content_area = ctk.CTkFrame(self.body_frame, fg_color="transparent")
+        self.content_area.pack(side="right", fill="both", expand=True)
+
+        # Top Bar of Content (Category Info)
+        self.cat_header = ctk.CTkFrame(self.content_area, height=40, fg_color="transparent")
+        self.cat_header.pack(fill="x", padx=20, pady=(20, 0))
+        
+        self.current_cat_label = ctk.CTkLabel(self.cat_header, text="General", font=("Segoe UI", 20, "bold"))
+        self.current_cat_label.pack(side="left")
+
+        # Hint
+        ctk.CTkLabel(self.cat_header, text="(Right-click to Copy/Delete)", text_color="gray").pack(side="right", anchor="s")
+
+        # Scrollable Grid
+        self.grid_frame = ctk.CTkScrollableFrame(
+            self.content_area, 
+            fg_color="transparent",
+            scrollbar_button_color="#2b2b2b",  # Minimal visibility or transparent
+            scrollbar_button_hover_color="#3a3f4b"
+        )
+        # self.grid_frame._scrollbar.configure(width=0) # Removing unsafe access
+        # Hack to "hide" scrollbar visually if user requested
+        self.grid_frame.configure(scrollbar_button_color=self.cget("fg_color"), scrollbar_button_hover_color=self.cget("fg_color"))
+        
+        self.grid_frame.pack(fill="both", expand=True, padx=10, pady=10)
+        
+        # Grid Cols
         self.cols = 5
         for i in range(self.cols):
-            self.scroll_frame.grid_columnconfigure(i, weight=1)
+            self.grid_frame.grid_columnconfigure(i, weight=1)
+
+    def refresh_full_ui(self):
+        self.refresh_sidebar()
+        self.refresh_grid()
+
+    def refresh_sidebar(self):
+        # Clear sidebar
+        for widget in self.sidebar.winfo_children():
+            # Don't delete the "CATEGORIES" header if I packed it... 
+            # I packed it in setup_ui inside sidebar. 
+            # Better to use a container inside sidebar for buttons to clear easily.
+            if isinstance(widget, ctk.CTkButton) or getattr(widget, "is_cat_item", False):
+                widget.destroy()
+
+        # List Categories
+        for cat in self.data.keys():
+            is_active = (cat == self.current_category)
+            fg = "#2b2f38" if not is_active else "#10b153"
+            hover = "#3a3f4b" if not is_active else "#10b153"
+            
+            btn = ctk.CTkButton(
+                self.sidebar,
+                text=cat,
+                fg_color=fg,
+                hover_color=hover,
+                corner_radius=6,
+                height=35,
+                anchor="w",
+                command=lambda c=cat: self.switch_category(c)
+            )
+            btn.is_cat_item = True
+            btn.pack(fill="x", padx=10, pady=2)
+            
+            # Context Menu for Category (Rename/Delete)
+            btn.bind("<Button-3>", lambda e, c=cat: self.show_category_context(e, c))
+
+        # New Category Button
+        sep = ctk.CTkFrame(self.sidebar, height=2, fg_color="#2b2b2b")
+        sep.is_cat_item = True
+        sep.pack(fill="x", padx=20, pady=15)
+
+        new_btn = ctk.CTkButton(
+            self.sidebar,
+            text="+ New Category",
+            fg_color="transparent",
+            border_width=1,
+            border_color="gray",
+            text_color="gray",
+            hover_color="#2b2f38",
+            height=30,
+            command=self.add_category
+        )
+        new_btn.is_cat_item = True
+        new_btn.pack(fill="x", padx=20, pady=(0, 20))
+
+    def switch_category(self, cat):
+        self.current_category = cat
+        self.refresh_sidebar() # to update highlights
+        self.refresh_grid()
 
     def refresh_grid(self):
-        self.current_card = None  # Reset tracked hover card
-        
-        # Clear existing stuff
-        for widget in self.scroll_frame.winfo_children():
+        # Update Header
+        self.current_cat_label.configure(text=self.current_category)
+
+        # Clear Grid
+        self.current_hover_card = None
+        for widget in self.grid_frame.winfo_children():
             widget.destroy()
 
-        # Populate grid
-        for idx, char in enumerate(self.chars):
+        # Get items
+        items = self.data.get(self.current_category, [])
+
+        if not items:
+            ctk.CTkLabel(self.grid_frame, text="No characters yet.", text_color="gray").pack(pady=50)
+            return
+
+        for idx, char in enumerate(items):
             row = idx // self.cols
             col = idx % self.cols
             
-            # Card Container
-            card = ctk.CTkFrame(self.scroll_frame, corner_radius=10, fg_color="#2b2f38")
+            # Card
+            card = ctk.CTkFrame(self.grid_frame, corner_radius=10, fg_color="#2b2f38")
             card.grid(row=row, column=col, padx=5, pady=5, sticky="nsew")
             
-            # Character Label
+            # Label
             lbl = ctk.CTkLabel(card, text=char, font=("Nirmala UI", 32), text_color="white")
             lbl.pack(expand=True, pady=15, padx=15)
             
-            # Robust Singleton Hover Logic
+            # Hover Logic (Singleton)
             def on_enter(e, c=card):
-                # Force-clear any other highlighted card
-                if self.current_card and self.current_card != c:
-                    try:
-                        self.current_card.configure(fg_color="#2b2f38", border_width=0)
-                    except:
-                        pass # Widget might have been destroyed
+                if self.current_hover_card and self.current_hover_card != c:
+                    try: self.current_hover_card.configure(fg_color="#2b2f38", border_width=0)
+                    except: pass
                 
-                # Highlight this one
                 c.configure(fg_color="#3a3f4b", border_width=1, border_color="#10b153")
-                self.current_card = c
+                self.current_hover_card = c
 
+            # Mouse wheel scrolling often causes "Leave" events, handle gracefully
             def on_leave(e, c=card):
-                # Bounds check to prevent flickering inside the card
                 x, y = c.winfo_pointerxy()
                 widget_x = c.winfo_rootx()
                 widget_y = c.winfo_rooty()
-                
+                # If truly outside
                 if not (widget_x <= x <= widget_x + c.winfo_width() and 
                         widget_y <= y <= widget_y + c.winfo_height()):
                     c.configure(fg_color="#2b2f38", border_width=0)
-                    if self.current_card == c:
-                        self.current_card = None
+                    if self.current_hover_card == c:
+                        self.current_hover_card = None
 
             card.bind("<Enter>", on_enter)
             card.bind("<Leave>", on_leave)
             lbl.bind("<Enter>", on_enter)
             lbl.bind("<Leave>", on_leave)
-            
-            # Context Menu Bindings
-            card.bind("<Button-3>", lambda e, c=char: self.show_context_menu(e, c))
-            lbl.bind("<Button-3>", lambda e, c=char: self.show_context_menu(e, c))
-            
-            # Left Click to Copy
+
+            # Actions
             card.bind("<Button-1>", lambda e, c=char: self.copy_char(c))
             lbl.bind("<Button-1>", lambda e, c=char: self.copy_char(c))
-
-    def show_context_menu(self, event, char):
-        menu = tk.Menu(self, tearoff=0, bg="#2b2f38", fg="white", activebackground="#10b153", bd=0)
-        menu.add_command(label=f"Copy  '{char}'", command=lambda: self.copy_char(char))
-        menu.add_separator()
-        menu.add_command(label="Delete", command=lambda: self.delete_char(char))
-        
-        try:
-            menu.tk_popup(event.x_root, event.y_root)
-        finally:
-            menu.grab_release()
+            card.bind("<Button-3>", lambda e, c=char: self.show_char_context(e, c))
+            lbl.bind("<Button-3>", lambda e, c=char: self.show_char_context(e, c))
 
     def copy_char(self, char):
-        # Use pyperclip if avaialble, else tkinter fallback
         if pyperclip:
             pyperclip.copy(char)
         else:
             self.clipboard_clear()
             self.clipboard_append(char)
-            self.update() 
-            
-        # Flash visual feedback
-        print(f"Copied: {char}")
+            self.update()
         self.show_toast(f"Copied: {char}")
 
     def show_toast(self, message):
-        # Simple toast using title update or popup
-        orig_title = self.title()
         self.title(f"{message}   ✔")
         self.after(1500, lambda: self.title("Special Character Picker"))
 
+    # --- Management ---
+    def add_category(self):
+        name = simpledialog.askstring("New Category", "Enter category name:")
+        if name:
+            name = name.strip()
+            if name and name not in self.data:
+                self.data[name] = []
+                self.current_category = name
+                self.save_data()
+                self.refresh_full_ui()
+            elif name in self.data:
+                messagebox.showerror("Error", "Category already exists.")
+
     def add_new_char(self):
-        # Custom input dialog style? defaulting to simpledialog for simplicity
-        char = simpledialog.askstring("Add Character", "Paste your special character here:")
-        if char:
-            char = char.strip()
-            if char and char not in self.chars:
-                self.chars.append(char)
-                self.save_chars()
-                self.refresh_grid()
-            elif char in self.chars:
-                messagebox.showinfo("Exists", "This character is already in your list.")
+         if not self.current_category:
+             return
+         
+         char = simpledialog.askstring("Add Character", f"Add character to '{self.current_category}':")
+         if char:
+             char = char.strip()
+             # Split if user pasted multiple? For now assume single or string
+             if char and char not in self.data[self.current_category]:
+                 self.data[self.current_category].append(char)
+                 self.save_data()
+                 self.refresh_grid()
+
+    # --- Context Menus ---
+    def show_char_context(self, event, char):
+        menu = tk.Menu(self, tearoff=0, bg="#2b2f38", fg="white", activebackground="#10b153", bd=0)
+        menu.add_command(label=f"Copy '{char}'", command=lambda: self.copy_char(char))
+        menu.add_separator()
+        menu.add_command(label="Delete", command=lambda: self.delete_char(char))
+        # Move to another category?
+        menu.add_separator()
+        move_menu = tk.Menu(menu, tearoff=0, bg="#2b2f38", fg="white", activebackground="#10b153", bd=0)
+        for cat in self.data.keys():
+            if cat != self.current_category:
+                move_menu.add_command(label=f"Move to {cat}", command=lambda c=char, t=cat: self.move_char(c, t))
+        menu.add_cascade(label="Move to...", menu=move_menu)
+
+        try: menu.tk_popup(event.x_root, event.y_root)
+        finally: menu.grab_release()
+
+    def show_category_context(self, event, cat):
+        menu = tk.Menu(self, tearoff=0, bg="#2b2f38", fg="white", activebackground="#10b153", bd=0)
+        menu.add_command(label=f"Use '{cat}'", command=lambda: self.switch_category(cat))
+        menu.add_separator()
+        menu.add_command(label="Delete Category", command=lambda: self.delete_category(cat))
+        
+        try: menu.tk_popup(event.x_root, event.y_root)
+        finally: menu.grab_release()
 
     def delete_char(self, char):
-        if messagebox.askyesno("Delete", f"Are you sure you want to delete '{char}'?"):
-            if char in self.chars:
-                self.chars.remove(char)
-                self.save_chars()
+        if messagebox.askyesno("Delete", f"Delete '{char}' from {self.current_category}?"):
+            if char in self.data[self.current_category]:
+                self.data[self.current_category].remove(char)
+                self.save_data()
                 self.refresh_grid()
 
+    def move_char(self, char, target_cat):
+        if char in self.data[self.current_category]:
+            self.data[self.current_category].remove(char)
+            self.data[target_cat].append(char)
+            self.save_data()
+            self.refresh_grid()
+            self.show_toast(f"Moved to {target_cat}")
+
+    def delete_category(self, cat):
+        if messagebox.askyesno("Delete", f"Delete category '{cat}' and all its characters?"):
+            del self.data[cat]
+            if cat == self.current_category:
+                # Switch to another available or create empty
+                if self.data:
+                    self.current_category = list(self.data.keys())[0]
+                else:
+                    self.data["General"] = []
+                    self.current_category = "General"
+            self.save_data()
+            self.refresh_full_ui()
+
 if __name__ == "__main__":
-    app = SpecialCharPicker()
-    app.mainloop()
+    try:
+        app = SpecialCharPicker()
+        app.mainloop()
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        input("Error occurred. Press Enter...")
+
