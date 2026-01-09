@@ -1,18 +1,19 @@
 import tkinter as tk
 from tkinter import ttk, filedialog
+from tkinterdnd2 import DND_FILES, TkinterDnD
 from Cryptodome.Cipher import AES
 from Cryptodome.Protocol.KDF import PBKDF2
 from Cryptodome.Random import get_random_bytes
 import os
 
-class FileLockerApp(tk.Tk):
+class FileLockerApp(TkinterDnD.Tk):
     def __init__(self):
         super().__init__()
-        self.title("File Locker")
-        self.geometry("600x450")
+        self.title("File Locker - Drag & Drop Supported")
+        self.geometry("600x480")
         self.configure(bg="#282c34")
         self.set_style()
-        self.selected_files = [] # Store files list separately
+        self.selected_files = [] 
         self.create_widgets()
 
     def set_style(self):
@@ -67,6 +68,10 @@ class FileLockerApp(tk.Tk):
         main_frame = ttk.Frame(self, padding="20")
         main_frame.pack(expand=True, fill="both")
 
+        # --- Header ---
+        header_label = ttk.Label(main_frame, text="Drag and drop files below or use Browse", font=("JetBrainsMono NF", 11, "italic"))
+        header_label.pack(pady=(0, 10))
+
         # --- File Selection ---
         file_frame = ttk.Frame(main_frame)
         file_frame.pack(fill="both", expand=True, pady=(0, 10))
@@ -77,7 +82,7 @@ class FileLockerApp(tk.Tk):
         ttk.Label(header_frame, text="Selected Files:").pack(side="left")
         ttk.Button(header_frame, text="Browse Files", command=self.select_files, style="Browse.TButton").pack(side="right")
         
-        # Listbox for files
+        # Listbox for files with DND support
         self.file_listbox = tk.Listbox(
             file_frame,
             bg="#21252b",
@@ -92,6 +97,10 @@ class FileLockerApp(tk.Tk):
             highlightcolor="#41abff"
         )
         self.file_listbox.pack(fill="both", expand=True)
+        
+        # Enable Drag and Drop
+        self.file_listbox.drop_target_register(DND_FILES)
+        self.file_listbox.dnd_bind('<<Drop>>', self.drop_files)
 
         # --- Password ---
         password_frame = ttk.Frame(main_frame)
@@ -115,13 +124,22 @@ class FileLockerApp(tk.Tk):
         self.result_label = ttk.Label(main_frame, text="", wraplength=550, justify="center")
         self.result_label.pack(pady=(10, 0))
 
+    def drop_files(self, event):
+        files = self.tk.splitlist(event.data)
+        for f in files:
+            if f not in self.selected_files:
+                self.selected_files.append(f)
+                self.file_listbox.insert(tk.END, f)
+
     def select_files(self):
         file_paths = filedialog.askopenfilenames()
         if file_paths:
-            self.selected_files = list(file_paths)
-            self.file_listbox.delete(0, tk.END)
-            for path in self.selected_files:
-                self.file_listbox.insert(tk.END, path)
+            # Add to existing instead of replace? User might want to accumulate
+            # But previous behavior was replace. Let's append actually, better UX for DND context
+            for path in file_paths:
+                if path not in self.selected_files:
+                    self.selected_files.append(path)
+                    self.file_listbox.insert(tk.END, path)
 
     def derive_key(self, password, salt, key_length=32):
         return PBKDF2(password.encode(), salt, dkLen=key_length)
