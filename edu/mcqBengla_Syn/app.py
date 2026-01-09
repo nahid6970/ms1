@@ -69,11 +69,25 @@ def generate_quiz(num_questions=10):
         # Find correct answer index
         correct_index = options.index(correct_answer)
         
+        # Create word-to-group mapping for all options
+        word_groups = {}
+        for option in options:
+            for group in synonym_groups:
+                if option in group['words']:
+                    word_groups[option] = {
+                        'group_name': group['group'],
+                        'all_synonyms': group['words']
+                    }
+                    break
+        
         quiz_questions.append({
             'question': f"{question_word} এর সমার্থক",
             'options': options,
             'correct': correct_index,
-            'group': selected_group['group']
+            'group': selected_group['group'],
+            'question_word': question_word,
+            'question_group_synonyms': group_words,
+            'word_groups': word_groups
         })
     
     return quiz_questions

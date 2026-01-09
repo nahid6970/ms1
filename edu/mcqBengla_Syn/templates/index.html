@@ -78,6 +78,104 @@
             transform: scale(1.05);
         }
 
+        .synonym-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .synonym-modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 80%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .synonym-modal h3 {
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.5em;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 10px;
+        }
+
+        .synonym-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .synonym-item {
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            border: 2px solid #2196f3;
+        }
+
+        .synonym-item.highlight {
+            background: #4caf50;
+            color: white;
+            border-color: #45a049;
+        }
+
+        .close-modal {
+            background: #2196f3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            display: block;
+            margin: 0 auto;
+            transition: all 0.3s;
+        }
+
+        .close-modal:hover {
+            background: #1976d2;
+            transform: translateY(-2px);
+        }
+
+        .option.clickable {
+            cursor: pointer;
+            position: relative;
+        }
+
+        .option.clickable::after {
+            content: "📖";
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.8em;
+            opacity: 0.7;
+        }
+
         .stats-card {
             background: #f8f9fa;
             border-radius: 8px;
@@ -509,6 +607,18 @@
         </div>
     </div>
 
+    <!-- Synonym Modal -->
+    <div id="synonym-modal" class="synonym-modal">
+        <div class="synonym-modal-content">
+            <h3 id="modal-title">সমার্থক শব্দসমূহ</h3>
+            <div id="synonym-list" class="synonym-list">
+                <!-- Synonyms will be populated here -->
+            </div>
+            <button class="close-modal" onclick="closeSynonymModal()">বন্ধ করুন</button>
+        </div>
+    </div>
+    </div>
+
     <script>
         let currentQuiz = [];
         let currentQuestionIndex = 0;
@@ -704,7 +814,10 @@
                     } else if (i === index && !isCorrect) {
                         opt.classList.add('wrong');
                     }
-                    opt.onclick = null; // Disable further clicks
+                    
+                    // Make options clickable for synonym display
+                    opt.classList.add('clickable');
+                    opt.onclick = () => showSynonyms(question.options[i], question);
                 });
                 
                 if (isCorrect) {
@@ -715,6 +828,51 @@
                 // Show next button
                 document.getElementById('next-btn').style.display = 'block';
             }, 500);
+        }
+
+        function showSynonyms(clickedWord, question) {
+            const modal = document.getElementById('synonym-modal');
+            const modalTitle = document.getElementById('modal-title');
+            const synonymList = document.getElementById('synonym-list');
+            
+            // Find the group for the clicked word
+            const wordGroup = question.word_groups[clickedWord];
+            
+            if (wordGroup) {
+                modalTitle.textContent = `"${clickedWord}" এর সমার্থক শব্দসমূহ (${wordGroup.group_name})`;
+                
+                // Clear previous synonyms
+                synonymList.innerHTML = '';
+                
+                // Add all synonyms from the group
+                wordGroup.all_synonyms.forEach(synonym => {
+                    const synonymItem = document.createElement('div');
+                    synonymItem.className = 'synonym-item';
+                    synonymItem.textContent = synonym;
+                    
+                    // Highlight the clicked word and question word
+                    if (synonym === clickedWord || synonym === question.question_word) {
+                        synonymItem.classList.add('highlight');
+                    }
+                    
+                    synonymList.appendChild(synonymItem);
+                });
+                
+                // Show modal
+                modal.style.display = 'block';
+            }
+        }
+
+        function closeSynonymModal() {
+            document.getElementById('synonym-modal').style.display = 'none';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('synonym-modal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
         }
 
         function nextQuestion() {
