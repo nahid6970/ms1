@@ -10774,14 +10774,18 @@ function showCustomSyntaxColorPicker(index, field, event) {
     });
 
     // Right side: New Controls (Random + Hex)
+
     const sidePanel = document.createElement('div');
     sidePanel.style.display = 'flex';
     sidePanel.style.flexDirection = 'column';
     sidePanel.style.gap = '10px';
-    sidePanel.style.width = '140px';
+    sidePanel.style.width = '150px';
     sidePanel.style.flexShrink = '0';
-    sidePanel.style.borderLeft = '1px solid #dee2e6';
-    sidePanel.style.paddingLeft = '15px';
+    sidePanel.style.borderLeft = '1px solid #e9ecef';
+    sidePanel.style.padding = '10px';
+    sidePanel.style.background = '#f8f9fa';
+    sidePanel.style.borderRadius = '0 6px 6px 0';
+    sidePanel.style.marginLeft = '5px';
 
     // Random Color Button (Moved here)
     const randomBtn = document.createElement('button');
