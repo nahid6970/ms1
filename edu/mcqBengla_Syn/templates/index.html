@@ -522,7 +522,26 @@
         window.addEventListener('load', function() {
             loadAnalytics();
             loadWeakAreas();
+            loadSavedQuestionCount();
         });
+
+        function loadSavedQuestionCount() {
+            // Load saved question count from localStorage
+            const savedCount = localStorage.getItem('quiz_question_count');
+            if (savedCount) {
+                document.getElementById('num-questions').value = savedCount;
+            }
+            
+            // Add event listener to save when value changes
+            document.getElementById('num-questions').addEventListener('change', saveQuestionCount);
+            document.getElementById('num-questions').addEventListener('input', saveQuestionCount);
+        }
+
+        function saveQuestionCount() {
+            // Save current question count to localStorage
+            const questionCount = document.getElementById('num-questions').value;
+            localStorage.setItem('quiz_question_count', questionCount);
+        }
 
         async function loadAnalytics() {
             try {
@@ -598,6 +617,9 @@
             totalQuestions = parseInt(numQuestions);
             quizStartTime = new Date();
             categoryPerformance = {};
+            
+            // Save the question count for next time
+            saveQuestionCount();
             
             // Show loading
             document.getElementById('quiz-setup').style.display = 'none';
