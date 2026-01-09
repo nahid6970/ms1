@@ -560,14 +560,33 @@ class SpecialCharPicker(ctk.CTk):
          if not self.current_category:
              return
          
-         char = simpledialog.askstring("Add Character", f"Add character to '{self.current_category}':")
-         if char:
-             char = char.strip()
-             # Split if user pasted multiple? For now assume single or string
-             if char and char not in self.data[self.current_category]:
-                 self.data[self.current_category].append(char)
-                 self.save_data()
-                 self.refresh_grid()
+         # Use custom dialog for adding
+         dialog = CharEditDialog(self, f"Add to '{self.current_category}'")
+         if not dialog.result: return # Cancelled
+         
+         char_text, char_desc = dialog.result
+         char_text = char_text.strip()
+         char_desc = char_desc.strip()
+         
+         if not char_text: return
+
+         # Construct new item
+         if char_desc:
+             new_item = {"char": char_text, "desc": char_desc}
+         else:
+             new_item = char_text
+             
+         # Check duplicates? (optional, but good practice)
+         # Using display text to check existence might be tricky if mixed, 
+         # but let's check against existing items in a smart way.
+         existing_texts = [self.get_char_text(i) for i in self.data[self.current_category]]
+         if char_text in existing_texts:
+             messagebox.showwarning("Duplicate", f"Character '{char_text}' already exists in this category.")
+             return
+
+         self.data[self.current_category].append(new_item)
+         self.save_data()
+         self.refresh_grid()
 
     # --- Context Menus ---
     def show_char_context(self, event, item):
