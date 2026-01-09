@@ -2,21 +2,33 @@
   {
     "bgColor": "transparent",
     "fgColor": "#E60000",
+    "isBold": true,
+    "isItalic": false,
+    "isUnderline": false,
     "marker": "++"
   },
   {
     "bgColor": "#ABFF4D",
     "fgColor": "#212529",
+    "isBold": false,
+    "isItalic": false,
+    "isUnderline": false,
     "marker": "%%"
   },
   {
     "bgColor": "#FF8080",
     "fgColor": "#212529",
+    "isBold": false,
+    "isItalic": false,
+    "isUnderline": false,
     "marker": "\u00bf\u00bf"
   },
   {
     "bgColor": "#80E5FF",
     "fgColor": "#212529",
+    "isBold": false,
+    "isItalic": false,
+    "isUnderline": false,
     "marker": "\u00a1\u00a1"
   }
 ]

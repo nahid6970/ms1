@@ -6025,6 +6025,14 @@ function stripMarkdown(text, preserveLinks = false) {
     // Remove word connector markers: [1]Word or [1-R]Word -> Word
     stripped = stripped.replace(/\[(\d+)(?:-[A-Z]+)?\](\S+)/g, '$2');
 
+    // Remove custom color syntax markers
+    customColorSyntaxes.forEach(syntax => {
+        if (!syntax.marker) return;
+        const escapedMarker = syntax.marker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(escapedMarker + '(.+?)' + escapedMarker, 'g');
+        stripped = stripped.replace(regex, '$1');
+    });
+
     return stripped;
 }
 
@@ -6805,15 +6813,15 @@ function getVisualTextWidth(text) {
     if (!text || !text.trim()) {
         return text.length;
     }
-    
+
     // Check if text contains non-ASCII characters (like Bangla)
     const hasUnicode = /[^\x00-\x7F]/.test(text);
-    
+
     if (!hasUnicode) {
         // For ASCII-only text, use string length for better performance and accuracy
         return text.length;
     }
-    
+
     // For Unicode text, measure actual width
     const tempSpan = document.createElement('span');
     tempSpan.style.visibility = 'hidden';
@@ -6822,11 +6830,11 @@ function getVisualTextWidth(text) {
     tempSpan.style.fontFamily = 'Vrinda, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif';
     tempSpan.style.fontSize = '14px';
     tempSpan.textContent = text;
-    
+
     document.body.appendChild(tempSpan);
     const pixelWidth = tempSpan.offsetWidth;
     document.body.removeChild(tempSpan);
-    
+
     // Create reference measurement with ASCII characters
     const refSpan = document.createElement('span');
     refSpan.style.visibility = 'hidden';
@@ -6835,11 +6843,11 @@ function getVisualTextWidth(text) {
     refSpan.style.fontFamily = 'Vrinda, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif';
     refSpan.style.fontSize = '14px';
     refSpan.textContent = 'A'.repeat(text.length); // Same number of ASCII chars
-    
+
     document.body.appendChild(refSpan);
     const refWidth = refSpan.offsetWidth;
     document.body.removeChild(refSpan);
-    
+
     // Calculate relative width compared to ASCII
     const ratio = pixelWidth / refWidth;
     return Math.ceil(text.length * ratio);
@@ -10554,7 +10562,20 @@ function renderCustomColorSyntaxList() {
                     style="width: 32px; height: 28px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; background: ${syntax.fgColor};"
                     title="Text Color"></button>
             </div>
-            <div class="custom-syntax-preview" style="background: ${syntax.bgColor}; color: ${syntax.fgColor};">
+            
+            <div class="custom-syntax-input-group" style="gap: 10px;">
+                <label style="cursor: pointer; font-weight: bold;" title="Bold">
+                    <input type="checkbox" ${syntax.isBold ? 'checked' : ''} onchange="updateCustomSyntax(${index}, 'isBold', this.checked)"> B
+                </label>
+                <label style="cursor: pointer; font-style: italic;" title="Italic">
+                    <input type="checkbox" ${syntax.isItalic ? 'checked' : ''} onchange="updateCustomSyntax(${index}, 'isItalic', this.checked)"> I
+                </label>
+                <label style="cursor: pointer; text-decoration: underline;" title="Underline">
+                    <input type="checkbox" ${syntax.isUnderline ? 'checked' : ''} onchange="updateCustomSyntax(${index}, 'isUnderline', this.checked)"> U
+                </label>
+            </div>
+
+            <div class="custom-syntax-preview" style="background: ${syntax.bgColor}; color: ${syntax.fgColor}; ${syntax.isBold ? 'font-weight: bold;' : ''} ${syntax.isItalic ? 'font-style: italic;' : ''} ${syntax.isUnderline ? 'text-decoration: underline;' : ''}">
                 ${syntax.marker}text${syntax.marker}
             </div>
             <button class="btn-remove-syntax" onclick="removeCustomSyntax(${index})">
@@ -10575,7 +10596,10 @@ function addCustomColorSyntax() {
     customColorSyntaxes.push({
         marker: '++',
         bgColor: '#ff00ff',
-        fgColor: '#ffffff'
+        fgColor: '#ffffff',
+        isBold: false,
+        isItalic: false,
+        isUnderline: false
     });
     saveCustomColorSyntaxes();
     renderCustomColorSyntaxList();
@@ -10793,7 +10817,13 @@ function applyCustomColorSyntaxes(text) {
         const regex = new RegExp(`${escapedMarker}(.+?)${escapedMarker}`, 'g');
 
         formatted = formatted.replace(regex, (match, content) => {
-            return `<span style="background: ${syntax.bgColor}; color: ${syntax.fgColor}; padding: 1px 4px; border-radius: 3px; display: inline; vertical-align: baseline; line-height: 1.3; box-decoration-break: clone; -webkit-box-decoration-break: clone;">${content}</span>`;
+            let style = `background: ${syntax.bgColor}; color: ${syntax.fgColor}; padding: 1px 4px; border-radius: 3px; display: inline; vertical-align: baseline; line-height: 1.3; box-decoration-break: clone; -webkit-box-decoration-break: clone;`;
+
+            if (syntax.isBold) style += ' font-weight: bold;';
+            if (syntax.isItalic) style += ' font-style: italic;';
+            if (syntax.isUnderline) style += ' text-decoration: underline;';
+
+            return `<span style="${style}">${content}</span>`;
         });
     });
 

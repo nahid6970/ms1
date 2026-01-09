@@ -1550,6 +1550,15 @@ def generate_static_html(data, custom_syntaxes):
                 // Remove new link markers: url[text] -> text
                 stripped = stripped.replace(/(https?:\/\/[^\\s\\[]+)\\[(.+?)\\]/g, '$2');
             }
+
+            // Remove custom color syntax markers
+            customColorSyntaxes.forEach(syntax => {
+                if (!syntax.marker) return;
+                const escapedMarker = syntax.marker.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&');
+                const regex = new RegExp(escapedMarker + '(.+?)' + escapedMarker, 'g');
+                stripped = stripped.replace(regex, '$1');
+            });
+
             return stripped;
         }
 
@@ -2756,7 +2765,13 @@ def generate_static_html(data, custom_syntaxes):
                 const escapedMarker = syntax.marker.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&');
                 const regex = new RegExp(escapedMarker + '(.+?)' + escapedMarker, 'g');
                 formatted = formatted.replace(regex, (match, content) => {
-                    return '<span style="background: ' + syntax.bgColor + '; color: ' + syntax.fgColor + '; padding: 1px 4px; border-radius: 3px; display: inline; vertical-align: baseline; line-height: 1.3; box-decoration-break: clone; -webkit-box-decoration-break: clone;">' + content + '</span>';
+                    let style = 'background: ' + syntax.bgColor + '; color: ' + syntax.fgColor + '; padding: 1px 4px; border-radius: 3px; display: inline; vertical-align: baseline; line-height: 1.3; box-decoration-break: clone; -webkit-box-decoration-break: clone;';
+                    
+                    if (syntax.isBold) style += ' font-weight: bold;';
+                    if (syntax.isItalic) style += ' font-style: italic;';
+                    if (syntax.isUnderline) style += ' text-decoration: underline;';
+                    
+                    return '<span style="' + style + '">' + content + '</span>';
                 });
             });
             return formatted;
