@@ -17,6 +17,103 @@ ctk.set_default_color_theme("blue")
 
 CONFIG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "special_chars.json")
 
+class ToolTip:
+    def __init__(self, widget, text, delay=1000):
+        self.widget = widget
+        self.text = text
+        self.delay = delay
+        self.id = None
+        self.tw = None
+        
+        self.widget.bind("<Enter>", self.enter)
+        self.widget.bind("<Leave>", self.leave)
+        self.widget.bind("<ButtonPress>", self.leave)
+
+    def enter(self, event=None):
+        self.schedule()
+
+    def leave(self, event=None):
+        self.unschedule()
+        self.hidetip()
+
+    def schedule(self):
+        self.unschedule()
+        self.id = self.widget.after(self.delay, self.showtip)
+
+    def unschedule(self):
+        if self.id:
+            self.widget.after_cancel(self.id)
+            self.id = None
+
+    def showtip(self):
+        if self.tw: return
+        x, y, cx, cy = self.widget.bbox("insert") 
+        x = x + self.widget.winfo_rootx() + 25
+        y = y + self.widget.winfo_rooty() + 25
+        self.tw = tk.Toplevel(self.widget)
+        self.tw.wm_overrideredirect(True)
+        self.tw.wm_geometry(f"+{x}+{y}")
+        
+        # Transparent-ish background? No, just standard tooltip look
+        label = tk.Label(self.tw, text=self.text, justify='left',
+                       background="#ffffe0", relief='solid', borderwidth=1,
+                       font=("tahoma", "8", "normal"))
+        label.pack(ipadx=1)
+
+    def hidetip(self):
+        if self.tw:
+            self.tw.destroy()
+            self.tw = None
+
+class CharEditDialog(ctk.CTkToplevel):
+    def __init__(self, parent, title, initial_char="", initial_desc=""):
+        super().__init__(parent)
+        self.title(title)
+        self.geometry("320x240")
+        self.resizable(False, False)
+        self.result = None
+        
+        # Center relative to parent (manual calculation)
+        x = parent.winfo_rootx() + (parent.winfo_width() // 2) - 160
+        y = parent.winfo_rooty() + (parent.winfo_height() // 2) - 120
+        self.geometry(f"+{x}+{y}")
+        
+        self.transient(parent)
+        self.grab_set()
+        self.configure(fg_color="#1d2027")
+        
+        # UI
+        ctk.CTkLabel(self, text="Character:", font=("Segoe UI", 12), text_color="gray").pack(pady=(20, 5), padx=20, anchor="w")
+        self.char_entry = ctk.CTkEntry(self, width=280, corner_radius=0, border_color="gray")
+        self.char_entry.insert(0, initial_char)
+        self.char_entry.pack(pady=0, padx=20)
+        self.char_entry.focus()
+        
+        ctk.CTkLabel(self, text="Description (Tooltip):", font=("Segoe UI", 12), text_color="gray").pack(pady=(15, 5), padx=20, anchor="w")
+        self.desc_entry = ctk.CTkEntry(self, width=280, corner_radius=0, border_color="gray")
+        self.desc_entry.insert(0, initial_desc)
+        self.desc_entry.pack(pady=0, padx=20)
+        
+        btn_frame = ctk.CTkFrame(self, fg_color="transparent")
+        btn_frame.pack(pady=20, padx=20, fill="x")
+        
+        ctk.CTkButton(btn_frame, text="Cancel", fg_color="transparent", border_width=1, border_color="gray",
+                      command=self.cancel, width=100, corner_radius=0).pack(side="left", padx=(0, 10))
+        ctk.CTkButton(btn_frame, text="Save", fg_color="#10b153", hover_color="#0e9646",
+                      command=self.save, width=100, corner_radius=0).pack(side="right")
+
+        self.bind("<Return>", lambda e: self.save())
+        self.bind("<Escape>", lambda e: self.cancel())
+        
+        self.wait_window(self)
+
+    def save(self):
+        self.result = (self.char_entry.get(), self.desc_entry.get())
+        self.destroy()
+
+    def cancel(self):
+        self.destroy()
+
 class SpecialCharPicker(ctk.CTk):
     def __init__(self):
         super().__init__()
@@ -39,6 +136,16 @@ class SpecialCharPicker(ctk.CTk):
         # UI Layout
         self.setup_ui()
         self.refresh_full_ui()
+
+    def get_char_text(self, item):
+        if isinstance(item, dict):
+            return item.get("char", "?")
+        return str(item)
+
+    def get_char_desc(self, item):
+        if isinstance(item, dict):
+            return item.get("desc", "")
+        return ""
 
     def load_data(self):
         default_data = {
@@ -289,19 +396,27 @@ class SpecialCharPicker(ctk.CTk):
             ctk.CTkLabel(self.grid_frame, text="No characters yet.", text_color="gray").pack(pady=50)
             return
 
-        for idx, char in enumerate(items):
+        for idx, item in enumerate(items):
             row = idx // self.cols
             col = idx % self.cols
             
+            char_text = self.get_char_text(item)
+            char_desc = self.get_char_desc(item)
+
             # Card
             card = ctk.CTkFrame(self.grid_frame, corner_radius=0, fg_color="#2b2f38")
             card.grid(row=row, column=col, padx=5, pady=5, sticky="nsew")
             card.char_index = idx  # Store index for drag-drop
             
             # Label
-            lbl = ctk.CTkLabel(card, text=char, font=("Nirmala UI", 32), text_color="white")
+            lbl = ctk.CTkLabel(card, text=char_text, font=("Nirmala UI", 32), text_color="white")
             lbl.pack(expand=True, pady=15, padx=15)
             
+            # ToolTip
+            if char_desc:
+                ToolTip(card, char_desc, delay=1000)
+                ToolTip(lbl, char_desc, delay=1000)
+
             # Hover Logic (Singleton)
             def on_enter(e, c=card):
                 if self.current_hover_card and self.current_hover_card != c:
@@ -339,27 +454,30 @@ class SpecialCharPicker(ctk.CTk):
             card.bind("<ButtonRelease-1>", self.stop_drag)
             lbl.bind("<ButtonRelease-1>", self.stop_drag)
 
-            # Right Click still works
-            card.bind("<Button-3>", lambda e, c=char: self.show_char_context(e, c))
-            lbl.bind("<Button-3>", lambda e, c=char: self.show_char_context(e, c))
+            # Right Click still works (pass full item)
+            card.bind("<Button-3>", lambda e, i=item: self.show_char_context(e, i))
+            lbl.bind("<Button-3>", lambda e, i=item: self.show_char_context(e, i))
 
-    def copy_char(self, char):
+    def copy_char(self, item):
+        char_text = self.get_char_text(item)
         if pyperclip:
-            pyperclip.copy(char)
+            pyperclip.copy(char_text)
         else:
             self.clipboard_clear()
-            self.clipboard_append(char)
+            self.clipboard_append(char_text)
             self.update()
-        self.show_toast(f"Copied: {char}")
+        self.show_toast(f"Copied: {char_text}")
 
     # --- Drag and Drop Sorting ---
     def start_drag(self, event, index):
+        item = self.data[self.current_category][index]
         self.drag_data = {
             "index": index,
             "x": event.x_root,
             "y": event.y_root,
             "moved": False,
-            "char": self.data[self.current_category][index]
+            "item": item,
+            "display": self.get_char_text(item)
         }
 
     def do_drag(self, event):
@@ -372,7 +490,7 @@ class SpecialCharPicker(ctk.CTk):
         if not self.drag_data["moved"] and (dx > 10 or dy > 10):
             self.drag_data["moved"] = True
             # Create a ghost label that follows the mouse
-            self.ghost = ctk.CTkLabel(self, text=self.drag_data["char"], 
+            self.ghost = ctk.CTkLabel(self, text=self.drag_data["display"], 
                                      font=("Nirmala UI", 32), fg_color="#3a3f4b")
             self.ghost.place(x=0, y=0)
 
@@ -386,7 +504,7 @@ class SpecialCharPicker(ctk.CTk):
         
         if not self.drag_data.get("moved"):
             # It was just a quick click, not a drag -> Perform Copy
-            self.copy_char(self.drag_data["char"])
+            self.copy_char(self.drag_data["item"])
         else:
             # It was a drag -> Handle Reorder
             self.ghost.destroy()
@@ -452,12 +570,13 @@ class SpecialCharPicker(ctk.CTk):
                  self.refresh_grid()
 
     # --- Context Menus ---
-    def show_char_context(self, event, char):
+    def show_char_context(self, event, item):
+        char_text = self.get_char_text(item)
         menu = tk.Menu(self, tearoff=0, bg="#2b2f38", fg="white", activebackground="#10b153", bd=0)
-        menu.add_command(label=f"Copy '{char}'", command=lambda: self.copy_char(char))
+        menu.add_command(label=f"Copy '{char_text}'", command=lambda: self.copy_char(item))
         menu.add_separator()
-        menu.add_command(label="Edit Character", command=lambda: self.edit_char(char))
-        menu.add_command(label="Delete", command=lambda: self.delete_char(char))
+        menu.add_command(label="Edit Character", command=lambda: self.edit_char(item))
+        menu.add_command(label="Delete", command=lambda: self.delete_char(item))
         
         # Move to another category
         menu.add_separator()
@@ -465,7 +584,7 @@ class SpecialCharPicker(ctk.CTk):
         for cat in self.data.keys():
             # Skip current category AND the internal _settings key
             if cat != self.current_category and cat != "_settings":
-                move_menu.add_command(label=f"Move to {cat}", command=lambda c=char, t=cat: self.move_char(c, t))
+                move_menu.add_command(label=f"Move to {cat}", command=lambda c=item, t=cat: self.move_char(c, t))
         menu.add_cascade(label="Move to...", menu=move_menu)
 
         try: menu.tk_popup(event.x_root, event.y_root)
@@ -480,22 +599,39 @@ class SpecialCharPicker(ctk.CTk):
         try: menu.tk_popup(event.x_root, event.y_root)
         finally: menu.grab_release()
 
-    def delete_char(self, char):
-        if messagebox.askyesno("Delete", f"Delete '{char}' from {self.current_category}?"):
-            if char in self.data[self.current_category]:
-                self.data[self.current_category].remove(char)
+    def delete_char(self, item):
+        char_text = self.get_char_text(item)
+        if messagebox.askyesno("Delete", f"Delete '{char_text}' from {self.current_category}?"):
+            if item in self.data[self.current_category]:
+                self.data[self.current_category].remove(item)
                 self.save_data()
                 self.refresh_grid()
 
-    def edit_char(self, old_char):
-        new_char = simpledialog.askstring("Edit Character", "Update character:", initialvalue=old_char)
-        if new_char:
-            new_char = new_char.strip()
-            if new_char and new_char != old_char:
-                idx = self.data[self.current_category].index(old_char)
-                self.data[self.current_category][idx] = new_char
-                self.save_data()
-                self.refresh_grid()
+    def edit_char(self, old_item):
+        old_text = self.get_char_text(old_item)
+        old_desc = self.get_char_desc(old_item)
+        
+        # Use custom dialog
+        dialog = CharEditDialog(self, "Edit Character", initial_char=old_text, initial_desc=old_desc)
+        if not dialog.result: return # Cancelled
+        
+        new_text, new_desc = dialog.result
+        new_text = new_text.strip()
+        new_desc = new_desc.strip()
+        
+        if not new_text: return
+        
+        # Construct new item
+        if new_desc:
+            new_item = {"char": new_text, "desc": new_desc}
+        else:
+            new_item = new_text
+            
+        # Update
+        idx = self.data[self.current_category].index(old_item)
+        self.data[self.current_category][idx] = new_item
+        self.save_data()
+        self.refresh_grid()
 
     def rename_category(self, old_name):
         new_name = simpledialog.askstring("Rename Category", "Enter new name:", initialvalue=old_name)
@@ -512,10 +648,10 @@ class SpecialCharPicker(ctk.CTk):
                 self.save_data()
                 self.refresh_full_ui()
 
-    def move_char(self, char, target_cat):
-        if char in self.data[self.current_category]:
-            self.data[self.current_category].remove(char)
-            self.data[target_cat].append(char)
+    def move_char(self, item, target_cat):
+        if item in self.data[self.current_category]:
+            self.data[self.current_category].remove(item)
+            self.data[target_cat].append(item)
             self.save_data()
             self.refresh_grid()
             self.show_toast(f"Moved to {target_cat}")
