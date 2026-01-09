@@ -162,11 +162,11 @@ def get_history():
 
 @app.route('/api/get-weak-areas')
 def get_weak_areas():
-    """Analyze weak areas based on quiz history"""
+    """Analyze weak and strong areas based on quiz history"""
     history = load_history()
     
     if not history:
-        return jsonify({'weak_areas': [], 'suggestions': []})
+        return jsonify({'weak_areas': [], 'strong_areas': [], 'suggestions': []})
     
     # Analyze category performance
     category_stats = {}
@@ -177,8 +177,9 @@ def get_weak_areas():
             category_stats[category]['correct'] += performance.get('correct', 0)
             category_stats[category]['total'] += performance.get('total', 0)
     
-    # Find weak areas (less than 60% accuracy)
+    # Find weak areas (less than 60% accuracy) and strong areas (80%+ accuracy)
     weak_areas = []
+    strong_areas = []
     for category, stats in category_stats.items():
         if stats['total'] > 0:
             accuracy = (stats['correct'] / stats['total']) * 100
@@ -188,9 +189,16 @@ def get_weak_areas():
                     'accuracy': round(accuracy, 1),
                     'questions_attempted': stats['total']
                 })
+            elif accuracy >= 80:
+                strong_areas.append({
+                    'category': category,
+                    'accuracy': round(accuracy, 1),
+                    'questions_attempted': stats['total']
+                })
     
-    # Sort by lowest accuracy
+    # Sort by accuracy
     weak_areas.sort(key=lambda x: x['accuracy'])
+    strong_areas.sort(key=lambda x: x['accuracy'], reverse=True)
     
     # Generate suggestions
     suggestions = []
@@ -202,10 +210,25 @@ def get_weak_areas():
         suggestions.append("চমৎকার! সব বিষয়ে ভালো দক্ষতা রয়েছে")
         suggestions.append("নিয়মিত অনুশীলন চালিয়ে যান")
     
+    if strong_areas:
+        suggestions.append(f"'{strong_areas[0]['category']}' বিষয়ে দুর্দান্ত দক্ষতা!")
+    
     return jsonify({
         'weak_areas': weak_areas[:5],  # Top 5 weak areas
+        'strong_areas': strong_areas[:5],  # Top 5 strong areas
         'suggestions': suggestions
     })
+
+@app.route('/api/clear-history', methods=['POST'])
+def clear_history():
+    """Clear all quiz history"""
+    try:
+        # Remove the history file if it exists
+        if os.path.exists(HISTORY_FILE):
+            os.remove(HISTORY_FILE)
+        return jsonify({'success': True, 'message': 'History cleared successfully'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/api/check-answer', methods=['POST'])
 def check_answer():

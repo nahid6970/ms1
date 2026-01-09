@@ -1,87 +1,46 @@
 [
   {
     "id": 1,
-    "date": "2026-01-09T23:35:51.643033",
-    "total_questions": 2,
-    "correct_answers": 0,
-    "score_percentage": 0,
-    "time_taken": 4,
+    "date": "2026-01-09T23:44:15.085706",
+    "total_questions": 10,
+    "correct_answers": 7,
+    "score_percentage": 70,
+    "time_taken": 48,
     "categories_performance": {
-      "ভ্রমর": {
-        "correct": 0,
-        "total": 1
-      },
-      "পৃথিবী": {
-        "correct": 0,
-        "total": 1
-      }
-    },
-    "difficulty": "মিশ্র"
-  },
-  {
-    "id": 2,
-    "date": "2026-01-09T23:36:09.658131",
-    "total_questions": 2,
-    "correct_answers": 0,
-    "score_percentage": 0,
-    "time_taken": 4,
-    "categories_performance": {
-      "পৃথিবী": {
-        "correct": 0,
-        "total": 1
-      },
-      "চোখ": {
-        "correct": 0,
-        "total": 1
-      }
-    },
-    "difficulty": "মিশ্র"
-  },
-  {
-    "id": 3,
-    "date": "2026-01-09T23:36:29.059619",
-    "total_questions": 2,
-    "correct_answers": 1,
-    "score_percentage": 50,
-    "time_taken": 4,
-    "categories_performance": {
-      "পানি": {
-        "correct": 0,
-        "total": 1
-      },
-      "পুরুষ": {
-        "correct": 1,
-        "total": 1
-      }
-    },
-    "difficulty": "মিশ্র"
-  },
-  {
-    "id": 4,
-    "date": "2026-01-09T23:37:07.144339",
-    "total_questions": 5,
-    "correct_answers": 2,
-    "score_percentage": 40,
-    "time_taken": 9,
-    "categories_performance": {
-      "চোখ": {
+      "বায়ু": {
         "correct": 1,
         "total": 1
       },
-      "পুত্র": {
+      "শরীর": {
         "correct": 0,
         "total": 1
       },
-      "বজ্র": {
-        "correct": 0,
-        "total": 1
-      },
-      "জোছনা": {
+      "নদী": {
         "correct": 1,
-        "total": 1
+        "total": 2
       },
       "পাখি": {
+        "correct": 1,
+        "total": 1
+      },
+      "পদ্ম": {
         "correct": 0,
+        "total": 1
+      },
+      "পানি": {
+        "correct": 1,
+        "total": 1
+      },
+      "সংবাদ": {
+        "correct": 1,
+        "total": 1
+      },
+      "বৃক্ষ": {
+        "correct": 1,
+        "total": 1
+      },
+      "কপাল": {
+        "correct": 1,
         "total": 1
       }
     },

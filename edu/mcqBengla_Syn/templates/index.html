@@ -26,9 +26,29 @@
             border-radius: 15px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             padding: 20px;
-            height: fit-content;
+            height: calc(100vh - 40px);
             position: sticky;
             top: 20px;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
         }
 
         .sidebar h3 {
@@ -37,6 +57,25 @@
             font-size: 1.3em;
             border-bottom: 2px solid #e0e0e0;
             padding-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .clear-btn {
+            background: #f44336;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px;
+            font-size: 0.8em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .clear-btn:hover {
+            background: #d32f2f;
+            transform: scale(1.05);
         }
 
         .stats-card {
@@ -86,6 +125,18 @@
 
         .weak-areas {
             margin-top: 20px;
+        }
+
+        .strong-areas {
+            margin-top: 20px;
+        }
+
+        .strong-area {
+            background: #e8f5e8;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 8px;
+            border-left: 4px solid #4CAF50;
         }
 
         .weak-area {
@@ -364,7 +415,7 @@
 <body>
     <!-- Sidebar -->
     <div class="sidebar">
-        <h3>📊 পরিসংখ্যান</h3>
+        <h3>📊 পরিসংখ্যান <button class="clear-btn" onclick="clearAllData()">Clear</button></h3>
         <div id="analytics-section">
             <div class="stats-card">
                 <div class="label">মোট কুইজ</div>
@@ -384,9 +435,11 @@
             </div>
         </div>
 
-        <h3>📈 সাম্প্রতিক ফলাফল</h3>
-        <div id="history-section">
-            <p style="color: #666; text-align: center;">কোনো ইতিহাস নেই</p>
+        <div class="strong-areas">
+            <h3>💪 শক্তিশালী ক্ষেত্র</h3>
+            <div id="strong-areas-section">
+                <p style="color: #666; text-align: center;">ডেটা লোড হচ্ছে...</p>
+            </div>
         </div>
 
         <div class="weak-areas">
@@ -482,22 +535,6 @@
                 document.getElementById('best-score').textContent = data.analytics.best_score + '%';
                 document.getElementById('improvement-trend').textContent = data.analytics.improvement_trend;
                 
-                // Update history
-                const historySection = document.getElementById('history-section');
-                if (data.history.length === 0) {
-                    historySection.innerHTML = '<p style="color: #666; text-align: center;">কোনো ইতিহাস নেই</p>';
-                } else {
-                    historySection.innerHTML = '';
-                    data.history.reverse().forEach(quiz => {
-                        const historyItem = document.createElement('div');
-                        historyItem.className = 'history-item';
-                        historyItem.innerHTML = `
-                            <div class="date">${new Date(quiz.date).toLocaleDateString('bn-BD')}</div>
-                            <div class="score">${quiz.correct_answers}/${quiz.total_questions} (${quiz.score_percentage}%)</div>
-                        `;
-                        historySection.appendChild(historyItem);
-                    });
-                }
             } catch (error) {
                 console.error('Error loading analytics:', error);
             }
@@ -507,6 +544,23 @@
             try {
                 const response = await fetch('/api/get-weak-areas');
                 const data = await response.json();
+                
+                // Update strong areas
+                const strongAreasSection = document.getElementById('strong-areas-section');
+                if (data.strong_areas && data.strong_areas.length > 0) {
+                    strongAreasSection.innerHTML = '';
+                    data.strong_areas.forEach(area => {
+                        const strongArea = document.createElement('div');
+                        strongArea.className = 'strong-area';
+                        strongArea.innerHTML = `
+                            <div style="font-weight: bold;">${area.category}</div>
+                            <div style="font-size: 0.9em; color: #666;">${area.accuracy}% সঠিকতা</div>
+                        `;
+                        strongAreasSection.appendChild(strongArea);
+                    });
+                } else {
+                    strongAreasSection.innerHTML = '<p style="color: #666; text-align: center;">আরো কুইজ নিন</p>';
+                }
                 
                 // Update weak areas
                 const weakAreasSection = document.getElementById('weak-areas-section');
@@ -699,6 +753,35 @@
         function restartQuiz() {
             document.getElementById('results').style.display = 'none';
             document.getElementById('quiz-setup').style.display = 'block';
+        }
+
+        async function clearAllData() {
+            if (confirm('আপনি কি সত্যিই সব ডেটা মুছে ফেলতে চান? এটি পূর্বাবস্থায় ফেরানো যাবে না।')) {
+                try {
+                    const response = await fetch('/api/clear-history', {
+                        method: 'POST'
+                    });
+                    
+                    if (response.ok) {
+                        // Reset all displays
+                        document.getElementById('total-quizzes').textContent = '০';
+                        document.getElementById('average-score').textContent = '০%';
+                        document.getElementById('best-score').textContent = '০%';
+                        document.getElementById('improvement-trend').textContent = 'নেই';
+                        
+                        document.getElementById('strong-areas-section').innerHTML = '<p style="color: #666; text-align: center;">আরো কুইজ নিন</p>';
+                        document.getElementById('weak-areas-section').innerHTML = '<p style="color: #666; text-align: center;">ডেটা লোড হচ্ছে...</p>';
+                        document.getElementById('suggestions-section').innerHTML = '<p style="color: #666; text-align: center;">ডেটা লোড হচ্ছে...</p>';
+                        
+                        alert('সব ডেটা সফলভাবে মুছে ফেলা হয়েছে!');
+                    } else {
+                        alert('ডেটা মুছতে সমস্যা হয়েছে।');
+                    }
+                } catch (error) {
+                    console.error('Error clearing data:', error);
+                    alert('ডেটা মুছতে সমস্যা হয়েছে।');
+                }
+            }
         }
     </script>
 </body>
