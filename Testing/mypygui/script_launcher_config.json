@@ -203,6 +203,28 @@
             "height": 0,
             "is_bold": false,
             "is_italic": false
+        },
+        {
+            "name": "Locker",
+            "path": "C:/Users/nahid/ms/ms1/Testing/antigravity_acc_change/Locker.py",
+            "type": "script",
+            "hide_terminal": true,
+            "keep_open": false,
+            "kill_window": true,
+            "ctrl_left_cmd": "",
+            "ctrl_right_cmd": "",
+            "use_inline": false,
+            "inline_type": "cmd",
+            "inline_script": "",
+            "font_size": 20,
+            "border_width": 0,
+            "corner_radius": 4,
+            "col_span": 1,
+            "row_span": 1,
+            "width": 0,
+            "height": 0,
+            "is_bold": false,
+            "is_italic": false
         }
     ],
     "github_repos": [
