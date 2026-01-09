@@ -10734,91 +10734,223 @@ function showCustomSyntaxColorPicker(index, field, event) {
     const colorGrid = document.createElement('div');
     colorGrid.className = 'color-picker-grid';
 
+    // Add Random Color Button
+    const randomBtn = document.createElement('div');
+    randomBtn.style.gridColumn = '1 / -1';
+    randomBtn.style.marginBottom = '10px';
+    randomBtn.style.textAlign = 'center';
+    randomBtn.innerHTML = '<button type="button" class="btn btn-secondary" style="width: 100%; font-size: 12px;">🎲 Random Colors</button>';
+    randomBtn.onclick = (e) => {
+        e.stopPropagation();
+
+        // Generate random harmonious colors
+        const hue = Math.floor(Math.random() * 360);
+        const bgSat = 20 + Math.floor(Math.random() * 30); // Low saturation for BG
+        const bgLight = 85 + Math.floor(Math.random() * 10); // High lightness for BG
+
+        const fgSat = 60 + Math.floor(Math.random() * 40); // High saturation for FG
+        const fgLight = 10 + Math.floor(Math.random() * 20); // Low lightness for FG
+
+        const randomBg = `hsl(${hue}, ${bgSat}%, ${bgLight}%)`;
+        const randomFg = `hsl(${hue}, ${fgSat}%, ${fgLight}%)`;
+
+        // Determine what to update based on current selection mode
+        const radios = document.getElementsByName('syntaxColorType');
+        let mode = 'background';
+        for (let r of radios) if (r.checked) mode = r.value;
+
+        // This is a "global" randomizer effect for both properties
+        // Update data model
+        customColorSyntaxes[index].bgColor = randomBg;
+        customColorSyntaxes[index].fgColor = randomFg;
+
+        // Update Preview
+        const preview = document.getElementById('syntaxColorPreviewArea');
+        if (preview) {
+            preview.style.backgroundColor = randomBg;
+            preview.style.color = randomFg;
+            // Update the text to show hex/rgb conversion if needed, or just keep it simple.
+            // We'll let the HSL be computed style.
+        }
+
+        // Force update of the list when closing or immediately?
+        // Let's rely on save when closing, but for now just update visual preview
+
+        // Also update the input fields if they existed... but they are in the list behind the modal. 
+        // We will refresh the list when closing this modal.
+    };
+    colorGrid.appendChild(randomBtn);
+
+
     presetColors.forEach(color => {
         const colorSwatch = document.createElement('div');
-        colorSwatch.className = 'color-swatch';
+        colorSwatch.className = 'color-swatch-item';
         colorSwatch.style.backgroundColor = color;
-        colorSwatch.title = color;
-        colorSwatch.onclick = () => {
-            const bgRadio = popup.querySelector('input[name="syntaxColorType"][value="background"]');
-            const transparentCheck = popup.querySelector('#syntaxTransparentCheck');
-
-            if (bgRadio && bgRadio.checked) {
-                selectedBgColor = color;
-                transparentCheck.checked = false;
-            } else {
-                selectedFgColor = color;
+        colorSwatch.onclick = (e) => {
+            e.stopPropagation();
+            const radios = document.getElementsByName('syntaxColorType');
+            let type = 'background';
+            for (const radio of radios) {
+                if (radio.checked) {
+                    type = radio.value;
+                    break;
+                }
             }
 
-            updatePreview();
+            const preview = document.getElementById('syntaxColorPreviewArea');
+            if (type === 'background') {
+                customColorSyntaxes[index].bgColor = color;
+                preview.style.backgroundColor = color;
+
+                // Uncheck transparent if manual color selected
+                const transCheck = document.getElementById('syntaxTransparentCheck');
+                if (transCheck) transCheck.checked = false;
+            } else {
+                customColorSyntaxes[index].fgColor = color;
+                preview.style.color = color;
+            }
         };
         colorGrid.appendChild(colorSwatch);
     });
 
     popup.appendChild(colorGrid);
 
-    // Update preview function
-    function updatePreview() {
-        const preview = popup.querySelector('#syntaxColorPreviewArea');
-        const transparentCheck = popup.querySelector('#syntaxTransparentCheck');
-        const bgRadio = popup.querySelector('input[name="syntaxColorType"][value="background"]');
+    // Custom Hex Input
+    const hexInputContainer = document.createElement('div');
+    hexInputContainer.style.marginTop = '15px';
+    hexInputContainer.style.display = 'flex';
+    hexInputContainer.style.alignItems = 'center';
+    hexInputContainer.style.gap = '10px';
+    hexInputContainer.innerHTML = `
+        <label style="font-size: 12px; font-weight: bold;">Custom Hex:</label>
+        <input type="color" id="syntaxCustomColorPicker" style="width: 40px; height: 30px; padding: 0; border: none; cursor: pointer;">
+        <input type="text" id="syntaxCustomHexInput" placeholder="#RRGGBB" style="flex: 1; padding: 6px; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; text-transform: uppercase;">
+    `;
+    popup.appendChild(hexInputContainer);
 
-        if (bgRadio && bgRadio.checked && transparentCheck && transparentCheck.checked) {
-            preview.style.backgroundColor = 'transparent';
-            preview.style.backgroundImage = 'linear-gradient(45deg, #ccc 25%, transparent 25%, transparent 75%, #ccc 75%, #ccc), linear-gradient(45deg, #ccc 25%, white 25%, white 75%, #ccc 75%, #ccc)';
-            preview.style.backgroundSize = '10px 10px';
-            preview.style.backgroundPosition = '0 0, 5px 5px';
-        } else {
-            preview.style.backgroundColor = selectedBgColor;
-            preview.style.backgroundImage = 'none';
+    // Handle hex input changes
+    setTimeout(() => {
+        const colorInput = document.getElementById('syntaxCustomColorPicker');
+        const hexInput = document.getElementById('syntaxCustomHexInput');
+
+        // Initialize with current value based on mode
+        const radios = document.getElementsByName('syntaxColorType');
+        let initialMode = 'background';
+        for (let r of radios) if (r.checked) initialMode = r.value;
+        const initialColor = initialMode === 'background' ? customColorSyntaxes[index].bgColor : customColorSyntaxes[index].fgColor;
+
+        // Only set if valid hex
+        if (initialColor && initialColor.startsWith('#')) {
+            colorInput.value = initialColor;
+            hexInput.value = initialColor;
         }
-        preview.style.color = selectedFgColor;
-    }
 
-    // Radio change listeners
-    bgRadioLabel.querySelector('input').addEventListener('change', updatePreview);
-    fgRadioLabel.querySelector('input').addEventListener('change', updatePreview);
+        const updateColorFromInput = (val) => {
+            const radios = document.getElementsByName('syntaxColorType');
+            let type = 'background';
+            for (const radio of radios) {
+                if (radio.checked) {
+                    type = radio.value;
+                    break;
+                }
+            }
 
-    // Transparent checkbox listener
-    transparentLabel.querySelector('input').addEventListener('change', (e) => {
-        if (e.target.checked) {
-            selectedBgColor = 'transparent';
-        } else {
-            selectedBgColor = '#ffffff';
-        }
-        updatePreview();
-    });
+            const preview = document.getElementById('syntaxColorPreviewArea');
+            if (type === 'background') {
+                customColorSyntaxes[index].bgColor = val;
+                preview.style.backgroundColor = val;
+                const transCheck = document.getElementById('syntaxTransparentCheck');
+                if (transCheck) transCheck.checked = false;
+            } else {
+                customColorSyntaxes[index].fgColor = val;
+                preview.style.color = val;
+            }
+        };
 
-    // Set initial transparent state
-    if (selectedBgColor === 'transparent') {
-        transparentLabel.querySelector('input').checked = true;
-        updatePreview();
-    }
+        colorInput.oninput = (e) => {
+            hexInput.value = e.target.value.toUpperCase();
+            updateColorFromInput(e.target.value);
+        };
 
-    // OK button
-    const okBtn = document.createElement('button');
-    okBtn.className = 'btn btn-primary';
-    okBtn.textContent = 'OK';
-    okBtn.style.marginTop = '15px';
-    okBtn.style.width = '100%';
-    okBtn.onclick = () => {
-        updateCustomSyntax(index, 'bgColor', selectedBgColor);
-        updateCustomSyntax(index, 'fgColor', selectedFgColor);
-        document.body.removeChild(overlay);
+        hexInput.oninput = (e) => {
+            const val = e.target.value;
+            if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
+                colorInput.value = val;
+                updateColorFromInput(val);
+            }
+        };
+
+        // Update input when mode changes
+        const radioInputs = document.getElementsByName('syntaxColorType');
+        radioInputs.forEach(r => {
+            r.addEventListener('change', (e) => {
+                const mode = e.target.value;
+                const col = mode === 'background' ? customColorSyntaxes[index].bgColor : customColorSyntaxes[index].fgColor;
+                if (col && col.startsWith('#')) {
+                    colorInput.value = col;
+                    hexInput.value = col;
+                } else if (!col || col === 'transparent') {
+                    // Reset to white or black default
+                    colorInput.value = mode === 'background' ? '#ffffff' : '#000000';
+                    hexInput.value = '';
+                } else {
+                    // Try to parse HSL? Simplify: just don't sync color picker for now
+                    hexInput.value = col;
+                }
+            });
+        });
+
+    }, 0);
+
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'btn btn-primary btn-full-width';
+    closeBtn.style.marginTop = '15px';
+    closeBtn.textContent = 'Done';
+    closeBtn.onclick = async (e) => {
+        e.stopPropagation();
+        overlay.remove();
+        await saveCustomColorSyntaxes();
+        renderCustomColorSyntaxList();
     };
-    popup.appendChild(okBtn);
+    popup.appendChild(closeBtn);
 
-    // Close on overlay click
-    overlay.onclick = (e) => {
-        if (e.target === overlay) {
-            document.body.removeChild(overlay);
-        }
-    };
-
-    // Append popup inside overlay, then overlay to body
     overlay.appendChild(popup);
     document.body.appendChild(overlay);
+
+    // Initial state for transparent checkbox
+    setTimeout(() => {
+        const transCheck = document.getElementById('syntaxTransparentCheck');
+        if (transCheck) {
+            transCheck.checked = selectedBgColor === 'transparent';
+            transCheck.onchange = (e) => {
+                if (e.target.checked) {
+                    // Set bg to transparent
+                    customColorSyntaxes[index].bgColor = 'transparent';
+                    document.getElementById('syntaxColorPreviewArea').style.backgroundColor = 'transparent';
+                    // Auto-select Background mode to show it happened?
+                } else {
+                    // Revert to a default or keep current?
+                    // If currently transparent, switch to white
+                    if (customColorSyntaxes[index].bgColor === 'transparent') {
+                        customColorSyntaxes[index].bgColor = '#ffffff';
+                        document.getElementById('syntaxColorPreviewArea').style.backgroundColor = '#ffffff';
+                    }
+                }
+            };
+        }
+    }, 0);
 }
+
+
+
+
+
+// Close on overlay click
+
+
+// Append popup inside overlay, then overlay to body
+
+
 
 // Apply custom color syntaxes in parsing
 function applyCustomColorSyntaxes(text) {
