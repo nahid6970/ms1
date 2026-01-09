@@ -16,6 +16,101 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
+            display: flex;
+            gap: 20px;
+        }
+
+        .sidebar {
+            width: 300px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            padding: 20px;
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+
+        .sidebar h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 10px;
+        }
+
+        .stats-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid #2196F3;
+        }
+
+        .stats-card .label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .stats-card .value {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .history-item {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-left: 4px solid #4CAF50;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .history-item:hover {
+            background: #e3f2fd;
+            transform: translateX(5px);
+        }
+
+        .history-item .date {
+            font-size: 0.8em;
+            color: #666;
+        }
+
+        .history-item .score {
+            font-weight: bold;
+            color: #4CAF50;
+        }
+
+        .weak-areas {
+            margin-top: 20px;
+        }
+
+        .weak-area {
+            background: #fff3e0;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 8px;
+            border-left: 4px solid #FF9800;
+        }
+
+        .suggestions {
+            margin-top: 20px;
+        }
+
+        .suggestion {
+            background: #e8f5e8;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 8px;
+            border-left: 4px solid #4CAF50;
+            font-size: 0.9em;
+        }
+
+        .main-content {
+            flex: 1;
         }
 
         .container {
@@ -237,6 +332,21 @@
         }
 
         @media (max-width: 600px) {
+            body {
+                flex-direction: column;
+                padding: 10px;
+            }
+            
+            .sidebar {
+                width: 100%;
+                position: static;
+                order: 2;
+            }
+            
+            .main-content {
+                order: 1;
+            }
+            
             .options {
                 grid-template-columns: 1fr;
             }
@@ -246,13 +356,57 @@
             }
             
             .container {
-                margin: 10px;
+                margin: 0;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h3>📊 পরিসংখ্যান</h3>
+        <div id="analytics-section">
+            <div class="stats-card">
+                <div class="label">মোট কুইজ</div>
+                <div class="value" id="total-quizzes">০</div>
+            </div>
+            <div class="stats-card">
+                <div class="label">গড় স্কোর</div>
+                <div class="value" id="average-score">০%</div>
+            </div>
+            <div class="stats-card">
+                <div class="label">সর্বোচ্চ স্কোর</div>
+                <div class="value" id="best-score">০%</div>
+            </div>
+            <div class="stats-card">
+                <div class="label">উন্নতির ধারা</div>
+                <div class="value" id="improvement-trend">নেই</div>
+            </div>
+        </div>
+
+        <h3>📈 সাম্প্রতিক ফলাফল</h3>
+        <div id="history-section">
+            <p style="color: #666; text-align: center;">কোনো ইতিহাস নেই</p>
+        </div>
+
+        <div class="weak-areas">
+            <h3>⚠️ দুর্বল ক্ষেত্র</h3>
+            <div id="weak-areas-section">
+                <p style="color: #666; text-align: center;">ডেটা লোড হচ্ছে...</p>
+            </div>
+        </div>
+
+        <div class="suggestions">
+            <h3>💡 পরামর্শ</h3>
+            <div id="suggestions-section">
+                <p style="color: #666; text-align: center;">ডেটা লোড হচ্ছে...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="container">
         <div class="header">
             <h1>🎯 বাংলা সমার্থক শব্দ কুইজ</h1>
             <p>আপনার বাংলা সমার্থক শব্দের জ্ঞান পরীক্ষা করুন</p>
@@ -308,10 +462,88 @@
         let score = 0;
         let selectedAnswer = null;
         let totalQuestions = 0;
+        let quizStartTime = null;
+        let categoryPerformance = {};
+
+        // Load data on page load
+        window.addEventListener('load', function() {
+            loadAnalytics();
+            loadWeakAreas();
+        });
+
+        async function loadAnalytics() {
+            try {
+                const response = await fetch('/api/get-history');
+                const data = await response.json();
+                
+                // Update analytics
+                document.getElementById('total-quizzes').textContent = data.analytics.total_quizzes;
+                document.getElementById('average-score').textContent = data.analytics.average_score + '%';
+                document.getElementById('best-score').textContent = data.analytics.best_score + '%';
+                document.getElementById('improvement-trend').textContent = data.analytics.improvement_trend;
+                
+                // Update history
+                const historySection = document.getElementById('history-section');
+                if (data.history.length === 0) {
+                    historySection.innerHTML = '<p style="color: #666; text-align: center;">কোনো ইতিহাস নেই</p>';
+                } else {
+                    historySection.innerHTML = '';
+                    data.history.reverse().forEach(quiz => {
+                        const historyItem = document.createElement('div');
+                        historyItem.className = 'history-item';
+                        historyItem.innerHTML = `
+                            <div class="date">${new Date(quiz.date).toLocaleDateString('bn-BD')}</div>
+                            <div class="score">${quiz.correct_answers}/${quiz.total_questions} (${quiz.score_percentage}%)</div>
+                        `;
+                        historySection.appendChild(historyItem);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading analytics:', error);
+            }
+        }
+
+        async function loadWeakAreas() {
+            try {
+                const response = await fetch('/api/get-weak-areas');
+                const data = await response.json();
+                
+                // Update weak areas
+                const weakAreasSection = document.getElementById('weak-areas-section');
+                if (data.weak_areas.length === 0) {
+                    weakAreasSection.innerHTML = '<p style="color: #666; text-align: center;">কোনো দুর্বল ক্ষেত্র নেই</p>';
+                } else {
+                    weakAreasSection.innerHTML = '';
+                    data.weak_areas.forEach(area => {
+                        const weakArea = document.createElement('div');
+                        weakArea.className = 'weak-area';
+                        weakArea.innerHTML = `
+                            <div style="font-weight: bold;">${area.category}</div>
+                            <div style="font-size: 0.9em; color: #666;">${area.accuracy}% সঠিকতা</div>
+                        `;
+                        weakAreasSection.appendChild(weakArea);
+                    });
+                }
+                
+                // Update suggestions
+                const suggestionsSection = document.getElementById('suggestions-section');
+                suggestionsSection.innerHTML = '';
+                data.suggestions.forEach(suggestion => {
+                    const suggestionDiv = document.createElement('div');
+                    suggestionDiv.className = 'suggestion';
+                    suggestionDiv.textContent = suggestion;
+                    suggestionsSection.appendChild(suggestionDiv);
+                });
+            } catch (error) {
+                console.error('Error loading weak areas:', error);
+            }
+        }
 
         async function startQuiz() {
             const numQuestions = document.getElementById('num-questions').value;
             totalQuestions = parseInt(numQuestions);
+            quizStartTime = new Date();
+            categoryPerformance = {};
             
             // Show loading
             document.getElementById('quiz-setup').style.display = 'none';
@@ -375,6 +607,16 @@
             const question = currentQuiz[currentQuestionIndex];
             const isCorrect = index === question.correct;
             
+            // Track category performance
+            const category = question.group || 'অন্যান্য';
+            if (!categoryPerformance[category]) {
+                categoryPerformance[category] = { correct: 0, total: 0 };
+            }
+            categoryPerformance[category].total++;
+            if (isCorrect) {
+                categoryPerformance[category].correct++;
+            }
+            
             // Mark selected option
             optionElement.classList.add('selected');
             
@@ -409,11 +651,12 @@
             }
         }
 
-        function showResults() {
+        async function showResults() {
             document.getElementById('quiz-container').style.display = 'none';
             document.getElementById('results').style.display = 'block';
             
             const percentage = Math.round((score / totalQuestions) * 100);
+            const timeTaken = Math.round((new Date() - quizStartTime) / 1000); // seconds
             
             document.getElementById('final-score').textContent = score;
             document.getElementById('total-questions').textContent = totalQuestions;
@@ -427,6 +670,29 @@
                 percentageElement.style.color = '#FF9800';
             } else {
                 percentageElement.style.color = '#f44336';
+            }
+            
+            // Save quiz result
+            try {
+                await fetch('/api/save-quiz-result', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        total_questions: totalQuestions,
+                        correct_answers: score,
+                        score_percentage: percentage,
+                        time_taken: timeTaken,
+                        categories_performance: categoryPerformance
+                    })
+                });
+                
+                // Reload analytics
+                loadAnalytics();
+                loadWeakAreas();
+            } catch (error) {
+                console.error('Error saving quiz result:', error);
             }
         }
 
