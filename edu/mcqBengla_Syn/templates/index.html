@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>বাংলা সমার্থক শব্দ কুইজ</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'SolaimanLipi', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(45deg, #2196F3, #21CBF3);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .quiz-setup {
+            padding: 30px;
+            text-align: center;
+        }
+
+        .quiz-setup h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .input-group {
+            margin: 20px 0;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+            color: #555;
+        }
+
+        .input-group input {
+            padding: 12px;
+            font-size: 1.1em;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            width: 200px;
+            text-align: center;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .quiz-container {
+            padding: 30px;
+            display: none;
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .question-counter {
+            font-size: 1.2em;
+            color: #666;
+        }
+
+        .score {
+            font-size: 1.2em;
+            color: #4CAF50;
+            font-weight: bold;
+        }
+
+        .question {
+            background: #fff;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .question h3 {
+            font-size: 1.8em;
+            color: #333;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .option {
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            font-size: 1.1em;
+        }
+
+        .option:hover {
+            background: #e3f2fd;
+            border-color: #2196F3;
+            transform: translateY(-2px);
+        }
+
+        .option.selected {
+            background: #2196F3;
+            color: white;
+            border-color: #1976D2;
+        }
+
+        .option.correct {
+            background: #4CAF50;
+            color: white;
+            border-color: #45a049;
+        }
+
+        .option.wrong {
+            background: #f44336;
+            color: white;
+            border-color: #d32f2f;
+        }
+
+        .next-btn {
+            display: block;
+            margin: 20px auto;
+            background: linear-gradient(45deg, #FF9800, #F57C00);
+        }
+
+        .results {
+            text-align: center;
+            padding: 40px;
+            display: none;
+        }
+
+        .results h2 {
+            font-size: 2.5em;
+            color: #4CAF50;
+            margin-bottom: 20px;
+        }
+
+        .results .score-display {
+            font-size: 1.8em;
+            margin: 20px 0;
+            color: #333;
+        }
+
+        .results .percentage {
+            font-size: 3em;
+            font-weight: bold;
+            color: #2196F3;
+            margin: 20px 0;
+        }
+
+        .restart-btn {
+            background: linear-gradient(45deg, #9C27B0, #7B1FA2);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            display: none;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 600px) {
+            .options {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .container {
+                margin: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 বাংলা সমার্থক শব্দ কুইজ</h1>
+            <p>আপনার বাংলা সমার্থক শব্দের জ্ঞান পরীক্ষা করুন</p>
+        </div>
+
+        <!-- Quiz Setup -->
+        <div class="quiz-setup" id="quiz-setup">
+            <h2>কুইজ সেটআপ</h2>
+            <div class="input-group">
+                <label for="num-questions">প্রশ্নের সংখ্যা:</label>
+                <input type="number" id="num-questions" min="5" max="50" value="10">
+            </div>
+            <button class="btn" onclick="startQuiz()">কুইজ শুরু করুন</button>
+        </div>
+
+        <!-- Loading -->
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>কুইজ তৈরি হচ্ছে...</p>
+        </div>
+
+        <!-- Quiz Container -->
+        <div class="quiz-container" id="quiz-container">
+            <div class="question-header">
+                <div class="question-counter" id="question-counter">প্রশ্ন ১/১০</div>
+                <div class="score" id="score">স্কোর: ০</div>
+            </div>
+            
+            <div class="question" id="question-card">
+                <h3 id="question-text">প্রশ্ন লোড হচ্ছে...</h3>
+                <div class="options" id="options-container">
+                    <!-- Options will be populated by JavaScript -->
+                </div>
+            </div>
+            
+            <button class="btn next-btn" id="next-btn" onclick="nextQuestion()" style="display: none;">পরবর্তী প্রশ্ন</button>
+        </div>
+
+        <!-- Results -->
+        <div class="results" id="results">
+            <h2>🎉 কুইজ সম্পন্ন!</h2>
+            <div class="score-display">
+                আপনার স্কোর: <span id="final-score">০</span>/<span id="total-questions">১০</span>
+            </div>
+            <div class="percentage" id="percentage">০%</div>
+            <button class="btn restart-btn" onclick="restartQuiz()">আবার খেলুন</button>
+        </div>
+    </div>
+
+    <script>
+        let currentQuiz = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let selectedAnswer = null;
+        let totalQuestions = 0;
+
+        async function startQuiz() {
+            const numQuestions = document.getElementById('num-questions').value;
+            totalQuestions = parseInt(numQuestions);
+            
+            // Show loading
+            document.getElementById('quiz-setup').style.display = 'none';
+            document.getElementById('loading').style.display = 'block';
+            
+            try {
+                const response = await fetch(`/api/generate-quiz?num_questions=${numQuestions}`);
+                currentQuiz = await response.json();
+                
+                // Hide loading and show quiz
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('quiz-container').style.display = 'block';
+                
+                // Reset variables
+                currentQuestionIndex = 0;
+                score = 0;
+                
+                displayQuestion();
+            } catch (error) {
+                alert('কুইজ লোড করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('quiz-setup').style.display = 'block';
+            }
+        }
+
+        function displayQuestion() {
+            const question = currentQuiz[currentQuestionIndex];
+            
+            // Update question counter and score
+            document.getElementById('question-counter').textContent = 
+                `প্রশ্ন ${currentQuestionIndex + 1}/${totalQuestions}`;
+            document.getElementById('score').textContent = `স্কোর: ${score}`;
+            
+            // Display question
+            document.getElementById('question-text').textContent = question.question;
+            
+            // Display options
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'option';
+                optionDiv.textContent = option;
+                optionDiv.onclick = () => selectOption(index, optionDiv);
+                optionsContainer.appendChild(optionDiv);
+            });
+            
+            // Hide next button
+            document.getElementById('next-btn').style.display = 'none';
+            selectedAnswer = null;
+        }
+
+        function selectOption(index, optionElement) {
+            // Remove previous selections
+            document.querySelectorAll('.option').forEach(opt => {
+                opt.classList.remove('selected', 'correct', 'wrong');
+            });
+            
+            selectedAnswer = index;
+            const question = currentQuiz[currentQuestionIndex];
+            const isCorrect = index === question.correct;
+            
+            // Mark selected option
+            optionElement.classList.add('selected');
+            
+            // Show correct/wrong after a short delay
+            setTimeout(() => {
+                document.querySelectorAll('.option').forEach((opt, i) => {
+                    if (i === question.correct) {
+                        opt.classList.add('correct');
+                    } else if (i === index && !isCorrect) {
+                        opt.classList.add('wrong');
+                    }
+                    opt.onclick = null; // Disable further clicks
+                });
+                
+                if (isCorrect) {
+                    score++;
+                    document.getElementById('score').textContent = `স্কোর: ${score}`;
+                }
+                
+                // Show next button
+                document.getElementById('next-btn').style.display = 'block';
+            }, 500);
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            
+            if (currentQuestionIndex < currentQuiz.length) {
+                displayQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            document.getElementById('quiz-container').style.display = 'none';
+            document.getElementById('results').style.display = 'block';
+            
+            const percentage = Math.round((score / totalQuestions) * 100);
+            
+            document.getElementById('final-score').textContent = score;
+            document.getElementById('total-questions').textContent = totalQuestions;
+            document.getElementById('percentage').textContent = `${percentage}%`;
+            
+            // Change percentage color based on score
+            const percentageElement = document.getElementById('percentage');
+            if (percentage >= 80) {
+                percentageElement.style.color = '#4CAF50';
+            } else if (percentage >= 60) {
+                percentageElement.style.color = '#FF9800';
+            } else {
+                percentageElement.style.color = '#f44336';
+            }
+        }
+
+        function restartQuiz() {
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('quiz-setup').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
