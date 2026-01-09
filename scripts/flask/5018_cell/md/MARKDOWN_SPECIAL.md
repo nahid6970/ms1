@@ -32,3 +32,8 @@
 ## Alternative Link Syntax
 **Syntax:** `https://url[Link Text]`
 **Function:** Shorter than `{link:url}...` and supports nested markdown.
+
+## Custom Color Syntax
+**Syntax:** User-defined (e.g., `++text++`, `%%text%%`)
+**Function:** Apply custom colors and formatting defined in Settings.
+**Details:** See `md/CUSTOM_SYNTAX.md`.
