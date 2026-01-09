@@ -10731,60 +10731,20 @@ function showCustomSyntaxColorPicker(index, field, event) {
         '#FFE5F9', '#FFB3EF', '#FF80E5', '#FF4DDB', '#FF1AD1', '#E600BC', '#B30093', '#80006A', '#4D0040', '#1A0017'
     ];
 
+    // Container for the split layout
+    const splitLayout = document.createElement('div');
+    splitLayout.style.display = 'flex';
+    splitLayout.style.gap = '15px';
+    splitLayout.style.marginBottom = '15px';
+
+    // Left side: Color Grid (Preset Colors)
     const colorGrid = document.createElement('div');
     colorGrid.className = 'color-picker-grid';
-
-    // Add Random Color Button
-    const randomBtn = document.createElement('div');
-    randomBtn.style.gridColumn = '1 / -1';
-    randomBtn.style.marginBottom = '10px';
-    randomBtn.style.textAlign = 'center';
-    randomBtn.innerHTML = '<button type="button" class="btn btn-secondary" style="width: 100%; font-size: 12px;">🎲 Random Colors</button>';
-    randomBtn.onclick = (e) => {
-        e.stopPropagation();
-
-        // Generate random harmonious colors
-        const hue = Math.floor(Math.random() * 360);
-        const bgSat = 20 + Math.floor(Math.random() * 30); // Low saturation for BG
-        const bgLight = 85 + Math.floor(Math.random() * 10); // High lightness for BG
-
-        const fgSat = 60 + Math.floor(Math.random() * 40); // High saturation for FG
-        const fgLight = 10 + Math.floor(Math.random() * 20); // Low lightness for FG
-
-        const randomBg = `hsl(${hue}, ${bgSat}%, ${bgLight}%)`;
-        const randomFg = `hsl(${hue}, ${fgSat}%, ${fgLight}%)`;
-
-        // Determine what to update based on current selection mode
-        const radios = document.getElementsByName('syntaxColorType');
-        let mode = 'background';
-        for (let r of radios) if (r.checked) mode = r.value;
-
-        // This is a "global" randomizer effect for both properties
-        // Update data model
-        customColorSyntaxes[index].bgColor = randomBg;
-        customColorSyntaxes[index].fgColor = randomFg;
-
-        // Update Preview
-        const preview = document.getElementById('syntaxColorPreviewArea');
-        if (preview) {
-            preview.style.backgroundColor = randomBg;
-            preview.style.color = randomFg;
-            // Update the text to show hex/rgb conversion if needed, or just keep it simple.
-            // We'll let the HSL be computed style.
-        }
-
-        // Force update of the list when closing or immediately?
-        // Let's rely on save when closing, but for now just update visual preview
-
-        // Also update the input fields if they existed... but they are in the list behind the modal. 
-        // We will refresh the list when closing this modal.
-    };
-    colorGrid.appendChild(randomBtn);
-
+    // Remove the random button from here
 
     presetColors.forEach(color => {
         const colorSwatch = document.createElement('div');
-        colorSwatch.className = 'color-swatch-item';
+        colorSwatch.className = 'color-swatch';
         colorSwatch.style.backgroundColor = color;
         colorSwatch.onclick = (e) => {
             e.stopPropagation();
@@ -10813,20 +10773,73 @@ function showCustomSyntaxColorPicker(index, field, event) {
         colorGrid.appendChild(colorSwatch);
     });
 
-    popup.appendChild(colorGrid);
+    // Right side: New Controls (Random + Hex)
+    const sidePanel = document.createElement('div');
+    sidePanel.style.display = 'flex';
+    sidePanel.style.flexDirection = 'column';
+    sidePanel.style.gap = '10px';
+    sidePanel.style.width = '140px';
+    sidePanel.style.flexShrink = '0';
+    sidePanel.style.borderLeft = '1px solid #dee2e6';
+    sidePanel.style.paddingLeft = '15px';
 
-    // Custom Hex Input
+    // Random Color Button (Moved here)
+    const randomBtn = document.createElement('button');
+    randomBtn.type = 'button';
+    randomBtn.className = 'btn btn-secondary';
+    randomBtn.style.width = '100%';
+    randomBtn.style.fontSize = '12px';
+    randomBtn.style.padding = '8px';
+    randomBtn.innerHTML = '🎲 Random';
+    randomBtn.onclick = (e) => {
+        e.stopPropagation();
+
+        // Generate random harmonious colors
+        const hue = Math.floor(Math.random() * 360);
+        const bgSat = 20 + Math.floor(Math.random() * 30); // Low saturation for BG
+        const bgLight = 85 + Math.floor(Math.random() * 10); // High lightness for BG
+
+        const fgSat = 60 + Math.floor(Math.random() * 40); // High saturation for FG
+        const fgLight = 10 + Math.floor(Math.random() * 20); // Low lightness for FG
+
+        const randomBg = `hsl(${hue}, ${bgSat}%, ${bgLight}%)`;
+        const randomFg = `hsl(${hue}, ${fgSat}%, ${fgLight}%)`;
+
+        // Determine what to update based on current selection mode
+        const radios = document.getElementsByName('syntaxColorType');
+        let mode = 'background';
+        for (let r of radios) if (r.checked) mode = r.value;
+
+        // Update data model
+        customColorSyntaxes[index].bgColor = randomBg;
+        customColorSyntaxes[index].fgColor = randomFg;
+
+        // Update Preview
+        const preview = document.getElementById('syntaxColorPreviewArea');
+        if (preview) {
+            preview.style.backgroundColor = randomBg;
+            preview.style.color = randomFg;
+        }
+    };
+    sidePanel.appendChild(randomBtn);
+
+    // Custom Hex Input (Moved here)
     const hexInputContainer = document.createElement('div');
-    hexInputContainer.style.marginTop = '15px';
     hexInputContainer.style.display = 'flex';
-    hexInputContainer.style.alignItems = 'center';
-    hexInputContainer.style.gap = '10px';
+    hexInputContainer.style.flexDirection = 'column';
+    hexInputContainer.style.gap = '5px';
     hexInputContainer.innerHTML = `
-        <label style="font-size: 12px; font-weight: bold;">Custom Hex:</label>
-        <input type="color" id="syntaxCustomColorPicker" style="width: 40px; height: 30px; padding: 0; border: none; cursor: pointer;">
-        <input type="text" id="syntaxCustomHexInput" placeholder="#RRGGBB" style="flex: 1; padding: 6px; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; text-transform: uppercase;">
+        <label style="font-size: 11px; font-weight: bold; color: #666;">CUSTOM HEX</label>
+        <div style="display: flex; gap: 5px;">
+             <input type="color" id="syntaxCustomColorPicker" style="width: 30px; height: 30px; padding: 0; border: none; cursor: pointer;">
+             <input type="text" id="syntaxCustomHexInput" placeholder="#RGB" style="flex: 1; padding: 4px; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; text-transform: uppercase; font-size: 12px; min-width: 0;">
+        </div>
     `;
-    popup.appendChild(hexInputContainer);
+    sidePanel.appendChild(hexInputContainer);
+
+    splitLayout.appendChild(colorGrid);
+    splitLayout.appendChild(sidePanel);
+    popup.appendChild(splitLayout);
 
     // Handle hex input changes
     setTimeout(() => {
