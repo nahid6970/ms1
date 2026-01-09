@@ -10535,52 +10535,67 @@ function renderCustomColorSyntaxList() {
     list.innerHTML = '';
 
     if (customColorSyntaxes.length === 0) {
-        list.innerHTML = '<p style="color: #6c757d; font-size: 13px; text-align: center; padding: 20px;">No custom syntaxes added yet. Click "Add Custom Syntax" to create one.</p>';
+        list.innerHTML = '<p style="color: #6c757d; font-size: 13px; text-align: center; padding: 30px; background: #f8f9fa; border-radius: 8px;">No custom syntaxes added yet. Click "Add Custom Syntax" to create one.</p>';
+        renderCustomSyntaxButtons();
         return;
     }
+
+    // Add Header Row
+    const header = document.createElement('div');
+    header.className = 'custom-syntax-header';
+    header.innerHTML = `
+        <div style="flex: 0 0 80px;">Marker</div>
+        <div style="flex: 0 0 100px;">Colors</div>
+        <div style="flex: 0 0 120px;">Format</div>
+        <div style="flex: 1;">Preview</div>
+        <div style="flex: 0 0 40px;"></div>
+    `;
+    list.appendChild(header);
 
     customColorSyntaxes.forEach((syntax, index) => {
         const item = document.createElement('div');
         item.className = 'custom-syntax-item';
 
         item.innerHTML = `
-            <div class="custom-syntax-input-group">
+            <div class="cs-col-marker">
                 <input type="text" value="${syntax.marker}" 
                     onchange="updateCustomSyntax(${index}, 'marker', this.value)" 
-                    placeholder="++, $$"
-                    maxlength="4">
-            </div>
-            <div class="custom-syntax-input-group">
-                <label>BG:</label>
-                <button onclick="showCustomSyntaxColorPicker(${index}, 'bgColor', event)" 
-                    style="width: 32px; height: 28px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; background: ${syntax.bgColor};"
-                    title="Background Color"></button>
-            </div>
-            <div class="custom-syntax-input-group">
-                <label>FG:</label>
-                <button onclick="showCustomSyntaxColorPicker(${index}, 'fgColor', event)" 
-                    style="width: 32px; height: 28px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; background: ${syntax.fgColor};"
-                    title="Text Color"></button>
+                    placeholder="++"
+                    maxlength="4" title="Enter marker characters (e.g. ++, %%)">
             </div>
             
-            <div class="custom-syntax-input-group" style="gap: 10px;">
-                <label style="cursor: pointer; font-weight: bold;" title="Bold">
+            <div class="cs-col-colors">
+                <div class="color-dot" onclick="showCustomSyntaxColorPicker(${index}, 'bgColor', event)" 
+                    style="background: ${syntax.bgColor};" title="Background Color: ${syntax.bgColor}">
+                    <span class="color-dot-label">BG</span>
+                </div>
+                <div class="color-dot" onclick="showCustomSyntaxColorPicker(${index}, 'fgColor', event)" 
+                    style="background: ${syntax.fgColor};" title="Text Color: ${syntax.fgColor}">
+                    <span class="color-dot-label" style="color: white; text-shadow: 0 0 2px black;">FG</span>
+                </div>
+            </div>
+            
+            <div class="cs-col-format">
+                <label class="toggle-icon ${syntax.isBold ? 'active' : ''}" title="Bold">
                     <input type="checkbox" ${syntax.isBold ? 'checked' : ''} onchange="updateCustomSyntax(${index}, 'isBold', this.checked)"> B
                 </label>
-                <label style="cursor: pointer; font-style: italic;" title="Italic">
+                <label class="toggle-icon ${syntax.isItalic ? 'active' : ''}" style="font-style: italic;" title="Italic">
                     <input type="checkbox" ${syntax.isItalic ? 'checked' : ''} onchange="updateCustomSyntax(${index}, 'isItalic', this.checked)"> I
                 </label>
-                <label style="cursor: pointer; text-decoration: underline;" title="Underline">
+                <label class="toggle-icon ${syntax.isUnderline ? 'active' : ''}" style="text-decoration: underline;" title="Underline">
                     <input type="checkbox" ${syntax.isUnderline ? 'checked' : ''} onchange="updateCustomSyntax(${index}, 'isUnderline', this.checked)"> U
                 </label>
             </div>
 
-            <div class="custom-syntax-preview" style="background: ${syntax.bgColor}; color: ${syntax.fgColor}; ${syntax.isBold ? 'font-weight: bold;' : ''} ${syntax.isItalic ? 'font-style: italic;' : ''} ${syntax.isUnderline ? 'text-decoration: underline;' : ''}">
-                ${syntax.marker}text${syntax.marker}
+            <div class="cs-col-preview">
+                <div class="preview-box" style="background: ${syntax.bgColor}; color: ${syntax.fgColor}; ${syntax.isBold ? 'font-weight: bold;' : ''} ${syntax.isItalic ? 'font-style: italic;' : ''} ${syntax.isUnderline ? 'text-decoration: underline;' : ''}">
+                    ${syntax.marker || '..'}sample${syntax.marker || '..'}
+                </div>
             </div>
-            <button class="btn-remove-syntax" onclick="removeCustomSyntax(${index})">
-                🗑️
-            </button>
+            
+            <div class="cs-col-action">
+                <button class="btn-icon-danger" onclick="removeCustomSyntax(${index})" title="Remove">✕</button>
+            </div>
         `;
 
         list.appendChild(item);
