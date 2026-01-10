@@ -69,6 +69,12 @@ MergeTab(hNewWnd) {
         }
 
         if (newPath != "") {
+             ; Filter out "My PC" or empty paths if they accidentally slipped through 
+             ; (My PC CLSID is ::{20D04FE0-3AEA-1069-A2D8-08002B30309D})
+             if (newPath ~= "i)^::{") {
+                  return ; Do not merge special shell folders like My PC
+             }
+
             try {
                 ; Close the newly created window
                 WinClose(hNewWnd)
