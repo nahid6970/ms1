@@ -7,7 +7,7 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                              QHBoxLayout, QLabel, QPushButton, QLineEdit, 
                              QScrollArea, QFrame, QMessageBox, QDialog, 
                              QComboBox, QFileDialog, QSplitter, QGraphicsEffect,
-                             QGraphicsDropShadowEffect, QMenu)
+                             QGraphicsDropShadowEffect, QMenu, QCheckBox)
 from PyQt6.QtCore import Qt, QSize, QTimer, pyqtSignal, QPropertyAnimation, QEasingCurve
 from PyQt6.QtGui import QFont, QColor, QPalette, QCursor, QPainter, QPen, QAction
 
@@ -325,6 +325,111 @@ class ItemDialog(QDialog):
         }
         self.accept()
 
+class ScanResultsDialog(QDialog):
+    def __init__(self, items, parent=None):
+        super().__init__(parent)
+        self.found_items = items
+        self.selected_items = []
+        self.setWindowTitle("SYSTEM // SCAN_RESULTS")
+        self.resize(600, 500)
+        self.setStyleSheet(f"""
+            QDialog {{ background-color: {CP_BG}; border: 1px solid {CP_DIM}; }}
+            QLabel {{ color: {CP_TEXT}; font-family: 'Consolas'; }}
+            QCheckBox {{
+                color: {CP_TEXT};
+                font-family: 'Consolas';
+                font-size: 11px;
+                spacing: 10px;
+                padding: 10px;
+                border: 1px solid {CP_PANEL};
+                background: {CP_PANEL};
+            }}
+            QCheckBox::indicator {{
+                width: 14px;
+                height: 14px;
+                border: 1px solid {CP_DIM};
+                background: {CP_BG};
+            }}
+            QCheckBox::indicator:checked {{
+                background: {CP_YELLOW};
+                border: 1px solid {CP_YELLOW};
+            }}
+            QCheckBox::indicator:hover {{
+                border: 1px solid {CP_CYAN};
+            }}
+            QCheckBox:hover {{
+                border: 1px solid {CP_DIM};
+                background: #1a1a25;
+            }}
+        """)
+        self.setup_ui()
+
+    def setup_ui(self):
+        layout = QVBoxLayout(self)
+        layout.setSpacing(15)
+        layout.setContentsMargins(20, 20, 20, 20)
+        
+        header = QLabel(f"DETECTED {len(self.found_items)} NEW ENTRIES")
+        header.setFont(QFont("Consolas", 12, QFont.Weight.Bold))
+        header.setStyleSheet(f"color: {CP_YELLOW};")
+        layout.addWidget(header)
+        
+        sub_header = QLabel("SELECT ITEMS TO IMPORT:")
+        sub_header.setStyleSheet(f"color: {CP_SUBTEXT};")
+        layout.addWidget(sub_header)
+        
+        # Scroll area for items
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QFrame.Shape.NoFrame)
+        scroll.setStyleSheet(f"""
+            QScrollArea {{ border: none; background: transparent; }}
+            QWidget {{ background: transparent; }}
+            QScrollBar:vertical {{
+                background: {CP_BG};
+                width: 8px;
+            }}
+            QScrollBar::handle:vertical {{
+                background: {CP_DIM};
+            }}
+        """)
+        
+        container = QWidget()
+        self.vbox = QVBoxLayout(container)
+        self.vbox.setSpacing(5)
+        self.vbox.setContentsMargins(0, 0, 5, 0)
+        
+        self.checkboxes = []
+        for item in self.found_items:
+            path_display = item['paths'][0]
+            if len(path_display) > 60: path_display = "..." + path_display[-57:]
+            
+            cb = QCheckBox(f"{item['name']}\n[{path_display}]")
+            cb.setCursor(Qt.CursorShape.PointingHandCursor)
+            cb.setChecked(True) # Default all selected
+            self.vbox.addWidget(cb)
+            self.checkboxes.append((cb, item))
+        
+        self.vbox.addStretch()
+        scroll.setWidget(container)
+        layout.addWidget(scroll)
+        
+        # Buttons
+        btn_layout = QHBoxLayout()
+        add_btn = CyberButton("IMPORT SELECTED", color=CP_CYAN)
+        add_btn.clicked.connect(self.accept_selection)
+        
+        cancel_btn = CyberButton("DISCARD", color=CP_RED, is_outlined=True)
+        cancel_btn.clicked.connect(self.reject)
+        
+        btn_layout.addWidget(add_btn)
+        btn_layout.addWidget(cancel_btn)
+        layout.addLayout(btn_layout)
+        
+    def accept_selection(self):
+        self.selected_items = [item for cb, item in self.checkboxes if cb.isChecked()]
+        self.accept()
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -615,20 +720,16 @@ class MainWindow(QMainWindow):
                         })
         
         if found_items:
-            msg = f"FOUND {len(found_items)} NEW ITEMS:\n\n"
-            for item in found_items[:10]:
-                msg += f"• {item['name']} ({item['paths'][0]})\n"
-            if len(found_items) > 10: msg += f"\n...and {len(found_items)-10} more."
-            
-            msg += "\n\nADD THESE ENTRIES TO DATABASE?"
-            
-            if QMessageBox.question(self, "SCAN COMPLETE", msg) == QMessageBox.StandardButton.Yes:
-                self.items.extend(found_items)
-                self.save_items()
-                self.populate_lists()
-                self.update_status(f"IMPORTED {len(found_items)} NEW ENTRIES")
-            else:
-                self.update_status("IMPORT ABORTED")
+            dialog = ScanResultsDialog(found_items, self)
+            if dialog.exec():
+                selected = dialog.selected_items
+                if selected:
+                    self.items.extend(selected)
+                    self.save_items()
+                    self.populate_lists()
+                    self.update_status(f"IMPORTED {len(selected)} NEW ENTRIES")
+                else:
+                    self.update_status("IMPORT CANCELLED")
         else:
             self.update_status("SCAN COMPLETE: NO NEW ENTRIES")
 
