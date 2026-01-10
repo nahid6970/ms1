@@ -547,5 +547,14 @@
     ],
     "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5004 paint\\app.py",
     "ExecutableType": "pythonw"
+  },
+  {
+    "name": "ShareX",
+    "type": "App",
+    "paths": [
+      "C:\\Users\\nahid\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\ShareX.lnk"
+    ],
+    "Command": "",
+    "ExecutableType": "other"
   }
 ]
