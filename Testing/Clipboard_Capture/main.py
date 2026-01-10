@@ -9,8 +9,13 @@ import sys
 from PIL import Image, ImageDraw
 import pystray # pip install pystray
 
-HISTORY_FILE = "clipboard_history.json"
-SETTINGS_FILE = "settings.json"
+# Path Handling - Ensures files are relative to the script location
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+HISTORY_FILE = os.path.join(BASE_DIR, "clipboard_history.json")
+SETTINGS_FILE = os.path.join(BASE_DIR, "settings.json")
+
+# Font Constant
+FONT_FAMILY = "JetBrainsMono NFP"
 
 class CompactClipboardApp(ctk.CTk):
     def __init__(self):
@@ -51,51 +56,65 @@ class CompactClipboardApp(ctk.CTk):
         
         self.mode_switch = ctk.CTkSwitch(self.settings_frame, text="Auto-Pattern Mode", 
                                        variable=self.auto_mode_var, command=self.toggle_mode,
-                                       font=ctk.CTkFont(size=14, weight="bold"))
+                                       font=ctk.CTkFont(family=FONT_FAMILY, size=13, weight="bold"))
         self.mode_switch.grid(row=0, column=0, sticky="w", pady=(0, 10))
 
-        self.template_entry = ctk.CTkEntry(self.settings_frame, placeholder_text="Pattern: {1} -> {2}")
+        self.template_entry = ctk.CTkEntry(self.settings_frame, placeholder_text="Pattern: {1} -> {2}",
+                                           font=ctk.CTkFont(family=FONT_FAMILY, size=12))
         self.template_entry.insert(0, self.pattern_template)
         self.template_entry.grid(row=1, column=0, sticky="ew", pady=(0, 2))
         self.template_entry.bind("<KeyRelease>", self.on_template_change)
         
-        self.template_hint = ctk.CTkLabel(self.settings_frame, text="Format: {1}, {2} etc.", text_color="gray50", font=("Arial", 10))
+        # Using a slightly smaller font for hint
+        self.template_hint = ctk.CTkLabel(self.settings_frame, text="Format: {1}, {2} etc.", 
+                                          text_color="gray50", font=ctk.CTkFont(family=FONT_FAMILY, size=10))
         self.template_hint.grid(row=2, column=0, sticky="w", padx=2)
 
         # 2. Status Info Row
         self.info_frame = ctk.CTkFrame(self, height=25, fg_color="transparent")
         self.info_frame.grid(row=1, column=0, sticky="ew", padx=15, pady=(5, 5))
         
-        self.status_label = ctk.CTkLabel(self.info_frame, text="Ready", font=("Arial", 11, "bold"), text_color="#2ecc71")
+        self.status_label = ctk.CTkLabel(self.info_frame, text="Ready", 
+                                         font=ctk.CTkFont(family=FONT_FAMILY, size=11, weight="bold"), 
+                                         text_color="#2ecc71")
         self.status_label.pack(side="left")
         
-        self.group_info_label = ctk.CTkLabel(self.info_frame, text="Group Size: 2", font=("Arial", 11), text_color="gray70")
+        self.group_info_label = ctk.CTkLabel(self.info_frame, text="Group Size: 2", 
+                                             font=ctk.CTkFont(family=FONT_FAMILY, size=11), 
+                                             text_color="gray70")
         self.group_info_label.pack(side="right")
 
         # 3. Preview Box
-        self.preview_box = ctk.CTkTextbox(self, font=("Consolas", 12), fg_color="#1f1f1f", text_color="#2ecc71")
+        self.preview_box = ctk.CTkTextbox(self, font=ctk.CTkFont(family=FONT_FAMILY, size=12), 
+                                          fg_color="#1f1f1f", text_color="#2ecc71")
         self.preview_box.grid(row=3, column=0, sticky="nsew", padx=10, pady=5)
         self.preview_box.insert("0.0", "Accumulated pattern will appear here...")
         self.preview_box.configure(state="disabled")
 
-        # 4. Action Buttons (Square, Bold, Contrast)
+        # 4. Action Buttons
         self.btn_frame = ctk.CTkFrame(self, fg_color="transparent")
         self.btn_frame.grid(row=4, column=0, sticky="ew", padx=10, pady=10)
         self.btn_frame.grid_columnconfigure((0,1), weight=1)
 
         self.btn_copy = ctk.CTkButton(self.btn_frame, text="Copy Output", command=self.manual_copy, 
                                       fg_color="#27ae60", hover_color="#2ecc71", 
-                                      text_color="white", font=ctk.CTkFont(weight="bold"), corner_radius=0)
+                                      text_color="white", 
+                                      font=ctk.CTkFont(family=FONT_FAMILY, weight="bold"), 
+                                      corner_radius=0)
         self.btn_copy.grid(row=0, column=0, columnspan=2, sticky="ew", pady=(0, 5))
 
         self.btn_reset = ctk.CTkButton(self.btn_frame, text="Reset Session", command=self.reset_session, 
                                        fg_color="#d35400", hover_color="#e67e22",
-                                       text_color="white", font=ctk.CTkFont(weight="bold"), corner_radius=0)
+                                       text_color="white", 
+                                       font=ctk.CTkFont(family=FONT_FAMILY, weight="bold"), 
+                                       corner_radius=0)
         self.btn_reset.grid(row=1, column=0, sticky="ew", padx=(0, 2))
 
         self.btn_clear_hist = ctk.CTkButton(self.btn_frame, text="Clear DB", command=self.clear_history, 
                                             fg_color="#c0392b", hover_color="#e74c3c",
-                                            text_color="white", font=ctk.CTkFont(weight="bold"), corner_radius=0)
+                                            text_color="white", 
+                                            font=ctk.CTkFont(family=FONT_FAMILY, weight="bold"), 
+                                            corner_radius=0)
         self.btn_clear_hist.grid(row=1, column=1, sticky="ew", padx=(2, 0))
 
         # System Tray Setup
