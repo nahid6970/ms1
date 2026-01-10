@@ -2,6 +2,7 @@ import customtkinter as ctk
 import pyperclip
 import threading
 import time
+import re
 from datetime import datetime
 
 class ClipboardManager(ctk.CTk):
@@ -44,17 +45,18 @@ class ClipboardManager(ctk.CTk):
                                        font=ctk.CTkFont(size=14, weight="bold"))
         self.mode_switch.grid(row=0, column=0, sticky="w", padx=10, pady=(0, 20))
 
-        # Items per Group (Changed to Entry)
-        ctk.CTkLabel(self.settings_frame, text="Items per Group").grid(row=1, column=0, sticky="w", padx=10)
-        self.group_size_entry = ctk.CTkEntry(self.settings_frame, width=200)
-        self.group_size_entry.insert(0, "2")
-        self.group_size_entry.grid(row=2, column=0, sticky="w", padx=10, pady=(0, 5))
-
         # Pattern Template
         ctk.CTkLabel(self.settings_frame, text="Template Pattern ({1}, {2}...)").grid(row=5, column=0, sticky="w", padx=10, pady=(10, 0))
         self.template_entry = ctk.CTkEntry(self.settings_frame, placeholder_text="{1} -> **{2}**")
         self.template_entry.insert(0, "{1} -> **{2}**")
         self.template_entry.grid(row=6, column=0, sticky="ew", padx=10, pady=(5, 5))
+        
+        # Dynamic Group Info
+        self.group_info_label = ctk.CTkLabel(self.settings_frame, text="Detected Group Size: 2", text_color="gray70", font=ctk.CTkFont(size=11))
+        self.group_info_label.grid(row=7, column=0, sticky="w", padx=15, pady=(0, 10))
+        
+        # Bind key release to update group info dynamically
+        self.template_entry.bind("<KeyRelease>", self.update_group_info)
 
         # Batch Status (Buffer)
         self.status_frame = ctk.CTkFrame(self.sidebar_frame, fg_color="#2b2b2b", corner_radius=6)
@@ -116,11 +118,19 @@ class ClipboardManager(ctk.CTk):
         self.destroy()
 
     def get_group_size(self):
-        try:
-            val = int(self.group_size_entry.get())
-            return max(1, val)
-        except ValueError:
-            return 2 # Default fallback
+        # Dynamically calculate based on template
+        template = self.template_entry.get()
+        matches = re.findall(r'\{(\d+)\}', template)
+        if matches:
+            # Find the max index used
+            max_idx = max(map(int, matches))
+            return max(1, max_idx)
+        return 1
+
+    def update_group_info(self, event=None):
+        size = self.get_group_size()
+        self.group_info_label.configure(text=f"Detected Group Size: {size}")
+        self.update_status_display()
 
     def toggle_mode(self):
         if self.auto_mode_var.get():
