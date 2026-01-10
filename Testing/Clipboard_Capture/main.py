@@ -18,6 +18,7 @@ class SettingsWindow(ctk.CTkToplevel):
         self.title("Settings")
         self.geometry("350x250")
         self.resizable(False, False)
+        self.attributes('-topmost', True) # Keep settings on top too
         
         # Auto Mode Switch
         self.mode_switch = ctk.CTkSwitch(self, text="Auto-Pattern Mode", 
@@ -52,6 +53,8 @@ class CompactClipboardApp(ctk.CTk):
         self.geometry("320x450")
         self.resizable(False, True)
         ctk.set_appearance_mode("dark")
+        # Start hidden? Usually tray apps do. But user said "launch from tray", maybe they want to see it first.
+        # I'll let it show on start.
         
         # Data & State
         self.clipboard_history = []
@@ -112,14 +115,14 @@ class CompactClipboardApp(ctk.CTk):
         self.monitor_thread = threading.Thread(target=self.monitor_clipboard, daemon=True)
         self.monitor_thread.start()
 
-        # Init Tray in separate thread causing issues usually with GUI loops.
-        # Ideally, main thread runs GUI, separate thread runs Tray. 
-        # But pystray run() is blocking. 
-        # We will run pystray in a thread.
+        # Init Tray
         self.tray_thread = threading.Thread(target=self.setup_tray, daemon=True)
         self.tray_thread.start()
         
         self.update_status()
+        
+        # Ensure initial position is correct too
+        self.after(100, self._show_window_safe)
 
     def create_image(self):
         # Generate a simple icon
@@ -134,26 +137,55 @@ class CompactClipboardApp(ctk.CTk):
         return image
 
     def setup_tray(self):
-        icon = pystray.Icon("SmartClip", self.create_image(), "SmartClip Manager", menu=pystray.Menu(
-            pystray.MenuItem("Show", self.show_window),
+        # default=True makes the "Show" item trigger on left-click
+        menu = pystray.Menu(
+            pystray.MenuItem("Show", self.show_window, default=True),
             pystray.MenuItem("Exit", self.quit_app)
-        ))
+        )
+        icon = pystray.Icon("SmartClip", self.create_image(), "SmartClip Manager", menu=menu)
         self.tray_icon = icon
         icon.run()
 
     def show_window(self, icon=None, item=None):
+        # Triggers UI update from the tray thread, so schedule it on main thread
+        self.after(0, self._show_window_safe)
+
+    def _show_window_safe(self):
         self.deiconify()
-        self.lift()
-        self.focus_force()
+        self.update_idletasks()
+        try:
+            self.lift()
+            self.attributes('-topmost', True) # Keep on top
+            self.focus_force()
+        except: pass
+        
+        try:
+            screen_w = self.winfo_screenwidth()
+            screen_h = self.winfo_screenheight()
+            win_w = 320
+            win_h = 450
+            
+            # Position: Right side, Vertically centered
+            x_pos = screen_w - win_w - 20
+            y_pos = (screen_h - win_h) // 2
+            
+            self.geometry(f"{win_w}x{win_h}+{x_pos}+{y_pos}")
+        except: pass
 
     def hide_window(self):
         self.withdraw()
 
     def quit_app(self, icon=None, item=None):
-        self.tray_icon.stop()
         self.is_running = False
+        try:
+            self.tray_icon.stop()
+        except: pass
+        # Clean exit on main thread
+        self.after(0, self._quit_safe)
+
+    def _quit_safe(self):
         self.quit()
-        sys.exit()
+        self.destroy()
 
     def open_settings(self):
         SettingsWindow(self)
@@ -200,7 +232,10 @@ class CompactClipboardApp(ctk.CTk):
     def clear_history(self):
         self.clipboard_history.clear()
         self.save_history()
-        self.last_clip = "" # Reset last clip so we can recopy things if needed?
+        # Update last_clip to current system clipboard so we don't re-import it immediately
+        try:
+            self.last_clip = pyperclip.paste()
+        except: pass
 
     def copy_to_clip(self, text):
         self.ignore_next = text
