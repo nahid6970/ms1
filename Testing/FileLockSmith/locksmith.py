@@ -130,10 +130,31 @@ class LocksmithApp(ctk.CTk, TkinterDnD.DnDWrapper):
         for widget in self.results_scroll.winfo_children():
             widget.destroy()
 
+        import queue
+        self.scan_queue = queue.Queue()
+        
         # Run scan in thread
-        threading.Thread(target=self.run_scan, args=(target_path,), daemon=True).start()
+        threading.Thread(target=self.run_scan_thread, args=(target_path, self.scan_queue), daemon=True).start()
+        
+        # Start monitoring
+        self.check_scan_status()
 
-    def run_scan(self, target_path):
+    def check_scan_status(self):
+        try:
+            # Poll queue
+            while True:
+                msg_type, data = self.scan_queue.get_nowait()
+                if msg_type == 'progress':
+                    self.status_label.configure(text=data)
+                elif msg_type == 'done':
+                    self.display_results(data)
+                    return # Stop polling
+        except:
+            pass # Queue empty
+        
+        self.after(100, self.check_scan_status)
+
+    def run_scan_thread(self, target_path, q):
         import time
         target_path = os.path.abspath(target_path).lower()
         found_locks = []
@@ -149,15 +170,13 @@ class LocksmithApp(ctk.CTk, TkinterDnD.DnDWrapper):
             if pid in skip_pids:
                 continue
 
-            # Yield to UI thread to prevent lag
-            if i % 10 == 0: 
-                time.sleep(0.01)
-                progress_text = f"Scanning process {i}/{total}..."
-                self.after(0, lambda t=progress_text: self.status_label.configure(text=t))
+            # Update progress fewer times to avoid queue spam
+            if i % 20 == 0: 
+                q.put(('progress', f"Scanning process {i}/{total}..."))
+                # minimal sleep just to be safe on CPU
+                time.sleep(0.001)
 
             try:
-                # Fast check using process_iter is preferred usually, but we have PIDs.
-                # Constructing Process object is cheap.
                 try:
                     proc = psutil.Process(pid)
                 except (psutil.NoSuchProcess, psutil.AccessDenied):
@@ -169,8 +188,6 @@ class LocksmithApp(ctk.CTk, TkinterDnD.DnDWrapper):
                 except:
                     name = "???"
 
-                # Basic optimization: if process started before our boot time? No.
-                
                 # Check CWD (Fast)
                 matched_file = None
                 try:
@@ -183,7 +200,6 @@ class LocksmithApp(ctk.CTk, TkinterDnD.DnDWrapper):
                 # Check Open Files (Slow) - Only if not already found
                 if not matched_file:
                     try:
-                        # Attempt to filter? No obvious way.
                         open_files = proc.open_files()
                         for f in open_files:
                             if self.is_subpath(f.path, target_path):
@@ -193,14 +209,12 @@ class LocksmithApp(ctk.CTk, TkinterDnD.DnDWrapper):
                         pass
                 
                 if matched_file:
-                     # Fetch full info for UI
                     found_locks.append((proc, matched_file))
 
             except Exception:
                 continue
 
-        # Update UI on main thread with final results
-        self.after(0, lambda: self.display_results(found_locks))
+        q.put(('done', found_locks))
 
     def is_subpath(self, path, target):
         path = os.path.abspath(path).lower()
