@@ -44,14 +44,11 @@ class ClipboardManager(ctk.CTk):
                                        font=ctk.CTkFont(size=14, weight="bold"))
         self.mode_switch.grid(row=0, column=0, sticky="w", padx=10, pady=(0, 20))
 
-        # Items per Group
+        # Items per Group (Changed to Entry)
         ctk.CTkLabel(self.settings_frame, text="Items per Group").grid(row=1, column=0, sticky="w", padx=10)
-        self.group_size_slider = ctk.CTkSlider(self.settings_frame, from_=2, to=10, number_of_steps=8)
-        self.group_size_slider.set(2)
-        self.group_size_slider.grid(row=2, column=0, sticky="ew", padx=10, pady=(0, 5))
-        self.group_size_value = ctk.CTkLabel(self.settings_frame, text="2", font=ctk.CTkFont(weight="bold"))
-        self.group_size_value.grid(row=2, column=0, sticky="e", padx=15)
-        self.group_size_slider.configure(command=self.update_slider_labels)
+        self.group_size_entry = ctk.CTkEntry(self.settings_frame, width=200)
+        self.group_size_entry.insert(0, "2")
+        self.group_size_entry.grid(row=2, column=0, sticky="w", padx=10, pady=(0, 5))
 
         # Pattern Template
         ctk.CTkLabel(self.settings_frame, text="Template Pattern ({1}, {2}...)").grid(row=5, column=0, sticky="w", padx=10, pady=(10, 0))
@@ -82,9 +79,13 @@ class ClipboardManager(ctk.CTk):
         self.btns_frame.grid(row=4, column=0, sticky="ew")
         self.btns_frame.grid_columnconfigure((0,1), weight=1)
 
+        self.copy_output_btn = ctk.CTkButton(self.btns_frame, text="Copy Output", command=self.manual_copy_output, 
+                                     fg_color="#2ecc71", hover_color="#27ae60", height=30)
+        self.copy_output_btn.pack(side="top", fill="x", padx=20, pady=(5, 5))
+
         self.clear_buffer_btn = ctk.CTkButton(self.btns_frame, text="Reset & Clear", command=self.reset_session, 
                                      fg_color="#e74c3c", hover_color="#c0392b", height=30)
-        self.clear_buffer_btn.pack(side="top", fill="x", padx=20, pady=5)
+        self.clear_buffer_btn.pack(side="top", fill="x", padx=20, pady=(0, 5))
         
         ctk.CTkButton(self.sidebar_frame, text="Clear History", command=self.clear_history, fg_color="transparent", border_width=1, border_color="gray50", text_color="gray80", hover_color="#333333").grid(row=9, column=0, padx=20, pady=10, sticky="s")
 
@@ -114,8 +115,12 @@ class ClipboardManager(ctk.CTk):
         self.is_running = False
         self.destroy()
 
-    def update_slider_labels(self, value=None):
-        self.group_size_value.configure(text=str(int(self.group_size_slider.get())))
+    def get_group_size(self):
+        try:
+            val = int(self.group_size_entry.get())
+            return max(1, val)
+        except ValueError:
+            return 2 # Default fallback
 
     def toggle_mode(self):
         if self.auto_mode_var.get():
@@ -136,13 +141,17 @@ class ClipboardManager(ctk.CTk):
         for widget in self.scrollable_frame.winfo_children():
             widget.destroy()
 
+    def manual_copy_output(self):
+        if self.accumulated_text:
+            self.copy_to_clip(self.accumulated_text)
+
     def update_status_display(self):
         # Update Buffer Buffer Label
         if not self.pattern_buffer:
             self.buffer_text.configure(text="Buffer: Empty (Waiting for copy...)" if self.auto_mode_var.get() else "Buffer: Inactive")
         else:
             current_count = len(self.pattern_buffer)
-            total_needed = int(self.group_size_slider.get())
+            total_needed = self.get_group_size()
             self.buffer_text.configure(text=f"Buffer: {current_count}/{total_needed} items ready")
 
         # Update Result Textbox
@@ -183,7 +192,7 @@ class ClipboardManager(ctk.CTk):
     def handle_auto_mode(self, clip):
         self.pattern_buffer.append(clip)
         
-        required_size = int(self.group_size_slider.get())
+        required_size = self.get_group_size()
         if len(self.pattern_buffer) >= required_size:
             self.create_pattern_and_paste()
         else:
