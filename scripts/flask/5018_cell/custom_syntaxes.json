@@ -16,9 +16,9 @@
     "marker": "%%"
   },
   {
-    "bgColor": "#FF8080",
-    "fgColor": "#212529",
-    "isBold": false,
+    "bgColor": "#FF1A1A",
+    "fgColor": "#FFFFFF",
+    "isBold": true,
     "isItalic": false,
     "isUnderline": false,
     "marker": "\u00bf\u00bf"
