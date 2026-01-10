@@ -13,6 +13,9 @@ Persistent
 #Include "C:\Users\nahid\ms\ms1\scripts\Autohtokey\gemini_helper.ahk"
 ; #Include "C:\Users\nahid\ms\ms1\scripts\Autohtokey\recordKey.ahk"
 
+;! Explorer Tab Manager
+SetTimer(ManageExplorerTabs, 200)
+
 ;! v1 startups
 ; Run("C:\Users\nahid\ms\ms1\scripts\ahk\old\shadowFight3.ahk")
 ; Run("control.exe folders")
@@ -130,6 +133,92 @@ return
 } ; V1toV2: Added bracket in the end
 
 
+;! Explorer Tab Manager Function
+ManageExplorerTabs() {
+    static knownExplorers := Map()
+    
+    ; Get current explorer windows
+    currentExplorers := WinGetList("ahk_class CabinetWClass")
+    
+    ; Check for new windows
+    for hWnd in currentExplorers {
+        if (!knownExplorers.Has(hWnd)) {
+            ; This is a new window
+            
+            ; Check if we have other 'valid' explorer windows open
+            targetHWnd := 0
+            
+            for knownhWnd, _ in knownExplorers {
+                if WinExist(knownhWnd) {
+                     ; Found a target, make sure it's not the same window just in case (though Has check prevents that)
+                    targetHWnd := knownhWnd
+                    break 
+                }
+            }
+            
+            if (targetHWnd) {
+                ; Merge logic
+                try {
+                    ; Get path
+                    path := ""
+                    sh := ComObject("Shell.Application")
+                    for window in sh.Windows {
+                        try {
+                            if (window.hwnd = hWnd) {
+                                path := window.Document.Folder.Self.Path
+                                break
+                            }
+                        }
+                    }
+                    
+                    if (path != "") {
+                        ; Close the new isolated window
+                        WinClose(hWnd)
+                        
+                        ; Activate the existing window
+                        WinActivate(targetHWnd)
+                        if WinWaitActive(targetHWnd,, 1) {
+                            ; Open New Tab
+                            Send("^t") 
+                            Sleep(150)
+                            ; Focus Address Bar and Navigate
+                            Send("!d") 
+                            Sleep(50)
+                            SendText(path)
+                            Sleep(50)
+                            Send("{Enter}")
+                            ; Optional: Move focus back
+                            Send("{Esc}") 
+                        }
+                        
+                        ; Mark as known so we don't process again if close failed
+                        knownExplorers[hWnd] := true 
+                    } else {
+                        ; Could not get path, let it be
+                        knownExplorers[hWnd] := true 
+                    }
+                } catch {
+                     knownExplorers[hWnd] := true 
+                }
+            } else {
+                ; First window, just track it
+                knownExplorers[hWnd] := true
+            }
+        }
+    }
+    
+    ; Cleanup closed windows from known list
+    listToDelete := []
+    for hWnd, _ in knownExplorers {
+        if (!WinExist(hWnd))
+            listToDelete.Push(hWnd)
+    }
+    for hWnd in listToDelete {
+        knownExplorers.Delete(hWnd)
+    }
+}
+
+
 
 
 
@@ -141,19 +230,19 @@ return
 ; {
 ;     global ; Declare global scope for variables
 ;     i := 1 ; Initialize the variable if not already set
-
+ 
 ;     ; Get the process ID of the active window
 ;     PID := WinGetPID("A")
-
+ 
 ;     ; Set process priority based on the value of 'i'
 ;     ProcessSetPriority(((i = 1) ? "L" : ((i = 2) ? "N" : "H")), PID)
-
+ 
 ;     ; Update 'i' for the next use, cycling through 1, 2, and 3
 ;     i := (i > 2) ? 1 : i + 1
 ; }
-
-
-
+ 
+ 
+ 
 ; ; Detect when the right mouse button is pressed down
 ; RButton::
 ; {
@@ -163,9 +252,9 @@ return
 ;         Sleep(50) ; Adjust the delay for how fast 'j' is sent
 ;     }
 ; }
-
-
-
+ 
+ 
+ 
 ; Persistent
 ; SetTitleMatchMode(2) ; Allow partial matching of window titles
 ; ; Allow the right mouse button to work normally in other apps
@@ -181,4 +270,3 @@ return
 ;     }
 ;     return
 ; }
-
