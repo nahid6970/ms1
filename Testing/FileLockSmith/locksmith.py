@@ -46,14 +46,21 @@ class ProcessItem(ctk.CTkFrame):
     def terminate_process(self):
         self.kill_callback(self.proc, self)
 
-class LocksmithApp(ctk.CTk):
+from tkinterdnd2 import DND_FILES, TkinterDnD
+
+class LocksmithApp(ctk.CTk, TkinterDnD.DnDWrapper):
     def __init__(self):
         super().__init__()
+        self.TkdndVersion = TkinterDnD._require(self)
 
         self.title("PyLocksmith - File Lock Manager")
         self.geometry("700x600")
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(2, weight=1)
+
+        # Enable Drag and Drop
+        self.drop_target_register(DND_FILES)
+        self.dnd_bind('<<Drop>>', self.drop_data)
 
         # Header
         self.header_frame = ctk.CTkFrame(self, fg_color="transparent")
@@ -69,7 +76,7 @@ class LocksmithApp(ctk.CTk):
         self.search_frame = ctk.CTkFrame(self, fg_color="#1f1f1f", corner_radius=15)
         self.search_frame.grid(row=1, column=0, padx=20, pady=10, sticky="ew")
 
-        self.path_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Select a folder or file to inspect...", height=40, border_width=0, fg_color="#333333")
+        self.path_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Drag folder here or use Browse...", height=40, border_width=0, fg_color="#333333")
         self.path_entry.pack(side="left", fill="x", expand=True, padx=(15, 10), pady=10)
         
         self.btn_browse = ctk.CTkButton(self.search_frame, text="Browse", width=80, command=self.browse_path, fg_color="#3a7ebf", hover_color="#27629f")
@@ -85,6 +92,14 @@ class LocksmithApp(ctk.CTk):
         # Results Area
         self.results_scroll = ctk.CTkScrollableFrame(self, fg_color="transparent")
         self.results_scroll.grid(row=2, column=0, padx=20, pady=10, sticky="nsew")
+
+    def drop_data(self, event):
+        data = event.data
+        if data.startswith('{') and data.endswith('}'):
+            data = data[1:-1]
+        self.path_entry.delete(0, "end")
+        self.path_entry.insert(0, data)
+        self.start_scan()
 
     def is_admin(self):
         try:
@@ -119,42 +134,72 @@ class LocksmithApp(ctk.CTk):
         threading.Thread(target=self.run_scan, args=(target_path,), daemon=True).start()
 
     def run_scan(self, target_path):
+        import time
         target_path = os.path.abspath(target_path).lower()
         found_locks = []
+        
+        # Get all PIDs first to have a total count
+        all_pids = list(psutil.pids())
+        total = len(all_pids)
+        
+        # Common system PIDs to skip (System Idle, System)
+        skip_pids = {0, 4}
 
-        for proc in psutil.process_iter(['pid', 'name', 'username']):
-            try:
-                # Check open files
-                try:
-                    open_files = proc.open_files()
-                except (psutil.AccessDenied, psutil.NoSuchProcess):
-                    open_files = []
-                
-                # Check CWD
-                try:
-                    cwd = proc.cwd()
-                except (psutil.AccessDenied, psutil.NoSuchProcess):
-                    cwd = ""
-
-                # Analyze
-                matched_file = None
-                
-                if cwd and self.is_subpath(cwd, target_path):
-                    matched_file = cwd + " (Working Directory)"
-                
-                if not matched_file:
-                    for f in open_files:
-                        if self.is_subpath(f.path, target_path):
-                            matched_file = f.path
-                            break
-                
-                if matched_file:
-                    found_locks.append((proc, matched_file))
-
-            except (psutil.NoSuchProcess, psutil.AccessDenied):
+        for i, pid in enumerate(all_pids):
+            if pid in skip_pids:
                 continue
 
-        # Update UI on main thread
+            # Yield to UI thread to prevent lag
+            if i % 10 == 0: 
+                time.sleep(0.01)
+                progress_text = f"Scanning process {i}/{total}..."
+                self.after(0, lambda t=progress_text: self.status_label.configure(text=t))
+
+            try:
+                # Fast check using process_iter is preferred usually, but we have PIDs.
+                # Constructing Process object is cheap.
+                try:
+                    proc = psutil.Process(pid)
+                except (psutil.NoSuchProcess, psutil.AccessDenied):
+                    continue
+                
+                # Check attributes lightweight first
+                try:
+                    name = proc.name()
+                except:
+                    name = "???"
+
+                # Basic optimization: if process started before our boot time? No.
+                
+                # Check CWD (Fast)
+                matched_file = None
+                try:
+                    cwd = proc.cwd()
+                    if cwd and self.is_subpath(cwd, target_path):
+                        matched_file = cwd + " (Working Directory)"
+                except (psutil.AccessDenied, psutil.NoSuchProcess):
+                    pass
+
+                # Check Open Files (Slow) - Only if not already found
+                if not matched_file:
+                    try:
+                        # Attempt to filter? No obvious way.
+                        open_files = proc.open_files()
+                        for f in open_files:
+                            if self.is_subpath(f.path, target_path):
+                                matched_file = f.path
+                                break
+                    except (psutil.AccessDenied, psutil.NoSuchProcess):
+                        pass
+                
+                if matched_file:
+                     # Fetch full info for UI
+                    found_locks.append((proc, matched_file))
+
+            except Exception:
+                continue
+
+        # Update UI on main thread with final results
         self.after(0, lambda: self.display_results(found_locks))
 
     def is_subpath(self, path, target):
