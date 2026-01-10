@@ -7,9 +7,9 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                              QHBoxLayout, QLabel, QPushButton, QLineEdit, 
                              QScrollArea, QFrame, QMessageBox, QDialog, 
                              QComboBox, QFileDialog, QSplitter, QGraphicsEffect,
-                             QGraphicsDropShadowEffect)
+                             QGraphicsDropShadowEffect, QMenu)
 from PyQt6.QtCore import Qt, QSize, QTimer, pyqtSignal, QPropertyAnimation, QEasingCurve
-from PyQt6.QtGui import QFont, QColor, QPalette, QCursor, QPainter, QPen
+from PyQt6.QtGui import QFont, QColor, QPalette, QCursor, QPainter, QPen, QAction
 
 # Constants
 JSON_FILE = os.path.join(os.path.dirname(__file__), "startup_items.json")
@@ -98,6 +98,9 @@ class StartupItemWidget(QFrame):
         # Determine border color based on activity
         self.border_color = CP_YELLOW if self.is_active else CP_DIM
         
+        self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.customContextMenuRequested.connect(self.show_context_menu)
+        
         self.setup_ui()
         self.update_style()
 
@@ -112,8 +115,7 @@ class StartupItemWidget(QFrame):
         self.status_lbl.setFixedWidth(40)
         self.status_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.status_lbl.setCursor(Qt.CursorShape.PointingHandCursor)
-        # Make the label clickable by filtering events or wrapping in button
-        # Simpler: Transparent button over it or just use a button
+        
         self.status_btn = QPushButton(self.status_lbl.text())
         self.status_btn.setFixedSize(45, 25)
         self.status_btn.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -137,50 +139,46 @@ class StartupItemWidget(QFrame):
         path_label = QLabel(full_detail)
         path_label.setFont(QFont("Consolas", 8))
         path_label.setStyleSheet(f"color: {CP_SUBTEXT};")
-        path_label.setWordWrap(False) # Don't wrap, let it clip with ellipsis if needed or rely on scroll
-        # Actually standard QLabel doesn't auto-ellipsis easily without custom paint, 
-        # so we'll rely on the layout handling.
+        path_label.setWordWrap(False) 
         
         info_layout.addWidget(name_label)
         info_layout.addWidget(path_label)
         layout.addLayout(info_layout, stretch=1)
-
-        # Actions (Icon-ish text buttons)
-        btns_layout = QHBoxLayout()
-        btns_layout.setSpacing(2)
         
-        self.launch_btn = self.create_action_btn("RUN", CP_CYAN)
-        self.launch_btn.clicked.connect(lambda: self.launched.emit(self.item))
-        
-        self.edit_btn = self.create_action_btn("EDIT", CP_TEXT)
-        self.edit_btn.clicked.connect(lambda: self.edited.emit(self.item))
-        
-        self.del_btn = self.create_action_btn("DEL", CP_RED)
-        self.del_btn.clicked.connect(lambda: self.deleted.emit(self.item))
-
-        layout.addWidget(self.launch_btn)
-        layout.addWidget(self.edit_btn)
-        layout.addWidget(self.del_btn)
-
-    def create_action_btn(self, text, hover_color):
-        btn = QPushButton(text)
-        btn.setFixedSize(40, 25)
-        btn.setFont(QFont("Consolas", 7, QFont.Weight.Bold))
-        btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn.setStyleSheet(f"""
-            QPushButton {{
-                background-color: transparent;
-                color: {CP_SUBTEXT};
-                border: 1px solid {CP_DIM};
-                border-radius: 0px;
+    def show_context_menu(self, pos):
+        menu = QMenu(self)
+        menu.setFont(QFont("Consolas", 9))
+        menu.setStyleSheet(f"""
+            QMenu {{
+                background-color: {CP_BG};
+                color: {CP_TEXT};
+                border: 1px solid {CP_CYAN};
             }}
-            QPushButton:hover {{
+            QMenu::item {{
+                padding: 6px 25px;
+                background-color: transparent;
+            }}
+            QMenu::item:selected {{
+                background-color: {CP_CYAN};
                 color: {CP_BG};
-                background-color: {hover_color};
-                border: 1px solid {hover_color};
             }}
         """)
-        return btn
+        
+        launch_action = QAction("EXECUTE PROTOCOL", self)
+        launch_action.triggered.connect(lambda: self.launched.emit(self.item))
+        menu.addAction(launch_action)
+        
+        edit_action = QAction("EDIT CONFIG", self)
+        edit_action.triggered.connect(lambda: self.edited.emit(self.item))
+        menu.addAction(edit_action)
+        
+        menu.addSeparator()
+        
+        delete_action = QAction("PURGE ENTRY", self)
+        delete_action.triggered.connect(lambda: self.deleted.emit(self.item))
+        menu.addAction(delete_action)
+        
+        menu.exec(self.mapToGlobal(pos))
 
     def update_style(self):
         color = CP_YELLOW if self.is_active else CP_DIM
@@ -489,7 +487,6 @@ class MainWindow(QMainWindow):
             else:
                 self.app_container.addWidget(widget)
 
-    # ... reused logic ...
     def check_registry(self, item):
         try:
             with winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run", 0, winreg.KEY_READ) as reg_key:
@@ -562,7 +559,6 @@ class MainWindow(QMainWindow):
 
     def scan_folders(self):
         self.update_status("SCANNING DIRECTORIES...")
-        # (Simplified scan logic for brevity, reused from before but condensed)
         start_folders = [
             os.path.expandvars(r"%ProgramData%\Microsoft\Windows\Start Menu\Programs\Startup"),
             os.path.expandvars(r"%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup")
@@ -590,8 +586,23 @@ class MainWindow(QMainWindow):
             self.update_status("SCAN RESULT: NO NEW ENTRIES")
 
     def delete_matching_shortcuts(self):
-         # ... existing logic ...
-         self.update_status("PRUNE CHECK COMPLETE")
+         start_folders = [
+            os.path.expandvars(r"%ProgramData%\Microsoft\Windows\Start Menu\Programs\Startup"),
+            os.path.expandvars(r"%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup")
+        ]
+         deleted = 0
+         names = {i["name"].lower() for i in self.items}
+         for d in start_folders:
+             if os.path.exists(d):
+                 for f in os.listdir(d):
+                     if f.lower().endswith('.lnk'):
+                         name = os.path.splitext(f)[0]
+                         if name.lower() in names:
+                             try:
+                                 os.remove(os.path.join(d, f))
+                                 deleted += 1
+                             except: pass
+         self.update_status(f"PRUNE: {deleted} SHORTCUTS ELIMINATED")
 
     def filter_items(self, text):
         text = text.lower()
