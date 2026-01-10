@@ -291,6 +291,14 @@ class CompactClipboardApp(ctk.CTk):
                 curr_clip = pyperclip.paste()
                 if curr_clip != self.last_clip and curr_clip.strip() != "":
                     
+                    # If Auto Mode is OFF, we stop here.
+                    # We update last_clip to ensure we don't process this clip later when mode is turned ON.
+                    # But we do NOT save to history/JSON or process patterns.
+                    if not self.auto_mode_var.get():
+                        self.last_clip = curr_clip
+                        time.sleep(0.5)
+                        continue
+                    
                     if self.ignore_next == curr_clip:
                         self.last_clip = curr_clip
                         self.ignore_next = None
@@ -307,8 +315,7 @@ class CompactClipboardApp(ctk.CTk):
                     if len(self.clipboard_history) > 50: self.clipboard_history.pop()
                     self.save_history()
 
-                    if self.auto_mode_var.get():
-                        self.handle_auto_mode(curr_clip)
+                    self.handle_auto_mode(curr_clip)
                         
             except: pass
             time.sleep(0.5)
