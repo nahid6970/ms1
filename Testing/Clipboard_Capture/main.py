@@ -10,64 +10,30 @@ from PIL import Image, ImageDraw
 import pystray # pip install pystray
 
 HISTORY_FILE = "clipboard_history.json"
-
-class SettingsWindow(ctk.CTkToplevel):
-    def __init__(self, parent):
-        super().__init__(parent)
-        self.parent = parent
-        self.title("Settings")
-        self.geometry("350x250")
-        self.resizable(False, False)
-        self.attributes('-topmost', True) # Keep settings on top too
-        
-        # Auto Mode Switch
-        self.mode_switch = ctk.CTkSwitch(self, text="Auto-Pattern Mode", 
-                                       variable=parent.auto_mode_var, command=parent.toggle_mode,
-                                       font=ctk.CTkFont(size=14, weight="bold"))
-        self.mode_switch.pack(pady=20, padx=20, anchor="w")
-
-        # Template
-        ctk.CTkLabel(self, text="Pattern Template ({1}, {2}...)").pack(pady=(10, 5), padx=20, anchor="w")
-        self.template_entry = ctk.CTkEntry(self, width=300)
-        self.template_entry.insert(0, parent.pattern_template)
-        self.template_entry.pack(pady=5, padx=20)
-        self.template_entry.bind("<KeyRelease>", self.on_template_change)
-
-        # Dynamic Info
-        self.group_info = ctk.CTkLabel(self, text=f"Detected Group Size: {parent.get_group_size()}", text_color="gray70")
-        self.group_info.pack(pady=5, padx=20, anchor="w")
-        
-        ctk.CTkLabel(self, text="* Close to save settings", font=("Arial", 10), text_color="gray50").pack(side="bottom", pady=10)
-
-    def on_template_change(self, event):
-        self.parent.pattern_template = self.template_entry.get()
-        size = self.parent.get_group_size()
-        self.group_info.configure(text=f"Detected Group Size: {size}")
-        self.parent.update_status()
+SETTINGS_FILE = "settings.json"
 
 class CompactClipboardApp(ctk.CTk):
     def __init__(self):
         super().__init__()
 
         self.title("SmartClip")
-        self.geometry("320x450")
+        self.geometry("320x500") 
         self.resizable(False, True)
         ctk.set_appearance_mode("dark")
-        # Start hidden? Usually tray apps do. But user said "launch from tray", maybe they want to see it first.
-        # I'll let it show on start.
         
         # Data & State
         self.clipboard_history = []
         self.pattern_buffer = [] 
         self.accumulated_text = ""
         self.last_clip = ""
-        self.auto_mode_var = ctk.BooleanVar(value=True) # Default On? Or Off. Let's start Off.
+        self.auto_mode_var = ctk.BooleanVar(value=True) 
         self.pattern_template = "{1} -> **{2}**"
         self.ignore_next = None
         self.is_running = True
 
-        # Load Data
+        # Load Data & Settings
         self.load_history()
+        self.load_settings()
         
         try:
             self.last_clip = pyperclip.paste()
@@ -76,27 +42,45 @@ class CompactClipboardApp(ctk.CTk):
 
         # --- UI Construction ---
         self.grid_columnconfigure(0, weight=1)
-        self.grid_rowconfigure(1, weight=1)
+        self.grid_rowconfigure(3, weight=1)
 
-        # 1. Top Bar (Status)
-        self.top_frame = ctk.CTkFrame(self, height=40, fg_color="transparent")
-        self.top_frame.grid(row=0, column=0, sticky="ew", padx=10, pady=(10, 5))
+        # 1. Settings Area (Header)
+        self.settings_frame = ctk.CTkFrame(self, fg_color="transparent")
+        self.settings_frame.grid(row=0, column=0, sticky="ew", padx=15, pady=(15, 5))
+        self.settings_frame.grid_columnconfigure(0, weight=1)
         
-        self.status_label = ctk.CTkLabel(self.top_frame, text="Ready", font=ctk.CTkFont(size=14, weight="bold"), text_color="gray")
+        self.mode_switch = ctk.CTkSwitch(self.settings_frame, text="Auto-Pattern Mode", 
+                                       variable=self.auto_mode_var, command=self.toggle_mode,
+                                       font=ctk.CTkFont(size=14, weight="bold"))
+        self.mode_switch.grid(row=0, column=0, sticky="w", pady=(0, 10))
+
+        self.template_entry = ctk.CTkEntry(self.settings_frame, placeholder_text="Pattern: {1} -> {2}")
+        self.template_entry.insert(0, self.pattern_template)
+        self.template_entry.grid(row=1, column=0, sticky="ew", pady=(0, 2))
+        self.template_entry.bind("<KeyRelease>", self.on_template_change)
+        
+        self.template_hint = ctk.CTkLabel(self.settings_frame, text="Format: {1}, {2} etc.", text_color="gray50", font=("Arial", 10))
+        self.template_hint.grid(row=2, column=0, sticky="w", padx=2)
+
+        # 2. Status Info Row
+        self.info_frame = ctk.CTkFrame(self, height=25, fg_color="transparent")
+        self.info_frame.grid(row=1, column=0, sticky="ew", padx=15, pady=(5, 5))
+        
+        self.status_label = ctk.CTkLabel(self.info_frame, text="Ready", font=("Arial", 11, "bold"), text_color="#2ecc71")
         self.status_label.pack(side="left")
         
-        self.settings_btn = ctk.CTkButton(self.top_frame, text="⚙", width=30, height=30, command=self.open_settings)
-        self.settings_btn.pack(side="right")
+        self.group_info_label = ctk.CTkLabel(self.info_frame, text="Group Size: 2", font=("Arial", 11), text_color="gray70")
+        self.group_info_label.pack(side="right")
 
-        # 2. Main Content (Output Preview)
+        # 3. Preview Box
         self.preview_box = ctk.CTkTextbox(self, font=("Consolas", 12), fg_color="#1f1f1f", text_color="#2ecc71")
-        self.preview_box.grid(row=1, column=0, sticky="nsew", padx=10, pady=5)
+        self.preview_box.grid(row=3, column=0, sticky="nsew", padx=10, pady=5)
         self.preview_box.insert("0.0", "Accumulated pattern will appear here...")
         self.preview_box.configure(state="disabled")
 
-        # 3. Action Buttons
+        # 4. Action Buttons
         self.btn_frame = ctk.CTkFrame(self, fg_color="transparent")
-        self.btn_frame.grid(row=2, column=0, sticky="ew", padx=10, pady=10)
+        self.btn_frame.grid(row=4, column=0, sticky="ew", padx=10, pady=10)
         self.btn_frame.grid_columnconfigure((0,1), weight=1)
 
         self.btn_copy = ctk.CTkButton(self.btn_frame, text="Copy Output", command=self.manual_copy, fg_color="#2ecc71", hover_color="#27ae60")
@@ -119,13 +103,11 @@ class CompactClipboardApp(ctk.CTk):
         self.tray_thread = threading.Thread(target=self.setup_tray, daemon=True)
         self.tray_thread.start()
         
+        # Initial UI Update
         self.update_status()
-        
-        # Ensure initial position is correct too
         self.after(100, self._show_window_safe)
 
     def create_image(self):
-        # Generate a simple icon
         width = 64
         height = 64
         color1 = "#2ecc71"
@@ -137,7 +119,6 @@ class CompactClipboardApp(ctk.CTk):
         return image
 
     def setup_tray(self):
-        # default=True makes the "Show" item trigger on left-click
         menu = pystray.Menu(
             pystray.MenuItem("Show", self.show_window, default=True),
             pystray.MenuItem("Exit", self.quit_app)
@@ -147,7 +128,6 @@ class CompactClipboardApp(ctk.CTk):
         icon.run()
 
     def show_window(self, icon=None, item=None):
-        # Triggers UI update from the tray thread, so schedule it on main thread
         self.after(0, self._show_window_safe)
 
     def _show_window_safe(self):
@@ -155,7 +135,7 @@ class CompactClipboardApp(ctk.CTk):
         self.update_idletasks()
         try:
             self.lift()
-            self.attributes('-topmost', True) # Keep on top
+            self.attributes('-topmost', True)
             self.focus_force()
         except: pass
         
@@ -163,9 +143,8 @@ class CompactClipboardApp(ctk.CTk):
             screen_w = self.winfo_screenwidth()
             screen_h = self.winfo_screenheight()
             win_w = 320
-            win_h = 450
+            win_h = 500
             
-            # Position: Right side, Vertically centered
             x_pos = screen_w - win_w - 20
             y_pos = (screen_h - win_h) // 2
             
@@ -177,24 +156,27 @@ class CompactClipboardApp(ctk.CTk):
 
     def quit_app(self, icon=None, item=None):
         self.is_running = False
+        self.save_settings() # Save on exit
         try:
             self.tray_icon.stop()
         except: pass
-        # Clean exit on main thread
         self.after(0, self._quit_safe)
 
     def _quit_safe(self):
         self.quit()
         self.destroy()
 
-    def open_settings(self):
-        SettingsWindow(self)
-
     # --- Logic ---
+
+    def on_template_change(self, event):
+        self.pattern_template = self.template_entry.get()
+        self.update_status() 
+        self.save_settings() # Save on change
 
     def toggle_mode(self):
         self.reset_session()
         self.update_status()
+        self.save_settings() # Save on toggle
 
     def get_group_size(self):
         matches = re.findall(r'\{(\d+)\}', self.pattern_template)
@@ -203,13 +185,17 @@ class CompactClipboardApp(ctk.CTk):
         return 1
 
     def update_status(self):
-        # Header Status
+        req = self.get_group_size()
+        
+        # Update Group Info Label
+        self.group_info_label.configure(text=f"Size: {req}")
+
+        # Update Main Status
         if self.auto_mode_var.get():
-            req = self.get_group_size()
             curr = len(self.pattern_buffer)
-            self.status_label.configure(text=f"Active: {curr}/{req} in buffer", text_color="#2ecc71")
+            self.status_label.configure(text=f"Active: {curr}/{req}", text_color="#2ecc71")
         else:
-            self.status_label.configure(text="Auto-Mode: OFF", text_color="gray")
+            self.status_label.configure(text="Auto: OFF", text_color="gray")
         
         # Textbox
         self.preview_box.configure(state="normal")
@@ -232,7 +218,6 @@ class CompactClipboardApp(ctk.CTk):
     def clear_history(self):
         self.clipboard_history.clear()
         self.save_history()
-        # Update last_clip to current system clipboard so we don't re-import it immediately
         try:
             self.last_clip = pyperclip.paste()
         except: pass
@@ -255,6 +240,25 @@ class CompactClipboardApp(ctk.CTk):
                 json.dump(self.clipboard_history, f, indent=4)
         except: pass
 
+    def load_settings(self):
+        if os.path.exists(SETTINGS_FILE):
+            try:
+                with open(SETTINGS_FILE, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                    self.pattern_template = data.get("template", "{1} -> **{2}**")
+                    self.auto_mode_var.set(data.get("auto_mode", True))
+            except: pass
+
+    def save_settings(self):
+        data = {
+            "template": self.pattern_template,
+            "auto_mode": self.auto_mode_var.get()
+        }
+        try:
+            with open(SETTINGS_FILE, "w", encoding="utf-8") as f:
+                json.dump(data, f, indent=4)
+        except: pass
+
     # --- Monitor ---
     def monitor_clipboard(self):
         while self.is_running:
@@ -268,7 +272,6 @@ class CompactClipboardApp(ctk.CTk):
                         time.sleep(0.5)
                         continue
                     
-                    # Dedupe vs history[0]
                     if self.clipboard_history and self.clipboard_history[0] == curr_clip:
                         self.last_clip = curr_clip 
                         time.sleep(0.5)
