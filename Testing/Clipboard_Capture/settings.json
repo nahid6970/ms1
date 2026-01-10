@@ -1,4 +1,4 @@
 {
-    "template": "{1} -> **{2}** __{3}__",
+    "template": "{1} -> **{2}**",
     "auto_mode": true
 }
