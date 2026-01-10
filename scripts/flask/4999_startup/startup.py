@@ -377,6 +377,9 @@ class MainWindow(QMainWindow):
         toolbar_layout.addWidget(CyberButton("PRUNE_LNK", color=CP_RED, parent=self, is_outlined=True))
         toolbar_layout.itemAt(3).widget().clicked.connect(self.delete_matching_shortcuts) # Del Match
 
+        toolbar_layout.addWidget(CyberButton("OPEN_DIRS", color=CP_YELLOW, parent=self, is_outlined=True))
+        toolbar_layout.itemAt(4).widget().clicked.connect(self.open_startup_dirs)
+
         toolbar_layout.addStretch()
         
         self.search_input = CyberInput("SEARCH_DB://...", self)
@@ -403,6 +406,16 @@ class MainWindow(QMainWindow):
         self.app_container = self.create_column_box("APPLICATION_LAYER", splitter)
         
         main_layout.addWidget(splitter, stretch=1)
+
+    def open_startup_dirs(self):
+        folders = [
+            os.path.expandvars(r"%ProgramData%\Microsoft\Windows\Start Menu\Programs\Startup"),
+            os.path.expandvars(r"%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup")
+        ]
+        for f in folders:
+            if os.path.exists(f):
+                os.startfile(f)
+        self.update_status("DIRECTORIES ACCESSED")
 
     def create_column_box(self, title, splitter):
         wrapper = QWidget()
@@ -557,33 +570,67 @@ class MainWindow(QMainWindow):
         self.load_items()
         self.update_status("RELOAD COMPLETE")
 
+    def resolve_shortcut(self, path):
+        try:
+            cmd = f"powershell -NoProfile -Command \"(New-Object -ComObject WScript.Shell).CreateShortcut('{path}').TargetPath\""
+            startupinfo = subprocess.STARTUPINFO()
+            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+            process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, text=True, startupinfo=startupinfo)
+            stdout, _ = process.communicate()
+            result = stdout.strip()
+            return result if result else path
+        except:
+            return path
+
     def scan_folders(self):
         self.update_status("SCANNING DIRECTORIES...")
         start_folders = [
             os.path.expandvars(r"%ProgramData%\Microsoft\Windows\Start Menu\Programs\Startup"),
             os.path.expandvars(r"%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup")
         ]
-        found = []
+        found_items = []
         names = {i["name"].lower() for i in self.items}
+        
         for d in start_folders:
             if os.path.exists(d):
                 for f in os.listdir(d):
-                    if f.lower().endswith(('.exe', '.lnk')):
+                    if f.lower().endswith(('.exe', '.lnk', '.bat', '.cmd', '.url')):
                         name = os.path.splitext(f)[0]
-                        if name.lower() not in names:
-                            found.append({
-                                "name": name,
-                                "type": "App",
-                                "paths": [os.path.join(d, f)],
-                                "Command": "", "ExecutableType": "other"
-                            })
-        if found:
-            self.items.extend(found)
-            self.save_items()
-            self.populate_lists()
-            self.update_status(f"SCAN RESULT: {len(found)} NEW ITEMS")
+                        if name.lower() in names: continue
+                            
+                        full_path = os.path.join(d, f)
+                        real_path = full_path
+                        
+                        if f.lower().endswith('.lnk'):
+                            resolved = self.resolve_shortcut(full_path)
+                            if resolved and os.path.exists(resolved):
+                                real_path = resolved
+                        
+                        found_items.append({
+                            "name": name,
+                            "type": "App" if real_path.lower().endswith(".exe") else "Command",
+                            "paths": [real_path],
+                            "Command": "", 
+                            "ExecutableType": "other"
+                        })
+        
+        if found_items:
+            msg = f"FOUND {len(found_items)} NEW ITEMS:\n\n"
+            for item in found_items[:10]:
+                msg += f"• {item['name']} ({item['paths'][0]})\n"
+            if len(found_items) > 10: msg += f"\n...and {len(found_items)-10} more."
+            
+            msg += "\n\nADD THESE ENTRIES TO DATABASE?"
+            
+            if QMessageBox.question(self, "SCAN COMPLETE", msg) == QMessageBox.StandardButton.Yes:
+                self.items.extend(found_items)
+                self.save_items()
+                self.populate_lists()
+                self.update_status(f"IMPORTED {len(found_items)} NEW ENTRIES")
+            else:
+                self.update_status("IMPORT ABORTED")
         else:
-            self.update_status("SCAN RESULT: NO NEW ENTRIES")
+            self.update_status("SCAN COMPLETE: NO NEW ENTRIES")
 
     def delete_matching_shortcuts(self):
          start_folders = [
