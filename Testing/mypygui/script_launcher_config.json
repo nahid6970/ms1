@@ -11,7 +11,7 @@
         "show_github": false,
         "show_rclone": false,
         "show_system_stats": true,
-        "always_on_top": false
+        "always_on_top": true
     },
     "scripts": [
         {
