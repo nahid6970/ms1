@@ -3,7 +3,11 @@ import pyperclip
 import threading
 import time
 import re
+import json
+import os
 from datetime import datetime
+
+HISTORY_FILE = "clipboard_history.json"
 
 class ClipboardManager(ctk.CTk):
     def __init__(self):
@@ -21,6 +25,15 @@ class ClipboardManager(ctk.CTk):
         self.is_running = True
         self.ignore_next = None 
         
+        # Initialize last_clip with current content to prevent startup duplication
+        try:
+            self.last_clip = pyperclip.paste()
+        except:
+            self.last_clip = ""
+        
+        # Load persisted history
+        self.load_history()
+
         # Grid layout
         self.grid_columnconfigure(1, weight=1)
         self.grid_rowconfigure(0, weight=1)
@@ -117,6 +130,22 @@ class ClipboardManager(ctk.CTk):
         self.is_running = False
         self.destroy()
 
+    def load_history(self):
+        if os.path.exists(HISTORY_FILE):
+            try:
+                with open(HISTORY_FILE, "r", encoding="utf-8") as f:
+                    self.clipboard_history = json.load(f)
+            except Exception as e:
+                print(f"Error loading history: {e}")
+                self.clipboard_history = []
+
+    def save_history(self):
+        try:
+            with open(HISTORY_FILE, "w", encoding="utf-8") as f:
+                json.dump(self.clipboard_history, f, indent=4)
+        except Exception as e:
+            print(f"Error saving history: {e}")
+
     def get_group_size(self):
         # Dynamically calculate based on template
         template = self.template_entry.get()
@@ -147,6 +176,7 @@ class ClipboardManager(ctk.CTk):
 
     def clear_history(self):
         self.clipboard_history.clear()
+        self.save_history()
         self.displayed_history_len = 0
         for widget in self.scrollable_frame.winfo_children():
             widget.destroy()
@@ -174,23 +204,34 @@ class ClipboardManager(ctk.CTk):
         self.result_text.configure(state="disabled")
 
     def monitor_clipboard(self):
-        last_clip = ""
         while self.is_running:
             try:
                 curr_clip = pyperclip.paste()
                 
-                if curr_clip != last_clip and curr_clip.strip() != "":
+                # Check if new content and not empty
+                if curr_clip != self.last_clip and curr_clip.strip() != "":
                     
+                    # Prevent Auto-Pattern loopback
                     if self.ignore_next == curr_clip:
-                        last_clip = curr_clip 
+                        self.last_clip = curr_clip 
                         self.ignore_next = None
                         time.sleep(0.5)
                         continue
+                    
+                    # Double check against the latest history item to prevent visual dupes
+                    # This happens if user clears history but system clipboard logic triggers
+                    if self.clipboard_history and self.clipboard_history[0] == curr_clip:
+                        self.last_clip = curr_clip
+                        time.sleep(0.5)
+                        continue
 
-                    last_clip = curr_clip
+                    self.last_clip = curr_clip
                     self.clipboard_history.insert(0, curr_clip)
                     if len(self.clipboard_history) > 50: 
                         self.clipboard_history.pop()
+                    
+                    # Save persistence
+                    self.save_history()
 
                     if self.auto_mode_var.get():
                         self.handle_auto_mode(curr_clip)
