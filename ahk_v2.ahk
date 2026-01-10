@@ -76,12 +76,44 @@ MergeTab(hNewWnd) {
              }
 
             try {
-                ; Close the newly created window
+                ; Close the newly created window immediately
                 WinClose(hNewWnd)
-
+                
                 ; Activate the target window
                 WinActivate(targetWnd)
-                if WinWaitActive(targetWnd,, 2) {
+                WinWaitActive(targetWnd,, 2)
+
+                ; Check if the path is already open in the target window
+                pathAlreadyOpen := false
+                sh := ComObject("Shell.Application")
+                openPaths := []
+                for window in sh.Windows {
+                    try {
+                        ; Check if this tab belongs to our target window
+                        ; Note: grabbing the HWND of a tab is tricky, but often they share the main window HWND or parent
+                        ; We'll assume if it's in the collection, it's open somewhere. 
+                        ; We strictly want to avoid opening duplicates in the SAME window if possible.
+                        if (window.Document.Folder.Self.Path = newPath) {
+                            pathAlreadyOpen := true
+                            break
+                        }
+                    }
+                }
+
+                if (pathAlreadyOpen) {
+                    ; Attempt to switch to the existing tab
+                    ; Since there is no direct "Activate Tab" API, we cycle Ctrl+Tab until the Window Title matches the folder name
+                    SplitPath(newPath, &folderName)
+                    Loop 20 { ; Max attempts
+                        currentTitle := WinGetTitle(targetWnd)
+                        if (InStr(currentTitle, folderName)) {
+                            break ; Found it (probably)
+                        }
+                        Send("^{Tab}")
+                        Sleep(50)
+                    }
+                } else {
+                    ; Create new tab
                     Send("^t") ; Open new tab
                     Sleep(150) ; Slight delay for tab animation
                     Send("!d") ; Focus address bar
