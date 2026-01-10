@@ -31,6 +31,7 @@ ShellMessage(wParam, lParam, *) {
 }
 
 MergeTab(hNewWnd) {
+    ; Wait for the window to actually exist
     if !WinExist(hNewWnd)
         return
 
@@ -47,20 +48,28 @@ MergeTab(hNewWnd) {
     }
 
     if (targetWnd) {
-        try {
-            ; Get path from the new window
-            newPath := ""
-            sh := ComObject("Shell.Application")
-            for window in sh.Windows {
-                try {
-                    if (window.hwnd == hNewWnd) {
-                        newPath := window.Document.Folder.Self.Path
-                        break
+        newPath := ""
+        
+        ; Retry loop to get the path (sometimes COM object is slow to update)
+        Loop 10 {
+            try {
+                sh := ComObject("Shell.Application")
+                for window in sh.Windows {
+                    try {
+                        if (window.hwnd == hNewWnd) {
+                            newPath := window.Document.Folder.Self.Path
+                            break
+                        }
                     }
                 }
             }
+            if (newPath != "")
+                break
+            Sleep(100) ; Wait 100ms before retrying
+        }
 
-            if (newPath != "") {
+        if (newPath != "") {
+            try {
                 ; Close the newly created window
                 WinClose(hNewWnd)
 
@@ -68,7 +77,7 @@ MergeTab(hNewWnd) {
                 WinActivate(targetWnd)
                 if WinWaitActive(targetWnd,, 2) {
                     Send("^t") ; Open new tab
-                    Sleep(50)
+                    Sleep(150) ; Slight delay for tab animation
                     Send("!d") ; Focus address bar
                     Sleep(50)
                     SendText(newPath)
