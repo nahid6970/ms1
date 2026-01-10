@@ -13,8 +13,72 @@ Persistent
 #Include "C:\Users\nahid\ms\ms1\scripts\Autohtokey\gemini_helper.ahk"
 ; #Include "C:\Users\nahid\ms\ms1\scripts\Autohtokey\recordKey.ahk"
 
-;! Explorer Tab Manager
-SetTimer(ManageExplorerTabs, 200)
+;! Explorer Tabs Hook
+; Register the shell hook to listen for window creation
+DllCall("RegisterShellHookWindow", "Ptr", A_ScriptHwnd)
+msgNum := DllCall("RegisterWindowMessage", "Str", "SHELLHOOK")
+OnMessage(msgNum, ShellMessage)
+
+ShellMessage(wParam, lParam, *) {
+    if (wParam == 1) { ; HSHELL_WINDOWCREATED
+        try {
+            if (WinGetClass(lParam) == "CabinetWClass") {
+                ; Found a new Explorer window, wait briefly to let it initialize and then process
+                SetTimer(MergeTab.Bind(lParam), -100)
+            }
+        }
+    }
+}
+
+MergeTab(hNewWnd) {
+    if !WinExist(hNewWnd)
+        return
+
+    ; Get list of all Explorer windows
+    allExplorers := WinGetList("ahk_class CabinetWClass")
+    targetWnd := 0
+    
+    ; Find an existing explorer window that isn't the new one
+    for hWnd in allExplorers {
+        if (hWnd != hNewWnd) {
+            targetWnd := hWnd
+            break
+        }
+    }
+
+    if (targetWnd) {
+        try {
+            ; Get path from the new window
+            newPath := ""
+            sh := ComObject("Shell.Application")
+            for window in sh.Windows {
+                try {
+                    if (window.hwnd == hNewWnd) {
+                        newPath := window.Document.Folder.Self.Path
+                        break
+                    }
+                }
+            }
+
+            if (newPath != "") {
+                ; Close the newly created window
+                WinClose(hNewWnd)
+
+                ; Activate the target window
+                WinActivate(targetWnd)
+                if WinWaitActive(targetWnd,, 2) {
+                    Send("^t") ; Open new tab
+                    Sleep(50)
+                    Send("!d") ; Focus address bar
+                    Sleep(50)
+                    SendText(newPath)
+                    Sleep(50)
+                    Send("{Enter}")
+                }
+            }
+        }
+    }
+}
 
 ;! v1 startups
 ; Run("C:\Users\nahid\ms\ms1\scripts\ahk\old\shadowFight3.ahk")
@@ -131,92 +195,6 @@ global ; V1toV2: Made function global
     ToolTip()  ; Clear the tooltip
 return
 } ; V1toV2: Added bracket in the end
-
-
-;! Explorer Tab Manager Function
-ManageExplorerTabs() {
-    static knownExplorers := Map()
-    
-    ; Get current explorer windows
-    currentExplorers := WinGetList("ahk_class CabinetWClass")
-    
-    ; Check for new windows
-    for hWnd in currentExplorers {
-        if (!knownExplorers.Has(hWnd)) {
-            ; This is a new window
-            
-            ; Check if we have other 'valid' explorer windows open
-            targetHWnd := 0
-            
-            for knownhWnd, _ in knownExplorers {
-                if WinExist(knownhWnd) {
-                     ; Found a target, make sure it's not the same window just in case (though Has check prevents that)
-                    targetHWnd := knownhWnd
-                    break 
-                }
-            }
-            
-            if (targetHWnd) {
-                ; Merge logic
-                try {
-                    ; Get path
-                    path := ""
-                    sh := ComObject("Shell.Application")
-                    for window in sh.Windows {
-                        try {
-                            if (window.hwnd = hWnd) {
-                                path := window.Document.Folder.Self.Path
-                                break
-                            }
-                        }
-                    }
-                    
-                    if (path != "") {
-                        ; Close the new isolated window
-                        WinClose(hWnd)
-                        
-                        ; Activate the existing window
-                        WinActivate(targetHWnd)
-                        if WinWaitActive(targetHWnd,, 1) {
-                            ; Open New Tab
-                            Send("^t") 
-                            Sleep(150)
-                            ; Focus Address Bar and Navigate
-                            Send("!d") 
-                            Sleep(50)
-                            SendText(path)
-                            Sleep(50)
-                            Send("{Enter}")
-                            ; Optional: Move focus back
-                            Send("{Esc}") 
-                        }
-                        
-                        ; Mark as known so we don't process again if close failed
-                        knownExplorers[hWnd] := true 
-                    } else {
-                        ; Could not get path, let it be
-                        knownExplorers[hWnd] := true 
-                    }
-                } catch {
-                     knownExplorers[hWnd] := true 
-                }
-            } else {
-                ; First window, just track it
-                knownExplorers[hWnd] := true
-            }
-        }
-    }
-    
-    ; Cleanup closed windows from known list
-    listToDelete := []
-    for hWnd, _ in knownExplorers {
-        if (!WinExist(hWnd))
-            listToDelete.Push(hWnd)
-    }
-    for hWnd in listToDelete {
-        knownExplorers.Delete(hWnd)
-    }
-}
 
 
 
