@@ -30,5 +30,13 @@
     "isItalic": false,
     "isUnderline": false,
     "marker": "\u00a1\u00a1"
+  },
+  {
+    "bgColor": "transparent",
+    "fgColor": "#78ff75",
+    "isBold": true,
+    "isItalic": false,
+    "isUnderline": false,
+    "marker": "\u022d\u022d"
   }
 ]
