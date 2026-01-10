@@ -78,18 +78,24 @@ class CompactClipboardApp(ctk.CTk):
         self.preview_box.insert("0.0", "Accumulated pattern will appear here...")
         self.preview_box.configure(state="disabled")
 
-        # 4. Action Buttons
+        # 4. Action Buttons (Square, Bold, Contrast)
         self.btn_frame = ctk.CTkFrame(self, fg_color="transparent")
         self.btn_frame.grid(row=4, column=0, sticky="ew", padx=10, pady=10)
         self.btn_frame.grid_columnconfigure((0,1), weight=1)
 
-        self.btn_copy = ctk.CTkButton(self.btn_frame, text="Copy Output", command=self.manual_copy, fg_color="#2ecc71", hover_color="#27ae60")
+        self.btn_copy = ctk.CTkButton(self.btn_frame, text="Copy Output", command=self.manual_copy, 
+                                      fg_color="#27ae60", hover_color="#2ecc71", 
+                                      text_color="white", font=ctk.CTkFont(weight="bold"), corner_radius=0)
         self.btn_copy.grid(row=0, column=0, columnspan=2, sticky="ew", pady=(0, 5))
 
-        self.btn_reset = ctk.CTkButton(self.btn_frame, text="Reset Session", command=self.reset_session, fg_color="#e67e22", hover_color="#d35400")
+        self.btn_reset = ctk.CTkButton(self.btn_frame, text="Reset Session", command=self.reset_session, 
+                                       fg_color="#d35400", hover_color="#e67e22",
+                                       text_color="white", font=ctk.CTkFont(weight="bold"), corner_radius=0)
         self.btn_reset.grid(row=1, column=0, sticky="ew", padx=(0, 2))
 
-        self.btn_clear_hist = ctk.CTkButton(self.btn_frame, text="Clear DB", command=self.clear_history, fg_color="#c0392b", hover_color="#922b21")
+        self.btn_clear_hist = ctk.CTkButton(self.btn_frame, text="Clear DB", command=self.clear_history, 
+                                            fg_color="#c0392b", hover_color="#e74c3c",
+                                            text_color="white", font=ctk.CTkFont(weight="bold"), corner_radius=0)
         self.btn_clear_hist.grid(row=1, column=1, sticky="ew", padx=(2, 0))
 
         # System Tray Setup
