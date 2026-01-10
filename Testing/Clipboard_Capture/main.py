@@ -5,308 +5,270 @@ import time
 import re
 import json
 import os
-from datetime import datetime
+import sys
+from PIL import Image, ImageDraw
+import pystray # pip install pystray
 
 HISTORY_FILE = "clipboard_history.json"
 
-class ClipboardManager(ctk.CTk):
+class SettingsWindow(ctk.CTkToplevel):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.parent = parent
+        self.title("Settings")
+        self.geometry("350x250")
+        self.resizable(False, False)
+        
+        # Auto Mode Switch
+        self.mode_switch = ctk.CTkSwitch(self, text="Auto-Pattern Mode", 
+                                       variable=parent.auto_mode_var, command=parent.toggle_mode,
+                                       font=ctk.CTkFont(size=14, weight="bold"))
+        self.mode_switch.pack(pady=20, padx=20, anchor="w")
+
+        # Template
+        ctk.CTkLabel(self, text="Pattern Template ({1}, {2}...)").pack(pady=(10, 5), padx=20, anchor="w")
+        self.template_entry = ctk.CTkEntry(self, width=300)
+        self.template_entry.insert(0, parent.pattern_template)
+        self.template_entry.pack(pady=5, padx=20)
+        self.template_entry.bind("<KeyRelease>", self.on_template_change)
+
+        # Dynamic Info
+        self.group_info = ctk.CTkLabel(self, text=f"Detected Group Size: {parent.get_group_size()}", text_color="gray70")
+        self.group_info.pack(pady=5, padx=20, anchor="w")
+        
+        ctk.CTkLabel(self, text="* Close to save settings", font=("Arial", 10), text_color="gray50").pack(side="bottom", pady=10)
+
+    def on_template_change(self, event):
+        self.parent.pattern_template = self.template_entry.get()
+        size = self.parent.get_group_size()
+        self.group_info.configure(text=f"Detected Group Size: {size}")
+        self.parent.update_status()
+
+class CompactClipboardApp(ctk.CTk):
     def __init__(self):
         super().__init__()
 
-        self.title("SmartClip Manager")
-        self.geometry("900x750")
+        self.title("SmartClip")
+        self.geometry("320x450")
+        self.resizable(False, True)
         ctk.set_appearance_mode("dark")
-        ctk.set_default_color_theme("blue")
-
-        self.clipboard_history = []
-        self.pattern_buffer = []  # Stores current incoming batch
-        self.accumulated_text = "" # Stores the full result string
-        self.displayed_history_len = 0
-        self.is_running = True
-        self.ignore_next = None 
         
-        # Initialize last_clip with current content to prevent startup duplication
+        # Data & State
+        self.clipboard_history = []
+        self.pattern_buffer = [] 
+        self.accumulated_text = ""
+        self.last_clip = ""
+        self.auto_mode_var = ctk.BooleanVar(value=True) # Default On? Or Off. Let's start Off.
+        self.pattern_template = "{1} -> **{2}**"
+        self.ignore_next = None
+        self.is_running = True
+
+        # Load Data
+        self.load_history()
+        
         try:
             self.last_clip = pyperclip.paste()
-        except:
-            self.last_clip = ""
+        except: 
+            pass
+
+        # --- UI Construction ---
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_rowconfigure(1, weight=1)
+
+        # 1. Top Bar (Status)
+        self.top_frame = ctk.CTkFrame(self, height=40, fg_color="transparent")
+        self.top_frame.grid(row=0, column=0, sticky="ew", padx=10, pady=(10, 5))
         
-        # Load persisted history
-        self.load_history()
-
-        # Grid layout
-        self.grid_columnconfigure(1, weight=1)
-        self.grid_rowconfigure(0, weight=1)
-
-        # Sidebar (Settings & Controls) - Darker background
-        self.sidebar_frame = ctk.CTkFrame(self, width=320, corner_radius=0)
-        self.sidebar_frame.grid(row=0, column=0, sticky="nsew")
-        self.sidebar_frame.grid_rowconfigure(10, weight=1)
-
-        self.logo_label = ctk.CTkLabel(self.sidebar_frame, text="SmartClip", font=ctk.CTkFont(size=28, weight="bold"))
-        self.logo_label.grid(row=0, column=0, padx=20, pady=(30, 20))
-
-        # --- Settings Section ---
-        self.settings_frame = ctk.CTkFrame(self.sidebar_frame, fg_color="transparent")
-        self.settings_frame.grid(row=1, column=0, sticky="ew", padx=10)
-        self.settings_frame.grid_columnconfigure(0, weight=1)
-
-        # Mode Switch
-        self.auto_mode_var = ctk.BooleanVar(value=False)
-        self.mode_switch = ctk.CTkSwitch(self.settings_frame, text="Auto-Pattern Mode", 
-                                       variable=self.auto_mode_var, command=self.toggle_mode,
-                                       font=ctk.CTkFont(size=14, weight="bold"))
-        self.mode_switch.grid(row=0, column=0, sticky="w", padx=10, pady=(0, 20))
-
-        # Pattern Template
-        ctk.CTkLabel(self.settings_frame, text="Template Pattern ({1}, {2}...)").grid(row=5, column=0, sticky="w", padx=10, pady=(10, 0))
-        self.template_entry = ctk.CTkEntry(self.settings_frame, placeholder_text="{1} -> **{2}**")
-        self.template_entry.insert(0, "{1} -> **{2}**")
-        self.template_entry.grid(row=6, column=0, sticky="ew", padx=10, pady=(5, 5))
+        self.status_label = ctk.CTkLabel(self.top_frame, text="Ready", font=ctk.CTkFont(size=14, weight="bold"), text_color="gray")
+        self.status_label.pack(side="left")
         
-        # Dynamic Group Info
-        self.group_info_label = ctk.CTkLabel(self.settings_frame, text="Detected Group Size: 2", text_color="gray70", font=ctk.CTkFont(size=11))
-        self.group_info_label.grid(row=7, column=0, sticky="w", padx=15, pady=(0, 10))
+        self.settings_btn = ctk.CTkButton(self.top_frame, text="⚙", width=30, height=30, command=self.open_settings)
+        self.settings_btn.pack(side="right")
+
+        # 2. Main Content (Output Preview)
+        self.preview_box = ctk.CTkTextbox(self, font=("Consolas", 12), fg_color="#1f1f1f", text_color="#2ecc71")
+        self.preview_box.grid(row=1, column=0, sticky="nsew", padx=10, pady=5)
+        self.preview_box.insert("0.0", "Accumulated pattern will appear here...")
+        self.preview_box.configure(state="disabled")
+
+        # 3. Action Buttons
+        self.btn_frame = ctk.CTkFrame(self, fg_color="transparent")
+        self.btn_frame.grid(row=2, column=0, sticky="ew", padx=10, pady=10)
+        self.btn_frame.grid_columnconfigure((0,1), weight=1)
+
+        self.btn_copy = ctk.CTkButton(self.btn_frame, text="Copy Output", command=self.manual_copy, fg_color="#2ecc71", hover_color="#27ae60")
+        self.btn_copy.grid(row=0, column=0, columnspan=2, sticky="ew", pady=(0, 5))
+
+        self.btn_reset = ctk.CTkButton(self.btn_frame, text="Reset Session", command=self.reset_session, fg_color="#e67e22", hover_color="#d35400")
+        self.btn_reset.grid(row=1, column=0, sticky="ew", padx=(0, 2))
+
+        self.btn_clear_hist = ctk.CTkButton(self.btn_frame, text="Clear DB", command=self.clear_history, fg_color="#c0392b", hover_color="#922b21")
+        self.btn_clear_hist.grid(row=1, column=1, sticky="ew", padx=(2, 0))
+
+        # System Tray Setup
+        self.protocol("WM_DELETE_WINDOW", self.hide_window)
         
-        # Bind key release to update group info dynamically
-        self.template_entry.bind("<KeyRelease>", self.update_group_info)
-
-        # Batch Status (Buffer)
-        self.status_frame = ctk.CTkFrame(self.sidebar_frame, fg_color="#2b2b2b", corner_radius=6)
-        self.status_frame.grid(row=3, column=0, padx=15, pady=(20, 10), sticky="ew")
-        self.status_frame.grid_columnconfigure(0, weight=1)
-
-        self.batch_label = ctk.CTkLabel(self.status_frame, text="Pattern Builder", text_color="gray")
-        self.batch_label.pack(pady=5)
-        
-        # Buffer display
-        self.buffer_text = ctk.CTkLabel(self.status_frame, text="Waiting...", text_color="gray70", wraplength=280)
-        self.buffer_text.pack(pady=(0, 5))
-        
-        # Accumulated result display
-        self.result_text = ctk.CTkTextbox(self.status_frame, height=120, fg_color="#1f1f1f", text_color="#2ecc71")
-        self.result_text.pack(fill="x", padx=5, pady=5)
-        self.result_text.insert("0.0", "--- Generated Output ---")
-        self.result_text.configure(state="disabled")
-
-        # Action Buttons
-        self.btns_frame = ctk.CTkFrame(self.sidebar_frame, fg_color="transparent")
-        self.btns_frame.grid(row=4, column=0, sticky="ew")
-        self.btns_frame.grid_columnconfigure((0,1), weight=1)
-
-        self.copy_output_btn = ctk.CTkButton(self.btns_frame, text="Copy Output", command=self.manual_copy_output, 
-                                     fg_color="#2ecc71", hover_color="#27ae60", height=30)
-        self.copy_output_btn.pack(side="top", fill="x", padx=20, pady=(5, 5))
-
-        self.clear_buffer_btn = ctk.CTkButton(self.btns_frame, text="Reset & Clear", command=self.reset_session, 
-                                     fg_color="#e74c3c", hover_color="#c0392b", height=30)
-        self.clear_buffer_btn.pack(side="top", fill="x", padx=20, pady=(0, 5))
-        
-        ctk.CTkButton(self.sidebar_frame, text="Clear History", command=self.clear_history, fg_color="transparent", border_width=1, border_color="gray50", text_color="gray80", hover_color="#333333").grid(row=9, column=0, padx=20, pady=10, sticky="s")
-
-        # Main Content (Clipboard History)
-        self.main_frame = ctk.CTkFrame(self, corner_radius=0, fg_color="#1a1a1a") # Darker main bg
-        self.main_frame.grid(row=0, column=1, sticky="nsew")
-        self.main_frame.grid_rowconfigure(1, weight=1)
-        self.main_frame.grid_columnconfigure(0, weight=1)
-
-        self.history_header = ctk.CTkLabel(self.main_frame, text="Recent Clips", font=ctk.CTkFont(size=22, weight="bold"))
-        self.history_header.grid(row=0, column=0, padx=30, pady=(30, 20), sticky="w")
-
-        self.scrollable_frame = ctk.CTkScrollableFrame(self.main_frame, label_text="", fg_color="transparent")
-        self.scrollable_frame.grid(row=1, column=0, padx=30, pady=(0, 30), sticky="nsew")
-
-        # Start Monitor
+        # Start Threads
         self.monitor_thread = threading.Thread(target=self.monitor_clipboard, daemon=True)
         self.monitor_thread.start()
+
+        # Init Tray in separate thread causing issues usually with GUI loops.
+        # Ideally, main thread runs GUI, separate thread runs Tray. 
+        # But pystray run() is blocking. 
+        # We will run pystray in a thread.
+        self.tray_thread = threading.Thread(target=self.setup_tray, daemon=True)
+        self.tray_thread.start()
         
-        # Periodic UI Update
-        self.after(500, self.update_ui_loop)
+        self.update_status()
 
-        # Handle window close
-        self.protocol("WM_DELETE_WINDOW", self.on_closing)
+    def create_image(self):
+        # Generate a simple icon
+        width = 64
+        height = 64
+        color1 = "#2ecc71"
+        color2 = "#3498db"
+        image = Image.new('RGB', (width, height), color1)
+        dc = ImageDraw.Draw(image)
+        dc.rectangle((width // 2, 0, width, height // 2), fill=color2)
+        dc.rectangle((0, height // 2, width // 2, height), fill=color2)
+        return image
 
-    def on_closing(self):
+    def setup_tray(self):
+        icon = pystray.Icon("SmartClip", self.create_image(), "SmartClip Manager", menu=pystray.Menu(
+            pystray.MenuItem("Show", self.show_window),
+            pystray.MenuItem("Exit", self.quit_app)
+        ))
+        self.tray_icon = icon
+        icon.run()
+
+    def show_window(self, icon=None, item=None):
+        self.deiconify()
+        self.lift()
+        self.focus_force()
+
+    def hide_window(self):
+        self.withdraw()
+
+    def quit_app(self, icon=None, item=None):
+        self.tray_icon.stop()
         self.is_running = False
-        self.destroy()
+        self.quit()
+        sys.exit()
 
-    def load_history(self):
-        if os.path.exists(HISTORY_FILE):
-            try:
-                with open(HISTORY_FILE, "r", encoding="utf-8") as f:
-                    self.clipboard_history = json.load(f)
-            except Exception as e:
-                print(f"Error loading history: {e}")
-                self.clipboard_history = []
+    def open_settings(self):
+        SettingsWindow(self)
 
-    def save_history(self):
-        try:
-            with open(HISTORY_FILE, "w", encoding="utf-8") as f:
-                json.dump(self.clipboard_history, f, indent=4)
-        except Exception as e:
-            print(f"Error saving history: {e}")
-
-    def get_group_size(self):
-        # Dynamically calculate based on template
-        template = self.template_entry.get()
-        matches = re.findall(r'\{(\d+)\}', template)
-        if matches:
-            # Find the max index used
-            max_idx = max(map(int, matches))
-            return max(1, max_idx)
-        return 1
-
-    def update_group_info(self, event=None):
-        size = self.get_group_size()
-        self.group_info_label.configure(text=f"Detected Group Size: {size}")
-        self.update_status_display()
+    # --- Logic ---
 
     def toggle_mode(self):
+        self.reset_session()
+        self.update_status()
+
+    def get_group_size(self):
+        matches = re.findall(r'\{(\d+)\}', self.pattern_template)
+        if matches:
+            return max(1, max(map(int, matches)))
+        return 1
+
+    def update_status(self):
+        # Header Status
         if self.auto_mode_var.get():
-            self.batch_label.configure(text="Pattern Builder (Active)", text_color="#2ecc71")
-            self.reset_session()
+            req = self.get_group_size()
+            curr = len(self.pattern_buffer)
+            self.status_label.configure(text=f"Active: {curr}/{req} in buffer", text_color="#2ecc71")
         else:
-            self.batch_label.configure(text="Pattern Builder (Inactive)", text_color="gray")
-            self.reset_session()
+            self.status_label.configure(text="Auto-Mode: OFF", text_color="gray")
+        
+        # Textbox
+        self.preview_box.configure(state="normal")
+        self.preview_box.delete("0.0", "end")
+        if self.accumulated_text:
+            self.preview_box.insert("0.0", self.accumulated_text)
+        else:
+            self.preview_box.insert("0.0", "(Waiting for input...)")
+        self.preview_box.configure(state="disabled")
+
+    def manual_copy(self):
+        if self.accumulated_text:
+            self.copy_to_clip(self.accumulated_text)
 
     def reset_session(self):
         self.pattern_buffer.clear()
         self.accumulated_text = ""
-        self.update_status_display()
+        self.update_status()
 
     def clear_history(self):
         self.clipboard_history.clear()
         self.save_history()
-        self.displayed_history_len = 0
-        for widget in self.scrollable_frame.winfo_children():
-            widget.destroy()
-
-    def manual_copy_output(self):
-        if self.accumulated_text:
-            self.copy_to_clip(self.accumulated_text)
-
-    def update_status_display(self):
-        # Update Buffer Buffer Label
-        if not self.pattern_buffer:
-            self.buffer_text.configure(text="Buffer: Empty (Waiting for copy...)" if self.auto_mode_var.get() else "Buffer: Inactive")
-        else:
-            current_count = len(self.pattern_buffer)
-            total_needed = self.get_group_size()
-            self.buffer_text.configure(text=f"Buffer: {current_count}/{total_needed} items ready")
-
-        # Update Result Textbox
-        self.result_text.configure(state="normal")
-        self.result_text.delete("0.0", "end")
-        if self.accumulated_text:
-            self.result_text.insert("0.0", self.accumulated_text)
-        else:
-            self.result_text.insert("0.0", "--- Output Preview ---")
-        self.result_text.configure(state="disabled")
-
-    def monitor_clipboard(self):
-        while self.is_running:
-            try:
-                curr_clip = pyperclip.paste()
-                
-                # Check if new content and not empty
-                if curr_clip != self.last_clip and curr_clip.strip() != "":
-                    
-                    # Prevent Auto-Pattern loopback
-                    if self.ignore_next == curr_clip:
-                        self.last_clip = curr_clip 
-                        self.ignore_next = None
-                        time.sleep(0.5)
-                        continue
-                    
-                    # Double check against the latest history item to prevent visual dupes
-                    # This happens if user clears history but system clipboard logic triggers
-                    if self.clipboard_history and self.clipboard_history[0] == curr_clip:
-                        self.last_clip = curr_clip
-                        time.sleep(0.5)
-                        continue
-
-                    self.last_clip = curr_clip
-                    self.clipboard_history.insert(0, curr_clip)
-                    if len(self.clipboard_history) > 50: 
-                        self.clipboard_history.pop()
-                    
-                    # Save persistence
-                    self.save_history()
-
-                    if self.auto_mode_var.get():
-                        self.handle_auto_mode(curr_clip)
-                        
-            except Exception:
-                pass
-            time.sleep(0.5)
-
-    def handle_auto_mode(self, clip):
-        self.pattern_buffer.append(clip)
-        
-        required_size = self.get_group_size()
-        if len(self.pattern_buffer) >= required_size:
-            self.create_pattern_and_paste()
-        else:
-            self.after(0, self.update_status_display)
-
-    def create_pattern_and_paste(self):
-        template = self.template_entry.get()
-        chunk = self.pattern_buffer
-        
-        # Create line
-        current_line = template
-        for j, item in enumerate(chunk):
-            placeholder = f"{{{j+1}}}"
-            current_line = current_line.replace(placeholder, item.strip())
-        
-        # Accumulate
-        if self.accumulated_text:
-            self.accumulated_text += "\n" + current_line
-        else:
-            self.accumulated_text = current_line
-            
-        # Copy FULL accumulated text
-        self.ignore_next = self.accumulated_text
-        pyperclip.copy(self.accumulated_text)
-        
-        # Clear buffer but KEEP accumulation
-        self.pattern_buffer = []
-        
-        # UI update
-        self.after(0, self.update_status_display)
-
-    def update_ui_loop(self):
-        if not self.is_running:
-            return
-        
-        current_len = len(self.clipboard_history)
-        if current_len != self.displayed_history_len:
-            self.refresh_list()
-            self.displayed_history_len = current_len
-        
-        self.after(500, self.update_ui_loop)
-
-    def refresh_list(self):
-        for widget in self.scrollable_frame.winfo_children():
-            widget.destroy()
-
-        for idx, clip in enumerate(self.clipboard_history):
-            preview = clip.replace("\n", " ").strip()
-            if len(preview) > 60:
-                preview = preview[:60] + "..."
-            
-            card = ctk.CTkFrame(self.scrollable_frame, fg_color="#2b2b2b", corner_radius=6)
-            card.pack(fill="x", pady=4)
-            
-            ctk.CTkLabel(card, text=f"#{idx+1}", text_color="gray50", width=30).pack(side="left", padx=(10, 5))
-            ctk.CTkLabel(card, text=preview, anchor="w", font=ctk.CTkFont(size=13)).pack(side="left", fill="x", expand=True, padx=5, pady=8)
-            ctk.CTkButton(card, text="Copy", width=60, height=24, fg_color="transparent", border_width=1, 
-                                     command=lambda c=clip: self.copy_to_clip(c)).pack(side="right", padx=10)
+        self.last_clip = "" # Reset last clip so we can recopy things if needed?
 
     def copy_to_clip(self, text):
         self.ignore_next = text
         pyperclip.copy(text)
 
+    # --- Persistence ---
+    def load_history(self):
+        if os.path.exists(HISTORY_FILE):
+            try:
+                with open(HISTORY_FILE, "r", encoding="utf-8") as f:
+                    self.clipboard_history = json.load(f)
+            except: self.clipboard_history = []
+            
+    def save_history(self):
+        try:
+            with open(HISTORY_FILE, "w", encoding="utf-8") as f:
+                json.dump(self.clipboard_history, f, indent=4)
+        except: pass
+
+    # --- Monitor ---
+    def monitor_clipboard(self):
+        while self.is_running:
+            try:
+                curr_clip = pyperclip.paste()
+                if curr_clip != self.last_clip and curr_clip.strip() != "":
+                    
+                    if self.ignore_next == curr_clip:
+                        self.last_clip = curr_clip
+                        self.ignore_next = None
+                        time.sleep(0.5)
+                        continue
+                    
+                    # Dedupe vs history[0]
+                    if self.clipboard_history and self.clipboard_history[0] == curr_clip:
+                        self.last_clip = curr_clip 
+                        time.sleep(0.5)
+                        continue
+
+                    self.last_clip = curr_clip
+                    self.clipboard_history.insert(0, curr_clip)
+                    if len(self.clipboard_history) > 50: self.clipboard_history.pop()
+                    self.save_history()
+
+                    if self.auto_mode_var.get():
+                        self.handle_auto_mode(curr_clip)
+                        
+            except: pass
+            time.sleep(0.5)
+
+    def handle_auto_mode(self, clip):
+        self.pattern_buffer.append(clip)
+        if len(self.pattern_buffer) >= self.get_group_size():
+            # Process Buffer
+            template = self.pattern_template
+            line = template
+            for i, item in enumerate(self.pattern_buffer):
+                 line = line.replace(f"{{{i+1}}}", item.strip())
+            
+            if self.accumulated_text:
+                self.accumulated_text += "\n" + line
+            else:
+                self.accumulated_text = line
+            
+            self.copy_to_clip(self.accumulated_text)
+            self.pattern_buffer = []
+        
+        self.after(0, self.update_status)
+
 if __name__ == "__main__":
-    app = ClipboardManager()
+    app = CompactClipboardApp()
     app.mainloop()
