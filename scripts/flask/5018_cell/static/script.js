@@ -582,7 +582,7 @@ function handleKeyboardShortcuts(e) {
     }
 
     // Alt+Up to move lines up
-    if (e.altKey && e.key === 'ArrowUp') {
+    if (e.altKey && !e.ctrlKey && e.key === 'ArrowUp') {
         const activeElement = document.activeElement;
         // Should work in any cell input/textarea
         if ((activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA') &&
@@ -593,7 +593,7 @@ function handleKeyboardShortcuts(e) {
     }
 
     // Alt+Down to move lines down
-    if (e.altKey && e.key === 'ArrowDown') {
+    if (e.altKey && !e.ctrlKey && e.key === 'ArrowDown') {
         const activeElement = document.activeElement;
         if ((activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA') &&
             activeElement.closest('td:not(.row-number)')) {
