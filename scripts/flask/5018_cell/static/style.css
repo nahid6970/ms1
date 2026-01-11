@@ -777,6 +777,8 @@ td textarea {
     z-index: 1;
     display: none;
     line-height: 1.4;
+    tab-size: 8;
+    -moz-tab-size: 8;
 }
 
 .markdown-preview strong {
@@ -943,6 +945,8 @@ td:not(:focus-within).has-markdown-preview {
     /* Stop browser from auto-scrolling to top on Enter */
     overflow-anchor: none;
     scroll-behavior: auto !important;
+    tab-size: 8;
+    -moz-tab-size: 8;
 }
 
 .wrap-enabled td textarea:not(.merged-cell textarea):focus {
