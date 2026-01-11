@@ -33,3 +33,14 @@
 **Sorting Priority:** No dashes > single dash `-` > double dash `--` > alphabetical/numerical.
 **Smart Grouping:** Children stay with their parents during reordering.
 **Function:** `sortLines()`.
+
+## Search Word Under Cursor (F8)
+**Purpose:** Speed up searching by automatically adding the word under the cursor to the search box.
+**Behavior:**
+- **No Selection:** Intelligently detects word boundaries (any non-whitespace characters) around the cursor and adds that word.
+- **Selection:** If text is selected, that specific selection is added.
+- **Result:**
+  - Adds the term to the existing search query (comma-separated).
+  - Automatically triggers a search recalculation.
+  - Focuses the search box.
+- **Smart Recalculation:** Focusing the search box or using F8 forces a fresh search, ensuring results are always up-to-date with recent cell edits.
