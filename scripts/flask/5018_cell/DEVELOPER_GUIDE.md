@@ -47,7 +47,7 @@ The state is managed in a central object synced with `data.json`.
 - **[Hidden Content](md/HIDDEN_CONTENT.md):** Collapsible `{{}}` and MCQ `[[]]` logic.
 - **[Special Markdown](md/MARKDOWN_SPECIAL.md):** Small text, custom headings, border boxes, underlines.
 - **[Highlight Shortcuts](md/COLOR_HIGHLIGHT_SHORTCUTS.md):** `==`, `!!`, `??` syntaxes.
-- **[Custom Color Syntaxes](md/CUSTOM_COLOR_SYNTAX.md):** Dynamic user-defined highlighting.
+- **[Custom Color Syntaxes](md/CUSTOM_SYNTAX.md):** Dynamic user-defined highlighting.
 
 ### Advanced Editing Tools
 - **[Editing Extensions](md/EDITING_EXTENSIONS.md):** Search, Line tools, Case conversion, Multi-cursor.

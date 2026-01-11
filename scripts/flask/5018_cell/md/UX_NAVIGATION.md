@@ -28,6 +28,14 @@
 5. Text Case
 6. Quick Highlights (Custom Syntaxes automatically added here)
 
+## Search Word Under Cursor (F8)
+**Purpose:** Instantly add the word under the cursor (or selection) to the search box and focus it.
+**Implementation:** `handleKeyboardShortcuts` (F8).
+
+## Swap Position (F9)
+**Purpose:** Swap two words/phrases separated by a delimiter (space, tab, comma) while preserving alignment.
+**Implementation:** `handleKeyboardShortcuts` (F9).
+
 ## Sub-Sheet Hierarchy
 **Purpose:** Organize sheets in a parent-child structure.
 **UI Elements:**
