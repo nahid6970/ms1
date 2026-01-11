@@ -129,6 +129,50 @@
             transform: scale(0.95);
         }
 
+        .rotate-control {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background-color: #444;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+
+        .rotate-input {
+            width: 100px;
+            cursor: pointer;
+            vertical-align: middle;
+        }
+
+        .rotate-btn {
+            background-color: #444;
+            color: white;
+            border: 1px solid #666;
+            border-radius: 4px;
+            width: 24px;
+            height: 24px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .rotate-btn:hover {
+            background-color: #2196F3;
+            border-color: #2196F3;
+        }
+
+        .rotate-value {
+            font-size: 12px;
+            color: #aaa;
+            min-width: 40px;
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+        }
+
         .minimap {
             position: fixed;
             right: 20px;
@@ -551,6 +595,19 @@
                 <input type="number" class="zoom-input" id="zoomInput" value="150" min="10" max="500" step="10">
                 <button class="zoom-btn" onclick="zoomIn()" title="Zoom In">+</button>
             </div>
+            <div class="rotate-control">
+                <button class="rotate-btn" onclick="rotateAdjust(-0.5)" title="Rotate Left (Fine)">
+                    <i class="nf nf-fa-undo" style="font-size: 10px;"></i>
+                </button>
+                <input type="range" class="rotate-input" id="rotateInput" value="0" min="-45" max="45" step="0.5" title="Rotate (-45° to +45°)">
+                <button class="rotate-btn" onclick="rotateAdjust(0.5)" title="Rotate Right (Fine)">
+                    <i class="nf nf-fa-repeat" style="font-size: 10px;"></i>
+                </button>
+                <span id="rotateValue" class="rotate-value">0.0°</span>
+                <button class="rotate-btn" onclick="resetRotation()" title="Reset Rotation" style="margin-left: 5px;">
+                   <i class="nf nf-fa-refresh" style="font-size: 10px;"></i>
+                </button>
+            </div>
             <button class="control-btn" id="minimapToggle" onclick="toggleMinimap()" title="Toggle Minimap">
                 <i class="nf nf-fa-map"></i>
             </button>
@@ -702,6 +759,47 @@
         let isDragging = false;
         let startX, startY, scrollLeft, scrollTop;
         let minimapEnabled = localStorage.getItem('minimapEnabled') !== 'false'; // Default to true
+        let currentRotation = 0;
+
+        function updateImageTransform() {
+            const image = document.getElementById('mainImage');
+            const zoomInput = document.getElementById('zoomInput');
+            
+            // Determine scale
+            let scale = 1;
+            if (isZoomed) {
+                scale = parseInt(zoomInput.value) / 100;
+            }
+            
+            // Apply transform
+            image.style.transform = `scale(${scale}) rotate(${currentRotation}deg)`;
+            
+            // Additional class handling if needed
+            // (Note: .zoomed class on wrapper handles alignment, which we might want even if only rotated)
+        }
+
+        function rotateAdjust(amount) {
+            const input = document.getElementById('rotateInput');
+            let newVal = parseFloat(input.value) + amount;
+            // Clamp roughly
+            if (newVal > 45) newVal = 45;
+            if (newVal < -45) newVal = -45;
+            
+            input.value = newVal;
+            input.dispatchEvent(new Event('input'));
+        }
+
+        function resetRotation() {
+             const input = document.getElementById('rotateInput');
+             input.value = 0;
+             input.dispatchEvent(new Event('input'));
+        }
+
+        document.getElementById('rotateInput').addEventListener('input', function() {
+            currentRotation = parseFloat(this.value);
+            document.getElementById('rotateValue').textContent = currentRotation.toFixed(1) + '°';
+            updateImageTransform();
+        });
 
         // Initialize minimap toggle button state
         document.addEventListener('DOMContentLoaded', function () {
@@ -740,13 +838,12 @@
 
             if (!isZoomed) {
                 // Get zoom level from input (convert percentage to decimal)
-                const zoomLevel = parseInt(zoomInput.value) / 100;
-
-                // Apply custom zoom level
-                image.style.transform = `scale(${zoomLevel})`;
+                // Enable zoom
                 image.classList.add('zoomed');
                 wrapper.classList.add('zoomed');
                 isZoomed = true;
+                
+                updateImageTransform();
 
                 // Show minimap if enabled
                 if (minimapEnabled) {
@@ -760,13 +857,15 @@
                     updateMinimapViewport();
                 }, 10);
             } else {
-                // Reset to default
-                image.style.transform = 'scale(1)';
+                // Disable zoom (Reset to fit)
                 image.classList.remove('zoomed');
                 wrapper.classList.remove('zoomed');
+                isZoomed = false;
+                
+                updateImageTransform();
+                
                 wrapper.scrollLeft = 0;
                 wrapper.scrollTop = 0;
-                isZoomed = false;
 
                 // Hide minimap
                 hideMinimap();
@@ -833,10 +932,10 @@
         // Update zoom when input changes (if already zoomed)
         document.getElementById('zoomInput').addEventListener('input', function () {
             if (isZoomed) {
+                updateImageTransform();
+
                 const image = document.getElementById('mainImage');
                 const wrapper = document.getElementById('imageWrapper');
-                const zoomLevel = parseInt(this.value) / 100;
-                image.style.transform = `scale(${zoomLevel})`;
 
                 // Preserve current scroll position relative to the zoom level
                 const rect = wrapper.getBoundingClientRect();
@@ -1422,9 +1521,7 @@
             zoomInput.value = currentZoom;
 
             if (isZoomed) {
-                const image = document.getElementById('mainImage');
-                const zoomLevel = currentZoom / 100;
-                image.style.transform = `scale(${zoomLevel})`;
+                updateImageTransform();
             }
         }
 
@@ -1435,9 +1532,7 @@
             zoomInput.value = currentZoom;
 
             if (isZoomed) {
-                const image = document.getElementById('mainImage');
-                const zoomLevel = currentZoom / 100;
-                image.style.transform = `scale(${zoomLevel})`;
+                updateImageTransform();
             }
         }
 
