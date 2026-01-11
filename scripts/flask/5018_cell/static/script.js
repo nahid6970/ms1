@@ -434,6 +434,53 @@ function handleKeyboardShortcuts(e) {
         }
     }
 
+    // F9 to swap two words containing a separator in the middle
+    if (e.key === 'F9') {
+        const activeElement = document.activeElement;
+        if (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA') {
+            e.preventDefault();
+
+            const start = activeElement.selectionStart;
+            const end = activeElement.selectionEnd;
+
+            if (start !== end) {
+                const text = activeElement.value.substring(start, end);
+                // Regex to split: (Part1)(Separator)(Part2)
+                // Separator defined as: consecutive whitespace, tab, comma-space, etc.
+                // We use a non-greedy match for first part, then the separator, then the rest
+                const match = text.match(/^(.+?)([\t ,]+)(.+)$/);
+
+                if (match) {
+                    const part1 = match[1];
+                    const separator = match[2];
+                    const part2 = match[3];
+
+                    const newText = part2 + separator + part1;
+
+                    // Replace text
+                    const val = activeElement.value;
+                    const newVal = val.substring(0, start) + newText + val.substring(end);
+
+                    activeElement.value = newVal;
+
+                    // Restore selection
+                    activeElement.selectionStart = start;
+                    activeElement.selectionEnd = start + newText.length;
+
+                    // Trigger change event
+                    const event = new Event('input', { bubbles: true });
+                    activeElement.dispatchEvent(event);
+
+                    showToast('Swapped text position', 'success');
+                } else {
+                    showToast('Could not identify two parts separated by space/comma', 'warning');
+                }
+            } else {
+                showToast('Please select text to swap', 'info');
+            }
+        }
+    }
+
     // Ctrl+Shift+D to select next occurrence (multi-cursor simulation)
     if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'D') {
         const activeElement = document.activeElement;
