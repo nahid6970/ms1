@@ -8,6 +8,7 @@
 - **Matching:** Each cell is checked against all terms, and if any term matches, the row is shown.
 - **Highlighting:** `highlightMultipleTermsInHtml()` manages merged/overlapping matches.
 - **Overlay:** `createTextHighlightOverlayMulti()` for input/textarea elements.
+- **Move Matches (⇅):** A special button appears in the search box when results are found. Clicking it moves all matched rows to follow the first matched row in the sheet, effectively grouping them together.
 
 ## Line Conversion Tools
 **Implementation:**

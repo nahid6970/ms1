@@ -218,6 +218,7 @@ body {
 }
 
 .search-box {
+    position: relative;
     display: flex;
     align-items: center;
     gap: 5px;
@@ -271,6 +272,37 @@ body {
     font-size: 13px;
     font-weight: 500;
     color: #333;
+}
+
+.btn-clear-search,
+.btn-move-matches {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    font-size: 18px;
+    color: #adb5bd;
+    cursor: pointer;
+    line-height: 1;
+    padding: 2px 5px;
+    border-radius: 4px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-move-matches {
+    right: 30px;
+    font-size: 14px;
+}
+
+.btn-clear-search:hover,
+.btn-move-matches:hover {
+    color: #495057;
+    background-color: #e9ecef;
 }
 
 .search-box:focus-within {

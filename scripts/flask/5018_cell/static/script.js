@@ -4969,14 +4969,142 @@ function searchTable(force = false) {
     });
 
     // Show toast with results
+    const moveBtn = document.getElementById('moveMatchesBtn');
     if (searchTerms.length > 0 && foundCount === 0) {
         showToast('No results found', 'info');
-    } else if (searchTerms.length > 1 && foundCount > 0) {
-        const foundList = Array.from(foundTerms).join(', ');
-        showToast(`Found ${foundCount} row(s) matching: ${foundList}`, 'success');
-    } else if (searchTerms.length === 1 && foundCount > 0) {
-        showToast(`Found ${foundCount} row(s)`, 'success');
+        if (moveBtn) moveBtn.style.display = 'none';
+    } else if (searchTerms.length > 0 && foundCount > 0) {
+        if (moveBtn) moveBtn.style.display = 'flex';
+        if (searchTerms.length > 1) {
+            const foundList = Array.from(foundTerms).join(', ');
+            showToast(`Found ${foundCount} row(s) matching: ${foundList}`, 'success');
+        } else {
+            showToast(`Found ${foundCount} row(s)`, 'success');
+        }
+    } else {
+        if (moveBtn) moveBtn.style.display = 'none';
     }
+}
+
+async function moveMatchedRows() {
+    const searchInput = document.getElementById('searchInput');
+    const searchTerm = searchInput.value.trim();
+    if (!searchTerm) {
+        console.log("No search term");
+        return;
+    }
+
+    const searchTerms = searchTerm.split(',')
+        .map(term => stripMarkdown(term.trim()).toLowerCase())
+        .filter(term => term.length > 0);
+
+    const rowElements = document.querySelectorAll('#dataTable tbody tr');
+    const matchedIndices = [];
+
+    rowElements.forEach((row, index) => {
+        if (row.style.display !== 'none') {
+            matchedIndices.push(index);
+        }
+    });
+
+    const rows = tableData.sheets[currentSheet].rows;
+    const styles = tableData.sheets[currentSheet].cellStyles || {};
+
+    // Internal helper to group lines within a cell text
+    const groupLinesInCell = (text) => {
+        if (typeof text !== 'string' || !text.includes('\n')) return text;
+        const lines = text.split('\n');
+        const mLinesIdx = [];
+        lines.forEach((line, idx) => {
+            const stripped = stripMarkdown(line.toLowerCase());
+            if (searchTerms.some(term => stripped.includes(term))) {
+                mLinesIdx.push(idx);
+            }
+        });
+
+        if (mLinesIdx.length < 2) return text;
+
+        const firstMatchIdx = mLinesIdx[0];
+        const matchedLines = mLinesIdx.map(idx => lines[idx]);
+        const newLines = [];
+        const matchedSet = new Set(mLinesIdx);
+
+        for (let i = 0; i < lines.length; i++) {
+            if (i === firstMatchIdx) {
+                matchedLines.forEach(l => newLines.push(l));
+            } else if (!matchedSet.has(i)) {
+                newLines.push(lines[i]);
+            }
+        }
+        return newLines.join('\n');
+    };
+
+    // Check if we actually have work
+    let hasLineWork = false;
+    matchedIndices.forEach(idx => {
+        rows[idx].forEach(val => {
+            if (groupLinesInCell(val) !== val) hasLineWork = true;
+        });
+    });
+
+    if (matchedIndices.length < 2 && !hasLineWork) {
+        showToast('Need at least 2 matches (rows or lines) to move', 'info');
+        return;
+    }
+
+    if (!confirm(`Group all matched lines and rows?`)) {
+        return;
+    }
+
+    // 1. Reorder lines in all matched rows
+    matchedIndices.forEach(idx => {
+        const rowData = rows[idx];
+        rowData.forEach((cellVal, colIdx) => {
+            rowData[colIdx] = groupLinesInCell(cellVal);
+        });
+    });
+
+    // 2. Group matched rows together (only if more than 1)
+    if (matchedIndices.length >= 2) {
+        const matchedRowsData = matchedIndices.map(idx => JSON.parse(JSON.stringify(rows[idx])));
+        const targetBaseIndex = matchedIndices[0];
+        const newRows = [];
+        const matchedRowsSet = new Set(matchedIndices);
+        const oldToNewMap = {};
+        let currentNewIdx = 0;
+
+        for (let i = 0; i < rows.length; i++) {
+            if (!matchedRowsSet.has(i)) {
+                oldToNewMap[i] = currentNewIdx;
+                newRows.push(rows[i]);
+                currentNewIdx++;
+            } else if (i === targetBaseIndex) {
+                matchedIndices.forEach((oldIdx, mIdx) => {
+                    oldToNewMap[oldIdx] = currentNewIdx + mIdx;
+                });
+                matchedRowsData.forEach(rowData => newRows.push(rowData));
+                currentNewIdx += matchedIndices.length;
+            }
+        }
+
+        const newCellStyles = {};
+        Object.keys(styles).forEach(key => {
+            const [r, c] = key.split('-').map(Number);
+            if (oldToNewMap.hasOwnProperty(r)) {
+                newCellStyles[`${oldToNewMap[r]}-${c}`] = styles[key];
+            } else {
+                newCellStyles[key] = styles[key];
+            }
+        });
+
+        tableData.sheets[currentSheet].rows = newRows;
+        tableData.sheets[currentSheet].cellStyles = newCellStyles;
+    }
+
+    await saveData();
+    renderTable();
+    searchTable(true);
+    showToast('Matches grouped successfully', 'success');
 }
 
 // Create a text highlight overlay for cells without markdown preview
