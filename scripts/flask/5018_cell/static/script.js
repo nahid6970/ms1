@@ -200,6 +200,16 @@ function initializeApp() {
             document.body.classList.add('show-hidden-text');
         }
     }
+    // Force search recalculation when search input is focused (e.g. clicking back after editing)
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.addEventListener('focus', () => {
+            // Only force if there is a value
+            if (searchInput.value.trim()) {
+                searchTable(true);
+            }
+        });
+    }
 }
 
 function loadColumnWidths() {
@@ -417,7 +427,7 @@ function handleKeyboardShortcuts(e) {
                     }
 
                     // Trigger search
-                    searchTable();
+                    searchTable(true);
                     searchInput.focus();
                 }
             }
@@ -4682,12 +4692,13 @@ function nextSearchMatch() {
     showToast(`Match ${currentMatchIndex + 1} of ${searchMatches.length}`, 'info');
 }
 
-function searchTable() {
+function searchTable(force = false) {
     const searchInput = document.getElementById('searchInput');
     const searchTerm = searchInput.value.trim();
 
     // Prevent reset if search term hasn't changed (e.g. Enter key release)
-    if (searchTerm === lastSearchTerm) {
+    // UNLESS forced (like when deleting a term)
+    if (!force && searchTerm === lastSearchTerm) {
         return;
     }
     lastSearchTerm = searchTerm;
