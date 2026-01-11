@@ -7,6 +7,8 @@ let isSelecting = false;
 let sheetHistory = []; // Track recently visited sheets for Alt+M toggle
 let singleRowMode = false;
 let singleRowIndex = 0;
+let lastMouseX = 0;
+let lastMouseY = 0;
 
 /**
  * MULTI-CELL OPERATION PATTERN:
@@ -94,6 +96,12 @@ function initializeApp() {
             localStorage.setItem('scrollLeft', tableContainer.scrollLeft);
         });
     }
+
+    // Track mouse position for F8 hover search
+    document.addEventListener('mousemove', (e) => {
+        lastMouseX = e.clientX;
+        lastMouseY = e.clientY;
+    });
 
 
 
@@ -397,64 +405,98 @@ function handleKeyboardShortcuts(e) {
         toggleTopRibbons();
     }
 
-    // F8 to search word under cursor
+    // F8 to search word under cursor or mouse hover
     if (e.key === 'F8') {
         e.preventDefault();
+        let text = '';
         const activeElement = document.activeElement;
-        if (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA') {
-            let text = '';
 
-            // First check if there is an active selection
+        // 1. Check for active selection first (priority)
+        const selection = window.getSelection();
+        if (selection && selection.toString().trim().length > 0) {
+            text = selection.toString().trim();
+        }
+        // 2. Check for selection within an input/textarea if not caught by window.getSelection()
+        else if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
             if (activeElement.selectionStart !== activeElement.selectionEnd) {
                 text = activeElement.value.substring(activeElement.selectionStart, activeElement.selectionEnd);
             }
+        }
 
-            // If no selection, get the word under the cursor
-            if (!text) {
-                const val = activeElement.value;
-                const cursor = activeElement.selectionStart;
-
-                // Find start of word (look backwards)
-                // Use [^\s] to match any non-whitespace character (more robust than \w)
-                let start = cursor;
-                while (start > 0 && /[^\s]/.test(val[start - 1])) {
-                    start--;
-                }
-
-                // Find end of word (look forwards)
-                let end = cursor;
-                while (end < val.length && /[^\s]/.test(val[end])) {
-                    end++;
-                }
-
-                if (start < end) {
-                    text = val.substring(start, end);
+        // 3. If no selection, try getting word under mouse hover
+        if (!text) {
+            let range;
+            if (document.caretRangeFromPoint) {
+                range = document.caretRangeFromPoint(lastMouseX, lastMouseY);
+            } else if (document.caretPositionFromPoint) {
+                const pos = document.caretPositionFromPoint(lastMouseX, lastMouseY);
+                if (pos) {
+                    range = document.createRange();
+                    range.setStart(pos.offsetNode, pos.offset);
+                    range.setEnd(pos.offsetNode, pos.offset);
                 }
             }
 
-            if (text) {
-                // Determine if we should append or replace
-                const searchInput = document.getElementById('searchInput');
+            if (range) {
+                if (range.startContainer.nodeType === Node.TEXT_NODE) {
+                    const node = range.startContainer;
+                    const offset = range.startOffset;
+                    const val = node.textContent;
 
-                // If appending is desired (Shift+F8?), or just default replace/append logic?
-                // User said "add it to search box", which I implemented as comma-append.
+                    let start = offset;
+                    while (start > 0 && /[^\s]/.test(val[start - 1])) start--;
+                    let end = offset;
+                    while (end < val.length && /[^\s]/.test(val[end])) end++;
 
-                if (searchInput) {
-                    const currentVal = searchInput.value.trim();
-                    if (currentVal) {
-                        // Check duplicates
-                        const terms = currentVal.split(',').map(t => t.trim().toLowerCase());
-                        if (!terms.includes(text.toLowerCase())) {
-                            searchInput.value = currentVal + ', ' + text;
-                        }
-                    } else {
-                        searchInput.value = text;
+                    if (start < end) {
+                        text = val.substring(start, end);
                     }
-
-                    // Trigger search
-                    searchTable(true);
-                    searchInput.focus();
+                } else if (range.startContainer.nodeType === Node.ELEMENT_NODE) {
+                    // If hovering over an input/textarea element directly
+                    const hoveredEl = range.startContainer;
+                    if (hoveredEl.tagName === 'INPUT' || hoveredEl.tagName === 'TEXTAREA') {
+                        // For inputs, we can't easily get the character under mouse without it being focused,
+                        // but if it IS focused, it might already be handled.
+                        // However, we can use the "under cursor" logic if it's the active element.
+                        if (hoveredEl === activeElement) {
+                            const val = hoveredEl.value;
+                            const cursor = hoveredEl.selectionStart;
+                            let start = cursor;
+                            while (start > 0 && /[^\s]/.test(val[start - 1])) start--;
+                            let end = cursor;
+                            while (end < val.length && /[^\s]/.test(val[end])) end++;
+                            if (start < end) text = val.substring(start, end);
+                        }
+                    }
                 }
+            }
+        }
+
+        // 4. Fallback: If still no text and we ARE in an input, use the cursor position (existing behavior)
+        if (!text && activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
+            const val = activeElement.value;
+            const cursor = activeElement.selectionStart;
+            let start = cursor;
+            while (start > 0 && /[^\s]/.test(val[start - 1])) start--;
+            let end = cursor;
+            while (end < val.length && /[^\s]/.test(val[end])) end++;
+            if (start < end) text = val.substring(start, end);
+        }
+
+        if (text) {
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                const currentVal = searchInput.value.trim();
+                if (currentVal) {
+                    const terms = currentVal.split(',').map(t => t.trim().toLowerCase());
+                    if (!terms.includes(text.toLowerCase())) {
+                        searchInput.value = currentVal + ', ' + text;
+                    }
+                } else {
+                    searchInput.value = text;
+                }
+                searchTable(true);
+                searchInput.focus();
             }
         }
     }

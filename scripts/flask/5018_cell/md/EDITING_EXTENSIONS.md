@@ -8,7 +8,10 @@
 - **Matching:** Each cell is checked against all terms, and if any term matches, the row is shown.
 - **Highlighting:** `highlightMultipleTermsInHtml()` manages merged/overlapping matches.
 - **Overlay:** `createTextHighlightOverlayMulti()` for input/textarea elements.
-- **Move Matches (⇅):** A special button appears in the search box when results are found. Clicking it moves all matched rows to follow the first matched row in the sheet, effectively grouping them together.
+- **Move Matches (⇅):** A special button appears in the search box when results are found. Clicking it performs dual-level grouping:
+  - **Sheet Level:** All matching rows are moved to follow the first matched row's original position.
+  - **Cell Level:** Within each matched row, all internal lines matching the search terms are moved to the top of that cell (following the cell's first match).
+  - **Logic:** Requires at least 2 total matches (either 2+ rows or 2+ lines in a single cell) to activate. Automatically triggers a search refresh upon completion to show the updated layout.
 
 ## Line Conversion Tools
 **Implementation:**
@@ -35,11 +38,12 @@
 **Smart Grouping:** Children stay with their parents during reordering.
 **Function:** `sortLines()`.
 
-## Search Word Under Cursor (F8)
-**Purpose:** Speed up searching by automatically adding the word under the cursor to the search box.
+## Search Word (F8)
+**Purpose:** Speed up searching by automatically adding a word to the search box.
 **Behavior:**
-- **No Selection:** Intelligently detects word boundaries (any non-whitespace characters) around the cursor and adds that word.
-- **Selection:** If text is selected, that specific selection is added.
+- **Hover Mode:** Simply hover your mouse over any word (in a cell or markdown preview) and press **F8**. The tool picks the word under the mouse pointer.
+- **Edit Mode (No Selection):** Picks the word at the current text cursor position.
+- **Selection Mode:** If text is selected (highlighted), that specific text is added.
 - **Result:**
   - Adds the term to the existing search query (comma-separated).
   - Automatically triggers a search recalculation.
