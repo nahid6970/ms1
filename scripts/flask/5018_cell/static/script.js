@@ -10931,6 +10931,16 @@ function showCustomSyntaxColorPicker(index, field, event) {
     };
     popup.appendChild(closeBtn);
 
+    // Close on overlay click
+    overlay.onclick = async (e) => {
+        if (e.target === overlay) {
+            e.stopPropagation();
+            overlay.remove();
+            await saveCustomColorSyntaxes();
+            renderCustomColorSyntaxList();
+        }
+    };
+
     overlay.appendChild(popup);
     document.body.appendChild(overlay);
 
