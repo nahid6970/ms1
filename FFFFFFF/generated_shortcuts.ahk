@@ -536,7 +536,7 @@ PrintScreen::Run("C:\Users\nahid\ms\ms1\Testing\screenshot\region_screenshot.py"
 #v::Run("C:\Users\nahid\ms\ms1\Testing\screenshot\gallery\gallery.py", "", "Hide")
 
 ;! DropClipboard Insert To Field
-^+d:: {
+^+i:: {
     DropClipboard()
     DropClipboard() {
         ; 1. Get current text from clipboard
