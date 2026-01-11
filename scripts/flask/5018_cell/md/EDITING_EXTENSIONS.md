@@ -59,3 +59,13 @@
 - When editing a cell (Input or Textarea), pressing **Tab** inserts a `\t` character at the cursor position.
 - This allows for precise alignment of text using the app's monospaced font support.
 - Focus navigation between cells can still be done via mouse or other keyboard arrows/Enter keys.
+
+## Move Lines Up/Down (Alt + Up / Down)
+**Purpose:** Quickly reorder lines within a cell (Input or Textarea), similar to VS Code's `Alt + Up/Down` feature.
+**Behavior:**
+- **Single Line:** Moves the line containing the cursor up or down.
+- **Selection:** Moves the entire block of selected lines up or down.
+- **Logic:**
+  - Swaps the selected lines with the line above (Alt+Up) or below (Alt+Down).
+  - Preserves the cursor's horizontal position (offset) and the selection range.
+  - Automatically triggers cell auto-resize if wrap mode is enabled.

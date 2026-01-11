@@ -539,6 +539,27 @@ function handleKeyboardShortcuts(e) {
         addRow();
     }
 
+    // Alt+Up to move lines up
+    if (e.altKey && e.key === 'ArrowUp') {
+        const activeElement = document.activeElement;
+        // Should work in any cell input/textarea
+        if ((activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA') &&
+            activeElement.closest('td:not(.row-number)')) {
+            e.preventDefault();
+            moveLines(activeElement, -1);
+        }
+    }
+
+    // Alt+Down to move lines down
+    if (e.altKey && e.key === 'ArrowDown') {
+        const activeElement = document.activeElement;
+        if ((activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA') &&
+            activeElement.closest('td:not(.row-number)')) {
+            e.preventDefault();
+            moveLines(activeElement, 1);
+        }
+    }
+
     // Alt+M to toggle between most recent 2 sheets
     if (e.altKey && e.key === 'm') {
         e.preventDefault();
@@ -557,6 +578,69 @@ function handleKeyboardShortcuts(e) {
                 autoResizeTextarea(textarea);
             }, 10);
         }
+    }
+}
+
+function moveLines(activeElement, direction) {
+    const value = activeElement.value;
+    const start = activeElement.selectionStart;
+    const end = activeElement.selectionEnd;
+
+    const lines = value.split('\n');
+
+    // Find affected lines
+    const startLineIndex = value.substring(0, start).split('\n').length - 1;
+    let endLineIndex = value.substring(0, end).split('\n').length - 1;
+
+    // If selection ends at a newline, exclude that line unless it's just a cursor
+    if (end > start && value[end - 1] === '\n') {
+        endLineIndex--;
+    }
+
+    // Boundary checks
+    if (direction === -1 && startLineIndex === 0) return;
+    if (direction === 1 && endLineIndex === lines.length - 1) return;
+
+    // Extract the lines to be moved
+    const movedLines = lines.splice(startLineIndex, endLineIndex - startLineIndex + 1);
+
+    // Re-insert at new position
+    if (direction === -1) {
+        lines.splice(startLineIndex - 1, 0, ...movedLines);
+    } else {
+        lines.splice(startLineIndex + 1, 0, ...movedLines);
+    }
+
+    const newValue = lines.join('\n');
+    activeElement.value = newValue;
+
+    // Restore selection
+    let newStart = 0;
+    for (let i = 0; i < (startLineIndex + direction); i++) {
+        newStart += lines[i].length + 1;
+    }
+    // Add offset within the line
+    const startOfSourceLine = value.lastIndexOf('\n', start - 1) + 1;
+    const offsetInStartLine = start - startOfSourceLine;
+    newStart += offsetInStartLine;
+
+    let newEnd = 0;
+    for (let i = 0; i < (startLineIndex + direction); i++) {
+        newEnd += lines[i].length + 1;
+    }
+    const offsetFromSelectionStart = end - start;
+    newEnd += offsetInStartLine + offsetFromSelectionStart;
+
+    activeElement.selectionStart = newStart;
+    activeElement.selectionEnd = newEnd;
+
+    // Trigger change
+    const changeEvent = new Event('input', { bubbles: true });
+    activeElement.dispatchEvent(changeEvent);
+
+    // Auto-resize if wrap enabled
+    if (activeElement.tagName === 'TEXTAREA' && localStorage.getItem('rowWrapEnabled') === 'true') {
+        autoResizeTextarea(activeElement);
     }
 }
 
