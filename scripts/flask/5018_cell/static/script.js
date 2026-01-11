@@ -362,6 +362,68 @@ function handleKeyboardShortcuts(e) {
         toggleTopRibbons();
     }
 
+    // F8 to search word under cursor
+    if (e.key === 'F8') {
+        e.preventDefault();
+        const activeElement = document.activeElement;
+        if (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA') {
+            let text = '';
+
+            // First check if there is an active selection
+            if (activeElement.selectionStart !== activeElement.selectionEnd) {
+                text = activeElement.value.substring(activeElement.selectionStart, activeElement.selectionEnd);
+            }
+
+            // If no selection, get the word under the cursor
+            if (!text) {
+                const val = activeElement.value;
+                const cursor = activeElement.selectionStart;
+
+                // Find start of word (look backwards)
+                // Use [^\s] to match any non-whitespace character (more robust than \w)
+                let start = cursor;
+                while (start > 0 && /[^\s]/.test(val[start - 1])) {
+                    start--;
+                }
+
+                // Find end of word (look forwards)
+                let end = cursor;
+                while (end < val.length && /[^\s]/.test(val[end])) {
+                    end++;
+                }
+
+                if (start < end) {
+                    text = val.substring(start, end);
+                }
+            }
+
+            if (text) {
+                // Determine if we should append or replace
+                const searchInput = document.getElementById('searchInput');
+
+                // If appending is desired (Shift+F8?), or just default replace/append logic?
+                // User said "add it to search box", which I implemented as comma-append.
+
+                if (searchInput) {
+                    const currentVal = searchInput.value.trim();
+                    if (currentVal) {
+                        // Check duplicates
+                        const terms = currentVal.split(',').map(t => t.trim().toLowerCase());
+                        if (!terms.includes(text.toLowerCase())) {
+                            searchInput.value = currentVal + ', ' + text;
+                        }
+                    } else {
+                        searchInput.value = text;
+                    }
+
+                    // Trigger search
+                    searchTable();
+                    searchInput.focus();
+                }
+            }
+        }
+    }
+
     // Ctrl+Shift+D to select next occurrence (multi-cursor simulation)
     if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'D') {
         const activeElement = document.activeElement;
@@ -5010,6 +5072,7 @@ function createTextHighlightOverlayMulti(cell, input, searchTerms) {
     // Get computed styles from input
     const computedStyle = window.getComputedStyle(input);
 
+    // Get input position within cell
     // Get input position within cell
     const cellRect = cell.getBoundingClientRect();
     const inputRect = input.getBoundingClientRect();
