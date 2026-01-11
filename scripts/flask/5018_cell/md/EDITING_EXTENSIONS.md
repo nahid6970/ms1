@@ -44,3 +44,18 @@
   - Automatically triggers a search recalculation.
   - Focuses the search box.
 - **Smart Recalculation:** Focusing the search box or using F8 forces a fresh search, ensuring results are always up-to-date with recent cell edits.
+
+## Swap Word Position (F9)
+**Purpose:** Quickly swap the position of two words or phrases separated by a delimiter.
+**Behavior:**
+- Select text containing two parts separated by a spacer (space, tab, or comma).
+- Press **F9** to swap their positions while preserving the exact spacer in the middle.
+- **Example:** `A , B` becomes `B , A`.
+- **Note:** This is useful for reordering paired data or fixing word order.
+
+## Literal Tab Insertion (Tab)
+**Purpose:** Use the **Tab** key to insert actual tab characters within cells instead of moving focus.
+**Behavior:**
+- When editing a cell (Input or Textarea), pressing **Tab** inserts a `\t` character at the cursor position.
+- This allows for precise alignment of text using the app's monospaced font support.
+- Focus navigation between cells can still be done via mouse or other keyboard arrows/Enter keys.

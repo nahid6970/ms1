@@ -290,6 +290,31 @@ function applyFontSizeScale() {
 
 
 function handleKeyboardShortcuts(e) {
+    // Tab key handling in cells
+    if (e.key === 'Tab') {
+        const activeElement = document.activeElement;
+        // Check if we are in a cell input/textarea (not search input or other modals)
+        if ((activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA') &&
+            activeElement.closest('td:not(.row-number)')) {
+
+            e.preventDefault();
+            const start = activeElement.selectionStart;
+            const end = activeElement.selectionEnd;
+            const value = activeElement.value;
+
+            // Insert tab character
+            activeElement.value = value.substring(0, start) + "\t" + value.substring(end);
+
+            // Put cursor after the tab
+            activeElement.selectionStart = activeElement.selectionEnd = start + 1;
+
+            // Trigger change event to update cell
+            const changeEvent = new Event('input', { bubbles: true });
+            activeElement.dispatchEvent(changeEvent);
+            return;
+        }
+    }
+
     // Ctrl+S or Cmd+S to save
     if ((e.ctrlKey || e.metaKey) && e.key === 's') {
         e.preventDefault();
