@@ -1,6 +1,8 @@
-/* Cyberpunk styling for Add/Edit Sidebar Button Popup */
+/* Cyberpunk styling for Add/Edit Sidebar Button Popup AND Link Popups */
 #add-sidebar-button-popup .Menu,
-#edit-sidebar-button-popup .Menu {
+#edit-sidebar-button-popup .Menu,
+#add-link-popup .Menu,
+#edit-link-popup .Menu {
     background-color: #0a0a0f !important;
     border: 2px solid #00ff41 !important;
     box-shadow: 0 0 20px rgba(0, 255, 65, 0.4) !important;
@@ -9,7 +11,9 @@
 }
 
 #add-sidebar-button-popup h3,
-#edit-sidebar-button-popup h3 {
+#edit-sidebar-button-popup h3,
+#add-link-popup h3,
+#edit-link-popup h3 {
     color: #00ff41 !important;
     text-shadow: 0 0 5px rgba(0, 255, 65, 0.5);
     font-family: 'JetBrainsMono NFP', monospace;
@@ -18,7 +22,9 @@
 }
 
 #add-sidebar-button-popup .close-button,
-#edit-sidebar-button-popup .close-button {
+#edit-sidebar-button-popup .close-button,
+#add-link-popup .close-button,
+#edit-link-popup .close-button {
     color: #ff0055 !important;
     background: transparent !important;
     font-size: 28px;
@@ -26,7 +32,9 @@
 }
 
 #add-sidebar-button-popup .close-button:hover,
-#edit-sidebar-button-popup .close-button:hover {
+#edit-sidebar-button-popup .close-button:hover,
+#add-link-popup .close-button:hover,
+#edit-link-popup .close-button:hover {
     text-shadow: 0 0 10px #ff0055;
     transform: scale(1.1);
 }
@@ -36,7 +44,15 @@
 #add-sidebar-button-popup select,
 #edit-sidebar-button-popup input[type="text"],
 #edit-sidebar-button-popup input[type="url"],
-#edit-sidebar-button-popup select {
+#edit-sidebar-button-popup select,
+#add-link-popup input[type="text"],
+#add-link-popup input[type="url"],
+#add-link-popup select,
+#add-link-popup textarea,
+#edit-link-popup input[type="text"],
+#edit-link-popup input[type="url"],
+#edit-link-popup select,
+#edit-link-popup textarea {
     background-color: #1a1a20 !important;
     border: 1px solid #333 !important;
     color: #ffffff !important;
@@ -48,23 +64,34 @@
 #add-sidebar-button-popup input:focus,
 #add-sidebar-button-popup select:focus,
 #edit-sidebar-button-popup input:focus,
-#edit-sidebar-button-popup select:focus {
+#edit-sidebar-button-popup select:focus,
+#add-link-popup input:focus,
+#add-link-popup select:focus,
+#add-link-popup textarea:focus,
+#edit-link-popup input:focus,
+#edit-link-popup select:focus,
+#edit-link-popup textarea:focus {
     border-color: #00ff41 !important;
     box-shadow: 0 0 10px rgba(0, 255, 65, 0.2) !important;
     outline: none;
 }
 
 #add-sidebar-button-popup h4,
-#edit-sidebar-button-popup h4 {
+#edit-sidebar-button-popup h4,
+#add-link-popup h4,
+#edit-link-popup h4 {
     color: #00ff41 !important;
     border-bottom: 1px solid #00ff41 !important;
     text-transform: uppercase;
     font-size: 0.9em;
     margin-top: 20px !important;
+    margin-bottom: 10px !important;
 }
 
 #add-sidebar-button-popup button[type="submit"],
-#edit-sidebar-button-popup button[type="submit"] {
+#edit-sidebar-button-popup button[type="submit"],
+#add-link-popup button[type="submit"],
+#edit-link-popup button[type="submit"] {
     background-color: transparent !important;
     color: #00ff41 !important;
     border: 1px solid #00ff41 !important;
@@ -78,7 +105,9 @@
 }
 
 #add-sidebar-button-popup button[type="submit"]:hover,
-#edit-sidebar-button-popup button[type="submit"]:hover {
+#edit-sidebar-button-popup button[type="submit"]:hover,
+#add-link-popup button[type="submit"]:hover,
+#edit-link-popup button[type="submit"]:hover {
     background-color: #00ff41 !important;
     color: #000000 !important;
     box-shadow: 0 0 15px rgba(0, 255, 65, 0.5);
@@ -86,7 +115,41 @@
 
 /* Checkbox styling override */
 #add-sidebar-button-popup label,
-#edit-sidebar-button-popup label {
+#edit-sidebar-button-popup label,
+#add-link-popup label,
+#edit-link-popup label {
     color: #cccccc !important;
     font-size: 0.9em;
+}
+
+/* Specifically for URL add button in link popups */
+.add-url-btn {
+    background-color: transparent !important;
+    color: #00ff41 !important;
+    border: 1px solid #00ff41 !important;
+    border-radius: 0 !important;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.add-url-btn:hover {
+    background-color: #00ff41 !important;
+    color: black !important;
+    box-shadow: 0 0 5px rgba(0, 255, 65, 0.5);
+}
+
+/* Preview button styling */
+.preview-note-button {
+    background-color: #1a1a20 !important;
+    border: 1px solid #00f3ff !important;
+    /* Keep preview button cyan for distinction */
+    color: #00f3ff !important;
+    border-radius: 0 !important;
+    box-shadow: 0 0 5px rgba(0, 243, 255, 0.2) !important;
+}
+
+.preview-note-button:hover {
+    background-color: #00f3ff !important;
+    color: #000000 !important;
+    box-shadow: 0 0 15px rgba(0, 243, 255, 0.6) !important;
 }
