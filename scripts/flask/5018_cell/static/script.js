@@ -5893,6 +5893,36 @@ function positionCursorAtMouseClick(textarea, mouseEvent) {
         // Ensure we don't scroll beyond the content bounds
         const maxScrollTop = Math.max(0, textarea.scrollHeight - textarea.clientHeight);
         textarea.scrollTop = Math.max(0, Math.min(targetScrollTop, maxScrollTop));
+        
+        // Also scroll the table container to ensure cursor line is visible below header
+        const tableContainer = document.querySelector('.table-container');
+        const headerRow = document.querySelector('#dataTable thead');
+        if (tableContainer && headerRow) {
+            const headerHeight = headerRow.getBoundingClientRect().height;
+            const containerRect = tableContainer.getBoundingClientRect();
+            const cell = textarea.closest('td');
+            
+            if (cell) {
+                const cellRect = cell.getBoundingClientRect();
+                // Calculate where the cursor line is in the viewport
+                const cursorLineInCell = cursorLineTop - textarea.scrollTop;
+                const cursorLineInViewport = cellRect.top + cursorLineInCell;
+                
+                // Target position: cursor line should be visible just below header (with some padding)
+                const targetViewportY = containerRect.top + headerHeight + 50;
+                
+                // If cursor line is above the target position, scroll the container
+                if (cursorLineInViewport < targetViewportY) {
+                    const scrollAdjustment = targetViewportY - cursorLineInViewport;
+                    tableContainer.scrollTop = Math.max(0, tableContainer.scrollTop - scrollAdjustment);
+                }
+                // If cursor line is below the visible area, scroll down
+                else if (cursorLineInViewport > containerRect.bottom - 50) {
+                    const scrollAdjustment = cursorLineInViewport - (containerRect.bottom - 100);
+                    tableContainer.scrollTop = tableContainer.scrollTop + scrollAdjustment;
+                }
+            }
+        }
     });
 }
 
