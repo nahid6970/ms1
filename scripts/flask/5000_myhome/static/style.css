@@ -5,7 +5,8 @@
 
 /* Topbar - Cyberpunk styling */
 .topbar {
-  position: relative;
+  position: sticky;
+  top: 10px;
   width: fit-content;
   max-width: 95%;
   /* Prevent overflowing on small screens */
