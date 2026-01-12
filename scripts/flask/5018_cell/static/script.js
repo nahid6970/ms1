@@ -5937,19 +5937,12 @@ function positionCursorAtMouseClick(textarea, mouseEvent) {
                 const cursorLineInCell = cursorLineTop - textarea.scrollTop;
                 const cursorLineInViewport = cellRect.top + cursorLineInCell;
                 
-                // Target position: cursor line should be visible just below header (with some padding)
-                const targetViewportY = containerRect.top + headerHeight + 50;
+                // Target position: cursor line should be immediately after header (with minimal padding)
+                const targetViewportY = containerRect.top + headerHeight + 10;
                 
-                // If cursor line is above the target position, scroll the container
-                if (cursorLineInViewport < targetViewportY) {
-                    const scrollAdjustment = targetViewportY - cursorLineInViewport;
-                    tableContainer.scrollTop = Math.max(0, tableContainer.scrollTop - scrollAdjustment);
-                }
-                // If cursor line is below the visible area, scroll down
-                else if (cursorLineInViewport > containerRect.bottom - 50) {
-                    const scrollAdjustment = cursorLineInViewport - (containerRect.bottom - 100);
-                    tableContainer.scrollTop = tableContainer.scrollTop + scrollAdjustment;
-                }
+                // Always scroll to position cursor line right after header
+                const scrollAdjustment = cursorLineInViewport - targetViewportY;
+                tableContainer.scrollTop = tableContainer.scrollTop + scrollAdjustment;
             }
         }
     });
