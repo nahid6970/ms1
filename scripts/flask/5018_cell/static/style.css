@@ -2905,10 +2905,10 @@ Markdown Table Styles */
     border-bottom: 1px solid #000000 !important;
 }
 
-/* Hide markdown preview when toggle is off - REMOVED to allow hover picking to work always */
-/* .hide-markdown-preview .markdown-preview {
+/* Hide markdown preview when toggle is off (raw mode) */
+.hide-markdown-preview .markdown-preview {
     display: none !important;
-} */
+}
 
 .hide-markdown-preview input.has-markdown,
 .hide-markdown-preview textarea.has-markdown {
