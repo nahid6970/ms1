@@ -2905,11 +2905,8 @@ Markdown Table Styles */
     border-bottom: 1px solid #000000 !important;
 }
 
-/* Hide markdown preview when toggle is off (raw mode) */
-.hide-markdown-preview .markdown-preview {
-    display: none !important;
-}
-
+/* Raw mode: preview is not created, so no need to hide it */
+/* Input/textarea styling in raw mode */
 .hide-markdown-preview input.has-markdown,
 .hide-markdown-preview textarea.has-markdown {
     opacity: 1 !important;

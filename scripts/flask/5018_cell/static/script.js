@@ -1376,6 +1376,17 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
     const hasMarkdown = checkHasMarkdown(value);
     const isTextarea = inputElement && inputElement.tagName === 'TEXTAREA';
 
+    // In raw mode, don't create/update preview overlay - just show the input directly
+    if (!isMarkdownEnabled) {
+        const existingPreview = cell.querySelector('.markdown-preview');
+        if (existingPreview) {
+            existingPreview.remove();
+        }
+        inputElement.classList.remove('has-markdown');
+        delete inputElement.dataset.formattedHtml;
+        return;
+    }
+
     // Remove existing preview
     const existingPreview = cell.querySelector('.markdown-preview');
     if (existingPreview) {
@@ -1389,11 +1400,10 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
     if (value && isTextCell) {
         // Determine content based on toggle
         let formattedHTML;
-        if (isMarkdownEnabled && hasMarkdown) {
+        if (hasMarkdown) {
             formattedHTML = parseMarkdown(value);
         } else {
-            // Raw mode or plain text: Escape HTML but apply custom color syntaxes
-            // Using applyCustomColorSyntaxesRaw ensures we see the markers
+            // Plain text: Escape HTML but apply custom color syntaxes
             formattedHTML = applyCustomColorSyntaxesRaw(escapeHtml(value)).replace(/\n/g, '<br>');
         }
 
@@ -9718,8 +9728,31 @@ window.addEventListener('load', () => {
 function adjustCellHeightForMarkdown(cell) {
     const input = cell.querySelector('input, textarea');
     const preview = cell.querySelector('.markdown-preview');
+    const isMarkdownEnabled = localStorage.getItem('markdownPreviewEnabled') !== 'false';
 
-    if (!input || !preview || !input.classList.contains('has-markdown')) {
+    if (!input) {
+        return;
+    }
+
+    // In raw mode (no preview), just resize based on input content
+    if (!isMarkdownEnabled || !preview) {
+        if (input.tagName === 'TEXTAREA') {
+            // Clear existing height to measure natural scrollHeight
+            input.style.height = 'auto';
+            input.style.minHeight = '';
+            
+            // Force reflow
+            void input.offsetHeight;
+            
+            // Set height based on content with buffer
+            const inputHeight = input.scrollHeight + 10;
+            input.style.height = inputHeight + 'px';
+            input.style.minHeight = inputHeight + 'px';
+        }
+        return;
+    }
+
+    if (!input.classList.contains('has-markdown')) {
         return;
     }
 
@@ -9761,15 +9794,29 @@ function adjustCellHeightForMarkdown(cell) {
     preview.style.display = originalPreviewDisplay;
 }
 
-// Apply to all cells with markdown after rendering
+// Apply to all cells with markdown after rendering (or all textareas in raw mode)
 function adjustAllMarkdownCells() {
-    const cells = document.querySelectorAll('td .has-markdown');
-    cells.forEach(input => {
-        const cell = input.closest('td');
-        if (cell) {
-            adjustCellHeightForMarkdown(cell);
-        }
-    });
+    const isMarkdownEnabled = localStorage.getItem('markdownPreviewEnabled') !== 'false';
+    
+    if (isMarkdownEnabled) {
+        // In markdown mode, only adjust cells with has-markdown class
+        const cells = document.querySelectorAll('td .has-markdown');
+        cells.forEach(input => {
+            const cell = input.closest('td');
+            if (cell) {
+                adjustCellHeightForMarkdown(cell);
+            }
+        });
+    } else {
+        // In raw mode, adjust all textareas
+        const textareas = document.querySelectorAll('td textarea');
+        textareas.forEach(textarea => {
+            const cell = textarea.closest('td');
+            if (cell && !cell.classList.contains('merged-cell')) {
+                adjustCellHeightForMarkdown(cell);
+            }
+        });
+    }
 }
 
 // Call after table renders
