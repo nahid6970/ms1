@@ -30,19 +30,21 @@ Added clipboard copy functionality to F8 handler:
 **Problem:**
 1. When clicking on markdown preview to edit, if the cursor position was far down in the cell content, users had to scroll to see it
 2. After exiting edit mode (blur), the scroll position was lost and users couldn't find where they were
+3. Switching between markdown and raw mode while editing caused scroll position issues
 
 **Solution:**
 Updated `positionCursorAtMouseClick()` to:
-1. Scroll the table container to show the cursor line just below the header (with 50px padding)
+1. Always scroll the table container to position the cursor line immediately after the header (10px padding)
 2. Save the original scroll position before scrolling
 3. Add a blur event listener that restores the original scroll position when exiting edit mode
+4. Use `e.relatedTarget` to detect if blur was caused by clicking toggle buttons - if so, skip restore and let `renderTable` handle scroll
 
-This way users can see what they're editing, but when done, they return to their original view.
+This way users can see what they're editing at the top of the view, and when done, they return to their original position.
 
 **Files Modified:**
-- `static/script.js` - `positionCursorAtMouseClick()` (~line 5850)
+- `static/script.js` - `positionCursorAtMouseClick()` (~line 5870)
 
-**Related Issues:** None
+**Related Issues:** Raw mode toggle scroll issues
 
 ---
 
