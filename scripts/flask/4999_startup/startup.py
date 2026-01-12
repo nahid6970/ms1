@@ -479,11 +479,14 @@ class MainWindow(QMainWindow):
         toolbar_layout.addWidget(CyberButton("SCAN_SYS", color=CP_TEXT, parent=self, is_outlined=True))
         toolbar_layout.itemAt(2).widget().clicked.connect(self.scan_folders)
         
+        toolbar_layout.addWidget(CyberButton("SCAN_REG", color="#FF00FF", parent=self, is_outlined=True))
+        toolbar_layout.itemAt(3).widget().clicked.connect(self.scan_registry)
+        
         toolbar_layout.addWidget(CyberButton("PRUNE_LNK", color=CP_RED, parent=self, is_outlined=True))
-        toolbar_layout.itemAt(3).widget().clicked.connect(self.delete_matching_shortcuts) # Del Match
+        toolbar_layout.itemAt(4).widget().clicked.connect(self.delete_matching_shortcuts) # Del Match
 
         toolbar_layout.addWidget(CyberButton("OPEN_DIRS", color=CP_YELLOW, parent=self, is_outlined=True))
-        toolbar_layout.itemAt(4).widget().clicked.connect(self.open_startup_dirs)
+        toolbar_layout.itemAt(5).widget().clicked.connect(self.open_startup_dirs)
 
         toolbar_layout.addStretch()
         
@@ -511,6 +514,73 @@ class MainWindow(QMainWindow):
         self.app_container = self.create_column_box("APPLICATION_LAYER", splitter)
         
         main_layout.addWidget(splitter, stretch=1)
+
+    # ... (other methods)
+
+    def scan_registry(self):
+        self.update_status("SCANNING REGISTRY...")
+        found_items = []
+        names = {i["name"].lower() for i in self.items}
+
+        reg_paths = [
+            (winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run"),
+            (winreg.HKEY_LOCAL_MACHINE, r"Software\Microsoft\Windows\CurrentVersion\Run")
+        ]
+
+        for hkey, path in reg_paths:
+            try:
+                with winreg.OpenKey(hkey, path, 0, winreg.KEY_READ) as key:
+                    count = winreg.QueryInfoKey(key)[1]
+                    for i in range(count):
+                        try:
+                            name, value, _ = winreg.EnumValue(key, i)
+                            if name.lower() in names: continue
+                            
+                            # Simple parsing of command line to get path + args
+                            # This is heuristic; value might be quoted path + args or just path
+                            cmd = str(value)
+                            path_extracted = cmd
+                            args_extracted = ""
+                            
+                            if cmd.startswith('"'):
+                                # Quoted path
+                                close_quote = cmd.find('"', 1)
+                                if close_quote != -1:
+                                    path_extracted = cmd[1:close_quote]
+                                    args_extracted = cmd[close_quote+1:].strip()
+                            else:
+                                # Space separated? hard to tell without checking file existence
+                                # We'll assume the first token is path if it ends in .exe, else keep as is
+                                parts = cmd.split(' ', 1)
+                                if parts[0].lower().endswith('.exe'):
+                                    path_extracted = parts[0]
+                                    args_extracted = parts[1] if len(parts) > 1 else ""
+                            
+                            found_items.append({
+                                "name": name,
+                                "type": "App" if path_extracted.lower().endswith(".exe") else "Command",
+                                "paths": [path_extracted],
+                                "Command": args_extracted,
+                                "ExecutableType": "other"
+                            })
+                        except:
+                            continue
+            except:
+                continue
+
+        if found_items:
+            dialog = ScanResultsDialog(found_items, self)
+            if dialog.exec():
+                selected = dialog.selected_items
+                if selected:
+                    self.items.extend(selected)
+                    self.save_items()
+                    self.populate_lists()
+                    self.update_status(f"IMPORTED {len(selected)} REGISTRY ENTRIES")
+                else:
+                    self.update_status("IMPORT CANCELLED")
+        else:
+            self.update_status("REGISTRY SCAN COMPLETE: NO NEW ENTRIES")
 
     def open_startup_dirs(self):
         folders = [
