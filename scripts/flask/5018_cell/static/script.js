@@ -1357,8 +1357,10 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
 
     if (!inputElement) return;
 
-    // Parse markdown-style formatting
+    // Parse markdown if enabled, otherwise just show raw text with syntax
+    const isMarkdownEnabled = localStorage.getItem('markdownPreviewEnabled') !== 'false';
     const hasMarkdown = checkHasMarkdown(value);
+    const isTextarea = inputElement && inputElement.tagName === 'TEXTAREA';
 
     // Remove existing preview
     const existingPreview = cell.querySelector('.markdown-preview');
@@ -1366,20 +1368,27 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
         existingPreview.remove();
     }
 
-    if (hasMarkdown) {
-        // Store the formatted HTML in a data attribute
-        const formattedHTML = parseMarkdown(value);
-        inputElement.dataset.formattedHtml = formattedHTML;
+    // We always want a preview overlay for hover features (like F8) to work without focus,
+    // especially for textareas/wrapped cells.
+    if (value && (hasMarkdown || isTextarea)) {
+        // Determine content based on toggle
+        let formattedHTML;
+        if (isMarkdownEnabled && hasMarkdown) {
+            formattedHTML = parseMarkdown(value);
+        } else {
+            // Raw mode: Escape HTML but apply custom color syntaxes (keeping markers)
+            formattedHTML = applyCustomColorSyntaxesRaw(escapeHtml(value)).replace(/\n/g, '<br>');
+        }
 
-        // Apply visual indicator
+        inputElement.dataset.formattedHtml = formattedHTML;
         inputElement.classList.add('has-markdown');
 
         // Create preview overlay
         const preview = document.createElement('div');
         preview.className = 'markdown-preview';
-        preview.onmousedown = handlePreviewMouseDown; // Handle clicks to position cursor
+        preview.onmousedown = handlePreviewMouseDown;
         preview.innerHTML = formattedHTML;
-        preview.style.whiteSpace = 'pre-wrap'; // Preserve newlines and spaces
+        preview.style.whiteSpace = 'pre-wrap';
 
         // Copy styles from input/textarea (use inline styles to avoid reflows)
         preview.style.color = inputElement.style.color;
@@ -5677,6 +5686,9 @@ function toggleMarkdownPreview() {
         localStorage.setItem('markdownPreviewEnabled', 'false');
         showToast('Markdown preview disabled', 'success');
     }
+
+    // Refresh table to update all preview overlays with raw/parsed content
+    renderTable();
 }
 
 function toggleCollapsible(id) {
@@ -11404,6 +11416,30 @@ function applyCustomColorSyntaxes(text) {
             if (syntax.isUnderline) style += ' text-decoration: underline;';
 
             return `<span style="${style}">${content}</span>`;
+        });
+    });
+
+    return formatted;
+}
+
+// Similar to applyCustomColorSyntaxes but preserves the makers in the output
+function applyCustomColorSyntaxesRaw(text) {
+    let formatted = text;
+
+    customColorSyntaxes.forEach(syntax => {
+        if (!syntax.marker) return;
+
+        const escapedMarker = syntax.marker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(`${escapedMarker}(.+?)${escapedMarker}`, 'g');
+
+        formatted = formatted.replace(regex, (match, content) => {
+            let style = `background: ${syntax.bgColor}; color: ${syntax.fgColor}; padding: 1px 4px; border-radius: 3px; display: inline; vertical-align: baseline; line-height: 1.3; box-decoration-break: clone; -webkit-box-decoration-break: clone;`;
+
+            if (syntax.isBold) style += ' font-weight: bold;';
+            if (syntax.isItalic) style += ' font-style: italic;';
+            if (syntax.isUnderline) style += ' text-decoration: underline;';
+
+            return `<span style="${style}">${match}</span>`;
         });
     });
 
