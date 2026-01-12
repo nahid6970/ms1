@@ -6,7 +6,7 @@
       "C:\\Users\\nahid\\ms\\ms1\\ahk_v2.ahk"
     ],
     "Command": "",
-    "ps1_command": "Echo HI",
+    "ps1_command": "Start-Process -FilePath \"C:\\Users\\nahid\\ms\\ms1\\ahk_v2.ahk\"",
     "ExecutableType": "other",
     "script_enabled": false
   },
@@ -194,7 +194,8 @@
     "paths": [
       "C:\\WINDOWS\\system32\\AMD\\ANR\\AMDNoiseSuppression.exe"
     ],
-    "Command": ""
+    "Command": "",
+    "script_enabled": false
   },
   {
     "type": "App",
