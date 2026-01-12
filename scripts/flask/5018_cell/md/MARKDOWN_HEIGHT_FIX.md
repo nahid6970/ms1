@@ -14,17 +14,25 @@ The `adjustCellHeightForMarkdown()` function had several issues:
 
 ## Solution Applied
 
-### 1. Fixed `adjustCellHeightForMarkdown()` function (script.js ~line 7715)
+### 1. Fixed `adjustCellHeightForMarkdown()` function (script.js ~line 9727)
 
 **Key improvements:**
 - Wrapped measurements in `requestAnimationFrame()` to ensure browser has finished layout
 - Temporarily removed `position: absolute` from input during measurement
 - Forced reflow using `void cell.offsetHeight` before measuring
 - Used both `getBoundingClientRect()` and `scrollHeight` for more reliable measurements
-- Added 4px buffer to prevent content clipping
+- Added buffer to prevent content clipping
 - Set `minHeight` on both the preview, input, AND the cell itself
+- **Raw mode support**: In raw mode (markdown preview disabled), the function now resizes textareas based on their content without requiring a preview element
 
-### 2. Updated CSS (style.css ~line 726)
+### 2. Raw Mode Height Adjustment
+
+When markdown preview is disabled (raw mode):
+- The function skips preview-related logic
+- Resizes textareas directly based on `scrollHeight`
+- `adjustAllMarkdownCells()` now processes all textareas in raw mode, not just those with `has-markdown` class
+
+### 3. Updated CSS (style.css ~line 726)
 
 Added to `.markdown-preview`:
 ```css
@@ -34,13 +42,9 @@ overflow-wrap: break-word;
 
 This ensures padding is included in height calculations and text wraps properly.
 
-### 3. Immediate height adjustment (script.js ~line 983)
+### 4. Immediate height adjustment (script.js ~line 983)
 
 Added call to `adjustCellHeightForMarkdown(cell)` immediately after creating the preview in `applyMarkdownFormatting()`, ensuring cells are sized correctly as soon as markdown is detected.
-
-### 4. Increased render delay (script.js ~line 7791)
-
-Changed timeout from 100ms to 150ms in the `renderTable` wrapper to give more time for complex markdown content to fully layout before measuring.
 
 ## How to Test
 
@@ -58,17 +62,19 @@ Changed timeout from 100ms to 150ms in the `renderTable` wrapper to give more ti
    - Enter markdown with links
    - Mix of list items and regular content
    - Very long markdown content
+   - **Raw mode**: Toggle markdown preview off and verify cells still expand to show all content
 
 4. Verify:
    - No content is cut off at the bottom
    - Cell heights expand properly
    - Switching between edit mode (focused) and preview mode (unfocused) works smoothly
    - All markdown previews display fully
+   - Raw mode shows all content without cutoff
 
 ## Files Modified
 
-1. `static/script.js` - Lines ~7715-7746, ~983-986, ~7791
-2. `static/style.css` - Lines ~726-742
+1. `static/script.js` - `adjustCellHeightForMarkdown()`, `adjustAllMarkdownCells()`
+2. `static/style.css` - `.markdown-preview` box-sizing
 
 ## Why List Items Worked
 

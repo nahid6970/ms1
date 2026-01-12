@@ -12,6 +12,39 @@ This is a Flask-based web application providing a dynamic, markdown-enabled spre
 - **`templates/index.html`**: UI shell and modal structures.
 - **`export_static.py`**: Standalone HTML export generator.
 
+## 📋 Problems & Fixes Log
+When encountering and fixing bugs or issues, document them in **`md/PROBLEMS_AND_FIXES.md`**.
+
+### Purpose
+- Track historical issues and their solutions
+- Help AI assistants understand past problems and fixes
+- Identify if old fixes might conflict with new features
+- Provide context for debugging similar issues
+
+### Format
+Each entry should include:
+```markdown
+## [Date] - Brief Problem Title
+
+**Problem:** Description of the issue
+
+**Root Cause:** What was causing it
+
+**Solution:** How it was fixed
+
+**Files Modified:** List of changed files
+
+**Related Issues:** Any connected problems or features
+```
+
+### When to Update
+- After fixing any non-trivial bug
+- When a fix involves multiple files or complex logic
+- When a fix might affect other features
+- When reverting or modifying a previous fix
+
+See **[Problems & Fixes Log](md/PROBLEMS_AND_FIXES.md)** for the full history.
+
 ## ⚡ Critical Implementation Rule: "The Rule of 6"
 When adding new **Markdown Syntax** or **Cell Formatting**, you **MUST** update these 6 locations:
 
@@ -43,9 +76,9 @@ The state is managed in a central object synced with `data.json`.
 - **[Recent Sheets (F2)](md/RECENT_SHEETS.md):** Navigation history.
 
 ### Cell & Formatting Features
-- **[Cell-Specific Features](md/CELL_FEATURES.md):** Checkmarks, Sort Rank, Color History, Single Row View.
+- **[Cell-Specific Features](md/CELL_FEATURES.md):** Checkmarks, Sort Rank, Color History, Single Row View, Raw Mode.
 - **[Hidden Content](md/HIDDEN_CONTENT.md):** Collapsible `{{}}` and MCQ `[[]]` logic.
-- **[Special Markdown](md/MARKDOWN_SPECIAL.md):** Small text, custom headings, border boxes, underlines.
+- **[Special Markdown](md/MARKDOWN_SPECIAL.md):** Lists, Small text, custom headings, border boxes, underlines.
 - **[Highlight Shortcuts](md/COLOR_HIGHLIGHT_SHORTCUTS.md):** `==`, `!!`, `??` syntaxes.
 - **[Custom Color Syntaxes](md/CUSTOM_SYNTAX.md):** Dynamic user-defined highlighting.
 
@@ -58,6 +91,10 @@ The state is managed in a central object synced with `data.json`.
 - **[Core Systems](md/CORE_SYSTEMS.md):** Font system, Load timing, Height adjustment, Cursors.
 - **[PDF & Static Export](md/CELL_PDF_EXPORT_FEATURE.md):** Visual capture and standalone generation.
 - **[Clipboard Tools](md/COPY_SHEET_CONTENT.md):** Sheet content copying logic.
+- **[Markdown Height Fix](md/MARKDOWN_HEIGHT_FIX.md):** Cell height adjustment for markdown and raw mode.
+
+### Troubleshooting
+- **[Problems & Fixes Log](md/PROBLEMS_AND_FIXES.md):** Historical bug fixes and solutions.
 
 ---
 *For specific layout features (Timeline, Word Connectors), search for their respective logic in `static/script.js`.*

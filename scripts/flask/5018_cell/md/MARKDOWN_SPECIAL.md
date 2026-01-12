@@ -1,5 +1,28 @@
 # Special Markdown & Highlight Syntaxes
 
+## List Items
+**Syntax:** 
+- `- item` → Bullet list (•)
+- `-- item` → Sub-bullet (◦) with 1em indent
+- `--- item` → Sub-sub-bullet (▪) with 2em indent
+- `1. item` → Numbered list
+
+**Features:**
+- Hanging indent: wrapped lines align with text after the bullet, not the bullet itself
+- Tab preservation: tab characters within list content maintain alignment
+- Uses `display: inline-block` with `text-indent` for proper hanging indent
+- `white-space: pre-wrap` preserves tabs and spaces
+
+**Example:**
+```
+- আকুঞ্চন		প্রসারণ
+- কুঞ্চন		প্রসারণ
+-- Sub-item with indent
+--- Deep nested item
+1. First numbered item
+2. Second numbered item
+```
+
 ## Small Text
 **Syntax:** `..small text..` 
 **Output:** `<span style="font-size: 0.75em;">$1</span>`

@@ -28,3 +28,13 @@
 - Any cell containing **Markdown** markers or **Newlines** is automatically rendered as a multiline textarea.
 - This happens even if global **Wrap (↩️)** is turned off, ensuring your data never gets squashed into a 1-line box.
 - These textareas auto-resize as you type to match the content height.
+
+## Raw Mode (Markdown Preview Toggle)
+**Purpose:** View and edit raw text without markdown rendering.
+**Toggle:** Markdown preview checkbox in toolbar.
+**Behavior:**
+- When disabled, markdown preview overlays are removed
+- Cells show raw text with syntax markers visible
+- Cell heights auto-adjust to show all content (no cutoff)
+- `adjustCellHeightForMarkdown()` handles height in both modes
+- `adjustAllMarkdownCells()` processes all textareas in raw mode
