@@ -88,12 +88,21 @@ function initializeApp() {
         }
     });
 
-    // Save scroll position on scroll
+    // Save scroll position on scroll (delay to avoid overwriting during initial restore)
     const tableContainer = document.querySelector('.table-container');
+    let initialLoadComplete = false;
+    
     if (tableContainer) {
+        // Wait for initial scroll restore to complete before enabling save
+        setTimeout(() => {
+            initialLoadComplete = true;
+        }, 1000);
+        
         tableContainer.addEventListener('scroll', () => {
-            localStorage.setItem('scrollTop', tableContainer.scrollTop);
-            localStorage.setItem('scrollLeft', tableContainer.scrollLeft);
+            if (initialLoadComplete) {
+                localStorage.setItem('scrollTop', tableContainer.scrollTop);
+                localStorage.setItem('scrollLeft', tableContainer.scrollLeft);
+            }
         });
     }
 
@@ -6332,7 +6341,7 @@ function renderTable() {
 
     // Restore scroll position after rendering
     if (tableContainer) {
-        requestAnimationFrame(() => {
+        const restoreScroll = () => {
             // First try to restore from saved position during this render
             if (scrollTop > 0 || scrollLeft > 0) {
                 tableContainer.scrollTop = scrollTop;
@@ -6341,10 +6350,17 @@ function renderTable() {
                 // Otherwise restore from localStorage (after page refresh)
                 const savedScrollTop = parseInt(localStorage.getItem('scrollTop') || '0');
                 const savedScrollLeft = parseInt(localStorage.getItem('scrollLeft') || '0');
-                tableContainer.scrollTop = savedScrollTop;
-                tableContainer.scrollLeft = savedScrollLeft;
+                if (savedScrollTop > 0 || savedScrollLeft > 0) {
+                    tableContainer.scrollTop = savedScrollTop;
+                    tableContainer.scrollLeft = savedScrollLeft;
+                }
             }
-        });
+        };
+        
+        // Try multiple times to ensure scroll is restored after all content loads
+        requestAnimationFrame(restoreScroll);
+        setTimeout(restoreScroll, 100);
+        setTimeout(restoreScroll, 300);
     }
 
     // Update row count display
@@ -9797,6 +9813,11 @@ function adjustCellHeightForMarkdown(cell) {
 // Apply to all cells with markdown after rendering (or all textareas in raw mode)
 function adjustAllMarkdownCells() {
     const isMarkdownEnabled = localStorage.getItem('markdownPreviewEnabled') !== 'false';
+    const tableContainer = document.querySelector('.table-container');
+    
+    // Save scroll position before adjustments
+    const savedScrollTop = tableContainer ? tableContainer.scrollTop : 0;
+    const savedScrollLeft = tableContainer ? tableContainer.scrollLeft : 0;
     
     if (isMarkdownEnabled) {
         // In markdown mode, only adjust cells with has-markdown class
@@ -9817,15 +9838,42 @@ function adjustAllMarkdownCells() {
             }
         });
     }
+    
+    // Restore scroll position after adjustments
+    if (tableContainer && (savedScrollTop > 0 || savedScrollLeft > 0)) {
+        tableContainer.scrollTop = savedScrollTop;
+        tableContainer.scrollLeft = savedScrollLeft;
+    }
 }
 
 // Call after table renders
 const originalRenderTable = renderTable;
 renderTable = function () {
+    const tableContainer = document.querySelector('.table-container');
+    
+    // Save scroll from localStorage for page refresh scenario
+    const savedScrollTop = parseInt(localStorage.getItem('scrollTop') || '0');
+    const savedScrollLeft = parseInt(localStorage.getItem('scrollLeft') || '0');
+    
+    // Also save current scroll if already scrolled
+    const currentScrollTop = tableContainer ? tableContainer.scrollTop : 0;
+    const currentScrollLeft = tableContainer ? tableContainer.scrollLeft : 0;
+    
+    // Use whichever is non-zero (current takes priority)
+    const targetScrollTop = currentScrollTop > 0 ? currentScrollTop : savedScrollTop;
+    const targetScrollLeft = currentScrollLeft > 0 ? currentScrollLeft : savedScrollLeft;
+    
     originalRenderTable.apply(this, arguments);
+    
     setTimeout(() => {
         adjustAllMarkdownCells();
-    }, 300);
+        
+        // Final scroll restore after all adjustments
+        if (tableContainer && (targetScrollTop > 0 || targetScrollLeft > 0)) {
+            tableContainer.scrollTop = targetScrollTop;
+            tableContainer.scrollLeft = targetScrollLeft;
+        }
+    }, 350);
 };
 
 // Add resize listener to handle window scaling
