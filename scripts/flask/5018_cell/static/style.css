@@ -412,6 +412,16 @@ body {
     opacity: 0.4;
 }
 
+/* Raw mode indicator - orange background when raw mode is active */
+.raw-mode-active {
+    background: #fff3e0 !important;
+    border-color: #ff9800 !important;
+}
+
+.raw-mode-active span {
+    opacity: 1 !important;
+}
+
 .btn-delete-empty {
     background: #fff5f5;
     border-color: #dc3545;

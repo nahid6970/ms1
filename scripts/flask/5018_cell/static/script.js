@@ -189,10 +189,14 @@ function initializeApp() {
     const markdownToggle = document.getElementById('markdownToggle');
     if (markdownToggle) {
         markdownToggle.checked = markdownPreviewEnabled;
+        const toggleLabel = markdownToggle.closest('label');
         if (!markdownPreviewEnabled) {
             const table = document.getElementById('dataTable');
             if (table) {
                 table.classList.add('hide-markdown-preview');
+            }
+            if (toggleLabel) {
+                toggleLabel.classList.add('raw-mode-active');
             }
         }
     }
@@ -5712,15 +5716,18 @@ function toggleRowNumbers() {
 function toggleMarkdownPreview() {
     const markdownToggle = document.getElementById('markdownToggle');
     const table = document.getElementById('dataTable');
+    const toggleLabel = markdownToggle.closest('label');
 
     if (markdownToggle.checked) {
         table.classList.remove('hide-markdown-preview');
+        toggleLabel.classList.remove('raw-mode-active');
         localStorage.setItem('markdownPreviewEnabled', 'true');
         showToast('Markdown preview enabled', 'success');
     } else {
         table.classList.add('hide-markdown-preview');
+        toggleLabel.classList.add('raw-mode-active');
         localStorage.setItem('markdownPreviewEnabled', 'false');
-        showToast('Markdown preview disabled', 'success');
+        showToast('Raw mode enabled', 'info');
     }
 
     // Refresh table to update all preview overlays with raw/parsed content
