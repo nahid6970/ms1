@@ -7,7 +7,18 @@ This document tracks historical bugs, issues, and their solutions. Use this to:
 
 ---
 
-## [2026-01-12] - F8 Word Pick Now Copies to Clipboard
+## [2026-01-12 23:45] - PENDING: Markdown Edit to Raw Mode Scroll Jump
+
+**Problem:**
+When exiting markdown edit mode and then switching to raw mode, the scroll jumps to the end of the sheet.
+
+**Status:** PENDING - To be fixed later
+
+**Related Issues:** Click-to-Edit scroll restore, Raw mode toggle
+
+---
+
+## [2026-01-12 23:30] - F8 Word Pick Now Copies to Clipboard
 
 **Problem:**
 When using F8 to pick a word under cursor/hover, users wanted the word to also be copied to clipboard for easy pasting elsewhere.
@@ -25,7 +36,7 @@ Added clipboard copy functionality to F8 handler:
 
 ---
 
-## [2026-01-12] - Click-to-Edit Cursor Visibility and Scroll Restore
+## [2026-01-12 23:00] - Click-to-Edit Cursor Visibility and Scroll Restore
 
 **Problem:**
 1. When clicking on markdown preview to edit, if the cursor position was far down in the cell content, users had to scroll to see it
@@ -48,7 +59,7 @@ This way users can see what they're editing at the top of the view, and when don
 
 ---
 
-## [2026-01-12] - Raw Mode Visual Indicator
+## [2026-01-12 22:30] - Raw Mode Visual Indicator
 
 **Problem:**
 It was hard to tell when raw mode (markdown preview disabled) was active vs when markdown preview was enabled.
@@ -68,7 +79,7 @@ It was hard to tell when raw mode (markdown preview disabled) was active vs when
 
 ---
 
-## [2026-01-12] - Scroll Position Lost on Refresh and Raw Mode Toggle
+## [2026-01-12 22:00] - Scroll Position Lost on Refresh and Raw Mode Toggle
 
 **Problem:**
 1. Page refresh caused scroll to jump to top
@@ -92,7 +103,7 @@ It was hard to tell when raw mode (markdown preview disabled) was active vs when
 
 ---
 
-## [2026-01-12] - List Item Tab Alignment & Hanging Indent Issues
+## [2026-01-12 21:30] - List Item Tab Alignment & Hanging Indent Issues
 
 **Problem:** 
 1. Tab characters within list items (`- item`) weren't aligning properly across different list items
@@ -118,7 +129,7 @@ Changed list rendering to use:
 
 ---
 
-## [2026-01-12] - Raw Mode Showing Text Twice
+## [2026-01-12 21:00] - Raw Mode Showing Text Twice
 
 **Problem:**
 When markdown preview was disabled (raw mode), cell content appeared twice - both the input/textarea and a preview overlay were visible.
@@ -141,7 +152,7 @@ The CSS `.hide-markdown-preview .markdown-preview { display: none }` was kept co
 
 ---
 
-## [2026-01-12] - Raw Mode Cell Height Not Adjusting
+## [2026-01-12 20:30] - Raw Mode Cell Height Not Adjusting
 
 **Problem:**
 In raw mode (markdown preview disabled), cells weren't expanding to show all content. The last lines of text were cut off.
@@ -165,7 +176,7 @@ Updated `adjustCellHeightForMarkdown()` to:
 ## Template for New Entries
 
 ```markdown
-## [YYYY-MM-DD] - Brief Problem Title
+## [YYYY-MM-DD HH:MM] - Brief Problem Title
 
 **Problem:** 
 Description of the issue observed
