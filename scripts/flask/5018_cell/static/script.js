@@ -5904,12 +5904,21 @@ function positionCursorAtMouseClick(textarea, mouseEvent) {
                 textarea.dataset.originalContainerScrollLeft = tableContainer.scrollLeft;
                 
                 // Add blur handler to restore scroll position
-                const restoreScroll = () => {
-                    const savedTop = parseFloat(textarea.dataset.originalContainerScrollTop);
-                    const savedLeft = parseFloat(textarea.dataset.originalContainerScrollLeft);
-                    if (!isNaN(savedTop)) {
-                        tableContainer.scrollTop = savedTop;
-                        tableContainer.scrollLeft = savedLeft;
+                const restoreScroll = (e) => {
+                    // Don't restore if blur was caused by mode toggle button click
+                    const relatedTarget = e.relatedTarget;
+                    const isToggleAction = relatedTarget?.closest('.btn-icon-toggle') || 
+                                          relatedTarget?.closest('#markdownToggle');
+                    
+                    if (!isToggleAction) {
+                        const savedTop = parseFloat(textarea.dataset.originalContainerScrollTop);
+                        const savedLeft = parseFloat(textarea.dataset.originalContainerScrollLeft);
+                        if (!isNaN(savedTop) && tableContainer) {
+                            requestAnimationFrame(() => {
+                                tableContainer.scrollTop = savedTop;
+                                tableContainer.scrollLeft = savedLeft;
+                            });
+                        }
                     }
                     delete textarea.dataset.originalContainerScrollTop;
                     delete textarea.dataset.originalContainerScrollLeft;
