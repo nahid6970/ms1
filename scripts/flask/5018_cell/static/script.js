@@ -2249,36 +2249,36 @@ function oldParseMarkdownBody(lines) {
         // Subscript: ~text~ -> <sub>text</sub>
         formatted = formatted.replace(/~(.+?)~/g, '<sub>$1</sub>');
 
-        // Sub-sublist: --- item -> ▪ item with more indent
+        // Sub-sublist: --- item -> ▪ item with more indent (small square)
+        // Using text-indent for hanging indent to preserve tab alignment
         if (formatted.trim().startsWith('--- ')) {
-            const spaces = formatted.match(/^(\s*)/)[0];
-            const content = formatted.trim().substring(4);
-            formatted = `${spaces}<span style="display: inline-block; width: 5.5ch; text-align: left; vertical-align: baseline;"><span style="display: inline-block; width: 4ch;"></span><span style="font-size: 0.85em; position: relative; top: -0.05em;">▪</span></span>${content}`;
+            const content = formatted.replace(/^(\s*)--- (.+)$/, '$2');
+            formatted = formatted.replace(/^(\s*)--- .+$/, '$1<span style="display: inline-block; width: 100%; margin-left: 3em; text-indent: -1em; white-space: pre-wrap;"><span style="display: inline-block; width: 1em; text-indent: 0;">▪</span>▪CONTENT▪</span>');
+            formatted = formatted.replace('▪CONTENT▪', content);
         }
-        // Sublist: -- item -> ◦ item with more indent
+        // Sublist: -- item -> ◦ item with more indent (white circle)
         else if (formatted.trim().startsWith('-- ')) {
-            const spaces = formatted.match(/^(\s*)/)[0];
-            const content = formatted.trim().substring(3);
-            formatted = `${spaces}<span style="display: inline-block; width: 3.5ch; text-align: left; vertical-align: baseline;"><span style="display: inline-block; width: 2ch;"></span><span style="position: relative; top: 0.05em;">◦</span></span>${content}`;
+            const content = formatted.replace(/^(\s*)-- (.+)$/, '$2');
+            formatted = formatted.replace(/^(\s*)-- .+$/, '$1<span style="display: inline-block; width: 100%; margin-left: 2em; text-indent: -1em; white-space: pre-wrap;"><span style="display: inline-block; width: 1em; text-indent: 0;">◦</span>◦CONTENT◦</span>');
+            formatted = formatted.replace('◦CONTENT◦', content);
         }
-        // Bullet list: - item -> • item with alignment preservation
+        // Bullet list: - item -> • item with hanging indent (black circle)
+        // Using text-indent for proper hanging indent that preserves tab alignment
         else if (formatted.trim().startsWith('- ')) {
-            const spaces = formatted.match(/^(\s*)/)[0];
-            const content = formatted.trim().substring(2);
-            // Use exactly 2ch width to match the "- " marker in the editor
-            formatted = `${spaces}<span style="display: inline-block; width: 2ch; text-align: left; vertical-align: baseline;">•</span>${content}`;
+            const content = formatted.replace(/^(\s*)- (.+)$/, '$2');
+            formatted = formatted.replace(/^(\s*)- .+$/, '$1<span style="display: inline-block; width: 100%; margin-left: 1em; text-indent: -1em; white-space: pre-wrap;"><span style="display: inline-block; width: 1em; text-indent: 0;">•</span>•CONTENT•</span>');
+            formatted = formatted.replace('•CONTENT•', content);
         }
 
-        // Numbered list: 1. item -> 1. item with alignment preservation
+        // Numbered list: 1. item -> 1. item with hanging indent
         if (/^\d+\.\s/.test(formatted.trim())) {
             const match = formatted.match(/^(\s*)(\d+\.\s)(.+)$/);
             if (match) {
                 const spaces = match[1];
                 const number = match[2];
                 const content = match[3];
-                // Use a span with width based on number length + 1ch (space)
-                const numWidth = number.length + 0.5;
-                formatted = `${spaces}<span style="display: inline-block; width: ${numWidth}ch; text-align: left; vertical-align: baseline;">${number}</span>${content}`;
+                formatted = `${spaces}<span style="display: inline-block; width: 100%; margin-left: 2em; text-indent: -2em; white-space: pre-wrap;"><span style="display: inline-block; width: 2em; text-indent: 0;">${number}</span>NUMCONTENT</span>`;
+                formatted = formatted.replace('NUMCONTENT', content);
             }
         }
 

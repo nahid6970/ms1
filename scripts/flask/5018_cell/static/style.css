@@ -749,11 +749,15 @@ td input {
     box-sizing: border-box;
     /* Use Vrinda for Bangla characters, fallback to default for others */
     font-family: Vrinda, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    tab-size: 8;
+    -moz-tab-size: 8;
 }
 
 td textarea {
     /* Use Vrinda for Bangla characters, fallback to default for others */
     font-family: Vrinda, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    tab-size: 8;
+    -moz-tab-size: 8;
 }
 
 /* Markdown formatting indicator */
@@ -945,8 +949,6 @@ td:not(:focus-within).has-markdown-preview {
     /* Stop browser from auto-scrolling to top on Enter */
     overflow-anchor: none;
     scroll-behavior: auto !important;
-    tab-size: 8;
-    -moz-tab-size: 8;
 }
 
 .wrap-enabled td textarea:not(.merged-cell textarea):focus {

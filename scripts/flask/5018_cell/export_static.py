@@ -2188,21 +2188,23 @@ def generate_static_html(data, custom_syntaxes):
                 formatted = formatted.replace(/~(.+?)~/g, '<sub>$1</sub>');
 
                 // Sub-sublist: --- item -> ▪ item with more indent (small square)
+                // Using text-indent for hanging indent to preserve tab alignment
                 if (formatted.trim().startsWith('--- ')) {
                     const content = formatted.replace(/^(\\s*)--- (.+)$/, '$2');
-                    formatted = formatted.replace(/^(\\s*)--- .+$/, '$1<span style="display: inline-flex; align-items: flex-start; width: 100%; margin-left: 2em;"><span style="margin-right: 0.5em; flex-shrink: 0; line-height: 1; font-size: 0.75em; position: relative; top: 0.4em;">▪</span><span style="flex: 1;">▪CONTENT▪</span></span>');
+                    formatted = formatted.replace(/^(\\s*)--- .+$/, '$1<span style="display: inline-block; width: 100%; margin-left: 3em; text-indent: -1em; white-space: pre-wrap;"><span style="display: inline-block; width: 1em; text-indent: 0;">▪</span>▪CONTENT▪</span>');
                     formatted = formatted.replace('▪CONTENT▪', content);
                 }
                 // Sublist: -- item -> ◦ item with more indent (white circle)
                 else if (formatted.trim().startsWith('-- ')) {
                     const content = formatted.replace(/^(\\s*)-- (.+)$/, '$2');
-                    formatted = formatted.replace(/^(\\s*)-- .+$/, '$1<span style="display: inline-flex; align-items: flex-start; width: 100%; margin-left: 1em;"><span style="margin-right: 0.5em; flex-shrink: 0; line-height: 1; font-size: 0.9em; position: relative; top: 0.35em;">◦</span><span style="flex: 1;">◦CONTENT◦</span></span>');
+                    formatted = formatted.replace(/^(\\s*)-- .+$/, '$1<span style="display: inline-block; width: 100%; margin-left: 2em; text-indent: -1em; white-space: pre-wrap;"><span style="display: inline-block; width: 1em; text-indent: 0;">◦</span>◦CONTENT◦</span>');
                     formatted = formatted.replace('◦CONTENT◦', content);
                 }
                 // Bullet list: - item -> • item with hanging indent (black circle)
+                // Using text-indent for proper hanging indent that preserves tab alignment
                 else if (formatted.trim().startsWith('- ')) {
                     const content = formatted.replace(/^(\\s*)- (.+)$/, '$2');
-                    formatted = formatted.replace(/^(\\s*)- .+$/, '$1<span style="display: inline-flex; align-items: flex-start; width: 100%;"><span style="margin-right: 0.5em; flex-shrink: 0; line-height: 1; font-size: 0.9em; position: relative; top: 0.35em;">•</span><span style="flex: 1;">•CONTENT•</span></span>');
+                    formatted = formatted.replace(/^(\\s*)- .+$/, '$1<span style="display: inline-block; width: 100%; margin-left: 1em; text-indent: -1em; white-space: pre-wrap;"><span style="display: inline-block; width: 1em; text-indent: 0;">•</span>•CONTENT•</span>');
                     formatted = formatted.replace('•CONTENT•', content);
                 }
 
@@ -2213,7 +2215,7 @@ def generate_static_html(data, custom_syntaxes):
                         const spaces = match[1];
                         const number = match[2];
                         const content = match[3];
-                        formatted = `${spaces}<span style="display: inline-flex; align-items: baseline; width: 100%;"><span style="margin-right: 0.5em; flex-shrink: 0;">${number}</span><span style="flex: 1;">NUMCONTENT</span></span>`;
+                        formatted = `${spaces}<span style="display: inline-block; width: 100%; margin-left: 2em; text-indent: -2em; white-space: pre-wrap;"><span style="display: inline-block; width: 2em; text-indent: 0;">${number}</span>NUMCONTENT</span>`;
                         formatted = formatted.replace('NUMCONTENT', content);
                     }
                 }
