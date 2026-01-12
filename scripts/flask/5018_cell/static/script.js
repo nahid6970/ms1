@@ -411,6 +411,14 @@ function handleKeyboardShortcuts(e) {
         let text = '';
         const activeElement = document.activeElement;
 
+        // Helper to clean up the picked word (strips markers and symbols from ends)
+        const cleanPick = (str) => {
+            if (!str) return '';
+            // Strip common symbols and markdown markers from start and end
+            // Bengali character range \u0980-\u09FF included
+            return str.replace(/^[^a-zA-Z0-9\u0980-\u09FF]+|[^a-zA-Z0-9\u0980-\u09FF]+$/g, '').trim();
+        };
+
         // 1. Check for active selection first (priority)
         const selection = window.getSelection();
         if (selection && selection.toString().trim().length > 0) {
@@ -438,33 +446,37 @@ function handleKeyboardShortcuts(e) {
             }
 
             if (range) {
+                // Ensure the range is within the data table to avoid picking from other UI elements
+                const isTableContent = range.startContainer.nodeType === Node.TEXT_NODE ?
+                    range.startContainer.parentElement.closest('#dataTable') :
+                    range.startContainer.closest?.('#dataTable');
+
+                if (!isTableContent) return;
+
+                const boundaryRegex = /[\s!@#%^&*()\-+=[\]{}|\\;:'",.<>/?]/;
                 if (range.startContainer.nodeType === Node.TEXT_NODE) {
                     const node = range.startContainer;
                     const offset = range.startOffset;
                     const val = node.textContent;
 
                     let start = offset;
-                    while (start > 0 && /[^\s]/.test(val[start - 1])) start--;
+                    while (start > 0 && !boundaryRegex.test(val[start - 1])) start--;
                     let end = offset;
-                    while (end < val.length && /[^\s]/.test(val[end])) end++;
+                    while (end < val.length && !boundaryRegex.test(val[end])) end++;
 
                     if (start < end) {
                         text = val.substring(start, end);
                     }
                 } else if (range.startContainer.nodeType === Node.ELEMENT_NODE) {
-                    // If hovering over an input/textarea element directly
                     const hoveredEl = range.startContainer;
                     if (hoveredEl.tagName === 'INPUT' || hoveredEl.tagName === 'TEXTAREA') {
-                        // For inputs, we can't easily get the character under mouse without it being focused,
-                        // but if it IS focused, it might already be handled.
-                        // However, we can use the "under cursor" logic if it's the active element.
                         if (hoveredEl === activeElement) {
                             const val = hoveredEl.value;
                             const cursor = hoveredEl.selectionStart;
                             let start = cursor;
-                            while (start > 0 && /[^\s]/.test(val[start - 1])) start--;
+                            while (start > 0 && !boundaryRegex.test(val[start - 1])) start--;
                             let end = cursor;
-                            while (end < val.length && /[^\s]/.test(val[end])) end++;
+                            while (end < val.length && !boundaryRegex.test(val[end])) end++;
                             if (start < end) text = val.substring(start, end);
                         }
                     }
@@ -472,28 +484,30 @@ function handleKeyboardShortcuts(e) {
             }
         }
 
-        // 4. Fallback: If still no text and we ARE in an input, use the cursor position (existing behavior)
+        // 4. Fallback: word under typing cursor
         if (!text && activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
             const val = activeElement.value;
             const cursor = activeElement.selectionStart;
+            const boundaryRegex = /[\s!@#%^&*()\-+=[\]{}|\\;:'",.<>/?]/;
             let start = cursor;
-            while (start > 0 && /[^\s]/.test(val[start - 1])) start--;
+            while (start > 0 && !boundaryRegex.test(val[start - 1])) start--;
             let end = cursor;
-            while (end < val.length && /[^\s]/.test(val[end])) end++;
+            while (end < val.length && !boundaryRegex.test(val[end])) end++;
             if (start < end) text = val.substring(start, end);
         }
 
-        if (text) {
+        const cleanedText = cleanPick(text);
+        if (cleanedText) {
             const searchInput = document.getElementById('searchInput');
             if (searchInput) {
                 const currentVal = searchInput.value.trim();
                 if (currentVal) {
                     const terms = currentVal.split(',').map(t => t.trim().toLowerCase());
-                    if (!terms.includes(text.toLowerCase())) {
-                        searchInput.value = currentVal + ', ' + text;
+                    if (!terms.includes(cleanedText.toLowerCase())) {
+                        searchInput.value = currentVal + ', ' + cleanedText;
                     }
                 } else {
-                    searchInput.value = text;
+                    searchInput.value = cleanedText;
                 }
                 searchTable(true);
                 searchInput.focus();
@@ -1368,15 +1382,18 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
         existingPreview.remove();
     }
 
-    // We always want a preview overlay for hover features (like F8) to work without focus,
-    // especially for textareas/wrapped cells.
-    if (value && (hasMarkdown || isTextarea)) {
+    // Always create a preview overlay if the cell has text and is not a special type (like date)
+    // This ensures F8 hover picking works without focus across all modes.
+    const isTextCell = inputElement && (inputElement.tagName === 'TEXTAREA' || inputElement.type === 'text');
+
+    if (value && isTextCell) {
         // Determine content based on toggle
         let formattedHTML;
         if (isMarkdownEnabled && hasMarkdown) {
             formattedHTML = parseMarkdown(value);
         } else {
-            // Raw mode: Escape HTML but apply custom color syntaxes (keeping markers)
+            // Raw mode or plain text: Escape HTML but apply custom color syntaxes
+            // Using applyCustomColorSyntaxesRaw ensures we see the markers
             formattedHTML = applyCustomColorSyntaxesRaw(escapeHtml(value)).replace(/\n/g, '<br>');
         }
 
