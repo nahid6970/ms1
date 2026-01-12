@@ -21,3 +21,10 @@
 **Purpose:** Focus on one row at a time.
 **Controls:** 📖 Toggle, ⬅️ Previous, ➡️ Next buttons.
 **Logic:** `renderTable()` filters for only one row index when active.
+
+## Smart Textareas
+**Purpose:** Ensures multiline and markdown content stays visible and editable.
+**Behavior:** 
+- Any cell containing **Markdown** markers or **Newlines** is automatically rendered as a multiline textarea.
+- This happens even if global **Wrap (↩️)** is turned off, ensuring your data never gets squashed into a 1-line box.
+- These textareas auto-resize as you type to match the content height.

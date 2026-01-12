@@ -29,8 +29,21 @@
 6. Quick Highlights (Custom Syntaxes automatically added here)
 
 ## Search Word Under Cursor (F8)
-**Purpose:** Instantly add the word under the cursor (or selection) to the search box and focus it.
-**Implementation:** `handleKeyboardShortcuts` (F8).
+**Purpose:** Speed up searching by adding a word to the search box via hover or cursor position.
+**Features:**
+- **Hover-Pick:** Hover over any word and press **F8** to add it to the search.
+- **Auto-Cleanup:** Strips syntax markers (`**`, `!!`, etc.) automatically.
+- **Cross-Mode:** Works perfectly in both Parsed and Raw viewing modes.
+- **Implementation:** `handleKeyboardShortcuts` (F8).
+
+## Markdown Preview Toggle (📝)
+**Purpose:** Switch between rendered HTML and raw editable text.
+**Behavior:**
+- **Parsed Mode:** Standard rendered markdown visuals.
+- **Raw Mode:** Displays raw text including tags (e.g., `**text**`).
+- **Syntax Highlighting:** Raw mode still shows **Custom Syntax colors** to aid readability.
+- **No Layout Collapse:** Cells maintain their full height and wrap settings in both modes.
+- **Refresh:** Toggling auto-refreshes the table to update all views.
 
 ## Swap Position (F9)
 **Purpose:** Swap two words/phrases separated by a delimiter (space, tab, comma) while preserving alignment.

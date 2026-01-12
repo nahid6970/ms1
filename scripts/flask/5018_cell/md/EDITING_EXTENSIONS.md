@@ -39,16 +39,17 @@
 **Function:** `sortLines()`.
 
 ## Search Word (F8)
-**Purpose:** Speed up searching by automatically adding a word to the search box.
+**Purpose:** Speed up searching by automatically adding a word to the search box from anywhere in the table.
 **Behavior:**
-- **Hover Mode:** Simply hover your mouse over any word (in a cell or markdown preview) and press **F8**. The tool picks the word under the mouse pointer.
+- **Hover Mode (Hover-Pick):** Simply hover your mouse over any word (in a cell, raw text, or markdown preview) and press **F8**. The tool picks the word under the mouse pointer without needing to click or focus the cell.
+- **Smart Cleanup:** Automatically strips markdown markers (`**`, `++`, `__`), symbols, and punctuation from the ends of the picked word for clean search results.
 - **Edit Mode (No Selection):** Picks the word at the current text cursor position.
 - **Selection Mode:** If text is selected (highlighted), that specific text is added.
 - **Result:**
   - Adds the term to the existing search query (comma-separated).
   - Automatically triggers a search recalculation.
   - Focuses the search box.
-- **Smart Recalculation:** Focusing the search box or using F8 forces a fresh search, ensuring results are always up-to-date with recent cell edits.
+- **Cross-Mode Support:** Hover-picking works identically in both **Parsed Markdown** and **Raw Text** modes.
 
 ## Swap Word Position (F9)
 **Purpose:** Quickly swap the position of two words or phrases separated by a delimiter.
@@ -68,6 +69,7 @@
 ## Move Lines Up/Down (Alt + Up / Down)
 **Purpose:** Quickly reorder lines within a cell (Input or Textarea), similar to VS Code's `Alt + Up/Down` feature.
 **Behavior:**
+- **Activation:** Works when **Alt** is pressed and **Ctrl** is NOT pressed (to avoid conflict with multi-cursor).
 - **Single Line:** Moves the line containing the cursor up or down.
 - **Selection:** Moves the entire block of selected lines up or down.
 - **Logic:**
