@@ -524,6 +524,22 @@ function handleKeyboardShortcuts(e) {
                 }
                 searchTable(true);
                 searchInput.focus();
+                
+                // Copy the picked word to clipboard
+                try {
+                    const tempInput = document.createElement('textarea');
+                    tempInput.value = cleanedText;
+                    tempInput.style.position = 'fixed';
+                    tempInput.style.left = '-9999px';
+                    document.body.appendChild(tempInput);
+                    tempInput.select();
+                    tempInput.setSelectionRange(0, 99999);
+                    document.execCommand('copy');
+                    document.body.removeChild(tempInput);
+                    showToast(`"${cleanedText}" copied`, 'info');
+                } catch (err) {
+                    console.log('Copy failed:', err);
+                }
             }
         }
     }
