@@ -91,13 +91,13 @@ function initializeApp() {
     // Save scroll position on scroll (delay to avoid overwriting during initial restore)
     const tableContainer = document.querySelector('.table-container');
     let initialLoadComplete = false;
-    
+
     if (tableContainer) {
         // Wait for initial scroll restore to complete before enabling save
         setTimeout(() => {
             initialLoadComplete = true;
         }, 1000);
-        
+
         tableContainer.addEventListener('scroll', () => {
             if (initialLoadComplete) {
                 localStorage.setItem('scrollTop', tableContainer.scrollTop);
@@ -528,7 +528,7 @@ function handleKeyboardShortcuts(e) {
                 } catch (err) {
                     console.log('Copy failed:', err);
                 }
-                
+
                 // Then add to search box
                 const currentVal = searchInput.value.trim();
                 if (currentVal) {
@@ -5893,7 +5893,7 @@ function positionCursorAtMouseClick(textarea, mouseEvent) {
         // Ensure we don't scroll beyond the content bounds
         const maxScrollTop = Math.max(0, textarea.scrollHeight - textarea.clientHeight);
         textarea.scrollTop = Math.max(0, Math.min(targetScrollTop, maxScrollTop));
-        
+
         // Scroll table container to ensure cursor line is visible below header
         const tableContainer = document.querySelector('.table-container');
         const headerRow = document.querySelector('#dataTable thead');
@@ -5902,14 +5902,14 @@ function positionCursorAtMouseClick(textarea, mouseEvent) {
             if (!textarea.dataset.originalContainerScrollTop) {
                 textarea.dataset.originalContainerScrollTop = tableContainer.scrollTop;
                 textarea.dataset.originalContainerScrollLeft = tableContainer.scrollLeft;
-                
+
                 // Add blur handler to restore scroll position
                 const restoreScroll = (e) => {
                     // Don't restore if blur was caused by mode toggle button click
                     const relatedTarget = e.relatedTarget;
-                    const isToggleAction = relatedTarget?.closest('.btn-icon-toggle') || 
-                                          relatedTarget?.closest('#markdownToggle');
-                    
+                    const isToggleAction = relatedTarget?.closest('.btn-icon-toggle') ||
+                        relatedTarget?.closest('#markdownToggle');
+
                     if (!isToggleAction) {
                         const savedTop = parseFloat(textarea.dataset.originalContainerScrollTop);
                         const savedLeft = parseFloat(textarea.dataset.originalContainerScrollLeft);
@@ -5926,20 +5926,20 @@ function positionCursorAtMouseClick(textarea, mouseEvent) {
                 };
                 textarea.addEventListener('blur', restoreScroll);
             }
-            
+
             const headerHeight = headerRow.getBoundingClientRect().height;
             const containerRect = tableContainer.getBoundingClientRect();
             const cell = textarea.closest('td');
-            
+
             if (cell) {
                 const cellRect = cell.getBoundingClientRect();
                 // Calculate where the cursor line is in the viewport
                 const cursorLineInCell = cursorLineTop - textarea.scrollTop;
                 const cursorLineInViewport = cellRect.top + cursorLineInCell;
-                
+
                 // Target position: cursor line should be immediately after header (with minimal padding)
                 const targetViewportY = containerRect.top + headerHeight + 10;
-                
+
                 // Always scroll to position cursor line right after header
                 const scrollAdjustment = cursorLineInViewport - targetViewportY;
                 tableContainer.scrollTop = tableContainer.scrollTop + scrollAdjustment;
@@ -6432,7 +6432,7 @@ function renderTable() {
                 }
             }
         };
-        
+
         // Try multiple times to ensure scroll is restored after all content loads
         requestAnimationFrame(restoreScroll);
         setTimeout(restoreScroll, 100);
@@ -9832,10 +9832,10 @@ function adjustCellHeightForMarkdown(cell) {
             // Clear existing height to measure natural scrollHeight
             input.style.height = 'auto';
             input.style.minHeight = '';
-            
+
             // Force reflow
             void input.offsetHeight;
-            
+
             // Set height based on content with buffer
             const inputHeight = input.scrollHeight + 10;
             input.style.height = inputHeight + 'px';
@@ -9890,11 +9890,11 @@ function adjustCellHeightForMarkdown(cell) {
 function adjustAllMarkdownCells() {
     const isMarkdownEnabled = localStorage.getItem('markdownPreviewEnabled') !== 'false';
     const tableContainer = document.querySelector('.table-container');
-    
+
     // Save scroll position before adjustments
     const savedScrollTop = tableContainer ? tableContainer.scrollTop : 0;
     const savedScrollLeft = tableContainer ? tableContainer.scrollLeft : 0;
-    
+
     if (isMarkdownEnabled) {
         // In markdown mode, only adjust cells with has-markdown class
         const cells = document.querySelectorAll('td .has-markdown');
@@ -9914,7 +9914,7 @@ function adjustAllMarkdownCells() {
             }
         });
     }
-    
+
     // Restore scroll position after adjustments
     if (tableContainer && (savedScrollTop > 0 || savedScrollLeft > 0)) {
         tableContainer.scrollTop = savedScrollTop;
@@ -9926,24 +9926,24 @@ function adjustAllMarkdownCells() {
 const originalRenderTable = renderTable;
 renderTable = function () {
     const tableContainer = document.querySelector('.table-container');
-    
+
     // Save scroll from localStorage for page refresh scenario
     const savedScrollTop = parseInt(localStorage.getItem('scrollTop') || '0');
     const savedScrollLeft = parseInt(localStorage.getItem('scrollLeft') || '0');
-    
+
     // Also save current scroll if already scrolled
     const currentScrollTop = tableContainer ? tableContainer.scrollTop : 0;
     const currentScrollLeft = tableContainer ? tableContainer.scrollLeft : 0;
-    
+
     // Use whichever is non-zero (current takes priority)
     const targetScrollTop = currentScrollTop > 0 ? currentScrollTop : savedScrollTop;
     const targetScrollLeft = currentScrollLeft > 0 ? currentScrollLeft : savedScrollLeft;
-    
+
     originalRenderTable.apply(this, arguments);
-    
+
     setTimeout(() => {
         adjustAllMarkdownCells();
-        
+
         // Final scroll restore after all adjustments
         if (tableContainer && (targetScrollTop > 0 || targetScrollLeft > 0)) {
             tableContainer.scrollTop = targetScrollTop;
