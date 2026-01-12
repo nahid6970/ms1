@@ -5,24 +5,28 @@
 
 /* Topbar - Cyberpunk styling */
 .topbar {
-  position: sticky;
+  position: fixed;
+  /* Keeps it strictly visible on screen */
   top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  /* Robust centering for fixed element */
   width: fit-content;
   max-width: 95%;
   /* Prevent overflowing on small screens */
-  margin: 10px auto;
-  /* Center horizontally with some top spacing */
+  margin: 0 auto;
+  /* Reset auto margin in favor of transform centering */
   z-index: 1000;
   background-color: #0a0a0f;
   /* Dark cyberpunk background */
   padding: 10px 20px;
   /* Adjusted padding */
   box-sizing: border-box;
-  border: 2px solid #00f3ff;
-  /* Full Neon cyan border */
-  border-radius: 20px;
-  /* Rounded corners for pill shape */
-  box-shadow: 0 0 15px rgba(0, 243, 255, 0.3);
+  border: 2px solid #00ff41;
+  /* Full Neon Green border */
+  border-radius: 0px;
+  /* Sharp corners for cyberpunk look */
+  box-shadow: 0 0 15px rgba(0, 255, 65, 0.3);
   /* Neon glow */
 }
 
@@ -51,28 +55,30 @@
 
 /* Adjust main content to make space for sidebar */
 
+/* Adjust main content to make space for sidebar */
 .flex-container2 {
-  margin-top: 0px;
-  /* Space for the sidebar */
+  margin-top: 80px;
+  /* Space for the floating fixed topbar */
   padding-top: 20px;
   /* Additional padding */
 }
 
 /* Adjust button styling for sidebar - keep original styling */
 /* Adjust button styling for topbar - Cyberpunk style */
+/* Adjust button styling for topbar - Cyberpunk style */
 .top-center-controls .add-button {
   background-color: #1a1a20 !important;
-  color: #00f3ff !important;
-  /* Neon text */
-  border: 1px solid #00f3ff;
-  box-shadow: 0 0 5px rgba(0, 243, 255, 0.2);
+  color: #00ff41 !important;
+  /* Neon Green text */
+  border: 1px solid #00ff41;
+  box-shadow: 0 0 5px rgba(0, 255, 65, 0.2);
   transition: all 0.3s ease;
 }
 
 .top-center-controls .add-button:hover {
-  background-color: #00f3ff !important;
+  background-color: #00ff41 !important;
   color: #000000 !important;
-  box-shadow: 0 0 15px rgba(0, 243, 255, 0.6);
+  box-shadow: 0 0 15px rgba(0, 255, 65, 0.6);
 }
 
 
@@ -1085,9 +1091,9 @@ div.toggle-container {
 /* Sidebar add button styling - Cyberpunk style */
 .top-center-controls .add-button.sidebar-add-button {
   background-color: #1a1a20 !important;
-  color: #00f3ff !important;
-  border: 1px solid #00f3ff !important;
-  box-shadow: 0 0 5px rgba(0, 243, 255, 0.2);
+  color: #00ff41 !important;
+  border: 1px solid #00ff41 !important;
+  box-shadow: 0 0 5px rgba(0, 255, 65, 0.2);
   min-width: 40px;
   min-height: 40px;
   display: flex;
