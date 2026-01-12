@@ -20,7 +20,12 @@ document.addEventListener('DOMContentLoaded', () => {
         panX: 0,
         panY: 0,
         elements: [], // Store drawn elements
-        currentElement: null
+        currentElement: null,
+        selectedElement: null,
+        isDraggingElement: false,
+        isRotatingElement: false,
+        selectionHandle: null, // 'rotate'
+        clipboard: null
     };
 
     // Resize Canvas
@@ -49,11 +54,23 @@ document.addEventListener('DOMContentLoaded', () => {
     // Tool Switching
     document.querySelectorAll('.tool-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
+            const id = btn.id;
+            if (id === 'btn-copy') {
+                copySelected();
+                pasteClipboard(); // Auto-paste for "Duplicate" effect
+                return;
+            }
+            if (id === 'btn-delete') {
+                deleteSelected();
+                return;
+            }
+
             const tool = btn.dataset.tool;
             const action = btn.dataset.action;
 
             if (action === 'clear') {
-                state.elements = [];
+                state.elements = []; // Clear
+                state.selectedElement = null;
                 state.panX = 0;
                 state.panY = 0;
                 state.zoom = 1;
@@ -234,8 +251,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (e.target.tagName === 'TEXTAREA') return;
 
-        state.isDrawing = true;
         const pos = getMousePos(e);
+        state.isDrawing = true;
         state.startX = pos.x;
         state.startY = pos.y;
 
@@ -247,13 +264,65 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (state.tool === 'select') {
-            // Find element to move
+            // Check for rotation handle hit if element selected
+            if (state.selectedElement) {
+                const center = getElementCenter(state.selectedElement);
+                // Rotate handle position: roughly Top Center - 30px offset, rotated
+                // We need to know current rotation to position handle accurately for hit test
+                // Simpler: Just check distance to the visual handle we draw
+                // WE NEED TO DEFINE ROTATION PROP IF NOT PRESENT
+                if (state.selectedElement.rotation === undefined) state.selectedElement.rotation = 0;
+
+                // For hit testing, we need the transformed handle position
+                // This is getting complex mathematically.
+                // Let's do a simpler hit test for rotation: if we are close to the handle
+                // The handle is drawn relative to center.
+                // We'll calculate the handle world position
+                const bounds = getElementBounds(state.selectedElement);
+                if (bounds) {
+                    const cx = (bounds.minX + bounds.maxX) / 2;
+                    const cy = (bounds.minY + bounds.maxY) / 2;
+                    const handleDist = 30; // Distance above top
+                    // Rotate the point (cx, bounds.minY - handleDist) around (cx, cy) by el.rotation
+                    const angle = state.selectedElement.rotation || 0;
+                    const hx_local = 0;
+                    const hy_local = -(bounds.maxY - bounds.minY) / 2 - 30;
+
+                    const hx_world = cx + hx_local * Math.cos(angle) - hy_local * Math.sin(angle);
+                    const hy_world = cy + hx_local * Math.sin(angle) + hy_local * Math.cos(angle);
+
+                    if (Math.hypot(pos.x - hx_world, pos.y - hy_world) < 15) {
+                        state.isRotatingElement = true;
+                        state.lastRotationAngle = Math.atan2(pos.y - cy, pos.x - cx);
+                        return; // Handle hit
+                    }
+                }
+            }
+
+            // Find element to select/move
             // Reverse order to check top-most first
             for (let i = state.elements.length - 1; i >= 0; i--) {
-                if (isPointInElement(pos.x, pos.y, state.elements[i])) {
-                    state.selectedElement = state.elements[i];
+                // Hit test considering rotation?
+                // For now, hit test un-rotated bounding box for simplicity? 
+                // Or implementing robust OBB hit test?
+                // Lets start with unrotated for simplicity of "isPointInElement" 
+                // but actually, we should inversely rotate the point to check against AABB
+                const el = state.elements[i];
+                // Inverse rotate point if element has rotation
+                let testX = pos.x, testY = pos.y;
+                if (el.rotation) {
+                    const center = getElementCenter(el);
+                    const dx = pos.x - center.x;
+                    const dy = pos.y - center.y;
+                    const angle = -el.rotation;
+                    testX = center.x + dx * Math.cos(angle) - dy * Math.sin(angle);
+                    testY = center.y + dx * Math.sin(angle) + dy * Math.cos(angle);
+                }
+
+                if (isPointInElement(testX, testY, el)) {
+                    state.selectedElement = el;
                     state.isDraggingElement = true;
-                    // We don't return here? We might want to clear selection if we clicked empty space
+                    if (state.selectedElement.rotation === undefined) state.selectedElement.rotation = 0;
                     redraw(); // To maybe show selection highlight later
                     return;
                 }
@@ -278,7 +347,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 points: [{ x: pos.x, y: pos.y }],
                 color: state.strokeColor,
                 width: state.lineWidth,
-                opacity: state.opacity
+                opacity: state.opacity,
+                rotation: 0
             };
         } else {
             state.currentElement = {
@@ -289,7 +359,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 endY: pos.y,
                 color: state.strokeColor,
                 width: state.lineWidth,
-                opacity: state.opacity
+                opacity: state.opacity,
+                rotation: 0
             };
         }
     }
@@ -301,29 +372,50 @@ document.addEventListener('DOMContentLoaded', () => {
         const pos = getMousePos(e);
 
         // Handle Moving Elements
-        if (state.tool === 'select' && state.isDraggingElement && state.selectedElement) {
-            const diffX = pos.x - state.startX;
-            const diffY = pos.y - state.startY;
+        if (state.tool === 'select') {
+            if (state.isRotatingElement && state.selectedElement) {
+                const center = getElementCenter(state.selectedElement);
+                const angle = Math.atan2(pos.y - center.y, pos.x - center.x);
+                // Snap to 15 deg steps if Shift pressed? Not implemented yet.
+                // Rotation delta
+                // const delta = angle - state.lastRotationAngle;
+                // state.selectedElement.rotation += delta;
+                // state.lastRotationAngle = angle;
 
-            const el = state.selectedElement;
-            if (el.type === 'draw') {
-                el.points.forEach(p => { p.x += diffX; p.y += diffY; });
-            } else if (el.type === 'text') {
-                el.x += diffX;
-                el.y += diffY;
-            } else {
-                el.startX += diffX;
-                el.startY += diffY;
-                el.endX += diffX;
-                el.endY += diffY;
+                // Absolute rotation based on handle: Handle is "up" (-90deg), so offset
+                // Actually simple atan2 gives absolute angle from center. 
+                // We want the object's "top" to follow the mouse.
+                // So rotation = angle + 90deg (PI/2)
+                state.selectedElement.rotation = angle + Math.PI / 2;
+
+                redraw();
+                return;
             }
 
-            // Reset start to current for next frame
-            state.startX = pos.x;
-            state.startY = pos.y;
+            if (state.isDraggingElement && state.selectedElement) {
+                const diffX = pos.x - state.startX;
+                const diffY = pos.y - state.startY;
 
-            redraw();
-            return;
+                const el = state.selectedElement;
+                if (el.type === 'draw') {
+                    el.points.forEach(p => { p.x += diffX; p.y += diffY; });
+                } else if (el.type === 'text') {
+                    el.x += diffX;
+                    el.y += diffY;
+                } else {
+                    el.startX += diffX;
+                    el.startY += diffY;
+                    el.endX += diffX;
+                    el.endY += diffY;
+                }
+
+                // Reset start to current for next frame
+                state.startX = pos.x;
+                state.startY = pos.y;
+
+                redraw();
+                return;
+            }
         }
 
 
@@ -364,6 +456,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (state.tool === 'select') {
             state.isDraggingElement = false;
+            state.isRotatingElement = false;
             return;
         }
 
@@ -394,6 +487,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (state.currentElement) {
+            // Assign default rotation if missing
+            state.currentElement.rotation = 0;
             state.elements.push(state.currentElement);
             state.currentElement = null;
             redraw();
@@ -425,33 +520,71 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.restore();
     }
 
+    function getElementBounds(el) {
+        if (!el) return null;
+        if (el.type === 'draw') {
+            const xs = el.points.map(p => p.x);
+            const ys = el.points.map(p => p.y);
+            return { minX: Math.min(...xs), maxX: Math.max(...xs), minY: Math.min(...ys), maxY: Math.max(...ys) };
+        } else if (el.type === 'text') {
+            const width = el.text.length * el.fontSize * 0.6;
+            return { minX: el.x, maxX: el.x + width, minY: el.y, maxY: el.y + el.fontSize };
+        } else {
+            return {
+                minX: Math.min(el.startX, el.endX),
+                maxX: Math.max(el.startX, el.endX),
+                minY: Math.min(el.startY, el.endY),
+                maxY: Math.max(el.startY, el.endY)
+            };
+        }
+    }
+
+    function getElementCenter(el) {
+        const bounds = getElementBounds(el);
+        return { x: (bounds.minX + bounds.maxX) / 2, y: (bounds.minY + bounds.maxY) / 2 };
+    }
+
     function drawSelectionHighlight(el) {
         ctx.save();
-        ctx.strokeStyle = '#00a8ff'; // Selection color
+
+        // Rotation for highlight
+        const center = getElementCenter(el);
+        if (el.rotation) {
+            ctx.translate(center.x, center.y);
+            ctx.rotate(el.rotation);
+            ctx.translate(-center.x, -center.y);
+        }
+
+        ctx.strokeStyle = '#00a8ff';
         ctx.lineWidth = 1;
         ctx.setLineDash([5, 3]);
         const padding = 5;
 
-        let minX, minY, maxX, maxY;
+        // Get Local Bounds (unrotated relative to center) 
+        // Logic: All shapes are defined by coordinates matching unrotated state 
+        // EXCEPT 'draw' which stores raw points. 
+        // For 'draw', points are raw. If we rotate with ctx.rotate, we are rotating the visual representation.
+        // So the bounds calculation using raw points matches the "local" bounds if we assume raw points are "model space".
+        // BUT for 'draw' we modify points directly on move...
+        // Let's rely on getElementBounds returning the axis aligned bounds of the data
+        const bounds = getElementBounds(el);
+        if (!bounds) { ctx.restore(); return; }
 
-        if (el.type === 'draw') {
-            const xs = el.points.map(p => p.x);
-            const ys = el.points.map(p => p.y);
-            minX = Math.min(...xs); maxX = Math.max(...xs);
-            minY = Math.min(...ys); maxY = Math.max(...ys);
-        } else if (el.type === 'text') {
-            minX = el.x;
-            minY = el.y;
-            maxX = el.x + (el.text.length * el.fontSize * 0.6);
-            maxY = el.y + el.fontSize;
-        } else {
-            minX = Math.min(el.startX, el.endX);
-            maxX = Math.max(el.startX, el.endX);
-            minY = Math.min(el.startY, el.endY);
-            maxY = Math.max(el.startY, el.endY);
-        }
+        ctx.strokeRect(bounds.minX - padding, bounds.minY - padding, (bounds.maxX - bounds.minX) + padding * 2, (bounds.maxY - bounds.minY) + padding * 2);
 
-        ctx.strokeRect(minX - padding, minY - padding, (maxX - minX) + padding * 2, (maxY - minY) + padding * 2);
+        // Draw Rotation Handle
+        ctx.beginPath();
+        const topY = bounds.minY - padding;
+        const midX = (bounds.minX + bounds.maxX) / 2;
+        ctx.moveTo(midX, topY);
+        ctx.lineTo(midX, topY - 20);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(midX, topY - 25, 5, 0, Math.PI * 2);
+        ctx.fillStyle = '#00a8ff';
+        ctx.fill();
+
         ctx.restore();
     }
 
@@ -459,6 +592,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!el) return;
 
         ctx.save();
+
+        // Apply Rotation if exists
+        if (el.rotation) {
+            const center = getElementCenter(el);
+            ctx.translate(center.x, center.y);
+            ctx.rotate(el.rotation);
+            ctx.translate(-center.x, -center.y);
+        }
+
         ctx.globalAlpha = el.opacity;
         ctx.strokeStyle = el.color;
         ctx.fillStyle = el.color;
@@ -469,7 +611,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.beginPath();
 
         if (el.type === 'draw') {
-            if (el.points.length < 2) return;
+            if (el.points.length < 2) { ctx.restore(); return; }
             ctx.moveTo(el.points[0].x, el.points[0].y);
             for (let i = 1; i < el.points.length; i++) {
                 ctx.lineTo(el.points[i].x, el.points[i].y);
@@ -569,9 +711,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Keyboard Shortcuts
     window.addEventListener('keydown', (e) => {
+        // Allow shortcuts unless typing in an input
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
 
-        switch (e.key.toLowerCase()) {
+        const key = e.key.toLowerCase();
+
+        // Delete (Del or Backspace)
+        if (key === 'delete' || key === 'backspace') {
+            e.preventDefault(); // Prevent browser back navigation
+            deleteSelected();
+        }
+
+        // Copy (Ctrl+C)
+        if ((e.ctrlKey || e.metaKey) && key === 'c') {
+            e.preventDefault();
+            copySelected();
+        }
+
+        // Paste (Ctrl+V)
+        if ((e.ctrlKey || e.metaKey) && key === 'v') {
+            // Allow default paste? No, we handle our own clipboard
+            e.preventDefault();
+            pasteClipboard();
+        }
+
+        // Tools
+        switch (key) {
             case 'v': document.querySelector('[data-tool="select"]').click(); break;
             case ' ': document.querySelector('[data-tool="pan"]').click(); break;
             case 'p': document.querySelector('[data-tool="draw"]').click(); break;
@@ -582,5 +747,44 @@ document.addEventListener('DOMContentLoaded', () => {
             case 'a': document.querySelector('[data-tool="arrow"]').click(); break;
         }
     });
+
+    // Actions
+    function deleteSelected() {
+        if (state.selectedElement) {
+            state.elements = state.elements.filter(el => el !== state.selectedElement);
+            state.selectedElement = null;
+            redraw();
+        }
+    }
+
+    function copySelected() {
+        if (state.selectedElement) {
+            state.clipboard = JSON.parse(JSON.stringify(state.selectedElement));
+            console.log('Copied element to clipboard');
+        }
+    }
+
+    function pasteClipboard() {
+        if (state.clipboard) {
+            const newEl = JSON.parse(JSON.stringify(state.clipboard));
+            // Offset new element slightly
+            const offset = 20;
+            if (newEl.type === 'draw') {
+                newEl.points.forEach(p => { p.x += offset; p.y += offset; });
+            } else if (newEl.type === 'text') {
+                newEl.x += offset;
+                newEl.y += offset;
+            } else {
+                newEl.startX += offset;
+                newEl.startY += offset;
+                newEl.endX += offset;
+                newEl.endY += offset;
+            }
+            state.elements.push(newEl);
+            state.selectedElement = newEl;
+            redraw();
+            console.log('Pasted element');
+        }
+    }
 
 });
