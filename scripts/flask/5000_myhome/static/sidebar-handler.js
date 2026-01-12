@@ -4,7 +4,7 @@ let sidebarButtons = [];
 let sidebarEditMode = false;
 
 // Load sidebar buttons on page load
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     setupSidebarToggle(); // Setup toggle first
     loadSidebarButtons(); // Then load buttons
     setupSidebarEventListeners(); // Finally setup other listeners
@@ -26,12 +26,12 @@ function loadSidebarButtons() {
 
 // Setup sidebar - always expanded, no toggle functionality
 function setupSidebarToggle() {
-    const sidebarContainer = document.getElementById('sidebar-container');
+    const sidebarContainer = document.getElementById('topbar');
     const sidebarToggle = document.getElementById('sidebar-toggle');
-    
+
     // Always keep sidebar expanded
-    sidebarContainer.classList.add('expanded');
-    
+    if (sidebarContainer) sidebarContainer.classList.add('expanded');
+
     // Hide the toggle button since we don't need it
     if (sidebarToggle) {
         sidebarToggle.style.display = 'none';
@@ -66,13 +66,13 @@ function renderSidebarButtons() {
 function createSidebarButtonElement(button, index) {
     const buttonContainer = document.createElement('div');
     buttonContainer.className = 'notification-button-container';
-    
+
     // Create the button element
     const buttonElement = document.createElement('a');
     buttonElement.className = 'add-button custom-sidebar-button';
     buttonElement.title = button.name;
     buttonElement.id = button.id;
-    
+
     // Apply custom styling using both CSS custom properties and direct styles
     const textColor = button.text_color || '#000000';
     const bgColor = button.bg_color || '#ffffff';
@@ -80,9 +80,9 @@ function createSidebarButtonElement(button, index) {
     const borderColor = button.border_color || '#cccccc';
     const borderRadius = button.border_radius || '4px';
     const fontSize = button.font_size || '16px';
-    
+
     console.log(`Applying styles to ${button.name}: text=${textColor}, bg=${bgColor}, hover=${hoverColor}, border=${borderColor}, radius=${borderRadius}, fontSize=${fontSize}`);
-    
+
     // Set CSS custom properties
     buttonElement.style.setProperty('--custom-text-color', textColor);
     buttonElement.style.setProperty('--custom-bg-color', bgColor);
@@ -90,23 +90,23 @@ function createSidebarButtonElement(button, index) {
     buttonElement.style.setProperty('--custom-border-color', borderColor);
     buttonElement.style.setProperty('--custom-border-radius', borderRadius);
     buttonElement.style.setProperty('--custom-font-size', fontSize);
-    
+
     // Also set direct styles as fallback
     buttonElement.style.setProperty('color', textColor, 'important');
     buttonElement.style.setProperty('background-color', bgColor, 'important');
     buttonElement.style.setProperty('border', `2px solid ${borderColor}`, 'important');
     buttonElement.style.setProperty('border-radius', borderRadius, 'important');
     buttonElement.style.setProperty('font-size', fontSize, 'important');
-    
+
     // Add hover event listeners for guaranteed hover effect
-    buttonElement.addEventListener('mouseenter', function() {
+    buttonElement.addEventListener('mouseenter', function () {
         this.style.setProperty('background-color', hoverColor, 'important');
     });
-    
-    buttonElement.addEventListener('mouseleave', function() {
+
+    buttonElement.addEventListener('mouseleave', function () {
         this.style.setProperty('background-color', bgColor, 'important');
     });
-    
+
     // Set content based on display type
     if (button.display_type === 'image' && button.img_src) {
         const img = document.createElement('img');
@@ -120,7 +120,7 @@ function createSidebarButtonElement(button, index) {
         icon.className = button.icon_class || 'nf nf-fa-question';
         buttonElement.appendChild(icon);
     }
-    
+
     // Set up click behavior
     if (button.has_notification) {
         buttonElement.href = '#';
@@ -128,9 +128,9 @@ function createSidebarButtonElement(button, index) {
         buttonElement.href = button.url;
         buttonElement.target = '_blank';
     }
-    
+
     buttonContainer.appendChild(buttonElement);
-    
+
     // Add notification badge if needed
     if (button.has_notification) {
         const badge = document.createElement('span');
@@ -140,7 +140,7 @@ function createSidebarButtonElement(button, index) {
         badge.textContent = '0';
         buttonContainer.appendChild(badge);
     }
-    
+
     // Add edit and delete buttons (hidden by default)
     const editButtons = document.createElement('div');
     editButtons.className = 'sidebar-edit-buttons';
@@ -150,14 +150,14 @@ function createSidebarButtonElement(button, index) {
         <button class="delete-sidebar-btn" onclick="deleteSidebarButton(${index})" title="Delete">🗑️</button>
     `;
     buttonContainer.appendChild(editButtons);
-    
+
     return buttonContainer;
 }
 
 // Setup event listeners for sidebar functionality
 function setupSidebarEventListeners() {
     // Add button click handler
-    document.addEventListener('click', function(e) {
+    document.addEventListener('click', function (e) {
         if (e.target.closest('#add-sidebar-button')) {
             e.preventDefault();
             showAddSidebarButtonPopup();
@@ -167,7 +167,7 @@ function setupSidebarEventListeners() {
     // Add sidebar button form submission
     const addForm = document.getElementById('add-sidebar-button-form');
     if (addForm) {
-        addForm.addEventListener('submit', function(e) {
+        addForm.addEventListener('submit', function (e) {
             e.preventDefault();
             addSidebarButton();
         });
@@ -176,7 +176,7 @@ function setupSidebarEventListeners() {
     // Edit sidebar button form submission
     const editForm = document.getElementById('edit-sidebar-button-form');
     if (editForm) {
-        editForm.addEventListener('submit', function(e) {
+        editForm.addEventListener('submit', function (e) {
             e.preventDefault();
             saveSidebarButtonEdit();
         });
@@ -185,7 +185,7 @@ function setupSidebarEventListeners() {
     // Display type handlers
     const displayTypeSelect = document.getElementById('sidebar-button-display-type');
     if (displayTypeSelect) {
-        displayTypeSelect.addEventListener('change', function() {
+        displayTypeSelect.addEventListener('change', function () {
             const iconSettings = document.getElementById('icon-settings');
             const imageSettings = document.getElementById('image-settings');
             if (this.value === 'image') {
@@ -200,7 +200,7 @@ function setupSidebarEventListeners() {
 
     const editDisplayTypeSelect = document.getElementById('edit-sidebar-button-display-type');
     if (editDisplayTypeSelect) {
-        editDisplayTypeSelect.addEventListener('change', function() {
+        editDisplayTypeSelect.addEventListener('change', function () {
             const iconSettings = document.getElementById('edit-icon-settings');
             const imageSettings = document.getElementById('edit-image-settings');
             if (this.value === 'image') {
@@ -216,7 +216,7 @@ function setupSidebarEventListeners() {
     // Notification checkbox handlers
     const notificationCheckbox = document.getElementById('sidebar-button-notification');
     if (notificationCheckbox) {
-        notificationCheckbox.addEventListener('change', function() {
+        notificationCheckbox.addEventListener('change', function () {
             const settings = document.getElementById('notification-settings');
             settings.style.display = this.checked ? 'block' : 'none';
         });
@@ -224,7 +224,7 @@ function setupSidebarEventListeners() {
 
     const editNotificationCheckbox = document.getElementById('edit-sidebar-button-notification');
     if (editNotificationCheckbox) {
-        editNotificationCheckbox.addEventListener('change', function() {
+        editNotificationCheckbox.addEventListener('change', function () {
             const settings = document.getElementById('edit-notification-settings');
             settings.style.display = this.checked ? 'block' : 'none';
         });
@@ -270,11 +270,11 @@ function setupSidebarPopupCloseHandlers() {
 function showAddSidebarButtonPopup() {
     const popup = document.getElementById('add-sidebar-button-popup');
     popup.classList.remove('hidden');
-    
+
     // Reset form
     document.getElementById('add-sidebar-button-form').reset();
     document.getElementById('notification-settings').style.display = 'none';
-    
+
     // Reset display type settings
     document.getElementById('icon-settings').style.display = 'block';
     document.getElementById('image-settings').style.display = 'none';
@@ -295,7 +295,7 @@ function addSidebarButton() {
     const borderRadius = document.getElementById('sidebar-button-border-radius').value;
     const fontSize = document.getElementById('sidebar-button-font-size').value;
     const hasNotification = document.getElementById('sidebar-button-notification').checked;
-    
+
     const newButton = {
         id: `custom-button-${Date.now()}`,
         name: name,
@@ -324,23 +324,23 @@ function addSidebarButton() {
         },
         body: JSON.stringify(newButton)
     })
-    .then(response => response.json())
-    .then(data => {
-        console.log('Button added successfully');
-        loadSidebarButtons(); // Reload buttons
-        document.getElementById('add-sidebar-button-popup').classList.add('hidden');
-    })
-    .catch(error => {
-        console.error('Error adding button:', error);
-        alert('Error adding button');
-    });
+        .then(response => response.json())
+        .then(data => {
+            console.log('Button added successfully');
+            loadSidebarButtons(); // Reload buttons
+            document.getElementById('add-sidebar-button-popup').classList.add('hidden');
+        })
+        .catch(error => {
+            console.error('Error adding button:', error);
+            alert('Error adding button');
+        });
 }
 
 // Edit sidebar button
 function editSidebarButton(index) {
     const button = sidebarButtons[index];
     const popup = document.getElementById('edit-sidebar-button-popup');
-    
+
     // Fill form with current values
     document.getElementById('edit-sidebar-button-index').value = index;
     document.getElementById('edit-sidebar-button-name').value = button.name;
@@ -355,7 +355,7 @@ function editSidebarButton(index) {
     document.getElementById('edit-sidebar-button-border-radius').value = button.border_radius || '';
     document.getElementById('edit-sidebar-button-font-size').value = button.font_size || '';
     document.getElementById('edit-sidebar-button-notification').checked = button.has_notification || false;
-    
+
     // Show/hide settings based on display type
     const displayType = button.display_type || 'icon';
     const iconSettings = document.getElementById('edit-icon-settings');
@@ -367,7 +367,7 @@ function editSidebarButton(index) {
         iconSettings.style.display = 'block';
         imageSettings.style.display = 'none';
     }
-    
+
     if (button.has_notification) {
         document.getElementById('edit-notification-settings').style.display = 'block';
         document.getElementById('edit-sidebar-button-notification-api').value = button.notification_api || '';
@@ -375,7 +375,7 @@ function editSidebarButton(index) {
     } else {
         document.getElementById('edit-notification-settings').style.display = 'none';
     }
-    
+
     popup.classList.remove('hidden');
 }
 
@@ -394,7 +394,7 @@ function saveSidebarButtonEdit() {
     const borderRadius = document.getElementById('edit-sidebar-button-border-radius').value;
     const fontSize = document.getElementById('edit-sidebar-button-font-size').value;
     const hasNotification = document.getElementById('edit-sidebar-button-notification').checked;
-    
+
     const updatedButton = {
         ...sidebarButtons[index],
         name: name,
@@ -426,16 +426,16 @@ function saveSidebarButtonEdit() {
         },
         body: JSON.stringify(updatedButton)
     })
-    .then(response => response.json())
-    .then(data => {
-        console.log('Button updated successfully');
-        loadSidebarButtons(); // Reload buttons
-        document.getElementById('edit-sidebar-button-popup').classList.add('hidden');
-    })
-    .catch(error => {
-        console.error('Error updating button:', error);
-        alert('Error updating button');
-    });
+        .then(response => response.json())
+        .then(data => {
+            console.log('Button updated successfully');
+            loadSidebarButtons(); // Reload buttons
+            document.getElementById('edit-sidebar-button-popup').classList.add('hidden');
+        })
+        .catch(error => {
+            console.error('Error updating button:', error);
+            alert('Error updating button');
+        });
 }
 
 // Delete sidebar button
@@ -445,15 +445,15 @@ function deleteSidebarButton(index) {
         fetch(`/api/sidebar-buttons/${index}`, {
             method: 'DELETE'
         })
-        .then(response => response.json())
-        .then(data => {
-            console.log('Button deleted successfully');
-            loadSidebarButtons(); // Reload buttons
-        })
-        .catch(error => {
-            console.error('Error deleting button:', error);
-            alert('Error deleting button');
-        });
+            .then(response => response.json())
+            .then(data => {
+                console.log('Button deleted successfully');
+                loadSidebarButtons(); // Reload buttons
+            })
+            .catch(error => {
+                console.error('Error deleting button:', error);
+                alert('Error deleting button');
+            });
     }
 }
 
@@ -484,16 +484,16 @@ function setupNotificationUpdates() {
 function setupButtonNotifications(button) {
     // Update notifications on page load
     updateButtonNotifications(button);
-    
+
     // Update notifications every 30 seconds
     setInterval(() => {
         updateButtonNotifications(button);
     }, 30000);
-    
+
     // Setup click handler for notification buttons
     const buttonElement = document.getElementById(button.id);
     if (buttonElement) {
-        buttonElement.addEventListener('click', function(e) {
+        buttonElement.addEventListener('click', function (e) {
             e.preventDefault();
             handleNotificationButtonClick(button);
         });
@@ -503,13 +503,13 @@ function setupButtonNotifications(button) {
 // Update notification badge for a button
 function updateButtonNotifications(button) {
     if (!button.notification_api) return;
-    
+
     fetch(button.notification_api)
         .then(response => response.json())
         .then(data => {
             const count = data.unseen_count || 0;
             const badge = document.getElementById(`${button.id}-notification-badge`);
-            
+
             if (badge) {
                 if (count > 0) {
                     badge.textContent = count;
@@ -530,13 +530,13 @@ function updateButtonNotifications(button) {
 function handleNotificationButtonClick(button) {
     const badge = document.getElementById(`${button.id}-notification-badge`);
     const count = badge ? parseInt(badge.textContent) || 0 : 0;
-    
+
     if (count === 0) {
         // No notifications, just open the URL
         window.open(button.url, '_blank');
         return;
     }
-    
+
     if (button.mark_seen_api && confirm(`Mark all ${count} items as seen?`)) {
         fetch(button.mark_seen_api, { method: 'POST' })
             .then(response => response.json())
