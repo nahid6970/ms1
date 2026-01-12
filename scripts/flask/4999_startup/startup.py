@@ -13,7 +13,8 @@ from PyQt6.QtGui import QFont, QColor, QPalette, QCursor, QPainter, QPen, QActio
 
 # Constants
 JSON_FILE = os.path.join(os.path.dirname(__file__), "startup_items.json")
-PS1_FILE = os.path.join(os.path.expanduser("~"), "Desktop", "myStartup.ps1")
+SETTINGS_FILE = os.path.join(os.path.dirname(__file__), "settings.json")
+DEFAULT_PS1 = os.path.join(os.path.expanduser("~"), "Desktop", "myStartup.ps1")
 
 # Cyberpunk Palette
 CP_BG = "#050505"           # Main Background (almost black)
@@ -458,10 +459,12 @@ class MainWindow(QMainWindow):
         
         self.items = []
         self.widgets_map = {}
-        self.current_mode = "REGISTRY" # or "SCRIPT"
+        self.current_mode = "REGISTRY"
+        self.ps1_file_path = DEFAULT_PS1
         
-        self.setup_ui()
         self.load_items()
+        self.setup_ui()
+        self.populate_lists() # Populate after UI is ready
         
     def setup_ui(self):
         central_widget = QWidget()
@@ -490,8 +493,9 @@ class MainWindow(QMainWindow):
         toolbar_layout = QHBoxLayout(toolbar_frame)
         toolbar_layout.setContentsMargins(10, 10, 10, 10)
         
-        # Mode Toggle
-        self.mode_btn = CyberButton(f"MODE: {self.current_mode}", color=CP_CYAN, parent=self, is_outlined=False)
+        # Mode Toggle - color based on loaded mode
+        mode_color = CP_CYAN if self.current_mode == "REGISTRY" else CP_YELLOW
+        self.mode_btn = CyberButton(f"MODE: {self.current_mode}", color=mode_color, parent=self, is_outlined=False)
         self.mode_btn.setFixedWidth(160)
         self.mode_btn.clicked.connect(self.toggle_mode)
         toolbar_layout.addWidget(self.mode_btn)
@@ -520,8 +524,8 @@ class MainWindow(QMainWindow):
         toolbar_layout.addWidget(CyberButton("OPEN_DIRS", color=CP_YELLOW, parent=self, is_outlined=True))
         toolbar_layout.itemAt(7).widget().clicked.connect(self.open_startup_dirs)
         
-        toolbar_layout.addWidget(CyberButton("OPEN_PS1", color="#00FF00", parent=self, is_outlined=True))
-        toolbar_layout.itemAt(8).widget().clicked.connect(self.open_ps1_file)
+        toolbar_layout.addWidget(CyberButton("PS1_PATH", color="#00FF00", parent=self, is_outlined=True))
+        toolbar_layout.itemAt(8).widget().clicked.connect(self.select_ps1_path)
 
         toolbar_layout.addStretch()
         
@@ -622,14 +626,21 @@ class MainWindow(QMainWindow):
         else:
             self.update_status("REGISTRY SCAN COMPLETE: NO NEW ENTRIES")
 
+    def select_ps1_path(self):
+        new_path, _ = QFileDialog.getSaveFileName(self, "SELECT PS1 LOCATION", self.ps1_file_path, "PowerShell Script (*.ps1)")
+        if new_path:
+            self.ps1_file_path = new_path
+            self.save_items()
+            self.update_status(f"PATH UPDATED: {os.path.basename(new_path)}")
+
     def open_ps1_file(self):
-        if os.path.exists(PS1_FILE):
-            os.startfile(PS1_FILE)
+        if os.path.exists(self.ps1_file_path):
+            os.startfile(self.ps1_file_path)
             self.update_status("PS1 SCRIPT OPENED")
         else:
             self.update_status("PS1 NOT FOUND - GENERATING...")
             self.generate_ps1()
-            if os.path.exists(PS1_FILE): os.startfile(PS1_FILE)
+            if os.path.exists(self.ps1_file_path): os.startfile(self.ps1_file_path)
 
     def open_startup_dirs(self):
         folders = [
@@ -685,18 +696,40 @@ class MainWindow(QMainWindow):
 
     def load_items(self):
         try:
+            # Load items
             if os.path.exists(JSON_FILE):
                 with open(JSON_FILE, 'r', encoding='utf-8') as f:
                     self.items = json.load(f)
             else:
                 self.items = []
-            self.populate_lists()
+                
+            # Load settings
+            if os.path.exists(SETTINGS_FILE):
+                with open(SETTINGS_FILE, 'r', encoding='utf-8') as f:
+                    settings = json.load(f)
+                    self.current_mode = settings.get("current_mode", "REGISTRY")
+                    self.ps1_file_path = settings.get("ps1_file_path", DEFAULT_PS1)
+            
+            # Since setup_ui might not have been called yet in __init__, we don't populate here if we call this from __init__
+            # Actually, I swapped the order in __init__ so I MUST be careful.
         except:
             pass
 
     def save_items(self):
-        with open(JSON_FILE, 'w', encoding='utf-8') as f:
-            json.dump(self.items, f, indent=2, ensure_ascii=False)
+        try:
+            # Save items
+            with open(JSON_FILE, 'w', encoding='utf-8') as f:
+                json.dump(self.items, f, indent=2, ensure_ascii=False)
+            
+            # Save settings
+            settings = {
+                "current_mode": self.current_mode,
+                "ps1_file_path": self.ps1_file_path
+            }
+            with open(SETTINGS_FILE, 'w', encoding='utf-8') as f:
+                json.dump(settings, f, indent=2, ensure_ascii=False)
+        except:
+            pass
 
     def toggle_mode(self):
         if self.current_mode == "REGISTRY":
@@ -706,6 +739,7 @@ class MainWindow(QMainWindow):
             self.current_mode = "REGISTRY"
             color = CP_CYAN
             
+        self.save_items() # Save the new mode
         self.title_lbl.setText(f"SYSTEM // STARTUP_CONTROL // {self.current_mode}")
         self.mode_btn.setText(f"MODE: {self.current_mode}")
         self.mode_btn.color = color 
@@ -818,7 +852,7 @@ class MainWindow(QMainWindow):
             content += "Write-Host 'Startup Sequence Complete.' -ForegroundColor Green\n"
             content += "Start-Sleep -Seconds 3\n"
             
-            with open(PS1_FILE, 'w', encoding='utf-8') as f:
+            with open(self.ps1_file_path, 'w', encoding='utf-8') as f:
                 f.write(content)
                 
             self.update_status(f"PS1 GENERATED: {enabled_count} ACTIVE ITEMS")

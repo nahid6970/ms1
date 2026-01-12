@@ -8,7 +8,7 @@
     "Command": "",
     "ps1_command": "Echo HI",
     "ExecutableType": "other",
-    "script_enabled": true
+    "script_enabled": false
   },
   {
     "name": "ollama-chat (8000)",
