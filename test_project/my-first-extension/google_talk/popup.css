@@ -1,0 +1,110 @@
+body {
+    margin: 0;
+    width: 320px;
+    height: 380px;
+    background-color: #121212;
+    color: white;
+    font-family: 'Inter', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.container {
+    text-align: center;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: radial-gradient(circle at center, #1e1e1e 0%, #121212 100%);
+}
+
+.status {
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin-bottom: 40px;
+    color: #e0e0e0;
+    height: 30px;
+    letter-spacing: 0.5px;
+}
+
+.mic-wrapper {
+    position: relative;
+    width: 90px;
+    height: 90px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 40px;
+    cursor: pointer;
+}
+
+.mic-circle {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ff4b4b, #ff0000);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 10px 30px rgba(255, 0, 0, 0.4);
+    z-index: 2;
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mic-circle:active {
+    transform: scale(0.92);
+}
+
+.mic-icon {
+    width: 45px;
+    height: 45px;
+    fill: white;
+}
+
+.ripple {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 75, 75, 0.5);
+    opacity: 0;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.listening .ripple {
+    animation: ripple-anim 2s infinite;
+}
+
+.ripple.delay {
+    animation-delay: 1s;
+}
+
+@keyframes ripple-anim {
+    0% {
+        transform: scale(1);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(2.8);
+        opacity: 0;
+    }
+}
+
+.lang-display {
+    font-size: 0.85rem;
+    color: #aaa;
+    background: rgba(255, 255, 255, 0.08);
+    padding: 6px 16px;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.1);
+    transition: background 0.3s;
+}
+
+.lang-display:hover {
+    background: rgba(255, 255, 255, 0.15);
+}

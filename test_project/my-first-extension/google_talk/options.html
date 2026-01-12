@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Google Voice Search</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #121212;
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background: #1e1e1e;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            width: 320px;
+            text-align: center;
+        }
+
+        h1 {
+            margin-top: 0;
+            font-size: 1.5rem;
+            margin-bottom: 24px;
+            background: linear-gradient(135deg, #ff4b4b, #ff0000);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .form-group {
+            text-align: left;
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #bbb;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #333;
+            background: #252525;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+            cursor: pointer;
+            transition: border-color 0.2s;
+            font-family: inherit;
+        }
+
+        select:focus {
+            border-color: #ff4b4b;
+        }
+
+        button {
+            background: linear-gradient(135deg, #ff4b4b, #ff0000);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1rem;
+            width: 100%;
+            cursor: pointer;
+            font-weight: 600;
+            transition: transform 0.1s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            box-shadow: 0 0 15px rgba(255, 75, 75, 0.4);
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .toast {
+            margin-top: 20px;
+            color: #4CAF50;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.9rem;
+            height: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Voice Settings</h1>
+        <div class="form-group">
+            <label for="lang">Speech Language</label>
+            <select id="lang">
+                <option value="en-US">English (United States)</option>
+                <option value="bn-BD">Bangla (Bangladesh)</option>
+            </select>
+        </div>
+        <button id="save">Save Preferences</button>
+        <div class="toast" id="toast">Settings saved successfully!</div>
+    </div>
+    <script src="options.js"></script>
+</body>
+
+</html>
