@@ -6,16 +6,21 @@
 /* Topbar - Cyberpunk styling */
 .topbar {
   position: relative;
-  width: 100%;
+  width: fit-content;
+  max-width: 95%;
+  /* Prevent overflowing on small screens */
+  margin: 10px auto;
+  /* Center horizontally with some top spacing */
   z-index: 1000;
   background-color: #0a0a0f;
   /* Dark cyberpunk background */
-  padding: 15px 10px;
-  /* Increased top/bottom padding for badges */
+  padding: 10px 20px;
+  /* Adjusted padding */
   box-sizing: border-box;
-  margin-top: 0;
-  border-bottom: 2px solid #00f3ff;
-  /* Neon cyan border */
+  border: 2px solid #00f3ff;
+  /* Full Neon cyan border */
+  border-radius: 20px;
+  /* Rounded corners for pill shape */
   box-shadow: 0 0 15px rgba(0, 243, 255, 0.3);
   /* Neon glow */
 }
@@ -24,6 +29,7 @@
 
 /* Always show sidebar content */
 
+/* Always show topbar content */
 /* Always show topbar content */
 .topbar .top-center-controls {
   display: flex;
@@ -34,9 +40,8 @@
   gap: 15px;
   /* Increased gap */
   width: 100%;
-  overflow-x: auto;
-  overflow-y: visible;
-  /* Allow badges to show */
+  overflow: visible;
+  /* Allow content to extend without scrollbars */
   padding-top: 5px;
   padding-bottom: 5px;
 }
