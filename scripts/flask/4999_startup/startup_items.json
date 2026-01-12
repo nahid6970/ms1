@@ -559,5 +559,45 @@
     ],
     "Command": "",
     "ExecutableType": "other"
+  },
+  {
+    "name": "WingetUI",
+    "type": "App",
+    "paths": [
+      "C:\\Users\\nahid\\AppData\\Local\\Programs\\UniGetUI\\UniGetUI.exe"
+    ],
+    "Command": "--daemon",
+    "ps1_command": "Start-Process -FilePath \"C:\\Users\\nahid\\AppData\\Local\\Programs\\UniGetUI\\UniGetUI.exe\" -ArgumentList \"--daemon\"",
+    "ExecutableType": "other"
+  },
+  {
+    "name": "YASB",
+    "type": "App",
+    "paths": [
+      "C:\\Program Files\\YASB\\yasb.exe"
+    ],
+    "Command": "",
+    "ps1_command": "Start-Process -FilePath \"C:\\Program Files\\YASB\\yasb.exe\"",
+    "ExecutableType": "other"
+  },
+  {
+    "name": "Podman Desktop",
+    "type": "App",
+    "paths": [
+      "C:\\Users\\nahid\\AppData\\Local\\Programs\\Podman Desktop\\Podman Desktop.exe"
+    ],
+    "Command": "",
+    "ps1_command": "Start-Process -FilePath \"C:\\Users\\nahid\\AppData\\Local\\Programs\\Podman Desktop\\Podman Desktop.exe\"",
+    "ExecutableType": "other"
+  },
+  {
+    "name": "tvncontrol",
+    "type": "App",
+    "paths": [
+      "C:\\Program Files\\TightVNC\\tvnserver.exe"
+    ],
+    "Command": "-controlservice -slave",
+    "ps1_command": "Start-Process -FilePath \"C:\\Program Files\\TightVNC\\tvnserver.exe\" -ArgumentList \"-controlservice -slave\"",
+    "ExecutableType": "other"
   }
 ]
