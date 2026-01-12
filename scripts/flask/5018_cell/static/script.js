@@ -513,19 +513,7 @@ function handleKeyboardShortcuts(e) {
         if (cleanedText) {
             const searchInput = document.getElementById('searchInput');
             if (searchInput) {
-                const currentVal = searchInput.value.trim();
-                if (currentVal) {
-                    const terms = currentVal.split(',').map(t => t.trim().toLowerCase());
-                    if (!terms.includes(cleanedText.toLowerCase())) {
-                        searchInput.value = currentVal + ', ' + cleanedText;
-                    }
-                } else {
-                    searchInput.value = cleanedText;
-                }
-                searchTable(true);
-                searchInput.focus();
-                
-                // Copy the picked word to clipboard
+                // Copy the picked word to clipboard first
                 try {
                     const tempInput = document.createElement('textarea');
                     tempInput.value = cleanedText;
@@ -540,6 +528,19 @@ function handleKeyboardShortcuts(e) {
                 } catch (err) {
                     console.log('Copy failed:', err);
                 }
+                
+                // Then add to search box
+                const currentVal = searchInput.value.trim();
+                if (currentVal) {
+                    const terms = currentVal.split(',').map(t => t.trim().toLowerCase());
+                    if (!terms.includes(cleanedText.toLowerCase())) {
+                        searchInput.value = currentVal + ', ' + cleanedText;
+                    }
+                } else {
+                    searchInput.value = cleanedText;
+                }
+                searchTable(true);
+                searchInput.focus();
             }
         }
     }
