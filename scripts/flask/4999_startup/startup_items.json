@@ -6,7 +6,9 @@
       "C:\\Users\\nahid\\ms\\ms1\\ahk_v2.ahk"
     ],
     "Command": "",
-    "ExecutableType": "other"
+    "ps1_command": "Echo HI",
+    "ExecutableType": "other",
+    "script_enabled": true
   },
   {
     "name": "ollama-chat (8000)",

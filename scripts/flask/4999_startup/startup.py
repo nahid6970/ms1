@@ -13,6 +13,7 @@ from PyQt6.QtGui import QFont, QColor, QPalette, QCursor, QPainter, QPen, QActio
 
 # Constants
 JSON_FILE = os.path.join(os.path.dirname(__file__), "startup_items.json")
+PS1_FILE = os.path.join(os.path.expanduser("~"), "Desktop", "myStartup.ps1")
 
 # Cyberpunk Palette
 CP_BG = "#050505"           # Main Background (almost black)
@@ -226,7 +227,7 @@ class ItemDialog(QDialog):
         self.item = item
         self.result_data = None
         self.setWindowTitle("SYSTEM // EDIT" if item else "SYSTEM // NEW")
-        self.setFixedSize(500, 500)
+        self.setFixedSize(600, 600) # Increased size
         self.setStyleSheet(f"""
             QDialog {{ background-color: {CP_BG}; border: 1px solid {CP_DIM}; }}
             QLabel {{ color: {CP_CYAN}; font-family: 'Consolas'; font-weight: bold; font-size: 12px; }}
@@ -274,9 +275,14 @@ class ItemDialog(QDialog):
         layout.addLayout(path_layout)
 
         # Args
-        layout.addWidget(QLabel("PARAMETERS // ARGS"))
-        self.args_input = CyberInput("Optional arguments...")
+        layout.addWidget(QLabel("PARAMETERS // ARGS (REGISTRY)"))
+        self.args_input = CyberInput("Optional arguments for Registry...")
         layout.addWidget(self.args_input)
+        
+        # PS1 Command
+        layout.addWidget(QLabel("CUSTOM COMMAND // PS1 SCRIPT"))
+        self.ps1_input = CyberInput("Complete PowerShell command line...")
+        layout.addWidget(self.ps1_input)
 
         layout.addStretch()
 
@@ -311,17 +317,30 @@ class ItemDialog(QDialog):
         self.type_combo.setCurrentText(self.item["type"])
         self.path_input.setText(self.item["paths"][0] if self.item["paths"] else "")
         self.args_input.setText(self.item.get("Command", ""))
+        self.ps1_input.setText(self.item.get("ps1_command", ""))
         self.exec_type_combo.setCurrentText(self.item.get("ExecutableType", "other"))
 
     def save_item(self):
-        if not self.name_input.text() or not self.path_input.text():
+        if not self.name_input.text():
             return
+        
+        # Default ps1 command if empty
+        ps_cmd = self.ps1_input.text()
+        if not ps_cmd and self.path_input.text():
+            path = self.path_input.text()
+            args = self.args_input.text()
+            ps_cmd = f'Start-Process -FilePath "{path}"'
+            if args:
+                ps_cmd += f' -ArgumentList "{args}"'
+
         self.result_data = {
             "name": self.name_input.text(),
             "type": self.type_combo.currentText(),
             "paths": [self.path_input.text()],
             "Command": self.args_input.text(),
-            "ExecutableType": self.exec_type_combo.currentText()
+            "ps1_command": ps_cmd,
+            "ExecutableType": self.exec_type_combo.currentText(),
+            "script_enabled": self.item.get("script_enabled", False) if self.item else False
         }
         self.accept()
 
@@ -434,11 +453,12 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("STARTUP // MANAGER_V2.0")
-        self.resize(1100, 750)
+        self.resize(1100, 800)
         self.setStyleSheet(f"QMainWindow {{ background-color: {CP_BG}; }}")
         
         self.items = []
         self.widgets_map = {}
+        self.current_mode = "REGISTRY" # or "SCRIPT"
         
         self.setup_ui()
         self.load_items()
@@ -452,10 +472,10 @@ class MainWindow(QMainWindow):
 
         # Header / Status Bar
         header_layout = QHBoxLayout()
-        title_lbl = QLabel("SYSTEM // STARTUP_CONTROL")
-        title_lbl.setFont(QFont("Consolas", 16, QFont.Weight.Bold))
-        title_lbl.setStyleSheet(f"color: {CP_YELLOW}; letter-spacing: 2px;")
-        header_layout.addWidget(title_lbl)
+        self.title_lbl = QLabel(f"SYSTEM // STARTUP_CONTROL // {self.current_mode}")
+        self.title_lbl.setFont(QFont("Consolas", 16, QFont.Weight.Bold))
+        self.title_lbl.setStyleSheet(f"color: {CP_YELLOW}; letter-spacing: 2px;")
+        header_layout.addWidget(self.title_lbl)
         header_layout.addStretch()
         
         self.status_label = QLabel("SYSTEM READY")
@@ -470,28 +490,43 @@ class MainWindow(QMainWindow):
         toolbar_layout = QHBoxLayout(toolbar_frame)
         toolbar_layout.setContentsMargins(10, 10, 10, 10)
         
-        toolbar_layout.addWidget(CyberButton("NEW_ENTRY", color=CP_YELLOW, parent=self, is_outlined=False))
-        toolbar_layout.itemAt(0).widget().clicked.connect(self.add_item)
+        # Mode Toggle
+        self.mode_btn = CyberButton(f"MODE: {self.current_mode}", color=CP_CYAN, parent=self, is_outlined=False)
+        self.mode_btn.setFixedWidth(160)
+        self.mode_btn.clicked.connect(self.toggle_mode)
+        toolbar_layout.addWidget(self.mode_btn)
+        
+        # Separator
+        sep = QFrame()
+        sep.setFrameShape(QFrame.Shape.VLine)
+        sep.setStyleSheet(f"color: {CP_DIM};")
+        toolbar_layout.addWidget(sep)
+
+        toolbar_layout.addWidget(CyberButton("NEW_ENTRY", color=CP_YELLOW, parent=self, is_outlined=True))
+        toolbar_layout.itemAt(2).widget().clicked.connect(self.add_item)
         
         toolbar_layout.addWidget(CyberButton("REFRESH", color=CP_CYAN, parent=self, is_outlined=True))
-        toolbar_layout.itemAt(1).widget().clicked.connect(self.refresh_items)
+        toolbar_layout.itemAt(3).widget().clicked.connect(self.refresh_items)
         
         toolbar_layout.addWidget(CyberButton("SCAN_SYS", color=CP_TEXT, parent=self, is_outlined=True))
-        toolbar_layout.itemAt(2).widget().clicked.connect(self.scan_folders)
+        toolbar_layout.itemAt(4).widget().clicked.connect(self.scan_folders)
         
         toolbar_layout.addWidget(CyberButton("SCAN_REG", color="#FF00FF", parent=self, is_outlined=True))
-        toolbar_layout.itemAt(3).widget().clicked.connect(self.scan_registry)
+        toolbar_layout.itemAt(5).widget().clicked.connect(self.scan_registry)
         
         toolbar_layout.addWidget(CyberButton("PRUNE_LNK", color=CP_RED, parent=self, is_outlined=True))
-        toolbar_layout.itemAt(4).widget().clicked.connect(self.delete_matching_shortcuts) # Del Match
+        toolbar_layout.itemAt(6).widget().clicked.connect(self.delete_matching_shortcuts) # Del Match
 
         toolbar_layout.addWidget(CyberButton("OPEN_DIRS", color=CP_YELLOW, parent=self, is_outlined=True))
-        toolbar_layout.itemAt(5).widget().clicked.connect(self.open_startup_dirs)
+        toolbar_layout.itemAt(7).widget().clicked.connect(self.open_startup_dirs)
+        
+        toolbar_layout.addWidget(CyberButton("OPEN_PS1", color="#00FF00", parent=self, is_outlined=True))
+        toolbar_layout.itemAt(8).widget().clicked.connect(self.open_ps1_file)
 
         toolbar_layout.addStretch()
         
         self.search_input = CyberInput("SEARCH_DB://...", self)
-        self.search_input.setFixedWidth(300)
+        self.search_input.setFixedWidth(200)
         self.search_input.textChanged.connect(self.filter_items)
         toolbar_layout.addWidget(self.search_input)
         
@@ -556,11 +591,16 @@ class MainWindow(QMainWindow):
                                     path_extracted = parts[0]
                                     args_extracted = parts[1] if len(parts) > 1 else ""
                             
+                            ps1_cmd = f'Start-Process -FilePath "{path_extracted}"'
+                            if args_extracted:
+                                ps1_cmd += f' -ArgumentList "{args_extracted}"'
+                                
                             found_items.append({
                                 "name": name,
                                 "type": "App" if path_extracted.lower().endswith(".exe") else "Command",
                                 "paths": [path_extracted],
                                 "Command": args_extracted,
+                                "ps1_command": ps1_cmd,
                                 "ExecutableType": "other"
                             })
                         except:
@@ -581,6 +621,15 @@ class MainWindow(QMainWindow):
                     self.update_status("IMPORT CANCELLED")
         else:
             self.update_status("REGISTRY SCAN COMPLETE: NO NEW ENTRIES")
+
+    def open_ps1_file(self):
+        if os.path.exists(PS1_FILE):
+            os.startfile(PS1_FILE)
+            self.update_status("PS1 SCRIPT OPENED")
+        else:
+            self.update_status("PS1 NOT FOUND - GENERATING...")
+            self.generate_ps1()
+            if os.path.exists(PS1_FILE): os.startfile(PS1_FILE)
 
     def open_startup_dirs(self):
         folders = [
@@ -649,6 +698,21 @@ class MainWindow(QMainWindow):
         with open(JSON_FILE, 'w', encoding='utf-8') as f:
             json.dump(self.items, f, indent=2, ensure_ascii=False)
 
+    def toggle_mode(self):
+        if self.current_mode == "REGISTRY":
+            self.current_mode = "SCRIPT"
+            color = CP_YELLOW
+        else:
+            self.current_mode = "REGISTRY"
+            color = CP_CYAN
+            
+        self.title_lbl.setText(f"SYSTEM // STARTUP_CONTROL // {self.current_mode}")
+        self.mode_btn.setText(f"MODE: {self.current_mode}")
+        self.mode_btn.color = color 
+        self.mode_btn.update_style()
+        self.populate_lists() # Reload widgets with new active state
+        self.update_status(f"SWITCHED TO {self.current_mode} MODE")
+
     def populate_lists(self):
         # Clear existing
         while self.cmd_container.count():
@@ -661,7 +725,12 @@ class MainWindow(QMainWindow):
         self.widgets_map.clear()
 
         for item in self.items:
-            is_active = self.check_registry(item)
+            is_active = False
+            if self.current_mode == "REGISTRY":
+                is_active = self.check_registry(item)
+            else:
+                is_active = item.get("script_enabled", False)
+
             widget = StartupItemWidget(item, is_active)
             widget.toggled.connect(self.handle_toggle)
             widget.launched.connect(self.handle_launch)
@@ -685,22 +754,76 @@ class MainWindow(QMainWindow):
 
     def handle_toggle(self, item, current_state):
         should_enable = not current_state
-        reg_path = r"Software\Microsoft\Windows\CurrentVersion\Run"
-        try:
-            if should_enable:
-                 with winreg.OpenKey(winreg.HKEY_CURRENT_USER, reg_path, 0, winreg.KEY_WRITE) as reg_key:
-                    path = item["paths"][0]
-                    command = item.get("Command", "")
-                    full = f'"{path}" {command}' if command else f'"{path}"'
-                    winreg.SetValueEx(reg_key, item["name"], 0, winreg.REG_SZ, full)
-            else:
-                 with winreg.OpenKey(winreg.HKEY_CURRENT_USER, reg_path, 0, winreg.KEY_WRITE) as reg_key:
-                    winreg.DeleteValue(reg_key, item["name"])
+        
+        if self.current_mode == "REGISTRY":
+            reg_path = r"Software\Microsoft\Windows\CurrentVersion\Run"
+            try:
+                if should_enable:
+                     with winreg.OpenKey(winreg.HKEY_CURRENT_USER, reg_path, 0, winreg.KEY_WRITE) as reg_key:
+                        path = item["paths"][0]
+                        command = item.get("Command", "")
+                        full = f'"{path}" {command}' if command else f'"{path}"'
+                        winreg.SetValueEx(reg_key, item["name"], 0, winreg.REG_SZ, full)
+                else:
+                     with winreg.OpenKey(winreg.HKEY_CURRENT_USER, reg_path, 0, winreg.KEY_WRITE) as reg_key:
+                        winreg.DeleteValue(reg_key, item["name"])
+                
+                self.widgets_map[item["name"]].set_active(should_enable)
+                self.update_status(f"REGISTRY UPDATED: {item['name']} -> {'ON' if should_enable else 'OFF'}")
+            except Exception as e:
+                self.update_status(f"REGISTRY ERROR: {str(e)}")
+        else:
+            # SCRIPT MODE
+            # We need to find the item in self.items to update it, as item is a dict copy? 
+            # Actually item passed from widget is likely the one in self.items if passed by ref.
+            # But let's be safe and update self.items then save.
             
+            # Update the item active state
+            item["script_enabled"] = should_enable 
+            self.save_items()
+            self.generate_ps1()
+            
+            # The widget holds the item dict, so if it's the same ref, it's fine.
             self.widgets_map[item["name"]].set_active(should_enable)
-            self.update_status(f"PROTOCOL UPDATED: {item['name']} -> {'ON' if should_enable else 'OFF'}")
+            self.update_status(f"SCRIPT UPDATED: {item['name']} -> {'ON' if should_enable else 'OFF'}")
+
+    def generate_ps1(self):
+        try:
+            content = "# Auto-generated startup script by SYSTEM // STARTUP_CONTROL\n"
+            content += "Write-Host 'Initializing Startup Protocol...' -ForegroundColor Cyan\n\n"
+            
+            enabled_count = 0
+            for item in self.items:
+                if item.get("script_enabled", False):
+                    name = item["name"]
+                    cmd = item.get("ps1_command", "")
+                    
+                    # Fallback generation if ps1_command empty
+                    if not cmd:
+                         path = item["paths"][0]
+                         args = item.get("Command", "")
+                         cmd = f'Start-Process -FilePath "{path}"'
+                         if args: cmd += f' -ArgumentList "{args}"'
+                    
+                    content += f"# {name}\n"
+                    content += "try {\n"
+                    content += f'    Write-Host "Exec: {name}..." -ForegroundColor Yellow\n'
+                    content += f'    {cmd}\n'
+                    content += "    Write-Host '  [OK]' -ForegroundColor Green\n"
+                    content += "} catch {\n"
+                    content += f"    Write-Host '  [FAILED] ' $_ -ForegroundColor Red\n"
+                    content += "}\n\n"
+                    enabled_count += 1
+            
+            content += "Write-Host 'Startup Sequence Complete.' -ForegroundColor Green\n"
+            content += "Start-Sleep -Seconds 3\n"
+            
+            with open(PS1_FILE, 'w', encoding='utf-8') as f:
+                f.write(content)
+                
+            self.update_status(f"PS1 GENERATED: {enabled_count} ACTIVE ITEMS")
         except Exception as e:
-            self.update_status(f"ERROR: {str(e)}")
+            self.update_status(f"PS1 GENERATION FAILED: {str(e)}")
 
     def handle_launch(self, item):
         try:
@@ -781,11 +904,13 @@ class MainWindow(QMainWindow):
                             if resolved and os.path.exists(resolved):
                                 real_path = resolved
                         
+                        ps1_cmd = f'Start-Process -FilePath "{real_path}"'
                         found_items.append({
                             "name": name,
                             "type": "App" if real_path.lower().endswith(".exe") else "Command",
                             "paths": [real_path],
                             "Command": "", 
+                            "ps1_command": ps1_cmd,
                             "ExecutableType": "other"
                         })
         
