@@ -34,10 +34,16 @@ document.addEventListener('DOMContentLoaded', () => {
     resizeCanvas();
 
     // Event Listeners
-    canvas.addEventListener('mousedown', startDrawing);
-    canvas.addEventListener('mousemove', draw);
-    canvas.addEventListener('mouseup', stopDrawing);
+    canvas.addEventListener('mousedown', handleStart);
+    canvas.addEventListener('mousemove', handleMove);
+    canvas.addEventListener('mouseup', handleEnd);
+    canvas.addEventListener('mouseout', handleEnd);
     canvas.addEventListener('wheel', handleZoom);
+
+    // Touch Support
+    canvas.addEventListener('touchstart', handleStart, { passive: false });
+    canvas.addEventListener('touchmove', handleMove, { passive: false });
+    canvas.addEventListener('touchend', handleEnd);
 
 
     // Tool Switching
@@ -150,14 +156,82 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Drawing Logic
     function getMousePos(e) {
+        let clientX, clientY;
+        if (e.touches && e.touches.length > 0) {
+            clientX = e.touches[0].clientX;
+            clientY = e.touches[0].clientY;
+        } else {
+            clientX = e.clientX;
+            clientY = e.clientY;
+        }
+
         return {
-            x: (e.clientX - state.panX) / state.zoom,
-            y: (e.clientY - state.panY) / state.zoom
+            x: (clientX - state.panX) / state.zoom,
+            y: (clientY - state.panY) / state.zoom,
+            clientX: clientX,
+            clientY: clientY
         };
     }
 
-    function startDrawing(e) {
-        // Correct logic for text tool input persistence
+    // Hit Testing
+    function isPointInElement(x, y, el) {
+        const padding = 10;
+        if (el.type === 'rectangle' || el.type === 'ellipse' || el.type === 'text') { // Text uses x,y but we can approx
+            // For text, we assume a box. Ideally we'd measure text, but for now approximation:
+            let left, right, top, bottom;
+            if (el.type === 'text') {
+                left = el.x;
+                top = el.y;
+                right = el.x + (el.text.length * el.fontSize * 0.6); // Approx width
+                bottom = el.y + el.fontSize;
+            } else {
+                left = Math.min(el.startX, el.endX);
+                right = Math.max(el.startX, el.endX);
+                top = Math.min(el.startY, el.endY);
+                bottom = Math.max(el.startY, el.endY);
+            }
+            return x >= left - padding && x <= right + padding && y >= top - padding && y <= bottom + padding;
+        } else if (el.type === 'line' || el.type === 'arrow') {
+            // Distance to line segment
+            const A = x - el.startX;
+            const B = y - el.startY;
+            const C = el.endX - el.startX;
+            const D = el.endY - el.startY;
+            const dot = A * C + B * D;
+            const lenSq = C * C + D * D;
+            let param = -1;
+            if (lenSq !== 0) param = dot / lenSq;
+            let xx, yy;
+            if (param < 0) {
+                xx = el.startX;
+                yy = el.startY;
+            } else if (param > 1) {
+                xx = el.endX;
+                yy = el.endY;
+            } else {
+                xx = el.startX + param * C;
+                yy = el.startY + param * D;
+            }
+            const dx = x - xx;
+            const dy = y - yy;
+            return (dx * dx + dy * dy) < (padding * padding);
+        } else if (el.type === 'draw') {
+            // Simple check: minimal distance to any point
+            for (let p of el.points) {
+                if (Math.hypot(p.x - x, p.y - y) < padding) return true;
+            }
+            return false;
+        }
+        return false;
+    }
+
+    function handleStart(e) {
+        if (e.type === 'touchstart') {
+            // e.preventDefault(); // Prevent scrolling on touch
+            // Only prevent if we are drawing or panning (not attempting to click ui?? UI is outside canvas)
+            if (e.target === canvas) e.preventDefault();
+        }
+
         if (e.target.tagName === 'TEXTAREA') return;
 
         state.isDrawing = true;
@@ -167,8 +241,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (state.tool === 'pan') {
             canvas.style.cursor = 'grabbing';
-            state.lastMouseX = e.clientX;
-            state.lastMouseY = e.clientY;
+            state.lastMouseX = pos.clientX;
+            state.lastMouseY = pos.clientY;
+            return;
+        }
+
+        if (state.tool === 'select') {
+            // Find element to move
+            // Reverse order to check top-most first
+            for (let i = state.elements.length - 1; i >= 0; i--) {
+                if (isPointInElement(pos.x, pos.y, state.elements[i])) {
+                    state.selectedElement = state.elements[i];
+                    state.isDraggingElement = true;
+                    // We don't return here? We might want to clear selection if we clicked empty space
+                    redraw(); // To maybe show selection highlight later
+                    return;
+                }
+            }
+            state.selectedElement = null;
+            redraw(); // Clear highlight if clicked empty space
+            return;
+        }
+
+        // For Text tool, we create input on Mouse Up (Click) to avoid drag creation issues
+        // OR we just do it here but ensure we don't draw dots.
+        if (state.tool === 'text') {
+            // We'll handle text creation in handleEnd to emulate a "click"
+            // But we need to mark that we started a click
+            state.isClickCandidate = true;
             return;
         }
 
@@ -180,10 +280,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 width: state.lineWidth,
                 opacity: state.opacity
             };
-        } else if (state.tool === 'text') {
-            createTextInput(e.clientX, e.clientY, pos.x, pos.y);
-            state.isDrawing = false;
-            return;
         } else {
             state.currentElement = {
                 type: state.tool,
@@ -192,26 +288,61 @@ document.addEventListener('DOMContentLoaded', () => {
                 endX: pos.x,
                 endY: pos.y,
                 color: state.strokeColor,
-                width: state.lineWidth, // Use slider width for shapes
+                width: state.lineWidth,
                 opacity: state.opacity
             };
         }
     }
 
-    function draw(e) {
+    function handleMove(e) {
         if (!state.isDrawing) return;
+        if (e.type === 'touchmove') e.preventDefault();
 
         const pos = getMousePos(e);
+
+        // Handle Moving Elements
+        if (state.tool === 'select' && state.isDraggingElement && state.selectedElement) {
+            const diffX = pos.x - state.startX;
+            const diffY = pos.y - state.startY;
+
+            const el = state.selectedElement;
+            if (el.type === 'draw') {
+                el.points.forEach(p => { p.x += diffX; p.y += diffY; });
+            } else if (el.type === 'text') {
+                el.x += diffX;
+                el.y += diffY;
+            } else {
+                el.startX += diffX;
+                el.startY += diffY;
+                el.endX += diffX;
+                el.endY += diffY;
+            }
+
+            // Reset start to current for next frame
+            state.startX = pos.x;
+            state.startY = pos.y;
+
+            redraw();
+            return;
+        }
+
+
         state.currentX = pos.x;
         state.currentY = pos.y;
 
+        // If moved significantly, it's not a click
+        if (state.isClickCandidate && (Math.abs(state.startX - pos.x) > 5 || Math.abs(state.startY - pos.y) > 5)) {
+            state.isClickCandidate = false;
+        }
+        if (state.tool === 'text') return; // Don't do anything while dragging in text mode
+
         if (state.tool === 'pan') {
-            const dx = e.clientX - state.lastMouseX;
-            const dy = e.clientY - state.lastMouseY;
+            const dx = pos.clientX - state.lastMouseX;
+            const dy = pos.clientY - state.lastMouseY;
             state.panX += dx;
             state.panY += dy;
-            state.lastMouseX = e.clientX;
-            state.lastMouseY = e.clientY;
+            state.lastMouseX = pos.clientX;
+            state.lastMouseY = pos.clientY;
             redraw();
             return;
         }
@@ -224,13 +355,38 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         redraw();
-        // Draw current element temporarily on top
         drawElement(state.currentElement);
     }
 
-    function stopDrawing() {
+    function handleEnd(e) {
         if (!state.isDrawing) return;
-        state.isDrawing = false;
+        state.isDrawing = false; // Reset immediately
+
+        if (state.tool === 'select') {
+            state.isDraggingElement = false;
+            return;
+        }
+
+        if (state.tool === 'text' && state.isClickCandidate) {
+            // It was a click!
+            // We need coordinates. For touchend, e.touches is empty, use changedTouches
+            let clientX, clientY;
+            if (e.changedTouches && e.changedTouches.length > 0) {
+                clientX = e.changedTouches[0].clientX;
+                clientY = e.changedTouches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+
+            // Recalculate canvas pos
+            const x = (clientX - state.panX) / state.zoom;
+            const y = (clientY - state.panY) / state.zoom;
+
+            createTextInput(clientX, clientY, x, y);
+            state.isClickCandidate = false;
+            return;
+        }
 
         if (state.tool === 'pan') {
             canvas.style.cursor = 'grab';
@@ -261,6 +417,41 @@ document.addEventListener('DOMContentLoaded', () => {
         // Draw all saved elements
         state.elements.forEach(el => drawElement(el));
 
+        // Highlight selected
+        if (state.selectedElement && state.tool === 'select') {
+            drawSelectionHighlight(state.selectedElement);
+        }
+
+        ctx.restore();
+    }
+
+    function drawSelectionHighlight(el) {
+        ctx.save();
+        ctx.strokeStyle = '#00a8ff'; // Selection color
+        ctx.lineWidth = 1;
+        ctx.setLineDash([5, 3]);
+        const padding = 5;
+
+        let minX, minY, maxX, maxY;
+
+        if (el.type === 'draw') {
+            const xs = el.points.map(p => p.x);
+            const ys = el.points.map(p => p.y);
+            minX = Math.min(...xs); maxX = Math.max(...xs);
+            minY = Math.min(...ys); maxY = Math.max(...ys);
+        } else if (el.type === 'text') {
+            minX = el.x;
+            minY = el.y;
+            maxX = el.x + (el.text.length * el.fontSize * 0.6);
+            maxY = el.y + el.fontSize;
+        } else {
+            minX = Math.min(el.startX, el.endX);
+            maxX = Math.max(el.startX, el.endX);
+            minY = Math.min(el.startY, el.endY);
+            maxY = Math.max(el.startY, el.endY);
+        }
+
+        ctx.strokeRect(minX - padding, minY - padding, (maxX - minX) + padding * 2, (maxY - minY) + padding * 2);
         ctx.restore();
     }
 
@@ -303,20 +494,20 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.textBaseline = 'top'; // Easier positioning
             ctx.fillText(el.text, el.x, el.y);
         } else if (el.type === 'arrow') {
-            // Basic arrow implementation
-            const headLength = el.width * 3; // Scale arrow head with width
+            const headLength = Math.max(10, el.width * 3); // Slightly larger head
             const angle = Math.atan2(el.endY - el.startY, el.endX - el.startX);
 
             ctx.moveTo(el.startX, el.startY);
             ctx.lineTo(el.endX, el.endY);
             ctx.stroke();
 
-            // Arrowhead
+            // Better Arrowhead (Triangle)
             ctx.beginPath();
             ctx.moveTo(el.endX, el.endY);
             ctx.lineTo(el.endX - headLength * Math.cos(angle - Math.PI / 6), el.endY - headLength * Math.sin(angle - Math.PI / 6));
             ctx.lineTo(el.endX - headLength * Math.cos(angle + Math.PI / 6), el.endY - headLength * Math.sin(angle + Math.PI / 6));
-            ctx.lineTo(el.endX, el.endY);
+            ctx.closePath(); // Close triangle
+            ctx.fillStyle = el.color;
             ctx.fill();
         }
 
@@ -331,7 +522,14 @@ document.addEventListener('DOMContentLoaded', () => {
         input.style.color = state.strokeColor;
         input.style.fontSize = state.fontSize + 'px';
         input.style.fontFamily = state.fontFamily;
-        input.style.zIndex = '1000'; // Ensure it's on top
+        input.style.zIndex = '10000'; // Ensure it's on top
+        // Add semi-transparent background to make it visible
+        const r = parseInt(state.bgColor.slice(1, 3), 16);
+        const g = parseInt(state.bgColor.slice(3, 5), 16);
+        const b = parseInt(state.bgColor.slice(5, 7), 16);
+        // Inverse contrast or just a slight box? Let's use a border and slight fill
+        input.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+        input.style.backdropFilter = 'blur(2px)';
 
         document.body.appendChild(input);
 
