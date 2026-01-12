@@ -2913,7 +2913,9 @@ Markdown Table Styles */
 .hide-markdown-preview input.has-markdown,
 .hide-markdown-preview textarea.has-markdown {
     opacity: 1 !important;
+    position: relative !important;
     color: inherit !important;
+    z-index: auto !important;
 }
 
 /* Settings Modal Styles */

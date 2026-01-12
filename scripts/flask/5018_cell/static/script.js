@@ -4974,9 +4974,10 @@ function searchTable(force = false) {
                     // Don't add search-highlight to cell - preserve cell background color
                     // cell.classList.add('search-highlight');
 
-                    // Highlight markdown preview if it exists
+                    // Highlight markdown preview if it exists and is visible
                     const preview = cell.querySelector('.markdown-preview');
-                    if (preview) {
+                    const markdownDisabled = table.classList.contains('hide-markdown-preview');
+                    if (preview && !markdownDisabled) {
                         // Don't add search-highlight to preview - preserve cell background
                         // preview.classList.add('search-highlight');
 
@@ -5544,8 +5545,8 @@ function toggleRowWrap() {
         // Convert textareas back to inputs
         const textareas = table.querySelectorAll('td textarea');
         textareas.forEach(textarea => {
-            // Skip merged cell textareas
-            if (textarea.closest('td.merged-cell')) {
+            // Skip merged cell textareas OR cells with markdown (which should stay as textareas)
+            if (textarea.closest('td.merged-cell') || textarea.classList.contains('has-markdown')) {
                 return;
             }
 
@@ -6137,9 +6138,10 @@ function renderTable() {
             }
 
             const isTextType = col.type === 'text' || !col.type;
+            const hasMarkdown = checkHasMarkdown(cellValue);
             let input;
 
-            if (wrapEnabled && isTextType) {
+            if ((wrapEnabled || hasMarkdown) && isTextType) {
                 input = document.createElement('textarea');
                 input.rows = 1;
                 // Preserve newlines in the value
@@ -6281,11 +6283,13 @@ function renderTable() {
 
     tableBody.appendChild(fragment);
 
-    // Auto-resize textareas if wrap is enabled
-    if (localStorage.getItem('rowWrapEnabled') === 'true') {
-        const textareas = tableBody.querySelectorAll('textarea:not(.merged-cell textarea)');
-        textareas.forEach(textarea => autoResizeTextarea(textarea));
-    }
+    // Auto-resize textareas (if wrap enabled OR if it contains markdown)
+    const textareas = tableBody.querySelectorAll('textarea:not(.merged-cell textarea)');
+    textareas.forEach(textarea => {
+        if (localStorage.getItem('rowWrapEnabled') === 'true' || textarea.classList.contains('has-markdown')) {
+            autoResizeTextarea(textarea);
+        }
+    });
 
     // Restore scroll position after rendering
     if (tableContainer) {
