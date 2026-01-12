@@ -269,6 +269,28 @@
             "height": 0,
             "is_bold": false,
             "is_italic": false
+        },
+        {
+            "name": "Nuke",
+            "path": "",
+            "type": "script",
+            "hide_terminal": false,
+            "keep_open": true,
+            "kill_window": true,
+            "ctrl_left_cmd": "",
+            "ctrl_right_cmd": "",
+            "use_inline": false,
+            "inline_type": "powershell",
+            "inline_script": "[Environment]::SetEnvironmentVariable(\"PSReadLineScreenReaderOptimization\", \"None\", \"User\")\n",
+            "font_size": 20,
+            "border_width": 0,
+            "corner_radius": 4,
+            "col_span": 1,
+            "row_span": 1,
+            "width": 0,
+            "height": 0,
+            "is_bold": false,
+            "is_italic": false
         }
     ],
     "github_repos": [

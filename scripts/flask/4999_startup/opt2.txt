@@ -1,0 +1,463 @@
+
+[32;1mEditMode                  : [0mE
+                            m
+                            a
+                            c
+                            s
+[32;1mContinuationPrompt        : [0m[90m[0m
+                            [90m [0m
+[32;1mContinuationPromptColor   : [0m[37m[0m
+[32;1mExtraPromptLineCount      : [0m0
+[32;1mAddToHistoryHandler       : [0mS
+                            y
+                            s
+                            t
+                            e
+                            m
+                            .
+                            F
+                            u
+                            n
+                            c
+                            `
+                            2
+                            [
+                            S
+                            y
+                            s
+                            t
+                            e
+                            m
+                            .
+                            S
+                            t
+                            r
+                            i
+                            n
+                            g
+                            ,
+                            S
+                            y
+                            s
+                            t
+                            e
+                            m
+                            .
+                            O
+                            b
+                            j
+                            e
+                            c
+                            t
+                            ]
+[32;1mCommandValidationHandler  : [0mS
+                            y
+                            s
+                            t
+                            e
+                            m
+                            .
+                            A
+                            c
+                            t
+                            i
+                            o
+                            n
+                            `
+                            1
+                            [
+                            S
+                            y
+                            s
+                            t
+                            e
+                            m
+                            .
+                            M
+                            a
+                            n
+                            a
+                            g
+                            e
+                            m
+                            e
+                            n
+                            t
+                            .
+                            A
+                            u
+                            t
+                            o
+                            m
+                            a
+                            t
+                            i
+                            o
+                            n
+                            .
+                            L
+                            a
+                            n
+                            g
+                            u
+                            a
+                            g
+                            e
+                            .
+                            C
+                            o
+                            m
+                            m
+                            a
+                            n
+                            d
+                            A
+                            s
+                            t
+                            ]
+[32;1mCommandsToValidateScriptB : [0m{
+                            F
+                            o
+                            r
+                            E
+                            a
+                            c
+                            h
+                            -
+                            O
+                            b
+                            j
+                            e
+                            c
+                            t
+                            ,
+                             
+                            %
+                            ,
+                             
+                            I
+                            n
+                            v
+                            o
+                            k
+                            e
+                            -
+                            C
+                            o
+                            m
+                            m
+                            a
+                            n
+                            d
+                            ,
+                             
+                            i
+                            c
+                            m
+                            .
+                            }
+[32;1mHistoryNoDuplicates       : [0mT
+                            r
+                            u
+                            e
+[32;1mMaximumHistoryCount       : [0m0
+[32;1mMaximumKillRingCount      : [0m1
+                            0
+[32;1mHistorySearchCursorMovesT : [0mT
+                            r
+                            u
+                            e
+[32;1mShowToolTips              : [0mT
+                            r
+                            u
+                            e
+[32;1mDingTone                  : [0m1
+                            2
+                            2
+                            1
+[32;1mCompletionQueryItems      : [0m1
+                            0
+                            0
+[32;1mWordDelimiters            : [0m;
+                            :
+                            ,
+                            .
+                            [
+                            ]
+                            {
+                            }
+                            (
+                            )
+                            /
+                            \
+                            |
+                            !
+                            ?
+                            ^
+                            &
+                            *
+                            -
+                            =
+                            +
+                            '
+                            "
+                            -
+                            -
+                            ?
+[32;1mDingDuration              : [0m5
+                            0
+[32;1mBellStyle                 : [0mV
+                            i
+                            s
+                            u
+                            a
+                            l
+[32;1mHistorySearchCaseSensitiv : [0mF
+                            a
+                            l
+                            s
+                            e
+[32;1mViModeIndicator           : [0mS
+                            c
+                            r
+                            i
+                            p
+                            t
+[32;1mViModeChangeHandler       : [0m
+                             
+                             
+                             
+                             
+                             
+                             
+                             
+                             
+                             
+                             
+                             
+                             
+                             
+                             
+                             
+                             
+                            [
+                            M
+                            i
+                            c
+                            r
+                            o
+                            s
+                            o
+                            f
+                            t
+                            .
+                            P
+                            o
+                            w
+                            e
+                            r
+                            S
+                            h
+                            e
+                            l
+                            l
+                            .
+                            P
+                            S
+                            C
+                            o
+                            n
+                            s
+                            o
+                            l
+                            e
+                            R
+                            e
+                            a
+                            d
+                            L
+                            i
+                            n
+                            e
+                            ]
+                            :
+                            :
+                            I
+                            n
+                            v
+                            o
+                            k
+                            e
+                            P
+                            r
+                            o
+                            m
+                            p
+                            t
+                            (
+                            )
+                             
+                             
+                             
+                             
+                             
+                             
+                             
+                             
+                             
+                             
+                             
+                             
+[32;1mHistorySavePath           : [0mC
+                            :
+                            \
+                            U
+                            s
+                            e
+                            r
+                            s
+                            \
+                            n
+                            a
+                            h
+                            i
+                            d
+                            \
+                            A
+                            p
+                            p
+                            D
+                            a
+                            t
+                            a
+                            \
+                            R
+                            o
+                            a
+                            m
+                            i
+                            n
+                            g
+                            \
+                            M
+                            i
+                            c
+                            r
+                            o
+                            s
+                            o
+                            f
+                            t
+                            \
+                            W
+                            i
+                            n
+                            d
+                            o
+                            w
+                            s
+                            \
+                            P
+                            o
+                            w
+                            e
+                            r
+                            S
+                            h
+                            e
+                            l
+                            l
+                            \
+                            P
+                            S
+                            R
+                            e
+                            a
+                            d
+                            L
+                            i
+                            n
+                            e
+                            \
+                            C
+                            o
+                            n
+                            s
+                            o
+                            l
+                            e
+                            H
+                            o
+                            s
+                            t
+                            _
+                            h
+                            i
+                            s
+                            t
+                            o
+                            r
+                            y
+                            .
+                            t
+                            x
+                            t
+[32;1mHistorySaveStyle          : [0mS
+                            a
+                            v
+                            e
+                            I
+                            n
+                            c
+                            r
+                            e
+                            m
+                            e
+                            n
+                            t
+                            a
+                            l
+                            l
+                            y
+[32;1mPredictionSource          : [0mN
+                            o
+                            n
+                            e
+[32;1mPredictionViewStyle       : [0mI
+                            n
+                            l
+                            i
+                            n
+                            e
+                            V
+                            i
+                            e
+                            w
+[32;1mAnsiEscapeTimeout         : [0m1
+                            0
+                            0
+[32;1mPromptText                : [0m
+[32;1mDefaultTokenColor         : [0m[37m[0m
+[32;1mCommentColor              : [0m[32m[0m
+[32;1mKeywordColor              : [0m[92m[0m
+[32;1mStringColor               : [0m[36m[0m
+[32;1mOperatorColor             : [0m[90m[0m
+[32;1mVariableColor             : [0m[92m[0m
+[32;1mCommandColor              : [0m[93m[0m
+[32;1mParameterColor            : [0m[90m[0m
+[32;1mTypeColor                 : [0m[37m[0m
+[32;1mNumberColor               : [0m[97m[0m
+[32;1mMemberColor               : [0m[37m[0m
+[32;1mEmphasisColor             : [0m[96m[0m
+[32;1mErrorColor                : [0m[91m[0m
+[32;1mSelectionColor            : [0m[30;47m[0m
+[32;1mInlinePredictionColor     : [0m[97;2;3m[0m
+[32;1mListPredictionColor       : [0m[33m[0m
+[32;1mListPredictionSelectedCol : [0m[48;5;238m[0m
+[32;1mListPredictionTooltipColo : [0m[97;2;3m[0m
+[32;1mTerminateOrphanedConsoleA : [0mF
+                            a
+                            l
+                            s
+                            e
+
