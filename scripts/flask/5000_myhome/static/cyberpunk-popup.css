@@ -53,9 +53,9 @@
 #edit-link-popup input[type="url"],
 #edit-link-popup select,
 #edit-link-popup textarea {
-    background-color: #1a1a20 !important;
+    background-color: #1a1a20;
     border: 1px solid #333 !important;
-    color: #ffffff !important;
+    color: #ffffff;
     border-radius: 0 !important;
     font-family: 'JetBrainsMono NFP', monospace;
     transition: all 0.3s ease;
