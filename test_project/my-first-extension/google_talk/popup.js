@@ -12,10 +12,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (result.speech_lang) {
             currentLang = result.speech_lang;
         }
-        
+
         // Update UI text
         langDisplayEl.textContent = currentLang === 'bn-BD' ? 'Bangla' : 'English';
-        
+
         // Start automatically on open
         startListening();
     });
@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
         recognition = new webkitSpeechRecognition();
         recognition.lang = currentLang;
         recognition.continuous = false;
-        recognition.interimResults = false;
+        recognition.interimResults = true;
 
         recognition.onstart = () => {
             isListening = true;
@@ -42,9 +42,9 @@ document.addEventListener('DOMContentLoaded', () => {
         recognition.onend = () => {
             isListening = false;
             wrapper.classList.remove('listening');
-            // If we closed without result, just revert status
-            if (statusEl.textContent !== "Searching...") {
-                 statusEl.textContent = "Tap to retry";
+            // If the socket closed and we haven't searched yet, reset status
+            if (statusEl.textContent.trim().length === 0 || statusEl.textContent === "Listening..." || statusEl.textContent === 'শোনা হচ্ছে...') {
+                statusEl.textContent = "Tap to retry";
             }
         };
 
@@ -52,38 +52,55 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error(event.error);
             isListening = false;
             wrapper.classList.remove('listening');
-            if(event.error === 'not-allowed') {
-                 statusEl.textContent = "Allow Microphone";
+            if (event.error === 'not-allowed') {
+                statusEl.textContent = "Allow Microphone";
             } else {
-                 statusEl.textContent = "Error"; // Keep it simple
+                statusEl.textContent = "Error";
             }
         };
 
         recognition.onresult = (event) => {
-            const transcript = event.results[0][0].transcript;
-            if (transcript.trim().length > 0) {
-                statusEl.textContent = "Searching...";
-                
-                // Perform Search
-                const query = encodeURIComponent(transcript);
-                const url = `https://www.google.com/search?q=${query}`;
-                
-                chrome.tabs.create({ url: url });
-                
-                // Optional: Close the popup after a slight delay
-                // window.close(); 
+            let finalTranscript = '';
+            let interimTranscript = '';
+
+            for (let i = event.resultIndex; i < event.results.length; ++i) {
+                if (event.results[i].isFinal) {
+                    finalTranscript += event.results[i][0].transcript;
+                } else {
+                    interimTranscript += event.results[i][0].transcript;
+                }
+            }
+
+            if (finalTranscript.length > 0) {
+                // Final result - Search immediately
+                performSearch(finalTranscript);
+            } else if (interimTranscript.length > 0) {
+                // Interim result - Show in UI
+                statusEl.textContent = interimTranscript;
             }
         };
 
         try {
             recognition.start();
-        } catch(e) {
+        } catch (e) {
             console.error(e);
             statusEl.textContent = "Error starting";
         }
     }
-    
-    // Allow clicking the mic to restart manually
+
+    function performSearch(queryText) {
+        statusEl.textContent = "Searching...";
+        recognition.stop(); // Ensure it stops
+
+        const query = encodeURIComponent(queryText);
+        const url = `https://www.google.com/search?q=${query}`;
+
+        chrome.tabs.create({ url: url });
+        // Optional: Close current popup
+        // window.close();
+    }
+
+    // Allow clicking the mic to restart manually or stop (which triggers result finalization)
     wrapper.addEventListener('click', () => {
         if (!isListening) {
             startListening();
