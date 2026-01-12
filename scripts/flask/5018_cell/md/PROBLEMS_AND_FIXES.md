@@ -7,6 +7,65 @@ This document tracks historical bugs, issues, and their solutions. Use this to:
 
 ---
 
+## [2026-01-12] - F8 Word Pick Now Copies to Clipboard
+
+**Problem:**
+When using F8 to pick a word under cursor/hover, users wanted the word to also be copied to clipboard for easy pasting elsewhere.
+
+**Solution:**
+Added clipboard copy functionality to F8 handler:
+- Copies the picked word to clipboard before adding to search box
+- Uses `execCommand('copy')` with a hidden textarea for reliable cross-browser support
+- Shows toast notification confirming the copy
+
+**Files Modified:**
+- `static/script.js` - F8 handler (~line 515)
+
+**Related Issues:** None
+
+---
+
+## [2026-01-12] - Click-to-Edit Cursor Visibility and Scroll Restore
+
+**Problem:**
+1. When clicking on markdown preview to edit, if the cursor position was far down in the cell content, users had to scroll to see it
+2. After exiting edit mode (blur), the scroll position was lost and users couldn't find where they were
+
+**Solution:**
+Updated `positionCursorAtMouseClick()` to:
+1. Scroll the table container to show the cursor line just below the header (with 50px padding)
+2. Save the original scroll position before scrolling
+3. Add a blur event listener that restores the original scroll position when exiting edit mode
+
+This way users can see what they're editing, but when done, they return to their original view.
+
+**Files Modified:**
+- `static/script.js` - `positionCursorAtMouseClick()` (~line 5850)
+
+**Related Issues:** None
+
+---
+
+## [2026-01-12] - Raw Mode Visual Indicator
+
+**Problem:**
+It was hard to tell when raw mode (markdown preview disabled) was active vs when markdown preview was enabled.
+
+**Solution:**
+- Added `.raw-mode-active` CSS class with orange background (`#fff3e0`) and border (`#ff9800`)
+- Toggle function adds/removes this class on the button label
+- Toast message now says "Raw mode enabled" instead of "Markdown preview disabled"
+- Changed button icon to 📄 and updated tooltip
+
+**Files Modified:**
+- `static/style.css` - Added `.raw-mode-active` styles (~line 418)
+- `static/script.js` - `toggleMarkdownPreview()` and initialization (~line 5712, ~line 187)
+- `templates/index.html` - Updated button title and icon (~line 149)
+
+**Related Issues:** None
+
+---
+
 ## [2026-01-12] - Scroll Position Lost on Refresh and Raw Mode Toggle
 
 **Problem:**
