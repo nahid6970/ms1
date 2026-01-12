@@ -7,6 +7,30 @@ This document tracks historical bugs, issues, and their solutions. Use this to:
 
 ---
 
+## [2026-01-12] - Scroll Position Lost on Refresh and Raw Mode Toggle
+
+**Problem:**
+1. Page refresh caused scroll to jump to top
+2. Toggling to raw mode (disabling markdown preview) caused scroll to jump to top
+3. Toggling back to markdown mode worked fine
+
+**Root Cause:**
+1. The scroll event listener was saving `0` to localStorage during initial page load before the saved position could be restored
+2. `adjustAllMarkdownCells()` ran after scroll restore attempts, causing layout changes that reset scroll
+3. The `renderTable` wrapper's height adjustment timeout (300ms) happened after scroll restore (0-300ms)
+
+**Solution:**
+1. Added 1-second delay before scroll save listener becomes active (`initialLoadComplete` flag)
+2. `adjustAllMarkdownCells()` now saves/restores scroll position around height adjustments
+3. `renderTable` wrapper now saves scroll from both localStorage and current position, then restores AFTER `adjustAllMarkdownCells()` completes (350ms)
+
+**Files Modified:**
+- `static/script.js` - Scroll save listener (~line 93), `adjustAllMarkdownCells()` (~line 9814), `renderTable` wrapper (~line 9848)
+
+**Related Issues:** Raw mode cell height adjustment
+
+---
+
 ## [2026-01-12] - List Item Tab Alignment & Hanging Indent Issues
 
 **Problem:** 
