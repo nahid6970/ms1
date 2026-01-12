@@ -9,7 +9,8 @@
 
 * {
     box-sizing: border-box;
-    user-select: none; /* Prevent selection for better drawing experience */
+    user-select: none;
+    /* Prevent selection for better drawing experience */
 }
 
 body {
@@ -18,7 +19,8 @@ body {
     font-family: 'Inter', sans-serif;
     background-color: var(--bg-color);
     color: var(--text-color);
-    overflow: hidden; /* Prevent scrolling */
+    overflow: hidden;
+    /* Prevent scrolling */
 }
 
 #app {
@@ -68,16 +70,30 @@ canvas {
     flex-wrap: wrap;
 }
 
-.color-swatch {
+.color-swatch,
+#custom-color-picker {
     width: 24px;
     height: 24px;
     border-radius: 4px;
     cursor: pointer;
     border: 2px solid transparent;
     transition: transform 0.1s;
+    padding: 0;
+    -webkit-appearance: none;
+    appearance: none;
 }
 
-.color-swatch:hover {
+#custom-color-picker::-webkit-color-swatch-wrapper {
+    padding: 0;
+}
+
+#custom-color-picker::-webkit-color-swatch {
+    border: none;
+    border-radius: 4px;
+}
+
+.color-swatch:hover,
+#custom-color-picker:hover {
     transform: scale(1.1);
 }
 
@@ -86,12 +102,14 @@ canvas {
 }
 
 /* Font Picker */
-.font-picker, .size-picker {
+.font-picker,
+.size-picker {
     display: flex;
     gap: 8px;
 }
 
-.font-btn, .size-btn {
+.font-btn,
+.size-btn {
     flex: 1;
     background: transparent;
     border: 1px solid var(--border-color);
@@ -106,12 +124,14 @@ canvas {
     transition: all 0.2s;
 }
 
-.font-btn:hover, .size-btn:hover {
+.font-btn:hover,
+.size-btn:hover {
     background-color: var(--hover-bg);
     color: var(--text-color);
 }
 
-.font-btn.active, .size-btn.active {
+.font-btn.active,
+.size-btn.active {
     background-color: var(--accent-color);
     color: white;
     border-color: var(--accent-color);
@@ -126,7 +146,7 @@ canvas {
     background-color: var(--sidebar-bg);
     padding: 8px 16px;
     border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
     display: flex;
     gap: 8px;
     z-index: 10;

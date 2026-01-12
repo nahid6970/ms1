@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const canvas = document.getElementById('whiteboard');
     const ctx = canvas.getContext('2d');
-    
+
     // State
     const state = {
         tool: 'select', // select, pan, draw, rectangle, ellipse, arrow, line, text
@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
         canvas.height = window.innerHeight;
         redraw();
     }
-    
+
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
 
@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.addEventListener('click', (e) => {
             const tool = btn.dataset.tool;
             const action = btn.dataset.action;
-            
+
             if (action === 'clear') {
                 state.elements = [];
                 state.panX = 0;
@@ -68,26 +68,26 @@ document.addEventListener('DOMContentLoaded', () => {
     // Color Picker
     document.querySelectorAll('.color-picker:not(.bg-picker) .color-swatch').forEach(swatch => {
         swatch.addEventListener('click', () => {
-             document.querySelectorAll('.color-picker:not(.bg-picker) .color-swatch').forEach(s => s.classList.remove('active'));
-             swatch.classList.add('active');
-             state.strokeColor = swatch.dataset.color;
+            document.querySelectorAll('.color-picker:not(.bg-picker) .color-swatch').forEach(s => s.classList.remove('active'));
+            swatch.classList.add('active');
+            state.strokeColor = swatch.dataset.color;
         });
     });
 
-     // Custom Color Picker
+    // Custom Color Picker
     document.getElementById('custom-color-picker').addEventListener('input', (e) => {
         state.strokeColor = e.target.value;
         // visual update could be added here
     });
 
     // Background Picker
-     document.querySelectorAll('.bg-picker .color-swatch').forEach(swatch => {
+    document.querySelectorAll('.bg-picker .color-swatch').forEach(swatch => {
         swatch.addEventListener('click', () => {
-             document.querySelectorAll('.bg-picker .color-swatch').forEach(s => s.classList.remove('active'));
-             swatch.classList.add('active');
-             state.bgColor = swatch.dataset.bgcolor;
-             document.body.style.backgroundColor = state.bgColor;
-             redraw();
+            document.querySelectorAll('.bg-picker .color-swatch').forEach(s => s.classList.remove('active'));
+            swatch.classList.add('active');
+            state.bgColor = swatch.dataset.bgcolor;
+            document.body.style.backgroundColor = state.bgColor;
+            redraw();
         });
     });
 
@@ -108,34 +108,39 @@ document.addEventListener('DOMContentLoaded', () => {
             state.fontSize = parseInt(btn.dataset.size);
         });
     });
-    
+
     // Opacity
     document.getElementById('opacity-slider').addEventListener('input', (e) => {
         state.opacity = parseFloat(e.target.value);
     });
-    
+
+    // Thickness
+    document.getElementById('thickness-slider').addEventListener('input', (e) => {
+        state.lineWidth = parseInt(e.target.value);
+    });
+
     // Zoom Controls
     document.getElementById('zoom-in').addEventListener('click', () => {
         changeZoom(0.1);
     });
-    
+
     document.getElementById('zoom-out').addEventListener('click', () => {
         changeZoom(-0.1);
     });
 
     function changeZoom(delta) {
         state.zoom += delta;
-        if(state.zoom < 0.1) state.zoom = 0.1;
+        if (state.zoom < 0.1) state.zoom = 0.1;
         updateZoomDisplay();
         redraw();
     }
-    
+
     function updateZoomDisplay() {
         document.getElementById('zoom-level').textContent = Math.round(state.zoom * 100) + '%';
     }
 
     function handleZoom(e) {
-        if(e.ctrlKey) {
+        if (e.ctrlKey) {
             e.preventDefault();
             const delta = e.deltaY > 0 ? -0.1 : 0.1;
             changeZoom(delta);
@@ -152,11 +157,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function startDrawing(e) {
+        // Correct logic for text tool input persistence
+        if (e.target.tagName === 'TEXTAREA') return;
+
         state.isDrawing = true;
         const pos = getMousePos(e);
         state.startX = pos.x;
         state.startY = pos.y;
-        
+
         if (state.tool === 'pan') {
             canvas.style.cursor = 'grabbing';
             state.lastMouseX = e.clientX;
@@ -165,26 +173,26 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (state.tool === 'draw') {
-             state.currentElement = {
+            state.currentElement = {
                 type: 'draw',
-                points: [{x: pos.x, y: pos.y}],
+                points: [{ x: pos.x, y: pos.y }],
                 color: state.strokeColor,
                 width: state.lineWidth,
-                opacity: state.opacity 
+                opacity: state.opacity
             };
         } else if (state.tool === 'text') {
             createTextInput(e.clientX, e.clientY, pos.x, pos.y);
             state.isDrawing = false;
             return;
         } else {
-             state.currentElement = {
+            state.currentElement = {
                 type: state.tool,
                 startX: pos.x,
                 startY: pos.y,
                 endX: pos.x,
                 endY: pos.y,
                 color: state.strokeColor,
-                width: 2, // Default shape width
+                width: state.lineWidth, // Use slider width for shapes
                 opacity: state.opacity
             };
         }
@@ -192,7 +200,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function draw(e) {
         if (!state.isDrawing) return;
-        
+
         const pos = getMousePos(e);
         state.currentX = pos.x;
         state.currentY = pos.y;
@@ -209,26 +217,26 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (state.tool === 'draw') {
-            state.currentElement.points.push({x: pos.x, y: pos.y});
+            state.currentElement.points.push({ x: pos.x, y: pos.y });
         } else if (['rectangle', 'ellipse', 'line', 'arrow'].includes(state.tool)) {
-             state.currentElement.endX = pos.x;
-             state.currentElement.endY = pos.y;
+            state.currentElement.endX = pos.x;
+            state.currentElement.endY = pos.y;
         }
-        
+
         redraw();
         // Draw current element temporarily on top
-        drawElement(state.currentElement); 
+        drawElement(state.currentElement);
     }
 
     function stopDrawing() {
         if (!state.isDrawing) return;
         state.isDrawing = false;
-        
+
         if (state.tool === 'pan') {
             canvas.style.cursor = 'grab';
             return;
         }
-        
+
         if (state.currentElement) {
             state.elements.push(state.currentElement);
             state.currentElement = null;
@@ -241,7 +249,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.save();
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
+
         // Background color
         ctx.fillStyle = state.bgColor;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -258,7 +266,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function drawElement(el) {
         if (!el) return;
-        
+
         ctx.save();
         ctx.globalAlpha = el.opacity;
         ctx.strokeStyle = el.color;
@@ -279,31 +287,30 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (el.type === 'rectangle') {
             ctx.strokeRect(el.startX, el.startY, el.endX - el.startX, el.endY - el.startY);
         } else if (el.type === 'ellipse') {
-             const radiusX = Math.abs((el.endX - el.startX) / 2);
-             const radiusY = Math.abs((el.endY - el.startY) / 2);
-             const centerX = Math.min(el.startX, el.endX) + radiusX;
-             const centerY = Math.min(el.startY, el.endY) + radiusY;
-             ctx.ellipse(centerX, centerY, radiusX, radiusY, 0, 0, 2 * Math.PI);
-             ctx.stroke();
+            const radiusX = Math.abs((el.endX - el.startX) / 2);
+            const radiusY = Math.abs((el.endY - el.startY) / 2);
+            const centerX = Math.min(el.startX, el.endX) + radiusX;
+            const centerY = Math.min(el.startY, el.endY) + radiusY;
+            ctx.ellipse(centerX, centerY, radiusX, radiusY, 0, 0, 2 * Math.PI);
+            ctx.stroke();
         } else if (el.type === 'line') {
             ctx.moveTo(el.startX, el.startY);
             ctx.lineTo(el.endX, el.endY);
             ctx.stroke();
         } else if (el.type === 'text') {
             ctx.font = `${el.fontFamily === 'Inter' ? '' : ''} ${el.fontSize}px ${el.fontFamily}`;
-            ctx.fillStyle = el.color;
+            ctx.fillStyle = el.color; // Use stroke color for text
             ctx.textBaseline = 'top'; // Easier positioning
-            // Handle multi-line if needed, but simple for now
             ctx.fillText(el.text, el.x, el.y);
         } else if (el.type === 'arrow') {
-             // Basic arrow implementation
-            const headLength = 10;
+            // Basic arrow implementation
+            const headLength = el.width * 3; // Scale arrow head with width
             const angle = Math.atan2(el.endY - el.startY, el.endX - el.startX);
-            
+
             ctx.moveTo(el.startX, el.startY);
             ctx.lineTo(el.endX, el.endY);
             ctx.stroke();
-            
+
             // Arrowhead
             ctx.beginPath();
             ctx.moveTo(el.endX, el.endY);
@@ -324,45 +331,49 @@ document.addEventListener('DOMContentLoaded', () => {
         input.style.color = state.strokeColor;
         input.style.fontSize = state.fontSize + 'px';
         input.style.fontFamily = state.fontFamily;
-        
+        input.style.zIndex = '1000'; // Ensure it's on top
+
         document.body.appendChild(input);
-        
+
+        // Auto-expand/focus
         input.focus();
-        
+
         // Handle blur/enter to finalize text
         const finalize = () => {
-             const text = input.value;
-             if (text.trim()) {
-                 state.elements.push({
-                     type: 'text',
-                     text: text,
-                     x: canvasX,
-                     y: canvasY,
-                     color: state.strokeColor,
-                     fontSize: state.fontSize,
-                     fontFamily: state.fontFamily,
-                     opacity: state.opacity,
-                     width: 1
-                 });
-                 redraw();
-             }
-             document.body.removeChild(input);
+            const text = input.value;
+            if (text.trim()) {
+                state.elements.push({
+                    type: 'text',
+                    text: text,
+                    x: canvasX,
+                    y: canvasY,
+                    color: state.strokeColor,
+                    fontSize: state.fontSize,
+                    fontFamily: state.fontFamily,
+                    opacity: state.opacity,
+                    width: 1
+                });
+                redraw();
+            }
+            if (input.parentNode) {
+                document.body.removeChild(input);
+            }
         };
 
         input.addEventListener('blur', finalize);
         input.addEventListener('keydown', (e) => {
-             if (e.key === 'Enter' && !e.shiftKey) { // Shift+Enter for newline
-                 e.preventDefault();
-                 input.blur();
-             }
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                input.blur();
+            }
         });
     }
 
     // Keyboard Shortcuts
     window.addEventListener('keydown', (e) => {
-        if(e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
 
-        switch(e.key.toLowerCase()) {
+        switch (e.key.toLowerCase()) {
             case 'v': document.querySelector('[data-tool="select"]').click(); break;
             case ' ': document.querySelector('[data-tool="pan"]').click(); break;
             case 'p': document.querySelector('[data-tool="draw"]').click(); break;

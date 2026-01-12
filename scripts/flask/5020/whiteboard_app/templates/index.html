@@ -1,14 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Infinite Whiteboard</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Caveat&family=Roboto+Mono&display=swap">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Caveat&family=Roboto+Mono&display=swap">
     <!-- Using Google Material Icons for simplicity -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
 </head>
+
 <body>
     <div id="app">
         <!-- Top Toolbar -->
@@ -32,16 +35,16 @@
             <button class="tool-btn" data-tool="line" title="Line (L)">
                 <span class="material-icons-round">remove</span>
             </button>
-             <button class="tool-btn" data-tool="draw" title="Draw (P)">
+            <button class="tool-btn" data-tool="draw" title="Draw (P)">
                 <span class="material-icons-round">edit</span>
             </button>
             <button class="tool-btn" data-tool="text" title="Text (T)">
                 <span class="material-icons-round">text_fields</span>
             </button>
-             <button class="tool-btn" data-tool="image" title="Insert Image">
+            <button class="tool-btn" data-tool="image" title="Insert Image">
                 <span class="material-icons-round">image</span>
             </button>
-             <div class="separator"></div>
+            <div class="separator"></div>
             <button class="tool-btn" data-action="clear" title="Clear Canvas">
                 <span class="material-icons-round">delete_outline</span>
             </button>
@@ -57,25 +60,27 @@
                     <div class="color-swatch" style="background-color: #4caf50;" data-color="#4caf50"></div>
                     <div class="color-swatch" style="background-color: #2196f3;" data-color="#2196f3"></div>
                     <div class="color-swatch" style="background-color: #ffc107;" data-color="#ffc107"></div>
+                    <input type="color" id="custom-color-picker" value="#ffffff" title="Custom Color">
                 </div>
-                 <input type="color" id="custom-color-picker" value="#ffffff" style="margin-top: 8px; width: 100%; border: none; height: 30px; cursor: pointer;">
             </div>
 
             <div class="sidebar-section">
                 <div class="section-title">Background</div>
-                 <div class="color-picker bg-picker">
+                <div class="color-picker bg-picker">
                     <div class="color-swatch active" style="background-color: #121212;" data-bgcolor="#121212"></div>
                     <div class="color-swatch" style="background-color: #1e1e1e;" data-bgcolor="#1e1e1e"></div>
                     <div class="color-swatch" style="background-color: #ffffff;" data-bgcolor="#ffffff"></div>
-                 </div>
+                </div>
             </div>
 
             <div class="sidebar-section">
                 <div class="section-title">Font family</div>
                 <div class="font-picker">
-                    <button class="font-btn active" data-font="Caveat" style="font-family: 'Caveat', cursive;">A</button>
+                    <button class="font-btn active" data-font="Caveat"
+                        style="font-family: 'Caveat', cursive;">A</button>
                     <button class="font-btn" data-font="Inter" style="font-family: 'Inter', sans-serif;">A</button>
-                    <button class="font-btn" data-font="Roboto Mono" style="font-family: 'Roboto Mono', monospace;">A</button>
+                    <button class="font-btn" data-font="Roboto Mono"
+                        style="font-family: 'Roboto Mono', monospace;">A</button>
                 </div>
             </div>
 
@@ -89,17 +94,22 @@
                 </div>
             </div>
 
-             <div class="sidebar-section">
+            <div class="sidebar-section">
                 <div class="section-title">Opacity</div>
-                 <input type="range" id="opacity-slider" min="0.1" max="1" step="0.1" value="1">
+                <input type="range" id="opacity-slider" min="0.1" max="1" step="0.1" value="1">
+            </div>
+
+            <div class="sidebar-section">
+                <div class="section-title">Thickness</div>
+                <input type="range" id="thickness-slider" min="1" max="20" step="1" value="3">
             </div>
         </div>
 
         <!-- Canvas -->
         <canvas id="whiteboard"></canvas>
-        
+
         <!-- Zoom Controls -->
-         <div class="zoom-controls">
+        <div class="zoom-controls">
             <button class="zoom-btn" id="zoom-out"><span class="material-icons-round">remove</span></button>
             <span id="zoom-level">100%</span>
             <button class="zoom-btn" id="zoom-in"><span class="material-icons-round">add</span></button>
@@ -108,4 +118,5 @@
 
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>
+
 </html>
