@@ -9,6 +9,7 @@ A powerful PyQt6 application for visually managing, searching, and generating Au
 - **Category Organization**: Group shortcuts into categories (System, Navigation, Media, etc.) with custom color coding.
 - **Two Shortcut Types**:
     - **Script Shortcuts**: Runs AutoHotkey v2 code when a hotkey is pressed.
+    - **Background Scripts**: Code that runs automatically as soon as the script starts (perfect for timers, setup, or persistent background tasks). No hotkey required.
     - **Text Shortcuts (Hotstrings)**: Replaces a typed trigger (e.g., `;v2`) with replacement text. **Automatically handles special characters (#, !, etc.) and multiline text literally.**
 
 ---

@@ -227,8 +227,6 @@ class AddEditShortcutDialog(QDialog):
         form_layout.addWidget(self.enabled_checkbox)
         
         if self.shortcut_type == "script":
-            # Hotkey
-            form_layout.addWidget(QLabel("Hotkey:"))
             hotkey_row = QHBoxLayout()
             self.hotkey_edit = HotkeyLineEdit()
             self.hotkey_edit.setPlaceholderText("e.g., !Space, ^!n, #x")
@@ -262,21 +260,22 @@ class AddEditShortcutDialog(QDialog):
             hotkey_row.addWidget(self.hotkey_edit)
             hotkey_row.addWidget(self.record_hotkey_btn)
             form_layout.addLayout(hotkey_row)
-        else:
+        elif self.shortcut_type == "text":
             # Trigger
             form_layout.addWidget(QLabel("Trigger (without ::):"))
             self.trigger_edit = QLineEdit()
             self.trigger_edit.setPlaceholderText("e.g., ;v1, ;run")
             form_layout.addWidget(self.trigger_edit)
+        # Background script type has no hotkey/trigger
         
         # Add form layout to top layout
         top_layout.addLayout(form_layout)
         
         # Right side - action/replacement with bigger height and width
-        if self.shortcut_type == "script":
+        if self.shortcut_type in ["script", "startup"]:
             # Action
             action_layout = QVBoxLayout()
-            action_layout.addWidget(QLabel("Action:"))
+            action_layout.addWidget(QLabel("Script/Action Code:"))
             self.action_edit = QTextEdit()
             self.action_edit.setMinimumHeight(300)  # Bigger height
             self.action_edit.setMinimumWidth(400)   # Bigger width
@@ -304,7 +303,7 @@ class AddEditShortcutDialog(QDialog):
 
     def get_existing_categories(self):
         categories = set()
-        for shortcut in self.parent_window.script_shortcuts + self.parent_window.text_shortcuts:
+        for shortcut in self.parent_window.script_shortcuts + self.parent_window.text_shortcuts + self.parent_window.startup_scripts:
             category = shortcut.get('category', '').strip()
             if category:
                 categories.add(category)
@@ -328,6 +327,8 @@ class AddEditShortcutDialog(QDialog):
 
         if self.shortcut_type == "script":
             self.hotkey_edit.setText(self.shortcut_data.get("hotkey", ""))
+            self.action_edit.setPlainText(self.shortcut_data.get("action", ""))
+        elif self.shortcut_type == "startup":
             self.action_edit.setPlainText(self.shortcut_data.get("action", ""))
         else:
             self.trigger_edit.setText(self.shortcut_data.get("trigger", ""))
@@ -359,7 +360,20 @@ class AddEditShortcutDialog(QDialog):
                 "action": action,
                 "enabled": enabled
             }
-        else:
+        elif self.shortcut_type == "startup":
+            action = self.action_edit.toPlainText().strip()
+            if not action:
+                QMessageBox.warning(self, "Warning", "Action code is required.")
+                return
+
+            shortcut_data = {
+                "name": name,
+                "category": category,
+                "description": description,
+                "action": action,
+                "enabled": enabled
+            }
+        else: # self.shortcut_type == "text"
             trigger = self.trigger_edit.text().strip()
             replacement = self.replacement_edit.toPlainText().strip()
 
@@ -477,6 +491,7 @@ class AHKShortcutEditor(QMainWindow):
         super().__init__()
         self.script_shortcuts = []
         self.text_shortcuts = []
+        self.startup_scripts = []
         self.category_colors = {
             "System": "#FF6B6B", "Navigation": "#4ECDC4", "Text": "#45B7D1",
             "Media": "#96CEB4", "AutoHotkey": "#FFEAA7", "General": "#DDA0DD",
@@ -509,6 +524,7 @@ class AHKShortcutEditor(QMainWindow):
         self.add_menu = QMenu()
         self.add_menu.addAction("Script Shortcut", lambda: self.open_add_dialog("script"))
         self.add_menu.addAction("Text Shortcut", lambda: self.open_add_dialog("text"))
+        self.add_menu.addAction("Background Script", lambda: self.open_add_dialog("startup"))
         self.add_btn.setMenu(self.add_menu)
         top_layout.addWidget(self.add_btn)
 
@@ -654,6 +670,9 @@ class AHKShortcutEditor(QMainWindow):
                 elif shortcut_type == "text" and index < len(self.text_shortcuts):
                     self.selected_shortcut = self.text_shortcuts[index]
                     self.selected_type = "text"
+                elif shortcut_type == "startup" and index < len(self.startup_scripts):
+                    self.selected_shortcut = self.startup_scripts[index]
+                    self.selected_type = "startup"
 
                 # Update display to show selection
                 self.update_display()
@@ -666,13 +685,12 @@ class AHKShortcutEditor(QMainWindow):
 
                 # Toggle the enabled state
                 if shortcut_type == "script" and index < len(self.script_shortcuts):
-                    shortcut = self.script_shortcuts[index]
-                    shortcut["enabled"] = not shortcut.get("enabled", True)
+                    self.script_shortcuts[index]["enabled"] = not self.script_shortcuts[index].get("enabled", True)
                 elif shortcut_type == "text" and index < len(self.text_shortcuts):
-                    shortcut = self.text_shortcuts[index]
-                    shortcut["enabled"] = not shortcut.get("enabled", True)
+                    self.text_shortcuts[index]["enabled"] = not self.text_shortcuts[index].get("enabled", True)
+                elif shortcut_type == "startup" and index < len(self.startup_scripts):
+                    self.startup_scripts[index]["enabled"] = not self.startup_scripts[index].get("enabled", True)
 
-                # Save and update display
                 self.save_shortcuts_json()
                 self.update_display()
 
@@ -716,6 +734,7 @@ class AHKShortcutEditor(QMainWindow):
                     data = json.load(f)
                     self.script_shortcuts = data.get("script_shortcuts", [])
                     self.text_shortcuts = data.get("text_shortcuts", [])
+                    self.startup_scripts = data.get("startup_scripts", [])
             except Exception as e:
                 QMessageBox.critical(self, "Error", f"Failed to load shortcuts JSON: {e}")
                 self.create_default_shortcuts()
@@ -737,7 +756,11 @@ class AHKShortcutEditor(QMainWindow):
 
     def save_shortcuts_json(self):
         try:
-            data = {"script_shortcuts": self.script_shortcuts, "text_shortcuts": self.text_shortcuts}
+            data = {
+                "script_shortcuts": self.script_shortcuts, 
+                "text_shortcuts": self.text_shortcuts,
+                "startup_scripts": self.startup_scripts
+            }
             with open(SHORTCUTS_JSON_PATH, 'w', encoding='utf-8') as f:
                 json.dump(data, f, indent=4, ensure_ascii=False)
         except Exception as e:
@@ -759,15 +782,17 @@ class AHKShortcutEditor(QMainWindow):
                           if search_query in f"{s.get('name', '')} {s.get('hotkey', '')} {s.get('description', '')} {s.get('category', '')}".lower()]
         filtered_text = [s for s in self.text_shortcuts
                         if search_query in f"{s.get('name', '')} {s.get('trigger', '')} {s.get('description', '')} {s.get('category', '')}".lower()]
+        filtered_startup = [s for s in self.startup_scripts
+                           if search_query in f"{s.get('name', '')} {s.get('description', '')} {s.get('category', '')}".lower()]
 
-        html = self.generate_html(filtered_script, filtered_text, group_by_category)
+        html = self.generate_html(filtered_script, filtered_text, filtered_startup, group_by_category)
         self.text_browser.setHtml(html)
 
         # Restore scroll position after a brief delay to allow HTML to load
         from PyQt6.QtCore import QTimer
         QTimer.singleShot(10, lambda: scrollbar.setValue(scroll_position))
 
-    def generate_html(self, script_shortcuts, text_shortcuts, group_by_category):
+    def generate_html(self, script_shortcuts, text_shortcuts, startup_scripts, group_by_category):
         html = """
         <!DOCTYPE html>
         <html>
@@ -880,6 +905,33 @@ class AHKShortcutEditor(QMainWindow):
         html += """
                 </div>
                 <div class="column">
+                    <div class="section-title">Background Scripts</div>
+        """
+
+        if group_by_category:
+            startup_categories = {}
+            for shortcut in startup_scripts:
+                category = shortcut.get('category', 'General')
+                if category not in startup_categories:
+                    startup_categories[category] = []
+                startup_categories[category].append(shortcut)
+
+            for i, category in enumerate(sorted(startup_categories.keys())):
+                color = self.get_category_color(category)
+                first_class = " first-in-section" if i == 0 else ""
+                html += f'<div class="category-header{first_class}" style="color: {color};">📁 {category}</div>'
+
+                for shortcut in sorted(startup_categories[category], key=lambda x: x.get('name', '').lower()):
+                    original_index = self.startup_scripts.index(shortcut)
+                    html += self.generate_shortcut_html(shortcut, "startup", original_index, True)
+        else:
+            for shortcut in sorted(startup_scripts, key=lambda x: x.get('name', '').lower()):
+                original_index = self.startup_scripts.index(shortcut)
+                html += self.generate_shortcut_html(shortcut, "startup", original_index, False)
+
+        html += """
+                </div>
+                <div class="column">
                     <div class="section-title">Text Shortcuts</div>
         """
 
@@ -927,6 +979,8 @@ class AHKShortcutEditor(QMainWindow):
 
         if shortcut_type == "script":
             key = shortcut.get('hotkey', '')
+        elif shortcut_type == "startup":
+            key = "🚀 Startup"
         else:
             key = shortcut.get('trigger', '')
 
@@ -973,6 +1027,8 @@ class AHKShortcutEditor(QMainWindow):
         if reply == QMessageBox.StandardButton.Yes:
             if self.selected_type == "script":
                 self.script_shortcuts.remove(self.selected_shortcut)
+            elif self.selected_type == "startup":
+                self.startup_scripts.remove(self.selected_shortcut)
             else:
                 self.text_shortcuts.remove(self.selected_shortcut)
 
@@ -989,7 +1045,23 @@ class AHKShortcutEditor(QMainWindow):
         try:
             output_lines = ["#Requires AutoHotkey v2.0", "#SingleInstance", "Persistent", ""]
 
-            # Add enabled script shortcuts
+            # Add Background/Startup Scripts at the top (Auto-execute section)
+            enabled_startup = [s for s in self.startup_scripts if s.get('enabled', True)]
+            if enabled_startup:
+                output_lines.append(";! === BACKGROUND / STARTUP SCRIPTS ===")
+                for shortcut in enabled_startup:
+                    output_lines.append(f";! {shortcut.get('name', 'Unnamed')}")
+                    if shortcut.get('description'):
+                        output_lines.append(f";! {shortcut.get('description')}")
+                    
+                    action = shortcut.get('action', '')
+                    # Cleanup parameters
+                    action = action.replace(',,,', ',,')
+                    
+                    output_lines.append(action)
+                    output_lines.append("")
+
+            # Add script shortcuts
             enabled_scripts = [s for s in self.script_shortcuts if s.get('enabled', True)]
             if enabled_scripts:
                 output_lines.append(";! === SCRIPT SHORTCUTS ===")
