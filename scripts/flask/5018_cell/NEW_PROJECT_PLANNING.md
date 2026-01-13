@@ -11,7 +11,12 @@ This project involves a complete overhaul of the `5018_cell` application, transi
     - **Visual Distinction**: Syntax markers are rendered in a **subtle greyish color** while editing. this ensures they don't distract from the main text content while still being fully editable.
     - **Persistent Effects**: Styling like custom colors, bolding, and highlighting remains active even while you are typing and modified markers are visible.
     - **Final Render**: When the row loses focus (blur) or the page is refreshed, the syntax markers vanish, and advanced layout effects (math symbols, massive headers, timelines) snap into their fully polished "View Mode."
-- **Persistence Layer**: Data remains synchronized with `data.json` via the Flask backend, but the JSON schema will be flattened to prioritize a continuous row-based list for each sheet.
+- **Persistence Layer**: Data remains synchronized with `data.json` via the Flask backend.
+    - **ID-Based Referencing (Anti-Corruption)**: Fundamental shift from "Index-based" to **"ID-based" architecture**.
+        - Every sheet is assigned a **Permanent Unique ID** (UUID/Hash) upon creation.
+        - All secondary data (History, Category mappings, Sub-sheet parents, Search results) will reference the **ID**, not the array index.
+        - This prevents navigation breakage and data corruption even if sheets are reordered, moved to different categories, or deleted.
+    - **Flattened Schema**: JSON structure will prioritize a continuous row-based list for each sheet, stored under its unique ID.
 
 ---
 
@@ -23,6 +28,9 @@ The new system will prioritize a highly flexible, user-extensible coloring syste
 1.  **Primary Coloring: The Custom Syntax Engine**:
     *   **Core Logic**: Instead of hardcoded regex for every color, the application will rely on a dynamic **Custom Syntax Registry** (seeded by `custom_syntaxes.json`).
     *   **User-Defined Markers**: Users can define any marker (e.g., `++`, `%%`, `¿¿`) and pair them with `bgColor`, `fgColor`, `isBold`, etc.
+    *   **Settings Management**: A dedicated section in the **Global Settings Panel** (⚙️) allows users to manage these markers.
+        *   **➕ Add Button**: Instantly create new entries for custom markers.
+        *   **Live Preview**: See how the marker will look while configuring its colors.
     *   **Flexible Adaptation**: This system is the "source of truth" for coloring. If a user wants a new highlight color, they simply add a marker definition rather than modifying the parser code.
 
 2.  **Highlight & Highlight Presets (The "Standard Library")**:
@@ -128,10 +136,32 @@ To ensure consistency in the new architecture, every content-feature must be uni
 4.  **Static Mirror**: Equivalent Python-based parsing in `export_static.py` for identical offline views.
 5.  **Focus Logic**: Seamless transition between transparent editing and polished viewing with **zero cursor jumping**.
 6.  **Style Tokens**: Centralized CSS variables for themes (Light/Dark/Cyberpunk) and custom syntaxes.
+7.  **Index-Proof Persistence**: Absolute ban on using sheet indices for storage. Every function must lookup sheets via their permanent `id` to ensure stability during deletions or reorders.
+
+## 4. Implemented Feature Summaries
+
+### A. Implemented Markdown Overview
+The new system will carry over and standardize the following primary syntax:
+- **Emphasis**: `**Bold**`, `@@Italic@@`, `__Underline__`, `~~Strikethrough~~`.
+- **Scripts**: `^Superscript^`, `~Subscript~`.
+- **Sizing**: `## Heading`, `#2#Big Text#/#`, `..Small Text..`.
+- **Math**: `\( \frac{1}{2} \)` (KaTeX) and smart `a/b` fractions.
+- **Lists**: `- Bullet`, `-- Sub-bullet`.
+- **Logic**: `{{ Collapsible }}` and `[[ Secret Answers ]]`.
+- **Coloring**: `==Black==`, `!!Red!!`, `??Blue??` + All custom markers.
+
+### B. Global Settings Overview (⚙️)
+Unified control center for the following:
+- **Themes**: Instant switching between **Light**, **Dark**, and **Cyberpunk** modes.
+- **Fonts**: Toggle specialized fonts like **Vrinda** (for better Bangla rendering).
+- **Data Management**: 
+    - **Backup/Restore**: Manual JSON triggers for data migration.
+    - **Standalone Export**: Configuration for the one-click HTML generator.
+- **Syntax Manager**: The centralized hub for adding/removing all color markers with the `➕` tool.
 
 ---
 
-## 4. Immediate Planning Objectives
+## 5. Immediate Planning Objectives
 *   **Data Migration**: Convert existing multi-column `data.json` to a single-column array format.
 *   **Single-Layer Refactor**: Implement the "Transparent Overlay" logic where the user interacts with the rendered text layer.
     *   **Focus State**: On focus, the row expands, markers become visible (via CSS/JS class toggle), and font-sizes are normalized to 1em for perfect cursor alignment.
