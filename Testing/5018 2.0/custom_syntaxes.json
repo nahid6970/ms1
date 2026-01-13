@@ -1,0 +1,17 @@
+{
+  "++": {
+    "bgColor": "#86efac",
+    "fgColor": "#1a1a2e",
+    "isBold": false
+  },
+  "%%": {
+    "bgColor": "#c4b5fd",
+    "fgColor": "#1a1a2e",
+    "isBold": false
+  },
+  "¿¿": {
+    "bgColor": "#fdba74",
+    "fgColor": "#1a1a2e",
+    "isBold": true
+  }
+}

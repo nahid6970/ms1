@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markdown Sheets</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div id="app">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="sidebar">
+            <div class="sidebar-header">
+                <h2>📚 Sheets</h2>
+                <button id="add-category-btn" title="Add Category">➕</button>
+            </div>
+            <div id="category-tree" class="category-tree"></div>
+        </aside>
+
+        <!-- Main Content -->
+        <main id="main-content" class="main-content">
+            <header id="header" class="header">
+                <div class="header-left">
+                    <button id="toggle-sidebar" title="Toggle Sidebar (F4)">☰</button>
+                    <h1 id="sheet-title" contenteditable="true">Welcome</h1>
+                </div>
+                <div class="header-right">
+                    <button id="add-row-btn" title="Add Row">+ Row</button>
+                    <button id="export-btn" title="Export Static HTML">📤 Export</button>
+                    <button id="theme-toggle" title="Toggle Theme">🌙</button>
+                </div>
+            </header>
+
+            <div id="sheet-container" class="sheet-container">
+                <!-- Rows rendered here -->
+            </div>
+        </main>
+
+        <!-- Modals -->
+        <div id="vault-modal" class="modal hidden">
+            <div class="modal-content vault-modal">
+                <div class="vault-header">
+                    <input type="text" id="vault-search" placeholder="Search... (* for global, # for content)">
+                    <button class="close-modal">&times;</button>
+                </div>
+                <div class="vault-body">
+                    <div id="vault-categories" class="vault-categories"></div>
+                    <div id="vault-sheets" class="vault-sheets"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="history-modal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>📜 Recent Sheets</h3>
+                    <button class="close-modal">&times;</button>
+                </div>
+                <div id="history-list" class="history-list"></div>
+            </div>
+        </div>
+
+        <div id="format-modal" class="modal hidden">
+            <div class="modal-content format-modal">
+                <div class="modal-header">
+                    <h3>✨ Quick Format (F3)</h3>
+                    <button class="close-modal">&times;</button>
+                </div>
+                <div class="format-sections">
+                    <div class="format-section">
+                        <h4>Text Style</h4>
+                        <div class="format-buttons">
+                            <button data-format="**" title="Bold">B</button>
+                            <button data-format="@@" title="Italic">I</button>
+                            <button data-format="__" title="Underline">U</button>
+                            <button data-format="~~" title="Strikethrough">S</button>
+                        </div>
+                    </div>
+                    <div class="format-section">
+                        <h4>Highlights</h4>
+                        <div class="format-buttons" id="highlight-buttons">
+                            <button data-format="==" class="hl-yellow" title="Yellow">==</button>
+                            <button data-format="!!" class="hl-red" title="Red">!!</button>
+                            <button data-format="??" class="hl-blue" title="Blue">??</button>
+                        </div>
+                    </div>
+                    <div class="format-section">
+                        <h4>Custom Syntaxes</h4>
+                        <div class="format-buttons" id="custom-syntax-buttons"></div>
+                    </div>
+                    <div class="format-section">
+                        <h4>Structure</h4>
+                        <div class="format-buttons">
+                            <button data-format="## " data-wrap="false" title="Heading">H2</button>
+                            <button data-format="#2#" data-end="#/#" title="Big Text">Big</button>
+                            <button data-format=".." title="Small">..</button>
+                            <button data-format="^" title="Superscript">x²</button>
+                            <button data-format="~" title="Subscript">x₂</button>
+                        </div>
+                    </div>
+                    <div class="format-section">
+                        <h4>Math</h4>
+                        <div class="format-buttons">
+                            <button id="math-assistant-btn" title="KaTeX Assistant">∑</button>
+                            <button data-format="\\(" data-end="\\)" title="Inline Math">$</button>
+                        </div>
+                    </div>
+                    <div class="format-section">
+                        <h4>Selection Stats</h4>
+                        <div id="selection-stats" class="selection-stats">
+                            <span>Chars: 0</span>
+                            <span>Words: 0</span>
+                            <span>Lines: 0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="math-modal" class="modal hidden">
+            <div class="modal-content math-modal">
+                <div class="modal-header">
+                    <h3>📐 KaTeX Math Assistant</h3>
+                    <button class="close-modal">&times;</button>
+                </div>
+                <div class="math-fields">
+                    <div class="math-field">
+                        <label>Numerator</label>
+                        <input type="text" id="math-numerator" placeholder="e.g., x + 1">
+                    </div>
+                    <div class="math-field">
+                        <label>Denominator</label>
+                        <input type="text" id="math-denominator" placeholder="e.g., 2">
+                    </div>
+                    <div class="math-field">
+                        <label>Square Root</label>
+                        <input type="text" id="math-sqrt" placeholder="e.g., x">
+                    </div>
+                    <div class="math-field">
+                        <label>Exponent</label>
+                        <input type="text" id="math-exponent" placeholder="e.g., 2">
+                    </div>
+                </div>
+                <div class="math-preview">
+                    <label>Preview:</label>
+                    <div id="math-preview-output"></div>
+                    <code id="math-latex-output"></code>
+                </div>
+                <button id="math-insert-btn" class="primary-btn">Insert</button>
+            </div>
+        </div>
+
+        <!-- Context Menu -->
+        <div id="context-menu" class="context-menu hidden">
+            <div class="context-item" data-action="rename">✏️ Rename</div>
+            <div class="context-item" data-action="move">📁 Move to...</div>
+            <div class="context-item" data-action="delete">🗑️ Delete</div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
