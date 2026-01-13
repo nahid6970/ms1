@@ -606,6 +606,15 @@ PrintScreen::Run("C:\Users\nahid\ms\ms1\Testing\screenshot\region_screenshot.py"
     }
 }
 
+;! Go To SleepMode
+#l:: {
+    GoToSleep()
+    GoToSleep() {
+        ; 0 = Standby (Sleep), 1 = Hibernate
+        DllCall("PowrProf\SetSuspendState", "Int", 0, "Int", 0, "Int", 0)
+    }
+}
+
 ;! === TEXT SHORTCUTS ===
 ;! AutoHotkey Version 1
 ;! Inserts AHK v1 header requirement
