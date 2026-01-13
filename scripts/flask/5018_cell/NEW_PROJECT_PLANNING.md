@@ -14,16 +14,23 @@ This project involves a complete overhaul of the `5018_cell` application, transi
 
 ## 2. Comprehensive Feature Index (To be Ported)
 
-### A. The "Omni-Markdown" Parsing Engine
-The new system will adopt and refine all legacy syntax rules:
-1.  **Text Formatting**: 
+### A. The "Omni-Markdown" Parsing Engine & Custom Color Core
+The new system will prioritize a highly flexible, user-extensible coloring system.
+
+1.  **Primary Coloring: The Custom Syntax Engine**:
+    *   **Core Logic**: Instead of hardcoded regex for every color, the application will rely on a dynamic **Custom Syntax Registry** (seeded by `custom_syntaxes.json`).
+    *   **User-Defined Markers**: Users can define any marker (e.g., `++`, `%%`, `¿¿`) and pair them with `bgColor`, `fgColor`, `isBold`, etc.
+    *   **Flexible Adaptation**: This system is the "source of truth" for coloring. If a user wants a new highlight color, they simply add a marker definition rather than modifying the parser code.
+
+2.  **Highlight & Highlight Presets (The "Standard Library")**:
+    *   **Core Presets**: Built-in support for standard markers (e.g., `==`, `!!`, `??`).
+    *   **Full Customization**: These presets can be extended or modified within the Custom Syntax Registry to fit any design system.
+    *   **Marker-First Philosophy**: All visual emphasis is achieved via short, memorable symbols, keeping the raw markdown readable and easy to type.
+
+3.  **Text Formatting & Scripts**:
     *   Emphasis: Bold (`**`), Italic (`@@`), Underline (`__`), Strikethrough (`~~`).
     *   Sizing: Multi-level Headings (`##`), Variable sized markers (`#2#Text#/#`), and Small text (`..text..`).
     *   Scripts: Superscript (`^`) and Subscript (`~`).
-2.  **Color & Highlight System**:
-    *   Presets: Standard (`==`), Red Alert (`!!`), Blue Info (`??`).
-    *   Dynamic Inline: Custom CSS-style markers `{fg:color;bg:color}text{/}`.
-    *   **Global Custom Syntaxes**: Integration of `custom_syntaxes.json` to allow user-defined regex-based formatting.
 3.  **Layout & Structure**:
     *   Lists: Multi-level indented bullets (`-`, `--`, `---`) and auto-numbered lists.
     *   Separators: Styled horizontal lines with color mapping (`R-----G`).
@@ -45,7 +52,14 @@ The new system will adopt and refine all legacy syntax rules:
 2.  **Productivity Shortcuts (F-Key System)**:
     *   **F1 (Vault)**: Global quick-switcher, command palette, and sheet creator.
     *   **F2 (History)**: Vertical list of recently edited or viewed sheets.
-    *   **F3 (Context)**: Inline Quick-Format menu for selections.
+    *   **F3 (Quick Format - "Selection Power-Tool")**: 
+        *   **Standard Formatting**: Buttons for Bold, Italic, Underline, Strikethrough, etc.
+        *   **Dynamic Markers**: Instant access to `##` Headings, `#2#` Big Text, `..` Small text, and `_R_` Colored underlines.
+        *   **Custom Syntax Shelf**: A dynamic section that automatically populates buttons for every marker defined in `custom_syntaxes.json` (e.g., `++`, `%%`, `¿¿`).
+        *   **Math & Advanced Tools**: Buttons for `\(\sqrt{}\)`, smart fractions, Link creation, and Google Search.
+        *   **Text Manipulation**: One-click Case conversion (UPPER, lower, Proper), List sorting, and Table alignment.
+        *   **Selection Stats**: Live character, word, and line counting for the selected area.
+        *   **Multi-Select (F3 + Click)**: Ability to "queue" multiple formats to apply them all at once to a selection.
     *   **F4 (Layout)**: Toggle UI chrome (Header/Sidebar) for "Zen Mode".
     *   **F8 (Smart Pick)**: Extract word from under mouse/cursor and auto-add to search/clipboard.
     *   **F9 (Swap)**: Instance-swap two terms separated by symbols in a selection.
@@ -55,9 +69,12 @@ The new system will adopt and refine all legacy syntax rules:
     *   **Case Ops**: Instant `Uppercase`/`Lowercase` transformation.
     *   **Tab Handling**: Intelligent indentation within textareas.
 
-### C. Data & Export
+### C. Data & Export Systems
 *   **Real-Time Sync**: Auto-save to `data.json` on blur or save command (`Ctrl+S`).
-*   **Static Rendering**: High-fidelity export to a single standalone HTML file (`export_static.py`).
+*   **Dual-Nature Backend (Live & Static)**: 
+    *   **Live App**: Full Flask functionality for editing and database sync.
+    *   **Auto-Static Export**: Built-in Flask endpoint to generate a single-file, standalone HTML export (integrated `export_static.py` logic).
+    *   **On-Demand Snapshots**: UI button to immediately download the current sheet/vault as a portable HTML file with all styles and assets embedded.
 *   **PDF Generation**: Layout-aware PDF export for printing/sharing.
 *   **Priority System**: Row-level Rank badges and Background Color history.
 
