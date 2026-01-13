@@ -5,9 +5,12 @@ This project involves a complete overhaul of the `5018_cell` application, transi
 
 ### Core Architectural Shift:
 - **Vertical Orientation**: Each sheet contains exactly **one column** and multiple rows (blocks). This removes the complexity of horizontal scrolling and refocuses on vertical content flow.
-- **Unified Markdown Interface**: Removal of the "Raw Mode" toggle. The application will operate exclusively in a **Live Preview / Hybrid Mode**.
-    - **Editing**: Users edit raw Markdown syntax directly. Highlighting and basic formatting (bold, color) are applied to the syntax tokens *while* editing.
-    - **Viewing**: When not focused, the content is rendered into its final polished form (Large headers, math symbols, etc.).
+- **Unified WYSIWYG Interface**: Removal of the separate "Raw Mode" toggle. The system operates on a **Single-Layer Editing** principle.
+    - **Direct Editing**: You edit the rendered output directly. There is no separate "raw text box" to look at.
+    - **Smart Syntax Visibility**: When a row is focused for editing, the Markdown syntax markers (e.g., `**`, `##`, `!!`) automatically become visible so you can modify the formatting tokens.
+    - **Visual Distinction**: Syntax markers are rendered in a **subtle greyish color** while editing. this ensures they don't distract from the main text content while still being fully editable.
+    - **Persistent Effects**: Styling like custom colors, bolding, and highlighting remains active even while you are typing and modified markers are visible.
+    - **Final Render**: When the row loses focus (blur) or the page is refreshed, the syntax markers vanish, and advanced layout effects (math symbols, massive headers, timelines) snap into their fully polished "View Mode."
 - **Persistence Layer**: Data remains synchronized with `data.json` via the Flask backend, but the JSON schema will be flattened to prioritize a continuous row-based list for each sheet.
 
 ---
@@ -49,7 +52,14 @@ The new system will prioritize a highly flexible, user-extensible coloring syste
 1.  **Sidebar (The Tree)**:
     *   Hierarchical organization: Categories > Sheets > Sub-sheets.
     *   Dynamic management: Rename, Move, and Delete via right-click or icons.
-2.  **Productivity Shortcuts (F-Key System)**:
+2.  **In-Sheet Search & Sorting**:
+    *   **Advanced search bar**: Real-time filtering with support for multi-term comma-separated searching.
+    *   **Row Gathering (⇅ Tool)**: 
+        *   **Row Grouping**: A dedicated button that automatically reorders the sheet to move all rows matching your search so they sit directly below the **first** matching row.
+        *   **Cluster Results**: This effectively "groups" all your search results together in the middle of the sheet for easy review.
+        *   **Intra-Cell Reordering**: For multi-line textareas, the "Gather" tool also rearranges the lines *inside* the cell so that matching sentences/items are grouped together at the top of that specific cell.
+    *   **Search Transparency**: Formatting markers are stripped during search, ensuring that a search for "Apple" finds `**Apple**`, `!!Apple!!`, and `{fg:red}Apple{/}` identically.
+3.  **Productivity Shortcuts (F-Key System)**:
     *   **F1 (Vault - "Global Command Center")**: 
         *   **Tri-Mode Search**: 
             *   **Normal**: Local filter of sheets within the active category.
@@ -114,5 +124,7 @@ To ensure consistency in the new architecture, every content-feature must be uni
 
 ## 4. Immediate Planning Objectives
 *   **Data Migration**: Convert existing multi-column `data.json` to a single-column array format.
-*   **Overlay Elimination**: Refactor the preview logic to use a background-content strategy where the styled output sits directly behind the transparent input.
+*   **Single-Layer Refactor**: Implement the "Transparent Overlay" logic where the user interacts with the rendered text layer.
+    *   **Focus State**: On focus, the row expands, markers become visible (via CSS/JS class toggle), and font-sizes are normalized to 1em for perfect cursor alignment.
+    *   **Blur State**: On blur, markers are hidden, and full markdown rendering (KaTeX, headers) is re-applied.
 *   **Refresh Persistence**: Ensure the Flask backend captures "Last Sheet" and "Last Cursor" states for a truly seamless reload experience.
