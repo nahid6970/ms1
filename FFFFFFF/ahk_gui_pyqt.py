@@ -5,7 +5,7 @@ import re
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QVBoxLayout, QHBoxLayout,
                             QWidget, QPushButton, QLineEdit, QCheckBox, QDialog,
                             QDialogButtonBox, QLabel, QTextEdit, QComboBox, QMessageBox,
-                            QSplitter, QFrame, QTextBrowser, QMenu)
+                            QSplitter, QFrame, QTextBrowser, QMenu, QSizePolicy)
 from PyQt6.QtCore import Qt, pyqtSignal, QSettings, QPoint, QSize
 from PyQt6.QtGui import QFont, QTextCursor, QKeySequence
 
@@ -536,9 +536,10 @@ class AHKShortcutEditor(QMainWindow):
                 background-color: #2d2d2d;
                 border: 1px solid #444;
                 border-radius: 6px;
-                padding: 5px 10px;
+                padding: 0px 10px;  /* Reduced vertical padding to match fixed height */
                 color: #ffffff;
                 font-size: 14px;
+                height: 28px;
             }
             QLineEdit:focus {
                 border-color: #61dafb;
@@ -611,7 +612,7 @@ class AHKShortcutEditor(QMainWindow):
         self.search_edit.setObjectName("search_edit")
         self.search_edit.setPlaceholderText(" Search shortcuts...")
         self.search_edit.textChanged.connect(self.update_display)
-        self.search_edit.setMinimumWidth(300)
+        self.search_edit.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         self.search_edit.setStyleSheet("font-family: 'Segoe UI', 'JetBrainsMono NFP';")
         
         self.record_search_btn = QPushButton("⌨")
@@ -640,8 +641,7 @@ class AHKShortcutEditor(QMainWindow):
         top_layout.addWidget(self.search_edit)
         top_layout.addWidget(self.record_search_btn)
 
-        # Spacer to push generate button to far right
-        top_layout.addStretch()
+        # Removed the addStretch() to let the search bar expand
 
         # Generate button
         generate_btn = QPushButton("🚀 Generate AHK")
