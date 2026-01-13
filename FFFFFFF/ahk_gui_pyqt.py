@@ -901,13 +901,15 @@ class AHKShortcutEditor(QMainWindow):
                     color: #ffffff;
                     font-weight: bold;
                     font-size: 18px;
+                    white-space: nowrap;
+                    padding-right: 15px;
                 }
                 .shortcut-separator {
                     color: #32CD32;
                     font-weight: bold;
-                    margin: 0 10px;
                     font-size: 22px;
                     vertical-align: middle;
+                    white-space: nowrap;
                 }
                 .shortcut-name {
                     color: #ffffff;
@@ -1030,13 +1032,13 @@ class AHKShortcutEditor(QMainWindow):
 
         if shortcut_type == "script":
             key = shortcut.get('hotkey', '')
-            key_width = 130  # Increased for larger font
+            key_width = 150
         elif shortcut_type == "startup":
             key = "🚀 Startup"
-            key_width = 130
+            key_width = 150
         else: # text
             key = shortcut.get('trigger', '')
-            key_width = 170  # Increased for larger font
+            key_width = 200
 
         name = shortcut.get('name', 'Unnamed')
         description = shortcut.get('description', '')
@@ -1045,9 +1047,9 @@ class AHKShortcutEditor(QMainWindow):
         # Calculate background color inline for best QTextBrowser compatibility
         bg_color = "transparent"
         if is_selected:
-            bg_color = "#3a4b5e" # Blue-ish for selection
+            bg_color = "#4a5b6e" # Lighter blue for selection
         elif not enabled:
-            bg_color = "#3d2424" # Dark red for disabled
+            bg_color = "#5a3434" # Lighter red for disabled
 
         text_style = 'style="color: #888;"' if not enabled else ""
 
@@ -1064,9 +1066,9 @@ class AHKShortcutEditor(QMainWindow):
                         <a href="select://{shortcut_type}/{index}" style="text-decoration: none; color: inherit;">
                             <table cellpadding="0" cellspacing="0" width="100%">
                                 <tr {text_style}>
-                                    <td width="{key_width}" class="shortcut-key" valign="middle">{key}</td>
-                                    <td width="40" class="shortcut-separator" valign="middle" align="center">󰌌</td>
-                                    <td class="shortcut-name" valign="middle">{name}{desc_html}</td>
+                                    <td width="{key_width}" class="shortcut-key" valign="middle" style="white-space: nowrap;">{key}</td>
+                                    <td width="50" class="shortcut-separator" valign="middle" align="center">󰌌</td>
+                                    <td style="padding-left: 15px;" class="shortcut-name" valign="middle">{name}{desc_html}</td>
                                 </tr>
                             </table>
                         </a>
