@@ -824,7 +824,6 @@ class AHKShortcutEditor(QMainWindow):
         return self.category_colors.get(category, "#B0B0B0")
 
     def update_display(self):
-        # Save current scroll position
         scrollbar = self.text_browser.verticalScrollBar()
         scroll_position = scrollbar.value()
 
@@ -840,11 +839,13 @@ class AHKShortcutEditor(QMainWindow):
                            if search_query in f"{s.get('name', '')} {s.get('description', '')} {s.get('category', '')}".lower()]
 
         html = self.generate_html(filtered_script, filtered_text, filtered_startup, group_by_category)
+        
+        # Only set HTML if it changed or it's an interaction
         self.text_browser.setHtml(html)
-
-        # Restore scroll position after a brief delay to allow HTML to load
+        scrollbar.setValue(scroll_position)
+        # Second pass restoration for dynamic heights
         from PyQt6.QtCore import QTimer
-        QTimer.singleShot(10, lambda: scrollbar.setValue(scroll_position))
+        QTimer.singleShot(1, lambda: scrollbar.setValue(scroll_position))
 
     def generate_html(self, script_shortcuts, text_shortcuts, startup_scripts, group_by_category):
         html = """
@@ -1032,13 +1033,16 @@ class AHKShortcutEditor(QMainWindow):
 
         if shortcut_type == "script":
             key = shortcut.get('hotkey', '')
-            key_width = 150
+            key_width = 170
         elif shortcut_type == "startup":
             key = "🚀 Startup"
-            key_width = 150
+            key_width = 170
         else: # text
             key = shortcut.get('trigger', '')
-            key_width = 200
+            key_width = 220
+        
+        # Ensure icon column is stable
+        icon_width = 60
 
         name = shortcut.get('name', 'Unnamed')
         description = shortcut.get('description', '')
@@ -1067,7 +1071,7 @@ class AHKShortcutEditor(QMainWindow):
                             <table cellpadding="0" cellspacing="0" width="100%">
                                 <tr {text_style}>
                                     <td width="{key_width}" class="shortcut-key" valign="middle" style="white-space: nowrap;">{key}</td>
-                                    <td width="50" class="shortcut-separator" valign="middle" align="center">󰌌</td>
+                                    <td width="{icon_width}" class="shortcut-separator" valign="middle" align="center">󰌌</td>
                                     <td style="padding-left: 15px;" class="shortcut-name" valign="middle">{name}{desc_html}</td>
                                 </tr>
                             </table>
