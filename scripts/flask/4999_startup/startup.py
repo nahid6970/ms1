@@ -569,13 +569,16 @@ class MainWindow(QMainWindow):
         self.sort_combo = QComboBox()
         self.sort_combo.addItems(["Name", "Date"])
         self.sort_combo.setCurrentText(self.sort_by)
-        self.sort_combo.setFixedWidth(80)
+        self.sort_combo.setFixedWidth(100)
+        self.sort_combo.setFixedHeight(30)
         self.sort_combo.setStyleSheet(self.get_combo_style())
+        self.sort_combo.setCursor(Qt.CursorShape.PointingHandCursor)
         self.sort_combo.currentTextChanged.connect(self.change_sort)
         row2_layout.addWidget(self.sort_combo)
 
         self.order_btn = CyberButton(self.sort_order, color=CP_CYAN, parent=self, is_outlined=True)
         self.order_btn.setFixedWidth(60)
+        self.order_btn.setFixedHeight(30)
         self.order_btn.clicked.connect(self.toggle_sort_order)
         row2_layout.addWidget(self.order_btn)
         
@@ -824,15 +827,21 @@ class MainWindow(QMainWindow):
     def get_combo_style(self):
         return f"""
             QComboBox {{
-                background-color: {CP_BG};
-                color: {CP_TEXT};
-                border: 1px solid {CP_DIM};
-                padding: 2px 5px;
-                font-family: Consolas;
-                font-size: 10px;
+                background-color: transparent;
+                color: {CP_CYAN};
+                border: 1px solid {CP_CYAN};
+                padding: 5px 15px;
+                font-family: 'Consolas';
+                font-weight: bold;
+                font-size: 9pt;
+            }}
+            QComboBox:hover {{
+                background-color: {CP_CYAN};
+                color: {CP_BG};
             }}
             QComboBox::drop-down {{
                 border: 0px;
+                width: 0px;
             }}
             QComboBox QAbstractItemView {{
                 background-color: {CP_PANEL};
@@ -840,6 +849,7 @@ class MainWindow(QMainWindow):
                 selection-background-color: {CP_CYAN};
                 selection-color: {CP_BG};
                 border: 1px solid {CP_CYAN};
+                outline: none;
             }}
         """
 
