@@ -193,14 +193,13 @@ function createRowBlock(row, index) {
     const wrapper = document.createElement('div');
     wrapper.className = 'row-wrapper';
     
-    const editor = document.createElement('textarea');
+    // Single contenteditable div - shows rendered when blurred, raw when focused
+    const editor = document.createElement('div');
     editor.className = 'row-editor';
-    editor.value = row.content;
-    editor.placeholder = 'Type markdown here...';
-    
-    const preview = document.createElement('div');
-    preview.className = 'row-preview';
-    preview.innerHTML = parseMarkdown(row.content);
+    editor.contentEditable = true;
+    editor.dataset.placeholder = 'Type markdown here...';
+    editor.innerHTML = parseMarkdown(row.content);
+    editor._rawContent = row.content;
     
     const actions = document.createElement('div');
     actions.className = 'row-actions';
@@ -210,22 +209,46 @@ function createRowBlock(row, index) {
         <button class="delete-row" title="Delete">×</button>
     `;
     
-    // Event listeners
-    editor.addEventListener('input', () => {
-        row.content = editor.value;
-        preview.innerHTML = parseMarkdown(editor.value);
-        autoResizeTextarea(editor);
-    });
-    
+    // Focus: switch to raw markdown with syntax visible
     editor.addEventListener('focus', () => {
         activeEditor = editor;
+        editor.classList.add('editing');
+        // Show raw content with syntax highlighting
+        editor.innerHTML = highlightSyntax(editor._rawContent);
+        // Restore cursor to end
+        placeCaretAtEnd(editor);
     });
     
+    // Blur: save and render back to preview
     editor.addEventListener('blur', () => {
+        editor.classList.remove('editing');
+        // Extract plain text (raw markdown)
+        editor._rawContent = extractRawText(editor);
+        row.content = editor._rawContent;
+        // Render as preview
+        editor.innerHTML = parseMarkdown(editor._rawContent);
         saveData();
     });
     
-    editor.addEventListener('keydown', (e) => handleEditorKeydown(e, row, index));
+    // Input: update raw content and re-highlight
+    editor.addEventListener('input', () => {
+        if (editor.classList.contains('editing')) {
+            editor._rawContent = extractRawText(editor);
+            row.content = editor._rawContent;
+            
+            // Save cursor position
+            const sel = window.getSelection();
+            const offset = getCaretCharacterOffset(editor);
+            
+            // Re-highlight
+            editor.innerHTML = highlightSyntax(editor._rawContent);
+            
+            // Restore cursor
+            setCaretPosition(editor, offset);
+        }
+    });
+    
+    editor.addEventListener('keydown', (e) => handleEditorKeydown(e, row, index, editor));
     
     // Action buttons
     actions.querySelector('.move-up').addEventListener('click', () => moveRow(index, -1));
@@ -233,32 +256,175 @@ function createRowBlock(row, index) {
     actions.querySelector('.delete-row').addEventListener('click', () => deleteRow(index));
     
     wrapper.appendChild(editor);
-    wrapper.appendChild(preview);
     block.appendChild(wrapper);
     block.appendChild(actions);
-    
-    // Auto-resize on load
-    setTimeout(() => autoResizeTextarea(editor), 0);
     
     return block;
 }
 
-function autoResizeTextarea(textarea) {
-    textarea.style.height = 'auto';
-    const newHeight = Math.max(60, textarea.scrollHeight);
-    textarea.style.height = newHeight + 'px';
-    textarea.parentElement.style.minHeight = newHeight + 'px';
+// Syntax highlighting for edit mode - shows markers but keeps same visual styling as preview
+function highlightSyntax(text) {
+    if (!text) return '';
+    
+    let html = escapeHtml(text);
+    
+    // Headings - same size as preview, markers visible
+    html = html.replace(/^(###)\s(.+)$/gm, '<span class="md-h3"><span class="syn-marker">$1 </span>$2</span>');
+    html = html.replace(/^(##)\s(.+)$/gm, '<span class="md-h2"><span class="syn-marker">$1 </span>$2</span>');
+    html = html.replace(/^(#)\s(.+)$/gm, '<span class="md-h1"><span class="syn-marker">$1 </span>$2</span>');
+    
+    // Big text #2#text#/# - keep the size
+    html = html.replace(/(#(\d)#)(.+?)(#\/#)/g, (m, open, size, content, close) => {
+        return `<span class="md-big" style="font-size: ${size}em;"><span class="syn-marker">${open}</span>${content}<span class="syn-marker">${close}</span></span>`;
+    });
+    
+    // Box #B#content#/#
+    html = html.replace(/(#B#)(.+?)(#\/#)/gs, '<span class="md-box"><span class="syn-marker">$1</span>$2<span class="syn-marker">$3</span></span>');
+    
+    // Bold **text**
+    html = html.replace(/(\*\*)(.+?)(\*\*)/g, '<span class="md-bold"><span class="syn-marker">$1</span>$2<span class="syn-marker">$3</span></span>');
+    
+    // Italic @@text@@
+    html = html.replace(/(@@)(.+?)(@@)/g, '<span class="md-italic"><span class="syn-marker">$1</span>$2<span class="syn-marker">$3</span></span>');
+    
+    // Underline __text__
+    html = html.replace(/(__)(.+?)(__)/g, '<span class="md-underline"><span class="syn-marker">$1</span>$2<span class="syn-marker">$3</span></span>');
+    
+    // Strikethrough ~~text~~
+    html = html.replace(/(~~)(.+?)(~~)/g, '<span class="md-strike"><span class="syn-marker">$1</span>$2<span class="syn-marker">$3</span></span>');
+    
+    // Small text ..text..
+    html = html.replace(/(\.\.)(.+?)(\.\.)/g, '<span class="md-small"><span class="syn-marker">$1</span>$2<span class="syn-marker">$3</span></span>');
+    
+    // Superscript ^text^
+    html = html.replace(/(\^)([^\^]+)(\^)/g, '<span class="md-sup"><span class="syn-marker">$1</span>$2<span class="syn-marker">$3</span></span>');
+    
+    // Subscript ~text~
+    html = html.replace(/(?<!~)(~)([^~]+)(~)(?!~)/g, '<span class="md-sub"><span class="syn-marker">$1</span>$2<span class="syn-marker">$3</span></span>');
+    
+    // Highlights - same colors as preview
+    html = html.replace(/(==)(.+?)(==)/g, '<span class="md-hl-yellow"><span class="syn-marker">$1</span>$2<span class="syn-marker">$3</span></span>');
+    html = html.replace(/(!!)(.+?)(!!)/g, '<span class="md-hl-red"><span class="syn-marker">$1</span>$2<span class="syn-marker">$3</span></span>');
+    html = html.replace(/(\?\?)(.+?)(\?\?)/g, '<span class="md-hl-blue"><span class="syn-marker">$1</span>$2<span class="syn-marker">$3</span></span>');
+    
+    // Custom syntaxes - same styling as preview
+    for (const [marker, config] of Object.entries(customSyntaxes)) {
+        const escaped = escapeRegex(marker);
+        const regex = new RegExp(`(${escaped})(.+?)(${escaped})`, 'g');
+        const style = buildCustomStyle(config);
+        html = html.replace(regex, `<span class="md-custom" style="${style}"><span class="syn-marker">$1</span>$2<span class="syn-marker">$3</span></span>`);
+    }
+    
+    // Math \( ... \) - show raw latex but styled
+    html = html.replace(/(\\\()(.+?)(\\\))/g, '<span class="syn-math-wrap"><span class="syn-marker">$1</span><span class="syn-math">$2</span><span class="syn-marker">$3</span></span>');
+    
+    // Collapsible {{ }}
+    html = html.replace(/(\{\{)(.+?)(\}\})/gs, '<span class="syn-marker">$1</span>$2<span class="syn-marker">$3</span>');
+    
+    // Answer [[ ]]
+    html = html.replace(/(\[\[)(.+?)(\]\])/g, '<span class="md-answer"><span class="syn-marker">$1</span>$2<span class="syn-marker">$3</span></span>');
+    
+    // Lists - keep indentation
+    html = html.replace(/^(---)\s+(.+)$/gm, '<span class="md-list" style="padding-left:3em;"><span class="syn-marker">$1 </span><span class="md-list-item">$2</span></span>');
+    html = html.replace(/^(--)(?!-)\s+(.+)$/gm, '<span class="md-list" style="padding-left:2em;"><span class="syn-marker">$1 </span><span class="md-list-item">$2</span></span>');
+    html = html.replace(/^(-)(?!-)\s+(.+)$/gm, '<span class="md-list"><span class="syn-marker">$1 </span><span class="md-list-item">$2</span></span>');
+    
+    // Separators
+    html = html.replace(/^([RGBYPO])?(-{3,})([RGBYPO])?$/gm, (match, c1, dashes, c2) => {
+        const colors = { R: '#ef4444', G: '#22c55e', B: '#3b82f6', Y: '#eab308', P: '#a855f7', O: '#f97316' };
+        const color = colors[c1] || colors[c2] || 'var(--border)';
+        return `<span class="syn-marker">${c1 || ''}${dashes}${c2 || ''}</span><hr class="md-separator" style="background: ${color};">`;
+    });
+    
+    // Preserve line breaks
+    html = html.replace(/\n/g, '<br>');
+    
+    return html;
 }
 
-function handleEditorKeydown(e, row, index) {
+// Extract raw text from contenteditable
+function extractRawText(element) {
+    let text = '';
+    const walk = (node) => {
+        if (node.nodeType === Node.TEXT_NODE) {
+            text += node.textContent;
+        } else if (node.nodeName === 'BR') {
+            text += '\n';
+        } else if (node.nodeName === 'DIV' && text.length > 0 && !text.endsWith('\n')) {
+            text += '\n';
+            node.childNodes.forEach(walk);
+        } else {
+            node.childNodes.forEach(walk);
+        }
+    };
+    walk(element);
+    return text;
+}
+
+// Caret position helpers for contenteditable
+function getCaretCharacterOffset(element) {
+    let caretOffset = 0;
+    const sel = window.getSelection();
+    if (sel.rangeCount > 0) {
+        const range = sel.getRangeAt(0);
+        const preCaretRange = range.cloneRange();
+        preCaretRange.selectNodeContents(element);
+        preCaretRange.setEnd(range.endContainer, range.endOffset);
+        caretOffset = preCaretRange.toString().length;
+    }
+    return caretOffset;
+}
+
+function setCaretPosition(element, offset) {
+    const range = document.createRange();
+    const sel = window.getSelection();
+    let currentOffset = 0;
+    let found = false;
+    
+    const walk = (node) => {
+        if (found) return;
+        if (node.nodeType === Node.TEXT_NODE) {
+            if (currentOffset + node.length >= offset) {
+                range.setStart(node, offset - currentOffset);
+                range.collapse(true);
+                found = true;
+            } else {
+                currentOffset += node.length;
+            }
+        } else {
+            for (const child of node.childNodes) {
+                walk(child);
+                if (found) break;
+            }
+        }
+    };
+    
+    walk(element);
+    
+    if (!found) {
+        // Place at end if offset exceeds content
+        range.selectNodeContents(element);
+        range.collapse(false);
+    }
+    
+    sel.removeAllRanges();
+    sel.addRange(range);
+}
+
+function placeCaretAtEnd(element) {
+    const range = document.createRange();
+    const sel = window.getSelection();
+    range.selectNodeContents(element);
+    range.collapse(false);
+    sel.removeAllRanges();
+    sel.addRange(range);
+}
+
+function handleEditorKeydown(e, row, index, editor) {
     // Tab handling
     if (e.key === 'Tab') {
         e.preventDefault();
-        const start = e.target.selectionStart;
-        const end = e.target.selectionEnd;
-        e.target.value = e.target.value.substring(0, start) + '\t' + e.target.value.substring(end);
-        e.target.selectionStart = e.target.selectionEnd = start + 1;
-        e.target.dispatchEvent(new Event('input'));
+        document.execCommand('insertText', false, '\t');
     }
     
     // Ctrl+S to save
@@ -277,32 +443,22 @@ function handleEditorKeydown(e, row, index) {
         moveRow(index, 1);
     }
     
-    // Ctrl+D for multi-cursor simulation (duplicate line/selection)
+    // Ctrl+D for duplicate
     if (e.ctrlKey && e.key === 'd') {
         e.preventDefault();
-        duplicateSelection(e.target);
+        const sel = window.getSelection();
+        const text = sel.toString() || getCurrentLine(editor);
+        document.execCommand('insertText', false, text);
     }
 }
 
-function duplicateSelection(textarea) {
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const value = textarea.value;
-    
-    if (start === end) {
-        // No selection - duplicate current line
-        const lineStart = value.lastIndexOf('\n', start - 1) + 1;
-        const lineEnd = value.indexOf('\n', start);
-        const line = value.substring(lineStart, lineEnd === -1 ? value.length : lineEnd);
-        const newValue = value.substring(0, lineEnd === -1 ? value.length : lineEnd) + '\n' + line + value.substring(lineEnd === -1 ? value.length : lineEnd);
-        textarea.value = newValue;
-    } else {
-        // Duplicate selection
-        const selected = value.substring(start, end);
-        textarea.value = value.substring(0, end) + selected + value.substring(end);
-    }
-    
-    textarea.dispatchEvent(new Event('input'));
+function getCurrentLine(element) {
+    const text = extractRawText(element);
+    const offset = getCaretCharacterOffset(element);
+    const before = text.substring(0, offset);
+    const lineStart = before.lastIndexOf('\n') + 1;
+    const lineEnd = text.indexOf('\n', offset);
+    return text.substring(lineStart, lineEnd === -1 ? text.length : lineEnd);
 }
 
 function moveRow(index, direction) {
@@ -574,27 +730,18 @@ function renderCustomSyntaxButtons() {
 function applyFormat(format, endFormat = null) {
     if (!activeEditor) return;
     
-    const start = activeEditor.selectionStart;
-    const end = activeEditor.selectionEnd;
-    const value = activeEditor.value;
-    const selected = value.substring(start, end);
-    
+    const sel = window.getSelection();
+    const selected = sel.toString();
     const endMarker = endFormat || format;
     const newText = format + selected + endMarker;
     
-    activeEditor.value = value.substring(0, start) + newText + value.substring(end);
-    activeEditor.selectionStart = start + format.length;
-    activeEditor.selectionEnd = start + format.length + selected.length;
     activeEditor.focus();
-    activeEditor.dispatchEvent(new Event('input'));
+    document.execCommand('insertText', false, newText);
 }
 
 function updateSelectionStats() {
-    if (!activeEditor) return;
-    
-    const start = activeEditor.selectionStart;
-    const end = activeEditor.selectionEnd;
-    const selected = activeEditor.value.substring(start, end);
+    const sel = window.getSelection();
+    const selected = sel.toString();
     
     const chars = selected.length;
     const words = selected.trim() ? selected.trim().split(/\s+/).length : 0;
@@ -644,12 +791,8 @@ function updateMathPreview() {
 function insertMath() {
     const latex = document.getElementById('math-latex-output').textContent;
     if (activeEditor && latex) {
-        const start = activeEditor.selectionStart;
-        const value = activeEditor.value;
-        activeEditor.value = value.substring(0, start) + latex + value.substring(start);
-        activeEditor.selectionStart = activeEditor.selectionEnd = start + latex.length;
         activeEditor.focus();
-        activeEditor.dispatchEvent(new Event('input'));
+        document.execCommand('insertText', false, latex);
     }
     mathModal.classList.add('hidden');
 }
@@ -821,13 +964,8 @@ function setupEventListeners() {
             } else {
                 // Insert at start of line
                 if (activeEditor) {
-                    const start = activeEditor.selectionStart;
-                    const value = activeEditor.value;
-                    const lineStart = value.lastIndexOf('\n', start - 1) + 1;
-                    activeEditor.value = value.substring(0, lineStart) + format + value.substring(lineStart);
-                    activeEditor.selectionStart = activeEditor.selectionEnd = start + format.length;
                     activeEditor.focus();
-                    activeEditor.dispatchEvent(new Event('input'));
+                    document.execCommand('insertText', false, format);
                 }
             }
             formatModal.classList.add('hidden');
