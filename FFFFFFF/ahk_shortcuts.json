@@ -63,8 +63,9 @@
             "name": "Kill Foreground Process",
             "description": "Forcefully kills the process under mouse cursor",
             "hotkey": "!q",
-            "action": "KillForeground()\nKillForeground() {\n    MouseGetPos(, , &WinID)\n    ProcessID := WinGetPID(\"ahk_id \" WinID)\n    Run(\"taskkill /f /pid \" ProcessID, , \"Hide\")\n}",
-            "category": "Script"
+            "action": "KillForeground() {\n    MouseGetPos(, , &WinID)\n    ProcessID := WinGetPID(\"ahk_id \" WinID)\n    Run(\"taskkill /f /pid \" ProcessID, , \"Hide\")\n}",
+            "category": "Script",
+            "enabled": true
         },
         {
             "name": "Copy Path",

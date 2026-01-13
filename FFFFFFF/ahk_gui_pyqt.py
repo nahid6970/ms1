@@ -1001,8 +1001,24 @@ class AHKShortcutEditor(QMainWindow):
                     action = shortcut.get('action', '')
                     hotkey = shortcut.get('hotkey', '')
 
+                    # Cleanup: Fix common "Too many parameters" error like Run("...", , , "Hide") 
+                    # by reducing triple commas to double (v2 standard for skipping 1 param)
+                    action = action.replace(',,,', ',,')
+
                     if '\n' in action:
                         output_lines.append(f"{hotkey}:: {{")
+                        
+                        # Smart Function Calling:
+                        # Detect if the action starts with a function definition and call it if missing
+                        lines = [l.strip() for l in action.split('\n') if l.strip()]
+                        match = re.search(r"^\s*([a-zA-Z0-9_]+)\s*\([^)]*\)\s*\{", action, re.MULTILINE)
+                        
+                        if match and len(lines) > 0:
+                            func_name = match.group(1)
+                            # If first line is a definition and NO other line calls it, inject the call
+                            if lines[0].startswith(f"{func_name}(") and not any(l.strip() == f"{func_name}()" for l in lines):
+                                output_lines.append(f"    {func_name}()")
+                                
                         for line in action.split('\n'):
                             if line.strip():
                                 output_lines.append(f"    {line}")
