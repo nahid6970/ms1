@@ -199,26 +199,19 @@ LAlt & c:: {
 ;! Black Screen
 ^!b:: {
     Toggle_Screen_Blackout()
-    ; Define a variable to track the state of the screen blackout
     Toggle_Screen_Blackout() {
-    blackoutState := 0
-    ; Define a global variable to store the Gui object
-    myGui := ""
-    ; Define a function to toggle the screen blackout
-        global blackoutState, myGui  ; Declare the variables as global so they can be accessed inside the function
+        static blackoutState := 0
+        static myGui := ""
         if (blackoutState = 0) {
-            ; If the screen is not blacked out, create a black fullscreen window
             blackoutState := 1
-            ; Create the black window to cover the entire screen
             myGui := Gui()
-            myGui.Opt("+LastFound +AlwaysOnTop -Caption +ToolWindow") ; Remove caption and border
+            myGui.Opt("+LastFound +AlwaysOnTop -Caption +ToolWindow")
             myGui.BackColor := "Black"
             myGui.Show("w" . A_ScreenWidth . " h" . A_ScreenHeight . " x0 y0 NoActivate")
         } else {
-            ; If the screen is already blacked out, close the window
             blackoutState := 0
             myGui.Destroy()
-            myGui := ""  ; Clear the myGui object
+            myGui := ""
         }
     }
 }
@@ -226,26 +219,19 @@ LAlt & c:: {
 ;! White Screen
 ^!w:: {
     Toggle_Screen_Whiteout()
-    ; Define a variable to track the state of the screen blackout
     Toggle_Screen_Whiteout() {
-    whiteState := 0
-    ; Define a global variable to store the Gui object
-    myGui := ""
-    ; Define a function to toggle the screen blackout
-        global whiteState, myGui  ; Declare the variables as global so they can be accessed inside the function
+        static whiteState := 0
+        static myGui := ""
         if (whiteState = 0) {
-            ; If the screen is not blacked out, create a black fullscreen window
             whiteState := 1
-            ; Create the black window to cover the entire screen
             myGui := Gui()
-            myGui.Opt("+LastFound +AlwaysOnTop -Caption +ToolWindow") ; Remove caption and border
+            myGui.Opt("+LastFound +AlwaysOnTop -Caption +ToolWindow")
             myGui.BackColor := "ffffff"
             myGui.Show("w" . A_ScreenWidth . " h" . A_ScreenHeight . " x0 y0 NoActivate")
         } else {
-            ; If the screen is already blacked out, close the window
             whiteState := 0
             myGui.Destroy()
-            myGui := ""  ; Clear the myGui object
+            myGui := ""
         }
     }
 }

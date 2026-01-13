@@ -152,14 +152,14 @@
             "category": "Display",
             "description": "",
             "hotkey": "^!b",
-            "action": "Toggle_Screen_Blackout()\n; Define a variable to track the state of the screen blackout\nToggle_Screen_Blackout() {\nblackoutState := 0\n; Define a global variable to store the Gui object\nmyGui := \"\"\n; Define a function to toggle the screen blackout\n    global blackoutState, myGui  ; Declare the variables as global so they can be accessed inside the function\n    if (blackoutState = 0) {\n        ; If the screen is not blacked out, create a black fullscreen window\n        blackoutState := 1\n        ; Create the black window to cover the entire screen\n        myGui := Gui()\n        myGui.Opt(\"+LastFound +AlwaysOnTop -Caption +ToolWindow\") ; Remove caption and border\n        myGui.BackColor := \"Black\"\n        myGui.Show(\"w\" . A_ScreenWidth . \" h\" . A_ScreenHeight . \" x0 y0 NoActivate\")\n    } else {\n        ; If the screen is already blacked out, close the window\n        blackoutState := 0\n        myGui.Destroy()\n        myGui := \"\"  ; Clear the myGui object\n    }\n}"
+            "action": "Toggle_Screen_Blackout() {\n    static blackoutState := 0\n    static myGui := \"\"\n    \n    if (blackoutState = 0) {\n        blackoutState := 1\n        myGui := Gui()\n        myGui.Opt(\"+LastFound +AlwaysOnTop -Caption +ToolWindow\")\n        myGui.BackColor := \"Black\"\n        myGui.Show(\"w\" . A_ScreenWidth . \" h\" . A_ScreenHeight . \" x0 y0 NoActivate\")\n    } else {\n        blackoutState := 0\n        myGui.Destroy()\n        myGui := \"\"\n    }\n}"
         },
         {
             "name": "White Screen",
             "category": "Display",
             "description": "",
             "hotkey": "^!w",
-            "action": "Toggle_Screen_Whiteout()\n; Define a variable to track the state of the screen blackout\nToggle_Screen_Whiteout() {\nwhiteState := 0\n; Define a global variable to store the Gui object\nmyGui := \"\"\n; Define a function to toggle the screen blackout\n    global whiteState, myGui  ; Declare the variables as global so they can be accessed inside the function\n    if (whiteState = 0) {\n        ; If the screen is not blacked out, create a black fullscreen window\n        whiteState := 1\n        ; Create the black window to cover the entire screen\n        myGui := Gui()\n        myGui.Opt(\"+LastFound +AlwaysOnTop -Caption +ToolWindow\") ; Remove caption and border\n        myGui.BackColor := \"ffffff\"\n        myGui.Show(\"w\" . A_ScreenWidth . \" h\" . A_ScreenHeight . \" x0 y0 NoActivate\")\n    } else {\n        ; If the screen is already blacked out, close the window\n        whiteState := 0\n        myGui.Destroy()\n        myGui := \"\"  ; Clear the myGui object\n    }\n}"
+            "action": "Toggle_Screen_Whiteout() {\n    static whiteState := 0\n    static myGui := \"\"\n    \n    if (whiteState = 0) {\n        whiteState := 1\n        myGui := Gui()\n        myGui.Opt(\"+LastFound +AlwaysOnTop -Caption +ToolWindow\")\n        myGui.BackColor := \"ffffff\"\n        myGui.Show(\"w\" . A_ScreenWidth . \" h\" . A_ScreenHeight . \" x0 y0 NoActivate\")\n    } else {\n        whiteState := 0\n        myGui.Destroy()\n        myGui := \"\"\n    }\n}"
         },
         {
             "name": "Execute Script W/O Closing",
