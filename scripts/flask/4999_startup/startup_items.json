@@ -599,5 +599,17 @@
     "Command": "-controlservice -slave",
     "ps1_command": "Start-Process -FilePath \"C:\\Program Files\\TightVNC\\tvnserver.exe\" -ArgumentList \"-controlservice -slave\"",
     "ExecutableType": "other"
+  },
+  {
+    "name": "Autorun for nahid",
+    "type": "App",
+    "paths": [
+      "C:\\Program Files\\PowerToys\\PowerToys.exe"
+    ],
+    "Command": "",
+    "ps1_command": "Start-Process -FilePath \"C:\\Program Files\\PowerToys\\PowerToys.exe\"",
+    "ExecutableType": "other",
+    "origin": "TaskScheduler",
+    "original_name": "Autorun for nahid"
   }
 ]
