@@ -623,28 +623,27 @@ PrintScreen::Run("C:\Users\nahid\ms\ms1\Testing\screenshot\region_screenshot.py"
 ;! === TEXT SHORTCUTS ===
 ;! AutoHotkey Version 1
 ;! Inserts AHK v1 header requirement
-::;v1::{#}Requires AutoHotkey v1.0
+:T:;v1::#Requires AutoHotkey v1.0
 
 ;! AutoHotkey Version 2
 ;! Inserts AHK v2 header requirement
-::;v2::{#}Requires AutoHotkey v2.0
+:T:;v2::{#}Requires AutoHotkey v2.0
 
 ;! Registry Run Path
 ;! Windows startup registry path run
-::;run::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run
+:T:;run::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run
 
 ;! PowerShell Symlink
 ;! PowerShell command to create symbolic link
-::;mklink::New-Item -ItemType SymbolicLink -Path "Fake" -Target "Original" -Force
+:T:;mklink::New-Item -ItemType SymbolicLink -Path "Fake" -Target "Original" -Force
 
 ;! Symbols
 ;!   󰩷  󰣉  󰁄 󰁌 󰞘 󰜴 󱞩 󱞫 󰤼
-::;--::
+:T:;--::
 
 ;! Writers list of writings
-::;list::x
+:TR:;list::
 (
-
 রচনা:
 কাব্যগ্রন্থ/গদ্যকাব্য:
 কবিতা:
@@ -660,19 +659,19 @@ PrintScreen::Run("C:\Users\nahid\ms\ms1\Testing\screenshot\region_screenshot.py"
 )
 
 ;! Star
-::;star::
+:T:;star::
 
 ;! Db path
-::;db::C:\Users\nahid\ms\db
+:T:;db::C:\Users\nahid\ms\db
 
 ;! Changes for Ai to know that i made on my files
-::;change::ok i have made some changes from last time  so keep that in mind now
+:T:;change::ok i have made some changes from last time  so keep that in mind now
 
 ;! Percentage %
-::;%::℅
+:T:;%::℅
 
 ;! not equal
-::;notequal::≠
+:T:;notequal::≠
 
 ;! Theta Sign
-::;theta::θ
+:T:;theta::θ

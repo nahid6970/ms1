@@ -1019,7 +1019,21 @@ class AHKShortcutEditor(QMainWindow):
                     output_lines.append(f";! {shortcut.get('name', 'Unnamed')}")
                     if shortcut.get('description'):
                         output_lines.append(f";! {shortcut.get('description')}")
-                    output_lines.append(f"::{shortcut.get('trigger', '')}::{shortcut.get('replacement', '')}")
+                    
+                    replacement = shortcut.get('replacement', '')
+                    trigger = shortcut.get('trigger', '')
+                    
+                    if '\n' in replacement:
+                        # TR mode (Text + Raw) + Escaping starting ( to avoid parser confusion
+                        output_lines.append(f":TR:{trigger}::")
+                        output_lines.append("(")
+                        # If a line starts with (, AHK thinks it's a new continuation section.
+                        # We must escape it with a backtick.
+                        cleaned = "\n".join(["`" + line if line.startswith("(") else line for line in replacement.split("\n")])
+                        output_lines.append(cleaned)
+                        output_lines.append(")")
+                    else:
+                        output_lines.append(f":T:{trigger}::{replacement}")
                     output_lines.append("")
 
             output_file = "generated_shortcuts.ahk"

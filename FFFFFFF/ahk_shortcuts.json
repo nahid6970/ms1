@@ -252,7 +252,7 @@
             "name": "AutoHotkey Version 1",
             "description": "Inserts AHK v1 header requirement",
             "trigger": ";v1",
-            "replacement": "{#}Requires AutoHotkey v1.0",
+            "replacement": "#Requires AutoHotkey v1.0",
             "category": "AHK",
             "enabled": true
         },
@@ -290,7 +290,8 @@
             "category": "Temporary",
             "description": "",
             "trigger": ";list",
-            "replacement": "x\n(\n\nরচনা:\nকাব্যগ্রন্থ/গদ্যকাব্য:\nকবিতা:\nউপন্যাস:\nনাটক:\nসনেট:\nছোটগল্প/গল্প:\nগদ্যগ্রন্থ-প্রবন্ধ:\nঅনুবাদ গ্রন্থ:\nবই:\nঅন্যান্য:\nপংক্তি এবং উদ্ধৃতি:\n)"
+            "replacement": "রচনা:\nকাব্যগ্রন্থ/গদ্যকাব্য:\nকবিতা:\nউপন্যাস:\nনাটক:\nসনেট:\nছোটগল্প/গল্প:\nগদ্যগ্রন্থ-প্রবন্ধ:\nঅনুবাদ গ্রন্থ:\nবই:\nঅন্যান্য:\nপংক্তি এবং উদ্ধৃতি:",
+            "enabled": true
         },
         {
             "name": "Star",
