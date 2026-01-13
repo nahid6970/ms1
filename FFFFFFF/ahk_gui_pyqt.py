@@ -854,27 +854,27 @@ class AHKShortcutEditor(QMainWindow):
             <style>
                 body {
                     font-family: 'JetBrains Mono', 'Consolas', monospace;
-                    margin: 20px;
+                    margin: 10px 20px;
                     background: #2b2b2b;
                     color: #ffffff;
-                    font-size: 16px; /* Increased base font size */
+                    font-size: 18px; /* High visibility base size */
                 }
                 .container { display: flex; gap: 20px; }
                 .column { flex: 1; }
                 .section-title {
-                    font-size: 20px; /* Increased */
+                    font-size: 24px;
                     font-weight: bold;
-                    margin: 25px 0 8px 0;
+                    margin: 15px 0 5px 0;
                     color: #61dafb;
                 }
                 .section-title:first-child {
                     margin-top: 5px;
                 }
                 .category-header {
-                    font-size: 18px; /* Increased */
+                    font-size: 22px;
                     font-weight: bold;
-                    margin: 25px 0 5px 0;
-                    padding: 5px 10px;
+                    margin: 12px 0 3px 0;
+                    padding: 3px 10px;
                     border-radius: 5px;
                     background: #404040;
                 }
@@ -882,17 +882,15 @@ class AHKShortcutEditor(QMainWindow):
                     margin-top: 8px;
                 }
                 .shortcut-item {
-                    padding: 10px 14px; /* Increased padding */
-                    margin: 3px 0; /* Slightly increased margin */
+                    padding: 2px 10px;
+                    margin: 1px 0;
                     border-radius: 5px;
                     cursor: pointer;
                     transition: background 0.2s;
                     border-left: 3px solid transparent;
-                    display: flex;
-                    align-items: center;
                 }
                 .shortcut-item:hover {
-                    background: rgba(255,255,255,0.1);
+                    background: rgba(255,255,255,0.05);
                     border-left-color: #61dafb;
                 }
                 .shortcut-item.selected {
@@ -902,28 +900,26 @@ class AHKShortcutEditor(QMainWindow):
                 .shortcut-key {
                     color: #ffffff;
                     font-weight: bold;
-                    font-size: 16px;
+                    font-size: 18px;
                 }
                 .shortcut-separator {
                     color: #32CD32;
                     font-weight: bold;
                     margin: 0 10px;
-                    font-size: 18px;
+                    font-size: 22px;
                     vertical-align: middle;
                 }
                 .shortcut-name {
                     color: #ffffff;
-                    font-size: 16px; /* Increased */
+                    font-size: 18px;
                 }
                 .shortcut-desc {
                     color: #888;
-                    font-size: 14px; /* Increased from 12px */
+                    font-size: 15px;
                 }
                 .status-enabled { color: #27ae60; }
-                .status-disabled {
-                    color: #e74c3c;
-                    opacity: 0.6;
-                }
+                .status-disabled { color: #ff5555; }
+                
                 .indent { margin-left: 20px; }
                 a { text-decoration: none; color: inherit; }
             </style>
@@ -1034,31 +1030,40 @@ class AHKShortcutEditor(QMainWindow):
 
         if shortcut_type == "script":
             key = shortcut.get('hotkey', '')
-            key_width = 110
+            key_width = 130  # Increased for larger font
         elif shortcut_type == "startup":
             key = "🚀 Startup"
-            key_width = 110
+            key_width = 130
         else: # text
             key = shortcut.get('trigger', '')
-            key_width = 150
+            key_width = 170  # Increased for larger font
 
         name = shortcut.get('name', 'Unnamed')
         description = shortcut.get('description', '')
         desc_html = f' <span class="shortcut-desc">({description[:25]}...)</span>' if len(description) > 25 else f' <span class="shortcut-desc">({description})</span>' if description else ''
 
+        # Calculate background color inline for best QTextBrowser compatibility
+        bg_color = "transparent"
+        if is_selected:
+            bg_color = "#3a4b5e" # Blue-ish for selection
+        elif not enabled:
+            bg_color = "#3d2424" # Dark red for disabled
+
+        text_style = 'style="color: #888;"' if not enabled else ""
+
         return f'''
-        <div class="shortcut-item {indent_class} {status_class} {selected_class}">
-            <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse;">
+        <div class="shortcut-item {indent_class}">
+            <table width="100%" cellpadding="3" cellspacing="0" style="background-color: {bg_color}; border-radius: 5px; border-collapse: separate;">
                 <tr>
-                    <td width="35" valign="middle">
+                    <td width="40" valign="middle">
                         <a href="toggle://{shortcut_type}/{index}" style="text-decoration: none;">
-                            <span class="{status_class}" style="font-size: 14px;">{status}</span>
+                            <span class="{status_class}" style="font-size: 18px;">{status}</span>
                         </a>
                     </td>
                     <td valign="middle">
                         <a href="select://{shortcut_type}/{index}" style="text-decoration: none; color: inherit;">
-                            <table cellpadding="0" cellspacing="0">
-                                <tr>
+                            <table cellpadding="0" cellspacing="0" width="100%">
+                                <tr {text_style}>
                                     <td width="{key_width}" class="shortcut-key" valign="middle">{key}</td>
                                     <td width="40" class="shortcut-separator" valign="middle" align="center">󰌌</td>
                                     <td class="shortcut-name" valign="middle">{name}{desc_html}</td>
