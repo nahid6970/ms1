@@ -3,6 +3,7 @@ import os
 import json
 import winreg
 import subprocess
+import time
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
                              QHBoxLayout, QLabel, QPushButton, QLineEdit, 
                              QScrollArea, QFrame, QMessageBox, QDialog, 
@@ -146,6 +147,15 @@ class StartupItemWidget(QFrame):
         info_layout.addWidget(name_label)
         info_layout.addWidget(path_label)
         layout.addLayout(info_layout, stretch=1)
+        
+        # Timeline / Logged Date
+        ts = self.item.get("added_at", time.time())
+        date_str = time.strftime("%Y-%m-%d", time.localtime(ts))
+        time_label = QLabel(f"LOGGED: {date_str}")
+        time_label.setFont(QFont("Consolas", 7))
+        time_label.setStyleSheet(f"color: {CP_DIM};")
+        time_label.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignBottom)
+        layout.addWidget(time_label)
         
     def show_context_menu(self, pos):
         menu = QMenu(self)
@@ -461,6 +471,8 @@ class MainWindow(QMainWindow):
         self.widgets_map = {}
         self.current_mode = "REGISTRY"
         self.ps1_file_path = DEFAULT_PS1
+        self.sort_by = "Name" # or "Date"
+        self.sort_order = "ASC" # or "DESC"
         
         self.load_items()
         self.setup_ui()
@@ -549,6 +561,23 @@ class MainWindow(QMainWindow):
         row2_layout.itemAt(3).widget().clicked.connect(self.delete_matching_shortcuts) # Del Match
         
         row2_layout.addStretch()
+
+        # Sorting Controls
+        row2_layout.addWidget(QLabel("// SORT_BY: "))
+        row2_layout.itemAt(5).widget().setStyleSheet(f"color: {CP_SUBTEXT}; font-family: Consolas; font-size: 10px;")
+        
+        self.sort_combo = QComboBox()
+        self.sort_combo.addItems(["Name", "Date"])
+        self.sort_combo.setCurrentText(self.sort_by)
+        self.sort_combo.setFixedWidth(80)
+        self.sort_combo.setStyleSheet(self.get_combo_style())
+        self.sort_combo.currentTextChanged.connect(self.change_sort)
+        row2_layout.addWidget(self.sort_combo)
+
+        self.order_btn = CyberButton(self.sort_order, color=CP_CYAN, parent=self, is_outlined=True)
+        self.order_btn.setFixedWidth(60)
+        self.order_btn.clicked.connect(self.toggle_sort_order)
+        row2_layout.addWidget(self.order_btn)
         
         toolbar_main_layout.addLayout(row2_layout)
         
@@ -623,7 +652,8 @@ class MainWindow(QMainWindow):
                                 "paths": [path_extracted],
                                 "Command": args_extracted,
                                 "ps1_command": ps1_cmd,
-                                "ExecutableType": "other"
+                                "ExecutableType": "other",
+                                "added_at": time.time()
                             })
                         except:
                             continue
@@ -727,6 +757,18 @@ class MainWindow(QMainWindow):
                     settings = json.load(f)
                     self.current_mode = settings.get("current_mode", "REGISTRY")
                     self.ps1_file_path = settings.get("ps1_file_path", DEFAULT_PS1)
+                    self.sort_by = settings.get("sort_by", "Name")
+                    self.sort_order = settings.get("sort_order", "ASC")
+
+            # Ensure every item has an added_at timestamp
+            changed = False
+            now = time.time()
+            for item in self.items:
+                if "added_at" not in item:
+                    item["added_at"] = now
+                    changed = True
+            if changed:
+                self.save_items()
             
             # Since setup_ui might not have been called yet in __init__, we don't populate here if we call this from __init__
             # Actually, I swapped the order in __init__ so I MUST be careful.
@@ -742,7 +784,9 @@ class MainWindow(QMainWindow):
             # Save settings
             settings = {
                 "current_mode": self.current_mode,
-                "ps1_file_path": self.ps1_file_path
+                "ps1_file_path": self.ps1_file_path,
+                "sort_by": self.sort_by,
+                "sort_order": self.sort_order
             }
             with open(SETTINGS_FILE, 'w', encoding='utf-8') as f:
                 json.dump(settings, f, indent=2, ensure_ascii=False)
@@ -765,6 +809,40 @@ class MainWindow(QMainWindow):
         self.populate_lists() # Reload widgets with new active state
         self.update_status(f"SWITCHED TO {self.current_mode} MODE")
 
+    def change_sort(self, text):
+        self.sort_by = text
+        self.save_items()
+        self.populate_lists()
+        self.update_status(f"SORTED BY {text.upper()}")
+
+    def toggle_sort_order(self):
+        self.sort_order = "DESC" if self.sort_order == "ASC" else "ASC"
+        self.order_btn.setText(self.sort_order)
+        self.save_items()
+        self.populate_lists()
+
+    def get_combo_style(self):
+        return f"""
+            QComboBox {{
+                background-color: {CP_BG};
+                color: {CP_TEXT};
+                border: 1px solid {CP_DIM};
+                padding: 2px 5px;
+                font-family: Consolas;
+                font-size: 10px;
+            }}
+            QComboBox::drop-down {{
+                border: 0px;
+            }}
+            QComboBox QAbstractItemView {{
+                background-color: {CP_PANEL};
+                color: {CP_TEXT};
+                selection-background-color: {CP_CYAN};
+                selection-color: {CP_BG};
+                border: 1px solid {CP_CYAN};
+            }}
+        """
+
     def populate_lists(self):
         # Clear existing
         while self.cmd_container.count():
@@ -776,7 +854,12 @@ class MainWindow(QMainWindow):
         
         self.widgets_map.clear()
 
-        for item in self.items:
+        # Sorting logic
+        sorted_items = sorted(self.items, 
+                            key=lambda x: x["name"].lower() if self.sort_by == "Name" else x.get("added_at", 0),
+                            reverse=(self.sort_order == "DESC"))
+
+        for item in sorted_items:
             is_active = False
             if self.current_mode == "REGISTRY":
                 is_active = self.check_registry(item)
@@ -911,7 +994,9 @@ class MainWindow(QMainWindow):
     def add_item(self):
         dialog = ItemDialog(self)
         if dialog.exec():
-            self.items.append(dialog.result_data)
+            item = dialog.result_data
+            item["added_at"] = time.time()
+            self.items.append(item)
             self.save_items()
             self.populate_lists()
             self.update_status("NEW ENTRY LOGGED")
@@ -963,7 +1048,8 @@ class MainWindow(QMainWindow):
                             "paths": [real_path],
                             "Command": "", 
                             "ps1_command": ps1_cmd,
-                            "ExecutableType": "other"
+                            "ExecutableType": "other",
+                            "added_at": time.time()
                         })
         
         if found_items:
@@ -1085,7 +1171,8 @@ class MainWindow(QMainWindow):
                     "ps1_command": ps1_cmd,
                     "ExecutableType": "other",
                     "origin": "TaskScheduler",
-                    "original_name": task_name
+                    "original_name": task_name,
+                    "added_at": time.time()
                 })
                 count_found += 1
 

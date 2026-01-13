@@ -8,7 +8,8 @@
     "Command": "",
     "ps1_command": "Start-Process -FilePath \"C:\\Users\\nahid\\ms\\ms1\\ahk_v2.ahk\"",
     "ExecutableType": "other",
-    "script_enabled": false
+    "script_enabled": false,
+    "added_at": 1768273756.591541
   },
   {
     "name": "ollama-chat (8000)",
@@ -17,7 +18,8 @@
       "C:\\Windows\\System32\\cmd.exe"
     ],
     "Command": "C:\\Users\\nahid\\ms\\ms1\\test_project\\ollama-chat-app\\server.py",
-    "ExecutableType": "cmd"
+    "ExecutableType": "cmd",
+    "added_at": 1768273756.591541
   },
   {
     "type": "Command",
@@ -26,7 +28,8 @@
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
     "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5001_share_text\\share_text.py",
-    "ExecutableType": "pythonw"
+    "ExecutableType": "pythonw",
+    "added_at": 1768273756.591541
   },
   {
     "type": "Command",
@@ -35,7 +38,8 @@
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
     "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5002_upload_files\\upload_files.py",
-    "ExecutableType": "pythonw"
+    "ExecutableType": "pythonw",
+    "added_at": 1768273756.591541
   },
   {
     "type": "Command",
@@ -44,7 +48,8 @@
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
     "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5003_Browse_PC_Files\\Browse_PC_Files.py",
-    "ExecutableType": "pythonw"
+    "ExecutableType": "pythonw",
+    "added_at": 1768273756.591541
   },
   {
     "type": "Command",
@@ -53,7 +58,8 @@
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
     "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5005_GameARR\\GameARR.py",
-    "ExecutableType": "pythonw"
+    "ExecutableType": "pythonw",
+    "added_at": 1768273756.591541
   },
   {
     "type": "Command",
@@ -62,7 +68,8 @@
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
     "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5006_Run_Commands\\Run_Commands.py",
-    "ExecutableType": "pythonw"
+    "ExecutableType": "pythonw",
+    "added_at": 1768273756.591541
   },
   {
     "type": "Command",
@@ -71,7 +78,8 @@
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
     "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5007_Controlby_Android\\Android_Control_PC.py",
-    "ExecutableType": "pythonw"
+    "ExecutableType": "pythonw",
+    "added_at": 1768273756.591541
   },
   {
     "type": "Command",
@@ -80,7 +88,8 @@
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
     "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5008_esports_scheduler\\Esports_Match_Schedule.py",
-    "ExecutableType": "pythonw"
+    "ExecutableType": "pythonw",
+    "added_at": 1768273756.591541
   },
   {
     "type": "Command",
@@ -89,7 +98,8 @@
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
     "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5009_MCQ\\app.py",
-    "ExecutableType": "pythonw"
+    "ExecutableType": "pythonw",
+    "added_at": 1768273756.591541
   },
   {
     "type": "Command",
@@ -98,7 +108,8 @@
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
     "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5010_coc\\Clash_of_Clans.py",
-    "ExecutableType": "pythonw"
+    "ExecutableType": "pythonw",
+    "added_at": 1768273756.591541
   },
   {
     "type": "Command",
@@ -106,7 +117,8 @@
     "paths": [
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
-    "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\clipboard.py"
+    "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\clipboard.py",
+    "added_at": 1768273756.591541
   },
   {
     "type": "Command",
@@ -114,7 +126,8 @@
     "paths": [
       "C:\\Users\\nahid\\ms\\ms1\\scripts\\Autohtokey\\Command\\komorebi.ahk"
     ],
-    "Command": ""
+    "Command": "",
+    "added_at": 1768273756.591541
   },
   {
     "type": "Command",
@@ -122,7 +135,8 @@
     "paths": [
       "C:\\Users\\nahid\\ms\\ms1\\scripts\\Autohtokey\\Command\\mypygui.ahk"
     ],
-    "Command": ""
+    "Command": "",
+    "added_at": 1768273756.591541
   },
   {
     "type": "Command",
@@ -130,7 +144,8 @@
     "paths": [
       "C:\\Users\\nahid\\ms\\ms1\\scripts\\Autohtokey\\Command\\openwebui.ahk"
     ],
-    "Command": ""
+    "Command": "",
+    "added_at": 1768273756.591541
   },
   {
     "type": "Command",
@@ -138,7 +153,8 @@
     "paths": [
       "C:\\Users\\nahid\\ms\\ms1\\scripts\\Autohtokey\\Command\\remote_control.ahk"
     ],
-    "Command": ""
+    "Command": "",
+    "added_at": 1768273756.591541
   },
   {
     "type": "Command",
@@ -146,7 +162,8 @@
     "paths": [
       "C:\\Users\\nahid\\ms\\ms1\\scripts\\Autohtokey\\Command\\square_corner.ahk"
     ],
-    "Command": ""
+    "Command": "",
+    "added_at": 1768273756.591541
   },
   {
     "type": "Command",
@@ -154,7 +171,8 @@
     "paths": [
       "C:\\Users\\nahid\\ms\\ms1\\scripts\\Autohtokey\\Command\\sshd.ahk"
     ],
-    "Command": ""
+    "Command": "",
+    "added_at": 1768273756.591541
   },
   {
     "type": "Command",
@@ -162,7 +180,8 @@
     "paths": [
       "C:\\Users\\nahid\\ms\\ms1\\scripts\\sync.ps1"
     ],
-    "Command": ""
+    "Command": "",
+    "added_at": 1768273756.591541
   },
   {
     "type": "Command",
@@ -170,7 +189,8 @@
     "paths": [
       "C:\\Users\\nahid\\ms\\ms1\\scripts\\Autohtokey\\Command\\syncthing.ahk"
     ],
-    "Command": ""
+    "Command": "",
+    "added_at": 1768273756.591541
   },
   {
     "type": "Command",
@@ -178,7 +198,8 @@
     "paths": [
       "C:\\Users\\nahid\\ms\\ms1\\scripts\\Autohtokey\\Command\\virtual_monitor.ahk"
     ],
-    "Command": ""
+    "Command": "",
+    "added_at": 1768273756.591541
   },
   {
     "type": "Command",
@@ -186,7 +207,8 @@
     "paths": [
       "C:\\Users\\nahid\\ms\\ms1\\scripts\\disable_defender.ps1"
     ],
-    "Command": ""
+    "Command": "",
+    "added_at": 1768273756.591541
   },
   {
     "type": "App",
@@ -195,7 +217,8 @@
       "C:\\WINDOWS\\system32\\AMD\\ANR\\AMDNoiseSuppression.exe"
     ],
     "Command": "",
-    "script_enabled": false
+    "script_enabled": false,
+    "added_at": 1768273756.591541
   },
   {
     "type": "App",
@@ -203,7 +226,8 @@
     "paths": [
       "C:\\Program Files (x86)\\Ananda Computers\\BijoyBayanno\\BijoyBayanno.exe"
     ],
-    "Command": ""
+    "Command": "",
+    "added_at": 1768273756.591541
   },
   {
     "type": "App",
@@ -211,7 +235,8 @@
     "paths": [
       "C:\\Users\\nahid\\scoop\\apps\\capture2text\\current\\Capture2Text.exe"
     ],
-    "Command": ""
+    "Command": "",
+    "added_at": 1768273756.591541
   },
   {
     "type": "App",
@@ -219,7 +244,8 @@
     "paths": [
       "C:\\Program Files\\Cloudflare\\Cloudflare WARP\\Cloudflare WARP.exe"
     ],
-    "Command": ""
+    "Command": "",
+    "added_at": 1768273756.591541
   },
   {
     "type": "App",
@@ -227,7 +253,8 @@
     "paths": [
       "C:\\Program Files (x86)\\DesktopCoral\\DesktopCoral.exe"
     ],
-    "Command": ""
+    "Command": "",
+    "added_at": 1768273756.591541
   },
   {
     "type": "App",
@@ -235,7 +262,8 @@
     "paths": [
       "C:\\Users\\nahid\\scoop\\apps\\ditto\\current\\Ditto.exe"
     ],
-    "Command": ""
+    "Command": "",
+    "added_at": 1768273756.591541
   },
   {
     "type": "App",
@@ -243,7 +271,8 @@
     "paths": [
       "C:\\Users\\nahid\\AppData\\Local\\FlowLauncher\\app-1.19.4\\Flow.Launcher.exe"
     ],
-    "Command": ""
+    "Command": "",
+    "added_at": 1768273756.591541
   },
   {
     "type": "App",
@@ -251,7 +280,8 @@
     "paths": [
       "C:\\Users\\nahid\\AppData\\Local\\Softdeluxe\\Free Download Manager\\fdm.exe"
     ],
-    "Command": "--hidden"
+    "Command": "--hidden",
+    "added_at": 1768273756.591541
   },
   {
     "type": "App",
@@ -259,7 +289,8 @@
     "paths": [
       "C:\\Users\\nahid\\AppData\\Local\\Programs\\Ollama\\ollama app.exe"
     ],
-    "Command": ""
+    "Command": "",
+    "added_at": 1768273756.591541
   },
   {
     "name": "Prowlarr",
@@ -268,7 +299,8 @@
       "C:/ProgramData/Prowlarr/bin/Prowlarr.exe"
     ],
     "Command": "",
-    "ExecutableType": "other"
+    "ExecutableType": "other",
+    "added_at": 1768273756.591541
   },
   {
     "name": "qBittorrent",
@@ -276,7 +308,8 @@
     "paths": [
       "C:\\Program Files\\qBittorrent\\qbittorrent.exe"
     ],
-    "Command": "\"--profile=\" \"--configuration=\""
+    "Command": "\"--profile=\" \"--configuration=\"",
+    "added_at": 1768273756.591541
   },
   {
     "type": "App",
@@ -284,7 +317,8 @@
     "paths": [
       "C:\\ProgramData\\Radarr\\bin\\Radarr.exe"
     ],
-    "Command": ""
+    "Command": "",
+    "added_at": 1768273756.591541
   },
   {
     "type": "App",
@@ -292,7 +326,8 @@
     "paths": [
       "C:\\Users\\nahid\\scoop\\apps\\rssguard\\current\\rssguard.exe"
     ],
-    "Command": ""
+    "Command": "",
+    "added_at": 1768273756.591541
   },
   {
     "type": "App",
@@ -300,7 +335,8 @@
     "paths": [
       "C:\\ProgramData\\Sonarr\\bin\\Sonarr.exe"
     ],
-    "Command": ""
+    "Command": "",
+    "added_at": 1768273756.591541
   },
   {
     "type": "App",
@@ -308,7 +344,8 @@
     "paths": [
       "C:\\Users\\nahid\\scoop\\apps\\text-grab\\current\\Text-Grab.exe"
     ],
-    "Command": ""
+    "Command": "",
+    "added_at": 1768273756.591541
   },
   {
     "type": "App",
@@ -316,7 +353,8 @@
     "paths": [
       "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
     ],
-    "Command": "--no-startup-window /prefetch:5"
+    "Command": "--no-startup-window /prefetch:5",
+    "added_at": 1768273756.591541
   },
   {
     "type": "App",
@@ -324,7 +362,8 @@
     "paths": [
       "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe"
     ],
-    "Command": "--no-startup-window --win-session-start"
+    "Command": "--no-startup-window --win-session-start",
+    "added_at": 1768273756.591541
   },
   {
     "name": "Flask - 5000 - myhome",
@@ -333,7 +372,8 @@
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
     "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5000_myhome\\app.py",
-    "ExecutableType": "pythonw"
+    "ExecutableType": "pythonw",
+    "added_at": 1768273756.591541
   },
   {
     "name": "KeyWiz",
@@ -342,7 +382,8 @@
       "C:\\Users\\nahid\\scoop\\apps\\keyviz\\current\\keyviz.exe"
     ],
     "Command": "",
-    "ExecutableType": "other"
+    "ExecutableType": "other",
+    "added_at": 1768273756.591541
   },
   {
     "name": "Flask - 5011 - TV Show",
@@ -351,7 +392,8 @@
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
     "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5011_tv_show\\app.py",
-    "ExecutableType": "pythonw"
+    "ExecutableType": "pythonw",
+    "added_at": 1768273756.591541
   },
   {
     "name": "Flask - 5015 - JOB",
@@ -360,7 +402,8 @@
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
     "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5015_job\\job_tracker\\app.py",
-    "ExecutableType": "pythonw"
+    "ExecutableType": "pythonw",
+    "added_at": 1768273756.591541
   },
   {
     "name": "Flask - 5013 - Movies",
@@ -369,7 +412,8 @@
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
     "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5013_movie_tracker\\app.py",
-    "ExecutableType": "pythonw"
+    "ExecutableType": "pythonw",
+    "added_at": 1768273756.591541
   },
   {
     "name": "Huntarr",
@@ -378,7 +422,8 @@
       "C:\\Program Files\\Huntarr\\Huntarr.exe"
     ],
     "Command": "",
-    "ExecutableType": "other"
+    "ExecutableType": "other",
+    "added_at": 1768273756.591541
   },
   {
     "name": "Flask - 5016 - Sync W Android",
@@ -387,7 +432,8 @@
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
     "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5016_Sync_w_android\\sync_server.py",
-    "ExecutableType": "pythonw"
+    "ExecutableType": "pythonw",
+    "added_at": 1768273756.591541
   },
   {
     "name": "Flask - 5012 - Gallery",
@@ -396,7 +442,8 @@
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
     "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5012_share_images\\share_images.py",
-    "ExecutableType": "pythonw"
+    "ExecutableType": "pythonw",
+    "added_at": 1768273756.591541
   },
   {
     "name": "KDE Connect",
@@ -405,7 +452,8 @@
       "C:\\Program Files\\KDE Connect\\bin\\kdeconnect-indicator.exe"
     ],
     "Command": "",
-    "ExecutableType": "other"
+    "ExecutableType": "other",
+    "added_at": 1768273756.591541
   },
   {
     "name": "Tailscale",
@@ -414,7 +462,8 @@
       "C:\\Program Files\\Tailscale\\tailscale-ipn.exe"
     ],
     "Command": "",
-    "ExecutableType": "other"
+    "ExecutableType": "other",
+    "added_at": 1768273756.591541
   },
   {
     "name": "Jackett",
@@ -423,7 +472,8 @@
       "C:\\ProgramData\\Jackett\\JackettTray.exe"
     ],
     "Command": "",
-    "ExecutableType": "other"
+    "ExecutableType": "other",
+    "added_at": 1768273756.591541
   },
   {
     "name": "Flask - 4999 - Startup Setup",
@@ -432,7 +482,8 @@
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
     "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\4999_startup\\app.py",
-    "ExecutableType": "pythonw"
+    "ExecutableType": "pythonw",
+    "added_at": 1768273756.591541
   },
   {
     "name": "Flask - 4998 - Applist",
@@ -441,7 +492,8 @@
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
     "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\4998_Applist\\applist_app.py",
-    "ExecutableType": "pythonw"
+    "ExecutableType": "pythonw",
+    "added_at": 1768273756.591541
   },
   {
     "name": "Flask - 5555 - Terminal",
@@ -450,7 +502,8 @@
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
     "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5555_terminal\\myterminal.py",
-    "ExecutableType": "pythonw"
+    "ExecutableType": "pythonw",
+    "added_at": 1768273756.591541
   },
   {
     "name": "QuickLook",
@@ -459,7 +512,8 @@
       "C:\\Users\\nahid\\AppData\\Local\\Programs\\QuickLook\\QuickLook.exe"
     ],
     "Command": "/autorun",
-    "ExecutableType": "other"
+    "ExecutableType": "other",
+    "added_at": 1768273756.591541
   },
   {
     "name": "Audio Share (cmd)",
@@ -468,7 +522,8 @@
       "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe"
     ],
     "Command": "as-cmd --bind=192.168.0.101",
-    "ExecutableType": "cmd"
+    "ExecutableType": "cmd",
+    "added_at": 1768273756.591541
   },
   {
     "name": "Audio Share (app)",
@@ -477,7 +532,8 @@
       "C:\\Users\\nahid\\ms\\msBackups\\AudioShareServer.exe"
     ],
     "Command": "",
-    "ExecutableType": "other"
+    "ExecutableType": "other",
+    "added_at": 1768273756.591541
   },
   {
     "name": "Flask - 5017 - Audio Stream",
@@ -486,7 +542,8 @@
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
     "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5017_audio_stream\\app.py",
-    "ExecutableType": "pythonw"
+    "ExecutableType": "pythonw",
+    "added_at": 1768273756.591541
   },
   {
     "name": "RustDesk",
@@ -495,7 +552,8 @@
       "C:\\Users\\nahid\\scoop\\apps\\rustdesk\\current\\RustDesk.exe"
     ],
     "Command": "",
-    "ExecutableType": "other"
+    "ExecutableType": "other",
+    "added_at": 1768273756.591541
   },
   {
     "name": "RustDesk Tray",
@@ -504,7 +562,8 @@
       "C:\\Program Files\\RustDesk\\rustdesk.exe"
     ],
     "Command": "--tray",
-    "ExecutableType": "other"
+    "ExecutableType": "other",
+    "added_at": 1768273756.591541
   },
   {
     "name": "ngnix",
@@ -513,7 +572,8 @@
       "C:\\Users\\nahid\\ms\\msBackups\\@nginx\\nginx.exe"
     ],
     "Command": "",
-    "ExecutableType": "other"
+    "ExecutableType": "other",
+    "added_at": 1768273756.591541
   },
   {
     "name": "Flask - 5018 - Excelly",
@@ -522,7 +582,8 @@
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
     "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5018_cell\\app.py",
-    "ExecutableType": "pythonw"
+    "ExecutableType": "pythonw",
+    "added_at": 1768273756.591541
   },
   {
     "name": "n8n",
@@ -531,7 +592,8 @@
       "C:\\Program Files\\AutoHotkey\\v2\\AutoHotkey.exe"
     ],
     "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\Autohtokey\\Command\\n8n.ahk",
-    "ExecutableType": "ahk_v2"
+    "ExecutableType": "ahk_v2",
+    "added_at": 1768273756.591541
   },
   {
     "name": "web host",
@@ -540,7 +602,8 @@
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
     "Command": "C:\\Users\\nahid\\ms\\ms1\\web_host.py",
-    "ExecutableType": "pythonw"
+    "ExecutableType": "pythonw",
+    "added_at": 1768273756.591541
   },
   {
     "name": "Flask - 5004 - Paint",
@@ -549,7 +612,8 @@
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
     "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5004 paint\\app.py",
-    "ExecutableType": "pythonw"
+    "ExecutableType": "pythonw",
+    "added_at": 1768273756.591541
   },
   {
     "name": "ShareX",
@@ -558,7 +622,8 @@
       "C:\\Users\\nahid\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\ShareX.lnk"
     ],
     "Command": "",
-    "ExecutableType": "other"
+    "ExecutableType": "other",
+    "added_at": 1768273756.591541
   },
   {
     "name": "WingetUI",
@@ -568,7 +633,8 @@
     ],
     "Command": "--daemon",
     "ps1_command": "Start-Process -FilePath \"C:\\Users\\nahid\\AppData\\Local\\Programs\\UniGetUI\\UniGetUI.exe\" -ArgumentList \"--daemon\"",
-    "ExecutableType": "other"
+    "ExecutableType": "other",
+    "added_at": 1768273756.591541
   },
   {
     "name": "YASB",
@@ -578,7 +644,8 @@
     ],
     "Command": "",
     "ps1_command": "Start-Process -FilePath \"C:\\Program Files\\YASB\\yasb.exe\"",
-    "ExecutableType": "other"
+    "ExecutableType": "other",
+    "added_at": 1768273756.591541
   },
   {
     "name": "Podman Desktop",
@@ -588,7 +655,8 @@
     ],
     "Command": "",
     "ps1_command": "Start-Process -FilePath \"C:\\Users\\nahid\\AppData\\Local\\Programs\\Podman Desktop\\Podman Desktop.exe\"",
-    "ExecutableType": "other"
+    "ExecutableType": "other",
+    "added_at": 1768273756.591541
   },
   {
     "name": "tvncontrol",
@@ -598,7 +666,8 @@
     ],
     "Command": "-controlservice -slave",
     "ps1_command": "Start-Process -FilePath \"C:\\Program Files\\TightVNC\\tvnserver.exe\" -ArgumentList \"-controlservice -slave\"",
-    "ExecutableType": "other"
+    "ExecutableType": "other",
+    "added_at": 1768273756.591541
   },
   {
     "name": "Autorun for nahid",
@@ -610,6 +679,7 @@
     "ps1_command": "Start-Process -FilePath \"C:\\Program Files\\PowerToys\\PowerToys.exe\"",
     "ExecutableType": "other",
     "origin": "TaskScheduler",
-    "original_name": "Autorun for nahid"
+    "original_name": "Autorun for nahid",
+    "added_at": 1768273756.591541
   }
 ]
