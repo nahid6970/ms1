@@ -487,54 +487,72 @@ class MainWindow(QMainWindow):
         header_layout.addWidget(self.status_label)
         main_layout.addLayout(header_layout)
 
-        # Toolbar
-        toolbar_frame = QFrame()
-        toolbar_frame.setStyleSheet(f"background-color: {CP_PANEL}; border: 1px solid {CP_DIM};")
-        toolbar_layout = QHBoxLayout(toolbar_frame)
-        toolbar_layout.setContentsMargins(10, 10, 10, 10)
+        # Toolbar Container
+        toolbar_container = QWidget()
+        toolbar_container.setStyleSheet(f"background-color: {CP_PANEL}; border: 1px solid {CP_DIM};")
+        toolbar_main_layout = QVBoxLayout(toolbar_container)
+        toolbar_main_layout.setContentsMargins(5, 5, 5, 5)
+        toolbar_main_layout.setSpacing(5)
+
+        # Row 1: Core Actions
+        row1_layout = QHBoxLayout()
+        row1_layout.setContentsMargins(5, 5, 5, 5)
         
         # Mode Toggle - color based on loaded mode
         mode_color = CP_CYAN if self.current_mode == "REGISTRY" else CP_YELLOW
         self.mode_btn = CyberButton(f"MODE: {self.current_mode}", color=mode_color, parent=self, is_outlined=False)
         self.mode_btn.setFixedWidth(160)
         self.mode_btn.clicked.connect(self.toggle_mode)
-        toolbar_layout.addWidget(self.mode_btn)
+        row1_layout.addWidget(self.mode_btn)
         
         # Separator
         sep = QFrame()
         sep.setFrameShape(QFrame.Shape.VLine)
         sep.setStyleSheet(f"color: {CP_DIM};")
-        toolbar_layout.addWidget(sep)
+        row1_layout.addWidget(sep)
 
-        toolbar_layout.addWidget(CyberButton("NEW_ENTRY", color=CP_YELLOW, parent=self, is_outlined=True))
-        toolbar_layout.itemAt(2).widget().clicked.connect(self.add_item)
+        row1_layout.addWidget(CyberButton("NEW_ENTRY", color=CP_YELLOW, parent=self, is_outlined=True))
+        row1_layout.itemAt(2).widget().clicked.connect(self.add_item)
         
-        toolbar_layout.addWidget(CyberButton("REFRESH", color=CP_CYAN, parent=self, is_outlined=True))
-        toolbar_layout.itemAt(3).widget().clicked.connect(self.refresh_items)
-        
-        toolbar_layout.addWidget(CyberButton("SCAN_SYS", color=CP_TEXT, parent=self, is_outlined=True))
-        toolbar_layout.itemAt(4).widget().clicked.connect(self.scan_folders)
-        
-        toolbar_layout.addWidget(CyberButton("SCAN_REG", color="#FF00FF", parent=self, is_outlined=True))
-        toolbar_layout.itemAt(5).widget().clicked.connect(self.scan_registry)
-        
-        toolbar_layout.addWidget(CyberButton("PRUNE_LNK", color=CP_RED, parent=self, is_outlined=True))
-        toolbar_layout.itemAt(6).widget().clicked.connect(self.delete_matching_shortcuts) # Del Match
+        row1_layout.addWidget(CyberButton("REFRESH", color=CP_CYAN, parent=self, is_outlined=True))
+        row1_layout.itemAt(3).widget().clicked.connect(self.refresh_items)
 
-        toolbar_layout.addWidget(CyberButton("OPEN_DIRS", color=CP_YELLOW, parent=self, is_outlined=True))
-        toolbar_layout.itemAt(7).widget().clicked.connect(self.open_startup_dirs)
+        row1_layout.addWidget(CyberButton("OPEN_DIRS", color=CP_YELLOW, parent=self, is_outlined=True))
+        row1_layout.itemAt(4).widget().clicked.connect(self.open_startup_dirs)
         
-        toolbar_layout.addWidget(CyberButton("PS1_PATH", color="#00FF00", parent=self, is_outlined=True))
-        toolbar_layout.itemAt(8).widget().clicked.connect(self.select_ps1_path)
+        row1_layout.addWidget(CyberButton("PS1_PATH", color="#00FF00", parent=self, is_outlined=True))
+        row1_layout.itemAt(5).widget().clicked.connect(self.select_ps1_path)
 
-        toolbar_layout.addStretch()
+        row1_layout.addStretch()
         
         self.search_input = CyberInput("SEARCH_DB://...", self)
         self.search_input.setFixedWidth(200)
         self.search_input.textChanged.connect(self.filter_items)
-        toolbar_layout.addWidget(self.search_input)
+        row1_layout.addWidget(self.search_input)
         
-        main_layout.addWidget(toolbar_frame)
+        toolbar_main_layout.addLayout(row1_layout)
+
+        # Row 2: Scan & Maintenance
+        row2_layout = QHBoxLayout()
+        row2_layout.setContentsMargins(5, 0, 5, 5)
+        
+        row2_layout.addWidget(CyberButton("SCAN_SYS", color=CP_TEXT, parent=self, is_outlined=True))
+        row2_layout.itemAt(0).widget().clicked.connect(self.scan_folders)
+        
+        row2_layout.addWidget(CyberButton("SCAN_REG", color="#FF00FF", parent=self, is_outlined=True))
+        row2_layout.itemAt(1).widget().clicked.connect(self.scan_registry)
+        
+        row2_layout.addWidget(CyberButton("SCAN_TASKS", color="#FFA500", parent=self, is_outlined=True))
+        row2_layout.itemAt(2).widget().clicked.connect(self.scan_tasks)
+        
+        row2_layout.addWidget(CyberButton("PRUNE_LNK", color=CP_RED, parent=self, is_outlined=True))
+        row2_layout.itemAt(3).widget().clicked.connect(self.delete_matching_shortcuts) # Del Match
+        
+        row2_layout.addStretch()
+        
+        toolbar_main_layout.addLayout(row2_layout)
+        
+        main_layout.addWidget(toolbar_container)
 
         # Splitter for lists
         splitter = QSplitter(Qt.Orientation.Horizontal)
@@ -955,12 +973,152 @@ class MainWindow(QMainWindow):
                 if selected:
                     self.items.extend(selected)
                     self.save_items()
+                    
+                    # Logic to disable imported tasks
+                    for item in selected:
+                        if item.get("origin") == "TaskScheduler":
+                            task_name = item.get("original_name")
+                            try:
+                                subprocess.run(f'schtasks /Change /TN "{task_name}" /DISABLE', shell=True, check=True)
+                                self.update_status(f"DISABLED TASK: {task_name}")
+                            except:
+                                self.update_status(f"FAILED TO DISABLE TASK: {task_name}")
+
                     self.populate_lists()
                     self.update_status(f"IMPORTED {len(selected)} NEW ENTRIES")
                 else:
                     self.update_status("IMPORT CANCELLED")
         else:
             self.update_status("SCAN COMPLETE: NO NEW ENTRIES")
+
+    def scan_tasks(self):
+        self.update_status("SCANNING TASK SCHEDULER...")
+        # Force UI update
+        QApplication.processEvents()
+        
+        found_items = []
+        names = {i["name"].lower() for i in self.items}
+        
+        try:
+            # Robust PowerShell command to get ALL enabled tasks with actions
+            # We filter in Python to avoid PowerShell pipeline complexity issues
+            ps_cmd = """
+            Get-ScheduledTask | Where-Object { $_.State -ne 'Disabled' } | ForEach-Object {
+                $t = $_
+                $action = $t.Actions[0]
+                if ($action.Execute) {
+                    $isLogon = $false
+                    foreach ($trig in $t.Triggers) {
+                        if ($trig.ToString() -match 'Logon' -or $trig.Id -eq 'LogonTrigger') { 
+                            $isLogon = $true 
+                        }
+                    }
+                    
+                    if ($isLogon) {
+                        [PSCustomObject]@{
+                            TaskName = $t.TaskName
+                            Execute = $action.Execute
+                            Arguments = $action.Arguments
+                        }
+                    }
+                }
+            } | ConvertTo-Json -Compress
+            """
+            
+            # Use specific encoding handling for PowerShell output
+            startupinfo = subprocess.STARTUPINFO()
+            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+            
+            process = subprocess.Popen(["powershell", "-NoProfile", "-Command", ps_cmd], 
+                                     stdout=subprocess.PIPE, stderr=subprocess.PIPE, 
+                                     text=True, startupinfo=startupinfo)
+            stdout, stderr = process.communicate()
+            
+            if stderr and not stdout:
+                print(f"PS Error: {stderr}")
+                self.update_status("TASK SCAN ERROR: PS EXEC FAILED")
+                return
+
+            # Handle case where ConvertTo-Json returns a single object (dict) or list (list)
+            # PowerShell's ConvertTo-Json has a quirk where single items aren't wrapped in a list
+            data = []
+            cleaned_out = stdout.strip()
+            if cleaned_out:
+                try:
+                    parsed = json.loads(cleaned_out)
+                    if isinstance(parsed, dict):
+                        data = [parsed]
+                    elif isinstance(parsed, list):
+                        data = parsed
+                except json.JSONDecodeError:
+                    # sometimes header noise or multiple JSON blobs
+                    self.update_status("TASK SCAN ERROR: INVALID JSON")
+                    return
+
+            count_found = 0
+            for task in data:
+                task_name = task.get("TaskName", "")
+                exe_path = task.get("Execute", "")
+                args = task.get("Arguments", "")
+                
+                if not exe_path: continue
+                
+                # Cleanup path (unquote if needed)
+                exe_path = exe_path.strip('"')
+                
+                # Determine simple name
+                simple_name = task_name.split('\\')[-1]
+                
+                # Filter duplicates
+                if simple_name.lower() in names: continue
+                
+                # Build PS command
+                ps1_cmd = f'Start-Process -FilePath "{exe_path}"'
+                if args:
+                     ps1_cmd += f' -ArgumentList "{args}"'
+                
+                found_items.append({
+                    "name": simple_name,
+                    "type": "App" if exe_path.lower().endswith(".exe") else "Command",
+                    "paths": [exe_path],
+                    "Command": args if args else "",
+                    "ps1_command": ps1_cmd,
+                    "ExecutableType": "other",
+                    "origin": "TaskScheduler",
+                    "original_name": task_name
+                })
+                count_found += 1
+
+            if found_items:
+                dialog = ScanResultsDialog(found_items, self)
+                if dialog.exec():
+                    selected = dialog.selected_items
+                    if selected:
+                        self.items.extend(selected)
+                        self.save_items()
+                        
+                        # Logic to disable imported tasks
+                        disabled_count = 0
+                        for item in selected:
+                            if item.get("origin") == "TaskScheduler":
+                                origin_name = item.get("original_name")
+                                try:
+                                    # Use schtasks to disable
+                                    subprocess.run(f'schtasks /Change /TN "{origin_name}" /DISABLE', 
+                                                 shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                                    disabled_count += 1
+                                except:
+                                    pass
+
+                        self.populate_lists()
+                        self.update_status(f"IMPORTED {len(selected)} TASKS ({disabled_count} DISABLED IN OS)")
+                    else:
+                        self.update_status("IMPORT CANCELLED")
+            else:
+                self.update_status(f"TASK SCAN: 0 NEW (Found {len(data)} total)")
+                    
+        except Exception as e:
+             self.update_status(f"TASK SCAN EXCEPTION: {str(e)}")
 
     def delete_matching_shortcuts(self):
          start_folders = [
