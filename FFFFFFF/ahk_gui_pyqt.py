@@ -212,6 +212,7 @@ class AddEditShortcutDialog(QDialog):
         self.category_combo.setEditable(True)
         existing_categories = self.get_existing_categories()
         self.category_combo.addItems(existing_categories)
+        self.category_combo.setCurrentText("General")
         form_layout.addWidget(self.category_combo)
         
         # Description
