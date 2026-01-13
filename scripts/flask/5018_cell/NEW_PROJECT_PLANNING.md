@@ -94,7 +94,16 @@ The new system will prioritize a highly flexible, user-extensible coloring syste
     *   **F4 (Layout)**: Toggle UI chrome (Header/Sidebar) for "Zen Mode".
     *   **F8 (Smart Pick)**: Extract word from under mouse/cursor and auto-add to search/clipboard.
     *   **F9 (Swap)**: Instance-swap two terms separated by symbols in a selection.
-3.  **Advanced Editing**:
+3.  **Advanced Editing & Block Context**:
+    *   **Block-Level Context Menu (Right-Click)**: 
+        *   **Visual Controls**: Instant toggle for **Bold**, **Italic**, and **Center Alignment** for the entire block.
+        *   **Structure Tools**: Dedicated **Border Options** (styled boundaries) for block emphasis.
+        *   **Customization**: Pick **Cell/Block Colors** (background and foreground) and set custom **Font Sizes**.
+        *   **Productivity**: 
+            *   **Mark Complete**: One-click checkmark/strikethrough for the whole block.
+            *   **Rank Badges**: Assign "Sort Rank" values (🏆) to prioritize items.
+            *   **Clear Formatting**: Instantly reset a block to the default design tokens.
+        *   **Export**: One-click "Export Block to PDF" for individual sharing.
     *   **Multi-Cursor**: Simulation of VS Code-style `Ctrl+D` and `Ctrl+Alt+Up/Down` for bulk editing within a cell.
     *   **Line Manipulation**: `Alt+Up/Down` to move content blocks vertically within a sheet.
     *   **Case Ops**: Instant `Uppercase`/`Lowercase` transformation.
