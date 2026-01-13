@@ -2,19 +2,6 @@
 #SingleInstance
 Persistent
 
-;! === BACKGROUND / STARTUP SCRIPTS ===
-;! Test
-; Set a timer to run the function every 10 seconds (10000ms)
-SetTimer(ShowHello, 10000)
-
-ShowHello() {
-    ; Shows a tooltip message
-    ToolTip("Hello World!")
-    
-    ; This hides the tooltip after 2 seconds (using a negative number)
-    SetTimer(() => ToolTip(), -2000)
-}
-
 ;! === SCRIPT SHORTCUTS ===
 ;! Run Python Script
 ;! Opens run.py in the ms1 directory

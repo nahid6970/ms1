@@ -519,10 +519,54 @@ class AHKShortcutEditor(QMainWindow):
 
         # Top controls
         top_layout = QHBoxLayout()
+        top_layout.setSpacing(10)
+        top_layout.setContentsMargins(10, 5, 10, 5)
+
+        # Better styling for the whole app
+        self.setStyleSheet("""
+            QMainWindow { background-color: #1e1e1e; }
+            QPushButton {
+                font-family: 'Segoe UI', sans-serif;
+                font-size: 14px;
+                border-radius: 6px;
+                padding: 6px 12px;
+                height: 28px;
+            }
+            QLineEdit {
+                background-color: #2d2d2d;
+                border: 1px solid #444;
+                border-radius: 6px;
+                padding: 5px 10px;
+                color: #ffffff;
+                font-size: 14px;
+            }
+            QLineEdit:focus {
+                border-color: #61dafb;
+            }
+            QMenu {
+                background-color: #2d2d2d;
+                color: white;
+                border: 1px solid #444;
+            }
+            QMenu::item:selected {
+                background-color: #3d3d3d;
+            }
+        """)
 
         # Add button with menu
         self.add_btn = QPushButton("+ Add")
-        self.add_btn.setStyleSheet("background-color: #27ae60; color: white; font-weight: bold; padding: 8px 16px;")
+        self.add_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #2ea44f;
+                color: white;
+                font-weight: bold;
+                border: 1px solid #288f44;
+            }
+            QPushButton:hover {
+                background-color: #34bc5a;
+            }
+            QPushButton::menu-indicator { image: none; }
+        """)
         self.add_menu = QMenu()
         self.add_menu.addAction("Script Shortcut", lambda: self.open_add_dialog("script"))
         self.add_menu.addAction("Text Shortcut", lambda: self.open_add_dialog("text"))
@@ -530,57 +574,55 @@ class AHKShortcutEditor(QMainWindow):
         self.add_btn.setMenu(self.add_menu)
         top_layout.addWidget(self.add_btn)
 
+        # Category toggle as a modern switch style
         self.category_toggle = QCheckBox("\uf205")
         self.category_toggle.setChecked(True)
         self.category_toggle.toggled.connect(self.on_category_toggle)
         self.category_toggle.setToolTip("Group by Category")
         self.category_toggle.setStyleSheet("""
             QCheckBox {
-                font-family: 'JetBrainsMono NFP', 'JetBrains Mono', monospace;
-                font-size: 20px;
-                padding: 12px;
-                min-width: 0px;
-                min-height: 48px;
+                font-family: 'JetBrainsMono NFP';
+                font-size: 24px;
                 color: #61dafb;
+                margin-left: 5px;
+                margin-right: 5px;
             }
-            QCheckBox::indicator {
-                width: 0px;
-                height: 0px;
-            }
+            QCheckBox::indicator { width: 0px; height: 0px; }
         """)
         top_layout.addWidget(self.category_toggle)
 
         # Color button
-        self.colors_btn = QPushButton("Color")
-        self.colors_btn.setStyleSheet("background-color: #8e44ad; color: white;")
+        self.colors_btn = QPushButton("🎨 Colors")
+        self.colors_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #6f42c1;
+                color: white;
+                border: 1px solid #5a32a3;
+            }
+            QPushButton:hover {
+                background-color: #8250df;
+            }
+        """)
         self.colors_btn.clicked.connect(self.open_color_dialog)
-        self.colors_btn.setMaximumWidth(80)
         top_layout.addWidget(self.colors_btn)
 
-        # Search with Record button
-        self.search_container = QWidget()
-        search_layout_inner = QHBoxLayout(self.search_container)
-        search_layout_inner.setContentsMargins(0, 0, 0, 0)
-        search_layout_inner.setSpacing(5)
-
+        # Search box
         self.search_edit = HotkeyLineEdit()
         self.search_edit.setObjectName("search_edit")
-        self.search_edit.setPlaceholderText("Search shortcuts...")
+        self.search_edit.setPlaceholderText(" Search shortcuts...")
         self.search_edit.textChanged.connect(self.update_display)
-        self.search_edit.setStyleSheet("border-radius: 10px; padding: 5px;")
-        self.search_edit.setMinimumWidth(200)
+        self.search_edit.setMinimumWidth(300)
+        self.search_edit.setStyleSheet("font-family: 'Segoe UI', 'JetBrainsMono NFP';")
         
         self.record_search_btn = QPushButton("⌨")
         self.record_search_btn.setCheckable(True)
         self.record_search_btn.setFixedWidth(40)
-        self.record_search_btn.setToolTip("Record keys to search")
         self.record_search_btn.setStyleSheet("""
             QPushButton {
-                font-family: 'JetBrainsMono NFP', 'JetBrains Mono', monospace;
-                background-color: #3d3d3d;
-                border: 1px solid #555;
-                border-radius: 10px;
-                color: white;
+                font-family: 'JetBrainsMono NFP';
+                background-color: #2d2d2d;
+                border: 1px solid #444;
+                color: #888;
                 font-size: 18px;
             }
             QPushButton:checked {
@@ -589,21 +631,31 @@ class AHKShortcutEditor(QMainWindow):
                 border-color: #61dafb;
             }
             QPushButton:hover {
-                background-color: #4d4d4d;
                 border-color: #61dafb;
             }
         """)
-        self.record_search_btn.setToolTip("Open Shortcut Builder")
         self.record_search_btn.clicked.connect(lambda checked: self.search_edit.set_recording(checked))
         self.search_edit.record_button = self.record_search_btn
 
-        search_layout_inner.addWidget(self.search_edit)
-        search_layout_inner.addWidget(self.record_search_btn)
-        top_layout.addWidget(self.search_container)
+        top_layout.addWidget(self.search_edit)
+        top_layout.addWidget(self.record_search_btn)
+
+        # Spacer to push generate button to far right
+        top_layout.addStretch()
 
         # Generate button
-        generate_btn = QPushButton("Generate AHK Script")
-        generate_btn.setStyleSheet("background-color: #27ae60; color: black;")
+        generate_btn = QPushButton("🚀 Generate AHK")
+        generate_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #2188ff;
+                color: white;
+                font-weight: bold;
+                border: 1px solid #1c73d9;
+            }
+            QPushButton:hover {
+                background-color: #3b9bff;
+            }
+        """)
         generate_btn.clicked.connect(self.generate_ahk_script)
         top_layout.addWidget(generate_btn)
 
