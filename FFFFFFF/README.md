@@ -26,6 +26,26 @@ To add a new script to the GUI, follow these steps:
 - If your script is a **single line** (e.g., `Run "notepad.exe"`), the GUI will generate it as `Hotkey::Action`.
 - If your script has **multiple lines**, the GUI **automatically wraps** it in `{ }` braces. You don't need to add them yourself unless you are defining internal functions or blocks.
 
+### 💡 Best Practice: Use Functions for Everything
+For the best experience when sharing code with AI (like me!) or writing your own, **always wrap your logic inside a function**.
+
+**Why?**
+1. It avoids "variable name conflicts" between different shortcuts.
+2. It makes the code much cleaner when pasted into the GUI.
+3. It ensures that variables defined inside the function don't accidentally "leak" into other parts of your AHK script.
+
+**The "Clean Format" to use:**
+```autohotkey
+; Give your function a unique name
+MyAwesomeAction() {
+    ; All your script logic goes here
+    MsgBox("Action complete!")
+}
+
+; Then just call it inside the Hotkey in the GUI:
+MyAwesomeAction()
+```
+
 ---
 
 ## 📝 AHK v2 Script Examples
