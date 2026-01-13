@@ -397,6 +397,8 @@ class AddEditShortcutDialog(QDialog):
             # Add new
             if self.shortcut_type == "script":
                 self.parent_window.script_shortcuts.append(shortcut_data)
+            elif self.shortcut_type == "startup":
+                self.parent_window.startup_scripts.append(shortcut_data)
             else:
                 self.parent_window.text_shortcuts.append(shortcut_data)
 
