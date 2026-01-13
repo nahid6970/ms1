@@ -118,7 +118,8 @@
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
     "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\clipboard.py",
-    "added_at": 1768273756.591541
+    "added_at": 1768273756.591541,
+    "script_enabled": false
   },
   {
     "type": "Command",
@@ -208,7 +209,8 @@
       "C:\\Users\\nahid\\ms\\ms1\\scripts\\disable_defender.ps1"
     ],
     "Command": "",
-    "added_at": 1768273756.591541
+    "added_at": 1768273756.591541,
+    "script_enabled": false
   },
   {
     "type": "App",
@@ -523,7 +525,8 @@
     ],
     "Command": "as-cmd --bind=192.168.0.101",
     "ExecutableType": "cmd",
-    "added_at": 1768273756.591541
+    "added_at": 1768273756.591541,
+    "script_enabled": false
   },
   {
     "name": "Audio Share (app)",
