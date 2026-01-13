@@ -541,12 +541,9 @@ class MainWindow(QMainWindow):
         self.search_input.setFixedWidth(200)
         self.search_input.textChanged.connect(self.filter_items)
         row1_layout.addWidget(self.search_input)
-        
-        toolbar_main_layout.addLayout(row1_layout)
-
-        # Row 2: Scan & Maintenance
+        # Row 2: Scan & Maintenance (Calculated first to be placed ABOVE)
         row2_layout = QHBoxLayout()
-        row2_layout.setContentsMargins(5, 0, 5, 5)
+        row2_layout.setContentsMargins(5, 5, 5, 5)
         
         row2_layout.addWidget(CyberButton("SCAN_SYS", color=CP_TEXT, parent=self, is_outlined=True))
         row2_layout.itemAt(0).widget().clicked.connect(self.scan_folders)
@@ -558,18 +555,18 @@ class MainWindow(QMainWindow):
         row2_layout.itemAt(2).widget().clicked.connect(self.scan_tasks)
         
         row2_layout.addWidget(CyberButton("PRUNE_LNK", color=CP_RED, parent=self, is_outlined=True))
-        row2_layout.itemAt(3).widget().clicked.connect(self.delete_matching_shortcuts) # Del Match
+        row2_layout.itemAt(3).widget().clicked.connect(self.delete_matching_shortcuts)
         
         row2_layout.addStretch()
 
         # Sorting Controls
-        row2_layout.addWidget(QLabel("// SORT_BY: "))
+        row2_layout.addWidget(QLabel("// SORT: "))
         row2_layout.itemAt(5).widget().setStyleSheet(f"color: {CP_SUBTEXT}; font-family: Consolas; font-size: 10px;")
         
         self.sort_combo = QComboBox()
         self.sort_combo.addItems(["Name", "Date"])
         self.sort_combo.setCurrentText(self.sort_by)
-        self.sort_combo.setFixedWidth(100)
+        self.sort_combo.setFixedWidth(80)
         self.sort_combo.setFixedHeight(30)
         self.sort_combo.setStyleSheet(self.get_combo_style())
         self.sort_combo.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -577,12 +574,14 @@ class MainWindow(QMainWindow):
         row2_layout.addWidget(self.sort_combo)
 
         self.order_btn = CyberButton(self.sort_order, color=CP_CYAN, parent=self, is_outlined=True)
-        self.order_btn.setFixedWidth(60)
+        self.order_btn.setFixedWidth(50)
         self.order_btn.setFixedHeight(30)
         self.order_btn.clicked.connect(self.toggle_sort_order)
         row2_layout.addWidget(self.order_btn)
-        
+
+        # Add rows to toolbar - SCAN ROW GOES ON TOP
         toolbar_main_layout.addLayout(row2_layout)
+        toolbar_main_layout.addLayout(row1_layout)
         
         main_layout.addWidget(toolbar_container)
 
@@ -694,14 +693,33 @@ class MainWindow(QMainWindow):
             if os.path.exists(self.ps1_file_path): os.startfile(self.ps1_file_path)
 
     def open_startup_dirs(self):
+        # 1. Open common startup folders
         folders = [
             os.path.expandvars(r"%ProgramData%\Microsoft\Windows\Start Menu\Programs\Startup"),
             os.path.expandvars(r"%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup")
         ]
         for f in folders:
-            if os.path.exists(f):
-                os.startfile(f)
-        self.update_status("DIRECTORIES ACCESSED")
+            try:
+                if os.path.exists(f): os.startfile(f)
+            except: pass
+        
+        # 2. Open Registry Editor to the Startup path
+        # Note: Computer\ prefix exists in modern Windows, but HKEY_CURRENT_USER works too.
+        reg_target = r"Computer\HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run"
+        try:
+            # Kill current regedit so it re-reads the registry on next start
+            subprocess.run('taskkill /F /IM regedit.exe', shell=True, capture_output=True)
+            
+            # Update LastKey so it opens at our target path
+            with winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Applets\Regedit", 0, winreg.KEY_SET_VALUE) as key:
+                winreg.SetValueEx(key, "LastKey", 0, winreg.REG_SZ, reg_target)
+            
+            # Launch regedit using the Windows 'start' command for best compatibility
+            subprocess.Popen('start regedit.exe', shell=True)
+        except Exception as e:
+            print(f"DEBUG: Registry open failed: {e}")
+
+        self.update_status("FS & REGISTRY SYNCED")
 
     def create_column_box(self, title, splitter):
         wrapper = QWidget()
