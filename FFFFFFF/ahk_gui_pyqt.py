@@ -850,13 +850,14 @@ class AHKShortcutEditor(QMainWindow):
                 .shortcut-key {
                     color: #ffffff;
                     font-weight: bold;
-                    font-size: 16px; /* Increased */
+                    font-size: 16px;
                 }
                 .shortcut-separator {
                     color: #32CD32;
                     font-weight: bold;
-                    margin: 0 8px;
-                    font-size: 16px; /* Increased */
+                    margin: 0 10px;
+                    font-size: 18px;
+                    vertical-align: middle;
                 }
                 .shortcut-name {
                     color: #ffffff;
@@ -981,27 +982,40 @@ class AHKShortcutEditor(QMainWindow):
 
         if shortcut_type == "script":
             key = shortcut.get('hotkey', '')
+            key_width = 110
         elif shortcut_type == "startup":
             key = "🚀 Startup"
-        else:
+            key_width = 110
+        else: # text
             key = shortcut.get('trigger', '')
+            key_width = 150
 
         name = shortcut.get('name', 'Unnamed')
         description = shortcut.get('description', '')
-
         desc_html = f' <span class="shortcut-desc">({description[:25]}...)</span>' if len(description) > 25 else f' <span class="shortcut-desc">({description})</span>' if description else ''
 
         return f'''
         <div class="shortcut-item {indent_class} {status_class} {selected_class}">
-            <a href="toggle://{shortcut_type}/{index}" style="text-decoration: none; margin-right: 8px;">
-                <span class="{status_class}" style="cursor: pointer; font-size: 14px;">{status}</span>
-            </a>
-            <a href="select://{shortcut_type}/{index}" style="text-decoration: none; color: inherit; flex: 1;">
-                <span class="shortcut-key">{key}</span>
-                <span class="shortcut-separator">󰌌</span>
-                <span class="shortcut-name">{name}</span>
-                {desc_html}
-            </a>
+            <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse;">
+                <tr>
+                    <td width="35" valign="middle">
+                        <a href="toggle://{shortcut_type}/{index}" style="text-decoration: none;">
+                            <span class="{status_class}" style="font-size: 14px;">{status}</span>
+                        </a>
+                    </td>
+                    <td valign="middle">
+                        <a href="select://{shortcut_type}/{index}" style="text-decoration: none; color: inherit;">
+                            <table cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <td width="{key_width}" class="shortcut-key" valign="middle">{key}</td>
+                                    <td width="40" class="shortcut-separator" valign="middle" align="center">󰌌</td>
+                                    <td class="shortcut-name" valign="middle">{name}{desc_html}</td>
+                                </tr>
+                            </table>
+                        </a>
+                    </td>
+                </tr>
+            </table>
         </div>
         '''
 
