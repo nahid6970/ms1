@@ -50,13 +50,34 @@ The new system will prioritize a highly flexible, user-extensible coloring syste
     *   Hierarchical organization: Categories > Sheets > Sub-sheets.
     *   Dynamic management: Rename, Move, and Delete via right-click or icons.
 2.  **Productivity Shortcuts (F-Key System)**:
-    *   **F1 (Vault)**: Global quick-switcher, command palette, and sheet creator.
-    *   **F2 (History)**: Vertical list of recently edited or viewed sheets.
+    *   **F1 (Vault - "Global Command Center")**: 
+        *   **Tri-Mode Search**: 
+            *   **Normal**: Local filter of sheets within the active category.
+            *   **Global (`*`)**: Instant jump-search across every category in the vault.
+            *   **Content (`#`)**: Deep-search into the actual text content of every row in every sheet.
+        *   **Category Orchestration**: 
+            *   **Dynamic Pane**: A dedicated left-rail for category selection with automatic sheet-count badges.
+            *   **Drag & Drop / Reordering**: Ability to move categories up/down via ⬆️/⬇️ controls to define sidebar priority.
+            *   **CRUD Operations**: Inline creation (➕) and right-click context menus for instant Rename/Delete.
+        *   **Sheet Organization**: 
+            *   **Sub-sheet Nesting**: Toggle visibility of parent/child sheet hierarchies with the 📂 (folder) tool.
+            *   **Visual Separators**: Add and manage non-functional "spacer" lines within categories to group related sheets visually.
+            *   **Interactive List**: Direct click-to-switch with keyboard-ready `Enter` support for the top search result.
+            *   **Management**: Right-click for "Move to Category", Rename (with Nickname support), and Delete.
+    *   **F2 (History - "Vertical Recents")**: 
+        *   **Chronological Tracking**: List of recently visited sheets with the most recent at the top.
+        *   **Smart Labels**: Displays Sub-sheet relationships (e.g., "Sheet [Parent]").
+        *   **Fast Jump**: Numbered shortcuts (#1, #2...) for even faster switching.
     *   **F3 (Quick Format - "Selection Power-Tool")**: 
         *   **Standard Formatting**: Buttons for Bold, Italic, Underline, Strikethrough, etc.
         *   **Dynamic Markers**: Instant access to `##` Headings, `#2#` Big Text, `..` Small text, and `_R_` Colored underlines.
         *   **Custom Syntax Shelf**: A dynamic section that automatically populates buttons for every marker defined in `custom_syntaxes.json` (e.g., `++`, `%%`, `¿¿`).
-        *   **Math & Advanced Tools**: Buttons for `\(\sqrt{}\)`, smart fractions, Link creation, and Google Search.
+        *   **KaTeX Math Assistant (Modal)**: 
+            *   **Visual Editor**: A specialized math icon that opens an assistant window.
+            *   **Template Fields**: Dedicated input boxes for **Numerators**, **Denominators**, **Square Roots** (`\sqrt{}`), and **Exponents**.
+            *   **Instant LaTeX Generation**: Build complex expressions by filling in the boxes; the window automatically generates the corresponding `\( ... \)` KaTeX string.
+            *   **Smart Insertion**: Clicking "OK" inserts the perfectly formatted math string at the cursor position.
+        *   **Advanced Tools**: Smart fraction detection (`a/b` conversion), Link creation, and Google Search.
         *   **Text Manipulation**: One-click Case conversion (UPPER, lower, Proper), List sorting, and Table alignment.
         *   **Selection Stats**: Live character, word, and line counting for the selected area.
         *   **Multi-Select (F3 + Click)**: Ability to "queue" multiple formats to apply them all at once to a selection.
