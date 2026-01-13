@@ -340,13 +340,5 @@
             "enabled": true
         }
     ],
-    "startup_scripts": [
-        {
-            "name": "Test",
-            "category": "General",
-            "description": "",
-            "action": "; Set a timer to run the function every 10 seconds (10000ms)\nSetTimer(ShowHello, 10000)\n\nShowHello() {\n    ; Shows a tooltip message\n    ToolTip(\"Hello World!\")\n    \n    ; This hides the tooltip after 2 seconds (using a negative number)\n    SetTimer(() => ToolTip(), -2000)\n}",
-            "enabled": true
-        }
-    ]
+    "startup_scripts": []
 }
