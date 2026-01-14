@@ -40,15 +40,15 @@
                     "inline_type": "cmd",
                     "inline_script": "",
                     "font_family": "Consolas",
-                    "_runtime_height": 50,
+                    "_runtime_height": 10,
                     "_runtime_font_size": 20
                 },
                 {
                     "name": "Convert",
                     "path": "C:/Users/nahid/ms/ms1/scripts/ffmpeg/convert.ps1",
                     "type": "script",
-                    "_runtime_height": 50,
-                    "_runtime_font_size": 25
+                    "_runtime_height": 10,
+                    "_runtime_font_size": 10
                 },
                 {
                     "name": "IMG-Dimension",
@@ -56,22 +56,22 @@
                     "type": "script",
                     "hide_terminal": false,
                     "font_size": 20,
-                    "_runtime_height": 50,
+                    "_runtime_height": 10,
                     "_runtime_font_size": 20
                 },
                 {
                     "name": "Merge",
                     "path": "C:/Users/nahid/ms/ms1/scripts/ffmpeg/merge.ps1",
                     "type": "script",
-                    "_runtime_height": 50,
-                    "_runtime_font_size": 25
+                    "_runtime_height": 10,
+                    "_runtime_font_size": 10
                 },
                 {
                     "name": "Trim",
                     "path": "C:/Users/nahid/ms/ms1/scripts/ffmpeg/trim.ps1",
                     "type": "script",
-                    "_runtime_height": 50,
-                    "_runtime_font_size": 25
+                    "_runtime_height": 10,
+                    "_runtime_font_size": 10
                 },
                 {
                     "name": "VID-Dimension",
@@ -79,7 +79,7 @@
                     "type": "script",
                     "hide_terminal": false,
                     "font_size": 20,
-                    "_runtime_height": 50,
+                    "_runtime_height": 10,
                     "_runtime_font_size": 20
                 }
             ],
@@ -99,7 +99,7 @@
             "height": 0,
             "_runtime_height": 50,
             "font_family": "Consolas",
-            "grid_btn_height": 50,
+            "grid_btn_height": 0,
             "_runtime_font_size": 20
         },
         {
@@ -506,7 +506,9 @@
             "corner_radius": 0,
             "border_width": 0,
             "grid_columns": 0,
-            "grid_btn_height": 0
+            "grid_btn_height": 0,
+            "_runtime_height": 50,
+            "_runtime_font_size": 10
         }
     ],
     "github_repos": [

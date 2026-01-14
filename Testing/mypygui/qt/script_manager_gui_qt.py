@@ -337,7 +337,7 @@ class EditDialog(QDialog):
             l_fv.addWidget(self.spn_inner_cols, 0, 1)
             
             l_fv.addWidget(QLabel("Inner Row Height:"), 0, 2)
-            self.spn_inner_h = QSpinBox(); self.spn_inner_h.setRange(0, 200); 
+            self.spn_inner_h = QSpinBox(); self.spn_inner_h.setRange(0, 9999); 
             self.spn_inner_h.setValue(self.script.get("grid_btn_height", 0)) # 0 means default
             self.spn_inner_h.setToolTip("0 = Inherit Global")
             l_fv.addWidget(self.spn_inner_h, 0, 3)
@@ -519,7 +519,7 @@ class SettingsDialog(QDialog):
         l_grid.addRow("Columns:", self.spn_cols)
         
         self.spn_btn_h = QSpinBox()
-        self.spn_btn_h.setRange(20, 200)
+        self.spn_btn_h.setRange(20, 9999)
         self.spn_btn_h.setValue(self.config.get("default_btn_height", 40))
         l_grid.addRow("Btn Height:", self.spn_btn_h)
 
