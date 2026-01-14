@@ -65,6 +65,7 @@ class CyberButton(QPushButton):
         super().mousePressEvent(event)
 
     def mouseMoveEvent(self, event):
+        super().mouseMoveEvent(event) # Allow standard behavior
         if not (event.buttons() & Qt.MouseButton.LeftButton): return
         if (event.pos() - self.drag_start_pos).manhattanLength() < QApplication.startDragDistance(): return
         
@@ -125,8 +126,9 @@ class CyberButton(QPushButton):
         #    fg_normal = color
             
         # Hover Style defaults (swap)
-        bg_hover = hover_color if "hover_color" in self.script else CP_BG
-        fg_hover = hover_text_color if "hover_text_color" in self.script else color
+        # We use a slightly lighter grey as default hover background so it's visible on CP_BG
+        bg_hover = self.script.get("hover_color", "#1a1a1a")
+        fg_hover = self.script.get("hover_text_color", color)
 
         self.setStyleSheet(f"""
             QPushButton {{
@@ -135,11 +137,12 @@ class CyberButton(QPushButton):
                 border: {border_width}px solid {border_color};
                 padding: 10px;
                 border-radius: {radius}px;
+                min-height: 20px;
             }}
             QPushButton:hover {{
-                background-color: {bg_hover};
-                color: {fg_hover};
-                border: {border_width}px solid {border_color};
+                background-color: {bg_hover} !important;
+                color: {fg_hover} !important;
+                border: {max(1, border_width)}px solid {border_color};
             }}
         """)
 
