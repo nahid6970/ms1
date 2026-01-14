@@ -83,9 +83,13 @@ class ScriptLauncherApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Antigravity Script Manager")
-        self.root.overrideredirect(True)
+        # Re-enable window frame for taskbar visibility
+        # self.root.overrideredirect(True)
         self.root.configure(bg="#1d2027")
         self.root.attributes("-topmost", True)
+        
+        # Set window icon from SVG
+        self.set_window_icon()
         
         self.load_config()
         
@@ -109,6 +113,77 @@ class ScriptLauncherApp:
         # Start background threads
         self.stop_threads = False
         threading.Thread(target=self.status_monitor_thread, daemon=True).start()
+
+    def set_window_icon(self):
+        """Create and set window icon from SVG code"""
+        try:
+            from PIL import Image, ImageDraw, ImageTk
+            import io
+            
+            # SVG rocket icon code
+            svg_code = '''
+            <svg width="64" height="64" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="grad1" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" style="stop-color:#26b2f3;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#0d8c42;stop-opacity:1" />
+                    </linearGradient>
+                </defs>
+                <!-- Rocket body -->
+                <ellipse cx="32" cy="40" rx="12" ry="20" fill="url(#grad1)"/>
+                <!-- Rocket nose -->
+                <path d="M 32 10 L 20 25 L 44 25 Z" fill="#fe1616"/>
+                <!-- Window -->
+                <circle cx="32" cy="35" r="5" fill="#1d2027"/>
+                <circle cx="32" cy="35" r="3" fill="#26b2f3" opacity="0.7"/>
+                <!-- Left fin -->
+                <path d="M 20 45 L 15 55 L 20 50 Z" fill="#fe1616"/>
+                <!-- Right fin -->
+                <path d="M 44 45 L 49 55 L 44 50 Z" fill="#fe1616"/>
+                <!-- Flame -->
+                <ellipse cx="32" cy="62" rx="8" ry="6" fill="#ff934b" opacity="0.8"/>
+                <ellipse cx="32" cy="60" rx="6" ry="4" fill="#ffd700" opacity="0.9"/>
+            </svg>
+            '''
+            
+            # Try to render SVG using cairosvg if available
+            try:
+                import cairosvg
+                png_data = cairosvg.svg2png(bytestring=svg_code.encode('utf-8'), output_width=64, output_height=64)
+                image = Image.open(io.BytesIO(png_data))
+            except ImportError:
+                # Fallback: Create a simple icon using PIL
+                image = Image.new('RGBA', (64, 64), (0, 0, 0, 0))
+                draw = ImageDraw.Draw(image)
+                
+                # Draw rocket body (ellipse)
+                draw.ellipse([20, 20, 44, 60], fill='#26b2f3', outline='#0d8c42', width=2)
+                
+                # Draw rocket nose (triangle approximation)
+                draw.polygon([32, 10, 20, 25, 44, 25], fill='#fe1616')
+                
+                # Draw window
+                draw.ellipse([27, 30, 37, 40], fill='#1d2027')
+                draw.ellipse([29, 32, 35, 38], fill='#26b2f3')
+                
+                # Draw fins
+                draw.polygon([20, 45, 15, 55, 20, 50], fill='#fe1616')
+                draw.polygon([44, 45, 49, 55, 44, 50], fill='#fe1616')
+                
+                # Draw flame
+                draw.ellipse([24, 56, 40, 64], fill='#ff934b')
+                draw.ellipse([26, 56, 38, 62], fill='#ffd700')
+            
+            # Convert to PhotoImage and set as icon
+            photo = ImageTk.PhotoImage(image)
+            self.root.iconphoto(True, photo)
+            
+            # Keep a reference to prevent garbage collection
+            self.icon_photo = photo
+            
+        except Exception as e:
+            print(f"Could not set window icon: {e}")
+            # Continue without icon
 
     def setup_fonts(self):
         # Fallback fonts logic

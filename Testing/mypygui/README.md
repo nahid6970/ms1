@@ -62,12 +62,14 @@ A powerful, premium Python-based GUI application designed to centralize your wor
     - **Grid Layout**: Adjust columns and default font size.
     - **Widget Toggles**: Enable/disable GitHub, Rclone, or System Stats widgets.
 - **Portable**: Configuration is saved to `script_launcher_config.json` relative to the script, making it fully portable.
+- **Custom Icon**: Features a custom rocket icon in the taskbar, rendered from SVG for crisp display.
 
 ## 🚀 Getting Started
 
 ### Prerequisites
 - Python 3.10+
-- Dependencies: `pip install customtkinter psutil`
+- Dependencies: `pip install customtkinter psutil pillow`
+- Optional (for better SVG rendering): `pip install cairosvg`
 - Optional tools in PATH: `git`, `rclone`, `lazygit`, `pwsh`.
 
 ### Installation
