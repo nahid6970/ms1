@@ -1157,6 +1157,7 @@ class MainWindow(QMainWindow):
         menu.setStyleSheet(f"QMenu {{ background-color: {CP_PANEL}; color: {CP_TEXT}; border: 1px solid {CP_CYAN}; }} QMenu::item:selected {{ background-color: {CP_CYAN}; color: {CP_BG}; }}")
         
         menu.addAction("Edit").triggered.connect(lambda: self.open_edit(script))
+        menu.addAction("Reset Styles").triggered.connect(lambda: self.reset_item_styles(script))
         menu.addAction("Duplicate").triggered.connect(lambda: self.duplicate_item(script))
         menu.addSeparator()
         menu.addAction("Cut").triggered.connect(lambda: self.cut_item(script))
@@ -1168,6 +1169,28 @@ class MainWindow(QMainWindow):
         menu.addSeparator()
         menu.addAction("Delete").triggered.connect(lambda: self.delete_item(script))
         menu.exec(btn.mapToGlobal(pos))
+
+    def reset_item_styles(self, script):
+        """Reset item styles to global defaults"""
+        is_folder = (script.get("type") == "folder")
+        
+        # Remove custom style keys to use defaults
+        keys_to_remove = ["color", "text_color", "hover_color", "hover_text_color", 
+                         "border_color", "font_family", "font_size", "is_bold", 
+                         "is_italic", "corner_radius", "border_width", "width", "height"]
+        for key in keys_to_remove:
+            script.pop(key, None)
+        
+        # Reset spans
+        script["col_span"] = 1
+        script["row_span"] = 1
+        
+        # Reset folder-specific settings
+        if is_folder:
+            script["grid_columns"] = 0
+            script["grid_btn_height"] = 0
+        
+        self.save_config()
 
     def duplicate_item(self, script):
         import copy
