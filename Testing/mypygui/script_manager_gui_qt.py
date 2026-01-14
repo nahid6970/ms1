@@ -740,8 +740,8 @@ class SettingsDialog(QDialog):
         
     def init_ui(self):
         self.setObjectName("SettingsDialog")
-        # Reduced height to 550 to fit inside main window (650)
-        self.setFixedSize(500, 550)
+        # Ensure enough space for items
+        self.setFixedSize(500, 600)
         accent = self.parent_app.config['settings']['accent_color']
         border = self.parent_app.config['settings']['border_color']
         
@@ -764,8 +764,9 @@ class SettingsDialog(QDialog):
                 color: white;
                 border: 1px solid #333;
                 border-radius: 4px;
-                padding: 8px;
-                font-size: 15px;
+                padding: 6px 10px;
+                font-size: 14px;
+                min-height: 35px;
             }}
             QLineEdit:focus {{
                 border: 1px solid {accent};
@@ -774,8 +775,9 @@ class SettingsDialog(QDialog):
                 color: #dddddd;
                 border: none;
                 spacing: 12px;
-                font-size: 11px;
+                font-size: 13px;
                 font-family: 'Segoe UI';
+                min-height: 25px;
             }}
             QCheckBox::indicator {{
                 width: 20px;

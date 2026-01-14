@@ -163,7 +163,17 @@
             "is_italic": false,
             "width": 0,
             "height": 0,
-            "border_color": "#4bfb42"
+            "border_color": "#4bfb42",
+            "keep_open": false,
+            "kill_window": false,
+            "use_inline": false,
+            "inline_type": "cmd",
+            "inline_script": "",
+            "font_family": "Agency FB",
+            "color": "#2b2f38",
+            "text_color": "white",
+            "hover_color": "#26b2f3",
+            "hover_text_color": "white"
         },
         {
             "name": "mklink",
@@ -187,7 +197,10 @@
             "use_inline": false,
             "inline_type": "cmd",
             "inline_script": "",
-            "font_family": "JetBrainsMono NFP"
+            "font_family": "JetBrainsMono Nerd Font Propo",
+            "hover_color": "#26b2f3",
+            "hover_text_color": "white",
+            "border_color": "#fe1616"
         },
         {
             "name": "AntiGravity",
