@@ -484,9 +484,10 @@ class SettingsDialog(QDialog):
         super().__init__(parent)
         self.config = config
         self.setWindowTitle("GLOBAL CONFIG")
-        self.resize(500, 400)
+        self.resize(500, 500)
+        self.app_bg = self.config.get("app_bg", CP_BG)
         self.setStyleSheet(f"""
-            QDialog {{ background-color: {CP_BG}; border: 1px solid {CP_YELLOW}; }}
+            QDialog {{ background-color: {self.app_bg}; border: 1px solid {CP_YELLOW}; }}
             QLabel {{ color: {CP_TEXT}; font-family: 'Consolas'; font-weight: bold; }}
             QLineEdit, QSpinBox {{ background: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 5px; }}
             QSpinBox::up-button, QSpinBox::down-button {{ width: 0px; border: none; }}
@@ -501,25 +502,47 @@ class SettingsDialog(QDialog):
         layout.setSpacing(15)
         layout.setContentsMargins(30, 30, 30, 30)
         
-        # Grid Settings
+        # 1. Grid Settings
         grp_grid = QGroupBox("GRID")
         grp_grid.setStyleSheet(f"QGroupBox {{ border: 1px solid {CP_DIM}; margin-top: 10px; padding-top: 10px; color: {CP_YELLOW}; font-weight: bold; }}")
         l_grid = QFormLayout()
         
         self.spn_cols = QSpinBox()
-        self.spn_cols.setRange(1, 10)
+        self.spn_cols.setRange(1, 20)
         self.spn_cols.setValue(self.config.get("columns", 5))
         l_grid.addRow("Columns:", self.spn_cols)
         
         self.spn_btn_h = QSpinBox()
         self.spn_btn_h.setRange(20, 200)
         self.spn_btn_h.setValue(self.config.get("default_btn_height", 40))
-        l_grid.addRow("Default Btn Height:", self.spn_btn_h)
+        l_grid.addRow("Btn Height:", self.spn_btn_h)
+
+        self.spn_font_size = QSpinBox()
+        self.spn_font_size.setRange(6, 40)
+        self.spn_font_size.setValue(self.config.get("default_font_size", 10))
+        l_grid.addRow("Font Size:", self.spn_font_size)
 
         grp_grid.setLayout(l_grid)
         layout.addWidget(grp_grid)
 
-        # Window Settings
+        # 2. Appearance Settings
+        grp_app = QGroupBox("APPEARANCE")
+        grp_app.setStyleSheet(f"QGroupBox {{ border: 1px solid {CP_DIM}; margin-top: 10px; padding-top: 10px; color: {CP_YELLOW}; font-weight: bold; }}")
+        l_app = QFormLayout()
+
+        self.btn_app_bg = QPushButton("Pick Background Color")
+        self.update_bg_btn_style()
+        self.btn_app_bg.clicked.connect(self.pick_app_bg)
+        l_app.addRow("Main BG:", self.btn_app_bg)
+
+        self.chk_widgets = QCheckBox("Show Stats Dashboard")
+        self.chk_widgets.setChecked(self.config.get("show_widgets", True))
+        l_app.addRow("", self.chk_widgets)
+
+        grp_app.setLayout(l_app)
+        layout.addWidget(grp_app)
+
+        # 3. Window Settings
         grp_win = QGroupBox("WINDOW")
         grp_win.setStyleSheet(f"QGroupBox {{ border: 1px solid {CP_DIM}; margin-top: 10px; padding-top: 10px; color: {CP_YELLOW}; font-weight: bold; }}")
         l_win = QFormLayout()
@@ -545,9 +568,24 @@ class SettingsDialog(QDialog):
         layout.addStretch()
         layout.addWidget(btn_save)
 
+    def update_bg_btn_style(self):
+        lc = QColor(self.app_bg).lightness()
+        self.btn_app_bg.setStyleSheet(f"background-color: {self.app_bg}; color: {'black' if lc > 128 else 'white'}; border: 1px solid {CP_DIM}; padding: 5px;")
+
+    def pick_app_bg(self):
+        c = QColorDialog.getColor(QColor(self.app_bg), self)
+        if c.isValid():
+            self.app_bg = c.name()
+            self.update_bg_btn_style()
+            # Preview it immediately on the dialog itself
+            self.setStyleSheet(f"QDialog {{ background-color: {self.app_bg}; border: 1px solid {CP_YELLOW}; }} " + self.styleSheet().split("}", 1)[1])
+
     def save(self):
         self.config["columns"] = self.spn_cols.value()
         self.config["default_btn_height"] = self.spn_btn_h.value()
+        self.config["default_font_size"] = self.spn_font_size.value()
+        self.config["app_bg"] = self.app_bg
+        self.config["show_widgets"] = self.chk_widgets.isChecked()
         self.config["window_width"] = self.spn_w.value()
         self.config["window_height"] = self.spn_h.value()
         self.config["always_on_top"] = self.chk_top.isChecked()
@@ -561,12 +599,15 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("SCRIPT // MANAGER_V3.2")
-        self.setStyleSheet(f"QMainWindow {{ background-color: {CP_BG}; }}")
         
         self.config = {}
         self.view_stack = [] 
         
         self.load_config()
+
+        # Apply global settings
+        app_bg = self.config.get("app_bg", CP_BG)
+        self.setStyleSheet(f"QMainWindow {{ background-color: {app_bg}; }}")
         
         # Apply window settings
         w = self.config.get("window_width", 1100)
@@ -597,10 +638,17 @@ class MainWindow(QMainWindow):
             self.refresh_grid()
             
             # Apply immediate global effects
+            app_bg = self.config.get("app_bg", CP_BG)
+            self.setStyleSheet(f"QMainWindow {{ background-color: {app_bg}; }}")
+
             if self.config.get("always_on_top", False):
                 self.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint, True)
             else:
                 self.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint, False)
+
+            if hasattr(self, 'dash_frame'):
+                self.dash_frame.setVisible(self.config.get("show_widgets", True))
+
             self.show()
             
         except: pass
@@ -632,13 +680,14 @@ class MainWindow(QMainWindow):
         self.main_layout.addLayout(header)
 
         # Dashboard
-        dash_frame = QFrame(); dash_frame.setFixedHeight(60); 
-        dash_layout = QHBoxLayout(dash_frame); dash_layout.setContentsMargins(0,0,0,0)
+        self.dash_frame = QFrame(); self.dash_frame.setFixedHeight(60); 
+        dash_layout = QHBoxLayout(self.dash_frame); dash_layout.setContentsMargins(0,0,0,0)
         self.stat_cpu = StatWidget("CPU", CP_CYAN); self.stat_ram = StatWidget("RAM", CP_ORANGE); self.stat_disk = StatWidget("SSD", CP_GREEN)
         dash_layout.addWidget(self.stat_cpu); dash_layout.addWidget(self.stat_ram); dash_layout.addWidget(self.stat_disk)
         lbl_status = QLabel(" GITHUB: OK | RCLONE: IDLE "); lbl_status.setFont(QFont("Consolas", 9)); lbl_status.setStyleSheet(f"color: {CP_SUBTEXT}; background: {CP_PANEL}; border: 1px solid {CP_DIM}; padding: 5px;")
         dash_layout.addWidget(lbl_status); dash_layout.addStretch()
-        self.main_layout.addWidget(dash_frame)
+        self.main_layout.addWidget(self.dash_frame)
+        self.dash_frame.setVisible(self.config.get("show_widgets", True))
 
         # Grid
         scroll = QScrollArea(); scroll.setWidgetResizable(True); scroll.setStyleSheet(f"background: transparent; border: none;")
@@ -646,6 +695,7 @@ class MainWindow(QMainWindow):
         scroll.setWidget(self.grid_container); self.main_layout.addWidget(scroll)
 
     def update_stats(self):
+        if not self.config.get("show_widgets", True): return
         try:
             self.stat_cpu.set_value(psutil.cpu_percent())
             self.stat_ram.set_value(psutil.virtual_memory().percent)
@@ -678,6 +728,9 @@ class MainWindow(QMainWindow):
             cols = self.config.get("columns", 5)
             def_h = self.config.get("default_btn_height", 40)
 
+        # Default typography
+        def_fs = self.config.get("default_font_size", 10)
+
         grid_map = {} # (row, col) -> occupied
         r, c = 0, 0
         
@@ -685,6 +738,14 @@ class MainWindow(QMainWindow):
             # Force height update if not specifically set
             if "height" not in script or script["height"] == 0:
                 script["_runtime_height"] = def_h
+            
+            # Apply default font size if item doesn't have one
+            # Note: CyberButton uses script.get("font_size", 10)
+            # We will use a runtime override or just pass it in script_data if missing
+            if "font_size" not in script:
+                script["_runtime_font_size"] = def_fs
+            else:
+                script["_runtime_font_size"] = script["font_size"]
             
             # Determine spans
             c_span = script.get("col_span", 1)
@@ -722,9 +783,15 @@ class MainWindow(QMainWindow):
             # Add widget
             btn = CyberButton(script.get("name", "Unnamed"), script_data=script)
             
-            # Apply dynamic height preference if user hasn't overridden it in item
+            # Apply dynamic preferences
             if script.get("height", 0) == 0:
                 btn.setFixedHeight(def_h)
+            
+            # Apply runtime font size
+            if "_runtime_font_size" in script:
+                f = btn.font()
+                f.setPointSize(script["_runtime_font_size"])
+                btn.setFont(f)
                 
             btn.clicked.connect(partial(self.handle_click, script))
             btn.customContextMenuRequested.connect(partial(self.show_context_menu, btn, script))

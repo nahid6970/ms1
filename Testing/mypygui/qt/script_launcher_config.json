@@ -112,7 +112,8 @@
             "height": 0,
             "_runtime_height": 50,
             "font_family": "Consolas",
-            "grid_btn_height": 50
+            "grid_btn_height": 50,
+            "_runtime_font_size": 20
         },
         {
             "name": "YTC",
@@ -163,7 +164,8 @@
                     "is_italic": false
                 }
             ],
-            "_runtime_height": 50
+            "_runtime_height": 50,
+            "_runtime_font_size": 10
         },
         {
             "name": "Task Manager",
@@ -181,7 +183,8 @@
             "row_span": 1,
             "width": 0,
             "height": 0,
-            "_runtime_height": 50
+            "_runtime_height": 50,
+            "_runtime_font_size": 20
         },
         {
             "name": "Explorer",
@@ -209,7 +212,8 @@
             "text_color": "white",
             "hover_color": "#26b2f3",
             "hover_text_color": "white",
-            "_runtime_height": 50
+            "_runtime_height": 50,
+            "_runtime_font_size": 20
         },
         {
             "name": "mklink",
@@ -237,7 +241,8 @@
             "hover_color": "#26b2f3",
             "hover_text_color": "white",
             "border_color": "#fe1616",
-            "_runtime_height": 50
+            "_runtime_height": 50,
+            "_runtime_font_size": 20
         },
         {
             "name": "AntiGravity",
@@ -260,7 +265,8 @@
             "inline_type": "cmd",
             "inline_script": "",
             "kill_window": true,
-            "_runtime_height": 50
+            "_runtime_height": 50,
+            "_runtime_font_size": 20
         },
         {
             "name": "C-Map",
@@ -284,7 +290,8 @@
             "is_bold": false,
             "is_italic": false,
             "_runtime_height": 50,
-            "font_family": "Consolas"
+            "font_family": "Consolas",
+            "_runtime_font_size": 20
         },
         {
             "name": "pip",
@@ -309,7 +316,8 @@
             "is_italic": false,
             "font_family": "Consolas",
             "_runtime_height": 50,
-            "border_color": "#55aaff"
+            "border_color": "#55aaff",
+            "_runtime_font_size": 12
         },
         {
             "name": "Locker",
@@ -333,7 +341,8 @@
             "is_bold": false,
             "is_italic": false,
             "_runtime_height": 50,
-            "font_family": "Consolas"
+            "font_family": "Consolas",
+            "_runtime_font_size": 20
         },
         {
             "name": "ClipBoard",
@@ -356,7 +365,8 @@
             "height": 0,
             "is_bold": false,
             "is_italic": false,
-            "_runtime_height": 50
+            "_runtime_height": 50,
+            "_runtime_font_size": 20
         },
         {
             "name": "Lock-Smith",
@@ -379,7 +389,8 @@
             "height": 0,
             "is_bold": false,
             "is_italic": false,
-            "_runtime_height": 50
+            "_runtime_height": 50,
+            "_runtime_font_size": 20
         },
         {
             "name": "Nuke",
@@ -402,7 +413,8 @@
             "height": 0,
             "is_bold": false,
             "is_italic": false,
-            "_runtime_height": 50
+            "_runtime_height": 50,
+            "_runtime_font_size": 20
         },
         {
             "name": "New Folder",
@@ -419,7 +431,11 @@
             "height": 0,
             "corner_radius": 0,
             "border_width": 0,
-            "_runtime_height": 50
+            "_runtime_height": 50,
+            "_runtime_font_size": 10,
+            "border_color": "#000000",
+            "grid_columns": 0,
+            "grid_btn_height": 0
         }
     ],
     "github_repos": [
@@ -481,5 +497,8 @@
     "default_btn_height": 50,
     "window_width": 1200,
     "window_height": 800,
-    "always_on_top": false
+    "always_on_top": false,
+    "default_font_size": 10,
+    "app_bg": "#55557f",
+    "show_widgets": false
 }
