@@ -254,6 +254,22 @@
             "hotkey": "#l",
             "action": "GoToSleep() {\n    ; 0 = Standby (Sleep), 1 = Hibernate\n    DllCall(\"PowrProf\\SetSuspendState\", \"Int\", 0, \"Int\", 0, \"Int\", 0)\n}",
             "enabled": true
+        },
+        {
+            "name": "Komorebi W1",
+            "category": "General",
+            "description": "",
+            "hotkey": "#1",
+            "action": "Run(\"komorebic.exe focus-workspace 0\", , \"Hide\")",
+            "enabled": true
+        },
+        {
+            "name": "Komorebi W2",
+            "category": "General",
+            "description": "",
+            "hotkey": "#2",
+            "action": "Run(\"komorebic.exe focus-workspace 1\", , \"Hide\")",
+            "enabled": true
         }
     ],
     "text_shortcuts": [

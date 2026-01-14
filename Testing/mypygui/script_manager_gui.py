@@ -82,7 +82,7 @@ DEFAULT_CONFIG = {
 class ScriptLauncherApp:
     def __init__(self, root):
         self.root = root
-        self.root.title("Antigravity Script Manager")
+        self.root.title("Script Manager")
         # Re-enable window frame for taskbar visibility
         # self.root.overrideredirect(True)
         self.root.configure(bg="#1d2027")

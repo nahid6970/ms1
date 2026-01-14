@@ -615,6 +615,12 @@ PrintScreen::Run("C:\Users\nahid\ms\ms1\Testing\screenshot\region_screenshot.py"
     }
 }
 
+;! Komorebi W1
+#1::Run("komorebic.exe focus-workspace 0", , "Hide")
+
+;! Komorebi W2
+#2::Run("komorebic.exe focus-workspace 1", , "Hide")
+
 ;! === TEXT SHORTCUTS ===
 ;! AutoHotkey Version 1
 ;! Inserts AHK v1 header requirement
