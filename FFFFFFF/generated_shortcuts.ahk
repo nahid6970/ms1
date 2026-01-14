@@ -513,7 +513,7 @@ LAlt & c:: {
 }
 
 ;! Take Screenshot
-PrintScreen::Run("C:\Users\nahid\ms\ms1\Testing\screenshot\region_screenshot.py", "", "Hide")
+PrintScreen::Run("C:\Users\nahid\ms\ms1\scripts\Autohtokey\version2\gui\Bio.ahk", "", "Hide")
 
 ;! Open Folder gui
 #f::Run("C:\Users\nahid\ms\ms1\Testing\screenshot\folder_launcher\launcher.py", "", "Hide")

@@ -220,7 +220,7 @@
             "category": "General",
             "description": "",
             "hotkey": "PrintScreen",
-            "action": "Run(\"C:\\Users\\nahid\\ms\\ms1\\Testing\\screenshot\\region_screenshot.py\", \"\", \"Hide\")",
+            "action": "Run(\"C:\\Users\\nahid\\ms\\ms1\\scripts\\Autohtokey\\version2\\gui\\Bio.ahk\", \"\", \"Hide\")",
             "enabled": true
         },
         {

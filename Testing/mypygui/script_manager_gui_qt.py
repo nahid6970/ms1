@@ -322,10 +322,17 @@ class EditDialog(QDialog):
             "border_color": self.script.get("border_color", "#fe1616")
         }
         self.init_ui()
+        self.center_to_parent()
         
+    def center_to_parent(self):
+        if self.parent_app:
+            p_geo = self.parent_app.geometry()
+            self.move(p_geo.center() - self.rect().center())
+
     def init_ui(self):
         self.setObjectName("EditDialog")
-        self.setFixedSize(900 if self.script.get("type") != "folder" else 500, 750)
+        # Fixed height to fit inside main window (650)
+        self.setFixedSize(900 if self.script.get("type") != "folder" else 500, 600)
         accent = self.parent_app.config['settings']['accent_color']
         border = self.parent_app.config['settings']['border_color']
         
@@ -333,36 +340,42 @@ class EditDialog(QDialog):
             QDialog#EditDialog {{
                 background-color: #1d2027;
                 border: 2px solid {border};
+                border-radius: 8px;
             }}
             QLabel {{
-                color: #bbbbbb; 
-                font-size: 11px;
+                color: #888888; 
+                font-size: 10px;
+                font-weight: bold;
                 border: none;
                 background: transparent;
-                font-family: 'Segoe UI';
+                font-family: 'Segoe UI Semibold';
+                text-transform: uppercase;
             }}
             QLineEdit, QComboBox, QTextEdit {{
-                background-color: #2b2f38;
-                color: white;
-                border: 1px solid #444;
+                background-color: #252830;
+                color: #ffffff;
+                border: 1px solid #333;
                 border-radius: 4px;
-                padding: 6px;
+                padding: 8px;
                 font-family: 'Consolas', 'JetBrainsMono NFP';
+                font-size: 12px;
             }}
             QLineEdit:focus, QComboBox:focus, QTextEdit:focus {{
                 border: 1px solid {accent};
+                background-color: #2b2f38;
             }}
             QCheckBox, QRadioButton {{
-                color: white;
+                color: #dddddd;
                 border: none;
                 spacing: 12px;
-                font-size: 12px;
+                font-size: 11px;
+                font-family: 'Segoe UI';
             }}
             QCheckBox::indicator, QRadioButton::indicator {{
                 width: 18px;
                 height: 18px;
-                background-color: #2b2f38;
-                border: 1px solid #555;
+                background-color: #252830;
+                border: 1px solid #444;
                 border-radius: 3px;
             }}
             QCheckBox::indicator:checked, QRadioButton::indicator:checked {{
@@ -373,36 +386,38 @@ class EditDialog(QDialog):
                 background-color: #10b153;
                 color: white;
                 font-weight: bold;
-                font-size: 14px;
+                font-size: 13px;
                 border: none;
-                border-radius: 4px;
-                letter-spacing: 1px;
+                border-radius: 6px;
+                letter-spacing: 2px;
             }}
             QPushButton#SaveBtn:hover {{
                 background-color: #14d363;
             }}
             QPushButton#CloseBtn {{
-                color: #888;
+                color: #555;
                 border: none;
-                font-size: 18px;
+                font-size: 20px;
                 background: transparent;
             }}
             QPushButton#CloseBtn:hover {{
-                color: white;
+                color: #ffffff;
                 background-color: #fe1616;
+                border-radius: 4px;
             }}
             QFrame#GroupFrame {{
                 border: 1px solid #333;
-                border-radius: 6px;
-                margin-top: 10px;
-                background: rgba(255, 255, 255, 0.03);
+                border-left: 3px solid {accent};
+                border-radius: 4px;
+                margin-top: 8px;
+                background: rgba(255, 255, 255, 0.02);
             }}
             QPushButton#BrowseBtn {{
                 background-color: #3a3f4b;
                 color: white;
                 border: none;
-                border-radius: 3px;
-                padding: 4px;
+                border-radius: 4px;
+                font-weight: bold;
             }}
             QPushButton#BrowseBtn:hover {{
                 background-color: #4a4f5b;
@@ -412,20 +427,21 @@ class EditDialog(QDialog):
                 font-size: 10px;
                 font-weight: bold;
                 border-radius: 4px;
-                border: 1px solid #555;
-                padding: 8px;
-                min-height: 20px;
+                border: 1px solid #444;
+                padding: 10px;
+                min-height: 25px;
             }}
         """)
         
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(20, 20, 20, 20)
+        layout.setContentsMargins(25, 20, 25, 25)
         layout.setSpacing(15)
         
         # Header
         header = QHBoxLayout()
-        title = QLabel(f"EDIT {self.script['type'].upper()}: {self.script['name'].upper()}")
-        title.setStyleSheet(f"color: {accent}; font-weight: bold; font-size: 20px; letter-spacing: 1px;")
+        title_text = f"EDIT {self.script['type'].upper()}: {self.script['name'].upper()}"
+        title = QLabel(title_text)
+        title.setStyleSheet(f"color: {accent}; font-weight: bold; font-size: 18px; letter-spacing: 1px;")
         header.addWidget(title)
         
         header.addStretch()
@@ -441,10 +457,18 @@ class EditDialog(QDialog):
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
         scroll.setStyleSheet("QScrollArea { border: none; background: transparent; }")
+        
+        # Custom Scrollbar styling
+        scroll.verticalScrollBar().setStyleSheet(f"""
+            QScrollBar:vertical {{ border: none; background: transparent; width: 8px; }}
+            QScrollBar::handle:vertical {{ background: {accent}; border-radius: 4px; min-height: 20px; }}
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{ height: 0px; }}
+        """)
+        
         scroll_content = QWidget()
         scroll_content.setStyleSheet("background: transparent;")
         content_vlayout = QVBoxLayout(scroll_content)
-        content_vlayout.setContentsMargins(0, 0, 0, 0)
+        content_vlayout.setContentsMargins(0, 0, 5, 0)
         content_vlayout.setSpacing(15)
 
         # Outer horizontal layout for panels
@@ -460,45 +484,45 @@ class EditDialog(QDialog):
         basic_group.setObjectName("GroupFrame")
         basic_layout = QGridLayout(basic_group)
         basic_layout.setContentsMargins(20, 20, 20, 20)
-        basic_layout.setSpacing(10)
+        basic_layout.setSpacing(12)
         
-        basic_layout.addWidget(QLabel("LABEL NAME:"), 0, 0)
+        basic_layout.addWidget(QLabel("LABEL NAME"), 0, 0)
         self.name_edit = QLineEdit(self.script["name"])
         basic_layout.addWidget(self.name_edit, 0, 1)
         
         if self.script.get("type") != "folder":
-            basic_layout.addWidget(QLabel("SCRIPT PATH:"), 1, 0)
+            basic_layout.addWidget(QLabel("SCRIPT PATH"), 1, 0)
             path_row = QHBoxLayout()
             self.path_edit = QLineEdit(self.script.get("path", ""))
             path_row.addWidget(self.path_edit)
             browse_btn = QPushButton("...")
             browse_btn.setObjectName("BrowseBtn")
-            browse_btn.setFixedWidth(45)
+            browse_btn.setFixedSize(40, 32)
             browse_btn.clicked.connect(self.browse_path)
             path_row.addWidget(browse_btn)
             basic_layout.addLayout(path_row, 1, 1)
             
             cb_layout = QHBoxLayout()
-            cb_layout.setSpacing(20)
-            self.hide_terminal = QCheckBox("Hide Terminal")
+            cb_layout.setSpacing(25)
+            self.hide_terminal = QCheckBox("HIDE TERMINAL")
             self.hide_terminal.setChecked(self.script.get("hide_terminal", False))
             cb_layout.addWidget(self.hide_terminal)
             
-            self.no_exit = QCheckBox("No Exit")
+            self.no_exit = QCheckBox("NO EXIT")
             self.no_exit.setChecked(self.script.get("keep_open", False))
             cb_layout.addWidget(self.no_exit)
             
-            self.kill_win = QCheckBox("Kill Main")
+            self.kill_win = QCheckBox("KILL MAIN")
             self.kill_win.setChecked(self.script.get("kill_window", False))
             cb_layout.addWidget(self.kill_win)
             cb_layout.addStretch()
             basic_layout.addLayout(cb_layout, 2, 0, 1, 2)
             
-            basic_layout.addWidget(QLabel("CTRL+LEFT CMD:"), 3, 0)
+            basic_layout.addWidget(QLabel("CTRL+L ACTION"), 3, 0)
             self.ctrl_l_edit = QLineEdit(self.script.get("ctrl_left_cmd", ""))
             basic_layout.addWidget(self.ctrl_l_edit, 3, 1)
             
-            basic_layout.addWidget(QLabel("CTRL+RIGHT CMD:"), 4, 0)
+            basic_layout.addWidget(QLabel("CTRL+R ACTION"), 4, 0)
             self.ctrl_r_edit = QLineEdit(self.script.get("ctrl_right_cmd", ""))
             basic_layout.addWidget(self.ctrl_r_edit, 4, 1)
         
@@ -509,22 +533,22 @@ class EditDialog(QDialog):
         typo_group.setObjectName("GroupFrame")
         typo_layout = QGridLayout(typo_group)
         typo_layout.setContentsMargins(20, 20, 20, 20)
-        typo_layout.setSpacing(10)
-        typo_layout.addWidget(QLabel("FONT FAMILY:"), 0, 0)
+        typo_layout.setSpacing(12)
+        typo_layout.addWidget(QLabel("FONT FAMILY"), 0, 0)
         self.font_combo = QComboBox()
         self.font_combo.addItems(sorted(QFontDatabase.families()))
         self.font_combo.setCurrentText(self.script.get("font_family", self.parent_app.config["settings"]["font_family"]))
         typo_layout.addWidget(self.font_combo, 0, 1)
         
-        typo_layout.addWidget(QLabel("FONT SIZE:"), 1, 0)
+        typo_layout.addWidget(QLabel("FONT SIZE"), 1, 0)
         self.size_edit = QLineEdit(str(self.script.get("font_size", self.parent_app.config["settings"]["font_size"])))
         typo_layout.addWidget(self.size_edit, 1, 1)
         
         font_style_row = QHBoxLayout()
-        self.is_bold = QCheckBox("Bold Font")
+        self.is_bold = QCheckBox("BOLD")
         self.is_bold.setChecked(self.script.get("is_bold", False))
         font_style_row.addWidget(self.is_bold)
-        self.is_italic = QCheckBox("Italic Font")
+        self.is_italic = QCheckBox("ITALIC")
         self.is_italic.setChecked(self.script.get("is_italic", False))
         font_style_row.addWidget(self.is_italic)
         typo_layout.addLayout(font_style_row, 2, 0, 1, 2)
@@ -552,26 +576,26 @@ class EditDialog(QDialog):
         dim_group.setObjectName("GroupFrame")
         dim_layout = QGridLayout(dim_group)
         dim_layout.setContentsMargins(20, 20, 20, 20)
-        dim_layout.setSpacing(10)
+        dim_layout.setSpacing(12)
         
-        dim_layout.addWidget(QLabel("WIDTH:"), 0, 0)
+        dim_layout.addWidget(QLabel("WIDTH"), 0, 0)
         self.width_edit = QLineEdit(str(self.script.get("width", 0)))
         dim_layout.addWidget(self.width_edit, 0, 1)
-        dim_layout.addWidget(QLabel("HEIGHT:"), 0, 2)
+        dim_layout.addWidget(QLabel("HEIGHT"), 0, 2)
         self.height_edit = QLineEdit(str(self.script.get("height", 0)))
         dim_layout.addWidget(self.height_edit, 0, 3)
         
-        dim_layout.addWidget(QLabel("COL SPAN:"), 1, 0)
+        dim_layout.addWidget(QLabel("COL SPAN"), 1, 0)
         self.cspan_edit = QLineEdit(str(self.script.get("col_span", 1)))
         dim_layout.addWidget(self.cspan_edit, 1, 1)
-        dim_layout.addWidget(QLabel("ROW SPAN:"), 1, 2)
+        dim_layout.addWidget(QLabel("ROW SPAN"), 1, 2)
         self.rspan_edit = QLineEdit(str(self.script.get("row_span", 1)))
         dim_layout.addWidget(self.rspan_edit, 1, 3)
         
-        dim_layout.addWidget(QLabel("RADIUS:"), 2, 0)
+        dim_layout.addWidget(QLabel("RADIUS"), 2, 0)
         self.radius_edit = QLineEdit(str(self.script.get("corner_radius", 4)))
         dim_layout.addWidget(self.radius_edit, 2, 1)
-        dim_layout.addWidget(QLabel("BORDER:"), 2, 2)
+        dim_layout.addWidget(QLabel("BORDER"), 2, 2)
         self.bwidth_edit = QLineEdit(str(self.script.get("border_width", 0)))
         dim_layout.addWidget(self.bwidth_edit, 2, 3)
         
@@ -592,7 +616,7 @@ class EditDialog(QDialog):
             inline_layout.setContentsMargins(20, 20, 20, 20)
             inline_layout.setSpacing(15)
             
-            inline_layout.addWidget(QLabel("EXECUTION MODE:"))
+            inline_layout.addWidget(QLabel("EXECUTION MODE"))
             mode_row = QHBoxLayout()
             self.mode_file = QRadioButton("FILE PATH")
             self.mode_inline = QRadioButton("INLINE SCRIPT")
@@ -607,17 +631,17 @@ class EditDialog(QDialog):
             mode_row.addWidget(self.mode_inline)
             inline_layout.addLayout(mode_row)
             
-            inline_layout.addWidget(QLabel("INLINE TYPE:"))
+            inline_layout.addWidget(QLabel("INLINE ENGINE"))
             self.inline_type = QComboBox()
             self.inline_type.addItems(["cmd", "pwsh", "powershell"])
             self.inline_type.setCurrentText(self.script.get("inline_type", "cmd"))
             inline_layout.addWidget(self.inline_type)
             
-            inline_layout.addWidget(QLabel("SCRIPT CONTENT:"))
+            inline_layout.addWidget(QLabel("SCRIPT CONTENT"))
             self.inline_script = QTextEdit()
             self.inline_script.setPlainText(self.script.get("inline_script", ""))
             self.inline_script.setAcceptRichText(False)
-            self.inline_script.setPlaceholderText("Enter script here...")
+            self.inline_script.setPlaceholderText("Enter commands here...")
             inline_layout.addWidget(self.inline_script)
             
             right_panel.addWidget(inline_group)
@@ -627,9 +651,9 @@ class EditDialog(QDialog):
         scroll.setWidget(scroll_content)
         layout.addWidget(scroll)
         
-        save_btn = QPushButton("SAVE CHANGES")
+        save_btn = QPushButton("APPLY CHANGES")
         save_btn.setObjectName("SaveBtn")
-        save_btn.setFixedHeight(55)
+        save_btn.setFixedHeight(50)
         save_btn.clicked.connect(self.save)
         layout.addWidget(save_btn)
 
@@ -698,10 +722,17 @@ class SettingsDialog(QDialog):
         self.parent_app = parent_app
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint)
         self.init_ui()
+        self.center_to_parent()
+
+    def center_to_parent(self):
+        if self.parent_app:
+            p_geo = self.parent_app.geometry()
+            self.move(p_geo.center() - self.rect().center())
         
     def init_ui(self):
         self.setObjectName("SettingsDialog")
-        self.setFixedSize(500, 650)
+        # Reduced height to 550 to fit inside main window (650)
+        self.setFixedSize(500, 550)
         accent = self.parent_app.config['settings']['accent_color']
         border = self.parent_app.config['settings']['border_color']
         
@@ -709,34 +740,39 @@ class SettingsDialog(QDialog):
             QDialog#SettingsDialog {{
                 background-color: #1d2027;
                 border: 2px solid {border};
+                border-radius: 8px;
             }}
             QLabel {{
-                color: #bbbbbb; 
-                font-size: 11px;
+                color: #888888; 
+                font-size: 10px;
+                font-weight: bold;
                 border: none;
-                font-family: 'Segoe UI';
+                font-family: 'Segoe UI Semibold';
+                text-transform: uppercase;
             }}
             QLineEdit {{
-                background-color: #2b2f38;
+                background-color: #252830;
                 color: white;
-                border: 1px solid #444;
+                border: 1px solid #333;
                 border-radius: 4px;
-                padding: 6px;
+                padding: 8px;
+                font-size: 12px;
             }}
             QLineEdit:focus {{
                 border: 1px solid {accent};
             }}
             QCheckBox {{
-                color: white;
+                color: #dddddd;
                 border: none;
                 spacing: 12px;
-                font-size: 12px;
+                font-size: 11px;
+                font-family: 'Segoe UI';
             }}
             QCheckBox::indicator {{
                 width: 20px;
                 height: 20px;
-                background-color: #2b2f38;
-                border: 1px solid #555;
+                background-color: #252830;
+                border: 1px solid #444;
                 border-radius: 4px;
             }}
             QCheckBox::indicator:checked {{
@@ -749,38 +785,40 @@ class SettingsDialog(QDialog):
                 font-weight: bold;
                 font-size: 14px;
                 border: none;
-                border-radius: 4px;
-                letter-spacing: 1px;
+                border-radius: 6px;
+                letter-spacing: 2px;
             }}
             QPushButton#SaveBtn:hover {{
                 background-color: #14d363;
             }}
             QPushButton#CloseBtn {{
-                color: #888;
+                color: #555;
                 border: none;
-                font-size: 18px;
+                font-size: 20px;
                 background: transparent;
             }}
             QPushButton#CloseBtn:hover {{
-                color: white;
+                color: #ffffff;
                 background-color: #fe1616;
+                border_radius: 4px;
             }}
             QFrame#GroupFrame {{
                 border: 1px solid #333;
-                border-radius: 6px;
+                border-left: 3px solid {accent};
+                border-radius: 4px;
                 margin-top: 12px;
-                background: rgba(255, 255, 255, 0.03);
+                background: rgba(255, 255, 255, 0.02);
             }}
         """)
         
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(25, 25, 25, 25)
+        layout.setContentsMargins(30, 25, 30, 30)
         layout.setSpacing(15)
         
         # Header
         header = QHBoxLayout()
         title = QLabel("GLOBAL SETTINGS")
-        title.setStyleSheet(f"color: {accent}; font-weight: bold; font-size: 20px; letter-spacing: 1px;")
+        title.setStyleSheet(f"color: {accent}; font-weight: bold; font-size: 18px; letter-spacing: 1px;")
         header.addWidget(title)
         
         header.addStretch()
@@ -797,17 +835,17 @@ class SettingsDialog(QDialog):
         grid_group.setObjectName("GroupFrame")
         grid_l = QVBoxLayout(grid_group)
         grid_l.setContentsMargins(20, 20, 20, 20)
-        grid_l.setSpacing(12)
+        grid_l.setSpacing(15)
         grid_l.addWidget(QLabel("GRID CONFIGURATION"))
         
         row1 = QHBoxLayout()
-        row1.addWidget(QLabel("BUTTONS PER ROW:"))
+        row1.addWidget(QLabel("BUTTONS PER ROW"))
         self.cols_edit = QLineEdit(str(self.parent_app.config["settings"]["columns"]))
         row1.addWidget(self.cols_edit)
         grid_l.addLayout(row1)
         
         row2 = QHBoxLayout()
-        row2.addWidget(QLabel("DEFAULT FONT SIZE:"))
+        row2.addWidget(QLabel("GLOBAL FONT SIZE"))
         self.fsize_edit = QLineEdit(str(self.parent_app.config["settings"].get("font_size", 10)))
         row2.addWidget(self.fsize_edit)
         grid_l.addLayout(row2)
@@ -818,9 +856,9 @@ class SettingsDialog(QDialog):
         win_group.setObjectName("GroupFrame")
         win_l = QVBoxLayout(win_group)
         win_l.setContentsMargins(20, 20, 20, 20)
-        win_l.setSpacing(12)
+        win_l.setSpacing(15)
         win_l.addWidget(QLabel("WINDOW BEHAVIOR"))
-        self.always_on_top = QCheckBox("KEEP WINDOW ALWAYS ON TOP")
+        self.always_on_top = QCheckBox("ALWAYS ON TOP")
         self.always_on_top.setChecked(self.parent_app.config["settings"].get("always_on_top", True))
         win_l.addWidget(self.always_on_top)
         layout.addWidget(win_group)
@@ -831,17 +869,17 @@ class SettingsDialog(QDialog):
         widget_l = QVBoxLayout(widget_group)
         widget_l.setContentsMargins(20, 20, 20, 20)
         widget_l.setSpacing(15)
-        widget_l.addWidget(QLabel("UI WIDGET TOGGLES"))
+        widget_l.addWidget(QLabel("INTERFACE PANELS"))
         
-        self.show_github = QCheckBox("SHOW GITHUB STATUS PANEL")
+        self.show_github = QCheckBox("GITHUB STATUS")
         self.show_github.setChecked(self.parent_app.config["settings"].get("show_github", True))
         widget_l.addWidget(self.show_github)
         
-        self.show_rclone = QCheckBox("SHOW RCLONE STATUS PANEL")
+        self.show_rclone = QCheckBox("RCLONE STATUS")
         self.show_rclone.setChecked(self.parent_app.config["settings"].get("show_rclone", True))
         widget_l.addWidget(self.show_rclone)
         
-        self.show_stats = QCheckBox("SHOW SYSTEM STATS (CPU/RAM/DISK/NET)")
+        self.show_stats = QCheckBox("SYSTEM MONITOR (CPU/RAM/DISK/NET)")
         self.show_stats.setChecked(self.parent_app.config["settings"].get("show_system_stats", True))
         widget_l.addWidget(self.show_stats)
         layout.addWidget(widget_group)
