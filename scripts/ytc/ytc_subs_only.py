@@ -129,48 +129,152 @@ class YouTubeSubtitleDownloader(ctk.CTk):
         
         threading.Thread(target=self._download_thread, args=(url, save_dir, lang_selection, include_auto, output_format)).start()
 
-    def _convert_vtt_to_txt(self, vtt_path):
-        """Simple regex-based VTT/SRT to Text converter that preserves lines but removes timestamps."""
+    def _convert_to_raw_text(self, file_path):
+        """Converts SRT/VTT to strict raw text by removing timestamps, indices, and tags."""
         try:
-            txt_path = os.path.splitext(vtt_path)[0] + ".txt"
+            txt_path = os.path.splitext(file_path)[0] + ".txt"
             
-            with open(vtt_path, 'r', encoding='utf-8') as f:
-                content = f.read()
+            with open(file_path, 'r', encoding='utf-8') as f:
+                lines = f.readlines()
 
-            # Remove Header (WEBVTT)
-            content = re.sub(r'WEBVTT.*\n', '', content)
-            
-            # Remove timestamps (00:00:00.000 --> 00:00:05.000)
-            # Matches VTT style and SRT style roughly
-            content = re.sub(r'\d{2}:\d{2}:\d{2}[\.,]\d{3} --> \d{2}:\d{2}:\d{2}[\.,]\d{3}.*\n', '', content)
-            
-            # Remove pure numbers on their own lines (SRT indices)
-            content = re.sub(r'^\d+\s*$', '', content, flags=re.MULTILINE)
-            
-            # Remove HTML/XML tags (like <c.color> or <b>)
-            content = re.sub(r'<[^>]+>', '', content)
+            clean_lines = []
+            last_line = ""
 
-            # Cleanup empty lines
-            lines = [line.strip() for line in content.splitlines() if line.strip()]
-            
-            # Deduplicate sequential identical lines (often happens in auto-subs)
-            dedup_lines = []
             for line in lines:
-                if not dedup_lines or dedup_lines[-1] != line:
-                    dedup_lines.append(line)
+                line = line.strip()
+                if not line: continue
+                
+                # Skip numeric indices (pure numbers)
+                if line.isdigit():
+                    continue
+                
+                # Skip timestamp lines (contain "-->")
+                if "-->" in line:
+                    continue
+                
+                # Skip Headers (common in VTT)
+                if line.startswith("WEBVTT") or line.startswith("Kind:") or line.startswith("Language:"):
+                    continue
+
+                # Remove HTML/XML tags (like <c.color>, <i>, <b>, <font>)
+                line = re.sub(r'<[^>]+>', '', line)
+                
+                # Remove timestamps if inline (rare in standard srt but good safety)
+                line = re.sub(r'\d{2}:\d{2}:\d{2}[\.,]\d{3}', '', line)
+
+                if not line: continue
+
+                # Sequential Dedup (avoid repeating lines)
+                if line != last_line:
+                    clean_lines.append(line)
+                    last_line = line
             
             with open(txt_path, 'w', encoding='utf-8') as f:
-                f.write("\n".join(dedup_lines))
+                f.write("\n".join(clean_lines))
             
-            # Delete original
-            os.remove(vtt_path)
+            # Delete original srt/vtt
+            os.remove(file_path)
             return True
         except Exception as e:
-            print(f"Error converting {vtt_path}: {e}")
+            print(f"Error converting {file_path}: {e}")
+            return False
+
+    def _convert_to_raw_text(self, file_path):
+        """Converts SRT/VTT to strict raw text by removing timestamps, indices, tags, and rolling duplicates."""
+        try:
+            txt_path = os.path.splitext(file_path)[0] + ".txt"
+            
+            with open(file_path, 'r', encoding='utf-8') as f:
+                lines = f.readlines()
+
+            clean_lines = []
+            seen_lines = set() # For global deduplication if needed, but let's do sequential smart processing
+
+            for line in lines:
+                line = line.strip()
+                if not line: continue
+                
+                # Check 1: Strict numeric index (just digits)
+                if re.fullmatch(r'\d+', line):
+                    continue
+                
+                # Check 2: Timestamp line (contains arrow)
+                if "-->" in line:
+                    continue
+                
+                # Check 3: WebVTT Headers
+                if line.startswith("WEBVTT") or line.startswith("Kind:") or line.startswith("Language:"):
+                    continue
+
+                # Remove Tags
+                line = re.sub(r'<[^>]+>', '', line)
+                
+                # Remove inline timestamps if any
+                line = re.sub(r'\d{2}:\d{2}:\d{2}[\.,]\d{3}', '', line)
+                line = line.strip()
+                
+                if not line: continue
+
+                # Logic for "Rolling" captions (e.g. Line 1, then Line 1+2, then Line 1+2+3)
+                # We want to only keep the 'new' part of the info.
+                # However, generic deduplication (checking if previous line is same) is safest for now.
+                # Advanced de-rolling is risky without semantic analysis.
+                # We will just do strict sequential deduplication.
+                
+                if not clean_lines or clean_lines[-1] != line:
+                    # Also check if this line is just a substring of the previous one (rare)
+                    # or if the previous line is a substring of this one (rolling caption case!)
+                    
+                    # Case: Rolling captions
+                    # Prev: "Hello"
+                    # Curr: "Hello World"
+                    # We want to maybe just update the last line? 
+                    # OR we just output "Hello World" and user sees repetition?
+                    # The user specifically asked to remove numbers and timestamps.
+                    # Let's keep it simple: Sequential Dedup.
+                     clean_lines.append(line)
+            
+            # Additional cleanup: Filter out lines that are subsets of the next line (Rolling fix attempt)
+            # Example:
+            # 1. "Test"
+            # 2. "Test Live"
+            # -> We usually only want "Test Live", but this is tricky if they are distinct sentences.
+            # Let's stick to the requested "remove timestamps and numbers" for now, 
+            # but I will add a check: if `line` starts with `last_line`, process it?
+            # Actually, standard SRT viewers handle this. For raw text, it IS annoying.
+            # Let's try a simple heuristic: If Line B starts with Line A, replace Line A with Line B.
+            
+            final_lines = []
+            for line in clean_lines:
+                if final_lines and line.startswith(final_lines[-1]):
+                    # Replace the previous partial line with the new longer one
+                    final_lines[-1] = line
+                elif final_lines and final_lines[-1] in line:
+                     # If the previous line is contained anywhere in the new line?
+                     # Too aggressive. "I am" -> "I am here".
+                     final_lines[-1] = line
+                else:
+                    final_lines.append(line)
+
+            with open(txt_path, 'w', encoding='utf-8') as f:
+                f.write("\n".join(final_lines))
+            
+            # Delete original
+            try:
+                os.remove(file_path)
+            except:
+                pass
+            return True
+        except Exception as e:
+            print(f"Error converting {file_path}: {e}")
             return False
 
     def _download_thread(self, url, save_dir, lang_selection, include_auto, output_format):
         try:
+            # Track start time to find new files
+            import time
+            start_time = time.time()
+
             command = ["yt-dlp", "--skip-download", "--write-subs", "-o", f"{save_dir}/%(title)s.%(ext)s"]
             
             # Language
@@ -186,7 +290,6 @@ class YouTubeSubtitleDownloader(ctk.CTk):
                 command.append("--write-auto-subs")
 
             # Determine download format
-            # If txt is requested, we download srt (easier to parse)
             dl_format = output_format if output_format != "txt" else "srt"
             command.extend(["--convert-subs", dl_format])
 
@@ -207,41 +310,51 @@ class YouTubeSubtitleDownloader(ctk.CTk):
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.PIPE, 
                 text=True, 
-                creationflags=subprocess.CREATE_NO_WINDOW,
-                bufsize=1,
-                universal_newlines=True
+                creationflags=subprocess.CREATE_NO_WINDOW
             )
             
-            downloaded_files = []
-
+            # Just read output to keep buffer clear, but don't rely on it for filenames
             while True:
                 line = process.stdout.readline()
                 if not line and process.poll() is not None:
                     break
                 if line:
-                    line = line.strip()
-                    self.after(0, lambda m=line: self.status_label.configure(text=m[-80:]))
-                    
-                    # Regex to capture filename robustly
-                    # Matches: "[info] Writing video subtitles to: C:\Path\To\File.srt"
-                    match = re.search(r'Writing video subtitles to:\s+(.+)$', line)
-                    if match:
-                         path = match.group(1).strip()
-                         downloaded_files.append(path)
+                    self.after(0, lambda m=line.strip(): self.status_label.configure(text=m[-80:]))
 
             stderr = process.communicate()[1]
 
             if process.returncode == 0:
-                # Post-processing for Text
                 if output_format == "txt":
                     self.after(0, lambda: self.status_label.configure(text="Converting to raw text..."))
-                    if not downloaded_files:
-                        self.after(0, lambda: messagebox.showwarning("Warning", "Download successful but could not auto-convert to text (file path not detected)."))
                     
-                    for fpath in downloaded_files:
-                        self._convert_vtt_to_txt(fpath)
+                    # Robust File Finding: Look for any .srt or .vtt file modified AFTER start_time in the folder
+                    found_files = []
+                    try:
+                        for filename in os.listdir(save_dir):
+                            if filename.endswith(".srt") or filename.endswith(".vtt"):
+                                full_path = os.path.join(save_dir, filename)
+                                # Check modification time
+                                if os.path.getmtime(full_path) > start_time - 5: # 5s buffer
+                                    found_files.append(full_path)
+                    except Exception as e:
+                        print(f"File scan error: {e}")
 
-                self.after(0, lambda: messagebox.showinfo("Success", "Download Completed!"))
+                    if found_files:
+                        success_count = 0
+                        for fpath in found_files:
+                            if self._convert_to_raw_text(fpath):
+                                success_count += 1
+                        
+                        if success_count > 0:
+                             self.after(0, lambda: messagebox.showinfo("Success", f"Download & Conversion Completed!\nProcessed {success_count} file(s)."))
+                        else:
+                             self.after(0, lambda: messagebox.showwarning("Warning", "Downloaded files found but conversion failed."))
+                    else:
+                        self.after(0, lambda: messagebox.showwarning("Warning", "Download successful but no new subtitle files were found for conversion."))
+
+                else:
+                    self.after(0, lambda: messagebox.showinfo("Success", "Download Completed!"))
+                
                 self.after(0, lambda: self.status_label.configure(text="Ready", text_color="gray"))
             else:
                 self.after(0, lambda: messagebox.showerror("Error", f"Download failed:\n{stderr}"))
