@@ -55,7 +55,22 @@ When adding new **Markdown Syntax** or **Cell Formatting**, you **MUST** update 
 5.  **Static Parsing (`export_static.py`):** Add Python-escaped regex to both `parseMarkdown` functions.
 6.  **User Guide (`templates/index.html`):** Add examples to the "Markdown Formatting Guide" modal.
 
-## Core Architectural Concepts
+### Core Architectural Concepts
+
+### View Modes (Critical)
+The application operates in two distinct view modes, toggled by the **Page Icon (📄)** in the toolbar (`toggleMarkdownPreview()`):
+
+1.  **Raw Mode (Preview Disabled)**:
+    *   **Visual**: Displays the raw `<input>` or `<textarea>` directly.
+    *   **Content**: Shows raw syntax symbols (e.g., `**bold**`, `\(math\)`) as plain text.
+    *   **Behavior**: No HTML rendering or overlays. Fast and direct.
+    *   **Use Case**: Deep editing, debugging syntax, or bulk text improvements.
+
+2.  **Markdown Mode (Preview Enabled)**:
+    *   **Visual**: Renders a **Preview Overlay** (`.markdown-preview`) *on top* of the text input.
+    *   **Content**: Shows processed HTML (Bold, Colors, Math, Tables).
+    *   **Behavior**: The underlying input becomes transparent. Typing happens "through" the preview.
+    *   **Use Case**: Reading, presenting, and "Rich-Text" style editing.
 
 ### Data Structure (`tableData`)
 The state is managed in a central object synced with `data.json`.
