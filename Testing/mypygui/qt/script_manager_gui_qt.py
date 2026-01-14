@@ -740,9 +740,21 @@ class MainWindow(QMainWindow):
         self.back_btn = CyberButton("<<", script_data={"color": CP_RED, "type": "script"}); self.back_btn.setFixedSize(50, 40); self.back_btn.clicked.connect(self.go_back); self.back_btn.hide()
         self.title_lbl = QLabel("SCRIPT MANAGER"); self.title_lbl.setFont(QFont("Consolas", 16, QFont.Weight.Bold)); self.title_lbl.setStyleSheet(f"color: {CP_YELLOW};")
         header.addWidget(self.back_btn); header.addWidget(self.title_lbl); header.addStretch()
-        stg_btn = CyberButton("SETTINGS", script_data={"color": CP_DIM}); stg_btn.setFixedSize(100, 40); 
-        stg_btn.clicked.connect(self.add_new_item) # Temp map for easy add
-        header.addWidget(stg_btn)
+        
+        # Controls
+        btn_add_script = CyberButton("+ SCRIPT", script_data={"color": CP_GREEN, "type": "script"}); btn_add_script.setFixedSize(110, 40)
+        btn_add_script.clicked.connect(self.add_new_item)
+        
+        btn_add_folder = CyberButton("+ FOLDER", script_data={"color": CP_CYAN, "type": "script"}); btn_add_folder.setFixedSize(110, 40)
+        btn_add_folder.clicked.connect(self.add_new_folder)
+        
+        btn_settings = CyberButton("CONFIG", script_data={"color": CP_DIM, "type": "script"}); btn_settings.setFixedSize(90, 40)
+        btn_settings.clicked.connect(self.open_global_settings)
+
+        header.addWidget(btn_add_script)
+        header.addWidget(btn_add_folder)
+        header.addWidget(btn_settings)
+        
         self.main_layout.addLayout(header)
 
         # Dashboard
@@ -889,12 +901,30 @@ class MainWindow(QMainWindow):
         if EditDialog(script, self).exec(): self.save_config()
 
     def add_new_item(self):
-        # Quick hack to add new item
-        new_script = {"name": "New Item", "path": "", "type": "script", "color": CP_YELLOW}
+        new_script = {"name": "New Script", "path": "", "type": "script", "color": CP_YELLOW}
         target_list = self.view_stack[-1]["scripts"] if self.view_stack else self.config["scripts"]
         target_list.append(new_script)
         if EditDialog(new_script, self).exec(): self.save_config()
         else: target_list.remove(new_script)
+
+    def add_new_folder(self):
+        new_folder = {
+            "name": "New Folder", 
+            "type": "folder", 
+            "scripts": [], 
+            "color": CP_CYAN,
+            "col_span": 1,
+            "row_span": 1
+        }
+        target_list = self.view_stack[-1]["scripts"] if self.view_stack else self.config["scripts"]
+        target_list.append(new_folder)
+        if EditDialog(new_folder, self).exec(): 
+            self.save_config()
+        else: 
+            target_list.remove(new_folder)
+
+    def open_global_settings(self):
+        QMessageBox.information(self, "Settings", "Global Application Config\n(Columns, Default Fonts, etc. - Not Implemented)")
 
     def delete_item(self, script):
         if QMessageBox.question(self, "Confirm", "Delete?") == QMessageBox.StandardButton.Yes:
