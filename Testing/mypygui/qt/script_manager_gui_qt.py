@@ -179,36 +179,6 @@ class StatWidget(QFrame):
 # -----------------------------------------------------------------------------
 # SELECTION DIALOG
 # -----------------------------------------------------------------------------
-class TypeSelectionDialog(QDialog):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setWindowTitle("CREATE ITEM")
-        self.setFixedSize(400, 150)
-        self.setStyleSheet(f"background-color: {CP_BG}; border: 1px solid {CP_YELLOW};")
-        self.selected_type = None
-        
-        layout = QHBoxLayout(self)
-        layout.setSpacing(20)
-        layout.setContentsMargins(30,30,30,30)
-        
-        btn_script = QPushButton("SCRIPT")
-        btn_script.setStyleSheet(f"background-color: {CP_PANEL}; color: {CP_GREEN}; border: 2px solid {CP_GREEN}; font-family: 'Consolas'; font-size: 14pt; font-weight: bold;")
-        btn_script.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_script.clicked.connect(lambda: self.finish("script"))
-        
-        btn_folder = QPushButton("FOLDER")
-        btn_folder.setStyleSheet(f"background-color: {CP_PANEL}; color: {CP_CYAN}; border: 2px solid {CP_CYAN}; font-family: 'Consolas'; font-size: 14pt; font-weight: bold;")
-        btn_folder.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_folder.clicked.connect(lambda: self.finish("folder"))
-        
-        layout.addWidget(btn_script)
-        layout.addWidget(btn_folder)
-        
-    def finish(self, t):
-        self.selected_type = t
-        self.accept()
-
-# -----------------------------------------------------------------------------
 # FULL EDIT DIALOG
 # -----------------------------------------------------------------------------
 class EditDialog(QDialog):
@@ -916,10 +886,14 @@ class MainWindow(QMainWindow):
         self.title_lbl = QLabel("SCRIPT MANAGER"); self.title_lbl.setFont(QFont("Consolas", 16, QFont.Weight.Bold)); self.title_lbl.setStyleSheet(f"color: {CP_YELLOW};")
         header.addWidget(self.back_btn); header.addWidget(self.title_lbl); header.addStretch()
         
-        # ADD BUTTON
-        self.btn_add = CyberButton("+", script_data={"color": CP_GREEN, "type": "script"})
-        self.btn_add.setFixedSize(40, 30) # Compact Header Btn
-        self.btn_add.clicked.connect(self.prompt_add_new)
+        # ADD BUTTONS - Script and Folder
+        self.btn_add_script = CyberButton("+S", script_data={"color": CP_GREEN, "type": "script"})
+        self.btn_add_script.setFixedSize(40, 30)
+        self.btn_add_script.clicked.connect(self.add_new_item)
+        
+        self.btn_add_folder = CyberButton("+F", script_data={"color": CP_YELLOW, "type": "script"})
+        self.btn_add_folder.setFixedSize(40, 30)
+        self.btn_add_folder.clicked.connect(self.add_new_folder)
         
         cfg_col = self.config.get("cfg_btn_color", CP_DIM)
         self.btn_cfg = CyberButton("CFG", script_data={"color": cfg_col, "type": "script"}); self.btn_cfg.setFixedSize(50, 30)
@@ -928,7 +902,8 @@ class MainWindow(QMainWindow):
         self.btn_close = CyberButton("X", script_data={"color": CP_RED, "type": "script"}); self.btn_close.setFixedSize(40, 30)
         self.btn_close.clicked.connect(self.close)
 
-        header.addWidget(self.btn_add)
+        header.addWidget(self.btn_add_script)
+        header.addWidget(self.btn_add_folder)
         header.addWidget(self.btn_cfg)
         header.addWidget(self.btn_close)
         
@@ -976,7 +951,8 @@ class MainWindow(QMainWindow):
         paste_act.triggered.connect(self.paste_item)
         
         menu.addSeparator()
-        menu.addAction("Add New...").triggered.connect(self.prompt_add_new)
+        menu.addAction("Add Script").triggered.connect(self.add_new_item)
+        menu.addAction("Add Folder").triggered.connect(self.add_new_folder)
         
         menu.exec(self.grid_container.mapToGlobal(pos))
 
@@ -1277,19 +1253,44 @@ class MainWindow(QMainWindow):
         if EditDialog(script, self).exec(): self.save_config()
 
     def delete_item(self, script):
-        if QMessageBox.question(self, "Delete", f"Delete '{script.get('name')}'?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No) == QMessageBox.StandardButton.Yes:
+        dlg = QDialog(self)
+        dlg.setWindowTitle("DELETE")
+        dlg.setFixedSize(350, 120)
+        dlg.setStyleSheet(f"""
+            QDialog {{ background-color: {CP_BG}; border: 2px solid {CP_RED}; }}
+            QLabel {{ color: {CP_TEXT}; font-family: 'Consolas'; font-size: 11pt; }}
+        """)
+        
+        layout = QVBoxLayout(dlg)
+        layout.setContentsMargins(20, 20, 20, 20)
+        
+        lbl = QLabel(f"Delete '{script.get('name')}'?")
+        lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(lbl)
+        
+        btn_layout = QHBoxLayout()
+        btn_layout.addStretch()
+        
+        btn_yes = QPushButton("YES")
+        btn_yes.setStyleSheet(f"background-color: {CP_RED}; color: white; border: none; padding: 8px 25px; font-family: 'Consolas'; font-weight: bold;")
+        btn_yes.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_yes.clicked.connect(dlg.accept)
+        
+        btn_no = QPushButton("NO")
+        btn_no.setStyleSheet(f"background-color: {CP_DIM}; color: white; border: none; padding: 8px 25px; font-family: 'Consolas'; font-weight: bold;")
+        btn_no.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_no.clicked.connect(dlg.reject)
+        
+        btn_layout.addWidget(btn_yes)
+        btn_layout.addWidget(btn_no)
+        btn_layout.addStretch()
+        layout.addLayout(btn_layout)
+        
+        if dlg.exec():
             target_list = self.view_stack[-1]["scripts"] if self.view_stack else self.config["scripts"]
             if script in target_list:
                 target_list.remove(script)
                 self.save_config()
-
-    def prompt_add_new(self):
-        dlg = TypeSelectionDialog(self)
-        if dlg.exec():
-            if dlg.selected_type == "script":
-                self.add_new_item()
-            elif dlg.selected_type == "folder":
-                self.add_new_folder()
 
     def add_new_item(self):
         new_script = {"name": "New Script", "path": "", "type": "script", "color": "#FFFFFF"}
