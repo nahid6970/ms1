@@ -186,7 +186,8 @@
             "kill_window": false,
             "use_inline": false,
             "inline_type": "cmd",
-            "inline_script": ""
+            "inline_script": "",
+            "font_family": "JetBrainsMono NFP"
         },
         {
             "name": "AntiGravity",

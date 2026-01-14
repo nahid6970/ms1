@@ -1107,16 +1107,31 @@ class ScriptLauncherApp:
         current_font = script.get("font_family", self.config["settings"].get("font_family", self.main_font))
         font_family_var = tk.StringVar(value=current_font)
         
-        font_dropdown = ctk.CTkOptionMenu(
-            font_family_row, 
-            variable=font_family_var, 
-            values=font_list[:50],  # Limit to first 50 fonts for performance
-            width=200, 
-            fg_color="#2b2f38", 
-            button_color="#3a3f4b", 
-            button_hover_color="#4a4f5b"
+        # Create combobox with scrollable dropdown
+        from tkinter import ttk
+        font_combo = ttk.Combobox(
+            font_family_row,
+            textvariable=font_family_var,
+            values=font_list,
+            state="readonly",
+            width=25,
+            height=15  # Number of visible items before scrolling
         )
-        font_dropdown.pack(side="left", padx=5)
+        font_combo.pack(side="left", padx=5)
+        
+        # Style the combobox to match dark theme
+        style = ttk.Style()
+        style.theme_use('default')
+        style.configure('TCombobox', 
+                       fieldbackground='#2b2f38',
+                       background='#3a3f4b',
+                       foreground='white',
+                       arrowcolor='white',
+                       borderwidth=0)
+        style.map('TCombobox',
+                 fieldbackground=[('readonly', '#2b2f38')],
+                 selectbackground=[('readonly', '#2b2f38')],
+                 selectforeground=[('readonly', 'white')])
         
         # Font Size & Styles Row
         size_style_row = tk.Frame(typo_frame, bg="#1d2027")
