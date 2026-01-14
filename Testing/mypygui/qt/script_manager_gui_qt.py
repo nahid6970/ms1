@@ -273,7 +273,13 @@ class EditDialog(QDialog):
         l_typo.addWidget(QLabel("Size:"), 1, 0)
         self.spn_size = QSpinBox()
         self.spn_size.setRange(6, 72)
-        self.spn_size.setValue(self.script.get("font_size", 10))
+        
+        # Pull global default if item has no font_size
+        default_fs = 10
+        if parent and hasattr(parent, "config"):
+            default_fs = parent.config.get("default_font_size", 10)
+            
+        self.spn_size.setValue(self.script.get("font_size", default_fs))
         l_typo.addWidget(self.spn_size, 1, 1)
         self.chk_bold = QCheckBox("Bold")
         self.chk_bold.setChecked(self.script.get("is_bold", True))

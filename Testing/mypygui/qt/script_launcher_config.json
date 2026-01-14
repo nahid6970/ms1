@@ -40,13 +40,15 @@
                     "inline_type": "cmd",
                     "inline_script": "",
                     "font_family": "Consolas",
-                    "_runtime_height": 50
+                    "_runtime_height": 50,
+                    "_runtime_font_size": 20
                 },
                 {
                     "name": "Convert",
                     "path": "C:/Users/nahid/ms/ms1/scripts/ffmpeg/convert.ps1",
                     "type": "script",
-                    "_runtime_height": 50
+                    "_runtime_height": 50,
+                    "_runtime_font_size": 25
                 },
                 {
                     "name": "IMG-Dimension",
@@ -54,19 +56,22 @@
                     "type": "script",
                     "hide_terminal": false,
                     "font_size": 20,
-                    "_runtime_height": 50
+                    "_runtime_height": 50,
+                    "_runtime_font_size": 20
                 },
                 {
                     "name": "Merge",
                     "path": "C:/Users/nahid/ms/ms1/scripts/ffmpeg/merge.ps1",
                     "type": "script",
-                    "_runtime_height": 50
+                    "_runtime_height": 50,
+                    "_runtime_font_size": 25
                 },
                 {
                     "name": "Trim",
                     "path": "C:/Users/nahid/ms/ms1/scripts/ffmpeg/trim.ps1",
                     "type": "script",
-                    "_runtime_height": 50
+                    "_runtime_height": 50,
+                    "_runtime_font_size": 25
                 },
                 {
                     "name": "VID-Dimension",
@@ -74,26 +79,8 @@
                     "type": "script",
                     "hide_terminal": false,
                     "font_size": 20,
-                    "_runtime_height": 50
-                },
-                {
-                    "name": "New Folder",
-                    "type": "folder",
-                    "scripts": [],
-                    "color": "#FCEE0A",
-                    "col_span": 1,
-                    "row_span": 1,
-                    "font_family": "Consolas",
-                    "font_size": 10,
-                    "is_bold": true,
-                    "is_italic": false,
-                    "width": 0,
-                    "height": 0,
-                    "corner_radius": 0,
-                    "border_width": 0,
-                    "grid_columns": 0,
-                    "grid_btn_height": 0,
-                    "_runtime_height": 50
+                    "_runtime_height": 50,
+                    "_runtime_font_size": 20
                 }
             ],
             "font_size": 20,
@@ -434,6 +421,90 @@
             "_runtime_height": 50,
             "_runtime_font_size": 10,
             "border_color": "#000000",
+            "grid_columns": 0,
+            "grid_btn_height": 0
+        },
+        {
+            "name": "New Folder",
+            "type": "folder",
+            "scripts": [],
+            "color": "#FCEE0A",
+            "col_span": 1,
+            "row_span": 1,
+            "font_family": "Consolas",
+            "font_size": 10,
+            "is_bold": true,
+            "is_italic": false,
+            "width": 0,
+            "height": 0,
+            "corner_radius": 0,
+            "border_width": 0,
+            "grid_columns": 0,
+            "grid_btn_height": 0,
+            "_runtime_height": 50,
+            "_runtime_font_size": 10
+        },
+        {
+            "name": "New Script",
+            "path": "",
+            "type": "script",
+            "color": "#FFFFFF",
+            "hide_terminal": false,
+            "keep_open": false,
+            "kill_window": false,
+            "ctrl_left_cmd": "",
+            "ctrl_right_cmd": "",
+            "use_inline": false,
+            "inline_type": "cmd",
+            "inline_script": "",
+            "font_family": "Consolas",
+            "font_size": 10,
+            "is_bold": true,
+            "is_italic": false,
+            "col_span": 1,
+            "row_span": 1,
+            "width": 0,
+            "height": 0,
+            "corner_radius": 0,
+            "border_width": 0,
+            "_runtime_height": 50,
+            "_runtime_font_size": 10
+        },
+        {
+            "name": "New Folder",
+            "type": "folder",
+            "scripts": [],
+            "color": "#FCEE0A",
+            "col_span": 1,
+            "row_span": 1,
+            "font_family": "Consolas",
+            "font_size": 25,
+            "is_bold": true,
+            "is_italic": false,
+            "width": 0,
+            "height": 0,
+            "corner_radius": 0,
+            "border_width": 0,
+            "grid_columns": 0,
+            "grid_btn_height": 0,
+            "_runtime_height": 50,
+            "_runtime_font_size": 25
+        },
+        {
+            "name": "New Folder",
+            "type": "folder",
+            "scripts": [],
+            "color": "#FCEE0A",
+            "col_span": 1,
+            "row_span": 1,
+            "font_family": "Consolas",
+            "font_size": 10,
+            "is_bold": true,
+            "is_italic": false,
+            "width": 0,
+            "height": 0,
+            "corner_radius": 0,
+            "border_width": 0,
             "grid_columns": 0,
             "grid_btn_height": 0
         }
