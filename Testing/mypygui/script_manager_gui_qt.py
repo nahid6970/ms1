@@ -349,7 +349,7 @@ class EditDialog(QDialog):
             }}
             QLabel {{
                 color: #888888; 
-                font-size: 10px;
+                font-size: 13px;
                 font-weight: bold;
                 border: none;
                 background: transparent;
@@ -363,7 +363,7 @@ class EditDialog(QDialog):
                 border-radius: 4px;
                 padding: 8px;
                 font-family: 'Consolas', 'JetBrainsMono NFP';
-                font-size: 12px;
+                font-size: 14px;
             }}
             QLineEdit:focus, QComboBox:focus, QTextEdit:focus {{
                 border: 1px solid {accent};
@@ -444,7 +444,8 @@ class EditDialog(QDialog):
         
         # Header
         header = QHBoxLayout()
-        title_text = f"EDIT {self.script['type'].upper()}: {self.script['name'].upper()}"
+        script_type = self.script.get("type", "script")
+        title_text = f"EDIT {script_type.upper()}: {self.script['name'].upper()}"
         title = QLabel(title_text)
         title.setStyleSheet(f"color: {accent}; font-weight: bold; font-size: 18px; letter-spacing: 1px;")
         header.addWidget(title)
@@ -752,7 +753,7 @@ class SettingsDialog(QDialog):
             }}
             QLabel {{
                 color: #888888; 
-                font-size: 10px;
+                font-size: 13px;
                 font-weight: bold;
                 border: none;
                 font-family: 'Segoe UI Semibold';
@@ -764,7 +765,7 @@ class SettingsDialog(QDialog):
                 border: 1px solid #333;
                 border-radius: 4px;
                 padding: 8px;
-                font-size: 12px;
+                font-size: 15px;
             }}
             QLineEdit:focus {{
                 border: 1px solid {accent};
@@ -975,7 +976,8 @@ class ScriptLauncherApp(QMainWindow):
         self.set_window_icon()
         
         self.layout = QVBoxLayout(self.main_widget)
-        self.layout.setContentsMargins(10, 10, 10, 10)
+        self.layout.setContentsMargins(10, 5, 10, 10)
+        self.layout.setSpacing(5)
         
         # Header
         self.header = QFrame()
@@ -991,7 +993,7 @@ class ScriptLauncherApp(QMainWindow):
         self.header_layout.addWidget(self.back_btn)
         
         self.title_lbl = QLabel("SCRIPT MANAGER 🚀")
-        self.title_lbl.setStyleSheet(f"color: {self.config['settings']['accent_color']}; font-weight: bold; font-size: 14px;")
+        self.title_lbl.setStyleSheet(f"color: {self.config['settings']['accent_color']}; font-weight: bold; font-size: 16px;")
         self.header_layout.addWidget(self.title_lbl)
         
         self.header_layout.addStretch()
@@ -1018,11 +1020,13 @@ class ScriptLauncherApp(QMainWindow):
         
         # Status / Stats Widgets
         stats_layout = QHBoxLayout()
+        stats_layout.setSpacing(10)
+        stats_layout.setContentsMargins(0, 0, 0, 0)
         
         # Github
         if self.config["settings"].get("show_github", True):
             self.github_frame = QFrame()
-            self.github_frame.setStyleSheet("QFrame { border: 1px solid #333; padding: 5px; } QLabel { border: none; font-size: 10px; }")
+            self.github_frame.setStyleSheet("QFrame { border: 1px solid #333; padding: 5px; } QLabel { border: none; font-size: 13px; }")
             self.github_layout = QHBoxLayout(self.github_frame)
             self.repo_widgets = {}
             for repo in self.config["github_repos"]:
@@ -1037,7 +1041,7 @@ class ScriptLauncherApp(QMainWindow):
         # Rclone
         if self.config["settings"].get("show_rclone", True):
             self.rclone_frame = QFrame()
-            self.rclone_frame.setStyleSheet("QFrame { border: 1px solid #333; padding: 5px; } QLabel { border: none; font-size: 10px; }")
+            self.rclone_frame.setStyleSheet("QFrame { border: 1px solid #333; padding: 5px; } QLabel { border: none; font-size: 13px; }")
             self.rclone_layout = QHBoxLayout(self.rclone_frame)
             self.folder_widgets = {}
             for folder in self.config["rclone_folders"]:
@@ -1143,6 +1147,7 @@ class ScriptLauncherApp(QMainWindow):
         self.grid_container.setAcceptDrops(True)
         self.grid_layout = QGridLayout(self.grid_container)
         self.grid_layout.setSpacing(10)
+        self.grid_layout.setVerticalSpacing(5)
         self.scroll.setWidget(self.grid_container)
         self.layout.addWidget(self.scroll)
         
@@ -1208,6 +1213,9 @@ class ScriptLauncherApp(QMainWindow):
                             found = True
                             break
                 if found: break
+        
+        # Add a spacer at the bottom to push buttons to the top
+        self.grid_layout.setRowStretch(self.grid_layout.rowCount(), 1)
 
     def start_monitoring(self):
         self.sys_thread = SystemMonitorThread()
