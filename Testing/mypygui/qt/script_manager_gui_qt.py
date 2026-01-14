@@ -392,8 +392,34 @@ class EditDialog(QDialog):
         vbox.addLayout(btn_layout)
 
     def create_color_btn(self, label, key):
+        # Determine effective default based on key and type, matching CyberButton logic
+        is_folder = (self.script.get("type") == "folder")
+        default_val = CP_BG
+        
+        # 1. Main Color
+        if key == "color":
+            default_val = CP_YELLOW if is_folder else "#FFFFFF"
+            
+        # 2. Text Color
+        elif key == "text_color":
+            default_val = "#000000"
+            
+        # 3. Hover Color
+        elif key == "hover_color":
+            default_val = CP_BG
+            
+        # 4. Hover Text
+        elif key == "hover_text_color":
+            # This depends on the main color
+            default_val = self.script.get("color", CP_YELLOW if is_folder else "#FFFFFF")
+            
+        # 5. Border Color
+        elif key == "border_color":
+            default_val = self.script.get("color", CP_YELLOW if is_folder else "#FFFFFF")
+
         c = self.script.get(key)
-        if not c: c = CP_BG
+        if not c: c = default_val
+        
         btn = QPushButton(label)
         self.set_btn_color(btn, c)
         btn.clicked.connect(lambda: self.pick_color(btn, key))

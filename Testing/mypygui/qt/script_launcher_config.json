@@ -299,7 +299,7 @@
             "inline_type": "cmd",
             "inline_script": "",
             "font_size": 12,
-            "border_width": 0,
+            "border_width": 5,
             "corner_radius": 4,
             "col_span": 1,
             "row_span": 1,
@@ -308,7 +308,8 @@
             "is_bold": false,
             "is_italic": false,
             "font_family": "Consolas",
-            "_runtime_height": 50
+            "_runtime_height": 50,
+            "border_color": "#55aaff"
         },
         {
             "name": "Locker",
@@ -323,7 +324,7 @@
             "inline_type": "cmd",
             "inline_script": "",
             "font_size": 20,
-            "border_width": 0,
+            "border_width": 5,
             "corner_radius": 4,
             "col_span": 1,
             "row_span": 1,
@@ -331,7 +332,8 @@
             "height": 0,
             "is_bold": false,
             "is_italic": false,
-            "_runtime_height": 50
+            "_runtime_height": 50,
+            "font_family": "Consolas"
         },
         {
             "name": "ClipBoard",
