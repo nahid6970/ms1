@@ -593,7 +593,9 @@ class SettingsDialog(QDialog):
             QLabel {{ color: {CP_TEXT}; font-family: 'Consolas'; font-weight: bold; }}
             QLineEdit, QSpinBox {{ background: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 5px; }}
             QSpinBox::up-button, QSpinBox::down-button {{ width: 0px; border: none; }}
-            QCheckBox {{ color: {CP_TEXT}; font-family: 'Consolas'; }}
+            QCheckBox {{ color: {CP_TEXT}; font-family: 'Consolas'; spacing: 8px; }}
+            QCheckBox::indicator {{ width: 14px; height: 14px; border: 1px solid {CP_DIM}; background: {CP_PANEL}; }}
+            QCheckBox::indicator:checked {{ background: {CP_YELLOW}; border-color: {CP_YELLOW}; }}
             QPushButton {{ background: {CP_DIM}; color: white; border: none; padding: 8px; font-weight: bold; }}
             QPushButton:hover {{ background: {CP_DIM}44; border: 1px solid {self.win_border}; }}
         """)
@@ -728,7 +730,9 @@ class SettingsDialog(QDialog):
             QLabel {{ color: {CP_TEXT}; font-family: 'Consolas'; font-weight: bold; }}
             QLineEdit, QSpinBox {{ background: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 5px; }}
             QSpinBox::up-button, QSpinBox::down-button {{ width: 0px; border: none; }}
-            QCheckBox {{ color: {CP_TEXT}; font-family: 'Consolas'; }}
+            QCheckBox {{ color: {CP_TEXT}; font-family: 'Consolas'; spacing: 8px; }}
+            QCheckBox::indicator {{ width: 14px; height: 14px; border: 1px solid {CP_DIM}; background: {CP_PANEL}; }}
+            QCheckBox::indicator:checked {{ background: {CP_YELLOW}; border-color: {CP_YELLOW}; }}
             QPushButton {{ background: {CP_DIM}; color: white; border: none; padding: 8px; font-weight: bold; }}
             QPushButton:hover {{ background: {CP_DIM}44; border: 1px solid {self.win_border}; }}
         """)
