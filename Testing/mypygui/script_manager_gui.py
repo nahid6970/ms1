@@ -1107,31 +1107,75 @@ class ScriptLauncherApp:
         current_font = script.get("font_family", self.config["settings"].get("font_family", self.main_font))
         font_family_var = tk.StringVar(value=current_font)
         
-        # Create combobox with scrollable dropdown
+        # Create custom styled combobox
         from tkinter import ttk
+        
+        # Configure style for better appearance
+        combo_style = ttk.Style()
+        combo_style.theme_use('clam')
+        
+        combo_style.configure('Dark.TCombobox',
+                             fieldbackground='#2b2f38',
+                             background='#2b2f38',
+                             foreground='white',
+                             arrowcolor='white',
+                             bordercolor='#3a3f4b',
+                             lightcolor='#2b2f38',
+                             darkcolor='#2b2f38',
+                             borderwidth=1,
+                             relief='flat')
+        
+        combo_style.map('Dark.TCombobox',
+                       fieldbackground=[('readonly', '#2b2f38'), ('disabled', '#1d2027')],
+                       foreground=[('readonly', 'white'), ('disabled', '#666666')],
+                       background=[('readonly', '#2b2f38')],
+                       bordercolor=[('focus', '#26b2f3')])
+        
+        # Dropdown list styling
+        top.option_add('*TCombobox*Listbox.background', '#2b2f38')
+        top.option_add('*TCombobox*Listbox.foreground', 'white')
+        top.option_add('*TCombobox*Listbox.selectBackground', '#26b2f3')
+        top.option_add('*TCombobox*Listbox.selectForeground', 'white')
+        top.option_add('*TCombobox*Listbox.font', (self.main_font, 9))
+        
         font_combo = ttk.Combobox(
             font_family_row,
             textvariable=font_family_var,
             values=font_list,
-            state="readonly",
+            state="normal",  # Allow typing to search
             width=25,
-            height=15  # Number of visible items before scrolling
+            height=15,
+            style='Dark.TCombobox'
         )
         font_combo.pack(side="left", padx=5)
         
-        # Style the combobox to match dark theme
-        style = ttk.Style()
-        style.theme_use('default')
-        style.configure('TCombobox', 
-                       fieldbackground='#2b2f38',
-                       background='#3a3f4b',
-                       foreground='white',
-                       arrowcolor='white',
-                       borderwidth=0)
-        style.map('TCombobox',
-                 fieldbackground=[('readonly', '#2b2f38')],
-                 selectbackground=[('readonly', '#2b2f38')],
-                 selectforeground=[('readonly', 'white')])
+        # Bind events for type-to-search functionality
+        def on_keypress(event):
+            typed = event.char.lower()
+            if typed and typed.isprintable():
+                current_val = font_family_var.get()
+                # Find first font starting with typed character
+                for font in font_list:
+                    if font.lower().startswith(typed):
+                        font_combo.set(font)
+                        # Scroll to show the selected item
+                        try:
+                            idx = font_list.index(font)
+                            font_combo.current(idx)
+                        except:
+                            pass
+                        break
+                return "break"  # Prevent default behavior
+        
+        font_combo.bind("<KeyPress>", on_keypress)
+        
+        # Prevent manual editing, only allow selection
+        def validate_selection(event):
+            if font_family_var.get() not in font_list:
+                # Reset to current font if invalid
+                font_combo.set(current_font)
+        
+        font_combo.bind("<FocusOut>", validate_selection)
         
         # Font Size & Styles Row
         size_style_row = tk.Frame(typo_frame, bg="#1d2027")
