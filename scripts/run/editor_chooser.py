@@ -157,11 +157,11 @@ def create_editor_chooser(file_paths):
         for r_idx, row in enumerate(button_grid):
             for c_idx, (btn_frame, label, name, color) in enumerate(row):
                 if r_idx == current_pos[0] and c_idx == current_pos[1]:
-                    # Focused button - larger
+                    # Focused button - larger (fills the 140x70 slot)
                     btn_frame.config(width=140, height=70, highlightthickness=2, highlightbackground='#ffffff')
                     label.config(font=tkfont.Font(family="Segoe UI", size=12, weight="bold"))
                 else:
-                    # Unfocused button - normal size
+                    # Unfocused button - normal size (centered in 140x70 slot)
                     btn_frame.config(width=120, height=60, highlightthickness=0)
                     label.config(font=button_font)
     
@@ -194,9 +194,14 @@ def create_editor_chooser(file_paths):
             root.destroy()
             open_with_editor(file_paths, name.lower().replace("vscode", "vscode"))
         
-        # Create frame for button
-        btn_frame = tk.Frame(parent, bg=color, width=120, height=60, cursor='hand2')
-        btn_frame.pack(side='left', padx=10)
+        # Create a fixed-size 'slot' to prevent layout shifting
+        slot_frame = tk.Frame(parent, bg='#1e1e1e', width=140, height=70)
+        slot_frame.pack(side='left', padx=5)
+        slot_frame.pack_propagate(False)
+
+        # Create frame for button centered in the slot
+        btn_frame = tk.Frame(slot_frame, bg=color, width=120, height=60, cursor='hand2')
+        btn_frame.place(relx=0.5, rely=0.5, anchor='center')
         btn_frame.pack_propagate(False)
         
         # Create label inside frame
