@@ -452,8 +452,11 @@ class ScriptLauncherApp:
             is_bold = script.get("is_bold", False) or is_folder
             is_italic = script.get("is_italic", False)
             
+            # Get font family - use script-specific, fallback to global, then main_font
+            font_family = script.get("font_family", self.config["settings"].get("font_family", self.main_font))
+            
             font_spec = ctk.CTkFont(
-                family=self.main_font,
+                family=font_family,
                 size=f_size,
                 weight="bold" if is_bold else "normal",
                 slant="italic" if is_italic else "roman"
@@ -1088,17 +1091,47 @@ class ScriptLauncherApp:
         typo_frame = tk.LabelFrame(left_panel, text="   TYPOGRAPHY   ", bg="#1d2027", fg="gray", font=(self.main_font, 10, "bold"), bd=1, relief="groove")
         typo_frame.pack(fill="x", padx=15, pady=5)
         
+        # Font Family Row
+        font_family_row = tk.Frame(typo_frame, bg="#1d2027")
+        font_family_row.pack(fill="x", padx=10, pady=(10, 5))
+        
+        tk.Label(font_family_row, text="Font:", fg="white", bg="#1d2027").pack(side="left", padx=(0, 5))
+        
+        # Get available fonts
+        from tkinter import font as tkfont
+        available_fonts = sorted(list(set(tkfont.families())))
+        # Add common fonts to the top if they exist
+        priority_fonts = ["JetBrainsMono NFP", "JetBrainsMono Nerd Font", "JetBrains Mono", "Consolas", "Courier New", "Arial", "Segoe UI", "Calibri"]
+        font_list = [f for f in priority_fonts if f in available_fonts] + [f for f in available_fonts if f not in priority_fonts]
+        
+        current_font = script.get("font_family", self.config["settings"].get("font_family", self.main_font))
+        font_family_var = tk.StringVar(value=current_font)
+        
+        font_dropdown = ctk.CTkOptionMenu(
+            font_family_row, 
+            variable=font_family_var, 
+            values=font_list[:50],  # Limit to first 50 fonts for performance
+            width=200, 
+            fg_color="#2b2f38", 
+            button_color="#3a3f4b", 
+            button_hover_color="#4a4f5b"
+        )
+        font_dropdown.pack(side="left", padx=5)
+        
         # Font Size & Styles Row
-        tk.Label(typo_frame, text="Size:", fg="white", bg="#1d2027").pack(side="left", padx=(10,5), pady=10)
+        size_style_row = tk.Frame(typo_frame, bg="#1d2027")
+        size_style_row.pack(fill="x", padx=10, pady=(5, 10))
+        
+        tk.Label(size_style_row, text="Size:", fg="white", bg="#1d2027").pack(side="left", padx=(0, 5))
         default_fs = self.config["settings"].get("font_size", 10)
         fsize_var = tk.StringVar(value=str(script.get("font_size", default_fs)))
-        tk.Entry(typo_frame, textvariable=fsize_var, bg="#2b2f38", fg="white", insertbackground="white", bd=0, width=4).pack(side="left")
+        tk.Entry(size_style_row, textvariable=fsize_var, bg="#2b2f38", fg="white", insertbackground="white", bd=0, width=4).pack(side="left")
         
         v_bold = tk.BooleanVar(value=script.get("is_bold", False))
-        tk.Checkbutton(typo_frame, text="Bold", variable=v_bold, bg="#1d2027", fg="white", selectcolor="#2b2f38", activebackground="#1d2027", activeforeground="white").pack(side="left", padx=10)
+        tk.Checkbutton(size_style_row, text="Bold", variable=v_bold, bg="#1d2027", fg="white", selectcolor="#2b2f38", activebackground="#1d2027", activeforeground="white").pack(side="left", padx=10)
         
         v_italic = tk.BooleanVar(value=script.get("is_italic", False))
-        tk.Checkbutton(typo_frame, text="Italic", variable=v_italic, bg="#1d2027", fg="white", selectcolor="#2b2f38", activebackground="#1d2027", activeforeground="white").pack(side="left", padx=5)
+        tk.Checkbutton(size_style_row, text="Italic", variable=v_italic, bg="#1d2027", fg="white", selectcolor="#2b2f38", activebackground="#1d2027", activeforeground="white").pack(side="left", padx=5)
 
         # --- Section 3: Colors ---
         color_frame = tk.LabelFrame(left_panel, text="   COLORS   ", bg="#1d2027", fg="gray", font=(self.main_font, 10, "bold"), bd=1, relief="groove")
@@ -1195,6 +1228,10 @@ class ScriptLauncherApp:
                 script["font_size"] = int(fsize_var.get())
             except:
                 script["font_size"] = self.config["settings"].get("font_size", 10)
+            
+            # Save font family
+            script["font_family"] = font_family_var.get()
+            
             try:
                 script["border_width"] = int(border_width_var.get())
             except:

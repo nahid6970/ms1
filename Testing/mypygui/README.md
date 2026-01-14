@@ -26,7 +26,7 @@ A powerful, premium Python-based GUI application designed to centralize your wor
 
 ### 🎨 Premium Customization
 - **Visual Editor**: A beautiful, borderless "Edit / Stylize" dialog to tweak every aspect of your buttons.
-- **Typography control**: Change font size and toggle **Bold** / *Italic* styles.
+- **Typography control**: Change font family, font size and toggle **Bold** / *Italic* styles.
 - **Shape & Colors**:
     - Custom **Corner Radius** for rounded or sharp buttons.
     - Adjustable **Border Width** and color.

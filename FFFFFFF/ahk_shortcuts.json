@@ -313,7 +313,8 @@
             "category": "General",
             "description": "",
             "trigger": ";change",
-            "replacement": "ok i have made some changes from last time  so keep that in mind now"
+            "replacement": "ok i have made some changes from last time  so keep that in mind now",
+            "enabled": true
         },
         {
             "name": "Percentage %",
