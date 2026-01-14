@@ -411,6 +411,11 @@ class EditDialog(QDialog):
             
         # === BOTTOM BUTTONS ===
         btn_layout = QHBoxLayout()
+        
+        btn_reset = QPushButton("RESET STYLES")
+        btn_reset.setStyleSheet(f"background-color: {CP_DIM}; color: white; padding: 10px;")
+        btn_reset.clicked.connect(self.reset_styles)
+        
         btn_save = QPushButton("SAVE CHANGES"); 
         btn_save.setStyleSheet(f"background-color: {CP_YELLOW}; color: black; font-weight: bold; padding: 10px;")
         btn_save.clicked.connect(self.save)
@@ -418,10 +423,53 @@ class EditDialog(QDialog):
         btn_cancel.setStyleSheet(f"background-color: {CP_RED}; color: white; padding: 10px;")
         btn_cancel.clicked.connect(self.reject)
         
+        btn_layout.addWidget(btn_reset)
         btn_layout.addStretch()
         btn_layout.addWidget(btn_save)
         btn_layout.addWidget(btn_cancel)
         vbox.addLayout(btn_layout)
+
+    def reset_styles(self):
+        # Determine defaults
+        is_folder = (self.script.get("type") == "folder")
+        def_bg = CP_YELLOW if is_folder else "#FFFFFF"
+        def_fg = "#000000"
+        
+        parent = self.parent()
+        def_fs = 10
+        if parent and hasattr(parent, "config"):
+            def_fs = parent.config.get("default_font_size", 10)
+
+        # Reset Typography
+        self.cmb_font.setCurrentFont(QFont("Consolas"))
+        self.spn_size.setValue(def_fs)
+        self.chk_bold.setChecked(True)
+        self.chk_italic.setChecked(False)
+
+        # Reset Colors
+        self.script.pop("color", None)
+        self.script.pop("text_color", None)
+        self.script.pop("hover_color", None)
+        self.script.pop("hover_text_color", None)
+        self.script.pop("border_color", None)
+
+        self.set_btn_color(self.btn_col_bg, def_bg)
+        self.set_btn_color(self.btn_col_fg, def_fg)
+        self.set_btn_color(self.btn_col_hbg, CP_BG)
+        self.set_btn_color(self.btn_col_hfg, def_bg)
+        self.set_btn_color(self.btn_col_brd, def_bg)
+
+        # Reset Layout/Styling Metrics
+        self.spn_cspan.setValue(1)
+        self.spn_rspan.setValue(1)
+        self.spn_width.setValue(0)
+        self.spn_height.setValue(0)
+        self.spn_radius.setValue(0)
+        self.spn_border.setValue(1 if is_folder else 0)
+
+        if is_folder:
+            self.spn_inner_cols.setValue(0)
+            self.spn_inner_h.setValue(0)
 
     def create_color_btn(self, label, key):
         # Determine effective default based on key and type, matching CyberButton logic

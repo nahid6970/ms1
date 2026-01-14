@@ -40,14 +40,14 @@
                     "inline_type": "cmd",
                     "inline_script": "",
                     "font_family": "Consolas",
-                    "_runtime_height": 50,
+                    "_runtime_height": 800,
                     "_runtime_font_size": 20
                 },
                 {
                     "name": "Convert",
                     "path": "C:/Users/nahid/ms/ms1/scripts/ffmpeg/convert.ps1",
                     "type": "script",
-                    "_runtime_height": 50,
+                    "_runtime_height": 800,
                     "_runtime_font_size": 10
                 },
                 {
@@ -56,21 +56,21 @@
                     "type": "script",
                     "hide_terminal": false,
                     "font_size": 20,
-                    "_runtime_height": 50,
+                    "_runtime_height": 800,
                     "_runtime_font_size": 20
                 },
                 {
                     "name": "Merge",
                     "path": "C:/Users/nahid/ms/ms1/scripts/ffmpeg/merge.ps1",
                     "type": "script",
-                    "_runtime_height": 50,
+                    "_runtime_height": 800,
                     "_runtime_font_size": 10
                 },
                 {
                     "name": "Trim",
                     "path": "C:/Users/nahid/ms/ms1/scripts/ffmpeg/trim.ps1",
                     "type": "script",
-                    "_runtime_height": 50,
+                    "_runtime_height": 800,
                     "_runtime_font_size": 10
                 },
                 {
@@ -79,7 +79,7 @@
                     "type": "script",
                     "hide_terminal": false,
                     "font_size": 20,
-                    "_runtime_height": 50,
+                    "_runtime_height": 800,
                     "_runtime_font_size": 20
                 }
             ],
@@ -99,7 +99,7 @@
             "height": 0,
             "_runtime_height": 50,
             "font_family": "Consolas",
-            "grid_btn_height": 0,
+            "grid_btn_height": 800,
             "_runtime_font_size": 20
         },
         {
@@ -162,6 +162,32 @@
             "name": "New Folder",
             "type": "folder",
             "scripts": [
+                {
+                    "name": "New Script",
+                    "path": "",
+                    "type": "script",
+                    "color": "#FFFFFF",
+                    "hide_terminal": false,
+                    "keep_open": false,
+                    "kill_window": false,
+                    "ctrl_left_cmd": "",
+                    "ctrl_right_cmd": "",
+                    "use_inline": false,
+                    "inline_type": "cmd",
+                    "inline_script": "",
+                    "font_family": "Consolas",
+                    "font_size": 10,
+                    "is_bold": true,
+                    "is_italic": false,
+                    "col_span": 1,
+                    "row_span": 1,
+                    "width": 0,
+                    "height": 0,
+                    "corner_radius": 0,
+                    "border_width": 0,
+                    "_runtime_height": 50,
+                    "_runtime_font_size": 10
+                },
                 {
                     "name": "New Script",
                     "path": "",
@@ -316,13 +342,11 @@
         {
             "name": "mklink",
             "path": "C:/Users/nahid/ms/ms1/Testing/mklink/mklink.py",
-            "font_size": 20,
+            "font_size": 10,
             "hide_terminal": true,
-            "color": "#000000",
-            "text_color": "#ffffff",
-            "border_width": 1,
+            "border_width": 0,
             "corner_radius": 0,
-            "is_bold": false,
+            "is_bold": true,
             "is_italic": false,
             "ctrl_left_cmd": "",
             "ctrl_right_cmd": "",
@@ -335,12 +359,9 @@
             "use_inline": false,
             "inline_type": "cmd",
             "inline_script": "",
-            "font_family": "JetBrainsMono Nerd Font Propo",
-            "hover_color": "#26b2f3",
-            "hover_text_color": "white",
-            "border_color": "#fe1616",
+            "font_family": "Consolas",
             "_runtime_height": 50,
-            "_runtime_font_size": 20
+            "_runtime_font_size": 10
         },
         {
             "name": "AntiGravity",
@@ -513,50 +534,6 @@
             "is_italic": false,
             "_runtime_height": 50,
             "_runtime_font_size": 20
-        },
-        {
-            "name": "New Script",
-            "path": "",
-            "type": "script",
-            "color": "#FFFFFF",
-            "hide_terminal": false,
-            "keep_open": false,
-            "kill_window": false,
-            "ctrl_left_cmd": "",
-            "ctrl_right_cmd": "",
-            "use_inline": false,
-            "inline_type": "cmd",
-            "inline_script": "",
-            "font_family": "Consolas",
-            "font_size": 10,
-            "is_bold": true,
-            "is_italic": false,
-            "col_span": 1,
-            "row_span": 1,
-            "width": 0,
-            "height": 0,
-            "corner_radius": 0,
-            "border_width": 0,
-            "_runtime_height": 50,
-            "_runtime_font_size": 10
-        },
-        {
-            "name": "New Folder",
-            "type": "folder",
-            "scripts": [],
-            "color": "#FCEE0A",
-            "col_span": 1,
-            "row_span": 1,
-            "font_family": "Consolas",
-            "font_size": 10,
-            "is_bold": true,
-            "is_italic": false,
-            "width": 0,
-            "height": 0,
-            "corner_radius": 0,
-            "border_width": 0,
-            "grid_columns": 0,
-            "grid_btn_height": 0
         }
     ],
     "github_repos": [
@@ -615,7 +592,7 @@
         }
     ],
     "columns": 5,
-    "default_btn_height": 50,
+    "default_btn_height": 800,
     "window_width": 1200,
     "window_height": 800,
     "always_on_top": false,
