@@ -188,7 +188,8 @@ class EditDialog(QDialog):
             QLineEdit, QSpinBox, QFontComboBox, QComboBox, QPlainTextEdit {{
                 background-color: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 4px; selection-background-color: {CP_CYAN}; selection-color: black;
             }}
-            QLineEdit:focus, QPlainTextEdit:focus {{ border: 1px solid {CP_CYAN}; }}
+            QLineEdit:focus, QPlainTextEdit:focus, QSpinBox:focus {{ border: 1px solid {CP_CYAN}; }}
+            QSpinBox::up-button, QSpinBox::down-button {{ width: 0px; border: none; }}
             QPushButton {{ background-color: {CP_DIM}; border: 1px solid {CP_DIM}; color: white; padding: 6px 12px; }}
             QPushButton:hover {{ background-color: #2a2a2a; border: 1px solid {CP_YELLOW}; }}
             QCheckBox {{ spacing: 8px; }}
@@ -413,17 +414,105 @@ class EditDialog(QDialog):
 # MAIN WINDOW
 # -----------------------------------------------------------------------------
 
+# -----------------------------------------------------------------------------
+# SETTINGS DIALOG
+# -----------------------------------------------------------------------------
+class SettingsDialog(QDialog):
+    def __init__(self, config, parent=None):
+        super().__init__(parent)
+        self.config = config
+        self.setWindowTitle("GLOBAL CONFIG")
+        self.resize(500, 400)
+        self.setStyleSheet(f"""
+            QDialog {{ background-color: {CP_BG}; border: 1px solid {CP_YELLOW}; }}
+            QLabel {{ color: {CP_TEXT}; font-family: 'Consolas'; font-weight: bold; }}
+            QLineEdit, QSpinBox {{ background: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 5px; }}
+            QSpinBox::up-button, QSpinBox::down-button {{ width: 0px; border: none; }}
+            QCheckBox {{ color: {CP_TEXT}; font-family: 'Consolas'; }}
+            QPushButton {{ background: {CP_DIM}; color: white; border: none; padding: 8px; font-weight: bold; }}
+            QPushButton:hover {{ background: {CP_DIM}44; border: 1px solid {CP_YELLOW}; }}
+        """)
+        self.setup_ui()
+
+    def setup_ui(self):
+        layout = QVBoxLayout(self)
+        layout.setSpacing(15)
+        layout.setContentsMargins(30, 30, 30, 30)
+        
+        # Grid Settings
+        grp_grid = QGroupBox("GRID")
+        grp_grid.setStyleSheet(f"QGroupBox {{ border: 1px solid {CP_DIM}; margin-top: 10px; padding-top: 10px; color: {CP_YELLOW}; font-weight: bold; }}")
+        l_grid = QFormLayout()
+        
+        self.spn_cols = QSpinBox()
+        self.spn_cols.setRange(1, 10)
+        self.spn_cols.setValue(self.config.get("columns", 5))
+        l_grid.addRow("Columns:", self.spn_cols)
+        
+        self.spn_btn_h = QSpinBox()
+        self.spn_btn_h.setRange(20, 200)
+        self.spn_btn_h.setValue(self.config.get("default_btn_height", 40))
+        l_grid.addRow("Default Btn Height:", self.spn_btn_h)
+
+        grp_grid.setLayout(l_grid)
+        layout.addWidget(grp_grid)
+
+        # Window Settings
+        grp_win = QGroupBox("WINDOW")
+        grp_win.setStyleSheet(f"QGroupBox {{ border: 1px solid {CP_DIM}; margin-top: 10px; padding-top: 10px; color: {CP_YELLOW}; font-weight: bold; }}")
+        l_win = QFormLayout()
+        
+        size_box = QHBoxLayout()
+        self.spn_w = QSpinBox(); self.spn_w.setRange(400, 3000); self.spn_w.setValue(self.config.get("window_width", 1100))
+        self.spn_h = QSpinBox(); self.spn_h.setRange(300, 2000); self.spn_h.setValue(self.config.get("window_height", 800))
+        size_box.addWidget(QLabel("W:")); size_box.addWidget(self.spn_w)
+        size_box.addWidget(QLabel("H:")); size_box.addWidget(self.spn_h)
+        l_win.addRow("Size:", size_box)
+        
+        self.chk_top = QCheckBox("Always On Top")
+        self.chk_top.setChecked(self.config.get("always_on_top", False))
+        l_win.addRow("", self.chk_top)
+        
+        grp_win.setLayout(l_win)
+        layout.addWidget(grp_win)
+
+        # Save
+        btn_save = QPushButton("SAVE CONFIG")
+        btn_save.setStyleSheet(f"background-color: {CP_GREEN}; color: black;")
+        btn_save.clicked.connect(self.save)
+        layout.addStretch()
+        layout.addWidget(btn_save)
+
+    def save(self):
+        self.config["columns"] = self.spn_cols.value()
+        self.config["default_btn_height"] = self.spn_btn_h.value()
+        self.config["window_width"] = self.spn_w.value()
+        self.config["window_height"] = self.spn_h.value()
+        self.config["always_on_top"] = self.chk_top.isChecked()
+        self.accept()
+
+# -----------------------------------------------------------------------------
+# MAIN WINDOW
+# -----------------------------------------------------------------------------
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("SCRIPT // MANAGER_V3.1")
-        self.resize(1100, 800)
+        self.setWindowTitle("SCRIPT // MANAGER_V3.2")
         self.setStyleSheet(f"QMainWindow {{ background-color: {CP_BG}; }}")
         
         self.config = {}
         self.view_stack = [] 
         
         self.load_config()
+        
+        # Apply window settings
+        w = self.config.get("window_width", 1100)
+        h = self.config.get("window_height", 800)
+        self.resize(w, h)
+        if self.config.get("always_on_top", False):
+            self.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint)
+        
         self.setup_ui()
         self.refresh_grid()
         
@@ -444,6 +533,14 @@ class MainWindow(QMainWindow):
             with open(CONFIG_FILE, "w", encoding='utf-8') as f:
                 json.dump(self.config, f, indent=4)
             self.refresh_grid()
+            
+            # Apply immediate global effects
+            if self.config.get("always_on_top", False):
+                self.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint, True)
+            else:
+                self.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint, False)
+            self.show()
+            
         except: pass
 
     def setup_ui(self):
@@ -461,10 +558,10 @@ class MainWindow(QMainWindow):
         
         # ADD BUTTON
         self.btn_add = CyberButton("+", script_data={"color": CP_GREEN, "type": "script"})
-        self.btn_add.setFixedSize(60, 40)
+        self.btn_add.setFixedSize(40, 30) # Compact Header Btn
         self.btn_add.clicked.connect(self.prompt_add_new)
         
-        btn_settings = CyberButton("CONFIG", script_data={"color": CP_DIM, "type": "script"}); btn_settings.setFixedSize(90, 40)
+        btn_settings = CyberButton("CFG", script_data={"color": CP_DIM, "type": "script"}); btn_settings.setFixedSize(50, 30)
         btn_settings.clicked.connect(self.open_global_settings)
 
         header.addWidget(self.btn_add)
@@ -473,16 +570,17 @@ class MainWindow(QMainWindow):
         self.main_layout.addLayout(header)
 
         # Dashboard
-        dash_frame = QFrame(); dash_frame.setFixedHeight(80); dash_layout = QHBoxLayout(dash_frame); dash_layout.setContentsMargins(0,0,0,0)
+        dash_frame = QFrame(); dash_frame.setFixedHeight(60); 
+        dash_layout = QHBoxLayout(dash_frame); dash_layout.setContentsMargins(0,0,0,0)
         self.stat_cpu = StatWidget("CPU", CP_CYAN); self.stat_ram = StatWidget("RAM", CP_ORANGE); self.stat_disk = StatWidget("SSD", CP_GREEN)
         dash_layout.addWidget(self.stat_cpu); dash_layout.addWidget(self.stat_ram); dash_layout.addWidget(self.stat_disk)
-        lbl_status = QLabel("  GITHUB: OK  |  RCLONE: IDLE  "); lbl_status.setFont(QFont("Consolas", 10)); lbl_status.setStyleSheet(f"color: {CP_SUBTEXT}; background: {CP_PANEL}; border: 1px solid {CP_DIM}; padding: 10px;")
+        lbl_status = QLabel(" GITHUB: OK | RCLONE: IDLE "); lbl_status.setFont(QFont("Consolas", 9)); lbl_status.setStyleSheet(f"color: {CP_SUBTEXT}; background: {CP_PANEL}; border: 1px solid {CP_DIM}; padding: 5px;")
         dash_layout.addWidget(lbl_status); dash_layout.addStretch()
         self.main_layout.addWidget(dash_frame)
 
         # Grid
         scroll = QScrollArea(); scroll.setWidgetResizable(True); scroll.setStyleSheet(f"background: transparent; border: none;")
-        self.grid_container = QWidget(); self.grid = QGridLayout(self.grid_container); self.grid.setSpacing(15); self.grid.setAlignment(Qt.AlignmentFlag.AlignTop)
+        self.grid_container = QWidget(); self.grid = QGridLayout(self.grid_container); self.grid.setSpacing(10); self.grid.setAlignment(Qt.AlignmentFlag.AlignTop)
         scroll.setWidget(self.grid_container); self.main_layout.addWidget(scroll)
 
     def update_stats(self):
@@ -507,11 +605,18 @@ class MainWindow(QMainWindow):
             self.title_lbl.setText("SCRIPT MANAGER // ROOT")
             self.back_btn.hide()
 
-        cols = 5
+        # Configurable Grid
+        cols = self.config.get("columns", 5)
+        def_h = self.config.get("default_btn_height", 40)
+        
         grid_map = {} # (row, col) -> occupied
-
         r, c = 0, 0
+        
         for script in scripts:
+            # Force height update if not specifically set
+            if "height" not in script or script["height"] == 0:
+                script["_runtime_height"] = def_h
+            
             # Determine spans
             c_span = script.get("col_span", 1)
             r_span = script.get("row_span", 1)
@@ -533,8 +638,7 @@ class MainWindow(QMainWindow):
                     continue
 
                 if not conflict:
-                    # Found spot
-                    break
+                    break # Found spot
                 
                 c += 1
                 if c >= cols:
@@ -548,6 +652,11 @@ class MainWindow(QMainWindow):
             
             # Add widget
             btn = CyberButton(script.get("name", "Unnamed"), script_data=script)
+            
+            # Apply dynamic height preference if user hasn't overridden it in item
+            if script.get("height", 0) == 0:
+                btn.setFixedHeight(def_h)
+                
             btn.clicked.connect(partial(self.handle_click, script))
             btn.customContextMenuRequested.connect(partial(self.show_context_menu, btn, script))
             self.grid.addWidget(btn, r, c, r_span, c_span)
@@ -647,7 +756,9 @@ class MainWindow(QMainWindow):
             target_list.remove(new_folder)
 
     def open_global_settings(self):
-        QMessageBox.information(self, "Settings", "Global Application Config\n(Columns, Default Fonts, etc. - Not Implemented)")
+        dlg = SettingsDialog(self.config, self)
+        if dlg.exec():
+            self.save_config()
 
     def delete_item(self, script):
         if QMessageBox.question(self, "Confirm", "Delete?") == QMessageBox.StandardButton.Yes:

@@ -84,7 +84,8 @@
             "child_width": 0,
             "child_height": 100,
             "width": 0,
-            "height": 0
+            "height": 0,
+            "_runtime_height": 40
         },
         {
             "name": "YTC",
@@ -134,7 +135,8 @@
                     "is_bold": false,
                     "is_italic": false
                 }
-            ]
+            ],
+            "_runtime_height": 40
         },
         {
             "name": "Task Manager",
@@ -151,7 +153,8 @@
             "col_span": 1,
             "row_span": 1,
             "width": 0,
-            "height": 0
+            "height": 0,
+            "_runtime_height": 40
         },
         {
             "name": "Explorer",
@@ -178,7 +181,8 @@
             "color": "#2b2f38",
             "text_color": "white",
             "hover_color": "#26b2f3",
-            "hover_text_color": "white"
+            "hover_text_color": "white",
+            "_runtime_height": 40
         },
         {
             "name": "mklink",
@@ -205,7 +209,8 @@
             "font_family": "JetBrainsMono Nerd Font Propo",
             "hover_color": "#26b2f3",
             "hover_text_color": "white",
-            "border_color": "#fe1616"
+            "border_color": "#fe1616",
+            "_runtime_height": 40
         },
         {
             "name": "AntiGravity",
@@ -227,7 +232,8 @@
             "use_inline": false,
             "inline_type": "cmd",
             "inline_script": "",
-            "kill_window": true
+            "kill_window": true,
+            "_runtime_height": 40
         },
         {
             "name": "C-Map",
@@ -249,7 +255,9 @@
             "width": 0,
             "height": 0,
             "is_bold": false,
-            "is_italic": false
+            "is_italic": false,
+            "_runtime_height": 40,
+            "font_family": "Consolas"
         },
         {
             "name": "pip",
@@ -263,7 +271,7 @@
             "use_inline": false,
             "inline_type": "cmd",
             "inline_script": "",
-            "font_size": 54,
+            "font_size": 12,
             "border_width": 0,
             "corner_radius": 4,
             "col_span": 1,
@@ -272,7 +280,8 @@
             "height": 0,
             "is_bold": false,
             "is_italic": false,
-            "font_family": "Consolas"
+            "font_family": "Consolas",
+            "_runtime_height": 40
         },
         {
             "name": "Locker",
@@ -294,7 +303,8 @@
             "width": 0,
             "height": 0,
             "is_bold": false,
-            "is_italic": false
+            "is_italic": false,
+            "_runtime_height": 40
         },
         {
             "name": "ClipBoard",
@@ -316,7 +326,8 @@
             "width": 0,
             "height": 0,
             "is_bold": false,
-            "is_italic": false
+            "is_italic": false,
+            "_runtime_height": 40
         },
         {
             "name": "Lock-Smith",
@@ -338,7 +349,8 @@
             "width": 0,
             "height": 0,
             "is_bold": false,
-            "is_italic": false
+            "is_italic": false,
+            "_runtime_height": 40
         },
         {
             "name": "Nuke",
@@ -360,12 +372,14 @@
             "width": 0,
             "height": 0,
             "is_bold": false,
-            "is_italic": false
+            "is_italic": false,
+            "_runtime_height": 40
         },
         {
             "name": "New Folder",
             "type": "folder",
-            "scripts": []
+            "scripts": [],
+            "_runtime_height": 40
         }
     ],
     "github_repos": [
@@ -422,5 +436,10 @@
             "dst": "gu:/song",
             "cmd": "rclone check src dst --fast-list --size-only"
         }
-    ]
+    ],
+    "columns": 5,
+    "default_btn_height": 50,
+    "window_width": 1100,
+    "window_height": 800,
+    "always_on_top": false
 }
