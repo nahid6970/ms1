@@ -83,12 +83,12 @@
                     "_runtime_font_size": 20
                 }
             ],
-            "font_size": 15,
+            "font_size": 10,
             "border_width": 1,
             "corner_radius": 0,
             "col_span": 1,
             "row_span": 1,
-            "is_bold": false,
+            "is_bold": true,
             "is_italic": false,
             "grid_columns": 0,
             "child_width": 0,
@@ -98,7 +98,10 @@
             "_runtime_height": 50,
             "font_family": "Consolas",
             "grid_btn_height": 0,
-            "_runtime_font_size": 15
+            "_runtime_font_size": 10,
+            "_runtime_font_family": "Consolas",
+            "_runtime_is_bold": true,
+            "_runtime_is_italic": false
         },
         {
             "name": "YTC",
@@ -154,9 +157,9 @@
                 }
             ],
             "_runtime_height": 50,
-            "_runtime_font_size": 15,
+            "_runtime_font_size": 10,
             "font_family": "Consolas",
-            "font_size": 15,
+            "font_size": 10,
             "is_bold": true,
             "is_italic": false,
             "col_span": 1,
@@ -166,7 +169,10 @@
             "corner_radius": 0,
             "border_width": 1,
             "grid_columns": 0,
-            "grid_btn_height": 0
+            "grid_btn_height": 0,
+            "_runtime_font_family": "Consolas",
+            "_runtime_is_bold": true,
+            "_runtime_is_italic": false
         },
         {
             "name": "New Folder",
@@ -196,7 +202,10 @@
                     "corner_radius": 0,
                     "border_width": 0,
                     "_runtime_height": 50,
-                    "_runtime_font_size": 10
+                    "_runtime_font_size": 10,
+                    "_runtime_font_family": "Consolas",
+                    "_runtime_is_bold": true,
+                    "_runtime_is_italic": false
                 },
                 {
                     "name": "New Script",
@@ -222,7 +231,10 @@
                     "corner_radius": 0,
                     "border_width": 0,
                     "_runtime_height": 50,
-                    "_runtime_font_size": 10
+                    "_runtime_font_size": 10,
+                    "_runtime_font_family": "Consolas",
+                    "_runtime_is_bold": true,
+                    "_runtime_is_italic": false
                 },
                 {
                     "name": "New Script",
@@ -248,7 +260,10 @@
                     "corner_radius": 0,
                     "border_width": 0,
                     "_runtime_height": 50,
-                    "_runtime_font_size": 10
+                    "_runtime_font_size": 10,
+                    "_runtime_font_family": "Consolas",
+                    "_runtime_is_bold": true,
+                    "_runtime_is_italic": false
                 },
                 {
                     "name": "New Script",
@@ -274,7 +289,33 @@
                     "corner_radius": 0,
                     "border_width": 0,
                     "_runtime_height": 50,
-                    "_runtime_font_size": 10
+                    "_runtime_font_size": 10,
+                    "_runtime_font_family": "Consolas",
+                    "_runtime_is_bold": true,
+                    "_runtime_is_italic": false
+                },
+                {
+                    "name": "New Folder",
+                    "type": "folder",
+                    "scripts": [],
+                    "color": "#FCEE0A",
+                    "col_span": 1,
+                    "row_span": 1,
+                    "font_family": "Consolas",
+                    "font_size": 10,
+                    "is_bold": true,
+                    "is_italic": false,
+                    "width": 0,
+                    "height": 0,
+                    "corner_radius": 0,
+                    "border_width": 0,
+                    "grid_columns": 0,
+                    "grid_btn_height": 0,
+                    "_runtime_height": 50,
+                    "_runtime_font_size": 10,
+                    "_runtime_font_family": "Consolas",
+                    "_runtime_is_bold": true,
+                    "_runtime_is_italic": false
                 }
             ],
             "color": "#FCEE0A",
@@ -292,7 +333,10 @@
             "_runtime_font_size": 10,
             "border_color": "#000000",
             "grid_columns": 0,
-            "grid_btn_height": 0
+            "grid_btn_height": 0,
+            "_runtime_font_family": "Consolas",
+            "_runtime_is_bold": true,
+            "_runtime_is_italic": false
         },
         {
             "name": "Task Manager",
@@ -316,7 +360,10 @@
             "use_inline": false,
             "inline_type": "cmd",
             "inline_script": "",
-            "font_family": "Consolas"
+            "font_family": "Consolas",
+            "_runtime_font_family": "Consolas",
+            "_runtime_is_bold": true,
+            "_runtime_is_italic": false
         },
         {
             "name": "Explorer",
@@ -340,16 +387,19 @@
             "inline_script": "",
             "font_family": "Consolas",
             "_runtime_height": 50,
-            "_runtime_font_size": 10
+            "_runtime_font_size": 10,
+            "_runtime_font_family": "Consolas",
+            "_runtime_is_bold": true,
+            "_runtime_is_italic": false
         },
         {
             "name": "mklink",
             "path": "C:/Users/nahid/ms/ms1/Testing/mklink/mklink.py",
-            "font_size": 15,
+            "font_size": 10,
             "hide_terminal": true,
             "border_width": 0,
             "corner_radius": 0,
-            "is_bold": false,
+            "is_bold": true,
             "is_italic": false,
             "ctrl_left_cmd": "",
             "ctrl_right_cmd": "",
@@ -364,7 +414,10 @@
             "inline_script": "",
             "font_family": "Consolas",
             "_runtime_height": 50,
-            "_runtime_font_size": 10
+            "_runtime_font_size": 10,
+            "_runtime_font_family": "Consolas",
+            "_runtime_is_bold": true,
+            "_runtime_is_italic": false
         },
         {
             "name": "AntiGravity",
@@ -389,7 +442,10 @@
             "kill_window": true,
             "_runtime_height": 50,
             "_runtime_font_size": 10,
-            "font_family": "Consolas"
+            "font_family": "Consolas",
+            "_runtime_font_family": "Consolas",
+            "_runtime_is_bold": true,
+            "_runtime_is_italic": false
         },
         {
             "name": "C-Map",
@@ -414,7 +470,10 @@
             "is_italic": false,
             "_runtime_height": 50,
             "font_family": "Consolas",
-            "_runtime_font_size": 10
+            "_runtime_font_size": 10,
+            "_runtime_font_family": "Consolas",
+            "_runtime_is_bold": true,
+            "_runtime_is_italic": false
         },
         {
             "name": "pip",
@@ -439,7 +498,10 @@
             "is_italic": false,
             "font_family": "Consolas",
             "_runtime_height": 50,
-            "_runtime_font_size": 10
+            "_runtime_font_size": 10,
+            "_runtime_font_family": "Consolas",
+            "_runtime_is_bold": true,
+            "_runtime_is_italic": false
         },
         {
             "name": "Locker",
@@ -464,7 +526,10 @@
             "is_italic": false,
             "_runtime_height": 50,
             "font_family": "Consolas",
-            "_runtime_font_size": 10
+            "_runtime_font_size": 10,
+            "_runtime_font_family": "Consolas",
+            "_runtime_is_bold": true,
+            "_runtime_is_italic": false
         },
         {
             "name": "ClipBoard",
@@ -489,7 +554,10 @@
             "is_italic": false,
             "_runtime_height": 50,
             "_runtime_font_size": 10,
-            "font_family": "Consolas"
+            "font_family": "Consolas",
+            "_runtime_font_family": "Consolas",
+            "_runtime_is_bold": true,
+            "_runtime_is_italic": false
         },
         {
             "name": "Lock-Smith",
@@ -514,7 +582,10 @@
             "is_italic": false,
             "_runtime_height": 50,
             "_runtime_font_size": 10,
-            "font_family": "Consolas"
+            "font_family": "Consolas",
+            "_runtime_font_family": "Consolas",
+            "_runtime_is_bold": true,
+            "_runtime_is_italic": false
         },
         {
             "name": "Nuke",
@@ -539,7 +610,10 @@
             "is_italic": false,
             "_runtime_height": 50,
             "_runtime_font_size": 10,
-            "font_family": "Consolas"
+            "font_family": "Consolas",
+            "_runtime_font_family": "Consolas",
+            "_runtime_is_bold": true,
+            "_runtime_is_italic": false
         }
     ],
     "github_repos": [
@@ -602,12 +676,12 @@
     "window_width": 1200,
     "window_height": 800,
     "always_on_top": false,
-    "default_font_size": 15,
+    "default_font_size": 10,
     "app_bg": "#27273a",
     "show_widgets": false,
     "window_border_color": "#1efc94",
     "cfg_btn_color": "#55aaff",
     "default_font_family": "Consolas",
-    "default_is_bold": false,
+    "default_is_bold": true,
     "default_is_italic": false
 }

@@ -293,6 +293,9 @@ class EditDialog(QDialog):
         l_typo = QGridLayout()
         self.cmb_font = QFontComboBox()
         self.cmb_font.setCurrentFont(QFont(self.script.get("font_family", "Consolas")))
+        self.cmb_font.setEditable(False)
+        self.cmb_font.setFontFilters(QFontComboBox.FontFilter.ScalableFonts)
+        self.cmb_font.setMaximumWidth(200)
         l_typo.addWidget(QLabel("Font:"), 0, 0)
         l_typo.addWidget(self.cmb_font, 0, 1, 1, 3)
         l_typo.addWidget(QLabel("Size:"), 1, 0)
@@ -608,6 +611,9 @@ class SettingsDialog(QDialog):
         # Font settings
         self.cmb_font = QFontComboBox()
         self.cmb_font.setCurrentFont(QFont(self.config.get("default_font_family", "Consolas")))
+        self.cmb_font.setEditable(False)
+        self.cmb_font.setFontFilters(QFontComboBox.FontFilter.ScalableFonts)
+        self.cmb_font.setMaximumWidth(180)
         l_grid.addRow("Font:", self.cmb_font)
 
         self.spn_font_size = QSpinBox()
