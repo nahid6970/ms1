@@ -414,9 +414,13 @@ class EditDialog(QDialog):
         # === BOTTOM BUTTONS ===
         btn_layout = QHBoxLayout()
         
-        btn_reset = QPushButton("RESET STYLES")
+        btn_reset = QPushButton("RESET")
         btn_reset.setStyleSheet(f"background-color: {CP_DIM}; color: white; padding: 10px;")
         btn_reset.clicked.connect(self.reset_styles)
+        
+        btn_random = QPushButton("RANDOM")
+        btn_random.setStyleSheet(f"background-color: {CP_CYAN}; color: black; padding: 10px;")
+        btn_random.clicked.connect(self.randomize_colors)
         
         btn_save = QPushButton("SAVE CHANGES"); 
         btn_save.setStyleSheet(f"background-color: {CP_YELLOW}; color: black; font-weight: bold; padding: 10px;")
@@ -426,6 +430,7 @@ class EditDialog(QDialog):
         btn_cancel.clicked.connect(self.reject)
         
         btn_layout.addWidget(btn_reset)
+        btn_layout.addWidget(btn_random)
         btn_layout.addStretch()
         btn_layout.addWidget(btn_save)
         btn_layout.addWidget(btn_cancel)
