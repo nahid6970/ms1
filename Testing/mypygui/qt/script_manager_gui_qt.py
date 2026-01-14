@@ -319,6 +319,26 @@ class EditDialog(QDialog):
         grp_layout.setLayout(l_lay)
         left_layout.addWidget(grp_layout)
         
+        # 6. Folder Specific View Settings
+        if self.script.get("type") == "folder":
+            grp_fview = QGroupBox("FOLDER VIEW SETTINGS")
+            l_fv = QGridLayout()
+            
+            l_fv.addWidget(QLabel("Inner Columns:"), 0, 0)
+            self.spn_inner_cols = QSpinBox(); self.spn_inner_cols.setRange(0, 20); 
+            self.spn_inner_cols.setValue(self.script.get("grid_columns", 0)) # 0 means default
+            self.spn_inner_cols.setToolTip("0 = Inherit Global")
+            l_fv.addWidget(self.spn_inner_cols, 0, 1)
+            
+            l_fv.addWidget(QLabel("Inner Row Height:"), 0, 2)
+            self.spn_inner_h = QSpinBox(); self.spn_inner_h.setRange(0, 200); 
+            self.spn_inner_h.setValue(self.script.get("grid_btn_height", 0)) # 0 means default
+            self.spn_inner_h.setToolTip("0 = Inherit Global")
+            l_fv.addWidget(self.spn_inner_h, 0, 3)
+            
+            grp_fview.setLayout(l_fv)
+            left_layout.addWidget(grp_fview)
+        
         left_layout.addStretch()
         left_widget.setLayout(left_layout)
         scroll.setWidget(left_widget)
@@ -419,6 +439,10 @@ class EditDialog(QDialog):
         self.script["height"] = self.spn_height.value()
         self.script["corner_radius"] = self.spn_radius.value()
         self.script["border_width"] = self.spn_border.value()
+        
+        if self.script.get("type") == "folder":
+            self.script["grid_columns"] = self.spn_inner_cols.value()
+            self.script["grid_btn_height"] = self.spn_inner_h.value()
         
         self.accept()
 
@@ -612,15 +636,22 @@ class MainWindow(QMainWindow):
             scripts = folder.get("scripts", [])
             self.title_lbl.setText(f"SCRIPT MANAGER // {folder.get('name', '').upper()}")
             self.back_btn.show()
+            
+            # Context settings (fallback to global)
+            cols = folder.get("grid_columns", 0)
+            if cols == 0: cols = self.config.get("columns", 5)
+            
+            def_h = folder.get("grid_btn_height", 0)
+            if def_h == 0: def_h = self.config.get("default_btn_height", 40)
         else:
             scripts = self.config.get("scripts", [])
             self.title_lbl.setText("SCRIPT MANAGER // ROOT")
             self.back_btn.hide()
+            
+            # Global settings
+            cols = self.config.get("columns", 5)
+            def_h = self.config.get("default_btn_height", 40)
 
-        # Configurable Grid
-        cols = self.config.get("columns", 5)
-        def_h = self.config.get("default_btn_height", 40)
-        
         grid_map = {} # (row, col) -> occupied
         r, c = 0, 0
         
