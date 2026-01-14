@@ -2,6 +2,17 @@
 #SingleInstance
 Persistent
 
+Paste(text) {
+    Old := A_Clipboard
+    A_Clipboard := ""  ; Clear clipboard first
+    A_Clipboard := text
+    if !ClipWait(1)
+        return
+    SendInput "^v"
+    Sleep 250  ; Wait for paste to complete before restoring clipboard
+    A_Clipboard := Old
+}
+
 ;! === SCRIPT SHORTCUTS ===
 ;! Run Python Script
 ;! Opens run.py in the ms1 directory
@@ -639,38 +650,54 @@ PrintScreen::Run("C:\Users\nahid\ms\ms1\scripts\Autohtokey\version2\gui\Bio.ahk"
 ;! === TEXT SHORTCUTS ===
 ;! AutoHotkey Version 1
 ;! Inserts AHK v1 header requirement
-:T:;v1::#Requires AutoHotkey v1.0
+:X:;v1::Paste('#Requires AutoHotkey v1.0')
 
 ;! AutoHotkey Version 2
 ;! Inserts AHK v2 header requirement
-:T:;v2::{#}Requires AutoHotkey v2.0
+:X:;v2::Paste('{#}Requires AutoHotkey v2.0')
 
 ;! Registry Run Path
 ;! Windows startup registry path run
-:T:;run::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run
+:X:;run::Paste('HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run')
 
 ;! PowerShell Symlink
 ;! PowerShell command to create symbolic link
-:T:;mklink::New-Item -ItemType SymbolicLink -Path "Fake" -Target "Original" -Force
+:X:;mklink::Paste('New-Item -ItemType SymbolicLink -Path "Fake" -Target "Original" -Force')
 
 ;! Symbols
 ;!   󰩷  󰣉  󰁄 󰁌 󰞘 󰜴 󱞩 󱞫 󰤼
-:T:;--::
+:X:;--::Paste('')
 
 ;! Star
-:T:;star::
+:X:;star::Paste('')
 
 ;! Db path
-:T:;db::C:\Users\nahid\ms\db
+:X:;db::Paste('C:\Users\nahid\ms\db')
 
 ;! Changes for Ai to know that i made on my files
-:T:;change::ok i have made some changes from last time  so keep that in mind now
+:X:;change::Paste('ok i have made some changes from last time  so keep that in mind now')
 
 ;! Percentage %
-:T:;%::℅
+:X:;%::Paste('℅')
 
 ;! not equal
-:T:;notequal::≠
+:X:;notequal::Paste('≠')
 
 ;! Theta Sign
-:T:;theta::θ
+:X:;theta::Paste('θ')
+
+;! Custom Syntex [Half]
+:X:;cms::Paste("
+(
+make a study note for this
+md syntex formet is a bit different here is how i use them
+
+#1.5#text#/#  = extra big text
+##text##  = big text
+**text** = bold text
+@@text@@ = italic text
+__text__ = underline
+- text = list 1
+-- text = list 2
+--- text = list 3
+)")

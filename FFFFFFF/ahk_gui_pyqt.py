@@ -1124,6 +1124,21 @@ class AHKShortcutEditor(QMainWindow):
         try:
             output_lines = ["#Requires AutoHotkey v2.0", "#SingleInstance", "Persistent", ""]
 
+            # Add helper function for fast pasting
+            output_lines.extend([
+                "Paste(text) {",
+                "    Old := A_Clipboard",
+                "    A_Clipboard := \"\"  ; Clear clipboard first",
+                "    A_Clipboard := text",
+                "    if !ClipWait(1)",
+                "        return",
+                "    SendInput \"^v\"",
+                "    Sleep 250  ; Wait for paste to complete before restoring clipboard",
+                "    A_Clipboard := Old",
+                "}",
+                ""
+            ])
+
             # Add Background/Startup Scripts at the top (Auto-execute section)
             enabled_startup = [s for s in self.startup_scripts if s.get('enabled', True)]
             if enabled_startup:
@@ -1191,23 +1206,33 @@ class AHKShortcutEditor(QMainWindow):
                     trigger = shortcut.get('trigger', '')
                     
                     if '\n' in replacement:
-                        # TR mode (Text + Raw) + Escaping starting ( to avoid parser confusion
-                        output_lines.append(f":TR:{trigger}::")
-                        output_lines.append("(")
-                        # If a line starts with (, AHK thinks it's a new continuation section.
-                        # We must escape it with a backtick.
-                        cleaned = "\n".join(["`" + line if line.startswith("(") else line for line in replacement.split("\n")])
-                        output_lines.append(cleaned)
-                        output_lines.append(")")
+                        # Multiline: Use AHK v2 continuation section (must use double quotes for string wrapper)
+                        safe_replacement = replacement.replace('"', '""')
+                        
+                        output_lines.append(f":X:{trigger}::Paste(\"")
+                        output_lines.append("(") 
+                        
+                        lines = safe_replacement.split('\n')
+                        for line in lines:
+                            # AHK v2 Continuation: escape lines starting with ) or , with backtick
+                            # Although only ) is strictly needed for closing, safety first
+                            if line.strip().startswith(")"):
+                                output_lines.append("`" + line)
+                            else:
+                                output_lines.append(line)
+                                
+                        output_lines.append(")\")")
                     else:
-                        output_lines.append(f":T:{trigger}::{replacement}")
+                        # Single line: Use single quotes to robustly handle double quotes in content
+                        safe_replacement = replacement.replace("'", "''")
+                        output_lines.append(f":X:{trigger}::Paste('{safe_replacement}')")
                     output_lines.append("")
 
             output_file = "generated_shortcuts.ahk"
             with open(output_file, 'w', encoding='utf-8') as f:
                 f.write('\n'.join(output_lines))
 
-            QMessageBox.information(self, "Success", f"AHK script generated successfully as '{output_file}'!")
+            self.statusBar().showMessage(f"🚀 Success: AHK script generated as '{output_file}'", 3000)
 
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Failed to generate AHK script: {e}")

@@ -363,6 +363,14 @@
             "trigger": ";theta",
             "replacement": "θ",
             "enabled": true
+        },
+        {
+            "name": "Custom Syntex [Half]",
+            "category": "General",
+            "description": "",
+            "trigger": ";cms",
+            "replacement": "make a study note for this\nmd syntex formet is a bit different here is how i use them\n\n#1.5#text#/#  = extra big text\n##text##  = big text\n**text** = bold text\n@@text@@ = italic text\n__text__ = underline\n- text = list 1\n-- text = list 2\n--- text = list 3",
+            "enabled": true
         }
     ],
     "startup_scripts": [
