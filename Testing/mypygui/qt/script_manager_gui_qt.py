@@ -12,8 +12,8 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                              QCheckBox, QColorDialog, QMenu, QTextEdit, QFormLayout,
                              QGroupBox, QSpinBox, QFileDialog, QFontComboBox, QPlainTextEdit,
                              QRadioButton, QButtonGroup, QSplitter)
-from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QPoint
-from PyQt6.QtGui import QFont, QCursor, QColor, QDesktopServices, QAction, QIcon, QPainter, QBrush, QPixmap
+from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QPoint, QMimeData
+from PyQt6.QtGui import QFont, QCursor, QColor, QDesktopServices, QAction, QIcon, QPainter, QBrush, QPixmap, QDrag
 from PyQt6.QtCore import QUrl
 
 # -----------------------------------------------------------------------------
@@ -57,6 +57,29 @@ class CyberButton(QPushButton):
         self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         
         self.update_style()
+        self.drag_start_pos = QPoint()
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.MouseButton.LeftButton:
+            self.drag_start_pos = event.pos()
+        super().mousePressEvent(event)
+
+    def mouseMoveEvent(self, event):
+        if not (event.buttons() & Qt.MouseButton.LeftButton): return
+        if (event.pos() - self.drag_start_pos).manhattanLength() < QApplication.startDragDistance(): return
+        
+        drag = QDrag(self)
+        mime = QMimeData()
+        mime.setText(self.script.get("name", ""))
+        # We store the object pointer for internal transfer
+        mime.setData("application/x-script-item", b"")
+        drag.setMimeData(mime)
+        
+        # Pixmap for drag feedback
+        pix = self.grab()
+        drag.setPixmap(pix)
+        drag.setHotSpot(event.pos())
+        drag.exec(Qt.DropAction.MoveAction)
 
     def update_style(self):
         # Defaults
@@ -652,6 +675,10 @@ class MainWindow(QMainWindow):
         
         self.load_config()
         self.setup_icon()
+        
+        # Clipboard for Cut/Paste
+        self.clipboard_item = None
+        self.clipboard_source_list = None
 
         # Apply global settings
         app_bg = self.config.get("app_bg", CP_BG)
@@ -702,7 +729,7 @@ class MainWindow(QMainWindow):
             event.accept()
 
     def mouseMoveEvent(self, event):
-        if event.buttons() == Qt.ButtonsMask.LeftButton:
+        if event.buttons() == Qt.MouseButton.LeftButton:
             self.move(event.globalPosition().toPoint() - self.drag_pos)
             event.accept()
 
@@ -798,8 +825,53 @@ class MainWindow(QMainWindow):
 
         # Grid
         scroll = QScrollArea(); scroll.setWidgetResizable(True); scroll.setStyleSheet(f"background: transparent; border: none;")
-        self.grid_container = QWidget(); self.grid = QGridLayout(self.grid_container); self.grid.setSpacing(10); self.grid.setAlignment(Qt.AlignmentFlag.AlignTop)
+        self.grid_container = QWidget()
+        self.grid_container.setAcceptDrops(True)
+        # Event filters for drag/drop on container
+        self.grid_container.dragEnterEvent = self.gridDragEnterEvent
+        self.grid_container.dropEvent = self.gridDropEvent
+        
+        self.grid = QGridLayout(self.grid_container); self.grid.setSpacing(10); self.grid.setAlignment(Qt.AlignmentFlag.AlignTop)
         scroll.setWidget(self.grid_container); self.main_layout.addWidget(scroll)
+
+    def gridDragEnterEvent(self, event):
+        if event.mimeData().hasFormat("application/x-script-item"):
+            event.acceptProposedAction()
+
+    def gridDropEvent(self, event):
+        source_btn = event.source()
+        if not isinstance(source_btn, CyberButton): return
+        
+        # Find where it was dropped
+        drop_pos = event.position().toPoint()
+        
+        scripts = self.view_stack[-1]["scripts"] if self.view_stack else self.config["scripts"]
+        
+        # Find nearest item index
+        target_idx = -1
+        min_dist = 999999
+        for i in range(self.grid.count()):
+            w = self.grid.itemAt(i).widget()
+            if w:
+                dist = (w.geometry().center() - drop_pos).manhattanLength()
+                if dist < min_dist:
+                    min_dist = dist
+                    target_idx = i
+        
+        if source_btn.script in scripts:
+            old_idx = scripts.index(source_btn.script)
+            
+            # Guard: If dropping on itself or no meaningful change, skip refresh
+            if target_idx == old_idx or target_idx == -1:
+                event.accept()
+                return
+
+            # Perform the move
+            scripts.pop(old_idx)
+            scripts.insert(target_idx, source_btn.script)
+            
+            self.save_config()
+            event.acceptProposedAction()
 
     def update_stats(self):
         if not self.config.get("show_widgets", True): return
@@ -960,12 +1032,57 @@ class MainWindow(QMainWindow):
     def show_context_menu(self, btn, script, pos):
         menu = QMenu(self)
         menu.setStyleSheet(f"QMenu {{ background-color: {CP_PANEL}; color: {CP_TEXT}; border: 1px solid {CP_CYAN}; }} QMenu::item:selected {{ background-color: {CP_CYAN}; color: {CP_BG}; }}")
+        
         menu.addAction("Edit").triggered.connect(lambda: self.open_edit(script))
+        menu.addAction("Duplicate").triggered.connect(lambda: self.duplicate_item(script))
+        menu.addSeparator()
+        menu.addAction("Cut").triggered.connect(lambda: self.cut_item(script))
+        
+        paste_act = menu.addAction("Paste")
+        paste_act.setEnabled(self.clipboard_item is not None)
+        paste_act.triggered.connect(self.paste_item)
+        
+        menu.addSeparator()
         menu.addAction("Delete").triggered.connect(lambda: self.delete_item(script))
         menu.exec(btn.mapToGlobal(pos))
 
-    def open_edit(self, script):
-        if EditDialog(script, self).exec(): self.save_config()
+    def duplicate_item(self, script):
+        import copy
+        new_script = copy.deepcopy(script)
+        if "name" in new_script: new_script["name"] += " (Copy)"
+        
+        target_list = self.view_stack[-1]["scripts"] if self.view_stack else self.config["scripts"]
+        target_list.append(new_script)
+        self.save_config()
+
+    def cut_item(self, script):
+        self.clipboard_item = script
+        self.clipboard_source_list = self.view_stack[-1]["scripts"] if self.view_stack else self.config["scripts"]
+        # Visual feedback could be added here (e.g. ghosting the button)
+        QApplication.beep()
+
+    def paste_item(self):
+        if not self.clipboard_item: return
+        
+        target_list = self.view_stack[-1]["scripts"] if self.view_stack else self.config["scripts"]
+        
+        # Remove from old
+        if self.clipboard_source_list is not None and self.clipboard_item in self.clipboard_source_list:
+            self.clipboard_source_list.remove(self.clipboard_item)
+            
+        # Add to new
+        target_list.append(self.clipboard_item)
+        
+        self.clipboard_item = None
+        self.clipboard_source_list = None
+        self.save_config()
+
+    def delete_item(self, script):
+        if QMessageBox.question(self, "Delete", f"Delete '{script.get('name')}'?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No) == QMessageBox.StandardButton.Yes:
+            target_list = self.view_stack[-1]["scripts"] if self.view_stack else self.config["scripts"]
+            if script in target_list:
+                target_list.remove(script)
+                self.save_config()
 
     def prompt_add_new(self):
         dlg = TypeSelectionDialog(self)

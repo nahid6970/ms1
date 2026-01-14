@@ -97,7 +97,7 @@
             "child_height": 100,
             "width": 0,
             "height": 0,
-            "_runtime_height": 500,
+            "_runtime_height": 50,
             "font_family": "Consolas",
             "grid_btn_height": 0,
             "_runtime_font_size": 20
@@ -155,7 +155,7 @@
                     "_runtime_font_size": 20
                 }
             ],
-            "_runtime_height": 500,
+            "_runtime_height": 50,
             "_runtime_font_size": 10
         },
         {
@@ -174,7 +174,7 @@
             "row_span": 1,
             "width": 0,
             "height": 0,
-            "_runtime_height": 500,
+            "_runtime_height": 50,
             "_runtime_font_size": 20
         },
         {
@@ -203,7 +203,7 @@
             "text_color": "white",
             "hover_color": "#26b2f3",
             "hover_text_color": "white",
-            "_runtime_height": 500,
+            "_runtime_height": 50,
             "_runtime_font_size": 20
         },
         {
@@ -232,7 +232,7 @@
             "hover_color": "#26b2f3",
             "hover_text_color": "white",
             "border_color": "#fe1616",
-            "_runtime_height": 500,
+            "_runtime_height": 50,
             "_runtime_font_size": 20
         },
         {
@@ -256,7 +256,7 @@
             "inline_type": "cmd",
             "inline_script": "",
             "kill_window": true,
-            "_runtime_height": 500,
+            "_runtime_height": 50,
             "_runtime_font_size": 20
         },
         {
@@ -280,7 +280,7 @@
             "height": 0,
             "is_bold": false,
             "is_italic": false,
-            "_runtime_height": 500,
+            "_runtime_height": 50,
             "font_family": "Consolas",
             "_runtime_font_size": 20
         },
@@ -306,7 +306,7 @@
             "is_bold": false,
             "is_italic": false,
             "font_family": "Consolas",
-            "_runtime_height": 500,
+            "_runtime_height": 50,
             "border_color": "#55aaff",
             "_runtime_font_size": 12
         },
@@ -331,7 +331,7 @@
             "height": 0,
             "is_bold": false,
             "is_italic": false,
-            "_runtime_height": 500,
+            "_runtime_height": 50,
             "font_family": "Consolas",
             "_runtime_font_size": 20
         },
@@ -356,7 +356,7 @@
             "height": 0,
             "is_bold": false,
             "is_italic": false,
-            "_runtime_height": 500,
+            "_runtime_height": 50,
             "_runtime_font_size": 20
         },
         {
@@ -380,7 +380,7 @@
             "height": 0,
             "is_bold": false,
             "is_italic": false,
-            "_runtime_height": 500,
+            "_runtime_height": 50,
             "_runtime_font_size": 20
         },
         {
@@ -404,7 +404,7 @@
             "height": 0,
             "is_bold": false,
             "is_italic": false,
-            "_runtime_height": 500,
+            "_runtime_height": 50,
             "_runtime_font_size": 20
         },
         {
@@ -422,31 +422,11 @@
             "height": 0,
             "corner_radius": 0,
             "border_width": 0,
-            "_runtime_height": 500,
+            "_runtime_height": 50,
             "_runtime_font_size": 10,
             "border_color": "#000000",
             "grid_columns": 0,
             "grid_btn_height": 0
-        },
-        {
-            "name": "New Folder",
-            "type": "folder",
-            "scripts": [],
-            "color": "#FCEE0A",
-            "col_span": 1,
-            "row_span": 1,
-            "font_family": "Consolas",
-            "font_size": 10,
-            "is_bold": true,
-            "is_italic": false,
-            "width": 0,
-            "height": 0,
-            "corner_radius": 0,
-            "border_width": 0,
-            "grid_columns": 0,
-            "grid_btn_height": 0,
-            "_runtime_height": 500,
-            "_runtime_font_size": 10
         },
         {
             "name": "New Script",
@@ -471,27 +451,7 @@
             "height": 0,
             "corner_radius": 0,
             "border_width": 0,
-            "_runtime_height": 500,
-            "_runtime_font_size": 10
-        },
-        {
-            "name": "New Folder",
-            "type": "folder",
-            "scripts": [],
-            "color": "#FCEE0A",
-            "col_span": 1,
-            "row_span": 1,
-            "font_family": "Consolas",
-            "font_size": 10,
-            "is_bold": true,
-            "is_italic": false,
-            "width": 0,
-            "height": 0,
-            "corner_radius": 0,
-            "border_width": 0,
-            "grid_columns": 0,
-            "grid_btn_height": 0,
-            "_runtime_height": 500,
+            "_runtime_height": 50,
             "_runtime_font_size": 10
         }
     ],
