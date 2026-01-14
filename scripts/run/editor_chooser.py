@@ -241,10 +241,10 @@ def create_editor_chooser(file_paths):
         # Title for each row
         row_title_font = tkfont.Font(family="Segoe UI", size=10, weight="bold")
         rtitle = tk.Label(content_frame, text=row_titles[r_idx], font=row_title_font, bg='#1e1e1e', fg='#ffffff')
-        rtitle.pack(pady=(5, 0), anchor='w', padx=20)
+        rtitle.pack(pady=(5, 0), anchor='w', padx=15)
         
         row_frame = tk.Frame(content_frame, bg='#1e1e1e')
-        row_frame.pack(pady=5)
+        row_frame.pack(pady=5, anchor='w', padx=5)
         
         btn_row = []
         for c_idx, (name, color, icon) in enumerate(row_data):
