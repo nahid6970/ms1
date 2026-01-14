@@ -336,8 +336,9 @@ class EditDialog(QDialog):
 
     def init_ui(self):
         self.setObjectName("EditDialog")
-        # Fixed height to fit inside main window (650)
-        self.setFixedSize(900 if self.script.get("type") != "folder" else 500, 600)
+        # Increased height and width to fit everything without scrolling
+        is_folder = self.script.get("type") == "folder"
+        self.setFixedSize(950 if not is_folder else 500, 850 if not is_folder else 600)
         accent = self.parent_app.config['settings']['accent_color']
         border = self.parent_app.config['settings']['border_color']
         
@@ -439,8 +440,8 @@ class EditDialog(QDialog):
         """)
         
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(25, 20, 25, 25)
-        layout.setSpacing(15)
+        layout.setContentsMargins(20, 15, 20, 20)
+        layout.setSpacing(10)
         
         # Header
         header = QHBoxLayout()
@@ -475,7 +476,7 @@ class EditDialog(QDialog):
         scroll_content.setStyleSheet("background: transparent;")
         content_vlayout = QVBoxLayout(scroll_content)
         content_vlayout.setContentsMargins(0, 0, 5, 0)
-        content_vlayout.setSpacing(15)
+        content_vlayout.setSpacing(10)
 
         # Outer horizontal layout for panels
         content_hlayout = QHBoxLayout()
@@ -489,8 +490,8 @@ class EditDialog(QDialog):
         basic_group = QFrame()
         basic_group.setObjectName("GroupFrame")
         basic_layout = QGridLayout(basic_group)
-        basic_layout.setContentsMargins(20, 20, 20, 20)
-        basic_layout.setSpacing(12)
+        basic_layout.setContentsMargins(15, 12, 15, 12)
+        basic_layout.setSpacing(8)
         
         basic_layout.addWidget(QLabel("LABEL NAME"), 0, 0)
         self.name_edit = QLineEdit(self.script["name"])
@@ -538,8 +539,8 @@ class EditDialog(QDialog):
         typo_group = QFrame()
         typo_group.setObjectName("GroupFrame")
         typo_layout = QGridLayout(typo_group)
-        typo_layout.setContentsMargins(20, 20, 20, 20)
-        typo_layout.setSpacing(12)
+        typo_layout.setContentsMargins(15, 12, 15, 12)
+        typo_layout.setSpacing(8)
         typo_layout.addWidget(QLabel("FONT FAMILY"), 0, 0)
         self.font_combo = QComboBox()
         self.font_combo.addItems(sorted(QFontDatabase.families()))
@@ -564,8 +565,8 @@ class EditDialog(QDialog):
         color_group = QFrame()
         color_group.setObjectName("GroupFrame")
         color_layout = QGridLayout(color_group)
-        color_layout.setContentsMargins(20, 20, 20, 20)
-        color_layout.setSpacing(15)
+        color_layout.setContentsMargins(15, 12, 15, 12)
+        color_layout.setSpacing(10)
         
         self.btn_bg = self.create_color_btn("BUTTON BACKGROUND", "color")
         color_layout.addWidget(self.btn_bg, 0, 0)
@@ -581,8 +582,8 @@ class EditDialog(QDialog):
         dim_group = QFrame()
         dim_group.setObjectName("GroupFrame")
         dim_layout = QGridLayout(dim_group)
-        dim_layout.setContentsMargins(20, 20, 20, 20)
-        dim_layout.setSpacing(12)
+        dim_layout.setContentsMargins(15, 12, 15, 12)
+        dim_layout.setSpacing(8)
         
         dim_layout.addWidget(QLabel("WIDTH"), 0, 0)
         self.width_edit = QLineEdit(str(self.script.get("width", 0)))
@@ -619,8 +620,8 @@ class EditDialog(QDialog):
             inline_group = QFrame()
             inline_group.setObjectName("GroupFrame")
             inline_layout = QVBoxLayout(inline_group)
-            inline_layout.setContentsMargins(20, 20, 20, 20)
-            inline_layout.setSpacing(15)
+            inline_layout.setContentsMargins(15, 15, 15, 15)
+            inline_layout.setSpacing(10)
             
             inline_layout.addWidget(QLabel("EXECUTION MODE"))
             mode_row = QHBoxLayout()
