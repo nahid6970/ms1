@@ -59,9 +59,21 @@ class CyberButton(QPushButton):
         self.update_style()
 
     def update_style(self):
-        # Extract properties
-        color = self.script.get("color", CP_YELLOW if not self.is_folder else CP_CYAN)
-        text_color = self.script.get("text_color", CP_BG if not self.is_folder else color)
+        # Defaults
+        # Folders -> Yellow (Explorer-like)
+        # Scripts -> White
+        
+        default_color = CP_YELLOW if self.is_folder else "#FFFFFF"
+        
+        # Extract properties with new defaults
+        color = self.script.get("color", default_color)
+        
+        # Text Color logic
+        # Scripts (Filled White) -> Black text
+        # Folders (Filled Yellow) -> Black text
+        default_text_color = "#000000" 
+        text_color = self.script.get("text_color", default_text_color)
+        
         hover_color = self.script.get("hover_color", CP_BG)
         hover_text_color = self.script.get("hover_text_color", color)
         
@@ -84,10 +96,10 @@ class CyberButton(QPushButton):
         bg_normal = color
         fg_normal = text_color
         
-        # For folders, existing logic was outline-ish
-        if self.is_folder:
-            bg_normal = CP_PANEL
-            fg_normal = color
+        # Override for folders is NOT needed anymore since we want them filled
+        # if self.is_folder:
+        #    bg_normal = CP_PANEL
+        #    fg_normal = color
             
         # Hover Style defaults (swap)
         bg_hover = hover_color if "hover_color" in self.script else CP_BG
@@ -733,7 +745,7 @@ class MainWindow(QMainWindow):
                 self.add_new_folder()
 
     def add_new_item(self):
-        new_script = {"name": "New Script", "path": "", "type": "script", "color": CP_YELLOW}
+        new_script = {"name": "New Script", "path": "", "type": "script", "color": "#FFFFFF"}
         target_list = self.view_stack[-1]["scripts"] if self.view_stack else self.config["scripts"]
         target_list.append(new_script)
         if EditDialog(new_script, self).exec(): self.save_config()
@@ -744,7 +756,7 @@ class MainWindow(QMainWindow):
             "name": "New Folder", 
             "type": "folder", 
             "scripts": [], 
-            "color": CP_CYAN,
+            "color": CP_YELLOW,
             "col_span": 1,
             "row_span": 1
         }
