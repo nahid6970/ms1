@@ -53,7 +53,6 @@ class CyberButton(QPushButton):
         if h > 0: self.setFixedHeight(h)
         else: self.setMinimumHeight(45)
 
-
         # Enable Right Click
         self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         
@@ -66,7 +65,6 @@ class CyberButton(QPushButton):
         super().mousePressEvent(event)
 
     def mouseMoveEvent(self, event):
-        super().mouseMoveEvent(event) # Allow standard behavior
         if not (event.buttons() & Qt.MouseButton.LeftButton): return
         if (event.pos() - self.drag_start_pos).manhattanLength() < QApplication.startDragDistance(): return
         
@@ -410,11 +408,6 @@ class EditDialog(QDialog):
             
         # === BOTTOM BUTTONS ===
         btn_layout = QHBoxLayout()
-        
-        btn_reset = QPushButton("RESET STYLES")
-        btn_reset.setStyleSheet(f"background-color: {CP_DIM}; color: white; padding: 10px;")
-        btn_reset.clicked.connect(self.reset_styles)
-        
         btn_save = QPushButton("SAVE CHANGES"); 
         btn_save.setStyleSheet(f"background-color: {CP_YELLOW}; color: black; font-weight: bold; padding: 10px;")
         btn_save.clicked.connect(self.save)
@@ -422,53 +415,10 @@ class EditDialog(QDialog):
         btn_cancel.setStyleSheet(f"background-color: {CP_RED}; color: white; padding: 10px;")
         btn_cancel.clicked.connect(self.reject)
         
-        btn_layout.addWidget(btn_reset)
         btn_layout.addStretch()
         btn_layout.addWidget(btn_save)
         btn_layout.addWidget(btn_cancel)
         vbox.addLayout(btn_layout)
-
-    def reset_styles(self):
-        # Determine defaults
-        is_folder = (self.script.get("type") == "folder")
-        def_bg = CP_YELLOW if is_folder else "#FFFFFF"
-        def_fg = "#000000"
-        
-        parent = self.parent()
-        def_fs = 10
-        if parent and hasattr(parent, "config"):
-            def_fs = parent.config.get("default_font_size", 10)
-
-        # Reset Typography
-        self.cmb_font.setCurrentFont(QFont("Consolas"))
-        self.spn_size.setValue(def_fs)
-        self.chk_bold.setChecked(True)
-        self.chk_italic.setChecked(False)
-
-        # Reset Colors
-        self.script.pop("color", None)
-        self.script.pop("text_color", None)
-        self.script.pop("hover_color", None)
-        self.script.pop("hover_text_color", None)
-        self.script.pop("border_color", None)
-
-        self.set_btn_color(self.btn_col_bg, def_bg)
-        self.set_btn_color(self.btn_col_fg, def_fg)
-        self.set_btn_color(self.btn_col_hbg, CP_BG)
-        self.set_btn_color(self.btn_col_hfg, def_bg)
-        self.set_btn_color(self.btn_col_brd, def_bg)
-
-        # Reset Layout/Styling Metrics
-        self.spn_cspan.setValue(1)
-        self.spn_rspan.setValue(1)
-        self.spn_width.setValue(0)
-        self.spn_height.setValue(0)
-        self.spn_radius.setValue(0)
-        self.spn_border.setValue(1 if is_folder else 0)
-
-        if is_folder:
-            self.spn_inner_cols.setValue(0)
-            self.spn_inner_h.setValue(0)
 
     def create_color_btn(self, label, key):
         # Determine effective default based on key and type, matching CyberButton logic
@@ -874,12 +824,7 @@ class MainWindow(QMainWindow):
         self.dash_frame.setVisible(self.config.get("show_widgets", True))
 
         # Grid
-        self.scroll = QScrollArea()
-        self.scroll.setWidgetResizable(True)
-        self.scroll.setStyleSheet(f"background: transparent; border: none;")
-        self.scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
-        self.scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        
+        scroll = QScrollArea(); scroll.setWidgetResizable(True); scroll.setStyleSheet(f"background: transparent; border: none;")
         self.grid_container = QWidget()
         self.grid_container.setAcceptDrops(True)
         self.grid_container.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
@@ -889,12 +834,8 @@ class MainWindow(QMainWindow):
         self.grid_container.dragEnterEvent = self.gridDragEnterEvent
         self.grid_container.dropEvent = self.gridDropEvent
         
-        self.grid = QGridLayout(self.grid_container)
-        self.grid.setSpacing(10)
-        self.grid.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
-        
-        self.scroll.setWidget(self.grid_container)
-        self.main_layout.addWidget(self.scroll)
+        self.grid = QGridLayout(self.grid_container); self.grid.setSpacing(10); self.grid.setAlignment(Qt.AlignmentFlag.AlignTop)
+        scroll.setWidget(self.grid_container); self.main_layout.addWidget(scroll)
 
     def show_grid_context_menu(self, pos):
         menu = QMenu(self)
@@ -1050,8 +991,6 @@ class MainWindow(QMainWindow):
             btn.clicked.connect(partial(self.handle_click, script))
             btn.customContextMenuRequested.connect(partial(self.show_context_menu, btn, script))
             self.grid.addWidget(btn, r, c, r_span, c_span)
-        
-
 
     def handle_click(self, script):
         if script.get("type") == "folder":
