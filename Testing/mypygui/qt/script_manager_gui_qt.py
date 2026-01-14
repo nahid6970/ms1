@@ -1124,9 +1124,18 @@ class MainWindow(QMainWindow):
             # Add widget
             btn = CyberButton(script.get("name", "Unnamed"), script_data=script)
             
-            # Apply dynamic preferences
-            if script.get("height", 0) == 0:
-                btn.setFixedHeight(def_h)
+            # Apply dynamic preferences - calculate height based on row span
+            item_h = script.get("height", 0)
+            if item_h == 0:
+                item_h = def_h
+            
+            # For row span > 1, calculate total height including spacing
+            if r_span > 1:
+                spacing = self.grid.spacing()
+                total_h = (item_h * r_span) + (spacing * (r_span - 1))
+                btn.setFixedHeight(total_h)
+            else:
+                btn.setFixedHeight(item_h)
             
             # Apply runtime font settings
             f = QFont(script.get("_runtime_font_family", def_font), script.get("_runtime_font_size", def_fs))
