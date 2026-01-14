@@ -402,7 +402,11 @@ class ImageResizerApp(QMainWindow):
              QMessageBox.warning(self, "Invalid Size", "Width and Height must be greater than 0.")
              return
 
-        default_name = f"{os.path.splitext(os.path.basename(self.current_image_path))[0]}_{new_w}x{new_h}"
+        # Construct full path to default to the original image's directory
+        dir_name = os.path.dirname(self.current_image_path)
+        base_name = os.path.splitext(os.path.basename(self.current_image_path))[0]
+        default_name = os.path.join(dir_name, f"{base_name}_{new_w}x{new_h}")
+
         save_path, _ = QFileDialog.getSaveFileName(
             self, "Save Image", default_name, "PNG (*.png);;JPEG (*.jpg);;WEBP (*.webp)"
         )
