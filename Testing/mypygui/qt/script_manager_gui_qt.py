@@ -13,7 +13,7 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                              QGroupBox, QSpinBox, QFileDialog, QFontComboBox, QPlainTextEdit,
                              QRadioButton, QButtonGroup, QSplitter)
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QPoint
-from PyQt6.QtGui import QFont, QCursor, QColor, QDesktopServices, QAction, QIcon
+from PyQt6.QtGui import QFont, QCursor, QColor, QDesktopServices, QAction, QIcon, QPainter, QBrush, QPixmap
 from PyQt6.QtCore import QUrl
 
 # -----------------------------------------------------------------------------
@@ -492,14 +492,17 @@ class SettingsDialog(QDialog):
         self.setWindowTitle("GLOBAL CONFIG")
         self.resize(500, 500)
         self.app_bg = self.config.get("app_bg", CP_BG)
+        self.win_border = self.config.get("window_border_color", CP_YELLOW)
+        self.cfg_color = self.config.get("cfg_btn_color", CP_DIM)
+        
         self.setStyleSheet(f"""
-            QDialog {{ background-color: {self.app_bg}; border: 1px solid {CP_YELLOW}; }}
+            QDialog {{ background-color: {self.app_bg}; border: 2px solid {self.win_border}; }}
             QLabel {{ color: {CP_TEXT}; font-family: 'Consolas'; font-weight: bold; }}
             QLineEdit, QSpinBox {{ background: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 5px; }}
             QSpinBox::up-button, QSpinBox::down-button {{ width: 0px; border: none; }}
             QCheckBox {{ color: {CP_TEXT}; font-family: 'Consolas'; }}
             QPushButton {{ background: {CP_DIM}; color: white; border: none; padding: 8px; font-weight: bold; }}
-            QPushButton:hover {{ background: {CP_DIM}44; border: 1px solid {CP_YELLOW}; }}
+            QPushButton:hover {{ background: {CP_DIM}44; border: 1px solid {self.win_border}; }}
         """)
         self.setup_ui()
 
@@ -537,9 +540,19 @@ class SettingsDialog(QDialog):
         l_app = QFormLayout()
 
         self.btn_app_bg = QPushButton("Pick Background Color")
-        self.update_bg_btn_style()
+        self.update_color_btn_style(self.btn_app_bg, self.app_bg)
         self.btn_app_bg.clicked.connect(self.pick_app_bg)
         l_app.addRow("Main BG:", self.btn_app_bg)
+
+        self.btn_win_border = QPushButton("Pick Border Color")
+        self.update_color_btn_style(self.btn_win_border, self.win_border)
+        self.btn_win_border.clicked.connect(self.pick_win_border)
+        l_app.addRow("Win Border:", self.btn_win_border)
+
+        self.btn_cfg_col = QPushButton("Pick CFG Button Color")
+        self.update_color_btn_style(self.btn_cfg_col, self.cfg_color)
+        self.btn_cfg_col.clicked.connect(self.pick_cfg_color)
+        l_app.addRow("CFG Button:", self.btn_cfg_col)
 
         self.chk_widgets = QCheckBox("Show Stats Dashboard")
         self.chk_widgets.setChecked(self.config.get("show_widgets", True))
@@ -574,23 +587,48 @@ class SettingsDialog(QDialog):
         layout.addStretch()
         layout.addWidget(btn_save)
 
-    def update_bg_btn_style(self):
-        lc = QColor(self.app_bg).lightness()
-        self.btn_app_bg.setStyleSheet(f"background-color: {self.app_bg}; color: {'black' if lc > 128 else 'white'}; border: 1px solid {CP_DIM}; padding: 5px;")
+    def update_color_btn_style(self, btn, color):
+        lc = QColor(color).lightness()
+        btn.setStyleSheet(f"background-color: {color}; color: {'black' if lc > 128 else 'white'}; border: 1px solid {CP_DIM}; padding: 5px;")
 
     def pick_app_bg(self):
         c = QColorDialog.getColor(QColor(self.app_bg), self)
         if c.isValid():
             self.app_bg = c.name()
-            self.update_bg_btn_style()
-            # Preview it immediately on the dialog itself
-            self.setStyleSheet(f"QDialog {{ background-color: {self.app_bg}; border: 1px solid {CP_YELLOW}; }} " + self.styleSheet().split("}", 1)[1])
+            self.update_color_btn_style(self.btn_app_bg, self.app_bg)
+            self.update_dialog_style()
+
+    def pick_win_border(self):
+        c = QColorDialog.getColor(QColor(self.win_border), self)
+        if c.isValid():
+            self.win_border = c.name()
+            self.update_color_btn_style(self.btn_win_border, self.win_border)
+            self.update_dialog_style()
+
+    def pick_cfg_color(self):
+        c = QColorDialog.getColor(QColor(self.cfg_color), self)
+        if c.isValid():
+            self.cfg_color = c.name()
+            self.update_color_btn_style(self.btn_cfg_col, self.cfg_color)
+
+    def update_dialog_style(self):
+        self.setStyleSheet(f"""
+            QDialog {{ background-color: {self.app_bg}; border: 2px solid {self.win_border}; }}
+            QLabel {{ color: {CP_TEXT}; font-family: 'Consolas'; font-weight: bold; }}
+            QLineEdit, QSpinBox {{ background: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 5px; }}
+            QSpinBox::up-button, QSpinBox::down-button {{ width: 0px; border: none; }}
+            QCheckBox {{ color: {CP_TEXT}; font-family: 'Consolas'; }}
+            QPushButton {{ background: {CP_DIM}; color: white; border: none; padding: 8px; font-weight: bold; }}
+            QPushButton:hover {{ background: {CP_DIM}44; border: 1px solid {self.win_border}; }}
+        """)
 
     def save(self):
         self.config["columns"] = self.spn_cols.value()
         self.config["default_btn_height"] = self.spn_btn_h.value()
         self.config["default_font_size"] = self.spn_font_size.value()
         self.config["app_bg"] = self.app_bg
+        self.config["window_border_color"] = self.win_border
+        self.config["cfg_btn_color"] = self.cfg_color
         self.config["show_widgets"] = self.chk_widgets.isChecked()
         self.config["window_width"] = self.spn_w.value()
         self.config["window_height"] = self.spn_h.value()
@@ -605,11 +643,15 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("SCRIPT // MANAGER_V3.2")
+        self.setWindowFlags(Qt.WindowType.FramelessWindowHint)
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         
         self.config = {}
         self.view_stack = [] 
+        self.drag_pos = QPoint()
         
         self.load_config()
+        self.setup_icon()
 
         # Apply global settings
         app_bg = self.config.get("app_bg", CP_BG)
@@ -629,6 +671,41 @@ class MainWindow(QMainWindow):
         self.timer.timeout.connect(self.update_stats)
         self.timer.start(2000)
 
+    def setup_icon(self):
+        # Code Icon SVG logic
+        svg_data = f"""
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+            <rect width="512" height="512" rx="60" fill="{CP_BG}"/>
+            <path d="M160 128L32 256l128 128M352 128l128 128-128 128M288 64kL224 448" 
+                  stroke="{CP_YELLOW}" stroke-width="40" stroke-linecap="round" fill="none"/>
+            <path d="M160 128L32 256l128 128" stroke="{CP_CYAN}" stroke-width="40" stroke-linecap="round" fill="none"/>
+        </svg>
+        """
+        pixmap = QPixmap(64, 64)
+        pixmap.fill(Qt.GlobalColor.transparent)
+        painter = QPainter(pixmap)
+        # For simplicity, we create a basic icon using QPainter instead of full SVG parsing without extra deps
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        painter.setBrush(QBrush(QColor(CP_BG)))
+        painter.setPen(Qt.PenStyle.NoPen)
+        painter.drawRoundedRect(0, 0, 64, 64, 10, 10)
+        painter.setPen(QColor(CP_YELLOW))
+        font = QFont("Consolas", 30, QFont.Weight.Bold)
+        painter.setFont(font)
+        painter.drawText(pixmap.rect(), Qt.AlignmentFlag.AlignCenter, "</>")
+        painter.end()
+        self.setWindowIcon(QIcon(pixmap))
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.MouseButton.LeftButton:
+            self.drag_pos = event.globalPosition().toPoint() - self.frameGeometry().topLeft()
+            event.accept()
+
+    def mouseMoveEvent(self, event):
+        if event.buttons() == Qt.ButtonsMask.LeftButton:
+            self.move(event.globalPosition().toPoint() - self.drag_pos)
+            event.accept()
+
     def load_config(self):
         if os.path.exists(CONFIG_FILE):
             try:
@@ -645,7 +722,15 @@ class MainWindow(QMainWindow):
             
             # Apply immediate global effects
             app_bg = self.config.get("app_bg", CP_BG)
+            win_border = self.config.get("window_border_color", CP_YELLOW)
             self.setStyleSheet(f"QMainWindow {{ background-color: {app_bg}; }}")
+            if hasattr(self, 'main_frame'):
+                self.main_frame.setStyleSheet(f"#MainFrame {{ border: 2px solid {win_border}; background-color: {app_bg}; }}")
+
+            if hasattr(self, 'btn_cfg'):
+                cfg_col = self.config.get("cfg_btn_color", CP_DIM)
+                self.btn_cfg.script["color"] = cfg_col
+                self.btn_cfg.update_style()
 
             if self.config.get("always_on_top", False):
                 self.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint, True)
@@ -662,9 +747,20 @@ class MainWindow(QMainWindow):
     def setup_ui(self):
         central = QWidget()
         self.setCentralWidget(central)
-        self.main_layout = QVBoxLayout(central)
+        clayout = QVBoxLayout(central)
+        clayout.setContentsMargins(0, 0, 0, 0)
+
+        # MAIN FRAME (for border)
+        self.main_frame = QFrame()
+        self.main_frame.setObjectName("MainFrame")
+        app_bg = self.config.get("app_bg", CP_BG)
+        win_border = self.config.get("window_border_color", CP_YELLOW)
+        self.main_frame.setStyleSheet(f"#MainFrame {{ border: 2px solid {win_border}; background-color: {app_bg}; }}")
+        
+        self.main_layout = QVBoxLayout(self.main_frame)
         self.main_layout.setContentsMargins(20, 20, 20, 20)
         self.main_layout.setSpacing(15)
+        clayout.addWidget(self.main_frame)
 
         # Header
         header = QHBoxLayout()
@@ -677,11 +773,16 @@ class MainWindow(QMainWindow):
         self.btn_add.setFixedSize(40, 30) # Compact Header Btn
         self.btn_add.clicked.connect(self.prompt_add_new)
         
-        btn_settings = CyberButton("CFG", script_data={"color": CP_DIM, "type": "script"}); btn_settings.setFixedSize(50, 30)
-        btn_settings.clicked.connect(self.open_global_settings)
+        cfg_col = self.config.get("cfg_btn_color", CP_DIM)
+        self.btn_cfg = CyberButton("CFG", script_data={"color": cfg_col, "type": "script"}); self.btn_cfg.setFixedSize(50, 30)
+        self.btn_cfg.clicked.connect(self.open_global_settings)
+
+        self.btn_close = CyberButton("X", script_data={"color": CP_RED, "type": "script"}); self.btn_close.setFixedSize(40, 30)
+        self.btn_close.clicked.connect(self.close)
 
         header.addWidget(self.btn_add)
-        header.addWidget(btn_settings)
+        header.addWidget(self.btn_cfg)
+        header.addWidget(self.btn_close)
         
         self.main_layout.addLayout(header)
 
