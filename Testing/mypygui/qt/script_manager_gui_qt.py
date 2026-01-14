@@ -876,16 +876,20 @@ class MainWindow(QMainWindow):
 
         # Grid
         scroll = QScrollArea(); scroll.setWidgetResizable(True); scroll.setStyleSheet(f"background: transparent; border: none;")
+        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         self.grid_container = QWidget()
         self.grid_container.setAcceptDrops(True)
         self.grid_container.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.grid_container.customContextMenuRequested.connect(self.show_grid_context_menu)
+        self.grid_container.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.MinimumExpanding)
         
         # Event filters for drag/drop on container
         self.grid_container.dragEnterEvent = self.gridDragEnterEvent
         self.grid_container.dropEvent = self.gridDropEvent
         
-        self.grid = QGridLayout(self.grid_container); self.grid.setSpacing(10); self.grid.setAlignment(Qt.AlignmentFlag.AlignTop)
+        self.grid = QGridLayout(self.grid_container); self.grid.setSpacing(10)
+        self.grid.setRowStretch(100, 1)  # Spacer row at bottom to prevent stretching
         scroll.setWidget(self.grid_container); self.main_layout.addWidget(scroll)
 
     def show_grid_context_menu(self, pos):
@@ -1042,6 +1046,9 @@ class MainWindow(QMainWindow):
             btn.clicked.connect(partial(self.handle_click, script))
             btn.customContextMenuRequested.connect(partial(self.show_context_menu, btn, script))
             self.grid.addWidget(btn, r, c, r_span, c_span)
+        
+        # Add stretch to last row to prevent items from expanding vertically
+        self.grid.setRowStretch(r + 1, 1)
 
     def handle_click(self, script):
         if script.get("type") == "folder":
