@@ -9,9 +9,11 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                              QHBoxLayout, QLabel, QPushButton, QScrollArea, 
                              QFrame, QMessageBox, QGridLayout, QSizePolicy,
                              QProgressBar, QDialog, QLineEdit, QComboBox, 
-                             QCheckBox, QColorDialog, QMenu, QTextEdit, QFormLayout)
+                             QCheckBox, QColorDialog, QMenu, QTextEdit, QFormLayout,
+                             QGroupBox, QSpinBox, QFileDialog, QFontComboBox, QPlainTextEdit,
+                             QRadioButton, QButtonGroup, QSplitter)
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QPoint
-from PyQt6.QtGui import QFont, QCursor, QColor, QDesktopServices, QAction
+from PyQt6.QtGui import QFont, QCursor, QColor, QDesktopServices, QAction, QIcon
 from PyQt6.QtCore import QUrl
 
 # -----------------------------------------------------------------------------
@@ -26,7 +28,7 @@ CP_DIM = "#3a3a3a"          # Dimmed/Inactive
 CP_TEXT = "#E0E0E0"         # Main Text
 CP_SUBTEXT = "#808080"      # Sub Text
 CP_GREEN = "#00ff21"        # Success Green
-CP_ORANGE = "#ff934b"       # Warning Orange [RAM]
+CP_ORANGE = "#ff934b"       # Warning Orange
 
 CONFIG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "script_launcher_config.json")
 
@@ -35,51 +37,77 @@ CONFIG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "script_l
 # -----------------------------------------------------------------------------
 
 class CyberButton(QPushButton):
-    def __init__(self, text, parent=None, color=CP_YELLOW, is_outlined=False, font_size=10, is_folder=False, script_data=None):
+    def __init__(self, text, parent=None, script_data=None):
         super().__init__(text, parent)
-        self.color = color
-        self.is_outlined = is_outlined
-        self.is_folder = is_folder
-        self.script_data = script_data
+        self.script = script_data or {}
+        self.is_folder = (self.script.get("type") == "folder")
         
-        self.setFont(QFont("Consolas", font_size, QFont.Weight.Bold))
+        # Cursor
         self.setCursor(Qt.CursorShape.PointingHandCursor)
         self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-        self.setMinimumHeight(45)
         
+        # Dimensions
+        w = self.script.get("width", 0)
+        h = self.script.get("height", 0)
+        if w > 0: self.setFixedWidth(w)
+        if h > 0: self.setFixedHeight(h)
+        else: self.setMinimumHeight(45)
+
         # Enable Right Click
         self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         
         self.update_style()
 
     def update_style(self):
+        # Extract properties
+        color = self.script.get("color", CP_YELLOW if not self.is_folder else CP_CYAN)
+        text_color = self.script.get("text_color", CP_BG if not self.is_folder else color)
+        hover_color = self.script.get("hover_color", CP_BG)
+        hover_text_color = self.script.get("hover_text_color", color)
+        
+        border_width = self.script.get("border_width", 1 if self.is_folder else 0)
+        border_color = self.script.get("border_color", color)
+        radius = self.script.get("corner_radius", 0)
+        
+        # Font
+        font_family = self.script.get("font_family", "Consolas")
+        font_size = self.script.get("font_size", 10)
+        is_bold = self.script.get("is_bold", True)
+        is_italic = self.script.get("is_italic", False)
+        
+        f = QFont(font_family, font_size)
+        f.setBold(is_bold)
+        f.setItalic(is_italic)
+        self.setFont(f)
+
+        # To handle Hover properly with complex overrides, we use QSS
+        # If text_color is not set, default to contrast
+        
+        # Base Style
+        bg_normal = color
+        fg_normal = text_color
+        
+        # For folders, existing logic was outline-ish
         if self.is_folder:
-            bg_color = CP_PANEL
-            border_str = f"1px solid {self.color}"
-            text_color = self.color
-        else:
-            if self.is_outlined:
-                bg_color = "transparent"
-                border_str = f"2px solid {self.color}"
-                text_color = self.color
-            else:
-                bg_color = self.color
-                border_str = "none"
-                text_color = CP_BG
+            bg_normal = CP_PANEL
+            fg_normal = color
+            
+        # Hover Style defaults (swap)
+        bg_hover = hover_color if "hover_color" in self.script else CP_BG
+        fg_hover = hover_text_color if "hover_text_color" in self.script else color
 
         self.setStyleSheet(f"""
             QPushButton {{
-                background-color: {bg_color};
-                color: {text_color};
-                border: {border_str};
+                background-color: {bg_normal};
+                color: {fg_normal};
+                border: {border_width}px solid {border_color};
                 padding: 10px;
-                font-family: 'Consolas';
-                border-radius: 0px;
+                border-radius: {radius}px;
             }}
             QPushButton:hover {{
-                background-color: {CP_BG if not self.is_outlined else self.color};
-                color: {self.color if not self.is_outlined else CP_BG};
-                border: 1px solid {self.color};
+                background-color: {bg_hover};
+                color: {fg_hover};
+                border: {border_width}px solid {border_color};
             }}
         """)
 
@@ -89,126 +117,578 @@ class StatWidget(QFrame):
         self.setFrameShape(QFrame.Shape.StyledPanel)
         self.setStyleSheet(f"background-color: {CP_PANEL}; border: 1px solid {CP_DIM};")
         self.setFixedWidth(140)
-        
         layout = QVBoxLayout(self)
         layout.setContentsMargins(5, 5, 5, 5)
         layout.setSpacing(2)
         
-        # Header
-        self.lbl_title = QLabel(label)
-        self.lbl_title.setFont(QFont("Consolas", 8, QFont.Weight.Bold))
-        self.lbl_title.setStyleSheet(f"color: {CP_SUBTEXT};")
-        layout.addWidget(self.lbl_title)
+        lbl = QLabel(label)
+        lbl.setFont(QFont("Consolas", 8, QFont.Weight.Bold))
+        lbl.setStyleSheet(f"color: {CP_SUBTEXT};")
+        layout.addWidget(lbl)
         
-        # Value
         self.lbl_val = QLabel("0%")
         self.lbl_val.setFont(QFont("Consolas", 10, QFont.Weight.Bold))
         self.lbl_val.setStyleSheet(f"color: {color};")
         self.lbl_val.setAlignment(Qt.AlignmentFlag.AlignRight)
         layout.addWidget(self.lbl_val)
         
-        # Bar
         self.bar = QProgressBar()
         self.bar.setFixedHeight(4)
         self.bar.setTextVisible(False)
-        self.bar.setStyleSheet(f"""
-            QProgressBar {{
-                background-color: {CP_DIM};
-                border: none;
-            }}
-            QProgressBar::chunk {{
-                background-color: {color};
-            }}
-        """)
+        self.bar.setStyleSheet(f"QProgressBar {{ background: {CP_DIM}; border: none; }} QProgressBar::chunk {{ background: {color}; }}")
         layout.addWidget(self.bar)
 
-    def set_value(self, val, text=None):
+    def set_value(self, val):
         self.bar.setValue(int(val))
-        self.lbl_val.setText(text if text else f"{val}%")
+        self.lbl_val.setText(f"{int(val)}%")
+
+# -----------------------------------------------------------------------------
+# FULL EDIT DIALOG
+# -----------------------------------------------------------------------------
 
 class EditDialog(QDialog):
     def __init__(self, script_data, parent=None):
         super().__init__(parent)
         self.script = script_data
         self.setWindowTitle(f"EDIT // {self.script.get('name', 'UNKNOWN')}")
-        self.resize(500, 600)
+        self.resize(1000, 750)
         self.setStyleSheet(f"""
-            QDialog {{ background-color: {CP_BG}; border: 1px solid {CP_YELLOW}; }}
-            QLabel {{ color: {CP_TEXT}; font-family: 'Consolas'; }}
-            QLineEdit, QTextEdit {{ 
-                background-color: {CP_PANEL}; 
-                color: {CP_YELLOW}; 
+            QDialog {{ background-color: {CP_BG}; }}
+            QWidget {{ color: {CP_TEXT}; font-family: 'Consolas'; font-size: 10pt; }}
+            QGroupBox {{ 
                 border: 1px solid {CP_DIM}; 
-                padding: 5px; 
-                font-family: 'Consolas';
+                margin-top: 10px; 
+                padding-top: 10px; 
+                font-weight: bold; 
+                color: {CP_YELLOW}; 
             }}
-            QLineEdit:focus, QTextEdit:focus {{ border: 1px solid {CP_CYAN}; }}
-            QCheckBox {{ color: {CP_TEXT}; font-family: 'Consolas'; }}
+            QGroupBox::title {{ subcontrol-origin: margin; subcontrol-position: top left; padding: 0 5px; }}
+            QLineEdit, QSpinBox, QFontComboBox, QComboBox, QPlainTextEdit {{
+                background-color: {CP_PANEL};
+                color: {CP_CYAN};
+                border: 1px solid {CP_DIM};
+                padding: 4px;
+            }}
+            QLineEdit:focus, QPlainTextEdit:focus {{ border: 1px solid {CP_CYAN}; }}
+            QPushButton {{ 
+                background-color: {CP_DIM}; 
+                border: none; 
+                color: white; 
+                padding: 6px 12px; 
+            }}
+            QPushButton:hover {{ background-color: {CP_DIM}44; border: 1px solid {CP_YELLOW}; }}
+            QCheckBox {{ spacing: 8px; }}
+            QCheckBox::indicator {{ width: 14px; height: 14px; border: 1px solid {CP_DIM}; background: {CP_PANEL}; }}
+            QCheckBox::indicator:checked {{ background: {CP_YELLOW}; border-color: {CP_YELLOW}; }}
         """)
         self.setup_ui()
 
     def setup_ui(self):
-        layout = QVBoxLayout(self)
+        main_layout = QHBoxLayout(self)
         
-        form = QFormLayout()
+        # === LEFT PANEL (Scrollable) ===
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QFrame.Shape.NoFrame)
+        left_widget = QWidget()
+        left_layout = QVBoxLayout(left_widget)
         
+        # 1. Identity & Path
+        grp_basic = QGroupBox("IDENTITY")
+        l_basic = QFormLayout()
         self.inp_name = QLineEdit(self.script.get("name", ""))
-        form.addRow("Name:", self.inp_name)
+        l_basic.addRow("Name:", self.inp_name)
         
-        self.inp_path = QLineEdit(self.script.get("path", ""))
-        fsbox = QHBoxLayout()
-        fsbox.addWidget(self.inp_name)
-
-
         if self.script.get("type") != "folder":
-            form.addRow("Path:", self.inp_path)
+            path_box = QHBoxLayout()
+            self.inp_path = QLineEdit(self.script.get("path", ""))
+            btn_browse = QPushButton("...")
+            btn_browse.setFixedWidth(30)
+            btn_browse.clicked.connect(self.browse_path)
+            path_box.addWidget(self.inp_path)
+            path_box.addWidget(btn_browse)
+            l_basic.addRow("Path:", path_box)
+        grp_basic.setLayout(l_basic)
+        left_layout.addWidget(grp_basic)
+
+        # 2. Execution Behavior
+        if self.script.get("type") != "folder":
+            grp_exec = QGroupBox("EXECUTION")
+            l_exec = QVBoxLayout()
             
+            box_checks = QHBoxLayout()
             self.chk_hide = QCheckBox("Hide Terminal")
             self.chk_hide.setChecked(self.script.get("hide_terminal", False))
-            form.addRow("", self.chk_hide)
-            
             self.chk_keep = QCheckBox("Keep Open")
             self.chk_keep.setChecked(self.script.get("keep_open", False))
-            form.addRow("", self.chk_keep)
-
+            self.chk_kill = QCheckBox("Kill Launcher")
+            self.chk_kill.setChecked(self.script.get("kill_window", False))
+            
+            box_checks.addWidget(self.chk_hide)
+            box_checks.addWidget(self.chk_keep)
+            box_checks.addWidget(self.chk_kill)
+            l_exec.addLayout(box_checks)
+            
+            # Shortucts
+            l_exec_form = QFormLayout()
             self.inp_ctrl_left = QLineEdit(self.script.get("ctrl_left_cmd", ""))
-            form.addRow("Ctrl+Left Cmd:", self.inp_ctrl_left)
+            self.inp_ctrl_right = QLineEdit(self.script.get("ctrl_right_cmd", ""))
+            l_exec_form.addRow("Ctrl+Left Cmd:", self.inp_ctrl_left)
+            l_exec_form.addRow("Ctrl+Right Cmd:", self.inp_ctrl_right)
+            l_exec.addLayout(l_exec_form)
+            
+            grp_exec.setLayout(l_exec)
+            left_layout.addWidget(grp_exec)
 
-        # Style options
-        self.btn_color = QPushButton("Pick Color")
-        self.btn_color.setStyleSheet(f"background-color: {self.script.get('color', CP_YELLOW)}; color: black;")
-        self.btn_color.clicked.connect(self.pick_color)
-        form.addRow("Color:", self.btn_color)
+        # 3. Typography
+        grp_typo = QGroupBox("TYPOGRAPHY")
+        l_typo = QGridLayout()
+        
+        self.cmb_font = QFontComboBox()
+        cur_font = self.script.get("font_family", "Consolas")
+        self.cmb_font.setCurrentFont(QFont(cur_font))
+        l_typo.addWidget(QLabel("Font:"), 0, 0)
+        l_typo.addWidget(self.cmb_font, 0, 1, 1, 3)
+        
+        l_typo.addWidget(QLabel("Size:"), 1, 0)
+        self.spn_size = QSpinBox()
+        self.spn_size.setRange(6, 72)
+        self.spn_size.setValue(self.script.get("font_size", 10))
+        l_typo.addWidget(self.spn_size, 1, 1)
+        
+        self.chk_bold = QCheckBox("Bold")
+        self.chk_bold.setChecked(self.script.get("is_bold", False))
+        l_typo.addWidget(self.chk_bold, 1, 2)
+        
+        self.chk_italic = QCheckBox("Italic")
+        self.chk_italic.setChecked(self.script.get("is_italic", False))
+        l_typo.addWidget(self.chk_italic, 1, 3)
+        
+        grp_typo.setLayout(l_typo)
+        left_layout.addWidget(grp_typo)
 
-        layout.addLayout(form)
+        # 4. Colors
+        grp_colors = QGroupBox("COLORS")
+        l_colors = QGridLayout()
         
-        # Buttons
-        btn_box = QHBoxLayout()
-        save_btn = QPushButton("SAVE")
-        save_btn.setStyleSheet(f"background-color: {CP_YELLOW}; color: black; font-weight: bold; padding: 10px;")
-        save_btn.clicked.connect(self.save)
+        self.btn_col_bg = self.create_color_btn("BG Color", "color")
+        self.btn_col_fg = self.create_color_btn("Text Color", "text_color")
+        self.btn_col_hbg = self.create_color_btn("Hover BG", "hover_color")
+        self.btn_col_hfg = self.create_color_btn("Hover Text", "hover_text_color")
+        self.btn_col_brd = self.create_color_btn("Border", "border_color")
         
-        cancel_btn = QPushButton("CANCEL")
-        cancel_btn.setStyleSheet(f"background-color: {CP_RED}; color: white; padding: 10px;")
-        cancel_btn.clicked.connect(self.reject)
+        l_colors.addWidget(QLabel("Normal:"), 0, 0)
+        l_colors.addWidget(self.btn_col_bg, 0, 1)
+        l_colors.addWidget(self.btn_col_fg, 0, 2)
         
-        btn_box.addWidget(save_btn)
-        btn_box.addWidget(cancel_btn)
-        layout.addLayout(btn_box)
+        l_colors.addWidget(QLabel("Hover:"), 1, 0)
+        l_colors.addWidget(self.btn_col_hbg, 1, 1)
+        l_colors.addWidget(self.btn_col_hfg, 1, 2)
+        
+        l_colors.addWidget(QLabel("Border:"), 2, 0)
+        l_colors.addWidget(self.btn_col_brd, 2, 1)
+        
+        grp_colors.setLayout(l_colors)
+        left_layout.addWidget(grp_colors)
 
-    def pick_color(self):
-        color = QColorDialog.getColor(QColor(self.script.get("color", CP_YELLOW)), self)
-        if color.isValid():
-            self.script["color"] = color.name()
-            self.btn_color.setStyleSheet(f"background-color: {color.name()}; color: black;")
+        # 5. Layout & Styling
+        grp_layout = QGroupBox("LAYOUT")
+        l_lay = QGridLayout()
+        
+        l_lay.addWidget(QLabel("Col Span:"), 0, 0)
+        self.spn_cspan = QSpinBox()
+        self.spn_cspan.setRange(1, 10)
+        self.spn_cspan.setValue(self.script.get("col_span", 1))
+        l_lay.addWidget(self.spn_cspan, 0, 1)
+        
+        l_lay.addWidget(QLabel("Row Span:"), 0, 2)
+        self.spn_rspan = QSpinBox()
+        self.spn_rspan.setRange(1, 10)
+        self.spn_rspan.setValue(self.script.get("row_span", 1))
+        l_lay.addWidget(self.spn_rspan, 0, 3)
+        
+        l_lay.addWidget(QLabel("Width:"), 1, 0)
+        self.spn_width = QSpinBox()
+        self.spn_width.setRange(0, 9999)
+        self.spn_width.setValue(self.script.get("width", 0))
+        l_lay.addWidget(self.spn_width, 1, 1)
+        
+        l_lay.addWidget(QLabel("Height:"), 1, 2)
+        self.spn_height = QSpinBox()
+        self.spn_height.setRange(0, 9999)
+        self.spn_height.setValue(self.script.get("height", 0))
+        l_lay.addWidget(self.spn_height, 1, 3)
+        
+        l_lay.addWidget(QLabel("Radius:"), 2, 0)
+        self.spn_radius = QSpinBox()
+        self.spn_radius.setRange(0, 50)
+        self.spn_radius.setValue(self.script.get("corner_radius", 0))
+        l_lay.addWidget(self.spn_radius, 2, 1)
+
+        l_lay.addWidget(QLabel("Border W:"), 2, 2)
+        self.spn_border = QSpinBox()
+        self.spn_border.setRange(0, 10)
+        self.spn_border.setValue(self.script.get("border_width", 0))
+        l_lay.addWidget(self.spn_border, 2, 3)
+        
+        grp_layout.setLayout(l_lay)
+        left_layout.addWidget(grp_layout)
+        
+        left_layout.addStretch()
+        left_widget.setLayout(left_layout)
+        scroll.setWidget(left_widget)
+        main_layout.addWidget(scroll, stretch=4)
+        
+        # === RIGHT PANEL (Inline Editor) ===
+        if self.script.get("type") != "folder":
+            right_widget = QGroupBox("INLINE EDITOR")
+            r_layout = QVBoxLayout()
+            
+            # Mode Selection
+            mode_layout = QHBoxLayout()
+            self.grp_mode = QButtonGroup(self)
+            self.rb_file = QRadioButton("Exec File Path")
+            self.rb_inline = QRadioButton("Exec Inline Script")
+            self.grp_mode.addButton(self.rb_file)
+            self.grp_mode.addButton(self.rb_inline)
+            
+            if self.script.get("use_inline", False):
+                self.rb_inline.setChecked(True)
+            else:
+                self.rb_file.setChecked(True)
+                
+            mode_layout.addWidget(self.rb_file)
+            mode_layout.addWidget(self.rb_inline)
+            r_layout.addLayout(mode_layout)
+            
+            # Type Selection
+            type_layout = QHBoxLayout()
+            type_layout.addWidget(QLabel("Script Type:"))
+            self.cmb_type = QComboBox()
+            self.cmb_type.addItems(["cmd", "pwsh", "powershell"])
+            self.cmb_type.setCurrentText(self.script.get("inline_type", "cmd"))
+            type_layout.addWidget(self.cmb_type)
+            r_layout.addLayout(type_layout)
+            
+            # Editor
+            self.txt_inline = QPlainTextEdit()
+            self.txt_inline.setPlainText(self.script.get("inline_script", ""))
+            self.txt_inline.setFont(QFont("Consolas", 10))
+            r_layout.addWidget(self.txt_inline)
+            
+            right_widget.setLayout(r_layout)
+            main_layout.addWidget(right_widget, stretch=6)
+
+        # === BOTTOM BUTTONS ===
+        # Use a floating layout or add to main
+        # But since we used QHBox for panels, we need to wrap the whole thing if we want bottom buttons.
+        # FIX: Reparent main_layout to a container, put buttons below.
+        pass # Doing this at the end of __init__ wrapper instead
+
+        # We need a separate button area, actually let's just make the dialog layout VBox,
+        # then put the panels in an HBox
+        
+    def create_color_btn(self, label, key):
+        # Default colors
+        default = CP_YELLOW
+        if key == "text_color": default = CP_BG
+        if key == "hover_color": default = CP_BG
+        
+        current = self.script.get(key, default)
+        btn = QPushButton(label)
+        btn.setStyleSheet(f"background-color: {current}; color: {'black' if self.is_light(current) else 'white'}; border: 1px solid {CP_DIM};")
+        
+        # We need to store exact key on button or use closure
+        btn.clicked.connect(lambda: self.pick_color(btn, key))
+        return btn
+
+    def is_light(self, color_str):
+        c = QColor(color_str)
+        return c.lightness() > 128
+
+    def pick_color(self, btn, key):
+        c = QColorDialog.getColor(QColor(self.script.get(key, "#000000")), self)
+        if c.isValid():
+            hex_c = c.name()
+            self.script[key] = hex_c
+            btn.setStyleSheet(f"background-color: {hex_c}; color: {'black' if self.is_light(hex_c) else 'white'}; border: 1px solid {CP_DIM};")
+
+    def browse_path(self):
+        f, _ = QFileDialog.getOpenFileName(self, "Select Executable")
+        if f: self.inp_path.setText(f)
 
     def save(self):
+        # Gather all data
         self.script["name"] = self.inp_name.text()
+        
         if self.script.get("type") != "folder":
             self.script["path"] = self.inp_path.text()
             self.script["hide_terminal"] = self.chk_hide.isChecked()
             self.script["keep_open"] = self.chk_keep.isChecked()
+            self.script["kill_window"] = self.chk_kill.isChecked()
             self.script["ctrl_left_cmd"] = self.inp_ctrl_left.text()
+            self.script["ctrl_right_cmd"] = self.inp_ctrl_right.text()
+            
+            self.script["use_inline"] = self.rb_inline.isChecked()
+            self.script["inline_type"] = self.cmb_type.currentText()
+            self.script["inline_script"] = self.txt_inline.toPlainText()
+
+        # Typo
+        self.script["font_family"] = self.cmb_font.currentFont().family()
+        self.script["font_size"] = self.spn_size.value()
+        self.script["is_bold"] = self.chk_bold.isChecked()
+        self.script["is_italic"] = self.chk_italic.isChecked()
+        
+        # Layout
+        self.script["col_span"] = self.spn_cspan.value()
+        self.script["row_span"] = self.spn_rspan.value()
+        self.script["width"] = self.spn_width.value()
+        self.script["height"] = self.spn_height.value()
+        self.script["corner_radius"] = self.spn_radius.value()
+        self.script["border_width"] = self.spn_border.value()
+
+        self.accept()
+
+# We need to wrap setup_ui with buttons
+    def setup_ui_wrapper(self):
+        # Logic to put buttons at bottom
+        pass 
+        # Overriding the init to handle layouts properly
+        
+# Re-implementing EditDialog init to use proper layout structure
+class EditDialog(QDialog):
+    def __init__(self, script_data, parent=None):
+        super().__init__(parent)
+        self.script = script_data
+        self.setWindowTitle(f"EDIT // {self.script.get('name', 'UNKNOWN')}")
+        self.resize(1100, 750)
+        self.setStyleSheet(f"""
+            QDialog {{ background-color: {CP_BG}; }}
+            QWidget {{ color: {CP_TEXT}; font-family: 'Consolas'; font-size: 10pt; }}
+            QGroupBox {{ border: 1px solid {CP_DIM}; margin-top: 10px; padding-top: 10px; font-weight: bold; color: {CP_YELLOW}; }}
+            QGroupBox::title {{ subcontrol-origin: margin; subcontrol-position: top left; padding: 0 5px; }}
+            QLineEdit, QSpinBox, QFontComboBox, QComboBox, QPlainTextEdit {{
+                background-color: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 4px; selection-background-color: {CP_CYAN}; selection-color: black;
+            }}
+            QLineEdit:focus, QPlainTextEdit:focus {{ border: 1px solid {CP_CYAN}; }}
+            QPushButton {{ background-color: {CP_DIM}; border: 1px solid {CP_DIM}; color: white; padding: 6px 12px; }}
+            QPushButton:hover {{ background-color: #2a2a2a; border: 1px solid {CP_YELLOW}; }}
+            QCheckBox {{ spacing: 8px; }}
+            QCheckBox::indicator {{ width: 14px; height: 14px; border: 1px solid {CP_DIM}; background: {CP_PANEL}; }}
+            QCheckBox::indicator:checked {{ background: {CP_YELLOW}; border-color: {CP_YELLOW}; }}
+        """)
+        
+        vbox = QVBoxLayout(self)
+        
+        # Content HBox
+        hbox = QHBoxLayout()
+        vbox.addLayout(hbox)
+        
+        # === LEFT PANEL ===
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QFrame.Shape.NoFrame)
+        left_widget = QWidget()
+        left_layout = QVBoxLayout(left_widget)
+        
+        # 1. Identity
+        grp_basic = QGroupBox("IDENTITY")
+        l_basic = QFormLayout()
+        self.inp_name = QLineEdit(self.script.get("name", ""))
+        l_basic.addRow("Name:", self.inp_name)
+        if self.script.get("type") != "folder":
+            path_box = QHBoxLayout()
+            self.inp_path = QLineEdit(self.script.get("path", ""))
+            btn_browse = QPushButton("...")
+            btn_browse.setFixedWidth(30)
+            btn_browse.clicked.connect(self.browse_path)
+            path_box.addWidget(self.inp_path)
+            path_box.addWidget(btn_browse)
+            l_basic.addRow("Path:", path_box)
+        grp_basic.setLayout(l_basic)
+        left_layout.addWidget(grp_basic)
+        
+        # 2. Execution
+        if self.script.get("type") != "folder":
+            grp_exec = QGroupBox("BEHAVIOR")
+            l_exec = QVBoxLayout()
+            box_checks = QHBoxLayout()
+            self.chk_hide = QCheckBox("Hide Term")
+            self.chk_hide.setChecked(self.script.get("hide_terminal", False))
+            self.chk_keep = QCheckBox("Keep Open")
+            self.chk_keep.setChecked(self.script.get("keep_open", False))
+            self.chk_kill = QCheckBox("Kill Launch")
+            self.chk_kill.setChecked(self.script.get("kill_window", False))
+            box_checks.addWidget(self.chk_hide)
+            box_checks.addWidget(self.chk_keep)
+            box_checks.addWidget(self.chk_kill)
+            l_exec.addLayout(box_checks)
+            l_sc = QFormLayout()
+            self.inp_ctrl_left = QLineEdit(self.script.get("ctrl_left_cmd", ""))
+            self.inp_ctrl_right = QLineEdit(self.script.get("ctrl_right_cmd", ""))
+            l_sc.addRow("Ctrl+Left:", self.inp_ctrl_left)
+            l_sc.addRow("Ctrl+Right:", self.inp_ctrl_right)
+            l_exec.addLayout(l_sc)
+            grp_exec.setLayout(l_exec)
+            left_layout.addWidget(grp_exec)
+            
+        # 3. Typography
+        grp_typo = QGroupBox("TYPOGRAPHY")
+        l_typo = QGridLayout()
+        self.cmb_font = QFontComboBox()
+        self.cmb_font.setCurrentFont(QFont(self.script.get("font_family", "Consolas")))
+        l_typo.addWidget(QLabel("Font:"), 0, 0)
+        l_typo.addWidget(self.cmb_font, 0, 1, 1, 3)
+        l_typo.addWidget(QLabel("Size:"), 1, 0)
+        self.spn_size = QSpinBox()
+        self.spn_size.setRange(6, 72)
+        self.spn_size.setValue(self.script.get("font_size", 10))
+        l_typo.addWidget(self.spn_size, 1, 1)
+        self.chk_bold = QCheckBox("Bold")
+        self.chk_bold.setChecked(self.script.get("is_bold", True))
+        l_typo.addWidget(self.chk_bold, 1, 2)
+        self.chk_italic = QCheckBox("Italic")
+        self.chk_italic.setChecked(self.script.get("is_italic", False))
+        l_typo.addWidget(self.chk_italic, 1, 3)
+        grp_typo.setLayout(l_typo)
+        left_layout.addWidget(grp_typo)
+        
+        # 4. Colors
+        grp_colors = QGroupBox("COLORS")
+        l_colors = QGridLayout()
+        self.btn_col_bg = self.create_color_btn("BG Color", "color")
+        self.btn_col_fg = self.create_color_btn("Text Color", "text_color")
+        self.btn_col_hbg = self.create_color_btn("Hover BG", "hover_color")
+        self.btn_col_hfg = self.create_color_btn("Hover Text", "hover_text_color")
+        self.btn_col_brd = self.create_color_btn("Border", "border_color")
+        l_colors.addWidget(self.btn_col_bg, 0, 0)
+        l_colors.addWidget(self.btn_col_fg, 0, 1)
+        l_colors.addWidget(self.btn_col_hbg, 1, 0)
+        l_colors.addWidget(self.btn_col_hfg, 1, 1)
+        l_colors.addWidget(self.btn_col_brd, 2, 0, 1, 2)
+        grp_colors.setLayout(l_colors)
+        left_layout.addWidget(grp_colors)
+        
+        # 5. Layout
+        grp_layout = QGroupBox("GRID LAYOUT")
+        l_lay = QGridLayout()
+        self.spn_cspan = QSpinBox(); self.spn_cspan.setRange(1, 10); self.spn_cspan.setValue(self.script.get("col_span", 1))
+        self.spn_rspan = QSpinBox(); self.spn_rspan.setRange(1, 10); self.spn_rspan.setValue(self.script.get("row_span", 1))
+        self.spn_width = QSpinBox(); self.spn_width.setRange(0, 9999); self.spn_width.setValue(self.script.get("width", 0))
+        self.spn_height = QSpinBox(); self.spn_height.setRange(0, 9999); self.spn_height.setValue(self.script.get("height", 0))
+        self.spn_radius = QSpinBox(); self.spn_radius.setRange(0, 50); self.spn_radius.setValue(self.script.get("corner_radius", 0))
+        self.spn_border = QSpinBox(); self.spn_border.setRange(0, 10); self.spn_border.setValue(self.script.get("border_width", 0))
+        
+        l_lay.addWidget(QLabel("Col Span:"), 0, 0); l_lay.addWidget(self.spn_cspan, 0, 1)
+        l_lay.addWidget(QLabel("Row Span:"), 0, 2); l_lay.addWidget(self.spn_rspan, 0, 3)
+        l_lay.addWidget(QLabel("Width:"), 1, 0); l_lay.addWidget(self.spn_width, 1, 1)
+        l_lay.addWidget(QLabel("Height:"), 1, 2); l_lay.addWidget(self.spn_height, 1, 3)
+        l_lay.addWidget(QLabel("Radius:"), 2, 0); l_lay.addWidget(self.spn_radius, 2, 1)
+        l_lay.addWidget(QLabel("Border:"), 2, 2); l_lay.addWidget(self.spn_border, 2, 3)
+        grp_layout.setLayout(l_lay)
+        left_layout.addWidget(grp_layout)
+        
+        left_layout.addStretch()
+        left_widget.setLayout(left_layout)
+        scroll.setWidget(left_widget)
+        hbox.addWidget(scroll, stretch=4)
+        
+        # === RIGHT PANEL ===
+        if self.script.get("type") != "folder":
+            right_grp = QGroupBox("INLINE SCRIPT EDITOR")
+            r_lay = QVBoxLayout()
+            
+            # Switch
+            mode_box = QHBoxLayout()
+            self.grp_mode = QButtonGroup(self)
+            self.rb_file = QRadioButton("Target File")
+            self.rb_inline = QRadioButton("Inline Script")
+            self.grp_mode.addButton(self.rb_file); self.grp_mode.addButton(self.rb_inline)
+            mode_box.addWidget(self.rb_file); mode_box.addWidget(self.rb_inline)
+            if self.script.get("use_inline"): self.rb_inline.setChecked(True)
+            else: self.rb_file.setChecked(True)
+            r_lay.addLayout(mode_box)
+            
+            # Interpreter
+            r_lay.addWidget(QLabel("Interpreter:"))
+            self.cmb_type = QComboBox()
+            self.cmb_type.addItems(["cmd", "pwsh", "powershell"])
+            self.cmb_type.setCurrentText(self.script.get("inline_type", "cmd"))
+            r_lay.addWidget(self.cmb_type)
+            
+            # Editor
+            r_lay.addWidget(QLabel("Code:"))
+            self.txt_inline = QPlainTextEdit()
+            self.txt_inline.setPlainText(self.script.get("inline_script", ""))
+            self.txt_inline.setFont(QFont("Consolas", 10))
+            r_lay.addWidget(self.txt_inline)
+            
+            right_grp.setLayout(r_lay)
+            hbox.addWidget(right_grp, stretch=6)
+            
+        # === BOTTOM BUTTONS ===
+        btn_layout = QHBoxLayout()
+        btn_save = QPushButton("SAVE CHANGES"); 
+        btn_save.setStyleSheet(f"background-color: {CP_YELLOW}; color: black; font-weight: bold; padding: 10px;")
+        btn_save.clicked.connect(self.save)
+        btn_cancel = QPushButton("CANCEL")
+        btn_cancel.setStyleSheet(f"background-color: {CP_RED}; color: white; padding: 10px;")
+        btn_cancel.clicked.connect(self.reject)
+        
+        btn_layout.addStretch()
+        btn_layout.addWidget(btn_save)
+        btn_layout.addWidget(btn_cancel)
+        vbox.addLayout(btn_layout)
+
+    def create_color_btn(self, label, key):
+        c = self.script.get(key)
+        if not c: c = CP_BG
+        btn = QPushButton(label)
+        self.set_btn_color(btn, c)
+        btn.clicked.connect(lambda: self.pick_color(btn, key))
+        return btn
+
+    def set_btn_color(self, btn, color_str):
+        lc = QColor(color_str).lightness()
+        btn.setStyleSheet(f"background-color: {color_str}; color: {'black' if lc > 128 else 'white'}; border: 1px solid {CP_DIM};")
+
+    def pick_color(self, btn, key):
+        curr = self.script.get(key) or "#000000"
+        c = QColorDialog.getColor(QColor(curr), self)
+        if c.isValid():
+            h = c.name()
+            self.script[key] = h
+            self.set_btn_color(btn, h)
+
+    def browse_path(self):
+        f, _ = QFileDialog.getOpenFileName(self, "Select Executable")
+        if f: self.inp_path.setText(f)
+
+    def save(self):
+        self.script["name"] = self.inp_name.text()
+        
+        if self.script.get("type") != "folder":
+            self.script["path"] = self.inp_path.text()
+            self.script["hide_terminal"] = self.chk_hide.isChecked()
+            self.script["keep_open"] = self.chk_keep.isChecked()
+            self.script["kill_window"] = self.chk_kill.isChecked()
+            self.script["ctrl_left_cmd"] = self.inp_ctrl_left.text()
+            self.script["ctrl_right_cmd"] = self.inp_ctrl_right.text()
+            self.script["use_inline"] = self.rb_inline.isChecked()
+            self.script["inline_type"] = self.cmb_type.currentText()
+            self.script["inline_script"] = self.txt_inline.toPlainText()
+            
+        self.script["font_family"] = self.cmb_font.currentFont().family()
+        self.script["font_size"] = self.spn_size.value()
+        self.script["is_bold"] = self.chk_bold.isChecked()
+        self.script["is_italic"] = self.chk_italic.isChecked()
+        self.script["col_span"] = self.spn_cspan.value()
+        self.script["row_span"] = self.spn_rspan.value()
+        self.script["width"] = self.spn_width.value()
+        self.script["height"] = self.spn_height.value()
+        self.script["corner_radius"] = self.spn_radius.value()
+        self.script["border_width"] = self.spn_border.value()
+        
         self.accept()
 
 # -----------------------------------------------------------------------------
@@ -218,7 +698,7 @@ class EditDialog(QDialog):
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("SCRIPT // MANAGER_V3.0")
+        self.setWindowTitle("SCRIPT // MANAGER_V3.1")
         self.resize(1100, 800)
         self.setStyleSheet(f"QMainWindow {{ background-color: {CP_BG}; }}")
         
@@ -229,10 +709,9 @@ class MainWindow(QMainWindow):
         self.setup_ui()
         self.refresh_grid()
         
-        # Timer for System Stats
         self.timer = QTimer()
         self.timer.timeout.connect(self.update_stats)
-        self.timer.start(2000) # Update every 2s
+        self.timer.start(2000)
 
     def load_config(self):
         if os.path.exists(CONFIG_FILE):
@@ -240,16 +719,14 @@ class MainWindow(QMainWindow):
                 with open(CONFIG_FILE, "r", encoding='utf-8') as f:
                     self.config = json.load(f)
             except: self.config = {"scripts": []}
-        else:
-            self.config = {"scripts": []}
+        else: self.config = {"scripts": []}
             
     def save_config(self):
         try:
             with open(CONFIG_FILE, "w", encoding='utf-8') as f:
                 json.dump(self.config, f, indent=4)
             self.refresh_grid()
-        except Exception as e:
-            print(f"Save failed: {e}")
+        except: pass
 
     def setup_ui(self):
         central = QWidget()
@@ -258,84 +735,41 @@ class MainWindow(QMainWindow):
         self.main_layout.setContentsMargins(20, 20, 20, 20)
         self.main_layout.setSpacing(15)
 
-        # 1. HEADER
+        # Header
         header = QHBoxLayout()
-        
-        self.back_btn = CyberButton("<<", color=CP_RED, is_outlined=True)
-        self.back_btn.setFixedSize(50, 40)
-        self.back_btn.clicked.connect(self.go_back)
-        self.back_btn.hide()
-        
-        self.title_lbl = QLabel("SCRIPT MANAGER // ROOT")
-        self.title_lbl.setFont(QFont("Consolas", 16, QFont.Weight.Bold))
-        self.title_lbl.setStyleSheet(f"color: {CP_YELLOW};")
-        
-        header.addWidget(self.back_btn)
-        header.addWidget(self.title_lbl)
-        header.addStretch()
-        
-        stg_btn = CyberButton("SETTINGS", color=CP_DIM, is_outlined=True)
-        stg_btn.setFixedSize(100, 40)
-        stg_btn.clicked.connect(lambda: QMessageBox.information(self, "Info", "Global Settings Not Implemented Yet"))
+        self.back_btn = CyberButton("<<", script_data={"color": CP_RED, "type": "script"}); self.back_btn.setFixedSize(50, 40); self.back_btn.clicked.connect(self.go_back); self.back_btn.hide()
+        self.title_lbl = QLabel("SCRIPT MANAGER"); self.title_lbl.setFont(QFont("Consolas", 16, QFont.Weight.Bold)); self.title_lbl.setStyleSheet(f"color: {CP_YELLOW};")
+        header.addWidget(self.back_btn); header.addWidget(self.title_lbl); header.addStretch()
+        stg_btn = CyberButton("SETTINGS", script_data={"color": CP_DIM}); stg_btn.setFixedSize(100, 40); 
+        stg_btn.clicked.connect(self.add_new_item) # Temp map for easy add
         header.addWidget(stg_btn)
-        
         self.main_layout.addLayout(header)
 
-        # 2. DASHBOARD (Stats + Widgets)
-        dash_frame = QFrame()
-        dash_frame.setFixedHeight(80)
-        dash_layout = QHBoxLayout(dash_frame)
-        dash_layout.setContentsMargins(0,0,0,0)
-        
-        # Stats
-        self.stat_cpu = StatWidget("CPU", CP_CYAN)
-        self.stat_ram = StatWidget("RAM", CP_ORANGE)
-        self.stat_disk = StatWidget("SSD", CP_GREEN)
-        
-        dash_layout.addWidget(self.stat_cpu)
-        dash_layout.addWidget(self.stat_ram)
-        dash_layout.addWidget(self.stat_disk)
-        
-        # Github / Rclone (Static Text for now as placeholders)
-        self.lbl_status = QLabel("  GITHUB: OK  |  RCLONE: IDLE  ")
-        self.lbl_status.setFont(QFont("Consolas", 10))
-        self.lbl_status.setStyleSheet(f"color: {CP_SUBTEXT}; background: {CP_PANEL}; border: 1px solid {CP_DIM}; padding: 10px;")
-        dash_layout.addWidget(self.lbl_status)
-        
-        dash_layout.addStretch()
+        # Dashboard
+        dash_frame = QFrame(); dash_frame.setFixedHeight(80); dash_layout = QHBoxLayout(dash_frame); dash_layout.setContentsMargins(0,0,0,0)
+        self.stat_cpu = StatWidget("CPU", CP_CYAN); self.stat_ram = StatWidget("RAM", CP_ORANGE); self.stat_disk = StatWidget("SSD", CP_GREEN)
+        dash_layout.addWidget(self.stat_cpu); dash_layout.addWidget(self.stat_ram); dash_layout.addWidget(self.stat_disk)
+        lbl_status = QLabel("  GITHUB: OK  |  RCLONE: IDLE  "); lbl_status.setFont(QFont("Consolas", 10)); lbl_status.setStyleSheet(f"color: {CP_SUBTEXT}; background: {CP_PANEL}; border: 1px solid {CP_DIM}; padding: 10px;")
+        dash_layout.addWidget(lbl_status); dash_layout.addStretch()
         self.main_layout.addWidget(dash_frame)
 
-        # 3. GRID AREA
-        scroll = QScrollArea()
-        scroll.setWidgetResizable(True)
-        scroll.setStyleSheet(f"background: transparent; border: none;")
-        
-        self.grid_container = QWidget()
-        self.grid = QGridLayout(self.grid_container)
-        self.grid.setSpacing(15)
-        self.grid.setAlignment(Qt.AlignmentFlag.AlignTop)
-        
-        scroll.setWidget(self.grid_container)
-        self.main_layout.addWidget(scroll)
+        # Grid
+        scroll = QScrollArea(); scroll.setWidgetResizable(True); scroll.setStyleSheet(f"background: transparent; border: none;")
+        self.grid_container = QWidget(); self.grid = QGridLayout(self.grid_container); self.grid.setSpacing(15); self.grid.setAlignment(Qt.AlignmentFlag.AlignTop)
+        scroll.setWidget(self.grid_container); self.main_layout.addWidget(scroll)
 
     def update_stats(self):
         try:
-            cpu = psutil.cpu_percent()
-            ram = psutil.virtual_memory().percent
-            disk = psutil.disk_usage('C://').percent
-            
-            self.stat_cpu.set_value(cpu)
-            self.stat_ram.set_value(ram)
-            self.stat_disk.set_value(disk)
+            self.stat_cpu.set_value(psutil.cpu_percent())
+            self.stat_ram.set_value(psutil.virtual_memory().percent)
+            self.stat_disk.set_value(psutil.disk_usage('C://').percent)
         except: pass
 
     def refresh_grid(self):
-        # Clear
         while self.grid.count():
             item = self.grid.takeAt(0)
             if item.widget(): item.widget().deleteLater()
 
-        # Get Items
         if self.view_stack:
             folder = self.view_stack[-1]
             scripts = folder.get("scripts", [])
@@ -346,31 +780,50 @@ class MainWindow(QMainWindow):
             self.title_lbl.setText("SCRIPT MANAGER // ROOT")
             self.back_btn.hide()
 
-        # Populate
         cols = 5
-        row, col = 0, 0
-        
+        grid_map = {} # (row, col) -> occupied
+
+        r, c = 0, 0
         for script in scripts:
-            name = script.get("name", "Unnamed")
-            # Default colors
-            color = script.get("color", CP_YELLOW if script.get("type") != "folder" else CP_CYAN)
-            if not color.startswith("#"): color = CP_YELLOW
+            # Determine spans
+            c_span = script.get("col_span", 1)
+            r_span = script.get("row_span", 1)
             
-            btn = CyberButton(name, color=color, is_folder=(script.get("type") == "folder"), script_data=script)
+            # Find next free slot
+            while True:
+                conflict = False
+                for ir in range(r, r + r_span):
+                    for ic in range(c, c + c_span):
+                         if (ir, ic) in grid_map:
+                             conflict = True
+                             break
+                    if conflict: break
+                
+                # Check column boundary
+                if c + c_span > cols:
+                    r += 1
+                    c = 0
+                    continue
+
+                if not conflict:
+                    # Found spot
+                    break
+                
+                c += 1
+                if c >= cols:
+                     r += 1
+                     c = 0
+            
+            # Mark occupied
+            for ir in range(r, r + r_span):
+                for ic in range(c, c + c_span):
+                    grid_map[(ir, ic)] = True
+            
+            # Add widget
+            btn = CyberButton(script.get("name", "Unnamed"), script_data=script)
             btn.clicked.connect(partial(self.handle_click, script))
             btn.customContextMenuRequested.connect(partial(self.show_context_menu, btn, script))
-            
-            # Grid logic
-            colspan = 1
-            if col + colspan > cols:
-                row += 1
-                col = 0
-            
-            self.grid.addWidget(btn, row, col)
-            col += 1
-            if col >= cols:
-                row += 1
-                col = 0
+            self.grid.addWidget(btn, r, c, r_span, c_span)
 
     def handle_click(self, script):
         if script.get("type") == "folder":
@@ -380,62 +833,73 @@ class MainWindow(QMainWindow):
             self.launch_script(script)
 
     def launch_script(self, script):
+        # Handle Inline
+        if script.get("use_inline"):
+            self.launch_inline(script)
+            return
+
         path = os.path.expandvars(script.get("path", ""))
         hide = script.get("hide_terminal", False)
         
+        if not path: return
         cwd = os.path.dirname(path) if os.path.isfile(path) else None
         
         try:
             if path.endswith(".py"):
                 exe = "pythonw" if hide else "python"
                 subprocess.Popen([exe, path], cwd=cwd)
-                print(f"Launched Python: {path}")
             elif path.endswith(".ps1"):
                 cmd = ["pwsh", "-File", path] if shutil.which("pwsh") else ["powershell", "-File", path]
                 if hide: cmd.insert(1, "-WindowStyle"); cmd.insert(2, "Hidden")
                 subprocess.Popen(cmd, cwd=cwd)
-                print(f"Launched PS1: {path}")
             else:
                 subprocess.Popen(path, shell=True, cwd=cwd)
-                print(f"Launched EXE: {path}")
-        except Exception as e:
-            QMessageBox.critical(self, "Error", str(e))
+            
+            if script.get("kill_window"): self.close()
+        except Exception as e: QMessageBox.critical(self, "Error", str(e))
+
+    def launch_inline(self, script):
+        import tempfile
+        code = script.get("inline_script", "")
+        # Very simple execution
+        ext = ".ps1" if script.get("inline_type") in ["pwsh", "powershell"] else ".bat"
+        with tempfile.NamedTemporaryFile(mode='w', suffix=ext, delete=False) as f:
+            f.write(code)
+            tmp = f.name
+        
+        hide = script.get("hide_terminal", False)
+        if ext == ".ps1":
+            cmd = ["pwsh", "-File", tmp]
+            if hide: cmd.insert(1, "-WindowStyle"); cmd.insert(2, "Hidden")
+            subprocess.Popen(cmd)
+        else:
+            subprocess.Popen(tmp, shell=True)
 
     def go_back(self):
-        if self.view_stack:
-            self.view_stack.pop()
-            self.refresh_grid()
+        if self.view_stack: self.view_stack.pop(); self.refresh_grid()
 
     def show_context_menu(self, btn, script, pos):
         menu = QMenu(self)
-        menu.setStyleSheet(f"""
-            QMenu {{ background-color: {CP_PANEL}; color: {CP_TEXT}; border: 1px solid {CP_CYAN}; }}
-            QMenu::item:selected {{ background-color: {CP_CYAN}; color: {CP_BG}; }}
-        """)
-        
-        edit_action = QAction("Edit", self)
-        edit_action.triggered.connect(lambda: self.open_edit(script))
-        menu.addAction(edit_action)
-        
-        del_action = QAction("Delete", self)
-        del_action.triggered.connect(lambda: self.delete_item(script))
-        menu.addAction(del_action)
-        
+        menu.setStyleSheet(f"QMenu {{ background-color: {CP_PANEL}; color: {CP_TEXT}; border: 1px solid {CP_CYAN}; }} QMenu::item:selected {{ background-color: {CP_CYAN}; color: {CP_BG}; }}")
+        menu.addAction("Edit").triggered.connect(lambda: self.open_edit(script))
+        menu.addAction("Delete").triggered.connect(lambda: self.delete_item(script))
         menu.exec(btn.mapToGlobal(pos))
 
     def open_edit(self, script):
-        dlg = EditDialog(script, self)
-        if dlg.exec():
-            self.save_config()
+        if EditDialog(script, self).exec(): self.save_config()
+
+    def add_new_item(self):
+        # Quick hack to add new item
+        new_script = {"name": "New Item", "path": "", "type": "script", "color": CP_YELLOW}
+        target_list = self.view_stack[-1]["scripts"] if self.view_stack else self.config["scripts"]
+        target_list.append(new_script)
+        if EditDialog(new_script, self).exec(): self.save_config()
+        else: target_list.remove(new_script)
 
     def delete_item(self, script):
-        confirm = QMessageBox.question(self, "Confirm", f"Delete {script['name']}?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
-        if confirm == QMessageBox.StandardButton.Yes:
-            # Locate and remove
+        if QMessageBox.question(self, "Confirm", "Delete?") == QMessageBox.StandardButton.Yes:
             target_list = self.view_stack[-1]["scripts"] if self.view_stack else self.config["scripts"]
-            if script in target_list:
-                target_list.remove(script)
-                self.save_config()
+            if script in target_list: target_list.remove(script); self.save_config()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
