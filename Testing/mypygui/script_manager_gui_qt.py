@@ -313,7 +313,7 @@ class EditDialog(QDialog):
         super().__init__(parent_app)
         self.script = script
         self.parent_app = parent_app
-        self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint)
+        self.setWindowFlags(Qt.WindowType.Window | Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint)
         self.color_map = {
             "color": self.script.get("color", "#2b2f38"),
             "text_color": self.script.get("text_color", "white"),
@@ -322,12 +322,17 @@ class EditDialog(QDialog):
             "border_color": self.script.get("border_color", "#fe1616")
         }
         self.init_ui()
+        # Ensure geometry is updated before centering
+        self.adjustSize()
         self.center_to_parent()
         
     def center_to_parent(self):
         if self.parent_app:
             p_geo = self.parent_app.geometry()
-            self.move(p_geo.center() - self.rect().center())
+            # Calculate position to center the dialog over the parent
+            target_x = p_geo.x() + (p_geo.width() - self.width()) // 2
+            target_y = p_geo.y() + (p_geo.height() - self.height()) // 2
+            self.move(target_x, target_y)
 
     def init_ui(self):
         self.setObjectName("EditDialog")
@@ -720,14 +725,17 @@ class SettingsDialog(QDialog):
     def __init__(self, parent_app):
         super().__init__(parent_app)
         self.parent_app = parent_app
-        self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint)
+        self.setWindowFlags(Qt.WindowType.Window | Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint)
         self.init_ui()
+        self.adjustSize()
         self.center_to_parent()
 
     def center_to_parent(self):
         if self.parent_app:
             p_geo = self.parent_app.geometry()
-            self.move(p_geo.center() - self.rect().center())
+            target_x = p_geo.x() + (p_geo.width() - self.width()) // 2
+            target_y = p_geo.y() + (p_geo.height() - self.height()) // 2
+            self.move(target_x, target_y)
         
     def init_ui(self):
         self.setObjectName("SettingsDialog")
@@ -800,7 +808,7 @@ class SettingsDialog(QDialog):
             QPushButton#CloseBtn:hover {{
                 color: #ffffff;
                 background-color: #fe1616;
-                border_radius: 4px;
+                border-radius: 4px;
             }}
             QFrame#GroupFrame {{
                 border: 1px solid #333;
