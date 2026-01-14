@@ -88,7 +88,7 @@
             "corner_radius": 0,
             "col_span": 1,
             "row_span": 1,
-            "is_bold": true,
+            "is_bold": false,
             "is_italic": false,
             "grid_columns": 0,
             "child_width": 0,
@@ -345,11 +345,11 @@
         {
             "name": "mklink",
             "path": "C:/Users/nahid/ms/ms1/Testing/mklink/mklink.py",
-            "font_size": 10,
+            "font_size": 15,
             "hide_terminal": true,
             "border_width": 0,
             "corner_radius": 0,
-            "is_bold": true,
+            "is_bold": false,
             "is_italic": false,
             "ctrl_left_cmd": "",
             "ctrl_right_cmd": "",
@@ -606,5 +606,8 @@
     "app_bg": "#27273a",
     "show_widgets": false,
     "window_border_color": "#1efc94",
-    "cfg_btn_color": "#55aaff"
+    "cfg_btn_color": "#55aaff",
+    "default_font_family": "Consolas",
+    "default_is_bold": false,
+    "default_is_italic": false
 }

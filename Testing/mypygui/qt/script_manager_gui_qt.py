@@ -435,15 +435,21 @@ class EditDialog(QDialog):
         def_fg = "#000000"
         
         parent = self.parent()
+        def_font = "Consolas"
         def_fs = 10
+        def_bold = True
+        def_italic = False
         if parent and hasattr(parent, "config"):
+            def_font = parent.config.get("default_font_family", "Consolas")
             def_fs = parent.config.get("default_font_size", 10)
+            def_bold = parent.config.get("default_is_bold", True)
+            def_italic = parent.config.get("default_is_italic", False)
 
         # Reset Typography
-        self.cmb_font.setCurrentFont(QFont("Consolas"))
+        self.cmb_font.setCurrentFont(QFont(def_font))
         self.spn_size.setValue(def_fs)
-        self.chk_bold.setChecked(True)
-        self.chk_italic.setChecked(False)
+        self.chk_bold.setChecked(def_bold)
+        self.chk_italic.setChecked(def_italic)
 
         # Reset Colors
         self.script.pop("color", None)
@@ -599,10 +605,25 @@ class SettingsDialog(QDialog):
         self.spn_btn_h.setValue(self.config.get("default_btn_height", 40))
         l_grid.addRow("Btn Height:", self.spn_btn_h)
 
+        # Font settings
+        self.cmb_font = QFontComboBox()
+        self.cmb_font.setCurrentFont(QFont(self.config.get("default_font_family", "Consolas")))
+        l_grid.addRow("Font:", self.cmb_font)
+
         self.spn_font_size = QSpinBox()
         self.spn_font_size.setRange(6, 40)
         self.spn_font_size.setValue(self.config.get("default_font_size", 10))
         l_grid.addRow("Font Size:", self.spn_font_size)
+
+        font_style_box = QHBoxLayout()
+        self.chk_bold = QCheckBox("Bold")
+        self.chk_bold.setChecked(self.config.get("default_is_bold", True))
+        self.chk_italic = QCheckBox("Italic")
+        self.chk_italic.setChecked(self.config.get("default_is_italic", False))
+        font_style_box.addWidget(self.chk_bold)
+        font_style_box.addWidget(self.chk_italic)
+        font_style_box.addStretch()
+        l_grid.addRow("Style:", font_style_box)
 
         grp_grid.setLayout(l_grid)
         layout.addWidget(grp_grid)
@@ -698,7 +719,10 @@ class SettingsDialog(QDialog):
     def save(self):
         self.config["columns"] = self.spn_cols.value()
         self.config["default_btn_height"] = self.spn_btn_h.value()
+        self.config["default_font_family"] = self.cmb_font.currentFont().family()
         self.config["default_font_size"] = self.spn_font_size.value()
+        self.config["default_is_bold"] = self.chk_bold.isChecked()
+        self.config["default_is_italic"] = self.chk_italic.isChecked()
         self.config["app_bg"] = self.app_bg
         self.config["window_border_color"] = self.win_border
         self.config["cfg_btn_color"] = self.cfg_color
@@ -984,6 +1008,9 @@ class MainWindow(QMainWindow):
 
         # Default typography
         def_fs = self.config.get("default_font_size", 10)
+        def_font = self.config.get("default_font_family", "Consolas")
+        def_bold = self.config.get("default_is_bold", True)
+        def_italic = self.config.get("default_is_italic", False)
 
         grid_map = {} # (row, col) -> occupied
         r, c = 0, 0
@@ -993,13 +1020,26 @@ class MainWindow(QMainWindow):
             if "height" not in script or script["height"] == 0:
                 script["_runtime_height"] = def_h
             
-            # Apply default font size if item doesn't have one
-            # Note: CyberButton uses script.get("font_size", 10)
-            # We will use a runtime override or just pass it in script_data if missing
+            # Apply default font settings if item doesn't have them
             if "font_size" not in script:
                 script["_runtime_font_size"] = def_fs
             else:
                 script["_runtime_font_size"] = script["font_size"]
+            
+            if "font_family" not in script:
+                script["_runtime_font_family"] = def_font
+            else:
+                script["_runtime_font_family"] = script["font_family"]
+                
+            if "is_bold" not in script:
+                script["_runtime_is_bold"] = def_bold
+            else:
+                script["_runtime_is_bold"] = script["is_bold"]
+                
+            if "is_italic" not in script:
+                script["_runtime_is_italic"] = def_italic
+            else:
+                script["_runtime_is_italic"] = script["is_italic"]
             
             # Determine spans
             c_span = script.get("col_span", 1)
@@ -1041,11 +1081,11 @@ class MainWindow(QMainWindow):
             if script.get("height", 0) == 0:
                 btn.setFixedHeight(def_h)
             
-            # Apply runtime font size
-            if "_runtime_font_size" in script:
-                f = btn.font()
-                f.setPointSize(script["_runtime_font_size"])
-                btn.setFont(f)
+            # Apply runtime font settings
+            f = QFont(script.get("_runtime_font_family", def_font), script.get("_runtime_font_size", def_fs))
+            f.setBold(script.get("_runtime_is_bold", def_bold))
+            f.setItalic(script.get("_runtime_is_italic", def_italic))
+            btn.setFont(f)
                 
             btn.clicked.connect(partial(self.handle_click, script))
             btn.customContextMenuRequested.connect(partial(self.show_context_menu, btn, script))
