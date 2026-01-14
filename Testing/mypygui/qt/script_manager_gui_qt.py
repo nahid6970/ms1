@@ -484,6 +484,42 @@ class EditDialog(QDialog):
             self.spn_inner_cols.setValue(0)
             self.spn_inner_h.setValue(0)
 
+    def randomize_colors(self):
+        import random
+        
+        def rand_color():
+            return "#{:06x}".format(random.randint(0, 0xFFFFFF))
+        
+        def contrasting_text(bg_hex):
+            # Calculate luminance and return black or white
+            bg = bg_hex.lstrip('#')
+            r, g, b = int(bg[0:2], 16), int(bg[2:4], 16), int(bg[4:6], 16)
+            luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
+            return "#000000" if luminance > 0.5 else "#FFFFFF"
+        
+        # Generate random colors
+        bg_color = rand_color()
+        text_color = contrasting_text(bg_color)
+        hover_bg = rand_color()
+        hover_text = contrasting_text(hover_bg)
+        border_color = rand_color()
+        border_width = random.randint(1, 3)
+        
+        # Apply to script
+        self.script["color"] = bg_color
+        self.script["text_color"] = text_color
+        self.script["hover_color"] = hover_bg
+        self.script["hover_text_color"] = hover_text
+        self.script["border_color"] = border_color
+        
+        # Update UI
+        self.set_btn_color(self.btn_col_bg, bg_color)
+        self.set_btn_color(self.btn_col_fg, text_color)
+        self.set_btn_color(self.btn_col_hbg, hover_bg)
+        self.set_btn_color(self.btn_col_hfg, hover_text)
+        self.set_btn_color(self.btn_col_brd, border_color)
+        self.spn_border.setValue(border_width)
+
     def create_color_btn(self, label, key):
         # Determine effective default based on key and type, matching CyberButton logic
         is_folder = (self.script.get("type") == "folder")
