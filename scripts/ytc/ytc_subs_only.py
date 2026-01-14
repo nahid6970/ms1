@@ -4,16 +4,17 @@ from tkinter import filedialog, messagebox
 import subprocess
 import threading
 import os
+import re
 
 ctk.set_appearance_mode("System")
-ctk.set_default_color_theme("green")  # Distinct theme for the subtitles-only app
+ctk.set_default_color_theme("green")
 
 class YouTubeSubtitleDownloader(ctk.CTk):
     def __init__(self):
         super().__init__()
 
         self.title("YouTube Subtitle Downloader")
-        self.geometry("600x550")
+        self.geometry("600x600")
 
         # Configure grid layout
         self.grid_columnconfigure(1, weight=1)
@@ -44,6 +45,9 @@ class YouTubeSubtitleDownloader(ctk.CTk):
         self.convert_checkbox = ctk.CTkCheckBox(self.options_frame, text="Convert to SRT (Best compatibility)")
         self.convert_checkbox.grid(row=2, column=0, columnspan=2, padx=15, pady=(0, 15), sticky="w")
         self.convert_checkbox.select()
+
+        self.raw_text_checkbox = ctk.CTkCheckBox(self.options_frame, text="Save as Raw Text (No Timestamps)")
+        self.raw_text_checkbox.grid(row=3, column=0, columnspan=2, padx=15, pady=(0, 15), sticky="w")
 
         # --- Cookies / Auth Section ---
         self.cookies_frame = ctk.CTkFrame(self)
@@ -109,16 +113,18 @@ class YouTubeSubtitleDownloader(ctk.CTk):
         if not save_dir:
             return
 
+        # Gather options
         lang_selection = self.lang_combo.get()
         include_auto = self.auto_subs_checkbox.get()
         convert_srt = self.convert_checkbox.get()
+        raw_text = self.raw_text_checkbox.get()
 
         self.status_label.configure(text="Downloading subtitles...", text_color="#2CC985")
         self.download_button.configure(state="disabled")
         
-        threading.Thread(target=self._download_thread, args=(url, save_dir, lang_selection, include_auto, convert_srt)).start()
+        threading.Thread(target=self._download_thread, args=(url, save_dir, lang_selection, include_auto, convert_srt, raw_text)).start()
 
-    def _download_thread(self, url, save_dir, lang_selection, include_auto, convert_srt):
+    def _download_thread(self, url, save_dir, lang_selection, include_auto, convert_srt, raw_text):
         try:
             # Base command: Skip video download, write subs
             command = ["yt-dlp", "--skip-download", "--write-subs", "-o", f"{save_dir}/%(title)s.%(ext)s"]
@@ -136,8 +142,9 @@ class YouTubeSubtitleDownloader(ctk.CTk):
             if include_auto:
                 command.append("--write-auto-subs")
 
-            # Conversion
-            if convert_srt:
+            # Conversion: If raw_text is requested, we prefer converting to SRT first as it's easier to parse 
+            # than unknown formats, but VTT is also fine.
+            if convert_srt or raw_text: 
                 command.extend(["--convert-subs", "srt"])
 
             # Auth
@@ -156,17 +163,33 @@ class YouTubeSubtitleDownloader(ctk.CTk):
             # Process
             process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=subprocess.CREATE_NO_WINDOW)
             
+            downloaded_files = [] 
+            
             while True:
                 line = process.stdout.readline()
                 if not line and process.poll() is not None:
                     break
                 if line:
-                    # Update status with relevant info (trimming generic info)
                     msg = line.strip()
                     if "[info]" in msg: msg = msg.replace("[info] ", "")
+                    # Log to UI
                     self.after(0, lambda m=msg: self.status_label.configure(text=m[-80:]))
-            
+                    
+                    # Capture downloaded/written subtitle filenames
+                    # yt-dlp Output Example: "[info] Writing video subtitles to: C:\Path\Title.en.srt"
+                    if "Writing video subtitles to: " in line:
+                        parts = line.split("Writing video subtitles to: ")
+                        if len(parts) > 1:
+                            fpath = parts[1].strip()
+                            downloaded_files.append(fpath)
+
             if process.returncode == 0:
+                # If raw text requested, post-process
+                if raw_text and downloaded_files:
+                    self.after(0, lambda: self.status_label.configure(text="Converting to raw text..."))
+                    for sub_file in downloaded_files:
+                         self._convert_to_raw_text(sub_file)
+
                 self.after(0, lambda: messagebox.showinfo("Success", "Subtitle Download Completed!"))
                 self.after(0, lambda: self.status_label.configure(text="Ready", text_color="gray"))
             else:
@@ -178,6 +201,62 @@ class YouTubeSubtitleDownloader(ctk.CTk):
             self.after(0, lambda: self.status_label.configure(text="Error", text_color="red"))
         finally:
             self.after(0, lambda: self.download_button.configure(state="normal"))
+
+    def _convert_to_raw_text(self, file_path):
+        try:
+            if not os.path.exists(file_path): 
+                return
+
+            with open(file_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+
+            lines = content.splitlines()
+            text_lines = []
+            
+            is_srt = file_path.lower().endswith(".srt")
+            
+            if is_srt:
+                # SRT Simple Parsing
+                for line in lines:
+                    line = line.strip()
+                    if not line: continue
+                    if line.isdigit(): continue
+                    if "-->" in line: continue
+                    text_lines.append(line)
+            else:
+                # Fallback VTT or others
+                for line in lines:
+                    line = line.strip()
+                    if not line: continue
+                    if line == "WEBVTT": continue
+                    if "-->" in line: continue
+                    text_lines.append(line)
+
+            # Cleanup
+            clean_text = "\n".join(text_lines)
+            # Remove simple HTML tags
+            clean_text = re.sub(r'<[^>]+>', '', clean_text)
+            
+            # Simple de-duplication of consecutive text 
+            # (Often needed for auto-captions where text scrolls)
+            final_lines = []
+            prev_line = None
+            for line in clean_text.splitlines():
+                if line != prev_line:
+                    final_lines.append(line)
+                    prev_line = line
+            
+            final_content = "\n".join(final_lines)
+
+            # Save as txt
+            txt_path = os.path.splitext(file_path)[0] + ".txt"
+            with open(txt_path, 'w', encoding='utf-8') as f:
+                f.write(final_content)
+                
+            print(f"Created raw text file: {txt_path}")
+
+        except Exception as e:
+            print(f"Failed to convert {file_path} to raw text: {e}")
 
 if __name__ == "__main__":
     app = YouTubeSubtitleDownloader()
