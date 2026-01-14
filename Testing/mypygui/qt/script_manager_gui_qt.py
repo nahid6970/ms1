@@ -1136,7 +1136,7 @@ class MainWindow(QMainWindow):
                 
             btn.clicked.connect(partial(self.handle_click, script))
             btn.customContextMenuRequested.connect(partial(self.show_context_menu, btn, script))
-            self.grid.addWidget(btn, r, c, r_span, c_span)
+            self.grid.addWidget(btn, r, c, r_span, c_span, Qt.AlignmentFlag.AlignTop)
         
 
 
