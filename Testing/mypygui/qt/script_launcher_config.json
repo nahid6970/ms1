@@ -34,7 +34,12 @@
                     "height": 0,
                     "is_bold": false,
                     "is_italic": false,
-                    "keep_open": false
+                    "keep_open": false,
+                    "kill_window": true,
+                    "use_inline": false,
+                    "inline_type": "cmd",
+                    "inline_script": "",
+                    "font_family": "Consolas"
                 },
                 {
                     "name": "Convert",
