@@ -270,6 +270,14 @@
             "hotkey": "#2",
             "action": "Run(\"komorebic.exe focus-workspace 1\", , \"Hide\")",
             "enabled": true
+        },
+        {
+            "name": "Komorebi Toggle Workspace",
+            "category": "General",
+            "description": "",
+            "hotkey": "#q",
+            "action": "{\n    ; Static variables keep their value between keypresses\n    static toggle := 0\n    \n    if (toggle == 0) {\n        Run(\"komorebic.exe focus-workspace 1\", , \"Hide\")\n        toggle := 1\n    } else {\n        Run(\"komorebic.exe focus-workspace 0\", , \"Hide\")\n        toggle := 0\n    }\n}",
+            "enabled": true
         }
     ],
     "text_shortcuts": [

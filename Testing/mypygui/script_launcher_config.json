@@ -342,6 +342,11 @@
             "height": 0,
             "is_bold": false,
             "is_italic": false
+        },
+        {
+            "name": "New Folder",
+            "type": "folder",
+            "scripts": []
         }
     ],
     "github_repos": [
