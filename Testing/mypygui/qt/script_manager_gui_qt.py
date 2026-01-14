@@ -827,12 +827,28 @@ class MainWindow(QMainWindow):
         scroll = QScrollArea(); scroll.setWidgetResizable(True); scroll.setStyleSheet(f"background: transparent; border: none;")
         self.grid_container = QWidget()
         self.grid_container.setAcceptDrops(True)
+        self.grid_container.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.grid_container.customContextMenuRequested.connect(self.show_grid_context_menu)
+        
         # Event filters for drag/drop on container
         self.grid_container.dragEnterEvent = self.gridDragEnterEvent
         self.grid_container.dropEvent = self.gridDropEvent
         
         self.grid = QGridLayout(self.grid_container); self.grid.setSpacing(10); self.grid.setAlignment(Qt.AlignmentFlag.AlignTop)
         scroll.setWidget(self.grid_container); self.main_layout.addWidget(scroll)
+
+    def show_grid_context_menu(self, pos):
+        menu = QMenu(self)
+        menu.setStyleSheet(f"QMenu {{ background-color: {CP_PANEL}; color: {CP_TEXT}; border: 1px solid {CP_CYAN}; }} QMenu::item:selected {{ background-color: {CP_CYAN}; color: {CP_BG}; }}")
+        
+        paste_act = menu.addAction("Paste Here")
+        paste_act.setEnabled(self.clipboard_item is not None)
+        paste_act.triggered.connect(self.paste_item)
+        
+        menu.addSeparator()
+        menu.addAction("Add New...").triggered.connect(self.prompt_add_new)
+        
+        menu.exec(self.grid_container.mapToGlobal(pos))
 
     def gridDragEnterEvent(self, event):
         if event.mimeData().hasFormat("application/x-script-item"):
@@ -1077,6 +1093,9 @@ class MainWindow(QMainWindow):
         self.clipboard_source_list = None
         self.save_config()
 
+    def open_edit(self, script):
+        if EditDialog(script, self).exec(): self.save_config()
+
     def delete_item(self, script):
         if QMessageBox.question(self, "Delete", f"Delete '{script.get('name')}'?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No) == QMessageBox.StandardButton.Yes:
             target_list = self.view_stack[-1]["scripts"] if self.view_stack else self.config["scripts"]
@@ -1120,10 +1139,7 @@ class MainWindow(QMainWindow):
         if dlg.exec():
             self.save_config()
 
-    def delete_item(self, script):
-        if QMessageBox.question(self, "Confirm", "Delete?") == QMessageBox.StandardButton.Yes:
-            target_list = self.view_stack[-1]["scripts"] if self.view_stack else self.config["scripts"]
-            if script in target_list: target_list.remove(script); self.save_config()
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
