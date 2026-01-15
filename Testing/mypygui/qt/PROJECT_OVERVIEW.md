@@ -23,6 +23,7 @@ Universal support for `.py`, `.ps1`, `.bat`, and `.exe` with the following flags
 ### 2. Interactive Navigation
 - **Hierarchy**: Supports infinite nesting of folders.
 - **Clickable Breadcrumbs**: The header shows `// ROOT / FOLDER / SUBFOLDER`. Each part is a clickable link for instant "jump-back" navigation.
+- **Dynamic Header**: Frameless window with custom drag logic and a 35px top margin to ensure utility buttons (+S, +F, CFG, X) are fully visible.
 - **Multi-line Labels**: Supports HTML-style `<br>` tags in item names for precise aesthetic control on grid buttons.
 
 ### 3. Deep Customization (Cyberpunk Aesthetic)
@@ -30,7 +31,10 @@ Universal support for `.py`, `.ps1`, `.bat`, and `.exe` with the following flags
 - **Global Level (CFG Menu)**:
     - **Global Layout**: Define grid columns and default button heights.
     - **Global Typography**: Set default font family (Consolas recommended) and sizes.
-    - **Item Defaults**: Configure default background/foreground colors and hover states for both Scripts and Folders separately.
+    - **Appearance Settings**: 
+        - Custom Main Background and Window Border colors.
+        - **CFG Button Styling**: Independent Background (BG) and Foreground (FG/Text) controls for the main config button.
+    - **Item Defaults**: Configure default background/foreground colors and hover states for both Scripts and Folders separately. New items automatically inherit these defaults.
 - **Stats Dashboard**: Integrated real-time CPU, RAM, and Disk usage monitoring.
 
 ---
@@ -41,7 +45,8 @@ Universal support for `.py`, `.ps1`, `.bat`, and `.exe` with the following flags
 - Handles the rendering of grid items.
 - Manages multi-line text conversion (`<br>` -> `\n`).
 - Implements hovering effects and context menu triggers (Edit, Copy, Cut, Delete).
-- Dynamically calculates height based on `row_span` and grid spacing.
+- **Theme Awareness**: Ingests the global `config` object to apply dynamic defaults if individual overrides are missing.
+- **Robust CSS**: Uses a 1px transparent border fallback to ensure background colors render correctly on Windows.
 
 ### `_run_shell` (Centralized Launch Helper)
 - Standardizes process creation.
@@ -49,8 +54,8 @@ Universal support for `.py`, `.ps1`, `.bat`, and `.exe` with the following flags
 - Correctly handles the `verb` (None vs "runas") and `show` (SW_HIDE vs SW_SHOWNORMAL) parameters.
 
 ### `EditDialog` & `SettingsDialog`
-- **EditDialog**: 1150px wide, 45/55 split between settings and the Inline Script Editor.
-- **SettingsDialog**: Advanced color pickers for every global default state.
+- **EditDialog**: 1150px wide, 45/55 split between settings and the Inline Script Editor. Now identifies parent config to provide accurate color previews.
+- **SettingsDialog**: Advanced color pickers for every global default state, including new CFG button FG/BG controls.
 
 ---
 
@@ -64,8 +69,7 @@ The JSON follows a recursive structure:
       "type": "script",
       "path": "C:\\...",
       "run_admin": true,
-      "use_inline": false,
-      "color": "#FFFFFF"
+      "use_inline": false
     },
     {
       "name": "Tools",
@@ -74,13 +78,15 @@ The JSON follows a recursive structure:
     }
   ],
   "def_script_bg": "#FFFFFF",
-  "def_folder_bg": "#FCEE0A"
+  "def_folder_bg": "#FCEE0A",
+  "cfg_btn_color": "#3a3a3a",
+  "cfg_text_color": "white"
 }
 ```
 
-## 📝 Recent Version Notes (v3.2)
-- **Fixed**: Admin elevation path mangling ("Syntax Incorrect" error).
-- **Fixed**: Elevated PowerShell windows closing immediately.
-- **Added**: Breadcrumb-based navigation.
-- **Added**: Detailed global item styling in CFG menu.
-- **Improved**: Collapsed redundant whitespace in folder navigation titles.
+## 📝 Recent Version Notes (v3.3)
+- **Fixed**: Header buttons (+S, +F, CFG, X) being cut off at the top.
+- **Fixed**: Global Script Foreground color accidentally changing the CFG button text.
+- **Added**: Interactive, clickable breadcrumb navigation with collapsed extra whitespace.
+- **Added**: Full global item styling (BG, FG, Hover) in CFG menu.
+- **Improved**: New items now strictly inherit global defaults instead of having hardcoded color keys.

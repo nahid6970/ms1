@@ -815,5 +815,6 @@
     "def_folder_bg": "#ffff00",
     "def_folder_fg": "#000000",
     "def_folder_hbg": "#68650c",
-    "def_folder_hfg": "#ffffff"
+    "def_folder_hfg": "#ffffff",
+    "cfg_text_color": "#000000"
 }

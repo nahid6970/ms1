@@ -625,6 +625,7 @@ class SettingsDialog(QDialog):
         self.app_bg = self.config.get("app_bg", CP_BG)
         self.win_border = self.config.get("window_border_color", CP_YELLOW)
         self.cfg_color = self.config.get("cfg_btn_color", CP_DIM)
+        self.cfg_text_color = self.config.get("cfg_text_color", "white")
         
         # Item Style Defaults
         self.def_script_bg = self.config.get("def_script_bg", "#FFFFFF")
@@ -711,10 +712,18 @@ class SettingsDialog(QDialog):
         self.btn_win_border.clicked.connect(self.pick_win_border)
         l_app.addRow("Win Border:", self.btn_win_border)
 
-        self.btn_cfg_col = QPushButton("Pick CFG Button Color")
+        cfg_box = QHBoxLayout()
+        self.btn_cfg_col = QPushButton("BG")
         self.update_color_btn_style(self.btn_cfg_col, self.cfg_color)
         self.btn_cfg_col.clicked.connect(self.pick_cfg_color)
-        l_app.addRow("CFG Button:", self.btn_cfg_col)
+        
+        self.btn_cfg_txt = QPushButton("FG")
+        self.update_color_btn_style(self.btn_cfg_txt, self.cfg_text_color)
+        self.btn_cfg_txt.clicked.connect(self.pick_cfg_text_color)
+        
+        cfg_box.addWidget(self.btn_cfg_col)
+        cfg_box.addWidget(self.btn_cfg_txt)
+        l_app.addRow("CFG Button:", cfg_box)
 
         self.chk_widgets = QCheckBox("Show Stats Dashboard")
         self.chk_widgets.setChecked(self.config.get("show_widgets", True))
@@ -828,6 +837,12 @@ class SettingsDialog(QDialog):
             self.cfg_color = c.name()
             self.update_color_btn_style(self.btn_cfg_col, self.cfg_color)
 
+    def pick_cfg_text_color(self):
+        c = QColorDialog.getColor(QColor(self.cfg_text_color), self)
+        if c.isValid():
+            self.cfg_text_color = c.name()
+            self.update_color_btn_style(self.btn_cfg_txt, self.cfg_text_color)
+
     def pick_config_color(self, attr_name, btn):
         current_color = getattr(self, attr_name)
         c = QColorDialog.getColor(QColor(current_color), self)
@@ -858,6 +873,7 @@ class SettingsDialog(QDialog):
         self.config["app_bg"] = self.app_bg
         self.config["window_border_color"] = self.win_border
         self.config["cfg_btn_color"] = self.cfg_color
+        self.config["cfg_text_color"] = self.cfg_text_color
         self.config["show_widgets"] = self.chk_widgets.isChecked()
         self.config["window_width"] = self.spn_w.value()
         self.config["window_height"] = self.spn_h.value()
@@ -1027,7 +1043,8 @@ class MainWindow(QMainWindow):
         self.btn_add_folder.clicked.connect(self.add_new_folder)
         
         cfg_col = self.config.get("cfg_btn_color", CP_DIM)
-        self.btn_cfg = CyberButton("CFG", script_data={"color": cfg_col, "type": "script", "text_color": "white"}, config=self.config)
+        cfg_txt = self.config.get("cfg_text_color", "white")
+        self.btn_cfg = CyberButton("CFG", script_data={"color": cfg_col, "type": "script", "text_color": cfg_txt}, config=self.config)
         self.btn_cfg.setFixedSize(55, 35) # Increased height
         self.btn_cfg.clicked.connect(self.open_global_settings)
 
