@@ -1735,7 +1735,6 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
         });
 
         preview.addEventListener('input', () => {
-            const offset = getCaretCharacterOffset(preview);
             const newRawValue = extractRawText(preview);
 
             // Update input source of truth
@@ -1751,11 +1750,8 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
                 saveData();
             }, 1000);
 
-            // Re-highlight syntax but stay in edit mode
-            preview.innerHTML = highlightSyntax(newRawValue);
-
-            // Restore caret
-            setCaretPosition(preview, offset);
+            // DON'T re-render on every keystroke - the browser already updated the DOM
+            // Only sync data and adjust height
 
             // Adjust cell height based on preview content
             requestAnimationFrame(() => {
