@@ -888,6 +888,15 @@ td textarea {
 /* Keep transparency during edit if preferred, but usually white background helps readability */
 .markdown-preview[contenteditable="true"] {
     cursor: text;
+    /* Prevent browser from scrolling to show this element on focus */
+    scroll-margin: 0;
+    scroll-margin-top: 0;
+    scroll-margin-bottom: 0;
+}
+
+/* Prevent focus-triggered scrolling */
+.markdown-preview:focus {
+    scroll-margin: 0 !important;
 }
 
 .markdown-preview a {

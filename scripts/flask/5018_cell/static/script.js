@@ -1320,10 +1320,20 @@ function handlePreviewMouseDown(e) {
     }
 
     // In the new Architecture, we focus the preview itself!
-    // But we need to make sure the targetOffset is correctly applied to the preview's content
+    // Save scroll position and use preventScroll to avoid any jumping
+    const tableContainer = document.querySelector('.table-container');
+    const savedScrollTop = tableContainer ? tableContainer.scrollTop : 0;
+    const savedScrollLeft = tableContainer ? tableContainer.scrollLeft : 0;
+
     setTimeout(() => {
-        preview.focus();
+        preview.focus({ preventScroll: true });
         setCaretPosition(preview, targetOffset);
+
+        // Restore scroll position in case browser still scrolled
+        if (tableContainer) {
+            tableContainer.scrollTop = savedScrollTop;
+            tableContainer.scrollLeft = savedScrollLeft;
+        }
     }, 0);
 }
 
@@ -1689,11 +1699,23 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
         // --- Event Listeners for Edit Mode Architecture ---
 
         preview.addEventListener('focus', () => {
+            // Save scroll position before any DOM changes
+            const tableContainer = document.querySelector('.table-container');
+            const savedScrollTop = tableContainer ? tableContainer.scrollTop : 0;
+            const savedScrollLeft = tableContainer ? tableContainer.scrollLeft : 0;
+
             preview.classList.add('editing');
             // Get current value from input (source of truth)
             const rawValue = inputElement.value;
             preview.innerHTML = highlightSyntax(rawValue);
 
+            // Restore scroll position after content change
+            if (tableContainer) {
+                requestAnimationFrame(() => {
+                    tableContainer.scrollTop = savedScrollTop;
+                    tableContainer.scrollLeft = savedScrollLeft;
+                });
+            }
             // Note: Caret position is handled by handlePreviewMouseDown mapping
         });
 
