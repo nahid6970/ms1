@@ -5,15 +5,17 @@ import subprocess
 import shutil
 import psutil
 from functools import partial
+import re
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
                              QHBoxLayout, QLabel, QPushButton, QScrollArea, 
                              QFrame, QMessageBox, QGridLayout, QSizePolicy,
                              QProgressBar, QDialog, QLineEdit, QComboBox, 
                              QCheckBox, QColorDialog, QMenu, QTextEdit, QFormLayout,
                              QGroupBox, QSpinBox, QFileDialog, QFontComboBox, QPlainTextEdit,
-                             QRadioButton, QButtonGroup, QSplitter)
+                             QRadioButton, QButtonGroup, QSplitter, QStyleOptionButton, QStyle)
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QPoint, QMimeData
-from PyQt6.QtGui import QFont, QCursor, QColor, QDesktopServices, QAction, QIcon, QPainter, QBrush, QPixmap, QDrag
+from PyQt6.QtGui import (QFont, QCursor, QColor, QDesktopServices, QAction, QIcon, QPainter, 
+                         QBrush, QPixmap, QDrag, QTextDocument)
 from PyQt6.QtCore import QUrl
 import ctypes
 
@@ -39,12 +41,17 @@ CONFIG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "script_l
 
 class CyberButton(QPushButton):
     def __init__(self, text, parent=None, script_data=None, config=None):
-        # Convert <br> variants to \n for multi-line support
-        display_text = text.replace("<br>", "\n").replace("<br/>", "\n").replace("<BR>", "\n")
-        super().__init__(display_text, parent)
+        self.raw_text = text or ""
+        # Convert <br> variants for base height calc
+        clean_text = self.raw_text.replace("<br>", "\n").replace("<br/>", "\n").replace("<BR>", "\n")
+        super().__init__(clean_text, parent)
         self.script = script_data or {}
         self.config = config or {}
         self.is_folder = (self.script.get("type") == "folder")
+        
+        # Style storage
+        self.fg_normal = "#FFFFFF"
+        self.fg_hover = "#FFFFFF"
         
         # Cursor
         self.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -87,6 +94,41 @@ class CyberButton(QPushButton):
         drag.setHotSpot(event.pos())
         drag.exec(Qt.DropAction.MoveAction)
 
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        
+        # Standard button background/border
+        opt = QStyleOptionButton()
+        self.initStyleOption(opt)
+        opt.text = "" # Don't draw standard text
+        self.style().drawControl(QStyle.ControlElement.CE_PushButton, opt, painter, self)
+        
+        # Prepare content
+        color = self.fg_hover if self.underMouse() else self.fg_normal
+        
+        doc = QTextDocument()
+        doc.setDefaultFont(self.font())
+        
+        # Process tags: <br> and <fs=XX>
+        html = self.raw_text.replace("<br>", "<br/>").replace("<BR>", "<br/>")
+        # Match <fs=XX>... and wrap in span until next tag or break
+        html = re.sub(r"<fs=(\d+)>(.*?)(?=<fs=|<br/>|$)", r'<span style="font-size:\1pt">\2</span>', html)
+        
+        # Render centered
+        full_html = f"<div style='color: {color}; text-align: center; font-family: {self.font().family()};'>{html}</div>"
+        doc.setHtml(full_html)
+        
+        # Account for button padding (10px in QSS)
+        doc.setTextWidth(self.width() - 20)
+        
+        # Center vertically
+        content_h = doc.size().height()
+        y_offset = (self.height() - content_h) / 2
+        
+        painter.translate(10, y_offset)
+        doc.drawContents(painter)
+
     def update_style(self):
         # Defaults
         # Folders -> Yellow (Explorer-like)
@@ -119,6 +161,10 @@ class CyberButton(QPushButton):
         text_color = self.script.get("text_color", default_text_color)
         hover_bg = self.script.get("hover_color", default_hover_bg)
         hover_fg = self.script.get("hover_text_color", default_hover_fg)
+        
+        # Store for paintEvent
+        self.fg_normal = text_color
+        self.fg_hover = hover_fg
         
         border_width = self.script.get("border_width", 1 if self.is_folder else 0)
         border_color = self.script.get("border_color", color)
