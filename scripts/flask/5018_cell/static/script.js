@@ -1278,6 +1278,9 @@ function handlePreviewMouseDown(e) {
     // Only handle left clicks
     if (e.button !== 0) return;
 
+    // If already editing, let the default browser behavior handle selection/caret movement
+    if (e.currentTarget.classList.contains('editing')) return;
+
     // Don't interfere with links or check boxes inside the preview
     if (e.target.closest('a') || e.target.tagName === 'INPUT') return;
 
@@ -1394,7 +1397,16 @@ function highlightSyntax(text) {
         });
     }
 
-    return formatted.replace(/\n/g, '<br>');
+    // Convert newlines to BR
+    formatted = formatted.replace(/\n/g, '<br>');
+
+    // Ensure empty lines are clickable by adding zero-width space after BR
+    // Handle consecutive BRs (empty lines in the middle)
+    formatted = formatted.replace(/<br><br>/g, '<br>\u200B<br>');
+    // Handle trailing BR
+    formatted = formatted.replace(/<br>$/g, '<br>\u200B');
+
+    return formatted;
 }
 
 function extractRawText(element) {
@@ -1417,16 +1429,99 @@ function extractRawText(element) {
 }
 
 function getCaretCharacterOffset(element) {
-    let caretOffset = 0;
     const sel = window.getSelection();
-    if (sel.rangeCount > 0) {
-        const range = sel.getRangeAt(0);
-        const preCaretRange = range.cloneRange();
-        preCaretRange.selectNodeContents(element);
-        preCaretRange.setEnd(range.startContainer, range.startOffset);
-        caretOffset = preCaretRange.toString().length;
-    }
-    return caretOffset;
+    if (sel.rangeCount === 0) return 0;
+    const range = sel.getRangeAt(0);
+    const preCaretRange = range.cloneRange();
+    preCaretRange.selectNodeContents(element);
+    preCaretRange.setEnd(range.startContainer, range.startOffset);
+
+    // We MUST walk the DOM exactly as extractRawText does to get a matching offset
+    let offset = 0;
+    const stopNode = range.startContainer;
+    const stopOffset = range.startOffset;
+
+    let stopped = false;
+    const walk = (node) => {
+        if (stopped) return;
+
+        if (node === stopNode) {
+            if (node.nodeType === Node.TEXT_NODE) {
+                offset += stopOffset;
+            }
+            stopped = true;
+            return;
+        }
+
+        if (node.nodeType === Node.TEXT_NODE) {
+            offset += node.textContent.length;
+        } else if (node.nodeName === 'BR') {
+            offset += 1;
+        } else if (node.nodeName === 'DIV' || node.nodeName === 'P') {
+            // This logic must match extractRawText's newline logic
+            // But it's complex because of how DIVs are nested.
+            // Simplified: most contenteditable newlines are BR or simple DIV wrap.
+            // Using preCaretRange.toString().length is often "close enough" 
+            // but for absolute precision we'd need a perfect mirror of extractRawText.
+        }
+
+        for (let child of node.childNodes) {
+            walk(child);
+            if (stopped) return;
+        }
+
+        // After a block element, if we processed it, extractRawText might add a \n
+        if (!stopped && (node.nodeName === 'DIV' || node.nodeName === 'P')) {
+            // offset += 1; // Only if we transition to a new block?
+        }
+    };
+
+    // Actually, for most cases in our simple syntax highlighting, 
+    // the following approach is more reliable as it captures the string exactly:
+    const content = element.innerHTML;
+    // But HTML vs text is the issue.
+
+    // Let's use the most standard reliable method:
+    const textBefore = extractRawTextBeforeCaret(element, range);
+    return textBefore.length;
+}
+
+function extractRawTextBeforeCaret(element, range) {
+    let text = '';
+    let stopped = false;
+    const stopNode = range.startContainer;
+    const stopOffset = range.startOffset;
+
+    const walk = (node) => {
+        if (stopped) return;
+
+        if (node === stopNode) {
+            if (node.nodeType === Node.TEXT_NODE) {
+                text += node.textContent.substring(0, stopOffset);
+            }
+            stopped = true;
+            return;
+        }
+
+        if (node.nodeType === Node.TEXT_NODE) {
+            text += node.textContent;
+        } else if (node.nodeName === 'BR') {
+            text += '\n';
+        } else if (node.nodeName === 'DIV' || node.nodeName === 'P') {
+            if (text.length > 0 && !text.endsWith('\n')) text += '\n';
+            for (let child of node.childNodes) {
+                walk(child);
+                if (stopped) return;
+            }
+        } else {
+            for (let child of node.childNodes) {
+                walk(child);
+                if (stopped) return;
+            }
+        }
+    };
+    walk(element);
+    return text.replace(/\r/g, '').replace(/\u200B/g, '');
 }
 
 function setCaretPosition(element, offset) {
@@ -1438,20 +1533,58 @@ function setCaretPosition(element, offset) {
     const walk = (node) => {
         if (found) return;
         if (node.nodeType === Node.TEXT_NODE) {
-            if (currentOffset + node.length >= offset) {
-                range.setStart(node, offset - currentOffset);
+            // Get text content without zero-width spaces for counting
+            const textContent = node.textContent;
+            const cleanText = textContent.replace(/\u200B/g, '');
+            const cleanLength = cleanText.length;
+
+            if (currentOffset + cleanLength >= offset) {
+                // Need to find the actual position within this node
+                // accounting for any ZWS characters
+                let targetCleanOffset = offset - currentOffset;
+                let actualOffset = 0;
+                let cleanCount = 0;
+
+                for (let i = 0; i < textContent.length; i++) {
+                    if (textContent[i] !== '\u200B') {
+                        if (cleanCount === targetCleanOffset) {
+                            actualOffset = i;
+                            break;
+                        }
+                        cleanCount++;
+                    }
+                    actualOffset = i + 1;
+                }
+
+                range.setStart(node, Math.min(actualOffset, textContent.length));
                 range.collapse(true);
                 found = true;
             } else {
-                currentOffset += node.length;
+                currentOffset += cleanLength;
+            }
+        } else if (node.nodeName === 'BR') {
+            if (currentOffset === offset) {
+                range.setStartBefore(node);
+                range.collapse(true);
+                found = true;
+            } else {
+                currentOffset += 1; // BR is one \n
+                if (currentOffset === offset) {
+                    range.setStartAfter(node);
+                    range.collapse(true);
+                    found = true;
+                }
+            }
+        } else if (node.nodeName === 'DIV' || node.nodeName === 'P') {
+            for (const child of node.childNodes) {
+                walk(child);
+                if (found) break;
             }
         } else {
             for (const child of node.childNodes) {
                 walk(child);
                 if (found) break;
             }
-            // Handle empty elements or BR as 1 char if needed? 
-            // BR usually doesn't count in toString().length though
         }
     };
 
@@ -1524,6 +1657,35 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
         preview.style.textAlign = inputElement.style.textAlign;
         preview.style.backgroundColor = cell.style.backgroundColor;
 
+        // NEW: Standardize line breaks
+        preview.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const selection = window.getSelection();
+                if (selection.rangeCount > 0) {
+                    const range = selection.getRangeAt(0);
+                    range.deleteContents();
+
+                    // Insert BR followed by zero-width space for cursor positioning
+                    const br = document.createElement('br');
+                    range.insertNode(br);
+
+                    // Create a text node after BR for cursor placement
+                    const textNode = document.createTextNode('\u200B'); // Zero-width space
+                    br.parentNode.insertBefore(textNode, br.nextSibling);
+
+                    // Position cursor after the BR (in the zero-width space)
+                    range.setStart(textNode, 1);
+                    range.setEnd(textNode, 1);
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+
+                    // Update the underlying input value WITHOUT triggering full re-render
+                    inputElement.value = extractRawText(preview);
+                }
+            }
+        });
+
         // --- Event Listeners for Edit Mode Architecture ---
 
         preview.addEventListener('focus', () => {
@@ -1554,8 +1716,18 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
             const offset = getCaretCharacterOffset(preview);
             const newRawValue = extractRawText(preview);
 
-            // Update input source of truth silently for search/etc
+            // Update input source of truth
             inputElement.value = newRawValue;
+
+            // Save data directly to tableData without triggering re-render
+            const sheet = tableData.sheets[currentSheet];
+            sheet.rows[rowIndex][colIndex] = newRawValue;
+
+            // Debounced save to backend
+            clearTimeout(window.autoSaveTimeout);
+            window.autoSaveTimeout = setTimeout(() => {
+                saveData();
+            }, 1000);
 
             // Re-highlight syntax but stay in edit mode
             preview.innerHTML = highlightSyntax(newRawValue);
@@ -1563,9 +1735,15 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
             // Restore caret
             setCaretPosition(preview, offset);
 
-            // Auto-resize if needed
-            autoResizeTextarea(inputElement);
-            adjustCellHeightForMarkdown(cell);
+            // Adjust cell height based on preview content
+            requestAnimationFrame(() => {
+                const previewHeight = preview.scrollHeight;
+                const minHeight = 22;
+                const targetHeight = Math.max(minHeight, previewHeight);
+                preview.style.minHeight = targetHeight + 'px';
+                inputElement.style.height = targetHeight + 'px';
+                cell.style.height = targetHeight + 'px';
+            });
         });
 
         // Use original handlePreviewMouseDown for mapping click to caret position

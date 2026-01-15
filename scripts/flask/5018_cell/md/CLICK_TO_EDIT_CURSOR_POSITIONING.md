@@ -1,4 +1,7 @@
-# Click-to-Edit Cursor Positioning Issue
+# Click-to-Edit Cursor Positioning (Resolved)
+
+## Status: REVERTED TO NORMAL BEHAVIOR (2026-01-15)
+The previous attempts to force special scrolling (centering or top-aligning) were removed to allow for a standard, non-jumping user experience. The system now relies on default browser focus behavior.
 
 ## Problem Description
 

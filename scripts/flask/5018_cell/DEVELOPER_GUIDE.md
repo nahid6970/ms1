@@ -96,6 +96,7 @@ The state is managed in a central object synced with `data.json`.
 - **[Special Markdown](md/MARKDOWN_SPECIAL.md):** Lists, Small text, custom headings, border boxes, underlines.
 - **[Highlight Shortcuts](md/COLOR_HIGHLIGHT_SHORTCUTS.md):** `==`, `!!`, `??` syntaxes.
 - **[Custom Color Syntaxes](md/CUSTOM_SYNTAX.md):** Dynamic user-defined highlighting.
+- **[WYSIWYG Edit Mode](md/WYSIWYG_EDIT_MODE.md):** ContentEditable interface with visible syntax markers.
 
 ### Advanced Editing Tools
 - **[Editing Extensions](md/EDITING_EXTENSIONS.md):** Search, Line tools, Case conversion, Multi-cursor.

@@ -25,9 +25,10 @@
 ## Smart Textareas
 **Purpose:** Ensures multiline and markdown content stays visible and editable.
 **Behavior:** 
-- Any cell containing **Markdown** markers or **Newlines** is automatically rendered as a multiline textarea.
-- This happens even if global **Wrap (↩️)** is turned off, ensuring your data never gets squashed into a 1-line box.
-- These textareas auto-resize as you type to match the content height.
+- Any cell containing **Markdown** markers or **Newlines** is automatically rendered using a **WYSIWYG ContentEditable** editor.
+- This provides a "Hybrid" experience: styled text stays visible while you edit, and syntax markers (like `**`) appear in a subtle, faded style.
+- These editors auto-resize as you type to match the content height.
+- Global **Wrap (↩️)** settings are respected, but markdown always ensures data never gets squashed into a 1-line box.
 
 ## Raw Mode (Markdown Preview Toggle)
 **Purpose:** View and edit raw text without markdown rendering.

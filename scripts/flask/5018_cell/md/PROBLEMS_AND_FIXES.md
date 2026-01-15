@@ -7,6 +7,50 @@ This document tracks historical bugs, issues, and their solutions. Use this to:
 
 ---
 
+## [2026-01-15 23:45] - WYSIWYG Markdown Editing Implementation
+**Problem:** 
+Editing markdown using a transparent textarea overlay felt disconnected and didn't allow for real-time visual feedback of formatted text during editing. Syntax markers were often hard to manage.
+
+**Root Cause:** 
+Traditional `<textarea>` elements only support plain text, forcing a separate rendering layer (preview) to be overlaid on top.
+
+**Solution:** 
+Transitioned to a `contenteditable="true"` architecture:
+- Replaced the transparent textarea with a dynamic `contenteditable` div.
+- Implemented dual-rendering: `parseMarkdown()` for clean preview (blur) and `highlightSyntax()` for editing (focus).
+- Added `extractRawText()` to reliably reconstruct markdown from the DOM.
+- Implemented character-offset based caret management (`getCaretCharacterOffset` and `setCaretPosition`) to preserve cursor position during real-time re-highlighting.
+- Styled syntax markers with `.syn-marker` class (0.6 opacity, normal font weight) to make them unobtrusive.
+
+**Files Modified:**
+- `static/script.js` - Major refactor of `applyMarkdownFormatting`, added `highlightSyntax`, `extractRawText`, caret helpers.
+- `static/style.css` - Added `.syn-marker` and contenteditable focus styles.
+- `md/WYSIWYG_EDIT_MODE.md` - New documentation.
+
+**Related Issues:** Click-to-Edit cursor positioning.
+
+---
+
+## [2026-01-15 23:30] - Reverted Forced Sheet Scrolling to Top
+**Problem:** 
+A previously implemented feature forced the sheet to scroll so that the focused cell line was positioned at the very top (header) of the viewport. Users found this disorienting as it caused excessive "jumping" of the entire sheet.
+
+**Root Cause:** 
+Explicit `tableContainer.scrollTop` adjustments in `positionCursorAtMouseClick` and forced centering in cell `onclick` handlers.
+
+**Solution:** 
+Reverted the sheet-level scrolling logic to restore "normal" browser behavior:
+- Removed `tableContainer.scrollTop` logic from `positionCursorAtMouseClick`.
+- Removed `.onclick` handlers that called `keepCursorCentered` in `renderTable`.
+- The system now relies on the browser's default focus mechanism, which avoids unnecessary sheet jumps.
+
+**Files Modified:**
+- `static/script.js` - Removed scroll logic in `positionCursorAtMouseClick`, removed handlers in `renderTable`.
+
+**Related Issues:** Click-to-Edit scroll restore.
+
+---
+
 ## [2026-01-12 23:45] - PENDING: Markdown Edit to Raw Mode Scroll Jump
 
 **Problem:**

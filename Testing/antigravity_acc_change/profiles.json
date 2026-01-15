@@ -20,7 +20,7 @@
     {
         "name": "nahid69701",
         "path": "C:/Users/nahid/ms/ms1/Testing/antigravity_acc_change/nahid69701",
-        "active": true,
+        "active": false,
         "is_locked": true,
         "password": "182358",
         "timer_enabled": true,
@@ -29,7 +29,7 @@
     {
         "name": "nahid69702",
         "path": "C:/Users/nahid/ms/ms1/Testing/antigravity_acc_change/nahid69702",
-        "active": false,
+        "active": true,
         "is_locked": true,
         "password": "182358",
         "timer_enabled": true,
