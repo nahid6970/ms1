@@ -12154,25 +12154,20 @@ function copySheetContent() {
             return;
         }
 
-        let allText = [];
+        let allCells = [];
 
         sheet.rows.forEach(row => {
-            let rowText = [];
             row.forEach((cellValue) => {
                 if (cellValue !== null && cellValue !== undefined && cellValue !== '') {
-                    // Start of Selection
-                    const strValue = String(cellValue);
-                    rowText.push(strValue.trim());
-                    // End of Selection
+                    const strValue = String(cellValue).trim();
+                    if (strValue) {
+                        allCells.push(strValue);
+                    }
                 }
             });
-            // Only add row if it has content
-            if (rowText.length > 0) {
-                allText.push(rowText.join(' '));
-            }
         });
 
-        const finalText = allText.join('\n\n');
+        const finalText = allCells.join('\n-----\n');
 
         if (!finalText) {
             showToast("No content to copy", "info");
