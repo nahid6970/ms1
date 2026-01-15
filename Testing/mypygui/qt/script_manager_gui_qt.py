@@ -1169,7 +1169,10 @@ class MainWindow(QMainWindow):
                     exe = "pythonw" if hide else "python"
                     subprocess.Popen([exe, path], cwd=cwd)
             elif path.endswith(".ps1"):
-                ps_exe = "pwsh" if shutil.which("pwsh") else "powershell"
+                # Use preferred interpreter if saved, else auto-detect
+                ps_exe = script.get("inline_type")
+                if ps_exe not in ["pwsh", "powershell"]:
+                    ps_exe = "pwsh" if shutil.which("pwsh") else "powershell"
                 if new_term:
                     no_exit = "-NoExit " if keep else ""
                     cmd = f'start {ps_exe} {no_exit}-File "{path}"'
@@ -1201,7 +1204,9 @@ class MainWindow(QMainWindow):
         keep = script.get("keep_open", False)
 
         if ext == ".ps1":
-            ps_exe = "pwsh" if shutil.which("pwsh") else "powershell"
+            ps_exe = script.get("inline_type", "powershell")
+            if ps_exe not in ["pwsh", "powershell"]:
+                 ps_exe = "pwsh" if shutil.which("pwsh") else "powershell"
             if new_term:
                 no_exit = "-NoExit " if keep else ""
                 cmd = f'start {ps_exe} {no_exit}-File "{tmp}"'
