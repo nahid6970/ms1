@@ -15,6 +15,28 @@
     },
     "scripts": [
         {
+            "name": "Initial <br> Application <br> Setup",
+            "type": "folder",
+            "scripts": [],
+            "col_span": 1,
+            "row_span": 1,
+            "font_family": "Consolas",
+            "font_size": 12,
+            "is_bold": true,
+            "is_italic": false,
+            "width": 0,
+            "height": 0,
+            "corner_radius": 0,
+            "border_width": 0,
+            "grid_columns": 0,
+            "grid_btn_height": 0,
+            "_runtime_height": 100,
+            "_runtime_font_size": 12,
+            "_runtime_font_family": "Consolas",
+            "_runtime_is_bold": true,
+            "_runtime_is_italic": false
+        },
+        {
             "name": "\uea83 FFMPEG",
             "type": "folder",
             "scripts": [
