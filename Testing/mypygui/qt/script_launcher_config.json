@@ -282,7 +282,8 @@
                     "_runtime_font_size": 12,
                     "_runtime_font_family": "Consolas",
                     "_runtime_is_bold": true,
-                    "_runtime_is_italic": false
+                    "_runtime_is_italic": false,
+                    "color": "#ff0000"
                 },
                 {
                     "name": "Harden Windows Security Using GUI",
@@ -312,7 +313,8 @@
                     "_runtime_font_size": 12,
                     "_runtime_font_family": "Consolas",
                     "_runtime_is_bold": true,
-                    "_runtime_is_italic": false
+                    "_runtime_is_italic": false,
+                    "color": "#ff0000"
                 },
                 {
                     "name": "Winhance",
@@ -337,7 +339,12 @@
                     "width": 0,
                     "height": 0,
                     "corner_radius": 0,
-                    "border_width": 0
+                    "border_width": 0,
+                    "_runtime_height": 50,
+                    "_runtime_font_size": 12,
+                    "_runtime_font_family": "Consolas",
+                    "_runtime_is_bold": true,
+                    "_runtime_is_italic": false
                 }
             ],
             "color": "#FCEE0A",
