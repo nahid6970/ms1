@@ -350,7 +350,6 @@ class EditDialog(QDialog):
         if idx >= 0: self.cmb_font.setCurrentIndex(idx)
         else: self.cmb_font.setEditText(current_font) # fallback if editable
         
-        self.cmb_font.setMaximumWidth(200)
         l_typo.addWidget(QLabel("Font:"), 0, 0)
         l_typo.addWidget(self.cmb_font, 0, 1, 1, 3)
         l_typo.addWidget(QLabel("Size:"), 1, 0)
@@ -729,7 +728,6 @@ class SettingsDialog(QDialog):
         idx = self.cmb_font.findText(current_font, Qt.MatchFlag.MatchExactly)
         if idx >= 0: self.cmb_font.setCurrentIndex(idx)
         
-        self.cmb_font.setMaximumWidth(180)
         l_grid.addRow("Font:", self.cmb_font)
 
         self.spn_font_size = QSpinBox()
