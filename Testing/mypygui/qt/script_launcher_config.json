@@ -950,7 +950,7 @@
             "_runtime_is_italic": false
         },
         {
-            "name": "<fs=40>\ue606<br>Lock-Smith",
+            "name": "<fs=40>\ue606  <br>Lock-Smith",
             "path": "C:/Users/nahid/ms/ms1/Testing/FileLockSmith/locksmith.py",
             "type": "script",
             "hide_terminal": true,
@@ -970,7 +970,7 @@
             "_runtime_is_italic": false,
             "new_terminal": false,
             "run_admin": false,
-            "font_family": "Consolas",
+            "font_family": "JetBrainsMono Nerd Font Propo",
             "font_size": 12,
             "is_bold": true,
             "is_italic": false,

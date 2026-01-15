@@ -108,25 +108,37 @@ class CyberButton(QPushButton):
         color = self.fg_hover if self.underMouse() else self.fg_normal
         
         doc = QTextDocument()
+        doc.setDocumentMargin(0)
         doc.setDefaultFont(self.font())
         
-        # Process tags: <br> and <fs=XX>
-        html = self.raw_text.replace("<br>", "<br/>").replace("<BR>", "<br/>")
-        # Match <fs=XX>... and wrap in span until next tag or break
-        html = re.sub(r"<fs=(\d+)>(.*?)(?=<fs=|<br/>|$)", r'<span style="font-size:\1pt">\2</span>', html)
+        # CSS to force perfect centering and remove all extra line spacing/margins
+        doc.setDefaultStyleSheet(f"""
+            * {{ 
+                text-align: center; 
+                color: {color}; 
+                margin: 0; 
+                padding: 0; 
+                line-height: 100%;
+                font-family: "{self.font().family()}";
+            }}
+        """)
         
-        # Render centered
-        full_html = f"<div style='color: {color}; text-align: center; font-family: {self.font().family()};'>{html}</div>"
-        doc.setHtml(full_html)
+        # Process tags
+        html_content = self.raw_text.replace("<br>", "<br/>").replace("<BR>", "<br/>")
+        # More robust fs tag replacement
+        html_content = re.sub(r"<fs=(\d+)>(.*?)(?=<fs=|<br/>|$)", r'<span style="font-size:\1pt">\2</span>', html_content)
         
-        # Account for button padding (10px in QSS)
-        doc.setTextWidth(self.width() - 20)
+        doc.setHtml(f"<body>{html_content}</body>")
         
-        # Center vertically
+        # Use full button width for mathematical centering
+        doc.setTextWidth(self.width())
+        
+        # Total content height
         content_h = doc.size().height()
+        # Vertical centering calculation
         y_offset = (self.height() - content_h) / 2
         
-        painter.translate(10, y_offset)
+        painter.translate(0, y_offset)
         doc.drawContents(painter)
 
     def update_style(self):
