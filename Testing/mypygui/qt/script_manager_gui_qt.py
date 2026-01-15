@@ -110,21 +110,13 @@ class CyberButton(QPushButton):
         doc = QTextDocument()
         doc.setDefaultFont(self.font())
         
-        # Process tags: <br>, <fs=XX>, and <ff=Font Name>
+        # Process tags: <br> and <fs:XX>...</fs>
         html = self.raw_text.replace("<br>", "<br/>").replace("<BR>", "<br/>")
+        # Match <fs:XX>...</fs> and wrap in span
+        html = re.sub(r"<fs:(\d+)>(.*?)</fs>", r'<span style="font-size:\1pt">\2</span>', html)
         
-        # Match <fs=XX>...
-        html = re.sub(r"<fs=(\d+)>(.*?)(?=<fs=|<ff=|<br/>|$)", r'<span style="font-size:\1pt">\2</span>', html)
-        # Match <ff=Font Name>...
-        html = re.sub(r"<ff=([^>]+)>(.*?)(?=<fs=|<ff=|<br/>|$)", r'<span style="font-family:\1">\2</span>', html)
-        
-        # To fix centering issues with mixed sizes/fonts, wrap each line in a centered div
-        lines = html.split("<br/>")
-        divs = [f"<div style='text-align: center;'>{line}</div>" for line in lines]
-        container_html = "".join(divs)
-
         # Render centered
-        full_html = f"<div style='color: {color}; font-family: {self.font().family()};'>{container_html}</div>"
+        full_html = f"<div style='color: {color}; text-align: center; font-family: {self.font().family()};'>{html}</div>"
         doc.setHtml(full_html)
         
         # Account for button padding (10px in QSS)
