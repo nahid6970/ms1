@@ -108,37 +108,33 @@ class CyberButton(QPushButton):
         color = self.fg_hover if self.underMouse() else self.fg_normal
         
         doc = QTextDocument()
-        doc.setDocumentMargin(0)
         doc.setDefaultFont(self.font())
         
-        # CSS to force perfect centering and remove all extra line spacing/margins
-        doc.setDefaultStyleSheet(f"""
-            * {{ 
-                text-align: center; 
-                color: {color}; 
-                margin: 0; 
-                padding: 0; 
-                line-height: 100%;
-                font-family: "{self.font().family()}";
-            }}
-        """)
+        # Process tags: <br>, <fs=XX>, and <ff=Font Name>
+        html = self.raw_text.replace("<br>", "<br/>").replace("<BR>", "<br/>")
         
-        # Process tags
-        html_content = self.raw_text.replace("<br>", "<br/>").replace("<BR>", "<br/>")
-        # More robust fs tag replacement
-        html_content = re.sub(r"<fs=(\d+)>(.*?)(?=<fs=|<br/>|$)", r'<span style="font-size:\1pt">\2</span>', html_content)
+        # Match <fs=XX>...
+        html = re.sub(r"<fs=(\d+)>(.*?)(?=<fs=|<ff=|<br/>|$)", r'<span style="font-size:\1pt">\2</span>', html)
+        # Match <ff=Font Name>...
+        html = re.sub(r"<ff=([^>]+)>(.*?)(?=<fs=|<ff=|<br/>|$)", r'<span style="font-family:\1">\2</span>', html)
         
-        doc.setHtml(f"<body>{html_content}</body>")
+        # To fix centering issues with mixed sizes/fonts, wrap each line in a centered div
+        lines = html.split("<br/>")
+        divs = [f"<div style='text-align: center;'>{line}</div>" for line in lines]
+        container_html = "".join(divs)
+
+        # Render centered
+        full_html = f"<div style='color: {color}; font-family: {self.font().family()};'>{container_html}</div>"
+        doc.setHtml(full_html)
         
-        # Use full button width for mathematical centering
-        doc.setTextWidth(self.width())
+        # Account for button padding (10px in QSS)
+        doc.setTextWidth(self.width() - 20)
         
-        # Total content height
+        # Center vertically
         content_h = doc.size().height()
-        # Vertical centering calculation
         y_offset = (self.height() - content_h) / 2
         
-        painter.translate(0, y_offset)
+        painter.translate(10, y_offset)
         doc.drawContents(painter)
 
     def update_style(self):
