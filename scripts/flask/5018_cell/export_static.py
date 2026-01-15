@@ -2779,6 +2779,66 @@ def generate_static_html(data, custom_syntaxes):
             return formatted;
         }
 
+        function copySheetContent() {
+            try {
+                const sheet = tableData.sheets[currentSheet];
+                if (!sheet || !sheet.rows || sheet.rows.length === 0) {
+                    alert("Sheet is empty");
+                    return;
+                }
+
+                let allCells = [];
+
+                sheet.rows.forEach(row => {
+                    row.forEach((cellValue) => {
+                        if (cellValue !== null && cellValue !== undefined && cellValue !== '') {
+                            const strValue = String(cellValue).trim();
+                            if (strValue) {
+                                allCells.push(strValue);
+                            }
+                        }
+                    });
+                });
+
+                const finalText = allCells.join('\n-----\n\n');
+
+                if (!finalText) {
+                    alert("No content to copy");
+                    return;
+                }
+
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(finalText).then(() => {
+                        alert("Sheet content copied to clipboard!");
+                    }).catch(err => {
+                        console.error("Clipboard error:", err);
+                        copyToClipboardFallback(finalText);
+                    });
+                } else {
+                    copyToClipboardFallback(finalText);
+                }
+            } catch (e) {
+                console.error("Error copying content:", e);
+                alert("Error copying content");
+            }
+        }
+
+        function copyToClipboardFallback(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.left = '-9999px';
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                alert("Sheet content copied to clipboard!");
+            } catch (err) {
+                alert("Failed to copy content");
+            }
+            document.body.removeChild(textarea);
+        }
+
         // Initialize on load
         window.onload = function() {
             loadCustomColorSyntaxes();
@@ -2866,6 +2926,10 @@ def generate_static_html(data, custom_syntaxes):
 
                 <button onclick="toggleAllCollapsibles()" class="btn-icon-toggle" title="Show/hide all collapsible text">
                     <span>👁️</span>
+                </button>
+
+                <button onclick="copySheetContent()" class="btn-icon-toggle" id="btnCopyContent" title="Copy Current Sheet Content">
+                    <span>📋</span>
                 </button>
             </div>
 
