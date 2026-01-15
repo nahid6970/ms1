@@ -1067,7 +1067,7 @@ class MainWindow(QMainWindow):
         def create_sep():
             lbl = QLabel("/")
             lbl.setFont(QFont("Consolas", 14, QFont.Weight.Bold))
-            lbl.setStyleSheet(f"color: {CP_DIM}; padding: 0 5px;")
+            lbl.setStyleSheet(f"color: white; padding: 0 5px;")
             return lbl
 
         # Initial // ROOT
