@@ -217,11 +217,11 @@
                     "_runtime_is_bold": true,
                     "_runtime_is_italic": false,
                     "new_terminal": true,
-                    "run_admin": true
+                    "run_admin": false
                 },
                 {
                     "name": "Powershell [old]",
-                    "path": "",
+                    "path": "echo nahidboss",
                     "type": "script",
                     "hide_terminal": false,
                     "keep_open": true,
@@ -239,6 +239,7 @@
                     "_runtime_font_family": "Consolas",
                     "_runtime_is_bold": true,
                     "_runtime_is_italic": false,
+                    "run_admin": true,
                     "font_family": "Consolas",
                     "font_size": 12,
                     "is_bold": true,
@@ -246,8 +247,7 @@
                     "width": 0,
                     "height": 0,
                     "corner_radius": 0,
-                    "border_width": 0,
-                    "run_admin": false
+                    "border_width": 0
                 },
                 {
                     "name": "PWSH Core",
@@ -278,10 +278,10 @@
                     "_runtime_font_family": "Consolas",
                     "_runtime_is_bold": true,
                     "_runtime_is_italic": false,
-                    "run_admin": false
+                    "run_admin": true
                 }
             ],
-            "color": "#FCEE0A",
+            "color": "#7b5385",
             "col_span": 1,
             "row_span": 1,
             "font_family": "Consolas",
@@ -291,14 +291,18 @@
             "width": 0,
             "height": 0,
             "corner_radius": 0,
-            "border_width": 0,
+            "border_width": 1,
             "grid_columns": 0,
             "grid_btn_height": 0,
             "_runtime_height": 100,
             "_runtime_font_size": 12,
             "_runtime_font_family": "Consolas",
             "_runtime_is_bold": true,
-            "_runtime_is_italic": false
+            "_runtime_is_italic": false,
+            "text_color": "#FFFFFF",
+            "hover_color": "#abc146",
+            "hover_text_color": "#000000",
+            "border_color": "#2f78dd"
         },
         {
             "name": "Useful Commands",
@@ -630,7 +634,7 @@
     "default_btn_height": 100,
     "window_width": 1200,
     "window_height": 800,
-    "always_on_top": true,
+    "always_on_top": false,
     "default_font_size": 12,
     "app_bg": "#1d1d2b",
     "show_widgets": false,

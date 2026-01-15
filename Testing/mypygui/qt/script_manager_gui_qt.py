@@ -15,6 +15,7 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QPoint, QMimeData
 from PyQt6.QtGui import QFont, QCursor, QColor, QDesktopServices, QAction, QIcon, QPainter, QBrush, QPixmap, QDrag
 from PyQt6.QtCore import QUrl
+import ctypes
 
 # -----------------------------------------------------------------------------
 # CYBERPUNK THEME PALETTE
@@ -1155,6 +1156,18 @@ class MainWindow(QMainWindow):
         else:
             self.launch_script(script)
 
+    def _run_shell(self, executable, params=None, work_dir=None, admin=False, hide=False):
+        # Centralized helper for robust Windows process launching
+        verb = "runas" if admin else None
+        show = 0 if hide else 1 # SW_HIDE=0, SW_SHOWNORMAL=1
+        try:
+            # ShellExecuteW handles path quoting and working directories natively
+            res = ctypes.windll.shell32.ShellExecuteW(None, verb, str(executable), params, str(work_dir or ""), show)
+            if res <= 32:
+                 QMessageBox.warning(self, "Launch Error", f"ShellExecute failed (Code {res}) for:\n{executable}")
+        except Exception as e:
+            QMessageBox.critical(self, "System Error", f"Failed to execute {executable}:\n{str(e)}")
+
     def launch_script(self, script):
         # Handle Inline
         if script.get("use_inline"):
@@ -1172,48 +1185,38 @@ class MainWindow(QMainWindow):
         keep = script.get("keep_open", False)
         admin = script.get("run_admin", False)
 
-        def run_elevated(executable, params, work_dir):
-            import ctypes
-            # 1 = SW_SHOWNORMAL
-            ctypes.windll.shell32.ShellExecuteW(None, "runas", executable, params, work_dir, 1)
-
         try:
             if path.endswith(".py"):
-                if admin:
-                    # Use cmd to host python so /k works for elevation
-                    exec_params = f'/{"k" if keep else "c"} python "{path}"'
-                    run_elevated("cmd.exe", exec_params, cwd)
-                elif new_term:
-                    cmd = f'start cmd /{"k" if keep else "c"} python "{path}"'
-                    subprocess.Popen(cmd, shell=True, cwd=cwd)
+                if admin or new_term:
+                    # Use cmd to host python so /k (keep open) works
+                    mode = "/k" if keep else "/c"
+                    params = f'{mode} python "{path}"'
+                    self._run_shell("cmd.exe", params, cwd, admin=admin, hide=hide)
                 else:
-                    exe = "pythonw" if hide else "python"
-                    subprocess.Popen([exe, path], cwd=cwd)
+                    # Simple launch
+                    py_exe = "pythonw" if hide else "python"
+                    self._run_shell(py_exe, f'"{path}"', cwd, hide=hide)
             elif path.endswith(".ps1"):
-                # Use preferred interpreter if saved, else auto-detect
+                # Determine shell
                 ps_exe = script.get("inline_type")
                 if ps_exe not in ["pwsh", "powershell"]:
                     ps_exe = "pwsh" if shutil.which("pwsh") else "powershell"
                 
-                if admin:
-                    no_exit = "-NoExit" if keep else ""
-                    exec_params = f'{no_exit} -File "{path}"'
-                    run_elevated(ps_exe, exec_params, cwd)
-                elif new_term:
-                    no_exit = "-NoExit" if keep else ""
-                    cmd = f'start {ps_exe} {no_exit}-File "{path}"'
-                    subprocess.Popen(cmd, shell=True, cwd=cwd)
+                # Construct params
+                no_exit = "-NoExit" if keep else ""
+                params = f'{no_exit} -File "{path}"'
+                
+                if admin or new_term:
+                    self._run_shell(ps_exe, params, cwd, admin=admin, hide=hide)
                 else:
-                    cmd = [ps_exe, "-File", path]
-                    if hide: cmd.insert(1, "-WindowStyle"); cmd.insert(2, "Hidden")
-                    subprocess.Popen(cmd, cwd=cwd)
+                    self._run_shell(ps_exe, params, cwd, hide=hide)
             else:
-                if admin:
-                    run_elevated("cmd.exe", f'/{"k" if keep else "c"} "{path}"', cwd)
-                elif new_term:
-                    subprocess.Popen(f'start {path}', shell=True, cwd=cwd)
+                # Generic launch (Executables, Batch files, Folders)
+                if admin or new_term:
+                    mode = "/k" if keep else "/c"
+                    self._run_shell("cmd.exe", f'{mode} "{path}"', cwd, admin=admin, hide=hide)
                 else:
-                    subprocess.Popen(path, shell=True, cwd=cwd)
+                    self._run_shell(path, None, cwd, hide=hide)
             
             if script.get("kill_window"): self.close()
         except Exception as e: QMessageBox.critical(self, "Error", str(e))
@@ -1232,34 +1235,18 @@ class MainWindow(QMainWindow):
         keep = script.get("keep_open", False)
         admin = script.get("run_admin", False)
 
-        def run_elevated_inline(executable, params):
-            import ctypes
-            ctypes.windll.shell32.ShellExecuteW(None, "runas", executable, params, os.getcwd(), 1)
-
         if ext == ".ps1":
             ps_exe = script.get("inline_type", "powershell")
             if ps_exe not in ["pwsh", "powershell"]:
                  ps_exe = "pwsh" if shutil.which("pwsh") else "powershell"
             
-            if admin:
-                no_exit = "-NoExit" if keep else ""
-                exec_params = f'{no_exit} -File "{tmp}"'
-                run_elevated_inline(ps_exe, exec_params)
-            elif new_term:
-                no_exit = "-NoExit" if keep else ""
-                cmd = f'start {ps_exe} {no_exit}-File "{tmp}"'
-                subprocess.Popen(cmd, shell=True)
-            else:
-                cmd = [ps_exe, "-File", tmp]
-                if hide: cmd.insert(1, "-WindowStyle"); cmd.insert(2, "Hidden")
-                subprocess.Popen(cmd)
+            no_exit = "-NoExit" if keep else ""
+            params = f'{no_exit} -File "{tmp}"'
+            self._run_shell(ps_exe, params, os.getcwd(), admin=admin, hide=hide)
         else:
-            if admin:
-                run_elevated_inline("cmd.exe", f'/{"k" if keep else "c"} "{tmp}"')
-            elif new_term:
-                subprocess.Popen(f'start cmd /{"k" if keep else "c"} "{tmp}"', shell=True)
-            else:
-                subprocess.Popen(tmp, shell=True)
+            # Inline batch/command
+            mode = "/k" if keep else "/c"
+            self._run_shell("cmd.exe", f'{mode} "{tmp}"', os.getcwd(), admin=admin, hide=hide)
 
     def go_back(self):
         if self.view_stack: self.view_stack.pop(); self.refresh_grid()
