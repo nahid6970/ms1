@@ -1003,7 +1003,7 @@ class MainWindow(QMainWindow):
         self.main_frame.setStyleSheet(f"#MainFrame {{ border: 2px solid {win_border}; background-color: {app_bg}; }}")
         
         self.main_layout = QVBoxLayout(self.main_frame)
-        self.main_layout.setContentsMargins(20, 20, 20, 20)
+        self.main_layout.setContentsMargins(20, 35, 20, 20) # Increased top margin
         self.main_layout.setSpacing(15)
         clayout.addWidget(self.main_frame)
 
@@ -1018,19 +1018,21 @@ class MainWindow(QMainWindow):
         header.addStretch()
         
         # ADD BUTTONS - Script and Folder
-        self.btn_add_script = CyberButton("+S", script_data={"color": CP_GREEN, "type": "script"}, config=self.config)
-        self.btn_add_script.setFixedSize(40, 30)
+        self.btn_add_script = CyberButton("+S", script_data={"color": CP_GREEN, "type": "script", "text_color": "black"}, config=self.config)
+        self.btn_add_script.setFixedSize(45, 35) # Increased height
         self.btn_add_script.clicked.connect(self.add_new_item)
         
-        self.btn_add_folder = CyberButton("+F", script_data={"color": CP_YELLOW, "type": "script"}, config=self.config)
-        self.btn_add_folder.setFixedSize(40, 30)
+        self.btn_add_folder = CyberButton("+F", script_data={"color": CP_YELLOW, "type": "script", "text_color": "black"}, config=self.config)
+        self.btn_add_folder.setFixedSize(45, 35) # Increased height
         self.btn_add_folder.clicked.connect(self.add_new_folder)
         
         cfg_col = self.config.get("cfg_btn_color", CP_DIM)
-        self.btn_cfg = CyberButton("CFG", script_data={"color": cfg_col, "type": "script"}, config=self.config); self.btn_cfg.setFixedSize(50, 30)
+        self.btn_cfg = CyberButton("CFG", script_data={"color": cfg_col, "type": "script", "text_color": "white"}, config=self.config)
+        self.btn_cfg.setFixedSize(55, 35) # Increased height
         self.btn_cfg.clicked.connect(self.open_global_settings)
 
-        self.btn_close = CyberButton("X", script_data={"color": CP_RED, "type": "script"}, config=self.config); self.btn_close.setFixedSize(40, 30)
+        self.btn_close = CyberButton("X", script_data={"color": CP_RED, "type": "script", "text_color": "white"}, config=self.config)
+        self.btn_close.setFixedSize(45, 35) # Increased height
         self.btn_close.clicked.connect(self.close)
 
         header.addWidget(self.btn_add_script)
