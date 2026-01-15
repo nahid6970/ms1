@@ -1,0 +1,51 @@
+        colorSwatch.onclick = () => selectColor(color);
+    customBtn.onclick = () => customInput.click();
+    okBtn.onclick = () => applyUnifiedColors(rowIndex, colIndex);
+    closeBtn.onclick = () => document.body.removeChild(overlay);
+    overlay.onclick = (e) => {
+        historyItem.onclick = () => {
+        deleteBtn.onclick = (e) => {
+    okBtn.onclick = () => {
+    closeBtn.onclick = () => document.body.removeChild(overlay);
+    overlay.onclick = (e) => {
+        nameSpan.onclick = () => {
+    parentTab.onclick = () => switchSheet(parentIndex);
+            tab.onclick = () => switchSheet(index);
+    addBtn.onclick = () => addSubSheet(parentIndex);
+    renameItem.onclick = () => {
+    deleteItem.onclick = () => {
+    allName.onclick = () => {
+        nameSpan.onclick = () => {
+        deleteBtn.onclick = (e) => {
+        menuBtn.onclick = (e) => toggleColumnMenu(e, index);
+        sortAscItem.onclick = (e) => {
+        sortDescItem.onclick = (e) => {
+            moveLeftItem.onclick = (e) => {
+            moveRightItem.onclick = (e) => {
+        editItem.onclick = () => {
+        deleteItem.onclick = () => {
+        contentSpan.onclick = () => deleteRow(rowIndex);
+                textarea.onclick = (e) => {
+                input.onclick = (e) => {
+window.onclick = function (event) {
+        item.onclick = () => {
+        swatchBtn.onclick = () => {
+            deleteBtn.onclick = (e) => {
+        historyBtn.onclick = () => {
+        deleteBtn.onclick = (e) => {
+            deleteBtn.onclick = (e) => {
+                item.onclick = () => switchToSheetFromF1(index);
+        swatchBtn.onclick = (e) => {
+            deleteBtn.onclick = (e) => {
+    parentTab.onclick = () => switchSheet(parentIndex);
+            tab.onclick = () => switchSheet(index);
+    addBtn.onclick = () => addSubSheet(parentIndex);
+    renameItem.onclick = () => {
+    deleteItem.onclick = () => {
+        header.onclick = (e) => {
+            sheetDiv.onclick = () => {
+        button.onclick = (event) => applyQuickFormat(syntax.marker, syntax.marker, event);
+        colorSwatch.onclick = (e) => {
+    randomBtn.onclick = (e) => {
+    closeBtn.onclick = async (e) => {
+    overlay.onclick = async (e) => {

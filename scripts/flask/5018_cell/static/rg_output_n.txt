@@ -1,0 +1,51 @@
+3066:        colorSwatch.onclick = () => selectColor(color);
+3095:    customBtn.onclick = () => customInput.click();
+3102:    okBtn.onclick = () => applyUnifiedColors(rowIndex, colIndex);
+3115:    closeBtn.onclick = () => document.body.removeChild(overlay);
+3150:    overlay.onclick = (e) => {
+3292:        historyItem.onclick = () => {
+3302:        deleteBtn.onclick = (e) => {
+3761:    okBtn.onclick = () => {
+3787:    closeBtn.onclick = () => document.body.removeChild(overlay);
+3801:    overlay.onclick = (e) => {
+4465:        nameSpan.onclick = () => {
+4515:    parentTab.onclick = () => switchSheet(parentIndex);
+4537:            tab.onclick = () => switchSheet(index);
+4554:    addBtn.onclick = () => addSubSheet(parentIndex);
+4577:    renameItem.onclick = () => {
+4586:    deleteItem.onclick = () => {
+4870:    allName.onclick = () => {
+4906:        nameSpan.onclick = () => {
+4932:        deleteBtn.onclick = (e) => {
+6118:        menuBtn.onclick = (e) => toggleColumnMenu(e, index);
+6134:        sortAscItem.onclick = (e) => {
+6143:        sortDescItem.onclick = (e) => {
+6166:            moveLeftItem.onclick = (e) => {
+6179:            moveRightItem.onclick = (e) => {
+6193:        editItem.onclick = () => {
+6201:        deleteItem.onclick = () => {
+6247:        contentSpan.onclick = () => deleteRow(rowIndex);
+6302:                textarea.onclick = (e) => {
+6405:                input.onclick = (e) => {
+6805:window.onclick = function (event) {
+7058:        item.onclick = () => {
+7876:        swatchBtn.onclick = () => {
+7887:            deleteBtn.onclick = (e) => {
+7939:        historyBtn.onclick = () => {
+7949:        deleteBtn.onclick = (e) => {
+9379:            deleteBtn.onclick = (e) => {
+9870:                item.onclick = () => switchToSheetFromF1(index);
+10764:        swatchBtn.onclick = (e) => {
+10781:            deleteBtn.onclick = (e) => {
+10970:    parentTab.onclick = () => switchSheet(parentIndex);
+10986:            tab.onclick = () => switchSheet(index);
+11003:    addBtn.onclick = () => addSubSheet(parentIndex);
+11025:    renameItem.onclick = () => {
+11033:    deleteItem.onclick = () => {
+11110:        header.onclick = (e) => {
+11130:            sheetDiv.onclick = () => {
+11311:        button.onclick = (event) => applyQuickFormat(syntax.marker, syntax.marker, event);
+11555:        colorSwatch.onclick = (e) => {
+11604:    randomBtn.onclick = (e) => {
+11732:    closeBtn.onclick = async (e) => {
+11741:    overlay.onclick = async (e) => {

@@ -6001,57 +6001,8 @@ function positionCursorAtMouseClick(textarea, mouseEvent) {
         const maxScrollTop = Math.max(0, textarea.scrollHeight - textarea.clientHeight);
         textarea.scrollTop = Math.max(0, Math.min(targetScrollTop, maxScrollTop));
 
-        // Scroll table container to ensure cursor line is visible below header
-        const tableContainer = document.querySelector('.table-container');
-        const headerRow = document.querySelector('#dataTable thead');
-        if (tableContainer && headerRow) {
-            // Save original scroll position to restore on blur
-            if (!textarea.dataset.originalContainerScrollTop) {
-                textarea.dataset.originalContainerScrollTop = tableContainer.scrollTop;
-                textarea.dataset.originalContainerScrollLeft = tableContainer.scrollLeft;
-
-                // Add blur handler to restore scroll position
-                const restoreScroll = (e) => {
-                    // Don't restore if blur was caused by mode toggle button click
-                    const relatedTarget = e.relatedTarget;
-                    const isToggleAction = relatedTarget?.closest('.btn-icon-toggle') ||
-                        relatedTarget?.closest('#markdownToggle');
-
-                    if (!isToggleAction) {
-                        const savedTop = parseFloat(textarea.dataset.originalContainerScrollTop);
-                        const savedLeft = parseFloat(textarea.dataset.originalContainerScrollLeft);
-                        if (!isNaN(savedTop) && tableContainer) {
-                            requestAnimationFrame(() => {
-                                tableContainer.scrollTop = savedTop;
-                                tableContainer.scrollLeft = savedLeft;
-                            });
-                        }
-                    }
-                    delete textarea.dataset.originalContainerScrollTop;
-                    delete textarea.dataset.originalContainerScrollLeft;
-                    textarea.removeEventListener('blur', restoreScroll);
-                };
-                textarea.addEventListener('blur', restoreScroll);
-            }
-
-            const headerHeight = headerRow.getBoundingClientRect().height;
-            const containerRect = tableContainer.getBoundingClientRect();
-            const cell = textarea.closest('td');
-
-            if (cell) {
-                const cellRect = cell.getBoundingClientRect();
-                // Calculate where the cursor line is in the viewport
-                const cursorLineInCell = cursorLineTop - textarea.scrollTop;
-                const cursorLineInViewport = cellRect.top + cursorLineInCell;
-
-                // Target position: cursor line should be immediately after header (with minimal padding)
-                const targetViewportY = containerRect.top + headerHeight + 10;
-
-                // Always scroll to position cursor line right after header
-                const scrollAdjustment = cursorLineInViewport - targetViewportY;
-                tableContainer.scrollTop = tableContainer.scrollTop + scrollAdjustment;
-            }
-        }
+        // REMOVED: Forced sheet-level scrolling to top. 
+        // We let the browser handle focus naturally now.
     });
 }
 
@@ -6298,10 +6249,7 @@ function renderTable() {
                     keepCursorCentered(textarea);
                 };
 
-                // Scroll to cursor position when clicking in merged cell textarea
-                textarea.onclick = (e) => {
-                    keepCursorCentered(e.target);
-                };
+                // Removed custom click scroll logic
 
                 // Apply styles to merged cell
                 const cellStyle = getCellStyle(rowIndex, colIndex);
@@ -6401,10 +6349,7 @@ function renderTable() {
                     }
                 };
 
-                // Scroll to cursor position when clicking in textarea
-                input.onclick = (e) => {
-                    keepCursorCentered(e.target);
-                };
+                // Removed custom click scroll logic
 
                 // Mark td as having textarea for vertical alignment
                 td.classList.add('has-textarea');
