@@ -451,7 +451,7 @@ class EditDialog(QDialog):
             # Interpreter
             r_lay.addWidget(QLabel("Interpreter:"))
             self.cmb_type = QComboBox()
-            self.cmb_type.addItems(["cmd", "powershell", "pwsh"])
+            self.cmb_type.addItems(["cmd", "powershell", "pwsh", "python"])
             self.cmb_type.setCurrentText(self.script.get("inline_type", "cmd"))
             r_lay.addWidget(self.cmb_type)
             
@@ -1447,7 +1447,10 @@ class MainWindow(QMainWindow):
         import tempfile
         code = script.get("inline_script", "")
         # Very simple execution
-        ext = ".ps1" if script.get("inline_type") in ["pwsh", "powershell"] else ".bat"
+        it = script.get("inline_type", "cmd")
+        if it == "python": ext = ".py"
+        elif it in ["powershell", "pwsh"]: ext = ".ps1"
+        else: ext = ".bat"
         with tempfile.NamedTemporaryFile(mode='w', suffix=ext, delete=False) as f:
             f.write(code)
             tmp = f.name
@@ -1465,6 +1468,15 @@ class MainWindow(QMainWindow):
             no_exit = "-NoExit" if keep else ""
             params = f'{no_exit} -File "{tmp}"'
             self._run_shell(ps_exe, params, os.getcwd(), admin=admin, hide=hide)
+        elif ext == ".py":
+            mode = "/k" if keep else "/c"
+            # We host python in cmd if we need to keep it open or if new terminal is needed
+            if keep or new_term or admin:
+                params = f'{mode} python "{tmp}"'
+                self._run_shell("cmd.exe", params, os.getcwd(), admin=admin, hide=hide)
+            else:
+                py_exe = "pythonw" if hide else "python"
+                self._run_shell(py_exe, f'"{tmp}"', os.getcwd(), admin=admin, hide=hide)
         else:
             # Inline batch/command
             mode = "/k" if keep else "/c"
