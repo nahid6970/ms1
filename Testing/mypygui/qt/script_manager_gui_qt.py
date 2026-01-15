@@ -15,7 +15,7 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                              QRadioButton, QButtonGroup, QSplitter, QStyleOptionButton, QStyle)
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QPoint, QMimeData
 from PyQt6.QtGui import (QFont, QCursor, QColor, QDesktopServices, QAction, QIcon, QPainter, 
-                         QBrush, QPixmap, QDrag, QTextDocument)
+                         QBrush, QPixmap, QDrag, QTextDocument, QFontDatabase)
 from PyQt6.QtCore import QUrl
 import ctypes
 
@@ -260,7 +260,7 @@ class EditDialog(QDialog):
             QWidget {{ color: {CP_TEXT}; font-family: 'Consolas'; font-size: 10pt; }}
             QGroupBox {{ border: 1px solid {CP_DIM}; margin-top: 10px; padding-top: 10px; font-weight: bold; color: {CP_YELLOW}; }}
             QGroupBox::title {{ subcontrol-origin: margin; subcontrol-position: top left; padding: 0 5px; }}
-            QLineEdit, QSpinBox, QFontComboBox, QComboBox, QPlainTextEdit {{
+            QLineEdit, QSpinBox, QComboBox, QPlainTextEdit {{
                 background-color: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 4px; selection-background-color: {CP_CYAN}; selection-color: black;
             }}
             QLineEdit:focus, QPlainTextEdit:focus, QSpinBox:focus {{ border: 1px solid {CP_CYAN}; }}
@@ -342,10 +342,14 @@ class EditDialog(QDialog):
         # 3. Typography
         grp_typo = QGroupBox("TYPOGRAPHY")
         l_typo = QGridLayout()
-        self.cmb_font = QFontComboBox()
-        self.cmb_font.setCurrentFont(QFont(self.script.get("font_family", "Consolas")))
-        self.cmb_font.setEditable(False)
-        self.cmb_font.setFontFilters(QFontComboBox.FontFilter.ScalableFonts)
+        self.cmb_font = QComboBox()
+        all_fonts = sorted(QFontDatabase.families())
+        self.cmb_font.addItems(all_fonts)
+        current_font = self.script.get("font_family", "Consolas")
+        idx = self.cmb_font.findText(current_font, Qt.MatchFlag.MatchExactly)
+        if idx >= 0: self.cmb_font.setCurrentIndex(idx)
+        else: self.cmb_font.setEditText(current_font) # fallback if editable
+        
         self.cmb_font.setMaximumWidth(200)
         l_typo.addWidget(QLabel("Font:"), 0, 0)
         l_typo.addWidget(self.cmb_font, 0, 1, 1, 3)
@@ -638,7 +642,7 @@ class EditDialog(QDialog):
             self.script["inline_type"] = self.cmb_type.currentText()
             self.script["inline_script"] = self.txt_inline.toPlainText()
             
-        self.script["font_family"] = self.cmb_font.currentFont().family()
+        self.script["font_family"] = self.cmb_font.currentText()
         self.script["font_size"] = self.spn_size.value()
         self.script["is_bold"] = self.chk_bold.isChecked()
         self.script["is_italic"] = self.chk_italic.isChecked()
@@ -718,10 +722,13 @@ class SettingsDialog(QDialog):
         l_grid.addRow("Btn Height:", self.spn_btn_h)
 
         # Font settings
-        self.cmb_font = QFontComboBox()
-        self.cmb_font.setCurrentFont(QFont(self.config.get("default_font_family", "Consolas")))
-        self.cmb_font.setEditable(False)
-        self.cmb_font.setFontFilters(QFontComboBox.FontFilter.ScalableFonts)
+        self.cmb_font = QComboBox()
+        all_fonts = sorted(QFontDatabase.families())
+        self.cmb_font.addItems(all_fonts)
+        current_font = self.config.get("default_font_family", "Consolas")
+        idx = self.cmb_font.findText(current_font, Qt.MatchFlag.MatchExactly)
+        if idx >= 0: self.cmb_font.setCurrentIndex(idx)
+        
         self.cmb_font.setMaximumWidth(180)
         l_grid.addRow("Font:", self.cmb_font)
 
@@ -912,7 +919,7 @@ class SettingsDialog(QDialog):
     def save(self):
         self.config["columns"] = self.spn_cols.value()
         self.config["default_btn_height"] = self.spn_btn_h.value()
-        self.config["default_font_family"] = self.cmb_font.currentFont().family()
+        self.config["default_font_family"] = self.cmb_font.currentText()
         self.config["default_font_size"] = self.spn_font_size.value()
         self.config["default_is_bold"] = self.chk_bold.isChecked()
         self.config["default_is_italic"] = self.chk_italic.isChecked()
