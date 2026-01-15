@@ -245,9 +245,12 @@ class EditDialog(QDialog):
             self.chk_keep.setChecked(self.script.get("keep_open", False))
             self.chk_kill = QCheckBox("Kill Launch")
             self.chk_kill.setChecked(self.script.get("kill_window", False))
+            self.chk_new_term = QCheckBox("New Terminal")
+            self.chk_new_term.setChecked(self.script.get("new_terminal", False))
             box_checks.addWidget(self.chk_hide)
             box_checks.addWidget(self.chk_keep)
             box_checks.addWidget(self.chk_kill)
+            box_checks.addWidget(self.chk_new_term)
             l_exec.addLayout(box_checks)
             l_sc = QFormLayout()
             self.inp_ctrl_left = QLineEdit(self.script.get("ctrl_left_cmd", ""))
@@ -548,6 +551,7 @@ class EditDialog(QDialog):
             self.script["hide_terminal"] = self.chk_hide.isChecked()
             self.script["keep_open"] = self.chk_keep.isChecked()
             self.script["kill_window"] = self.chk_kill.isChecked()
+            self.script["new_terminal"] = self.chk_new_term.isChecked()
             self.script["ctrl_left_cmd"] = self.inp_ctrl_left.text()
             self.script["ctrl_right_cmd"] = self.inp_ctrl_right.text()
             self.script["use_inline"] = self.rb_inline.isChecked()
@@ -1152,16 +1156,32 @@ class MainWindow(QMainWindow):
         if not path: return
         cwd = os.path.dirname(path) if os.path.isfile(path) else None
         
+        new_term = script.get("new_terminal", False)
+        keep = script.get("keep_open", False)
+
         try:
             if path.endswith(".py"):
-                exe = "pythonw" if hide else "python"
-                subprocess.Popen([exe, path], cwd=cwd)
+                if new_term:
+                    cmd = f'start cmd /{"k" if keep else "c"} python "{path}"'
+                    subprocess.Popen(cmd, shell=True, cwd=cwd)
+                else:
+                    exe = "pythonw" if hide else "python"
+                    subprocess.Popen([exe, path], cwd=cwd)
             elif path.endswith(".ps1"):
-                cmd = ["pwsh", "-File", path] if shutil.which("pwsh") else ["powershell", "-File", path]
-                if hide: cmd.insert(1, "-WindowStyle"); cmd.insert(2, "Hidden")
-                subprocess.Popen(cmd, cwd=cwd)
+                ps_exe = "pwsh" if shutil.which("pwsh") else "powershell"
+                if new_term:
+                    no_exit = "-NoExit " if keep else ""
+                    cmd = f'start {ps_exe} {no_exit}-File "{path}"'
+                    subprocess.Popen(cmd, shell=True, cwd=cwd)
+                else:
+                    cmd = [ps_exe, "-File", path]
+                    if hide: cmd.insert(1, "-WindowStyle"); cmd.insert(2, "Hidden")
+                    subprocess.Popen(cmd, cwd=cwd)
             else:
-                subprocess.Popen(path, shell=True, cwd=cwd)
+                if new_term:
+                    subprocess.Popen(f'start {path}', shell=True, cwd=cwd)
+                else:
+                    subprocess.Popen(path, shell=True, cwd=cwd)
             
             if script.get("kill_window"): self.close()
         except Exception as e: QMessageBox.critical(self, "Error", str(e))
@@ -1176,12 +1196,24 @@ class MainWindow(QMainWindow):
             tmp = f.name
         
         hide = script.get("hide_terminal", False)
+        new_term = script.get("new_terminal", False)
+        keep = script.get("keep_open", False)
+
         if ext == ".ps1":
-            cmd = ["pwsh", "-File", tmp]
-            if hide: cmd.insert(1, "-WindowStyle"); cmd.insert(2, "Hidden")
-            subprocess.Popen(cmd)
+            ps_exe = "pwsh" if shutil.which("pwsh") else "powershell"
+            if new_term:
+                no_exit = "-NoExit " if keep else ""
+                cmd = f'start {ps_exe} {no_exit}-File "{tmp}"'
+                subprocess.Popen(cmd, shell=True)
+            else:
+                cmd = [ps_exe, "-File", tmp]
+                if hide: cmd.insert(1, "-WindowStyle"); cmd.insert(2, "Hidden")
+                subprocess.Popen(cmd)
         else:
-            subprocess.Popen(tmp, shell=True)
+            if new_term:
+                subprocess.Popen(f'start cmd /{"k" if keep else "c"} "{tmp}"', shell=True)
+            else:
+                subprocess.Popen(tmp, shell=True)
 
     def go_back(self):
         if self.view_stack: self.view_stack.pop(); self.refresh_grid()
