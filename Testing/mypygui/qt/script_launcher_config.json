@@ -389,11 +389,11 @@
                     "_runtime_is_italic": false
                 },
                 {
-                    "name": "New Folder",
+                    "name": "1",
                     "type": "folder",
                     "scripts": [
                         {
-                            "name": "New Folder",
+                            "name": "2",
                             "type": "folder",
                             "scripts": [],
                             "color": "#FCEE0A",
@@ -408,7 +408,12 @@
                             "corner_radius": 0,
                             "border_width": 0,
                             "grid_columns": 0,
-                            "grid_btn_height": 0
+                            "grid_btn_height": 0,
+                            "_runtime_height": 100,
+                            "_runtime_font_size": 12,
+                            "_runtime_font_family": "Consolas",
+                            "_runtime_is_bold": true,
+                            "_runtime_is_italic": false
                         }
                     ],
                     "color": "#FCEE0A",
@@ -532,8 +537,8 @@
             "_runtime_font_family": "Consolas",
             "_runtime_is_bold": true,
             "_runtime_is_italic": false,
-            "color": "#341e9a",
-            "text_color": "#FFFFFF",
+            "color": "#da554c",
+            "text_color": "#000000",
             "hover_color": "#ae2aea",
             "hover_text_color": "#FFFFFF",
             "border_color": "#502e10",
@@ -544,7 +549,9 @@
             "width": 0,
             "height": 0,
             "corner_radius": 0,
-            "border_width": 1
+            "border_width": 1,
+            "new_terminal": false,
+            "run_admin": false
         },
         {
             "name": "Task Manager",

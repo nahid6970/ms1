@@ -909,8 +909,12 @@ class MainWindow(QMainWindow):
         header = QHBoxLayout()
         header.setSpacing(10)
         self.back_btn = CyberButton("<<", script_data={"color": CP_RED, "type": "script"}); self.back_btn.setFixedSize(50, 40); self.back_btn.clicked.connect(self.go_back); self.back_btn.hide()
-        self.title_lbl = QLabel("// ROOT"); self.title_lbl.setFont(QFont("Consolas", 16, QFont.Weight.Bold)); self.title_lbl.setStyleSheet(f"color: {CP_YELLOW};")
-        header.addWidget(self.back_btn); header.addWidget(self.title_lbl); header.addStretch()
+        self.breadcrumb_layout = QHBoxLayout()
+        self.breadcrumb_layout.setSpacing(0)
+        
+        header.addWidget(self.back_btn)
+        header.addLayout(self.breadcrumb_layout)
+        header.addStretch()
         
         # ADD BUTTONS - Script and Folder
         self.btn_add_script = CyberButton("+S", script_data={"color": CP_GREEN, "type": "script"})
@@ -1029,23 +1033,61 @@ class MainWindow(QMainWindow):
             self.stat_disk.set_value(psutil.disk_usage('C://').percent)
         except: pass
 
+    def clear_layout(self, layout):
+        while layout.count():
+            item = layout.takeAt(0)
+            if item.widget(): item.widget().deleteLater()
+            elif item.layout(): self.clear_layout(item.layout())
+
     def refresh_grid(self):
         while self.grid.count():
             item = self.grid.takeAt(0)
             if item.widget(): item.widget().deleteLater()
 
+        self.clear_layout(self.breadcrumb_layout)
+        
+        # Helper for breadcrumb clicks
+        def navigate_to(index):
+            if index == -1: self.view_stack = []
+            else: self.view_stack = self.view_stack[:index+1]
+            self.refresh_grid()
+
+        def create_bc_btn(text, action):
+            btn = QPushButton(text)
+            btn.setFont(QFont("Consolas", 14, QFont.Weight.Bold))
+            btn.setStyleSheet(f"""
+                QPushButton {{ 
+                    color: {CP_YELLOW}; border: none; background: transparent; padding: 2px 5px; text-transform: uppercase;
+                }}
+                QPushButton:hover {{ color: {CP_CYAN}; text-decoration: underline; }}
+            """)
+            btn.clicked.connect(action)
+            return btn
+
+        def create_sep():
+            lbl = QLabel("/")
+            lbl.setFont(QFont("Consolas", 14, QFont.Weight.Bold))
+            lbl.setStyleSheet(f"color: {CP_DIM}; padding: 0 5px;")
+            return lbl
+
+        # Initial // ROOT
+        self.breadcrumb_layout.addWidget(QLabel("// "))
+        self.breadcrumb_layout.itemAt(0).widget().setStyleSheet(f"color: {CP_YELLOW}; font-family: 'Consolas'; font-size: 14pt; font-weight: bold;")
+        
+        root_btn = create_bc_btn("ROOT", lambda: navigate_to(-1))
+        self.breadcrumb_layout.addWidget(root_btn)
+
+        if self.view_stack:
+            for i, folder in enumerate(self.view_stack):
+                self.breadcrumb_layout.addWidget(create_sep())
+                name = folder.get("name", "???").replace("<br>", " ").replace("<br/>", " ").replace("<BR>", " ")
+                name = " ".join(name.split())
+                btn = create_bc_btn(name, partial(lambda idx: navigate_to(idx), i))
+                self.breadcrumb_layout.addWidget(btn)
+
         if self.view_stack:
             folder = self.view_stack[-1]
             scripts = folder.get("scripts", [])
-            
-            # Create a clean breadcrumb path (stripping <br> tags)
-            breadcrumbs = []
-            for f in self.view_stack:
-                name = f.get("name", "???").replace("<br>", " ").replace("<br/>", " ").replace("<BR>", " ").upper()
-                name = " ".join(name.split()) # Collapse extra spaces
-                breadcrumbs.append(name)
-            
-            self.title_lbl.setText(f"// {' / '.join(breadcrumbs)}")
             self.back_btn.show()
             
             # Context settings (fallback to global)
@@ -1056,7 +1098,6 @@ class MainWindow(QMainWindow):
             if def_h == 0: def_h = self.config.get("default_btn_height", 40)
         else:
             scripts = self.config.get("scripts", [])
-            self.title_lbl.setText("// ROOT")
             self.back_btn.hide()
             
             # Global settings
