@@ -1148,6 +1148,7 @@ class MainWindow(QMainWindow):
         # Handle Inline
         if script.get("use_inline"):
             self.launch_inline(script)
+            if script.get("kill_window"): self.close()
             return
 
         path = os.path.expandvars(script.get("path", ""))
