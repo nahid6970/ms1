@@ -848,6 +848,48 @@ td textarea {
     color: inherit;
 }
 
+/* Edit Mode Architecture: Syntax Markers */
+.syn-marker {
+    color: #888;
+    opacity: 0.6;
+    font-weight: normal !important;
+    /* Reset so ** doesn't look bold */
+    font-style: normal !important;
+    /* Reset so @@ doesn't look italic */
+    text-decoration: none !important;
+    /* Reset so __ doesn't look underlined */
+    font-size: 0.9em;
+    /* Slightly smaller */
+    vertical-align: baseline;
+    /* Keep aligned with text */
+}
+
+/* Ensure styled elements have consistent behavior in contenteditable */
+.markdown-preview strong,
+.markdown-preview em,
+.markdown-preview u,
+.markdown-preview del,
+.markdown-preview mark,
+.markdown-preview code,
+.markdown-preview sup,
+.markdown-preview sub,
+.markdown-preview span {
+    display: inline;
+}
+
+.markdown-preview[contenteditable="true"]:focus {
+    outline: none;
+    box-shadow: inset 0 0 0 1px #007bff;
+    background: #fff;
+    z-index: 100;
+    /* Ensure active editor is on top */
+}
+
+/* Keep transparency during edit if preferred, but usually white background helps readability */
+.markdown-preview[contenteditable="true"] {
+    cursor: text;
+}
+
 .markdown-preview a {
     color: #007bff;
     text-decoration: underline;

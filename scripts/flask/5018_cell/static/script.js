@@ -1295,12 +1295,11 @@ function handlePreviewMouseDown(e) {
     const input = cell.querySelector('input, textarea');
     if (!input) return;
 
-    // 1. Get Click Position in the Preview
+    // Detect click position in the Preview HTML
     let range;
     if (document.caretRangeFromPoint) {
         range = document.caretRangeFromPoint(e.clientX, e.clientY);
     } else if (document.caretPositionFromPoint) {
-        // Firefox fallback
         const pos = document.caretPositionFromPoint(e.clientX, e.clientY);
         if (pos) {
             range = document.createRange();
@@ -1308,75 +1307,162 @@ function handlePreviewMouseDown(e) {
         }
     }
 
-    // Default to end if detection fails
-    let finalPos = input.value.length;
-
+    // Map HTML click position to plain text character offset
+    let targetOffset = input.value.length;
     if (range) {
-        const clickedNode = range.startContainer;
-        const clickOffset = range.startOffset;
+        const preCaretRange = range.cloneRange();
+        preCaretRange.selectNodeContents(preview);
+        preCaretRange.setEnd(range.startContainer, range.startOffset);
+        targetOffset = preCaretRange.toString().length;
+    }
 
-        if (clickedNode.nodeType === Node.TEXT_NODE) {
-            const searchPhrase = clickedNode.textContent;
-            const rawText = input.value;
+    // In the new Architecture, we focus the preview itself!
+    // But we need to make sure the targetOffset is correctly applied to the preview's content
+    setTimeout(() => {
+        preview.focus();
+        setCaretPosition(preview, targetOffset);
+    }, 0);
+}
 
-            // 2. Count occurrences of this phrase before the click in Preview
-            let found = false;
-            let count = 0;
+// -----------------------------------------------------------------------------
+// EDIT MODE ARCHITECTURE: WYSIWYG WITH VISIBLE SYNTAX
+// -----------------------------------------------------------------------------
 
-            function countOccurrencesBefore(node) {
-                if (node === clickedNode) {
-                    found = true;
-                    return;
-                }
+function highlightSyntax(text) {
+    if (!text) return "";
+    let formatted = escapeHtml(text);
 
-                if (node.nodeType === Node.TEXT_NODE) {
-                    const text = node.textContent;
-                    let pos = text.indexOf(searchPhrase);
-                    while (pos !== -1) {
-                        count++;
-                        pos = text.indexOf(searchPhrase, pos + 1);
-                    }
-                }
+    // Rule: **bold**
+    formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong class="md-bold"><span class="syn-marker">**</span>$1<span class="syn-marker">**</span></strong>');
 
-                if (node.childNodes) {
-                    for (let i = 0; i < node.childNodes.length; i++) {
-                        if (found) return;
-                        countOccurrencesBefore(node.childNodes[i]);
-                    }
-                }
-            }
+    // Rule: @@italic@@
+    formatted = formatted.replace(/@@(.*?)@@/g, '<em><span class="syn-marker">@@</span>$1<span class="syn-marker">@@</span></em>');
 
-            countOccurrencesBefore(preview);
+    // Rule: __underline__
+    formatted = formatted.replace(/__(.*?)__/g, '<u><span class="syn-marker">__</span>$1<span class="syn-marker">__</span></u>');
 
-            // 3. Find the (count + 1)th instance in Raw Text
-            let rawSearchPos = -1;
-            for (let i = 0; i <= count; i++) {
-                rawSearchPos = rawText.indexOf(searchPhrase, rawSearchPos + 1);
-                if (rawSearchPos === -1) break;
-            }
+    // Rule: ~~strikethrough~~
+    formatted = formatted.replace(/~~(.*?)~~/g, '<del><span class="syn-marker">~~</span>$1<span class="syn-marker">~~</span></del>');
 
-            // 4. Calculate final position
-            if (rawSearchPos !== -1) {
-                finalPos = rawSearchPos + clickOffset;
-            }
+    // Rule: ==highlight==
+    formatted = formatted.replace(/==(.*?)==/g, '<mark><span class="syn-marker">==</span>$1<span class="syn-marker">==</span></mark>');
+
+    // Rule: !!red!!
+    formatted = formatted.replace(/!!(.*?)!!/g, '<span style="background: #ff0000; color: #ffffff;"><span class="syn-marker">!!</span>$1<span class="syn-marker">!!</span></span>');
+
+    // Rule: ??blue??
+    formatted = formatted.replace(/\?\?(.*?)\?\?/g, '<span style="background: #0000ff; color: #ffffff;"><span class="syn-marker">??</span>$1<span class="syn-marker">??</span></span>');
+
+    // Rule: `code`
+    formatted = formatted.replace(/`(.*?)`/g, '<code><span class="syn-marker">`</span>$1<span class="syn-marker">`</span></strong>');
+
+    // Rule: ^sup^
+    formatted = formatted.replace(/\^(.*?)\^/g, '<sup><span class="syn-marker">^</span>$1<span class="syn-marker">^</span></sup>');
+
+    // Rule: ~sub~
+    formatted = formatted.replace(/~(.*?)~/g, '<sub><span class="syn-marker">~</span>$1<span class="syn-marker">~</span></sub>');
+
+    // Rule: Heading ##text##
+    formatted = formatted.replace(/##(.*?)##/g, '<span style="font-size: 1.3em; font-weight: 600;"><span class="syn-marker">##</span>$1<span class="syn-marker">##</span></span>');
+
+    // Rule: Wavy underline _.text._
+    formatted = formatted.replace(/_\.(.*?)\._/g, '<span style="text-decoration: underline wavy;"><span class="syn-marker">_.</span>$1<span class="syn-marker">._</span></span>');
+
+    // Rule: Border box #R#text#/#
+    formatted = formatted.replace(/#([A-Z]+)#(.*?)(?:#\/#)/g, (match, colorCode, text) => {
+        const colorMap = {
+            'R': '#ff0000', 'G': '#00ff00', 'B': '#0000ff', 'Y': '#ffff00',
+            'O': '#ff8800', 'P': '#ff00ff', 'C': '#00ffff', 'W': '#ffffff',
+            'K': '#000000', 'GR': '#808080'
+        };
+        const color = colorMap[colorCode] || '#888';
+        return `<span style="border: 1px solid ${color}; padding: 0 4px; border-radius: 3px;"><span class="syn-marker">#${colorCode}#</span>${text}<span class="syn-marker">#/#</span></span>`;
+    });
+
+    // Rule: Variable font size #2#text#/#
+    formatted = formatted.replace(/#([\d.]+)#(.*?)(?:#\/#)/g, '<span style="font-size: $1em; font-weight: 600;"><span class="syn-marker">#$1#</span>$2<span class="syn-marker">#/#</span></span>');
+
+    // Custom Color Syntax support
+    if (typeof customColorSyntaxes !== 'undefined') {
+        customColorSyntaxes.forEach(syntax => {
+            if (!syntax.marker) return;
+            const escapedMarker = escapeHtml(syntax.marker);
+            const markerRegex = escapedMarker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const regex = new RegExp(markerRegex + '(.*?)' + markerRegex, 'g');
+            formatted = formatted.replace(regex, `<span style="background: ${syntax.backgroundColor || 'transparent'}; color: ${syntax.color || 'inherit'};">` +
+                `<span class="syn-marker">${escapedMarker}</span>$1<span class="syn-marker">${escapedMarker}</span></span>`);
+        });
+    }
+
+    return formatted.replace(/\n/g, '<br>');
+}
+
+function extractRawText(element) {
+    let text = '';
+    const walk = (node) => {
+        if (node.nodeType === Node.TEXT_NODE) {
+            text += node.textContent;
+        } else if (node.nodeName === 'BR') {
+            text += '\n';
+        } else if (node.nodeName === 'DIV' || node.nodeName === 'P') {
+            if (text.length > 0 && !text.endsWith('\n')) text += '\n';
+            node.childNodes.forEach(walk);
+        } else {
+            node.childNodes.forEach(walk);
         }
-    }
+    };
+    walk(element);
+    // Handle the case where contenteditable adds a trailing \n or empty space
+    return text.replace(/\r/g, '').replace(/\u200B/g, ''); // Clean zero-width space if any
+}
 
-    // 5. Apply focus and selection synchronously
-    // Use preventScroll to stop browser from jumping around
-    input.focus({ preventScroll: true });
-
-    try {
-        input.setSelectionRange(finalPos, finalPos);
-    } catch (e) {
-        console.error('Selection set failed', e);
+function getCaretCharacterOffset(element) {
+    let caretOffset = 0;
+    const sel = window.getSelection();
+    if (sel.rangeCount > 0) {
+        const range = sel.getRangeAt(0);
+        const preCaretRange = range.cloneRange();
+        preCaretRange.selectNodeContents(element);
+        preCaretRange.setEnd(range.startContainer, range.startOffset);
+        caretOffset = preCaretRange.toString().length;
     }
+    return caretOffset;
+}
 
-    // 6. Manual scroll to ensure visibility
-    // 6. Manual scroll to ensure correct positioning (Solution 1: Position at Click)
-    if (input.tagName === 'TEXTAREA') {
-        positionCursorAtMouseClick(input, e);
+function setCaretPosition(element, offset) {
+    const range = document.createRange();
+    const sel = window.getSelection();
+    let currentOffset = 0;
+    let found = false;
+
+    const walk = (node) => {
+        if (found) return;
+        if (node.nodeType === Node.TEXT_NODE) {
+            if (currentOffset + node.length >= offset) {
+                range.setStart(node, offset - currentOffset);
+                range.collapse(true);
+                found = true;
+            } else {
+                currentOffset += node.length;
+            }
+        } else {
+            for (const child of node.childNodes) {
+                walk(child);
+                if (found) break;
+            }
+            // Handle empty elements or BR as 1 char if needed? 
+            // BR usually doesn't count in toString().length though
+        }
+    };
+
+    walk(element);
+    // If not found (offset too large), put at end
+    if (!found) {
+        range.selectNodeContents(element);
+        range.collapse(false);
     }
+    sel.removeAllRanges();
+    sel.addRange(range);
 }
 
 function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null) {
@@ -1385,37 +1471,21 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
     if (inputElement) {
         cell = inputElement.closest('td');
     } else {
-        // Find the cell element (fallback for single updates)
         const table = document.getElementById('dataTable');
         if (!table) return;
-
         const rows = table.querySelectorAll('tbody tr');
         if (!rows[rowIndex]) return;
-
         const cells = rows[rowIndex].querySelectorAll('td:not(.row-number)');
         if (!cells[colIndex]) return;
-
         cell = cells[colIndex];
         inputElement = cell.querySelector('input, textarea');
     }
 
     if (!inputElement) return;
 
-    // Parse markdown if enabled, otherwise just show raw text with syntax
     const isMarkdownEnabled = localStorage.getItem('markdownPreviewEnabled') !== 'false';
     const hasMarkdown = checkHasMarkdown(value);
-    const isTextarea = inputElement && inputElement.tagName === 'TEXTAREA';
-
-    // In raw mode, don't create/update preview overlay - just show the input directly
-    if (!isMarkdownEnabled) {
-        const existingPreview = cell.querySelector('.markdown-preview');
-        if (existingPreview) {
-            existingPreview.remove();
-        }
-        inputElement.classList.remove('has-markdown');
-        delete inputElement.dataset.formattedHtml;
-        return;
-    }
+    const isTextCell = inputElement && (inputElement.tagName === 'TEXTAREA' || inputElement.type === 'text');
 
     // Remove existing preview
     const existingPreview = cell.querySelector('.markdown-preview');
@@ -1423,45 +1493,87 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
         existingPreview.remove();
     }
 
-    // Always create a preview overlay if the cell has text and is not a special type (like date)
-    // This ensures F8 hover picking works without focus across all modes.
-    const isTextCell = inputElement && (inputElement.tagName === 'TEXTAREA' || inputElement.type === 'text');
+    if (!isMarkdownEnabled) {
+        inputElement.classList.remove('has-markdown');
+        delete inputElement.dataset.formattedHtml;
+        return;
+    }
 
     if (value && isTextCell) {
-        // Determine content based on toggle
-        let formattedHTML;
-        if (hasMarkdown) {
-            formattedHTML = parseMarkdown(value);
-        } else {
-            // Plain text: Escape HTML but apply custom color syntaxes
-            formattedHTML = applyCustomColorSyntaxesRaw(escapeHtml(value)).replace(/\n/g, '<br>');
-        }
+        let formattedHTML = hasMarkdown ? parseMarkdown(value) : applyCustomColorSyntaxesRaw(escapeHtml(value)).replace(/\n/g, '<br>');
 
         inputElement.dataset.formattedHtml = formattedHTML;
         inputElement.classList.add('has-markdown');
 
-        // Create preview overlay
         const preview = document.createElement('div');
         preview.className = 'markdown-preview';
-        preview.onmousedown = handlePreviewMouseDown;
         preview.innerHTML = formattedHTML;
         preview.style.whiteSpace = 'pre-wrap';
+        preview.style.wordWrap = 'break-word';
 
-        // Copy styles from input/textarea (use inline styles to avoid reflows)
+        // NEW: Edit Mode Architecture
+        preview.contentEditable = "true";
+        preview.spellcheck = false;
+
+        // Sync styles
         preview.style.color = inputElement.style.color;
         preview.style.fontFamily = inputElement.style.fontFamily;
         preview.style.fontSize = inputElement.style.fontSize;
         preview.style.fontWeight = inputElement.style.fontWeight;
         preview.style.fontStyle = inputElement.style.fontStyle;
         preview.style.textAlign = inputElement.style.textAlign;
-
-        // Copy background from cell
         preview.style.backgroundColor = cell.style.backgroundColor;
+
+        // --- Event Listeners for Edit Mode Architecture ---
+
+        preview.addEventListener('focus', () => {
+            preview.classList.add('editing');
+            // Get current value from input (source of truth)
+            const rawValue = inputElement.value;
+            preview.innerHTML = highlightSyntax(rawValue);
+
+            // Note: Caret position is handled by handlePreviewMouseDown mapping
+        });
+
+        preview.addEventListener('blur', () => {
+            preview.classList.remove('editing');
+            const newRawValue = extractRawText(preview);
+            if (newRawValue !== inputElement.value) {
+                inputElement.value = newRawValue;
+                updateCell(rowIndex, colIndex, newRawValue);
+            }
+            preview.innerHTML = hasMarkdown ? parseMarkdown(newRawValue) : applyCustomColorSyntaxesRaw(escapeHtml(newRawValue)).replace(/\n/g, '<br>');
+
+            // Re-draw connectors
+            requestAnimationFrame(() => {
+                drawWordConnectors(preview);
+            });
+        });
+
+        preview.addEventListener('input', () => {
+            const offset = getCaretCharacterOffset(preview);
+            const newRawValue = extractRawText(preview);
+
+            // Update input source of truth silently for search/etc
+            inputElement.value = newRawValue;
+
+            // Re-highlight syntax but stay in edit mode
+            preview.innerHTML = highlightSyntax(newRawValue);
+
+            // Restore caret
+            setCaretPosition(preview, offset);
+
+            // Auto-resize if needed
+            autoResizeTextarea(inputElement);
+            adjustCellHeightForMarkdown(cell);
+        });
+
+        // Use original handlePreviewMouseDown for mapping click to caret position
+        preview.onmousedown = handlePreviewMouseDown;
 
         cell.style.position = 'relative';
         cell.appendChild(preview);
 
-        // Draw word connectors after preview is added
         requestAnimationFrame(() => {
             drawWordConnectors(preview);
         });
@@ -1529,9 +1641,6 @@ function drawWordConnectors(previewElement) {
             svg.style.overflow = 'visible';
 
             // Draw U-shaped bracket line with arrows: ↑─────↑
-            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-            const width = Math.abs(endX - startX);
-            // Draw U-shape with arrow tips at top of both verticals (offset by 3 for padding)
             const d = `M 3,9 L 3,2 M 3,9 L ${width + 3},9 M ${width + 3},9 L ${width + 3},2 M 1.5,4 L 3,2 L 4.5,4 M ${width + 1.5},4 L ${width + 3},2 L ${width + 4.5},4`;
             path.setAttribute('d', d);
             path.setAttribute('stroke', color);
@@ -5092,8 +5201,6 @@ function searchTable(force = false) {
         } else {
             showToast(`Found ${foundCount} row(s)`, 'success');
         }
-    } else {
-        if (moveBtn) moveBtn.style.display = 'none';
     }
 }
 
