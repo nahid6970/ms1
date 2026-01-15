@@ -122,6 +122,9 @@ class CyberButton(QPushButton):
         
         border_width = self.script.get("border_width", 1 if self.is_folder else 0)
         border_color = self.script.get("border_color", color)
+        
+        # Robust CSS border logic (helps background-color apply on Windows)
+        border_css = f"{border_width}px solid {border_color}" if border_width > 0 else f"1px solid transparent"
         radius = self.script.get("corner_radius", 0)
         
         # Font
@@ -150,16 +153,16 @@ class CyberButton(QPushButton):
 
         self.setStyleSheet(f"""
             QPushButton {{
-                background-color: {bg_normal};
+                background: {bg_normal};
                 color: {fg_normal};
-                border: {border_width}px solid {border_color};
+                border: {border_css};
                 padding: 10px;
                 border-radius: {radius}px;
             }}
             QPushButton:hover {{
-                background-color: {bg_hover};
+                background: {bg_hover};
                 color: {fg_hover};
-                border: {border_width}px solid {border_color};
+                border: {border_css};
             }}
         """)
 
@@ -203,6 +206,7 @@ class EditDialog(QDialog):
     def __init__(self, script_data, parent=None):
         super().__init__(parent)
         self.script = script_data
+        self.config = parent.config if parent and hasattr(parent, 'config') else {}
         self.setWindowTitle(f"EDIT // {self.script.get('name', 'UNKNOWN')}")
         self.resize(1150, 750)
         self.setStyleSheet(f"""
@@ -524,24 +528,25 @@ class EditDialog(QDialog):
     def create_color_btn(self, label, key):
         # Determine effective default based on key and type, matching CyberButton logic
         is_folder = (self.script.get("type") == "folder")
-        default_val = CP_BG
         
-        # 1. Main Color
+        # Initialize default_val, which will be overridden by specific keys
+        default_val = CP_BG 
+        
+        # 1. Background
         if key == "color":
-            default_val = CP_YELLOW if is_folder else "#FFFFFF"
+            default_val = self.config.get("def_folder_bg", CP_YELLOW) if is_folder else self.config.get("def_script_bg", "#FFFFFF")
             
         # 2. Text Color
         elif key == "text_color":
-            default_val = "#000000"
+            default_val = self.config.get("def_folder_fg", "#000000") if is_folder else self.config.get("def_script_fg", "#000000")
             
         # 3. Hover Color
         elif key == "hover_color":
-            default_val = CP_BG
+            default_val = self.config.get("def_folder_hbg", CP_BG) if is_folder else self.config.get("def_script_hbg", CP_BG)
             
         # 4. Hover Text
         elif key == "hover_text_color":
-            # This depends on the main color
-            default_val = self.script.get("color", CP_YELLOW if is_folder else "#FFFFFF")
+            default_val = self.config.get("def_folder_hfg", CP_YELLOW) if is_folder else self.config.get("def_script_hfg", "#FFFFFF")
             
         # 5. Border Color
         elif key == "border_color":
@@ -1513,7 +1518,7 @@ class MainWindow(QMainWindow):
                 self.save_config()
 
     def add_new_item(self):
-        new_script = {"name": "New Script", "path": "", "type": "script", "color": "#FFFFFF"}
+        new_script = {"name": "New Script", "path": "", "type": "script"}
         target_list = self.view_stack[-1]["scripts"] if self.view_stack else self.config["scripts"]
         target_list.append(new_script)
         if EditDialog(new_script, self).exec(): self.save_config()
@@ -1523,8 +1528,7 @@ class MainWindow(QMainWindow):
         new_folder = {
             "name": "New Folder", 
             "type": "folder", 
-            "scripts": [], 
-            "color": CP_YELLOW,
+            "scripts": [],
             "col_span": 1,
             "row_span": 1
         }
