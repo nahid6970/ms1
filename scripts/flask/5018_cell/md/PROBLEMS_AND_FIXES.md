@@ -7,6 +7,85 @@ This document tracks historical bugs, issues, and their solutions. Use this to:
 
 ---
 
+## [2026-01-16 00:30] - WYSIWYG Backspace/Delete Double-Press Fix
+**Problem:** 
+In the contenteditable WYSIWYG editor, pressing Backspace or Delete required two presses to delete one character.
+
+**Root Cause:** 
+Zero-width spaces (`\u200B`) were inserted after `<br>` tags to make empty lines clickable. Backspace/Delete would first delete the invisible ZWS (no visible change), then the actual character.
+
+**Solution:** 
+Added keydown handlers for Backspace and Delete that detect if the adjacent character is a ZWS and automatically remove it before letting the default action continue.
+
+**Files Modified:**
+- `static/script.js` - Added ZWS skip logic in the keydown handler.
+
+**Related Issues:** Enter key handling, empty line clicking.
+
+---
+
+## [2026-01-16 00:25] - WYSIWYG Focus Scroll Prevention
+**Problem:** 
+When clicking on a cell to edit, especially if scrolled far into a tall cell, the sheet would jump to position the cell's top border at the top of the viewport.
+
+**Root Cause:** 
+Browser default behavior scrolls focused elements into view. The `focus()` call on contenteditable elements triggered this.
+
+**Solution:** 
+Multiple fixes applied:
+- Used `focus({ preventScroll: true })` when focusing the preview.
+- Save and restore `tableContainer.scrollTop/scrollLeft` around focus events.
+- Added CSS `scroll-margin: 0` to prevent browser scroll adjustments.
+
+**Files Modified:**
+- `static/script.js` - `handlePreviewMouseDown` and focus event listener.
+- `static/style.css` - Added scroll-margin rules for `.markdown-preview`.
+
+**Related Issues:** Click-to-Edit positioning.
+
+---
+
+## [2026-01-16 00:20] - WYSIWYG Data Save and Cell Height Fix
+**Problem:** 
+1. Data wasn't saving while typing in the WYSIWYG editor.
+2. As content grew, text would overflow the cell border instead of expanding.
+3. Calling `updateCell()` during input caused focus loss.
+
+**Root Cause:** 
+`updateCell()` calls `applyMarkdownFormatting()` which recreates the preview element, destroying the focused element. Height adjustment was based on the hidden input, not the visible preview.
+
+**Solution:** 
+- Save data directly to `tableData.sheets[currentSheet].rows[rowIndex][colIndex]` without calling `updateCell()`.
+- Use debounced `saveData()` for backend persistence.
+- Measure `preview.scrollHeight` directly and apply height to preview, input, and cell.
+
+**Files Modified:**
+- `static/script.js` - Refactored `input` event handler in `applyMarkdownFormatting`.
+
+**Related Issues:** Focus loss during editing.
+
+---
+
+## [2026-01-16 00:15] - WYSIWYG Cursor Jump on Input
+**Problem:** 
+While typing, the cursor would jump around, sometimes to previous lines or the top of the cell.
+
+**Root Cause:** 
+The `input` event handler was re-rendering the entire content with `highlightSyntax()` on every keystroke, then attempting to restore the caret position. Offset calculation inconsistencies (especially with ZWS characters) caused mismatches.
+
+**Solution:** 
+Removed real-time re-rendering from the input handler. Now:
+- Browser handles DOM updates natively (typing, deletion).
+- Input handler only syncs data and adjusts height.
+- Full re-render only happens on focus (to show syntax) and blur (to show preview).
+
+**Files Modified:**
+- `static/script.js` - Simplified `input` event handler.
+
+**Related Issues:** Caret management, ZWS handling.
+
+---
+
 ## [2026-01-15 23:45] - WYSIWYG Markdown Editing Implementation
 **Problem:** 
 Editing markdown using a transparent textarea overlay felt disconnected and didn't allow for real-time visual feedback of formatted text during editing. Syntax markers were often hard to manage.
