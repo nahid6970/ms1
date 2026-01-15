@@ -38,11 +38,12 @@ CONFIG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "script_l
 # -----------------------------------------------------------------------------
 
 class CyberButton(QPushButton):
-    def __init__(self, text, parent=None, script_data=None):
+    def __init__(self, text, parent=None, script_data=None, config=None):
         # Convert <br> variants to \n for multi-line support
         display_text = text.replace("<br>", "\n").replace("<br/>", "\n").replace("<BR>", "\n")
         super().__init__(display_text, parent)
         self.script = script_data or {}
+        self.config = config or {}
         self.is_folder = (self.script.get("type") == "folder")
         
         # Cursor
@@ -91,19 +92,33 @@ class CyberButton(QPushButton):
         # Folders -> Yellow (Explorer-like)
         # Scripts -> White
         
-        default_color = CP_YELLOW if self.is_folder else "#FFFFFF"
+        # Use config defaults
+        def_sbg = self.config.get("def_script_bg", "#FFFFFF")
+        def_sfg = self.config.get("def_script_fg", "#000000")
+        def_shbg = self.config.get("def_script_hbg", CP_BG)
+        def_shfg = self.config.get("def_script_hfg", def_sbg)
+
+        def_fbg = self.config.get("def_folder_bg", CP_YELLOW)
+        def_ffg = self.config.get("def_folder_fg", "#000000")
+        def_fhbg = self.config.get("def_folder_hbg", CP_BG)
+        def_fhfg = self.config.get("def_folder_hfg", def_fbg)
+
+        if self.is_folder:
+            default_color = def_fbg
+            default_text_color = def_ffg
+            default_hover_bg = def_fhbg
+            default_hover_fg = def_fhfg
+        else:
+            default_color = def_sbg
+            default_text_color = def_sfg
+            default_hover_bg = def_shbg
+            default_hover_fg = def_shfg
         
-        # Extract properties with new defaults
+        # Extract properties
         color = self.script.get("color", default_color)
-        
-        # Text Color logic
-        # Scripts (Filled White) -> Black text
-        # Folders (Filled Yellow) -> Black text
-        default_text_color = "#000000" 
         text_color = self.script.get("text_color", default_text_color)
-        
-        hover_color = self.script.get("hover_color", CP_BG)
-        hover_text_color = self.script.get("hover_text_color", color)
+        hover_bg = self.script.get("hover_color", default_hover_bg)
+        hover_fg = self.script.get("hover_text_color", default_hover_fg)
         
         border_width = self.script.get("border_width", 1 if self.is_folder else 0)
         border_color = self.script.get("border_color", color)
@@ -130,8 +145,8 @@ class CyberButton(QPushButton):
         #    fg_normal = color
             
         # Hover Style defaults (swap)
-        bg_hover = hover_color if "hover_color" in self.script else CP_BG
-        fg_hover = hover_text_color if "hover_text_color" in self.script else color
+        bg_hover = hover_bg
+        fg_hover = hover_fg
 
         self.setStyleSheet(f"""
             QPushButton {{
@@ -601,10 +616,21 @@ class SettingsDialog(QDialog):
         super().__init__(parent)
         self.config = config
         self.setWindowTitle("GLOBAL CONFIG")
-        self.resize(500, 500)
+        self.resize(600, 850)
         self.app_bg = self.config.get("app_bg", CP_BG)
         self.win_border = self.config.get("window_border_color", CP_YELLOW)
         self.cfg_color = self.config.get("cfg_btn_color", CP_DIM)
+        
+        # Item Style Defaults
+        self.def_script_bg = self.config.get("def_script_bg", "#FFFFFF")
+        self.def_script_fg = self.config.get("def_script_fg", "#000000")
+        self.def_script_hbg = self.config.get("def_script_hbg", CP_BG)
+        self.def_script_hfg = self.config.get("def_script_hfg", self.def_script_bg)
+
+        self.def_folder_bg = self.config.get("def_folder_bg", CP_YELLOW)
+        self.def_folder_fg = self.config.get("def_folder_fg", "#000000")
+        self.def_folder_hbg = self.config.get("def_folder_hbg", CP_BG)
+        self.def_folder_hfg = self.config.get("def_folder_hfg", self.def_folder_bg)
         
         self.setStyleSheet(f"""
             QDialog {{ background-color: {self.app_bg}; border: 2px solid {self.win_border}; }}
@@ -715,6 +741,57 @@ class SettingsDialog(QDialog):
         grp_win.setLayout(l_win)
         layout.addWidget(grp_win)
 
+        # 4. Item Style Defaults
+        grp_items = QGroupBox("ITEM DEFAULTS")
+        grp_items.setStyleSheet(f"QGroupBox {{ border: 1px solid {CP_DIM}; margin-top: 10px; padding-top: 10px; color: {CP_YELLOW}; font-weight: bold; }}")
+        l_items = QGridLayout()
+
+        # Labels
+        # l_items.addWidget(QLabel("CATEGORY"), 0, 0)
+        l_items.addWidget(QLabel("BG"), 0, 1)
+        l_items.addWidget(QLabel("FG"), 0, 2)
+        l_items.addWidget(QLabel("H-BG"), 0, 3)
+        l_items.addWidget(QLabel("H-FG"), 0, 4)
+
+        # Scripts
+        l_items.addWidget(QLabel("SCRIPT:"), 1, 0)
+        self.btn_sbg = QPushButton(""); self.update_color_btn_style(self.btn_sbg, self.def_script_bg)
+        self.btn_sbg.clicked.connect(lambda: self.pick_config_color("def_script_bg", self.btn_sbg))
+        l_items.addWidget(self.btn_sbg, 1, 1)
+
+        self.btn_sfg = QPushButton(""); self.update_color_btn_style(self.btn_sfg, self.def_script_fg)
+        self.btn_sfg.clicked.connect(lambda: self.pick_config_color("def_script_fg", self.btn_sfg))
+        l_items.addWidget(self.btn_sfg, 1, 2)
+
+        self.btn_shbg = QPushButton(""); self.update_color_btn_style(self.btn_shbg, self.def_script_hbg)
+        self.btn_shbg.clicked.connect(lambda: self.pick_config_color("def_script_hbg", self.btn_shbg))
+        l_items.addWidget(self.btn_shbg, 1, 3)
+
+        self.btn_shfg = QPushButton(""); self.update_color_btn_style(self.btn_shfg, self.def_script_hfg)
+        self.btn_shfg.clicked.connect(lambda: self.pick_config_color("def_script_hfg", self.btn_shfg))
+        l_items.addWidget(self.btn_shfg, 1, 4)
+
+        # Folders
+        l_items.addWidget(QLabel("FOLDER:"), 2, 0)
+        self.btn_fbg = QPushButton(""); self.update_color_btn_style(self.btn_fbg, self.def_folder_bg)
+        self.btn_fbg.clicked.connect(lambda: self.pick_config_color("def_folder_bg", self.btn_fbg))
+        l_items.addWidget(self.btn_fbg, 2, 1)
+
+        self.btn_ffg = QPushButton(""); self.update_color_btn_style(self.btn_ffg, self.def_folder_fg)
+        self.btn_ffg.clicked.connect(lambda: self.pick_config_color("def_folder_fg", self.btn_ffg))
+        l_items.addWidget(self.btn_ffg, 2, 2)
+
+        self.btn_fhbg = QPushButton(""); self.update_color_btn_style(self.btn_fhbg, self.def_folder_hbg)
+        self.btn_fhbg.clicked.connect(lambda: self.pick_config_color("def_folder_hbg", self.btn_fhbg))
+        l_items.addWidget(self.btn_fhbg, 2, 3)
+
+        self.btn_fhfg = QPushButton(""); self.update_color_btn_style(self.btn_fhfg, self.def_folder_hfg)
+        self.btn_fhfg.clicked.connect(lambda: self.pick_config_color("def_folder_hfg", self.btn_fhfg))
+        l_items.addWidget(self.btn_fhfg, 2, 4)
+
+        grp_items.setLayout(l_items)
+        layout.addWidget(grp_items)
+
         # Save
         btn_save = QPushButton("SAVE CONFIG")
         btn_save.setStyleSheet(f"background-color: {CP_GREEN}; color: black;")
@@ -746,6 +823,13 @@ class SettingsDialog(QDialog):
             self.cfg_color = c.name()
             self.update_color_btn_style(self.btn_cfg_col, self.cfg_color)
 
+    def pick_config_color(self, attr_name, btn):
+        current_color = getattr(self, attr_name)
+        c = QColorDialog.getColor(QColor(current_color), self)
+        if c.isValid():
+            setattr(self, attr_name, c.name())
+            self.update_color_btn_style(btn, c.name())
+
     def update_dialog_style(self):
         self.setStyleSheet(f"""
             QDialog {{ background-color: {self.app_bg}; border: 2px solid {self.win_border}; }}
@@ -773,6 +857,18 @@ class SettingsDialog(QDialog):
         self.config["window_width"] = self.spn_w.value()
         self.config["window_height"] = self.spn_h.value()
         self.config["always_on_top"] = self.chk_top.isChecked()
+        
+        # Item Style Defaults
+        self.config["def_script_bg"] = self.def_script_bg
+        self.config["def_script_fg"] = self.def_script_fg
+        self.config["def_script_hbg"] = self.def_script_hbg
+        self.config["def_script_hfg"] = self.def_script_hfg
+
+        self.config["def_folder_bg"] = self.def_folder_bg
+        self.config["def_folder_fg"] = self.def_folder_fg
+        self.config["def_folder_hbg"] = self.def_folder_hbg
+        self.config["def_folder_hfg"] = self.def_folder_hfg
+        
         self.accept()
 
 # -----------------------------------------------------------------------------
@@ -908,7 +1004,7 @@ class MainWindow(QMainWindow):
 
         header = QHBoxLayout()
         header.setSpacing(10)
-        self.back_btn = CyberButton("<<", script_data={"color": CP_RED, "type": "script"}); self.back_btn.setFixedSize(50, 40); self.back_btn.clicked.connect(self.go_back); self.back_btn.hide()
+        self.back_btn = CyberButton("<<", script_data={"color": CP_RED, "type": "script"}, config=self.config); self.back_btn.setFixedSize(50, 40); self.back_btn.clicked.connect(self.go_back); self.back_btn.hide()
         self.breadcrumb_layout = QHBoxLayout()
         self.breadcrumb_layout.setSpacing(0)
         
@@ -917,19 +1013,19 @@ class MainWindow(QMainWindow):
         header.addStretch()
         
         # ADD BUTTONS - Script and Folder
-        self.btn_add_script = CyberButton("+S", script_data={"color": CP_GREEN, "type": "script"})
+        self.btn_add_script = CyberButton("+S", script_data={"color": CP_GREEN, "type": "script"}, config=self.config)
         self.btn_add_script.setFixedSize(40, 30)
         self.btn_add_script.clicked.connect(self.add_new_item)
         
-        self.btn_add_folder = CyberButton("+F", script_data={"color": CP_YELLOW, "type": "script"})
+        self.btn_add_folder = CyberButton("+F", script_data={"color": CP_YELLOW, "type": "script"}, config=self.config)
         self.btn_add_folder.setFixedSize(40, 30)
         self.btn_add_folder.clicked.connect(self.add_new_folder)
         
         cfg_col = self.config.get("cfg_btn_color", CP_DIM)
-        self.btn_cfg = CyberButton("CFG", script_data={"color": cfg_col, "type": "script"}); self.btn_cfg.setFixedSize(50, 30)
+        self.btn_cfg = CyberButton("CFG", script_data={"color": cfg_col, "type": "script"}, config=self.config); self.btn_cfg.setFixedSize(50, 30)
         self.btn_cfg.clicked.connect(self.open_global_settings)
 
-        self.btn_close = CyberButton("X", script_data={"color": CP_RED, "type": "script"}); self.btn_close.setFixedSize(40, 30)
+        self.btn_close = CyberButton("X", script_data={"color": CP_RED, "type": "script"}, config=self.config); self.btn_close.setFixedSize(40, 30)
         self.btn_close.clicked.connect(self.close)
 
         header.addWidget(self.btn_add_script)
@@ -1173,7 +1269,7 @@ class MainWindow(QMainWindow):
                     grid_map[(ir, ic)] = True
             
             # Add widget
-            btn = CyberButton(script.get("name", "Unnamed"), script_data=script)
+            btn = CyberButton(script.get("name", "Unnamed"), script_data=script, config=self.config)
             
             # Apply dynamic preferences - calculate height based on row span
             item_h = script.get("height", 0)
