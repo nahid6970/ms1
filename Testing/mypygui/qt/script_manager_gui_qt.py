@@ -906,10 +906,10 @@ class MainWindow(QMainWindow):
         self.main_layout.setSpacing(15)
         clayout.addWidget(self.main_frame)
 
-        # Header
         header = QHBoxLayout()
+        header.setSpacing(10)
         self.back_btn = CyberButton("<<", script_data={"color": CP_RED, "type": "script"}); self.back_btn.setFixedSize(50, 40); self.back_btn.clicked.connect(self.go_back); self.back_btn.hide()
-        self.title_lbl = QLabel("SCRIPT MANAGER"); self.title_lbl.setFont(QFont("Consolas", 16, QFont.Weight.Bold)); self.title_lbl.setStyleSheet(f"color: {CP_YELLOW};")
+        self.title_lbl = QLabel("// ROOT"); self.title_lbl.setFont(QFont("Consolas", 16, QFont.Weight.Bold)); self.title_lbl.setStyleSheet(f"color: {CP_YELLOW};")
         header.addWidget(self.back_btn); header.addWidget(self.title_lbl); header.addStretch()
         
         # ADD BUTTONS - Script and Folder
@@ -1037,7 +1037,15 @@ class MainWindow(QMainWindow):
         if self.view_stack:
             folder = self.view_stack[-1]
             scripts = folder.get("scripts", [])
-            self.title_lbl.setText(f"SCRIPT MANAGER // {folder.get('name', '').upper()}")
+            
+            # Create a clean breadcrumb path (stripping <br> tags)
+            breadcrumbs = []
+            for f in self.view_stack:
+                name = f.get("name", "???").replace("<br>", " ").replace("<br/>", " ").replace("<BR>", " ").upper()
+                name = " ".join(name.split()) # Collapse extra spaces
+                breadcrumbs.append(name)
+            
+            self.title_lbl.setText(f"// {' / '.join(breadcrumbs)}")
             self.back_btn.show()
             
             # Context settings (fallback to global)
@@ -1048,7 +1056,7 @@ class MainWindow(QMainWindow):
             if def_h == 0: def_h = self.config.get("default_btn_height", 40)
         else:
             scripts = self.config.get("scripts", [])
-            self.title_lbl.setText("SCRIPT MANAGER // ROOT")
+            self.title_lbl.setText("// ROOT")
             self.back_btn.hide()
             
             # Global settings

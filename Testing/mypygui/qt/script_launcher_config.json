@@ -177,6 +177,29 @@
             "border_width": 0
         },
         {
+            "name": "Github <br> Projects",
+            "type": "folder",
+            "scripts": [],
+            "color": "#FCEE0A",
+            "col_span": 1,
+            "row_span": 1,
+            "font_family": "Consolas",
+            "font_size": 12,
+            "is_bold": true,
+            "is_italic": false,
+            "width": 0,
+            "height": 0,
+            "corner_radius": 0,
+            "border_width": 0,
+            "grid_columns": 0,
+            "grid_btn_height": 0,
+            "_runtime_height": 100,
+            "_runtime_font_size": 12,
+            "_runtime_font_family": "Consolas",
+            "_runtime_is_bold": true,
+            "_runtime_is_italic": false
+        },
+        {
             "name": "Testing <br> Terminal",
             "type": "folder",
             "scripts": [
@@ -364,6 +387,48 @@
                     "_runtime_font_family": "Consolas",
                     "_runtime_is_bold": true,
                     "_runtime_is_italic": false
+                },
+                {
+                    "name": "New Folder",
+                    "type": "folder",
+                    "scripts": [
+                        {
+                            "name": "New Folder",
+                            "type": "folder",
+                            "scripts": [],
+                            "color": "#FCEE0A",
+                            "col_span": 1,
+                            "row_span": 1,
+                            "font_family": "Consolas",
+                            "font_size": 12,
+                            "is_bold": true,
+                            "is_italic": false,
+                            "width": 0,
+                            "height": 0,
+                            "corner_radius": 0,
+                            "border_width": 0,
+                            "grid_columns": 0,
+                            "grid_btn_height": 0
+                        }
+                    ],
+                    "color": "#FCEE0A",
+                    "col_span": 1,
+                    "row_span": 1,
+                    "font_family": "Consolas",
+                    "font_size": 12,
+                    "is_bold": true,
+                    "is_italic": false,
+                    "width": 0,
+                    "height": 0,
+                    "corner_radius": 0,
+                    "border_width": 0,
+                    "grid_columns": 0,
+                    "grid_btn_height": 0,
+                    "_runtime_height": 100,
+                    "_runtime_font_size": 12,
+                    "_runtime_font_family": "Consolas",
+                    "_runtime_is_bold": true,
+                    "_runtime_is_italic": false
                 }
             ],
             "color": "#7b5385",
@@ -390,7 +455,7 @@
             "border_color": "#2f78dd"
         },
         {
-            "name": "Useful Commands",
+            "name": "Useful <br> Commands",
             "type": "folder",
             "scripts": [
                 {
