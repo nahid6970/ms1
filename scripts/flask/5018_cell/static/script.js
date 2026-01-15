@@ -12167,7 +12167,7 @@ function copySheetContent() {
             });
         });
 
-        const finalText = allCells.join('\n-----\n');
+        const finalText = allCells.join('\n-----\n\n');
 
         if (!finalText) {
             showToast("No content to copy", "info");
