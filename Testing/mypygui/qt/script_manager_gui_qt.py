@@ -39,7 +39,9 @@ CONFIG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "script_l
 
 class CyberButton(QPushButton):
     def __init__(self, text, parent=None, script_data=None):
-        super().__init__(text, parent)
+        # Convert <br> variants to \n for multi-line support
+        display_text = text.replace("<br>", "\n").replace("<br/>", "\n").replace("<BR>", "\n")
+        super().__init__(display_text, parent)
         self.script = script_data or {}
         self.is_folder = (self.script.get("type") == "folder")
         

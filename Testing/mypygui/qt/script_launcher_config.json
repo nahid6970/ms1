@@ -111,15 +111,7 @@
             "_runtime_font_size": 12,
             "_runtime_font_family": "Consolas",
             "_runtime_is_bold": true,
-            "_runtime_is_italic": false,
-            "font_family": "Consolas",
-            "font_size": 12,
-            "is_bold": true,
-            "is_italic": false,
-            "width": 0,
-            "height": 0,
-            "corner_radius": 0,
-            "border_width": 0
+            "_runtime_is_italic": false
         },
         {
             "name": "YTC",
@@ -185,7 +177,7 @@
             "border_width": 0
         },
         {
-            "name": "Test Terminal",
+            "name": "Testing <br> Terminal <br> GG",
             "type": "folder",
             "scripts": [
                 {
@@ -657,15 +649,7 @@
             "_runtime_font_size": 12,
             "_runtime_font_family": "Consolas",
             "_runtime_is_bold": true,
-            "_runtime_is_italic": false,
-            "font_family": "Consolas",
-            "font_size": 12,
-            "is_bold": true,
-            "is_italic": false,
-            "width": 0,
-            "height": 0,
-            "corner_radius": 0,
-            "border_width": 0
+            "_runtime_is_italic": false
         }
     ],
     "github_repos": [
