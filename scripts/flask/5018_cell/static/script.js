@@ -6701,6 +6701,7 @@ window.onclick = function (event) {
     const settingsModal = document.getElementById('settingsModal');
     const sheetList = document.getElementById('sheetList');
 
+    const markdownModal = document.getElementById('markdownGuideModal');
     if (event.target === columnModal) {
         closeColumnModal();
     }
@@ -6709,6 +6710,9 @@ window.onclick = function (event) {
     }
     if (event.target === settingsModal) {
         closeSettingsModal();
+    }
+    if (event.target === markdownModal) {
+        closeMarkdownGuide();
     }
 
     // Close sheet list when clicking outside
@@ -8283,10 +8287,10 @@ function setupMultiReplaceListener(input) {
 
     input.addEventListener('keydown', input.multiReplaceKeyListener);
 
-    // Clear on blur
+    // Clear on blur (with a longer delay to allow for internal focus shifts)
     input.addEventListener('blur', function clearOnBlur() {
         setTimeout(() => {
-            if (multiSelectionData) {
+            if (multiSelectionData && document.activeElement !== input) {
                 const count = multiSelectionData.matches.length;
                 clearMultiSelection();
                 if (input.multiReplaceKeyListener) {
@@ -8294,7 +8298,7 @@ function setupMultiReplaceListener(input) {
                 }
                 showToast(`Edited ${count} locations`, 'success');
             }
-        }, 100);
+        }, 500);
     }, { once: true });
 }
 
@@ -8352,7 +8356,9 @@ function handleMultiCursorEdit(input, action, char) {
             const oldLength = oldMatch.end - oldMatch.start;
 
             if (action === 'insert') {
-                newEnd = newStart + char.length; // Replaced with char
+                // After insertion, cursor should be at the end of the new text, as a cursor (start === end)
+                newStart = newStart + char.length;
+                newEnd = newStart;
                 offsetChange = char.length - oldLength;
             } else if (action === 'backspace') {
                 if (oldLength > 0) {
@@ -11696,17 +11702,7 @@ function closeMarkdownGuide() {
 }
 
 // Close modals when clicking outside
-window.onclick = function (event) {
-    const settingsModal = document.getElementById('settingsModal');
-    const markdownModal = document.getElementById('markdownGuideModal');
-
-    if (event.target === settingsModal) {
-        closeSettingsModal();
-    }
-    if (event.target === markdownModal) {
-        closeMarkdownGuide();
-    }
-};
+// Merged into the main window.onclick below
 
 
 // Variable Font Size Quick Format Function

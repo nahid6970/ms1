@@ -1173,3 +1173,6 @@ if __name__ == ""__main__"":
 
 *Generated from startup.py cyberpunk theme implementation*
 )")
+
+;! Check summary and unorganized data in ai
+:X:;check::Paste('here is everything added to summary or it missed something')
