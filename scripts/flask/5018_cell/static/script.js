@@ -398,6 +398,18 @@ function handleKeyboardShortcuts(e) {
     if (e.key === 'F3') {
         e.preventDefault();
         const activeElement = document.activeElement;
+        const selection = window.getSelection();
+
+        // Check for selection in contenteditable (WYSIWYG mode)
+        if (activeElement.classList && activeElement.classList.contains('markdown-preview') &&
+            activeElement.isContentEditable) {
+            if (selection && !selection.isCollapsed && selection.toString().trim()) {
+                showQuickFormatter(activeElement);
+                return;
+            }
+        }
+
+        // Check for selection in input/textarea (legacy mode)
         if ((activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA') &&
             activeElement.selectionStart !== activeElement.selectionEnd) {
             showQuickFormatter(activeElement);
@@ -1791,6 +1803,12 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
         });
 
         preview.addEventListener('blur', () => {
+            // Don't process blur if quick formatter is open (we'll re-focus after formatting)
+            const quickFormatter = document.getElementById('quickFormatter');
+            if (quickFormatter && quickFormatter.style.display === 'block') {
+                return; // Skip blur processing when quick formatter is active
+            }
+
             preview.classList.remove('editing');
             const newRawValue = extractRawText(preview);
             if (newRawValue !== inputElement.value) {
@@ -1804,6 +1822,7 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
                 drawWordConnectors(preview);
             });
         });
+
 
         preview.addEventListener('input', () => {
             const newRawValue = extractRawText(preview);
@@ -7295,10 +7314,28 @@ let selectedFormats = []; // Track selected formats for multi-apply
 
 function showQuickFormatter(inputElement) {
     quickFormatterTarget = inputElement;
-    quickFormatterSelection = {
-        start: inputElement.selectionStart,
-        end: inputElement.selectionEnd
-    };
+
+    // Handle contenteditable (WYSIWYG mode)
+    if (inputElement.isContentEditable) {
+        const selection = window.getSelection();
+        if (selection && selection.rangeCount > 0) {
+            const range = selection.getRangeAt(0);
+            quickFormatterSelection = {
+                isContentEditable: true,
+                range: range.cloneRange(),
+                text: selection.toString()
+            };
+        } else {
+            return; // No selection, don't show
+        }
+    } else {
+        // Handle input/textarea (legacy mode)
+        quickFormatterSelection = {
+            isContentEditable: false,
+            start: inputElement.selectionStart,
+            end: inputElement.selectionEnd
+        };
+    }
 
     // Clear selected formats when opening
     selectedFormats = [];
@@ -7344,10 +7381,20 @@ function closeQuickFormatterOnClickOutside(event) {
 }
 
 function updateSelectionStats(inputElement) {
-    const selectedText = inputElement.value.substring(
-        inputElement.selectionStart,
-        inputElement.selectionEnd
-    );
+    let selectedText = '';
+
+    // Handle contenteditable (WYSIWYG mode)
+    if (inputElement.isContentEditable) {
+        if (quickFormatterSelection && quickFormatterSelection.isContentEditable) {
+            selectedText = quickFormatterSelection.text || '';
+        }
+    } else {
+        // Handle input/textarea (legacy mode)
+        selectedText = inputElement.value.substring(
+            inputElement.selectionStart,
+            inputElement.selectionEnd
+        );
+    }
 
     // Count lines
     const lines = selectedText.split('\n');
@@ -7454,8 +7501,49 @@ function applyQuickFormat(prefix, suffix, event) {
         return;
     }
 
-    // Otherwise, apply single format as before
     const input = quickFormatterTarget;
+
+    // Handle contenteditable (WYSIWYG mode)
+    if (quickFormatterSelection.isContentEditable) {
+        const selectedText = quickFormatterSelection.text || '';
+        const formattedText = prefix + selectedText + suffix;
+
+        // Get the underlying input/textarea to update the value
+        const cell = input.closest('td');
+        const hiddenInput = cell ? cell.querySelector('input, textarea') : null;
+
+        if (hiddenInput) {
+            // Get the full raw text
+            const rawText = extractRawText(input);
+            // Find and replace the selected text (first occurrence)
+            const newRawText = rawText.replace(selectedText, formattedText);
+
+            // Update hidden input
+            hiddenInput.value = newRawText;
+
+            // Update tableData
+            const rowIndex = parseInt(cell.parentElement.dataset.row);
+            const colIndex = parseInt(cell.dataset.col);
+            if (!isNaN(rowIndex) && !isNaN(colIndex)) {
+                const sheet = tableData.sheets[currentSheet];
+                sheet.rows[rowIndex][colIndex] = newRawText;
+                clearTimeout(window.autoSaveTimeout);
+                window.autoSaveTimeout = setTimeout(() => saveData(), 1000);
+            }
+
+            // Re-render the preview with highlighted syntax
+            input.innerHTML = highlightSyntax(newRawText);
+        }
+
+        closeQuickFormatter();
+        showToast('Format applied', 'success');
+
+        // Refocus the preview
+        input.focus();
+        return;
+    }
+
+    // Handle input/textarea (legacy mode)
     const start = quickFormatterSelection.start;
     const end = quickFormatterSelection.end;
     const selectedText = input.value.substring(start, end);
@@ -7515,10 +7603,18 @@ function applyLinkFormat(event) {
 function searchGoogle(event) {
     if (!quickFormatterTarget) return;
 
-    const input = quickFormatterTarget;
-    const start = quickFormatterSelection.start;
-    const end = quickFormatterSelection.end;
-    const selectedText = input.value.substring(start, end);
+    let selectedText = '';
+
+    // Handle contenteditable (WYSIWYG mode)
+    if (quickFormatterSelection.isContentEditable) {
+        selectedText = quickFormatterSelection.text || '';
+    } else {
+        // Handle input/textarea (legacy mode)
+        const input = quickFormatterTarget;
+        const start = quickFormatterSelection.start;
+        const end = quickFormatterSelection.end;
+        selectedText = input.value.substring(start, end);
+    }
 
     if (!selectedText) {
         showToast('No text selected', 'warning');
@@ -7536,16 +7632,25 @@ function searchGoogle(event) {
     showToast('Searching in Google', 'success');
 }
 
+
 function searchGoogleWithExtra(event) {
     event.preventDefault();
     event.stopPropagation();
 
     if (!quickFormatterTarget) return;
 
-    const input = quickFormatterTarget;
-    const start = quickFormatterSelection.start;
-    const end = quickFormatterSelection.end;
-    const selectedText = input.value.substring(start, end);
+    let selectedText = '';
+
+    // Handle contenteditable (WYSIWYG mode)
+    if (quickFormatterSelection.isContentEditable) {
+        selectedText = quickFormatterSelection.text || '';
+    } else {
+        // Handle input/textarea (legacy mode)
+        const input = quickFormatterTarget;
+        const start = quickFormatterSelection.start;
+        const end = quickFormatterSelection.end;
+        selectedText = input.value.substring(start, end);
+    }
 
     if (!selectedText) {
         showToast('No text selected', 'warning');
@@ -10369,791 +10474,6 @@ window.addEventListener('resize', () => {
     adjustAllMarkdownCells();
 });
 
-// Quick Formatter Functions (F3)
-
-function applyQuickFormat(prefix, suffix, event) {
-    if (!quickFormatterTarget) return;
-
-    const input = quickFormatterTarget;
-    const start = quickFormatterSelection.start;
-    const end = quickFormatterSelection.end;
-    const selectedText = input.value.substring(start, end);
-
-    // Check if there are multiple formats selected (from right-clicks)
-    if (selectedFormats.length > 0) {
-        // Add the current format to the list
-        selectedFormats.push({ prefix, suffix });
-
-        // Apply all selected formats
-        let allPrefixes = '';
-        let allSuffixes = '';
-
-        // Apply all selected formats (nesting them)
-        selectedFormats.forEach(format => {
-            allPrefixes += format.prefix;
-            allSuffixes = format.suffix + allSuffixes;
-        });
-
-        // Insert the formatting
-        const newText = input.value.substring(0, start) +
-            allPrefixes + selectedText + allSuffixes +
-            input.value.substring(end);
-
-        input.value = newText;
-
-        // Trigger change event to update cell
-        const changeEvent = new Event('input', { bubbles: true });
-        input.dispatchEvent(changeEvent);
-
-        // Set cursor position after the inserted text
-        const newCursorPos = start + allPrefixes.length + selectedText.length + allSuffixes.length;
-        input.setSelectionRange(newCursorPos, newCursorPos);
-        input.focus();
-
-        // Store count before clearing
-        const formatCount = selectedFormats.length;
-
-        // Clear selected formats
-        selectedFormats = [];
-        updateFormatCheckmarks();
-
-        closeQuickFormatter();
-        showToast(`Applied ${formatCount} formats`, 'success');
-    } else {
-        // Single format application
-        const newText = input.value.substring(0, start) +
-            prefix + selectedText + suffix +
-            input.value.substring(end);
-
-        input.value = newText;
-
-        // Trigger change event to update cell
-        const changeEvent = new Event('input', { bubbles: true });
-        input.dispatchEvent(changeEvent);
-
-        // Set cursor position after the inserted text
-        const newCursorPos = start + prefix.length + selectedText.length + suffix.length;
-        input.setSelectionRange(newCursorPos, newCursorPos);
-        input.focus();
-
-        closeQuickFormatter();
-        showToast('Format applied', 'success');
-    }
-}
-
-function applyLinkFormat(event) {
-    if (!quickFormatterTarget) return;
-
-    const input = quickFormatterTarget;
-    const start = quickFormatterSelection.start;
-    const end = quickFormatterSelection.end;
-    const selectedUrl = input.value.substring(start, end);
-
-    // Use default placeholder text with italic formatting
-    const linkText = '@@Link@@';
-
-    // Insert the link syntax: {link:url}@@Link@@{/}
-    const newText = input.value.substring(0, start) +
-        `{link:${selectedUrl}}` + linkText + '{/}' +
-        input.value.substring(end);
-
-    input.value = newText;
-
-    // Trigger change event to update cell
-    const changeEvent = new Event('input', { bubbles: true });
-    input.dispatchEvent(changeEvent);
-
-    // Set cursor position after the inserted text
-    const linkPrefix = `{link:${selectedUrl}}`;
-    const newCursorPos = start + linkPrefix.length + linkText.length + 3;
-    input.setSelectionRange(newCursorPos, newCursorPos);
-    input.focus();
-
-    closeQuickFormatter();
-    showToast('Link applied', 'success');
-}
-
-function searchGoogle(event) {
-    if (!quickFormatterTarget) return;
-
-    const input = quickFormatterTarget;
-    const start = quickFormatterSelection.start;
-    const end = quickFormatterSelection.end;
-    const selectedText = input.value.substring(start, end);
-
-    if (!selectedText) {
-        showToast('No text selected', 'warning');
-        return;
-    }
-
-    // Strip markdown formatting before searching
-    const cleanText = stripMarkdown(selectedText);
-
-    // Open Google search in new tab
-    const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(cleanText)}`;
-    window.open(searchUrl, '_blank');
-
-    closeQuickFormatter();
-    showToast('Searching in Google', 'success');
-}
-
-function sortLines(event) {
-    if (!quickFormatterTarget) return;
-
-    const input = quickFormatterTarget;
-    const start = quickFormatterSelection.start;
-    const end = quickFormatterSelection.end;
-    const selectedText = input.value.substring(start, end);
-
-    if (!selectedText) {
-        showToast('No text selected', 'warning');
-        return;
-    }
-
-    // Parse lines into blocks (parent + children)
-    const lines = selectedText.split('\n');
-    const blocks = [];
-    let currentBlock = null;
-
-    for (let i = 0; i < lines.length; i++) {
-        const line = lines[i];
-        const trimmed = line.trim();
-
-        // Check dash patterns
-        const isDoubleDash = trimmed.startsWith('-- ');
-        const isSingleDash = trimmed.startsWith('- ') && !trimmed.startsWith('-- ');
-        const hasNoDash = !trimmed.startsWith('- ');
-
-        // Determine if this is a child line by looking at context
-        let isChildLine = false;
-
-        if (isDoubleDash) {
-            // -- is always a child
-            isChildLine = true;
-        } else if (isSingleDash) {
-            // - could be parent or child depending on what came before
-            if (currentBlock && currentBlock.children.length === 0) {
-                // Previous line was a parent with no children yet
-                // Check if previous parent has no dash (then this - is a child)
-                // or if previous parent has - (then this - is also a parent)
-                const prevParentTrimmed = currentBlock.parent.trim();
-                if (prevParentTrimmed.startsWith('- ')) {
-                    // Previous parent also starts with -, so this is a new parent
-                    isChildLine = false;
-                } else {
-                    // Previous parent has no dash, so this - is a child
-                    isChildLine = true;
-                }
-            } else if (currentBlock && currentBlock.children.length > 0) {
-                // Previous line(s) were children, check the last child's format
-                const lastChild = currentBlock.children[currentBlock.children.length - 1];
-                if (lastChild.trim().startsWith('-- ')) {
-                    // Last child was --, so this - is a new parent
-                    isChildLine = false;
-                } else {
-                    // Last child was -, so this - is also a child
-                    isChildLine = true;
-                }
-            } else {
-                // No current block, this - starts a new parent
-                isChildLine = false;
-            }
-        } else {
-            // No dash = parent line
-            isChildLine = false;
-        }
-
-        if (isChildLine) {
-            // This is a child line, add to current block
-            if (currentBlock) {
-                currentBlock.children.push(line);
-            } else {
-                // Orphan child line, treat as its own block
-                blocks.push({
-                    parent: line,
-                    children: [],
-                    isOrphan: true
-                });
-            }
-        } else {
-            // This is a parent line, start a new block
-            if (currentBlock) {
-                blocks.push(currentBlock);
-            }
-            currentBlock = {
-                parent: line,
-                children: []
-            };
-        }
-    }
-
-    // Don't forget the last block
-    if (currentBlock) {
-        blocks.push(currentBlock);
-    }
-
-    // Sort blocks by their parent line with dash priority and smart numerical sorting
-    const sortedBlocks = blocks.sort((a, b) => {
-        const lineA = a.parent.trim();
-        const lineB = b.parent.trim();
-
-        // Check dash prefixes for priority (no dash > single dash > double dash)
-        const dashPriorityA = lineA.startsWith('-- ') ? 2 : (lineA.startsWith('- ') ? 1 : 0);
-        const dashPriorityB = lineB.startsWith('-- ') ? 2 : (lineB.startsWith('- ') ? 1 : 0);
-
-        // If different dash priorities, sort by priority (lower number = higher priority)
-        if (dashPriorityA !== dashPriorityB) {
-            return dashPriorityA - dashPriorityB;
-        }
-
-        // Same dash priority, now compare content
-        // Remove dash prefix for comparison
-        const contentA = lineA.replace(/^-+\s*/, '');
-        const contentB = lineB.replace(/^-+\s*/, '');
-
-        // Extract leading numbers from both strings
-        const numA = contentA.match(/^\d+/);
-        const numB = contentB.match(/^\d+/);
-
-        // If both start with numbers, compare numerically
-        if (numA && numB) {
-            const diff = parseInt(numA[0], 10) - parseInt(numB[0], 10);
-            if (diff !== 0) return diff;
-            // If numbers are equal, compare the rest of the string
-            return contentA.toLowerCase().localeCompare(contentB.toLowerCase());
-        }
-
-        // If only one starts with a number, numbers come first
-        if (numA) return -1;
-        if (numB) return 1;
-
-        // Otherwise, alphabetical comparison (case-insensitive)
-        return contentA.toLowerCase().localeCompare(contentB.toLowerCase());
-    });
-
-    // Reconstruct the sorted text
-    const sortedLines = [];
-    for (const block of sortedBlocks) {
-        sortedLines.push(block.parent);
-        sortedLines.push(...block.children);
-    }
-
-    const sortedText = sortedLines.join('\n');
-
-    // Replace the selected text with sorted text
-    const newText = input.value.substring(0, start) +
-        sortedText +
-        input.value.substring(end);
-
-    input.value = newText;
-
-    // Trigger change event to update cell
-    const changeEvent = new Event('input', { bubbles: true });
-    input.dispatchEvent(changeEvent);
-
-    // Set cursor position at the end of the sorted text
-    const newCursorPos = start + sortedText.length;
-    input.setSelectionRange(newCursorPos, newCursorPos);
-    input.focus();
-
-    closeQuickFormatter();
-    showToast('Lines sorted (keeping lists with parents)', 'success');
-}
-
-function removeFormatting(event) {
-    if (!quickFormatterTarget) return;
-
-    const input = quickFormatterTarget;
-    const start = quickFormatterSelection.start;
-    const end = quickFormatterSelection.end;
-    const selectedText = input.value.substring(start, end);
-
-    if (!selectedText) {
-        showToast('No text selected', 'warning');
-        return;
-    }
-
-    // Use the stripMarkdown function to remove all formatting, but preserve links
-    const cleanText = stripMarkdown(selectedText, true);
-
-    // Replace the selected text with clean text
-    const newText = input.value.substring(0, start) +
-        cleanText +
-        input.value.substring(end);
-
-    input.value = newText;
-
-    // Trigger change event to update cell
-    const changeEvent = new Event('input', { bubbles: true });
-    input.dispatchEvent(changeEvent);
-
-    // Set cursor position at the end of the clean text
-    const newCursorPos = start + cleanText.length;
-    input.setSelectionRange(newCursorPos, newCursorPos);
-    input.focus();
-
-    closeQuickFormatter();
-    showToast('Formatting removed', 'success');
-}
-
-function selectAllMatchingFromFormatter(event) {
-    event.preventDefault();
-    event.stopPropagation();
-
-    if (!quickFormatterTarget) {
-        console.log('No quickFormatterTarget');
-        return;
-    }
-
-    // Store the target and selection
-    const target = quickFormatterTarget;
-    const selection = quickFormatterSelection;
-
-    // Keep the input focused and restore selection
-    target.focus();
-    target.setSelectionRange(selection.start, selection.end);
-
-    // Select all matching occurrences
-    selectAllMatchingOccurrences(target);
-
-    // Close the formatter after selection is done
-    closeQuickFormatter();
-}
-
-function showColorPicker(event) {
-    if (event) {
-        event.preventDefault();
-    }
-
-    const colorSection = document.getElementById('colorPickerSection');
-    const formatter = document.getElementById('quickFormatter');
-    const isShowing = colorSection.style.display === 'none';
-
-    colorSection.style.display = isShowing ? 'block' : 'none';
-
-    // Add/remove class to shift formatter left
-    if (isShowing) {
-        formatter.classList.add('with-color-picker');
-        loadColorSwatches();
-    } else {
-        formatter.classList.remove('with-color-picker');
-    }
-}
-
-function toggleColorSelection(event) {
-    event.preventDefault();
-
-    // Toggle color picker visibility for selection
-    showColorPicker(event);
-
-    return false;
-}
-
-function applyColorFormat() {
-    if (!quickFormatterTarget) return;
-
-    const input = quickFormatterTarget;
-    const start = quickFormatterSelection.start;
-    const end = quickFormatterSelection.end;
-    const selectedText = input.value.substring(start, end);
-
-    const fgColor = document.getElementById('quickFgColor').value;
-    const bgColor = document.getElementById('quickBgColor').value;
-    const noBg = document.getElementById('noBgCheckbox').checked;
-
-    // Build color syntax
-    let colorSyntax = '';
-    if (noBg) {
-        colorSyntax = `{fg:${fgColor}}`;
-    } else {
-        colorSyntax = `{fg:${fgColor};bg:${bgColor}}`;
-    }
-
-    // Check if there are other formats selected (from right-clicks)
-    if (selectedFormats.length > 0) {
-        // Apply all selected formats along with color
-        let allPrefixes = colorSyntax; // Color goes first
-        let allSuffixes = '{/}'; // Color closing tag
-
-        // Add other formats (nesting them)
-        selectedFormats.forEach(format => {
-            allPrefixes += format.prefix;
-            allSuffixes = format.suffix + allSuffixes;
-        });
-
-        // Insert the formatting
-        const newText = input.value.substring(0, start) +
-            allPrefixes + selectedText + allSuffixes +
-            input.value.substring(end);
-
-        input.value = newText;
-
-        // Trigger change event to update cell
-        const changeEvent = new Event('input', { bubbles: true });
-        input.dispatchEvent(changeEvent);
-
-        // Set cursor position after the inserted text
-        const newCursorPos = start + allPrefixes.length + selectedText.length + allSuffixes.length;
-        input.setSelectionRange(newCursorPos, newCursorPos);
-        input.focus();
-
-        // Store count before clearing
-        const formatCount = selectedFormats.length + 1; // +1 for color
-
-        // Clear selected formats
-        selectedFormats = [];
-        updateFormatCheckmarks();
-
-        closeQuickFormatter();
-        showToast(`Applied ${formatCount} formats (including color)`, 'success');
-    } else {
-        // Just color formatting
-        const newText = input.value.substring(0, start) +
-            colorSyntax + selectedText + '{/}' +
-            input.value.substring(end);
-
-        input.value = newText;
-
-        // Trigger change event to update cell
-        const changeEvent = new Event('input', { bubbles: true });
-        input.dispatchEvent(changeEvent);
-
-        // Set cursor position after the inserted text
-        const newCursorPos = start + colorSyntax.length + selectedText.length + 3;
-        input.setSelectionRange(newCursorPos, newCursorPos);
-        input.focus();
-
-        closeQuickFormatter();
-        showToast('Color applied', 'success');
-    }
-}
-
-// Multi-format selection support (variable declared earlier in file)
-
-function toggleFormatSelection(prefix, suffix, event) {
-    event.preventDefault();
-
-    // Find the format in selectedFormats
-    const formatIndex = selectedFormats.findIndex(f => f.prefix === prefix && f.suffix === suffix);
-
-    if (formatIndex >= 0) {
-        // Remove from selection
-        selectedFormats.splice(formatIndex, 1);
-    } else {
-        // Add to selection
-        selectedFormats.push({ prefix, suffix });
-    }
-
-    // Update visual checkmarks
-    updateFormatCheckmarks();
-
-    return false;
-}
-
-function updateFormatCheckmarks() {
-    // Remove all existing checkmarks
-    document.querySelectorAll('.format-btn .format-checkmark').forEach(el => el.remove());
-
-    // Add checkmarks to selected formats
-    selectedFormats.forEach(format => {
-        const buttons = document.querySelectorAll('.format-btn');
-        buttons.forEach(btn => {
-            const onclick = btn.getAttribute('onclick');
-            if (onclick && onclick.includes(`'${format.prefix}'`) && onclick.includes(`'${format.suffix}'`)) {
-                // Add checkmark if not already present
-                if (!btn.querySelector('.format-checkmark')) {
-                    const checkmark = document.createElement('span');
-                    checkmark.className = 'format-checkmark';
-                    checkmark.textContent = '✓';
-                    checkmark.style.position = 'absolute';
-                    checkmark.style.top = '2px';
-                    checkmark.style.right = '2px';
-                    checkmark.style.fontSize = '10px';
-                    checkmark.style.color = '#4CAF50';
-                    checkmark.style.fontWeight = 'bold';
-                    btn.style.position = 'relative';
-                    btn.appendChild(checkmark);
-                }
-            }
-        });
-    });
-}
-
-function applyMultipleFormats(event) {
-    if (!quickFormatterTarget || selectedFormats.length === 0) {
-        showToast('No formats selected', 'warning');
-        return;
-    }
-
-    const input = quickFormatterTarget;
-    const start = quickFormatterSelection.start;
-    const end = quickFormatterSelection.end;
-    const selectedText = input.value.substring(start, end);
-
-    // Build nested formatting
-    let formattedText = selectedText;
-    let allPrefixes = '';
-    let allSuffixes = '';
-
-    // Apply all selected formats (nesting them)
-    selectedFormats.forEach(format => {
-        allPrefixes += format.prefix;
-        allSuffixes = format.suffix + allSuffixes;
-    });
-
-    // Insert the formatting
-    const newText = input.value.substring(0, start) +
-        allPrefixes + selectedText + allSuffixes +
-        input.value.substring(end);
-
-    input.value = newText;
-
-    // Trigger change event to update cell
-    const changeEvent = new Event('input', { bubbles: true });
-    input.dispatchEvent(changeEvent);
-
-    // Set cursor position after the inserted text
-    const newCursorPos = start + allPrefixes.length + selectedText.length + allSuffixes.length;
-    input.setSelectionRange(newCursorPos, newCursorPos);
-    input.focus();
-
-    // Clear selected formats
-    selectedFormats = [];
-    updateFormatCheckmarks();
-
-    closeQuickFormatter();
-    showToast('Multiple formats applied', 'success');
-}
-
-// Load and display color swatches
-function loadColorSwatches() {
-    const swatchesContainer = document.getElementById('colorSwatches');
-    if (!swatchesContainer) return;
-
-    swatchesContainer.innerHTML = '';
-
-    // Default presets
-    const defaultSwatches = [
-        { fg: '#ffffff', bg: '#000000' }, // White on Black
-        { fg: '#000000', bg: '#ffff00' }, // Black on Yellow
-        { fg: '#ffffff', bg: '#ff0000' }, // White on Red
-        { fg: '#000000', bg: '#00ff00' }, // Black on Green
-        { fg: '#ffffff', bg: '#0000ff' }, // White on Blue
-        { fg: '#000000', bg: '#ffa500' }, // Black on Orange
-        { fg: '#ffffff', bg: '#800080' }, // White on Purple
-    ];
-
-    // Load saved swatches from localStorage
-    const savedSwatches = JSON.parse(localStorage.getItem('colorSwatches') || '[]');
-    const allSwatches = [...savedSwatches, ...defaultSwatches];
-
-    allSwatches.forEach((swatch, index) => {
-        const swatchBtn = document.createElement('button');
-        swatchBtn.className = 'color-swatch';
-
-        // Show visual indicator if noBg is set
-        if (swatch.noBg) {
-            swatchBtn.style.background = 'transparent';
-            swatchBtn.style.border = '2px dashed #999';
-        } else {
-            swatchBtn.style.background = swatch.bg;
-        }
-        swatchBtn.style.color = swatch.fg;
-        swatchBtn.textContent = 'Aa';
-
-        const bgText = swatch.noBg ? 'No BG' : swatch.bg;
-        swatchBtn.title = `Text: ${swatch.fg}, Background: ${bgText}`;
-
-        // Build color syntax for this swatch
-        let colorSyntax = '';
-        if (swatch.noBg) {
-            colorSyntax = `{fg:${swatch.fg}}`;
-        } else {
-            colorSyntax = `{fg:${swatch.fg};bg:${swatch.bg}}`;
-        }
-
-        // Left-click: Apply color (with any selected formats)
-        swatchBtn.onclick = (e) => {
-            e.preventDefault();
-            applySwatchColor(colorSyntax);
-        };
-
-        // Right-click: Add to multi-selection
-        swatchBtn.oncontextmenu = (e) => {
-            e.preventDefault();
-            toggleSwatchSelection(colorSyntax, swatch);
-            return false;
-        };
-
-        // Add delete button for saved swatches
-        if (index < savedSwatches.length) {
-            const deleteBtn = document.createElement('span');
-            deleteBtn.className = 'swatch-delete';
-            deleteBtn.textContent = '×';
-            deleteBtn.onclick = (e) => {
-                e.stopPropagation();
-                deleteSwatch(index);
-            };
-            swatchBtn.appendChild(deleteBtn);
-        }
-
-        // Check if this swatch is in selectedFormats and add checkmark
-        const isSelected = selectedFormats.some(f => f.prefix === colorSyntax && f.suffix === '{/}');
-        if (isSelected) {
-            const checkmark = document.createElement('span');
-            checkmark.className = 'format-checkmark swatch-checkmark';
-            checkmark.textContent = '✓';
-            checkmark.style.position = 'absolute';
-            checkmark.style.top = '2px';
-            checkmark.style.right = '2px';
-            checkmark.style.fontSize = '10px';
-            checkmark.style.color = '#4CAF50';
-            checkmark.style.fontWeight = 'bold';
-            checkmark.style.zIndex = '10';
-            swatchBtn.appendChild(checkmark);
-        }
-
-        swatchesContainer.appendChild(swatchBtn);
-    });
-}
-
-function applySwatchColor(colorSyntax) {
-    if (!quickFormatterTarget) return;
-
-    const input = quickFormatterTarget;
-    const start = quickFormatterSelection.start;
-    const end = quickFormatterSelection.end;
-    const selectedText = input.value.substring(start, end);
-
-    // Check if there are other formats selected (from right-clicks)
-    if (selectedFormats.length > 0) {
-        // Apply all selected formats along with color
-        let allPrefixes = colorSyntax; // Color goes first
-        let allSuffixes = '{/}'; // Color closing tag
-
-        // Add other formats (nesting them)
-        selectedFormats.forEach(format => {
-            allPrefixes += format.prefix;
-            allSuffixes = format.suffix + allSuffixes;
-        });
-
-        // Insert the formatting
-        const newText = input.value.substring(0, start) +
-            allPrefixes + selectedText + allSuffixes +
-            input.value.substring(end);
-
-        input.value = newText;
-
-        // Trigger change event to update cell
-        const changeEvent = new Event('input', { bubbles: true });
-        input.dispatchEvent(changeEvent);
-
-        // Set cursor position after the inserted text
-        const newCursorPos = start + allPrefixes.length + selectedText.length + allSuffixes.length;
-        input.setSelectionRange(newCursorPos, newCursorPos);
-        input.focus();
-
-        // Store count before clearing
-        const formatCount = selectedFormats.length + 1; // +1 for color
-
-        // Clear selected formats
-        selectedFormats = [];
-        updateFormatCheckmarks();
-
-        closeQuickFormatter();
-        showToast(`Applied ${formatCount} formats (including color)`, 'success');
-    } else {
-        // Just color formatting
-        const newText = input.value.substring(0, start) +
-            colorSyntax + selectedText + '{/}' +
-            input.value.substring(end);
-
-        input.value = newText;
-
-        // Trigger change event to update cell
-        const changeEvent = new Event('input', { bubbles: true });
-        input.dispatchEvent(changeEvent);
-
-        // Set cursor position after the inserted text
-        const newCursorPos = start + colorSyntax.length + selectedText.length + 3;
-        input.setSelectionRange(newCursorPos, newCursorPos);
-        input.focus();
-
-        closeQuickFormatter();
-        showToast('Color applied', 'success');
-    }
-    const fgColor = document.getElementById('quickFgColor').value;
-    const bgColor = document.getElementById('quickBgColor').value;
-    const noBg = document.getElementById('noBgCheckbox').checked;
-
-    const newSwatch = {
-        fg: fgColor,
-        bg: bgColor,
-        noBg: noBg
-    };
-
-    // Load existing swatches
-    const savedSwatches = JSON.parse(localStorage.getItem('colorSwatches') || '[]');
-
-    // Check if this combination already exists
-    const exists = savedSwatches.some(s =>
-        s.fg === fgColor && s.bg === bgColor && s.noBg === noBg
-    );
-
-    if (!exists) {
-        savedSwatches.unshift(newSwatch); // Add to beginning
-        // Keep only last 10 custom swatches
-        if (savedSwatches.length > 10) {
-            savedSwatches.pop();
-        }
-        localStorage.setItem('colorSwatches', JSON.stringify(savedSwatches));
-        loadColorSwatches();
-        showToast('Color saved to swatches', 'success');
-    } else {
-        showToast('This color combination already exists', 'info');
-    }
-}
-
-function deleteSwatch(index) {
-    const savedSwatches = JSON.parse(localStorage.getItem('colorSwatches') || '[]');
-    savedSwatches.splice(index, 1);
-    localStorage.setItem('colorSwatches', JSON.stringify(savedSwatches));
-    loadColorSwatches();
-    showToast('Swatch deleted', 'success');
-}
-
-function toggleSwatchSelection(colorSyntax, swatch) {
-    // Find the format in selectedFormats
-    const formatIndex = selectedFormats.findIndex(f => f.prefix === colorSyntax && f.suffix === '{/}');
-
-    if (formatIndex >= 0) {
-        // Remove from selection (deselecting this color)
-        selectedFormats.splice(formatIndex, 1);
-    } else {
-        // Remove any other color selections first (only one color allowed)
-        selectedFormats = selectedFormats.filter(f => !f.isColor);
-
-        // Add this color to selection
-        selectedFormats.push({ prefix: colorSyntax, suffix: '{/}', isColor: true, swatch: swatch });
-    }
-
-    // Update visual checkmarks on both format buttons and swatches
-    updateFormatCheckmarks();
-    loadColorSwatches(); // Reload to show/hide checkmarks on swatches
-}
-
-function toggleHiddenText() {
-    const toggle = document.getElementById('hiddenTextToggle');
-    if (toggle && toggle.checked) {
-        document.body.classList.add('show-hidden-text');
-        localStorage.setItem('hiddenTextVisible', 'true');
-        showToast('Hidden text shown', 'success');
-    } else {
-        document.body.classList.remove('show-hidden-text');
-        localStorage.setItem('hiddenTextVisible', 'false');
-        showToast('Hidden text hidden', 'success');
-    }
-}
 
 // Sub-Sheet Bar Logic
 function renderSubSheetBar() {

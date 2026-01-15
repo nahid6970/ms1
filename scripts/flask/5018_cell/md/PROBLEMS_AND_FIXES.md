@@ -7,6 +7,25 @@ This document tracks historical bugs, issues, and their solutions. Use this to:
 
 ---
 
+## [2026-01-16 00:40] - WYSIWYG Enter Key Cell Expansion Fix
+**Problem:** 
+When pressing Enter at the end of a cell, the new line would overflow the cell border and the cursor would become invisible.
+
+**Root Cause:** 
+The Enter key handler was updating cell height, but not accounting for the newly added `<br>` element. The height calculation happened before the browser had a chance to layout the new content, and the cursor wasn't scrolled into view.
+
+**Solution:** 
+- Added extra padding (+20px) to height calculation to ensure room for the cursor.
+- Changed cell and preview height to `'auto'` with `minHeight` to allow natural expansion.
+- Added `br.scrollIntoView({ block: 'nearest', behavior: 'instant' })` to scroll the cursor into view.
+
+**Files Modified:**
+- `static/script.js` - Enhanced Enter key handler in `applyMarkdownFormatting`.
+
+**Related Issues:** Cell height adjustment, cursor visibility.
+
+---
+
 ## [2026-01-16 00:30] - WYSIWYG Backspace/Delete Double-Press Fix
 **Problem:** 
 In the contenteditable WYSIWYG editor, pressing Backspace or Delete required two presses to delete one character.
