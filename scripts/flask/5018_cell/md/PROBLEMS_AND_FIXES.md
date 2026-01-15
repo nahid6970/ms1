@@ -7,6 +7,62 @@ This document tracks historical bugs, issues, and their solutions. Use this to:
 
 ---
 
+## [2026-01-16 01:20] - F3 Quick Formatter Blur Handler Fix
+**Problem:** 
+When applying formatting via F3, the effect would appear briefly then disappear, leaving all text looking normal (unformatted).
+
+**Root Cause:** 
+When F3 opens, it steals focus from the contenteditable preview. This triggered the `blur` event handler, which immediately called `parseMarkdown()` to render the clean preview. After formatting was applied and the preview refocused, the clean preview content was being used instead of the newly formatted content.
+
+**Solution:** 
+Added a check in the blur event handler to skip processing when the quick formatter is visible (`quickFormatter.style.display === 'block'`). This prevents the premature switch from syntax-highlighted mode to clean preview mode.
+
+**Files Modified:**
+- `static/script.js` - Added quick formatter visibility check in blur handler.
+
+**Related Issues:** F3 formatting, contenteditable focus/blur.
+
+---
+
+## [2026-01-16 01:00] - F3 Quick Formatter Duplicate Functions Removed
+**Problem:** 
+F3 quick formatter buttons clicked but did nothing - no formatting was applied and the window stayed open.
+
+**Root Cause:** 
+Duplicate function definitions existed in `script.js`. The old versions (lines 10470-11255) were defined after the fixed versions (lines 7483+), causing JavaScript to overwrite the fixed functions with the old ones that didn't support contenteditable elements.
+
+**Solution:** 
+Removed approximately 785 lines of duplicate quick formatter functions from lines 10470-11255. Now only the fixed versions that support both contenteditable and legacy input/textarea remain.
+
+**Files Modified:**
+- `static/script.js` - Removed duplicate function block.
+
+**Related Issues:** F3 formatting, function duplication.
+
+---
+
+## [2026-01-16 00:45] - F3 Quick Formatter Contenteditable Support
+**Problem:** 
+F3 quick formatter didn't open when text was selected in the WYSIWYG contenteditable editor.
+
+**Root Cause:** 
+The F3 keydown handler only checked for `INPUT` and `TEXTAREA` elements. The WYSIWYG editor uses a `contenteditable` DIV (`.markdown-preview`), which wasn't detected.
+
+**Solution:** 
+Updated multiple functions to support contenteditable elements:
+- **F3 handler:** Added check for `.markdown-preview` with `isContentEditable`.
+- **`showQuickFormatter`:** Uses `window.getSelection()` to get range and text for contenteditable.
+- **`updateSelectionStats`:** Gets selected text from stored `quickFormatterSelection.text`.
+- **`applyQuickFormat`:** For contenteditable, extracts raw text, replaces selection, updates tableData & hidden input, and re-renders with `highlightSyntax()`.
+- **`searchGoogle`/`searchGoogleWithExtra`:** Gets text from contenteditable selection.
+
+**Files Modified:**
+- `static/script.js` - Updated F3 handler, showQuickFormatter, updateSelectionStats, applyQuickFormat, searchGoogle, searchGoogleWithExtra.
+
+**Related Issues:** WYSIWYG editing, F3 quick formatting.
+
+---
+
 ## [2026-01-16 00:40] - WYSIWYG Enter Key Cell Expansion Fix
 **Problem:** 
 When pressing Enter at the end of a cell, the new line would overflow the cell border and the cursor would become invisible.
