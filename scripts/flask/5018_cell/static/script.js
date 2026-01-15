@@ -1667,7 +1667,7 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
         preview.style.textAlign = inputElement.style.textAlign;
         preview.style.backgroundColor = cell.style.backgroundColor;
 
-        // NEW: Standardize line breaks
+        // NEW: Standardize line breaks and handle ZWS
         preview.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
                 e.preventDefault();
@@ -1692,6 +1692,54 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
 
                     // Update the underlying input value WITHOUT triggering full re-render
                     inputElement.value = extractRawText(preview);
+                }
+            }
+
+            // Handle Backspace - skip over ZWS
+            if (e.key === 'Backspace') {
+                const selection = window.getSelection();
+                if (selection.rangeCount > 0 && selection.isCollapsed) {
+                    const range = selection.getRangeAt(0);
+                    const node = range.startContainer;
+                    const offset = range.startOffset;
+
+                    // If we're in a text node and the character before cursor is ZWS
+                    if (node.nodeType === Node.TEXT_NODE && offset > 0) {
+                        const text = node.textContent;
+                        if (text[offset - 1] === '\u200B') {
+                            // Delete the ZWS and let the event continue to delete the real character
+                            node.textContent = text.slice(0, offset - 1) + text.slice(offset);
+                            range.setStart(node, offset - 1);
+                            range.setEnd(node, offset - 1);
+                            selection.removeAllRanges();
+                            selection.addRange(range);
+                            // Don't prevent default - let it delete the next character too
+                        }
+                    }
+                }
+            }
+
+            // Handle Delete - skip over ZWS
+            if (e.key === 'Delete') {
+                const selection = window.getSelection();
+                if (selection.rangeCount > 0 && selection.isCollapsed) {
+                    const range = selection.getRangeAt(0);
+                    const node = range.startContainer;
+                    const offset = range.startOffset;
+
+                    // If we're in a text node and the character after cursor is ZWS
+                    if (node.nodeType === Node.TEXT_NODE && offset < node.textContent.length) {
+                        const text = node.textContent;
+                        if (text[offset] === '\u200B') {
+                            // Delete the ZWS and let the event continue to delete the real character
+                            node.textContent = text.slice(0, offset) + text.slice(offset + 1);
+                            range.setStart(node, offset);
+                            range.setEnd(node, offset);
+                            selection.removeAllRanges();
+                            selection.addRange(range);
+                            // Don't prevent default - let it delete the next character too
+                        }
+                    }
                 }
             }
         });
