@@ -3812,7 +3812,7 @@ td .markdown-preview {
 .md-separator {
     width: 100%;
     height: 4px;
-    background: #ccc;
+    background: #000;
     margin: 6px 0 !important;
     padding: 0 !important;
     display: block;

@@ -710,7 +710,7 @@ def generate_static_html(data, custom_syntaxes):
             top: 0;
             bottom: 50%;
             width: 1px;
-            background: #ccc;
+            background: #000;
         }
 
         /* Horizontal line (L shape) */
@@ -721,7 +721,7 @@ def generate_static_html(data, custom_syntaxes):
             top: 50%;
             width: 12px;
             height: 1px;
-            background: #ccc;
+            background: #000;
         }
 
         /* Last item - only show L corner, no line below */
@@ -1867,7 +1867,7 @@ def generate_static_html(data, custom_syntaxes):
                     return hex;
                 };
                 
-                let separatorStyle = 'width: 100%; height: 4px; background: #ccc; margin: 6px 0; padding: 0; display: block; border: none; line-height: 0; font-size: 0;';
+                let separatorStyle = 'width: 100%; height: 4px; background: #000; margin: 6px 0; padding: 0; display: block; border: none; line-height: 0; font-size: 0;';
                 if (prefixColor && colorMap[prefixColor]) {
                     separatorStyle = 'width: 100%; height: 4px; background: ' + colorMap[prefixColor] + '; margin: 6px 0; padding: 0; display: block; border: none; line-height: 0; font-size: 0;';
                 }
@@ -2121,7 +2121,7 @@ def generate_static_html(data, custom_syntaxes):
                         return hex;
                     };
                     
-                    let separatorStyle = 'width: 100%; height: 4px; background: #ccc; margin: 6px 0; padding: 0; display: block; border: none; line-height: 0; font-size: 0;';
+                    let separatorStyle = 'width: 100%; height: 4px; background: #000; margin: 6px 0; padding: 0; display: block; border: none; line-height: 0; font-size: 0;';
                     if (prefixColor && colorMap[prefixColor]) {
                         separatorStyle = 'width: 100%; height: 4px; background: ' + colorMap[prefixColor] + '; margin: 6px 0; padding: 0; display: block; border: none; line-height: 0; font-size: 0;';
                     }
