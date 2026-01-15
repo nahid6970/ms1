@@ -2800,7 +2800,7 @@ def generate_static_html(data, custom_syntaxes):
                     });
                 });
 
-                const finalText = allCells.join('\n-----\n\n');
+                const finalText = allCells.join('\\n-----\\n\\n');
 
                 if (!finalText) {
                     alert("No content to copy");
