@@ -8247,10 +8247,17 @@ function setupMultiReplaceListener(input) {
             return;
         }
 
-        // Allow other navigation keys to clear multi-selection
-        const navigationKeys = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End', 'PageUp', 'PageDown'];
+        // Handle multi-cursor navigation
+        const navigationKeys = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'];
         if (navigationKeys.includes(e.key)) {
-            // Clear multi-selection mode when navigating without shift
+            e.preventDefault();
+            handleMultiCursorMove(input, e.key);
+            return;
+        }
+
+        // Other navigation keys (PageUp, etc.) clear multi-selection
+        const clearKeys = ['PageUp', 'PageDown'];
+        if (clearKeys.includes(e.key)) {
             clearMultiSelection();
             return;
         }
@@ -8489,6 +8496,86 @@ function handleMultiSelectionExtension(input, key) {
     // Show visual markers for all selections
     showSelectionMarkers(input, newSelectedMatches);
     showMultiSelectionIndicator(input, newSelectedMatches.length, multiSelectionData.matches.length);
+}
+
+function handleMultiCursorMove(input, key) {
+    if (!multiSelectionData) return;
+
+    const text = input.value;
+    const lines = text.split('\n');
+    let currentPos = 0;
+    const lineStarts = [0];
+
+    // Build line start positions
+    for (let i = 0; i < lines.length - 1; i++) {
+        currentPos += lines[i].length + 1;
+        lineStarts.push(currentPos);
+    }
+
+    const newSelectedMatches = [];
+
+    multiSelectionData.selectedMatches.forEach(match => {
+        let newStart = match.start;
+        let newEnd = match.end;
+
+        if (key === 'ArrowLeft') {
+            if (newStart !== newEnd) {
+                newEnd = newStart; // Collapse to start
+            } else if (newStart > 0) {
+                newStart--;
+                newEnd = newStart;
+            }
+        } else if (key === 'ArrowRight') {
+            if (newStart !== newEnd) {
+                newStart = newEnd; // Collapse to end
+            } else if (newEnd < text.length) {
+                newEnd++;
+                newStart = newEnd;
+            }
+        } else if (key === 'Home') {
+            const lineIdx = lineStarts.findIndex((s, i) =>
+                newStart >= s && (lineStarts[i + 1] === undefined || newStart < lineStarts[i + 1])
+            );
+            if (lineIdx !== -1) {
+                newStart = newEnd = lineStarts[lineIdx];
+            }
+        } else if (key === 'End') {
+            const lineIdx = lineStarts.findIndex((s, i) =>
+                newStart >= s && (lineStarts[i + 1] === undefined || newStart < lineStarts[i + 1])
+            );
+            if (lineIdx !== -1) {
+                const nextS = lineStarts[lineIdx + 1];
+                newStart = newEnd = nextS ? nextS - 1 : text.length;
+            }
+        } else if (key === 'ArrowUp' || key === 'ArrowDown') {
+            const direction = key === 'ArrowUp' ? -1 : 1;
+            const lineIdx = lineStarts.findIndex((s, i) =>
+                newStart >= s && (lineStarts[i + 1] === undefined || newStart < lineStarts[i + 1])
+            );
+
+            if (lineIdx !== -1) {
+                const targetLineIdx = lineIdx + direction;
+                if (targetLineIdx >= 0 && targetLineIdx < lines.length) {
+                    const column = newStart - lineStarts[lineIdx];
+                    const targetLineStart = lineStarts[targetLineIdx];
+                    newStart = newEnd = targetLineStart + Math.min(column, lines[targetLineIdx].length);
+                }
+            }
+        }
+
+        newSelectedMatches.push({ start: newStart, end: newEnd });
+    });
+
+    multiSelectionData.selectedMatches = newSelectedMatches;
+    // Keep matches synced with current cursor positions so "Select Next" works relative to current cursors
+    multiSelectionData.matches = [...newSelectedMatches];
+
+    // Update visuals
+    showSelectionMarkers(input, newSelectedMatches);
+
+    // Move native caret to the last "match"
+    const last = newSelectedMatches[newSelectedMatches.length - 1];
+    input.setSelectionRange(last.start, last.end);
 }
 
 function clearMultiSelection() {
