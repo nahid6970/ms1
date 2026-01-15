@@ -112,7 +112,7 @@ RAlt & Numpad3::Run("C:\Users\nahid\ms\msBackups\Display\DisplaySwitch.exe /exte
 }
 
 ;! mypygui
-#x::Run("C:\Users\nahid\ms\ms1\Testing\mypygui\script_manager_gui.py", , "Hide")
+#x::Run("C:\Users\nahid\ms\ms1\Testing\mypygui\qt\script_manager_gui_qt.py", , "Hide")
 
 ;! Startup Setup
 #s::Run("C:\Users\nahid\ms\ms1\scripts\flask\4999_startup\startup.py", , "Hide")

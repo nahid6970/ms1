@@ -86,7 +86,7 @@
             "category": "Launch",
             "description": "",
             "hotkey": "#x",
-            "action": "Run(\"C:\\Users\\nahid\\ms\\ms1\\Testing\\mypygui\\script_manager_gui.py\", , \"Hide\")",
+            "action": "Run(\"C:\\Users\\nahid\\ms\\ms1\\Testing\\mypygui\\qt\\script_manager_gui_qt.py\", , \"Hide\")",
             "enabled": true
         },
         {
