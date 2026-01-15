@@ -370,7 +370,7 @@ class EditDialog(QDialog):
             # Interpreter
             r_lay.addWidget(QLabel("Interpreter:"))
             self.cmb_type = QComboBox()
-            self.cmb_type.addItems(["cmd", "pwsh", "powershell"])
+            self.cmb_type.addItems(["cmd", "powershell", "pwsh"])
             self.cmb_type.setCurrentText(self.script.get("inline_type", "cmd"))
             r_lay.addWidget(self.cmb_type)
             
