@@ -216,14 +216,15 @@
                     "_runtime_font_family": "Consolas",
                     "_runtime_is_bold": true,
                     "_runtime_is_italic": false,
-                    "new_terminal": true
+                    "new_terminal": true,
+                    "run_admin": true
                 },
                 {
                     "name": "Powershell [old]",
                     "path": "",
                     "type": "script",
                     "hide_terminal": false,
-                    "keep_open": false,
+                    "keep_open": true,
                     "kill_window": false,
                     "new_terminal": true,
                     "ctrl_left_cmd": "",
@@ -245,7 +246,8 @@
                     "width": 0,
                     "height": 0,
                     "corner_radius": 0,
-                    "border_width": 0
+                    "border_width": 0,
+                    "run_admin": false
                 },
                 {
                     "name": "PWSH Core",
@@ -253,7 +255,7 @@
                     "type": "script",
                     "color": "#FFFFFF",
                     "hide_terminal": false,
-                    "keep_open": false,
+                    "keep_open": true,
                     "kill_window": false,
                     "new_terminal": true,
                     "ctrl_left_cmd": "",
@@ -275,7 +277,8 @@
                     "_runtime_font_size": 12,
                     "_runtime_font_family": "Consolas",
                     "_runtime_is_bold": true,
-                    "_runtime_is_italic": false
+                    "_runtime_is_italic": false,
+                    "run_admin": false
                 }
             ],
             "color": "#FCEE0A",
@@ -307,12 +310,12 @@
                     "type": "script",
                     "hide_terminal": false,
                     "keep_open": true,
-                    "kill_window": true,
+                    "kill_window": false,
                     "ctrl_left_cmd": "",
                     "ctrl_right_cmd": "",
-                    "use_inline": false,
-                    "inline_type": "pwsh",
-                    "inline_script": "[Environment]::SetEnvironmentVariable(\"PSReadLineScreenReaderOptimization\", \"None\", \"User\")\n",
+                    "use_inline": true,
+                    "inline_type": "powershell",
+                    "inline_script": "[Environment]::SetEnvironmentVariable(\"PSReadLineScreenReaderOptimization\", \"None\", \"User\")",
                     "col_span": 1,
                     "row_span": 1,
                     "_runtime_height": 100,
@@ -332,7 +335,9 @@
                     "text_color": "#FFFFFF",
                     "hover_color": "#101087",
                     "hover_text_color": "#FFFFFF",
-                    "border_color": "#94fb6f"
+                    "border_color": "#94fb6f",
+                    "new_terminal": true,
+                    "run_admin": true
                 }
             ],
             "color": "#FCEE0A",

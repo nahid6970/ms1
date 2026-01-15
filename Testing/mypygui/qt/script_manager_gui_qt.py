@@ -186,7 +186,7 @@ class EditDialog(QDialog):
         super().__init__(parent)
         self.script = script_data
         self.setWindowTitle(f"EDIT // {self.script.get('name', 'UNKNOWN')}")
-        self.resize(1100, 750)
+        self.resize(1150, 750)
         self.setStyleSheet(f"""
             QDialog {{ background-color: {CP_BG}; }}
             QWidget {{ color: {CP_TEXT}; font-family: 'Consolas'; font-size: 10pt; }}
@@ -214,6 +214,7 @@ class EditDialog(QDialog):
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
         scroll.setFrameShape(QFrame.Shape.NoFrame)
+        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         left_widget = QWidget()
         left_layout = QVBoxLayout(left_widget)
         
@@ -238,7 +239,6 @@ class EditDialog(QDialog):
         if self.script.get("type") != "folder":
             grp_exec = QGroupBox("BEHAVIOR")
             l_exec = QVBoxLayout()
-            box_checks = QHBoxLayout()
             self.chk_hide = QCheckBox("Hide Term")
             self.chk_hide.setChecked(self.script.get("hide_terminal", False))
             self.chk_keep = QCheckBox("Keep Open")
@@ -247,11 +247,21 @@ class EditDialog(QDialog):
             self.chk_kill.setChecked(self.script.get("kill_window", False))
             self.chk_new_term = QCheckBox("New Terminal")
             self.chk_new_term.setChecked(self.script.get("new_terminal", False))
-            box_checks.addWidget(self.chk_hide)
-            box_checks.addWidget(self.chk_keep)
-            box_checks.addWidget(self.chk_kill)
-            box_checks.addWidget(self.chk_new_term)
-            l_exec.addLayout(box_checks)
+            self.chk_admin = QCheckBox("Run as Admin")
+            self.chk_admin.setChecked(self.script.get("run_admin", False))
+
+            row1 = QHBoxLayout()
+            row1.addWidget(self.chk_hide)
+            row1.addWidget(self.chk_keep)
+            row1.addWidget(self.chk_kill)
+            row1.addWidget(self.chk_new_term)
+            
+            row2 = QHBoxLayout()
+            row2.addWidget(self.chk_admin)
+            row2.addStretch() 
+            
+            l_exec.addLayout(row1)
+            l_exec.addLayout(row2)
             l_sc = QFormLayout()
             self.inp_ctrl_left = QLineEdit(self.script.get("ctrl_left_cmd", ""))
             self.inp_ctrl_right = QLineEdit(self.script.get("ctrl_right_cmd", ""))
@@ -349,7 +359,7 @@ class EditDialog(QDialog):
         left_layout.addStretch()
         left_widget.setLayout(left_layout)
         scroll.setWidget(left_widget)
-        hbox.addWidget(scroll, stretch=4)
+        hbox.addWidget(scroll, stretch=4) # 40% split
         
         # === RIGHT PANEL ===
         if self.script.get("type") != "folder":
@@ -382,7 +392,7 @@ class EditDialog(QDialog):
             r_lay.addWidget(self.txt_inline)
             
             right_grp.setLayout(r_lay)
-            hbox.addWidget(right_grp, stretch=6)
+            hbox.addWidget(right_grp, stretch=6) # 60% split
             
         # === BOTTOM BUTTONS ===
         btn_layout = QHBoxLayout()
@@ -552,6 +562,7 @@ class EditDialog(QDialog):
             self.script["keep_open"] = self.chk_keep.isChecked()
             self.script["kill_window"] = self.chk_kill.isChecked()
             self.script["new_terminal"] = self.chk_new_term.isChecked()
+            self.script["run_admin"] = self.chk_admin.isChecked()
             self.script["ctrl_left_cmd"] = self.inp_ctrl_left.text()
             self.script["ctrl_right_cmd"] = self.inp_ctrl_right.text()
             self.script["use_inline"] = self.rb_inline.isChecked()
@@ -1159,10 +1170,20 @@ class MainWindow(QMainWindow):
         
         new_term = script.get("new_terminal", False)
         keep = script.get("keep_open", False)
+        admin = script.get("run_admin", False)
+
+        def run_elevated(executable, params, work_dir):
+            import ctypes
+            # 1 = SW_SHOWNORMAL
+            ctypes.windll.shell32.ShellExecuteW(None, "runas", executable, params, work_dir, 1)
 
         try:
             if path.endswith(".py"):
-                if new_term:
+                if admin:
+                    # Use cmd to host python so /k works for elevation
+                    exec_params = f'/{"k" if keep else "c"} python "{path}"'
+                    run_elevated("cmd.exe", exec_params, cwd)
+                elif new_term:
                     cmd = f'start cmd /{"k" if keep else "c"} python "{path}"'
                     subprocess.Popen(cmd, shell=True, cwd=cwd)
                 else:
@@ -1173,8 +1194,13 @@ class MainWindow(QMainWindow):
                 ps_exe = script.get("inline_type")
                 if ps_exe not in ["pwsh", "powershell"]:
                     ps_exe = "pwsh" if shutil.which("pwsh") else "powershell"
-                if new_term:
-                    no_exit = "-NoExit " if keep else ""
+                
+                if admin:
+                    no_exit = "-NoExit" if keep else ""
+                    exec_params = f'{no_exit} -File "{path}"'
+                    run_elevated(ps_exe, exec_params, cwd)
+                elif new_term:
+                    no_exit = "-NoExit" if keep else ""
                     cmd = f'start {ps_exe} {no_exit}-File "{path}"'
                     subprocess.Popen(cmd, shell=True, cwd=cwd)
                 else:
@@ -1182,7 +1208,9 @@ class MainWindow(QMainWindow):
                     if hide: cmd.insert(1, "-WindowStyle"); cmd.insert(2, "Hidden")
                     subprocess.Popen(cmd, cwd=cwd)
             else:
-                if new_term:
+                if admin:
+                    run_elevated("cmd.exe", f'/{"k" if keep else "c"} "{path}"', cwd)
+                elif new_term:
                     subprocess.Popen(f'start {path}', shell=True, cwd=cwd)
                 else:
                     subprocess.Popen(path, shell=True, cwd=cwd)
@@ -1202,13 +1230,23 @@ class MainWindow(QMainWindow):
         hide = script.get("hide_terminal", False)
         new_term = script.get("new_terminal", False)
         keep = script.get("keep_open", False)
+        admin = script.get("run_admin", False)
+
+        def run_elevated_inline(executable, params):
+            import ctypes
+            ctypes.windll.shell32.ShellExecuteW(None, "runas", executable, params, os.getcwd(), 1)
 
         if ext == ".ps1":
             ps_exe = script.get("inline_type", "powershell")
             if ps_exe not in ["pwsh", "powershell"]:
                  ps_exe = "pwsh" if shutil.which("pwsh") else "powershell"
-            if new_term:
-                no_exit = "-NoExit " if keep else ""
+            
+            if admin:
+                no_exit = "-NoExit" if keep else ""
+                exec_params = f'{no_exit} -File "{tmp}"'
+                run_elevated_inline(ps_exe, exec_params)
+            elif new_term:
+                no_exit = "-NoExit" if keep else ""
                 cmd = f'start {ps_exe} {no_exit}-File "{tmp}"'
                 subprocess.Popen(cmd, shell=True)
             else:
@@ -1216,7 +1254,9 @@ class MainWindow(QMainWindow):
                 if hide: cmd.insert(1, "-WindowStyle"); cmd.insert(2, "Hidden")
                 subprocess.Popen(cmd)
         else:
-            if new_term:
+            if admin:
+                run_elevated_inline("cmd.exe", f'/{"k" if keep else "c"} "{tmp}"')
+            elif new_term:
                 subprocess.Popen(f'start cmd /{"k" if keep else "c"} "{tmp}"', shell=True)
             else:
                 subprocess.Popen(tmp, shell=True)
