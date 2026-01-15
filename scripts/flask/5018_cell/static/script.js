@@ -1692,6 +1692,29 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
 
                     // Update the underlying input value WITHOUT triggering full re-render
                     inputElement.value = extractRawText(preview);
+
+                    // Save data
+                    const sheet = tableData.sheets[currentSheet];
+                    sheet.rows[rowIndex][colIndex] = inputElement.value;
+                    clearTimeout(window.autoSaveTimeout);
+                    window.autoSaveTimeout = setTimeout(() => saveData(), 1000);
+
+                    // Adjust cell height to accommodate new line AND scroll cursor into view
+                    requestAnimationFrame(() => {
+                        const previewHeight = preview.scrollHeight;
+                        const minHeight = 22;
+                        const targetHeight = Math.max(minHeight, previewHeight + 20); // Add padding
+                        preview.style.minHeight = targetHeight + 'px';
+                        preview.style.height = 'auto';
+                        inputElement.style.height = targetHeight + 'px';
+                        cell.style.height = 'auto';
+                        cell.style.minHeight = targetHeight + 'px';
+
+                        // Scroll the cursor (BR element) into view within the preview
+                        if (br && br.scrollIntoView) {
+                            br.scrollIntoView({ block: 'nearest', behavior: 'instant' });
+                        }
+                    });
                 }
             }
 
