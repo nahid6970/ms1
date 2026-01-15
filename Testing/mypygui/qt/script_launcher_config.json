@@ -937,27 +937,8 @@
             "width": 0,
             "height": 0,
             "corner_radius": 0,
-            "border_width": 0
-        },
-        {
-            "name": "ClipBoard",
-            "path": "C:/Users/nahid/ms/ms1/Testing/Clipboard_Capture/main.py",
-            "type": "script",
-            "hide_terminal": true,
-            "keep_open": false,
-            "kill_window": false,
-            "ctrl_left_cmd": "",
-            "ctrl_right_cmd": "",
-            "use_inline": false,
-            "inline_type": "cmd",
-            "inline_script": "",
-            "col_span": 1,
-            "row_span": 1,
-            "_runtime_height": 100,
-            "_runtime_font_size": 12,
-            "_runtime_font_family": "Consolas",
-            "_runtime_is_bold": true,
-            "_runtime_is_italic": false
+            "border_width": 0,
+            "text_color": "#aa0000"
         },
         {
             "name": "<fs:25>\udb82\udcef</fs> <br> Lock-Smith",
@@ -988,6 +969,26 @@
             "height": 0,
             "corner_radius": 0,
             "border_width": 0
+        },
+        {
+            "name": "ClipBoard",
+            "path": "C:/Users/nahid/ms/ms1/Testing/Clipboard_Capture/main.py",
+            "type": "script",
+            "hide_terminal": true,
+            "keep_open": false,
+            "kill_window": false,
+            "ctrl_left_cmd": "",
+            "ctrl_right_cmd": "",
+            "use_inline": false,
+            "inline_type": "cmd",
+            "inline_script": "",
+            "col_span": 1,
+            "row_span": 1,
+            "_runtime_height": 100,
+            "_runtime_font_size": 12,
+            "_runtime_font_family": "Consolas",
+            "_runtime_is_bold": true,
+            "_runtime_is_italic": false
         }
     ],
     "github_repos": [
