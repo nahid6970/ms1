@@ -535,12 +535,23 @@ class EditDialog(QDialog):
         vbox.addLayout(btn_layout)
 
     def reset_styles(self):
-        # Determine defaults
+        # Determine defaults from global config
         is_folder = (self.script.get("type") == "folder")
-        def_bg = CP_YELLOW if is_folder else "#FFFFFF"
-        def_fg = "#000000"
-        
         parent = self.parent()
+        
+        # Color defaults from config
+        if is_folder:
+            def_bg = self.config.get("def_folder_bg", CP_YELLOW)
+            def_fg = self.config.get("def_folder_fg", "#000000")
+            def_hbg = self.config.get("def_folder_hbg", CP_BG)
+            def_hfg = self.config.get("def_folder_hfg", def_bg)
+        else:
+            def_bg = self.config.get("def_script_bg", "#FFFFFF")
+            def_fg = self.config.get("def_script_fg", "#000000")
+            def_hbg = self.config.get("def_script_hbg", CP_BG)
+            def_hfg = self.config.get("def_script_hfg", def_bg)
+        
+        # Font defaults
         def_font = "Consolas"
         def_fs = 10
         def_bold = True
@@ -567,8 +578,8 @@ class EditDialog(QDialog):
 
         self.set_btn_color(self.btn_col_bg, def_bg)
         self.set_btn_color(self.btn_col_fg, def_fg)
-        self.set_btn_color(self.btn_col_hbg, CP_BG)
-        self.set_btn_color(self.btn_col_hfg, def_bg)
+        self.set_btn_color(self.btn_col_hbg, def_hbg)
+        self.set_btn_color(self.btn_col_hfg, def_hfg)
         self.set_btn_color(self.btn_col_brd, def_bg)
 
         # Reset Layout/Styling Metrics
