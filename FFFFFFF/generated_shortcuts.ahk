@@ -1176,3 +1176,12 @@ if __name__ == ""__main__"":
 
 ;! Check summary and unorganized data in ai
 :X:;check::Paste('here is everything added to summary or it missed something')
+
+;! AI Instruction Prompt 1
+:X:;ai1::Paste("
+(
+IMPORTANT:
+- here when i say commit then commit the current changes in my github and then push
+- only commit when i type ""commit""
+- use emoji ✅when resolved any bug and ⚠️ when facing any issue etc to make the commit message more attractive
+)")

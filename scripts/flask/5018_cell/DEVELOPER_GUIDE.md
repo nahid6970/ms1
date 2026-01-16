@@ -72,6 +72,37 @@ The application operates in two distinct view modes, toggled by the **Page Icon 
     *   **Behavior**: The underlying input becomes transparent. Typing happens "through" the preview.
     *   **Use Case**: Reading, presenting, and "Rich-Text" style editing.
 
+### Edit Mode Architecture (ContentEditable)
+When a cell is focused for editing in Markdown Mode, it transitions to **Edit Mode** using `contentEditable`:
+
+1.  **Preview to Edit Transition**:
+    *   On focus, the preview div becomes `contentEditable="true"` and adds class `editing`.
+    *   Content switches from `parseMarkdown()` (hidden syntax) to `highlightSyntax()` (visible syntax with styling).
+    *   Syntax markers like `**`, `@@`, `##` are shown with `.syn-marker` class (dimmed appearance).
+    *   User can see and edit the raw syntax while still seeing formatting applied.
+
+2.  **WYSIWYG with Visible Syntax**:
+    *   Unlike traditional WYSIWYG, syntax markers remain visible but styled differently.
+    *   Example: `**bold text**` shows as **`**`**`bold text`**`**`** (markers dimmed, content bold).
+    *   This allows users to understand and modify the markdown syntax directly.
+
+3.  **Sync with Underlying Input**:
+    *   The contentEditable div is the editing surface, but the `<input>` or `<textarea>` remains the source of truth.
+    *   On every change, `extractRawText()` extracts plain text from contentEditable and updates the input.
+    *   On blur, the preview switches back to `parseMarkdown()` rendering (syntax hidden).
+
+4.  **Key Features in Edit Mode**:
+    *   **F3 Quick Formatter**: Works with contentEditable using Range API for selections.
+    *   **Keyboard Shortcuts**: Tab, F9 (swap words), Ctrl+Shift+D (multi-cursor) adapted for contentEditable.
+    *   **Click-to-Edit**: Clicking preview enters edit mode with cursor at click position (see CLICK_TO_EDIT_CURSOR_POSITIONING.md).
+    *   **Link Handling**: Links are intercepted to open in new tab instead of entering edit mode.
+
+5.  **Related Documentation**:
+    *   **[WYSIWYG Edit Mode](md/WYSIWYG_EDIT_MODE.md):** Detailed architecture and implementation.
+    *   **[Edit Mode Architecture](md/EDIT_MODE_ARCHITECTURE.md):** Technical deep-dive.
+    *   **[Click-to-Edit Cursor Positioning](md/CLICK_TO_EDIT_CURSOR_POSITIONING.md):** Cursor mapping challenges.
+    *   **[Keyboard Shortcuts](md/KEYBOARD_SHORTCUTS.md):** All keyboard shortcuts including edit mode support.
+
 ### Data Structure (`tableData`)
 The state is managed in a central object synced with `data.json`.
 - **Sheets:** Rows, columns, and `cellStyles` (keyed by `"row-col"`).
@@ -96,12 +127,17 @@ The state is managed in a central object synced with `data.json`.
 - **[Special Markdown](md/MARKDOWN_SPECIAL.md):** Lists, Small text, custom headings, border boxes, underlines.
 - **[Highlight Shortcuts](md/COLOR_HIGHLIGHT_SHORTCUTS.md):** `==`, `!!`, `??` syntaxes.
 - **[Custom Color Syntaxes](md/CUSTOM_SYNTAX.md):** Dynamic user-defined highlighting.
-- **[WYSIWYG Edit Mode](md/WYSIWYG_EDIT_MODE.md):** ContentEditable interface with visible syntax markers.
 
 ### Advanced Editing Tools
 - **[Editing Extensions](md/EDITING_EXTENSIONS.md):** Search, Line tools, Case conversion, Multi-cursor.
 - **[Advanced Tables](md/TABLE_ADVANCED.md):** Pipe tables, Rowspan `^^`, Auto-formatting.
 - **[Math & KaTeX](md/KATEX_MATH.md):** LaTeX representation and smart fraction conversion.
+- **[Keyboard Shortcuts](md/KEYBOARD_SHORTCUTS.md):** Complete reference for all keyboard shortcuts.
+
+### Edit Mode & Architecture
+- **[WYSIWYG Edit Mode](md/WYSIWYG_EDIT_MODE.md):** ContentEditable interface with visible syntax markers.
+- **[Edit Mode Architecture](md/EDIT_MODE_ARCHITECTURE.md):** Technical deep-dive into contentEditable implementation.
+- **[Click-to-Edit Cursor Positioning](md/CLICK_TO_EDIT_CURSOR_POSITIONING.md):** Cursor mapping between preview and edit mode (UNRESOLVED).
 
 ### Backend & Core Systems
 - **[Core Systems](md/CORE_SYSTEMS.md):** Font system, Load timing, Height adjustment, Cursors.

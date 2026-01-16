@@ -4,86 +4,140 @@
 
 When users click on a markdown preview cell to enter edit mode, the cursor should appear at the exact position where they clicked. This is challenging because the preview shows rendered text (without markdown syntax), but the edit mode shows raw text (with syntax like `**bold**`, `@@italic@@`, etc.).
 
+## Current Status: UNRESOLVED
+
+The feature is partially implemented but not working correctly. The cursor positioning is off when clicking on text that has markdown syntax at the beginning.
+
 ## The Challenge
 
 **Example:**
-- Raw input: `**ctrl-check+shift+d** ABCD`
-- Rendered preview: `ctrl-check+shift+d ABCD` (bold formatting applied, syntax hidden)
-- User clicks between "AB|CD"
-- Visible offset: 21 (position in rendered text)
-- Raw offset: 23 (position in raw text, accounting for `**` markers)
+- Raw input: `##This Text Is Big Text## This Is Normal Text`
+- Rendered preview: `This Text Is Big Text This Is Normal Text` (heading formatting applied, `##` syntax hidden)
+- User clicks after "This Text Is Big Te" (19 visible characters)
+- Expected cursor position: Raw offset 21 (2 for opening `##` + 19 visible chars)
+- Actual cursor position: Raw offset 19 (incorrect, ignoring the `##` markers)
 
-The system must map the visible offset (21) to the correct raw offset (23).
+The system must map the visible offset (19) to the correct raw offset (21).
 
-## Solution Architecture
+## Problem Analysis
 
-### 1. Detect Click Position (Visible Offset)
+### What Works
+- `stripMarkdown()` function correctly removes all markdown syntax
+- Test: `stripMarkdown("##This Text Is Big Text##")` returns `"This Text Is Big Text"` (25→21 characters) ✓
+- Click detection and visible offset calculation works correctly ✓
 
+### What Doesn't Work
+- The mapping from visible offset to raw offset produces 1:1 correspondence
+- Expected mapping: `{visible 0: 2, visible 1: 3, visible 2: 4, ..., visible 19: 21}`
+- Actual mapping: `{visible 0: 0, visible 1: 1, visible 2: 2, ..., visible 19: 19}` ✗
+
+### Root Cause
+The character-by-character mapping loop finds the FIRST raw position where `stripMarkdown(substring).length === visiblePos`, which is always equal to `visiblePos` itself. This is because:
+- For visible position 0: Raw position 0 gives `stripMarkdown("") = ""` (length 0) ✓ Match found, stops
+- For visible position 1: Raw position 1 gives `stripMarkdown("#") = ""` (length 0) ✗ No match, continues...
+  - But wait, this should work! The issue might be that `stripMarkdown("#")` is NOT returning `""` as expected
+
+## Attempted Solutions
+
+### 1. Binary Search Approach (Failed)
 ```javascript
-// Get click position in rendered HTML
-let range;
-if (document.caretRangeFromPoint) {
-    range = document.caretRangeFromPoint(e.clientX, e.clientY);
-}
-
-// Extract text before caret to get visible offset
-const textBefore = extractRawTextBeforeCaret(preview, range);
-const visibleOffset = textBefore.length;
-```
-
-### 2. Map Visible Offset to Raw Offset
-
-Uses binary search for efficiency (O(log n) instead of O(n)):
-
-```javascript
-const rawInput = input.value;
-let left = 0;
-let right = rawInput.length;
-let rawOffset = 0;
-
+// Find raw position where stripMarkdown(substring) gives target visible length
 while (left <= right) {
     const mid = Math.floor((left + right) / 2);
-    const rawSubstr = rawInput.substring(0, mid);
-    const strippedSubstr = stripMarkdown(rawSubstr);
-    const visibleLen = strippedSubstr.length;
-    
-    if (visibleLen === visibleOffset) {
+    const strippedSubstr = stripMarkdown(rawInput.substring(0, mid));
+    if (strippedSubstr.length === visibleOffset) {
         rawOffset = mid;
-        break;
-    } else if (visibleLen < visibleOffset) {
+        left = mid + 1; // Keep searching right
+    } else if (strippedSubstr.length < visibleOffset) {
         left = mid + 1;
     } else {
         right = mid - 1;
     }
 }
 ```
+**Problem:** Found a position with correct visible length, but it was inside the visible content, not after markdown syntax.
 
-### 3. Fine-Tune Position
-
-Handle edge cases where binary search lands in the middle of markdown syntax:
-
+### 2. Fine-Tuning Loop (Failed)
 ```javascript
+// Move forward to skip markdown syntax
 while (rawOffset < rawInput.length) {
-    const rawSubstr = rawInput.substring(0, rawOffset);
-    const strippedSubstr = stripMarkdown(rawSubstr);
-    if (strippedSubstr.length >= visibleOffset) {
+    const currentStripped = stripMarkdown(rawInput.substring(0, rawOffset));
+    const nextStripped = stripMarkdown(rawInput.substring(0, rawOffset + 1));
+    if (currentStripped.length === visibleOffset && nextStripped.length === visibleOffset) {
+        rawOffset++; // Next char is syntax, keep moving
+    } else {
         break;
     }
-    rawOffset++;
+}
+```
+**Problem:** Logic couldn't distinguish between being inside visible content vs. being in markdown syntax.
+
+### 3. Character-by-Character Mapping (Failed)
+```javascript
+for (let visiblePos = 0; visiblePos <= strippedInput.length; visiblePos++) {
+    for (let rawPos = 0; rawPos <= rawInput.length; rawPos++) {
+        const strippedSubstr = stripMarkdown(rawInput.substring(0, rawPos));
+        if (strippedSubstr.length === visiblePos) {
+            visibleToRawMap[visiblePos] = rawPos;
+            break; // Found first match
+        }
+    }
+}
+```
+**Problem:** Produces 1:1 mapping. The issue is that it finds the FIRST raw position with matching visible length, which is always the same as the visible position.
+
+## Potential Solutions to Try
+
+### Option A: Reverse Mapping
+Instead of mapping visible→raw, map raw→visible, then invert:
+```javascript
+const rawToVisibleMap = [];
+for (let rawPos = 0; rawPos <= rawInput.length; rawPos++) {
+    const stripped = stripMarkdown(rawInput.substring(0, rawPos));
+    rawToVisibleMap[rawPos] = stripped.length;
+}
+// Then invert: for each visible position, find the LAST raw position with that visible length
+```
+
+### Option B: Incremental Tracking
+Walk through raw input once, track when visible length increases:
+```javascript
+let visibleCount = 0;
+let prevStripped = "";
+for (let rawPos = 0; rawPos <= rawInput.length; rawPos++) {
+    const stripped = stripMarkdown(rawInput.substring(0, rawPos));
+    if (stripped.length > prevStripped.length) {
+        // Visible length increased, map all new visible positions to this raw position
+        while (visibleCount < stripped.length) {
+            visibleToRawMap[visibleCount] = rawPos;
+            visibleCount++;
+        }
+    }
+    prevStripped = stripped;
 }
 ```
 
-### 4. Set Cursor Position
-
+### Option C: Parse Markdown Patterns Directly
+Instead of using `stripMarkdown`, parse markdown patterns and calculate offset adjustments:
 ```javascript
-requestAnimationFrame(() => {
-    setCaretPosition(preview, rawOffset);
-});
+// Find all markdown syntax patterns before the visible offset
+const patterns = [/\*\*(.+?)\*\*/g, /##(.+?)##/g, /@@(.+?)@@/g, ...];
+let syntaxCharsBeforeOffset = 0;
+// For each pattern match before visible offset, add syntax length to offset
 ```
 
-## Markdown Patterns Handled
+### Option D: Debug stripMarkdown Behavior
+The 1:1 mapping suggests `stripMarkdown` might not be working as expected on partial strings. Test:
+```javascript
+console.log(stripMarkdown("#"));      // Should be ""
+console.log(stripMarkdown("##"));     // Should be ""
+console.log(stripMarkdown("##T"));    // Should be "T"
+console.log(stripMarkdown("##Te"));   // Should be "Te"
+```
 
-The `stripMarkdown` function handles all these patterns:
+## Markdown Patterns to Handle
+
+The `stripMarkdown` function handles these patterns:
 - `**bold**` → bold
 - `@@italic@@` → italic
 - `__underline__` → underline
@@ -100,22 +154,6 @@ The `stripMarkdown` function handles all these patterns:
 - `{fg:#fff;bg:#000}text{/}` → colored text
 - `{link:url}text{/}` → link
 - `url[text]` → link
-- And many more...
-
-## Performance
-
-- **Binary Search:** O(log n) iterations where n = raw input length
-- **stripMarkdown calls:** ~log(n) times (once per binary search iteration)
-- **Fine-tuning:** O(k) where k is typically small (length of markdown syntax at position)
-- **Total:** O(log n) for most cases, very efficient even for large cells
-
-## Edge Cases
-
-1. **Click at start:** visibleOffset = 0 → rawOffset = 0
-2. **Click at end:** visibleOffset = max → rawOffset = rawInput.length
-3. **Click inside markdown syntax:** Fine-tuning loop ensures cursor lands after the syntax
-4. **Multiple markdown patterns:** stripMarkdown handles all patterns correctly
-5. **Nested patterns:** stripMarkdown processes in correct order
 
 ## Related Functions
 
@@ -125,22 +163,9 @@ The `stripMarkdown` function handles all these patterns:
 - `setCaretPosition()` - Sets cursor in contentEditable element
 - `highlightSyntax()` - Renders markdown with visible syntax in edit mode
 
-## Testing
+## Files Involved
 
-To test cursor positioning:
-1. Create a cell with various markdown patterns
-2. Click at different positions in the preview
-3. Check console logs for offset mapping
-4. Verify cursor appears at correct position in edit mode
+- `static/script.js` - Main implementation
+- `md/PROBLEMS_AND_FIXES.md` - Issue tracking
+- `md/CLICK_TO_EDIT_CURSOR_POSITIONING.md` - This file
 
-Example test cases:
-- `**bold** text` - click on "text"
-- `@@italic@@ **bold**` - click between patterns
-- `{fg:#f00}colored{/} normal` - click on "colored"
-- Long text with multiple patterns throughout
-
-## Future Improvements
-
-- Cache mapping for repeated clicks (if performance becomes an issue)
-- Handle RTL text and bidirectional text
-- Support for table cells with complex nested structures

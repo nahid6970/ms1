@@ -7,33 +7,82 @@ This document tracks historical bugs, issues, and their solutions. Use this to:
 
 ---
 
-## [2026-01-16 19:30] - Click-to-Edit Cursor Positioning Incorrect
+## [2026-01-16 20:00] - Click-to-Edit Cursor Positioning Incorrect (UNRESOLVED)
 
 **Problem:**
-When clicking on markdown preview to enter edit mode, the cursor appeared at the wrong position. For example, clicking between "AB|CD" in "aasdasd ABCA -> DDA" would show cursor at "aasdasd|" instead. The offset was calculated from the parsed HTML (visible text without markdown syntax), but needed to be mapped to the raw input (with syntax like `**`, `@@`, etc.).
+When clicking on markdown preview to enter edit mode, the cursor appears at the wrong position. For example:
+- Raw input: `"##This Text Is Big Text## This Is Normal Text"`
+- User clicks on "This Text Is Big Te|" (after 19 visible characters)
+- Expected: Cursor at raw position 21 (accounting for opening `##`)
+- Actual: Cursor at raw position 19 (inside the visible content, ignoring markdown syntax)
+
+The offset is calculated from the rendered HTML (visible text without markdown syntax), but needs to be mapped to the raw input (with syntax like `##`, `**`, `@@`, etc.).
 
 **Root Cause:**
-The `handlePreviewMouseDown` function calculated the click offset from the rendered HTML (which has markdown syntax stripped), but then directly used this offset to position the cursor in the raw input text (which contains markdown syntax). This caused misalignment because markdown syntax characters like `**bold**` take up 4 extra characters in raw input but 0 in visible output.
+The `handlePreviewMouseDown` function calculates the click offset from the rendered HTML (which has markdown syntax stripped), but the mapping to raw input position is not working correctly. The issue is that `stripMarkdown()` correctly removes syntax when called on the full string, but the character-by-character mapping is producing 1:1 correspondence instead of accounting for the markdown syntax characters.
 
-**Solution:**
-Implemented a binary search algorithm to efficiently map visible character positions to raw input positions:
-1. Use `caretRangeFromPoint` to get the visible offset (position in rendered text)
-2. Binary search through raw input to find the position where `stripMarkdown(substring)` gives the target visible offset
-3. Fine-tune the position to handle cases where we land in the middle of markdown syntax
-4. Set cursor at the calculated raw offset
+**Attempted Solutions:**
 
-This approach is efficient (O(log n) instead of O(n)) and handles all markdown patterns correctly by leveraging the existing `stripMarkdown` function.
+1. **Binary Search Approach (Failed):**
+   - Used binary search to find raw position where `stripMarkdown(substring)` gives target visible offset
+   - Problem: Found first position with correct visible length, but this was inside the visible content, not after markdown syntax
+   - Example: For visible offset 19, found raw position 19 instead of 21
+
+2. **Fine-Tuning Loop (Failed):**
+   - After binary search, tried to move forward to skip markdown syntax
+   - Problem: Logic couldn't distinguish between being inside visible content vs. being in markdown syntax
+
+3. **Character-by-Character Mapping (Failed):**
+   - Built a mapping array: `visibleToRawMap[visiblePos] = rawPos`
+   - For each visible position, searched for raw position where `stripMarkdown(substring)` gives that visible length
+   - Problem: Mapping produced 1:1 correspondence (visible 0→raw 0, visible 1→raw 1, etc.) even though `stripMarkdown()` correctly removes syntax
+   - Debug output showed:
+     ```
+     stripMarkdown("##This Text Is Big Text##") = "This Text Is Big Text" ✓ (25→21 chars)
+     But mapping: {visible 0: 0, visible 1: 1, visible 2: 2, ...} ✗ (should be offset by 2)
+     ```
+
+**Key Observations:**
+- `stripMarkdown()` function works correctly when tested in isolation
+- The mapping loop is broken - it finds the FIRST raw position with matching visible length, which is always the same as the visible position
+- For `"##This Text Is Big Text##"`:
+  - Raw position 0: `""` → stripped `""` (0 chars)
+  - Raw position 1: `"#"` → stripped `""` (0 chars) ← Should map visible 0 to here
+  - Raw position 2: `"##"` → stripped `""` (0 chars) ← Or here
+  - Raw position 3: `"##T"` → stripped `"T"` (1 char) ← Should map visible 1 to here
+  - But current logic maps visible 0→raw 0, visible 1→raw 1
+
+**Needed Solution:**
+The mapping needs to find the LAST raw position where visible length equals target, not the first. Or use a different approach:
+- Option A: Reverse the mapping - for each raw position, calculate visible position, then invert the map
+- Option B: Use a different algorithm that tracks markdown syntax boundaries
+- Option C: Parse markdown syntax patterns directly and calculate offset adjustments
+- Option D: Build the mapping incrementally by walking through raw input and tracking when visible length increases
 
 **Files Modified:**
 - `static/script.js` - handlePreviewMouseDown (~line 1402)
+- `md/PROBLEMS_AND_FIXES.md` - This entry
+- `md/CLICK_TO_EDIT_CURSOR_POSITIONING.md` - Technical documentation
 
 **Related Issues:** Edit mode, cursor positioning, markdown syntax
 
-**Technical Details:**
-- Binary search range: 0 to rawInput.length
-- For each midpoint, strip markdown and compare visible length to target
-- Adjust search range based on comparison
-- Final fine-tuning loop ensures exact match
+**Console Logs for Debugging:**
+```javascript
+// Example output showing the problem:
+Extracted text before caret: "This Text Is Big Te"
+Click position - visible offset: 19
+Raw input: "##This Text Is Big Text## This Is Normal Text"
+Stripped input: "This Text Is Big Text This Is Normal Text"
+stripMarkdown test:
+  Input: "##This Text Is Big Text##"
+  Output: "This Text Is Big Text"
+  Input length: 25 Output length: 21
+Mapping sample: {visible 0: 0, visible 1: 1, visible 2: 2, visible 5: 5, visible 10: 10, visible 19: 19, visible 20: 20}
+// ↑ This should be: {visible 0: 2, visible 1: 3, visible 2: 4, ..., visible 19: 21, visible 20: 22}
+```
+
+**Next Steps for Resolution:**
+Try Option D: Build mapping by walking through raw input once, tracking visible character count as it increases.
 
 ---
 

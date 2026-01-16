@@ -387,6 +387,14 @@
             "trigger": ";check",
             "replacement": "here is everything added to summary or it missed something",
             "enabled": true
+        },
+        {
+            "name": "AI Instruction Prompt 1",
+            "category": "General",
+            "description": "",
+            "trigger": ";ai1",
+            "replacement": "IMPORTANT:\n- here when i say commit then commit the current changes in my github and then push\n- only commit when i type \"commit\"\n- use emoji ✅when resolved any bug and ⚠️ when facing any issue etc to make the commit message more attractive",
+            "enabled": true
         }
     ],
     "startup_scripts": [

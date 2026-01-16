@@ -1440,46 +1440,69 @@ function handlePreviewMouseDown(e) {
     if (range) {
         const textBefore = extractRawTextBeforeCaret(preview, range);
         visibleOffset = textBefore.length;
+        console.log('Extracted text before caret:', JSON.stringify(textBefore));
+        console.log('Preview HTML:', preview.innerHTML.substring(0, 200));
     }
 
     console.log('Click position - visible offset:', visibleOffset);
 
     // Now we need to map this visible offset to the raw input offset
-    // Use binary search approach for efficiency
+    // Strategy: Count how many markdown syntax characters exist before this visible position
     const rawInput = input.value;
+    const strippedInput = stripMarkdown(rawInput);
     
-    // Binary search to find the raw position that gives us the visible offset
-    let left = 0;
-    let right = rawInput.length;
-    let rawOffset = 0;
+    console.log('Raw input:', JSON.stringify(rawInput.substring(0, 100)));
+    console.log('Stripped input:', JSON.stringify(strippedInput.substring(0, 100)));
+    console.log('Raw length:', rawInput.length, 'Stripped length:', strippedInput.length);
     
-    while (left <= right) {
-        const mid = Math.floor((left + right) / 2);
-        const rawSubstr = rawInput.substring(0, mid);
-        const strippedSubstr = stripMarkdown(rawSubstr);
-        const visibleLen = strippedSubstr.length;
-        
-        if (visibleLen === visibleOffset) {
-            rawOffset = mid;
-            break;
-        } else if (visibleLen < visibleOffset) {
-            left = mid + 1;
-            rawOffset = mid; // Keep track of last valid position
-        } else {
-            right = mid - 1;
+    // Debug: Test stripMarkdown on a small sample
+    const testInput = "##This Text Is Big Text##";
+    const testStripped = stripMarkdown(testInput);
+    console.log('stripMarkdown test:');
+    console.log('  Input:', JSON.stringify(testInput));
+    console.log('  Output:', JSON.stringify(testStripped));
+    console.log('  Input length:', testInput.length, 'Output length:', testStripped.length);
+    
+    // Build a character-by-character mapping
+    // For each position in stripped text, find corresponding position in raw text
+    const visibleToRawMap = [];
+    
+    // Debug: Check first few positions manually
+    console.log('Manual mapping check:');
+    for (let testPos = 0; testPos <= 5; testPos++) {
+        const testSubstr = rawInput.substring(0, testPos);
+        const testStripped = stripMarkdown(testSubstr);
+        console.log(`  rawPos ${testPos}: "${testSubstr}" → stripped "${testStripped}" (len ${testStripped.length})`);
+    }
+    
+    for (let visiblePos = 0; visiblePos <= strippedInput.length; visiblePos++) {
+        // Find the raw position where we have exactly visiblePos visible characters
+        for (let rawPos = 0; rawPos <= rawInput.length; rawPos++) {
+            const rawSubstr = rawInput.substring(0, rawPos);
+            const strippedSubstr = stripMarkdown(rawSubstr);
+            
+            if (strippedSubstr.length === visiblePos) {
+                visibleToRawMap[visiblePos] = rawPos;
+                if (visiblePos <= 5 || visiblePos === 19 || visiblePos === 20) {
+                    console.log(`  Mapping: visible ${visiblePos} → raw ${rawPos}`);
+                }
+                break;
+            }
         }
     }
     
-    // Fine-tune: we might be in the middle of markdown syntax
-    // Move forward until we get the exact visible offset
-    while (rawOffset < rawInput.length) {
-        const rawSubstr = rawInput.substring(0, rawOffset);
-        const strippedSubstr = stripMarkdown(rawSubstr);
-        if (strippedSubstr.length >= visibleOffset) {
-            break;
-        }
-        rawOffset++;
-    }
+    // Get the raw offset for our visible offset
+    let rawOffset = visibleToRawMap[visibleOffset] || rawInput.length;
+    
+    console.log('Mapping sample:', {
+        'visible 0': visibleToRawMap[0],
+        'visible 1': visibleToRawMap[1],
+        'visible 2': visibleToRawMap[2],
+        'visible 5': visibleToRawMap[5],
+        'visible 10': visibleToRawMap[10],
+        'visible 19': visibleToRawMap[19],
+        'visible 20': visibleToRawMap[20]
+    });
     
     console.log('Offset mapping:');
     console.log('- Visible offset:', visibleOffset);
