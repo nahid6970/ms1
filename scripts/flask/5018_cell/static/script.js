@@ -39,7 +39,7 @@ function initializeApp() {
     document.getElementById('renameForm').onsubmit = handleRenameFormSubmit;
 
     // Set up keyboard shortcuts
-    document.addEventListener('keydown', handleKeyboardShortcuts);
+    document.addEventListener('keydown', handleKeyboardShortcuts, true); // Use capture phase
 
     // Prevent scroll jump on Enter, Cut, and other operations in textareas
     document.addEventListener('beforeinput', e => {
@@ -649,24 +649,46 @@ function handleKeyboardShortcuts(e) {
         e.preventDefault();
         e.stopPropagation();
         const activeElement = document.activeElement;
+        
+        // This feature only works in INPUT/TEXTAREA, not contentEditable
+        if (activeElement.classList && activeElement.classList.contains('markdown-preview')) {
+            showToast('Select next occurrence only works in raw mode (📄 button)', 'info');
+            return;
+        }
+        
+        // Handle input/textarea
         if (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA') {
             selectNextOccurrence(activeElement);
         }
     }
 
-    // Ctrl+Alt+Down to add cursor below (multi-line cursor)
+    // Ctrl+Alt+Down to add cursor below (multi-line cursor) - textarea only
     if (e.ctrlKey && e.altKey && e.key === 'ArrowDown') {
         e.preventDefault();
         const activeElement = document.activeElement;
+        
+        // This feature only works in TEXTAREA, not contentEditable
+        if (activeElement.classList && activeElement.classList.contains('markdown-preview')) {
+            showToast('Multi-cursor only works in raw mode (📄 button)', 'info');
+            return;
+        }
+        
         if (activeElement.tagName === 'TEXTAREA') {
             addCursorBelow(activeElement);
         }
     }
 
-    // Ctrl+Alt+Up to add cursor above (multi-line cursor)
+    // Ctrl+Alt+Up to add cursor above (multi-line cursor) - textarea only
     if (e.ctrlKey && e.altKey && e.key === 'ArrowUp') {
         e.preventDefault();
         const activeElement = document.activeElement;
+        
+        // This feature only works in TEXTAREA, not contentEditable
+        if (activeElement.classList && activeElement.classList.contains('markdown-preview')) {
+            showToast('Multi-cursor only works in raw mode (📄 button)', 'info');
+            return;
+        }
+        
         if (activeElement.tagName === 'TEXTAREA') {
             addCursorAbove(activeElement);
         }
@@ -1659,6 +1681,57 @@ function setCaretPosition(element, offset) {
     }
     sel.removeAllRanges();
     sel.addRange(range);
+}
+
+// Select text at specific position in contentEditable element
+function selectTextAtPosition(element, startOffset, endOffset) {
+    const sel = window.getSelection();
+    const startRange = document.createRange();
+    const endRange = document.createRange();
+    
+    let currentOffset = 0;
+    let startNode = null, startNodeOffset = 0;
+    let endNode = null, endNodeOffset = 0;
+    let startFound = false, endFound = false;
+
+    const walk = (node) => {
+        if (startFound && endFound) return;
+        
+        if (node.nodeType === Node.TEXT_NODE) {
+            const textLength = node.textContent.replace(/\u200B/g, '').length;
+            
+            if (!startFound && currentOffset + textLength >= startOffset) {
+                startNode = node;
+                startNodeOffset = startOffset - currentOffset;
+                startFound = true;
+            }
+            
+            if (!endFound && currentOffset + textLength >= endOffset) {
+                endNode = node;
+                endNodeOffset = endOffset - currentOffset;
+                endFound = true;
+            }
+            
+            currentOffset += textLength;
+        } else if (node.nodeName === 'BR') {
+            currentOffset += 1;
+        } else {
+            for (const child of node.childNodes) {
+                walk(child);
+                if (startFound && endFound) break;
+            }
+        }
+    };
+
+    walk(element);
+    
+    if (startNode && endNode) {
+        const range = document.createRange();
+        range.setStart(startNode, startNodeOffset);
+        range.setEnd(endNode, endNodeOffset);
+        sel.removeAllRanges();
+        sel.addRange(range);
+    }
 }
 
 function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null) {

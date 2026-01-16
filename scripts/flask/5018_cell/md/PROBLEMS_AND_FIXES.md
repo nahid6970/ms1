@@ -7,6 +7,33 @@ This document tracks historical bugs, issues, and their solutions. Use this to:
 
 ---
 
+## [2026-01-16 17:30] - Keyboard Shortcuts Not Working (F9, Ctrl+Shift+D, Ctrl+Alt+Arrows)
+
+**Problem:**
+1. F9 (swap words) not working in contentEditable mode
+2. Ctrl+Shift+D (select next occurrence) not working at all
+3. Ctrl+Alt+Up/Down (multi-cursor) not working at all
+
+**Root Cause:**
+1. F9 was only implemented for INPUT/TEXTAREA, not contentEditable
+2. Ctrl+Shift+D and Ctrl+Alt+arrows were being detected by the browser but the handlers were checking for INPUT/TEXTAREA only, and the active element was the contentEditable DIV
+3. These are complex multi-cursor features that require direct access to `.value`, `.selectionStart`, `.selectionEnd` properties which don't exist in contentEditable
+
+**Solution:**
+1. **F9**: Updated to handle both contentEditable and INPUT/TEXTAREA modes using the same pattern as other formatter functions (check `isContentEditable`, use `window.getSelection()` and `Range` API, update underlying input)
+2. **Ctrl+Shift+D, Ctrl+Alt+arrows**: These features require raw mode because they manipulate text selections and cursors in ways that are incompatible with contentEditable's DOM structure. Added user-friendly toast messages: "Select next occurrence only works in raw mode (📄 button)" and "Multi-cursor only works in raw mode (📄 button)"
+3. Moved keyboard event listener to capture phase (`addEventListener(..., true)`) to catch events before browser defaults
+4. Added `e.preventDefault()` at the top of Ctrl+Alt+arrow handlers to prevent Windows screen rotation shortcuts
+
+**Files Modified:**
+- `static/script.js` - F9 handler (~line 561), Ctrl+Shift+D handler (~line 660), Ctrl+Alt+arrow handlers (~line 675, 690), event listener registration (~line 42)
+
+**Related Issues:** ContentEditable vs INPUT/TEXTAREA feature compatibility
+
+**Note:** Multi-cursor features (Ctrl+Shift+D, Ctrl+Alt+arrows) are intentionally limited to raw mode because they require precise character-level manipulation that's not feasible in contentEditable's rich DOM structure.
+
+---
+
 ## [2026-01-16 17:00] - F3 Formatting Not Persisting After Refresh
 
 **Problem:**
