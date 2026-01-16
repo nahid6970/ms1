@@ -12049,6 +12049,61 @@ function applyVariableFontSize(event) {
     if (!quickFormatterTarget) return;
 
     const input = quickFormatterTarget;
+    
+    // Handle contenteditable (WYSIWYG mode)
+    if (quickFormatterSelection.isContentEditable) {
+        const selectedText = quickFormatterSelection.text || '';
+        
+        if (!selectedText) {
+            showToast('Please select text first', 'error');
+            return;
+        }
+
+        // Prompt for font size
+        const size = prompt('Enter font size multiplier (e.g., 2 for 2x, 1.5 for 1.5x, 0.8 for smaller):', '2');
+
+        if (size === null) return; // User cancelled
+
+        const sizeNum = parseFloat(size);
+        if (isNaN(sizeNum) || sizeNum <= 0) {
+            showToast('Invalid size. Please enter a positive number.', 'error');
+            return;
+        }
+
+        // Apply the variable font size syntax
+        const formattedText = `#${sizeNum}#${selectedText}#/#`;
+        
+        // Insert formatted text into contentEditable
+        const range = quickFormatterSelection.range;
+        range.deleteContents();
+        const textNode = document.createTextNode(formattedText);
+        range.insertNode(textNode);
+        
+        // Update underlying input element
+        const cell = input.closest('td');
+        if (cell) {
+            const inputElement = cell.querySelector('input, textarea');
+            if (inputElement) {
+                inputElement.value = extractRawText(input);
+                const changeEvent = new Event('input', { bubbles: true });
+                inputElement.dispatchEvent(changeEvent);
+            }
+        }
+        
+        // Set cursor after the formatted text
+        const newRange = document.createRange();
+        newRange.setStartAfter(textNode);
+        newRange.collapse(true);
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(newRange);
+
+        closeQuickFormatter();
+        showToast(`Font size ${sizeNum}x applied`, 'success');
+        return;
+    }
+
+    // Handle input/textarea (legacy mode)
     const start = quickFormatterSelection.start;
     const end = quickFormatterSelection.end;
     const selectedText = input.value.substring(start, end);
@@ -12095,6 +12150,64 @@ function applyBorderBox(event) {
     if (!quickFormatterTarget) return;
 
     const input = quickFormatterTarget;
+    
+    // Handle contenteditable (WYSIWYG mode)
+    if (quickFormatterSelection.isContentEditable) {
+        const selectedText = quickFormatterSelection.text || '';
+        
+        if (!selectedText) {
+            showToast('Please select text first', 'error');
+            return;
+        }
+
+        // Prompt for color
+        const colorOptions = 'R (Red), G (Green), B (Blue), Y (Yellow), O (Orange), P (Purple), C (Cyan), W (White), K (Black), GR (Gray)';
+        const color = prompt(`Enter border color:\n${colorOptions}`, 'R');
+
+        if (color === null) return; // User cancelled
+
+        const colorUpper = color.trim().toUpperCase();
+        const validColors = ['R', 'G', 'B', 'Y', 'O', 'P', 'C', 'W', 'K', 'GR'];
+
+        if (!validColors.includes(colorUpper)) {
+            showToast('Invalid color. Use: R, G, B, Y, O, P, C, W, K, or GR', 'error');
+            return;
+        }
+
+        // Apply the border box syntax
+        const formattedText = `#${colorUpper}#${selectedText}#/#`;
+        
+        // Insert formatted text into contentEditable
+        const range = quickFormatterSelection.range;
+        range.deleteContents();
+        const textNode = document.createTextNode(formattedText);
+        range.insertNode(textNode);
+        
+        // Update underlying input element
+        const cell = input.closest('td');
+        if (cell) {
+            const inputElement = cell.querySelector('input, textarea');
+            if (inputElement) {
+                inputElement.value = extractRawText(input);
+                const changeEvent = new Event('input', { bubbles: true });
+                inputElement.dispatchEvent(changeEvent);
+            }
+        }
+        
+        // Set cursor after the formatted text
+        const newRange = document.createRange();
+        newRange.setStartAfter(textNode);
+        newRange.collapse(true);
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(newRange);
+
+        closeQuickFormatter();
+        showToast(`${colorUpper} border applied`, 'success');
+        return;
+    }
+
+    // Handle input/textarea (legacy mode)
     const start = quickFormatterSelection.start;
     const end = quickFormatterSelection.end;
     const selectedText = input.value.substring(start, end);

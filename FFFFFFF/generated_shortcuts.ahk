@@ -1185,3 +1185,27 @@ IMPORTANT:
 - only commit when i type ""commit""
 - use emoji ✅when resolved any bug and ⚠️ when facing any issue etc to make the commit message more attractive
 )")
+
+;! AI - Instruction For md file
+:X:;ai2::Paste("
+(
+For Projects Always create a Dev.md file and discuss important thing about the project general idea important things etc and also make a md directory where u will add Provlems_Solution.md where u will update  problems and how we resolved them in this structure
+
+## Template for New Entries
+## [YYYY-MM-DD HH:MM] - Brief Problem Title
+
+**Problem:** 
+Description of the issue observed
+
+**Root Cause:** 
+What was actually causing the problem
+
+**Solution:** 
+How it was fixed (include key code changes)
+
+**Files Modified:**
+- `file1.js` - Brief description of change
+- `file2.css` - Brief description of change
+
+**Related Issues:** Links to related problems or ""None""
+)")
