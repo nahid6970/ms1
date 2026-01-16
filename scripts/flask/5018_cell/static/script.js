@@ -9228,16 +9228,40 @@ function handleMultiCursorMove(input, key) {
         newSelectedMatches.push({ start: newStart, end: newEnd });
     });
 
-    multiSelectionData.selectedMatches = newSelectedMatches;
-    // Keep matches synced with current cursor positions so "Select Next" works relative to current cursors
-    multiSelectionData.matches = [...newSelectedMatches];
+    // Consolidate cursors on the same line (for Home/End keys)
+    if (key === 'Home' || key === 'End') {
+        const consolidatedMatches = [];
+        const seenPositions = new Set();
+        
+        for (const match of newSelectedMatches) {
+            if (!seenPositions.has(match.start)) {
+                consolidatedMatches.push(match);
+                seenPositions.add(match.start);
+            }
+        }
+        
+        multiSelectionData.selectedMatches = consolidatedMatches;
+        multiSelectionData.matches = [...consolidatedMatches];
+        
+        // Update indicator count
+        showMultiSelectionIndicator(input, consolidatedMatches.length, consolidatedMatches.length);
+        showSelectionMarkers(input, consolidatedMatches);
+        
+        // Move native caret to the last match
+        const last = consolidatedMatches[consolidatedMatches.length - 1];
+        input.setSelectionRange(last.start, last.end);
+    } else {
+        multiSelectionData.selectedMatches = newSelectedMatches;
+        // Keep matches synced with current cursor positions so "Select Next" works relative to current cursors
+        multiSelectionData.matches = [...newSelectedMatches];
 
-    // Update visuals
-    showSelectionMarkers(input, newSelectedMatches);
+        // Update visuals
+        showSelectionMarkers(input, newSelectedMatches);
 
-    // Move native caret to the last "match"
-    const last = newSelectedMatches[newSelectedMatches.length - 1];
-    input.setSelectionRange(last.start, last.end);
+        // Move native caret to the last "match"
+        const last = newSelectedMatches[newSelectedMatches.length - 1];
+        input.setSelectionRange(last.start, last.end);
+    }
 }
 
 function clearMultiSelection() {
