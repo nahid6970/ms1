@@ -11594,6 +11594,87 @@ function applyBorderBox(event) {
     showToast(`${colorUpper} border applied`, 'success');
 }
 
+// Remove All Formatting Function (strips markdown syntax)
+function removeFormatting(event) {
+    console.log('removeFormatting called!');
+    
+    if (!quickFormatterTarget) {
+        showToast('No target element', 'error');
+        return;
+    }
+
+    const input = quickFormatterTarget;
+    let selectedText = '';
+    
+    // Handle contentEditable (WYSIWYG mode)
+    if (quickFormatterSelection.isContentEditable) {
+        selectedText = quickFormatterSelection.text || '';
+    } else {
+        // Handle input/textarea (legacy mode)
+        const start = quickFormatterSelection.start;
+        const end = quickFormatterSelection.end;
+        selectedText = input.value.substring(start, end);
+    }
+
+    if (!selectedText) {
+        showToast('No text selected', 'warning');
+        return;
+    }
+
+    // Use the stripMarkdown function to remove all formatting
+    const cleanText = stripMarkdown(selectedText);
+
+    // Handle contentEditable (WYSIWYG mode)
+    if (quickFormatterSelection.isContentEditable) {
+        const range = quickFormatterSelection.range;
+        range.deleteContents();
+        const textNode = document.createTextNode(cleanText);
+        range.insertNode(textNode);
+        
+        // Update the underlying input value
+        const rawText = extractRawText(input);
+        const actualInput = input.previousElementSibling;
+        if (actualInput && (actualInput.tagName === 'INPUT' || actualInput.tagName === 'TEXTAREA')) {
+            actualInput.value = rawText;
+            
+            // Trigger change event
+            const changeEvent = new Event('input', { bubbles: true });
+            actualInput.dispatchEvent(changeEvent);
+        }
+        
+        // Set cursor at the end of clean text
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        const newRange = document.createRange();
+        newRange.setStartAfter(textNode);
+        newRange.setEndAfter(textNode);
+        selection.addRange(newRange);
+        
+    } else {
+        // Handle input/textarea (legacy mode)
+        const start = quickFormatterSelection.start;
+        const end = quickFormatterSelection.end;
+        
+        const newText = input.value.substring(0, start) +
+            cleanText +
+            input.value.substring(end);
+
+        input.value = newText;
+
+        // Trigger change event to update cell
+        const changeEvent = new Event('input', { bubbles: true });
+        input.dispatchEvent(changeEvent);
+
+        // Set cursor position at the end of the clean text
+        const newCursorPos = start + cleanText.length;
+        input.setSelectionRange(newCursorPos, newCursorPos);
+        input.focus();
+    }
+
+    closeQuickFormatter();
+    showToast('Formatting removed', 'success');
+}
+
 // ==========================================
 // PDF EXPORT FEATURE
 // ==========================================
