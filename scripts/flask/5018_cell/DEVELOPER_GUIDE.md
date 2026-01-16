@@ -137,7 +137,7 @@ The state is managed in a central object synced with `data.json`.
 ### Edit Mode & Architecture
 - **[WYSIWYG Edit Mode](md/WYSIWYG_EDIT_MODE.md):** ContentEditable interface with visible syntax markers.
 - **[Edit Mode Architecture](md/EDIT_MODE_ARCHITECTURE.md):** Technical deep-dive into contentEditable implementation.
-- **[Click-to-Edit Cursor Positioning](md/CLICK_TO_EDIT_CURSOR_POSITIONING.md):** Cursor mapping between preview and edit mode (UNRESOLVED).
+    *   **[Click-to-Edit Cursor Positioning](md/CLICK_TO_EDIT_CURSOR_POSITIONING.md):** Cursor mapping between preview and edit mode (RESOLVED).
 
 ### Backend & Core Systems
 - **[Core Systems](md/CORE_SYSTEMS.md):** Font system, Load timing, Height adjustment, Cursors.

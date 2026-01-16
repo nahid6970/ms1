@@ -1399,6 +1399,122 @@ function checkHasMarkdown(value) {
 }
 
 
+function calculateVisibleToRawMap(rawInput) {
+    const hiddenRanges = [];
+
+    // Helper to add hidden range
+    const addRange = (start, end) => {
+        if (start < end) hiddenRanges.push({start, end});
+    };
+
+    const patterns = [
+        { regex: /\[\[(.+?)\]\]/g, keepGroup: 1 },
+        { regex: /\{[^}]*\}(.+?)\{\/\}/g, keepGroup: 1 },
+        { regex: /\*\*(.+?)\*\*/g, keepGroup: 1 },
+        { regex: /_[A-Z]+_(.+?)__/g, keepGroup: 1 },
+        { regex: /__(.+?)__/g, keepGroup: 1 },
+        { regex: /@@(.+?)@@/g, keepGroup: 1 },
+        { regex: /#[\d.]+#(.+?)#\/#/g, keepGroup: 1 },
+        { regex: /#[A-Z]+#(.+?)#\/#/g, keepGroup: 1 },
+        { regex: /##(.+?)##/g, keepGroup: 1 },
+        { regex: /\.\.(.+?)\.\./g, keepGroup: 1 },
+        { regex: /_\.(.+?)\._/g, keepGroup: 1 },
+        { regex: /^[A-Z]*-{5,}(?:[A-Z]+(?:-[A-Z]+)?|#[0-9a-fA-F]{3,6}(?:-#[0-9a-fA-F]{3,6})?)?$/gm, keepGroup: -1 },
+        { regex: /```(.+?)```/gs, keepGroup: 1 },
+        { regex: /`(.+?)`/g, keepGroup: 1 },
+        { regex: /~~(.+?)~~/g, keepGroup: 1 },
+        { regex: /==(.+?)==/g, keepGroup: 1 },
+        { regex: /!!(.+?)!!/g, keepGroup: 1 },
+        { regex: /\?\?(.+?)\?\?/g, keepGroup: 1 },
+        { regex: /\\\((.*?)\\\)/g, keepGroup: 1 },
+        { regex: /\^(.+?)\^/g, keepGroup: 1 },
+        { regex: /~(.+?)~/g, keepGroup: 1 },
+        { regex: /\{link:[^}]*\}(.+?)\{\/\}/g, keepGroup: 1 },
+        { regex: /(https?:\/\/[^\s\[]+)\[(.+?)\]/g, keepGroup: 2 },
+        { regex: /\{\{(.+?)\}\}/g, keepGroup: 1 },
+        { regex: /^\s*-\s+/gm, keepGroup: -1 },
+        { regex: /^\s*--\s+/gm, keepGroup: -1 },
+        { regex: /^\s*---\s+/gm, keepGroup: -1 },
+        { regex: /^Table\*\d+(?:_[^\s\n,]+)?(?:_[^\s\n,]+)?(?:[\n\s,]+)/i, keepGroup: -1 },
+        { regex: /^Timeline(?:C)?(?:-[A-Z]+)?\*(.+?)$/gm, keepGroup: 1 },
+        { regex: /\[(\d+)(?:-[A-Z]+)?\](\S+)/g, keepGroup: 2 }
+    ];
+
+    if (typeof customColorSyntaxes !== 'undefined') {
+        customColorSyntaxes.forEach(syntax => {
+            if (!syntax.marker) return;
+            const escapedMarker = syntax.marker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            patterns.push({
+                 regex: new RegExp(escapedMarker + '(.+?)' + escapedMarker, 'g'),
+                 keepGroup: 1
+            });
+        });
+    }
+
+    patterns.forEach(p => {
+        p.regex.lastIndex = 0;
+        let match;
+        while ((match = p.regex.exec(rawInput)) !== null) {
+            const fullMatchStart = match.index;
+            const fullMatchEnd = fullMatchStart + match[0].length;
+            
+            if (p.keepGroup === -1) {
+                addRange(fullMatchStart, fullMatchEnd);
+            } else if (match[p.keepGroup]) {
+                const groupVal = match[p.keepGroup];
+                const groupStartInMatch = match[0].indexOf(groupVal);
+                
+                if (groupStartInMatch !== -1) {
+                    const groupStartAbs = fullMatchStart + groupStartInMatch;
+                    const groupEndAbs = groupStartAbs + groupVal.length;
+                    
+                    addRange(fullMatchStart, groupStartAbs);
+                    addRange(groupEndAbs, fullMatchEnd);
+                }
+            }
+        }
+    });
+
+    hiddenRanges.sort((a, b) => a.start - b.start);
+    
+    const mergedRanges = [];
+    if (hiddenRanges.length > 0) {
+        let current = hiddenRanges[0];
+        for (let i = 1; i < hiddenRanges.length; i++) {
+            const next = hiddenRanges[i];
+            if (next.start < current.end) {
+                current.end = Math.max(current.end, next.end);
+            } else {
+                mergedRanges.push(current);
+                current = next;
+            }
+        }
+        mergedRanges.push(current);
+    }
+
+    const map = [];
+    let rawPos = 0;
+    let visiblePos = 0;
+    
+    while (rawPos <= rawInput.length) {
+        let isHidden = false;
+        for (const range of mergedRanges) {
+            if (rawPos >= range.start && rawPos < range.end) {
+                isHidden = true;
+                break;
+            }
+        }
+        
+        if (!isHidden) {
+            map[visiblePos] = rawPos;
+            visiblePos++;
+        }
+        rawPos++;
+    }
+    
+    return map;
+}
+
 function handlePreviewMouseDown(e) {
     // Only handle left clicks
     if (e.button !== 0) return;
@@ -1449,66 +1565,13 @@ function handlePreviewMouseDown(e) {
     // Now we need to map this visible offset to the raw input offset
     // Strategy: Count how many markdown syntax characters exist before this visible position
     const rawInput = input.value;
-    const strippedInput = stripMarkdown(rawInput);
     
-    console.log('Raw input:', JSON.stringify(rawInput.substring(0, 100)));
-    console.log('Stripped input:', JSON.stringify(strippedInput.substring(0, 100)));
-    console.log('Raw length:', rawInput.length, 'Stripped length:', strippedInput.length);
-    
-    // Debug: Test stripMarkdown on a small sample
-    const testInput = "##This Text Is Big Text##";
-    const testStripped = stripMarkdown(testInput);
-    console.log('stripMarkdown test:');
-    console.log('  Input:', JSON.stringify(testInput));
-    console.log('  Output:', JSON.stringify(testStripped));
-    console.log('  Input length:', testInput.length, 'Output length:', testStripped.length);
-    
-    // Build a character-by-character mapping
-    // For each position in stripped text, find corresponding position in raw text
-    const visibleToRawMap = [];
-    
-    // Debug: Check first few positions manually
-    console.log('Manual mapping check:');
-    for (let testPos = 0; testPos <= 5; testPos++) {
-        const testSubstr = rawInput.substring(0, testPos);
-        const testStripped = stripMarkdown(testSubstr);
-        console.log(`  rawPos ${testPos}: "${testSubstr}" → stripped "${testStripped}" (len ${testStripped.length})`);
-    }
-    
-    for (let visiblePos = 0; visiblePos <= strippedInput.length; visiblePos++) {
-        // Find the raw position where we have exactly visiblePos visible characters
-        for (let rawPos = 0; rawPos <= rawInput.length; rawPos++) {
-            const rawSubstr = rawInput.substring(0, rawPos);
-            const strippedSubstr = stripMarkdown(rawSubstr);
-            
-            if (strippedSubstr.length === visiblePos) {
-                visibleToRawMap[visiblePos] = rawPos;
-                if (visiblePos <= 5 || visiblePos === 19 || visiblePos === 20) {
-                    console.log(`  Mapping: visible ${visiblePos} → raw ${rawPos}`);
-                }
-                break;
-            }
-        }
-    }
+    // Use the robust mapping function to find the raw offset
+    const visibleToRawMap = calculateVisibleToRawMap(rawInput);
     
     // Get the raw offset for our visible offset
-    let rawOffset = visibleToRawMap[visibleOffset] || rawInput.length;
-    
-    console.log('Mapping sample:', {
-        'visible 0': visibleToRawMap[0],
-        'visible 1': visibleToRawMap[1],
-        'visible 2': visibleToRawMap[2],
-        'visible 5': visibleToRawMap[5],
-        'visible 10': visibleToRawMap[10],
-        'visible 19': visibleToRawMap[19],
-        'visible 20': visibleToRawMap[20]
-    });
-    
-    console.log('Offset mapping:');
-    console.log('- Visible offset:', visibleOffset);
-    console.log('- Raw offset:', rawOffset);
-    console.log('- Context:', rawInput.substring(Math.max(0, rawOffset - 20), Math.min(rawInput.length, rawOffset + 20)));
-    console.log('- Cursor will be before:', rawInput[rawOffset]);
+    let rawOffset = visibleToRawMap[visibleOffset];
+    if (rawOffset === undefined) rawOffset = rawInput.length;
 
     // Save scroll position
     const tableContainer = document.querySelector('.table-container');
