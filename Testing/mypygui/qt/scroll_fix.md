@@ -1,80 +1,66 @@
-# Height & Scroll Comparison: old_version.py vs script_manager_gui_qt.py
+# Script Manager GUI Qt - Development Notes
 
-## Key Differences Found
+## Issue 1: Height & Scroll Fix
 
-### 1. CyberButton Size Policy
+### Problem
+Items height was limited by window size - couldn't scroll when items were tall.
 
-**Old (working):**
-```python
-self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-```
+### Root Cause
+CyberButton stylesheet had `min-height: 20px;` and `!important` on hover styles that weren't in the original working version.
 
-**New (broken):**
-```python
-self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
-```
-
-### 2. CyberButton Default Height Fallback
-
-**Old (working):**
-```python
-if h > 0: self.setFixedHeight(h)
-else: self.setMinimumHeight(45)
-```
-
-**New (broken):**
-```python
-if h > 0: self.setFixedHeight(h)
-# Global default height is handled in refresh_grid for consistency
-```
-
-The new version removed `setMinimumHeight(45)` fallback.
-
-### 3. refresh_grid Height Logic
-
-**Old (working - simple):**
-```python
-btn = CyberButton(script.get("name", "Unnamed"), script_data=script)
-
-# Apply dynamic preferences
-if script.get("height", 0) == 0:
-    btn.setFixedHeight(def_h)
-```
-
-**New (broken - complex):**
-```python
-btn = CyberButton(script.get("name", "Unnamed"), script_data=script)
-
-# Determine effective height for this specific item
-item_h = script.get("height", 0)
-if item_h == 0: item_h = def_h
-
-# Scale height by row span to ensure it actually takes up the space
-spacing = 10
-total_h = (item_h * r_span) + (spacing * (r_span - 1))
-btn.setFixedHeight(total_h) 
-```
-
-The new version adds row_span calculation which may cause issues.
-
-### 4. Grid Row Stretch
-
-**Old:** No row stretch added after items
-
-**New:** Adds stretch at end:
-```python
-self.grid.setRowStretch(r + 1, 1)
-```
+### Fix
+Reverted CyberButton stylesheet to match old_version.py exactly. Keep `SizePolicy.Expanding` for both directions.
 
 ---
 
-## Recommendation
+## Issue 2: Row Span Fix
 
-To fix the new version while keeping scroll working:
+### Problem
+Row span wasn't working properly - items didn't span multiple rows correctly.
 
-1. Keep `SizePolicy.Policy.Fixed` for vertical (needed for scroll)
-2. Restore `setMinimumHeight(45)` fallback in CyberButton
-3. Simplify the height logic in refresh_grid back to the old approach
-4. Remove or keep the row stretch (test both)
+### Fix
+- Added `Qt.AlignmentFlag.AlignTop` to grid widget placement
+- For row_span > 1, calculate total height as: `(item_h * r_span) + (spacing * (r_span - 1))`
 
-The old version's height worked because buttons had `Expanding` vertical policy which let them fill space. The new version needs `Fixed` for scroll, but the height calculation became too complex.
+---
+
+## Issue 3: Icon Settings
+
+### Features Added
+- Icon width (W) - 0 = auto
+- Icon height (H) - 0 = auto  
+- Icon gap - space between icon and text (default: 2px)
+- Icon position - top/left/right/bottom/center (center = icon only, no text)
+
+### Reset Behavior
+Both `reset_styles()` in EditDialog and `reset_item_styles()` in main window:
+- **Preserve** `icon_path` (keeps the icon file)
+- **Reset** icon settings to defaults: width=0, height=0, gap=2, position="top"
+
+---
+
+## Issue 4: Delete Dialog & Add Buttons
+
+### Changes
+- Replaced single "+" button with "+S" (green, add script) and "+F" (yellow, add folder)
+- Custom styled delete dialog with cyberpunk theme (QDialog instead of QMessageBox)
+- Context menu has "Add Script" and "Add Folder" options
+
+---
+
+## Issue 5: Settings Dialog
+
+### Features Added
+- Font family dropdown (QFontComboBox, non-editable, max-width ~180px)
+- Bold checkbox
+- Italic checkbox
+- Checkbox styling matches Edit panel (yellow fill when checked)
+- Hidden scrollbars
+- Removed "Size:" label from window size row
+
+---
+
+## Issue 6: Context Menu
+
+### Added Options
+- "Reset Styles" - resets item to global defaults (preserves icon path)
