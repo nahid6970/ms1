@@ -319,6 +319,8 @@ function handleKeyboardShortcuts(e) {
         // Handle contentEditable (markdown preview mode)
         if (activeElement.classList && activeElement.classList.contains('markdown-preview') && activeElement.isContentEditable) {
             e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
             
             // Insert tab character
             const selection = window.getSelection();
@@ -329,21 +331,35 @@ function handleKeyboardShortcuts(e) {
                 range.insertNode(textNode);
                 
                 // Move cursor after tab
-                range.setStartAfter(textNode);
-                range.setEndAfter(textNode);
+                const newRange = document.createRange();
+                newRange.setStartAfter(textNode);
+                newRange.setEndAfter(textNode);
                 selection.removeAllRanges();
-                selection.addRange(range);
+                selection.addRange(newRange);
                 
-                // Update underlying input
+                // Update underlying input and data WITHOUT triggering input event
                 const rawText = extractRawText(activeElement);
                 const actualInput = activeElement.previousElementSibling;
                 if (actualInput && (actualInput.tagName === 'INPUT' || actualInput.tagName === 'TEXTAREA')) {
                     actualInput.value = rawText;
-                    const event = new Event('input', { bubbles: true });
-                    actualInput.dispatchEvent(event);
+                    
+                    // Update tableData directly
+                    const cell = activeElement.closest('td');
+                    const row = cell.parentElement;
+                    const rowIndex = parseInt(row.dataset.row);
+                    const colIndex = parseInt(cell.dataset.col);
+                    
+                    if (!isNaN(rowIndex) && !isNaN(colIndex)) {
+                        const sheet = tableData.sheets[currentSheet];
+                        sheet.rows[rowIndex][colIndex] = rawText;
+                        
+                        // Debounced save
+                        clearTimeout(window.autoSaveTimeout);
+                        window.autoSaveTimeout = setTimeout(() => saveData(), 1000);
+                    }
                 }
             }
-            return;
+            return false;
         }
         
         // Handle input/textarea (raw mode)
@@ -351,6 +367,7 @@ function handleKeyboardShortcuts(e) {
             activeElement.closest('td:not(.row-number)')) {
 
             e.preventDefault();
+            e.stopPropagation();
             const start = activeElement.selectionStart;
             const end = activeElement.selectionEnd;
             const value = activeElement.value;
@@ -359,12 +376,14 @@ function handleKeyboardShortcuts(e) {
             activeElement.value = value.substring(0, start) + "\t" + value.substring(end);
 
             // Put cursor after the tab
-            activeElement.selectionStart = activeElement.selectionEnd = start + 1;
+            const newPos = start + 1;
+            activeElement.selectionStart = activeElement.selectionEnd = newPos;
 
             // Trigger change event to update cell
             const changeEvent = new Event('input', { bubbles: true });
             activeElement.dispatchEvent(changeEvent);
-            return;
+            
+            return false;
         }
     }
 
