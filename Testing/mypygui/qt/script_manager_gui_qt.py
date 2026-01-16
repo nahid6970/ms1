@@ -107,14 +107,31 @@ class CyberButton(QPushButton):
         # Check for icon
         icon_path = self.script.get("icon_path", "")
         icon_pixmap = None
+        icon_w = 0
         icon_h = 0
         if icon_path and os.path.exists(icon_path):
             icon_pixmap = QPixmap(icon_path)
             if not icon_pixmap.isNull():
-                # Scale icon to fit (max 32px height, or half of button height)
-                max_icon_h = min(32, self.height() // 2)
-                icon_pixmap = icon_pixmap.scaledToHeight(max_icon_h, Qt.TransformationMode.SmoothTransformation)
+                # Get custom size or use auto
+                custom_w = self.script.get("icon_width", 0)
+                custom_h = self.script.get("icon_height", 0)
+                
+                if custom_w > 0 and custom_h > 0:
+                    icon_pixmap = icon_pixmap.scaled(custom_w, custom_h, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+                elif custom_w > 0:
+                    icon_pixmap = icon_pixmap.scaledToWidth(custom_w, Qt.TransformationMode.SmoothTransformation)
+                elif custom_h > 0:
+                    icon_pixmap = icon_pixmap.scaledToHeight(custom_h, Qt.TransformationMode.SmoothTransformation)
+                else:
+                    # Auto: max 32px height, or half of button height
+                    max_icon_h = min(32, self.height() // 2)
+                    icon_pixmap = icon_pixmap.scaledToHeight(max_icon_h, Qt.TransformationMode.SmoothTransformation)
+                
+                icon_w = icon_pixmap.width()
                 icon_h = icon_pixmap.height()
+        
+        # Get icon position
+        icon_position = self.script.get("icon_position", "top")
         
         # Prepare content
         color = self.fg_hover if self.underMouse() else self.fg_normal
@@ -141,25 +158,63 @@ class CyberButton(QPushButton):
         doc.setHtml(full_html)
         
         # Account for button padding (10px in QSS)
-        doc.setTextWidth(self.width() - 20)
-        
-        # Calculate total content height (icon + spacing + text)
-        text_h = doc.size().height()
+        padding = 10
         spacing = 4 if icon_pixmap else 0
-        total_h = icon_h + spacing + text_h
         
-        # Center vertically
-        y_start = (self.height() - total_h) / 2
-        
-        # Draw icon if present
-        if icon_pixmap:
-            icon_x = (self.width() - icon_pixmap.width()) / 2
-            painter.drawPixmap(int(icon_x), int(y_start), icon_pixmap)
-            y_start += icon_h + spacing
-        
-        # Draw text
-        painter.translate(10, y_start)
-        doc.drawContents(painter)
+        if icon_position in ["top", "bottom"]:
+            # Vertical layout
+            doc.setTextWidth(self.width() - (padding * 2))
+            text_h = doc.size().height()
+            total_h = icon_h + spacing + text_h
+            y_start = (self.height() - total_h) / 2
+            
+            if icon_position == "top":
+                # Icon on top
+                if icon_pixmap:
+                    icon_x = (self.width() - icon_w) / 2
+                    painter.drawPixmap(int(icon_x), int(y_start), icon_pixmap)
+                    y_start += icon_h + spacing
+                painter.translate(padding, y_start)
+                doc.drawContents(painter)
+            else:
+                # Icon on bottom
+                painter.translate(padding, y_start)
+                doc.drawContents(painter)
+                if icon_pixmap:
+                    painter.resetTransform()
+                    icon_x = (self.width() - icon_w) / 2
+                    icon_y = y_start + text_h + spacing
+                    painter.drawPixmap(int(icon_x), int(icon_y), icon_pixmap)
+        else:
+            # Horizontal layout (left or right)
+            available_w = self.width() - (padding * 2) - icon_w - spacing
+            doc.setTextWidth(available_w)
+            text_h = doc.size().height()
+            text_w = doc.idealWidth()
+            
+            total_w = icon_w + spacing + text_w
+            x_start = (self.width() - total_w) / 2
+            y_center = (self.height() - max(icon_h, text_h)) / 2
+            
+            if icon_position == "left":
+                # Icon on left
+                if icon_pixmap:
+                    icon_y = (self.height() - icon_h) / 2
+                    painter.drawPixmap(int(x_start), int(icon_y), icon_pixmap)
+                text_x = x_start + icon_w + spacing
+                text_y = (self.height() - text_h) / 2
+                painter.translate(text_x, text_y)
+                doc.drawContents(painter)
+            else:
+                # Icon on right
+                text_y = (self.height() - text_h) / 2
+                painter.translate(x_start, text_y)
+                doc.drawContents(painter)
+                if icon_pixmap:
+                    painter.resetTransform()
+                    icon_x = x_start + text_w + spacing
+                    icon_y = (self.height() - icon_h) / 2
+                    painter.drawPixmap(int(icon_x), int(icon_y), icon_pixmap)
 
     def update_style(self):
         # Defaults
@@ -343,6 +398,33 @@ class EditDialog(QDialog):
         icon_box.addWidget(self.inp_icon)
         icon_box.addWidget(btn_browse_icon)
         l_basic.addRow("Icon:", icon_box)
+        
+        # Icon settings row
+        icon_settings = QHBoxLayout()
+        icon_settings.addWidget(QLabel("W:"))
+        self.spn_icon_w = QSpinBox()
+        self.spn_icon_w.setRange(0, 256)
+        self.spn_icon_w.setValue(self.script.get("icon_width", 0))
+        self.spn_icon_w.setToolTip("0 = Auto")
+        self.spn_icon_w.setFixedWidth(60)
+        icon_settings.addWidget(self.spn_icon_w)
+        
+        icon_settings.addWidget(QLabel("H:"))
+        self.spn_icon_h = QSpinBox()
+        self.spn_icon_h.setRange(0, 256)
+        self.spn_icon_h.setValue(self.script.get("icon_height", 0))
+        self.spn_icon_h.setToolTip("0 = Auto")
+        self.spn_icon_h.setFixedWidth(60)
+        icon_settings.addWidget(self.spn_icon_h)
+        
+        icon_settings.addWidget(QLabel("Pos:"))
+        self.cmb_icon_pos = QComboBox()
+        self.cmb_icon_pos.addItems(["top", "left", "right", "bottom"])
+        self.cmb_icon_pos.setCurrentText(self.script.get("icon_position", "top"))
+        self.cmb_icon_pos.setFixedWidth(70)
+        icon_settings.addWidget(self.cmb_icon_pos)
+        icon_settings.addStretch()
+        l_basic.addRow("", icon_settings)
         
         grp_basic.setLayout(l_basic)
         left_layout.addWidget(grp_basic)
@@ -691,6 +773,9 @@ class EditDialog(QDialog):
     def save(self):
         self.script["name"] = self.inp_name.text()
         self.script["icon_path"] = self.inp_icon.text()
+        self.script["icon_width"] = self.spn_icon_w.value()
+        self.script["icon_height"] = self.spn_icon_h.value()
+        self.script["icon_position"] = self.cmb_icon_pos.currentText()
         
         if self.script.get("type") != "folder":
             self.script["path"] = self.inp_path.text()
@@ -1575,7 +1660,7 @@ class MainWindow(QMainWindow):
         keys_to_remove = ["color", "text_color", "hover_color", "hover_text_color", 
                          "border_color", "font_family", "font_size", "is_bold", 
                          "is_italic", "corner_radius", "border_width", "width", "height",
-                         "icon_path"]
+                         "icon_path", "icon_width", "icon_height", "icon_position"]
         for key in keys_to_remove:
             script.pop(key, None)
         
