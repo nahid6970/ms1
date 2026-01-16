@@ -1,191 +1,146 @@
-# Click-to-Edit Cursor Positioning (Resolved)
+# Click-to-Edit Cursor Positioning
 
-## Status: REVERTED TO NORMAL BEHAVIOR (2026-01-15)
-The previous attempts to force special scrolling (centering or top-aligning) were removed to allow for a standard, non-jumping user experience. The system now relies on default browser focus behavior.
+## Overview
 
-## Problem Description
+When users click on a markdown preview cell to enter edit mode, the cursor should appear at the exact position where they clicked. This is challenging because the preview shows rendered text (without markdown syntax), but the edit mode shows raw text (with syntax like `**bold**`, `@@italic@@`, etc.).
 
-When clicking on rendered markdown text in the preview overlay, the cursor is positioned correctly in the raw markdown text, but the textarea scrolls to center the cursor line or make it visible. This causes the text to jump up or down from where the user clicked, requiring them to scroll to find their cursor position.
+## The Challenge
 
-**Current Behavior:**
-1. User clicks on text in markdown preview (e.g., at Y position 200px)
-2. Cursor is correctly positioned in raw markdown text
-3. `keepCursorCentered()` or `keepCursorVisible()` scrolls the textarea
-4. Text jumps to a different position (e.g., cursor line now at Y position 100px or 300px)
-5. User has to scroll to find where their cursor actually is
+**Example:**
+- Raw input: `**ctrl-check+shift+d** ABCD`
+- Rendered preview: `ctrl-check+shift+d ABCD` (bold formatting applied, syntax hidden)
+- User clicks between "AB|CD"
+- Visible offset: 21 (position in rendered text)
+- Raw offset: 23 (position in raw text, accounting for `**` markers)
 
-**Desired Behavior:**
-1. User clicks on text in markdown preview at Y position 200px
-2. Cursor is positioned in raw markdown text
-3. Textarea scrolls so the cursor line appears at exactly Y position 200px (where user clicked)
-4. No additional scrolling needed - cursor is exactly where user expects it
+The system must map the visible offset (21) to the correct raw offset (23).
 
-## Current Implementation
+## Solution Architecture
 
-The click-to-edit functionality is handled in `handlePreviewMouseDown()` function in `static/script.js`:
+### 1. Detect Click Position (Visible Offset)
 
 ```javascript
-function handlePreviewMouseDown(e) {
-    // ... cursor position calculation logic ...
+// Get click position in rendered HTML
+let range;
+if (document.caretRangeFromPoint) {
+    range = document.caretRangeFromPoint(e.clientX, e.clientY);
+}
+
+// Extract text before caret to get visible offset
+const textBefore = extractRawTextBeforeCaret(preview, range);
+const visibleOffset = textBefore.length;
+```
+
+### 2. Map Visible Offset to Raw Offset
+
+Uses binary search for efficiency (O(log n) instead of O(n)):
+
+```javascript
+const rawInput = input.value;
+let left = 0;
+let right = rawInput.length;
+let rawOffset = 0;
+
+while (left <= right) {
+    const mid = Math.floor((left + right) / 2);
+    const rawSubstr = rawInput.substring(0, mid);
+    const strippedSubstr = stripMarkdown(rawSubstr);
+    const visibleLen = strippedSubstr.length;
     
-    // 6. Manual scroll to ensure visibility
-    if (input.tagName === 'TEXTAREA' && typeof keepCursorCentered === 'function') {
-        keepCursorCentered(input);
-        requestAnimationFrame(() => keepCursorCentered(input));
+    if (visibleLen === visibleOffset) {
+        rawOffset = mid;
+        break;
+    } else if (visibleLen < visibleOffset) {
+        left = mid + 1;
+    } else {
+        right = mid - 1;
     }
 }
 ```
 
-The `keepCursorCentered()` function centers the cursor line in the middle of the textarea:
+### 3. Fine-Tune Position
+
+Handle edge cases where binary search lands in the middle of markdown syntax:
 
 ```javascript
-function keepCursorCentered(textarea) {
-    requestAnimationFrame(() => {
-        const lineHeight = parseFloat(getComputedStyle(textarea).lineHeight) || 20;
-        const lines = textarea.value.substr(0, textarea.selectionStart).split('\n');
-        const wantedTop = (lines.length - 1) * lineHeight;
-        textarea.scrollTop = wantedTop - textarea.clientHeight / 2 + lineHeight / 2;
-    });
+while (rawOffset < rawInput.length) {
+    const rawSubstr = rawInput.substring(0, rawOffset);
+    const strippedSubstr = stripMarkdown(rawSubstr);
+    if (strippedSubstr.length >= visibleOffset) {
+        break;
+    }
+    rawOffset++;
 }
 ```
 
-## Proposed Solutions
-
-### Solution 1: Position Cursor Line at Mouse Click Position
-
-Replace the centering behavior with exact positioning:
+### 4. Set Cursor Position
 
 ```javascript
-function positionCursorAtMouseClick(textarea, mouseEvent) {
-    requestAnimationFrame(() => {
-        const lineHeight = parseFloat(getComputedStyle(textarea).lineHeight) || 20;
-        const lines = textarea.value.substr(0, textarea.selectionStart).split('\n');
-        const cursorLineIndex = lines.length - 1;
-        const cursorLineTop = cursorLineIndex * lineHeight;
-        
-        // Get the mouse Y position relative to the textarea
-        const textareaRect = textarea.getBoundingClientRect();
-        const mouseY = mouseEvent.clientY - textareaRect.top;
-        
-        // Calculate scroll position so cursor line appears exactly at mouse Y position
-        const targetScrollTop = cursorLineTop - mouseY;
-        
-        // Ensure we don't scroll beyond the content bounds
-        const maxScrollTop = Math.max(0, textarea.scrollHeight - textarea.clientHeight);
-        textarea.scrollTop = Math.max(0, Math.min(targetScrollTop, maxScrollTop));
-    });
-}
+requestAnimationFrame(() => {
+    setCaretPosition(preview, rawOffset);
+});
 ```
 
-### Solution 2: Minimal Scroll Approach
+## Markdown Patterns Handled
 
-Only scroll if the cursor is not visible, and when scrolling, position it at the click location:
+The `stripMarkdown` function handles all these patterns:
+- `**bold**` → bold
+- `@@italic@@` → italic
+- `__underline__` → underline
+- `~~strikethrough~~` → strikethrough
+- `==highlight==` → highlight
+- `!!red!!` → red background
+- `??blue??` → blue background
+- `` `code` `` → code
+- `^sup^` → superscript
+- `~sub~` → subscript
+- `##heading##` → heading
+- `..small..` → small text
+- `[[correct]]` → correct answer marker
+- `{fg:#fff;bg:#000}text{/}` → colored text
+- `{link:url}text{/}` → link
+- `url[text]` → link
+- And many more...
 
-```javascript
-function keepCursorAtClickPosition(textarea, clickY) {
-    requestAnimationFrame(() => {
-        const lineHeight = parseFloat(getComputedStyle(textarea).lineHeight) || 20;
-        const lines = textarea.value.substr(0, textarea.selectionStart).split('\n');
-        const cursorLineTop = (lines.length - 1) * lineHeight;
-        const cursorLineBottom = cursorLineTop + lineHeight;
-        
-        const currentScrollTop = textarea.scrollTop;
-        const visibleTop = currentScrollTop;
-        const visibleBottom = currentScrollTop + textarea.clientHeight;
-        
-        // If cursor is already visible, don't scroll
-        if (cursorLineTop >= visibleTop && cursorLineBottom <= visibleBottom) {
-            return;
-        }
-        
-        // If cursor is not visible, position it at the click Y position
-        const targetScrollTop = cursorLineTop - clickY;
-        const maxScrollTop = Math.max(0, textarea.scrollHeight - textarea.clientHeight);
-        textarea.scrollTop = Math.max(0, Math.min(targetScrollTop, maxScrollTop));
-    });
-}
-```
+## Performance
 
-### Solution 3: Preview-Textarea Coordinate Mapping
+- **Binary Search:** O(log n) iterations where n = raw input length
+- **stripMarkdown calls:** ~log(n) times (once per binary search iteration)
+- **Fine-tuning:** O(k) where k is typically small (length of markdown syntax at position)
+- **Total:** O(log n) for most cases, very efficient even for large cells
 
-Map the click position from preview coordinates to textarea coordinates:
+## Edge Cases
 
-```javascript
-function mapPreviewClickToTextarea(textarea, preview, mouseEvent) {
-    requestAnimationFrame(() => {
-        const previewRect = preview.getBoundingClientRect();
-        const textareaRect = textarea.getBoundingClientRect();
-        
-        // Calculate relative click position in preview
-        const clickYInPreview = mouseEvent.clientY - previewRect.top;
-        const previewHeight = previewRect.height;
-        const clickRatio = clickYInPreview / previewHeight;
-        
-        // Map to textarea coordinates
-        const textareaHeight = textareaRect.height;
-        const targetYInTextarea = clickRatio * textareaHeight;
-        
-        // Position cursor line at the mapped position
-        const lineHeight = parseFloat(getComputedStyle(textarea).lineHeight) || 20;
-        const lines = textarea.value.substr(0, textarea.selectionStart).split('\n');
-        const cursorLineTop = (lines.length - 1) * lineHeight;
-        
-        const targetScrollTop = cursorLineTop - targetYInTextarea;
-        const maxScrollTop = Math.max(0, textarea.scrollHeight - textarea.clientHeight);
-        textarea.scrollTop = Math.max(0, Math.min(targetScrollTop, maxScrollTop));
-    });
-}
-```
+1. **Click at start:** visibleOffset = 0 → rawOffset = 0
+2. **Click at end:** visibleOffset = max → rawOffset = rawInput.length
+3. **Click inside markdown syntax:** Fine-tuning loop ensures cursor lands after the syntax
+4. **Multiple markdown patterns:** stripMarkdown handles all patterns correctly
+5. **Nested patterns:** stripMarkdown processes in correct order
 
-## Implementation Notes
+## Related Functions
 
-### Key Considerations:
-1. **Coordinate Systems**: Preview and textarea may have different coordinate systems due to different content heights
-2. **Line Height Calculation**: Must accurately calculate line height and cursor line position
-3. **Scroll Bounds**: Ensure scrolling doesn't go beyond content boundaries
-4. **Timing**: Use `requestAnimationFrame` to ensure DOM updates are complete
-5. **Browser Compatibility**: Handle different browsers' text selection APIs
+- `handlePreviewMouseDown()` - Main click handler (~line 1402)
+- `extractRawTextBeforeCaret()` - Gets visible text before click position
+- `stripMarkdown()` - Removes all markdown syntax (~line 7040)
+- `setCaretPosition()` - Sets cursor in contentEditable element
+- `highlightSyntax()` - Renders markdown with visible syntax in edit mode
 
-### Files to Modify:
-- `static/script.js`: Update `handlePreviewMouseDown()` function
-- `static/script.js`: Replace or modify `keepCursorCentered()` function
-- `export_static.py`: Apply same logic to static export if needed
+## Testing
 
-### Testing Scenarios:
-1. Click on text at top of preview
-2. Click on text at bottom of preview  
-3. Click on text in middle of preview
-4. Test with long content that requires scrolling
-5. Test with short content that doesn't need scrolling
-6. Test with different markdown formatting (headers, lists, etc.)
+To test cursor positioning:
+1. Create a cell with various markdown patterns
+2. Click at different positions in the preview
+3. Check console logs for offset mapping
+4. Verify cursor appears at correct position in edit mode
 
-## Alternative Approaches
+Example test cases:
+- `**bold** text` - click on "text"
+- `@@italic@@ **bold**` - click between patterns
+- `{fg:#f00}colored{/} normal` - click on "colored"
+- Long text with multiple patterns throughout
 
-### Option A: Visual Indicator
-Instead of moving the text, add a visual indicator (like a temporary highlight or arrow) showing where the cursor was positioned.
+## Future Improvements
 
-### Option B: Smooth Animation
-Animate the scroll transition so users can follow where their cursor went.
-
-### Option C: Dual View Mode
-Show both preview and raw text side by side, eliminating the need for click-to-edit positioning.
-
-## Future Implementation Checklist
-
-When implementing this feature:
-
-- [ ] Choose one of the proposed solutions
-- [ ] Update `handlePreviewMouseDown()` function
-- [ ] Create or modify cursor positioning function
-- [ ] Test with various content lengths and positions
-- [ ] Ensure compatibility with existing keyboard shortcuts
-- [ ] Update static export functionality if needed
-- [ ] Test cross-browser compatibility
-- [ ] Update developer documentation
-
-## Related Code Locations
-
-- `handlePreviewMouseDown()`: ~line 962 in `static/script.js`
-- `keepCursorCentered()`: ~line 5340 in `static/script.js`
-- Click handlers for textareas: ~lines 5617, 5712 in `static/script.js`
-- Preview creation: ~line 1109 in `static/script.js`
+- Cache mapping for repeated clicks (if performance becomes an issue)
+- Handle RTL text and bidirectional text
+- Support for table cells with complex nested structures

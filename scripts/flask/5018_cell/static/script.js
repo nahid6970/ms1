@@ -1435,31 +1435,77 @@ function handlePreviewMouseDown(e) {
         }
     }
 
-    // Map HTML click position to plain text character offset
-    let targetOffset = input.value.length;
+    // Get the visible text position (from parsed HTML)
+    let visibleOffset = 0;
     if (range) {
-        const preCaretRange = range.cloneRange();
-        preCaretRange.selectNodeContents(preview);
-        preCaretRange.setEnd(range.startContainer, range.startOffset);
-        targetOffset = preCaretRange.toString().length;
+        const textBefore = extractRawTextBeforeCaret(preview, range);
+        visibleOffset = textBefore.length;
     }
 
-    // In the new Architecture, we focus the preview itself!
-    // Save scroll position and use preventScroll to avoid any jumping
+    console.log('Click position - visible offset:', visibleOffset);
+
+    // Now we need to map this visible offset to the raw input offset
+    // Use binary search approach for efficiency
+    const rawInput = input.value;
+    
+    // Binary search to find the raw position that gives us the visible offset
+    let left = 0;
+    let right = rawInput.length;
+    let rawOffset = 0;
+    
+    while (left <= right) {
+        const mid = Math.floor((left + right) / 2);
+        const rawSubstr = rawInput.substring(0, mid);
+        const strippedSubstr = stripMarkdown(rawSubstr);
+        const visibleLen = strippedSubstr.length;
+        
+        if (visibleLen === visibleOffset) {
+            rawOffset = mid;
+            break;
+        } else if (visibleLen < visibleOffset) {
+            left = mid + 1;
+            rawOffset = mid; // Keep track of last valid position
+        } else {
+            right = mid - 1;
+        }
+    }
+    
+    // Fine-tune: we might be in the middle of markdown syntax
+    // Move forward until we get the exact visible offset
+    while (rawOffset < rawInput.length) {
+        const rawSubstr = rawInput.substring(0, rawOffset);
+        const strippedSubstr = stripMarkdown(rawSubstr);
+        if (strippedSubstr.length >= visibleOffset) {
+            break;
+        }
+        rawOffset++;
+    }
+    
+    console.log('Offset mapping:');
+    console.log('- Visible offset:', visibleOffset);
+    console.log('- Raw offset:', rawOffset);
+    console.log('- Context:', rawInput.substring(Math.max(0, rawOffset - 20), Math.min(rawInput.length, rawOffset + 20)));
+    console.log('- Cursor will be before:', rawInput[rawOffset]);
+
+    // Save scroll position
     const tableContainer = document.querySelector('.table-container');
     const savedScrollTop = tableContainer ? tableContainer.scrollTop : 0;
     const savedScrollLeft = tableContainer ? tableContainer.scrollLeft : 0;
 
-    setTimeout(() => {
-        preview.focus({ preventScroll: true });
-        setCaretPosition(preview, targetOffset);
+    // Focus the preview (this will trigger the focus handler which changes innerHTML)
+    preview.focus({ preventScroll: true });
+    
+    // Wait for focus handler to complete, then set cursor position
+    requestAnimationFrame(() => {
+        console.log('Setting cursor to raw offset:', rawOffset);
+        setCaretPosition(preview, rawOffset);
 
-        // Restore scroll position in case browser still scrolled
+        // Restore scroll position
         if (tableContainer) {
             tableContainer.scrollTop = savedScrollTop;
             tableContainer.scrollLeft = savedScrollLeft;
         }
-    }, 0);
+    });
 }
 
 // -----------------------------------------------------------------------------

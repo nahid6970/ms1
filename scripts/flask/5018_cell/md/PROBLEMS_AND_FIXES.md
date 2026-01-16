@@ -7,6 +7,36 @@ This document tracks historical bugs, issues, and their solutions. Use this to:
 
 ---
 
+## [2026-01-16 19:30] - Click-to-Edit Cursor Positioning Incorrect
+
+**Problem:**
+When clicking on markdown preview to enter edit mode, the cursor appeared at the wrong position. For example, clicking between "AB|CD" in "aasdasd ABCA -> DDA" would show cursor at "aasdasd|" instead. The offset was calculated from the parsed HTML (visible text without markdown syntax), but needed to be mapped to the raw input (with syntax like `**`, `@@`, etc.).
+
+**Root Cause:**
+The `handlePreviewMouseDown` function calculated the click offset from the rendered HTML (which has markdown syntax stripped), but then directly used this offset to position the cursor in the raw input text (which contains markdown syntax). This caused misalignment because markdown syntax characters like `**bold**` take up 4 extra characters in raw input but 0 in visible output.
+
+**Solution:**
+Implemented a binary search algorithm to efficiently map visible character positions to raw input positions:
+1. Use `caretRangeFromPoint` to get the visible offset (position in rendered text)
+2. Binary search through raw input to find the position where `stripMarkdown(substring)` gives the target visible offset
+3. Fine-tune the position to handle cases where we land in the middle of markdown syntax
+4. Set cursor at the calculated raw offset
+
+This approach is efficient (O(log n) instead of O(n)) and handles all markdown patterns correctly by leveraging the existing `stripMarkdown` function.
+
+**Files Modified:**
+- `static/script.js` - handlePreviewMouseDown (~line 1402)
+
+**Related Issues:** Edit mode, cursor positioning, markdown syntax
+
+**Technical Details:**
+- Binary search range: 0 to rawInput.length
+- For each midpoint, strip markdown and compare visible length to target
+- Adjust search range based on comparison
+- Final fine-tuning loop ensures exact match
+
+---
+
 ## [2026-01-16 18:15] - Multi-Line Cursor Selection Support
 
 **Problem:**
