@@ -961,8 +961,9 @@ class SettingsDialog(QDialog):
         l_win = QFormLayout()
         
         size_box = QHBoxLayout()
-        size_box.addWidget(QLabel("Main:"))
-        size_box.addSpacing(5)
+        lbl_main = QLabel("Main:")
+        lbl_main.setFixedWidth(35)
+        size_box.addWidget(lbl_main)
         size_box.addWidget(QLabel("W:"))
         self.spn_w = QSpinBox(); self.spn_w.setRange(400, 3000); self.spn_w.setValue(self.config.get("window_width", 1100))
         size_box.addWidget(self.spn_w)
@@ -974,8 +975,9 @@ class SettingsDialog(QDialog):
         l_win.addRow(size_box)
         
         edit_size_box = QHBoxLayout()
-        edit_size_box.addWidget(QLabel("Edit:"))
-        edit_size_box.addSpacing(10)
+        lbl_edit = QLabel("Edit:")
+        lbl_edit.setFixedWidth(35)
+        edit_size_box.addWidget(lbl_edit)
         edit_size_box.addWidget(QLabel("W:"))
         self.spn_edit_w = QSpinBox(); self.spn_edit_w.setRange(400, 3000); self.spn_edit_w.setValue(self.config.get("edit_panel_width", 1150))
         edit_size_box.addWidget(self.spn_edit_w)
