@@ -7,6 +7,38 @@ This document tracks historical bugs, issues, and their solutions. Use this to:
 
 ---
 
+## [2026-01-16 18:15] - Multi-Line Cursor Selection Support
+
+**Problem:**
+Multi-line cursors (Ctrl+Alt+Up/Down) could only insert/delete text at cursor positions. There was no way to select text on multiple lines simultaneously or move cursors by word boundaries, making it difficult to select and replace different words on each line.
+
+**Root Cause:**
+The multi-line cursor system only tracked cursor positions (line, column), not selections. The keydown handler didn't support Shift+arrow keys or Ctrl+Space for word navigation.
+
+**Solution:**
+1. Added selection tracking to cursor objects: `selectionStart` and `selectionEnd` properties
+2. Implemented Shift+arrow key support (Shift+Left, Shift+Right, Shift+Home, Shift+End) to extend selections
+3. Added Ctrl+Space to move cursors to next word boundary (stops at spaces and special characters)
+4. Updated `handleMultiLineCursorMove()` to handle selection extension with `extendSelection` parameter
+5. Modified typing/deletion logic to handle selections (replace selected text when typing, delete selection on Backspace/Delete)
+6. Enhanced `showCursorMarkers()` to visualize selections with blue highlight overlays (rgba(0, 123, 255, 0.3))
+7. Native cursor on last line shows native selection, other lines show CSS selection highlights
+
+**Files Modified:**
+- `static/script.js` - setupMultiLineCursorListener (~line 9518), handleMultiLineCursorMove (~line 9633), showCursorMarkers (~line 9344), getAbsolutePosition helper (~line 9710)
+
+**Related Issues:** Multi-cursor editing, Ctrl+Alt+arrows
+
+**Usage:**
+- Ctrl+Alt+Down/Up: Add cursors on adjacent lines
+- Shift+Home/End: Select from cursor to line start/end on all lines
+- Shift+Arrow: Extend selection character by character
+- Ctrl+Space: Jump to next word boundary
+- Type: Replace all selections with typed text
+- Backspace/Delete: Delete all selections
+
+---
+
 ## [2026-01-16 18:00] - Multi-Line Cursor Visual Markers Not Updating
 
 **Problem:**
