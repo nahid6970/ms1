@@ -508,7 +508,8 @@ class EditDialog(QDialog):
             def_italic = parent.config.get("default_is_italic", False)
 
         # Reset Typography
-        self.cmb_font.setCurrentFont(QFont(def_font))
+        idx = self.cmb_font.findText(def_font, Qt.MatchFlag.MatchExactly)
+        if idx >= 0: self.cmb_font.setCurrentIndex(idx)
         self.spn_size.setValue(def_fs)
         self.chk_bold.setChecked(def_bold)
         self.chk_italic.setChecked(def_italic)

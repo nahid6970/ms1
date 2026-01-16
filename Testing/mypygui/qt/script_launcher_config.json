@@ -804,7 +804,15 @@
             "_runtime_is_bold": true,
             "_runtime_is_italic": false,
             "new_terminal": true,
-            "run_admin": false
+            "run_admin": false,
+            "font_family": "JetBrainsMono Nerd Font Propo",
+            "font_size": 12,
+            "is_bold": true,
+            "is_italic": false,
+            "width": 0,
+            "height": 0,
+            "corner_radius": 0,
+            "border_width": 0
         },
         {
             "name": "Explorer",
@@ -823,7 +831,17 @@
             "_runtime_font_size": 12,
             "_runtime_font_family": "JetBrainsMono Nerd Font Propo",
             "_runtime_is_bold": true,
-            "_runtime_is_italic": false
+            "_runtime_is_italic": false,
+            "new_terminal": false,
+            "run_admin": false,
+            "font_family": "JetBrainsMono Nerd Font Propo",
+            "font_size": 12,
+            "is_bold": true,
+            "is_italic": false,
+            "width": 0,
+            "height": 0,
+            "corner_radius": 0,
+            "border_width": 0
         },
         {
             "name": "mklink",
@@ -842,7 +860,9 @@
             "_runtime_font_size": 12,
             "_runtime_font_family": "JetBrainsMono Nerd Font Propo",
             "_runtime_is_bold": true,
-            "_runtime_is_italic": false
+            "_runtime_is_italic": false,
+            "new_terminal": false,
+            "run_admin": false
         },
         {
             "name": "C-Map",
@@ -862,7 +882,17 @@
             "_runtime_font_size": 12,
             "_runtime_font_family": "JetBrainsMono Nerd Font Propo",
             "_runtime_is_bold": true,
-            "_runtime_is_italic": false
+            "_runtime_is_italic": false,
+            "new_terminal": false,
+            "run_admin": false,
+            "font_family": "JetBrainsMono Nerd Font Propo",
+            "font_size": 12,
+            "is_bold": true,
+            "is_italic": false,
+            "width": 0,
+            "height": 0,
+            "corner_radius": 0,
+            "border_width": 0
         },
         {
             "name": "<fs:50>\ue672</fs>",
@@ -906,7 +936,15 @@
             "_runtime_is_bold": true,
             "_runtime_is_italic": false,
             "new_terminal": false,
-            "run_admin": false
+            "run_admin": false,
+            "font_family": "JetBrainsMono Nerd Font Propo",
+            "font_size": 12,
+            "is_bold": true,
+            "is_italic": false,
+            "width": 0,
+            "height": 0,
+            "corner_radius": 0,
+            "border_width": 0
         },
         {
             "name": "ClipBoard",
@@ -997,9 +1035,9 @@
     "default_font_family": "JetBrainsMono Nerd Font Propo",
     "default_is_bold": true,
     "default_is_italic": false,
-    "def_script_bg": "#aaaaff",
+    "def_script_bg": "#ffffff",
     "def_script_fg": "#000000",
-    "def_script_hbg": "#6f6fa7",
+    "def_script_hbg": "#8c8c8c",
     "def_script_hfg": "#aaff00",
     "def_folder_bg": "#ffff00",
     "def_folder_fg": "#000000",
