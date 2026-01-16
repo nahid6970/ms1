@@ -334,7 +334,19 @@
             "grid_btn_height": 0,
             "_runtime_font_family": "JetBrainsMono Nerd Font Propo",
             "_runtime_is_bold": true,
-            "_runtime_is_italic": false
+            "_runtime_is_italic": false,
+            "icon_path": "C:/Program Files/AutoHotkey/UX/inc/spy.ico",
+            "icon_width": 0,
+            "icon_height": 50,
+            "icon_position": "top",
+            "font_family": "JetBrainsMono Nerd Font Propo",
+            "font_size": 14,
+            "is_bold": true,
+            "is_italic": false,
+            "width": 0,
+            "height": 0,
+            "corner_radius": 0,
+            "border_width": 0
         },
         {
             "name": "Github <br> Projectsl",
@@ -923,7 +935,7 @@
             "border_width": 0,
             "icon_width": 0,
             "icon_height": 100,
-            "icon_position": "top"
+            "icon_position": "center"
         }
     ],
     "github_repos": [

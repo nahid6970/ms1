@@ -161,7 +161,13 @@ class CyberButton(QPushButton):
         padding = 10
         spacing = 4 if icon_pixmap else 0
         
-        if icon_position in ["top", "bottom"]:
+        if icon_position == "center":
+            # Center: icon only, no text
+            if icon_pixmap:
+                icon_x = (self.width() - icon_w) / 2
+                icon_y = (self.height() - icon_h) / 2
+                painter.drawPixmap(int(icon_x), int(icon_y), icon_pixmap)
+        elif icon_position in ["top", "bottom"]:
             # Vertical layout
             doc.setTextWidth(self.width() - (padding * 2))
             text_h = doc.size().height()
@@ -419,9 +425,9 @@ class EditDialog(QDialog):
         
         icon_settings.addWidget(QLabel("Pos:"))
         self.cmb_icon_pos = QComboBox()
-        self.cmb_icon_pos.addItems(["top", "left", "right", "bottom"])
+        self.cmb_icon_pos.addItems(["top", "left", "right", "bottom", "center"])
         self.cmb_icon_pos.setCurrentText(self.script.get("icon_position", "top"))
-        self.cmb_icon_pos.setFixedWidth(70)
+        self.cmb_icon_pos.setFixedWidth(80)
         icon_settings.addWidget(self.cmb_icon_pos)
         icon_settings.addStretch()
         l_basic.addRow("", icon_settings)
