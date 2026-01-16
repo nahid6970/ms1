@@ -104,6 +104,18 @@ class CyberButton(QPushButton):
         opt.text = "" # Don't draw standard text
         self.style().drawControl(QStyle.ControlElement.CE_PushButton, opt, painter, self)
         
+        # Check for icon
+        icon_path = self.script.get("icon_path", "")
+        icon_pixmap = None
+        icon_h = 0
+        if icon_path and os.path.exists(icon_path):
+            icon_pixmap = QPixmap(icon_path)
+            if not icon_pixmap.isNull():
+                # Scale icon to fit (max 32px height, or half of button height)
+                max_icon_h = min(32, self.height() // 2)
+                icon_pixmap = icon_pixmap.scaledToHeight(max_icon_h, Qt.TransformationMode.SmoothTransformation)
+                icon_h = icon_pixmap.height()
+        
         # Prepare content
         color = self.fg_hover if self.underMouse() else self.fg_normal
         
@@ -131,11 +143,22 @@ class CyberButton(QPushButton):
         # Account for button padding (10px in QSS)
         doc.setTextWidth(self.width() - 20)
         
-        # Center vertically
-        content_h = doc.size().height()
-        y_offset = (self.height() - content_h) / 2
+        # Calculate total content height (icon + spacing + text)
+        text_h = doc.size().height()
+        spacing = 4 if icon_pixmap else 0
+        total_h = icon_h + spacing + text_h
         
-        painter.translate(10, y_offset)
+        # Center vertically
+        y_start = (self.height() - total_h) / 2
+        
+        # Draw icon if present
+        if icon_pixmap:
+            icon_x = (self.width() - icon_pixmap.width()) / 2
+            painter.drawPixmap(int(icon_x), int(y_start), icon_pixmap)
+            y_start += icon_h + spacing
+        
+        # Draw text
+        painter.translate(10, y_start)
         doc.drawContents(painter)
 
     def update_style(self):
@@ -309,6 +332,18 @@ class EditDialog(QDialog):
             path_box.addWidget(self.inp_path)
             path_box.addWidget(btn_browse)
             l_basic.addRow("Path:", path_box)
+        
+        # Icon path (for all items)
+        icon_box = QHBoxLayout()
+        self.inp_icon = QLineEdit(self.script.get("icon_path", ""))
+        self.inp_icon.setPlaceholderText("Optional .ico or .png")
+        btn_browse_icon = QPushButton("...")
+        btn_browse_icon.setFixedWidth(30)
+        btn_browse_icon.clicked.connect(self.browse_icon)
+        icon_box.addWidget(self.inp_icon)
+        icon_box.addWidget(btn_browse_icon)
+        l_basic.addRow("Icon:", icon_box)
+        
         grp_basic.setLayout(l_basic)
         left_layout.addWidget(grp_basic)
         
@@ -635,8 +670,13 @@ class EditDialog(QDialog):
         f, _ = QFileDialog.getOpenFileName(self, "Select Executable")
         if f: self.inp_path.setText(f)
 
+    def browse_icon(self):
+        f, _ = QFileDialog.getOpenFileName(self, "Select Icon", "", "Icon Files (*.ico *.png *.jpg *.svg)")
+        if f: self.inp_icon.setText(f)
+
     def save(self):
         self.script["name"] = self.inp_name.text()
+        self.script["icon_path"] = self.inp_icon.text()
         
         if self.script.get("type") != "folder":
             self.script["path"] = self.inp_path.text()
