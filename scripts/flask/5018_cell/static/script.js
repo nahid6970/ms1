@@ -7861,12 +7861,26 @@ function selectAllMatchingFromFormatter(event) {
     const target = quickFormatterTarget;
     const selection = quickFormatterSelection;
 
-    // Keep the input focused and restore selection
-    target.focus();
-    target.setSelectionRange(selection.start, selection.end);
-
-    // Select all matching occurrences
-    selectAllMatchingOccurrences(target);
+    // Handle contentEditable mode
+    if (selection.isContentEditable) {
+        // Keep focus on contentEditable
+        target.focus();
+        
+        // Restore selection
+        if (selection.range) {
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(selection.range.cloneRange());
+        }
+        
+        // Select all matching occurrences
+        selectAllMatchingOccurrences(target);
+    } else {
+        // Handle input/textarea (legacy mode)
+        target.focus();
+        target.setSelectionRange(selection.start, selection.end);
+        selectAllMatchingOccurrences(target);
+    }
 
     // Close the formatter after selection is done
     setTimeout(() => {
@@ -8940,6 +8954,13 @@ function applyMultipleFormatsWithColor(colorSyntax) {
 let multiSelectionData = null;
 
 function selectAllMatchingOccurrences(input) {
+    // Handle contentEditable mode - direct to raw mode
+    if (input.isContentEditable) {
+        showToast('Select All Matching works in Raw Mode (📄 button)', 'info');
+        return;
+    }
+    
+    // Handle input/textarea (legacy mode)
     const text = input.value;
     const selStart = input.selectionStart;
     const selEnd = input.selectionEnd;
