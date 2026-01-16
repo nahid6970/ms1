@@ -1185,6 +1185,7 @@ IMPORTANT:
 - only commit when i type ""commit""
 - use emoji ✅when resolved any bug and ⚠️ when facing any issue etc to make the commit message more attractive
 - also first update the md files then commit
+- use only 1 line for commit message
 )")
 
 ;! AI - Instruction For md file
