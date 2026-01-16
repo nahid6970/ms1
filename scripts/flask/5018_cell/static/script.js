@@ -12251,6 +12251,308 @@ function applyBorderBox(event) {
     showToast(`${colorUpper} border applied`, 'success');
 }
 
+// Sort Lines Function
+function sortLines(event) {
+    if (!quickFormatterTarget) return;
+
+    const input = quickFormatterTarget;
+    let selectedText = '';
+    let start = 0;
+    let end = 0;
+    
+    // Handle contenteditable (WYSIWYG mode)
+    if (quickFormatterSelection.isContentEditable) {
+        selectedText = quickFormatterSelection.text || '';
+    } else {
+        // Handle input/textarea (legacy mode)
+        start = quickFormatterSelection.start;
+        end = quickFormatterSelection.end;
+        selectedText = input.value.substring(start, end);
+    }
+
+    if (!selectedText) {
+        showToast('No text selected', 'warning');
+        return;
+    }
+
+    // Parse lines into blocks (parent + children)
+    const lines = selectedText.split('\n');
+    const blocks = [];
+    let currentBlock = null;
+
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        const trimmed = line.trim();
+
+        // Check dash patterns
+        const isDoubleDash = trimmed.startsWith('-- ');
+        const isSingleDash = trimmed.startsWith('- ') && !trimmed.startsWith('-- ');
+
+        // Determine if this is a child line
+        let isChildLine = false;
+
+        if (isDoubleDash) {
+            isChildLine = true;
+        } else if (isSingleDash) {
+            if (currentBlock && currentBlock.children.length === 0) {
+                const prevParentTrimmed = currentBlock.parent.trim();
+                if (prevParentTrimmed.startsWith('- ')) {
+                    isChildLine = false;
+                } else {
+                    isChildLine = true;
+                }
+            } else if (currentBlock && currentBlock.children.length > 0) {
+                const lastChild = currentBlock.children[currentBlock.children.length - 1];
+                if (lastChild.trim().startsWith('-- ')) {
+                    isChildLine = false;
+                } else {
+                    isChildLine = true;
+                }
+            } else {
+                isChildLine = false;
+            }
+        }
+
+        if (isChildLine) {
+            if (currentBlock) {
+                currentBlock.children.push(line);
+            } else {
+                blocks.push({
+                    parent: line,
+                    children: [],
+                    isOrphan: true
+                });
+            }
+        } else {
+            if (currentBlock) {
+                blocks.push(currentBlock);
+            }
+            currentBlock = {
+                parent: line,
+                children: []
+            };
+        }
+    }
+
+    if (currentBlock) {
+        blocks.push(currentBlock);
+    }
+
+    // Sort blocks by parent content
+    const sortedBlocks = blocks.sort((a, b) => {
+        const contentA = a.parent.replace(/^[-–—•]\s*/, '').trim();
+        const contentB = b.parent.replace(/^[-–—•]\s*/, '').trim();
+
+        const numA = contentA.match(/^\d+/);
+        const numB = contentB.match(/^\d+/);
+
+        if (numA && numB) {
+            const diff = parseInt(numA[0], 10) - parseInt(numB[0], 10);
+            if (diff !== 0) return diff;
+            return contentA.toLowerCase().localeCompare(contentB.toLowerCase());
+        }
+
+        if (numA) return -1;
+        if (numB) return 1;
+
+        return contentA.toLowerCase().localeCompare(contentB.toLowerCase());
+    });
+
+    // Reconstruct the sorted text
+    const sortedLines = [];
+    for (const block of sortedBlocks) {
+        sortedLines.push(block.parent);
+        sortedLines.push(...block.children);
+    }
+
+    const sortedText = sortedLines.join('\n');
+
+    // Apply the sorted text
+    if (quickFormatterSelection.isContentEditable) {
+        const range = quickFormatterSelection.range;
+        range.deleteContents();
+        const textNode = document.createTextNode(sortedText);
+        range.insertNode(textNode);
+        
+        const cell = input.closest('td');
+        if (cell) {
+            const inputElement = cell.querySelector('input, textarea');
+            if (inputElement) {
+                inputElement.value = extractRawText(input);
+                const changeEvent = new Event('input', { bubbles: true });
+                inputElement.dispatchEvent(changeEvent);
+            }
+        }
+        
+        const newRange = document.createRange();
+        newRange.setStartAfter(textNode);
+        newRange.collapse(true);
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(newRange);
+    } else {
+        const newText = input.value.substring(0, start) +
+            sortedText +
+            input.value.substring(end);
+
+        input.value = newText;
+
+        const changeEvent = new Event('input', { bubbles: true });
+        input.dispatchEvent(changeEvent);
+
+        const newCursorPos = start + sortedText.length;
+        input.setSelectionRange(newCursorPos, newCursorPos);
+        input.focus();
+    }
+
+    closeQuickFormatter();
+    showToast('Lines sorted (keeping lists with parents)', 'success');
+}
+
+// Lines to Comma Function
+function linesToComma(event) {
+    if (!quickFormatterTarget) return;
+
+    const input = quickFormatterTarget;
+    let selectedText = '';
+    let start = 0;
+    let end = 0;
+    
+    // Handle contenteditable (WYSIWYG mode)
+    if (quickFormatterSelection.isContentEditable) {
+        selectedText = quickFormatterSelection.text || '';
+    } else {
+        // Handle input/textarea (legacy mode)
+        start = quickFormatterSelection.start;
+        end = quickFormatterSelection.end;
+        selectedText = input.value.substring(start, end);
+    }
+
+    if (!selectedText) {
+        showToast('No text selected', 'warning');
+        return;
+    }
+
+    // Split into lines, remove leading dashes and trim, filter empty lines
+    const lines = selectedText.split('\n')
+        .map(line => line.replace(/^[-–—•]\s*/, '').trim())
+        .filter(line => line.length > 0);
+
+    // Join with comma and space
+    const commaText = lines.join(', ');
+
+    // Apply the comma-separated text
+    if (quickFormatterSelection.isContentEditable) {
+        const range = quickFormatterSelection.range;
+        range.deleteContents();
+        const textNode = document.createTextNode(commaText);
+        range.insertNode(textNode);
+        
+        const cell = input.closest('td');
+        if (cell) {
+            const inputElement = cell.querySelector('input, textarea');
+            if (inputElement) {
+                inputElement.value = extractRawText(input);
+                const changeEvent = new Event('input', { bubbles: true });
+                inputElement.dispatchEvent(changeEvent);
+            }
+        }
+        
+        const newRange = document.createRange();
+        newRange.selectNode(textNode);
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(newRange);
+    } else {
+        const newText = input.value.substring(0, start) +
+            commaText +
+            input.value.substring(end);
+
+        input.value = newText;
+
+        const changeEvent = new Event('input', { bubbles: true });
+        input.dispatchEvent(changeEvent);
+
+        input.setSelectionRange(start, start + commaText.length);
+        input.focus();
+    }
+
+    closeQuickFormatter();
+    showToast(`Converted ${lines.length} lines to comma-separated`, 'success');
+}
+
+// Comma to Lines Function
+function commaToLines(event) {
+    if (!quickFormatterTarget) return;
+
+    const input = quickFormatterTarget;
+    let selectedText = '';
+    let start = 0;
+    let end = 0;
+    
+    // Handle contenteditable (WYSIWYG mode)
+    if (quickFormatterSelection.isContentEditable) {
+        selectedText = quickFormatterSelection.text || '';
+    } else {
+        // Handle input/textarea (legacy mode)
+        start = quickFormatterSelection.start;
+        end = quickFormatterSelection.end;
+        selectedText = input.value.substring(start, end);
+    }
+
+    if (!selectedText) {
+        showToast('No text selected', 'warning');
+        return;
+    }
+
+    // Split by comma, trim each item, filter empty items
+    const items = selectedText.split(',')
+        .map(item => item.trim())
+        .filter(item => item.length > 0);
+
+    // Join with newlines
+    const linesText = items.join('\n');
+
+    // Apply the lines text
+    if (quickFormatterSelection.isContentEditable) {
+        const range = quickFormatterSelection.range;
+        range.deleteContents();
+        const textNode = document.createTextNode(linesText);
+        range.insertNode(textNode);
+        
+        const cell = input.closest('td');
+        if (cell) {
+            const inputElement = cell.querySelector('input, textarea');
+            if (inputElement) {
+                inputElement.value = extractRawText(input);
+                const changeEvent = new Event('input', { bubbles: true });
+                inputElement.dispatchEvent(changeEvent);
+            }
+        }
+        
+        const newRange = document.createRange();
+        newRange.selectNode(textNode);
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(newRange);
+    } else {
+        const newText = input.value.substring(0, start) +
+            linesText +
+            input.value.substring(end);
+
+        input.value = newText;
+
+        const changeEvent = new Event('input', { bubbles: true });
+        input.dispatchEvent(changeEvent);
+
+        input.setSelectionRange(start, start + linesText.length);
+        input.focus();
+    }
+
+    closeQuickFormatter();
+    showToast(`Converted to ${items.length} lines`, 'success');
+}
+
 // Remove All Formatting Function (strips markdown syntax)
 function removeFormatting(event) {
     console.log('removeFormatting called!');
