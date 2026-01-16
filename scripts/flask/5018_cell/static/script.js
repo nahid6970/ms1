@@ -8072,16 +8072,63 @@ function applyLinkFormat(event) {
     if (!quickFormatterTarget) return;
 
     const input = quickFormatterTarget;
+    
+    // Handle contenteditable (WYSIWYG mode)
+    if (quickFormatterSelection.isContentEditable) {
+        const selectedUrl = quickFormatterSelection.text || '';
+        
+        if (!selectedUrl) {
+            showToast('Please select URL first', 'warning');
+            return;
+        }
+
+        // Use default placeholder text
+        const linkText = 'Link';
+
+        // Insert the new link syntax: url[text]
+        const formattedText = `${selectedUrl}[${linkText}]`;
+        
+        // Insert formatted text into contentEditable
+        const range = quickFormatterSelection.range;
+        range.deleteContents();
+        const textNode = document.createTextNode(formattedText);
+        range.insertNode(textNode);
+        
+        // Update underlying input element
+        const cell = input.closest('td');
+        if (cell) {
+            const inputElement = cell.querySelector('input, textarea');
+            if (inputElement) {
+                inputElement.value = extractRawText(input);
+                const changeEvent = new Event('input', { bubbles: true });
+                inputElement.dispatchEvent(changeEvent);
+            }
+        }
+        
+        // Set cursor after the formatted text
+        const newRange = document.createRange();
+        newRange.setStartAfter(textNode);
+        newRange.collapse(true);
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(newRange);
+
+        closeQuickFormatter();
+        showToast('Link applied', 'success');
+        return;
+    }
+    
+    // Handle input/textarea (legacy mode)
     const start = quickFormatterSelection.start;
     const end = quickFormatterSelection.end;
     const selectedUrl = input.value.substring(start, end);
 
-    // Use default placeholder text with italic formatting
-    const linkText = '@@Link@@';
+    // Use default placeholder text
+    const linkText = 'Link';
 
-    // Insert the link syntax: {link:url}@@Link@@{/}
+    // Insert the new link syntax: url[text]
     const newText = input.value.substring(0, start) +
-        `{link:${selectedUrl}}` + linkText + '{/}' +
+        `${selectedUrl}[${linkText}]` +
         input.value.substring(end);
 
     input.value = newText;
@@ -8091,8 +8138,7 @@ function applyLinkFormat(event) {
     input.dispatchEvent(changeEvent);
 
     // Set cursor position after the inserted text
-    const linkPrefix = `{link:${selectedUrl}}`;
-    const newCursorPos = start + linkPrefix.length + linkText.length + 3;
+    const newCursorPos = start + selectedUrl.length + linkText.length + 2;
     input.setSelectionRange(newCursorPos, newCursorPos);
     input.focus();
 
