@@ -537,10 +537,26 @@ class MainWindow(QMainWindow):
 
         row1_layout.addStretch()
         
-        self.search_input = CyberInput("SEARCH_DB://...", self)
-        self.search_input.setFixedWidth(200)
-        self.search_input.textChanged.connect(self.filter_items)
-        row1_layout.addWidget(self.search_input)
+        # Sorting Controls (moved from row2)
+        row1_layout.addWidget(QLabel("// SORT: "))
+        row1_layout.itemAt(7).widget().setStyleSheet(f"color: {CP_SUBTEXT}; font-family: Consolas; font-size: 10px;")
+        
+        self.sort_combo = QComboBox()
+        self.sort_combo.addItems(["Name", "Date"])
+        self.sort_combo.setCurrentText(self.sort_by)
+        self.sort_combo.setFixedWidth(80)
+        self.sort_combo.setFixedHeight(30)
+        self.sort_combo.setStyleSheet(self.get_combo_style())
+        self.sort_combo.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.sort_combo.currentTextChanged.connect(self.change_sort)
+        row1_layout.addWidget(self.sort_combo)
+
+        self.order_btn = CyberButton(self.sort_order, color=CP_CYAN, parent=self, is_outlined=True)
+        self.order_btn.setFixedWidth(70)
+        self.order_btn.setFixedHeight(30)
+        self.order_btn.clicked.connect(self.toggle_sort_order)
+        row1_layout.addWidget(self.order_btn)
+
         # Row 2: Scan & Maintenance (Calculated first to be placed ABOVE)
         row2_layout = QHBoxLayout()
         row2_layout.setContentsMargins(5, 5, 5, 5)
@@ -559,25 +575,11 @@ class MainWindow(QMainWindow):
         
         row2_layout.addStretch()
 
-        # Sorting Controls
-        row2_layout.addWidget(QLabel("// SORT: "))
-        row2_layout.itemAt(5).widget().setStyleSheet(f"color: {CP_SUBTEXT}; font-family: Consolas; font-size: 10px;")
-        
-        self.sort_combo = QComboBox()
-        self.sort_combo.addItems(["Name", "Date"])
-        self.sort_combo.setCurrentText(self.sort_by)
-        self.sort_combo.setFixedWidth(80)
-        self.sort_combo.setFixedHeight(30)
-        self.sort_combo.setStyleSheet(self.get_combo_style())
-        self.sort_combo.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.sort_combo.currentTextChanged.connect(self.change_sort)
-        row2_layout.addWidget(self.sort_combo)
-
-        self.order_btn = CyberButton(self.sort_order, color=CP_CYAN, parent=self, is_outlined=True)
-        self.order_btn.setFixedWidth(50)
-        self.order_btn.setFixedHeight(30)
-        self.order_btn.clicked.connect(self.toggle_sort_order)
-        row2_layout.addWidget(self.order_btn)
+        # Search box (moved from row1)
+        self.search_input = CyberInput("SEARCH_DB://...", self)
+        self.search_input.setFixedWidth(200)
+        self.search_input.textChanged.connect(self.filter_items)
+        row2_layout.addWidget(self.search_input)
 
         # Add rows to toolbar - SCAN ROW GOES ON TOP
         toolbar_main_layout.addLayout(row2_layout)
