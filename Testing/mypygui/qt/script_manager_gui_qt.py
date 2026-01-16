@@ -347,7 +347,9 @@ class EditDialog(QDialog):
         self.script = script_data
         self.config = parent.config if parent and hasattr(parent, 'config') else {}
         self.setWindowTitle(f"EDIT // {self.script.get('name', 'UNKNOWN')}")
-        self.resize(1150, 750)
+        edit_w = self.config.get("edit_panel_width", 1150)
+        edit_h = self.config.get("edit_panel_height", 750)
+        self.resize(edit_w, edit_h)
         self.setStyleSheet(f"""
             QDialog {{ background-color: {CP_BG}; }}
             QWidget {{ color: {CP_TEXT}; font-family: 'Consolas'; font-size: 10pt; }}
@@ -967,7 +969,18 @@ class SettingsDialog(QDialog):
         size_box.addWidget(QLabel("H:"))
         size_box.addWidget(self.spn_h)
         size_box.addStretch()
-        l_win.addRow(size_box)
+        l_win.addRow("Main:", size_box)
+        
+        edit_size_box = QHBoxLayout()
+        self.spn_edit_w = QSpinBox(); self.spn_edit_w.setRange(400, 3000); self.spn_edit_w.setValue(self.config.get("edit_panel_width", 1150))
+        self.spn_edit_h = QSpinBox(); self.spn_edit_h.setRange(300, 2000); self.spn_edit_h.setValue(self.config.get("edit_panel_height", 750))
+        edit_size_box.addWidget(QLabel("W:"))
+        edit_size_box.addWidget(self.spn_edit_w)
+        edit_size_box.addSpacing(10)
+        edit_size_box.addWidget(QLabel("H:"))
+        edit_size_box.addWidget(self.spn_edit_h)
+        edit_size_box.addStretch()
+        l_win.addRow("Edit:", edit_size_box)
         
         self.chk_top = QCheckBox("Always On Top")
         self.chk_top.setChecked(self.config.get("always_on_top", False))
@@ -1098,6 +1111,8 @@ class SettingsDialog(QDialog):
         self.config["show_widgets"] = self.chk_widgets.isChecked()
         self.config["window_width"] = self.spn_w.value()
         self.config["window_height"] = self.spn_h.value()
+        self.config["edit_panel_width"] = self.spn_edit_w.value()
+        self.config["edit_panel_height"] = self.spn_edit_h.value()
         self.config["always_on_top"] = self.chk_top.isChecked()
         
         # Item Style Defaults

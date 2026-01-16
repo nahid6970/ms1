@@ -152,7 +152,7 @@
             "border_width": 0
         },
         {
-            "name": "\uea83 FFMPEG",
+            "name": "FFMPEG",
             "type": "folder",
             "scripts": [
                 {
@@ -169,7 +169,7 @@
                     "use_inline": false,
                     "inline_type": "cmd",
                     "inline_script": "",
-                    "_runtime_height": 100,
+                    "_runtime_height": 900,
                     "_runtime_font_size": 14,
                     "_runtime_font_family": "JetBrainsMono Nerd Font Propo",
                     "_runtime_is_bold": true,
@@ -181,7 +181,7 @@
                     "name": "Convert",
                     "path": "C:/Users/nahid/ms/ms1/scripts/ffmpeg/convert.ps1",
                     "type": "script",
-                    "_runtime_height": 100,
+                    "_runtime_height": 900,
                     "_runtime_font_size": 14,
                     "_runtime_font_family": "JetBrainsMono Nerd Font Propo",
                     "_runtime_is_bold": true,
@@ -204,7 +204,7 @@
                     "path": "C:/Users/nahid/ms/ms1/scripts/ffmpeg/image_dimension.ps1",
                     "type": "script",
                     "hide_terminal": false,
-                    "_runtime_height": 100,
+                    "_runtime_height": 900,
                     "_runtime_font_size": 14,
                     "_runtime_font_family": "JetBrainsMono Nerd Font Propo",
                     "_runtime_is_bold": true,
@@ -216,7 +216,7 @@
                     "name": "Merge",
                     "path": "C:/Users/nahid/ms/ms1/scripts/ffmpeg/merge.ps1",
                     "type": "script",
-                    "_runtime_height": 100,
+                    "_runtime_height": 900,
                     "_runtime_font_size": 14,
                     "_runtime_font_family": "JetBrainsMono Nerd Font Propo",
                     "_runtime_is_bold": true,
@@ -228,7 +228,7 @@
                     "name": "Trim",
                     "path": "C:/Users/nahid/ms/ms1/scripts/ffmpeg/trim.ps1",
                     "type": "script",
-                    "_runtime_height": 100,
+                    "_runtime_height": 900,
                     "_runtime_font_size": 14,
                     "_runtime_font_family": "JetBrainsMono Nerd Font Propo",
                     "_runtime_is_bold": true,
@@ -241,7 +241,7 @@
                     "path": "C:/Users/nahid/ms/ms1/scripts/ffmpeg/vid_dim.ps1",
                     "type": "script",
                     "hide_terminal": false,
-                    "_runtime_height": 100,
+                    "_runtime_height": 900,
                     "_runtime_font_size": 14,
                     "_runtime_font_family": "JetBrainsMono Nerd Font Propo",
                     "_runtime_is_bold": true,
@@ -261,15 +261,7 @@
             "_runtime_font_family": "JetBrainsMono Nerd Font Propo",
             "_runtime_is_bold": true,
             "_runtime_is_italic": false,
-            "icon_path": "",
-            "font_family": "JetBrainsMono Nerd Font Propo",
-            "font_size": 14,
-            "is_bold": true,
-            "is_italic": false,
-            "width": 0,
-            "height": 0,
-            "corner_radius": 0,
-            "border_width": 0
+            "icon_path": ""
         },
         {
             "name": "YTC",
@@ -1003,5 +995,9 @@
     "def_folder_fg": "#000000",
     "def_folder_hbg": "#68650c",
     "def_folder_hfg": "#ffffff",
-    "cfg_text_color": "#000000"
+    "cfg_text_color": "#000000",
+    "edit_panel_width": 1200,
+    "edit_panel_height": 850,
+    "style_panel_width": 400,
+    "inline_panel_width": 500
 }
