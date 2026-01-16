@@ -702,7 +702,29 @@ function handleKeyboardShortcuts(e) {
         
         // This feature only works in INPUT/TEXTAREA, not contentEditable
         if (activeElement.classList && activeElement.classList.contains('markdown-preview')) {
-            showToast('Select next occurrence only works in raw mode (📄 button)', 'info');
+            const switched = enableRawMode();
+            if (switched) {
+                showToast('Switched to Raw Mode for Select Next Occurrence', 'info');
+                // After switching, focus the input in the same cell
+                setTimeout(() => {
+                    const cell = activeElement.closest('td');
+                    if (cell) {
+                        const inputElement = cell.querySelector('input, textarea');
+                        if (inputElement) {
+                            inputElement.focus();
+                            // Try to restore selection
+                            const selectedText = window.getSelection().toString();
+                            if (selectedText) {
+                                const text = inputElement.value;
+                                const index = text.indexOf(selectedText);
+                                if (index !== -1) {
+                                    inputElement.setSelectionRange(index, index + selectedText.length);
+                                }
+                            }
+                        }
+                    }
+                }, 100);
+            }
             return;
         }
         
@@ -719,7 +741,20 @@ function handleKeyboardShortcuts(e) {
         
         // This feature only works in TEXTAREA, not contentEditable
         if (activeElement.classList && activeElement.classList.contains('markdown-preview')) {
-            showToast('Multi-cursor only works in raw mode (📄 button)', 'info');
+            const switched = enableRawMode();
+            if (switched) {
+                showToast('Switched to Raw Mode for Multi-Cursor', 'info');
+                // After switching, focus the textarea in the same cell
+                setTimeout(() => {
+                    const cell = activeElement.closest('td');
+                    if (cell) {
+                        const textarea = cell.querySelector('textarea');
+                        if (textarea) {
+                            textarea.focus();
+                        }
+                    }
+                }, 100);
+            }
             return;
         }
         
@@ -735,7 +770,20 @@ function handleKeyboardShortcuts(e) {
         
         // This feature only works in TEXTAREA, not contentEditable
         if (activeElement.classList && activeElement.classList.contains('markdown-preview')) {
-            showToast('Multi-cursor only works in raw mode (📄 button)', 'info');
+            const switched = enableRawMode();
+            if (switched) {
+                showToast('Switched to Raw Mode for Multi-Cursor', 'info');
+                // After switching, focus the textarea in the same cell
+                setTimeout(() => {
+                    const cell = activeElement.closest('td');
+                    if (cell) {
+                        const textarea = cell.querySelector('textarea');
+                        if (textarea) {
+                            textarea.focus();
+                        }
+                    }
+                }, 100);
+            }
             return;
         }
         
@@ -6555,6 +6603,24 @@ function toggleMarkdownPreview() {
     renderTable();
 }
 
+// Helper function to enable raw mode programmatically
+function enableRawMode() {
+    const markdownToggle = document.getElementById('markdownToggle');
+    const table = document.getElementById('dataTable');
+    const toggleLabel = markdownToggle.closest('label');
+    
+    if (markdownToggle.checked) {
+        // Currently in preview mode, switch to raw mode
+        markdownToggle.checked = false;
+        table.classList.add('hide-markdown-preview');
+        toggleLabel.classList.add('raw-mode-active');
+        localStorage.setItem('markdownPreviewEnabled', 'false');
+        renderTable();
+        return true; // Switched to raw mode
+    }
+    return false; // Already in raw mode
+}
+
 function toggleCollapsible(id) {
     const element = document.getElementById(id);
     if (element) {
@@ -8954,13 +9020,36 @@ function applyMultipleFormatsWithColor(colorSyntax) {
 let multiSelectionData = null;
 
 function selectAllMatchingOccurrences(input) {
-    // Handle contentEditable mode - direct to raw mode
+    // Handle contentEditable mode - automatically switch to raw mode
     if (input.isContentEditable) {
-        showToast('Select All Matching works in Raw Mode (📄 button)', 'info');
+        const switched = enableRawMode();
+        if (switched) {
+            showToast('Switched to Raw Mode for Select All Matching', 'info');
+            // After switching, the cell will be re-rendered, so we need to wait and retry
+            setTimeout(() => {
+                // Find the corresponding input element in the same cell
+                const cell = input.closest('td');
+                if (cell) {
+                    const inputElement = cell.querySelector('input, textarea');
+                    if (inputElement) {
+                        inputElement.focus();
+                        // Try to restore selection if possible
+                        const selectedText = window.getSelection().toString();
+                        if (selectedText) {
+                            const text = inputElement.value;
+                            const index = text.indexOf(selectedText);
+                            if (index !== -1) {
+                                inputElement.setSelectionRange(index, index + selectedText.length);
+                            }
+                        }
+                    }
+                }
+            }, 100);
+        }
         return;
     }
     
-    // Handle input/textarea (legacy mode)
+    // Handle input/textarea (raw mode)
     const text = input.value;
     const selStart = input.selectionStart;
     const selEnd = input.selectionEnd;
