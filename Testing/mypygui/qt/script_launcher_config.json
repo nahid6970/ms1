@@ -813,6 +813,25 @@
             "_runtime_is_italic": false
         },
         {
+            "name": "Task Manager",
+            "path": "taskmgr.exe",
+            "hide_terminal": false,
+            "ctrl_left_cmd": "",
+            "ctrl_right_cmd": "",
+            "col_span": 1,
+            "row_span": 1,
+            "_runtime_height": 100,
+            "_runtime_font_size": 12,
+            "keep_open": false,
+            "kill_window": false,
+            "use_inline": false,
+            "inline_type": "cmd",
+            "inline_script": "",
+            "_runtime_font_family": "Consolas",
+            "_runtime_is_bold": true,
+            "_runtime_is_italic": false
+        },
+        {
             "name": "AntiGravity",
             "path": "C:/Users/nahid/ms/ms1/Testing/antigravity_acc_change/vsc_manager.py",
             "type": "script",
@@ -846,25 +865,6 @@
             "border_width": 2,
             "new_terminal": true,
             "run_admin": false
-        },
-        {
-            "name": "Task Manager",
-            "path": "taskmgr.exe",
-            "hide_terminal": false,
-            "ctrl_left_cmd": "",
-            "ctrl_right_cmd": "",
-            "col_span": 1,
-            "row_span": 1,
-            "_runtime_height": 100,
-            "_runtime_font_size": 12,
-            "keep_open": false,
-            "kill_window": false,
-            "use_inline": false,
-            "inline_type": "cmd",
-            "inline_script": "",
-            "_runtime_font_family": "Consolas",
-            "_runtime_is_bold": true,
-            "_runtime_is_italic": false
         },
         {
             "name": "Explorer",
