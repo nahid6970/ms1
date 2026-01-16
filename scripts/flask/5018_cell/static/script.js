@@ -9376,18 +9376,44 @@ function showCursorMarkers(textarea, cursors) {
         
         const lineNum = cursor.line - 1;
         if (lineNum < lines.length) {
-            const lineText = lines[lineNum].substring(0, cursor.column);
-            const x = paddingLeft + measureText(lineText, font);
-            const y = paddingTop + lineNum * lineHeight;
+            // Show selection if exists
+            if (cursor.selectionStart !== undefined && cursor.selectionEnd !== undefined) {
+                const selStart = cursor.selectionStart;
+                const selEnd = cursor.selectionEnd;
+                
+                const startText = lines[lineNum].substring(0, selStart);
+                const selectedText = lines[lineNum].substring(selStart, selEnd);
+                
+                const startX = paddingLeft + measureText(startText, font);
+                const selWidth = measureText(selectedText, font);
+                const y = paddingTop + lineNum * lineHeight;
+                
+                // Create selection highlight
+                const selMarker = document.createElement('div');
+                selMarker.style.position = 'absolute';
+                selMarker.style.left = startX + 'px';
+                selMarker.style.top = y + 'px';
+                selMarker.style.width = selWidth + 'px';
+                selMarker.style.height = lineHeight + 'px';
+                selMarker.style.backgroundColor = 'rgba(0, 123, 255, 0.3)';
+                selMarker.style.pointerEvents = 'none';
+                
+                overlay.appendChild(selMarker);
+            } else {
+                // Show cursor
+                const lineText = lines[lineNum].substring(0, cursor.column);
+                const x = paddingLeft + measureText(lineText, font);
+                const y = paddingTop + lineNum * lineHeight;
 
-            // Create cursor marker
-            const marker = document.createElement('div');
-            marker.className = 'cursor-marker';
-            marker.style.left = x + 'px';
-            marker.style.top = y + 'px';
-            marker.style.height = lineHeight + 'px';
+                // Create cursor marker
+                const marker = document.createElement('div');
+                marker.className = 'cursor-marker';
+                marker.style.left = x + 'px';
+                marker.style.top = y + 'px';
+                marker.style.height = lineHeight + 'px';
 
-            overlay.appendChild(marker);
+                overlay.appendChild(marker);
+            }
         }
     });
 
@@ -9536,10 +9562,24 @@ function setupMultiLineCursorListener(textarea) {
     textarea.multiLineCursorKeyListener = function (e) {
         if (!multiLineCursorData || multiLineCursorData.textarea !== textarea) return;
 
+        // Handle Shift+arrow keys for selection
+        if (e.shiftKey && ['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) {
+            e.preventDefault();
+            handleMultiLineCursorMove(textarea, e.key, true); // true = extend selection
+            return;
+        }
+
+        // Handle Ctrl+Space to move to next word boundary
+        if (e.ctrlKey && e.key === ' ') {
+            e.preventDefault();
+            handleMultiLineCursorMove(textarea, 'NextWord', false);
+            return;
+        }
+
         // Handle arrow keys to move cursors
         if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'].includes(e.key)) {
             e.preventDefault();
-            handleMultiLineCursorMove(textarea, e.key);
+            handleMultiLineCursorMove(textarea, e.key, false);
             return;
         }
 
@@ -9557,7 +9597,11 @@ function setupMultiLineCursorListener(textarea) {
             let newText = textarea.value;
 
             // Sort cursors by position (descending) to avoid position shifts
-            const sortedCursors = [...cursors].sort((a, b) => b.pos - a.pos);
+            const sortedCursors = [...cursors].sort((a, b) => {
+                const aPos = getAbsolutePosition(newText, a);
+                const bPos = getAbsolutePosition(newText, b);
+                return bPos - aPos;
+            });
 
             // Process each cursor from end to start
             sortedCursors.forEach((cursor) => {
@@ -9567,32 +9611,47 @@ function setupMultiLineCursorListener(textarea) {
                     // Calculate actual position in current text
                     const lineStart = lines.slice(0, cursor.line - 1).join('\n').length + (cursor.line > 1 ? 1 : 0);
                     const currentLine = lines[cursor.line - 1];
-                    const insertPos = lineStart + Math.min(cursor.column, currentLine.length);
+                    
+                    // Handle selection
+                    if (cursor.selectionStart !== undefined && cursor.selectionEnd !== undefined) {
+                        const selStart = lineStart + cursor.selectionStart;
+                        const selEnd = lineStart + cursor.selectionEnd;
+                        
+                        if (e.key === 'Backspace' || e.key === 'Delete') {
+                            // Delete selection
+                            newText = newText.substring(0, selStart) + newText.substring(selEnd);
+                            cursor.column = cursor.selectionStart;
+                            delete cursor.selectionStart;
+                            delete cursor.selectionEnd;
+                        } else if (e.key.length === 1) {
+                            // Replace selection with typed character
+                            newText = newText.substring(0, selStart) + e.key + newText.substring(selEnd);
+                            cursor.column = cursor.selectionStart + 1;
+                            delete cursor.selectionStart;
+                            delete cursor.selectionEnd;
+                        }
+                    } else {
+                        // No selection - normal behavior
+                        const insertPos = lineStart + Math.min(cursor.column, currentLine.length);
 
-                    if (e.key === 'Backspace' && cursor.column > 0) {
-                        // Delete character before cursor
-                        newText = newText.substring(0, insertPos - 1) + newText.substring(insertPos);
-                    } else if (e.key === 'Delete' && cursor.column < currentLine.length) {
-                        // Delete character after cursor
-                        newText = newText.substring(0, insertPos) + newText.substring(insertPos + 1);
-                    } else if (e.key.length === 1) {
-                        // Insert character
-                        newText = newText.substring(0, insertPos) + e.key + newText.substring(insertPos);
+                        if (e.key === 'Backspace' && cursor.column > 0) {
+                            // Delete character before cursor
+                            newText = newText.substring(0, insertPos - 1) + newText.substring(insertPos);
+                            cursor.column--;
+                        } else if (e.key === 'Delete' && cursor.column < currentLine.length) {
+                            // Delete character after cursor
+                            newText = newText.substring(0, insertPos) + newText.substring(insertPos + 1);
+                        } else if (e.key.length === 1) {
+                            // Insert character
+                            newText = newText.substring(0, insertPos) + e.key + newText.substring(insertPos);
+                            cursor.column++;
+                        }
                     }
                 }
             });
 
             // Update textarea
             textarea.value = newText;
-
-            // Update cursor positions for all cursors
-            multiLineCursorData.cursors.forEach(cursor => {
-                if (e.key.length === 1) {
-                    cursor.column++;
-                } else if (e.key === 'Backspace' && cursor.column > 0) {
-                    cursor.column--;
-                }
-            });
 
             // Trigger change event
             const changeEvent = new Event('input', { bubbles: true });
@@ -9634,29 +9693,76 @@ function clearMultiLineCursor() {
     clearVisualMarkers();
 }
 
-function handleMultiLineCursorMove(textarea, key) {
+function handleMultiLineCursorMove(textarea, key, extendSelection = false) {
     if (!multiLineCursorData) return;
 
     const text = textarea.value;
     const lines = text.split('\n');
 
     multiLineCursorData.cursors.forEach(cursor => {
-        if (key === 'ArrowLeft' && cursor.column > 0) {
-            cursor.column--;
-        } else if (key === 'ArrowRight') {
-            const lineIdx = cursor.line - 1;
-            if (lineIdx < lines.length && cursor.column < lines[lineIdx].length) {
-                cursor.column++;
-            }
-        } else if (key === 'Home') {
-            cursor.column = 0;
-        } else if (key === 'End') {
-            const lineIdx = cursor.line - 1;
-            if (lineIdx < lines.length) {
-                cursor.column = lines[lineIdx].length;
-            }
+        const lineIdx = cursor.line - 1;
+        if (lineIdx >= lines.length) return;
+        
+        const currentLine = lines[lineIdx];
+        
+        // Initialize selection if extending
+        if (extendSelection && cursor.selectionStart === undefined) {
+            cursor.selectionStart = cursor.column;
+            cursor.selectionEnd = cursor.column;
         }
-        // ArrowUp/Down don't make sense for multi-line cursors (they're already on different lines)
+        
+        // Store old position for selection
+        const oldColumn = extendSelection ? cursor.selectionEnd : cursor.column;
+        let newColumn = oldColumn;
+        
+        if (key === 'ArrowLeft' && oldColumn > 0) {
+            newColumn = oldColumn - 1;
+        } else if (key === 'ArrowRight' && oldColumn < currentLine.length) {
+            newColumn = oldColumn + 1;
+        } else if (key === 'Home') {
+            newColumn = 0;
+        } else if (key === 'End') {
+            newColumn = currentLine.length;
+        } else if (key === 'NextWord') {
+            // Move to next word boundary (space or special char)
+            const wordBoundary = /[\s\W]/;
+            let pos = oldColumn;
+            
+            // Skip current word
+            while (pos < currentLine.length && !wordBoundary.test(currentLine[pos])) {
+                pos++;
+            }
+            // Skip spaces/special chars
+            while (pos < currentLine.length && wordBoundary.test(currentLine[pos])) {
+                pos++;
+            }
+            
+            newColumn = pos;
+        }
+        
+        if (extendSelection) {
+            // Update selection end
+            cursor.selectionEnd = newColumn;
+            
+            // Normalize selection (start should be less than end)
+            if (cursor.selectionStart > cursor.selectionEnd) {
+                [cursor.selectionStart, cursor.selectionEnd] = [cursor.selectionEnd, cursor.selectionStart];
+            }
+            
+            // If selection collapsed, remove it
+            if (cursor.selectionStart === cursor.selectionEnd) {
+                cursor.column = cursor.selectionStart;
+                delete cursor.selectionStart;
+                delete cursor.selectionEnd;
+            } else {
+                cursor.column = cursor.selectionEnd;
+            }
+        } else {
+            // Clear selection and move cursor
+            delete cursor.selectionStart;
+            delete cursor.selectionEnd;
+            cursor.column = newColumn;
+        }
     });
 
     // Update visual markers
@@ -9665,8 +9771,23 @@ function handleMultiLineCursorMove(textarea, key) {
     // Move native cursor to last position
     const lastCursor = multiLineCursorData.cursors[multiLineCursorData.cursors.length - 1];
     const lineStart = lines.slice(0, lastCursor.line - 1).join('\n').length + (lastCursor.line > 1 ? 1 : 0);
-    const newCursorPos = lineStart + lastCursor.column;
-    textarea.setSelectionRange(newCursorPos, newCursorPos);
+    
+    if (lastCursor.selectionStart !== undefined) {
+        // Show selection
+        const selStart = lineStart + lastCursor.selectionStart;
+        const selEnd = lineStart + lastCursor.selectionEnd;
+        textarea.setSelectionRange(selStart, selEnd);
+    } else {
+        // Show cursor
+        const newCursorPos = lineStart + lastCursor.column;
+        textarea.setSelectionRange(newCursorPos, newCursorPos);
+    }
+}
+
+function getAbsolutePosition(text, cursor) {
+    const lines = text.split('\n');
+    const lineStart = lines.slice(0, cursor.line - 1).join('\n').length + (cursor.line > 1 ? 1 : 0);
+    return lineStart + cursor.column;
 }
 
 function populateF1Categories() {
