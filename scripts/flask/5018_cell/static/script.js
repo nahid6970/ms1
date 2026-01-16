@@ -753,8 +753,11 @@ function handleKeyboardShortcuts(e) {
     // Alt+Up to move lines up
     if (e.altKey && !e.ctrlKey && e.key === 'ArrowUp') {
         const activeElement = document.activeElement;
-        // Should work in any cell input/textarea
-        if ((activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA') &&
+        // Check if it's a contentEditable element or input/textarea in a cell
+        if (activeElement.isContentEditable && activeElement.classList.contains('markdown-preview')) {
+            e.preventDefault();
+            moveLines(activeElement, -1);
+        } else if ((activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA') &&
             activeElement.closest('td:not(.row-number)')) {
             e.preventDefault();
             moveLines(activeElement, -1);
@@ -764,7 +767,11 @@ function handleKeyboardShortcuts(e) {
     // Alt+Down to move lines down
     if (e.altKey && !e.ctrlKey && e.key === 'ArrowDown') {
         const activeElement = document.activeElement;
-        if ((activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA') &&
+        // Check if it's a contentEditable element or input/textarea in a cell
+        if (activeElement.isContentEditable && activeElement.classList.contains('markdown-preview')) {
+            e.preventDefault();
+            moveLines(activeElement, 1);
+        } else if ((activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA') &&
             activeElement.closest('td:not(.row-number)')) {
             e.preventDefault();
             moveLines(activeElement, 1);
@@ -793,6 +800,87 @@ function handleKeyboardShortcuts(e) {
 }
 
 function moveLines(activeElement, direction) {
+    // Handle contentEditable (WYSIWYG mode)
+    if (activeElement.isContentEditable) {
+        const selection = window.getSelection();
+        if (!selection.rangeCount) return;
+        
+        const range = selection.getRangeAt(0);
+        const value = extractRawText(activeElement);
+        
+        // Get cursor position in raw text
+        const textBefore = extractRawTextBeforeCaret(activeElement, range);
+        const start = textBefore.length;
+        const end = start + (selection.toString().length || 0);
+        
+        const lines = value.split('\n');
+
+        // Find affected lines
+        const startLineIndex = value.substring(0, start).split('\n').length - 1;
+        let endLineIndex = value.substring(0, end).split('\n').length - 1;
+
+        // If selection ends at a newline, exclude that line unless it's just a cursor
+        if (end > start && value[end - 1] === '\n') {
+            endLineIndex--;
+        }
+
+        // Boundary checks
+        if (direction === -1 && startLineIndex === 0) return;
+        if (direction === 1 && endLineIndex === lines.length - 1) return;
+
+        // Extract the lines to be moved
+        const movedLines = lines.splice(startLineIndex, endLineIndex - startLineIndex + 1);
+
+        // Re-insert at new position
+        if (direction === -1) {
+            lines.splice(startLineIndex - 1, 0, ...movedLines);
+        } else {
+            lines.splice(startLineIndex + 1, 0, ...movedLines);
+        }
+
+        const newValue = lines.join('\n');
+        
+        // Update the contentEditable element with highlighted syntax
+        activeElement.innerHTML = highlightSyntax(newValue);
+        
+        // Update underlying input element directly without triggering input event
+        const cell = activeElement.closest('td');
+        if (cell) {
+            const inputElement = cell.querySelector('input, textarea');
+            if (inputElement) {
+                // Get current data
+                const rowIndex = parseInt(cell.parentElement.dataset.row);
+                const colIndex = parseInt(cell.dataset.col);
+                
+                // Update data directly
+                if (tableData.sheets[currentSheet] && 
+                    tableData.sheets[currentSheet].rows[rowIndex] && 
+                    tableData.sheets[currentSheet].rows[rowIndex][colIndex] !== undefined) {
+                    tableData.sheets[currentSheet].rows[rowIndex][colIndex] = newValue;
+                }
+                
+                // Update input value without triggering events
+                inputElement.value = newValue;
+                
+                // Trigger save in background
+                saveData();
+            }
+        }
+        
+        // Restore cursor position
+        let newStart = 0;
+        for (let i = 0; i < (startLineIndex + direction); i++) {
+            newStart += lines[i].length + 1;
+        }
+        const startOfSourceLine = value.lastIndexOf('\n', start - 1) + 1;
+        const offsetInStartLine = start - startOfSourceLine;
+        newStart += offsetInStartLine;
+        
+        setCaretPosition(activeElement, newStart);
+        return;
+    }
+    
+    // Handle input/textarea (legacy mode)
     const value = activeElement.value;
     const start = activeElement.selectionStart;
     const end = activeElement.selectionEnd;
