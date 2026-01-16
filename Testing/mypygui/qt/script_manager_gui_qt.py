@@ -159,7 +159,7 @@ class CyberButton(QPushButton):
         
         # Account for button padding (10px in QSS)
         padding = 10
-        spacing = 4 if icon_pixmap else 0
+        spacing = self.script.get("icon_gap", 2) if icon_pixmap else 0
         
         if icon_position == "center":
             # Center: icon only, no text
@@ -412,7 +412,7 @@ class EditDialog(QDialog):
         self.spn_icon_w.setRange(0, 256)
         self.spn_icon_w.setValue(self.script.get("icon_width", 0))
         self.spn_icon_w.setToolTip("0 = Auto")
-        self.spn_icon_w.setFixedWidth(60)
+        self.spn_icon_w.setFixedWidth(55)
         icon_settings.addWidget(self.spn_icon_w)
         
         icon_settings.addWidget(QLabel("H:"))
@@ -420,14 +420,22 @@ class EditDialog(QDialog):
         self.spn_icon_h.setRange(0, 256)
         self.spn_icon_h.setValue(self.script.get("icon_height", 0))
         self.spn_icon_h.setToolTip("0 = Auto")
-        self.spn_icon_h.setFixedWidth(60)
+        self.spn_icon_h.setFixedWidth(55)
         icon_settings.addWidget(self.spn_icon_h)
+        
+        icon_settings.addWidget(QLabel("Gap:"))
+        self.spn_icon_gap = QSpinBox()
+        self.spn_icon_gap.setRange(0, 50)
+        self.spn_icon_gap.setValue(self.script.get("icon_gap", 2))
+        self.spn_icon_gap.setToolTip("Space between icon and text")
+        self.spn_icon_gap.setFixedWidth(45)
+        icon_settings.addWidget(self.spn_icon_gap)
         
         icon_settings.addWidget(QLabel("Pos:"))
         self.cmb_icon_pos = QComboBox()
         self.cmb_icon_pos.addItems(["top", "left", "right", "bottom", "center"])
         self.cmb_icon_pos.setCurrentText(self.script.get("icon_position", "top"))
-        self.cmb_icon_pos.setFixedWidth(80)
+        self.cmb_icon_pos.setFixedWidth(75)
         icon_settings.addWidget(self.cmb_icon_pos)
         icon_settings.addStretch()
         l_basic.addRow("", icon_settings)
@@ -781,6 +789,7 @@ class EditDialog(QDialog):
         self.script["icon_path"] = self.inp_icon.text()
         self.script["icon_width"] = self.spn_icon_w.value()
         self.script["icon_height"] = self.spn_icon_h.value()
+        self.script["icon_gap"] = self.spn_icon_gap.value()
         self.script["icon_position"] = self.cmb_icon_pos.currentText()
         
         if self.script.get("type") != "folder":
@@ -1666,7 +1675,7 @@ class MainWindow(QMainWindow):
         keys_to_remove = ["color", "text_color", "hover_color", "hover_text_color", 
                          "border_color", "font_family", "font_size", "is_bold", 
                          "is_italic", "corner_radius", "border_width", "width", "height",
-                         "icon_path", "icon_width", "icon_height", "icon_position"]
+                         "icon_path", "icon_width", "icon_height", "icon_gap", "icon_position"]
         for key in keys_to_remove:
             script.pop(key, None)
         
