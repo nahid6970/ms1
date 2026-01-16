@@ -560,60 +560,95 @@ function handleKeyboardShortcuts(e) {
 
     // F9 to swap two words containing a separator in the middle
     if (e.key === 'F9') {
-        console.log('F9 pressed!');
         e.preventDefault();
         const activeElement = document.activeElement;
-        console.log('Active element:', activeElement.tagName);
-        if (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA') {
-
-            const start = activeElement.selectionStart;
-            const end = activeElement.selectionEnd;
-
-            if (start !== end) {
-                const text = activeElement.value.substring(start, end);
-                // Regex to split: (Part1)(Separator)(Part2)
-                // Separator defined as: consecutive whitespace, tab, comma-space, etc.
-                // We use a non-greedy match for first part, then the separator, then the rest
-                const match = text.match(/^(.+?)([\t ,]+)(.+)$/);
-
-                if (match) {
-                    const part1 = match[1];
-                    const separator = match[2];
-                    const part2 = match[3];
-
-                    const newText = part2 + separator + part1;
-
-                    // Replace text
-                    const val = activeElement.value;
-                    const newVal = val.substring(0, start) + newText + val.substring(end);
-
-                    activeElement.value = newVal;
-
-                    // Restore selection
-                    activeElement.selectionStart = start;
-                    activeElement.selectionEnd = start + newText.length;
-
-                    // Trigger change event
-                    const event = new Event('input', { bubbles: true });
-                    activeElement.dispatchEvent(event);
-
-                    showToast('Swapped text position', 'success');
+        
+        // Handle both contentEditable and input/textarea
+        if (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA' || 
+            (activeElement.classList && activeElement.classList.contains('markdown-preview'))) {
+            
+            let text = '';
+            let isContentEditable = activeElement.isContentEditable;
+            
+            if (isContentEditable) {
+                const selection = window.getSelection();
+                if (selection && !selection.isCollapsed) {
+                    text = selection.toString();
                 } else {
-                    showToast('Could not identify two parts separated by space/comma', 'warning');
+                    showToast('Please select text to swap', 'info');
+                    return;
                 }
             } else {
-                showToast('Please select text to swap', 'info');
+                const start = activeElement.selectionStart;
+                const end = activeElement.selectionEnd;
+                
+                if (start !== end) {
+                    text = activeElement.value.substring(start, end);
+                } else {
+                    showToast('Please select text to swap', 'info');
+                    return;
+                }
+            }
+
+            // Regex to split: (Part1)(Separator)(Part2)
+            const match = text.match(/^(.+?)([\t ,]+)(.+)$/);
+
+            if (match) {
+                const part1 = match[1];
+                const separator = match[2];
+                const part2 = match[3];
+                const newText = part2 + separator + part1;
+
+                if (isContentEditable) {
+                    // Handle contentEditable
+                    const selection = window.getSelection();
+                    if (selection.rangeCount > 0) {
+                        const range = selection.getRangeAt(0);
+                        range.deleteContents();
+                        const textNode = document.createTextNode(newText);
+                        range.insertNode(textNode);
+                        
+                        // Update underlying input
+                        const rawText = extractRawText(activeElement);
+                        const actualInput = activeElement.previousElementSibling;
+                        if (actualInput && (actualInput.tagName === 'INPUT' || actualInput.tagName === 'TEXTAREA')) {
+                            actualInput.value = rawText;
+                            const event = new Event('input', { bubbles: true });
+                            actualInput.dispatchEvent(event);
+                        }
+                        
+                        // Select the swapped text
+                        const newRange = document.createRange();
+                        newRange.selectNodeContents(textNode);
+                        selection.removeAllRanges();
+                        selection.addRange(newRange);
+                    }
+                } else {
+                    // Handle input/textarea
+                    const start = activeElement.selectionStart;
+                    const end = activeElement.selectionEnd;
+                    const val = activeElement.value;
+                    const newVal = val.substring(0, start) + newText + val.substring(end);
+                    activeElement.value = newVal;
+                    activeElement.selectionStart = start;
+                    activeElement.selectionEnd = start + newText.length;
+                    
+                    const event = new Event('input', { bubbles: true });
+                    activeElement.dispatchEvent(event);
+                }
+
+                showToast('Swapped text position', 'success');
+            } else {
+                showToast('Could not identify two parts separated by space/comma', 'warning');
             }
         }
     }
 
     // Ctrl+Shift+D to select next occurrence (multi-cursor simulation)
     if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'D') {
-        console.log('Ctrl+Shift+D pressed!');
         e.preventDefault();
         e.stopPropagation();
         const activeElement = document.activeElement;
-        console.log('Active element:', activeElement.tagName);
         if (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA') {
             selectNextOccurrence(activeElement);
         }
@@ -621,18 +656,18 @@ function handleKeyboardShortcuts(e) {
 
     // Ctrl+Alt+Down to add cursor below (multi-line cursor)
     if (e.ctrlKey && e.altKey && e.key === 'ArrowDown') {
+        e.preventDefault();
         const activeElement = document.activeElement;
         if (activeElement.tagName === 'TEXTAREA') {
-            e.preventDefault();
             addCursorBelow(activeElement);
         }
     }
 
     // Ctrl+Alt+Up to add cursor above (multi-line cursor)
     if (e.ctrlKey && e.altKey && e.key === 'ArrowUp') {
+        e.preventDefault();
         const activeElement = document.activeElement;
         if (activeElement.tagName === 'TEXTAREA') {
-            e.preventDefault();
             addCursorAbove(activeElement);
         }
     }
