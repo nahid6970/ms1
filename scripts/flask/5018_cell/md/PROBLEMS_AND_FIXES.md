@@ -7,6 +7,30 @@ This document tracks historical bugs, issues, and their solutions. Use this to:
 
 ---
 
+## [2026-01-16 17:45] - Multi-Cursor Home/End Not Consolidating Cursors Per Line
+
+**Problem:**
+When using Ctrl+Shift+D to select multiple occurrences of a word (including multiple on the same line), pressing Home or End would move each cursor independently, resulting in multiple cursors at the same position on the same line. When typing, text would be inserted multiple times on that line.
+
+**Root Cause:**
+The `handleMultiCursorMove()` function moved each cursor independently without checking if multiple cursors ended up at the same position after Home/End navigation.
+
+**Solution:**
+Added cursor consolidation logic specifically for Home/End keys:
+1. After moving all cursors to line start (Home) or line end (End), check for duplicate positions
+2. Use a Set to track seen positions and filter out duplicates
+3. Update the selectedMatches and matches arrays with the consolidated list
+4. Update the visual indicator to show the correct count of remaining cursors
+
+This ensures one cursor per line after Home/End, making multi-line editing more intuitive.
+
+**Files Modified:**
+- `static/script.js` - handleMultiCursorMove (~line 9163)
+
+**Related Issues:** Multi-cursor editing, Ctrl+Shift+D
+
+---
+
 ## [2026-01-16 17:30] - Keyboard Shortcuts Not Working (F9, Ctrl+Shift+D, Ctrl+Alt+Arrows)
 
 **Problem:**
