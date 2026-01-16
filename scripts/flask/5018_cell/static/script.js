@@ -9372,8 +9372,7 @@ function showCursorMarkers(textarea, cursors) {
 
     // Create markers for each cursor
     cursors.forEach((cursor, index) => {
-        if (index === cursors.length - 1) return; // Skip last one (native cursor shows it)
-
+        // Show all cursors including the last one
         const lineNum = cursor.line - 1;
         if (lineNum < lines.length) {
             const lineText = lines[lineNum].substring(0, cursor.column);
@@ -9447,7 +9446,7 @@ function addCursorBelow(textarea) {
         textarea.setSelectionRange(nextCursorPos, nextCursorPos);
 
         showMultiCursorIndicator(textarea, multiLineCursorData.cursors.length);
-        // showCursorMarkers(textarea, multiLineCursorData.cursors); // Disabled - only show main cursor
+        showCursorMarkers(textarea, multiLineCursorData.cursors);
         setupMultiLineCursorListener(textarea);
     }
 }
@@ -9489,7 +9488,7 @@ function addCursorAbove(textarea) {
         textarea.setSelectionRange(prevCursorPos, prevCursorPos);
 
         showMultiCursorIndicator(textarea, multiLineCursorData.cursors.length);
-        // showCursorMarkers(textarea, multiLineCursorData.cursors); // Disabled - only show main cursor
+        showCursorMarkers(textarea, multiLineCursorData.cursors);
         setupMultiLineCursorListener(textarea);
     }
 }
@@ -9535,6 +9534,19 @@ function setupMultiLineCursorListener(textarea) {
     // Keydown listener to capture what will be typed/deleted
     textarea.multiLineCursorKeyListener = function (e) {
         if (!multiLineCursorData || multiLineCursorData.textarea !== textarea) return;
+
+        // Handle arrow keys to move cursors
+        if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'].includes(e.key)) {
+            e.preventDefault();
+            handleMultiLineCursorMove(textarea, e.key);
+            return;
+        }
+
+        // Handle Escape to clear multi-cursor
+        if (e.key === 'Escape') {
+            clearMultiLineCursor();
+            return;
+        }
 
         // Prevent default to handle manually
         if (e.key.length === 1 || e.key === 'Backspace' || e.key === 'Delete') {
@@ -9595,7 +9607,7 @@ function setupMultiLineCursorListener(textarea) {
             }
 
             // Update visual markers
-            // showCursorMarkers(textarea, cursors); // Disabled - only show main cursor
+            showCursorMarkers(textarea, cursors);
         }
     };
 
@@ -9619,6 +9631,41 @@ function clearMultiLineCursor() {
         indicator.style.display = 'none';
     }
     clearVisualMarkers();
+}
+
+function handleMultiLineCursorMove(textarea, key) {
+    if (!multiLineCursorData) return;
+
+    const text = textarea.value;
+    const lines = text.split('\n');
+
+    multiLineCursorData.cursors.forEach(cursor => {
+        if (key === 'ArrowLeft' && cursor.column > 0) {
+            cursor.column--;
+        } else if (key === 'ArrowRight') {
+            const lineIdx = cursor.line - 1;
+            if (lineIdx < lines.length && cursor.column < lines[lineIdx].length) {
+                cursor.column++;
+            }
+        } else if (key === 'Home') {
+            cursor.column = 0;
+        } else if (key === 'End') {
+            const lineIdx = cursor.line - 1;
+            if (lineIdx < lines.length) {
+                cursor.column = lines[lineIdx].length;
+            }
+        }
+        // ArrowUp/Down don't make sense for multi-line cursors (they're already on different lines)
+    });
+
+    // Update visual markers
+    showCursorMarkers(textarea, multiLineCursorData.cursors);
+
+    // Move native cursor to last position
+    const lastCursor = multiLineCursorData.cursors[multiLineCursorData.cursors.length - 1];
+    const lineStart = lines.slice(0, lastCursor.line - 1).join('\n').length + (lastCursor.line > 1 ? 1 : 0);
+    const newCursorPos = lineStart + lastCursor.column;
+    textarea.setSelectionRange(newCursorPos, newCursorPos);
 }
 
 function populateF1Categories() {
