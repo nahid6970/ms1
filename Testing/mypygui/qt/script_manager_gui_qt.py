@@ -389,7 +389,10 @@ class EditDialog(QDialog):
         self.cmb_font = QComboBox()
         all_fonts = sorted(QFontDatabase.families())
         self.cmb_font.addItems(all_fonts)
-        current_font = self.script.get("font_family", "Consolas")
+        
+        # Use global default if item has no custom font
+        default_font = self.config.get("default_font_family", "Consolas")
+        current_font = self.script.get("font_family", default_font)
         idx = self.cmb_font.findText(current_font, Qt.MatchFlag.MatchExactly)
         if idx >= 0: self.cmb_font.setCurrentIndex(idx)
         else: self.cmb_font.setEditText(current_font) # fallback if editable
@@ -401,17 +404,17 @@ class EditDialog(QDialog):
         self.spn_size.setRange(6, 72)
         
         # Pull global default if item has no font_size
-        default_fs = 10
-        if parent and hasattr(parent, "config"):
-            default_fs = parent.config.get("default_font_size", 10)
+        default_fs = self.config.get("default_font_size", 10)
+        default_bold = self.config.get("default_is_bold", True)
+        default_italic = self.config.get("default_is_italic", False)
             
         self.spn_size.setValue(self.script.get("font_size", default_fs))
         l_typo.addWidget(self.spn_size, 1, 1)
         self.chk_bold = QCheckBox("Bold")
-        self.chk_bold.setChecked(self.script.get("is_bold", True))
+        self.chk_bold.setChecked(self.script.get("is_bold", default_bold))
         l_typo.addWidget(self.chk_bold, 1, 2)
         self.chk_italic = QCheckBox("Italic")
-        self.chk_italic.setChecked(self.script.get("is_italic", False))
+        self.chk_italic.setChecked(self.script.get("is_italic", default_italic))
         l_typo.addWidget(self.chk_italic, 1, 3)
         grp_typo.setLayout(l_typo)
         left_layout.addWidget(grp_typo)
@@ -1565,13 +1568,14 @@ class MainWindow(QMainWindow):
         menu.exec(btn.mapToGlobal(pos))
 
     def reset_item_styles(self, script):
-        """Reset item styles to global defaults"""
+        """Reset item styles to global defaults - matches EditDialog reset"""
         is_folder = (script.get("type") == "folder")
         
-        # Remove custom style keys to use defaults
+        # Remove custom style keys to use defaults (same as EditDialog)
         keys_to_remove = ["color", "text_color", "hover_color", "hover_text_color", 
                          "border_color", "font_family", "font_size", "is_bold", 
-                         "is_italic", "corner_radius", "border_width", "width", "height"]
+                         "is_italic", "corner_radius", "border_width", "width", "height",
+                         "icon_path"]
         for key in keys_to_remove:
             script.pop(key, None)
         
