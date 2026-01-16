@@ -8018,9 +8018,17 @@ function changeTextCase(caseType, event) {
     if (!quickFormatterTarget) return;
 
     const input = quickFormatterTarget;
-    const start = quickFormatterSelection.start;
-    const end = quickFormatterSelection.end;
-    const selectedText = input.value.substring(start, end);
+    let selectedText = '';
+    
+    // Handle contentEditable (WYSIWYG mode)
+    if (quickFormatterSelection.isContentEditable) {
+        selectedText = quickFormatterSelection.text || '';
+    } else {
+        // Handle input/textarea (legacy mode)
+        const start = quickFormatterSelection.start;
+        const end = quickFormatterSelection.end;
+        selectedText = input.value.substring(start, end);
+    }
 
     if (!selectedText) {
         showToast('No text selected', 'warning');
@@ -8043,20 +8051,50 @@ function changeTextCase(caseType, event) {
             return;
     }
 
-    // Replace the selected text
-    const newText = input.value.substring(0, start) +
-        convertedText +
-        input.value.substring(end);
+    // Handle contentEditable (WYSIWYG mode)
+    if (quickFormatterSelection.isContentEditable) {
+        const range = quickFormatterSelection.range;
+        range.deleteContents();
+        const textNode = document.createTextNode(convertedText);
+        range.insertNode(textNode);
+        
+        // Update the underlying input value
+        const rawText = extractRawText(input);
+        const actualInput = input.previousElementSibling;
+        if (actualInput && (actualInput.tagName === 'INPUT' || actualInput.tagName === 'TEXTAREA')) {
+            actualInput.value = rawText;
+            
+            // Trigger change event
+            const changeEvent = new Event('input', { bubbles: true });
+            actualInput.dispatchEvent(changeEvent);
+        }
+        
+        // Select the converted text
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        const newRange = document.createRange();
+        newRange.selectNodeContents(textNode);
+        selection.addRange(newRange);
+        
+    } else {
+        // Handle input/textarea (legacy mode)
+        const start = quickFormatterSelection.start;
+        const end = quickFormatterSelection.end;
+        
+        const newText = input.value.substring(0, start) +
+            convertedText +
+            input.value.substring(end);
 
-    input.value = newText;
+        input.value = newText;
 
-    // Trigger change event to update cell
-    const changeEvent = new Event('input', { bubbles: true });
-    input.dispatchEvent(changeEvent);
+        // Trigger change event to update cell
+        const changeEvent = new Event('input', { bubbles: true });
+        input.dispatchEvent(changeEvent);
 
-    // Select the converted text
-    input.setSelectionRange(start, start + convertedText.length);
-    input.focus();
+        // Select the converted text
+        input.setSelectionRange(start, start + convertedText.length);
+        input.focus();
+    }
 
     closeQuickFormatter();
     const caseNames = { upper: 'UPPERCASE', lower: 'lowercase', proper: 'Proper Case' };
