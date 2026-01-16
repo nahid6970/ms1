@@ -7,6 +7,56 @@ This document tracks historical bugs, issues, and their solutions. Use this to:
 
 ---
 
+## [2026-01-16 16:30] - Markdown Links Not Opening in Browser
+
+**Problem:**
+When clicking on links in markdown preview (when NOT in edit mode), the cell would enter edit mode instead of opening the link in a browser.
+
+**Root Cause:**
+The markdown preview element has `contentEditable="true"`, so any click on it (including on links) triggers focus and enters edit mode. The click event handler alone wasn't enough to prevent this because the focus happens on mousedown, before the click event.
+
+**Solution:**
+Added both `mousedown` and `click` event handlers to intercept link clicks:
+1. `mousedown` handler prevents the default focus behavior when clicking on links
+2. `click` handler opens the link in a new tab using `window.open()`
+3. Both handlers use `e.preventDefault()`, `e.stopPropagation()`, and `e.stopImmediatePropagation()` to prevent event bubbling
+4. Both handlers use capture phase (`true` parameter) to catch events before they bubble
+
+**Files Modified:**
+- `static/script.js` - Link click handlers (~line 1689)
+
+**Related Issues:** ContentEditable focus behavior
+
+---
+
+## [2026-01-16 16:15] - F3 Quick Formatter Functions Not Working with ContentEditable
+
+**Problem:**
+1. Table formatter (F3 → 📊) not working - button clicks weren't registering any action
+2. Remove formatting (F3 → 🧹) not working - function was completely missing from script.js
+
+**Root Cause:**
+1. The `formatPipeTable()` function was written to work with INPUT/TEXTAREA elements (using `.value` property and `.selectionStart/.selectionEnd`)
+2. When markdown preview is active, F3 opens on the contentEditable DIV instead, which uses different APIs (`.textContent`, `window.getSelection()`, `Range` objects)
+3. The `quickFormatterSelection` object structure is different for contentEditable: `{isContentEditable: true, range: Range, text: '...'}` vs `{start: number, end: number}`
+4. The `removeFormatting()` function was deleted from script.js at some point
+
+**Solution:**
+1. Updated `formatPipeTable()` to detect if target is contentEditable and handle both modes:
+   - ContentEditable: Use `quickFormatterSelection.text` for selected text, `range.deleteContents()` and `range.insertNode()` for replacement
+   - Legacy: Use `input.value.substring(start, end)` and string manipulation
+2. Added `removeFormatting()` function back with same dual-mode support
+3. Both functions now update the underlying input element when working with contentEditable
+4. Added cache control headers to Flask app to prevent browser caching issues during development
+
+**Files Modified:**
+- `static/script.js` - formatPipeTable (~line 7848), removeFormatting (~line 11598)
+- `app.py` - Added cache control headers (~line 7)
+
+**Related Issues:** All F3 quick formatter functions need to support both contentEditable and legacy input modes
+
+---
+
 ## [2026-01-16 15:30] - Multiple Shortcut and Feature Fixes
 
 **Problem:**

@@ -1686,15 +1686,29 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
         preview.style.backgroundColor = cell.style.backgroundColor;
 
         // Handle link clicks - prevent editing and open link instead
+        preview.addEventListener('mousedown', (e) => {
+            if (e.target.tagName === 'A') {
+                console.log('Link mousedown:', e.target.href);
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                return false;
+            }
+        }, true);
+        
         preview.addEventListener('click', (e) => {
             console.log('Preview clicked, target:', e.target.tagName);
             if (e.target.tagName === 'A') {
                 console.log('Link clicked:', e.target.href);
                 e.preventDefault();
                 e.stopPropagation();
+                e.stopImmediatePropagation();
+                
+                // Open link
                 window.open(e.target.href, '_blank', 'noopener,noreferrer');
+                return false;
             }
-        });
+        }, true); // Use capture phase to catch event before it bubbles
 
         // NEW: Standardize line breaks and handle ZWS
         preview.addEventListener('keydown', (e) => {
@@ -7328,11 +7342,18 @@ function populateF2RecentSheets() {
 // Quick Markdown Formatter (F3)
 let quickFormatterTarget = null;
 let quickFormatterSelection = { start: 0, end: 0 };
+let quickFormatterScrollPosition = 0; // Save scroll position
 
 let selectedFormats = []; // Track selected formats for multi-apply
 
 function showQuickFormatter(inputElement) {
     quickFormatterTarget = inputElement;
+    
+    // Save current scroll position
+    const tableContainer = document.querySelector('.table-container');
+    if (tableContainer) {
+        quickFormatterScrollPosition = tableContainer.scrollTop;
+    }
 
     // Handle contenteditable (WYSIWYG mode)
     if (inputElement.isContentEditable) {
@@ -7439,6 +7460,14 @@ function closeQuickFormatter() {
     quickFormatterTarget = null;
     selectedFormats = [];
     document.removeEventListener('click', closeQuickFormatterOnClickOutside);
+    
+    // Restore scroll position
+    const tableContainer = document.querySelector('.table-container');
+    if (tableContainer && quickFormatterScrollPosition !== undefined) {
+        setTimeout(() => {
+            tableContainer.scrollTop = quickFormatterScrollPosition;
+        }, 50);
+    }
 }
 
 function selectAllMatchingFromFormatter(event) {
