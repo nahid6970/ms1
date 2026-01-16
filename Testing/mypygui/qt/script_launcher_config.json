@@ -858,11 +858,19 @@
             "inline_script": "",
             "_runtime_height": 100,
             "_runtime_font_size": 12,
-            "_runtime_font_family": "JetBrainsMono Nerd Font Propo",
+            "_runtime_font_family": "Consolas",
             "_runtime_is_bold": true,
             "_runtime_is_italic": false,
             "new_terminal": false,
-            "run_admin": false
+            "run_admin": false,
+            "font_family": "Consolas",
+            "font_size": 12,
+            "is_bold": true,
+            "is_italic": false,
+            "width": 0,
+            "height": 0,
+            "corner_radius": 0,
+            "border_width": 0
         },
         {
             "name": "C-Map",
@@ -884,15 +892,7 @@
             "_runtime_is_bold": true,
             "_runtime_is_italic": false,
             "new_terminal": false,
-            "run_admin": false,
-            "font_family": "JetBrainsMono Nerd Font Propo",
-            "font_size": 12,
-            "is_bold": true,
-            "is_italic": false,
-            "width": 0,
-            "height": 0,
-            "corner_radius": 0,
-            "border_width": 0
+            "run_admin": false
         },
         {
             "name": "<fs:50>\ue672</fs>",

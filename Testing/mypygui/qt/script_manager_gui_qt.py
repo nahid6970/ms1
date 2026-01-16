@@ -111,9 +111,18 @@ class CyberButton(QPushButton):
         doc.setDefaultFont(self.font())
         
         # Process tags: <br> and <fs:XX>...</fs>
-        html = self.raw_text.replace("<br>", "<br/>").replace("<BR>", "<br/>")
-        # Match <fs:XX>...</fs> and wrap in span
-        html = re.sub(r"<fs:(\d+)>(.*?)</fs>", r'<span style="font-size:\1pt">\2</span>', html)
+        # First, escape HTML special chars, but preserve our custom tags
+        html = self.raw_text
+        # Temporarily replace our tags with placeholders
+        html = html.replace("<br>", "{{BR}}").replace("<br/>", "{{BR}}").replace("<BR>", "{{BR}}")
+        html = re.sub(r"<fs:(\d+)>", r"{{FS:\1}}", html)
+        html = html.replace("</fs>", "{{/FS}}")
+        # Escape HTML
+        html = html.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+        # Restore our tags
+        html = html.replace("{{BR}}", "<br/>")
+        html = re.sub(r"\{\{FS:(\d+)\}\}", r'<span style="font-size:\1pt">', html)
+        html = html.replace("{{/FS}}", "</span>")
         
         # Render centered
         full_html = f"<div style='color: {color}; text-align: center; font-family: {self.font().family()};'>{html}</div>"
