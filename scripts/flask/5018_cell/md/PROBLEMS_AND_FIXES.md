@@ -7,6 +7,31 @@ This document tracks historical bugs, issues, and their solutions. Use this to:
 
 ---
 
+## [2026-01-16 16:45] - F3 Quick Formatter Additional Functions Not Working
+
+**Problem:**
+1. Text case conversion (uppercase, lowercase, proper case) buttons in F3 not working
+2. Scroll position jumping to top after applying F3 formatting
+
+**Root Cause:**
+1. `changeTextCase()` function was only written for INPUT/TEXTAREA elements, not contentEditable
+2. No scroll position saving/restoration when opening/closing F3 formatter
+
+**Solution:**
+1. Updated `changeTextCase()` to handle both contentEditable and legacy modes (same pattern as formatPipeTable and removeFormatting)
+2. Added `quickFormatterScrollPosition` variable to save scroll position
+3. `showQuickFormatter()` now saves `tableContainer.scrollTop` when opening
+4. `closeQuickFormatter()` now restores scroll position with 50ms delay after closing
+
+**Files Modified:**
+- `static/script.js` - changeTextCase (~line 8017), showQuickFormatter (~line 7330), closeQuickFormatter (~line 7450)
+
+**Related Issues:** All F3 formatter functions need contentEditable support
+
+**Note:** This is part of a larger pattern - any F3 formatter function that modifies text needs to check `quickFormatterSelection.isContentEditable` and handle both modes appropriately.
+
+---
+
 ## [2026-01-16 16:30] - Markdown Links Not Opening in Browser
 
 **Problem:**

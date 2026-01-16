@@ -7555,39 +7555,33 @@ function applyQuickFormat(prefix, suffix, event) {
     if (quickFormatterSelection.isContentEditable) {
         const selectedText = quickFormatterSelection.text || '';
         const formattedText = prefix + selectedText + suffix;
-
-        // Get the underlying input/textarea to update the value
-        const cell = input.closest('td');
-        const hiddenInput = cell ? cell.querySelector('input, textarea') : null;
-
-        if (hiddenInput) {
-            // Get the full raw text
-            const rawText = extractRawText(input);
-            // Find and replace the selected text (first occurrence)
-            const newRawText = rawText.replace(selectedText, formattedText);
-
-            // Update hidden input
-            hiddenInput.value = newRawText;
-
-            // Update tableData
-            const rowIndex = parseInt(cell.parentElement.dataset.row);
-            const colIndex = parseInt(cell.dataset.col);
-            if (!isNaN(rowIndex) && !isNaN(colIndex)) {
-                const sheet = tableData.sheets[currentSheet];
-                sheet.rows[rowIndex][colIndex] = newRawText;
-                clearTimeout(window.autoSaveTimeout);
-                window.autoSaveTimeout = setTimeout(() => saveData(), 1000);
-            }
-
-            // Re-render the preview with highlighted syntax
-            input.innerHTML = highlightSyntax(newRawText);
+        
+        // Insert formatted text into contentEditable
+        const range = quickFormatterSelection.range;
+        range.deleteContents();
+        const textNode = document.createTextNode(formattedText);
+        range.insertNode(textNode);
+        
+        // Update the underlying input value
+        const rawText = extractRawText(input);
+        const actualInput = input.previousElementSibling;
+        if (actualInput && (actualInput.tagName === 'INPUT' || actualInput.tagName === 'TEXTAREA')) {
+            actualInput.value = rawText;
+            
+            // Trigger change event to save data
+            const changeEvent = new Event('input', { bubbles: true });
+            actualInput.dispatchEvent(changeEvent);
         }
+        
+        // Select the formatted text
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        const newRange = document.createRange();
+        newRange.selectNodeContents(textNode);
+        selection.addRange(newRange);
 
         closeQuickFormatter();
         showToast('Format applied', 'success');
-
-        // Refocus the preview
-        input.focus();
         return;
     }
 
