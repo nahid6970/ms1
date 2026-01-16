@@ -7,6 +7,30 @@ This document tracks historical bugs, issues, and their solutions. Use this to:
 
 ---
 
+## [2026-01-16 18:00] - Multi-Line Cursor Visual Markers Not Updating
+
+**Problem:**
+When using Ctrl+Alt+Up/Down to create multi-line cursors, the visual cursor markers were disabled (commented out). When re-enabled, they didn't update when moving cursors with arrow keys, and the last cursor showed both a CSS marker and the native cursor (double cursor).
+
+**Root Cause:**
+1. Visual cursor markers (`showCursorMarkers`) were commented out in both `addCursorBelow/Above` and the keydown listener, likely due to previous issues
+2. Arrow key navigation wasn't implemented for multi-line cursors - they only worked for typing/deleting
+3. The `showCursorMarkers` function was showing markers for ALL cursors including the last one, causing a double cursor effect
+
+**Solution:**
+1. Re-enabled `showCursorMarkers()` calls in `addCursorBelow()` and `addCursorAbove()`
+2. Added arrow key handling in the keydown listener (ArrowLeft, ArrowRight, Home, End, Escape)
+3. Created `handleMultiLineCursorMove()` function to update cursor positions and refresh visual markers when arrow keys are pressed
+4. Updated `showCursorMarkers()` to skip the last cursor (shows native cursor only) to avoid double cursor
+5. Added Escape key to clear multi-cursor mode
+
+**Files Modified:**
+- `static/script.js` - addCursorBelow (~line 9419), addCursorAbove (~line 9461), setupMultiLineCursorListener (~line 9518), showCursorMarkers (~line 9344), handleMultiLineCursorMove (~line 9633)
+
+**Related Issues:** Multi-cursor visual feedback, Ctrl+Alt+arrows
+
+---
+
 ## [2026-01-16 17:45] - Multi-Cursor Home/End Not Consolidating Cursors Per Line
 
 **Problem:**
