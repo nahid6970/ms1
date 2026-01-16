@@ -7,6 +7,33 @@ This document tracks historical bugs, issues, and their solutions. Use this to:
 
 ---
 
+## [2026-01-16 15:30] - Multiple Shortcut and Feature Fixes
+
+**Problem:**
+1. Table formatter (F3 → 📊) and clear cell formatting not working
+2. Links in markdown preview not opening when clicked
+3. Ctrl+Shift+D not working (Chrome's default bookmark shortcut interfering)
+4. F9 shortcut not working
+
+**Root Cause:**
+1. Clear cell formatting wasn't saving data after clearing
+2. Markdown preview has `contentEditable="true"`, so clicking links positioned cursor instead of following the link
+3. Ctrl+Shift+D wasn't preventing default early enough, allowing Chrome's bookmark shortcut to interfere
+4. F9 had `e.preventDefault()` in wrong position (after checking element instead of before)
+
+**Solution:**
+1. Added `saveData()` call to `clearCellFormatting()` function
+2. Added click event listener to markdown preview that intercepts link clicks, prevents default editing behavior, and opens links in new tab using `window.open()`
+3. Moved `e.preventDefault()` and added `e.stopPropagation()` to top of Ctrl+Shift+D handler before element checks
+4. Moved `e.preventDefault()` to top of F9 handler before element checks
+
+**Files Modified:**
+- `static/script.js` - Link click handler (~line 1675), clearCellFormatting (~line 4281), Ctrl+Shift+D handler (~line 607), F9 handler (~line 561)
+
+**Related Issues:** Markdown preview contentEditable architecture
+
+---
+
 ## [2026-01-16 01:20] - F3 Quick Formatter Blur Handler Fix
 **Problem:** 
 When applying formatting via F3, the effect would appear briefly then disappear, leaving all text looking normal (unformatted).

@@ -1,3 +1,4 @@
+// Version: 2026-01-16-15:45 - Fixed F9, Ctrl+Shift+D, links, clear formatting
 let tableData = { sheets: [], activeSheet: 0, categories: [], sheetCategories: {} };
 let currentSheet = 0;
 let currentCategory = null; // null means "Uncategorized"
@@ -559,9 +560,11 @@ function handleKeyboardShortcuts(e) {
 
     // F9 to swap two words containing a separator in the middle
     if (e.key === 'F9') {
+        console.log('F9 pressed!');
+        e.preventDefault();
         const activeElement = document.activeElement;
+        console.log('Active element:', activeElement.tagName);
         if (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA') {
-            e.preventDefault();
 
             const start = activeElement.selectionStart;
             const end = activeElement.selectionEnd;
@@ -606,9 +609,12 @@ function handleKeyboardShortcuts(e) {
 
     // Ctrl+Shift+D to select next occurrence (multi-cursor simulation)
     if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'D') {
+        console.log('Ctrl+Shift+D pressed!');
+        e.preventDefault();
+        e.stopPropagation();
         const activeElement = document.activeElement;
+        console.log('Active element:', activeElement.tagName);
         if (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA') {
-            e.preventDefault();
             selectNextOccurrence(activeElement);
         }
     }
@@ -1678,6 +1684,17 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
         preview.style.fontStyle = inputElement.style.fontStyle;
         preview.style.textAlign = inputElement.style.textAlign;
         preview.style.backgroundColor = cell.style.backgroundColor;
+
+        // Handle link clicks - prevent editing and open link instead
+        preview.addEventListener('click', (e) => {
+            console.log('Preview clicked, target:', e.target.tagName);
+            if (e.target.tagName === 'A') {
+                console.log('Link clicked:', e.target.href);
+                e.preventDefault();
+                e.stopPropagation();
+                window.open(e.target.href, '_blank', 'noopener,noreferrer');
+            }
+        });
 
         // NEW: Standardize line breaks and handle ZWS
         preview.addEventListener('keydown', (e) => {
@@ -4309,6 +4326,7 @@ function clearCellFormatting() {
                 cellTd.style.border = '';
             }
         });
+        saveData();
         closeCellContextMenu();
         showToast(`Formatting cleared for ${selectedCells.length} cells`, 'success');
     } else {
@@ -4332,6 +4350,7 @@ function clearCellFormatting() {
         tdElement.style.backgroundColor = col.color || '#ffffff';
         tdElement.style.border = '';
 
+        saveData();
         closeCellContextMenu();
         showToast('Cell formatting cleared', 'success');
     }
@@ -7826,12 +7845,32 @@ function padTextToWidth(text, targetWidth) {
 }
 
 function formatPipeTable(event) {
-    if (!quickFormatterTarget) return;
+    console.log('formatPipeTable called!');
+    console.log('quickFormatterTarget:', quickFormatterTarget);
+    
+    if (!quickFormatterTarget) {
+        console.log('No quickFormatterTarget - returning');
+        showToast('No target element', 'error');
+        return;
+    }
 
     const input = quickFormatterTarget;
-    const start = quickFormatterSelection.start;
-    const end = quickFormatterSelection.end;
-    const selectedText = input.value.substring(start, end);
+    console.log('Input element:', input);
+    console.log('Selection:', quickFormatterSelection);
+    
+    let selectedText = '';
+    
+    // Handle contentEditable (WYSIWYG mode)
+    if (quickFormatterSelection.isContentEditable) {
+        selectedText = quickFormatterSelection.text || '';
+    } else {
+        // Handle input/textarea (legacy mode)
+        const start = quickFormatterSelection.start;
+        const end = quickFormatterSelection.end;
+        selectedText = input.value.substring(start, end);
+    }
+    
+    console.log('Selected text:', selectedText);
 
     if (!selectedText) {
         showToast('No text selected', 'warning');
@@ -7893,20 +7932,50 @@ function formatPipeTable(event) {
 
         const formattedText = formatted.join('\n');
 
-        // Replace the selected text
-        const newText = input.value.substring(0, start) +
-            formattedText +
-            input.value.substring(end);
+        // Handle contentEditable (WYSIWYG mode)
+        if (quickFormatterSelection.isContentEditable) {
+            const range = quickFormatterSelection.range;
+            range.deleteContents();
+            const textNode = document.createTextNode(formattedText);
+            range.insertNode(textNode);
+            
+            // Update the underlying input value
+            const rawText = extractRawText(input);
+            const actualInput = input.previousElementSibling;
+            if (actualInput && (actualInput.tagName === 'INPUT' || actualInput.tagName === 'TEXTAREA')) {
+                actualInput.value = rawText;
+                
+                // Trigger change event
+                const changeEvent = new Event('input', { bubbles: true });
+                actualInput.dispatchEvent(changeEvent);
+            }
+            
+            // Select the formatted text
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            const newRange = document.createRange();
+            newRange.selectNodeContents(textNode);
+            selection.addRange(newRange);
+            
+        } else {
+            // Handle input/textarea (legacy mode)
+            const start = quickFormatterSelection.start;
+            const end = quickFormatterSelection.end;
+            
+            const newText = input.value.substring(0, start) +
+                formattedText +
+                input.value.substring(end);
 
-        input.value = newText;
+            input.value = newText;
 
-        // Trigger change event to update cell
-        const changeEvent = new Event('input', { bubbles: true });
-        input.dispatchEvent(changeEvent);
+            // Trigger change event to update cell
+            const changeEvent = new Event('input', { bubbles: true });
+            input.dispatchEvent(changeEvent);
 
-        // Select the result
-        input.setSelectionRange(start, start + formattedText.length);
-        input.focus();
+            // Select the result
+            input.setSelectionRange(start, start + formattedText.length);
+            input.focus();
+        }
 
         closeQuickFormatter();
         showToast('Table formatted', 'success');

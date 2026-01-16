@@ -4,6 +4,17 @@ import os
 
 app = Flask(__name__)
 
+# Disable caching for development
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
+
+@app.after_request
+def add_header(response):
+    # Prevent caching of all responses
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '-1'
+    return response
+
 DATA_FILE = r'C:\Users\nahid\ms\ms1\scripts\flask\5018_cell\data.json'
 CUSTOM_SYNTAXES_FILE = r'C:\Users\nahid\ms\ms1\scripts\flask\5018_cell\custom_syntaxes.json'
 
