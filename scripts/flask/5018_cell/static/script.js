@@ -9370,9 +9370,10 @@ function showCursorMarkers(textarea, cursors) {
     const paddingTop = parseFloat(computedStyle.paddingTop) || 4;
     const font = `${computedStyle.fontSize} ${computedStyle.fontFamily}`;
 
-    // Create markers for each cursor
+    // Create markers for each cursor (except the last one which shows the native cursor)
     cursors.forEach((cursor, index) => {
-        // Show all cursors including the last one
+        if (index === cursors.length - 1) return; // Skip last one - native cursor shows it
+        
         const lineNum = cursor.line - 1;
         if (lineNum < lines.length) {
             const lineText = lines[lineNum].substring(0, cursor.column);
