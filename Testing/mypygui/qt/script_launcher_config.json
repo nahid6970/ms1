@@ -335,7 +335,7 @@
             "_runtime_font_family": "JetBrainsMono Nerd Font Propo",
             "_runtime_is_bold": true,
             "_runtime_is_italic": false,
-            "icon_gap": 20
+            "icon_path": "C:/Program Files/AutoHotkey/UX/inc/spy.ico"
         },
         {
             "name": "Github <br> Projectsl",

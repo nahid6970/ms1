@@ -693,6 +693,12 @@ class EditDialog(QDialog):
             self.spn_inner_cols.setValue(0)
             self.spn_inner_h.setValue(0)
 
+        # Reset Icon Settings (but preserve icon_path)
+        self.spn_icon_w.setValue(0)
+        self.spn_icon_h.setValue(0)
+        self.spn_icon_gap.setValue(2)
+        self.cmb_icon_pos.setCurrentText("top")
+
     def randomize_colors(self):
         import random
         
@@ -1672,10 +1678,11 @@ class MainWindow(QMainWindow):
         is_folder = (script.get("type") == "folder")
         
         # Remove custom style keys to use defaults (same as EditDialog)
+        # Note: icon_path is preserved, only icon sizing/position reset
         keys_to_remove = ["color", "text_color", "hover_color", "hover_text_color", 
                          "border_color", "font_family", "font_size", "is_bold", 
                          "is_italic", "corner_radius", "border_width", "width", "height",
-                         "icon_path", "icon_width", "icon_height", "icon_gap", "icon_position"]
+                         "icon_width", "icon_height", "icon_gap", "icon_position"]
         for key in keys_to_remove:
             script.pop(key, None)
         
