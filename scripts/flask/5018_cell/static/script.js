@@ -315,7 +315,38 @@ function handleKeyboardShortcuts(e) {
     // Tab key handling in cells
     if (e.key === 'Tab') {
         const activeElement = document.activeElement;
-        // Check if we are in a cell input/textarea (not search input or other modals)
+        
+        // Handle contentEditable (markdown preview mode)
+        if (activeElement.classList && activeElement.classList.contains('markdown-preview') && activeElement.isContentEditable) {
+            e.preventDefault();
+            
+            // Insert tab character
+            const selection = window.getSelection();
+            if (selection.rangeCount > 0) {
+                const range = selection.getRangeAt(0);
+                range.deleteContents();
+                const textNode = document.createTextNode('\t');
+                range.insertNode(textNode);
+                
+                // Move cursor after tab
+                range.setStartAfter(textNode);
+                range.setEndAfter(textNode);
+                selection.removeAllRanges();
+                selection.addRange(range);
+                
+                // Update underlying input
+                const rawText = extractRawText(activeElement);
+                const actualInput = activeElement.previousElementSibling;
+                if (actualInput && (actualInput.tagName === 'INPUT' || actualInput.tagName === 'TEXTAREA')) {
+                    actualInput.value = rawText;
+                    const event = new Event('input', { bubbles: true });
+                    actualInput.dispatchEvent(event);
+                }
+            }
+            return;
+        }
+        
+        // Handle input/textarea (raw mode)
         if ((activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA') &&
             activeElement.closest('td:not(.row-number)')) {
 
