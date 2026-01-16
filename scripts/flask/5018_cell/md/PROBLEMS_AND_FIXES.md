@@ -7,6 +7,31 @@ This document tracks historical bugs, issues, and their solutions. Use this to:
 
 ---
 
+## [2026-01-17 21:30] - Double-Click Word Selection Includes Trailing Space
+
+**Problem:**
+When double-clicking on a word in contentEditable mode, the browser's default behavior would select the word plus any trailing whitespace. For example, double-clicking "abcd" in "abcd abc" would select "abcd " (with the space).
+
+**Root Cause:**
+Browser default double-click behavior includes trailing whitespace in word selection for easier text manipulation (e.g., cut/paste operations).
+
+**Solution:**
+Added custom double-click handler for contentEditable preview elements:
+1. Intercept the double-click event
+2. Check if selection ends with whitespace using regex `/\s$/`
+3. Count trailing whitespace characters
+4. Adjust the range's end position backward to exclude trailing spaces
+5. Update the selection with the trimmed range
+
+**Files Modified:**
+- `static/script.js` - preview double-click handler (~line 2140)
+
+**Related Issues:** ContentEditable, text selection, UX improvement
+
+**Result:** Clean word selection without trailing spaces in contentEditable mode.
+
+---
+
 ## [2026-01-17 21:00] - F3 Multi-Format Selection Issues
 
 **Problem:**

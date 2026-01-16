@@ -2136,6 +2136,46 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
             }
         }, true); // Use capture phase to catch event before it bubbles
 
+        // Handle double-click to select word without trailing space
+        preview.addEventListener('dblclick', (e) => {
+            e.preventDefault();
+            
+            const selection = window.getSelection();
+            if (!selection.rangeCount) return;
+            
+            const range = selection.getRangeAt(0);
+            
+            // Get the selected text
+            let selectedText = selection.toString();
+            
+            // If selection ends with whitespace, trim it
+            if (selectedText && /\s$/.test(selectedText)) {
+                // Move the end of the range backward to exclude trailing whitespace
+                const endContainer = range.endContainer;
+                let endOffset = range.endOffset;
+                
+                // Count trailing whitespace
+                let trailingSpaces = 0;
+                for (let i = selectedText.length - 1; i >= 0; i--) {
+                    if (/\s/.test(selectedText[i])) {
+                        trailingSpaces++;
+                    } else {
+                        break;
+                    }
+                }
+                
+                // Adjust the range to exclude trailing spaces
+                if (trailingSpaces > 0) {
+                    const newRange = document.createRange();
+                    newRange.setStart(range.startContainer, range.startOffset);
+                    newRange.setEnd(endContainer, endOffset - trailingSpaces);
+                    
+                    selection.removeAllRanges();
+                    selection.addRange(newRange);
+                }
+            }
+        });
+
         // NEW: Standardize line breaks and handle ZWS
         preview.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
