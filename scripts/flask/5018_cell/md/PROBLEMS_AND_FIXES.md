@@ -7,10 +7,158 @@ This document tracks historical bugs, issues, and their solutions. Use this to:
 
 ---
 
-## [2026-01-16 20:00] - Click-to-Edit Cursor Positioning Incorrect (UNRESOLVED)
+## [2026-01-17 21:00] - F3 Multi-Format Selection Issues
 
 **Problem:**
-When clicking on markdown preview to enter edit mode, the cursor appears at the wrong position. For example:
+1. Multi-format selection (right-click to select multiple formats, left-click to apply all) was not working in contentEditable mode
+2. When clicking on a format that was already selected, it would apply that format twice (once from selectedFormats array, once as the clicked format)
+
+**Root Cause:**
+1. The `applyMultipleFormats()` function only handled INPUT/TEXTAREA with `.value` property, not contentEditable
+2. The function always added the last clicked format without checking if it was already in the selectedFormats array
+
+**Solution:**
+1. Added full contentEditable support to `applyMultipleFormats()`:
+   - Check `quickFormatterSelection.isContentEditable`
+   - Use Range API to insert formatted text
+   - Update underlying input with `extractRawText()`
+   - Trigger input event for auto-save
+2. Added duplicate detection:
+   - Check if `lastPrefix|lastSuffix` key exists in selectedFormats
+   - Only add the last clicked format if it's not already selected
+   - Adjust format count in toast message accordingly
+
+**Files Modified:**
+- `static/script.js` - applyMultipleFormats (~line 8719)
+
+**Related Issues:** F3 Quick Formatter, multi-format selection, contentEditable
+
+**Usage:**
+- Right-click on format buttons (Bold, Italic, Underline, etc.) to select them
+- Checkmarks (✓) appear on selected formats
+- Left-click any format button to apply all selected formats at once
+- Works in both raw mode and preview edit mode
+
+---
+
+## [2026-01-17 20:30] - Link Syntax and Clear Format Behavior
+
+**Problem:**
+1. Link button in F3 formatter was using old syntax `{link:url}text{/}`
+2. When using "Clear Format" button, the new link syntax `url[text]` would be completely removed, losing the URL
+
+**Root Cause:**
+1. `applyLinkFormat()` was hardcoded to use old syntax and didn't support contentEditable
+2. `stripMarkdown()` was converting `url[text]` → `text`, discarding the URL
+
+**Solution:**
+1. Updated `applyLinkFormat()` to:
+   - Use new syntax: `url[text]` instead of `{link:url}text{/}`
+   - Support contentEditable mode with Range API
+   - Keep old syntax working for backward compatibility
+2. Updated `stripMarkdown()` to:
+   - Convert new syntax: `url[text]` → `url text` (keeps both URL and text)
+   - Convert old syntax: `{link:url}text{/}` → `text` (keeps only text)
+
+**Files Modified:**
+- `static/script.js` - applyLinkFormat (~line 8071), stripMarkdown (~line 7280)
+
+**Related Issues:** Link formatting, F3 Quick Formatter, stripMarkdown
+
+**Note:** Both link syntaxes work for rendering. The new syntax is cleaner and preserves more information when clearing formats.
+
+---
+
+## [2026-01-17 20:00] - Auto-Switch to Raw Mode for Multi-Cursor Features
+
+**Problem:**
+Multi-cursor and multi-selection features (Ctrl+Shift+D, Ctrl+Alt+Up/Down, Select All Matching button) only work in raw mode, but users had to manually switch modes when trying to use them in preview mode.
+
+**Root Cause:**
+These features require direct text manipulation with `.value`, `.selectionStart`, `.selectionEnd` properties that don't exist in contentEditable. They were showing toast messages directing users to switch modes manually.
+
+**Solution:**
+Implemented automatic mode switching:
+1. Created `enableRawMode()` helper function to programmatically switch to raw mode
+2. Updated all three feature handlers to:
+   - Detect if in contentEditable (preview) mode
+   - Call `enableRawMode()` to switch automatically
+   - Show toast: "Switched to Raw Mode for [feature name]"
+   - Wait 100ms for table re-render
+   - Focus the appropriate input/textarea in the same cell
+   - For text-based features, try to restore the selection
+
+**Files Modified:**
+- `static/script.js` - enableRawMode (~line 6557), Ctrl+Shift+D handler (~line 700), Ctrl+Alt+Up/Down handlers (~line 716, 732), selectAllMatchingOccurrences (~line 9142)
+
+**Related Issues:** Multi-cursor, multi-selection, mode switching, UX improvement
+
+**Features Affected:**
+- 🎯 Select All Matching button (F3 formatter)
+- Ctrl+Shift+D (Select Next Occurrence)
+- Ctrl+Alt+Up/Down (Multi-line cursor)
+
+---
+
+## [2026-01-17 19:00] - F3 Formatter Functions Not Working in ContentEditable
+
+**Problem:**
+Several F3 Quick Formatter functions were not working in contentEditable (preview edit) mode:
+1. H+ (Variable Font Size) - `#2#text#/#` syntax
+2. Border Box (□) - `#R#text#/#` syntax
+3. Sort Lines (🔤)
+4. Lines to Comma (➡️)
+5. Comma to Lines (⬇️)
+
+**Root Cause:**
+These functions only handled INPUT/TEXTAREA elements using `.value`, `.selectionStart`, `.selectionEnd` properties, which don't exist in contentEditable mode.
+
+**Solution:**
+Updated all five functions to support both modes:
+1. Check `quickFormatterSelection.isContentEditable` at the start
+2. For contentEditable:
+   - Extract selected text from `quickFormatterSelection.text`
+   - Use Range API to insert/replace text
+   - Update underlying input with `extractRawText()`
+   - Trigger input event for auto-save
+   - Set cursor position with `setCaretPosition()`
+3. For INPUT/TEXTAREA:
+   - Use existing logic with `.value` and `.setSelectionRange()`
+
+**Files Modified:**
+- `static/script.js` - applyVariableFontSize (~line 12048), applyBorderBox (~line 12147), sortLines (~line 12252), linesToComma (~line 12412), commaToLines (~line 12492)
+
+**Related Issues:** F3 Quick Formatter, contentEditable support
+
+---
+
+## [2026-01-17 18:30] - Alt+Up/Down Exits Edit Mode
+
+**Problem:**
+Using Alt+Up/Down to move lines in contentEditable mode would work but then exit edit mode, forcing the user to click back into the cell.
+
+**Root Cause:**
+The `moveLines()` function was updating the underlying input element and triggering an `input` event, which caused a blur/focus cycle that exited edit mode.
+
+**Solution:**
+Changed the update strategy for contentEditable mode:
+1. Update contentEditable with `highlightSyntax()` instead of plain text
+2. Update tableData directly without triggering input events
+3. Update input.value silently (no event dispatch)
+4. Call `saveData()` directly for background persistence
+5. Restore cursor position with `setCaretPosition()`
+
+**Files Modified:**
+- `static/script.js` - moveLines (~line 800)
+
+**Related Issues:** Alt+Up/Down, line movement, contentEditable, edit mode
+
+---
+
+## [2026-01-16 20:00] - Click-to-Edit Cursor Positioning Incorrect (RESOLVED)
+
+**Problem:**
+When clicking on markdown preview to enter edit mode, the cursor appeared at the wrong position. For example:
 - Raw input: `"##This Text Is Big Text## This Is Normal Text"`
 - User clicks on "This Text Is Big Te|" (after 19 visible characters)
 - Expected: Cursor at raw position 21 (accounting for opening `##`)
@@ -18,71 +166,31 @@ When clicking on markdown preview to enter edit mode, the cursor appears at the 
 
 The offset is calculated from the rendered HTML (visible text without markdown syntax), but needs to be mapped to the raw input (with syntax like `##`, `**`, `@@`, etc.).
 
-**Root Cause:**
-The `handlePreviewMouseDown` function calculates the click offset from the rendered HTML (which has markdown syntax stripped), but the mapping to raw input position is not working correctly. The issue is that `stripMarkdown()` correctly removes syntax when called on the full string, but the character-by-character mapping is producing 1:1 correspondence instead of accounting for the markdown syntax characters.
+**Root Cause (Resolved by Gemini):**
+The initial approach tried to use `stripMarkdown()` on partial substrings to build a mapping, but regex patterns like `/##(.+?)##/g` need to see the complete pattern to match. When called on partial strings like `"##T"`, the regex doesn't match, so nothing gets stripped, resulting in 1:1 mapping.
 
-**Attempted Solutions:**
+**Solution (Implemented by Gemini):**
+Created `calculateVisibleToRawMap()` function that:
+1. Parses the full string once to identify all markdown patterns
+2. Marks hidden ranges (which character positions are syntax vs content)
+3. Builds a mapping by walking through and counting only non-hidden characters
+4. Uses this mapping to convert visible offset to raw offset
 
-1. **Binary Search Approach (Failed):**
-   - Used binary search to find raw position where `stripMarkdown(substring)` gives target visible offset
-   - Problem: Found first position with correct visible length, but this was inside the visible content, not after markdown syntax
-   - Example: For visible offset 19, found raw position 19 instead of 21
-
-2. **Fine-Tuning Loop (Failed):**
-   - After binary search, tried to move forward to skip markdown syntax
-   - Problem: Logic couldn't distinguish between being inside visible content vs. being in markdown syntax
-
-3. **Character-by-Character Mapping (Failed):**
-   - Built a mapping array: `visibleToRawMap[visiblePos] = rawPos`
-   - For each visible position, searched for raw position where `stripMarkdown(substring)` gives that visible length
-   - Problem: Mapping produced 1:1 correspondence (visible 0→raw 0, visible 1→raw 1, etc.) even though `stripMarkdown()` correctly removes syntax
-   - Debug output showed:
-     ```
-     stripMarkdown("##This Text Is Big Text##") = "This Text Is Big Text" ✓ (25→21 chars)
-     But mapping: {visible 0: 0, visible 1: 1, visible 2: 2, ...} ✗ (should be offset by 2)
-     ```
-
-**Key Observations:**
-- `stripMarkdown()` function works correctly when tested in isolation
-- The mapping loop is broken - it finds the FIRST raw position with matching visible length, which is always the same as the visible position
-- For `"##This Text Is Big Text##"`:
-  - Raw position 0: `""` → stripped `""` (0 chars)
-  - Raw position 1: `"#"` → stripped `""` (0 chars) ← Should map visible 0 to here
-  - Raw position 2: `"##"` → stripped `""` (0 chars) ← Or here
-  - Raw position 3: `"##T"` → stripped `"T"` (1 char) ← Should map visible 1 to here
-  - But current logic maps visible 0→raw 0, visible 1→raw 1
-
-**Needed Solution:**
-The mapping needs to find the LAST raw position where visible length equals target, not the first. Or use a different approach:
-- Option A: Reverse the mapping - for each raw position, calculate visible position, then invert the map
-- Option B: Use a different algorithm that tracks markdown syntax boundaries
-- Option C: Parse markdown syntax patterns directly and calculate offset adjustments
-- Option D: Build the mapping incrementally by walking through raw input and tracking when visible length increases
+**Why It Works:**
+- Regex patterns match on the full string where patterns are complete
+- Marks which parts are syntax vs content
+- No need to call `stripMarkdown()` multiple times
+- Handles all patterns including custom syntaxes
 
 **Files Modified:**
-- `static/script.js` - handlePreviewMouseDown (~line 1402)
-- `md/PROBLEMS_AND_FIXES.md` - This entry
-- `md/CLICK_TO_EDIT_CURSOR_POSITIONING.md` - Technical documentation
+- `static/script.js` - calculateVisibleToRawMap (~line 1402), handlePreviewMouseDown (~line 1520)
+- `md/PROBLEMS_AND_FIXES.md` - Updated with resolution
+- `md/CLICK_TO_EDIT_CURSOR_POSITIONING.md` - Updated with solution details
 
 **Related Issues:** Edit mode, cursor positioning, markdown syntax
 
-**Console Logs for Debugging:**
-```javascript
-// Example output showing the problem:
-Extracted text before caret: "This Text Is Big Te"
-Click position - visible offset: 19
-Raw input: "##This Text Is Big Text## This Is Normal Text"
-Stripped input: "This Text Is Big Text This Is Normal Text"
-stripMarkdown test:
-  Input: "##This Text Is Big Text##"
-  Output: "This Text Is Big Text"
-  Input length: 25 Output length: 21
-Mapping sample: {visible 0: 0, visible 1: 1, visible 2: 2, visible 5: 5, visible 10: 10, visible 19: 19, visible 20: 20}
-// ↑ This should be: {visible 0: 2, visible 1: 3, visible 2: 4, ..., visible 19: 21, visible 20: 22}
-```
-
-**Next Steps for Resolution:**
-Try Option D: Build mapping by walking through raw input once, tracking visible character count as it increases.
+**Key Learning:**
+The fundamental mistake was assuming `stripMarkdown()` would work on partial strings. Regex patterns need complete patterns to match. The solution was to parse once, mark ranges, then map - a much more robust approach.
 
 ---
 

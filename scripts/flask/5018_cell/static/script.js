@@ -8720,11 +8720,12 @@ function applyMultipleFormats(lastPrefix, lastSuffix) {
     if (!quickFormatterTarget) return;
 
     const input = quickFormatterTarget;
-    const start = quickFormatterSelection.start;
-    const end = quickFormatterSelection.end;
-    let selectedText = input.value.substring(start, end);
-
-    // Build the complete format string with all selected formats plus the last one
+    
+    // Check if the last clicked format is already in selectedFormats
+    const lastFormatKey = `${lastPrefix}|${lastSuffix}`;
+    const isDuplicate = selectedFormats.some(f => f.key === lastFormatKey);
+    
+    // Build the complete format string with all selected formats
     let allPrefixes = '';
     let allSuffixes = '';
 
@@ -8734,9 +8735,52 @@ function applyMultipleFormats(lastPrefix, lastSuffix) {
         allSuffixes = format.suffix + allSuffixes; // Reverse order for closing tags
     });
 
-    // Add the last clicked format
-    allPrefixes += lastPrefix;
-    allSuffixes = lastSuffix + allSuffixes;
+    // Add the last clicked format only if it's not already selected
+    if (!isDuplicate) {
+        allPrefixes += lastPrefix;
+        allSuffixes = lastSuffix + allSuffixes;
+    }
+
+    const totalFormats = selectedFormats.length + (isDuplicate ? 0 : 1);
+
+    // Handle contenteditable (WYSIWYG mode)
+    if (quickFormatterSelection.isContentEditable) {
+        const selectedText = quickFormatterSelection.text || '';
+        const formattedText = allPrefixes + selectedText + allSuffixes;
+        
+        // Insert formatted text into contentEditable
+        const range = quickFormatterSelection.range;
+        range.deleteContents();
+        const textNode = document.createTextNode(formattedText);
+        range.insertNode(textNode);
+        
+        // Update the underlying input value
+        const rawText = extractRawText(input);
+        const actualInput = input.previousElementSibling;
+        if (actualInput && (actualInput.tagName === 'INPUT' || actualInput.tagName === 'TEXTAREA')) {
+            actualInput.value = rawText;
+            
+            // Trigger change event to save data
+            const changeEvent = new Event('input', { bubbles: true });
+            actualInput.dispatchEvent(changeEvent);
+        }
+        
+        // Select the formatted text
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        const newRange = document.createRange();
+        newRange.selectNodeContents(textNode);
+        selection.addRange(newRange);
+
+        closeQuickFormatter();
+        showToast(`Applied ${totalFormats} formats`, 'success');
+        return;
+    }
+
+    // Handle input/textarea (legacy mode)
+    const start = quickFormatterSelection.start;
+    const end = quickFormatterSelection.end;
+    let selectedText = input.value.substring(start, end);
 
     // Insert the markdown syntax
     const newText = input.value.substring(0, start) +
@@ -8755,7 +8799,7 @@ function applyMultipleFormats(lastPrefix, lastSuffix) {
     input.focus();
 
     closeQuickFormatter();
-    showToast(`Applied ${selectedFormats.length + 1} formats`, 'success');
+    showToast(`Applied ${totalFormats} formats`, 'success');
 }
 
 function showColorPicker(event) {
