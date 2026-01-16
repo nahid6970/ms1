@@ -7,6 +7,36 @@ This document tracks historical bugs, issues, and their solutions. Use this to:
 
 ---
 
+## [2026-01-16 17:00] - F3 Formatting Not Persisting After Refresh
+
+**Problem:**
+When applying formatting via F3 (bold, italic, colors, etc.) in contentEditable mode, the syntax would disappear after refreshing the page. The formatting was visible temporarily but not saved to the database.
+
+**Root Cause:**
+The `applyQuickFormat()` function was trying to update the underlying input element using a complex approach:
+1. It extracted raw text from contentEditable
+2. Used string replace to find/replace selected text (unreliable with duplicate text)
+3. Called `highlightSyntax()` to re-render the preview
+4. Manually updated tableData and triggered save
+
+This approach was fragile and didn't properly sync the contentEditable DOM with the underlying input element.
+
+**Solution:**
+Simplified the contentEditable handling to match the pattern used in other formatter functions:
+1. Insert formatted text directly into contentEditable using `range.insertNode(textNode)`
+2. Extract the complete raw text using `extractRawText(input)`
+3. Update the underlying input element's `.value` property
+4. Trigger `input` event on the underlying element (which handles tableData update and auto-save)
+
+This ensures the contentEditable changes are properly synced to the hidden input/textarea, which is what gets saved to the database.
+
+**Files Modified:**
+- `static/script.js` - applyQuickFormat (~line 7538)
+
+**Related Issues:** All F3 formatter functions must properly sync contentEditable changes to underlying input
+
+---
+
 ## [2026-01-16 16:45] - F3 Quick Formatter Additional Functions Not Working
 
 **Problem:**
