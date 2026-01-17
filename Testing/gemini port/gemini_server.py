@@ -101,9 +101,9 @@ def chat():
             # For npm @google/gemini-cli with YOLO mode (auto-approve tools)
             # Using positional argument for one-shot mode (non-interactive by default)
             commands = [
-                ['gemini', '--yolo', full_message],  # npm with auto-approve, one-shot
-                ['gemini', '--approval-mode', 'yolo', full_message],  # explicit approval mode
-                ['gemini', full_message],  # npm global install (fallback)
+                ['gemini', '--yolo', '--model', model, full_message],  # npm with auto-approve, one-shot
+                ['gemini', '--approval-mode', 'yolo', '--model', model, full_message],  # explicit approval mode
+                ['gemini', '--model', model, full_message],  # npm global install (fallback)
             ]
             
             result = None
@@ -112,9 +112,12 @@ def chat():
             for cmd in commands:
                 try:
                     # Create the command string properly for shell execution
+                    # Last argument is always the message
+                    base_args = cmd[:-1]
+                    msg = cmd[-1]
                     # Escape quotes in the message
-                    escaped_msg = cmd[2].replace('"', '\\"') if len(cmd) == 3 else ''
-                    cmd_str = f'{cmd[0]} {cmd[1]} "{escaped_msg}"' if len(cmd) == 3 else ' '.join(cmd)
+                    escaped_msg = msg.replace('"', '\\"')
+                    cmd_str = ' '.join(base_args) + f' "{escaped_msg}"'
                     
                     # Use Popen for better control
                     process = subprocess.Popen(
@@ -228,6 +231,55 @@ def reset_stats():
     session_data['message_count'] = 0
     session_data['response_times'] = []
     return jsonify({'status': 'success'})
+
+@app.route('/api/quota', methods=['GET'])
+def get_quota_stats():
+    """Get Gemini API quota stats via CLI"""
+    try:
+        # Run gemini interactive mode and send /stats
+        cmd = 'gemini'
+        process = subprocess.Popen(
+            cmd,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            shell=True,
+            cwd=WORKING_DIR
+        )
+        
+        # Send /stats command and exit
+        # We also send /model to verify connectivity if stats fails? No, just stats.
+        stdout, stderr = process.communicate(input='/stats\n/exit\n', timeout=15)
+        
+        if process.returncode != 0:
+             # Try with --yolo just in case it behaves differently, though unlikely for interactive
+             pass
+
+        # Parse the output to find the stats table
+        # We look for "Model Usage" or "Reqs" or "Usage left"
+        output = stdout + "\n" + stderr
+        
+        # Extract the relevant part (heuristically)
+        # If we find the table headers
+        if "Model Usage" in output:
+            return jsonify({
+                'status': 'success',
+                'output': output,
+                'raw': True
+            })
+            
+        return jsonify({
+            'status': 'success',
+            'output': output,
+            'message': 'Command ran but table not found',
+            'raw': True
+        })
+
+    except subprocess.TimeoutExpired:
+        return jsonify({'error': 'Timeout fetching stats'}), 504
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/api/settings', methods=['POST'])
 def update_settings():
