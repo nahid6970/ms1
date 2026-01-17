@@ -1760,7 +1760,7 @@ function highlightSyntax(text) {
     formatted = formatted.replace(/\?\?(.*?)\?\?/g, '<span style="background: #0000ff; color: #ffffff;"><span class="syn-marker">??</span>$1<span class="syn-marker">??</span></span>');
 
     // Rule: `code`
-    formatted = formatted.replace(/`(.*?)`/g, '<code><span class="syn-marker">`</span>$1<span class="syn-marker">`</span></strong>');
+    formatted = formatted.replace(/`(.*?)`/g, '<code><span class="syn-marker">`</span>$1<span class="syn-marker">`</span></code>');
 
     // Rule: ^sup^
     formatted = formatted.replace(/\^(.*?)\^/g, '<sup><span class="syn-marker">^</span>$1<span class="syn-marker">^</span></sup>');

@@ -100,6 +100,36 @@ Increased table headers' z-index from `10` to `200` to ensure they always stay a
 
 ---
 
+## [2026-01-17 23:00] - Code Formatting Bug Fix in Edit Mode
+
+**Problem:**
+When using backticks for code formatting like `text`, it rendered correctly in markdown preview mode but in edit mode everything after the opening backtick appeared as code formatting, breaking the rest of the text.
+
+**Root Cause:**
+The `highlightSyntax()` function had malformed HTML in the code formatting regex - it was using `</strong>` closing tag instead of `</code>`, creating invalid HTML that broke the parsing and affected subsequent text formatting.
+
+**Solution:**
+Fixed the backtick formatting rule in `highlightSyntax()` function by changing the closing tag from `</strong>` to `</code>`:
+
+**Before:**
+```javascript
+formatted = formatted.replace(/`(.*?)`/g, '<code><span class="syn-marker">`</span>$1<span class="syn-marker">`</span></strong>');
+```
+
+**After:**
+```javascript
+formatted = formatted.replace(/`(.*?)`/g, '<code><span class="syn-marker">`</span>$1<span class="syn-marker">`</span></code>');
+```
+
+**Files Modified:**
+- `static/script.js` - highlightSyntax() function code formatting rule
+
+**Related Issues:** Edit mode syntax highlighting, HTML parsing, code formatting
+
+**Result:** Code formatting with backticks now works correctly in both preview and edit modes without affecting other text.
+
+---
+
 ## [2026-01-17 22:15] - Square Root and Fraction Buttons Not Working in ContentEditable
 
 **Problem:**
