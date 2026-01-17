@@ -1184,7 +1184,7 @@ IMPORTANT:
 - here when i say commit then commit the current changes in my github and then push
 - only commit when i type ""commit""
 - use emoji ✅when resolved any bug and ⚠️ when facing any issue etc to make the commit message more attractive
-- also first update the md files then commit
+- also first update the md files then commit [update whatever md files needs update like recent changes, problem solving md, new feature md etc]
 - use only 1 line for commit message
 )")
 

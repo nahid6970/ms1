@@ -393,7 +393,7 @@
             "category": "General",
             "description": "",
             "trigger": ";ai1",
-            "replacement": "IMPORTANT:\n- here when i say commit then commit the current changes in my github and then push\n- only commit when i type \"commit\"\n- use emoji ✅when resolved any bug and ⚠️ when facing any issue etc to make the commit message more attractive\n- also first update the md files then commit\n- use only 1 line for commit message",
+            "replacement": "IMPORTANT:\n- here when i say commit then commit the current changes in my github and then push\n- only commit when i type \"commit\"\n- use emoji ✅when resolved any bug and ⚠️ when facing any issue etc to make the commit message more attractive\n- also first update the md files then commit [update whatever md files needs update like recent changes, problem solving md, new feature md etc]\n- use only 1 line for commit message",
             "enabled": true
         },
         {
