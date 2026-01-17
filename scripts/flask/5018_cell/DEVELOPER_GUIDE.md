@@ -2,6 +2,13 @@
 
 This document serves as a high-level guide for understanding the project's architecture and the "Rule of 6" for consistent feature implementation. Detailed feature specifications are located in the `md/` directory.
 
+## 🚨 IMPORTANT: Always Check Recent Work First
+**Before starting any development session, read the recent work log to understand the current project state:**
+
+#[[file:md/RECENT.md]]
+
+This file contains the last 5 development sessions with timestamps, current status, known issues, and next steps. It provides essential context for continuing development work efficiently.
+
 ## Project Overview
 This is a Flask-based web application providing a dynamic, markdown-enabled spreadsheet interface (`5018_cell`).
 
@@ -44,6 +51,54 @@ Each entry should include:
 - When reverting or modifying a previous fix
 
 See **[Problems & Fixes Log](md/PROBLEMS_AND_FIXES.md)** for the full history.
+
+## 🔄 Recent Work Log (CRITICAL FOR SESSION CONTINUITY)
+**ALWAYS maintain `md/RECENT.md`** to track recent development sessions. This file is **automatically referenced** at the top of this guide using `#[[file:md/RECENT.md]]` to ensure it's read first.
+
+### Purpose
+- **Session Continuity**: Provide immediate context when resuming development
+- **AI Assistant Context**: Help AI understand current project state without re-explanation
+- **Progress Tracking**: Track what was accomplished in recent sessions
+- **Issue Awareness**: Identify current problems and their status
+- **Next Steps Planning**: Clear direction for continuing development
+
+### Format (Keep Last 5 Sessions)
+```markdown
+# Recent Development Log
+
+## [YYYY-MM-DD HH:MM] - Session Summary
+
+**What We Accomplished:**
+- Feature/fix descriptions with timestamps
+
+**Files Modified:**
+- List of changed files with brief descriptions
+
+**Next Steps:**
+- Planned improvements or fixes
+
+**Current Status:**
+- Working features
+- Known issues
+
+**Time Spent:** X hours
+```
+
+### Critical Rules
+- **Always include timestamps** in HH:MM format for each session
+- **Keep only the last 5 sessions** - archive older ones to prevent file bloat
+- **Update at the END of each session** with accurate time tracking
+- **Include specific file paths** and what was changed in each
+- **List known issues** and their current status
+- **Reference this file** at the top of DEVELOPER_GUIDE.md using `#[[file:md/RECENT.md]]`
+
+### When to Update
+- **End of every development session** (mandatory)
+- After completing major features
+- When encountering new issues
+- Before taking breaks from the project
+
+**The Recent.md file is automatically included when reading this developer guide, ensuring session continuity.**
 
 ## ⚡ Critical Implementation Rule: "The Rule of 6"
 When adding new **Markdown Syntax** or **Cell Formatting**, you **MUST** update these 6 locations:
@@ -147,6 +202,7 @@ The state is managed in a central object synced with `data.json`.
 
 ### Troubleshooting
 - **[Problems & Fixes Log](md/PROBLEMS_AND_FIXES.md):** Historical bug fixes and solutions.
+- **[Recent Work Log](md/RECENT.md):** Latest development sessions and current project state.
 
 ---
 *For specific layout features (Timeline, Word Connectors), search for their respective logic in `static/script.js`.*
