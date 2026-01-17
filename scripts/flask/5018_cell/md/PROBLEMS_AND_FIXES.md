@@ -168,6 +168,33 @@ if (cellStyle.superscriptMode) {
 
 ---
 
+## [2026-01-17 23:12] - Set Superscript Mode Default to Enabled
+
+**Problem:**
+Superscript mode was disabled by default, requiring users to manually enable it for each cell. Since most cells use `^text^` for superscript formatting, this created unnecessary workflow friction.
+
+**Root Cause:**
+The `getCellStyle()` function returned undefined for `superscriptMode` by default, which was treated as false/disabled in the parsing logic.
+
+**Solution:**
+Modified `getCellStyle()` function to return `superscriptMode: true` as the default value for new cells:
+
+```javascript
+// Set default values for new cells
+if (style.superscriptMode === undefined) {
+    style.superscriptMode = true; // Default to enabled
+}
+```
+
+**Files Modified:**
+- `static/script.js` - Updated getCellStyle() function default behavior
+
+**Related Issues:** User workflow optimization, default behavior, superscript parsing
+
+**Result:** New cells now have superscript mode enabled by default, making `^text^` work immediately without manual configuration. Existing cells maintain their current settings for backward compatibility.
+
+---
+
 ## [2026-01-17 22:15] - Square Root and Fraction Buttons Not Working in ContentEditable
 
 **Problem:**

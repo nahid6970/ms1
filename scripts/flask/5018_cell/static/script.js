@@ -3421,6 +3421,12 @@ function getCellStyle(rowIndex, colIndex) {
     }
     const key = getCellKey(rowIndex, colIndex);
     const style = sheet.cellStyles[key] || {};
+    
+    // Set default values for new cells
+    if (style.superscriptMode === undefined) {
+        style.superscriptMode = true; // Default to enabled
+    }
+    
     console.log('Get cell style:', key, style);
     return style;
 }
