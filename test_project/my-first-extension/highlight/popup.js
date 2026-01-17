@@ -5,14 +5,18 @@ document.addEventListener('DOMContentLoaded', () => {
   const status = document.getElementById('status');
   const saveColorsBtn = document.getElementById('saveColors');
 
+  // Excluded Domains
+  const excludedDomainsInput = document.getElementById('excludedDomains');
+  const saveExclusionsBtn = document.getElementById('saveExclusions');
+
   // Color inputs
   const color1 = document.getElementById('color1');
   const color2 = document.getElementById('color2');
   const color3 = document.getElementById('color3');
   const color4 = document.getElementById('color4');
 
-  // Load saved colors
-  chrome.storage.local.get(['customColors'], (result) => {
+  // Load saved settings
+  chrome.storage.local.get(['customColors', 'excludedDomains'], (result) => {
     if (result.customColors) {
       const colors = result.customColors;
       color1.value = colors[0] || '#ffff00';
@@ -20,6 +24,22 @@ document.addEventListener('DOMContentLoaded', () => {
       color3.value = colors[2] || '#aaddff';
       color4.value = colors[3] || '#ffaaaa';
     }
+
+    if (result.excludedDomains) {
+      excludedDomainsInput.value = result.excludedDomains.join('\n');
+    }
+  });
+
+  // Save Exclusions
+  saveExclusionsBtn.addEventListener('click', () => {
+    const domains = excludedDomainsInput.value
+      .split('\n')
+      .map(d => d.trim())
+      .filter(d => d.length > 0);
+
+    chrome.storage.local.set({ excludedDomains: domains }, () => {
+      showStatus('Exclusions saved! Refresh pages to apply.');
+    });
   });
 
   // Save colors
