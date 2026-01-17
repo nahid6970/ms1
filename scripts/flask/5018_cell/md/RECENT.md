@@ -58,7 +58,7 @@
 - ✅ All original issues from Issue.txt resolved
 
 **Known Issues:**
-- None currently identified - all major syntax conflicts resolved
+- **Superscript toggle not working** - Both checked/unchecked show `^text^` as superscript (documented in PROBLEMS_AND_FIXES.md)
 
 ---
 

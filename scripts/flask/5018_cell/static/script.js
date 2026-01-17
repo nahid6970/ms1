@@ -2862,7 +2862,7 @@ function parseMarkdownInline(text, cellStyle = {}) {
     formatted = formatted.replace(/~~(.+?)~~/g, '<del>$1</del>');
 
     // Superscript: ^text^ -> <sup>text</sup> (only if superscriptMode is enabled)
-    if (cellStyle.superscriptMode !== false) {
+    if (cellStyle.superscriptMode) {
         formatted = formatted.replace(/\^(.+?)\^/g, '<sup>$1</sup>');
     }
 
@@ -3215,7 +3215,7 @@ function oldParseMarkdownBody(lines, cellStyle = {}) {
         formatted = formatted.replace(/~~(.+?)~~/g, '<del>$1</del>');
 
         // Superscript: ^text^ -> <sup>text</sup> (only if superscriptMode is enabled)
-        if (cellStyle.superscriptMode !== false) {
+        if (cellStyle.superscriptMode) {
             formatted = formatted.replace(/\^(.+?)\^/g, '<sup>$1</sup>');
         }
 
@@ -3432,6 +3432,12 @@ function getCellStyle(rowIndex, colIndex) {
     }
     const key = getCellKey(rowIndex, colIndex);
     const style = sheet.cellStyles[key] || {};
+    
+    // Set default values for new cells
+    if (style.superscriptMode === undefined) {
+        style.superscriptMode = true; // Default to enabled
+    }
+    
     console.log('Get cell style:', key, style);
     return style;
 }
@@ -3622,7 +3628,7 @@ function showCellContextMenu(e, rowIndex, colIndex, inputElement, tdElement) {
     document.getElementById('ctxItalic').classList.toggle('checked', style.italic === true);
     document.getElementById('ctxCenter').classList.toggle('checked', style.center === true);
     document.getElementById('ctxComplete').classList.toggle('checked', style.complete === true);
-    document.getElementById('ctxSuperscript').classList.toggle('checked', style.superscriptMode !== false);
+    document.getElementById('ctxSuperscript').classList.toggle('checked', style.superscriptMode === true);
 
     // Show/hide merge options
     const isMerged = mergeInfo && (mergeInfo.colspan || mergeInfo.rowspan || mergeInfo.hidden);
