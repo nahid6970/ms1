@@ -1029,6 +1029,15 @@
         <div class="quick-formatter-separator"></div>
         <div class="quick-formatter-title" style="font-size: 12px; margin-top: 8px;">Math</div>
         <div class="quick-formatter-options">
+            <button class="format-btn" onclick="applyQuickFormat('^', '^', event)"
+                oncontextmenu="return toggleFormatSelection('^', '^', event)"
+                title="Superscript (Right-click to select)">
+                X<sup>2</sup>
+            </button>
+            <button class="format-btn" onclick="applyQuickFormat('~', '~', event)"
+                oncontextmenu="return toggleFormatSelection('~', '~', event)" title="Subscript (Right-click to select)">
+                X<sub>2</sub>
+            </button>
             <button class="format-btn" onclick="applySqrtFormat(event)" title="Square Root - \(\sqrt{value}\)">
                 √
             </button>
@@ -1041,15 +1050,6 @@
                     <span
                         style="position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); font-size: 8px;">b</span>
                 </span>
-            </button>
-            <button class="format-btn" onclick="applyQuickFormat('^', '^', event)"
-                oncontextmenu="return toggleFormatSelection('^', '^', event)"
-                title="Superscript (Right-click to select)">
-                X<sup>2</sup>
-            </button>
-            <button class="format-btn" onclick="applyQuickFormat('~', '~', event)"
-                oncontextmenu="return toggleFormatSelection('~', '~', event)" title="Subscript (Right-click to select)">
-                X<sub>2</sub>
             </button>
         </div>
 

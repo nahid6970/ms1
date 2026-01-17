@@ -108,6 +108,61 @@ See **[Problems & Fixes Log](md/PROBLEMS_AND_FIXES.md)** for the full history.
 
 **The Recent.md file is automatically included when reading this developer guide, ensuring session continuity.**
 
+## 🚀 Git Commit Workflow (CRITICAL)
+**IMPORTANT:** Follow this exact workflow when committing changes to maintain proper documentation and version control.
+
+### Commit Command
+- **Only commit when explicitly instructed** - Wait for the command "commit"
+- **Never auto-commit** - Always wait for explicit instruction
+
+### Pre-Commit Process (MANDATORY)
+1. **Update documentation files FIRST** before any Git operations:
+   - `md/RECENT.md` - Add/update current session details with timestamps
+   - `md/PROBLEMS_AND_FIXES.md` - Document any bugs fixed or issues resolved
+   - `md/KEYBOARD_SHORTCUTS.md` - Update if shortcuts changed
+   - Any other relevant feature documentation files
+   - `DEVELOPER_GUIDE.md` - Update if architecture changed
+
+2. **Verify all changes are documented** before proceeding to Git operations
+
+### Git Operations Sequence
+```bash
+git add .
+git commit -m "emoji one-line message"
+git push
+```
+
+### Commit Message Format
+- **One line only** - No multi-line commit messages
+- **Start with appropriate emoji**:
+  - ✅ Bug fixes and issue resolution
+  - ⚠️ Known issues or warnings
+  - 🎯 New features and implementations
+  - 📝 Documentation updates
+  - 🔧 Code improvements and refactoring
+  - 🧹 Code cleanup and removal
+  - 🚀 Performance improvements
+  - 🎨 UI/UX improvements
+
+### Example Workflow
+```
+User: "commit"
+AI: 
+1. Updates md/RECENT.md with session details
+2. Updates md/PROBLEMS_AND_FIXES.md if bugs were fixed
+3. Updates other relevant documentation
+4. git add .
+5. git commit -m "✅ Fixed F3 formatter contentEditable support"
+6. git push
+```
+
+### Critical Rules
+- **Documentation first, Git second** - Always update docs before committing
+- **Wait for "commit" command** - Never commit automatically
+- **One-line messages** - Keep commit messages concise and clear
+- **Appropriate emojis** - Use emojis to categorize the type of change
+- **Complete workflow** - Always add, commit, and push in sequence
+
 ## ⚡ Critical Implementation Rule: "The Rule of 6"
 When adding new **Markdown Syntax** or **Cell Formatting**, you **MUST** update these 6 locations:
 
