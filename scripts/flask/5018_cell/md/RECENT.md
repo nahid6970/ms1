@@ -6,6 +6,44 @@
 
 ---
 
+## [2026-01-17 22:55] - Header Z-Index Fix for Edit Mode Scrolling
+
+**Session Duration:** 0.08 hours
+
+**What We Accomplished:**
+
+### ✅ Fixed Header Visibility Issue in Edit Mode (22:50-22:55)
+- **Problem identified**: When in contentEditable edit mode and scrolling, edit box covered table headers
+- **Root cause**: Table headers had `z-index: 10` while edit mode had `z-index: 100`
+- **Solution applied**: Increased table headers z-index from `10` to `200`
+- **Result**: Headers now stay visible above edit boxes during scrolling
+
+**Files Modified:**
+- `static/style.css` - Updated `th` z-index from 10 to 200 (1 line)
+
+**Technical Details:**
+- **Z-Index Hierarchy Established**:
+  - Table Headers (`th`): `z-index: 200` ← Fixed
+  - ContentEditable Edit Mode: `z-index: 100`
+  - F3 Quick Formatter: `z-index: 10000`
+  - Modals: `z-index: 5000`
+  - Context Menus: `z-index: 2000`
+
+**Next Steps:**
+- Test header visibility during edit mode scrolling
+- Continue with any additional UI improvements
+
+**Current Status:**
+- ✅ Flask server running on http://127.0.0.1:5018
+- ✅ Header visibility issue resolved
+- ✅ Z-index hierarchy properly established
+- ✅ Edit mode scrolling now works correctly
+
+**Known Issues:**
+- None currently identified
+
+---
+
 ## [2026-01-17 22:50] - Math Category Reordering and Project Template Creation
 
 **Session Duration:** 0.1 hours

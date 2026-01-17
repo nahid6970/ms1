@@ -80,6 +80,26 @@ No standardized project setup template available, and Math category had less com
 
 ---
 
+## [2026-01-17 22:55] - Header Z-Index Fix for Edit Mode Scrolling
+
+**Problem:**
+When in contentEditable edit mode and scrolling the sheet, the edit box would cover/interrupt the table headers, causing them to disappear from view.
+
+**Root Cause:**
+Z-index conflict - table headers (`th`) had `z-index: 10` while contentEditable cells in edit mode had `z-index: 100`, causing edit boxes to render above the headers during scrolling.
+
+**Solution:**
+Increased table headers' z-index from `10` to `200` to ensure they always stay above edit boxes and remain visible during scrolling.
+
+**Files Modified:**
+- `static/style.css` - Updated `th` selector z-index property
+
+**Related Issues:** UI layering, edit mode UX, header visibility
+
+**Result:** Table headers now remain visible and properly positioned above edit boxes during scrolling in edit mode.
+
+---
+
 ## [2026-01-17 22:15] - Square Root and Fraction Buttons Not Working in ContentEditable
 
 **Problem:**
