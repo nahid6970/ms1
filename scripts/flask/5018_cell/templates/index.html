@@ -983,15 +983,6 @@
                 oncontextmenu="return toggleFormatSelection('`', '`', event)" title="Code (Right-click to select)">
                 <code>C</code>
             </button>
-            <button class="format-btn" onclick="applyQuickFormat('^', '^', event)"
-                oncontextmenu="return toggleFormatSelection('^', '^', event)"
-                title="Superscript (Right-click to select)">
-                X<sup>2</sup>
-            </button>
-            <button class="format-btn" onclick="applyQuickFormat('~', '~', event)"
-                oncontextmenu="return toggleFormatSelection('~', '~', event)" title="Subscript (Right-click to select)">
-                X<sub>2</sub>
-            </button>
             <button class="format-btn" onclick="applyLinkFormat(event)" title="Link">
                 🔗
             </button>
@@ -1051,35 +1042,14 @@
                         style="position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); font-size: 8px;">b</span>
                 </span>
             </button>
-            <button class="format-btn" onclick="applyMathFormat('\\\\times', event)" title="Multiplication - ×">
-                ×
+            <button class="format-btn" onclick="applyQuickFormat('^', '^', event)"
+                oncontextmenu="return toggleFormatSelection('^', '^', event)"
+                title="Superscript (Right-click to select)">
+                X<sup>2</sup>
             </button>
-            <button class="format-btn" onclick="applyMathFormat('\\\\div', event)" title="Division - ÷">
-                ÷
-            </button>
-            <button class="format-btn" onclick="applyMathFormat('\\\\pm', event)" title="Plus-Minus - ±">
-                ±
-            </button>
-            <button class="format-btn" onclick="applyMathFormat('\\\\neq', event)" title="Not Equal - ≠">
-                ≠
-            </button>
-            <button class="format-btn" onclick="applyMathFormat('\\\\leq', event)" title="Less Than or Equal - ≤">
-                ≤
-            </button>
-            <button class="format-btn" onclick="applyMathFormat('\\\\geq', event)" title="Greater Than or Equal - ≥">
-                ≥
-            </button>
-            <button class="format-btn" onclick="applyMathFormat('\\\\approx', event)" title="Approximately - ≈">
-                ≈
-            </button>
-            <button class="format-btn" onclick="applyMathFormat('\\\\infty', event)" title="Infinity - ∞">
-                ∞
-            </button>
-            <button class="format-btn" onclick="applyMathFormat('\\\\pi', event)" title="Pi - π">
-                π
-            </button>
-            <button class="format-btn" onclick="applyMathFormat('\\\\alpha', event)" title="Alpha - α">
-                α
+            <button class="format-btn" onclick="applyQuickFormat('~', '~', event)"
+                oncontextmenu="return toggleFormatSelection('~', '~', event)" title="Subscript (Right-click to select)">
+                X<sub>2</sub>
             </button>
         </div>
 

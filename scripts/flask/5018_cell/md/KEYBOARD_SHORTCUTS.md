@@ -48,7 +48,8 @@ When text is selected, press F3 to open the formatter with these options:
 - **Variable font size** (`#2#text#/#`)
 - **Square root** (`\(\sqrt{text}\)`)
 - **Smart math** (converts fractions to LaTeX)
-- **Math symbols** (×, ÷, ±, ≠, ≤, ≥, ≈, ∞, π, α)
+- **Superscript** (`^text^`)
+- **Subscript** (`~text~`)
 - **📊 Format pipe table** - Auto-align table columns
 - **🧹 Remove formatting** - Strip all markdown syntax
 - **ABC/abc/Abc** - Change text case (UPPER/lower/Proper)

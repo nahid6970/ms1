@@ -7,6 +7,43 @@ This document tracks historical bugs, issues, and their solutions. Use this to:
 
 ---
 
+## [2026-01-17 22:45] - Math Category Refinement and Git Workflow Setup
+
+**Problem:**
+Math category had too many buttons (12 total) making it cluttered, and needed to establish proper Git commit workflow with documentation updates.
+
+**Root Cause:**
+Initial implementation added all possible math symbols without considering UI focus and usability. Also lacked structured Git workflow.
+
+**Solution:**
+1. **Simplified Math category** to 4 essential buttons:
+   - Moved superscript (X^2^) and subscript (X~2~) from main section to Math
+   - Removed 10 math symbol buttons (×, ÷, ±, ≠, ≤, ≥, ≈, ∞, π, α)
+   - Kept core functions: √ (Square Root), a/b (Fraction), X^2^, X~2~
+
+2. **Enhanced documentation system**:
+   - Added `#[[file:md/RECENT.md]]` reference in DEVELOPER_GUIDE.md
+   - Clarified archiving process (move to ARCHIVE_RECENT.md, don't delete)
+   - Established Git commit rules with emoji messages
+
+3. **Code cleanup**:
+   - Removed unused `applyMathFormat()` function (~60 lines)
+   - Updated documentation to reflect changes
+
+**Files Modified:**
+- `templates/index.html` - Math category refinement
+- `static/script.js` - Removed applyMathFormat() function
+- `md/KEYBOARD_SHORTCUTS.md` - Updated documentation
+- `DEVELOPER_GUIDE.md` - Enhanced Recent.md integration
+- `md/RECENT.md` - Updated with session details
+- `md/ARCHIVE_RECENT.md` - Created archive template
+
+**Related Issues:** F3 formatter organization, documentation system, Git workflow
+
+**Result:** Cleaner, more focused Math category with 4 essential buttons and established documentation/Git workflow.
+
+---
+
 ## [2026-01-17 22:15] - Square Root and Fraction Buttons Not Working in ContentEditable
 
 **Problem:**
