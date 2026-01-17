@@ -7,6 +7,36 @@ This document tracks historical bugs, issues, and their solutions. Use this to:
 
 ---
 
+## [2026-01-17 22:15] - Square Root and Fraction Buttons Not Working in ContentEditable
+
+**Problem:**
+The Square Root (√) and Smart Fraction (a/b) buttons in the F3 formatter were not working in contentEditable (preview edit) mode, similar to other F3 functions that were previously fixed.
+
+**Root Cause:**
+The `applySqrtFormat()` and `applyHatFormat()` functions were only written for INPUT/TEXTAREA elements using `.value`, `.selectionStart`, `.selectionEnd` properties, which don't exist in contentEditable mode.
+
+**Solution:**
+Updated both functions to support dual modes:
+1. **ContentEditable mode:**
+   - Check `quickFormatterSelection.isContentEditable` at the start
+   - Extract selected text from `quickFormatterSelection.text`
+   - Use Range API to insert/replace text with `range.deleteContents()` and `range.insertNode()`
+   - Update underlying input with `extractRawText()`
+   - Trigger input event for auto-save
+   - Set cursor position with `setCaretPosition()`
+
+2. **INPUT/TEXTAREA mode:**
+   - Use existing logic with `.value` and `.setSelectionRange()`
+
+**Files Modified:**
+- `static/script.js` - applySqrtFormat (~line 8642), applyHatFormat (~line 8676)
+
+**Related Issues:** F3 Quick Formatter, contentEditable support, Math category
+
+**Note:** This follows the same pattern used to fix other F3 formatter functions like H+, Border Box, Sort Lines, etc. All F3 formatter functions now support both contentEditable and legacy input modes.
+
+---
+
 ## [2026-01-17 21:30] - Double-Click Word Selection Includes Trailing Space
 
 **Problem:**

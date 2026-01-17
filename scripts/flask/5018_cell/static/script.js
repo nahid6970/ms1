@@ -8642,6 +8642,43 @@ function changeTextCase(caseType, event) {
 function applySqrtFormat(event) {
     if (!quickFormatterTarget) return;
 
+    // Check if we're in contentEditable mode
+    if (quickFormatterSelection.isContentEditable) {
+        // ContentEditable mode
+        const selectedText = quickFormatterSelection.text;
+        
+        if (!selectedText) {
+            showToast('No text selected', 'warning');
+            return;
+        }
+
+        // Create the square root syntax
+        const sqrtSyntax = `\\(\\sqrt{${selectedText}}\\)`;
+        
+        // Insert the square root at the selection
+        const range = quickFormatterSelection.range;
+        range.deleteContents();
+        const textNode = document.createTextNode(sqrtSyntax);
+        range.insertNode(textNode);
+
+        // Update the underlying input
+        const input = quickFormatterTarget;
+        input.value = extractRawText(input);
+        
+        // Trigger input event for auto-save
+        const inputEvent = new Event('input', { bubbles: true });
+        input.dispatchEvent(inputEvent);
+
+        // Set cursor position after the inserted text
+        setCaretPosition(input.parentElement.querySelector('.markdown-preview'), 
+                        range.startOffset + sqrtSyntax.length);
+
+        closeQuickFormatter();
+        showToast('Square root applied', 'success');
+        return;
+    }
+
+    // Regular INPUT/TEXTAREA mode
     const input = quickFormatterTarget;
     const start = quickFormatterSelection.start;
     const end = quickFormatterSelection.end;
@@ -8676,6 +8713,86 @@ function applySqrtFormat(event) {
 function applyHatFormat(event) {
     if (!quickFormatterTarget) return;
 
+    // Check if we're in contentEditable mode
+    if (quickFormatterSelection.isContentEditable) {
+        // ContentEditable mode
+        const selectedText = quickFormatterSelection.text;
+        
+        if (!selectedText) {
+            showToast('No text selected', 'warning');
+            return;
+        }
+
+        // Smart parsing: detect if text contains fraction patterns
+        let fracSyntax;
+
+        // Check if it's a simple fraction pattern (no * outside parentheses)
+        if (selectedText.includes('/')) {
+            // Try to intelligently parse the fraction
+            // Replace * with \cdot for multiplication in LaTeX
+            let processed = selectedText;
+
+            // Find the main division (last / that's not inside parentheses)
+            let depth = 0;
+            let mainDivIndex = -1;
+
+            for (let i = selectedText.length - 1; i >= 0; i--) {
+                if (selectedText[i] === ')') depth++;
+                else if (selectedText[i] === '(') depth--;
+                else if (selectedText[i] === '/' && depth === 0) {
+                    mainDivIndex = i;
+                    break;
+                }
+            }
+
+            if (mainDivIndex !== -1) {
+                // Split at the main division
+                let numerator = selectedText.substring(0, mainDivIndex).trim();
+                let denominator = selectedText.substring(mainDivIndex + 1).trim();
+
+                // Replace * with \times (cross sign) in both parts
+                numerator = numerator.replace(/\*/g, '\\times ');
+                denominator = denominator.replace(/\*/g, '\\times ');
+
+                fracSyntax = `\\(\\frac{${numerator}}{${denominator}}\\)`;
+            } else {
+                // No division found, just wrap it
+                processed = processed.replace(/\*/g, '\\cdot ');
+                fracSyntax = `\\(${processed}\\)`;
+            }
+        } else if (selectedText.includes('*')) {
+            // Just multiplication, no division
+            const processed = selectedText.replace(/\*/g, '\\times ');
+            fracSyntax = `\\(${processed}\\)`;
+        } else {
+            // No special operators, just wrap it
+            fracSyntax = `\\(${selectedText}\\)`;
+        }
+
+        // Insert the fraction at the selection
+        const range = quickFormatterSelection.range;
+        range.deleteContents();
+        const textNode = document.createTextNode(fracSyntax);
+        range.insertNode(textNode);
+
+        // Update the underlying input
+        const input = quickFormatterTarget;
+        input.value = extractRawText(input);
+        
+        // Trigger input event for auto-save
+        const inputEvent = new Event('input', { bubbles: true });
+        input.dispatchEvent(inputEvent);
+
+        // Set cursor position after the inserted text
+        setCaretPosition(input.parentElement.querySelector('.markdown-preview'), 
+                        range.startOffset + fracSyntax.length);
+
+        closeQuickFormatter();
+        showToast('Math notation applied', 'success');
+        return;
+    }
+
+    // Regular INPUT/TEXTAREA mode
     const input = quickFormatterTarget;
     const start = quickFormatterSelection.start;
     const end = quickFormatterSelection.end;
@@ -8754,6 +8871,73 @@ function applyHatFormat(event) {
 
     closeQuickFormatter();
     showToast('Math notation applied', 'success');
+}
+
+function applyMathFormat(mathSymbol, event) {
+    if (!quickFormatterTarget) return;
+
+    // Check if we're in contentEditable mode
+    if (quickFormatterSelection.isContentEditable) {
+        // ContentEditable mode
+        const selectedText = quickFormatterSelection.text;
+        
+        if (!selectedText) {
+            showToast('No text selected', 'warning');
+            return;
+        }
+
+        // Create the math syntax
+        const mathSyntax = `\\(${mathSymbol}\\)`;
+        
+        // Insert the math symbol at the selection
+        const range = quickFormatterSelection.range;
+        range.deleteContents();
+        const textNode = document.createTextNode(mathSyntax);
+        range.insertNode(textNode);
+
+        // Update the underlying input
+        const input = quickFormatterTarget;
+        input.value = extractRawText(input);
+        
+        // Trigger input event for auto-save
+        const inputEvent = new Event('input', { bubbles: true });
+        input.dispatchEvent(inputEvent);
+
+        // Set cursor position after the inserted text
+        setCaretPosition(input.parentElement.querySelector('.markdown-preview'), 
+                        range.startOffset + mathSyntax.length);
+
+        closeQuickFormatter();
+        showToast('Math symbol applied', 'success');
+        return;
+    }
+
+    // Regular INPUT/TEXTAREA mode
+    const input = quickFormatterTarget;
+    const start = quickFormatterSelection.start;
+    const end = quickFormatterSelection.end;
+    const selectedText = input.value.substring(start, end);
+
+    // Create the math syntax - if text is selected, wrap it, otherwise just insert the symbol
+    const mathSyntax = selectedText ? `\\(${selectedText} ${mathSymbol}\\)` : `\\(${mathSymbol}\\)`;
+    
+    const newText = input.value.substring(0, start) +
+        mathSyntax +
+        input.value.substring(end);
+
+    input.value = newText;
+
+    // Trigger change event to update cell
+    const changeEvent = new Event('input', { bubbles: true });
+    input.dispatchEvent(changeEvent);
+
+    // Set cursor position after the inserted text
+    const newCursorPos = start + mathSyntax.length;
+    input.setSelectionRange(newCursorPos, newCursorPos);
+    input.focus();
+
+    closeQuickFormatter();
+    showToast('Math symbol applied', 'success');
 }
 
 function applyMultipleFormats(lastPrefix, lastSuffix) {

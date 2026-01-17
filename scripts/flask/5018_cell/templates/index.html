@@ -992,19 +992,6 @@
                 oncontextmenu="return toggleFormatSelection('~', '~', event)" title="Subscript (Right-click to select)">
                 X<sub>2</sub>
             </button>
-            <button class="format-btn" onclick="applySqrtFormat(event)" title="Square Root - \(\sqrt{value}\)">
-                √
-            </button>
-            <button class="format-btn" onclick="applyHatFormat(event)"
-                title="Smart Math - Converts a/b, a*b/c, (a+b)/(c+d) to LaTeX">
-                <span style="position: relative; display: inline-block;">
-                    <span
-                        style="position: absolute; top: -8px; left: 50%; transform: translateX(-50%); font-size: 8px;">a</span>
-                    <span style="font-size: 16px;">―</span>
-                    <span
-                        style="position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); font-size: 8px;">b</span>
-                </span>
-            </button>
             <button class="format-btn" onclick="applyLinkFormat(event)" title="Link">
                 🔗
             </button>
@@ -1045,6 +1032,54 @@
             </button>
             <button class="format-btn" onclick="removeFormatting(event)" title="Remove All Formatting">
                 🧹
+            </button>
+        </div>
+
+        <div class="quick-formatter-separator"></div>
+        <div class="quick-formatter-title" style="font-size: 12px; margin-top: 8px;">Math</div>
+        <div class="quick-formatter-options">
+            <button class="format-btn" onclick="applySqrtFormat(event)" title="Square Root - \(\sqrt{value}\)">
+                √
+            </button>
+            <button class="format-btn" onclick="applyHatFormat(event)"
+                title="Smart Math - Converts a/b, a*b/c, (a+b)/(c+d) to LaTeX">
+                <span style="position: relative; display: inline-block;">
+                    <span
+                        style="position: absolute; top: -8px; left: 50%; transform: translateX(-50%); font-size: 8px;">a</span>
+                    <span style="font-size: 16px;">―</span>
+                    <span
+                        style="position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); font-size: 8px;">b</span>
+                </span>
+            </button>
+            <button class="format-btn" onclick="applyMathFormat('\\\\times', event)" title="Multiplication - ×">
+                ×
+            </button>
+            <button class="format-btn" onclick="applyMathFormat('\\\\div', event)" title="Division - ÷">
+                ÷
+            </button>
+            <button class="format-btn" onclick="applyMathFormat('\\\\pm', event)" title="Plus-Minus - ±">
+                ±
+            </button>
+            <button class="format-btn" onclick="applyMathFormat('\\\\neq', event)" title="Not Equal - ≠">
+                ≠
+            </button>
+            <button class="format-btn" onclick="applyMathFormat('\\\\leq', event)" title="Less Than or Equal - ≤">
+                ≤
+            </button>
+            <button class="format-btn" onclick="applyMathFormat('\\\\geq', event)" title="Greater Than or Equal - ≥">
+                ≥
+            </button>
+            <button class="format-btn" onclick="applyMathFormat('\\\\approx', event)" title="Approximately - ≈">
+                ≈
+            </button>
+            <button class="format-btn" onclick="applyMathFormat('\\\\infty', event)" title="Infinity - ∞">
+                ∞
+            </button>
+            <button class="format-btn" onclick="applyMathFormat('\\\\pi', event)" title="Pi - π">
+                π
+            </button>
+            <button class="format-btn" onclick="applyMathFormat('\\\\alpha', event)" title="Alpha - α">
+                α
             </button>
         </div>
 
