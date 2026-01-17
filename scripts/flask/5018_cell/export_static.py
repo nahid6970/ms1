@@ -1414,6 +1414,9 @@ def generate_static_html(data, custom_syntaxes):
                     const cellContent = document.createElement('div');
                     cellContent.className = 'cell-content';
                     
+                    // Apply cell-specific styles
+                    const cellStyle = (sheet.cellStyles || {})[`${rowIndex}-${colIndex}`] || {};
+
                     // Handle markdown formatting and newlines
                     // IMPORTANT: When adding new markdown syntax, add detection here
                     // This must match the hasMarkdown check in static/script.js
@@ -1459,7 +1462,7 @@ def generate_static_html(data, custom_syntaxes):
                     
                     if (hasMarkdown) {
                         // Apply markdown formatting
-                        cellContent.innerHTML = parseMarkdown(cellValue);
+                        cellContent.innerHTML = parseMarkdown(cellValue, cellStyle);
                     } else if (cellValue.includes('\\n')) {
                         // Just handle newlines
                         cellContent.innerHTML = cellValue.replace(/\\n/g, '<br>');
@@ -1477,8 +1480,6 @@ def generate_static_html(data, custom_syntaxes):
                         cellContent.style.fontSize = col.fontSize + 'px';
                     }
 
-                    // Apply cell-specific styles
-                    const cellStyle = (sheet.cellStyles || {})[`${rowIndex}-${colIndex}`] || {};
                     if (cellStyle.bold) cellContent.style.fontWeight = 'bold';
                     if (cellStyle.italic) cellContent.style.fontStyle = 'italic';
                     if (cellStyle.center) cellContent.style.textAlign = 'center';
@@ -1590,7 +1591,7 @@ def generate_static_html(data, custom_syntaxes):
          * - ``` code block ```
          */
         /* ----------  PIPE-TABLE → CSS-GRID  ---------- */
-        function parseGridTable(lines) {
+        function parseGridTable(lines, cellStyle = {}) {
             const rows = lines.map(l => {
                 // Remove leading/trailing whitespace and pipes
                 const trimmed = l.trim().replace(/^\\||\\|$/g, '');
@@ -1688,7 +1689,7 @@ def generate_static_html(data, custom_syntaxes):
                     }
                     
                     return {
-                        content: parseMarkdownInline(content),
+                        content: parseMarkdownInline(content, cellStyle),
                         align: align,
                         borderColor: borderColor
                     };
@@ -1765,7 +1766,7 @@ def generate_static_html(data, custom_syntaxes):
         }
 
         /*  inline parser for table cells - supports all markdown except lists  */
-        function parseMarkdownInline(text) {
+        function parseMarkdownInline(text, cellStyle = {}) {
             let formatted = text;
 
             // Convert LaTeX $...$ syntax to KaTeX \\(...\\) syntax
@@ -1932,7 +1933,9 @@ def generate_static_html(data, custom_syntaxes):
             formatted = formatted.replace(/~~(.+?)~~/g, '<del>$1</del>');
 
             // Superscript: ^text^ -> <sup>text</sup>
-            formatted = formatted.replace(/\\^(.+?)\\^/g, '<sup>$1</sup>');
+            if (cellStyle.superscriptMode !== false) {
+                formatted = formatted.replace(/\\^(.+?)\\^/g, '<sup>$1</sup>');
+            }
 
             // Subscript: ~text~ -> <sub>text</sub>
             formatted = formatted.replace(/~(.+?)~/g, '<sub>$1</sub>');
@@ -1999,7 +2002,7 @@ def generate_static_html(data, custom_syntaxes):
             return formatted;
         }
 
-        function oldParseMarkdownBody(lines) {
+        function oldParseMarkdownBody(lines, cellStyle = {}) {
             /* copy the *body* of the existing parser (bold, italic, lists …)
                but skip the table-splitting logic we just added. */
             let txt = lines.join('\\n');
@@ -2189,7 +2192,9 @@ def generate_static_html(data, custom_syntaxes):
                 formatted = formatted.replace(/~~(.+?)~~/g, '<del>$1</del>');
 
                 // Superscript: ^text^ -> <sup>text</sup>
-                formatted = formatted.replace(/\\^(.+?)\\^/g, '<sup>$1</sup>');
+                if (cellStyle.superscriptMode !== false) {
+                    formatted = formatted.replace(/\\^(.+?)\\^/g, '<sup>$1</sup>');
+                }
 
                 // Subscript: ~text~ -> <sub>text</sub> (single tilde only, after strikethrough is processed)
                 formatted = formatted.replace(/~(.+?)~/g, '<sub>$1</sub>');
@@ -2393,7 +2398,7 @@ def generate_static_html(data, custom_syntaxes):
             }, '');
         }
 
-        function parseMarkdown(text) {
+        function parseMarkdown(text, cellStyle = {}) {
             if (!text) return '';
 
             /* -----  GRID-TABLE DETECTION  ----- */
@@ -2423,12 +2428,12 @@ def generate_static_html(data, custom_syntaxes):
                 if (cur.length) blocks.push({ grid: inGrid, lines: cur });
 
                 return blocks.map(b =>
-                    b.grid ? parseGridTable(b.lines) : oldParseMarkdownBody(b.lines)
+                    b.grid ? parseGridTable(b.lines, cellStyle) : oldParseMarkdownBody(b.lines, cellStyle)
                 ).join('<br>');
             }
 
             // If no grid table, process as normal markdown
-            return oldParseMarkdownBody(lines);
+            return oldParseMarkdownBody(lines, cellStyle);
         }
 
         function searchTable() {
