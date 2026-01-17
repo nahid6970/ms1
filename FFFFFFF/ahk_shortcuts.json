@@ -403,6 +403,14 @@
             "trigger": ";ai2",
             "replacement": "For Projects Always create a Dev.md file and discuss important thing about the project general idea important things etc and also make a md directory where u will add Provlems_Solution.md where u will update  problems and how we resolved them in this structure\n\n## Template for New Entries\n## [YYYY-MM-DD HH:MM] - Brief Problem Title\n\n**Problem:** \nDescription of the issue observed\n\n**Root Cause:** \nWhat was actually causing the problem\n\n**Solution:** \nHow it was fixed (include key code changes)\n\n**Files Modified:**\n- `file1.js` - Brief description of change\n- `file2.css` - Brief description of change\n\n**Related Issues:** Links to related problems or \"None\"",
             "enabled": true
+        },
+        {
+            "name": "Unresolved ai orompt",
+            "category": "General",
+            "description": "",
+            "trigger": ";unresolved",
+            "replacement": "still shows as power in both checked and unchecked situatin ok add it to problem & talk about how u tried to reslove it i will use another ai",
+            "enabled": true
         }
     ],
     "startup_scripts": [

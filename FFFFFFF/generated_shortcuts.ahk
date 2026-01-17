@@ -1211,3 +1211,6 @@ How it was fixed (include key code changes)
 
 **Related Issues:** Links to related problems or ""None""
 )")
+
+;! Unresolved ai orompt
+:X:;unresolved::Paste('still shows as power in both checked and unchecked situatin ok add it to problem & talk about how u tried to reslove it i will use another ai')
