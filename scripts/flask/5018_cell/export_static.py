@@ -1419,6 +1419,7 @@ def generate_static_html(data, custom_syntaxes):
                     // This must match the hasMarkdown check in static/script.js
                     const cellValue = row[colIndex] || '';
                     const hasMarkdown = cellValue.includes('\\\\(') || 
+                        cellValue.includes('$') ||  // LaTeX math syntax
                         cellValue.includes('[[') || 
                         cellValue.includes('**') || 
                         cellValue.includes('__') || 
@@ -1767,6 +1768,9 @@ def generate_static_html(data, custom_syntaxes):
         function parseMarkdownInline(text) {
             let formatted = text;
 
+            // Convert LaTeX $...$ syntax to KaTeX \\(...\\) syntax
+            formatted = formatted.replace(/\\$([^$]+)\\$/g, '\\\\\\($1\\\\\\)');
+
             // Math: \\( ... \\) -> KaTeX (process first to avoid conflicts)
             if (window.katex) {
                 formatted = formatted.replace(/\\\\\\((.*?)\\\\\\)/g, (match, math) => {
@@ -2024,6 +2028,9 @@ def generate_static_html(data, custom_syntaxes):
             const codeLines = txt.split('\\n');
             const formattedLines = codeLines.map(line => {
                 let formatted = line;
+
+                // Convert LaTeX $...$ syntax to KaTeX \\(...\\) syntax
+                formatted = formatted.replace(/\\$([^$]+)\\$/g, '\\\\\\($1\\\\\\)');
 
                 // Code block: ```text``` -> <code>text</code>
                 if (formatted.trim() === '```') {

@@ -1508,6 +1508,7 @@ function checkHasMarkdown(value) {
         str.includes('{link:') ||
         (str.includes('http') && str.includes('[')) ||
         str.includes('{{') ||
+        str.includes('$') ||  // LaTeX math syntax
         str.includes('\n- ') ||
         str.includes('\n-- ') ||
         str.includes('\n--- ') ||
@@ -1736,6 +1737,10 @@ function handlePreviewMouseDown(e) {
 
 function highlightSyntax(text) {
     if (!text) return "";
+    
+    // Convert LaTeX $...$ syntax to KaTeX \(...\) syntax before escaping HTML
+    text = text.replace(/\$([^$]+)\$/g, '\\($1\\)');
+    
     let formatted = escapeHtml(text);
 
     // Rule: **bold**
@@ -2690,6 +2695,9 @@ function parseGridTable(lines) {
 function parseMarkdownInline(text, cellStyle = {}) {
     let formatted = text;
 
+    // Convert LaTeX $...$ syntax to KaTeX \(...\) syntax
+    formatted = formatted.replace(/\$([^$]+)\$/g, '\\($1\\)');
+
     // Math: \( ... \) -> KaTeX (process first to avoid conflicts)
     if (window.katex) {
         formatted = formatted.replace(/\\\((.*?)\\\)/g, (match, math) => {
@@ -3042,6 +3050,9 @@ function oldParseMarkdownBody(lines, cellStyle = {}) {
         if (inCodeBlock) {
             return `<code>${formatted}</code>`;
         }
+
+        // Convert LaTeX $...$ syntax to KaTeX \(...\) syntax
+        formatted = formatted.replace(/\$([^$]+)\$/g, '\\($1\\)');
 
         // Math: \( ... \) -> KaTeX (process first to avoid conflicts)
         if (window.katex) {
@@ -7356,6 +7367,9 @@ function closeAllColumnMenus() {
 function stripMarkdown(text, preserveLinks = false) {
     if (!text) return '';
     let stripped = String(text);
+
+    // Remove LaTeX math markers: $text$ -> text
+    stripped = stripped.replace(/\$([^$]+)\$/g, '$1');
 
     // Remove correct answer markers: [[text]] -> text
     stripped = stripped.replace(/\[\[(.+?)\]\]/g, '$1');
