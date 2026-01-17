@@ -86,11 +86,19 @@ See **[Problems & Fixes Log](md/PROBLEMS_AND_FIXES.md)** for the full history.
 
 ### Critical Rules
 - **Always include timestamps** in HH:MM format for each session
-- **Keep only the last 5 sessions** - archive older ones to prevent file bloat
+- **Keep only the last 5 sessions** in RECENT.md for quick reference
+- **Archive older sessions** by moving them to `md/ARCHIVE_RECENT.md` (don't delete!)
 - **Update at the END of each session** with accurate time tracking
 - **Include specific file paths** and what was changed in each
 - **List known issues** and their current status
 - **Reference this file** at the top of DEVELOPER_GUIDE.md using `#[[file:md/RECENT.md]]`
+
+### Archiving Process (When you have 6+ sessions)
+1. **Create/Update `md/ARCHIVE_RECENT.md`** if it doesn't exist
+2. **Move the oldest session** from RECENT.md to the top of ARCHIVE_RECENT.md
+3. **Keep the format** but add "ARCHIVED" prefix to session titles
+4. **Don't delete anything** - maintain complete development history
+5. **RECENT.md stays focused** on last 5 sessions for quick context
 
 ### When to Update
 - **End of every development session** (mandatory)
@@ -203,6 +211,7 @@ The state is managed in a central object synced with `data.json`.
 ### Troubleshooting
 - **[Problems & Fixes Log](md/PROBLEMS_AND_FIXES.md):** Historical bug fixes and solutions.
 - **[Recent Work Log](md/RECENT.md):** Latest development sessions and current project state.
+- **[Archived Sessions](md/ARCHIVE_RECENT.md):** Older development sessions (6+ sessions old).
 
 ---
 *For specific layout features (Timeline, Word Connectors), search for their respective logic in `static/script.js`.*

@@ -1,6 +1,8 @@
 # Recent Development Log
 
-**KEEP ONLY LAST 5 SESSIONS** - Archive older sessions to maintain focus on recent work.
+**KEEP ONLY LAST 5 SESSIONS** - Move older sessions to `md/ARCHIVE_RECENT.md` (don't delete them!)
+
+**Archiving Process:** When you have 6+ sessions, move the oldest one to ARCHIVE_RECENT.md with "ARCHIVED" prefix.
 
 ---
 
