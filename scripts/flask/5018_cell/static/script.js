@@ -1569,9 +1569,9 @@ function calculateVisibleToRawMap(rawInput) {
         { regex: /\{link:[^}]*\}(.+?)\{\/\}/g, keepGroup: 1 },
         { regex: /(https?:\/\/[^\s\[]+)\[(.+?)\]/g, keepGroup: 2 },
         { regex: /\{\{(.+?)\}\}/g, keepGroup: 1 },
-        { regex: /^\s*-\s+/gm, keepGroup: -1 },
-        { regex: /^\s*--\s+/gm, keepGroup: -1 },
-        { regex: /^\s*---\s+/gm, keepGroup: -1 },
+        { regex: /^(\s*-)\s+/gm, keepGroup: 1 },
+        { regex: /^(\s*-)-\s+/gm, keepGroup: 1 },
+        { regex: /^(\s*-)--\s+/gm, keepGroup: 1 },
         { regex: /^Table\*\d+(?:_[^\s\n,]+)?(?:_[^\s\n,]+)?(?:[\n\s,]+)/i, keepGroup: -1 },
         { regex: /^Timeline(?:C)?(?:-[A-Z]+)?\*(.+?)$/gm, keepGroup: 1 },
         { regex: /\[(\d+)(?:-[A-Z]+)?\](\S+)/g, keepGroup: 2 }

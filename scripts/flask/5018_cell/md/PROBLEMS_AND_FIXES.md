@@ -7,6 +7,23 @@ This document tracks historical bugs, issues, and their solutions. Use this to:
 
 ---
 
+## [2026-01-18 00:40] - Cursor Offset Mismatch in List Items
+
+**Problem:** Clicking on a word in a list item while in Markdown preview mode would place the caret 1-3 characters ahead of the intended position.
+
+**Root Cause:** The `calculateVisibleToRawMap` function was marking the entire list marker (e.g., `- `, `-- `, `--- `) as hidden. However, the rendered preview replaces these markers with a single bullet character (`•`, `◦`, or `▪`). This caused a 1:1 mapping discrepancy between the raw text and the visible text.
+
+**Solution:**
+- Updated the regex patterns in `calculateVisibleToRawMap` inside `static/script.js` to preserve the first character of the list marker.
+- This ensures that the mapping recognizes the single bullet character in the visible view, aligning the offsets correctly.
+
+**Files Modified:**
+- `static/script.js` - Updated `calculateVisibleToRawMap` patterns.
+
+**Related Issues:** Click-to-edit, mapping accuracy
+
+---
+
 ## [2026-01-18 00:30] - Cell Height Overflow in Edit Mode
 
 **Problem:** When a cell was focused for editing in Markdown mode, the height did not always adjust to accommodate the raw syntax, causing text to overflow the cell borders or overlap with the row below.

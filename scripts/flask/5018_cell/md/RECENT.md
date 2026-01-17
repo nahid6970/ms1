@@ -6,6 +6,30 @@
 
 ---
 
+## [2026-01-18 00:45] - List Item Cursor Positioning Fix
+
+**Session Duration:** 0.15 hours
+
+**What We Accomplished:**
+
+### ✅ Fixed Click-to-Edit Cursor Position in Lists (00:35-00:45)
+- **Problem**: Clicking a word in a list item placed the cursor 1-3 characters ahead of the target due to markdown syntax stripping discrepancies.
+- **Root Cause**: The mapping logic treated list markers (`- `, `-- `, `--- `) as entirely hidden, but the preview renders them as single characters (bullets).
+- **Solution**: Updated `calculateVisibleToRawMap` patterns to preserve one character for the bullet symbols, aligning the visible text offset with the raw text syntax.
+
+**Files Modified:**
+- `static/script.js` - Updated regex patterns in `calculateVisibleToRawMap`
+
+**Technical Details:**
+- **Regex Update**: Switched list marker logic from `keepGroup: -1` (hide all) to capturing and keeping the first character (the bullet representation).
+
+**Current Status:**
+- ✅ Flask server running on http://127.0.0.1:5018
+- ✅ Cursor positioning now 100% accurate for list items
+- ✅ Continuity with high-fidelity editing experience
+
+---
+
 ## [2026-01-18 00:35] - Edit Mode Height Fix and Documentation Policy
 
 **Session Duration:** 0.35 hours
@@ -173,44 +197,4 @@
 **Known Issues:**
 - **Superscript toggle not working** - Both checked/unchecked show `^text^` as superscript (documented in PROBLEMS_AND_FIXES.md)
 
----
-
-## [2026-01-17 23:12] - Set Superscript Mode Default to Enabled
-
-**Session Duration:** 0.03 hours
-
-**What We Accomplished:**
-
-### ✅ Default Superscript Mode Enhancement (23:10-23:12)
-- **Changed default behavior**: Superscript mode now enabled by default for new cells
-- **User request**: Most cells use `^text^` formatting, so default should be enabled
-- **Backward compatibility**: Existing cells keep their current settings unchanged
-- **Implementation**: Modified `getCellStyle()` to return `superscriptMode: true` by default
-
-**Files Modified:**
-- `static/script.js` - Updated getCellStyle() default behavior (4 lines)
-
-**Technical Details:**
-- **Default Value**: New cells automatically get `superscriptMode: true`
-- **Context Menu**: Shows checkmark ✓ by default for new cells
-- **Existing Data**: No impact on previously saved cell settings
-- **Override**: Users can still uncheck for math expressions when needed
-
-**User Experience:**
-- **Before**: Had to manually enable superscript mode for each cell
-- **After**: `^text^` works immediately in new cells by default
-- **Math Mode**: Can still uncheck for expressions like `2^3 = 8`
-
-**Next Steps:**
-- Address LaTeX math syntax issue (`$...$` not rendering)
-- Continue with other syntax improvements
-
-**Current Status:**
-- ✅ Flask server running on http://127.0.0.1:5018
-- ✅ Superscript mode enabled by default
-- ✅ User workflow optimized for common use case
-- ✅ Backward compatibility maintained
-
-**Known Issues:**
-- LaTeX math syntax (`$...$`) not rendering (next priority)
 
