@@ -366,7 +366,8 @@ def generate_static_html(data, custom_syntaxes):
         .cell-content {
             width: 100%;
             border: none;
-            padding: 4px;
+            padding: 8px 12px 6px 12px;
+            font-family: Vrinda, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: transparent;
             box-sizing: border-box;
             pointer-events: none;
@@ -784,13 +785,15 @@ def generate_static_html(data, custom_syntaxes):
         mark {
             background: #000000;
             color: #ffffff;
-            padding: 1px 4px;
+            padding: 2px 6px;
             border-radius: 3px;
             display: inline;
             vertical-align: baseline;
             line-height: 1.3;
             box-decoration-break: clone;
             -webkit-box-decoration-break: clone;
+            word-break: normal;
+            overflow-wrap: break-word;
         }
 
         del {
@@ -1811,12 +1814,14 @@ def generate_static_html(data, custom_syntaxes):
                 });
                 // Only add padding and border-radius if there's a background
                 if (hasBg) {
-                    styleObj.padding = '1px 6px';
+                    styleObj.padding = '2px 8px';
                     styleObj.borderRadius = '4px';
                 }
                 styleObj.display = 'inline';
                 styleObj.verticalAlign = 'baseline';
                 styleObj.lineHeight = '1.3';
+                styleObj.wordBreak = 'normal';
+                styleObj.overflowWrap = 'break-word';
                 styleObj.boxDecorationBreak = 'clone';
                 styleObj.WebkitBoxDecorationBreak = 'clone';
                 const styleStr = Object.entries(styleObj).map(([k, v]) => {
@@ -1834,7 +1839,7 @@ def generate_static_html(data, custom_syntaxes):
                     'K': '#000000', 'GR': '#808080'
                 };
                 if (colorMap[colorCode]) {
-                    return '<span style="border: 2px solid ' + colorMap[colorCode] + '; padding: 2px 6px; border-radius: 4px; display: inline; box-decoration-break: clone; -webkit-box-decoration-break: clone;">' + text + '</span>';
+                    return '<span style="border: 2px solid ' + colorMap[colorCode] + '; padding: 2px 8px; border-radius: 4px; display: inline; box-decoration-break: clone; -webkit-box-decoration-break: clone; word-break: normal; overflow-wrap: break-word;">' + text + '</span>';
                 }
                 return match;
             });
@@ -2203,20 +2208,20 @@ def generate_static_html(data, custom_syntaxes):
                 // Using text-indent for hanging indent to preserve tab alignment
                 if (formatted.trim().startsWith('--- ')) {
                     const content = formatted.replace(/^(\\s*)--- (.+)$/, '$2');
-                    formatted = formatted.replace(/^(\\s*)--- .+$/, '$1<span style="display: inline-block; width: 100%; margin-left: 3em; text-indent: -1em; white-space: pre-wrap;"><span style="display: inline-block; width: 1em; text-indent: 0;">▪</span>▪CONTENT▪</span>');
+                    formatted = formatted.replace(/^(\\s*)--- .+$/, '$1<span style="display: inline-block; width: 100%; box-sizing: border-box; padding-left: 3em; text-indent: -1em; white-space: pre-wrap;"><span style="display: inline-block; width: 1em; text-indent: 0;">▪</span>▪CONTENT▪</span>');
                     formatted = formatted.replace('▪CONTENT▪', content);
                 }
                 // Sublist: -- item -> ◦ item with more indent (white circle)
                 else if (formatted.trim().startsWith('-- ')) {
                     const content = formatted.replace(/^(\\s*)-- (.+)$/, '$2');
-                    formatted = formatted.replace(/^(\\s*)-- .+$/, '$1<span style="display: inline-block; width: 100%; margin-left: 2em; text-indent: -1em; white-space: pre-wrap;"><span style="display: inline-block; width: 1em; text-indent: 0;">◦</span>◦CONTENT◦</span>');
+                    formatted = formatted.replace(/^(\\s*)-- .+$/, '$1<span style="display: inline-block; width: 100%; box-sizing: border-box; padding-left: 2em; text-indent: -1em; white-space: pre-wrap;"><span style="display: inline-block; width: 1em; text-indent: 0;">◦</span>◦CONTENT◦</span>');
                     formatted = formatted.replace('◦CONTENT◦', content);
                 }
                 // Bullet list: - item -> • item with hanging indent (black circle)
                 // Using text-indent for proper hanging indent that preserves tab alignment
                 else if (formatted.trim().startsWith('- ')) {
                     const content = formatted.replace(/^(\\s*)- (.+)$/, '$2');
-                    formatted = formatted.replace(/^(\\s*)- .+$/, '$1<span style="display: inline-block; width: 100%; margin-left: 1em; text-indent: -1em; white-space: pre-wrap;"><span style="display: inline-block; width: 1em; text-indent: 0;">•</span>•CONTENT•</span>');
+                    formatted = formatted.replace(/^(\\s*)- .+$/, '$1<span style="display: inline-block; width: 100%; box-sizing: border-box; padding-left: 1em; text-indent: -1em; white-space: pre-wrap;"><span style="display: inline-block; width: 1em; text-indent: 0;">•</span>•CONTENT•</span>');
                     formatted = formatted.replace('•CONTENT•', content);
                 }
 
@@ -2227,7 +2232,7 @@ def generate_static_html(data, custom_syntaxes):
                         const spaces = match[1];
                         const number = match[2];
                         const content = match[3];
-                        formatted = `${spaces}<span style="display: inline-block; width: 100%; margin-left: 2em; text-indent: -2em; white-space: pre-wrap;"><span style="display: inline-block; width: 2em; text-indent: 0;">${number}</span>NUMCONTENT</span>`;
+                        formatted = `${spaces}<span style="display: inline-block; width: 100%; box-sizing: border-box; padding-left: 2em; text-indent: -2em; white-space: pre-wrap;"><span style="display: inline-block; width: 2em; text-indent: 0;">${number}</span>NUMCONTENT</span>`;
                         formatted = formatted.replace('NUMCONTENT', content);
                     }
                 }
@@ -2239,10 +2244,10 @@ def generate_static_html(data, custom_syntaxes):
                 formatted = formatted.replace(/==(.+?)==/g, '<mark>$1</mark>');
 
                 // Red highlight: !!text!! -> red background with white text
-                formatted = formatted.replace(/!!(.+?)!!/g, '<span style="background: #ff0000; color: #ffffff; padding: 1px 4px; border-radius: 3px; display: inline; vertical-align: baseline; line-height: 1.3; box-decoration-break: clone; -webkit-box-decoration-break: clone;">$1</span>');
+                formatted = formatted.replace(/!!(.+?)!!/g, '<span style="background: #ff0000; color: #ffffff; padding: 2px 6px; border-radius: 3px; display: inline; vertical-align: baseline; line-height: 1.3; box-decoration-break: clone; -webkit-box-decoration-break: clone; word-break: normal; overflow-wrap: break-word;">$1</span>');
 
                 // Blue highlight: ??text?? -> blue background with white text
-                formatted = formatted.replace(/\\?\\?(.+?)\\?\\?/g, '<span style="background: #0000ff; color: #ffffff; padding: 1px 4px; border-radius: 3px; display: inline; vertical-align: baseline; line-height: 1.3; box-decoration-break: clone; -webkit-box-decoration-break: clone;">$1</span>');
+                formatted = formatted.replace(/\\?\\?(.+?)\\?\\?/g, '<span style="background: #0000ff; color: #ffffff; padding: 2px 6px; border-radius: 3px; display: inline; vertical-align: baseline; line-height: 1.3; box-decoration-break: clone; -webkit-box-decoration-break: clone; word-break: normal; overflow-wrap: break-word;">$1</span>');
 
                 // Correct Answer: [[text]] -> hidden text with green highlight on click
                 formatted = formatted.replace(/\\[\\[(.+?)\\]\\]/g, '<span class="correct-answer">$1</span>');

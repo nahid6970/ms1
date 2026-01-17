@@ -7,6 +7,37 @@ This document tracks historical bugs, issues, and their solutions. Use this to:
 
 ---
 
+## [2026-01-17 23:55] - Bangla Text Overflow and Border Box Fixes
+
+**Problem:**
+Bangla text was overflowing cell borders and border box spans (specifically the last word of a sentence/phrase). Red borders and background highlights were also too tight, causing glyphs to touch or extend beyond the edges.
+
+**Root Cause:**
+1. **Font Inconsistency**: The `.markdown-preview` (and static export equivalent) used default system fonts while the input used `Vrinda`. Differences in character width calculation between fonts caused text to occupy more space than the preview container expected.
+2. **Insufficient Padding**: Horizontal padding (8px for preview, 4-6px for spans) was too small for complex Bangla conjuncts and characters with vowel signs (matras) that extend horizontally or vertically.
+3. **Word Breaking**: Default browser word-breaking for Bangla can sometimes split words or cut off characters if they are inside an inline span with tight constraints.
+
+**Solution:**
+1. **Unified Font**: Added `Vrinda` font to `.markdown-preview` in `style.css` and `.cell-content` in `export_static.py` to match the input font.
+2. **Increased Preview Padding**: Updated `.markdown-preview` padding from `4px 8px` to `8px 12px 20px 12px` to provide more breathing room and match the total internal padding of the input cells.
+3. **Enhanced Inline Span Styling**:
+   - Increased horizontal padding for Border Box (`#R#`), Custom Colors (`{bg:R}`), and Highlights (`!!`, `??`, `==`) from `4-6px` to `8px`.
+   - Added `word-break: normal;` and `overflow-wrap: break-word;` to these spans in both `script.js` and `export_static.py`.
+   - Added `box-decoration-break: clone;` to more syntaxes to ensure borders/backgrounds wrap correctly across multiple lines.
+4. **Edit Mode Sync**: Updated `highlightSyntax()` in `script.js` to use the same improved padding and word-break settings for consistency during editing.
+5. **List Item Overflow and Gap Fix**: Initially tried `display: block` to fix overflow, but this caused double line breaks in the `pre-wrap` container. Corrected this by using `display: inline-block; width: 100%; box-sizing: border-box; padding-left: Xem;`. This keeps the indent inside the element's width (preventing overflow) without triggering the extra vertical space of block elements. Also reduced cell bottom padding from `20px` to `6px`.
+
+**Files Modified:**
+- `static/style.css` - Unified font and increased preview padding
+- `static/script.js` - Updated `parseMarkdownInline`, `oldParseMarkdownBody`, `highlightSyntax`, and list item styles
+- `export_static.py` - Synced CSS, JS formatting, and list item logic for static exports
+
+**Related Issues:** Bangla rendering, UI overflow, border box styling, list indentation
+
+**Result:** Bangla text and lists now render consistently within cells and border boxes without horizontal overflow. The removal of `width: 100%` from list items ensures they stay within the parent's width even with indents.
+
+---
+
 ## [2026-01-17 22:45] - Math Category Refinement and Git Workflow Setup
 
 **Problem:**

@@ -315,13 +315,13 @@ function handleKeyboardShortcuts(e) {
     // Tab key handling in cells
     if (e.key === 'Tab') {
         const activeElement = document.activeElement;
-        
+
         // Handle contentEditable (markdown preview mode)
         if (activeElement.classList && activeElement.classList.contains('markdown-preview') && activeElement.isContentEditable) {
             e.preventDefault();
             e.stopPropagation();
             e.stopImmediatePropagation();
-            
+
             // Insert tab character
             const selection = window.getSelection();
             if (selection.rangeCount > 0) {
@@ -329,30 +329,30 @@ function handleKeyboardShortcuts(e) {
                 range.deleteContents();
                 const textNode = document.createTextNode('\t');
                 range.insertNode(textNode);
-                
+
                 // Move cursor after tab
                 const newRange = document.createRange();
                 newRange.setStartAfter(textNode);
                 newRange.setEndAfter(textNode);
                 selection.removeAllRanges();
                 selection.addRange(newRange);
-                
+
                 // Update underlying input and data WITHOUT triggering input event
                 const rawText = extractRawText(activeElement);
                 const actualInput = activeElement.previousElementSibling;
                 if (actualInput && (actualInput.tagName === 'INPUT' || actualInput.tagName === 'TEXTAREA')) {
                     actualInput.value = rawText;
-                    
+
                     // Update tableData directly
                     const cell = activeElement.closest('td');
                     const row = cell.parentElement;
                     const rowIndex = parseInt(row.dataset.row);
                     const colIndex = parseInt(cell.dataset.col);
-                    
+
                     if (!isNaN(rowIndex) && !isNaN(colIndex)) {
                         const sheet = tableData.sheets[currentSheet];
                         sheet.rows[rowIndex][colIndex] = rawText;
-                        
+
                         // Debounced save
                         clearTimeout(window.autoSaveTimeout);
                         window.autoSaveTimeout = setTimeout(() => saveData(), 1000);
@@ -361,7 +361,7 @@ function handleKeyboardShortcuts(e) {
             }
             return false;
         }
-        
+
         // Handle input/textarea (raw mode)
         if ((activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA') &&
             activeElement.closest('td:not(.row-number)')) {
@@ -382,7 +382,7 @@ function handleKeyboardShortcuts(e) {
             // Trigger change event to update cell
             const changeEvent = new Event('input', { bubbles: true });
             activeElement.dispatchEvent(changeEvent);
-            
+
             return false;
         }
     }
@@ -612,14 +612,14 @@ function handleKeyboardShortcuts(e) {
     if (e.key === 'F9') {
         e.preventDefault();
         const activeElement = document.activeElement;
-        
+
         // Handle both contentEditable and input/textarea
-        if (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA' || 
+        if (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA' ||
             (activeElement.classList && activeElement.classList.contains('markdown-preview'))) {
-            
+
             let text = '';
             let isContentEditable = activeElement.isContentEditable;
-            
+
             if (isContentEditable) {
                 const selection = window.getSelection();
                 if (selection && !selection.isCollapsed) {
@@ -631,7 +631,7 @@ function handleKeyboardShortcuts(e) {
             } else {
                 const start = activeElement.selectionStart;
                 const end = activeElement.selectionEnd;
-                
+
                 if (start !== end) {
                     text = activeElement.value.substring(start, end);
                 } else {
@@ -657,7 +657,7 @@ function handleKeyboardShortcuts(e) {
                         range.deleteContents();
                         const textNode = document.createTextNode(newText);
                         range.insertNode(textNode);
-                        
+
                         // Update underlying input
                         const rawText = extractRawText(activeElement);
                         const actualInput = activeElement.previousElementSibling;
@@ -666,7 +666,7 @@ function handleKeyboardShortcuts(e) {
                             const event = new Event('input', { bubbles: true });
                             actualInput.dispatchEvent(event);
                         }
-                        
+
                         // Select the swapped text
                         const newRange = document.createRange();
                         newRange.selectNodeContents(textNode);
@@ -682,7 +682,7 @@ function handleKeyboardShortcuts(e) {
                     activeElement.value = newVal;
                     activeElement.selectionStart = start;
                     activeElement.selectionEnd = start + newText.length;
-                    
+
                     const event = new Event('input', { bubbles: true });
                     activeElement.dispatchEvent(event);
                 }
@@ -699,7 +699,7 @@ function handleKeyboardShortcuts(e) {
         e.preventDefault();
         e.stopPropagation();
         const activeElement = document.activeElement;
-        
+
         // This feature only works in INPUT/TEXTAREA, not contentEditable
         if (activeElement.classList && activeElement.classList.contains('markdown-preview')) {
             const switched = enableRawMode();
@@ -727,7 +727,7 @@ function handleKeyboardShortcuts(e) {
             }
             return;
         }
-        
+
         // Handle input/textarea
         if (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA') {
             selectNextOccurrence(activeElement);
@@ -738,7 +738,7 @@ function handleKeyboardShortcuts(e) {
     if (e.ctrlKey && e.altKey && e.key === 'ArrowDown') {
         e.preventDefault();
         const activeElement = document.activeElement;
-        
+
         // This feature only works in TEXTAREA, not contentEditable
         if (activeElement.classList && activeElement.classList.contains('markdown-preview')) {
             const switched = enableRawMode();
@@ -757,7 +757,7 @@ function handleKeyboardShortcuts(e) {
             }
             return;
         }
-        
+
         if (activeElement.tagName === 'TEXTAREA') {
             addCursorBelow(activeElement);
         }
@@ -767,7 +767,7 @@ function handleKeyboardShortcuts(e) {
     if (e.ctrlKey && e.altKey && e.key === 'ArrowUp') {
         e.preventDefault();
         const activeElement = document.activeElement;
-        
+
         // This feature only works in TEXTAREA, not contentEditable
         if (activeElement.classList && activeElement.classList.contains('markdown-preview')) {
             const switched = enableRawMode();
@@ -786,7 +786,7 @@ function handleKeyboardShortcuts(e) {
             }
             return;
         }
-        
+
         if (activeElement.tagName === 'TEXTAREA') {
             addCursorAbove(activeElement);
         }
@@ -852,15 +852,15 @@ function moveLines(activeElement, direction) {
     if (activeElement.isContentEditable) {
         const selection = window.getSelection();
         if (!selection.rangeCount) return;
-        
+
         const range = selection.getRangeAt(0);
         const value = extractRawText(activeElement);
-        
+
         // Get cursor position in raw text
         const textBefore = extractRawTextBeforeCaret(activeElement, range);
         const start = textBefore.length;
         const end = start + (selection.toString().length || 0);
-        
+
         const lines = value.split('\n');
 
         // Find affected lines
@@ -887,10 +887,10 @@ function moveLines(activeElement, direction) {
         }
 
         const newValue = lines.join('\n');
-        
+
         // Update the contentEditable element with highlighted syntax
         activeElement.innerHTML = highlightSyntax(newValue);
-        
+
         // Update underlying input element directly without triggering input event
         const cell = activeElement.closest('td');
         if (cell) {
@@ -899,22 +899,22 @@ function moveLines(activeElement, direction) {
                 // Get current data
                 const rowIndex = parseInt(cell.parentElement.dataset.row);
                 const colIndex = parseInt(cell.dataset.col);
-                
+
                 // Update data directly
-                if (tableData.sheets[currentSheet] && 
-                    tableData.sheets[currentSheet].rows[rowIndex] && 
+                if (tableData.sheets[currentSheet] &&
+                    tableData.sheets[currentSheet].rows[rowIndex] &&
                     tableData.sheets[currentSheet].rows[rowIndex][colIndex] !== undefined) {
                     tableData.sheets[currentSheet].rows[rowIndex][colIndex] = newValue;
                 }
-                
+
                 // Update input value without triggering events
                 inputElement.value = newValue;
-                
+
                 // Trigger save in background
                 saveData();
             }
         }
-        
+
         // Restore cursor position
         let newStart = 0;
         for (let i = 0; i < (startLineIndex + direction); i++) {
@@ -923,11 +923,11 @@ function moveLines(activeElement, direction) {
         const startOfSourceLine = value.lastIndexOf('\n', start - 1) + 1;
         const offsetInStartLine = start - startOfSourceLine;
         newStart += offsetInStartLine;
-        
+
         setCaretPosition(activeElement, newStart);
         return;
     }
-    
+
     // Handle input/textarea (legacy mode)
     const value = activeElement.value;
     const start = activeElement.selectionStart;
@@ -1541,7 +1541,7 @@ function calculateVisibleToRawMap(rawInput) {
 
     // Helper to add hidden range
     const addRange = (start, end) => {
-        if (start < end) hiddenRanges.push({start, end});
+        if (start < end) hiddenRanges.push({ start, end });
     };
 
     const patterns = [
@@ -1582,8 +1582,8 @@ function calculateVisibleToRawMap(rawInput) {
             if (!syntax.marker) return;
             const escapedMarker = syntax.marker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
             patterns.push({
-                 regex: new RegExp(escapedMarker + '(.+?)' + escapedMarker, 'g'),
-                 keepGroup: 1
+                regex: new RegExp(escapedMarker + '(.+?)' + escapedMarker, 'g'),
+                keepGroup: 1
             });
         });
     }
@@ -1594,17 +1594,17 @@ function calculateVisibleToRawMap(rawInput) {
         while ((match = p.regex.exec(rawInput)) !== null) {
             const fullMatchStart = match.index;
             const fullMatchEnd = fullMatchStart + match[0].length;
-            
+
             if (p.keepGroup === -1) {
                 addRange(fullMatchStart, fullMatchEnd);
             } else if (match[p.keepGroup]) {
                 const groupVal = match[p.keepGroup];
                 const groupStartInMatch = match[0].indexOf(groupVal);
-                
+
                 if (groupStartInMatch !== -1) {
                     const groupStartAbs = fullMatchStart + groupStartInMatch;
                     const groupEndAbs = groupStartAbs + groupVal.length;
-                    
+
                     addRange(fullMatchStart, groupStartAbs);
                     addRange(groupEndAbs, fullMatchEnd);
                 }
@@ -1613,7 +1613,7 @@ function calculateVisibleToRawMap(rawInput) {
     });
 
     hiddenRanges.sort((a, b) => a.start - b.start);
-    
+
     const mergedRanges = [];
     if (hiddenRanges.length > 0) {
         let current = hiddenRanges[0];
@@ -1632,7 +1632,7 @@ function calculateVisibleToRawMap(rawInput) {
     const map = [];
     let rawPos = 0;
     let visiblePos = 0;
-    
+
     while (rawPos <= rawInput.length) {
         let isHidden = false;
         for (const range of mergedRanges) {
@@ -1641,14 +1641,14 @@ function calculateVisibleToRawMap(rawInput) {
                 break;
             }
         }
-        
+
         if (!isHidden) {
             map[visiblePos] = rawPos;
             visiblePos++;
         }
         rawPos++;
     }
-    
+
     return map;
 }
 
@@ -1702,10 +1702,10 @@ function handlePreviewMouseDown(e) {
     // Now we need to map this visible offset to the raw input offset
     // Strategy: Count how many markdown syntax characters exist before this visible position
     const rawInput = input.value;
-    
+
     // Use the robust mapping function to find the raw offset
     const visibleToRawMap = calculateVisibleToRawMap(rawInput);
-    
+
     // Get the raw offset for our visible offset
     let rawOffset = visibleToRawMap[visibleOffset];
     if (rawOffset === undefined) rawOffset = rawInput.length;
@@ -1717,7 +1717,7 @@ function handlePreviewMouseDown(e) {
 
     // Focus the preview (this will trigger the focus handler which changes innerHTML)
     preview.focus({ preventScroll: true });
-    
+
     // Wait for focus handler to complete, then set cursor position
     requestAnimationFrame(() => {
         console.log('Setting cursor to raw offset:', rawOffset);
@@ -1737,10 +1737,10 @@ function handlePreviewMouseDown(e) {
 
 function highlightSyntax(text) {
     if (!text) return "";
-    
+
     // Convert LaTeX $...$ syntax to KaTeX \(...\) syntax before escaping HTML
     text = text.replace(/\$([^$]+)\$/g, '\\($1\\)');
-    
+
     let formatted = escapeHtml(text);
 
     // Rule: **bold**
@@ -1759,10 +1759,10 @@ function highlightSyntax(text) {
     formatted = formatted.replace(/==(.*?)==/g, '<mark><span class="syn-marker">==</span>$1<span class="syn-marker">==</span></mark>');
 
     // Rule: !!red!!
-    formatted = formatted.replace(/!!(.*?)!!/g, '<span style="background: #ff0000; color: #ffffff;"><span class="syn-marker">!!</span>$1<span class="syn-marker">!!</span></span>');
+    formatted = formatted.replace(/!!(.*?)!!/g, '<span style="background: #ff0000; color: #ffffff; padding: 2px 6px; border-radius: 3px; display: inline; vertical-align: baseline; line-height: 1.3; box-decoration-break: clone; -webkit-box-decoration-break: clone; word-break: normal; overflow-wrap: break-word;"><span class="syn-marker">!!</span>$1<span class="syn-marker">!!</span></span>');
 
     // Rule: ??blue??
-    formatted = formatted.replace(/\?\?(.*?)\?\?/g, '<span style="background: #0000ff; color: #ffffff;"><span class="syn-marker">??</span>$1<span class="syn-marker">??</span></span>');
+    formatted = formatted.replace(/\?\?(.*?)\?\?/g, '<span style="background: #0000ff; color: #ffffff; padding: 2px 6px; border-radius: 3px; display: inline; vertical-align: baseline; line-height: 1.3; box-decoration-break: clone; -webkit-box-decoration-break: clone; word-break: normal; overflow-wrap: break-word;"><span class="syn-marker">??</span>$1<span class="syn-marker">??</span></span>');
 
     // Rule: `code`
     formatted = formatted.replace(/`(.*?)`/g, '<code><span class="syn-marker">`</span>$1<span class="syn-marker">`</span></code>');
@@ -1787,7 +1787,7 @@ function highlightSyntax(text) {
             'K': '#000000', 'GR': '#808080'
         };
         const color = colorMap[colorCode] || '#888';
-        return `<span style="border: 1px solid ${color}; padding: 0 4px; border-radius: 3px;"><span class="syn-marker">#${colorCode}#</span>${text}<span class="syn-marker">#/#</span></span>`;
+        return `<span style="border: 2px solid ${color}; padding: 2px 8px; border-radius: 4px; display: inline; box-decoration-break: clone; -webkit-box-decoration-break: clone; word-break: normal; overflow-wrap: break-word;"><span class="syn-marker">#${colorCode}#</span>${text}<span class="syn-marker">#/#</span></span>`;
     });
 
     // Rule: Variable font size #2#text#/#
@@ -2011,7 +2011,7 @@ function selectTextAtPosition(element, startOffset, endOffset) {
     const sel = window.getSelection();
     const startRange = document.createRange();
     const endRange = document.createRange();
-    
+
     let currentOffset = 0;
     let startNode = null, startNodeOffset = 0;
     let endNode = null, endNodeOffset = 0;
@@ -2019,22 +2019,22 @@ function selectTextAtPosition(element, startOffset, endOffset) {
 
     const walk = (node) => {
         if (startFound && endFound) return;
-        
+
         if (node.nodeType === Node.TEXT_NODE) {
             const textLength = node.textContent.replace(/\u200B/g, '').length;
-            
+
             if (!startFound && currentOffset + textLength >= startOffset) {
                 startNode = node;
                 startNodeOffset = startOffset - currentOffset;
                 startFound = true;
             }
-            
+
             if (!endFound && currentOffset + textLength >= endOffset) {
                 endNode = node;
                 endNodeOffset = endOffset - currentOffset;
                 endFound = true;
             }
-            
+
             currentOffset += textLength;
         } else if (node.nodeName === 'BR') {
             currentOffset += 1;
@@ -2047,7 +2047,7 @@ function selectTextAtPosition(element, startOffset, endOffset) {
     };
 
     walk(element);
-    
+
     if (startNode && endNode) {
         const range = document.createRange();
         range.setStart(startNode, startNodeOffset);
@@ -2126,7 +2126,7 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
                 return false;
             }
         }, true);
-        
+
         preview.addEventListener('click', (e) => {
             console.log('Preview clicked, target:', e.target.tagName);
             if (e.target.tagName === 'A') {
@@ -2134,7 +2134,7 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
                 e.preventDefault();
                 e.stopPropagation();
                 e.stopImmediatePropagation();
-                
+
                 // Open link
                 window.open(e.target.href, '_blank', 'noopener,noreferrer');
                 return false;
@@ -2144,21 +2144,21 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
         // Handle double-click to select word without trailing space
         preview.addEventListener('dblclick', (e) => {
             e.preventDefault();
-            
+
             const selection = window.getSelection();
             if (!selection.rangeCount) return;
-            
+
             const range = selection.getRangeAt(0);
-            
+
             // Get the selected text
             let selectedText = selection.toString();
-            
+
             // If selection ends with whitespace, trim it
             if (selectedText && /\s$/.test(selectedText)) {
                 // Move the end of the range backward to exclude trailing whitespace
                 const endContainer = range.endContainer;
                 let endOffset = range.endOffset;
-                
+
                 // Count trailing whitespace
                 let trailingSpaces = 0;
                 for (let i = selectedText.length - 1; i >= 0; i--) {
@@ -2168,13 +2168,13 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
                         break;
                     }
                 }
-                
+
                 // Adjust the range to exclude trailing spaces
                 if (trailingSpaces > 0) {
                     const newRange = document.createRange();
                     newRange.setStart(range.startContainer, range.startOffset);
                     newRange.setEnd(endContainer, endOffset - trailingSpaces);
-                    
+
                     selection.removeAllRanges();
                     selection.addRange(newRange);
                 }
@@ -2737,12 +2737,14 @@ function parseMarkdownInline(text, cellStyle = {}) {
         });
         // Only add padding and border-radius if there's a background
         if (hasBg) {
-            styleObj.padding = '1px 6px';
+            styleObj.padding = '2px 8px';
             styleObj.borderRadius = '4px';
         }
         styleObj.display = 'inline';
         styleObj.verticalAlign = 'baseline';
         styleObj.lineHeight = '1.3';
+        styleObj.wordBreak = 'normal';
+        styleObj.overflowWrap = 'break-word';
         styleObj.boxDecorationBreak = 'clone';
         styleObj.WebkitBoxDecorationBreak = 'clone';
         const styleStr = Object.entries(styleObj).map(([k, v]) => {
@@ -2760,7 +2762,7 @@ function parseMarkdownInline(text, cellStyle = {}) {
             'K': '#000000', 'GR': '#808080'
         };
         if (colorMap[colorCode]) {
-            return `<span style="border: 2px solid ${colorMap[colorCode]}; padding: 2px 6px; border-radius: 4px; display: inline; box-decoration-break: clone; -webkit-box-decoration-break: clone;">${text}</span>`;
+            return `<span style="border: 2px solid ${colorMap[colorCode]}; padding: 2px 8px; border-radius: 4px; display: inline; box-decoration-break: clone; -webkit-box-decoration-break: clone; word-break: normal; overflow-wrap: break-word;">${text}</span>`;
         }
         return match; // Not a valid color, leave unchanged
     });
@@ -3093,12 +3095,14 @@ function oldParseMarkdownBody(lines, cellStyle = {}) {
             });
             // Only add padding and border-radius if there's a background
             if (hasBg) {
-                styleObj.padding = '1px 6px';
+                styleObj.padding = '2px 8px';
                 styleObj.borderRadius = '4px';
             }
             styleObj.display = 'inline';
             styleObj.verticalAlign = 'baseline';
             styleObj.lineHeight = '1.3';
+            styleObj.wordBreak = 'normal';
+            styleObj.overflowWrap = 'break-word';
             styleObj.boxDecorationBreak = 'clone';
             styleObj.WebkitBoxDecorationBreak = 'clone';
             const styleStr = Object.entries(styleObj).map(([k, v]) => {
@@ -3116,7 +3120,7 @@ function oldParseMarkdownBody(lines, cellStyle = {}) {
                 'K': '#000000', 'GR': '#808080'
             };
             if (colorMap[colorCode]) {
-                return `<span style="border: 2px solid ${colorMap[colorCode]}; padding: 2px 6px; border-radius: 4px; display: inline; box-decoration-break: clone; -webkit-box-decoration-break: clone;">${text}</span>`;
+                return `<span style="border: 2px solid ${colorMap[colorCode]}; padding: 2px 8px; border-radius: 4px; display: inline; box-decoration-break: clone; -webkit-box-decoration-break: clone; word-break: normal; overflow-wrap: break-word;">${text}</span>`;
             }
             return match; // Not a valid color, leave unchanged
         });
@@ -3226,20 +3230,20 @@ function oldParseMarkdownBody(lines, cellStyle = {}) {
         // Using text-indent for hanging indent to preserve tab alignment
         if (formatted.trim().startsWith('--- ')) {
             const content = formatted.replace(/^(\s*)--- (.+)$/, '$2');
-            formatted = formatted.replace(/^(\s*)--- .+$/, '$1<span style="display: inline-block; width: 100%; margin-left: 3em; text-indent: -1em; white-space: pre-wrap;"><span style="display: inline-block; width: 1em; text-indent: 0;">▪</span>▪CONTENT▪</span>');
+            formatted = formatted.replace(/^(\s*)--- .+$/, '$1<span style="display: inline-block; width: 100%; box-sizing: border-box; padding-left: 3em; text-indent: -1em; white-space: pre-wrap;"><span style="display: inline-block; width: 1em; text-indent: 0;">▪</span>▪CONTENT▪</span>');
             formatted = formatted.replace('▪CONTENT▪', content);
         }
         // Sublist: -- item -> ◦ item with more indent (white circle)
         else if (formatted.trim().startsWith('-- ')) {
             const content = formatted.replace(/^(\s*)-- (.+)$/, '$2');
-            formatted = formatted.replace(/^(\s*)-- .+$/, '$1<span style="display: inline-block; width: 100%; margin-left: 2em; text-indent: -1em; white-space: pre-wrap;"><span style="display: inline-block; width: 1em; text-indent: 0;">◦</span>◦CONTENT◦</span>');
+            formatted = formatted.replace(/^(\s*)-- .+$/, '$1<span style="display: inline-block; width: 100%; box-sizing: border-box; padding-left: 2em; text-indent: -1em; white-space: pre-wrap;"><span style="display: inline-block; width: 1em; text-indent: 0;">◦</span>◦CONTENT◦</span>');
             formatted = formatted.replace('◦CONTENT◦', content);
         }
         // Bullet list: - item -> • item with hanging indent (black circle)
         // Using text-indent for proper hanging indent that preserves tab alignment
         else if (formatted.trim().startsWith('- ')) {
             const content = formatted.replace(/^(\s*)- (.+)$/, '$2');
-            formatted = formatted.replace(/^(\s*)- .+$/, '$1<span style="display: inline-block; width: 100%; margin-left: 1em; text-indent: -1em; white-space: pre-wrap;"><span style="display: inline-block; width: 1em; text-indent: 0;">•</span>•CONTENT•</span>');
+            formatted = formatted.replace(/^(\s*)- .+$/, '$1<span style="display: inline-block; width: 100%; box-sizing: border-box; padding-left: 1em; text-indent: -1em; white-space: pre-wrap;"><span style="display: inline-block; width: 1em; text-indent: 0;">•</span>•CONTENT•</span>');
             formatted = formatted.replace('•CONTENT•', content);
         }
 
@@ -3250,7 +3254,7 @@ function oldParseMarkdownBody(lines, cellStyle = {}) {
                 const spaces = match[1];
                 const number = match[2];
                 const content = match[3];
-                formatted = `${spaces}<span style="display: inline-block; width: 100%; margin-left: 2em; text-indent: -2em; white-space: pre-wrap;"><span style="display: inline-block; width: 2em; text-indent: 0;">${number}</span>NUMCONTENT</span>`;
+                formatted = `${spaces}<span style="display: inline-block; width: 100%; box-sizing: border-box; padding-left: 2em; text-indent: -2em; white-space: pre-wrap;"><span style="display: inline-block; width: 2em; text-indent: 0;">${number}</span>NUMCONTENT</span>`;
                 formatted = formatted.replace('NUMCONTENT', content);
             }
         }
@@ -3262,10 +3266,10 @@ function oldParseMarkdownBody(lines, cellStyle = {}) {
         formatted = formatted.replace(/==(.+?)==/g, '<mark>$1</mark>');
 
         // Red highlight: !!text!! -> red background with white text
-        formatted = formatted.replace(/!!(.+?)!!/g, '<span style="background: #ff0000; color: #ffffff; padding: 1px 4px; border-radius: 3px; display: inline; vertical-align: baseline; line-height: 1.3; box-decoration-break: clone; -webkit-box-decoration-break: clone;">$1</span>');
+        formatted = formatted.replace(/!!(.+?)!!/g, '<span style="background: #ff0000; color: #ffffff; padding: 2px 6px; border-radius: 3px; display: inline; vertical-align: baseline; line-height: 1.3; box-decoration-break: clone; -webkit-box-decoration-break: clone; word-break: normal; overflow-wrap: break-word;">$1</span>');
 
         // Blue highlight: ??text?? -> blue background with white text
-        formatted = formatted.replace(/\?\?(.+?)\?\?/g, '<span style="background: #0000ff; color: #ffffff; padding: 1px 4px; border-radius: 3px; display: inline; vertical-align: baseline; line-height: 1.3; box-decoration-break: clone; -webkit-box-decoration-break: clone;">$1</span>');
+        formatted = formatted.replace(/\?\?(.+?)\?\?/g, '<span style="background: #0000ff; color: #ffffff; padding: 2px 6px; border-radius: 3px; display: inline; vertical-align: baseline; line-height: 1.3; box-decoration-break: clone; -webkit-box-decoration-break: clone; word-break: normal; overflow-wrap: break-word;">$1</span>');
 
         // Collapsible text: {{text}} -> hidden text with toggle button
         formatted = formatted.replace(/\{\{(.+?)\}\}/g, (match, content) => {
@@ -3432,12 +3436,12 @@ function getCellStyle(rowIndex, colIndex) {
     }
     const key = getCellKey(rowIndex, colIndex);
     const style = sheet.cellStyles[key] || {};
-    
+
     // Set default values for new cells
     if (style.superscriptMode === undefined) {
         style.superscriptMode = true; // Default to enabled
     }
-    
+
     console.log('Get cell style:', key, style);
     return style;
 }
@@ -3607,7 +3611,7 @@ function toggleSuperscriptMode() {
     }
 
     document.getElementById('ctxSuperscript').classList.toggle('checked', newValue);
-    
+
     // Re-render the table to apply changes
     renderTable();
 }
@@ -6695,7 +6699,7 @@ function enableRawMode() {
     const markdownToggle = document.getElementById('markdownToggle');
     const table = document.getElementById('dataTable');
     const toggleLabel = markdownToggle.closest('label');
-    
+
     if (markdownToggle.checked) {
         // Currently in preview mode, switch to raw mode
         markdownToggle.checked = false;
@@ -7882,7 +7886,7 @@ let selectedFormats = []; // Track selected formats for multi-apply
 
 function showQuickFormatter(inputElement) {
     quickFormatterTarget = inputElement;
-    
+
     // Save current scroll position
     const tableContainer = document.querySelector('.table-container');
     if (tableContainer) {
@@ -7994,7 +7998,7 @@ function closeQuickFormatter() {
     quickFormatterTarget = null;
     selectedFormats = [];
     document.removeEventListener('click', closeQuickFormatterOnClickOutside);
-    
+
     // Restore scroll position
     const tableContainer = document.querySelector('.table-container');
     if (tableContainer && quickFormatterScrollPosition !== undefined) {
@@ -8021,14 +8025,14 @@ function selectAllMatchingFromFormatter(event) {
     if (selection.isContentEditable) {
         // Keep focus on contentEditable
         target.focus();
-        
+
         // Restore selection
         if (selection.range) {
             const sel = window.getSelection();
             sel.removeAllRanges();
             sel.addRange(selection.range.cloneRange());
         }
-        
+
         // Select all matching occurrences
         selectAllMatchingOccurrences(target);
     } else {
@@ -8103,24 +8107,24 @@ function applyQuickFormat(prefix, suffix, event) {
     if (quickFormatterSelection.isContentEditable) {
         const selectedText = quickFormatterSelection.text || '';
         const formattedText = prefix + selectedText + suffix;
-        
+
         // Insert formatted text into contentEditable
         const range = quickFormatterSelection.range;
         range.deleteContents();
         const textNode = document.createTextNode(formattedText);
         range.insertNode(textNode);
-        
+
         // Update the underlying input value
         const rawText = extractRawText(input);
         const actualInput = input.previousElementSibling;
         if (actualInput && (actualInput.tagName === 'INPUT' || actualInput.tagName === 'TEXTAREA')) {
             actualInput.value = rawText;
-            
+
             // Trigger change event to save data
             const changeEvent = new Event('input', { bubbles: true });
             actualInput.dispatchEvent(changeEvent);
         }
-        
+
         // Select the formatted text
         const selection = window.getSelection();
         selection.removeAllRanges();
@@ -8162,11 +8166,11 @@ function applyLinkFormat(event) {
     if (!quickFormatterTarget) return;
 
     const input = quickFormatterTarget;
-    
+
     // Handle contenteditable (WYSIWYG mode)
     if (quickFormatterSelection.isContentEditable) {
         const selectedUrl = quickFormatterSelection.text || '';
-        
+
         if (!selectedUrl) {
             showToast('Please select URL first', 'warning');
             return;
@@ -8177,13 +8181,13 @@ function applyLinkFormat(event) {
 
         // Insert the new link syntax: url[text]
         const formattedText = `${selectedUrl}[${linkText}]`;
-        
+
         // Insert formatted text into contentEditable
         const range = quickFormatterSelection.range;
         range.deleteContents();
         const textNode = document.createTextNode(formattedText);
         range.insertNode(textNode);
-        
+
         // Update underlying input element
         const cell = input.closest('td');
         if (cell) {
@@ -8194,7 +8198,7 @@ function applyLinkFormat(event) {
                 inputElement.dispatchEvent(changeEvent);
             }
         }
-        
+
         // Set cursor after the formatted text
         const newRange = document.createRange();
         newRange.setStartAfter(textNode);
@@ -8207,7 +8211,7 @@ function applyLinkFormat(event) {
         showToast('Link applied', 'success');
         return;
     }
-    
+
     // Handle input/textarea (legacy mode)
     const start = quickFormatterSelection.start;
     const end = quickFormatterSelection.end;
@@ -8464,7 +8468,7 @@ function padTextToWidth(text, targetWidth) {
 function formatPipeTable(event) {
     console.log('formatPipeTable called!');
     console.log('quickFormatterTarget:', quickFormatterTarget);
-    
+
     if (!quickFormatterTarget) {
         console.log('No quickFormatterTarget - returning');
         showToast('No target element', 'error');
@@ -8474,9 +8478,9 @@ function formatPipeTable(event) {
     const input = quickFormatterTarget;
     console.log('Input element:', input);
     console.log('Selection:', quickFormatterSelection);
-    
+
     let selectedText = '';
-    
+
     // Handle contentEditable (WYSIWYG mode)
     if (quickFormatterSelection.isContentEditable) {
         selectedText = quickFormatterSelection.text || '';
@@ -8486,7 +8490,7 @@ function formatPipeTable(event) {
         const end = quickFormatterSelection.end;
         selectedText = input.value.substring(start, end);
     }
-    
+
     console.log('Selected text:', selectedText);
 
     if (!selectedText) {
@@ -8555,30 +8559,30 @@ function formatPipeTable(event) {
             range.deleteContents();
             const textNode = document.createTextNode(formattedText);
             range.insertNode(textNode);
-            
+
             // Update the underlying input value
             const rawText = extractRawText(input);
             const actualInput = input.previousElementSibling;
             if (actualInput && (actualInput.tagName === 'INPUT' || actualInput.tagName === 'TEXTAREA')) {
                 actualInput.value = rawText;
-                
+
                 // Trigger change event
                 const changeEvent = new Event('input', { bubbles: true });
                 actualInput.dispatchEvent(changeEvent);
             }
-            
+
             // Select the formatted text
             const selection = window.getSelection();
             selection.removeAllRanges();
             const newRange = document.createRange();
             newRange.selectNodeContents(textNode);
             selection.addRange(newRange);
-            
+
         } else {
             // Handle input/textarea (legacy mode)
             const start = quickFormatterSelection.start;
             const end = quickFormatterSelection.end;
-            
+
             const newText = input.value.substring(0, start) +
                 formattedText +
                 input.value.substring(end);
@@ -8607,7 +8611,7 @@ function changeTextCase(caseType, event) {
 
     const input = quickFormatterTarget;
     let selectedText = '';
-    
+
     // Handle contentEditable (WYSIWYG mode)
     if (quickFormatterSelection.isContentEditable) {
         selectedText = quickFormatterSelection.text || '';
@@ -8645,30 +8649,30 @@ function changeTextCase(caseType, event) {
         range.deleteContents();
         const textNode = document.createTextNode(convertedText);
         range.insertNode(textNode);
-        
+
         // Update the underlying input value
         const rawText = extractRawText(input);
         const actualInput = input.previousElementSibling;
         if (actualInput && (actualInput.tagName === 'INPUT' || actualInput.tagName === 'TEXTAREA')) {
             actualInput.value = rawText;
-            
+
             // Trigger change event
             const changeEvent = new Event('input', { bubbles: true });
             actualInput.dispatchEvent(changeEvent);
         }
-        
+
         // Select the converted text
         const selection = window.getSelection();
         selection.removeAllRanges();
         const newRange = document.createRange();
         newRange.selectNodeContents(textNode);
         selection.addRange(newRange);
-        
+
     } else {
         // Handle input/textarea (legacy mode)
         const start = quickFormatterSelection.start;
         const end = quickFormatterSelection.end;
-        
+
         const newText = input.value.substring(0, start) +
             convertedText +
             input.value.substring(end);
@@ -8696,7 +8700,7 @@ function applySqrtFormat(event) {
     if (quickFormatterSelection.isContentEditable) {
         // ContentEditable mode
         const selectedText = quickFormatterSelection.text;
-        
+
         if (!selectedText) {
             showToast('No text selected', 'warning');
             return;
@@ -8704,7 +8708,7 @@ function applySqrtFormat(event) {
 
         // Create the square root syntax
         const sqrtSyntax = `\\(\\sqrt{${selectedText}}\\)`;
-        
+
         // Insert the square root at the selection
         const range = quickFormatterSelection.range;
         range.deleteContents();
@@ -8714,14 +8718,14 @@ function applySqrtFormat(event) {
         // Update the underlying input
         const input = quickFormatterTarget;
         input.value = extractRawText(input);
-        
+
         // Trigger input event for auto-save
         const inputEvent = new Event('input', { bubbles: true });
         input.dispatchEvent(inputEvent);
 
         // Set cursor position after the inserted text
-        setCaretPosition(input.parentElement.querySelector('.markdown-preview'), 
-                        range.startOffset + sqrtSyntax.length);
+        setCaretPosition(input.parentElement.querySelector('.markdown-preview'),
+            range.startOffset + sqrtSyntax.length);
 
         closeQuickFormatter();
         showToast('Square root applied', 'success');
@@ -8767,7 +8771,7 @@ function applyHatFormat(event) {
     if (quickFormatterSelection.isContentEditable) {
         // ContentEditable mode
         const selectedText = quickFormatterSelection.text;
-        
+
         if (!selectedText) {
             showToast('No text selected', 'warning');
             return;
@@ -8828,14 +8832,14 @@ function applyHatFormat(event) {
         // Update the underlying input
         const input = quickFormatterTarget;
         input.value = extractRawText(input);
-        
+
         // Trigger input event for auto-save
         const inputEvent = new Event('input', { bubbles: true });
         input.dispatchEvent(inputEvent);
 
         // Set cursor position after the inserted text
-        setCaretPosition(input.parentElement.querySelector('.markdown-preview'), 
-                        range.startOffset + fracSyntax.length);
+        setCaretPosition(input.parentElement.querySelector('.markdown-preview'),
+            range.startOffset + fracSyntax.length);
 
         closeQuickFormatter();
         showToast('Math notation applied', 'success');
@@ -8927,11 +8931,11 @@ function applyMultipleFormats(lastPrefix, lastSuffix) {
     if (!quickFormatterTarget) return;
 
     const input = quickFormatterTarget;
-    
+
     // Check if the last clicked format is already in selectedFormats
     const lastFormatKey = `${lastPrefix}|${lastSuffix}`;
     const isDuplicate = selectedFormats.some(f => f.key === lastFormatKey);
-    
+
     // Build the complete format string with all selected formats
     let allPrefixes = '';
     let allSuffixes = '';
@@ -8954,24 +8958,24 @@ function applyMultipleFormats(lastPrefix, lastSuffix) {
     if (quickFormatterSelection.isContentEditable) {
         const selectedText = quickFormatterSelection.text || '';
         const formattedText = allPrefixes + selectedText + allSuffixes;
-        
+
         // Insert formatted text into contentEditable
         const range = quickFormatterSelection.range;
         range.deleteContents();
         const textNode = document.createTextNode(formattedText);
         range.insertNode(textNode);
-        
+
         // Update the underlying input value
         const rawText = extractRawText(input);
         const actualInput = input.previousElementSibling;
         if (actualInput && (actualInput.tagName === 'INPUT' || actualInput.tagName === 'TEXTAREA')) {
             actualInput.value = rawText;
-            
+
             // Trigger change event to save data
             const changeEvent = new Event('input', { bubbles: true });
             actualInput.dispatchEvent(changeEvent);
         }
-        
+
         // Select the formatted text
         const selection = window.getSelection();
         selection.removeAllRanges();
@@ -9345,7 +9349,7 @@ function selectAllMatchingOccurrences(input) {
         }
         return;
     }
-    
+
     // Handle input/textarea (raw mode)
     const text = input.value;
     const selStart = input.selectionStart;
@@ -9909,21 +9913,21 @@ function handleMultiCursorMove(input, key) {
     if (key === 'Home' || key === 'End') {
         const consolidatedMatches = [];
         const seenPositions = new Set();
-        
+
         for (const match of newSelectedMatches) {
             if (!seenPositions.has(match.start)) {
                 consolidatedMatches.push(match);
                 seenPositions.add(match.start);
             }
         }
-        
+
         multiSelectionData.selectedMatches = consolidatedMatches;
         multiSelectionData.matches = [...consolidatedMatches];
-        
+
         // Update indicator count
         showMultiSelectionIndicator(input, consolidatedMatches.length, consolidatedMatches.length);
         showSelectionMarkers(input, consolidatedMatches);
-        
+
         // Move native caret to the last match
         const last = consolidatedMatches[consolidatedMatches.length - 1];
         input.setSelectionRange(last.start, last.end);
@@ -10050,21 +10054,21 @@ function showCursorMarkers(textarea, cursors) {
     // Create markers for each cursor (except the last one which shows the native cursor)
     cursors.forEach((cursor, index) => {
         if (index === cursors.length - 1) return; // Skip last one - native cursor shows it
-        
+
         const lineNum = cursor.line - 1;
         if (lineNum < lines.length) {
             // Show selection if exists
             if (cursor.selectionStart !== undefined && cursor.selectionEnd !== undefined) {
                 const selStart = cursor.selectionStart;
                 const selEnd = cursor.selectionEnd;
-                
+
                 const startText = lines[lineNum].substring(0, selStart);
                 const selectedText = lines[lineNum].substring(selStart, selEnd);
-                
+
                 const startX = paddingLeft + measureText(startText, font);
                 const selWidth = measureText(selectedText, font);
                 const y = paddingTop + lineNum * lineHeight;
-                
+
                 // Create selection highlight
                 const selMarker = document.createElement('div');
                 selMarker.style.position = 'absolute';
@@ -10074,7 +10078,7 @@ function showCursorMarkers(textarea, cursors) {
                 selMarker.style.height = lineHeight + 'px';
                 selMarker.style.backgroundColor = 'rgba(0, 123, 255, 0.3)';
                 selMarker.style.pointerEvents = 'none';
-                
+
                 overlay.appendChild(selMarker);
             } else {
                 // Show cursor
@@ -10288,12 +10292,12 @@ function setupMultiLineCursorListener(textarea) {
                     // Calculate actual position in current text
                     const lineStart = lines.slice(0, cursor.line - 1).join('\n').length + (cursor.line > 1 ? 1 : 0);
                     const currentLine = lines[cursor.line - 1];
-                    
+
                     // Handle selection
                     if (cursor.selectionStart !== undefined && cursor.selectionEnd !== undefined) {
                         const selStart = lineStart + cursor.selectionStart;
                         const selEnd = lineStart + cursor.selectionEnd;
-                        
+
                         if (e.key === 'Backspace' || e.key === 'Delete') {
                             // Delete selection
                             newText = newText.substring(0, selStart) + newText.substring(selEnd);
@@ -10379,19 +10383,19 @@ function handleMultiLineCursorMove(textarea, key, extendSelection = false) {
     multiLineCursorData.cursors.forEach(cursor => {
         const lineIdx = cursor.line - 1;
         if (lineIdx >= lines.length) return;
-        
+
         const currentLine = lines[lineIdx];
-        
+
         // Initialize selection if extending
         if (extendSelection && cursor.selectionStart === undefined) {
             cursor.selectionStart = cursor.column;
             cursor.selectionEnd = cursor.column;
         }
-        
+
         // Store old position for selection
         const oldColumn = extendSelection ? cursor.selectionEnd : cursor.column;
         let newColumn = oldColumn;
-        
+
         if (key === 'ArrowLeft' && oldColumn > 0) {
             newColumn = oldColumn - 1;
         } else if (key === 'ArrowRight' && oldColumn < currentLine.length) {
@@ -10404,7 +10408,7 @@ function handleMultiLineCursorMove(textarea, key, extendSelection = false) {
             // Move to next word boundary (space or special char)
             const wordBoundary = /[\s\W]/;
             let pos = oldColumn;
-            
+
             // Skip current word
             while (pos < currentLine.length && !wordBoundary.test(currentLine[pos])) {
                 pos++;
@@ -10413,19 +10417,19 @@ function handleMultiLineCursorMove(textarea, key, extendSelection = false) {
             while (pos < currentLine.length && wordBoundary.test(currentLine[pos])) {
                 pos++;
             }
-            
+
             newColumn = pos;
         }
-        
+
         if (extendSelection) {
             // Update selection end
             cursor.selectionEnd = newColumn;
-            
+
             // Normalize selection (start should be less than end)
             if (cursor.selectionStart > cursor.selectionEnd) {
                 [cursor.selectionStart, cursor.selectionEnd] = [cursor.selectionEnd, cursor.selectionStart];
             }
-            
+
             // If selection collapsed, remove it
             if (cursor.selectionStart === cursor.selectionEnd) {
                 cursor.column = cursor.selectionStart;
@@ -10448,7 +10452,7 @@ function handleMultiLineCursorMove(textarea, key, extendSelection = false) {
     // Move native cursor to last position
     const lastCursor = multiLineCursorData.cursors[multiLineCursorData.cursors.length - 1];
     const lineStart = lines.slice(0, lastCursor.line - 1).join('\n').length + (lastCursor.line > 1 ? 1 : 0);
-    
+
     if (lastCursor.selectionStart !== undefined) {
         // Show selection
         const selStart = lineStart + lastCursor.selectionStart;
@@ -12544,11 +12548,11 @@ function applyVariableFontSize(event) {
     if (!quickFormatterTarget) return;
 
     const input = quickFormatterTarget;
-    
+
     // Handle contenteditable (WYSIWYG mode)
     if (quickFormatterSelection.isContentEditable) {
         const selectedText = quickFormatterSelection.text || '';
-        
+
         if (!selectedText) {
             showToast('Please select text first', 'error');
             return;
@@ -12567,13 +12571,13 @@ function applyVariableFontSize(event) {
 
         // Apply the variable font size syntax
         const formattedText = `#${sizeNum}#${selectedText}#/#`;
-        
+
         // Insert formatted text into contentEditable
         const range = quickFormatterSelection.range;
         range.deleteContents();
         const textNode = document.createTextNode(formattedText);
         range.insertNode(textNode);
-        
+
         // Update underlying input element
         const cell = input.closest('td');
         if (cell) {
@@ -12584,7 +12588,7 @@ function applyVariableFontSize(event) {
                 inputElement.dispatchEvent(changeEvent);
             }
         }
-        
+
         // Set cursor after the formatted text
         const newRange = document.createRange();
         newRange.setStartAfter(textNode);
@@ -12645,11 +12649,11 @@ function applyBorderBox(event) {
     if (!quickFormatterTarget) return;
 
     const input = quickFormatterTarget;
-    
+
     // Handle contenteditable (WYSIWYG mode)
     if (quickFormatterSelection.isContentEditable) {
         const selectedText = quickFormatterSelection.text || '';
-        
+
         if (!selectedText) {
             showToast('Please select text first', 'error');
             return;
@@ -12671,13 +12675,13 @@ function applyBorderBox(event) {
 
         // Apply the border box syntax
         const formattedText = `#${colorUpper}#${selectedText}#/#`;
-        
+
         // Insert formatted text into contentEditable
         const range = quickFormatterSelection.range;
         range.deleteContents();
         const textNode = document.createTextNode(formattedText);
         range.insertNode(textNode);
-        
+
         // Update underlying input element
         const cell = input.closest('td');
         if (cell) {
@@ -12688,7 +12692,7 @@ function applyBorderBox(event) {
                 inputElement.dispatchEvent(changeEvent);
             }
         }
-        
+
         // Set cursor after the formatted text
         const newRange = document.createRange();
         newRange.setStartAfter(textNode);
@@ -12754,7 +12758,7 @@ function sortLines(event) {
     let selectedText = '';
     let start = 0;
     let end = 0;
-    
+
     // Handle contenteditable (WYSIWYG mode)
     if (quickFormatterSelection.isContentEditable) {
         selectedText = quickFormatterSelection.text || '';
@@ -12868,7 +12872,7 @@ function sortLines(event) {
         range.deleteContents();
         const textNode = document.createTextNode(sortedText);
         range.insertNode(textNode);
-        
+
         const cell = input.closest('td');
         if (cell) {
             const inputElement = cell.querySelector('input, textarea');
@@ -12878,7 +12882,7 @@ function sortLines(event) {
                 inputElement.dispatchEvent(changeEvent);
             }
         }
-        
+
         const newRange = document.createRange();
         newRange.setStartAfter(textNode);
         newRange.collapse(true);
@@ -12912,7 +12916,7 @@ function linesToComma(event) {
     let selectedText = '';
     let start = 0;
     let end = 0;
-    
+
     // Handle contenteditable (WYSIWYG mode)
     if (quickFormatterSelection.isContentEditable) {
         selectedText = quickFormatterSelection.text || '';
@@ -12942,7 +12946,7 @@ function linesToComma(event) {
         range.deleteContents();
         const textNode = document.createTextNode(commaText);
         range.insertNode(textNode);
-        
+
         const cell = input.closest('td');
         if (cell) {
             const inputElement = cell.querySelector('input, textarea');
@@ -12952,7 +12956,7 @@ function linesToComma(event) {
                 inputElement.dispatchEvent(changeEvent);
             }
         }
-        
+
         const newRange = document.createRange();
         newRange.selectNode(textNode);
         const selection = window.getSelection();
@@ -12984,7 +12988,7 @@ function commaToLines(event) {
     let selectedText = '';
     let start = 0;
     let end = 0;
-    
+
     // Handle contenteditable (WYSIWYG mode)
     if (quickFormatterSelection.isContentEditable) {
         selectedText = quickFormatterSelection.text || '';
@@ -13014,7 +13018,7 @@ function commaToLines(event) {
         range.deleteContents();
         const textNode = document.createTextNode(linesText);
         range.insertNode(textNode);
-        
+
         const cell = input.closest('td');
         if (cell) {
             const inputElement = cell.querySelector('input, textarea');
@@ -13024,7 +13028,7 @@ function commaToLines(event) {
                 inputElement.dispatchEvent(changeEvent);
             }
         }
-        
+
         const newRange = document.createRange();
         newRange.selectNode(textNode);
         const selection = window.getSelection();
@@ -13051,7 +13055,7 @@ function commaToLines(event) {
 // Remove All Formatting Function (strips markdown syntax)
 function removeFormatting(event) {
     console.log('removeFormatting called!');
-    
+
     if (!quickFormatterTarget) {
         showToast('No target element', 'error');
         return;
@@ -13059,7 +13063,7 @@ function removeFormatting(event) {
 
     const input = quickFormatterTarget;
     let selectedText = '';
-    
+
     // Handle contentEditable (WYSIWYG mode)
     if (quickFormatterSelection.isContentEditable) {
         selectedText = quickFormatterSelection.text || '';
@@ -13084,18 +13088,18 @@ function removeFormatting(event) {
         range.deleteContents();
         const textNode = document.createTextNode(cleanText);
         range.insertNode(textNode);
-        
+
         // Update the underlying input value
         const rawText = extractRawText(input);
         const actualInput = input.previousElementSibling;
         if (actualInput && (actualInput.tagName === 'INPUT' || actualInput.tagName === 'TEXTAREA')) {
             actualInput.value = rawText;
-            
+
             // Trigger change event
             const changeEvent = new Event('input', { bubbles: true });
             actualInput.dispatchEvent(changeEvent);
         }
-        
+
         // Set cursor at the end of clean text
         const selection = window.getSelection();
         selection.removeAllRanges();
@@ -13103,12 +13107,12 @@ function removeFormatting(event) {
         newRange.setStartAfter(textNode);
         newRange.setEndAfter(textNode);
         selection.addRange(newRange);
-        
+
     } else {
         // Handle input/textarea (legacy mode)
         const start = quickFormatterSelection.start;
         const end = quickFormatterSelection.end;
-        
+
         const newText = input.value.substring(0, start) +
             cleanText +
             input.value.substring(end);

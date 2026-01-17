@@ -6,6 +6,48 @@
 
 ---
 
+## [2026-01-18 00:10] - Bangla Text Overflow and List Gap Fixes
+
+**Session Duration:** 0.25 hours
+
+**What We Accomplished:**
+
+### ✅ Fixed Bangla Text Overflow (23:45-23:55)
+- **Problem**: Bangla text was cut off at the end of cells or overflowed border boxes.
+- **Unified Font**: Added `Vrinda` font to `.markdown-preview` to match the input font.
+- **Increased Padding**: Updated preview and inline span padding to accommodate complex Bangla glyphs.
+- **Edit Mode Sync**: Updated `highlightSyntax()` to match preview styling.
+
+### ✅ Fixed List Item Indentation and Gaps (24:00-00:10)
+- **Overflow Fix**: Removed `width: 100%` and `margin-left` from list items which pushed text out of cells.
+- **Indentation Refinement**: Used `display: inline-block; width: 100%; box-sizing: border-box; padding-left: Xem;` to maintain hanging indents without overflow.
+- **Gap Removal**: Resolved double-line-breaks in lists by ensuring elements didn't force extra vertical space.
+- **Padding Cleanup**: Reduced cell bottom padding from `20px` to `6px` for a tighter UI.
+
+**Files Modified:**
+- `static/style.css` - Font and padding updates
+- `static/script.js` - List layout logic and syntax highlighting padding
+- `export_static.py` - Synced all layout and font fixes for exports
+- `md/PROBLEMS_AND_FIXES.md` - Logged the detailed fix
+
+**Technical Details:**
+- **Layout Strategy**: Switched to `border-box` sizing for list items so that `padding-left` (the indent) is contained *within* the 100% width, preventing horizontal shifting.
+- **Font Rendering**: Vrinda font ensure that the browser's text measurement matches the available space exactly.
+
+**Next Steps:**
+- Monitor for any other specialized Bangla glyphs that might need even more padding.
+
+**Current Status:**
+- ✅ Flask server running on http://127.0.0.1:5018
+- ✅ Bangla text rendering perfectly within cells
+- ✅ Lists wrap correctly without overflow or extra gaps
+- ✅ Static exports match app rendering exactly
+
+**Known Issues:**
+- None identified in current layout.
+
+---
+
 ## [2026-01-17 23:35] - Superscript Toggle Fix for Static Export
 
 **Session Duration:** 0.1 hours
@@ -186,36 +228,3 @@
 
 ---
 
-## [2026-01-17 23:00] - Code Formatting Bug Fix in Edit Mode
-
-**Session Duration:** 0.08 hours
-
-**What We Accomplished:**
-
-### ✅ Fixed Code Backtick Formatting in Edit Mode (22:55-23:00)
-- **Problem identified**: Using `text` for code worked in preview but broke formatting in edit mode
-- **Root cause**: `highlightSyntax()` function had malformed HTML - used `</strong>` instead of `</code>`
-- **Solution applied**: Fixed closing tag from `</strong>` to `</code>` in backtick regex
-- **Result**: Code formatting now works correctly in both preview and edit modes
-
-**Files Modified:**
-- `static/script.js` - Fixed highlightSyntax() code formatting rule (1 line)
-
-**Technical Details:**
-- **Bug Location**: Line in `highlightSyntax()` function handling backtick code formatting
-- **Issue**: Malformed HTML `<code>...</strong>` broke parsing and affected subsequent text
-- **Fix**: Proper HTML `<code>...</code>` now contains formatting correctly
-- **Impact**: Code blocks no longer interfere with other text formatting in edit mode
-
-**Next Steps:**
-- Test code formatting in both preview and edit modes
-- Continue with any additional formatting improvements
-
-**Current Status:**
-- ✅ Flask server running on http://127.0.0.1:5018
-- ✅ Code formatting bug resolved
-- ✅ Edit mode syntax highlighting working correctly
-- ✅ All markdown formatting functions operational
-
-**Known Issues:**
-- None currently identified
