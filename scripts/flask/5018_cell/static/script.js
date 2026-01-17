@@ -2087,7 +2087,7 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
     }
 
     if (value && isTextCell) {
-        let formattedHTML = hasMarkdown ? parseMarkdown(value) : applyCustomColorSyntaxesRaw(escapeHtml(value)).replace(/\n/g, '<br>');
+        let formattedHTML = hasMarkdown ? parseMarkdown(value, getCellStyle(rowIndex, colIndex)) : applyCustomColorSyntaxesRaw(escapeHtml(value)).replace(/\n/g, '<br>');
 
         inputElement.dataset.formattedHtml = formattedHTML;
         inputElement.classList.add('has-markdown');
@@ -2312,7 +2312,7 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
                 inputElement.value = newRawValue;
                 updateCell(rowIndex, colIndex, newRawValue);
             }
-            preview.innerHTML = hasMarkdown ? parseMarkdown(newRawValue) : applyCustomColorSyntaxesRaw(escapeHtml(newRawValue)).replace(/\n/g, '<br>');
+            preview.innerHTML = hasMarkdown ? parseMarkdown(newRawValue, getCellStyle(rowIndex, colIndex)) : applyCustomColorSyntaxesRaw(escapeHtml(newRawValue)).replace(/\n/g, '<br>');
 
             // Re-draw connectors
             requestAnimationFrame(() => {
@@ -2687,7 +2687,7 @@ function parseGridTable(lines) {
 }
 
 /*  inline parser for table cells - supports all markdown except lists  */
-function parseMarkdownInline(text) {
+function parseMarkdownInline(text, cellStyle = {}) {
     let formatted = text;
 
     // Math: \( ... \) -> KaTeX (process first to avoid conflicts)
@@ -2853,8 +2853,10 @@ function parseMarkdownInline(text) {
     // Strikethrough: ~~text~~ -> <del>text</del>
     formatted = formatted.replace(/~~(.+?)~~/g, '<del>$1</del>');
 
-    // Superscript: ^text^ -> <sup>text</sup>
-    formatted = formatted.replace(/\^(.+?)\^/g, '<sup>$1</sup>');
+    // Superscript: ^text^ -> <sup>text</sup> (only if superscriptMode is enabled)
+    if (cellStyle.superscriptMode) {
+        formatted = formatted.replace(/\^(.+?)\^/g, '<sup>$1</sup>');
+    }
 
     // Subscript: ~text~ -> <sub>text</sub>
     formatted = formatted.replace(/~(.+?)~/g, '<sub>$1</sub>');
@@ -2919,7 +2921,7 @@ function parseMarkdownInline(text) {
 /**
  * Parse markdown syntax and convert to HTML
  */
-function parseMarkdown(text) {
+function parseMarkdown(text, cellStyle = {}) {
     if (!text) return '';
 
     // Table*N detection (allow text before table)
@@ -2930,7 +2932,7 @@ function parseMarkdown(text) {
         let preText = '';
         if (tableMatch.index > 0) {
             const textBefore = text.substring(0, tableMatch.index);
-            preText = oldParseMarkdownBody(textBefore.split('\n'));
+            preText = oldParseMarkdownBody(textBefore.split('\n'), cellStyle);
         }
 
         const cols = parseInt(tableMatch[1]);
@@ -2967,7 +2969,7 @@ function parseMarkdown(text) {
             const currentTableHtml = parseCommaTable(cols, currentTableContent, borderColor, borderWidth);
 
             // Recursively parse the rest
-            return preText + currentTableHtml + parseMarkdown(remainingContent);
+            return preText + currentTableHtml + parseMarkdown(remainingContent, cellStyle);
         }
 
         // Check if there's another table definition in the content (fallback)
@@ -2979,7 +2981,7 @@ function parseMarkdown(text) {
 
             const currentTableHtml = parseCommaTable(cols, currentTableContent, borderColor, borderWidth);
 
-            return preText + currentTableHtml + parseMarkdown(remainingContent);
+            return preText + currentTableHtml + parseMarkdown(remainingContent, cellStyle);
         }
 
         return preText + parseCommaTable(cols, content, borderColor, borderWidth);
@@ -3012,15 +3014,15 @@ function parseMarkdown(text) {
         if (cur.length) blocks.push({ grid: inGrid, lines: cur });
 
         return blocks.map(b =>
-            b.grid ? parseGridTable(b.lines) : oldParseMarkdownBody(b.lines)
+            b.grid ? parseGridTable(b.lines) : oldParseMarkdownBody(b.lines, cellStyle)
         ).join('\n');
     }
 
     // If no grid table, process as normal markdown
-    return oldParseMarkdownBody(lines);
+    return oldParseMarkdownBody(lines, cellStyle);
 }
 
-function oldParseMarkdownBody(lines) {
+function oldParseMarkdownBody(lines, cellStyle = {}) {
     /* copy the *body* of the existing parser (bold, italic, lists …)
        but skip the table-splitting logic we just added. */
     let txt = lines.join('\n');
@@ -3201,8 +3203,10 @@ function oldParseMarkdownBody(lines) {
         // Strikethrough: ~~text~~ -> <del>text</del>
         formatted = formatted.replace(/~~(.+?)~~/g, '<del>$1</del>');
 
-        // Superscript: ^text^ -> <sup>text</sup>
-        formatted = formatted.replace(/\^(.+?)\^/g, '<sup>$1</sup>');
+        // Superscript: ^text^ -> <sup>text</sup> (only if superscriptMode is enabled)
+        if (cellStyle.superscriptMode) {
+            formatted = formatted.replace(/\^(.+?)\^/g, '<sup>$1</sup>');
+        }
 
         // Subscript: ~text~ -> <sub>text</sub>
         formatted = formatted.replace(/~(.+?)~/g, '<sub>$1</sub>');
@@ -3566,6 +3570,31 @@ function toggleCellComplete() {
     document.getElementById('ctxComplete').classList.toggle('checked', newValue);
 }
 
+function toggleSuperscriptMode() {
+    if (!contextMenuCell) return;
+
+    const { rowIndex, colIndex } = contextMenuCell;
+    const style = getCellStyle(rowIndex, colIndex);
+    const newValue = !style.superscriptMode;
+
+    // Apply to multiple cells if selected
+    if (selectedCells.length > 0) {
+        selectedCells.forEach(cell => {
+            setCellStyle(cell.row, cell.col, 'superscriptMode', newValue);
+        });
+        showToast(`Superscript mode ${newValue ? 'enabled' : 'disabled'} for ${selectedCells.length} cells`, 'success');
+    } else {
+        // Apply to single cell
+        setCellStyle(rowIndex, colIndex, 'superscriptMode', newValue);
+        showToast(`Superscript mode ${newValue ? 'enabled' : 'disabled'}`, 'success');
+    }
+
+    document.getElementById('ctxSuperscript').classList.toggle('checked', newValue);
+    
+    // Re-render the table to apply changes
+    renderTable();
+}
+
 // Border options will be handled by unified border modal
 
 function showCellContextMenu(e, rowIndex, colIndex, inputElement, tdElement) {
@@ -3582,6 +3611,7 @@ function showCellContextMenu(e, rowIndex, colIndex, inputElement, tdElement) {
     document.getElementById('ctxItalic').classList.toggle('checked', style.italic === true);
     document.getElementById('ctxCenter').classList.toggle('checked', style.center === true);
     document.getElementById('ctxComplete').classList.toggle('checked', style.complete === true);
+    document.getElementById('ctxSuperscript').classList.toggle('checked', style.superscriptMode === true);
 
     // Show/hide merge options
     const isMerged = mergeInfo && (mergeInfo.colspan || mergeInfo.rowspan || mergeInfo.hidden);

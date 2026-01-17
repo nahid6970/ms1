@@ -130,6 +130,44 @@ formatted = formatted.replace(/`(.*?)`/g, '<code><span class="syn-marker">`</spa
 
 ---
 
+## [2026-01-17 23:10] - Superscript Mode Toggle Implementation
+
+**Problem:**
+Syntax conflict between math notation (`2^3 = 8`) and superscript formatting (`x^2^`). Users needed ability to control when `^text^` should be parsed as superscript vs displayed as normal text for mathematical expressions.
+
+**Root Cause:**
+The parsing functions always converted `^text^` to superscript formatting, making it impossible to display mathematical expressions like `2^3` without unwanted formatting.
+
+**Solution:**
+Implemented per-cell superscript mode toggle:
+
+1. **Added context menu option**: "^Superscript^ Mode" in right-click cell menu
+2. **Per-cell control**: Each cell stores `superscriptMode` property in cell styles
+3. **Conditional parsing**: Modified parsing functions to only convert `^text^` when mode is enabled:
+   - `parseMarkdown(text, cellStyle = {})`
+   - `parseMarkdownInline(text, cellStyle = {})`
+   - `oldParseMarkdownBody(lines, cellStyle = {})`
+4. **Multi-cell support**: Toggle works with multiple selected cells
+5. **Visual feedback**: Checkmark indicator shows current state
+
+**Technical Implementation:**
+```javascript
+// Conditional superscript parsing
+if (cellStyle.superscriptMode) {
+    formatted = formatted.replace(/\^(.+?)\^/g, '<sup>$1</sup>');
+}
+```
+
+**Files Modified:**
+- `templates/index.html` - Added context menu option
+- `static/script.js` - Added toggleSuperscriptMode() and updated parsing functions
+
+**Related Issues:** Math notation conflicts, syntax parsing, context menu functionality
+
+**Result:** Users can now control per-cell whether `^text^` displays as normal text (for math) or superscript formatting (for variables).
+
+---
+
 ## [2026-01-17 22:15] - Square Root and Fraction Buttons Not Working in ContentEditable
 
 **Problem:**
