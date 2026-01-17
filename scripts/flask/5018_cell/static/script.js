@@ -3054,10 +3054,18 @@ function oldParseMarkdownBody(lines, cellStyle = {}) {
         // IMPORTANT: Save the original line BEFORE any formatting for list detection
         const originalLine = line;
 
+        // IMPORTANT: Process simple inline formatting BEFORE KaTeX
+        // KaTeX output may contain * characters that break bold/italic regex
+        // Bold: **text** -> <strong>text</strong>
+        formatted = formatted.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+
+        // Italic: @@text@@ -> <em>text</em>
+        formatted = formatted.replace(/@@(.+?)@@/g, '<em>$1</em>');
+
         // Convert LaTeX $...$ syntax to KaTeX \(...\) syntax
         formatted = formatted.replace(/\$([^$]+)\$/g, '\\($1\\)');
 
-        // Math: \( ... \) -> KaTeX (process first to avoid conflicts)
+        // Math: \( ... \) -> KaTeX (process after bold/italic to avoid conflicts)
         if (window.katex) {
             formatted = formatted.replace(/\\\((.*?)\\\)/g, (match, math) => {
                 try {
@@ -3194,11 +3202,8 @@ function oldParseMarkdownBody(lines, cellStyle = {}) {
             return result;
         });
 
-        // Bold: **text** -> <strong>text</strong>
-        formatted = formatted.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-
-        // Italic: @@text@@ -> <em>text</em>
-        formatted = formatted.replace(/@@(.+?)@@/g, '<em>$1</em>');
+        // NOTE: Bold and Italic are now processed BEFORE KaTeX (see above)
+        // to prevent KaTeX HTML output from breaking the ** and @@ regex
 
         // Colored underline: _R_text__ -> colored underline (must come before regular underline)
         formatted = formatted.replace(/_([A-Z]+)_(.+?)__/g, (match, colorCode, text) => {

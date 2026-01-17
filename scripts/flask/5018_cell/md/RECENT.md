@@ -6,28 +6,32 @@
 
 ---
 
-## [2026-01-18 01:00] - KaTeX List Detection Fix
+## [2026-01-18 01:07] - KaTeX Parsing Order Fixes (Lists + Bold/Italic)
 
-**Session Duration:** 0.15 hours
+**Session Duration:** 0.25 hours
 
 **What We Accomplished:**
 
 ### ✅ Fixed List Detection with KaTeX Math (00:55-01:00)
-- **Problem**: List items containing `\(\sqrt{}\)` or other KaTeX math would fail to render as lists. The `-- ` prefix showed as raw text, and other markdown (bold, italic) also broke.
-- **Root Cause**: List detection used `formatted.trim().startsWith('-- ')`, but KaTeX had already transformed the line into HTML before this check.
-- **Solution**: Save the original unmodified line before any formatting, then use it for list detection while still extracting content from the formatted output.
+- **Problem**: List items containing `\(\sqrt{}\)` or other KaTeX math would fail to render as lists.
+- **Solution**: Save the original unmodified line before any formatting, then use it for list detection.
+
+### ✅ Fixed Bold/Italic with KaTeX Math (01:03-01:07)
+- **Problem**: Bold markers (`**text**`) and italic (`@@text@@`) failed when KaTeX was present.
+- **Root Cause**: KaTeX was processed first, and its HTML output broke the regex patterns.
+- **Solution**: Moved bold and italic parsing to happen **before** KaTeX rendering.
 
 **Files Modified:**
-- `static/script.js` - Updated `oldParseMarkdownBody` to use `originalLine` for list detection
+- `static/script.js` - Reordered parsing in `oldParseMarkdownBody`
 
 **Technical Details:**
-- **Parsing Order**: KaTeX → List Check was causing failures. Now: Original Line saved → KaTeX → List Check on Original → Content from Formatted.
-- **Benefit**: All inline formatting (bold, italic, math) now works correctly inside list items.
+- **Parsing Order**: Bold/Italic → LaTeX conversion → KaTeX rendering → Other formatting
+- **Benefit**: All markdown syntax now works correctly alongside KaTeX math.
 
 **Current Status:**
 - ✅ Flask server running on http://127.0.0.1:5018
-- ✅ Lists with KaTeX rendering correctly
-- ✅ All markdown syntax works inside list items
+- ✅ Bold and italic work with KaTeX
+- ✅ Lists render correctly with math formulas
 
 ---
 

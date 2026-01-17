@@ -7,6 +7,23 @@ This document tracks historical bugs, issues, and their solutions. Use this to:
 
 ---
 
+## [2026-01-18 01:07] - Bold/Italic Not Rendering When KaTeX Present
+
+**Problem:** When text contained both bold markers (`**text**`) and KaTeX math (like `\(\sqrt{}\)`), the bold formatting failed to render. The `**` syntax remained visible as raw text.
+
+**Root Cause:** KaTeX was processed **before** bold/italic parsing. KaTeX HTML output contains `*` characters (in CSS, attributes, etc.), which broke the `\*\*(.+?)\*\*` regex matching for bold.
+
+**Solution:**
+- Moved bold and italic parsing to happen **before** KaTeX rendering.
+- This ensures `**` and `@@` markers are converted to `<strong>` and `<em>` tags before KaTeX introduces complex HTML.
+
+**Files Modified:**
+- `static/script.js` - Reordered parsing in `oldParseMarkdownBody`.
+
+**Related Issues:** KaTeX integration, parsing order
+
+---
+
 ## [2026-01-18 01:00] - List Detection Failed with KaTeX Math
 
 **Problem:** When a list item (e.g., `-- item`) contained KaTeX math syntax like `\(\sqrt{}\)`, the list marker was not detected. The line would display as plain text with raw `-- ` prefix and other markdown (like `**bold**`) also failed to render.
