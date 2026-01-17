@@ -116,7 +116,8 @@ See **[Problems & Fixes Log](md/PROBLEMS_AND_FIXES.md)** for the full history.
 - **Never auto-commit** - Always wait for explicit instruction
 
 ### Pre-Commit Process (MANDATORY)
-1. **Update documentation files FIRST** before any Git operations:
+1. **Wait for "commit" command**: Documentation files (like `md/RECENT.md`, `md/PROBLEMS_AND_FIXES.md`) must ONLY be updated when the user explicitly says "commit". Do NOT update them during active development steps.
+2. **Update documentation files FIRST** (after the "commit" command):
    - `md/RECENT.md` - Add/update current session details with timestamps
    - `md/PROBLEMS_AND_FIXES.md` - Document any bugs fixed or issues resolved
    - `md/KEYBOARD_SHORTCUTS.md` - Update if shortcuts changed
