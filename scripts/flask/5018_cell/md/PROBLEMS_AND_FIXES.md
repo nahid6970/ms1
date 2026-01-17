@@ -7,6 +7,26 @@ This document tracks historical bugs, issues, and their solutions. Use this to:
 
 ---
 
+## [2026-01-18 01:25] - Table Border Color Defaulting to Faint Grey
+
+**Problem:** Default table borders for Markdown tables (comma and pipe syntax) were using a faint grey color (`#ced4da`), which was difficult to see against some backgrounds.
+
+**Root Cause:** The default color was hardcoded to `#ced4da` in `parseCommaTable` and various CSS definitions for `.md-cell` and `.markdown-table`.
+
+**Solution:**
+- Updated `parseCommaTable` in `static/script.js` to use `#000000` (black) as the default `borderColor`.
+- Updated `.md-cell`, `.markdown-table`, and `.md-header` CSS in `static/style.css` to use black borders.
+- Synchronized these changes in `export_static.py` for consistent standalone exports.
+
+**Files Modified:**
+- `static/script.js` - Changed default `borderColor` in `parseCommaTable`.
+- `static/style.css` - Updated table and cell border colors to black.
+- `export_static.py` - Updated embedded CSS for tables and cells.
+
+**Related Issues:** Styling consistency, visibility improvement.
+
+---
+
 ## [2026-01-18 01:07] - Bold/Italic Not Rendering When KaTeX Present
 
 **Problem:** When text contained both bold markers (`**text**`) and KaTeX math (like `\(\sqrt{}\)`), the bold formatting failed to render. The `**` syntax remained visible as raw text.

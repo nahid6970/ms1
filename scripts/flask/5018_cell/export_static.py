@@ -848,7 +848,7 @@ def generate_static_html(data, custom_syntaxes):
         .md-cell {
             padding: 4px 12px;
             border: none;
-            border-right: 3px solid #ced4da;
+            border-right: 3px solid #000000;
             background: transparent;
             overflow: hidden;
             word-break: break-word;
@@ -868,7 +868,7 @@ def generate_static_html(data, custom_syntaxes):
         .md-header {
             background: transparent;
             font-weight: 600;
-            border-bottom: 2px solid #495057;
+            border-bottom: 2px solid #000000;
             white-space: normal;
             word-break: break-word;
         }

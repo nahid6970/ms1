@@ -2448,7 +2448,7 @@ function parseCommaTable(cols, text, borderColor, borderWidth) {
     let gridStyle = `--cols:${cols};`;
 
     // Explicitly calculate border style to ensure it applies
-    const bColor = borderColor || '#ced4da';
+    const bColor = borderColor || '#000000';
     const bWidth = borderWidth || '1px';
     const cellStyle = `border: ${bWidth} solid ${bColor} !important;`;
 

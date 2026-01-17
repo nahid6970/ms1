@@ -6,6 +6,31 @@
 
 ---
 
+## [2026-01-18 01:25] - Default Table Border Color Update
+
+**Session Duration:** 0.3 hours
+
+**What We Accomplished:**
+
+### ✅ Updated Default Table Border Color to Black
+- **Problem**: Default Markdown table borders were faint grey (`#ced4da`), making them hard to see.
+- **Solution**: Changed the default border color to black (`#000000`) for all Markdown-based tables (comma and pipe syntax).
+- **Consistency**: Synchronized the change across the main application (`static/script.js`, `static/style.css`) and standalone exports (`export_static.py`).
+- **Header Refinement**: Updated `.md-header` to use a black bottom border for better visual separation.
+
+**Files Modified:**
+- `static/script.js` - Updated `parseCommaTable` default color.
+- `static/style.css` - Updated `.md-cell`, `.markdown-table`, and `.md-header` border colors.
+- `export_static.py` - Updated embedded CSS for tables and cells.
+- `md/PROBLEMS_AND_FIXES.md` - Documented the color update.
+
+**Current Status:**
+- ✅ Flask server running on http://127.0.0.1:5018
+- ✅ Markdown tables now render with black borders by default.
+- ✅ Standalone exports match the application's table styling.
+
+---
+
 ## [2026-01-18 01:07] - KaTeX Parsing Order Fixes (Lists + Bold/Italic)
 
 **Session Duration:** 0.25 hours

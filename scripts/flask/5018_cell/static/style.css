@@ -2835,7 +2835,7 @@ Markdown Table Styles */
 
 .markdown-table th,
 .markdown-table td {
-    border: 1px solid #ced4da;
+    border: 1px solid #000000;
     padding: 4px 6px;
     text-align: left;
     vertical-align: top;
@@ -2885,7 +2885,7 @@ Markdown Table Styles */
 
 .md-cell {
     padding: 4px 6px;
-    border: 1px solid #ced4da;
+    border: 1px solid #000000;
     background: #fff;
     overflow: hidden;
     word-break: break-word;
@@ -2933,7 +2933,7 @@ Markdown Table Styles */
 .md-cell {
     padding: 4px 12px !important;
     border: none !important;
-    border-right: 3px solid #ced4da !important;
+    border-right: 3px solid #000000 !important;
     background: transparent !important;
     overflow: hidden !important;
     word-break: break-word !important;
@@ -2953,7 +2953,7 @@ Markdown Table Styles */
 .md-header {
     background: transparent !important;
     font-weight: 600 !important;
-    border-bottom: 2px solid #495057 !important;
+    border-bottom: 2px solid #000000 !important;
     white-space: normal !important;
     word-break: break-word !important;
 }
