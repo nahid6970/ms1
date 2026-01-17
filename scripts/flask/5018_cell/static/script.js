@@ -2301,7 +2301,9 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
                     tableContainer.scrollLeft = savedScrollLeft;
                 });
             }
-            // Note: Caret position is handled by handlePreviewMouseDown mapping
+
+            // Adjust height immediately for the newly highlighted syntax content
+            adjustCellHeightForMarkdown(cell);
         });
 
         preview.addEventListener('blur', () => {
@@ -2318,6 +2320,9 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
                 updateCell(rowIndex, colIndex, newRawValue);
             }
             preview.innerHTML = hasMarkdown ? parseMarkdown(newRawValue, getCellStyle(rowIndex, colIndex)) : applyCustomColorSyntaxesRaw(escapeHtml(newRawValue)).replace(/\n/g, '<br>');
+
+            // Recalculate height for the parsed content
+            adjustCellHeightForMarkdown(cell);
 
             // Re-draw connectors
             requestAnimationFrame(() => {
@@ -2346,14 +2351,7 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
             // Only sync data and adjust height
 
             // Adjust cell height based on preview content
-            requestAnimationFrame(() => {
-                const previewHeight = preview.scrollHeight;
-                const minHeight = 22;
-                const targetHeight = Math.max(minHeight, previewHeight);
-                preview.style.minHeight = targetHeight + 'px';
-                inputElement.style.height = targetHeight + 'px';
-                cell.style.height = targetHeight + 'px';
-            });
+            adjustCellHeightForMarkdown(cell);
         });
 
         // Use original handlePreviewMouseDown for mapping click to caret position
@@ -11509,6 +11507,10 @@ function adjustCellHeightForMarkdown(cell) {
     input.style.minHeight = maxHeight + 'px';
     preview.style.height = maxHeight + 'px';
     preview.style.minHeight = maxHeight + 'px';
+
+    // NEW: Also set height on the parent cell (TD) to prevent absolute overflow
+    cell.style.height = maxHeight + 'px';
+    cell.style.minHeight = maxHeight + 'px';
 
     // Restore display
     input.style.display = originalInputDisplay;

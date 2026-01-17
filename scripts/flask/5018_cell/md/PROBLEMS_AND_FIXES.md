@@ -7,6 +7,24 @@ This document tracks historical bugs, issues, and their solutions. Use this to:
 
 ---
 
+## [2026-01-18 00:30] - Cell Height Overflow in Edit Mode
+
+**Problem:** When a cell was focused for editing in Markdown mode, the height did not always adjust to accommodate the raw syntax, causing text to overflow the cell borders or overlap with the row below.
+
+**Root Cause:** The `adjustCellHeightForMarkdown` function was only setting heights on the input/preview elements, not explicitly on the parent `td`. Additionally, height recalculations were missing from certain `contentEditable` event listeners.
+
+**Solution:** 
+- Updated `adjustCellHeightForMarkdown` in `static/script.js` to also set `height` and `minHeight` on the parent `td`.
+- Integrated `adjustCellHeightForMarkdown` into `focus`, `blur`, and `input` listeners for the markdown preview overlay.
+- Unified measurement logic to use the maximum height of both raw text and rendered preview.
+
+**Files Modified:**
+- `static/script.js` - Updated height adjustment logic and event listeners.
+
+**Related Issues:** Edit mode UI, overflow prevention
+
+---
+
 ## [2026-01-17 23:55] - Bangla Text Overflow and Border Box Fixes
 
 **Problem:**

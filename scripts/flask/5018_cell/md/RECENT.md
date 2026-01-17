@@ -6,6 +6,41 @@
 
 ---
 
+## [2026-01-18 00:35] - Edit Mode Height Fix and Documentation Policy
+
+**Session Duration:** 0.35 hours
+
+**What We Accomplished:**
+
+### ✅ Fixed Edit Mode Cell Height Overflow (00:20-00:30)
+- **Problem**: When editing cells with complex formatting or math, the cell did not always expand to fit the content, causing overlap.
+- **Enhanced Logic**: Updated `adjustCellHeightForMarkdown` to explicitly set height on the parent `td`.
+- **Event Binding**: Linked the height adjustment to `focus`, `blur`, and `input` events of the `contentEditable` preview to ensure real-time scaling.
+- **Improved Buffer**: Maintained a stable buffer to prevent vertical cutoff of LaTeX formulas.
+
+### ✅ Updated Developer Documentation Policy (00:30-00:35)
+- **Clarified Workflow**: Updated `DEVELOPER_GUIDE.md` to state that documentation (`.md`) files should only be modified after a "commit" command from the user.
+- **Strict Adherence**: Committed to waiting for explicit instructions before updating logs during development rounds.
+
+**Files Modified:**
+- `static/script.js` - Integrated height logic into edit mode events
+- `DEVELOPER_GUIDE.md` - Updated pre-commit documentation rules
+- `md/PROBLEMS_AND_FIXES.md` - Documented the height overflow fix
+
+**Technical Details:**
+- **DOM Sync**: Setting `td` height ensures that table rows actually expand to contain their absolute-positioned preview elements.
+- **Edit Loop**: Recalculating height on every `input` event within the `contentEditable` div provides a smooth, fluid expansion as the user types.
+
+**Current Status:**
+- ✅ Flask server running on http://127.0.0.1:5018
+- ✅ Edit mode height scaling perfectly
+- ✅ Documentation workflow clarified
+
+**Known Issues:**
+- None identified in the current edit mode experience.
+
+---
+
 ## [2026-01-18 00:10] - Bangla Text Overflow and List Gap Fixes
 
 **Session Duration:** 0.25 hours
@@ -178,53 +213,4 @@
 
 **Known Issues:**
 - LaTeX math syntax (`$...$`) not rendering (next priority)
-
----
-
-## [2026-01-17 23:10] - Superscript Mode Toggle Implementation
-
-**Session Duration:** 0.17 hours
-
-**What We Accomplished:**
-
-### ✅ Superscript Mode Toggle Feature (23:00-23:10)
-- **Added context menu option**: "^Superscript^ Mode" toggle in right-click cell menu
-- **Implemented per-cell control**: Each cell can independently enable/disable superscript parsing
-- **Solved syntax conflict**: `^text^` can now be normal text (for math like `2^3`) or superscript formatting
-- **Visual feedback**: Checkmark shows when superscript mode is enabled for a cell
-- **Conditional parsing**: Modified parsing functions to only convert `^text^` to superscript when mode is enabled
-
-### ✅ Technical Implementation Details
-- **Context Menu**: Added toggle option with checkmark indicator
-- **Cell Style Storage**: `superscriptMode` property stored in cell styles
-- **JavaScript Functions**: 
-  - `toggleSuperscriptMode()` - Handles toggle logic and multi-cell support
-  - Updated `showCellContextMenu()` - Shows checkmark state
-- **Parser Updates**: Modified `parseMarkdown()`, `parseMarkdownInline()`, `oldParseMarkdownBody()` to accept cellStyle parameter
-- **Conditional Logic**: Superscript parsing only occurs when `cellStyle.superscriptMode === true`
-
-**Files Modified:**
-- `templates/index.html` - Added superscript toggle to context menu (3 lines)
-- `static/script.js` - Added toggle function and updated parsing logic (~40 lines)
-
-**Usage:**
-- **Default Behavior**: `^text^` displays as normal text (good for math: `2^3 = 8`)
-- **When Enabled**: `^text^` becomes superscript formatting (good for variables: `x^2^`)
-- **Per Cell Control**: Right-click cell → "^Superscript^ Mode" to toggle
-- **Multi-Cell Support**: Works with multiple selected cells
-
-**Next Steps:**
-- Address LaTeX math syntax issue (`$...$` not rendering)
-- Continue with other syntax improvements
-
-**Current Status:**
-- ✅ Flask server running on http://127.0.0.1:5018
-- ✅ Superscript toggle working perfectly
-- ✅ Math vs superscript conflict resolved
-- ✅ Context menu functionality enhanced
-
-**Known Issues:**
-- LaTeX math syntax (`$...$`) not rendering (next priority)
-
----
 
