@@ -7,6 +7,24 @@ This document tracks historical bugs, issues, and their solutions. Use this to:
 
 ---
 
+## [2026-01-18 01:00] - List Detection Failed with KaTeX Math
+
+**Problem:** When a list item (e.g., `-- item`) contained KaTeX math syntax like `\(\sqrt{}\)`, the list marker was not detected. The line would display as plain text with raw `-- ` prefix and other markdown (like `**bold**`) also failed to render.
+
+**Root Cause:** The list detection logic checked `formatted.trim().startsWith('-- ')`. However, KaTeX rendering happened *before* this check, transforming the line into complex HTML. The resulting string no longer started with `-- `, causing the list check to fail.
+
+**Solution:**
+- Saved the original unmodified line (`const originalLine = line;`) before any formatting.
+- Changed list detection to use `originalLine.trim().startsWith(...)` instead of `formatted.trim().startsWith(...)`.
+- Content extraction still uses `formatted` to preserve rendered KaTeX and other styling.
+
+**Files Modified:**
+- `static/script.js` - Updated `oldParseMarkdownBody` list detection logic.
+
+**Related Issues:** KaTeX integration, list parsing order
+
+---
+
 ## [2026-01-18 00:40] - Cursor Offset Mismatch in List Items
 
 **Problem:** Clicking on a word in a list item while in Markdown preview mode would place the caret 1-3 characters ahead of the intended position.

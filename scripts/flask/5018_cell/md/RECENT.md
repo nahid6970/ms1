@@ -6,6 +6,31 @@
 
 ---
 
+## [2026-01-18 01:00] - KaTeX List Detection Fix
+
+**Session Duration:** 0.15 hours
+
+**What We Accomplished:**
+
+### ✅ Fixed List Detection with KaTeX Math (00:55-01:00)
+- **Problem**: List items containing `\(\sqrt{}\)` or other KaTeX math would fail to render as lists. The `-- ` prefix showed as raw text, and other markdown (bold, italic) also broke.
+- **Root Cause**: List detection used `formatted.trim().startsWith('-- ')`, but KaTeX had already transformed the line into HTML before this check.
+- **Solution**: Save the original unmodified line before any formatting, then use it for list detection while still extracting content from the formatted output.
+
+**Files Modified:**
+- `static/script.js` - Updated `oldParseMarkdownBody` to use `originalLine` for list detection
+
+**Technical Details:**
+- **Parsing Order**: KaTeX → List Check was causing failures. Now: Original Line saved → KaTeX → List Check on Original → Content from Formatted.
+- **Benefit**: All inline formatting (bold, italic, math) now works correctly inside list items.
+
+**Current Status:**
+- ✅ Flask server running on http://127.0.0.1:5018
+- ✅ Lists with KaTeX rendering correctly
+- ✅ All markdown syntax works inside list items
+
+---
+
 ## [2026-01-18 00:45] - List Item Cursor Positioning Fix
 
 **Session Duration:** 0.15 hours
@@ -140,61 +165,4 @@
 
 **Known Issues:**
 - None currently identified
-
----
-
-## [2026-01-17 23:20] - LaTeX Math Syntax Support Implementation
-
-**Session Duration:** 0.13 hours
-
-**What We Accomplished:**
-
-### ✅ LaTeX Math Syntax Support (23:12-23:20)
-- **Added LaTeX `$...$` syntax support** - Converts to existing KaTeX `\(...)` format
-- **AI compatibility** - Copy-paste AI math solutions now work instantly
-- **Backward compatible** - Existing `\(...)` syntax unchanged
-- **Full implementation** - Works in preview, edit mode, and static exports
-
-### ✅ Technical Implementation Details
-- **Conversion Logic**: `$math$` → `\(math\)` → KaTeX renders
-- **JavaScript Functions Updated**:
-  - `parseMarkdownInline()` - Inline math parsing
-  - `oldParseMarkdownBody()` - Main text parsing  
-  - `highlightSyntax()` - Edit mode syntax highlighting
-  - `stripMarkdown()` - Search/sort text stripping
-  - `checkHasMarkdown()` - Markdown detection
-- **Python Export Updated**:
-  - `export_static.py` - Both parseMarkdown functions
-  - Updated hasMarkdown detection for static exports
-
-**Files Modified:**
-- `static/script.js` - Added LaTeX conversion to 5 functions (~10 lines)
-- `export_static.py` - Added LaTeX conversion to export functions (~5 lines)
-
-**Examples Working:**
-- `$2^3 = 8$` → Renders as proper math notation
-- `$\sqrt{25}$` → Renders as √25  
-- `$\log_2 8 = 3$` → Renders as log₂ 8 = 3
-- `$\frac{1}{2}$` → Renders as ½
-- `[$a^m \times a^n = a^{m+n}$]` → Renders with proper math formatting
-
-**User Experience:**
-- **Before**: AI math showed as raw LaTeX text `$\sqrt{25}$`
-- **After**: AI math renders beautifully as √25
-- **Copy-Paste**: AI solutions work immediately without conversion
-- **Dual Support**: Both `$...$` and `\(...)` syntaxes work
-
-**Next Steps:**
-- Test with complex AI-generated math content
-- Continue with any remaining syntax improvements
-
-**Current Status:**
-- ✅ Flask server running on http://127.0.0.1:5018
-- ✅ LaTeX math syntax fully supported
-- ✅ AI compatibility achieved
-- ✅ All original issues from Issue.txt resolved
-
-**Known Issues:**
-- **Superscript toggle not working** - Both checked/unchecked show `^text^` as superscript (documented in PROBLEMS_AND_FIXES.md)
-
 
