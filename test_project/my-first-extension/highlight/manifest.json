@@ -1,6 +1,6 @@
 {
     "manifest_version": 3,
-    "name": "Web Highlighter",
+    "name": "Highlighter",
     "version": "1.0",
     "description": "Highlight text on any website and save it.",
     "permissions": [
@@ -13,7 +13,7 @@
     ],
     "action": {
         "default_popup": "popup.html",
-        "default_title": "Web Highlighter"
+        "default_title": "Highlighter"
     },
     "background": {
         "service_worker": "background.js"
