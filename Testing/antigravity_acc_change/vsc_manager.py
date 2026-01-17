@@ -176,7 +176,21 @@ class ProfileDialog(QDialog):
             self.dt_edit.setDateTime(QDateTime.currentDateTime().addSecs(3600)) # Default +1h
 
         timer_layout.addWidget(self.dt_edit)
+        
+        # Paste datetime input
+        paste_layout = QHBoxLayout()
+        paste_layout.addWidget(QLabel("Or paste:"))
+        self.paste_input = QLineEdit()
+        self.paste_input.setPlaceholderText("e.g., 1/20/2026, 1:49:25 AM")
+        paste_layout.addWidget(self.paste_input)
+        self.parse_btn = QPushButton("Apply")
+        self.parse_btn.setObjectName("browseBtn")
+        self.parse_btn.clicked.connect(self.parse_pasted_time)
+        paste_layout.addWidget(self.parse_btn)
+        timer_layout.addLayout(paste_layout)
+        
         layout.addWidget(self.timer_frame)
+
 
         # Signal connections
         self.lock_checkbox.toggled.connect(self.toggle_password_fields)
@@ -215,6 +229,41 @@ class ProfileDialog(QDialog):
             self.dt_edit.setDisplayFormat("dd MMM yyyy h:mm ap")
         else:
             self.dt_edit.setDisplayFormat("dd MMM yyyy HH:mm")
+
+    def parse_pasted_time(self):
+        text = self.paste_input.text().strip()
+        if not text:
+            return
+        
+        # Try multiple formats
+        formats = [
+            "%m/%d/%Y, %I:%M:%S %p",  # 1/20/2026, 1:49:25 AM
+            "%m/%d/%Y, %I:%M %p",      # 1/20/2026, 1:49 AM
+            "%m/%d/%Y %I:%M:%S %p",   # 1/20/2026 1:49:25 AM
+            "%m/%d/%Y %I:%M %p",       # 1/20/2026 1:49 AM
+            "%d/%m/%Y, %I:%M:%S %p",  # 20/1/2026, 1:49:25 AM (alternate)
+            "%Y-%m-%d %H:%M:%S",       # 2026-01-20 13:49:25
+            "%Y-%m-%d %H:%M",          # 2026-01-20 13:49
+        ]
+        
+        parsed_dt = None
+        for fmt in formats:
+            try:
+                parsed_dt = datetime.strptime(text, fmt)
+                break
+            except ValueError:
+                continue
+        
+        if parsed_dt:
+            qdt = QDateTime(
+                QDate(parsed_dt.year, parsed_dt.month, parsed_dt.day),
+                QTime(parsed_dt.hour, parsed_dt.minute, parsed_dt.second)
+            )
+            self.dt_edit.setDateTime(qdt)
+            self.paste_input.clear()
+        else:
+            QMessageBox.warning(self, "Parse Error", 
+                f"Could not parse: '{text}'\n\nTry formats like:\n• 1/20/2026, 1:49:25 AM\n• 1/20/2026, 1:49 AM")
 
     def browse_path(self):
         path = QFileDialog.getExistingDirectory(self, "Select Source Directory")
