@@ -467,7 +467,12 @@ class YTCDownloaderApp(QMainWindow):
             fs = get_val(f, 'filesize', get_val(f, 'filesize_approx', 0))
             sz_str = self.format_size(fs)
             
-            display = f"[{ext:<4}] {str(abr):>3}kbps | {sz_str:>8} | (ID:{fid})"
+            # Align with video: 
+            # Video: [EXT ] RES(11) @ FPS(5) (Total ~19 chars) | SIZE
+            # Audio: [EXT ] BITRATE(19 chars)                  | SIZE
+            
+            abr_str = f"{int(abr)}kbps" if abr else "N/A"
+            display = f"[{ext:<4}] {abr_str:<19} | {sz_str:>8} | (ID:{fid})"
             self.audio_combo.addItem(display, fid)
 
     def on_fetch_error(self, err):
