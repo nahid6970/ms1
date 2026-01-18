@@ -27,7 +27,12 @@ def run_fzf(items, prompt="Select > ", header=""):
         "--layout=reverse", 
         f"--prompt={prompt}", 
         f"--header={header}", 
-        "--expect=ctrl-a,ctrl-d"
+        "--expect=ctrl-a,ctrl-d",
+        "--color=bg:#1e1e1e,fg:#d0d0d0,bg+:#2e2e2e,fg+:#ffffff,hl:#00d9ff,hl+:#00ff00",
+        "--color=info:#afaf87,prompt:#d782ff,pointer:#d782ff,marker:#19d600,header:#888888",
+        "--border",
+        "--margin=1",
+        "--padding=1"
     ]
     
     try:
