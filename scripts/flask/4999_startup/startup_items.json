@@ -684,16 +684,5 @@
     "origin": "TaskScheduler",
     "original_name": "Autorun for nahid",
     "added_at": 1768273756.591541
-  },
-  {
-    "name": "www.livecareer.co.uk_build-cv_final-cv.png - Shortcut",
-    "type": "Command",
-    "paths": [
-      "C:\\Users\\nahid\\Desktop\\www.livecareer.co.uk_build-cv_final-cv.png"
-    ],
-    "Command": "",
-    "ps1_command": "Start-Process -FilePath \"C:\\Users\\nahid\\Desktop\\www.livecareer.co.uk_build-cv_final-cv.png\"",
-    "ExecutableType": "other",
-    "added_at": 1768701093.68629
   }
 ]

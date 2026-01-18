@@ -254,8 +254,8 @@ class SymlinkManager(ctk.CTk):
         filtered_links = [l for l in self.links if query in l['name'].lower() or query in l['target'].lower() or query in l['fake'].lower()]
         link = filtered_links[index]
         
-        target = os.path.normpath(link["target"])
-        fake = os.path.normpath(link["fake"])
+        target = link["target"]
+        fake = link["fake"]
         link_type = link.get("type", "folder")
 
         if not os.path.exists(target):
@@ -301,39 +301,11 @@ class SymlinkManager(ctk.CTk):
                 messagebox.showinfo("Success", f"Link created successfully:\n{fake}")
             else:
                 error_msg = result.stderr.strip() or result.stdout.strip()
-                if "privilege" in error_msg.lower() or "access is denied" in error_msg.lower():
-                     # Try to run as admin
-                    try:
-                        import ctypes
-                        import time
-                        
-                        # Use ShellExecute with 'runas' to trigger UAC
-                        # We must quote the command correctly for cmd /c
-                        # cmd /c mklink "fake" "target"
-                        
-                        # Note: ShellExecuteW params are separated. 
-                        # File: cmd.exe, Params: /c mklink ...
-                        
-                        params = f'/c {cmd}'
-                        ret = ctypes.windll.shell32.ShellExecuteW(None, "runas", "cmd.exe", params, None, 1)
-                        
-                        if ret > 32: # Success
-                            time.sleep(0.5) # Give it a moment to execute
-                            # We can't capture output from ShellExecute easily, so we check existence
-                            if os.path.exists(fake) or os.path.islink(fake):
-                                messagebox.showinfo("Success", f"Link created with Admin privileges:\n{fake}")
-                            else:
-                                # It might have failed silently or user clicked No
-                                messagebox.showwarning("Check Status", "Admin command issued. Please check if the link was created.")
-                        else:
-                            messagebox.showerror("Error", "Failed to elevate privileges.")
-                            
-                    except Exception as admin_e:
-                        messagebox.showerror("Error", f"Failed to run as admin: {str(admin_e)}")
-                        
-                elif "file already exists" in error_msg.lower():
+                if "file already exists" in error_msg.lower():
                     # This shouldn't happen now, but just in case
                     messagebox.showerror("Error", f"File still exists after deletion attempt:\n{error_msg}")
+                elif "Privilege" in error_msg or "access is denied" in error_msg.lower():
+                    messagebox.showerror("Permission Denied", "Creation failed. Please run this script as Administrator to create symlinks.")
                 else:
                     messagebox.showerror("Error", f"Failed to create link:\n{error_msg}")
         except Exception as e:
