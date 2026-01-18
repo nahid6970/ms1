@@ -356,11 +356,13 @@ class ItemDialog(QDialog):
         self.accept()
 
 class ScanResultsDialog(QDialog):
-    def __init__(self, items, parent=None):
+    def __init__(self, items, parent=None, title="SYSTEM // SCAN_RESULTS", confirm_text="IMPORT SELECTED"):
         super().__init__(parent)
         self.found_items = items
         self.selected_items = []
-        self.setWindowTitle("SYSTEM // SCAN_RESULTS")
+        self.dialog_title = title
+        self.confirm_text = confirm_text
+        self.setWindowTitle(title)
         self.resize(600, 500)
         self.setStyleSheet(f"""
             QDialog {{ background-color: {CP_BG}; border: 1px solid {CP_DIM}; }}
@@ -399,12 +401,12 @@ class ScanResultsDialog(QDialog):
         layout.setSpacing(15)
         layout.setContentsMargins(20, 20, 20, 20)
         
-        header = QLabel(f"DETECTED {len(self.found_items)} NEW ENTRIES")
+        header = QLabel(f"DETECTED {len(self.found_items)} ENTRIES")
         header.setFont(QFont("Consolas", 12, QFont.Weight.Bold))
         header.setStyleSheet(f"color: {CP_YELLOW};")
         layout.addWidget(header)
         
-        sub_header = QLabel("SELECT ITEMS TO IMPORT:")
+        sub_header = QLabel(f"{self.dialog_title} - SELECT ITEMS:")
         sub_header.setStyleSheet(f"color: {CP_SUBTEXT};")
         layout.addWidget(sub_header)
         
@@ -431,7 +433,10 @@ class ScanResultsDialog(QDialog):
         
         self.checkboxes = []
         for item in self.found_items:
-            path_display = item['paths'][0]
+            # Handle item paths which might be a list or direct string for deletion mode
+            path_val = item['paths'][0] if isinstance(item.get('paths'), list) else item.get('path', '')
+            
+            path_display = path_val
             if len(path_display) > 60: path_display = "..." + path_display[-57:]
             
             cb = QCheckBox(f"{item['name']}\n[{path_display}]")
@@ -446,7 +451,7 @@ class ScanResultsDialog(QDialog):
         
         # Buttons
         btn_layout = QHBoxLayout()
-        add_btn = CyberButton("IMPORT SELECTED", color=CP_CYAN)
+        add_btn = CyberButton(self.confirm_text, color=CP_CYAN)
         add_btn.clicked.connect(self.accept_selection)
         
         cancel_btn = CyberButton("DISCARD", color=CP_RED, is_outlined=True)
@@ -1238,23 +1243,48 @@ class MainWindow(QMainWindow):
              self.update_status(f"TASK SCAN EXCEPTION: {str(e)}")
 
     def delete_matching_shortcuts(self):
-         start_folders = [
+        start_folders = [
             os.path.expandvars(r"%ProgramData%\Microsoft\Windows\Start Menu\Programs\Startup"),
             os.path.expandvars(r"%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup")
         ]
-         deleted = 0
-         names = {i["name"].lower() for i in self.items}
-         for d in start_folders:
-             if os.path.exists(d):
-                 for f in os.listdir(d):
-                     if f.lower().endswith('.lnk'):
-                         name = os.path.splitext(f)[0]
-                         if name.lower() in names:
-                             try:
-                                 os.remove(os.path.join(d, f))
-                                 deleted += 1
-                             except: pass
-         self.update_status(f"PRUNE: {deleted} SHORTCUTS ELIMINATED")
+        
+        matching_shortcuts = []
+        names = {i["name"].lower() for i in self.items}
+        
+        for d in start_folders:
+            if os.path.exists(d):
+                for f in os.listdir(d):
+                    if f.lower().endswith('.lnk'):
+                        name = os.path.splitext(f)[0]
+                        if name.lower() in names:
+                            full_path = os.path.join(d, f)
+                            matching_shortcuts.append({
+                                "name": name,
+                                "path": full_path,
+                                "paths": [full_path] # Compat with dialog
+                            })
+
+        if not matching_shortcuts:
+            self.update_status("NO MATCHING SHORTCUTS FOUND")
+            # Removed popup for cleaner UX
+            return
+
+        # Show selection dialog
+        dialog = ScanResultsDialog(matching_shortcuts, self, title="SYSTEM // PRUNE_SHORTCUTS", confirm_text="DELETE SELECTED")
+        if dialog.exec():
+            selected = dialog.selected_items
+            deleted_count = 0
+            for item in selected:
+                try:
+                    os.remove(item['path'])
+                    deleted_count += 1
+                except:
+                    pass
+            
+            self.update_status(f"PRUNED {deleted_count} SHORTCUTS")
+            QMessageBox.information(self, "SYSTEM // PRUNE", f"Successfully deleted {deleted_count} redundant shortcuts.")
+        else:
+            self.update_status("PRUNE OPERATION CANCELLED")
 
     def filter_items(self, text):
         text = text.lower()
