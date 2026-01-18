@@ -114,6 +114,12 @@ QProgressBar {{
 QProgressBar::chunk {{
     background-color: {ACCENT_CYAN};
 }}
+QComboBox QAbstractItemView {{
+    background-color: {FG_COLOR};
+    selection-background-color: {ACCENT_MAGENTA};
+    outline: none;
+    padding: 5px;
+}}
 """
 
 SETTINGS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "ytc_qt_settings.json")
@@ -401,6 +407,17 @@ class YTCDownloaderApp(QMainWindow):
         self.thread.finished.connect(self.thread.deleteLater)
         self.thread.start()
 
+    def format_size(self, bytes_val):
+        if not bytes_val: return "N/A"
+        try:
+            val = float(bytes_val)
+            for unit in ['B', 'KB', 'MB', 'GB', 'TB']:
+                if val < 1024:
+                    return f"{val:.1f}{unit}"
+                val /= 1024
+            return f"{val:.1f}PB"
+        except: return "N/A"
+
     def on_fetch_success(self, v_fmts, a_fmts):
         self.fetch_btn.setEnabled(True)
         self.progress.setRange(0, 100)
@@ -409,21 +426,42 @@ class YTCDownloaderApp(QMainWindow):
         
         self.video_combo.clear()
         self.video_combo.addItem("Best Video (Auto)", "best")
+        
+        # Helper for safe access
+        def get_val(d, k, default): return d.get(k) if d.get(k) is not None else default
+
         for f in v_fmts:
-            res = f.get('resolution', 'N/A')
-            ext = f['ext']
-            fid = f['format_id']
-            fps = f.get('fps', '?')
-            note = f.get('format_note', '')
-            self.video_combo.addItem(f"[{ext.upper()}] {res} @ {fps}fps | {note} (ID:{fid})", fid)
+            res = get_val(f, 'resolution', 'N/A')
+            ext = get_val(f, 'ext', '???').upper()
+            fid = get_val(f, 'format_id', '?')
+            fps = get_val(f, 'fps', 0)
+            note = get_val(f, 'format_note', '')
+            
+            # Size
+            fs = get_val(f, 'filesize', get_val(f, 'filesize_approx', 0))
+            sz_str = self.format_size(fs)
+            
+            # Format: [EXT ] RES        @ FPS   | SIZE    | NOTE
+            # Example: [MP4 ] 1920x1080  @ 60fps |  200MB  | 
+            
+            display = (f"[{ext:<4}] {str(res):<11} @ {str(fps):<5} | {sz_str:>8} | {note} (ID:{fid})")
+            self.video_combo.addItem(display, fid)
+        
+        # Adjust view width for content
+        self.video_combo.view().setMinimumWidth(len(display) * 9 if v_fmts else 400)
 
         self.audio_combo.clear()
         self.audio_combo.addItem("Best Audio (Auto)", "best")
         for f in a_fmts:
-            ext = f['ext']
-            abr = f.get('abr', '?')
-            fid = f['format_id']
-            self.audio_combo.addItem(f"[{ext.upper()}] {abr}kbps (ID:{fid})", fid)
+            ext = get_val(f, 'ext', '???').upper()
+            abr = get_val(f, 'abr', 0)
+            fid = get_val(f, 'format_id', '?')
+            
+            fs = get_val(f, 'filesize', get_val(f, 'filesize_approx', 0))
+            sz_str = self.format_size(fs)
+            
+            display = f"[{ext:<4}] {str(abr):>3}kbps | {sz_str:>8} | (ID:{fid})"
+            self.audio_combo.addItem(display, fid)
 
     def on_fetch_error(self, err):
         self.fetch_btn.setEnabled(True)
