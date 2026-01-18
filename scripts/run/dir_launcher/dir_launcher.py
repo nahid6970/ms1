@@ -67,7 +67,7 @@ def run_fzf(items, prompt="Select > ", help_text="", extra_args=None):
         f"--preview=echo {safe_header}",
         "--preview-window=up:1:hidden:wrap",
         "--bind=?:toggle-preview",
-        "--expect=ctrl-a,ctrl-d,ctrl-e,tab,alt-up,alt-down",
+        "--expect=ctrl-a,ctrl-d,ctrl-e,ctrl-s,tab,alt-up,alt-down",
         "--color=bg:#1e1e1e,fg:#d0d0d0,bg+:#2e2e2e,fg+:#ffffff,hl:#00d9ff,hl+:#00ff00",
         "--color=info:#afaf87,prompt:#d782ff,pointer:#d782ff,marker:#19d600,header:#888888",
         "--border",
@@ -162,7 +162,7 @@ def main():
         key, selection = run_fzf(
             fzf_items, 
             prompt=f"Dir ({view_mode}) > ", 
-            help_text="Ctrl-A: Add | Ctrl-E: Edit | Ctrl-D: Del | Tab: View | Alt-Up/Down: Move | Enter: Select",
+            help_text="Ctrl-A: Add | Ctrl-E: Edit | Ctrl-S: Sort | Ctrl-D: Del | Tab: View | Alt-Up/Down: Move | Enter: Select",
             extra_args=fzf_args
         )
         
@@ -244,6 +244,15 @@ def main():
                 dirs.pop(idx)
                 data["directories"] = dirs
                 save_data(data)
+        
+        elif key == 'ctrl-s':
+            # Sort by Category then by Name (or basename of path)
+            dirs.sort(key=lambda x: (
+                x.get("category", "General").lower(), 
+                x.get("name", os.path.basename(x["path"].rstrip(os.sep))).lower()
+            ))
+            data["directories"] = dirs
+            save_data(data)
 
 def handle_directory(dir_obj, data):
     # dir_obj is {"path": "...", "category": "..."}
