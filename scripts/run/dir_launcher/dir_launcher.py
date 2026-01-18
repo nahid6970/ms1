@@ -5,14 +5,47 @@ import subprocess
 
 DATA_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dir_launcher.json")
 
+# ANSI Colors
+C_RESET = "\033[0m"
+C_CYAN = "\033[36m"
+C_GREEN = "\033[32m"
+C_GREY = "\033[90m"
+
 def load_data():
     if not os.path.exists(DATA_FILE):
         return {"directories": [], "commands": [], "settings": {"view_mode": "full"}}
+    
     with open(DATA_FILE, 'r') as f:
         data = json.load(f)
-        if "settings" not in data:
-            data["settings"] = {"view_mode": "full"}
-        return data
+        
+    # Migration: Ensure directories are objects
+    migrated = False
+    new_dirs = []
+    for d in data.get("directories", []):
+        if isinstance(d, str):
+            new_dirs.append({"path": d, "category": "General"})
+            migrated = True
+        else:
+            new_dirs.append(d)
+    data["directories"] = new_dirs
+    
+    # Migration: Ensure commands have category
+    new_cmds = []
+    for c in data.get("commands", []):
+        if "category" not in c:
+            c["category"] = "General"
+            migrated = True
+        new_cmds.append(c)
+    data["commands"] = new_cmds
+    
+    if "settings" not in data:
+        data["settings"] = {"view_mode": "full"}
+        migrated = True
+
+    if migrated:
+        save_data(data)
+        
+    return data
 
 def save_data(data):
     with open(DATA_FILE, 'w') as f:
@@ -21,16 +54,14 @@ def save_data(data):
 def run_fzf(items, prompt="Select > ", help_text="", extra_args=None):
     """
     Runs fzf with the given items.
-    Returns (key, selection).
-    key is 'ctrl-a', 'ctrl-d', 'tab' or '' (for enter).
-    Returns (None, None) if cancelled.
+    Items should be a list of strings.
+    Returns (key, selection_string).
     """
-    # Use header as help text in a hidden preview window
-    # Escape pipe characters for Windows cmd echo
     safe_header = help_text.replace("|", "^|")
 
     fzf_cmd = [
         "fzf", 
+        "--ansi",
         "--layout=reverse", 
         f"--prompt={prompt} [?] ", 
         f"--preview=echo {safe_header}",
@@ -60,7 +91,6 @@ def run_fzf(items, prompt="Select > ", help_text="", extra_args=None):
         print("Error: fzf not found in PATH.")
         sys.exit(1)
     
-    # fzf returns 0 on match, 1 on no match, 130 on abort
     if process.returncode == 130:
         return None, None
     
@@ -72,41 +102,54 @@ def run_fzf(items, prompt="Select > ", help_text="", extra_args=None):
     selection = lines[1] if len(lines) > 1 else ""
     return key, selection
 
-def move_item(items, item, direction):
-    """Moves item up (-1) or down (1) in the list."""
-    try:
-        idx = items.index(item)
-    except ValueError:
-        return False
-    
-    new_idx = idx + direction
+def move_item(items, index, direction):
+    """Moves item at index up (-1) or down (1)."""
+    new_idx = index + direction
     if 0 <= new_idx < len(items):
-        items[idx], items[new_idx] = items[new_idx], items[idx]
+        items[index], items[new_idx] = items[new_idx], items[index]
         return True
     return False
+
+def get_selection_index(selection):
+    """Extracts index from string 'Index\tContent'"""
+    if not selection: return -1
+    try:
+        return int(selection.split('\t')[0])
+    except:
+        return -1
 
 def main():
     while True:
         data = load_data()
-        dirs = data.get("directories", [])
+        dirs = data.get("directories", []) # List of dicts
         settings = data.get("settings", {"view_mode": "full"})
         view_mode = settings.get("view_mode", "full")
         
-        # Prepare content based on view mode
+        # Format for FZF: "Index \t DisplayString"
+        # Display: "[Category] Path/Name"
         fzf_items = []
-        fzf_args = []
+        max_cat_len = 0
+        if dirs:
+            max_cat_len = max(len(d.get("category", "")) for d in dirs)
         
-        if view_mode == "name":
-            # Show "Folder\tFullPath", tell fzf to display only 1st column
-            for d in dirs:
-                name = os.path.basename(d.rstrip(os.sep).rstrip('/'))
-                if not name: name = d # Fallback for root
-                fzf_items.append(f"{name}\t{d}")
-            fzf_args = ["--delimiter=\t", "--with-nth=1"]
-        else:
-            # Full path mode
-            fzf_items = dirs
-            fzf_args = []
+        for idx, d in enumerate(dirs):
+            cat = d.get("category", "General")
+            path = d.get("path", "")
+            
+            # Pad category for alignment
+            cat_display = f"{C_CYAN}[{cat}]{C_RESET}".ljust(max_cat_len + 12) # +12 for ansi codes roughly
+            
+            if view_mode == "name":
+                name = os.path.basename(path.rstrip(os.sep).rstrip('/'))
+                if not name: name = path
+                display = f"{cat_display} {name}"
+            else:
+                display = f"{cat_display} {path}"
+            
+            fzf_items.append(f"{idx}\t{display}")
+
+        # Hide index (column 1) from display
+        fzf_args = ["--delimiter=\t", "--with-nth=2.."]
             
         key, selection = run_fzf(
             fzf_items, 
@@ -116,19 +159,11 @@ def main():
         )
         
         if key is None:
-            # Esc pressed
             break
             
-        # Parse selection if in Name mode to get full path
-        selected_dir = ""
-        if selection:
-            if view_mode == "name" and '\t' in selection:
-                selected_dir = selection.split('\t')[1]
-            else:
-                selected_dir = selection
+        idx = get_selection_index(selection)
 
         if key == 'tab':
-            # Toggle view mode
             new_mode = "full" if view_mode == "name" else "name"
             settings["view_mode"] = new_mode
             data["settings"] = settings
@@ -136,68 +171,90 @@ def main():
             continue 
 
         elif key == 'alt-up':
-            if selected_dir and move_item(dirs, selected_dir, -1):
+            if idx != -1 and move_item(dirs, idx, -1):
                 data["directories"] = dirs
                 save_data(data)
                 
         elif key == 'alt-down':
-            if selected_dir and move_item(dirs, selected_dir, 1):
+            if idx != -1 and move_item(dirs, idx, 1):
                 data["directories"] = dirs
                 save_data(data)
 
         elif key == '':
-            if selected_dir:
-                handle_directory(selected_dir, data)
+            if idx != -1 and idx < len(dirs):
+                handle_directory(dirs[idx], data) # Pass specific dir object and full data
+        
         elif key == 'ctrl-a':
             print("\n--- Add New Directory ---")
             new_dir = input("Enter path: ").strip().strip('"').strip("'")
             if new_dir:
                 if os.path.isdir(new_dir):
-                    if new_dir not in dirs:
-                        dirs.append(new_dir)
+                    cat = input("Category (default 'General'): ").strip()
+                    if not cat: cat = "General"
+                    
+                    # Check duplicates (by path)
+                    if not any(d["path"] == new_dir for d in dirs):
+                        dirs.append({"path": new_dir, "category": cat})
                         data["directories"] = dirs
                         save_data(data)
                 else:
                     input(f"Error: '{new_dir}' is not a valid directory. Press Enter to continue...")
+        
         elif key == 'ctrl-d':
-            if selected_dir and selected_dir in dirs:
-                # confirm? nah, easy enough to re-add
-                dirs.remove(selected_dir)
+            if idx != -1 and idx < len(dirs):
+                dirs.pop(idx)
                 data["directories"] = dirs
                 save_data(data)
 
-def handle_directory(directory, data):
+def handle_directory(dir_obj, data):
+    # dir_obj is {"path": "...", "category": "..."}
+    directory_path = dir_obj.get("path")
+    
     while True:
+        # Re-load commands each time to sync
+        # But we need to use the passed 'data' for commands since 'main' loaded it. 
+        # Actually better to reload to ensure consistency? 
+        # For simple tool, using boolean logic is fine.
         commands = data.get("commands", [])
-        # Use a display string "Name" but map back to full object
-        # Or just show names in fzf
-        cmd_names = [c["name"] for c in commands]
         
-        key, selected_cmd_name = run_fzf(
-            cmd_names, 
-            prompt=f"[{directory}] Action > ", 
-            help_text="Ctrl-A: Add | Ctrl-D: Del | Alt-Up/Down: Move | Enter: Run | Esc: Back"
+        fzf_items = []
+        max_cat_len = 0
+        if commands:
+            max_cat_len = max(len(c.get("category", "")) for c in commands)
+            
+        for idx, c in enumerate(commands):
+            cat = c.get("category", "General")
+            name = c.get("name", "Unknown")
+            cat_display = f"{C_CYAN}[{cat}]{C_RESET}".ljust(max_cat_len + 12)
+            display = f"{cat_display} {name}"
+            fzf_items.append(f"{idx}\t{display}")
+            
+        fzf_args = ["--delimiter=\t", "--with-nth=2.."]
+        
+        key, selection = run_fzf(
+            fzf_items, 
+            prompt=f"[{os.path.basename(directory_path)}] Action > ", 
+            help_text="Ctrl-A: Add | Ctrl-D: Del | Alt-Up/Down: Move | Enter: Run | Esc: Back",
+            extra_args=fzf_args
         )
         
         if key is None:
-            return # Back to dir selection
+            return 
 
-        cmd_obj = None
-        if selected_cmd_name:
-            cmd_obj = next((c for c in commands if c["name"] == selected_cmd_name), None)
-
+        idx = get_selection_index(selection)
+        
         if key == '':
-            if cmd_obj:
-                execute_command(cmd_obj["template"], directory)
-                sys.exit(0) # Done
+            if idx != -1 and idx < len(commands):
+                execute_command(commands[idx]["template"], directory_path)
+                sys.exit(0)
         
         elif key == 'alt-up':
-            if cmd_obj and move_item(commands, cmd_obj, -1):
+            if idx != -1 and move_item(commands, idx, -1):
                 data["commands"] = commands
                 save_data(data)
 
         elif key == 'alt-down':
-            if cmd_obj and move_item(commands, cmd_obj, 1):
+            if idx != -1 and move_item(commands, idx, 1):
                 data["commands"] = commands
                 save_data(data)
 
@@ -207,12 +264,16 @@ def handle_directory(directory, data):
             if name:
                 template = input("Command Template (use {path} as placeholder): ").strip()
                 if template:
-                    commands.append({"name": name, "template": template})
+                    cat = input("Category (default 'General'): ").strip()
+                    if not cat: cat = "General"
+                    commands.append({"name": name, "template": template, "category": cat})
                     data["commands"] = commands
                     save_data(data)
+                    
         elif key == 'ctrl-d':
-            if selected_cmd_name:
-                data["commands"] = [c for c in commands if c["name"] != selected_cmd_name]
+            if idx != -1 and idx < len(commands):
+                commands.pop(idx)
+                data["commands"] = commands
                 save_data(data)
 
 def execute_command(template, path):

@@ -1,28 +1,43 @@
 {
     "directories": [
-        "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\",
-        "C:\\Users\\nahid\\ms\\ms1\\scripts\\run\\dir_launcher"
+        {
+            "path": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\",
+            "category": "General"
+        },
+        {
+            "path": "C:\\Users\\nahid\\ms\\ms1\\scripts\\run\\dir_launcher",
+            "category": "General"
+        },
+        {
+            "path": "C:\\Users\\nahid\\ms\\ms1\\",
+            "category": "FF"
+        }
     ],
     "commands": [
         {
             "name": "Gemini",
-            "template": "start \"Gemini\" /D \"{path}\" cmd /k gemini"
+            "template": "start \"Gemini\" /D \"{path}\" cmd /k gemini",
+            "category": "General"
         },
         {
             "name": "Explorer",
-            "template": "explorer \"{path}\""
+            "template": "explorer \"{path}\"",
+            "category": "General"
         },
         {
             "name": "Antigravity",
-            "template": "antigravity \"{path}\""
+            "template": "antigravity \"{path}\"",
+            "category": "General"
         },
         {
             "name": "Kiro App",
-            "template": "kiro \"{path}\""
+            "template": "kiro \"{path}\"",
+            "category": "General"
         },
         {
             "name": "Terminal",
-            "template": "start cmd /k cd /d \"{path}\""
+            "template": "start cmd /k cd /d \"{path}\"",
+            "category": "General"
         }
     ],
     "settings": {
