@@ -182,12 +182,17 @@ class DownloadWorker(QObject):
     error = pyqtSignal(str)
     success = pyqtSignal()
 
-    def __init__(self, cmd):
+    def __init__(self, cmd, save_dir, convert_to_txt=False):
         super().__init__()
         self.cmd = cmd
+        self.save_dir = save_dir
+        self.convert_to_txt = convert_to_txt
 
     def run(self):
         try:
+            import time
+            start_time = time.time()
+
             process = subprocess.Popen(
                 self.cmd, 
                 stdout=subprocess.PIPE, 
@@ -201,14 +206,16 @@ class DownloadWorker(QObject):
                 if not line and process.poll() is not None:
                     break
                 if line:
-                    # Parse progress if possible, for now just raw line
                     line = line.strip()
                     # Strip ANSI
                     line = re.sub(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])', '', line)
-                    self.progress.emit(line[-90:]) # Show parsing
+                    self.progress.emit(line[-90:])
             
             stderr = process.communicate()[1]
             if process.returncode == 0:
+                if self.convert_to_txt:
+                    self.progress.emit("CONVERTING_TO_RAW_TEXT...")
+                    self._process_raw_text(start_time)
                 self.success.emit()
             else:
                 self.error.emit(stderr)
@@ -216,6 +223,56 @@ class DownloadWorker(QObject):
             self.error.emit(str(e))
         finally:
             self.finished.emit()
+
+    def _process_raw_text(self, start_time):
+        try:
+            for filename in os.listdir(self.save_dir):
+                if filename.endswith(".srt") or filename.endswith(".vtt"):
+                    full_path = os.path.join(self.save_dir, filename)
+                    # Modify check: if created/modified after start_time
+                    if os.path.getmtime(full_path) > start_time - 5:
+                        self._convert_file(full_path)
+        except Exception as e:
+            print(f"Conversion processing error: {e}")
+
+    def _convert_file(self, file_path):
+        try:
+            txt_path = os.path.splitext(file_path)[0] + ".txt"
+            with open(file_path, 'r', encoding='utf-8') as f:
+                lines = f.readlines()
+
+            clean_lines = []
+            final_lines = []
+            
+            for line in lines:
+                line = line.strip()
+                if not line: continue
+                if re.fullmatch(r'\d+', line): continue 
+                if "-->" in line: continue 
+                if line.startswith("WEBVTT") or line.startswith("Kind:") or line.startswith("Language:"): continue
+                
+                line = re.sub(r'<[^>]+>', '', line)
+                line = re.sub(r'\d{2}:\d{2}:\d{2}[\.,]\d{3}', '', line)
+                line = line.strip()
+                if not line: continue
+
+                if not clean_lines or clean_lines[-1] != line:
+                     clean_lines.append(line)
+            
+            # Simple Rolling Fix
+            for line in clean_lines:
+                if final_lines and line.startswith(final_lines[-1]):
+                    final_lines[-1] = line
+                else:
+                    final_lines.append(line)
+
+            with open(txt_path, 'w', encoding='utf-8') as f:
+                f.write("\n".join(final_lines))
+            
+            try: os.remove(file_path)
+            except: pass
+        except Exception as e:
+            print(e)
 
 class YTCDownloaderApp(QMainWindow):
     def __init__(self):
@@ -256,6 +313,28 @@ class YTCDownloaderApp(QMainWindow):
         # Formats Frame
         fmt_frame = QFrame()
         fmt_layout = QVBoxLayout(fmt_frame)
+
+        # Mode Selection
+        mode_box = QHBoxLayout()
+        mode_box.addWidget(QLabel("OPERATION_MODE:"))
+        self.mode_group = QButtonGroup()
+        self.r_video = QRadioButton("VIDEO_DOWNLOAD")
+        self.r_subs = QRadioButton("SUBTITLES_ONLY")
+        self.mode_group.addButton(self.r_video)
+        self.mode_group.addButton(self.r_subs)
+        self.r_video.setChecked(True)
+        self.mode_group.buttonClicked.connect(self.toggle_mode_ui)
+        
+        mode_box.addWidget(self.r_video)
+        mode_box.addWidget(self.r_subs)
+        mode_box.addStretch()
+        fmt_layout.addLayout(mode_box)
+        
+        # Separator
+        sep = QFrame()
+        sep.setFrameShape(QFrame.Shape.HLine)
+        sep.setStyleSheet(f"background-color: {ACCENT_CYAN}; max-height: 1px;")
+        fmt_layout.addWidget(sep)
         
         # Video Fmt
         v_layout = QHBoxLayout()
@@ -283,16 +362,31 @@ class YTCDownloaderApp(QMainWindow):
         sub_layout = QHBoxLayout()
         self.sub_check = QCheckBox("DOWNLOAD_SUBTITLES")
         self.sub_check.stateChanged.connect(self.toggle_sub_ui)
-        if self.settings.get("subtitles", False): self.sub_check.setChecked(True)
-        
         sub_layout.addWidget(self.sub_check)
         
         sub_layout.addWidget(QLabel("LANG:"))
         self.lang_combo = QComboBox()
-        self.lang_combo.addItems(["English", "Bengali", "All"])
+        self.lang_combo.addItems(["English", "Bengali", "Hindi", "All"])
         self.lang_combo.setCurrentText(self.settings.get("sub_lang", "English"))
         self.lang_combo.setEnabled(self.sub_check.isChecked())
         sub_layout.addWidget(self.lang_combo)
+
+        # Extra Sub Options (Format & Auto)
+        self.sub_extras = QWidget()
+        extra_layout = QHBoxLayout(self.sub_extras)
+        extra_layout.setContentsMargins(0, 0, 0, 0)
+        
+        extra_layout.addWidget(QLabel("FMT:"))
+        self.sub_fmt = QComboBox()
+        self.sub_fmt.addItems(["SRT", "VTT", "TXT (Raw)"])
+        extra_layout.addWidget(self.sub_fmt)
+        
+        self.auto_sub = QCheckBox("INCLUDE_AUTO_GEN")
+        extra_layout.addWidget(self.auto_sub)
+        extra_layout.addStretch()
+        
+        self.sub_extras.setVisible(False) # Hidden by default (Video mode)
+        sub_layout.addWidget(self.sub_extras)
 
         opt_layout.addLayout(sub_layout)
         main.addWidget(opt_frame)
@@ -361,10 +455,38 @@ class YTCDownloaderApp(QMainWindow):
         self.progress = QProgressBar()
         self.progress.setTextVisible(False)
         self.progress.setFixedHeight(5)
+        self.progress.setFixedHeight(5)
         main.addWidget(self.progress)
+        
+        # Initialize State Safely
+        mode = self.settings.get("mode", "video")
+        if mode == "subs": self.r_subs.setChecked(True)
+        else: self.r_video.setChecked(True)
+        self.toggle_mode_ui()
 
     def toggle_sub_ui(self):
         self.lang_combo.setEnabled(self.sub_check.isChecked())
+
+    def toggle_mode_ui(self):
+        is_video = self.r_video.isChecked()
+        
+        # Video/Audio combos
+        self.video_combo.setEnabled(is_video)
+        self.audio_combo.setEnabled(is_video)
+        
+        # Sub options
+        if is_video:
+            self.sub_check.setText("DOWNLOAD_SUBTITLES")
+            self.sub_check.setEnabled(True)
+            self.sub_check.setChecked(self.settings.get("subtitles", False))
+            self.sub_extras.setVisible(False)
+            self.toggle_sub_ui()
+        else:
+            self.sub_check.setText("DOWNLOAD_SUBTITLES (FORCED)")
+            self.sub_check.setChecked(True)
+            self.sub_check.setEnabled(False) # Always checked in sub mode
+            self.lang_combo.setEnabled(True)
+            self.sub_extras.setVisible(True)
 
     def refresh_auth(self):
         if self.r_browser.isChecked():
@@ -494,30 +616,58 @@ class YTCDownloaderApp(QMainWindow):
         self.save_settings()
 
         # Build Command
+        # Build Command
         cmd = ["yt-dlp"]
-        
-        # Formats
-        v_id = self.video_combo.currentData()
-        a_id = self.audio_combo.currentData()
-        
-        f_str = ""
-        if v_id == "best" and a_id == "best": f_str = "bestvideo+bestaudio/best"
-        elif v_id == "best": f_str = f"bestvideo+{a_id}"
-        elif a_id == "best": f_str = f"{v_id}+bestaudio"
-        else: f_str = f"{v_id}+{a_id}"
-        
-        cmd.extend(["-f", f_str])
+        convert_txt = False
+
+        if self.r_subs.isChecked():
+            # Subtitle Only Mode
+            cmd.append("--skip-download")
+            cmd.append("--write-subs")
+            
+            if self.auto_sub.isChecked():
+                cmd.append("--write-auto-subs")
+            
+            fmt_sel = self.sub_fmt.currentText()
+            if "TXT" in fmt_sel:
+                cmd.extend(["--convert-subs", "srt"]) # Download srt first
+                convert_txt = True
+            elif "SRT" in fmt_sel:
+                 cmd.extend(["--convert-subs", "srt"])
+            elif "VTT" in fmt_sel:
+                 cmd.extend(["--convert-subs", "vtt"])
+
+            lang = self.lang_combo.currentText()
+            if lang == "Bengali": cmd.extend(["--sub-langs", "bn"])
+            elif lang == "Hindi": cmd.extend(["--sub-langs", "hi"])
+            elif lang == "All": cmd.extend(["--sub-langs", "all"])
+            else: cmd.extend(["--sub-langs", "en.*"])
+
+        else:
+            # Video Mode
+            # Formats
+            v_id = self.video_combo.currentData()
+            a_id = self.audio_combo.currentData()
+            
+            f_str = ""
+            if v_id == "best" and a_id == "best": f_str = "bestvideo+bestaudio/best"
+            elif v_id == "best": f_str = f"bestvideo+{a_id}"
+            elif a_id == "best": f_str = f"{v_id}+bestaudio"
+            else: f_str = f"{v_id}+{a_id}"
+            
+            cmd.extend(["-f", f_str])
+            
+            # Subtitles
+            if self.sub_check.isChecked():
+                cmd.append("--write-subs")
+                lang = self.lang_combo.currentText()
+                if lang == "Bengali": cmd.extend(["--sub-langs", "bn"])
+                elif lang == "Hindi": cmd.extend(["--sub-langs", "hi"])
+                elif lang == "All": cmd.extend(["--sub-langs", "all"])
+                else: cmd.extend(["--sub-langs", "en.*"]) # English default
         
         # Output
         cmd.extend(["-o", f"{save_dir}/%(title)s.%(ext)s"])
-        
-        # Subtitles
-        if self.sub_check.isChecked():
-            cmd.append("--write-subs")
-            lang = self.lang_combo.currentText()
-            if lang == "Bengali": cmd.extend(["--sub-langs", "bn"])
-            elif lang == "All": cmd.extend(["--sub-langs", "all"])
-            else: cmd.extend(["--sub-langs", "en.*"]) # English default
         
         # Auth
         if self.r_browser.isChecked():
@@ -533,7 +683,7 @@ class YTCDownloaderApp(QMainWindow):
         self.progress.setRange(0, 0)
 
         self.thread = QThread()
-        self.worker = DownloadWorker(cmd)
+        self.worker = DownloadWorker(cmd, save_dir, convert_txt)
         self.worker.moveToThread(self.thread)
         self.thread.started.connect(self.worker.run)
         
@@ -571,6 +721,7 @@ class YTCDownloaderApp(QMainWindow):
         return {}
 
     def save_settings(self):
+        self.settings["mode"] = "subs" if self.r_subs.isChecked() else "video"
         self.settings["subtitles"] = self.sub_check.isChecked()
         self.settings["sub_lang"] = self.lang_combo.currentText()
         
