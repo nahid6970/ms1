@@ -384,9 +384,11 @@ class YTCDownloaderApp(QMainWindow):
         extra_layout.addWidget(QLabel("FMT:"))
         self.sub_fmt = QComboBox()
         self.sub_fmt.addItems(["SRT", "VTT", "TXT (Raw)"])
+        self.sub_fmt.setCurrentText(self.settings.get("sub_fmt", "SRT"))
         extra_layout.addWidget(self.sub_fmt)
         
         self.auto_sub = QCheckBox("INCLUDE_AUTO_GEN")
+        self.auto_sub.setChecked(self.settings.get("auto_sub", False))
         extra_layout.addWidget(self.auto_sub)
         extra_layout.addStretch()
         
@@ -729,6 +731,8 @@ class YTCDownloaderApp(QMainWindow):
         self.settings["mode"] = "subs" if self.r_subs.isChecked() else "video"
         self.settings["subtitles"] = self.sub_check.isChecked()
         self.settings["sub_lang"] = self.lang_combo.currentText()
+        self.settings["sub_fmt"] = self.sub_fmt.currentText()
+        self.settings["auto_sub"] = self.auto_sub.isChecked()
         
         method = "none"
         if self.r_browser.isChecked(): method = "browser"
