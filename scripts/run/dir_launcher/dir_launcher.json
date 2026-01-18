@@ -1,6 +1,10 @@
 {
     "directories": [
         {
+            "path": "C:\\Users\\nahid\\ms\\ms1\\scripts\\run\\dir_launcher",
+            "category": "General"
+        },
+        {
             "path": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\",
             "category": "Flask"
         },
@@ -9,8 +13,36 @@
             "category": "Flask"
         },
         {
-            "path": "C:\\Users\\nahid\\ms\\ms1\\scripts\\run\\dir_launcher",
-            "category": "General"
+            "path": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\4999_startup",
+            "category": "Flask"
+        },
+        {
+            "path": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5000_myhome",
+            "category": "Flask"
+        },
+        {
+            "path": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5003_Browse_PC_Files",
+            "category": "Flask"
+        },
+        {
+            "path": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5004 paint",
+            "category": "Flask"
+        },
+        {
+            "path": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5011_tv_show",
+            "category": "Flask"
+        },
+        {
+            "path": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5013_movie_tracker",
+            "category": "Flask"
+        },
+        {
+            "path": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5018_cell",
+            "category": "Flask"
+        },
+        {
+            "path": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5555_terminal",
+            "category": "Flask"
         }
     ],
     "commands": [
