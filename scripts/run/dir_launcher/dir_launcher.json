@@ -43,6 +43,26 @@
         {
             "path": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5555_terminal",
             "category": "Flask"
+        },
+        {
+            "path": "C:\\Users\\nahid\\ms\\ms1\\scripts\\ytc",
+            "category": "script"
+        },
+        {
+            "path": "C:\\Users\\nahid\\ms\\ms1\\Testing\\mypygui\\qt",
+            "category": "Testing"
+        },
+        {
+            "path": "C:\\Users\\nahid\\ms\\ms1\\Testing\\mklink",
+            "category": "Testing"
+        },
+        {
+            "path": "C:\\Users\\nahid\\ms\\ms1\\Testing\\port finder",
+            "category": "Testing"
+        },
+        {
+            "path": "C:\\Users\\nahid\\ms\\ms1\\Testing\\FileLockSmith",
+            "category": "Testing"
         }
     ],
     "commands": [
