@@ -17,21 +17,21 @@
         {
             "name": "Gemini",
             "template": "start \"Gemini\" /D \"{path}\" cmd /k gemini",
-            "category": "General"
-        },
-        {
-            "name": "Explorer",
-            "template": "explorer \"{path}\"",
-            "category": "General"
+            "category": "AI"
         },
         {
             "name": "Antigravity",
             "template": "antigravity \"{path}\"",
-            "category": "General"
+            "category": "AI"
         },
         {
             "name": "Kiro App",
             "template": "kiro \"{path}\"",
+            "category": "AI"
+        },
+        {
+            "name": "Explorer",
+            "template": "explorer \"{path}\"",
             "category": "General"
         },
         {

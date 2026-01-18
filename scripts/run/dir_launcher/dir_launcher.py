@@ -154,7 +154,7 @@ def main():
         key, selection = run_fzf(
             fzf_items, 
             prompt=f"Dir ({view_mode}) > ", 
-            help_text="Ctrl-A: Add | Ctrl-D: Del | Tab: View | Alt-Up/Down: Move | Enter: Select",
+            help_text="Ctrl-A: Add | Ctrl-E: Edit | Ctrl-D: Del | Tab: View | Alt-Up/Down: Move | Enter: Select",
             extra_args=fzf_args
         )
         
