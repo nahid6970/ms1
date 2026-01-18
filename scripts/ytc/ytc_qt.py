@@ -125,7 +125,7 @@ QComboBox QAbstractItemView {{
 SETTINGS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "ytc_qt_settings.json")
 
 class FetchWorker(QObject):
-    finished = pyqtSignal(list, list) # video_formats, audio_formats
+    finished = pyqtSignal(str, list, list) # title, video_formats, audio_formats
     error = pyqtSignal(str)
     
     def __init__(self, url, cookie_method, browser, cookie_file):
@@ -171,7 +171,8 @@ class FetchWorker(QObject):
             v_fmts.reverse()
             a_fmts.reverse()
             
-            self.finished.emit(v_fmts, a_fmts)
+            title = info.get('title', 'Unknown Title')
+            self.finished.emit(title, v_fmts, a_fmts)
         except Exception as e:
             self.error.emit(str(e))
 
@@ -231,10 +232,10 @@ class YTCDownloaderApp(QMainWindow):
         main.setSpacing(15)
 
         # Header
-        head = QLabel(">> NEURAL_LINK_DOWNLOADER_V3")
-        head.setObjectName("Header")
-        head.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        main.addWidget(head)
+        self.head = QLabel("YT-DLP")
+        self.head.setObjectName("Header")
+        self.head.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        main.addWidget(self.head)
 
         # URL
         url_box = QHBoxLayout()
@@ -418,11 +419,17 @@ class YTCDownloaderApp(QMainWindow):
             return f"{val:.1f}PB"
         except: return "N/A"
 
-    def on_fetch_success(self, v_fmts, a_fmts):
+    def on_fetch_success(self, title, v_fmts, a_fmts):
         self.fetch_btn.setEnabled(True)
         self.progress.setRange(0, 100)
         self.progress.setValue(100)
         self.status.setText("METADATA_ACQUIRED")
+        
+        display_title = title
+        if len(display_title) > 50:
+            display_title = display_title[:47] + "..."
+        self.head.setText(display_title)
+        self.head.setToolTip(title)
         
         self.video_combo.clear()
         self.video_combo.addItem("Best Video (Auto)", "best")
