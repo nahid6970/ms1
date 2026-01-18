@@ -1282,7 +1282,6 @@ class MainWindow(QMainWindow):
                     pass
             
             self.update_status(f"PRUNED {deleted_count} SHORTCUTS")
-            QMessageBox.information(self, "SYSTEM // PRUNE", f"Successfully deleted {deleted_count} redundant shortcuts.")
         else:
             self.update_status("PRUNE OPERATION CANCELLED")
 
