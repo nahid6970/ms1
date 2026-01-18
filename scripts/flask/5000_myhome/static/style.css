@@ -19,7 +19,7 @@
   z-index: 1000;
   background-color: #0a0a0f;
   /* Dark cyberpunk background */
-  padding: 10px 20px;
+  padding: 5px 15px;
   /* Adjusted padding */
   box-sizing: border-box;
   border: 2px solid #00ff41;
@@ -42,13 +42,13 @@
   justify-content: center;
   /* Center the content */
   align-items: center;
-  gap: 15px;
+  gap: 10px;
   /* Increased gap */
   width: 100%;
   overflow: visible;
   /* Allow content to extend without scrollbars */
-  padding-top: 5px;
-  padding-bottom: 5px;
+  padding-top: 0px;
+  padding-bottom: 0px;
 }
 
 
@@ -57,7 +57,7 @@
 
 /* Adjust main content to make space for sidebar */
 .flex-container2 {
-  margin-top: 80px;
+  margin-top: 60px;
   /* Space for the floating fixed topbar */
   padding-top: 20px;
   /* Additional padding */
