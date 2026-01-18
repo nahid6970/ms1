@@ -24,19 +24,23 @@ def search_directories_and_files():
     # Shortcut list text for F1 display
     shortcuts_text = r"""
 Shortcuts available:
-  Enter   : Show action menu (Editor/VSCode/Folder/Run/Copy/Terminal) - works with multi-select
-  Ctrl-n  : Open file with editor chooser - works with multi-select
-  Ctrl-o  : Open file location in Explorer - works with multi-select  
-  Ctrl-c  : Copy full file path to clipboard - works with multi-select
-  Ctrl-r  : Run file with PowerShell Start-Process - works with multi-select
-  Ctrl-p  : Toggle preview window on/off
-  F1      : Show this shortcuts help window
-  F2      : Toggle between chafa/viu and QuickLook for image preview
-  F4      : View bookmarks (open saved bookmarks list)
-  F5      : Add current file to bookmarks
+  Enter     : Show action menu (Editor/VSCode/Folder/Run/Copy/Terminal) - works with multi-select
+  Ctrl-n    : Open file with editor chooser - works with multi-select
+  Ctrl-o    : Open file location in Explorer - works with multi-select  
+  Ctrl-c    : Copy full file path to clipboard - works with multi-select
+  Ctrl-r    : Run file with PowerShell Start-Process - works with multi-select
+  Ctrl-p    : Toggle preview window on/off
+  F1        : Show this shortcuts help window
+  F2        : Toggle between chafa/viu and QuickLook for image preview
+  F3        : Toggle view mode (Full Path / Filename)
+  F4        : View bookmarks (open saved bookmarks list)
+  F5        : Add current file to bookmarks
+  Alt-Up    : Move bookmarked file up in order
+  Alt-Down  : Move bookmarked file down in order
+  ?         : Show this help
   
 Multi-select: Use Tab to select multiple files, then use any action
-Supports files with spaces in their names!
+Bookmarked files (marked with *) appear first in the list!
 """
 
     # Create a state file to track preview mode (chafa vs quicklook)
@@ -375,6 +379,121 @@ python "{menu_script_path}" "!temp_file!" "{editor_chooser_script}"
             batch_file = batch_temp.name
 
 
+        # View mode state file for F3 toggle (full path vs filename) - stored in script dir for persistence
+        view_mode_file = os.path.join(script_dir, "run_settings.txt")
+        if not os.path.exists(view_mode_file):
+            with open(view_mode_file, 'w') as f:
+                f.write("full")
+        
+        # Create file feeder script that outputs files in different formats based on view mode
+        bookmarks_file = r"C:\Users\nahid\script_output\bookmarks.json"
+        feeder_script_content = f'''
+import os
+import sys
+import json
+
+view_mode_file = r"{view_mode_file}"
+bookmarks_file = r"{bookmarks_file}"
+directories = {repr(directories)}
+ignore_list = {repr(ignore_list)}
+
+# Read current view mode
+view_mode = "full"
+if os.path.exists(view_mode_file):
+    with open(view_mode_file, 'r') as f:
+        view_mode = f.read().strip()
+
+# Toggle mode if requested
+if len(sys.argv) > 1 and sys.argv[1] == "--toggle":
+    view_mode = "name" if view_mode == "full" else "full"
+    with open(view_mode_file, 'w') as f:
+        f.write(view_mode)
+
+# Load bookmarks
+bookmarks = []
+if os.path.exists(bookmarks_file):
+    try:
+        with open(bookmarks_file, 'r', encoding='utf-8') as f:
+            bookmarks = json.load(f)
+    except:
+        bookmarks = []
+
+# Helper function to format display
+def format_display(full_path, is_bookmarked):
+    marker = "* " if is_bookmarked else "  "
+    if view_mode == "name":
+        parent = os.path.basename(os.path.dirname(full_path))
+        file = os.path.basename(full_path)
+        display = f"{{marker}}{{file}} ({{parent}})"
+    else:
+        display = f"{{marker}}{{full_path}}"
+    return display
+
+# Output bookmarked files first
+printed_paths = set()
+for bm in bookmarks:
+    if os.path.exists(bm):
+        display = format_display(bm, True)
+        print(f"{{display}}\\t{{bm}}")
+        printed_paths.add(bm)
+
+# Output other files
+for root_dir in directories:
+    if not os.path.isdir(root_dir):
+        continue
+    for root, _, files in os.walk(root_dir, onerror=lambda e: None):
+        for file in files:
+            full_path = os.path.join(root, file)
+            if full_path in printed_paths:
+                continue
+            if any(ignore_item in full_path for ignore_item in ignore_list):
+                continue
+            display = format_display(full_path, False)
+            print(f"{{display}}\\t{{full_path}}")
+'''
+        
+        with tempfile.NamedTemporaryFile(mode='w', delete=False, encoding='utf-8', suffix='.py') as feeder_script:
+            feeder_script.write(feeder_script_content)
+            feeder_script_file = feeder_script.name
+        
+        # Create bookmark reorder script for Alt+Up/Down
+        bookmark_reorder_script_content = f'''
+import sys
+import json
+import os
+
+bookmarks_file = r"{bookmarks_file}"
+
+def move_bookmark(file_path, direction):
+    if not os.path.exists(bookmarks_file):
+        return
+    try:
+        with open(bookmarks_file, 'r', encoding='utf-8') as f:
+            bookmarks = json.load(f)
+    except:
+        return
+    
+    if file_path not in bookmarks:
+        return
+    
+    idx = bookmarks.index(file_path)
+    new_idx = idx + direction
+    
+    if 0 <= new_idx < len(bookmarks):
+        bookmarks[idx], bookmarks[new_idx] = bookmarks[new_idx], bookmarks[idx]
+        with open(bookmarks_file, 'w', encoding='utf-8') as f:
+            json.dump(bookmarks, f, indent=2, ensure_ascii=False)
+
+if __name__ == "__main__":
+    if len(sys.argv) >= 3:
+        direction = -1 if sys.argv[1] == "up" else 1
+        file_path = sys.argv[2]
+        move_bookmark(file_path, direction)
+'''
+        
+        with tempfile.NamedTemporaryFile(mode='w', delete=False, encoding='utf-8', suffix='.py') as reorder_script:
+            reorder_script.write(bookmark_reorder_script_content)
+            bookmark_reorder_script_file = reorder_script.name
         
         # Prepare fzf arguments with PowerShell preview for images and F2 toggle
         fzf_args = [
@@ -382,28 +501,33 @@ python "{menu_script_path}" "!temp_file!" "{editor_chooser_script}"
             "--multi",
             "--with-nth=1",
             "--delimiter=\t",
-            f"--preview=powershell -ExecutionPolicy Bypass -File \"{preview_script_file}\" {{1}}",
+            f"--preview=powershell -ExecutionPolicy Bypass -File \"{preview_script_file}\" {{2}}",
             "--preview-window=~3",
             "--preview-window=hidden",   # Start with preview hidden
             "--border",
-            "--layout=reverse", 
+            "--layout=reverse",
+            "--header=Press ? for help | F3: Toggle View | Alt+Up/Down: Move Bookmark",
             "--color=bg:#1e1e1e,fg:#d0d0d0,bg+:#2e2e2e,fg+:#ffffff,hl:#00d9ff,hl+:#00ff00,info:#afaf87,prompt:#d782ff,pointer:#d782ff,marker:#19d600,header:#888888,border:#d782ff",
-            f"--bind=enter:execute({batch_file} {{+1}})",
-            f"--bind=ctrl-n:execute-silent(python \"{editor_chooser_script}\" {{+1}})",
-            "--bind=ctrl-o:execute-silent(explorer.exe /select,{1})",
-            "--bind=ctrl-c:execute-silent(echo {1} | clip)",
-            "--bind=ctrl-r:execute-silent(powershell -command Start-Process '{1}')",
+            f"--bind=enter:execute({batch_file} {{+2}})",
+            f"--bind=ctrl-n:execute-silent(python \"{editor_chooser_script}\" {{+2}})",
+            "--bind=ctrl-o:execute-silent(explorer.exe /select,{2})",
+            "--bind=ctrl-c:execute-silent(echo {2} | clip)",
+            "--bind=ctrl-r:execute-silent(powershell -command Start-Process '{2}')",
             f"--bind=f1:execute-silent(cmd /c start cmd /k type {temp_shortcut_file} & pause)",
             f"--bind=f2:execute-silent(powershell -ExecutionPolicy Bypass -File \"{toggle_script_file}\")+refresh-preview",
+            f"--bind=f3:reload(python \"{feeder_script_file}\" --toggle)",
             f"--bind=f4:execute-silent(start cmd /c python \"{view_bookmarks_script}\")",
-            f"--bind=f5:execute-silent(python \"{add_bookmark_script}\" {{1}})",
+            f"--bind=f5:execute-silent(python \"{add_bookmark_script}\" {{2}})+reload(python \"{feeder_script_file}\")",
             "--bind=ctrl-p:toggle-preview",
+            f"--bind=?:execute-silent(cmd /c start cmd /k type {temp_shortcut_file})",
+            f"--bind=alt-up:execute-silent(python \"{bookmark_reorder_script_file}\" up {{2}})+reload(python \"{feeder_script_file}\")",
+            f"--bind=alt-down:execute-silent(python \"{bookmark_reorder_script_file}\" down {{2}})+reload(python \"{feeder_script_file}\")",
         ]
 
-        # Start fzf process
+        # Start fzf process with initial file feed
         process = subprocess.Popen(fzf_args, stdin=subprocess.PIPE, text=True, encoding='utf-8')
 
-        # Traverse directories and send file paths to fzf's stdin
+        # Initial file feed
         for root_dir in directories:
             if not os.path.isdir(root_dir):
                 continue
@@ -416,9 +540,8 @@ python "{menu_script_path}" "!temp_file!" "{editor_chooser_script}"
                     if any(ignore_item in full_path for ignore_item in ignore_list):
                         continue
 
-                    directory_name = os.path.dirname(full_path)
                     try:
-                        process.stdin.write(f"{full_path}\t{directory_name}\n")
+                        process.stdin.write(f"{full_path}\t{full_path}\n")
                     except BrokenPipeError:
                         break
                 else:
