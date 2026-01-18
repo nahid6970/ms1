@@ -72,10 +72,13 @@ QPushButton:disabled {{
 QComboBox {{
     background-color: {BG_COLOR};
     border: 1px solid {ACCENT_MAGENTA};
-    padding: 5px;
+    border-radius: 4px;
+    padding: 2px 5px;
+    min-height: 22px;
 }}
 QComboBox::drop-down {{
     border: none;
+    width: 20px;
 }}
 QComboBox QAbstractItemView {{
     background-color: {FG_COLOR};
@@ -360,6 +363,7 @@ class YTCDownloaderApp(QMainWindow):
         
         # Subtitles Config
         sub_layout = QHBoxLayout()
+        sub_layout.setAlignment(Qt.AlignmentFlag.AlignVCenter)
         self.sub_check = QCheckBox("DOWNLOAD_SUBTITLES")
         self.sub_check.stateChanged.connect(self.toggle_sub_ui)
         sub_layout.addWidget(self.sub_check)
@@ -374,7 +378,8 @@ class YTCDownloaderApp(QMainWindow):
         # Extra Sub Options (Format & Auto)
         self.sub_extras = QWidget()
         extra_layout = QHBoxLayout(self.sub_extras)
-        extra_layout.setContentsMargins(0, 0, 0, 0)
+        extra_layout.setContentsMargins(10, 0, 0, 0)
+        extra_layout.setAlignment(Qt.AlignmentFlag.AlignVCenter)
         
         extra_layout.addWidget(QLabel("FMT:"))
         self.sub_fmt = QComboBox()
