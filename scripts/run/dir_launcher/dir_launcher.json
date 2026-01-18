@@ -1,7 +1,7 @@
 {
     "directories": [
         "C:\\Users\\nahid\\ms\\ms1\\scripts\\run\\dir_launcher",
-        "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5000_myhome"
+        "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\"
     ],
     "commands": [
         {
@@ -9,7 +9,7 @@
             "template": "start \"Gemini\" /D \"{path}\" cmd /k gemini"
         },
         {
-            "name": "Files Explorer",
+            "name": "Explorer",
             "template": "explorer \"{path}\""
         },
         {
