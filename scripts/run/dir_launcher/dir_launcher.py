@@ -22,11 +22,17 @@ def run_fzf(items, prompt="Select > ", header=""):
     key is 'ctrl-a', 'ctrl-d' or '' (for enter).
     Returns (None, None) if cancelled.
     """
+    # Use header as help text in a hidden preview window
+    # Escape pipe characters for Windows cmd echo
+    safe_header = header.replace("|", "^|")
+
     fzf_cmd = [
         "fzf", 
         "--layout=reverse", 
-        f"--prompt={prompt}", 
-        f"--header={header}", 
+        f"--prompt={prompt} [?] ", 
+        f"--preview=echo {safe_header}",
+        "--preview-window=up:1:hidden:wrap",
+        "--bind=?:toggle-preview",
         "--expect=ctrl-a,ctrl-d",
         "--color=bg:#1e1e1e,fg:#d0d0d0,bg+:#2e2e2e,fg+:#ffffff,hl:#00d9ff,hl+:#00ff00",
         "--color=info:#afaf87,prompt:#d782ff,pointer:#d782ff,marker:#19d600,header:#888888",
