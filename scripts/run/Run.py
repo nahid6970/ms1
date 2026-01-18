@@ -392,6 +392,9 @@ import os
 import sys
 import json
 
+# Fix Unicode encoding for Windows console
+sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+
 view_mode_file = r"{view_mode_file}"
 bookmarks_file = r"{bookmarks_file}"
 directories = {repr(directories)}
@@ -524,32 +527,17 @@ if __name__ == "__main__":
             f"--bind=alt-down:execute-silent(python \"{bookmark_reorder_script_file}\" down {{2}})+reload(python \"{feeder_script_file}\")",
         ]
 
-        # Start fzf process with initial file feed
-        process = subprocess.Popen(fzf_args, stdin=subprocess.PIPE, text=True, encoding='utf-8')
-
-        # Initial file feed
-        for root_dir in directories:
-            if not os.path.isdir(root_dir):
-                continue
-
-            for root, _, files in os.walk(root_dir, onerror=lambda e: None):
-                for file in files:
-                    full_path = os.path.join(root, file)
-
-                    # Check against ignore list
-                    if any(ignore_item in full_path for ignore_item in ignore_list):
-                        continue
-
-                    try:
-                        process.stdin.write(f"{full_path}\t{full_path}\n")
-                    except BrokenPipeError:
-                        break
-                else:
-                    continue
-                break
+        # Start fzf process with initial file feed from feeder script
+        # Use the feeder script for initial load to respect saved view mode and show bookmarks first
+        initial_feed = subprocess.Popen(
+            ['python', feeder_script_file],
+            stdout=subprocess.PIPE,
+            text=True,
+            encoding='utf-8'
+        )
         
-        # Close stdin to signal end of input to fzf
-        process.stdin.close()
+        process = subprocess.Popen(fzf_args, stdin=initial_feed.stdout, text=True, encoding='utf-8')
+        initial_feed.stdout.close()  # Allow feeder to receive SIGPIPE if fzf exits
         process.wait()
 
         # Clean up temp files
