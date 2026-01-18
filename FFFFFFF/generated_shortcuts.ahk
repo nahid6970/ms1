@@ -698,6 +698,8 @@ __text__ = underline
 - text = list 1
 -- text = list 2
 --- text = list 3
+Dont add unnecessary extra lines between heading and its content
+dont use --- or dash to add separator just keep single empty line for spacing
 )")
 
 ;! Cyberpunk styling with pyqt
