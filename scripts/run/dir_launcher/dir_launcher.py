@@ -7,24 +7,27 @@ DATA_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dir_launch
 
 def load_data():
     if not os.path.exists(DATA_FILE):
-        return {"directories": [], "commands": []}
+        return {"directories": [], "commands": [], "settings": {"view_mode": "full"}}
     with open(DATA_FILE, 'r') as f:
-        return json.load(f)
+        data = json.load(f)
+        if "settings" not in data:
+            data["settings"] = {"view_mode": "full"}
+        return data
 
 def save_data(data):
     with open(DATA_FILE, 'w') as f:
         json.dump(data, f, indent=4)
 
-def run_fzf(items, prompt="Select > ", header=""):
+def run_fzf(items, prompt="Select > ", help_text="", extra_args=None):
     """
     Runs fzf with the given items.
     Returns (key, selection).
-    key is 'ctrl-a', 'ctrl-d' or '' (for enter).
+    key is 'ctrl-a', 'ctrl-d', 'tab' or '' (for enter).
     Returns (None, None) if cancelled.
     """
     # Use header as help text in a hidden preview window
     # Escape pipe characters for Windows cmd echo
-    safe_header = header.replace("|", "^|")
+    safe_header = help_text.replace("|", "^|")
 
     fzf_cmd = [
         "fzf", 
@@ -33,13 +36,16 @@ def run_fzf(items, prompt="Select > ", header=""):
         f"--preview=echo {safe_header}",
         "--preview-window=up:1:hidden:wrap",
         "--bind=?:toggle-preview",
-        "--expect=ctrl-a,ctrl-d",
+        "--expect=ctrl-a,ctrl-d,tab",
         "--color=bg:#1e1e1e,fg:#d0d0d0,bg+:#2e2e2e,fg+:#ffffff,hl:#00d9ff,hl+:#00ff00",
         "--color=info:#afaf87,prompt:#d782ff,pointer:#d782ff,marker:#19d600,header:#888888",
         "--border",
         "--margin=1",
         "--padding=1"
     ]
+    
+    if extra_args:
+        fzf_cmd.extend(extra_args)
     
     try:
         process = subprocess.Popen(
@@ -70,18 +76,53 @@ def main():
     while True:
         data = load_data()
         dirs = data.get("directories", [])
+        settings = data.get("settings", {"view_mode": "full"})
+        view_mode = settings.get("view_mode", "full")
         
-        key, selected_dir = run_fzf(
-            dirs, 
-            prompt="Dir > ", 
-            header="Ctrl-A: Add Path | Ctrl-D: Remove Path | Enter: Select"
+        # Prepare content based on view mode
+        fzf_items = []
+        fzf_args = []
+        
+        if view_mode == "name":
+            # Show "Folder\tFullPath", tell fzf to display only 1st column
+            for d in dirs:
+                name = os.path.basename(d.rstrip(os.sep).rstrip('/'))
+                if not name: name = d # Fallback for root
+                fzf_items.append(f"{name}\t{d}")
+            fzf_args = ["--delimiter=\t", "--with-nth=1"]
+        else:
+            # Full path mode
+            fzf_items = dirs
+            fzf_args = []
+            
+        key, selection = run_fzf(
+            fzf_items, 
+            prompt=f"Dir ({view_mode}) > ", 
+            help_text="Ctrl-A: Add Path | Ctrl-D: Remove Path | Tab: Toggle View | Enter: Select",
+            extra_args=fzf_args
         )
         
         if key is None:
             # Esc pressed
             break
             
-        if key == '':
+        # Parse selection if in Name mode to get full path
+        selected_dir = ""
+        if selection:
+            if view_mode == "name" and '\t' in selection:
+                selected_dir = selection.split('\t')[1]
+            else:
+                selected_dir = selection
+
+        if key == 'tab':
+            # Toggle view mode
+            new_mode = "full" if view_mode == "name" else "name"
+            settings["view_mode"] = new_mode
+            data["settings"] = settings
+            save_data(data)
+            continue # Loop again with new settings
+
+        elif key == '':
             if selected_dir:
                 handle_directory(selected_dir, data)
         elif key == 'ctrl-a':
@@ -112,7 +153,7 @@ def handle_directory(directory, data):
         key, selected_cmd_name = run_fzf(
             cmd_names, 
             prompt=f"[{directory}] Action > ", 
-            header="Ctrl-A: Add Cmd | Ctrl-D: Remove Cmd | Enter: Run | Esc: Back"
+            help_text="Ctrl-A: Add Cmd | Ctrl-D: Remove Cmd | Enter: Run | Esc: Back"
         )
         
         if key is None:

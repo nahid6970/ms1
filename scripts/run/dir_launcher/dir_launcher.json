@@ -24,5 +24,8 @@
             "name": "Terminal",
             "template": "start cmd /k cd /d \"{path}\""
         }
-    ]
+    ],
+    "settings": {
+        "view_mode": "name"
+    }
 }
