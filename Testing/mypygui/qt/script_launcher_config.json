@@ -1091,7 +1091,7 @@
     "always_on_top": false,
     "default_font_size": 14,
     "app_bg": "#1d1d2b",
-    "show_widgets": false,
+    "show_widgets": true,
     "window_border_color": "#1efc94",
     "cfg_btn_color": "#55aaff",
     "default_font_family": "JetBrainsMono Nerd Font Propo",
