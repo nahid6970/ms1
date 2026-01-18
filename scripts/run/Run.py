@@ -499,14 +499,18 @@ if __name__ == "__main__":
             bookmark_reorder_script_file = reorder_script.name
         
         # Prepare fzf arguments with PowerShell preview for images and F2 toggle
-        help_cmd = f"fzf --preview \"type {temp_shortcut_file}\" --preview-window=up:99%:wrap --height=50% --layout=reverse --border --prompt=\"Help (Esc to close) > \" --color=bg:#1e1e1e,fg:#d0d0d0,bg+:#2e2e2e,fg+:#ffffff,hl:#00d9ff,hl+:#00ff00,info:#afaf87,prompt:#d782ff,pointer:#d782ff,marker:#19d600,header:#888888,border:#d782ff"
-        
+        # Compact multiline help header
+        help_header = "Enter: Menu       | F3: Toggle View    | ?: Toggle Help\nCtrl-N: Editor    | F5: Bookmark       | Alt-Up: Move Up\nCtrl-O: Explorer  | Ctrl-C: Copy Path  | Alt-Down: Move Down\nCtrl-R: Run File  | F2: Toggle Preview"
+         
         fzf_args = [
             "fzf",
             "--multi",
             "--with-nth=1",
             "--delimiter=\t",
             "--prompt=Search [?] > ",
+            "--header-first",
+            "--no-header",
+            f"--header={help_header}",
             f"--preview=powershell -ExecutionPolicy Bypass -File \"{preview_script_file}\" {{2}}",
             "--preview-window=right:50%:hidden",
             "--border",
@@ -523,7 +527,8 @@ if __name__ == "__main__":
             f"--bind=f4:execute-silent(start cmd /c python \"{view_bookmarks_script}\")",
             f"--bind=f5:execute-silent(python \"{add_bookmark_script}\" {{2}})+reload(python \"{feeder_script_file}\")",
             "--bind=ctrl-p:toggle-preview",
-            f"--bind=?:execute({help_cmd})",
+            "--bind=?:toggle-header",
+            "--bind=start:toggle-header",
             f"--bind=alt-up:execute-silent(python \"{bookmark_reorder_script_file}\" up {{2}})+reload(python \"{feeder_script_file}\")",
             f"--bind=alt-down:execute-silent(python \"{bookmark_reorder_script_file}\" down {{2}})+reload(python \"{feeder_script_file}\")",
         ]
