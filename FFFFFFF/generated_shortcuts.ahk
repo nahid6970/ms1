@@ -482,16 +482,14 @@ LAlt & c:: {
         if InStr(ClipBoardContent, "\") {
             ; Handle multiple files (split by newline)
             FilePaths := ""
-            Loop Parse, ClipBoardContent, "`n", "`r"
-            {
-                if (A_LoopField != "")
-                {
+            Loop Parse, ClipBoardContent, "`n", "`r" {
+                if (A_LoopField != "") {
                     FilePaths .= '"' . A_LoopField . '" '
                 }
             }
             if (FilePaths != "") {
-                ; Call editor_chooser.py with all file paths
-                Run('python "C:\Users\nahid\ms\ms1\scripts\run\editor_chooser.py" ' . FilePaths)
+                ; Use pythonw to run without console window
+                Run('pythonw "C:\Users\nahid\ms\ms1\scripts\run\editor_chooser.py" ' . FilePaths, , "Hide")
             }
         } else {
             MsgBox("No valid file path found.")
