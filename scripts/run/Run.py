@@ -293,7 +293,7 @@ def show_fzf_menu():
             "--height=100%",                 # taller window
             f"--preview=bat --color=always --style=plain {preview_file_path} || type {preview_file_path}",
             "--preview-window=right:60%:border-left",
-            "--color=bg:-1,bg+:#1e1e1e,fg:#ebdbb2,fg+:#ebdbb2,hl:#fe8019,hl+:#fe8019,info:#83a598,prompt:#b8bb26,pointer:#d3869b,marker:#b8bb26,spinner:#fe8019,header:#83a598,preview-bg:-1,border:#665c54"
+            "--color=bg:#1e1e1e,fg:#d0d0d0,bg+:#2e2e2e,fg+:#ffffff,hl:#00d9ff,hl+:#00ff00,info:#afaf87,prompt:#d782ff,pointer:#d782ff,marker:#19d600,header:#888888,border:#d782ff"
         ]
         
         process = subprocess.Popen(fzf_args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True, encoding='utf-8')
@@ -387,7 +387,7 @@ python "{menu_script_path}" "!temp_file!" "{editor_chooser_script}"
             "--preview-window=hidden",   # Start with preview hidden
             "--border",
             "--layout=reverse", 
-            "--color=bg:-1,bg+:#1e1e1e,fg:#d1ff94,fg+:#8fdbff,hl:#fe8019,hl+:#fe8019,info:#83a598,prompt:#b8bb26,pointer:#d3869b,marker:#ff4747,spinner:#fe8019,header:#83a598,preview-bg:-1,border:#d782ff",
+            "--color=bg:#1e1e1e,fg:#d0d0d0,bg+:#2e2e2e,fg+:#ffffff,hl:#00d9ff,hl+:#00ff00,info:#afaf87,prompt:#d782ff,pointer:#d782ff,marker:#19d600,header:#888888,border:#d782ff",
             f"--bind=enter:execute({batch_file} {{+1}})",
             f"--bind=ctrl-n:execute-silent(python \"{editor_chooser_script}\" {{+1}})",
             "--bind=ctrl-o:execute-silent(explorer.exe /select,{1})",

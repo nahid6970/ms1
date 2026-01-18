@@ -2,15 +2,15 @@
     "directories": [
         {
             "path": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\",
-            "category": "General"
+            "category": "Flask"
+        },
+        {
+            "path": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\4998_Applist",
+            "category": "Flask"
         },
         {
             "path": "C:\\Users\\nahid\\ms\\ms1\\scripts\\run\\dir_launcher",
             "category": "General"
-        },
-        {
-            "path": "C:\\Users\\nahid\\ms\\ms1\\",
-            "category": "FF"
         }
     ],
     "commands": [
