@@ -1,0 +1,28 @@
+{
+    "directories": [
+        "c:/Users/nahid/ms/ms1",
+        "C:\\Users\\nahid\\ms\\ms1\\scripts\\run\\dir_launcher"
+    ],
+    "commands": [
+        {
+            "name": "Gemini",
+            "template": "start \"Gemini\" /D \"{path}\" cmd /k gemini"
+        },
+        {
+            "name": "Files Explorer",
+            "template": "explorer \"{path}\""
+        },
+        {
+            "name": "Antigravity",
+            "template": "antigravity \"{path}\""
+        },
+        {
+            "name": "Kiro App",
+            "template": "kiro \"{path}\""
+        },
+        {
+            "name": "Terminal",
+            "template": "start cmd /k cd /d \"{path}\""
+        }
+    ]
+}
