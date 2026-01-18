@@ -3,7 +3,6 @@ import os
 import json
 import subprocess
 import shutil
-import psutil
 from functools import partial
 import re
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
@@ -305,36 +304,7 @@ class CyberButton(QPushButton):
             }}
         """)
 
-class StatWidget(QFrame):
-    def __init__(self, label, color, parent=None):
-        super().__init__(parent)
-        self.setFrameShape(QFrame.Shape.StyledPanel)
-        self.setStyleSheet(f"background-color: {CP_PANEL}; border: 1px solid {CP_DIM};")
-        self.setFixedWidth(140)
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(5, 5, 5, 5)
-        layout.setSpacing(2)
-        
-        lbl = QLabel(label)
-        lbl.setFont(QFont("Consolas", 8, QFont.Weight.Bold))
-        lbl.setStyleSheet(f"color: {CP_SUBTEXT};")
-        layout.addWidget(lbl)
-        
-        self.lbl_val = QLabel("0%")
-        self.lbl_val.setFont(QFont("Consolas", 10, QFont.Weight.Bold))
-        self.lbl_val.setStyleSheet(f"color: {color};")
-        self.lbl_val.setAlignment(Qt.AlignmentFlag.AlignRight)
-        layout.addWidget(self.lbl_val)
-        
-        self.bar = QProgressBar()
-        self.bar.setFixedHeight(4)
-        self.bar.setTextVisible(False)
-        self.bar.setStyleSheet(f"QProgressBar {{ background: {CP_DIM}; border: none; }} QProgressBar::chunk {{ background: {color}; }}")
-        layout.addWidget(self.bar)
 
-    def set_value(self, val):
-        self.bar.setValue(int(val))
-        self.lbl_val.setText(f"{int(val)}%")
 
 # -----------------------------------------------------------------------------
 # SELECTION DIALOG
@@ -948,10 +918,6 @@ class SettingsDialog(QDialog):
         cfg_box.addWidget(self.btn_cfg_txt)
         l_app.addRow("CFG Button:", cfg_box)
 
-        self.chk_widgets = QCheckBox("Show Stats Dashboard")
-        self.chk_widgets.setChecked(self.config.get("show_widgets", True))
-        l_app.addRow("", self.chk_widgets)
-
         grp_app.setLayout(l_app)
         layout.addWidget(grp_app)
 
@@ -1114,7 +1080,6 @@ class SettingsDialog(QDialog):
         self.config["window_border_color"] = self.win_border
         self.config["cfg_btn_color"] = self.cfg_color
         self.config["cfg_text_color"] = self.cfg_text_color
-        self.config["show_widgets"] = self.chk_widgets.isChecked()
         self.config["window_width"] = self.spn_w.value()
         self.config["window_height"] = self.spn_h.value()
         self.config["edit_panel_width"] = self.spn_edit_w.value()
@@ -1169,10 +1134,6 @@ class MainWindow(QMainWindow):
         
         self.setup_ui()
         self.refresh_grid()
-        
-        self.timer = QTimer()
-        self.timer.timeout.connect(self.update_stats)
-        self.timer.start(2000)
 
     def setup_icon(self):
         # Code Icon SVG logic
@@ -1240,9 +1201,6 @@ class MainWindow(QMainWindow):
             else:
                 self.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint, False)
 
-            if hasattr(self, 'dash_frame'):
-                self.dash_frame.setVisible(self.config.get("show_widgets", True))
-
             self.show()
             
         except: pass
@@ -1300,16 +1258,6 @@ class MainWindow(QMainWindow):
         header.addWidget(self.btn_close)
         
         self.main_layout.addLayout(header)
-
-        # Dashboard
-        self.dash_frame = QFrame(); self.dash_frame.setFixedHeight(60); 
-        dash_layout = QHBoxLayout(self.dash_frame); dash_layout.setContentsMargins(0,0,0,0)
-        self.stat_cpu = StatWidget("CPU", CP_CYAN); self.stat_ram = StatWidget("RAM", CP_ORANGE); self.stat_disk = StatWidget("SSD", CP_GREEN)
-        dash_layout.addWidget(self.stat_cpu); dash_layout.addWidget(self.stat_ram); dash_layout.addWidget(self.stat_disk)
-        lbl_status = QLabel(" GITHUB: OK | RCLONE: IDLE "); lbl_status.setFont(QFont("Consolas", 9)); lbl_status.setStyleSheet(f"color: {CP_SUBTEXT}; background: {CP_PANEL}; border: 1px solid {CP_DIM}; padding: 5px;")
-        dash_layout.addWidget(lbl_status); dash_layout.addStretch()
-        self.main_layout.addWidget(self.dash_frame)
-        self.dash_frame.setVisible(self.config.get("show_widgets", True))
 
         # Grid
         self.scroll = QScrollArea()
@@ -1387,13 +1335,7 @@ class MainWindow(QMainWindow):
             self.save_config()
             event.acceptProposedAction()
 
-    def update_stats(self):
-        if not self.config.get("show_widgets", True): return
-        try:
-            self.stat_cpu.set_value(psutil.cpu_percent())
-            self.stat_ram.set_value(psutil.virtual_memory().percent)
-            self.stat_disk.set_value(psutil.disk_usage('C://').percent)
-        except: pass
+
 
     def clear_layout(self, layout):
         while layout.count():

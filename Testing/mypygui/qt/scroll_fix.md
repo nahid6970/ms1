@@ -60,7 +60,19 @@ Both `reset_styles()` in EditDialog and `reset_item_styles()` in main window:
 
 ---
 
-## Issue 6: Context Menu
+## Issue 7: Performance Widget Removal
 
-### Added Options
-- "Reset Styles" - resets item to global defaults (preserves icon path)
+### Changes Made
+- **Removed StatWidget class** - CPU/RAM/SSD monitoring widgets
+- **Removed psutil import** - no longer needed for system monitoring
+- **Removed dashboard section** - entire performance monitoring dashboard
+- **Removed stats timer** - QTimer for updating performance metrics
+- **Removed update_stats method** - performance monitoring logic
+- **Removed show_widgets setting** - from global configuration panel
+- **Cleaner interface** - focused purely on script management without system monitoring overhead
+
+### Benefits
+- Lighter application footprint
+- Reduced dependencies (no psutil required)
+- Cleaner, more focused UI
+- Better performance without constant system polling

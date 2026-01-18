@@ -1,23 +1,36 @@
-# Scroll Issue Fix
+# Script Manager GUI Qt
 
-## Problem
-Items in the grid don't scroll when they exceed the window height - they just get cut off at the window border.
+A cyberpunk-themed script launcher and manager built with PyQt6.
 
-## Root Cause
-In `CyberButton.__init__` (around line 46):
+## Features
 
-```python
-self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-```
+- **Grid-based Layout**: Customizable grid with drag & drop support
+- **Script & Folder Management**: Organize scripts in folders with custom styling
+- **Icon Support**: Add custom icons (.ico, .png, .jpg, .svg) with positioning options
+- **Inline Script Editor**: Write and execute scripts directly in the app
+- **Custom Styling**: Per-item colors, fonts, borders, and hover effects
+- **Admin Execution**: Run scripts with elevated privileges
+- **Multiple Interpreters**: Support for cmd, PowerShell, Python
+- **Cyberpunk Theme**: Dark theme with neon accents
 
-The vertical `Expanding` policy causes buttons to stretch to fill available space in the scroll area viewport. This prevents the grid container from growing taller than the viewport, so no scrollbar appears.
+## Recent Changes
 
-## Fix
-Change the vertical size policy from `Expanding` to `Fixed`:
+### ✅ Performance Widget Removal
+- Removed CPU, RAM, and SSD monitoring widgets
+- Eliminated psutil dependency
+- Cleaner, lighter interface focused on script management
+- Removed dashboard settings from configuration panel
 
-```python
-self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
-```
+## Installation
 
-- Horizontal `Expanding` - buttons fill column width (keeps current behavior)
-- Vertical `Fixed` - buttons respect their set height, allowing grid to grow and scroll
+1. Install Python 3.8+
+2. Install dependencies: `pip install PyQt6`
+3. Run: `python script_manager_gui_qt.py`
+
+## Configuration
+
+Settings are stored in `script_launcher_config.json` and include:
+- Grid layout (columns, button height)
+- Default fonts and styling
+- Window dimensions and behavior
+- Item style defaults for scripts and folders
