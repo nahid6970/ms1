@@ -392,7 +392,7 @@
             "name": "AI Instruction Prompt 1",
             "category": "General",
             "description": "",
-            "trigger": ";ai1",
+            "trigger": ";commit",
             "replacement": "IMPORTANT:\n- here when i say commit then commit the current changes in my github and then push\n- only commit when i type \"commit\"\n- use emoji ✅when resolved any bug and ⚠️ when facing any issue etc to make the commit message more attractive\n- also first update the md files then commit [update whatever md files needs update like recent changes, problem solving md, new feature md etc]\n- use only 1 line for commit message",
             "enabled": true
         },
@@ -400,7 +400,7 @@
             "name": "AI - Instruction For md file",
             "category": "General",
             "description": "",
-            "trigger": ";ai2",
+            "trigger": ";ai1",
             "replacement": "For Projects Always create a Dev.md file and discuss important thing about the project general idea important things etc and also make a md directory where u will add Provlems_Solution.md where u will update  problems and how we resolved them in this structure\n\n## Template for New Entries\n## [YYYY-MM-DD HH:MM] - Brief Problem Title\n\n**Problem:** \nDescription of the issue observed\n\n**Root Cause:** \nWhat was actually causing the problem\n\n**Solution:** \nHow it was fixed (include key code changes)\n\n**Files Modified:**\n- `file1.js` - Brief description of change\n- `file2.css` - Brief description of change\n\n**Related Issues:** Links to related problems or \"None\"",
             "enabled": true
         },

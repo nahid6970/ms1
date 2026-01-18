@@ -1176,7 +1176,7 @@ if __name__ == ""__main__"":
 :X:;check::Paste('here is everything added to summary or it missed something')
 
 ;! AI Instruction Prompt 1
-:X:;ai1::Paste("
+:X:;commit::Paste("
 (
 IMPORTANT:
 - here when i say commit then commit the current changes in my github and then push
@@ -1187,7 +1187,7 @@ IMPORTANT:
 )")
 
 ;! AI - Instruction For md file
-:X:;ai2::Paste("
+:X:;ai1::Paste("
 (
 For Projects Always create a Dev.md file and discuss important thing about the project general idea important things etc and also make a md directory where u will add Provlems_Solution.md where u will update  problems and how we resolved them in this structure
 
