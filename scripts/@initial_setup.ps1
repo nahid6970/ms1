@@ -213,7 +213,7 @@ Write-Host "########## Komorebi Setup ##########"
 Write-Host "####################################"
 Komorebic quickstart
 Remove-Item "C:\Users\nahid\komorebi.json"
-New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\komorebi.json" -Target "C:\Users\nahid\ms\ms1\asset\komorebi\komorebi.json" -Force #[pwsh]
+New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\komorebi.json" -Target "C:\@delta\ms1\asset\komorebi\komorebi.json" -Force #[pwsh]
 
 # VSCode
 New-Item -ItemType SymbolicLink -Path C:\Users\nahid\AppData\Roaming\Code\User\keybindings.json -Target C:\Users\nahid\ms\ms1\mklink\vscode\keybindings.json -Force

@@ -15,8 +15,8 @@ myGui.Add("Text", "xm y+5 Backgroundffffff c1E90FF w40 +Center", "󰜉").OnEvent
 ; Functional buttons
 myGui.Add("Text", "xm y+5 Backgroundffffff c000000 w40 +Center", "").OnEvent("Click", (*) => (myGui.Destroy(), Sleep(500), Send("#+f"))) ; Text Grab
 myGui.Add("Text", "xm y+5 Backgroundffffff c000000 w40 +Center", "").OnEvent("Click", (*) =>  (myGui.Destroy(), Sleep(500), pasteshit(), Reload()))
-myGui.Add("Text", "xm y+5 Backgroundffffff c000000 w40 +Center", "").OnEvent("Click", (*) => (Run("C:\Users\nahid\ms\ms1\scripts\xy\XY_CroosHair.py",, "Hide"))) ; CrossHair
-myGui.Add("Text", "xm y+5 Backgroundffffff cec2d47 w40 +Center", "").OnEvent("Click", (*) => (Run("C:\Users\nahid\ms\ms1\scripts\Locker.py",, "Hide"))) ; Locker
+myGui.Add("Text", "xm y+5 Backgroundffffff c000000 w40 +Center", "").OnEvent("Click", (*) => (Run("C:\@delta\ms1\scripts\xy\XY_CroosHair.py",, "Hide"))) ; CrossHair
+myGui.Add("Text", "xm y+5 Backgroundffffff cec2d47 w40 +Center", "").OnEvent("Click", (*) => (Run("C:\@delta\ms1\scripts\Locker.py",, "Hide"))) ; Locker
 
 myGui.Add("Text" , "xm y+5 Backgroundffffff c000000 w40 +Center" , "" )
 .OnEvent("Click"

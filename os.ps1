@@ -252,7 +252,7 @@ $menu = [ordered]@{
                     uv tool install winshell
 
                     uv tool update-shell
-                # C:\Users\nahid\scoop\apps\python312\current\python.exe -m pip install -r C:\Users\nahid\ms\ms1\asset\pip\pip_required.txt
+                # C:\Users\nahid\scoop\apps\python312\current\python.exe -m pip install -r C:\@delta\ms1\asset\pip\pip_required.txt
             }
         }
         "Update Packages" = {
@@ -378,7 +378,7 @@ $menu = [ordered]@{
                 Write-Host "it will try to replace ms1 komorebi profile just let it and then copy it from git and paste the code in" -ForegroundColor Green
                 Komorebic quickstart
                 Remove-Item 'C:\Users\nahid\komorebi.json'
-                New-Item -ItemType SymbolicLink -Path 'C:\Users\nahid\komorebi.json' -Target 'C:\Users\nahid\ms\ms1\asset\komorebi\komorebi.json' -Force #[pwsh]
+                New-Item -ItemType SymbolicLink -Path 'C:\Users\nahid\komorebi.json' -Target 'C:\@delta\ms1\asset\komorebi\komorebi.json' -Force #[pwsh]
             }
         }
         "Reference" = {
@@ -388,7 +388,7 @@ $menu = [ordered]@{
         }
         "PowerShell Profile" = {
             nw_pwsh_asadmin -Command {
-                New-Item -ItemType SymbolicLink -Path C:\Users\nahid\Documents\PowerShell\Microsoft.PowerShell_profile.ps1 -Target C:\Users\nahid\ms\ms1\asset\Powershell\Microsoft.PowerShell_profile.ps1 -Force
+                New-Item -ItemType SymbolicLink -Path C:\Users\nahid\Documents\PowerShell\Microsoft.PowerShell_profile.ps1 -Target C:\@delta\ms1\asset\Powershell\Microsoft.PowerShell_profile.ps1 -Force
             }
         }
         "Prowlarr" = {
@@ -437,13 +437,13 @@ $menu = [ordered]@{
         }
         "Terminal Profile" = {
             nw_pwsh_asadmin -Command {
-                New-Item -ItemType SymbolicLink -Path C:\Users\nahid\AppData\Local\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json -Target C:\Users\nahid\ms\ms1\asset\terminal\settings.json -Force
+                New-Item -ItemType SymbolicLink -Path C:\Users\nahid\AppData\Local\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json -Target C:\@delta\ms1\asset\terminal\settings.json -Force
             }
         }
         "VSCode" = {
             nw_pwsh_asadmin -Command {
-                New-Item -ItemType SymbolicLink -Path C:\Users\nahid\AppData\Roaming\Code\User\keybindings.json -Target C:\Users\nahid\ms\ms1\asset\vscode\keybindings.json -Force
-                New-Item -ItemType SymbolicLink -Path C:\Users\nahid\AppData\Roaming\Code\User\settings.json -Target C:\Users\nahid\ms\ms1\asset\vscode\settings.json -Force
+                New-Item -ItemType SymbolicLink -Path C:\Users\nahid\AppData\Roaming\Code\User\keybindings.json -Target C:\@delta\ms1\asset\vscode\keybindings.json -Force
+                New-Item -ItemType SymbolicLink -Path C:\Users\nahid\AppData\Roaming\Code\User\settings.json -Target C:\@delta\ms1\asset\vscode\settings.json -Force
             }
         }
         "example" = {

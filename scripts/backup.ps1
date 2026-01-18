@@ -12,8 +12,8 @@ $FGC = [System.ConsoleColor]::green
 # $BGC = [System.ConsoleColor]::blue
 
 #Installed-Apps-Backup
-    # moved to update.ps1 scoop export > C:\Users\nahid\ms\ms1\asset\installedApps\list_scoop.txt
-    # moved to update.ps1 winget export C:\Users\nahid\ms\ms1\asset\installedApps\list_winget.txt > C:\Users\nahid\ms\ms1\asset\installedApps\ex_wingetlist.txt
+    # moved to update.ps1 scoop export > C:\@delta\ms1\asset\installedApps\list_scoop.txt
+    # moved to update.ps1 winget export C:\@delta\ms1\asset\installedApps\list_winget.txt > C:\@delta\ms1\asset\installedApps\ex_wingetlist.txt
    # Start-Process -FilePath "winget" -ArgumentList "export C:\Users\nahid\ms\ms1\asset\installedApps\winget_apps.txt" -RedirectStandardOutput "C:\Users\nahid\ms\ms1\asset\installedApps\winget_unknown.txt" -WindowStyle Hidden #-Wait -NoNewWindow
     #winget list > C:\Users\nahid\ms\ms1\asset\installedApps\winget_list.txt
     #C:\Users\nahid\ms\ms1\scripts\scoop\scoop_list.ps1
@@ -96,7 +96,7 @@ function rclone_config {
 
 function pwsh_profile  {
     $pwsh_src      = "C:\Users\nahid\OneDrive\Documents\PowerShell\Microsoft.PowerShell_profile.ps1"
-    $pwsh_dst      = "C:\Users\nahid\ms\ms1\asset\Powershell\Microsoft.PowerShell_profile.ps1"
+    $pwsh_dst      = "C:\@delta\ms1\asset\Powershell\Microsoft.PowerShell_profile.ps1"
     # create_dir -Path $pwsh_dst
     Copy-Item -Path $pwsh_src -Destination $pwsh_dst
 }
@@ -190,9 +190,9 @@ Write-Host "Database & configs backedup ☑️." -ForegroundColor Blue
 
 
 # Git-Run
-#     C:\Users\nahid\ms\ms1\scripts\Github\ms1u.ps1
+#     C:\@delta\ms1\scripts\Github\ms1u.ps1
 # Write-Host "Git ms1u Update ✅" -ForegroundColor $FGC
-#     C:\Users\nahid\ms\ms1\scripts\Github\ms2u.ps1
+#     C:\@delta\ms1\scripts\Github\ms2u.ps1
 # Write-Host "Git ms2u Update ✅" -ForegroundColor $FGC
 
 

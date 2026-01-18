@@ -9,7 +9,7 @@ from datetime import datetime
 app = Flask(__name__)
 
 DATA_FILE = r'C:\Users\nahid\ms\ms1\scripts\flask\5000_myhome\data.json'
-SIDEBAR_BUTTONS_FILE = r'C:\Users\nahid\ms\ms1\scripts\flask\5000_myhome\sidebar_buttons.json'
+SIDEBAR_BUTTONS_FILE = r'C:\@delta\ms1\scripts\flask\5000_myhome\sidebar_buttons.json'
 
 # Helper function to read data from JSON file
 def read_data():
@@ -155,7 +155,7 @@ def generate_static_html():
     """Generate static HTML file with embedded CSS and JS"""
     try:
         # Run the generate_static.py script from current directory
-        result = subprocess.run(['pythonw', r'C:\Users\nahid\ms\ms1\scripts\flask\5000_myhome\generate_static.py'], 
+        result = subprocess.run(['pythonw', r'C:\@delta\ms1\scripts\flask\5000_myhome\generate_static.py'], 
                               capture_output=True, text=True, cwd='.', 
                               encoding='utf-8', errors='replace')
         if result.returncode == 0:

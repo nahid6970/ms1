@@ -27,7 +27,7 @@ OpenWithEditor() {
         
         if (FilePaths != "") {
             ; Call editor_chooser.py with all file paths
-            Run('python "C:\Users\nahid\ms\ms1\scripts\run\editor_chooser.py" ' . FilePaths)
+            Run('python "C:\@delta\ms1\scripts\run\editor_chooser.py" ' . FilePaths)
         }
     } else {
         MsgBox("No valid file path found.")

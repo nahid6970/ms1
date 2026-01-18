@@ -5,13 +5,13 @@
 Persistent
 
 ;! v2 startups
-#Include C:\Users\nahid\ms\ms1\scripts\Autohtokey\version2\tray.ahk
-#Include C:\Users\nahid\ms\ms1\scripts\Autohtokey\version2\shadowFight3.ahk
-#Include C:\Users\nahid\ms\ms1\scripts\pyautogui\Clash_of_Clans.ahk
-#Include C:\Users\nahid\ms\ms1\scripts\Autohtokey\math.ahk
-#Include "C:\Users\nahid\ms\ms1\FFFFFFF\generated_shortcuts.ahk"
-#Include "C:\Users\nahid\ms\ms1\scripts\Autohtokey\gemini_helper.ahk"
-; #Include "C:\Users\nahid\ms\ms1\scripts\Autohtokey\recordKey.ahk"
+#Include C:\@delta\ms1\scripts\Autohtokey\version2\tray.ahk
+#Include C:\@delta\ms1\scripts\Autohtokey\version2\shadowFight3.ahk
+#Include C:\@delta\ms1\scripts\pyautogui\Clash_of_Clans.ahk
+#Include C:\@delta\ms1\scripts\Autohtokey\math.ahk
+#Include "C:\@delta\ms1\FFFFFFF\generated_shortcuts.ahk"
+#Include "C:\@delta\ms1\scripts\Autohtokey\gemini_helper.ahk"
+; #Include "C:\@delta\ms1\scripts\Autohtokey\recordKey.ahk"
 
 
 
@@ -43,7 +43,7 @@ switchToLastTab() {
 
 
 ;! gui
-; !u::Run("C:\Users\nahid\ms\ms1\scripts\Autohtokey\version2\gui\Ultimate_Gui.ahk", "", "Hide")
+; !u::Run("C:\@delta\ms1\scripts\Autohtokey\version2\gui\Ultimate_Gui.ahk", "", "Hide")
 
 
 

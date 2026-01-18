@@ -659,14 +659,14 @@ function chat {
   python server.py
 }
 
-function yy { pwsh -c "C:\Users\nahid\ms\ms1\scripts\winget_scoop\scoop_install.ps1" }
-function nay { pwsh -c "C:\Users\nahid\ms\ms1\scripts\winget_scoop\scoop_uninstall.ps1" }
+function yy { pwsh -c "C:\@delta\ms1\scripts\winget_scoop\scoop_install.ps1" }
+function nay { pwsh -c "C:\@delta\ms1\scripts\winget_scoop\scoop_uninstall.ps1" }
 
-function ww { pwsh -c "C:\Users\nahid\ms\ms1\scripts\winget_scoop\wget_install.ps1" }
-function yayw2 { pwsh -c "C:\Users\nahid\ms\ms1\scripts\winget_scoop\wget_install2.ps1" }
-function nayw { pwsh -c "C:\Users\nahid\ms\ms1\scripts\winget_scoop\wget_install2.ps1" }
-function yaywn1 { pwsh -c "C:\Users\nahid\ms\ms1\scripts\winget_scoop\wget_n_install.ps1" }
-function yaywn2 { pwsh -c "C:\Users\nahid\ms\ms1\scripts\winget_scoop\wget_n_install2.ps1" }
+function ww { pwsh -c "C:\@delta\ms1\scripts\winget_scoop\wget_install.ps1" }
+function yayw2 { pwsh -c "C:\@delta\ms1\scripts\winget_scoop\wget_install2.ps1" }
+function nayw { pwsh -c "C:\@delta\ms1\scripts\winget_scoop\wget_install2.ps1" }
+function yaywn1 { pwsh -c "C:\@delta\ms1\scripts\winget_scoop\wget_n_install.ps1" }
+function yaywn2 { pwsh -c "C:\@delta\ms1\scripts\winget_scoop\wget_n_install2.ps1" }
 
 
 # PsExec.exe this will only work through remote not in real terminal
@@ -729,8 +729,8 @@ function killp  {
 #     Write-Output $filteredOutput
 # }
 
-# Import-Module -Name C:\Users\nahid\ms\ms1\asset\Powershell\pwsh_AutinHistory.ps1
-# Import-Module -Name C:\Users\nahid\ms\ms1\asset\Powershell\pwsh_Polyfill.ps1
+# Import-Module -Name C:\@delta\ms1\asset\Powershell\pwsh_AutinHistory.ps1
+# Import-Module -Name C:\@delta\ms1\asset\Powershell\pwsh_Polyfill.ps1
 
 #* Enable Zoxide at the end of the script to work
 #f45873b3-b655-43a6-b217-97c00aa0db58 PowerToys CommandNotFound module
@@ -796,7 +796,7 @@ New-Item -Path Function:trim -Value { C:\Users\nahid\OneDrive\Git\ms1\scripts\ff
 # function scoop_install_fzf { winget search  "" | fzf --multi --preview 'scoop info {1}' | ForEach-Object { scoop install $_.split()[0] } }
 # function scoop_uninstall_fzf { scoop list  "" | fzf --multi --preview 'scoop show {1}' | ForEach-Object { scoop uninstall $_.split()[0] } }
 
-Set-Alias trim C:\Users\nahid\ms\ms1\scripts\ffmpeg\trim.ps1
+Set-Alias trim C:\@delta\ms1\scripts\ffmpeg\trim.ps1
 
 # function sync { C:\Users\nahid\ms\ms1\sync.ps1 }
 

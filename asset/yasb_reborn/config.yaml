@@ -85,7 +85,7 @@ widgets:
         - "\u2588" # 80%+
       histogram_num_columns: 8
       callbacks:
-        on_left: "exec cmd /k start C:\\Users\\nahid\\ms\\ms1\\asset\\yasb_reborn\\get_top_processes.ps1"
+        on_left: "exec cmd /k start C:\\@delta\\ms1\\asset\\yasb_reborn\\get_top_processes.ps1"
         on_middle: "exec cmd /c Taskmgr"
         on_right: "toggle_label"
       container_padding:
@@ -104,7 +104,7 @@ widgets:
       label: "<span>\uefc5</span> {virtual_mem_used}/{virtual_mem_total}"
       update_interval: 5000
       callbacks:
-        on_left: "exec cmd /c start C:\\Users\\nahid\\ms\\ms1\\test_project\\ollama-chat-app\\ollama_stop_models.ps1"
+        on_left: "exec cmd /c start C:\\@delta\\ms1\\test_project\\ollama-chat-app\\ollama_stop_models.ps1"
         on_middle: "do_nothing"
         on_right: "toggle_label"
       container_padding:
@@ -651,7 +651,7 @@ widgets:
       label_alt: "<span>\uf466</span> Scoop: {data[count]} packages"
       class_name: "scoop-widget"
       exec_options:
-        run_cmd: "C:\\Users\\nahid\\ms\\ms1\\asset\\yasb_reborn\\x_scoop_count_package.bat"
+        run_cmd: "C:\\@delta\\ms1\\asset\\yasb_reborn\\x_scoop_count_package.bat"
         run_interval: 300000 # every 5 minutes
         return_format: "json"
         hide_empty: true
@@ -676,7 +676,7 @@ widgets:
       label_alt: "<span>\uf17a</span> Winget: {data[count]} packages"
       class_name: "winget-widget"
       exec_options:
-        run_cmd: "C:\\Users\\nahid\\ms\\ms1\\asset\\yasb_reborn\\x_winget_count_package.bat"
+        run_cmd: "C:\\@delta\\ms1\\asset\\yasb_reborn\\x_winget_count_package.bat"
         run_interval: 300000 # every 5 minutes
         return_format: "json"
         hide_empty: true
@@ -701,7 +701,7 @@ widgets:
       label_alt: ""
       class_name: "countdown-widget"
       exec_options:
-        run_cmd: "C:\\Users\\nahid\\ms\\ms1\\asset\\yasb_reborn\\CountDown\\get_timer.bat"
+        run_cmd: "C:\\@delta\\ms1\\asset\\yasb_reborn\\CountDown\\get_timer.bat"
         run_interval: 10000 # every 5 minutes
         return_format: "json"
         hide_empty: false
@@ -755,7 +755,7 @@ widgets:
               label: "gpt-oss:20b-cloud"
             - name: "minimax-m2:cloud"
               label: "minimax-m2:cloud"
-              instructions: "C:/Users/nahid/ms/ms1/asset/yasb_reborn/ai_chat/custom_gpt_chatmode.md"
+              instructions: "C:/@delta/ms1/asset/yasb_reborn/ai_chat/custom_gpt_chatmode.md"
       container_padding:
         top: 0
         left: 10
@@ -811,7 +811,7 @@ widgets:
       callbacks:
         on_left: "toggle_menu"
         on_middle: "do_nothing"
-        on_right: "exec cmd /c C:\\Users\\nahid\\ms\\ms1\\asset\\yasb_reborn\\language_switcher.ahk"
+        on_right: "exec cmd /c C:\\@delta\\ms1\\asset\\yasb_reborn\\language_switcher.ahk"
       language_menu:
         blur: true
         round_corners: true

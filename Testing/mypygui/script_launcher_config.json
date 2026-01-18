@@ -20,7 +20,7 @@
             "scripts": [
                 {
                     "name": "Android Icon",
-                    "path": "C:\\Users\\nahid\\ms\\ms1\\scripts\\ffmpeg\\android_icon_generator.ps1",
+                    "path": "C:\\@delta\\ms1\\scripts\\ffmpeg\\android_icon_generator.ps1",
                     "type": "script",
                     "hide_terminal": false,
                     "ctrl_left_cmd": "",
@@ -38,29 +38,29 @@
                 },
                 {
                     "name": "Convert",
-                    "path": "C:/Users/nahid/ms/ms1/scripts/ffmpeg/convert.ps1",
+                    "path": "C:/@delta/ms1/scripts/ffmpeg/convert.ps1",
                     "type": "script"
                 },
                 {
                     "name": "IMG-Dimension",
-                    "path": "C:/Users/nahid/ms/ms1/scripts/ffmpeg/image_dimension.ps1",
+                    "path": "C:/@delta/ms1/scripts/ffmpeg/image_dimension.ps1",
                     "type": "script",
                     "hide_terminal": false,
                     "font_size": 20
                 },
                 {
                     "name": "Merge",
-                    "path": "C:/Users/nahid/ms/ms1/scripts/ffmpeg/merge.ps1",
+                    "path": "C:/@delta/ms1/scripts/ffmpeg/merge.ps1",
                     "type": "script"
                 },
                 {
                     "name": "Trim",
-                    "path": "C:/Users/nahid/ms/ms1/scripts/ffmpeg/trim.ps1",
+                    "path": "C:/@delta/ms1/scripts/ffmpeg/trim.ps1",
                     "type": "script"
                 },
                 {
                     "name": "VID-Dimension",
-                    "path": "C:/Users/nahid/ms/ms1/scripts/ffmpeg/vid_dim.ps1",
+                    "path": "C:/@delta/ms1/scripts/ffmpeg/vid_dim.ps1",
                     "type": "script",
                     "hide_terminal": false,
                     "font_size": 20
@@ -87,7 +87,7 @@
             "scripts": [
                 {
                     "name": "YTC",
-                    "path": "C:/Users/nahid/ms/ms1/scripts/ytc/ytc_qt.py",
+                    "path": "C:/@delta/ms1/scripts/ytc/ytc_qt.py",
                     "type": "script",
                     "hide_terminal": true,
                     "keep_open": false,
@@ -109,7 +109,7 @@
                 },
                 {
                     "name": "YTC-Sub",
-                    "path": "C:/Users/nahid/ms/ms1/scripts/ytc/ytc_subs_only.py",
+                    "path": "C:/@delta/ms1/scripts/ytc/ytc_subs_only.py",
                     "type": "script",
                     "hide_terminal": true,
                     "keep_open": false,
@@ -177,7 +177,7 @@
         },
         {
             "name": "mklink",
-            "path": "C:/Users/nahid/ms/ms1/Testing/mklink/mklink.py",
+            "path": "C:/@delta/ms1/Testing/mklink/mklink.py",
             "font_size": 20,
             "hide_terminal": true,
             "color": "#000000",
@@ -204,7 +204,7 @@
         },
         {
             "name": "AntiGravity",
-            "path": "C:/Users/nahid/ms/ms1/Testing/antigravity_acc_change/vsc_manager.py",
+            "path": "C:/@delta/ms1/Testing/antigravity_acc_change/vsc_manager.py",
             "type": "script",
             "hide_terminal": true,
             "ctrl_left_cmd": "",
@@ -226,7 +226,7 @@
         },
         {
             "name": "C-Map",
-            "path": "C:/Users/nahid/ms/ms1/Testing/mypygui/special_char_picker.py",
+            "path": "C:/@delta/ms1/Testing/mypygui/special_char_picker.py",
             "type": "script",
             "hide_terminal": true,
             "keep_open": false,
@@ -248,7 +248,7 @@
         },
         {
             "name": "pip",
-            "path": "C:/Users/nahid/ms/ms1/Testing/mypygui/install_dependencies.py",
+            "path": "C:/@delta/ms1/Testing/mypygui/install_dependencies.py",
             "type": "script",
             "hide_terminal": false,
             "keep_open": false,
@@ -270,7 +270,7 @@
         },
         {
             "name": "Locker",
-            "path": "C:/Users/nahid/ms/ms1/Testing/antigravity_acc_change/Locker.py",
+            "path": "C:/@delta/ms1/Testing/antigravity_acc_change/Locker.py",
             "type": "script",
             "hide_terminal": true,
             "keep_open": false,
@@ -292,7 +292,7 @@
         },
         {
             "name": "ClipBoard",
-            "path": "C:/Users/nahid/ms/ms1/Testing/Clipboard_Capture/main.py",
+            "path": "C:/@delta/ms1/Testing/Clipboard_Capture/main.py",
             "type": "script",
             "hide_terminal": true,
             "keep_open": false,
@@ -314,7 +314,7 @@
         },
         {
             "name": "Lock-Smith",
-            "path": "C:/Users/nahid/ms/ms1/Testing/FileLockSmith/locksmith.py",
+            "path": "C:/@delta/ms1/Testing/FileLockSmith/locksmith.py",
             "type": "script",
             "hide_terminal": true,
             "keep_open": false,

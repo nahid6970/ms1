@@ -36,7 +36,7 @@
 !x::RunWait, pwsh -Command "cd $env:USERPROFILE; Start-Process pwsh -Verb RunAs",,Hide ;* cmd as admin
 !y::RunWait, python.exe C:\Users\nahid\ms\ms1\yasb\main.py,,Hide                                      ;* yasb
 #r::RunWait, "C:\Users\nahid\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\System Tools\Run.lnk"
-#x::RunWait, C:\Users\nahid\ms\ms1\mypygui.py ,,Hide                                                  ;* mypygui
+#x::RunWait, C:\@delta\ms1\mypygui.py ,,Hide                                                  ;* mypygui
 
 ; RAlt & E:: Convert_Lowercase()
 ; RAlt & L:: Choose_Action() ; Shortcut to open the action chooser

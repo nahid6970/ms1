@@ -28,14 +28,14 @@ $stackPanel.Children.Add($maximize_bt)
 $stackPanel.Children.Add($minimize_bt)
 
 $Tools_bt = & $cs1 -content "Tools ⚡"-onClick({$window.Content = $Tools_Panel})
-$backup_bt = & $bkup -content "Backup 🔃" -onClick({ Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\Users\nahid\ms\ms1\scripts\backup.ps1`"" })
+$backup_bt = & $bkup -content "Backup 🔃" -onClick({ Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\@delta\ms1\scripts\backup.ps1`"" })
 $FFmpeg_bt = & $cs1 -content "FFmpeg 📺" -onClick({ $window.Content = $FFmpeg_Panel })
 $Find_bt = & $cs1 -content "Find 🔎" -onClick({ $window.Content = $Find_Panel })
 $Folder_bt = & $fldr -content "Folders 📂" -onClick({ $window.Content = $Folder_Panel })
 $Valorant_bt = & $vlr -content "Valorant 🎮" -onClick({ $window.Content = $Valorant_Panel })
 $Rclone_bt = & $rcl -content "Rclone" -onClick({ $window.Content = $Rclone_Panel })
 $Health_bt = & $hth -content "Health 💊" -onClick({ $window.Content = $Health_Panel })
-$Update_bt = & $updt -content "Update 👍🏻" -onClick({ Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\Users\nahid\ms\ms1\scripts\update.ps1`"" })
+$Update_bt = & $updt -content "Update 👍🏻" -onClick({ Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\@delta\ms1\scripts\update.ps1`"" })
 
 $stackPanel.Children.Add($backup_bt)
 $stackPanel.Children.Add($Update_bt)
@@ -94,9 +94,9 @@ $Rclone_Panel.Children.Add($minimize_bt)
 $Rclone_Panel.Children.Add($back_bt)
 
 $sync_bt = & $cs2 -content "Sync" -onClick {  Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\Users\nahid\ms\ms1\scripts\rclone\sync.ps1`"" ; $window.Content = $stackPanel  }
-$about_bt = & $cs2 -content "Storage Info" -onClick {  Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\Users\nahid\ms\ms1\scripts\rclone\about.ps1`"" ; $window.Content = $stackPanel  }
-$delete_trashgu_bt = & $cs2 -content "Delete GU Trash" -onClick {  Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\Users\nahid\ms\ms1\scripts\rclone\delete_gu.ps1`"" ; $window.Content = $stackPanel  }
-$touch_bt = & $cs2 -content "Touch Drives" -onClick {  Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\Users\nahid\ms\ms1\scripts\rclone\touch.ps1`"" ; $window.Content = $stackPanel  }
+$about_bt = & $cs2 -content "Storage Info" -onClick {  Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\@delta\ms1\scripts\rclone\about.ps1`"" ; $window.Content = $stackPanel  }
+$delete_trashgu_bt = & $cs2 -content "Delete GU Trash" -onClick {  Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\@delta\ms1\scripts\rclone\delete_gu.ps1`"" ; $window.Content = $stackPanel  }
+$touch_bt = & $cs2 -content "Touch Drives" -onClick {  Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\@delta\ms1\scripts\rclone\touch.ps1`"" ; $window.Content = $stackPanel  }
 
 $Rclone_Panel.Children.Add($sync_bt)
 $Rclone_Panel.Children.Add($about_bt)
@@ -152,11 +152,11 @@ $FFmpeg_Panel.Children.Add($maximize_bt)
 $FFmpeg_Panel.Children.Add($minimize_bt)
 $FFmpeg_Panel.Children.Add($back_bt)
 
-$trim_bt = & $cs2 -content "Trim" -onClick {  Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\Users\nahid\ms\ms1\scripts\ffmpeg\trim.ps1`"" ; $window.Content = $stackPanel  }
-$convert_bt = & $cs2 -content "Convert Video" -onClick {  Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\Users\nahid\ms\ms1\scripts\ffmpeg\convert.ps1`"" ; $window.Content = $stackPanel  }
+$trim_bt = & $cs2 -content "Trim" -onClick {  Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\@delta\ms1\scripts\ffmpeg\trim.ps1`"" ; $window.Content = $stackPanel  }
+$convert_bt = & $cs2 -content "Convert Video" -onClick {  Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\@delta\ms1\scripts\ffmpeg\convert.ps1`"" ; $window.Content = $stackPanel  }
 $dimension_bt = & $cs2 -content "Video Dimension" -onClick {  Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\Users\nahid\ms\ms1\scripts\ffmpeg\dimension.ps1`"" ; $window.Content = $stackPanel  }
 $imgdim_bt = & $cs2 -content "Image Dimension" -onClick {  Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\Users\nahid\ms\ms1\scripts\ffmpeg\imgdim.ps1`"" ; $window.Content = $stackPanel  }
-$merge_bt = & $cs2 -content "Merge Videos" -onClick {  Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\Users\nahid\ms\ms1\scripts\ffmpeg\merge.ps1`"" ; $window.Content = $stackPanel  }
+$merge_bt = & $cs2 -content "Merge Videos" -onClick {  Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\@delta\ms1\scripts\ffmpeg\merge.ps1`"" ; $window.Content = $stackPanel  }
 
 $FFmpeg_Panel.Children.Add($convert_bt)
 $FFmpeg_Panel.Children.Add($dimension_bt)
@@ -178,9 +178,9 @@ $Find_Panel.Children.Add($maximize_bt)
 $Find_Panel.Children.Add($minimize_bt)
 $Find_Panel.Children.Add($back_bt)
 
-$find_file_bt = & $cs2 -content "Find File" -onClick  { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\Users\nahid\ms\ms1\scripts\find\find_file.ps1`"" ; $window.Content = $stackPanel }
-$find_size_bt = & $cs2 -content "Find Size" -onClick  { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\Users\nahid\ms\ms1\scripts\find\find_size.ps1`"" ; $window.Content = $stackPanel }
-$find_pattern_bt = & $cs2 -content "Find Pattern" -onClick  { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\Users\nahid\ms\ms1\scripts\find\find_pattern.ps1`"" ; $window.Content = $stackPanel }
+$find_file_bt = & $cs2 -content "Find File" -onClick  { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\@delta\ms1\scripts\find\find_file.ps1`"" ; $window.Content = $stackPanel }
+$find_size_bt = & $cs2 -content "Find Size" -onClick  { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\@delta\ms1\scripts\find\find_size.ps1`"" ; $window.Content = $stackPanel }
+$find_pattern_bt = & $cs2 -content "Find Pattern" -onClick  { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\@delta\ms1\scripts\find\find_pattern.ps1`"" ; $window.Content = $stackPanel }
 
 $Find_Panel.Children.Add($find_file_bt)
 $Find_Panel.Children.Add($find_size_bt)

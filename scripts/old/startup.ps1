@@ -6,16 +6,16 @@ function ahkscripts            {Start-Process "C:\Users\nahid\ms\ms1\ahkscripts.
 function aria2c_rpc            {Start-Process -FilePath "aria2c" -ArgumentList "--enable-rpc", "--rpc-listen-all" -WindowStyle Hidden }
 function capture2text          {Start-Process "C:\Users\nahid\scoop\apps\capture2text\current\Capture2Text.exe" }
 function free_download_manager {Start-Process 'C:\Users\nahid\AppData\Local\Softdeluxe\Free Download Manager\fdm.exe' -WindowStyle Minimized }
-function monitor_size          {Start-Process "powershell.exe" -ArgumentList "-File C:\Users\nahid\ms\ms1\scripts\monitor_size.ps1" -Verb RunAs -WindowStyle Hidden }
-function mypygui               {Start-Process "python.exe" -ArgumentList "C:\Users\nahid\ms\ms1\mypygui.py" -Verb RunAs -WindowStyle Hidden }
+function monitor_size          {Start-Process "powershell.exe" -ArgumentList "-File C:\@delta\ms1\scripts\monitor_size.ps1" -Verb RunAs -WindowStyle Hidden }
+function mypygui               {Start-Process "python.exe" -ArgumentList "C:\@delta\ms1\mypygui.py" -Verb RunAs -WindowStyle Hidden }
 function powertoys             {if (Test-Path "C:\Users\nahid\AppData\Local\PowerToys\PowerToys.exe") { Start-Process "C:\Users\nahid\AppData\Local\PowerToys\PowerToys.exe" } elseif (Test-Path "C:\Users\nahid\scoop\apps\PowerToys\current\PowerToys.exe") { Start-Process "C:\Users\nahid\scoop\apps\PowerToys\current\PowerToys.exe" } else { Write-Warning "PowerToys not found in either expected location." } }
 function rssguard              {Start-Process "C:\Users\nahid\scoop\apps\rssguard\current\rssguard.exe" }
 function rssowl                {Start-Process "C:\RSSOwlnix\RSSOwlnix.exe" -WindowStyle Minimized }
-function sync                  {Start-Process "C:\Users\nahid\ms\ms1\scripts\sync.ps1" }
+function sync                  {Start-Process "C:\@delta\ms1\scripts\sync.ps1" }
 function syncthing             {Start-Process "C:\Users\nahid\scoop\apps\syncthing\current\syncthing.exe" -WindowStyle Hidden }
 function valo_qbit             {Start-Process "C:\Users\nahid\ms\ms1\scripts\valorant\valo_qbit.ps1" -WindowStyle Hidden }
 
-function arr_monitor           {Start-Process "C:\Users\nahid\ms\ms1\scripts\arr\arr_monitor.ps1" -WindowStyle Hidden }
+function arr_monitor           {Start-Process "C:\@delta\ms1\scripts\arr\arr_monitor.ps1" -WindowStyle Hidden }
 function bazarr                {Start-Process -FilePath "C:\ProgramData\Bazarr\WinPython\python-3.10.0\python.exe" -ArgumentList "C:\ProgramData\Bazarr\bazarr.py" -WindowStyle Hidden }
 function flaresolver           {Start-Process "C:\Users\nahid\scoop\apps\flaresolverr\current\flaresolverr.exe" -WindowStyle Hidden }
 function prowlarr              {C:\ProgramData\Prowlarr\bin\Prowlarr.exe }

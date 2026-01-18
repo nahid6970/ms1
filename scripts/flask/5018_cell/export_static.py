@@ -20,7 +20,7 @@ from datetime import datetime
 
 # Paths
 DATA_FILE = r'C:\Users\nahid\ms\ms1\scripts\flask\5018_cell\data.json'
-CUSTOM_SYNTAXES_FILE = r'C:\Users\nahid\ms\ms1\scripts\flask\5018_cell\custom_syntaxes.json'
+CUSTOM_SYNTAXES_FILE = r'C:\@delta\ms1\scripts\flask\5018_cell\custom_syntaxes.json'
 OUTPUT_FILE = r'C:\Users\nahid\ms\db\5000_myhome\mycell.html'
 
 def load_data():

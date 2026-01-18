@@ -20,7 +20,7 @@ ScrollLock:: {
     run_py_script()
     run_py_script()
     {
-        Run("C:\Users\nahid\ms\ms1\scripts\run\Run.py", , "Show")
+        Run("C:\@delta\ms1\scripts\run\Run.py", , "Show")
         ; Wait a moment for the window to appear
         Sleep(1000)
         ; Make the window always on top (assumes it's the active window)
@@ -42,11 +42,11 @@ RAlt & Numpad3::Run("C:\Users\nahid\ms\msBackups\Display\DisplaySwitch.exe /exte
 
 ;! Bio GUI
 ;! Opens Bio.ahk GUI
-!b::Run("C:\Users\nahid\ms\ms1\scripts\Autohtokey\version2\gui\Bio.ahk", "", "Hide")
+!b::Run("C:\@delta\ms1\scripts\Autohtokey\version2\gui\Bio.ahk", "", "Hide")
 
 ;! Ultimate GUI
 ;! Opens Ultimate_Gui.py
-!u::Run("C:\Users\nahid\ms\ms1\Ultimate_Gui.py", "", "Hide")
+!u::Run("C:\@delta\ms1\Ultimate_Gui.py", "", "Hide")
 
 ;! Always On Top Toggle
 ;! Toggles always on top for active window
@@ -112,13 +112,13 @@ RAlt & Numpad3::Run("C:\Users\nahid\ms\msBackups\Display\DisplaySwitch.exe /exte
 }
 
 ;! mypygui
-#x::Run("C:\Users\nahid\ms\ms1\Testing\mypygui\qt\script_manager_gui_qt.py", , "Hide")
+#x::Run("C:\@delta\ms1\Testing\mypygui\qt\script_manager_gui_qt.py", , "Hide")
 
 ;! Startup Setup
-#s::Run("C:\Users\nahid\ms\ms1\scripts\flask\4999_startup\startup.py", , "Hide")
+#s::Run("C:\@delta\ms1\scripts\flask\4999_startup\startup.py", , "Hide")
 
 ;! CrossHair
-^+m::Run("C:\Users\nahid\ms\ms1\scripts\xy\XY_CroosHair.py", , "Hide")
+^+m::Run("C:\@delta\ms1\scripts\xy\XY_CroosHair.py", , "Hide")
 
 ;! Explorer Restart
 LAlt & e::Run('pwsh -c explorer.exe', , 'Hide')
@@ -186,7 +186,7 @@ RAlt & -:: {
 }
 
 ;! Send Apps to 2nd Display
-!1::Run("C:\Users\nahid\ms\ms1\scripts\Autohtokey\version2\display\send_to_2nd.ahk", "", "Hide")
+!1::Run("C:\@delta\ms1\scripts\Autohtokey\version2\display\send_to_2nd.ahk", "", "Hide")
 
 ;! Center Apps Window
 LAlt & c:: {
@@ -489,7 +489,7 @@ LAlt & c:: {
             }
             if (FilePaths != "") {
                 ; Use pythonw to run without console window
-                Run('pythonw "C:\Users\nahid\ms\ms1\scripts\run\editor_chooser.py" ' . FilePaths, , "Hide")
+                Run('pythonw "C:\@delta\ms1\scripts\run\editor_chooser.py" ' . FilePaths, , "Hide")
             }
         } else {
             MsgBox("No valid file path found.")
@@ -522,13 +522,13 @@ LAlt & c:: {
 }
 
 ;! Take Screenshot
-PrintScreen::Run("C:\Users\nahid\ms\ms1\scripts\Autohtokey\version2\gui\Bio.ahk", "", "Hide")
+PrintScreen::Run("C:\@delta\ms1\scripts\Autohtokey\version2\gui\Bio.ahk", "", "Hide")
 
 ;! Open Folder gui
-#f::Run("C:\Users\nahid\ms\ms1\Testing\screenshot\folder_launcher\launcher.py", "", "Hide")
+#f::Run("C:\@delta\ms1\Testing\screenshot\folder_launcher\launcher.py", "", "Hide")
 
 ;! Gallery View
-#v::Run("C:\Users\nahid\ms\ms1\Testing\screenshot\gallery\gallery.py", "", "Hide")
+#v::Run("C:\@delta\ms1\Testing\screenshot\gallery\gallery.py", "", "Hide")
 
 ;! DropClipboard Insert To Field
 ^+i:: {

@@ -372,7 +372,7 @@ function Show-MainMenu {
                     # pip install screeninfo
                     # pip install winshell
 
-                    $su C:\Users\nahid\scoop\apps\python312\current\python.exe -m pip install -r C:\Users\nahid\ms\ms1\asset\pip\pip_required.txt
+                    $su C:\Users\nahid\scoop\apps\python312\current\python.exe -m pip install -r C:\@delta\ms1\asset\pip\pip_required.txt
                                          "
             }
 
@@ -572,23 +572,23 @@ function Show-MainMenu {
                 nw_pwsh -Command "
                     Komorebic quickstart
                     Remove-Item 'C:\Users\nahid\komorebi.json'
-                    $su New-Item -ItemType SymbolicLink -Path 'C:\Users\nahid\komorebi.json' -Target 'C:\Users\nahid\ms\ms1\asset\komorebi\komorebi.json' -Force #[pwsh]
+                    $su New-Item -ItemType SymbolicLink -Path 'C:\Users\nahid\komorebi.json' -Target 'C:\@delta\ms1\asset\komorebi\komorebi.json' -Force #[pwsh]
                                          "
             }
             "VSCode" {
                 nw_pwsh -Command "
-                    New-Item -ItemType SymbolicLink -Path C:\Users\nahid\AppData\Roaming\Code\User\keybindings.json -Target C:\Users\nahid\ms\ms1\asset\vscode\keybindings.json -Force
-                    New-Item -ItemType SymbolicLink -Path C:\Users\nahid\AppData\Roaming\Code\User\settings.json -Target C:\Users\nahid\ms\ms1\asset\vscode\settings.json -Force
+                    New-Item -ItemType SymbolicLink -Path C:\Users\nahid\AppData\Roaming\Code\User\keybindings.json -Target C:\@delta\ms1\asset\vscode\keybindings.json -Force
+                    New-Item -ItemType SymbolicLink -Path C:\Users\nahid\AppData\Roaming\Code\User\settings.json -Target C:\@delta\ms1\asset\vscode\settings.json -Force
                                          "
             }
             "PowerShell Profile" {
                 nw_pwsh -Command "
-                    $su New-Item -ItemType SymbolicLink -Path C:\Users\nahid\Documents\PowerShell\Microsoft.PowerShell_profile.ps1 -Target C:\Users\nahid\ms\ms1\asset\Powershell\Microsoft.PowerShell_profile.ps1 -Force
+                    $su New-Item -ItemType SymbolicLink -Path C:\Users\nahid\Documents\PowerShell\Microsoft.PowerShell_profile.ps1 -Target C:\@delta\ms1\asset\Powershell\Microsoft.PowerShell_profile.ps1 -Force
                                          "
             }
             "Terminal Profile" {
                 nw_pwsh -Command "
-                    $su New-Item -ItemType SymbolicLink -Path C:\Users\nahid\AppData\Local\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json -Target C:\Users\nahid\ms\ms1\asset\terminal\settings.json -Force
+                    $su New-Item -ItemType SymbolicLink -Path C:\Users\nahid\AppData\Local\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json -Target C:\@delta\ms1\asset\terminal\settings.json -Force
                                          "
             }
             "PotPlayer Register" {

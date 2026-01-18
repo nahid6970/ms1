@@ -49,9 +49,9 @@ g
 cls
 C:\Users\nahid\ms\ms1\kp.ps1
 C:/Users/nahid/ms/ms1/kp.ps1
-C:\Users\nahid\ms\ms1\mypygui.py
+C:\@delta\ms1\mypygui.py
 cls
-python C:\Users\nahid\ms\ms1\mypygui.py
+python C:\@delta\ms1\mypygui.py
 cls
 C:\Users\nahid\ms\ms1\kill_processes.nu
 nu C:\Users\nahid\ms\ms1\kill_processes.nu

@@ -368,7 +368,7 @@ class WindowsUtil:
                                 "Write-Host 'It will try to replace ms1 komorebi profile just let it and then copy it from git and paste the code in' -ForegroundColor Green",
                                 "komorebic quickstart",
                                 "Remove-Item 'C:\\Users\\nahid\\komorebi.json' -ErrorAction SilentlyContinue",
-                                "New-Item -ItemType SymbolicLink -Path 'C:\\Users\\nahid\\komorebi.json' -Target 'C:\\Users\\nahid\\ms\\ms1\\asset\\komorebi\\komorebi.json' -Force"
+                                "New-Item -ItemType SymbolicLink -Path 'C:\\Users\\nahid\\komorebi.json' -Target 'C:\\@delta\\ms1\\asset\\komorebi\\komorebi.json' -Force"
                             ],
                             "description": "Setup Komorebi configuration symbolic link"
                         }
@@ -386,7 +386,7 @@ class WindowsUtil:
                         "title": "PowerShell Profile", 
                         "action": {
                             "powershell": [
-                                "New-Item -ItemType SymbolicLink -Path 'C:\\Users\\nahid\\Documents\\PowerShell\\Microsoft.PowerShell_profile.ps1' -Target 'C:\\Users\\nahid\\ms\\ms1\\asset\\Powershell\\Microsoft.PowerShell_profile.ps1' -Force"
+                                "New-Item -ItemType SymbolicLink -Path 'C:\\Users\\nahid\\Documents\\PowerShell\\Microsoft.PowerShell_profile.ps1' -Target 'C:\\@delta\\ms1\\asset\\Powershell\\Microsoft.PowerShell_profile.ps1' -Force"
                             ],
                             "description": "Create symbolic link for PowerShell profile"
                         }
@@ -442,7 +442,7 @@ class WindowsUtil:
                         "title": "Terminal Profile", 
                         "action": {
                             "powershell": [
-                                "New-Item -ItemType SymbolicLink -Path 'C:\\Users\\nahid\\AppData\\Local\\Packages\\Microsoft.WindowsTerminal_8wekyb3d8bbwe\\LocalState\\settings.json' -Target 'C:\\Users\\nahid\\ms\\ms1\\asset\\terminal\\settings.json' -Force"
+                                "New-Item -ItemType SymbolicLink -Path 'C:\\Users\\nahid\\AppData\\Local\\Packages\\Microsoft.WindowsTerminal_8wekyb3d8bbwe\\LocalState\\settings.json' -Target 'C:\\@delta\\ms1\\asset\\terminal\\settings.json' -Force"
                             ],
                             "description": "Create symbolic link for Windows Terminal settings"
                         }
@@ -451,8 +451,8 @@ class WindowsUtil:
                         "title": "VSCode", 
                         "action": {
                             "powershell": [
-                                "New-Item -ItemType SymbolicLink -Path 'C:\\Users\\nahid\\AppData\\Roaming\\Code\\User\\keybindings.json' -Target 'C:\\Users\\nahid\\ms\\ms1\\asset\\vscode\\keybindings.json' -Force",
-                                "New-Item -ItemType SymbolicLink -Path 'C:\\Users\\nahid\\AppData\\Roaming\\Code\\User\\settings.json' -Target 'C:\\Users\\nahid\\ms\\ms1\\asset\\vscode\\settings.json' -Force"
+                                "New-Item -ItemType SymbolicLink -Path 'C:\\Users\\nahid\\AppData\\Roaming\\Code\\User\\keybindings.json' -Target 'C:\\@delta\\ms1\\asset\\vscode\\keybindings.json' -Force",
+                                "New-Item -ItemType SymbolicLink -Path 'C:\\Users\\nahid\\AppData\\Roaming\\Code\\User\\settings.json' -Target 'C:\\@delta\\ms1\\asset\\vscode\\settings.json' -Force"
                             ],
                             "description": "Create symbolic links for VSCode settings and keybindings"
                         }

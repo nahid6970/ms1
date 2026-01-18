@@ -5,7 +5,7 @@ from threading import Thread
 file_routes = [
     {'path': r'C:\Users\nahid\ms\ms1\archlinux\arch_install.sh', 'port': 7710},
     {'path': r'C:\Users\nahid\ms\ms1\archlinux\os.sh', 'port': 7711},
-    {'path': r'C:\Users\nahid\ms\ms1\Ultimate_Gui.py', 'port': 7713},
+    {'path': r'C:\@delta\ms1\Ultimate_Gui.py', 'port': 7713},
 ]
 
 # Function to create a new Flask app for each file

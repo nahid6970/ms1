@@ -1,4 +1,4 @@
-#Include C:\Users\nahid\ms\ms1\scripts\Autohtokey\AHK_BT\V1_4\Class_ImageButton.ahk
+#Include C:\@delta\ms1\scripts\Autohtokey\AHK_BT\V1_4\Class_ImageButton.ahk
 Gui, +AlwaysOnTop
 Gui, Margin, 20, 20
 Gui,Font,s12 Normal Bold,Jetbrainsmono nfp
@@ -92,10 +92,10 @@ Kill_Python:
 Run, taskkill /f /im python.exe,,Hide
 return
 Start_Python_mypygui_hideT:
-Run, C:\Users\nahid\ms\ms1\mypygui.py,,Hide
+Run, C:\@delta\ms1\mypygui.py,,Hide
 return
 Start_Python_mypygui_showT:
-    Run, cmd /k python "C:\Users\nahid\ms\ms1\mypygui.py", , UseErrorLevel
+    Run, cmd /k python "C:\@delta\ms1\mypygui.py", , UseErrorLevel
     if (ErrorLevel)
     {
         MsgBox, Script failed to execute. Error code: %ErrorLevel%

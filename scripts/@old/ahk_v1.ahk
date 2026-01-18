@@ -29,8 +29,8 @@ ExitScript:
 
 
 
-#Include, C:\Users\nahid\ms\ms1\scripts\Autohtokey\version1\text\Text_Related.ahk
-#Include, C:\Users\nahid\ms\ms1\scripts\Autohtokey\version1\Windows_Screen_related.ahk
+#Include, C:\@delta\ms1\scripts\Autohtokey\version1\text\Text_Related.ahk
+#Include, C:\@delta\ms1\scripts\Autohtokey\version1\Windows_Screen_related.ahk
 ; #Include, C:\Users\nahid\ms\ms1\scripts\ahk\shadowFight3.ahk
 
 ;;* AHK Related
@@ -77,7 +77,7 @@ RAlt & Numpad3::Run, %ComSpec% /c "C:\Users\nahid\ms\msBackups\Display\DisplaySw
 !x::RunWait, pwsh -Command "cd $env:USERPROFILE; Start-Process pwsh -Verb RunAs",,Hide ;* cmd as admin
 ; !y::RunWait, python.exe C:\Users\nahid\ms\ms1\yasb\main.py,,Hide                                      ;* yasb
 #r::RunWait, "C:\Users\nahid\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\System Tools\Run.lnk"
-#x::RunWait, C:\Users\nahid\ms\ms1\mypygui.py ,,Hide                                                  ;* mypygui
+#x::RunWait, C:\@delta\ms1\mypygui.py ,,Hide                                                  ;* mypygui
 
 ; RAlt & L:: Choose_Action() ; Shortcut to open the action chooser
 ;; Replace & Text Related

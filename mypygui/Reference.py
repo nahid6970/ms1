@@ -33,18 +33,18 @@ Rss_db_src       =r"C:\Users\nahid\scoop\apps\rssguard\current\data4\database"
 
 glazewm_dst      =r"C:\Users\nahid\ms\ms1\asset\glazewm\.glaze-wm"
 glazewm_src      =r"C:\Users\nahid\.glaze-wm"
-komorebi_dst     =r"C:\Users\nahid\ms\ms1\asset\komorebi\komorebi.json"
+komorebi_dst     =r"C:\@delta\ms1\asset\komorebi\komorebi.json"
 komorebi_src     =r"C:\Users\nahid\komorebi.json"
 Nilesoft_dst     =r"C:\Users\nahid\ms\ms1\asset\nilesoft_shell\imports"
 Nilesoft_src     =r"C:\Program Files\Nilesoft Shell\imports"
-pwsh_profile_dst =r"C:\Users\nahid\ms\ms1\asset\Powershell\Microsoft.PowerShell_profile.ps1"
+pwsh_profile_dst =r"C:\@delta\ms1\asset\Powershell\Microsoft.PowerShell_profile.ps1"
 pwsh_profile_src =r"C:\Users\nahid\OneDrive\Documents\PowerShell\Microsoft.PowerShell_profile.ps1"
 pwshH_dst        =r"C:\Users\nahid\OneDrive\backup\ConsoleHost_history.txt"
 pwshH_src        =r"C:\Users\nahid\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt"
 rclone_dst       =r"C:\Users\nahid\OneDrive\backup\rclone\rclone.conf"
 rclone_src       =r"C:\Users\nahid\scoop\apps\rclone\current\rclone.conf"
-terminal_dst     =r"C:\Users\nahid\ms\ms1\asset\terminal\settings.json"
-terminal_dst     =r"C:\Users\nahid\ms\ms1\asset\terminal\settings.json"
+terminal_dst     =r"C:\@delta\ms1\asset\terminal\settings.json"
+terminal_dst     =r"C:\@delta\ms1\asset\terminal\settings.json"
 terminal_src     =r"C:\Users\nahid\AppData\Local\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json"
 terminal_src     =r"C:\Users\nahid\AppData\Local\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json"
 whkd_dst         =r"C:\Users\nahid\ms\ms1\asset\whkd\whkdrc\whkdrc"
@@ -240,17 +240,17 @@ class HoverButton(tk.Button):
 
 
 # def start_bar_1(event):
-#     subprocess.Popen(["cmd /c start C:\\Users\\nahid\\ms\\ms1\\scripts\\python\\bar_1.py"], shell=True)
+#     subprocess.Popen(["cmd /c start C:\\@delta\\ms1\\scripts\\python\\bar_1.py"], shell=True)
 # def start_bar_1(event):
-#     subprocess.Popen(["powershell", "start-process", "C:\\Users\\nahid\\ms\\ms1\\scripts\\python\\bar_1.py", "-WindowStyle", "Hidden"], shell=True)
+#     subprocess.Popen(["powershell", "start-process", "C:\\@delta\\ms1\\scripts\\python\\bar_1.py", "-WindowStyle", "Hidden"], shell=True)
 # def edit_bar_1(event):
-#     subprocess.Popen(["powershell", "start-process","code", "C:\\Users\\nahid\\ms\\ms1\\scripts\\python\\bar_1.py", "-WindowStyle", "Hidden"], shell=True)
+#     subprocess.Popen(["powershell", "start-process","code", "C:\\@delta\\ms1\\scripts\\python\\bar_1.py", "-WindowStyle", "Hidden"], shell=True)
 
 # def start_shortcut(event):
-#     subprocess.Popen(["powershell", "start-process", "C:\\Users\\nahid\\ms\\ms1\\scripts\\shortcut.py", "-WindowStyle", "Hidden"], shell=True)
+#     subprocess.Popen(["powershell", "start-process", "C:\\@delta\\ms1\\scripts\\shortcut.py", "-WindowStyle", "Hidden"], shell=True)
 
 # def start_backup(event):
-#     subprocess.Popen(["Start", "pwsh",  "-NoExit", "-Command", "& {$host.UI.RawUI.WindowTitle='GiTSync' ; C:\\Users\\nahid\\ms\\ms1\\scripts\\backup.ps1 ; C:\\Users\\nahid\\ms\\ms1\\scripts\\Github\\ms1u.ps1 ; C:\\Users\\nahid\\ms\\ms1\\scripts\\Github\\ms2u.ps1 ; cd ~}"], shell=True)
+#     subprocess.Popen(["Start", "pwsh",  "-NoExit", "-Command", "& {$host.UI.RawUI.WindowTitle='GiTSync' ; C:\\@delta\\ms1\\scripts\\backup.ps1 ; C:\\@delta\\ms1\\scripts\\Github\\ms1u.ps1 ; C:\\@delta\\ms1\\scripts\\Github\\ms2u.ps1 ; cd ~}"], shell=True)
 
 
 def start_fzf_c():
@@ -268,45 +268,45 @@ def start_fzf_d():
 #     subprocess.Popen(["powershell", "-Command", f'Start-Process powershell -ArgumentList "-NoExit -Command cd D:\\ ; ack {input_text}"'], shell=True)
 
 def start_find_file():
-    subprocess.Popen(["powershell", "start", "C:\\Users\\nahid\\ms\\ms1\\scripts\\find\\find_file.ps1"])
+    subprocess.Popen(["powershell", "start", "C:\\@delta\\ms1\\scripts\\find\\find_file.ps1"])
 def start_find_pattern():
-    subprocess.Popen(["powershell", "start", "C:\\Users\\nahid\\ms\\ms1\\scripts\\find\\find_file.ps1"])
+    subprocess.Popen(["powershell", "start", "C:\\@delta\\ms1\\scripts\\find\\find_file.ps1"])
 def start_find_size():
-    subprocess.Popen(["powershell", "start", "C:\\Users\\nahid\\ms\\ms1\\scripts\\find\\find_size.ps1"])
+    subprocess.Popen(["powershell", "start", "C:\\@delta\\ms1\\scripts\\find\\find_size.ps1"])
 
 # def start_tools(event):
-#     subprocess.Popen(["powershell", "start-process", "C:\\Users\\nahid\\ms\\ms1\\scripts\\mypygui_import\\tools.py", "-WindowStyle", "Hidden"], shell=True)
+#     subprocess.Popen(["powershell", "start-process", "C:\\@delta\\ms1\\scripts\\mypygui_import\\tools.py", "-WindowStyle", "Hidden"], shell=True)
 
 # def start_applist(event):
-#     subprocess.Popen(["cmd /c start C:\\Users\\nahid\\ms\\ms1\\scripts\\mypygui_import\\applist.py"], shell=True)
+#     subprocess.Popen(["cmd /c start C:\\@delta\\ms1\\scripts\\mypygui_import\\applist.py"], shell=True)
 # def edit_applist(event):
-#     subprocess.Popen(["cmd /c code C:\\Users\\nahid\\ms\\ms1\\scripts\\mypygui_import\\applist.py"], shell=True)
+#     subprocess.Popen(["cmd /c code C:\\@delta\\ms1\\scripts\\mypygui_import\\applist.py"], shell=True)
 
 # def start_appstore(event):
-#     subprocess.Popen(["cmd /c start C:\\Users\\nahid\\ms\\ms1\\scripts\\mypygui_import\\app_store.py"], shell=True)
+#     subprocess.Popen(["cmd /c start C:\\@delta\\ms1\\scripts\\mypygui_import\\app_store.py"], shell=True)
 # def edit_appstore(event):
-#     subprocess.Popen(["cmd /c code C:\\Users\\nahid\\ms\\ms1\\scripts\\mypygui_import\\app_store.py"], shell=True)
+#     subprocess.Popen(["cmd /c code C:\\@delta\\ms1\\scripts\\mypygui_import\\app_store.py"], shell=True)
 
 # def start_folder(event):
-#     subprocess.Popen(["cmd /c C:\\Users\\nahid\\ms\\ms1\\scripts\\mypygui_import\\folder.py"], shell=True)
+#     subprocess.Popen(["cmd /c C:\\@delta\\ms1\\scripts\\mypygui_import\\folder.py"], shell=True)
 # def Edit_folder(event):
-#     subprocess.Popen(["cmd /c code C:\\Users\\nahid\\ms\\ms1\\scripts\\mypygui_import\\folder.py"], shell=True)
+#     subprocess.Popen(["cmd /c code C:\\@delta\\ms1\\scripts\\mypygui_import\\folder.py"], shell=True)
 
 # def start_process(event):
-#     subprocess.Popen(["powershell", "start-process", "C:\\Users\\nahid\\ms\\ms1\\scripts\\mypygui_import\\process.py"], shell=True)
+#     subprocess.Popen(["powershell", "start-process", "C:\\@delta\\ms1\\scripts\\mypygui_import\\process.py"], shell=True)
 # def Edit_process(event):
-#     subprocess.Popen(["powershell", "start-process","code", "C:\\Users\\nahid\\ms\\ms1\\scripts\\mypygui_import\\process.py"], shell=True)
+#     subprocess.Popen(["powershell", "start-process","code", "C:\\@delta\\ms1\\scripts\\mypygui_import\\process.py"], shell=True)
 
 # def start_script_list(event):
-#     subprocess.Popen(["powershell", "start-process", "C:\\Users\\nahid\\ms\\ms1\\scripts\\mypygui_import\\script_list.py", "-WindowStyle", "Hidden"], shell=True)
+#     subprocess.Popen(["powershell", "start-process", "C:\\@delta\\ms1\\scripts\\mypygui_import\\script_list.py", "-WindowStyle", "Hidden"], shell=True)
 # def edit_script_list(event):
-#     subprocess.Popen(["powershell", "start-process","code", "C:\\Users\\nahid\\ms\\ms1\\scripts\\mypygui_import\\script_list.py", "-WindowStyle", "Hidden"], shell=True)
+#     subprocess.Popen(["powershell", "start-process","code", "C:\\@delta\\ms1\\scripts\\mypygui_import\\script_list.py", "-WindowStyle", "Hidden"], shell=True)
 
 
 # def get_appinfo(event):
-#     subprocess.Popen(["cmd /c C:\\Users\\nahid\\ms\\ms1\\scripts\\info.py"], shell=True)
+#     subprocess.Popen(["cmd /c C:\\@delta\\ms1\\scripts\\info.py"], shell=True)
 # def edit_appinfo(event):
-#     subprocess.Popen(["cmd /c code C:\\Users\\nahid\\ms\\ms1\\scripts\\info.py"], shell=True)
+#     subprocess.Popen(["cmd /c code C:\\@delta\\ms1\\scripts\\info.py"], shell=True)
 
 
 def force_shutdown(event):
@@ -321,14 +321,14 @@ def force_restart(event):
         # subprocess.run(["shutdown", "/r", "/t", "0"])
 
 # def open_backup(event=None):
-#     subprocess.Popen(["powershell", "start", "C:\\Users\\nahid\\ms\\ms1\\scripts\\backup.ps1"], shell=True)
+#     subprocess.Popen(["powershell", "start", "C:\\@delta\\ms1\\scripts\\backup.ps1"], shell=True)
 # def edit_backup(event=None):
-#     subprocess.Popen(["powershell", "start","code", "C:\\Users\\nahid\\ms\\ms1\\scripts\\backup.ps1"], shell=True)
+#     subprocess.Popen(["powershell", "start","code", "C:\\@delta\\ms1\\scripts\\backup.ps1"], shell=True)
 
 # def open_update(event=None):
-#     subprocess.Popen(["powershell", "start", "C:\\Users\\nahid\\ms\\ms1\\scripts\\update.ps1"],  shell=True)
+#     subprocess.Popen(["powershell", "start", "C:\\@delta\\ms1\\scripts\\update.ps1"],  shell=True)
 # def edit_update(event=None):
-#     subprocess.Popen(["powershell", "start","code", "C:\\Users\\nahid\\ms\\ms1\\scripts\\update.ps1"],  shell=True)
+#     subprocess.Popen(["powershell", "start","code", "C:\\@delta\\ms1\\scripts\\update.ps1"],  shell=True)
 
 def c_size(event=None):
     subprocess.run(["powershell", "Start-Process rclone -ArgumentList 'ncdu c:\\' "])
@@ -336,25 +336,25 @@ def d_size(event=None):
     subprocess.run(["powershell", "Start-Process rclone -ArgumentList 'ncdu d:\\' "])
 
 def start_trim():
-    subprocess.Popen(["powershell", "start", "C:\\Users\\nahid\\ms\\ms1\\scripts\\ffmpeg\\trim.ps1"])
+    subprocess.Popen(["powershell", "start", "C:\\@delta\\ms1\\scripts\\ffmpeg\\trim.ps1"])
 def start_convert():
-    subprocess.Popen(["powershell", "start", "C:\\Users\\nahid\\ms\\ms1\\scripts\\ffmpeg\\convert.ps1"])
+    subprocess.Popen(["powershell", "start", "C:\\@delta\\ms1\\scripts\\ffmpeg\\convert.ps1"])
 def start_dimension():
     subprocess.Popen(["powershell", "start", "C:\\Users\\nahid\\ms\\ms1\\scripts\\ffmpeg\\dimension.ps1"])
 def start_imgdimension():
     subprocess.Popen(["powershell", "start", "C:\\Users\\nahid\\ms\\ms1\\scripts\\ffmpeg\\imgdim.ps1"])
 def start_merge():
-    subprocess.Popen(["powershell", "start", "C:\\Users\\nahid\\ms\\ms1\\scripts\\ffmpeg\\merge.ps1"])
+    subprocess.Popen(["powershell", "start", "C:\\@delta\\ms1\\scripts\\ffmpeg\\merge.ps1"])
 
 # def Backup_Restore(event):
-#     subprocess.Popen(["powershell", "start", "C:\\Users\\nahid\\ms\\ms1\\scripts\\BackupRestore.py"])
+#     subprocess.Popen(["powershell", "start", "C:\\@delta\\ms1\\scripts\\BackupRestore.py"])
 # def editBackup_Restore(event):
-#     subprocess.Popen(["powershell", "start","code", "C:\\Users\\nahid\\ms\\ms1\\scripts\\BackupRestore.py"])
+#     subprocess.Popen(["powershell", "start","code", "C:\\@delta\\ms1\\scripts\\BackupRestore.py"])
 
 def fzf_search(event):
-    subprocess.Popen(["cmd /c start C:\\Users\\nahid\\ms\\ms1\\scripts\\ff.ps1"], shell=True)
+    subprocess.Popen(["cmd /c start C:\\@delta\\ms1\\scripts\\ff.ps1"], shell=True)
 def edit_fzfSearch(event):
-    subprocess.Popen(["cmd /c code C:\\Users\\nahid\\ms\\ms1\\scripts\\ff.ps1"],shell=True)
+    subprocess.Popen(["cmd /c code C:\\@delta\\ms1\\scripts\\ff.ps1"],shell=True)
 
 # def launch_LockBox(event=None):
 #     subprocess.Popen('cmd /c  "C:\\Program Files\\My Lockbox\\mylbx.exe"')

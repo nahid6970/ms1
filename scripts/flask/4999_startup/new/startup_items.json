@@ -1,12 +1,12 @@
 [
   {
     "name": "ahk_v2",
-    "command": "Start-Process -FilePath \"C:\\Users\\nahid\\ms\\ms1\\ahk_v2.ahk\"",
+    "command": "Start-Process -FilePath \"C:\\@delta\\ms1\\ahk_v2.ahk\"",
     "enabled": true
   },
   {
     "name": "Flask - 5004 - Paint",
-    "command": "pythonw \"C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5004 paint\\app.py\"",
+    "command": "pythonw \"C:\\@delta\\ms1\\scripts\\flask\\5004 paint\\app.py\"",
     "enabled": true
   }
 ]

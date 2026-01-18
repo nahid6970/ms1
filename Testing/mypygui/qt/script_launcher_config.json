@@ -35,7 +35,7 @@
                             "ctrl_right_cmd": "",
                             "use_inline": true,
                             "inline_type": "pwsh",
-                            "inline_script": "New-Item -ItemType SymbolicLink -Path C:\\Users\\nahid\\Documents\\PowerShell\\Microsoft.PowerShell_profile.ps1 -Target C:\\Users\\nahid\\ms\\ms1\\asset\\Powershell\\Microsoft.PowerShell_profile.ps1 -Force",
+                            "inline_script": "New-Item -ItemType SymbolicLink -Path C:\\Users\\nahid\\Documents\\PowerShell\\Microsoft.PowerShell_profile.ps1 -Target C:\\@delta\\ms1\\asset\\Powershell\\Microsoft.PowerShell_profile.ps1 -Force",
                             "font_family": "Consolas",
                             "font_size": 12,
                             "is_bold": true,
@@ -65,7 +65,7 @@
                             "ctrl_right_cmd": "",
                             "use_inline": true,
                             "inline_type": "pwsh",
-                            "inline_script": "Write-Host \"initially after creating with  quickstart have to run komorebi with the default profile then we can mklink\" -ForegroundColor Green\nWrite-Host \"it will try to replace ms1 komorebi profile just let it and then copy it from git and paste the code in\" -ForegroundColor Green\nKomorebic quickstart\nRemove-Item 'C:\\Users\\nahid\\komorebi.json'\nNew-Item -ItemType SymbolicLink -Path 'C:\\Users\\nahid\\komorebi.json' -Target 'C:\\Users\\nahid\\ms\\ms1\\asset\\komorebi\\komorebi.json' -Force #[pwsh]",
+                            "inline_script": "Write-Host \"initially after creating with  quickstart have to run komorebi with the default profile then we can mklink\" -ForegroundColor Green\nWrite-Host \"it will try to replace ms1 komorebi profile just let it and then copy it from git and paste the code in\" -ForegroundColor Green\nKomorebic quickstart\nRemove-Item 'C:\\Users\\nahid\\komorebi.json'\nNew-Item -ItemType SymbolicLink -Path 'C:\\Users\\nahid\\komorebi.json' -Target 'C:\\@delta\\ms1\\asset\\komorebi\\komorebi.json' -Force #[pwsh]",
                             "font_family": "Consolas",
                             "font_size": 12,
                             "is_bold": true,
@@ -95,7 +95,7 @@
                 },
                 {
                     "name": "pip",
-                    "path": "C:/Users/nahid/ms/ms1/Testing/mypygui/install_dependencies.py",
+                    "path": "C:/@delta/ms1/Testing/mypygui/install_dependencies.py",
                     "type": "script",
                     "hide_terminal": false,
                     "keep_open": true,
@@ -238,7 +238,7 @@
             "scripts": [
                 {
                     "name": "Android Icon",
-                    "path": "C:\\Users\\nahid\\ms\\ms1\\scripts\\ffmpeg\\android_icon_generator.ps1",
+                    "path": "C:\\@delta\\ms1\\scripts\\ffmpeg\\android_icon_generator.ps1",
                     "type": "script",
                     "hide_terminal": false,
                     "ctrl_left_cmd": "",
@@ -260,7 +260,7 @@
                 },
                 {
                     "name": "Convert",
-                    "path": "C:/Users/nahid/ms/ms1/scripts/ffmpeg/convert.ps1",
+                    "path": "C:/@delta/ms1/scripts/ffmpeg/convert.ps1",
                     "type": "script",
                     "_runtime_height": 100,
                     "_runtime_font_size": 14,
@@ -282,7 +282,7 @@
                 },
                 {
                     "name": "IMG-Dimension",
-                    "path": "C:/Users/nahid/ms/ms1/scripts/ffmpeg/image_dimension.ps1",
+                    "path": "C:/@delta/ms1/scripts/ffmpeg/image_dimension.ps1",
                     "type": "script",
                     "hide_terminal": false,
                     "_runtime_height": 100,
@@ -295,7 +295,7 @@
                 },
                 {
                     "name": "Merge",
-                    "path": "C:/Users/nahid/ms/ms1/scripts/ffmpeg/merge.ps1",
+                    "path": "C:/@delta/ms1/scripts/ffmpeg/merge.ps1",
                     "type": "script",
                     "_runtime_height": 100,
                     "_runtime_font_size": 14,
@@ -307,7 +307,7 @@
                 },
                 {
                     "name": "Trim",
-                    "path": "C:/Users/nahid/ms/ms1/scripts/ffmpeg/trim.ps1",
+                    "path": "C:/@delta/ms1/scripts/ffmpeg/trim.ps1",
                     "type": "script",
                     "_runtime_height": 100,
                     "_runtime_font_size": 14,
@@ -319,7 +319,7 @@
                 },
                 {
                     "name": "VID-Dimension",
-                    "path": "C:/Users/nahid/ms/ms1/scripts/ffmpeg/vid_dim.ps1",
+                    "path": "C:/@delta/ms1/scripts/ffmpeg/vid_dim.ps1",
                     "type": "script",
                     "hide_terminal": false,
                     "_runtime_height": 100,
@@ -758,7 +758,7 @@
         },
         {
             "name": "AntiGravity",
-            "path": "C:/Users/nahid/ms/ms1/Testing/antigravity_acc_change/vsc_manager.py",
+            "path": "C:/@delta/ms1/Testing/antigravity_acc_change/vsc_manager.py",
             "type": "script",
             "hide_terminal": true,
             "ctrl_left_cmd": "",
@@ -858,7 +858,7 @@
         },
         {
             "name": "mklink",
-            "path": "C:/Users/nahid/ms/ms1/Testing/mklink/mklink.py",
+            "path": "C:/@delta/ms1/Testing/mklink/mklink.py",
             "hide_terminal": true,
             "ctrl_left_cmd": "",
             "ctrl_right_cmd": "",
@@ -880,7 +880,7 @@
         },
         {
             "name": "C-Map",
-            "path": "C:/Users/nahid/ms/ms1/Testing/mypygui/special_char_picker.py",
+            "path": "C:/@delta/ms1/Testing/mypygui/special_char_picker.py",
             "type": "script",
             "hide_terminal": true,
             "keep_open": false,
@@ -902,7 +902,7 @@
         },
         {
             "name": "Locker",
-            "path": "C:/Users/nahid/ms/ms1/Testing/antigravity_acc_change/Locker.py",
+            "path": "C:/@delta/ms1/Testing/antigravity_acc_change/Locker.py",
             "type": "script",
             "hide_terminal": true,
             "keep_open": false,
@@ -938,7 +938,7 @@
         },
         {
             "name": "<fs:25>\udb82\udcef</fs> <br> Lock-Smith",
-            "path": "C:/Users/nahid/ms/ms1/Testing/FileLockSmith/locksmith.py",
+            "path": "C:/@delta/ms1/Testing/FileLockSmith/locksmith.py",
             "type": "script",
             "hide_terminal": true,
             "keep_open": false,
@@ -973,7 +973,7 @@
         },
         {
             "name": "ClipBoard",
-            "path": "C:/Users/nahid/ms/ms1/Testing/Clipboard_Capture/main.py",
+            "path": "C:/@delta/ms1/Testing/Clipboard_Capture/main.py",
             "type": "script",
             "hide_terminal": true,
             "keep_open": false,
@@ -993,7 +993,7 @@
         },
         {
             "name": "StatusBar",
-            "path": "C:/Users/nahid/ms/ms1/mypygui.py",
+            "path": "C:/@delta/ms1/mypygui.py",
             "type": "script",
             "icon_path": "",
             "icon_width": 0,
@@ -1028,7 +1028,7 @@
         },
         {
             "name": "YTC",
-            "path": "C:/Users/nahid/ms/ms1/scripts/ytc/ytc_qt.py",
+            "path": "C:/@delta/ms1/scripts/ytc/ytc_qt.py",
             "type": "script",
             "hide_terminal": true,
             "keep_open": false,

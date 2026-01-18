@@ -12,7 +12,7 @@
             "name": "Run Python Script",
             "description": "Opens run.py in the ms1 directory",
             "hotkey": "ScrollLock",
-            "action": "run_py_script()\nrun_py_script()\n{\n    Run(\"C:\\Users\\nahid\\ms\\ms1\\scripts\\run\\Run.py\", , \"Show\")\n    ; Wait a moment for the window to appear\n    Sleep(1000)\n    ; Make the window always on top (assumes it's the active window)\n    ;WinSetAlwaysOnTop(true, \"A\")\n}",
+            "action": "run_py_script()\nrun_py_script()\n{\n    Run(\"C:\\@delta\\ms1\\scripts\\run\\Run.py\", , \"Show\")\n    ; Wait a moment for the window to appear\n    Sleep(1000)\n    ; Make the window always on top (assumes it's the active window)\n    ;WinSetAlwaysOnTop(true, \"A\")\n}",
             "category": "Launch",
             "enabled": true
         },
@@ -41,7 +41,7 @@
             "name": "Bio GUI",
             "description": "Opens Bio.ahk GUI",
             "hotkey": "!b",
-            "action": "Run(\"C:\\Users\\nahid\\ms\\ms1\\scripts\\Autohtokey\\version2\\gui\\Bio.ahk\", \"\", \"Hide\")",
+            "action": "Run(\"C:\\@delta\\ms1\\scripts\\Autohtokey\\version2\\gui\\Bio.ahk\", \"\", \"Hide\")",
             "category": "Launch",
             "enabled": true
         },
@@ -49,7 +49,7 @@
             "name": "Ultimate GUI",
             "description": "Opens Ultimate_Gui.py",
             "hotkey": "!u",
-            "action": "Run(\"C:\\Users\\nahid\\ms\\ms1\\Ultimate_Gui.py\", \"\", \"Hide\")",
+            "action": "Run(\"C:\\@delta\\ms1\\Ultimate_Gui.py\", \"\", \"Hide\")",
             "category": "Launch"
         },
         {
@@ -86,7 +86,7 @@
             "category": "Launch",
             "description": "",
             "hotkey": "#x",
-            "action": "Run(\"C:\\Users\\nahid\\ms\\ms1\\Testing\\mypygui\\qt\\script_manager_gui_qt.py\", , \"Hide\")",
+            "action": "Run(\"C:\\@delta\\ms1\\Testing\\mypygui\\qt\\script_manager_gui_qt.py\", , \"Hide\")",
             "enabled": true
         },
         {
@@ -94,14 +94,14 @@
             "category": "Launch",
             "description": "",
             "hotkey": "#s",
-            "action": "Run(\"C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\4999_startup\\startup.py\", , \"Hide\")"
+            "action": "Run(\"C:\\@delta\\ms1\\scripts\\flask\\4999_startup\\startup.py\", , \"Hide\")"
         },
         {
             "name": "CrossHair",
             "category": "General",
             "description": "",
             "hotkey": "^+m",
-            "action": "Run(\"C:\\Users\\nahid\\ms\\ms1\\scripts\\xy\\XY_CroosHair.py\", , \"Hide\")"
+            "action": "Run(\"C:\\@delta\\ms1\\scripts\\xy\\XY_CroosHair.py\", , \"Hide\")"
         },
         {
             "name": "Explorer Restart",
@@ -129,7 +129,7 @@
             "category": "Display",
             "description": "",
             "hotkey": "!1",
-            "action": "Run(\"C:\\Users\\nahid\\ms\\ms1\\scripts\\Autohtokey\\version2\\display\\send_to_2nd.ahk\", \"\", \"Hide\")",
+            "action": "Run(\"C:\\@delta\\ms1\\scripts\\Autohtokey\\version2\\display\\send_to_2nd.ahk\", \"\", \"Hide\")",
             "enabled": true
         },
         {
@@ -137,7 +137,7 @@
             "category": "General",
             "description": "",
             "hotkey": "^!n",
-            "action": "Run(\"C:\\Users\\nahid\\ms\\ms1\\scripts\\Autohtokey\\version1\\nvim_OpenWith.ahk\", \"\", \"Show\")",
+            "action": "Run(\"C:\\@delta\\ms1\\scripts\\Autohtokey\\version1\\nvim_OpenWith.ahk\", \"\", \"Show\")",
             "enabled": false
         },
         {
@@ -196,7 +196,7 @@
             "category": "General",
             "description": "",
             "hotkey": "^!n",
-            "action": "OpenWithEditor() {\n    ; Backup current clipboard content\n    ClipboardBackup := ClipboardAll()\n    \n    ; Clear clipboard and copy the selected file path\n    A_Clipboard := \"\"\n    Send(\"^c\")\n    if !ClipWait(1) {\n        MsgBox(\"No valid file path found.\")\n        A_Clipboard := ClipboardBackup\n        return\n    }\n    \n    ClipBoardContent := A_Clipboard\n    if InStr(ClipBoardContent, \"\\\") {\n        ; Handle multiple files (split by newline)\n        FilePaths := \"\"\n        Loop Parse, ClipBoardContent, \"`n\", \"`r\" {\n            if (A_LoopField != \"\") {\n                FilePaths .= '\"' . A_LoopField . '\" '\n            }\n        }\n        if (FilePaths != \"\") {\n            ; Use pythonw to run without console window\n            Run('pythonw \"C:\\Users\\nahid\\ms\\ms1\\scripts\\run\\editor_chooser.py\" ' . FilePaths, , \"Hide\")\n        }\n    } else {\n        MsgBox(\"No valid file path found.\")\n    }\n    \n    ; Restore original clipboard content\n    A_Clipboard := ClipboardBackup\n}",
+            "action": "OpenWithEditor() {\n    ; Backup current clipboard content\n    ClipboardBackup := ClipboardAll()\n    \n    ; Clear clipboard and copy the selected file path\n    A_Clipboard := \"\"\n    Send(\"^c\")\n    if !ClipWait(1) {\n        MsgBox(\"No valid file path found.\")\n        A_Clipboard := ClipboardBackup\n        return\n    }\n    \n    ClipBoardContent := A_Clipboard\n    if InStr(ClipBoardContent, \"\\\") {\n        ; Handle multiple files (split by newline)\n        FilePaths := \"\"\n        Loop Parse, ClipBoardContent, \"`n\", \"`r\" {\n            if (A_LoopField != \"\") {\n                FilePaths .= '\"' . A_LoopField . '\" '\n            }\n        }\n        if (FilePaths != \"\") {\n            ; Use pythonw to run without console window\n            Run('pythonw \"C:\\@delta\\ms1\\scripts\\run\\editor_chooser.py\" ' . FilePaths, , \"Hide\")\n        }\n    } else {\n        MsgBox(\"No valid file path found.\")\n    }\n    \n    ; Restore original clipboard content\n    A_Clipboard := ClipboardBackup\n}",
             "enabled": true
         },
         {
@@ -220,7 +220,7 @@
             "category": "General",
             "description": "",
             "hotkey": "PrintScreen",
-            "action": "Run(\"C:\\Users\\nahid\\ms\\ms1\\scripts\\Autohtokey\\version2\\gui\\Bio.ahk\", \"\", \"Hide\")",
+            "action": "Run(\"C:\\@delta\\ms1\\scripts\\Autohtokey\\version2\\gui\\Bio.ahk\", \"\", \"Hide\")",
             "enabled": true
         },
         {
@@ -228,7 +228,7 @@
             "category": "General",
             "description": "",
             "hotkey": "#f",
-            "action": "Run(\"C:\\Users\\nahid\\ms\\ms1\\Testing\\screenshot\\folder_launcher\\launcher.py\", \"\", \"Hide\")",
+            "action": "Run(\"C:\\@delta\\ms1\\Testing\\screenshot\\folder_launcher\\launcher.py\", \"\", \"Hide\")",
             "enabled": true
         },
         {
@@ -236,7 +236,7 @@
             "category": "General",
             "description": "",
             "hotkey": "#v",
-            "action": "Run(\"C:\\Users\\nahid\\ms\\ms1\\Testing\\screenshot\\gallery\\gallery.py\", \"\", \"Hide\")",
+            "action": "Run(\"C:\\@delta\\ms1\\Testing\\screenshot\\gallery\\gallery.py\", \"\", \"Hide\")",
             "enabled": true
         },
         {

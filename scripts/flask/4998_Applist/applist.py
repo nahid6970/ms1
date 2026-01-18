@@ -248,7 +248,7 @@ def delete_application(app_to_delete):
 
 import json
 
-DATA_FILE = "C:/Users/nahid/ms/ms1/scripts/flask/4998_Applist/data.json"
+DATA_FILE = "C:/@delta/ms1/scripts/flask/4998_Applist/data.json"
 
 def load_applications():
     if os.path.exists(DATA_FILE):

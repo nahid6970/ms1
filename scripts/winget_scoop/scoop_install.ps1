@@ -1,4 +1,4 @@
-# # if this is the first time run this script first C:\Users\nahid\ms\ms1\scripts\winget_scoop\scoop_list.py
+# # if this is the first time run this script first C:\@delta\ms1\scripts\winget_scoop\scoop_list.py
 
 # # Path to the text file containing the package list
 # $packageListFile = "C:\Users\nahid\python_scoop_list_fzf.txt"
@@ -30,7 +30,7 @@
 
 
 # Ensure the prerequisite script is run
-$prerequisiteScript = "C:\Users\nahid\ms\ms1\scripts\winget_scoop\scoop_list.py"
+$prerequisiteScript = "C:\@delta\ms1\scripts\winget_scoop\scoop_list.py"
 
 # Check if the prerequisite script exists
 if (Test-Path $prerequisiteScript) {

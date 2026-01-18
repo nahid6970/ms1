@@ -16,7 +16,7 @@ def add_header(response):
     return response
 
 DATA_FILE = r'C:\Users\nahid\ms\ms1\scripts\flask\5018_cell\data.json'
-CUSTOM_SYNTAXES_FILE = r'C:\Users\nahid\ms\ms1\scripts\flask\5018_cell\custom_syntaxes.json'
+CUSTOM_SYNTAXES_FILE = r'C:\@delta\ms1\scripts\flask\5018_cell\custom_syntaxes.json'
 
 def load_data():
     if os.path.exists(DATA_FILE):
