@@ -67,7 +67,7 @@ def run_fzf(items, prompt="Select > ", help_text="", extra_args=None):
         f"--preview=echo {safe_header}",
         "--preview-window=up:1:hidden:wrap",
         "--bind=?:toggle-preview",
-        "--expect=ctrl-a,ctrl-d,tab,alt-up,alt-down",
+        "--expect=ctrl-a,ctrl-d,ctrl-e,tab,alt-up,alt-down",
         "--color=bg:#1e1e1e,fg:#d0d0d0,bg+:#2e2e2e,fg+:#ffffff,hl:#00d9ff,hl+:#00ff00",
         "--color=info:#afaf87,prompt:#d782ff,pointer:#d782ff,marker:#19d600,header:#888888",
         "--border",
@@ -200,6 +200,26 @@ def main():
                 else:
                     input(f"Error: '{new_dir}' is not a valid directory. Press Enter to continue...")
         
+        elif key == 'ctrl-e':
+            if idx != -1 and idx < len(dirs):
+                curr = dirs[idx]
+                print(f"\n--- Edit Directory [{curr['path']}] ---")
+                
+                new_path = input(f"New Path (Enter to keep '{curr['path']}'): ").strip().strip('"').strip("'")
+                if not new_path: 
+                    new_path = curr['path']
+                
+                new_cat = input(f"New Category (Enter to keep '{curr.get('category', 'General')}'): ").strip()
+                if not new_cat:
+                    new_cat = curr.get('category', 'General')
+
+                if new_path != curr['path'] and not os.path.isdir(new_path):
+                     input(f"Error: '{new_path}' is not a valid directory. Press Enter to cancel edit...")
+                else:
+                    dirs[idx] = {"path": new_path, "category": new_cat}
+                    data["directories"] = dirs
+                    save_data(data)
+
         elif key == 'ctrl-d':
             if idx != -1 and idx < len(dirs):
                 dirs.pop(idx)
@@ -270,6 +290,24 @@ def handle_directory(dir_obj, data):
                     data["commands"] = commands
                     save_data(data)
                     
+        elif key == 'ctrl-e':
+            if idx != -1 and idx < len(commands):
+                curr = commands[idx]
+                print(f"\n--- Edit Command [{curr['name']}] ---")
+                
+                new_name = input(f"New Name (Enter to keep '{curr['name']}'): ").strip()
+                if not new_name: new_name = curr['name']
+                
+                new_temp = input(f"New Template (Enter to keep current): ").strip()
+                if not new_temp: new_temp = curr['template']
+                
+                new_cat = input(f"New Category (Enter to keep '{curr.get('category', 'General')}'): ").strip()
+                if not new_cat: new_cat = curr.get('category', 'General')
+                
+                commands[idx] = {"name": new_name, "template": new_temp, "category": new_cat}
+                data["commands"] = commands
+                save_data(data)
+
         elif key == 'ctrl-d':
             if idx != -1 and idx < len(commands):
                 commands.pop(idx)
