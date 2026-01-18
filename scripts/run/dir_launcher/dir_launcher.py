@@ -36,7 +36,7 @@ def run_fzf(items, prompt="Select > ", help_text="", extra_args=None):
         f"--preview=echo {safe_header}",
         "--preview-window=up:1:hidden:wrap",
         "--bind=?:toggle-preview",
-        "--expect=ctrl-a,ctrl-d,tab",
+        "--expect=ctrl-a,ctrl-d,tab,alt-up,alt-down",
         "--color=bg:#1e1e1e,fg:#d0d0d0,bg+:#2e2e2e,fg+:#ffffff,hl:#00d9ff,hl+:#00ff00",
         "--color=info:#afaf87,prompt:#d782ff,pointer:#d782ff,marker:#19d600,header:#888888",
         "--border",
@@ -72,6 +72,19 @@ def run_fzf(items, prompt="Select > ", help_text="", extra_args=None):
     selection = lines[1] if len(lines) > 1 else ""
     return key, selection
 
+def move_item(items, item, direction):
+    """Moves item up (-1) or down (1) in the list."""
+    try:
+        idx = items.index(item)
+    except ValueError:
+        return False
+    
+    new_idx = idx + direction
+    if 0 <= new_idx < len(items):
+        items[idx], items[new_idx] = items[new_idx], items[idx]
+        return True
+    return False
+
 def main():
     while True:
         data = load_data()
@@ -98,7 +111,7 @@ def main():
         key, selection = run_fzf(
             fzf_items, 
             prompt=f"Dir ({view_mode}) > ", 
-            help_text="Ctrl-A: Add Path | Ctrl-D: Remove Path | Tab: Toggle View | Enter: Select",
+            help_text="Ctrl-A: Add | Ctrl-D: Del | Tab: View | Alt-Up/Down: Move | Enter: Select",
             extra_args=fzf_args
         )
         
@@ -120,7 +133,17 @@ def main():
             settings["view_mode"] = new_mode
             data["settings"] = settings
             save_data(data)
-            continue # Loop again with new settings
+            continue 
+
+        elif key == 'alt-up':
+            if selected_dir and move_item(dirs, selected_dir, -1):
+                data["directories"] = dirs
+                save_data(data)
+                
+        elif key == 'alt-down':
+            if selected_dir and move_item(dirs, selected_dir, 1):
+                data["directories"] = dirs
+                save_data(data)
 
         elif key == '':
             if selected_dir:
@@ -153,18 +176,31 @@ def handle_directory(directory, data):
         key, selected_cmd_name = run_fzf(
             cmd_names, 
             prompt=f"[{directory}] Action > ", 
-            help_text="Ctrl-A: Add Cmd | Ctrl-D: Remove Cmd | Enter: Run | Esc: Back"
+            help_text="Ctrl-A: Add | Ctrl-D: Del | Alt-Up/Down: Move | Enter: Run | Esc: Back"
         )
         
         if key is None:
             return # Back to dir selection
 
+        cmd_obj = None
+        if selected_cmd_name:
+            cmd_obj = next((c for c in commands if c["name"] == selected_cmd_name), None)
+
         if key == '':
-            if selected_cmd_name:
-                cmd_obj = next((c for c in commands if c["name"] == selected_cmd_name), None)
-                if cmd_obj:
-                    execute_command(cmd_obj["template"], directory)
-                    sys.exit(0) # Done
+            if cmd_obj:
+                execute_command(cmd_obj["template"], directory)
+                sys.exit(0) # Done
+        
+        elif key == 'alt-up':
+            if cmd_obj and move_item(commands, cmd_obj, -1):
+                data["commands"] = commands
+                save_data(data)
+
+        elif key == 'alt-down':
+            if cmd_obj and move_item(commands, cmd_obj, 1):
+                data["commands"] = commands
+                save_data(data)
+
         elif key == 'ctrl-a':
             print("\n--- Add New Command ---")
             name = input("Command Name: ").strip()
