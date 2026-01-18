@@ -529,8 +529,8 @@ if __name__ == "__main__":
             "--bind=ctrl-p:toggle-preview",
             "--bind=?:toggle-header",
             "--bind=start:toggle-header",
-            f"--bind=alt-up:execute-silent(python \"{bookmark_reorder_script_file}\" up {{2}})+reload(python \"{feeder_script_file}\")",
-            f"--bind=alt-down:execute-silent(python \"{bookmark_reorder_script_file}\" down {{2}})+reload(python \"{feeder_script_file}\")",
+            f"--bind=alt-up:execute-silent(python \"{bookmark_reorder_script_file}\" up {{2}})+reload(python \"{feeder_script_file}\")+up",
+            f"--bind=alt-down:execute-silent(python \"{bookmark_reorder_script_file}\" down {{2}})+reload(python \"{feeder_script_file}\")+down",
         ]
 
         # Start fzf process with initial file feed from feeder script

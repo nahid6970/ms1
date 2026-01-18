@@ -67,7 +67,9 @@ def run_fzf(items, prompt="Select > ", help_text="", extra_args=None):
         f"--preview=echo {safe_header}",
         "--preview-window=up:1:hidden:wrap",
         "--bind=?:toggle-preview",
-        "--expect=ctrl-a,ctrl-d,ctrl-e,ctrl-s,tab,alt-up,alt-down",
+        "--bind=?:toggle-preview",
+        "--expect=ctrl-a,ctrl-d,ctrl-e,tab",
+        "--color=bg:#1e1e1e,fg:#d0d0d0,bg+:#2e2e2e,fg+:#ffffff,hl:#00d9ff,hl+:#00ff00",
         "--color=bg:#1e1e1e,fg:#d0d0d0,bg+:#2e2e2e,fg+:#ffffff,hl:#00d9ff,hl+:#00ff00",
         "--color=info:#afaf87,prompt:#d782ff,pointer:#d782ff,marker:#19d600,header:#888888",
         "--border",
@@ -157,7 +159,15 @@ def main():
             fzf_items.append(f"{idx}\t{display}")
 
         # Hide index (column 1) from display
-        fzf_args = ["--delimiter=\t", "--with-nth=2.."]
+        # Hide index (column 1) from display
+        script_path = os.path.abspath(__file__)
+        fzf_args = [
+            "--delimiter=\t", 
+            "--with-nth=2..",
+            f"--bind=ctrl-s:execute-silent(python \"{script_path}\" --sort-dirs)+reload(python \"{script_path}\" --feed-dirs)",
+            f"--bind=alt-up:execute-silent(python \"{script_path}\" --move-dir {{1}} up)+reload(python \"{script_path}\" --feed-dirs)+up",
+            f"--bind=alt-down:execute-silent(python \"{script_path}\" --move-dir {{1}} down)+reload(python \"{script_path}\" --feed-dirs)+down"
+        ]
             
         key, selection = run_fzf(
             fzf_items, 
@@ -348,4 +358,84 @@ def execute_command(template, path):
     subprocess.run(final_cmd, shell=True)
 
 if __name__ == "__main__":
-    main()
+    import sys
+    
+    # helper for generating list (Must match main's format logic)
+    def generate_dir_list(data):
+        dirs = data.get("directories", [])
+        settings = data.get("settings", {"view_mode": "full"})
+        view_mode = settings.get("view_mode", "full")
+        
+        items = []
+        max_cat_len = 0
+        if dirs:
+            max_cat_len = max(len(d.get("category", "")) for d in dirs)
+            
+        for idx, d in enumerate(dirs):
+            cat = d.get("category", "General")
+            path = d.get("path", "")
+            
+            # Pad category for alignment
+            cat_display = f"{C_CYAN}[{cat}]{C_RESET}".ljust(max_cat_len + 12) 
+            
+            custom_name = d.get("name", "")
+            
+            if view_mode == "name":
+                if custom_name:
+                    display_name = custom_name
+                else:
+                    display_name = os.path.basename(path.rstrip(os.sep).rstrip('/'))
+                    if not display_name: display_name = path
+                display = f"{cat_display} {display_name}"
+            else:
+                display = f"{cat_display} {path}"
+                if custom_name:
+                    display += f" ({custom_name})"
+            
+            items.append(f"{idx}\t{display}")
+        return items
+
+    # CLI Argument Handling
+    if len(sys.argv) > 1:
+        cmd = sys.argv[1]
+        
+        if cmd == "--feed-dirs":
+            # Output for FZF reload
+            # Fix Unicode for Windows
+            sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+            data = load_data()
+            items = generate_dir_list(data)
+            print("\n".join(items))
+            sys.exit(0)
+            
+        elif cmd == "--move-dir":
+            # --move-dir index direction
+            if len(sys.argv) >= 4:
+                idx_str = sys.argv[2]
+                direction_str = sys.argv[3]
+                try:
+                    idx = int(idx_str)
+                    direction = -1 if direction_str == "up" else 1
+                    data = load_data()
+                    dirs = data.get("directories", [])
+                    if move_item(dirs, idx, direction):
+                        data["directories"] = dirs
+                        save_data(data)
+                except: pass
+            sys.exit(0)
+            
+        elif cmd == "--sort-dirs":
+            data = load_data()
+            dirs = data.get("directories", [])
+            dirs.sort(key=lambda x: (
+                x.get("category", "General").lower(), 
+                x.get("name", os.path.basename(x["path"].rstrip(os.sep))).lower()
+            ))
+            data["directories"] = dirs
+            save_data(data)
+            sys.exit(0)
+
+    try:
+        main()
+    except KeyboardInterrupt:
+        pass
