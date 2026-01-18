@@ -1,8 +1,9 @@
 {
     "directories": [
         {
-            "path": "C:\\Users\\nahid\\ms\\ms1\\scripts\\run\\dir_launcher",
-            "category": "General"
+            "path": "C:\\Users\\nahid\\ms\\ms1\\scripts\\run",
+            "category": "script",
+            "name": "Run & Dir"
         },
         {
             "path": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\",
@@ -50,7 +51,8 @@
         },
         {
             "path": "C:\\Users\\nahid\\ms\\ms1\\Testing\\mypygui\\qt",
-            "category": "Testing"
+            "category": "Testing",
+            "name": "Script Manager"
         },
         {
             "path": "C:\\Users\\nahid\\ms\\ms1\\Testing\\mklink",

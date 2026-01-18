@@ -139,12 +139,20 @@ def main():
             # Pad category for alignment
             cat_display = f"{C_CYAN}[{cat}]{C_RESET}".ljust(max_cat_len + 12) # +12 for ansi codes roughly
             
+            custom_name = d.get("name", "")
+            
             if view_mode == "name":
-                name = os.path.basename(path.rstrip(os.sep).rstrip('/'))
-                if not name: name = path
-                display = f"{cat_display} {name}"
+                if custom_name:
+                    display_name = custom_name
+                else:
+                    display_name = os.path.basename(path.rstrip(os.sep).rstrip('/'))
+                    if not display_name: display_name = path
+                
+                display = f"{cat_display} {display_name}"
             else:
                 display = f"{cat_display} {path}"
+                if custom_name:
+                    display += f" ({custom_name})"
             
             fzf_items.append(f"{idx}\t{display}")
 
@@ -192,9 +200,13 @@ def main():
                     cat = input("Category (default 'General'): ").strip()
                     if not cat: cat = "General"
                     
+                    name = input("Display Name (optional): ").strip()
+
                     # Check duplicates (by path)
                     if not any(d["path"] == new_dir for d in dirs):
-                        dirs.append({"path": new_dir, "category": cat})
+                        new_entry = {"path": new_dir, "category": cat}
+                        if name: new_entry["name"] = name
+                        dirs.append(new_entry)
                         data["directories"] = dirs
                         save_data(data)
                 else:
@@ -212,11 +224,18 @@ def main():
                 new_cat = input(f"New Category (Enter to keep '{curr.get('category', 'General')}'): ").strip()
                 if not new_cat:
                     new_cat = curr.get('category', 'General')
+                
+                curr_name = curr.get("name", "")
+                new_name = input(f"New Display Name (Enter to keep '{curr_name}'): ").strip()
+                if not new_name:
+                    new_name = curr_name
 
                 if new_path != curr['path'] and not os.path.isdir(new_path):
                      input(f"Error: '{new_path}' is not a valid directory. Press Enter to cancel edit...")
                 else:
-                    dirs[idx] = {"path": new_path, "category": new_cat}
+                    new_entry = {"path": new_path, "category": new_cat}
+                    if new_name: new_entry["name"] = new_name
+                    dirs[idx] = new_entry
                     data["directories"] = dirs
                     save_data(data)
 
