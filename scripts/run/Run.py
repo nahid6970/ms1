@@ -500,7 +500,7 @@ if __name__ == "__main__":
         
         # Prepare fzf arguments with PowerShell preview for images and F2 toggle
         # Compact multiline help header
-        help_header = "Enter: Menu       | F3: Toggle View    | ?: Toggle Help\nCtrl-N: Editor    | F5: Bookmark       | Alt-Up: Move Up\nCtrl-O: Explorer  | Ctrl-C: Copy Path  | Alt-Down: Move Down\nCtrl-R: Run File  | F2: Toggle Preview"
+        help_header = "Enter: Menu       | F3: Toggle View    | F5: Bookmark\nCtrl-N: Editor    | F2: Toggle Preview | Alt-Up: Move Up\nCtrl-O: Explorer  | Ctrl-C: Copy Path  | Alt-Down: Move Down\nCtrl-R: Run File"
          
         fzf_args = [
             "fzf",
