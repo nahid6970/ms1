@@ -43,6 +43,7 @@ STYLESHEET = f"""
         padding: 4px;
         selection-background-color: {CP_CYAN};
         selection-color: #000000;
+        border-radius: 0px;
     }}
     QLineEdit:focus, QComboBox:focus {{
         border: 1px solid {CP_CYAN};
@@ -55,6 +56,7 @@ STYLESHEET = f"""
         color: white;
         padding: 6px 12px;
         font-weight: bold;
+        border-radius: 0px;
     }}
     QPushButton:hover {{
         background-color: #2a2a2a;
@@ -457,7 +459,7 @@ class SymlinkManager(QMainWindow):
             
             # Container
             item_frame = QFrame()
-            item_frame.setStyleSheet(f"background-color: {CP_PANEL}; border-radius: 4px; border: 1px solid {CP_DIM};")
+            item_frame.setStyleSheet(f"background-color: {CP_PANEL}; border-radius: 0px; border: 1px solid {CP_DIM};")
             item_layout = QHBoxLayout(item_frame)
             
             # Info
@@ -479,25 +481,37 @@ class SymlinkManager(QMainWindow):
             if status_text != "Working":
                 fix_btn = QPushButton("🔗 Fix")
                 fix_btn.setFixedSize(80, 30)
-                fix_btn.setStyleSheet(f"border-color: {CP_CYAN}; color: {CP_CYAN};")
+                fix_btn.setStyleSheet(f"""
+                    QPushButton {{ border-color: {CP_CYAN}; color: {CP_CYAN}; }}
+                    QPushButton:hover {{ background-color: {CP_CYAN}; color: black; }}
+                """)
                 fix_btn.clicked.connect(lambda checked, idx=i: self.create_link(idx))
                 btn_layout.addWidget(fix_btn)
 
             open_btn = QPushButton("📂 Open")
             open_btn.setFixedSize(80, 30)
-            open_btn.setStyleSheet(f"border-color: #9b59b6; color: #9b59b6;")
+            open_btn.setStyleSheet(f"""
+                QPushButton {{ border-color: #9b59b6; color: #9b59b6; }}
+                QPushButton:hover {{ background-color: #9b59b6; color: black; }}
+            """)
             open_btn.clicked.connect(lambda checked, idx=i: self.open_folder(idx))
             btn_layout.addWidget(open_btn)
 
             edit_btn = QPushButton("📝 Edit")
             edit_btn.setFixedSize(80, 30)
-            edit_btn.setStyleSheet(f"border-color: {CP_ORANGE}; color: {CP_ORANGE};")
+            edit_btn.setStyleSheet(f"""
+                QPushButton {{ border-color: {CP_ORANGE}; color: {CP_ORANGE}; }}
+                QPushButton:hover {{ background-color: {CP_ORANGE}; color: black; }}
+            """)
             edit_btn.clicked.connect(lambda checked, idx=i: self.edit_link(idx))
             btn_layout.addWidget(edit_btn)
 
             del_btn = QPushButton("🗑️")
             del_btn.setFixedSize(50, 30)
-            del_btn.setStyleSheet(f"border-color: {CP_RED}; color: {CP_RED};")
+            del_btn.setStyleSheet(f"""
+                QPushButton {{ border-color: {CP_RED}; color: {CP_RED}; }}
+                QPushButton:hover {{ background-color: {CP_RED}; color: black; }}
+            """)
             del_btn.clicked.connect(lambda checked, idx=i: self.delete_link(idx))
             btn_layout.addWidget(del_btn)
 
