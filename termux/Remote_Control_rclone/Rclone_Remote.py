@@ -5,7 +5,7 @@ import time
 # Cloud file to read commands from
 REMOTE_COMMAND_FILE = r"g00:\Remote_Control\Command.txt"
 # Local file for storing command output
-LOCAL_OUTPUT_FILE = r"C:\Users\nahid\ms\msBackups\Remote_Control\output.txt"
+LOCAL_OUTPUT_FILE = r"C:\@delta\msBackups\Remote_Control\output.txt"
 # Cloud file to upload command output
 REMOTE_OUTPUT_FILE = r"g00:\Remote_Control\output.txt"
 # Path to the latest PowerShell executable

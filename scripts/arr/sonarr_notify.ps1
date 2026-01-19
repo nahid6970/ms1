@@ -8,7 +8,7 @@ $epfile_seasonnumber = $env:sonarr_episodefile_seasonnumber
 $releasename = $env:sonarr_episodefile_scenename
 $releasetitle = $env:sonarr_release_title
 $isupgrade = $env:sonarr_isupgrade
-$iconPath = "C:\Users\nahid\ms\msBackups\icon\sonarr.png" # Path to Sonarr icon file
+$iconPath = "C:\@delta\msBackups\icon\sonarr.png" # Path to Sonarr icon file
 
 if ($eventtype -eq "Test") {
     New-BurntToastNotification -AppLogo $iconPath -Text $eventtype, "Sonarr test notification."

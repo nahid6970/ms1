@@ -348,7 +348,7 @@ def FameFunction(button):
                     # Example logic
 
                     #! Single match and click ; since not array so no need to use match
-                    match_this = find_image(r"C:\Users\nahid\ms\msBackups\tap_joy\precats\MatchThis.png", confidence=0.80, region=(1169, 111, 1646, 353))
+                    match_this = find_image(r"C:\@delta\msBackups\tap_joy\precats\MatchThis.png", confidence=0.80, region=(1169, 111, 1646, 353))
                     if match_this:
                         center = pyautogui.center(match_this)
                         press_global_screen_with_delays((1220, 308, .5))

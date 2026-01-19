@@ -3,8 +3,10 @@ import os
 import re
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
                              QHBoxLayout, QLabel, QLineEdit, QPushButton, 
-                             QTextEdit, QGroupBox, QFormLayout, QRadioButton,
-                             QButtonGroup, QCheckBox, QMessageBox, QFrame)
+                             QComboBox, QCheckBox, QFileDialog, QMessageBox, 
+                             QFrame, QTextEdit, QGroupBox, QFormLayout, QRadioButton,
+                             QButtonGroup, QListWidget, QSplitter,
+                             QListWidgetItem)
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QFont, QClipboard
 
@@ -24,7 +26,8 @@ class PathConverter(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("PATH_CONVERTER // CYBER_QT")
-        self.setGeometry(100, 100, 900, 700)
+        self.setGeometry(100, 100, 700, 400)  # Reduced from 900x700 to 700x400
+        self.setFixedSize(700, 400)  # Make window non-resizable for compact design
         
         # Apply cyberpunk theme
         self.setStyleSheet(f"""
@@ -161,8 +164,8 @@ class PathConverter(QMainWindow):
         central = QWidget()
         self.setCentralWidget(central)
         main_layout = QVBoxLayout(central)
-        main_layout.setContentsMargins(25, 25, 25, 25)
-        main_layout.setSpacing(20)
+        main_layout.setContentsMargins(20, 20, 20, 20)  # Reduced margins
+        main_layout.setSpacing(15)  # Reduced spacing
         
         # Header
         header = QLabel("PATH_CONVERTER")
@@ -174,218 +177,130 @@ class PathConverter(QMainWindow):
         input_group = QGroupBox("INPUT_PATH")
         input_layout = QVBoxLayout(input_group)
         
-        input_label = QLabel("PASTE_YOUR_PATH:")
-        input_label.setObjectName("SectionLabel")
-        input_layout.addWidget(input_label)
+        # Input field with separator selector
+        input_row = QHBoxLayout()
         
         self.input_field = QLineEdit()
-        self.input_field.setPlaceholderText("C:\\Users\\example\\file.txt or /home/user/file.txt")
+        self.input_field.setPlaceholderText("Paste your path here...")
         self.input_field.textChanged.connect(self.on_input_changed)
-        input_layout.addWidget(self.input_field)
+        input_row.addWidget(self.input_field, 2)  # Give more space to input
         
-        # Quick actions
-        quick_layout = QHBoxLayout()
+        # Separator selector
+        separator_label = QLabel("FORMAT:")
+        separator_label.setObjectName("SectionLabel")
+        input_row.addWidget(separator_label)
         
-        self.clear_btn = QPushButton("CLEAR")
-        self.clear_btn.clicked.connect(self.clear_input)
-        quick_layout.addWidget(self.clear_btn)
+        self.separator_combo = QComboBox()
+        self.separator_combo.addItem("/ (Forward)", "forward")
+        self.separator_combo.addItem("// (Double Forward)", "double_forward") 
+        self.separator_combo.addItem("\\ (Backslash)", "backslash")
+        self.separator_combo.addItem("\\\\ (Double Back)", "double_backslash")
+        self.separator_combo.addItem("WSL", "wsl")
+        self.separator_combo.addItem("Android", "android")
+        self.separator_combo.addItem("Escaped", "escaped")
+        self.separator_combo.addItem("Raw String", "raw")
+        self.separator_combo.addItem("URI", "uri")
+        self.separator_combo.currentTextChanged.connect(self.on_format_changed)
+        input_row.addWidget(self.separator_combo, 1)
         
-        self.paste_btn = QPushButton("PASTE")
-        self.paste_btn.clicked.connect(self.paste_from_clipboard)
-        quick_layout.addWidget(self.paste_btn)
-        
-        self.convert_btn = QPushButton("CONVERT_ALL")
-        self.convert_btn.setObjectName("AccentButton")
-        self.convert_btn.clicked.connect(self.convert_all_formats)
-        quick_layout.addWidget(self.convert_btn)
-        
-        quick_layout.addStretch()
-        input_layout.addLayout(quick_layout)
-        
+        input_layout.addLayout(input_row)
         main_layout.addWidget(input_group)
         
-        # Separator
-        separator = QFrame()
-        separator.setObjectName("Separator")
-        separator.setFrameShape(QFrame.Shape.HLine)
-        main_layout.addWidget(separator)
-        
-        # Settings section
-        settings_group = QGroupBox("ADVANCED_FORMATS")
-        settings_layout = QVBoxLayout(settings_group)
-        
-        settings_info = QLabel("Enable additional format outputs:")
-        settings_info.setStyleSheet(f"color: {CP_SUBTEXT}; font-size: 9pt;")
-        settings_layout.addWidget(settings_info)
-        
-        # Checkboxes for additional formats
-        checkbox_layout = QHBoxLayout()
-        
-        self.format_checkboxes = {}
-        additional_formats = [
-            ("ANDROID", "android"),
-            ("WSL", "wsl"),
-            ("ESCAPED", "escaped"),
-            ("RAW_STRING", "raw"),
-            ("URI", "uri")
-        ]
-        
-        for title, key in additional_formats:
-            checkbox = QCheckBox(title)
-            checkbox.stateChanged.connect(self.update_format_visibility)
-            self.format_checkboxes[key] = checkbox
-            checkbox_layout.addWidget(checkbox)
-        
-        checkbox_layout.addStretch()
-        settings_layout.addLayout(checkbox_layout)
-        main_layout.addWidget(settings_group)
-        
-        # Output formats section
-        output_group = QGroupBox("OUTPUT_FORMATS")
+        # Output section
+        output_group = QGroupBox("CONVERTED_OUTPUT")
         output_layout = QVBoxLayout(output_group)
         
-        # Create format outputs
-        self.format_outputs = {}
-        self.format_frames = {}
+        # Output field with copy button
+        output_row = QHBoxLayout()
         
-        # Default formats (always visible)
-        default_formats = [
-            ("FORWARD_SLASH", "Forward slash (C:/path/to/file)", "forward"),
-            ("DOUBLE_FORWARD", "Double forward slash (C://path//to//file)", "double_forward"),
-            ("BACKSLASH", "Backslash (C:\\path\\to\\file)", "backslash"),
-            ("DOUBLE_BACKSLASH", "Double backslash (C:\\\\path\\\\to\\\\file)", "double_backslash")
-        ]
+        self.output_field = QLineEdit()
+        self.output_field.setReadOnly(True)
+        self.output_field.setPlaceholderText("Converted path will appear here...")
+        self.output_field.setStyleSheet(f"""
+            QLineEdit {{
+                background-color: {CP_PANEL}; 
+                color: {CP_GREEN}; 
+                border: 1px solid {CP_GREEN}; 
+                padding: 8px;
+                font-size: 10pt;
+                font-weight: bold;
+            }}
+        """)
+        output_row.addWidget(self.output_field, 3)
         
-        # Additional formats (toggleable)
-        additional_format_details = [
-            ("ANDROID", "Android format (/storage/emulated/0/path)", "android"),
-            ("WSL", "WSL format (/mnt/c/path/to/file)", "wsl"),
-            ("ESCAPED", "Escaped format (C:\\\\\\\\path\\\\\\\\to\\\\\\\\file)", "escaped"),
-            ("RAW_STRING", "Python raw string (r'C:\\path\\to\\file')", "raw"),
-            ("URI", "File URI (file:///C:/path/to/file)", "uri")
-        ]
+        self.copy_output_btn = QPushButton("COPY")
+        self.copy_output_btn.setObjectName("AccentButton")
+        self.copy_output_btn.clicked.connect(self.copy_output_to_clipboard)
+        output_row.addWidget(self.copy_output_btn)
         
-        all_formats = default_formats + additional_format_details
-        
-        for title, description, key in all_formats:
-            format_frame = self.create_format_output(title, description, key)
-            self.format_frames[key] = format_frame
-            output_layout.addWidget(format_frame)
-            
-            # Hide additional formats by default
-            if key in self.format_checkboxes:
-                format_frame.setVisible(False)
-        
+        output_layout.addLayout(output_row)
         main_layout.addWidget(output_group)
         
         # Status
-        self.status_label = QLabel("SYSTEM_READY >> Paste a path to begin conversion")
+        self.status_label = QLabel("SYSTEM_READY >> Paste a path and select format")
         self.status_label.setObjectName("StatusLabel")
         main_layout.addWidget(self.status_label)
         
-    def create_format_output(self, title, description, key):
-        frame = QFrame()
-        layout = QVBoxLayout(frame)
-        layout.setContentsMargins(10, 5, 10, 5)
-        layout.setSpacing(5)
+    def on_format_changed(self):
+        """Convert path when format selection changes"""
+        self.convert_path()
         
-        # Title and copy button
-        header_layout = QHBoxLayout()
-        
-        title_label = QLabel(f"{title}:")
-        title_label.setObjectName("SectionLabel")
-        header_layout.addWidget(title_label)
-        
-        desc_label = QLabel(description)
-        desc_label.setStyleSheet(f"color: {CP_SUBTEXT}; font-size: 9pt;")
-        header_layout.addWidget(desc_label)
-        
-        header_layout.addStretch()
-        
-        copy_btn = QPushButton("COPY")
-        copy_btn.setObjectName("CopyButton")
-        copy_btn.clicked.connect(lambda: self.copy_to_clipboard(key))
-        header_layout.addWidget(copy_btn)
-        
-        layout.addLayout(header_layout)
-        
-        # Output field
-        output_field = QLineEdit()
-        output_field.setReadOnly(True)
-        output_field.setPlaceholderText("Converted path will appear here...")
-        self.format_outputs[key] = output_field
-        layout.addWidget(output_field)
-        
-        return frame
-    
-    def update_format_visibility(self):
-        """Show/hide format outputs based on checkbox states"""
-        for key, checkbox in self.format_checkboxes.items():
-            if key in self.format_frames:
-                self.format_frames[key].setVisible(checkbox.isChecked())
-        
-        # Update status
-        visible_count = sum(1 for cb in self.format_checkboxes.values() if cb.isChecked())
-        total_formats = 4 + visible_count  # 4 default + additional
-        self.status_label.setText(f"FORMAT_DISPLAY >> Showing {total_formats} formats")
-    
     def on_input_changed(self):
-        input_path = self.input_field.text().strip()
-        if input_path:
-            self.convert_all_formats()
+        """Convert path when input changes"""
+        self.convert_path()
+    
+    def copy_output_to_clipboard(self):
+        output_text = self.output_field.text()
+        if output_text:
+            clipboard = QApplication.clipboard()
+            clipboard.setText(output_text)
+            format_name = self.separator_combo.currentText().split(' ')[0]
+            self.status_label.setText(f"COPIED >> {format_name} format copied to clipboard")
         else:
-            self.clear_all_outputs()
+            self.status_label.setText("NO_OUTPUT >> Nothing to copy")
     
-    def clear_input(self):
-        self.input_field.clear()
-        self.clear_all_outputs()
-        self.status_label.setText("INPUT_CLEARED >> Ready for new path")
-    
-    def paste_from_clipboard(self):
-        clipboard = QApplication.clipboard()
-        text = clipboard.text().strip()
-        if text:
-            self.input_field.setText(text)
-            self.status_label.setText("PATH_PASTED >> Auto-converting formats")
-        else:
-            self.status_label.setText("CLIPBOARD_EMPTY >> No text to paste")
-    
-    def clear_all_outputs(self):
-        for output_field in self.format_outputs.values():
-            output_field.clear()
-    
-    def convert_all_formats(self):
+    def convert_path(self):
         input_path = self.input_field.text().strip()
         if not input_path:
-            self.status_label.setText("NO_INPUT >> Enter a path to convert")
+            self.output_field.clear()
             return
         
         try:
+            # Get selected format
+            format_key = self.separator_combo.currentData()
+            
             # Normalize the input path
             normalized = self.normalize_path(input_path)
             
-            # Convert to different formats
-            conversions = {
-                "forward": self.to_forward_slash_format(normalized),
-                "double_forward": self.to_double_forward_format(normalized),
-                "backslash": self.to_backslash_format(normalized),
-                "double_backslash": self.to_double_backslash_format(normalized),
-                "android": self.to_android_format(normalized),
-                "wsl": self.to_wsl_format(normalized),
-                "escaped": self.to_escaped_format(normalized),
-                "raw": self.to_raw_string_format(normalized),
-                "uri": self.to_uri_format(normalized)
-            }
+            # Convert to selected format
+            if format_key == "forward":
+                converted = self.to_forward_slash_format(normalized)
+            elif format_key == "double_forward":
+                converted = self.to_double_forward_format(normalized)
+            elif format_key == "backslash":
+                converted = self.to_backslash_format(normalized)
+            elif format_key == "double_backslash":
+                converted = self.to_double_backslash_format(normalized)
+            elif format_key == "wsl":
+                converted = self.to_wsl_format(normalized)
+            elif format_key == "android":
+                converted = self.to_android_format(normalized)
+            elif format_key == "escaped":
+                converted = self.to_escaped_format(normalized)
+            elif format_key == "raw":
+                converted = self.to_raw_string_format(normalized)
+            elif format_key == "uri":
+                converted = self.to_uri_format(normalized)
+            else:
+                converted = normalized
             
-            # Update output fields
-            for key, converted_path in conversions.items():
-                if key in self.format_outputs:
-                    self.format_outputs[key].setText(converted_path)
-            
-            self.status_label.setText("CONVERSION_COMPLETE >> All formats generated")
+            self.output_field.setText(converted)
+            format_name = self.separator_combo.currentText().split(' ')[0]
+            self.status_label.setText(f"CONVERTED >> {format_name} format ready")
             
         except Exception as e:
             self.status_label.setText(f"CONVERSION_ERROR >> {str(e)}")
+            self.output_field.clear()
     
     def normalize_path(self, path):
         """Normalize path separators and clean up the path"""

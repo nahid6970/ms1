@@ -20,7 +20,7 @@ for ($i = 1; ; $i++) {
 #     rclone sync "D:/software" "gu:/software" -P --check-first --transfers=1 --track-renames --exclude @ignore/ --fast-list               --log-level INFO --log-file="C:\Users\nahid\OneDrive\backup\rclone\software.txt"
 
 powershell Write-Host "msBackups" -ForegroundColor black -BackgroundColor white
-rclone sync C:\Users\nahid\ms\msBackups\ o0:\msBackups\ -P --check-first --transfers=10 --track-renames --fast-list
+rclone sync C:\@delta\msBackups\ o0:\msBackups\ -P --check-first --transfers=10 --track-renames --fast-list
 
 timeout /T 360 /NOBREAK
 Clear-Host

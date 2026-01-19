@@ -264,9 +264,9 @@ Event_w_Ads_BT.pack(side="left", padx=(1, 1), pady=(1, 1))
                     # elif any(find_image(image, confidence=0.95) for image in continueF): press_keys_with_delays(window, 'c', 1)
 					
                     # # for ck fighkt
-                    # elif find_image(r"C:\Users\nahid\ms\msBackups\shadowfight3\temporary\to_battle.png", confidence=0.8): press_keys_with_delays(window, ' ', 2,)
-                    # elif find_image(r"C:\Users\nahid\ms\msBackups\shadowfight3\temporary\fightttt.png", confidence=0.8, region=(1286, 831, 1713, 942)): press_keys_with_delays(window, 'c', 2,)
-                    # elif find_image(r"C:\Users\nahid\ms\msBackups\shadowfight3\temporary\Claim.png", confidence=0.8): press_keys_with_delays(window, 'c', 2,)
+                    # elif find_image(r"C:\@delta\msBackups\shadowfight3\temporary\to_battle.png", confidence=0.8): press_keys_with_delays(window, ' ', 2,)
+                    # elif find_image(r"C:\@delta\msBackups\shadowfight3\temporary\fightttt.png", confidence=0.8, region=(1286, 831, 1713, 942)): press_keys_with_delays(window, 'c', 2,)
+                    # elif find_image(r"C:\@delta\msBackups\shadowfight3\temporary\Claim.png", confidence=0.8): press_keys_with_delays(window, 'c', 2,)
             
                     # # elif find_image(Select_CreepyParty, confidence=0.8): press_keys_with_delays(window, 'y', 1) #! optional
                     # elif find_image(Select_SelectOption, confidence=0.8, region=(385, 622, 816, 753 )): press_keys_with_delays(window, '2', 1) #! optional
@@ -297,7 +297,7 @@ Event_w_Ads_BT.pack(side="left", padx=(1, 1), pady=(1, 1))
                     #     time.sleep(60)
 
                     # # Check if the no_currency image is found
-                    # elif find_image(r'C:\Users\nahid\ms\msBackups\shadowfight3\notify\no_currency.png', confidence=0.8):
+                    # elif find_image(r'C:\@delta\msBackups\shadowfight3\notify\no_currency.png', confidence=0.8):
                     #     # Run the whatsapp.py script
                     #     subprocess.run(['python', r'C:\@delta\ms1\SH3\whatsapp.py'])
                     #     # Wait for 1 minute

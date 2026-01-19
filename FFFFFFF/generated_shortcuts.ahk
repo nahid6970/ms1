@@ -30,15 +30,15 @@ ScrollLock:: {
 
 ;! Monitor Internal
 ;! Switch to internal monitor only
-RAlt & Numpad1::Run("C:\Users\nahid\ms\msBackups\Display\DisplaySwitch.exe /internal", "", "Hide")
+RAlt & Numpad1::Run("C:\@delta\msBackups\Display\DisplaySwitch.exe /internal", "", "Hide")
 
 ;! Monitor External
 ;! Switch to external monitor only
-RAlt & Numpad2::Run("C:\Users\nahid\ms\msBackups\Display\DisplaySwitch.exe /external", "", "Hide")
+RAlt & Numpad2::Run("C:\@delta\msBackups\Display\DisplaySwitch.exe /external", "", "Hide")
 
 ;! Monitor Extend
 ;! Extend display to both monitors
-RAlt & Numpad3::Run("C:\Users\nahid\ms\msBackups\Display\DisplaySwitch.exe /extend", "", "Hide")
+RAlt & Numpad3::Run("C:\@delta\msBackups\Display\DisplaySwitch.exe /extend", "", "Hide")
 
 ;! Bio GUI
 ;! Opens Bio.ahk GUI
@@ -107,7 +107,7 @@ RAlt & Numpad3::Run("C:\Users\nahid\ms\msBackups\Display\DisplaySwitch.exe /exte
         ; Kill python.exe
         Run("taskkill /F /IM python.exe",,"Hide")
         ; Run the command
-        Run("C:\Users\nahid\ms\msBackups\Display\DisplaySwitch.exe /internal",,"Hide")
+        Run("C:\@delta\msBackups\Display\DisplaySwitch.exe /internal",,"Hide")
     }
 }
 

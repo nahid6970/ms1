@@ -44,7 +44,7 @@ last_found_time = None
 is_searching = False
 last_used_time = time.time()  # Tracks when the function was last called
 image_found_count = {}  # Dictionary to store cumulative counts of found images
-output_file_path = r"C:\Users\nahid\ms\msBackups\sf3_img.txt"  # Path to save found image output
+output_file_path = r"C:\@delta\msBackups\sf3_img.txt"  # Path to save found image output
 
 # Ensure the output directory exists
 os.makedirs(os.path.dirname(output_file_path), exist_ok=True)
@@ -146,9 +146,9 @@ def ntfy_termux_rclone_touch():
         print("Script stopped by user.")
 
 
-WhatsApp_Entry=r'C:\Users\nahid\ms\msBackups\shadowfight3\whatsapp\whatsapp_mobile\Enter_Whatsapp.png'
-WhatsApp_Cally=r'C:\Users\nahid\ms\msBackups\shadowfight3\whatsapp\whatsapp_mobile\call.png'
-WhatsApp_Cancel=r'C:\Users\nahid\ms\msBackups\shadowfight3\whatsapp\whatsapp_mobile\cancel.png'
+WhatsApp_Entry=r'C:\@delta\msBackups\shadowfight3\whatsapp\whatsapp_mobile\Enter_Whatsapp.png'
+WhatsApp_Cally=r'C:\@delta\msBackups\shadowfight3\whatsapp\whatsapp_mobile\call.png'
+WhatsApp_Cancel=r'C:\@delta\msBackups\shadowfight3\whatsapp\whatsapp_mobile\cancel.png'
 def ntfy_WhatsApp():
     pyautogui.click(x=1778, y=900)
     time.sleep(2)
@@ -166,8 +166,8 @@ def ntfy_WhatsApp():
     except KeyboardInterrupt: print("Script stopped by user.")
 
 
-Signal_Entry =r"C:\Users\nahid\ms\msBackups\shadowfight3\ntfy\Signal\Signal_Enter.png"
-Signal_Cally =r"C:\Users\nahid\ms\msBackups\shadowfight3\ntfy\Signal\Signal_Call.png"
+Signal_Entry =r"C:\@delta\msBackups\shadowfight3\ntfy\Signal\Signal_Enter.png"
+Signal_Cally =r"C:\@delta\msBackups\shadowfight3\ntfy\Signal\Signal_Call.png"
 def ntfy_Signal():
     pyautogui.click(x=1778, y=900)
     time.sleep(2)
@@ -378,12 +378,12 @@ Fame_BT.pack( side="left",padx=(1, 1), pady=(1, 1))
 
 window_title='LDPlayer'
 
-# Home=r"C:\Users\nahid\ms\msBackups\CoC\Home.png"
-Home=r"C:\Users\nahid\ms\msBackups\CoC\Chat.png"
-Return=r"C:\Users\nahid\ms\msBackups\CoC\return.png"
-Okay_Star_Bonus=r"C:\Users\nahid\ms\msBackups\CoC\Okay_StarBonus.png"
-Fight=r"C:\Users\nahid\ms\msBackups\CoC\Fight.png"
-Fight2=r"C:\Users\nahid\ms\msBackups\CoC\Round2.png"
+# Home=r"C:\@delta\msBackups\CoC\Home.png"
+Home=r"C:\@delta\msBackups\CoC\Chat.png"
+Return=r"C:\@delta\msBackups\CoC\return.png"
+Okay_Star_Bonus=r"C:\@delta\msBackups\CoC\Okay_StarBonus.png"
+Fight=r"C:\@delta\msBackups\CoC\Fight.png"
+Fight2=r"C:\@delta\msBackups\CoC\Round2.png"
 
 
 

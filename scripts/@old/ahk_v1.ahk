@@ -1,7 +1,7 @@
 #Requires AutoHotkey v1.0
 
 #Persistent ; Keeps the script running
-Menu, Tray, Icon, C:\Users\nahid\ms\msBackups\icon\shutdown3.png ; Set the tray icon
+Menu, Tray, Icon, C:\@delta\msBackups\icon\shutdown3.png ; Set the tray icon
 Menu, Tray, NoStandard ; Disable default tray menu items (Restore, Pause, etc.)
 
 ; Create a tray icon with a right-click menu
@@ -42,9 +42,9 @@ ExitScript:
 ; !Numpad1::Run, pwsh -c "Start-Process "C:\Windows\System32\DisplaySwitch.exe" -ArgumentList "/internal"",,Hide
 ; !Numpad2::Run, pwsh -c "Start-Process "C:\Windows\System32\DisplaySwitch.exe" -ArgumentList "/external"",,Hide
 ; !Numpad3::Run, pwsh -c "Start-Process "C:\Windows\System32\DisplaySwitch.exe" -ArgumentList "/extend"",,Hide
-RAlt & Numpad1::Run, %ComSpec% /c "C:\Users\nahid\ms\msBackups\Display\DisplaySwitch.exe /internal",,Hide
-RAlt & Numpad2::Run, %ComSpec% /c "C:\Users\nahid\ms\msBackups\Display\DisplaySwitch.exe /external",,Hide
-RAlt & Numpad3::Run, %ComSpec% /c "C:\Users\nahid\ms\msBackups\Display\DisplaySwitch.exe /extend",,Hide
+RAlt & Numpad1::Run, %ComSpec% /c "C:\@delta\msBackups\Display\DisplaySwitch.exe /internal",,Hide
+RAlt & Numpad2::Run, %ComSpec% /c "C:\@delta\msBackups\Display\DisplaySwitch.exe /external",,Hide
+RAlt & Numpad3::Run, %ComSpec% /c "C:\@delta\msBackups\Display\DisplaySwitch.exe /extend",,Hide
 #2:: Run, cmd /c C:\Users\nahid\OneDrive\backup\usbmmidd_v2\2ndMonitor.bat,,Hide
 !c::Center_Focused_Window()
 !1::Send_to_2nd_Monitor()

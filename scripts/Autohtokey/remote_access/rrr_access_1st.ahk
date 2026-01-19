@@ -7,5 +7,5 @@ Run("taskkill /F /IM python.exe",,"Hide")
 ; Run the command
 
 ; Use PsExec to run the command in the interactive session
-Run('C:\Users\nahid\ms\msBackups\PSTools\PsExec64.exe -i 1 "C:\Users\nahid\ms\msBackups\Display\DisplaySwitch.exe" /internal', "", "Hide")
+Run('C:\@delta\msBackups\PSTools\PsExec64.exe -i 1 "C:\@delta\msBackups\Display\DisplaySwitch.exe" /internal', "", "Hide")
 

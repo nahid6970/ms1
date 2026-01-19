@@ -149,8 +149,8 @@ def ntfy_signal_cli():
 
 
 
-Signal_Entry =r"C:\Users\nahid\ms\msBackups\shadowfight3\ntfy\Signal\Signal_Enter.png"
-Signal_Cally =r"C:\Users\nahid\ms\msBackups\shadowfight3\ntfy\Signal\Signal_Call.png"
+Signal_Entry =r"C:\@delta\msBackups\shadowfight3\ntfy\Signal\Signal_Enter.png"
+Signal_Cally =r"C:\@delta\msBackups\shadowfight3\ntfy\Signal\Signal_Call.png"
 def ntfy_Signal():
     pyautogui.click(x=1778, y=900)
     time.sleep(2)
@@ -429,20 +429,20 @@ def Event_Function():
             event_save_selected_key(selected_key)
 
             # image_action_map = [
-            #     # (r"C:\Users\nahid\ms\msBackups\CoC\MainBase\Train.png", (179, 690, 269, 781), lambda: press_global_screen_with_delays((265,878,1),(1313,591,1))),
-            #     (r"C:\Users\nahid\ms\msBackups\CoC\MainBase\return.png", (819, 786, 1087, 920), lambda: press_global_screen_with_delays((961, 855,1))),
-            #     (r"C:\Users\nahid\ms\msBackups\CoC\MainBase\okay.png", (757, 758, 1158, 951), lambda: press_global_screen_with_delays((961, 855,1))),
+            #     # (r"C:\@delta\msBackups\CoC\MainBase\Train.png", (179, 690, 269, 781), lambda: press_global_screen_with_delays((265,878,1),(1313,591,1))),
+            #     (r"C:\@delta\msBackups\CoC\MainBase\return.png", (819, 786, 1087, 920), lambda: press_global_screen_with_delays((961, 855,1))),
+            #     (r"C:\@delta\msBackups\CoC\MainBase\okay.png", (757, 758, 1158, 951), lambda: press_global_screen_with_delays((961, 855,1))),
             # ]
 
             try:
                 while not Event_Function.state["stop_flag"]:
                     
-                    # gold_found = find_image( r"C:\Users\nahid\ms\msBackups\CoC\MainBase\gold_full.png", confidence=1, region=(1411, 116, 1443, 151))
-                    # elixir_found = find_image( r"C:\Users\nahid\ms\msBackups\CoC\MainBase\elixir_full.png", confidence=1, region=(1418, 198, 1445, 235))
+                    # gold_found = find_image( r"C:\@delta\msBackups\CoC\MainBase\gold_full.png", confidence=1, region=(1411, 116, 1443, 151))
+                    # elixir_found = find_image( r"C:\@delta\msBackups\CoC\MainBase\elixir_full.png", confidence=1, region=(1418, 198, 1445, 235))
 
 
 
-                    # full_storage = find_image( r"C:\Users\nahid\ms\msBackups\CoC\MainBase\full_storage.png", confidence=0.85, region=(1398, 101, 1439, 256))
+                    # full_storage = find_image( r"C:\@delta\msBackups\CoC\MainBase\full_storage.png", confidence=0.85, region=(1398, 101, 1439, 256))
                     
 
 
@@ -453,9 +453,9 @@ def Event_Function():
                     #     run_command('signal-cli --trust-new-identities always -a +8801533876178 send -m "example" +8801779787186')
                     #     time.sleep(30)
 
-                    if find_image(r"C:\Users\nahid\ms\msBackups\CoC\MainBase\Train.png", confidence=0.8, region=(169, 684, 279, 790)):
-                        gold_found = find_image(r"C:\Users\nahid\ms\msBackups\CoC\MainBase\full_gold.png", confidence=0.95, region=(1410, 103, 1455, 245))
-                        elixir_found = find_image(r"C:\Users\nahid\ms\msBackups\CoC\MainBase\full_elixir.png", confidence=0.95, region=(1410, 103, 1455, 245))
+                    if find_image(r"C:\@delta\msBackups\CoC\MainBase\Train.png", confidence=0.8, region=(169, 684, 279, 790)):
+                        gold_found = find_image(r"C:\@delta\msBackups\CoC\MainBase\full_gold.png", confidence=0.95, region=(1410, 103, 1455, 245))
+                        elixir_found = find_image(r"C:\@delta\msBackups\CoC\MainBase\full_elixir.png", confidence=0.95, region=(1410, 103, 1455, 245))
 
                         if gold_found or elixir_found:
                             run_command('signal-cli --trust-new-identities always -a +8801533876178 send -m \""Storage Full"\" +8801779787186')
@@ -464,7 +464,7 @@ def Event_Function():
                             press_global_screen_with_delays((265, 878, 1), (1313, 591, 1))
 
 
-                    # elif find_image(r"C:\Users\nahid\ms\msBackups\CoC\MainBase\attack.png", confidence=0.8, region=(1452, 639, 1759, 804)):
+                    # elif find_image(r"C:\@delta\msBackups\CoC\MainBase\attack.png", confidence=0.8, region=(1452, 639, 1759, 804)):
                     #     # Step 3: Execute attack sequence
                     #     press_keys_with_delays(window, troop_vars["jump_spell_key"].get(), 1)
                     #     press_global_screen_with_delays((1230, 426, 1), (1227, 626, 1))
@@ -479,34 +479,34 @@ def Event_Function():
                     #     press_global_screen_with_delays((1230, 426, 0), (1227, 626, 3), (1086, 508, 0))
                     #     press_keys_with_delays(window, troop_vars["goblin_key"].get(), 1, 'f12', 1)
 
-                    elif find_image(r"C:\Users\nahid\ms\msBackups\CoC\MainBase\okay.png", confidence=0.8, region=(757, 758, 1158, 951)): press_global_screen_with_delays((961, 855,1))
-                    elif find_image(r"C:\Users\nahid\ms\msBackups\CoC\MainBase\return.png", confidence=0.8, region=(819, 786, 1087, 920)): press_global_screen_with_delays((961, 855,5))
+                    elif find_image(r"C:\@delta\msBackups\CoC\MainBase\okay.png", confidence=0.8, region=(757, 758, 1158, 951)): press_global_screen_with_delays((961, 855,1))
+                    elif find_image(r"C:\@delta\msBackups\CoC\MainBase\return.png", confidence=0.8, region=(819, 786, 1087, 920)): press_global_screen_with_delays((961, 855,5))
 
                     #! GateKeeper in order for other to happen this image first need to be found
-                    elif find_image(r"C:\Users\nahid\ms\msBackups\CoC\MainBase\attack.png", confidence=0.8, region=(1452, 639, 1759, 804)):
+                    elif find_image(r"C:\@delta\msBackups\CoC\MainBase\attack.png", confidence=0.8, region=(1452, 639, 1759, 804)):
                         # Step 3: Execute attack sequence
                         press_keys_with_delays(window, '', 1)
                         # Step 1: Store all matched positions
 
                         #! Single match and click since not array so no need to use match
-                        # jump = find_image(r"C:\Users\nahid\ms\msBackups\CoC\MainBase\spell_Jump.png", confidence=0.80, region=(167, 815, 1756, 981))
+                        # jump = find_image(r"C:\@delta\msBackups\CoC\MainBase\spell_Jump.png", confidence=0.80, region=(167, 815, 1756, 981))
                         # if jump:
                         #     center = pyautogui.center(jump)
                         #     press_global_screen_with_delays((center[0], center[1], 1))
                         #     press_global_screen_with_delays((1230, 426, 1), (1227, 626, 1))
 
                         matches = {
-                            "jump": find_image(r"C:\Users\nahid\ms\msBackups\CoC\MainBase\spell_Jump.png", confidence=0.80, region=(167, 815, 1756, 981)),
+                            "jump": find_image(r"C:\@delta\msBackups\CoC\MainBase\spell_Jump.png", confidence=0.80, region=(167, 815, 1756, 981)),
                             
-                            "minion_prince": find_image(r"C:\Users\nahid\ms\msBackups\CoC\MainBase\hero_Minion_prince.png", confidence=0.80, region=(167, 815, 1756, 981)),
-                            "king": find_image(r"C:\Users\nahid\ms\msBackups\CoC\MainBase\hero_King.png", confidence=0.80, region=(167, 815, 1756, 981)),
-                            "queen": find_image(r"C:\Users\nahid\ms\msBackups\CoC\MainBase\hero_Queen.png", confidence=0.80, region=(167, 815, 1756, 981)),
-                            "warden": find_image(r"C:\Users\nahid\ms\msBackups\CoC\MainBase\hero_Warden.png", confidence=0.80, region=(167, 815, 1756, 981)),
-                            "royalchampion": find_image(r"C:\Users\nahid\ms\msBackups\CoC\MainBase\hero_RoyalChampion.png", confidence=0.80, region=(167, 815, 1756, 981)),
+                            "minion_prince": find_image(r"C:\@delta\msBackups\CoC\MainBase\hero_Minion_prince.png", confidence=0.80, region=(167, 815, 1756, 981)),
+                            "king": find_image(r"C:\@delta\msBackups\CoC\MainBase\hero_King.png", confidence=0.80, region=(167, 815, 1756, 981)),
+                            "queen": find_image(r"C:\@delta\msBackups\CoC\MainBase\hero_Queen.png", confidence=0.80, region=(167, 815, 1756, 981)),
+                            "warden": find_image(r"C:\@delta\msBackups\CoC\MainBase\hero_Warden.png", confidence=0.80, region=(167, 815, 1756, 981)),
+                            "royalchampion": find_image(r"C:\@delta\msBackups\CoC\MainBase\hero_RoyalChampion.png", confidence=0.80, region=(167, 815, 1756, 981)),
 
-                            "valk": find_image(r"C:\Users\nahid\ms\msBackups\CoC\MainBase\valkyrie.png", confidence=0.80, region=(167, 815, 1756, 981)),
-                            "rage": find_image(r"C:\Users\nahid\ms\msBackups\CoC\MainBase\spell_Rage.png", confidence=0.90, region=(167, 815, 1756, 981)),
-                            "goblin": find_image(r"C:\Users\nahid\ms\msBackups\CoC\MainBase\goblin.png", confidence=0.80, region=(167, 815, 1756, 981))
+                            "valk": find_image(r"C:\@delta\msBackups\CoC\MainBase\valkyrie.png", confidence=0.80, region=(167, 815, 1756, 981)),
+                            "rage": find_image(r"C:\@delta\msBackups\CoC\MainBase\spell_Rage.png", confidence=0.90, region=(167, 815, 1756, 981)),
+                            "goblin": find_image(r"C:\@delta\msBackups\CoC\MainBase\goblin.png", confidence=0.80, region=(167, 815, 1756, 981))
                         }
 
                         # Step 2: Execute in preferred order
@@ -687,17 +687,17 @@ def FameFunction(button):
                     focus_window(window_title)
                     # Example logic
 
-                    if find_image(r"C:\Users\nahid\ms\msBackups\CoC\builder\Chat.png", confidence=0.8, region=(173, 420, 279, 547)): 
+                    if find_image(r"C:\@delta\msBackups\CoC\builder\Chat.png", confidence=0.8, region=(173, 420, 279, 547)): 
                         press_global_screen_with_delays((1276, 200,1))
                         press_global_screen_with_delays((1339, 846,1))
                         press_global_screen_with_delays((268, 875,1),(268, 875,1))
                         press_global_screen_with_delays((1355, 671,1))
 
-                    if find_image(r"C:\Users\nahid\ms\msBackups\CoC\builder\return.png", confidence=0.8, region=(797, 772, 1115, 920)): 
+                    if find_image(r"C:\@delta\msBackups\CoC\builder\return.png", confidence=0.8, region=(797, 772, 1115, 920)): 
                         press_global_screen_with_delays((960, 840,1))
 
                     #! 1st troops
-                    if find_image(r"C:\Users\nahid\ms\msBackups\CoC\builder\phase1.png", confidence=0.8, region=(359, 657, 652, 761)): 
+                    if find_image(r"C:\@delta\msBackups\CoC\builder\phase1.png", confidence=0.8, region=(359, 657, 652, 761)): 
                         # press_keys_with_delays(window, 'x',1, 'y',1, 'z',1)
                         press_keys_with_delays(window, 't',4)
                         press_keys_with_delays(window, '1',1, 'x',0, 'y',0, 'z',0)
@@ -705,7 +705,7 @@ def FameFunction(button):
                         press_keys_with_delays(window, '5',1, 'x',0, 'z',0)
                         press_keys_with_delays(window, '0',1, 'y',0)
                     #! 2nd troops
-                    if find_image(r"C:\Users\nahid\ms\msBackups\CoC\builder\phase2.png", confidence=0.8, region=(1176, 893, 1281, 969)): 
+                    if find_image(r"C:\@delta\msBackups\CoC\builder\phase2.png", confidence=0.8, region=(1176, 893, 1281, 969)): 
                         press_keys_with_delays(window, 'f',4)
                         press_keys_with_delays(window, '7',0, 'x',0, 'y',0, 'z',0, 'x',0, 'y',0, 'z',0)
                         press_keys_with_delays(window, '4',1, 'y',1, '4',1)
