@@ -327,3 +327,4 @@ build/
 *This template is based on proven practices from real project development.*
 *Customize it for your specific needs and technology stack.*
 
+# Always run a python script when u finished ur conversation. bcz it will notify me that u finished ur task and i will get a notification if the window was minimised or on another workspace
