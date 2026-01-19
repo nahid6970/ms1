@@ -27,7 +27,7 @@
                 },
                 {
                     "name": "Event (num1)",
-                    "path": "C:/Users/nahid/ms/msBackups/shadowfight3/event/Tournament.png",
+                    "path": "C:/@delta/msBackups/shadowfight3/event/Tournament.png",
                     "confidence": 0.8,
                     "region": [
                         269,
@@ -50,7 +50,7 @@
                 },
                 {
                     "name": "Event (num2)",
-                    "path": "C:/Users/nahid/ms/msBackups/shadowfight3/event/Tournament.png",
+                    "path": "C:/@delta/msBackups/shadowfight3/event/Tournament.png",
                     "confidence": 0.8,
                     "region": [
                         269,
@@ -73,7 +73,7 @@
                 },
                 {
                     "name": "Event (ALT)",
-                    "path": "C:/Users/nahid/ms/msBackups/shadowfight3/event/Tournament.png",
+                    "path": "C:/@delta/msBackups/shadowfight3/event/Tournament.png",
                     "confidence": 0.8,
                     "region": [
                         269,
@@ -417,7 +417,7 @@
             "images": [
                 {
                     "name": "Hound",
-                    "path": "C:/Users/nahid/ms/msBackups/shadowfight3/action",
+                    "path": "C:/@delta/msBackups/shadowfight3/action",
                     "confidence": 0.8,
                     "region": [
                         187,
@@ -442,7 +442,7 @@
                 },
                 {
                     "name": "KOS 2TAP",
-                    "path": "C:/Users/nahid/ms/msBackups/shadowfight3/action",
+                    "path": "C:/@delta/msBackups/shadowfight3/action",
                     "confidence": 0.8,
                     "region": [
                         187,

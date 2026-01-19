@@ -958,7 +958,7 @@ os.makedirs(LOG_DIR, exist_ok=True)
 commands = {
     "msBackups": {
         "cmd": "rclone check src dst --fast-list --size-only",
-        "src": "C:/Users/nahid/ms/msBackups",
+        "src": "C:/@delta/msBackups",
         "dst": "o0:/msBackups",
         "log": f"{LOG_DIR}/msBackups_check.log",
         "label": "\udb85\ude32"

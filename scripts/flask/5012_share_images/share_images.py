@@ -8,7 +8,7 @@ import glob
 app = Flask(__name__)
 
 # Configuration for image uploads
-UPLOAD_FOLDER = 'C:/Users/nahid/ms/msBackups/Shared_Images' # Make sure this directory exists or create it
+UPLOAD_FOLDER = 'C:/@delta/msBackups/Shared_Images' # Make sure this directory exists or create it
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 METADATA_FILE = os.path.join(UPLOAD_FOLDER, 'images_metadata.json') # File to store image metadata
 

@@ -58,7 +58,7 @@ DEFAULT_CONFIG = {
         {
             "name": "msBackups",
             "label": "\udb85\ude32",
-            "src": "C:/Users/nahid/ms/msBackups",
+            "src": "C:/@delta/msBackups",
             "dst": "o0:/msBackups",
             "cmd": "rclone check src dst --fast-list --size-only"
         },

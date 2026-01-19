@@ -4,7 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 import re
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///C:/Users/nahid/ms/msBackups/DataBase/esports.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///C:/@delta/msBackups/DataBase/esports.db'
 db = SQLAlchemy(app)
 
 # Models
