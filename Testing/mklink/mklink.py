@@ -368,13 +368,15 @@ class SymlinkManager(QMainWindow):
 
         AddLinkDialog(self, on_save, edit_data=link).exec()
 
-    def open_folder(self, index):
+    def open_both_folders(self, index):
         link = self.get_filtered_links()[index]
-        path = os.path.normpath(link["fake"])
+        target = os.path.normpath(link["target"])
+        fake = os.path.normpath(link["fake"])
         try:
-            subprocess.Popen(f'explorer /select,"{path}"')
+            subprocess.Popen(f'explorer /select,"{target}"')
+            subprocess.Popen(f'explorer /select,"{fake}"')
         except Exception as e:
-            QMessageBox.critical(self, "Error", f"Failed to open folder:\n{str(e)}")
+            QMessageBox.critical(self, "Error", f"Failed to open folders:\n{str(e)}")
 
     def create_link(self, index):
         link = self.get_filtered_links()[index]
@@ -488,13 +490,14 @@ class SymlinkManager(QMainWindow):
                 fix_btn.clicked.connect(lambda checked, idx=i: self.create_link(idx))
                 btn_layout.addWidget(fix_btn)
 
+            # Open Both Button
             open_btn = QPushButton("📂 Open")
             open_btn.setFixedSize(80, 30)
             open_btn.setStyleSheet(f"""
                 QPushButton {{ border-color: #9b59b6; color: #9b59b6; }}
                 QPushButton:hover {{ background-color: #9b59b6; color: black; }}
             """)
-            open_btn.clicked.connect(lambda checked, idx=i: self.open_folder(idx))
+            open_btn.clicked.connect(lambda checked, idx=i: self.open_both_folders(idx))
             btn_layout.addWidget(open_btn)
 
             edit_btn = QPushButton("📝 Edit")
