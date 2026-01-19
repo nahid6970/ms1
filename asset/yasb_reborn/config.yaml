@@ -706,7 +706,7 @@ widgets:
         return_format: "json"
         hide_empty: false
       callbacks:
-        on_left: "exec cmd /c C://Users//nahid//ms//ms1//asset//yasb_reborn//CountDown//set_timer.py"
+        on_left: "exec cmd /c C://@delta//ms1//asset//yasb_reborn//CountDown//set_timer.py"
         on_middle: "toggle_label"
         on_right: "exec cmd /c start https://winget.run"
       container_padding:
