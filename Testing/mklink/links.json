@@ -4,5 +4,11 @@
         "target": "C:/Users/nahid/ms/db/5018_cell/data.json",
         "fake": "C:/@delta/ms1/scripts/flask/5018_cell/data.json",
         "type": "file"
+    },
+    {
+        "name": "5000 MyHome",
+        "target": "C:/Users/nahid/ms/db/5000_myhome/data.json",
+        "fake": "C:/@delta/ms1/scripts/flask/5000_myhome/data.json",
+        "type": "file"
     }
 ]
