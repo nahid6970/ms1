@@ -12,7 +12,8 @@ A professional, high-performance GUI utility for managing Windows symbolic links
   - **Add (➕)**: Easily create new entries.
   - **Edit (📝)**: Modify existing entries without deleting them.
   - **Delete (🗑️)**: Safely remove management entries.
-  - **Fix (🔗)**: Recreate broken or missing links with one click.
+  - **Fix (🔗)**: Recreate broken or missing links with one click. Now intelligently handles "Points Elsewhere" conflicts by cleaning up the old link first.
+  - **Open (📂)**: Instantly open Windows Explorer to the location of any link, with the item pre-selected.
 - **Color-Coded Paths**: 
   - **Target (Real)**: Blue themed browse button for the source data.
   - **Fake (Link)**: Purple themed browse button for the link destination.
@@ -44,6 +45,7 @@ A professional, high-performance GUI utility for managing Windows symbolic links
    - **Adding**: Click the green **"➕ Add Link"** button.
    - **Editing**: Click the orange **"📝 Edit"** button on any entry to modify its details.
    - **Fixing**: Click the blue **"🔗 Fix"** button if a link is missing or broken.
+   - **Opening**: Click the purple **"📂 Open"** button to jump directly to the link's folder.
 4. **Browse with Precision**:
    Use the blue **📂 Target** button for the actual folders and the purple **📂 Fake** button for the link location.
 
