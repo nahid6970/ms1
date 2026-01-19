@@ -24,7 +24,7 @@ for index, (name, text) in enumerate(buttons):
     row = (index // 4) + 1  # Start from row 1
     col = index % 4
     button = tk.Label(main_frame, bg="#000000", fg="#FFFFFF", height=1, width=20, bd=0, highlightthickness=0, 
-                      command=lambda n=name: subprocess.Popen(["powershell", f"python C:/Users/nahid/ms/ms1/HotKeys.py {n}"]), text=text)
+                      command=lambda n=name: subprocess.Popen(["powershell", f"python C:/@delta/ms1/HotKeys.py {n}"]), text=text)
     button.grid(row=row, column=col, padx=(5, 5), pady=(5, 5))
 
 root.mainloop()

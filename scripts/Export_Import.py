@@ -27,7 +27,7 @@ def compare_directories(dir1, dir2):
 
 def perform_comparison():
     src = "c:/Users/nahid/.yasb/"
-    dst = "C:/Users/nahid/ms/ms1/asset/.yasb/"
+    dst = "C:/@delta/ms1/asset/.yasb/"
     compare_directories(src, dst)
 
 label = tk.Label(root, font=("calibri", 10), wraplength=600)

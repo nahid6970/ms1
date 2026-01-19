@@ -45,7 +45,7 @@ DEFAULT_CONFIG = {
     "rclone_folders": [
         {
             "name": "ms1",
-            "src": "C:/Users/nahid/ms/ms1/",
+            "src": "C:/@delta/ms1/",
             "dst": "o0:/ms1/",
             "label": "ms1",
             "cmd": 'rclone check src dst --fast-list --size-only --exclude ".git/**" --exclude "__pycache__/**"',

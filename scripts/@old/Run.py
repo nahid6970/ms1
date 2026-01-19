@@ -34,7 +34,7 @@ BORDER_FRAME = create_custom_border(root)
 
 # Directories to search
 directories = [
-    "C:/Users/nahid/ms/ms1/",
+    "C:/@delta/ms1/",
     "C:/ms2/",
     "C:/ms3/",
     "C:/Users/nahid/ms/msBackups/",

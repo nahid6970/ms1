@@ -298,9 +298,9 @@ class CombinedWidget(BaseWidget):
 
     def _xy_position_action(self, event, label):
         if event.button() == Qt.MouseButton.LeftButton:
-           subprocess.Popen('cmd /c C:/Users/nahid/ms/ms1/utility/position_x_y.py')
+           subprocess.Popen('cmd /c C:/@delta/ms1/utility/position_x_y.py')
         elif event.button() == Qt.MouseButton.RightButton:
-           subprocess.Popen('cmd /c code C:/Users/nahid/ms/ms1/utility/position_x_y.py')
+           subprocess.Popen('cmd /c code C:/@delta/ms1/utility/position_x_y.py')
 
 
     def PowerToys_Mouse_Pointer_action(self, event, label):
@@ -327,9 +327,9 @@ class CombinedWidget(BaseWidget):
 
     def _potplaylist_action(self, event, label):
         if event.button() == Qt.MouseButton.LeftButton:
-           subprocess.Popen('cmd /c start C:/Users/nahid/ms/ms1/scripts/playlist.py')
+           subprocess.Popen('cmd /c start C:/@delta/ms1/scripts/playlist.py')
         elif event.button() == Qt.MouseButton.RightButton:
-           subprocess.Popen('cmd /c start Code C:/Users/nahid/ms/ms1/scripts/playlist.py')
+           subprocess.Popen('cmd /c start Code C:/@delta/ms1/scripts/playlist.py')
 
 
     def _killProcess_action(self, event, label):

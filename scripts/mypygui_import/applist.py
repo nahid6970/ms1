@@ -8,7 +8,7 @@ import ctypes
 from Reference import *
 
 # import sys
-# sys.path.append('C:/Users/nahid/ms/ms1/')
+# sys.path.append('C:/@delta/ms1/')
 # from functionlist import *
 
 

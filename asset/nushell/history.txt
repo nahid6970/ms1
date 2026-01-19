@@ -48,7 +48,7 @@ cls
 g
 cls
 C:\@delta\ms1\kp.ps1
-C:/Users/nahid/ms/ms1/kp.ps1
+C:/@delta/ms1/kp.ps1
 C:\@delta\ms1\mypygui.py
 cls
 python C:\@delta\ms1\mypygui.py

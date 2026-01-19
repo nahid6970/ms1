@@ -979,7 +979,7 @@ commands = {
     },
     "ms1": {
         "cmd": 'rclone check src dst --fast-list --size-only --exclude ".git/**" --exclude "__pycache__/**"',
-        "src": "C:/Users/nahid/ms/ms1/",
+        "src": "C:/@delta/ms1/",
         "dst": "o0:/ms1/",
         "log": f"{LOG_DIR}/ms1_check.log",
         "label": "ms1",
@@ -1069,7 +1069,7 @@ create_gui()
 
 # ms1_rclone_o0 = tk.Label(ROOT1,text="ms1", bg="#1d2027", fg="#cc5907", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
 # ms1_rclone_o0.pack(side="left", padx=(0, 0), pady=(0, 0))
-# ms1_rclone_o0.bind( "<Button-1>", lambda event=None: run_command( r'rclone sync C:/Users/nahid/ms/ms1/ o0:/ms1/ --exclude ".git/**" --exclude "__pycache__/**" -P --fast-list' ))
+# ms1_rclone_o0.bind( "<Button-1>", lambda event=None: run_command( r'rclone sync C:/@delta/ms1/ o0:/ms1/ --exclude ".git/**" --exclude "__pycache__/**" -P --fast-list' ))
 
 
 #! ██████╗ ██╗ ██████╗ ██╗  ██╗████████╗
