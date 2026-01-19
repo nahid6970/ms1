@@ -595,8 +595,9 @@
       "C:\\Program Files\\AutoHotkey\\v2\\AutoHotkey.exe"
     ],
     "Command": "C:\\@delta\\ms1\\scripts\\Autohtokey\\Command\\n8n.ahk",
+    "ps1_command": "Start-Process -FilePath \"C:\\Program Files\\AutoHotkey\\v2\\AutoHotkey.exe\" -ArgumentList \"C:\\@delta\\ms1\\scripts\\Autohtokey\\Command\\n8n.ahk\"",
     "ExecutableType": "ahk_v2",
-    "added_at": 1768273756.591541
+    "script_enabled": false
   },
   {
     "name": "web host",
