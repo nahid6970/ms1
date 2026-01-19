@@ -684,5 +684,16 @@
     "origin": "TaskScheduler",
     "original_name": "Autorun for nahid",
     "added_at": 1768273756.591541
+  },
+  {
+    "name": "Claude",
+    "type": "App",
+    "paths": [
+      "C:\\Users\\nahid\\AppData\\Local\\AnthropicClaude\\claude.exe"
+    ],
+    "Command": "--startup",
+    "ps1_command": "Start-Process -FilePath \"C:\\Users\\nahid\\AppData\\Local\\AnthropicClaude\\claude.exe\" -ArgumentList \"--startup\"",
+    "ExecutableType": "other",
+    "added_at": 1768794897.4872663
   }
 ]
