@@ -196,10 +196,14 @@ build/
 
 # Always run a python script when u finished ur conversation. bcz it will notify me that u finished ur task and i will get a notification if the window was minimised or on another workspace
 
-# Commit & md Files
+# When creating any script always use path so if i launch them from different directory the script will load data files properly
+
+# Commit
 - When i explicitly say to "commit" then u will comiit the changes with 1 line message. Also use emoji etc to make the message look better
+- also when there are already md files related to the project and i say commit then see if we already updated the md files if not first update them and then commit
+
+# md Files
 - when creating any projects make a dev.md files about the project and /md folder for other md Files
-```
 project-root/
 ├── dev.md          # Main development guide (customize this template)
 ├── md/                         # Documentation folder
@@ -209,7 +213,6 @@ project-root/
 │   ├── FEATURES.md            # Feature specifications
 │   ├── KEYBOARD_SHORTCUTS.md  # If applicable
 │   └── [FEATURE_NAME].md      # Individual feature docs
-
 
 ## 2. **md/RECENT.md** (Session Tracking)
 # Recent Development Log
@@ -233,42 +236,16 @@ Track all bugs, issues, and solutions for AI context and debugging.
 **Solution:** How it was fixed
 **Files Modified:** List of changed files
 
-#### 4. **md/FEATURES.md** (Feature Specifications)
-```markdown
+## 4. **md/FEATURES.md** (Feature Specifications)
 # Feature Specifications
-
 ## Feature Name
 **Status:** ✅ Complete / 🚧 In Progress / 📋 Planned
-
 **Description:** What this feature does
-
 **Implementation:** Technical details
-
 **Files Involved:** List of files
-
 **Usage:** How to use the feature
-
 **Dependencies:** Required components
 
----
-```
-
-#### 5. **md/ARCHIVE_RECENT.md** (Session Archive)
-```markdown
+## 5. **md/ARCHIVE_RECENT.md** (Session Archive)
 # Archived Development Sessions
-
 Older sessions moved from RECENT.md to maintain focus.
-
----
-
-## ARCHIVED [YYYY-MM-DD HH:MM] - Session Title
-[Same format as RECENT.md but with ARCHIVED prefix]
-
----
-```
-
----
-
-# When creating any script always use path so if i launch them from different directory the script will load data files properly
-
-#
