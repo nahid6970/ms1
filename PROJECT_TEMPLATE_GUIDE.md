@@ -4,148 +4,7 @@ This is a **reusable template** for setting up proper documentation and developm
 
 ---
 
-## 🚀 Initial Project Setup Checklist
 
-### 📁 Required Directory Structure
-```
-project-root/
-├── README.md                    # Project overview and setup
-├── DEVELOPER_GUIDE.md          # Main development guide (customize this template)
-├── md/                         # Documentation folder
-│   ├── RECENT.md              # Last 5 development sessions
-│   ├── ARCHIVE_RECENT.md      # Older sessions archive
-│   ├── PROBLEMS_AND_FIXES.md  # Bug tracking and solutions
-│   ├── FEATURES.md            # Feature specifications
-│   ├── KEYBOARD_SHORTCUTS.md  # If applicable
-│   └── [FEATURE_NAME].md      # Individual feature docs
-├── src/ or static/            # Source code
-├── templates/ or views/       # UI templates
-└── .gitignore                 # Git ignore file
-```
-
-### 📋 Essential Files to Create
-
-#### 1. **DEVELOPER_GUIDE.md** (Main Guide)
-```markdown
-# Project Developer Guide
-
-## 🚨 IMPORTANT: Always Check Recent Work First
-#[[file:md/RECENT.md]]
-
-## Project Overview
-[Describe your project, architecture, key technologies]
-
-## Key Files
-- **main.py/app.js/index.html**: [Main application file]
-- **static/**: [Frontend assets]
-- **templates/**: [UI templates]
-
-## 🔄 Recent Work Log (CRITICAL FOR SESSION CONTINUITY)
-Maintain `md/RECENT.md` with last 5 sessions for AI context.
-
-## 📋 Problems & Fixes Log
-Document all bugs and solutions in `md/PROBLEMS_AND_FIXES.md`.
-
-## 🚀 Git Commit Workflow (CRITICAL)
-[Copy the Git workflow section from this template]
-
-## Feature Documentation Index
-- [List your feature documentation files]
-```
-
-#### 2. **md/RECENT.md** (Session Tracking)
-```markdown
-# Recent Development Log
-
-**KEEP ONLY LAST 5 SESSIONS** - Move older to ARCHIVE_RECENT.md
-
----
-
-## [YYYY-MM-DD HH:MM] - Session Title
-
-**Session Duration:** X hours
-
-**What We Accomplished:**
-- Feature/fix descriptions with timestamps
-
-**Files Modified:**
-- List of changed files with descriptions
-
-**Next Steps:**
-- Planned improvements
-
-**Current Status:**
-- Working features
-- Known issues
-
-**Known Issues:**
-- List current problems
-
----
-
-*Next session: [What to work on next]*
-```
-
-#### 3. **md/PROBLEMS_AND_FIXES.md** (Bug Tracking)
-```markdown
-# Problems & Fixes Log
-
-Track all bugs, issues, and solutions for AI context and debugging.
-
----
-
-## [YYYY-MM-DD HH:MM] - Problem Title
-
-**Problem:** Description of the issue
-
-**Root Cause:** What was causing it
-
-**Solution:** How it was fixed
-
-**Files Modified:** List of changed files
-
-**Related Issues:** Connected problems
-
-**Result:** Outcome and verification
-
----
-```
-
-#### 4. **md/FEATURES.md** (Feature Specifications)
-```markdown
-# Feature Specifications
-
-## Feature Name
-**Status:** ✅ Complete / 🚧 In Progress / 📋 Planned
-
-**Description:** What this feature does
-
-**Implementation:** Technical details
-
-**Files Involved:** List of files
-
-**Usage:** How to use the feature
-
-**Dependencies:** Required components
-
----
-```
-
-#### 5. **md/ARCHIVE_RECENT.md** (Session Archive)
-```markdown
-# Archived Development Sessions
-
-Older sessions moved from RECENT.md to maintain focus.
-
----
-
-## ARCHIVED [YYYY-MM-DD HH:MM] - Session Title
-[Same format as RECENT.md but with ARCHIVED prefix]
-
----
-```
-
----
 
 ## 🚀 Git Commit Workflow Template
 
@@ -327,13 +186,133 @@ build/
 *This template is based on proven practices from real project development.*
 *Customize it for your specific needs and technology stack.*
 
+
+
+
+
+
+
+
+
 # Always run a python script when u finished ur conversation. bcz it will notify me that u finished ur task and i will get a notification if the window was minimised or on another workspace
 
 # Commit & md Files
 - When i explicitly say to "commit" then u will comiit the changes with 1 line message. Also use emoji etc to make the message look better
 - when creating any projects make a dev.md files about the project and /md folder for other md Files
--- 
---
+```
+project-root/
+├── dev.md          # Main development guide (customize this template)
+├── md/                         # Documentation folder
+│   ├── RECENT.md              # Last 5 development sessions
+│   ├── ARCHIVE_RECENT.md      # Older sessions archive
+│   ├── PROBLEMS_AND_FIXES.md  # Bug tracking and solutions
+│   ├── FEATURES.md            # Feature specifications
+│   ├── KEYBOARD_SHORTCUTS.md  # If applicable
+│   └── [FEATURE_NAME].md      # Individual feature docs
+
+
+## 🔄 Recent Work Log (CRITICAL FOR SESSION CONTINUITY)
+Maintain `md/RECENT.md` with last 5 sessions for AI context.
+
+## 📋 Problems & Fixes Log
+Document all bugs and solutions in `md/PROBLEMS_AND_FIXES.md`.
+
+## Feature Documentation Index
+- [List your feature documentation files]
+
+#### 2. **md/RECENT.md** (Session Tracking)
+```markdown
+# Recent Development Log
+
+**KEEP ONLY LAST 5 SESSIONS** - Move older to ARCHIVE_RECENT.md
+
+---
+
+## [YYYY-MM-DD HH:MM] - Session Title
+
+**Session Duration:** X hours
+
+**What We Accomplished:**
+- Feature/fix descriptions with timestamps
+
+**Files Modified:**
+- List of changed files with descriptions
+
+**Next Steps:**
+- Planned improvements
+
+**Current Status:**
+- Working features
+- Known issues
+
+**Known Issues:**
+- List current problems
+
+---
+
+*Next session: [What to work on next]*
+```
+
+#### 3. **md/PROBLEMS_AND_FIXES.md** (Bug Tracking)
+```markdown
+# Problems & Fixes Log
+
+Track all bugs, issues, and solutions for AI context and debugging.
+
+---
+
+## [YYYY-MM-DD HH:MM] - Problem Title
+
+**Problem:** Description of the issue
+
+**Root Cause:** What was causing it
+
+**Solution:** How it was fixed
+
+**Files Modified:** List of changed files
+
+**Related Issues:** Connected problems
+
+**Result:** Outcome and verification
+
+---
+```
+
+#### 4. **md/FEATURES.md** (Feature Specifications)
+```markdown
+# Feature Specifications
+
+## Feature Name
+**Status:** ✅ Complete / 🚧 In Progress / 📋 Planned
+
+**Description:** What this feature does
+
+**Implementation:** Technical details
+
+**Files Involved:** List of files
+
+**Usage:** How to use the feature
+
+**Dependencies:** Required components
+
+---
+```
+
+#### 5. **md/ARCHIVE_RECENT.md** (Session Archive)
+```markdown
+# Archived Development Sessions
+
+Older sessions moved from RECENT.md to maintain focus.
+
+---
+
+## ARCHIVED [YYYY-MM-DD HH:MM] - Session Title
+[Same format as RECENT.md but with ARCHIVED prefix]
+
+---
+```
+
+---
 
 # When creating any script always use path so if i launch them from different directory the script will load data files properly
 
