@@ -1,101 +1,101 @@
 {
-    "directories": [
-        {
-            "path": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\",
-            "category": "Flask",
-            "name": "Flask"
-        },
-        {
-            "path": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\4998_Applist",
-            "category": "Flask"
-        },
-        {
-            "path": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\4999_startup",
-            "category": "Flask"
-        },
-        {
-            "path": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5000_myhome",
-            "category": "Flask"
-        },
-        {
-            "path": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5003_Browse_PC_Files",
-            "category": "Flask"
-        },
-        {
-            "path": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5004 paint",
-            "category": "Flask"
-        },
-        {
-            "path": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5011_tv_show",
-            "category": "Flask"
-        },
-        {
-            "path": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5013_movie_tracker",
-            "category": "Flask"
-        },
-        {
-            "path": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5018_cell",
-            "category": "Flask"
-        },
-        {
-            "path": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5555_terminal",
-            "category": "Flask"
-        },
-        {
-            "path": "C:\\Users\\nahid\\ms\\ms1\\scripts\\run",
-            "category": "script",
-            "name": "Run & Dir"
-        },
-        {
-            "path": "C:\\Users\\nahid\\ms\\ms1\\scripts\\ytc",
-            "category": "script"
-        },
-        {
-            "path": "C:\\Users\\nahid\\ms\\ms1\\Testing\\FileLockSmith",
-            "category": "Testing"
-        },
-        {
-            "path": "C:\\Users\\nahid\\ms\\ms1\\Testing\\mklink",
-            "category": "Testing"
-        },
-        {
-            "path": "C:\\Users\\nahid\\ms\\ms1\\Testing\\port finder",
-            "category": "Testing"
-        },
-        {
-            "path": "C:\\Users\\nahid\\ms\\ms1\\Testing\\mypygui\\qt",
-            "category": "Testing",
-            "name": "Script Manager"
-        }
-    ],
-    "commands": [
-        {
-            "name": "Gemini",
-            "template": "start \"Gemini\" /D \"{path}\" cmd /k gemini",
-            "category": "AI"
-        },
-        {
-            "name": "Antigravity",
-            "template": "antigravity \"{path}\"",
-            "category": "AI"
-        },
-        {
-            "name": "Kiro App",
-            "template": "kiro \"{path}\"",
-            "category": "AI"
-        },
-        {
-            "name": "Explorer",
-            "template": "explorer \"{path}\"",
-            "category": "General"
-        },
-        {
-            "name": "Terminal",
-            "template": "start cmd /k cd /d \"{path}\"",
-            "category": "General"
-        }
-    ],
-    "settings": {
-        "view_mode": "name"
+  "directories": [
+    {
+      "path": "C:\\@delta\\ms1\\scripts\\flask\\",
+      "category": "Flask",
+      "name": "Flask"
+    },
+    {
+      "path": "C:\\@delta\\ms1\\scripts\\flask\\4998_Applist",
+      "category": "Flask"
+    },
+    {
+      "path": "C:\\@delta\\ms1\\scripts\\flask\\4999_startup",
+      "category": "Flask"
+    },
+    {
+      "path": "C:\\@delta\\ms1\\scripts\\flask\\5000_myhome",
+      "category": "Flask"
+    },
+    {
+      "path": "C:\\@delta\\ms1\\scripts\\flask\\5003_Browse_PC_Files",
+      "category": "Flask"
+    },
+    {
+      "path": "C:\\@delta\\ms1\\scripts\\flask\\5004 paint",
+      "category": "Flask"
+    },
+    {
+      "path": "C:\\@delta\\ms1\\scripts\\flask\\5011_tv_show",
+      "category": "Flask"
+    },
+    {
+      "path": "C:\\@delta\\ms1\\scripts\\flask\\5013_movie_tracker",
+      "category": "Flask"
+    },
+    {
+      "path": "C:\\@delta\\ms1\\scripts\\flask\\5018_cell",
+      "category": "Flask"
+    },
+    {
+      "path": "C:\\@delta\\ms1\\scripts\\flask\\5555_terminal",
+      "category": "Flask"
+    },
+    {
+      "path": "C:\\@delta\\ms1\\scripts\\run",
+      "category": "script",
+      "name": "Run & Dir"
+    },
+    {
+      "path": "C:\\@delta\\ms1\\scripts\\ytc",
+      "category": "script"
+    },
+    {
+      "path": "C:\\@delta\\ms1\\Testing\\FileLockSmith",
+      "category": "Testing"
+    },
+    {
+      "path": "C:\\@delta\\ms1\\Testing\\mklink",
+      "category": "Testing"
+    },
+    {
+      "path": "C:\\@delta\\ms1\\Testing\\port finder",
+      "category": "Testing"
+    },
+    {
+      "path": "C:\\@delta\\ms1\\Testing\\mypygui\\qt",
+      "category": "Testing",
+      "name": "Script Manager"
     }
+  ],
+  "commands": [
+    {
+      "name": "Gemini",
+      "template": "start \"Gemini\" /D \"{path}\" cmd /k gemini",
+      "category": "AI"
+    },
+    {
+      "name": "Antigravity",
+      "template": "antigravity \"{path}\"",
+      "category": "AI"
+    },
+    {
+      "name": "Kiro App",
+      "template": "kiro \"{path}\"",
+      "category": "AI"
+    },
+    {
+      "name": "Explorer",
+      "template": "explorer \"{path}\"",
+      "category": "General"
+    },
+    {
+      "name": "Terminal",
+      "template": "start cmd /k cd /d \"{path}\"",
+      "category": "General"
+    }
+  ],
+  "settings": {
+    "view_mode": "name"
+  }
 }
