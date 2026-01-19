@@ -24,7 +24,8 @@ def notify(message="Task Completed"):
             safe_message = str(message).replace('"', '""').replace("\n", " ")
             vbs_content = (
                 f'Set ws = CreateObject("WScript.Shell")\n'
-                f'ws.Popup "{safe_message}", 0, "Gemini Task Complete", 64\n'
+                # 4160 = 64 (Information Icon) + 4096 (System Modal / Topmost)
+                f'ws.Popup "{safe_message}", 0, "Gemini Task Complete", 4160\n'
             )
             
             vbs_path = os.path.join(tempfile.gettempdir(), "gemini_block.vbs")
