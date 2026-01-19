@@ -475,7 +475,7 @@ widgets:
         - { title: "Download", path: "D:\\Downloads" }
         - { title: "msBackups", path: "C:\\Users\\nahid\\ms\\msBackups" }
         - { title: "Job", path: "C:\\Users\\nahid\\ms\\msBackups\\@JOB" }
-        - { title: "ms1", path: "C:\\Users\\nahid\\ms\\ms1" }
+        - { title: "ms1", path: "C:\\@delta\\ms1" }
       system_menu: false
       power_menu: false
       blur: true

@@ -229,8 +229,8 @@ BackupRestore_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /
 
 Encrypt_lb = tk.Label(ROW_2,text="\uf084", bg="#1d2027", fg="#ff0000", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 50, "bold"))
 Encrypt_lb.pack(side="left", padx=(0, 0), pady=(0, 0))
-Encrypt_lb.bind("<Button-1>",lambda event=None:subprocess.Popen('cmd /c C:\\Users\\nahid\\ms\\ms1\\utility\\Encryption.py'))
-Encrypt_lb.bind("<Control-Button-1>",lambda event=None:subprocess.Popen('cmd /c code C:\\Users\\nahid\\ms\\ms1\\utility\\Encryption.py'))
+Encrypt_lb.bind("<Button-1>",lambda event=None:subprocess.Popen('cmd /c C:\\@delta\\ms1\\utility\\Encryption.py'))
+Encrypt_lb.bind("<Control-Button-1>",lambda event=None:subprocess.Popen('cmd /c code C:\\@delta\\ms1\\utility\\Encryption.py'))
 
 
 

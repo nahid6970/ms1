@@ -674,8 +674,8 @@ button_properties = [
 ("◀ FFMPEG",BOX_1,"#98c379","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 0 ,1,1,5,"ew" , 0,0, (1,1),(0,0), lambda: switch_to_frame(MAIN_FRAME, FR_FFmpeg)),
 ("Trim"           ,BOX_1,"#FFFFFF" ,"#1D2027",1 ,0 ,"flat" ,("JetBrainsMono NF",11 ,"bold"   ),1 ,1,1,1,"ew" ,0,0,(1,1),(0,0),lambda:subprocess.Popen(["powershell" ,"start","C:\\@delta\\ms1\\scripts\\ffmpeg\\trim.ps1"]     )),
 ("Convert"        ,BOX_1,"#FFFFFF" ,"#1D2027",1 ,0 ,"flat" ,("JetBrainsMono NF",11 ,"bold"   ),1 ,2,1,1,"ew" ,0,0,(1,1),(0,0),lambda:subprocess.Popen(["powershell" ,"start","C:\\@delta\\ms1\\scripts\\ffmpeg\\convert.ps1"]  )),
-("Dimension"      ,BOX_1,"#FFFFFF" ,"#1D2027",1 ,0 ,"flat" ,("JetBrainsMono NF",11 ,"bold"   ),1 ,3,1,1,"ew" ,0,0,(1,1),(0,0),lambda:subprocess.Popen(["powershell" ,"start","C:\\Users\\nahid\\ms\\ms1\\scripts\\ffmpeg\\dimension.ps1"])),
-("Imagedimension" ,BOX_1,"#FFFFFF" ,"#1D2027",1 ,0 ,"flat" ,("JetBrainsMono NF",11 ,"bold"   ),1 ,4,1,1,"ew" ,0,0,(1,1),(0,0),lambda:subprocess.Popen(["powershell" ,"start","C:\\Users\\nahid\\ms\\ms1\\scripts\\ffmpeg\\imgdim.ps1"]   )),
+("Dimension"      ,BOX_1,"#FFFFFF" ,"#1D2027",1 ,0 ,"flat" ,("JetBrainsMono NF",11 ,"bold"   ),1 ,3,1,1,"ew" ,0,0,(1,1),(0,0),lambda:subprocess.Popen(["powershell" ,"start","C:\\@delta\\ms1\\scripts\\ffmpeg\\dimension.ps1"])),
+("Imagedimension" ,BOX_1,"#FFFFFF" ,"#1D2027",1 ,0 ,"flat" ,("JetBrainsMono NF",11 ,"bold"   ),1 ,4,1,1,"ew" ,0,0,(1,1),(0,0),lambda:subprocess.Popen(["powershell" ,"start","C:\\@delta\\ms1\\scripts\\ffmpeg\\imgdim.ps1"]   )),
 ("Merge"          ,BOX_1,"#FFFFFF" ,"#1D2027",1 ,0 ,"flat" ,("JetBrainsMono NF",11 ,"bold"   ),1 ,5,1,1,"ew" ,0,0,(1,1),(0,0),lambda:subprocess.Popen(["powershell" ,"start","C:\\@delta\\ms1\\scripts\\ffmpeg\\merge.ps1"]    )),
 ]
 for button_props in button_properties:

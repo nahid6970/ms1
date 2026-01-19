@@ -17,7 +17,7 @@
     "paths": [
       "C:\\Windows\\System32\\cmd.exe"
     ],
-    "Command": "C:\\Users\\nahid\\ms\\ms1\\test_project\\ollama-chat-app\\server.py",
+    "Command": "C:\\@delta\\ms1\\test_project\\ollama-chat-app\\server.py",
     "ExecutableType": "cmd",
     "added_at": 1768273756.591541
   },

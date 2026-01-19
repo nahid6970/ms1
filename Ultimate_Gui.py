@@ -235,7 +235,7 @@ def create_control_panel_without_tab_border():
 
     ffmpeg_img_dim_button = tk.Label(ffmpeg_tab, text="", width=2, bg="#31ffc1", fg="#000000", relief="solid", borderwidth=1, font=medium_font)
     ffmpeg_img_dim_button.grid(row=0, column=4, padx=5, pady=5)
-    ffmpeg_img_dim_button.bind("<Button-1>", lambda event: run_script("C:\\Users\\nahid\\ms\\ms1\\scripts\\ffmpeg\\img_dim.ps1", hide=False))
+    ffmpeg_img_dim_button.bind("<Button-1>", lambda event: run_script("C:\\@delta\\ms1\\scripts\\ffmpeg\\img_dim.ps1", hide=False))
 
     notebook.add(ffmpeg_tab, text="ffmpeg")
 

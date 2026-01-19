@@ -100,7 +100,7 @@ class CPUMonitor(QWidget):
 
     def apply_stylesheet(self):
         try:
-            with open("C:\\Users\\nahid\\ms\\ms1\\pyqt\\customize\\style.css", "r") as f:
+            with open("C:\\@delta\\ms1\\pyqt\\customize\\style.css", "r") as f:
                 self.setStyleSheet(f.read())
         except FileNotFoundError:
             print("Stylesheet file not found: customize/style.css")

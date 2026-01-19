@@ -377,7 +377,7 @@ class WindowsUtil:
                         "title": "Reference.py", 
                         "action": {
                             "powershell": [
-                                "New-Item -ItemType SymbolicLink -Path 'C:\\Users\\nahid\\scoop\\apps\\python312\\current\\Lib\\Reference.py' -Target 'C:\\Users\\nahid\\ms\\ms1\\Reference.py' -Force"
+                                "New-Item -ItemType SymbolicLink -Path 'C:\\Users\\nahid\\scoop\\apps\\python312\\current\\Lib\\Reference.py' -Target 'C:\\@delta\\ms1\\Reference.py' -Force"
                             ],
                             "description": "Create symbolic link for Python Reference.py"
                         }
@@ -618,7 +618,7 @@ class WindowsUtil:
                                 "Remove-Item -Force -Recurse -Verbose 'C:\\Users\\nahid\\AppData\\Local\\nvim' -ErrorAction SilentlyContinue",
                                 "Remove-Item -Force -Recurse -Verbose 'C:\\Users\\nahid\\AppData\\Local\\nvim-data' -ErrorAction SilentlyContinue",
                                 "New-Item -ItemType Directory -Path 'C:\\Users\\nahid\\AppData\\Local\\nvim' -Force",
-                                "New-Item -ItemType SymbolicLink -Path 'C:\\Users\\nahid\\AppData\\Local\\nvim\\init.lua' -Target 'C:\\Users\\nahid\\ms\\ms1\\linux\\linux\\neovim\\init.lua' -Force",
+                                "New-Item -ItemType SymbolicLink -Path 'C:\\Users\\nahid\\AppData\\Local\\nvim\\init.lua' -Target 'C:\\@delta\\ms1\\linux\\linux\\neovim\\init.lua' -Force",
                                 "Write-Host 'Neovim configuration 1 setup complete' -ForegroundColor Green"
                             ],
                             "description": "Setup Neovim with configuration 1 (init.lua)"
@@ -632,7 +632,7 @@ class WindowsUtil:
                                 "Remove-Item -Force -Recurse -Verbose 'C:\\Users\\nahid\\AppData\\Local\\nvim' -ErrorAction SilentlyContinue",
                                 "Remove-Item -Force -Recurse -Verbose 'C:\\Users\\nahid\\AppData\\Local\\nvim-data' -ErrorAction SilentlyContinue",
                                 "New-Item -ItemType Directory -Path 'C:\\Users\\nahid\\AppData\\Local\\nvim' -Force",
-                                "New-Item -ItemType SymbolicLink -Path 'C:\\Users\\nahid\\AppData\\Local\\nvim\\init.lua' -Target 'C:\\Users\\nahid\\ms\\ms1\\linux\\linux\\neovim\\init2.lua' -Force",
+                                "New-Item -ItemType SymbolicLink -Path 'C:\\Users\\nahid\\AppData\\Local\\nvim\\init.lua' -Target 'C:\\@delta\\ms1\\linux\\linux\\neovim\\init2.lua' -Force",
                                 "Write-Host 'Neovim configuration 2 setup complete' -ForegroundColor Green"
                             ],
                             "description": "Setup Neovim with configuration 2 (init2.lua)"
@@ -661,7 +661,7 @@ class WindowsUtil:
                         "title": "PotPlayer Register", 
                         "action": {
                             "powershell": [
-                                "Start-Process 'C:\\Users\\nahid\\ms\\ms1\\asset\\potplayer\\PotPlayerMini64.reg' -Verbose",
+                                "Start-Process 'C:\\@delta\\ms1\\asset\\potplayer\\PotPlayerMini64.reg' -Verbose",
                                 "Write-Host 'PotPlayer registry settings applied' -ForegroundColor Green"
                             ],
                             "description": "Apply PotPlayer registry settings"

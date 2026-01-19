@@ -2,7 +2,7 @@
 # Define your repositories here
 queue = Queue()
 repos = [
-    {"name": "ms1", "path": "C:\\Users\\nahid\\ms\\ms1", "label": "ms1"},
+    {"name": "ms1", "path": "C:\\@delta\\ms1", "label": "ms1"},
     {"name": "db", "path": "C:\\Users\\nahid\\ms\\db", "label": "db"},
     {"name": "test", "path": "C:\\Users\\nahid\\ms\\test", "label": "test"},
     # {"name": "ms2", "path": "C:\\ms2", "label": "2"},

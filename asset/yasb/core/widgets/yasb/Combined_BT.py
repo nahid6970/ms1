@@ -222,9 +222,9 @@ class CombinedWidget(BaseWidget):
         modifiers = QApplication.keyboardModifiers()
         if event.button() == Qt.MouseButton.LeftButton:
             if modifiers == Qt.KeyboardModifier.ControlModifier:
-                subprocess.Popen(['cmd.exe', '/c', 'Code C:\\Users\\nahid\\ms\\ms1\\utility\\find_files.ps1']) 
+                subprocess.Popen(['cmd.exe', '/c', 'Code C:\\@delta\\ms1\\utility\\find_files.ps1']) 
             else:
-                subprocess.Popen(['cmd.exe', '/c','start', 'C:\\Users\\nahid\\ms\\ms1\\utility\\find_files.ps1']) 
+                subprocess.Popen(['cmd.exe', '/c','start', 'C:\\@delta\\ms1\\utility\\find_files.ps1']) 
         elif event.button() == Qt.MouseButton.RightButton:
             if modifiers == Qt.KeyboardModifier.ControlModifier:
                 subprocess.Popen(['cmd.exe', '/c', 'code', '-g', 'C:\\@delta\\ms1\\scripts\\mypygui_import\\edit_files.py:89'])
@@ -250,9 +250,9 @@ class CombinedWidget(BaseWidget):
 
     def _desktop_action(self, event, label):
         if event.button() == Qt.MouseButton.LeftButton:
-            subprocess.Popen('cmd /c C:\\Users\\nahid\\ms\\ms1\\utility\\desktop_icon.py')
+            subprocess.Popen('cmd /c C:\\@delta\\ms1\\utility\\desktop_icon.py')
         elif event.button() == Qt.MouseButton.RightButton:
-            subprocess.Popen('cmd /c Code C:\\Users\\nahid\\ms\\ms1\\utility\\desktop_icon.py')
+            subprocess.Popen('cmd /c Code C:\\@delta\\ms1\\utility\\desktop_icon.py')
 
 
     def _folder_action(self, event, label):

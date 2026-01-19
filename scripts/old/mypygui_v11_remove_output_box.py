@@ -689,10 +689,10 @@ def open_ffmpeg_convt():
     subprocess.run(["powershell", "start", "C:\\@delta\\ms1\\scripts\\ffmpeg\\convert.ps1"])
 
 def open_ffmpeg_dimns():
-    subprocess.run(["powershell", "start", "C:\\Users\\nahid\\ms\\ms1\\scripts\\ffmpeg\\dimension.ps1"])
+    subprocess.run(["powershell", "start", "C:\\@delta\\ms1\\scripts\\ffmpeg\\dimension.ps1"])
 
 def open_ffmpeg_imgdm():
-    subprocess.run(["powershell", "start", "C:\\Users\\nahid\\ms\\ms1\\scripts\\ffmpeg\\imgdim.ps1"])
+    subprocess.run(["powershell", "start", "C:\\@delta\\ms1\\scripts\\ffmpeg\\imgdim.ps1"])
 
 def open_ffmpeg_merge():
     subprocess.run(["powershell", "start", "C:\\@delta\\ms1\\scripts\\ffmpeg\\merge.ps1"])
@@ -1678,8 +1678,8 @@ def run_script():
 
 # Folders
 folders = [
-"C:\\Users\\nahid\\ms\\ms1\\scripts\\autohotkey",
-"C:\\Users\\nahid\\ms\\ms1\\scripts\\python"
+"C:\\@delta\\ms1\\scripts\\autohotkey",
+"C:\\@delta\\ms1\\scripts\\python"
 ]
 BOX_PYTHON_2 = tk.Frame(FR_PYTHON_TOOL, bg="#1d2027") ; BOX_PYTHON_2.pack(side="top", anchor="center", pady=(0,0), padx=(0,0))
 # Dropdown for folders

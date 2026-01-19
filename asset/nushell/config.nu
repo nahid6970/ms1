@@ -894,15 +894,15 @@ $env.config = {
 
 
 
-def yay [] { pwsh -c "C:\\Users\\nahid\\ms\\ms1\\scripts\\winget_scoop\\scoop_install.ps1" }
-def nay [] { pwsh -c "C:\\Users\\nahid\\ms\\ms1\\scripts\\winget_scoop\\scoop_uninstall.ps1" }
+def yay [] { pwsh -c "C:\\@delta\\ms1\\scripts\\winget_scoop\\scoop_install.ps1" }
+def nay [] { pwsh -c "C:\\@delta\\ms1\\scripts\\winget_scoop\\scoop_uninstall.ps1" }
 
-def yayw1 [] { pwsh -c "C:\\Users\\nahid\\ms\\ms1\\scripts\\winget_scoop\\wget_install.ps1" }
-def yayw2 [] { pwsh -c "C:\\Users\\nahid\\ms\\ms1\\scripts\\winget_scoop\\wget_install2.ps1" }
-def nayw [] { pwsh -c "C:\\Users\\nahid\\ms\\ms1\\scripts\\winget_scoop\\wget_install2.ps1" }
+def yayw1 [] { pwsh -c "C:\\@delta\\ms1\\scripts\\winget_scoop\\wget_install.ps1" }
+def yayw2 [] { pwsh -c "C:\\@delta\\ms1\\scripts\\winget_scoop\\wget_install2.ps1" }
+def nayw [] { pwsh -c "C:\\@delta\\ms1\\scripts\\winget_scoop\\wget_install2.ps1" }
 
-def yaywn1 [] { pwsh -c "C:\\Users\\nahid\\ms\\ms1\\scripts\\winget_scoop\\wget_n_install.ps1" }
-def yaywn2 [] { pwsh -c "C:\\Users\\nahid\\ms\\ms1\\scripts\\winget_scoop\\wget_n_install2.ps1" }
+def yaywn1 [] { pwsh -c "C:\\@delta\\ms1\\scripts\\winget_scoop\\wget_n_install.ps1" }
+def yaywn2 [] { pwsh -c "C:\\@delta\\ms1\\scripts\\winget_scoop\\wget_n_install2.ps1" }
 
 alias ms1 = cd "C:\\ms1"
 alias ms2 = cd "C:\\ms2"

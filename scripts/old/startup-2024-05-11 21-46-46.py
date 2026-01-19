@@ -19,7 +19,7 @@ class StartupManager(tk.Tk):
             {"type": "App","name": "\uf4c3 Radarr"      ,"path": "C:\\ProgramData\\Radarr\\bin\\Radarr.exe"},
             {"type": "App","name": "\uf4c3 Sonarr"      ,"path": "C:\\ProgramData\\Sonarr\\bin\\Sonarr.exe"},
 
-            {"type": "Command","name": "\uf445 ahkscript"     ,"command": "Start-Process 'C:\\Users\\nahid\\ms\\ms1\\ahkscripts.ahk'"},
+            {"type": "Command","name": "\uf445 ahkscript"     ,"command": "Start-Process 'C:\\@delta\\ms1\\ahkscripts.ahk'"},
             {"type": "Command","name": "\uf445 arr_monitor"   ,"command": "Start-Process 'C:\\@delta\\ms1\\scripts\\arr\\arr_monitor.ps1' -WindowStyle Hidden"},
             {"type": "Command","name": "\uf445 bazarr"        ,"command": "Start-Process -FilePath 'C:\\ProgramData\\Bazarr\\WinPython\\python-3.10.0\\python.exe' -ArgumentList 'C:\\ProgramData\\Bazarr\\bazarr.py' -WindowStyle Hidden"},
             {"type": "Command","name": "\uf445 flaresolver"   ,"command": "Start-Process 'C:\\Users\\nahid\\scoop\\apps\\flaresolverr\\current\\flaresolverr.exe' -WindowStyle Hidden"},
@@ -27,10 +27,10 @@ class StartupManager(tk.Tk):
             {"type": "Command","name": "\uf445 mypygui"       ,"command": "Start-Process 'python.exe' -ArgumentList 'C:\\@delta\\ms1\\mypygui.py' -Verb RunAs -WindowStyle Hidden"},
             {"type": "Command","name": "\uf445 sync"          ,"command": "Start-Process 'C:\\@delta\\ms1\\scripts\\sync.ps1'"},
             {"type": "Command","name": "\uf445 syncthing"     ,"command": "Start-Process 'C:\\Users\\nahid\\scoop\\apps\\syncthing\\current\\syncthing.exe' -WindowStyle Hidden"},
-            {"type": "Command","name": "\uf445 ValoQbit"      ,"command": "Start-Process 'C:\\Users\\nahid\\ms\\ms1\\scripts\\valorant\\valo_qbit.ps1' -WindowStyle Hidden"},
+            {"type": "Command","name": "\uf445 ValoQbit"      ,"command": "Start-Process 'C:\\@delta\\ms1\\scripts\\valorant\\valo_qbit.ps1' -WindowStyle Hidden"},
             {"type": "Command","name": "\uf445 Glaze_WM"      ,"command": "Start-Process 'glazewm.exe' -WindowStyle hidden"},
             {"type": "Command","name": "\uf445 whkd"          ,"command": "Start-Process 'C:\\Users\\nahid\\scoop\\apps\\whkd\\current\\whkd.exe' -WindowStyle Hidden"},
-            {"type": "Command","name": "\uf445 yasb"          ,"command": "Start-Process 'python.exe' -ArgumentList 'C:\\Users\\nahid\\ms\\ms1\\yasb\\main.py' -WindowStyle Hidden"},
+            {"type": "Command","name": "\uf445 yasb"          ,"command": "Start-Process 'python.exe' -ArgumentList 'C:\\@delta\\ms1\\yasb\\main.py' -WindowStyle Hidden"},
             {"type": "Command","name": "\uf445 komorebic"     ,"command": "komorebic start"},
             # Add more items in the same format if needed
         ]

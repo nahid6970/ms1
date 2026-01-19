@@ -61,7 +61,7 @@ class StartupManager(tk.Tk):
 # {"type": "Command","name": "Open WebUI"       ,"paths": "Start-Process open-webui serve"},
 # {"type": "Command","name": "Syncthing"        ,"paths": "Start-Process 'C:\\Users\\nahid\\scoop\\apps\\syncthing\\current\\syncthing.exe' -WindowStyle Hidden"},
 # {"type": "Command","name": "whkd"             ,"paths": "Start-Process 'C:\\Users\\nahid\\scoop\\apps\\whkd\\current\\whkd.exe' -WindowStyle Hidden"},
-# {"type": "Command","name": "Yasb"             ,"paths": "Start-Process 'python.exe' -ArgumentList 'C:\\Users\\nahid\\ms\\ms1\\yasb\\main.py' -WindowStyle Hidden"},
+# {"type": "Command","name": "Yasb"             ,"paths": "Start-Process 'python.exe' -ArgumentList 'C:\\@delta\\ms1\\yasb\\main.py' -WindowStyle Hidden"},
 
 {"type": "App","name": "AMDNoiseSuppression"    ,"paths": [r"C:\WINDOWS\system32\AMD\ANR\AMDNoiseSuppression.exe"]},
 {"type": "App","name": "BijoyBayanno"           ,"paths": [r"C:\Program Files (x86)\Ananda Computers\BijoyBayanno\BijoyBayanno.exe"]},

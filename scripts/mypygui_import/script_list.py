@@ -96,8 +96,8 @@ def run_script():
 
 # Folders
 folders = [
-    "C:\\Users\\nahid\\ms\\ms1\\scripts\\autohotkey",
-    "C:\\Users\\nahid\\ms\\ms1\\scripts\\python"
+    "C:\\@delta\\ms1\\scripts\\autohotkey",
+    "C:\\@delta\\ms1\\scripts\\python"
 ]
 
 # Dropdown for folders

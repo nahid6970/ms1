@@ -543,8 +543,8 @@ Tools_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\@delta\\ms
 
 Startup_bt=CTkLabel(ROOT1, text="\uf4cc", bg_color="#1d2027",text_color="#6488ff", anchor="w",font=("JetBrainsMono NFP",25,"bold"))
 Startup_bt.pack(side="left",padx=(10,0),pady=(1,0))
-Startup_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\Users\\nahid\\ms\\ms1\\startup.py"], shell=True))
-Startup_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\Users\\nahid\\ms\\ms1\\startup.py"], shell=True))
+Startup_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\@delta\\ms1\\startup.py"], shell=True))
+Startup_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\@delta\\ms1\\startup.py"], shell=True))
 
 AppManagement_bt=CTkLabel(ROOT1, text="\uf40e", bg_color="#1d2027",text_color="#26b2f3", anchor="w",font=("JetBrainsMono NFP",25,"bold"))
 AppManagement_bt.pack(side="left",padx=(10,0),pady=(1,0))
@@ -590,8 +590,8 @@ BackupRestore_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /
 
 PositionXY_bt=tk.Label(ROOT1, text="\udb83\ude51",bg="#1d2027",fg="#ffffff",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",16,"bold"))
 PositionXY_bt.pack(side="left",padx=(3,0),pady=(0,0))
-PositionXY_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\Users\\nahid\\ms\\ms1\\utility\\PositionXY.py"], shell=True))
-PositionXY_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\Users\\nahid\\ms\\ms1\\utility\\PositionXY.py"],shell=True))
+PositionXY_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\@delta\\ms1\\utility\\PositionXY.py"], shell=True))
+PositionXY_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\@delta\\ms1\\utility\\PositionXY.py"],shell=True))
 
 ColorTool_bt=tk.Label(ROOT1, text="\ue22b",bg="#1d2027",fg="#c588fd",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",16,"bold"))
 ColorTool_bt.pack(side="left",padx=(3,0),pady=(0,0))
@@ -676,8 +676,8 @@ LockBox_lb.bind("<Button-1>",lambda event=None:subprocess.Popen('cmd /c "C:\\Pro
 
 Encrypt_lb = tk.Label(ROOT1,text="\uf511", bg="#1d2027", fg="#ff0000", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
 Encrypt_lb.pack(side="left", padx=(0, 0), pady=(0, 0))
-Encrypt_lb.bind("<Button-1>",lambda event=None:subprocess.Popen('cmd /c C:\\Users\\nahid\\ms\\ms1\\utility\\Encryption.py'))
-Encrypt_lb.bind("<Control-Button-1>",lambda event=None:subprocess.Popen('cmd /c code C:\\Users\\nahid\\ms\\ms1\\utility\\Encryption.py'))
+Encrypt_lb.bind("<Button-1>",lambda event=None:subprocess.Popen('cmd /c C:\\@delta\\ms1\\utility\\Encryption.py'))
+Encrypt_lb.bind("<Control-Button-1>",lambda event=None:subprocess.Popen('cmd /c code C:\\@delta\\ms1\\utility\\Encryption.py'))
 
 Changes_Monitor_lb = tk.Label(ROOT1, text="", bg="#1d2027", fg="#68fc2d")
 Changes_Monitor_lb.pack(side="left",padx=(3,0),pady=(0,0))
@@ -702,7 +702,7 @@ cpu_core_frame.pack(side="left",padx=(3,0),pady=(0,0))
 
 LB_CPU=tk.Label(ROOT2,bg="#000000",fg="#FFFFFF",height=0,width =5,relief="flat",highlightthickness=1,highlightbackground="#1b8af1",anchor ="center",font=("JetBrainsMono NFP",10,"bold"),text="")
 LB_CPU.pack(side="left",padx=(3,0 ),pady=(0,0))
-LB_CPU.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c start C:\\Users\\nahid\\ms\\ms1\\utility\\kill_process.ps1"], shell=True))
+LB_CPU.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c start C:\\@delta\\ms1\\utility\\kill_process.ps1"], shell=True))
 
 LB_GPU=tk.Label(ROOT2,bg="#000000",fg="#FFFFFF",height=0,width =5,relief="flat",highlightthickness=1,highlightbackground="#e22910",anchor ="center",font=("JetBrainsMono NFP",10,"bold"),text="")
 LB_GPU.pack(side="left",padx=(3,0 ),pady=(0,0))

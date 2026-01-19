@@ -28,7 +28,7 @@ start_time = time.time()
 # Define your repositories here
 queue = Queue()
 repos = [
-    {"name": "ms1", "path": "C:\\Users\\nahid\\ms\\ms1", "label": "ms1"},
+    {"name": "ms1", "path": "C:\\@delta\\ms1", "label": "ms1"},
     {"name": "db", "path": "C:\\Users\\nahid\\ms\\db", "label": "db"},
     {"name": "test", "path": "C:\\Users\\nahid\\ms\\test", "label": "test"},
     # {"name": "ms2", "path": "C:\\ms2", "label": "2"},
@@ -1058,7 +1058,7 @@ class MainWindow(QMainWindow):
         """Run a script file"""
         try:
             # Adjust paths as needed for your system
-            script_path = f"C:\\Users\\nahid\\ms\\ms1\\scripts\\{script_name}"
+            script_path = f"C:\\@delta\\ms1\\scripts\\{script_name}"
             subprocess.Popen(f'cmd /c start "{script_path}"', shell=True)
         except Exception as e:
             print(f"Error running script {script_name}: {e}")
@@ -1066,7 +1066,7 @@ class MainWindow(QMainWindow):
     def edit_script(self, script_name):
         """Edit a script file in VS Code"""
         try:
-            script_path = f"C:\\Users\\nahid\\ms\\ms1\\scripts\\{script_name}"
+            script_path = f"C:\\@delta\\ms1\\scripts\\{script_name}"
             subprocess.Popen(f'cmd /c code "{script_path}"', shell=True)
         except Exception as e:
             print(f"Error editing script {script_name}: {e}")

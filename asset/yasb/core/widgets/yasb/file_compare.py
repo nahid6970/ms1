@@ -37,9 +37,9 @@ class CustomWidget(BaseWidget):
         # Source and destination paths (files or directories)
         source_dest_pairs = {
 "komorebi"       :("C:\\Users\\nahid\\komorebi.json"                                                                                  ,"C:\\@delta\\ms1\\asset\\komorebi\\komorebi.json"                         ),
-"glaze-wm"       :("C:\\Users\\nahid\\.glaze-wm"                                                                                      ,"C:\\Users\\nahid\\ms\\ms1\\asset\\glazewm\\.glaze-wm"                              ),
-"Nilesoft"       :("C:\\Program Files\\Nilesoft Shell\\imports"                                                                       ,"C:\\Users\\nahid\\ms\\ms1\\asset\\nilesoft_shell\\imports"                         ),
-"whkd"           :("C:\\Users\\nahid\\.config\\whkdrc"                                                                                ,"C:\\Users\\nahid\\ms\\ms1\\asset\\whkd\\whkdrc\\whkdrc"                            ),
+"glaze-wm"       :("C:\\Users\\nahid\\.glaze-wm"                                                                                      ,"C:\\@delta\\ms1\\asset\\glazewm\\.glaze-wm"                              ),
+"Nilesoft"       :("C:\\Program Files\\Nilesoft Shell\\imports"                                                                       ,"C:\\@delta\\ms1\\asset\\nilesoft_shell\\imports"                         ),
+"whkd"           :("C:\\Users\\nahid\\.config\\whkdrc"                                                                                ,"C:\\@delta\\ms1\\asset\\whkd\\whkdrc\\whkdrc"                            ),
 "pwshH":("C:\\Users\\nahid\\AppData\\Roaming\\Microsoft\\Windows\\PowerShell\\PSReadLine\\ConsoleHost_history.txt"          ,"C:\\Users\\nahid\\OneDrive\\backup\\ConsoleHost_history.txt"     ),
 "terminal"       :("C:\\Users\\nahid\\AppData\\Local\\Packages\\Microsoft.WindowsTerminal_8wekyb3d8bbwe\\LocalState\\settings.json"   ,"C:\\@delta\\ms1\\asset\\terminal\\settings.json\\settings.json"          ),
 "rclone_config"  :("C:\\Users\\nahid\\scoop\\apps\\rclone\\current\\rclone.conf"                                                      ,"C:\\Users\\nahid\\OneDrive\\backup\\rclone\\rclone.conf"         ),

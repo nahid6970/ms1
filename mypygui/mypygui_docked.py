@@ -489,8 +489,8 @@ Tools_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C
 
 Startup_bt=CTkLabel(ROOT1, text="\uf4cc", bg_color="#1d2027",text_color="#10b153", anchor="w",font=("JetBrainsMono NFP",25,"bold"))
 Startup_bt.pack(side="left",padx=(2,0),pady=(1,0))
-Startup_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\Users\\nahid\\ms\\ms1\\startup.py"], shell=True))
-Startup_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\Users\\nahid\\ms\\ms1\\startup.py"], shell=True))
+Startup_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\@delta\\ms1\\startup.py"], shell=True))
+Startup_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\@delta\\ms1\\startup.py"], shell=True))
 
 
 # ProcessPRLS_bt=CTkLabel(ROOT1, text="\uf4bc", bg_color="#1d2027",text_color="#f04410", anchor="w",font=("JetBrainsMono NFP",25,"bold"))
@@ -573,9 +573,9 @@ Info_lb.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:
 
 ShadowFight3_lb = tk.Label(ROOT1,text="sf3", bg="#1d2027", fg="#cc5907", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
 ShadowFight3_lb.pack(side="left", padx=(0, 0), pady=(0, 0))
-# ShadowFight3_lb.bind("<Button-1>",lambda event=None:subprocess.Popen('cmd /c start C:\\Users\\nahid\\ms\\ms1\\SH3\\SH3V2.py'))
+# ShadowFight3_lb.bind("<Button-1>",lambda event=None:subprocess.Popen('cmd /c start C:\\@delta\\ms1\\SH3\\SH3V2.py'))
 ShadowFight3_lb.bind( "<Button-1>", lambda event=None: run_command(r'python C:\Users\nahid\ms\ms1\scripts\shadowFight3\shadowFight3.py'))
-ShadowFight3_lb.bind("<Control-Button-1>",lambda event=None: run_command('code C:\\Users\\nahid\\ms\\ms1\\scripts\\shadowFight3\\shadowFight3.py'))
+ShadowFight3_lb.bind("<Control-Button-1>",lambda event=None: run_command('code C:\\@delta\\ms1\\scripts\\shadowFight3\\shadowFight3.py'))
 ShadowFight3_lb.bind( "<Button-3>", lambda event=None: run_command(r'python C:\@delta\ms1\scripts\CoC\CoC.py'))
 ShadowFight3_lb.bind("<Control-Button-3>",lambda event=None: run_command('code C:\\@delta\\ms1\\scripts\\CoC\\CoC.py'))
 
@@ -593,7 +593,7 @@ ShadowFight3_lb.bind("<Control-Button-3>",lambda event=None: run_command('code C
 #     Trim_bt          =tk.Button(BoxForFFmpeg,text="Trim"          ,width=0,fg="#FFFFFF",bg="#1D2027",command=start_trim        ); Trim_bt.pack          (side="left",padx=(0,0))
 #     Convert_bt       =tk.Button(BoxForFFmpeg,text="Convert"       ,width=0,fg="#FFFFFF",bg="#1D2027",command=start_convert     ); Convert_bt.pack       (side="left",padx=(0,0))
 #     Dimension_bt     =tk.Button(BoxForFFmpeg,text="Dimension"     ,width=0,fg="#FFFFFF",bg="#1D2027",command=start_dimension   ); Dimension_bt.pack     (side="left",padx=(0,0))
-#     Imagedimension_bt=tk.Button(BoxForFFmpeg,text="Imagedimension",width=0,fg="#FFFFFF",bg="#1D2027", command=lambda: subprocess.Popen(["cmd /c start C:\\Users\\nahid\\ms\\ms1\\scripts\\ffmpeg\\imgdim.ps1"], shell=True)) ; Imagedimension_bt.pack(side="left",padx=(0,0))
+#     Imagedimension_bt=tk.Button(BoxForFFmpeg,text="Imagedimension",width=0,fg="#FFFFFF",bg="#1D2027", command=lambda: subprocess.Popen(["cmd /c start C:\\@delta\\ms1\\scripts\\ffmpeg\\imgdim.ps1"], shell=True)) ; Imagedimension_bt.pack(side="left",padx=(0,0))
 #     Merge_bt         =tk.Button(BoxForFFmpeg,text="Merge"         ,width=0,fg="#FFFFFF",bg="#1D2027",command=start_merge       ); Merge_bt.pack         (side="left",padx=(0,0))
 # ffmpeg(FR_FFmpeg)
 

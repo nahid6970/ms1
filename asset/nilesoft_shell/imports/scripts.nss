@@ -5,13 +5,13 @@ item(title='Restart File Explorer' image=\uE013 cmd-powershell="Stop-Process -Na
 
 	menu(title="Rclone" image=\uE09C)
 	{
-	item(title='sync.ps1' image=\uE218 cmd-pwsh="C:\\Users\\nahid\\ms\\ms1\\scripts\\sync.ps1")
+	item(title='sync.ps1' image=\uE218 cmd-pwsh="C:\\@delta\\ms1\\scripts\\sync.ps1")
 	item(title='msBackups' image=\uE218 cmd-pwsh='rclone sync C:\\Users\\nahid\\ms\\msBackups\\ o0:\\msBackups\\ -P --check-first --transfers=1 --track-renames --fast-list')
 	}
 
 	menu(title="FFmpeg" image=\uE154)
 	{
-    item(title='Image Dimension' image=\uE150 cmd-powershell="Start-Process powershell.exe -ArgumentList '-ExecutionPolicy Bypass -File \"C:\\Users\\nahid\\ms\\ms1\\scripts\\ffmpeg\\img_dim.ps1\"'")
+    item(title='Image Dimension' image=\uE150 cmd-powershell="Start-Process powershell.exe -ArgumentList '-ExecutionPolicy Bypass -File \"C:\\@delta\\ms1\\scripts\\ffmpeg\\img_dim.ps1\"'")
 	}
 
 	menu(title="New File" image=\uE16D)

@@ -340,9 +340,9 @@ def start_trim():
 def start_convert():
     subprocess.Popen(["powershell", "start", "C:\\@delta\\ms1\\scripts\\ffmpeg\\convert.ps1"])
 def start_dimension():
-    subprocess.Popen(["powershell", "start", "C:\\Users\\nahid\\ms\\ms1\\scripts\\ffmpeg\\dimension.ps1"])
+    subprocess.Popen(["powershell", "start", "C:\\@delta\\ms1\\scripts\\ffmpeg\\dimension.ps1"])
 def start_imgdimension():
-    subprocess.Popen(["powershell", "start", "C:\\Users\\nahid\\ms\\ms1\\scripts\\ffmpeg\\imgdim.ps1"])
+    subprocess.Popen(["powershell", "start", "C:\\@delta\\ms1\\scripts\\ffmpeg\\imgdim.ps1"])
 def start_merge():
     subprocess.Popen(["powershell", "start", "C:\\@delta\\ms1\\scripts\\ffmpeg\\merge.ps1"])
 
@@ -360,4 +360,4 @@ def edit_fzfSearch(event):
 #     subprocess.Popen('cmd /c  "C:\\Program Files\\My Lockbox\\mylbx.exe"')
 
 # def kill_proces(event):
-#     subprocess.Popen(["cmd /c start C:\\Users\\nahid\\ms\\ms1\\utility\\kill_process.ps1"], shell=True)
+#     subprocess.Popen(["cmd /c start C:\\@delta\\ms1\\utility\\kill_process.ps1"], shell=True)

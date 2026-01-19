@@ -611,8 +611,8 @@ widgets:
   #     exec_options:
   #       run_once: true
   #     callbacks:
-  #       on_left: "exec C:\\Users\\nahid\\ms\\ms1\\utility\\position_x_y.py"
-  #       on_right: "exec code C:\\Users\\nahid\\ms\\ms1\\utility\\position_x_y.py"
+  #       on_left: "exec C:\\@delta\\ms1\\utility\\position_x_y.py"
+  #       on_right: "exec code C:\\@delta\\ms1\\utility\\position_x_y.py"
 
   # desktop:
   #   type: "yasb.desktop.CustomWidget"
@@ -623,7 +623,7 @@ widgets:
   #     exec_options:
   #       run_once: true
   #     callbacks:
-  #       on_left: "exec C:\\Users\\nahid\\ms\\ms1\\desktop_icon.py"
+  #       on_left: "exec C:\\@delta\\ms1\\desktop_icon.py"
   #       on_right: "do_nothing"
 
     # CPU_Histo:

@@ -498,7 +498,7 @@ uptime_label.pack(side="left",padx=(0,5),pady=(1,0))
 
 OS_LB = tk.Label(ROOT1,text="OS", bg="#1d2027", fg="#59e3a7", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
 OS_LB.pack(side="left", padx=(0, 0), pady=(0, 0))
-OS_LB.bind( "<Button-1>", lambda event=None: subprocess.Popen( r'cmd /c start windows.py', cwd=r'C:\\Users\\nahid\\ms\\ms1\\New folder\\'))
+OS_LB.bind( "<Button-1>", lambda event=None: subprocess.Popen( r'cmd /c start windows.py', cwd=r'C:\\@delta\\ms1\\New folder\\'))
 OS_LB.bind("<Button-3>",lambda event:subprocess.Popen([r"cmd /c start C:\@delta\ms1\New folder\windows.py"], shell=True))
 OS_LB.bind("<Control-Button-1>",lambda event=None:subprocess.Popen(r'cmd /c code C:\@delta\ms1\New folder\windows.py'))
 
@@ -667,7 +667,7 @@ VirtualMonitor_lb.bind("<Control-Button-1>",lambda event=None:subprocess.Popen('
 
 # ShadowFight3_lb = tk.Label(ROOT1,text="sf3", bg="#1d2027", fg="#cc5907", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
 # ShadowFight3_lb.pack(side="left", padx=(0, 0), pady=(0, 0))
-# # ShadowFight3_lb.bind("<Button-1>",lambda event=None:subprocess.Popen('cmd /c start C:\\Users\\nahid\\ms\\ms1\\SH3\\SH3V2.py'))
+# # ShadowFight3_lb.bind("<Button-1>",lambda event=None:subprocess.Popen('cmd /c start C:\\@delta\\ms1\\SH3\\SH3V2.py'))
 # ShadowFight3_lb.bind( "<Button-1>", lambda event=None: run_command(r'python C:\@delta\ms1\scripts\pyautogui\sf3_Lcpu.py'))
 # ShadowFight3_lb.bind("<Control-Button-1>",lambda event=None: run_command(r'code C:\@delta\ms1\scripts\pyautogui\sf3_Lcpu.py'))
 # ShadowFight3_lb.bind( "<Button-3>", lambda event=None: run_command(r'python C:\@delta\ms1\scripts\pyautogui\sf3_Hcpu.py'))
@@ -746,7 +746,7 @@ AHKPY_BT.bind("<Control-Button-1>", lambda event=None: subprocess.Popen(
 #     Trim_bt          =tk.Button(BoxForFFmpeg,text="Trim"          ,width=0,fg="#FFFFFF",bg="#1D2027",command=start_trim        ); Trim_bt.pack          (side="left",padx=(0,0))
 #     Convert_bt       =tk.Button(BoxForFFmpeg,text="Convert"       ,width=0,fg="#FFFFFF",bg="#1D2027",command=start_convert     ); Convert_bt.pack       (side="left",padx=(0,0))
 #     Dimension_bt     =tk.Button(BoxForFFmpeg,text="Dimension"     ,width=0,fg="#FFFFFF",bg="#1D2027",command=start_dimension   ); Dimension_bt.pack     (side="left",padx=(0,0))
-#     Imagedimension_bt=tk.Button(BoxForFFmpeg,text="Imagedimension",width=0,fg="#FFFFFF",bg="#1D2027", command=lambda: subprocess.Popen(["cmd /c start C:\\Users\\nahid\\ms\\ms1\\scripts\\ffmpeg\\imgdim.ps1"], shell=True)) ; Imagedimension_bt.pack(side="left",padx=(0,0))
+#     Imagedimension_bt=tk.Button(BoxForFFmpeg,text="Imagedimension",width=0,fg="#FFFFFF",bg="#1D2027", command=lambda: subprocess.Popen(["cmd /c start C:\\@delta\\ms1\\scripts\\ffmpeg\\imgdim.ps1"], shell=True)) ; Imagedimension_bt.pack(side="left",padx=(0,0))
 #     Merge_bt         =tk.Button(BoxForFFmpeg,text="Merge"         ,width=0,fg="#FFFFFF",bg="#1D2027",command=start_merge       ); Merge_bt.pack         (side="left",padx=(0,0))
 # ffmpeg(FR_FFmpeg)
 
@@ -882,7 +882,7 @@ SEPARATOR.pack(side="left",padx=(3,0),pady=(0,0))
 # Define your repositories here
 queue = Queue()
 repos = [
-    {"name": "ms1", "path": "C:\\Users\\nahid\\ms\\ms1", "label": "ms1"},
+    {"name": "ms1", "path": "C:\\@delta\\ms1", "label": "ms1"},
     {"name": "db", "path": "C:\\Users\\nahid\\ms\\db", "label": "db"},
     {"name": "test", "path": "C:\\Users\\nahid\\ms\\test", "label": "test"},
     # {"name": "ms2", "path": "C:\\ms2", "label": "2"},

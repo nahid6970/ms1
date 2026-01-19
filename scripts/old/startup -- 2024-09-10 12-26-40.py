@@ -8,7 +8,7 @@ class StartupManager(tk.Tk):
         super().__init__()
         self.title("Startup Manager")
         self.items = [
-{"type": "Command","name": "AHKSCRIPT"           ,"command": "Start-Process 'C:\\Users\\nahid\\ms\\ms1\\ahkscripts.ahk'"},
+{"type": "Command","name": "AHKSCRIPT"           ,"command": "Start-Process 'C:\\@delta\\ms1\\ahkscripts.ahk'"},
 {"type": "Command","name": "MYPYGUI"             ,"command": "Start-Process  'C:\\@delta\\ms1\\mypygui.py' -WindowStyle Hidden"},
 {"type": "Command","name": "KOMOREBIC"           ,"command": "komorebic start"},
 {"type": "Command","name": "2ndMonitor-Virtual"  ,"command": "cmd /c C:\\Users\\nahid\\OneDrive\\backup\\usbmmidd_v2\\2ndMonitor.bat"},
@@ -27,7 +27,7 @@ class StartupManager(tk.Tk):
 {"type": "Command","name": "SYNC"                ,"command": "Start-Process 'C:\\@delta\\ms1\\scripts\\sync.ps1'"},
 {"type": "Command","name": "SYNCTHING"           ,"command": "Start-Process 'C:\\Users\\nahid\\scoop\\apps\\syncthing\\current\\syncthing.exe' -WindowStyle Hidden"},
 {"type": "Command","name": "WHKD"                ,"command": "Start-Process 'C:\\Users\\nahid\\scoop\\apps\\whkd\\current\\whkd.exe' -WindowStyle Hidden"},
-{"type": "Command","name": "YASB"                ,"command": "Start-Process 'python.exe' -ArgumentList 'C:\\Users\\nahid\\ms\\ms1\\yasb\\main.py' -WindowStyle Hidden"},
+{"type": "Command","name": "YASB"                ,"command": "Start-Process 'python.exe' -ArgumentList 'C:\\@delta\\ms1\\yasb\\main.py' -WindowStyle Hidden"},
 
 {"type": "App","name": "BijoyBayanno"      ,"path": "C:\\Program Files (x86)\\Ananda Computers\\BijoyBayanno\\BijoyBayanno.exe"},
 {"type": "App","name": "Capture2Text"      ,"path": "C:\\Users\\nahid\\scoop\\apps\\capture2text\\current\\Capture2Text.exe"},
@@ -41,7 +41,7 @@ class StartupManager(tk.Tk):
 {"type": "App","name": "Cloudflare WARP"   ,"path": "C:\\Program Files\\Cloudflare\\Cloudflare WARP\\Cloudflare WARP.exe"},
         ]
 
-        self.ps1_file_path = "C:\\Users\\nahid\\ms\\ms1\\startup_commands.ps1"
+        self.ps1_file_path = "C:\\@delta\\ms1\\startup_commands.ps1"
         self.create_ps1_file()
         self.create_widgets()
 
