@@ -883,7 +883,7 @@ SEPARATOR.pack(side="left",padx=(3,0),pady=(0,0))
 queue = Queue()
 repos = [
     {"name": "ms1", "path": "C:\\@delta\\ms1", "label": "ms1"},
-    {"name": "db", "path": "C:\\Users\\nahid\\ms\\db", "label": "db"},
+    {"name": "db", "path": "C:\\@delta\\db", "label": "db"},
     {"name": "test", "path": "C:\\Users\\nahid\\ms\\test", "label": "test"},
     # {"name": "ms2", "path": "C:\\ms2", "label": "2"},
     # {"name": "ms3", "path": "C:\\ms3", "label": "3"},

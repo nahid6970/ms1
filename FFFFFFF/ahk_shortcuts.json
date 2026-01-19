@@ -330,7 +330,7 @@
             "category": "Path",
             "description": "",
             "trigger": ";db",
-            "replacement": "C:\\Users\\nahid\\ms\\db"
+            "replacement": "C:\\@delta\\db"
         },
         {
             "name": "Changes for Ai to know that i made on my files",
