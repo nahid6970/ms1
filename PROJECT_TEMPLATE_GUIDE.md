@@ -317,7 +317,7 @@ build/
 *This template is based on proven practices from real project development.*
 *Customize it for your specific needs and technology stack.*
 
-# Adjust them with actual readme so ai gets it better
+# Adjust Them
 #If i am working on a project that doesnt have any md file and i said nothing than dont do anything about md Files
 #For flask application always try to use port that is not used currently
 #some ai like gemini still commits without i saying it commit so its need to be fixed like gemini cli commits and it automatically updates too without saying commit so update this readme file more and give it as a critical need
