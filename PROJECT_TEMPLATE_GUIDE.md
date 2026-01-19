@@ -328,3 +328,13 @@ build/
 *Customize it for your specific needs and technology stack.*
 
 # Always run a python script when u finished ur conversation. bcz it will notify me that u finished ur task and i will get a notification if the window was minimised or on another workspace
+
+# Commit & md Files
+- When i explicitly say to "commit" then u will comiit the changes with 1 line message. Also use emoji etc to make the message look better
+- when creating any projects make a dev.md files about the project and /md folder for other md Files
+-- 
+--
+
+# When creating any script always use path so if i launch them from different directory the script will load data files properly
+
+#
