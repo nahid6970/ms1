@@ -26,3 +26,7 @@ git push origin archive-2026
 # 6. Local cleanup to immediately reclaim disk space
 git reflog expire --expire=now --all
 git gc --prune=now --aggressive
+
+
+# git clone --depth 1 
+-- use it for cloning with only last commit so very efficient
