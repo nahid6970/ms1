@@ -1,0 +1,33 @@
+{
+  "ide": {
+    "hasSeenNudge": true,
+    "enabled": true
+  },
+  "security": {
+    "auth": {
+      "selectedType": "oauth-personal"
+    }
+  },
+  "general": {
+    "previewFeatures": true,
+    "approvalMode": "yolo"
+  },
+  "ui": {
+    "showStatusInTitle": true,
+    "hideBanner": true
+  },
+  "mcpServers": {
+    "notify": {
+      "command": "python",
+      "args": [
+        "c:/Users/nahid/.gemini/notify_server.py"
+      ]
+    }
+  },
+  "tools": {
+    "auto_approve": true,
+    "shell": {
+      "showColor": false
+    }
+  }
+}

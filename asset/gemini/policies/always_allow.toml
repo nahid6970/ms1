@@ -1,0 +1,31 @@
+# User-tier policy to allow all tools automatically
+# Priority 999 ensures this wins within the User tier (base 2)
+
+[[rule]]
+# Matches all built-in tools and any tool name exactly
+toolName = [
+    "run_shell_command",
+    "write_file",
+    "replace",
+    "delete_file",
+    "create_directory",
+    "move_file",
+    "delegate_to_agent",
+    "run_blocking_notification_script"
+]
+decision = "allow"
+priority = 999
+
+[[rule]]
+# Wildcard to match ANY tool from ANY MCP server
+# The documentation says 'mcpName__toolName' is the format
+# So '*__*' should match any tool on any server
+toolName = "*__*"
+decision = "allow"
+priority = 999
+
+[[rule]]
+# Allow all tools on specific servers we know about
+mcpName = "notify"
+decision = "allow"
+priority = 999
