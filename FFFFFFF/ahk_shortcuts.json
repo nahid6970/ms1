@@ -20,21 +20,21 @@
             "name": "Monitor Internal",
             "description": "Switch to internal monitor only",
             "hotkey": "RAlt & Numpad1",
-            "action": "Run(\"C:\\Users\\nahid\\ms\\msBackups\\Display\\DisplaySwitch.exe /internal\", \"\", \"Hide\")",
+            "action": "Run(\"C:\\@delta\\msBackups\\Display\\DisplaySwitch.exe /internal\", \"\", \"Hide\")",
             "category": "Launch"
         },
         {
             "name": "Monitor External",
             "description": "Switch to external monitor only",
             "hotkey": "RAlt & Numpad2",
-            "action": "Run(\"C:\\Users\\nahid\\ms\\msBackups\\Display\\DisplaySwitch.exe /external\", \"\", \"Hide\")",
+            "action": "Run(\"C:\\@delta\\msBackups\\Display\\DisplaySwitch.exe /external\", \"\", \"Hide\")",
             "category": "Launch"
         },
         {
             "name": "Monitor Extend",
             "description": "Extend display to both monitors",
             "hotkey": "RAlt & Numpad3",
-            "action": "Run(\"C:\\Users\\nahid\\ms\\msBackups\\Display\\DisplaySwitch.exe /extend\", \"\", \"Hide\")",
+            "action": "Run(\"C:\\@delta\\msBackups\\Display\\DisplaySwitch.exe /extend\", \"\", \"Hide\")",
             "category": "Launch"
         },
         {
@@ -79,7 +79,7 @@
             "category": "Script",
             "description": "",
             "hotkey": "^!+r",
-            "action": "{\n    ; Kill dnplayer.exe\n    Run(\"taskkill /F /IM dnplayer.exe\",,\"Hide\")\n    ; Kill python.exe\n    Run(\"taskkill /F /IM python.exe\",,\"Hide\")\n    ; Run the command\n    Run(\"C:\\Users\\nahid\\ms\\msBackups\\Display\\DisplaySwitch.exe /internal\",,\"Hide\")\n}"
+            "action": "{\n    ; Kill dnplayer.exe\n    Run(\"taskkill /F /IM dnplayer.exe\",,\"Hide\")\n    ; Kill python.exe\n    Run(\"taskkill /F /IM python.exe\",,\"Hide\")\n    ; Run the command\n    Run(\"C:\\@delta\\msBackups\\Display\\DisplaySwitch.exe /internal\",,\"Hide\")\n}"
         },
         {
             "name": "mypygui",
@@ -188,7 +188,7 @@
             "category": "General",
             "description": "",
             "hotkey": "!n",
-            "action": "Run(\"C:\\Users\\nahid\\ms\\msBackups\\@JOB\\autofill.ahk\", \"\", \"Hide\")",
+            "action": "Run(\"C:\\@delta\\msBackups\\@JOB\\autofill.ahk\", \"\", \"Hide\")",
             "enabled": false
         },
         {

@@ -6,7 +6,7 @@ item(title='Restart File Explorer' image=\uE013 cmd-powershell="Stop-Process -Na
 	menu(title="Rclone" image=\uE09C)
 	{
 	item(title='sync.ps1' image=\uE218 cmd-pwsh="C:\\@delta\\ms1\\scripts\\sync.ps1")
-	item(title='msBackups' image=\uE218 cmd-pwsh='rclone sync C:\\Users\\nahid\\ms\\msBackups\\ o0:\\msBackups\\ -P --check-first --transfers=1 --track-renames --fast-list')
+	item(title='msBackups' image=\uE218 cmd-pwsh='rclone sync C:\\@delta\\msBackups\\ o0:\\msBackups\\ -P --check-first --transfers=1 --track-renames --fast-list')
 	}
 
 	menu(title="FFmpeg" image=\uE154)

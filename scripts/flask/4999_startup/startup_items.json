@@ -532,7 +532,7 @@
     "name": "Audio Share (app)",
     "type": "App",
     "paths": [
-      "C:\\Users\\nahid\\ms\\msBackups\\AudioShareServer.exe"
+      "C:\\@delta\\msBackups\\AudioShareServer.exe"
     ],
     "Command": "",
     "ExecutableType": "other",
@@ -572,7 +572,7 @@
     "name": "ngnix",
     "type": "App",
     "paths": [
-      "C:\\Users\\nahid\\ms\\msBackups\\@nginx\\nginx.exe"
+      "C:\\@delta\\msBackups\\@nginx\\nginx.exe"
     ],
     "Command": "",
     "ExecutableType": "other",

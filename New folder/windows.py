@@ -397,7 +397,7 @@ class WindowsUtil:
                             "powershell": [
                                 "winget install TeamProwlarr.Prowlarr",
                                 "Write-Host 'Do it with manual Restore!' -ForegroundColor Green",
-                                "Start-Process 'C:\\Users\\nahid\\ms\\msBackups\\ARR_timely'"
+                                "Start-Process 'C:\\@delta\\msBackups\\ARR_timely'"
                             ],
                             "description": "Install Prowlarr and open backup restore location"
                         }
@@ -408,7 +408,7 @@ class WindowsUtil:
                             "powershell": [
                                 "winget install TeamRadarr.Radarr",
                                 "Write-Host 'Do it with manual Restore!' -ForegroundColor Green",
-                                "Start-Process 'C:\\Users\\nahid\\ms\\msBackups\\ARR_timely'"
+                                "Start-Process 'C:\\@delta\\msBackups\\ARR_timely'"
                             ],
                             "description": "Install Radarr and open backup restore location"
                         }
@@ -421,8 +421,8 @@ class WindowsUtil:
                                 "Stop-Process -Name 'rssguard' -ErrorAction SilentlyContinue",
                                 "Remove-Item 'C:\\Users\\nahid\\scoop\\apps\\rssguard\\current\\data4\\database' -Recurse -ErrorAction SilentlyContinue",
                                 "Remove-Item 'C:\\Users\\nahid\\scoop\\apps\\rssguard\\current\\data4\\config' -Recurse -ErrorAction SilentlyContinue",
-                                "New-Item -ItemType SymbolicLink -Path 'C:\\Users\\nahid\\scoop\\apps\\rssguard\\current\\data4\\config' -Target 'C:\\Users\\nahid\\ms\\msBackups\\@mklink\\rssguard\\config' -Force",
-                                "New-Item -ItemType SymbolicLink -Path 'C:\\Users\\nahid\\scoop\\apps\\rssguard\\current\\data4\\database' -Target 'C:\\Users\\nahid\\ms\\msBackups\\@mklink\\rssguard\\database' -Force"
+                                "New-Item -ItemType SymbolicLink -Path 'C:\\Users\\nahid\\scoop\\apps\\rssguard\\current\\data4\\config' -Target 'C:\\@delta\\msBackups\\@mklink\\rssguard\\config' -Force",
+                                "New-Item -ItemType SymbolicLink -Path 'C:\\Users\\nahid\\scoop\\apps\\rssguard\\current\\data4\\database' -Target 'C:\\@delta\\msBackups\\@mklink\\rssguard\\database' -Force"
                             ],
                             "description": "Setup RssGuard with symbolic links to backup data"
                         }
@@ -433,7 +433,7 @@ class WindowsUtil:
                             "powershell": [
                                 "winget install TeamSonarr.Sonarr",
                                 "Write-Host 'Do it with manual Restore!' -ForegroundColor Green",
-                                "Start-Process 'C:\\Users\\nahid\\ms\\msBackups\\ARR_timely'"
+                                "Start-Process 'C:\\@delta\\msBackups\\ARR_timely'"
                             ],
                             "description": "Install Sonarr and open backup restore location"
                         }

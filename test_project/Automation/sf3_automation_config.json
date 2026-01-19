@@ -4,7 +4,7 @@
             "images": [
                 {
                     "name": "Home \u2794 Event",
-                    "path": "C:\\Users\\nahid\\ms\\msBackups\\shadowfight3\\Home.png",
+                    "path": "C:\\@delta\\msBackups\\shadowfight3\\Home.png",
                     "confidence": 0.8,
                     "region": null,
                     "action": {
@@ -96,7 +96,7 @@
                 },
                 {
                     "name": "Event (ALT) mapTXTalt",
-                    "path": "C:\\Users\\nahid\\ms\\msBackups\\shadowfight3\\event\\map_alt.png  ",
+                    "path": "C:\\@delta\\msBackups\\shadowfight3\\event\\map_alt.png  ",
                     "confidence": 0.8,
                     "region": [
                         1158,
@@ -124,7 +124,7 @@
                 },
                 {
                     "name": "Register  ",
-                    "path": "C:\\Users\\nahid\\ms\\msBackups\\shadowfight3\\event\\SELECT.png",
+                    "path": "C:\\@delta\\msBackups\\shadowfight3\\event\\SELECT.png",
                     "confidence": 0.8,
                     "region": [
                         1076,
@@ -149,7 +149,7 @@
                 },
                 {
                     "name": "Continue",
-                    "path": "C:\\Users\\nahid\\ms\\msBackups\\shadowfight3\\cont_dynamic",
+                    "path": "C:\\@delta\\msBackups\\shadowfight3\\cont_dynamic",
                     "confidence": 0.8,
                     "region": [
                         1450,
@@ -170,7 +170,7 @@
                 },
                 {
                     "name": "X button home",
-                    "path": "C:\\Users\\nahid\\ms\\msBackups\\shadowfight3\\event\\inside_ads.png",
+                    "path": "C:\\@delta\\msBackups\\shadowfight3\\event\\inside_ads.png",
                     "confidence": 0.8,
                     "region": [
                         171,
@@ -191,7 +191,7 @@
                 },
                 {
                     "name": "boosterTXTclick  ",
-                    "path": "C:\\Users\\nahid\\ms\\msBackups\\shadowfight3\\booster.png",
+                    "path": "C:\\@delta\\msBackups\\shadowfight3\\booster.png",
                     "confidence": 0.8,
                     "region": [
                         1277,
@@ -212,7 +212,7 @@
                 },
                 {
                     "name": "booster swipe (basic)",
-                    "path": "C:\\Users\\nahid\\ms\\msBackups\\shadowfight3\\event\\booster_swipe.png",
+                    "path": "C:\\@delta\\msBackups\\shadowfight3\\event\\booster_swipe.png",
                     "confidence": 0.8,
                     "region": [
                         809,
@@ -235,7 +235,7 @@
                 },
                 {
                     "name": "booster swipe   (premium)",
-                    "path": "C:\\Users\\nahid\\ms\\msBackups\\shadowfight3\\event\\booster_premium_swip.png",
+                    "path": "C:\\@delta\\msBackups\\shadowfight3\\event\\booster_premium_swip.png",
                     "confidence": 0.8,
                     "region": [
                         809,
@@ -267,7 +267,7 @@
             "images": [
                 {
                     "name": "Home \u2794 Fame",
-                    "path": "C:\\Users\\nahid\\ms\\msBackups\\shadowfight3\\Home.png",
+                    "path": "C:\\@delta\\msBackups\\shadowfight3\\Home.png",
                     "confidence": 0.8,
                     "region": null,
                     "action": {
@@ -285,7 +285,7 @@
                 },
                 {
                     "name": "change window world",
-                    "path": "C:\\Users\\nahid\\ms\\msBackups\\shadowfight3\\fame\\image_20.png",
+                    "path": "C:\\@delta\\msBackups\\shadowfight3\\fame\\image_20.png",
                     "confidence": 0.8,
                     "region": [
                         167,
@@ -312,7 +312,7 @@
                 },
                 {
                     "name": "Enter Fight",
-                    "path": "C:\\Users\\nahid\\ms\\msBackups\\shadowfight3\\fame\\b_tournament.png",
+                    "path": "C:\\@delta\\msBackups\\shadowfight3\\fame\\b_tournament.png",
                     "confidence": 0.8,
                     "region": [
                         196,
@@ -333,7 +333,7 @@
                 },
                 {
                     "name": "Enter Fight (Fight TXT)",
-                    "path": "C:\\Users\\nahid\\ms\\msBackups\\shadowfight3\\fame\\b_space2.png",
+                    "path": "C:\\@delta\\msBackups\\shadowfight3\\fame\\b_space2.png",
                     "confidence": 0.75,
                     "region": [
                         700,
@@ -354,7 +354,7 @@
                 },
                 {
                     "name": "Continue",
-                    "path": "C:\\Users\\nahid\\ms\\msBackups\\shadowfight3\\cont_dynamic",
+                    "path": "C:\\@delta\\msBackups\\shadowfight3\\cont_dynamic",
                     "confidence": 0.8,
                     "region": [
                         1450,
@@ -381,7 +381,7 @@
                 },
                 {
                     "name": "X button home (copy)",
-                    "path": "C:\\Users\\nahid\\ms\\msBackups\\shadowfight3\\event\\inside_ads.png",
+                    "path": "C:\\@delta\\msBackups\\shadowfight3\\event\\inside_ads.png",
                     "confidence": 0.8,
                     "region": [
                         171,

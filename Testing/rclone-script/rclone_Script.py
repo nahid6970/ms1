@@ -332,7 +332,7 @@ class RcloneGUI(QMainWindow):
         }
         
         self.quick_commands = [
-            {"name": "msBackups ↑", "command": "rclone sync C:\\Users\\nahid\\ms\\msBackups\\ o0:\\msBackups\\ -P --check-first --transfers=10 --track-renames --fast-list"},
+            {"name": "msBackups ↑", "command": "rclone sync C:\\@delta\\msBackups\\ o0:\\msBackups\\ -P --check-first --transfers=10 --track-renames --fast-list"},
             {"name": "Song ↑", "command": "rclone sync D:\\song\\ gu:\\song\\ -P --check-first --transfers=10 --track-renames --fast-list"},
             {"name": "Software ↑", "command": "rclone sync D:\\software\\ gu:\\software\\ -P --check-first --transfers=10 --track-renames --fast-list"},
             {"name": "Software ↓", "command": "rclone sync gu:\\software\\ D:\\software\\ -P --check-first --transfers=10 --track-renames --fast-list"},

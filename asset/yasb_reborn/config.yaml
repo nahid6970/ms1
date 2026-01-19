@@ -410,7 +410,7 @@ widgets:
     type: "yasb.wallpapers.WallpapersWidget"
     options:
       label: "<span>\udb83\ude09</span>"
-      image_path: "C:\\Users\\nahid\\ms\\msBackups\\wallpaper" # Example path to folder with images
+      image_path: "C:\\@delta\\msBackups\\wallpaper" # Example path to folder with images
       change_automatically: false # Automatically change wallpaper
       update_interval: 60 # If change_automatically is true, update interval in seconds
       gallery:
@@ -473,8 +473,8 @@ widgets:
       menu_list:
         - { title: "User Home", path: "~" }
         - { title: "Download", path: "D:\\Downloads" }
-        - { title: "msBackups", path: "C:\\Users\\nahid\\ms\\msBackups" }
-        - { title: "Job", path: "C:\\Users\\nahid\\ms\\msBackups\\@JOB" }
+        - { title: "msBackups", path: "C:\\@delta\\msBackups" }
+        - { title: "Job", path: "C:\\@delta\\msBackups\\@JOB" }
         - { title: "ms1", path: "C:\\@delta\\ms1" }
       system_menu: false
       power_menu: false
