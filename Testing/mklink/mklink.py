@@ -3,6 +3,7 @@ import json
 import os
 import sys
 from tkinter import filedialog, messagebox
+import subprocess
 
 # Set appearance and theme
 ctk.set_appearance_mode("Dark")
@@ -287,6 +288,19 @@ class SymlinkManager(ctk.CTk):
                         return
                 else:  # No - cancel operation
                     return
+            else:
+                # It IS a proper link/junction.
+                # We must remove the existing one first.
+                try:
+                    # Check if it is a directory (Junction or Directory Symlink)
+                    if os.path.isdir(fake):
+                        os.rmdir(fake)
+                    else:
+                        # It is a file (File Symlink)
+                        os.remove(fake)
+                except Exception as e:
+                    messagebox.showerror("Delete Error", f"Failed to remove existing link before creating new one:\n{str(e)}")
+                    return
 
         try:
             if link_type == "folder":
@@ -341,6 +355,18 @@ class SymlinkManager(ctk.CTk):
         
         self.refresh_ui()
 
+    def open_folder(self, index):
+        query = self.search_var.get().lower()
+        filtered_links = [l for l in self.links if query in l['name'].lower() or query in l['target'].lower() or query in l['fake'].lower()]
+        link = filtered_links[index]
+        
+        path = os.path.normpath(link["fake"])
+        
+        try:
+            subprocess.Popen(f'explorer /select,"{path}"')
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to open folder:\n{str(e)}")
+
     def refresh_ui(self):
         for widget in self.scrollable_frame.winfo_children():
             widget.destroy()
@@ -385,6 +411,8 @@ class SymlinkManager(ctk.CTk):
 
             btn_frame = ctk.CTkFrame(item_frame, fg_color="transparent")
             btn_frame.grid(row=0, column=2, rowspan=2, padx=15, pady=10, sticky="e")
+            
+            col_idx = 0
 
             # Fix/Create Button
             if status != "Working":
@@ -392,21 +420,31 @@ class SymlinkManager(ctk.CTk):
                                        corner_radius=0, font=ctk.CTkFont(family=FONT_FAMILY, size=11),
                                        fg_color="#3498db", hover_color="#2980b9",
                                        command=lambda idx=i: self.create_link(idx))
-                fix_btn.grid(row=0, column=0, padx=(0, 5))
+                fix_btn.grid(row=0, column=col_idx, padx=(0, 5))
+                col_idx += 1
+
+            # Open Button
+            open_btn = ctk.CTkButton(btn_frame, text="📂 Open", width=75, height=28, 
+                                    corner_radius=0, font=ctk.CTkFont(family=FONT_FAMILY, size=11),
+                                    fg_color="#8e44ad", hover_color="#9b59b6",
+                                    command=lambda idx=i: self.open_folder(idx))
+            open_btn.grid(row=0, column=col_idx, padx=(0, 5))
+            col_idx += 1
 
             # Edit Button
             edit_btn = ctk.CTkButton(btn_frame, text="📝 Edit", width=75, height=28, 
                                     corner_radius=0, font=ctk.CTkFont(family=FONT_FAMILY, size=11),
                                     fg_color="#f39c12", hover_color="#e67e22",
                                     command=lambda idx=i: self.edit_link(idx))
-            edit_btn.grid(row=0, column=1, padx=(0, 5))
+            edit_btn.grid(row=0, column=col_idx, padx=(0, 5))
+            col_idx += 1
 
             # Delete button
             del_btn = ctk.CTkButton(btn_frame, text="🗑️ Del", width=75, height=28, 
                                    corner_radius=0, font=ctk.CTkFont(family=FONT_FAMILY, size=11),
                                    fg_color="#c0392b", hover_color="#e74c3c",
                                    command=lambda idx=i: self.delete_link(idx))
-            del_btn.grid(row=0, column=2)
+            del_btn.grid(row=0, column=col_idx)
 
 if __name__ == "__main__":
     app = SymlinkManager()
