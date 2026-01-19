@@ -150,7 +150,10 @@ Older sessions moved from RECENT.md to maintain focus.
 ## 🚀 Git Commit Workflow Template
 
 ### Commit Rules
-- **Only commit when explicitly told "commit"**
+- **⛔ CRITICAL: NEVER COMMIT WITHOUT EXPLICIT INSTRUCTION**
+  - Some AI models have a bad habit of auto-committing. **THIS IS STRICTLY FORBIDDEN.**
+  - You must receive a clear command (e.g., "commit this", "save changes to git") before running `git commit`.
+  - Updating documentation does NOT authorize a git commit of code or docs unless requested.
 - **Update documentation FIRST** before Git operations
 - **One-line commit messages** with emojis
 - **Complete sequence:** add → commit → push
@@ -213,6 +216,7 @@ git push
 3. **Use consistent naming** conventions
 4. **Keep files focused** - single responsibility
 5. **Comment non-obvious code** thoroughly
+6. **Detailed Path Handling:** Scripts should use absolute paths (resolved relative to the script file) to ensure they work correctly regardless of the execution directory (e.g., `os.path.join(os.path.dirname(__file__), 'data.json')`).
 
 ---
 
@@ -225,8 +229,14 @@ git push
 4. **Customize file structure** for your technology stack
 5. **Add project-specific** keyboard shortcuts or commands
 
+### Working with Existing Projects
+- **Respect existing structure:** If a project lacks this MD structure and the user hasn't requested it, DO NOT impose it.
+- **Adapt workflow:** Follow the project's established patterns unless explicitly asked to modernize them.
+
 ### Technology-Specific Additions
-- **Web Projects:** Add API documentation, component guides
+- **Web Projects:** 
+  - Add API documentation, component guides
+  - **Dynamic Ports:** For frameworks like Flask/FastAPI, ALWAYS check for available ports before starting dev servers. Do not hardcode ports if avoidable.
 - **Desktop Apps:** Add build instructions, deployment guides  
 - **Mobile Apps:** Add platform-specific setup, testing guides
 - **Libraries:** Add usage examples, API reference
@@ -317,8 +327,3 @@ build/
 *This template is based on proven practices from real project development.*
 *Customize it for your specific needs and technology stack.*
 
-# Adjust Them
-#If i am working on a project that doesnt have any md file and i said nothing than dont do anything about md Files
-#For flask application when i am creating a flask project first use a command to see which ports are not used & use one of them
-#some ai like gemini still commits without i saying it commit so its need to be fixed like gemini cli commits and it automatically updates too without saying commit so update this readme file more and give it as a critical need
-#for path related issue inside scripts make them like so wehn i launch them from different path it will still load its data files etc
