@@ -319,6 +319,6 @@ build/
 
 # Adjust Them
 #If i am working on a project that doesnt have any md file and i said nothing than dont do anything about md Files
-#For flask application always try to use port that is not used currently
+#For flask application when i am creating a flask project first use a command to see which ports are not used & use one of them
 #some ai like gemini still commits without i saying it commit so its need to be fixed like gemini cli commits and it automatically updates too without saying commit so update this readme file more and give it as a critical need
 #for path related issue inside scripts make them like so wehn i launch them from different path it will still load its data files etc
