@@ -2,7 +2,7 @@
 $searchString = & fzf --query "" --preview "echo {}"
 
 # Directories to search
-$directories = @("C:\Users\nahid\ms\ms1\", "C:\ms2\")
+$directories = @("C:\@delta\ms1\", "C:\ms2\")
 
 # Define the file types to ignore
 $ignoreFileTypes = @(".git", ".pyc")

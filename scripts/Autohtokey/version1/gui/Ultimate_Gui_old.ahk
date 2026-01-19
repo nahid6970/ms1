@@ -121,7 +121,7 @@ return
 
 ; extra unused
 start_RunningAppsMonitor:
-Run, python.exe C:\Users\nahid\ms\ms1\running_apps.py,,Hide
+Run, python.exe C:\@delta\ms1\running_apps.py,,Hide
 return
 start_cmd_asAdmin:
 Run, pwsh -Command "cd $env:USERPROFILE; Start-Process pwsh -Verb RunAs",,Hide

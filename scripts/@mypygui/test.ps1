@@ -1,4 +1,4 @@
-Import-Module -Name C:\Users\nahid\ms\ms1\scripts\@pwsggui\cs.ps1
+Import-Module -Name C:\@delta\ms1\scripts\@pwsggui\cs.ps1
 
 Add-Type -AssemblyName PresentationFramework
 
@@ -92,7 +92,7 @@ $Rclone_Panel.Children.Add($maximize_bt)
 $Rclone_Panel.Children.Add($minimize_bt)
 $Rclone_Panel.Children.Add($BackToMain_bt)
 
-$sync_bt = & $cs2 -content "Sync" -onClick {  Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\Users\nahid\ms\ms1\scripts\rclone\sync.ps1`"" ; $Main_Panel.Content = $Rclone_Panel  }
+$sync_bt = & $cs2 -content "Sync" -onClick {  Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\@delta\ms1\scripts\rclone\sync.ps1`"" ; $Main_Panel.Content = $Rclone_Panel  }
 $about_bt = & $cs2 -content "Storage Info" -onClick {  Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\@delta\ms1\scripts\rclone\about.ps1`"" ; $Main_Panel.Content = $Rclone_Panel  }
 $delete_trashgu_bt = & $cs2 -content "Delete GU Trash" -onClick {  Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\@delta\ms1\scripts\rclone\delete_gu.ps1`"" ; $Main_Panel.Content = $Rclone_Panel  }
 $touch_bt = & $cs2 -content "Touch Drives" -onClick {  Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\@delta\ms1\scripts\rclone\touch.ps1`"" ; $Main_Panel.Content = $Rclone_Panel  }
@@ -241,8 +241,8 @@ $FFmpeg_Panel.Children.Add($BackToMain_bt)
 
 $trim_bt = & $cs2 -content "Trim" -onClick {  Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\@delta\ms1\scripts\ffmpeg\trim.ps1`"" ; $Main_Panel.Content = $FFmpeg_Panel  }
 $convert_bt = & $cs2 -content "Convert Video" -onClick {  Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\@delta\ms1\scripts\ffmpeg\convert.ps1`"" ; $Main_Panel.Content = $FFmpeg_Panel  }
-$dimension_bt = & $cs2 -content "Video Dimension" -onClick {  Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\Users\nahid\ms\ms1\scripts\ffmpeg\dimension.ps1`"" ; $Main_Panel.Content = $FFmpeg_Panel  }
-$imgdim_bt = & $cs2 -content "Image Dimension" -onClick {  Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\Users\nahid\ms\ms1\scripts\ffmpeg\imgdim.ps1`"" ; $Main_Panel.Content = $FFmpeg_Panel  }
+$dimension_bt = & $cs2 -content "Video Dimension" -onClick {  Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\@delta\ms1\scripts\ffmpeg\dimension.ps1`"" ; $Main_Panel.Content = $FFmpeg_Panel  }
+$imgdim_bt = & $cs2 -content "Image Dimension" -onClick {  Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\@delta\ms1\scripts\ffmpeg\imgdim.ps1`"" ; $Main_Panel.Content = $FFmpeg_Panel  }
 $merge_bt = & $cs2 -content "Merge Videos" -onClick {  Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\@delta\ms1\scripts\ffmpeg\merge.ps1`"" ; $Main_Panel.Content = $FFmpeg_Panel  }
 
 $FFmpeg_Panel.Children.Add($convert_bt)
@@ -334,8 +334,8 @@ $Valorant_Panel.Children.Add($maximize_bt)
 $Valorant_Panel.Children.Add($minimize_bt)
 $Valorant_Panel.Children.Add($BackToMain_bt)
 
-$valo_ahk_bt = & $vlr -content "Valorant-AHK" -onClick { C:\Users\nahid\ms\ms1\scripts\valorant\valo.ahk; $Main_Panel.Content = $Valorant_Panel}
-$valorant_qbit_bt = & $vlr -content "Valorant + Qbit" -onClick  { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\Users\nahid\ms\ms1\scripts\valorant\valo_qbit.ps1`"" ; $Main_Panel.Content = $Valorant_Panel }
+$valo_ahk_bt = & $vlr -content "Valorant-AHK" -onClick { C:\@delta\ms1\scripts\valorant\valo.ahk; $Main_Panel.Content = $Valorant_Panel}
+$valorant_qbit_bt = & $vlr -content "Valorant + Qbit" -onClick  { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\@delta\ms1\scripts\valorant\valo_qbit.ps1`"" ; $Main_Panel.Content = $Valorant_Panel }
 
 $Valorant_Panel.Children.Add($valo_ahk_bt)
 $Valorant_Panel.Children.Add($valorant_qbit_bt)

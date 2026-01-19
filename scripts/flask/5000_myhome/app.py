@@ -8,7 +8,7 @@ from datetime import datetime
 
 app = Flask(__name__)
 
-DATA_FILE = r'C:\Users\nahid\ms\ms1\scripts\flask\5000_myhome\data.json'
+DATA_FILE = r'C:\@delta\ms1\scripts\flask\5000_myhome\data.json'
 SIDEBAR_BUTTONS_FILE = r'C:\@delta\ms1\scripts\flask\5000_myhome\sidebar_buttons.json'
 
 # Helper function to read data from JSON file
@@ -335,7 +335,7 @@ def manual_generate_static():
     """Manual endpoint to generate static HTML"""
     try:
         generate_static_html()
-        return jsonify({'message': 'Static HTML generated successfully', 'file': r'C:\Users\nahid\ms\ms1\myhome\myhome.html'})
+        return jsonify({'message': 'Static HTML generated successfully', 'file': r'C:\@delta\ms1\myhome\myhome.html'})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

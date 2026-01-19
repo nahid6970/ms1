@@ -349,7 +349,7 @@ def close_window(event=None):
     # Close the current window
     ROOT.destroy()
     # Start the specified script
-    script_path = r"C:\Users\nahid\ms\ms1\SH3\sf3_AHK.py"
+    script_path = r"C:\@delta\ms1\SH3\sf3_AHK.py"
     subprocess.Popen([sys.executable, script_path])
 
 #!  █████╗ ██╗  ██╗██╗  ██╗     █████╗ ████████╗████████╗ █████╗  ██████╗██╗  ██╗
@@ -802,7 +802,7 @@ def FameFunction(button):
                    
                    
                     # elif any(find_image(image) for image in notifyF):
-                    #     subprocess.run(['python', r'C:\Users\nahid\ms\ms1\SH3\whatsapp.py'])
+                    #     subprocess.run(['python', r'C:\@delta\ms1\SH3\whatsapp.py'])
                     #     time.sleep(60)
                     time.sleep(2)
             except KeyboardInterrupt: print("Script stopped by user.")

@@ -409,7 +409,7 @@ function Show-MainMenu {
                 Write-Host 'Setting up Neovim...'
                 $su Remove-Item -Force -Recurse -Verbose C:\Users\nahid\AppData\Local\nvim
                 $su Remove-Item -Force -Recurse -Verbose C:\Users\nahid\AppData\Local\nvim-data
-                $su New-Item -ItemType SymbolicLink -Path C:\Users\nahid\AppData\Local\nvim\init.lua -Target C:\Users\nahid\ms\ms1\asset\linux\neovim\init.lua -Force
+                $su New-Item -ItemType SymbolicLink -Path C:\Users\nahid\AppData\Local\nvim\init.lua -Target C:\@delta\ms1\asset\linux\neovim\init.lua -Force
                 "
             }
             "Neovim_2.conf" {
@@ -417,7 +417,7 @@ function Show-MainMenu {
                 Write-Host 'Setting up Neovim...'
                 Remove-Item -Force -Recurse -Verbose C:\Users\nahid\AppData\Local\nvim
                 Remove-Item -Force -Recurse -Verbose C:\Users\nahid\AppData\Local\nvim-data
-                New-Item -ItemType SymbolicLink -Path C:\Users\nahid\AppData\Local\nvim\init.lua -Target C:\Users\nahid\ms\ms1\asset\linux\neovim\init2.lua -Force
+                New-Item -ItemType SymbolicLink -Path C:\Users\nahid\AppData\Local\nvim\init.lua -Target C:\@delta\ms1\asset\linux\neovim\init2.lua -Force
                 "
             }
 
@@ -498,8 +498,8 @@ function Show-MainMenu {
             "nilesoft nss [bk]" {
                 nw_powershell -Command "
                     # cd c:\
-                    Copy-Item -Path 'C:\Program Files\Nilesoft Shell\shell.nss'  -Destination 'C:\Users\nahid\ms\ms1\asset\nilesoft_shell\shell.nss' -Force -Verbose
-                    Copy-Item -Path 'C:\Program Files\Nilesoft Shell\imports'  -Destination 'C:\Users\nahid\ms\ms1\asset\nilesoft_shell\' -Recurse -Force -Verbose
+                    Copy-Item -Path 'C:\Program Files\Nilesoft Shell\shell.nss'  -Destination 'C:\@delta\ms1\asset\nilesoft_shell\shell.nss' -Force -Verbose
+                    Copy-Item -Path 'C:\Program Files\Nilesoft Shell\imports'  -Destination 'C:\@delta\ms1\asset\nilesoft_shell\' -Recurse -Force -Verbose
                                          "
             }
 
@@ -532,7 +532,7 @@ function Show-MainMenu {
             }
             # mklink
             "Reference" {
-                nw_pwsh -Command "$su New-Item -ItemType SymbolicLink -Path 'C:\Users\nahid\scoop\apps\python312\current\Lib\Reference.py' -Target 'C:\Users\nahid\ms\ms1\Reference.py' -Force #[pwsh]"
+                nw_pwsh -Command "$su New-Item -ItemType SymbolicLink -Path 'C:\Users\nahid\scoop\apps\python312\current\Lib\Reference.py' -Target 'C:\@delta\ms1\Reference.py' -Force #[pwsh]"
             }
             # sonarr will take some time to resolve the issue internally just wait
             "Sonarr" {
@@ -593,7 +593,7 @@ function Show-MainMenu {
             }
             "PotPlayer Register" {
                 nw_pwsh -Command "
-                    Start-Process 'C:\Users\nahid\ms\ms1\asset\potplayer\PotPlayerMini64.reg' -Verbose
+                    Start-Process 'C:\@delta\ms1\asset\potplayer\PotPlayerMini64.reg' -Verbose
                                          "
             }
         }

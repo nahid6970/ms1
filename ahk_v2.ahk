@@ -16,7 +16,7 @@ Persistent
 
 
 ;! v1 startups
-; Run("C:\Users\nahid\ms\ms1\scripts\ahk\old\shadowFight3.ahk")
+; Run("C:\@delta\ms1\scripts\ahk\old\shadowFight3.ahk")
 ; Run("control.exe folders")
 
 ;! AHK Related

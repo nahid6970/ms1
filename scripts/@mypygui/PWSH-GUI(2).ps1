@@ -1,5 +1,5 @@
 
-Import-Module -Name C:\Users\nahid\ms\ms1\scripts\@pwsggui\cs.ps1
+Import-Module -Name C:\@delta\ms1\scripts\@pwsggui\cs.ps1
 Add-Type -AssemblyName PresentationFramework
 $window = New-Object Windows.Window
 $window.Title = "PowerShell GUI"
@@ -93,7 +93,7 @@ $Rclone_Panel.Children.Add($maximize_bt)
 $Rclone_Panel.Children.Add($minimize_bt)
 $Rclone_Panel.Children.Add($back_bt)
 
-$sync_bt = & $cs2 -content "Sync" -onClick {  Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\Users\nahid\ms\ms1\scripts\rclone\sync.ps1`"" ; $window.Content = $stackPanel  }
+$sync_bt = & $cs2 -content "Sync" -onClick {  Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\@delta\ms1\scripts\rclone\sync.ps1`"" ; $window.Content = $stackPanel  }
 $about_bt = & $cs2 -content "Storage Info" -onClick {  Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\@delta\ms1\scripts\rclone\about.ps1`"" ; $window.Content = $stackPanel  }
 $delete_trashgu_bt = & $cs2 -content "Delete GU Trash" -onClick {  Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\@delta\ms1\scripts\rclone\delete_gu.ps1`"" ; $window.Content = $stackPanel  }
 $touch_bt = & $cs2 -content "Touch Drives" -onClick {  Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\@delta\ms1\scripts\rclone\touch.ps1`"" ; $window.Content = $stackPanel  }
@@ -154,8 +154,8 @@ $FFmpeg_Panel.Children.Add($back_bt)
 
 $trim_bt = & $cs2 -content "Trim" -onClick {  Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\@delta\ms1\scripts\ffmpeg\trim.ps1`"" ; $window.Content = $stackPanel  }
 $convert_bt = & $cs2 -content "Convert Video" -onClick {  Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\@delta\ms1\scripts\ffmpeg\convert.ps1`"" ; $window.Content = $stackPanel  }
-$dimension_bt = & $cs2 -content "Video Dimension" -onClick {  Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\Users\nahid\ms\ms1\scripts\ffmpeg\dimension.ps1`"" ; $window.Content = $stackPanel  }
-$imgdim_bt = & $cs2 -content "Image Dimension" -onClick {  Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\Users\nahid\ms\ms1\scripts\ffmpeg\imgdim.ps1`"" ; $window.Content = $stackPanel  }
+$dimension_bt = & $cs2 -content "Video Dimension" -onClick {  Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\@delta\ms1\scripts\ffmpeg\dimension.ps1`"" ; $window.Content = $stackPanel  }
+$imgdim_bt = & $cs2 -content "Image Dimension" -onClick {  Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\@delta\ms1\scripts\ffmpeg\imgdim.ps1`"" ; $window.Content = $stackPanel  }
 $merge_bt = & $cs2 -content "Merge Videos" -onClick {  Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\@delta\ms1\scripts\ffmpeg\merge.ps1`"" ; $window.Content = $stackPanel  }
 
 $FFmpeg_Panel.Children.Add($convert_bt)
@@ -239,8 +239,8 @@ $Valorant_Panel.Children.Add($maximize_bt)
 $Valorant_Panel.Children.Add($minimize_bt)
 $Valorant_Panel.Children.Add($back_bt)
 
-$valo_ahk_bt = & $vlr -content "Valorant-AHK" -onClick { C:\Users\nahid\ms\ms1\scripts\valorant\valo.ahk; $window.Content = $stackPanel}
-$valorant_qbit_bt = & $vlr -content "Valorant + Qbit" -onClick  { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\Users\nahid\ms\ms1\scripts\valorant\valo_qbit.ps1`"" ; $window.Content = $stackPanel }
+$valo_ahk_bt = & $vlr -content "Valorant-AHK" -onClick { C:\@delta\ms1\scripts\valorant\valo.ahk; $window.Content = $stackPanel}
+$valorant_qbit_bt = & $vlr -content "Valorant + Qbit" -onClick  { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\@delta\ms1\scripts\valorant\valo_qbit.ps1`"" ; $window.Content = $stackPanel }
 
 $Valorant_Panel.Children.Add($valo_ahk_bt)
 $Valorant_Panel.Children.Add($valorant_qbit_bt)

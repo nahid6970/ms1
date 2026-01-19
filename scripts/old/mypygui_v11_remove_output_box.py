@@ -1137,7 +1137,7 @@ def scoop_info():
 
 def scoop_install_fzf():
     # Path to the Python script generating the package list
-    python_script = r"C:\Users\nahid\ms\ms1\scripts\python\scoop_list.py"
+    python_script = r"C:\@delta\ms1\scripts\python\scoop_list.py"
 
     # Run the Python script to generate the package list
     try:

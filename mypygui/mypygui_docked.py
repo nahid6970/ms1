@@ -574,7 +574,7 @@ Info_lb.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:
 ShadowFight3_lb = tk.Label(ROOT1,text="sf3", bg="#1d2027", fg="#cc5907", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
 ShadowFight3_lb.pack(side="left", padx=(0, 0), pady=(0, 0))
 # ShadowFight3_lb.bind("<Button-1>",lambda event=None:subprocess.Popen('cmd /c start C:\\@delta\\ms1\\SH3\\SH3V2.py'))
-ShadowFight3_lb.bind( "<Button-1>", lambda event=None: run_command(r'python C:\Users\nahid\ms\ms1\scripts\shadowFight3\shadowFight3.py'))
+ShadowFight3_lb.bind( "<Button-1>", lambda event=None: run_command(r'python C:\@delta\ms1\scripts\shadowFight3\shadowFight3.py'))
 ShadowFight3_lb.bind("<Control-Button-1>",lambda event=None: run_command('code C:\\@delta\\ms1\\scripts\\shadowFight3\\shadowFight3.py'))
 ShadowFight3_lb.bind( "<Button-3>", lambda event=None: run_command(r'python C:\@delta\ms1\scripts\CoC\CoC.py'))
 ShadowFight3_lb.bind("<Control-Button-3>",lambda event=None: run_command('code C:\\@delta\\ms1\\scripts\\CoC\\CoC.py'))

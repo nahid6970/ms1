@@ -664,8 +664,8 @@ Set-PSReadLineKeyHandler -Chord 'Alt+x' `
 
 #* Environmental Variable
 $env:PATH += ";c:\ms1"
-$env:PATH += ";C:\Users\nahid\ms\ms1\scripts"
-$env:PATH += ";C:\Users\nahid\ms\ms1\utility"
+$env:PATH += ";C:\@delta\ms1\scripts"
+$env:PATH += ";C:\@delta\ms1\utility"
 # $env:PATH += ";D:\binutils-gdb\ld"
 
 function killme  {
@@ -675,7 +675,7 @@ Stop-Process -Name "chrome"
 }
 
 function chat {
-  Set-Location "C:\Users\nahid\ms\ms1\ollama-chat-app"
+  Set-Location "C:\@delta\ms1\ollama-chat-app"
   python server.py
 }
 
@@ -839,9 +839,9 @@ function killp  {
 
 New-Item -Path Function:e -Value { explorer . } -Force | Out-Null
 New-Item -Path Function:lse -Value { eza -al --color=always --group-directories-first } -Force | Out-Null
-New-Item -Path Function:pk -Value { C:\WINDOWS\SYSTEM32\cmd.exe /c start powershell -ExecutionPolicy Bypass -File "C:\Users\nahid\ms\ms1\kp.ps1" } -Force | Out-Null
+New-Item -Path Function:pk -Value { C:\WINDOWS\SYSTEM32\cmd.exe /c start powershell -ExecutionPolicy Bypass -File "C:\@delta\ms1\kp.ps1" } -Force | Out-Null
 Set-Alias time date
-New-Item -Path Function:ms1 -Value  { Set-Location C:\Users\nahid\ms\ms1\ } -Force | Out-Null
+New-Item -Path Function:ms1 -Value  { Set-Location C:\@delta\ms1\ } -Force | Out-Null
 New-Item -Path Function:ms2 -Value  { Set-Location c:\ms2\ } -Force | Out-Null
 New-Item -Path Function:ms3 -Value  { Set-Location c:\ms3\ } -Force | Out-Null
 # New-Item -Path Function:yt -Value {yt-dlp} -Force | Out-Null
@@ -856,7 +856,7 @@ New-Item -Path Function:trim -Value { C:\Users\nahid\OneDrive\Git\ms1\scripts\ff
 
 Set-Alias trim C:\@delta\ms1\scripts\ffmpeg\trim.ps1
 
-# function sync { C:\Users\nahid\ms\ms1\sync.ps1 }
+# function sync { C:\@delta\ms1\sync.ps1 }
 
 # function prowlarr_stop { Stop-Process -Name prowlarr }
 # function prowlarr      { Start-Process -FilePath "C:\ProgramData\Prowlarr\bin\Prowlarr.exe" }
@@ -924,7 +924,7 @@ function pkill {
 }
 
 # $env:GEMINI_API_KEY = "AIzaSyD3tpmHrTXFJGAvL7N055Qz1b4ZRUX6yJM"
-$ENV:STARSHIP_CONFIG = "C:\Users\nahid\ms\ms1\linux\config\.config\starship\starship.toml"
+$ENV:STARSHIP_CONFIG = "C:\@delta\ms1\linux\config\.config\starship\starship.toml"
 $env:OLLAMA_HOST = "http://localhost:11434"
 
 

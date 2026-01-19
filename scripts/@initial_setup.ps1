@@ -125,7 +125,7 @@ pip_install
 Write-Host "################################################" 
 Write-Host "########## Python Functionlist MKLINK ##########" 
 Write-Host "################################################" 
-New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\scoop\apps\python\current\Lib\functionlist.py" -Target "C:\Users\nahid\ms\ms1\Reference.py" -Force #[pwsh]
+New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\scoop\apps\python\current\Lib\functionlist.py" -Target "C:\@delta\ms1\Reference.py" -Force #[pwsh]
 
 #* Jackett Setup
 Write-Host "###################################" -ForegroundColor Blue
@@ -191,7 +191,7 @@ Start-Process powershell "oh-my-posh font install" -Verb Runas -Wait
 
 #* Potplayer Register Settings
 # Define the base path where your folders are located
-$basePath = "C:\Users\nahid\ms\ms1\asset\potplayer"
+$basePath = "C:\@delta\ms1\asset\potplayer"
 # Get the most recent folder by ordering the folders by their creation time in descending order and selecting the first one
 $latestFolder = Get-ChildItem -Path $basePath | Where-Object { $_.PSIsContainer } | Sort-Object CreationTime -Descending | Select-Object -First 1
 # Construct the path to the .reg file within the latest folder
@@ -203,7 +203,7 @@ Start-Process $regFilePath -Verbose
 # Define the registry path and the value details
 $registryPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run"
 $valueName = "StartUps"
-$valuePath = "C:\Users\nahid\ms\ms1\startup_commands.ps1"
+$valuePath = "C:\@delta\ms1\startup_commands.ps1"
 # Add the new string value to the registry
 Start-Process powershell "New-ItemProperty -Path $registryPath -Name $valueName -Value $valuePath -PropertyType String -Force" -Verb Runas -Wait
 Write-Output "Registry entry created: $registryPath\$valueName with value $valuePath"
@@ -216,11 +216,11 @@ Remove-Item "C:\Users\nahid\komorebi.json"
 New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\komorebi.json" -Target "C:\@delta\ms1\asset\komorebi\komorebi.json" -Force #[pwsh]
 
 # VSCode
-New-Item -ItemType SymbolicLink -Path C:\Users\nahid\AppData\Roaming\Code\User\keybindings.json -Target C:\Users\nahid\ms\ms1\mklink\vscode\keybindings.json -Force
-New-Item -ItemType SymbolicLink -Path C:\Users\nahid\AppData\Roaming\Code\User\settings.json -Target C:\Users\nahid\ms\ms1\mklink\vscode\settings.json -Force
+New-Item -ItemType SymbolicLink -Path C:\Users\nahid\AppData\Roaming\Code\User\keybindings.json -Target C:\@delta\ms1\mklink\vscode\keybindings.json -Force
+New-Item -ItemType SymbolicLink -Path C:\Users\nahid\AppData\Roaming\Code\User\settings.json -Target C:\@delta\ms1\mklink\vscode\settings.json -Force
 
 # Powershell Profiles
-New-Item -ItemType SymbolicLink -Path C:\Users\nahid\OneDrive\Documents\PowerShell\Microsoft.PowerShell_profile.ps1 -Target C:\Users\nahid\ms\ms1\mklink\PWSH_Profile\PWSH_Profile.ps1 -Force
+New-Item -ItemType SymbolicLink -Path C:\Users\nahid\OneDrive\Documents\PowerShell\Microsoft.PowerShell_profile.ps1 -Target C:\@delta\ms1\mklink\PWSH_Profile\PWSH_Profile.ps1 -Force
 
 # Rust Initial Setup
 # install rustup from scoop or default and choose 3 without any additional items / vscode and proceed with 1

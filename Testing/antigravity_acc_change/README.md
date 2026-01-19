@@ -40,7 +40,7 @@ pip install PyQt6
    - **Locker Settings**: If your files were encrypted using `Locker.py`, check the **"Files are encrypted (.enc)"** box and provide your password.
 3. **Activate a Profile**:
    - Click **Activate**.
-   - If the profile is locked, the app decrypts the `.enc` files on-the-fly and saves the clean versions to `C:\Users\nahid\ms\ms1\Testing\Test`.
+   - If the profile is locked, the app decrypts the `.enc` files on-the-fly and saves the clean versions to `C:\@delta\ms1\Testing\Test`.
    - Only one profile can be active at a time.
 
 ## 📂 Project Structure
@@ -51,6 +51,6 @@ pip install PyQt6
 
 ## ⚠️ Important Note
 The application is pre-configured to target files in:
-`C:\Users\nahid\ms\ms1\Testing\Test`
+`C:\@delta\ms1\Testing\Test`
 
 Ensure this path exists before activating a profile to avoid errors.

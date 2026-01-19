@@ -30,7 +30,7 @@ myGui.Add("Text", "xm y+5 Background31ffc1 c000000 w50 +Center +Border", "").
 myGui.Add("Text", "x+5 yp Background31ffc1 c000000 w50 +Center +Border", "").OnEvent("Click", (*) => (Run("C:\@delta\ms1\scripts\ffmpeg\convert.ps1",, "Show"))) ;; ffmpeg video Convert
 myGui.Add("Text", "x+5 yp Background31ffc1 c000000 w50 +Center +Border", "󰕩").OnEvent("Click", (*) => (Run("C:\@delta\ms1\scripts\ffmpeg\merge.ps1",, "Show"))) ;; ffmpeg video merge
 myGui.Add("Text", "x+5 yp Background31ffc1 c000000 w50 +Center +Border", "").OnEvent("Click", (*) => (Run("C:\@delta\ms1\scripts\ffmpeg\vid_dim.ps1",, "Show"))) ;; ffmpeg video dimension
-myGui.Add("Text", "x+5 yp Background31ffc1 c000000 w50 +Center +Border", "").OnEvent("Click", (*) => (Run("C:\Users\nahid\ms\ms1\scripts\ffmpeg\img_dim.ps1",, "Show"))) ;; ffmpeg image dimension
+myGui.Add("Text", "x+5 yp Background31ffc1 c000000 w50 +Center +Border", "").OnEvent("Click", (*) => (Run("C:\@delta\ms1\scripts\ffmpeg\img_dim.ps1",, "Show"))) ;; ffmpeg image dimension
 
 myGui.SetFont("s12 Bold", "Jetbrainsmono nfp")
 myGui.Add("Text", "xm y+5  w200 +Center Border", "AHK-Scripts").SetFont("s12 Bold", "Jetbrainsmono nfp")

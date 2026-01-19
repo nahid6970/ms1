@@ -32,7 +32,7 @@ DEFAULT_CONFIG = {
         {"name": "Task Mgr", "path": "taskmgr.exe"}
     ],
     "github_repos": [
-        {"name": "ms1", "path": r"C:\Users\nahid\ms\ms1"},
+        {"name": "ms1", "path": r"C:\@delta\ms1"},
         {"name": "db", "path": r"C:\Users\nahid\ms\db"},
         {"name": "test", "path": r"C:\Users\nahid\ms\test"}
     ],

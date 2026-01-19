@@ -31,7 +31,7 @@ ExitScript:
 
 #Include, C:\@delta\ms1\scripts\Autohtokey\version1\text\Text_Related.ahk
 #Include, C:\@delta\ms1\scripts\Autohtokey\version1\Windows_Screen_related.ahk
-; #Include, C:\Users\nahid\ms\ms1\scripts\ahk\shadowFight3.ahk
+; #Include, C:\@delta\ms1\scripts\ahk\shadowFight3.ahk
 
 ;;* AHK Related
 ^+p::Pause    ; Pause script with Ctrl+Alt+P
@@ -55,8 +55,8 @@ RAlt & Numpad3::Run, %ComSpec% /c "C:\Users\nahid\ms\msBackups\Display\DisplaySw
 ^!w::Toggle_Screen_Whiteout()
 
 ; gui
-!b::Run, %ComSpec% /c "C:\Users\nahid\ms\ms1\scripts\ahk\Bio.ahk",,Hide
-!u::Run, %ComSpec% /c "C:\Users\nahid\ms\ms1\scripts\ahk\Ultimate_Gui.ahk",,Hide
+!b::Run, %ComSpec% /c "C:\@delta\ms1\scripts\ahk\Bio.ahk",,Hide
+!u::Run, %ComSpec% /c "C:\@delta\ms1\scripts\ahk\Ultimate_Gui.ahk",,Hide
 
 
 ; Kill Commands
@@ -73,9 +73,9 @@ RAlt & Numpad3::Run, %ComSpec% /c "C:\Users\nahid\ms\msBackups\Display\DisplaySw
 ; !g::RunWait, C:\Users\nahid\scoop\apps\glazewm\current\GlazeWM.exe,,Hide               ;* GlazeWM
 ; !k::RunWait, komorebic start,,Hide                                                     ;* Komorebi
 ; !o::RunWait, C:\Users\nahid\scoop\apps\whkd\current\whkd.exe,,Hide                     ;* whkd
-!r::RunWait, python.exe C:\Users\nahid\ms\ms1\running_apps.py,,Hide                                   ;* running apps
+!r::RunWait, python.exe C:\@delta\ms1\running_apps.py,,Hide                                   ;* running apps
 !x::RunWait, pwsh -Command "cd $env:USERPROFILE; Start-Process pwsh -Verb RunAs",,Hide ;* cmd as admin
-; !y::RunWait, python.exe C:\Users\nahid\ms\ms1\yasb\main.py,,Hide                                      ;* yasb
+; !y::RunWait, python.exe C:\@delta\ms1\yasb\main.py,,Hide                                      ;* yasb
 #r::RunWait, "C:\Users\nahid\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\System Tools\Run.lnk"
 #x::RunWait, C:\@delta\ms1\mypygui.py ,,Hide                                                  ;* mypygui
 

@@ -280,7 +280,7 @@ $Rclone_Panel = New-Object Windows.Controls.StackPanel
 $Rclone_Panel.Margin = New-Object Windows.Thickness(0, 0, 0, 0)
 Import-Module -Name C:\@delta\ms1\scripts\@pwsggui\cs_mx_mm_bk\Rclone_Panel.ps1
 
-$sync_bt           = req ` -content "Sync"             ` -styles @($ff10, $b, $fg00, $bg06, $fz16, $w250, $h040) ` -onClick { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\Users\nahid\ms\ms1\scripts\rclone\sync.ps1`"" ; $Main_Panel.Content = $Rclone_Panel  }
+$sync_bt           = req ` -content "Sync"             ` -styles @($ff10, $b, $fg00, $bg06, $fz16, $w250, $h040) ` -onClick { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\@delta\ms1\scripts\rclone\sync.ps1`"" ; $Main_Panel.Content = $Rclone_Panel  }
 $about_bt          = req ` -content "Storage Info"     ` -styles @($ff10, $b, $fg00, $bg06, $fz16, $w250, $h040) ` -onClick { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\@delta\ms1\scripts\rclone\about.ps1`"" ; $Main_Panel.Content = $Rclone_Panel  }
 $delete_trashgu_bt = req ` -content "Delete GU Trash"  ` -styles @($ff10, $b, $fg00, $bg06, $fz16, $w250, $h040) ` -onClick { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\@delta\ms1\scripts\rclone\delete_gu.ps1`"" ; $Main_Panel.Content = $Rclone_Panel  }
 $touch_bt          = req ` -content "Touch Drives"     ` -styles @($ff10, $b, $fg00, $bg06, $fz16, $w250, $h040) ` -onClick { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\@delta\ms1\scripts\rclone\touch.ps1`"" ; $Main_Panel.Content = $Rclone_Panel  }
@@ -414,11 +414,11 @@ $StartStop_Upper_Panel.HorizontalAlignment = [Windows.HorizontalAlignment]::Righ
 #$Health_UpperPart.VerticalAlignment = [Windows.VerticalAlignment]::Center
 
 # Create buttons for the top wrap panel
-Import-Module -Name C:\Users\nahid\ms\ms1\scripts\@pwsggui\cs_mx_mm_bk\StartStop_Panel.ps1
+Import-Module -Name C:\@delta\ms1\scripts\@pwsggui\cs_mx_mm_bk\StartStop_Panel.ps1
 
 # Create buttons inside Health_Grid
-$ahkscript_bt           = req ` -content "AHK Script"          ` -styles @($ff10, $b, $fg00, $bg01, $fz16, $w250, $h040, $m1) ` -onClick { C:\Users\nahid\ms\ms1\scripts\ahkscripts.ahk ; $Main_Panel.Content = $StartStop_Panel }
-$startup_bt             = req ` -content "Startup.Ps1"         ` -styles @($ff10, $b, $fg00, $bg01, $fz16, $w250, $h040, $m1) ` -onClick { C:\Users\nahid\ms\ms1\scripts\startup.ps1 ; $Main_Panel.Content = $StartStop_Panel }1
+$ahkscript_bt           = req ` -content "AHK Script"          ` -styles @($ff10, $b, $fg00, $bg01, $fz16, $w250, $h040, $m1) ` -onClick { C:\@delta\ms1\scripts\ahkscripts.ahk ; $Main_Panel.Content = $StartStop_Panel }
+$startup_bt             = req ` -content "Startup.Ps1"         ` -styles @($ff10, $b, $fg00, $bg01, $fz16, $w250, $h040, $m1) ` -onClick { C:\@delta\ms1\scripts\startup.ps1 ; $Main_Panel.Content = $StartStop_Panel }1
 
 $powertoys_kill_bt      = req ` -content "PowerToys (Kill)"    ` -styles @($ff10, $b, $fg00, $bg01, $fz16, $W400, $H040, $m1) ` -onClick {  Start-Process -FilePath "taskkill" -ArgumentList "/F /IM PowerToys.exe" -Verb RunAs ; $Main_Panel.Content = $StartStop_Panel }
 $powertoys_restart_bt   = req ` -content "PowerToys (Restart)" ` -styles @($ff10, $b, $fg00, $bg01, $fz16, $W400, $H040, $m1) ` -onClick {  C:\Users\nahid\scoop\apps\powertoys\current\PowerToys.exe ; $Main_Panel.Content = $StartStop_Panel }
@@ -500,8 +500,8 @@ Import-Module -Name C:\@delta\ms1\scripts\@pwsggui\cs_mx_mm_bk\FFmpeg_Panel.ps1
 
 $trim_bt      =  req ` -content "Trim"            ` -styles @($ff10, $b, $fg00, $bg01, $fz16, $w250, $h040) ` -onClick { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\@delta\ms1\scripts\ffmpeg\trim.ps1`"" ; $Main_Panel.Content = $FFmpeg_Panel  }
 $convert_bt   =  req ` -content "Convert Video"   ` -styles @($ff10, $b, $fg00, $bg01, $fz16, $w250, $h040) ` -onClick { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\@delta\ms1\scripts\ffmpeg\convert.ps1`"" ; $Main_Panel.Content = $FFmpeg_Panel  }
-$dimension_bt =  req ` -content "Video Dimension" ` -styles @($ff10, $b, $fg00, $bg01, $fz16, $w250, $h040) ` -onClick { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\Users\nahid\ms\ms1\scripts\ffmpeg\dimension.ps1`"" ; $Main_Panel.Content = $FFmpeg_Panel  }
-$imgdim_bt    =  req ` -content "Image Dimension" ` -styles @($ff10, $b, $fg00, $bg01, $fz16, $w250, $h040) ` -onClick { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\Users\nahid\ms\ms1\scripts\ffmpeg\imgdim.ps1`"" ; $Main_Panel.Content = $FFmpeg_Panel  }
+$dimension_bt =  req ` -content "Video Dimension" ` -styles @($ff10, $b, $fg00, $bg01, $fz16, $w250, $h040) ` -onClick { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\@delta\ms1\scripts\ffmpeg\dimension.ps1`"" ; $Main_Panel.Content = $FFmpeg_Panel  }
+$imgdim_bt    =  req ` -content "Image Dimension" ` -styles @($ff10, $b, $fg00, $bg01, $fz16, $w250, $h040) ` -onClick { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\@delta\ms1\scripts\ffmpeg\imgdim.ps1`"" ; $Main_Panel.Content = $FFmpeg_Panel  }
 $merge_bt     =  req ` -content "Merge Videos"    ` -styles @($ff10, $b, $fg00, $bg01, $fz16, $w250, $h040) ` -onClick { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\@delta\ms1\scripts\ffmpeg\merge.ps1`"" ; $Main_Panel.Content = $FFmpeg_Panel  }
 
 $FFmpeg_Panel.Children.Add($convert_bt)
@@ -562,8 +562,8 @@ $Valorant_Panel = New-Object Windows.Controls.StackPanel
 $Valorant_Panel.Margin = New-Object Windows.Thickness 0
 Import-Module -Name C:\@delta\ms1\scripts\@pwsggui\cs_mx_mm_bk\Valorant_Panel.ps1
 
-$valo_ahk_bt      = req ` -content "Valorant-AHK"    ` -styles @($ff10, $b, $fg01, $bg05, $fz16, $w250, $h040) ` -onClick { C:\Users\nahid\ms\ms1\scripts\valorant\valo.ahk; $Main_Panel.Content = $Valorant_Panel}
-$valorant_qbit_bt = req ` -content "Valorant + Qbit" ` -styles @($ff10, $b, $fg01, $bg05, $fz16, $w250, $h040) ` -onClick { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\Users\nahid\ms\ms1\scripts\valorant\valo_qbit.ps1`"" ; $Main_Panel.Content = $Valorant_Panel }
+$valo_ahk_bt      = req ` -content "Valorant-AHK"    ` -styles @($ff10, $b, $fg01, $bg05, $fz16, $w250, $h040) ` -onClick { C:\@delta\ms1\scripts\valorant\valo.ahk; $Main_Panel.Content = $Valorant_Panel}
+$valorant_qbit_bt = req ` -content "Valorant + Qbit" ` -styles @($ff10, $b, $fg01, $bg05, $fz16, $w250, $h040) ` -onClick { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\@delta\ms1\scripts\valorant\valo_qbit.ps1`"" ; $Main_Panel.Content = $Valorant_Panel }
 
 $Valorant_Panel.Children.Add($valo_ahk_bt)
 $Valorant_Panel.Children.Add($valorant_qbit_bt)

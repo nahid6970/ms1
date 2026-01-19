@@ -1,7 +1,7 @@
 # Gemini CLI Dashboard - Tips & Troubleshooting
 
 ## Working Directory
-All Gemini CLI commands run from: `C:\Users\nahid\ms\ms1\Testing\geminiTesting`
+All Gemini CLI commands run from: `C:\@delta\ms1\Testing\geminiTesting`
 
 Any files created by Gemini will be saved there.
 
@@ -11,7 +11,7 @@ The dashboard now runs Gemini CLI with `--yolo` mode, which means:
 - ✅ File system tools ARE available (write_file, read_file, etc.)
 - ✅ Tools are auto-approved without confirmation
 - ✅ Gemini can create, edit, and manage files directly
-- ✅ All files are created in: `C:\Users\nahid\ms\ms1\Testing\geminiTesting`
+- ✅ All files are created in: `C:\@delta\ms1\Testing\geminiTesting`
 
 ## How It Works Now
 

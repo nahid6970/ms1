@@ -27,7 +27,7 @@ class StartupManager(tk.Tk):
         # Define items with multiple potential paths
         return [
 {"type": "Command","name": "ahk_v2"                           ,"paths": [r"C:\@delta\ms1\ahk_v2.ahk"]},
-{"type": "Command","name": "ollama-chat"                      ,"paths": [r"C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe"] , "Command": r"C:\Users\nahid\ms\ms1\ollama-chat-app\server.py"},
+{"type": "Command","name": "ollama-chat"                      ,"paths": [r"C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe"] , "Command": r"C:\@delta\ms1\ollama-chat-app\server.py"},
 {"type": "Command","name": "Flask - 5001 - Text"              ,"paths": [r"C:\Users\nahid\scoop\apps\python312\current\pythonw.exe"] , "Command": "C:\\@delta\\ms1\\scripts\\flask\\5001_share_text\\share_text.py"},
 {"type": "Command","name": "Flask - 5002 - Share File"        ,"paths": [r"C:\Users\nahid\scoop\apps\python312\current\pythonw.exe"] , "Command": "C:\\@delta\\ms1\\scripts\\flask\\5002_upload_files\\upload_files.py"},
 {"type": "Command","name": "Flask - 5003 - Drive"             ,"paths": [r"C:\Users\nahid\scoop\apps\python312\current\pythonw.exe"] , "Command": "C:\\@delta\\ms1\\scripts\\flask\\5003_Browse_PC_Files\\Browse_PC_Files.py"},

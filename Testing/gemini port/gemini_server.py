@@ -11,7 +11,7 @@ app = Flask(__name__)
 CORS(app)
 
 # Set working directory for Gemini CLI
-WORKING_DIR = r"C:\Users\nahid\ms\ms1\Testing\geminiTesting"
+WORKING_DIR = r"C:\@delta\ms1\Testing\geminiTesting"
 os.makedirs(WORKING_DIR, exist_ok=True)
 
 # Load system prompt

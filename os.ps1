@@ -293,7 +293,7 @@ $menu = [ordered]@{
                 Write-Host 'Setting up Neovim...'
                 Remove-Item -Force -Recurse -Verbose C:\Users\nahid\AppData\Local\nvim
                 Remove-Item -Force -Recurse -Verbose C:\Users\nahid\AppData\Local\nvim-data
-                New-Item -ItemType SymbolicLink -Path C:\Users\nahid\AppData\Local\nvim\init.lua -Target C:\Users\nahid\ms\ms1\linux\linux\neovim\init.lua -Force
+                New-Item -ItemType SymbolicLink -Path C:\Users\nahid\AppData\Local\nvim\init.lua -Target C:\@delta\ms1\linux\linux\neovim\init.lua -Force
             }
         }
         "Neovim_2.conf" = {
@@ -301,7 +301,7 @@ $menu = [ordered]@{
                 Write-Host 'Setting up Neovim...'
                 Remove-Item -Force -Recurse -Verbose C:\Users\nahid\AppData\Local\nvim
                 Remove-Item -Force -Recurse -Verbose C:\Users\nahid\AppData\Local\nvim-data
-                New-Item -ItemType SymbolicLink -Path C:\Users\nahid\AppData\Local\nvim\init.lua -Target C:\Users\nahid\ms\ms1\linux\linux\neovim\init2.lua -Force
+                New-Item -ItemType SymbolicLink -Path C:\Users\nahid\AppData\Local\nvim\init.lua -Target C:\@delta\ms1\linux\linux\neovim\init2.lua -Force
             }
         }
         "Notepad++ Theme Setup" = {
@@ -325,7 +325,7 @@ $menu = [ordered]@{
         }
         "PotPlayer Register" = {
             nw_pwsh -Command {
-                Start-Process 'C:\Users\nahid\ms\ms1\asset\potplayer\PotPlayerMini64.reg' -Verbose
+                Start-Process 'C:\@delta\ms1\asset\potplayer\PotPlayerMini64.reg' -Verbose
             }
         }
     }
@@ -383,7 +383,7 @@ $menu = [ordered]@{
         }
         "Reference" = {
             nw_pwsh_asadmin -Command {
-                New-Item -ItemType SymbolicLink -Path 'C:\Users\nahid\scoop\apps\python312\current\Lib\Reference.py' -Target 'C:\Users\nahid\ms\ms1\Reference.py' -Force #[pwsh]
+                New-Item -ItemType SymbolicLink -Path 'C:\Users\nahid\scoop\apps\python312\current\Lib\Reference.py' -Target 'C:\@delta\ms1\Reference.py' -Force #[pwsh]
             }
         }
         "PowerShell Profile" = {

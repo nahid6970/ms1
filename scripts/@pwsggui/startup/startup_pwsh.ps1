@@ -19,7 +19,7 @@ $shortcutPath = [System.IO.Path]::Combine($env:APPDATA, 'Microsoft\Windows\Start
 if (-not (Test-Path $shortcutPath)) {
 $WshShell = New-Object -ComObject WScript.Shell
 $shortcut = $WshShell.CreateShortcut($shortcutPath)
-$shortcut.TargetPath = "C:\Users\nahid\ms\ms1\scripts\startup.ps1"
+$shortcut.TargetPath = "C:\@delta\ms1\scripts\startup.ps1"
 $shortcut.Save() } })
 
 $Startup_CheckBox.Add_Unchecked({

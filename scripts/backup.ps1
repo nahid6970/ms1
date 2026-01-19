@@ -14,10 +14,10 @@ $FGC = [System.ConsoleColor]::green
 #Installed-Apps-Backup
     # moved to update.ps1 scoop export > C:\@delta\ms1\asset\installedApps\list_scoop.txt
     # moved to update.ps1 winget export C:\@delta\ms1\asset\installedApps\list_winget.txt > C:\@delta\ms1\asset\installedApps\ex_wingetlist.txt
-   # Start-Process -FilePath "winget" -ArgumentList "export C:\Users\nahid\ms\ms1\asset\installedApps\winget_apps.txt" -RedirectStandardOutput "C:\Users\nahid\ms\ms1\asset\installedApps\winget_unknown.txt" -WindowStyle Hidden #-Wait -NoNewWindow
-    #winget list > C:\Users\nahid\ms\ms1\asset\installedApps\winget_list.txt
-    #C:\Users\nahid\ms\ms1\scripts\scoop\scoop_list.ps1
-    #Start-Process -FilePath "winget" -ArgumentList "export C:\Users\nahid\ms\ms1\asset\installedApps\winget_apps.txt" -RedirectStandardOutput "C:\Users\nahid\ms\ms1\asset\installedApps\winget_unknown.txt" #-Wait -NoNewWindow  
+   # Start-Process -FilePath "winget" -ArgumentList "export C:\@delta\ms1\asset\installedApps\winget_apps.txt" -RedirectStandardOutput "C:\@delta\ms1\asset\installedApps\winget_unknown.txt" -WindowStyle Hidden #-Wait -NoNewWindow
+    #winget list > C:\@delta\ms1\asset\installedApps\winget_list.txt
+    #C:\@delta\ms1\scripts\scoop\scoop_list.ps1
+    #Start-Process -FilePath "winget" -ArgumentList "export C:\@delta\ms1\asset\installedApps\winget_apps.txt" -RedirectStandardOutput "C:\@delta\ms1\asset\installedApps\winget_unknown.txt" #-Wait -NoNewWindow  
     #[-Wait = will wait before anyother command can be executed in the same script]
     #[-NoNewWindow = wont create any new window]
     #[-WindowStyle Hidden/minimized/maximized/normal]
@@ -30,8 +30,8 @@ Write-Host "Pandoc Myorg ✔️" -ForegroundColor $FGC
 #$emacs_src    = @( "C:\Users\nahid\AppData\Roaming\.emacs.d\config.org", "C:\Users\nahid\AppData\Roaming\.emacs.d\init.el", "C:\Users\nahid\AppData\Roaming\.emacs.d\early-init.el" )
 #$nvim_src     = "C:\Users\nahid\AppData\Local\nvim\init.lua"
 
-#$emacs_dst    = "C:\Users\nahid\ms\ms1\asset\emacs\"
-#$nvim_dst     = "C:\Users\nahid\ms\ms1\asset\neovim\init.lua"
+#$emacs_dst    = "C:\@delta\ms1\asset\emacs\"
+#$nvim_dst     = "C:\@delta\ms1\asset\neovim\init.lua"
 
 
 function create_dir { param( [string]$Path ) if (-not (Test-Path $Path -PathType Container)) { New-Item -ItemType Directory -Force -Path $Path } }
@@ -39,35 +39,35 @@ function create_dir { param( [string]$Path ) if (-not (Test-Path $Path -PathType
 
 function yasb {
     $yasb_src = @( "C:\Users\nahid\.yasb" )
-    $yasb_dst = "C:\Users\nahid\ms\ms1\asset\yasb"
+    $yasb_dst = "C:\@delta\ms1\asset\yasb"
     create_dir -Path $yasb_dst
     $yasb_src | ForEach-Object { Copy-Item -Path $_ -Destination $yasb_dst -Recurse -Force }
 }
 
 function komorebi {
     $komorebi_src = @( "C:\Users\nahid\komorebi.json" )
-    $komorebi_dst = "C:\Users\nahid\ms\ms1\asset\komorebi"
+    $komorebi_dst = "C:\@delta\ms1\asset\komorebi"
     create_dir -Path $komorebi_dst
     $komorebi_src | ForEach-Object { Copy-Item -Path $_ -Destination $komorebi_dst -Recurse -Force }
 }
 
 function whkd {
     $whkd_src = @( "C:\Users\nahid\.config\whkdrc" )
-    $whkd_dst = "C:\Users\nahid\ms\ms1\asset\whkd\whkdrc"
+    $whkd_dst = "C:\@delta\ms1\asset\whkd\whkdrc"
     create_dir -Path $whkd_dst
     $whkd_src | ForEach-Object { Copy-Item -Path $_ -Destination $whkd_dst -Recurse -Force }
 }
 
 function glazewm {
     $glazewm_src = @( "C:\Users\nahid\.glaze-wm\" )
-    $glazewm_dst = "C:\Users\nahid\ms\ms1\asset\glazewm"
+    $glazewm_dst = "C:\@delta\ms1\asset\glazewm"
     create_dir -Path $glazewm_dst
     $glazewm_src | ForEach-Object { Copy-Item -Path $_ -Destination $glazewm_dst -Recurse -Force }
 }
 
 function nilesoft_shell {
     $nilesoftshell_src = @( "C:\Program Files\Nilesoft Shell\shell.nss" , "C:\Program Files\Nilesoft Shell\imports" )
-    $nilesoftshell_dst = "C:\Users\nahid\ms\ms1\asset\nilesoft_shell"
+    $nilesoftshell_dst = "C:\@delta\ms1\asset\nilesoft_shell"
     create_dir -Path $nilesoftshell_dst
     $nilesoftshell_src | ForEach-Object { Copy-Item -Path $_ -Destination $nilesoftshell_dst -Recurse -Force }
 }
@@ -82,7 +82,7 @@ function Command_History {
 
 function terminal {
     $terminal_src = "C:\Users\nahid\AppData\Local\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json"
-    $terminal_dst = "C:\Users\nahid\ms\ms1\asset\terminal\"
+    $terminal_dst = "C:\@delta\ms1\asset\terminal\"
     create_dir -Path $terminal_dst
     Copy-Item -Path $terminal_src -Destination $terminal_dst
 }

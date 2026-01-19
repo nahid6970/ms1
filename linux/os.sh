@@ -2,13 +2,13 @@
 
 #! import list
 for file in ~/ms1/linux/import/*.sh; do [[ -r "$file" ]] && source "$file" || echo "Error sourcing $file" >&2; done
-#! C:\Users\nahid\ms\ms1\linux\import\compositors.sh
-#! C:\Users\nahid\ms\ms1\linux\import\container.sh
-#! C:\Users\nahid\ms\ms1\linux\import\sddm.sh
-#! C:\Users\nahid\ms\ms1\linux\import\StatusBar.sh
-#! C:\Users\nahid\ms\ms1\linux\import\store.sh
-#! C:\Users\nahid\ms\ms1\linux\import\tty.sh
-#! C:\Users\nahid\ms\ms1\linux\import\wallpaper.sh
+#! C:\@delta\ms1\linux\import\compositors.sh
+#! C:\@delta\ms1\linux\import\container.sh
+#! C:\@delta\ms1\linux\import\sddm.sh
+#! C:\@delta\ms1\linux\import\StatusBar.sh
+#! C:\@delta\ms1\linux\import\store.sh
+#! C:\@delta\ms1\linux\import\tty.sh
+#! C:\@delta\ms1\linux\import\wallpaper.sh
 
 # Define some color variables
 RED='\033[0;31m'
@@ -113,16 +113,16 @@ echo Set All configs
 cp -a "$HOME/ms1/linux/config/bashrc" "$HOME/.bashrc"
 cp -a "$HOME/ms1/linux/config/autostart.sh" "$HOME/autostart.sh"
 
-cp -a "$HOME/ms1/linux/config/.config/hypr" "$HOME/.config/" #! C:\Users\nahid\ms\ms1\linux\config\.config\hypr\hyprland.conf
-cp -a "$HOME/ms1/linux/config/.config/xmonad" "$HOME/.xmonad" #! C:\Users\nahid\ms\ms1\linux\config\.config\xmonad\xmonad.hs
-cp -a "$HOME/ms1/linux/config/.config/qtile" "$HOME/.config" #! C:\Users\nahid\ms\ms1\linux\config\.config\qtile\config.py
+cp -a "$HOME/ms1/linux/config/.config/hypr" "$HOME/.config/" #! C:\@delta\ms1\linux\config\.config\hypr\hyprland.conf
+cp -a "$HOME/ms1/linux/config/.config/xmonad" "$HOME/.xmonad" #! C:\@delta\ms1\linux\config\.config\xmonad\xmonad.hs
+cp -a "$HOME/ms1/linux/config/.config/qtile" "$HOME/.config" #! C:\@delta\ms1\linux\config\.config\qtile\config.py
 
-cp -a "$HOME/ms1/linux/config/.config/conky" "$HOME/.config/" #! C:\Users\nahid\ms\ms1\linux\config\.config\conky\conky_hyprland.conf
-cp -a "$HOME/ms1/linux/config/.config/foot" "$HOME/.config/" #! C:\Users\nahid\ms\ms1\linux\config\.config\foot\foot.ini
-cp -a "$HOME/ms1/linux/config/.config/waybar" "$HOME/.config/" #! C:\Users\nahid\ms\ms1\linux\config\.config\waybar\config.jsonc
+cp -a "$HOME/ms1/linux/config/.config/conky" "$HOME/.config/" #! C:\@delta\ms1\linux\config\.config\conky\conky_hyprland.conf
+cp -a "$HOME/ms1/linux/config/.config/foot" "$HOME/.config/" #! C:\@delta\ms1\linux\config\.config\foot\foot.ini
+cp -a "$HOME/ms1/linux/config/.config/waybar" "$HOME/.config/" #! C:\@delta\ms1\linux\config\.config\waybar\config.jsonc
 cp -a "$HOME/ms1/linux/config/.config/wofi" "$HOME/.config/"
-cp -a "$HOME/ms1/linux/config/.config/dunst" "$HOME/.config/" #! C:\Users\nahid\ms\ms1\linux\config\.config\dunst\dunstrc
-cp -a "$HOME/ms1/linux/config/.config/starship/starship.toml" "$HOME/.config" #! C:\Users\nahid\ms\ms1\linux\config\.config\starship\starship.toml
+cp -a "$HOME/ms1/linux/config/.config/dunst" "$HOME/.config/" #! C:\@delta\ms1\linux\config\.config\dunst\dunstrc
+cp -a "$HOME/ms1/linux/config/.config/starship/starship.toml" "$HOME/.config" #! C:\@delta\ms1\linux\config\.config\starship\starship.toml
 
 # source $HOME/autostart.sh
 # echo -e "${RED}Please run 'source ~/.bashrc' to apply changes to your current shell.${NC}"

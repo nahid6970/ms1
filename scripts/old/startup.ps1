@@ -2,7 +2,7 @@ Start-Sleep -Seconds 5
 
 
 
-function ahkscripts            {Start-Process "C:\Users\nahid\ms\ms1\ahkscripts.ahk" }
+function ahkscripts            {Start-Process "C:\@delta\ms1\ahkscripts.ahk" }
 function aria2c_rpc            {Start-Process -FilePath "aria2c" -ArgumentList "--enable-rpc", "--rpc-listen-all" -WindowStyle Hidden }
 function capture2text          {Start-Process "C:\Users\nahid\scoop\apps\capture2text\current\Capture2Text.exe" }
 function free_download_manager {Start-Process 'C:\Users\nahid\AppData\Local\Softdeluxe\Free Download Manager\fdm.exe' -WindowStyle Minimized }
@@ -13,7 +13,7 @@ function rssguard              {Start-Process "C:\Users\nahid\scoop\apps\rssguar
 function rssowl                {Start-Process "C:\RSSOwlnix\RSSOwlnix.exe" -WindowStyle Minimized }
 function sync                  {Start-Process "C:\@delta\ms1\scripts\sync.ps1" }
 function syncthing             {Start-Process "C:\Users\nahid\scoop\apps\syncthing\current\syncthing.exe" -WindowStyle Hidden }
-function valo_qbit             {Start-Process "C:\Users\nahid\ms\ms1\scripts\valorant\valo_qbit.ps1" -WindowStyle Hidden }
+function valo_qbit             {Start-Process "C:\@delta\ms1\scripts\valorant\valo_qbit.ps1" -WindowStyle Hidden }
 
 function arr_monitor           {Start-Process "C:\@delta\ms1\scripts\arr\arr_monitor.ps1" -WindowStyle Hidden }
 function bazarr                {Start-Process -FilePath "C:\ProgramData\Bazarr\WinPython\python-3.10.0\python.exe" -ArgumentList "C:\ProgramData\Bazarr\bazarr.py" -WindowStyle Hidden }
@@ -24,7 +24,7 @@ function sonarr                {C:\ProgramData\Sonarr\bin\Sonarr.exe }
 
 function Glaze_WM              {Start-Process 'glazewm.exe' -WindowStyle hidden }
 function whkd                  {Start-Process "C:\Users\nahid\scoop\apps\whkd\current\whkd.exe" -WindowStyle Hidden }
-function yasb                  {Start-Process "python.exe" -ArgumentList "C:\Users\nahid\ms\ms1\yasb\main.py" -WindowStyle Hidden }
+function yasb                  {Start-Process "python.exe" -ArgumentList "C:\@delta\ms1\yasb\main.py" -WindowStyle Hidden }
 
 
 

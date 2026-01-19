@@ -32,9 +32,9 @@
 !g::RunWait, C:\Users\nahid\scoop\apps\glazewm\current\GlazeWM.exe,,Hide               ;* GlazeWM
 !k::RunWait, komorebic start,,Hide                                                     ;* Komorebi
 !o::RunWait, C:\Users\nahid\scoop\apps\whkd\current\whkd.exe,,Hide                     ;* whkd
-!r::RunWait, python.exe C:\Users\nahid\ms\ms1\running_apps.py,,Hide                                   ;* running apps
+!r::RunWait, python.exe C:\@delta\ms1\running_apps.py,,Hide                                   ;* running apps
 !x::RunWait, pwsh -Command "cd $env:USERPROFILE; Start-Process pwsh -Verb RunAs",,Hide ;* cmd as admin
-!y::RunWait, python.exe C:\Users\nahid\ms\ms1\yasb\main.py,,Hide                                      ;* yasb
+!y::RunWait, python.exe C:\@delta\ms1\yasb\main.py,,Hide                                      ;* yasb
 #r::RunWait, "C:\Users\nahid\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\System Tools\Run.lnk"
 #x::RunWait, C:\@delta\ms1\mypygui.py ,,Hide                                                  ;* mypygui
 

@@ -206,7 +206,7 @@ $Rclone_bt       = req ` -content "[R]clone"          ` -styles @($ff10, $b, $fg
 $StartStop_bt    = req ` -content "[S]top [R]estart"  ` -styles @($ff10, $b, $fg00, $bg01, $fz16, $w250, $h040) ` -onClick { $Prev_Content = $Main_Panel.Content ; $Main_Panel.Content = $StartStop_Panel ; $Main_Panel.Width = 400 ; $Main_Panel.Height = 700 ; $BackToMain_bt.Tag = $Prev_Content }
 $Startupapps_bt  = req ` -content "[S]tartup Apps"    ` -styles @($ff10, $b, $fg00, $bg01, $fz16, $w250, $h040) ` -onClick { $Prev_Content = $Main_Panel.Content ; $Main_Panel.Content = $StartupApps_Panel ; $Main_Panel.Width = 400 ; $Main_Panel.Height = 700 ; $BackToMain_bt.Tag = $Prev_Content }
 $Tools_bt        = req ` -content "[T]ools"           ` -styles @($ff10, $b, $fg00, $bg01, $fz16, $w250, $h040) ` -onClick { $Prev_Content = $Main_Panel.Content ; $Main_Panel.Content = $Tools_Panel ; $Main_Panel.Width = 400 ; $Main_Panel.Height = 700 ; $BackToMain_bt.Tag = $Prev_Content }
-$Update_bt       = req ` -content "[U]pdate"          ` -styles @($ff10, $b, $fg01, $bg03, $fz16, $w250, $h040) ` -onClick { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\Users\nahid\ms\ms1\utility\kill_process.ps1`"" }
+$Update_bt       = req ` -content "[U]pdate"          ` -styles @($ff10, $b, $fg01, $bg03, $fz16, $w250, $h040) ` -onClick { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\@delta\ms1\utility\kill_process.ps1`"" }
 $Valorant_bt     = req ` -content "[V]alorant"        ` -styles @($ff10, $b, $fg01, $bg05, $fz16, $w250, $h040) ` -onClick { $Prev_Content = $Main_Panel.Content ; $Main_Panel.Content = $Valorant_Panel ; $Main_Panel.Width = 400 ; $Main_Panel.Height = 700 ; $BackToMain_bt.Tag = $Prev_Content }
 
 $Main_Panel.Content.Children.Add($backup_bt)
@@ -280,7 +280,7 @@ $Rclone_Panel = New-Object Windows.Controls.StackPanel
 $Rclone_Panel.Margin = New-Object Windows.Thickness(0, 0, 0, 0)
 Import-Module -Name C:\@delta\ms1\scripts\@pwsggui\cs_mx_mm_bk\Rclone_Panel.ps1
 
-$sync_bt           = req ` -content "Sync"             ` -styles @($ff10, $b, $fg00, $bg06, $fz16, $w250, $h040) ` -onClick { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\Users\nahid\ms\ms1\scripts\rclone\sync.ps1`"" ; $Main_Panel.Content = $Rclone_Panel  }
+$sync_bt           = req ` -content "Sync"             ` -styles @($ff10, $b, $fg00, $bg06, $fz16, $w250, $h040) ` -onClick { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\@delta\ms1\scripts\rclone\sync.ps1`"" ; $Main_Panel.Content = $Rclone_Panel  }
 $about_bt          = req ` -content "Storage Info"     ` -styles @($ff10, $b, $fg00, $bg06, $fz16, $w250, $h040) ` -onClick { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\@delta\ms1\scripts\rclone\about.ps1`"" ; $Main_Panel.Content = $Rclone_Panel  }
 $delete_trashgu_bt = req ` -content "Delete GU Trash"  ` -styles @($ff10, $b, $fg00, $bg06, $fz16, $w250, $h040) ` -onClick { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\@delta\ms1\scripts\rclone\delete_gu.ps1`"" ; $Main_Panel.Content = $Rclone_Panel  }
 $touch_bt          = req ` -content "Touch Drives"     ` -styles @($ff10, $b, $fg00, $bg06, $fz16, $w250, $h040) ` -onClick { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\@delta\ms1\scripts\rclone\touch.ps1`"" ; $Main_Panel.Content = $Rclone_Panel  }
@@ -413,8 +413,8 @@ Import-Module -Name C:\@delta\ms1\scripts\@pwsggui\cs_mx_mm_bk\FFmpeg_Panel.ps1
 
 $trim_bt      =  req ` -content "Trim"            ` -styles @($ff10, $b, $fg00, $bg01, $fz16, $w250, $h040) ` -onClick { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\@delta\ms1\scripts\ffmpeg\trim.ps1`"" ; $Main_Panel.Content = $FFmpeg_Panel  }
 $convert_bt   =  req ` -content "Convert Video"   ` -styles @($ff10, $b, $fg00, $bg01, $fz16, $w250, $h040) ` -onClick { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\@delta\ms1\scripts\ffmpeg\convert.ps1`"" ; $Main_Panel.Content = $FFmpeg_Panel  }
-$dimension_bt =  req ` -content "Video Dimension" ` -styles @($ff10, $b, $fg00, $bg01, $fz16, $w250, $h040) ` -onClick { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\Users\nahid\ms\ms1\scripts\ffmpeg\dimension.ps1`"" ; $Main_Panel.Content = $FFmpeg_Panel  }
-$imgdim_bt    =  req ` -content "Image Dimension" ` -styles @($ff10, $b, $fg00, $bg01, $fz16, $w250, $h040) ` -onClick { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\Users\nahid\ms\ms1\scripts\ffmpeg\imgdim.ps1`"" ; $Main_Panel.Content = $FFmpeg_Panel  }
+$dimension_bt =  req ` -content "Video Dimension" ` -styles @($ff10, $b, $fg00, $bg01, $fz16, $w250, $h040) ` -onClick { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\@delta\ms1\scripts\ffmpeg\dimension.ps1`"" ; $Main_Panel.Content = $FFmpeg_Panel  }
+$imgdim_bt    =  req ` -content "Image Dimension" ` -styles @($ff10, $b, $fg00, $bg01, $fz16, $w250, $h040) ` -onClick { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\@delta\ms1\scripts\ffmpeg\imgdim.ps1`"" ; $Main_Panel.Content = $FFmpeg_Panel  }
 $merge_bt     =  req ` -content "Merge Videos"    ` -styles @($ff10, $b, $fg00, $bg01, $fz16, $w250, $h040) ` -onClick { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\@delta\ms1\scripts\ffmpeg\merge.ps1`"" ; $Main_Panel.Content = $FFmpeg_Panel  }
 
 $FFmpeg_Panel.Children.Add($convert_bt)

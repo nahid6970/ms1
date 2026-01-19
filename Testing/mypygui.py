@@ -613,7 +613,7 @@ VirtualMonitor_lb.bind("<Control-Button-1>",lambda event=None:subprocess.Popen('
 # ollama_lb.pack(side="left", padx=(0, 0), pady=(0, 0))
 # ollama_lb.bind("<Button-1>",lambda event=None:subprocess.Popen('cmd /c start C:\\@delta\\ms1\\test_project\\ollama-chat-app\\kill_port_8000.py'))
 # ollama_lb.bind("<Button-3>",lambda event=None:subprocess.Popen('cmd /c start C:\\@delta\\ms1\\test_project\\ollama-chat-app\\ollama_stop_models.ps1'))
-# ollama_lb.bind("<Control-Button-1>",lambda event=None: run_command(r'code C:\Users\nahid\ms\ms1\test_project\ollama-chat-app\server.py'))
+# ollama_lb.bind("<Control-Button-1>",lambda event=None: run_command(r'code C:\@delta\ms1\test_project\ollama-chat-app\server.py'))
 
 path_replace = tk.Label(ROOT1,text="PathR", bg="#1d2027", fg="#86ff45", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
 path_replace.pack(side="left", padx=(0, 0), pady=(0, 0))
@@ -627,12 +627,12 @@ Automation = tk.Label(ROOT1, text="AutoM", bg="#1d2027", fg="#ffab2d",
 Automation.pack(side="left", padx=(0, 0), pady=(0, 0))
 Automation.bind("<Button-1>", lambda event=None: subprocess.Popen(
     r'cmd /c game_automation_tool.py',
-    cwd=r'C:\Users\nahid\ms\ms1\test_project\Automation',
+    cwd=r'C:\@delta\ms1\test_project\Automation',
     shell=True
 ))
 Automation.bind("<Control-Button-1>", lambda event=None: subprocess.Popen(
     r'code game_automation_tool.py',
-    cwd=r'C:\Users\nahid\ms\ms1\test_project\Automation',
+    cwd=r'C:\@delta\ms1\test_project\Automation',
     shell=True
 ))
 
@@ -643,12 +643,12 @@ KomoBT = tk.Label(ROOT1, text="KOMO", bg="#1d2027", fg="#8319f5",
 KomoBT.pack(side="left", padx=(0, 0), pady=(0, 0))
 KomoBT.bind("<Button-1>", lambda event=None: subprocess.Popen(
     r'cmd /c komorebi_gui_custom.py',
-    cwd=r'C:\Users\nahid\ms\ms1\asset\komorebi',
+    cwd=r'C:\@delta\ms1\asset\komorebi',
     shell=True
 ))
 KomoBT.bind("<Control-Button-1>", lambda event=None: subprocess.Popen(
     r'code komorebi_gui_custom.py',
-    cwd=r'C:\Users\nahid\ms\ms1\asset\komorebi',
+    cwd=r'C:\@delta\ms1\asset\komorebi',
     shell=True
 ))
 
@@ -658,13 +658,13 @@ AHKPY_BT = tk.Label(ROOT1, text="AHK", bg="#1d2027", fg="#84ff8e",
                       font=("JetBrainsMono NFP", 16, "bold"))
 AHKPY_BT.pack(side="left", padx=(0, 0), pady=(0, 0))
 AHKPY_BT.bind("<Button-1>", lambda event=None: subprocess.Popen(
-    r'cmd /c C:\Users\nahid\ms\ms1\FFFFFFF\ahk_gui_editor.py',
-    cwd=r'C:\Users\nahid\ms\ms1\FFFFFFF',
+    r'cmd /c C:\@delta\ms1\FFFFFFF\ahk_gui_editor.py',
+    cwd=r'C:\@delta\ms1\FFFFFFF',
     shell=True
 ))
 AHKPY_BT.bind("<Control-Button-1>", lambda event=None: subprocess.Popen(
-    r'code C:\Users\nahid\ms\ms1\FFFFFFF\ahk_gui_editor.py',
-    cwd=r'C:\Users\nahid\ms\ms1\FFFFFFF',
+    r'code C:\@delta\ms1\FFFFFFF\ahk_gui_editor.py',
+    cwd=r'C:\@delta\ms1\FFFFFFF',
     shell=True
 ))
 

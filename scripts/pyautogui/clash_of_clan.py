@@ -312,7 +312,7 @@ def close_window(event=None):
     # Close the current window
     ROOT.destroy()
     # Start the specified script
-    script_path = r"C:\Users\nahid\ms\ms1\SH3\sf3_AHK.py"
+    script_path = r"C:\@delta\ms1\SH3\sf3_AHK.py"
     subprocess.Popen([sys.executable, script_path])
 
 #* ███████╗██╗   ██╗███████╗███╗   ██╗████████╗

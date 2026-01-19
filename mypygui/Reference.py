@@ -31,11 +31,11 @@ Rss_cf_src       =r"C:\Users\nahid\scoop\apps\rssguard\current\data4\config\conf
 Rss_db_dst       =r"C:\Users\nahid\OneDrive\backup\rssguard\database"
 Rss_db_src       =r"C:\Users\nahid\scoop\apps\rssguard\current\data4\database"
 
-glazewm_dst      =r"C:\Users\nahid\ms\ms1\asset\glazewm\.glaze-wm"
+glazewm_dst      =r"C:\@delta\ms1\asset\glazewm\.glaze-wm"
 glazewm_src      =r"C:\Users\nahid\.glaze-wm"
 komorebi_dst     =r"C:\@delta\ms1\asset\komorebi\komorebi.json"
 komorebi_src     =r"C:\Users\nahid\komorebi.json"
-Nilesoft_dst     =r"C:\Users\nahid\ms\ms1\asset\nilesoft_shell\imports"
+Nilesoft_dst     =r"C:\@delta\ms1\asset\nilesoft_shell\imports"
 Nilesoft_src     =r"C:\Program Files\Nilesoft Shell\imports"
 pwsh_profile_dst =r"C:\@delta\ms1\asset\Powershell\Microsoft.PowerShell_profile.ps1"
 pwsh_profile_src =r"C:\Users\nahid\OneDrive\Documents\PowerShell\Microsoft.PowerShell_profile.ps1"
@@ -47,7 +47,7 @@ terminal_dst     =r"C:\@delta\ms1\asset\terminal\settings.json"
 terminal_dst     =r"C:\@delta\ms1\asset\terminal\settings.json"
 terminal_src     =r"C:\Users\nahid\AppData\Local\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json"
 terminal_src     =r"C:\Users\nahid\AppData\Local\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json"
-whkd_dst         =r"C:\Users\nahid\ms\ms1\asset\whkd\whkdrc\whkdrc"
+whkd_dst         =r"C:\@delta\ms1\asset\whkd\whkdrc\whkdrc"
 whkd_src         =r"C:\Users\nahid\.config\whkdrc"
 
 #*  █████╗ ██████╗ ██████╗     ██████╗  █████╗ ████████╗██╗  ██╗

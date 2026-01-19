@@ -227,7 +227,7 @@ namespace simple_csharp_project
                                 Remove-Item -Force -Recurse -Verbose C:\Users\nahid\AppData\Local\nvim-data;
                                 New-Item -ItemType SymbolicLink `
                                         -Path C:\Users\nahid\AppData\Local\nvim\init.lua `
-                                        -Target C:\Users\nahid\ms\ms1\asset\linux\neovim\init.lua `
+                                        -Target C:\@delta\ms1\asset\linux\neovim\init.lua `
                                         -Force
                             ",
                             true
