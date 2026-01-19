@@ -7,7 +7,7 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                              QFrame, QTextEdit, QGroupBox, QFormLayout, QRadioButton,
                              QButtonGroup, QListWidget, QSplitter,
                              QListWidgetItem)
-from PyQt6.QtCore import Qt, pyqtSignal
+from PyQt6.QtCore import Qt, pyqtSignal, QTimer
 from PyQt6.QtGui import QFont, QClipboard
 
 # CYBERPUNK THEME PALETTE
@@ -26,8 +26,8 @@ class PathConverter(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("PATH_CONVERTER // CYBER_QT")
-        self.setGeometry(100, 100, 700, 400)  # Reduced from 900x700 to 700x400
-        self.setFixedSize(700, 400)  # Make window non-resizable for compact design
+        self.setGeometry(100, 100, 700, 400)
+        # Don't set fixed size constraints initially - we'll handle this in adjust_window_width
         
         # Apply cyberpunk theme
         self.setStyleSheet(f"""
@@ -284,10 +284,61 @@ class PathConverter(QMainWindow):
     def on_input1_changed(self):
         """Convert path 1 when input changes"""
         self.convert_path(1)
+        self.adjust_window_width()
     
     def on_input2_changed(self):
         """Convert path 2 when input changes"""
         self.convert_path(2)
+        self.adjust_window_width()
+    
+    def adjust_window_width(self):
+        """Dynamically adjust window width based on input content"""
+        # Get the longest text from both input fields
+        text1 = self.input_field1.text()
+        text2 = self.input_field2.text()
+        
+        # Find the longer text
+        longest_text = text1 if len(text1) > len(text2) else text2
+        
+        print(f"DEBUG: Adjusting width for text: '{longest_text}' (length: {len(longest_text)})")
+        
+        if not longest_text:
+            # If both fields are empty, use minimum width
+            target_width = 700
+        else:
+            # Simple calculation: 10 pixels per character + base width
+            char_width = 10
+            base_width = 500  # Base width for UI elements
+            target_width = base_width + (len(longest_text) * char_width)
+            
+            # Clamp between minimum and maximum
+            target_width = max(700, min(1200, target_width))
+        
+        # Get current size
+        current_width = self.width()
+        print(f"DEBUG: Current width: {current_width}, Target width: {target_width}")
+        
+        # Force resize if different
+        if current_width != target_width:
+            print(f"DEBUG: Resizing from {current_width} to {target_width}")
+            
+            # Use QTimer to delay the resize slightly
+            from PyQt6.QtCore import QTimer
+            QTimer.singleShot(10, lambda: self.do_resize(target_width))
+    
+    def do_resize(self, target_width):
+        """Actually perform the resize"""
+        print(f"DEBUG: Actually resizing to {target_width}")
+        self.resize(target_width, 400)
+        
+        # Center the window
+        app = QApplication.instance()
+        if app:
+            screen = app.primaryScreen().geometry()
+            x = (screen.width() - target_width) // 2
+            y = (screen.height() - 400) // 2
+            self.move(x, y)
+            print(f"DEBUG: Moved window to ({x}, {y})")
     
     def copy_output(self, field_number):
         """Copy output from specified field to clipboard"""
