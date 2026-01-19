@@ -267,7 +267,7 @@ class PathTrackerGUI(QMainWindow):
         # self.quick_folders is hardcoded nicely in original, we can keep it
         self.quick_folders = [
             "C:/Users/nahid/ms/ms1/", 
-            "C:/Users/nahid/ms/db/", 
+            "C:/@delta/db/", 
             "C:/@delta/msBackups/"
         ]
         self.quick_combo.addItems(self.quick_folders)

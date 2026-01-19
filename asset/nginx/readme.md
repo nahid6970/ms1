@@ -55,7 +55,7 @@ server {
     ssl_prefer_server_ciphers  on;
     
     location / {
-        root   C:/Users/nahid/ms/db/5000_myhome;
+        root   C:/@delta/db/5000_myhome;
         index  myhome.html;
     }
 }
