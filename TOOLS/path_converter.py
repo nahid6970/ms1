@@ -164,31 +164,22 @@ class PathConverter(QMainWindow):
         central = QWidget()
         self.setCentralWidget(central)
         main_layout = QVBoxLayout(central)
-        main_layout.setContentsMargins(20, 20, 20, 20)  # Reduced margins
-        main_layout.setSpacing(15)  # Reduced spacing
-        
+        main_layout.setContentsMargins(20, 20, 20, 20)
+        main_layout.setSpacing(15)
+
         # Header
         header = QLabel("PATH_CONVERTER")
         header.setObjectName("HeaderLabel")
         header.setAlignment(Qt.AlignmentFlag.AlignCenter)
         main_layout.addWidget(header)
         
-        # Input section
-        input_group = QGroupBox("INPUT_PATH")
-        input_layout = QVBoxLayout(input_group)
+        # Format selector at top
+        format_group = QGroupBox("OUTPUT_FORMAT")
+        format_layout = QHBoxLayout(format_group)
         
-        # Input field with separator selector
-        input_row = QHBoxLayout()
-        
-        self.input_field = QLineEdit()
-        self.input_field.setPlaceholderText("Paste your path here...")
-        self.input_field.textChanged.connect(self.on_input_changed)
-        input_row.addWidget(self.input_field, 2)  # Give more space to input
-        
-        # Separator selector
-        separator_label = QLabel("FORMAT:")
-        separator_label.setObjectName("SectionLabel")
-        input_row.addWidget(separator_label)
+        format_label = QLabel("SELECT_FORMAT:")
+        format_label.setObjectName("SectionLabel")
+        format_layout.addWidget(format_label)
         
         self.separator_combo = QComboBox()
         self.separator_combo.addItem("/ (Forward)", "forward")
@@ -201,68 +192,129 @@ class PathConverter(QMainWindow):
         self.separator_combo.addItem("Raw String", "raw")
         self.separator_combo.addItem("URI", "uri")
         self.separator_combo.currentTextChanged.connect(self.on_format_changed)
-        input_row.addWidget(self.separator_combo, 1)
+        format_layout.addWidget(self.separator_combo)
+        format_layout.addStretch()
         
-        input_layout.addLayout(input_row)
-        main_layout.addWidget(input_group)
+        main_layout.addWidget(format_group)
         
-        # Output section
-        output_group = QGroupBox("CONVERTED_OUTPUT")
-        output_layout = QVBoxLayout(output_group)
+        # Conversion rows
+        conversion_group = QGroupBox("PATH_CONVERSION")
+        conversion_layout = QVBoxLayout(conversion_group)
         
-        # Output field with copy button
-        output_row = QHBoxLayout()
+        # Row 1: Input1 → Output1 → Copy1
+        row1_layout = QHBoxLayout()
         
-        self.output_field = QLineEdit()
-        self.output_field.setReadOnly(True)
-        self.output_field.setPlaceholderText("Converted path will appear here...")
-        self.output_field.setStyleSheet(f"""
+        self.input_field1 = QLineEdit()
+        self.input_field1.setPlaceholderText("Paste path 1 here...")
+        self.input_field1.textChanged.connect(self.on_input1_changed)
+        row1_layout.addWidget(self.input_field1, 2)
+        
+        arrow1 = QLabel("→")
+        arrow1.setObjectName("SectionLabel")
+        arrow1.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        row1_layout.addWidget(arrow1)
+        
+        self.output_field1 = QLineEdit()
+        self.output_field1.setReadOnly(True)
+        self.output_field1.setPlaceholderText("Converted path 1...")
+        self.output_field1.setStyleSheet(f"""
             QLineEdit {{
                 background-color: {CP_PANEL}; 
                 color: {CP_GREEN}; 
                 border: 1px solid {CP_GREEN}; 
-                padding: 8px;
-                font-size: 10pt;
+                padding: 6px;
                 font-weight: bold;
             }}
         """)
-        output_row.addWidget(self.output_field, 3)
+        row1_layout.addWidget(self.output_field1, 2)
         
-        self.copy_output_btn = QPushButton("COPY")
-        self.copy_output_btn.setObjectName("AccentButton")
-        self.copy_output_btn.clicked.connect(self.copy_output_to_clipboard)
-        output_row.addWidget(self.copy_output_btn)
+        self.copy_btn1 = QPushButton("COPY")
+        self.copy_btn1.setObjectName("CopyButton")
+        self.copy_btn1.clicked.connect(lambda: self.copy_output(1))
+        row1_layout.addWidget(self.copy_btn1)
         
-        output_layout.addLayout(output_row)
-        main_layout.addWidget(output_group)
+        conversion_layout.addLayout(row1_layout)
         
+        # Row 2: Input2 → Output2 → Copy2
+        row2_layout = QHBoxLayout()
+        
+        self.input_field2 = QLineEdit()
+        self.input_field2.setPlaceholderText("Paste path 2 here...")
+        self.input_field2.textChanged.connect(self.on_input2_changed)
+        row2_layout.addWidget(self.input_field2, 2)
+        
+        arrow2 = QLabel("→")
+        arrow2.setObjectName("SectionLabel")
+        arrow2.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        row2_layout.addWidget(arrow2)
+        
+        self.output_field2 = QLineEdit()
+        self.output_field2.setReadOnly(True)
+        self.output_field2.setPlaceholderText("Converted path 2...")
+        self.output_field2.setStyleSheet(f"""
+            QLineEdit {{
+                background-color: {CP_PANEL}; 
+                color: {CP_GREEN}; 
+                border: 1px solid {CP_GREEN}; 
+                padding: 6px;
+                font-weight: bold;
+            }}
+        """)
+        row2_layout.addWidget(self.output_field2, 2)
+        
+        self.copy_btn2 = QPushButton("COPY")
+        self.copy_btn2.setObjectName("CopyButton")
+        self.copy_btn2.clicked.connect(lambda: self.copy_output(2))
+        row2_layout.addWidget(self.copy_btn2)
+        
+        conversion_layout.addLayout(row2_layout)
+        
+        main_layout.addWidget(conversion_group)
+
         # Status
-        self.status_label = QLabel("SYSTEM_READY >> Paste a path and select format")
+        self.status_label = QLabel("SYSTEM_READY >> Select format and paste paths")
         self.status_label.setObjectName("StatusLabel")
         main_layout.addWidget(self.status_label)
         
     def on_format_changed(self):
-        """Convert path when format selection changes"""
-        self.convert_path()
+        """Convert paths when format selection changes"""
+        self.convert_path(1)
+        self.convert_path(2)
         
-    def on_input_changed(self):
-        """Convert path when input changes"""
-        self.convert_path()
+    def on_input1_changed(self):
+        """Convert path 1 when input changes"""
+        self.convert_path(1)
     
-    def copy_output_to_clipboard(self):
-        output_text = self.output_field.text()
+    def on_input2_changed(self):
+        """Convert path 2 when input changes"""
+        self.convert_path(2)
+    
+    def copy_output(self, field_number):
+        """Copy output from specified field to clipboard"""
+        if field_number == 1:
+            output_text = self.output_field1.text()
+        else:
+            output_text = self.output_field2.text()
+            
         if output_text:
             clipboard = QApplication.clipboard()
             clipboard.setText(output_text)
             format_name = self.separator_combo.currentText().split(' ')[0]
-            self.status_label.setText(f"COPIED >> {format_name} format copied to clipboard")
+            self.status_label.setText(f"COPIED >> Path {field_number} ({format_name}) copied to clipboard")
         else:
-            self.status_label.setText("NO_OUTPUT >> Nothing to copy")
+            self.status_label.setText(f"NO_OUTPUT >> Path {field_number} is empty")
     
-    def convert_path(self):
-        input_path = self.input_field.text().strip()
+    def convert_path(self, field_number):
+        """Convert path for specified field"""
+        if field_number == 1:
+            input_path = self.input_field1.text().strip()
+            output_field = self.output_field1
+        else:
+            input_path = self.input_field2.text().strip()
+            output_field = self.output_field2
+            
         if not input_path:
-            self.output_field.clear()
+            output_field.clear()
             return
         
         try:
@@ -294,13 +346,11 @@ class PathConverter(QMainWindow):
             else:
                 converted = normalized
             
-            self.output_field.setText(converted)
-            format_name = self.separator_combo.currentText().split(' ')[0]
-            self.status_label.setText(f"CONVERTED >> {format_name} format ready")
+            output_field.setText(converted)
             
         except Exception as e:
-            self.status_label.setText(f"CONVERSION_ERROR >> {str(e)}")
-            self.output_field.clear()
+            self.status_label.setText(f"CONVERSION_ERROR >> Path {field_number}: {str(e)}")
+            output_field.clear()
     
     def normalize_path(self, path):
         """Normalize path separators and clean up the path"""
