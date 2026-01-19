@@ -959,7 +959,7 @@ commands = {
     "msBackups": {
         "cmd": "rclone check src dst --fast-list --size-only",
         "src": "C:/@delta/msBackups",
-        "dst": "o0:/msBackups",
+        "dst": "gu:/msBackups",
         "log": f"{LOG_DIR}/msBackups_check.log",
         "label": "\udb85\ude32"
     },
@@ -990,7 +990,7 @@ commands = {
     "Photos": {
         "cmd": 'rclone check src dst --fast-list --size-only --exclude \".globalTrash/**\" --exclude \".stfolder/**\" --exclude \".stfolder (1)/**\"',
         "src": "C:/Users/nahid/Pictures/",
-        "dst": "o0:/Pictures/",
+        "dst": "gu:/Pictures/",
         "log": f"{LOG_DIR}/Pictures_check.log",
         "label": "\uf03e",
         "left_click_cmd": "rclone sync src dst -P --fast-list --track-renames --exclude \".globalTrash/**\" --exclude \".stfolder/**\" --log-level INFO",
