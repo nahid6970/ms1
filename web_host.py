@@ -3,8 +3,8 @@ from threading import Thread
 
 # List of HTML files to serve with their respective ports
 html_routes = [
-    {'path': r'C:\Users\nahid\ms\db\5000_myhome\myhome.html', 'port': 6001},
-    {'path': r'C:\Users\nahid\ms\db\5000_myhome\mycell.html', 'port': 6002},
+    {'path': r'C:\@delta\db\5000_myhome\myhome.html', 'port': 6001},
+    {'path': r'C:\@delta\db\5000_myhome\mycell.html', 'port': 6002},
 ]
 
 # Function to create a new Flask app for each HTML file

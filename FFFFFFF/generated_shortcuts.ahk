@@ -670,7 +670,7 @@ PrintScreen::Run("C:\@delta\ms1\scripts\Autohtokey\version2\gui\Bio.ahk", "", "H
 :X:;star::Paste('')
 
 ;! Db path
-:X:;db::Paste('C:\Users\nahid\ms\db')
+:X:;db::Paste('C:\@delta\db')
 
 ;! Changes for Ai to know that i made on my files
 :X:;change::Paste('ok i have made some changes from last time  so keep that in mind now')

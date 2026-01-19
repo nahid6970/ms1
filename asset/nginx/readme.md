@@ -95,7 +95,7 @@ From any device on your Tailnet, visit: `https://win6970.blowfish-owl.ts.net`
 
 ```
 Project Files:
-C:\Users\nahid\ms\db\5000_myhome\
+C:\@delta\db\5000_myhome\
 └── myhome.html
 
 SSL Certificates:
@@ -172,6 +172,6 @@ If you need new certificates (they expire or you lose them):
 
 - **Domain**: win6970.blowfish-owl.ts.net
 - **nginx location**: D:\Downloads\nginx\
-- **Website files**: C:\Users\nahid\ms\db\5000_myhome\
+- **Website files**: C:\@delta\db\5000_myhome\
 - **Main file**: myhome.html
 - **Certificates**: C:\Users\nahid\

@@ -9,8 +9,8 @@ import os
 from datetime import datetime
 
 # Paths
-DATA_FILE = r'C:\Users\nahid\ms\db\5000_myhome\myword.html'
-OUTPUT_FILE = r'C:\Users\nahid\ms\db\5000_myhome\myword.html'
+DATA_FILE = r'C:\@delta\db\5000_myhome\myword.html'
+OUTPUT_FILE = r'C:\@delta\db\5000_myhome\myword.html'
 
 def load_data():
     """Load data from JSON file"""

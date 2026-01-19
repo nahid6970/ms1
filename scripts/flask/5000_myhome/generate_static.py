@@ -27,8 +27,8 @@ SIDEBAR_HANDLER_JS_FILE = os.path.join(PROJECT_ROOT, 'static', 'sidebar-handler.
 CONTEXT_MENU_JS_FILE = os.path.join(PROJECT_ROOT, 'static', 'context-menu.js')
 
 # Path to the output files
-OUTPUT_HTML_FILE = r"C:\Users\nahid\ms\db\5000_myhome\myhome.html"
-OUTPUT_NOTE_PREVIEW_FILE = r"C:\Users\nahid\ms\db\5000_myhome\note_preview.html"
+OUTPUT_HTML_FILE = r"C:\@delta\db\5000_myhome\myhome.html"
+OUTPUT_NOTE_PREVIEW_FILE = r"C:\@delta\db\5000_myhome\note_preview.html"
 
 
 def read_data():

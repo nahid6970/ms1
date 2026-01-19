@@ -33,7 +33,7 @@ DEFAULT_CONFIG = {
     ],
     "github_repos": [
         {"name": "ms1", "path": r"C:\@delta\ms1"},
-        {"name": "db", "path": r"C:\Users\nahid\ms\db"},
+        {"name": "db", "path": r"C:\@delta\db"},
         {"name": "test", "path": r"C:\Users\nahid\ms\test"}
     ],
     "rclone_folders": [
