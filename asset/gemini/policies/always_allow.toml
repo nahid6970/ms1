@@ -11,7 +11,7 @@ toolName = [
     "create_directory",
     "move_file",
     "delegate_to_agent",
-    "run_blocking_notification_script"
+    "show_task_complete_notification"
 ]
 decision = "allow"
 priority = 999

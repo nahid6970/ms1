@@ -20,7 +20,7 @@
     "notify": {
       "command": "python",
       "args": [
-        "c:/Users/nahid/.gemini/notify_server.py"
+        "c:/Users/nahid/.gemini/task_complete_mcp.py"
       ]
     }
   },
