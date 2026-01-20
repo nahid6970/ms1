@@ -1512,9 +1512,13 @@ function checkHasMarkdown(value) {
         str.includes('\n- ') ||
         str.includes('\n-- ') ||
         str.includes('\n--- ') ||
+        str.includes('\n---- ') ||
+        str.includes('\n----- ') ||
         str.trim().startsWith('- ') ||
         str.trim().startsWith('-- ') ||
         str.trim().startsWith('--- ') ||
+        str.trim().startsWith('---- ') ||
+        str.trim().startsWith('----- ') ||
         str.match(/(?:^|\n)Table\*\d+/i) ||
         str.trim().startsWith('|') ||
         str.includes('\\(') ||
@@ -1572,6 +1576,8 @@ function calculateVisibleToRawMap(rawInput) {
         { regex: /^(\s*-)\s+/gm, keepGroup: 1 },
         { regex: /^(\s*-)-\s+/gm, keepGroup: 1 },
         { regex: /^(\s*-)--\s+/gm, keepGroup: 1 },
+        { regex: /^(\s*-)---\s+/gm, keepGroup: 1 },
+        { regex: /^(\s*-)----\s+/gm, keepGroup: 1 },
         { regex: /^Table\*\d+(?:_[^\s\n,]+)?(?:_[^\s\n,]+)?(?:[\n\s,]+)/i, keepGroup: -1 },
         { regex: /^Timeline(?:C)?(?:-[A-Z]+)?\*(.+?)$/gm, keepGroup: 1 },
         { regex: /\[(\d+)(?:-[A-Z]+)?\](\S+)/g, keepGroup: 2 }
@@ -3232,10 +3238,20 @@ function oldParseMarkdownBody(lines, cellStyle = {}) {
         // Subscript: ~text~ -> <sub>text</sub>
         formatted = formatted.replace(/~(.+?)~/g, '<sub>$1</sub>');
 
+        // Sub-sub-sub-sublist: ----- item -> − item with more indent
+        if (originalLine.trim().startsWith('----- ')) {
+            const content = formatted.replace(/^(\s*)----- /, '');
+            formatted = `<span style="display: inline-block; width: 100%; box-sizing: border-box; padding-left: 5em; text-indent: -1em; white-space: pre-wrap;"><span style="display: inline-block; width: 1em; text-indent: 0;">−</span>${content}</span>`;
+        }
+        // Sub-sub-sublist: ---- item -> ▸ item with more indent
+        else if (originalLine.trim().startsWith('---- ')) {
+            const content = formatted.replace(/^(\s*)---- /, '');
+            formatted = `<span style="display: inline-block; width: 100%; box-sizing: border-box; padding-left: 4em; text-indent: -1em; white-space: pre-wrap;"><span style="display: inline-block; width: 1em; text-indent: 0;">▸</span>${content}</span>`;
+        }
         // Sub-sublist: --- item -> ▪ item with more indent (small square)
         // Using text-indent for hanging indent to preserve tab alignment
         // IMPORTANT: Use originalLine for detection since KaTeX may have already modified formatted
-        if (originalLine.trim().startsWith('--- ')) {
+        else if (originalLine.trim().startsWith('--- ')) {
             const content = formatted.replace(/^(\s*)--- /, '');
             formatted = `<span style="display: inline-block; width: 100%; box-sizing: border-box; padding-left: 3em; text-indent: -1em; white-space: pre-wrap;"><span style="display: inline-block; width: 1em; text-indent: 0;">▪</span>${content}</span>`;
         }

@@ -6,6 +6,30 @@
 
 ---
 
+## [2026-01-20 03:55] - Implemented List Levels 4 & 5
+
+**Session Duration:** 0.2 hours
+
+**What We Accomplished:**
+
+### ✅ Extended List Functionality to 5 Levels
+- **Features**: Added support for Level 4 (`---- `) and Level 5 (`----- `) lists.
+- **Visuals**: Level 4 uses `▸` (triangle), Level 5 uses `−` (minus/dash).
+- **Consistency**: Implemented in both `script.js` (live preview) and `export_static.py` (static export).
+- **Rule of 6**: Updated detection, stripping (static), parsing, and documentation.
+
+**Files Modified:**
+- `static/script.js` - Updated `oldParseMarkdownBody`, `checkHasMarkdown`, `calculateVisibleToRawMap`.
+- `export_static.py` - Updated `oldParseMarkdownBody`, `stripMarkdown`.
+- `md/MARKDOWN_SPECIAL.md` - Documented new syntax.
+- `md/RECENT.md` - Logged session.
+
+**Current Status:**
+- ✅ Lists implemented up to 5 levels.
+- ✅ Documentation updated.
+
+---
+
 ## [2026-01-18 01:25] - Default Table Border Color Update
 
 **Session Duration:** 0.3 hours

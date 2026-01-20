@@ -2,7 +2,7 @@
     {
         "name": "nahid6970",
         "path": "C:/@delta/ms1/Testing/antigravity_acc_change/nahid6970",
-        "active": false,
+        "active": true,
         "is_locked": true,
         "password": "182358",
         "timer_enabled": true,
@@ -47,11 +47,11 @@
     {
         "name": "nahid2016912207",
         "path": "C:/@delta/ms1/Testing/antigravity_acc_change/nahid2016912207",
-        "active": true,
+        "active": false,
         "is_locked": true,
         "password": "182358",
         "timer_enabled": true,
-        "target_time": "2026-01-18T18:50:08"
+        "target_time": "2026-01-26T15:17:22"
     },
     {
         "name": "nahid69708",

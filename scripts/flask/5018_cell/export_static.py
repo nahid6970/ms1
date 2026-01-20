@@ -1544,6 +1544,10 @@ def generate_static_html(data, custom_syntaxes):
             stripped = stripped.replace(/^\\s*--\\s+/gm, '');
             // Remove sub-sub-bullet markers: --- item -> item
             stripped = stripped.replace(/^\\s*---\\s+/gm, '');
+            // Remove sub-sub-sub-bullet markers: ---- item -> item
+            stripped = stripped.replace(/^\\s*----\\s+/gm, '');
+            // Remove sub-sub-sub-sub-bullet markers: ----- item -> item
+            stripped = stripped.replace(/^\\s*-----\\s+/gm, '');
             // Remove Timeline markers: Timeline*Name or Timeline-R*Name -> Name
             stripped = stripped.replace(/^Timeline(?:C)?(?:-[A-Z]+)?\\*(.+?)$/gm, '$1');
             // Remove word connector markers: [1]Word or [1-R]Word -> Word
@@ -2204,9 +2208,21 @@ def generate_static_html(data, custom_syntaxes):
                 // Subscript: ~text~ -> <sub>text</sub> (single tilde only, after strikethrough is processed)
                 formatted = formatted.replace(/~(.+?)~/g, '<sub>$1</sub>');
 
+                // Sub-sub-sub-sublist: ----- item -> − item with more indent
+                if (formatted.trim().startsWith('----- ')) {
+                    const content = formatted.replace(/^(\\s*)----- (.+)$/, '$2');
+                    formatted = formatted.replace(/^(\\s*)----- .+$/, '$1<span style="display: inline-block; width: 100%; box-sizing: border-box; padding-left: 5em; text-indent: -1em; white-space: pre-wrap;"><span style="display: inline-block; width: 1em; text-indent: 0;">−</span>−CONTENT−</span>');
+                    formatted = formatted.replace('−CONTENT−', content);
+                }
+                // Sub-sub-sublist: ---- item -> ▸ item with more indent
+                else if (formatted.trim().startsWith('---- ')) {
+                    const content = formatted.replace(/^(\\s*)---- (.+)$/, '$2');
+                    formatted = formatted.replace(/^(\\s*)---- .+$/, '$1<span style="display: inline-block; width: 100%; box-sizing: border-box; padding-left: 4em; text-indent: -1em; white-space: pre-wrap;"><span style="display: inline-block; width: 1em; text-indent: 0;">▸</span>▸CONTENT▸</span>');
+                    formatted = formatted.replace('▸CONTENT▸', content);
+                }
                 // Sub-sublist: --- item -> ▪ item with more indent (small square)
                 // Using text-indent for hanging indent to preserve tab alignment
-                if (formatted.trim().startsWith('--- ')) {
+                else if (formatted.trim().startsWith('--- ')) {
                     const content = formatted.replace(/^(\\s*)--- (.+)$/, '$2');
                     formatted = formatted.replace(/^(\\s*)--- .+$/, '$1<span style="display: inline-block; width: 100%; box-sizing: border-box; padding-left: 3em; text-indent: -1em; white-space: pre-wrap;"><span style="display: inline-block; width: 1em; text-indent: 0;">▪</span>▪CONTENT▪</span>');
                     formatted = formatted.replace('▪CONTENT▪', content);

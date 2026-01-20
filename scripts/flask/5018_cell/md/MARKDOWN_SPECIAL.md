@@ -5,6 +5,8 @@
 - `- item` → Bullet list (•)
 - `-- item` → Sub-bullet (◦) with 1em indent
 - `--- item` → Sub-sub-bullet (▪) with 2em indent
+- `---- item` → Level 4 bullet (▸) with 3em indent
+- `----- item` → Level 5 bullet (−) with 4em indent
 - `1. item` → Numbered list
 
 **Features:**
