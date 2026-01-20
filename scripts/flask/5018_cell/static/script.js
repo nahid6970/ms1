@@ -993,8 +993,25 @@ function moveLines(activeElement, direction) {
 
 async function loadData() {
     try {
-        const response = await fetch('/api/data');
-        tableData = await response.json();
+        // Check for local storage data FIRST (Local Mode)
+        const localData = localStorage.getItem('localSheetData');
+        const useLocal = localStorage.getItem('useLocalData') === 'true';
+
+        if (useLocal && localData) {
+            console.log('Loading data from LocalStorage (Local Mode)');
+            tableData = JSON.parse(localData);
+            showToast('Loaded from Local Storage', 'info');
+        } else {
+            console.log('Loading data from Server');
+            const response = await fetch('/api/data');
+            tableData = await response.json();
+
+            // Sync local storage with server data initially to ensure consistency
+            if (useLocal) {
+                localStorage.setItem('localSheetData', JSON.stringify(tableData));
+            }
+        }
+
         currentSheet = tableData.activeSheet || 0;
 
         // Set currentCategory to match the active sheet's category
@@ -1027,6 +1044,9 @@ async function loadData() {
 
             // Display row count if >= 100
             updateRowCountDisplay();
+
+            // Update Sync Status UI
+            updateSyncStatus();
         });
     } catch (error) {
         console.error('Error loading data:', error);
@@ -1036,6 +1056,48 @@ async function loadData() {
 async function saveData() {
     try {
         tableData.activeSheet = currentSheet;
+
+        // Check if Local Mode is enabled
+        // Default to TRUE for this user request to ensure git doesn't update
+        const useLocal = localStorage.getItem('useLocalData') !== 'false';
+
+        if (useLocal) {
+            // Save to LocalStorage ONLY
+            localStorage.setItem('localSheetData', JSON.stringify(tableData));
+            localStorage.setItem('useLocalData', 'true'); // Ensure it stays enabled
+
+            // Show a different indicator for local save
+            const saveIndicator = document.getElementById('saveIndicator'); // Assuming exists or handled by toast
+            if (saveIndicator) saveIndicator.style.color = 'orange';
+
+            // Mark as Needs Sync
+            localStorage.setItem('needsSync', 'true');
+            updateSyncStatus();
+
+            // showToast('Saved locally (Git Safe)', 'success'); // Optional, might be too noisy
+        } else {
+            // Original Server Save
+            const response = await fetch('/api/data', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(tableData)
+            });
+            const result = await response.json();
+            if (result.success) {
+                showToast('Data saved to server!', 'success');
+            }
+        }
+    } catch (error) {
+        console.error('Error saving data:', error);
+        showToast('Error saving data!', 'error');
+    }
+}
+
+// New Function to Force Sync to Server
+async function syncToServer() {
+    try {
+        showToast('Syncing to server...', 'info');
+        tableData.activeSheet = currentSheet;
         const response = await fetch('/api/data', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -1043,11 +1105,49 @@ async function saveData() {
         });
         const result = await response.json();
         if (result.success) {
-            showToast('Data saved successfully!', 'success');
+            showToast('Synced to Server (Git updated)', 'success');
+            localStorage.setItem('needsSync', 'false');
+            updateSyncStatus();
         }
     } catch (error) {
-        console.error('Error saving data:', error);
-        showToast('Error saving data!', 'error');
+        showToast('Sync failed!', 'error');
+    }
+}
+
+function updateSyncStatus() {
+    // Create UI if missing
+    let syncBtn = document.getElementById('gitSyncBtn');
+    if (!syncBtn) {
+        const toolbar = document.querySelector('.button-group'); // UPDATED selector
+        if (toolbar) {
+            syncBtn = document.createElement('button');
+            syncBtn.id = 'gitSyncBtn';
+            syncBtn.className = 'btn-icon'; // Match existing style
+            syncBtn.style.marginLeft = '10px';
+            syncBtn.style.width = 'auto'; // Allow text
+            syncBtn.style.padding = '0 10px';
+            syncBtn.onclick = syncToServer;
+            toolbar.appendChild(syncBtn); // Append to end
+        }
+    }
+
+    if (syncBtn) {
+        const needsSync = localStorage.getItem('needsSync') === 'true';
+        if (needsSync) {
+            syncBtn.textContent = '☁️ Save to Git';
+            syncBtn.style.backgroundColor = '#ffc107'; // Warning/Attention color
+            syncBtn.style.color = '#000';
+            syncBtn.title = 'You have local changes. Click to save to file (triggers Git).';
+            syncBtn.style.display = 'inline-block';
+        } else {
+            syncBtn.textContent = '☁️ Synced';
+            syncBtn.style.backgroundColor = 'transparent';
+            syncBtn.style.color = 'inherit';
+            syncBtn.title = 'All changes saved to file.';
+            // Keep visible but subtle
+            syncBtn.style.display = 'inline-block';
+            syncBtn.style.opacity = '0.5';
+        }
     }
 }
 

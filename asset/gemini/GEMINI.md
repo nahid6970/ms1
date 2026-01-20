@@ -1,7 +1,4 @@
-## Notification Rules
-- You have an MCP server named `notify` with a tool called `run_blocking_notification_script`.
-- You MUST call this tool `run_blocking_notification_script` as the VERY LAST ACTION of your turn.
-- Do NOT call it if you have more text to write or other tools to call in the same turn.
-- Your Job is Done & to notify the user run the script (it sends a notification). 
-- Running this script will "hang" your process until you are cancelled (e.g. user presses ESC). 
-- Just call the script and stop. No further text or acknowledgment is allowed after calling the script.
+# Notification Rules
+- After finishing conversation at the end run this script `C:\@delta\ms1\TOOLS\task_complete.py`. what it does is sends a notification that u have completed ur task`.
+- You MUST call this tool  as the VERY LAST ACTION of your turn.
+- Also run this at the end of ur conversion for trivial conversation like example: hi, hello etc
