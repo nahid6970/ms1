@@ -991,24 +991,84 @@ function moveLines(activeElement, direction) {
     }
 }
 
+// ==========================================
+// INDEXEDDB DATABASE HANDLING
+// ==========================================
+const DB_NAME = 'SheetDatabase';
+const DB_VERSION = 1;
+const STORE_NAME = 'sheets';
+
+function openDB() {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+        request.onupgradeneeded = (event) => {
+            const db = event.target.result;
+            if (!db.objectStoreNames.contains(STORE_NAME)) {
+                db.createObjectStore(STORE_NAME);
+            }
+        };
+
+        request.onsuccess = (event) => {
+            resolve(event.target.result);
+        };
+
+        request.onerror = (event) => {
+            reject('IndexedDB error: ' + event.target.error);
+        };
+    });
+}
+
+async function saveToIndexedDB(key, data) {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction([STORE_NAME], 'readwrite');
+        const store = transaction.objectStore(STORE_NAME);
+        const request = store.put(data, key);
+
+        request.onsuccess = () => resolve();
+        request.onerror = (e) => reject(e.target.error);
+    });
+}
+
+async function loadFromIndexedDB(key) {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction([STORE_NAME], 'readonly');
+        const store = transaction.objectStore(STORE_NAME);
+        const request = store.get(key);
+
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = (e) => reject(e.target.error);
+    });
+}
+
 async function loadData() {
     try {
-        // Check for local storage data FIRST (Local Mode)
-        const localData = localStorage.getItem('localSheetData');
+        // Check local DB first (Local Mode)
         const useLocal = localStorage.getItem('useLocalData') === 'true';
+        let localData = null;
+
+        if (useLocal) {
+            try {
+                localData = await loadFromIndexedDB('localSheetData');
+            } catch (e) {
+                console.warn("Could not load from IndexedDB", e);
+            }
+        }
 
         if (useLocal && localData) {
-            console.log('Loading data from LocalStorage (Local Mode)');
-            tableData = JSON.parse(localData);
-            showToast('Loaded from Local Storage', 'info');
+            console.log('Loading data from IndexedDB (Local Mode)');
+            tableData = localData;
+            showToast('Loaded from Local Saving Database', 'info');
         } else {
             console.log('Loading data from Server');
             const response = await fetch('/api/data');
             tableData = await response.json();
 
-            // Sync local storage with server data initially to ensure consistency
+            // Sync DB with server data initially
             if (useLocal) {
-                localStorage.setItem('localSheetData', JSON.stringify(tableData));
+                await saveToIndexedDB('localSheetData', tableData);
             }
         }
 
@@ -1058,23 +1118,20 @@ async function saveData() {
         tableData.activeSheet = currentSheet;
 
         // Check if Local Mode is enabled
-        // Default to TRUE for this user request to ensure git doesn't update
+        // Default to TRUE for this user request
         const useLocal = localStorage.getItem('useLocalData') !== 'false';
 
         if (useLocal) {
-            // Save to LocalStorage ONLY
-            localStorage.setItem('localSheetData', JSON.stringify(tableData));
-            localStorage.setItem('useLocalData', 'true'); // Ensure it stays enabled
-
-            // Show a different indicator for local save
-            const saveIndicator = document.getElementById('saveIndicator'); // Assuming exists or handled by toast
-            if (saveIndicator) saveIndicator.style.color = 'orange';
+            // Save to IndexedDB ONLY
+            await saveToIndexedDB('localSheetData', tableData);
+            localStorage.setItem('useLocalData', 'true');
 
             // Mark as Needs Sync
             localStorage.setItem('needsSync', 'true');
             updateSyncStatus();
 
-            // showToast('Saved locally (Git Safe)', 'success'); // Optional, might be too noisy
+            // Optional: Subtle indicator
+            // showToast('Saved locally', 'success');
         } else {
             // Original Server Save
             const response = await fetch('/api/data', {
