@@ -116,7 +116,44 @@ def generate_static_html(data, custom_syntaxes):
             border-bottom: 1px solid #ddd;
             flex-wrap: nowrap;
             overflow-x: auto;
+            overflow-x: auto;
             overflow-y: visible;
+        }
+
+        .main-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 20px;
+            background: white;
+            border-bottom: 1px solid #eee;
+            min-height: 40px;
+        }
+
+        .current-sheet-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            white-space: nowrap;
+        }
+
+        .current-category-title {
+            font-size: 13px;
+            color: #666;
+            white-space: nowrap;
+        }
+
+        .header-separator {
+            color: #ccc;
+            margin: 0 4px;
+        }
+
+        .header-info-wrapper {
+            display: flex;
+            align-items: baseline;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
         }
 
 
@@ -517,7 +554,16 @@ def generate_static_html(data, custom_syntaxes):
                 padding: 8px 10px;
                 gap: 5px;
                 flex-wrap: nowrap;
+                flex-wrap: nowrap;
                 overflow-x: auto;
+            }
+
+            .main-header {
+                padding: 8px 10px;
+            }
+            
+            .current-sheet-title {
+                font-size: 15px;
             }
 
             .category-controls {
@@ -3213,13 +3259,17 @@ def generate_static_html(data, custom_syntaxes):
     </div>
 
     <div class="container">
-        <div class="sheet-tabs">
+        <!-- Main Header with Sheet Info -->
+        <div class="main-header">
             <button class="btn-menu" onclick="toggleSidebar()" title="Open Navigation">☰</button>
-            <div class="current-sheet-info">
+            <div class="header-info-wrapper">
                 <span id="currentSheetTitle" class="current-sheet-title">Sheet1</span>
+                <span class="header-separator">•</span>
                 <span id="currentCategoryTitle" class="current-category-title">Uncategorized</span>
             </div>
+        </div>
 
+        <div class="sheet-tabs">
             <div class="search-box">
                 <input type="text" id="searchInput" placeholder="Search..." onkeyup="searchTable()" title="Search in all cells">
                 <button onclick="clearSearch()" class="btn-clear-search" title="Clear search">×</button>

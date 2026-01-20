@@ -22,6 +22,10 @@
   - Added button to UI (magnifying glass) for mobile access.
   - Implemented responsive layout for categories and sheet grid.
   - Supports F1 hotkey and category filtering.
+- **Layout**: Optimized header for mobile.
+  - Moved Sheet Name and Category to a dedicated top bar.
+  - combined Name and Category into a single line (`Name • Category`).
+  - Reduced toolbar clutter and prevented height issues on mobile.
 
 **Files Modified:**
 - `app.py` - Updated `STATE_FILE` path and added directory creation.
