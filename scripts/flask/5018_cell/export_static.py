@@ -1182,6 +1182,135 @@ def generate_static_html(data, custom_syntaxes):
             color: #666;
             margin-top: 8px;
         }
+        }
+        
+        /* F1 Modal Styles */
+        .f1-modal {
+            max-width: 800px;
+            width: 90%;
+            height: 80vh;
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .f1-content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            border-top: 1px solid #eee;
+        }
+
+        .f1-sidebar {
+            width: 250px;
+            background: #f8f9fa;
+            border-right: 1px solid #ddd;
+            padding: 15px;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .f1-main {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            background: white;
+        }
+
+        .f1-category-item {
+            padding: 8px 12px;
+            margin-bottom: 4px;
+            cursor: pointer;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: #333;
+        }
+
+        .f1-category-item:hover {
+            background: #e9ecef;
+        }
+
+        .f1-category-item.active {
+            background: #007bff;
+            color: white;
+        }
+
+        .f1-category-count {
+            background: rgba(0,0,0,0.1);
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 12px;
+        }
+
+        .f1-sheet-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+        }
+
+        .f1-sheet-card {
+            padding: 15px;
+            border: 1px solid #eee;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: white;
+        }
+
+        .f1-sheet-card:hover {
+            border-color: #007bff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            transform: translateY(-1px);
+        }
+
+        .f1-sheet-name {
+            font-weight: 500;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .f1-sheet-path {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        /* Mobile Responsive F1 */
+        @media (max-width: 768px) {
+            .f1-content {
+                flex-direction: column;
+            }
+
+            .f1-sidebar {
+                width: 100%;
+                height: 150px;
+                border-right: none;
+                border-bottom: 1px solid #ddd;
+            }
+
+            .f1-category-list {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 5px;
+            }
+
+            .f1-category-item {
+                flex: 0 0 auto;
+                background: white;
+                border: 1px solid #ddd;
+            }
+            
+            .f1-sheet-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .f1-modal {
+                height: 90vh;
+                width: 95%;
+            }
+        }
     </style>
     <script>
         let tableData = ''' + json.dumps(data) + ''';
@@ -2797,6 +2926,145 @@ def generate_static_html(data, custom_syntaxes):
             }
         }
 
+        // ==================== F1 NAVIGATION ====================
+        let selectedF1Category = null;
+
+        function openF1Modal() {
+            const modal = document.getElementById('f1Modal');
+            if (modal) {
+                modal.style.display = 'flex';
+                populateF1Categories();
+                selectF1Category(selectedF1Category); // Refresh sheet list
+                
+                // Close sidebar if open (for mobile)
+                const sidebar = document.getElementById('sidebar');
+                if (sidebar && sidebar.classList.contains('show')) {
+                    toggleSidebar();
+                }
+            }
+        }
+
+        function closeF1Modal() {
+            const modal = document.getElementById('f1Modal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        function populateF1Categories() {
+            const list = document.getElementById('f1CategoryList');
+            if (!list) return;
+
+            list.innerHTML = '';
+
+            // Group sheets by category
+            const categoryMap = { 'Uncategorized': [] };
+            if (tableData.categories) {
+                tableData.categories.forEach(cat => categoryMap[cat] = []);
+            }
+
+            tableData.sheets.forEach((sheet, index) => {
+                const cat = tableData.sheetCategories[index] || tableData.sheetCategories[String(index)] || 'Uncategorized';
+                if (!categoryMap[cat]) categoryMap[cat] = [];
+                categoryMap[cat].push(sheet);
+            });
+
+            // All Categories Item
+            const allItem = document.createElement('div');
+            allItem.className = 'f1-category-item' + (selectedF1Category === null ? ' active' : '');
+            allItem.innerHTML = `
+                <span>All Sheets</span>
+                <span class="f1-category-count">${tableData.sheets.length}</span>
+            `;
+            allItem.onclick = () => selectF1Category(null);
+            list.appendChild(allItem);
+
+            // Other Categories
+            Object.keys(categoryMap).forEach(cat => {
+                const count = categoryMap[cat].length;
+                if (count === 0 && cat !== 'Uncategorized') return; // Skip empty except uncategorized if it exists in data
+
+                const item = document.createElement('div');
+                item.className = 'f1-category-item' + (selectedF1Category === cat ? ' active' : '');
+                item.innerHTML = `
+                    <span>${cat}</span>
+                    <span class="f1-category-count">${count}</span>
+                `;
+                item.onclick = () => selectF1Category(cat);
+                list.appendChild(item);
+            });
+        }
+
+        function selectF1Category(category) {
+            selectedF1Category = category;
+            
+            // Update UI highlight
+            const items = document.querySelectorAll('.f1-category-item');
+            items.forEach(item => {
+                const name = item.querySelector('span').textContent;
+                if (category === null && name === 'All Sheets') {
+                    item.classList.add('active');
+                } else if (category === name) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+
+            renderF1SheetList();
+        }
+
+        function renderF1SheetList() {
+            const container = document.getElementById('f1SheetList');
+            if (!container) return;
+
+            container.innerHTML = '';
+            const grid = document.createElement('div');
+            grid.className = 'f1-sheet-grid';
+
+            tableData.sheets.forEach((sheet, index) => {
+                // Filter by category
+                const sheetCat = tableData.sheetCategories[index] || tableData.sheetCategories[String(index)] || 'Uncategorized';
+                if (selectedF1Category !== null && sheetCat !== selectedF1Category) {
+                    return;
+                }
+
+                const card = document.createElement('div');
+                card.className = 'f1-sheet-card';
+                card.onclick = () => {
+                    switchSheet(index);
+                    closeF1Modal();
+                };
+
+                const nickname = sheet.nickname ? ` (${sheet.nickname})` : '';
+                
+                card.innerHTML = `
+                    <div class="f1-sheet-name">📄 ${sheet.name}${nickname}</div>
+                    <div class="f1-sheet-path">${sheetCat}</div>
+                `;
+                grid.appendChild(card);
+            });
+
+            if (grid.children.length === 0) {
+                container.innerHTML = '<div style="padding: 20px; text-align: center; color: #666;">No sheets found in this category</div>';
+            } else {
+                container.appendChild(grid);
+            }
+        }
+
+        // Add keyboard listener for F1
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'F1') {
+                e.preventDefault();
+                const modal = document.getElementById('f1Modal');
+                if (modal.style.display === 'flex') {
+                    closeF1Modal();
+                } else {
+                    openF1Modal();
+                }
+            }
+        });
+
         // ==================== CUSTOM COLOR SYNTAX ====================
         let customColorSyntaxes = ''' + json.dumps(custom_syntaxes) + ''';
 
@@ -2987,6 +3255,9 @@ def generate_static_html(data, custom_syntaxes):
             <button onclick="openSettings()" class="btn-icon-toggle" title="Settings" style="margin-left: 5px;">
                 <span>⚙️</span>
             </button>
+            <button onclick="openF1Modal()" class="btn-icon-toggle" title="Quick Navigation (F1)" style="margin-left: 5px;">
+                <span>🔍</span>
+            </button>
         </div>
 
         <!-- Sub-Sheet Navigation Bar -->
@@ -3033,6 +3304,26 @@ def generate_static_html(data, custom_syntaxes):
                         </div>
                         <p class="settings-description">Customize the color of table borders and cell separators</p>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+    <!-- F1 Navigation Modal -->
+    <div id="f1Modal" class="modal" style="display: none;">
+        <div class="modal-content f1-modal">
+            <div class="modal-header">
+                <h2>Quick Navigation</h2>
+                <span class="close" onclick="closeF1Modal()">&times;</span>
+            </div>
+            <div class="f1-content">
+                <div class="f1-sidebar">
+                    <h3>Categories</h3>
+                    <div id="f1CategoryList" class="f1-category-list"></div>
+                </div>
+                <div class="f1-main">
+                    <h3>Sheets</h3>
+                    <div id="f1SheetList" class="f1-sheet-list"></div>
                 </div>
             </div>
         </div>
