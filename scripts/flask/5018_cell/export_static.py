@@ -1698,6 +1698,7 @@ def generate_static_html(data, custom_syntaxes):
                     if (cellStyle.bold) cellContent.style.fontWeight = 'bold';
                     if (cellStyle.italic) cellContent.style.fontStyle = 'italic';
                     if (cellStyle.center) cellContent.style.textAlign = 'center';
+                    if (cellStyle.justify) cellContent.style.textAlign = 'justify';
                     if (cellStyle.complete) td.classList.add('cell-complete');
                     
                     // Handle borders properly
