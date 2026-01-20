@@ -991,87 +991,10 @@ function moveLines(activeElement, direction) {
     }
 }
 
-// ==========================================
-// INDEXEDDB DATABASE HANDLING
-// ==========================================
-const DB_NAME = 'SheetDatabase';
-const DB_VERSION = 1;
-const STORE_NAME = 'sheets';
-
-function openDB() {
-    return new Promise((resolve, reject) => {
-        const request = indexedDB.open(DB_NAME, DB_VERSION);
-
-        request.onupgradeneeded = (event) => {
-            const db = event.target.result;
-            if (!db.objectStoreNames.contains(STORE_NAME)) {
-                db.createObjectStore(STORE_NAME);
-            }
-        };
-
-        request.onsuccess = (event) => {
-            resolve(event.target.result);
-        };
-
-        request.onerror = (event) => {
-            reject('IndexedDB error: ' + event.target.error);
-        };
-    });
-}
-
-async function saveToIndexedDB(key, data) {
-    const db = await openDB();
-    return new Promise((resolve, reject) => {
-        const transaction = db.transaction([STORE_NAME], 'readwrite');
-        const store = transaction.objectStore(STORE_NAME);
-        const request = store.put(data, key);
-
-        request.onsuccess = () => resolve();
-        request.onerror = (e) => reject(e.target.error);
-    });
-}
-
-async function loadFromIndexedDB(key) {
-    const db = await openDB();
-    return new Promise((resolve, reject) => {
-        const transaction = db.transaction([STORE_NAME], 'readonly');
-        const store = transaction.objectStore(STORE_NAME);
-        const request = store.get(key);
-
-        request.onsuccess = () => resolve(request.result);
-        request.onerror = (e) => reject(e.target.error);
-    });
-}
-
 async function loadData() {
     try {
-        // Check local DB first (Local Mode)
-        const useLocal = localStorage.getItem('useLocalData') === 'true';
-        let localData = null;
-
-        if (useLocal) {
-            try {
-                localData = await loadFromIndexedDB('localSheetData');
-            } catch (e) {
-                console.warn("Could not load from IndexedDB", e);
-            }
-        }
-
-        if (useLocal && localData) {
-            console.log('Loading data from IndexedDB (Local Mode)');
-            tableData = localData;
-            showToast('Loaded from Local Saving Database', 'info');
-        } else {
-            console.log('Loading data from Server');
-            const response = await fetch('/api/data');
-            tableData = await response.json();
-
-            // Sync DB with server data initially
-            if (useLocal) {
-                await saveToIndexedDB('localSheetData', tableData);
-            }
-        }
-
+        const response = await fetch('/api/data');
+        tableData = await response.json();
         currentSheet = tableData.activeSheet || 0;
 
         // Set currentCategory to match the active sheet's category
@@ -1104,9 +1027,6 @@ async function loadData() {
 
             // Display row count if >= 100
             updateRowCountDisplay();
-
-            // Update Sync Status UI
-            updateSyncStatus();
         });
     } catch (error) {
         console.error('Error loading data:', error);
@@ -1116,45 +1036,6 @@ async function loadData() {
 async function saveData() {
     try {
         tableData.activeSheet = currentSheet;
-
-        // Check if Local Mode is enabled
-        // Default to TRUE for this user request
-        const useLocal = localStorage.getItem('useLocalData') !== 'false';
-
-        if (useLocal) {
-            // Save to IndexedDB ONLY
-            await saveToIndexedDB('localSheetData', tableData);
-            localStorage.setItem('useLocalData', 'true');
-
-            // Mark as Needs Sync
-            localStorage.setItem('needsSync', 'true');
-            updateSyncStatus();
-
-            // Optional: Subtle indicator
-            // showToast('Saved locally', 'success');
-        } else {
-            // Original Server Save
-            const response = await fetch('/api/data', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(tableData)
-            });
-            const result = await response.json();
-            if (result.success) {
-                showToast('Data saved to server!', 'success');
-            }
-        }
-    } catch (error) {
-        console.error('Error saving data:', error);
-        showToast('Error saving data!', 'error');
-    }
-}
-
-// New Function to Force Sync to Server
-async function syncToServer() {
-    try {
-        showToast('Syncing to server...', 'info');
-        tableData.activeSheet = currentSheet;
         const response = await fetch('/api/data', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -1162,49 +1043,11 @@ async function syncToServer() {
         });
         const result = await response.json();
         if (result.success) {
-            showToast('Synced to Server (Git updated)', 'success');
-            localStorage.setItem('needsSync', 'false');
-            updateSyncStatus();
+            showToast('Data saved successfully!', 'success');
         }
     } catch (error) {
-        showToast('Sync failed!', 'error');
-    }
-}
-
-function updateSyncStatus() {
-    // Create UI if missing
-    let syncBtn = document.getElementById('gitSyncBtn');
-    if (!syncBtn) {
-        const toolbar = document.querySelector('.button-group'); // UPDATED selector
-        if (toolbar) {
-            syncBtn = document.createElement('button');
-            syncBtn.id = 'gitSyncBtn';
-            syncBtn.className = 'btn-icon'; // Match existing style
-            syncBtn.style.marginLeft = '10px';
-            syncBtn.style.width = 'auto'; // Allow text
-            syncBtn.style.padding = '0 10px';
-            syncBtn.onclick = syncToServer;
-            toolbar.appendChild(syncBtn); // Append to end
-        }
-    }
-
-    if (syncBtn) {
-        const needsSync = localStorage.getItem('needsSync') === 'true';
-        if (needsSync) {
-            syncBtn.textContent = '☁️ Save to Git';
-            syncBtn.style.backgroundColor = '#ffc107'; // Warning/Attention color
-            syncBtn.style.color = '#000';
-            syncBtn.title = 'You have local changes. Click to save to file (triggers Git).';
-            syncBtn.style.display = 'inline-block';
-        } else {
-            syncBtn.textContent = '☁️ Synced';
-            syncBtn.style.backgroundColor = 'transparent';
-            syncBtn.style.color = 'inherit';
-            syncBtn.title = 'All changes saved to file.';
-            // Keep visible but subtle
-            syncBtn.style.display = 'inline-block';
-            syncBtn.style.opacity = '0.5';
-        }
+        console.error('Error saving data:', error);
+        showToast('Error saving data!', 'error');
     }
 }
 
