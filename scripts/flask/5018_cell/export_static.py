@@ -1284,6 +1284,7 @@ def generate_static_html(data, custom_syntaxes):
             align-items: center;
             justify-content: space-between;
             color: #333;
+            transition: all 0.2s;
         }
 
         .f1-category-item:hover {
@@ -1293,6 +1294,16 @@ def generate_static_html(data, custom_syntaxes):
         .f1-category-item.active {
             background: #007bff;
             color: white;
+        }
+        
+        /* Highlight for the category the user is physically on, distinct from selection */
+        .f1-category-item.current-context {
+            border-left: 3px solid #28a745; /* Green indicator */
+            padding-left: 9px; /* Adjust for border */
+        }
+        
+        .f1-category-item.active.current-context {
+            border-left-color: #fff; /* White indicator when active */
         }
 
         .f1-category-count {
@@ -1439,9 +1450,11 @@ def generate_static_html(data, custom_syntaxes):
             // Render Categories
             Object.keys(categoryMap).forEach(catName => {
                 const sheets = categoryMap[catName];
+                // Check if this category contains the current sheet
+                const isCurrentCategory = sheets.some(s => s.originalIndex === currentSheet);
 
                 const catDiv = document.createElement('div');
-                catDiv.className = 'tree-category collapsed'; // Start collapsed
+                catDiv.className = isCurrentCategory ? 'tree-category' : 'tree-category collapsed';
 
                 const header = document.createElement('div');
                 header.className = 'tree-category-header tree-item';
@@ -1452,8 +1465,10 @@ def generate_static_html(data, custom_syntaxes):
                     icon.textContent = catDiv.classList.contains('collapsed') ? '📁' : '📂';
                 };
 
+                const initialIcon = isCurrentCategory ? '📂' : '📁';
+
                 header.innerHTML = `
-                    <span class="tree-icon">📁</span>
+                    <span class="tree-icon">${initialIcon}</span>
                     <span class="tree-label">${catName}</span>
                 `;
 
@@ -2985,13 +3000,34 @@ def generate_static_html(data, custom_syntaxes):
 
         // ==================== F1 NAVIGATION ====================
         let selectedF1Category = null;
+        let f1ModalState = {
+            initialized: false,
+            lastSelectedCategory: null, // What the user explicitly clicked
+            currentSheetCategory: null // Where the user is currently at
+        };
 
         function openF1Modal() {
             const modal = document.getElementById('f1Modal');
             if (modal) {
                 modal.style.display = 'flex';
+                
+                // Determine initial category state
+                const currentSheetCat = tableData.sheetCategories[currentSheet] || tableData.sheetCategories[String(currentSheet)] || 'Uncategorized';
+                f1ModalState.currentSheetCategory = currentSheetCat;
+
+                // Priority for selection:
+                // 1. If we have a saved last selection, use that (persistence)
+                // 2. Else, default to the current sheet's category
+                if (!f1ModalState.initialized) {
+                    selectedF1Category = currentSheetCat;
+                    f1ModalState.lastSelectedCategory = currentSheetCat;
+                    f1ModalState.initialized = true;
+                } else if (f1ModalState.lastSelectedCategory !== undefined) {
+                    selectedF1Category = f1ModalState.lastSelectedCategory;
+                }
+
                 populateF1Categories();
-                selectF1Category(selectedF1Category); // Refresh sheet list
+                selectF1Category(selectedF1Category, false); // false = don't overwrite lastSelected if just opening
                 
                 // Close sidebar if open (for mobile)
                 const sidebar = document.getElementById('sidebar');
@@ -3039,32 +3075,43 @@ def generate_static_html(data, custom_syntaxes):
             // Other Categories
             Object.keys(categoryMap).forEach(cat => {
                 const count = categoryMap[cat].length;
-                if (count === 0 && cat !== 'Uncategorized') return; // Skip empty except uncategorized if it exists in data
+                if (count === 0 && cat !== 'Uncategorized') return;
 
                 const item = document.createElement('div');
                 item.className = 'f1-category-item' + (selectedF1Category === cat ? ' active' : '');
+                
+                // Highlight if this is the category of the currently open sheet
+                if (cat === f1ModalState.currentSheetCategory) {
+                    item.classList.add('current-context');
+                }
+
                 item.innerHTML = `
                     <span>${cat}</span>
                     <span class="f1-category-count">${count}</span>
                 `;
-                item.onclick = () => selectF1Category(cat);
+                item.onclick = () => selectF1Category(cat, true);
                 list.appendChild(item);
             });
         }
 
-        function selectF1Category(category) {
+        function selectF1Category(category, userInteraction = true) {
             selectedF1Category = category;
+            if (userInteraction) {
+                f1ModalState.lastSelectedCategory = category;
+            }
             
             // Update UI highlight
             const items = document.querySelectorAll('.f1-category-item');
             items.forEach(item => {
                 const name = item.querySelector('span').textContent;
+                
+                // Reset active state
+                item.classList.remove('active');
+                
                 if (category === null && name === 'All Sheets') {
                     item.classList.add('active');
                 } else if (category === name) {
                     item.classList.add('active');
-                } else {
-                    item.classList.remove('active');
                 }
             });
 

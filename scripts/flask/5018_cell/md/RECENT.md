@@ -29,7 +29,14 @@
 - **Theming**: Applied Cyberpunk styling to the Sidebar Tree View.
   - Updated both `static/style.css` (Main App) and `export_static.py` (Static Export).
   - Dark background (`#050505`) with Neon Green (`#00ff41`) and Cyan (`#00d2ff`) accents.
+  - Dark background (`#050505`) with Neon Green (`#00ff41`) and Cyan (`#00d2ff`) accents.
   - High-contrast text and hover effects.
+- **F1 Window Logic**: Enhanced State Persistence & Context Highlighting.
+  - **State Memory**: Reopening modal restores last selected category/view.
+  - **Context Highlight**: Sidebar indicates the *current sheet's category* with a green border (`current-context` class), separate from the *active selection*.
+  - **Smart Defaults**: Initial open selects the current sheet's category automatically.
+- **Sidebar UX**: Fixed issue where categories would collapse upon selecting a sheet.
+  - Sidebar now auto-expands the category containing the active sheet during render.
 
 **Files Modified:**
 - `app.py` - Updated `STATE_FILE` path and added directory creation.
