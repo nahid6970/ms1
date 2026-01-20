@@ -14,7 +14,7 @@
             }
         ],
         "folder_exists": true,
-        "notify": "unseen"
+        "notify": "seen"
     },
     {
         "id": 2,
@@ -31,7 +31,7 @@
             }
         ],
         "folder_exists": true,
-        "notify": "unseen"
+        "notify": "seen"
     },
     {
         "id": 3,
@@ -48,7 +48,7 @@
             }
         ],
         "folder_exists": true,
-        "notify": "unseen"
+        "notify": "seen"
     },
     {
         "id": 4,
@@ -65,7 +65,7 @@
             }
         ],
         "folder_exists": true,
-        "notify": "unseen"
+        "notify": "seen"
     },
     {
         "id": 5,
@@ -82,7 +82,7 @@
             }
         ],
         "folder_exists": true,
-        "notify": "unseen"
+        "notify": "seen"
     },
     {
         "id": 6,
@@ -99,7 +99,7 @@
             }
         ],
         "folder_exists": true,
-        "notify": "unseen"
+        "notify": "seen"
     },
     {
         "id": 7,
@@ -116,7 +116,7 @@
             }
         ],
         "folder_exists": true,
-        "notify": "unseen"
+        "notify": "seen"
     },
     {
         "id": 8,
@@ -133,7 +133,7 @@
             }
         ],
         "folder_exists": true,
-        "notify": "unseen"
+        "notify": "seen"
     },
     {
         "id": 9,
@@ -150,7 +150,7 @@
             }
         ],
         "folder_exists": true,
-        "notify": "unseen"
+        "notify": "seen"
     },
     {
         "id": 10,
@@ -167,7 +167,7 @@
             }
         ],
         "folder_exists": true,
-        "notify": "unseen"
+        "notify": "seen"
     },
     {
         "id": 11,
@@ -184,7 +184,7 @@
             }
         ],
         "folder_exists": true,
-        "notify": "unseen"
+        "notify": "seen"
     },
     {
         "id": 12,
@@ -201,7 +201,7 @@
             }
         ],
         "folder_exists": true,
-        "notify": "unseen"
+        "notify": "seen"
     },
     {
         "id": 13,
@@ -218,7 +218,7 @@
             }
         ],
         "folder_exists": true,
-        "notify": "unseen"
+        "notify": "seen"
     },
     {
         "id": 14,
@@ -235,7 +235,7 @@
             }
         ],
         "folder_exists": true,
-        "notify": "unseen"
+        "notify": "seen"
     },
     {
         "id": 15,
@@ -252,7 +252,7 @@
             }
         ],
         "folder_exists": true,
-        "notify": "unseen"
+        "notify": "seen"
     },
     {
         "id": 16,
@@ -269,7 +269,7 @@
             }
         ],
         "folder_exists": true,
-        "notify": "unseen"
+        "notify": "seen"
     },
     {
         "id": 17,
@@ -286,7 +286,7 @@
             }
         ],
         "folder_exists": true,
-        "notify": "unseen"
+        "notify": "seen"
     },
     {
         "id": 18,
@@ -303,7 +303,7 @@
             }
         ],
         "folder_exists": true,
-        "notify": "unseen"
+        "notify": "seen"
     },
     {
         "id": 19,
@@ -320,7 +320,7 @@
             }
         ],
         "folder_exists": true,
-        "notify": "unseen"
+        "notify": "seen"
     },
     {
         "id": 20,
@@ -337,7 +337,7 @@
             }
         ],
         "folder_exists": true,
-        "notify": "unseen"
+        "notify": "seen"
     },
     {
         "id": 21,
@@ -354,7 +354,7 @@
             }
         ],
         "folder_exists": true,
-        "notify": "unseen"
+        "notify": "seen"
     },
     {
         "id": 22,
@@ -371,7 +371,7 @@
             }
         ],
         "folder_exists": true,
-        "notify": "unseen"
+        "notify": "seen"
     },
     {
         "id": 23,
@@ -388,7 +388,7 @@
             }
         ],
         "folder_exists": true,
-        "notify": "unseen"
+        "notify": "seen"
     },
     {
         "id": 24,
@@ -405,6 +405,6 @@
             }
         ],
         "folder_exists": true,
-        "notify": "unseen"
+        "notify": "seen"
     }
 ]

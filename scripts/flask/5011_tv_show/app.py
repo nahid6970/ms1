@@ -14,7 +14,7 @@ def add_header(response):
     return response
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-DATA_FILE = os.path.join(BASE_DIR, 'data.json')
+DATA_FILE = r"C:\@delta\db\5011_tv_show\data.json"
 ROOT_SHOWS_FOLDER = r"D:\Downloads\@Sonarr"
 
 def load_data():
