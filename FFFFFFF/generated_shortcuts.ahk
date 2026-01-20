@@ -267,16 +267,18 @@ LAlt & c:: {
         if (A_Clipboard != "") {
             ; Get the selected file path from the clipboard
             FilePath := A_Clipboard
+            ; Extract the directory from the file path
+            SplitPath(FilePath, , &FileDir)
             Ext := SubStr(FilePath, (InStr(FilePath, ".", 0, -1) + 1)<1 ? (InStr(FilePath, ".", 0, -1) + 1)-1 : (InStr(FilePath, ".", 0, -1) + 1))
-            ; Check the extension and run the appropriate command
+            ; Check the extension and run the appropriate command with working directory
             if (Ext = "py") {
-                Run("cmd /k python `"" FilePath "`"", , , &PID)
+                Run("cmd /k python `"" FilePath "`"", FileDir, , &PID)
             } else if (Ext = "ps1") {
-                Run("cmd /k powershell -ExecutionPolicy Bypass -File `"" FilePath "`"", , , &PID)
+                Run("cmd /k powershell -ExecutionPolicy Bypass -File `"" FilePath "`"", FileDir, , &PID)
             } else if (Ext = "bat") {
-                Run("cmd /k `"" FilePath "`"", , , &PID)
+                Run("cmd /k `"" FilePath "`"", FileDir, , &PID)
             } else if (Ext = "ahk") {
-                Run("cmd /k `"" FilePath "`"", , , &PID)
+                Run("cmd /k `"" FilePath "`"", FileDir, , &PID)
             } else {
                 MsgBox("Unsupported file type: " Ext)
             }
