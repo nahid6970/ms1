@@ -3566,6 +3566,8 @@ function toggleCellCenter() {
         selectedCells.forEach(cell => {
             const cellInput = cell.td.querySelector('input, textarea');
             setCellStyle(cell.row, cell.col, 'center', newValue);
+            // Clear justify if setting center
+            if (newValue) setCellStyle(cell.row, cell.col, 'justify', false);
             if (cellInput) {
                 cellInput.style.textAlign = newValue ? 'center' : 'left';
             }
@@ -3574,10 +3576,44 @@ function toggleCellCenter() {
     } else {
         // Apply to single cell
         setCellStyle(rowIndex, colIndex, 'center', newValue);
+        // Clear justify if setting center
+        if (newValue) setCellStyle(rowIndex, colIndex, 'justify', false);
         inputElement.style.textAlign = newValue ? 'center' : 'left';
     }
 
     document.getElementById('ctxCenter').classList.toggle('checked', newValue);
+    document.getElementById('ctxJustify').classList.toggle('checked', false);
+}
+
+function toggleCellJustify() {
+    if (!contextMenuCell) return;
+
+    const { rowIndex, colIndex, inputElement } = contextMenuCell;
+    const style = getCellStyle(rowIndex, colIndex);
+    const newValue = !style.justify;
+
+    // Apply to multiple cells if selected
+    if (selectedCells.length > 0) {
+        selectedCells.forEach(cell => {
+            const cellInput = cell.td.querySelector('input, textarea');
+            setCellStyle(cell.row, cell.col, 'justify', newValue);
+            // Clear center if setting justify
+            if (newValue) setCellStyle(cell.row, cell.col, 'center', false);
+            if (cellInput) {
+                cellInput.style.textAlign = newValue ? 'justify' : 'left';
+            }
+        });
+        showToast(`Justify align ${newValue ? 'applied' : 'removed'} for ${selectedCells.length} cells`, 'success');
+    } else {
+        // Apply to single cell
+        setCellStyle(rowIndex, colIndex, 'justify', newValue);
+        // Clear center if setting justify
+        if (newValue) setCellStyle(rowIndex, colIndex, 'center', false);
+        inputElement.style.textAlign = newValue ? 'justify' : 'left';
+    }
+
+    document.getElementById('ctxJustify').classList.toggle('checked', newValue);
+    document.getElementById('ctxCenter').classList.toggle('checked', false);
 }
 
 function toggleCellComplete() {
@@ -3651,6 +3687,7 @@ function showCellContextMenu(e, rowIndex, colIndex, inputElement, tdElement) {
     document.getElementById('ctxBold').classList.toggle('checked', style.bold === true);
     document.getElementById('ctxItalic').classList.toggle('checked', style.italic === true);
     document.getElementById('ctxCenter').classList.toggle('checked', style.center === true);
+    document.getElementById('ctxJustify').classList.toggle('checked', style.justify === true);
     document.getElementById('ctxComplete').classList.toggle('checked', style.complete === true);
     document.getElementById('ctxSuperscript').classList.toggle('checked', style.superscriptMode === true);
 
@@ -7258,6 +7295,7 @@ function renderTable() {
             if (cellStyle.bold) input.style.fontWeight = 'bold';
             if (cellStyle.italic) input.style.fontStyle = 'italic';
             if (cellStyle.center) input.style.textAlign = 'center';
+            if (cellStyle.justify) input.style.textAlign = 'justify';
             if (cellStyle.complete) td.classList.add('cell-complete');
             if (cellStyle.border) {
                 const borderWidth = cellStyle.borderWidth || '1px';
