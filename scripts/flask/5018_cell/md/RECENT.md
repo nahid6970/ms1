@@ -37,6 +37,7 @@
   - **Smart Defaults**: Initial open selects the current sheet's category automatically.
 - **Sidebar UX**: Fixed issue where categories would collapse upon selecting a sheet.
   - Sidebar now auto-expands the category containing the active sheet during render.
+  - Applied to both `export_static.py` and `static/script.js`.
 
 **Files Modified:**
 - `app.py` - Updated `STATE_FILE` path and added directory creation.

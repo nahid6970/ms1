@@ -11768,9 +11768,11 @@ function renderSidebar() {
     // Render Categories
     Object.keys(categoryMap).forEach(catName => {
         const sheets = categoryMap[catName];
+        // Check if this category contains the current sheet
+        const isCurrentCategory = sheets.some(s => s.originalIndex === currentSheet);
 
         const catDiv = document.createElement('div');
-        catDiv.className = 'tree-category collapsed'; // Start collapsed
+        catDiv.className = isCurrentCategory ? 'tree-category' : 'tree-category collapsed';
 
         const header = document.createElement('div');
         header.className = 'tree-category-header tree-item';
@@ -11782,8 +11784,10 @@ function renderSidebar() {
         };
         header.oncontextmenu = (e) => showTreeContextMenu(e, 'category', catName);
 
+        const initialIcon = isCurrentCategory ? '📂' : '📁';
+
         header.innerHTML = `
-            <span class="tree-icon">📁</span>
+            <span class="tree-icon">${initialIcon}</span>
             <span class="tree-label">${catName}</span>
         `;
 
