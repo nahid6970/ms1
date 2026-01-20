@@ -26,6 +26,10 @@
   - Moved Sheet Name and Category to a dedicated top bar.
   - combined Name and Category into a single line (`Name • Category`).
   - Reduced toolbar clutter and prevented height issues on mobile.
+- **Theming**: Applied Cyberpunk styling to the Sidebar Tree View.
+  - Updated both `static/style.css` (Main App) and `export_static.py` (Static Export).
+  - Dark background (`#050505`) with Neon Green (`#00ff41`) and Cyan (`#00d2ff`) accents.
+  - High-contrast text and hover effects.
 
 **Files Modified:**
 - `app.py` - Updated `STATE_FILE` path and added directory creation.

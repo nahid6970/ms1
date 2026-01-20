@@ -620,38 +620,40 @@ def generate_static_html(data, custom_syntaxes):
             }
         }
 
-        /* Sidebar Navigation */
-        .sidebar-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 999;
-            display: none;
-        }
-
-        .sidebar-overlay.show {
-            display: block;
-        }
-
+        /* Sidebar Navigation - Cyberpunk Theme */
         .sidebar {
             position: fixed;
             top: 0;
             left: -300px;
             width: 300px;
             height: 100%;
-            background: white;
-            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+            background: #050505; /* Black */
+            border-right: 1px solid #1a1a1a;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
             z-index: 1000;
-            transition: left 0.3s ease;
+            transition: left 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
             display: flex;
             flex-direction: column;
         }
 
         .sidebar.show {
             left: 0;
+        }
+
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 999;
+            display: none;
+            backdrop-filter: blur(2px);
+        }
+
+        .sidebar-overlay.show {
+            display: block;
         }
 
         .sidebar-tree {
@@ -698,26 +700,31 @@ def generate_static_html(data, custom_syntaxes):
             color: #666;
         }
 
-        /* Tree Items */
+        /* Tree Items - Cyberpunk Theme */
         .tree-item {
             display: flex;
             align-items: center;
             padding: 8px 15px;
             cursor: pointer;
             user-select: none;
-            transition: background 0.2s;
-            color: #333;
+            transition: all 0.2s;
+            color: #cccccc;
             font-size: 14px;
+            border-left: 3px solid transparent;
         }
 
         .tree-item:hover {
-            background: #f0f0f0;
+            background: rgba(0, 255, 65, 0.05); /* Faint neon green */
+            color: #ffffff;
+            border-left-color: rgba(0, 255, 65, 0.4);
         }
 
         .tree-item.active {
-            background: #e7f3ff;
-            color: #007bff;
-            border-right: 3px solid #007bff;
+            background: rgba(0, 255, 65, 0.1);
+            color: #00ff41; /* Neon Green */
+            border-left-color: #00ff41;
+            border-right: none;
+            text-shadow: 0 0 8px rgba(0, 255, 65, 0.3);
         }
 
         .tree-category {
@@ -728,14 +735,18 @@ def generate_static_html(data, custom_syntaxes):
             display: flex;
             align-items: center;
             gap: 8px;
-            font-weight: 600;
-            color: #555;
+            font-weight: 700;
+            color: #00d2ff;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 0.5px;
             padding: 8px 12px;
-            border-radius: 4px;
+            border-radius: 0;
         }
 
         .tree-category-header:hover {
-            background: #f8f9fa;
+            background: rgba(0, 210, 255, 0.1);
+            color: #ffffff;
         }
 
         .tree-category-content {
@@ -753,7 +764,7 @@ def generate_static_html(data, custom_syntaxes):
             display: flex;
             align-items: center;
             gap: 6px;
-            border-radius: 4px;
+            border-radius: 0;
             margin: 0;
             position: relative;
             padding-top: 6px;
@@ -768,7 +779,7 @@ def generate_static_html(data, custom_syntaxes):
             top: 0;
             bottom: 50%;
             width: 1px;
-            background: #000;
+            background: #333;
         }
 
         /* Horizontal line (L shape) */
@@ -779,7 +790,7 @@ def generate_static_html(data, custom_syntaxes):
             top: 50%;
             width: 12px;
             height: 1px;
-            background: #000;
+            background: #333;
         }
 
         /* Last item - only show L corner, no line below */

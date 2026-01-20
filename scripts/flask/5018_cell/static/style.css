@@ -4119,32 +4119,38 @@ mark {
     background: #0056b3;
 }
 
+/* Sidebar Tree Container */
 .sidebar-tree {
     flex: 1;
     overflow-y: auto;
     padding: 10px 0;
 }
 
-/* Tree Items */
+/* Tree Items - Cyberpunk Theme */
 .tree-item {
     display: flex;
     align-items: center;
     padding: 8px 15px;
     cursor: pointer;
     user-select: none;
-    transition: background 0.2s;
-    color: #333;
+    transition: all 0.2s;
+    color: #cccccc;
     font-size: 14px;
+    border-left: 3px solid transparent;
 }
 
 .tree-item:hover {
-    background: #f0f0f0;
+    background: rgba(0, 255, 65, 0.05); /* Faint neon green */
+    color: #ffffff;
+    border-left-color: rgba(0, 255, 65, 0.4);
 }
 
 .tree-item.active {
-    background: #e7f3ff;
-    color: #007bff;
-    border-right: 3px solid #007bff;
+    background: rgba(0, 255, 65, 0.1);
+    color: #00ff41; /* Neon Green */
+    border-left-color: #00ff41;
+    border-right: none;
+    text-shadow: 0 0 8px rgba(0, 255, 65, 0.3);
 }
 
 .tree-category {
@@ -4155,14 +4161,18 @@ mark {
     display: flex;
     align-items: center;
     gap: 8px;
-    font-weight: 600;
-    color: #555;
+    font-weight: 700;
+    color: #00d2ff; /* Cyan for categories */
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 0.5px;
     padding: 8px 12px;
-    border-radius: 4px;
+    border-radius: 0;
 }
 
 .tree-category-header:hover {
-    background: #f8f9fa;
+    background: rgba(0, 210, 255, 0.1);
+    color: #ffffff;
 }
 
 .tree-category-content {
@@ -4180,7 +4190,7 @@ mark {
     display: flex;
     align-items: center;
     gap: 6px;
-    border-radius: 4px;
+    border-radius: 0;
     margin: 0;
     position: relative;
     padding-top: 6px;
@@ -4195,7 +4205,7 @@ mark {
     top: 0;
     bottom: 50%;
     width: 1px;
-    background: #ccc;
+    background: #333; /* Darker guide lines */
 }
 
 /* Horizontal line (L shape) */
@@ -4206,7 +4216,7 @@ mark {
     top: 50%;
     width: 12px;
     height: 1px;
-    background: #ccc;
+    background: #333; /* Darker guide lines */
 }
 
 /* Last item - only show L corner, no line below */
@@ -4235,9 +4245,10 @@ mark {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.7); /* Darker overlay */
     z-index: 999;
     display: none;
+    backdrop-filter: blur(2px);
 }
 
 .sidebar-overlay.show {
@@ -4250,10 +4261,11 @@ mark {
     left: -300px;
     width: 300px;
     height: 100%;
-    background: white;
-    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    background: #050505; /* Deep black bg */
+    border-right: 1px solid #1a1a1a;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
     z-index: 1000;
-    transition: left 0.3s ease;
+    transition: left 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
     display: flex;
     flex-direction: column;
 }
@@ -4264,36 +4276,38 @@ mark {
 
 .sidebar-toolbar {
     padding: 12px 15px;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid #1a1a1a;
+    background: #0a0a0a;
 }
 
 .btn-sidebar-action {
     width: 100%;
     padding: 8px 12px;
-    background: #007bff;
-    color: white;
-    border: none;
-    border-radius: 4px;
+    background: #0a0a0a;
+    color: #00ff41;
+    border: 1px solid #00ff41;
+    border-radius: 2px;
     cursor: pointer;
-    font-size: 14px;
+    font-size: 13px;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    transition: background 0.2s;
+    font-weight: 600;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 0 5px rgba(0, 255, 65, 0.1);
+    font-family: inherit;
 }
 
 .btn-sidebar-action:hover {
-    background: #0056b3;
+    background: #00ff41;
+    color: #000000;
+    box-shadow: 0 0 15px rgba(0, 255, 65, 0.4);
 }
 
-.sidebar-tree {
-    flex: 1;
-    overflow-y: auto;
-    padding: 10px 0;
-}
-
-/* Updated Header Styles */
+/* Header Styles Update for consistency with export */
 .btn-menu {
     background: none;
     border: 1px solid #ddd;
