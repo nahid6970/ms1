@@ -46,29 +46,43 @@ def save_data(data):
     # Ensure directory exists
     os.makedirs(os.path.dirname(STATE_FILE), exist_ok=True)
     with open(STATE_FILE, 'w') as f:
-        json.dump(state, f, indent=2)
+        json.dump(state, f, indent=2, sort_keys=True)
         
     # Save sheets to data file (excluding activeSheet)
     content = {k: v for k, v in data.items() if k != 'activeSheet'}
-    with open(DATA_FILE, 'w') as f:
-        json.dump(content, f, indent=2)
     
-    # Auto-export static HTML after saving data
-    try:
-        import subprocess
-        import sys
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        export_script_path = os.path.join(script_dir, 'export_static.py')
-        result = subprocess.run([sys.executable, export_script_path], 
-                              capture_output=True, text=True, cwd=script_dir)
-        if result.returncode == 0:
-            print("Auto-exported static HTML")
-            if result.stdout.strip():
-                print(result.stdout.strip())
-        else:
-            print(f"Auto-export failed: {result.stderr}")
-    except Exception as e:
-        print(f"Auto-export failed: {e}")
+    # Check if data has actually changed before writing
+    existing_content = None
+    if os.path.exists(DATA_FILE):
+        try:
+            with open(DATA_FILE, 'r') as f:
+                existing_content = json.load(f)
+        except:
+            existing_content = None
+    
+    # Compare: only write if content is different
+    if existing_content != content:
+        with open(DATA_FILE, 'w') as f:
+            json.dump(content, f, indent=2, sort_keys=True)
+        
+        # Auto-export static HTML ONLY if data actually changed
+        try:
+            import subprocess
+            import sys
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+            export_script_path = os.path.join(script_dir, 'export_static.py')
+            result = subprocess.run([sys.executable, export_script_path], 
+                                  capture_output=True, text=True, cwd=script_dir)
+            if result.returncode == 0:
+                print("Auto-exported static HTML")
+                if result.stdout.strip():
+                    print(result.stdout.strip())
+            else:
+                print(f"Auto-export failed: {result.stderr}")
+        except Exception as e:
+            print(f"Auto-export failed: {e}")
+    else:
+        print("No changes detected, skipping save and export")
 
 @app.route('/')
 def index():

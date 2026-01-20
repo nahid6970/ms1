@@ -41,6 +41,10 @@
 - **Performance**: Optimized sheet switching.
     - Added `/api/active-sheet` endpoint to `app.py`.
     - `switchSheet` now only updates `sheet_active.json` and does **not** trigger full data save or static export.
+- **Dirty Check**: Prevent unnecessary file writes.
+    - `save_data` now compares incoming data with existing `data.json`.
+    - Only writes to `data.json` and triggers static export if content has actually changed.
+    - Uses `sort_keys=True` in `json.dump` for consistent key ordering.
 
 **Files Modified:**
 - `app.py` - Updated `STATE_FILE` path and added directory creation.
