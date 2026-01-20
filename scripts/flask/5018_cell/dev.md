@@ -225,7 +225,7 @@ When a cell is focused for editing in Markdown Mode, it transitions to **Edit Mo
 ### Data Structure (`tableData`)
 The state is managed in a central object synced with persistence files:
 - **`data.json`:** Content (Sheets, Rows, Columns, Styles).
-- **`app_state.json`:** Application State (Active Sheet index).
+- **`sheet_active.json`:** Application State (Active Sheet index).
 - **Sheets:** Rows, columns, and `cellStyles` (keyed by `"row-col"`).
 - **Categories:** Organization for sheets.
 - **Metadata:** Nicknames, parent/sub-sheet relationships.

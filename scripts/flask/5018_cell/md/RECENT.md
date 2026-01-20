@@ -18,15 +18,16 @@
   - `data.json`: Stores content (sheets, rows, columns, styles).
   - `app_state.json`: Stores application state (active sheet index).
 - **Implementation**: Updated `app.py` and `export_static.py` to transparently load/save from both sources.
+- **Update**: Changed state file path to `C:\@delta\output\5018_output\sheet_active.json`.
 
 **Files Modified:**
-- `app.py` - Updated load/save logic.
-- `export_static.py` - Updated load logic.
+- `app.py` - Updated `STATE_FILE` path and added directory creation.
+- `export_static.py` - Updated `STATE_FILE` path.
 - `dev.md` - Updated data architecture documentation.
 - `md/RECENT.md` - Logged session.
 
 **Current Status:**
-- ✅ Active sheet state is now isolated in `app_state.json`.
+- ✅ Active sheet state is now isolated in `sheet_active.json`.
 
 ---
 

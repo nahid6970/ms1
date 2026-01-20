@@ -16,7 +16,7 @@ def add_header(response):
     return response
 
 DATA_FILE = r'C:\@delta\ms1\scripts\flask\5018_cell\data.json'
-STATE_FILE = r'C:\@delta\ms1\scripts\flask\5018_cell\app_state.json'
+STATE_FILE = r'C:\@delta\output\5018_output\sheet_active.json'
 CUSTOM_SYNTAXES_FILE = r'C:\@delta\ms1\scripts\flask\5018_cell\custom_syntaxes.json'
 
 def load_data():
@@ -43,6 +43,8 @@ def load_data():
 def save_data(data):
     # Save activeSheet to state file
     state = {'activeSheet': data.get('activeSheet', 0)}
+    # Ensure directory exists
+    os.makedirs(os.path.dirname(STATE_FILE), exist_ok=True)
     with open(STATE_FILE, 'w') as f:
         json.dump(state, f, indent=2)
         
