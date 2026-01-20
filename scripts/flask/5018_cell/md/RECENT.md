@@ -38,6 +38,9 @@
 - **Sidebar UX**: Fixed issue where categories would collapse upon selecting a sheet.
   - Sidebar now auto-expands the category containing the active sheet during render.
   - Applied to both `export_static.py` and `static/script.js`.
+- **Performance**: Optimized sheet switching.
+    - Added `/api/active-sheet` endpoint to `app.py`.
+    - `switchSheet` now only updates `sheet_active.json` and does **not** trigger full data save or static export.
 
 **Files Modified:**
 - `app.py` - Updated `STATE_FILE` path and added directory creation.

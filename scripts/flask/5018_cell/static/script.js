@@ -1083,10 +1083,11 @@ function showToast(message, type = 'success') {
 async function autoSaveActiveSheet() {
     try {
         tableData.activeSheet = currentSheet;
-        await fetch('/api/data', {
+        // Use lightweight endpoint that doesn't trigger export
+        await fetch('/api/active-sheet', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(tableData)
+            body: JSON.stringify({ activeSheet: currentSheet })
         });
     } catch (error) {
         console.error('Error auto-saving:', error);

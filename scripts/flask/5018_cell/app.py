@@ -78,6 +78,16 @@ def index():
 def get_data():
     return jsonify(load_data())
 
+@app.route('/api/active-sheet', methods=['POST'])
+def save_active_sheet():
+    index = request.json.get('activeSheet')
+    if index is not None:
+        state = {'activeSheet': index}
+        os.makedirs(os.path.dirname(STATE_FILE), exist_ok=True)
+        with open(STATE_FILE, 'w') as f:
+            json.dump(state, f, indent=2)
+    return jsonify({'success': True})
+
 @app.route('/api/data', methods=['POST'])
 def save_table_data():
     data = request.json
