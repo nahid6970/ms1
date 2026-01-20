@@ -20,15 +20,26 @@ from datetime import datetime
 
 # Paths
 DATA_FILE = r'C:\@delta\ms1\scripts\flask\5018_cell\data.json'
+STATE_FILE = r'C:\@delta\ms1\scripts\flask\5018_cell\app_state.json'
 CUSTOM_SYNTAXES_FILE = r'C:\@delta\ms1\scripts\flask\5018_cell\custom_syntaxes.json'
 OUTPUT_FILE = r'C:\@delta\db\5000_myhome\mycell.html'
 
 def load_data():
-    """Load data from JSON file"""
+    """Load data from JSON file and state file"""
+    data = {'sheets': [], 'activeSheet': 0}
+    
     if os.path.exists(DATA_FILE):
         with open(DATA_FILE, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    return {'sheets': [], 'activeSheet': 0}
+            file_data = json.load(f)
+            data.update(file_data)
+            
+    if os.path.exists(STATE_FILE):
+        with open(STATE_FILE, 'r', encoding='utf-8') as f:
+            state_data = json.load(f)
+            if 'activeSheet' in state_data:
+                data['activeSheet'] = state_data['activeSheet']
+                
+    return data
 
 def load_custom_syntaxes():
     """Load custom color syntaxes from JSON file"""

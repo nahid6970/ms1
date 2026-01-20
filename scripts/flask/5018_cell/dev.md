@@ -223,7 +223,9 @@ When a cell is focused for editing in Markdown Mode, it transitions to **Edit Mo
     *   **[Keyboard Shortcuts](md/KEYBOARD_SHORTCUTS.md):** All keyboard shortcuts including edit mode support.
 
 ### Data Structure (`tableData`)
-The state is managed in a central object synced with `data.json`.
+The state is managed in a central object synced with persistence files:
+- **`data.json`:** Content (Sheets, Rows, Columns, Styles).
+- **`app_state.json`:** Application State (Active Sheet index).
 - **Sheets:** Rows, columns, and `cellStyles` (keyed by `"row-col"`).
 - **Categories:** Organization for sheets.
 - **Metadata:** Nicknames, parent/sub-sheet relationships.

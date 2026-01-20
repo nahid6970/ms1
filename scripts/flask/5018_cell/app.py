@@ -16,22 +16,40 @@ def add_header(response):
     return response
 
 DATA_FILE = r'C:\@delta\ms1\scripts\flask\5018_cell\data.json'
+STATE_FILE = r'C:\@delta\ms1\scripts\flask\5018_cell\app_state.json'
 CUSTOM_SYNTAXES_FILE = r'C:\@delta\ms1\scripts\flask\5018_cell\custom_syntaxes.json'
 
 def load_data():
-    if os.path.exists(DATA_FILE):
-        with open(DATA_FILE, 'r') as f:
-            return json.load(f)
-    return {
+    data = {
         'sheets': [
             {'name': 'Sheet1', 'columns': [], 'rows': []}
         ],
         'activeSheet': 0
     }
+    
+    if os.path.exists(DATA_FILE):
+        with open(DATA_FILE, 'r') as f:
+            file_data = json.load(f)
+            data.update(file_data)
+            
+    if os.path.exists(STATE_FILE):
+        with open(STATE_FILE, 'r') as f:
+            state_data = json.load(f)
+            if 'activeSheet' in state_data:
+                data['activeSheet'] = state_data['activeSheet']
+                
+    return data
 
 def save_data(data):
+    # Save activeSheet to state file
+    state = {'activeSheet': data.get('activeSheet', 0)}
+    with open(STATE_FILE, 'w') as f:
+        json.dump(state, f, indent=2)
+        
+    # Save sheets to data file (excluding activeSheet)
+    content = {k: v for k, v in data.items() if k != 'activeSheet'}
     with open(DATA_FILE, 'w') as f:
-        json.dump(data, f, indent=2)
+        json.dump(content, f, indent=2)
     
     # Auto-export static HTML after saving data
     try:

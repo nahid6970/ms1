@@ -6,6 +6,30 @@
 
 ---
 
+## [2026-01-20 05:43] - Separated Active Sheet State
+
+**Session Duration:** 0.1 hours
+
+**What We Accomplished:**
+
+### ✅ Decoupled Active Sheet State
+- **Problem**: Changing the active sheet updated `data.json`, potentially causing unnecessary file updates.
+- **Solution**: Separated persistence into two files:
+  - `data.json`: Stores content (sheets, rows, columns, styles).
+  - `app_state.json`: Stores application state (active sheet index).
+- **Implementation**: Updated `app.py` and `export_static.py` to transparently load/save from both sources.
+
+**Files Modified:**
+- `app.py` - Updated load/save logic.
+- `export_static.py` - Updated load logic.
+- `dev.md` - Updated data architecture documentation.
+- `md/RECENT.md` - Logged session.
+
+**Current Status:**
+- ✅ Active sheet state is now isolated in `app_state.json`.
+
+---
+
 ## [2026-01-20 03:55] - Implemented List Levels 4 & 5
 
 **Session Duration:** 0.2 hours
