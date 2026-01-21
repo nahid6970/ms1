@@ -86,7 +86,7 @@
             "category": "Launch",
             "description": "",
             "hotkey": "#x",
-            "action": "Run(\"C:\\@delta\\ms1\\Testing\\mypygui\\qt\\script_manager_gui_qt.py\", , \"Hide\")",
+            "action": "Run('pythonw \"C:\\@delta\\ms1\\Testing\\mypygui\\qt\\script_manager_gui_qt.py\"')",
             "enabled": true
         },
         {

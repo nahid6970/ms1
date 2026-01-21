@@ -112,7 +112,7 @@ RAlt & Numpad3::Run("C:\@delta\msBackups\Display\DisplaySwitch.exe /extend", "",
 }
 
 ;! mypygui
-#x::Run("C:\@delta\ms1\Testing\mypygui\qt\script_manager_gui_qt.py", , "Hide")
+#x::Run('pythonw "C:\@delta\ms1\Testing\mypygui\qt\script_manager_gui_qt.py"')
 
 ;! Startup Setup
 #s::Run("C:\@delta\ms1\scripts\flask\4999_startup\startup.py", , "Hide")
