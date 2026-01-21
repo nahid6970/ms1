@@ -491,19 +491,19 @@ class EditDialog(QDialog):
         name_box = QHBoxLayout()
         self.inp_name = QLineEdit(self.script.get("name", ""))
         self.inp_name.setPlaceholderText("Script Name")
-        self.inp_name.setMaximumWidth(350) # Increased from 220
+        self.inp_name.setMaximumWidth(450) # Increased from 350
         name_box.addWidget(self.inp_name)
         
         name_box.addWidget(QLabel("NF:"))
         self.inp_nf_char = QLineEdit(self.script.get("nf_char", ""))
         self.inp_nf_char.setPlaceholderText("")
-        self.inp_nf_char.setFixedWidth(45)
+        self.inp_nf_char.setFixedWidth(80) # Increased from 45 to show more of escapes
         self.inp_nf_char.setToolTip("Nerd Font Character")
         name_box.addWidget(self.inp_nf_char)
         
         # SVG Button and Preview
         self.btn_svg = QPushButton("SVG")
-        self.btn_svg.setFixedWidth(55) # Increased from 40
+        self.btn_svg.setFixedWidth(60) # Increased slightly more for safety
         self.btn_svg.setToolTip("Paste raw SVG code")
         self.btn_svg.clicked.connect(self.open_svg_dialog)
         name_box.addWidget(self.btn_svg)
