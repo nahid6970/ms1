@@ -1368,11 +1368,9 @@ class MainWindow(QMainWindow):
 
         header = QHBoxLayout()
         header.setSpacing(10)
-        self.back_btn = CyberButton("<<", script_data={"color": CP_RED, "type": "script"}, config=self.config); self.back_btn.setFixedSize(50, 40); self.back_btn.clicked.connect(self.go_back); self.back_btn.hide()
         self.breadcrumb_layout = QHBoxLayout()
         self.breadcrumb_layout.setSpacing(0)
         
-        header.addWidget(self.back_btn)
         header.addLayout(self.breadcrumb_layout)
         header.addStretch()
         
@@ -1570,9 +1568,6 @@ class MainWindow(QMainWindow):
             scripts = []
             self.collect_all_items(self.config.get("scripts", []), scripts)
             
-            # Disable back button in search (or map it to clear)
-            self.back_btn.hide()
-            
             # Global grid settings for search results
             cols = self.config.get("columns", 5)
             def_h = self.config.get("default_btn_height", 40)
@@ -1591,7 +1586,6 @@ class MainWindow(QMainWindow):
             if self.view_stack:
                 folder = self.view_stack[-1]
                 scripts = folder.get("scripts", [])
-                self.back_btn.show()
                 
                 # Context settings (fallback to global)
                 cols = folder.get("grid_columns", 0)
@@ -1601,7 +1595,6 @@ class MainWindow(QMainWindow):
                 if def_h == 0: def_h = self.config.get("default_btn_height", 40)
             else:
                 scripts = self.config.get("scripts", [])
-                self.back_btn.hide()
                 
                 # Global settings
                 cols = self.config.get("columns", 5)
@@ -1813,9 +1806,6 @@ class MainWindow(QMainWindow):
             # Inline batch/command
             mode = "/k" if keep else "/c"
             self._run_shell("cmd.exe", f'{mode} "{tmp}"', os.getcwd(), admin=admin, hide=hide)
-
-    def go_back(self):
-        if self.view_stack: self.view_stack.pop(); self.refresh_grid()
 
     def show_context_menu(self, btn, script, pos):
         menu = QMenu(self)
