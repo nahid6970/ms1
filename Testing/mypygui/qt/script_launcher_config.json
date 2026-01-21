@@ -287,7 +287,8 @@
             "text_color": "#FFFFFF",
             "hover_color": "#3e85a5",
             "hover_text_color": "#FFFFFF",
-            "border_color": "#67a4b9"
+            "border_color": "#67a4b9",
+            "nf_char": ""
         },
         {
             "name": "FFMPEG",
@@ -399,7 +400,20 @@
             "_runtime_font_family": "JetBrainsMono Nerd Font Propo",
             "_runtime_is_bold": true,
             "_runtime_is_italic": false,
-            "icon_path": ""
+            "icon_path": "",
+            "nf_char": "",
+            "icon_width": 0,
+            "icon_height": 0,
+            "icon_gap": 2,
+            "icon_position": "top",
+            "font_family": "JetBrainsMono Nerd Font Propo",
+            "font_size": 14,
+            "is_bold": true,
+            "is_italic": false,
+            "width": 0,
+            "height": 0,
+            "corner_radius": 0,
+            "border_width": 0
         },
         {
             "name": "Github <br> Projects",
@@ -1007,7 +1021,7 @@
             "border_width": 0
         },
         {
-            "name": "<fs:25>\udb82\udcef</fs> <br> Lock-Smith",
+            "name": "Lock-Smith",
             "path": "C:/@delta/ms1/Testing/FileLockSmith/locksmith.py",
             "type": "script",
             "hide_terminal": true,
@@ -1028,10 +1042,10 @@
             "new_terminal": false,
             "run_admin": false,
             "icon_path": "",
-            "icon_width": 0,
+            "icon_width": 100,
             "icon_height": 0,
             "icon_gap": 2,
-            "icon_position": "top",
+            "icon_position": "center",
             "font_family": "JetBrainsMono Nerd Font Propo",
             "font_size": 14,
             "is_bold": true,
@@ -1039,7 +1053,9 @@
             "width": 0,
             "height": 0,
             "corner_radius": 0,
-            "border_width": 0
+            "border_width": 0,
+            "nf_char": "\udb82\udcef",
+            "text_color": "#55ff7f"
         },
         {
             "name": "ClipBoard",
@@ -1129,11 +1145,12 @@
             "width": 0,
             "height": 0,
             "corner_radius": 0,
-            "border_width": 0,
+            "border_width": 2,
             "nf_char": "\uf16a",
             "text_color": "#ff0000",
             "color": "#00007f",
-            "hover_color": "#55007f"
+            "hover_color": "#55007f",
+            "border_color": "#ff0000"
         },
         {
             "name": "Path<br>Converter",
