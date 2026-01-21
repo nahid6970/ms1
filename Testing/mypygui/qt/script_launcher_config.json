@@ -222,7 +222,7 @@
                     "ctrl_right_cmd": "",
                     "use_inline": false,
                     "inline_type": "cmd",
-                    "inline_script": "",
+                    "inline_script": "winget install Meld.Meld",
                     "col_span": 1,
                     "row_span": 1,
                     "_runtime_height": 100,
