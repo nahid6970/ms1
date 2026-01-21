@@ -1385,6 +1385,23 @@ class MainWindow(QMainWindow):
         self.btn_add_folder.setFixedSize(45, 35) # Increased height
         self.btn_add_folder.clicked.connect(self.add_new_folder)
         
+        # Search Box
+        self.inp_search = QLineEdit()
+        self.inp_search.setPlaceholderText("SEARCH...")
+        self.inp_search.setFixedWidth(200)
+        self.inp_search.setStyleSheet(f"""
+            QLineEdit {{ 
+                background-color: {CP_PANEL}; 
+                color: {CP_CYAN}; 
+                border: 1px solid {CP_DIM}; 
+                padding: 5px; 
+                font-family: 'Consolas';
+                font-size: 11pt;
+            }}
+            QLineEdit:focus {{ border: 1px solid {CP_CYAN}; }}
+        """)
+        self.inp_search.textChanged.connect(self.handle_search)
+        
         cfg_col = self.config.get("cfg_btn_color", CP_DIM)
         cfg_txt = self.config.get("cfg_text_color", "white")
         self.btn_cfg = CyberButton("CFG", script_data={"color": cfg_col, "type": "script", "text_color": cfg_txt}, config=self.config)
@@ -1395,6 +1412,7 @@ class MainWindow(QMainWindow):
         self.btn_close.setFixedSize(45, 35) # Increased height
         self.btn_close.clicked.connect(self.close)
 
+        header.addWidget(self.inp_search) # Add search here
         header.addWidget(self.btn_add_script)
         header.addWidget(self.btn_add_folder)
         header.addWidget(self.btn_cfg)
@@ -1478,7 +1496,20 @@ class MainWindow(QMainWindow):
             self.save_config()
             event.acceptProposedAction()
 
+    def collect_all_items(self, item_list, results):
+        """Recursively collect all items matching search"""
+        for item in item_list:
+            # Check match (case insensitive)
+            query = self.inp_search.text().lower()
+            if query in item.get("name", "").lower():
+                results.append(item)
+            
+            # Recurse if folder
+            if item.get("type") == "folder" and "scripts" in item:
+                self.collect_all_items(item["scripts"], results)
 
+    def handle_search(self, text):
+        self.refresh_grid()
 
     def clear_layout(self, layout):
         while layout.count():
@@ -1524,15 +1555,29 @@ class MainWindow(QMainWindow):
         root_btn = create_bc_btn("ROOT", lambda: navigate_to(-1))
         self.breadcrumb_layout.addWidget(root_btn)
 
-        if self.view_stack:
-            for i, folder in enumerate(self.view_stack):
-                self.breadcrumb_layout.addWidget(create_sep())
-                name = folder.get("name", "???").replace("<br>", " ").replace("<br/>", " ").replace("<BR>", " ")
-                name = " ".join(name.split())
-                btn = create_bc_btn(name, partial(lambda idx: navigate_to(idx), i))
-                self.breadcrumb_layout.addWidget(btn)
+        # CHECK SEARCH STATE
+        search_query = self.inp_search.text().strip()
+        is_searching = len(search_query) > 0
 
-        if self.view_stack:
+        if is_searching:
+            # SEARCH MODE
+            self.breadcrumb_layout.addWidget(create_sep())
+            lbl_search = QLabel(f"SEARCH: {search_query}")
+            lbl_search.setStyleSheet(f"color: {CP_CYAN}; font-family: 'Consolas'; font-size: 14pt; font-weight: bold;")
+            self.breadcrumb_layout.addWidget(lbl_search)
+            
+            # Flattened list
+            scripts = []
+            self.collect_all_items(self.config.get("scripts", []), scripts)
+            
+            # Disable back button in search (or map it to clear)
+            self.back_btn.hide()
+            
+            # Global grid settings for search results
+            cols = self.config.get("columns", 5)
+            def_h = self.config.get("default_btn_height", 40)
+            
+        elif self.view_stack:
             folder = self.view_stack[-1]
             scripts = folder.get("scripts", [])
             self.back_btn.show()
