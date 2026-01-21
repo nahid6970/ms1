@@ -105,12 +105,76 @@ class CyberButton(QPushButton):
         
         # Check for icon
         icon_path = self.script.get("icon_path", "")
+        nf_char = self.script.get("nf_char", "")
+        
         icon_pixmap = None
         icon_w = 0
         icon_h = 0
-        if icon_path and os.path.exists(icon_path):
-            icon_pixmap = QPixmap(icon_path)
-            if not icon_pixmap.isNull():
+        
+        try:
+            # Priority 1: Image Path
+            if icon_path and os.path.exists(icon_path):
+                icon_pixmap = QPixmap(icon_path)
+                
+            # Priority 2: Nerd Font Character
+            elif nf_char:
+                display_char = nf_char
+                # Robust parsing for hex codes
+                try:
+                    clean_hex = None
+                    if nf_char.startswith("\\u"):
+                        clean_hex = nf_char[2:]
+                    elif nf_char.lower().startswith("u+"):
+                        clean_hex = nf_char[2:]
+                    elif nf_char.lower().startswith("0x"):
+                        clean_hex = nf_char[2:]
+                    
+                    # If we have a potential hex string, try to convert
+                    if clean_hex:
+                        display_char = chr(int(clean_hex, 16))
+                except:
+                    # If parsing fails, use the raw string (e.g. user pasted the actual char)
+                    pass
+
+                # Determine size for the generated icon
+                gen_w = self.script.get("icon_width", 0)
+                gen_h = self.script.get("icon_height", 0)
+                if gen_w <= 0: gen_w = 64
+                if gen_h <= 0: gen_h = 64
+                
+                # Draw the character onto a transparent pixmap
+                icon_pixmap = QPixmap(gen_w, gen_h)
+                icon_pixmap.fill(Qt.GlobalColor.transparent)
+                
+                p = QPainter(icon_pixmap)
+                p.setRenderHint(QPainter.RenderHint.Antialiasing)
+                p.setRenderHint(QPainter.RenderHint.TextAntialiasing)
+                
+                # Simplified Font Selection - rely on Qt's fallback or specific priority
+                # We try a few common Nerd Font family names. 
+                # Note: iterating QFontDatabase in paintEvent is too heavy/crash-prone.
+                font_fam = "JetBrainsMono NFP" # Default preference
+                
+                # Set font
+                f = QFont(font_fam)
+                # If the system doesn't have this, Qt uses a default. 
+                # We can try to force a style hint if needed, but usually this is fine.
+                f.setStyleHint(QFont.StyleHint.Monospace)
+                
+                f.setPixelSize(int(min(gen_w, gen_h) * 0.8))
+                p.setFont(f)
+                
+                # Safe Color
+                c_str = self.fg_normal
+                if not isinstance(c_str, str) or not c_str.startswith("#"):
+                    c_str = "#FFFFFF"
+                p.setPen(QColor(c_str))
+                
+                p.drawText(icon_pixmap.rect(), Qt.AlignmentFlag.AlignCenter, display_char)
+                p.end()
+
+            # Final processing of the pixmap (scaling if needed)
+            if icon_pixmap and not icon_pixmap.isNull():
                 # Get custom size or use auto
                 custom_w = self.script.get("icon_width", 0)
                 custom_h = self.script.get("icon_height", 0)
@@ -123,11 +187,22 @@ class CyberButton(QPushButton):
                     icon_pixmap = icon_pixmap.scaledToHeight(custom_h, Qt.TransformationMode.SmoothTransformation)
                 else:
                     # Auto: max 32px height, or half of button height
-                    max_icon_h = min(32, self.height() // 2)
-                    icon_pixmap = icon_pixmap.scaledToHeight(max_icon_h, Qt.TransformationMode.SmoothTransformation)
+                    btn_h = self.height()
+                    if btn_h > 0:
+                        max_icon_h = min(32, btn_h // 2)
+                        if max_icon_h > 0:
+                             icon_pixmap = icon_pixmap.scaledToHeight(max_icon_h, Qt.TransformationMode.SmoothTransformation)
                 
-                icon_w = icon_pixmap.width()
-                icon_h = icon_pixmap.height()
+                if not icon_pixmap.isNull():
+                    icon_w = icon_pixmap.width()
+                    icon_h = icon_pixmap.height()
+                    
+        except Exception as e:
+            # Fallback in case of any painting error to prevent crash
+            print(f"Icon Paint Error: {e}")
+            icon_pixmap = None
+            icon_w = 0
+            icon_h = 0
         
         # Get icon position
         icon_position = self.script.get("icon_position", "top")
@@ -354,8 +429,20 @@ class EditDialog(QDialog):
         # 1. Identity
         grp_basic = QGroupBox("IDENTITY")
         l_basic = QFormLayout()
+        
+        name_box = QHBoxLayout()
         self.inp_name = QLineEdit(self.script.get("name", ""))
-        l_basic.addRow("Name:", self.inp_name)
+        name_box.addWidget(self.inp_name)
+        
+        name_box.addWidget(QLabel("NF Char:"))
+        self.inp_nf_char = QLineEdit(self.script.get("nf_char", ""))
+        self.inp_nf_char.setPlaceholderText(" or \\uf1b9")
+        self.inp_nf_char.setFixedWidth(80)
+        self.inp_nf_char.setToolTip("Nerd Font Character (copy/paste or unicode escape)")
+        name_box.addWidget(self.inp_nf_char)
+        
+        l_basic.addRow("Name:", name_box)
+        
         if self.script.get("type") != "folder":
             path_box = QHBoxLayout()
             self.inp_path = QLineEdit(self.script.get("path", ""))
@@ -821,6 +908,7 @@ class EditDialog(QDialog):
 
     def save(self):
         self.script["name"] = self.inp_name.text()
+        self.script["nf_char"] = self.inp_nf_char.text()
         self.script["icon_path"] = self.inp_icon.text()
         self.script["icon_width"] = self.spn_icon_w.value()
         self.script["icon_height"] = self.spn_icon_h.value()
