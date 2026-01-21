@@ -1131,7 +1131,8 @@
             "border_width": 0,
             "nf_char": "\uf16a",
             "text_color": "#ff0000",
-            "color": "#ffffff"
+            "color": "#00007f",
+            "hover_color": "#55007f"
         },
         {
             "name": "Path<br>Converter",
