@@ -1577,24 +1577,35 @@ class MainWindow(QMainWindow):
             cols = self.config.get("columns", 5)
             def_h = self.config.get("default_btn_height", 40)
             
-        elif self.view_stack:
-            folder = self.view_stack[-1]
-            scripts = folder.get("scripts", [])
-            self.back_btn.show()
-            
-            # Context settings (fallback to global)
-            cols = folder.get("grid_columns", 0)
-            if cols == 0: cols = self.config.get("columns", 5)
-            
-            def_h = folder.get("grid_btn_height", 0)
-            if def_h == 0: def_h = self.config.get("default_btn_height", 40)
         else:
-            scripts = self.config.get("scripts", [])
-            self.back_btn.hide()
-            
-            # Global settings
-            cols = self.config.get("columns", 5)
-            def_h = self.config.get("default_btn_height", 40)
+            # NORMAL NAVIGATION
+            # Restore breadcrumbs
+            if self.view_stack:
+                for i, folder in enumerate(self.view_stack):
+                    self.breadcrumb_layout.addWidget(create_sep())
+                    name = folder.get("name", "???").replace("<br>", " ").replace("<br/>", " ").replace("<BR>", " ")
+                    name = " ".join(name.split())
+                    btn = create_bc_btn(name, partial(lambda idx: navigate_to(idx), i))
+                    self.breadcrumb_layout.addWidget(btn)
+
+            if self.view_stack:
+                folder = self.view_stack[-1]
+                scripts = folder.get("scripts", [])
+                self.back_btn.show()
+                
+                # Context settings (fallback to global)
+                cols = folder.get("grid_columns", 0)
+                if cols == 0: cols = self.config.get("columns", 5)
+                
+                def_h = folder.get("grid_btn_height", 0)
+                if def_h == 0: def_h = self.config.get("default_btn_height", 40)
+            else:
+                scripts = self.config.get("scripts", [])
+                self.back_btn.hide()
+                
+                # Global settings
+                cols = self.config.get("columns", 5)
+                def_h = self.config.get("default_btn_height", 40)
 
         # Default typography
         def_fs = self.config.get("default_font_size", 10)
