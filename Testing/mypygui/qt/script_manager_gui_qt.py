@@ -155,14 +155,18 @@ class CyberButton(QPushButton):
                 # Note: iterating QFontDatabase in paintEvent is too heavy/crash-prone.
                 font_fam = "JetBrainsMono NFP" # Default preference
                 
-                # Set font
+            # Set font and calculate size
                 f = QFont(font_fam)
-                # If the system doesn't have this, Qt uses a default. 
-                # We can try to force a style hint if needed, but usually this is fine.
                 f.setStyleHint(QFont.StyleHint.Monospace)
                 
-                f.setPixelSize(int(min(gen_w, gen_h) * 0.8))
+                # Try to find a good pixel size
+                font_size = int(min(gen_w, gen_h) * 0.85)
+                f.setPixelSize(font_size)
                 p.setFont(f)
+                
+                # Use metrics for precise centering
+                metrics = p.fontMetrics()
+                rect = metrics.tightBoundingRect(display_char)
                 
                 # Safe Color
                 c_str = self.fg_normal
@@ -170,7 +174,11 @@ class CyberButton(QPushButton):
                     c_str = "#FFFFFF"
                 p.setPen(QColor(c_str))
                 
-                p.drawText(icon_pixmap.rect(), Qt.AlignmentFlag.AlignCenter, display_char)
+                # Calculate offsets to truly center the glyph
+                x_off = (gen_w - rect.width()) / 2 - rect.x()
+                y_off = (gen_h - rect.height()) / 2 - rect.y()
+                
+                p.drawText(int(x_off), int(y_off), display_char)
                 p.end()
 
             # Final processing of the pixmap (scaling if needed)
@@ -190,6 +198,9 @@ class CyberButton(QPushButton):
                     btn_h = self.height()
                     if btn_h > 0:
                         max_icon_h = min(32, btn_h // 2)
+                        # Ensure Nerd Font icons feel similar in scale to images
+                        if nf_char: max_icon_h = min(40, btn_h // 2)
+                        
                         if max_icon_h > 0:
                              icon_pixmap = icon_pixmap.scaledToHeight(max_icon_h, Qt.TransformationMode.SmoothTransformation)
                 
@@ -198,8 +209,6 @@ class CyberButton(QPushButton):
                     icon_h = icon_pixmap.height()
                     
         except Exception as e:
-            # Fallback in case of any painting error to prevent crash
-            print(f"Icon Paint Error: {e}")
             icon_pixmap = None
             icon_w = 0
             icon_h = 0
@@ -210,46 +219,37 @@ class CyberButton(QPushButton):
         # Prepare content
         color = self.fg_hover if self.underMouse() else self.fg_normal
         
-        doc = QTextDocument()
-        doc.setDefaultFont(self.font())
-        
-        # Process tags: <br> and <fs:XX>...</fs>
-        # First, escape HTML special chars, but preserve our custom tags
+        # Process tags
         html = self.raw_text
-        # Temporarily replace our tags with placeholders
         html = html.replace("<br>", "{{BR}}").replace("<br/>", "{{BR}}").replace("<BR>", "{{BR}}")
         html = re.sub(r"<fs:(\d+)>", r"{{FS:\1}}", html)
         html = html.replace("</fs>", "{{/FS}}")
-        # Escape HTML
         html = html.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-        # Restore our tags
         html = html.replace("{{BR}}", "<br/>")
         html = re.sub(r"\{\{FS:(\d+)\}\}", r'<span style="font-size:\1pt">', html)
         html = html.replace("{{/FS}}", "</span>")
         
-        # Render centered
-        full_html = f"<div style='color: {color}; text-align: center; font-family: {self.font().family()};'>{html}</div>"
-        doc.setHtml(full_html)
+        doc = QTextDocument()
+        doc.setDefaultFont(self.font())
         
         # Account for button padding (10px in QSS)
         padding = 10
         spacing = self.script.get("icon_gap", 2) if icon_pixmap else 0
         
         if icon_position == "center":
-            # Center: icon only, no text
             if icon_pixmap:
                 icon_x = (self.width() - icon_w) / 2
                 icon_y = (self.height() - icon_h) / 2
                 painter.drawPixmap(int(icon_x), int(icon_y), icon_pixmap)
         elif icon_position in ["top", "bottom"]:
-            # Vertical layout
+            # Vertical layout: Text uses full width and is centered by HTML
+            doc.setHtml(f"<div style='color: {color}; text-align: center; font-family: {self.font().family()};'>{html}</div>")
             doc.setTextWidth(self.width() - (padding * 2))
             text_h = doc.size().height()
             total_h = icon_h + spacing + text_h
             y_start = (self.height() - total_h) / 2
             
             if icon_position == "top":
-                # Icon on top
                 if icon_pixmap:
                     icon_x = (self.width() - icon_w) / 2
                     painter.drawPixmap(int(icon_x), int(y_start), icon_pixmap)
@@ -257,7 +257,6 @@ class CyberButton(QPushButton):
                 painter.translate(padding, y_start)
                 doc.drawContents(painter)
             else:
-                # Icon on bottom
                 painter.translate(padding, y_start)
                 doc.drawContents(painter)
                 if icon_pixmap:
@@ -266,18 +265,17 @@ class CyberButton(QPushButton):
                     icon_y = y_start + text_h + spacing
                     painter.drawPixmap(int(icon_x), int(icon_y), icon_pixmap)
         else:
-            # Horizontal layout (left or right)
+            # Horizontal layout: We calculate exact text width to center the block
+            doc.setHtml(f"<div style='color: {color}; font-family: {self.font().family()};'>{html}</div>")
             available_w = self.width() - (padding * 2) - icon_w - spacing
             doc.setTextWidth(available_w)
-            text_h = doc.size().height()
             text_w = doc.idealWidth()
+            text_h = doc.size().height()
             
             total_w = icon_w + spacing + text_w
             x_start = (self.width() - total_w) / 2
-            y_center = (self.height() - max(icon_h, text_h)) / 2
             
             if icon_position == "left":
-                # Icon on left
                 if icon_pixmap:
                     icon_y = (self.height() - icon_h) / 2
                     painter.drawPixmap(int(x_start), int(icon_y), icon_pixmap)
