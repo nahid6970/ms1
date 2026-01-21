@@ -562,8 +562,8 @@
             ],
             "col_span": 1,
             "row_span": 1,
-            "grid_columns": 0,
-            "grid_btn_height": 0,
+            "grid_columns": 1,
+            "grid_btn_height": 50,
             "_runtime_height": 100,
             "_runtime_font_size": 14,
             "_runtime_font_family": "JetBrainsMono Nerd Font Propo",
@@ -581,7 +581,8 @@
             "width": 0,
             "height": 0,
             "corner_radius": 0,
-            "border_width": 0
+            "border_width": 0,
+            "nf_char": ""
         },
         {
             "name": "Testing <br> Terminal",

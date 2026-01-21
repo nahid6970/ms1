@@ -120,6 +120,9 @@ class CyberButton(QPushButton):
         # Enable Right Click
         self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         
+        # Enable Hover Events
+        self.setAttribute(Qt.WidgetAttribute.WA_Hover)
+        
         self.update_style()
         self.drag_start_pos = QPoint()
 
@@ -153,6 +156,8 @@ class CyberButton(QPushButton):
         # Standard button background/border
         opt = QStyleOptionButton()
         self.initStyleOption(opt)
+        is_hovered = bool(opt.state & QStyle.StateFlag.State_MouseOver)
+        
         opt.text = "" # Don't draw standard text
         self.style().drawControl(QStyle.ControlElement.CE_PushButton, opt, painter, self)
         
@@ -239,7 +244,7 @@ class CyberButton(QPushButton):
                 rect = metrics.tightBoundingRect(display_char)
                 
                 # Safe Color - Use dynamic color based on hover state
-                current_color = self.fg_hover if self.underMouse() else self.fg_normal
+                current_color = self.fg_hover if is_hovered else self.fg_normal
                 
                 c_str = current_color
                 if not isinstance(c_str, str) or not c_str.startswith("#"):
@@ -289,7 +294,7 @@ class CyberButton(QPushButton):
         icon_position = self.script.get("icon_position", "top")
         
         # Prepare content
-        color = self.fg_hover if self.underMouse() else self.fg_normal
+        color = self.fg_hover if is_hovered else self.fg_normal
         
         # Process tags
         html = self.raw_text
