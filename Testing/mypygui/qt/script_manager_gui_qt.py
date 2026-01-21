@@ -20,6 +20,16 @@ from PyQt6.QtCore import QUrl
 import ctypes
 
 # -----------------------------------------------------------------------------
+# WINDOWS TASKBAR FIX: Register App ID early (before any UI creation)
+# -----------------------------------------------------------------------------
+if os.name == 'nt':
+    try:
+        myappid = 'cyberpunk.script.manager.v3'
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+    except Exception:
+        pass
+
+# -----------------------------------------------------------------------------
 # CYBERPUNK THEME PALETTE
 # -----------------------------------------------------------------------------
 CP_BG = "#050505"           # Main Background
@@ -1392,29 +1402,37 @@ class MainWindow(QMainWindow):
         self.refresh_grid()
 
     def setup_icon(self):
-        # Code Icon SVG logic
-        svg_data = f"""
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-            <rect width="512" height="512" rx="60" fill="{CP_BG}"/>
-            <path d="M160 128L32 256l128 128M352 128l128 128-128 128M288 64kL224 448" 
-                  stroke="{CP_YELLOW}" stroke-width="40" stroke-linecap="round" fill="none"/>
-            <path d="M160 128L32 256l128 128" stroke="{CP_CYAN}" stroke-width="40" stroke-linecap="round" fill="none"/>
-        </svg>
-        """
-        pixmap = QPixmap(64, 64)
-        pixmap.fill(Qt.GlobalColor.transparent)
-        painter = QPainter(pixmap)
-        # For simplicity, we create a basic icon using QPainter instead of full SVG parsing without extra deps
-        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        painter.setBrush(QBrush(QColor(CP_BG)))
-        painter.setPen(Qt.PenStyle.NoPen)
-        painter.drawRoundedRect(0, 0, 64, 64, 10, 10)
-        painter.setPen(QColor(CP_YELLOW))
-        font = QFont("Consolas", 30, QFont.Weight.Bold)
-        painter.setFont(font)
-        painter.drawText(pixmap.rect(), Qt.AlignmentFlag.AlignCenter, "</>")
-        painter.end()
-        self.setWindowIcon(QIcon(pixmap))
+        # We use a shared utility to ensure the icon is set from a file source
+        # Windows taskbar is much more reliable when loading from a disk-based asset
+        icon_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "app_icon_v3.png")
+        
+        if not os.path.exists(icon_path):
+            # Generate the icon file if it doesn't exist
+            pixmap = QPixmap(256, 256)
+            pixmap.fill(Qt.GlobalColor.transparent)
+            painter = QPainter(pixmap)
+            painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+            
+            # Draw Background Square with Rounded Corners
+            painter.setBrush(QBrush(QColor(CP_BG)))
+            painter.setPen(QColor(CP_CYAN)) # Cyan border
+            painter.drawRoundedRect(10, 10, 236, 236, 40, 40)
+            
+            # Draw </> text
+            painter.setPen(QColor(CP_YELLOW))
+            font = QFont("Consolas", 120, QFont.Weight.Bold)
+            painter.setFont(font)
+            painter.drawText(pixmap.rect(), Qt.AlignmentFlag.AlignCenter, "</>")
+            painter.end()
+            pixmap.save(icon_path)
+
+        icon = QIcon(icon_path)
+        self.setWindowIcon(icon)
+        QApplication.instance().setWindowIcon(icon)
+        
+        # Delayed re-apply to handle cases where Windows taskbar is slow to update
+        QTimer.singleShot(100, lambda: self.setWindowIcon(icon))
+        QTimer.singleShot(500, lambda: self.setWindowIcon(icon))
 
     def mousePressEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
@@ -2067,6 +2085,12 @@ class MainWindow(QMainWindow):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
+    
+    # Set app-wide icon immediately
+    icon_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "app_icon_v3.png")
+    if os.path.exists(icon_path):
+        app.setWindowIcon(QIcon(icon_path))
+        
     window = MainWindow()
     window.show()
     sys.exit(app.exec())
