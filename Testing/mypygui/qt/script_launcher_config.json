@@ -258,14 +258,19 @@
             "width": 0,
             "height": 0,
             "corner_radius": 0,
-            "border_width": 0,
+            "border_width": 1,
             "grid_columns": 0,
             "grid_btn_height": 0,
             "_runtime_height": 100,
             "_runtime_font_size": 14,
             "_runtime_font_family": "JetBrainsMono Nerd Font Propo",
             "_runtime_is_bold": true,
-            "_runtime_is_italic": false
+            "_runtime_is_italic": false,
+            "color": "#496288",
+            "text_color": "#FFFFFF",
+            "hover_color": "#3e85a5",
+            "hover_text_color": "#FFFFFF",
+            "border_color": "#67a4b9"
         },
         {
             "name": "FFMPEG",

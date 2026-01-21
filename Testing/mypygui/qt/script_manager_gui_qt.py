@@ -564,11 +564,22 @@ class EditDialog(QDialog):
             r_lay.addLayout(mode_box)
             
             # Interpreter
-            r_lay.addWidget(QLabel("Interpreter:"))
+            interp_layout = QHBoxLayout()
+            interp_layout.addWidget(QLabel("Interpreter:"))
+            
             self.cmb_type = QComboBox()
             self.cmb_type.addItems(["cmd", "powershell", "pwsh", "python"])
             self.cmb_type.setCurrentText(self.script.get("inline_type", "cmd"))
-            r_lay.addWidget(self.cmb_type)
+            interp_layout.addWidget(self.cmb_type)
+
+            btn_run_inline = QPushButton("Run")
+            btn_run_inline.setFixedWidth(50)
+            btn_run_inline.setToolTip("Test run this inline script immediately")
+            btn_run_inline.setStyleSheet(f"background-color: {CP_GREEN}; color: black; border: none; font-weight: bold;")
+            btn_run_inline.clicked.connect(self.test_run_inline)
+            interp_layout.addWidget(btn_run_inline)
+            
+            r_lay.addLayout(interp_layout)
             
             # Editor
             r_lay.addWidget(QLabel("Code:"))
@@ -604,6 +615,52 @@ class EditDialog(QDialog):
         btn_layout.addWidget(btn_save)
         btn_layout.addWidget(btn_cancel)
         vbox.addLayout(btn_layout)
+
+    def test_run_inline(self):
+        import tempfile
+        
+        code = self.txt_inline.toPlainText()
+        if not code.strip(): return
+        
+        it = self.cmb_type.currentText()
+        if it == "python": ext = ".py"
+        elif it in ["powershell", "pwsh"]: ext = ".ps1"
+        else: ext = ".bat"
+        
+        try:
+            with tempfile.NamedTemporaryFile(mode='w', suffix=ext, delete=False) as f:
+                f.write(code)
+                tmp = f.name
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Temp file error: {e}")
+            return
+            
+        # For test run: always keep open to see output, default to current admin setting
+        keep = True
+        hide = False
+        admin = self.chk_admin.isChecked()
+        
+        parent = self.parent()
+        if hasattr(parent, "_run_shell"):
+            cwd = os.getcwd()
+            
+            if ext == ".ps1":
+                ps_exe = it
+                if ps_exe not in ["pwsh", "powershell"]:
+                     ps_exe = "pwsh" if shutil.which("pwsh") else "powershell"
+                
+                no_exit = "-NoExit" if keep else ""
+                params = f'{no_exit} -File "{tmp}"'
+                parent._run_shell(ps_exe, params, cwd, admin=admin, hide=hide)
+                
+            elif ext == ".py":
+                mode = "/k" if keep else "/c"
+                params = f'{mode} python "{tmp}"'
+                parent._run_shell("cmd.exe", params, cwd, admin=admin, hide=hide)
+                
+            else:
+                mode = "/k" if keep else "/c"
+                parent._run_shell("cmd.exe", f'{mode} "{tmp}"', cwd, admin=admin, hide=hide)
 
     def reset_styles(self):
         # Determine defaults from global config
