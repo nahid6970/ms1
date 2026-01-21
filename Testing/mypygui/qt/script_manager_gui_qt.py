@@ -490,28 +490,34 @@ class EditDialog(QDialog):
         
         name_box = QHBoxLayout()
         self.inp_name = QLineEdit(self.script.get("name", ""))
+        self.inp_name.setPlaceholderText("Script Name")
+        self.inp_name.setMaximumWidth(350) # Increased from 220
         name_box.addWidget(self.inp_name)
         
-        name_box.addWidget(QLabel("NF Char:"))
+        name_box.addWidget(QLabel("NF:"))
         self.inp_nf_char = QLineEdit(self.script.get("nf_char", ""))
-        self.inp_nf_char.setPlaceholderText(" or \\uf1b9")
-        self.inp_nf_char.setFixedWidth(80)
-        self.inp_nf_char.setToolTip("Nerd Font Character (copy/paste or unicode escape)")
+        self.inp_nf_char.setPlaceholderText("")
+        self.inp_nf_char.setFixedWidth(45)
+        self.inp_nf_char.setToolTip("Nerd Font Character")
         name_box.addWidget(self.inp_nf_char)
         
-        # SVG Button
+        # SVG Button and Preview
         self.btn_svg = QPushButton("SVG")
-        self.btn_svg.setFixedWidth(40)
+        self.btn_svg.setFixedWidth(55) # Increased from 40
         self.btn_svg.setToolTip("Paste raw SVG code")
-        # Highlight if SVG exists
-        if self.script.get("svg_content"):
-             self.btn_svg.setStyleSheet(f"background-color: {CP_CYAN}; color: black; font-weight: bold;")
-        else:
-             self.btn_svg.setStyleSheet(f"background-color: {CP_DIM}; color: white;")
         self.btn_svg.clicked.connect(self.open_svg_dialog)
         name_box.addWidget(self.btn_svg)
         
+        self.lbl_svg_preview = QLabel()
+        self.lbl_svg_preview.setFixedSize(24, 24)
+        self.lbl_svg_preview.setStyleSheet(f"border: 1px solid {CP_DIM}; background: {CP_PANEL};")
+        self.lbl_svg_preview.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        name_box.addWidget(self.lbl_svg_preview)
+        
+        name_box.addStretch()
         l_basic.addRow("Name:", name_box)
+        
+        self.update_svg_preview(self.script.get("svg_content", ""))
         
         if self.script.get("type") != "folder":
             path_box = QHBoxLayout()
@@ -976,28 +982,34 @@ class EditDialog(QDialog):
         f, _ = QFileDialog.getOpenFileName(self, "Select Icon", "", "Icon Files (*.ico *.png *.jpg *.svg)")
         if f: self.inp_icon.setText(f)
 
+    def update_svg_preview(self, svg_code):
+        if not svg_code or not svg_code.strip():
+            self.lbl_svg_preview.clear()
+            self.btn_svg.setStyleSheet(f"background-color: {CP_DIM}; color: white;")
+            return
+            
+        try:
+            pix = QPixmap(20, 20)
+            pix.fill(Qt.GlobalColor.transparent)
+            painter = QPainter(pix)
+            renderer = QSvgRenderer(QByteArray(svg_code.encode('utf-8')))
+            renderer.render(painter)
+            painter.end()
+            self.lbl_svg_preview.setPixmap(pix)
+            self.btn_svg.setStyleSheet(f"background-color: {CP_CYAN}; color: black; font-weight: bold;")
+        except:
+            self.lbl_svg_preview.setText("ERR")
+            self.lbl_svg_preview.setStyleSheet(f"color: {CP_RED}; font-size: 8pt;")
+
     def open_svg_dialog(self):
-        # Use a temporary variable or modify script directly?
-        # Better to keep it in a temp attribute until saved, 
-        # but for simplicity we can read/write to self.script['_tmp_svg'] 
-        # or just hold it in a member.
-        current = self.script.get("svg_content", "")
-        # If we haven't saved yet, maybe we have a temp one? 
-        # Actually, let's just use self.script for storage, 
-        # realizing that "cancel" on the main dialog won't revert this unless we deepcopy.
-        # But EditDialog is modal and changes are usually committed on save.
-        # We'll store it in a temp variable for this session.
+        current = self._temp_svg_content if hasattr(self, "_temp_svg_content") else self.script.get("svg_content", "")
         if not hasattr(self, "_temp_svg_content"):
              self._temp_svg_content = current
              
         dlg = SvgInputDialog(self._temp_svg_content, self)
         if dlg.exec():
             self._temp_svg_content = dlg.svg_code
-            # Update button style immediately
-            if self._temp_svg_content.strip():
-                self.btn_svg.setStyleSheet(f"background-color: {CP_CYAN}; color: black; font-weight: bold;")
-            else:
-                self.btn_svg.setStyleSheet(f"background-color: {CP_DIM}; color: white;")
+            self.update_svg_preview(self._temp_svg_content)
 
     def save(self):
         self.script["name"] = self.inp_name.text()
