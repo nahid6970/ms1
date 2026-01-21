@@ -228,8 +228,10 @@ class CyberButton(QPushButton):
                 metrics = p.fontMetrics()
                 rect = metrics.tightBoundingRect(display_char)
                 
-                # Safe Color
-                c_str = self.fg_normal
+                # Safe Color - Use dynamic color based on hover state
+                current_color = self.fg_hover if self.underMouse() else self.fg_normal
+                
+                c_str = current_color
                 if not isinstance(c_str, str) or not c_str.startswith("#"):
                     c_str = "#FFFFFF"
                 p.setPen(QColor(c_str))
