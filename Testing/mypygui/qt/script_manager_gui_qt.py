@@ -12,9 +12,10 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                              QCheckBox, QColorDialog, QMenu, QTextEdit, QFormLayout,
                              QGroupBox, QSpinBox, QFileDialog, QFontComboBox, QPlainTextEdit,
                              QRadioButton, QButtonGroup, QSplitter, QStyleOptionButton, QStyle)
-from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QPoint, QMimeData
+from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QPoint, QMimeData, QByteArray
 from PyQt6.QtGui import (QFont, QCursor, QColor, QDesktopServices, QAction, QIcon, QPainter, 
                          QBrush, QPixmap, QDrag, QTextDocument, QFontDatabase)
+from PyQt6.QtSvg import QSvgRenderer
 from PyQt6.QtCore import QUrl
 import ctypes
 
@@ -37,6 +38,48 @@ CONFIG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "script_l
 # -----------------------------------------------------------------------------
 # WIDGETS
 # -----------------------------------------------------------------------------
+
+class SvgInputDialog(QDialog):
+    def __init__(self, current_svg="", parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("PASTE SVG CODE")
+        self.resize(500, 400)
+        self.svg_code = current_svg
+        self.setStyleSheet(f"""
+            QDialog {{ background-color: {CP_BG}; border: 2px solid {CP_CYAN}; }}
+            QPlainTextEdit {{ background-color: {CP_PANEL}; color: {CP_TEXT}; font-family: 'Consolas'; border: 1px solid {CP_DIM}; }}
+            QPushButton {{ background-color: {CP_DIM}; color: white; padding: 8px; border: 1px solid {CP_DIM}; }}
+            QPushButton:hover {{ border: 1px solid {CP_CYAN}; }}
+        """)
+        
+        layout = QVBoxLayout(self)
+        self.txt_input = QPlainTextEdit()
+        self.txt_input.setPlaceholderText("<svg>...</svg>")
+        self.txt_input.setPlainText(self.svg_code)
+        layout.addWidget(self.txt_input)
+        
+        btn_box = QHBoxLayout()
+        btn_save = QPushButton("SAVE SVG")
+        btn_save.setStyleSheet(f"background-color: {CP_GREEN}; color: black; font-weight: bold;")
+        btn_save.clicked.connect(self.save_and_close)
+        
+        btn_clear = QPushButton("CLEAR")
+        btn_clear.clicked.connect(self.clear_svg)
+        
+        btn_cancel = QPushButton("CANCEL")
+        btn_cancel.clicked.connect(self.reject)
+        
+        btn_box.addWidget(btn_save)
+        btn_box.addWidget(btn_clear)
+        btn_box.addWidget(btn_cancel)
+        layout.addLayout(btn_box)
+        
+    def save_and_close(self):
+        self.svg_code = self.txt_input.toPlainText()
+        self.accept()
+        
+    def clear_svg(self):
+        self.txt_input.clear()
 
 class CyberButton(QPushButton):
     def __init__(self, text, parent=None, script_data=None, config=None):
@@ -106,6 +149,7 @@ class CyberButton(QPushButton):
         # Check for icon
         icon_path = self.script.get("icon_path", "")
         nf_char = self.script.get("nf_char", "")
+        svg_content = self.script.get("svg_content", "")
         
         icon_pixmap = None
         icon_w = 0
@@ -115,8 +159,24 @@ class CyberButton(QPushButton):
             # Priority 1: Image Path
             if icon_path and os.path.exists(icon_path):
                 icon_pixmap = QPixmap(icon_path)
+            
+            # Priority 2: Raw SVG Content
+            elif svg_content and svg_content.strip():
+                # Determine size
+                gen_w = self.script.get("icon_width", 0)
+                gen_h = self.script.get("icon_height", 0)
+                if gen_w <= 0: gen_w = 64
+                if gen_h <= 0: gen_h = 64
                 
-            # Priority 2: Nerd Font Character
+                icon_pixmap = QPixmap(gen_w, gen_h)
+                icon_pixmap.fill(Qt.GlobalColor.transparent)
+                
+                painter_svg = QPainter(icon_pixmap)
+                renderer = QSvgRenderer(QByteArray(svg_content.encode('utf-8')))
+                renderer.render(painter_svg)
+                painter_svg.end()
+                
+            # Priority 3: Nerd Font Character
             elif nf_char:
                 display_char = nf_char
                 # Robust parsing for hex codes
@@ -438,6 +498,18 @@ class EditDialog(QDialog):
         self.inp_nf_char.setFixedWidth(80)
         self.inp_nf_char.setToolTip("Nerd Font Character (copy/paste or unicode escape)")
         name_box.addWidget(self.inp_nf_char)
+        
+        # SVG Button
+        self.btn_svg = QPushButton("SVG")
+        self.btn_svg.setFixedWidth(40)
+        self.btn_svg.setToolTip("Paste raw SVG code")
+        # Highlight if SVG exists
+        if self.script.get("svg_content"):
+             self.btn_svg.setStyleSheet(f"background-color: {CP_CYAN}; color: black; font-weight: bold;")
+        else:
+             self.btn_svg.setStyleSheet(f"background-color: {CP_DIM}; color: white;")
+        self.btn_svg.clicked.connect(self.open_svg_dialog)
+        name_box.addWidget(self.btn_svg)
         
         l_basic.addRow("Name:", name_box)
         
@@ -904,10 +976,37 @@ class EditDialog(QDialog):
         f, _ = QFileDialog.getOpenFileName(self, "Select Icon", "", "Icon Files (*.ico *.png *.jpg *.svg)")
         if f: self.inp_icon.setText(f)
 
+    def open_svg_dialog(self):
+        # Use a temporary variable or modify script directly?
+        # Better to keep it in a temp attribute until saved, 
+        # but for simplicity we can read/write to self.script['_tmp_svg'] 
+        # or just hold it in a member.
+        current = self.script.get("svg_content", "")
+        # If we haven't saved yet, maybe we have a temp one? 
+        # Actually, let's just use self.script for storage, 
+        # realizing that "cancel" on the main dialog won't revert this unless we deepcopy.
+        # But EditDialog is modal and changes are usually committed on save.
+        # We'll store it in a temp variable for this session.
+        if not hasattr(self, "_temp_svg_content"):
+             self._temp_svg_content = current
+             
+        dlg = SvgInputDialog(self._temp_svg_content, self)
+        if dlg.exec():
+            self._temp_svg_content = dlg.svg_code
+            # Update button style immediately
+            if self._temp_svg_content.strip():
+                self.btn_svg.setStyleSheet(f"background-color: {CP_CYAN}; color: black; font-weight: bold;")
+            else:
+                self.btn_svg.setStyleSheet(f"background-color: {CP_DIM}; color: white;")
+
     def save(self):
         self.script["name"] = self.inp_name.text()
         self.script["nf_char"] = self.inp_nf_char.text()
         self.script["icon_path"] = self.inp_icon.text()
+        
+        # Save SVG
+        if hasattr(self, "_temp_svg_content"):
+            self.script["svg_content"] = self._temp_svg_content
         self.script["icon_width"] = self.spn_icon_w.value()
         self.script["icon_height"] = self.spn_icon_h.value()
         self.script["icon_gap"] = self.spn_icon_gap.value()
