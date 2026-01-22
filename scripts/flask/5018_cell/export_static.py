@@ -3355,7 +3355,6 @@ def generate_static_html(data, custom_syntaxes):
             </div>
 
             <div class="font-size-control">
-                <span class="font-size-label">Font:</span>
                 <button onclick="adjustFontSize(-1)" class="btn-font-size" title="Decrease font size">−</button>
                 <span id="fontSizeDisplay" class="font-size-display">100%</span>
                 <button onclick="adjustFontSize(1)" class="btn-font-size" title="Increase font size">+</button>
