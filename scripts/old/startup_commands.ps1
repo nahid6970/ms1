@@ -1,6 +1,6 @@
 # PowerShell script for startup
 Start-Process 'C:\@delta\ms1\ahkscripts.ahk'
-Start-Process  'C:\@delta\ms1\mypygui.py' -WindowStyle Hidden
+Start-Process  'C:\@delta\ms1\@Status-Bar\mypygui.py' -WindowStyle Hidden
 komorebic start
 Start-Process 'C:\Users\nahid\OneDrive\backup\win11-toggle-rounded-corners.exe' -ArgumentList '--disable' -Verb RunAs -WindowStyle Hidden
 Start-Process C:\@delta\ms1\scripts\scheduled.ps1

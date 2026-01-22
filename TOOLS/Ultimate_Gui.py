@@ -21,7 +21,7 @@ def kill_process(process_name):
 
 def start_python_st():
     """Starts Python with a specific script, keeping the terminal open for errors."""
-    subprocess.Popen(['python', 'C:\\@delta\\ms1\\mypygui.py']) # Simple way to run, might not keep terminal open
+    subprocess.Popen(['python', 'C:\\@delta\\ms1\\@Status-Bar\\mypygui.py']) # Simple way to run, might not keep terminal open
 
 def restart_explorer():
     """Restarts explorer.exe."""
@@ -205,7 +205,7 @@ def create_control_panel_without_tab_border():
 
     mypygui_h_button = tk.Label(BOX_4, text="mypygui-H", width=20, bg="#32ec44", fg="black", font=default_font)
     mypygui_h_button.grid(row=5, column=1, padx=5, pady=5)
-    mypygui_h_button.bind("<Button-1>", lambda event: run_script("C:\\@delta\\ms1\\mypygui.py", hide=True))
+    mypygui_h_button.bind("<Button-1>", lambda event: run_script("C:\\@delta\\ms1\\@Status-Bar\\mypygui.py", hide=True))
 
     mypygui_s_button = tk.Label(BOX_4, text="mypygui-S", width=20, bg="#32ec44", fg="black", font=default_font)
     mypygui_s_button.grid(row=5, column=2, padx=5, pady=5)

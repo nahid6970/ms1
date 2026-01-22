@@ -92,10 +92,10 @@ Kill_Python:
 Run, taskkill /f /im python.exe,,Hide
 return
 Start_Python_mypygui_hideT:
-Run, C:\@delta\ms1\mypygui.py,,Hide
+Run, C:\@delta\ms1\@Status-Bar\mypygui.py,,Hide
 return
 Start_Python_mypygui_showT:
-    Run, cmd /k python "C:\@delta\ms1\mypygui.py", , UseErrorLevel
+    Run, cmd /k python "C:\@delta\ms1\@Status-Bar\mypygui.py", , UseErrorLevel
     if (ErrorLevel)
     {
         MsgBox, Script failed to execute. Error code: %ErrorLevel%

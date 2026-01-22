@@ -24,7 +24,7 @@ class StartupManager(tk.Tk):
             {"type": "Command","name": "bazarr"        ,"command": "Start-Process -FilePath 'C:\\ProgramData\\Bazarr\\WinPython\\python-3.10.0\\python.exe' -ArgumentList 'C:\\ProgramData\\Bazarr\\bazarr.py' -WindowStyle Hidden"},
             {"type": "Command","name": "flaresolver"   ,"command": "Start-Process 'C:\\Users\\nahid\\scoop\\apps\\flaresolverr\\current\\flaresolverr.exe' -WindowStyle Hidden"},
             {"type": "Command","name": "monitor_size"  ,"command": "Start-Process 'powershell.exe' -ArgumentList '-File C:\\@delta\\ms1\\scripts\\monitor_size.ps1' -Verb RunAs -WindowStyle Hidden"},
-            {"type": "Command","name": "mypygui"       ,"command": "Start-Process 'python.exe' -ArgumentList 'C:\\@delta\\ms1\\mypygui.py' -Verb RunAs -WindowStyle Hidden"},
+            {"type": "Command","name": "mypygui"       ,"command": "Start-Process 'python.exe' -ArgumentList 'C:\\@delta\\ms1\\@Status-Bar\\mypygui.py' -Verb RunAs -WindowStyle Hidden"},
             {"type": "Command","name": "sync"          ,"command": "Start-Process 'C:\\@delta\\ms1\\scripts\\sync.ps1'"},
             {"type": "Command","name": "syncthing"     ,"command": "Start-Process 'C:\\Users\\nahid\\scoop\\apps\\syncthing\\current\\syncthing.exe' -WindowStyle Hidden"},
             {"type": "Command","name": "ValoQbit"      ,"command": "Start-Process 'C:\\@delta\\ms1\\scripts\\valorant\\valo_qbit.ps1' -WindowStyle Hidden"},

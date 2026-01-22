@@ -9,7 +9,7 @@ class StartupManager(tk.Tk):
         self.title("Startup Manager")
         self.items = [
 {"type": "Command","name": "AHKSCRIPT"           ,"command": "Start-Process 'C:\\@delta\\ms1\\ahkscripts.ahk'"},
-{"type": "Command","name": "MYPYGUI"             ,"command": "Start-Process  'C:\\@delta\\ms1\\mypygui.py' -WindowStyle Hidden"},
+{"type": "Command","name": "MYPYGUI"             ,"command": "Start-Process  'C:\\@delta\\ms1\\@Status-Bar\\mypygui.py' -WindowStyle Hidden"},
 {"type": "Command","name": "KOMOREBIC"           ,"command": "komorebic start"},
 {"type": "Command","name": "2ndMonitor-Virtual"  ,"command": "cmd /c C:\\Users\\nahid\\OneDrive\\backup\\usbmmidd_v2\\2ndMonitor.bat"},
 {"type": "Command","name": "1st Monitor"         ,"command": "cmd /c C:\\Users\\nahid\\OneDrive\\backup\\DisplaySwitch.exe /internal"},

@@ -49,9 +49,9 @@ g
 cls
 C:\@delta\ms1\kp.ps1
 C:/@delta/ms1/kp.ps1
-C:\@delta\ms1\mypygui.py
+C:\@delta\ms1\@Status-Bar\mypygui.py
 cls
-python C:\@delta\ms1\mypygui.py
+python C:\@delta\ms1\@Status-Bar\mypygui.py
 cls
 C:\@delta\ms1\kill_processes.nu
 nu C:\@delta\ms1\kill_processes.nu

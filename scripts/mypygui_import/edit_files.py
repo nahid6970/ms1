@@ -86,7 +86,7 @@ BOX_1 = tk.Frame(MAIN_FRAME, bg="#282c34")
 BOX_1.pack(side="top", pady=(30,0), padx=(0,0))
 
 button_properties = [
-("mypygui.py"      ,BOX_1,"#346c9a","#ffffff",1,47,"flat",("calibri",12,"bold"),0,0,(0,0),(0,0),lambda: subprocess.Popen(["Start","powershell","-Command","& { code C:\\@delta\\ms1\\mypygui.py }"]                                            ,shell=True)                                                                     ),
+("mypygui.py"      ,BOX_1,"#346c9a","#ffffff",1,47,"flat",("calibri",12,"bold"),0,0,(0,0),(0,0),lambda: subprocess.Popen(["Start","powershell","-Command","& { code C:\\@delta\\ms1\\@Status-Bar\\mypygui.py }"]                                            ,shell=True)                                                                     ),
 ("desktop_icon.py" ,BOX_1,"#346c9a","#ffffff",1,47,"flat",("calibri",12,"bold"),0,0,(0,0),(0,5),lambda: subprocess.Popen(["Start","powershell","-Command","& { code C:\\@delta\\ms1\\desktop_icon.py }"]                                       ,shell=True)                                                                     ),
 ("edit_files.py"   ,BOX_1,"#346c9a","#ffffff",1,47,"flat",("calibri",12,"bold"),0,0,(0,0),(0,5),lambda: subprocess.Popen(["Start","powershell","-Command","& { code C:\\@delta\\ms1\\mypygui_import\\edit_files.py }"]                         ,shell=True)                                                                     ),
 

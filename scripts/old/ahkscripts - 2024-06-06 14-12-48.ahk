@@ -12,7 +12,7 @@
 ~Esc & q::KillForeground()
 
 ;;* Start Apps / Scripts
-#x::RunWait, C:\@delta\ms1\mypygui.py ,,Hide                                                  ;* mypygui
+#x::RunWait, C:\@delta\ms1\@Status-Bar\mypygui.py ,,Hide                                                  ;* mypygui
 !y::RunWait, python.exe C:\@delta\ms1\yasb\main.py,,Hide                                      ;* yasb
 !r::RunWait, python.exe C:\@delta\ms1\running_apps.py,,Hide                                   ;* running apps
 !o::RunWait, C:\Users\nahid\scoop\apps\whkd\current\whkd.exe,,Hide                     ;* whkd

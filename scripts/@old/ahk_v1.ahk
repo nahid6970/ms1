@@ -77,7 +77,7 @@ RAlt & Numpad3::Run, %ComSpec% /c "C:\@delta\msBackups\Display\DisplaySwitch.exe
 !x::RunWait, pwsh -Command "cd $env:USERPROFILE; Start-Process pwsh -Verb RunAs",,Hide ;* cmd as admin
 ; !y::RunWait, python.exe C:\@delta\ms1\yasb\main.py,,Hide                                      ;* yasb
 #r::RunWait, "C:\Users\nahid\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\System Tools\Run.lnk"
-#x::RunWait, C:\@delta\ms1\mypygui.py ,,Hide                                                  ;* mypygui
+#x::RunWait, C:\@delta\ms1\@Status-Bar\mypygui.py ,,Hide                                                  ;* mypygui
 
 ; RAlt & L:: Choose_Action() ; Shortcut to open the action chooser
 ;; Replace & Text Related

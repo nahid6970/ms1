@@ -815,7 +815,7 @@ AHKPY_BT.bind("<Control-Button-1>", lambda event=None: subprocess.Popen(
 # BACK=tk.Button(BOX,text="\ueb6f",width=0 ,bg="#1d2027", fg="#ffffff", command=lambda:switch_to_frame(MAIN_FRAME,EDIT_FRAME))
 # BACK.pack(side="left" ,padx=(0,0))
 # def Folder(EDIT_FRAME):
-#     MYPYGUI=tk.Button(BOX,text="MYPYGUI",width=0 ,fg="#ffffff", bg="#204892", command=lambda:(subprocess.Popen(["cmd /c Code C:\\@delta\\ms1\\mypygui.py"],shell=True), switch_to_frame(MAIN_FRAME,EDIT_FRAME)))
+#     MYPYGUI=tk.Button(BOX,text="MYPYGUI",width=0 ,fg="#ffffff", bg="#204892", command=lambda:(subprocess.Popen(["cmd /c Code C:\\@delta\\ms1\\@Status-Bar\\mypygui.py"],shell=True), switch_to_frame(MAIN_FRAME,EDIT_FRAME)))
 #     MYPYGUI.pack(side="left" ,padx=(0,0))
 #     AHKEDIT=tk.Button(BOX,text="AHKSCRIPT",width=0 ,fg="#020202", bg="#5f925f", command=lambda:(subprocess.Popen(["cmd /c Code C:\\@delta\\ms1\\ahk_v2.ahk"],shell=True), switch_to_frame(MAIN_FRAME,EDIT_FRAME)))
 #     AHKEDIT.pack(side="left" ,padx=(0,0))

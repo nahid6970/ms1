@@ -41,7 +41,7 @@ myGui.Add("Text", "xm y+5  w200 +Center Border", "Komorebi").SetFont("s12 Bold",
 myGui.Add("Text", "x+5 yp Background32ec44 cBlack w200 +Center", "").OnEvent("Click", (*) => Run("komorebi.exe", , "Hide"))
 
 myGui.Add("Text", "xm y+5  w200 +Center Border", "Python").SetFont("s12 Bold", "Jetbrainsmono nfp")
-myGui.Add("Text", "x+5 yp Background32ec44 cBlack w200 +Center", "mypygui-H").OnEvent("Click", (*) => Run("C:\@delta\ms1\mypygui.py", , "Hide"))
+myGui.Add("Text", "x+5 yp Background32ec44 cBlack w200 +Center", "mypygui-H").OnEvent("Click", (*) => Run("C:\@delta\ms1\@Status-Bar\mypygui.py", , "Hide"))
 myGui.Add("Text", "x+5 yp Background32ec44 cBlack w200 +Center", "mypygui-S").OnEvent("Click", (*) =>  StartPython_ST())
 
 myGui.Add("Text", "xm y+5  w200 +Center Border", "Explorer").SetFont("s12 Bold", "Jetbrainsmono nfp")
@@ -58,7 +58,7 @@ KillProcess(processName) {
 
 ; Function to start Python with a specific script, keeping PowerShell open for errors
 startpython_st() {
-    Run('pwsh -NoExit -Command "python C:\@delta\ms1\mypygui.py"', , "") 
+    Run('pwsh -NoExit -Command "python C:\@delta\ms1\@Status-Bar\mypygui.py"', , "") 
 }
 
 ; Function to restart explorer.exe

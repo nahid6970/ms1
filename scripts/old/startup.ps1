@@ -7,7 +7,7 @@ function aria2c_rpc            {Start-Process -FilePath "aria2c" -ArgumentList "
 function capture2text          {Start-Process "C:\Users\nahid\scoop\apps\capture2text\current\Capture2Text.exe" }
 function free_download_manager {Start-Process 'C:\Users\nahid\AppData\Local\Softdeluxe\Free Download Manager\fdm.exe' -WindowStyle Minimized }
 function monitor_size          {Start-Process "powershell.exe" -ArgumentList "-File C:\@delta\ms1\scripts\monitor_size.ps1" -Verb RunAs -WindowStyle Hidden }
-function mypygui               {Start-Process "python.exe" -ArgumentList "C:\@delta\ms1\mypygui.py" -Verb RunAs -WindowStyle Hidden }
+function mypygui               {Start-Process "python.exe" -ArgumentList "C:\@delta\ms1\@Status-Bar\mypygui.py" -Verb RunAs -WindowStyle Hidden }
 function powertoys             {if (Test-Path "C:\Users\nahid\AppData\Local\PowerToys\PowerToys.exe") { Start-Process "C:\Users\nahid\AppData\Local\PowerToys\PowerToys.exe" } elseif (Test-Path "C:\Users\nahid\scoop\apps\PowerToys\current\PowerToys.exe") { Start-Process "C:\Users\nahid\scoop\apps\PowerToys\current\PowerToys.exe" } else { Write-Warning "PowerToys not found in either expected location." } }
 function rssguard              {Start-Process "C:\Users\nahid\scoop\apps\rssguard\current\rssguard.exe" }
 function rssowl                {Start-Process "C:\RSSOwlnix\RSSOwlnix.exe" -WindowStyle Minimized }
