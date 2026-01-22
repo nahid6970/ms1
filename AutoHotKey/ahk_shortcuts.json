@@ -82,11 +82,11 @@
             "action": "{\n    ; Kill dnplayer.exe\n    Run(\"taskkill /F /IM dnplayer.exe\",,\"Hide\")\n    ; Kill python.exe\n    Run(\"taskkill /F /IM python.exe\",,\"Hide\")\n    ; Run the command\n    Run(\"C:\\@delta\\msBackups\\Display\\DisplaySwitch.exe /internal\",,\"Hide\")\n}"
         },
         {
-            "name": "mypygui",
+            "name": "Script Manager",
             "category": "Launch",
             "description": "",
             "hotkey": "#x",
-            "action": "Run('pythonw \"C:\\@delta\\ms1\\Testing\\mypygui\\qt\\script_manager_gui_qt.py\"')",
+            "action": "Run('pythonw \"C:\\@delta\\db\\@run_from_db\\Script_Manager\\script_manager_gui_qt.py\"')",
             "enabled": true
         },
         {
