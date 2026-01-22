@@ -519,8 +519,8 @@ Tools_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C
 
 Startup_bt=CTkLabel(ROOT1, text="\uf4cc", bg_color="#1d2027",text_color="#10b153", anchor="w",font=("JetBrainsMono NFP",25,"bold"))
 Startup_bt.pack(side="left",padx=(2,0),pady=(1,0))
-Startup_bt.bind("<Button-1>",lambda event:subprocess.Popen([r"cmd /c C:\@delta\ms1\scripts\flask\4999_startup\startup.py"], shell=True))
-Startup_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen([r"cmd /c code C:\@delta\ms1\scripts\flask\4999_startup\startup.py"], shell=True))
+Startup_bt.bind("<Button-1>",lambda event:subprocess.Popen([r"cmd /c C:\@delta\ms1\flask\4999_startup\startup.py"], shell=True))
+Startup_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen([r"cmd /c code C:\@delta\ms1\flask\4999_startup\startup.py"], shell=True))
 
 
 # ProcessPRLS_bt=CTkLabel(ROOT1, text="\uf4bc", bg_color="#1d2027",text_color="#f04410", anchor="w",font=("JetBrainsMono NFP",25,"bold"))
@@ -530,8 +530,8 @@ Startup_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen([r"cmd /c cod
 
 AppManagement_bt=CTkLabel(ROOT1, text="\uf40e", bg_color="#1d2027",text_color="#26b2f3", anchor="w",font=("JetBrainsMono NFP",25,"bold"))
 AppManagement_bt.pack(side="left",padx=(10,0),pady=(1,0))
-AppManagement_bt.bind("<Button-1>",lambda event:subprocess.Popen([r"cmd /c start C:\@delta\ms1\scripts\flask\4998_Applist\applist.py"], shell=True))
-AppManagement_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen([r"cmd /c code C:\@delta\ms1\scripts\flask\4998_Applist\applist.py"], shell=True))
+AppManagement_bt.bind("<Button-1>",lambda event:subprocess.Popen([r"cmd /c start C:\@delta\ms1\flask\4998_Applist\applist.py"], shell=True))
+AppManagement_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen([r"cmd /c code C:\@delta\ms1\flask\4998_Applist\applist.py"], shell=True))
 AppManagement_bt.bind("<Button-3>",lambda event:subprocess.Popen(["cmd /c start C:\\@delta\\ms1\\scripts\\mypygui_import\\app_store.py"], shell=True))
 AppManagement_bt.bind("<Control-Button-3>",lambda event:subprocess.Popen(["cmd /c code C:\\@delta\\ms1\\scripts\\mypygui_import\\app_store.py"], shell=True))
 

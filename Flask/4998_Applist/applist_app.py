@@ -7,7 +7,7 @@ import threading
 app = Flask(__name__)
 
 # Configuration
-DATA_FILE = r"C:\@delta\ms1\scripts\flask\4998_Applist\data.json"
+DATA_FILE = r"C:\@delta\ms1\flask\4998_Applist\data.json"
 
 def load_applications():
     """Load applications from JSON file"""

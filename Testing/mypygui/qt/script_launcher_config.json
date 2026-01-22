@@ -1029,7 +1029,7 @@
         },
         {
             "name": "Lock-Smith",
-            "path": "C:/@delta/ms1/Testing/FileLockSmith/locksmith.py",
+            "path": "C:\\@delta\\db\\locksmith.py",
             "type": "script",
             "hide_terminal": true,
             "keep_open": false,

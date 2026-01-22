@@ -4,7 +4,7 @@ import os
 from flask import jsonify
 import math
 
-app = Flask(__name__, static_folder='C:\\@delta\\ms1\\scripts\\flask\\5005_GameARR\\static')
+app = Flask(__name__, static_folder='C:\\@delta\\ms1\\flask\\5005_GameARR\\static')
 DB_PATH = r"C:\@delta\msBackups\gameARR\game.db"
 GAMES_PER_PAGE = 20
 

@@ -94,7 +94,7 @@
             "category": "Launch",
             "description": "",
             "hotkey": "#s",
-            "action": "Run(\"C:\\@delta\\ms1\\scripts\\flask\\4999_startup\\startup.py\", , \"Hide\")"
+            "action": "Run(\"C:\\@delta\\ms1\\flask\\4999_startup\\startup.py\", , \"Hide\")"
         },
         {
             "name": "CrossHair",
