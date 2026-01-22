@@ -2125,8 +2125,9 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
 
         // Handle link clicks - prevent editing and open link instead
         preview.addEventListener('mousedown', (e) => {
-            if (e.target.tagName === 'A') {
-                console.log('Link mousedown:', e.target.href);
+            const link = e.target.closest('a');
+            if (link) {
+                console.log('Link mousedown:', link.href);
                 e.preventDefault();
                 e.stopPropagation();
                 e.stopImmediatePropagation();
@@ -2136,14 +2137,15 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
 
         preview.addEventListener('click', (e) => {
             console.log('Preview clicked, target:', e.target.tagName);
-            if (e.target.tagName === 'A') {
-                console.log('Link clicked:', e.target.href);
+            const link = e.target.closest('a');
+            if (link) {
+                console.log('Link clicked:', link.href);
                 e.preventDefault();
                 e.stopPropagation();
                 e.stopImmediatePropagation();
 
                 // Open link
-                window.open(e.target.href, '_blank', 'noopener,noreferrer');
+                window.open(link.href, '_blank', 'noopener,noreferrer');
                 return false;
             }
         }, true); // Use capture phase to catch event before it bubbles
