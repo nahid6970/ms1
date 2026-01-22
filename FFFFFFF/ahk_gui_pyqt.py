@@ -260,6 +260,58 @@ class AddEditShortcutDialog(QDialog):
             hotkey_row.addWidget(self.hotkey_edit)
             hotkey_row.addWidget(self.record_hotkey_btn)
             form_layout.addLayout(hotkey_row)
+        elif self.shortcut_type == "context":
+            # Context shortcuts have both hotkey and context fields
+            form_layout.addWidget(QLabel("Hotkey:"))
+            hotkey_row = QHBoxLayout()
+            self.hotkey_edit = HotkeyLineEdit()
+            self.hotkey_edit.setPlaceholderText("e.g., ^s, ^r")
+            
+            self.record_hotkey_btn = QPushButton("⌨")
+            self.record_hotkey_btn.setCheckable(True)
+            self.record_hotkey_btn.setFixedWidth(40)
+            self.record_hotkey_btn.setStyleSheet("""
+                QPushButton {
+                    font-family: 'JetBrainsMono NFP', 'JetBrains Mono', monospace;
+                    background-color: #3d3d3d;
+                    border: 1px solid #555;
+                    border-radius: 5px;
+                    color: white;
+                    font-size: 18px;
+                }
+                QPushButton:checked {
+                    background-color: #61dafb;
+                    color: black;
+                    border-color: #61dafb;
+                }
+                QPushButton:hover {
+                    background-color: #4d4d4d;
+                    border-color: #61dafb;
+                }
+            """)
+            self.record_hotkey_btn.setToolTip("Open Shortcut Builder")
+            self.record_hotkey_btn.clicked.connect(lambda checked: self.hotkey_edit.set_recording(checked))
+            self.hotkey_edit.record_button = self.record_hotkey_btn
+            
+            hotkey_row.addWidget(self.hotkey_edit)
+            hotkey_row.addWidget(self.record_hotkey_btn)
+            form_layout.addLayout(hotkey_row)
+            
+            # Context fields
+            form_layout.addWidget(QLabel("Window Title (contains):"))
+            self.window_title_edit = QLineEdit()
+            self.window_title_edit.setPlaceholderText("e.g., Gemini, Visual Studio Code")
+            form_layout.addWidget(self.window_title_edit)
+            
+            form_layout.addWidget(QLabel("Process Name (optional):"))
+            self.process_name_edit = QLineEdit()
+            self.process_name_edit.setPlaceholderText("e.g., WindowsTerminal.exe, Code.exe")
+            form_layout.addWidget(self.process_name_edit)
+            
+            form_layout.addWidget(QLabel("Window Class (optional):"))
+            self.window_class_edit = QLineEdit()
+            self.window_class_edit.setPlaceholderText("e.g., CabinetWClass")
+            form_layout.addWidget(self.window_class_edit)
         elif self.shortcut_type == "text":
             # Trigger
             form_layout.addWidget(QLabel("Trigger (without ::):"))
@@ -272,7 +324,7 @@ class AddEditShortcutDialog(QDialog):
         top_layout.addLayout(form_layout)
         
         # Right side - action/replacement with bigger height and width
-        if self.shortcut_type in ["script", "startup"]:
+        if self.shortcut_type in ["script", "startup", "context"]:
             # Action
             action_layout = QVBoxLayout()
             action_layout.addWidget(QLabel("Script/Action Code:"))
@@ -303,7 +355,7 @@ class AddEditShortcutDialog(QDialog):
 
     def get_existing_categories(self):
         categories = set()
-        for shortcut in self.parent_window.script_shortcuts + self.parent_window.text_shortcuts + self.parent_window.startup_scripts:
+        for shortcut in self.parent_window.script_shortcuts + self.parent_window.text_shortcuts + self.parent_window.startup_scripts + self.parent_window.context_shortcuts:
             category = shortcut.get('category', '').strip()
             if category:
                 categories.add(category)
@@ -327,6 +379,12 @@ class AddEditShortcutDialog(QDialog):
 
         if self.shortcut_type == "script":
             self.hotkey_edit.setText(self.shortcut_data.get("hotkey", ""))
+            self.action_edit.setPlainText(self.shortcut_data.get("action", ""))
+        elif self.shortcut_type == "context":
+            self.hotkey_edit.setText(self.shortcut_data.get("hotkey", ""))
+            self.window_title_edit.setText(self.shortcut_data.get("window_title", ""))
+            self.process_name_edit.setText(self.shortcut_data.get("process_name", ""))
+            self.window_class_edit.setText(self.shortcut_data.get("window_class", ""))
             self.action_edit.setPlainText(self.shortcut_data.get("action", ""))
         elif self.shortcut_type == "startup":
             self.action_edit.setPlainText(self.shortcut_data.get("action", ""))
@@ -357,6 +415,32 @@ class AddEditShortcutDialog(QDialog):
                 "category": category,
                 "description": description,
                 "hotkey": hotkey,
+                "action": action,
+                "enabled": enabled
+            }
+        elif self.shortcut_type == "context":
+            hotkey = self.hotkey_edit.text().strip()
+            action = self.action_edit.toPlainText().strip()
+            window_title = self.window_title_edit.text().strip()
+            process_name = self.process_name_edit.text().strip()
+            window_class = self.window_class_edit.text().strip()
+
+            if not hotkey or not action:
+                QMessageBox.warning(self, "Warning", "Hotkey and action are required.")
+                return
+            
+            if not window_title and not process_name and not window_class:
+                QMessageBox.warning(self, "Warning", "At least one context field (Window Title, Process Name, or Window Class) is required.")
+                return
+
+            shortcut_data = {
+                "name": name,
+                "category": category,
+                "description": description,
+                "hotkey": hotkey,
+                "window_title": window_title,
+                "process_name": process_name,
+                "window_class": window_class,
                 "action": action,
                 "enabled": enabled
             }
@@ -397,6 +481,8 @@ class AddEditShortcutDialog(QDialog):
             # Add new
             if self.shortcut_type == "script":
                 self.parent_window.script_shortcuts.append(shortcut_data)
+            elif self.shortcut_type == "context":
+                self.parent_window.context_shortcuts.append(shortcut_data)
             elif self.shortcut_type == "startup":
                 self.parent_window.startup_scripts.append(shortcut_data)
             else:
@@ -446,7 +532,7 @@ class CategoryColorDialog(QDialog):
     def populate_colors(self, layout):
         # Get all categories
         all_categories = set()
-        for shortcut in self.parent_window.script_shortcuts + self.parent_window.text_shortcuts:
+        for shortcut in self.parent_window.script_shortcuts + self.parent_window.text_shortcuts + self.parent_window.context_shortcuts:
             category = shortcut.get('category', 'General')
             if category:
                 all_categories.add(category)
@@ -494,6 +580,7 @@ class AHKShortcutEditor(QMainWindow):
         self.script_shortcuts = []
         self.text_shortcuts = []
         self.startup_scripts = []
+        self.context_shortcuts = []
         self.category_colors = {
             "System": "#FF6B6B", "Navigation": "#4ECDC4", "Text": "#45B7D1",
             "Media": "#96CEB4", "AutoHotkey": "#FFEAA7", "General": "#DDA0DD",
@@ -571,6 +658,7 @@ class AHKShortcutEditor(QMainWindow):
         self.add_menu = QMenu()
         self.add_menu.addAction("Script Shortcut", lambda: self.open_add_dialog("script"))
         self.add_menu.addAction("Text Shortcut", lambda: self.open_add_dialog("text"))
+        self.add_menu.addAction("Context Shortcut", lambda: self.open_add_dialog("context"))
         self.add_menu.addAction("Background Script", lambda: self.open_add_dialog("startup"))
         self.add_btn.setMenu(self.add_menu)
         top_layout.addWidget(self.add_btn)
@@ -724,6 +812,9 @@ class AHKShortcutEditor(QMainWindow):
                 elif shortcut_type == "text" and index < len(self.text_shortcuts):
                     self.selected_shortcut = self.text_shortcuts[index]
                     self.selected_type = "text"
+                elif shortcut_type == "context" and index < len(self.context_shortcuts):
+                    self.selected_shortcut = self.context_shortcuts[index]
+                    self.selected_type = "context"
                 elif shortcut_type == "startup" and index < len(self.startup_scripts):
                     self.selected_shortcut = self.startup_scripts[index]
                     self.selected_type = "startup"
@@ -742,6 +833,8 @@ class AHKShortcutEditor(QMainWindow):
                     self.script_shortcuts[index]["enabled"] = not self.script_shortcuts[index].get("enabled", True)
                 elif shortcut_type == "text" and index < len(self.text_shortcuts):
                     self.text_shortcuts[index]["enabled"] = not self.text_shortcuts[index].get("enabled", True)
+                elif shortcut_type == "context" and index < len(self.context_shortcuts):
+                    self.context_shortcuts[index]["enabled"] = not self.context_shortcuts[index].get("enabled", True)
                 elif shortcut_type == "startup" and index < len(self.startup_scripts):
                     self.startup_scripts[index]["enabled"] = not self.startup_scripts[index].get("enabled", True)
 
@@ -789,6 +882,7 @@ class AHKShortcutEditor(QMainWindow):
                     self.script_shortcuts = data.get("script_shortcuts", [])
                     self.text_shortcuts = data.get("text_shortcuts", [])
                     self.startup_scripts = data.get("startup_scripts", [])
+                    self.context_shortcuts = data.get("context_shortcuts", [])
             except Exception as e:
                 QMessageBox.critical(self, "Error", f"Failed to load shortcuts JSON: {e}")
                 self.create_default_shortcuts()
@@ -813,7 +907,8 @@ class AHKShortcutEditor(QMainWindow):
             data = {
                 "script_shortcuts": self.script_shortcuts, 
                 "text_shortcuts": self.text_shortcuts,
-                "startup_scripts": self.startup_scripts
+                "startup_scripts": self.startup_scripts,
+                "context_shortcuts": self.context_shortcuts
             }
             with open(SHORTCUTS_JSON_PATH, 'w', encoding='utf-8') as f:
                 json.dump(data, f, indent=4, ensure_ascii=False)
@@ -835,10 +930,12 @@ class AHKShortcutEditor(QMainWindow):
                           if search_query in f"{s.get('name', '')} {s.get('hotkey', '')} {s.get('description', '')} {s.get('category', '')}".lower()]
         filtered_text = [s for s in self.text_shortcuts
                         if search_query in f"{s.get('name', '')} {s.get('trigger', '')} {s.get('description', '')} {s.get('category', '')}".lower()]
+        filtered_context = [s for s in self.context_shortcuts
+                           if search_query in f"{s.get('name', '')} {s.get('hotkey', '')} {s.get('description', '')} {s.get('category', '')} {s.get('window_title', '')}".lower()]
         filtered_startup = [s for s in self.startup_scripts
                            if search_query in f"{s.get('name', '')} {s.get('description', '')} {s.get('category', '')}".lower()]
 
-        html = self.generate_html(filtered_script, filtered_text, filtered_startup, group_by_category)
+        html = self.generate_html(filtered_script, filtered_text, filtered_context, filtered_startup, group_by_category)
         
         # Only set HTML if it changed or it's an interaction
         self.text_browser.setHtml(html)
@@ -847,7 +944,204 @@ class AHKShortcutEditor(QMainWindow):
         from PyQt6.QtCore import QTimer
         QTimer.singleShot(1, lambda: scrollbar.setValue(scroll_position))
 
-    def generate_html(self, script_shortcuts, text_shortcuts, startup_scripts, group_by_category):
+    def generate_html(self, script_shortcuts, text_shortcuts, context_shortcuts, startup_scripts, group_by_category):
+        html = """
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <style>
+                body {
+                    font-family: 'JetBrains Mono', 'Consolas', monospace;
+                    margin: 10px 20px;
+                    background: #2b2b2b;
+                    color: #ffffff;
+                    font-size: 18px; /* High visibility base size */
+                }
+                .container { display: flex; gap: 20px; }
+                .column { flex: 1; }
+                .section-title {
+                    font-size: 24px;
+                    font-weight: bold;
+                    margin: 15px 0 5px 0;
+                    color: #61dafb;
+                }
+                .section-title:first-child {
+                    margin-top: 5px;
+                }
+                .category-header {
+                    font-size: 22px;
+                    font-weight: bold;
+                    margin: 12px 0 3px 0;
+                    padding: 3px 10px;
+                    border-radius: 5px;
+                    background: #404040;
+                }
+                .category-header.first-in-section {
+                    margin-top: 8px;
+                }
+                .shortcut-item {
+                    padding: 2px 10px;
+                    margin: 1px 0;
+                    border-radius: 5px;
+                    cursor: pointer;
+                    transition: background 0.2s;
+                    border-left: 3px solid transparent;
+                }
+                .shortcut-item:hover {
+                    background: rgba(255,255,255,0.05);
+                    border-left-color: #61dafb;
+                }
+                .shortcut-item.selected {
+                    background: rgba(97, 218, 251, 0.2);
+                    border-left-color: #61dafb;
+                }
+                .shortcut-key {
+                    color: #ffffff;
+                    font-weight: bold;
+                    font-size: 18px;
+                    white-space: nowrap;
+                    padding-right: 15px;
+                }
+                .shortcut-separator {
+                    color: #32CD32;
+                    font-weight: bold;
+                    font-size: 22px;
+                    vertical-align: middle;
+                    white-space: nowrap;
+                }
+                .shortcut-name {
+                    color: #ffffff;
+                    font-size: 18px;
+                }
+                .shortcut-desc {
+                    color: #888;
+                    font-size: 15px;
+                }
+                .status-enabled { color: #27ae60; }
+                .status-disabled { color: #ff5555; }
+                
+                .indent { margin-left: 20px; }
+                a { text-decoration: none; color: inherit; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="column">
+                    <div class="section-title">Script Shortcuts</div>
+        """
+
+        if group_by_category:
+            # Group script shortcuts by category
+            script_categories = {}
+            for shortcut in script_shortcuts:
+                category = shortcut.get('category', 'General')
+                if category not in script_categories:
+                    script_categories[category] = []
+                script_categories[category].append(shortcut)
+
+            for i, category in enumerate(sorted(script_categories.keys())):
+                color = self.get_category_color(category)
+                first_class = " first-in-section" if i == 0 else ""
+                html += f'<div class="category-header{first_class}" style="color: {color};">📁 {category}</div>'
+
+                for shortcut in sorted(script_categories[category], key=lambda x: x.get('hotkey', '').lower()):
+                    original_index = self.script_shortcuts.index(shortcut)
+                    html += self.generate_shortcut_html(shortcut, "script", original_index, True)
+        else:
+            # Flat list
+            for shortcut in sorted(script_shortcuts, key=lambda x: x.get('hotkey', '').lower()):
+                original_index = self.script_shortcuts.index(shortcut)
+                html += self.generate_shortcut_html(shortcut, "script", original_index, False)
+
+        html += """
+                </div>
+                <div class="column">
+                    <div class="section-title">Context Shortcuts</div>
+        """
+
+        if group_by_category:
+            context_categories = {}
+            for shortcut in context_shortcuts:
+                category = shortcut.get('category', 'General')
+                if category not in context_categories:
+                    context_categories[category] = []
+                context_categories[category].append(shortcut)
+
+            for i, category in enumerate(sorted(context_categories.keys())):
+                color = self.get_category_color(category)
+                first_class = " first-in-section" if i == 0 else ""
+                html += f'<div class="category-header{first_class}" style="color: {color};">📁 {category}</div>'
+
+                for shortcut in sorted(context_categories[category], key=lambda x: x.get('hotkey', '').lower()):
+                    original_index = self.context_shortcuts.index(shortcut)
+                    html += self.generate_shortcut_html(shortcut, "context", original_index, True)
+        else:
+            for shortcut in sorted(context_shortcuts, key=lambda x: x.get('hotkey', '').lower()):
+                original_index = self.context_shortcuts.index(shortcut)
+                html += self.generate_shortcut_html(shortcut, "context", original_index, False)
+
+        html += """
+                    <div class="section-title">Background Scripts</div>
+        """
+
+        if group_by_category:
+            startup_categories = {}
+            for shortcut in startup_scripts:
+                category = shortcut.get('category', 'General')
+                if category not in startup_categories:
+                    startup_categories[category] = []
+                startup_categories[category].append(shortcut)
+
+            for i, category in enumerate(sorted(startup_categories.keys())):
+                color = self.get_category_color(category)
+                first_class = " first-in-section" if i == 0 else ""
+                html += f'<div class="category-header{first_class}" style="color: {color};">📁 {category}</div>'
+
+                for shortcut in sorted(startup_categories[category], key=lambda x: x.get('name', '').lower()):
+                    original_index = self.startup_scripts.index(shortcut)
+                    html += self.generate_shortcut_html(shortcut, "startup", original_index, True)
+        else:
+            for shortcut in sorted(startup_scripts, key=lambda x: x.get('name', '').lower()):
+                original_index = self.startup_scripts.index(shortcut)
+                html += self.generate_shortcut_html(shortcut, "startup", original_index, False)
+
+        html += """
+                </div>
+                <div class="column">
+                    <div class="section-title">Text Shortcuts</div>
+        """
+
+        if group_by_category:
+            # Group text shortcuts by category
+            text_categories = {}
+            for shortcut in text_shortcuts:
+                category = shortcut.get('category', 'General')
+                if category not in text_categories:
+                    text_categories[category] = []
+                text_categories[category].append(shortcut)
+
+            for i, category in enumerate(sorted(text_categories.keys())):
+                color = self.get_category_color(category)
+                first_class = " first-in-section" if i == 0 else ""
+                html += f'<div class="category-header{first_class}" style="color: {color};">📁 {category}</div>'
+
+                for shortcut in sorted(text_categories[category], key=lambda x: x.get('trigger', '').lower()):
+                    original_index = self.text_shortcuts.index(shortcut)
+                    html += self.generate_shortcut_html(shortcut, "text", original_index, True)
+        else:
+            # Flat list
+            for shortcut in sorted(text_shortcuts, key=lambda x: x.get('trigger', '').lower()):
+                original_index = self.text_shortcuts.index(shortcut)
+                html += self.generate_shortcut_html(shortcut, "text", original_index, False)
+
+        html += """
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+
+        return html
         html = """
         <!DOCTYPE html>
         <html>
@@ -1034,6 +1328,12 @@ class AHKShortcutEditor(QMainWindow):
         if shortcut_type == "script":
             key = shortcut.get('hotkey', '')
             key_width = 170
+        elif shortcut_type == "context":
+            key = shortcut.get('hotkey', '')
+            window_title = shortcut.get('window_title', '')
+            if window_title:
+                key = f"{key} [{window_title[:15]}...]" if len(window_title) > 15 else f"{key} [{window_title}]"
+            key_width = 220
         elif shortcut_type == "startup":
             key = "🚀 Startup"
             key_width = 170
@@ -1106,6 +1406,8 @@ class AHKShortcutEditor(QMainWindow):
         if reply == QMessageBox.StandardButton.Yes:
             if self.selected_type == "script":
                 self.script_shortcuts.remove(self.selected_shortcut)
+            elif self.selected_type == "context":
+                self.context_shortcuts.remove(self.selected_shortcut)
             elif self.selected_type == "startup":
                 self.startup_scripts.remove(self.selected_shortcut)
             else:
@@ -1191,6 +1493,72 @@ class AHKShortcutEditor(QMainWindow):
                         output_lines.append("}")
                     else:
                         output_lines.append(f"{hotkey}::{action}")
+                    output_lines.append("")
+
+            # Add context shortcuts with #HotIf directives
+            enabled_context = [s for s in self.context_shortcuts if s.get('enabled', True)]
+            if enabled_context:
+                output_lines.append(";! === CONTEXT SHORTCUTS ===")
+                
+                # Group by context to minimize #HotIf blocks
+                for shortcut in enabled_context:
+                    output_lines.append(f";! {shortcut.get('name', 'Unnamed')}")
+                    if shortcut.get('description'):
+                        output_lines.append(f";! {shortcut.get('description')}")
+                    
+                    # Generate context check function
+                    window_title = shortcut.get('window_title', '')
+                    process_name = shortcut.get('process_name', '')
+                    window_class = shortcut.get('window_class', '')
+                    
+                    # Build condition
+                    conditions = []
+                    if process_name:
+                        conditions.append(f'processName = "{process_name}"')
+                    if window_title:
+                        conditions.append(f'InStr(windowTitle, "{window_title}")')
+                    if window_class:
+                        conditions.append(f'windowClass = "{window_class}"')
+                    
+                    condition_str = " && ".join(conditions)
+                    
+                    # Generate unique function name
+                    func_name = f"Is{shortcut.get('name', 'Context').replace(' ', '')}Context"
+                    
+                    output_lines.append(f"{func_name}() {{")
+                    output_lines.append("    try {")
+                    if process_name:
+                        output_lines.append('        processName := WinGetProcessName("A")')
+                    if window_title:
+                        output_lines.append('        windowTitle := WinGetTitle("A")')
+                    if window_class:
+                        output_lines.append('        windowClass := WinGetClass("A")')
+                    output_lines.append(f"        if ({condition_str}) {{")
+                    output_lines.append("            return true")
+                    output_lines.append("        }")
+                    output_lines.append("    }")
+                    output_lines.append("    return false")
+                    output_lines.append("}")
+                    output_lines.append("")
+                    
+                    # Add #HotIf directive
+                    output_lines.append(f"#HotIf {func_name}()")
+                    output_lines.append("")
+                    
+                    action = shortcut.get('action', '')
+                    hotkey = shortcut.get('hotkey', '')
+                    action = action.replace(',,,', ',,')
+                    
+                    if '\n' in action:
+                        output_lines.append(f"{hotkey}:: {{")
+                        for line in action.split('\n'):
+                            if line.strip():
+                                output_lines.append(f"    {line}")
+                        output_lines.append("}")
+                    else:
+                        output_lines.append(f"{hotkey}::{action}")
+                    output_lines.append("")
+                    output_lines.append("#HotIf")
                     output_lines.append("")
 
             # Add enabled text shortcuts
