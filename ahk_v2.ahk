@@ -10,9 +10,9 @@ Persistent
 #Include C:\@delta\ms1\scripts\pyautogui\Clash_of_Clans.ahk
 #Include C:\@delta\ms1\scripts\Autohtokey\math.ahk
 #Include "C:\@delta\ms1\FFFFFFF\generated_shortcuts.ahk"
-#Include "C:\@delta\ms1\scripts\Autohtokey\gemini_helper.ahk"
+; #Include "C:\@delta\ms1\scripts\Autohtokey\gemini_helper.ahk"
 ; #Include "C:\@delta\ms1\scripts\Autohtokey\recordKey.ahk"
-
+ 
 
 
 ;! v1 startups

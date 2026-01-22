@@ -647,6 +647,45 @@ PrintScreen::Run("C:\@delta\ms1\scripts\Autohtokey\version2\gui\Bio.ahk", "", "H
     }
 }
 
+;! === CONTEXT SHORTCUTS ===
+;! Gemini Save Chat
+;! Save current Gemini chat session
+IsGeminiSaveChatContext() {
+    try {
+        processName := WinGetProcessName("A")
+        windowTitle := WinGetTitle("A")
+        if (processName = "WindowsTerminal.exe" && InStr(windowTitle, "Gemini")) {
+            return true
+        }
+    }
+    return false
+}
+
+#HotIf IsGeminiSaveChatContext()
+
+^s::SendText("/chat save")
+
+#HotIf
+
+;! Gemini Resume Chat
+;! Resume previous Gemini chat session
+IsGeminiResumeChatContext() {
+    try {
+        processName := WinGetProcessName("A")
+        windowTitle := WinGetTitle("A")
+        if (processName = "WindowsTerminal.exe" && InStr(windowTitle, "Gemini")) {
+            return true
+        }
+    }
+    return false
+}
+
+#HotIf IsGeminiResumeChatContext()
+
+^r::SendText("/chat resume")
+
+#HotIf
+
 ;! === TEXT SHORTCUTS ===
 ;! AutoHotkey Version 1
 ;! Inserts AHK v1 header requirement
