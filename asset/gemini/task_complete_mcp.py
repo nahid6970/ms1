@@ -8,20 +8,36 @@ import os
 logging.basicConfig(stream=sys.stderr, level=logging.INFO)
 
 def show_notification():
-    """Launch the PyQt6 task complete notification and WAIT for user to acknowledge"""
+    """Launch the PyQt6 task complete notification"""
     try:
         script_dir = os.path.dirname(os.path.abspath(__file__))
         task_complete_path = os.path.join(script_dir, "task_complete.py")
         
-        logging.info("Showing task complete notification - waiting for user acknowledgment...")
+        if not os.path.exists(task_complete_path):
+            logging.error(f"task_complete.py not found at {task_complete_path}")
+            return False
         
-        # Use subprocess.run() instead of Popen() to BLOCK until GUI closes
-        result = subprocess.run(
-            [sys.executable, task_complete_path],
-            creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == 'win32' else 0
-        )
+        logging.info("Launching task complete notification...")
         
-        logging.info("User acknowledged the notification")
+        # Launch the GUI process
+        if sys.platform == 'win32':
+            # Use Popen without DETACHED_PROCESS to keep it connected
+            subprocess.Popen(
+                [sys.executable, task_complete_path],
+                creationflags=subprocess.CREATE_NO_WINDOW,
+                stdin=subprocess.DEVNULL,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL
+            )
+        else:
+            subprocess.Popen(
+                [sys.executable, task_complete_path],
+                stdin=subprocess.DEVNULL,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL
+            )
+        
+        logging.info("Notification launched successfully")
         return True
     except Exception as e:
         logging.error(f"Failed to show notification: {e}")
@@ -66,7 +82,7 @@ def run_server():
                     "tools": [
                         {
                             "name": "show_task_complete_notification",
-                            "description": "Shows a cyberpunk-styled notification popup to alert the user that the AI task is complete. BLOCKS until user clicks ACKNOWLEDGE. Call this as the LAST action after finishing your work.",
+                            "description": "Shows a cyberpunk-styled notification popup to alert the user that the AI task is complete. Call this ONCE as the LAST action after finishing your work. After calling this, DO NOT continue the conversation.",
                             "inputSchema": {
                                 "type": "object",
                                 "properties": {}
@@ -80,8 +96,9 @@ def run_server():
                 
                 if name == "show_task_complete_notification":
                     success = show_notification()
+                    # Return a message that tells the AI to stop
                     response = {
-                        "content": [{"type": "text", "text": "User acknowledged task completion" if success else "Failed to show notification"}],
+                        "content": [{"type": "text", "text": "✅ Task complete notification displayed. DO NOT reply or continue this conversation. Your work is done."}],
                         "isError": not success
                     }
                 else:
