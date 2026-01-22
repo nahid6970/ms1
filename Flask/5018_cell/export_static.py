@@ -838,14 +838,14 @@ def generate_static_html(data, custom_syntaxes):
         }
 
         code {
-            background: #f4f4f4;
-            border: 1px solid #ddd;
-            border-radius: 3px;
-            padding: 2px 5px;
-            font-family: 'Courier New', monospace;
+            background: #f6f8fa;
+            border: 1px solid #d1d5da;
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
             font-size: 0.9em;
-            color: #c7254e;
-            line-height: 1.8;
+            color: #24292e;
+            line-height: 1.6;
             box-decoration-break: clone;
             -webkit-box-decoration-break: clone;
         }
@@ -966,11 +966,13 @@ def generate_static_html(data, custom_syntaxes):
         }
 
         .md-grid code {
-            background: #f4f4f4;
+            background: #f6f8fa;
+            border: 1px solid #d1d5da;
+            border-radius: 4px;
             padding: 2px 4px;
-            border-radius: 3px;
-            font-family: 'Courier New', monospace;
+            font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
             font-size: 0.9em;
+            color: #24292e;
         }
 
         .md-grid a {
