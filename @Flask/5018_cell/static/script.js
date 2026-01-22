@@ -222,6 +222,21 @@ function initializeApp() {
             document.body.classList.add('show-hidden-text');
         }
     }
+
+    // Restore single row mode
+    singleRowMode = localStorage.getItem('singleRowMode') === 'true';
+    singleRowIndex = parseInt(localStorage.getItem('singleRowIndex')) || 0;
+    const btnSingleRow = document.getElementById('btnSingleRowMode');
+    if (btnSingleRow) {
+        if (singleRowMode) {
+            btnSingleRow.classList.add('active');
+            const prevBtn = document.getElementById('btnPrevRow');
+            const nextBtn = document.getElementById('btnNextRow');
+            if (prevBtn) prevBtn.disabled = (singleRowIndex <= 0);
+            if (nextBtn) nextBtn.disabled = false; // Will be properly updated in renderTable
+        }
+    }
+
     // Force search recalculation when search input is focused (e.g. clicking back after editing)
     const searchInput = document.getElementById('searchInput');
     if (searchInput) {
@@ -6660,6 +6675,15 @@ function toggleRowWrap() {
 }
 
 function toggleSingleRowMode() {
+    const activeElement = document.activeElement;
+    const cell = activeElement ? activeElement.closest('td') : null;
+
+    // Only update singleRowIndex if we are ENABLING single row mode
+    // AND if we are currently in a cell
+    if (!singleRowMode && cell && cell.dataset.row !== undefined) {
+        singleRowIndex = parseInt(cell.dataset.row);
+    }
+
     singleRowMode = !singleRowMode;
     const btn = document.getElementById('btnSingleRowMode');
     const prevBtn = document.getElementById('btnPrevRow');
@@ -6679,6 +6703,9 @@ function toggleSingleRowMode() {
 
     if (singleRowIndex < 0) singleRowIndex = 0;
 
+    localStorage.setItem('singleRowMode', singleRowMode);
+    localStorage.setItem('singleRowIndex', singleRowIndex);
+
     renderTable();
     updateSingleRowButtons();
 }
@@ -6687,6 +6714,7 @@ function prevSingleRow() {
     if (!singleRowMode) return;
     if (singleRowIndex > 0) {
         singleRowIndex--;
+        localStorage.setItem('singleRowIndex', singleRowIndex);
         renderTable();
         updateSingleRowButtons();
     }
@@ -6697,6 +6725,7 @@ function nextSingleRow() {
     const sheet = tableData.sheets[currentSheet];
     if (singleRowIndex < sheet.rows.length - 1) {
         singleRowIndex++;
+        localStorage.setItem('singleRowIndex', singleRowIndex);
         renderTable();
         updateSingleRowButtons();
     }
