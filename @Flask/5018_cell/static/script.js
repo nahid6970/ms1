@@ -8,6 +8,7 @@ let isSelecting = false;
 let sheetHistory = []; // Track recently visited sheets for Alt+M toggle
 let singleRowMode = false;
 let singleRowIndex = 0;
+let lastFocusedCell = null; // Track last focused cell for context-aware operations
 let lastMouseX = 0;
 let lastMouseY = 0;
 
@@ -2308,6 +2309,7 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
         // --- Event Listeners for Edit Mode Architecture ---
 
         preview.addEventListener('focus', () => {
+            lastFocusedCell = { row: rowIndex, col: colIndex };
             // Save scroll position before any DOM changes
             const tableContainer = document.querySelector('.table-container');
             const savedScrollTop = tableContainer ? tableContainer.scrollTop : 0;
@@ -5298,6 +5300,7 @@ function switchSheet(index) {
     }
 
     currentSheet = index;
+    lastFocusedCell = null; // Reset focused cell on sheet switch
 
     // Update currentCategory to match the sheet's category
     const sheetCategory = tableData.sheetCategories[index] || tableData.sheetCategories[String(index)] || null;
@@ -6675,13 +6678,18 @@ function toggleRowWrap() {
 }
 
 function toggleSingleRowMode() {
-    const activeElement = document.activeElement;
-    const cell = activeElement ? activeElement.closest('td') : null;
-
     // Only update singleRowIndex if we are ENABLING single row mode
-    // AND if we are currently in a cell
-    if (!singleRowMode && cell && cell.dataset.row !== undefined) {
-        singleRowIndex = parseInt(cell.dataset.row);
+    // Use lastFocusedCell if available, otherwise try to find current focus
+    if (!singleRowMode) {
+        if (lastFocusedCell) {
+            singleRowIndex = lastFocusedCell.row;
+        } else {
+            const activeElement = document.activeElement;
+            const cell = activeElement ? activeElement.closest('td') : null;
+            if (cell && cell.dataset.row !== undefined) {
+                singleRowIndex = parseInt(cell.dataset.row);
+            }
+        }
     }
 
     singleRowMode = !singleRowMode;
@@ -7201,6 +7209,9 @@ function renderTable() {
                 }
 
                 textarea.onchange = (e) => updateCell(rowIndex, colIndex, e.target.value);
+                textarea.onfocus = () => {
+                    lastFocusedCell = { row: rowIndex, col: colIndex };
+                };
 
                 // Also handle input event for real-time updates
                 textarea.oninput = (e) => {
@@ -7333,6 +7344,9 @@ function renderTable() {
                     updateCell(rowIndex, colIndex, e.target.value);
                     // Update the stored original value
                     e.target.dataset.originalValue = e.target.value;
+                };
+                input.onfocus = () => {
+                    lastFocusedCell = { row: rowIndex, col: colIndex };
                 };
             }
 
