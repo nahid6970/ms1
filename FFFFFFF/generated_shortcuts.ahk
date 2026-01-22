@@ -654,7 +654,7 @@ IsGeminiSaveChatContext() {
     try {
         processName := WinGetProcessName("A")
         windowTitle := WinGetTitle("A")
-        if (processName = "WindowsTerminal.exe" && InStr(windowTitle, "Gemini")) {
+        if (processName = "WindowsTerminal.exe" && InStr(windowTitle, "Ready")) {
             return true
         }
     }
@@ -663,7 +663,7 @@ IsGeminiSaveChatContext() {
 
 #HotIf IsGeminiSaveChatContext()
 
-^s::SendText("/chat save")
+^s::SendText("/chat save ")
 
 #HotIf
 
@@ -673,7 +673,7 @@ IsGeminiResumeChatContext() {
     try {
         processName := WinGetProcessName("A")
         windowTitle := WinGetTitle("A")
-        if (processName = "WindowsTerminal.exe" && InStr(windowTitle, "Gemini")) {
+        if (processName = "WindowsTerminal.exe" && InStr(windowTitle, "Ready")) {
             return true
         }
     }
@@ -682,7 +682,7 @@ IsGeminiResumeChatContext() {
 
 #HotIf IsGeminiResumeChatContext()
 
-^r::SendText("/chat resume")
+^r::SendText("/chat resume ")
 
 #HotIf
 

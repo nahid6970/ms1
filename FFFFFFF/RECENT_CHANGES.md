@@ -2,6 +2,24 @@
 
 ## 2025-01-22
 
+### ✅ Added Duplicate Shortcut Feature
+**New Feature:** Right-click context menu now includes "Duplicate" option to quickly copy shortcuts.
+
+**How It Works:**
+- Right-click any shortcut → Select "Duplicate"
+- Creates a copy with "(Copy)" appended to the name
+- Clears hotkey/trigger to avoid conflicts
+- Automatically selects the duplicate for easy editing
+- Shows success message with instructions
+
+**Use Cases:**
+- Create variations of existing shortcuts
+- Quickly set up similar shortcuts for different contexts
+- Template shortcuts for common patterns
+
+**Files Modified:**
+- `ahk_gui_pyqt.py` - Added duplicate_selected() method and context menu item
+
 ### ✅ Fixed Script Execution Working Directory Issue
 **Problem:** The `^!+Enter` shortcut was running scripts from a fixed directory (`C:\@delta\ms1\`) instead of the script's actual location, causing logs and output files to be created in the wrong place.
 

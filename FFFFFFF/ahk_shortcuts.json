@@ -428,10 +428,10 @@
             "category": "Terminal",
             "description": "Save current Gemini chat session",
             "hotkey": "^s",
-            "window_title": "Gemini",
+            "window_title": "Ready",
             "process_name": "WindowsTerminal.exe",
             "window_class": "",
-            "action": "SendText(\"/chat save\")",
+            "action": "SendText(\"/chat save \")",
             "enabled": true
         },
         {
@@ -439,10 +439,10 @@
             "category": "Terminal",
             "description": "Resume previous Gemini chat session",
             "hotkey": "^r",
-            "window_title": "Gemini",
+            "window_title": "Ready",
             "process_name": "WindowsTerminal.exe",
             "window_class": "",
-            "action": "SendText(\"/chat resume\")",
+            "action": "SendText(\"/chat resume \")",
             "enabled": true
         }
     ]

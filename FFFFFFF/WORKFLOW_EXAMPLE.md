@@ -167,6 +167,21 @@ Or double-click `generated_shortcuts.ahk` in File Explorer.
 4. Click OK
 5. Regenerate the AHK script
 
+### To Duplicate:
+1. Click the shortcut to select it
+2. Right-click → Duplicate
+3. A copy is created with "(Copy)" in the name
+4. Hotkey/trigger is cleared to avoid conflicts
+5. Edit the duplicate to customize it
+6. Regenerate the script
+
+**Example Use Case:**
+You have a Gemini shortcut for Windows Terminal. Duplicate it to create a similar shortcut for PowerShell:
+```
+Original: ^s [Gemini] → Save Chat
+Duplicate: ^s [PowerShell] → Save History
+```
+
 ### To Disable Temporarily:
 1. Click the ✅ icon next to the shortcut
 2. It changes to ❌

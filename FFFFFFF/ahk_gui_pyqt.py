@@ -763,8 +763,11 @@ class AHKShortcutEditor(QMainWindow):
         # Context menu for shortcuts
         self.context_menu = QMenu(self)
         self.edit_action = self.context_menu.addAction("Edit")
+        self.duplicate_action = self.context_menu.addAction("Duplicate")
+        self.context_menu.addSeparator()
         self.remove_action = self.context_menu.addAction("Remove")
         self.edit_action.triggered.connect(self.edit_selected)
+        self.duplicate_action.triggered.connect(self.duplicate_selected)
         self.remove_action.triggered.connect(self.remove_selected)
 
         central_widget.setLayout(layout)
@@ -847,11 +850,13 @@ class AHKShortcutEditor(QMainWindow):
         if self.selected_shortcut and self.selected_type:
             # Enable/disable actions based on selection
             self.edit_action.setEnabled(True)
+            self.duplicate_action.setEnabled(True)
             self.remove_action.setEnabled(True)
             self.context_menu.exec(self.text_browser.mapToGlobal(position))
         else:
             # Optionally show a disabled menu or no menu at all
             self.edit_action.setEnabled(False)
+            self.duplicate_action.setEnabled(False)
             self.remove_action.setEnabled(False)
             # For a cleaner UX, we won't show the menu if nothing is selected
 
@@ -1394,6 +1399,46 @@ class AHKShortcutEditor(QMainWindow):
         dialog = AddEditShortcutDialog(self, self.selected_type, self.selected_shortcut)
         dialog.exec()
 
+    def duplicate_selected(self):
+        if not self.selected_shortcut or not self.selected_type:
+            QMessageBox.warning(self, "Warning", "Please select a shortcut to duplicate.")
+            return
+
+        # Create a copy of the selected shortcut
+        import copy
+        duplicated = copy.deepcopy(self.selected_shortcut)
+        
+        # Modify the name to indicate it's a copy
+        original_name = duplicated.get('name', 'Unnamed')
+        duplicated['name'] = f"{original_name} (Copy)"
+        
+        # For script and context shortcuts, clear the hotkey to avoid conflicts
+        if self.selected_type in ["script", "context"]:
+            duplicated['hotkey'] = ""
+        # For text shortcuts, clear the trigger
+        elif self.selected_type == "text":
+            duplicated['trigger'] = ""
+        
+        # Add to the appropriate list
+        if self.selected_type == "script":
+            self.script_shortcuts.append(duplicated)
+        elif self.selected_type == "context":
+            self.context_shortcuts.append(duplicated)
+        elif self.selected_type == "startup":
+            self.startup_scripts.append(duplicated)
+        else:
+            self.text_shortcuts.append(duplicated)
+        
+        # Save and update display
+        self.save_shortcuts_json()
+        self.update_display()
+        
+        # Select the new duplicate
+        self.selected_shortcut = duplicated
+        self.update_display()
+        
+        # Show success message
+        QMessageBox.information(self, "Success", f"Duplicated '{original_name}' as '{duplicated['name']}'.\n\nPlease edit the duplicate to set a unique hotkey/trigger.")
 
     def remove_selected(self):
         if not self.selected_shortcut or not self.selected_type:
