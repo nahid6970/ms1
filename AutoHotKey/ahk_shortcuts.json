@@ -444,6 +444,17 @@
             "window_class": "",
             "action": "SendText(\"/chat resume \")",
             "enabled": true
+        },
+        {
+            "name": "Gemini Session",
+            "category": "Terminal",
+            "description": "Save current Gemini chat session",
+            "hotkey": "+/",
+            "window_title": "Ready",
+            "process_name": "WindowsTerminal.exe",
+            "window_class": "",
+            "action": "SendText(\"/stats session\")",
+            "enabled": true
         }
     ]
 }

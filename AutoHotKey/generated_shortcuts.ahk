@@ -686,6 +686,25 @@ IsGeminiResumeChatContext() {
 
 #HotIf
 
+;! Gemini Session
+;! Save current Gemini chat session
+IsGeminiSessionContext() {
+    try {
+        processName := WinGetProcessName("A")
+        windowTitle := WinGetTitle("A")
+        if (processName = "WindowsTerminal.exe" && InStr(windowTitle, "Ready")) {
+            return true
+        }
+    }
+    return false
+}
+
+#HotIf IsGeminiSessionContext()
+
++/::SendText("/stats session")
+
+#HotIf
+
 ;! === TEXT SHORTCUTS ===
 ;! AutoHotkey Version 1
 ;! Inserts AHK v1 header requirement
