@@ -46,7 +46,7 @@ RAlt & Numpad3::Run("C:\@delta\msBackups\Display\DisplaySwitch.exe /extend", "",
 
 ;! Ultimate GUI
 ;! Opens Ultimate_Gui.py
-!u::Run("C:\@delta\ms1\Ultimate_Gui.py", "", "Hide")
+!u::Run("C:\@delta\ms1\TOOLS\Ultimate_Gui.py", "", "Hide")
 
 ;! Always On Top Toggle
 ;! Toggles always on top for active window
