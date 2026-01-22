@@ -842,7 +842,7 @@ td textarea {
 }
 
 code {
-    background: #f6f8fa;
+    background: #fffbe6;
     border: 1px solid #d1d5da;
     border-radius: 4px;
     padding: 2px 5px;
@@ -852,7 +852,7 @@ code {
 }
 
 .markdown-preview code {
-    background: #f6f8fa;
+    background: #fffbe6;
     border: 1px solid #d1d5da;
     border-radius: 4px;
     padding: 2px 6px;
@@ -2904,7 +2904,7 @@ Markdown Table Styles */
 }
 
 .markdown-table code {
-    background: #f6f8fa;
+    background: #fffbe6;
     border: 1px solid #d1d5da;
     border-radius: 4px;
     padding: 2px 4px;
@@ -2953,7 +2953,7 @@ Markdown Table Styles */
 }
 
 .md-grid code {
-    background: #f6f8fa;
+    background: #fffbe6;
     border: 1px solid #d1d5da;
     border-radius: 4px;
     padding: 2px 4px;

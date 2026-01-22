@@ -838,7 +838,7 @@ def generate_static_html(data, custom_syntaxes):
         }
 
         code {
-            background: #f6f8fa;
+            background: #fffbe6;
             border: 1px solid #d1d5da;
             border-radius: 4px;
             padding: 2px 6px;
@@ -966,7 +966,7 @@ def generate_static_html(data, custom_syntaxes):
         }
 
         .md-grid code {
-            background: #f6f8fa;
+            background: #fffbe6;
             border: 1px solid #d1d5da;
             border-radius: 4px;
             padding: 2px 4px;
