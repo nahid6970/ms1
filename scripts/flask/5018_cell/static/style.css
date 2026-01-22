@@ -715,31 +715,38 @@ th {
 }
 
 .header-toggle-container {
+    position: absolute;
+    right: 4px;
+    top: 50%;
+    transform: translateY(-50%);
     display: flex;
-    gap: 4px;
-    margin-left: auto;
-    padding-left: 10px;
+    gap: 2px;
+    z-index: 10;
+    background: rgba(248, 249, 250, 0.8);
+    padding: 2px;
+    border-radius: 4px;
 }
 
 .btn-header-toggle {
-    background: #eee;
-    border: 1px solid #ccc;
+    background: #f0f0f0;
+    border: 1px solid #ddd;
     border-radius: 3px;
     cursor: pointer;
-    font-size: 12px;
-    padding: 2px 4px;
-    transition: all 0.2s;
-    opacity: 0.5;
-    filter: grayscale(1);
+    font-size: 10px;
+    width: 20px;
+    height: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
-    line-height: 1;
+    transition: all 0.2s;
+    opacity: 0.6;
+    filter: grayscale(1);
+    padding: 0;
 }
 
 .btn-header-toggle:hover {
     background: #e0e0e0;
-    opacity: 0.8;
+    opacity: 1;
 }
 
 .btn-header-toggle.active {
@@ -747,7 +754,7 @@ th {
     border-color: #00cc7a;
     opacity: 1;
     filter: grayscale(0);
-    box-shadow: 0 0 5px rgba(0, 255, 157, 0.3);
+    box-shadow: 0 0 4px rgba(0, 255, 157, 0.4);
 }
 
 .header-cell {
@@ -758,6 +765,7 @@ th {
     overflow: visible;
     position: relative;
     padding-left: 30px;
+    padding-right: 70px; /* Space for toggles */
     min-width: 0;
 }
 

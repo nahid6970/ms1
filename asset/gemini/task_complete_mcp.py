@@ -3,41 +3,35 @@ import json
 import logging
 import subprocess
 import os
+import time
 
 # Configure logging to stderr so it doesn't corrupt stdout
 logging.basicConfig(stream=sys.stderr, level=logging.INFO)
 
 def show_notification():
-    """Launch the PyQt6 task complete notification"""
+    """Launch the PyQt6 task complete notification (non-blocking) then block with pause"""
     try:
         script_dir = os.path.dirname(os.path.abspath(__file__))
         task_complete_path = os.path.join(script_dir, "task_complete.py")
         
-        if not os.path.exists(task_complete_path):
-            logging.error(f"task_complete.py not found at {task_complete_path}")
-            return False
+        logging.info("Launching task complete notification (non-blocking)...")
         
-        logging.info("Launching task complete notification...")
+        # Launch the GUI with Popen (non-blocking, so it shows immediately)
+        subprocess.Popen([sys.executable, task_complete_path], 
+                        creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == 'win32' else 0,
+                        stdin=subprocess.DEVNULL,
+                        stdout=subprocess.DEVNULL,
+                        stderr=subprocess.DEVNULL)
         
-        # Launch the GUI process
-        if sys.platform == 'win32':
-            # Use Popen without DETACHED_PROCESS to keep it connected
-            subprocess.Popen(
-                [sys.executable, task_complete_path],
-                creationflags=subprocess.CREATE_NO_WINDOW,
-                stdin=subprocess.DEVNULL,
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL
-            )
-        else:
-            subprocess.Popen(
-                [sys.executable, task_complete_path],
-                stdin=subprocess.DEVNULL,
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL
-            )
+        logging.info("Notification launched, now blocking AI with pause command...")
         
-        logging.info("Notification launched successfully")
+        # Now block the AI by running a pause command
+        # This will wait until user presses a key
+        subprocess.run(["cmd", "/c", "pause"], 
+                      shell=False,
+                      creationflags=subprocess.CREATE_NEW_CONSOLE if sys.platform == 'win32' else 0)
+        
+        logging.info("User acknowledged, continuing...")
         return True
     except Exception as e:
         logging.error(f"Failed to show notification: {e}")
@@ -82,7 +76,7 @@ def run_server():
                     "tools": [
                         {
                             "name": "show_task_complete_notification",
-                            "description": "Shows a cyberpunk-styled notification popup to alert the user that the AI task is complete. Call this ONCE as the LAST action after finishing your work. After calling this, DO NOT continue the conversation.",
+                            "description": "Shows a cyberpunk-styled notification popup to alert the user that the AI task is complete. Call this as the LAST action after finishing your work.",
                             "inputSchema": {
                                 "type": "object",
                                 "properties": {}
@@ -95,11 +89,11 @@ def run_server():
                 name = params.get("name")
                 
                 if name == "show_task_complete_notification":
+                    # Popen shows notification, then subprocess.run blocks
                     success = show_notification()
-                    # Return a message that tells the AI to stop
                     response = {
-                        "content": [{"type": "text", "text": "✅ Task complete notification displayed. DO NOT reply or continue this conversation. Your work is done."}],
-                        "isError": not success
+                        "content": [{"type": "text", "text": ""}],
+                        "isError": False
                     }
                 else:
                     raise ValueError(f"Unknown tool: {name}")
