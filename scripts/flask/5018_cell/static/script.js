@@ -6973,6 +6973,19 @@ function renderTable() {
             columnName.style.flex = '1';
         }
 
+        headerCell.appendChild(columnName);
+
+        // Add toggle buttons to the first column
+        if (index === 0) {
+            const toggleSpan = document.createElement('span');
+            toggleSpan.style.cssText = 'float: right; display: flex; gap: 2px; margin-left: 5px;';
+            toggleSpan.innerHTML = 
+                '<button onclick="toggleToolbar()" title="Toggle Toolbar" style="background:none; border:none; cursor:pointer; font-size:10px; padding:0;">🛠️</button>' +
+                '<button onclick="toggleSheetTabs()" title="Toggle Sheet Tabs" style="background:none; border:none; cursor:pointer; font-size:10px; padding:0;">📑</button>' +
+                '<button onclick="toggleSubsheetBar()" title="Toggle Subsheet Bar" style="background:none; border:none; cursor:pointer; font-size:10px; padding:0;">📂</button>';
+            headerCell.appendChild(toggleSpan);
+        }
+
         const menuWrapper = document.createElement('div');
         menuWrapper.className = 'column-menu-wrapper';
 
@@ -11446,19 +11459,59 @@ function toggleRecentSheets() {
 }
 
 
+// Toggle toolbar visibility (persisted)
+function toggleToolbar() {
+    const toolbar = document.querySelector('.toolbar');
+    if (toolbar) {
+        const isHidden = toolbar.style.display === 'none';
+        toolbar.style.display = isHidden ? 'flex' : 'none';
+        localStorage.setItem('toolbarDisplay', toolbar.style.display);
+        showToast(isHidden ? 'Toolbar shown' : 'Toolbar hidden', 'info');
+    }
+}
+
+// Toggle sheet tabs visibility (persisted)
+function toggleSheetTabs() {
+    const sheetTabs = document.querySelector('.sheet-tabs');
+    if (sheetTabs) {
+        const isHidden = sheetTabs.style.display === 'none';
+        sheetTabs.style.display = isHidden ? 'flex' : 'none';
+        localStorage.setItem('sheetTabsDisplay', sheetTabs.style.display);
+        showToast(isHidden ? 'Sheet tabs shown' : 'Sheet tabs hidden', 'info');
+    }
+}
+
+// Toggle subsheet bar visibility (persisted)
+function toggleSubsheetBar() {
+    const subsheetBar = document.querySelector('.subsheet-bar');
+    if (subsheetBar) {
+        const isHidden = subsheetBar.style.display === 'none';
+        subsheetBar.style.display = isHidden ? 'block' : 'none';
+        localStorage.setItem('subsheetBarDisplay', subsheetBar.style.display);
+        showToast(isHidden ? 'Subsheet bar shown' : 'Subsheet bar hidden', 'info');
+    }
+}
+
 // Toggle top ribbons (toolbar and sheet tabs) with F4 - 4 states
 function toggleTopRibbons() {
     const toolbar = document.querySelector('.toolbar');
     const sheetTabs = document.querySelector('.sheet-tabs');
+    
+    // Determine current state based on visibility
+    const isToolbarVisible = toolbar.style.display !== 'none';
+    const isTabsVisible = sheetTabs.style.display !== 'none';
+    
+    let nextState;
+    // State 0: Both Visible -> State 1: Tabs Hidden
+    if (isToolbarVisible && isTabsVisible) nextState = 1;
+    // State 1: Tabs Hidden -> State 2: Toolbar Hidden (Tabs Visible)
+    else if (isToolbarVisible && !isTabsVisible) nextState = 2;
+    // State 2: Toolbar Hidden -> State 3: Both Hidden
+    else if (!isToolbarVisible && isTabsVisible) nextState = 3;
+    // State 3: Both Hidden -> State 0: Both Visible
+    else nextState = 0;
 
-    // Get current state (0=all shown, 1=sheets hidden, 2=toolbar hidden, 3=both hidden)
-    let currentState = parseInt(localStorage.getItem('ribbonsState') || '0');
-
-    // Cycle to next state
-    currentState = (currentState + 1) % 4;
-
-    // Apply state
-    switch (currentState) {
+    switch (nextState) {
         case 0: // Show all
             toolbar.style.display = 'flex';
             sheetTabs.style.display = 'flex';
@@ -11481,26 +11534,33 @@ function toggleTopRibbons() {
             break;
     }
 
-    localStorage.setItem('ribbonsState', currentState.toString());
+    // Save individual states
+    localStorage.setItem('toolbarDisplay', toolbar.style.display);
+    localStorage.setItem('sheetTabsDisplay', sheetTabs.style.display);
 }
 
-// Restore ribbons state on page load
+// Restore visibility states on page load
 window.addEventListener('load', () => {
-    const ribbonsState = parseInt(localStorage.getItem('ribbonsState') || '0');
     const toolbar = document.querySelector('.toolbar');
     const sheetTabs = document.querySelector('.sheet-tabs');
+    const subsheetBar = document.querySelector('.subsheet-bar');
 
-    switch (ribbonsState) {
-        case 1: // Hide sheet tabs only
-            sheetTabs.style.display = 'none';
-            break;
-        case 2: // Hide toolbar only
-            toolbar.style.display = 'none';
-            break;
-        case 3: // Hide both
-            toolbar.style.display = 'none';
-            sheetTabs.style.display = 'none';
-            break;
+    // Restore Toolbar
+    const savedToolbarDisplay = localStorage.getItem('toolbarDisplay');
+    if (savedToolbarDisplay) {
+        toolbar.style.display = savedToolbarDisplay;
+    }
+
+    // Restore Sheet Tabs
+    const savedSheetTabsDisplay = localStorage.getItem('sheetTabsDisplay');
+    if (savedSheetTabsDisplay) {
+        sheetTabs.style.display = savedSheetTabsDisplay;
+    }
+    
+    // Restore Subsheet Bar
+    const savedSubsheetBarDisplay = localStorage.getItem('subsheetBarDisplay');
+    if (savedSubsheetBarDisplay && subsheetBar) {
+        subsheetBar.style.display = savedSubsheetBarDisplay;
     }
 });
 
