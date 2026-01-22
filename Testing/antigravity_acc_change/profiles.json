@@ -11,7 +11,7 @@
     {
         "name": "sahadat",
         "path": "C:/@delta/ms1/Testing/antigravity_acc_change/sahadat",
-        "active": false,
+        "active": true,
         "is_locked": true,
         "password": "182358",
         "timer_enabled": true,
@@ -47,7 +47,7 @@
     {
         "name": "nahid2016912207",
         "path": "C:/@delta/ms1/Testing/antigravity_acc_change/nahid2016912207",
-        "active": true,
+        "active": false,
         "is_locked": true,
         "password": "182358",
         "timer_enabled": true,
