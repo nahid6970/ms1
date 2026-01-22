@@ -2,6 +2,44 @@
 
 ## 2025-01-22
 
+### ✅ Added Action Code Hints & Command Reference
+**New Feature:** Action code fields now show helpful placeholder hints with examples, plus a Command Reference button for detailed documentation.
+
+**What's Included:**
+- **Context-aware hints:** Different examples for script/context/startup shortcuts
+- **Command Reference button:** Opens comprehensive AutoHotkey v2 command guide
+- **Common patterns:** Terminal commands, key sending, window operations, clipboard, etc.
+
+**Hints Include:**
+- SendText() for terminal commands
+- Send() for key combinations
+- Run() for launching programs
+- Window operations (WinMaximize, WinClose, etc.)
+- Clipboard operations
+- Multiple action examples
+- Comments explaining each command
+
+**Command Reference Covers:**
+- Sending text & keys
+- Running programs
+- Window operations
+- Clipboard operations
+- Messages & dialogs
+- Timing & delays
+- Variables & strings
+- Control flow
+- File operations
+- Mouse operations
+- System information
+- Common patterns
+- Context shortcut examples
+
+**Files Added:**
+- `AHK_COMMAND_REFERENCE.md` - Comprehensive AutoHotkey v2 command reference
+
+**Files Modified:**
+- `ahk_gui_pyqt.py` - Added placeholder hints and command reference dialog
+
 ### ✅ Added Duplicate Shortcut Feature
 **New Feature:** Right-click context menu now includes "Duplicate" option to quickly copy shortcuts.
 

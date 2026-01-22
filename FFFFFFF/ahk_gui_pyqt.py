@@ -331,6 +331,106 @@ class AddEditShortcutDialog(QDialog):
             self.action_edit = QTextEdit()
             self.action_edit.setMinimumHeight(300)  # Bigger height
             self.action_edit.setMinimumWidth(400)   # Bigger width
+            
+            # Add helpful placeholder text based on shortcut type
+            if self.shortcut_type == "context":
+                placeholder = """Examples:
+
+; Send text (for terminal commands)
+SendText("/chat save")
+SendText("ls -la")
+
+; Send keys
+Send("^c")  ; Ctrl+C
+Send("{Enter}")
+Send("!{F4}")  ; Alt+F4
+
+; Run programs
+Run("notepad.exe")
+Run("C:\\path\\to\\program.exe")
+
+; Show message
+MsgBox("Hello!")
+
+; Multiple actions
+SendText("cd Documents")
+Send("{Enter}")
+Sleep(100)
+SendText("dir")
+Send("{Enter}")
+
+; Get clipboard
+text := A_Clipboard
+MsgBox(text)
+
+; Set clipboard
+A_Clipboard := "New text"
+
+; Window operations
+WinMaximize("A")  ; Maximize active window
+WinMinimize("A")  ; Minimize active window
+WinClose("A")     ; Close active window"""
+            elif self.shortcut_type == "startup":
+                placeholder = """Examples:
+
+; Background script that runs on startup
+; No hotkey needed - runs automatically
+
+; Register shell hook
+DllCall("RegisterShellHookWindow", "Ptr", A_ScriptHwnd)
+
+; Set timer
+SetTimer(MyFunction, 1000)  ; Run every 1 second
+
+; Monitor clipboard
+OnClipboardChange(MyClipFunction)
+
+; Watch for window events
+SetTimer(CheckWindow, 500)"""
+            else:  # script
+                placeholder = """Examples:
+
+; Simple action
+Run("notepad.exe")
+
+; Multiple lines
+{
+    MsgBox("Starting...")
+    Run("notepad.exe")
+    Sleep(1000)
+    WinActivate("Untitled - Notepad")
+}
+
+; Function definition
+MyFunction() {
+    MsgBox("Hello!")
+    Send("^c")
+}
+
+; Send keys
+Send("^c")  ; Ctrl+C
+Send("{Enter}")
+SendText("Hello World")"""
+            
+            self.action_edit.setPlaceholderText(placeholder)
+            
+            # Add help button for command reference
+            help_btn = QPushButton("📖 Command Reference")
+            help_btn.setStyleSheet("""
+                QPushButton {
+                    background-color: #6f42c1;
+                    color: white;
+                    border: 1px solid #5a32a3;
+                    padding: 5px 10px;
+                    border-radius: 5px;
+                }
+                QPushButton:hover {
+                    background-color: #8250df;
+                }
+            """)
+            help_btn.clicked.connect(self.show_command_reference)
+            action_layout.addWidget(help_btn)
+            
             action_layout.addWidget(self.action_edit)
             top_layout.addLayout(action_layout)
         else:
@@ -391,6 +491,40 @@ class AddEditShortcutDialog(QDialog):
         else:
             self.trigger_edit.setText(self.shortcut_data.get("trigger", ""))
             self.replacement_edit.setPlainText(self.shortcut_data.get("replacement", ""))
+
+    def show_command_reference(self):
+        """Show AutoHotkey command reference in a dialog"""
+        ref_dialog = QDialog(self)
+        ref_dialog.setWindowTitle("AutoHotkey Command Reference")
+        ref_dialog.resize(800, 600)
+        
+        layout = QVBoxLayout()
+        
+        # Create text browser for the reference
+        browser = QTextBrowser()
+        browser.setOpenExternalLinks(True)
+        
+        # Load the reference content
+        ref_file = "AHK_COMMAND_REFERENCE.md"
+        if os.path.exists(ref_file):
+            try:
+                with open(ref_file, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                    browser.setMarkdown(content)
+            except Exception as e:
+                browser.setPlainText(f"Error loading reference: {e}\n\nPlease check AHK_COMMAND_REFERENCE.md file.")
+        else:
+            browser.setPlainText("Command reference file not found.\n\nPlease ensure AHK_COMMAND_REFERENCE.md exists in the script directory.")
+        
+        layout.addWidget(browser)
+        
+        # Close button
+        close_btn = QPushButton("Close")
+        close_btn.clicked.connect(ref_dialog.close)
+        layout.addWidget(close_btn)
+        
+        ref_dialog.setLayout(layout)
+        ref_dialog.exec()
 
     def accept_dialog(self):
         name = self.name_edit.text().strip()
