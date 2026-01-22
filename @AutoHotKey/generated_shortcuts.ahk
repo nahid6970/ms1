@@ -115,7 +115,7 @@ RAlt & Numpad3::Run("C:\@delta\msBackups\Display\DisplaySwitch.exe /extend", "",
 #x::Run('pythonw "C:\@delta\db\@run_from_db\Script_Manager\script_manager_gui_qt.py"')
 
 ;! Startup Setup
-#s::Run("C:\@delta\ms1\flask\4999_startup\startup.py", , "Hide")
+#s::Run("C:\@delta\ms1\@Flask\4999_startup\startup.py", , "Hide")
 
 ;! CrossHair
 ^+m::Run("C:\@delta\ms1\scripts\xy\XY_CroosHair.py", , "Hide")

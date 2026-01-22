@@ -27,7 +27,7 @@
     "paths": [
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
-    "Command": "C:\\@delta\\ms1\\flask\\5001_share_text\\share_text.py",
+    "Command": "C:\\@delta\\ms1\\@Flask\\5001_share_text\\share_text.py",
     "ExecutableType": "pythonw",
     "added_at": 1768273756.591541
   },
@@ -37,7 +37,7 @@
     "paths": [
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
-    "Command": "C:\\@delta\\ms1\\flask\\5002_upload_files\\upload_files.py",
+    "Command": "C:\\@delta\\ms1\\@Flask\\5002_upload_files\\upload_files.py",
     "ExecutableType": "pythonw",
     "added_at": 1768273756.591541
   },
@@ -47,7 +47,7 @@
     "paths": [
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
-    "Command": "C:\\@delta\\ms1\\flask\\5003_Browse_PC_Files\\Browse_PC_Files.py",
+    "Command": "C:\\@delta\\ms1\\@Flask\\5003_Browse_PC_Files\\Browse_PC_Files.py",
     "ExecutableType": "pythonw",
     "added_at": 1768273756.591541
   },
@@ -57,7 +57,7 @@
     "paths": [
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
-    "Command": "C:\\@delta\\ms1\\flask\\5005_GameARR\\GameARR.py",
+    "Command": "C:\\@delta\\ms1\\@Flask\\5005_GameARR\\GameARR.py",
     "ExecutableType": "pythonw",
     "added_at": 1768273756.591541
   },
@@ -67,7 +67,7 @@
     "paths": [
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
-    "Command": "C:\\@delta\\ms1\\flask\\5006_Run_Commands\\Run_Commands.py",
+    "Command": "C:\\@delta\\ms1\\@Flask\\5006_Run_Commands\\Run_Commands.py",
     "ExecutableType": "pythonw",
     "added_at": 1768273756.591541
   },
@@ -77,7 +77,7 @@
     "paths": [
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
-    "Command": "C:\\@delta\\ms1\\flask\\5007_Controlby_Android\\Android_Control_PC.py",
+    "Command": "C:\\@delta\\ms1\\@Flask\\5007_Controlby_Android\\Android_Control_PC.py",
     "ExecutableType": "pythonw",
     "added_at": 1768273756.591541
   },
@@ -87,7 +87,7 @@
     "paths": [
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
-    "Command": "C:\\@delta\\ms1\\flask\\5008_esports_scheduler\\Esports_Match_Schedule.py",
+    "Command": "C:\\@delta\\ms1\\@Flask\\5008_esports_scheduler\\Esports_Match_Schedule.py",
     "ExecutableType": "pythonw",
     "added_at": 1768273756.591541
   },
@@ -97,7 +97,7 @@
     "paths": [
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
-    "Command": "C:\\@delta\\ms1\\flask\\5009_MCQ\\app.py",
+    "Command": "C:\\@delta\\ms1\\@Flask\\5009_MCQ\\app.py",
     "ExecutableType": "pythonw",
     "added_at": 1768273756.591541
   },
@@ -107,7 +107,7 @@
     "paths": [
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
-    "Command": "C:\\@delta\\ms1\\flask\\5010_coc\\Clash_of_Clans.py",
+    "Command": "C:\\@delta\\ms1\\@Flask\\5010_coc\\Clash_of_Clans.py",
     "ExecutableType": "pythonw",
     "added_at": 1768273756.591541
   },
@@ -373,7 +373,7 @@
     "paths": [
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
-    "Command": "C:\\@delta\\ms1\\flask\\5000_myhome\\app.py",
+    "Command": "C:\\@delta\\ms1\\@Flask\\5000_myhome\\app.py",
     "ExecutableType": "pythonw",
     "added_at": 1768273756.591541
   },
@@ -393,7 +393,7 @@
     "paths": [
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
-    "Command": "C:\\@delta\\ms1\\flask\\5011_tv_show\\app.py",
+    "Command": "C:\\@delta\\ms1\\@Flask\\5011_tv_show\\app.py",
     "ExecutableType": "pythonw",
     "added_at": 1768273756.591541
   },
@@ -403,7 +403,7 @@
     "paths": [
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
-    "Command": "C:\\@delta\\ms1\\flask\\5015_job\\job_tracker\\app.py",
+    "Command": "C:\\@delta\\ms1\\@Flask\\5015_job\\job_tracker\\app.py",
     "ExecutableType": "pythonw",
     "added_at": 1768273756.591541
   },
@@ -413,7 +413,7 @@
     "paths": [
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
-    "Command": "C:\\@delta\\ms1\\flask\\5013_movie_tracker\\app.py",
+    "Command": "C:\\@delta\\ms1\\@Flask\\5013_movie_tracker\\app.py",
     "ExecutableType": "pythonw",
     "added_at": 1768273756.591541
   },
@@ -433,7 +433,7 @@
     "paths": [
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
-    "Command": "C:\\@delta\\ms1\\flask\\5016_Sync_w_android\\sync_server.py",
+    "Command": "C:\\@delta\\ms1\\@Flask\\5016_Sync_w_android\\sync_server.py",
     "ExecutableType": "pythonw",
     "added_at": 1768273756.591541
   },
@@ -443,7 +443,7 @@
     "paths": [
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
-    "Command": "C:\\@delta\\ms1\\flask\\5012_share_images\\share_images.py",
+    "Command": "C:\\@delta\\ms1\\@Flask\\5012_share_images\\share_images.py",
     "ExecutableType": "pythonw",
     "added_at": 1768273756.591541
   },
@@ -483,7 +483,7 @@
     "paths": [
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
-    "Command": "C:\\@delta\\ms1\\flask\\4999_startup\\app.py",
+    "Command": "C:\\@delta\\ms1\\@Flask\\4999_startup\\app.py",
     "ExecutableType": "pythonw",
     "added_at": 1768273756.591541
   },
@@ -493,7 +493,7 @@
     "paths": [
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
-    "Command": "C:\\@delta\\ms1\\flask\\4998_Applist\\applist_app.py",
+    "Command": "C:\\@delta\\ms1\\@Flask\\4998_Applist\\applist_app.py",
     "ExecutableType": "pythonw",
     "added_at": 1768273756.591541
   },
@@ -503,7 +503,7 @@
     "paths": [
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
-    "Command": "C:\\@delta\\ms1\\flask\\5555_terminal\\myterminal.py",
+    "Command": "C:\\@delta\\ms1\\@Flask\\5555_terminal\\myterminal.py",
     "ExecutableType": "pythonw",
     "added_at": 1768273756.591541
   },
@@ -544,7 +544,7 @@
     "paths": [
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
-    "Command": "C:\\@delta\\ms1\\flask\\5017_audio_stream\\app.py",
+    "Command": "C:\\@delta\\ms1\\@Flask\\5017_audio_stream\\app.py",
     "ExecutableType": "pythonw",
     "added_at": 1768273756.591541
   },
@@ -584,7 +584,7 @@
     "paths": [
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
-    "Command": "C:\\@delta\\ms1\\flask\\5018_cell\\app.py",
+    "Command": "C:\\@delta\\ms1\\@Flask\\5018_cell\\app.py",
     "ExecutableType": "pythonw",
     "added_at": 1768273756.591541
   },
@@ -616,7 +616,7 @@
     "paths": [
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
-    "Command": "C:\\@delta\\ms1\\flask\\5004 paint\\app.py",
+    "Command": "C:\\@delta\\ms1\\@Flask\\5004 paint\\app.py",
     "ExecutableType": "pythonw",
     "added_at": 1768273756.591541
   },

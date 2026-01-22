@@ -140,10 +140,10 @@ def create_control_panel_without_tab_border():
 
     def start_flask_scripts_silently():
         scripts = [
-            r"C:\@delta\ms1\flask\Browse_PC_Files\Browse_PC_Files.py",
-            r"C:\@delta\ms1\flask\GameARR\SeperateFiles\GameARR.py",
-            r"C:\@delta\ms1\flask\share_text\share_text.py",
-            r"C:\@delta\ms1\flask\upload_files.py",
+            r"C:\@delta\ms1\@Flask\Browse_PC_Files\Browse_PC_Files.py",
+            r"C:\@delta\ms1\@Flask\GameARR\SeperateFiles\GameARR.py",
+            r"C:\@delta\ms1\@Flask\share_text\share_text.py",
+            r"C:\@delta\ms1\@Flask\upload_files.py",
         ]
         for script in scripts:
             subprocess.Popen(

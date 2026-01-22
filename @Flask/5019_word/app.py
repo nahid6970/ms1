@@ -4,7 +4,7 @@ import os
 
 app = Flask(__name__)
 
-DATA_FILE = r'C:\@delta\ms1\flask\5019_word\word_data.json'
+DATA_FILE = r'C:\@delta\ms1\@Flask\5019_word\word_data.json'
 
 def load_data():
     if os.path.exists(DATA_FILE):

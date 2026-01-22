@@ -14,7 +14,7 @@ OUTPUT_FILE = r'C:\@delta\db\5000_myhome\myword.html'
 
 def load_data():
     """Load data from JSON file"""
-    data_file = r'C:\@delta\ms1\flask\5019_word\word_data.json'
+    data_file = r'C:\@delta\ms1\@Flask\5019_word\word_data.json'
     if os.path.exists(data_file):
         with open(data_file, 'r', encoding='utf-8') as f:
             return json.load(f)
@@ -386,7 +386,7 @@ def export_to_static():
     """Main export function"""
     try:
         # Check if data file exists
-        data_file = r'C:\@delta\ms1\flask\5019_word\word_data.json'
+        data_file = r'C:\@delta\ms1\@Flask\5019_word\word_data.json'
         if not os.path.exists(data_file):
             print(f"ERROR: Data file not found: {data_file}")
             return False
