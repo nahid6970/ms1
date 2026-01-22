@@ -714,24 +714,51 @@ th {
     z-index: 200;
 }
 
-.header-cell {
-
+.header-toggle-container {
     display: flex;
+    gap: 4px;
+    margin-left: auto;
+    padding-left: 10px;
+}
 
-    justify-content: space-between;
-
+.btn-header-toggle {
+    background: #eee;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+    padding: 2px 4px;
+    transition: all 0.2s;
+    opacity: 0.5;
+    filter: grayscale(1);
+    display: flex;
     align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
 
+.btn-header-toggle:hover {
+    background: #e0e0e0;
+    opacity: 0.8;
+}
+
+.btn-header-toggle.active {
+    background: #00ff9d;
+    border-color: #00cc7a;
+    opacity: 1;
+    filter: grayscale(0);
+    box-shadow: 0 0 5px rgba(0, 255, 157, 0.3);
+}
+
+.header-cell {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     gap: 5px;
-
     overflow: visible;
-
     position: relative;
-
     padding-left: 30px;
-
     min-width: 0;
-
 }
 
 

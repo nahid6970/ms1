@@ -6978,11 +6978,16 @@ function renderTable() {
         // Add toggle buttons to the first column
         if (index === 0) {
             const toggleSpan = document.createElement('span');
-            toggleSpan.style.cssText = 'float: right; display: flex; gap: 2px; margin-left: 5px;';
+            toggleSpan.className = 'header-toggle-container';
+            
+            const toolbarVisible = document.querySelector('.toolbar')?.style.display !== 'none';
+            const tabsVisible = document.querySelector('.sheet-tabs')?.style.display !== 'none';
+            const subsheetsVisible = document.querySelector('.subsheet-bar')?.style.display !== 'none';
+
             toggleSpan.innerHTML = 
-                '<button onclick="toggleToolbar()" title="Toggle Toolbar" style="background:none; border:none; cursor:pointer; font-size:10px; padding:0;">🛠️</button>' +
-                '<button onclick="toggleSheetTabs()" title="Toggle Sheet Tabs" style="background:none; border:none; cursor:pointer; font-size:10px; padding:0;">📑</button>' +
-                '<button onclick="toggleSubsheetBar()" title="Toggle Subsheet Bar" style="background:none; border:none; cursor:pointer; font-size:10px; padding:0;">📂</button>';
+                `<button onclick="toggleToolbar(); renderTable();" title="Toggle Toolbar" class="btn-header-toggle ${toolbarVisible ? 'active' : ''}">🛠️</button>` +
+                `<button onclick="toggleSheetTabs(); renderTable();" title="Toggle Sheet Tabs" class="btn-header-toggle ${tabsVisible ? 'active' : ''}">📑</button>` +
+                `<button onclick="toggleSubsheetBar(); renderTable();" title="Toggle Subsheet Bar" class="btn-header-toggle ${subsheetsVisible ? 'active' : ''}">📂</button>`;
             headerCell.appendChild(toggleSpan);
         }
 
@@ -11562,6 +11567,9 @@ window.addEventListener('load', () => {
     if (savedSubsheetBarDisplay && subsheetBar) {
         subsheetBar.style.display = savedSubsheetBarDisplay;
     }
+
+    // Re-render table to update button active classes in the header
+    renderTable();
 });
 
 
