@@ -2708,26 +2708,39 @@ def generate_static_html(data, custom_syntaxes):
                 if (cur.length) blocks.push({ grid: inGrid, lines: cur });
 
                 // Join blocks with line breaks to separate tables from surrounding text
-                const processedBlocks = blocks.map(b =>
-                    b.grid ? parseGridTable(b.lines, cellStyle) : oldParseMarkdownBody(b.lines, cellStyle)
-                );
+                const processedBlocks = blocks.map(b => ({
+                    content: b.grid ? parseGridTable(b.lines, cellStyle) : oldParseMarkdownBody(b.lines, cellStyle),
+                    isGrid: b.grid
+                }));
                 
-                // Add <br> between blocks to preserve spacing
-                return processedBlocks.reduce((acc, block, i) => {
-                    if (i === 0) return block;
+                // Join blocks - tables have their own margin, so no <br> needed around them
+                return processedBlocks.reduce((acc, item, i) => {
+                    if (i === 0) return item.content;
                     
-                    // If current block is empty (just whitespace), it represents an empty line
-                    // Convert it to <br> to preserve the visual spacing
+                    const prevItem = processedBlocks[i - 1];
+                    const block = item.content;
+                    
+                    // If current block is empty, it represents empty line(s)
                     if (!block.trim()) {
+                        // Skip empty line after table (tables have their own spacing)
+                        if (prevItem.isGrid) {
+                            return acc;
+                        }
+                        // Preserve empty line in other cases
                         return acc + '<br>';
                     }
                     
-                    // If previous accumulator ends with content, add <br> before this block
-                    if (acc.trim()) {
+                    // Don't add <br> if either current or previous block is a table
+                    // Tables have CSS margin that provides spacing
+                    if (item.isGrid || prevItem.isGrid) {
+                        return acc + block;
+                    }
+                    
+                    // For text-to-text transitions, add <br>
+                    if (acc.trim() && block.trim()) {
                         return acc + '<br>' + block;
                     }
                     
-                    // Previous was empty, just append current block
                     return acc + block;
                 }, '');
             }

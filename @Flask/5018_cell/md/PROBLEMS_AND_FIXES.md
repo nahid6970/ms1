@@ -96,17 +96,24 @@ The table parsing logic splits content into blocks (table blocks and non-table b
 **Solution:**
 Updated the block-joining logic in both `static/script.js` and `export_static.py` to explicitly handle empty blocks:
 1. When a block is empty (just whitespace), convert it to a `<br>` tag to preserve the visual spacing
-2. Add `<br>` between non-empty blocks to maintain proper separation
-3. This ensures empty lines are preserved as visual spacing
+2. **Exception:** Skip empty lines that come immediately after a table, since tables have their own spacing (prevents huge gaps)
+3. Add `<br>` between non-empty blocks to maintain proper separation
+4. This ensures empty lines are preserved as visual spacing where needed
 
 **Code Change:**
 ```javascript
-// OLD: Skipped empty blocks
-if (!acc.trim() || !block.trim()) return acc + block;
+// Track which blocks are tables
+const processedBlocks = blocks.map(b => ({
+    content: b.grid ? parseGridTable(b.lines) : oldParseMarkdownBody(b.lines),
+    isGrid: b.grid
+}));
 
-// NEW: Convert empty blocks to <br>
+// Convert empty blocks to <br>, but skip if after a table
 if (!block.trim()) {
-    return acc + '<br>';
+    if (prevItem.isGrid) {
+        return acc; // Skip empty line after table
+    }
+    return acc + '<br>'; // Preserve empty line in other cases
 }
 ```
 
