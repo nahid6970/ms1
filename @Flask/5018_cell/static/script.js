@@ -1828,6 +1828,41 @@ function highlightSyntax(text) {
         });
     }
 
+    // Rule: Table lines detection (Pipe and Comma tables)
+    // Wrap lines in span with correct line-height to prevent jumping (rendering vs edit mismatch)
+    const lines = formatted.split('\n');
+    let inCommaTable = false;
+
+    formatted = lines.map(line => {
+        const trimmed = line.trim();
+
+        // Pipe Table Line
+        if (trimmed.startsWith('|')) {
+            return `<span class="syntax-table-line">${line}</span>`;
+        }
+
+        // Comma Table Start
+        if (trimmed.match(/^Table\*\d+/i)) {
+            inCommaTable = true;
+            return `<span class="syntax-table-line">${line}</span>`;
+        }
+
+        // Inside Comma Table
+        if (inCommaTable) {
+            // Check for end conditions
+            if (trimmed === '' || trimmed.match(/^Table\*end/i)) {
+                inCommaTable = false;
+                if (trimmed.match(/^Table\*end/i)) {
+                    return `<span class="syntax-table-line">${line}</span>`;
+                }
+            } else {
+                return `<span class="syntax-table-line">${line}</span>`;
+            }
+        }
+
+        return line;
+    }).join('\n');
+
     // Convert newlines to BR
     formatted = formatted.replace(/\n/g, '<br>');
 
@@ -7016,12 +7051,12 @@ function renderTable() {
         if (index === 0) {
             const toggleSpan = document.createElement('span');
             toggleSpan.className = 'header-toggle-container';
-            
+
             const toolbarVisible = document.querySelector('.toolbar')?.style.display !== 'none';
             const tabsVisible = document.querySelector('.sheet-tabs')?.style.display !== 'none';
             const subsheetsVisible = document.querySelector('.subsheet-bar')?.style.display !== 'none';
 
-            toggleSpan.innerHTML = 
+            toggleSpan.innerHTML =
                 `<button onclick="toggleToolbar(); renderTable();" title="Toggle Toolbar" class="btn-header-toggle ${toolbarVisible ? 'active' : ''}">🛠️</button>` +
                 `<button onclick="toggleSheetTabs(); renderTable();" title="Toggle Sheet Tabs" class="btn-header-toggle ${tabsVisible ? 'active' : ''}">📑</button>` +
                 `<button onclick="toggleSubsheetBar(); renderTable();" title="Toggle Subsheet Bar" class="btn-header-toggle ${subsheetsVisible ? 'active' : ''}">📂</button>`;
@@ -11544,11 +11579,11 @@ function toggleSubsheetBar() {
 function toggleTopRibbons() {
     const toolbar = document.querySelector('.toolbar');
     const sheetTabs = document.querySelector('.sheet-tabs');
-    
+
     // Determine current state based on visibility
     const isToolbarVisible = toolbar.style.display !== 'none';
     const isTabsVisible = sheetTabs.style.display !== 'none';
-    
+
     let nextState;
     // State 0: Both Visible -> State 1: Tabs Hidden
     if (isToolbarVisible && isTabsVisible) nextState = 1;
@@ -11604,7 +11639,7 @@ window.addEventListener('load', () => {
     if (savedSheetTabsDisplay) {
         sheetTabs.style.display = savedSheetTabsDisplay;
     }
-    
+
     // Restore Subsheet Bar
     const savedSubsheetBarDisplay = localStorage.getItem('subsheetBarDisplay');
     if (savedSubsheetBarDisplay && subsheetBar) {
@@ -13724,3 +13759,51 @@ function copyToClipboardFallback(text) {
 
     document.body.removeChild(textarea);
 }
+
+// ==========================================
+// Line Height Settings (Table Edit & Markdown)
+// ==========================================
+
+function updateLineHeightSettings(type, value) {
+    const root = document.documentElement;
+    // Ensure value is a number
+    let val = parseFloat(value);
+    if (isNaN(val)) return;
+
+    // Clamp values
+    if (val < 1.0) val = 1.0;
+    if (val > 3.0) val = 3.0;
+
+    if (type === 'table-edit') {
+        const cssVal = val;
+        root.style.setProperty('--table-edit-line-height', cssVal);
+        localStorage.setItem('tableEditLineHeight', cssVal);
+    } else if (type === 'markdown-preview') {
+        const cssVal = val;
+        root.style.setProperty('--markdown-preview-line-height', cssVal);
+        localStorage.setItem('markdownPreviewLineHeight', cssVal);
+    }
+}
+
+function loadLineHeightSettings() {
+    const root = document.documentElement;
+
+    // Load Table Edit Line Height
+    const tableEditHeight = localStorage.getItem('tableEditLineHeight');
+    if (tableEditHeight) {
+        root.style.setProperty('--table-edit-line-height', tableEditHeight);
+        const input = document.getElementById('tableEditLineHeight');
+        if (input) input.value = tableEditHeight;
+    }
+
+    // Load Markdown Preview Line Height
+    const markdownHeight = localStorage.getItem('markdownPreviewLineHeight');
+    if (markdownHeight) {
+        root.style.setProperty('--markdown-preview-line-height', markdownHeight);
+        const input = document.getElementById('markdownPreviewLineHeight');
+        if (input) input.value = markdownHeight;
+    }
+}
+
+// Initialize on load
+document.addEventListener('DOMContentLoaded', loadLineHeightSettings);

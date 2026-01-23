@@ -467,6 +467,32 @@
                         <p class="settings-description">Enable Vrinda font for better Bangla text rendering. Disable if
                             you prefer larger default fonts.</p>
                     </div>
+
+                    <div class="settings-item" style="margin-top: 20px;">
+                        <h4 style="margin-bottom: 12px; font-size: 14px; color: #555;">Line Height Settings</h4>
+                        
+                        <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                            <div style="flex: 1; min-width: 200px;">
+                                <label for="tableEditLineHeight" class="settings-label" style="font-size: 13px;">Table Edit Mode</label>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <input type="number" id="tableEditLineHeight" value="1.6" step="0.1" min="1.0" max="3.0"
+                                        onchange="updateLineHeightSettings('table-edit', this.value)"
+                                        style="width: 70px; padding: 6px; border: 1px solid #ddd; border-radius: 4px;">
+                                    <span style="font-size: 12px; color: #666;">(Default: 1.6)</span>
+                                </div>
+                            </div>
+
+                            <div style="flex: 1; min-width: 200px;">
+                                <label for="markdownPreviewLineHeight" class="settings-label" style="font-size: 13px;">Markdown Preview</label>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <input type="number" id="markdownPreviewLineHeight" value="1.5" step="0.1" min="1.0" max="3.0"
+                                        onchange="updateLineHeightSettings('markdown-preview', this.value)"
+                                        style="width: 70px; padding: 6px; border: 1px solid #ddd; border-radius: 4px;">
+                                    <span style="font-size: 12px; color: #666;">(Default: 1.5)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="settings-section">

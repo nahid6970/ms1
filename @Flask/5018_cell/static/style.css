@@ -1,5 +1,17 @@
 :root {
     --grid-line-color: #dddddd;
+    --table-edit-line-height: 1.6;
+    --markdown-preview-line-height: 1.5;
+}
+
+/* ... existing styles ... */
+
+/* Table line styling in Edit Mode to match rendered row height */
+.syntax-table-line {
+    display: inline-block;
+    line-height: var(--table-edit-line-height) !important;
+    padding: 8px 0;
+    vertical-align: middle;
 }
 
 * {
@@ -765,7 +777,8 @@ th {
     overflow: visible;
     position: relative;
     padding-left: 30px;
-    padding-right: 70px; /* Space for toggles */
+    padding-right: 70px;
+    /* Space for toggles */
     min-width: 0;
 }
 
@@ -4189,14 +4202,16 @@ mark {
 }
 
 .tree-item:hover {
-    background: rgba(0, 255, 65, 0.05); /* Faint neon green */
+    background: rgba(0, 255, 65, 0.05);
+    /* Faint neon green */
     color: #ffffff;
     border-left-color: rgba(0, 255, 65, 0.4);
 }
 
 .tree-item.active {
     background: rgba(0, 255, 65, 0.1);
-    color: #00ff41; /* Neon Green */
+    color: #00ff41;
+    /* Neon Green */
     border-left-color: #00ff41;
     border-right: none;
     text-shadow: 0 0 8px rgba(0, 255, 65, 0.3);
@@ -4211,7 +4226,8 @@ mark {
     align-items: center;
     gap: 8px;
     font-weight: 700;
-    color: #00d2ff; /* Cyan for categories */
+    color: #00d2ff;
+    /* Cyan for categories */
     text-transform: uppercase;
     font-size: 12px;
     letter-spacing: 0.5px;
@@ -4254,7 +4270,8 @@ mark {
     top: 0;
     bottom: 50%;
     width: 1px;
-    background: #333; /* Darker guide lines */
+    background: #333;
+    /* Darker guide lines */
 }
 
 /* Horizontal line (L shape) */
@@ -4265,7 +4282,8 @@ mark {
     top: 50%;
     width: 12px;
     height: 1px;
-    background: #333; /* Darker guide lines */
+    background: #333;
+    /* Darker guide lines */
 }
 
 /* Last item - only show L corner, no line below */
@@ -4294,7 +4312,8 @@ mark {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.7); /* Darker overlay */
+    background: rgba(0, 0, 0, 0.7);
+    /* Darker overlay */
     z-index: 999;
     display: none;
     backdrop-filter: blur(2px);
@@ -4310,7 +4329,8 @@ mark {
     left: -300px;
     width: 300px;
     height: 100%;
-    background: #050505; /* Deep black bg */
+    background: #050505;
+    /* Deep black bg */
     border-right: 1px solid #1a1a1a;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
     z-index: 1000;
@@ -4617,4 +4637,12 @@ ll Rank Badge */
 .btn-icon-danger:hover {
     background: #ffeeee;
     color: #dc3545;
+}
+
+/* Table line styling in Edit Mode to match rendered row height */
+.syntax-table-line {
+    display: inline-block;
+    line-height: var(--table-edit-line-height) !important;
+    padding: 8px 0;
+    vertical-align: middle;
 }

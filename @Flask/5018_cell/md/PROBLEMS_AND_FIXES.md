@@ -7,6 +7,44 @@ This document tracks historical bugs, issues, and their solutions. Use this to:
 
 ---
 
+## [2026-01-23 11:27] - Table Shrinkage in Edit Mode
+
+**Problem:** When formatted table lines were wrapped in spans with `width: 100%`, it forced the subsequent `<br>` (generated from newlines) onto a new line, creating large gaps (double spacing) between rows in edit mode.
+
+**Solution:**
+Replaced large `line-height` (2.5) with a combination of `line-height: 1.6` and `padding: 8px 0`. This achieves the target row height (~41px) by adding padding around the text rather than spacing out the lines of text themselves, preventing the "huge gap" appearance while ensuring table rows don't shrink.
+
+**Files Modified:**
+- `static/style.css` - Updated `.syntax-table-line`.
+
+**Result:** Table rows in edit mode resemble rendered height without excessive vertical spacing characters.
+
+---
+
+## [2026-01-23 11:27] - Table Shrinkage in Edit Mode
+
+**Root Cause:**
+1. Rendered tables (`tr`) have a fixed/min-height of 40px.
+2. Raw text in the editor (`.markdown-preview` in contentEditable mode) has standard text line-height (~20px).
+3. `adjustCellHeightForMarkdown` resizes the cell based on the *current* content height. When switching to edit mode, the content became shorter, causing the shift.
+
+**Solution:**
+**Solution:**
+1. Updated `highlightSyntax` in `static/script.js` to iterate through lines and detect *both* Pipe tables (`|...`) and Comma tables (`Table*N` blocks).
+2. Wrapped these lines in a span with class `.syntax-table-line`.
+3. Added `.syntax-table-line` to `static/style.css` with `line-height: 2.5` (~35-40px) to approximate the rendered table row height.
+
+**Files Modified:**
+- `static/script.js` - Updated `highlightSyntax` to wrap table lines.
+- `static/style.css` - Added `.syntax-table-line` style.
+
+**Related Issues:** Edit mode UI, layout stability
+
+**Result:** Cells containing tables now maintain a similar height when switching between preview and edit modes, preventing jarring layout shifts.
+
+---
+
+
 ## [2026-01-18 01:25] - Table Border Color Defaulting to Faint Grey
 
 **Problem:** Default table borders for Markdown tables (comma and pipe syntax) were using a faint grey color (`#ced4da`), which was difficult to see against some backgrounds.

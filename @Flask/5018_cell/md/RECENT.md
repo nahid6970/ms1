@@ -6,6 +6,29 @@
 
 ---
 
+## [2026-01-23 11:27] - Table Edit Mode Stability
+
+**Session Duration:** 0.1 hours
+
+**What We Accomplished:**
+
+### ✅ Fixed Table Shrinkage in Edit Mode
+- **Problem**: Switching to edit mode on a table caused the cell to shrink and shift the sheet layout.
+- **Solution**: Refined spacing strategy & Added Settings.
+  - Adjusted default `line-height` to `1.6`.
+  - **New Feature**: Added "Line Height Settings" in the Settings menu (`⚙️`).
+    - Users can now manually adjust **Table Edit Mode** line height (Default: 1.6).
+    - Users can also adjust **Markdown Preview** line height (Default: 1.5).
+  - This styling is persisted via `localStorage`.
+
+**Files Modified:**
+- `static/script.js` - Added table line styling rule to `highlightSyntax`.
+- `static/style.css` - Added `.syntax-table-line` class.
+- `md/PROBLEMS_AND_FIXES.md` - Logged the fix.
+
+**Current Status:**
+- ✅ Tables maintain height consistency during editing.
+
 ## [2026-01-20 05:43] - Separated Active Sheet State
 
 **Session Duration:** 0.1 hours
