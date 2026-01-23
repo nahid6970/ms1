@@ -46,5 +46,13 @@
     "isItalic": true,
     "isUnderline": false,
     "marker": "\u0194\u0194"
+  },
+  {
+    "marker": "\u00db\u00db",
+    "bgColor": "#ffffff",
+    "fgColor": "#212529",
+    "isBold": true,
+    "isItalic": true,
+    "isUnderline": true
   }
 ]
