@@ -7,6 +7,35 @@ This document tracks historical bugs, issues, and their solutions. Use this to:
 
 ---
 
+## [2026-01-23] - KaTeX Lines Merging with Adjacent Lines in Export
+
+**Problem:** In the static export (`export_static.py`), KaTeX math expressions were appearing merged with the lines above and below them, instead of being on separate lines. This only affected the export - the main app displayed them correctly.
+
+**Root Cause:** 
+The `export_static.py` file had an extra `isKatex` check in the line-joining logic that prevented `<br>` tag insertion when a line contained `class="katex"`. This check was too broad - it prevented line breaks even when KaTeX was inline with other text that should be on separate lines. The main app (`static/script.js`) did not have this check and worked correctly.
+
+**Solution:**
+Removed the `isKatex` check from the `processedLines.reduce()` function in `export_static.py` (around line 2670). The KaTeX newlines are already properly handled earlier in the process where `result.replace(/\\n/g, '')` removes newlines from within KaTeX output. The extra check was unnecessary and causing incorrect line merging.
+
+**Code Change:**
+```javascript
+// REMOVED these lines:
+// Check for KaTeX output (don't add br inside KaTeX spans)
+var isKatex = line.includes('class="katex"') || prev.includes('class="katex"');
+
+// And removed isKatex from the condition:
+if (isSeparator || prevIsSeparator || isBgWrapper || prevIsBgWrapper || (isTimelineStart && isListItem) || isTimelineEnd) {
+```
+
+**Files Modified:**
+- `export_static.py` - Removed KaTeX detection from line-joining logic (~line 2670)
+
+**Related Issues:** KaTeX rendering, static export, line break handling
+
+**Result:** KaTeX expressions now display on separate lines in static exports, matching the behavior of the main application.
+
+---
+
 ## [2026-01-23 11:27] - Table Shrinkage in Edit Mode
 
 **Problem:** When formatted table lines were wrapped in spans with `width: 100%`, it forced the subsequent `<br>` (generated from newlines) onto a new line, creating large gaps (double spacing) between rows in edit mode.
