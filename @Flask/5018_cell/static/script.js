@@ -3049,7 +3049,7 @@ function parseMarkdown(text, cellStyle = {}) {
 
         return blocks.map(b =>
             b.grid ? parseGridTable(b.lines) : oldParseMarkdownBody(b.lines, cellStyle)
-        ).join('\n');
+        ).join('');
     }
 
     // If no grid table, process as normal markdown

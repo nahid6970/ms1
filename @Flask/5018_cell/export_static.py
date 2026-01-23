@@ -2665,7 +2665,7 @@ def generate_static_html(data, custom_syntaxes):
 
                 return blocks.map(b =>
                     b.grid ? parseGridTable(b.lines, cellStyle) : oldParseMarkdownBody(b.lines, cellStyle)
-                ).join('<br>');
+                ).join('');
             }
 
             // If no grid table, process as normal markdown
