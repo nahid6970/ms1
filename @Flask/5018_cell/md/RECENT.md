@@ -22,11 +22,12 @@
   - This styling is persisted via `localStorage`.
 
 ### ✅ Fixed Empty Line Above Tables & Added Distributed Formatting
-- **Problem 1**: Empty lines immediately preceding a table were often consumed by the parser, making them invisible in preview mode.
-- **Solution 1**: Updated `parseMarkdown` to restore the newline if the table regex detection consumed one, and used `.join('\n')` instead of `.join('')` when assembling grid table blocks.
+- **Problem 1**: Empty lines immediately preceding a table were often consumed by the parser.
+- **Solution 1**: Updated `parseMarkdown` to explicitly restore newlines if the table regex matched them.
+  - *Correction*: Reverted `.join('\n')` to `.join('')` for grid tables, as this was causing large gaps *after* tables (regrssion from commit 4b2bf8). The explicit newline restoration handles the "preservation" issue correctly without adding unwanted spacing blocks.
 
-- **Problem 2**: Formatting tags (like `**bold**`, `==highlight==`) could not span across table cell delimiters (`|`), forcing users to repeat tags in each cell.
-- **Solution 2**: Implemented "Distributed Formatting". Syntax like `| **==A | B==** |` is now automatically distributed as `| **==A==** | **==B==** |` before parsing. This works for `**`, `==`, `__`, `@@`, and `!!`.
+- **Problem 2**: Formatting tags could not span across table cell delimiters.
+- **Solution 2**: Implemented "Distributed Formatting" (see above).
 
 **Files Modified:**
 - `static/script.js` - Added table line styling rule to `highlightSyntax`.
