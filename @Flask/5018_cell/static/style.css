@@ -2881,7 +2881,7 @@ Markdown Table Styles */
 .markdown-table th,
 .markdown-table td {
     border: 1px solid #000000;
-    padding: 4px 6px;
+    padding: 1px 6px;
     text-align: left;
     vertical-align: top;
     word-break: break-word;
@@ -2980,7 +2980,7 @@ Markdown Table Styles */
 }
 
 .md-cell {
-    padding: 4px 12px !important;
+    padding: 1px 12px !important;
     border: none !important;
     border-right: 3px solid #000000 !important;
     background: transparent !important;
