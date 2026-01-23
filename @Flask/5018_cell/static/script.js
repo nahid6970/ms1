@@ -3117,7 +3117,23 @@ function parseMarkdown(text, cellStyle = {}) {
 
         return blocks.map(b =>
             b.grid ? parseGridTable(b.lines) : oldParseMarkdownBody(b.lines, cellStyle)
-        ).join('');
+        ).reduce((acc, block, i) => {
+            if (i === 0) return block;
+            
+            // If current block is empty (just whitespace), it represents an empty line
+            // Convert it to <br> to preserve the visual spacing
+            if (!block.trim()) {
+                return acc + '<br>';
+            }
+            
+            // If previous accumulator ends with content, add <br> before this block
+            if (acc.trim()) {
+                return acc + '<br>' + block;
+            }
+            
+            // Previous was empty, just append current block
+            return acc + block;
+        }, '');
     }
 
     // If no grid table, process as normal markdown

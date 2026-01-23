@@ -7,6 +7,44 @@ This document tracks historical bugs, issues, and their solutions. Use this to:
 
 ---
 
+## [2026-01-23] - Table Text Merging with Adjacent Lines in Export
+
+**Problem:** In the static export (`export_static.py`), text before and after pipe tables was appearing merged with the table content, instead of being on separate lines. For example, "Text before table| col1 | col2 |Text after table" would all appear on one line.
+
+**Root Cause:** 
+When the `parseMarkdown` function detected pipe tables, it split the content into blocks (table blocks and non-table blocks), processed each block separately, but then joined them with `.join('')` - meaning no separator between blocks. This caused the text before/after tables to merge directly with the table HTML without any line breaks.
+
+**Solution:**
+Modified the block joining logic to add `<br>` tags between blocks. The fix processes blocks into an array first, then uses `reduce()` to join them with `<br>` separators, while skipping empty blocks to avoid unnecessary line breaks.
+
+**Code Change:**
+```javascript
+// OLD:
+return blocks.map(b =>
+    b.grid ? parseGridTable(b.lines, cellStyle) : oldParseMarkdownBody(b.lines, cellStyle)
+).join('');
+
+// NEW:
+const processedBlocks = blocks.map(b =>
+    b.grid ? parseGridTable(b.lines, cellStyle) : oldParseMarkdownBody(b.lines, cellStyle)
+);
+
+return processedBlocks.reduce((acc, block, i) => {
+    if (i === 0) return block;
+    if (!acc.trim() || !block.trim()) return acc + block;
+    return acc + '<br>' + block;
+}, '');
+```
+
+**Files Modified:**
+- `export_static.py` - Updated block joining logic in `parseMarkdown` function (~line 2710)
+
+**Related Issues:** Table rendering, static export, line break handling
+
+**Result:** Text before and after pipe tables now appears on separate lines in static exports, properly separated from the table content.
+
+---
+
 ## [2026-01-23] - KaTeX Lines Merging with Adjacent Lines in Export
 
 **Problem:** In the static export (`export_static.py`), KaTeX math expressions were appearing merged with the lines above and below them, instead of being on separate lines. This only affected the export - the main app displayed them correctly.
@@ -33,6 +71,52 @@ if (isSeparator || prevIsSeparator || isBgWrapper || prevIsBgWrapper || (isTimel
 **Related Issues:** KaTeX rendering, static export, line break handling
 
 **Result:** KaTeX expressions now display on separate lines in static exports, matching the behavior of the main application.
+
+---
+
+## [2026-01-23] - Empty Lines Before/After Tables Not Showing
+
+**Problem:** When there was an empty line before or after a pipe table, the empty line would disappear in the rendered output. This affected both the main app and static export.
+
+**Example:**
+```
+Text line
+[empty line]
+| Table | Header |
+| ----- | ------ |
+[empty line]
+Text after
+```
+
+The empty lines would not be displayed, causing the table to appear directly adjacent to the surrounding text.
+
+**Root Cause:** 
+The table parsing logic splits content into blocks (table blocks and non-table blocks). When an empty line appeared between text and a table, it created a separate block containing just the empty line. The block-joining logic had a condition that skipped adding `<br>` tags for empty blocks (`if (!block.trim())`), which caused empty lines to disappear completely.
+
+**Solution:**
+Updated the block-joining logic in both `static/script.js` and `export_static.py` to explicitly handle empty blocks:
+1. When a block is empty (just whitespace), convert it to a `<br>` tag to preserve the visual spacing
+2. Add `<br>` between non-empty blocks to maintain proper separation
+3. This ensures empty lines are preserved as visual spacing
+
+**Code Change:**
+```javascript
+// OLD: Skipped empty blocks
+if (!acc.trim() || !block.trim()) return acc + block;
+
+// NEW: Convert empty blocks to <br>
+if (!block.trim()) {
+    return acc + '<br>';
+}
+```
+
+**Files Modified:**
+- `static/script.js` - Updated block-joining logic in `parseMarkdown()` (~line 3119)
+- `export_static.py` - Updated block-joining logic in `parseMarkdown()` (~line 2716)
+
+**Related Issues:** Table rendering, empty line preservation, block parsing
+
+**Result:** Empty lines before and after tables are now properly displayed, maintaining the intended visual spacing in both the main app and static exports.
 
 ---
 

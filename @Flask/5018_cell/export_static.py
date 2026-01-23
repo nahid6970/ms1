@@ -2707,9 +2707,29 @@ def generate_static_html(data, custom_syntaxes):
                 });
                 if (cur.length) blocks.push({ grid: inGrid, lines: cur });
 
-                return blocks.map(b =>
+                // Join blocks with line breaks to separate tables from surrounding text
+                const processedBlocks = blocks.map(b =>
                     b.grid ? parseGridTable(b.lines, cellStyle) : oldParseMarkdownBody(b.lines, cellStyle)
-                ).join('');
+                );
+                
+                // Add <br> between blocks to preserve spacing
+                return processedBlocks.reduce((acc, block, i) => {
+                    if (i === 0) return block;
+                    
+                    // If current block is empty (just whitespace), it represents an empty line
+                    // Convert it to <br> to preserve the visual spacing
+                    if (!block.trim()) {
+                        return acc + '<br>';
+                    }
+                    
+                    // If previous accumulator ends with content, add <br> before this block
+                    if (acc.trim()) {
+                        return acc + '<br>' + block;
+                    }
+                    
+                    // Previous was empty, just append current block
+                    return acc + block;
+                }, '');
             }
 
             // If no grid table, process as normal markdown
