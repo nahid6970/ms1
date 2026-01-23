@@ -7991,8 +7991,9 @@ function filterF2Sheets() {
     items.forEach(item => {
         const sheetName = item.querySelector('.f2-sheet-name');
         const name = sheetName ? sheetName.textContent.toLowerCase() : '';
+        const nickname = item.dataset.nickname ? item.dataset.nickname.toLowerCase() : '';
 
-        if (name.includes(searchTerm)) {
+        if (name.includes(searchTerm) || nickname.includes(searchTerm)) {
             item.style.display = 'flex';
         } else {
             item.style.display = 'none';
@@ -8050,6 +8051,7 @@ function populateF2RecentSheets() {
 
         const item = document.createElement('div');
         item.className = 'f2-sheet-item';
+        item.dataset.nickname = sheet.nickname || '';
         item.tabIndex = 0;
 
         if (sheetIndex === currentSheet) {

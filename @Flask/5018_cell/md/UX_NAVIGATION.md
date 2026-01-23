@@ -13,10 +13,11 @@
 **Purpose:** Quick navigation to recently viewed sheets.
 **Features:**
 - Recency-based sorting.
+- Filter by **Sheet Name** or **Nickname**.
 - Current sheet highlight.
 - Sub-sheet indicators: `Sheet Name [Parent Name]`.
 - Cyberpunk styling (matching F1).
-- **Functions:** `openF2Popup()`, `populateF2RecentSheets()`.
+- **Functions:** `openF2Popup()`, `populateF2RecentSheets()`, `filterF2Sheets()`.
 
 ## Quick Formatter (F3)
 **Purpose:** Instant text formatting for selected text in cells.
