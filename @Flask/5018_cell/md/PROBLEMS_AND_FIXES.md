@@ -42,6 +42,7 @@ Replaced large `line-height` (2.5) with a combination of `line-height: 1.6` and 
 
 **Result:** Cells containing tables now maintain a similar height when switching between preview and edit modes, preventing jarring layout shifts.
 
+
 ---
 
 
@@ -152,7 +153,7 @@ Bangla text was overflowing cell borders and border box spans (specifically the 
    - Increased horizontal padding for Border Box (`#R#`), Custom Colors (`{bg:R}`), and Highlights (`!!`, `??`, `==`) from `4-6px` to `8px`.
    - Added `word-break: normal;` and `overflow-wrap: break-word;` to these spans in both `script.js` and `export_static.py`.
    - Added `box-decoration-break: clone;` to more syntaxes to ensure borders/backgrounds wrap correctly across multiple lines.
-4. **Edit Mode Sync**: Updated `highlightSyntax()` in `script.js` to use the same improved padding and word-break settings for consistency during editing.
+4. **Edit Mode Sync**: Updated `highlightSyntax()` in `static/script.js` to use the same improved padding and word-break settings for consistency during editing.
 5. **List Item Overflow and Gap Fix**: Initially tried `display: block` to fix overflow, but this caused double line breaks in the `pre-wrap` container. Corrected this by using `display: inline-block; width: 100%; box-sizing: border-box; padding-left: Xem;`. This keeps the indent inside the element's width (preventing overflow) without triggering the extra vertical space of block elements. Also reduced cell bottom padding from `20px` to `6px`.
 
 **Files Modified:**
@@ -365,7 +366,7 @@ The parsing functions only recognized KaTeX `\(...\)` syntax and didn't convert 
 **Solution:**
 Implemented LaTeX to KaTeX conversion across all parsing functions:
 
-1. **Conversion Logic**: Added `text.replace(/\$([^$]+)\$/g, '\\($1\\)')` to convert `$math$` → `\(math\)`
+1. **Conversion Logic**: Added `text.replace(/$([^$]+)$/g, '\u005C($1\u005C)')` to convert `$math$` → `\(math\)`
 2. **JavaScript Functions Updated**:
    - `parseMarkdownInline()` - Inline math parsing
    - `oldParseMarkdownBody()` - Main text parsing
@@ -378,7 +379,7 @@ Implemented LaTeX to KaTeX conversion across all parsing functions:
 **Technical Implementation:**
 ```javascript
 // Convert LaTeX $...$ syntax to KaTeX \(...\) syntax
-formatted = formatted.replace(/\$([^$]+)\$/g, '\\($1\\)');
+formatted = formatted.replace(/\u0024([^\u0024]+)\u0024/g, '\\u005C($1\\u005C)');
 ```
 
 **Files Modified:**
@@ -470,7 +471,7 @@ Browser default double-click behavior includes trailing whitespace in word selec
 **Solution:**
 Added custom double-click handler for contentEditable preview elements:
 1. Intercept the double-click event
-2. Check if selection ends with whitespace using regex `/\s$/`
+2. Check if selection ends with whitespace using regex `/S$/`
 3. Count trailing whitespace characters
 4. Adjust the range's end position backward to exclude trailing spaces
 5. Update the selection with the trimmed range
@@ -1274,23 +1275,18 @@ Updated `adjustCellHeightForMarkdown()` to:
 
 ---
 
-## Template for New Entries
-
-```markdown
-## [YYYY-MM-DD HH:MM] - Brief Problem Title
+## [2026-01-23 11:45] - Pipe Table Parsing Fix in Export
 
 **Problem:** 
-Description of the issue observed
+Pipes (`|`) inside markdown formatting (e.g. `**@@==...|...==@@**`) were splitting table cells incorrectly in static export, breaking table structure.
 
 **Root Cause:** 
-What was actually causing the problem
+`parseGridTable` used simple `split('|')` which didn't respect markdown context/delimiters.
 
 **Solution:** 
-How it was fixed (include key code changes)
+Implemented `splitTableLine` context-aware parser in `export_static.py` JS template. It iterates through characters and tracks context (bold, italic, highlight, underline, links) to ignore pipes inside these delimiters.
 
 **Files Modified:**
-- `file1.js` - Brief description of change
-- `file2.css` - Brief description of change
+- `export_static.py` - Added `splitTableLine` function and updated `parseGridTable`.
 
-**Related Issues:** Links to related problems or "None"
-```
+**Related Issues:** None
