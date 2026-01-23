@@ -21,6 +21,13 @@
     - Users can also adjust **Markdown Preview** line height (Default: 1.5).
   - This styling is persisted via `localStorage`.
 
+### ✅ Fixed Empty Line Above Tables & Added Distributed Formatting
+- **Problem 1**: Empty lines immediately preceding a table were often consumed by the parser, making them invisible in preview mode.
+- **Solution 1**: Updated `parseMarkdown` to restore the newline if the table regex detection consumed one, and used `.join('\n')` instead of `.join('')` when assembling grid table blocks.
+
+- **Problem 2**: Formatting tags (like `**bold**`, `==highlight==`) could not span across table cell delimiters (`|`), forcing users to repeat tags in each cell.
+- **Solution 2**: Implemented "Distributed Formatting". Syntax like `| **==A | B==** |` is now automatically distributed as `| **==A==** | **==B==** |` before parsing. This works for `**`, `==`, `__`, `@@`, and `!!`.
+
 **Files Modified:**
 - `static/script.js` - Added table line styling rule to `highlightSyntax`.
 - `static/style.css` - Added `.syntax-table-line` class.

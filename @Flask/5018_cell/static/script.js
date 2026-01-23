@@ -2987,11 +2987,39 @@ function parseMarkdownInline(text, cellStyle = {}) {
     return formatted;
 }
 
+// Helper to distribute formatting tags across table pipes
+// e.g. "**A | B**" -> "**A** | **B**"
+function distributeTableFormatting(text) {
+    if (!text) return text;
+    // Supported tags: **, ==, __, @@, !!
+    const tags = ['**', '==', '@@', '__', '!!'];
+    let processed = text;
+
+    tags.forEach(tag => {
+        // Escape the tag for regex
+        const escaped = tag.replace(/([.*+?^${}()|[\]\\])/g, '\\$1');
+        // Regex to find tag wrapping content
+        const regex = new RegExp(`${escaped}(.+?)${escaped}`, 'g');
+
+        processed = processed.replace(regex, (match, inner) => {
+            // Only distribute if the inner content contains a pipe
+            if (inner.includes('|')) {
+                return inner.split('|').map(p => `${tag}${p}${tag}`).join('|');
+            }
+            return match;
+        });
+    });
+    return processed;
+}
+
 /**
  * Parse markdown syntax and convert to HTML
  */
 function parseMarkdown(text, cellStyle = {}) {
     if (!text) return '';
+
+    // Distribute formatting tags across table pipes (Syntax Sugar)
+    text = distributeTableFormatting(text);
 
     // Table*N detection (allow text before table)
     const tableRegex = /(?:^|\n)Table\*(\d+)(?:\s*_\s*([^\s\n,]+))?(?:\s*_\s*([^\s\n,]+))?(?:[\n\s,]+)([\s\S]*)/i;
@@ -3002,6 +3030,11 @@ function parseMarkdown(text, cellStyle = {}) {
         if (tableMatch.index > 0) {
             const textBefore = text.substring(0, tableMatch.index);
             preText = oldParseMarkdownBody(textBefore.split('\n'), cellStyle);
+        }
+
+        // Restore the newline consumed by (?:^|\n) if it matched \n
+        if (tableMatch[0].startsWith('\n')) {
+            preText += '\n';
         }
 
         const cols = parseInt(tableMatch[1]);
@@ -3084,7 +3117,7 @@ function parseMarkdown(text, cellStyle = {}) {
 
         return blocks.map(b =>
             b.grid ? parseGridTable(b.lines) : oldParseMarkdownBody(b.lines, cellStyle)
-        ).join('');
+        ).join('\n');
     }
 
     // If no grid table, process as normal markdown
