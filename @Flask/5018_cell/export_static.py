@@ -1813,13 +1813,60 @@ def generate_static_html(data, custom_syntaxes):
          * - ``` code block ```
          */
         /* ----------  PIPE-TABLE → CSS-GRID  ---------- */
+        function splitTableLine(line) {
+            let cells = [];
+            let currentCell = '';
+            let i = 0;
+            let inBold = false;      // **
+            let inItalic = false;    // @@
+            let inHighlight = false; // ==
+            let inUnderline = false; // __
+            let inLink = false;      // [[
+
+            while (i < line.length) {
+                const char = line[i];
+                
+                // Handle escapes
+                if (char === '\\\\' && i + 1 < line.length) {
+                    currentCell += char + line[i+1];
+                    i += 2;
+                    continue;
+                }
+                
+                // Check for markers (2 chars)
+                if (i + 1 < line.length) {
+                    const twoChars = char + line[i+1];
+                    if (twoChars === '**') { inBold = !inBold; currentCell += twoChars; i += 2; continue; }
+                    if (twoChars === '@@') { inItalic = !inItalic; currentCell += twoChars; i += 2; continue; }
+                    if (twoChars === '==') { inHighlight = !inHighlight; currentCell += twoChars; i += 2; continue; }
+                    if (twoChars === '__') { inUnderline = !inUnderline; currentCell += twoChars; i += 2; continue; }
+                    if (twoChars === '[[') { inLink = true; currentCell += twoChars; i += 2; continue; }
+                    if (twoChars === ']]') { inLink = false; currentCell += twoChars; i += 2; continue; }
+                }
+
+                // Check for pipe
+                if (char === '|') {
+                    if (!inBold && !inItalic && !inHighlight && !inUnderline && !inLink) {
+                        cells.push(currentCell);
+                        currentCell = '';
+                        i++;
+                        continue;
+                    }
+                }
+                
+                currentCell += char;
+                i++;
+            }
+            cells.push(currentCell);
+            return cells.map(c => c.trim());
+        }
+
         function parseGridTable(lines, cellStyle = {}) {
             const rows = lines.map(l => {
                 // Remove leading/trailing whitespace and pipes
                 const trimmed = l.trim().replace(/^\\||\\|$/g, '');
-                // Split by pipe and trim each cell
-                const cells = trimmed.split('|').map(c => c.trim());
-                return cells;
+                // Split by pipe and trim each cell, respecting delimiters
+                return splitTableLine(trimmed);
             });
             const cols = rows[0].length;
             
