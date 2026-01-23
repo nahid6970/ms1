@@ -6,6 +6,47 @@
 
 ---
 
+## [2026-01-23 12:25] - Fix Custom Color Syntax in Edit Mode
+
+**Session Duration:** 0.1 hours
+
+**What We Accomplished:**
+
+### ✅ Fixed Custom Color Syntax Rendering in Edit Mode
+- **Problem**: Custom color syntaxes (e.g., `++text++`) were not displaying their colors or styles when editing a cell (WYSIWYG mode).
+- **Root Cause**: The `highlightSyntax` function was using incorrect property names (`backgroundColor` instead of `bgColor`) and missing style logic.
+- **Solution**: Updated `highlightSyntax` to use correct properties and apply bold, italic, and underline styles defined in the custom syntax.
+
+**Files Modified:**
+- `static/script.js` - Corrected property mapping in `highlightSyntax`.
+- `md/RECENT.md` - Logged session.
+
+**Current Status:**
+- ✅ Custom syntaxes now render correctly in both Preview and Edit modes.
+
+---
+
+## [2026-01-23 12:10] - Markdown Preview Line Height Fix
+
+**Session Duration:** 0.1 hours
+
+**What We Accomplished:**
+
+### ✅ Fixed Markdown Preview Line Height Setting
+- **Problem**: The "Markdown Preview" line height setting was not updating the preview or table rows because the CSS was hardcoded to `1.4`.
+- **Solution**:
+  - Updated `.markdown-preview` class in `static/style.css` to use `var(--markdown-preview-line-height)`.
+  - Explicitly applied the variable to `.markdown-table td` and `.markdown-table th` to ensure tables inside the preview respect the setting.
+
+**Files Modified:**
+- `static/style.css` - Replaced hardcoded line-height with CSS variable.
+- `md/RECENT.md` - Logged session.
+
+**Current Status:**
+- ✅ Markdown Preview line height now dynamically updates when changed in Settings.
+
+---
+
 ## [2026-01-23 12:00] - Server-Side Settings Persistence
 
 **Session Duration:** 0.1 hours
@@ -83,79 +124,3 @@
 
 **Current Status:**
 - ✅ Tables maintain height consistency during editing.
-
----
-
-## [2026-01-20 05:43] - Separated Active Sheet State
-
-**Session Duration:** 0.1 hours
-
-**What We Accomplished:**
-
-### ✅ Decoupled Active Sheet State
-- **Problem**: Changing the active sheet updated `data.json`, potentially causing unnecessary file updates.
-- **Solution**: Separated persistence into two files:
-  - `data.json`: Stores content (sheets, rows, columns, styles).
-  - `app_state.json`: Stores application state (active sheet index).
-- **Update**: Changed state file path to `C:\@delta\output\5018_output\sheet_active.json`.
-- **Feature**: Added F1 Quick Navigation modal to `export_static.py`.
-  - Added button to UI (magnifying glass) for mobile access.
-  - Implemented responsive layout for categories and sheet grid.
-  - Supports F1 hotkey and category filtering.
-- **Layout**: Optimized header for mobile.
-  - Moved Sheet Name and Category to a dedicated top bar.
-  - combined Name and Category into a single line (`Name • Category`).
-  - Reduced toolbar clutter and prevented height issues on mobile.
-- **Theming**: Applied Cyberpunk styling to the Sidebar Tree View.
-  - Updated both `static/style.css` (Main App) and `export_static.py` (Static Export).
-  - Dark background (`#050505`) with Neon Green (`#00ff41`) and Cyan (`#00d2ff`) accents.
-  - Dark background (`#050505`) with Neon Green (`#00ff41`) and Cyan (`#00d2ff`) accents.
-  - High-contrast text and hover effects.
-- **F1 Window Logic**: Enhanced State Persistence & Context Highlighting.
-  - **State Memory**: Reopening modal restores last selected category/view.
-  - **Context Highlight**: Sidebar indicates the *current sheet's category* with a green border (`current-context` class), separate from the *active selection*.
-  - **Smart Defaults**: Initial open selects the current sheet's category automatically.
-- **Sidebar UX**: Fixed issue where categories would collapse upon selecting a sheet.
-  - Sidebar now auto-expands the category containing the active sheet during render.
-  - Applied to both `export_static.py` and `static/script.js`.
-- **Performance**: Optimized sheet switching.
-    - Added `/api/active-sheet` endpoint to `app.py`.
-    - `switchSheet` now only updates `sheet_active.json` and does **not** trigger full data save or static export.
-- **Dirty Check**: Prevent unnecessary file writes.
-    - `save_data` now compares incoming data with existing `data.json`.
-    - Only writes to `data.json` and triggers static export if content has actually changed.
-    - Uses `sort_keys=True` in `json.dump` for consistent key ordering.
-
-**Files Modified:**
-- `app.py` - Updated `STATE_FILE` path and added directory creation.
-- `export_static.py` - Updated `STATE_FILE` path and added F1 modal logic.
-- `dev.md` - Updated data architecture documentation.
-- `md/RECENT.md` - Logged session.
-
-**Current Status:**
-- ✅ Active sheet state is now isolated in `sheet_active.json`.
-- ✅ Static export includes F1 navigation.
-
----
-
-## [2026-01-20 03:55] - Implemented List Levels 4 & 5
-
-**Session Duration:** 0.2 hours
-
-**What We Accomplished:**
-
-### ✅ Extended List Functionality to 5 Levels
-- **Features**: Added support for Level 4 (`---- `) and Level 5 (`----- `) lists.
-- **Visuals**: Level 4 uses `▸` (triangle), Level 5 uses `−` (minus/dash).
-- **Consistency**: Implemented in both `script.js` (live preview) and `export_static.py` (static export).
-- **Rule of 6**: Updated detection, stripping (static), parsing, and documentation.
-
-**Files Modified:**
-- `static/script.js` - Updated `oldParseMarkdownBody`, `checkHasMarkdown`, `calculateVisibleToRawMap`.
-- `export_static.py` - Updated `oldParseMarkdownBody`, `stripMarkdown`.
-- `md/MARKDOWN_SPECIAL.md` - Documented new syntax.
-- `md/RECENT.md` - Logged session.
-
-**Current Status:**
-- ✅ Lists implemented up to 5 levels.
-- ✅ Documentation updated.

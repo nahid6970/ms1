@@ -839,7 +839,7 @@ td textarea {
     word-wrap: break-word;
     z-index: 1;
     display: none;
-    line-height: 1.4;
+    line-height: var(--markdown-preview-line-height);
     tab-size: 8;
     -moz-tab-size: 8;
 }
@@ -2900,6 +2900,7 @@ Markdown Table Styles */
     word-break: break-word;
     overflow-wrap: break-word;
     max-width: 300px;
+    line-height: var(--markdown-preview-line-height);
 }
 
 .markdown-table th {

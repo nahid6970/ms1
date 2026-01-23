@@ -1823,7 +1823,13 @@ function highlightSyntax(text) {
             const escapedMarker = escapeHtml(syntax.marker);
             const markerRegex = escapedMarker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
             const regex = new RegExp(markerRegex + '(.*?)' + markerRegex, 'g');
-            formatted = formatted.replace(regex, `<span style="background: ${syntax.backgroundColor || 'transparent'}; color: ${syntax.color || 'inherit'};">` +
+            
+            let style = `background: ${syntax.bgColor || 'transparent'}; color: ${syntax.fgColor || 'inherit'};`;
+            if (syntax.isBold) style += ' font-weight: bold;';
+            if (syntax.isItalic) style += ' font-style: italic;';
+            if (syntax.isUnderline) style += ' text-decoration: underline;';
+            
+            formatted = formatted.replace(regex, `<span style="${style}">` +
                 `<span class="syn-marker">${escapedMarker}</span>$1<span class="syn-marker">${escapedMarker}</span></span>`);
         });
     }
