@@ -2666,15 +2666,12 @@ def generate_static_html(data, custom_syntaxes):
                 var isBgWrapper = line.includes('background-color:') && line.trim().indexOf('<div style=') === 0;
                 var prevIsBgWrapper = prev.includes('background-color:') && prev.trim().indexOf('<div style=') === 0;
                 
-                // Check for KaTeX output (don't add br inside KaTeX spans)
-                var isKatex = line.includes('class="katex"') || prev.includes('class="katex"');
-                
                 // Don't add <br> after timeline opening or before timeline closing
                 var isTimelineStart = prev.includes('class="md-timeline"');
                 var isTimelineEnd = line === '</div></div>';
                 var isListItem = line.trim().indexOf('<span style="display: inline-flex') === 0;
                 
-                if (isSeparator || prevIsSeparator || isBgWrapper || prevIsBgWrapper || isKatex || (isTimelineStart && isListItem) || isTimelineEnd) {
+                if (isSeparator || prevIsSeparator || isBgWrapper || prevIsBgWrapper || (isTimelineStart && isListItem) || isTimelineEnd) {
                     return acc + line;
                 }
                 return acc + '<br>' + line;
