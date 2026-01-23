@@ -18,6 +18,7 @@ def add_header(response):
 DATA_FILE = r'C:\@delta\ms1\@Flask\5018_cell\data.json'
 STATE_FILE = r'C:\@delta\output\5018_output\sheet_active.json'
 CUSTOM_SYNTAXES_FILE = r'C:\@delta\ms1\@Flask\5018_cell\custom_syntaxes.json'
+SETTINGS_FILE = r'C:\@delta\db\5018_cell\setting.json'
 
 def load_data():
     data = {
@@ -207,6 +208,27 @@ def save_custom_syntaxes():
         print(f"Auto-export failed: {e}")
     
     return jsonify({'success': True})
+
+@app.route('/api/settings', methods=['GET'])
+def get_settings():
+    if os.path.exists(SETTINGS_FILE):
+        try:
+            with open(SETTINGS_FILE, 'r') as f:
+                return jsonify(json.load(f))
+        except:
+            return jsonify({})
+    return jsonify({})
+
+@app.route('/api/settings', methods=['POST'])
+def save_settings():
+    settings = request.json
+    try:
+        os.makedirs(os.path.dirname(SETTINGS_FILE), exist_ok=True)
+        with open(SETTINGS_FILE, 'w') as f:
+            json.dump(settings, f, indent=2, sort_keys=True)
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", debug=True, port=5018)

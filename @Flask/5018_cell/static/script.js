@@ -13831,6 +13831,8 @@ function copyToClipboardFallback(text) {
 // Line Height Settings (Table Edit & Markdown)
 // ==========================================
 
+let globalSettings = {};
+
 function updateLineHeightSettings(type, value) {
     const root = document.documentElement;
     // Ensure value is a number
@@ -13841,35 +13843,49 @@ function updateLineHeightSettings(type, value) {
     if (val < 1.0) val = 1.0;
     if (val > 3.0) val = 3.0;
 
+    const cssVal = val.toString();
+
     if (type === 'table-edit') {
-        const cssVal = val;
         root.style.setProperty('--table-edit-line-height', cssVal);
-        localStorage.setItem('tableEditLineHeight', cssVal);
+        globalSettings.tableEditLineHeight = cssVal;
     } else if (type === 'markdown-preview') {
-        const cssVal = val;
         root.style.setProperty('--markdown-preview-line-height', cssVal);
-        localStorage.setItem('markdownPreviewLineHeight', cssVal);
+        globalSettings.markdownPreviewLineHeight = cssVal;
     }
+    
+    saveSettings();
+}
+
+function saveSettings() {
+    fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(globalSettings)
+    }).catch(console.error);
 }
 
 function loadLineHeightSettings() {
-    const root = document.documentElement;
+    fetch('/api/settings')
+        .then(response => response.json())
+        .then(settings => {
+            globalSettings = settings;
+            const root = document.documentElement;
 
-    // Load Table Edit Line Height
-    const tableEditHeight = localStorage.getItem('tableEditLineHeight');
-    if (tableEditHeight) {
-        root.style.setProperty('--table-edit-line-height', tableEditHeight);
-        const input = document.getElementById('tableEditLineHeight');
-        if (input) input.value = tableEditHeight;
-    }
+            // Load Table Edit Line Height
+            if (settings.tableEditLineHeight) {
+                root.style.setProperty('--table-edit-line-height', settings.tableEditLineHeight);
+                const input = document.getElementById('tableEditLineHeight');
+                if (input) input.value = settings.tableEditLineHeight;
+            }
 
-    // Load Markdown Preview Line Height
-    const markdownHeight = localStorage.getItem('markdownPreviewLineHeight');
-    if (markdownHeight) {
-        root.style.setProperty('--markdown-preview-line-height', markdownHeight);
-        const input = document.getElementById('markdownPreviewLineHeight');
-        if (input) input.value = markdownHeight;
-    }
+            // Load Markdown Preview Line Height
+            if (settings.markdownPreviewLineHeight) {
+                root.style.setProperty('--markdown-preview-line-height', settings.markdownPreviewLineHeight);
+                const input = document.getElementById('markdownPreviewLineHeight');
+                if (input) input.value = settings.markdownPreviewLineHeight;
+            }
+        })
+        .catch(console.error);
 }
 
 // Initialize on load

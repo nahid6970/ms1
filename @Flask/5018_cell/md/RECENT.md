@@ -6,6 +6,30 @@
 
 ---
 
+## [2026-01-23 12:00] - Server-Side Settings Persistence
+
+**Session Duration:** 0.1 hours
+
+**What We Accomplished:**
+
+### ✅ Migrated Line Height Settings to JSON File
+- **Problem**: Settings were only stored in `localStorage`, limiting portability.
+- **Solution**: Implemented server-side persistence for application settings.
+  - Created `C:\@delta\db\5018_cell\setting.json` as the storage file.
+  - Added `/api/settings` GET/POST endpoints to `app.py`.
+  - Updated `static/script.js` to fetch/save settings via API instead of `localStorage`.
+- **Impact**: "Table Edit Mode" and "Markdown Preview" line heights are now saved globally to the filesystem.
+
+**Files Modified:**
+- `app.py` - Added settings API and file constants.
+- `static/script.js` - Switched `loadLineHeightSettings` and `updateLineHeightSettings` to use the API.
+- `md/RECENT.md` - Logged session.
+
+**Current Status:**
+- ✅ Settings are now persisted to `setting.json`.
+
+---
+
 ## [2026-01-23 11:45] - F2 Nickname Search
 
 **Session Duration:** 0.1 hours
@@ -135,28 +159,3 @@
 **Current Status:**
 - ✅ Lists implemented up to 5 levels.
 - ✅ Documentation updated.
-
----
-
-## [2026-01-18 01:25] - Default Table Border Color Update
-
-**Session Duration:** 0.3 hours
-
-**What We Accomplished:**
-
-### ✅ Updated Default Table Border Color to Black
-- **Problem**: Default Markdown table borders were faint grey (`#ced4da`), making them hard to see.
-- **Solution**: Changed the default border color to black (`#000000`) for all Markdown-based tables (comma and pipe syntax).
-- **Consistency**: Synchronized the change across the main application (`static/script.js`, `static/style.css`) and standalone exports (`export_static.py`).
-- **Header Refinement**: Updated `.md-header` to use a black bottom border for better visual separation.
-
-**Files Modified:**
-- `static/script.js` - Updated `parseCommaTable` default color.
-- `static/style.css` - Updated `.md-cell`, `.markdown-table`, and `.md-header` border colors.
-- `export_static.py` - Updated embedded CSS for tables and cells.
-- `md/PROBLEMS_AND_FIXES.md` - Documented the color update.
-
-**Current Status:**
-- ✅ Flask server running on http://127.0.0.1:5018
-- ✅ Markdown tables now render with black borders by default.
-- ✅ Standalone exports match the application's table styling.
