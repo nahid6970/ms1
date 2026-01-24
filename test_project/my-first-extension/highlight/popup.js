@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const importBtn = document.getElementById('importBtn');
   const clearBtn = document.getElementById('clearBtn');
   const status = document.getElementById('status');
+  const saveToPythonBtn = document.getElementById('saveToPython');
   const saveColorsBtn = document.getElementById('saveColors');
 
   // Excluded Domains
@@ -66,6 +67,26 @@ document.addEventListener('DOMContentLoaded', () => {
   function showStatus(msg, duration = 3000) {
     status.textContent = msg;
     setTimeout(() => status.textContent = '', duration);
+  }
+
+  // Save to Python server button
+  if (saveToPythonBtn) {
+    saveToPythonBtn.addEventListener('click', function () {
+      chrome.storage.local.get(null, function (items) {
+        // Send message to background script to save
+        chrome.runtime.sendMessage({
+          action: 'saveToPython',
+          data: items
+        }, function (response) {
+          // Check if response exists and doesn't have success: false
+          if (response && response.success !== false) {
+            showStatus('Data saved to Python server!');
+          } else {
+            showStatus('Failed to save to Python server. Make sure the server is running.');
+          }
+        });
+      });
+    });
   }
 
   exportBtn.addEventListener('click', () => {
