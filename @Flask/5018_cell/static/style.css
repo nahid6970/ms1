@@ -929,6 +929,16 @@ code {
     /* Keep aligned with text */
 }
 
+/* Clean Mode: Hide all syntax markers */
+.clean-markdown-mode .syn-marker {
+    display: none !important;
+}
+
+.clean-mode-active span {
+    color: #ff00ff !important; /* Magenta for clean mode */
+    text-shadow: 0 0 5px #ff00ff;
+}
+
 /* Ensure styled elements have consistent behavior in contenteditable */
 .markdown-preview strong,
 .markdown-preview em,

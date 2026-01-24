@@ -6,6 +6,36 @@
 
 ---
 
+## [2026-01-23 12:45] - 3-State Markdown Mode & Clean Mode
+
+**Session Duration:** 0.15 hours
+
+**What We Accomplished:**
+
+### ✅ Implemented Clean Markdown Mode (No Syntax)
+- **Feature**: Added a third view mode called "Clean Mode" that renders markdown but hides all syntax markers (`**`, `##`, etc.) even during editing.
+- **Cycle Logic**: The markdown toggle (📄 icon) now cycles through 3 states:
+  1. **Raw Mode**: Shows raw text (0).
+  2. **Standard Mode**: Shows preview, focus shows dimmed syntax (1).
+  3. **Clean Mode**: Shows preview, focus hides syntax completely (2).
+- **Interactions**:
+  - **Left Click**: Cycles modes (Raw -> Standard -> Clean -> Raw).
+  - **Right Click**: Also cycles modes (as requested).
+- **Visuals**:
+  - Added CSS rule to hide `.syn-marker` in `clean-markdown-mode`.
+  - Added magenta glow to the toggle icon in Clean Mode.
+
+**Files Modified:**
+- `static/script.js` - Refactored `toggleMarkdownPreview`, `enableRawMode`, and initialization logic for 3 states. Added event listeners.
+- `static/style.css` - Added Clean Mode CSS rules.
+- `md/RECENT.md` - Logged session.
+
+**Current Status:**
+- ✅ 3-state toggle functional (Raw/Standard/Clean).
+- ✅ Clean mode hiding syntax markers as requested.
+
+---
+
 ## [2026-01-23 12:25] - Fix Custom Color Syntax in Edit Mode
 
 **Session Duration:** 0.1 hours
@@ -86,41 +116,7 @@
 
 **Files Modified:**
 - `static/script.js` - Added dataset attribute and updated filter logic.
-- `md/UX_NAVIGATION.md` - Updated F2 features list.
 - `md/RECENT.md` - Logged session.
 
 **Current Status:**
 - ✅ F2 search now finds sheets by nickname.
-
----
-
-## [2026-01-23 11:27] - Table Edit Mode Stability
-
-**Session Duration:** 0.1 hours
-
-**What We Accomplished:**
-
-### ✅ Fixed Table Shrinkage in Edit Mode
-- **Problem**: Switching to edit mode on a table caused the cell to shrink and shift the sheet layout.
-- **Solution**: Refined spacing strategy & Added Settings.
-  - Adjusted default `line-height` to `1.6`.
-  - **New Feature**: Added "Line Height Settings" in the Settings menu (`⚙️`).
-    - Users can now manually adjust **Table Edit Mode** line height (Default: 1.6).
-    - Users can also adjust **Markdown Preview** line height (Default: 1.5).
-  - This styling is persisted via `localStorage`.
-
-### ✅ Fixed Empty Line Above Tables & Added Distributed Formatting
-- **Problem 1**: Empty lines immediately preceding a table were often consumed by the parser.
-- **Solution 1**: Updated `parseMarkdown` to explicitly restore newlines if the table regex matched them.
-  - *Correction*: Reverted `.join('\n')` to `.join('')` for grid tables, as this was causing large gaps *after* tables (regrssion from commit 4b2bf8). The explicit newline restoration handles the "preservation" issue correctly without adding unwanted spacing blocks.
-
-- **Problem 2**: Formatting tags could not span across table cell delimiters.
-- **Solution 2**: Implemented "Distributed Formatting" (see above).
-
-**Files Modified:**
-- `static/script.js` - Added table line styling rule to `highlightSyntax`.
-- `static/style.css` - Added `.syntax-table-line` class.
-- `md/PROBLEMS_AND_FIXES.md` - Logged the fix.
-
-**Current Status:**
-- ✅ Tables maintain height consistency during editing.

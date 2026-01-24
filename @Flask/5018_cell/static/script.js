@@ -187,19 +187,31 @@ function initializeApp() {
     }
 
     // Restore markdown preview toggle state
-    const markdownPreviewEnabled = localStorage.getItem('markdownPreviewEnabled') !== 'false'; // Default true
+    let markdownMode = localStorage.getItem('markdownPreviewMode');
+    // Migration from old boolean storage
+    if (markdownMode === null) {
+        const oldEnabled = localStorage.getItem('markdownPreviewEnabled');
+        markdownMode = oldEnabled === 'false' ? '0' : '1';
+    }
+    
     const markdownToggle = document.getElementById('markdownToggle');
     if (markdownToggle) {
-        markdownToggle.checked = markdownPreviewEnabled;
+        const table = document.getElementById('dataTable');
         const toggleLabel = markdownToggle.closest('label');
-        if (!markdownPreviewEnabled) {
-            const table = document.getElementById('dataTable');
-            if (table) {
-                table.classList.add('hide-markdown-preview');
-            }
-            if (toggleLabel) {
-                toggleLabel.classList.add('raw-mode-active');
-            }
+        
+        if (markdownMode === '0') {
+            // Raw Mode
+            markdownToggle.checked = false;
+            if (table) table.classList.add('hide-markdown-preview');
+            if (toggleLabel) toggleLabel.classList.add('raw-mode-active');
+        } else if (markdownMode === '1') {
+            // Standard Markdown
+            markdownToggle.checked = true;
+        } else if (markdownMode === '2') {
+            // Clean Markdown
+            markdownToggle.checked = true;
+            if (table) table.classList.add('clean-markdown-mode');
+            if (toggleLabel) toggleLabel.classList.add('clean-mode-active');
         }
     }
 
@@ -6880,17 +6892,41 @@ function toggleMarkdownPreview() {
     const table = document.getElementById('dataTable');
     const toggleLabel = markdownToggle.closest('label');
 
-    if (markdownToggle.checked) {
-        table.classList.remove('hide-markdown-preview');
-        toggleLabel.classList.remove('raw-mode-active');
-        localStorage.setItem('markdownPreviewEnabled', 'true');
-        showToast('Markdown preview enabled', 'success');
-    } else {
+    // Current state (0=Raw, 1=Standard, 2=Clean)
+    let currentMode = localStorage.getItem('markdownPreviewMode');
+    if (currentMode === null) {
+        currentMode = table.classList.contains('hide-markdown-preview') ? '0' : '1';
+    }
+
+    // Cycle: 0 -> 1 -> 2 -> 0
+    let nextMode = (parseInt(currentMode) + 1) % 3;
+
+    // Remove all mode classes first
+    table.classList.remove('hide-markdown-preview');
+    table.classList.remove('clean-markdown-mode');
+    toggleLabel.classList.remove('raw-mode-active');
+    toggleLabel.classList.remove('clean-mode-active');
+
+    if (nextMode === 0) {
+        // Switch to Raw Mode
+        markdownToggle.checked = false;
         table.classList.add('hide-markdown-preview');
         toggleLabel.classList.add('raw-mode-active');
-        localStorage.setItem('markdownPreviewEnabled', 'false');
         showToast('Raw mode enabled', 'info');
+    } else if (nextMode === 1) {
+        // Switch to Standard Markdown
+        markdownToggle.checked = true;
+        showToast('Markdown preview enabled', 'success');
+    } else if (nextMode === 2) {
+        // Switch to Clean Markdown (No Syntax)
+        markdownToggle.checked = true;
+        table.classList.add('clean-markdown-mode');
+        toggleLabel.classList.add('clean-mode-active');
+        showToast('Clean mode enabled (syntax hidden)', 'success');
     }
+
+    localStorage.setItem('markdownPreviewMode', nextMode.toString());
+    localStorage.setItem('markdownPreviewEnabled', nextMode === 0 ? 'false' : 'true');
 
     // Refresh table to update all preview overlays with raw/parsed content
     renderTable();
@@ -6902,16 +6938,21 @@ function enableRawMode() {
     const table = document.getElementById('dataTable');
     const toggleLabel = markdownToggle.closest('label');
 
-    if (markdownToggle.checked) {
-        // Currently in preview mode, switch to raw mode
-        markdownToggle.checked = false;
-        table.classList.add('hide-markdown-preview');
-        toggleLabel.classList.add('raw-mode-active');
-        localStorage.setItem('markdownPreviewEnabled', 'false');
-        renderTable();
-        return true; // Switched to raw mode
-    }
-    return false; // Already in raw mode
+    // Current state
+    let currentMode = localStorage.getItem('markdownPreviewMode');
+    if (currentMode === '0') return false; // Already in raw mode
+
+    // Switch to raw mode (0)
+    markdownToggle.checked = false;
+    table.classList.remove('clean-markdown-mode');
+    table.classList.add('hide-markdown-preview');
+    toggleLabel.classList.remove('clean-mode-active');
+    toggleLabel.classList.add('raw-mode-active');
+    
+    localStorage.setItem('markdownPreviewMode', '0');
+    localStorage.setItem('markdownPreviewEnabled', 'false');
+    renderTable();
+    return true; // Switched to raw mode
 }
 
 function toggleCollapsible(id) {
@@ -13896,3 +13937,18 @@ function loadLineHeightSettings() {
 
 // Initialize on load
 document.addEventListener('DOMContentLoaded', loadLineHeightSettings);
+
+// Initialize markdown toggle context menu and clicks
+document.addEventListener('DOMContentLoaded', () => {
+    const markdownToggle = document.getElementById('markdownToggle');
+    if (markdownToggle) {
+        const label = markdownToggle.closest('label');
+        if (label) {
+            // Right click to cycle modes as well
+            label.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                toggleMarkdownPreview();
+            });
+        }
+    }
+});
