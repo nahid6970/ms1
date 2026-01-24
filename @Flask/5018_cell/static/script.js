@@ -3099,8 +3099,9 @@ function parseMarkdown(text, cellStyle = {}) {
 
             const currentTableHtml = parseCommaTable(cols, currentTableContent, borderColor, borderWidth);
 
-            // Recursively parse the rest
-            return preText + currentTableHtml + parseMarkdown(remainingContent, cellStyle);
+            // Recursively parse the rest. Add newline only if the next part doesn't already start with one
+            const separator = remainingContent.startsWith('\n') ? '' : '\n';
+            return preText + currentTableHtml + separator + parseMarkdown(remainingContent, cellStyle);
         }
 
         // Check if there's another table definition in the content (fallback)
@@ -3111,8 +3112,8 @@ function parseMarkdown(text, cellStyle = {}) {
             const remainingContent = content.substring(splitIndex);
 
             const currentTableHtml = parseCommaTable(cols, currentTableContent, borderColor, borderWidth);
-
-            return preText + currentTableHtml + parseMarkdown(remainingContent, cellStyle);
+            const separator = remainingContent.startsWith('\n') ? '' : '\n';
+            return preText + currentTableHtml + separator + parseMarkdown(remainingContent, cellStyle);
         }
 
         return preText + parseCommaTable(cols, content, borderColor, borderWidth);

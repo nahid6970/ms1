@@ -6,6 +6,33 @@
 
 ---
 
+## [2026-01-23 13:30] - Refined Table Spacing & Joining
+
+**Session Duration:** 0.15 hours
+
+**What We Accomplished:**
+
+### ✅ Refined Spacing Strategy Around Tables
+- **Problem**: The previous fix for preserving empty lines introduced "double spacing" below tables, making subsequent text appear too far away.
+- **Root Cause**: Tables have their own CSS margins (`margin: 4px 0` for `.md-grid`). Adding a newline (`\n`) in a `pre-wrap` container creates a full line break on top of that margin.
+- **Solution**: 
+  - Updated `parseMarkdown` to use a "smart joiner". 
+  - It now only adds a newline if it's transitioning between text blocks or if there's an explicit empty line.
+  - If a block is a table and the next block is text, it skips the newline to rely on the table's built-in margin.
+- **Comma Tables**: Applied similar refined logic to `Table*N` syntax, adding a newline only if the remaining content doesn't already start with one.
+- **Consistency**: Synchronized the logic across `static/script.js` and `export_static.py`.
+
+**Files Modified:**
+- `static/script.js` - Refined joiner in `parseMarkdown`.
+- `export_static.py` - Refined joiner in `parseMarkdown`.
+- `md/RECENT.md` - Logged session.
+
+**Current Status:**
+- ✅ Empty lines are preserved above/below tables when explicitly typed.
+- ✅ Normal spacing is maintained when text immediately follows a table.
+
+---
+
 ## [2026-01-23 13:15] - Fixed Empty Line Above Tables
 
 **Session Duration:** 0.1 hours
@@ -101,24 +128,3 @@
 
 **Current Status:**
 - ✅ Custom syntaxes now render correctly in both Preview and Edit modes.
-
----
-
-## [2026-01-23 12:10] - Markdown Preview Line Height Fix
-
-**Session Duration:** 0.1 hours
-
-**What We Accomplished:**
-
-### ✅ Fixed Markdown Preview Line Height Setting
-- **Problem**: The "Markdown Preview" line height setting was not updating the preview or table rows because the CSS was hardcoded to `1.4`.
-- **Solution**:
-  - Updated `.markdown-preview` class in `static/style.css` to use `var(--markdown-preview-line-height)`.
-  - Explicitly applied the variable to `.markdown-table td` and `.markdown-table th` to ensure tables inside the preview respect the setting.
-
-**Files Modified:**
-- `static/style.css` - Replaced hardcoded line-height with CSS variable.
-- `md/RECENT.md` - Logged session.
-
-**Current Status:**
-- ✅ Markdown Preview line height now dynamically updates when changed in Settings.

@@ -2722,7 +2722,7 @@ def generate_static_html(data, custom_syntaxes):
                         return acc + item.content;
                     }
                     
-                    return acc + '\n' + item.content;
+                    return acc + '\\n' + item.content;
                 }, '');
             }
 
