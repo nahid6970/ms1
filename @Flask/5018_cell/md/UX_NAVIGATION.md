@@ -37,15 +37,17 @@
 - **Cross-Mode:** Works perfectly in both Parsed and Raw viewing modes.
 - **Implementation:** `handleKeyboardShortcuts` (F8).
 
-## Markdown View Modes (📄)
+## Markdown View Modes (📝 & 👁️)
 **Purpose:** Switch between different levels of markdown rendering and syntax visibility.
 **Modes:**
-1.  **Raw Mode:** Displays raw text including tags (e.g., `**text**`) in standard inputs.
-2.  **Standard Mode:** Renders HTML; Focus reveals dimmed syntax markers.
-3.  **Clean Mode:** Renders HTML; Focus hides all syntax markers (True WYSIWYG).
+1.  **Raw Mode (📝):** Displays raw text including tags (e.g., `**text**`) in standard inputs.
+2.  **Visual Mode (👁️):** Renders HTML. Click to cycle between:
+    *   **Standard:** Focus reveals dimmed syntax markers.
+    *   **Clean:** Focus hides all syntax markers (True WYSIWYG).
 **Behavior:**
-- **Toggle:** Click or Right-click the 📄 icon to cycle through modes.
-- **Indicators:** Standard mode uses default theme; Clean mode adds a magenta glow to the icon.
+- **Toggle Raw:** Click 📝 to switch to source code view.
+- **Cycle Visual:** Click or Right-click 👁️ to switch between Standard and Clean modes.
+- **Indicators:** Clean mode adds a magenta glow to the 👁️ icon.
 - **Persistence:** Remembers selection via `localStorage.markdownPreviewMode`.
 - **See Also:** [Markdown View Modes](md/MARKDOWN_MODES.md) for technical details.
 

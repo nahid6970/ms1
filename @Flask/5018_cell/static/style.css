@@ -424,13 +424,15 @@ body {
     opacity: 0.4;
 }
 
-/* Raw mode indicator - orange background when raw mode is active */
-.raw-mode-active {
-    background: #fff3e0 !important;
-    border-color: #ff9800 !important;
+/* Active state for toggle labels */
+.btn-icon-toggle.active input[type="checkbox"]+span {
+    opacity: 1 !important;
 }
 
-.raw-mode-active span {
+/* Clean Mode Indicator - Magenta Glow */
+.clean-mode-active span {
+    color: #ff00ff !important;
+    text-shadow: 0 0 5px #ff00ff;
     opacity: 1 !important;
 }
 

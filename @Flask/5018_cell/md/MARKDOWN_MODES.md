@@ -1,23 +1,32 @@
 # Markdown View Modes
 
-The application supports three distinct view modes for markdown-enabled cells, allowing users to balance between deep editing and a clean visual experience.
+The application supports three distinct view modes for markdown-enabled cells, managed by two dedicated buttons in the toolbar.
 
 ## Mode Overview
 
-Users can cycle through these modes by clicking (left-click) or right-clicking the **Page Icon (📄)** in the toolbar.
-
-| Mode | ID | Behavior | Best For |
+| Button | Mode | ID | Behavior |
 | :--- | :--- | :--- | :--- |
-| **Raw Mode** | 0 | Shows the raw markdown text inside a standard `<textarea>` or `<input>`. No formatting is applied. | Debugging syntax, bulk text changes, and complex editing. |
-| **Standard Mode** | 1 | **Blur:** Shows clean rendered HTML.<br>**Focus:** Shows rendered HTML with dimmed syntax markers (`.syn-marker`). | Balanced "Rich-Text" editing where syntax is still visible but unobtrusive. |
-| **Clean Mode** | 2 | **Blur:** Shows clean rendered HTML.<br>**Focus:** Shows rendered HTML with **completely hidden** syntax markers. | True WYSIWYG editing. The text appears exactly as it will be rendered. |
+| **📝 (Raw)** | **Raw Mode** | 0 | Shows the raw markdown text inside a standard `<textarea>` or `<input>`. No formatting is applied. |
+| **👁️ (Visual)** | **Standard Mode** | 1 | **Blur:** Shows clean rendered HTML.<br>**Focus:** Shows rendered HTML with dimmed syntax markers (`.syn-marker`). |
+| **👁️ (Visual)** | **Clean Mode** | 2 | **Blur:** Shows clean rendered HTML.<br>**Focus:** Shows rendered HTML with **completely hidden** syntax markers. |
+
+## Controls
+
+### 1. Raw Mode Toggle (📝)
+- **Click:** Switches between **Raw Mode** and your last used **Visual Mode**.
+- **Visual:** Active when 📝 icon is fully opaque.
+
+### 2. Visual Mode Toggle (👁️)
+- **Click / Right-Click:** Cycles between **Standard Mode** and **Clean Mode**.
+- **Visual:** Active when 👁️ icon is fully opaque.
+- **Indicator:** In **Clean Mode**, the 👁️ icon has a **Magenta Glow**.
 
 ## Mode Persistence
 
 The current mode is persisted in `localStorage` under `markdownPreviewMode`.
-- `0`: Raw Mode (icon checkbox unchecked)
-- `1`: Standard Markdown Mode (icon checkbox checked, default look)
-- `2`: Clean Markdown Mode (icon checkbox checked, icon has magenta glow)
+- `0`: Raw Mode
+- `1`: Standard Markdown Mode
+- `2`: Clean Markdown Mode
 
 ## Technical Implementation
 
@@ -35,15 +44,8 @@ In Clean Mode, syntax markers are hidden via CSS while the parent styled element
 ```
 
 ### Toggle Logic (`static/script.js`)
-The `toggleMarkdownPreview()` function manages the cycle:
-1. Reads `currentMode` from `localStorage`.
-2. Calculates `nextMode = (current + 1) % 3`.
-3. Updates CSS classes on the table.
-4. Updates UI indicators (checkbox, label classes).
-5. Calls `renderTable()` to refresh the view.
-
-## Visual Indicators
-
-- **Raw Mode:** The 📄 icon is dimmed (unchecked).
-- **Standard Mode:** The 📄 icon is active (checked, default cyan/green).
-- **Clean Mode:** The 📄 icon is active and has a **Magenta Glow** (`clean-mode-active` class) to indicate syntax is suppressed.
+The `setMode(mode)` function manages the transitions:
+1. Updates CSS classes on the table.
+2. Updates UI indicators (checkboxes, active label classes).
+3. Updates `localStorage`.
+4. Calls `renderTable()` to refresh the view.

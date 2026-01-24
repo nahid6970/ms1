@@ -6,6 +6,41 @@
 
 ---
 
+## [2026-01-23 15:00] - 2-Button Markdown Mode Toggle
+
+**Session Duration:** 0.2 hours
+
+**What We Accomplished:**
+
+### ✅ Split Markdown Toggle into 2 Buttons
+- **Feature**: Refactored the view mode controls for better UX. Instead of a single cycle button, there are now two dedicated toggles:
+  1. **📝 (Raw Mode)**: Dedicated button to switch to source code view.
+  2. **👁️ (Visual Mode)**: Dedicated button to toggle between **Standard** (dimmed syntax) and **Clean** (pure WYSIWYG) modes.
+- **Interactions**:
+  - Clicking 📝 instantly enters/exits Raw mode.
+  - Clicking 👁️ cycles between Standard <-> Clean modes.
+  - Right-clicking either icon also cycles its respective state.
+- **Visuals**:
+  - Clean Mode still features the magenta glow on the 👁️ icon.
+  - Refined CSS for active/inactive toggle states.
+- **Technical**:
+  - Refactored `static/script.js` to use a central `setMode(mode)` function.
+  - Removed redundant `enableRawMode` logic.
+  - Synchronized across initialization, event listeners, and documentation.
+
+**Files Modified:**
+- `templates/index.html` - Added the new button structure.
+- `static/script.js` - Refactored mode logic and listeners.
+- `static/style.css` - Updated active/clean mode styles.
+- `md/MARKDOWN_MODES.md` - Updated documentation for the new UI.
+- `md/UX_NAVIGATION.md` - Updated UI documentation.
+- `md/RECENT.md` - Logged session.
+
+**Current Status:**
+- ✅ Improved 2-button control system for markdown viewing.
+
+---
+
 ## [2026-01-23 14:45] - Title Text Font Styling
 
 **Session Duration:** 0.15 hours
@@ -22,13 +57,6 @@
   - Updated parsing logic in `static/script.js` and `export_static.py` to handle `em`, `rem`, and `f-` parameters.
   - Corrected detection and stripping regexes to allow `#`, `.`, and `-` in parameter blocks.
 - **Documentation**: Updated Formatting Guide and `md/MARKDOWN_SPECIAL.md` with new styling examples.
-
-**Files Modified:**
-- `static/script.js` - Updated core logic (6 locations).
-- `export_static.py` - Updated export logic (3 locations).
-- `templates/index.html` - Enhanced guide entry.
-- `md/MARKDOWN_SPECIAL.md` - Updated feature documentation.
-- `md/RECENT.md` - Logged session.
 
 **Current Status:**
 - ✅ Title Text supports full border and font customization.
@@ -83,18 +111,3 @@
 
 **Current Status:**
 - ✅ Spacing issues resolved.
-
----
-
-## [2026-01-23 13:45] - Fixed Empty Lines Above Separators
-
-**Session Duration:** 0.1 hours
-
-**What We Accomplished:**
-
-### ✅ Fixed Empty Line Consumption Above/Below Separators
-- **Problem**: Empty lines above/below horizontal separators were being "swallowed."
-- **Solution**: Refined the joiner to only skip the newline if **both** lines have content.
-
-**Current Status:**
-- ✅ Separators respect empty lines.
