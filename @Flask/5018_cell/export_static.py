@@ -2713,35 +2713,16 @@ def generate_static_html(data, custom_syntaxes):
                     isGrid: b.grid
                 }));
                 
-                // Join blocks - tables have their own margin, so no <br> needed around them
+                // Join blocks with a newline only if needed
                 return processedBlocks.reduce((acc, item, i) => {
                     if (i === 0) return item.content;
                     
-                    const prevItem = processedBlocks[i - 1];
-                    const block = item.content;
-                    
-                    // If current block is empty, it represents empty line(s)
-                    if (!block.trim()) {
-                        // Skip empty line after table (tables have their own spacing)
-                        if (prevItem.isGrid) {
-                            return acc;
-                        }
-                        // Preserve empty line in other cases
-                        return acc + '<br>';
+                    const prevWasGrid = processedBlocks[i-1].isGrid;
+                    if (prevWasGrid && item.content.trim() !== '') {
+                        return acc + item.content;
                     }
                     
-                    // Don't add <br> if either current or previous block is a table
-                    // Tables have CSS margin that provides spacing
-                    if (item.isGrid || prevItem.isGrid) {
-                        return acc + block;
-                    }
-                    
-                    // For text-to-text transitions, add <br>
-                    if (acc.trim() && block.trim()) {
-                        return acc + '<br>' + block;
-                    }
-                    
-                    return acc + block;
+                    return acc + '\n' + item.content;
                 }, '');
             }
 

@@ -6,6 +6,28 @@
 
 ---
 
+## [2026-01-23 13:15] - Fixed Empty Line Above Tables
+
+**Session Duration:** 0.1 hours
+
+**What We Accomplished:**
+
+### ✅ Fixed Empty Line Consumption Before Grid Tables
+- **Problem**: When a user added an empty line between text and a Pipe table (`|...|`), the empty line was ignored in the preview, causing the text to merge with the table.
+- **Root Cause**: The block-joining logic in `parseMarkdown` was using an over-aggressive strategy that skipped separators if one of the blocks was a table.
+- **Solution**: Simplified the block-joining logic to always use a newline (`\n`) as a separator between blocks. This preserves the natural document structure and ensures that explicit empty lines are rendered in the `pre-wrap` preview.
+- **Consistency**: Applied the fix to both the live application (`static/script.js`) and the standalone export logic (`export_static.py`).
+
+**Files Modified:**
+- `static/script.js` - Updated `parseMarkdown` block joiner.
+- `export_static.py` - Updated `parseMarkdown` block joiner.
+- `md/RECENT.md` - Logged session.
+
+**Current Status:**
+- ✅ Empty lines above/below tables are now correctly preserved in all modes.
+
+---
+
 ## [2026-01-23 13:00] - List Indentation Fix & Markdown Mode Polish
 
 **Session Duration:** 0.15 hours
@@ -100,27 +122,3 @@
 
 **Current Status:**
 - ✅ Markdown Preview line height now dynamically updates when changed in Settings.
-
----
-
-## [2026-01-23 12:00] - Server-Side Settings Persistence
-
-**Session Duration:** 0.1 hours
-
-**What We Accomplished:**
-
-### ✅ Migrated Line Height Settings to JSON File
-- **Problem**: Settings were only stored in `localStorage`, limiting portability.
-- **Solution**: Implemented server-side persistence for application settings.
-  - Created `C:\@delta\db\5018_cell\setting.json` as the storage file.
-  - Added `/api/settings` GET/POST endpoints to `app.py`.
-  - Updated `static/script.js` to fetch/save settings via API instead of `localStorage`.
-- **Impact**: "Table Edit Mode" and "Markdown Preview" line heights are now saved globally to the filesystem.
-
-**Files Modified:**
-- `app.py` - Added settings API and file constants.
-- `static/script.js` - Switched `loadLineHeightSettings` and `updateLineHeightSettings` to use the API.
-- `md/RECENT.md` - Logged session.
-
-**Current Status:**
-- ✅ Settings are now persisted to `setting.json`.
