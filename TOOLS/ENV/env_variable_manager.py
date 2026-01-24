@@ -276,18 +276,21 @@ class EnvVariableManager(QMainWindow):
         # Controls
         controls_layout = QHBoxLayout()
         add_btn = QPushButton("➕ ADD ALIAS")
+        edit_btn = QPushButton("✏️ EDIT")
         remove_btn = QPushButton("❌ REMOVE")
         apply_btn = QPushButton("⚡ APPLY ALL")
         refresh_btn = QPushButton("🔄 REFRESH")
         setup_btn = QPushButton("🔧 AUTO-SETUP")
         
         add_btn.clicked.connect(self.add_alias)
+        edit_btn.clicked.connect(self.edit_alias)
         remove_btn.clicked.connect(self.remove_alias)
         apply_btn.clicked.connect(self.apply_all_aliases)
         refresh_btn.clicked.connect(self.load_aliases)
         setup_btn.clicked.connect(self.setup_auto_load)
         
         controls_layout.addWidget(add_btn)
+        controls_layout.addWidget(edit_btn)
         controls_layout.addWidget(remove_btn)
         controls_layout.addWidget(apply_btn)
         controls_layout.addWidget(refresh_btn)
@@ -710,6 +713,30 @@ class EnvVariableManager(QMainWindow):
                 self.aliases[name] = command
                 self.save_aliases()
                 self.load_aliases()
+    
+    def edit_alias(self):
+        """Edit selected alias"""
+        current = self.alias_list.currentItem()
+        if current:
+            text = current.text()
+            if " → " in text:
+                old_name, old_command = text.split(" → ", 1)
+                
+                # Step 1: Edit Name
+                new_name, ok1 = QInputDialog.getText(self, "Edit Alias", "Alias Name (Shortcut):",
+                                                    text=old_name)
+                if ok1 and new_name:
+                    # Step 2: Edit Command
+                    new_command, ok2 = QInputDialog.getText(self, "Edit Alias", f"Command for '{new_name}':",
+                                                      text=old_command)
+                    if ok2 and new_command:
+                        # Update aliases
+                        if new_name != old_name and old_name in self.aliases:
+                            del self.aliases[old_name]
+                        
+                        self.aliases[new_name] = new_command
+                        self.save_aliases()
+                        self.load_aliases()
     
     def remove_alias(self):
         """Remove selected alias"""
