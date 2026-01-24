@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const clearBtn = document.getElementById('clearBtn');
   const status = document.getElementById('status');
   const saveToPythonBtn = document.getElementById('saveToPython');
+  const loadFromPythonBtn = document.getElementById('loadFromPython');
   const saveColorsBtn = document.getElementById('saveColors');
 
   // Excluded Domains
@@ -85,6 +86,29 @@ document.addEventListener('DOMContentLoaded', () => {
             showStatus('Failed to save to Python server. Make sure the server is running.');
           }
         });
+      });
+    });
+  }
+
+  // Load from Python server button
+  if (loadFromPythonBtn) {
+    loadFromPythonBtn.addEventListener('click', function () {
+      chrome.runtime.sendMessage({
+        action: 'loadFromPython'
+      }, function (response) {
+        if (response && response.success && response.data) {
+          chrome.storage.local.set(response.data, () => {
+            showStatus('Data loaded from Python server! Refresh pages to see changes.');
+            // Notify all tabs to refresh
+            chrome.tabs.query({}, (tabs) => {
+              tabs.forEach(tab => {
+                chrome.tabs.sendMessage(tab.id, { action: "refresh_highlights" }).catch(() => { });
+              });
+            });
+          });
+        } else {
+          showStatus('Failed to load from Python server. Make sure the server is running.');
+        }
       });
     });
   }
