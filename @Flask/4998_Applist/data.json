@@ -859,5 +859,12 @@
         "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\zoxide\\current\\zoxide.exe",
         "winget_name": "",
         "winget_path": ""
+    },
+    {
+        "name": "JackieLiu.NotepadsApp",
+        "scoop_name": "",
+        "scoop_path": "",
+        "winget_name": "JackieLiu.NotepadsApp",
+        "winget_path": ""
     }
 ]
