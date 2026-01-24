@@ -6,6 +6,32 @@
 
 ---
 
+## [2026-01-23 13:00] - List Indentation Fix & Markdown Mode Polish
+
+**Session Duration:** 0.15 hours
+
+**What We Accomplished:**
+
+### ✅ Implemented Hanging Indents for Lists in Edit Mode
+- **Feature**: List items (`-`, `--`, `---`, `----`, `-----`) now maintain a consistent hanging indent in Edit Mode (Standard and Clean modes).
+- **Implementation**: Updated `highlightSyntax` to detect list patterns and apply `text-indent: -1em` with appropriate `padding-left`.
+- **Consistency**: This ensures that when a list line wraps, the second line is indented, matching the Preview Mode behavior exactly.
+
+### ✅ Refined 3-State Markdown Toggle
+- **Interaction**: Added support for cycling modes via the Page Icon (📄) button.
+- **States**: 0 (Raw), 1 (Standard), 2 (Clean).
+- **UI**: Clean mode now hides syntax markers while maintaining the correct list indentation.
+
+**Files Modified:**
+- `static/script.js` - Updated `highlightSyntax` for list indentation.
+- `md/RECENT.md` - Logged session.
+
+**Current Status:**
+- ✅ List indentation follows preview behavior in all markdown modes.
+- ✅ 3-state toggle functional and documented.
+
+---
+
 ## [2026-01-23 12:45] - 3-State Markdown Mode & Clean Mode
 
 **Session Duration:** 0.15 hours
@@ -98,25 +124,3 @@
 
 **Current Status:**
 - ✅ Settings are now persisted to `setting.json`.
-
----
-
-## [2026-01-23 11:45] - F2 Nickname Search
-
-**Session Duration:** 0.1 hours
-
-**What We Accomplished:**
-
-### ✅ Implemented Nickname Search in F2 Popup
-- **Feature**: Users can now search for sheets by their **Nickname** in the F2 Recent Sheets popup.
-- **Implementation**:
-  - Updated `populateF2RecentSheets` to attach the nickname as a `data-nickname` attribute to list items.
-  - Updated `filterF2Sheets` to check against both the visible sheet name and the hidden nickname.
-- **Documentation**: Updated `md/UX_NAVIGATION.md` to reflect the new capability.
-
-**Files Modified:**
-- `static/script.js` - Added dataset attribute and updated filter logic.
-- `md/RECENT.md` - Logged session.
-
-**Current Status:**
-- ✅ F2 search now finds sheets by nickname.

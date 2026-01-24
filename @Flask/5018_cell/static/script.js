@@ -1854,6 +1854,7 @@ function highlightSyntax(text) {
     formatted = lines.map(line => {
         const trimmed = line.trim();
 
+        // Rule: Table lines detection (Pipe and Comma tables)
         // Pipe Table Line
         if (trimmed.startsWith('|')) {
             return `<span class="syntax-table-line">${line}</span>`;
@@ -1876,6 +1877,16 @@ function highlightSyntax(text) {
             } else {
                 return `<span class="syntax-table-line">${line}</span>`;
             }
+        }
+
+        // Rule: List indentation (Hanging Indent)
+        // Check for list patterns (-, --, ---, ----, -----)
+        // We match against the escaped characters from highlightSyntax or raw input
+        const listMatch = trimmed.match(/^(\-{1,5})\s/);
+        if (listMatch) {
+            const markerLength = listMatch[1].length;
+            const indentLevel = markerLength; // 1 to 5 ems
+            return `<span style="display: inline-block; width: 100%; box-sizing: border-box; padding-left: ${indentLevel}em; text-indent: -1em; white-space: pre-wrap;">${line}</span>`;
         }
 
         return line;
