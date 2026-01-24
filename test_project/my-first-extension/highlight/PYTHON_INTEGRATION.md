@@ -51,10 +51,38 @@ chrome.storage.local.onChanged.addListener((changes, areaName) => {
   }
 });
 
-// Handle manual save requests from popup
+// Load data from Python server
+async function loadDataFromPython() {
+  try {
+    const response = await fetch(`${PYTHON_SERVER}/load?extension_name=${EXTENSION_NAME}&file_name=${FILE_NAME}`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' }
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Server responded with ${response.status}`);
+    }
+    
+    const result = await response.json();
+    console.log('Data loaded from Python server:', result);
+    return result;
+  } catch (error) {
+    console.error('Failed to load data from Python server:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+// Handle manual save/load requests from popup
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === 'saveToPython') {
     sendDataToPython(message.data)
+      .then(result => sendResponse(result))
+      .catch(error => sendResponse({ success: false, error: error.message }));
+    return true; // Keep channel open for async response
+  }
+  
+  if (message.action === 'loadFromPython') {
+    loadDataFromPython()
       .then(result => sendResponse(result))
       .catch(error => sendResponse({ success: false, error: error.message }));
     return true; // Keep channel open for async response
@@ -102,13 +130,16 @@ Add these two sections to your `manifest.json`:
 
 If you already have `host_permissions`, just add `"http://localhost:8765/*"` to the array.
 
-### Step 3: Add Manual Save Button (Optional)
+### Step 3: Add Manual Save/Load Buttons (Optional)
 
-#### A. Add button to your popup HTML:
+#### A. Add buttons to your popup HTML:
 
 ```html
 <button id="saveToPython" style="background: #9C27B0; color: white; padding: 10px;">
-    💾 Save to Python Server
+    Save to Python Server
+</button>
+<button id="loadFromPython" style="background: #673AB7; color: white; padding: 10px;">
+    Load from Python Server
 </button>
 ```
 
@@ -117,6 +148,8 @@ If you already have `host_permissions`, just add `"http://localhost:8765/*"` to 
 ```javascript
 // Save to Python server button
 const saveToPythonBtn = document.getElementById('saveToPython');
+const loadFromPythonBtn = document.getElementById('loadFromPython');
+
 if (saveToPythonBtn) {
     saveToPythonBtn.addEventListener('click', function () {
         chrome.storage.local.get(null, function (items) {
@@ -132,6 +165,29 @@ if (saveToPythonBtn) {
                     alert('Failed to save to Python server. Make sure the server is running.');
                 }
             });
+        });
+    });
+}
+
+// Load from Python server button
+if (loadFromPythonBtn) {
+    loadFromPythonBtn.addEventListener('click', function () {
+        chrome.runtime.sendMessage({
+            action: 'loadFromPython'
+        }, function (response) {
+            if (response && response.success && response.data) {
+                chrome.storage.local.set(response.data, () => {
+                    alert('Data loaded from Python server! Refresh pages to see changes.');
+                    // Notify all tabs to refresh
+                    chrome.tabs.query({}, (tabs) => {
+                        tabs.forEach(tab => {
+                            chrome.tabs.sendMessage(tab.id, { action: "refresh_highlights" }).catch(() => { });
+                        });
+                    });
+                });
+            } else {
+                alert('Failed to load from Python server. Make sure the server is running.');
+            }
         });
     });
 }
@@ -158,11 +214,13 @@ Server runs on `http://localhost:8765`
 - Make changes in your extension (add data, modify settings, etc.)
 - Data auto-saves to: `extension_data/[EXTENSION_NAME]/[FILE_NAME]`
 - Or click the manual save button
+- Click the load button to restore data from the server
 
 ## Features
 
 ✅ **Auto-save** - Data saves automatically on every storage change
 ✅ **Manual save** - Optional button for on-demand saves
+✅ **Manual load** - Optional button to restore data from Python server
 ✅ **Works offline** - Extension works even if server is down
 ✅ **Health checks** - Verifies server connection on startup
 ✅ **No data loss** - Extension continues working normally if server is unavailable
@@ -299,11 +357,13 @@ For each extension you want to integrate:
 - [ ] Add `host_permissions` to `manifest.json`
 - [ ] Add `background` service worker to `manifest.json`
 - [ ] (Optional) Add save button to popup HTML
-- [ ] (Optional) Add save button handler to popup JS with `success !== false` check
+- [ ] (Optional) Add load button to popup HTML
+- [ ] (Optional) Add save/load button handlers to popup JS with `success !== false` check
 - [ ] Start Python server
 - [ ] Reload extension
 - [ ] Test by making changes in extension
 - [ ] Verify file created in `extension_data/[EXTENSION_NAME]/`
+- [ ] Test load button to restore data from server
 
 ## Need Help?
 
