@@ -3571,7 +3571,11 @@ function oldParseMarkdownBody(lines, cellStyle = {}) {
         const isListItem = line.trim().startsWith('<span style="display: inline-flex');
 
         if (isSeparator || prevIsSeparator || isBgWrapper || prevIsBgWrapper || (isTimelineStart && isListItem) || isTimelineEnd) {
-            return acc + line;
+            // Only skip the newline if both lines have content (to rely on block margins)
+            // If either line is empty, we must add the newline to preserve the user's spacing
+            if (line.trim() !== '' && prev.trim() !== '') {
+                return acc + line;
+            }
         }
         return acc + '\n' + line;
     }, '');

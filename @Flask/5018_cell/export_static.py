@@ -2672,7 +2672,10 @@ def generate_static_html(data, custom_syntaxes):
                 var isListItem = line.trim().indexOf('<span style="display: inline-flex') === 0;
                 
                 if (isSeparator || prevIsSeparator || isBgWrapper || prevIsBgWrapper || (isTimelineStart && isListItem) || isTimelineEnd) {
-                    return acc + line;
+                    // Only skip the <br> if both lines have content
+                    if (line.trim() !== '' && prev.trim() !== '') {
+                        return acc + line;
+                    }
                 }
                 return acc + '<br>' + line;
             }, '');

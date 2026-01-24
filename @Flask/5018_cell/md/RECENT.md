@@ -6,6 +6,28 @@
 
 ---
 
+## [2026-01-23 13:45] - Fixed Empty Lines Above Separators
+
+**Session Duration:** 0.1 hours
+
+**What We Accomplished:**
+
+### ✅ Fixed Empty Line Consumption Above/Below Separators
+- **Problem**: Just like with tables, empty lines placed immediately above or below horizontal separators (`-----`) were being "swallowed," causing the separator to touch the text.
+- **Root Cause**: The line-joining logic in `oldParseMarkdownBody` was aggressively skipping newlines when a separator was detected to avoid double-spacing from block margins. However, it did this even when the user intended to have an explicit empty line.
+- **Solution**: Refined the joiner to only skip the newline if **both** the current line and the previous line have content. If either is empty, the newline/break is preserved to maintain the user's intended spacing.
+- **Consistency**: Applied the fix to both `static/script.js` and `export_static.py`.
+
+**Files Modified:**
+- `static/script.js` - Refined separator joiner.
+- `export_static.py` - Refined separator joiner in embedded JS.
+- `md/RECENT.md` - Logged session.
+
+**Current Status:**
+- ✅ Separators now respect empty lines above/below them.
+
+---
+
 ## [2026-01-23 13:30] - Refined Table Spacing & Joining
 
 **Session Duration:** 0.15 hours
@@ -108,23 +130,3 @@
 **Current Status:**
 - ✅ 3-state toggle functional (Raw/Standard/Clean).
 - ✅ Clean mode hiding syntax markers as requested.
-
----
-
-## [2026-01-23 12:25] - Fix Custom Color Syntax in Edit Mode
-
-**Session Duration:** 0.1 hours
-
-**What We Accomplished:**
-
-### ✅ Fixed Custom Color Syntax Rendering in Edit Mode
-- **Problem**: Custom color syntaxes (e.g., `++text++`) were not displaying their colors or styles when editing a cell (WYSIWYG mode).
-- **Root Cause**: The `highlightSyntax` function was using incorrect property names (`backgroundColor` instead of `bgColor`) and missing style logic.
-- **Solution**: Updated `highlightSyntax` to use correct properties and apply bold, italic, and underline styles defined in the custom syntax.
-
-**Files Modified:**
-- `static/script.js` - Corrected property mapping in `highlightSyntax`.
-- `md/RECENT.md` - Logged session.
-
-**Current Status:**
-- ✅ Custom syntaxes now render correctly in both Preview and Edit modes.
