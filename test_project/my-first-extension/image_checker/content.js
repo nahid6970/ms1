@@ -258,21 +258,29 @@ function renderCheckmark(element) {
     checkmark.dataset.forId = element.dataset.icContentId;
 
     const s = currentSettings;
+
+    // Calculate dynamic size based on container dimensions
+    const rect = container.getBoundingClientRect();
+    // Use the smaller dimension to ensure it fits well
+    const baseDimension = Math.min(rect.width, rect.height) || 100; // Fallback to 100 if rect is 0 (hidden)
+    const calculatedSize = Math.max(20, baseDimension * (s.checkmarkSize / 100)); // Min 20px size
+    
     // Checkmark base styles
     Object.assign(checkmark.style, {
         position: 'absolute',
-        top: '5px',
-        left: '5px',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
         zIndex: '2147483640', // Very high z-index to stay on top
-        width: `${s.checkmarkSize}px`,
-        height: `${s.checkmarkSize}px`,
+        width: `${calculatedSize}px`,
+        height: `${calculatedSize}px`,
         backgroundColor: s.checkmarkColor,
         color: s.textColor,
         borderRadius: '50%',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        fontSize: `${s.checkmarkSize * 0.6}px`,
+        fontSize: `${calculatedSize * 0.6}px`,
         fontWeight: 'bold',
         pointerEvents: 'none',
         boxShadow: '0 2px 4px rgba(0,0,0,0.5)',
@@ -280,7 +288,7 @@ function renderCheckmark(element) {
         margin: '0',
         padding: '0',
         lineHeight: '1',
-        boxSizing: 'content-box'
+        boxSizing: 'border-box' // Changed to border-box to include border in size
     });
 
     // --- Insertion Logic ---
@@ -304,8 +312,10 @@ function renderCheckmark(element) {
         // container.offsetLeft/Top gives position relative to offsetParent.
         // Since we force parent to be relative (or find offsetParent), we can use these directly.
 
-        checkmark.style.top = (container.offsetTop + 5) + 'px';
-        checkmark.style.left = (container.offsetLeft + 5) + 'px';
+        // For centering over a void element (sibling), we position at center of that element
+        checkmark.style.top = (container.offsetTop + (container.offsetHeight / 2)) + 'px';
+        checkmark.style.left = (container.offsetLeft + (container.offsetWidth / 2)) + 'px';
+        // transform is already set to -50%, -50%
 
         // Insert after container
         if (container.nextSibling) {
@@ -320,8 +330,7 @@ function renderCheckmark(element) {
         if (style.position === 'static') {
             container.style.position = 'relative';
         }
-        checkmark.style.top = '5px';
-        checkmark.style.left = '5px';
+        // top/left 50% is already set
         container.appendChild(checkmark);
     }
 

@@ -945,3 +945,6 @@ if (Get-Module -Name PSReadLine) {
 Invoke-Expression (& 'C:\Users\nahid\scoop\shims\starship.exe' init powershell --print-full-init | Out-String)
 # oh-my-posh init pwsh --config 'C:\Users\nahid\scoop\apps\oh-my-posh\current\themes\1_shell.omp.json' | Invoke-Expression
 Invoke-Expression (& { (zoxide init powershell | Out-String) })
+
+# Auto-load aliases from env manager
+. 'C:\Users\nahid\.aliases\aliases.ps1'
