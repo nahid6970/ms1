@@ -1674,6 +1674,7 @@ def generate_static_html(data, custom_syntaxes):
                         cellValue.match(/^-{5,}#[0-9a-fA-F]{6}/m) ||
                         cellValue.match(/^[A-Z]+-{5,}#[0-9a-fA-F]{6}/m) ||
                         cellValue.match(/^Timeline(?:C)?(?:-[A-Z]+)?\\*/m) ||
+                        cellValue.match(/:::(?:[A-Za-z0-9_#.-]+:::)?.*?:::/) ||
                         cellValue.match(/\\[\\d+(?:-[A-Z]+)?\\]\\S+/) ||
                         (cellValue.includes('|') && cellValue.split('|').length >= 2);
                     
