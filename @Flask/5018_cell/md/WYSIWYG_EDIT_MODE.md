@@ -12,10 +12,12 @@ The system uses a single `div` with `contenteditable="true"` (the `.markdown-pre
 *   **Visual:** Shows the final rendered HTML. Syntax markers (e.g., `**`, `@@`) are completely hidden.
 *   **Purpose:** Clean reading and presentation experience.
 
-### 2. Focus State (Syntax Highlighting)
+### 2. Focus State (Interactive Editor)
 *   **Trigger:** When the user clicks or focuses the cell.
 *   **Renderer:** `highlightSyntax(text)`
-*   **Visual:** Styled HTML remains visible, but markdown syntax markers are revealed using a subtle, secondary style.
+*   **Behavior:** Styled HTML remains visible. Syntax markers (`.syn-marker`) behavior depends on the active [Markdown View Mode](md/MARKDOWN_MODES.md):
+    *   **Standard Mode:** Markers are revealed with subtle, dimmed styling.
+    *   **Clean Mode:** Markers remain completely hidden (True WYSIWYG).
 *   **Purpose:** Intuitive editing while maintaining visual context.
 
 ## Syntax Markers (`.syn-marker`)

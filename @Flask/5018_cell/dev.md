@@ -257,6 +257,7 @@ The state is managed in a central object synced with persistence files:
 - **[Keyboard Shortcuts](md/KEYBOARD_SHORTCUTS.md):** Complete reference for all keyboard shortcuts.
 
 ### Edit Mode & Architecture
+- **[Markdown View Modes](md/MARKDOWN_MODES.md):** 3-state system (Raw, Standard, Clean).
 - **[WYSIWYG Edit Mode](md/WYSIWYG_EDIT_MODE.md):** ContentEditable interface with visible syntax markers.
 - **[Edit Mode Architecture](md/EDIT_MODE_ARCHITECTURE.md):** Technical deep-dive into contentEditable implementation.
     *   **[Click-to-Edit Cursor Positioning](md/CLICK_TO_EDIT_CURSOR_POSITIONING.md):** Cursor mapping between preview and edit mode (RESOLVED).

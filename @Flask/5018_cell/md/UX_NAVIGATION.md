@@ -37,14 +37,17 @@
 - **Cross-Mode:** Works perfectly in both Parsed and Raw viewing modes.
 - **Implementation:** `handleKeyboardShortcuts` (F8).
 
-## Markdown Preview Toggle (📝)
-**Purpose:** Switch between rendered HTML and raw editable text.
+## Markdown View Modes (📄)
+**Purpose:** Switch between different levels of markdown rendering and syntax visibility.
+**Modes:**
+1.  **Raw Mode:** Displays raw text including tags (e.g., `**text**`) in standard inputs.
+2.  **Standard Mode:** Renders HTML; Focus reveals dimmed syntax markers.
+3.  **Clean Mode:** Renders HTML; Focus hides all syntax markers (True WYSIWYG).
 **Behavior:**
-- **Parsed Mode:** Standard rendered markdown visuals.
-- **Raw Mode:** Displays raw text including tags (e.g., `**text**`).
-- **Syntax Highlighting:** Raw mode still shows **Custom Syntax colors** to aid readability.
-- **No Layout Collapse:** Cells maintain their full height and wrap settings in both modes.
-- **Refresh:** Toggling auto-refreshes the table to update all views.
+- **Toggle:** Click or Right-click the 📄 icon to cycle through modes.
+- **Indicators:** Standard mode uses default theme; Clean mode adds a magenta glow to the icon.
+- **Persistence:** Remembers selection via `localStorage.markdownPreviewMode`.
+- **See Also:** [Markdown View Modes](md/MARKDOWN_MODES.md) for technical details.
 
 ## Swap Position (F9)
 **Purpose:** Swap two words/phrases separated by a delimiter (space, tab, comma) while preserving alignment.
