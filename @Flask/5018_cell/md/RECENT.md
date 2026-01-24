@@ -6,6 +6,36 @@
 
 ---
 
+## [2026-01-23 14:30] - Customizable Title Text Feature
+
+**Session Duration:** 0.15 hours
+
+**What We Accomplished:**
+
+### 🎯 Enhanced "Title Text" Syntax (`:::Params:::Text:::`)
+- **Customization**: Users can now set the **color** and **thickness** of Title Text borders.
+- **New Syntax**: 
+  - `:::Title:::` (Default: Black, 1px)
+  - `:::R_3px:::Title:::` (Red, 3px borders)
+  - `:::#00ff00_2px:::Title:::` (Hex colors supported)
+- **Implementation**:
+  - Added parameter parsing logic to `highlightSyntax` and `oldParseMarkdownBody`.
+  - Updated `export_static.py` to support customized titles in standalone HTML.
+  - Updated `stripMarkdown` and `calculateVisibleToRawMap` to handle parameters.
+- **Documentation**: Updated the Markdown Formatting Guide and `md/MARKDOWN_SPECIAL.md`.
+
+**Files Modified:**
+- `static/script.js` - Updated all 6 core parsing locations.
+- `export_static.py` - Updated all 3 export parsing locations.
+- `templates/index.html` - Enhanced guide entry.
+- `md/MARKDOWN_SPECIAL.md` - Added customization details.
+- `md/RECENT.md` - Logged session.
+
+**Current Status:**
+- ✅ Title Text is fully customizable and documented.
+
+---
+
 ## [2026-01-23 14:15] - Resolved Title Text Syntax Conflict
 
 **Session Duration:** 0.1 hours
@@ -16,13 +46,6 @@
 - **Conflict Resolution**: Changed the marker from `===` to `:::` because `===` was partially matched by the existing `==` (black highlight) rule, causing rendering errors.
 - **New Syntax**: Users now use `:::Title:::`.
 - **Implementation**: Updated all parsing, stripping, and detection logic in `static/script.js`, `export_static.py`, and the documentation.
-
-**Files Modified:**
-- `static/script.js` - Updated core logic.
-- `export_static.py` - Updated export logic.
-- `templates/index.html` - Updated formatting guide.
-- `md/MARKDOWN_SPECIAL.md` - Updated documentation.
-- `md/RECENT.md` - Logged session.
 
 **Current Status:**
 - ✅ `:::Title Text:::` is now safe from syntax conflicts.
@@ -36,7 +59,7 @@
 **What We Accomplished:**
 
 ### 🎯 Added "Title Text" Syntax
-- **New Feature**: Users can now create prominent section titles using `===` delimiters.
+- **New Feature**: Users can now create prominent section titles.
 - **Visuals**: Renders text as a bold, centered block with solid 1px top and bottom borders.
 - **Implementation**:
   - Added to `highlightSyntax` for real-time edit mode (with hidden markers).
@@ -90,20 +113,3 @@
 **Current Status:**
 - ✅ Empty lines are preserved above/below tables when explicitly typed.
 - ✅ Normal spacing is maintained when text immediately follows a table.
-
----
-
-## [2026-01-23 13:15] - Fixed Empty Line Above Tables
-
-**Session Duration:** 0.1 hours
-
-**What We Accomplished:**
-
-### ✅ Fixed Empty Line Consumption Before Grid Tables
-- **Problem**: When a user added an empty line between text and a Pipe table (`|...|`), the empty line was ignored in the preview, causing the text to merge with the table.
-- **Root Cause**: The block-joining logic in `parseMarkdown` was using an over-aggressive strategy that skipped separators if one of the blocks was a table.
-- **Solution**: Simplified the block-joining logic to always use a newline (`\n`) as a separator between blocks. This preserves the natural document structure and ensures that explicit empty lines are rendered in the `pre-wrap` preview.
-- **Consistency**: Applied the fix to both the live application (`static/script.js`) and the standalone export logic (`export_static.py`).
-
-**Current Status:**
-- ✅ Empty lines above/below tables are now correctly preserved in all modes.

@@ -34,8 +34,13 @@
 **Output:** `<span style="font-size: {size}em; font-weight: 600;">`
 
 ## Title Text
-**Syntax:** `:::Title Text:::`
-**Output:** Text with top and bottom borders, bold, and centered. Useful for important section titles.
+**Syntax:** `:::Title Text:::` or `:::Params:::Title Text:::`
+**Output:** Text with top and bottom borders, bold, and centered.
+**Customization:**
+- **Params:** `COLOR_THICKNESS` (e.g., `R_3px`, `G_1px`, `#00f_2px`)
+- **Colors:** R, G, B, Y, O, P, C, W, K, GR or Hex codes (e.g., `#ff0000`).
+- **Thickness:** Any pixel value (e.g., `2px`, `5px`).
+**Example:** `:::R_3px:::Important Section:::` creates a red title with 3px borders.
 
 ## Border Box
 **Syntax:** `#R#text#/#` (color codes: R, G, B, Y, O, P, C, W, K, GR)

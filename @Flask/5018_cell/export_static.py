@@ -1768,8 +1768,8 @@ def generate_static_html(data, custom_syntaxes):
             // Remove word connector markers: [1]Word or [1-R]Word -> Word
             stripped = stripped.replace(/\\[(\\d+)(?:-[A-Z]+)?\\](\\S+)/g, '$2');
 
-            // Remove title text markers: :::Text::: -> Text
-            stripped = stripped.replace(/:::(.+?):::/g, '$1');
+            // Remove title text markers: :::Text::: or :::R_2px:::Text::: -> Text
+            stripped = stripped.replace(/:::(?:[A-Za-z0-9_]+:::)?(.+?):::/g, '$1');
 
             if (!preserveLinks) {
                 // Remove link markers: {link:url}text{/} -> text
@@ -2127,8 +2127,27 @@ def generate_static_html(data, custom_syntaxes):
             // Wavy underline: _.text._ -> wavy underline
             formatted = formatted.replace(/_\\.(.+?)\\._/g, '<span style="text-decoration: underline wavy;">$1</span>');
 
-            // Title text :::Text:::
-            formatted = formatted.replace(/:::(.+?):::/g, '<div style="border-top: 1px solid #000; border-bottom: 1px solid #000; padding: 10px 0; margin: 10px 0; text-align: center; font-weight: bold; width: 100%;">$1</div>');
+            // Title text :::Params:::Text::: or :::Text:::
+            formatted = formatted.replace(/:::(?:([A-Za-z0-9_]+):::)?(.*?):::/g, function(match, params, content) {
+                const colorMap = {
+                    'R': '#ff0000', 'G': '#00ff00', 'B': '#0000ff', 'Y': '#ffff00',
+                    'O': '#ff8800', 'P': '#ff00ff', 'C': '#00ffff', 'W': '#ffffff',
+                    'K': '#000000', 'GR': '#808080'
+                };
+                let borderColor = '#000';
+                let borderWidth = '1px';
+                
+                if (params) {
+                    const parts = params.split('_');
+                    parts.forEach(function(part) {
+                        if (/^\\d+px$/.test(part)) borderWidth = part;
+                        else if (colorMap[part.toUpperCase()]) borderColor = colorMap[part.toUpperCase()];
+                        else if (/^#[0-9a-fA-F]{3,6}$/.test(part)) borderColor = part;
+                    });
+                }
+                
+                return '<div style="border-top: ' + borderWidth + ' solid ' + borderColor + '; border-bottom: ' + borderWidth + ' solid ' + borderColor + '; padding: 10px 0; margin: 10px 0; text-align: center; font-weight: bold; width: 100%;">' + content + '</div>';
+            });
 
             // Colored horizontal separator with optional background/text color for content below
             // Pattern: [COLOR1]-----[COLOR2] or [COLOR1]-----[COLOR2-COLOR3] or -----#HEX-#HEX
@@ -2580,8 +2599,27 @@ def generate_static_html(data, custom_syntaxes):
                 // Apply custom color syntaxes
                 formatted = applyCustomColorSyntaxes(formatted);
 
-                // Title text :::Text:::
-                formatted = formatted.replace(/:::(.+?):::/g, '<div style="border-top: 1px solid #000; border-bottom: 1px solid #000; padding: 10px 0; margin: 10px 0; text-align: center; font-weight: bold; width: 100%;">$1</div>');
+                // Title text :::Params:::Text::: or :::Text:::
+                formatted = formatted.replace(/:::(?:([A-Za-z0-9_]+):::)?(.*?):::/g, function(match, params, content) {
+                    const colorMap = {
+                        'R': '#ff0000', 'G': '#00ff00', 'B': '#0000ff', 'Y': '#ffff00',
+                        'O': '#ff8800', 'P': '#ff00ff', 'C': '#00ffff', 'W': '#ffffff',
+                        'K': '#000000', 'GR': '#808080'
+                    };
+                    let borderColor = '#000';
+                    let borderWidth = '1px';
+                    
+                    if (params) {
+                        const parts = params.split('_');
+                        parts.forEach(function(part) {
+                            if (/^\\d+px$/.test(part)) borderWidth = part;
+                            else if (colorMap[part.toUpperCase()]) borderColor = colorMap[part.toUpperCase()];
+                            else if (/^#[0-9a-fA-F]{3,6}$/.test(part)) borderColor = part;
+                        });
+                    }
+                    
+                    return '<div style="border-top: ' + borderWidth + ' solid ' + borderColor + '; border-bottom: ' + borderWidth + ' solid ' + borderColor + '; padding: 10px 0; margin: 10px 0; text-align: center; font-weight: bold; width: 100%;">' + content + '</div>';
+                });
 
                 return formatted;
             });
