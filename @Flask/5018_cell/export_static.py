@@ -1768,6 +1768,9 @@ def generate_static_html(data, custom_syntaxes):
             // Remove word connector markers: [1]Word or [1-R]Word -> Word
             stripped = stripped.replace(/\\[(\\d+)(?:-[A-Z]+)?\\](\\S+)/g, '$2');
 
+            // Remove title text markers: :::Text::: -> Text
+            stripped = stripped.replace(/:::(.+?):::/g, '$1');
+
             if (!preserveLinks) {
                 // Remove link markers: {link:url}text{/} -> text
                 stripped = stripped.replace(/\\{link:[^\\}]*\\}(.+?)\\{\\/\\}/g, '$1');
@@ -2123,6 +2126,9 @@ def generate_static_html(data, custom_syntaxes):
 
             // Wavy underline: _.text._ -> wavy underline
             formatted = formatted.replace(/_\\.(.+?)\\._/g, '<span style="text-decoration: underline wavy;">$1</span>');
+
+            // Title text :::Text:::
+            formatted = formatted.replace(/:::(.+?):::/g, '<div style="border-top: 1px solid #000; border-bottom: 1px solid #000; padding: 10px 0; margin: 10px 0; text-align: center; font-weight: bold; width: 100%;">$1</div>');
 
             // Colored horizontal separator with optional background/text color for content below
             // Pattern: [COLOR1]-----[COLOR2] or [COLOR1]-----[COLOR2-COLOR3] or -----#HEX-#HEX
@@ -2573,6 +2579,9 @@ def generate_static_html(data, custom_syntaxes):
 
                 // Apply custom color syntaxes
                 formatted = applyCustomColorSyntaxes(formatted);
+
+                // Title text :::Text:::
+                formatted = formatted.replace(/:::(.+?):::/g, '<div style="border-top: 1px solid #000; border-bottom: 1px solid #000; padding: 10px 0; margin: 10px 0; text-align: center; font-weight: bold; width: 100%;">$1</div>');
 
                 return formatted;
             });

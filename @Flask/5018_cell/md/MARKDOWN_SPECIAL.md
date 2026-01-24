@@ -33,6 +33,10 @@
 **Syntax:** `#2#text#/#` (2x size), `#0.5#text#/#` (0.5x size)
 **Output:** `<span style="font-size: {size}em; font-weight: 600;">`
 
+## Title Text
+**Syntax:** `:::Title Text:::`
+**Output:** Text with top and bottom borders, bold, and centered. Useful for important section titles.
+
 ## Border Box
 **Syntax:** `#R#text#/#` (color codes: R, G, B, Y, O, P, C, W, K, GR)
 **Output:** Colored border around text.

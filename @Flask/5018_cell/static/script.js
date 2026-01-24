@@ -1561,6 +1561,7 @@ function checkHasMarkdown(value) {
         str.includes('\n') || // Treat multi-line text as markdown for proper height handling
         str.match(/#[\d.]+#.+?#\/#/) || // Variable font size heading
         str.match(/#[A-Z]+#.+?#\/#/) || // Border box syntax
+        str.match(/:::.+?:::/) || // Title text syntax
         str.includes('_.') || // Wavy underline
         str.match(/^Timeline(?:C)?(?:-[A-Z]+)?\*/m) || // Timeline syntax
         str.match(/\[\d+(?:-[A-Z]+)?\]\S+/) || // Word connector syntax
@@ -1589,6 +1590,7 @@ function calculateVisibleToRawMap(rawInput) {
         { regex: /##(.+?)##/g, keepGroup: 1 },
         { regex: /\.\.(.+?)\.\./g, keepGroup: 1 },
         { regex: /_\.(.+?)\._/g, keepGroup: 1 },
+        { regex: /:::(.+?):::/g, keepGroup: 1 },
         { regex: /^[A-Z]*-{5,}(?:[A-Z]+(?:-[A-Z]+)?|#[0-9a-fA-F]{3,6}(?:-#[0-9a-fA-F]{3,6})?)?$/gm, keepGroup: -1 },
         { regex: /```(.+?)```/gs, keepGroup: 1 },
         { regex: /`(.+?)`/g, keepGroup: 1 },
@@ -1827,6 +1829,9 @@ function highlightSyntax(text) {
 
     // Rule: Variable font size #2#text#/#
     formatted = formatted.replace(/#([\d.]+)#(.*?)(?:#\/#)/g, '<span style="font-size: $1em; font-weight: 600;"><span class="syn-marker">#$1#</span>$2<span class="syn-marker">#/#</span></span>');
+
+    // Rule: Title text :::Text:::
+    formatted = formatted.replace(/:::(.*?):::/g, '<div style="border-top: 1px solid #000; border-bottom: 1px solid #000; padding: 10px 0; margin: 10px 0; text-align: center; font-weight: bold; width: 100%;"><span class="syn-marker">:::</span>$1<span class="syn-marker">:::</span></div>');
 
     // Custom Color Syntax support
     if (typeof customColorSyntaxes !== 'undefined') {
@@ -3472,6 +3477,9 @@ function oldParseMarkdownBody(lines, cellStyle = {}) {
 
         // Apply custom color syntaxes
         formatted = applyCustomColorSyntaxes(formatted);
+
+        // Rule: Title text :::Text:::
+        formatted = formatted.replace(/:::(.+?):::/g, '<div style="border-top: 1px solid #000; border-bottom: 1px solid #000; padding: 10px 0; margin: 10px 0; text-align: center; font-weight: bold; width: 100%;">$1</div>');
 
         return formatted;
     });
@@ -7674,6 +7682,9 @@ function stripMarkdown(text, preserveLinks = false) {
 
     // Remove wavy underline markers: _.text._ -> text
     stripped = stripped.replace(/_\.(.+?)\._/g, '$1');
+
+    // Remove title text markers: :::Text::: -> Text
+    stripped = stripped.replace(/:::(.+?):::/g, '$1');
 
     // Remove colored horizontal separator: R-----, -----G, R-----G, R-----K, -----R-W, -----#ff0000, -----#f00, etc. -> (empty)
     stripped = stripped.replace(/^[A-Z]*-{5,}(?:[A-Z]+(?:-[A-Z]+)?|#[0-9a-fA-F]{3,6}(?:-#[0-9a-fA-F]{3,6})?)?$/gm, '');
