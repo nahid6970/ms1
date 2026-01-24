@@ -6975,13 +6975,18 @@ function setMode(mode) {
         if (visualToggle) {
             visualToggle.checked = true;
             const vLabel = visualToggle.closest('label');
+            const vIcon = vLabel.querySelector('span');
             
             if (mode === 1) {
                 // Standard
                 vLabel.classList.add('active');
+                if (vIcon) vIcon.textContent = '👁️';
+                vLabel.title = 'Visual Mode: Standard (Dimmed Syntax)';
             } else {
                 // Clean
                 vLabel.classList.add('active', 'clean-mode-active');
+                if (vIcon) vIcon.textContent = '✨';
+                vLabel.title = 'Visual Mode: Clean (Pure WYSIWYG)';
                 table.classList.add('clean-markdown-mode');
             }
         }

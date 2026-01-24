@@ -7,8 +7,8 @@ The application supports three distinct view modes for markdown-enabled cells, m
 | Button | Mode | ID | Behavior |
 | :--- | :--- | :--- | :--- |
 | **📝 (Raw)** | **Raw Mode** | 0 | Shows the raw markdown text inside a standard `<textarea>` or `<input>`. No formatting is applied. |
-| **👁️ (Visual)** | **Standard Mode** | 1 | **Blur:** Shows clean rendered HTML.<br>**Focus:** Shows rendered HTML with dimmed syntax markers (`.syn-marker`). |
-| **👁️ (Visual)** | **Clean Mode** | 2 | **Blur:** Shows clean rendered HTML.<br>**Focus:** Shows rendered HTML with **completely hidden** syntax markers. |
+| **👁️ (Standard)** | **Standard Mode** | 1 | **Blur:** Shows clean rendered HTML.<br>**Focus:** Shows rendered HTML with dimmed syntax markers (`.syn-marker`). |
+| **✨ (Clean)** | **Clean Mode** | 2 | **Blur:** Shows clean rendered HTML.<br>**Focus:** Shows rendered HTML with **completely hidden** syntax markers. |
 
 ## Controls
 
@@ -16,10 +16,11 @@ The application supports three distinct view modes for markdown-enabled cells, m
 - **Click:** Switches between **Raw Mode** and your last used **Visual Mode**.
 - **Visual:** Active when 📝 icon is fully opaque.
 
-### 2. Visual Mode Toggle (👁️)
+### 2. Visual Mode Toggle (👁️ / ✨)
 - **Click / Right-Click:** Cycles between **Standard Mode** and **Clean Mode**.
-- **Visual:** Active when 👁️ icon is fully opaque.
-- **Indicator:** In **Clean Mode**, the 👁️ icon has a **Magenta Glow**.
+- **Visual:** Active when icon is fully opaque.
+- **Icon Change:** Icon changes to **👁️** for Standard and **✨** for Clean mode.
+- **Indicator:** In **Clean Mode**, the ✨ icon also has a **Magenta Glow**.
 
 ## Mode Persistence
 
