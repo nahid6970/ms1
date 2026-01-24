@@ -39,7 +39,8 @@ Create or update `background.js`:
 
 ```javascript
 const PYTHON_SERVER = 'http://localhost:8765';
-const EXTENSION_NAME = 'your_extension_name'; // Unique name for each extension
+const EXTENSION_NAME = 'your_extension_name'; // Folder name
+const FILE_NAME = 'data.json'; // Your custom filename
 
 async function sendDataToPython(data) {
   const response = await fetch(PYTHON_SERVER, {
@@ -47,6 +48,7 @@ async function sendDataToPython(data) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       extension_name: EXTENSION_NAME,
+      file_name: FILE_NAME,
       data: data
     })
   });
@@ -81,14 +83,39 @@ document.getElementById('saveBtn').addEventListener('click', () => {
 ```
 extension_data/
 ├── extension1/
-│   ├── extension1_20260124_143022.json
-│   └── extension1_20260124_150315.json
-├── extension2/
-│   ├── extension2_20260124_143045.json
-│   └── extension2_20260124_151230.json
-└── extension3/
-    └── extension3_20260124_144512.json
+│   └── data_for_ext_1.json
+├── highlight_ext/
+│   └── highlight.json
+├── todo_extension/
+│   └── todos.json
+└── notes_ext/
+    └── my_notes.json
 ```
+
+Each extension saves to its own folder with your custom filename!
+
+## Configuration Examples
+
+### Extension 1 - Todo App
+```javascript
+const EXTENSION_NAME = 'extension1';
+const FILE_NAME = 'data_for_ext_1.json';
+```
+Saves to: `extension_data/extension1/data_for_ext_1.json`
+
+### Extension 2 - Highlighter
+```javascript
+const EXTENSION_NAME = 'highlight_ext';
+const FILE_NAME = 'highlight.json';
+```
+Saves to: `extension_data/highlight_ext/highlight.json`
+
+### Extension 3 - Notes
+```javascript
+const EXTENSION_NAME = 'notes_ext';
+const FILE_NAME = 'my_notes.json';
+```
+Saves to: `extension_data/notes_ext/my_notes.json`
 
 ## Features
 

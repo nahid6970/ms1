@@ -2,7 +2,8 @@
 // This communicates with the Python server
 
 const PYTHON_SERVER = 'http://localhost:8765';
-const EXTENSION_NAME = 'my_extension'; // Change this for each extension
+const EXTENSION_NAME = 'my_extension'; // Change this for each extension (folder name)
+const FILE_NAME = 'data.json'; // Change this to your preferred filename
 
 // Function to send data to Python server
 async function sendDataToPython(data) {
@@ -14,6 +15,7 @@ async function sendDataToPython(data) {
       },
       body: JSON.stringify({
         extension_name: EXTENSION_NAME,
+        file_name: FILE_NAME,
         data: data
       })
     });

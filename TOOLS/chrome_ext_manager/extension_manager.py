@@ -50,16 +50,19 @@ class ExtensionHandler(BaseHTTPRequestHandler):
             
             # Extract extension info
             extension_name = data.get('extension_name', 'unknown')
+            file_name = data.get('file_name', 'data.json')  # Custom filename
             save_data = data.get('data', {})
+            
+            # Ensure filename ends with .json
+            if not file_name.endswith('.json'):
+                file_name += '.json'
             
             # Create directory for this extension
             extension_dir = DATA_DIR / extension_name
             extension_dir.mkdir(parents=True, exist_ok=True)
             
-            # Generate filename with timestamp
-            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-            filename = f"{extension_name}_{timestamp}.json"
-            filepath = extension_dir / filename
+            # Use custom filename
+            filepath = extension_dir / file_name
             
             # Save the data
             with open(filepath, 'w', encoding='utf-8') as f:
