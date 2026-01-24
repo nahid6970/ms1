@@ -7,123 +7,112 @@ This document tracks historical bugs, issues, and their solutions. Use this to:
 
 ---
 
-## [2026-01-23] - Table Text Merging with Adjacent Lines in Export
+## [2026-01-23 13:30] - Excessive Spacing Below Tables (Smart Joiner)
 
-**Problem:** In the static export (`export_static.py`), text before and after pipe tables was appearing merged with the table content, instead of being on separate lines. For example, "Text before table| col1 | col2 |Text after table" would all appear on one line.
+**Problem:** 
+After fixing the "empty line above table" issue, text immediately following a table appeared with a large gap (double spacing), making the layout look disconnected.
 
 **Root Cause:** 
-When the `parseMarkdown` function detected pipe tables, it split the content into blocks (table blocks and non-table blocks), processed each block separately, but then joined them with `.join('')` - meaning no separator between blocks. This caused the text before/after tables to merge directly with the table HTML without any line breaks.
+Tables (`.md-grid`) have their own CSS margins (`margin: 4px 0`). The previous fix of joining all markdown blocks with a newline (`\n`) created a full line break in the `pre-wrap` container on top of the CSS margin, resulting in redundant vertical space.
 
-**Solution:**
-Modified the block joining logic to add `<br>` tags between blocks. The fix processes blocks into an array first, then uses `reduce()` to join them with `<br>` separators, while skipping empty blocks to avoid unnecessary line breaks.
-
-**Code Change:**
-```javascript
-// OLD:
-return blocks.map(b =>
-    b.grid ? parseGridTable(b.lines, cellStyle) : oldParseMarkdownBody(b.lines, cellStyle)
-).join('');
-
-// NEW:
-const processedBlocks = blocks.map(b =>
-    b.grid ? parseGridTable(b.lines, cellStyle) : oldParseMarkdownBody(b.lines, cellStyle)
-);
-
-return processedBlocks.reduce((acc, block, i) => {
-    if (i === 0) return block;
-    if (!acc.trim() || !block.trim()) return acc + block;
-    return acc + '<br>' + block;
-}, '');
-```
+**Solution:** 
+Implemented a "Smart Joiner" in the `parseMarkdown` function. It now only adds a newline separator if it's transitioning between two text blocks or if an explicit empty line exists. If a block is a table, it relies on the table's CSS margin for spacing when followed by text.
 
 **Files Modified:**
-- `export_static.py` - Updated block joining logic in `parseMarkdown` function (~line 2710)
+- `static/script.js` - Refined block joining logic.
+- `export_static.py` - Refined block joining logic in embedded JS.
 
-**Related Issues:** Table rendering, static export, line break handling
-
-**Result:** Text before and after pipe tables now appears on separate lines in static exports, properly separated from the table content.
+**Related Issues:** Empty Lines Before/After Tables Not Showing
 
 ---
 
-## [2026-01-23] - KaTeX Lines Merging with Adjacent Lines in Export
+## [2026-01-23 13:20] - Export Script Blank Page (JS Syntax Error)
 
-**Problem:** In the static export (`export_static.py`), KaTeX math expressions were appearing merged with the lines above and below them, instead of being on separate lines. This only affected the export - the main app displayed them correctly.
+**Problem:** 
+Running `export_static.py` generated an HTML file that displayed as a completely blank page in the browser.
 
 **Root Cause:** 
-The `export_static.py` file had an extra `isKatex` check in the line-joining logic that prevented `<br>` tag insertion when a line contained `class="katex"`. This check was too broad - it prevented line breaks even when KaTeX was inline with other text that should be on separate lines. The main app (`static/script.js`) did not have this check and worked correctly.
+A literal newline character (`\n`) was accidentally introduced into a JavaScript string within the Python script's multiline HTML template. This caused a "Unterminated string literal" syntax error in the generated HTML's `<script>` block, crashing the entire frontend initialization.
 
-**Solution:**
-Removed the `isKatex` check from the `processedLines.reduce()` function in `export_static.py` (around line 2670). The KaTeX newlines are already properly handled earlier in the process where `result.replace(/\\n/g, '')` removes newlines from within KaTeX output. The extra check was unnecessary and causing incorrect line merging.
-
-**Code Change:**
-```javascript
-// REMOVED these lines:
-// Check for KaTeX output (don't add br inside KaTeX spans)
-var isKatex = line.includes('class="katex"') || prev.includes('class="katex"');
-
-// And removed isKatex from the condition:
-if (isSeparator || prevIsSeparator || isBgWrapper || prevIsBgWrapper || (isTimelineStart && isListItem) || isTimelineEnd) {
-```
+**Solution:** 
+Escaped the newline character as `\\n` within the Python template. This ensures that the generated HTML contains the literal characters `\n` which JS correctly interprets as a newline within a string, rather than a physical line break that breaks the code structure.
 
 **Files Modified:**
-- `export_static.py` - Removed KaTeX detection from line-joining logic (~line 2670)
+- `export_static.py` - Fixed JS escaping in `parseMarkdown`.
 
-**Related Issues:** KaTeX rendering, static export, line break handling
-
-**Result:** KaTeX expressions now display on separate lines in static exports, matching the behavior of the main application.
+**Related Issues:** Excessive Spacing Below Tables
 
 ---
 
-## [2026-01-23] - Empty Lines Before/After Tables Not Showing
+## [2026-01-23 13:15] - Empty Lines Before/After Tables Not Showing
 
 **Problem:** When there was an empty line before or after a pipe table, the empty line would disappear in the rendered output. This affected both the main app and static export.
 
-**Example:**
-```
-Text line
-[empty line]
-| Table | Header |
-| ----- | ------ |
-[empty line]
-Text after
-```
-
-The empty lines would not be displayed, causing the table to appear directly adjacent to the surrounding text.
-
 **Root Cause:** 
-The table parsing logic splits content into blocks (table blocks and non-table blocks). When an empty line appeared between text and a table, it created a separate block containing just the empty line. The block-joining logic had a condition that skipped adding `<br>` tags for empty blocks (`if (!block.trim())`), which caused empty lines to disappear completely.
+The table parsing logic splits content into blocks (table blocks and non-table blocks). The block-joining logic was using an over-aggressive strategy that skipped separators if one of the blocks was a table.
 
 **Solution:**
-Updated the block-joining logic in both `static/script.js` and `export_static.py` to explicitly handle empty blocks:
-1. When a block is empty (just whitespace), convert it to a `<br>` tag to preserve the visual spacing
-2. **Exception:** Skip empty lines that come immediately after a table, since tables have their own spacing (prevents huge gaps)
-3. Add `<br>` between non-empty blocks to maintain proper separation
-4. This ensures empty lines are preserved as visual spacing where needed
-
-**Code Change:**
-```javascript
-// Track which blocks are tables
-const processedBlocks = blocks.map(b => ({
-    content: b.grid ? parseGridTable(b.lines) : oldParseMarkdownBody(b.lines),
-    isGrid: b.grid
-}));
-
-// Convert empty blocks to <br>, but skip if after a table
-if (!block.trim()) {
-    if (prevItem.isGrid) {
-        return acc; // Skip empty line after table
-    }
-    return acc + '<br>'; // Preserve empty line in other cases
-}
-```
+Simplified the block-joining logic to always use a newline (`\n`) as a separator between blocks (later refined to the Smart Joiner).
 
 **Files Modified:**
-- `static/script.js` - Updated block-joining logic in `parseMarkdown()` (~line 3119)
-- `export_static.py` - Updated block-joining logic in `parseMarkdown()` (~line 2716)
+- `static/script.js` - Updated block-joining logic in `parseMarkdown()`.
+- `export_static.py` - Updated block-joining logic in `parseMarkdown()`.
 
-**Related Issues:** Table rendering, empty line preservation, block parsing
+**Related Issues:** Excessive Spacing Below Tables
 
-**Result:** Empty lines before and after tables are now properly displayed, maintaining the intended visual spacing in both the main app and static exports.
+---
+
+## [2026-01-23 12:25] - Custom Color Syntax Not Showing in Edit Mode
+
+**Problem:** 
+Custom color syntaxes (e.g., `++text++`) would show correctly in preview but lost all coloring and styles (bold/italic) when the cell was clicked for editing (WYSIWYG mode).
+
+**Root Cause:** 
+The `highlightSyntax` function (used for edit mode) was using incorrect property names (`backgroundColor` instead of `bgColor`, `color` instead of `fgColor`) and completely lacked logic to apply the `isBold`, `isItalic`, and `isUnderline` properties from the custom syntax definition.
+
+**Solution:** 
+Updated `highlightSyntax` in `static/script.js` to map to the correct property names and build a style string that includes font weight, style, and text decoration based on the syntax settings.
+
+**Files Modified:**
+- `static/script.js` - Corrected property mapping in `highlightSyntax`.
+
+**Related Issues:** WYSIWYG Markdown Edit Mode
+
+---
+
+## [2026-01-23 12:10] - Markdown Preview Line Height Ignoring Tables
+
+**Problem:** 
+Adjusting the "Markdown Preview" line height in Settings updated normal text but had no effect on the spacing within markdown tables (Pipe or Comma syntax).
+
+**Root Cause:** 
+The `.markdown-preview` CSS class had a hardcoded `line-height: 1.4` that overrode the `:root` variable. Additionally, `.markdown-table` cells did not have the variable applied to them.
+
+**Solution:** 
+Changed the hardcoded value in `static/style.css` to `var(--markdown-preview-line-height)` and explicitly added the same property to `.markdown-table td` and `.markdown-table th` to ensure inheritance.
+
+**Files Modified:**
+- `static/style.css` - Updated line-height rules for markdown elements.
+
+**Related Issues:** Server-Side Settings Persistence
+
+---
+
+## [2026-01-23 11:45] - F2 Popup Nickname Search Missing
+
+**Problem:** 
+Users could not search for sheets using their assigned nicknames in the F2 Recent Sheets popup, only by their primary names.
+
+**Root Cause:** 
+The `filterF2Sheets` function only extracted and checked the text content of the `.f2-sheet-name` element.
+
+**Solution:** 
+Updated `populateF2RecentSheets` to store the nickname in a `data-nickname` attribute on each item, and updated `filterF2Sheets` to include this attribute in its search comparison.
+
+**Files Modified:**
+- `static/script.js` - Updated F2 popup population and filtering.
+
+**Related Issues:** None
 
 ---
 
@@ -141,14 +130,13 @@ Replaced large `line-height` (2.5) with a combination of `line-height: 1.6` and 
 
 ---
 
-## [2026-01-23 11:27] - Table Shrinkage in Edit Mode
+## [2026-01-23 11:27] - Table Shrinkage in Edit Mode (Layout Shift)
 
 **Root Cause:**
 1. Rendered tables (`tr`) have a fixed/min-height of 40px.
 2. Raw text in the editor (`.markdown-preview` in contentEditable mode) has standard text line-height (~20px).
 3. `adjustCellHeightForMarkdown` resizes the cell based on the *current* content height. When switching to edit mode, the content became shorter, causing the shift.
 
-**Solution:**
 **Solution:**
 1. Updated `highlightSyntax` in `static/script.js` to iterate through lines and detect *both* Pipe tables (`|...`) and Comma tables (`Table*N` blocks).
 2. Wrapped these lines in a span with class `.syntax-table-line`.
@@ -163,7 +151,6 @@ Replaced large `line-height` (2.5) with a combination of `line-height: 1.6` and 
 **Result:** Cells containing tables now maintain a similar height when switching between preview and edit modes, preventing jarring layout shifts.
 
 ---
-
 
 ## [2026-01-18 01:25] - Table Border Color Defaulting to Faint Grey
 
@@ -187,7 +174,7 @@ Replaced large `line-height` (2.5) with a combination of `line-height: 1.6` and 
 
 ## [2026-01-18 01:07] - Bold/Italic Not Rendering When KaTeX Present
 
-**Problem:** When text contained both bold markers (`**text**`) and KaTeX math (like `\(\sqrt{}\)`), the bold formatting failed to render. The `**` syntax remained visible as raw text.
+**Problem:** When text contained both bold markers (`**text**`) and KaTeX math (like `\(\sqrt{\}\)`), the bold formatting failed to render. The `**` syntax remained visible as raw text.
 
 **Root Cause:** KaTeX was processed **before** bold/italic parsing. KaTeX HTML output contains `*` characters (in CSS, attributes, etc.), which broke the `\*\*(.+?)\*\*` regex matching for bold.
 
@@ -204,7 +191,7 @@ Replaced large `line-height` (2.5) with a combination of `line-height: 1.6` and 
 
 ## [2026-01-18 01:00] - List Detection Failed with KaTeX Math
 
-**Problem:** When a list item (e.g., `-- item`) contained KaTeX math syntax like `\(\sqrt{}\)`, the list marker was not detected. The line would display as plain text with raw `-- ` prefix and other markdown (like `**bold**`) also failed to render.
+**Problem:** When a list item (e.g., `-- item`) contained KaTeX math syntax like `\(\sqrt{\}\)`, the list marker was not detected. The line would display as plain text with raw `-- ` prefix and other markdown (like `**bold**`) also failed to render.
 
 **Root Cause:** The list detection logic checked `formatted.trim().startsWith('-- ')`. However, KaTeX rendering happened *before* this check, transforming the line into complex HTML. The resulting string no longer started with `-- `, causing the list check to fail.
 
@@ -590,7 +577,7 @@ Browser default double-click behavior includes trailing whitespace in word selec
 **Solution:**
 Added custom double-click handler for contentEditable preview elements:
 1. Intercept the double-click event
-2. Check if selection ends with whitespace using regex `/\s$/`
+2. Check if selection ends with whitespace using regex `/s$/`
 3. Count trailing whitespace characters
 4. Adjust the range's end position backward to exclude trailing spaces
 5. Update the selection with the trimmed range
@@ -1413,4 +1400,6 @@ How it was fixed (include key code changes)
 - `file2.css` - Brief description of change
 
 **Related Issues:** Links to related problems or "None"
+```
+
 ```
