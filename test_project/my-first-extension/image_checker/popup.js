@@ -84,6 +84,26 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
+    // Save to Python server button
+    const saveToPythonBtn = document.getElementById('saveToPython');
+    if (saveToPythonBtn) {
+        saveToPythonBtn.addEventListener('click', function () {
+            chrome.storage.local.get(null, function (items) {
+                // Send message to background script to save
+                chrome.runtime.sendMessage({
+                    action: 'saveToPython',
+                    data: items
+                }, function (response) {
+                    if (response && response.success) {
+                        alert('Data saved to Python server!');
+                    } else {
+                        alert('Failed to save to Python server. Make sure the server is running.');
+                    }
+                });
+            });
+        });
+    }
+
     // Import functionality
     const importBtn = document.getElementById('importData');
     const fileInput = document.getElementById('fileInput');
