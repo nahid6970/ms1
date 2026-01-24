@@ -22,11 +22,11 @@
 ## Quick Formatter (F3)
 **Purpose:** Instant text formatting for selected text in cells.
 **Layout Groups:**
-1. Text Formatting (Bold, Italic, etc.)
-2. Special Formatting (Super/Subscript)
-3. Utilities (Link, Search, Sort Lines, Conversion)
-4. Advanced (Select All Matching, Hidden Content)
-5. Text Case
+1. Text Formatting (Bold, Italic, H, H+, S, W, □, T, Code)
+2. Utilities (Link, Search, Search+, Sort Lines, 📊, ➡️, ⬇️, 🎯, 🧹)
+3. Advanced (Hide Text 👁️, Correct Answer ✓)
+4. Math (Superscript, Subscript, Square Root, Fraction)
+5. Text Case (abc, ABC, Abc)
 6. Quick Highlights (Custom Syntaxes automatically added here)
 
 ## Search Word Under Cursor (F8)

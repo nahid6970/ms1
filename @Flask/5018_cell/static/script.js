@@ -13154,6 +13154,95 @@ function applyBorderBox(event) {
     showToast(`${colorUpper} border applied`, 'success');
 }
 
+// Title Text Quick Format Function
+function applyTitleTextFormat(event) {
+    if (!quickFormatterTarget) return;
+
+    const input = quickFormatterTarget;
+
+    // Handle contenteditable (WYSIWYG mode)
+    if (quickFormatterSelection.isContentEditable) {
+        const selectedText = quickFormatterSelection.text || '';
+
+        if (!selectedText) {
+            showToast('Please select text first', 'error');
+            return;
+        }
+
+        // Prompt for params
+        const helpText = 'Optional: Color (R, G, #f00), Thickness (2px), Font Size (1.5em), Font Color (f-R, f-#fff).\nSeparate by _ (e.g., R_3px_1.2em_f-K)';
+        const params = prompt(`Enter Title Parameters:\n${helpText}`, '');
+
+        if (params === null) return; // User cancelled
+
+        // Apply the title text syntax
+        const formattedText = params.trim() ? `:::${params.trim()}:::${selectedText}:::` : `:::${selectedText}:::`;
+
+        // Insert formatted text into contentEditable
+        const range = quickFormatterSelection.range;
+        range.deleteContents();
+        const textNode = document.createTextNode(formattedText);
+        range.insertNode(textNode);
+
+        // Update underlying input element
+        const cell = input.closest('td');
+        if (cell) {
+            const inputElement = cell.querySelector('input, textarea');
+            if (inputElement) {
+                inputElement.value = extractRawText(input);
+                const changeEvent = new Event('input', { bubbles: true });
+                inputElement.dispatchEvent(changeEvent);
+            }
+        }
+
+        // Set cursor after the formatted text
+        const newRange = document.createRange();
+        newRange.setStartAfter(textNode);
+        newRange.collapse(true);
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(newRange);
+
+        closeQuickFormatter();
+        showToast(`Title style applied`, 'success');
+        return;
+    }
+
+    // Handle input/textarea (legacy mode)
+    const start = quickFormatterSelection.start;
+    const end = quickFormatterSelection.end;
+    const selectedText = input.value.substring(start, end);
+
+    if (!selectedText) {
+        showToast('Please select text first', 'error');
+        return;
+    }
+
+    // Prompt for params
+    const helpText = 'Optional: Color (R, G, #f00), Thickness (2px), Font Size (1.5em), Font Color (f-R, f-#fff).\nSeparate by _ (e.g., R_3px_1.2em_f-K)';
+    const params = prompt(`Enter Title Parameters:\n${helpText}`, '');
+
+    if (params === null) return; // User cancelled
+
+    // Apply the title text syntax
+    const syntax = params.trim() ? `:::${params.trim()}:::${selectedText}:::` : `:::${selectedText}:::`;
+    const newText = input.value.substring(0, start) + syntax + input.value.substring(end);
+
+    input.value = newText;
+
+    // Trigger change event
+    const changeEvent = new Event('input', { bubbles: true });
+    input.dispatchEvent(changeEvent);
+
+    // Set cursor after the formatted text
+    const newCursorPos = start + syntax.length;
+    input.setSelectionRange(newCursorPos, newCursorPos);
+    input.focus();
+
+    closeQuickFormatter();
+    showToast(`Title style applied`, 'success');
+}
+
 // Sort Lines Function
 function sortLines(event) {
     if (!quickFormatterTarget) return;

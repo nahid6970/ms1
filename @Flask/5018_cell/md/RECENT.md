@@ -6,6 +6,40 @@
 
 ---
 
+## [2026-01-23 15:30] - F3 Title Text Button & UX Polish
+
+**Session Duration:** 0.15 hours
+
+**What We Accomplished:**
+
+### 🎯 Added Title Text Button to F3 Formatter
+- **New Feature**: Added a **T** button to the Quick Formatter (F3) for the Title Text syntax.
+- **Workflow**:
+  - Select text and press **F3**.
+  - Click the **T** button (between Border Box and Code).
+  - A prompt allows entering optional parameters (e.g., `R_3px_1.5em_f-K`).
+  - Automatically wraps selection in `:::Params:::Text:::`.
+- **Implementation**:
+  - Added `applyTitleTextFormat(event)` to `static/script.js`.
+  - Added button UI to `templates/index.html`.
+  - Supports both WYSIWYG (contentEditable) and Raw (textarea) modes.
+
+### ✅ Refined Visual Mode Indication
+- **Dynamic Feedback**: Visual mode button icon now switches between **👁️** (Standard) and **✨** (Clean).
+- **Mode Tooltips**: Added explicit "Visual Mode: Standard" and "Visual Mode: Clean" titles to the button.
+
+**Files Modified:**
+- `templates/index.html` - Added F3 button.
+- `static/script.js` - Implemented `applyTitleTextFormat`.
+- `md/UX_NAVIGATION.md` - Updated F3 layout documentation.
+- `md/RECENT.md` - Logged session.
+
+**Current Status:**
+- ✅ Improved workflow for creating section titles.
+- ✅ Better visual feedback for view modes.
+
+---
+
 ## [2026-01-23 15:15] - Improved Visual Mode Indication
 
 **Session Duration:** 0.1 hours
@@ -15,17 +49,8 @@
 ### ✅ Enhanced Visual Mode UI Feedback
 - **Problem**: It was difficult to distinguish between "Standard" and "Clean" modes using only the 👁️ button's glow.
 - **Solution**: 
-  - **Dynamic Icons**: The Visual Mode button now changes its icon based on the active state:
-    - **👁️ (Eye)** for Standard Mode (dimmed syntax).
-    - **✨ (Sparkles)** for Clean Mode (pure WYSIWYG).
-  - **Dynamic Tooltips**: Updated the button's `title` attribute to explicitly show the mode name (e.g., "Visual Mode: Clean (Pure WYSIWYG)") on hover.
-- **Consistency**: Retained the magenta glow for Clean Mode as an additional high-contrast indicator.
-
-**Files Modified:**
-- `static/script.js` - Updated `setMode` logic for icons and tooltips.
-- `md/MARKDOWN_MODES.md` - Updated documentation with new icons.
-- `md/UX_NAVIGATION.md` - Updated UI documentation.
-- `md/RECENT.md` - Logged session.
+  - **Dynamic Icons**: Icon changes between **👁️** and **✨**.
+  - **Dynamic Tooltips**: Updated `title` attribute.
 
 **Current Status:**
 - ✅ Clear visual distinction between all 3 markdown modes.
@@ -39,10 +64,8 @@
 **What We Accomplished:**
 
 ### ✅ Split Markdown Toggle into 2 Buttons
-- **Feature**: Refactored the view mode controls. There are now two dedicated toggles:
-  1. **📝 (Raw Mode)**: Dedicated button to switch to source code view.
-  2. **👁️ (Visual Mode)**: Dedicated button to toggle between **Standard** and **Clean** modes.
-- **Implementation**: Refactored `static/script.js` to use a central `setMode(mode)` function.
+- Refactored controls into **📝 (Raw)** and **👁️ (Visual)** buttons.
+- Refactored `static/script.js` to use a central `setMode(mode)` function.
 
 **Current Status:**
 - ✅ Improved 2-button control system for markdown viewing.
@@ -56,8 +79,8 @@
 **What We Accomplished:**
 
 ### 🎯 Added Font Styling to "Title Text" (`:::Params:::Text:::`)
-- **Advanced Customization**: Users can now control the **font size** and **font color** inside Title Text bars.
-- **Enhanced Syntax**: Supports `em`, `rem`, and `f-` parameters.
+- Users can now control **font size** and **font color** inside Title Text bars.
+- Enhanced Syntax: Supports `em`, `rem`, and `f-` parameters.
 
 **Current Status:**
 - ✅ Title Text supports full border and font customization.
@@ -75,17 +98,3 @@
 
 **Current Status:**
 - ✅ Title Text is customizable.
-
----
-
-## [2026-01-23 14:15] - Resolved Title Text Syntax Conflict
-
-**Session Duration:** 0.1 hours
-
-**What We Accomplished:**
-
-### 🎯 Updated "Title Text" Syntax to `:::Text:::`
-- **Conflict Resolution**: Changed the marker from `===` to `:::` because `===` was partially matched by the existing `==` rule.
-
-**Current Status:**
-- ✅ `:::Title Text:::` is safe from syntax conflicts.
