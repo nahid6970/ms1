@@ -37,10 +37,12 @@
 **Syntax:** `:::Title Text:::` or `:::Params:::Title Text:::`
 **Output:** Text with top and bottom borders, bold, and centered.
 **Customization:**
-- **Params:** `COLOR_THICKNESS` (e.g., `R_3px`, `G_1px`, `#00f_2px`)
-- **Colors:** R, G, B, Y, O, P, C, W, K, GR or Hex codes (e.g., `#ff0000`).
+- **Params:** `BORDERC_THICK_FSIZE_FCOLOR` (e.g., `R_3px_1.5em_f-B`)
+- **Colors:** R, G, B, Y, O, P, C, W, K, GR or Hex codes.
 - **Thickness:** Any pixel value (e.g., `2px`, `5px`).
-**Example:** `:::R_3px:::Important Section:::` creates a red title with 3px borders.
+- **Font Size:** Values in `em`, `rem`, or `px` (e.g., `1.5em`, `20px`).
+- **Font Color:** Use `f-` prefix followed by color code or hex (e.g., `f-R`, `f-#000`).
+**Example:** `:::R_3px_1.2em_f-K:::Important Section:::` creates a red 3px bordered title with black 1.2em text.
 
 ## Border Box
 **Syntax:** `#R#text#/#` (color codes: R, G, B, Y, O, P, C, W, K, GR)

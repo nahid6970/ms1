@@ -1561,7 +1561,7 @@ function checkHasMarkdown(value) {
         str.includes('\n') || // Treat multi-line text as markdown for proper height handling
         str.match(/#[\d.]+#.+?#\/#/) || // Variable font size heading
         str.match(/#[A-Z]+#.+?#\/#/) || // Border box syntax
-        str.match(/:::(?:[A-Za-z0-9_]+:::)?.*?:::/) || // Title text syntax
+        str.match(/:::(?:[A-Za-z0-9_#.-]+:::)?.*?:::/) || // Title text syntax
         str.includes('_.') || // Wavy underline
         str.match(/^Timeline(?:C)?(?:-[A-Z]+)?\*/m) || // Timeline syntax
         str.match(/\[\d+(?:-[A-Z]+)?\]\S+/) || // Word connector syntax
@@ -1590,7 +1590,7 @@ function calculateVisibleToRawMap(rawInput) {
         { regex: /##(.+?)##/g, keepGroup: 1 },
         { regex: /\.\.(.+?)\.\./g, keepGroup: 1 },
         { regex: /_\.(.+?)\._/g, keepGroup: 1 },
-        { regex: /:::(?:[A-Za-z0-9_]+:::)?(.+?):::/g, keepGroup: 1 },
+        { regex: /:::(?:[A-Za-z0-9_#.-]+:::)?(.+?):::/g, keepGroup: 1 },
         { regex: /^[A-Z]*-{5,}(?:[A-Z]+(?:-[A-Z]+)?|#[0-9a-fA-F]{3,6}(?:-#[0-9a-fA-F]{3,6})?)?$/gm, keepGroup: -1 },
         { regex: /```(.+?)```/gs, keepGroup: 1 },
         { regex: /`(.+?)`/g, keepGroup: 1 },
@@ -1831,7 +1831,7 @@ function highlightSyntax(text) {
     formatted = formatted.replace(/#([\d.]+)#(.*?)(?:#\/#)/g, '<span style="font-size: $1em; font-weight: 600;"><span class="syn-marker">#$1#</span>$2<span class="syn-marker">#/#</span></span>');
 
     // Rule: Title text :::Params:::Text::: or :::Text:::
-    formatted = formatted.replace(/:::(?:([A-Za-z0-9_]+):::)?(.*?):::/g, (match, params, content) => {
+    formatted = formatted.replace(/:::(?:([A-Za-z0-9_#.-]+):::)?(.*?):::/g, (match, params, content) => {
         const colorMap = {
             'R': '#ff0000', 'G': '#00ff00', 'B': '#0000ff', 'Y': '#ffff00',
             'O': '#ff8800', 'P': '#ff00ff', 'C': '#00ffff', 'W': '#ffffff',
@@ -1839,17 +1839,30 @@ function highlightSyntax(text) {
         };
         let borderColor = '#000';
         let borderWidth = '1px';
+        let fontSize = 'inherit';
+        let textColor = 'inherit';
         
         if (params) {
             const parts = params.split('_');
             parts.forEach(part => {
-                if (/^\d+px$/.test(part)) borderWidth = part;
-                else if (colorMap[part.toUpperCase()]) borderColor = colorMap[part.toUpperCase()];
-                else if (/^#[0-9a-fA-F]{3,6}$/.test(part)) borderColor = part;
+                const upperPart = part.toUpperCase();
+                if (/^\d+px$/.test(part)) {
+                    borderWidth = part;
+                } else if (/^[\d.]+(em|rem|px)$/.test(part)) {
+                    fontSize = part;
+                } else if (part.startsWith('f-')) {
+                    const fColor = part.substring(2).toUpperCase();
+                    if (colorMap[fColor]) textColor = colorMap[fColor];
+                    else if (/^#[0-9a-fA-F]{3,6}$/.test(part.substring(2))) textColor = part.substring(2);
+                } else if (colorMap[upperPart]) {
+                    borderColor = colorMap[upperPart];
+                } else if (/^#[0-9a-fA-F]{3,6}$/.test(part)) {
+                    borderColor = part;
+                }
             });
         }
         
-        return `<div style="border-top: ${borderWidth} solid ${borderColor}; border-bottom: ${borderWidth} solid ${borderColor}; padding: 10px 0; margin: 10px 0; text-align: center; font-weight: bold; width: 100%;"><span class="syn-marker">:::${params ? params + ':::' : ''}</span>${content}<span class="syn-marker">:::</span></div>`;
+        return `<div style="border-top: ${borderWidth} solid ${borderColor}; border-bottom: ${borderWidth} solid ${borderColor}; padding: 10px 0; margin: 10px 0; text-align: center; font-weight: bold; width: 100%; font-size: ${fontSize}; color: ${textColor};"><span class="syn-marker">:::${params ? params + ':::' : ''}</span>${content}<span class="syn-marker">:::</span></div>`;
     });
 
     // Custom Color Syntax support
@@ -3498,7 +3511,7 @@ function oldParseMarkdownBody(lines, cellStyle = {}) {
         formatted = applyCustomColorSyntaxes(formatted);
 
         // Rule: Title text :::Params:::Text::: or :::Text:::
-        formatted = formatted.replace(/:::(?:([A-Za-z0-9_]+):::)?(.*?):::/g, (match, params, content) => {
+        formatted = formatted.replace(/:::(?:([A-Za-z0-9_#.-]+):::)?(.*?):::/g, (match, params, content) => {
             const colorMap = {
                 'R': '#ff0000', 'G': '#00ff00', 'B': '#0000ff', 'Y': '#ffff00',
                 'O': '#ff8800', 'P': '#ff00ff', 'C': '#00ffff', 'W': '#ffffff',
@@ -3506,17 +3519,30 @@ function oldParseMarkdownBody(lines, cellStyle = {}) {
             };
             let borderColor = '#000';
             let borderWidth = '1px';
+            let fontSize = 'inherit';
+            let textColor = 'inherit';
             
             if (params) {
                 const parts = params.split('_');
                 parts.forEach(part => {
-                    if (/^\d+px$/.test(part)) borderWidth = part;
-                    else if (colorMap[part.toUpperCase()]) borderColor = colorMap[part.toUpperCase()];
-                    else if (/^#[0-9a-fA-F]{3,6}$/.test(part)) borderColor = part;
+                    const upperPart = part.toUpperCase();
+                    if (/^\d+px$/.test(part)) {
+                        borderWidth = part;
+                    } else if (/^[\d.]+(em|rem|px)$/.test(part)) {
+                        fontSize = part;
+                    } else if (part.startsWith('f-')) {
+                        const fColor = part.substring(2).toUpperCase();
+                        if (colorMap[fColor]) textColor = colorMap[fColor];
+                        else if (/^#[0-9a-fA-F]{3,6}$/.test(part.substring(2))) textColor = part.substring(2);
+                    } else if (colorMap[upperPart]) {
+                        borderColor = colorMap[upperPart];
+                    } else if (/^#[0-9a-fA-F]{3,6}$/.test(part)) {
+                        borderColor = part;
+                    }
                 });
             }
             
-            return `<div style="border-top: ${borderWidth} solid ${borderColor}; border-bottom: ${borderWidth} solid ${borderColor}; padding: 10px 0; margin: 10px 0; text-align: center; font-weight: bold; width: 100%;">${content}</div>`;
+            return `<div style="border-top: ${borderWidth} solid ${borderColor}; border-bottom: ${borderWidth} solid ${borderColor}; padding: 10px 0; margin: 10px 0; text-align: center; font-weight: bold; width: 100%; font-size: ${fontSize}; color: ${textColor};">${content}</div>`;
         });
 
         return formatted;
@@ -7722,7 +7748,7 @@ function stripMarkdown(text, preserveLinks = false) {
     stripped = stripped.replace(/_\.(.+?)\._/g, '$1');
 
     // Remove title text markers: :::Text::: or :::R_2px:::Text::: -> Text
-    stripped = stripped.replace(/:::(?:[A-Za-z0-9_]+:::)?(.+?):::/g, '$1');
+    stripped = stripped.replace(/:::(?:[A-Za-z0-9_#.-]+:::)?(.+?):::/g, '$1');
 
     // Remove colored horizontal separator: R-----, -----G, R-----G, R-----K, -----R-W, -----#ff0000, -----#f00, etc. -> (empty)
     stripped = stripped.replace(/^[A-Z]*-{5,}(?:[A-Z]+(?:-[A-Z]+)?|#[0-9a-fA-F]{3,6}(?:-#[0-9a-fA-F]{3,6})?)?$/gm, '');

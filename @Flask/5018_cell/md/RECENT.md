@@ -6,6 +6,35 @@
 
 ---
 
+## [2026-01-23 14:45] - Title Text Font Styling
+
+**Session Duration:** 0.15 hours
+
+**What We Accomplished:**
+
+### 🎯 Added Font Styling to "Title Text" (`:::Params:::Text:::`)
+- **Advanced Customization**: Users can now control the **font size** and **font color** inside Title Text bars.
+- **Enhanced Syntax**: 
+  - `:::1.5em:::Title:::` (Change font size)
+  - `:::f-R:::Title:::` (Change font color to red - use `f-` prefix)
+  - `:::B_2px_1.2em_f-#fff:::Title:::` (Full styling: Blue 2px border, 1.2em white text)
+- **Implementation**:
+  - Updated parsing logic in `static/script.js` and `export_static.py` to handle `em`, `rem`, and `f-` parameters.
+  - Corrected detection and stripping regexes to allow `#`, `.`, and `-` in parameter blocks.
+- **Documentation**: Updated Formatting Guide and `md/MARKDOWN_SPECIAL.md` with new styling examples.
+
+**Files Modified:**
+- `static/script.js` - Updated core logic (6 locations).
+- `export_static.py` - Updated export logic (3 locations).
+- `templates/index.html` - Enhanced guide entry.
+- `md/MARKDOWN_SPECIAL.md` - Updated feature documentation.
+- `md/RECENT.md` - Logged session.
+
+**Current Status:**
+- ✅ Title Text supports full border and font customization.
+
+---
+
 ## [2026-01-23 14:30] - Customizable Title Text Feature
 
 **Session Duration:** 0.15 hours
@@ -17,22 +46,10 @@
 - **New Syntax**: 
   - `:::Title:::` (Default: Black, 1px)
   - `:::R_3px:::Title:::` (Red, 3px borders)
-  - `:::#00ff00_2px:::Title:::` (Hex colors supported)
-- **Implementation**:
-  - Added parameter parsing logic to `highlightSyntax` and `oldParseMarkdownBody`.
-  - Updated `export_static.py` to support customized titles in standalone HTML.
-  - Updated `stripMarkdown` and `calculateVisibleToRawMap` to handle parameters.
-- **Documentation**: Updated the Markdown Formatting Guide and `md/MARKDOWN_SPECIAL.md`.
-
-**Files Modified:**
-- `static/script.js` - Updated all 6 core parsing locations.
-- `export_static.py` - Updated all 3 export parsing locations.
-- `templates/index.html` - Enhanced guide entry.
-- `md/MARKDOWN_SPECIAL.md` - Added customization details.
-- `md/RECENT.md` - Logged session.
+- **Implementation**: Added parameter parsing logic to `highlightSyntax` and `oldParseMarkdownBody`.
 
 **Current Status:**
-- ✅ Title Text is fully customizable and documented.
+- ✅ Title Text is customizable.
 
 ---
 
@@ -43,12 +60,11 @@
 **What We Accomplished:**
 
 ### 🎯 Updated "Title Text" Syntax to `:::Text:::`
-- **Conflict Resolution**: Changed the marker from `===` to `:::` because `===` was partially matched by the existing `==` (black highlight) rule, causing rendering errors.
+- **Conflict Resolution**: Changed the marker from `===` to `:::` because `===` was partially matched by the existing `==` (black highlight) rule.
 - **New Syntax**: Users now use `:::Title:::`.
-- **Implementation**: Updated all parsing, stripping, and detection logic in `static/script.js`, `export_static.py`, and the documentation.
 
 **Current Status:**
-- ✅ `:::Title Text:::` is now safe from syntax conflicts.
+- ✅ `:::Title Text:::` is safe from syntax conflicts.
 
 ---
 
@@ -61,19 +77,12 @@
 ### 🎯 Added "Title Text" Syntax
 - **New Feature**: Users can now create prominent section titles.
 - **Visuals**: Renders text as a bold, centered block with solid 1px top and bottom borders.
-- **Implementation**:
-  - Added to `highlightSyntax` for real-time edit mode (with hidden markers).
-  - Added to `oldParseMarkdownBody` for standard preview mode.
-  - Implemented in `export_static.py` for standalone HTML consistency.
-  - Added to `checkHasMarkdown` and `stripMarkdown` for proper detection and searching.
-- **Documentation**: Updated "Markdown Formatting Guide" modal and `md/MARKDOWN_SPECIAL.md`.
 
 ### ✅ Refined Separator (`-----`) Line Joining
-- **Problem**: Explicit empty lines above/below horizontal separators were being removed.
-- **Fix**: Updated the line-joining logic to preserve newlines if either adjacent line is empty, matching the fix previously applied to tables.
+- **Fix**: Updated the line-joining logic to preserve newlines if either adjacent line is empty.
 
 **Current Status:**
-- ✅ Spacing issues for tables and separators are resolved.
+- ✅ Spacing issues resolved.
 
 ---
 
@@ -84,32 +93,8 @@
 **What We Accomplished:**
 
 ### ✅ Fixed Empty Line Consumption Above/Below Separators
-- **Problem**: Just like with tables, empty lines placed immediately above or below horizontal separators (`-----`) were being "swallowed," causing the separator to touch the text.
-- **Root Cause**: The line-joining logic in `oldParseMarkdownBody` was aggressively skipping newlines when a separator was detected to avoid double-spacing from block margins. However, it did this even when the user intended to have an explicit empty line.
-- **Solution**: Refined the joiner to only skip the newline if **both** the current line and the previous line have content. If either is empty, the newline/break is preserved to maintain the user's intended spacing.
-- **Consistency**: Applied the fix to both `static/script.js` and `export_static.py`.
+- **Problem**: Empty lines above/below horizontal separators were being "swallowed."
+- **Solution**: Refined the joiner to only skip the newline if **both** lines have content.
 
 **Current Status:**
-- ✅ Separators now respect empty lines above/below them.
-
----
-
-## [2026-01-23 13:30] - Refined Table Spacing & Joining
-
-**Session Duration:** 0.15 hours
-
-**What We Accomplished:**
-
-### ✅ Refined Spacing Strategy Around Tables
-- **Problem**: The previous fix for preserving empty lines introduced "double spacing" below tables, making subsequent text appear too far away.
-- **Root Cause**: Tables have their own CSS margins (`margin: 4px 0` for `.md-grid`). Adding a newline (`\n`) in a `pre-wrap` container creates a full line break on top of that margin.
-- **Solution**: 
-  - Updated `parseMarkdown` to use a "smart joiner". 
-  - It now only adds a newline if it's transitioning between text blocks or if there's an explicit empty line.
-  - If a block is a table and the next block is text, it skips the newline to rely on the table's built-in margin.
-- **Comma Tables**: Applied similar refined logic to `Table*N` syntax, adding a newline only if the remaining content doesn't already start with one.
-- **Consistency**: Synchronized the logic across `static/script.js` and `export_static.py`.
-
-**Current Status:**
-- ✅ Empty lines are preserved above/below tables when explicitly typed.
-- ✅ Normal spacing is maintained when text immediately follows a table.
+- ✅ Separators respect empty lines.

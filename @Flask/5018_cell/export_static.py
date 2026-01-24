@@ -1769,7 +1769,7 @@ def generate_static_html(data, custom_syntaxes):
             stripped = stripped.replace(/\\[(\\d+)(?:-[A-Z]+)?\\](\\S+)/g, '$2');
 
             // Remove title text markers: :::Text::: or :::R_2px:::Text::: -> Text
-            stripped = stripped.replace(/:::(?:[A-Za-z0-9_]+:::)?(.+?):::/g, '$1');
+            stripped = stripped.replace(/:::(?:[A-Za-z0-9_#.-]+:::)?(.+?):::/g, '$1');
 
             if (!preserveLinks) {
                 // Remove link markers: {link:url}text{/} -> text
@@ -2128,7 +2128,7 @@ def generate_static_html(data, custom_syntaxes):
             formatted = formatted.replace(/_\\.(.+?)\\._/g, '<span style="text-decoration: underline wavy;">$1</span>');
 
             // Title text :::Params:::Text::: or :::Text:::
-            formatted = formatted.replace(/:::(?:([A-Za-z0-9_]+):::)?(.*?):::/g, function(match, params, content) {
+            formatted = formatted.replace(/:::(?:([A-Za-z0-9_#.-]+):::)?(.*?):::/g, function(match, params, content) {
                 const colorMap = {
                     'R': '#ff0000', 'G': '#00ff00', 'B': '#0000ff', 'Y': '#ffff00',
                     'O': '#ff8800', 'P': '#ff00ff', 'C': '#00ffff', 'W': '#ffffff',
@@ -2136,17 +2136,30 @@ def generate_static_html(data, custom_syntaxes):
                 };
                 let borderColor = '#000';
                 let borderWidth = '1px';
+                let fontSize = 'inherit';
+                let textColor = 'inherit';
                 
                 if (params) {
                     const parts = params.split('_');
                     parts.forEach(function(part) {
-                        if (/^\\d+px$/.test(part)) borderWidth = part;
-                        else if (colorMap[part.toUpperCase()]) borderColor = colorMap[part.toUpperCase()];
-                        else if (/^#[0-9a-fA-F]{3,6}$/.test(part)) borderColor = part;
+                        const upperPart = part.toUpperCase();
+                        if (/^\\d+px$/.test(part)) {
+                            borderWidth = part;
+                        } else if (/^[\\d.]+(em|rem|px)$/.test(part)) {
+                            fontSize = part;
+                        } else if (part.indexOf('f-') === 0) {
+                            const fColor = part.substring(2).toUpperCase();
+                            if (colorMap[fColor]) textColor = colorMap[fColor];
+                            else if (/^#[0-9a-fA-F]{3,6}$/.test(part.substring(2))) textColor = part.substring(2);
+                        } else if (colorMap[upperPart]) {
+                            borderColor = colorMap[upperPart];
+                        } else if (/^#[0-9a-fA-F]{3,6}$/.test(part)) {
+                            borderColor = part;
+                        }
                     });
                 }
                 
-                return '<div style="border-top: ' + borderWidth + ' solid ' + borderColor + '; border-bottom: ' + borderWidth + ' solid ' + borderColor + '; padding: 10px 0; margin: 10px 0; text-align: center; font-weight: bold; width: 100%;">' + content + '</div>';
+                return '<div style="border-top: ' + borderWidth + ' solid ' + borderColor + '; border-bottom: ' + borderWidth + ' solid ' + borderColor + '; padding: 10px 0; margin: 10px 0; text-align: center; font-weight: bold; width: 100%; font-size: ' + fontSize + '; color: ' + textColor + ';">' + content + '</div>';
             });
 
             // Colored horizontal separator with optional background/text color for content below
@@ -2600,7 +2613,7 @@ def generate_static_html(data, custom_syntaxes):
                 formatted = applyCustomColorSyntaxes(formatted);
 
                 // Title text :::Params:::Text::: or :::Text:::
-                formatted = formatted.replace(/:::(?:([A-Za-z0-9_]+):::)?(.*?):::/g, function(match, params, content) {
+                formatted = formatted.replace(/:::(?:([A-Za-z0-9_#.-]+):::)?(.*?):::/g, function(match, params, content) {
                     const colorMap = {
                         'R': '#ff0000', 'G': '#00ff00', 'B': '#0000ff', 'Y': '#ffff00',
                         'O': '#ff8800', 'P': '#ff00ff', 'C': '#00ffff', 'W': '#ffffff',
@@ -2608,17 +2621,30 @@ def generate_static_html(data, custom_syntaxes):
                     };
                     let borderColor = '#000';
                     let borderWidth = '1px';
+                    let fontSize = 'inherit';
+                    let textColor = 'inherit';
                     
                     if (params) {
                         const parts = params.split('_');
                         parts.forEach(function(part) {
-                            if (/^\\d+px$/.test(part)) borderWidth = part;
-                            else if (colorMap[part.toUpperCase()]) borderColor = colorMap[part.toUpperCase()];
-                            else if (/^#[0-9a-fA-F]{3,6}$/.test(part)) borderColor = part;
+                            const upperPart = part.toUpperCase();
+                            if (/^\\d+px$/.test(part)) {
+                                borderWidth = part;
+                            } else if (/^[\\d.]+(em|rem|px)$/.test(part)) {
+                                fontSize = part;
+                            } else if (part.indexOf('f-') === 0) {
+                                const fColor = part.substring(2).toUpperCase();
+                                if (colorMap[fColor]) textColor = colorMap[fColor];
+                                else if (/^#[0-9a-fA-F]{3,6}$/.test(part.substring(2))) textColor = part.substring(2);
+                            } else if (colorMap[upperPart]) {
+                                borderColor = colorMap[upperPart];
+                            } else if (/^#[0-9a-fA-F]{3,6}$/.test(part)) {
+                                borderColor = part;
+                            }
                         });
                     }
                     
-                    return '<div style="border-top: ' + borderWidth + ' solid ' + borderColor + '; border-bottom: ' + borderWidth + ' solid ' + borderColor + '; padding: 10px 0; margin: 10px 0; text-align: center; font-weight: bold; width: 100%;">' + content + '</div>';
+                    return '<div style="border-top: ' + borderWidth + ' solid ' + borderColor + '; border-bottom: ' + borderWidth + ' solid ' + borderColor + '; padding: 10px 0; margin: 10px 0; text-align: center; font-weight: bold; width: 100%; font-size: ' + fontSize + '; color: ' + textColor + ';">' + content + '</div>';
                 });
 
                 return formatted;
