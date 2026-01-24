@@ -88,16 +88,36 @@ document.addEventListener('DOMContentLoaded', function () {
     const saveToPythonBtn = document.getElementById('saveToPython');
     if (saveToPythonBtn) {
         saveToPythonBtn.addEventListener('click', function () {
+            const originalText = saveToPythonBtn.textContent;
+            const originalBg = saveToPythonBtn.style.background;
+            
+            saveToPythonBtn.textContent = '⏳ Saving...';
+            saveToPythonBtn.disabled = true;
+            
             chrome.storage.local.get(null, function (items) {
                 // Send message to background script to save
                 chrome.runtime.sendMessage({
                     action: 'saveToPython',
                     data: items
                 }, function (response) {
-                    if (response && response.success) {
-                        alert('Data saved to Python server!');
+                    saveToPythonBtn.disabled = false;
+                    
+                    if (response && response.success !== false) {
+                        // Success
+                        saveToPythonBtn.textContent = '✅ Saved!';
+                        saveToPythonBtn.style.background = '#4CAF50';
+                        setTimeout(() => {
+                            saveToPythonBtn.textContent = originalText;
+                            saveToPythonBtn.style.background = originalBg;
+                        }, 2000);
                     } else {
-                        alert('Failed to save to Python server. Make sure the server is running.');
+                        // Failed
+                        saveToPythonBtn.textContent = '❌ Failed';
+                        saveToPythonBtn.style.background = '#f44336';
+                        setTimeout(() => {
+                            saveToPythonBtn.textContent = originalText;
+                            saveToPythonBtn.style.background = originalBg;
+                        }, 2000);
                     }
                 });
             });
