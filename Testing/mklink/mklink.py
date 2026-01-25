@@ -476,12 +476,30 @@ class SymlinkManager(QMainWindow):
 
     def open_both_folders(self, index):
         link_entry = self.get_filtered_links()[index]
+        items = link_entry.get("items", [])
+        
+        if not items:
+            return
+
+        if len(items) == 1:
+            self._open_item_paths(items[0]["target"], items[0]["fake"])
+        else:
+            menu = QMenu(self)
+            for item in items:
+                name = os.path.basename(item["target"]) or item["target"]
+                action = menu.addAction(f"[{item['type'][0].upper()}] {name}")
+                # Use default arguments in lambda to capture current values of item
+                action.triggered.connect(lambda checked, t=item["target"], f=item["fake"]: self._open_item_paths(t, f))
+            
+            menu.exec(QCursor.pos())
+
+    def _open_item_paths(self, target, fake):
+        target = os.path.normpath(target)
+        fake = os.path.normpath(fake)
         try:
-            for item in link_entry.get("items", []):
-                target = os.path.normpath(item["target"])
-                fake = os.path.normpath(item["fake"])
-                subprocess.Popen(f'explorer /select,"{target}"')
-                subprocess.Popen(f'explorer /select,"{fake}"')
+            # We use explorer /select to highlight the file/folder in its parent
+            subprocess.Popen(f'explorer /select,"{target}"')
+            subprocess.Popen(f'explorer /select,"{fake}"')
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Failed to open folders:\n{str(e)}")
 
@@ -612,8 +630,8 @@ class SymlinkManager(QMainWindow):
                 btn_layout.addWidget(fix_btn)
 
             # Open Both Button
-            open_btn = QPushButton("📂 Open All")
-            open_btn.setFixedSize(110, 30)
+            open_btn = QPushButton("📂 Open")
+            open_btn.setFixedSize(80, 30)
             open_btn.setStyleSheet(f"""
                 QPushButton {{ border-color: #9b59b6; color: #9b59b6; }}
                 QPushButton:hover {{ background-color: #9b59b6; color: black; }}
