@@ -6,9 +6,9 @@ import subprocess
 import shutil
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QLabel, QPushButton, QLineEdit, QGroupBox, QFormLayout, 
-                             QDialog, QMessageBox, QScrollArea, QFrame, QComboBox, QSizePolicy, QFileDialog)
+                             QDialog, QMessageBox, QScrollArea, QFrame, QComboBox, QSizePolicy, QFileDialog, QMenu)
 from PyQt6.QtCore import Qt, QSize
-from PyQt6.QtGui import QFont, QIcon, QColor
+from PyQt6.QtGui import QFont, QIcon, QColor, QCursor
 
 # ==========================================
 # CYBERPUNK THEME PALETTE & STYLESHEET
@@ -99,6 +99,20 @@ STYLESHEET = f"""
     }}
     QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{
         background: none;
+    }}
+    
+    /* MENU */
+    QMenu {{
+        background-color: {CP_PANEL};
+        border: 1px solid {CP_DIM};
+        color: {CP_TEXT};
+    }}
+    QMenu::item {{
+        padding: 8px 25px;
+    }}
+    QMenu::item:selected {{
+        background-color: {CP_DIM};
+        color: {CP_YELLOW};
     }}
 """
 
