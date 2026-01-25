@@ -77,14 +77,15 @@ if [ "$FULL_SETUP" = true ]; then
         tmux screen ncdu duf \
         jq yq
 
-    # Enable GUI apps (VcXsrv support)
-    echo "🖥️ Configuring GUI support (VcXsrv)..."
-    # Auto-set DISPLAY for VcXsrv on Windows
-    # Use ip route to find the host IP (more reliable than resolv.conf)
-    echo '# VcXsrv Display Configuration' >> ~/.bashrc
-    echo 'export DISPLAY=$(ip route list default | awk "{print \$3}"):0' >> ~/.bashrc
-    echo 'export LIBGL_ALWAYS_INDIRECT=1' >> ~/.bashrc
+    # Enable GUI apps (Native WSLg support)
+    echo "🖥️ Configuring GUI support (WSLg)..."
+    # WSLg provides DISPLAY and WAYLAND_DISPLAY automatically. 
+    # We only add optimizations to ~/.bashrc
+    echo '# WSLg Optimizations' >> ~/.bashrc
     echo 'export NO_AT_BRIDGE=1' >> ~/.bashrc
+    echo 'export MOZ_ENABLE_WAYLAND=1' >> ~/.bashrc
+    echo 'export GDK_BACKEND=wayland,x11' >> ~/.bashrc
+    echo 'export QT_QPA_PLATFORM="wayland;xcb"' >> ~/.bashrc
 
     # Install GUI apps for testing
     sudo apt install -y gedit mousepad
@@ -161,16 +162,24 @@ fi
 if [ "$FULL_SETUP" = false ]; then
      echo "🔧 Applying quick fixes..."
      
-     # Fix VcXsrv DISPLAY variable (remove old incorrect one first)
+     # Remove manual VcXsrv overrides to let WSLg take over
      sed -i '/VcXsrv Display Configuration/d' ~/.bashrc
      sed -i '/export DISPLAY=/d' ~/.bashrc
      sed -i '/export LIBGL_ALWAYS_INDIRECT=/d' ~/.bashrc
      sed -i '/export NO_AT_BRIDGE=/d' ~/.bashrc
+     sed -i '/export GDK_BACKEND=/d' ~/.bashrc
+     sed -i '/export QT_QPA_PLATFORM=/d' ~/.bashrc
+     sed -i '/export MOZ_ENABLE_WAYLAND=/d' ~/.bashrc
+     sed -i '/unset WAYLAND_DISPLAY/d' ~/.bashrc
+     sed -i '/export XDG_SESSION_TYPE=/d' ~/.bashrc
+     sed -i '/export XDG_RUNTIME_DIR=/d' ~/.bashrc
+     sed -i '/WSLg Optimizations/d' ~/.bashrc
      
-     echo '# VcXsrv Display Configuration' >> ~/.bashrc
-     echo 'export DISPLAY=$(ip route list default | awk "{print \$3}"):0' >> ~/.bashrc
-     echo 'export LIBGL_ALWAYS_INDIRECT=1' >> ~/.bashrc
+     echo '# WSLg Optimizations' >> ~/.bashrc
      echo 'export NO_AT_BRIDGE=1' >> ~/.bashrc
+     echo 'export MOZ_ENABLE_WAYLAND=1' >> ~/.bashrc
+     echo 'export GDK_BACKEND=wayland,x11' >> ~/.bashrc
+     echo 'export QT_QPA_PLATFORM="wayland;xcb"' >> ~/.bashrc
 fi
 
 # Create aliases for better commands (runs for both options)
@@ -246,6 +255,10 @@ cat > ~/sysinfo.sh << 'EOF'
 echo "=== System Information ==="
 neofetch --stdout
 echo ""
+echo "=== GUI Session Status ==="
+if [ -n "$WAYLAND_DISPLAY" ]; then echo "Wayland: Active ($WAYLAND_DISPLAY)"; else echo "Wayland: Inactive"; fi
+if [ -n "$DISPLAY" ]; then echo "X11: Active ($DISPLAY)"; else echo "X11: Inactive"; fi
+echo ""
 echo "=== Disk Usage ==="
 duf
 echo ""
@@ -267,7 +280,7 @@ if [ "$FULL_SETUP" = true ]; then
     echo "  • Homebrew package manager (if selected)"
     echo "  • Useful aliases and FZF shortcuts"
     echo "  • VS Code integration"
-    echo "  • GUI app support (VcXsrv configured)"
+    echo "  • GUI app support (WSLg optimized)"
     echo ""
     echo "🔄 Please restart your terminal or run: source ~/.bashrc"
 else
@@ -275,7 +288,7 @@ else
     echo ""
     echo "📋 What was updated:"
     echo "  • Aliases and FZF shortcuts"
-    echo "  • VcXsrv display config"
+    echo "  • WSLg optimizations"
     echo "  • VS Code extensions helper"
     echo "  • System info script"
     echo ""
@@ -287,13 +300,8 @@ echo "🏪 Install Snap apps: snap install <app-name>"
 echo "🍺 Install Homebrew packages: brew install <package-name>"
 echo ""
 echo "🖥️ For GUI apps:"
-echo "  1. Install VcXsrv on Windows (https://sourceforge.net/projects/vcxsrv/)"
-echo "  2. Launch 'XLaunch' on Windows with:"
-echo "     - Multiple windows"
-echo "     - Display number: 0"
-echo "     - Start no client"
-echo "     - ☑️ Disable access control"
-echo "  3. Run GUI apps (e.g., 'gedit' or 'mousepad')"
+echo "  - WSLg is active! You can run GUI apps directly."
+echo "  - Try: gedit, xclock, or firefox"
 echo ""
 echo "💡 Run ~/sysinfo.sh to see system information"
 echo "💡 Run ~/install-vscode-extensions.sh to install VS Code extensions"
