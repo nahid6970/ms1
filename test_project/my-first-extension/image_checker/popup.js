@@ -139,7 +139,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }, function (response) {
                 loadFromPythonBtn.disabled = false;
                 
-                if (response && response.success && response.data) {
+                if (response && response.success !== false && response.data) {
                     chrome.storage.local.set(response.data, () => {
                         loadFromPythonBtn.textContent = '✅ Loaded!';
                         loadFromPythonBtn.style.background = '#4CAF50';

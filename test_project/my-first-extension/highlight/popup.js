@@ -94,7 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
       chrome.runtime.sendMessage({
         action: 'loadFromPython'
       }, function (response) {
-        if (response && response.success && response.data) {
+        if (response && response.success !== false && response.data) {
           chrome.storage.local.set(response.data, () => {
             showStatus('Data loaded from Python server! Refresh pages to see changes.');
             // Notify all tabs to refresh
