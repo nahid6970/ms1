@@ -589,7 +589,7 @@ class SymlinkManager(QMainWindow):
             
             if status_text != "Working":
                 fix_btn = QPushButton("🔗 Fix All")
-                fix_btn.setFixedSize(90, 30)
+                fix_btn.setFixedSize(110, 30)
                 fix_btn.setStyleSheet(f"""
                     QPushButton {{ border-color: {CP_CYAN}; color: {CP_CYAN}; }}
                     QPushButton:hover {{ background-color: {CP_CYAN}; color: black; }}
@@ -599,7 +599,7 @@ class SymlinkManager(QMainWindow):
 
             # Open Both Button
             open_btn = QPushButton("📂 Open All")
-            open_btn.setFixedSize(90, 30)
+            open_btn.setFixedSize(110, 30)
             open_btn.setStyleSheet(f"""
                 QPushButton {{ border-color: #9b59b6; color: #9b59b6; }}
                 QPushButton:hover {{ background-color: #9b59b6; color: black; }}
@@ -627,8 +627,6 @@ class SymlinkManager(QMainWindow):
 
             item_layout.addLayout(btn_layout)
             self.scroll_layout.addWidget(item_frame)
-
-        self.scroll_layout.addStretch()
 
         self.scroll_layout.addStretch()
 
