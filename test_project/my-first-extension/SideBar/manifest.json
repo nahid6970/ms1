@@ -6,6 +6,12 @@
     "permissions": [
         "storage"
     ],
+    "host_permissions": [
+        "http://localhost:8765/*"
+    ],
+    "background": {
+        "service_worker": "background.js"
+    },
     "action": {
         "default_title": "Quick Sidebar Pro",
         "default_popup": "popup.html"

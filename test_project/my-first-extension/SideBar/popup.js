@@ -6,6 +6,8 @@ const linksContainer = document.getElementById('links-container');
 const addBtn = document.getElementById('add-btn');
 const settingsBtn = document.getElementById('settings-btn');
 const addFirstBtn = document.getElementById('add-first-btn');
+const saveToPythonBtn = document.getElementById('saveToPython');
+const loadFromPythonBtn = document.getElementById('loadFromPython');
 
 // Context Menu Elements
 const contextMenu = document.getElementById('context-menu');
@@ -166,5 +168,45 @@ function saveLinks() {
 addBtn.addEventListener('click', () => triggerBrowserModal());
 settingsBtn.addEventListener('click', () => triggerSettingsModal());
 addFirstBtn.addEventListener('click', () => triggerBrowserModal());
+
+// Save to Python server button handler
+if (saveToPythonBtn) {
+    saveToPythonBtn.addEventListener('click', function () {
+        chrome.storage.sync.get(null, function (items) {
+            chrome.runtime.sendMessage({
+                action: 'saveToPython',
+                data: items
+            }, function (response) {
+                if (response && response.success !== false) {
+                    alert('Data backed up to Python server!');
+                } else {
+                    alert('Failed to save to Python server. Make sure the server is running.');
+                }
+            });
+        });
+    });
+}
+
+// Load from Python server button handler
+if (loadFromPythonBtn) {
+    loadFromPythonBtn.addEventListener('click', function () {
+        chrome.runtime.sendMessage({
+            action: 'loadFromPython'
+        }, function (response) {
+            if (response && response.success !== false && response.data) {
+                chrome.storage.sync.set(response.data, () => {
+                    alert('Data restored from Python server!');
+                    // Update local links and re-render
+                    if (response.data.sidebar_links) {
+                        links = response.data.sidebar_links;
+                        renderLinks();
+                    }
+                });
+            } else {
+                alert('Failed to load from Python server. Make sure the server is running.');
+            }
+        });
+    });
+}
 
 init();
