@@ -129,7 +129,8 @@ class ItemRow(QWidget):
         self.type_combo = QComboBox()
         self.type_combo.addItems(["folder", "file"])
         self.type_combo.setCurrentText(link_type)
-        self.type_combo.setFixedWidth(80)
+        self.type_combo.setFixedWidth(100)
+        self.type_combo.currentTextChanged.connect(self.update_combo_style)
         
         self.target_entry = QLineEdit(target)
         self.target_entry.setPlaceholderText("Target Path")
@@ -155,6 +156,17 @@ class ItemRow(QWidget):
         self.layout.addWidget(self.fake_entry)
         self.layout.addWidget(fake_btn)
         self.layout.addWidget(self.remove_btn)
+        
+        # Set initial style
+        self.update_combo_style(self.type_combo.currentText())
+
+    def update_combo_style(self, text):
+        if text == "folder":
+            # Yellow folder color
+            self.type_combo.setStyleSheet("background-color: #FCEE0A; color: black; font-weight: bold; border: 1px solid #3a3a3a;")
+        else:
+            # White file color
+            self.type_combo.setStyleSheet("background-color: #FFFFFF; color: black; font-weight: bold; border: 1px solid #3a3a3a;")
 
     def browse_target(self):
         if self.type_combo.currentText() == "folder":
@@ -186,7 +198,7 @@ class AddLinkDialog(QDialog):
         self.edit_data = edit_data
         
         self.setWindowTitle("Edit Entry" if edit_data else "Add New Entry")
-        self.resize(850, 500)
+        self.resize(1200, 500)
         self.setModal(True)
 
         layout = QVBoxLayout(self)
