@@ -438,22 +438,26 @@ class AddProjectDialog(QDialog):
         super().__init__(parent)
         self.mode = mode
         self.theme = theme
-        self.setWindowTitle(f"ADD {mode.upper()}")
+        self.setWindowTitle(f"ADD {mode.upper()} TASK")
         self.setFixedWidth(500)
         self.setStyleSheet(f"""
             QDialog {{ background-color: {theme['bg']}; color: {theme['text']}; font-family: '{theme['font_family']}'; }}
-            QLineEdit {{ background-color: {theme['panel']}; color: {theme['accent']}; border: 1px solid {theme['dim']}; padding: 5px; }}
-            QPushButton {{ background-color: {theme['dim']}; border: 1px solid {theme['dim']}; color: white; padding: 6px; }}
+            QLabel {{ color: {theme['subtext']}; font-weight: bold; font-size: 9pt; }}
+            QLineEdit {{ background-color: {theme['panel']}; color: {theme['accent']}; border: 1px solid {theme['dim']}; padding: 6px; selection-background-color: {theme['accent']}; selection-color: black; }}
+            QPushButton {{ background-color: {theme['dim']}; border: 1px solid {theme['dim']}; color: white; padding: 6px; font-weight: bold; }}
+            QPushButton:hover {{ border: 1px solid {theme['accent']}; color: {theme['accent']}; }}
         """)
         
         layout = QVBoxLayout(self)
+        layout.setSpacing(15)
         form = QFormLayout()
+        form.setSpacing(10)
         
         self.name_input = QLineEdit()
         self.label_input = QLineEdit()
         self.path_input = QLineEdit()
-        browse_btn = QPushButton("...")
-        browse_btn.setFixedWidth(30)
+        browse_btn = QPushButton("\udb80\udc2a") # Folder icon
+        browse_btn.setFixedWidth(40)
         browse_btn.clicked.connect(self.browse_path)
         
         path_box = QHBoxLayout()
@@ -461,21 +465,35 @@ class AddProjectDialog(QDialog):
         path_box.addWidget(browse_btn)
         
         form.addRow("NAME:", self.name_input)
-        form.addRow("LABEL:", self.label_input)
-        form.addRow("PATH:", path_box)
+        form.addRow("UI LABEL:", self.label_input)
+        form.addRow("LOCAL PATH:", path_box)
         
         if mode == "rclone":
             self.dst_input = QLineEdit()
             self.cmd_input = QLineEdit("rclone check src dst --fast-list --size-only")
-            form.addRow("REMOTE:", self.dst_input)
-            form.addRow("COMMAND:", self.cmd_input)
+            self.l_cmd_input = QLineEdit("rclone sync src dst -P --fast-list --log-level INFO")
+            self.r_cmd_input = QLineEdit("rclone sync dst src -P --fast-list")
+            
+            form.addRow("REMOTE DST:", self.dst_input)
+            form.addRow("CHECK CMD:", self.cmd_input)
+            form.addRow("PUSH CMD (Ctrl+L):", self.l_cmd_input)
+            form.addRow("PULL CMD (Ctrl+R):", self.r_cmd_input)
         
         layout.addLayout(form)
         
         btns = QHBoxLayout()
-        add_btn = QPushButton("CONFIRM")
+        add_btn = QPushButton("DEPLOY INTERFACE")
         add_btn.clicked.connect(self.accept)
-        layout.addWidget(add_btn)
+        add_btn.setFixedHeight(40)
+        add_btn.setStyleSheet(f"background-color: {theme['accent']}; color: black;")
+        
+        cancel_btn = QPushButton("ABORT")
+        cancel_btn.clicked.connect(self.reject)
+        cancel_btn.setFixedHeight(40)
+        
+        btns.addWidget(add_btn, 2)
+        btns.addWidget(cancel_btn, 1)
+        layout.addLayout(btns)
 
     def browse_path(self):
         path = QFileDialog.getExistingDirectory(self, "Select Directory")
@@ -490,6 +508,8 @@ class AddProjectDialog(QDialog):
         if self.mode == "rclone":
             data["dst"] = self.dst_input.text()
             data["cmd"] = self.cmd_input.text()
+            data["left_click_cmd"] = self.l_cmd_input.text()
+            data["right_click_cmd"] = self.r_cmd_input.text()
         return data
 
 # --- MAIN WINDOW ---
