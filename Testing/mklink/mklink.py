@@ -565,17 +565,18 @@ class SymlinkManager(QMainWindow):
             
             # Info
             info_layout = QVBoxLayout()
-            name_lbl = QLabel(f"{link_entry['name']}  <span style='color:{status_color}; font-size:9pt;'>({status_text})</span>")
+            name_lbl = QLabel(f"<html>{link_entry['name']}  <span style='color:{status_color}; font-size:9pt;'>({status_text})</span></html>")
             name_lbl.setTextFormat(Qt.TextFormat.RichText)
             name_lbl.setStyleSheet("font-weight: bold; font-size: 11pt; border: none;")
             info_layout.addWidget(name_lbl)
 
             # Details (multi-item paths)
-            paths_text = ""
+            paths_text = "<html>"
             for item in link_entry.get("items", []):
                 paths_text += f"<span style='color:#3498db'>[{item['type'][0].upper()}] Target:</span> {item['target']}<br><span style='color:#9b59b6'>Link:</span> {item['fake']}<br>"
+            paths_text += "</html>"
             
-            paths_lbl = QLabel(paths_text.strip("<br>"))
+            paths_lbl = QLabel(paths_text)
             paths_lbl.setTextFormat(Qt.TextFormat.RichText)
             paths_lbl.setWordWrap(True)
             paths_lbl.setStyleSheet(f"color: {CP_SUBTEXT}; font-size: 8pt; border: none; padding-top: 5px;")
