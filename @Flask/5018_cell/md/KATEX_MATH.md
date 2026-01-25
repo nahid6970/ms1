@@ -9,18 +9,36 @@ KaTeX is a fast math typesetting library for the web. It renders LaTeX math nota
 ## Basic Syntax
 
 ### Inline Math
-Wrap your LaTeX expression with `\(` and `\)`:
+Wrap your LaTeX expression with `\(` and `\)` or a single `$` and `$`:
 
 ```
 \(expression\)
 ```
+OR
+```
+$expression$
+```
 
 **Example:**
 ```
-The formula is \(E = mc^2\)
+The formula is \(E = mc^2\) or $E = mc^2$
 ```
 
 **Renders as:** The formula is E = mc²
+
+### Display Math (Centered)
+Wrap your LaTeX expression with `$$` and `$$` for display mode (centered, larger):
+
+```
+$$expression$$
+```
+
+**Example:**
+```
+$$m = \frac{y_2 - y_1}{x_2 - x_1}$$
+```
+
+**Renders as:** A centered, standalone mathematical formula.
 
 ## Common Mathematical Expressions
 
@@ -227,16 +245,19 @@ y &= c + d
 ## Implementation Details
 
 ### How It Works
-1. **Detection:** The regex `/\\\((.*?)\\\)/g` finds all `\(...\)` patterns
+1. **Detection:** The application detects math patterns using regex:
+   - `$$ ... $$` for display mode
+   - `$ ... $` and `\( ... \)` for inline mode
 2. **Rendering:** KaTeX library converts LaTeX to HTML/CSS
-3. **Display:** Rendered math appears inline with text
-4. **Fallback:** If KaTeX fails, original text is shown
+3. **Edit Mode:** In the editor, delimiters are preserved and wrapped in `.syn-marker` for visibility while maintaining the original raw text.
+4. **Display:** Rendered math appears inline or as a block depending on the syntax used.
+5. **Fallback:** If KaTeX fails, original text is shown
 
 ### Files Involved
 - **templates/index.html** - Loads KaTeX CSS and JS from CDN
-- **static/script.js** - Parses and renders math expressions (regex: `/\\\((.*?)\\\)/g`)
-- **export_static.py** - Includes KaTeX in static exports with special handling:
-  - Regex: `/\\\((.*?)\\\)/g` (with proper Python string escaping)
+- **static/script.js** - Parses and renders math expressions (handles `$$...$$`, `$ ... $`, and `\( ... \)`)
+- **export_static.py** - Includes KaTeX in static exports with matching logic:
+  - Supports all three math syntaxes
   - Removes newlines from KaTeX output to prevent `<br>` tag insertion
   - Adds integrity hashes for security
 

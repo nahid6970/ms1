@@ -569,6 +569,14 @@
                             <td style="padding: 8px;">text<sub>subscript</sub></td>
                         </tr>
                         <tr style="border-bottom: 1px solid #ddd;">
+                            <td style="padding: 8px; font-family: monospace; background: #f8f9fa;">$x^2$ or \(x^2\)</td>
+                            <td style="padding: 8px;"><span id="inlineMathPreview"></span></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #ddd;">
+                            <td style="padding: 8px; font-family: monospace; background: #f8f9fa;">$$E = mc^2$$</td>
+                            <td style="padding: 8px;"><span id="displayMathPreview"></span></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #ddd;">
                             <td style="padding: 8px; font-family: monospace; background: #f8f9fa; font-size: 11px;">
                                 \(\sqrt{25}\)</td>
                             <td style="padding: 8px;"><span id="sqrtPreview"></span></td>
@@ -1186,6 +1194,26 @@
                 mutations.forEach(function (mutation) {
                     const modal = document.getElementById('markdownGuideModal');
                     if (modal && modal.style.display === 'block') {
+                        // Render inline math example
+                        const inlineMathPreview = document.getElementById('inlineMathPreview');
+                        if (inlineMathPreview && window.katex) {
+                            try {
+                                katex.render('x^2', inlineMathPreview, { throwOnError: false });
+                            } catch (e) {
+                                inlineMathPreview.textContent = 'x²';
+                            }
+                        }
+
+                        // Render display math example
+                        const displayMathPreview = document.getElementById('displayMathPreview');
+                        if (displayMathPreview && window.katex) {
+                            try {
+                                katex.render('E = mc^2', displayMathPreview, { throwOnError: false, displayMode: true });
+                            } catch (e) {
+                                displayMathPreview.textContent = 'E = mc²';
+                            }
+                        }
+
                         // Render square root example
                         const sqrtPreview = document.getElementById('sqrtPreview');
                         if (sqrtPreview && window.katex) {

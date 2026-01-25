@@ -1748,9 +1748,13 @@ def generate_static_html(data, custom_syntaxes):
         }
 
         function stripMarkdown(text, preserveLinks = false) {
-            if (!text) return '';
-            let stripped = String(text);
-            // Remove bold markers: **text** -> text
+            if (!text) return "";
+            let stripped = text;
+
+            // Remove LaTeX math markers: $$text$$ -> text, $text$ -> text
+            stripped = stripped.replace(/\$\$(.*?)\$\$/g, '$1');
+            stripped = stripped.replace(/\\$([^$]+)\\$/g, '$1');
+
             stripped = stripped.replace(/\\*\\*(.+?)\\*\\*/g, '$1');
             // Remove correct answer markers: [[text]] -> text
             stripped = stripped.replace(/\\[\\[(.+?)\\]\\]/g, '$1');
@@ -2042,23 +2046,49 @@ def generate_static_html(data, custom_syntaxes):
         function parseMarkdownInline(text, cellStyle = {}) {
             let formatted = text;
 
-            // Convert LaTeX $...$ syntax to KaTeX \\(...\\) syntax
-            formatted = formatted.replace(/\\$([^$]+)\\$/g, '\\\\\\($1\\\\\\)');
+            // Math: $$ ... $$ -> KaTeX (display mode)
+            if (window.katex) {
+                formatted = formatted.replace(/\$\$(.*?)\$\$/g, (match, math) => {
+                    try {
+                        const result = katex.renderToString(math, {
+                            throwOnError: false,
+                            displayMode: true
+                        });
+                        // Remove newlines in KaTeX output to prevent br insertion
+                        return result.replace(/\n/g, '');
+                    } catch (e) {
+                        return match;
+                    }
+                });
+            }
+
+            // Math: $ ... $ -> KaTeX (inline mode)
+            if (window.katex) {
+                formatted = formatted.replace(/\$([^$]+)\$/g, (match, math) => {
+                    try {
+                        const result = katex.renderToString(math, {
+                            throwOnError: false,
+                            displayMode: false
+                        });
+                        // Remove newlines in KaTeX output to prevent br insertion
+                        return result.replace(/\n/g, '');
+                    } catch (e) {
+                        return match;
+                    }
+                });
+            }
 
             // Math: \\( ... \\) -> KaTeX (process first to avoid conflicts)
             if (window.katex) {
                 formatted = formatted.replace(/\\\\\\((.*?)\\\\\\)/g, (match, math) => {
                     try {
-                        console.log('KaTeX input:', math);
                         const result = katex.renderToString(math, {
                             throwOnError: false,
                             displayMode: false
                         });
-                        console.log('KaTeX output:', result);
                         // Remove newlines in KaTeX output to prevent br insertion
-                        return result.replace(/\\n/g, '');
+                        return result.replace(/\n/g, '');
                     } catch (e) {
-                        console.error('KaTeX error:', e, 'Input was:', math);
                         return match;
                     }
                 });
@@ -2317,20 +2347,33 @@ def generate_static_html(data, custom_syntaxes):
                but skip the table-splitting logic we just added. */
             let txt = lines.join('\\n');
 
+            // Math: $$ ... $$ -> KaTeX (display mode)
+            if (window.katex) {
+                txt = txt.replace(/\$\$(.*?)\$\$/g, (match, math) => {
+                    try {
+                        const result = katex.renderToString(math, {
+                            throwOnError: false,
+                            displayMode: true
+                        });
+                        // Remove newlines in KaTeX output to prevent br insertion
+                        return result.replace(/\n/g, '');
+                    } catch (e) {
+                        return match;
+                    }
+                });
+            }
+
             // Math: \\( ... \\) -> KaTeX (process first to avoid conflicts)
             if (window.katex) {
                 txt = txt.replace(/\\\\\\((.*?)\\\\\\)/g, (match, math) => {
                     try {
-                        console.log('KaTeX input (body):', math);
                         const result = katex.renderToString(math, {
                             throwOnError: false,
                             displayMode: false
                         });
-                        console.log('KaTeX output (body):', result);
                         // Remove newlines in KaTeX output to prevent br insertion
-                        return result.replace(/\\n/g, '');
+                        return result.replace(/\n/g, '');
                     } catch (e) {
-                        console.error('KaTeX error (body):', e, 'Input was:', math);
                         return match;
                     }
                 });
@@ -2342,8 +2385,21 @@ def generate_static_html(data, custom_syntaxes):
             const formattedLines = codeLines.map(line => {
                 let formatted = line;
 
-                // Convert LaTeX $...$ syntax to KaTeX \\(...\\) syntax
-                formatted = formatted.replace(/\\$([^$]+)\\$/g, '\\\\\\($1\\\\\\)');
+                // Math: $ ... $ -> KaTeX (inline mode)
+                if (window.katex) {
+                    formatted = formatted.replace(/\$([^$]+)\$/g, (match, math) => {
+                        try {
+                            const result = katex.renderToString(math, {
+                                throwOnError: false,
+                                displayMode: false
+                            });
+                            // Remove newlines in KaTeX output to prevent br insertion
+                            return result.replace(/\n/g, '');
+                        } catch (e) {
+                            return match;
+                        }
+                    });
+                }
 
                 // Code block: ```text``` -> <code>text</code>
                 if (formatted.trim() === '```') {

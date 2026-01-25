@@ -1580,6 +1580,8 @@ function calculateVisibleToRawMap(rawInput) {
         { regex: /==(.+?)==/g, keepGroup: 1 },
         { regex: /!!(.+?)!!/g, keepGroup: 1 },
         { regex: /\?\?(.+?)\?\?/g, keepGroup: 1 },
+        { regex: /\$\$(.*?)\$\$/g, keepGroup: 1 },
+        { regex: /\$([^$]+)\$/g, keepGroup: 1 },
         { regex: /\\\((.*?)\\\)/g, keepGroup: 1 },
         { regex: /\^(.+?)\^/g, keepGroup: 1 },
         { regex: /~(.+?)~/g, keepGroup: 1 },
@@ -1757,10 +1759,16 @@ function handlePreviewMouseDown(e) {
 function highlightSyntax(text) {
     if (!text) return "";
 
-    // Convert LaTeX $...$ syntax to KaTeX \(...\) syntax before escaping HTML
-    text = text.replace(/\$([^$]+)\$/g, '\\($1\\)');
-
     let formatted = escapeHtml(text);
+
+    // Rule: Math \(...\)
+    formatted = formatted.replace(/\\\((.*?)\\\)/g, '<span class="md-math"><span class="syn-marker">\\(</span>$1<span class="syn-marker">\\)</span></span>');
+
+    // Rule: Math $$...$$
+    formatted = formatted.replace(/\$\$([^$]+)\$\$/g, '<span class="md-math"><span class="syn-marker">$$</span>$1<span class="syn-marker">$$</span></span>');
+
+    // Rule: Math $...$
+    formatted = formatted.replace(/\$([^$]+)\$/g, '<span class="md-math"><span class="syn-marker">$</span>$1<span class="syn-marker">$</span></span>');
 
     // Rule: **bold**
     formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong class="md-bold"><span class="syn-marker">**</span>$1<span class="syn-marker">**</span></strong>');
@@ -2802,8 +2810,33 @@ function parseGridTable(lines) {
 function parseMarkdownInline(text, cellStyle = {}) {
     let formatted = text;
 
-    // Convert LaTeX $...$ syntax to KaTeX \(...\) syntax
-    formatted = formatted.replace(/\$([^$]+)\$/g, '\\($1\\)');
+    // Math: $$ ... $$ -> KaTeX (display mode)
+    if (window.katex) {
+        formatted = formatted.replace(/\$\$(.*?)\$\$/g, (match, math) => {
+            try {
+                return katex.renderToString(math, {
+                    throwOnError: false,
+                    displayMode: true
+                });
+            } catch (e) {
+                return match;
+            }
+        });
+    }
+
+    // Math: $ ... $ -> KaTeX (inline mode)
+    if (window.katex) {
+        formatted = formatted.replace(/\$([^$]+)\$/g, (match, math) => {
+            try {
+                return katex.renderToString(math, {
+                    throwOnError: false,
+                    displayMode: false
+                });
+            } catch (e) {
+                return match;
+            }
+        });
+    }
 
     // Math: \( ... \) -> KaTeX (process first to avoid conflicts)
     if (window.katex) {
@@ -3220,8 +3253,33 @@ function oldParseMarkdownBody(lines, cellStyle = {}) {
         // Italic: @@text@@ -> <em>text</em>
         formatted = formatted.replace(/@@(.+?)@@/g, '<em>$1</em>');
 
-        // Convert LaTeX $...$ syntax to KaTeX \(...\) syntax
-        formatted = formatted.replace(/\$([^$]+)\$/g, '\\($1\\)');
+        // Math: $$ ... $$ -> KaTeX (display mode)
+        if (window.katex) {
+            formatted = formatted.replace(/\$\$(.*?)\$\$/g, (match, math) => {
+                try {
+                    return katex.renderToString(math, {
+                        throwOnError: false,
+                        displayMode: true
+                    });
+                } catch (e) {
+                    return match;
+                }
+            });
+        }
+
+        // Math: $ ... $ -> KaTeX (inline mode)
+        if (window.katex) {
+            formatted = formatted.replace(/\$([^$]+)\$/g, (match, math) => {
+                try {
+                    return katex.renderToString(math, {
+                        throwOnError: false,
+                        displayMode: false
+                    });
+                } catch (e) {
+                    return match;
+                }
+            });
+        }
 
         // Math: \( ... \) -> KaTeX (process after bold/italic to avoid conflicts)
         if (window.katex) {
@@ -7713,10 +7771,10 @@ function stripMarkdown(text, preserveLinks = false) {
     if (!text) return '';
     let stripped = String(text);
 
-    // Remove LaTeX math markers: $text$ -> text
+    // Remove LaTeX math markers: $text$ -> text, $text$ -> text
+    stripped = stripped.replace(/\$\$(.*?)\$\$/g, '$1');
     stripped = stripped.replace(/\$([^$]+)\$/g, '$1');
 
-    // Remove correct answer markers: [[text]] -> text
     stripped = stripped.replace(/\[\[(.+?)\]\]/g, '$1');
 
     // Remove color/style markers: {fg:#fff;bg:#000}text{/} -> text
