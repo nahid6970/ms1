@@ -1,0 +1,7 @@
+[
+    {
+        "name": "Test",
+        "source": "C:\\@delta\\ms1\\Testing\\mklink\\mirror-sync\\tst",
+        "destination": "C:\\@delta\\ms1\\Testing\\mklink\\mirror-sync\\dest"
+    }
+]
