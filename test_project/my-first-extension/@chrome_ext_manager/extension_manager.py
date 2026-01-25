@@ -17,7 +17,9 @@ from urllib.parse import urlparse, parse_qs
 # Configuration
 HOST = 'localhost'
 PORT = 8765
-DATA_DIR = Path('./extension_data')
+# Set DATA_DIR relative to the script's location
+SCRIPT_DIR = Path(__file__).parent.absolute()
+DATA_DIR = SCRIPT_DIR / 'extension_data'
 
 # Setup logging
 logging.basicConfig(
