@@ -29,6 +29,9 @@ case $choice in
 esac
 
 if [ "$FULL_SETUP" = true ]; then
+    # Switch to home directory to avoid /mnt/c performance issues
+    cd "$HOME"
+    
     echo "📦 Updating system packages..."
     # Wait for any existing apt processes to finish
     sudo fuser -vki /var/lib/dpkg/lock-frontend 2>/dev/null || true
@@ -89,6 +92,17 @@ if [ "$FULL_SETUP" = true ]; then
     sudo apt install -y docker-ce docker-ce-cli containerd.io
     sudo usermod -aG docker $USER
 
+    # Setup Git with better defaults (do this before Homebrew to prevent timeouts)
+    echo "🔧 Configuring Git..."
+    git config --global init.defaultBranch main
+    git config --global pull.rebase false
+    # Increase buffer size to prevent hangs during large clones (like Homebrew)
+    git config --global http.postBuffer 524288000
+    git config --global http.lowSpeedLimit 0
+    git config --global http.lowSpeedTime 999999
+    # Force HTTP/1.1 to fix "RPC failed; curl 92 HTTP/2" errors
+    git config --global http.version HTTP/1.1
+
     # Install additional package managers
     echo "📦 Installing additional package managers..."
 
@@ -97,18 +111,27 @@ if [ "$FULL_SETUP" = true ]; then
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
         if ! command -v brew &> /dev/null; then
-            echo "Installing Homebrew (this may take 30-60 minutes)..."
-            /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-            echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> ~/.bashrc
+            echo "Installing Homebrew via Tarball (Faster for slow connections)..."
+            
+            # 1. Create directory structure
+            sudo mkdir -p /home/linuxbrew/.linuxbrew/Homebrew
+            sudo chown -R $USER:$USER /home/linuxbrew/.linuxbrew
+            
+            # 2. Download and extract tarball (Avoids git clone history/timeouts)
+            echo "Downloading Homebrew..."
+            curl -L https://github.com/Homebrew/brew/tarball/master | tar xz --strip 1 -C /home/linuxbrew/.linuxbrew/Homebrew
+            
+            # 3. Configure environment
+            echo 'eval "$(/home/linuxbrew/.linuxbrew/Homebrew/bin/brew shellenv)"' >> ~/.bashrc
+            eval "$(/home/linuxbrew/.linuxbrew/Homebrew/bin/brew shellenv)"
+            
+            # 4. Verify installation
+            echo "Homebrew installed. initializing..."
+            brew --version
         fi
     else
         echo "Skipping Homebrew installation"
     fi
-
-    # Setup Git with better defaults
-    echo "🔧 Configuring Git..."
-    git config --global init.defaultBranch main
-    git config --global pull.rebase false
 
     # WSL integration improvements
     echo "🔗 Improving WSL integration..."
