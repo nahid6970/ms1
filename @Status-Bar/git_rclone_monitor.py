@@ -145,8 +145,10 @@ class ProjectWidget(QWidget):
         super().__init__(parent)
         self.project_id = project_id
         self.p_type = p_type
+        self.name = name
         self.path = path
-        self.extra = extra
+        self.extra = extra # dst for rclone
+        self.log_dir = r"C:\Users\nahid\script_output\rclone"
         
         layout = QHBoxLayout(self)
         layout.setContentsMargins(5, 2, 5, 2)
@@ -157,41 +159,57 @@ class ProjectWidget(QWidget):
         self.name_label = QLabel(name)
         self.name_label.setStyleSheet(f"font-weight: bold; color: {CP_TEXT};")
         
-        self.action_btn = QPushButton("OPEN")
-        self.action_btn.setFixedWidth(60)
-        self.action_btn.clicked.connect(self.open_folder)
-        
-        self.sync_btn = QPushButton("SYNC")
-        self.sync_btn.setFixedWidth(60)
-        self.sync_btn.clicked.connect(self.run_sync)
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.setToolTip(self.get_tooltip())
         
         layout.addWidget(self.status_indicator)
         layout.addWidget(self.name_label)
         layout.addStretch()
-        layout.addWidget(self.action_btn)
-        layout.addWidget(self.sync_btn)
         
-        self.setStyleSheet(f"""
-            QPushButton {{
-                background-color: {CP_DIM}; border: 1px solid {CP_DIM}; color: white; padding: 2px; font-size: 8pt;
-            }}
-            QPushButton:hover {{
-                border: 1px solid {CP_YELLOW}; color: {CP_YELLOW};
-            }}
-        """)
+        self.setStyleSheet(f"QWidget:hover {{ background-color: {CP_PANEL}; }}")
+
+    def get_tooltip(self):
+        if self.p_type == "git":
+            return "L-Click: Gitter | Ctrl+L: Explorer | R-Click: Lazygit | Ctrl+R: Git Restore"
+        else:
+            return "L-Click: View Log | Ctrl+L: Sync Push | Ctrl+R: Sync Pull"
+
+    def mousePressEvent(self, event):
+        modifiers = event.modifiers()
+        is_ctrl = modifiers & Qt.KeyboardModifier.ControlModifier
+        
+        if event.button() == Qt.MouseButton.LeftButton:
+            if self.p_type == "git":
+                if is_ctrl:
+                    subprocess.Popen(f'explorer "{self.path.replace("/", "\\")}"', shell=True)
+                else:
+                    subprocess.Popen(f'start pwsh -NoExit -Command "& {{$host.UI.RawUI.WindowTitle=\'GiTSync\' ; cd \'{self.path}\' ; gitter}}"', shell=True)
+            else: # rclone
+                if is_ctrl:
+                    cmd = f'rclone sync "{self.path}" "{self.extra}" -P --fast-list --log-level INFO'
+                    subprocess.Popen(f'start pwsh -NoExit -Command "{cmd}"', shell=True)
+                else:
+                    log_path = os.path.join(self.log_dir, f"{self.name}_check.log")
+                    if os.path.exists(log_path):
+                        subprocess.Popen(["powershell", "-NoExit", "-Command", f'edit "{log_path}"'], creationflags=subprocess.CREATE_NEW_CONSOLE)
+                    else:
+                        print(f"Log not found: {log_path}")
+
+        elif event.button() == Qt.MouseButton.RightButton:
+            if self.p_type == "git":
+                if is_ctrl:
+                    subprocess.Popen(f'start pwsh -NoExit -Command "& {{$host.UI.RawUI.WindowTitle=\'Git Restore\' ; cd \'{self.path}\' ; git restore .}}"', shell=True)
+                else:
+                    subprocess.Popen('start pwsh -NoExit -Command "lazygit"', cwd=self.path, shell=True)
+            else: # rclone
+                if is_ctrl:
+                    cmd = f'rclone sync "{self.extra}" "{self.path}" -P --fast-list'
+                    subprocess.Popen(f'start pwsh -NoExit -Command "{cmd}"', shell=True)
 
     def update_status(self, color):
         self.status_indicator.setStyleSheet(f"color: {color}; font-size: 14pt;")
 
-    def open_folder(self):
-        os.startfile(self.path)
 
-    def run_sync(self):
-        if self.p_type == "git":
-            subprocess.Popen(f'start pwsh -NoExit -Command "cd \'{self.path}\' ; git add .; git commit -m \'auto-sync\' ; git push"', shell=True)
-        else:
-            cmd = f'rclone sync "{self.path}" "{self.extra}" -P'
-            subprocess.Popen(f'start pwsh -NoExit -Command "{cmd}"', shell=True)
 
 class GitRcloneMonitor(QMainWindow):
     def __init__(self):
