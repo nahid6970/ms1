@@ -16,6 +16,12 @@
     "showStatusInTitle": true,
     "hideBanner": true
   },
+  "model": {
+    "routing": {
+      "enabled": true,
+      "requireConsent": false
+    }
+  },
   "mcpServers": {
     "notify": {
       "command": "python",
