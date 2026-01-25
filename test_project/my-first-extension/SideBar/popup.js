@@ -172,15 +172,26 @@ addFirstBtn.addEventListener('click', () => triggerBrowserModal());
 // Save to Python server button handler
 if (saveToPythonBtn) {
     saveToPythonBtn.addEventListener('click', function () {
+        const originalContent = saveToPythonBtn.innerHTML;
+        saveToPythonBtn.innerHTML = '...';
+        
         chrome.storage.sync.get(null, function (items) {
             chrome.runtime.sendMessage({
                 action: 'saveToPython',
                 data: items
             }, function (response) {
                 if (response && response.success !== false) {
-                    alert('Data backed up to Python server!');
+                    saveToPythonBtn.style.color = '#4CAF50';
+                    setTimeout(() => {
+                        saveToPythonBtn.innerHTML = originalContent;
+                        saveToPythonBtn.style.color = '';
+                    }, 2000);
                 } else {
-                    alert('Failed to save to Python server. Make sure the server is running.');
+                    saveToPythonBtn.style.color = '#f44336';
+                    setTimeout(() => {
+                        saveToPythonBtn.innerHTML = originalContent;
+                        saveToPythonBtn.style.color = '';
+                    }, 2000);
                 }
             });
         });
@@ -190,20 +201,31 @@ if (saveToPythonBtn) {
 // Load from Python server button handler
 if (loadFromPythonBtn) {
     loadFromPythonBtn.addEventListener('click', function () {
+        const originalContent = loadFromPythonBtn.innerHTML;
+        loadFromPythonBtn.innerHTML = '...';
+
         chrome.runtime.sendMessage({
             action: 'loadFromPython'
         }, function (response) {
             if (response && response.success !== false && response.data) {
                 chrome.storage.sync.set(response.data, () => {
-                    alert('Data restored from Python server!');
+                    loadFromPythonBtn.style.color = '#4CAF50';
                     // Update local links and re-render
                     if (response.data.sidebar_links) {
                         links = response.data.sidebar_links;
                         renderLinks();
                     }
+                    setTimeout(() => {
+                        loadFromPythonBtn.innerHTML = originalContent;
+                        loadFromPythonBtn.style.color = '';
+                    }, 2000);
                 });
             } else {
-                alert('Failed to load from Python server. Make sure the server is running.');
+                loadFromPythonBtn.style.color = '#f44336';
+                setTimeout(() => {
+                    loadFromPythonBtn.innerHTML = originalContent;
+                    loadFromPythonBtn.style.color = '';
+                }, 2000);
             }
         });
     });
