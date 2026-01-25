@@ -9,6 +9,7 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QH
                              QFileDialog, QDialog, QFormLayout, QMessageBox, QInputDialog,
                              QLayout, QLayoutItem, QSizePolicy)
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QObject, QRect, QPoint, QSize
+from PyQt6.QtGui import QFont, QFontMetrics
 
 # CYBERPUNK THEME PALETTE
 CP_BG = "#050505"
@@ -245,9 +246,13 @@ class ProjectWidget(QWidget):
         layout.setContentsMargins(4, 4, 4, 4)
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         
+        self.label_font = QFont("JetBrainsMono NFP", 10)
+        self.label_font.setBold(True)
+        
         label_text = self.config.get("label", name)
         self.name_label = QLabel(f"⟳ {label_text}")
-        self.name_label.setStyleSheet(f"font-weight: bold; color: {CP_DIM}; font-size: 10pt; font-family: 'JetBrainsMono NFP'; border: none; background: transparent;")
+        self.name_label.setFont(self.label_font)
+        self.name_label.setStyleSheet(f"color: {CP_DIM}; border: none; background: transparent; padding: 0px 10px;")
         self.name_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.name_label.setWordWrap(False) # Keep it single line for compactness
         
@@ -262,7 +267,6 @@ class ProjectWidget(QWidget):
                 background-color: {CP_PANEL}; 
                 border: 1px solid {CP_DIM}; 
                 border-radius: 4px; 
-                margin: 2px;
             }}
             ProjectWidget:hover {{ 
                 border: 1px solid {CP_CYAN}; 
@@ -272,9 +276,15 @@ class ProjectWidget(QWidget):
         self.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
 
     def sizeHint(self):
-        # Dynamic width based on text
-        width = self.name_label.fontMetrics().boundingRect(self.name_label.text()).width() + 30
-        return QSize(max(width, 80), 34)
+        # Dynamic width based on text using specific font metrics
+        # Using max of boundingRect and horizontalAdvance to handle wide glyphs (Nerd Fonts)
+        fm = QFontMetrics(self.name_label.font())
+        text = self.name_label.text()
+        # Calculate text width with extra padding for Nerd Font icons
+        text_width = max(fm.horizontalAdvance(text), fm.boundingRect(text).width())
+        # Add substantial padding: 20px label padding + 40px extra for icons + 20px margins
+        width = text_width + 100
+        return QSize(max(width, 120), 34)
 
     def get_tooltip(self):
         if self.p_type == "git":
@@ -352,7 +362,7 @@ class ProjectWidget(QWidget):
         
         label_text = self.config.get("label", self.name)
         self.name_label.setText(f"{sym} {label_text}")
-        self.name_label.setStyleSheet(f"font-weight: bold; color: {color}; font-size: 10pt; font-family: 'JetBrainsMono NFP'; border: none; background: transparent;")
+        self.name_label.setStyleSheet(f"color: {color}; border: none; background: transparent; padding: 0px 10px;")
         self.updateGeometry()
 
 
