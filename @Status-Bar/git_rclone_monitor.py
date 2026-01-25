@@ -4,22 +4,9 @@ import json
 import subprocess
 import threading
 import time
-from PyQt6.QtWidgets import (
-    QApplication,
-    QMainWindow,
-    QWidget,
-    QVBoxLayout,
-    QHBoxLayout,
-    QLabel,
-    QPushButton,
-    QLineEdit,
-    QGroupBox,
-    QScrollArea,
-    QFileDialog,
-    QDialog,
-    QFormLayout,
-    QMessageBox,
-)
+from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, 
+                             QLabel, QPushButton, QLineEdit, QGroupBox, QScrollArea, 
+                             QFileDialog, QDialog, QFormLayout, QMessageBox, QInputDialog)
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QObject
 
 # CYBERPUNK THEME PALETTE
@@ -183,7 +170,7 @@ class ProjectWidget(QWidget):
                 if is_ctrl:
                     subprocess.Popen(f'explorer "{self.path.replace("/", "\\")}"', shell=True)
                 else:
-                    subprocess.Popen(f'start pwsh -NoExit -Command "& {{$host.UI.RawUI.WindowTitle=\'GiTSync\' ; cd \'{self.path}\' ; gitter}}"', shell=True)
+                    self.run_gitter()
             else: # rclone
                 if is_ctrl:
                     cmd = f'rclone sync "{self.path}" "{self.extra}" -P --fast-list --log-level INFO'
@@ -205,6 +192,32 @@ class ProjectWidget(QWidget):
                 if is_ctrl:
                     cmd = f'rclone sync "{self.extra}" "{self.path}" -P --fast-list'
                     subprocess.Popen(f'start pwsh -NoExit -Command "{cmd}"', shell=True)
+
+    def run_gitter(self):
+        msg, ok = QInputDialog.getText(self, "GIT COMMIT", "Enter commit message (Leave empty for 'Auto-commit'):")
+        if not ok:
+            return
+        
+        commit_msg = msg.replace("'", "''") if msg.strip() else "Auto-commit"
+        
+        # Mimic the gitter function logic and output
+        # Using a single string with semicolons for the pwsh command
+        pwsh_logic = (
+            f"cd '{self.path}'; "
+            "Write-Host '--- GIT STATUS ---' -ForegroundColor Cyan; "
+            "git status; "
+            "Write-Host '--- STAGING & COMMITTING ---' -ForegroundColor Cyan; "
+            "git add .; "
+            f"git commit -m '{commit_msg}'; "
+            "Write-Host '--- PUSHING ---' -ForegroundColor Cyan; "
+            "git push; "
+            "Write-Host '--- COMPLETE ---' -ForegroundColor Green; "
+            "Write-Host 'G I T T E R' -ForegroundColor Green -BackgroundColor Black; "
+            "Write-Host 'SUCCESSFULLY SYNCED' -ForegroundColor Green;"
+        )
+        
+        full_cmd = f'start pwsh -NoExit -Command "{pwsh_logic}"'
+        subprocess.Popen(full_cmd, shell=True)
 
     def update_status(self, color):
         self.status_indicator.setStyleSheet(f"color: {color}; font-size: 14pt;")

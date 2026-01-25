@@ -15,6 +15,21 @@
     ],
     "rclone": [
         {
+            "name": "msBackups",
+            "path": "C:/@delta/msBackups",
+            "dst": "gu:/msBackups"
+        },
+        {
+            "name": "software",
+            "path": "D:/software",
+            "dst": "gu:/software"
+        },
+        {
+            "name": "song",
+            "path": "D:/song",
+            "dst": "gu:/song"
+        },
+        {
             "name": "ms1",
             "path": "C:/@delta/ms1/",
             "dst": "o0:/ms1/"
