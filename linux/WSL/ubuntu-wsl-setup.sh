@@ -77,9 +77,13 @@ if [ "$FULL_SETUP" = true ]; then
         tmux screen ncdu duf \
         jq yq
 
-    # Enable GUI apps (VNC support)
-    echo "🖥️ Setting up GUI support with VNC..."
-    sudo apt install -y xfce4 xfce4-goodies tightvncserver
+    # Enable GUI apps (VcXsrv support)
+    echo "🖥️ Configuring GUI support (VcXsrv)..."
+    # Auto-set DISPLAY for VcXsrv on Windows
+    # Use ip route to find the host IP (more reliable than resolv.conf)
+    echo '# VcXsrv Display Configuration' >> ~/.bashrc
+    echo 'export DISPLAY=$(ip route list default | awk "{print \$3}"):0' >> ~/.bashrc
+    echo 'export LIBGL_ALWAYS_INDIRECT=1' >> ~/.bashrc
 
     # Install GUI apps for testing
     sudo apt install -y gedit mousepad
@@ -152,6 +156,20 @@ if [ "$FULL_SETUP" = true ]; then
     sudo chsh -s $(which bash) $USER
 fi
 
+# Apply Quick Fixes (common to both full setup and quick fix option)
+if [ "$FULL_SETUP" = false ]; then
+     echo "🔧 Applying quick fixes..."
+     
+     # Fix VcXsrv DISPLAY variable (remove old incorrect one first)
+     sed -i '/VcXsrv Display Configuration/d' ~/.bashrc
+     sed -i '/export DISPLAY=/d' ~/.bashrc
+     sed -i '/export LIBGL_ALWAYS_INDIRECT=/d' ~/.bashrc
+     
+     echo '# VcXsrv Display Configuration' >> ~/.bashrc
+     echo 'export DISPLAY=$(ip route list default | awk "{print \$3}"):0' >> ~/.bashrc
+     echo 'export LIBGL_ALWAYS_INDIRECT=1' >> ~/.bashrc
+fi
+
 # Create aliases for better commands (runs for both options)
 echo "⚡ Setting up useful aliases..."
 cat >> ~/.bashrc << 'EOF'
@@ -195,20 +213,6 @@ alias brewf='brew search 2>/dev/null | fzf --preview "brew info {}" --bind "ente
 alias ff='find . -type f | fzf --preview "batcat --color=always {}"'
 alias fd='find . -type d | fzf'
 EOF
-
-# Create VNC startup script
-cat > ~/start-vnc.sh << 'EOF'
-#!/bin/bash
-# Kill any existing VNC sessions
-vncserver -kill :0 2>/dev/null || true
-
-# Start VNC server with XFCE desktop
-vncserver :0 -geometry 1920x1080 -depth 24
-
-echo "VNC server started on :0"
-echo "Connect with TightVNC Viewer to: localhost:5900"
-EOF
-chmod +x ~/start-vnc.sh
 
 # Install VS Code extensions helper
 echo "🔌 Setting up VS Code integration..."
@@ -260,7 +264,7 @@ if [ "$FULL_SETUP" = true ]; then
     echo "  • Homebrew package manager (if selected)"
     echo "  • Useful aliases and FZF shortcuts"
     echo "  • VS Code integration"
-    echo "  • GUI app support (VNC with XFCE)"
+    echo "  • GUI app support (VcXsrv configured)"
     echo ""
     echo "🔄 Please restart your terminal or run: source ~/.bashrc"
 else
@@ -268,7 +272,7 @@ else
     echo ""
     echo "📋 What was updated:"
     echo "  • Aliases and FZF shortcuts"
-    echo "  • VNC startup script"
+    echo "  • VcXsrv display config"
     echo "  • VS Code extensions helper"
     echo "  • System info script"
     echo ""
@@ -279,7 +283,14 @@ echo "📱 Install Flatpak apps: flatpak install flathub <app-name>"
 echo "🏪 Install Snap apps: snap install <app-name>"
 echo "🍺 Install Homebrew packages: brew install <package-name>"
 echo ""
-echo "🖥️ For GUI apps: Run ~/start-vnc.sh then connect TightVNC to localhost:5900"
-echo "🧪 Test GUI: gedit or mousepad"
+echo "🖥️ For GUI apps:"
+echo "  1. Install VcXsrv on Windows (https://sourceforge.net/projects/vcxsrv/)"
+echo "  2. Launch 'XLaunch' on Windows with:"
+echo "     - Multiple windows"
+echo "     - Display number: 0"
+echo "     - Start no client"
+echo "     - ☑️ Disable access control"
+echo "  3. Run GUI apps (e.g., 'gedit' or 'mousepad')"
+echo ""
 echo "💡 Run ~/sysinfo.sh to see system information"
 echo "💡 Run ~/install-vscode-extensions.sh to install VS Code extensions"
