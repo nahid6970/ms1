@@ -1,0 +1,28 @@
+{
+    "git": [
+        {
+            "name": "ms1",
+            "path": "C:/@delta/ms1"
+        },
+        {
+            "name": "db",
+            "path": "C:/@delta/db"
+        },
+        {
+            "name": "test",
+            "path": "C:/@delta/test"
+        }
+    ],
+    "rclone": [
+        {
+            "name": "ms1",
+            "path": "C:/@delta/ms1/",
+            "dst": "o0:/ms1/"
+        },
+        {
+            "name": "Photos",
+            "path": "C:/Users/nahid/Pictures/",
+            "dst": "gu:/Pictures/"
+        }
+    ]
+}
