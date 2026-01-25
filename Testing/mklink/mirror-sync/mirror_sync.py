@@ -272,9 +272,13 @@ class MirrorSyncManager(QMainWindow):
             json.dump(self.projects, f, indent=4)
 
     def refresh_ui(self):
+        # Robustly clear the layout
         while self.project_list_layout.count():
-            child = self.project_list_layout.takeAt(0)
-            if child.widget(): child.widget().deleteLater()
+            item = self.project_list_layout.takeAt(0)
+            widget = item.widget()
+            if widget:
+                widget.setParent(None)
+                widget.deleteLater()
 
         for i, proj in enumerate(self.projects):
             item_frame = QFrame()
@@ -344,7 +348,12 @@ class MirrorSyncManager(QMainWindow):
         dialog.resize(900, 350)
         d_layout = QVBoxLayout(dialog)
 
-        proj_data = self.projects[edit_index] if edit_index is not None else {}
+        # Safety check for index
+        if edit_index is not None and 0 <= edit_index < len(self.projects):
+            proj_data = self.projects[edit_index]
+        else:
+            proj_data = {}
+            edit_index = None # Fallback to new project mode if index is invalid
 
         name_in = QLineEdit(proj_data.get("name", ""))
         name_in.setPlaceholderText("Project Name")

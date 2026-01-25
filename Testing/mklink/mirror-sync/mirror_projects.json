@@ -1,7 +1,7 @@
 [
     {
-        "name": "Test",
-        "source": "C:\\@delta\\ms1\\Testing\\mklink\\mirror-sync\\tst",
-        "destination": "C:\\@delta\\ms1\\Testing\\mklink\\mirror-sync\\dest"
+        "name": "Gemini",
+        "source": "C:\\@delta\\ms1\\asset\\gemini",
+        "destination": "C:\\Users\\nahid\\.gemini"
     }
 ]
