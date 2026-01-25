@@ -68,15 +68,6 @@ if [ "$FULL_SETUP" = true ]; then
     echo "🏪 Enabling Snap store..."
     sudo apt install -y snapd
 
-    # Install modern terminal tools
-    echo "💻 Installing modern terminal tools..."
-
-    # Install zsh and oh-my-zsh
-    sudo apt install -y zsh
-    if [ ! -d "$HOME/.oh-my-zsh" ]; then
-        sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
-    fi
-
     # Install useful CLI tools
     sudo apt install -y \
         bat eza fd-find ripgrep fzf \
@@ -134,8 +125,8 @@ if [ "$FULL_SETUP" = true ]; then
     sudo apt autoremove -y
     sudo apt autoclean
 
-    # Make zsh default shell
-    sudo chsh -s $(which zsh) $USER
+    # Make bash default shell
+    sudo chsh -s $(which bash) $USER
 fi
 
 # Create aliases for better commands (runs for both options)
@@ -149,41 +140,6 @@ bind '"\e[B": history-search-forward'
 # FZF key bindings for enhanced search
 source /usr/share/doc/fzf/examples/key-bindings.bash 2>/dev/null || true
 source /usr/share/doc/fzf/examples/completion.bash 2>/dev/null || true
-
-# Modern CLI aliases
-alias ll='eza -la --icons'
-alias ls='eza --icons'
-alias cat='batcat'
-alias find='fd'
-alias grep='rg'
-alias du='ncdu'
-alias df='duf'
-alias top='htop'
-
-# Git shortcuts
-alias gs='git status'
-alias ga='git add'
-alias gc='git commit'
-alias gp='git push'
-alias gl='git log --oneline'
-
-# WSL shortcuts
-alias open='explorer.exe'
-alias code='code.exe'
-
-# FZF shortcuts for easier package management
-alias apti='apt list --upgradable 2>/dev/null | tail -n +2 | fzf --multi --preview "apt show {1}" --bind "enter:execute(echo {1} | cut -d/ -f1 | xargs sudo apt install)"'
-alias apts='apt-cache search . | fzf --preview "apt show {1}" --bind "enter:execute(echo {1} | cut -d\" \" -f1 | xargs sudo apt install)"'
-alias snapf='snap find "" 2>/dev/null | tail -n +2 | head -100 | fzf --preview "snap info {1}" --bind "enter:execute(echo {1} | awk \"{print \\$1}\" | xargs sudo snap install)"'
-alias brewf='brew search 2>/dev/null | fzf --preview "brew info {}" --bind "enter:execute(echo {} | xargs brew install)"'
-
-# FZF file operations
-alias ff='find . -type f | fzf --preview "batcat --color=always {}"'
-alias fd='find . -type d | fzf'
-EOF
-
-# Also add to zsh config
-cat >> ~/.zshrc << 'EOF'
 
 # Modern CLI aliases
 alias ll='eza -la --icons'
@@ -275,7 +231,7 @@ if [ "$FULL_SETUP" = true ]; then
     echo "📋 What was installed/configured:"
     echo "  • System updates and fixes"
     echo "  • Modern CLI tools (eza, bat, ripgrep, etc.)"
-    echo "  • Zsh with Oh My Zsh"
+    echo "  • Bash optimization"
     echo "  • Docker"
     echo "  • Flatpak and Snap stores"
     echo "  • Homebrew package manager (if selected)"
@@ -284,7 +240,6 @@ if [ "$FULL_SETUP" = true ]; then
     echo "  • GUI app support (VNC with XFCE)"
     echo ""
     echo "🔄 Please restart your terminal or run: source ~/.bashrc"
-    echo "🐚 To use zsh: exec zsh"
 else
     echo "🎉 Quick fixes applied!"
     echo ""
@@ -294,7 +249,7 @@ else
     echo "  • VS Code extensions helper"
     echo "  • System info script"
     echo ""
-    echo "🔄 Run: source ~/.zshrc (or restart terminal)"
+    echo "🔄 Run: source ~/.bashrc (or restart terminal)"
 fi
 
 echo "📱 Install Flatpak apps: flatpak install flathub <app-name>"
