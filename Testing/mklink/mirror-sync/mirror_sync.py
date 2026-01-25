@@ -233,10 +233,6 @@ class MirrorSyncManager(QMainWindow):
 
         right_layout.addLayout(split_layout)
 
-        # Progress (Above Rocket Button)
-        self.progress_bar = QProgressBar()
-        right_layout.addWidget(self.progress_bar)
-
         self.sync_btn = QPushButton("🚀 START MIRROR SYNC")
         self.sync_btn.setFixedHeight(50)
         self.sync_btn.setEnabled(False)
@@ -383,7 +379,12 @@ class MirrorSyncManager(QMainWindow):
     def start_sync(self):
         if not self.current_project: return
         
-        self.sync_btn.setEnabled(False)
+        # We don't disable it completely so the gradient can show, 
+        # but we ignore clicks if already syncing
+        if hasattr(self, 'worker') and self.worker.isRunning():
+            return
+
+        self.sync_btn.setText("🚀 SCANNING...")
         self.log_content.setText("Scanning...")
         
         self.worker = SyncWorker(self.current_project["source"], self.current_project["destination"])
@@ -392,12 +393,35 @@ class MirrorSyncManager(QMainWindow):
         self.worker.start()
 
     def update_progress(self, current, total, message):
-        self.progress_bar.setMaximum(total)
-        self.progress_bar.setValue(current)
+        percent = int((current / total) * 100) if total > 0 else 0
+        
+        # Dynamic style for progress fill
+        self.sync_btn.setStyleSheet(f"""
+            QPushButton {{ 
+                background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, 
+                    stop:0 {CP_GREEN}, stop:{percent/100} {CP_GREEN}, 
+                    stop:{percent/100 + 0.001} {CP_DIM}, stop:1 {CP_DIM});
+                border: 1px solid {CP_GREEN}; 
+                color: {"black" if percent > 50 else CP_GREEN}; 
+                font-size: 12pt;
+                font-weight: bold;
+            }}
+        """)
+        self.sync_btn.setText(f"🚀 SYNCING: {percent}%")
         self.log_content.setText(f"[{current}/{total}] {message}\n" + self.log_content.text()[:5000])
 
     def sync_finished(self, success, failed):
-        self.sync_btn.setEnabled(True)
+        # Reset Button Style
+        self.sync_btn.setStyleSheet(f"""
+            QPushButton {{ 
+                background-color: {CP_DIM}; 
+                border: 1px solid {CP_GREEN}; 
+                color: {CP_GREEN}; 
+                font-size: 12pt; 
+            }}
+            QPushButton:hover {{ background-color: {CP_GREEN}; color: black; }}
+        """)
+        self.sync_btn.setText("🚀 START MIRROR SYNC")
         QMessageBox.information(self, "Complete", f"Sync Finished.\nSuccess: {success}\nFailed: {failed}")
 
 if __name__ == "__main__":
