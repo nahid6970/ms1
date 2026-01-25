@@ -310,8 +310,18 @@ class MirrorSyncManager(QMainWindow):
         # Update Tree View
         src_path = self.current_project['source']
         if os.path.exists(src_path):
+            # Disconnect previous connections to avoid multiple calls/leaks
+            try:
+                self.tree_model.directoryLoaded.disconnect()
+            except:
+                pass
+                
+            # Connect directoryLoaded to expandAll to handle QFileSystemModel's lazy loading
+            self.tree_model.directoryLoaded.connect(lambda: self.tree_view.expandAll())
+            
             self.tree_model.setRootPath(src_path)
             self.tree_view.setRootIndex(self.tree_model.index(src_path))
+            self.tree_view.expandAll() # Initial call
         
         self.sync_btn.setEnabled(True)
         self.log_content.setText("Project loaded. Click Start to begin.")
