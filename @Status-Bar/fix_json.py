@@ -1,4 +1,6 @@
-{
+import json
+
+data = {
     "git": [
         {
             "name": "ms1",
@@ -21,21 +23,21 @@
             "name": "msBackups",
             "path": "C:/@delta/msBackups",
             "dst": "gu:/msBackups",
-            "label": "\udb80\uddb2",
+            "label": "󰆲",
             "cmd": "rclone check src dst --fast-list --size-only"
         },
         {
             "name": "software",
             "path": "D:/software",
             "dst": "gu:/software",
-            "label": "\uf40e",
+            "label": "",
             "cmd": "rclone check src dst --fast-list --size-only"
         },
         {
             "name": "song",
             "path": "D:/song",
             "dst": "gu:/song",
-            "label": "\uec1b",
+            "label": "",
             "cmd": "rclone check src dst --fast-list --size-only"
         },
         {
@@ -43,34 +45,21 @@
             "path": "C:/@delta/ms1/",
             "dst": "o0:/ms1/",
             "label": "ms1",
-            "cmd": "rclone check src dst --fast-list --size-only --exclude \".git/**\" --exclude \"__pycache__/**\"",
-            "left_click_cmd": "rclone sync src dst -P --fast-list --exclude \".git/**\" --exclude \"__pycache__/**\"  --log-level INFO",
+            "cmd": 'rclone check src dst --fast-list --size-only --exclude ".git/**" --exclude "__pycache__/**"',
+            "left_click_cmd": 'rclone sync src dst -P --fast-list --exclude ".git/**" --exclude "__pycache__/**"  --log-level INFO',
             "right_click_cmd": "rclone sync dst src -P --fast-list"
         },
         {
             "name": "Photos",
             "path": "C:/Users/nahid/Pictures/",
             "dst": "gu:/Pictures/",
-            "label": "\uf03e",
-            "cmd": "rclone check src dst --fast-list --size-only --exclude \".globalTrash/**\" --exclude \".stfolder/**\" --exclude \".stfolder (1)/**\"",
-            "left_click_cmd": "rclone sync src dst -P --fast-list --track-renames --exclude \".globalTrash/**\" --exclude \".stfolder/**\" --log-level INFO",
+            "label": "",
+            "cmd": 'rclone check src dst --fast-list --size-only --exclude ".globalTrash/**" --exclude ".stfolder/**" --exclude ".stfolder (1)/**"',
+            "left_click_cmd": 'rclone sync src dst -P --fast-list --track-renames --exclude ".globalTrash/**" --exclude ".stfolder/**" --log-level INFO',
             "right_click_cmd": "rclone sync dst src -P --fast-list"
         }
-    ],
-    "theme": {
-        "bg": "#050505",
-        "panel": "#0d0d0d",
-        "accent": "#00F0FF",
-        "accent_glow": "#00F0FF",
-        "text": "#E0E0E0",
-        "subtext": "#808080",
-        "red": "#FF003C",
-        "green": "#00ff21",
-        "yellow": "#FCEE0A",
-        "dim": "#1a1a1a",
-        "border": "#222222",
-        "opacity": 1.0,
-        "font_size": 15,
-        "font_family": "JetBrainsMono NFP"
-    }
+    ]
 }
+
+with open('projects_config.json', 'w', encoding='utf-8') as f:
+    json.dump(data, f, indent=4)

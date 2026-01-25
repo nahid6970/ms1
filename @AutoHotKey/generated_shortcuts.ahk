@@ -1274,3 +1274,10 @@ How it was fixed (include key code changes)
 
 ;! Unresolved ai orompt
 :X:;unresolved::Paste('still shows as power in both checked and unchecked situatin ok add it to problem & talk about how u tried to reslove it i will use another ai')
+
+;! path fix in python script
+:X:;path::Paste("
+(
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+CONFIG_FILE = os.path.join(SCRIPT_DIR, ""projects_config.json"")
+)")

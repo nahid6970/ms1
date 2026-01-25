@@ -411,6 +411,14 @@
             "trigger": ";unresolved",
             "replacement": "still shows as power in both checked and unchecked situatin ok add it to problem & talk about how u tried to reslove it i will use another ai",
             "enabled": true
+        },
+        {
+            "name": "path fix in python script",
+            "category": "General",
+            "description": "",
+            "trigger": ";path",
+            "replacement": "SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))\nCONFIG_FILE = os.path.join(SCRIPT_DIR, \"projects_config.json\")",
+            "enabled": true
         }
     ],
     "startup_scripts": [
