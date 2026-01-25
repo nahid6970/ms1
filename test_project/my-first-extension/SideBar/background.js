@@ -29,11 +29,13 @@ async function sendDataToPython(data) {
   }
 }
 
-// Auto-save on storage changes (Listening to both local and sync)
-chrome.storage.onChanged.addListener((changes, areaName) => {
-  chrome.storage[areaName].get(null, (items) => {
-    sendDataToPython(items);
-  });
+// Auto-save on storage changes (Only sync storage for this extension)
+chrome.storage.sync.onChanged.addListener((changes, areaName) => {
+  if (areaName === 'sync') {
+    chrome.storage.sync.get(null, (items) => {
+      sendDataToPython(items);
+    });
+  }
 });
 
 // Load data from Python server
