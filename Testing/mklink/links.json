@@ -51,6 +51,16 @@
                 "type": "file",
                 "target": "C:\\@delta\\ms1\\asset\\gemini\\GEMINI.md",
                 "fake": "C:\\Users\\nahid\\.gemini\\GEMINI.md"
+            },
+            {
+                "type": "file",
+                "target": "C:\\@delta\\ms1\\asset\\gemini\\task_complete.py",
+                "fake": "C:\\Users\\nahid\\.gemini\\task_complete.py"
+            },
+            {
+                "type": "file",
+                "target": "C:\\@delta\\ms1\\asset\\gemini\\task_complete_mcp.py",
+                "fake": "C:\\Users\\nahid\\.gemini\\task_complete_mcp.py"
             }
         ]
     }
