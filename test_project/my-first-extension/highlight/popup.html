@@ -1,136 +1,215 @@
 <!DOCTYPE html>
 <html>
-
 <head>
+  <meta charset="UTF-8">
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
+    
     body {
-      width: 300px;
-      padding: 15px;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f4f4f9;
+      width: 320px;
+      padding: 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      background: #1e1e1e;
+      color: #d4d4d4;
+      margin: 0;
     }
 
-    h2 {
-      margin-top: 0;
-      color: #333;
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #333;
+    }
+
+    .header-icon {
       font-size: 18px;
-      text-align: center;
+      color: #569cd6;
+    }
+
+    .header-title {
+      font-weight: 500;
+      font-size: 16px;
+    }
+
+    .section {
+      margin-bottom: 20px;
+      padding: 12px;
+      background: #2d2d30;
+      border-radius: 4px;
+      border-left: 3px solid #007acc;
+    }
+
+    .section-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #808080;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .color-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .color-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .color-label {
+      font-size: 10px;
+      color: #808080;
+    }
+
+    input[type="color"] {
+      width: 100%;
+      height: 28px;
+      border: 1px solid #3c3c3c;
+      background: #1e1e1e;
+      border-radius: 3px;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    textarea {
+      width: 100%;
+      height: 60px;
+      background: #1e1e1e;
+      border: 1px solid #3c3c3c;
+      color: #d4d4d4;
+      border-radius: 3px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      padding: 8px;
+      box-sizing: border-box;
+      resize: vertical;
     }
 
     .btn-group {
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 8px;
     }
 
     button {
-      padding: 10px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-weight: 600;
-      transition: background-color 0.2s;
-    }
-
-    .export-btn {
-      background-color: #4CAF50;
-      color: white;
-    }
-
-    .export-btn:hover {
-      background-color: #45a049;
-    }
-
-    .import-btn {
-      background-color: #2196F3;
-      color: white;
-    }
-
-    .import-btn:hover {
-      background-color: #0b7dda;
-    }
-
-    .clear-btn {
-      background-color: #f44336;
-      color: white;
-    }
-
-    .clear-btn:hover {
-      background-color: #da190b;
-    }
-
-    textarea {
       width: 100%;
-      height: 100px;
-      margin-top: 10px;
-      box-sizing: border-box;
-      border: 1px solid #ddd;
+      padding: 8px;
+      border: none;
       border-radius: 4px;
-      resize: vertical;
-      display: none;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s;
+      font-weight: 500;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      opacity: 0.9;
+    }
+
+    .btn-primary {
+      background: #0e639c;
+      color: white;
+    }
+
+    .btn-secondary {
+      background: #3c3c3c;
+      color: #cccccc;
+    }
+
+    .btn-save {
+      background: #16825d;
+      color: white;
+      margin-top: 8px;
+    }
+
+    .btn-python-save {
+      background: #9C27B0;
+      color: white;
+    }
+
+    .btn-python-load {
+      background: #673AB7;
+      color: white;
+    }
+
+    .btn-danger {
+      background: #a31515;
+      color: white;
     }
 
     #status {
-      margin-top: 10px;
-      font-size: 12px;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #333;
+      font-size: 10px;
+      color: #808080;
       text-align: center;
-      color: #666;
+      min-height: 14px;
+    }
+
+    .status-icon {
+      color: #4ec9b0;
+      margin-right: 4px;
     }
   </style>
 </head>
-
 <body>
-  <h2>Highlighter Tools</h2>
-
-  <!-- Color Settings -->
-  <div style="margin-bottom: 15px;">
-    <h3 style="font-size: 14px; margin-bottom: 8px; color: #555;">Preset Colors</h3>
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-      <div>
-        <label style="font-size: 11px; color: #777;">Color 1</label>
-        <input type="color" id="color1" value="#ffff00"
-          style="width: 100%; height: 30px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;">
-      </div>
-      <div>
-        <label style="font-size: 11px; color: #777;">Color 2</label>
-        <input type="color" id="color2" value="#aaffaa"
-          style="width: 100%; height: 30px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;">
-      </div>
-      <div>
-        <label style="font-size: 11px; color: #777;">Color 3</label>
-        <input type="color" id="color3" value="#aaddff"
-          style="width: 100%; height: 30px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;">
-      </div>
-      <div>
-        <label style="font-size: 11px; color: #777;">Color 4</label>
-        <input type="color" id="color4" value="#ffaaaa"
-          style="width: 100%; height: 30px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;">
-      </div>
-    </div>
-    <button id="saveColors"
-      style="width: 100%; margin-top: 8px; padding: 6px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">Save
-      Colors</button>
+  <div class="header">
+    <div class="header-icon">🖋️</div>
+    <div class="header-title">Highlighter</div>
   </div>
 
-  <!-- Domain Exclusion Settings -->
-  <div style="margin-bottom: 15px; border-top: 1px solid #ddd; padding-top: 10px;">
-    <h3 style="font-size: 14px; margin-bottom: 8px; color: #555;">Excluded Domains</h3>
-    <label style="font-size: 11px; color: #777; display: block; margin-bottom: 5px;">Enter domains to exclude (one per
-      line):</label>
-    <textarea id="excludedDomains" placeholder="example.com&#10;google.com"
-      style="display: block; width: 100%; height: 60px; margin-bottom: 8px; font-family: monospace; font-size: 12px; padding: 5px;"></textarea>
-    <button id="saveExclusions"
-      style="width: 100%; padding: 6px; background: #2196F3; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">Save
-      Exclusions</button>
+  <div class="section">
+    <div class="section-title"><span>🎨</span> Preset Colors</div>
+    <div class="color-grid">
+      <div class="color-item">
+        <label class="color-label">C1</label>
+        <input type="color" id="color1" value="#ffff00">
+      </div>
+      <div class="color-item">
+        <label class="color-label">C2</label>
+        <input type="color" id="color2" value="#aaffaa">
+      </div>
+      <div class="color-item">
+        <label class="color-label">C3</label>
+        <input type="color" id="color3" value="#aaddff">
+      </div>
+      <div class="color-item">
+        <label class="color-label">C4</label>
+        <input type="color" id="color4" value="#ffaaaa">
+      </div>
+    </div>
+    <button id="saveColors" class="btn-save">Save Colors</button>
+  </div>
+
+  <div class="section" style="border-left-color: #569cd6;">
+    <div class="section-title"><span>🚫</span> Exclusions</div>
+    <textarea id="excludedDomains" placeholder="domain.com"></textarea>
+    <button id="saveExclusions" class="btn-primary" style="margin-top: 8px;">Update Exclusions</button>
   </div>
 
   <div class="btn-group">
-    <button id="saveToPython" style="background: #9C27B0; color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer; font-weight: 600;">Save to Python Server</button>
-    <button id="loadFromPython" style="background: #673AB7; color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer; font-weight: 600;">Load from Python Server</button>
-    <button id="clearBtn" class="clear-btn">Clear All Data</button>
+    <button id="saveToPython" class="btn-python-save"><span>💾</span> Backup to Server</button>
+    <button id="loadFromPython" class="btn-python-load"><span>📂</span> Restore from Server</button>
+    <button id="clearBtn" class="btn-danger"><span>🗑️</span> Clear All Data</button>
   </div>
+
   <div id="status"></div>
   <script src="popup.js"></script>
 </body>
-
 </html>

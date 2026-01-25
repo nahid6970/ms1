@@ -1,53 +1,48 @@
 <!DOCTYPE html>
 <html>
-
 <head>
     <meta charset="utf-8">
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
+        
         body {
-            width: 250px;
-            padding: 15px;
-            font-family: Arial, sans-serif;
+            width: 300px;
+            padding: 16px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            margin: 0;
         }
 
         .header {
-            text-align: center;
-            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #333;
         }
 
-        .toggle-btn {
-            width: 100%;
-            padding: 12px;
-            background: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
+        .header-icon {
+            font-size: 18px;
+            color: #569cd6;
+        }
+
+        .header-title {
+            font-weight: 500;
             font-size: 16px;
-            margin-bottom: 10px;
         }
 
-        .toggle-btn:hover {
-            background: #45a049;
-        }
-
-        .toggle-btn.active {
-            background: #ff4444;
-        }
-
-        .clear-btn {
-            width: 100%;
-            padding: 10px;
-            background: #f44336;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        .clear-btn:hover {
-            background: #da190b;
+        .status {
+            text-align: center;
+            margin: 12px 0;
+            font-size: 11px;
+            color: #808080;
+            background: #2d2d30;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #333;
         }
 
         .button-row {
@@ -56,62 +51,75 @@
             margin-bottom: 8px;
         }
 
+        button {
+            padding: 8px;
+            border: none;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+            opacity: 0.9;
+        }
+
+        .btn-primary {
+            background: #0e639c;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #3c3c3c;
+            color: #cccccc;
+        }
+
+        .btn-danger {
+            background: #a31515;
+            color: white;
+        }
+
+        .btn-python-save {
+            background: #9C27B0;
+            color: white;
+        }
+
+        .btn-python-load {
+            background: #673AB7;
+            color: white;
+        }
+
         .half-btn {
             flex: 1;
-            padding: 10px;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        .export-btn {
-            background: #2196F3;
-        }
-
-        .export-btn:hover {
-            background: #1976D2;
-        }
-
-        .import-btn {
-            background: #FF9800;
-        }
-
-        .import-btn:hover {
-            background: #F57C00;
-        }
-
-        .status {
-            text-align: center;
-            margin: 10px 0;
-            font-size: 14px;
         }
 
         .settings-section {
-            margin-top: 15px;
-            border-top: 1px solid #ddd;
-            padding-top: 15px;
+            margin-top: 16px;
+            border-top: 1px solid #333;
+            padding-top: 16px;
         }
 
         .settings-toggle {
             width: 100%;
-            padding: 8px;
-            background: #666;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 12px;
-            margin-bottom: 10px;
-        }
-
-        .settings-toggle:hover {
-            background: #555;
+            background: #2d2d30;
+            color: #d4d4d4;
+            border: 1px solid #333;
         }
 
         .settings-content {
             display: none;
+            background: #2d2d30;
+            padding: 12px;
+            border-radius: 4px;
+            margin-top: 8px;
+            border-left: 3px solid #007acc;
         }
 
         .settings-content.show {
@@ -124,42 +132,50 @@
 
         .setting-label {
             display: block;
-            font-size: 12px;
-            margin-bottom: 4px;
-            font-weight: bold;
+            font-size: 10px;
+            margin-bottom: 6px;
+            color: #808080;
+            text-transform: uppercase;
+            font-weight: 700;
         }
 
         .setting-input {
             width: 100%;
-            padding: 6px;
-            border: 1px solid #ddd;
+            background: #1e1e1e;
+            border: 1px solid #3c3c3c;
+            color: #d4d4d4;
             border-radius: 3px;
-            font-size: 12px;
         }
 
         .setting-row {
             display: flex;
             gap: 8px;
             align-items: center;
-        }
-
-        .setting-checkbox {
-            margin-right: 6px;
+            font-size: 11px;
         }
 
         .color-input {
             width: 40px;
-            height: 30px;
-            border: none;
+            height: 24px;
+            background: #1e1e1e;
+            border: 1px solid #3c3c3c;
             border-radius: 3px;
             cursor: pointer;
+            padding: 0;
+        }
+
+        #sizeValue, #borderValue {
+            font-size: 10px;
+            color: #569cd6;
+            min-width: 30px;
         }
     </style>
 </head>
 
 <body>
     <div class="header">
-        <h3>Image Checker</h3>
+        <div class="header-icon">📸</div>
+        <div class="header-title">Image Checker</div>
     </div>
 
     <div id="status" class="status">
@@ -167,29 +183,29 @@
     </div>
 
     <div class="button-row">
-        <button id="toggleMode" class="half-btn clear-btn">
+        <button id="toggleMode" class="half-btn btn-danger">
             Start Mode
         </button>
-        <button id="clearAll" class="half-btn clear-btn">
+        <button id="clearAll" class="half-btn btn-danger">
             Clear All
         </button>
     </div>
 
     <div class="button-row">
-        <button id="exportData" class="half-btn export-btn">
-            Export Data
+        <button id="exportData" class="half-btn btn-primary">
+            <span>📤</span> Export
         </button>
-        <button id="importData" class="half-btn import-btn">
-            Import Data
+        <button id="importData" class="half-btn btn-primary">
+            <span>📥</span> Import
         </button>
     </div>
 
     <div class="button-row">
-        <button id="saveToPython" class="half-btn" style="background: #9C27B0;">
-            💾 Save
+        <button id="saveToPython" class="half-btn btn-python-save">
+            <span>💾</span> Backup
         </button>
-        <button id="loadFromPython" class="half-btn" style="background: #673AB7;">
-            📂 Load
+        <button id="loadFromPython" class="half-btn btn-python-load">
+            <span>📂</span> Restore
         </button>
     </div>
 
@@ -200,53 +216,46 @@
 
         <div id="settingsContent" class="settings-content">
             <div class="setting-item">
-                <label class="setting-label">Checkmark Size (% of image)</label>
-                <input type="range" id="checkmarkSize" class="setting-input" min="5" max="50" value="15">
-                <span id="sizeValue">15%</span>
+                <label class="setting-label">Checkmark Size</label>
+                <div class="setting-row">
+                    <input type="range" id="checkmarkSize" class="setting-input" min="5" max="50" value="15">
+                    <span id="sizeValue">15%</span>
+                </div>
             </div>
 
             <div class="setting-item">
-                <label class="setting-label">Checkmark Color</label>
+                <label class="setting-label">Colors</label>
                 <div class="setting-row">
                     <input type="color" id="checkmarkColor" class="color-input" value="#4CAF50">
-                    <span>Background</span>
-                </div>
-            </div>
-
-            <div class="setting-item">
-                <label class="setting-label">Text Color</label>
-                <div class="setting-row">
-                    <input type="color" id="textColor" class="color-input" value="#ffffff">
-                    <span>Checkmark ✓</span>
+                    <span>BG</span>
+                    <input type="color" id="textColor" class="color-input" value="#ffffff" style="margin-left: 8px;">
+                    <span>Text</span>
                 </div>
             </div>
 
             <div class="setting-item">
                 <div class="setting-row">
-                    <input type="checkbox" id="enableBorder" class="setting-checkbox">
-                    <label>Add border to marked images</label>
+                    <input type="checkbox" id="enableBorder">
+                    <label>Enable Border</label>
                 </div>
             </div>
 
             <div class="setting-item">
-                <label class="setting-label">Border Color & Width</label>
+                <label class="setting-label">Border Style</label>
                 <div class="setting-row">
                     <input type="color" id="borderColor" class="color-input" value="#4CAF50">
-                    <input type="range" id="borderWidth" class="setting-input" min="1" max="10" value="3"
-                        style="flex: 1; margin-left: 8px;">
+                    <input type="range" id="borderWidth" class="setting-input" min="1" max="10" value="3" style="flex: 1;">
                     <span id="borderValue">3px</span>
                 </div>
             </div>
 
-            <div class="setting-item">
-                <div class="setting-row">
-                    <button id="resetSettings" class="half-btn clear-btn" style="font-size: 12px;">
-                        Reset Default
-                    </button>
-                    <button id="applySettings" class="half-btn export-btn" style="font-size: 12px;">
-                        Apply Changes
-                    </button>
-                </div>
+            <div class="button-row" style="margin-top: 16px;">
+                <button id="resetSettings" class="half-btn btn-secondary">
+                    Reset
+                </button>
+                <button id="applySettings" class="half-btn btn-primary">
+                    Apply
+                </button>
             </div>
         </div>
     </div>
@@ -255,5 +264,4 @@
 
     <script src="popup.js"></script>
 </body>
-
 </html>
