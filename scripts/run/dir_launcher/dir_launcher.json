@@ -85,6 +85,11 @@
       "category": "AI"
     },
     {
+      "name": "Kiro CLI (WSL)",
+      "template": "start wsl bash -c \"cd $(wslpath '{path}') && exec bash -l -c kiro-cli\"",
+      "category": "AI"
+    },
+    {
       "name": "Explorer",
       "template": "explorer \"{path}\"",
       "category": "General"
