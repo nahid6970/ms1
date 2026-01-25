@@ -9,6 +9,11 @@ echo "🚀 Starting Ubuntu WSL optimization..."
 
 # Update system
 echo "📦 Updating system packages..."
+# Wait for any existing apt processes to finish
+sudo fuser -vki /var/lib/dpkg/lock-frontend 2>/dev/null || true
+sudo fuser -vki /var/cache/apt/archives/lock 2>/dev/null || true
+sudo rm -f /var/lib/dpkg/lock-frontend /var/cache/apt/archives/lock 2>/dev/null || true
+sudo dpkg --configure -a
 sudo apt update && sudo apt upgrade -y
 
 # Fix common WSL issues
@@ -191,7 +196,7 @@ EOF
 chmod +x ~/start-vnc.sh
 
 # Install GUI apps for testing
-sudo apt install -y firefox gedit
+sudo apt install -y gedit mousepad
 
 # Performance optimizations
 echo "⚡ Applying performance optimizations..."
@@ -229,6 +234,6 @@ echo "🏪 Install Snap apps: snap install <app-name>"
 echo "🍺 Install Homebrew packages: brew install <package-name>"
 echo ""
 echo "🖥️ For GUI apps: Run ~/start-vnc.sh then connect TightVNC to localhost:5900"
-echo "🧪 Test GUI: firefox or gedit"
+echo "🧪 Test GUI: gedit or mousepad"
 echo "💡 Run ~/sysinfo.sh to see system information"
 echo "💡 Run ~/install-vscode-extensions.sh to install VS Code extensions"
