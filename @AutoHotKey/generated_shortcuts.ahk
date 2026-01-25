@@ -701,7 +701,7 @@ IsGeminiSessionContext() {
 
 #HotIf IsGeminiSessionContext()
 
-+/::SendText("/stats session")
+^/::SendText("/stats session")
 
 #HotIf
 

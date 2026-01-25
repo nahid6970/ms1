@@ -449,7 +449,7 @@
             "name": "Gemini Session",
             "category": "Terminal",
             "description": "Save current Gemini chat session",
-            "hotkey": "+/",
+            "hotkey": "^/",
             "window_title": "Ready",
             "process_name": "WindowsTerminal.exe",
             "window_class": "",
