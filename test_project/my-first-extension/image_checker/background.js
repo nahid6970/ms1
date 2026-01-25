@@ -48,10 +48,38 @@ chrome.runtime.onStartup.addListener(() => {
     .catch(error => console.log('Python server not available:', error.message));
 });
 
-// Handle manual save requests from popup
+// Load data from Python server
+async function loadDataFromPython() {
+  try {
+    const response = await fetch(`${PYTHON_SERVER}/load?extension_name=${EXTENSION_NAME}&file_name=${FILE_NAME}`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' }
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Server responded with ${response.status}`);
+    }
+    
+    const result = await response.json();
+    console.log('Data loaded from Python server:', result);
+    return result;
+  } catch (error) {
+    console.error('Failed to load data from Python server:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+// Handle manual save/load requests from popup
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === 'saveToPython') {
     sendDataToPython(message.data)
+      .then(result => sendResponse(result))
+      .catch(error => sendResponse({ success: false, error: error.message }));
+    return true; // Keep channel open for async response
+  }
+  
+  if (message.action === 'loadFromPython') {
+    loadDataFromPython()
       .then(result => sendResponse(result))
       .catch(error => sendResponse({ success: false, error: error.message }));
     return true; // Keep channel open for async response

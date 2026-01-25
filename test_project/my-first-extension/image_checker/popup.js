@@ -124,6 +124,53 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // Load from Python server button
+    const loadFromPythonBtn = document.getElementById('loadFromPython');
+    if (loadFromPythonBtn) {
+        loadFromPythonBtn.addEventListener('click', function () {
+            const originalText = loadFromPythonBtn.textContent;
+            const originalBg = loadFromPythonBtn.style.background;
+            
+            loadFromPythonBtn.textContent = '⏳ Loading...';
+            loadFromPythonBtn.disabled = true;
+            
+            chrome.runtime.sendMessage({
+                action: 'loadFromPython'
+            }, function (response) {
+                loadFromPythonBtn.disabled = false;
+                
+                if (response && response.success && response.data) {
+                    chrome.storage.local.set(response.data, () => {
+                        loadFromPythonBtn.textContent = '✅ Loaded!';
+                        loadFromPythonBtn.style.background = '#4CAF50';
+                        
+                        alert('Data loaded from Python server! Refresh the page to see changes.');
+                        
+                        // Notify active tab to refresh
+                        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+                            if (tabs[0]) {
+                                chrome.tabs.reload(tabs[0].id);
+                            }
+                        });
+
+                        setTimeout(() => {
+                            loadFromPythonBtn.textContent = originalText;
+                            loadFromPythonBtn.style.background = originalBg;
+                        }, 2000);
+                    });
+                } else {
+                    loadFromPythonBtn.textContent = '❌ Failed';
+                    loadFromPythonBtn.style.background = '#f44336';
+                    alert('Failed to load from Python server. Make sure the server is running and data exists.');
+                    setTimeout(() => {
+                        loadFromPythonBtn.textContent = originalText;
+                        loadFromPythonBtn.style.background = originalBg;
+                    }, 2000);
+                }
+            });
+        });
+    }
+
     // Import functionality
     const importBtn = document.getElementById('importData');
     const fileInput = document.getElementById('fileInput');
