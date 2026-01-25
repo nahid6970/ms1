@@ -21,18 +21,21 @@ CP_DIM = "#3a3a3a"
 CP_TEXT = "#E0E0E0"
 CP_SUBTEXT = "#808080"
 
-CONFIG_FILE = "projects_config.json"
+# Get the directory where the script is located
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+CONFIG_FILE = os.path.join(SCRIPT_DIR, "projects_config.json")
 
 class WorkerSignals(QObject):
     finished = pyqtSignal(str, str, str) # id, type, status_color
 
 class MonitorWorker(threading.Thread):
-    def __init__(self, project_id, project_type, path, extra=None):
+    def __init__(self, project_id, project_type, path, extra=None, cmd_pattern=None):
         super().__init__()
         self.project_id = project_id
         self.project_type = project_type
         self.path = path
         self.extra = extra
+        self.cmd_pattern = cmd_pattern
         self.signals = WorkerSignals()
         self.daemon = True
 
@@ -56,14 +59,16 @@ class MonitorWorker(threading.Thread):
             self.signals.finished.emit(self.project_id, "git", CP_RED)
 
     def check_rclone(self):
-        # extra is dst
         src = self.path
         dst = self.extra
+        pattern = self.cmd_pattern if self.cmd_pattern else "rclone check src dst --fast-list --size-only"
+        
         try:
-            # Using size-only for speed as in mypygui.py
-            cmd = ["rclone", "check", src, dst, "--fast-list", "--size-only"]
-            res = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
-            if res.returncode == 0:
+            actual_cmd = pattern.replace("src", f'"{src}"').replace("dst", f'"{dst}"')
+            res = subprocess.run(actual_cmd, shell=True, capture_output=True, text=True, timeout=30)
+            
+            # The logic in mypygui.py uses "ERROR" check in the log output
+            if res.returncode == 0 and "ERROR" not in res.stdout + res.stderr:
                 self.signals.finished.emit(self.project_id, "rclone", CP_GREEN)
             else:
                 self.signals.finished.emit(self.project_id, "rclone", CP_RED)
@@ -75,13 +80,14 @@ class AddProjectDialog(QDialog):
         super().__init__(parent)
         self.mode = mode
         self.setWindowTitle(f"ADD NEW {mode.upper()} PROJECT")
-        self.setFixedWidth(400)
+        self.setFixedWidth(500)
         self.setStyleSheet(f"background-color: {CP_BG}; color: {CP_TEXT}; font-family: 'Consolas';")
         
         layout = QVBoxLayout(self)
         form = QFormLayout()
         
         self.name_input = QLineEdit()
+        self.label_input = QLineEdit()
         self.path_input = QLineEdit()
         self.browse_btn = QPushButton("BROWSE")
         self.browse_btn.clicked.connect(self.browse_path)
@@ -91,11 +97,19 @@ class AddProjectDialog(QDialog):
         path_layout.addWidget(self.browse_btn)
         
         form.addRow("NAME:", self.name_input)
+        form.addRow("UI LABEL:", self.label_input)
         form.addRow("PATH/SRC:", path_layout)
         
         if mode == "rclone":
             self.dst_input = QLineEdit()
+            self.cmd_input = QLineEdit("rclone check src dst --fast-list --size-only")
+            self.l_cmd_input = QLineEdit("rclone sync src dst -P --fast-list --log-level INFO")
+            self.r_cmd_input = QLineEdit("rclone sync dst src -P --fast-list")
+            
             form.addRow("REMOTE/DST:", self.dst_input)
+            form.addRow("CHECK CMD:", self.cmd_input)
+            form.addRow("CTRL+L CMD:", self.l_cmd_input)
+            form.addRow("CTRL+R CMD:", self.r_cmd_input)
         
         layout.addLayout(form)
         
@@ -108,10 +122,12 @@ class AddProjectDialog(QDialog):
         btns.addWidget(self.cancel_btn)
         layout.addLayout(btns)
         
-        for widget in [self.name_input, self.path_input]:
-            widget.setStyleSheet(f"background-color: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 4px;")
+        inputs = [self.name_input, self.label_input, self.path_input]
         if mode == "rclone":
-            self.dst_input.setStyleSheet(f"background-color: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 4px;")
+            inputs.extend([self.dst_input, self.cmd_input, self.l_cmd_input, self.r_cmd_input])
+            
+        for widget in inputs:
+            widget.setStyleSheet(f"background-color: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 4px;")
 
     def browse_path(self):
         path = QFileDialog.getExistingDirectory(self, "Select Directory")
@@ -121,20 +137,25 @@ class AddProjectDialog(QDialog):
     def get_data(self):
         data = {
             "name": self.name_input.text(),
+            "label": self.label_input.text() if self.label_input.text() else self.name_input.text(),
             "path": self.path_input.text()
         }
         if self.mode == "rclone":
             data["dst"] = self.dst_input.text()
+            data["cmd"] = self.cmd_input.text()
+            data["left_click_cmd"] = self.l_cmd_input.text()
+            data["right_click_cmd"] = self.r_cmd_input.text()
         return data
 
 class ProjectWidget(QWidget):
-    def __init__(self, project_id, name, p_type, path, extra=None, parent=None):
+    def __init__(self, project_id, name, p_type, path, extra=None, parent=None, config=None):
         super().__init__(parent)
         self.project_id = project_id
         self.p_type = p_type
         self.name = name
         self.path = path
         self.extra = extra # dst for rclone
+        self.config = config or {}
         self.log_dir = r"C:\Users\nahid\script_output\rclone"
         
         layout = QHBoxLayout(self)
@@ -143,7 +164,8 @@ class ProjectWidget(QWidget):
         self.status_indicator = QLabel("●")
         self.status_indicator.setStyleSheet(f"color: {CP_DIM}; font-size: 14pt;")
         
-        self.name_label = QLabel(name)
+        label_text = self.config.get("label", name)
+        self.name_label = QLabel(label_text)
         self.name_label.setStyleSheet(f"font-weight: bold; color: {CP_TEXT};")
         
         self.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -157,9 +179,9 @@ class ProjectWidget(QWidget):
 
     def get_tooltip(self):
         if self.p_type == "git":
-            return "L-Click: Gitter | Ctrl+L: Explorer | R-Click: Lazygit | Ctrl+R: Git Restore"
+            return f"Path: {self.path}\\nL-Click: Gitter | Ctrl+L: Explorer | R-Click: Lazygit | Ctrl+R: Git Restore"
         else:
-            return "L-Click: View Log | Ctrl+L: Sync Push | Ctrl+R: Sync Pull"
+            return f"Src: {self.path}\\nDst: {self.extra}\\nL-Click: View Log | Ctrl+L: Sync Push | Ctrl+R: Sync Pull"
 
     def mousePressEvent(self, event):
         modifiers = event.modifiers()
@@ -173,7 +195,8 @@ class ProjectWidget(QWidget):
                     self.run_gitter()
             else: # rclone
                 if is_ctrl:
-                    cmd = f'rclone sync "{self.path}" "{self.extra}" -P --fast-list --log-level INFO'
+                    pattern = self.config.get("left_click_cmd", "rclone sync src dst -P --fast-list --log-level INFO")
+                    cmd = pattern.replace("src", f'"{self.path}"').replace("dst", f'"{self.extra}"')
                     subprocess.Popen(f'start pwsh -NoExit -Command "{cmd}"', shell=True)
                 else:
                     log_path = os.path.join(self.log_dir, f"{self.name}_check.log")
@@ -190,7 +213,8 @@ class ProjectWidget(QWidget):
                     subprocess.Popen('start pwsh -NoExit -Command "lazygit"', cwd=self.path, shell=True)
             else: # rclone
                 if is_ctrl:
-                    cmd = f'rclone sync "{self.extra}" "{self.path}" -P --fast-list'
+                    pattern = self.config.get("right_click_cmd", "rclone sync dst src -P --fast-list")
+                    cmd = pattern.replace("src", f'"{self.path}"').replace("dst", f'"{self.extra}"')
                     subprocess.Popen(f'start pwsh -NoExit -Command "{cmd}"', shell=True)
 
     def run_gitter(self):
@@ -243,16 +267,23 @@ class GitRcloneMonitor(QMainWindow):
         QTimer.singleShot(1000, self.refresh_all)
 
     def load_config(self):
+        self.projects = {"git": [], "rclone": []}
         if os.path.exists(CONFIG_FILE):
             try:
-                with open(CONFIG_FILE, "r") as f:
-                    self.projects = json.load(f)
-            except:
-                pass
+                with open(CONFIG_FILE, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                    if isinstance(data, dict):
+                        self.projects["git"] = data.get("git", [])
+                        self.projects["rclone"] = data.get("rclone", [])
+            except Exception as e:
+                print(f"Error loading config: {e}")
 
     def save_config(self):
-        with open(CONFIG_FILE, "w") as f:
-            json.dump(self.projects, f, indent=4)
+        try:
+            with open(CONFIG_FILE, "w", encoding="utf-8") as f:
+                json.dump(self.projects, f, indent=4)
+        except Exception as e:
+            print(f"Error saving config: {e}")
 
     def init_ui(self):
         self.setStyleSheet(f"""
@@ -333,22 +364,32 @@ class GitRcloneMonitor(QMainWindow):
 
     def populate_lists(self):
         # Clear existing
-        for i in reversed(range(self.git_list_layout.count())):
-            self.git_list_layout.itemAt(i).widget().setParent(None)
-        for i in reversed(range(self.rclone_list_layout.count())):
-            self.rclone_list_layout.itemAt(i).widget().setParent(None)
+        for i in reversed(range(self.git_list_layout.count())): 
+            item = self.git_list_layout.itemAt(i)
+            if item and item.widget():
+                item.widget().setParent(None)
+        for i in reversed(range(self.rclone_list_layout.count())): 
+            item = self.rclone_list_layout.itemAt(i)
+            if item and item.widget():
+                item.widget().setParent(None)
         
         self.project_widgets = {"git": {}, "rclone": {}}
         
         for idx, p in enumerate(self.projects["git"]):
             pid = f"git_{idx}"
-            w = ProjectWidget(pid, p["name"], "git", p["path"])
+            path = p["path"]
+            if not os.path.isabs(path):
+                path = os.path.join(SCRIPT_DIR, path)
+            w = ProjectWidget(pid, p["name"], "git", path, config=p)
             self.git_list_layout.addWidget(w)
             self.project_widgets["git"][pid] = w
             
         for idx, p in enumerate(self.projects["rclone"]):
             pid = f"rclone_{idx}"
-            w = ProjectWidget(pid, p["name"], "rclone", p["path"], p["dst"])
+            path = p["path"]
+            if not os.path.isabs(path):
+                path = os.path.join(SCRIPT_DIR, path)
+            w = ProjectWidget(pid, p["name"], "rclone", path, p["dst"], config=p)
             self.rclone_list_layout.addWidget(w)
             self.project_widgets["rclone"][pid] = w
 
@@ -371,13 +412,16 @@ class GitRcloneMonitor(QMainWindow):
             
         for pid, w in self.project_widgets["rclone"].items():
             w.update_status(CP_DIM)
-            worker = MonitorWorker(pid, "rclone", w.path, w.extra)
+            cmd_pattern = w.config.get("cmd")
+            worker = MonitorWorker(pid, "rclone", w.path, w.extra, cmd_pattern)
             worker.signals.finished.connect(self.on_check_finished)
             worker.start()
 
     def on_check_finished(self, pid, p_type, color):
-        if pid in self.project_widgets[p_type]:
+        if p_type in self.project_widgets and pid in self.project_widgets[p_type]:
             self.project_widgets[p_type][pid].update_status(color)
+        
+        
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
