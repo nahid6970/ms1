@@ -5,9 +5,10 @@ import ctypes
 import subprocess
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QLabel, QPushButton, QLineEdit, QGroupBox, QScrollArea, 
-                             QFrame, QMessageBox, QFileDialog, QProgressBar, QDialog)
-
-from PyQt6.QtCore import Qt, QThread, pyqtSignal
+                             QFrame, QMessageBox, QFileDialog, QProgressBar, QDialog,
+                             QTreeView, QHeaderView)
+from PyQt6.QtGui import QFont, QIcon, QColor, QFileSystemModel
+from PyQt6.QtCore import Qt, QThread, pyqtSignal, QDir
 
 # ==========================================
 # CYBERPUNK THEME PALETTE
@@ -56,8 +57,25 @@ STYLESHEET = f"""
         background: {CP_PANEL};
         text-align: center;
         color: {CP_YELLOW};
+        height: 20px;
     }}
     QProgressBar::chunk {{ background-color: {CP_CYAN}; }}
+
+    /* TREE VIEW */
+    QTreeView {{
+        background-color: #080808;
+        border: 1px solid {CP_DIM};
+        color: {CP_TEXT};
+        outline: none;
+    }}
+    QTreeView::item:hover {{ background-color: #1a1a1a; }}
+    QTreeView::item:selected {{ background-color: #222222; color: {CP_YELLOW}; }}
+    QHeaderView::section {{
+        background-color: {CP_PANEL};
+        color: {CP_SUBTEXT};
+        padding: 4px;
+        border: 1px solid {CP_DIM};
+    }}
 """
 
 class SyncWorker(QThread):
@@ -180,28 +198,61 @@ class MirrorSyncManager(QMainWindow):
 
         self.details_label = QLabel("")
         self.details_label.setWordWrap(True)
-        self.details_label.setStyleSheet(f"color: {CP_SUBTEXT}; font-size: 9pt;")
+        self.details_label.setStyleSheet(f"color: {CP_SUBTEXT}; font-size: 9pt; margin-bottom: 5px;")
         right_layout.addWidget(self.details_label)
 
-        # Progress
-        self.progress_bar = QProgressBar()
-        right_layout.addWidget(self.progress_bar)
+        # Split area for Tree and Log
+        split_layout = QHBoxLayout()
+        
+        # Source Tree View
+        self.tree_view = QTreeView()
+        self.tree_model = QFileSystemModel()
+        self.tree_model.setReadOnly(True)
+        self.tree_view.setModel(self.tree_model)
+        self.tree_view.header().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
+        # Hide columns: Size, Type, Date Modified
+        for i in range(1, 4):
+            self.tree_view.hideColumn(i)
+        
+        tree_container = QVBoxLayout()
+        tree_container.addWidget(QLabel("SOURCE STRUCTURE:"))
+        tree_container.addWidget(self.tree_view)
+        split_layout.addLayout(tree_container, stretch=2)
 
+        # Log Area
+        log_container = QVBoxLayout()
+        log_container.addWidget(QLabel("ACTIVITY LOG:"))
         self.log_area = QScrollArea()
         self.log_area.setWidgetResizable(True)
         self.log_content = QLabel("Ready...")
         self.log_content.setAlignment(Qt.AlignmentFlag.AlignTop)
         self.log_content.setStyleSheet(f"color: {CP_SUBTEXT}; font-size: 9pt; padding: 10px; background-color: #080808;")
         self.log_area.setWidget(self.log_content)
-        right_layout.addWidget(self.log_area)
+        log_container.addWidget(self.log_area)
+        split_layout.addLayout(log_container, stretch=3)
+
+        right_layout.addLayout(split_layout)
+
+        # Progress (Above Rocket Button)
+        self.progress_bar = QProgressBar()
+        right_layout.addWidget(self.progress_bar)
 
         self.sync_btn = QPushButton("🚀 START MIRROR SYNC")
         self.sync_btn.setFixedHeight(50)
         self.sync_btn.setEnabled(False)
         self.sync_btn.setStyleSheet(f"""
-            QPushButton {{ background-color: {CP_DIM}; border: 1px solid {CP_GREEN}; color: {CP_GREEN}; font-size: 12pt; }}
+            QPushButton {{ 
+                background-color: {CP_DIM}; 
+                border: 1px solid {CP_GREEN}; 
+                color: {CP_GREEN}; 
+                font-size: 12pt; 
+            }}
             QPushButton:hover {{ background-color: {CP_GREEN}; color: black; }}
-            QPushButton:disabled {{ border-color: {CP_DIM}; color: {CP_DIM}; }}
+            QPushButton:disabled {{ 
+                background-color: #0a0a0a;
+                border: 1px solid #222222; 
+                color: #444444; 
+            }}
         """)
         self.sync_btn.clicked.connect(self.start_sync)
         right_layout.addWidget(self.sync_btn)
@@ -259,6 +310,13 @@ class MirrorSyncManager(QMainWindow):
         self.current_project = self.projects[index]
         self.selected_label.setText(self.current_project["name"])
         self.details_label.setText(f"SOURCE: {self.current_project['source']}\nDEST: {self.current_project['destination']}")
+        
+        # Update Tree View
+        src_path = self.current_project['source']
+        if os.path.exists(src_path):
+            self.tree_model.setRootPath(src_path)
+            self.tree_view.setRootIndex(self.tree_model.index(src_path))
+        
         self.sync_btn.setEnabled(True)
         self.log_content.setText("Project loaded. Click Start to begin.")
 
