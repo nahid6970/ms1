@@ -2316,12 +2316,16 @@ document.addEventListener('DOMContentLoaded', function () {
       // Get all URLs and selected URL index
       const allUrls = getAllUrls(false);
       const selectedUrlIndex = getSelectedUrlIndex(false);
-      const selectedClickAction = document.querySelector('input[name="link-click-action"]:checked').value;
+      const clickActionElement = document.querySelector('input[name="link-click-action"]:checked');
+      const selectedClickAction = clickActionElement ? clickActionElement.value : 'url';
+      
+      const defaultTypeElement = document.querySelector('input[name="link-default-type"]:checked');
+      const defaultType = defaultTypeElement ? defaultTypeElement.value : 'text';
 
       const newLink = {
         name: document.getElementById('link-name').value,
         group: document.getElementById('link-group').value || undefined,
-        url: allUrls.length > 0 ? allUrls[0] : document.getElementById('link-url').value, // Primary URL for backward compatibility
+        url: allUrls.length > 0 ? allUrls[0] : (document.getElementById('link-url') ? document.getElementById('link-url').value : ''), // Primary URL for backward compatibility
         urls: allUrls.length > 1 ? allUrls : undefined, // Store all URLs if multiple
         selected_url_index: allUrls.length > 1 ? selectedUrlIndex : undefined,
         icon_class: document.getElementById('link-icon-class').value || undefined,
@@ -2331,7 +2335,7 @@ document.addEventListener('DOMContentLoaded', function () {
         svg_code: document.getElementById('link-svg-code').value || undefined,
         width: document.getElementById('link-width').value || undefined,
         height: document.getElementById('link-height').value || undefined,
-        default_type: document.querySelector('input[name="link-default-type"]:checked').value || 'text',
+        default_type: defaultType,
         background_color: document.getElementById('link-background-color').value || undefined,
         border_radius: document.getElementById('link-border-radius').value || undefined,
         font_family: document.getElementById('link-font-family').value || undefined,
@@ -2766,18 +2770,29 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const linkId = editLinkIndexInput.value;
         const originalLink = links[linkId];
+        
+        if (!originalLink) {
+          console.error('Original link not found at index:', linkId);
+          alert('Error: Could not find the link being edited.');
+          return;
+        }
+
         const originalGroupName = originalLink.group || 'Ungrouped';
-        const newGroupName = document.getElementById('edit-link-group').value || 'Ungrouped';
+        const newGroupName = (document.getElementById('edit-link-group') ? document.getElementById('edit-link-group').value : '') || 'Ungrouped';
 
         // Get all URLs and selected URL index for edit form
         const allUrls = getAllUrls(true);
         const selectedUrlIndex = getSelectedUrlIndex(true);
-        const selectedClickAction = document.querySelector('input[name="edit-link-click-action"]:checked').value;
+        const clickActionElement = document.querySelector('input[name="edit-link-click-action"]:checked');
+        const selectedClickAction = clickActionElement ? clickActionElement.value : 'url';
+        
+        const defaultTypeElement = document.querySelector('input[name="edit-link-default-type"]:checked');
+        const defaultType = defaultTypeElement ? defaultTypeElement.value : 'text';
 
         const updatedLink = {
           name: document.getElementById('edit-link-name').value,
           group: document.getElementById('edit-link-group').value || undefined,
-          url: allUrls.length > 0 ? allUrls[0] : document.getElementById('edit-link-url').value, // Primary URL for backward compatibility
+          url: allUrls.length > 0 ? allUrls[0] : (document.getElementById('edit-link-url') ? document.getElementById('edit-link-url').value : ''), // Primary URL for backward compatibility
           urls: allUrls.length > 1 ? allUrls : undefined, // Store all URLs if multiple
           selected_url_index: allUrls.length > 1 ? selectedUrlIndex : undefined,
           icon_class: document.getElementById('edit-link-icon-class').value || undefined,
@@ -2787,7 +2802,7 @@ document.addEventListener('DOMContentLoaded', function () {
           height: document.getElementById('edit-link-height').value || undefined,
           text: document.getElementById('edit-link-text').value || undefined,
           svg_code: document.getElementById('edit-link-svg-code').value || undefined,
-          default_type: document.querySelector('input[name="edit-link-default-type"]:checked').value || 'text',
+          default_type: defaultType,
           background_color: document.getElementById('edit-link-background-color').value || undefined,
           border_radius: document.getElementById('edit-link-border-radius').value || undefined,
           title: document.getElementById('edit-link-title').value || undefined,
@@ -2847,38 +2862,45 @@ document.addEventListener('DOMContentLoaded', function () {
             editLinkPopup.classList.add('hidden');
             await fetchAndDisplayLinks();
 
-            // Re-open the popup if it was open (for both top groups and box groups)
-            if (originalLink.collapsible || originalLink.horizontal_stack) {
-              const groupElement = document.querySelector(`.group_type_top[data-group-name="${originalGroupName}"]`);
-              if (groupElement) {
-                groupElement.click();
-              } else {
-                const groupDiv = document.querySelector(`.link-group[data-group-name="${originalGroupName}"]`);
-                if (groupDiv) {
-                  groupDiv.click();
+            try {
+              // Re-open the popup if it was open (for both top groups and box groups)
+              if (originalLink && (originalLink.collapsible || originalLink.horizontal_stack)) {
+                const groupElement = document.querySelector(`.group_type_top[data-group-name="${originalGroupName}"]`);
+                if (groupElement) {
+                  groupElement.click();
+                } else {
+                  const groupDiv = document.querySelector(`.link-group[data-group-name="${originalGroupName}"]`);
+                  if (groupDiv) {
+                    groupDiv.click();
+                  }
                 }
               }
-            }
 
-            // Also re-open the new group if it has changed
-            if (newGroupName !== originalGroupName) {
-              const newGroupElement = document.querySelector(`.group_type_top[data-group-name="${newGroupName}"]`);
-              if (newGroupElement) {
-                newGroupElement.click();
-              } else {
-                const newGroupDiv = document.querySelector(`.link-group[data-group-name="${newGroupName}"]`);
-                if (newGroupDiv && newGroupDiv.classList.contains('group_type_box')) {
-                  newGroupDiv.click();
+              // Also re-open the new group if it has changed
+              if (newGroupName !== originalGroupName) {
+                const newGroupElement = document.querySelector(`.group_type_top[data-group-name="${newGroupName}"]`);
+                if (newGroupElement) {
+                  newGroupElement.click();
+                } else {
+                  const newGroupDiv = document.querySelector(`.link-group[data-group-name="${newGroupName}"]`);
+                  if (newGroupDiv && newGroupDiv.classList.contains('group_type_box')) {
+                    newGroupDiv.click();
+                  }
                 }
               }
+            } catch (uiError) {
+              console.warn('Error re-opening group UI:', uiError);
+              // Don't alert for UI re-opening errors if the save was successful
             }
 
           } else {
-            alert('Failed to update link.');
+            const errorData = await response.json().catch(() => ({}));
+            console.error('Server returned error:', response.status, errorData);
+            alert(`Failed to update link: ${errorData.message || response.statusText || 'Unknown error'}`);
           }
         } catch (error) {
-          console.error('Error updating link:', error);
-          alert('Error updating link.');
+          console.error('Detailed error updating link:', error);
+          alert('Error updating link: ' + error.message);
         }
       });
       editLinkForm.setAttribute('data-listener-attached', 'true');
