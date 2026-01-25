@@ -40,6 +40,17 @@ STYLESHEET = f"""
         font-weight: bold;
     }}
     QPushButton:hover {{ border: 1px solid {CP_YELLOW}; color: {CP_YELLOW}; }}
+    
+    /* SIDEBAR BUTTONS */
+    QFrame QPushButton {{
+        background-color: {CP_DIM};
+        border: 1px solid {CP_DIM};
+        padding: 4px;
+    }}
+    QFrame QPushButton:hover {{
+        border: 1px solid {CP_CYAN};
+    }}
+    
     QProgressBar {{
         border: 1px solid {CP_DIM};
         background: {CP_PANEL};
@@ -220,23 +231,25 @@ class MirrorSyncManager(QMainWindow):
 
         for i, proj in enumerate(self.projects):
             item_frame = QFrame()
-            item_frame.setStyleSheet(f"border: none; border-bottom: 1px solid {CP_DIM}; background: transparent;")
+            item_frame.setStyleSheet(f"border: none; border-bottom: 1px solid {CP_DIM}; background-color: transparent;")
             item_layout = QHBoxLayout(item_frame)
-            item_layout.setContentsMargins(5, 5, 5, 5)
+            item_layout.setContentsMargins(2, 2, 2, 2)
+            item_layout.setSpacing(5)
 
             btn = QPushButton(proj["name"])
-            btn.setStyleSheet("text-align: left; padding: 5px; border: none; font-weight: bold;")
+            btn.setStyleSheet("text-align: left; padding: 8px; border: none; font-weight: bold; background: transparent;")
             btn.clicked.connect(lambda checked, idx=i: self.select_project(idx))
             item_layout.addWidget(btn, stretch=1)
 
             edit_btn = QPushButton("📝")
-            edit_btn.setFixedSize(30, 30)
+            edit_btn.setFixedSize(35, 35)
+            edit_btn.setStyleSheet(f"color: {CP_YELLOW}; border: 1px solid {CP_DIM}; background-color: {CP_BG};")
             edit_btn.clicked.connect(lambda checked, idx=i: self.open_add_dialog(edit_index=idx))
             item_layout.addWidget(edit_btn)
 
             del_btn = QPushButton("🗑️")
-            del_btn.setFixedSize(30, 30)
-            del_btn.setStyleSheet(f"color: {CP_RED};")
+            del_btn.setFixedSize(35, 35)
+            del_btn.setStyleSheet(f"color: {CP_RED}; border: 1px solid {CP_DIM}; background-color: {CP_BG};")
             del_btn.clicked.connect(lambda checked, idx=i: self.delete_project(idx))
             item_layout.addWidget(del_btn)
 
