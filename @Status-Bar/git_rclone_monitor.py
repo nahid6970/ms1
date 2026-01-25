@@ -6,8 +6,9 @@ import threading
 import time
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, 
                              QLabel, QPushButton, QLineEdit, QGroupBox, QScrollArea, 
-                             QFileDialog, QDialog, QFormLayout, QMessageBox, QInputDialog)
-from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QObject
+                             QFileDialog, QDialog, QFormLayout, QMessageBox, QInputDialog,
+                             QLayout, QLayoutItem, QSizePolicy)
+from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QObject, QRect, QPoint, QSize
 
 # CYBERPUNK THEME PALETTE
 CP_BG = "#050505"
@@ -24,6 +25,89 @@ CP_SUBTEXT = "#808080"
 # Get the directory where the script is located
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 CONFIG_FILE = os.path.join(SCRIPT_DIR, "projects_config.json")
+
+class FlowLayout(QLayout):
+    def __init__(self, parent=None, margin=-1, spacing=-1):
+        super().__init__(parent)
+        if parent is not None:
+            self.setContentsMargins(margin, margin, margin, margin)
+        self.setSpacing(spacing)
+        self.items = []
+
+    def __del__(self):
+        item = self.takeAt(0)
+        while item:
+            item = self.takeAt(0)
+
+    def addItem(self, item):
+        self.items.append(item)
+
+    def count(self):
+        return len(self.items)
+
+    def itemAt(self, index):
+        if 0 <= index < len(self.items):
+            return self.items[index]
+        return None
+
+    def takeAt(self, index):
+        if 0 <= index < len(self.items):
+            return self.items.pop(index)
+        return None
+
+    def expandingDirections(self):
+        return Qt.Orientation(0)
+
+    def hasHeightForWidth(self):
+        return True
+
+    def heightForWidth(self, width):
+        height = self._do_layout(QRect(0, 0, width, 0), True)
+        return height
+
+    def setGeometry(self, rect):
+        super().setGeometry(rect)
+        self._do_layout(rect, False)
+
+    def sizeHint(self):
+        return self.minimumSize()
+
+    def minimumSize(self):
+        size = QSize()
+        for item in self.items:
+            size = size.expandedTo(item.minimumSize())
+        size += QSize(2 * self.contentsMargins().top(), 2 * self.contentsMargins().top())
+        return size
+
+    def _do_layout(self, rect, test_only):
+        l, t, r, b = self.getContentsMargins()
+        effective_rect = rect.adjusted(+l, +t, -r, -b)
+        x = effective_rect.x()
+        y = effective_rect.y()
+        line_height = 0
+
+        for item in self.items:
+            wid = item.widget()
+            space_x = self.spacing()
+            space_y = self.spacing()
+            if wid:
+                space_x += wid.style().layoutSpacing(QSizePolicy.ControlType.PushButton, QSizePolicy.ControlType.PushButton, Qt.Orientation.Horizontal)
+                space_y += wid.style().layoutSpacing(QSizePolicy.ControlType.PushButton, QSizePolicy.ControlType.PushButton, Qt.Orientation.Vertical)
+
+            next_x = x + item.sizeHint().width() + space_x
+            if next_x - space_x > effective_rect.right() and line_height > 0:
+                x = effective_rect.x()
+                y = y + line_height + space_y
+                next_x = x + item.sizeHint().width() + space_x
+                line_height = 0
+
+            if not test_only:
+                item.setGeometry(QRect(QPoint(x, y), item.sizeHint()))
+
+            x = next_x
+            line_height = max(line_height, item.sizeHint().height())
+
+        return y + line_height - rect.y() + b
 
 class WorkerSignals(QObject):
     finished = pyqtSignal(str, str, str) # id, type, status_color
@@ -81,7 +165,7 @@ class AddProjectDialog(QDialog):
         self.mode = mode
         self.setWindowTitle(f"ADD NEW {mode.upper()} PROJECT")
         self.setFixedWidth(500)
-        self.setStyleSheet(f"background-color: {CP_BG}; color: {CP_TEXT}; font-family: 'Consolas';")
+        self.setStyleSheet(f"background-color: {CP_BG}; color: {CP_TEXT}; font-family: 'JetBrainsMono NFP';")
         
         layout = QVBoxLayout(self)
         form = QFormLayout()
@@ -157,25 +241,40 @@ class ProjectWidget(QWidget):
         self.extra = extra # dst for rclone
         self.config = config or {}
         self.log_dir = r"C:\Users\nahid\script_output\rclone"
-        
-        layout = QHBoxLayout(self)
-        layout.setContentsMargins(5, 2, 5, 2)
-        
-        self.status_indicator = QLabel("●")
-        self.status_indicator.setStyleSheet(f"color: {CP_DIM}; font-size: 14pt;")
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(4, 4, 4, 4)
+        layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         
         label_text = self.config.get("label", name)
-        self.name_label = QLabel(label_text)
-        self.name_label.setStyleSheet(f"font-weight: bold; color: {CP_TEXT};")
+        self.name_label = QLabel(f"⟳ {label_text}")
+        self.name_label.setStyleSheet(f"font-weight: bold; color: {CP_DIM}; font-size: 10pt; font-family: 'JetBrainsMono NFP'; border: none; background: transparent;")
+        self.name_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.name_label.setWordWrap(False) # Keep it single line for compactness
         
         self.setCursor(Qt.CursorShape.PointingHandCursor)
         self.setToolTip(self.get_tooltip())
         
-        layout.addWidget(self.status_indicator)
         layout.addWidget(self.name_label)
-        layout.addStretch()
-        
-        self.setStyleSheet(f"QWidget:hover {{ background-color: {CP_PANEL}; }}")
+
+        # Added padding to the widget to prevent border clipping
+        self.setStyleSheet(f"""
+            ProjectWidget {{ 
+                background-color: {CP_PANEL}; 
+                border: 1px solid {CP_DIM}; 
+                border-radius: 4px; 
+                margin: 2px;
+            }}
+            ProjectWidget:hover {{ 
+                border: 1px solid {CP_CYAN}; 
+            }}
+        """)
+        self.setFixedHeight(34)
+        self.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
+
+    def sizeHint(self):
+        # Dynamic width based on text
+        width = self.name_label.fontMetrics().boundingRect(self.name_label.text()).width() + 30
+        return QSize(max(width, 80), 34)
 
     def get_tooltip(self):
         if self.p_type == "git":
@@ -244,7 +343,17 @@ class ProjectWidget(QWidget):
         subprocess.Popen(full_cmd, shell=True)
 
     def update_status(self, color):
-        self.status_indicator.setStyleSheet(f"color: {color}; font-size: 14pt;")
+        if color == CP_GREEN:
+            sym = "✓"
+        elif color == CP_RED:
+            sym = "✗"
+        else:
+            sym = "⟳"
+        
+        label_text = self.config.get("label", self.name)
+        self.name_label.setText(f"{sym} {label_text}")
+        self.name_label.setStyleSheet(f"font-weight: bold; color: {color}; font-size: 10pt; font-family: 'JetBrainsMono NFP'; border: none; background: transparent;")
+        self.updateGeometry()
 
 
 
@@ -288,17 +397,17 @@ class GitRcloneMonitor(QMainWindow):
     def init_ui(self):
         self.setStyleSheet(f"""
             QMainWindow {{ background-color: {CP_BG}; }}
-            QWidget {{ color: {CP_TEXT}; font-family: 'Consolas'; font-size: 10pt; }}
+            QWidget {{ color: {CP_TEXT}; font-family: 'JetBrainsMono NFP'; font-size: 9pt; }}
             QGroupBox {{
-                border: 1px solid {CP_DIM}; margin-top: 15px; padding-top: 10px; font-weight: bold; color: {CP_YELLOW};
+                border: 1px solid {CP_DIM}; margin-top: 12px; padding-top: 8px; font-weight: bold; color: {CP_YELLOW};
             }}
             QGroupBox::title {{ subcontrol-origin: margin; subcontrol-position: top left; padding: 0 5px; }}
             QScrollArea {{ background: transparent; border: none; }}
             QLineEdit {{
-                background-color: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 4px;
+                background-color: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 4px; font-family: 'JetBrainsMono NFP';
             }}
             QPushButton#MainBtn {{
-                background-color: {CP_DIM}; border: 1px solid {CP_DIM}; color: white; padding: 10px; font-weight: bold;
+                background-color: {CP_DIM}; border: 1px solid {CP_DIM}; color: white; padding: 8px; font-weight: bold; font-family: 'JetBrainsMono NFP';
             }}
             QPushButton#MainBtn:hover {{
                 border: 1px solid {CP_CYAN}; color: {CP_CYAN};
@@ -319,8 +428,7 @@ class GitRcloneMonitor(QMainWindow):
         self.git_layout = QVBoxLayout()
         self.git_scroll = QScrollArea()
         self.git_container = QWidget()
-        self.git_list_layout = QVBoxLayout(self.git_container)
-        self.git_list_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        self.git_list_layout = FlowLayout(self.git_container, 5, 5)
         self.git_scroll.setWidget(self.git_container)
         self.git_scroll.setWidgetResizable(True)
         
@@ -337,8 +445,7 @@ class GitRcloneMonitor(QMainWindow):
         self.rclone_layout = QVBoxLayout()
         self.rclone_scroll = QScrollArea()
         self.rclone_container = QWidget()
-        self.rclone_list_layout = QVBoxLayout(self.rclone_container)
-        self.rclone_list_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        self.rclone_list_layout = FlowLayout(self.rclone_container, 5, 5)
         self.rclone_scroll.setWidget(self.rclone_container)
         self.rclone_scroll.setWidgetResizable(True)
         
