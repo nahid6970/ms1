@@ -84,6 +84,7 @@ if [ "$FULL_SETUP" = true ]; then
     echo '# VcXsrv Display Configuration' >> ~/.bashrc
     echo 'export DISPLAY=$(ip route list default | awk "{print \$3}"):0' >> ~/.bashrc
     echo 'export LIBGL_ALWAYS_INDIRECT=1' >> ~/.bashrc
+    echo 'export NO_AT_BRIDGE=1' >> ~/.bashrc
 
     # Install GUI apps for testing
     sudo apt install -y gedit mousepad
@@ -164,10 +165,12 @@ if [ "$FULL_SETUP" = false ]; then
      sed -i '/VcXsrv Display Configuration/d' ~/.bashrc
      sed -i '/export DISPLAY=/d' ~/.bashrc
      sed -i '/export LIBGL_ALWAYS_INDIRECT=/d' ~/.bashrc
+     sed -i '/export NO_AT_BRIDGE=/d' ~/.bashrc
      
      echo '# VcXsrv Display Configuration' >> ~/.bashrc
      echo 'export DISPLAY=$(ip route list default | awk "{print \$3}"):0' >> ~/.bashrc
      echo 'export LIBGL_ALWAYS_INDIRECT=1' >> ~/.bashrc
+     echo 'export NO_AT_BRIDGE=1' >> ~/.bashrc
 fi
 
 # Create aliases for better commands (runs for both options)
