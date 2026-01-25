@@ -61,6 +61,11 @@
                 "type": "file",
                 "target": "C:\\@delta\\ms1\\asset\\gemini\\task_complete_mcp.py",
                 "fake": "C:\\Users\\nahid\\.gemini\\task_complete_mcp.py"
+            },
+            {
+                "type": "folder",
+                "target": "C:\\@delta\\ms1\\asset\\gemini\\policies",
+                "fake": "C:\\Users\\nahid\\.gemini\\policies"
             }
         ]
     }
