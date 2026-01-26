@@ -7,6 +7,30 @@ This document tracks historical bugs, issues, and their solutions. Use this to:
 
 ---
 
+## [2026-01-26 16:15] - Scroll Position Lost After Clearing Search
+
+**Problem:** 
+When a user searched for a term, found matches, and then cleared the search box (either via the "X" button or by deleting text), the table would scroll back to the very top. This forced users to manually scroll back down to find where they were.
+
+**Root Cause:** 
+1. **Auto-Save Conflict**: The scroll event listener was active during search. When the table filtered down to a few matches, its total height decreased, often forcing the scroll to `0`. The listener saved this `0` to `localStorage`, overwriting the user's actual reading position.
+2. **Missing Restoration**: The `clearSearch` function simply reset the view but didn't include any logic to reposition the viewport to the last matched row.
+
+**Solution:** 
+1. **Search Safety Check**: Modified the scroll event listener in `static/script.js` to ignore scroll events when the search box is not empty. This prevents the "shrunken" search view from corrupting the saved scroll state.
+2. **Visual Offset Capture**: Updated `searchTable()` to capture the `lastMatchRow` and its exact visual distance (pixel offset) from the top of the container before resetting.
+3. **Precision Restoration**: When the search is cleared, the system calculates the new position of that same row in the "full" table and adjusts `scrollTop` so the row stays in the exact same spot on the screen.
+4. **Refactored clearSearch**: Pointed the clear button logic directly to `searchTable()` to ensure this restoration logic is always triggered.
+
+**Files Modified:**
+- `static/script.js` - Updated scroll listener and `searchTable` logic.
+
+**Related Issues:** Sheet Scroll Position Preservation, Search UI UX
+
+**Result:** Clearing a search now feels seamless; the last row the user was looking at remains in the same visual position even after all other rows are restored.
+
+---
+
 ## [2026-01-26 15:30] - Sheet Scroll Position Not Preserved After Reordering
 
 **Problem:** 

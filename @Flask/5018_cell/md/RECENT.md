@@ -6,6 +6,40 @@
 
 ---
 
+## [2026-01-26 16:15] - Precision Search Scroll Restoration
+
+**Session Duration:** 0.4 hours
+
+**What We Accomplished:**
+
+### ✅ Fixed Scroll Jump When Clearing Search
+- **Problem**: When searching for terms and then clearing the search box, the table would jump back to the top of the sheet, causing users to lose their place.
+- **Root Cause**: 
+  - The scroll event listener was auto-saving the `scrollTop` of `0` when the table shrunken to show only search matches.
+  - There was no logic to restore the scroll position to the last viewed match after showing all rows.
+- **Solution**: 
+  - **Pixel-Perfect Restoration**: Implemented a "visual offset" capture system. Before clearing search, it records the exact distance of the last match from the container's top.
+  - **Adaptive Scrolling**: After clearing, it calculates and restores the scroll so the row remains at the identical screen position.
+  - **Search Safety**: Disabled scroll-saving while the search box contains text to prevent overwriting true reading positions with shrunken views.
+  - **Refined UX**: Simplified `clearSearch` to use the centralized logic in `searchTable`.
+
+**Technical Changes:**
+- `searchTable()`: Now captures `lastMatchRow` and its `visualOffset`.
+- `searchTable()`: Restores scroll position by adjusting `scrollTop` based on the delta between new and old offsets.
+- Scroll Event Listener: Added check to return early if search is active.
+- `clearSearch()`: Refactored to call `searchTable()` for consistent cleanup.
+
+**Files Modified:**
+- `static/script.js` - Implemented precise scroll mapping and search safety.
+- `md/RECENT.md` - Logged session.
+- `md/PROBLEMS_AND_FIXES.md` - Documented the fix.
+
+**Current Status:**
+- ✅ Search-to-Full transition is now seamless and maintains context.
+- ✅ No interference with per-sheet scroll preservation.
+
+---
+
 ## [2026-01-26 15:30] - Fixed Per-Sheet Scroll Position Preservation
 
 **Session Duration:** 0.5 hours
