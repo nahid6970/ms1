@@ -16,8 +16,17 @@ function toggleLastEditedPopup() {
     }
 
     // specific logic: close other menus if open (optional but good practice)
-    const ctxMenu = document.getElementById('cellContextMenu');
-    if (ctxMenu) ctxMenu.style.display = 'none';
+    // Use the global function if available to ensure proper cleanup, or just remove class
+    if (typeof closeCellContextMenu === 'function') {
+        closeCellContextMenu();
+    } else {
+        const ctxMenu = document.getElementById('cellContextMenu');
+        if (ctxMenu) {
+            ctxMenu.classList.remove('show');
+            // Ensure we don't leave an inline display:none that overrides the class later
+            ctxMenu.style.display = '';
+        }
+    }
 
     renderLastEditedPopup();
 
