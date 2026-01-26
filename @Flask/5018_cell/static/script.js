@@ -13395,7 +13395,7 @@ function applyTitleTextFormat(event) {
 
         // Prompt for params
         const helpText = 'Optional: Color (R, G, #f00), Thickness (2px), Font Size (1.5em), Font Color (f-R, f-#fff).\nSeparate by _ (e.g., R_3px_1.2em_f-K)';
-        const params = prompt(`Enter Title Parameters:\n${helpText}`, '');
+        const params = prompt(`Enter Title Parameters:\n${helpText}`, 'K_5px_2em_f-K');
 
         if (params === null) return; // User cancelled
 
@@ -13444,7 +13444,7 @@ function applyTitleTextFormat(event) {
 
     // Prompt for params
     const helpText = 'Optional: Color (R, G, #f00), Thickness (2px), Font Size (1.5em), Font Color (f-R, f-#fff).\nSeparate by _ (e.g., R_3px_1.2em_f-K)';
-    const params = prompt(`Enter Title Parameters:\n${helpText}`, '');
+    const params = prompt(`Enter Title Parameters:\n${helpText}`, 'K_5px_2em_f-K');
 
     if (params === null) return; // User cancelled
 
