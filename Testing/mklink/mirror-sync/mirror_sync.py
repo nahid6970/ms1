@@ -112,19 +112,19 @@ class SyncWorker(QThread):
                 # Handle existing file/link at destination
                 if os.path.exists(dst_path) or os.path.lexists(dst_path):
                     if self.is_copy:
-                        # In copy mode, overwrite if it's a link or file?
-                        # For safety, let's just overwrite.
+                        # COPY MODE: We want a real file.
                         if os.path.islink(dst_path):
-                            os.remove(dst_path)
-                        # If real file exists, shutil.copy2 will overwrite
+                            os.remove(dst_path) # Remove link to replace with file
+                        # If real file exists, shutil.copy2 will overwrite it (Desired behavior)
                     else:
+                        # SYMLINK MODE: We want a link.
                         if os.path.islink(dst_path):
+                            os.remove(dst_path) # Remove old link to update
+                        elif os.path.isfile(dst_path):
+                            # Real file exists but we want a link.
+                            # Since this is a Mirror Sync, we assume source is truth.
+                            # We delete the real file to replace with link.
                             os.remove(dst_path)
-                        else:
-                            # If it's a real file and not a link, we skip it to be safe 
-                            failed += 1
-                            self.progress.emit(i+1, total, f"Skipped (Real file exists): {rel_path}")
-                            continue
 
                 # Action
                 if self.is_copy:
@@ -253,6 +253,7 @@ class MirrorSyncManager(QMainWindow):
         # Copy Toggle
         self.copy_mode_chk = QCheckBox("Copy Files instead of Linking")
         self.copy_mode_chk.setStyleSheet(f"color: {CP_CYAN}; font-weight: bold; margin-bottom: 5px;")
+        self.copy_mode_chk.clicked.connect(self.save_current_settings)
         right_layout.addWidget(self.copy_mode_chk)
 
         self.sync_btn = QPushButton("🚀 START MIRROR SYNC")
@@ -279,6 +280,11 @@ class MirrorSyncManager(QMainWindow):
 
         self.current_project = None
         self.refresh_ui()
+
+    def save_current_settings(self):
+        if self.current_project:
+            self.current_project["copy_mode"] = self.copy_mode_chk.isChecked()
+            self.save_data()
 
     def load_data(self):
         if os.path.exists(self.data_file):
@@ -332,6 +338,9 @@ class MirrorSyncManager(QMainWindow):
         self.current_project = self.projects[index]
         self.selected_label.setText(self.current_project["name"])
         self.details_label.setText(f"SOURCE: {self.current_project['source']}\nDEST: {self.current_project['destination']}")
+        
+        # Load settings
+        self.copy_mode_chk.setChecked(self.current_project.get("copy_mode", False))
         
         # Update Tree View
         src_path = self.current_project['source']

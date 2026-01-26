@@ -2,6 +2,7 @@
     {
         "name": "Gemini",
         "source": "C:\\@delta\\ms1\\asset\\gemini",
-        "destination": "C:\\Users\\nahid\\.gemini"
+        "destination": "C:\\Users\\nahid\\.gemini",
+        "copy_mode": true
     }
 ]

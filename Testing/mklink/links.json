@@ -67,6 +67,7 @@
                 "target": "C:\\@delta\\ms1\\asset\\gemini\\policies",
                 "fake": "C:\\Users\\nahid\\.gemini\\policies"
             }
-        ]
+        ],
+        "copy_mode": true
     }
 ]
