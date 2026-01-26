@@ -26,7 +26,9 @@ Complete guide to all keyboard shortcuts available in the application.
 | **F3** | Open Quick Markdown Formatter (with text selected) |
 | **F8** | Search word under cursor/selection and copy to clipboard |
 | **F9** | Swap two words separated by space/comma (with text selected) |
+| **F2** | Recent sheets popup |
 | **Ctrl+S** | Save data (manual save) |
+| **Alt+N** | Quick add row |
 
 ### Quick Formatter (F3) Features
 When text is selected, press F3 to open the formatter with these options:

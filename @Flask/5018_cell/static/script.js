@@ -402,14 +402,16 @@ function handleKeyboardShortcuts(e) {
         e.preventDefault();
 
         // Blur the currently focused element to trigger onchange
-        if (document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA')) {
+        if (document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA' || document.activeElement.getAttribute('contenteditable') === 'true')) {
             document.activeElement.blur();
         }
 
         // Small delay to ensure onchange fires before saving
         setTimeout(() => {
             saveData();
+            showToast('Data saved', 'success');
         }, 50);
+        return false;
     }
 
     // Ctrl+F or Cmd+F to focus search
