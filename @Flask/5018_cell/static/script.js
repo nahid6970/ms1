@@ -102,9 +102,18 @@ function initializeApp() {
         }, 1000);
 
         tableContainer.addEventListener('scroll', () => {
-            if (initialLoadComplete) {
-                localStorage.setItem('scrollTop', tableContainer.scrollTop);
-                localStorage.setItem('scrollLeft', tableContainer.scrollLeft);
+            if (initialLoadComplete && tableData.sheets[currentSheet]) {
+                const scrollPositions = JSON.parse(localStorage.getItem('sheetScrollPositions') || '{}');
+                const sheetName = tableData.sheets[currentSheet].name;
+                scrollPositions[sheetName] = {
+                    scrollTop: tableContainer.scrollTop,
+                    scrollLeft: tableContainer.scrollLeft
+                };
+                localStorage.setItem('sheetScrollPositions', JSON.stringify(scrollPositions));
+                console.log(`[SCROLL] Auto-saved scroll for "${sheetName}":`, {
+                    scrollTop: tableContainer.scrollTop,
+                    scrollLeft: tableContainer.scrollLeft
+                });
             }
         });
     }
@@ -1024,6 +1033,9 @@ async function loadData() {
             }
         }
 
+        // Migrate old index-based scroll positions to name-based (one-time migration)
+        migrateScrollPositions();
+
         initializeCategories();
         renderSidebar();
         renderTable();
@@ -1077,6 +1089,39 @@ function updateRowCountDisplay() {
         } else {
             rowCountContainer.style.display = 'none';
         }
+    }
+}
+
+// Migrate old index-based scroll positions to name-based (one-time migration)
+function migrateScrollPositions() {
+    try {
+        const scrollPositions = JSON.parse(localStorage.getItem('sheetScrollPositions') || '{}');
+        const migrationDone = localStorage.getItem('scrollPositionsMigrated');
+        
+        // Check if migration is needed (if any keys are numeric)
+        const hasNumericKeys = Object.keys(scrollPositions).some(key => !isNaN(key));
+        
+        if (hasNumericKeys && !migrationDone) {
+            const newScrollPositions = {};
+            
+            // Convert index-based keys to name-based keys
+            Object.keys(scrollPositions).forEach(key => {
+                const index = parseInt(key);
+                if (!isNaN(index) && tableData.sheets[index]) {
+                    const sheetName = tableData.sheets[index].name;
+                    newScrollPositions[sheetName] = scrollPositions[key];
+                } else {
+                    // Keep non-numeric keys as-is (already migrated)
+                    newScrollPositions[key] = scrollPositions[key];
+                }
+            });
+            
+            localStorage.setItem('sheetScrollPositions', JSON.stringify(newScrollPositions));
+            localStorage.setItem('scrollPositionsMigrated', 'true');
+            console.log('Migrated scroll positions from index-based to name-based');
+        }
+    } catch (e) {
+        console.error('Error migrating scroll positions:', e);
     }
 }
 
@@ -5548,16 +5593,21 @@ async function deleteSheet(index) {
 }
 
 function switchSheet(index) {
-    // Save current scroll position before switching
+    // Save current scroll position before switching (using sheet name as key)
     if (currentSheet !== index) {
         const tableContainer = document.querySelector('.table-container');
-        if (tableContainer) {
+        if (tableContainer && tableData.sheets[currentSheet]) {
             const scrollPositions = JSON.parse(localStorage.getItem('sheetScrollPositions') || '{}');
-            scrollPositions[currentSheet] = {
+            const currentSheetName = tableData.sheets[currentSheet].name;
+            scrollPositions[currentSheetName] = {
                 scrollTop: tableContainer.scrollTop,
                 scrollLeft: tableContainer.scrollLeft
             };
             localStorage.setItem('sheetScrollPositions', JSON.stringify(scrollPositions));
+            console.log(`[SCROLL] Saved scroll for "${currentSheetName}":`, {
+                scrollTop: tableContainer.scrollTop,
+                scrollLeft: tableContainer.scrollLeft
+            });
         }
     }
 
@@ -5585,7 +5635,7 @@ function switchSheet(index) {
     currentCategory = sheetCategory;
 
     renderSidebar();
-    renderTable();
+    renderTable(false); // Don't preserve scroll when switching sheets
     autoSaveActiveSheet();
 
     // Apply font size scale after rendering
@@ -5593,15 +5643,24 @@ function switchSheet(index) {
         applyFontSizeScale();
     }, 0);
 
-    // Restore scroll position after rendering
+    // Restore scroll position after rendering (using sheet name as key)
     setTimeout(() => {
         const tableContainer = document.querySelector('.table-container');
-        if (tableContainer) {
+        if (tableContainer && tableData.sheets[index]) {
             const scrollPositions = JSON.parse(localStorage.getItem('sheetScrollPositions') || '{}');
-            const savedPosition = scrollPositions[index];
+            const sheetName = tableData.sheets[index].name;
+            const savedPosition = scrollPositions[sheetName];
+            console.log(`[SCROLL] Restoring scroll for "${sheetName}":`, savedPosition);
+            console.log('[SCROLL] All saved positions:', scrollPositions);
             if (savedPosition) {
                 tableContainer.scrollTop = savedPosition.scrollTop || 0;
                 tableContainer.scrollLeft = savedPosition.scrollLeft || 0;
+                console.log(`[SCROLL] Applied scroll for "${sheetName}":`, {
+                    scrollTop: tableContainer.scrollTop,
+                    scrollLeft: tableContainer.scrollLeft
+                });
+            } else {
+                console.log(`[SCROLL] No saved position found for "${sheetName}"`);
             }
         }
     }, 0);
@@ -7285,14 +7344,14 @@ function positionCursorAtMouseClick(textarea, mouseEvent) {
 
 
 
-function renderTable() {
+function renderTable(preserveScroll = true) {
     const headerRow = document.getElementById('headerRow');
     const tableBody = document.getElementById('tableBody');
     const tableContainer = document.querySelector('.table-container');
 
-    // Save current scroll position
-    const scrollTop = tableContainer ? tableContainer.scrollTop : 0;
-    const scrollLeft = tableContainer ? tableContainer.scrollLeft : 0;
+    // Save current scroll position (only if preserveScroll is true)
+    const scrollTop = (preserveScroll && tableContainer) ? tableContainer.scrollTop : 0;
+    const scrollLeft = (preserveScroll && tableContainer) ? tableContainer.scrollLeft : 0;
 
     headerRow.innerHTML = '';
     tableBody.innerHTML = '';
@@ -7776,13 +7835,20 @@ function renderTable() {
             if (scrollTop > 0 || scrollLeft > 0) {
                 tableContainer.scrollTop = scrollTop;
                 tableContainer.scrollLeft = scrollLeft;
+                console.log(`[SCROLL] renderTable: Restored from render params:`, { scrollTop, scrollLeft });
             } else {
-                // Otherwise restore from localStorage (after page refresh)
-                const savedScrollTop = parseInt(localStorage.getItem('scrollTop') || '0');
-                const savedScrollLeft = parseInt(localStorage.getItem('scrollLeft') || '0');
-                if (savedScrollTop > 0 || savedScrollLeft > 0) {
-                    tableContainer.scrollTop = savedScrollTop;
-                    tableContainer.scrollLeft = savedScrollLeft;
+                // Otherwise restore from per-sheet scroll positions
+                const scrollPositions = JSON.parse(localStorage.getItem('sheetScrollPositions') || '{}');
+                const sheetName = tableData.sheets[currentSheet]?.name;
+                const savedPosition = sheetName ? scrollPositions[sheetName] : null;
+                console.log(`[SCROLL] renderTable: Restoring for "${sheetName}":`, savedPosition);
+                if (savedPosition) {
+                    tableContainer.scrollTop = savedPosition.scrollTop || 0;
+                    tableContainer.scrollLeft = savedPosition.scrollLeft || 0;
+                    console.log(`[SCROLL] renderTable: Applied scroll:`, {
+                        scrollTop: tableContainer.scrollTop,
+                        scrollLeft: tableContainer.scrollLeft
+                    });
                 }
             }
         };
@@ -12054,20 +12120,43 @@ function adjustAllMarkdownCells() {
 
 // Call after table renders
 const originalRenderTable = renderTable;
-renderTable = function () {
+renderTable = function (preserveScroll = true) {
     const tableContainer = document.querySelector('.table-container');
 
-    // Save scroll from localStorage for page refresh scenario
-    const savedScrollTop = parseInt(localStorage.getItem('scrollTop') || '0');
-    const savedScrollLeft = parseInt(localStorage.getItem('scrollLeft') || '0');
+    // Save scroll from per-sheet positions for page refresh scenario
+    const scrollPositions = JSON.parse(localStorage.getItem('sheetScrollPositions') || '{}');
+    const sheetName = tableData.sheets[currentSheet]?.name;
+    const savedPosition = sheetName ? scrollPositions[sheetName] : null;
+    const savedScrollTop = savedPosition ? (savedPosition.scrollTop || 0) : 0;
+    const savedScrollLeft = savedPosition ? (savedPosition.scrollLeft || 0) : 0;
 
     // Also save current scroll if already scrolled
     const currentScrollTop = tableContainer ? tableContainer.scrollTop : 0;
     const currentScrollLeft = tableContainer ? tableContainer.scrollLeft : 0;
 
-    // Use whichever is non-zero (current takes priority)
-    const targetScrollTop = currentScrollTop > 0 ? currentScrollTop : savedScrollTop;
-    const targetScrollLeft = currentScrollLeft > 0 ? currentScrollLeft : savedScrollLeft;
+    // When switching sheets (preserveScroll=false), don't capture current scroll
+    // Use saved position from localStorage instead
+    let targetScrollTop, targetScrollLeft;
+    
+    if (preserveScroll) {
+        // Re-rendering same sheet: preserve current scroll or use saved
+        targetScrollTop = currentScrollTop > 0 ? currentScrollTop : savedScrollTop;
+        targetScrollLeft = currentScrollLeft > 0 ? currentScrollLeft : savedScrollLeft;
+    } else {
+        // Switching sheets: ignore current scroll, use saved position for new sheet
+        targetScrollTop = savedScrollTop;
+        targetScrollLeft = savedScrollLeft;
+    }
+
+    console.log(`[SCROLL] renderTable wrapper for "${sheetName}":`, {
+        preserveScroll,
+        savedScrollTop,
+        savedScrollLeft,
+        currentScrollTop,
+        currentScrollLeft,
+        targetScrollTop,
+        targetScrollLeft
+    });
 
     originalRenderTable.apply(this, arguments);
 
@@ -12078,6 +12167,10 @@ renderTable = function () {
         if (tableContainer && (targetScrollTop > 0 || targetScrollLeft > 0)) {
             tableContainer.scrollTop = targetScrollTop;
             tableContainer.scrollLeft = targetScrollLeft;
+            console.log(`[SCROLL] renderTable wrapper: Final restore for "${sheetName}":`, {
+                scrollTop: tableContainer.scrollTop,
+                scrollLeft: tableContainer.scrollLeft
+            });
         }
     }, 350);
 };
