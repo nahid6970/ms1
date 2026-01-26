@@ -172,16 +172,5 @@ function handlePopupTextareaKey(event) {
     event.stopPropagation();
 }
 
-// Close popup when clicking outside
-document.addEventListener('click', function (event) {
-    const popup = document.getElementById('lastEditedPopup');
-    const button = document.getElementById('btnLastEdited');
-
-    // Check if the click target is the button or contained within the button
-    const isButtonClick = event.target === button || button.contains(event.target);
-    const isPopupClick = popup.contains(event.target);
-
-    if (popup.style.display === 'block' && !isPopupClick && !isButtonClick) {
-        popup.style.display = 'none';
-    }
-});
+// Click-outside listener removed to keep popup open while working
+// Close via the button or the 'X' icon only

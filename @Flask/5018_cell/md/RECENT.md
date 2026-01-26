@@ -36,7 +36,8 @@
 - ✅ Feature implemented.
 - ✅ Fixed popup clipping issue by using fixed positioning.
 - ✅ Added persistence via localStorage.
-- ✅ Fixed bug in "Add to Recent Edits" context menu item (property name mismatch).
+- ✅ Fixed bug in "Add to Recent Edits" context menu item.
+- ✅ Made popup persistent (does not close when clicking outside), allowing interaction with other sheets while viewing.
 
 ---
 
