@@ -102,6 +102,11 @@ function initializeApp() {
         }, 1000);
 
         tableContainer.addEventListener('scroll', () => {
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput && searchInput.value.trim() !== '') {
+                return; // Don't save scroll position while searching to avoid overwriting with collapsed view
+            }
+
             if (initialLoadComplete && tableData.sheets[currentSheet]) {
                 const scrollPositions = JSON.parse(localStorage.getItem('sheetScrollPositions') || '{}');
                 const sheetName = tableData.sheets[currentSheet].name;
@@ -6326,6 +6331,13 @@ function searchTable(force = false) {
     if (!force && searchTerm === lastSearchTerm) {
         return;
     }
+
+    // Remember last match before resetting for scroll restore
+    let lastMatchRow = null;
+    if (currentMatchIndex >= 0 && searchMatches[currentMatchIndex]) {
+        lastMatchRow = searchMatches[currentMatchIndex].closest('tr');
+    }
+
     lastSearchTerm = searchTerm;
 
     const table = document.getElementById('dataTable');
@@ -6360,6 +6372,11 @@ function searchTable(force = false) {
         rows.forEach(row => {
             row.style.display = '';
         });
+
+        // Restore scroll to the last matched row
+        if (lastMatchRow) {
+            lastMatchRow.scrollIntoView({ behavior: 'instant', block: 'center' });
+        }
         return;
     }
 
@@ -6372,6 +6389,10 @@ function searchTable(force = false) {
         rows.forEach(row => {
             row.style.display = '';
         });
+
+        if (lastMatchRow) {
+            lastMatchRow.scrollIntoView({ behavior: 'instant', block: 'center' });
+        }
         return;
     }
 
@@ -6889,21 +6910,8 @@ function clearSearch() {
     const searchInput = document.getElementById('searchInput');
     searchInput.value = '';
 
-    // Remove text match highlights from markdown previews
-    document.querySelectorAll('.markdown-preview').forEach(preview => {
-        const originalHtml = preview.dataset.originalHtml;
-        if (originalHtml) {
-            preview.innerHTML = originalHtml;
-            delete preview.dataset.originalHtml;
-        }
-    });
-
-    // Remove text highlight overlays
-    document.querySelectorAll('.text-highlight-overlay').forEach(overlay => {
-        overlay.remove();
-    });
-
-    searchTable(); // This will show all rows and remove highlights
+    // searchTable will handle showing all rows, removing highlights, and restoring scroll
+    searchTable();
     showToast('Search cleared', 'info');
 }
 
