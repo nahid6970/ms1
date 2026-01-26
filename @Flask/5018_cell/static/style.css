@@ -937,7 +937,8 @@ code {
 }
 
 .clean-mode-active span {
-    color: #ff00ff !important; /* Magenta for clean mode */
+    color: #ff00ff !important;
+    /* Magenta for clean mode */
     text-shadow: 0 0 5px #ff00ff;
 }
 
@@ -4658,4 +4659,187 @@ ll Rank Badge */
     line-height: var(--table-edit-line-height) !important;
     padding: 8px 0;
     vertical-align: middle;
+}
+
+/* Recent Edits Popup */
+.recent-edits-popup {
+    position: fixed;
+    top: 50%;
+    /* JS will override if needed, but good default */
+    right: 20px;
+    width: 320px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    padding: 0;
+    display: none;
+    overflow: hidden;
+    animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.recent-edits-header {
+    padding: 10px 15px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #ddd;
+    font-weight: 600;
+    font-size: 14px;
+    color: #333;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.recent-edit-list {
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.recent-edit-item {
+    padding: 12px 15px;
+    border-bottom: 1px solid #eee;
+    transition: background 0.1s;
+}
+
+.recent-edit-item:last-child {
+    border-bottom: none;
+}
+
+.recent-edit-item:hover {
+    background: #fcfcfc;
+}
+
+.recent-edit-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    font-size: 12px;
+}
+
+.recent-edit-sheet {
+    font-weight: 600;
+    color: #007bff;
+}
+
+.recent-edit-cell-ref {
+    color: #666;
+    font-family: monospace;
+    background: #eee;
+    padding: 1px 4px;
+    border-radius: 3px;
+}
+
+.recent-edit-input-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.recent-edit-input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    font-family: inherit;
+    transition: all 0.2s;
+}
+
+.recent-edit-input:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
+    outline: none;
+}
+
+.recent-edit-empty {
+    padding: 20px;
+    text-align: center;
+    color: #999;
+    font-style: italic;
+    font-size: 13px;
+}
+
+.btn-update-cell {
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 12px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
+}
+
+.recent-edit-input:focus+.btn-update-cell,
+.recent-edit-input:not(:placeholder-shown)+.btn-update-cell {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Recent Edit Popup - Click-to-Edit Visual Mode */
+.recent-edit-view-container {
+    cursor: text;
+    width: 100%;
+    position: relative;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: #fff;
+    transition: all 0.2s;
+    min-height: 32px;
+}
+
+.recent-edit-view-container:hover {
+    border-color: #bbb;
+    background: #fdfdfd;
+}
+
+.recent-edit-preview {
+    padding: 8px;
+    font-size: 14px;
+    white-space: pre-wrap;
+    word-break: break-word;
+    color: #000 !important;
+    /* Force black text to ensure visibility against white background */
+    min-height: 32px;
+}
+
+.recent-edit-textarea {
+    width: 100%;
+    padding: 8px;
+    border: none;
+    /* Border handled by container */
+    border-radius: 4px;
+    font-size: 14px;
+    font-family: inherit;
+    min-height: 40px;
+    resize: vertical;
+    outline: none;
+    box-sizing: border-box;
+    display: none;
+    /* Hidden by default */
+    background: transparent;
+}
+
+/* When editing, show focus ring on container */
+.recent-edit-view-container.editing {
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
 }

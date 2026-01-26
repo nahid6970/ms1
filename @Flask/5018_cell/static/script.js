@@ -1,7 +1,8 @@
-// Version: 2026-01-16-15:45 - Fixed F9, Ctrl+Shift+D, links, clear formatting
+// Version: 2026-01-26-10:50 - Recent Sheet Edits Feature
 let tableData = { sheets: [], activeSheet: 0, categories: [], sheetCategories: {} };
 let currentSheet = 0;
 let currentCategory = null; // null means "Uncategorized"
+let lastEditedCells = JSON.parse(localStorage.getItem('lastEditedCells')) || {}; // Format: { sheetIndex: { row, col, value, timestamp } }
 let contextMenuCell = null;
 let selectedCells = []; // Array of {row, col, td} objects for multi-cell operations
 let isSelecting = false;
@@ -193,7 +194,7 @@ function initializeApp() {
         const oldEnabled = localStorage.getItem('markdownPreviewEnabled');
         markdownMode = oldEnabled === 'false' ? '0' : '1';
     }
-    
+
     // Initialize buttons using setMode
     setMode(parseInt(markdownMode));
 
@@ -1834,7 +1835,7 @@ function highlightSyntax(text) {
         let borderWidth = '1px';
         let fontSize = 'inherit';
         let textColor = 'inherit';
-        
+
         if (params) {
             const parts = params.split('_');
             parts.forEach(part => {
@@ -1854,7 +1855,7 @@ function highlightSyntax(text) {
                 }
             });
         }
-        
+
         return `<div style="border-top: ${borderWidth} solid ${borderColor}; border-bottom: ${borderWidth} solid ${borderColor}; padding: 10px 0; margin: 10px 0; text-align: center; font-weight: bold; width: 100%; font-size: ${fontSize}; color: ${textColor};"><span class="syn-marker">:::${params ? params + ':::' : ''}</span>${content}<span class="syn-marker">:::</span></div>`;
     });
 
@@ -1865,12 +1866,12 @@ function highlightSyntax(text) {
             const escapedMarker = escapeHtml(syntax.marker);
             const markerRegex = escapedMarker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
             const regex = new RegExp(markerRegex + '(.*?)' + markerRegex, 'g');
-            
+
             let style = `background: ${syntax.bgColor || 'transparent'}; color: ${syntax.fgColor || 'inherit'};`;
             if (syntax.isBold) style += ' font-weight: bold;';
             if (syntax.isItalic) style += ' font-style: italic;';
             if (syntax.isUnderline) style += ' text-decoration: underline;';
-            
+
             formatted = formatted.replace(regex, `<span style="${style}">` +
                 `<span class="syn-marker">${escapedMarker}</span>$1<span class="syn-marker">${escapedMarker}</span></span>`);
         });
@@ -3204,18 +3205,18 @@ function parseMarkdown(text, cellStyle = {}) {
             content: b.grid ? parseGridTable(b.lines) : oldParseMarkdownBody(b.lines, cellStyle),
             isGrid: b.grid
         }));
-        
+
         // Join blocks with a newline only if needed
         return processedBlocks.reduce((acc, item, i) => {
             if (i === 0) return item.content;
-            
+
             // If previous block was a table, don't add a newline (tables have CSS margin)
             // UNLESS the current block is empty (explicit empty line)
-            const prevWasGrid = processedBlocks[i-1].isGrid;
+            const prevWasGrid = processedBlocks[i - 1].isGrid;
             if (prevWasGrid && item.content.trim() !== '') {
                 return acc + item.content;
             }
-            
+
             return acc + '\n' + item.content;
         }, '');
     }
@@ -3564,7 +3565,7 @@ function oldParseMarkdownBody(lines, cellStyle = {}) {
             let borderWidth = '1px';
             let fontSize = 'inherit';
             let textColor = 'inherit';
-            
+
             if (params) {
                 const parts = params.split('_');
                 parts.forEach(part => {
@@ -3584,7 +3585,7 @@ function oldParseMarkdownBody(lines, cellStyle = {}) {
                     }
                 });
             }
-            
+
             return `<div style="border-top: ${borderWidth} solid ${borderColor}; border-bottom: ${borderWidth} solid ${borderColor}; padding: 10px 0; margin: 10px 0; text-align: center; font-weight: bold; width: 100%; font-size: ${fontSize}; color: ${textColor};">${content}</div>`;
         });
 
@@ -3924,6 +3925,25 @@ function toggleSuperscriptMode() {
 }
 
 // Border options will be handled by unified border modal
+
+// Manually add a cell to the "Recent Edits" list via Context Menu
+function addToRecentEdits() {
+    if (!contextMenuCell) return;
+
+    const { rowIndex, colIndex } = contextMenuCell;
+    const value = tableData.sheets[currentSheet].rows[rowIndex][colIndex];
+
+    lastEditedCells[currentSheet] = {
+        row: rowIndex,
+        col: colIndex,
+        value: value,
+        timestamp: Date.now()
+    };
+    localStorage.setItem('lastEditedCells', JSON.stringify(lastEditedCells));
+
+    showToast('Cell added to Recent Edits 📌', 'success');
+    closeCellContextMenu();
+}
 
 function showCellContextMenu(e, rowIndex, colIndex, inputElement, tdElement) {
     e.preventDefault();
@@ -7031,7 +7051,7 @@ function setMode(mode) {
     const rawToggle = document.getElementById('rawModeToggle');
     const visualToggle = document.getElementById('visualModeToggle');
     const table = document.getElementById('dataTable');
-    
+
     // Safety check
     mode = parseInt(mode);
     if (isNaN(mode) || mode < 0 || mode > 2) mode = 1;
@@ -7063,7 +7083,7 @@ function setMode(mode) {
             visualToggle.checked = true;
             const vLabel = visualToggle.closest('label');
             const vIcon = vLabel.querySelector('span');
-            
+
             if (mode === 1) {
                 // Standard
                 vLabel.classList.add('active');
@@ -7085,7 +7105,7 @@ function setMode(mode) {
 
 function toggleRawMode() {
     const currentMode = parseInt(localStorage.getItem('markdownPreviewMode') || '1');
-    
+
     if (currentMode === 0) {
         // If in Raw, go back to Standard (1)
         setMode(1);
@@ -7099,7 +7119,7 @@ function toggleRawMode() {
 
 function cycleVisualMode() {
     const currentMode = parseInt(localStorage.getItem('markdownPreviewMode') || '1');
-    
+
     if (currentMode === 0) {
         // If in Raw, go to Standard (1)
         setMode(1);
@@ -14146,7 +14166,7 @@ function updateLineHeightSettings(type, value) {
         root.style.setProperty('--markdown-preview-line-height', cssVal);
         globalSettings.markdownPreviewLineHeight = cssVal;
     }
-    
+
     saveSettings();
 }
 
@@ -14189,7 +14209,7 @@ document.addEventListener('DOMContentLoaded', loadLineHeightSettings);
 document.addEventListener('DOMContentLoaded', () => {
     const rawToggle = document.getElementById('rawModeToggle');
     const visualToggle = document.getElementById('visualModeToggle');
-    
+
     if (rawToggle) {
         const label = rawToggle.closest('label');
         if (label) {
@@ -14199,7 +14219,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
     }
-    
+
     if (visualToggle) {
         const label = visualToggle.closest('label');
         if (label) {

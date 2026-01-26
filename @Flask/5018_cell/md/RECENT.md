@@ -6,6 +6,40 @@
 
 ---
 
+## [2026-01-26 10:55] - Recent Sheet Edits Feature
+
+**Session Duration:** 0.2 hours
+
+**What We Accomplished:**
+
+### 🎯 Added "Recent Edits" Popup (Manual)
+- **New Feature**: Added a **🕒** button for viewing pinned/recent edits.
+- **Changed Functionality**:
+  - **Manual Tracking**: Users now manually add cells to the list using "📌 Add to Recent Edits" in the context menu.
+  - **Automatic tracking removed** to prevent noise.
+  - Clicking the clock button shows these manually pinned cells from *other* sheets.
+  - Users can **edit** these cells directly from the popup.
+  - Updates are synced to the respective sheet immediately.
+- **Implementation**:
+  - Context Menu: Added "Add to Recent Edits" option.
+  - JS: Removed auto-tracking from `updateCell`, added `addToRecentEdits()`.
+  - Persistence: Uses `localStorage`.
+
+**Files Modified:**
+- `templates/index.html` - Added button and script inclusion. Moved popup to body.
+- `static/style.css` - Added popup styles.
+- `static/script.js` - Added tracking logic.
+- `static/recent_edits.js` - New file for popup logic.
+- `md/RECENT.md` - Logged session.
+
+**Current Status:**
+- ✅ Feature implemented.
+- ✅ Fixed popup clipping issue by using fixed positioning.
+- ✅ Added persistence via localStorage.
+- ✅ Fixed bug in "Add to Recent Edits" context menu item (property name mismatch).
+
+---
+
 ## [2026-01-23 15:30] - F3 Title Text Button & UX Polish
 
 **Session Duration:** 0.15 hours

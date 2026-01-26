@@ -84,6 +84,10 @@
             <span>Unmerge Cell</span>
         </div>
         <div class="context-menu-separator"></div>
+        <div class="context-menu-item" onclick="addToRecentEdits()">
+            <span>📌</span>
+            <span>Add to Recent Edits</span>
+        </div>
         <div class="context-menu-item" onclick="exportCellToPDF()">
             <span>📄</span>
             <span>Export Cell to PDF</span>
@@ -99,6 +103,13 @@
             </div>
 
             <div class="sheet-controls">
+                <div style="position: relative;">
+                    <button onclick="toggleLastEditedPopup()" class="btn-sheet-action" id="btnLastEdited"
+                        title="Recent Edits from Other Sheets">🕒</button>
+                    <div id="lastEditedPopup" class="recent-edits-popup">
+                        <!-- Content injected via JS -->
+                    </div>
+                </div>
                 <button onclick="openSettings()" class="btn-sheet-action" title="Settings">⚙️</button>
                 <div id="rowCount" class="load-time-indicator" title="Total number of rows in current sheet"
                     style="display: none;">
@@ -473,23 +484,25 @@
 
                     <div class="settings-item" style="margin-top: 20px;">
                         <h4 style="margin-bottom: 12px; font-size: 14px; color: #555;">Line Height Settings</h4>
-                        
+
                         <div style="display: flex; gap: 20px; flex-wrap: wrap;">
                             <div style="flex: 1; min-width: 200px;">
-                                <label for="tableEditLineHeight" class="settings-label" style="font-size: 13px;">Table Edit Mode</label>
+                                <label for="tableEditLineHeight" class="settings-label" style="font-size: 13px;">Table
+                                    Edit Mode</label>
                                 <div style="display: flex; align-items: center; gap: 8px;">
-                                    <input type="number" id="tableEditLineHeight" value="1.6" step="0.1" min="1.0" max="3.0"
-                                        onchange="updateLineHeightSettings('table-edit', this.value)"
+                                    <input type="number" id="tableEditLineHeight" value="1.6" step="0.1" min="1.0"
+                                        max="3.0" onchange="updateLineHeightSettings('table-edit', this.value)"
                                         style="width: 70px; padding: 6px; border: 1px solid #ddd; border-radius: 4px;">
                                     <span style="font-size: 12px; color: #666;">(Default: 1.6)</span>
                                 </div>
                             </div>
 
                             <div style="flex: 1; min-width: 200px;">
-                                <label for="markdownPreviewLineHeight" class="settings-label" style="font-size: 13px;">Markdown Preview</label>
+                                <label for="markdownPreviewLineHeight" class="settings-label"
+                                    style="font-size: 13px;">Markdown Preview</label>
                                 <div style="display: flex; align-items: center; gap: 8px;">
-                                    <input type="number" id="markdownPreviewLineHeight" value="1.5" step="0.1" min="1.0" max="3.0"
-                                        onchange="updateLineHeightSettings('markdown-preview', this.value)"
+                                    <input type="number" id="markdownPreviewLineHeight" value="1.5" step="0.1" min="1.0"
+                                        max="3.0" onchange="updateLineHeightSettings('markdown-preview', this.value)"
                                         style="width: 70px; padding: 6px; border: 1px solid #ddd; border-radius: 4px;">
                                     <span style="font-size: 12px; color: #666;">(Default: 1.5)</span>
                                 </div>
@@ -624,15 +637,23 @@
                             </td>
                         </tr>
                         <tr style="border-bottom: 1px solid #ddd;">
-                            <td style="padding: 8px; font-family: monospace; background: #f8f9fa;">:::Title Text:::<br>:::R_3px:::Styled:::</td>
+                            <td style="padding: 8px; font-family: monospace; background: #f8f9fa;">:::Title
+                                Text:::<br>:::R_3px:::Styled:::</td>
                             <td style="padding: 8px;">
-                                <div style="border-top: 1px solid #000; border-bottom: 1px solid #000; padding: 2px 0; text-align: center; font-weight: bold; margin-bottom: 5px;">Title Text</div>
-                                <div style="border-top: 3px solid #ff0000; border-bottom: 3px solid #ff0000; padding: 2px 0; text-align: center; font-weight: bold; color: #000;">Styled</div>
+                                <div
+                                    style="border-top: 1px solid #000; border-bottom: 1px solid #000; padding: 2px 0; text-align: center; font-weight: bold; margin-bottom: 5px;">
+                                    Title Text</div>
+                                <div
+                                    style="border-top: 3px solid #ff0000; border-bottom: 3px solid #ff0000; padding: 2px 0; text-align: center; font-weight: bold; color: #000;">
+                                    Styled</div>
                             </td>
                         </tr>
                     </table>
                     <p style="font-size: 12px; color: #666; margin-top: 5px;">
-                        <strong>Title Syntax:</strong> <code>:::Params:::Text:::</code>. Params (optional) can include border/font color (e.g. <code>R</code>, <code>f-G</code>, <code>#f00</code>), thickness (e.g. <code>3px</code>), and font size (e.g. <code>1.5em</code>), separated by <code>_</code>. Font colors use <code>f-</code> prefix.
+                        <strong>Title Syntax:</strong> <code>:::Params:::Text:::</code>. Params (optional) can include
+                        border/font color (e.g. <code>R</code>, <code>f-G</code>, <code>#f00</code>), thickness (e.g.
+                        <code>3px</code>), and font size (e.g. <code>1.5em</code>), separated by <code>_</code>. Font
+                        colors use <code>f-</code> prefix.
                     </p>
                     <p
                         style="font-size: 12px; color: #666; margin-top: 10px; padding: 10px; background: #e7f3ff; border-left: 3px solid #007bff;">
@@ -1034,7 +1055,8 @@
                 <span style="border: 2px solid #ff0000; padding: 1px 4px; border-radius: 3px; font-size: 11px;">□</span>
             </button>
             <button class="format-btn" onclick="applyTitleTextFormat(event)" title="Title Text - :::Params:::text:::">
-                <span style="border-top: 1px solid #000; border-bottom: 1px solid #000; padding: 1px 0; font-size: 11px; font-weight: bold;">T</span>
+                <span
+                    style="border-top: 1px solid #000; border-bottom: 1px solid #000; padding: 1px 0; font-size: 11px; font-weight: bold;">T</span>
             </button>
             <button class="format-btn" onclick="applyQuickFormat('`', '`', event)"
                 oncontextmenu="return toggleFormatSelection('`', '`', event)" title="Code (Right-click to select)">
@@ -1183,7 +1205,13 @@
         </div>
     </div>
 
+    <!-- Recent Edits Popup (Moved to body to avoid overflow clipping) -->
+    <div id="lastEditedPopup" class="recent-edits-popup">
+        <!-- Content injected via JS -->
+    </div>
+
     <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script src="{{ url_for('static', filename='recent_edits.js') }}"></script>
     <script>
         // Render KaTeX examples in Markdown Guide when modal is opened
         document.addEventListener('DOMContentLoaded', function () {
