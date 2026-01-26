@@ -6,6 +6,39 @@
 
 ---
 
+## [2026-01-26 15:30] - Fixed Per-Sheet Scroll Position Preservation
+
+**Session Duration:** 0.5 hours
+
+**What We Accomplished:**
+
+### 🐛 Fixed Scroll Position Not Preserving for Specific Sheets
+- **Problem**: Scroll position was not being preserved for certain sheets (e.g., "GK" sheet) when switching between sheets.
+- **Root Cause**: Scroll positions were stored by **sheet index** instead of **sheet name**, so when sheets were reordered (moved up/down), the scroll positions became mismatched.
+- **Solution**: 
+  - Changed scroll position storage to use **sheet name** as the key instead of index.
+  - Added migration function to convert old index-based positions to name-based.
+  - Fixed `renderTable` wrapper that was overriding scroll positions after 350ms delay.
+  - Added `preserveScroll` parameter to `renderTable()` to distinguish between re-renders and sheet switches.
+
+**Technical Changes:**
+- `switchSheet()`: Now saves/restores scroll using sheet name as key.
+- `renderTable()`: Added `preserveScroll` parameter (default `true`).
+- `renderTable` wrapper: Respects `preserveScroll` flag to avoid overriding scroll on sheet switch.
+- Scroll event listener: Saves scroll position using sheet name.
+- Added `migrateScrollPositions()`: One-time migration from index-based to name-based storage.
+
+**Files Modified:**
+- `static/script.js` - Fixed scroll position logic throughout.
+- `md/RECENT.md` - Logged session.
+- `md/PROBLEMS_AND_FIXES.md` - Documented the bug and fix.
+
+**Current Status:**
+- ✅ Scroll positions now persist correctly across all sheets, even after reordering.
+- ✅ Added comprehensive logging for debugging scroll issues.
+
+---
+
 ## [2026-01-26 10:55] - Recent Sheet Edits Feature
 
 **Session Duration:** 0.2 hours
@@ -104,32 +137,3 @@
 
 **Current Status:**
 - ✅ Improved 2-button control system for markdown viewing.
-
----
-
-## [2026-01-23 14:45] - Title Text Font Styling
-
-**Session Duration:** 0.15 hours
-
-**What We Accomplished:**
-
-### 🎯 Added Font Styling to "Title Text" (`:::Params:::Text:::`)
-- Users can now control **font size** and **font color** inside Title Text bars.
-- Enhanced Syntax: Supports `em`, `rem`, and `f-` parameters.
-
-**Current Status:**
-- ✅ Title Text supports full border and font customization.
-
----
-
-## [2026-01-23 14:30] - Customizable Title Text Feature
-
-**Session Duration:** 0.15 hours
-
-**What We Accomplished:**
-
-### 🎯 Enhanced "Title Text" Syntax (`:::Params:::Text:::`)
-- **Customization**: Users can now set the **color** and **thickness** of Title Text borders.
-
-**Current Status:**
-- ✅ Title Text is customizable.

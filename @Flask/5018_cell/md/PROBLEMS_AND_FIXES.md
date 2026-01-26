@@ -7,6 +7,66 @@ This document tracks historical bugs, issues, and their solutions. Use this to:
 
 ---
 
+## [2026-01-26 15:30] - Sheet Scroll Position Not Preserved After Reordering
+
+**Problem:** 
+When switching between sheets, the scroll position was not being preserved for some sheets (notably the "GK" sheet). The scroll would reset to the top even though the user had scrolled down before switching away.
+
+**Root Cause:** 
+The scroll positions were being stored in localStorage using the **sheet index** as the key (e.g., `scrollPositions[0]`, `scrollPositions[1]`). When sheets were reordered using the "Move Up" or "Move Down" functions, the sheet indices changed, but the saved scroll positions remained associated with the old indices. This caused a mismatch where a sheet at index 3 would try to restore the scroll position saved for index 5.
+
+Additionally, the `renderTable()` function was capturing the scroll position at the beginning of rendering, which would capture the scroll from the **previous sheet** when switching sheets, then restore that wrong position after a 350ms delay, overriding the correct restoration.
+
+**Solution:** 
+1. **Changed scroll position storage key from index to name**: Updated `switchSheet()` and all scroll restoration logic to use `tableData.sheets[index].name` as the key instead of the numeric index. This ensures scroll positions persist even when sheets are reordered.
+
+2. **Added migration function**: Created `migrateScrollPositions()` to convert existing index-based scroll positions to name-based ones on first load, ensuring backward compatibility.
+
+3. **Fixed renderTable scroll capture**: Added a `preserveScroll` parameter to `renderTable(preserveScroll = true)`. When switching sheets, `switchSheet()` now calls `renderTable(false)` to prevent capturing the wrong scroll position.
+
+4. **Updated renderTable wrapper**: Modified the wrapper function to respect the `preserveScroll` parameter and only restore scroll when appropriate, preventing the 350ms delayed override.
+
+**Files Modified:**
+- `static/script.js` - Updated `switchSheet()`, `renderTable()`, scroll event listener, and renderTable wrapper
+- `static/script.js` - Added `migrateScrollPositions()` function
+- `static/script.js` - Updated `loadData()` to call migration function
+
+**Related Issues:** Sheet navigation, localStorage persistence, scroll restoration timing
+
+**Result:** Scroll positions now persist correctly across sheet switches, even after sheets are reordered. The migration ensures existing users' scroll positions are preserved.
+
+---
+
+## [2026-01-26 11:30] - Sheet Scroll Position Not Preserved After Reordering
+
+**Problem:** 
+When switching between sheets, the scroll position was not being preserved for some sheets (notably the "GK" sheet). The scroll would reset to the top even though the user had scrolled down before switching away.
+
+**Root Cause:** 
+The scroll positions were being stored in localStorage using the **sheet index** as the key (e.g., `scrollPositions[0]`, `scrollPositions[1]`). When sheets were reordered using the "Move Up" or "Move Down" functions, the sheet indices changed, but the saved scroll positions remained associated with the old indices. This caused a mismatch where a sheet at index 3 would try to restore the scroll position saved for index 5.
+
+Additionally, the `renderTable()` function was capturing the scroll position at the beginning of rendering, which would capture the scroll from the **previous sheet** when switching sheets, then restore that wrong position after a 350ms delay, overriding the correct restoration.
+
+**Solution:** 
+1. **Changed scroll position storage key from index to name**: Updated `switchSheet()` and all scroll restoration logic to use `tableData.sheets[index].name` as the key instead of the numeric index. This ensures scroll positions persist even when sheets are reordered.
+
+2. **Added migration function**: Created `migrateScrollPositions()` to convert existing index-based scroll positions to name-based ones on first load, ensuring backward compatibility.
+
+3. **Fixed renderTable scroll capture**: Added a `preserveScroll` parameter to `renderTable(preserveScroll = true)`. When switching sheets, `switchSheet()` now calls `renderTable(false)` to prevent capturing the wrong scroll position.
+
+4. **Updated renderTable wrapper**: Modified the wrapper function to respect the `preserveScroll` parameter and only restore scroll when appropriate, preventing the 350ms delayed override.
+
+**Files Modified:**
+- `static/script.js` - Updated `switchSheet()`, `renderTable()`, scroll event listener, and renderTable wrapper
+- `static/script.js` - Added `migrateScrollPositions()` function
+- `static/script.js` - Updated `loadData()` to call migration function
+
+**Related Issues:** Sheet navigation, localStorage persistence, scroll restoration timing
+
+**Result:** Scroll positions now persist correctly across sheet switches, even after sheets are reordered. The migration ensures existing users' scroll positions are preserved.
+
+---
+
 ## [2026-01-23 13:30] - Excessive Spacing Below Tables (Smart Joiner)
 
 **Problem:** 
