@@ -1115,7 +1115,8 @@ function addColumn() {
     document.getElementById('columnColorText').value = '#FFFFFF';
     document.getElementById('columnTextColor').value = '#000000';
     document.getElementById('columnTextColorText').value = '#000000';
-    document.getElementById('columnFontSize').value = '18';
+    document.getElementById('columnFont').value = 'JetBrains Mono';
+    document.getElementById('columnFontSize').value = '20';
     document.getElementById('headerBgColor').value = '#f8f9fa';
     document.getElementById('headerBgColorText').value = '#F8F9FA';
     document.getElementById('headerTextColor').value = '#333333';
@@ -1140,8 +1141,8 @@ function editColumn(index) {
     document.getElementById('columnColorText').value = col.color.toUpperCase();
     document.getElementById('columnTextColor').value = col.textColor || '#000000';
     document.getElementById('columnTextColorText').value = (col.textColor || '#000000').toUpperCase();
-    document.getElementById('columnFont').value = col.font || '';
-    document.getElementById('columnFontSize').value = col.fontSize || '18';
+    document.getElementById('columnFont').value = col.font || 'JetBrains Mono';
+    document.getElementById('columnFontSize').value = col.fontSize || '20';
 
     // Load header styling
     document.getElementById('headerBgColor').value = col.headerBgColor || '#f8f9fa';
@@ -5254,7 +5255,25 @@ async function addSheet() {
 
         if (response.ok) {
             const result = await response.json();
-            tableData.sheets.push({ name: sheetName, columns: [], rows: [] });
+            const defaultColumn = {
+                name: 'A',
+                type: 'text',
+                width: 150,
+                color: '#ffffff',
+                textColor: '#000000',
+                font: 'JetBrains Mono',
+                fontSize: 20,
+                headerBgColor: '#f8f9fa',
+                headerTextColor: '#333333',
+                headerBold: true,
+                headerItalic: false,
+                headerCenter: false
+            };
+            tableData.sheets.push({ 
+                name: sheetName, 
+                columns: [defaultColumn], 
+                rows: [['']] 
+            });
             currentSheet = result.sheetIndex;
 
             // Auto-assign to current category if one is selected
@@ -5287,10 +5306,24 @@ async function addSubSheet(parentIndex) {
 
         if (response.ok) {
             const result = await response.json();
+            const defaultColumn = {
+                name: 'A',
+                type: 'text',
+                width: 150,
+                color: '#ffffff',
+                textColor: '#000000',
+                font: 'JetBrains Mono',
+                fontSize: 20,
+                headerBgColor: '#f8f9fa',
+                headerTextColor: '#333333',
+                headerBold: true,
+                headerItalic: false,
+                headerCenter: false
+            };
             tableData.sheets.push({
                 name: subSheetName,
-                columns: [],
-                rows: [],
+                columns: [defaultColumn],
+                rows: [['']],
                 parentSheet: parentIndex
             });
             currentSheet = result.sheetIndex;

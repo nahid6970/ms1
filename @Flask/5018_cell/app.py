@@ -23,7 +23,26 @@ SETTINGS_FILE = r'C:\@delta\db\5018_cell\setting.json'
 def load_data():
     data = {
         'sheets': [
-            {'name': 'Sheet1', 'columns': [], 'rows': []}
+            {
+                'name': 'Sheet1',
+                'columns': [
+                    {
+                        'name': 'A',
+                        'type': 'text',
+                        'width': 150,
+                        'color': '#ffffff',
+                        'textColor': '#000000',
+                        'font': 'JetBrains Mono',
+                        'fontSize': 20,
+                        'headerBgColor': '#f8f9fa',
+                        'headerTextColor': '#333333',
+                        'headerBold': True,
+                        'headerItalic': False,
+                        'headerCenter': False
+                    }
+                ],
+                'rows': [['']]
+            }
         ],
         'activeSheet': 0
     }
@@ -115,7 +134,26 @@ def add_sheet():
     sheet_name = request.json.get('name', f'Sheet{len(data["sheets"]) + 1}')
     parent_sheet = request.json.get('parentSheet', None)
     
-    new_sheet = {'name': sheet_name, 'columns': [], 'rows': []}
+    # Initialize with 1 column (A) and 1 empty row
+    default_column = {
+        'name': 'A',
+        'type': 'text',
+        'width': 150,
+        'color': '#ffffff',
+        'textColor': '#000000',
+        'font': 'JetBrains Mono',
+        'fontSize': 20,
+        'headerBgColor': '#f8f9fa',
+        'headerTextColor': '#333333',
+        'headerBold': True,
+        'headerItalic': False,
+        'headerCenter': False
+    }
+    new_sheet = {
+        'name': sheet_name, 
+        'columns': [default_column], 
+        'rows': [['']]
+    }
     if parent_sheet is not None:
         new_sheet['parentSheet'] = parent_sheet
     
