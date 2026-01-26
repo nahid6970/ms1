@@ -5242,6 +5242,34 @@ function setCellRank() {
     }
 }
 
+function getDefaultSheetConfig(name, parentIndex = null) {
+    const defaultColumn = {
+        name: 'A',
+        type: 'text',
+        width: 150,
+        color: '#ffffff',
+        textColor: '#000000',
+        font: 'JetBrains Mono',
+        fontSize: 20,
+        headerBgColor: '#f8f9fa',
+        headerTextColor: '#333333',
+        headerBold: true,
+        headerItalic: false,
+        headerCenter: false
+    };
+    const sheet = {
+        name: name,
+        columns: [defaultColumn],
+        rows: [['']],
+        cellStyles: {},
+        mergedCells: {}
+    };
+    if (parentIndex !== null) {
+        sheet.parentSheet = parentIndex;
+    }
+    return sheet;
+}
+
 async function addSheet() {
     const sheetName = prompt('Enter sheet name:', `Sheet${tableData.sheets.length + 1}`);
     if (!sheetName) return;
@@ -5255,26 +5283,10 @@ async function addSheet() {
 
         if (response.ok) {
             const result = await response.json();
-            const defaultColumn = {
-                name: 'A',
-                type: 'text',
-                width: 150,
-                color: '#ffffff',
-                textColor: '#000000',
-                font: 'JetBrains Mono',
-                fontSize: 20,
-                headerBgColor: '#f8f9fa',
-                headerTextColor: '#333333',
-                headerBold: true,
-                headerItalic: false,
-                headerCenter: false
-            };
-            tableData.sheets.push({ 
-                name: sheetName, 
-                columns: [defaultColumn], 
-                rows: [['']] 
-            });
+            const newSheet = getDefaultSheetConfig(sheetName);
+            tableData.sheets.push(newSheet);
             currentSheet = result.sheetIndex;
+            await saveData();
 
             // Auto-assign to current category if one is selected
             if (currentCategory !== null) {
@@ -5306,26 +5318,8 @@ async function addSubSheet(parentIndex) {
 
         if (response.ok) {
             const result = await response.json();
-            const defaultColumn = {
-                name: 'A',
-                type: 'text',
-                width: 150,
-                color: '#ffffff',
-                textColor: '#000000',
-                font: 'JetBrains Mono',
-                fontSize: 20,
-                headerBgColor: '#f8f9fa',
-                headerTextColor: '#333333',
-                headerBold: true,
-                headerItalic: false,
-                headerCenter: false
-            };
-            tableData.sheets.push({
-                name: subSheetName,
-                columns: [defaultColumn],
-                rows: [['']],
-                parentSheet: parentIndex
-            });
+            const newSheet = getDefaultSheetConfig(subSheetName, parentIndex);
+            tableData.sheets.push(newSheet);
             currentSheet = result.sheetIndex;
 
             // Inherit parent's category
@@ -11095,13 +11089,7 @@ async function addF1Sheet() {
     const sheetName = prompt('Enter sheet name:');
     if (!sheetName) return;
 
-    const newSheet = {
-        name: sheetName,
-        columns: [],
-        rows: [],
-        cellStyles: {},
-        mergedCells: {}
-    };
+    const newSheet = getDefaultSheetConfig(sheetName);
 
     tableData.sheets.push(newSheet);
     const newIndex = tableData.sheets.length - 1;
@@ -12364,7 +12352,8 @@ async function showAddSheetToCategory(category) {
 
         if (response.ok) {
             const result = await response.json();
-            tableData.sheets.push({ name: sheetName, columns: [], rows: [] });
+            const newSheet = getDefaultSheetConfig(sheetName);
+            tableData.sheets.push(newSheet);
             const newIndex = result.sheetIndex;
             currentSheet = newIndex;
 
