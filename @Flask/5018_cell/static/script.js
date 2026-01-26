@@ -13468,6 +13468,71 @@ function applyTitleTextFormat(event) {
 }
 
 // Sort Lines Function
+function generatePlaceholderText(event) {
+    if (event && event.preventDefault) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+
+    if (!quickFormatterTarget) return;
+
+    const placeholder = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
+
+    const input = quickFormatterTarget;
+
+    // Handle contentEditable (WYSIWYG mode)
+    if (quickFormatterSelection.isContentEditable) {
+        const range = quickFormatterSelection.range;
+        range.deleteContents();
+        const textNode = document.createTextNode(placeholder);
+        range.insertNode(textNode);
+
+        // Update the underlying input value
+        const rawText = extractRawText(input);
+        const actualInput = input.previousElementSibling;
+        if (actualInput && (actualInput.tagName === 'INPUT' || actualInput.tagName === 'TEXTAREA')) {
+            actualInput.value = rawText;
+
+            // Trigger change event to save data
+            const changeEvent = new Event('input', { bubbles: true });
+            actualInput.dispatchEvent(changeEvent);
+        }
+
+        // Select the new text
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        const newRange = document.createRange();
+        newRange.selectNodeContents(textNode);
+        selection.addRange(newRange);
+
+        closeQuickFormatter();
+        showToast('Placeholder text generated', 'success');
+        return;
+    }
+
+    // Handle input/textarea (legacy mode)
+    const start = quickFormatterSelection.start;
+    const end = quickFormatterSelection.end;
+
+    const newText = input.value.substring(0, start) + placeholder + input.value.substring(end);
+    input.value = newText;
+
+    // Update tableData
+    const td = input.closest('td');
+    const rowIndex = parseInt(td.dataset.row);
+    const colIndex = parseInt(td.dataset.col);
+    if (!isNaN(rowIndex) && !isNaN(colIndex)) {
+        tableData.sheets[currentSheet].rows[rowIndex][colIndex] = newText;
+        saveData();
+    }
+
+    input.focus();
+    input.setSelectionRange(start, start + placeholder.length);
+
+    closeQuickFormatter();
+    showToast('Placeholder text generated', 'success');
+}
+
 function sortLines(event) {
     if (!quickFormatterTarget) return;
 
