@@ -48,11 +48,11 @@
     "marker": "\u0194\u0194"
   },
   {
-    "marker": "\u00db\u00db",
-    "bgColor": "#ffffff",
+    "bgColor": "transparent",
     "fgColor": "#212529",
     "isBold": true,
     "isItalic": true,
-    "isUnderline": true
+    "isUnderline": true,
+    "marker": "\u00db\u00db"
   }
 ]
