@@ -3,10 +3,11 @@ import json
 import os
 import ctypes
 import subprocess
+import shutil
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QLabel, QPushButton, QLineEdit, QGroupBox, QScrollArea, 
                              QFrame, QMessageBox, QFileDialog, QProgressBar, QDialog,
-                             QTreeView, QHeaderView)
+                             QTreeView, QHeaderView, QCheckBox)
 from PyQt6.QtGui import QFont, QIcon, QColor, QFileSystemModel
 from PyQt6.QtCore import Qt, QThread, pyqtSignal, QDir
 
@@ -82,10 +83,11 @@ class SyncWorker(QThread):
     progress = pyqtSignal(int, int, str) # current, total, message
     finished = pyqtSignal(int, int) # success, failed
 
-    def __init__(self, source, destination):
+    def __init__(self, source, destination, is_copy=False):
         super().__init__()
         self.source = os.path.normpath(source)
         self.destination = os.path.normpath(destination)
+        self.is_copy = is_copy
 
     def run(self):
         file_list = []
@@ -109,38 +111,49 @@ class SyncWorker(QThread):
 
                 # Handle existing file/link at destination
                 if os.path.exists(dst_path) or os.path.lexists(dst_path):
-                    if os.path.islink(dst_path):
-                        os.remove(dst_path)
+                    if self.is_copy:
+                        # In copy mode, overwrite if it's a link or file?
+                        # For safety, let's just overwrite.
+                        if os.path.islink(dst_path):
+                            os.remove(dst_path)
+                        # If real file exists, shutil.copy2 will overwrite
                     else:
-                        # If it's a real file and not a link, we skip it to be safe 
-                        # (User said "match every file and create link", usually means replacing or skipping)
-                        # We'll skip real files to avoid accidental data loss.
-                        failed += 1
-                        self.progress.emit(i+1, total, f"Skipped (Real file exists): {rel_path}")
-                        continue
+                        if os.path.islink(dst_path):
+                            os.remove(dst_path)
+                        else:
+                            # If it's a real file and not a link, we skip it to be safe 
+                            failed += 1
+                            self.progress.emit(i+1, total, f"Skipped (Real file exists): {rel_path}")
+                            continue
 
-                # Create Symlink (File)
-                cmd = f'mklink "{dst_path}" "{src_path}"'
-                result = subprocess.run(f'cmd /c {cmd}', capture_output=True, text=True, shell=True)
-                
-                if result.returncode == 0:
+                # Action
+                if self.is_copy:
+                    shutil.copy2(src_path, dst_path)
                     success += 1
-                    self.progress.emit(i+1, total, f"Linked: {rel_path}")
+                    self.progress.emit(i+1, total, f"Copied: {rel_path}")
                 else:
-                    # Try admin elevation if needed
-                    err = result.stderr.strip().lower()
-                    if "privilege" in err or "access is denied" in err:
-                        params = f'/c {cmd}'
-                        ret = ctypes.windll.shell32.ShellExecuteW(None, "runas", "cmd.exe", params, None, 0)
-                        if ret > 32:
-                            success += 1
-                            self.progress.emit(i+1, total, f"Linked (Admin): {rel_path}")
+                    # Create Symlink (File)
+                    cmd = f'mklink "{dst_path}" "{src_path}"'
+                    result = subprocess.run(f'cmd /c {cmd}', capture_output=True, text=True, shell=True)
+                    
+                    if result.returncode == 0:
+                        success += 1
+                        self.progress.emit(i+1, total, f"Linked: {rel_path}")
+                    else:
+                        # Try admin elevation if needed
+                        err = result.stderr.strip().lower()
+                        if "privilege" in err or "access is denied" in err:
+                            params = f'/c {cmd}'
+                            ret = ctypes.windll.shell32.ShellExecuteW(None, "runas", "cmd.exe", params, None, 0)
+                            if ret > 32:
+                                success += 1
+                                self.progress.emit(i+1, total, f"Linked (Admin): {rel_path}")
+                            else:
+                                failed += 1
+                                self.progress.emit(i+1, total, f"Failed (Admin Req): {rel_path}")
                         else:
                             failed += 1
-                            self.progress.emit(i+1, total, f"Failed (Admin Req): {rel_path}")
-                    else:
-                        failed += 1
-                        self.progress.emit(i+1, total, f"Error: {rel_path}")
+                            self.progress.emit(i+1, total, f"Error: {rel_path}")
 
             except Exception as e:
                 failed += 1
@@ -232,6 +245,15 @@ class MirrorSyncManager(QMainWindow):
         split_layout.addLayout(log_container, stretch=3)
 
         right_layout.addLayout(split_layout)
+
+        # Progress (Above Rocket Button)
+        self.progress_bar = QProgressBar()
+        right_layout.addWidget(self.progress_bar)
+
+        # Copy Toggle
+        self.copy_mode_chk = QCheckBox("Copy Files instead of Linking")
+        self.copy_mode_chk.setStyleSheet(f"color: {CP_CYAN}; font-weight: bold; margin-bottom: 5px;")
+        right_layout.addWidget(self.copy_mode_chk)
 
         self.sync_btn = QPushButton("🚀 START MIRROR SYNC")
         self.sync_btn.setFixedHeight(50)
@@ -406,7 +428,8 @@ class MirrorSyncManager(QMainWindow):
         self.sync_btn.setText("🚀 SCANNING...")
         self.log_content.setText("Scanning...")
         
-        self.worker = SyncWorker(self.current_project["source"], self.current_project["destination"])
+        is_copy = self.copy_mode_chk.isChecked()
+        self.worker = SyncWorker(self.current_project["source"], self.current_project["destination"], is_copy)
         self.worker.progress.connect(self.update_progress)
         self.worker.finished.connect(self.sync_finished)
         self.worker.start()

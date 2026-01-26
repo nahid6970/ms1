@@ -6,7 +6,7 @@ import subprocess
 import shutil
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QLabel, QPushButton, QLineEdit, QGroupBox, QFormLayout, 
-                             QDialog, QMessageBox, QScrollArea, QFrame, QComboBox, QSizePolicy, QFileDialog, QMenu)
+                             QDialog, QMessageBox, QScrollArea, QFrame, QComboBox, QSizePolicy, QFileDialog, QMenu, QCheckBox)
 from PyQt6.QtCore import Qt, QSize
 from PyQt6.QtGui import QFont, QIcon, QColor, QCursor
 
@@ -219,6 +219,14 @@ class AddLinkDialog(QDialog):
         if edit_data:
             self.name_entry.setText(edit_data.get("name", ""))
         name_layout.addWidget(self.name_entry)
+
+        # Copy Toggle
+        self.copy_chk = QCheckBox("Copy Mode (No Symlinks)")
+        self.copy_chk.setStyleSheet(f"color: {CP_CYAN}; font-weight: bold; margin-left: 20px;")
+        if edit_data:
+            self.copy_chk.setChecked(edit_data.get("copy_mode", False))
+        name_layout.addWidget(self.copy_chk)
+
         layout.addLayout(name_layout)
 
         # Items Header
@@ -316,7 +324,8 @@ class AddLinkDialog(QDialog):
             QMessageBox.warning(self, "Incomplete", "Please add at least one item.")
             return
 
-        self.on_save_callback(name, items)
+        copy_mode = self.copy_chk.isChecked()
+        self.on_save_callback(name, items, copy_mode)
         self.accept()
 
 # ==========================================
@@ -401,10 +410,11 @@ class SymlinkManager(QMainWindow):
     def open_add_dialog(self):
         AddLinkDialog(self, self.on_link_added).exec()
 
-    def on_link_added(self, name, items):
+    def on_link_added(self, name, items, copy_mode):
         self.links.append({
             "name": name,
-            "items": items
+            "items": items,
+            "copy_mode": copy_mode
         })
         self.search_entry.clear()
         self.save_data()
@@ -421,6 +431,8 @@ class SymlinkManager(QMainWindow):
 
     def check_status(self, entry):
         items = entry.get("items", [])
+        copy_mode = entry.get("copy_mode", False)
+        
         if not items:
             return "No items", CP_DIM
 
@@ -430,6 +442,18 @@ class SymlinkManager(QMainWindow):
             fake = item.get("fake", "")
             link_type = item.get("type", "folder")
             
+            # COPY MODE LOGIC
+            if copy_mode:
+                if os.path.exists(fake) and not os.path.lexists(fake):
+                    # Normal file/folder exists (good)
+                    statuses.append(("Copied", CP_GREEN))
+                elif os.path.islink(fake) or self.is_junction(fake):
+                    statuses.append(("Is Link (Mode: Copy)", CP_ORANGE))
+                elif not os.path.exists(fake):
+                    statuses.append(("Missing", CP_YELLOW))
+                continue
+            
+            # LINK MODE LOGIC
             if not os.path.exists(fake) and not os.path.lexists(fake):
                 statuses.append(("Missing Link", CP_YELLOW))
                 continue
@@ -477,9 +501,10 @@ class SymlinkManager(QMainWindow):
     def edit_link(self, index):
         link = self.get_filtered_links()[index]
         
-        def on_save(name, items):
+        def on_save(name, items, copy_mode):
             link["name"] = name
             link["items"] = items
+            link["copy_mode"] = copy_mode
             self.save_data()
             self.refresh_ui()
             self.status_bar.setText(f"Updated entry: {name}")
@@ -518,6 +543,7 @@ class SymlinkManager(QMainWindow):
     def create_link(self, index):
         link_entry = self.get_filtered_links()[index]
         items = link_entry.get("items", [])
+        copy_mode = link_entry.get("copy_mode", False)
         
         success_count = 0
         for item in items:
@@ -531,13 +557,27 @@ class SymlinkManager(QMainWindow):
 
             # Handle existing
             if os.path.exists(fake) or os.path.lexists(fake):
-                is_proper_link = os.path.islink(fake) or (link_type == "folder" and self.is_junction(fake))
-                if not is_proper_link:
-                     reply = QMessageBox.question(self, "File Exists", 
-                                                f"A {link_type} already exists at {fake}. Delete and replace?",
-                                                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
-                     if reply != QMessageBox.StandardButton.Yes:
-                         continue
+                # If copy mode, check if we need to replace a link with a copy
+                if copy_mode:
+                    if os.path.islink(fake) or self.is_junction(fake):
+                         reply = QMessageBox.question(self, "Replace Link?", 
+                                                    f"A link exists at {fake}. Replace with copy?",
+                                                    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+                         if reply != QMessageBox.StandardButton.Yes: continue
+                    else:
+                         # It's a real file/folder. Warn overwrite?
+                         reply = QMessageBox.question(self, "Overwrite?", 
+                                                    f"File/Folder exists at {fake}. Overwrite?",
+                                                    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+                         if reply != QMessageBox.StandardButton.Yes: continue
+                else:
+                    is_proper_link = os.path.islink(fake) or (link_type == "folder" and self.is_junction(fake))
+                    if not is_proper_link:
+                         reply = QMessageBox.question(self, "File Exists", 
+                                                    f"A {link_type} already exists at {fake}. Delete and replace?",
+                                                    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+                         if reply != QMessageBox.StandardButton.Yes:
+                             continue
                 
                 try:
                     if os.path.isdir(fake) and not os.path.islink(fake) and not self.is_junction(fake):
@@ -551,32 +591,40 @@ class SymlinkManager(QMainWindow):
 
             # Create
             try:
-                if link_type == "folder":
-                    cmd = f'mklink /J "{fake}" "{target}"'
-                else:
-                    cmd = f'mklink "{fake}" "{target}"'
-                
-                result = subprocess.run(f'cmd /c {cmd}', capture_output=True, text=True, shell=True)
-                
-                if result.returncode == 0:
+                if copy_mode:
+                    if os.path.isdir(target):
+                        shutil.copytree(target, fake, dirs_exist_ok=True)
+                    else:
+                        shutil.copy2(target, fake)
                     success_count += 1
                 else:
-                    err = result.stderr.strip() or result.stdout.strip()
-                    if "privilege" in err.lower() or "access is denied" in err.lower():
-                        params = f'/c {cmd}'
-                        ret = ctypes.windll.shell32.ShellExecuteW(None, "runas", "cmd.exe", params, None, 1)
-                        if ret > 32:
-                            success_count += 1
-                        else:
-                            QMessageBox.critical(self, "Error", "Failed to elevate privileges.")
+                    if link_type == "folder":
+                        cmd = f'mklink /J "{fake}" "{target}"'
                     else:
-                        QMessageBox.critical(self, "Error", f"Cmd failed for {fake}:\n{err}")
+                        cmd = f'mklink "{fake}" "{target}"'
+                    
+                    result = subprocess.run(f'cmd /c {cmd}', capture_output=True, text=True, shell=True)
+                    
+                    if result.returncode == 0:
+                        success_count += 1
+                    else:
+                        err = result.stderr.strip() or result.stdout.strip()
+                        if "privilege" in err.lower() or "access is denied" in err.lower():
+                            params = f'/c {cmd}'
+                            ret = ctypes.windll.shell32.ShellExecuteW(None, "runas", "cmd.exe", params, None, 1)
+                            if ret > 32:
+                                success_count += 1
+                            else:
+                                QMessageBox.critical(self, "Error", "Failed to elevate privileges.")
+                        else:
+                            QMessageBox.critical(self, "Error", f"Cmd failed for {fake}:\n{err}")
 
             except Exception as e:
                 QMessageBox.critical(self, "Error", f"Unexpected error:\n{str(e)}")
         
         if success_count == len(items):
-            QMessageBox.information(self, "Success", f"All {len(items)} links created successfully.")
+            op = "copied" if copy_mode else "linked"
+            QMessageBox.information(self, "Success", f"All {len(items)} items {op} successfully.")
         
         self.refresh_ui()
 
