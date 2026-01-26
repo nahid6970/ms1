@@ -2,7 +2,7 @@
 
 ## Problem Description
 
-Users need a way to export individual cells or selected cells to PDF format while preserving all visual formatting, including markdown effects, colors, borders, a
+Users need to export individual cells or selected cells to PDF format while preserving all visual formatting including:
 - Markdown rendering (bold, italic, highlights, colors, headings)
 - Right-click formatting (bold, italic, center align, colors, borders)
 - Cell styling (background colors, text colors, font sizes)
