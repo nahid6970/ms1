@@ -3941,7 +3941,7 @@ function addToRecentEdits() {
     };
     localStorage.setItem('lastEditedCells', JSON.stringify(lastEditedCells));
 
-    showToast('Cell added to Recent Edits 📌', 'success');
+    showToast('Cell Bookmarked 📌', 'success');
     closeCellContextMenu();
 }
 

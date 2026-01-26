@@ -50,13 +50,13 @@ function renderLastEditedPopup() {
     // Get edits from other sheets
     const edits = Object.entries(lastEditedCells)
         .map(([sheetIdx, data]) => ({ sheetIdx: parseInt(sheetIdx), ...data }))
-        .filter(edit => edit.sheetIdx !== currentSheet)
+        //.filter(edit => edit.sheetIdx !== currentSheet) // Removed filter to allow current sheet
         .sort((a, b) => b.timestamp - a.timestamp) // Most recent first
-        .slice(0, 100); // Max 100 items (effectively unlimited for normal use)
+        .slice(0, 1); // Show only 1 item
 
     let html = `
         <div class="recent-edits-header">
-            <span>Recent Edits (Other Sheets)</span>
+            <span>Bookmark</span>
             <span style="font-size:10px; cursor:pointer;" onclick="document.getElementById('lastEditedPopup').style.display='none'">✕</span>
         </div>
         <div class="recent-edit-list">
