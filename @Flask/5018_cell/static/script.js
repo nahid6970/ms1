@@ -6334,8 +6334,20 @@ function searchTable(force = false) {
 
     // Remember last match before resetting for scroll restore
     let lastMatchRow = null;
+    let visualOffset = 0;
+    const tableContainer = document.querySelector('.table-container');
+
     if (currentMatchIndex >= 0 && searchMatches[currentMatchIndex]) {
         lastMatchRow = searchMatches[currentMatchIndex].closest('tr');
+    } else if (searchMatches.length > 0) {
+        lastMatchRow = searchMatches[0].closest('tr');
+    }
+
+    if (lastMatchRow && tableContainer) {
+        // Record the visual offset from the top of the container
+        const rowRect = lastMatchRow.getBoundingClientRect();
+        const containerRect = tableContainer.getBoundingClientRect();
+        visualOffset = rowRect.top - containerRect.top;
     }
 
     lastSearchTerm = searchTerm;
@@ -6373,9 +6385,15 @@ function searchTable(force = false) {
             row.style.display = '';
         });
 
-        // Restore scroll to the last matched row
-        if (lastMatchRow) {
-            lastMatchRow.scrollIntoView({ behavior: 'instant', block: 'center' });
+        // Restore scroll precisely to the last matched row
+        if (lastMatchRow && tableContainer) {
+            // new scrollTop = row.offsetTop - visualOffset
+            // offsetTop is relative to the table, but the table might have a header
+            // A more robust way is to just adjust the current scrollTop
+            const newRowRect = lastMatchRow.getBoundingClientRect();
+            const newContainerRect = tableContainer.getBoundingClientRect();
+            const currentOffset = newRowRect.top - newContainerRect.top;
+            tableContainer.scrollTop += (currentOffset - visualOffset);
         }
         return;
     }
@@ -6390,8 +6408,11 @@ function searchTable(force = false) {
             row.style.display = '';
         });
 
-        if (lastMatchRow) {
-            lastMatchRow.scrollIntoView({ behavior: 'instant', block: 'center' });
+        if (lastMatchRow && tableContainer) {
+            const newRowRect = lastMatchRow.getBoundingClientRect();
+            const newContainerRect = tableContainer.getBoundingClientRect();
+            const currentOffset = newRowRect.top - newContainerRect.top;
+            tableContainer.scrollTop += (currentOffset - visualOffset);
         }
         return;
     }
