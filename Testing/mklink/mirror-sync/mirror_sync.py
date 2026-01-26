@@ -7,7 +7,7 @@ import shutil
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QLabel, QPushButton, QLineEdit, QGroupBox, QScrollArea, 
                              QFrame, QMessageBox, QFileDialog, QProgressBar, QDialog,
-                             QTreeView, QHeaderView, QCheckBox)
+                             QTreeView, QHeaderView, QCheckBox, QFormLayout)
 from PyQt6.QtGui import QFont, QIcon, QColor, QFileSystemModel
 from PyQt6.QtCore import Qt, QThread, pyqtSignal, QDir
 
@@ -246,10 +246,6 @@ class MirrorSyncManager(QMainWindow):
 
         right_layout.addLayout(split_layout)
 
-        # Progress (Above Rocket Button)
-        self.progress_bar = QProgressBar()
-        right_layout.addWidget(self.progress_bar)
-
         # Copy Toggle
         self.copy_mode_chk = QCheckBox("Copy Files instead of Linking")
         self.copy_mode_chk.setStyleSheet(f"color: {CP_CYAN}; font-weight: bold; margin-bottom: 5px;")
@@ -376,42 +372,62 @@ class MirrorSyncManager(QMainWindow):
     def open_add_dialog(self, edit_index=None):
         dialog = QDialog(self)
         dialog.setWindowTitle("Edit Project" if edit_index is not None else "New Mirror Project")
-        dialog.resize(900, 350)
-        d_layout = QVBoxLayout(dialog)
+        dialog.resize(900, 300)
+        main_d_layout = QVBoxLayout(dialog)
+        main_d_layout.setSpacing(15)
+
+        # Form Layout for alignment
+        form_widget = QWidget()
+        form_layout = QFormLayout(form_widget)
+        form_layout.setLabelAlignment(Qt.AlignmentFlag.AlignRight)
+        form_layout.setSpacing(10)
 
         # Safety check for index
         if edit_index is not None and 0 <= edit_index < len(self.projects):
             proj_data = self.projects[edit_index]
         else:
             proj_data = {}
-            edit_index = None # Fallback to new project mode if index is invalid
+            edit_index = None
 
+        # Name
         name_in = QLineEdit(proj_data.get("name", ""))
         name_in.setPlaceholderText("Project Name")
-        d_layout.addWidget(QLabel("Name:"))
-        d_layout.addWidget(name_in)
+        form_layout.addRow("Project Name:", name_in)
 
+        # Source
         src_in = QLineEdit(proj_data.get("source", ""))
-        src_btn = QPushButton("📂 Browse Source")
+        src_btn = QPushButton("📂 Browse")
+        src_btn.setFixedWidth(100)
         src_btn.clicked.connect(lambda: src_in.setText(QFileDialog.getExistingDirectory(dialog, "Select Source", src_in.text())))
-        d_layout.addWidget(QLabel("Source Root:"))
-        h1 = QHBoxLayout()
-        h1.addWidget(src_in)
-        h1.addWidget(src_btn)
-        d_layout.addLayout(h1)
+        src_h = QHBoxLayout()
+        src_h.addWidget(src_in)
+        src_h.addWidget(src_btn)
+        form_layout.addRow("Source Root:", src_h)
 
+        # Destination
         dst_in = QLineEdit(proj_data.get("destination", ""))
-        dst_btn = QPushButton("📂 Browse Destination")
+        dst_btn = QPushButton("📂 Browse")
+        dst_btn.setFixedWidth(100)
         dst_btn.clicked.connect(lambda: dst_in.setText(QFileDialog.getExistingDirectory(dialog, "Select Destination", dst_in.text())))
-        d_layout.addWidget(QLabel("Destination Root:"))
-        h2 = QHBoxLayout()
-        h2.addWidget(dst_in)
-        h2.addWidget(dst_btn)
-        d_layout.addLayout(h2)
+        dst_h = QHBoxLayout()
+        dst_h.addWidget(dst_in)
+        dst_h.addWidget(dst_btn)
+        form_layout.addRow("Destination Root:", dst_h)
 
+        main_d_layout.addWidget(form_widget)
+        main_d_layout.addStretch()
+
+        # Buttons
+        btn_box = QHBoxLayout()
+        btn_box.addStretch()
+        cancel_btn = QPushButton("Cancel")
+        cancel_btn.clicked.connect(dialog.reject)
         save_btn = QPushButton("Save Project")
+        save_btn.setStyleSheet(f"border-color: {CP_GREEN}; color: {CP_GREEN};")
         save_btn.clicked.connect(dialog.accept)
-        d_layout.addWidget(save_btn)
+        btn_box.addWidget(cancel_btn)
+        btn_box.addWidget(save_btn)
+        main_d_layout.addLayout(btn_box)
 
         if dialog.exec():
             name = name_in.text().strip()
@@ -420,6 +436,10 @@ class MirrorSyncManager(QMainWindow):
             if name and src and dst:
                 new_data = {"name": name, "source": src, "destination": dst}
                 if edit_index is not None:
+                    # Preserve existing settings if any
+                    for key in ["copy_mode"]:
+                        if key in self.projects[edit_index]:
+                            new_data[key] = self.projects[edit_index][key]
                     self.projects[edit_index] = new_data
                 else:
                     self.projects.append(new_data)
