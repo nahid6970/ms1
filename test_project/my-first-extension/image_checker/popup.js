@@ -247,6 +247,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const borderValue = document.getElementById('borderValue');
     const resetSettings = document.getElementById('resetSettings');
     const applySettings = document.getElementById('applySettings');
+    const excludedDomainsInput = document.getElementById('excludedDomains');
+    const saveExclusionsBtn = document.getElementById('saveExclusions');
 
     // Toggle settings panel
     settingsToggle.addEventListener('click', function () {
@@ -256,9 +258,31 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Load saved settings
-    chrome.storage.local.get(['imageCheckerSettings'], function (result) {
+    chrome.storage.local.get(['imageCheckerSettings', 'excludedDomains'], function (result) {
         const settings = result.imageCheckerSettings || getDefaultSettings();
         loadSettingsToUI(settings);
+        
+        if (result.excludedDomains) {
+            excludedDomainsInput.value = result.excludedDomains.join('\n');
+        }
+    });
+
+    // Save Exclusions
+    saveExclusionsBtn.addEventListener('click', () => {
+        const domains = excludedDomainsInput.value
+            .split('\n')
+            .map(d => d.trim())
+            .filter(d => d.length > 0);
+
+        chrome.storage.local.set({ excludedDomains: domains }, () => {
+            const originalText = saveExclusionsBtn.textContent;
+            saveExclusionsBtn.textContent = '✅ Saved!';
+            saveExclusionsBtn.style.background = '#4CAF50';
+            setTimeout(() => {
+                saveExclusionsBtn.textContent = originalText;
+                saveExclusionsBtn.style.background = '';
+            }, 2000);
+        });
     });
 
     // Update size value display
