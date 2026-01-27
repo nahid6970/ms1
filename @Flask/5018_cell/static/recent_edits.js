@@ -44,37 +44,68 @@ function toggleLastEditedPopup() {
  * Renders the content of the "Last Edited" popup.
  * Shows last edited cell from up to 3 OTHER sheets.
  */
+let currentBookmarkIndex = 0;
+
+/**
+ * Renders the content of the "Last Edited" popup.
+ * Shows last edited cell from up to 3 sheets.
+ */
 function renderLastEditedPopup() {
     const popup = document.getElementById('lastEditedPopup');
 
-    // Get edits from other sheets
-    const edits = Object.entries(lastEditedCells)
-        .map(([sheetIdx, data]) => ({ sheetIdx: parseInt(sheetIdx), ...data }))
-        //.filter(edit => edit.sheetIdx !== currentSheet) // Removed filter to allow current sheet
-        .sort((a, b) => b.timestamp - a.timestamp) // Most recent first
-        .slice(0, 1); // Show only 1 item
+    // Filter valid edits
+    let edits = [];
+    if (Array.isArray(lastEditedCells)) {
+        edits = lastEditedCells;
+    } else {
+        // Fallback for old object format
+        edits = Object.entries(lastEditedCells)
+            .map(([sheetIdx, data]) => ({ sheetIdx: parseInt(sheetIdx), ...data }));
+    }
+
+    // Sort by timestamp if not already sorted
+    edits = edits.sort((a, b) => b.timestamp - a.timestamp).slice(0, 3);
+
+    // Ensure index is valid
+    if (currentBookmarkIndex >= edits.length) {
+        currentBookmarkIndex = 0;
+    }
 
     let html = `
         <div class="recent-edits-header">
             <span>Bookmark</span>
             <span class="recent-edits-close" onclick="document.getElementById('lastEditedPopup').style.display='none'">✕</span>
         </div>
-        <div class="recent-edit-list">
     `;
 
     if (edits.length === 0) {
-        html += `<div class="recent-edit-empty">No recent edits in other sheets.</div>`;
+        html += `<div class="recent-edit-empty">No recent edits recorded.</div>`;
     } else {
-        edits.forEach(edit => {
-            // Validate sheet existence
+        // Render Tabs
+        html += `<div class="bookmark-tabs">`;
+        edits.forEach((edit, index) => {
             const sheet = tableData.sheets[edit.sheetIdx];
-            if (!sheet) return;
-
-            const sheetName = sheet.name;
+            const sheetName = sheet ? sheet.name : `Sheet ${edit.sheetIdx + 1}`;
             const cellRef = `${getExcelColumnName(edit.col)}${edit.row + 1}`;
+            const activeClass = index === currentBookmarkIndex ? 'active' : '';
 
-            // FETCH FRESH VALUE FROM SOURCE OF TRUTH
-            // This ensures we show what is actually in the table, not just what was cached
+            // Format: CellRef only, SheetName on hover using native title
+            html += `
+                <div class="bookmark-tab ${activeClass}" onclick="switchBookmark(${index})" title="${sheetName}">
+                    <span class="tab-cell-ref">${cellRef}</span>
+                </div>
+            `;
+        });
+        html += `</div>`;
+
+        // Render Active Content
+        html += `<div class="recent-edit-list">`;
+
+        const edit = edits[currentBookmarkIndex];
+        const sheet = tableData.sheets[edit.sheetIdx];
+
+        if (sheet) {
+            // FETCH FRESH VALUE
             let freshValue = "";
             try {
                 if (sheet.rows[edit.row] && sheet.rows[edit.row][edit.col] !== undefined) {
@@ -87,23 +118,24 @@ function renderLastEditedPopup() {
 
             // Sync cache if needed
             if (freshValue !== edit.value) {
-                console.log(`[POPUP] Syncing stale cache for ${cellRef}. Old: "${edit.value}", New: "${freshValue}"`);
                 edit.value = freshValue;
-                if (lastEditedCells[edit.sheetIdx]) {
-                    lastEditedCells[edit.sheetIdx].value = freshValue;
+                // Update specific item in array
+                const target = Array.isArray(lastEditedCells) ? lastEditedCells.find(item =>
+                    item.sheetIdx === edit.sheetIdx &&
+                    item.row === edit.row &&
+                    item.col === edit.col
+                ) : null;
+
+                if (target) {
+                    target.value = freshValue;
                     localStorage.setItem('lastEditedCells', JSON.stringify(lastEditedCells));
                 }
             }
 
-            // Escape value for attribute safely
             const safeValue = String(freshValue).replace(/"/g, '&quot;');
 
             html += `
                 <div class="recent-edit-item">
-                    <div class="recent-edit-info">
-                        <span class="recent-edit-sheet">📄 ${sheetName}</span>
-                        <span class="recent-edit-cell-ref">${cellRef}</span>
-                    </div>
                     <div class="recent-edit-view-container editing" style="border-color: #007bff; box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);">
                         <textarea class="recent-edit-textarea" 
                                   style="display: block; height: auto;"
@@ -113,14 +145,20 @@ function renderLastEditedPopup() {
                     </div>
                 </div>
             `;
-        });
+        }
+
+        html += `</div>`;
     }
 
-    html += `</div>`;
     popup.innerHTML = html;
 
-    // Auto-resize all textareas after rendering
+    // Auto-resize active textarea
     popup.querySelectorAll('.recent-edit-textarea').forEach(ta => autoResizePopupTextarea(ta));
+}
+
+function switchBookmark(index) {
+    currentBookmarkIndex = index;
+    renderLastEditedPopup();
 }
 
 /**
@@ -129,11 +167,10 @@ function renderLastEditedPopup() {
 function autoResizePopupTextarea(textarea) {
     // Reset height to recalculate
     textarea.style.height = 'auto';
-    
+
     // Set height based on content, capped at ~15 lines (approx 330px)
-    // standard line-height ~21px * 15 = 315 + padding
     const maxHeight = 330;
-    
+
     if (textarea.scrollHeight > maxHeight) {
         textarea.style.height = maxHeight + 'px';
         textarea.style.overflowY = 'auto'; // Enable scrollbar
@@ -156,10 +193,19 @@ function savePopupEdit(textarea, sheetIdx, row, col) {
         // Update data
         sheet.rows[row][col] = newValue;
 
-        // Update history tracking
-        if (lastEditedCells[sheetIdx]) {
-            lastEditedCells[sheetIdx].value = newValue;
-            lastEditedCells[sheetIdx].timestamp = Date.now();
+        // Update history tracking in array
+        let target = null;
+        if (Array.isArray(lastEditedCells)) {
+            target = lastEditedCells.find(item =>
+                item.sheetIdx === sheetIdx && item.row === row && item.col === col
+            );
+        } else {
+            if (lastEditedCells[sheetIdx]) target = lastEditedCells[sheetIdx];
+        }
+
+        if (target) {
+            target.value = newValue;
+            target.timestamp = Date.now();
             localStorage.setItem('lastEditedCells', JSON.stringify(lastEditedCells));
         }
 
@@ -198,29 +244,26 @@ function syncPopupWithMainUpdate(sheetIdx, row, col, newValue) {
     row = parseInt(row);
     col = parseInt(col);
 
-    console.log(`[SYNC] Checking sync for Sheet:${sheetIdx} R:${row} C:${col}`);
+    // Update history tracking in array
+    let target = null;
+    if (Array.isArray(lastEditedCells)) {
+        target = lastEditedCells.find(item =>
+            item.sheetIdx === sheetIdx && item.row === row && item.col === col
+        );
+    } else {
+        const item = lastEditedCells[sheetIdx];
+        if (item && item.row === row && item.col === col) target = item;
+    }
 
-    // Check if we have this sheet in our records
-    // lastEditedCells keys are strings in JSON, but we can access with numbers
-    const cellData = lastEditedCells[sheetIdx];
-
-    if (cellData &&
-        parseInt(cellData.row) === row &&
-        parseInt(cellData.col) === col) {
-
-        console.log(`[SYNC] Match found! Updating value to: "${newValue.substring(0, 20)}..."`);
-
-        lastEditedCells[sheetIdx].value = newValue;
-        lastEditedCells[sheetIdx].timestamp = Date.now();
+    if (target) {
+        target.value = newValue;
+        target.timestamp = Date.now();
         localStorage.setItem('lastEditedCells', JSON.stringify(lastEditedCells));
 
         // 2. If popup is open, update the UI dynamically
         const popup = document.getElementById('lastEditedPopup');
         if (popup && popup.style.display === 'block') {
-            console.log(`[SYNC] Popup is open, re-rendering...`);
             renderLastEditedPopup();
         }
-    } else {
-        console.log(`[SYNC] No match found in bookmarks.`);
     }
 }

@@ -2,7 +2,14 @@
 let tableData = { sheets: [], activeSheet: 0, categories: [], sheetCategories: {} };
 let currentSheet = 0;
 let currentCategory = null; // null means "Uncategorized"
-let lastEditedCells = JSON.parse(localStorage.getItem('lastEditedCells')) || {}; // Format: { sheetIndex: { row, col, value, timestamp } }
+// Migration: Convert object to array if needed
+let lastEditedCells = JSON.parse(localStorage.getItem('lastEditedCells')) || [];
+if (!Array.isArray(lastEditedCells)) {
+    lastEditedCells = Object.entries(lastEditedCells).map(([sheetIdx, data]) => ({
+        sheetIdx: parseInt(sheetIdx),
+        ...data
+    }));
+}
 let contextMenuCell = null;
 let selectedCells = []; // Array of {row, col, td} objects for multi-cell operations
 let isSelecting = false;
@@ -341,7 +348,7 @@ function handleKeyboardShortcuts(e) {
     if (e.target && e.target.classList && e.target.classList.contains('recent-edit-textarea')) {
         return; // Let the popup handle its own events
     }
-    
+
     // Tab key handling in cells
     if (e.key === 'Tab') {
         const activeElement = document.activeElement;
@@ -1107,13 +1114,13 @@ function migrateScrollPositions() {
     try {
         const scrollPositions = JSON.parse(localStorage.getItem('sheetScrollPositions') || '{}');
         const migrationDone = localStorage.getItem('scrollPositionsMigrated');
-        
+
         // Check if migration is needed (if any keys are numeric)
         const hasNumericKeys = Object.keys(scrollPositions).some(key => !isNaN(key));
-        
+
         if (hasNumericKeys && !migrationDone) {
             const newScrollPositions = {};
-            
+
             // Convert index-based keys to name-based keys
             Object.keys(scrollPositions).forEach(key => {
                 const index = parseInt(key);
@@ -1125,7 +1132,7 @@ function migrateScrollPositions() {
                     newScrollPositions[key] = scrollPositions[key];
                 }
             });
-            
+
             localStorage.setItem('sheetScrollPositions', JSON.stringify(newScrollPositions));
             localStorage.setItem('scrollPositionsMigrated', 'true');
             console.log('Migrated scroll positions from index-based to name-based');
@@ -3993,12 +4000,23 @@ function addToRecentEdits() {
     const { rowIndex, colIndex } = contextMenuCell;
     const value = tableData.sheets[currentSheet].rows[rowIndex][colIndex];
 
-    lastEditedCells[currentSheet] = {
+    // Remove existing if any (avoid duplicates)
+    lastEditedCells = lastEditedCells.filter(item =>
+        !(item.sheetIdx === currentSheet && item.row === rowIndex && item.col === colIndex)
+    );
+
+    // Add new to top
+    lastEditedCells.unshift({
+        sheetIdx: currentSheet,
         row: rowIndex,
         col: colIndex,
         value: value,
         timestamp: Date.now()
-    };
+    });
+
+    // Limit to 20
+    if (lastEditedCells.length > 20) lastEditedCells.pop();
+
     localStorage.setItem('lastEditedCells', JSON.stringify(lastEditedCells));
 
     showToast('Cell Bookmarked 📌', 'success');
@@ -12176,7 +12194,7 @@ renderTable = function (preserveScroll = true) {
     // When switching sheets (preserveScroll=false), don't capture current scroll
     // Use saved position from localStorage instead
     let targetScrollTop, targetScrollLeft;
-    
+
     if (preserveScroll) {
         // Re-rendering same sheet: preserve current scroll or use saved
         targetScrollTop = currentScrollTop > 0 ? currentScrollTop : savedScrollTop;

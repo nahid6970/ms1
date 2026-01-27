@@ -4715,7 +4715,8 @@ ll Rank Badge */
     color: #999;
     transition: all 0.2s;
     border-radius: 4px;
-    margin-right: -5px; /* Offset padding for right alignment */
+    margin-right: -5px;
+    /* Offset padding for right alignment */
 }
 
 .recent-edits-close:hover {
@@ -4865,4 +4866,72 @@ ll Rank Badge */
 .recent-edit-view-container.editing {
     border-color: #007bff;
     box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
+}
+
+/* Bookmark Tabs for Recent Edits Popup */
+.bookmark-tabs {
+    display: flex;
+    gap: 8px;
+    padding: 8px 15px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #eee;
+    overflow-x: auto;
+    white-space: nowrap;
+}
+
+.bookmark-tab {
+    padding: 6px 12px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+    user-select: none;
+    flex-shrink: 0;
+}
+
+.bookmark-tab:hover {
+    background: #f0f0f0;
+    border-color: #007bff;
+    transform: translateY(-1px);
+}
+
+.bookmark-tab.active {
+    background: #007bff;
+    color: white;
+    border-color: #007bff;
+    box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
+}
+
+.bookmark-tab .tab-sheet-name {
+    font-weight: 600;
+    color: #333;
+}
+
+.bookmark-tab.active .tab-sheet-name {
+    color: white;
+}
+
+.bookmark-tab .tab-cell-ref {
+    font-family: monospace;
+    background: #eee;
+    color: #555;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 12px;
+}
+
+.bookmark-tab.active .tab-cell-ref {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+/* Adjust Popup Content Area */
+.recent-edit-list {
+    padding: 15px;
+    background: white;
 }
