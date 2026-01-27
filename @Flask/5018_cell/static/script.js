@@ -337,6 +337,11 @@ function applyFontSizeScale() {
 
 
 function handleKeyboardShortcuts(e) {
+    // Ignore events from popup textarea to prevent interference
+    if (e.target && e.target.classList && e.target.classList.contains('recent-edit-textarea')) {
+        return; // Let the popup handle its own events
+    }
+    
     // Tab key handling in cells
     if (e.key === 'Tab') {
         const activeElement = document.activeElement;

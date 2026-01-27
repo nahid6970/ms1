@@ -66,22 +66,45 @@ function renderLastEditedPopup() {
         html += `<div class="recent-edit-empty">No recent edits in other sheets.</div>`;
     } else {
         edits.forEach(edit => {
-            const sheetName = tableData.sheets[edit.sheetIdx].name;
+            // Validate sheet existence
+            const sheet = tableData.sheets[edit.sheetIdx];
+            if (!sheet) return;
+
+            const sheetName = sheet.name;
             const cellRef = `${getExcelColumnName(edit.col)}${edit.row + 1}`;
 
-            // Escape value for attribute safely
-            const safeValue = edit.value.replace(/"/g, '&quot;');
-
-            // Generate Markdown Preview HTML (using main app's parser)
-            // checkHasMarkdown and parseMarkdown are in script.js (global)
-            let previewHtml = safeValue;
-            if (typeof checkHasMarkdown === 'function' && typeof parseMarkdown === 'function') {
-                // Use empty style object if getCellStyle unavailable or just default
-                const style = {};
-                previewHtml = checkHasMarkdown(edit.value)
-                    ? parseMarkdown(edit.value, style)
-                    : edit.value.replace(/\n/g, '<br>');
+            // FETCH FRESH VALUE FROM SOURCE OF TRUTH
+            // This ensures we show what is actually in the table, not just what was cached
+            let freshValue = "";
+            try {
+                if (sheet.rows[edit.row] && sheet.rows[edit.row][edit.col] !== undefined) {
+                    freshValue = sheet.rows[edit.row][edit.col];
+                }
+            } catch (e) {
+                console.error("Error fetching fresh value for popup:", e);
+                freshValue = edit.value || "";
             }
+
+            // Sync cache if needed
+            if (freshValue !== edit.value) {
+                console.log(`[POPUP] Syncing stale cache for ${cellRef}. Old: "${edit.value}", New: "${freshValue}"`);
+                edit.value = freshValue;
+                if (lastEditedCells[edit.sheetIdx]) {
+                    lastEditedCells[edit.sheetIdx].value = freshValue;
+                    localStorage.setItem('lastEditedCells', JSON.stringify(lastEditedCells));
+                }
+            }
+
+            // Escape value for attribute safely
+            const safeValue = String(freshValue).replace(/"/g, '&quot;');
+
+            // Show raw text (like raw mode) instead of parsed markdown
+            // Escape HTML and preserve line breaks
+            const previewHtml = String(freshValue)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/\n/g, '<br>');
 
             html += `
                 <div class="recent-edit-item">
@@ -89,10 +112,10 @@ function renderLastEditedPopup() {
                         <span class="recent-edit-sheet">📄 ${sheetName}</span>
                         <span class="recent-edit-cell-ref">${cellRef}</span>
                     </div>
-                    <div class="recent-edit-view-container" onclick="enablePopupEdit(this, ${edit.sheetIdx}, ${edit.row}, ${edit.col})">
-                        <div class="recent-edit-preview">${previewHtml}</div>
+                    <div class="recent-edit-view-container editing">
                         <textarea class="recent-edit-textarea" 
-                                  onblur="disablePopupEdit(this, ${edit.sheetIdx}, ${edit.row}, ${edit.col})"
+                                  style="display: block;"
+                                  onblur="savePopupEdit(this, ${edit.sheetIdx}, ${edit.row}, ${edit.col})"
                                   onkeydown="handlePopupTextareaKey(event)"
                                   oninput="autoResizePopupTextarea(this)">${safeValue}</textarea>
                     </div>
@@ -106,41 +129,21 @@ function renderLastEditedPopup() {
 }
 
 /**
- * Auto-resize the textarea based on content
+ * Set textarea height based on content without showing scrollbars
  */
 function autoResizePopupTextarea(textarea) {
+    // Reset height to recalculate
     textarea.style.height = 'auto';
-    textarea.style.height = (textarea.scrollHeight + 5) + 'px';
+    
+    // Set height based on content, capped at max-height from CSS (500px), min 300px
+    const newHeight = Math.min(500, Math.max(300, textarea.scrollHeight));
+    textarea.style.height = newHeight + 'px';
 }
 
 /**
- * Switch to edit mode for a popup item.
+ * Save the popup edit when textarea loses focus.
  */
-function enablePopupEdit(container, sheetIdx, row, col) {
-    if (container.classList.contains('editing')) return; // Already editing
-
-    container.classList.add('editing');
-
-    const preview = container.querySelector('.recent-edit-preview');
-    const textarea = container.querySelector('.recent-edit-textarea');
-
-    // Hide preview, show textarea
-    preview.style.display = 'none';
-    textarea.style.display = 'block';
-
-    // Adjust height to fit content accurately
-    autoResizePopupTextarea(textarea);
-
-    textarea.focus();
-}
-
-/**
- * Save and switch back to preview mode.
- */
-function disablePopupEdit(textarea, sheetIdx, row, col) {
-    const container = textarea.parentElement;
-    const preview = container.querySelector('.recent-edit-preview');
-
+function savePopupEdit(textarea, sheetIdx, row, col) {
     // Saving logic
     const newValue = textarea.value;
     const sheet = tableData.sheets[sheetIdx];
@@ -160,33 +163,30 @@ function disablePopupEdit(textarea, sheetIdx, row, col) {
         saveData();
         showToast(`Updated cell in ${sheet.name}`, 'success');
     }
-
-    // Update preview HTML
-    let previewHtml = newValue.replace(/\n/g, '<br>');
-    if (typeof checkHasMarkdown === 'function' && typeof parseMarkdown === 'function') {
-        const style = {};
-        previewHtml = checkHasMarkdown(newValue)
-            ? parseMarkdown(newValue, style)
-            : newValue.replace(/\n/g, '<br>');
-    }
-    preview.innerHTML = previewHtml;
-
-    // Switch view
-    textarea.style.display = 'none';
-    preview.style.display = 'block';
-    container.classList.remove('editing');
 }
 
 /**
- * Allow Shift+Enter for new lines, Enter to save (standard spreadsheet behavior),
- * or standard text area behavior if preferred. 
- * User asked for "wrap", so multi-line is implied.
- * Let's stick to: Enter = New Line (since it's a textarea), Ctrl+Enter = Save?
- * Or just Blur to save (which is implemented).
+ * Handle keyboard events in popup textarea.
+ * Enter = New line, Ctrl+Enter = Save and exit
  */
 function handlePopupTextareaKey(event) {
-    // Optional: Stop propagation to prevent global hotkeys
+    // Stop all propagation to prevent global hotkeys and page behavior
     event.stopPropagation();
+    event.stopImmediatePropagation();
+    
+    // Ctrl+Enter to save and exit
+    if (event.key === 'Enter' && event.ctrlKey) {
+        event.preventDefault();
+        event.target.blur(); // Trigger save via blur event
+        return false;
+    }
+    
+    // Regular Enter - allow new line but prevent any scroll behavior
+    if (event.key === 'Enter') {
+        // Don't prevent default - we want the newline
+        // But ensure no scrolling happens
+        return true;
+    }
 }
 
 // Click-outside listener removed to keep popup open while working
@@ -197,10 +197,22 @@ function handlePopupTextareaKey(event) {
  * Called from script.js updateCell().
  */
 function syncPopupWithMainUpdate(sheetIdx, row, col, newValue) {
-    // 1. Update the backing storage if this cell is pinned
-    if (lastEditedCells[sheetIdx] &&
-        lastEditedCells[sheetIdx].row === row &&
-        lastEditedCells[sheetIdx].col === col) {
+    // Ensure types match for comparison
+    sheetIdx = parseInt(sheetIdx);
+    row = parseInt(row);
+    col = parseInt(col);
+
+    console.log(`[SYNC] Checking sync for Sheet:${sheetIdx} R:${row} C:${col}`);
+
+    // Check if we have this sheet in our records
+    // lastEditedCells keys are strings in JSON, but we can access with numbers
+    const cellData = lastEditedCells[sheetIdx];
+
+    if (cellData &&
+        parseInt(cellData.row) === row &&
+        parseInt(cellData.col) === col) {
+
+        console.log(`[SYNC] Match found! Updating value to: "${newValue.substring(0, 20)}..."`);
 
         lastEditedCells[sheetIdx].value = newValue;
         lastEditedCells[sheetIdx].timestamp = Date.now();
@@ -209,11 +221,10 @@ function syncPopupWithMainUpdate(sheetIdx, row, col, newValue) {
         // 2. If popup is open, update the UI dynamically
         const popup = document.getElementById('lastEditedPopup');
         if (popup && popup.style.display === 'block') {
-            // Find the specific item in the DOM
-            // We don't have IDs on items, so we'll re-render if we can't find it easily.
-            // But re-rendering is safe here because the user is typing in the MAIN table,
-            // not the popup.
+            console.log(`[SYNC] Popup is open, re-rendering...`);
             renderLastEditedPopup();
         }
+    } else {
+        console.log(`[SYNC] No match found in bookmarks.`);
     }
 }

@@ -707,6 +707,7 @@
     "Command": "C:\\@delta\\db\\@run_from_db\\chrome_ext_manager\\extension_manager.py",
     "ps1_command": "Start-Process -FilePath \"C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe\" -ArgumentList \"C:\\@delta\\ms1\\test_project\\my-first-extension\\@chrome_ext_manager\\extension_manager.py\"",
     "ExecutableType": "pythonw",
-    "script_enabled": false
+    "script_enabled": false,
+    "added_at": 1769513702.432895
   }
 ]

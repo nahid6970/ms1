@@ -1684,22 +1684,23 @@ td input::-moz-selection {
 .toast {
     position: fixed;
     top: -100px;
-    right: 20px;
+    left: 50%;
+    transform: translateX(-50%);
     background: #28a745;
     color: white;
-    padding: 15px 30px;
-    border-radius: 8px;
+    padding: 8px 20px;
+    border-radius: 6px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 500;
-    z-index: 2000;
+    z-index: 5000;
     transition: top 0.3s ease-in-out;
-    min-width: 250px;
+    min-width: 180px;
     text-align: center;
 }
 
 .toast.show {
-    top: 20px;
+    top: 10px;
 }
 
 .toast.success {
@@ -4794,9 +4795,8 @@ ll Rank Badge */
     pointer-events: auto;
 }
 
-/* Recent Edit Popup - Click-to-Edit Visual Mode */
+/* Recent Edit Popup - Direct Edit Mode */
 .recent-edit-view-container {
-    cursor: text;
     width: 100%;
     position: relative;
     border: 1px solid #ddd;
@@ -4806,9 +4806,9 @@ ll Rank Badge */
     min-height: 32px;
 }
 
-.recent-edit-view-container:hover {
-    border-color: #bbb;
-    background: #fdfdfd;
+.recent-edit-view-container.editing {
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
 }
 
 .recent-edit-preview {
@@ -4829,13 +4829,17 @@ ll Rank Badge */
     border-radius: 4px;
     font-size: 14px;
     font-family: inherit;
-    min-height: 40px;
-    resize: vertical;
+    min-height: 300px;
+    max-height: 500px;
+    resize: none;
     outline: none;
     box-sizing: border-box;
     display: none;
     /* Hidden by default */
     background: transparent;
+    overflow-y: hidden;
+    /* Hide scrollbar */
+    overflow-x: hidden;
 }
 
 /* When editing, show focus ring on container */
