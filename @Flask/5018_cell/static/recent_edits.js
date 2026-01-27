@@ -93,7 +93,8 @@ function renderLastEditedPopup() {
                         <div class="recent-edit-preview">${previewHtml}</div>
                         <textarea class="recent-edit-textarea" 
                                   onblur="disablePopupEdit(this, ${edit.sheetIdx}, ${edit.row}, ${edit.col})"
-                                  onkeydown="handlePopupTextareaKey(event)">${safeValue}</textarea>
+                                  onkeydown="handlePopupTextareaKey(event)"
+                                  oninput="autoResizePopupTextarea(this)">${safeValue}</textarea>
                     </div>
                 </div>
             `;
@@ -102,6 +103,14 @@ function renderLastEditedPopup() {
 
     html += `</div>`;
     popup.innerHTML = html;
+}
+
+/**
+ * Auto-resize the textarea based on content
+ */
+function autoResizePopupTextarea(textarea) {
+    textarea.style.height = 'auto';
+    textarea.style.height = (textarea.scrollHeight + 5) + 'px';
 }
 
 /**
@@ -120,8 +129,7 @@ function enablePopupEdit(container, sheetIdx, row, col) {
     textarea.style.display = 'block';
 
     // Adjust height to fit content accurately
-    textarea.style.height = 'auto';
-    textarea.style.height = (textarea.scrollHeight + 5) + 'px'; // +5 buffer
+    autoResizePopupTextarea(textarea);
 
     textarea.focus();
 }
