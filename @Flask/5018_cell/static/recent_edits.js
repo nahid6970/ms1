@@ -89,7 +89,10 @@ function renderLastEditedPopup() {
 
             // Format: CellRef only, SheetName on hover using native title
             html += `
-                <div class="bookmark-tab ${activeClass}" onclick="switchBookmark(${index})" title="${sheetName}">
+                <div class="bookmark-tab ${activeClass}" 
+                     onclick="switchBookmark(${index})" 
+                     oncontextmenu="removeBookmark(event, ${index})" 
+                     title="${sheetName} (Right-click to remove)">
                     <span class="tab-cell-ref">${cellRef}</span>
                 </div>
             `;
@@ -157,6 +160,41 @@ function renderLastEditedPopup() {
 function switchBookmark(index) {
     currentBookmarkIndex = index;
     renderLastEditedPopup();
+}
+
+/**
+ * Remove a cell from bookmarks via right-click
+ */
+function removeBookmark(event, index) {
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+
+    // Identify which item to remove based on the same sort/slice logic used in render
+    let edits = Array.isArray(lastEditedCells) ? [...lastEditedCells] : [];
+    edits = edits.sort((a, b) => b.timestamp - a.timestamp).slice(0, 3);
+
+    if (index >= 0 && index < edits.length) {
+        const itemToRemove = edits[index];
+
+        // Filter the main array
+        lastEditedCells = lastEditedCells.filter(item =>
+            !(item.sheetIdx === itemToRemove.sheetIdx &&
+                item.row === itemToRemove.row &&
+                item.col === itemToRemove.col)
+        );
+
+        localStorage.setItem('lastEditedCells', JSON.stringify(lastEditedCells));
+
+        // Adjust current active tab if necessary
+        if (currentBookmarkIndex >= edits.length - 1 && currentBookmarkIndex > 0) {
+            currentBookmarkIndex--;
+        }
+
+        showToast('Bookmark removed', 'info');
+        renderLastEditedPopup();
+    }
 }
 
 /**
