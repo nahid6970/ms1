@@ -172,7 +172,15 @@ function savePopupEdit(textarea, sheetIdx, row, col) {
  * Handle keyboard events in popup textarea.
  */
 function handlePopupTextareaKey(event) {
-    // Stop all propagation to prevent global hotkeys and page behavior
+    // Check for Ctrl+S
+    if (event.ctrlKey && (event.key === 's' || event.key === 'S')) {
+        event.preventDefault(); // Prevent browser "Save Page As"
+        event.stopPropagation();
+        event.target.blur(); // Trigger save via the onblur handler
+        return;
+    }
+
+    // Stop all propagation to prevent global hotkeys and page behavior for other keys
     event.stopPropagation();
     // Allow default Enter behavior (newline)
 }
