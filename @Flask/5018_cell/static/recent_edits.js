@@ -98,23 +98,15 @@ function renderLastEditedPopup() {
             // Escape value for attribute safely
             const safeValue = String(freshValue).replace(/"/g, '&quot;');
 
-            // Show raw text (like raw mode) instead of parsed markdown
-            // Escape HTML and preserve line breaks
-            const previewHtml = String(freshValue)
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/\n/g, '<br>');
-
             html += `
                 <div class="recent-edit-item">
                     <div class="recent-edit-info">
                         <span class="recent-edit-sheet">📄 ${sheetName}</span>
                         <span class="recent-edit-cell-ref">${cellRef}</span>
                     </div>
-                    <div class="recent-edit-view-container editing">
+                    <div class="recent-edit-view-container editing" style="border-color: #007bff; box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);">
                         <textarea class="recent-edit-textarea" 
-                                  style="display: block;"
+                                  style="display: block; height: auto;"
                                   onblur="savePopupEdit(this, ${edit.sheetIdx}, ${edit.row}, ${edit.col})"
                                   onkeydown="handlePopupTextareaKey(event)"
                                   oninput="autoResizePopupTextarea(this)">${safeValue}</textarea>
@@ -126,6 +118,9 @@ function renderLastEditedPopup() {
 
     html += `</div>`;
     popup.innerHTML = html;
+
+    // Auto-resize all textareas after rendering
+    popup.querySelectorAll('.recent-edit-textarea').forEach(ta => autoResizePopupTextarea(ta));
 }
 
 /**
@@ -135,9 +130,17 @@ function autoResizePopupTextarea(textarea) {
     // Reset height to recalculate
     textarea.style.height = 'auto';
     
-    // Set height based on content, capped at max-height from CSS (500px), min 300px
-    const newHeight = Math.min(500, Math.max(300, textarea.scrollHeight));
-    textarea.style.height = newHeight + 'px';
+    // Set height based on content, capped at ~15 lines (approx 330px)
+    // standard line-height ~21px * 15 = 315 + padding
+    const maxHeight = 330;
+    
+    if (textarea.scrollHeight > maxHeight) {
+        textarea.style.height = maxHeight + 'px';
+        textarea.style.overflowY = 'auto'; // Enable scrollbar
+    } else {
+        textarea.style.height = textarea.scrollHeight + 'px';
+        textarea.style.overflowY = 'hidden'; // Hide scrollbar when fitting
+    }
 }
 
 /**
@@ -167,26 +170,11 @@ function savePopupEdit(textarea, sheetIdx, row, col) {
 
 /**
  * Handle keyboard events in popup textarea.
- * Enter = New line, Ctrl+Enter = Save and exit
  */
 function handlePopupTextareaKey(event) {
     // Stop all propagation to prevent global hotkeys and page behavior
     event.stopPropagation();
-    event.stopImmediatePropagation();
-    
-    // Ctrl+Enter to save and exit
-    if (event.key === 'Enter' && event.ctrlKey) {
-        event.preventDefault();
-        event.target.blur(); // Trigger save via blur event
-        return false;
-    }
-    
-    // Regular Enter - allow new line but prevent any scroll behavior
-    if (event.key === 'Enter') {
-        // Don't prevent default - we want the newline
-        // But ensure no scrolling happens
-        return true;
-    }
+    // Allow default Enter behavior (newline)
 }
 
 // Click-outside listener removed to keep popup open while working
