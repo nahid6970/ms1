@@ -7,6 +7,34 @@ This document tracks historical bugs, issues, and their solutions. Use this to:
 
 ---
 
+## [2026-01-27 23:59] - Bookmark Window Scroll Initialization and Layout Gaps
+
+**Problem:** 
+1. **Missing Scrollbar**: Large cells opened in the bookmark window didn't show the scrollbar immediately. Users had to either type or switch tabs for it to appear.
+2. **Excessive Whitespace**: The input field looked "small" relative to the popup because of excessive padding in the list and item containers.
+3. **Tab Clutter**: Showing both sheet names and cell refs in tabs made them too wide and hard to manage when multiple bookmarks were active.
+
+**Root Cause:** 
+1. **Timing race condition**: The `autoResizePopupTextarea` was running before the DOM had fully rendered the new content, leading to incorrect `scrollHeight` measurements. `overflow-y: hidden` was also preventing the scrollbar from appearing dynamically.
+2. **Padding Overkill**: `.recent-edit-list` had high padding, and `.recent-edit-item` had its own padding, creating nested "gutters".
+
+**Solution:** 
+1. **Async Resizing**: Wrapped `autoResizePopupTextarea` logic in a `setTimeout(..., 0)` to ensure it runs after the browser has calculated the layout.
+2. **Simplified Overflows**: Set `overflow-y: auto` by default for the textarea so the scrollbar is natively handled by the browser once the max-height is reached.
+3. **Tighten UI**: Reduced padding in `.recent-edit-list` to 10px and set `.recent-edit-item` padding to 0. 
+4. **Tab Hover Logic**: Refactored `renderLastEditedPopup` to extract the sheet name into a `title` attribute, leaving only the `cellRef` visible in the tab itself.
+5. **Right-Click Removal**: Added a context menu handler to tabs to allow immediate deletion of bookmarks.
+
+**Files Modified:**
+- `static/recent_edits.js` - Refactored resize logic and added removal functionality.
+- `static/style.css` - UI padding and layout refinements.
+
+**Related Issues:** Recent Edits Popup Out-of-Sync and Layout Issues
+
+**Result:** The bookmark window is now visually tight, the scrollbar appears exactly when needed, and tab management is much more efficient.
+
+---
+
 ## [2026-01-26 17:15] - Recent Edits Popup Out-of-Sync and Layout Issues
 
 **Problem:** 

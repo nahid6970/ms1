@@ -6,6 +6,41 @@
 
 ---
 
+## [2026-01-27 23:59] - Bookmark Window Enhancements
+
+**Session Duration:** 0.8 hours
+
+**What We Accomplished:**
+
+### 🚀 Enhanced Bookmark (Last Edited) Window
+-   **Tabbed Interface Display**:
+    -   Increased displayed bookmarks to **3 cells** (up from 2).
+    -   Refactored tabs to show **Cell Reference only** (e.g., `A60`) for a compact, modern appearance.
+    -   Implemented **Sheet Name on Hover**: Full sheet names now appear as tooltips (`title`) rather than taking up tab space.
+-   **Right-Click Quick Removal**:
+    -   Added `oncontextmenu` support to bookmark tabs.
+    -   Users can now **right-click a tab to remove** that cell from the bookmark list immediately.
+    -   Added visual hint "(Right-click to remove)" to tooltips.
+-   **UI & Reliability Fixes**:
+    -   **Scrollbar Sync**: Fixed a race condition where the scrollbar wouldn't appear on first load of a long cell. Using `setTimeout` and `overflow-y: auto` ensures immediate scroll visibility.
+    -   **Layout Tightening**: Reduced excessive padding in `.recent-edit-list` and `.recent-edit-item`.
+    -   **Data Structure Migration**: Fully transitioned `lastEditedCells` to an **Array-based structure** to support multiple entries per sheet and reliable sorting.
+    -   **Robust Syncing**: Fixed `savePopupEdit` and `syncPopupWithMainUpdate` to reliably handle the new array-based storage.
+
+**Files Modified:**
+- `static/recent_edits.js` - Major refactor for tab logic, removal feature, and resize reliability.
+- `static/script.js` - Migrated `lastEditedCells` initialization and `addToRecentEdits` to array logic.
+- `static/style.css` - Updated tab styling and tightened list layout.
+- `md/RECENT.md` - Logged session.
+- `md/PROBLEMS_AND_FIXES.md` - Documented scroll and layout fixes.
+
+**Current Status:**
+- ✅ Bookmark window is now a powerful, multi-cell productivity tool.
+- ✅ Tab management is intuitive with click-to-switch and right-click-to-remove.
+- ✅ UI feels more integrated and less "empty/oversized".
+
+---
+
 ## [2026-01-26 17:15] - UI/UX Refinements & Popup Direct Edit
 
 **Session Duration:** 0.6 hours
