@@ -4932,6 +4932,34 @@ ll Rank Badge */
 
 /* Adjust Popup Content Area */
 .recent-edit-list {
-    padding: 15px;
+    padding: 10px;
     background: white;
+    /* Ensure no double scrolling */
+    overflow: visible;
+}
+
+.recent-edit-item {
+    /* Reduce padding to reduce wasted space */
+    padding: 0;
+    border-bottom: none;
+}
+
+.recent-edit-textarea {
+    width: 100%;
+    padding: 8px;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    font-family: inherit;
+    /* Reduce min-height slightly so it doesn't look empty */
+    min-height: 250px;
+    max-height: 500px;
+    resize: none;
+    outline: none;
+    box-sizing: border-box;
+    display: none;
+    background: transparent;
+    /* Auto for Y scrollbar to appear immediately if content warrants it */
+    overflow-y: auto;
+    overflow-x: hidden;
 }

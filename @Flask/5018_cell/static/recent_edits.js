@@ -8,7 +8,6 @@
  */
 function toggleLastEditedPopup() {
     const popup = document.getElementById('lastEditedPopup');
-    const button = document.getElementById('btnLastEdited');
 
     if (popup.style.display === 'block') {
         popup.style.display = 'none';
@@ -23,7 +22,6 @@ function toggleLastEditedPopup() {
         const ctxMenu = document.getElementById('cellContextMenu');
         if (ctxMenu) {
             ctxMenu.classList.remove('show');
-            // Ensure we don't leave an inline display:none that overrides the class later
             ctxMenu.style.display = '';
         }
     }
@@ -165,19 +163,28 @@ function switchBookmark(index) {
  * Set textarea height based on content without showing scrollbars
  */
 function autoResizePopupTextarea(textarea) {
-    // Reset height to recalculate
-    textarea.style.height = 'auto';
+    if (!textarea) return;
 
-    // Set height based on content, capped at ~15 lines (approx 330px)
-    const maxHeight = 330;
+    // Use setTimeout to ensure DOM is rendered before calculating
+    setTimeout(() => {
+        // Reset height to recalculate
+        textarea.style.height = 'auto';
 
-    if (textarea.scrollHeight > maxHeight) {
-        textarea.style.height = maxHeight + 'px';
-        textarea.style.overflowY = 'auto'; // Enable scrollbar
-    } else {
-        textarea.style.height = textarea.scrollHeight + 'px';
-        textarea.style.overflowY = 'hidden'; // Hide scrollbar when fitting
-    }
+        // Set height based on content, capped at ~15 lines (approx 330px)
+        const maxHeight = 330;
+        const scrollHeight = textarea.scrollHeight;
+
+        // Force a minimum height if empty
+        const effectiveHeight = Math.max(scrollHeight, 100);
+
+        if (effectiveHeight > maxHeight) {
+            textarea.style.height = maxHeight + 'px';
+            textarea.style.overflowY = 'auto'; // Enable scrollbar
+        } else {
+            textarea.style.height = effectiveHeight + 'px';
+            textarea.style.overflowY = 'auto'; // Keep auto to avoid jumpiness, max-height handles it
+        }
+    }, 0);
 }
 
 /**
@@ -230,9 +237,6 @@ function handlePopupTextareaKey(event) {
     event.stopPropagation();
     // Allow default Enter behavior (newline)
 }
-
-// Click-outside listener removed to keep popup open while working
-// Close via the button or the 'X' icon only
 
 /**
  * Synchronize the popup content when a cell is updated in the main table.
