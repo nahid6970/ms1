@@ -15,6 +15,10 @@
         <label class="qs-label">URL</label>
         <input type="text" id="qs-url-input" class="qs-input" placeholder="https://...">
       </div>
+      <div class="qs-group">
+        <label class="qs-label">Image URL (Optional)</label>
+        <input type="text" id="qs-img-input" class="qs-input" placeholder="https://... (Leave empty for default)">
+      </div>
       <div class="qs-group qs-style-row">
         <div class="qs-style-field">
           <label class="qs-label">Color</label>
@@ -40,6 +44,7 @@
   const editIdInput = document.getElementById('qs-edit-id');
   const titleInput = document.getElementById('qs-title-input');
   const urlInput = document.getElementById('qs-url-input');
+  const imgInput = document.getElementById('qs-img-input');
   const colorInput = document.getElementById('qs-color-input');
   const solidInput = document.getElementById('qs-solid-input');
   const saveBtn = document.getElementById('qs-save');
@@ -80,6 +85,9 @@
         editIdInput.value = link.id;
         titleInput.value = link.title;
         urlInput.value = link.url;
+        // Check if the current icon is a google favicon. If not, it's a custom image.
+        const isGoogleFavicon = link.icon && link.icon.includes('google.com/s2/favicons');
+        imgInput.value = isGoogleFavicon ? '' : (link.icon || '');
         colorInput.value = link.color || '#38bdf8';
         solidInput.checked = link.isSolid || false;
       } else {
@@ -87,6 +95,7 @@
         editIdInput.value = '';
         titleInput.value = '';
         urlInput.value = '';
+        imgInput.value = '';
         colorInput.value = '#38bdf8';
         solidInput.checked = false;
       }
@@ -141,6 +150,7 @@
   saveBtn.onclick = () => {
     const title = titleInput.value.trim();
     let url = urlInput.value.trim();
+    const imgUrl = imgInput.value.trim();
     const color = colorInput.value;
     const isSolid = solidInput.checked;
     const editId = editIdInput.value;
@@ -158,7 +168,7 @@
         url: url,
         color: color,
         isSolid: isSolid,
-        icon: `https://www.google.com/s2/favicons?domain=${domain}&sz=64`
+        icon: imgUrl || `https://www.google.com/s2/favicons?domain=${domain}&sz=64`
       };
 
       if (editId) {
