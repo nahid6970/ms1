@@ -7,6 +7,35 @@ This document tracks historical bugs, issues, and their solutions. Use this to:
 
 ---
 
+## [2026-01-26 17:15] - Recent Edits Popup Out-of-Sync and Layout Issues
+
+**Problem:** 
+1. **Stale Data**: When editing a cell in the main table, the Recent Edits popup (if open or reopened) still showed the old text, leading to accidental overwrites.
+2. **Layout Shift**: Pressing Enter or pasting large text caused the popup to extend uncontrollably, sometimes pushing buttons off-screen.
+3. **UX Friction**: Users had to click twice (once to open popup, once to enter edit mode) to modify text.
+
+**Root Cause:** 
+1. The popup relied on a cached `value` property in `lastEditedCells` which wasn't updated during real-time typing in the main table.
+2. The `autoResizePopupTextarea` had a large minimum height (300px) and no maximum height, causing it to jump to a large size immediately.
+3. The multi-step "Preview -> Click -> Edit" architecture was unnecessary for a dedicated editing bookmark.
+
+**Solution:** 
+1. **Live Fetching**: Modified `renderLastEditedPopup` to fetch the cell value directly from `tableData` (the source of truth) whenever rendered.
+2. **Real-time Sync**: Added `syncPopupWithMainUpdate` called from `updateCell` to keep the bookmark data and UI updated even while typing elsewhere.
+3. **Direct Edit**: Removed the preview div and click-to-edit logic; the popup now shows the `textarea` immediately.
+4. **Height Capping**: Updated `autoResizePopupTextarea` to grow naturally but cap at 330px (~15 lines), enabling an internal scrollbar if the text goes further.
+5. **Type Safety**: Added `parseInt` to sheet/row/col indices to ensure strict matching between main table and bookmark storage.
+
+**Files Modified:**
+- `static/recent_edits.js` - Refactored for direct edit, live fetching, and height capping.
+- `static/script.js` - Added sync call in `updateCell`.
+
+**Related Issues:** Recent Sheet Edits Feature, UI Overflow
+
+**Result:** The bookmark popup is now a live, reliable editor that stays compact regardless of text length.
+
+---
+
 ## [2026-01-26 16:15] - Scroll Position Lost After Clearing Search
 
 **Problem:** 

@@ -6,6 +6,45 @@
 
 ---
 
+## [2026-01-26 17:15] - UI/UX Refinements & Popup Direct Edit
+
+**Session Duration:** 0.6 hours
+
+**What We Accomplished:**
+
+### 🎯 Added Lorem Ipsum Generator to F3 Formatter
+- **New Feature**: Added a **📝+** button to the Quick Formatter (F3).
+- **Functionality**: Replaces selected text with a standard Lorem Ipsum paragraph.
+- **Support**: Works in both WYSIWYG (contentEditable) and Raw (textarea) modes.
+
+### 🎨 Polished Notification UI
+- **Change**: Moved toast notifications (status updates) from top-right to **top-center**.
+- **UX**: Reduced size and padding for a more compact, modern look that doesn't obstruct content.
+
+### 🚀 Enhanced Recent Edits (Bookmark) Popup
+- **Direct Edit Mode**: Popup now displays the editable textarea immediately (no click-to-edit required).
+- **Live Synchronization**:
+  - Popup now fetches the **actual live value** from `tableData` when opened, ensuring it's always in sync with main table edits.
+  - Added `syncPopupWithMainUpdate()` to update the popup in real-time as the user types in the main table.
+- **Scroll & Height Control**:
+  - Implemented `autoResizePopupTextarea()` to grow naturally with text.
+  - Capped height at ~15 lines (330px) with internal scrolling to prevent the popup from extending off-screen.
+- **Fixed Input behavior**: Simplified Enter key handling to allow standard newlines without unwanted side effects.
+
+**Files Modified:**
+- `templates/index.html` - Added F3 button.
+- `static/style.css` - Compact top-center toast styles.
+- `static/script.js` - Implemented `generatePlaceholderText` and sync hook in `updateCell`.
+- `static/recent_edits.js` - Complete refactor for direct edit, live sync, and height capping.
+- `md/RECENT.md` - Logged session.
+
+**Current Status:**
+- ✅ Bookmark workflow is much faster with direct editing and reliable sync.
+- ✅ Notifications are less intrusive.
+- ✅ Rapid prototyping improved with placeholder text button.
+
+---
+
 ## [2026-01-26 16:35] - F3 Formatter Enhancements
 
 **Session Duration:** 0.2 hours
