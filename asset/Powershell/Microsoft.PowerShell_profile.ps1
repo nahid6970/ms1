@@ -732,10 +732,15 @@ function gitter {
     git status
     # Stage all changes
     git add .
+    if ($LASTEXITCODE -ne 0) { Write-Host "Error during 'git add'. Window will remain open." -ForegroundColor Red; return }
+
     # Commit with the generated message
     git commit -m $CommitMessage
+    if ($LASTEXITCODE -ne 0) { Write-Host "Error during 'git commit' (or nothing to commit). Window will remain open." -ForegroundColor Red; return }
+
     # Push to the remote repository
     git push
+    if ($LASTEXITCODE -ne 0) { Write-Host "Error during 'git push'. Window will remain open." -ForegroundColor Red; return }
 
     # Completion message
     Write-Host " ██████╗ ██████╗ ███╗   ███╗██████╗ ██╗     ███████╗████████╗███████╗" -ForegroundColor Green
@@ -744,6 +749,9 @@ function gitter {
     Write-Host "██║     ██║   ██║██║╚██╔╝██║██╔═══╝ ██║     ██╔══╝     ██║   ██╔══╝  " -ForegroundColor Green
     Write-Host "╚██████╗╚██████╔╝██║ ╚═╝ ██║██║     ███████╗███████╗   ██║   ███████╗" -ForegroundColor Green
     Write-Host " ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚═╝     ╚══════╝╚══════╝   ╚═╝   ╚══════╝" -ForegroundColor Green
+
+    # Close the window on success
+    exit
 }
 
 
