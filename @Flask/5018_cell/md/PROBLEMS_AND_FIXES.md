@@ -24,7 +24,8 @@ This document tracks historical bugs, issues, and their solutions. Use this to:
 2. **Real-time Sync**: Added `syncPopupWithMainUpdate` called from `updateCell` to keep the bookmark data and UI updated even while typing elsewhere.
 3. **Direct Edit**: Removed the preview div and click-to-edit logic; the popup now shows the `textarea` immediately.
 4. **Height Capping**: Updated `autoResizePopupTextarea` to grow naturally but cap at 330px (~15 lines), enabling an internal scrollbar if the text goes further.
-5. **Type Safety**: Added `parseInt` to sheet/row/col indices to ensure strict matching between main table and bookmark storage.
+5. **UI Polish**: Fixed the 'X' close button which had a tiny hit area and was misaligned. Added `.recent-edits-close` class with flexbox centering.
+6. **Type Safety**: Added `parseInt` to sheet/row/col indices to ensure strict matching between main table and bookmark storage.
 
 **Files Modified:**
 - `static/recent_edits.js` - Refactored for direct edit, live fetching, and height capping.

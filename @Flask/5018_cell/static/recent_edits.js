@@ -57,7 +57,7 @@ function renderLastEditedPopup() {
     let html = `
         <div class="recent-edits-header">
             <span>Bookmark</span>
-            <span style="font-size:10px; cursor:pointer;" onclick="document.getElementById('lastEditedPopup').style.display='none'">✕</span>
+            <span class="recent-edits-close" onclick="document.getElementById('lastEditedPopup').style.display='none'">✕</span>
         </div>
         <div class="recent-edit-list">
     `;

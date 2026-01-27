@@ -23,6 +23,7 @@
 
 ### 🚀 Enhanced Recent Edits (Bookmark) Popup
 - **Direct Edit Mode**: Popup now displays the editable textarea immediately (no click-to-edit required).
+- **UI Fix**: Improved the **✕ close button** positioning and hit area. It is now larger, centered, and easier to click.
 - **Live Synchronization**:
   - Popup now fetches the **actual live value** from `tableData` when opened, ensuring it's always in sync with main table edits.
   - Added `syncPopupWithMainUpdate()` to update the popup in real-time as the user types in the main table.
