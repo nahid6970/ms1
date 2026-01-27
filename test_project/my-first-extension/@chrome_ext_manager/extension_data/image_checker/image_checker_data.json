@@ -1,5 +1,8 @@
 {
   "checkingMode_global": false,
+  "excludedDomains": [
+    "http://192.168.0.101"
+  ],
   "imageCheckerSettings": {
     "borderColor": "#4caf50",
     "borderWidth": 3,
