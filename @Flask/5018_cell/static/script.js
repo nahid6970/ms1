@@ -1536,6 +1536,11 @@ function updateCell(rowIndex, colIndex, value) {
     window.autoSaveTimeout = setTimeout(() => {
         saveData();
     }, 1000);
+
+    // Sync with Recent Edits popup if this cell is pinned/bookmarked
+    if (typeof syncPopupWithMainUpdate === 'function') {
+        syncPopupWithMainUpdate(currentSheet, rowIndex, colIndex, value);
+    }
 }
 
 /**

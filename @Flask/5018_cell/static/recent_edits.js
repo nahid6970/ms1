@@ -191,3 +191,29 @@ function handlePopupTextareaKey(event) {
 
 // Click-outside listener removed to keep popup open while working
 // Close via the button or the 'X' icon only
+
+/**
+ * Synchronize the popup content when a cell is updated in the main table.
+ * Called from script.js updateCell().
+ */
+function syncPopupWithMainUpdate(sheetIdx, row, col, newValue) {
+    // 1. Update the backing storage if this cell is pinned
+    if (lastEditedCells[sheetIdx] &&
+        lastEditedCells[sheetIdx].row === row &&
+        lastEditedCells[sheetIdx].col === col) {
+
+        lastEditedCells[sheetIdx].value = newValue;
+        lastEditedCells[sheetIdx].timestamp = Date.now();
+        localStorage.setItem('lastEditedCells', JSON.stringify(lastEditedCells));
+
+        // 2. If popup is open, update the UI dynamically
+        const popup = document.getElementById('lastEditedPopup');
+        if (popup && popup.style.display === 'block') {
+            // Find the specific item in the DOM
+            // We don't have IDs on items, so we'll re-render if we can't find it easily.
+            // But re-rendering is safe here because the user is typing in the MAIN table,
+            // not the popup.
+            renderLastEditedPopup();
+        }
+    }
+}
