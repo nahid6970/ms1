@@ -9,25 +9,65 @@ document.addEventListener('DOMContentLoaded', () => {
   const excludedDomainsInput = document.getElementById('excludedDomains');
   const saveExclusionsBtn = document.getElementById('saveExclusions');
 
-  // Color inputs
-  const color1 = document.getElementById('color1');
-  const color2 = document.getElementById('color2');
-  const color3 = document.getElementById('color3');
-  const color4 = document.getElementById('color4');
+  // Color palette logic
+  const colorGrid = document.getElementById('colorGrid');
+  const addColorBtn = document.getElementById('addColorBtn');
+  let currentColors = ['#ffff00', '#aaffaa', '#aaddff', '#ffaaaa'];
+
+  function renderColors() {
+    // Remove existing color items
+    const existingItems = colorGrid.querySelectorAll('.color-item');
+    existingItems.forEach(item => item.remove());
+
+    currentColors.forEach((color, index) => {
+      const colorItem = document.createElement('div');
+      colorItem.className = 'color-item';
+
+      const label = document.createElement('label');
+      label.className = 'color-label';
+      label.textContent = `C${index + 1}`;
+
+      const input = document.createElement('input');
+      input.type = 'color';
+      input.value = color;
+      input.addEventListener('change', (e) => {
+        currentColors[index] = e.target.value;
+      });
+
+      const removeBtn = document.createElement('div');
+      removeBtn.className = 'remove-color-btn';
+      removeBtn.textContent = '×';
+      removeBtn.title = 'Remove Color';
+      removeBtn.addEventListener('click', () => {
+        currentColors.splice(index, 1);
+        renderColors();
+      });
+
+      colorItem.appendChild(label);
+      colorItem.appendChild(input);
+      colorItem.appendChild(removeBtn);
+      
+      // Insert before the add button
+      colorGrid.insertBefore(colorItem, addColorBtn);
+    });
+  }
 
   // Load saved settings
   chrome.storage.local.get(['customColors', 'excludedDomains'], (result) => {
-    if (result.customColors) {
-      const colors = result.customColors;
-      color1.value = colors[0] || '#ffff00';
-      color2.value = colors[1] || '#aaffaa';
-      color3.value = colors[2] || '#aaddff';
-      color4.value = colors[3] || '#ffaaaa';
+    if (result.customColors && Array.isArray(result.customColors)) {
+      currentColors = result.customColors;
     }
+    renderColors();
 
     if (result.excludedDomains) {
       excludedDomainsInput.value = result.excludedDomains.join('\n');
     }
+  });
+
+  // Add Color
+  addColorBtn.addEventListener('click', () => {
+    currentColors.push('#ffffff');
+    renderColors();
   });
 
   // Save Exclusions
@@ -44,14 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Save colors
   saveColorsBtn.addEventListener('click', () => {
-    const colors = [
-      color1.value,
-      color2.value,
-      color3.value,
-      color4.value
-    ];
-
-    chrome.storage.local.set({ customColors: colors }, () => {
+    chrome.storage.local.set({ customColors: currentColors }, () => {
       showStatus('Colors saved! Refresh pages to see changes.');
 
       // Notify all tabs to refresh

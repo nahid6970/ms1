@@ -44,7 +44,7 @@ function runExtension() {
 
     // Load custom colors from storage
     chrome.storage.local.get(['customColors'], (result) => {
-        if (result.customColors && result.customColors.length === 4) {
+        if (result.customColors && Array.isArray(result.customColors)) {
             COLORS = result.customColors;
             // Rebuild the menu with new colors
             rebuildColorMenu();
@@ -94,7 +94,7 @@ function runExtension() {
             location.reload();
         } else if (request.action === "reload_colors") {
             chrome.storage.local.get(['customColors'], (result) => {
-                if (result.customColors && result.customColors.length === 4) {
+                if (result.customColors && Array.isArray(result.customColors)) {
                     COLORS = result.customColors;
                     rebuildColorMenu();
                 }
