@@ -4,6 +4,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const saveToPythonBtn = document.getElementById('saveToPython');
   const loadFromPythonBtn = document.getElementById('loadFromPython');
   const saveColorsBtn = document.getElementById('saveColors');
+  const reloadExtensionBtn = document.getElementById('reloadExtension');
+
+  // Reload extension logic
+  if (reloadExtensionBtn) {
+    reloadExtensionBtn.addEventListener('click', () => {
+      chrome.runtime.reload();
+    });
+  }
 
   // Excluded Domains
   const excludedDomainsInput = document.getElementById('excludedDomains');
