@@ -8,6 +8,7 @@ const settingsBtn = document.getElementById('settings-btn');
 const addFirstBtn = document.getElementById('add-first-btn');
 const saveToPythonBtn = document.getElementById('saveToPython');
 const loadFromPythonBtn = document.getElementById('loadFromPython');
+const reloadBtn = document.getElementById('reload-extension');
 
 // Context Menu Elements
 const contextMenu = document.getElementById('context-menu');
@@ -168,6 +169,12 @@ function saveLinks() {
 addBtn.addEventListener('click', () => triggerBrowserModal());
 settingsBtn.addEventListener('click', () => triggerSettingsModal());
 addFirstBtn.addEventListener('click', () => triggerBrowserModal());
+
+if (reloadBtn) {
+    reloadBtn.addEventListener('click', () => {
+        chrome.runtime.reload();
+    });
+}
 
 // Save to Python server button handler
 if (saveToPythonBtn) {
