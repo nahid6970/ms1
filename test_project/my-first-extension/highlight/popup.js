@@ -112,17 +112,35 @@ document.addEventListener('DOMContentLoaded', () => {
   // Save to Python server button
   if (saveToPythonBtn) {
     saveToPythonBtn.addEventListener('click', function () {
+      const originalContent = saveToPythonBtn.innerHTML;
+      saveToPythonBtn.classList.add('loading');
+      saveToPythonBtn.innerHTML = '<span>⏳</span> Saving...';
+
       chrome.storage.local.get(null, function (items) {
         // Send message to background script to save
         chrome.runtime.sendMessage({
           action: 'saveToPython',
           data: items
         }, function (response) {
+          saveToPythonBtn.classList.remove('loading');
+          
           // Check if response exists and doesn't have success: false
           if (response && response.success !== false) {
+            saveToPythonBtn.classList.add('success');
+            saveToPythonBtn.innerHTML = '<span>✅</span> Saved!';
             showStatus('Data saved to Python server!');
+            
+            setTimeout(() => {
+              saveToPythonBtn.classList.remove('success');
+              saveToPythonBtn.innerHTML = originalContent;
+            }, 2000);
           } else {
+            saveToPythonBtn.innerHTML = '<span>❌</span> Failed';
             showStatus('Failed to save to Python server. Make sure the server is running.');
+            
+            setTimeout(() => {
+              saveToPythonBtn.innerHTML = originalContent;
+            }, 2000);
           }
         });
       });

@@ -197,6 +197,23 @@
       color: white;
     }
 
+    .btn-python-save.loading {
+      opacity: 0.7;
+      cursor: wait;
+      pointer-events: none;
+    }
+
+    .btn-python-save.success {
+      background: #28a745 !important;
+      animation: pulse-green 0.5s ease-in-out;
+    }
+
+    @keyframes pulse-green {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
     #status {
       margin-top: 12px;
       padding-top: 12px;
