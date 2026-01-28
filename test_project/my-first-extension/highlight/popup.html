@@ -32,6 +32,28 @@
     .header-title {
       font-weight: 500;
       font-size: 16px;
+      flex: 1;
+    }
+
+    .btn-reload-icon {
+      width: 28px !important;
+      height: 28px !important;
+      padding: 0 !important;
+      background: #3c3c3c !important;
+      border-radius: 4px;
+      color: #cccccc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+    }
+
+    .btn-reload-icon:hover {
+      background: #4a4a4a !important;
+      color: #ffffff;
+      transform: rotate(180deg);
     }
 
     .section {
@@ -145,6 +167,15 @@
       gap: 8px;
     }
 
+    .row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .row button {
+      flex: 1;
+    }
+
     button {
       width: 100%;
       padding: 8px;
@@ -234,6 +265,7 @@
   <div class="header">
     <div class="header-icon">🖋️</div>
     <div class="header-title">Highlighter</div>
+    <button id="reloadExtension" class="btn-reload-icon" title="Reload Extension"><span>🔄</span></button>
   </div>
 
   <div class="section">
@@ -252,9 +284,10 @@
   </div>
 
   <div class="btn-group">
-    <button id="reloadExtension" class="btn-secondary"><span>🔄</span> Reload Extension</button>
-    <button id="saveToPython" class="btn-python-save"><span>💾</span> Backup to Server</button>
-    <button id="loadFromPython" class="btn-python-load"><span>📂</span> Restore from Server</button>
+    <div class="row">
+      <button id="saveToPython" class="btn-python-save"><span>💾</span> Backup</button>
+      <button id="loadFromPython" class="btn-python-load"><span>📂</span> Restore</button>
+    </div>
     <button id="clearBtn" class="btn-danger"><span>🗑️</span> Clear All Data</button>
   </div>
 
