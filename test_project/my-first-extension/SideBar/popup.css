@@ -110,6 +110,15 @@ header {
     background: rgba(163, 21, 21, 0.1);
 }
 
+.icon-btn.loading svg {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
 /* 4 Column Grid */
 .links-list {
     display: grid;
