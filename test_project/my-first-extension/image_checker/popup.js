@@ -60,6 +60,13 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
+    const reloadBtn = document.getElementById('reloadExtension');
+    if (reloadBtn) {
+        reloadBtn.addEventListener('click', function () {
+            chrome.runtime.reload();
+        });
+    }
+
     const exportBtn = document.getElementById('exportData');
     exportBtn.addEventListener('click', function () {
         chrome.storage.local.get(['seenItems'], function (result) {
