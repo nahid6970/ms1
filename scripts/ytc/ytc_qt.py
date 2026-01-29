@@ -125,7 +125,7 @@ QComboBox QAbstractItemView {{
 }}
 """
 
-SETTINGS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "ytc_qt_settings.json")
+SETTINGS_FILE = r"C:\@delta\output\yt-dlp\youtube-dlp.json"
 
 class FetchWorker(QObject):
     finished = pyqtSignal(str, list, list) # title, video_formats, audio_formats
@@ -185,11 +185,12 @@ class DownloadWorker(QObject):
     error = pyqtSignal(str)
     success = pyqtSignal()
 
-    def __init__(self, cmd, save_dir, convert_to_txt=False):
+    def __init__(self, cmd, save_dir, convert_to_txt=False, time_range=None):
         super().__init__()
         self.cmd = cmd
         self.save_dir = save_dir
         self.convert_to_txt = convert_to_txt
+        self.time_range = time_range  # (start_seconds, end_seconds) or None
 
     def run(self):
         try:
@@ -247,20 +248,60 @@ class DownloadWorker(QObject):
             clean_lines = []
             final_lines = []
             
+            # Parse subtitle entries with timestamps
+            entries = []
+            current_entry = {"start": 0, "end": 0, "text": ""}
+            
             for line in lines:
                 line = line.strip()
                 if not line: continue
-                if re.fullmatch(r'\d+', line): continue 
-                if "-->" in line: continue 
-                if line.startswith("WEBVTT") or line.startswith("Kind:") or line.startswith("Language:"): continue
                 
-                line = re.sub(r'<[^>]+>', '', line)
-                line = re.sub(r'\d{2}:\d{2}:\d{2}[\.,]\d{3}', '', line)
-                line = line.strip()
-                if not line: continue
-
-                if not clean_lines or clean_lines[-1] != line:
-                     clean_lines.append(line)
+                # Check for timestamp line
+                if "-->" in line:
+                    # Parse timestamps (format: HH:MM:SS,mmm --> HH:MM:SS,mmm)
+                    try:
+                        time_parts = line.split("-->")
+                        start_str = time_parts[0].strip()
+                        end_str = time_parts[1].strip()
+                        
+                        current_entry["start"] = self._parse_subtitle_time(start_str)
+                        current_entry["end"] = self._parse_subtitle_time(end_str)
+                    except:
+                        continue
+                elif re.fullmatch(r'\d+', line):
+                    # Subtitle index number - save previous entry if exists
+                    if current_entry["text"]:
+                        entries.append(current_entry.copy())
+                        current_entry = {"start": 0, "end": 0, "text": ""}
+                elif not line.startswith("WEBVTT") and not line.startswith("Kind:") and not line.startswith("Language:"):
+                    # This is subtitle text
+                    line = re.sub(r'<[^>]+>', '', line)
+                    line = line.strip()
+                    if line:
+                        if current_entry["text"]:
+                            current_entry["text"] += " " + line
+                        else:
+                            current_entry["text"] = line
+            
+            # Add last entry
+            if current_entry["text"]:
+                entries.append(current_entry)
+            
+            # Filter by time range if specified
+            if self.time_range:
+                start_sec, end_sec = self.time_range
+                filtered_entries = []
+                for entry in entries:
+                    # Include if subtitle overlaps with requested range
+                    if entry["end"] >= start_sec and entry["start"] <= end_sec:
+                        filtered_entries.append(entry)
+                entries = filtered_entries
+            
+            # Extract text from entries
+            for entry in entries:
+                text = entry["text"]
+                if not clean_lines or clean_lines[-1] != text:
+                    clean_lines.append(text)
             
             # Simple Rolling Fix
             for line in clean_lines:
@@ -276,6 +317,28 @@ class DownloadWorker(QObject):
             except: pass
         except Exception as e:
             print(e)
+    
+    def _parse_subtitle_time(self, time_str):
+        """Convert subtitle timestamp to seconds (HH:MM:SS,mmm or HH:MM:SS.mmm)"""
+        try:
+            # Replace comma with dot for milliseconds
+            time_str = time_str.replace(',', '.')
+            # Split by dot to separate seconds and milliseconds
+            parts = time_str.split('.')
+            time_part = parts[0]
+            
+            # Split time part
+            time_components = time_part.split(':')
+            if len(time_components) == 3:
+                hours, minutes, seconds = map(int, time_components)
+                return hours * 3600 + minutes * 60 + seconds
+            elif len(time_components) == 2:
+                minutes, seconds = map(int, time_components)
+                return minutes * 60 + seconds
+            else:
+                return int(time_components[0])
+        except:
+            return 0
 
 class YTCDownloaderApp(QMainWindow):
     def __init__(self):
@@ -303,6 +366,8 @@ class YTCDownloaderApp(QMainWindow):
         url_lbl.setObjectName("SectionTitle")
         self.url_input = QLineEdit()
         self.url_input.setPlaceholderText("https://...")
+        self.url_input.setText(self.settings.get("last_url", ""))
+        self.url_input.textChanged.connect(self.extract_time_from_url)
         self.fetch_btn = QPushButton("SCAN_METADATA")
         self.fetch_btn.clicked.connect(self.fetch_formats)
         
@@ -507,6 +572,24 @@ class YTCDownloaderApp(QMainWindow):
         enabled = self.timeline_check.isChecked()
         self.start_time.setEnabled(enabled)
         self.end_time.setEnabled(enabled)
+    
+    def extract_time_from_url(self):
+        """Extract timestamp from YouTube URL (e.g., ?t=3040 or &t=3040)"""
+        url = self.url_input.text()
+        if not url:
+            return
+        
+        # Look for t= parameter in URL
+        match = re.search(r'[?&]t=(\d+)', url)
+        if match:
+            seconds = int(match.group(1))
+            # Only auto-fill if start_time is empty or if we're in subs mode
+            if not self.start_time.text() or self.r_subs.isChecked():
+                self.start_time.setText(str(seconds))
+                # Auto-enable timeline checkbox in subs mode
+                if self.r_subs.isChecked():
+                    self.timeline_check.setChecked(True)
+                    self.toggle_timeline_ui()
 
     def toggle_mode_ui(self):
         is_video = self.r_video.isChecked()
@@ -550,6 +633,9 @@ class YTCDownloaderApp(QMainWindow):
     def fetch_formats(self):
         url = self.url_input.text()
         if not url: return
+        
+        # Extract timestamp from URL if present (e.g., ?t=3040 or &t=3040)
+        self.extract_timestamp_from_url(url)
 
         self.fetch_btn.setEnabled(False)
         self.status.setText("SCANNING_METADATA...")
@@ -659,6 +745,7 @@ class YTCDownloaderApp(QMainWindow):
         # Build Command
         cmd = ["yt-dlp"]
         convert_txt = False
+        time_range = None
 
         if self.r_subs.isChecked():
             # Subtitle Only Mode
@@ -688,12 +775,10 @@ class YTCDownloaderApp(QMainWindow):
                 start = self.parse_time(self.start_time.text())
                 end = self.parse_time(self.end_time.text())
                 
-                if start is not None and end is not None:
-                    cmd.extend(["--download-sections", f"*{start}-{end}"])
-                elif start is not None:
-                    cmd.extend(["--download-sections", f"*{start}-inf"])
-                elif end is not None:
-                    cmd.extend(["--download-sections", f"*0-{end}"])
+                # Note: --download-sections doesn't work for subtitles
+                # We'll filter in post-processing instead
+                time_range = (start if start is not None else 0, 
+                             end if end is not None else float('inf'))
 
         else:
             # Video Mode
@@ -735,7 +820,7 @@ class YTCDownloaderApp(QMainWindow):
         self.progress.setRange(0, 0)
 
         self.thread = QThread()
-        self.worker = DownloadWorker(cmd, save_dir, convert_txt)
+        self.worker = DownloadWorker(cmd, save_dir, convert_txt, time_range)
         self.worker.moveToThread(self.thread)
         self.thread.started.connect(self.worker.run)
         
@@ -771,6 +856,20 @@ class YTCDownloaderApp(QMainWindow):
                 return None
         
         return None
+    
+    def extract_timestamp_from_url(self, url):
+        """Extract timestamp from YouTube URL (e.g., ?t=3040 or &t=3040) and populate start time field"""
+        import re
+        
+        # Match ?t=XXXX or &t=XXXX
+        match = re.search(r'[?&]t=(\d+)', url)
+        if match:
+            timestamp = match.group(1)
+            # Only set if timeline checkbox is checked or if start field is empty
+            if self.r_subs.isChecked():
+                self.timeline_check.setChecked(True)
+                self.start_time.setText(timestamp)
+                self.toggle_timeline_ui()
 
     def update_dl_status(self, msg):
         self.status.setText(msg)
@@ -805,6 +904,7 @@ class YTCDownloaderApp(QMainWindow):
         self.settings["use_timeline"] = self.timeline_check.isChecked()
         self.settings["start_time"] = self.start_time.text()
         self.settings["end_time"] = self.end_time.text()
+        self.settings["last_url"] = self.url_input.text()
         
         method = "none"
         if self.r_browser.isChecked(): method = "browser"
@@ -814,7 +914,9 @@ class YTCDownloaderApp(QMainWindow):
         self.settings["cookie_file"] = self.file_path.text()
         
         try:
-            with open(SETTINGS_FILE, 'w') as f: json.dump(self.settings, f)
+            # Ensure directory exists
+            os.makedirs(os.path.dirname(SETTINGS_FILE), exist_ok=True)
+            with open(SETTINGS_FILE, 'w') as f: json.dump(self.settings, f, indent=2)
         except: pass
 
     def closeEvent(self, e):
