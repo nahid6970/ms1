@@ -54,5 +54,13 @@
     "isItalic": true,
     "isUnderline": true,
     "marker": "\u00db\u00db"
+  },
+  {
+    "bgColor": "#C2FF80",
+    "fgColor": "hsl(104, 81%, 19%)",
+    "isBold": false,
+    "isItalic": false,
+    "isUnderline": false,
+    "marker": "\u2714\ufe0f\u2714\ufe0f"
   }
 ]
