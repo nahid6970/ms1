@@ -172,16 +172,36 @@ class MainWindow(QMainWindow):
                 font-weight: bold;
             }}
             QScrollBar:vertical {{
-                border: none;
+                border: 1px solid {CP_DIM};
                 background: {CP_BG};
-                width: 10px;
+                width: 12px;
+                margin: 0px;
             }}
             QScrollBar::handle:vertical {{
-                background: {CP_DIM};
+                background: {CP_CYAN};
                 min-height: 20px;
+            }}
+            QScrollBar::handle:vertical:hover {{
+                background: {CP_YELLOW};
             }}
             QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{
                 height: 0px;
+            }}
+            QScrollBar:horizontal {{
+                border: 1px solid {CP_DIM};
+                background: {CP_BG};
+                height: 12px;
+                margin: 0px;
+            }}
+            QScrollBar::handle:horizontal {{
+                background: {CP_CYAN};
+                min-width: 20px;
+            }}
+            QScrollBar::handle:horizontal:hover {{
+                background: {CP_YELLOW};
+            }}
+            QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {{
+                width: 0px;
             }}
         """
         )
