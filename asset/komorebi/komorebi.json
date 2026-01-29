@@ -273,6 +273,11 @@
             "kind": "Exe",
             "id": "Podman Desktop.exe",
             "matching_strategy": "Legacy"
+        },
+        {
+            "kind": "Exe",
+            "id": "mspaint.exe",
+            "matching_strategy": "Equals"
         }
     ],
     "tray_and_multi_window_applications": [
