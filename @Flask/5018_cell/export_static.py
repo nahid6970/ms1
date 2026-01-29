@@ -2036,7 +2036,7 @@ def generate_static_html(data, custom_syntaxes):
                             displayMode: true
                         });
                         // Remove newlines in KaTeX output to prevent br insertion
-                        return result.replace(/\n/g, '');
+                        return result.replace(/\\n/g, '');
                     } catch (e) {
                         return match;
                     }
@@ -2052,7 +2052,7 @@ def generate_static_html(data, custom_syntaxes):
                             displayMode: false
                         });
                         // Remove newlines in KaTeX output to prevent br insertion
-                        return result.replace(/\n/g, '');
+                        return result.replace(/\\n/g, '');
                     } catch (e) {
                         return match;
                     }
@@ -2068,7 +2068,7 @@ def generate_static_html(data, custom_syntaxes):
                             displayMode: false
                         });
                         // Remove newlines in KaTeX output to prevent br insertion
-                        return result.replace(/\n/g, '');
+                        return result.replace(/\\n/g, '');
                     } catch (e) {
                         return match;
                     }
@@ -2337,7 +2337,7 @@ def generate_static_html(data, custom_syntaxes):
                             displayMode: true
                         });
                         // Remove newlines in KaTeX output to prevent br insertion
-                        return result.replace(/\n/g, '');
+                        return result.replace(/\\n/g, '');
                     } catch (e) {
                         return match;
                     }
@@ -2353,7 +2353,7 @@ def generate_static_html(data, custom_syntaxes):
                             displayMode: false
                         });
                         // Remove newlines in KaTeX output to prevent br insertion
-                        return result.replace(/\n/g, '');
+                        return result.replace(/\\n/g, '');
                     } catch (e) {
                         return match;
                     }
@@ -2375,7 +2375,7 @@ def generate_static_html(data, custom_syntaxes):
                                 displayMode: false
                             });
                             // Remove newlines in KaTeX output to prevent br insertion
-                            return result.replace(/\n/g, '');
+                            return result.replace(/\\n/g, '');
                         } catch (e) {
                             return match;
                         }
