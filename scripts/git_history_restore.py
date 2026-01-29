@@ -45,7 +45,8 @@ class GitWorker:
 
         try:
             # git log format: hash|author|date|message
-            cmd = ["git", "log", "--pretty=format:%h|%an|%ad|%s", "--date=short", "-n", "200"]
+            # Explicitly add "-- ." to filter log to the current directory
+            cmd = ["git", "log", "--pretty=format:%h|%an|%ad|%s", "--date=short", "-n", "200", "--", "."]
             result = subprocess.check_output(cmd, cwd=directory, text=True, encoding='utf-8')
             
             commits = []
