@@ -48,9 +48,15 @@ class CyberDelegate(QStyledItemDelegate):
             # Force black text when highlighted/selected
             text_color = QColor("#000000")
         else:
-            # Use the color stored in the item's ForegroundRole
-            fg = index.data(Qt.ItemDataRole.ForegroundRole)
-            text_color = fg if isinstance(fg, QColor) else QColor(CP_TEXT)
+            # Extract color from Brush if available
+            fg_data = index.data(Qt.ItemDataRole.ForegroundRole)
+            from PyQt6.QtGui import QBrush
+            if isinstance(fg_data, QBrush):
+                text_color = fg_data.color()
+            elif isinstance(fg_data, QColor):
+                text_color = fg_data
+            else:
+                text_color = QColor(CP_TEXT)
         
         # 3. Draw Text
         painter.setPen(text_color)
