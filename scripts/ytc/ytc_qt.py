@@ -377,23 +377,52 @@ class YTCDownloaderApp(QMainWindow):
 
         # Extra Sub Options (Format & Auto)
         self.sub_extras = QWidget()
-        extra_layout = QHBoxLayout(self.sub_extras)
+        extra_layout = QVBoxLayout(self.sub_extras)
         extra_layout.setContentsMargins(10, 0, 0, 0)
-        extra_layout.setAlignment(Qt.AlignmentFlag.AlignVCenter)
+        extra_layout.setSpacing(8)
         
-        extra_layout.addWidget(QLabel("FMT:"))
+        # First row: Format and Auto-gen
+        row1 = QHBoxLayout()
+        row1.addWidget(QLabel("FMT:"))
         self.sub_fmt = QComboBox()
         self.sub_fmt.addItems(["SRT", "VTT", "TXT (Raw)"])
         self.sub_fmt.setCurrentText(self.settings.get("sub_fmt", "SRT"))
-        extra_layout.addWidget(self.sub_fmt)
+        row1.addWidget(self.sub_fmt)
         
         self.auto_sub = QCheckBox("INCLUDE_AUTO_GEN")
         self.auto_sub.setChecked(self.settings.get("auto_sub", False))
-        extra_layout.addWidget(self.auto_sub)
-        extra_layout.addStretch()
+        row1.addWidget(self.auto_sub)
+        row1.addStretch()
+        extra_layout.addLayout(row1)
+        
+        # Second row: Timeline selection
+        row2 = QHBoxLayout()
+        self.timeline_check = QCheckBox("TIMELINE_RANGE")
+        self.timeline_check.setChecked(self.settings.get("use_timeline", False))
+        self.timeline_check.stateChanged.connect(self.toggle_timeline_ui)
+        row2.addWidget(self.timeline_check)
+        
+        row2.addWidget(QLabel("START:"))
+        self.start_time = QLineEdit()
+        self.start_time.setPlaceholderText("0:00 or 3062")
+        self.start_time.setFixedWidth(100)
+        self.start_time.setText(self.settings.get("start_time", ""))
+        row2.addWidget(self.start_time)
+        
+        row2.addWidget(QLabel("END:"))
+        self.end_time = QLineEdit()
+        self.end_time.setPlaceholderText("5:30 or 3428")
+        self.end_time.setFixedWidth(100)
+        self.end_time.setText(self.settings.get("end_time", ""))
+        row2.addWidget(self.end_time)
+        row2.addStretch()
+        extra_layout.addLayout(row2)
         
         self.sub_extras.setVisible(False) # Hidden by default (Video mode)
         sub_layout.addWidget(self.sub_extras)
+        
+        # Initialize timeline UI state
+        self.toggle_timeline_ui()
 
         opt_layout.addLayout(sub_layout)
         main.addWidget(opt_frame)
@@ -473,6 +502,11 @@ class YTCDownloaderApp(QMainWindow):
 
     def toggle_sub_ui(self):
         self.lang_combo.setEnabled(self.sub_check.isChecked())
+    
+    def toggle_timeline_ui(self):
+        enabled = self.timeline_check.isChecked()
+        self.start_time.setEnabled(enabled)
+        self.end_time.setEnabled(enabled)
 
     def toggle_mode_ui(self):
         is_video = self.r_video.isChecked()
@@ -623,7 +657,6 @@ class YTCDownloaderApp(QMainWindow):
         self.save_settings()
 
         # Build Command
-        # Build Command
         cmd = ["yt-dlp"]
         convert_txt = False
 
@@ -649,6 +682,18 @@ class YTCDownloaderApp(QMainWindow):
             elif lang == "Hindi": cmd.extend(["--sub-langs", "hi"])
             elif lang == "All": cmd.extend(["--sub-langs", "all"])
             else: cmd.extend(["--sub-langs", "en.*"])
+            
+            # Timeline range
+            if self.timeline_check.isChecked():
+                start = self.parse_time(self.start_time.text())
+                end = self.parse_time(self.end_time.text())
+                
+                if start is not None and end is not None:
+                    cmd.extend(["--download-sections", f"*{start}-{end}"])
+                elif start is not None:
+                    cmd.extend(["--download-sections", f"*{start}-inf"])
+                elif end is not None:
+                    cmd.extend(["--download-sections", f"*0-{end}"])
 
         else:
             # Video Mode
@@ -702,6 +747,30 @@ class YTCDownloaderApp(QMainWindow):
         self.worker.finished.connect(self.worker.deleteLater)
         self.thread.finished.connect(self.thread.deleteLater)
         self.thread.start()
+    
+    def parse_time(self, time_str):
+        """Convert time string to seconds. Accepts formats: '3062', '51:02', '1:30:45'"""
+        if not time_str or not time_str.strip():
+            return None
+        
+        time_str = time_str.strip()
+        
+        # If it's just a number (seconds)
+        if time_str.isdigit():
+            return int(time_str)
+        
+        # If it contains colons (MM:SS or HH:MM:SS)
+        if ':' in time_str:
+            parts = time_str.split(':')
+            try:
+                if len(parts) == 2:  # MM:SS
+                    return int(parts[0]) * 60 + int(parts[1])
+                elif len(parts) == 3:  # HH:MM:SS
+                    return int(parts[0]) * 3600 + int(parts[1]) * 60 + int(parts[2])
+            except ValueError:
+                return None
+        
+        return None
 
     def update_dl_status(self, msg):
         self.status.setText(msg)
@@ -733,6 +802,9 @@ class YTCDownloaderApp(QMainWindow):
         self.settings["sub_lang"] = self.lang_combo.currentText()
         self.settings["sub_fmt"] = self.sub_fmt.currentText()
         self.settings["auto_sub"] = self.auto_sub.isChecked()
+        self.settings["use_timeline"] = self.timeline_check.isChecked()
+        self.settings["start_time"] = self.start_time.text()
+        self.settings["end_time"] = self.end_time.text()
         
         method = "none"
         if self.r_browser.isChecked(): method = "browser"
