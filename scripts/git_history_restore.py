@@ -256,11 +256,15 @@ class MainWindow(QMainWindow):
         self.status_label = QLabel("READY")
         self.status_label.setStyleSheet(f"color: {CP_CYAN}; font-weight: bold;")
         
+        copy_hash_btn = CyberButton("COPY HASH", CP_DIM, CP_CYAN, "white", "black")
+        copy_hash_btn.clicked.connect(self.copy_hash)
+        
         revert_btn = CyberButton("RESTORE SELECTED VERSION", CP_DIM, CP_RED, "white", "black")
         revert_btn.clicked.connect(self.revert_commit)
         
         action_layout.addWidget(self.status_label)
         action_layout.addStretch()
+        action_layout.addWidget(copy_hash_btn)
         action_layout.addWidget(revert_btn)
         layout.addLayout(action_layout)
 
@@ -274,6 +278,21 @@ class MainWindow(QMainWindow):
     def on_table_leave(self, event):
         self.delegate.hovered_row = -1
         self.table.viewport().update()
+
+    def copy_hash(self):
+        selected_items = self.table.selectedItems()
+        if not selected_items:
+            QMessageBox.warning(self, "Selection Required", "Please select a commit to copy its hash.")
+            return
+
+        row = selected_items[0].row()
+        commit_hash = self.table.item(row, 0).text()
+        
+        clipboard = QApplication.clipboard()
+        clipboard.setText(commit_hash)
+        
+        self.status_label.setStyleSheet(f"color: {CP_GREEN}; font-weight: bold;")
+        self.status_label.setText(f"HASH COPIED: {commit_hash}")
 
     def load_config(self):
         try:
