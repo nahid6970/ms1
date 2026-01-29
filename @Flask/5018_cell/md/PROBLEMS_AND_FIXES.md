@@ -7,7 +7,25 @@ This document tracks historical bugs, issues, and their solutions. Use this to:
 
 ---
 
-## [2026-01-27 23:59] - Bookmark Window Scroll Initialization and Layout Gaps
+## [2026-01-29 11:30] - F3 Formatter Link Removal Issue
+
+**Problem:** When using the "Remove All Formatting" (🧹) button in the F3 Quick Formatter, links using the `{link:url}text{/}` syntax were being stripped of their URL, leaving only the text. The user wanted it to behave like the `url[text]` syntax which preserves both.
+
+**Root Cause:** 
+1. The regex for old-style links in `stripMarkdown()` was only capturing the text group and discarding the URL.
+2. A broad color/style regex (`/\{[^}]*\}(.+?)\{\/\}/g`) was matching links and stripping them before the specific link-handling logic could run.
+
+**Solution:** 
+1. Updated `stripMarkdown()` in `static/script.js` and `export_static.py` to preserve both URL and text for all link syntaxes.
+2. Moved link stripping logic to the top of the `stripMarkdown()` function.
+3. Refined the general color regex to only match `fg:` or `bg:` markers, preventing it from matching links.
+
+**Files Modified:**
+- `static/script.js`
+- `export_static.py`
+
+**Related Issues:** F3 Quick Formatter, stripMarkdown logic consistency.
+
 
 **Problem:** 
 1. **Missing Scrollbar**: Large cells opened in the bookmark window didn't show the scrollbar immediately. Users had to either type or switch tabs for it to appear.

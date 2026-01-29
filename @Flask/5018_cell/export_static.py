@@ -1751,37 +1751,18 @@ def generate_static_html(data, custom_syntaxes):
             if (!text) return "";
             let stripped = text;
 
+            if (!preserveLinks) {
+                // Remove old link markers but keep both URL and text: {link:url}text{/} -> url text
+                stripped = stripped.replace(/\\{link:([^\\}]*)\\}(.+?)\\{\\/\\}/g, '$1 $2');
+                // Remove new link markers but keep both URL and text: url[text] -> url text
+                stripped = stripped.replace(/(https?:\/\/[^\\s\\[]+)\\[(.+?)\\]/g, '$1 $2');
+            }
+
             // Remove LaTeX math markers: $$text$$ -> text, $text$ -> text
             stripped = stripped.replace(/\$\$(.*?)\$\$/g, '$1');
             stripped = stripped.replace(/\\$([^$]+)\\$/g, '$1');
 
             stripped = stripped.replace(/\\*\\*(.+?)\\*\\*/g, '$1');
-            // Remove correct answer markers: [[text]] -> text
-            stripped = stripped.replace(/\\[\\[(.+?)\\]\\]/g, '$1');
-            // Remove bullet markers: - item -> item
-            stripped = stripped.replace(/^\\s*-\\s+/gm, '');
-            // Remove sub-bullet markers: -- item -> item
-            stripped = stripped.replace(/^\\s*--\\s+/gm, '');
-            // Remove sub-sub-bullet markers: --- item -> item
-            stripped = stripped.replace(/^\\s*---\\s+/gm, '');
-            // Remove sub-sub-sub-bullet markers: ---- item -> item
-            stripped = stripped.replace(/^\\s*----\\s+/gm, '');
-            // Remove sub-sub-sub-sub-bullet markers: ----- item -> item
-            stripped = stripped.replace(/^\\s*-----\\s+/gm, '');
-            // Remove Timeline markers: Timeline*Name or Timeline-R*Name -> Name
-            stripped = stripped.replace(/^Timeline(?:C)?(?:-[A-Z]+)?\\*(.+?)$/gm, '$1');
-            // Remove word connector markers: [1]Word or [1-R]Word -> Word
-            stripped = stripped.replace(/\\[(\\d+)(?:-[A-Z]+)?\\](\\S+)/g, '$2');
-
-            // Remove title text markers: :::Text::: or :::R_2px:::Text::: -> Text
-            stripped = stripped.replace(/:::(?:[A-Za-z0-9_#.-]+:::)?(.+?):::/g, '$1');
-
-            if (!preserveLinks) {
-                // Remove link markers: {link:url}text{/} -> text
-                stripped = stripped.replace(/\\{link:[^\\}]*\\}(.+?)\\{\\/\\}/g, '$1');
-                // Remove new link markers: url[text] -> text
-                stripped = stripped.replace(/(https?:\/\/[^\\s\\[]+)\\[(.+?)\\]/g, '$2');
-            }
 
             // Remove custom color syntax markers
             customColorSyntaxes.forEach(syntax => {

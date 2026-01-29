@@ -7943,6 +7943,14 @@ function stripMarkdown(text, preserveLinks = false) {
     if (!text) return '';
     let stripped = String(text);
 
+    if (!preserveLinks) {
+        // Remove old link markers but keep both URL and text: {link:url}text{/} -> url text
+        stripped = stripped.replace(/\{link:([^}]*)\}(.+?)\{\/\}/g, '$1 $2');
+
+        // Remove new link markers but keep both URL and text: url[text] -> url text
+        stripped = stripped.replace(/(https?:\/\/[^\s\[]+)\[(.+?)\]/g, '$1 $2');
+    }
+
     // Remove LaTeX math markers: $text$ -> text, $text$ -> text
     stripped = stripped.replace(/\$\$(.*?)\$\$/g, '$1');
     stripped = stripped.replace(/\$([^$]+)\$/g, '$1');
@@ -7950,7 +7958,8 @@ function stripMarkdown(text, preserveLinks = false) {
     stripped = stripped.replace(/\[\[(.+?)\]\]/g, '$1');
 
     // Remove color/style markers: {fg:#fff;bg:#000}text{/} -> text
-    stripped = stripped.replace(/\{[^}]*\}(.+?)\{\/\}/g, '$1');
+    // Only match if it contains fg: or bg: to avoid matching links
+    stripped = stripped.replace(/\{(?:fg:[^}]*|bg:[^}]*)\}(.+?)\{\/\}/g, '$1');
 
     // Remove bold markers: **text** -> text
     stripped = stripped.replace(/\*\*(.+?)\*\*/g, '$1');
@@ -8011,14 +8020,6 @@ function stripMarkdown(text, preserveLinks = false) {
 
     // Remove subscript markers: ~text~ -> text
     stripped = stripped.replace(/~(.+?)~/g, '$1');
-
-    if (!preserveLinks) {
-        // Remove old link markers: {link:url}text{/} -> text
-        stripped = stripped.replace(/\{link:[^}]*\}(.+?)\{\/\}/g, '$1');
-
-        // Remove new link markers but keep both URL and text: url[text] -> url text
-        stripped = stripped.replace(/(https?:\/\/[^\s\[]+)\[(.+?)\]/g, '$1 $2');
-    }
 
     // Remove collapsible text markers: {{text}} -> text
     stripped = stripped.replace(/\{\{(.+?)\}\}/g, '$1');

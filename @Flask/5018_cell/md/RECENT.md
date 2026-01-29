@@ -6,6 +6,32 @@
 
 ---
 
+## [2026-01-29 11:45] - F3 Formatter Link Removal Fix
+
+**Session Duration:** 0.5 hours
+
+**What We Accomplished:**
+
+### ✅ Fixed F3 Formatter Link Removal
+- **Problem**: "Remove Formatting" (🧹) in F3 menu was stripping URLs from `{link:url}text{/}` syntax.
+- **Solution**: 
+    - Updated `stripMarkdown()` to preserve both URL and text for all link syntaxes (e.g., `url text`).
+    - Reordered stripping logic to prioritize link preservation.
+    - Refined general color regex to avoid accidental link matching.
+- **Consistency**: Synchronized improvements to `export_static.py` for consistent search/sort and export behavior.
+
+**Files Modified:**
+- `static/script.js` - Major update to `stripMarkdown` logic.
+- `export_static.py` - Updated `stripMarkdown` for consistency.
+- `md/PROBLEMS_AND_FIXES.md` - Documented the fix.
+- `md/RECENT.md` - Logged session.
+
+**Current Status:**
+- ✅ Links are now correctly preserved when stripping formatting.
+- ✅ Search and Sort now reliably handle all link syntaxes.
+
+---
+
 ## [2026-01-27 23:59] - Bookmark Window Enhancements
 
 **Session Duration:** 0.8 hours
