@@ -1,6 +1,7 @@
 import sys
 import os
 import subprocess
+import json
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QLabel, QPushButton, QLineEdit, QTableWidget, QTableWidgetItem,
@@ -113,6 +114,9 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Git Time Machine // CYBERPUNK EDITION")
         self.resize(1000, 700)
         
+        # Calculate config path relative to the script location
+        self.config_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "git_history_config.json")
+
         # Global Stylesheet
         self.setStyleSheet(f"""
             QMainWindow {{ background-color: {CP_BG}; }}
@@ -152,7 +156,8 @@ class MainWindow(QMainWindow):
             QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{
                 height: 0px;
             }}
-        """)
+        """
+        )
 
         # Main Layout
         central = QWidget()
@@ -166,7 +171,14 @@ class MainWindow(QMainWindow):
         
         self.path_input = QLineEdit()
         self.path_input.setPlaceholderText("Select Git Directory...")
-        self.path_input.setText(os.getcwd())
+        
+        # Load last path or default to current
+        last_path = self.load_config()
+        if last_path and os.path.isdir(last_path):
+            self.path_input.setText(last_path)
+        else:
+            self.path_input.setText(os.getcwd())
+            
         self.path_input.returnPressed.connect(self.load_commits)
         
         browse_btn = CyberButton("BROWSE", CP_DIM, CP_CYAN)
@@ -214,11 +226,33 @@ class MainWindow(QMainWindow):
         
         layout.addLayout(action_layout)
 
-        # Initial Load
-        self.load_commits()
+        # Initial Load if path exists
+        if os.path.isdir(self.path_input.text()):
+            self.load_commits()
+
+    def load_config(self):
+        """Loads the last directory from json config."""
+        try:
+            if os.path.exists(self.config_file):
+                with open(self.config_file, 'r') as f:
+                    data = json.load(f)
+                    return data.get("last_directory", "")
+        except Exception as e:
+            print(f"Error loading config: {e}")
+        return ""
+
+    def save_config(self, directory):
+        """Saves the current directory to json config."""
+        try:
+            data = {"last_directory": directory}
+            with open(self.config_file, 'w') as f:
+                json.dump(data, f)
+        except Exception as e:
+            print(f"Error saving config: {e}")
 
     def browse_directory(self):
-        directory = QFileDialog.getExistingDirectory(self, "Select Git Repository", self.path_input.text())
+        start_dir = self.path_input.text() if os.path.isdir(self.path_input.text()) else os.getcwd()
+        directory = QFileDialog.getExistingDirectory(self, "Select Git Repository", start_dir)
         if directory:
             self.path_input.setText(directory)
             self.load_commits()
@@ -227,6 +261,10 @@ class MainWindow(QMainWindow):
         directory = self.path_input.text().strip()
         if not directory:
             return
+
+        # Save config on successful load attempt
+        if os.path.isdir(directory):
+            self.save_config(directory)
 
         self.table.setRowCount(0)
         self.status_label.setText("LOADING...")
