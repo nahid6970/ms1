@@ -57,9 +57,9 @@
   },
   {
     "bgColor": "#C2FF80",
-    "fgColor": "hsl(104, 81%, 19%)",
-    "isBold": false,
-    "isItalic": false,
+    "fgColor": "#212529",
+    "isBold": true,
+    "isItalic": true,
     "isUnderline": false,
     "marker": "\u2714\ufe0f\u2714\ufe0f"
   }
