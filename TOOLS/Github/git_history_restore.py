@@ -196,7 +196,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle("Git Time Machine // CYBERPUNK EDITION")
         
-        self.config_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "git_history_config.json")
+        self.config_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), r"C:\@delta\output\git_restore\git_history_config.json")
         self.commit_limit = 200  # Default limit
         self.window_width = 1400  # Default window width
         self.window_height = 700  # Default window height
