@@ -11,6 +11,8 @@ Save tabs to a list and close them. Restore them anytime with Python server back
 ✅ **Easy removal** - X button to remove tabs from list
 ✅ **Python server integration** - Auto-backup to local server
 ✅ **Manual save/load** - Buttons to sync with Python server
+✅ **YouTube channel icons** - Shows both YouTube favicon and channel avatar for videos
+✅ **Customizable icon sizes** - Adjust YouTube and channel icon sizes via settings
 
 ## Installation
 
@@ -47,6 +49,21 @@ Server runs on `http://localhost:8765`
 3. Click any tab title/URL to reopen it
 4. Click ❌ to remove from list
 5. Click "Clear All" to remove all tabs (shows visual feedback)
+
+### Customize Icon Sizes
+
+1. Click the ⚙️ settings button (top right of popup)
+2. Adjust YouTube icon size (16-32px)
+3. Adjust channel icon size (12-24px)
+4. Changes apply instantly
+5. Click "Reset to Default" to restore original sizes
+
+### YouTube Videos
+
+When saving YouTube videos:
+- YouTube favicon appears as the main icon
+- Channel avatar appears as a smaller overlay icon
+- Both icons are customizable in settings
 
 ### Backup to Python Server
 
