@@ -56,8 +56,26 @@ chrome.storage.local.onChanged.addListener((changes, areaName) => {
     chrome.storage.local.get(null, (items) => {
       sendDataToPython(items);
     });
+    
+    // Update badge when storage changes
+    updateBadge();
   }
 });
+
+// Update badge with tab count
+function updateBadge() {
+  chrome.storage.local.get(['savedTabs'], (result) => {
+    const savedTabs = result.savedTabs || [];
+    const count = savedTabs.length;
+    
+    if (count > 0) {
+      chrome.action.setBadgeText({ text: count.toString() });
+      chrome.action.setBadgeBackgroundColor({ color: '#667eea' });
+    } else {
+      chrome.action.setBadgeText({ text: '' });
+    }
+  });
+}
 
 // Create context menu on install
 chrome.runtime.onInstalled.addListener(() => {
@@ -66,6 +84,9 @@ chrome.runtime.onInstalled.addListener(() => {
     title: "Save & Close Tab",
     contexts: ["page"]
   });
+  
+  // Update badge on install
+  updateBadge();
 });
 
 // Handle context menu click
@@ -127,3 +148,6 @@ fetch(`${PYTHON_SERVER}/health`)
   .then(response => response.json())
   .then(data => console.log('Python server status:', data))
   .catch(error => console.log('Python server not available:', error.message));
+
+// Update badge on startup
+updateBadge();

@@ -6,6 +6,7 @@ Save tabs to a list and close them. Restore them anytime with Python server back
 
 ✅ **Right-click context menu** - Save & close tabs instantly
 ✅ **Beautiful popup UI** - View all saved tabs with titles and URLs
+✅ **Badge counter** - Shows number of saved tabs on extension icon
 ✅ **One-click restore** - Click any tab to reopen it
 ✅ **Easy removal** - X button to remove tabs from list
 ✅ **Python server integration** - Auto-backup to local server
