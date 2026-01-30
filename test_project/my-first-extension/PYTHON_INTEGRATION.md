@@ -146,12 +146,35 @@ If you already have `host_permissions`, just add `"http://localhost:8765/*"` to 
 #### B. Add this code to your popup JavaScript:
 
 ```javascript
+// Show button feedback (visual effect instead of alerts)
+function showButtonFeedback(button, success, message) {
+    const originalText = button.innerHTML;
+    const originalBg = button.style.background;
+    
+    if (success) {
+        button.innerHTML = '✓ ' + message;
+        button.style.background = '#4CAF50';
+    } else {
+        button.innerHTML = '✗ ' + message;
+        button.style.background = '#f44336';
+    }
+    
+    button.disabled = true;
+    
+    setTimeout(() => {
+        button.innerHTML = originalText;
+        button.style.background = originalBg;
+        button.disabled = false;
+    }, 2000);
+}
+
 // Save to Python server button
 const saveToPythonBtn = document.getElementById('saveToPython');
 const loadFromPythonBtn = document.getElementById('loadFromPython');
 
 if (saveToPythonBtn) {
-    saveToPythonBtn.addEventListener('click', function () {
+    saveToPythonBtn.addEventListener('click', function (e) {
+        const button = e.target;
         chrome.storage.local.get(null, function (items) {
             // Send message to background script to save
             chrome.runtime.sendMessage({
@@ -160,9 +183,9 @@ if (saveToPythonBtn) {
             }, function (response) {
                 // Check if response exists and doesn't have success: false
                 if (response && response.success !== false) {
-                    alert('Data saved to Python server!');
+                    showButtonFeedback(button, true, 'Saved!');
                 } else {
-                    alert('Failed to save to Python server. Make sure the server is running.');
+                    showButtonFeedback(button, false, 'Failed');
                 }
             });
         });
@@ -171,13 +194,14 @@ if (saveToPythonBtn) {
 
 // Load from Python server button
 if (loadFromPythonBtn) {
-    loadFromPythonBtn.addEventListener('click', function () {
+    loadFromPythonBtn.addEventListener('click', function (e) {
+        const button = e.target;
         chrome.runtime.sendMessage({
             action: 'loadFromPython'
         }, function (response) {
             if (response && response.success && response.data) {
                 chrome.storage.local.set(response.data, () => {
-                    alert('Data loaded from Python server! Refresh pages to see changes.');
+                    showButtonFeedback(button, true, 'Loaded!');
                     // Notify all tabs to refresh
                     chrome.tabs.query({}, (tabs) => {
                         tabs.forEach(tab => {
@@ -186,7 +210,7 @@ if (loadFromPythonBtn) {
                     });
                 });
             } else {
-                alert('Failed to load from Python server. Make sure the server is running.');
+                showButtonFeedback(button, false, 'Failed');
             }
         });
     });

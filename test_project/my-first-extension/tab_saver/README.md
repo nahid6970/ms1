@@ -49,8 +49,9 @@ Server runs on `http://localhost:8765`
 ### Backup to Python Server
 
 - **Auto-save**: Every change auto-saves to Python server
-- **Manual save**: Click 💾 Save button
-- **Manual load**: Click 📥 Load button to restore from server
+- **Manual save**: Click 💾 Save button (turns green ✓ on success)
+- **Manual load**: Click 📥 Load button (turns green ✓ on success)
+- **Visual feedback**: Buttons show success/failure with color changes (no popups!)
 
 ## File Structure
 
