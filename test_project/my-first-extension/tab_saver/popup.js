@@ -29,10 +29,25 @@ function displayTabs(tabs) {
     const tabItem = document.createElement('div');
     tabItem.className = 'tab-item';
     
+    const isYouTube = tab.url.includes('youtube.com/watch');
     const favicon = tab.favicon || 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><text y="20" font-size="20">🌐</text></svg>';
     
+    let faviconHTML;
+    if (isYouTube && tab.channelIcon) {
+      // YouTube with channel icon - show both
+      faviconHTML = `
+        <div class="tab-favicon-container">
+          <img src="${favicon}" class="tab-favicon-yt" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22><text y=%2220%22 font-size=%2220%22>▶️</text></svg>'">
+          <img src="${tab.channelIcon}" class="tab-favicon-channel" onerror="this.style.display='none'">
+        </div>
+      `;
+    } else {
+      // Regular favicon
+      faviconHTML = `<img src="${favicon}" class="tab-favicon" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22><text y=%2220%22 font-size=%2220%22>🌐</text></svg>'">`;
+    }
+    
     tabItem.innerHTML = `
-      <img src="${favicon}" class="tab-favicon" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22><text y=%2220%22 font-size=%2220%22>🌐</text></svg>'">
+      ${faviconHTML}
       <div class="tab-info" data-url="${tab.url}">
         <div class="tab-title">${tab.title}</div>
         <div class="tab-url">${tab.url}</div>

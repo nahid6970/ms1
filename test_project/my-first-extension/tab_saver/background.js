@@ -98,27 +98,57 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
     chrome.storage.local.get(['savedTabs'], (result) => {
       const savedTabs = result.savedTabs || [];
       
-      // Add current tab to list
-      const newTab = {
-        id: Date.now(),
-        title: tab.title,
-        url: tab.url,
-        favicon: tab.favIconUrl || '',
-        savedAt: new Date().toISOString()
-      };
+      // Get custom favicon for YouTube
+      let favicon = tab.favIconUrl || '';
       
-      savedTabs.push(newTab);
-      
-      // Save to storage
-      chrome.storage.local.set({ savedTabs: savedTabs }, () => {
-        console.log('Tab saved:', newTab);
-        
-        // Close the tab
-        chrome.tabs.remove(tab.id);
-      });
+      // For YouTube videos, try to get channel icon
+      if (tab.url.includes('youtube.com/watch')) {
+        // Execute script to get channel icon from the page
+        chrome.scripting.executeScript({
+          target: { tabId: tab.id },
+          func: () => {
+            // Try to get channel avatar
+            const channelAvatar = document.querySelector('ytd-video-owner-renderer img, #avatar img, .ytd-channel-name img');
+            return channelAvatar ? channelAvatar.src : null;
+          }
+        }).then((results) => {
+          const channelIcon = (results && results[0] && results[0].result) ? results[0].result : null;
+          
+          // Add tab with both YouTube favicon and channel icon
+          saveTab(savedTabs, tab, favicon, channelIcon);
+        }).catch(() => {
+          // If script fails, use default favicon only
+          saveTab(savedTabs, tab, favicon, null);
+        });
+      } else {
+        // For non-YouTube tabs, save immediately
+        saveTab(savedTabs, tab, favicon, null);
+      }
     });
   }
 });
+
+// Helper function to save tab
+function saveTab(savedTabs, tab, favicon, channelIcon = null) {
+  const newTab = {
+    id: Date.now(),
+    title: tab.title,
+    url: tab.url,
+    favicon: favicon,
+    channelIcon: channelIcon, // Store channel icon separately
+    savedAt: new Date().toISOString()
+  };
+  
+  savedTabs.push(newTab);
+  
+  // Save to storage
+  chrome.storage.local.set({ savedTabs: savedTabs }, () => {
+    console.log('Tab saved:', newTab);
+    
+    // Close the tab
+    chrome.tabs.remove(tab.id);
+  });
+}
 
 // Handle manual save/load requests from popup
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {

@@ -81,6 +81,30 @@ body {
   flex-shrink: 0;
 }
 
+.tab-favicon-container {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+.tab-favicon-yt {
+  width: 20px;
+  height: 20px;
+}
+
+.tab-favicon-channel {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid white;
+  background: white;
+}
+
 .tab-info {
   flex: 1;
   min-width: 0;
