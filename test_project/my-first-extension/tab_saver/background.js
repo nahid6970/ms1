@@ -107,16 +107,31 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
         chrome.scripting.executeScript({
           target: { tabId: tab.id },
           func: () => {
-            // Try to get channel avatar
-            const channelAvatar = document.querySelector('ytd-video-owner-renderer img, #avatar img, .ytd-channel-name img');
-            return channelAvatar ? channelAvatar.src : null;
+            // Try multiple selectors to get channel avatar
+            const selectors = [
+              '#owner #avatar img',
+              'ytd-video-owner-renderer #avatar img',
+              '#channel-thumbnail img',
+              'yt-img-shadow img',
+              '#avatar img'
+            ];
+            
+            for (const selector of selectors) {
+              const img = document.querySelector(selector);
+              if (img && img.src && !img.src.includes('data:')) {
+                return img.src;
+              }
+            }
+            return null;
           }
         }).then((results) => {
           const channelIcon = (results && results[0] && results[0].result) ? results[0].result : null;
+          console.log('Channel icon found:', channelIcon);
           
           // Add tab with both YouTube favicon and channel icon
           saveTab(savedTabs, tab, favicon, channelIcon);
-        }).catch(() => {
+        }).catch((error) => {
+          console.error('Failed to get channel icon:', error);
           // If script fails, use default favicon only
           saveTab(savedTabs, tab, favicon, null);
         });
