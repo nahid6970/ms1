@@ -6,7 +6,7 @@ from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QLabel, QPushButton, QLineEdit, QTableWidget, QTableWidgetItem,
     QHeaderView, QFileDialog, QMessageBox, QAbstractItemView, QStyledItemDelegate, QStyle,
-    QTreeView, QDialog, QFileIconProvider, QInputDialog, QTextEdit, QSplitter
+    QTreeView, QDialog, QFileIconProvider, QInputDialog, QTextEdit, QSplitter, QSpinBox
 )
 from PyQt6.QtCore import Qt, QSize, QRect, QDir, QFileInfo, QThread, pyqtSignal, QThread, pyqtSignal
 from PyQt6.QtGui import QFont, QColor, QCursor, QPainter, QFileSystemModel, QIcon, QPixmap
@@ -208,10 +208,16 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Git Time Machine // CYBERPUNK EDITION")
-        self.resize(1000, 700)
         
         self.config_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "git_history_config.json")
         self.commit_limit = 200  # Default limit
+        self.window_width = 1400  # Default window width
+        self.window_height = 700  # Default window height
+        self.split_ratio = [2, 3]  # Default split ratio [left, right]
+        
+        # Load config first to get window size
+        self.load_config()
+        self.resize(self.window_width, self.window_height)
 
         self.setStyleSheet(f"""
             QMainWindow {{ background-color: {CP_BG}; }}
@@ -318,6 +324,9 @@ class MainWindow(QMainWindow):
         tree_browse_btn = CyberButton("TREE VIEW", CP_DIM, CP_GREEN)
         tree_browse_btn.clicked.connect(self.open_tree_browser)
         
+        settings_btn = CyberButton("⚙️ SETTINGS", CP_DIM, CP_CYAN)
+        settings_btn.clicked.connect(self.open_settings)
+        
         load_btn = CyberButton("LOAD COMMITS", CP_DIM, CP_YELLOW)
         load_btn.clicked.connect(self.load_commits)
 
@@ -325,11 +334,13 @@ class MainWindow(QMainWindow):
         path_layout.addWidget(self.path_input)
         path_layout.addWidget(browse_btn)
         path_layout.addWidget(tree_browse_btn)
+        path_layout.addWidget(settings_btn)
         path_layout.addWidget(load_btn)
         layout.addLayout(path_layout)
 
         # Main content splitter (Table + Diff Panel)
         main_splitter = QSplitter(Qt.Orientation.Horizontal)
+        self.main_splitter = main_splitter  # Store reference for settings
         
         # LEFT: Commit Table
         table_widget = QWidget()
@@ -385,8 +396,10 @@ class MainWindow(QMainWindow):
         diff_layout.addWidget(self.diff_display)
         
         main_splitter.addWidget(diff_widget)
-        main_splitter.setStretchFactor(0, 2)  # Table takes 2/5
-        main_splitter.setStretchFactor(1, 3)  # Diff takes 3/5 (wider)
+        main_splitter.setStretchFactor(0, self.split_ratio[0])  # Table
+        main_splitter.setStretchFactor(1, self.split_ratio[1])  # Diff
+        
+        self.main_splitter = main_splitter  # Store reference for settings
         
         layout.addWidget(main_splitter)
 
@@ -399,12 +412,16 @@ class MainWindow(QMainWindow):
         copy_hash_btn = CyberButton("COPY HASH", CP_DIM, CP_CYAN, "white", "black")
         copy_hash_btn.clicked.connect(self.copy_hash)
         
+        settings_btn = CyberButton("⚙ SETTINGS", CP_DIM, CP_YELLOW, "white", "black")
+        settings_btn.clicked.connect(self.open_settings)
+        
         revert_btn = CyberButton("RESTORE SELECTED VERSION", CP_DIM, CP_RED, "white", "black")
         revert_btn.clicked.connect(self.revert_commit)
         
         action_layout.addWidget(self.status_label)
         action_layout.addStretch()
         action_layout.addWidget(copy_hash_btn)
+        action_layout.addWidget(settings_btn)
         action_layout.addWidget(revert_btn)
         layout.addLayout(action_layout)
 
@@ -430,6 +447,114 @@ class MainWindow(QMainWindow):
                 self.status_label.setText(f"LIMIT SET: ALL COMMITS")
             else:
                 self.status_label.setText(f"LIMIT SET: {limit} COMMITS")
+
+    def open_settings(self):
+        """Open settings dialog for window size and split ratio"""
+        dialog = QDialog(self)
+        dialog.setWindowTitle("Settings")
+        dialog.resize(400, 250)
+        dialog.setStyleSheet(f"""
+            QDialog {{ background-color: {CP_BG}; }}
+            QLabel {{ color: {CP_TEXT}; font-family: 'Consolas'; font-size: 10pt; }}
+            QLineEdit {{
+                background-color: {CP_PANEL};
+                color: {CP_CYAN};
+                border: 1px solid {CP_DIM};
+                padding: 6px;
+            }}
+        """)
+        
+        layout = QVBoxLayout(dialog)
+        layout.setSpacing(15)
+        layout.setContentsMargins(20, 20, 20, 20)
+        
+        # Header
+        header = QLabel("WINDOW SETTINGS:")
+        header.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold; font-size: 12pt;")
+        layout.addWidget(header)
+        
+        # Window Width
+        width_layout = QHBoxLayout()
+        width_layout.addWidget(QLabel("Window Width:"))
+        width_input = QLineEdit(str(self.window_width))
+        width_layout.addWidget(width_input)
+        layout.addLayout(width_layout)
+        
+        # Window Height
+        height_layout = QHBoxLayout()
+        height_layout.addWidget(QLabel("Window Height:"))
+        height_input = QLineEdit(str(self.window_height))
+        height_layout.addWidget(height_input)
+        layout.addLayout(height_layout)
+        
+        # Split Ratio
+        split_layout = QHBoxLayout()
+        split_layout.addWidget(QLabel("Left Panel %:"))
+        split_input = QLineEdit(str(int(self.split_ratio[0] / sum(self.split_ratio) * 100)))
+        split_layout.addWidget(split_input)
+        layout.addLayout(split_layout)
+        
+        info_label = QLabel("(Right panel will take the remaining %)")
+        info_label.setStyleSheet(f"color: {CP_DIM}; font-size: 9pt;")
+        layout.addWidget(info_label)
+        
+        layout.addStretch()
+        
+        # Buttons
+        btn_layout = QHBoxLayout()
+        btn_layout.addStretch()
+        
+        cancel_btn = CyberButton("CANCEL", CP_DIM, CP_RED)
+        cancel_btn.clicked.connect(dialog.reject)
+        btn_layout.addWidget(cancel_btn)
+        
+        save_btn = CyberButton("SAVE", CP_DIM, CP_GREEN)
+        save_btn.clicked.connect(dialog.accept)
+        btn_layout.addWidget(save_btn)
+        
+        layout.addLayout(btn_layout)
+        
+        if dialog.exec():
+            try:
+                new_width = int(width_input.text())
+                new_height = int(height_input.text())
+                left_percent = int(split_input.text())
+                
+                if 800 <= new_width <= 3840 and 600 <= new_height <= 2160 and 10 <= left_percent <= 90:
+                    self.window_width = new_width
+                    self.window_height = new_height
+                    right_percent = 100 - left_percent
+                    self.split_ratio = [left_percent, right_percent]
+                    
+                    self.resize(self.window_width, self.window_height)
+                    self.main_splitter.setStretchFactor(0, self.split_ratio[0])
+                    self.main_splitter.setStretchFactor(1, self.split_ratio[1])
+                    
+                    self.save_config()
+                    self.status_label.setStyleSheet(f"color: {CP_GREEN}; font-weight: bold;")
+                    self.status_label.setText("SETTINGS SAVED")
+                else:
+                    QMessageBox.warning(self, "Invalid Values", "Please enter valid values:\nWidth: 800-3840\nHeight: 600-2160\nLeft %: 10-90")
+            except ValueError:
+                QMessageBox.warning(self, "Invalid Input", "Please enter valid numbers")
+
+    def open_settings(self):
+        """Open settings dialog"""
+        dialog = SettingsDialog(self, self.window_width, self.window_height, self.split_ratio)
+        if dialog.exec():
+            self.window_width = dialog.width_spin.value()
+            self.window_height = dialog.height_spin.value()
+            left_ratio = dialog.left_spin.value()
+            right_ratio = dialog.right_spin.value()
+            self.split_ratio = [left_ratio, right_ratio]
+            
+            # Apply settings
+            self.resize(self.window_width, self.window_height)
+            self.main_splitter.setStretchFactor(0, self.split_ratio[0])
+            self.main_splitter.setStretchFactor(1, self.split_ratio[1])
+            
+            # Save to config
+            self.save_config()
 
     def open_tree_browser(self):
         """Open a popup window with tree view directory browser"""
@@ -561,6 +686,9 @@ class MainWindow(QMainWindow):
                 with open(self.config_file, 'r') as f:
                     data = json.load(f)
                     self.commit_limit = data.get("commit_limit", 200)
+                    self.window_width = data.get("window_width", 1400)
+                    self.window_height = data.get("window_height", 700)
+                    self.split_ratio = data.get("split_ratio", [2, 3])
                     return data.get("last_directory", "")
         except: pass
         return ""
@@ -571,7 +699,10 @@ class MainWindow(QMainWindow):
             with open(self.config_file, 'w') as f:
                 json.dump({
                     "last_directory": directory,
-                    "commit_limit": self.commit_limit
+                    "commit_limit": self.commit_limit,
+                    "window_width": self.window_width,
+                    "window_height": self.window_height,
+                    "split_ratio": self.split_ratio
                 }, f)
         except: pass
 
@@ -658,6 +789,110 @@ class MainWindow(QMainWindow):
                 self.status_label.setStyleSheet(f"color: {CP_RED}; font-weight: bold;")
                 self.status_label.setText("RESTORE FAILED")
                 QMessageBox.critical(self, "Error", result['error'])
+
+# --- SETTINGS DIALOG ---
+class SettingsDialog(QDialog):
+    def __init__(self, parent=None, width=1400, height=700, split_ratio=[2, 3]):
+        super().__init__(parent)
+        self.setWindowTitle("Settings")
+        self.resize(500, 300)
+        
+        self.setStyleSheet(f"""
+            QDialog {{ background-color: {CP_BG}; }}
+            QWidget {{ color: {CP_TEXT}; font-family: 'Consolas'; font-size: 10pt; }}
+            QLabel {{ color: {CP_TEXT}; }}
+            QSpinBox {{
+                background-color: {CP_PANEL};
+                color: {CP_CYAN};
+                border: 1px solid {CP_DIM};
+                padding: 5px;
+            }}
+        """)
+        
+        layout = QVBoxLayout(self)
+        layout.setSpacing(20)
+        layout.setContentsMargins(30, 30, 30, 30)
+        
+        # Header
+        header = QLabel("⚙️ WINDOW SETTINGS")
+        header.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold; font-size: 14pt;")
+        layout.addWidget(header)
+        
+        # Window Size
+        size_group = QWidget()
+        size_layout = QVBoxLayout(size_group)
+        
+        size_label = QLabel("Window Size:")
+        size_label.setStyleSheet(f"color: {CP_CYAN}; font-weight: bold; margin-bottom: 5px;")
+        size_layout.addWidget(size_label)
+        
+        width_layout = QHBoxLayout()
+        width_layout.addWidget(QLabel("Width:"))
+        self.width_spin = QInputDialog.getInt(self, "", "", width, 800, 3840, 1)[0] if False else None
+        from PyQt6.QtWidgets import QSpinBox
+        self.width_spin = QSpinBox()
+        self.width_spin.setRange(800, 3840)
+        self.width_spin.setValue(width)
+        self.width_spin.setSuffix(" px")
+        width_layout.addWidget(self.width_spin)
+        size_layout.addLayout(width_layout)
+        
+        height_layout = QHBoxLayout()
+        height_layout.addWidget(QLabel("Height:"))
+        self.height_spin = QSpinBox()
+        self.height_spin.setRange(600, 2160)
+        self.height_spin.setValue(height)
+        self.height_spin.setSuffix(" px")
+        height_layout.addWidget(self.height_spin)
+        size_layout.addLayout(height_layout)
+        
+        layout.addWidget(size_group)
+        
+        # Split Ratio
+        split_group = QWidget()
+        split_layout = QVBoxLayout(split_group)
+        
+        split_label = QLabel("Panel Split Ratio:")
+        split_label.setStyleSheet(f"color: {CP_CYAN}; font-weight: bold; margin-bottom: 5px;")
+        split_layout.addWidget(split_label)
+        
+        left_layout = QHBoxLayout()
+        left_layout.addWidget(QLabel("Left Panel (Table):"))
+        self.left_spin = QSpinBox()
+        self.left_spin.setRange(1, 10)
+        self.left_spin.setValue(split_ratio[0])
+        left_layout.addWidget(self.left_spin)
+        split_layout.addLayout(left_layout)
+        
+        right_layout = QHBoxLayout()
+        right_layout.addWidget(QLabel("Right Panel (Diff):"))
+        self.right_spin = QSpinBox()
+        self.right_spin.setRange(1, 10)
+        self.right_spin.setValue(split_ratio[1])
+        right_layout.addWidget(self.right_spin)
+        split_layout.addLayout(right_layout)
+        
+        hint_label = QLabel("💡 Tip: Higher values = more space")
+        hint_label.setStyleSheet(f"color: {CP_DIM}; font-size: 9pt; margin-top: 5px;")
+        split_layout.addWidget(hint_label)
+        
+        layout.addWidget(split_group)
+        
+        layout.addStretch()
+        
+        # Buttons
+        btn_layout = QHBoxLayout()
+        btn_layout.addStretch()
+        
+        cancel_btn = CyberButton("CANCEL", CP_DIM, CP_RED)
+        cancel_btn.clicked.connect(self.reject)
+        btn_layout.addWidget(cancel_btn)
+        
+        save_btn = CyberButton("SAVE", CP_DIM, CP_GREEN)
+        save_btn.clicked.connect(self.accept)
+        btn_layout.addWidget(save_btn)
+        
+        layout.addLayout(btn_layout)
 
 # --- TREE BROWSER DIALOG ---
 class TreeBrowserDialog(QDialog):
