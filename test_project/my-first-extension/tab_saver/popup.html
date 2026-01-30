@@ -13,6 +13,7 @@
       <div class="tab-count">
         <span id="tabCount">0</span> tabs saved
       </div>
+      <button id="settingsBtn" class="settings-btn" title="Settings">⚙️</button>
     </div>
 
     <div id="tabList" class="tab-list">
@@ -26,6 +27,29 @@
       <button id="clearAll" class="btn btn-danger">Clear All</button>
       <button id="saveToPython" class="btn btn-primary">💾 Save</button>
       <button id="loadFromPython" class="btn btn-success">📥 Load</button>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div id="settingsModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>⚙️ Icon Settings</h2>
+        <button id="closeModal" class="close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="setting-group">
+          <label for="ytIconSize">YouTube Icon Size (px):</label>
+          <input type="range" id="ytIconSize" min="16" max="32" value="20" step="2">
+          <span id="ytIconValue">20px</span>
+        </div>
+        <div class="setting-group">
+          <label for="channelIconSize">Channel Icon Size (px):</label>
+          <input type="range" id="channelIconSize" min="12" max="24" value="18" step="2">
+          <span id="channelIconValue">18px</span>
+        </div>
+        <button id="resetSettings" class="btn btn-secondary">Reset to Default</button>
+      </div>
     </div>
   </div>
 

@@ -161,3 +161,115 @@ document.getElementById('loadFromPython').addEventListener('click', (e) => {
 
 // Load tabs when popup opens
 loadTabs();
+
+// Settings functionality
+const settingsBtn = document.getElementById('settingsBtn');
+const settingsModal = document.getElementById('settingsModal');
+const closeModal = document.getElementById('closeModal');
+const ytIconSize = document.getElementById('ytIconSize');
+const channelIconSize = document.getElementById('channelIconSize');
+const ytIconValue = document.getElementById('ytIconValue');
+const channelIconValue = document.getElementById('channelIconValue');
+const resetSettings = document.getElementById('resetSettings');
+
+// Load saved settings
+function loadSettings() {
+  chrome.storage.local.get(['iconSettings'], (result) => {
+    const settings = result.iconSettings || {
+      ytIconSize: 20,
+      channelIconSize: 18
+    };
+    
+    ytIconSize.value = settings.ytIconSize;
+    channelIconSize.value = settings.channelIconSize;
+    ytIconValue.textContent = settings.ytIconSize + 'px';
+    channelIconValue.textContent = settings.channelIconSize + 'px';
+    
+    applyIconSizes(settings.ytIconSize, settings.channelIconSize);
+  });
+}
+
+// Apply icon sizes to CSS
+function applyIconSizes(ytSize, channelSize) {
+  // Update CSS variables or directly modify styles
+  const style = document.createElement('style');
+  style.id = 'dynamic-icon-styles';
+  
+  // Remove existing dynamic styles
+  const existingStyle = document.getElementById('dynamic-icon-styles');
+  if (existingStyle) {
+    existingStyle.remove();
+  }
+  
+  style.textContent = `
+    .tab-favicon-container {
+      width: ${ytSize}px !important;
+      height: ${ytSize}px !important;
+    }
+    .tab-favicon-yt {
+      width: ${ytSize}px !important;
+      height: ${ytSize}px !important;
+    }
+    .tab-favicon-channel {
+      width: ${channelSize}px !important;
+      height: ${channelSize}px !important;
+    }
+  `;
+  
+  document.head.appendChild(style);
+}
+
+// Save settings
+function saveSettings() {
+  const settings = {
+    ytIconSize: parseInt(ytIconSize.value),
+    channelIconSize: parseInt(channelIconSize.value)
+  };
+  
+  chrome.storage.local.set({ iconSettings: settings }, () => {
+    applyIconSizes(settings.ytIconSize, settings.channelIconSize);
+  });
+}
+
+// Open settings modal
+settingsBtn.addEventListener('click', () => {
+  settingsModal.classList.add('show');
+});
+
+// Close settings modal
+closeModal.addEventListener('click', () => {
+  settingsModal.classList.remove('show');
+});
+
+// Close modal when clicking outside
+settingsModal.addEventListener('click', (e) => {
+  if (e.target === settingsModal) {
+    settingsModal.classList.remove('show');
+  }
+});
+
+// Update YouTube icon size
+ytIconSize.addEventListener('input', (e) => {
+  const value = e.target.value;
+  ytIconValue.textContent = value + 'px';
+  saveSettings();
+});
+
+// Update channel icon size
+channelIconSize.addEventListener('input', (e) => {
+  const value = e.target.value;
+  channelIconValue.textContent = value + 'px';
+  saveSettings();
+});
+
+// Reset settings to default
+resetSettings.addEventListener('click', () => {
+  ytIconSize.value = 20;
+  channelIconSize.value = 18;
+  ytIconValue.textContent = '20px';
+  channelIconValue.textContent = '18px';
+  saveSettings();
+});
+
+// Load settings on startup
+loadSettings();
