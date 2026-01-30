@@ -6,9 +6,9 @@ from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QLabel, QPushButton, QLineEdit, QTableWidget, QTableWidgetItem,
     QHeaderView, QFileDialog, QMessageBox, QAbstractItemView, QStyledItemDelegate, QStyle,
-    QTreeView, QDialog, QFileIconProvider, QInputDialog, QTextEdit, QSplitter, QSpinBox
+    QTreeView, QDialog, QFileIconProvider, QInputDialog, QTextBrowser, QSplitter, QSpinBox
 )
-from PyQt6.QtCore import Qt, QSize, QRect, QDir, QFileInfo, QThread, pyqtSignal, QThread, pyqtSignal
+from PyQt6.QtCore import Qt, QSize, QRect, QDir, QFileInfo, QThread, pyqtSignal, QThread, pyqtSignal, QUrl
 from PyQt6.QtGui import QFont, QColor, QCursor, QPainter, QFileSystemModel, QIcon, QPixmap
 
 # --- THEME CONSTANTS (from THEME_GUIDE.md) ---
@@ -368,19 +368,24 @@ class MainWindow(QMainWindow):
         diff_label.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold;")
         diff_layout.addWidget(diff_label)
         
-        self.diff_display = QTextEdit()
-        self.diff_display.setReadOnly(True)
-        self.diff_display.setAcceptRichText(True)  # Enable HTML rendering
+        self.diff_display = QTextBrowser()
+        self.diff_display.setOpenExternalLinks(False)
+        self.diff_display.setOpenLinks(False)
         self.diff_display.setStyleSheet(f"""
-            background-color: {CP_BG};
-            color: {CP_TEXT};
-            border: 1px solid {CP_DIM};
-            font-family: 'JetBrainsMono Nerd Font', 'Consolas', monospace;
-            font-size: 10pt;
-            line-height: 1.5;
+            QTextBrowser {{
+                background-color: {CP_BG};
+                border: 1px solid {CP_DIM};
+                color: {CP_TEXT};
+                font-family: 'JetBrainsMono Nerd Font', 'Consolas', monospace;
+                font-size: 10pt;
+            }}
         """)
-        self.diff_display.setText("Select a commit to view changes...")
+        self.diff_display.setHtml("<div style='color: #E0E0E0; padding: 20px;'>Select a commit to view changes...</div>")
+        self.diff_display.anchorClicked.connect(self.on_file_header_clicked)
         diff_layout.addWidget(self.diff_display)
+        
+        # Track expanded files
+        self.expanded_files = set()
         
         main_splitter.addWidget(diff_widget)
         main_splitter.setStretchFactor(0, self.split_ratio[0])  # Table
@@ -560,37 +565,115 @@ class MainWindow(QMainWindow):
         self.delegate.hovered_row = -1
         self.table.viewport().update()
 
+    def toggle_file_section(self, url):
+        """Toggle file section visibility when clicked"""
+        file_id = url.toString()
+        if file_id in self.expanded_files:
+            self.expanded_files.remove(file_id)
+        else:
+            self.expanded_files.add(file_id)
+        
+        # Regenerate the diff display with updated state
+        self.refresh_diff_display()
+    
+    def refresh_diff_display(self):
+        """Refresh the diff display with current expanded state"""
+        if hasattr(self, 'current_diff_data'):
+            formatted_diff = self.format_diff(self.current_diff_data)
+            self.diff_display.setHtml(formatted_diff)
+
+    def on_file_header_clicked(self, url):
+        """Handle clicks on file headers to toggle expand/collapse"""
+        file_idx = int(url.toString().replace('file-', ''))
+        
+        if file_idx in self.expanded_files:
+            self.expanded_files.remove(file_idx)
+        else:
+            self.expanded_files.add(file_idx)
+        
+        # Regenerate HTML with updated state
+        self.render_diff_html()
+    
+    def render_diff_html(self):
+        """Render the diff HTML based on current expanded state"""
+        if not self.current_diff_sections:
+            return
+        
+        html_parts = []
+        html_parts.append(f"<html><body style='background-color: {CP_BG}; color: {CP_TEXT}; margin: 0; padding: 10px; font-family: \"JetBrainsMono Nerd Font\", \"Consolas\", monospace; font-size: 10pt;'>")
+        
+        for idx, section in enumerate(self.current_diff_sections):
+            stats = section['stats']
+            stats_text = f'<span style="color: {CP_GREEN};">+{stats["additions"]}</span> <span style="color: {CP_RED};">-{stats["deletions"]}</span>'
+            
+            is_expanded = idx in self.expanded_files
+            icon = '▼' if is_expanded else '▶'
+            
+            # File header (clickable)
+            html_parts.append(f'''
+                <div style="background-color: {CP_DIM}; color: {CP_YELLOW}; padding: 10px; margin-top: 15px; margin-bottom: 0px; font-weight: bold; border-left: 5px solid {CP_CYAN}; font-size: 11pt; cursor: pointer;">
+                    <a href="file-{idx}" style="color: {CP_YELLOW}; text-decoration: none;">{icon} 📄 {section['name']} &nbsp;&nbsp; {stats_text}</a>
+                </div>
+            ''')
+            
+            # File content (show if expanded)
+            if is_expanded:
+                content_lines = []
+                for line in section['lines']:
+                    if line.startswith('+'):
+                        escaped_line = line.replace('<', '&lt;').replace('>', '&gt;').replace(' ', '&nbsp;')
+                        content_lines.append(f'<div style="color: {CP_GREEN}; background-color: #001a00; padding: 3px 8px;">{escaped_line}</div>')
+                    elif line.startswith('-'):
+                        escaped_line = line.replace('<', '&lt;').replace('>', '&gt;').replace(' ', '&nbsp;')
+                        content_lines.append(f'<div style="color: {CP_RED}; background-color: #1a0000; padding: 3px 8px;">{escaped_line}</div>')
+                    elif line.strip():
+                        escaped_line = line.replace('<', '&lt;').replace('>', '&gt;').replace(' ', '&nbsp;')
+                        content_lines.append(f'<div style="color: {CP_TEXT}; padding: 3px 8px;">{escaped_line}</div>')
+                
+                html_parts.append(f'<div style="border-left: 5px solid {CP_DIM}; margin-bottom: 8px;">{"".join(content_lines)}</div>')
+        
+        html_parts.append("</body></html>")
+        self.diff_display.setHtml("".join(html_parts))
+
     def on_commit_selected(self):
         """Load diff when a commit is selected"""
         selected_items = self.table.selectedItems()
         if not selected_items:
-            self.diff_display.setText("Select a commit to view changes...")
+            self.diff_display.setHtml(f"<div style='color: {CP_TEXT}; padding: 20px;'>Select a commit to view changes...</div>")
+            self.expanded_files.clear()
+            self.current_diff_sections = []
             return
         
         row = selected_items[0].row()
         commit_hash = self.table.item(row, 0).text()
         directory = self.path_input.text()
         
-        self.diff_display.setText("Loading changes...")
+        self.diff_display.setHtml(f"<div style='color: {CP_YELLOW}; padding: 20px;'>Loading changes...</div>")
         QApplication.processEvents()
         
         result = GitWorker.get_commit_diff(directory, commit_hash)
         if "error" in result:
-            self.diff_display.setText(f"Error loading diff:\n{result['error']}")
+            self.diff_display.setHtml(f"<div style='color: {CP_RED}; padding: 20px;'>Error loading diff:<br>{result['error']}</div>")
+            self.expanded_files.clear()
+            self.current_diff_sections = []
             return
         
         diff_data = result["success"]
         
-        # Format the diff nicely
-        formatted_diff = self.format_diff(diff_data["diff"])
-        self.diff_display.setHtml(formatted_diff)
+        # Parse and store diff sections
+        self.current_diff_sections = self.parse_diff(diff_data["diff"])
+        self.expanded_files.clear()  # Collapse all by default
+        
+        # Render the diff
+        self.render_diff_html()
     
-    def format_diff(self, diff_text):
-        """Format git diff with colors using HTML - show only filenames and changes"""
+    def parse_diff(self, diff_text):
+        """Parse git diff into file sections"""
         lines = diff_text.split('\n')
-        formatted_lines = []
+        file_sections = []
         skip_until_diff = True
         current_file = None
+        current_file_lines = []
         file_stats = {}
         
         # First pass: collect file stats from diff
@@ -605,8 +688,10 @@ class MainWindow(QMainWindow):
             elif current_file and line.startswith('-') and not line.startswith('---'):
                 file_stats[current_file]['deletions'] += 1
         
-        # Second pass: format output
+        # Second pass: group by files
         current_file = None
+        current_file_lines = []
+        
         for line in lines:
             # Skip everything until we hit the first diff
             if skip_until_diff:
@@ -617,59 +702,38 @@ class MainWindow(QMainWindow):
             
             # Detect file changes
             if line.startswith('diff --git'):
-                # Extract filename
+                # Save previous file section
+                if current_file and current_file_lines:
+                    file_sections.append({
+                        'name': current_file,
+                        'lines': current_file_lines[:],
+                        'stats': file_stats.get(current_file, {'additions': 0, 'deletions': 0})
+                    })
+                    current_file_lines = []
+                
+                # Extract new filename
                 parts = line.split(' ')
                 if len(parts) >= 4:
                     current_file = parts[3].replace('b/', '')
-                    stats = file_stats.get(current_file, {'additions': 0, 'deletions': 0})
-                    stats_text = f'<span style="color: {CP_GREEN};">+{stats["additions"]}</span> <span style="color: {CP_RED};">-{stats["deletions"]}</span>'
-                    formatted_lines.append(f'<div style="background-color: {CP_DIM}; color: {CP_YELLOW}; padding: 10px; margin-top: 15px; margin-bottom: 8px; font-weight: bold; border-left: 5px solid {CP_CYAN}; font-size: 11pt;">📄 {current_file} &nbsp;&nbsp; {stats_text}</div>')
                 continue
             
-            # Skip index and other metadata
-            if line.startswith('index ') or line.startswith('new file') or line.startswith('deleted file') or line.startswith('mode '):
+            # Skip metadata
+            if line.startswith('index ') or line.startswith('new file') or line.startswith('deleted file') or line.startswith('mode ') or line.startswith('+++') or line.startswith('---') or line.startswith('@@'):
                 continue
             
-            # Skip +++ and --- lines (file paths)
-            if line.startswith('+++') or line.startswith('---'):
-                continue
-            
-            # Skip hunk headers (@@ lines) - these are the technical line numbers
-            if line.startswith('@@'):
-                continue
-            
-            # Format actual changes
-            if line.startswith('+'):
-                escaped_line = line.replace('<', '&lt;').replace('>', '&gt;').replace(' ', '&nbsp;')
-                formatted_lines.append(f'<div style="color: {CP_GREEN}; background-color: #001a00; padding: 3px 8px; font-family: \'JetBrainsMono Nerd Font\', \'Consolas\', monospace;">{escaped_line}</div>')
-            elif line.startswith('-'):
-                escaped_line = line.replace('<', '&lt;').replace('>', '&gt;').replace(' ', '&nbsp;')
-                formatted_lines.append(f'<div style="color: {CP_RED}; background-color: #1a0000; padding: 3px 8px; font-family: \'JetBrainsMono Nerd Font\', \'Consolas\', monospace;">{escaped_line}</div>')
-            elif line.strip():  # Context lines
-                escaped_line = line.replace('<', '&lt;').replace('>', '&gt;').replace(' ', '&nbsp;')
-                formatted_lines.append(f'<div style="color: {CP_TEXT}; padding: 3px 8px; font-family: \'JetBrainsMono Nerd Font\', \'Consolas\', monospace;">{escaped_line}</div>')
+            # Collect file lines
+            if current_file:
+                current_file_lines.append(line)
         
-        html = f'''
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <style>
-                body {{
-                    background-color: {CP_BG};
-                    color: {CP_TEXT};
-                    margin: 0;
-                    padding: 10px;
-                    font-family: 'JetBrainsMono Nerd Font', 'Consolas', monospace;
-                    font-size: 10pt;
-                }}
-            </style>
-        </head>
-        <body>
-            {"".join(formatted_lines)}
-        </body>
-        </html>
-        '''
-        return html
+        # Save last file section
+        if current_file and current_file_lines:
+            file_sections.append({
+                'name': current_file,
+                'lines': current_file_lines,
+                'stats': file_stats.get(current_file, {'additions': 0, 'deletions': 0})
+            })
+        
+        return file_sections
 
     def copy_hash(self):
         selected_items = self.table.selectedItems()
