@@ -8,7 +8,7 @@ from PyQt6.QtWidgets import (
     QHeaderView, QFileDialog, QMessageBox, QAbstractItemView, QStyledItemDelegate, QStyle,
     QTreeView, QDialog, QFileIconProvider, QInputDialog
 )
-from PyQt6.QtCore import Qt, QSize, QRect, QDir, QFileInfo
+from PyQt6.QtCore import Qt, QSize, QRect, QDir, QFileInfo, QThread, pyqtSignal, QThread, pyqtSignal
 from PyQt6.QtGui import QFont, QColor, QCursor, QPainter, QFileSystemModel, QIcon, QPixmap
 
 # --- THEME CONSTANTS (from THEME_GUIDE.md) ---
@@ -84,6 +84,19 @@ class CyberDelegate(QStyledItemDelegate):
         painter.restore()
 
 # --- GIT LOGIC ---
+class CommitLoaderThread(QThread):
+    """Background thread for loading commits"""
+    finished = pyqtSignal(dict)  # Emits result when done
+    
+    def __init__(self, directory, limit=None):
+        super().__init__()
+        self.directory = directory
+        self.limit = limit
+    
+    def run(self):
+        result = GitWorker.get_commits(self.directory, self.limit)
+        self.finished.emit(result)
+
 class GitWorker:
     @staticmethod
     def get_commits(directory, limit=None):
@@ -410,11 +423,18 @@ class MainWindow(QMainWindow):
 
         self.table.setRowCount(0)
         self.status_label.setText("LOADING...")
+        self.status_label.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold;")
         QApplication.processEvents()
 
-        result = GitWorker.get_commits(directory, self.commit_limit)
+        # Use threading for better performance
+        self.loader_thread = CommitLoaderThread(directory, self.commit_limit)
+        self.loader_thread.finished.connect(self.on_commits_loaded)
+        self.loader_thread.start()
+
+    def on_commits_loaded(self, result):
+        """Called when commits are loaded in background thread"""
         if "error" in result:
-            self.status_label.setStyleSheet(f"color: {CP_RED};")
+            self.status_label.setStyleSheet(f"color: {CP_RED}; font-weight: bold;")
             self.status_label.setText(f"ERROR: {result['error']}")
             return
 
