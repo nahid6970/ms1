@@ -385,8 +385,8 @@ class MainWindow(QMainWindow):
         diff_layout.addWidget(self.diff_display)
         
         main_splitter.addWidget(diff_widget)
-        main_splitter.setStretchFactor(0, 1)  # Table takes 1/2
-        main_splitter.setStretchFactor(1, 1)  # Diff takes 1/2 (increased width)
+        main_splitter.setStretchFactor(0, 2)  # Table takes 2/5
+        main_splitter.setStretchFactor(1, 3)  # Diff takes 3/5 (wider)
         
         layout.addWidget(main_splitter)
 
@@ -477,12 +477,15 @@ class MainWindow(QMainWindow):
         """Format git diff with colors using HTML - show only filenames and changes"""
         lines = diff_text.split('\n')
         formatted_lines = []
-        current_file = None
+        skip_until_diff = True
         
         for line in lines:
-            # Skip commit info lines
-            if line.startswith('commit ') or line.startswith('Author:') or line.startswith('Date:'):
-                continue
+            # Skip everything until we hit the first diff
+            if skip_until_diff:
+                if line.startswith('diff --git'):
+                    skip_until_diff = False
+                else:
+                    continue
             
             # Detect file changes
             if line.startswith('diff --git'):
