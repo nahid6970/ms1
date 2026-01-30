@@ -6,7 +6,7 @@ from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QLabel, QPushButton, QLineEdit, QTableWidget, QTableWidgetItem,
     QHeaderView, QFileDialog, QMessageBox, QAbstractItemView, QStyledItemDelegate, QStyle,
-    QTreeView, QDialog, QFileIconProvider, QInputDialog
+    QTreeView, QDialog, QFileIconProvider, QInputDialog, QTextEdit, QSplitter
 )
 from PyQt6.QtCore import Qt, QSize, QRect, QDir, QFileInfo, QThread, pyqtSignal, QThread, pyqtSignal
 from PyQt6.QtGui import QFont, QColor, QCursor, QPainter, QFileSystemModel, QIcon, QPixmap
@@ -138,6 +138,21 @@ class GitWorker:
             return {"error": str(e)}
 
     @staticmethod
+    def get_commit_diff(directory, commit_hash):
+        """Get the diff for a specific commit"""
+        try:
+            cmd = ["git", "show", "--pretty=format:", "--name-status", commit_hash]
+            result = subprocess.check_output(cmd, cwd=directory, text=True, encoding='utf-8')
+            
+            # Get detailed diff
+            cmd_diff = ["git", "show", commit_hash, "--color=never"]
+            diff_result = subprocess.check_output(cmd_diff, cwd=directory, text=True, encoding='utf-8')
+            
+            return {"success": {"files": result, "diff": diff_result}}
+        except Exception as e:
+            return {"error": str(e)}
+
+    @staticmethod
     def checkout_path(directory, commit_hash):
         try:
             cmd = ["git", "checkout", commit_hash, "--", "."]
@@ -145,6 +160,20 @@ class GitWorker:
             return {"success": True}
         except subprocess.CalledProcessError as e:
             return {"error": f"Git Error: {e}"}
+        except Exception as e:
+            return {"error": str(e)}
+
+    @staticmethod
+    def get_commit_diff(directory, commit_hash):
+        """Get the diff for a specific commit"""
+        try:
+            cmd = ["git", "show", "--pretty=format:", "--name-status", commit_hash]
+            files_result = subprocess.check_output(cmd, cwd=directory, text=True, encoding='utf-8')
+            
+            cmd = ["git", "show", commit_hash, "--color=never"]
+            diff_result = subprocess.check_output(cmd, cwd=directory, text=True, encoding='utf-8')
+            
+            return {"success": {"files": files_result, "diff": diff_result}}
         except Exception as e:
             return {"error": str(e)}
 
@@ -241,6 +270,13 @@ class MainWindow(QMainWindow):
             QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {{
                 width: 0px;
             }}
+            QTextEdit {{
+                background-color: {CP_PANEL};
+                color: {CP_TEXT};
+                border: 1px solid {CP_DIM};
+                font-family: 'Consolas';
+                font-size: 9pt;
+            }}
             
             /* TREE VIEW */
             QTreeView {{
@@ -292,10 +328,17 @@ class MainWindow(QMainWindow):
         path_layout.addWidget(load_btn)
         layout.addLayout(path_layout)
 
-        # Commit Table
+        # Main content splitter (Table + Diff Panel)
+        main_splitter = QSplitter(Qt.Orientation.Horizontal)
+        
+        # LEFT: Commit Table
+        table_widget = QWidget()
+        table_layout = QVBoxLayout(table_widget)
+        table_layout.setContentsMargins(0, 0, 0, 0)
+        
         table_label = QLabel("COMMIT HISTORY:")
         table_label.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold;")
-        layout.addWidget(table_label)
+        table_layout.addWidget(table_label)
 
         # Table Setup
         self.table = QTableWidget()
@@ -313,8 +356,38 @@ class MainWindow(QMainWindow):
         self.table.setItemDelegate(self.delegate)
         self.table.cellEntered.connect(self.on_cell_entered)
         self.table.leaveEvent = self.on_table_leave
+        self.table.itemSelectionChanged.connect(self.on_commit_selected)
 
-        layout.addWidget(self.table)
+        table_layout.addWidget(self.table)
+        main_splitter.addWidget(table_widget)
+        
+        # RIGHT: Diff Panel
+        diff_widget = QWidget()
+        diff_layout = QVBoxLayout(diff_widget)
+        diff_layout.setContentsMargins(0, 0, 0, 0)
+        
+        diff_label = QLabel("CHANGES:")
+        diff_label.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold;")
+        diff_layout.addWidget(diff_label)
+        
+        self.diff_display = QTextEdit()
+        self.diff_display.setReadOnly(True)
+        self.diff_display.setAcceptRichText(True)  # Enable HTML rendering
+        self.diff_display.setStyleSheet(f"""
+            background-color: {CP_BG};
+            color: {CP_TEXT};
+            border: 1px solid {CP_DIM};
+            font-family: 'Consolas';
+            font-size: 9pt;
+        """)
+        self.diff_display.setText("Select a commit to view changes...")
+        diff_layout.addWidget(self.diff_display)
+        
+        main_splitter.addWidget(diff_widget)
+        main_splitter.setStretchFactor(0, 2)  # Table takes 2/3
+        main_splitter.setStretchFactor(1, 1)  # Diff takes 1/3
+        
+        layout.addWidget(main_splitter)
 
         action_layout = QHBoxLayout()
         self.status_label = QLabel("READY")
@@ -373,6 +446,52 @@ class MainWindow(QMainWindow):
     def on_table_leave(self, event):
         self.delegate.hovered_row = -1
         self.table.viewport().update()
+
+    def on_commit_selected(self):
+        """Load diff when a commit is selected"""
+        selected_items = self.table.selectedItems()
+        if not selected_items:
+            self.diff_display.setText("Select a commit to view changes...")
+            return
+        
+        row = selected_items[0].row()
+        commit_hash = self.table.item(row, 0).text()
+        directory = self.path_input.text()
+        
+        self.diff_display.setText("Loading changes...")
+        QApplication.processEvents()
+        
+        result = GitWorker.get_commit_diff(directory, commit_hash)
+        if "error" in result:
+            self.diff_display.setText(f"Error loading diff:\n{result['error']}")
+            return
+        
+        diff_data = result["success"]
+        
+        # Format the diff nicely
+        formatted_diff = self.format_diff(diff_data["diff"])
+        self.diff_display.setHtml(formatted_diff)
+    
+    def format_diff(self, diff_text):
+        """Format git diff with colors using HTML"""
+        lines = diff_text.split('\n')
+        formatted_lines = []
+        
+        for line in lines:
+            if line.startswith('+++') or line.startswith('---'):
+                formatted_lines.append(f'<span style="color: {CP_CYAN}; font-weight: bold;">{line}</span>')
+            elif line.startswith('+'):
+                formatted_lines.append(f'<span style="color: {CP_GREEN};">{line}</span>')
+            elif line.startswith('-'):
+                formatted_lines.append(f'<span style="color: {CP_RED};">{line}</span>')
+            elif line.startswith('@@'):
+                formatted_lines.append(f'<span style="color: {CP_YELLOW}; font-weight: bold;">{line}</span>')
+            elif line.startswith('diff --git'):
+                formatted_lines.append(f'<span style="color: {CP_CYAN}; font-weight: bold;">{line}</span>')
+            else:
+                formatted_lines.append(line)
+        
+        return '<pre style="margin: 0; padding: 5px;">' + '<br>'.join(formatted_lines) + '</pre>'
 
     def copy_hash(self):
         selected_items = self.table.selectedItems()
