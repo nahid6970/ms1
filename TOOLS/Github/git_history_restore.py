@@ -377,15 +377,16 @@ class MainWindow(QMainWindow):
             background-color: {CP_BG};
             color: {CP_TEXT};
             border: 1px solid {CP_DIM};
-            font-family: 'Consolas';
-            font-size: 9pt;
+            font-family: 'JetBrainsMono Nerd Font', 'Consolas', monospace;
+            font-size: 10pt;
+            line-height: 1.5;
         """)
         self.diff_display.setText("Select a commit to view changes...")
         diff_layout.addWidget(self.diff_display)
         
         main_splitter.addWidget(diff_widget)
-        main_splitter.setStretchFactor(0, 2)  # Table takes 2/3
-        main_splitter.setStretchFactor(1, 1)  # Diff takes 1/3
+        main_splitter.setStretchFactor(0, 1)  # Table takes 1/2
+        main_splitter.setStretchFactor(1, 1)  # Diff takes 1/2 (increased width)
         
         layout.addWidget(main_splitter)
 
@@ -473,25 +474,68 @@ class MainWindow(QMainWindow):
         self.diff_display.setHtml(formatted_diff)
     
     def format_diff(self, diff_text):
-        """Format git diff with colors using HTML"""
+        """Format git diff with colors using HTML - show only filenames and changes"""
         lines = diff_text.split('\n')
         formatted_lines = []
+        current_file = None
         
         for line in lines:
+            # Skip commit info lines
+            if line.startswith('commit ') or line.startswith('Author:') or line.startswith('Date:'):
+                continue
+            
+            # Detect file changes
+            if line.startswith('diff --git'):
+                # Extract filename
+                parts = line.split(' ')
+                if len(parts) >= 4:
+                    current_file = parts[3].replace('b/', '')
+                    formatted_lines.append(f'<div style="background-color: {CP_DIM}; color: {CP_YELLOW}; padding: 10px; margin-top: 15px; margin-bottom: 8px; font-weight: bold; border-left: 5px solid {CP_CYAN}; font-size: 11pt;">📄 {current_file}</div>')
+                continue
+            
+            # Skip index and other metadata
+            if line.startswith('index ') or line.startswith('new file') or line.startswith('deleted file') or line.startswith('mode '):
+                continue
+            
+            # Skip +++ and --- lines (file paths)
             if line.startswith('+++') or line.startswith('---'):
-                formatted_lines.append(f'<span style="color: {CP_CYAN}; font-weight: bold;">{line}</span>')
-            elif line.startswith('+'):
-                formatted_lines.append(f'<span style="color: {CP_GREEN};">{line}</span>')
+                continue
+            
+            # Format actual changes
+            if line.startswith('+'):
+                escaped_line = line.replace('<', '&lt;').replace('>', '&gt;').replace(' ', '&nbsp;')
+                formatted_lines.append(f'<div style="color: {CP_GREEN}; background-color: #001a00; padding: 3px 8px; font-family: \'JetBrainsMono Nerd Font\', \'Consolas\', monospace;">{escaped_line}</div>')
             elif line.startswith('-'):
-                formatted_lines.append(f'<span style="color: {CP_RED};">{line}</span>')
+                escaped_line = line.replace('<', '&lt;').replace('>', '&gt;').replace(' ', '&nbsp;')
+                formatted_lines.append(f'<div style="color: {CP_RED}; background-color: #1a0000; padding: 3px 8px; font-family: \'JetBrainsMono Nerd Font\', \'Consolas\', monospace;">{escaped_line}</div>')
             elif line.startswith('@@'):
-                formatted_lines.append(f'<span style="color: {CP_YELLOW}; font-weight: bold;">{line}</span>')
-            elif line.startswith('diff --git'):
-                formatted_lines.append(f'<span style="color: {CP_CYAN}; font-weight: bold;">{line}</span>')
-            else:
-                formatted_lines.append(line)
+                escaped_line = line.replace('<', '&lt;').replace('>', '&gt;').replace(' ', '&nbsp;')
+                formatted_lines.append(f'<div style="color: {CP_CYAN}; font-weight: bold; padding: 5px 8px; margin-top: 8px; font-family: \'JetBrainsMono Nerd Font\', \'Consolas\', monospace;">{escaped_line}</div>')
+            elif line.strip():  # Context lines
+                escaped_line = line.replace('<', '&lt;').replace('>', '&gt;').replace(' ', '&nbsp;')
+                formatted_lines.append(f'<div style="color: {CP_TEXT}; padding: 3px 8px; font-family: \'JetBrainsMono Nerd Font\', \'Consolas\', monospace;">{escaped_line}</div>')
         
-        return '<pre style="margin: 0; padding: 5px;">' + '<br>'.join(formatted_lines) + '</pre>'
+        html = f'''
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <style>
+                body {{
+                    background-color: {CP_BG};
+                    color: {CP_TEXT};
+                    margin: 0;
+                    padding: 10px;
+                    font-family: 'JetBrainsMono Nerd Font', 'Consolas', monospace;
+                    font-size: 10pt;
+                }}
+            </style>
+        </head>
+        <body>
+            {"".join(formatted_lines)}
+        </body>
+        </html>
+        '''
+        return html
 
     def copy_hash(self):
         selected_items = self.table.selectedItems()
