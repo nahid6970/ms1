@@ -6,7 +6,7 @@ from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QLabel, QPushButton, QLineEdit, QTableWidget, QTableWidgetItem,
     QHeaderView, QFileDialog, QMessageBox, QAbstractItemView, QStyledItemDelegate, QStyle,
-    QTreeView, QDialog, QFileIconProvider
+    QTreeView, QDialog, QFileIconProvider, QInputDialog
 )
 from PyQt6.QtCore import Qt, QSize, QRect, QDir, QFileInfo
 from PyQt6.QtGui import QFont, QColor, QCursor, QPainter, QFileSystemModel, QIcon, QPixmap
@@ -86,7 +86,7 @@ class CyberDelegate(QStyledItemDelegate):
 # --- GIT LOGIC ---
 class GitWorker:
     @staticmethod
-    def get_commits(directory):
+    def get_commits(directory, limit=None):
         if not os.path.isdir(directory):
             return {"error": "Invalid directory"}
         
@@ -103,7 +103,10 @@ class GitWorker:
             return {"error": "Git not found on system path"}
 
         try:
-            cmd = ["git", "log", "--pretty=format:%h|%an|%ad|%s", "--date=short", "-n", "200", "--", "."]
+            if limit and limit > 0:
+                cmd = ["git", "log", "--pretty=format:%h|%an|%ad|%s", "--date=short", "-n", str(limit), "--", "."]
+            else:
+                cmd = ["git", "log", "--pretty=format:%h|%an|%ad|%s", "--date=short", "--", "."]
             result = subprocess.check_output(cmd, cwd=directory, text=True, encoding='utf-8')
             
             commits = []
@@ -166,6 +169,7 @@ class MainWindow(QMainWindow):
         self.resize(1000, 700)
         
         self.config_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "git_history_config.json")
+        self.commit_limit = 200  # Default limit
 
         self.setStyleSheet(f"""
             QMainWindow {{ background-color: {CP_BG}; }}
@@ -302,6 +306,8 @@ class MainWindow(QMainWindow):
         action_layout = QHBoxLayout()
         self.status_label = QLabel("READY")
         self.status_label.setStyleSheet(f"color: {CP_CYAN}; font-weight: bold;")
+        self.status_label.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.status_label.mousePressEvent = self.change_commit_limit
         
         copy_hash_btn = CyberButton("COPY HASH", CP_DIM, CP_CYAN, "white", "black")
         copy_hash_btn.clicked.connect(self.copy_hash)
@@ -317,6 +323,26 @@ class MainWindow(QMainWindow):
 
         if os.path.isdir(self.path_input.text()):
             self.load_commits()
+
+    def change_commit_limit(self, event):
+        """Open dialog to change commit limit"""
+        limit, ok = QInputDialog.getInt(
+            self, 
+            "Set Commit Limit", 
+            "How many commits to load?\n(0 = load all commits)", 
+            self.commit_limit, 
+            0, 
+            10000, 
+            1
+        )
+        if ok:
+            self.commit_limit = limit
+            self.save_config()
+            self.status_label.setStyleSheet(f"color: {CP_GREEN}; font-weight: bold;")
+            if limit == 0:
+                self.status_label.setText(f"LIMIT SET: ALL COMMITS")
+            else:
+                self.status_label.setText(f"LIMIT SET: {limit} COMMITS")
 
     def open_tree_browser(self):
         """Open a popup window with tree view directory browser"""
@@ -354,14 +380,20 @@ class MainWindow(QMainWindow):
         try:
             if os.path.exists(self.config_file):
                 with open(self.config_file, 'r') as f:
-                    return json.load(f).get("last_directory", "")
+                    data = json.load(f)
+                    self.commit_limit = data.get("commit_limit", 200)
+                    return data.get("last_directory", "")
         except: pass
         return ""
 
-    def save_config(self, directory):
+    def save_config(self):
+        directory = self.path_input.text() if hasattr(self, 'path_input') else ""
         try:
             with open(self.config_file, 'w') as f:
-                json.dump({"last_directory": directory}, f)
+                json.dump({
+                    "last_directory": directory,
+                    "commit_limit": self.commit_limit
+                }, f)
         except: pass
 
     def browse_directory(self):
@@ -374,13 +406,13 @@ class MainWindow(QMainWindow):
     def load_commits(self):
         directory = self.path_input.text().strip()
         if not directory: return
-        if os.path.isdir(directory): self.save_config(directory)
+        if os.path.isdir(directory): self.save_config()
 
         self.table.setRowCount(0)
         self.status_label.setText("LOADING...")
         QApplication.processEvents()
 
-        result = GitWorker.get_commits(directory)
+        result = GitWorker.get_commits(directory, self.commit_limit)
         if "error" in result:
             self.status_label.setStyleSheet(f"color: {CP_RED};")
             self.status_label.setText(f"ERROR: {result['error']}")
@@ -408,7 +440,8 @@ class MainWindow(QMainWindow):
                 self.table.setItem(i, col, item)
 
         self.status_label.setStyleSheet(f"color: {CP_GREEN}; font-weight: bold;")
-        self.status_label.setText(f"LOADED {len(commits)} COMMITS")
+        limit_text = f" (LIMIT: {self.commit_limit})" if self.commit_limit > 0 else " (ALL)"
+        self.status_label.setText(f"LOADED {len(commits)} COMMITS{limit_text}")
 
     def revert_commit(self):
         selected_items = self.table.selectedItems()
