@@ -112,7 +112,11 @@ RAlt & Numpad3::Run("C:\@delta\msBackups\Display\DisplaySwitch.exe /extend", "",
 }
 
 ;! Script Manager
-#x::Run('pythonw "C:\@delta\db\@run_from_db\Script_Manager\script_manager_gui_qt.py"')
+#x:: {
+    Run('pythonw "C:\@delta\db\@run_from_db\Script_Manager\script_manager_gui_qt.py"')
+    WinWait("SCRIPT // MANAGER")
+    WinActivate("SCRIPT // MANAGER")
+}
 
 ;! Startup Setup
 #s::Run("C:\@delta\ms1\@Flask\4999_startup\startup.py", , "Hide")

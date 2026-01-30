@@ -86,7 +86,7 @@
             "category": "Launch",
             "description": "",
             "hotkey": "#x",
-            "action": "Run('pythonw \"C:\\@delta\\db\\@run_from_db\\Script_Manager\\script_manager_gui_qt.py\"')",
+            "action": "Run('pythonw \"C:\\@delta\\db\\@run_from_db\\Script_Manager\\script_manager_gui_qt.py\"')\nWinWait(\"SCRIPT // MANAGER\")\nWinActivate(\"SCRIPT // MANAGER\")",
             "enabled": true
         },
         {
