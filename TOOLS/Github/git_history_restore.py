@@ -6,10 +6,10 @@ from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QLabel, QPushButton, QLineEdit, QTableWidget, QTableWidgetItem,
     QHeaderView, QFileDialog, QMessageBox, QAbstractItemView, QStyledItemDelegate, QStyle,
-    QTreeView, QDialog
+    QTreeView, QDialog, QFileIconProvider
 )
-from PyQt6.QtCore import Qt, QSize, QRect, QDir
-from PyQt6.QtGui import QFont, QColor, QCursor, QPainter, QFileSystemModel
+from PyQt6.QtCore import Qt, QSize, QRect, QDir, QFileInfo
+from PyQt6.QtGui import QFont, QColor, QCursor, QPainter, QFileSystemModel, QIcon, QPixmap
 
 # --- THEME CONSTANTS (from THEME_GUIDE.md) ---
 CP_BG = "#050505"           # Main Window Background
@@ -20,6 +20,20 @@ CP_RED = "#FF003C"          # Accent: Red
 CP_GREEN = "#00ff21"        # Accent: Green
 CP_DIM = "#3a3a3a"          # Dimmed/Borders/Inactive
 CP_TEXT = "#E0E0E0"         # Primary Text
+
+# --- CUSTOM ICON PROVIDER FOR FOLDERS ---
+class CyberIconProvider(QFileIconProvider):
+    def __init__(self):
+        super().__init__()
+        
+    def icon(self, type_or_info):
+        # Always return folder icon for directories
+        if isinstance(type_or_info, QFileInfo):
+            if type_or_info.isDir():
+                return super().icon(QFileIconProvider.IconType.Folder)
+        elif type_or_info == QFileIconProvider.IconType.Folder:
+            return super().icon(QFileIconProvider.IconType.Folder)
+        return super().icon(type_or_info)
 
 # --- CUSTOM DELEGATE FOR ROW HOVER & COLOR PERSISTENCE ---
 class CyberDelegate(QStyledItemDelegate):
@@ -217,9 +231,16 @@ class MainWindow(QMainWindow):
                 border: 1px solid {CP_DIM};
                 color: {CP_TEXT};
                 outline: none;
+                show-decoration-selected: 1;
+            }}
+            QTreeView::item {{
+                padding: 2px;
             }}
             QTreeView::item:hover {{ background-color: #1a1a1a; }}
-            QTreeView::item:selected {{ background-color: #222222; color: {CP_YELLOW}; }}
+            QTreeView::item:selected {{ 
+                background-color: #222222; 
+                color: {CP_YELLOW}; 
+            }}
         """
         )
 
@@ -441,9 +462,18 @@ class TreeBrowserDialog(QDialog):
                 border: 1px solid {CP_DIM};
                 color: {CP_TEXT};
                 outline: none;
+                show-decoration-selected: 1;
             }}
-            QTreeView::item:hover {{ background-color: #1a1a1a; }}
-            QTreeView::item:selected {{ background-color: #222222; color: {CP_YELLOW}; }}
+            QTreeView::item {{
+                padding: 2px;
+            }}
+            QTreeView::item:hover {{ 
+                background-color: #1a1a1a; 
+            }}
+            QTreeView::item:selected {{ 
+                background-color: #222222; 
+                color: {CP_YELLOW};
+            }}
         """)
         
         layout = QVBoxLayout(self)
@@ -468,6 +498,7 @@ class TreeBrowserDialog(QDialog):
         self.tree_model = QFileSystemModel()
         self.tree_model.setReadOnly(True)
         self.tree_model.setFilter(QDir.Filter.Dirs | QDir.Filter.NoDotAndDotDot)
+        self.tree_model.setIconProvider(CyberIconProvider())
         
         self.tree_model.setRootPath("")
         self.tree_view.setModel(self.tree_model)
