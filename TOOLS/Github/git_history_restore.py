@@ -201,6 +201,7 @@ class MainWindow(QMainWindow):
         self.window_width = 1400  # Default window width
         self.window_height = 700  # Default window height
         self.split_ratio = [2, 3]  # Default split ratio [left, right]
+        self.current_diff_sections = []  # Store parsed diff sections
         
         # Load config first to get window size
         self.load_config()
@@ -568,19 +569,19 @@ class MainWindow(QMainWindow):
     def toggle_file_section(self, url):
         """Toggle file section visibility when clicked"""
         file_id = url.toString()
-        if file_id in self.expanded_files:
-            self.expanded_files.remove(file_id)
-        else:
-            self.expanded_files.add(file_id)
-        
-        # Regenerate the diff display with updated state
-        self.refresh_diff_display()
-    
-    def refresh_diff_display(self):
-        """Refresh the diff display with current expanded state"""
-        if hasattr(self, 'current_diff_data'):
-            formatted_diff = self.format_diff(self.current_diff_data)
-            self.diff_display.setHtml(formatted_diff)
+        # Extract index from "file-0", "file-1", etc.
+        if file_id.startswith("file-"):
+            try:
+                idx = int(file_id.replace("file-", ""))
+                if idx in self.expanded_files:
+                    self.expanded_files.remove(idx)
+                else:
+                    self.expanded_files.add(idx)
+                
+                # Re-render the diff display
+                self.render_diff_html()
+            except ValueError:
+                pass
 
     def on_file_header_clicked(self, url):
         """Handle clicks on file headers to toggle expand/collapse"""
