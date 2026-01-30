@@ -69,7 +69,9 @@ function updateBadge() {
     const count = savedTabs.length;
     
     if (count > 0) {
-      chrome.action.setBadgeText({ text: count.toString() });
+      // Show 9+ for counts over 9
+      const badgeText = count > 9 ? '9+' : count.toString();
+      chrome.action.setBadgeText({ text: badgeText });
       chrome.action.setBadgeBackgroundColor({ color: '#667eea' });
     } else {
       chrome.action.setBadgeText({ text: '' });
