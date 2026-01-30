@@ -141,14 +141,15 @@ class GitWorker:
     def get_commit_diff(directory, commit_hash):
         """Get the diff for a specific commit"""
         try:
-            cmd = ["git", "show", "--pretty=format:", "--name-status", commit_hash]
-            result = subprocess.check_output(cmd, cwd=directory, text=True, encoding='utf-8')
+            # Get file stats (additions/deletions)
+            cmd_stats = ["git", "show", "--stat", "--format=", commit_hash]
+            stats_result = subprocess.check_output(cmd_stats, cwd=directory, text=True, encoding='utf-8')
             
             # Get detailed diff
             cmd_diff = ["git", "show", commit_hash, "--color=never"]
             diff_result = subprocess.check_output(cmd_diff, cwd=directory, text=True, encoding='utf-8')
             
-            return {"success": {"files": result, "diff": diff_result}}
+            return {"success": {"stats": stats_result, "diff": diff_result}}
         except Exception as e:
             return {"error": str(e)}
 
@@ -160,20 +161,6 @@ class GitWorker:
             return {"success": True}
         except subprocess.CalledProcessError as e:
             return {"error": f"Git Error: {e}"}
-        except Exception as e:
-            return {"error": str(e)}
-
-    @staticmethod
-    def get_commit_diff(directory, commit_hash):
-        """Get the diff for a specific commit"""
-        try:
-            cmd = ["git", "show", "--pretty=format:", "--name-status", commit_hash]
-            files_result = subprocess.check_output(cmd, cwd=directory, text=True, encoding='utf-8')
-            
-            cmd = ["git", "show", commit_hash, "--color=never"]
-            diff_result = subprocess.check_output(cmd, cwd=directory, text=True, encoding='utf-8')
-            
-            return {"success": {"files": files_result, "diff": diff_result}}
         except Exception as e:
             return {"error": str(e)}
 
@@ -603,7 +590,23 @@ class MainWindow(QMainWindow):
         lines = diff_text.split('\n')
         formatted_lines = []
         skip_until_diff = True
+        current_file = None
+        file_stats = {}
         
+        # First pass: collect file stats from diff
+        for line in lines:
+            if line.startswith('diff --git'):
+                parts = line.split(' ')
+                if len(parts) >= 4:
+                    current_file = parts[3].replace('b/', '')
+                    file_stats[current_file] = {'additions': 0, 'deletions': 0}
+            elif current_file and line.startswith('+') and not line.startswith('+++'):
+                file_stats[current_file]['additions'] += 1
+            elif current_file and line.startswith('-') and not line.startswith('---'):
+                file_stats[current_file]['deletions'] += 1
+        
+        # Second pass: format output
+        current_file = None
         for line in lines:
             # Skip everything until we hit the first diff
             if skip_until_diff:
@@ -618,7 +621,9 @@ class MainWindow(QMainWindow):
                 parts = line.split(' ')
                 if len(parts) >= 4:
                     current_file = parts[3].replace('b/', '')
-                    formatted_lines.append(f'<div style="background-color: {CP_DIM}; color: {CP_YELLOW}; padding: 10px; margin-top: 15px; margin-bottom: 8px; font-weight: bold; border-left: 5px solid {CP_CYAN}; font-size: 11pt;">📄 {current_file}</div>')
+                    stats = file_stats.get(current_file, {'additions': 0, 'deletions': 0})
+                    stats_text = f'<span style="color: {CP_GREEN};">+{stats["additions"]}</span> <span style="color: {CP_RED};">-{stats["deletions"]}</span>'
+                    formatted_lines.append(f'<div style="background-color: {CP_DIM}; color: {CP_YELLOW}; padding: 10px; margin-top: 15px; margin-bottom: 8px; font-weight: bold; border-left: 5px solid {CP_CYAN}; font-size: 11pt;">📄 {current_file} &nbsp;&nbsp; {stats_text}</div>')
                 continue
             
             # Skip index and other metadata
@@ -629,6 +634,10 @@ class MainWindow(QMainWindow):
             if line.startswith('+++') or line.startswith('---'):
                 continue
             
+            # Skip hunk headers (@@ lines) - these are the technical line numbers
+            if line.startswith('@@'):
+                continue
+            
             # Format actual changes
             if line.startswith('+'):
                 escaped_line = line.replace('<', '&lt;').replace('>', '&gt;').replace(' ', '&nbsp;')
@@ -636,9 +645,6 @@ class MainWindow(QMainWindow):
             elif line.startswith('-'):
                 escaped_line = line.replace('<', '&lt;').replace('>', '&gt;').replace(' ', '&nbsp;')
                 formatted_lines.append(f'<div style="color: {CP_RED}; background-color: #1a0000; padding: 3px 8px; font-family: \'JetBrainsMono Nerd Font\', \'Consolas\', monospace;">{escaped_line}</div>')
-            elif line.startswith('@@'):
-                escaped_line = line.replace('<', '&lt;').replace('>', '&gt;').replace(' ', '&nbsp;')
-                formatted_lines.append(f'<div style="color: {CP_CYAN}; font-weight: bold; padding: 5px 8px; margin-top: 8px; font-family: \'JetBrainsMono Nerd Font\', \'Consolas\', monospace;">{escaped_line}</div>')
             elif line.strip():  # Context lines
                 escaped_line = line.replace('<', '&lt;').replace('>', '&gt;').replace(' ', '&nbsp;')
                 formatted_lines.append(f'<div style="color: {CP_TEXT}; padding: 3px 8px; font-family: \'JetBrainsMono Nerd Font\', \'Consolas\', monospace;">{escaped_line}</div>')
