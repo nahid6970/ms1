@@ -135,6 +135,9 @@ If you already have `host_permissions`, just add `"http://localhost:8765/*"` to 
 #### A. Add buttons to your popup HTML:
 
 ```html
+<button id="clearAll" style="background: #ff4757; color: white; padding: 10px;">
+    Clear All
+</button>
 <button id="saveToPython" style="background: #9C27B0; color: white; padding: 10px;">
     Save to Python Server
 </button>
@@ -166,6 +169,28 @@ function showButtonFeedback(button, success, message) {
         button.style.background = originalBg;
         button.disabled = false;
     }, 2000);
+}
+
+// Clear all button (with visual feedback)
+const clearAllBtn = document.getElementById('clearAll');
+
+if (clearAllBtn) {
+    clearAllBtn.addEventListener('click', function (e) {
+        const button = e.target;
+        chrome.storage.local.get(['savedTabs'], (result) => {
+            const savedTabs = result.savedTabs || [];
+            
+            if (savedTabs.length === 0) {
+                showButtonFeedback(button, false, 'No tabs to clear');
+                return;
+            }
+            
+            chrome.storage.local.set({ savedTabs: [] }, () => {
+                showButtonFeedback(button, true, 'Cleared!');
+                // Reload your tab list display here
+            });
+        });
+    });
 }
 
 // Save to Python server button

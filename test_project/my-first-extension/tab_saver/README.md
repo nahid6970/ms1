@@ -45,13 +45,15 @@ Server runs on `http://localhost:8765`
 2. See all your saved tabs
 3. Click any tab title/URL to reopen it
 4. Click ❌ to remove from list
+5. Click "Clear All" to remove all tabs (shows visual feedback)
 
 ### Backup to Python Server
 
 - **Auto-save**: Every change auto-saves to Python server
 - **Manual save**: Click 💾 Save button (turns green ✓ on success)
 - **Manual load**: Click 📥 Load button (turns green ✓ on success)
-- **Visual feedback**: Buttons show success/failure with color changes (no popups!)
+- **Clear all**: Click "Clear All" button (turns green ✓ when cleared)
+- **Visual feedback**: All buttons show success/failure with color changes (no popups!)
 
 ## File Structure
 

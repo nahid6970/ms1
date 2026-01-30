@@ -70,12 +70,21 @@ function removeTab(tabId) {
 }
 
 // Clear all tabs
-document.getElementById('clearAll').addEventListener('click', () => {
-  if (confirm('Are you sure you want to clear all saved tabs?')) {
+document.getElementById('clearAll').addEventListener('click', (e) => {
+  const button = e.target;
+  chrome.storage.local.get(['savedTabs'], (result) => {
+    const savedTabs = result.savedTabs || [];
+    
+    if (savedTabs.length === 0) {
+      showButtonFeedback(button, false, 'No tabs to clear');
+      return;
+    }
+    
     chrome.storage.local.set({ savedTabs: [] }, () => {
+      showButtonFeedback(button, true, 'Cleared!');
       loadTabs();
     });
-  }
+  });
 });
 
 // Show button feedback
