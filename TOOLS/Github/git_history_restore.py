@@ -5,10 +5,11 @@ import json
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QLabel, QPushButton, QLineEdit, QTableWidget, QTableWidgetItem,
-    QHeaderView, QFileDialog, QMessageBox, QAbstractItemView, QStyledItemDelegate, QStyle
+    QHeaderView, QFileDialog, QMessageBox, QAbstractItemView, QStyledItemDelegate, QStyle,
+    QTreeView, QDialog
 )
-from PyQt6.QtCore import Qt, QSize, QRect
-from PyQt6.QtGui import QFont, QColor, QCursor, QPainter
+from PyQt6.QtCore import Qt, QSize, QRect, QDir
+from PyQt6.QtGui import QFont, QColor, QCursor, QPainter, QFileSystemModel
 
 # --- THEME CONSTANTS (from THEME_GUIDE.md) ---
 CP_BG = "#050505"           # Main Window Background
@@ -209,6 +210,16 @@ class MainWindow(QMainWindow):
             QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {{
                 width: 0px;
             }}
+            
+            /* TREE VIEW */
+            QTreeView {{
+                background-color: #080808;
+                border: 1px solid {CP_DIM};
+                color: {CP_TEXT};
+                outline: none;
+            }}
+            QTreeView::item:hover {{ background-color: #1a1a1a; }}
+            QTreeView::item:selected {{ background-color: #222222; color: {CP_YELLOW}; }}
         """
         )
 
@@ -230,14 +241,23 @@ class MainWindow(QMainWindow):
         browse_btn = CyberButton("BROWSE", CP_DIM, CP_CYAN)
         browse_btn.clicked.connect(self.browse_directory)
         
+        tree_browse_btn = CyberButton("TREE VIEW", CP_DIM, CP_GREEN)
+        tree_browse_btn.clicked.connect(self.open_tree_browser)
+        
         load_btn = CyberButton("LOAD COMMITS", CP_DIM, CP_YELLOW)
         load_btn.clicked.connect(self.load_commits)
 
         path_layout.addWidget(QLabel("DIR:"))
         path_layout.addWidget(self.path_input)
         path_layout.addWidget(browse_btn)
+        path_layout.addWidget(tree_browse_btn)
         path_layout.addWidget(load_btn)
         layout.addLayout(path_layout)
+
+        # Commit Table
+        table_label = QLabel("COMMIT HISTORY:")
+        table_label.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold;")
+        layout.addWidget(table_label)
 
         # Table Setup
         self.table = QTableWidget()
@@ -276,6 +296,15 @@ class MainWindow(QMainWindow):
 
         if os.path.isdir(self.path_input.text()):
             self.load_commits()
+
+    def open_tree_browser(self):
+        """Open a popup window with tree view directory browser"""
+        dialog = TreeBrowserDialog(self, self.path_input.text())
+        if dialog.exec():
+            selected_path = dialog.get_selected_path()
+            if selected_path:
+                self.path_input.setText(selected_path)
+                self.load_commits()
 
     def on_cell_entered(self, row, column):
         self.delegate.hovered_row = row
@@ -389,6 +418,107 @@ class MainWindow(QMainWindow):
                 self.status_label.setStyleSheet(f"color: {CP_RED}; font-weight: bold;")
                 self.status_label.setText("RESTORE FAILED")
                 QMessageBox.critical(self, "Error", result['error'])
+
+# --- TREE BROWSER DIALOG ---
+class TreeBrowserDialog(QDialog):
+    def __init__(self, parent=None, start_path=""):
+        super().__init__(parent)
+        self.setWindowTitle("Select Directory - Tree View")
+        self.resize(700, 500)
+        self.selected_path = start_path if start_path and os.path.isdir(start_path) else os.getcwd()
+        
+        self.setStyleSheet(f"""
+            QDialog {{ background-color: {CP_BG}; }}
+            QWidget {{ color: {CP_TEXT}; font-family: 'Consolas'; font-size: 10pt; }}
+            QLineEdit {{
+                background-color: {CP_PANEL};
+                color: {CP_CYAN};
+                border: 1px solid {CP_DIM};
+                padding: 6px;
+            }}
+            QTreeView {{
+                background-color: #080808;
+                border: 1px solid {CP_DIM};
+                color: {CP_TEXT};
+                outline: none;
+            }}
+            QTreeView::item:hover {{ background-color: #1a1a1a; }}
+            QTreeView::item:selected {{ background-color: #222222; color: {CP_YELLOW}; }}
+        """)
+        
+        layout = QVBoxLayout(self)
+        layout.setSpacing(15)
+        layout.setContentsMargins(20, 20, 20, 20)
+        
+        # Header
+        header_label = QLabel("BROWSE DIRECTORIES:")
+        header_label.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold; font-size: 12pt;")
+        layout.addWidget(header_label)
+        
+        # Current Path Display
+        path_layout = QHBoxLayout()
+        path_layout.addWidget(QLabel("Selected:"))
+        self.path_display = QLineEdit(self.selected_path)
+        self.path_display.setReadOnly(True)
+        path_layout.addWidget(self.path_display)
+        layout.addLayout(path_layout)
+        
+        # Tree View
+        self.tree_view = QTreeView()
+        self.tree_model = QFileSystemModel()
+        self.tree_model.setReadOnly(True)
+        self.tree_model.setFilter(QDir.Filter.Dirs | QDir.Filter.NoDotAndDotDot)
+        
+        self.tree_model.setRootPath("")
+        self.tree_view.setModel(self.tree_model)
+        self.tree_view.setRootIndex(self.tree_model.index(""))
+        self.tree_view.header().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
+        
+        # Hide columns: Size, Type, Date Modified
+        for i in range(1, 4):
+            self.tree_view.hideColumn(i)
+        
+        self.tree_view.clicked.connect(self.on_directory_clicked)
+        self.tree_view.doubleClicked.connect(self.on_directory_double_clicked)
+        
+        # Expand to start path
+        if os.path.isdir(self.selected_path):
+            index = self.tree_model.index(self.selected_path)
+            self.tree_view.setCurrentIndex(index)
+            self.tree_view.scrollTo(index)
+            self.tree_view.expand(index)
+        
+        layout.addWidget(self.tree_view)
+        
+        # Buttons
+        btn_layout = QHBoxLayout()
+        btn_layout.addStretch()
+        
+        cancel_btn = CyberButton("CANCEL", CP_DIM, CP_RED)
+        cancel_btn.clicked.connect(self.reject)
+        btn_layout.addWidget(cancel_btn)
+        
+        select_btn = CyberButton("SELECT", CP_DIM, CP_GREEN)
+        select_btn.clicked.connect(self.accept)
+        btn_layout.addWidget(select_btn)
+        
+        layout.addLayout(btn_layout)
+    
+    def on_directory_clicked(self, index):
+        path = self.tree_model.filePath(index)
+        if os.path.isdir(path):
+            self.selected_path = path
+            self.path_display.setText(path)
+    
+    def on_directory_double_clicked(self, index):
+        path = self.tree_model.filePath(index)
+        if os.path.isdir(path):
+            self.selected_path = path
+            self.path_display.setText(path)
+            self.accept()
+    
+    def get_selected_path(self):
+        return self.selected_path
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
