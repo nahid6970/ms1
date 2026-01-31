@@ -9,6 +9,7 @@ from PyQt6.QtCore import Qt, QSize
 from PyQt6.QtGui import QFont, QPixmap, QPainter, QColor, QIcon
 from PIL import Image, ImageDraw, ImageFont
 import json
+import matplotlib.font_manager as fm
 
 # CYBERPUNK THEME PALETTE
 CP_BG = "#050505"
@@ -34,9 +35,11 @@ class NerdFontConverter(QMainWindow):
             "output_format": "png",
             "icon_color": "#FFFFFF",
             "bg_color": "transparent",
-            "font_path": ""
+            "font_path": "",
+            "font_name": "JetBrainsMono Nerd Font"
         }
         
+        self.system_fonts = self.get_system_fonts()
         self.load_config()
         self.init_ui()
         self.apply_theme()
@@ -117,14 +120,37 @@ class NerdFontConverter(QMainWindow):
         self.icon_input.setPlaceholderText("Enter Nerd Font character (e.g., ) or Unicode (U+F015)")
         input_layout.addRow("Icon Character:", self.icon_input)
         
+        # Font selection (system fonts dropdown)
+        self.font_combo = QComboBox()
+        self.font_combo.setEditable(True)
+        nerd_fonts = [f for f in self.system_fonts.keys() if 'nerd' in f.lower() or 'nf' in f.lower()]
+        all_fonts = list(self.system_fonts.keys())
+        
+        # Add Nerd Fonts first, then all fonts
+        for font in nerd_fonts:
+            self.font_combo.addItem(font)
+        self.font_combo.insertSeparator(len(nerd_fonts))
+        for font in all_fonts:
+            if font not in nerd_fonts:
+                self.font_combo.addItem(font)
+        
+        # Set saved font or default
+        saved_font = self.config.get("font_name", "JetBrainsMono Nerd Font")
+        index = self.font_combo.findText(saved_font)
+        if index >= 0:
+            self.font_combo.setCurrentIndex(index)
+        
+        input_layout.addRow("Font Name:", self.font_combo)
+        
+        # Optional: Custom font file path
         self.font_path_input = QLineEdit(self.config.get("font_path", ""))
-        self.font_path_input.setPlaceholderText("Path to Nerd Font .ttf file")
+        self.font_path_input.setPlaceholderText("Or specify custom .ttf file path (optional)")
         font_browse_btn = QPushButton("BROWSE")
         font_browse_btn.clicked.connect(self.browse_font)
         font_layout = QHBoxLayout()
         font_layout.addWidget(self.font_path_input)
         font_layout.addWidget(font_browse_btn)
-        input_layout.addRow("Font File:", font_layout)
+        input_layout.addRow("Custom Font:", font_layout)
         
         input_group.setLayout(input_layout)
         main_layout.addWidget(input_group)
@@ -222,6 +248,18 @@ class NerdFontConverter(QMainWindow):
     def log(self, message):
         self.log_text.append(f">> {message}")
     
+    def get_system_fonts(self):
+        """Get all system fonts with their paths"""
+        fonts = {}
+        try:
+            for font in fm.fontManager.ttflist:
+                font_name = font.name
+                if font_name not in fonts:
+                    fonts[font_name] = font.fname
+        except:
+            pass
+        return fonts
+    
     def browse_font(self):
         file_path, _ = QFileDialog.getOpenFileName(
             self, "Select Nerd Font File", "", "Font Files (*.ttf *.otf)"
@@ -247,14 +285,24 @@ class NerdFontConverter(QMainWindow):
     def convert_icon(self):
         # Validate inputs
         icon_char = self.icon_input.text().strip()
-        font_path = self.font_path_input.text().strip()
         
         if not icon_char:
             QMessageBox.warning(self, "Input Error", "Please enter an icon character!")
             return
         
-        if not font_path or not Path(font_path).exists():
-            QMessageBox.warning(self, "Font Error", "Please select a valid Nerd Font file!")
+        # Get font path (custom file or system font)
+        font_path = self.font_path_input.text().strip()
+        if not font_path:
+            # Use selected system font
+            font_name = self.font_combo.currentText()
+            if font_name in self.system_fonts:
+                font_path = self.system_fonts[font_name]
+            else:
+                QMessageBox.warning(self, "Font Error", "Please select a valid font!")
+                return
+        
+        if not Path(font_path).exists():
+            QMessageBox.warning(self, "Font Error", f"Font file not found: {font_path}")
             return
         
         # Parse Unicode if needed
@@ -341,6 +389,7 @@ class NerdFontConverter(QMainWindow):
         self.config["icon_color"] = self.icon_color_input.text().strip()
         self.config["bg_color"] = self.bg_color_input.text().strip()
         self.config["font_path"] = self.font_path_input.text().strip()
+        self.config["font_name"] = self.font_combo.currentText()
         
         with open("nerdfont_converter_config.json", 'w') as f:
             json.dump(self.config, f, indent=2)
