@@ -331,24 +331,6 @@ class NerdFontConverter(QMainWindow):
             pass
         return fonts
     
-    def draw_rounded_rectangle(self, draw, xy, radius, outline=None, width=1):
-        """Draw a rounded rectangle"""
-        x1, y1 = xy[0]
-        x2, y2 = xy[1]
-        
-        # Draw the rounded rectangle using arcs and lines
-        for i in range(width):
-            offset = i
-            draw.arc([x1+offset, y1+offset, x1+offset+radius*2, y1+offset+radius*2], 180, 270, fill=outline)
-            draw.arc([x2-offset-radius*2, y1+offset, x2-offset, y1+offset+radius*2], 270, 360, fill=outline)
-            draw.arc([x2-offset-radius*2, y2-offset-radius*2, x2-offset, y2-offset], 0, 90, fill=outline)
-            draw.arc([x1+offset, y2-offset-radius*2, x1+offset+radius*2, y2-offset], 90, 180, fill=outline)
-            
-            draw.line([x1+offset+radius, y1+offset, x2-offset-radius, y1+offset], fill=outline)
-            draw.line([x1+offset+radius, y2-offset, x2-offset-radius, y2-offset], fill=outline)
-            draw.line([x1+offset, y1+offset+radius, x1+offset, y2-offset-radius], fill=outline)
-            draw.line([x2-offset, y1+offset+radius, x2-offset, y2-offset-radius], fill=outline)
-    
     def save_as_svg(self, output_path, icon_char, size, fill_color, bg_color, font_path,
                    border_enabled=False, border_color="#000000", border_thickness=2, border_radius=0):
         """Generate SVG file with embedded font"""
@@ -494,7 +476,7 @@ class NerdFontConverter(QMainWindow):
         dimensions = self.parse_dimensions()
         output_format = self.format_combo.currentText()
         icon_color = self.icon_color_input.text().strip()
-        bg_color = self.bg_color_input.text().strip()
+        bg_color = self.bg_color_input.text().strip() or "transparent"
         output_dir = Path(self.output_path_input.text().strip())
         
         # Border settings
@@ -528,13 +510,46 @@ class NerdFontConverter(QMainWindow):
                 # Add border if enabled
                 if border_enabled:
                     if border_radius > 0:
-                        # Rounded rectangle
-                        self.draw_rounded_rectangle(draw, [(0, 0), (size-1, size-1)], border_radius, 
-                                                   outline=border_color, width=border_thickness)
+                        # Create a new image with proper rounded corners
+                        rounded_img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
+                        rounded_draw = ImageDraw.Draw(rounded_img)
+                        
+                        # Draw rounded background first
+                        if bg_color != "transparent":
+                            rounded_draw.rounded_rectangle(
+                                [(0, 0), (size-1, size-1)], 
+                                radius=border_radius, 
+                                fill=bg_color
+                            )
+                        
+                        # Paste the icon on top
+                        rounded_img.paste(img, (0, 0), img)
+                        
+                        # Draw rounded border on top
+                        rounded_draw.rounded_rectangle(
+                            [(border_thickness//2, border_thickness//2), 
+                             (size-1-border_thickness//2, size-1-border_thickness//2)], 
+                            radius=border_radius, 
+                            outline=border_color, 
+                            width=border_thickness
+                        )
+                        
+                        # Create mask for rounded corners to clip everything
+                        mask = Image.new('L', (size, size), 0)
+                        mask_draw = ImageDraw.Draw(mask)
+                        mask_draw.rounded_rectangle([(0, 0), (size-1, size-1)], radius=border_radius, fill=255)
+                        
+                        # Apply mask to clip to rounded shape
+                        rounded_img.putalpha(mask)
+                        img = rounded_img
                     else:
                         # Square border
-                        for i in range(border_thickness):
-                            draw.rectangle([(i, i), (size-1-i, size-1-i)], outline=border_color)
+                        draw.rectangle(
+                            [(border_thickness//2, border_thickness//2), 
+                             (size-1-border_thickness//2, size-1-border_thickness//2)], 
+                            outline=border_color, 
+                            width=border_thickness
+                        )
                 
                 # Save to output directory
                 filename = f"icon_{size}x{size}.{output_format}"
