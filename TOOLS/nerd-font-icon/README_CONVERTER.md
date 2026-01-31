@@ -5,7 +5,7 @@ Convert Nerd Font icons to PNG/ICO/BMP/JPG with multiple dimensions in one click
 ## 🚀 Features
 
 - **Batch conversion** to multiple sizes (16x16, 32x32, 64x64, etc.)
-- **Dual output**: Images saved in both root `img/` and `img/all_sizes/` subdirectory
+- **Simple output**: All images saved directly in the `img/` directory
 - **Multiple formats**: PNG, ICO, BMP, JPG
 - **Customizable colors**: Icon color and background (including transparent)
 - **Config persistence**: Save your settings for next time
@@ -42,10 +42,8 @@ pip install -r requirements.txt
    ├── icon_16x16.png
    ├── icon_32x32.png
    ├── icon_64x64.png
-   └── all_sizes/
-       ├── icon_16x16.png
-       ├── icon_32x32.png
-       └── icon_64x64.png
+   ├── icon_128x128.png
+   └── icon_256x256.png
    ```
 
 ## ⚙️ Configuration
@@ -73,4 +71,4 @@ Settings are auto-saved to `nerdfont_converter_config.json`
 ## 📝 Example
 
 Input: `` (home icon from Nerd Font)
-Output: 8 different sizes in both `img/` and `img/all_sizes/`
+Output: All sizes directly in `img/` folder

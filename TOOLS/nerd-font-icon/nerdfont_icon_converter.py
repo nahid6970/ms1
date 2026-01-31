@@ -320,10 +320,8 @@ class NerdFontConverter(QMainWindow):
         bg_color = self.bg_color_input.text().strip()
         output_dir = Path(self.output_path_input.text().strip())
         
-        # Create directories
+        # Create output directory
         output_dir.mkdir(parents=True, exist_ok=True)
-        batch_dir = output_dir / "all_sizes"
-        batch_dir.mkdir(exist_ok=True)
         
         self.log(f"Starting conversion for '{icon_char}'...")
         self.log(f"Dimensions: {dimensions}")
@@ -352,16 +350,10 @@ class NerdFontConverter(QMainWindow):
                 fill_color = icon_color if icon_color != "transparent" else "#FFFFFF"
                 draw.text((x, y), icon_char, font=font, fill=fill_color)
                 
-                # Save to both locations
+                # Save to output directory
                 filename = f"icon_{size}x{size}.{output_format}"
-                
-                # Root directory
-                root_path = output_dir / filename
-                img.save(root_path, format=output_format.upper())
-                
-                # Batch directory
-                batch_path = batch_dir / filename
-                img.save(batch_path, format=output_format.upper())
+                output_path = output_dir / filename
+                img.save(output_path, format=output_format.upper())
                 
                 success_count += 1
                 self.log(f"✓ Generated {size}x{size} → {filename}")
