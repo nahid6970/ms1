@@ -29,6 +29,11 @@ class NerdFontConverter(QMainWindow):
         self.setWindowTitle("NERDFONT ICON CONVERTER")
         self.resize(900, 700)
         
+        # Config file path
+        self.config_dir = Path(r"C:\@delta\output\nerd-icon")
+        self.config_dir.mkdir(parents=True, exist_ok=True)
+        self.config_file = self.config_dir / "nerdfont_converter_config.json"
+        
         # Default settings
         self.config = {
             "dimensions": [16, 24, 32, 40, 48, 64, 128, 256],
@@ -372,10 +377,9 @@ class NerdFontConverter(QMainWindow):
         QMessageBox.information(self, "Success", f"Generated {success_count} icons in:\n{output_dir.absolute()}")
     
     def load_config(self):
-        config_file = Path("nerdfont_converter_config.json")
-        if config_file.exists():
+        if self.config_file.exists():
             try:
-                with open(config_file, 'r') as f:
+                with open(self.config_file, 'r') as f:
                     loaded = json.load(f)
                     self.config.update(loaded)
             except:
@@ -390,7 +394,7 @@ class NerdFontConverter(QMainWindow):
         self.config["font_name"] = self.font_combo.currentText()
         self.config["output_path"] = self.output_path_input.text().strip()
         
-        with open("nerdfont_converter_config.json", 'w') as f:
+        with open(self.config_file, 'w') as f:
             json.dump(self.config, f, indent=2)
         
         self.log("Configuration saved!")
