@@ -279,12 +279,33 @@ class NerdFontConverter(QMainWindow):
         return fonts
     
     def save_as_svg(self, output_path, icon_char, size, fill_color, bg_color, font_path):
-        """Generate SVG file"""
+        """Generate SVG file with embedded font"""
         font_size = int(size * 0.8)
         
         # Calculate approximate text position (centered)
         x = size // 2
         y = size // 2 + font_size // 3
+        
+        # Convert font to base64 for embedding
+        import base64
+        try:
+            with open(font_path, 'rb') as f:
+                font_data = base64.b64encode(f.read()).decode('utf-8')
+            font_family = Path(font_path).stem
+            
+            # Embedded font style
+            font_style = f'''<defs>
+    <style type="text/css">
+        @font-face {{
+            font-family: '{font_family}';
+            src: url(data:font/truetype;charset=utf-8;base64,{font_data}) format('truetype');
+        }}
+    </style>
+</defs>'''
+        except:
+            # Fallback without embedded font
+            font_family = "monospace"
+            font_style = ""
         
         # Background
         bg_rect = ""
@@ -294,8 +315,9 @@ class NerdFontConverter(QMainWindow):
         # SVG content
         svg_content = f'''<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="{size}" height="{size}" viewBox="0 0 {size} {size}">
+{font_style}
 {bg_rect}
-<text x="{x}" y="{y}" font-family="monospace" font-size="{font_size}" fill="{fill_color}" text-anchor="middle" dominant-baseline="middle">{icon_char}</text>
+<text x="{x}" y="{y}" font-family="{font_family}" font-size="{font_size}" fill="{fill_color}" text-anchor="middle" dominant-baseline="middle">{icon_char}</text>
 </svg>'''
         
         with open(output_path, 'w', encoding='utf-8') as f:
