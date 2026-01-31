@@ -180,9 +180,14 @@ class NerdFontConverter(QMainWindow):
         icon_color_layout = QHBoxLayout()
         self.icon_color_input = QLineEdit(self.config["icon_color"])
         self.icon_color_input.setPlaceholderText("#FFFFFF or transparent")
+        self.icon_color_input.textChanged.connect(lambda: self.update_color_preview(self.icon_color_input, self.icon_color_preview))
+        self.icon_color_preview = QLabel("   ")
+        self.icon_color_preview.setFixedSize(30, 30)
+        self.icon_color_preview.setStyleSheet(f"background-color: {self.config['icon_color']}; border: 1px solid {CP_DIM};")
         icon_color_btn = QPushButton("PICK COLOR")
-        icon_color_btn.clicked.connect(lambda: self.pick_color(self.icon_color_input))
+        icon_color_btn.clicked.connect(lambda: self.pick_color(self.icon_color_input, self.icon_color_preview))
         icon_color_layout.addWidget(self.icon_color_input)
+        icon_color_layout.addWidget(self.icon_color_preview)
         icon_color_layout.addWidget(icon_color_btn)
         settings_layout.addRow("Icon Color:", icon_color_layout)
         
@@ -190,9 +195,15 @@ class NerdFontConverter(QMainWindow):
         bg_color_layout = QHBoxLayout()
         self.bg_color_input = QLineEdit(self.config["bg_color"])
         self.bg_color_input.setPlaceholderText("transparent or #000000")
+        self.bg_color_input.textChanged.connect(lambda: self.update_color_preview(self.bg_color_input, self.bg_color_preview))
+        self.bg_color_preview = QLabel("   ")
+        self.bg_color_preview.setFixedSize(30, 30)
+        bg_preview_color = self.config["bg_color"] if self.config["bg_color"] != "transparent" else "#00000000"
+        self.bg_color_preview.setStyleSheet(f"background-color: {bg_preview_color}; border: 1px solid {CP_DIM};")
         bg_color_btn = QPushButton("PICK COLOR")
-        bg_color_btn.clicked.connect(lambda: self.pick_color(self.bg_color_input))
+        bg_color_btn.clicked.connect(lambda: self.pick_color(self.bg_color_input, self.bg_color_preview))
         bg_color_layout.addWidget(self.bg_color_input)
+        bg_color_layout.addWidget(self.bg_color_preview)
         bg_color_layout.addWidget(bg_color_btn)
         settings_layout.addRow("Background:", bg_color_layout)
         
@@ -211,9 +222,14 @@ class NerdFontConverter(QMainWindow):
         border_color_layout = QHBoxLayout()
         self.border_color_input = QLineEdit(self.config.get("border_color", "#000000"))
         self.border_color_input.setPlaceholderText("#000000")
+        self.border_color_input.textChanged.connect(lambda: self.update_color_preview(self.border_color_input, self.border_color_preview))
+        self.border_color_preview = QLabel("   ")
+        self.border_color_preview.setFixedSize(30, 30)
+        self.border_color_preview.setStyleSheet(f"background-color: {self.config.get('border_color', '#000000')}; border: 1px solid {CP_DIM};")
         border_color_btn = QPushButton("PICK COLOR")
-        border_color_btn.clicked.connect(lambda: self.pick_color(self.border_color_input))
+        border_color_btn.clicked.connect(lambda: self.pick_color(self.border_color_input, self.border_color_preview))
         border_color_layout.addWidget(self.border_color_input)
+        border_color_layout.addWidget(self.border_color_preview)
         border_color_layout.addWidget(border_color_btn)
         border_layout.addRow("Border Color:", border_color_layout)
         
@@ -404,7 +420,7 @@ class NerdFontConverter(QMainWindow):
         if dir_path:
             self.output_path_input.setText(dir_path)
     
-    def pick_color(self, line_edit):
+    def pick_color(self, line_edit, preview_label):
         """Open color picker dialog"""
         current_color = line_edit.text().strip()
         
@@ -420,6 +436,19 @@ class NerdFontConverter(QMainWindow):
         
         if color.isValid():
             line_edit.setText(color.name())
+            preview_label.setStyleSheet(f"background-color: {color.name()}; border: 1px solid {CP_DIM};")
+    
+    def update_color_preview(self, line_edit, preview_label):
+        """Update color preview when text changes"""
+        color_text = line_edit.text().strip()
+        if color_text == "transparent":
+            preview_label.setStyleSheet(f"background-color: #00000000; border: 1px solid {CP_DIM};")
+        elif color_text.startswith("#") and len(color_text) in [4, 7, 9]:
+            try:
+                QColor(color_text)  # Validate color
+                preview_label.setStyleSheet(f"background-color: {color_text}; border: 1px solid {CP_DIM};")
+            except:
+                pass
     
     def parse_dimensions(self):
         text = self.dimensions_text.toPlainText()
