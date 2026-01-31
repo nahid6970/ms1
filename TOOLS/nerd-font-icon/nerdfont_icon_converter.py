@@ -495,9 +495,14 @@ class NerdFontConverter(QMainWindow):
         
         for size in dimensions:
             try:
-                # Create image
-                img = Image.new('RGBA', (size, size), (0, 0, 0, 0) if bg_color == "transparent" else bg_color)
+                # Create image with transparent background always (bg will be added later if needed)
+                img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
                 draw = ImageDraw.Draw(img)
+                
+                # Draw background if no border or square border
+                if not border_enabled or (border_enabled and border_radius == 0):
+                    if bg_color != "transparent":
+                        draw.rectangle([(0, 0), (size-1, size-1)], fill=bg_color)
                 
                 # Load font
                 font_size = int(size * 0.75)
@@ -514,15 +519,15 @@ class NerdFontConverter(QMainWindow):
                         rounded_img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
                         rounded_draw = ImageDraw.Draw(rounded_img)
                         
-                        # Draw rounded background first
-                        if bg_color != "transparent":
+                        # Draw rounded background only if specified (not transparent)
+                        if bg_color and bg_color != "transparent" and bg_color.strip():
                             rounded_draw.rounded_rectangle(
                                 [(0, 0), (size-1, size-1)], 
                                 radius=border_radius, 
                                 fill=bg_color
                             )
                         
-                        # Paste the icon on top
+                        # Paste the icon on top (with transparency)
                         rounded_img.paste(img, (0, 0), img)
                         
                         # Draw rounded border on top
