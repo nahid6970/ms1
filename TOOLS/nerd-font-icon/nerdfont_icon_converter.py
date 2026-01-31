@@ -4,7 +4,7 @@ from pathlib import Path
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QLabel, QPushButton, QLineEdit, QGroupBox, QFormLayout,
                              QComboBox, QSpinBox, QTextEdit, QFileDialog, QMessageBox,
-                             QListWidget, QListWidgetItem, QColorDialog)
+                             QListWidget, QListWidgetItem, QColorDialog, QCheckBox)
 from PyQt6.QtCore import Qt, QSize
 from PyQt6.QtGui import QFont, QPixmap, QPainter, QColor, QIcon
 from PIL import Image, ImageDraw, ImageFont
@@ -42,7 +42,12 @@ class NerdFontConverter(QMainWindow):
             "bg_color": "transparent",
             "font_path": "",
             "font_name": "JetBrainsMono Nerd Font",
-            "output_path": "img"
+            "output_path": "img",
+            "border_enabled": False,
+            "border_color": "#000000",
+            "border_thickness": 2,
+            "border_radius": 0,
+            "last_icon": ""
         }
         
         self.system_fonts = self.get_system_fonts()
@@ -124,6 +129,7 @@ class NerdFontConverter(QMainWindow):
         
         self.icon_input = QLineEdit()
         self.icon_input.setPlaceholderText("Enter Nerd Font character (e.g., ) or Unicode (U+F015)")
+        self.icon_input.setText(self.config.get("last_icon", ""))
         input_layout.addRow("Icon Character:", self.icon_input)
         
         # Font selection (system fonts dropdown)
@@ -192,6 +198,37 @@ class NerdFontConverter(QMainWindow):
         
         settings_group.setLayout(settings_layout)
         main_layout.addWidget(settings_group)
+        
+        # Border Settings Group
+        border_group = QGroupBox("BORDER SETTINGS")
+        border_layout = QFormLayout()
+        
+        self.border_enabled = QCheckBox("Enable Border")
+        self.border_enabled.setChecked(self.config.get("border_enabled", False))
+        border_layout.addRow("", self.border_enabled)
+        
+        # Border color with picker
+        border_color_layout = QHBoxLayout()
+        self.border_color_input = QLineEdit(self.config.get("border_color", "#000000"))
+        self.border_color_input.setPlaceholderText("#000000")
+        border_color_btn = QPushButton("PICK COLOR")
+        border_color_btn.clicked.connect(lambda: self.pick_color(self.border_color_input))
+        border_color_layout.addWidget(self.border_color_input)
+        border_color_layout.addWidget(border_color_btn)
+        border_layout.addRow("Border Color:", border_color_layout)
+        
+        self.border_thickness = QSpinBox()
+        self.border_thickness.setRange(1, 50)
+        self.border_thickness.setValue(self.config.get("border_thickness", 2))
+        border_layout.addRow("Border Thickness:", self.border_thickness)
+        
+        self.border_radius = QSpinBox()
+        self.border_radius.setRange(0, 500)
+        self.border_radius.setValue(self.config.get("border_radius", 0))
+        border_layout.addRow("Border Radius (0=square):", self.border_radius)
+        
+        border_group.setLayout(border_layout)
+        main_layout.addWidget(border_group)
         
         # Dimensions Group
         dim_group = QGroupBox("OUTPUT DIMENSIONS")
@@ -278,7 +315,26 @@ class NerdFontConverter(QMainWindow):
             pass
         return fonts
     
-    def save_as_svg(self, output_path, icon_char, size, fill_color, bg_color, font_path):
+    def draw_rounded_rectangle(self, draw, xy, radius, outline=None, width=1):
+        """Draw a rounded rectangle"""
+        x1, y1 = xy[0]
+        x2, y2 = xy[1]
+        
+        # Draw the rounded rectangle using arcs and lines
+        for i in range(width):
+            offset = i
+            draw.arc([x1+offset, y1+offset, x1+offset+radius*2, y1+offset+radius*2], 180, 270, fill=outline)
+            draw.arc([x2-offset-radius*2, y1+offset, x2-offset, y1+offset+radius*2], 270, 360, fill=outline)
+            draw.arc([x2-offset-radius*2, y2-offset-radius*2, x2-offset, y2-offset], 0, 90, fill=outline)
+            draw.arc([x1+offset, y2-offset-radius*2, x1+offset+radius*2, y2-offset], 90, 180, fill=outline)
+            
+            draw.line([x1+offset+radius, y1+offset, x2-offset-radius, y1+offset], fill=outline)
+            draw.line([x1+offset+radius, y2-offset, x2-offset-radius, y2-offset], fill=outline)
+            draw.line([x1+offset, y1+offset+radius, x1+offset, y2-offset-radius], fill=outline)
+            draw.line([x2-offset, y1+offset+radius, x2-offset, y2-offset-radius], fill=outline)
+    
+    def save_as_svg(self, output_path, icon_char, size, fill_color, bg_color, font_path,
+                   border_enabled=False, border_color="#000000", border_thickness=2, border_radius=0):
         """Generate SVG file with embedded font"""
         font_size = int(size * 0.8)
         
@@ -310,13 +366,25 @@ class NerdFontConverter(QMainWindow):
         # Background
         bg_rect = ""
         if bg_color != "transparent":
-            bg_rect = f'<rect width="{size}" height="{size}" fill="{bg_color}"/>'
+            if border_radius > 0:
+                bg_rect = f'<rect width="{size}" height="{size}" rx="{border_radius}" ry="{border_radius}" fill="{bg_color}"/>'
+            else:
+                bg_rect = f'<rect width="{size}" height="{size}" fill="{bg_color}"/>'
+        
+        # Border
+        border_rect = ""
+        if border_enabled:
+            if border_radius > 0:
+                border_rect = f'<rect x="{border_thickness/2}" y="{border_thickness/2}" width="{size-border_thickness}" height="{size-border_thickness}" rx="{border_radius}" ry="{border_radius}" fill="none" stroke="{border_color}" stroke-width="{border_thickness}"/>'
+            else:
+                border_rect = f'<rect x="{border_thickness/2}" y="{border_thickness/2}" width="{size-border_thickness}" height="{size-border_thickness}" fill="none" stroke="{border_color}" stroke-width="{border_thickness}"/>'
         
         # SVG content
         svg_content = f'''<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="{size}" height="{size}" viewBox="0 0 {size} {size}">
 {font_style}
 {bg_rect}
+{border_rect}
 <text x="{x}" y="{y}" font-family="{font_family}" font-size="{font_size}" fill="{fill_color}" text-anchor="middle" dominant-baseline="middle">{icon_char}</text>
 </svg>'''
         
@@ -400,6 +468,12 @@ class NerdFontConverter(QMainWindow):
         bg_color = self.bg_color_input.text().strip()
         output_dir = Path(self.output_path_input.text().strip())
         
+        # Border settings
+        border_enabled = self.border_enabled.isChecked()
+        border_color = self.border_color_input.text().strip()
+        border_thickness = self.border_thickness.value()
+        border_radius = self.border_radius.value()
+        
         # Create output directory
         output_dir.mkdir(parents=True, exist_ok=True)
         
@@ -415,20 +489,23 @@ class NerdFontConverter(QMainWindow):
                 draw = ImageDraw.Draw(img)
                 
                 # Load font
-                font = ImageFont.truetype(font_path, int(size * 0.8))
+                font_size = int(size * 0.75)
+                font = ImageFont.truetype(font_path, font_size)
                 
-                # Get text bounding box
-                bbox = draw.textbbox((0, 0), icon_char, font=font)
-                text_width = bbox[2] - bbox[0]
-                text_height = bbox[3] - bbox[1]
-                
-                # Center the icon
-                x = (size - text_width) // 2 - bbox[0]
-                y = (size - text_height) // 2 - bbox[1]
-                
-                # Draw icon
+                # Draw icon centered using anchor
                 fill_color = icon_color if icon_color != "transparent" else "#FFFFFF"
-                draw.text((x, y), icon_char, font=font, fill=fill_color)
+                draw.text((size // 2, size // 2), icon_char, font=font, fill=fill_color, anchor="mm")
+                
+                # Add border if enabled
+                if border_enabled:
+                    if border_radius > 0:
+                        # Rounded rectangle
+                        self.draw_rounded_rectangle(draw, [(0, 0), (size-1, size-1)], border_radius, 
+                                                   outline=border_color, width=border_thickness)
+                    else:
+                        # Square border
+                        for i in range(border_thickness):
+                            draw.rectangle([(i, i), (size-1-i, size-1-i)], outline=border_color)
                 
                 # Save to output directory
                 filename = f"icon_{size}x{size}.{output_format}"
@@ -436,7 +513,8 @@ class NerdFontConverter(QMainWindow):
                 
                 if output_format == "svg":
                     # Generate SVG
-                    self.save_as_svg(output_path, icon_char, size, fill_color, bg_color, font_path)
+                    self.save_as_svg(output_path, icon_char, size, fill_color, bg_color, font_path,
+                                   border_enabled, border_color, border_thickness, border_radius)
                 else:
                     img.save(output_path, format=output_format.upper())
                 
@@ -449,11 +527,10 @@ class NerdFontConverter(QMainWindow):
         self.log(f"Conversion complete! {success_count}/{len(dimensions)} icons generated.")
         self.log(f"Output: {output_dir.absolute()}")
         
-        # Auto-save output path
+        # Auto-save output path and last icon
         self.config["output_path"] = str(output_dir)
+        self.config["last_icon"] = icon_char
         self.save_config()
-        
-        QMessageBox.information(self, "Success", f"Generated {success_count} icons in:\n{output_dir.absolute()}")
     
     def load_config(self):
         if self.config_file.exists():
@@ -472,12 +549,16 @@ class NerdFontConverter(QMainWindow):
         self.config["font_path"] = self.font_path_input.text().strip()
         self.config["font_name"] = self.font_combo.currentText()
         self.config["output_path"] = self.output_path_input.text().strip()
+        self.config["border_enabled"] = self.border_enabled.isChecked()
+        self.config["border_color"] = self.border_color_input.text().strip()
+        self.config["border_thickness"] = self.border_thickness.value()
+        self.config["border_radius"] = self.border_radius.value()
+        self.config["last_icon"] = self.icon_input.text().strip()
         
         with open(self.config_file, 'w') as f:
             json.dump(self.config, f, indent=2)
         
         self.log("Configuration saved!")
-        QMessageBox.information(self, "Saved", "Configuration saved successfully!")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
