@@ -36,7 +36,8 @@ class NerdFontConverter(QMainWindow):
             "icon_color": "#FFFFFF",
             "bg_color": "transparent",
             "font_path": "",
-            "font_name": "JetBrainsMono Nerd Font"
+            "font_name": "JetBrainsMono Nerd Font",
+            "output_path": "img"
         }
         
         self.system_fonts = self.get_system_fonts()
@@ -195,7 +196,7 @@ class NerdFontConverter(QMainWindow):
         output_group = QGroupBox("OUTPUT DIRECTORY")
         output_layout = QHBoxLayout()
         
-        self.output_path_input = QLineEdit("img")
+        self.output_path_input = QLineEdit(self.config.get("output_path", "img"))
         self.output_path_input.setPlaceholderText("Output directory path")
         output_browse_btn = QPushButton("BROWSE")
         output_browse_btn.clicked.connect(self.browse_output)
@@ -363,6 +364,11 @@ class NerdFontConverter(QMainWindow):
         
         self.log(f"Conversion complete! {success_count}/{len(dimensions)} icons generated.")
         self.log(f"Output: {output_dir.absolute()}")
+        
+        # Auto-save output path
+        self.config["output_path"] = str(output_dir)
+        self.save_config()
+        
         QMessageBox.information(self, "Success", f"Generated {success_count} icons in:\n{output_dir.absolute()}")
     
     def load_config(self):
@@ -382,6 +388,7 @@ class NerdFontConverter(QMainWindow):
         self.config["bg_color"] = self.bg_color_input.text().strip()
         self.config["font_path"] = self.font_path_input.text().strip()
         self.config["font_name"] = self.font_combo.currentText()
+        self.config["output_path"] = self.output_path_input.text().strip()
         
         with open("nerdfont_converter_config.json", 'w') as f:
             json.dump(self.config, f, indent=2)
