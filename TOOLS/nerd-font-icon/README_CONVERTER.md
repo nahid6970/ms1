@@ -6,7 +6,7 @@ Convert Nerd Font icons to PNG/ICO/BMP/JPG with multiple dimensions in one click
 
 - **Batch conversion** to multiple sizes (16x16, 32x32, 64x64, etc.)
 - **Simple output**: All images saved directly in the `img/` directory
-- **Multiple formats**: PNG, ICO, BMP, JPG
+- **Multiple formats**: PNG, SVG, ICO, BMP, JPG
 - **Customizable colors**: Icon color and background (including transparent)
 - **Config persistence**: Save your settings for next time
 - **Cyberpunk UI**: Styled with the theme from THEME_GUIDE.md
@@ -66,7 +66,7 @@ Settings are auto-saved to `nerdfont_converter_config.json`
 
 - **Icon Color**: Hex color (e.g., `#FFFFFF`) or `transparent`
 - **Background**: Hex color (e.g., `#000000`) or `transparent`
-- **Output Format**: PNG (recommended), ICO, BMP, JPG
+- **Output Format**: PNG (recommended), SVG, ICO, BMP, JPG
 
 ## 📝 Example
 

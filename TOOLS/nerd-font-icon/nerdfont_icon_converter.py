@@ -166,7 +166,7 @@ class NerdFontConverter(QMainWindow):
         settings_layout = QFormLayout()
         
         self.format_combo = QComboBox()
-        self.format_combo.addItems(["png", "ico", "bmp", "jpg"])
+        self.format_combo.addItems(["png", "svg", "ico", "bmp", "jpg"])
         self.format_combo.setCurrentText(self.config["output_format"])
         settings_layout.addRow("Output Format:", self.format_combo)
         
@@ -266,6 +266,29 @@ class NerdFontConverter(QMainWindow):
             pass
         return fonts
     
+    def save_as_svg(self, output_path, icon_char, size, fill_color, bg_color, font_path):
+        """Generate SVG file"""
+        font_size = int(size * 0.8)
+        
+        # Calculate approximate text position (centered)
+        x = size // 2
+        y = size // 2 + font_size // 3
+        
+        # Background
+        bg_rect = ""
+        if bg_color != "transparent":
+            bg_rect = f'<rect width="{size}" height="{size}" fill="{bg_color}"/>'
+        
+        # SVG content
+        svg_content = f'''<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="{size}" height="{size}" viewBox="0 0 {size} {size}">
+{bg_rect}
+<text x="{x}" y="{y}" font-family="monospace" font-size="{font_size}" fill="{fill_color}" text-anchor="middle" dominant-baseline="middle">{icon_char}</text>
+</svg>'''
+        
+        with open(output_path, 'w', encoding='utf-8') as f:
+            f.write(svg_content)
+    
     def browse_font(self):
         file_path, _ = QFileDialog.getOpenFileName(
             self, "Select Nerd Font File", "", "Font Files (*.ttf *.otf)"
@@ -359,7 +382,12 @@ class NerdFontConverter(QMainWindow):
                 # Save to output directory
                 filename = f"icon_{size}x{size}.{output_format}"
                 output_path = output_dir / filename
-                img.save(output_path, format=output_format.upper())
+                
+                if output_format == "svg":
+                    # Generate SVG
+                    self.save_as_svg(output_path, icon_char, size, fill_color, bg_color, font_path)
+                else:
+                    img.save(output_path, format=output_format.upper())
                 
                 success_count += 1
                 self.log(f"✓ Generated {size}x{size} → {filename}")
