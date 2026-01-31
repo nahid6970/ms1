@@ -4,7 +4,7 @@ from pathlib import Path
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QLabel, QPushButton, QLineEdit, QGroupBox, QFormLayout,
                              QComboBox, QSpinBox, QTextEdit, QFileDialog, QMessageBox,
-                             QListWidget, QListWidgetItem)
+                             QListWidget, QListWidgetItem, QColorDialog)
 from PyQt6.QtCore import Qt, QSize
 from PyQt6.QtGui import QFont, QPixmap, QPainter, QColor, QIcon
 from PIL import Image, ImageDraw, ImageFont
@@ -170,13 +170,25 @@ class NerdFontConverter(QMainWindow):
         self.format_combo.setCurrentText(self.config["output_format"])
         settings_layout.addRow("Output Format:", self.format_combo)
         
+        # Icon color with color picker
+        icon_color_layout = QHBoxLayout()
         self.icon_color_input = QLineEdit(self.config["icon_color"])
         self.icon_color_input.setPlaceholderText("#FFFFFF or transparent")
-        settings_layout.addRow("Icon Color:", self.icon_color_input)
+        icon_color_btn = QPushButton("PICK COLOR")
+        icon_color_btn.clicked.connect(lambda: self.pick_color(self.icon_color_input))
+        icon_color_layout.addWidget(self.icon_color_input)
+        icon_color_layout.addWidget(icon_color_btn)
+        settings_layout.addRow("Icon Color:", icon_color_layout)
         
+        # Background color with color picker
+        bg_color_layout = QHBoxLayout()
         self.bg_color_input = QLineEdit(self.config["bg_color"])
         self.bg_color_input.setPlaceholderText("transparent or #000000")
-        settings_layout.addRow("Background:", self.bg_color_input)
+        bg_color_btn = QPushButton("PICK COLOR")
+        bg_color_btn.clicked.connect(lambda: self.pick_color(self.bg_color_input))
+        bg_color_layout.addWidget(self.bg_color_input)
+        bg_color_layout.addWidget(bg_color_btn)
+        settings_layout.addRow("Background:", bg_color_layout)
         
         settings_group.setLayout(settings_layout)
         main_layout.addWidget(settings_group)
@@ -301,6 +313,23 @@ class NerdFontConverter(QMainWindow):
         dir_path = QFileDialog.getExistingDirectory(self, "Select Output Directory")
         if dir_path:
             self.output_path_input.setText(dir_path)
+    
+    def pick_color(self, line_edit):
+        """Open color picker dialog"""
+        current_color = line_edit.text().strip()
+        
+        # Parse current color if valid
+        initial_color = QColor("#FFFFFF")
+        if current_color and current_color != "transparent":
+            try:
+                initial_color = QColor(current_color)
+            except:
+                pass
+        
+        color = QColorDialog.getColor(initial_color, self, "Pick Color")
+        
+        if color.isValid():
+            line_edit.setText(color.name())
     
     def parse_dimensions(self):
         text = self.dimensions_text.toPlainText()
