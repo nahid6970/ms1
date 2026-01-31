@@ -47,7 +47,9 @@ class NerdFontConverter(QMainWindow):
             "border_color": "#000000",
             "border_thickness": 2,
             "border_radius": 0,
-            "last_icon": ""
+            "last_icon": "",
+            "icon_size_ratio": 75,
+            "filename_pattern": "icon_{size}x{size}"
         }
         
         self.system_fonts = self.get_system_fonts()
@@ -207,6 +209,18 @@ class NerdFontConverter(QMainWindow):
         bg_color_layout.addWidget(bg_color_btn)
         settings_layout.addRow("Background:", bg_color_layout)
         
+        # Icon size ratio
+        self.icon_size_ratio = QSpinBox()
+        self.icon_size_ratio.setRange(10, 200)
+        self.icon_size_ratio.setValue(self.config.get("icon_size_ratio", 75))
+        self.icon_size_ratio.setSuffix("%")
+        icon_ratio_label = QLabel("(How much of the image the icon fills, >100% crops)")
+        icon_ratio_label.setStyleSheet(f"color: {CP_SUBTEXT}; font-size: 9pt;")
+        icon_ratio_layout = QHBoxLayout()
+        icon_ratio_layout.addWidget(self.icon_size_ratio)
+        icon_ratio_layout.addWidget(icon_ratio_label)
+        settings_layout.addRow("Icon Size Ratio:", icon_ratio_layout)
+        
         settings_group.setLayout(settings_layout)
         main_layout.addWidget(settings_group)
         
@@ -263,16 +277,27 @@ class NerdFontConverter(QMainWindow):
         main_layout.addWidget(dim_group)
         
         # Output Group
-        output_group = QGroupBox("OUTPUT DIRECTORY")
-        output_layout = QHBoxLayout()
+        output_group = QGroupBox("OUTPUT SETTINGS")
+        output_layout = QFormLayout()
         
+        # Output directory
+        output_dir_layout = QHBoxLayout()
         self.output_path_input = QLineEdit(self.config.get("output_path", "img"))
         self.output_path_input.setPlaceholderText("Output directory path")
         output_browse_btn = QPushButton("BROWSE")
         output_browse_btn.clicked.connect(self.browse_output)
+        output_dir_layout.addWidget(self.output_path_input)
+        output_dir_layout.addWidget(output_browse_btn)
+        output_layout.addRow("Output Directory:", output_dir_layout)
         
-        output_layout.addWidget(self.output_path_input)
-        output_layout.addWidget(output_browse_btn)
+        # Filename pattern
+        self.filename_pattern = QLineEdit(self.config.get("filename_pattern", "icon_{size}x{size}"))
+        self.filename_pattern.setPlaceholderText("Use {size} for dimension, e.g., icon_{size}x{size} or icon{size}")
+        pattern_info = QLabel("Pattern examples: icon_{size}x{size}, icon{size}, myicon_{size}")
+        pattern_info.setStyleSheet(f"color: {CP_SUBTEXT}; font-size: 9pt;")
+        output_layout.addRow("Filename Pattern:", self.filename_pattern)
+        output_layout.addRow("", pattern_info)
+        
         output_group.setLayout(output_layout)
         main_layout.addWidget(output_group)
         
@@ -332,9 +357,9 @@ class NerdFontConverter(QMainWindow):
         return fonts
     
     def save_as_svg(self, output_path, icon_char, size, fill_color, bg_color, font_path,
-                   border_enabled=False, border_color="#000000", border_thickness=2, border_radius=0):
+                   border_enabled=False, border_color="#000000", border_thickness=2, border_radius=0, icon_size_ratio=75):
         """Generate SVG file with embedded font"""
-        font_size = int(size * 0.8)
+        font_size = int(size * (icon_size_ratio / 100))
         
         # Calculate approximate text position (centered)
         x = size // 2
@@ -485,6 +510,14 @@ class NerdFontConverter(QMainWindow):
         border_thickness = self.border_thickness.value()
         border_radius = self.border_radius.value()
         
+        # Icon size ratio
+        icon_size_ratio = self.icon_size_ratio.value()
+        
+        # Filename pattern
+        filename_pattern = self.filename_pattern.text().strip()
+        if not filename_pattern:
+            filename_pattern = "icon_{size}x{size}"
+        
         # Create output directory
         output_dir.mkdir(parents=True, exist_ok=True)
         
@@ -504,8 +537,8 @@ class NerdFontConverter(QMainWindow):
                     if bg_color != "transparent":
                         draw.rectangle([(0, 0), (size-1, size-1)], fill=bg_color)
                 
-                # Load font
-                font_size = int(size * 0.75)
+                # Load font with custom size ratio
+                font_size = int(size * (icon_size_ratio / 100))
                 font = ImageFont.truetype(font_path, font_size)
                 
                 # Draw icon centered using anchor
@@ -556,14 +589,14 @@ class NerdFontConverter(QMainWindow):
                             width=border_thickness
                         )
                 
-                # Save to output directory
-                filename = f"icon_{size}x{size}.{output_format}"
+                # Save to output directory with custom pattern
+                filename = filename_pattern.replace("{size}", str(size)) + f".{output_format}"
                 output_path = output_dir / filename
                 
                 if output_format == "svg":
                     # Generate SVG
                     self.save_as_svg(output_path, icon_char, size, fill_color, bg_color, font_path,
-                                   border_enabled, border_color, border_thickness, border_radius)
+                                   border_enabled, border_color, border_thickness, border_radius, icon_size_ratio)
                 else:
                     img.save(output_path, format=output_format.upper())
                 
@@ -603,6 +636,8 @@ class NerdFontConverter(QMainWindow):
         self.config["border_thickness"] = self.border_thickness.value()
         self.config["border_radius"] = self.border_radius.value()
         self.config["last_icon"] = self.icon_input.text().strip()
+        self.config["icon_size_ratio"] = self.icon_size_ratio.value()
+        self.config["filename_pattern"] = self.filename_pattern.text().strip()
         
         with open(self.config_file, 'w') as f:
             json.dump(self.config, f, indent=2)

@@ -66,7 +66,18 @@ Settings are auto-saved to `nerdfont_converter_config.json`
 
 - **Icon Color**: Hex color (e.g., `#FFFFFF`) or `transparent`
 - **Background**: Hex color (e.g., `#000000`) or `transparent`
+- **Icon Size Ratio**: 10-200% (controls how much of the image the icon fills)
+  - Default: 75% - good balance for most uses
+  - For Chrome extensions: Try 85-95% for larger, more visible icons
+  - Lower values (50-70%) create more padding around the icon
+  - Over 100% (110-150%) makes the icon overflow/crop for bold effect
+- **Filename Pattern**: Customize output filenames using `{size}` placeholder
+  - `icon_{size}x{size}` → icon_48x48.png (default)
+  - `icon{size}` → icon48.png
+  - `myicon_{size}` → myicon_48.png
+  - Any pattern you want!
 - **Output Format**: PNG (recommended), SVG, ICO, BMP, JPG
+- **Border Settings**: Add borders with custom color, thickness, and radius
 
 ## 📝 Example
 
