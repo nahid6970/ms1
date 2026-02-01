@@ -20,6 +20,18 @@ def open_with_editor(file_paths, editor):
             subprocess.run(f'start cmd /k edit {files_args}', shell=True)
         else:
             subprocess.run(['start', 'cmd', '/k', 'edit', file_paths], shell=True)
+    elif editor == "notepad++":
+        if isinstance(file_paths, list):
+            for file_path in file_paths:
+                subprocess.run(f'notepad++ "{file_path}"', shell=True)
+        else:
+            subprocess.run(f'notepad++ "{file_paths}"', shell=True)
+    elif editor == "notepads":
+        if isinstance(file_paths, list):
+            for file_path in file_paths:
+                subprocess.run(f'notepads "{file_path}"', shell=True)
+        else:
+            subprocess.run(f'notepads "{file_paths}"', shell=True)
     elif editor == "vscode":
         if isinstance(file_paths, list):
             for file_path in file_paths:
@@ -90,6 +102,8 @@ def create_editor_chooser(file_paths):
     editors = [
         ("nvim", "#19d600", ""),
         ("Edit", "#00ffcc", ""),
+        ("Notepad++", "#33ff33", ""),
+        ("Notepads", "#6666ff", ""),
         ("VSCode", "#7e96ff", ""),
         ("Emacs", "#8458b7", ""),
         ("Zed", "#ff6b6b", ""),
