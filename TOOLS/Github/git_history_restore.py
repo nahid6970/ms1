@@ -2,11 +2,12 @@ import sys
 import os
 import subprocess
 import json
+import re
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QLabel, QPushButton, QLineEdit, QTableWidget, QTableWidgetItem,
     QHeaderView, QFileDialog, QMessageBox, QAbstractItemView, QStyledItemDelegate, QStyle,
-    QTreeView, QDialog, QFileIconProvider, QInputDialog, QTextBrowser, QSplitter, QSpinBox
+    QTreeView, QDialog, QFileIconProvider, QInputDialog, QTextBrowser, QSplitter, QSpinBox, QMenu
 )
 from PyQt6.QtCore import Qt, QSize, QRect, QDir, QFileInfo, QThread, pyqtSignal, QThread, pyqtSignal, QUrl
 from PyQt6.QtGui import QFont, QColor, QCursor, QPainter, QFileSystemModel, QIcon, QPixmap
@@ -138,6 +139,20 @@ class GitWorker:
             return {"error": str(e)}
 
     @staticmethod
+    def get_git_root(directory):
+        """Get the root directory of the git repository"""
+        try:
+            root = subprocess.check_output(
+                ["git", "rev-parse", "--show-toplevel"],
+                cwd=directory,
+                text=True,
+                encoding='utf-8'
+            ).strip()
+            return root
+        except:
+            return directory
+
+    @staticmethod
     def get_commit_diff(directory, commit_hash):
         """Get the diff for a specific commit"""
         try:
@@ -190,6 +205,26 @@ class CyberButton(QPushButton):
                 color: {hover_text_color};
             }}
         """)
+
+class CyberDiffBrowser(QTextBrowser):
+    file_context_requested = pyqtSignal(int)
+
+    def contextMenuEvent(self, event):
+        url = self.anchorAt(event.pos())
+        if url.startswith("file-"):
+            try:
+                idx = int(url.replace("file-", ""))
+                menu = self.createStandardContextMenu()
+                menu.addSeparator()
+                action = menu.addAction("📂 Open in Editor")
+                
+                selected = menu.exec(event.globalPos())
+                if selected == action:
+                    self.file_context_requested.emit(idx)
+                return
+            except ValueError:
+                pass
+        super().contextMenuEvent(event)
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -369,7 +404,8 @@ class MainWindow(QMainWindow):
         diff_label.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold;")
         diff_layout.addWidget(diff_label)
         
-        self.diff_display = QTextBrowser()
+        self.diff_display = CyberDiffBrowser()
+        self.diff_display.file_context_requested.connect(self.open_file_in_editor)
         self.diff_display.setOpenExternalLinks(False)
         self.diff_display.setOpenLinks(False)
         self.diff_display.setStyleSheet(f"""
@@ -591,6 +627,23 @@ class MainWindow(QMainWindow):
         # Regenerate HTML with updated state
         self.render_diff_html()
     
+    def open_file_in_editor(self, idx):
+        if 0 <= idx < len(self.current_diff_sections):
+            rel_path = self.current_diff_sections[idx]['name']
+            current_dir = self.path_input.text()
+            
+            # Get git root to ensure correct path resolution
+            base_dir = GitWorker.get_git_root(current_dir)
+            full_path = os.path.normpath(os.path.join(base_dir, rel_path))
+            
+            script_path = r"C:\@delta\ms1\scripts\run\editor_chooser.py"
+            
+            try:
+                # Use Popen to not block the GUI
+                subprocess.Popen([sys.executable, script_path, full_path], cwd=os.path.dirname(script_path))
+            except Exception as e:
+                QMessageBox.warning(self, "Error", f"Failed to launch editor chooser:\n{str(e)}")
+
     def render_diff_html(self):
         """Render the diff HTML based on current expanded state"""
         if not self.current_diff_sections:
@@ -676,10 +729,22 @@ class MainWindow(QMainWindow):
         # First pass: collect file stats from diff
         for line in lines:
             if line.startswith('diff --git'):
-                parts = line.split(' ')
-                if len(parts) >= 4:
-                    current_file = parts[3].replace('b/', '')
+                # Safer extraction using regex to handle spaces and b/ prefix correctly
+                m = re.match(r'diff --git a/(.*) b/(.*)', line)
+                if m:
+                    current_file = m.group(2)
                     file_stats[current_file] = {'additions': 0, 'deletions': 0}
+                else:
+                    parts = line.split(' ')
+                    if len(parts) >= 4:
+                        # Fallback: simpler extraction, handle b/ prefix carefully
+                        # Check if part[3] starts with b/ and remove it
+                        raw_name = parts[3]
+                        if raw_name.startswith('b/'):
+                            current_file = raw_name[2:]
+                        else:
+                            current_file = raw_name
+                        file_stats[current_file] = {'additions': 0, 'deletions': 0}
             elif current_file and line.startswith('+') and not line.startswith('+++'):
                 file_stats[current_file]['additions'] += 1
             elif current_file and line.startswith('-') and not line.startswith('---'):
@@ -709,9 +774,17 @@ class MainWindow(QMainWindow):
                     current_file_lines = []
                 
                 # Extract new filename
-                parts = line.split(' ')
-                if len(parts) >= 4:
-                    current_file = parts[3].replace('b/', '')
+                m = re.match(r'diff --git a/(.*) b/(.*)', line)
+                if m:
+                    current_file = m.group(2)
+                else:
+                    parts = line.split(' ')
+                    if len(parts) >= 4:
+                         raw_name = parts[3]
+                         if raw_name.startswith('b/'):
+                             current_file = raw_name[2:]
+                         else:
+                             current_file = raw_name
                 continue
             
             # Skip metadata
