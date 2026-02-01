@@ -170,26 +170,12 @@ if (savedScrollPosition !== null) {
 // Toggle Default Home Page
 document.addEventListener('DOMContentLoaded', () => {
     const defaultHomePageSelect = document.getElementById('defaultHomePage');
-    const showCompletedCheckmarksToggle = document.getElementById('showCompletedCheckmarks');
     const showHiddenShowsToggle = document.getElementById('showHiddenShows');
     const html = document.documentElement;
 
     // Load default home page preference from localStorage
     const defaultHomePage = localStorage.getItem('defaultHomePage') || 'default';
     defaultHomePageSelect.value = defaultHomePage;
-
-    // Load show completed checkmarks preference from localStorage
-    const showCompletedCheckmarks = localStorage.getItem('showCompletedCheckmarks') === 'true';
-    console.log('Loaded showCompletedCheckmarks setting:', showCompletedCheckmarks);
-    if (showCompletedCheckmarks) {
-        html.classList.add('show-completed-checkmarks');
-        showCompletedCheckmarksToggle.checked = true;
-        console.log('Added show-completed-checkmarks class to HTML');
-    } else {
-        html.classList.remove('show-completed-checkmarks');
-        showCompletedCheckmarksToggle.checked = false;
-        console.log('Removed show-completed-checkmarks class from HTML');
-    }
 
     // Load show hidden shows preference from localStorage
     const showHiddenShows = localStorage.getItem('showHiddenShows') === 'true';
@@ -207,19 +193,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Save default home page preference to localStorage on change
     defaultHomePageSelect.addEventListener('change', () => {
         localStorage.setItem('defaultHomePage', defaultHomePageSelect.value);
-    });
-
-    // Save show completed checkmarks preference to localStorage on change
-    showCompletedCheckmarksToggle.addEventListener('change', () => {
-        if (showCompletedCheckmarksToggle.checked) {
-            html.classList.add('show-completed-checkmarks');
-            localStorage.setItem('showCompletedCheckmarks', 'true');
-            console.log('Enabled show-completed-checkmarks');
-        } else {
-            html.classList.remove('show-completed-checkmarks');
-            localStorage.setItem('showCompletedCheckmarks', 'false');
-            console.log('Disabled show-completed-checkmarks');
-        }
     });
 
     // Save show hidden shows preference to localStorage on change

@@ -86,11 +86,6 @@
                             <p class="show-status {% if show.status == 'Ended' %}status-ended{% else %}status-continuing{% endif %}">{{ show.status or 'Continuing' }}</p>
                         </div>
                     </div>
-                    {% if show.watched_count == show.total_count and show.total_count > 0 %}
-                    <div class="completed-checkmark">
-                        <i class="nf nf-fa-check"></i>
-                    </div>
-                    {% endif %}
                 </div>
             </div>
         {% endfor %}
@@ -193,13 +188,6 @@
                     <option value="default">Default (Title A-Z)</option>
                     <option value="last_episode">Last Episode Added</option>
                 </select>
-            </div>
-            <div class="setting-item">
-                <label for="showCompletedCheckmarks">Show Completed Checkmarks</label>
-                <label class="switch">
-                    <input type="checkbox" id="showCompletedCheckmarks">
-                    <span class="slider round"></span>
-                </label>
             </div>
             <div class="setting-item">
                 <label for="showHiddenShows">Show Hidden Shows</label>
