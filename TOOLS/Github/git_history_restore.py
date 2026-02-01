@@ -405,16 +405,12 @@ class MainWindow(QMainWindow):
         copy_hash_btn = CyberButton("COPY HASH", CP_DIM, CP_CYAN, "white", "black")
         copy_hash_btn.clicked.connect(self.copy_hash)
         
-        settings_btn = CyberButton("⚙ SETTINGS", CP_DIM, CP_YELLOW, "white", "black")
-        settings_btn.clicked.connect(self.open_settings)
-        
         revert_btn = CyberButton("RESTORE SELECTED VERSION", CP_DIM, CP_RED, "white", "black")
         revert_btn.clicked.connect(self.revert_commit)
         
         action_layout.addWidget(self.status_label)
         action_layout.addStretch()
         action_layout.addWidget(copy_hash_btn)
-        action_layout.addWidget(settings_btn)
         action_layout.addWidget(revert_btn)
         layout.addLayout(action_layout)
 
