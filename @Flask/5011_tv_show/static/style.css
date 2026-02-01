@@ -593,8 +593,8 @@ html.show-hidden-shows .show-card.ended-completed {
 }
 
 .star-svg {
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
     fill: white;
     stroke: black;
     stroke-width: 2.5px;
