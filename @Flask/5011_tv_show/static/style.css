@@ -586,6 +586,30 @@ html.show-hidden-shows .show-card.ended-completed {
     /* Slightly stronger green tint on hover */
 }
 
+.show-card.completed .card-info {
+    background: linear-gradient(to top, rgba(29, 185, 84, 0.95), rgba(29, 185, 84, 0.7));
+}
+
+.show-card.completed .card-info p {
+    color: #ffffff;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8), 0 0 8px rgba(0, 0, 0, 0.6);
+}
+
+.show-card.completed .card-info .episode-count {
+    color: #ffffff !important;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8), 0 0 10px rgba(0, 0, 0, 0.7);
+}
+
+.show-card.completed .card-info .last-episode-added {
+    color: #ffffff;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8), 0 0 10px rgba(0, 0, 0, 0.7);
+}
+
+.show-card.completed .card-info .show-status {
+    color: #ffffff;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8), 0 0 10px rgba(0, 0, 0, 0.7);
+}
+
 .show-card:hover {
     transform: scale(1.05);
     border: 2px solid rgb(24, 255, 3);
