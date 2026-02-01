@@ -504,25 +504,22 @@ html.show-hidden-shows .show-card.ended-completed {
 }
 
 .show-card.completed .card-info {
-    background: linear-gradient(to top, rgba(29, 185, 84, 0.9), rgba(29, 185, 84, 0.7));
+    background: linear-gradient(to top, rgba(29, 185, 84, 0.95), rgba(29, 185, 84, 0.7));
 }
 
 .show-card.completed .card-info p {
-    color: #ffffff;
-    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
-    font-weight: 600;
+    color: #000000;
+    text-shadow: none;
 }
 
 .show-card.completed .card-info .episode-count {
-    font-weight: 800;
-    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.9);
-    font-size: 1.15em !important;
+    font-weight: bold;
+    text-shadow: none;
 }
 
 .show-card.completed .card-info .last-episode-added {
-    color: #ffffff;
-    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
-    font-style: italic;
+    color: #000000;
+    text-shadow: none;
 }
 
 .show-card:hover {
@@ -688,15 +685,15 @@ html.show-hidden-shows .show-card.ended-completed {
 
 /* Darker colors for completed cards with green background */
 .show-card.completed .episode-count.no-episodes-watched {
-    color: #ffcccc !important;
+    color: #cc0000 !important;
 }
 
 .show-card.completed .episode-count.some-episodes-watched {
-    color: #fff4cc !important;
+    color: #cc8800 !important;
 }
 
 .show-card.completed .episode-count.all-episodes-watched {
-    color: #ccffcc !important;
+    color: #006600 !important;
 }
 
 .show-card.completed .episode-count.all-episodes-watched {
