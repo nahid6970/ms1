@@ -53,7 +53,9 @@
                     <i class="nf nf-md-sort_calendar_ascending"></i> Year
                 </a>
                 <a href="{{ url_for('index', sort_by='rating', order=next_order, query=query) }}" class="sort-menu-item">
-                    <i class="nf nf-fa-star"></i> Rating
+                    <svg viewBox="0 0 24 24" width="16" height="16" style="fill: currentColor; margin-right: 5px;">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26" />
+                    </svg> Rating
                 </a>
                 <a href="{{ url_for('index', sort_by='added', order=next_order, query=query) }}" class="sort-menu-item">
                     <i class="nf nf-fa-sort_numeric_asc"></i> Added
@@ -74,7 +76,9 @@
                         <div class="stars-container">
                             {% if show.rating %}
                                 {% for i in range(show.rating | int) %}
-                                    <i class="nf nf-fa-star"></i>
+                                    <svg viewBox="0 0 24 24" class="star-svg">
+                                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26" />
+                                    </svg>
                                 {% endfor %}
                             {% else %}
                                 &nbsp;

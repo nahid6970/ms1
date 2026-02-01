@@ -585,17 +585,18 @@ html.show-hidden-shows .show-card.ended-completed {
 }
 
 .stars-container {
-    color: white;
-    font-size: 1.4em;
-    text-shadow: 0 0 3px rgba(0, 0, 0, 0.9), 0 0 6px rgba(0, 0, 0, 0.8), 2px 2px 4px rgba(0, 0, 0, 0.9);
-    line-height: 1;
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 2px;
     padding: 8px 0;
-    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.6), transparent);
-    mix-blend-mode: difference;
+}
+
+.star-svg {
+    width: 20px;
+    height: 20px;
+    fill: white;
+    filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.8)) drop-shadow(0 0 4px rgba(0, 0, 0, 0.5));
 }
 
 .card-buttons {
