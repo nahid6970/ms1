@@ -73,7 +73,7 @@
                 <div class="img-wrapper">
                     <img src="{{ show.cover_image }}" alt="{{ show.title }}">
                     <div class="card-overlay">
-                        <div class="stars-container">
+                        <div class="stars-container{% if show.rating %} rating-{{ show.rating | int }}{% endif %}">
                             {% if show.rating %}
                                 {% for i in range(show.rating | int) %}
                                     <svg viewBox="0 0 24 24" class="star-svg">

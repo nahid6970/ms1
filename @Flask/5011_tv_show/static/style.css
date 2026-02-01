@@ -601,6 +601,16 @@ html.show-hidden-shows .show-card.ended-completed {
     paint-order: stroke fill;
 }
 
+.stars-container.rating-4 .star-svg {
+    fill: lightgreen;
+    stroke: black;
+}
+
+.stars-container.rating-5 .star-svg {
+    fill: skyblue;
+    stroke: black;
+}
+
 .card-buttons {
     display: flex;
     gap: 4px;
