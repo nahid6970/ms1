@@ -596,7 +596,9 @@ html.show-hidden-shows .show-card.ended-completed {
     width: 20px;
     height: 20px;
     fill: white;
-    filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.8)) drop-shadow(0 0 4px rgba(0, 0, 0, 0.5));
+    stroke: black;
+    stroke-width: 2.5px;
+    paint-order: stroke fill;
 }
 
 .card-buttons {
