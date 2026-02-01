@@ -602,12 +602,12 @@ html.show-hidden-shows .show-card.ended-completed {
 }
 
 .stars-container.rating-4 .star-svg {
-    fill: lightgreen;
+    fill: skyblue;
     stroke: black;
 }
 
 .stars-container.rating-5 .star-svg {
-    fill: skyblue;
+    fill: lightgreen;
     stroke: black;
 }
 
