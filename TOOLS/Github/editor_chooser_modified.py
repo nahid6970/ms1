@@ -21,11 +21,22 @@ def open_with_editor(file_paths, editor):
         else:
             subprocess.run(['start', 'cmd', '/k', 'edit', file_paths], shell=True)
     elif editor == "notepad++":
+        npp_path = "notepad++"
+        # Check common paths if not in PATH
+        possible_paths = [
+            os.path.join(os.environ.get("ProgramFiles", "C:\\Program Files"), "Notepad++", "notepad++.exe"),
+            os.path.join(os.environ.get("ProgramFiles(x86)", "C:\\Program Files (x86)"), "Notepad++", "notepad++.exe")
+        ]
+        for p in possible_paths:
+            if os.path.exists(p):
+                npp_path = f'"{p}"'
+                break
+                
         if isinstance(file_paths, list):
             for file_path in file_paths:
-                subprocess.run(f'notepad++ "{file_path}"', shell=True)
+                subprocess.run(f'start "" {npp_path} "{file_path}"', shell=True)
         else:
-            subprocess.run(f'notepad++ "{file_paths}"', shell=True)
+            subprocess.run(f'start "" {npp_path} "{file_paths}"', shell=True)
     elif editor == "notepads":
         if isinstance(file_paths, list):
             for file_path in file_paths:
