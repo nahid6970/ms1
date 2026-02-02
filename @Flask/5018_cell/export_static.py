@@ -363,6 +363,39 @@ def generate_static_html(data, custom_syntaxes):
             pointer-events: none;
         }
 
+        /* Gray out completed cells */
+        td.cell-complete {
+            background-color: #e9ecef !important;
+            opacity: 0.7;
+            color: #6c757d;
+            position: relative;
+        }
+
+        /* Add vertical lines over completed cells */
+        td.cell-complete::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: repeating-linear-gradient(
+                90deg,
+                transparent,
+                transparent 15px,
+                #999 15px,
+                #999 17px
+            );
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        /* Ensure cell content is positioned below the lines */
+        td.cell-complete .cell-content {
+            position: relative;
+            z-index: 0;
+        }
+
         th {
             background: #f8f9fa;
             font-weight: 600;

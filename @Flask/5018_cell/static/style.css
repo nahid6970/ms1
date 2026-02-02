@@ -1062,7 +1062,16 @@ td.cell-complete::after {
         #999 17px
     );
     pointer-events: none;
-    z-index: 1;
+    z-index: 100;
+}
+
+/* Ensure cell content is positioned below the lines */
+td.cell-complete .cell-content,
+td.cell-complete input,
+td.cell-complete textarea,
+td.cell-complete .markdown-preview {
+    position: relative;
+    z-index: 0;
 }
 
 /* When showing markdown preview, make cell height adapt */
