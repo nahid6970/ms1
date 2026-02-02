@@ -1855,8 +1855,8 @@ function highlightSyntax(text) {
     formatted = formatted.replace(/~~(.*?)~~/g, '<del><span class="syn-marker">~~</span>$1<span class="syn-marker">~~</span></del>');
 
     // Rule: ŝŝthickness:text ŝŝ or ŝŝtext ŝŝ (text stroke)
-    formatted = formatted.replace(/ŝŝ([\d.]+):(.*?) ŝŝ/g, '<span style="font-weight: bold; -webkit-text-stroke: $1px black; text-stroke: $1px black;"><span class="syn-marker">ŝŝ$1:</span>$2<span class="syn-marker"> ŝŝ</span></span>');
-    formatted = formatted.replace(/ŝŝ(.*?) ŝŝ/g, '<span style="font-weight: bold; -webkit-text-stroke: 2px black; text-stroke: 2px black;"><span class="syn-marker">ŝŝ</span>$1<span class="syn-marker"> ŝŝ</span></span>');
+    formatted = formatted.replace(/ŝŝ([\d.]+):(.*?) ŝŝ/g, '<span style="font-weight: bold; -webkit-text-stroke: $1px black; text-stroke: $1px black; paint-order: stroke fill; -webkit-text-fill-color: currentColor;"><span class="syn-marker">ŝŝ$1:</span>$2<span class="syn-marker"> ŝŝ</span></span>');
+    formatted = formatted.replace(/ŝŝ(.*?) ŝŝ/g, '<span style="font-weight: bold; -webkit-text-stroke: 2px black; text-stroke: 2px black; paint-order: stroke fill; -webkit-text-fill-color: currentColor;"><span class="syn-marker">ŝŝ</span>$1<span class="syn-marker"> ŝŝ</span></span>');
 
     // Rule: ==highlight==
     formatted = formatted.replace(/==(.*?)==/g, '<mark><span class="syn-marker">==</span>$1<span class="syn-marker">==</span></mark>');
@@ -3056,19 +3056,19 @@ function parseMarkdownInline(text, cellStyle = {}) {
 
     // Text Stroke: ŝŝthickness:textŝŝ or ŝŝtextŝŝ (default 2px)
     formatted = formatted.replace(/ŝŝ([\d.]+):(.+?)ŝŝ/g, (match, thickness, text) => {
-        return `<span style="font-weight: bold; -webkit-text-stroke: ${thickness}px black; text-stroke: ${thickness}px black;">${text}</span>`;
+        return `<span style="font-weight: bold; -webkit-text-stroke: ${thickness}px black; text-stroke: ${thickness}px black; paint-order: stroke fill; -webkit-text-fill-color: currentColor;">${text}</span>`;
     });
     formatted = formatted.replace(/ŝŝ(.+?)ŝŝ/g, (match, text) => {
-        return `<span style="font-weight: bold; -webkit-text-stroke: 2px black; text-stroke: 2px black;">${text}</span>`;
+        return `<span style="font-weight: bold; -webkit-text-stroke: 2px black; text-stroke: 2px black; paint-order: stroke fill; -webkit-text-fill-color: currentColor;">${text}</span>`;
     });
 
     // Text Stroke: ŝŝthickness:text ŝŝ or ŝŝtext ŝŝ -> text with stroke outline
     formatted = formatted.replace(/ŝŝ([\d.]+):(.+?) ŝŝ/g, (match, thickness, text) => {
-        return `<span style="-webkit-text-stroke: ${thickness}px #000000; text-stroke: ${thickness}px #000000; font-weight: bold; paint-order: stroke fill;">${text}</span>`;
+        return `<span style="-webkit-text-stroke: ${thickness}px #000000; text-stroke: ${thickness}px #000000; font-weight: bold; paint-order: stroke fill; -webkit-text-fill-color: currentColor;">${text}</span>`;
     });
     // Text Stroke (default 2px): ŝŝtext ŝŝ
     formatted = formatted.replace(/ŝŝ(.+?) ŝŝ/g, (match, text) => {
-        return `<span style="-webkit-text-stroke: 2px #000000; text-stroke: 2px #000000; font-weight: bold; paint-order: stroke fill;">${text}</span>`;
+        return `<span style="-webkit-text-stroke: 2px #000000; text-stroke: 2px #000000; font-weight: bold; paint-order: stroke fill; -webkit-text-fill-color: currentColor;">${text}</span>`;
     });
 
     // Bold: **text** -> <strong>text</strong>
@@ -3343,10 +3343,10 @@ function oldParseMarkdownBody(lines, cellStyle = {}) {
         
         // Text Stroke: ŝŝthickness:textŝŝ or ŝŝtextŝŝ (default 2px)
         formatted = formatted.replace(/ŝŝ([\d.]+):(.+?)ŝŝ/g, (match, thickness, text) => {
-            return `<span style="font-weight: bold; -webkit-text-stroke: ${thickness}px black; text-stroke: ${thickness}px black;">${text}</span>`;
+            return `<span style="font-weight: bold; -webkit-text-stroke: ${thickness}px black; text-stroke: ${thickness}px black; paint-order: stroke fill; -webkit-text-fill-color: currentColor;">${text}</span>`;
         });
         formatted = formatted.replace(/ŝŝ(.+?)ŝŝ/g, (match, text) => {
-            return `<span style="font-weight: bold; -webkit-text-stroke: 2px black; text-stroke: 2px black;">${text}</span>`;
+            return `<span style="font-weight: bold; -webkit-text-stroke: 2px black; text-stroke: 2px black; paint-order: stroke fill; -webkit-text-fill-color: currentColor;">${text}</span>`;
         });
         
         // Bold: **text** -> <strong>text</strong>
