@@ -38,6 +38,11 @@ Added a new markdown syntax `ŝŝtext ŝŝ` that applies a stroke/outline effect
    - `highlightSyntax()` - Lines 1857-1859
    - Shows syntax markers in edit mode with proper styling
 
+8. ✅ **F3 Quick Formatter (templates/index.html & static/script.js)**
+   - Added button in F3 formatter window
+   - `applyTextStroke()` function - Prompts for thickness and applies stroke
+   - Supports both contentEditable and legacy input modes
+
 ## Files Modified
 
 1. `static/script.js` - Core markdown parsing and detection
