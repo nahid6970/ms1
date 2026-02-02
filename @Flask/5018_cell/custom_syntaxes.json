@@ -40,7 +40,7 @@
     "marker": "\u022d\u022d"
   },
   {
-    "bgColor": "#ffffff",
+    "bgColor": "transparent",
     "fgColor": "#212529",
     "isBold": true,
     "isItalic": true,
