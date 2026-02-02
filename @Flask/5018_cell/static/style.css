@@ -1038,6 +1038,33 @@ td.cell-complete::before {
     pointer-events: none;
 }
 
+/* Gray out completed cells */
+td.cell-complete {
+    background-color: #e9ecef !important;
+    opacity: 0.7;
+    color: #6c757d;
+    position: relative;
+}
+
+/* Add vertical lines over completed cells */
+td.cell-complete::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 15px,
+        #999 15px,
+        #999 17px
+    );
+    pointer-events: none;
+    z-index: 1;
+}
+
 /* When showing markdown preview, make cell height adapt */
 td:not(:focus-within):has(.markdown-preview) {
     height: auto;
