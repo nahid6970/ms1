@@ -44,6 +44,14 @@ function init() {
     });
 }
 
+// Listen for updates from other contexts (like background script context menu)
+chrome.storage.onChanged.addListener((changes, areaName) => {
+    if (areaName === 'sync' && changes.sidebar_links) {
+        links = changes.sidebar_links.newValue || [];
+        renderLinks();
+    }
+});
+
 function showEmptyState(show) {
     if (show) {
         emptyState.classList.remove('hidden');

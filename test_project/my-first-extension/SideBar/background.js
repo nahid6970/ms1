@@ -81,3 +81,49 @@ fetch(`${PYTHON_SERVER}/health`)
   .then(response => response.json())
   .then(data => console.log('Python server status:', data))
   .catch(error => console.log('Python server not available:', error.message));
+
+// Context Menu Integration
+chrome.runtime.onInstalled.addListener(() => {
+  chrome.contextMenus.create({
+    id: "add-to-sidebar",
+    title: "Add to Quick Sidebar",
+    contexts: ["page"]
+  });
+});
+
+chrome.contextMenus.onClicked.addListener((info, tab) => {
+  if (info.menuItemId === "add-to-sidebar") {
+    addTabToSidebar(tab);
+  }
+});
+
+function addTabToSidebar(tab) {
+  if (!tab || !tab.url) return;
+
+  chrome.storage.sync.get(['sidebar_links'], (result) => {
+    const links = result.sidebar_links || [];
+    
+    let domain = '';
+    try {
+        domain = new URL(tab.url).hostname;
+    } catch (e) {
+        console.error('Invalid URL:', tab.url);
+        return;
+    }
+
+    const newLink = {
+      id: Date.now().toString(),
+      title: tab.title || domain,
+      url: tab.url,
+      color: '#38bdf8', // Default color
+      isSolid: false,
+      icon: `https://www.google.com/s2/favicons?domain=${domain}&sz=64`
+    };
+
+    links.push(newLink);
+
+    chrome.storage.sync.set({ sidebar_links: links }, () => {
+       console.log('Added to sidebar:', newLink);
+    });
+  });
+}
