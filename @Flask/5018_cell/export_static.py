@@ -2231,10 +2231,10 @@ def generate_static_html(data, custom_syntaxes):
 
             // Text Stroke: ŝŝthickness:textŝŝ or ŝŝtextŝŝ (default 2px)
             formatted = formatted.replace(/ŝŝ([\\d.]+):(.+?)ŝŝ/g, function(match, thickness, text) {
-                return '<span style="font-weight: bold; -webkit-text-stroke: ' + thickness + 'px black; text-stroke: ' + thickness + 'px black; paint-order: stroke fill; -webkit-text-fill-color: currentColor;">' + text + '</span>';
+                return '<span style="font-weight: bold; -webkit-text-stroke: ' + thickness + 'px currentColor; text-stroke: ' + thickness + 'px currentColor; paint-order: stroke fill;">' + text + '</span>';
             });
             formatted = formatted.replace(/ŝŝ(.+?)ŝŝ/g, function(match, text) {
-                return '<span style="font-weight: bold; -webkit-text-stroke: 2px black; text-stroke: 2px black; paint-order: stroke fill; -webkit-text-fill-color: currentColor;">' + text + '</span>';
+                return '<span style="font-weight: bold; -webkit-text-stroke: 2px currentColor; text-stroke: 2px currentColor; paint-order: stroke fill;">' + text + '</span>';
             });
 
             // Bold: **text** -> <strong>text</strong>
@@ -2524,10 +2524,10 @@ def generate_static_html(data, custom_syntaxes):
 
                 // Text Stroke: ŝŝthickness:textŝŝ or ŝŝtextŝŝ (default 2px)
                 formatted = formatted.replace(/ŝŝ([\\d.]+):(.+?)ŝŝ/g, function(match, thickness, text) {
-                    return '<span style="font-weight: bold; -webkit-text-stroke: ' + thickness + 'px black; text-stroke: ' + thickness + 'px black; paint-order: stroke fill; -webkit-text-fill-color: currentColor;">' + text + '</span>';
+                    return '<span style="font-weight: bold; -webkit-text-stroke: ' + thickness + 'px currentColor; text-stroke: ' + thickness + 'px currentColor; paint-order: stroke fill;">' + text + '</span>';
                 });
                 formatted = formatted.replace(/ŝŝ(.+?)ŝŝ/g, function(match, text) {
-                    return '<span style="font-weight: bold; -webkit-text-stroke: 2px black; text-stroke: 2px black; paint-order: stroke fill; -webkit-text-fill-color: currentColor;">' + text + '</span>';
+                    return '<span style="font-weight: bold; -webkit-text-stroke: 2px currentColor; text-stroke: 2px currentColor; paint-order: stroke fill;">' + text + '</span>';
                 });
 
                 // Bold: **text** -> <strong>text</strong>
