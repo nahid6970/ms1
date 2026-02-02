@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Stroke Fix Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 40px;
+            background: #f0f0f0;
+        }
+        .test-section {
+            margin: 30px 0;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .color-bg {
+            padding: 20px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .bg-blue { background: #0066cc; color: white; }
+        .bg-red { background: #cc0000; color: white; }
+        .bg-green { background: #00aa00; color: white; }
+        .bg-dark { background: #333; color: white; }
+        
+        /* OLD BROKEN VERSION - hollow text */
+        .text-stroke-broken {
+            font-weight: bold;
+            -webkit-text-stroke: 2px black;
+            text-stroke: 2px black;
+        }
+        
+        /* NEW FIXED VERSION - solid fill with stroke */
+        .text-stroke-fixed {
+            font-weight: bold;
+            -webkit-text-stroke: 2px black;
+            text-stroke: 2px black;
+            paint-order: stroke fill;
+            -webkit-text-fill-color: currentColor;
+        }
+        
+        h2 { color: #333; margin-top: 0; }
+        h3 { color: #666; font-size: 18px; margin: 15px 0 10px 0; }
+        .size-small { font-size: 14px; }
+        .size-medium { font-size: 24px; }
+        .size-large { font-size: 48px; }
+    </style>
+</head>
+<body>
+    <h1>Text Stroke Fix Demonstration</h1>
+    <p>This demonstrates the fix for hollow text issue with text-stroke on colored backgrounds.</p>
+
+    <div class="test-section">
+        <h2>❌ BEFORE (Broken - Hollow Text)</h2>
+        <p>Missing: <code>paint-order: stroke fill;</code> and <code>-webkit-text-fill-color: currentColor;</code></p>
+        
+        <div class="color-bg bg-blue">
+            <h3>Blue Background</h3>
+            <div class="size-small text-stroke-broken">Small Text (14px)</div>
+            <div class="size-medium text-stroke-broken">Medium Text (24px)</div>
+            <div class="size-large text-stroke-broken">Large Text (48px)</div>
+        </div>
+        
+        <div class="color-bg bg-red">
+            <h3>Red Background</h3>
+            <div class="size-small text-stroke-broken">Small Text (14px)</div>
+            <div class="size-medium text-stroke-broken">Medium Text (24px)</div>
+            <div class="size-large text-stroke-broken">Large Text (48px)</div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>✅ AFTER (Fixed - Solid Fill with Stroke)</h2>
+        <p>Includes: <code>paint-order: stroke fill;</code> and <code>-webkit-text-fill-color: currentColor;</code></p>
+        
+        <div class="color-bg bg-blue">
+            <h3>Blue Background</h3>
+            <div class="size-small text-stroke-fixed">Small Text (14px)</div>
+            <div class="size-medium text-stroke-fixed">Medium Text (24px)</div>
+            <div class="size-large text-stroke-fixed">Large Text (48px)</div>
+        </div>
+        
+        <div class="color-bg bg-red">
+            <h3>Red Background</h3>
+            <div class="size-small text-stroke-fixed">Small Text (14px)</div>
+            <div class="size-medium text-stroke-fixed">Medium Text (24px)</div>
+            <div class="size-large text-stroke-fixed">Large Text (48px)</div>
+        </div>
+        
+        <div class="color-bg bg-green">
+            <h3>Green Background</h3>
+            <div class="size-small text-stroke-fixed">Small Text (14px)</div>
+            <div class="size-medium text-stroke-fixed">Medium Text (24px)</div>
+            <div class="size-large text-stroke-fixed">Large Text (48px)</div>
+        </div>
+        
+        <div class="color-bg bg-dark">
+            <h3>Dark Background</h3>
+            <div class="size-small text-stroke-fixed">Small Text (14px)</div>
+            <div class="size-medium text-stroke-fixed">Medium Text (24px)</div>
+            <div class="size-large text-stroke-fixed">Large Text (48px)</div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>📝 Technical Details</h2>
+        <p><strong>The Problem:</strong> Without proper CSS properties, text-stroke creates hollow/outlined text where the fill is transparent.</p>
+        <p><strong>The Solution:</strong></p>
+        <ul>
+            <li><code>paint-order: stroke fill;</code> - Ensures the fill is painted on top of the stroke</li>
+            <li><code>-webkit-text-fill-color: currentColor;</code> - Explicitly sets the fill color to inherit from the text color</li>
+        </ul>
+        <p><strong>Fixed Locations:</strong></p>
+        <ul>
+            <li>static/script.js - highlightSyntax() (lines ~1859-1860)</li>
+            <li>static/script.js - parseMarkdownInline() (lines ~3067-3071)</li>
+            <li>static/script.js - oldParseMarkdownBody() (lines ~3346-3351)</li>
+            <li>export_static.py - parseMarkdownInline() (lines ~2234-2239)</li>
+            <li>export_static.py - oldParseMarkdownBody() (lines ~2527-2532)</li>
+        </ul>
+    </div>
+</body>
+</html>
