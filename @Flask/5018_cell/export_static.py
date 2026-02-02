@@ -1518,6 +1518,17 @@ def generate_static_html(data, custom_syntaxes):
             renderSidebar();
             renderTable();
             
+        function goToSheet(sheetName) {
+            // Find sheet index by name
+            const foundIndex = tableData.sheets.findIndex(s => s.name === sheetName);
+            
+            if (foundIndex !== -1) {
+                switchSheet(foundIndex);
+            } else {
+                alert(`Sheet "${sheetName}" not found`);
+            }
+        }
+            
             // Apply font size scale after rendering
             setTimeout(() => {
                 applyFontSizeScale();
@@ -2393,8 +2404,17 @@ def generate_static_html(data, custom_syntaxes):
                 }
 
                 // Links: {link:url}text{/} -> <a href="url">text</a>
-                formatted = formatted.replace(/\\{link:([^}]+)\\}(.+?)\\{\\/\\}/g, (match, url, text) => {
+                formatted = formatted.replace(/\{link:([^}]+)\}(.+?)\{\/\}/g, (match, url, text) => {
                     return `<a href="${url}" target="_blank" rel="noopener noreferrer">${text}</a>`;
+                });
+
+                // Internal Sheet Links: ((SheetName)) or ((SheetName, Label))
+                formatted = formatted.replace(/\(\((.+?)\)\)/g, (match, content) => {
+                    const parts = content.split(',');
+                    const sheetName = parts[0].trim();
+                    const label = parts.length > 1 ? parts.slice(1).join(',').trim() : sheetName;
+                    
+                    return `<span class="sheet-link" onclick="goToSheet('${sheetName.replace(/'/g, "\\'")}')" title="Go to sheet: ${sheetName}" style="color: #007bff; text-decoration: underline; cursor: pointer; font-weight: 500;">${label}</span>`;
                 });
 
                 // New Links: url[text] -> <a href="url">text</a> (supports nested markdown)
