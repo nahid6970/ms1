@@ -1286,3 +1286,6 @@ How it was fixed (include key code changes)
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 CONFIG_FILE = os.path.join(SCRIPT_DIR, ""projects_config.json"")
 )")
+
+;! er
+:X:;er::Paste('এর')

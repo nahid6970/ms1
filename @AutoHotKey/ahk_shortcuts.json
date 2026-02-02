@@ -419,6 +419,14 @@
             "trigger": ";path",
             "replacement": "SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))\nCONFIG_FILE = os.path.join(SCRIPT_DIR, \"projects_config.json\")",
             "enabled": true
+        },
+        {
+            "name": "er",
+            "category": "ENG -> Bengla",
+            "description": "",
+            "trigger": ";er",
+            "replacement": "এর",
+            "enabled": true
         }
     ],
     "startup_scripts": [
