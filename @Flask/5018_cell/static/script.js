@@ -1590,7 +1590,6 @@ function checkHasMarkdown(value) {
         str.includes('{link:') ||
         (str.includes('http') && str.includes('[')) ||
         str.includes('{{') ||
-        str.includes('((') ||
         str.includes('$') ||  // LaTeX math syntax
         str.includes('\n- ') ||
         str.includes('\n-- ') ||
@@ -2879,17 +2878,6 @@ function parseGridTable(lines) {
 }
 
 /*  inline parser for table cells - supports all markdown except lists  */
-function goToSheet(sheetName) {
-    // Find sheet index by name
-    const foundIndex = tableData.sheets.findIndex(s => s.name === sheetName);
-
-    if (foundIndex !== -1) {
-        switchSheet(foundIndex);
-    } else {
-        showToast(`Sheet "${sheetName}" not found`, 'warning');
-    }
-}
-
 function parseMarkdownInline(text, cellStyle = {}) {
     let formatted = text;
 
@@ -2906,16 +2894,6 @@ function parseMarkdownInline(text, cellStyle = {}) {
             }
         });
     }
-
-    // Internal Sheet Links: ((SheetName)) or ((SheetName, Label))
-    // Must be processed before other syntaxes to prevent conflict
-    formatted = formatted.replace(/\(\((.+?)\)\)/g, (match, content) => {
-        const parts = content.split(',');
-        const sheetName = parts[0].trim();
-        const label = parts.length > 1 ? parts.slice(1).join(',').trim() : sheetName;
-
-        return `<span class="sheet-link" onclick="goToSheet('${sheetName.replace(/'/g, "\\'")}')" title="Go to sheet: ${sheetName}">${label}</span>`;
-    });
 
     // Math: $ ... $ -> KaTeX (inline mode)
     if (window.katex) {
@@ -7966,12 +7944,6 @@ function stripMarkdown(text, preserveLinks = false) {
     let stripped = String(text);
 
     if (!preserveLinks) {
-        // Remove sheet link markers but keep label: ((Sheet, Label)) -> Label, ((Sheet)) -> Sheet
-        stripped = stripped.replace(/\(\((.+?)\)\)/g, (match, content) => {
-            const parts = content.split(',');
-            return parts.length > 1 ? parts.slice(1).join(',').trim() : parts[0].trim();
-        });
-
         // Remove old link markers but keep both URL and text: {link:url}text{/} -> url text
         stripped = stripped.replace(/\{link:([^}]*)\}(.+?)\{\/\}/g, '$1 $2');
 
