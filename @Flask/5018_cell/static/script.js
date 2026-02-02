@@ -1585,6 +1585,7 @@ function checkHasMarkdown(value) {
         str.includes('??') ||
         str.includes('^') ||
         str.includes('~') ||
+        str.includes('ŝŝ') ||  // Text stroke syntax
         str.includes('{fg:') ||
         str.includes('{bg:') ||
         str.includes('{link:') ||
@@ -1852,6 +1853,10 @@ function highlightSyntax(text) {
 
     // Rule: ~~strikethrough~~
     formatted = formatted.replace(/~~(.*?)~~/g, '<del><span class="syn-marker">~~</span>$1<span class="syn-marker">~~</span></del>');
+
+    // Rule: ŝŝthickness:text ŝŝ or ŝŝtext ŝŝ (text stroke)
+    formatted = formatted.replace(/ŝŝ([\d.]+):(.*?) ŝŝ/g, '<span style="font-weight: bold; -webkit-text-stroke: $1px black; text-stroke: $1px black;"><span class="syn-marker">ŝŝ$1:</span>$2<span class="syn-marker"> ŝŝ</span></span>');
+    formatted = formatted.replace(/ŝŝ(.*?) ŝŝ/g, '<span style="font-weight: bold; -webkit-text-stroke: 2px black; text-stroke: 2px black;"><span class="syn-marker">ŝŝ</span>$1<span class="syn-marker"> ŝŝ</span></span>');
 
     // Rule: ==highlight==
     formatted = formatted.replace(/==(.*?)==/g, '<mark><span class="syn-marker">==</span>$1<span class="syn-marker">==</span></mark>');
@@ -3049,6 +3054,23 @@ function parseMarkdownInline(text, cellStyle = {}) {
         return result;
     });
 
+    // Text Stroke: ŝŝthickness:textŝŝ or ŝŝtextŝŝ (default 2px)
+    formatted = formatted.replace(/ŝŝ([\d.]+):(.+?)ŝŝ/g, (match, thickness, text) => {
+        return `<span style="font-weight: bold; -webkit-text-stroke: ${thickness}px black; text-stroke: ${thickness}px black;">${text}</span>`;
+    });
+    formatted = formatted.replace(/ŝŝ(.+?)ŝŝ/g, (match, text) => {
+        return `<span style="font-weight: bold; -webkit-text-stroke: 2px black; text-stroke: 2px black;">${text}</span>`;
+    });
+
+    // Text Stroke: ŝŝthickness:text ŝŝ or ŝŝtext ŝŝ -> text with stroke outline
+    formatted = formatted.replace(/ŝŝ([\d.]+):(.+?) ŝŝ/g, (match, thickness, text) => {
+        return `<span style="-webkit-text-stroke: ${thickness}px #000000; text-stroke: ${thickness}px #000000; font-weight: bold; paint-order: stroke fill;">${text}</span>`;
+    });
+    // Text Stroke (default 2px): ŝŝtext ŝŝ
+    formatted = formatted.replace(/ŝŝ(.+?) ŝŝ/g, (match, text) => {
+        return `<span style="-webkit-text-stroke: 2px #000000; text-stroke: 2px #000000; font-weight: bold; paint-order: stroke fill;">${text}</span>`;
+    });
+
     // Bold: **text** -> <strong>text</strong>
     formatted = formatted.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
 
@@ -3318,6 +3340,15 @@ function oldParseMarkdownBody(lines, cellStyle = {}) {
 
         // IMPORTANT: Process simple inline formatting BEFORE KaTeX
         // KaTeX output may contain * characters that break bold/italic regex
+        
+        // Text Stroke: ŝŝthickness:textŝŝ or ŝŝtextŝŝ (default 2px)
+        formatted = formatted.replace(/ŝŝ([\d.]+):(.+?)ŝŝ/g, (match, thickness, text) => {
+            return `<span style="font-weight: bold; -webkit-text-stroke: ${thickness}px black; text-stroke: ${thickness}px black;">${text}</span>`;
+        });
+        formatted = formatted.replace(/ŝŝ(.+?)ŝŝ/g, (match, text) => {
+            return `<span style="font-weight: bold; -webkit-text-stroke: 2px black; text-stroke: 2px black;">${text}</span>`;
+        });
+        
         // Bold: **text** -> <strong>text</strong>
         formatted = formatted.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
 
@@ -7963,6 +7994,10 @@ function stripMarkdown(text, preserveLinks = false) {
 
     // Remove bold markers: **text** -> text
     stripped = stripped.replace(/\*\*(.+?)\*\*/g, '$1');
+
+    // Remove text stroke markers: ŝŝthickness:textŝŝ or ŝŝtextŝŝ -> text
+    stripped = stripped.replace(/ŝŝ[\d.]+:(.+?)ŝŝ/g, '$1');
+    stripped = stripped.replace(/ŝŝ(.+?)ŝŝ/g, '$1');
 
     // Remove colored underline markers: _R_text__ -> text
     stripped = stripped.replace(/_[A-Z]+_(.+?)__/g, '$1');

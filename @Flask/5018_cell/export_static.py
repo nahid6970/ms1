@@ -1654,6 +1654,7 @@ def generate_static_html(data, custom_syntaxes):
                         cellValue.includes('??') ||
                         cellValue.includes('^') || 
                         cellValue.includes('~') || 
+                        cellValue.includes('ŝŝ') ||  // Text stroke syntax
                         cellValue.includes('{fg:') || 
                         cellValue.includes('{bg:') || 
                         cellValue.includes('{link:') || 
@@ -2228,6 +2229,14 @@ def generate_static_html(data, custom_syntaxes):
                 return result;
             });
 
+            // Text Stroke: ŝŝthickness:textŝŝ or ŝŝtextŝŝ (default 2px)
+            formatted = formatted.replace(/ŝŝ([\\d.]+):(.+?)ŝŝ/g, function(match, thickness, text) {
+                return '<span style="font-weight: bold; -webkit-text-stroke: ' + thickness + 'px black; text-stroke: ' + thickness + 'px black;">' + text + '</span>';
+            });
+            formatted = formatted.replace(/ŝŝ(.+?)ŝŝ/g, function(match, text) {
+                return '<span style="font-weight: bold; -webkit-text-stroke: 2px black; text-stroke: 2px black;">' + text + '</span>';
+            });
+
             // Bold: **text** -> <strong>text</strong>
             formatted = formatted.replace(/\\*\\*(.+?)\\*\\*/g, '<strong>$1</strong>');
 
@@ -2511,6 +2520,14 @@ def generate_static_html(data, custom_syntaxes):
                     }
                     
                     return result;
+                });
+
+                // Text Stroke: ŝŝthickness:textŝŝ or ŝŝtextŝŝ (default 2px)
+                formatted = formatted.replace(/ŝŝ([\\d.]+):(.+?)ŝŝ/g, function(match, thickness, text) {
+                    return '<span style="font-weight: bold; -webkit-text-stroke: ' + thickness + 'px black; text-stroke: ' + thickness + 'px black;">' + text + '</span>';
+                });
+                formatted = formatted.replace(/ŝŝ(.+?)ŝŝ/g, function(match, text) {
+                    return '<span style="font-weight: bold; -webkit-text-stroke: 2px black; text-stroke: 2px black;">' + text + '</span>';
                 });
 
                 // Bold: **text** -> <strong>text</strong>

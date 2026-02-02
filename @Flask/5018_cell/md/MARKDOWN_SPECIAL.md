@@ -1,5 +1,14 @@
 # Special Markdown & Highlight Syntaxes
 
+## Text Stroke
+**Syntax:** `ŝŝthickness:textŝŝ` or `ŝŝtextŝŝ` (default 2px)
+**Output:** Text with a thick outline/border around letters
+**Examples:**
+- `ŝŝCUPINEŝŝ` → 2px stroke (default)
+- `ŝŝ3:CUPINEŝŝ` → 3px stroke
+- `ŝŝ5:THICK TEXTŝŝ` → 5px stroke
+**Details:** See `md/TEXT_STROKE.md`.
+
 ## List Items
 **Syntax:** 
 - `- item` → Bullet list (•)
