@@ -1838,7 +1838,8 @@ function highlightSyntax(text) {
     formatted = formatted.replace(/\\\((.*?)\\\)/g, (match, math) => {
         if (isCleanMode && window.katex) {
             try {
-                const rendered = katex.renderToString(math, { throwOnError: false, displayMode: false });
+                const unescapedMath = math.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'");
+                const rendered = katex.renderToString(unescapedMath, { throwOnError: false, displayMode: false });
                 return `<span class="md-math"><span class="syn-marker">\\(</span><span class="raw-math-hidden" style="display:none">${math}</span><span class="rendered-math-only" contenteditable="false">${rendered}</span><span class="syn-marker">\\)</span></span>`;
             } catch (e) {
                 return `<span class="md-math"><span class="syn-marker">\\(</span>${math}<span class="syn-marker">\\)</span></span>`;
@@ -1851,7 +1852,8 @@ function highlightSyntax(text) {
     formatted = formatted.replace(/\$\$([^$]+)\$\$/g, (match, math) => {
         if (isCleanMode && window.katex) {
             try {
-                const rendered = katex.renderToString(math, { throwOnError: false, displayMode: true });
+                const unescapedMath = math.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'");
+                const rendered = katex.renderToString(unescapedMath, { throwOnError: false, displayMode: true });
                 return `<span class="md-math"><span class="syn-marker">$$</span><span class="raw-math-hidden" style="display:none">${math}</span><span class="rendered-math-only" contenteditable="false">${rendered}</span><span class="syn-marker">$$</span></span>`;
             } catch (e) {
                 return `<span class="md-math"><span class="syn-marker">$$</span>${math}<span class="syn-marker">$$</span></span>`;
@@ -1864,7 +1866,8 @@ function highlightSyntax(text) {
     formatted = formatted.replace(/\$([^$]+)\$/g, (match, math) => {
         if (isCleanMode && window.katex) {
             try {
-                const rendered = katex.renderToString(math, { throwOnError: false, displayMode: false });
+                const unescapedMath = math.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'");
+                const rendered = katex.renderToString(unescapedMath, { throwOnError: false, displayMode: false });
                 return `<span class="md-math"><span class="syn-marker">$</span><span class="raw-math-hidden" style="display:none">${math}</span><span class="rendered-math-only" contenteditable="false">${rendered}</span><span class="syn-marker">$</span></span>`;
             } catch (e) {
                 return `<span class="md-math"><span class="syn-marker">$</span>${math}<span class="syn-marker">$</span></span>`;
@@ -2077,6 +2080,10 @@ function getCaretCharacterOffset(element) {
     let stopped = false;
     const walk = (node) => {
         if (stopped) return;
+
+        if (node.nodeType === Node.ELEMENT_NODE && node.classList.contains('rendered-math-only')) {
+            return; // Skip rendered math nodes
+        }
 
         if (node === stopNode) {
             if (node.nodeType === Node.TEXT_NODE) {
