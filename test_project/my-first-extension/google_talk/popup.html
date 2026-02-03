@@ -9,7 +9,9 @@
 </head>
 <body>
     <div class="container">
-        <div class="status" id="status">Initializing...</div>
+        <!-- Status text removed as requested, keeping element for interim transcript if needed, but styling it to be invisible initially -->
+        <div class="status" id="status" style="min-height: 24px;"></div>
+        
         <div class="mic-wrapper">
             <div class="mic-circle">
                 <svg class="mic-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
@@ -20,7 +22,11 @@
             <div class="ripple"></div>
             <div class="ripple delay"></div>
         </div>
-        <div class="lang-display" id="lang-display">English</div>
+
+        <div class="lang-toggle">
+            <button class="lang-btn" id="btn-en" data-lang="en-US">EN</button>
+            <button class="lang-btn" id="btn-bn" data-lang="bn-BD">BN</button>
+        </div>
     </div>
     <script src="popup.js"></script>
 </body>

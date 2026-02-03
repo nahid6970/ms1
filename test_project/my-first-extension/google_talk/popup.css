@@ -1,7 +1,7 @@
 body {
     margin: 0;
-    width: 320px;
-    height: 380px;
+    width: 220px;
+    height: 280px;
     background-color: #121212;
     color: white;
     font-family: 'Inter', sans-serif;
@@ -20,37 +20,43 @@ body {
     justify-content: center;
     align-items: center;
     background: radial-gradient(circle at center, #1e1e1e 0%, #121212 100%);
+    padding: 20px;
+    box-sizing: border-box;
 }
 
 .status {
-    font-size: 1.4rem;
-    font-weight: 600;
-    margin-bottom: 40px;
+    font-size: 0.9rem;
+    font-weight: 500;
     color: #e0e0e0;
-    height: 30px;
-    letter-spacing: 0.5px;
+    height: 24px;
+    margin-bottom: 20px;
+    opacity: 0.8;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
 }
 
 .mic-wrapper {
     position: relative;
-    width: 90px;
-    height: 90px;
+    width: 80px;
+    height: 80px;
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-bottom: 40px;
+    margin-bottom: 25px;
     cursor: pointer;
 }
 
 .mic-circle {
-    width: 90px;
-    height: 90px;
+    width: 80px;
+    height: 80px;
     border-radius: 50%;
     background: linear-gradient(135deg, #ff4b4b, #ff0000);
     display: flex;
     justify-content: center;
     align-items: center;
-    box-shadow: 0 10px 30px rgba(255, 0, 0, 0.4);
+    box-shadow: 0 8px 20px rgba(255, 0, 0, 0.4);
     z-index: 2;
     transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -60,8 +66,8 @@ body {
 }
 
 .mic-icon {
-    width: 45px;
-    height: 45px;
+    width: 40px;
+    height: 40px;
     fill: white;
 }
 
@@ -90,21 +96,37 @@ body {
         opacity: 0.8;
     }
     100% {
-        transform: scale(2.8);
+        transform: scale(2.5);
         opacity: 0;
     }
 }
 
-.lang-display {
-    font-size: 0.85rem;
-    color: #aaa;
-    background: rgba(255, 255, 255, 0.08);
-    padding: 6px 16px;
+.lang-toggle {
+    display: flex;
+    background: rgba(255, 255, 255, 0.1);
     border-radius: 20px;
-    border: 1px solid rgba(255,255,255,0.1);
-    transition: background 0.3s;
+    padding: 4px;
+    gap: 4px;
 }
 
-.lang-display:hover {
-    background: rgba(255, 255, 255, 0.15);
+.lang-btn {
+    background: transparent;
+    border: none;
+    color: #aaa;
+    padding: 6px 16px;
+    border-radius: 16px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.lang-btn:hover {
+    color: #fff;
+}
+
+.lang-btn.active {
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
