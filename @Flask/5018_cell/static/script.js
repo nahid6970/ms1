@@ -1831,16 +1831,47 @@ function handlePreviewMouseDown(e) {
 function highlightSyntax(text) {
     if (!text) return "";
 
+    const isCleanMode = document.getElementById('dataTable')?.classList.contains('clean-markdown-mode');
     let formatted = escapeHtml(text);
 
     // Rule: Math \(...\)
-    formatted = formatted.replace(/\\\((.*?)\\\)/g, '<span class="md-math"><span class="syn-marker">\\(</span>$1<span class="syn-marker">\\)</span></span>');
+    formatted = formatted.replace(/\\\((.*?)\\\)/g, (match, math) => {
+        if (isCleanMode && window.katex) {
+            try {
+                const rendered = katex.renderToString(math, { throwOnError: false, displayMode: false });
+                return `<span class="md-math"><span class="syn-marker">\\(</span><span class="raw-math-hidden" style="display:none">${math}</span><span class="rendered-math-only" contenteditable="false">${rendered}</span><span class="syn-marker">\\)</span></span>`;
+            } catch (e) {
+                return `<span class="md-math"><span class="syn-marker">\\(</span>${math}<span class="syn-marker">\\)</span></span>`;
+            }
+        }
+        return `<span class="md-math"><span class="syn-marker">\\(</span>${math}<span class="syn-marker">\\)</span></span>`;
+    });
 
     // Rule: Math $$...$$
-    formatted = formatted.replace(/\$\$([^$]+)\$\$/g, '<span class="md-math"><span class="syn-marker">$$</span>$1<span class="syn-marker">$$</span></span>');
+    formatted = formatted.replace(/\$\$([^$]+)\$\$/g, (match, math) => {
+        if (isCleanMode && window.katex) {
+            try {
+                const rendered = katex.renderToString(math, { throwOnError: false, displayMode: true });
+                return `<span class="md-math"><span class="syn-marker">$$</span><span class="raw-math-hidden" style="display:none">${math}</span><span class="rendered-math-only" contenteditable="false">${rendered}</span><span class="syn-marker">$$</span></span>`;
+            } catch (e) {
+                return `<span class="md-math"><span class="syn-marker">$$</span>${math}<span class="syn-marker">$$</span></span>`;
+            }
+        }
+        return `<span class="md-math"><span class="syn-marker">$$</span>${math}<span class="syn-marker">$$</span></span>`;
+    });
 
     // Rule: Math $...$
-    formatted = formatted.replace(/\$([^$]+)\$/g, '<span class="md-math"><span class="syn-marker">$</span>$1<span class="syn-marker">$</span></span>');
+    formatted = formatted.replace(/\$([^$]+)\$/g, (match, math) => {
+        if (isCleanMode && window.katex) {
+            try {
+                const rendered = katex.renderToString(math, { throwOnError: false, displayMode: false });
+                return `<span class="md-math"><span class="syn-marker">$</span><span class="raw-math-hidden" style="display:none">${math}</span><span class="rendered-math-only" contenteditable="false">${rendered}</span><span class="syn-marker">$</span></span>`;
+            } catch (e) {
+                return `<span class="md-math"><span class="syn-marker">$</span>${math}<span class="syn-marker">$</span></span>`;
+            }
+        }
+        return `<span class="md-math"><span class="syn-marker">$</span>${math}<span class="syn-marker">$</span></span>`;
+    });
 
     // Rule: **bold**
     formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong class="md-bold"><span class="syn-marker">**</span>$1<span class="syn-marker">**</span></strong>');
@@ -2010,6 +2041,10 @@ function highlightSyntax(text) {
 function extractRawText(element) {
     let text = '';
     const walk = (node) => {
+        if (node.nodeType === Node.ELEMENT_NODE && node.classList.contains('rendered-math-only')) {
+            return; // Skip rendered math nodes
+        }
+
         if (node.nodeType === Node.TEXT_NODE) {
             text += node.textContent;
         } else if (node.nodeName === 'BR') {
@@ -2093,6 +2128,10 @@ function extractRawTextBeforeCaret(element, range) {
     const walk = (node) => {
         if (stopped) return;
 
+        if (node.nodeType === Node.ELEMENT_NODE && node.classList.contains('rendered-math-only')) {
+            return; // Skip rendered math nodes
+        }
+
         if (node === stopNode) {
             if (node.nodeType === Node.TEXT_NODE) {
                 text += node.textContent.substring(0, stopOffset);
@@ -2130,6 +2169,11 @@ function setCaretPosition(element, offset) {
 
     const walk = (node) => {
         if (found) return;
+
+        if (node.nodeType === Node.ELEMENT_NODE && node.classList.contains('rendered-math-only')) {
+            return; // Skip rendered math nodes
+        }
+
         if (node.nodeType === Node.TEXT_NODE) {
             // Get text content without zero-width spaces for counting
             const textContent = node.textContent;
@@ -2209,6 +2253,10 @@ function selectTextAtPosition(element, startOffset, endOffset) {
 
     const walk = (node) => {
         if (startFound && endFound) return;
+
+        if (node.nodeType === Node.ELEMENT_NODE && node.classList.contains('rendered-math-only')) {
+            return; // Skip rendered math nodes
+        }
 
         if (node.nodeType === Node.TEXT_NODE) {
             const textLength = node.textContent.replace(/\u200B/g, '').length;
