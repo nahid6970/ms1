@@ -1,11 +1,13 @@
 import sys
 import os
 import winreg
+import json
+from datetime import datetime
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QLabel, QPushButton, QLineEdit, QGroupBox, QListWidget, 
                              QMessageBox, QInputDialog, QTabWidget, QTextEdit, QSplitter,
                              QListWidgetItem, QFormLayout, QTableWidget, QTableWidgetItem,
-                             QHeaderView)
+                             QHeaderView, QFileDialog)
 from PyQt6.QtCore import Qt, QSize
 from PyQt6.QtGui import QFont
 
@@ -50,6 +52,7 @@ class EnvVariableManager(QMainWindow):
         self.tabs.addTab(self.create_path_tab(), "PATH MANAGER")
         self.tabs.addTab(self.create_env_tab(), "ENV VARIABLES")
         self.tabs.addTab(self.create_alias_tab(), "ALIASES")
+        self.tabs.addTab(self.create_backup_tab(), "BACKUP/RESTORE")
         main_layout.addWidget(self.tabs)
         
         # Add status bar at bottom
@@ -537,7 +540,6 @@ class EnvVariableManager(QMainWindow):
         
         try:
             if os.path.exists(alias_file):
-                import json
                 with open(alias_file, 'r') as f:
                     self.aliases = json.load(f)
             else:
@@ -564,7 +566,6 @@ class EnvVariableManager(QMainWindow):
         """Save aliases to JSON file and generate loader scripts"""
         alias_file = os.path.join(self.alias_dir, "aliases.json")
         try:
-            import json
             with open(alias_file, 'w') as f:
                 json.dump(self.aliases, f, indent=2)
             
@@ -752,6 +753,144 @@ class EnvVariableManager(QMainWindow):
                         del self.aliases[name]
                         self.save_aliases()
                         self.load_aliases()
+    
+    # ===== BACKUP / RESTORE METHODS =====
+
+    def create_backup_tab(self):
+        """Create backup and restore tab"""
+        widget = QWidget()
+        layout = QVBoxLayout(widget)
+        
+        info = QLabel("💾 BACKUP & RESTORE SYSTEM CONFIGURATION")
+        info.setStyleSheet(f"font-size: 14pt; color: {CP_YELLOW}; padding: 10px;")
+        info.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(info)
+        
+        desc = QLabel("Export all environment variables, PATH entries, and aliases to a JSON file.\n"
+                      "Warning: Restoring from backup will overwrite existing variables.")
+        desc.setStyleSheet(f"color: {CP_SUBTEXT}; padding: 10px;")
+        desc.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(desc)
+        
+        btn_layout = QHBoxLayout()
+        backup_btn = QPushButton("📤 EXPORT TO JSON")
+        import_btn = QPushButton("📥 IMPORT FROM JSON")
+        
+        backup_btn.setMinimumHeight(60)
+        import_btn.setMinimumHeight(60)
+        
+        backup_btn.setStyleSheet(f"background-color: {CP_PANEL}; border: 2px solid {CP_CYAN}; color: {CP_CYAN}; font-size: 12pt;")
+        import_btn.setStyleSheet(f"background-color: {CP_PANEL}; border: 2px solid {CP_ORANGE}; color: {CP_ORANGE}; font-size: 12pt;")
+        
+        backup_btn.clicked.connect(self.export_config)
+        import_btn.clicked.connect(self.import_config)
+        
+        btn_layout.addWidget(backup_btn)
+        btn_layout.addWidget(import_btn)
+        layout.addLayout(btn_layout)
+        
+        layout.addStretch()
+        
+        return widget
+
+    def get_all_registry_vars(self, hkey, subkey):
+        """Helper to get all vars from a registry key"""
+        vars_dict = {}
+        try:
+            key = winreg.OpenKey(hkey, subkey, 0, winreg.KEY_READ)
+            i = 0
+            while True:
+                try:
+                    name, value, _ = winreg.EnumValue(key, i)
+                    vars_dict[name] = value
+                    i += 1
+                except OSError:
+                    break
+            winreg.CloseKey(key)
+        except Exception as e:
+            print(f"Error reading registry {subkey}: {e}")
+        return vars_dict
+
+    def export_config(self):
+        """Export all settings to JSON"""
+        file_path, _ = QFileDialog.getSaveFileName(self, "Export Configuration", "", "JSON Files (*.json)")
+        if not file_path:
+            return
+            
+        try:
+            config = {
+                "version": "1.0",
+                "timestamp": datetime.now().isoformat(),
+                "user_env": self.get_all_registry_vars(winreg.HKEY_CURRENT_USER, r"Environment"),
+                "system_env": self.get_all_registry_vars(winreg.HKEY_LOCAL_MACHINE, r"SYSTEM\CurrentControlSet\Control\Session Manager\Environment"),
+                "aliases": self.aliases
+            }
+            
+            with open(file_path, 'w') as f:
+                json.dump(config, f, indent=4)
+            
+            self.set_status(f"Configuration exported to {os.path.basename(file_path)}", CP_GREEN)
+            QMessageBox.information(self, "Export Success", f"Configuration successfully exported to:\n{file_path}")
+        except Exception as e:
+            self.set_status(f"Export failed: {str(e)}", CP_RED)
+            QMessageBox.critical(self, "Error", f"Failed to export: {str(e)}")
+
+    def import_config(self):
+        """Import settings from JSON"""
+        file_path, _ = QFileDialog.getOpenFileName(self, "Import Configuration", "", "JSON Files (*.json)")
+        if not file_path:
+            return
+            
+        try:
+            with open(file_path, 'r') as f:
+                config = json.load(f)
+            
+            # Basic validation
+            if "user_env" not in config and "system_env" not in config and "aliases" not in config:
+                raise ValueError("Invalid configuration file format.")
+            
+            reply = QMessageBox.question(self, "Confirm Import", 
+                                        "This will overwrite existing environment variables and aliases. Continue?",
+                                        QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+            
+            if reply != QMessageBox.StandardButton.Yes:
+                return
+
+            # Import User Env
+            if "user_env" in config:
+                key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Environment", 0, winreg.KEY_SET_VALUE)
+                for name, value in config["user_env"].items():
+                    winreg.SetValueEx(key, name, 0, winreg.REG_EXPAND_SZ, str(value))
+                winreg.CloseKey(key)
+
+            # Import System Env (might need admin)
+            if "system_env" in config:
+                try:
+                    key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, 
+                                        r"SYSTEM\CurrentControlSet\Control\Session Manager\Environment", 
+                                        0, winreg.KEY_SET_VALUE)
+                    for name, value in config["system_env"].items():
+                        winreg.SetValueEx(key, name, 0, winreg.REG_EXPAND_SZ, str(value))
+                    winreg.CloseKey(key)
+                except PermissionError:
+                    QMessageBox.warning(self, "Permission Denied", "Could not import System variables. Please run as Administrator.")
+
+            # Import Aliases
+            if "aliases" in config:
+                self.aliases.update(config["aliases"])
+                self.save_aliases()
+
+            self.broadcast_env_change()
+            self.load_path_vars(self.current_path_scope)
+            self.load_env_vars(self.current_env_scope)
+            self.load_aliases()
+            
+            self.set_status("Configuration imported successfully", CP_GREEN)
+            QMessageBox.information(self, "Import Success", "Configuration imported and applied.\nYou may need to restart your shell.")
+            
+        except Exception as e:
+            self.set_status(f"Import failed: {str(e)}", CP_RED)
+            QMessageBox.critical(self, "Error", f"Failed to import: {str(e)}")
     
     # ===== UTILITY METHODS =====
     
