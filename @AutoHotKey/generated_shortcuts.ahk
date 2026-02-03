@@ -1330,3 +1330,6 @@ CONFIG_FILE = os.path.join(SCRIPT_DIR, ""projects_config.json"")
 
 ;! er
 :X:;er::Paste('এর')
+
+;! Theme Guidlines & Rules
+:X:;theme::Paste('For theming C:\@delta\ms1\THEME_GUIDE.md use this file guidline u can use cat or some other command to see whats inside THEME_GUIDE.md')

@@ -427,6 +427,14 @@
             "trigger": ";er",
             "replacement": "এর",
             "enabled": true
+        },
+        {
+            "name": "Theme Guidlines & Rules",
+            "category": "General",
+            "description": "",
+            "trigger": ";theme",
+            "replacement": "For theming C:\\@delta\\ms1\\THEME_GUIDE.md use this file guidline u can use cat or some other command to see whats inside THEME_GUIDE.md",
+            "enabled": true
         }
     ],
     "startup_scripts": [
