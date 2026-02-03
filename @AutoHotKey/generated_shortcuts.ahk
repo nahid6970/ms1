@@ -13,6 +13,34 @@ Paste(text) {
     A_Clipboard := Old
 }
 
+;! === BACKGROUND / STARTUP SCRIPTS ===
+;! Smart Bengali Numbers
+;! Converts ;[numbers] to Bengali numbers dynamically
+~;:: {
+    ih := InputHook("V", "{Space}{Enter}{Tab}{Esc}")
+    ih.OnChar := (hook, char) => (char < "0" || char > "9") ? hook.Stop() : ""
+    ih.Start()
+    ih.Wait()
+    
+    if (ih.EndReason == "EndKey" && RegExMatch(ih.Input, "^\d+$")) {
+        static en_to_bn := Map(
+            "0", "০", "1", "১", "2", "২", "3", "৩", "4", "৪",
+            "5", "৫", "6", "৬", "7", "৭", "8", "৮", "9", "৯"
+        )
+        
+        converted := ""
+        Loop Parse, ih.Input {
+            converted .= en_to_bn[A_LoopField]
+        }
+        
+        SendInput "{Backspace " . StrLen(ih.Input) + 1 . "}"
+        SendInput converted
+        
+        if (ih.EndKey != "" && ih.EndKey != "Escape")
+            Send "{" . ih.EndKey . "}"
+    }
+}
+
 ;! === SCRIPT SHORTCUTS ===
 ;! Run Python Script
 ;! Opens run.py in the ms1 directory

@@ -431,6 +431,13 @@
     ],
     "startup_scripts": [
         {
+            "name": "Smart Bengali Numbers",
+            "category": "Text",
+            "description": "Converts ;[numbers] to Bengali numbers dynamically",
+            "action": "~;:: {\n    ih := InputHook(\"V\", \"{Space}{Enter}{Tab}{Esc}\")\n    ih.OnChar := (hook, char) => (char < \"0\" || char > \"9\") ? hook.Stop() : \"\"\n    ih.Start()\n    ih.Wait()\n    \n    if (ih.EndReason == \"EndKey\" && RegExMatch(ih.Input, \"^\\d+$\")) {\n        static en_to_bn := Map(\n            \"0\", \"০\", \"1\", \"১\", \"2\", \"২\", \"3\", \"৩\", \"4\", \"৪\",\n            \"5\", \"৫\", \"6\", \"৬\", \"7\", \"৭\", \"8\", \"৮\", \"9\", \"৯\"\n        )\n        \n        converted := \"\"\n        Loop Parse, ih.Input {\n            converted .= en_to_bn[A_LoopField]\n        }\n        \n        SendInput \"{Backspace \" . StrLen(ih.Input) + 1 . \"}\"\n        SendInput converted\n        \n        if (ih.EndKey != \"\" && ih.EndKey != \"Escape\")\n            Send \"{\" . ih.EndKey . \"}\"\n    }\n}",
+            "enabled": true
+        },
+        {
             "name": "Explorer Tabs Hook",
             "category": "General",
             "description": "",
