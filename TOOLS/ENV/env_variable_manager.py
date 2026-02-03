@@ -52,6 +52,7 @@ class EnvVariableManager(QMainWindow):
         self.tabs.addTab(self.create_path_tab(), "PATH MANAGER")
         self.tabs.addTab(self.create_env_tab(), "ENV VARIABLES")
         self.tabs.addTab(self.create_alias_tab(), "ALIASES")
+        self.tabs.addTab(self.create_context_tab(), "CONTEXT MENU")
         self.tabs.addTab(self.create_backup_tab(), "BACKUP/RESTORE")
         main_layout.addWidget(self.tabs)
         
@@ -754,6 +755,169 @@ class EnvVariableManager(QMainWindow):
                         self.save_aliases()
                         self.load_aliases()
     
+    # ===== CONTEXT MENU METHODS =====
+
+    def create_context_tab(self):
+        """Create tab for Windows Right-Click Context Menu customization"""
+        widget = QWidget()
+        layout = QVBoxLayout(widget)
+        
+        info = QLabel("🖱️ SHELL CONTEXT MENU MANAGER")
+        info.setStyleSheet(f"font-size: 14pt; color: {CP_CYAN}; padding: 10px;")
+        info.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(info)
+        
+        desc = QLabel("Add custom actions to the Windows Explorer right-click menu (Background & Folders).")
+        desc.setStyleSheet(f"color: {CP_SUBTEXT}; padding: 5px;")
+        desc.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(desc)
+        
+        # Menu Table
+        list_group = QGroupBox("CONTEXT MENU ENTRIES")
+        list_layout = QVBoxLayout()
+        self.context_table = QTableWidget()
+        self.context_table.setColumnCount(2)
+        self.context_table.setHorizontalHeaderLabels(["Menu Label", "Command / Script"])
+        self.context_table.horizontalHeader().setStretchLastSection(True)
+        self.context_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+        list_layout.addWidget(self.context_table)
+        list_group.setLayout(list_layout)
+        layout.addWidget(list_group)
+        
+        # Controls
+        controls_layout = QHBoxLayout()
+        add_btn = QPushButton("➕ ADD ENTRY")
+        remove_btn = QPushButton("❌ REMOVE")
+        refresh_btn = QPushButton("🔄 REFRESH")
+        
+        add_btn.clicked.connect(self.add_context_entry)
+        remove_btn.clicked.connect(self.remove_context_entry)
+        refresh_btn.clicked.connect(self.load_context_entries)
+        
+        controls_layout.addWidget(add_btn)
+        controls_layout.addWidget(remove_btn)
+        controls_layout.addWidget(refresh_btn)
+        layout.addLayout(controls_layout)
+        
+        # Initialize
+        self.load_context_entries()
+        
+        return widget
+
+    def load_context_entries(self):
+        """Load context menu entries from registry"""
+        self.context_table.setRowCount(0)
+        
+        # We look in Directory\Background\shell (for empty space right-click)
+        # and Directory\shell (for right-click on folders)
+        paths = [
+            r"Directory\Background\shell",
+            r"Directory\shell"
+        ]
+        
+        found_entries = {} # label -> command
+        
+        for base_path in paths:
+            try:
+                key = winreg.OpenKey(winreg.HKEY_CLASSES_ROOT, base_path, 0, winreg.KEY_READ)
+                i = 0
+                while True:
+                    try:
+                        subkey_name = winreg.EnumKey(key, i)
+                        if subkey_name.lower() in ["cmd", "powershell", "anycode"]: # Skip standard Windows entries
+                            i += 1
+                            continue
+                            
+                        # Get command
+                        try:
+                            cmd_key = winreg.OpenKey(winreg.HKEY_CLASSES_ROOT, f"{base_path}\\{subkey_name}\\command", 0, winreg.KEY_READ)
+                            cmd_value, _ = winreg.QueryValueEx(cmd_key, "")
+                            winreg.CloseKey(cmd_key)
+                            
+                            found_entries[subkey_name] = cmd_value
+                        except:
+                            pass
+                        
+                        i += 1
+                    except OSError:
+                        break
+                winreg.CloseKey(key)
+            except Exception as e:
+                print(f"Error loading context menu for {base_path}: {e}")
+
+        for name, cmd in found_entries.items():
+            row = self.context_table.rowCount()
+            self.context_table.insertRow(row)
+            self.context_table.setItem(row, 0, QTableWidgetItem(name))
+            self.context_table.setItem(row, 1, QTableWidgetItem(cmd))
+
+    def add_context_entry(self):
+        """Add a new right-click context menu entry"""
+        name, ok1 = QInputDialog.getText(self, "Add Context Entry", "Menu Label (e.g. 'Open Terminal Here'):")
+        if ok1 and name:
+            cmd, ok2 = QInputDialog.getText(self, "Add Context Entry", f"Command to execute for '{name}':\n(Use %V for current directory)")
+            if ok2 and cmd:
+                try:
+                    # Add to Directory (Folder right-click)
+                    self._create_reg_entry(rf"Directory\shell\{name}", cmd)
+                    # Add to Directory Background (Empty space right-click)
+                    self._create_reg_entry(rf"Directory\Background\shell\{name}", cmd)
+                    
+                    self.load_context_entries()
+                    self.set_status(f"Added context menu entry: {name}", CP_GREEN)
+                except PermissionError:
+                    QMessageBox.critical(self, "Error", "Permission Denied. Please run as Administrator to modify Context Menu.")
+                except Exception as e:
+                    QMessageBox.critical(self, "Error", f"Failed to add entry: {str(e)}")
+
+    def _create_reg_entry(self, path, command):
+        """Helper to create registry keys for context menu"""
+        key = winreg.CreateKey(winreg.HKEY_CLASSES_ROOT, path)
+        winreg.SetValue(key, "", winreg.REG_SZ, "") # Default value is empty or can be the label
+        
+        cmd_key = winreg.CreateKey(key, "command")
+        winreg.SetValue(cmd_key, "", winreg.REG_SZ, command)
+        
+        winreg.CloseKey(cmd_key)
+        winreg.CloseKey(key)
+
+    def remove_context_entry(self):
+        """Remove a context menu entry"""
+        row = self.context_table.currentRow()
+        if row >= 0:
+            name = self.context_table.item(row, 0).text()
+            reply = QMessageBox.question(self, "Confirm", f"Remove '{name}' from context menu?",
+                                        QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+            if reply == QMessageBox.StandardButton.Yes:
+                try:
+                    # Try to delete from both locations
+                    self._delete_reg_key(winreg.HKEY_CLASSES_ROOT, rf"Directory\shell\{name}")
+                    self._delete_reg_key(winreg.HKEY_CLASSES_ROOT, rf"Directory\Background\shell\{name}")
+                    
+                    self.load_context_entries()
+                    self.set_status(f"Removed {name}", CP_GREEN)
+                except PermissionError:
+                    QMessageBox.critical(self, "Error", "Permission Denied. Please run as Administrator.")
+                except Exception as e:
+                    self.set_status(f"Error removing entry: {str(e)}", CP_RED)
+
+    def _delete_reg_key(self, hkey, path):
+        """Helper to delete registry key and all subkeys"""
+        try:
+            # First delete subkeys
+            key = winreg.OpenKey(hkey, path, 0, winreg.KEY_ALL_ACCESS)
+            try:
+                while True:
+                    subkey = winreg.EnumKey(key, 0)
+                    self._delete_reg_key(key, subkey)
+            except OSError:
+                pass
+            winreg.CloseKey(key)
+            # Then delete the key itself
+            winreg.DeleteKey(hkey, path)
+        except FileNotFoundError:
+            pass # Already gone
+
     # ===== BACKUP / RESTORE METHODS =====
 
     def create_backup_tab(self):
