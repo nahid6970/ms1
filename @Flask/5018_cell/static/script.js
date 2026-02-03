@@ -1965,69 +1965,60 @@ function highlightSyntax(text) {
         return `<div style="border-top: ${borderWidth} solid ${borderColor}; border-bottom: ${borderWidth} solid ${borderColor}; padding: 10px 0; margin: 10px 0; text-align: center; font-weight: bold; width: 100%; font-size: ${fontSize}; color: ${textColor};"><span class="syn-marker">:::${params ? params + ':::' : ''}</span>${content}<span class="syn-marker">:::</span></div>`;
     });
 
-    // Custom Color Syntax support
-    if (typeof customColorSyntaxes !== 'undefined') {
-        customColorSyntaxes.forEach(syntax => {
-            if (!syntax.marker) return;
-            const escapedMarker = escapeHtml(syntax.marker);
-            const markerRegex = escapedMarker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            const regex = new RegExp(markerRegex + '(.*?)' + markerRegex, 'g');
-
-            let style = `background: ${syntax.bgColor || 'transparent'}; color: ${syntax.fgColor || 'inherit'};`;
-            if (syntax.isBold) style += ' font-weight: bold;';
-            if (syntax.isItalic) style += ' font-style: italic;';
-            if (syntax.isUnderline) style += ' text-decoration: underline;';
-
-            formatted = formatted.replace(regex, `<span style="${style}">` +
-                `<span class="syn-marker">${escapedMarker}</span>$1<span class="syn-marker">${escapedMarker}</span></span>`);
+    // Custom Color Syntax support using cache
+    if (typeof customColorSyntaxesCache !== 'undefined' && customColorSyntaxesCache.length > 0) {
+        customColorSyntaxesCache.forEach(syntax => {
+            formatted = formatted.replace(syntax.regex, `<span style="${syntax.style}">` +
+                `<span class="syn-marker">${syntax.marker}</span>$1<span class="syn-marker">${syntax.marker}</span></span>`);
         });
     }
 
-    // Rule: Table lines detection (Pipe and Comma tables)
-    // Wrap lines in span with correct line-height to prevent jumping (rendering vs edit mismatch)
-    const lines = formatted.split('\n');
-    let inCommaTable = false;
+    // Rule: Table lines detection and List indentation
+    // Optimization: Only process if there's a chance of tables or lists
+    if (formatted.includes('|') || formatted.includes('Table*') || formatted.includes('- ')) {
+        const lines = formatted.split('\n');
+        let inCommaTable = false;
 
-    formatted = lines.map(line => {
-        const trimmed = line.trim();
+        formatted = lines.map(line => {
+            if (line.length === 0) return line;
+            const trimmed = line.trim();
 
-        // Rule: Table lines detection (Pipe and Comma tables)
-        // Pipe Table Line
-        if (trimmed.startsWith('|')) {
-            return `<span class="syntax-table-line">${line}</span>`;
-        }
-
-        // Comma Table Start
-        if (trimmed.match(/^Table\*\d+/i)) {
-            inCommaTable = true;
-            return `<span class="syntax-table-line">${line}</span>`;
-        }
-
-        // Inside Comma Table
-        if (inCommaTable) {
-            // Check for end conditions
-            if (trimmed === '' || trimmed.match(/^Table\*end/i)) {
-                inCommaTable = false;
-                if (trimmed.match(/^Table\*end/i)) {
-                    return `<span class="syntax-table-line">${line}</span>`;
-                }
-            } else {
+            // Rule: Table lines detection (Pipe and Comma tables)
+            // Pipe Table Line
+            if (trimmed.startsWith('|')) {
                 return `<span class="syntax-table-line">${line}</span>`;
             }
-        }
 
-        // Rule: List indentation (Hanging Indent)
-        // Check for list patterns (-, --, ---, ----, -----)
-        // We match against the escaped characters from highlightSyntax or raw input
-        const listMatch = trimmed.match(/^(\-{1,5})\s/);
-        if (listMatch) {
-            const markerLength = listMatch[1].length;
-            const indentLevel = markerLength; // 1 to 5 ems
-            return `<span style="display: inline-block; width: 100%; box-sizing: border-box; padding-left: ${indentLevel}em; text-indent: -1em; white-space: pre-wrap;">${line}</span>`;
-        }
+            // Comma Table Start
+            if (trimmed.startsWith('Table*')) {
+                inCommaTable = true;
+                return `<span class="syntax-table-line">${line}</span>`;
+            }
 
-        return line;
-    }).join('\n');
+            // Inside Comma Table
+            if (inCommaTable) {
+                // Check for end conditions
+                if (trimmed === '' || trimmed.startsWith('Table*end')) {
+                    inCommaTable = false;
+                    if (trimmed.startsWith('Table*end')) {
+                        return `<span class="syntax-table-line">${line}</span>`;
+                    }
+                } else {
+                    return `<span class="syntax-table-line">${line}</span>`;
+                }
+            }
+
+            // Rule: List indentation (Hanging Indent)
+            // Check for list patterns (-, --, ---, ----, -----)
+            const listMatch = trimmed.match(/^(\-{1,5})\s/);
+            if (listMatch) {
+                const markerLength = listMatch[1].length;
+                return `<span style="display: inline-block; width: 100%; box-sizing: border-box; padding-left: ${markerLength}em; text-indent: -1em; white-space: pre-wrap;">${line}</span>`;
+            }
+
+            return line;
+        }).join('\n');
+    }
 
     // Convert newlines to BR
     formatted = formatted.replace(/\n/g, '<br>');
@@ -2540,18 +2531,20 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
             preview.classList.add('editing');
             // Get current value from input (source of truth)
             const rawValue = inputElement.value;
-            preview.innerHTML = highlightSyntax(rawValue);
+            
+            // Defer heavy highlighting to allow focus transition to happen first
+            requestAnimationFrame(() => {
+                preview.innerHTML = highlightSyntax(rawValue);
 
-            // Restore scroll position after content change
-            if (tableContainer) {
-                requestAnimationFrame(() => {
+                // Restore scroll position after content change
+                if (tableContainer) {
                     tableContainer.scrollTop = savedScrollTop;
                     tableContainer.scrollLeft = savedScrollLeft;
-                });
-            }
+                }
 
-            // Adjust height immediately for the newly highlighted syntax content
-            adjustCellHeightForMarkdown(cell);
+                // Adjust height immediately for the newly highlighted syntax content
+                adjustCellHeightForMarkdown(cell);
+            });
         });
 
         preview.addEventListener('blur', () => {
@@ -2598,8 +2591,11 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
             // DON'T re-render on every keystroke - the browser already updated the DOM
             // Only sync data and adjust height
 
-            // Adjust cell height based on preview content
-            adjustCellHeightForMarkdown(cell);
+            // Debounce height adjustment to prevent lag on large content
+            clearTimeout(preview._heightAdjustTimeout);
+            preview._heightAdjustTimeout = setTimeout(() => {
+                adjustCellHeightForMarkdown(cell);
+            }, 100);
         });
 
         // Use original handlePreviewMouseDown for mapping click to caret position
@@ -12671,17 +12667,35 @@ async function deleteCategory(categoryName) {
 
 // Load custom color syntaxes from JSON file
 let customColorSyntaxes = [];
+let customColorSyntaxesCache = [];
 
 async function loadCustomColorSyntaxes() {
     try {
         const response = await fetch('/api/custom-syntaxes');
         if (response.ok) {
             customColorSyntaxes = await response.json();
+            
+            // Pre-compile and cache regexes for performance
+            customColorSyntaxesCache = customColorSyntaxes.map(syntax => {
+                if (!syntax.marker) return null;
+                const escapedMarker = escapeHtml(syntax.marker);
+                const markerRegex = escapedMarker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                const regex = new RegExp(markerRegex + '(.*?)' + markerRegex, 'g');
+                
+                let style = `background: ${syntax.bgColor || 'transparent'}; color: ${syntax.fgColor || 'inherit'};`;
+                if (syntax.isBold) style += ' font-weight: bold;';
+                if (syntax.isItalic) style += ' font-style: italic;';
+                if (syntax.isUnderline) style += ' text-decoration: underline;';
+                
+                return { regex, style, marker: escapedMarker };
+            }).filter(s => s !== null);
+
             renderCustomSyntaxButtons(); // Render buttons after loading
         }
     } catch (e) {
         console.log('Could not load custom syntaxes:', e);
         customColorSyntaxes = [];
+        customColorSyntaxesCache = [];
     }
 }
 

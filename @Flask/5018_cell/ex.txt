@@ -1,0 +1,330 @@
+:::K_10px_1em_f-K:::Rules for Parts of Speech:::
+#2.5##K#Noun#/# #/#
+**__Abstract Noun__**
+-- চেনার উপায়: সাধারণত শব্দের শেষে নির্দিষ্ট সাফিক্স থাকে। যেমন:
+--- -ce (Patience)
+--- -hood
+--- -ment
+--- -ness (Kindness, Goodness, Brightness)
+--- -ship (Friendship)
+--- -th (Truth)
+--- -tion
+--- -ty (Honesty, Beauty)
+**__Material Noun__**: কোনো কিছু যা দিয়ে তৈরি করা হয় (উপাদান বা Element)।
+-- বৈশিষ্ট্য:
+--- এটি সর্বদা Singular।
+--- **@@__এটি হলো উপাদান (Ingredient), আর এর থেকে তৈরি জিনিসটি হলো Common Noun.__@@**
+-- উদাহরণ:
+--- Plastic (Material) → Pen (Common)
+--- Gold (Material) → Necklace (Common)
+--- Paper (Material) → Book (Common)
+--- Iron, Water, Milk, Salt, Rice. 
+​
+**__Rule1: Plural হলে Common Noun হয়ে যায়__**
+**Common Noun Logic:** কমন নাউন একা বসতে পারে না—হয় ডিটারমিনার লাগবে, নয়তো প্লুরাল হতে হবে।
+**Proper, Collective, Material, বা Abstract Noun** যদি কখনো Plural (বহুবচন) করা হয়, তখন তারা আর তাদের নিজস্ব ফর্মে থাকে না, তারা Common Noun হয়ে যায়।
+(মনে রাখার টেকনিক: এরা সিঙ্গেল ছিল, বিয়ে করে প্লুরাল হয়ে এখন 'কমন' হয়ে গেছে)
+-- উদাহরণ ১:
+--- The class is important. (Class = Collective Noun)
+--- Two classes are important. (Classes = Common Noun)
+-- উদাহরণ ২:
+--- We have five Shuvos in our batch. (Shuvos = Common Noun)
+-- উদাহরণ ৩:
+--- He gave me two advises. (Advises = Common Noun) - যদিও গ্রামাটিক্যালি advice প্লুরাল হয় না, কিন্তু প্রশ্নে থাকলে এটি কমন হিসেবে গণ্য হবে।
+**__Rule2: Article ও Preposition-এর মাঝে বসলে Common Noun হয়ে যায়__**
+যদি Proper, Abstract, বা Material Noun একটি ÛÛ++Article (The) এবং একটি Preposition (Of)++ÛÛ-এর মাঝে বসে, তবে সেটি Common Noun হয়ে যায়।
+--- Structure: The + [Noun] + of
+-- ÛÛউদাহরণ ১ (Abstract to Common):ÛÛ
+--- The charity of Hatim Tai. (Charity = Common Noun)
+--- The justice of the High Court. (Justice = Common Noun)
+--- The honesty of the poor boy. (Honesty = Common Noun)
+-- ÛÛউদাহরণ ২ (Material to Common):ÛÛ
+--- The water of the Ganges. (Water = Common Noun)
+-- ÛÛউদাহরণ ৩ (Proper to Common):ÛÛ
+--- Apurba is the Shakib Al Hasan of Turning Point. (Shakib Al Hasan = Common Noun)
+--- Nazrul is the Byron of Bangladesh. (Byron = Common Noun)
+​
+=> **Noun Clause:** Reporting Verb-এর পর `that` যুক্ত অংশটি সাধারণত **Noun Clause** হয়। (Ex: He says **that he is well**)।
+=> **Collective/Abstract to Common:** Abstract Noun-এর আগে Determiner বা Possessive বসলে সেটি **Common Noun** হয়ে যায়। (Ex: His **humility**)।
+=> **Uncountable Nouns:** `Scenery`, `Furniture`, `Information` সর্বদা Singular এবং এদের সাথে **@@__s/es যুক্ত হয় না & No article aswell__@@**। (Ex: ~~The/A~~ **scenery** is...)।
+​
+#2.5##K#Pronoun#/# #/#
+**__Personal Pronoun Classification Chart__**
+| **__Subjective | Objective | Possessive Adjective | Possessive Pronoun | Reflexive Pronoun__** |
+| I            | Me   | My    | Mine   | Myself                |
+| We           | Us   | Our   | Ours   | Ourselves             |
+| You          | You  | Your  | Yours  | Yourself / Yourselves |
+| **==They==** | Them | Their | Theirs | Themselves            |
+| **==He==**   | Him  | His   | His    | Himself               |
+| **==She==**  | Her  | Her   | Hers   | Herself               |
+| It           | It   | Its   | Its    | Itself                |
+| One          | One  | One's | One's  | Oneself               |
+| **==Who==**          | ==**Whom**== | ==**Whose**== | **==Whose==**  | :-: |
+- ==Womanhood -> it==
+- **Whose**: পজেসিভ এডজেক্টিভ (সর্বদা **__Noun__** এর পূর্বে বসে)। যেমন: (Whose book)।
+​
+##Pronoun Usage##
+- **==Be verb / বি-ভার্বের পর==**: **It is / It was** (Be verb)-এর পরে প্রোনাউনের @@**__Subjective Form__**@@ (I, We, He, She, They) বসে। 
+-- উদাহরণ: It was **we** !!(Us নয়)!! who had left early.
+- **Pronoun after Preposition**: **Between** বা যেকোনো Preposition এর পরে Pronoun এর @@**__Objective Form__**@@ (Me, Us, Him, Her, Them) বসে।
+-- উদাহরণ: Between you and **me** (I নয়), I doubt he will come. 
+- **Before Gerund/Noun**: **__Verb + ing ==or== Noun__**-এর ঠিক আগে Pronoun এর ==Possessive Adjective== **@@__(My, Our, His, Her, Their)__@@** বসে। 
+-- `We are waiting for **his** coming.`
+-- `I don't like **your** coming here late.`
+-- `This is **my** book.`
+- **==Possessive Pronoun==**: Stands alone without a noun.
+--- @@Example@@: This book is **mine**.
+- **Tag Question Logic:**
+-- কোনো প্রতিষ্ঠান (Bank, Jury, Team) বোঝালে প্রোনাউন হিসেবে **They** ব্যবহৃত হয়। (Ex: The Bank closes... **don't they**?)
+​
+__##The Antecedent Rule##__
+The **Antecedent** is **__the noun or pronoun that comes immediately before the relative pronoun__**. The verb following the relative pronoun must agree with the antecedent in number and person.
+- **Rule:** Antecedent + Relative Pronoun + **Verb** (Agrees with Antecedent)
+- **Rule:** Relative pronoun does not impact verb, Antecedent does
+- **Rule:** **==Be verb==** এর পরে **PRONOUN** এর **__SUBJECTIVE FORM__** হবে (i/he.0) not (me etc)
+- **Placement Rule:** The relative pronoun should be placed as close as possible to its antecedent.
+-- **অস্পষ্টতা এড়াতে Relative Pronoun সর্বদা তার Antecedent-এর ঠিক পাশে বসে।** ==(Rule–1 (সবচেয়ে গুরুত্বপূর্ণ))==
+-- Incorrect: The boy was short who snatched my handbag.
+-- Correct: The **__boy who__** snatched my handbag was short.
+++__##"One of the" vs. "Only one of the"##__++
+- **Rule A:** One of + Plural Noun + Relative Pronoun + **Plural Verb**
+- **Rule B:** Only one of + Plural Noun + Relative Pronoun + **Singular Verb** (Rare but important context: usually 'only one' triggers singular).
+**¿¿CONFUSING KEEP IN MIND¿¿**
+##=> One of my **__(friend/%%friends%%)__** __**(%%is%%/are)**__ going abroad. today##
+-- #0.8#@@[There is no ==Relative-Pronoun== Here so rules follow ==QP before==] [Be Careful if there is Relative Pronoun if there is then the verb will be based on the subject before RP]@@#/#
+##=> Karim is one of my **friends ==who== are** going abroad. (Refers to the group of friends).##
+-- @@#0.8#[Here Anticident + RP]#/#@@
+=> She is one of those girls **who are** always complaining. ✅
+-- @@#0.8#[Here Anticident + RP]#/#@@
+++##__The "Who" vs. "Whom" Magic Technique__##++
+**Technique:**
+#0.8#1. Count every **Finite Verb** in the sentence.#/#
+#0.8#2. Count every **Subject** in the sentence.#/#
+3. **If (# Verbs > # Subjects)** → Use **Who** (We need a subject).
+--- ==Who+Verb [Verb এর পূর্বে who/whom লাগলে who নিব]==
+---- **টেকনিক ১**: শূন্যস্থানের ঠিক পরেই যদি **Verb** থাকে $\rightarrow$ উত্তর হবে **Who**।
+--- Sub+Verb+ [1]Who +Sub+Verb+[1]Verb [Sub//Verb may remain far]
+---- **টেকনিক ৩**: যদি [Subject + Verb] এবং [Subject + Verb] থাকার পরেও আরও একটি **অতিরিক্ত (Extra) Verb** থাকে $\rightarrow$ উত্তর হবে **Who**।
+4. **If (# Verbs == # Subjects)** → Use **Whom** (We need an object).
+--- ==Sub+Verb+ Whom +Sub+Verb==
+---- **টেকনিক ২**: যদি দেখেন বাক্যে [Subject + Verb] এবং আবার [Subject + Verb] আছে কিন্তু কোনো **বাড়তি ভার্ব নেই** $\rightarrow$ উত্তর হবে **Whom**।
+##ব্যক্তি বনাম বস্তু/প্রাণী##
+- #0.8#**ব্যক্তির ক্ষেত্রে**: Who বা Whom বসে।#/#
+- #0.8#**বস্তু বা প্রাণীর ক্ষেত্রে**: Which বা That বসে।#/#
+-- #0.8#**উদাহরণ**: The animals **which** (not 'who') were chosen to present the political parties...#/#
+**__Relative Pronoun থেকে প্রশ্ন আসলে ৩টা জিনিস চেক করো__:**
+-- Antecedent
+-- Position
+-- Verb Agreement
+​
+##Person সাজানোর নিয়ম##
+- ==**সাধারণ বাক্যে:** ২৩১ নিয়ম (Second $\rightarrow$ Third $\rightarrow$ First)।==
+-- ==সূত্র: $2 \rightarrow 3 \rightarrow 1 + \text{Plural Verb}$==
+-- ==উদাহরণ: $\text{You, he and I are friends.}$==
+- ==**অপরাধ বা দোষ স্বীকারে:** ১২৩ নিয়ম (First $\rightarrow$ Second $\rightarrow$ Third)।==
+-- ==সূত্র: $1 \rightarrow 2 \rightarrow 3 + \text{Plural Verb}$==
+-- ==উদাহরণ: $\text{I, you and he are guilty.}$==
+​
+#2.5##K#Verb#/# #/#
+=> **Cognate Object:** Verb এবং Object একই মূল থেকে আসলে তাকে **cognate Object** বলে। (Ex: He ran a **race**, Dreamt a **dream**)।
+=> **Factitive Object:** যখন Transitive Verb-এর পর Object ছাড়াও অতিরিক্ত শব্দ (Complement) লাগে অর্থ পূর্ণ করতে। (Ex: He called me **a liar**)।
+​
+=> **@@++Transitive & Intransitive & Gerund & Participle & Infinitives ++@@**
+- ##Intransitive Verb##:
+-- Sentence completes without object
+-- **চেনার উপায়**: ভার্বকে **কি** বা **কাকে** দিয়ে প্রশ্ন করলে কোনো উত্তর পাওয়া যায় না।
+-- **সতর্কতা**: ভার্বের পরে 'কোথায়' (Where), 'কখন' (When) বা 'কীভাবে' (How) এর উত্তর থাকলে সেটি ÛÛObject নয়, বরং Adverb।ÛÛ
+-- ÛÛIntransitive Verbs (IntV): যে ভার্বের পর বাক্য শেষ করা যায় (Ex: Sleep)। এর পর যা বসে তা Adverb[1-Word] বা Adverbial Phrase[Some-Words]ÛÛ।
+--- Extra words = **@@==adverb/adverbial==@@**
+-- __**উদাহরণ**__: 
+--- The baby **cries**. (এখানে কোনো object নেই)।
+--- Birds **fly** in the sky. (কি ওড়ে বা কাকে ওড়ে—উত্তর নেই। 'কোথায় ওড়ে' তার উত্তর আছে, তাই এটি Intransitive)।
+--- He **goes** to school. (Goes একটি Intransitive verb কারণ 'to school' একটি স্থান বা Adverbial)।
+​
+- ##Transitive Verb##: 
+-- Needs object to complete meaning
+-- **চেনার উপায়**: ভার্বকে **কি (What)** অথবা **কাকে (Whom)** দিয়ে প্রশ্ন করলে যদি উত্তর পাওয়া যায়, তবে সেটি Transitive Verb।
+-- __**উদাহরণ**__: 
+--- He **reads** a book. (কি পড়ে? - বই। সুতরাং reads একটি Transitive verb)।
+--- I **met** him yesterday. (কাকে দেখা করেছি? - তাকে। সুতরাং met একটি Transitive verb)।
+-- ++##Transitive Verbs and Prepositions (Redundancy - PinPoint Error)##++
+--- The following words are **__Transitive Verbs__**. They do not require a preposition (like @@about, to, into@@) after them when used as a verb. Adding a preposition creates redundancy.
+| **@@__Verb      | Redundant.Pre | Correct Usage__@@**   |
+| **Discuss**     | **About**     | Discuss the topic     |
+| **Investigate** | **Into**      | Investigate the crime |
+| **Resemble**    | **To**        | Resembles her mother  |
+| **Enter**       | **Into**      | Enter the room        |
+| **Leave**       | **From**      | Leave the city        |
+| **Meet**        | **With**      | Meet the manager      |
+| **Answer**      | **To**        | Answer the phone      |
+| **Emphasize**   | **On**        | Emphasize the rules   |
+| **Repeat**      | **Again**     | Repeat the words      |
+| **Return**      | **Back**      | Return the book       |
+Await | For | Await
+- ++@@__**(Note: "Enter into" is only correct when referring to agreements or alliances, e.g., "Enter into a contract.")__@@**++
+​
+-- **==Intransitive & Transitive Both:==** ex: Break
+​
+- ##Infinitives (To + V1)##
+-- **গঠন**: **To + V1** (ভার্বের বেস ফর্ম)।
+-- **কাজ**: এটি বাক্যে নাউন, এডজেক্টিভ বা এডভার্ব-এর মতো কাজ করতে পারে।
+-- **ব্যবহার**: 
+--- **উদ্দেশ্য বোঝাতে**: I went there **to meet** him.
+--- **সাবজেক্ট হিসেবে**: **To tell** a lie is a great sin.
+--- **অবজেক্ট হিসেবে**: I want **to drink** water.
+-- ##@@Bare Infinitive - __ব্যাংকের জন্য জরুরি__@@##
+--- কিছু ভার্বের পরে 'To' উজ্জ্ব বা গোপন থাকে, একে @@Bare Infinitive@@ বলে। 
+--- **ভার্বগুলো হলো**: **@@==Let, Make, Bid, Help, See, Watch, Hear, notice, feel==@@**.
+--- **নিয়ম:** এই শব্দগুলোর পরে অবজেক্ট থাকলে পরবর্তী ভার্বের দুটি রূপ হতে পারে:
+---- **১. উদ্দেশ্যহীন (Aimless):** কাজটিতে কোনো নির্দিষ্ট উদ্দেশ্য নেই, চলছে এমন বুঝালে।
+----- সূত্র: $\text{Verb} + \text{Object} + \text{V}_{ing} \text{ (Participle)}$
+----- উদাহরণ: $\text{He saw the boat floating.}$
+---- **২. উদ্দেশ্যমূলক (Purpose):** শুরু থেকে শেষ পর্যন্ত দেখা বা নির্দিষ্ট উদ্দেশ্য থাকলে।
+----- সূত্র: $\text{Verb} + \text{Object} + \text{V}_1 \text{ (Bare Infinitive)}$
+----- উদাহরণ: $\text{I noticed him go.}$
+- **Infinitive (To+V1) বসে**: **@@==Intend, Hope, Want==@@** -এর পরে।
+-- **@@__All of them:__@@** demand, hope, desire, need, forget, prepare, plan, intend, appear, seem, promise, afford, deserve, agree
+-- @@উপদেশ: ব্যাংকের 'পিনপয়েন্ট এরর' পরীক্ষায় Bare Infinitive (To ছাড়া ব্যবহার) থেকে প্রায়ই প্রশ্ন আসে। উপরের তালিকাভুক্ত ভার্বগুলো (Make, Let ইত্যাদি) ভালো করে মনে রাখুন।@@
+​
+- ##Gerund/Noun (V+ing)##
+-- **Enjoy, Stop, Mind, Keep, Cannot Help, Avoid**-এর পরে। (ÛÛTransitive Verbs (TV)ÛÛ)
+-- উদাহরণ: Would you **mind taking** (To take নয়) a cup of tea
+--  'no good' (বা 'not any good') বাক্যাংশটির পরে সাধারণত gerund ব্যবহৃত হয়।
+​
+- ##Participle##
+-- **Participle:** Noun-এর ঠিক পরে Verb+ing থাকলে সেটি **Adjective/Participle** (Ex: The girl **carrying** a bag)।
+--- **Participle Identification:** সাবজেক্ট + ভার্ব + অবজেক্ট-এর পর যদি কমা (,) ছাড়া সরাসরি ভার্ব+ing থাকে, তবে সেটি **Participle** (যা Adjective-এর কাজ করে)।
+--- **Reduced Relative Clause:** `We met Mitha carrying a bouquet` মূলত ছিল `We met Mitha who was carrying...`। এখানে 'carrying' পার্টিসিপল।
+-- **Text + `Verb+ing` + Object + Comma + Sub:** বাক্যের শুরুতে `Verb+ing ... ,` থাকলে সেটি পার্টিসিপল (Ex: Finding himself alone, he--) & এবং কমার  আগ পর্যন্ত Participial Phrase (যা Adverbial Clause-এর কাজ সংক্ষেপে করে)।
+​
+- ##Causative Verbs (নিজে কাজ না করে অন্যকে দিয়ে করানো)##
+-- **প্রধান ৫টি Causative Verb**: @@==**Make, Have, Get, Let, Help**==@@
+--- **==Make==**: এরপরে ব্যক্তি (Person) বা বস্তু (Thing) যাই থাকুক -> __**@@V1 (Base form)@@**__ বসবে।
+---- **Active Structure**: Subject + Make + Person/Thing + **V1**
+---- @@Example@@: I made him **wash** my car. (To wash হবে না)
+--- **==Have==**: এরপরে ব্যক্তি থাকলে **V1**; আর বস্তু থাকলে **V3** (Past Participle) বসবে। 
+---- **ব্যক্তির ক্ষেত্রে (Active)**: Have-এর পরে ব্যক্তি থাকলে **__V1__** বসে।
+----- @@Example@@: I had the mechanic **repair** my car.
+---- **বস্তুর ক্ষেত্রে (Passive)**: Have-এর পরে বস্তু থাকলে **__V3 (Past Participle)__** বসে।
+----- @@Example@@: I had my car **repaired**.
+--- **==Get==**: এরপরে ব্যক্তি থাকলে **Infinitive** (To + V1); আর বস্তু থাকলে **V3** বসবে।
+---- **ব্যক্তির ক্ষেত্রে (Active)**: Get-এর পরে ব্যক্তি থাকলে **__Infinitive (To + V1)__** বসে। (এটি সবচেয়ে বেশি ভুল হয়)।
+----- @@Example@@: I got the mechanic **to repair** my car.
+---- **বস্তুর ক্ষেত্রে (Passive)**: Get-এর পরে বস্তু থাকলে **__V3__** বসে।
+----- @@Example@@: I got my car **repaired**.
+--- **==Let==**: এরপরে সবসময় **__V1__** বসে।
+---- @@Example@@: My father let me **go** to the cinema.
+--- **==Help==**: এরপরে সবসময় **__V1__** অথবা **__To + V1__** উভয়ই সঠিক
+---- @@Example@@: He helped me **finish** the work. (অথবা **to finish**)।
+​
+- ##__সতর্কতা ও পিনপয়েন্ট এরর টিপস__##
+-- **Make-এর Passive Voice**: যদি বাক্যটি নিজেই প্যাসিভ হয় (যেমন: I was made...), তখন কিন্তু **__To + V1__** বসে। 
+--- @@Example@@: He was made **to do** the work. (I made him **do** the work)।
+-- **__Get বনাম Have__**: মনে রাখবেন— **Get**-এর পরে ব্যক্তি থাকলে **To** লাগে, কিন্তু **Have**-এর পরে লাগে না। 
+| **@@__Causative Verb | ব্যক্তি (Person) থাকলে | বস্তু (Thing) থাকলে__@@** |
+| **Make**       | **V1**            | **V1**          |
+| **Have**       | **V1**            | **V3**          |
+| **Get**        | **To + V1**       | **V3**          |
+| **Let**        | **V1**            | **V1**          |
+-- **Had Better + V1:** মডাল ভার্বের মতো কাজ করে, তাই এর পর ভার্বের বেস ফর্ম বসে।
+@@পরামর্শ: ব্যাংক রিটেন এবং প্রিলিতে **@@=='Get' এবং 'Have'==@@** এর ব্যবহার থেকে সবচেয়ে বেশি প্রশ্ন আসে। বস্তুর ক্ষেত্রে (Thing) উভয় ভার্বেই **V3** বসে, এটি মনে রাখলে অর্ধেক কাজ সহজ হয়ে যাবে।@@
+@@উপদেশ: 'I got my hair cut' — এখানে **cut** হলো V3 (Cut-Cut-Cut)। অনেকে একে V1 ভেবে ভুল করেন।@@
+​
+##Extra Verb Rules:##
+- **Catch/Hold Structure:** `Catch/Hold` + Object (ব্যক্তি) + `By` + The/Possessive + Body Part। (Ex: He caught me **by the** hand / He held me **by my** hand)।
+- __**Need এর ব্যবহার**__
+-- **Modal Verb হিসেবে:** যখন এর পরে সরাসরি ভার্ব আসে (to বসে না, s/es হয় না)।
+--- সূত্র: $\text{Subject} + \text{need} + \text{V}_1$
+--- He need not go.
+-- **Main Verb হিসেবে:** যখন এর পরে Infinitive থাকে।
+--- সূত্র: $\text{Subject} + \text{need} + \text{to} + \text{V}_1$
+- **Sequence of Tense:** Principal Clause পাস্ট টেন্স হলে Subordinate Clause ও পাস্ট টেন্স হবে।
+-- সূত্র: $V_2 (\text{Main}) \rightarrow V_2 (\text{Subordinate})$
+​
+#2.5##K#Adjective#/# #/#
+- **@@Relative Clause = Adjective Clause@@**
+- **Complement:** Be Verb-এর পর সাধারণত Adjective বসে, যাকে **Complement** বলা হয় (Ex: The sky is **clear**)।
+**__Non-gradable / Absolute Adjectives__**
+- **শব্দসমূহ:** Perfect, Unique, Round, Dead, Full, Universal.
+- **নিয়ম:** এদের আগে more, most, very বসে না। এরা নিজেই Superlative অর্থ বহন করে।
+-- ভুল: Most perfect -> সঠিক: Perfect
+​
+
+#2.5##K#Adverb#/# #/#
+​
+#2.5##K#Preposition#/# #/#
+- **__List of Participle Prepositions__**: **@@Including, Regarding, Concerning, Following@@**.
+-- @@Do not mistake these for standard participles when used in this context.@@
+- ON VS IN
+-- **Street:** On/In the street (On বেশি প্রচলিত)। তবে **At the street corner**।
+-- **Time:** What's the time **by** your watch? (অধিকারে থাকা ঘড়ি বোঝাতে)।
+-- **In** vs **On** the street: কর্নার বা নির্দিষ্ট পয়েন্ট থাকলে **At**।
+- **__Preposition এর ব্যবহার (Instrument & Place)__**
+-- কলম দিয়ে লেখা: $\text{Write} + \text{with} + \text{a pen}$
+-- কাগজের উপর লেখা: $\text{Write} + \text{on} + \text{paper}$
+-- বাড়িতে বাস করা: $\text{Live} + \text{in} + \text{a house}$
+-- **টাকা কাছে থাকা:**
+--- পকেটে বা শরীরে বহন করা: $\text{Money} + \text{on} + \text{you}$
+--- হাতের নাগালে বা ব্যাগে থাকা: $\text{Money} + \text{with} + \text{you}$
+​
+
+#2.5##K#Conjunction#/# #/#
+- **Connectors (EasyTrick):** **@@==FANBOYS==@@** = **@@Compound Sentence@@**
+-- For, And, Nor, But, Or, Yet, So.
+-- **@@++Pair Conjunction++@@** = @@Either+or, Neither+nor, Not only+but also@@ = **@@Complex Sentence@@**
+​
+#2.5##K#++Combined Rules++#/# #/#
+- **Made of vs Made from:** (Noun & Preposition)
+-- **Made of:** উপাদান সরাসরি দৃশ্যমান/অপরিবর্তিত থাকলে (Chair made of wood)।
+-- **Made from:** উপাদান পরিবর্তিত হলে (Paper made from wood)।
+- **Parts of Speech Identification:**
+-- **After:**
+--- ২য় বাক্যে সাবজেক্ট+ভার্ব থাকলে → **Conjunction**।
+--- ২য় বাক্যে সাবজেক্ট না থাকলে (Verb+ing/Noun) → **Preposition**।
+-- **No + Noun:** 'No' ডিটারমিনার, তাই এর পরের শব্দটি **Noun** (Ex: He has done no **wrong**)। কিন্তু 'Wrong answer'-এ Wrong হলো **Adjective**।
+-- **Passive Voice Adjective:** বি-ভার্বের পর V3 (Passive Voice) থাকলে সেটি **Adjective** (Ex: English is **spoken**)।
+- **Nutritious vs Nutritional:**
+-- Nutritious Food (পুষ্টিকর খাবার)।
+-- Nutritional Value (পুষ্টিগুণ)।
+- **Embedded Question:**
+-- ২য় অংশটি অ্যাসারটিভ (Subject + Verb) হবে। (Ex: Can you tell me **where he is**?) [**==not==** ~~where does he live~~]
+-- ২য় অংশে প্রশ্নবোধক গঠন হবে না।
+- **Noun & Pronoun:**
+-- **Common Noun:** একা বসে না। ডিটারমিনার বা প্লুরাল হতে হয় (Ex: **Girls** are intelligent বা **A girl** is intelligent)।
+-- **Demonstrative:** This/That + Noun থাকলে সেটি **Adjective** (Ex: **This** shirt)। একা থাকলে **Pronoun** (Ex: **This** is mine)।
+-- **Substitute:** ম্যাংগো (Singular) → It; ম্যাংগোস (Plural) → They (বস্তুর ক্ষেত্রেও They হয়)।
+- **Transitive vs Intransitive:**
+-- Transitive ভার্ব সরাসরি অবজেক্ট নেয়।
+-- Intransitive ভার্ব প্রিপজিশন নিয়ে অবজেক্ট নেয় (Ex: Look **at**, Abide **by**)।
+- **For as Conjunction:** `For` সাধারণত Preposition, কিন্তু কমার (,) পরে বসলে এবং কারণ বোঝালে এটি **Conjunction** হয়ে যায় (অর্থ: Because/Since)। (Ex: ..., for he was ill)।
+- **As:** `As` এর পর পূর্ণ বাক্য (Subject + Verb) থাকলে সেটি **Conjunction**। `As` এর পর শুধু Noun Phrase থাকলে সেটি **Preposition** (অর্থ: হিসেবে)।
+##একনজরে মনে রাখার টেকনিক##
+- **Like/As + শব্দ/ফ্রেজ** = **Preposition**
+- **As + বাক্য (S+V)** = **Conjunction**
+-- He looks **like** his father.
+--- (এখানে `his father` হলো Noun Phrase, তাই `like` হলো Preposition। অর্থ: মতো)।
+- **Adjective + Enough // Enough + Noun:** `Enough` Adjective বা Adverb-এর **পরে** বসে (Ex: Old **enough**)। কিন্তু Noun-এর **আগে** বসে (Ex: **Enough** money)।
+- **__While এর ব্যবহার__**
+-- **While** এর ঠিক পরেই সাবজেক্ট থাকলে সেটি Past Continuous Tense হয়।
+--- সূত্র: $\text{Past Indefinite} + \text{While} + \text{Past Continuous}$
+--- গঠন: $\text{While} + \text{Subject} + \text{was/were} + \text{V}_{ing}$
+-- **নোট:** While এর পর সরাসরি ভার্ব থাকলে সেটি Preposition নয়, বরং **Conjunction** (উহ্য clause থাকে)।
+--- **@@__While__@@** cooking the dinner, Nasima arrived. -> While = Conjunction
+- **Adverb vs Preposition:**
+-- Preposition এর পর অবশ্যই Object থাকে।
+--- The dog was running **@@__behind__@@** the car.
+-- Object না থাকলে সেটি Adverb। (Example: $\text{Running behind}$)
+​
+##Tables:##
+**__Noun.Collective__** | #0.8#Army, Herd, Elite, Meeting, Pack, Group, Stack, Gentry, Navy, Infantry, Bundle, Gang, Shoal, Swarm, Party, Majority, Committee, Fleet, Mass, Flock, Class, Cattle, Library, Flight, Jury, Crowd, Audience, Cavalry, Team#/#
+**__Countable Noun__** | #0.8#Message, Dream (যদি বহুবচন হয়), Plan, Idea, Table#/#
+**__Uncountable Noun__** | #0.8#Advertising, Advice, Food, Furniture, Homework, Information, Information, Furniture, Love, Luggage, Money, Music, News, Physics/Economics (সাবজেক্টের নাম), Sand, Scenery, Time#/#
+**__Abstract Noun__** | #0.8#Honesty, Happiness, Patience, Sympathy, Courage, Beauty (সৌন্দর্য অর্থে), Freedom#/#
+**__Adverb__** | #0.8#Well, Ago, Again, Almost, Always, Already, Ever, Here, There, Now, Then, Once, Soon, Sometimes, Yesterday, Tomorrow, Twice, Thrice, Never, Only, Quite, Seldom, Today, Thus, Enough, Rather, Often, Very, Rarely, Hardly, Special#/#
+++**__Intransitive.V__**++ | #0.8#Arrive, Die, Go, Run, Sit, Sleep, Stay#/#
+​
+##একনজরে পার্থক্য (Quick Look)##
+| **@@__বিষয়টি | বৈশিষ্ট্য | উদাহরণ__@@** |
+| **Transitive** | Object প্রয়োজন হয় | I **eat** rice. |
+| **Intransitive** | Object প্রয়োজন হয় না | He **sleeps**. |
+| **Infinitive** | To + V1 গঠন | **To err** is human. |
