@@ -22,7 +22,7 @@ Paste(text) {
     ih.Start()
     ih.Wait()
     
-    if (ih.EndReason == "EndKey" && RegExMatch(ih.Input, "^\d+$")) {
+    if (ih.EndReason == "EndKey" && ih.Input != "") {
         static en_to_bn := Map(
             "0", "০", "1", "১", "2", "২", "3", "৩", "4", "৪",
             "5", "৫", "6", "৬", "7", "৭", "8", "৮", "9", "৯"
@@ -33,9 +33,21 @@ Paste(text) {
             converted .= en_to_bn[A_LoopField]
         }
         
-        SendInput "{Backspace " . StrLen(ih.Input) + 1 . "}"
+        ; Backspace: Input length + 1 (for ;) + 1 (for Space/Tab if used)
+        bs_count := StrLen(ih.Input) + 1
+        if (ih.EndKey == "Space" || ih.EndKey == "Tab")
+            bs_count += 1
+        
+        if (ih.EndKey == "Enter") {
+            Send "{Backspace}" ; Remove the newline created by Enter
+            Send "{Backspace " . bs_count . "}"
+        } else {
+            Send "{Backspace " . bs_count . "}"
+        }
+        
         SendInput converted
         
+        ; Restore the end key
         if (ih.EndKey != "" && ih.EndKey != "Escape")
             Send "{" . ih.EndKey . "}"
     }
