@@ -29,7 +29,7 @@ async function sendDataToPython(data) {
   }
 }
 
-// Auto-save on storage changes (Only sync storage for this extension)
+// Auto-save on storage changes
 chrome.storage.sync.onChanged.addListener((changes, areaName) => {
   if (areaName === 'sync') {
     chrome.storage.sync.get(null, (items) => {
@@ -65,59 +65,61 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     sendDataToPython(message.data)
       .then(result => sendResponse(result))
       .catch(error => sendResponse({ success: false, error: error.message }));
-    return true; // Keep channel open for async response
+    return true; 
   }
   
   if (message.action === 'loadFromPython') {
     loadDataFromPython()
       .then(result => sendResponse(result))
       .catch(error => sendResponse({ success: false, error: error.message }));
-    return true; // Keep channel open for async response
+    return true;
   }
 });
 
-// Initial health check
-fetch(`${PYTHON_SERVER}/health`)
-  .then(response => response.json())
-  .then(data => console.log('Python server status:', data))
-  .catch(error => console.log('Python server not available:', error.message));
-
-// Context Menu Integration
+// Context Menu Setup
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
     id: "add-to-sidebar",
     title: "Add to Quick Sidebar",
-    contexts: ["page"]
+    contexts: ["page", "link"]
   });
 });
 
 chrome.contextMenus.onClicked.addListener((info, tab) => {
   if (info.menuItemId === "add-to-sidebar") {
-    addTabToSidebar(tab);
+    const urlToAdd = info.linkUrl || info.pageUrl || tab.url;
+    const titleToAdd = info.selectionText || tab.title || "New Link";
+    addUrlToSidebar(urlToAdd, titleToAdd, tab.favIconUrl);
   }
 });
 
-function addTabToSidebar(tab) {
-  if (!tab || !tab.url) return;
+function addUrlToSidebar(url, title, favIconUrl) {
+  if (!url) return;
 
   chrome.storage.sync.get(['sidebar_links'], (result) => {
-    const links = result.sidebar_links || [];
+    let links = result.sidebar_links || [];
     
+    // Check if URL already exists
+    if (links.some(l => l.url === url)) {
+      console.log('Link already exists in sidebar');
+      return;
+    }
+
     let domain = '';
     try {
-        domain = new URL(tab.url).hostname;
+        domain = new URL(url).hostname;
     } catch (e) {
-        console.error('Invalid URL:', tab.url);
+        console.error('Invalid URL:', url);
         return;
     }
 
     const newLink = {
       id: Date.now().toString(),
-      title: tab.title || domain,
-      url: tab.url,
-      color: '#38bdf8', // Default color
+      title: title,
+      url: url,
+      color: '#38bdf8',
       isSolid: false,
-      icon: `https://www.google.com/s2/favicons?domain=${domain}&sz=64`
+      icon: favIconUrl || `https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${url}&size=64`
     };
 
     links.push(newLink);
@@ -127,3 +129,9 @@ function addTabToSidebar(tab) {
     });
   });
 }
+
+// Health check
+fetch(`${PYTHON_SERVER}/health`)
+  .then(response => response.json())
+  .then(data => console.log('Python server status:', data))
+  .catch(error => console.log('Python server not available:', error.message));

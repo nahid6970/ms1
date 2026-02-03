@@ -63,14 +63,13 @@ function showEmptyState(show) {
 }
 
 function renderLinks() {
-    linksList.innerHTML = '';
-
     if (links.length === 0) {
         showEmptyState(true);
         return;
     }
 
     showEmptyState(false);
+    const fragment = document.createDocumentFragment();
 
     links.forEach((link) => {
         const item = document.createElement('div');
@@ -85,7 +84,7 @@ function renderLinks() {
 
         item.innerHTML = `
             <div class="favicon-box" style="${iconStyle}">
-                <img src="${link.icon || ''}" onerror="this.src='https://www.google.com/s2/favicons?domain=google.com&sz=64'">
+                <img src="${link.icon || ''}" onerror="this.src='https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${link.url}&size=64'">
             </div>
         `;
 
@@ -137,8 +136,11 @@ function renderLinks() {
             }
         });
 
-        linksList.appendChild(item);
+        fragment.appendChild(item);
     });
+
+    linksList.innerHTML = '';
+    linksList.appendChild(fragment);
 }
 
 function triggerBrowserModal(editLink = null) {

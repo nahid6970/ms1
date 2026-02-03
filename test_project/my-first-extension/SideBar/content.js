@@ -93,8 +93,8 @@
       } else {
         titleText.textContent = 'New Link';
         editIdInput.value = '';
-        titleInput.value = '';
-        urlInput.value = '';
+        titleInput.value = document.title || '';
+        urlInput.value = window.location.href;
         imgInput.value = '';
         colorInput.value = '#38bdf8';
         solidInput.checked = false;
@@ -168,7 +168,7 @@
         url: url,
         color: color,
         isSolid: isSolid,
-        icon: imgUrl || `https://www.google.com/s2/favicons?domain=${domain}&sz=64`
+        icon: imgUrl || `https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${url}&size=64`
       };
 
       if (editId) {
