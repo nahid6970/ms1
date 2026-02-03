@@ -47,11 +47,16 @@ class EnvVariableManager(QMainWindow):
         self.status_label = QLabel("SYSTEM READY")
         self.status_label.setStyleSheet(f"color: {CP_GREEN}; font-weight: bold; padding: 5px;")
         
+        # Initialize Scripts Directory
+        self.scripts_dir = os.path.join(os.path.expanduser("~"), ".env_manager", "scripts")
+        os.makedirs(self.scripts_dir, exist_ok=True)
+        
         # Tab Widget
         self.tabs = QTabWidget()
         self.tabs.addTab(self.create_path_tab(), "PATH MANAGER")
         self.tabs.addTab(self.create_env_tab(), "ENV VARIABLES")
         self.tabs.addTab(self.create_alias_tab(), "ALIASES")
+        self.tabs.addTab(self.create_scripts_tab(), "SCRIPTS")
         self.tabs.addTab(self.create_context_tab(), "CONTEXT MENU")
         self.tabs.addTab(self.create_backup_tab(), "BACKUP/RESTORE")
         main_layout.addWidget(self.tabs)
@@ -918,6 +923,177 @@ class EnvVariableManager(QMainWindow):
         except FileNotFoundError:
             pass # Already gone
 
+    # ===== SCRIPT MANAGEMENT METHODS =====
+
+    def create_scripts_tab(self):
+        """Create tab for creating and managing custom scripts"""
+        widget = QWidget()
+        layout = QVBoxLayout(widget)
+        
+        splitter = QSplitter(Qt.Orientation.Horizontal)
+        
+        # Left Side: Script List
+        list_container = QWidget()
+        list_layout = QVBoxLayout(list_container)
+        
+        self.script_list = QListWidget()
+        self.script_list.itemClicked.connect(self.load_script_content)
+        list_layout.addWidget(QLabel("📜 SCRIPTS"))
+        list_layout.addWidget(self.script_list)
+        
+        list_btns = QHBoxLayout()
+        new_btn = QPushButton("🆕 NEW")
+        del_btn = QPushButton("🗑️ DELETE")
+        new_btn.clicked.connect(self.create_new_script)
+        del_btn.clicked.connect(self.delete_script)
+        list_btns.addWidget(new_btn)
+        list_btns.addWidget(del_btn)
+        list_layout.addLayout(list_btns)
+        
+        # Right Side: Editor
+        editor_container = QWidget()
+        editor_layout = QVBoxLayout(editor_container)
+        
+        self.script_editor = QTextEdit()
+        self.script_editor.setPlaceholderText("Write your script here (Python, Batch, etc.)...")
+        
+        self.script_name_label = QLabel("No script selected")
+        self.script_name_label.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold;")
+        
+        editor_layout.addWidget(self.script_name_label)
+        editor_layout.addWidget(self.script_editor)
+        
+        editor_btns = QHBoxLayout()
+        save_btn = QPushButton("💾 SAVE SCRIPT")
+        ctx_btn = QPushButton("🖱️ ADD TO CONTEXT MENU")
+        save_btn.clicked.connect(self.save_current_script)
+        ctx_btn.clicked.connect(self.add_script_to_context)
+        
+        save_btn.setStyleSheet(f"background-color: {CP_PANEL}; border: 1px solid {CP_GREEN}; color: {CP_GREEN};")
+        ctx_btn.setStyleSheet(f"background-color: {CP_PANEL}; border: 1px solid {CP_CYAN}; color: {CP_CYAN};")
+        
+        editor_btns.addWidget(save_btn)
+        editor_btns.addWidget(ctx_btn)
+        editor_layout.addLayout(editor_btns)
+        
+        splitter.addWidget(list_container)
+        splitter.addWidget(editor_container)
+        splitter.setStretchFactor(1, 2)
+        
+        layout.addWidget(splitter)
+        
+        # Load initial list
+        self.load_scripts_list()
+        
+        return widget
+
+    def load_scripts_list(self):
+        """Reload list of scripts from disk"""
+        self.script_list.clear()
+        if os.path.exists(self.scripts_dir):
+            for file in os.listdir(self.scripts_dir):
+                if os.path.isfile(os.path.join(self.scripts_dir, file)):
+                    self.script_list.addItem(file)
+
+    def load_script_content(self, item):
+        """Load selected script into editor"""
+        name = item.text()
+        path = os.path.join(self.scripts_dir, name)
+        try:
+            with open(path, 'r', encoding='utf-8') as f:
+                self.script_editor.setPlainText(f.read())
+            self.script_name_label.setText(f"EDITING: {name}")
+            self.current_editing_script = name
+        except Exception as e:
+            self.set_status(f"Error loading script: {e}", CP_RED)
+
+    def save_current_script(self):
+        """Save editor content to file"""
+        if not hasattr(self, 'current_editing_script') or not self.current_editing_script:
+            self.create_new_script()
+            return
+            
+        path = os.path.join(self.scripts_dir, self.current_editing_script)
+        try:
+            with open(path, 'w', encoding='utf-8') as f:
+                f.write(self.script_editor.toPlainText())
+            self.set_status(f"Saved {self.current_editing_script}", CP_GREEN)
+        except Exception as e:
+            self.set_status(f"Save failed: {e}", CP_RED)
+
+    def create_new_script(self):
+        """Create a new script file"""
+        name, ok = QInputDialog.getText(self, "New Script", "Filename (e.g. clean_temp.bat):")
+        if ok and name:
+            path = os.path.join(self.scripts_dir, name)
+            if os.path.exists(path):
+                QMessageBox.warning(self, "Warning", "File already exists!")
+                return
+            
+            try:
+                with open(path, 'w', encoding='utf-8') as f:
+                    f.write("")
+                self.load_scripts_list()
+                # Select it
+                items = self.script_list.findItems(name, Qt.MatchFlag.MatchExactly)
+                if items:
+                    self.script_list.setCurrentItem(items[0])
+                    self.load_script_content(items[0])
+            except Exception as e:
+                self.set_status(f"Creation failed: {e}", CP_RED)
+
+    def delete_script(self):
+        """Delete selected script"""
+        current = self.script_list.currentItem()
+        if current:
+            name = current.text()
+            reply = QMessageBox.question(self, "Confirm", f"Delete '{name}' permanently?",
+                                        QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+            if reply == QMessageBox.StandardButton.Yes:
+                try:
+                    os.remove(os.path.join(self.scripts_dir, name))
+                    self.load_scripts_list()
+                    self.script_editor.clear()
+                    self.script_name_label.setText("No script selected")
+                    self.current_editing_script = None
+                    self.set_status(f"Deleted {name}", CP_GREEN)
+                except Exception as e:
+                    self.set_status(f"Delete failed: {e}", CP_RED)
+
+    def add_script_to_context(self):
+        """Quickly add current script to context menu"""
+        if not hasattr(self, 'current_editing_script') or not self.current_editing_script:
+            QMessageBox.warning(self, "Error", "No script selected!")
+            return
+            
+        name = self.current_editing_script
+        path = os.path.join(self.scripts_dir, name)
+        
+        # Determine command based on extension
+        cmd = ""
+        if name.endswith(".py"):
+            cmd = f'python "{path}" "%V"'
+        elif name.endswith(".bat") or name.endswith(".cmd"):
+            cmd = f'"{path}" "%V"'
+        elif name.endswith(".ps1"):
+            cmd = f'powershell -ExecutionPolicy Bypass -File "{path}" "%V"'
+        else:
+            cmd = f'"{path}" "%V"'
+            
+        label, ok = QInputDialog.getText(self, "Context Menu Label", 
+                                        "Menu Label for this script:", 
+                                        text=f"Run {name}")
+        if ok and label:
+            try:
+                self._create_reg_entry(rf"Directory\shell\{label}", cmd)
+                self._create_reg_entry(rf"Directory\Background\shell\{label}", cmd)
+                self.load_context_entries()
+                QMessageBox.information(self, "Success", f"'{label}' added to context menu.")
+            except PermissionError:
+                QMessageBox.critical(self, "Error", "Permission Denied. Run as Admin.")
+            except Exception as e:
+                QMessageBox.critical(self, "Error", str(e))
+
     # ===== BACKUP / RESTORE METHODS =====
 
     def create_backup_tab(self):
@@ -930,8 +1106,8 @@ class EnvVariableManager(QMainWindow):
         info.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(info)
         
-        desc = QLabel("Export all environment variables, PATH entries, and aliases to a JSON file.\n"
-                      "Warning: Restoring from backup will overwrite existing variables.")
+        desc = QLabel("Export all environment variables, PATH entries, aliases, scripts, and context menu entries to a JSON file.\n"
+                      "Warning: Restoring from backup will overwrite existing settings.")
         desc.setStyleSheet(f"color: {CP_SUBTEXT}; padding: 10px;")
         desc.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(desc)
@@ -975,6 +1151,35 @@ class EnvVariableManager(QMainWindow):
             print(f"Error reading registry {subkey}: {e}")
         return vars_dict
 
+    def get_context_menu_data(self):
+        """Collect all custom context menu entries for backup"""
+        entries = {}
+        paths = [r"Directory\Background\shell", r"Directory\shell"]
+        for base_path in paths:
+            try:
+                key = winreg.OpenKey(winreg.HKEY_CLASSES_ROOT, base_path, 0, winreg.KEY_READ)
+                i = 0
+                while True:
+                    try:
+                        subkey_name = winreg.EnumKey(key, i)
+                        if subkey_name.lower() in ["cmd", "powershell", "anycode"]:
+                            i += 1
+                            continue
+                        try:
+                            cmd_key = winreg.OpenKey(winreg.HKEY_CLASSES_ROOT, f"{base_path}\\{subkey_name}\\command", 0, winreg.KEY_READ)
+                            cmd_value, _ = winreg.QueryValueEx(cmd_key, "")
+                            winreg.CloseKey(cmd_key)
+                            entries[subkey_name] = cmd_value
+                        except:
+                            pass
+                        i += 1
+                    except OSError:
+                        break
+                winreg.CloseKey(key)
+            except:
+                pass
+        return entries
+
     def export_config(self):
         """Export all settings to JSON"""
         file_path, _ = QFileDialog.getSaveFileName(self, "Export Configuration", "", "JSON Files (*.json)")
@@ -982,12 +1187,25 @@ class EnvVariableManager(QMainWindow):
             return
             
         try:
+            # Collect scripts
+            scripts_data = {}
+            if os.path.exists(self.scripts_dir):
+                for name in os.listdir(self.scripts_dir):
+                    p = os.path.join(self.scripts_dir, name)
+                    if os.path.isfile(p):
+                        try:
+                            with open(p, 'r', encoding='utf-8') as f:
+                                scripts_data[name] = f.read()
+                        except: pass
+
             config = {
-                "version": "1.0",
+                "version": "1.2",
                 "timestamp": datetime.now().isoformat(),
                 "user_env": self.get_all_registry_vars(winreg.HKEY_CURRENT_USER, r"Environment"),
                 "system_env": self.get_all_registry_vars(winreg.HKEY_LOCAL_MACHINE, r"SYSTEM\CurrentControlSet\Control\Session Manager\Environment"),
-                "aliases": self.aliases
+                "aliases": self.aliases,
+                "context_menu": self.get_context_menu_data(),
+                "scripts": scripts_data
             }
             
             with open(file_path, 'w') as f:
@@ -1010,11 +1228,11 @@ class EnvVariableManager(QMainWindow):
                 config = json.load(f)
             
             # Basic validation
-            if "user_env" not in config and "system_env" not in config and "aliases" not in config:
+            if "user_env" not in config and "system_env" not in config and "aliases" not in config and "context_menu" not in config and "scripts" not in config:
                 raise ValueError("Invalid configuration file format.")
             
             reply = QMessageBox.question(self, "Confirm Import", 
-                                        "This will overwrite existing environment variables and aliases. Continue?",
+                                        "This will overwrite existing environment variables, aliases, context menu entries, and scripts. Continue?",
                                         QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
             
             if reply != QMessageBox.StandardButton.Yes:
@@ -1044,10 +1262,31 @@ class EnvVariableManager(QMainWindow):
                 self.aliases.update(config["aliases"])
                 self.save_aliases()
 
+            # Import Context Menu
+            if "context_menu" in config:
+                try:
+                    for name, cmd in config["context_menu"].items():
+                        self._create_reg_entry(rf"Directory\shell\{name}", cmd)
+                        self._create_reg_entry(rf"Directory\Background\shell\{name}", cmd)
+                except PermissionError:
+                    QMessageBox.warning(self, "Permission Denied", "Could not import Context Menu entries. Please run as Administrator.")
+
+            # Import Scripts
+            if "scripts" in config:
+                os.makedirs(self.scripts_dir, exist_ok=True)
+                for name, content in config["scripts"].items():
+                    p = os.path.join(self.scripts_dir, name)
+                    try:
+                        with open(p, 'w', encoding='utf-8') as f:
+                            f.write(content)
+                    except: pass
+                self.load_scripts_list()
+
             self.broadcast_env_change()
             self.load_path_vars(self.current_path_scope)
             self.load_env_vars(self.current_env_scope)
             self.load_aliases()
+            self.load_context_entries()
             
             self.set_status("Configuration imported successfully", CP_GREEN)
             QMessageBox.information(self, "Import Success", "Configuration imported and applied.\nYou may need to restart your shell.")
