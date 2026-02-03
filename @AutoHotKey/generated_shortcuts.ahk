@@ -15,41 +15,42 @@ Paste(text) {
 
 ;! === BACKGROUND / STARTUP SCRIPTS ===
 ;! Smart Bengali Numbers
-;! Converts ;[numbers] to Bengali numbers dynamically
+;! Converts ;[numbers] to Bengali after Space (Fixed letters conflict)
 ~;:: {
+    static en_to_bn := Map(
+        "0", "০", "1", "১", "2", "২", "3", "৩", "4", "৪",
+        "5", "৫", "6", "৬", "7", "৭", "8", "৮", "9", "৯"
+    )
+    
     ih := InputHook("V", "{Space}{Enter}{Tab}{Esc}")
-    ih.OnChar := (hook, char) => (char < "0" || char > "9") ? hook.Stop() : ""
+    
+    ; Nested function for character validation
+    ih.OnChar := OnCharHandler
+    OnCharHandler(h, char) {
+        if !(char ~= "^\d$")
+            h.Stop()
+    }
+    
     ih.Start()
     ih.Wait()
     
     if (ih.EndReason == "EndKey" && ih.Input != "") {
-        static en_to_bn := Map(
-            "0", "০", "1", "১", "2", "২", "3", "৩", "4", "৪",
-            "5", "৫", "6", "৬", "7", "৭", "8", "৮", "9", "৯"
-        )
+        en_digits := ih.Input
+        bn_digits := ""
+        Loop Parse, en_digits
+            bn_digits .= en_to_bn[A_LoopField]
         
-        converted := ""
-        Loop Parse, ih.Input {
-            converted .= en_to_bn[A_LoopField]
-        }
-        
-        ; Backspace: Input length + 1 (for ;) + 1 (for Space/Tab if used)
-        bs_count := StrLen(ih.Input) + 1
-        if (ih.EndKey == "Space" || ih.EndKey == "Tab")
-            bs_count += 1
+        bs_count := StrLen(en_digits) + 2
         
         if (ih.EndKey == "Enter") {
-            Send "{Backspace}" ; Remove the newline created by Enter
-            Send "{Backspace " . bs_count . "}"
+            Send "{BackSpace}{BackSpace " . (bs_count - 1) . "}"
+            SendInput bn_digits
+            Send "{Enter}"
         } else {
-            Send "{Backspace " . bs_count . "}"
-        }
-        
-        SendInput converted
-        
-        ; Restore the end key
-        if (ih.EndKey != "" && ih.EndKey != "Escape")
+            Send "{BackSpace " . bs_count . "}"
+            SendInput bn_digits
             Send "{" . ih.EndKey . "}"
+        }
     }
 }
 
