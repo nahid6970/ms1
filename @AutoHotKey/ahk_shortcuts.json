@@ -435,6 +435,22 @@
             "trigger": ";theme",
             "replacement": "For theming C:\\@delta\\ms1\\THEME_GUIDE.md use this file guidline u can use cat or some other command to see whats inside THEME_GUIDE.md",
             "enabled": true
+        },
+        {
+            "name": "Bengla e",
+            "category": "General",
+            "description": "",
+            "trigger": ";e",
+            "replacement": "ে",
+            "enabled": true
+        },
+        {
+            "name": "bangla er",
+            "category": "General",
+            "description": "",
+            "trigger": ";er",
+            "replacement": "এর",
+            "enabled": true
         }
     ],
     "startup_scripts": [
