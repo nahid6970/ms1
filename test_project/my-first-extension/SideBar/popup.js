@@ -18,9 +18,11 @@ let currentRightClickedLinkId = null;
 
 // Initial Load
 function init() {
-    chrome.storage.sync.get(['sidebar_links'], (result) => {
+    chrome.storage.sync.get(['sidebar_links', 'itemsPerRow'], (result) => {
         if (result.sidebar_links && result.sidebar_links.length > 0) {
             links = result.sidebar_links;
+            const itemsPerRow = result.itemsPerRow || 4;
+            applyGridLayout(itemsPerRow);
             renderLinks();
         } else {
             showEmptyState(true);
@@ -44,11 +46,44 @@ function init() {
     });
 }
 
+// Apply grid layout based on items per row
+function applyGridLayout(itemsPerRow) {
+    const itemSize = 56; // favicon box size
+    const gap = 12;
+    const padding = 32; // 16px on each side
+    const minWidth = 320; // minimum width to show all header buttons
+    
+    // Calculate popup width based on items per row
+    let popupWidth = (itemSize * itemsPerRow) + (gap * (itemsPerRow - 1)) + padding;
+    
+    // Ensure minimum width for header buttons
+    popupWidth = Math.max(popupWidth, minWidth);
+    
+    document.body.style.width = `${popupWidth}px`;
+    
+    // Update grid columns
+    linksList.style.gridTemplateColumns = `repeat(${itemsPerRow}, 1fr)`;
+}
+
 // Listen for updates from other contexts (like background script context menu)
 chrome.storage.onChanged.addListener((changes, areaName) => {
-    if (areaName === 'sync' && changes.sidebar_links) {
-        links = changes.sidebar_links.newValue || [];
-        renderLinks();
+    if (areaName === 'sync') {
+        if (changes.sidebar_links) {
+            links = changes.sidebar_links.newValue || [];
+            renderLinks();
+        }
+        if (changes.itemsPerRow) {
+            applyGridLayout(changes.itemsPerRow.newValue || 4);
+        }
+    }
+});
+
+// Listen for settings updates
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.action === 'settings_updated') {
+        chrome.storage.sync.get(['itemsPerRow'], (result) => {
+            applyGridLayout(result.itemsPerRow || 4);
+        });
     }
 });
 

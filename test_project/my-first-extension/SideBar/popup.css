@@ -24,16 +24,19 @@
 }
 
 body {
-    width: 320px;
+    width: 320px; /* Default, will be adjusted by JS */
     background-color: var(--bg-color);
     color: var(--text-main);
     font-family: 'JetBrains Mono', monospace;
     font-size: 13px;
     min-height: 100px;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
 .container {
     padding: 16px;
+    overflow: visible;
 }
 
 header {
@@ -119,11 +122,12 @@ header {
     to { transform: rotate(360deg); }
 }
 
-/* 4 Column Grid */
+/* Dynamic Grid - columns set by JavaScript */
 .links-list {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(4, 1fr); /* Default, will be overridden by JS */
     gap: 12px;
+    overflow: visible;
 }
 
 .link-item {

@@ -58,24 +58,31 @@
     <div id="qs-settings-content" class="qs-modal-content-custom">
       <div class="qs-modal-title">Settings</div>
       <div class="qs-settings-section">
-        <p class="qs-label">Backup & Restore</p>
-        <div class="qs-settings-btns">
-          <button id="qs-export-btn" class="qs-btn qs-secondary" style="margin-bottom: 10px; width: 100%;">Export Links (.json)</button>
-          <button id="qs-import-btn" class="qs-btn qs-secondary" style="width: 100%;">Import Links (.json)</button>
-          <input type="file" id="qs-import-file" style="display: none;" accept=".json">
+        <p class="qs-label">Display Settings</p>
+        <div class="qs-group">
+          <label class="qs-label">Items per Row: <span id="qs-items-value">4</span></label>
+          <input type="range" id="qs-items-slider" class="qs-slider" min="2" max="8" value="4" step="1">
+          <div class="qs-slider-labels">
+            <span>2</span>
+            <span>3</span>
+            <span>4</span>
+            <span>5</span>
+            <span>6</span>
+            <span>7</span>
+            <span>8</span>
+          </div>
         </div>
       </div>
       <div class="qs-actions">
-        <button id="qs-settings-close" class="qs-btn qs-primary" style="width: 100%;">Close</button>
+        <button id="qs-settings-close" class="qs-btn qs-primary" style="width: 100%;">Save & Close</button>
       </div>
     </div>
   `;
   document.body.appendChild(settingsOverlay);
 
   const settingsClose = document.getElementById('qs-settings-close');
-  const exportBtn = document.getElementById('qs-export-btn');
-  const importBtn = document.getElementById('qs-import-btn');
-  const importFile = document.getElementById('qs-import-file');
+  const itemsSlider = document.getElementById('qs-items-slider');
+  const itemsValue = document.getElementById('qs-items-value');
 
   chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === 'open_modal') {
@@ -102,49 +109,31 @@
       overlay.classList.add('visible');
       titleInput.focus();
     } else if (request.action === 'open_settings') {
+      // Load current items per row setting
+      chrome.storage.sync.get(['itemsPerRow'], (result) => {
+        const itemsPerRow = result.itemsPerRow || 4;
+        itemsSlider.value = itemsPerRow;
+        itemsValue.textContent = itemsPerRow;
+      });
       settingsOverlay.classList.add('visible');
     }
   });
 
-  // Export Logic
-  exportBtn.onclick = () => {
-    chrome.storage.sync.get(['sidebar_links'], (result) => {
-      const links = result.sidebar_links || [];
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(links, null, 2));
-      const downloadAnchorNode = document.createElement('a');
-      downloadAnchorNode.setAttribute("href", dataStr);
-      downloadAnchorNode.setAttribute("download", "quicklinks_backup.json");
-      document.body.appendChild(downloadAnchorNode);
-      downloadAnchorNode.click();
-      downloadAnchorNode.remove();
+  // Items per row slider
+  itemsSlider.oninput = () => {
+    itemsValue.textContent = itemsSlider.value;
+  };
+
+  // Save settings and close
+  settingsClose.onclick = () => {
+    const itemsPerRow = parseInt(itemsSlider.value);
+    chrome.storage.sync.set({ itemsPerRow: itemsPerRow }, () => {
+      settingsOverlay.classList.remove('visible');
+      // Notify popup to update
+      chrome.runtime.sendMessage({ action: 'settings_updated' });
     });
   };
-
-  // Import Logic
-  importBtn.onclick = () => importFile.click();
-  importFile.onchange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      try {
-        const importedLinks = JSON.parse(event.target.result);
-        if (Array.isArray(importedLinks)) {
-          chrome.storage.sync.set({ sidebar_links: importedLinks }, () => {
-            alert('Links imported successfully!');
-            settingsOverlay.classList.remove('visible');
-          });
-        } else {
-          alert('Invalid backup file format.');
-        }
-      } catch (err) {
-        alert('Error parsing backup file.');
-      }
-    };
-    reader.readAsText(file);
-  };
-
-  settingsClose.onclick = () => settingsOverlay.classList.remove('visible');
+  
   settingsOverlay.onclick = (e) => { if (e.target === settingsOverlay) settingsOverlay.classList.remove('visible'); };
 
   saveBtn.onclick = () => {
