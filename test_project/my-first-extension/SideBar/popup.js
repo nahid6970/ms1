@@ -18,11 +18,12 @@ let currentRightClickedLinkId = null;
 
 // Initial Load
 function init() {
-    chrome.storage.sync.get(['sidebar_links', 'itemsPerRow'], (result) => {
+    chrome.storage.sync.get(['sidebar_links', 'itemsPerRow', 'extraPadding'], (result) => {
         if (result.sidebar_links && result.sidebar_links.length > 0) {
             links = result.sidebar_links;
             const itemsPerRow = result.itemsPerRow || 4;
-            applyGridLayout(itemsPerRow);
+            const extraPadding = result.extraPadding || 20;
+            applyGridLayout(itemsPerRow, extraPadding);
             renderLinks();
         } else {
             showEmptyState(true);
@@ -47,14 +48,16 @@ function init() {
 }
 
 // Apply grid layout based on items per row
-function applyGridLayout(itemsPerRow) {
+function applyGridLayout(itemsPerRow, extraPadding = 20) {
     const itemSize = 56; // favicon box size
     const gap = 12;
-    const padding = 32; // 16px on each side
+    const containerPaddingLeft = 20; // from CSS .container padding
+    const containerPaddingRight = 20; // from CSS .container padding
     const minWidth = 320; // minimum width to show all header buttons
     
     // Calculate popup width based on items per row
-    let popupWidth = (itemSize * itemsPerRow) + (gap * (itemsPerRow - 1)) + padding;
+    // Formula: (item_size * count) + (gap * (count - 1)) + left_padding + right_padding + extra_padding
+    let popupWidth = (itemSize * itemsPerRow) + (gap * (itemsPerRow - 1)) + containerPaddingLeft + containerPaddingRight + extraPadding;
     
     // Ensure minimum width for header buttons
     popupWidth = Math.max(popupWidth, minWidth);
@@ -72,8 +75,10 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
             links = changes.sidebar_links.newValue || [];
             renderLinks();
         }
-        if (changes.itemsPerRow) {
-            applyGridLayout(changes.itemsPerRow.newValue || 4);
+        if (changes.itemsPerRow || changes.extraPadding) {
+            chrome.storage.sync.get(['itemsPerRow', 'extraPadding'], (result) => {
+                applyGridLayout(result.itemsPerRow || 4, result.extraPadding || 20);
+            });
         }
     }
 });
@@ -81,8 +86,8 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
 // Listen for settings updates
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === 'settings_updated') {
-        chrome.storage.sync.get(['itemsPerRow'], (result) => {
-            applyGridLayout(result.itemsPerRow || 4);
+        chrome.storage.sync.get(['itemsPerRow', 'extraPadding'], (result) => {
+            applyGridLayout(result.itemsPerRow || 4, result.extraPadding || 20);
         });
     }
 });

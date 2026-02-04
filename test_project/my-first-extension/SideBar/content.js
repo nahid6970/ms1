@@ -72,6 +72,16 @@
             <span>8</span>
           </div>
         </div>
+        <div class="qs-group" style="margin-top: 16px;">
+          <label class="qs-label">Extra Padding (px): <span id="qs-padding-value">20</span></label>
+          <input type="range" id="qs-padding-slider" class="qs-slider" min="0" max="50" value="20" step="2">
+          <div class="qs-slider-labels">
+            <span>0</span>
+            <span>25</span>
+            <span>50</span>
+          </div>
+          <p style="font-size: 10px; color: #64748b; margin-top: 4px;">Adjust if items are cut off at edges</p>
+        </div>
       </div>
       <div class="qs-actions">
         <button id="qs-settings-close" class="qs-btn qs-primary" style="width: 100%;">Save & Close</button>
@@ -83,6 +93,8 @@
   const settingsClose = document.getElementById('qs-settings-close');
   const itemsSlider = document.getElementById('qs-items-slider');
   const itemsValue = document.getElementById('qs-items-value');
+  const paddingSlider = document.getElementById('qs-padding-slider');
+  const paddingValue = document.getElementById('qs-padding-value');
 
   chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === 'open_modal') {
@@ -109,11 +121,14 @@
       overlay.classList.add('visible');
       titleInput.focus();
     } else if (request.action === 'open_settings') {
-      // Load current items per row setting
-      chrome.storage.sync.get(['itemsPerRow'], (result) => {
+      // Load current items per row and padding settings
+      chrome.storage.sync.get(['itemsPerRow', 'extraPadding'], (result) => {
         const itemsPerRow = result.itemsPerRow || 4;
+        const extraPadding = result.extraPadding || 20;
         itemsSlider.value = itemsPerRow;
         itemsValue.textContent = itemsPerRow;
+        paddingSlider.value = extraPadding;
+        paddingValue.textContent = extraPadding;
       });
       settingsOverlay.classList.add('visible');
     }
@@ -124,10 +139,16 @@
     itemsValue.textContent = itemsSlider.value;
   };
 
+  // Padding slider
+  paddingSlider.oninput = () => {
+    paddingValue.textContent = paddingSlider.value;
+  };
+
   // Save settings and close
   settingsClose.onclick = () => {
     const itemsPerRow = parseInt(itemsSlider.value);
-    chrome.storage.sync.set({ itemsPerRow: itemsPerRow }, () => {
+    const extraPadding = parseInt(paddingSlider.value);
+    chrome.storage.sync.set({ itemsPerRow: itemsPerRow, extraPadding: extraPadding }, () => {
       settingsOverlay.classList.remove('visible');
       // Notify popup to update
       chrome.runtime.sendMessage({ action: 'settings_updated' });
