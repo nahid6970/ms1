@@ -2750,9 +2750,9 @@ tr {
 .f1-parent-sheet {
     flex: 1 1 auto;
     min-width: fit-content;
-    background: #0a1f15 !important;
-    border: 1px solid #1a4d36 !important;
-    border-left: 2px solid #00ff9d !important;
+    background: #0a1f15;
+    border: 1px solid #1a4d36;
+    border-left: 2px solid #00ff9d;
     box-shadow: none;
     font-weight: 600;
     color: #e0e0e0;
@@ -2761,9 +2761,9 @@ tr {
 .f1-sub-sheet {
     padding: 10px 14px;
     font-size: 13px;
-    background: #0a1520 !important;
-    border: 1px solid #1a2f4d !important;
-    border-left: 2px solid #00f3ff !important;
+    background: #0a1520;
+    border: 1px solid #1a2f4d;
+    border-left: 2px solid #00f3ff;
     flex: 1 1 auto;
     min-width: fit-content;
     color: #ccc;
@@ -2786,15 +2786,15 @@ tr {
 }
 
 .f1-parent-sheet:hover {
-    background: #0f2e20 !important;
-    border-color: #00ff9d !important;
+    background: #0f2e20;
+    border-color: #00ff9d;
     box-shadow: 0 0 15px rgba(0, 255, 157, 0.15);
     color: #fff;
 }
 
 .f1-sub-sheet:hover {
-    background: #0f1e30 !important;
-    border-color: #00f3ff !important;
+    background: #0f1e30;
+    border-color: #00f3ff;
     box-shadow: 0 0 15px rgba(0, 243, 255, 0.15);
     color: #fff;
 }
@@ -2804,16 +2804,16 @@ tr {
 }
 
 .f1-parent-sheet.active {
-    background: #00ff9d !important;
-    color: #000 !important;
-    border: 1px solid #00ff9d !important;
+    background: #00ff9d;
+    color: #000;
+    border: 1px solid #00ff9d;
     box-shadow: 0 0 20px rgba(0, 255, 157, 0.4);
 }
 
 .f1-sub-sheet.active {
-    background: #00f3ff !important;
-    color: #000 !important;
-    border: 1px solid #00f3ff !important;
+    background: #00f3ff;
+    color: #000;
+    border: 1px solid #00f3ff;
     box-shadow: 0 0 20px rgba(0, 243, 255, 0.4);
 }
 

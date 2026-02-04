@@ -11247,11 +11247,15 @@ function showF1SheetContextMenu(event, sheetIndex, isSubSheet) {
     const sheet = tableData.sheets[sheetIndex];
 
     if (isSubSheet) {
-        // Sub-sheet menu: Rename, Delete
+        // Sub-sheet menu: Rename, Colors, Delete
         menu.innerHTML = `
             <div class="context-menu-item" onclick="renameF1Sheet(${sheetIndex}); hideF1SheetContextMenu();">
                 <span>✏️</span>
                 <span>Rename</span>
+            </div>
+            <div class="context-menu-item" onclick="showSheetColorPicker(${sheetIndex}); hideF1SheetContextMenu();">
+                <span>🎨</span>
+                <span>Set Colors</span>
             </div>
             <div class="context-menu-separator"></div>
             <div class="context-menu-item" onclick="deleteF1Sheet(${sheetIndex}); hideF1SheetContextMenu();">
@@ -11260,11 +11264,15 @@ function showF1SheetContextMenu(event, sheetIndex, isSubSheet) {
             </div>
         `;
     } else {
-        // Parent sheet menu: Rename, Move to Category, Delete
+        // Parent sheet menu: Rename, Colors, Move to Category, Delete
         menu.innerHTML = `
             <div class="context-menu-item" onclick="renameF1Sheet(${sheetIndex}); hideF1SheetContextMenu();">
                 <span>✏️</span>
                 <span>Rename</span>
+            </div>
+            <div class="context-menu-item" onclick="showSheetColorPicker(${sheetIndex}); hideF1SheetContextMenu();">
+                <span>🎨</span>
+                <span>Set Colors</span>
             </div>
             <div class="context-menu-item" onclick="moveF1SheetToCategory(${sheetIndex}); hideF1SheetContextMenu();">
                 <span>📁</span>
@@ -11313,6 +11321,26 @@ async function deleteF1Sheet(sheetIndex) {
     await deleteSheet(sheetIndex);
     populateF1Categories();
     populateF1Sheets();
+}
+
+function showSheetColorPicker(sheetIndex) {
+    const sheet = tableData.sheets[sheetIndex];
+    const fgColor = sheet.fgColor || '#e0e0e0';
+    const bgColor = sheet.bgColor || '#0a1f15';
+    
+    // Use prompt for colors as a quick implementation, or better, reuse a modal
+    const newBg = prompt('Enter background color (hex, e.g., #ff0000) or leave empty to reset:', bgColor);
+    if (newBg === null) return; // Cancelled
+    
+    const newFg = prompt('Enter text color (hex, e.g., #ffffff) or leave empty to reset:', fgColor);
+    if (newFg === null) return; // Cancelled
+    
+    sheet.bgColor = newBg || undefined;
+    sheet.fgColor = newFg || undefined;
+    
+    saveData();
+    populateF1Sheets();
+    showToast(`Colors updated for "${sheet.name}"`, 'success');
 }
 
 async function addF1Sheet() {
@@ -11484,6 +11512,16 @@ function populateF1Sheets(searchAllCategories = false) {
         item.dataset.sheetIndex = index;
         item.draggable = true;
 
+        // Apply custom colors if they exist
+        if (sheet.bgColor) {
+            item.style.backgroundColor = sheet.bgColor;
+            item.style.backgroundImage = 'none'; // Override cyberpunk gradient if custom color is set
+            item.style.borderColor = sheet.bgColor; // Match border to bg for cleaner look
+        }
+        if (sheet.fgColor) {
+            item.style.color = sheet.fgColor;
+        }
+
         // Show category name if searching all categories
         const categoryLabel = searchAllCategories && sheetCategory ? ` <span style="color: #999; font-size: 12px;">(${sheetCategory})</span>` : '';
 
@@ -11556,6 +11594,16 @@ function populateF1Sheets(searchAllCategories = false) {
                 const subItem = document.createElement('div');
                 subItem.className = 'f1-sheet-item f1-sub-sheet' + (subIndex === currentSheet ? ' active' : '');
                 subItem.dataset.sheetIndex = subIndex;
+
+                // Apply custom colors if they exist
+                if (subSheet.bgColor) {
+                    subItem.style.backgroundColor = subSheet.bgColor;
+                    subItem.style.backgroundImage = 'none';
+                    subItem.style.borderColor = subSheet.bgColor;
+                }
+                if (subSheet.fgColor) {
+                    subItem.style.color = subSheet.fgColor;
+                }
 
                 const subNameSpan = document.createElement('span');
                 subNameSpan.className = 'f1-sheet-name-wrapper';
@@ -11947,6 +11995,17 @@ function filterF1Sheets() {
                 const item = document.createElement('div');
                 item.className = 'f1-sheet-item f1-parent-sheet' + (index === currentSheet ? ' active' : '');
                 item.dataset.sheetIndex = index;
+
+                // Apply custom colors if they exist
+                if (sheet.bgColor) {
+                    item.style.backgroundColor = sheet.bgColor;
+                    item.style.backgroundImage = 'none';
+                    item.style.borderColor = sheet.bgColor;
+                }
+                if (sheet.fgColor) {
+                    item.style.color = sheet.fgColor;
+                }
+
                 item.innerHTML = `
                     <div class="f1-sheet-name-wrapper">
                         <span class="f1-sheet-icon">🔍</span>
