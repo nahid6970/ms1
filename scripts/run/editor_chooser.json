@@ -1,0 +1,17 @@
+{
+    "editors": [
+        {"name": "NVIM", "color": "#00ff21"},
+        {"name": "EDIT", "color": "#00F0FF"},
+        {"name": "Notepad++", "color": "#00ff21"},
+        {"name": "Notepads", "color": "#6666ff"},
+        {"name": "VSCode", "color": "#7e96ff"},
+        {"name": "Emacs", "color": "#8458b7"},
+        {"name": "Zed", "color": "#FF003C"},
+        {"name": "Antigravity", "color": "#00F0FF"},
+        {"name": "Antigravity Dir", "color": "#00ff21"}
+    ],
+    "viewers": [
+        {"name": "CHROME", "color": "#FCEE0A"},
+        {"name": "PHOTOS", "color": "#00F0FF"}
+    ]
+}
