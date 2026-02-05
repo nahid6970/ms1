@@ -151,11 +151,18 @@ class CyberButton(QPushButton):
                 font-weight: bold;
                 font-size: 11pt;
                 border-radius: 0px;
+                outline: none;
             }}
             QPushButton:hover {{
                 background-color: {hover_bg};
                 color: {hover_text};
                 border: 1px solid {hover_text};
+            }}
+            QPushButton:focus {{
+                background-color: {hover_bg};
+                color: {hover_text};
+                border: 2px solid {CP_YELLOW};
+                padding: 9px;
             }}
             QPushButton:pressed {{
                 background-color: {CP_TEXT};
@@ -169,11 +176,16 @@ class EditorChooser(QWidget):
     def __init__(self, file_paths):
         super().__init__()
         self.file_paths = file_paths
+        self.buttons = []
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.Tool)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         
         self.init_ui()
         self.center_window()
+        
+        # Focus the first button by default
+        if self.buttons:
+            self.buttons[0].setFocus()
         
     def init_ui(self):
         # Main Border Frame
@@ -207,6 +219,7 @@ class EditorChooser(QWidget):
         # Restart Button
         restart_btn = QPushButton("RESTART")
         restart_btn.setFixedWidth(80)
+        restart_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         restart_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         restart_btn.setStyleSheet(f"""
             QPushButton {{
@@ -228,6 +241,7 @@ class EditorChooser(QWidget):
         # Close Button
         close_btn = QPushButton("X")
         close_btn.setFixedWidth(30)
+        close_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         close_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         close_btn.setStyleSheet(f"""
             QPushButton {{
@@ -264,6 +278,7 @@ class EditorChooser(QWidget):
             btn = CyberButton(name.upper(), color)
             btn.clicked.connect(lambda checked, n=name: self.handle_action(n))
             editors_grid.addWidget(btn, row, col)
+            self.buttons.append(btn)
             col += 1
             if col >= max_cols:
                 col = 0
@@ -284,6 +299,7 @@ class EditorChooser(QWidget):
             btn = CyberButton(name.upper(), color)
             btn.clicked.connect(lambda checked, n=name: self.handle_action(n))
             viewers_grid.addWidget(btn)
+            self.buttons.append(btn)
         
         layout.addLayout(viewers_grid)
         
@@ -312,6 +328,15 @@ class EditorChooser(QWidget):
     def restart_script(self):
         """Restart the current script"""
         os.execl(sys.executable, sys.executable, *sys.argv)
+
+    def keyPressEvent(self, event):
+        if event.key() in (Qt.Key.Key_Right, Qt.Key.Key_Down):
+            self.focusNextChild()
+        elif event.key() in (Qt.Key.Key_Left, Qt.Key.Key_Up):
+            self.focusPreviousChild()
+        elif event.key() == Qt.Key.Key_Escape:
+            self.close()
+        super().keyPressEvent(event)
 
     def changeEvent(self, event):
         if event.type() == event.Type.ActivationChange:
