@@ -319,6 +319,10 @@ class EditorChooser(QWidget):
                 self.close()
         super().changeEvent(event)
 
+    def focusOutEvent(self, event):
+        self.close()
+        super().focusOutEvent(event)
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     
@@ -330,6 +334,8 @@ if __name__ == "__main__":
         file_paths = sys.argv[1:]
         window = EditorChooser(file_paths)
         window.show()
+        window.activateWindow()
+        window.raise_()
         sys.exit(app.exec())
     else:
         print("Usage: python editor_chooser.py <file_path> [<file_path2> ...]")
