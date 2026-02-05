@@ -172,6 +172,13 @@ class CyberButton(QPushButton):
         self.setStyleSheet(style)
         self.setCursor(Qt.CursorShape.PointingHandCursor)
 
+    def keyPressEvent(self, event):
+        # Ignore arrow keys so they propagate to the parent EditorChooser
+        if event.key() in (Qt.Key.Key_Up, Qt.Key.Key_Down, Qt.Key.Key_Left, Qt.Key.Key_Right):
+            event.ignore()
+        else:
+            super().keyPressEvent(event)
+
 class EditorChooser(QWidget):
     def __init__(self, file_paths):
         super().__init__()
@@ -266,13 +273,15 @@ class EditorChooser(QWidget):
         layout.addWidget(QLabel(">> EDITORS"))
         
         config = load_config()
+        editors_data = config.get("editors", [])
+        self.num_editors = len(editors_data)
         
         editors_grid = QGridLayout()
         editors_grid.setSpacing(10)
         
         row, col = 0, 0
         max_cols = 3
-        for item in config.get("editors", []):
+        for item in editors_data:
             name = item.get("name", "Unknown")
             color = item.get("color", CP_CYAN)
             btn = CyberButton(name.upper(), color)
@@ -330,13 +339,53 @@ class EditorChooser(QWidget):
         os.execl(sys.executable, sys.executable, *sys.argv)
 
     def keyPressEvent(self, event):
-        if event.key() in (Qt.Key.Key_Right, Qt.Key.Key_Down):
-            self.focusNextChild()
-        elif event.key() in (Qt.Key.Key_Left, Qt.Key.Key_Up):
-            self.focusPreviousChild()
+        current_widget = self.focusWidget()
+        if current_widget not in self.buttons:
+            super().keyPressEvent(event)
+            return
+            
+        idx = self.buttons.index(current_widget)
+        grid_width = 3
+        target_idx = idx
+        
+        if event.key() == Qt.Key.Key_Right:
+            if idx + 1 < len(self.buttons):
+                target_idx = idx + 1
+        elif event.key() == Qt.Key.Key_Left:
+            if idx - 1 >= 0:
+                target_idx = idx - 1
+        elif event.key() == Qt.Key.Key_Down:
+            if idx < self.num_editors:
+                # Inside or moving out of editor grid
+                if idx + grid_width < self.num_editors:
+                    target_idx = idx + grid_width
+                else:
+                    # Move to viewers row
+                    viewer_start = self.num_editors
+                    # Try to align with column or pick first viewer
+                    col = idx % grid_width
+                    target_idx = min(viewer_start + col, len(self.buttons) - 1)
+        elif event.key() == Qt.Key.Key_Up:
+            if idx >= self.num_editors:
+                # In viewers, move to last row of editors
+                viewer_idx = idx - self.num_editors
+                last_row_start = ( (self.num_editors - 1) // grid_width ) * grid_width
+                target_idx = min(last_row_start + viewer_idx, self.num_editors - 1)
+            elif idx >= grid_width:
+                # Inside editor grid, move up one row
+                target_idx = idx - grid_width
         elif event.key() == Qt.Key.Key_Escape:
             self.close()
-        super().keyPressEvent(event)
+            return
+        elif event.key() == Qt.Key.Key_Return or event.key() == Qt.Key.Key_Enter:
+            current_widget.click()
+            return
+
+        if target_idx != idx:
+            self.buttons[target_idx].setFocus()
+        else:
+            # Handle cases where we are at boundaries
+            super().keyPressEvent(event)
 
     def changeEvent(self, event):
         if event.type() == event.Type.ActivationChange:
