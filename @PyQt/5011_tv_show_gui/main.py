@@ -142,6 +142,7 @@ class EpisodeItem(QFrame):
         layout.setContentsMargins(10, 5, 10, 5)
         title_label = QLabel(self.episode['title'])
         title_label.setStyleSheet(f"color: {CP_TEXT}; font-weight: bold; border: none;")
+        title_label.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
         layout.addWidget(title_label, 1)
         self.watched_cb = QCheckBox("Watched")
         self.watched_cb.setChecked(self.episode.get('watched', False))
@@ -157,6 +158,8 @@ class ShowCard(QPushButton):
         self.show_data = show
         self.setCursor(Qt.CursorShape.PointingHandCursor)
         self.clicked.connect(lambda: onClick(show))
+        # Ensure the button receives hover events reliably
+        self.setAttribute(Qt.WidgetAttribute.WA_Hover)
         self.setup_ui()
         if self.show_data.get('cover_image'):
             worker = ImageDownloadWorker(self.show_data['cover_image'])
@@ -167,27 +170,36 @@ class ShowCard(QPushButton):
         self.layout = QVBoxLayout(self)
         self.layout.setContentsMargins(5, 5, 5, 5)
         self.layout.setSpacing(5)
+        
         self.poster = QLabel()
         self.poster.setFixedSize(170, 180)
         self.poster.setStyleSheet(f"background-color: #000; border: 1px solid {CP_DIM};")
         self.poster.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.poster.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
         self.layout.addWidget(self.poster)
+        
         info_widget = QWidget()
+        info_widget.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
         info_layout = QVBoxLayout(info_widget)
         info_layout.setContentsMargins(0, 0, 0, 0)
         info_layout.setSpacing(2)
+        
         title_label = QLabel(self.show_data['title'])
         title_label.setStyleSheet(f"color: {CP_TEXT}; font-weight: bold; background: transparent; border: none;")
         title_label.setWordWrap(True)
         title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        title_label.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
         info_layout.addWidget(title_label)
+        
         watched_count = sum(1 for e in self.show_data.get('episodes', []) if e.get('watched'))
         total_count = len(self.show_data.get('episodes', []))
         stats = f"{watched_count}/{total_count} EPS"
         stats_label = QLabel(stats)
         stats_label.setStyleSheet(f"color: {CP_SUBTEXT}; font-size: 8pt; background: transparent; border: none;")
         stats_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        stats_label.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
         info_layout.addWidget(stats_label)
+        
         self.layout.addWidget(info_widget)
         self.update_style()
     def on_image_ready(self, url, path):
@@ -197,17 +209,20 @@ class ShowCard(QPushButton):
     def update_style(self):
         episodes = self.show_data.get('episodes', [])
         all_watched = len(episodes) > 0 and all(e.get('watched') for e in episodes)
-        # Completed shows get Green border, others get Dim border
         default_border = CP_GREEN if all_watched else CP_DIM
+        # Using a more robust selector and including multiple states to prevent highlight "flicker" or failure
         self.setStyleSheet(f"""
             QPushButton {{ 
                 background-color: {CP_PANEL}; 
                 border: 2px solid {default_border}; 
                 border-radius: 4px; 
             }} 
-            QPushButton:hover {{ 
+            QPushButton:hover, QPushButton:focus {{ 
                 border: 2px solid {CP_BLUE}; 
                 background-color: #111; 
+            }}
+            QPushButton:pressed {{
+                background-color: {CP_BLUE};
             }}
         """)
 
@@ -234,20 +249,16 @@ class MainWindow(QMainWindow):
             QPushButton:hover {{ background-color: #2a2a2a; border: 1px solid {CP_GREEN}; color: {CP_GREEN}; }}
             QComboBox {{ background: {CP_PANEL}; color: {CP_GREEN}; border: 1px solid {CP_DIM}; padding: 4px; }}
             QScrollArea {{ background: transparent; border: none; }}
-            
-            /* BLUE SCROLLBAR - ALWAYS BLUE */
             QScrollBar:vertical {{ border: none; background: {CP_BG}; width: 12px; }}
             QScrollBar::handle:vertical {{ background: {CP_BLUE}; min-height: 20px; border: 1px solid {CP_BLUE}; }}
             QScrollBar::handle:vertical:hover {{ background: {CP_BLUE}; border: 1px solid {CP_BLUE}; }}
             QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{ height: 0px; }}
             QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {{ background: none; }}
-            
             QScrollBar:horizontal {{ border: none; background: {CP_BG}; height: 12px; }}
             QScrollBar::handle:horizontal {{ background: {CP_BLUE}; min-width: 20px; border: 1px solid {CP_BLUE}; }}
             QScrollBar::handle:horizontal:hover {{ background: {CP_BLUE}; border: 1px solid {CP_BLUE}; }}
             QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {{ width: 0px; }}
             QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {{ background: none; }}
-            
             QCheckBox::indicator {{ width: 14px; height: 14px; border: 1px solid {CP_DIM}; background: {CP_PANEL}; }}
             QCheckBox::indicator:checked {{ background: {CP_GREEN}; border: 1px solid {CP_GREEN}; }}
         """)
