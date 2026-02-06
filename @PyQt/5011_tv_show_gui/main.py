@@ -8,7 +8,7 @@ from datetime import datetime
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, 
                              QLabel, QPushButton, QLineEdit, QComboBox, QScrollArea, 
                              QGridLayout, QFrame, QCheckBox, QStackedWidget)
-from PyQt6.QtCore import Qt, QThread, pyqtSignal, QTimer
+from PyQt6.QtCore import Qt, QThread, pyqtSignal, QTimer, QRunnable, QThreadPool, pyqtSlot, QObject
 from PyQt6.QtGui import QPixmap
 
 # CYBERPUNK THEME PALETTE
@@ -47,35 +47,51 @@ def save_data(data):
     except Exception as e:
         print(f"Error saving data: {e}")
 
-class ImageDownloader(QThread):
+class ImageDownloadSignals(QObject):
     finished = pyqtSignal(str, str) # url, local_path
+    error = pyqtSignal(str)
 
+class ImageDownloadWorker(QRunnable):
     def __init__(self, url):
         super().__init__()
         self.url = url
+        self.signals = ImageDownloadSignals()
 
+    @pyqtSlot()
     def run(self):
         if not self.url or not self.url.startswith("http"):
             return
             
-        # Create a unique filename based on URL hash
         url_hash = hashlib.md5(self.url.encode()).hexdigest()
-        ext = self.url.split('.')[-1] if '.' in self.url else 'jpg'
+        ext = self.url.split('.')[-1].split('?')[0] if '.' in self.url else 'jpg'
         if len(ext) > 4: ext = 'jpg'
         local_path = os.path.join(CACHE_DIR, f"{url_hash}.{ext}")
 
         if os.path.exists(local_path):
-            self.finished.emit(self.url, local_path)
+            self.signals.finished.emit(self.url, local_path)
             return
 
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        }
+
         try:
-            response = requests.get(self.url, timeout=10)
+            # Increased timeout to 30 seconds and added retries
+            session = requests.Session()
+            adapter = requests.adapters.HTTPAdapter(max_retries=3)
+            session.mount('http://', adapter)
+            session.mount('https://', adapter)
+            
+            response = session.get(self.url, headers=headers, timeout=30)
             if response.status_code == 200:
                 with open(local_path, 'wb') as f:
                     f.write(response.content)
-                self.finished.emit(self.url, local_path)
+                self.signals.finished.emit(self.url, local_path)
+            else:
+                self.signals.error.emit(f"Status {response.status_code}")
         except Exception as e:
-            print(f"Image download error: {e}")
+            self.signals.error.emit(str(e))
+            print(f"Image download error ({self.url}): {e}")
 
 class ScannerThread(QThread):
     finished = pyqtSignal(list)
@@ -204,9 +220,10 @@ class ShowCard(QPushButton):
         self.setup_ui()
         
         if self.show_data.get('cover_image'):
-            self.downloader = ImageDownloader(self.show_data['cover_image'])
-            self.downloader.finished.connect(self.on_image_ready)
-            self.downloader.start()
+            # Using ThreadPool instead of raw QThread
+            worker = ImageDownloadWorker(self.show_data['cover_image'])
+            worker.signals.finished.connect(self.on_image_ready)
+            QThreadPool.globalInstance().start(worker)
 
     def setup_ui(self):
         self.setFixedSize(180, 260)
@@ -214,14 +231,12 @@ class ShowCard(QPushButton):
         self.layout.setContentsMargins(5, 5, 5, 5)
         self.layout.setSpacing(5)
 
-        # Poster Area
         self.poster = QLabel()
         self.poster.setFixedSize(170, 180)
         self.poster.setStyleSheet(f"background-color: #000; border: 1px solid {CP_DIM};")
         self.poster.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.layout.addWidget(self.poster)
 
-        # Info Area
         info_widget = QWidget()
         info_layout = QVBoxLayout(info_widget)
         info_layout.setContentsMargins(0, 0, 0, 0)
@@ -264,6 +279,10 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle("TV SHOW TRACKER // CYBERPUNK_OS")
         self.resize(1100, 850)
+        
+        # Limit global thread pool to prevent crash
+        QThreadPool.globalInstance().setMaxThreadCount(8)
+        
         self.shows = load_data()
         self.current_show = None
         self.setup_ui()
@@ -278,7 +297,6 @@ class MainWindow(QMainWindow):
         self.stack = QStackedWidget()
         self.setCentralWidget(self.stack)
 
-        # LIST VIEW
         self.list_view = QWidget()
         l_layout = QVBoxLayout(self.list_view)
         toolbar = QHBoxLayout()
@@ -307,7 +325,6 @@ class MainWindow(QMainWindow):
         l_layout.addWidget(self.scroll)
         self.stack.addWidget(self.list_view)
 
-        # DETAIL VIEW
         self.detail_view = QWidget()
         d_layout = QVBoxLayout(self.detail_view)
         header = QHBoxLayout()
