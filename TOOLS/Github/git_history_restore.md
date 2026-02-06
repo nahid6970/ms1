@@ -9,6 +9,7 @@ A powerful and visually striking GUI tool for navigating Git history and restori
 - **Detailed Diffs**: Interactive diff viewer with syntax highlighting (additions/deletions) and expandable/collapsable file sections.
 - **Selective Restoration**: 
     - **Single File Restore**: Right-click any file in the diff view to restore just that specific file to the selected commit's version.
+    - **File Timeline**: Right-click any file in the diff view to see its complete history and restore it to *any* previous state, not just the currently selected commit.
     - **Full Restore**: Restore the entire repository directory to a specific commit point.
 - **Editor Integration**: Open files directly in your preferred editor from the diff view.
 - **Tree Browser**: Navigate your local directory structure to quickly switch between different Git repositories.
@@ -23,9 +24,10 @@ A powerful and visually striking GUI tool for navigating Git history and restori
 2. **Select Directory**: Use the "BROWSE" or "TREE VIEW" buttons to point to a Git repository.
 3. **Load Commits**: Click "LOAD COMMITS" to fetch the history.
 4. **View Changes**: Click any commit in the table to see the files changed and their specific diffs.
-5. **Restore**:
-   - For a single file: Right-click the file header in the "CHANGES" panel and select "⏮️ Restore this File".
-   - For the whole project: Select a commit and click "RESTORE SELECTED VERSION" at the bottom.
+5. **Restore Options**:
+   - **Restore current version**: Right-click a file and select "⏮️ Restore this File" to sync it with the currently selected commit.
+   - **Restore from history**: Right-click a file and select "📜 View File Timeline" to browse all versions of that specific file and pick one to restore.
+   - **Full Project Restore**: Select a commit and click "RESTORE SELECTED VERSION" at the bottom to revert the entire directory.
 
 ## Requirements
 
