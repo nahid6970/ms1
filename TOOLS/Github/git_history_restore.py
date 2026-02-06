@@ -190,6 +190,25 @@ class GitWorker:
         except Exception as e:
             return {"error": str(e)}
 
+    @staticmethod
+    def get_file_history(directory, file_path, limit=50):
+        try:
+            cmd = ["git", "log", "--pretty=format:%h|%ad|%s", "--date=short", "-n", str(limit), "--", file_path]
+            result = subprocess.check_output(cmd, cwd=directory, text=True, encoding='utf-8')
+            commits = []
+            for line in result.strip().split('\n'):
+                if not line: continue
+                parts = line.split('|', 2)
+                if len(parts) == 3:
+                    commits.append({
+                        "hash": parts[0],
+                        "date": parts[1],
+                        "message": parts[2]
+                    })
+            return {"success": commits}
+        except Exception as e:
+            return {"error": str(e)}
+
 # --- UI COMPONENTS ---
 
 class CyberButton(QPushButton):
@@ -220,6 +239,7 @@ class CyberButton(QPushButton):
 class CyberDiffBrowser(QTextBrowser):
     file_context_requested = pyqtSignal(int)
     file_restore_requested = pyqtSignal(int)
+    file_timeline_requested = pyqtSignal(int)
 
     def contextMenuEvent(self, event):
         url = self.anchorAt(event.pos())
@@ -230,12 +250,15 @@ class CyberDiffBrowser(QTextBrowser):
                 menu.addSeparator()
                 action_open = menu.addAction("📂 Open in Editor")
                 action_restore = menu.addAction("⏮️ Restore this File")
+                action_timeline = menu.addAction("📜 View File Timeline")
                 
                 selected = menu.exec(event.globalPos())
                 if selected == action_open:
                     self.file_context_requested.emit(idx)
                 elif selected == action_restore:
                     self.file_restore_requested.emit(idx)
+                elif selected == action_timeline:
+                    self.file_timeline_requested.emit(idx)
                 return
             except ValueError:
                 pass
@@ -422,6 +445,7 @@ class MainWindow(QMainWindow):
         self.diff_display = CyberDiffBrowser()
         self.diff_display.file_context_requested.connect(self.open_file_in_editor)
         self.diff_display.file_restore_requested.connect(self.restore_single_file)
+        self.diff_display.file_timeline_requested.connect(self.open_file_timeline)
         self.diff_display.setOpenExternalLinks(False)
         self.diff_display.setOpenLinks(False)
         self.diff_display.setStyleSheet(f"""
@@ -697,6 +721,46 @@ class MainWindow(QMainWindow):
                 self.status_label.setStyleSheet(f"color: {CP_RED}; font-weight: bold;")
                 self.status_label.setText("RESTORE FAILED")
                 QMessageBox.critical(self, "Error", result['error'])
+
+    def open_file_timeline(self, idx):
+        """Show timeline of all versions for a specific file"""
+        if not (0 <= idx < len(self.current_diff_sections)):
+            return
+            
+        rel_path = self.current_diff_sections[idx]['name']
+        directory = self.path_input.text()
+        base_dir = GitWorker.get_git_root(directory)
+        
+        self.status_label.setText(f"FETCHING TIMELINE: {rel_path}...")
+        self.status_label.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold;")
+        QApplication.processEvents()
+        
+        result = GitWorker.get_file_history(base_dir, rel_path)
+        if "error" in result:
+            QMessageBox.critical(self, "Error", f"Failed to get history:\n{result['error']}")
+            return
+            
+        commits = result["success"]
+        dialog = FileTimelineDialog(self, rel_path, commits)
+        if dialog.exec():
+            commit_hash = dialog.selected_commit
+            if commit_hash:
+                confirm = QMessageBox.question(
+                    self, "Confirm Restore",
+                    f"Restore {rel_path} to version {commit_hash}?",
+                    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+                )
+                if confirm == QMessageBox.StandardButton.Yes:
+                    self.status_label.setText(f"RESTORING {rel_path}...")
+                    QApplication.processEvents()
+                    res = GitWorker.checkout_file(base_dir, commit_hash, rel_path)
+                    if "success" in res:
+                        self.status_label.setStyleSheet(f"color: {CP_GREEN}; font-weight: bold;")
+                        self.status_label.setText(f"SUCCESS: RESTORED {rel_path}")
+                        QMessageBox.information(self, "Success", f"Restored {rel_path} to {commit_hash}")
+                    else:
+                        self.status_label.setStyleSheet(f"color: {CP_RED}; font-weight: bold;")
+                        QMessageBox.critical(self, "Error", res['error'])
 
     def render_diff_html(self):
         """Render the diff HTML based on current expanded state"""
@@ -1087,6 +1151,89 @@ class SettingsDialog(QDialog):
         btn_layout.addWidget(save_btn)
         
         layout.addLayout(btn_layout)
+
+# --- FILE TIMELINE DIALOG ---
+class FileTimelineDialog(QDialog):
+    def __init__(self, parent, file_path, commits):
+        super().__init__(parent)
+        self.setWindowTitle(f"Timeline: {os.path.basename(file_path)}")
+        self.resize(800, 500)
+        self.selected_commit = None
+        
+        self.setStyleSheet(f"""
+            QDialog {{ background-color: {CP_BG}; }}
+            QWidget {{ color: {CP_TEXT}; font-family: 'Consolas'; font-size: 10pt; }}
+            QTableWidget {{
+                background-color: {CP_PANEL};
+                gridline-color: {CP_DIM};
+                border: 1px solid {CP_DIM};
+                outline: none;
+            }}
+            QHeaderView::section {{
+                background-color: {CP_DIM};
+                color: {CP_YELLOW};
+                padding: 6px;
+                border: 1px solid {CP_PANEL};
+                font-weight: bold;
+            }}
+        """)
+        
+        layout = QVBoxLayout(self)
+        layout.setSpacing(15)
+        layout.setContentsMargins(20, 20, 20, 20)
+        
+        header = QLabel(f"HISTORY FOR: {file_path}")
+        header.setStyleSheet(f"color: {CP_CYAN}; font-weight: bold; font-size: 12pt;")
+        layout.addWidget(header)
+        
+        self.table = QTableWidget()
+        self.table.setColumnCount(3)
+        self.table.setHorizontalHeaderLabels(["HASH", "DATE", "MESSAGE"])
+        self.table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
+        self.table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
+        self.table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
+        self.table.setShowGrid(False)
+        self.table.verticalHeader().setVisible(False)
+        
+        self.table.setRowCount(len(commits))
+        for i, commit in enumerate(commits):
+            items = [
+                QTableWidgetItem(commit['hash']),
+                QTableWidgetItem(commit['date']),
+                QTableWidgetItem(commit['message'])
+            ]
+            
+            items[0].setForeground(QColor(CP_YELLOW))
+            items[1].setForeground(QColor(CP_TEXT))
+            items[2].setForeground(QColor(CP_CYAN))
+            
+            for col, item in enumerate(items):
+                item.setFlags(item.flags() ^ Qt.ItemFlag.ItemIsEditable)
+                self.table.setItem(i, col, item)
+            
+        layout.addWidget(self.table)
+        
+        btn_layout = QHBoxLayout()
+        btn_layout.addStretch()
+        
+        cancel_btn = CyberButton("CANCEL", CP_DIM, CP_RED)
+        cancel_btn.clicked.connect(self.reject)
+        btn_layout.addWidget(cancel_btn)
+        
+        restore_btn = CyberButton("RESTORE THIS VERSION", CP_DIM, CP_GREEN)
+        restore_btn.clicked.connect(self.accept_selection)
+        btn_layout.addWidget(restore_btn)
+        
+        layout.addLayout(btn_layout)
+        
+    def accept_selection(self):
+        selected = self.table.selectedItems()
+        if selected:
+            row = selected[0].row()
+            self.selected_commit = self.table.item(row, 0).text()
+            self.accept()
+        else:
+            QMessageBox.warning(self, "Selection Required", "Please select a version to restore.")
 
 # --- TREE BROWSER DIALOG ---
 class TreeBrowserDialog(QDialog):
