@@ -199,6 +199,14 @@ class MainWindow(QMainWindow):
             QSlider::handle:horizontal {{ background: {CP_CYAN}; border: 1px solid {CP_CYAN}; width: 10px; margin: -5px 0; }}
         """
 
+    def toggle_generator(self):
+        if self.gen_toggle_btn.isChecked():
+            self.gen_toggle_btn.setText("▼ HIDE GENERATOR")
+            self.gen_container.setVisible(True)
+        else:
+            self.gen_toggle_btn.setText("▶ SHOW GENERATOR")
+            self.gen_container.setVisible(False)
+
     def generate_password(self):
         chars = string.ascii_lowercase
         if self.use_upper.isChecked(): chars += string.ascii_uppercase
@@ -260,7 +268,15 @@ class MainWindow(QMainWindow):
 
         # Password Generator
         gen_grp = QGroupBox("PASSWORD GENERATOR")
-        gen_layout = QVBoxLayout()
+        gen_main_layout = QVBoxLayout()
+        
+        self.gen_toggle_btn = QPushButton("▶ SHOW GENERATOR")
+        self.gen_toggle_btn.setCheckable(True)
+        self.gen_toggle_btn.clicked.connect(self.toggle_generator)
+        self.gen_toggle_btn.setStyleSheet(f"text-align: left; color: {CP_CYAN}; border: none; background: transparent;")
+        
+        self.gen_container = QWidget()
+        gen_layout = QVBoxLayout(self.gen_container)
         
         options_layout = QHBoxLayout()
         self.len_label = QLabel("LENGTH: 16")
@@ -287,7 +303,12 @@ class MainWindow(QMainWindow):
         
         gen_layout.addLayout(options_layout)
         gen_layout.addWidget(gen_btn)
-        gen_grp.setLayout(gen_layout)
+        
+        self.gen_container.setVisible(False)
+        
+        gen_main_layout.addWidget(self.gen_toggle_btn)
+        gen_main_layout.addWidget(self.gen_container)
+        gen_grp.setLayout(gen_main_layout)
         content_layout.addWidget(gen_grp)
 
         # Entries List
