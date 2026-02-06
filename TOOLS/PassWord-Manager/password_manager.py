@@ -8,7 +8,7 @@ from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QLabel, QPushButton, QLineEdit, QGroupBox, QFormLayout,
     QScrollArea, QFrame, QMessageBox, QComboBox, QInputDialog,
-    QCheckBox, QSlider
+    QCheckBox, QSlider, QDialog
 )
 
 from PyQt6.QtCore import Qt, pyqtSignal
@@ -62,7 +62,42 @@ class CryptoManager:
         except Exception:
             return None
 
+class EditDialog(QDialog):
+    def __init__(self, username, password, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("EDIT CREDENTIALS")
+        self.setFixedWidth(350)
+        self.init_ui(username, password)
+
+    def init_ui(self, u, p):
+        layout = QVBoxLayout(self)
+        
+        form = QFormLayout()
+        self.u_input = QLineEdit(u)
+        self.p_input = QLineEdit(p)
+        form.addRow("USERNAME:", self.u_input)
+        form.addRow("PASSWORD:", self.p_input)
+        
+        btns = QHBoxLayout()
+        save_btn = QPushButton("UPDATE")
+        cancel_btn = QPushButton("CANCEL")
+        
+        save_btn.clicked.connect(self.accept)
+        cancel_btn.clicked.connect(self.reject)
+        
+        btns.addWidget(save_btn)
+        btns.addWidget(cancel_btn)
+        
+        layout.addLayout(form)
+        layout.addLayout(btns)
+
+    def get_data(self):
+        return self.u_input.text(), self.p_input.text()
+
 class PasswordEntry(QFrame):
+    edit_requested = pyqtSignal()
+    delete_requested = pyqtSignal()
+    
     def __init__(self, username, password, parent=None):
         super().__init__(parent)
         self.username = username
@@ -86,16 +121,25 @@ class PasswordEntry(QFrame):
         layout.addLayout(info_layout)
         layout.addStretch()
         
+        self.edit_btn = QPushButton("EDIT")
+        self.del_btn = QPushButton("DEL")
+        self.del_btn.setStyleSheet(f"color: {CP_RED}; border-color: {CP_DIM};")
         copy_user_btn = QPushButton("COPY USER")
         copy_pass_btn = QPushButton("COPY PASS")
         
-        for btn in [copy_user_btn, copy_pass_btn]:
-            btn.setFixedWidth(100)
+        for btn in [self.edit_btn, self.del_btn, copy_user_btn, copy_pass_btn]:
+            if btn == self.del_btn: btn.setFixedWidth(40)
+            elif btn == self.edit_btn: btn.setFixedWidth(60)
+            else: btn.setFixedWidth(100)
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
             
+        self.edit_btn.clicked.connect(self.edit_requested.emit)
+        self.del_btn.clicked.connect(self.delete_requested.emit)
         copy_user_btn.clicked.connect(lambda: self.copy_to_clipboard(self.username))
         copy_pass_btn.clicked.connect(lambda: self.copy_to_clipboard(self.password))
         
+        layout.addWidget(self.edit_btn)
+        layout.addWidget(self.del_btn)
         layout.addWidget(copy_user_btn)
         layout.addWidget(copy_pass_btn)
 
@@ -319,7 +363,15 @@ class MainWindow(QMainWindow):
         self.scroll.setWidget(self.scroll_content)
         self.scroll.setWidgetResizable(True)
         
-        content_layout.addWidget(QLabel("VAULT ENTRIES:"))
+        search_layout = QHBoxLayout()
+        self.search_input = QLineEdit()
+        self.search_input.setPlaceholderText("SEARCH BY USERNAME...")
+        self.search_input.textChanged.connect(self.load_entries)
+        search_layout.addWidget(QLabel("VAULT ENTRIES:"))
+        search_layout.addStretch()
+        search_layout.addWidget(self.search_input)
+        
+        content_layout.addLayout(search_layout)
         content_layout.addWidget(self.scroll)
         
         main_layout.addLayout(content_layout, 3)
@@ -370,10 +422,42 @@ class MainWindow(QMainWindow):
                 item.widget().deleteLater()
         
         domain = self.group_list.currentText()
+        search_query = self.search_input.text().lower()
+        
         if domain in self.vault_data:
-            for entry in self.vault_data[domain]:
+            for i, entry in enumerate(self.vault_data[domain]):
+                if search_query and search_query not in entry['u'].lower():
+                    continue
+                    
                 widget = PasswordEntry(entry['u'], entry['p'])
+                widget.edit_requested.connect(lambda idx=i: self.edit_entry(idx))
+                widget.delete_requested.connect(lambda idx=i: self.delete_entry(idx))
                 self.entries_layout.addWidget(widget)
+
+    def delete_entry(self, index):
+        domain = self.group_list.currentText()
+        if QMessageBox.question(self, "CONFIRM", "DELETE THIS CREDENTIAL?", 
+                                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No) == QMessageBox.StandardButton.Yes:
+            del self.vault_data[domain][index]
+            self.save_vault()
+            self.load_entries()
+
+    def edit_entry(self, index):
+        domain = self.group_list.currentText()
+        entry = self.vault_data[domain][index]
+        
+        dlg = EditDialog(entry['u'], entry['p'], self)
+        # Apply the same theme to dialog
+        dlg.setStyleSheet(self.get_stylesheet())
+        
+        if dlg.exec():
+            new_u, new_p = dlg.get_data()
+            if new_u and new_p:
+                self.vault_data[domain][index] = {"u": new_u, "p": new_p}
+                self.save_vault()
+                self.load_entries()
+            else:
+                QMessageBox.warning(self, "WARN", "FIELDS CANNOT BE EMPTY")
 
     def save_vault(self):
         data_str = json.dumps(self.vault_data)
