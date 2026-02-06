@@ -179,6 +179,17 @@ class GitWorker:
         except Exception as e:
             return {"error": str(e)}
 
+    @staticmethod
+    def checkout_file(directory, commit_hash, file_path):
+        try:
+            cmd = ["git", "checkout", commit_hash, "--", file_path]
+            subprocess.check_call(cmd, cwd=directory)
+            return {"success": True}
+        except subprocess.CalledProcessError as e:
+            return {"error": f"Git Error: {e}"}
+        except Exception as e:
+            return {"error": str(e)}
+
 # --- UI COMPONENTS ---
 
 class CyberButton(QPushButton):
@@ -208,6 +219,7 @@ class CyberButton(QPushButton):
 
 class CyberDiffBrowser(QTextBrowser):
     file_context_requested = pyqtSignal(int)
+    file_restore_requested = pyqtSignal(int)
 
     def contextMenuEvent(self, event):
         url = self.anchorAt(event.pos())
@@ -216,11 +228,14 @@ class CyberDiffBrowser(QTextBrowser):
                 idx = int(url.replace("file-", ""))
                 menu = self.createStandardContextMenu()
                 menu.addSeparator()
-                action = menu.addAction("📂 Open in Editor")
+                action_open = menu.addAction("📂 Open in Editor")
+                action_restore = menu.addAction("⏮️ Restore this File")
                 
                 selected = menu.exec(event.globalPos())
-                if selected == action:
+                if selected == action_open:
                     self.file_context_requested.emit(idx)
+                elif selected == action_restore:
+                    self.file_restore_requested.emit(idx)
                 return
             except ValueError:
                 pass
@@ -406,6 +421,7 @@ class MainWindow(QMainWindow):
         
         self.diff_display = CyberDiffBrowser()
         self.diff_display.file_context_requested.connect(self.open_file_in_editor)
+        self.diff_display.file_restore_requested.connect(self.restore_single_file)
         self.diff_display.setOpenExternalLinks(False)
         self.diff_display.setOpenLinks(False)
         self.diff_display.setStyleSheet(f"""
@@ -643,6 +659,44 @@ class MainWindow(QMainWindow):
                 subprocess.Popen([sys.executable, script_path, full_path], cwd=os.path.dirname(script_path))
             except Exception as e:
                 QMessageBox.warning(self, "Error", f"Failed to launch editor chooser:\n{str(e)}")
+
+    def restore_single_file(self, idx):
+        """Restore a single file to the selected commit version"""
+        if not (0 <= idx < len(self.current_diff_sections)):
+            return
+            
+        selected_items = self.table.selectedItems()
+        if not selected_items:
+            return
+            
+        row = selected_items[0].row()
+        commit_hash = self.table.item(row, 0).text()
+        rel_path = self.current_diff_sections[idx]['name']
+        directory = self.path_input.text()
+        
+        confirm = QMessageBox.question(
+            self, "Confirm File Restore",
+            f"Restore single file to commit version [{commit_hash}]?\n\nFile: {rel_path}",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+        )
+        
+        if confirm == QMessageBox.StandardButton.Yes:
+            self.status_label.setText(f"RESTORING {rel_path}...")
+            self.status_label.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold;")
+            QApplication.processEvents()
+            
+            # Get git root for correct path
+            base_dir = GitWorker.get_git_root(directory)
+            result = GitWorker.checkout_file(base_dir, commit_hash, rel_path)
+            
+            if "success" in result:
+                self.status_label.setStyleSheet(f"color: {CP_GREEN}; font-weight: bold;")
+                self.status_label.setText(f"SUCCESS: RESTORED {rel_path}")
+                QMessageBox.information(self, "Success", f"Successfully restored {rel_path} to version {commit_hash}.")
+            else:
+                self.status_label.setStyleSheet(f"color: {CP_RED}; font-weight: bold;")
+                self.status_label.setText("RESTORE FAILED")
+                QMessageBox.critical(self, "Error", result['error'])
 
     def render_diff_html(self):
         """Render the diff HTML based on current expanded state"""
