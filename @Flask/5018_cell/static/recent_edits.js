@@ -26,6 +26,10 @@ function toggleLastEditedPopup() {
         }
     }
 
+    // Also close temp notepad if open
+    const tempNotepad = document.getElementById('tempNotepadPopup');
+    if (tempNotepad) tempNotepad.style.display = 'none';
+
     renderLastEditedPopup();
 
     // Position the popup: Right side, Vertically centered
@@ -309,3 +313,14 @@ function syncPopupWithMainUpdate(sheetIdx, row, col, newValue) {
         }
     }
 }
+
+// Close popup when clicking outside
+document.addEventListener('click', function(event) {
+    const popup = document.getElementById('lastEditedPopup');
+    const btn = document.getElementById('btnLastEdited');
+    if (popup && popup.style.display === 'block') {
+        if (!popup.contains(event.target) && !btn.contains(event.target)) {
+            popup.style.display = 'none';
+        }
+    }
+});

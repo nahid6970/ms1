@@ -4613,6 +4613,33 @@ ll Rank Badge */
     animation: fadeIn 0.2s ease-out;
 }
 
+.temp-notepad-popup {
+    width: 400px; /* Slightly wider for notes */
+}
+
+.temp-notepad-container {
+    padding: 10px;
+}
+
+.temp-notepad-textarea {
+    width: 100%;
+    min-height: 200px;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    padding: 10px;
+    font-family: inherit;
+    font-size: 14px;
+    resize: vertical;
+    outline: none;
+    box-sizing: border-box;
+    display: block;
+}
+
+.temp-notepad-textarea:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
+}
+
 @keyframes fadeIn {
     from {
         opacity: 0;

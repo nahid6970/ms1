@@ -110,6 +110,13 @@
                         <!-- Content injected via JS -->
                     </div>
                 </div>
+                <div style="position: relative;">
+                    <button onclick="toggleTempNotepad()" class="btn-sheet-action" id="btnTempNotepad"
+                        title="Temporary Notepad">📝</button>
+                    <div id="tempNotepadPopup" class="recent-edits-popup temp-notepad-popup">
+                        <!-- Content injected via JS -->
+                    </div>
+                </div>
                 <button onclick="openSettings()" class="btn-sheet-action" title="Settings">⚙️</button>
                 <div id="rowCount" class="load-time-indicator" title="Total number of rows in current sheet"
                     style="display: none;">
@@ -1230,6 +1237,7 @@
 
     <script src="{{ url_for('static', filename='script.js') }}"></script>
     <script src="{{ url_for('static', filename='recent_edits.js') }}"></script>
+    <script src="{{ url_for('static', filename='temp_notepad.js') }}"></script>
     <script>
         // Render KaTeX examples in Markdown Guide when modal is opened
         document.addEventListener('DOMContentLoaded', function () {
