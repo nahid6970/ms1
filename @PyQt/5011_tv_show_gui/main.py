@@ -7,9 +7,10 @@ import hashlib
 from datetime import datetime
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, 
                              QLabel, QPushButton, QLineEdit, QComboBox, QScrollArea, 
-                             QGridLayout, QFrame, QCheckBox, QStackedWidget)
+                             QGridLayout, QFrame, QCheckBox, QStackedWidget, QMenu, 
+                             QInputDialog, QMessageBox)
 from PyQt6.QtCore import Qt, QThread, pyqtSignal, QTimer, QRunnable, QThreadPool, pyqtSlot, QObject
-from PyQt6.QtGui import QPixmap
+from PyQt6.QtGui import QPixmap, QAction
 
 # GREEN & BLUE TECH THEME PALETTE
 CP_BG = "#050505"
@@ -19,6 +20,7 @@ CP_BLUE = "#00AEEF"
 CP_DIM = "#222222"          
 CP_TEXT = "#E0E0E0"
 CP_SUBTEXT = "#808080"
+CP_RED = "#FF003C"
 
 # Paths
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -147,6 +149,7 @@ class ScannerThread(QThread):
 
 class EpisodeItem(QFrame):
     toggled = pyqtSignal()
+    deleteRequested = pyqtSignal(int)
     def __init__(self, show, episode, parent=None):
         super().__init__(parent)
         self.show_data = show
@@ -161,28 +164,42 @@ class EpisodeItem(QFrame):
         title_label.setStyleSheet(f"color: {CP_TEXT}; font-weight: bold; border: none;")
         title_label.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
         layout.addWidget(title_label, 1)
+        
         self.watched_cb = QCheckBox("Watched")
         self.watched_cb.setChecked(self.episode.get('watched', False))
         self.watched_cb.stateChanged.connect(self.toggle_watched)
         layout.addWidget(self.watched_cb)
+
+        del_btn = QPushButton("DEL")
+        del_btn.setFixedWidth(40)
+        del_btn.setStyleSheet(f"QPushButton {{ outline: none; background-color: {CP_DIM}; color: {CP_SUBTEXT}; border: none; padding: 2px; }} QPushButton:hover {{ background-color: {CP_RED}; color: white; }}")
+        del_btn.clicked.connect(lambda: self.deleteRequested.emit(self.episode['id']))
+        layout.addWidget(del_btn)
+
     def toggle_watched(self, state):
         self.episode['watched'] = (state == 2)
         self.toggled.emit()
 
 class ShowCard(QPushButton):
+    deleteRequested = pyqtSignal(int)
+    openFolderRequested = pyqtSignal(dict)
+    
     def __init__(self, show, onClick, parent=None):
         super().__init__(parent)
         self.show_data = show
         self.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.clicked.connect(lambda: onClick(show))
+        self.clicked.connect(lambda: onClick(self.show_data))
         self.setAttribute(Qt.WidgetAttribute.WA_Hover)
+        self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.customContextMenuRequested.connect(self.show_menu)
         self.setup_ui()
         if self.show_data.get('cover_image'):
             worker = ImageDownloadWorker(self.show_data['cover_image'])
             worker.signals.finished.connect(self.on_image_ready)
             QThreadPool.globalInstance().start(worker)
+            
     def setup_ui(self):
-        self.setFixedSize(180, 260)
+        self.setFixedSize(180, 280)
         self.layout = QVBoxLayout(self)
         self.layout.setContentsMargins(5, 5, 5, 5)
         self.layout.setSpacing(5)
@@ -205,26 +222,58 @@ class ShowCard(QPushButton):
         info_layout.addWidget(title_label)
         watched_count = sum(1 for e in self.show_data.get('episodes', []) if e.get('watched'))
         total_count = len(self.show_data.get('episodes', []))
-        stats = f"{watched_count}/{total_count} EPS"
-        stats_label = QLabel(stats)
+        latest_str = "No episodes"
+        dates = []
+        for e in self.show_data.get('episodes', []):
+            if e.get('added_date'):
+                try: dates.append(datetime.fromisoformat(e['added_date']))
+                except: pass
+        if dates: latest_str = max(dates).strftime('%d %b, %Y')
+        stats_label = QLabel(f"{watched_count}/{total_count} EPS")
         stats_label.setStyleSheet(f"color: {CP_SUBTEXT}; font-size: 8pt; background: transparent; border: none;")
         stats_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         stats_label.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
         info_layout.addWidget(stats_label)
+        date_label = QLabel(latest_str)
+        date_label.setStyleSheet(f"color: {CP_BLUE}; font-size: 7pt; font-style: italic; background: transparent; border: none;")
+        date_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        date_label.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
+        info_layout.addWidget(date_label)
         self.layout.addWidget(info_widget)
         self.update_style()
+        
+    def show_menu(self, pos):
+        menu = QMenu(self)
+        menu.setStyleSheet(f"QMenu {{ background-color: {CP_PANEL}; border: 1px solid {CP_BLUE}; color: {CP_TEXT}; }} QMenu::item:selected {{ background-color: {CP_BLUE}; color: black; }}")
+        open_action = QAction("Open Folder", self)
+        open_action.triggered.connect(lambda: self.openFolderRequested.emit(self.show_data))
+        delete_action = QAction("Delete Show", self)
+        delete_action.triggered.connect(lambda: self.deleteRequested.emit(self.show_data['id']))
+        menu.addAction(open_action)
+        menu.addSeparator()
+        menu.addAction(delete_action)
+        menu.exec(self.mapToGlobal(pos))
+        
     def on_image_ready(self, url, path):
         pixmap = QPixmap(path)
         if not pixmap.isNull():
             self.poster.setPixmap(pixmap.scaled(self.poster.size(), Qt.AspectRatioMode.KeepAspectRatioByExpanding, Qt.TransformationMode.SmoothTransformation))
+            
     def update_style(self):
         episodes = self.show_data.get('episodes', [])
         all_watched = len(episodes) > 0 and all(e.get('watched') for e in episodes)
         default_border = CP_GREEN if all_watched else CP_DIM
         self.setStyleSheet(f"""
-            QPushButton {{ background-color: {CP_PANEL}; border: 2px solid {default_border}; border-radius: 4px; }} 
-            QPushButton:hover, QPushButton:focus {{ border: 2px solid {CP_BLUE}; background-color: #111; }}
-            QPushButton:pressed {{ background-color: {CP_BLUE}; }}
+            QPushButton {{ 
+                outline: none;
+                background-color: {CP_PANEL}; 
+                border: 2px solid {default_border}; 
+                border-radius: 4px; 
+            }} 
+            QPushButton:hover {{ 
+                border: 2px solid {CP_BLUE}; 
+                background-color: #111; 
+            }}
         """)
 
 class MainWindow(QMainWindow):
@@ -237,35 +286,35 @@ class MainWindow(QMainWindow):
         self.settings = load_settings()
         self.current_show = None
         self.setup_ui()
-        
-        # Apply remembered sort order
         saved_sort = self.settings.get("sort_order", "Recently Added")
         index = self.sort.findText(saved_sort)
-        if index >= 0:
-            self.sort.setCurrentIndex(index)
-        
+        if index >= 0: self.sort.setCurrentIndex(index)
         self.refresh_grid()
         self.start_scan()
         self.scan_timer = QTimer()
         self.scan_timer.timeout.connect(self.start_scan)
         self.scan_timer.start(3600000)
+        
     def setup_ui(self):
         self.setStyleSheet(f"""
             QMainWindow {{ background-color: {CP_BG}; }}
             QWidget {{ color: {CP_TEXT}; font-family: 'Consolas'; font-size: 10pt; }}
             QLineEdit {{ background-color: {CP_PANEL}; color: {CP_GREEN}; border: 1px solid {CP_DIM}; padding: 6px; }}
-            QPushButton {{ background-color: {CP_DIM}; border: 1px solid {CP_DIM}; color: white; padding: 6px 12px; font-weight: bold; }}
+            QPushButton {{ 
+                outline: none;
+                background-color: {CP_DIM}; 
+                border: 1px solid {CP_DIM}; 
+                color: white; 
+                padding: 6px 12px; 
+                font-weight: bold; 
+            }}
             QPushButton:hover {{ background-color: #2a2a2a; border: 1px solid {CP_GREEN}; color: {CP_GREEN}; }}
             QComboBox {{ background: {CP_PANEL}; color: {CP_GREEN}; border: 1px solid {CP_DIM}; padding: 4px; }}
             QScrollArea {{ background: transparent; border: none; }}
             QScrollBar:vertical {{ border: none; background: {CP_BG}; width: 12px; }}
             QScrollBar::handle:vertical {{ background: {CP_BLUE}; min-height: 20px; border: 1px solid {CP_BLUE}; }}
-            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{ height: 0px; }}
-            QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {{ background: none; }}
             QScrollBar:horizontal {{ border: none; background: {CP_BG}; height: 12px; }}
             QScrollBar::handle:horizontal {{ background: {CP_BLUE}; min-width: 20px; border: 1px solid {CP_BLUE}; }}
-            QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {{ width: 0px; }}
-            QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {{ background: none; }}
             QCheckBox::indicator {{ width: 14px; height: 14px; border: 1px solid {CP_DIM}; background: {CP_PANEL}; }}
             QCheckBox::indicator:checked {{ background: {CP_GREEN}; border: 1px solid {CP_GREEN}; }}
         """)
@@ -279,7 +328,7 @@ class MainWindow(QMainWindow):
         self.search.textChanged.connect(self.refresh_grid)
         toolbar.addWidget(self.search)
         self.sort = QComboBox()
-        self.sort.addItems(["Title", "Recently Added", "Progress"])
+        self.sort.addItems(["Title", "Recently Added", "Progress", "Last Updated"])
         self.sort.currentIndexChanged.connect(self.on_sort_changed)
         toolbar.addWidget(self.sort)
         scan_btn = QPushButton("SCAN")
@@ -298,6 +347,7 @@ class MainWindow(QMainWindow):
         self.scroll.setWidget(self.grid_container)
         l_layout.addWidget(self.scroll)
         self.stack.addWidget(self.list_view)
+        
         self.detail_view = QWidget()
         d_layout = QVBoxLayout(self.detail_view)
         header = QHBoxLayout()
@@ -319,56 +369,98 @@ class MainWindow(QMainWindow):
         self.e_scroll.setWidget(self.e_container)
         d_layout.addWidget(self.e_scroll)
         self.stack.addWidget(self.detail_view)
+        
     def on_sort_changed(self):
         self.settings["sort_order"] = self.sort.currentText()
         save_settings(self.settings)
         self.refresh_grid()
+        
     def refresh_grid(self):
         while self.grid.count():
-            w = self.grid.takeAt(0).widget()
-            if w: w.deleteLater()
+            item = self.grid.takeAt(0)
+            if item.widget(): item.widget().deleteLater()
+            
         q = self.search.text().lower()
         filtered = [s for s in self.shows if q in s['title'].lower()]
         s_type = self.sort.currentText()
         if s_type == "Title": filtered.sort(key=lambda x: x['title'].lower())
         elif s_type == "Recently Added": filtered.sort(key=lambda x: x['id'], reverse=True)
         elif s_type == "Progress": filtered.sort(key=lambda s: sum(1 for e in s.get('episodes', []) if e.get('watched'))/max(1, len(s.get('episodes', []))), reverse=True)
+        elif s_type == "Last Updated":
+            def get_last_date(s):
+                dates = []
+                for e in s.get('episodes', []):
+                    if e.get('added_date'):
+                        try: dates.append(datetime.fromisoformat(e['added_date']))
+                        except: pass
+                return max(dates) if dates else datetime.min
+            filtered.sort(key=get_last_date, reverse=True)
+            
         cols = 5
         for i, show in enumerate(filtered):
             card = ShowCard(show, self.open_detail)
+            card.deleteRequested.connect(self.delete_show)
+            card.openFolderRequested.connect(self.open_folder_from_card)
             self.grid.addWidget(card, i // cols, i % cols)
+            
     def open_detail(self, show):
         self.current_show = show
         self.d_title.setText(show['title'])
         self.refresh_episodes()
         self.stack.setCurrentIndex(1)
+        
     def refresh_episodes(self):
         while self.e_layout.count():
-            w = self.e_layout.takeAt(0).widget()
-            if w: w.deleteLater()
+            item = self.e_layout.takeAt(0)
+            if item.widget(): item.widget().deleteLater()
         if self.current_show:
             for ep in self.current_show.get('episodes', []):
                 item = EpisodeItem(self.current_show, ep)
                 item.toggled.connect(self.save_and_sync)
+                item.deleteRequested.connect(self.delete_episode)
                 self.e_layout.addWidget(item)
-    def save_and_sync(self):
+                
+    def delete_show(self, show_id):
+        confirm = QMessageBox.question(self, "Delete Show", "Are you sure you want to delete this show from library?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+        if confirm == QMessageBox.StandardButton.Yes:
+            self.shows = [s for s in self.shows if s['id'] != show_id]
+            save_data(self.shows)
+            self.refresh_grid()
+            
+    def delete_episode(self, episode_id):
+        if self.current_show:
+            self.current_show['episodes'] = [e for e in self.current_show['episodes'] if e['id'] != episode_id]
+            save_data(self.shows)
+            self.refresh_episodes()
+            
+    def save_and_sync(self): 
         save_data(self.shows)
+        
     def open_show_folder(self):
         if self.current_show and self.current_show.get('directory_path'):
             p = self.current_show['directory_path']
             if os.path.exists(p):
                 if sys.platform == 'win32': os.startfile(p)
                 else: subprocess.run(['open' if sys.platform == 'darwin' else 'xdg-open', p])
+                
+    def open_folder_from_card(self, show_data):
+        p = show_data.get('directory_path')
+        if p and os.path.exists(p):
+            if sys.platform == 'win32': os.startfile(p)
+            else: subprocess.run(['open' if sys.platform == 'darwin' else 'xdg-open', p])
+            
     def start_scan(self):
         self.scanner = ScannerThread()
         self.scanner.finished.connect(self.on_scan_finished)
         self.scanner.start()
+        
     def on_scan_finished(self, updated):
         self.shows = updated
         self.refresh_grid()
         if self.current_show:
             self.current_show = next((s for s in self.shows if s['id'] == self.current_show['id']), None)
             if self.current_show: self.refresh_episodes()
+            
     def restart_app(self):
         save_data(self.shows)
         os.execv(sys.executable, [sys.executable] + sys.argv)
