@@ -6,6 +6,29 @@
 
 ---
 
+## [2026-02-06 14:45] - Cell Sort Ranking Enhancements
+
+**Session Duration:** 0.3 hours
+
+**What We Accomplished:**
+
+### 🎯 Added Auto-Reranking and Normalization for Sort Ranks
+- **New Logic**: When setting a rank (e.g., rank 1), the system now automatically shifts all existing ranks that are equal to or higher than the new rank (+1).
+- **Contiguous Sequencing**: Implemented a **Normalization** step (`normalizeSheetRanks`) that runs after every ranking change. This ensures ranks are always a gapless sequence (1, 2, 3...), even if an item is moved to a high number or a rank is deleted.
+- **Improved Moving Logic**: Moving a ranked cell now properly swaps positions by temporarily removing the cell from the list, compacting the rest, and then re-inserting at the target rank.
+- **Batch Support**: The feature now correctly handles multiple selected cells, processing them in sheet order (top-to-bottom).
+- **Reliability Fix**: Added missing `saveData()` call to the ranking function to ensure persistence.
+
+**Files Modified:**
+- `static/script.js` - Updated `setCellRank()` with reranking logic and `saveData()`.
+- `md/CELL_FEATURES.md` - Updated documentation.
+- `md/RECENT.md` - Logged session.
+
+**Current Status:**
+- ✅ Sort ranking is more dynamic and user-friendly.
+
+---
+
 ## [2026-02-06 14:30] - Temporary Notepad Feature
 
 **Session Duration:** 0.4 hours

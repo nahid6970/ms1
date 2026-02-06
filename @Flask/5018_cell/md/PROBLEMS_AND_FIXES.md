@@ -7,6 +7,32 @@ This document tracks historical bugs, issues, and their solutions. Use this to:
 
 ---
 
+## [2026-02-06 14:55] - Sort Rank Gaps and Non-Contiguous Numbers
+
+**Problem:** 
+After implementing auto-reranking, users noticed that initial numbers (like 1, 2) were sometimes missing, leaving a sequence like 3, 4, 5. This happened when a cell was moved from a low rank to a higher rank, or when a low rank was deleted, leaving a "hole" at the start.
+
+**Root Cause:** 
+The shifting logic only moved items *up* to make space for a new insertion, but it didn't pull items *down* to fill gaps created by removals or movements. Also, setting a rank higher than the current max + 1 created an immediate gap.
+
+**Solution:** 
+Implemented a **Normalization** strategy:
+1. Created `normalizeSheetRanks(sheet)` which collects all ranked cells, sorts them by their current rank value, and re-assigns them contiguous numbers starting from 1.
+2. Updated `setCellRank()` to:
+   - Temporarily remove the rank of the target cell(s) to prevent self-interference.
+   - Normalize the remaining ranks.
+   - Perform the shift-and-insert logic.
+   - Perform a final normalization to clean up any gaps.
+
+**Files Modified:**
+- `static/script.js` - Added `normalizeSheetRanks()` and updated `setCellRank()`.
+
+**Related Issues:** Cell Sort Ranking Enhancements
+
+**Result:** Sort ranks now always appear as a clean 1, 2, 3... sequence. Moving an item to rank "1" correctly pushes others down, and moving an item to a higher number correctly swaps it with others and fills the gap.
+
+---
+
 ## [2026-02-06 14:30] - Popup Management and Click-Outside Behavior
 
 **Problem:** 

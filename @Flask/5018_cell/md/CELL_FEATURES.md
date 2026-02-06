@@ -9,6 +9,8 @@
 **Access:** Right-click context menu → "Set Sort Rank" (🏆)
 **Visual:** Blue badge in top-right corner showing rank.
 **Logic:** Ranked cells sort before unranked cells during column sort.
+**Auto-Reranking:** When setting a rank (e.g., "1"), any existing cells with the same or higher rank are automatically incremented (e.g., 1 becomes 2, 2 becomes 3). This allows for easy "insertion" of new top-priority items.
+**Batch Support:** Works with multiple selected cells.
 **Function:** `setCellRank()`.
 
 ## Cell Color History

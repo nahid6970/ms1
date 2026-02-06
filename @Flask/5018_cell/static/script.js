@@ -5375,6 +5375,27 @@ function clearCellFormatting() {
     }
 }
 
+/**
+ * Helper to ensure ranks in a sheet are contiguous 1, 2, 3...
+ */
+function normalizeSheetRanks(sheet) {
+    if (!sheet.cellStyles) return;
+    
+    // 1. Collect all keys that have a numeric rank
+    const rankedKeys = Object.keys(sheet.cellStyles).filter(key => {
+        const rank = sheet.cellStyles[key].rank;
+        return rank !== undefined && rank !== null && typeof rank === 'number';
+    });
+    
+    // 2. Sort keys by their current rank value
+    rankedKeys.sort((a, b) => sheet.cellStyles[a].rank - sheet.cellStyles[b].rank);
+    
+    // 3. Re-assign ranks starting from 1
+    rankedKeys.forEach((key, index) => {
+        sheet.cellStyles[key].rank = index + 1;
+    });
+}
+
 function setCellRank() {
     if (!contextMenuCell) return;
 
@@ -5393,32 +5414,76 @@ function setCellRank() {
         return; // User cancelled
     }
 
-    // Initialize cellStyles if needed
-    if (!sheet.cellStyles) {
-        sheet.cellStyles = {};
-    }
-    if (!sheet.cellStyles[cellKey]) {
-        sheet.cellStyles[cellKey] = {};
-    }
+    const rankValue = rankInput.trim();
+    const cellsToRank = selectedCells.length > 0 ? [...selectedCells] : [{ row: rowIndex, col: colIndex }];
 
-    if (rankInput.trim() === '') {
-        // Remove rank
-        delete sheet.cellStyles[cellKey].rank;
+    if (rankValue === '') {
+        // Remove rank for all selected cells
+        cellsToRank.forEach(cell => {
+            const key = `${cell.row}-${cell.col}`;
+            if (sheet.cellStyles?.[key]) {
+                delete sheet.cellStyles[key].rank;
+            }
+        });
+        
+        // Compact remaining ranks
+        normalizeSheetRanks(sheet);
+        
+        saveData();
         closeCellContextMenu();
         renderTable();
-        showToast('Rank removed', 'success');
+        showToast(`Rank removed from ${cellsToRank.length} cells`, 'success');
     } else {
-        const rank = parseInt(rankInput);
+        const rank = parseInt(rankValue);
         if (isNaN(rank)) {
             showToast('Please enter a valid number', 'error');
             return;
         }
 
-        // Set rank
-        sheet.cellStyles[cellKey].rank = rank;
+        // Initialize cellStyles if needed
+        if (!sheet.cellStyles) {
+            sheet.cellStyles = {};
+        }
+
+        // 1. Temporarily remove ranks from targeted cells to prevent self-interference
+        cellsToRank.forEach(cell => {
+            const key = `${cell.row}-${cell.col}`;
+            if (sheet.cellStyles[key]) delete sheet.cellStyles[key].rank;
+        });
+
+        // 2. Compact existing ranks to have a clean 1..N sequence
+        normalizeSheetRanks(sheet);
+
+        // 3. Sort target cells by sheet position (top-to-bottom)
+        cellsToRank.sort((a, b) => a.row !== b.row ? a.row - b.row : a.col - b.col);
+
+        // 4. Apply new ranks in reverse order to maintain top-to-bottom priority
+        // If user enters '1', the top-most cell should end up as 1.
+        [...cellsToRank].reverse().forEach(cell => {
+            const key = `${cell.row}-${cell.col}`;
+
+            // Shift existing ranks >= target rank
+            Object.keys(sheet.cellStyles).forEach(otherKey => {
+                const otherStyle = sheet.cellStyles[otherKey];
+                if (otherStyle && typeof otherStyle.rank === 'number' && otherStyle.rank >= rank) {
+                    otherStyle.rank++;
+                }
+            });
+
+            // Set rank for current cell
+            if (!sheet.cellStyles[key]) {
+                sheet.cellStyles[key] = {};
+            }
+            sheet.cellStyles[key].rank = rank;
+        });
+
+        // 5. Final normalization to ensure no gaps (e.g. if user entered 10 but only 3 exist)
+        normalizeSheetRanks(sheet);
+
+        saveData();
         closeCellContextMenu();
         renderTable();
-        showToast(`Rank set to ${rank}`, 'success');
+        showToast(`Rank set to ${rank} for ${cellsToRank.length} cells (Sequence re-normalized)`, 'success');
     }
 }
 
