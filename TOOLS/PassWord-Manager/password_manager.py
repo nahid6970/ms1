@@ -27,7 +27,15 @@ CP_DIM = "#3a3a3a"
 CP_TEXT = "#E0E0E0"
 CP_SUBTEXT = "#808080"
 
-VAULT_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "vault.json")
+VAULT_DIR = r"C:\@delta\db\password-manager"
+VAULT_FILE = os.path.join(VAULT_DIR, "vault.json")
+
+# Ensure the vault directory exists
+if not os.path.exists(VAULT_DIR):
+    try:
+        os.makedirs(VAULT_DIR, exist_ok=True)
+    except Exception:
+        pass
 
 class CryptoManager:
     @staticmethod
