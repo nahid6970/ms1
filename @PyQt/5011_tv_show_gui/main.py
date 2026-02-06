@@ -23,6 +23,7 @@ CP_SUBTEXT = "#808080"
 # Paths
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_FILE = os.path.join(BASE_DIR, "data.json")
+SETTINGS_FILE = os.path.join(BASE_DIR, "settings.json")
 ROOT_SHOWS_FOLDER = r"D:\Downloads\@Sonarr"
 CACHE_DIR = os.path.join(os.path.expanduser("~"), ".cyber_tv_cache")
 
@@ -44,6 +45,22 @@ def save_data(data):
             json.dump(data, f, indent=4)
     except Exception as e:
         print(f"Error saving data: {e}")
+
+def load_settings():
+    try:
+        if os.path.exists(SETTINGS_FILE):
+            with open(SETTINGS_FILE, 'r') as f:
+                return json.load(f)
+    except:
+        pass
+    return {"sort_order": "Recently Added"}
+
+def save_settings(settings):
+    try:
+        with open(SETTINGS_FILE, 'w') as f:
+            json.dump(settings, f, indent=4)
+    except Exception as e:
+        print(f"Error saving settings: {e}")
 
 class ImageDownloadSignals(QObject):
     finished = pyqtSignal(str, str)
@@ -158,7 +175,6 @@ class ShowCard(QPushButton):
         self.show_data = show
         self.setCursor(Qt.CursorShape.PointingHandCursor)
         self.clicked.connect(lambda: onClick(show))
-        # Ensure the button receives hover events reliably
         self.setAttribute(Qt.WidgetAttribute.WA_Hover)
         self.setup_ui()
         if self.show_data.get('cover_image'):
@@ -170,27 +186,23 @@ class ShowCard(QPushButton):
         self.layout = QVBoxLayout(self)
         self.layout.setContentsMargins(5, 5, 5, 5)
         self.layout.setSpacing(5)
-        
         self.poster = QLabel()
         self.poster.setFixedSize(170, 180)
         self.poster.setStyleSheet(f"background-color: #000; border: 1px solid {CP_DIM};")
         self.poster.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.poster.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
         self.layout.addWidget(self.poster)
-        
         info_widget = QWidget()
         info_widget.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
         info_layout = QVBoxLayout(info_widget)
         info_layout.setContentsMargins(0, 0, 0, 0)
         info_layout.setSpacing(2)
-        
         title_label = QLabel(self.show_data['title'])
         title_label.setStyleSheet(f"color: {CP_TEXT}; font-weight: bold; background: transparent; border: none;")
         title_label.setWordWrap(True)
         title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         title_label.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
         info_layout.addWidget(title_label)
-        
         watched_count = sum(1 for e in self.show_data.get('episodes', []) if e.get('watched'))
         total_count = len(self.show_data.get('episodes', []))
         stats = f"{watched_count}/{total_count} EPS"
@@ -199,7 +211,6 @@ class ShowCard(QPushButton):
         stats_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         stats_label.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
         info_layout.addWidget(stats_label)
-        
         self.layout.addWidget(info_widget)
         self.update_style()
     def on_image_ready(self, url, path):
@@ -210,20 +221,10 @@ class ShowCard(QPushButton):
         episodes = self.show_data.get('episodes', [])
         all_watched = len(episodes) > 0 and all(e.get('watched') for e in episodes)
         default_border = CP_GREEN if all_watched else CP_DIM
-        # Using a more robust selector and including multiple states to prevent highlight "flicker" or failure
         self.setStyleSheet(f"""
-            QPushButton {{ 
-                background-color: {CP_PANEL}; 
-                border: 2px solid {default_border}; 
-                border-radius: 4px; 
-            }} 
-            QPushButton:hover, QPushButton:focus {{ 
-                border: 2px solid {CP_BLUE}; 
-                background-color: #111; 
-            }}
-            QPushButton:pressed {{
-                background-color: {CP_BLUE};
-            }}
+            QPushButton {{ background-color: {CP_PANEL}; border: 2px solid {default_border}; border-radius: 4px; }} 
+            QPushButton:hover, QPushButton:focus {{ border: 2px solid {CP_BLUE}; background-color: #111; }}
+            QPushButton:pressed {{ background-color: {CP_BLUE}; }}
         """)
 
 class MainWindow(QMainWindow):
@@ -233,8 +234,16 @@ class MainWindow(QMainWindow):
         self.resize(1100, 850)
         QThreadPool.globalInstance().setMaxThreadCount(8)
         self.shows = load_data()
+        self.settings = load_settings()
         self.current_show = None
         self.setup_ui()
+        
+        # Apply remembered sort order
+        saved_sort = self.settings.get("sort_order", "Recently Added")
+        index = self.sort.findText(saved_sort)
+        if index >= 0:
+            self.sort.setCurrentIndex(index)
+        
         self.refresh_grid()
         self.start_scan()
         self.scan_timer = QTimer()
@@ -251,12 +260,10 @@ class MainWindow(QMainWindow):
             QScrollArea {{ background: transparent; border: none; }}
             QScrollBar:vertical {{ border: none; background: {CP_BG}; width: 12px; }}
             QScrollBar::handle:vertical {{ background: {CP_BLUE}; min-height: 20px; border: 1px solid {CP_BLUE}; }}
-            QScrollBar::handle:vertical:hover {{ background: {CP_BLUE}; border: 1px solid {CP_BLUE}; }}
             QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{ height: 0px; }}
             QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {{ background: none; }}
             QScrollBar:horizontal {{ border: none; background: {CP_BG}; height: 12px; }}
             QScrollBar::handle:horizontal {{ background: {CP_BLUE}; min-width: 20px; border: 1px solid {CP_BLUE}; }}
-            QScrollBar::handle:horizontal:hover {{ background: {CP_BLUE}; border: 1px solid {CP_BLUE}; }}
             QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {{ width: 0px; }}
             QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {{ background: none; }}
             QCheckBox::indicator {{ width: 14px; height: 14px; border: 1px solid {CP_DIM}; background: {CP_PANEL}; }}
@@ -273,7 +280,7 @@ class MainWindow(QMainWindow):
         toolbar.addWidget(self.search)
         self.sort = QComboBox()
         self.sort.addItems(["Title", "Recently Added", "Progress"])
-        self.sort.currentIndexChanged.connect(self.refresh_grid)
+        self.sort.currentIndexChanged.connect(self.on_sort_changed)
         toolbar.addWidget(self.sort)
         scan_btn = QPushButton("SCAN")
         scan_btn.clicked.connect(self.start_scan)
@@ -312,6 +319,10 @@ class MainWindow(QMainWindow):
         self.e_scroll.setWidget(self.e_container)
         d_layout.addWidget(self.e_scroll)
         self.stack.addWidget(self.detail_view)
+    def on_sort_changed(self):
+        self.settings["sort_order"] = self.sort.currentText()
+        save_settings(self.settings)
+        self.refresh_grid()
     def refresh_grid(self):
         while self.grid.count():
             w = self.grid.takeAt(0).widget()
