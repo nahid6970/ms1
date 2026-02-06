@@ -2,11 +2,15 @@ import sys
 import os
 import json
 import base64
+import secrets
+import string
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QLabel, QPushButton, QLineEdit, QGroupBox, QFormLayout,
-    QScrollArea, QFrame, QMessageBox, QComboBox, QInputDialog
+    QScrollArea, QFrame, QMessageBox, QComboBox, QInputDialog,
+    QCheckBox, QSlider
 )
+
 from PyQt6.QtCore import Qt, pyqtSignal
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes
@@ -186,7 +190,25 @@ class MainWindow(QMainWindow):
             }}
             QGroupBox::title {{ subcontrol-origin: margin; subcontrol-position: top left; padding: 0 5px; }}
             QScrollArea {{ border: none; background: transparent; }}
+            
+            QCheckBox {{ spacing: 8px; color: {CP_TEXT}; }}
+            QCheckBox::indicator {{ width: 14px; height: 14px; border: 1px solid {CP_DIM}; background: {CP_PANEL}; }}
+            QCheckBox::indicator:checked {{ background: {CP_YELLOW}; border-color: {CP_YELLOW}; }}
+            
+            QSlider::groove:horizontal {{ border: 1px solid {CP_DIM}; height: 4px; background: {CP_PANEL}; margin: 2px 0; }}
+            QSlider::handle:horizontal {{ background: {CP_CYAN}; border: 1px solid {CP_CYAN}; width: 10px; margin: -5px 0; }}
         """
+
+    def generate_password(self):
+        chars = string.ascii_lowercase
+        if self.use_upper.isChecked(): chars += string.ascii_uppercase
+        if self.use_nums.isChecked(): chars += string.digits
+        if self.use_syms.isChecked(): chars += string.punctuation
+        
+        length = self.len_slider.value()
+        password = "".join(secrets.choice(chars) for _ in range(length))
+        self.p_input.setText(password)
+        self.p_input.setEchoMode(QLineEdit.EchoMode.Normal) # Show it so user sees what was generated
 
     def init_ui(self):
         central = QWidget()
@@ -236,6 +258,38 @@ class MainWindow(QMainWindow):
         add_grp.setLayout(add_form)
         content_layout.addWidget(add_grp)
 
+        # Password Generator
+        gen_grp = QGroupBox("PASSWORD GENERATOR")
+        gen_layout = QVBoxLayout()
+        
+        options_layout = QHBoxLayout()
+        self.len_label = QLabel("LENGTH: 16")
+        self.len_slider = QSlider(Qt.Orientation.Horizontal)
+        self.len_slider.setRange(8, 64)
+        self.len_slider.setValue(16)
+        self.len_slider.valueChanged.connect(lambda v: self.len_label.setText(f"LENGTH: {v}"))
+        
+        self.use_nums = QCheckBox("123")
+        self.use_syms = QCheckBox("!@#")
+        self.use_upper = QCheckBox("ABC")
+        self.use_nums.setChecked(True)
+        self.use_syms.setChecked(True)
+        self.use_upper.setChecked(True)
+        
+        options_layout.addWidget(self.len_label)
+        options_layout.addWidget(self.len_slider)
+        options_layout.addWidget(self.use_nums)
+        options_layout.addWidget(self.use_syms)
+        options_layout.addWidget(self.use_upper)
+        
+        gen_btn = QPushButton("GENERATE & FILL")
+        gen_btn.clicked.connect(self.generate_password)
+        
+        gen_layout.addLayout(options_layout)
+        gen_layout.addWidget(gen_btn)
+        gen_grp.setLayout(gen_layout)
+        content_layout.addWidget(gen_grp)
+
         # Entries List
         self.scroll = QScrollArea()
         self.scroll_content = QWidget()
@@ -281,6 +335,7 @@ class MainWindow(QMainWindow):
             self.vault_data[domain].append({"u": u, "p": p})
             self.u_input.clear()
             self.p_input.clear()
+            self.p_input.setEchoMode(QLineEdit.EchoMode.Password) # Reset echo mode
             self.save_vault()
             self.load_entries()
         else:
