@@ -197,8 +197,19 @@ class ShowCard(QPushButton):
     def update_style(self):
         episodes = self.show_data.get('episodes', [])
         all_watched = len(episodes) > 0 and all(e.get('watched') for e in episodes)
-        border = CP_GREEN if all_watched else CP_BLUE
-        self.setStyleSheet(f"QPushButton {{ background-color: {CP_PANEL}; border: 2px solid {border}; border-radius: 4px; }} QPushButton:hover {{ border: 2px solid {CP_BLUE}; background-color: #111; }}")
+        # Completed shows get Green border, others get Dim border
+        default_border = CP_GREEN if all_watched else CP_DIM
+        self.setStyleSheet(f"""
+            QPushButton {{ 
+                background-color: {CP_PANEL}; 
+                border: 2px solid {default_border}; 
+                border-radius: 4px; 
+            }} 
+            QPushButton:hover {{ 
+                border: 2px solid {CP_BLUE}; 
+                background-color: #111; 
+            }}
+        """)
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -223,16 +234,20 @@ class MainWindow(QMainWindow):
             QPushButton:hover {{ background-color: #2a2a2a; border: 1px solid {CP_GREEN}; color: {CP_GREEN}; }}
             QComboBox {{ background: {CP_PANEL}; color: {CP_GREEN}; border: 1px solid {CP_DIM}; padding: 4px; }}
             QScrollArea {{ background: transparent; border: none; }}
+            
+            /* BLUE SCROLLBAR - ALWAYS BLUE */
             QScrollBar:vertical {{ border: none; background: {CP_BG}; width: 12px; }}
-            QScrollBar::handle:vertical {{ background: {CP_GREEN}; min-height: 20px; border: 1px solid {CP_GREEN}; }}
+            QScrollBar::handle:vertical {{ background: {CP_BLUE}; min-height: 20px; border: 1px solid {CP_BLUE}; }}
             QScrollBar::handle:vertical:hover {{ background: {CP_BLUE}; border: 1px solid {CP_BLUE}; }}
             QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{ height: 0px; }}
             QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {{ background: none; }}
+            
             QScrollBar:horizontal {{ border: none; background: {CP_BG}; height: 12px; }}
-            QScrollBar::handle:horizontal {{ background: {CP_GREEN}; min-width: 20px; border: 1px solid {CP_GREEN}; }}
+            QScrollBar::handle:horizontal {{ background: {CP_BLUE}; min-width: 20px; border: 1px solid {CP_BLUE}; }}
             QScrollBar::handle:horizontal:hover {{ background: {CP_BLUE}; border: 1px solid {CP_BLUE}; }}
             QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {{ width: 0px; }}
             QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {{ background: none; }}
+            
             QCheckBox::indicator {{ width: 14px; height: 14px; border: 1px solid {CP_DIM}; background: {CP_PANEL}; }}
             QCheckBox::indicator:checked {{ background: {CP_GREEN}; border: 1px solid {CP_GREEN}; }}
         """)
@@ -316,7 +331,6 @@ class MainWindow(QMainWindow):
                 self.e_layout.addWidget(item)
     def save_and_sync(self):
         save_data(self.shows)
-        # Refresh current card border if needed when going back
     def open_show_folder(self):
         if self.current_show and self.current_show.get('directory_path'):
             p = self.current_show['directory_path']
