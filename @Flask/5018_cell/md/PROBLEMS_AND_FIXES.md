@@ -7,6 +7,30 @@ This document tracks historical bugs, issues, and their solutions. Use this to:
 
 ---
 
+## [2026-02-06 14:30] - Popup Management and Click-Outside Behavior
+
+**Problem:** 
+1. **Popup Clutter**: The new "Temporary Notepad" and the existing "Bookmark" popup could both be open at the same time, overlapping and creating a messy UI.
+2. **Persistent Popups**: Both popups required an explicit click on the toggle button or the 'X' close button to dismiss. Clicking elsewhere on the screen (the expected behavior) did nothing.
+
+**Root Cause:** 
+1. The toggle functions (`toggleLastEditedPopup` and the new `toggleTempNotepad`) operated independently without checking the state of other popups.
+2. There were no global `click` event listeners attached to the document to detect clicks outside the popup boundaries.
+
+**Solution:** 
+1. **Exclusive Toggling**: Updated both toggle functions to explicitly check for and hide the *other* popup before showing the requested one.
+2. **Global Click Listeners**: Added `document.addEventListener('click', ...)` for both features. These listeners check if the click target is *outside* the popup AND *outside* the toggle button. If so, they hide the popup.
+
+**Files Modified:**
+- `static/recent_edits.js` - Added coordination and click-outside listener.
+- `static/temp_notepad.js` - Implemented with click-outside listener.
+
+**Related Issues:** Recent Edits Popup UI
+
+**Result:** A much cleaner, standard web application feel where popups dismiss naturally when the user moves on to another task.
+
+---
+
 ## [2026-01-29 11:30] - F3 Formatter Link Removal Issue
 
 **Problem:** When using the "Remove All Formatting" (🧹) button in the F3 Quick Formatter, links using the `{link:url}text{/}` syntax were being stripped of their URL, leaving only the text. The user wanted it to behave like the `url[text]` syntax which preserves both.

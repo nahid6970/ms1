@@ -37,6 +37,22 @@
 - **Cross-Mode:** Works perfectly in both Parsed and Raw viewing modes.
 - **Implementation:** `handleKeyboardShortcuts` (F8).
 
+## Toolbar Utilities
+### Temporary Notepad (📝)
+**Purpose:** A persistent scratchpad for quick notes that survive page refreshes but are not saved to the sheet.
+**Features:**
+- **Toggle:** Click 📝 icon in the toolbar.
+- **Behavior:** Dedicated popup with resizeable textarea.
+- **Persistence:** Autosaves to `localStorage`.
+- **Interaction:** Closes when clicking outside or opening other popups.
+
+### Bookmark / Recent Edits (🕒)
+**Purpose:** View and jump to recently edited cells from other sheets.
+**Features:**
+- **Toggle:** Click 🕒 icon.
+- **Direct Edit:** Edit cell content directly within the popup.
+- **Sync:** Updates in real-time as data changes.
+
 ## Markdown View Modes (📝 & 👁️/✨)
 **Purpose:** Switch between different levels of markdown rendering and syntax visibility.
 **Modes:**

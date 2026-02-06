@@ -6,6 +6,37 @@
 
 ---
 
+## [2026-02-06 14:30] - Temporary Notepad Feature
+
+**Session Duration:** 0.4 hours
+
+**What We Accomplished:**
+
+### 🎯 Added Temporary Notepad
+- **New Feature**: Added a **📝** button to the toolbar that opens a persistent scratchpad.
+- **Functionality**:
+  - **Independent Storage**: content is saved to `localStorage` (`temp_notepad_content`), persisting across refreshes but remaining separate from sheet data.
+  - **UI/UX**: dedicated 400px wide popup with a resizeable textarea.
+  - **Interaction**: auto-focuses on open; closes automatically when clicking outside.
+- **Refinement**:
+  - **Exclusive Popups**: implemented logic to ensure opening the Notepad closes the Bookmark popup, and vice versa.
+  - **Click-Outside Fix**: added robust "click outside to close" handlers for both the Notepad and the Bookmark popup.
+
+**Files Modified:**
+- `templates/index.html` - Added button and popup container.
+- `static/style.css` - Added styling for `.temp-notepad-popup`.
+- `static/temp_notepad.js` - Created feature logic.
+- `static/recent_edits.js` - Added coordination logic and click-outside handler.
+- `md/TEMP_NOTEPAD_FEATURE.md` - Created feature documentation.
+- `md/RECENT.md` - Logged session.
+- `md/PROBLEMS_AND_FIXES.md` - Documented UI behavior fixes.
+
+**Current Status:**
+- ✅ Users have a dedicated space for temporary notes.
+- ✅ Popup management is cleaner (no overlapping windows).
+
+---
+
 ## [2026-01-29 11:45] - F3 Formatter Link Removal Fix
 
 **Session Duration:** 0.5 hours
