@@ -10,7 +10,7 @@ from PyQt6.QtWidgets import (
     QTreeView, QDialog, QFileIconProvider, QInputDialog, QTextBrowser, QSplitter, QSpinBox, QMenu
 )
 from PyQt6.QtCore import Qt, QSize, QRect, QDir, QFileInfo, QThread, pyqtSignal, QThread, pyqtSignal, QUrl
-from PyQt6.QtGui import QFont, QColor, QCursor, QPainter, QFileSystemModel, QIcon, QPixmap
+from PyQt6.QtGui import QFont, QColor, QCursor, QPainter, QFileSystemModel, QIcon, QPixmap, QPen
 
 # --- THEME CONSTANTS (from THEME_GUIDE.md) ---
 CP_BG = "#050505"           # Main Window Background
@@ -46,6 +46,7 @@ class CyberDelegate(QStyledItemDelegate):
         # Check states
         is_selected = option.state & QStyle.StateFlag.State_Selected
         is_hovered = index.row() == self.hovered_row
+        is_active = index.siblingAtColumn(0).data(Qt.ItemDataRole.UserRole) == True
         
         painter.save()
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
@@ -59,7 +60,12 @@ class CyberDelegate(QStyledItemDelegate):
         
         painter.fillRect(option.rect, bg_color)
 
-        # 2. Determine Text Color
+        # 2. Draw Active Border
+        if is_active:
+            painter.setPen(QPen(QColor(CP_GREEN), 2))
+            painter.drawRect(option.rect.adjusted(1, 1, -1, -1))
+
+        # 3. Determine Text Color
         if is_selected or is_hovered:
             # Force black text when highlighted/selected
             text_color = QColor("#000000")
@@ -74,7 +80,7 @@ class CyberDelegate(QStyledItemDelegate):
             else:
                 text_color = QColor(CP_TEXT)
         
-        # 3. Draw Text
+        # 4. Draw Text
         painter.setPen(text_color)
         text = str(index.data(Qt.ItemDataRole.DisplayRole))
         
@@ -275,6 +281,8 @@ class MainWindow(QMainWindow):
         self.window_height = 700  # Default window height
         self.split_ratio = [2, 3]  # Default split ratio [left, right]
         self.current_diff_sections = []  # Store parsed diff sections
+        self.active_commit_hash = None # Track currently restored full commit
+        self.restored_files = {} # Track restored files: {rel_path: commit_hash}
         
         # Load config first to get window size
         self.load_config()
@@ -714,6 +722,8 @@ class MainWindow(QMainWindow):
             result = GitWorker.checkout_file(base_dir, commit_hash, rel_path)
             
             if "success" in result:
+                self.restored_files[rel_path] = commit_hash
+                self.render_diff_html()
                 self.status_label.setStyleSheet(f"color: {CP_GREEN}; font-weight: bold;")
                 self.status_label.setText(f"SUCCESS: RESTORED {rel_path}")
                 QMessageBox.information(self, "Success", f"Successfully restored {rel_path} to version {commit_hash}.")
@@ -741,7 +751,7 @@ class MainWindow(QMainWindow):
             return
             
         commits = result["success"]
-        dialog = FileTimelineDialog(self, rel_path, commits)
+        dialog = FileTimelineDialog(self, rel_path, commits, self.restored_files.get(rel_path))
         if dialog.exec():
             commit_hash = dialog.selected_commit
             if commit_hash:
@@ -755,6 +765,8 @@ class MainWindow(QMainWindow):
                     QApplication.processEvents()
                     res = GitWorker.checkout_file(base_dir, commit_hash, rel_path)
                     if "success" in res:
+                        self.restored_files[rel_path] = commit_hash
+                        self.render_diff_html()
                         self.status_label.setStyleSheet(f"color: {CP_GREEN}; font-weight: bold;")
                         self.status_label.setText(f"SUCCESS: RESTORED {rel_path}")
                         QMessageBox.information(self, "Success", f"Restored {rel_path} to {commit_hash}")
@@ -777,10 +789,16 @@ class MainWindow(QMainWindow):
             is_expanded = idx in self.expanded_files
             icon = '▼' if is_expanded else '▶'
             
+            # Check if this file was restored
+            rel_path = section['name']
+            restored_hash = self.restored_files.get(rel_path)
+            active_tag = f' <span style="color: {CP_GREEN}; border: 1px solid {CP_GREEN}; padding: 1px 4px; font-size: 8pt;">ACTIVE: {restored_hash}</span>' if restored_hash else ""
+            border_style = f"border-left: 5px solid {CP_GREEN};" if restored_hash else f"border-left: 5px solid {CP_CYAN};"
+            
             # File header (clickable)
             html_parts.append(f'''
-                <div style="background-color: {CP_DIM}; color: {CP_YELLOW}; padding: 10px; margin-top: 15px; margin-bottom: 0px; font-weight: bold; border-left: 5px solid {CP_CYAN}; font-size: 11pt; cursor: pointer;">
-                    <a href="file-{idx}" style="color: {CP_YELLOW}; text-decoration: none;">{icon} 📄 {section['name']} &nbsp;&nbsp; {stats_text}</a>
+                <div style="background-color: {CP_DIM}; color: {CP_YELLOW}; padding: 10px; margin-top: 15px; margin-bottom: 0px; font-weight: bold; {border_style} font-size: 11pt; cursor: pointer;">
+                    <a href="file-{idx}" style="color: {CP_YELLOW}; text-decoration: none;">{icon} 📄 {rel_path} &nbsp;&nbsp; {stats_text}{active_tag}</a>
                 </div>
             ''')
             
@@ -1014,9 +1032,20 @@ class MainWindow(QMainWindow):
                 item.setFlags(item.flags() ^ Qt.ItemFlag.ItemIsEditable)
                 self.table.setItem(i, col, item)
 
+        self.update_table_active_state()
         self.status_label.setStyleSheet(f"color: {CP_GREEN}; font-weight: bold;")
         limit_text = f" (LIMIT: {self.commit_limit})" if self.commit_limit > 0 else " (ALL)"
         self.status_label.setText(f"LOADED {len(commits)} COMMITS{limit_text}")
+
+    def update_table_active_state(self):
+        """Update the table items to show which commit is active"""
+        for row in range(self.table.rowCount()):
+            item = self.table.item(row, 0)
+            if item:
+                is_active = item.text() == self.active_commit_hash
+                # Set UserRole data for the whole row (delegates look at col 0)
+                item.setData(Qt.ItemDataRole.UserRole, is_active)
+        self.table.viewport().update()
 
     def revert_commit(self):
         selected_items = self.table.selectedItems()
@@ -1040,6 +1069,8 @@ class MainWindow(QMainWindow):
             QApplication.processEvents()
             result = GitWorker.checkout_path(directory, commit_hash)
             if "success" in result:
+                self.active_commit_hash = commit_hash
+                self.update_table_active_state()
                 self.status_label.setStyleSheet(f"color: {CP_GREEN}; font-weight: bold;")
                 self.status_label.setText(f"SUCCESS: RESTORED TO {commit_hash}")
                 QMessageBox.information(self, "Success", f"Restored to {commit_hash}.")
@@ -1154,11 +1185,12 @@ class SettingsDialog(QDialog):
 
 # --- FILE TIMELINE DIALOG ---
 class FileTimelineDialog(QDialog):
-    def __init__(self, parent, file_path, commits):
+    def __init__(self, parent, file_path, commits, active_hash=None):
         super().__init__(parent)
         self.setWindowTitle(f"Timeline: {os.path.basename(file_path)}")
         self.resize(800, 500)
         self.selected_commit = None
+        self.active_hash = active_hash
         
         self.setStyleSheet(f"""
             QDialog {{ background-color: {CP_BG}; }}
@@ -1194,6 +1226,13 @@ class FileTimelineDialog(QDialog):
         self.table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
         self.table.setShowGrid(False)
         self.table.verticalHeader().setVisible(False)
+        self.table.setMouseTracking(True)
+
+        # Apply Custom Delegate
+        self.delegate = CyberDelegate(self.table)
+        self.table.setItemDelegate(self.delegate)
+        self.table.cellEntered.connect(self.on_cell_entered)
+        self.table.leaveEvent = self.on_table_leave
         
         self.table.setRowCount(len(commits))
         for i, commit in enumerate(commits):
@@ -1211,6 +1250,10 @@ class FileTimelineDialog(QDialog):
                 item.setFlags(item.flags() ^ Qt.ItemFlag.ItemIsEditable)
                 self.table.setItem(i, col, item)
             
+            # Mark active
+            if commit['hash'] == self.active_hash:
+                items[0].setData(Qt.ItemDataRole.UserRole, True)
+            
         layout.addWidget(self.table)
         
         btn_layout = QHBoxLayout()
@@ -1226,6 +1269,14 @@ class FileTimelineDialog(QDialog):
         
         layout.addLayout(btn_layout)
         
+    def on_cell_entered(self, row, column):
+        self.delegate.hovered_row = row
+        self.table.viewport().update()
+
+    def on_table_leave(self, event):
+        self.delegate.hovered_row = -1
+        self.table.viewport().update()
+
     def accept_selection(self):
         selected = self.table.selectedItems()
         if selected:
