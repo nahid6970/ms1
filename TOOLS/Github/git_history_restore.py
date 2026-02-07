@@ -1520,19 +1520,29 @@ class CommitExplorerDialog(QDialog):
                         item.setIcon(self.icon_provider.icon(QFileIconProvider.IconType.File))
                         item.setData("file", Qt.ItemDataRole.UserRole + 1)
                     
-                    # Ensure folders are always sorted above files
-                    # We can use a custom sort role or simply insert based on type
-                    # Using sortRole is cleaner
-                    item.setData(f"0_{part}" if not is_file else f"1_{part}", Qt.ItemDataRole.SortRole)
-                    
                     current_node.appendRow(item)
                     nodes[display_segment_path] = item
                 current_node = nodes[display_segment_path]
         
-        # Finally, sort the entire model based on the sort role
-        self.model.setSortRole(Qt.ItemDataRole.SortRole)
-        self.tree_view.setSortingEnabled(True)
-        self.tree_view.sortByColumn(0, Qt.SortOrder.AscendingOrder)
+        self.sort_tree_recursive(root_node)
+    
+    def sort_tree_recursive(self, parent_item):
+        """Sort children: folders first, then files, alphabetically"""
+        if parent_item.rowCount() == 0:
+            return
+        
+        children = []
+        for i in range(parent_item.rowCount()):
+            children.append(parent_item.takeRow(0))
+        
+        children.sort(key=lambda row: (
+            0 if row[0].data(Qt.ItemDataRole.UserRole + 1) == "folder" else 1,
+            row[0].text().lower()
+        ))
+        
+        for row in children:
+            parent_item.appendRow(row)
+            self.sort_tree_recursive(row[0])
 
     def show_context_menu(self, pos):
         index = self.tree_view.indexAt(pos)
