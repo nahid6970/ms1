@@ -10,7 +10,7 @@ from PyQt6.QtWidgets import (
     QTreeView, QDialog, QFileIconProvider, QInputDialog, QTextBrowser, QSplitter, QSpinBox, QMenu
 )
 from PyQt6.QtCore import Qt, QSize, QRect, QDir, QFileInfo, QThread, pyqtSignal, QThread, pyqtSignal, QUrl
-from PyQt6.QtGui import QFont, QColor, QCursor, QPainter, QFileSystemModel, QIcon, QPixmap, QPen
+from PyQt6.QtGui import QFont, QColor, QCursor, QPainter, QFileSystemModel, QIcon, QPixmap, QPen, QStandardItemModel, QStandardItem
 
 # --- THEME CONSTANTS (from THEME_GUIDE.md) ---
 CP_BG = "#050505"           # Main Window Background
@@ -224,6 +224,18 @@ class GitWorker:
                         "message": parts[2]
                     })
             return {"success": commits}
+        except Exception as e:
+            return {"error": str(e)}
+
+    @staticmethod
+    def get_commit_tree(directory, commit_hash, sub_path=None):
+        """Get all files in the repository at a specific commit, optionally filtered by sub_path"""
+        try:
+            cmd = ["git", "ls-tree", "-r", "--name-only", commit_hash]
+            if sub_path and sub_path != ".":
+                cmd.append(sub_path)
+            result = subprocess.check_output(cmd, cwd=directory, text=True, encoding='utf-8')
+            return {"success": result.strip().split('\n')}
         except Exception as e:
             return {"error": str(e)}
 
@@ -463,6 +475,7 @@ class MainWindow(QMainWindow):
         self.table.cellEntered.connect(self.on_cell_entered)
         self.table.leaveEvent = self.on_table_leave
         self.table.itemSelectionChanged.connect(self.on_commit_selected)
+        self.table.itemDoubleClicked.connect(lambda: self.open_commit_explorer())
 
         table_layout.addWidget(self.table)
         main_splitter.addWidget(table_widget)
@@ -515,12 +528,16 @@ class MainWindow(QMainWindow):
         copy_hash_btn = CyberButton("COPY HASH", CP_DIM, CP_CYAN, "white", "black")
         copy_hash_btn.clicked.connect(self.copy_hash)
         
+        explore_btn = CyberButton("EXPLORE COMMIT", CP_DIM, CP_CYAN, "white", "black")
+        explore_btn.clicked.connect(self.open_commit_explorer)
+        
         revert_btn = CyberButton("RESTORE SELECTED VERSION", CP_DIM, CP_RED, "white", "black")
         revert_btn.clicked.connect(self.revert_commit)
         
         action_layout.addWidget(self.status_label)
         action_layout.addStretch()
         action_layout.addWidget(copy_hash_btn)
+        action_layout.addWidget(explore_btn)
         action_layout.addWidget(revert_btn)
         layout.addLayout(action_layout)
 
@@ -757,6 +774,84 @@ class MainWindow(QMainWindow):
                 self.status_label.setStyleSheet(f"color: {CP_RED}; font-weight: bold;")
                 self.status_label.setText("RESTORE FAILED")
                 QMessageBox.critical(self, "Error", result['error'])
+
+    def open_commit_explorer(self):
+        """Open a tree explorer for the selected commit"""
+        selected_items = self.table.selectedItems()
+        if not selected_items:
+            # If no selection, maybe try the current item?
+            selected_items = [self.table.currentItem()] if self.table.currentItem() else []
+            if not selected_items:
+                QMessageBox.warning(self, "Selection Required", "Please select a commit to explore.")
+                return
+
+        row = selected_items[0].row()
+        commit_hash = self.table.item(row, 0).text()
+        directory = self.path_input.text()
+        base_dir = GitWorker.get_git_root(directory)
+        
+        # Calculate relative path from git root to current folder for filtering
+        rel_sub_path = os.path.relpath(directory, base_dir).replace('\\', '/')
+        if rel_sub_path == ".": rel_sub_path = None
+        
+        self.status_label.setText(f"FETCHING COMMIT TREE: {commit_hash}...")
+        self.status_label.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold;")
+        QApplication.processEvents()
+        
+        result = GitWorker.get_commit_tree(base_dir, commit_hash, rel_sub_path)
+        if "error" in result:
+            QMessageBox.critical(self, "Error", f"Failed to get commit tree:\n{result['error']}")
+            return
+            
+        dialog = CommitExplorerDialog(self, base_dir, commit_hash, result["success"], rel_sub_path)
+        dialog.exec()
+
+    def restore_file_by_path(self, rel_path, commit_hash):
+        """Helper to restore a file/folder by path from external dialog"""
+        directory = self.path_input.text()
+        base_dir = GitWorker.get_git_root(directory)
+        
+        confirm = QMessageBox.question(
+            self, "Confirm Restore",
+            f"Restore version {commit_hash}?\n\nTarget: {rel_path}",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+        )
+        
+        if confirm == QMessageBox.StandardButton.Yes:
+            res = GitWorker.checkout_file(base_dir, commit_hash, rel_path)
+            if "success" in res:
+                # Update status if it was a file (and tracked in restored_files)
+                # Note: Folder restoration doesn't necessarily track specific files easily
+                if os.path.isfile(os.path.join(base_dir, rel_path)):
+                    self.restored_files[rel_path] = commit_hash
+                    self.render_diff_html()
+                
+                self.status_label.setStyleSheet(f"color: {CP_GREEN}; font-weight: bold;")
+                self.status_label.setText(f"SUCCESS: RESTORED {rel_path}")
+                QMessageBox.information(self, "Success", f"Restored {rel_path} to {commit_hash}")
+            else:
+                QMessageBox.critical(self, "Error", res['error'])
+
+    def open_timeline_by_path(self, rel_path):
+        """Helper to open timeline for a specific path from external dialog"""
+        directory = self.path_input.text()
+        base_dir = GitWorker.get_git_root(directory)
+        
+        self.status_label.setText(f"FETCHING TIMELINE: {rel_path}...")
+        self.status_label.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold;")
+        QApplication.processEvents()
+        
+        result = GitWorker.get_file_history(base_dir, rel_path)
+        if "error" in result:
+            QMessageBox.critical(self, "Error", f"Failed to get history:\n{result['error']}")
+            return
+            
+        commits = result["success"]
+        dialog = FileTimelineDialog(self, rel_path, commits, self.restored_files.get(rel_path))
+        if dialog.exec():
+            commit_hash = dialog.selected_commit
+            if commit_hash:
+                self.restore_file_by_path(rel_path, commit_hash)
 
     def open_file_timeline(self, idx):
         """Show timeline of all versions for a specific file"""
@@ -1311,6 +1406,147 @@ class FileTimelineDialog(QDialog):
             self.accept()
         else:
             QMessageBox.warning(self, "Selection Required", "Please select a version to restore.")
+
+# --- COMMIT EXPLORER DIALOG ---
+class CommitExplorerDialog(QDialog):
+    def __init__(self, parent, directory, commit_hash, files, root_path_to_strip=None):
+        super().__init__(parent)
+        self.setWindowTitle(f"Explorer: {commit_hash}")
+        self.resize(900, 600)
+        self.directory = directory
+        self.commit_hash = commit_hash
+        self.base_dir = GitWorker.get_git_root(directory)
+        self.root_path_to_strip = root_path_to_strip
+        
+        self.setStyleSheet(f"""
+            QDialog {{ background-color: {CP_BG}; }}
+            QWidget {{ color: {CP_TEXT}; font-family: 'Consolas'; font-size: 10pt; }}
+            QTreeView {{
+                background-color: #080808;
+                border: 1px solid {CP_DIM};
+                color: {CP_TEXT};
+                outline: none;
+            }}
+            QTreeView::item {{ padding: 3px; }}
+            QTreeView::item:hover {{ background-color: #1a1a1a; }}
+            QTreeView::item:selected {{ background-color: #222222; color: {CP_YELLOW}; }}
+        """)
+        
+        layout = QVBoxLayout(self)
+        layout.setSpacing(15)
+        layout.setContentsMargins(20, 20, 20, 20)
+        
+        # Determine the display header
+        display_path = os.path.basename(directory) if root_path_to_strip else "ROOT"
+        header = QLabel(f"REPO STATE: {display_path} @ {commit_hash}")
+        header.setStyleSheet(f"color: {CP_CYAN}; font-weight: bold; font-size: 12pt;")
+        layout.addWidget(header)
+        
+        self.tree_view = QTreeView()
+        self.model = QStandardItemModel()
+        self.model.setHorizontalHeaderLabels([display_path])
+        self.tree_view.setModel(self.model)
+        
+        # Icon Provider
+        self.icon_provider = QFileIconProvider()
+        
+        # Build Tree
+        self.build_tree(files)
+        
+        self.tree_view.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.tree_view.customContextMenuRequested.connect(self.show_context_menu)
+        
+        layout.addWidget(self.tree_view)
+        
+        btn_layout = QHBoxLayout()
+        btn_layout.addStretch()
+        close_btn = CyberButton("CLOSE", CP_DIM, CP_CYAN)
+        close_btn.clicked.connect(self.accept)
+        btn_layout.addWidget(close_btn)
+        layout.addLayout(btn_layout)
+
+    def build_tree(self, files):
+        root_node = self.model.invisibleRootItem()
+        nodes = {}
+        
+        prefix_len = 0
+        if self.root_path_to_strip:
+            # Ensure prefix ends with / for correct stripping
+            prefix = self.root_path_to_strip if self.root_path_to_strip.endswith('/') else self.root_path_to_strip + '/'
+            prefix_len = len(prefix)
+
+        for file_path in sorted(files):
+            # The full path from git root is needed for restore logic
+            full_path_from_root = file_path
+            
+            # The relative path for display in the tree
+            display_path = file_path[prefix_len:] if file_path.startswith(self.root_path_to_strip or "") else file_path
+            if not display_path: continue
+
+            parts = display_path.split('/')
+            current_node = root_node
+            
+            path_so_far_for_restore = ""
+            if self.root_path_to_strip:
+                 path_so_far_for_restore = self.root_path_to_strip.rstrip('/')
+
+            for i, part in enumerate(parts):
+                # Build the display path segment
+                display_segment_path = "/".join(parts[:i+1])
+                
+                # Build the actual git-compatible path for this node
+                if path_so_far_for_restore:
+                    actual_git_path = f"{path_so_far_for_restore}/{display_segment_path}"
+                else:
+                    actual_git_path = display_segment_path
+
+                if display_segment_path not in nodes:
+                    item = QStandardItem(part)
+                    item.setData(actual_git_path, Qt.ItemDataRole.UserRole)
+                    
+                    is_file = (i == len(parts) - 1)
+                    if not is_file:
+                        item.setIcon(self.icon_provider.icon(QFileIconProvider.IconType.Folder))
+                        item.setData("folder", Qt.ItemDataRole.UserRole + 1)
+                    else:
+                        item.setIcon(self.icon_provider.icon(QFileIconProvider.IconType.File))
+                        item.setData("file", Qt.ItemDataRole.UserRole + 1)
+                        
+                    current_node.appendRow(item)
+                    nodes[display_segment_path] = item
+                current_node = nodes[display_segment_path]
+
+    def show_context_menu(self, pos):
+        index = self.tree_view.indexAt(pos)
+        if not index.isValid(): return
+        
+        item = self.model.itemFromIndex(index)
+        path = item.data(Qt.ItemDataRole.UserRole)
+        type = item.data(Qt.ItemDataRole.UserRole + 1)
+        
+        menu = QMenu(self)
+        menu.setStyleSheet(f"QMenu {{ background-color: {CP_PANEL}; color: {CP_TEXT}; border: 1px solid {CP_DIM}; }} QMenu::item:selected {{ background-color: {CP_CYAN}; color: black; }}")
+        
+        title = menu.addAction(f"{'📁' if type == 'folder' else '📄'} {os.path.basename(path)}")
+        title.setEnabled(False)
+        menu.addSeparator()
+        
+        if type == "file":
+            action_restore = menu.addAction("⏮️ Restore this File")
+            action_timeline = menu.addAction("📜 View File Timeline")
+            
+            selected = menu.exec(self.tree_view.viewport().mapToGlobal(pos))
+            if selected == action_restore:
+                self.parent().restore_file_by_path(path, self.commit_hash)
+            elif selected == action_timeline:
+                self.parent().open_timeline_by_path(path)
+                
+        else: # folder
+            action_restore_folder = menu.addAction("📂 Restore Entire Folder")
+            
+            selected = menu.exec(self.tree_view.viewport().mapToGlobal(pos))
+            if selected == action_restore_folder:
+                self.parent().restore_file_by_path(path, self.commit_hash)
 
 # --- TREE BROWSER DIALOG ---
 class TreeBrowserDialog(QDialog):
