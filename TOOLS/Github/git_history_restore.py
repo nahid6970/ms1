@@ -532,6 +532,9 @@ class MainWindow(QMainWindow):
         explore_btn = CyberButton("EXPLORE COMMIT", CP_DIM, CP_CYAN, "white", "black")
         explore_btn.clicked.connect(self.open_commit_explorer)
         
+        restore_files_btn = CyberButton("RESTORE FILES TO CURRENT", CP_DIM, CP_YELLOW, "black", "black")
+        restore_files_btn.clicked.connect(self.restore_files_to_current)
+        
         revert_btn = CyberButton("RESTORE SELECTED VERSION", CP_DIM, CP_RED, "white", "black")
         revert_btn.clicked.connect(self.revert_commit)
         
@@ -539,6 +542,7 @@ class MainWindow(QMainWindow):
         action_layout.addStretch()
         action_layout.addWidget(copy_hash_btn)
         action_layout.addWidget(explore_btn)
+        action_layout.addWidget(restore_files_btn)
         action_layout.addWidget(revert_btn)
         layout.addLayout(action_layout)
 
@@ -1196,6 +1200,36 @@ class MainWindow(QMainWindow):
                 self.status_label.setStyleSheet(f"color: {CP_GREEN}; font-weight: bold;")
                 self.status_label.setText(f"SUCCESS: RESTORED TO {commit_hash}")
                 QMessageBox.information(self, "Success", f"Restored to {commit_hash}.")
+            else:
+                self.status_label.setStyleSheet(f"color: {CP_RED}; font-weight: bold;")
+                self.status_label.setText("RESTORE FAILED")
+                QMessageBox.critical(self, "Error", result['error'])
+
+    def restore_files_to_current(self):
+        selected_items = self.table.selectedItems()
+        if not selected_items:
+            QMessageBox.warning(self, "Selection Required", "Please select a commit to restore files from.")
+            return
+
+        row = selected_items[0].row()
+        commit_hash = self.table.item(row, 0).text()
+        commit_msg = self.table.item(row, 3).text()
+        directory = self.path_input.text()
+
+        confirm = QMessageBox.question(
+            self, "Confirm File Restore",
+            f"Restore all files from commit to current working directory?\n\n[{commit_hash}] {commit_msg}\n\nThis will NOT change HEAD, only update files.",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+        )
+
+        if confirm == QMessageBox.StandardButton.Yes:
+            self.status_label.setText("RESTORING FILES...")
+            QApplication.processEvents()
+            result = GitWorker.checkout_path(directory, commit_hash)
+            if "success" in result:
+                self.status_label.setStyleSheet(f"color: {CP_GREEN}; font-weight: bold;")
+                self.status_label.setText(f"SUCCESS: FILES RESTORED FROM {commit_hash}")
+                QMessageBox.information(self, "Success", f"Files restored from {commit_hash}.\nYou can now commit these changes.")
             else:
                 self.status_label.setStyleSheet(f"color: {CP_RED}; font-weight: bold;")
                 self.status_label.setText("RESTORE FAILED")
