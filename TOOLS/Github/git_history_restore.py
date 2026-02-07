@@ -66,16 +66,16 @@ class CyberDelegate(QStyledItemDelegate):
             rect = option.rect
             
             # Draw top and bottom borders for all cells in the row
-            painter.drawLine(rect.topLeft() + QSize(0, 1).toPoint(), rect.topRight() + QSize(0, 1).toPoint())
-            painter.drawLine(rect.bottomLeft(), rect.bottomRight())
+            painter.drawLine(rect.left(), rect.top() + 1, rect.right(), rect.top() + 1)
+            painter.drawLine(rect.left(), rect.bottom(), rect.right(), rect.bottom())
             
             # Draw left border only for the first column
             if index.column() == 0:
-                painter.drawLine(rect.topLeft() + QSize(1, 1).toPoint(), rect.bottomLeft() + QSize(1, 0).toPoint())
+                painter.drawLine(rect.left() + 1, rect.top() + 1, rect.left() + 1, rect.bottom())
                 
             # Draw right border only for the last column
             if index.column() == index.model().columnCount() - 1:
-                painter.drawLine(rect.topRight() + QSize(-1, 1).toPoint(), rect.bottomRight() + QSize(-1, 0).toPoint())
+                painter.drawLine(rect.right() - 1, rect.top() + 1, rect.right() - 1, rect.bottom())
 
         # 3. Determine Text Color
         if is_selected or is_hovered:
@@ -266,6 +266,12 @@ class CyberDiffBrowser(QTextBrowser):
                 idx = int(url.replace("file-", ""))
                 menu = self.createStandardContextMenu()
                 menu.addSeparator()
+                
+                # Header info
+                header_action = menu.addAction(f"📄 FILE: {self.parent().current_diff_sections[idx]['name']}")
+                header_action.setEnabled(False)
+                menu.addSeparator()
+                
                 action_open = menu.addAction("📂 Open in Editor")
                 action_restore = menu.addAction("⏮️ Restore this File")
                 action_timeline = menu.addAction("📜 View File Timeline")
@@ -278,7 +284,7 @@ class CyberDiffBrowser(QTextBrowser):
                 elif selected == action_timeline:
                     self.file_timeline_requested.emit(idx)
                 return
-            except ValueError:
+            except Exception:
                 pass
         super().contextMenuEvent(event)
 
@@ -809,9 +815,11 @@ class MainWindow(QMainWindow):
             
             # File header (clickable)
             html_parts.append(f'''
-                <div style="background-color: {CP_DIM}; color: {CP_YELLOW}; padding: 10px; margin-top: 15px; margin-bottom: 0px; font-weight: bold; {border_style} font-size: 11pt; cursor: pointer;">
-                    <a href="file-{idx}" style="color: {CP_YELLOW}; text-decoration: none;">{icon} 📄 {rel_path} &nbsp;&nbsp; {stats_text}{active_tag}</a>
-                </div>
+                <a href="file-{idx}" style="text-decoration: none;">
+                    <div style="background-color: {CP_DIM}; color: {CP_YELLOW}; padding: 10px; margin-top: 15px; margin-bottom: 0px; font-weight: bold; {border_style} font-size: 11pt; cursor: pointer;">
+                        {icon} 📄 {rel_path} &nbsp;&nbsp; {stats_text}{active_tag}
+                    </div>
+                </a>
             ''')
             
             # File content (show if expanded)
