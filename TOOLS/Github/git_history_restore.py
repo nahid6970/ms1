@@ -241,11 +241,17 @@ class GitWorker:
 
     @staticmethod
     def get_commit_changed_files(directory, commit_hash):
-        """Get only the files that were changed in a specific commit"""
+        """Get only the files that were changed in a specific commit (excludes deletions)"""
         try:
-            cmd = ["git", "diff-tree", "--no-commit-id", "--name-only", "-r", "-z", commit_hash]
+            cmd = ["git", "diff-tree", "--no-commit-id", "--name-status", "-r", "-z", commit_hash]
             result = subprocess.check_output(cmd, cwd=directory, text=True, encoding='utf-8')
-            files = [f for f in result.split('\0') if f]
+            parts = result.split('\0')
+            files = []
+            for i in range(0, len(parts)-1, 2):
+                status = parts[i]
+                filename = parts[i+1]
+                if status and filename and not status.startswith('D'):
+                    files.append(filename)
             return {"success": files}
         except Exception as e:
             return {"error": str(e)}
