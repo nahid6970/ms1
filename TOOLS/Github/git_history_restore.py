@@ -239,6 +239,17 @@ class GitWorker:
         except Exception as e:
             return {"error": str(e)}
 
+    @staticmethod
+    def get_commit_changed_files(directory, commit_hash):
+        """Get only the files that were changed in a specific commit"""
+        try:
+            cmd = ["git", "diff-tree", "--no-commit-id", "--name-only", "-r", commit_hash]
+            result = subprocess.check_output(cmd, cwd=directory, text=True, encoding='utf-8')
+            files = [f for f in result.strip().split('\n') if f]
+            return {"success": files}
+        except Exception as e:
+            return {"error": str(e)}
+
 # --- UI COMPONENTS ---
 
 class CyberButton(QPushButton):
@@ -1215,25 +1226,44 @@ class MainWindow(QMainWindow):
         commit_hash = self.table.item(row, 0).text()
         commit_msg = self.table.item(row, 3).text()
         directory = self.path_input.text()
+        base_dir = GitWorker.get_git_root(directory)
+
+        # Get only files changed in this commit
+        result = GitWorker.get_commit_changed_files(base_dir, commit_hash)
+        if "error" in result:
+            QMessageBox.critical(self, "Error", f"Failed to get commit files:\n{result['error']}")
+            return
+        
+        changed_files = result["success"]
+        if not changed_files:
+            QMessageBox.information(self, "No Files", "No files were changed in this commit.")
+            return
 
         confirm = QMessageBox.question(
             self, "Confirm File Restore",
-            f"Restore all files from commit to current working directory?\n\n[{commit_hash}] {commit_msg}\n\nThis will NOT change HEAD, only update files.",
+            f"Restore {len(changed_files)} file(s) changed in this commit?\n\n[{commit_hash}] {commit_msg}\n\nThis will NOT change HEAD, only update files.",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
         )
 
         if confirm == QMessageBox.StandardButton.Yes:
             self.status_label.setText("RESTORING FILES...")
             QApplication.processEvents()
-            result = GitWorker.checkout_path(directory, commit_hash)
-            if "success" in result:
+            
+            failed = []
+            for file_path in changed_files:
+                res = GitWorker.checkout_file(base_dir, commit_hash, file_path)
+                if "error" in res:
+                    failed.append(file_path)
+            
+            if not failed:
                 self.status_label.setStyleSheet(f"color: {CP_GREEN}; font-weight: bold;")
-                self.status_label.setText(f"SUCCESS: FILES RESTORED FROM {commit_hash}")
-                QMessageBox.information(self, "Success", f"Files restored from {commit_hash}.\nYou can now commit these changes.")
+                self.status_label.setText(f"SUCCESS: {len(changed_files)} FILE(S) RESTORED FROM {commit_hash}")
+                QMessageBox.information(self, "Success", f"Restored {len(changed_files)} file(s) from {commit_hash}.\nYou can now commit these changes.")
             else:
                 self.status_label.setStyleSheet(f"color: {CP_RED}; font-weight: bold;")
-                self.status_label.setText("RESTORE FAILED")
-                QMessageBox.critical(self, "Error", result['error'])
+                self.status_label.setText("RESTORE PARTIALLY FAILED")
+                QMessageBox.warning(self, "Partial Success", f"Restored {len(changed_files) - len(failed)} file(s).\nFailed: {len(failed)}")
+
 
 # --- SETTINGS DIALOG ---
 class SettingsDialog(QDialog):
