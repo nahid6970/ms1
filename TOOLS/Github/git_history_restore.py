@@ -259,6 +259,10 @@ class CyberDiffBrowser(QTextBrowser):
     file_restore_requested = pyqtSignal(int)
     file_timeline_requested = pyqtSignal(int)
 
+    def __init__(self, main_window=None):
+        super().__init__()
+        self.main_window = main_window
+
     def contextMenuEvent(self, event):
         url = self.anchorAt(event.pos())
         if url.startswith("file-"):
@@ -267,8 +271,12 @@ class CyberDiffBrowser(QTextBrowser):
                 menu = self.createStandardContextMenu()
                 menu.addSeparator()
                 
-                # Header info
-                header_action = menu.addAction(f"📄 FILE: {self.parent().current_diff_sections[idx]['name']}")
+                # Header info - use main_window if available
+                file_name = "Unknown"
+                if self.main_window and idx < len(self.main_window.current_diff_sections):
+                    file_name = os.path.basename(self.main_window.current_diff_sections[idx]['name'])
+                
+                header_action = menu.addAction(f"📄 FILE: {file_name}")
                 header_action.setEnabled(False)
                 menu.addSeparator()
                 
@@ -468,7 +476,7 @@ class MainWindow(QMainWindow):
         diff_label.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold;")
         diff_layout.addWidget(diff_label)
         
-        self.diff_display = CyberDiffBrowser()
+        self.diff_display = CyberDiffBrowser(self)
         self.diff_display.file_context_requested.connect(self.open_file_in_editor)
         self.diff_display.file_restore_requested.connect(self.restore_single_file)
         self.diff_display.file_timeline_requested.connect(self.open_file_timeline)
@@ -813,13 +821,11 @@ class MainWindow(QMainWindow):
             active_tag = f' <span style="color: {CP_GREEN}; border: 1px solid {CP_GREEN}; padding: 1px 4px; font-size: 8pt;">ACTIVE: {restored_hash}</span>' if restored_hash else ""
             border_style = f"border-left: 5px solid {CP_GREEN};" if restored_hash else f"border-left: 5px solid {CP_CYAN};"
             
-            # File header (clickable)
+            # File header
             html_parts.append(f'''
-                <a href="file-{idx}" style="text-decoration: none;">
-                    <div style="background-color: {CP_DIM}; color: {CP_YELLOW}; padding: 10px; margin-top: 15px; margin-bottom: 0px; font-weight: bold; {border_style} font-size: 11pt; cursor: pointer;">
-                        {icon} 📄 {rel_path} &nbsp;&nbsp; {stats_text}{active_tag}
-                    </div>
-                </a>
+                <div style="background-color: {CP_DIM}; color: {CP_YELLOW}; padding: 10px; margin-top: 15px; margin-bottom: 0px; font-weight: bold; {border_style} font-size: 11pt;">
+                    <a href="file-{idx}" style="color: {CP_YELLOW}; text-decoration: none;">{icon} 📄 {rel_path} &nbsp;&nbsp; {stats_text}{active_tag}</a>
+                </div>
             ''')
             
             # File content (show if expanded)
