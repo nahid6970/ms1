@@ -1478,14 +1478,19 @@ class CommitExplorerDialog(QDialog):
             prefix = self.root_path_to_strip if self.root_path_to_strip.endswith('/') else self.root_path_to_strip + '/'
             prefix_len = len(prefix)
 
-        for file_path in sorted(files):
-            # The full path from git root is needed for restore logic
-            full_path_from_root = file_path
-            
-            # The relative path for display in the tree
-            display_path = file_path[prefix_len:] if file_path.startswith(self.root_path_to_strip or "") else file_path
-            if not display_path: continue
+        # Pre-process paths to ensure we build folders first and sort everything
+        # 1. Strip prefix if needed
+        processed_files = []
+        for f in files:
+            display_path = f[prefix_len:] if f.startswith(self.root_path_to_strip or "") else f
+            if display_path:
+                processed_files.append((display_path, f)) # (display, original)
 
+        # 2. Sort processed files so folders naturally get processed
+        # Sorting by display_path ensures we go level by level
+        processed_files.sort(key=lambda x: x[0])
+
+        for display_path, full_git_path in processed_files:
             parts = display_path.split('/')
             current_node = root_node
             
@@ -1514,10 +1519,20 @@ class CommitExplorerDialog(QDialog):
                     else:
                         item.setIcon(self.icon_provider.icon(QFileIconProvider.IconType.File))
                         item.setData("file", Qt.ItemDataRole.UserRole + 1)
-                        
+                    
+                    # Ensure folders are always sorted above files
+                    # We can use a custom sort role or simply insert based on type
+                    # Using sortRole is cleaner
+                    item.setData(f"0_{part}" if not is_file else f"1_{part}", Qt.ItemDataRole.SortRole)
+                    
                     current_node.appendRow(item)
                     nodes[display_segment_path] = item
                 current_node = nodes[display_segment_path]
+        
+        # Finally, sort the entire model based on the sort role
+        self.model.setSortRole(Qt.ItemDataRole.SortRole)
+        self.tree_view.setSortingEnabled(True)
+        self.tree_view.sortByColumn(0, Qt.SortOrder.AscendingOrder)
 
     def show_context_menu(self, pos):
         index = self.tree_view.indexAt(pos)
