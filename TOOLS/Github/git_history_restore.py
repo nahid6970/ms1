@@ -63,7 +63,19 @@ class CyberDelegate(QStyledItemDelegate):
         # 2. Draw Active Border
         if is_active:
             painter.setPen(QPen(QColor(CP_GREEN), 2))
-            painter.drawRect(option.rect.adjusted(1, 1, -1, -1))
+            rect = option.rect
+            
+            # Draw top and bottom borders for all cells in the row
+            painter.drawLine(rect.topLeft() + QSize(0, 1).toPoint(), rect.topRight() + QSize(0, 1).toPoint())
+            painter.drawLine(rect.bottomLeft(), rect.bottomRight())
+            
+            # Draw left border only for the first column
+            if index.column() == 0:
+                painter.drawLine(rect.topLeft() + QSize(1, 1).toPoint(), rect.bottomLeft() + QSize(1, 0).toPoint())
+                
+            # Draw right border only for the last column
+            if index.column() == index.model().columnCount() - 1:
+                painter.drawLine(rect.topRight() + QSize(-1, 1).toPoint(), rect.bottomRight() + QSize(-1, 0).toPoint())
 
         # 3. Determine Text Color
         if is_selected or is_hovered:
