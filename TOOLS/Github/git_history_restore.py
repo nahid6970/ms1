@@ -465,6 +465,7 @@ class MainWindow(QMainWindow):
         self.table.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeMode.Stretch)
         self.table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
         self.table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
+        self.table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.table.setShowGrid(False)
         self.table.verticalHeader().setVisible(False)
         self.table.setMouseTracking(True)
@@ -1345,6 +1346,7 @@ class FileTimelineDialog(QDialog):
         self.table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
         self.table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
         self.table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
+        self.table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.table.setShowGrid(False)
         self.table.verticalHeader().setVisible(False)
         self.table.setMouseTracking(True)
@@ -1443,6 +1445,7 @@ class CommitExplorerDialog(QDialog):
         layout.addWidget(header)
         
         self.tree_view = QTreeView()
+        self.tree_view.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.model = QStandardItemModel()
         self.model.setHorizontalHeaderLabels([display_path])
         self.tree_view.setModel(self.model)
