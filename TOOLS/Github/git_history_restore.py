@@ -231,11 +231,11 @@ class GitWorker:
     def get_commit_tree(directory, commit_hash, sub_path=None):
         """Get all files in the repository at a specific commit, optionally filtered by sub_path"""
         try:
-            cmd = ["git", "ls-tree", "-r", "--name-only", commit_hash]
+            cmd = ["git", "ls-tree", "-r", "--name-only", "-z", commit_hash]
             if sub_path and sub_path != ".":
                 cmd.append(sub_path)
             result = subprocess.check_output(cmd, cwd=directory, text=True, encoding='utf-8')
-            return {"success": result.strip().split('\n')}
+            return {"success": [f for f in result.split('\0') if f]}
         except Exception as e:
             return {"error": str(e)}
 
@@ -243,9 +243,9 @@ class GitWorker:
     def get_commit_changed_files(directory, commit_hash):
         """Get only the files that were changed in a specific commit"""
         try:
-            cmd = ["git", "diff-tree", "--no-commit-id", "--name-only", "-r", commit_hash]
+            cmd = ["git", "diff-tree", "--no-commit-id", "--name-only", "-r", "-z", commit_hash]
             result = subprocess.check_output(cmd, cwd=directory, text=True, encoding='utf-8')
-            files = [f for f in result.strip().split('\n') if f]
+            files = [f for f in result.split('\0') if f]
             return {"success": files}
         except Exception as e:
             return {"error": str(e)}
