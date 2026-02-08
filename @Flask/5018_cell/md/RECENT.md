@@ -6,6 +6,35 @@
 
 ---
 
+## [2026-02-06 15:45] - Square Borders and Sub-sheet Tab Colorization
+
+**Session Duration:** 0.5 hours
+
+**What We Accomplished:**
+
+### 🎯 Square UI Borders
+- **Visual Update**: Removed all rounded corners (`border-radius: 0`) from the main container, sheet tabs, subsheet bar, toolbar buttons, and search boxes for a sharper, professional look.
+
+### 🎨 Sub-sheet Tab Colorization
+- **Customizable Sub-sheets**: Added "Set Colors" to the right-click menu of sub-sheet tabs.
+- **Dynamic Styling**:
+  - Sub-sheet tabs now use their own `bgColor` and `fgColor` metadata.
+  - Active tabs are highlighted with a white inner border (`box-shadow`) to maintain visibility against custom backgrounds.
+  - Sub-sheet bar automatically adopts the parent sheet's background color.
+- **Real-time Sync**: Color changes now reflect immediately in the main view, subsheet bar, and sidebar tree.
+- **Fix**: Removed a duplicate `showSubSheetContextMenu` function that was overwriting the version containing the "Set Colors" option.
+
+**Files Modified:**
+- `static/style.css` - Removed border-radii across the UI.
+- `static/script.js` - Added "Set Colors" to subsheet menu, improved `applyTabColors`, and synchronized color updates.
+- `md/RECENT.md` - Logged session.
+
+**Current Status:**
+- ✅ UI has a consistent square aesthetic.
+- ✅ Sub-sheets are fully color-customizable from their own bar.
+
+---
+
 ## [2026-02-06 15:15] - Category Colors and Sort Rank Refinements
 
 **Session Duration:** 0.6 hours

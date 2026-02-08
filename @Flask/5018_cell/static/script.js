@@ -5947,8 +5947,14 @@ function renderSubSheetBar() {
     // Function to apply colors to a tab
     const applyTabColors = (tab, sheet, isActive) => {
         if (sheet.bgColor) {
-            tab.style.backgroundColor = isActive ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.1)';
-            tab.style.borderColor = 'rgba(255,255,255,0.3)';
+            tab.style.backgroundColor = sheet.bgColor;
+            if (isActive) {
+                tab.style.boxShadow = 'inset 0 0 0 2px rgba(255,255,255,0.4)';
+                tab.style.borderColor = 'rgba(255,255,255,0.5)';
+            } else {
+                tab.style.boxShadow = 'none';
+                tab.style.borderColor = 'rgba(0,0,0,0.1)';
+            }
         }
         if (sheet.fgColor) {
             tab.style.color = sheet.fgColor;
@@ -6038,6 +6044,15 @@ function showSubSheetContextMenu(event, sheetIndex) {
         menu.remove();
     };
 
+    // Color option
+    const colorItem = document.createElement('div');
+    colorItem.className = 'context-menu-item';
+    colorItem.innerHTML = '<span>🎨</span><span>Set Colors</span>';
+    colorItem.onclick = () => {
+        showSheetColorPicker(sheetIndex);
+        menu.remove();
+    };
+
     // Delete option
     const deleteItem = document.createElement('div');
     deleteItem.className = 'context-menu-item';
@@ -6048,6 +6063,7 @@ function showSubSheetContextMenu(event, sheetIndex) {
     };
 
     menu.appendChild(renameItem);
+    menu.appendChild(colorItem);
     menu.appendChild(deleteItem);
     document.body.appendChild(menu);
 
@@ -11481,6 +11497,8 @@ function showSheetColorPicker(sheetIndex) {
     
     saveData();
     populateF1Sheets();
+    renderSidebar(); // Update sidebar tree
+    renderTable();   // Update current view and subsheet bar
     showToast(`Colors updated for "${sheet.name}"`, 'success');
 }
 
@@ -12614,50 +12632,6 @@ function renderSubSheetBar() {
     addBtn.onclick = () => addSubSheet(parentIndex);
 
     subsheetTabs.appendChild(addBtn);
-}
-
-function showSubSheetContextMenu(event, sheetIndex) {
-    // Remove any existing context menu
-    const existingMenu = document.getElementById('subsheetContextMenu');
-    if (existingMenu) {
-        existingMenu.remove();
-    }
-
-    const menu = document.createElement('div');
-    menu.id = 'subsheetContextMenu';
-    menu.className = 'subsheet-context-menu';
-    menu.style.position = 'fixed';
-    menu.style.left = event.pageX + 'px';
-    menu.style.top = event.pageY + 'px';
-
-    const renameItem = document.createElement('div');
-    renameItem.className = 'context-menu-item';
-    renameItem.innerHTML = '<span>✏️</span><span>Rename</span>';
-    renameItem.onclick = () => {
-        menu.remove();
-        showRenameModal(sheetIndex);
-    };
-
-    const deleteItem = document.createElement('div');
-    deleteItem.className = 'context-menu-item';
-    deleteItem.innerHTML = '<span>🗑️</span><span>Delete</span>';
-    deleteItem.onclick = () => {
-        menu.remove();
-        deleteSheet(sheetIndex);
-    };
-
-    menu.appendChild(renameItem);
-    menu.appendChild(deleteItem);
-    document.body.appendChild(menu);
-
-    // Close menu on click outside
-    const closeMenu = (e) => {
-        if (!menu.contains(e.target)) {
-            menu.remove();
-            document.removeEventListener('click', closeMenu);
-        }
-    };
-    setTimeout(() => document.addEventListener('click', closeMenu), 0);
 }
 
 // Sidebar Logic
