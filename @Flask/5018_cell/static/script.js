@@ -1924,7 +1924,7 @@ function highlightSyntax(text) {
             'K': '#000000', 'GR': '#808080'
         };
         const color = colorMap[colorCode] || '#888';
-        return `<span style="border: 2px solid ${color}; padding: 2px 8px; border-radius: 4px; display: inline; box-decoration-break: clone; -webkit-box-decoration-break: clone; word-break: normal; overflow-wrap: break-word;"><span class="syn-marker">#${colorCode}#</span>${text}<span class="syn-marker">#/#</span></span>`;
+        return `<span style="border-left: 2px solid ${color}; border-right: 2px solid ${color}; padding: 0 4px; display: inline; vertical-align: baseline; box-decoration-break: clone; -webkit-box-decoration-break: clone; word-break: normal; overflow-wrap: break-word;"><span class="syn-marker">#${colorCode}#</span>${text}<span class="syn-marker">#/#</span></span>`;
     });
 
     // Rule: Variable font size #2#text#/#
@@ -3029,7 +3029,7 @@ function parseMarkdownInline(text, cellStyle = {}) {
             'K': '#000000', 'GR': '#808080'
         };
         if (colorMap[colorCode]) {
-            return `<span style="border: 2px solid ${colorMap[colorCode]}; padding: 2px 8px; border-radius: 4px; display: inline; box-decoration-break: clone; -webkit-box-decoration-break: clone; word-break: normal; overflow-wrap: break-word;">${text}</span>`;
+            return `<span style="border-left: 2px solid ${colorMap[colorCode]}; border-right: 2px solid ${colorMap[colorCode]}; padding: 0 4px; display: inline; vertical-align: baseline; box-decoration-break: clone; -webkit-box-decoration-break: clone; word-break: normal; overflow-wrap: break-word;">${text}</span>`;
         }
         return match; // Not a valid color, leave unchanged
     });
@@ -3735,7 +3735,7 @@ function oldParseMarkdownBody(lines, cellStyle = {}) {
                 'K': '#000000', 'GR': '#808080'
             };
             if (colorMap[colorCode]) {
-                return `<span style="border: 2px solid ${colorMap[colorCode]}; padding: 2px 8px; border-radius: 4px; display: inline; box-decoration-break: clone; -webkit-box-decoration-break: clone; word-break: normal; overflow-wrap: break-word;">${text}</span>`;
+                return `<span style="border-left: 2px solid ${colorMap[colorCode]}; border-right: 2px solid ${colorMap[colorCode]}; padding: 0 4px; display: inline; vertical-align: baseline; box-decoration-break: clone; -webkit-box-decoration-break: clone; word-break: normal; overflow-wrap: break-word;">${text}</span>`;
             }
             return match; // Not a valid color, leave unchanged
         });

@@ -13,12 +13,12 @@
 **What We Accomplished:**
 
 ### ✅ Final Fix for Nested Table Formatting (Stars and Punctuation)
-- **Problem**: Table rows with trailing punctuation failed to distribute formatting tags. Additionally, border boxes (`#R#`) were being clipped in exports.
+- **Problem**: Mixing row-wrapped formatting with cell-specific styles caused rendering artifacts. Additionally, the `inline-block` border box implementation broke the "hanging indent" in table cells and sometimes misaligned text.
 - **Solution**: 
-  - **Clipping Fix**: Changed `overflow` from `hidden` to `visible` for `.md-cell`. This ensures that even with a compact layout, the 2px borders are fully visible and not cut off by the cell edges.
-  - **Smart Detection**: Refined `distributeTableFormatting` to correctly handle punctuation and local tag pairs.
-- **Compact UI**: Reverted extra padding/line-height to maintain the original compact spreadsheet look while keeping the border fix.
-- **Consistency**: Synchronized these improvements to `export_static.py`.
+  - **Indentation Flow Fix**: Reverted Border Box (`#R#`) to `display: inline` but removed `box-decoration-break: clone`. This allows the text to flow naturally with the cell's hanging indent while maintaining a single continuous border that doesn't "re-box" every line.
+  - **Clipping Fix**: Maintained `overflow: visible` for `.md-cell` to ensure borders remain fully visible in all modes.
+  - **Smart Detection**: Refined `distributeTableFormatting` with a "Local Closure Check" to accurately handle complex nested tags and trailing punctuation like `।`.
+- **Consistency**: Synchronized all improvements across the live app and `export_static.py`.
 
 ### 🎨 UI Consistency Improvements
 - **Sub-sheet Fix**: Resolved a duplicate function issue that was preventing "Set Colors" from appearing in the sub-sheet menu.
