@@ -1310,7 +1310,7 @@ class MainWindow(QMainWindow):
                 QMessageBox.critical(self, "Error", result['error'])
 
     def restore_files_to_current(self):
-        """Replace current files with versions from the selected commit"""
+        """Replace current working files with versions from the selected commit"""
         selected_items = self.table.selectedItems()
         if not selected_items:
             QMessageBox.warning(self, "Selection Required", "Please select a commit to restore from.")
@@ -1323,7 +1323,6 @@ class MainWindow(QMainWindow):
         base_dir = GitWorker.get_git_root(directory)
         scope = self.scope_input.text() or "."
         
-        # Get files from the diff display (what's currently shown)
         if not self.current_diff_sections:
             QMessageBox.information(self, "No Changes", "No files to restore. Select a commit first.")
             return
@@ -1335,10 +1334,11 @@ class MainWindow(QMainWindow):
             return
 
         confirm = QMessageBox.question(
-            self, "Replace Files with Previous Version",
-            f"Replace current files with versions from:\n\n[{commit_hash}] {commit_msg}\n\n"
-            f"This will replace {len(target_files)} file(s) in '{scope}'.\n\n"
-            f"⚠️ WARNING: This will OVERWRITE your current files!",
+            self, "Replace Working Files",
+            f"Replace your current working files with versions from:\n\n[{commit_hash}] {commit_msg}\n\n"
+            f"Files to replace: {len(target_files)}\n"
+            f"Scope: '{scope}'\n\n"
+            f"⚠️ WARNING: This will OVERWRITE your current working directory files!",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
         )
 
