@@ -369,7 +369,7 @@
             "category": "General",
             "description": "",
             "trigger": ";cms",
-            "replacement": "make a study note for this\nmd syntex formet is a bit different here is how i use them\n\n#1.5#text#/#  = extra big text\n##text##  = big text\n**text** = bold text\n@@text@@ = italic text\n__text__ = underline\n- text = list 1\n-- text = list 2\n--- text = list 3\nDont add unnecessary extra lines between heading and its content\ndont use --- or dash to add separator just keep single empty line for spacing\nfor math use katex or latex formatting with \\(Math\\) or $Math$",
+            "replacement": "make a study note for this\nmd syntex formet is a bit different here is how i use them\n\n#1.5#text#/#  = extra big text\n##text##  = big text\n**text** = bold text\n@@text@@ = italic text\n__text__ = underline\n- text = list 1\n-- text = list 2\n--- text = list 3\nDont add unnecessary extra lines between heading and its content\ndont use --- or dash to add separator just keep single empty line for spacing\nWhen adding any tables dont use | :--- | :--- | :--- | between headers and content cells\nfor math use katex or latex formatting with \\(Math\\) or $Math$",
             "enabled": true
         },
         {

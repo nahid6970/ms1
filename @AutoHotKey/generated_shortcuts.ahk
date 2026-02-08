@@ -975,6 +975,7 @@ __text__ = underline
 --- text = list 3
 Dont add unnecessary extra lines between heading and its content
 dont use --- or dash to add separator just keep single empty line for spacing
+When adding any tables dont use | :--- | :--- | :--- | between headers and content cells
 for math use katex or latex formatting with \(Math\) or $Math$
 )")
 

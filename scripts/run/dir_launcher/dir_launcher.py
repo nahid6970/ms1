@@ -51,7 +51,7 @@ def save_data(data):
     with open(DATA_FILE, 'w') as f:
         json.dump(data, f, indent=4)
 
-def run_fzf(items, prompt="Select > ", help_text="", extra_args=None):
+def run_fzf(items, prompt="Select > ", help_text="", extra_args=None, expect="ctrl-a,ctrl-d,ctrl-e,tab"):
     """
     Runs fzf with the given items.
     Items should be a list of strings.
@@ -67,9 +67,7 @@ def run_fzf(items, prompt="Select > ", help_text="", extra_args=None):
         f"--preview=echo {safe_header}",
         "--preview-window=up:1:hidden:wrap",
         "--bind=?:toggle-preview",
-        "--bind=?:toggle-preview",
-        "--expect=ctrl-a,ctrl-d,ctrl-e,tab",
-        "--color=bg:#1e1e1e,fg:#d0d0d0,bg+:#2e2e2e,fg+:#ffffff,hl:#00d9ff,hl+:#00ff00",
+        f"--expect={expect}",
         "--color=bg:#1e1e1e,fg:#d0d0d0,bg+:#2e2e2e,fg+:#ffffff,hl:#00d9ff,hl+:#00ff00",
         "--color=info:#afaf87,prompt:#d782ff,pointer:#d782ff,marker:#19d600,header:#888888",
         "--border",
@@ -264,15 +262,14 @@ def main():
             data["directories"] = dirs
             save_data(data)
 
-def handle_directory(dir_obj, data):
+def handle_directory(dir_obj, data_passed):
     # dir_obj is {"path": "...", "category": "..."}
     directory_path = dir_obj.get("path")
+    script_path = os.path.abspath(__file__)
     
     while True:
-        # Re-load commands each time to sync
-        # But we need to use the passed 'data' for commands since 'main' loaded it. 
-        # Actually better to reload to ensure consistency? 
-        # For simple tool, using boolean logic is fine.
+        # Re-load data each time to sync with external changes (e.g. smooth moves)
+        data = load_data()
         commands = data.get("commands", [])
         
         fzf_items = []
@@ -287,12 +284,18 @@ def handle_directory(dir_obj, data):
             display = f"{cat_display} {name}"
             fzf_items.append(f"{idx}\t{display}")
             
-        fzf_args = ["--delimiter=\t", "--with-nth=2.."]
+        fzf_args = [
+            "--delimiter=\t", 
+            "--with-nth=2..",
+            f"--bind=ctrl-s:execute-silent(python \"{script_path}\" --sort-commands)+reload(python \"{script_path}\" --feed-commands)",
+            f"--bind=alt-up:execute-silent(python \"{script_path}\" --move-command {{1}} up)+reload(python \"{script_path}\" --feed-commands)+up",
+            f"--bind=alt-down:execute-silent(python \"{script_path}\" --move-command {{1}} down)+reload(python \"{script_path}\" --feed-commands)+down"
+        ]
         
         key, selection = run_fzf(
             fzf_items, 
             prompt=f"[{os.path.basename(directory_path)}] Action > ", 
-            help_text="Ctrl-A: Add | Ctrl-D: Del | Alt-Up/Down: Move | Enter: Run | Esc: Back",
+            help_text="Ctrl-A: Add | Ctrl-E: Edit | Ctrl-S: Sort | Ctrl-D: Del | Alt-Up/Down: Move | Enter: Run | Esc: Back",
             extra_args=fzf_args
         )
         
@@ -306,16 +309,6 @@ def handle_directory(dir_obj, data):
                 execute_command(commands[idx]["template"], directory_path)
                 sys.exit(0)
         
-        elif key == 'alt-up':
-            if idx != -1 and move_item(commands, idx, -1):
-                data["commands"] = commands
-                save_data(data)
-
-        elif key == 'alt-down':
-            if idx != -1 and move_item(commands, idx, 1):
-                data["commands"] = commands
-                save_data(data)
-
         elif key == 'ctrl-a':
             print("\n--- Add New Command ---")
             name = input("Command Name: ").strip()
@@ -336,7 +329,7 @@ def handle_directory(dir_obj, data):
                 new_name = input(f"New Name (Enter to keep '{curr['name']}'): ").strip()
                 if not new_name: new_name = curr['name']
                 
-                new_temp = input(f"New Template (Enter to keep current): ").strip()
+                new_temp = input(f"New Template (Enter to keep '{curr['template']}'): ").strip()
                 if not new_temp: new_temp = curr['template']
                 
                 new_cat = input(f"New Category (Enter to keep '{curr.get('category', 'General')}'): ").strip()
@@ -432,6 +425,49 @@ if __name__ == "__main__":
                 x.get("name", os.path.basename(x["path"].rstrip(os.sep))).lower()
             ))
             data["directories"] = dirs
+            save_data(data)
+            sys.exit(0)
+            
+        elif cmd == "--feed-commands":
+            sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+            data = load_data()
+            commands = data.get("commands", [])
+            items = []
+            max_cat_len = 0
+            if commands:
+                max_cat_len = max(len(c.get("category", "")) for c in commands)
+            for idx, c in enumerate(commands):
+                cat = c.get("category", "General")
+                name = c.get("name", "Unknown")
+                cat_display = f"{C_CYAN}[{cat}]{C_RESET}".ljust(max_cat_len + 12)
+                display = f"{cat_display} {name}"
+                items.append(f"{idx}\t{display}")
+            print("\n".join(items))
+            sys.exit(0)
+
+        elif cmd == "--move-command":
+            if len(sys.argv) >= 4:
+                idx_str = sys.argv[2]
+                direction_str = sys.argv[3]
+                try:
+                    idx = int(idx_str)
+                    direction = -1 if direction_str == "up" else 1
+                    data = load_data()
+                    commands = data.get("commands", [])
+                    if move_item(commands, idx, direction):
+                        data["commands"] = commands
+                        save_data(data)
+                except: pass
+            sys.exit(0)
+
+        elif cmd == "--sort-commands":
+            data = load_data()
+            commands = data.get("commands", [])
+            commands.sort(key=lambda x: (
+                x.get("category", "General").lower(), 
+                x.get("name", "").lower()
+            ))
+            data["commands"] = commands
             save_data(data)
             sys.exit(0)
 
