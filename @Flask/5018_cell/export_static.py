@@ -2844,7 +2844,7 @@ def generate_static_html(data, custom_syntaxes):
 
         // Helper to distribute formatting tags across table pipes
         // e.g. "**__A | B__**" -> "**__A__** | **__B__**"
-        // or "| **A | B** |" -> "| **A** | **B** |"
+        // or "| #K# A | B #/# । |" -> "| #K# A #/# | #K# B । #/# |"
         function distributeTableFormatting(text) {
             if (!text || !text.includes('|')) return text;
 
@@ -2860,52 +2860,90 @@ def generate_static_html(data, custom_syntaxes):
                 let current = trimmedLine;
                 if (hasLeadingPipe) current = current.substring(1);
                 if (hasTrailingPipe) current = current.substring(0, current.length - 1);
-                current = current.trim();
 
                 let prefixes = [];
                 let suffixes = [];
                 
-                // 1. Simple markers: ** == __ ~~ !! ?? ^ ~ ` @@
+                // Tags to check
                 const simpleTags = ['**', '==', '__', '~~', '!!', '??', '^', '~', '`', '@@'];
 
                 let changed = true;
                 while (changed) {
                     changed = false;
-                    
-                    // Try simple tags
+                    let checkStr = current.trim();
+                    const firstPipeIdx = current.indexOf('|');
+                    if (firstPipeIdx === -1) break;
+
+                    // 1. Simple markers: ** == __ ~~ !! ?? ^ ~ ` @@
                     for (const tag of simpleTags) {
-                        if (current.startsWith(tag) && current.endsWith(tag) && current.length >= tag.length * 2) {
-                            const inner = current.substring(tag.length, current.length - tag.length);
-                            if (inner.includes('|')) {
-                                prefixes.push(tag);
-                                suffixes.unshift(tag);
-                                current = inner;
-                                changed = true;
-                                break;
+                        if (checkStr.startsWith(tag)) {
+                            const firstTagIdx = current.indexOf(tag);
+                            const lastPipeIdx = current.lastIndexOf('|');
+                            const lastTagIdx = current.lastIndexOf(tag);
+                            
+                            // The tag must be AFTER the last pipe to be a row-wrapper
+                            if (lastTagIdx > lastPipeIdx) {
+                                // Check if closed locally
+                                const localClosingIdx = current.indexOf(tag, firstTagIdx + tag.length);
+                                if (localClosingIdx === -1 || localClosingIdx >= firstPipeIdx) {
+                                    prefixes.push(tag);
+                                    suffixes.unshift(tag);
+                                    current = current.substring(0, firstTagIdx) + 
+                                              current.substring(firstTagIdx + tag.length, lastTagIdx) + 
+                                              current.substring(lastTagIdx + tag.length);
+                                    changed = true;
+                                    break;
+                                }
                             }
                         }
                     }
                     if (changed) continue;
 
-                    // Try Border Box: #R# ... #/#
-                    const borderMatch = current.match(/^(#[A-Z]+#)(.+)(#\\/#)$/);
-                    if (borderMatch && borderMatch[2].includes('|')) {
-                        prefixes.push(borderMatch[1]);
-                        suffixes.unshift(borderMatch[3]);
-                        current = borderMatch[2];
-                        changed = true;
-                        continue;
+                    // 2. Border Box or Font Size: #R# ... #/# or #2# ... #/#
+                    const hashMatch = checkStr.match(/^#([A-Z]+|[\\d.]+)#/);
+                    if (hashMatch) {
+                        const startTag = hashMatch[0];
+                        const firstStartIdx = current.indexOf(startTag);
+                        const lastPipeIdx = current.lastIndexOf('|');
+                        const lastEndIdx = current.lastIndexOf('#/#');
+                        
+                        if (lastEndIdx > lastPipeIdx) {
+                            // Check if closed locally
+                            const localClosingIdx = current.indexOf('#/#', firstStartIdx + startTag.length);
+                            if (localClosingIdx === -1 || localClosingIdx >= firstPipeIdx) {
+                                prefixes.push(startTag);
+                                suffixes.unshift('#/#');
+                                current = current.substring(0, firstStartIdx) + 
+                                          current.substring(firstStartIdx + startTag.length, lastEndIdx) + 
+                                          current.substring(lastEndIdx + 3);
+                                changed = true;
+                                continue;
+                            }
+                        }
                     }
 
-                    // Try Text Stroke: ŝŝ...: ... ŝŝ
-                    // Note: handles both "ŝŝtextŝŝ" and "ŝŝtext ŝŝ"
+                    // 3. Text Stroke: ŝŝ...: ... ŝŝ
                     const strokeMatch = current.match(/^(ŝŝ(?:[\\d.]+:)?)(.+?)( ?ŝŝ)$/);
-                    if (strokeMatch && strokeMatch[2].includes('|')) {
-                        prefixes.push(strokeMatch[1]);
-                        suffixes.unshift(strokeMatch[3]);
-                        current = strokeMatch[2];
-                        changed = true;
-                        continue;
+                    if (strokeMatch) {
+                        const startTag = strokeMatch[1];
+                        const endTag = strokeMatch[3];
+                        const firstStartIdx = current.indexOf(startTag);
+                        const lastPipeIdx = current.lastIndexOf('|');
+                        const lastEndIdx = current.lastIndexOf(endTag);
+                        
+                        if (lastEndIdx > lastPipeIdx) {
+                            // Check if closed locally
+                            const localClosingIdx = current.indexOf('ŝŝ', firstStartIdx + startTag.length);
+                            if (localClosingIdx === -1 || localClosingIdx >= firstPipeIdx) {
+                                prefixes.push(startTag);
+                                suffixes.unshift(endTag);
+                                current = current.substring(0, firstStartIdx) + 
+                                          current.substring(firstStartIdx + startTag.length, lastEndIdx) + 
+                                          current.substring(lastEndIdx + endTag.length);
+                                changed = true;
+                                continue;
+                            }
+                        }
                     }
                 }
 
@@ -2914,10 +2952,10 @@ def generate_static_html(data, custom_syntaxes):
                     const fullSuffix = suffixes.join('');
                     const result = current.split('|').map(p => `${fullPrefix}${p}${fullSuffix}`).join('|');
                     
-                    // Reconstruct the line with outer pipes and original spacing
+                    // Reconstruct the line
                     const leadingSpace = line.match(/^\\s*/)[0];
                     const trailingSpace = line.match(/\\s*$/)[0];
-                    return leadingSpace + (hasLeadingPipe ? '| ' : '') + result + (hasTrailingPipe ? ' |' : '') + trailingSpace;
+                    return leadingSpace + (hasLeadingPipe ? '|' : '') + result + (hasTrailingPipe ? '|' : '') + trailingSpace;
                 }
 
                 return line;

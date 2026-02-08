@@ -47,28 +47,26 @@ Previous implementation assumed clean starting data. There was no "clean-up" pha
 
 ---
 
-## [2026-02-06 16:15] - Extra Stars in Nested Table Formatting
+## [2026-02-06 16:15] - Extra Stars and Detection Failures in Table Formatting
 
 **Problem:** 
-When wrapping a pipe table row in multiple formatting tags (e.g., `**__চাকমা | রাঙ্গামাটি__**`), extra stars (`**`) appeared after words or the raw syntax remained visible without rendering any effects.
+1. **Stars**: Wrapping rows in `**__...__**` caused extra stars to appear.
+2. **Detection**: Rows with trailing punctuation like `| #K# A | B #/# । |` didn't render at all, showing raw syntax.
 
 **Root Cause:** 
-1. **Conflict**: There was a global `distributeTableFormatting` function and a local one inside `parseGridTable`. When both ran, they created redundant tags (e.g., `****`).
-2. **Detection Failure**: The new stack-based logic failed when rows included leading/trailing pipes (e.g., `| **A | B** |`). The tags were not detected because the line started with `|` instead of the tag (e.g., `**`). This resulted in broken fragments like `**A` and `B**` inside cells.
+1. **Conflict**: Redundant distribution logic in `parseGridTable`.
+2. **Strict Matching**: The logic required tags to be at the absolute start/end of the content. If a user put a space or a `।` after the closing tag, the system didn't recognize it as a row-wrapper.
 
 **Solution:** 
-1. **Removed Redundancy**: Deleted the wrapping logic from `parseGridTable` entirely.
-2. **Pipe Peeling**: Updated `distributeTableFormatting` to detect and temporarily remove outer pipes (`|`) before looking for wrapping tags. 
-3. **Stack Distribution**: It now finds ALL wrapping tags at once (from outside in), builds a clean prefix/suffix stack, and applies it to each cell content.
-4. **Multi-tag Support**: Added support for all marker types including italic (`@@`), math (`^`, `~`), border boxes (`#R#`), and strokes (`ŝŝ`).
+1. **Centralized Logic**: rely solely on `distributeTableFormatting`.
+2. **Lenient Wrapping**: rewrote the logic to find tags that "enclose" the pipes. If a tag pair exists and all pipes are between the start and end tag, it's treated as a row-wrapper, even if there's text after the end tag.
+3. **Punctuation Support**: Specifically handles trailing punctuation by moving it inside the distributed tag or preserving it in the last cell correctly.
 
 **Files Modified:**
 - `static/script.js`
 - `export_static.py`
 
-**Related Issues:** Pipe Tables, distributeTableFormatting logic
-
-**Result:** Table rows now support unlimited nested formatting (e.g. `| **__!!ŝŝA | Bŝŝ!!__** |`) and every cell correctly inherits all styles.
+**Result:** Perfect rendering for rows like `| #K# A | B #/# । |`.
 
 ---
 

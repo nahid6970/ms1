@@ -12,12 +12,12 @@
 
 **What We Accomplished:**
 
-### ✅ Fixed Nested Table Formatting (Stars Issue)
-- **Problem**: Wrapping a whole table row in multiple tags (e.g. `**__A | B__**`) caused extra stars to appear or showed raw syntax in cells.
-- **Root Cause**: Two conflicting distribution logics were interfering. Additionally, the new consolidated logic failed to detect tags if the line started with a pipe (e.g. `| **A | B** |`).
+### ✅ Final Fix for Nested Table Formatting (Stars and Punctuation)
+- **Problem**: Mixing row-wrapped formatting (e.g. `**A | B**`) with cell-specific formatting (e.g. `**A** | B`) caused "double stars" and detection failures.
+- **Root Cause**: The distribution logic was too aggressive, treating any tags at the start/end of a line as a row-wrapper, even if they were already correctly paired within the first cell.
 - **Solution**: 
-  - **Refined Distribution**: Updated `distributeTableFormatting` to "peel off" outer pipes before distributing tags. It correctly builds a stack of all wrapping markers (bold, underline, math, border boxes, strokes) and pushes them into each cell.
-  - **Full Support**: Added support for all marker types including `@@` (Italic) and various stroke syntaxes.
+  - **Local Closure Check**: Added a check to see if a tag is already closed *before* the first pipe. If it is, it's ignored as a row-wrapper. This allows you to have bold in the first cell without bolding the whole row by accident.
+  - **Improved Robustness**: Maintained the punctuation fix (`।` support) while making the tag peeling much more accurate.
 - **Consistency**: Synchronized these improvements to `export_static.py`.
 
 ### 🎨 UI Consistency Improvements

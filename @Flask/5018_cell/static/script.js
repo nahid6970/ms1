@@ -3216,7 +3216,7 @@ function parseMarkdownInline(text, cellStyle = {}) {
 
 // e.g. "**__A | B__**" -> "**__A__** | **__B__**"
 
-// or "| **A | B** |" -> "| **A** | **B** |"
+// or "| #K# A | B #/# । |" -> "| #K# A #/# | #K# B । #/# |"
 
 function distributeTableFormatting(text) {
 
@@ -3248,8 +3248,6 @@ function distributeTableFormatting(text) {
 
         if (hasTrailingPipe) current = current.substring(0, current.length - 1);
 
-        current = current.trim();
-
 
 
         let prefixes = [];
@@ -3258,7 +3256,7 @@ function distributeTableFormatting(text) {
 
         
 
-        // 1. Simple markers: ** == __ ~~ !! ?? ^ ~ ` @@
+        // Tags to check
 
         const simpleTags = ['**', '==', '__', '~~', '!!', '??', '^', '~', '`', '@@'];
 
@@ -3270,27 +3268,55 @@ function distributeTableFormatting(text) {
 
             changed = false;
 
-            
+            let checkStr = current.trim();
 
-            // Try simple tags
+            const firstPipeIdx = current.indexOf('|');
+
+            if (firstPipeIdx === -1) break;
+
+
+
+            // 1. Simple markers: ** == __ ~~ !! ?? ^ ~ ` @@
 
             for (const tag of simpleTags) {
 
-                if (current.startsWith(tag) && current.endsWith(tag) && current.length >= tag.length * 2) {
+                if (checkStr.startsWith(tag)) {
 
-                    const inner = current.substring(tag.length, current.length - tag.length);
+                    const firstTagIdx = current.indexOf(tag);
 
-                    if (inner.includes('|')) {
+                    const lastPipeIdx = current.lastIndexOf('|');
 
-                        prefixes.push(tag);
+                    const lastTagIdx = current.lastIndexOf(tag);
 
-                        suffixes.unshift(tag);
+                    
 
-                        current = inner;
+                    // The tag must be AFTER the last pipe to be a row-wrapper
 
-                        changed = true;
+                    if (lastTagIdx > lastPipeIdx) {
 
-                        break;
+                        // CRITICAL: Check if this tag is already closed BEFORE the first pipe
+
+                        // If it is, then it's a local tag for the first cell, not a row-wrapper.
+
+                        const localClosingIdx = current.indexOf(tag, firstTagIdx + tag.length);
+
+                        if (localClosingIdx === -1 || localClosingIdx >= firstPipeIdx) {
+
+                            prefixes.push(tag);
+
+                            suffixes.unshift(tag);
+
+                            current = current.substring(0, firstTagIdx) + 
+
+                                      current.substring(firstTagIdx + tag.length, lastTagIdx) + 
+
+                                      current.substring(lastTagIdx + tag.length);
+
+                            changed = true;
+
+                            break;
+
+                        }
 
                     }
 
@@ -3302,43 +3328,107 @@ function distributeTableFormatting(text) {
 
 
 
-            // Try Border Box: #R# ... #/#
+            // 2. Border Box or Font Size: #R# ... #/# or #2# ... #/#
 
-            const borderMatch = current.match(/^(#[A-Z]+#)(.+)(#\/#)$/);
+            const hashMatch = checkStr.match(/^#([A-Z]+|[\d.]+)#/);
 
-            if (borderMatch && borderMatch[2].includes('|')) {
+            if (hashMatch) {
 
-                prefixes.push(borderMatch[1]);
+                const startTag = hashMatch[0];
 
-                suffixes.unshift(borderMatch[3]);
+                const firstStartIdx = current.indexOf(startTag);
 
-                current = borderMatch[2];
+                const lastPipeIdx = current.lastIndexOf('|');
 
-                changed = true;
+                const lastEndIdx = current.lastIndexOf('#/#');
 
-                continue;
+                
+
+                if (lastEndIdx > lastPipeIdx) {
+
+                    // Check if closed locally
+
+                    const localClosingIdx = current.indexOf('#/#', firstStartIdx + startTag.length);
+
+                    if (localClosingIdx === -1 || localClosingIdx >= firstPipeIdx) {
+
+                        prefixes.push(startTag);
+
+                        suffixes.unshift('#/#');
+
+                        current = current.substring(0, firstStartIdx) + 
+
+                                  current.substring(firstStartIdx + startTag.length, lastEndIdx) + 
+
+                                  current.substring(lastEndIdx + 3);
+
+                        changed = true;
+
+                        continue;
+
+                    }
+
+                }
 
             }
 
 
 
-            // Try Text Stroke: ŝŝ...: ... ŝŝ
+            // 3. Text Stroke: ŝŝ...: ... ŝŝ
 
-            // Note: handles both "ŝŝtextŝŝ" and "ŝŝtext ŝŝ"
+            const strokeStartMatch = checkStr.match(/^ŝŝ(?:[\d.]+:)?/);
 
-            const strokeMatch = current.match(/^(ŝŝ(?:[\d.]+:)?)(.+?)( ?ŝŝ)$/);
+            if (strokeStartMatch) {
 
-            if (strokeMatch && strokeMatch[2].includes('|')) {
+                const startTag = strokeStartMatch[0];
 
-                prefixes.push(strokeMatch[1]);
+                const firstStartIdx = current.indexOf(startTag);
 
-                suffixes.unshift(strokeMatch[3]);
+                const lastPipeIdx = current.lastIndexOf('|');
 
-                current = strokeMatch[2];
+                
 
-                changed = true;
+                // Check for "ŝŝ" or " ŝŝ" after last pipe
 
-                continue;
+                let lastEndIdx = current.lastIndexOf('ŝŝ');
+
+                let endTagLen = 2;
+
+                if (lastEndIdx > 0 && current[lastEndIdx-1] === ' ') {
+
+                    lastEndIdx--;
+
+                    endTagLen = 3;
+
+                }
+
+                
+
+                if (lastEndIdx > lastPipeIdx) {
+
+                    // Check if closed locally
+
+                    const localClosingIdx = current.indexOf('ŝŝ', firstStartIdx + startTag.length);
+
+                    if (localClosingIdx === -1 || localClosingIdx >= firstPipeIdx) {
+
+                        prefixes.push(startTag);
+
+                        suffixes.unshift(current.substring(lastEndIdx, lastEndIdx + endTagLen));
+
+                        current = current.substring(0, firstStartIdx) + 
+
+                                  current.substring(firstStartIdx + startTag.length, lastEndIdx) + 
+
+                                  current.substring(lastEndIdx + endTagLen);
+
+                        changed = true;
+
+                        continue;
+
+                    }
+
+                }
 
             }
 
@@ -3356,13 +3446,13 @@ function distributeTableFormatting(text) {
 
             
 
-            // Reconstruct the line with outer pipes and original spacing
+            // Reconstruct the line
 
             const leadingSpace = line.match(/^\s*/)[0];
 
             const trailingSpace = line.match(/\s*$/)[0];
 
-            return leadingSpace + (hasLeadingPipe ? '| ' : '') + result + (hasTrailingPipe ? ' |' : '') + trailingSpace;
+            return leadingSpace + (hasLeadingPipe ? '|' : '') + result + (hasTrailingPipe ? '|' : '') + trailingSpace;
 
         }
 
@@ -3373,6 +3463,10 @@ function distributeTableFormatting(text) {
     }).join('\n');
 
 }
+
+
+
+
 
 
 
