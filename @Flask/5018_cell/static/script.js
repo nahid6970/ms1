@@ -6306,6 +6306,9 @@ function updateSubSheetOverflow() {
         existingMore.remove();
     }
 
+    // Reset addBtn text
+    if (addBtn) addBtn.innerHTML = '+';
+
     // 2. Identify overflow
     const tabs = Array.from(subsheetTabs.querySelectorAll('.subsheet-tab'));
     if (tabs.length === 0) return;
@@ -6329,6 +6332,9 @@ function updateSubSheetOverflow() {
         // Move addBtn into the container
         subsheetTabs.insertBefore(moreContainer, addBtn);
         moreContainer.appendChild(addBtn);
+
+        // Update addBtn text to show overflow count
+        addBtn.innerHTML = `(${overflowTabs.length})+`;
 
         // Indicate if active sheet is in overflow
         const hasActive = overflowTabs.some(t => t.classList.contains('active'));
