@@ -7,6 +7,31 @@ This document tracks historical bugs, issues, and their solutions. Use this to:
 
 ---
 
+## [2026-02-08 16:05] - Multi-line #R# Border Box Styling Refinement
+
+**Problem:** 
+1. Multi-line `#R#` border boxes showed horizontal lines between every wrapped row of text.
+2. The initial line appeared slightly indented or shifted compared to subsequent lines.
+3. The border was too close to the text on wrapped lines, making it feel "squashed."
+
+**Root Cause:** 
+1. Standard `border` styles are drawn for every fragment of an `inline` element, creating internal horizontal separators.
+2. An asymmetrical horizontal `margin` was applied to the inline span, but it only affected the start/end fragments, causing alignment shifts.
+3. Standard `padding` on inline fragments is notoriously difficult to control across line breaks.
+
+**Solution:** 
+1. Switched from `border` to `outline: 2px solid [color]`. Browsers render `outline` as a single, continuous outer path around the collective shape of all fragments, effectively removing internal horizontal lines.
+2. Replaced `padding` with `outline-offset: 4px` and removed horizontal margins. This ensures perfect vertical alignment on the left for all lines and provides consistent breathing room on all sides.
+3. Added `line-height: 1.5` to the span to ensure the outline-offset has space to render between lines without overlapping text.
+
+**Files Modified:**
+- `static/script.js` - Updated `parseMarkdownInline` and `oldParseMarkdownBody`.
+- `export_static.py` - Updated both JS-embedded logic sections.
+
+**Related Issues:** Text Overflow in #R# Border Boxes
+
+---
+
 ## [2026-02-06 16:45] - Text Overflow in #R# Border Boxes
 
 **Problem:** 
