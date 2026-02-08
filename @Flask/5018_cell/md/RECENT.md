@@ -6,6 +6,36 @@
 
 ---
 
+## [2026-02-06 16:15] - Table Formatting and UI Refinements
+
+**Session Duration:** 0.5 hours
+
+**What We Accomplished:**
+
+### ✅ Fixed Nested Table Formatting (Stars Issue)
+- **Problem**: Wrapping a whole table row in multiple tags (e.g. `**__A | B__**`) caused extra stars to appear or showed raw syntax in cells.
+- **Root Cause**: Two conflicting distribution logics were interfering. Additionally, the new consolidated logic failed to detect tags if the line started with a pipe (e.g. `| **A | B** |`).
+- **Solution**: 
+  - **Refined Distribution**: Updated `distributeTableFormatting` to "peel off" outer pipes before distributing tags. It correctly builds a stack of all wrapping markers (bold, underline, math, border boxes, strokes) and pushes them into each cell.
+  - **Full Support**: Added support for all marker types including `@@` (Italic) and various stroke syntaxes.
+- **Consistency**: Synchronized these improvements to `export_static.py`.
+
+### 🎨 UI Consistency Improvements
+- **Sub-sheet Fix**: Resolved a duplicate function issue that was preventing "Set Colors" from appearing in the sub-sheet menu.
+- **Dynamic Colors**: Improved the `important` flags and inheritance for category/sheet colors to ensure they apply reliably across all bars and sidebars.
+
+**Files Modified:**
+- `static/script.js` - Major rewrite of `distributeTableFormatting` and cleanup of `parseGridTable`.
+- `export_static.py` - Updated to match new formatting logic.
+- `md/RECENT.md` - Logged session.
+- `md/PROBLEMS_AND_FIXES.md` - Documented the "stars" fix.
+
+**Current Status:**
+- ✅ Complex table rows like `**__A | B__**` now render perfectly.
+- ✅ Navigation bars are fully customizable and professional.
+
+---
+
 ## [2026-02-06 15:45] - Square Borders and Sub-sheet Tab Colorization
 
 **Session Duration:** 0.5 hours

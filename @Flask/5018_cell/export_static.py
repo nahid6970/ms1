@@ -2842,8 +2842,93 @@ def generate_static_html(data, custom_syntaxes):
             }, '');
         }
 
+        // Helper to distribute formatting tags across table pipes
+        // e.g. "**__A | B__**" -> "**__A__** | **__B__**"
+        // or "| **A | B** |" -> "| **A** | **B** |"
+        function distributeTableFormatting(text) {
+            if (!text || !text.includes('|')) return text;
+
+            // Process line by line to avoid crossing row boundaries
+            return text.split('\\n').map(line => {
+                if (!line.includes('|')) return line;
+
+                let trimmedLine = line.trim();
+                // Detect and peel outer pipes if they exist
+                const hasLeadingPipe = trimmedLine.startsWith('|');
+                const hasTrailingPipe = trimmedLine.endsWith('|') && trimmedLine.length > 1;
+                
+                let current = trimmedLine;
+                if (hasLeadingPipe) current = current.substring(1);
+                if (hasTrailingPipe) current = current.substring(0, current.length - 1);
+                current = current.trim();
+
+                let prefixes = [];
+                let suffixes = [];
+                
+                // 1. Simple markers: ** == __ ~~ !! ?? ^ ~ ` @@
+                const simpleTags = ['**', '==', '__', '~~', '!!', '??', '^', '~', '`', '@@'];
+
+                let changed = true;
+                while (changed) {
+                    changed = false;
+                    
+                    // Try simple tags
+                    for (const tag of simpleTags) {
+                        if (current.startsWith(tag) && current.endsWith(tag) && current.length >= tag.length * 2) {
+                            const inner = current.substring(tag.length, current.length - tag.length);
+                            if (inner.includes('|')) {
+                                prefixes.push(tag);
+                                suffixes.unshift(tag);
+                                current = inner;
+                                changed = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (changed) continue;
+
+                    // Try Border Box: #R# ... #/#
+                    const borderMatch = current.match(/^(#[A-Z]+#)(.+)(#\\/#)$/);
+                    if (borderMatch && borderMatch[2].includes('|')) {
+                        prefixes.push(borderMatch[1]);
+                        suffixes.unshift(borderMatch[3]);
+                        current = borderMatch[2];
+                        changed = true;
+                        continue;
+                    }
+
+                    // Try Text Stroke: ŝŝ...: ... ŝŝ
+                    // Note: handles both "ŝŝtextŝŝ" and "ŝŝtext ŝŝ"
+                    const strokeMatch = current.match(/^(ŝŝ(?:[\\d.]+:)?)(.+?)( ?ŝŝ)$/);
+                    if (strokeMatch && strokeMatch[2].includes('|')) {
+                        prefixes.push(strokeMatch[1]);
+                        suffixes.unshift(strokeMatch[3]);
+                        current = strokeMatch[2];
+                        changed = true;
+                        continue;
+                    }
+                }
+
+                if (prefixes.length > 0) {
+                    const fullPrefix = prefixes.join('');
+                    const fullSuffix = suffixes.join('');
+                    const result = current.split('|').map(p => `${fullPrefix}${p}${fullSuffix}`).join('|');
+                    
+                    // Reconstruct the line with outer pipes and original spacing
+                    const leadingSpace = line.match(/^\\s*/)[0];
+                    const trailingSpace = line.match(/\\s*$/)[0];
+                    return leadingSpace + (hasLeadingPipe ? '| ' : '') + result + (hasTrailingPipe ? ' |' : '') + trailingSpace;
+                }
+
+                return line;
+            }).join('\\n');
+        }
+
         function parseMarkdown(text, cellStyle = {}) {
             if (!text) return '';
+
+            // Distribute formatting tags across table pipes (Syntax Sugar)
+            text = distributeTableFormatting(text);
 
             /* -----  GRID-TABLE DETECTION  ----- */
             const lines = text.split('\\n');

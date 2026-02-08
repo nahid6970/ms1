@@ -2761,51 +2761,10 @@ function parseGridTable(lines) {
     const rows = lines.map(l => {
         // Remove leading/trailing whitespace and pipes
         let trimmed = l.trim().replace(/^\||\|$/g, '').trim();
-        let wrapStart = '', wrapEnd = '';
-
-        // Check for wrapping syntax markers that should apply to all cells
-        // 1. Simple markers: ** == __ ~~ !! ?? ^ ~ `
-        const simpleMarkers = ['**', '==', '__', '~~', '!!', '??', '^', '~', '`'];
-        for (const marker of simpleMarkers) {
-            // Check if the row starts and ends with the marker
-            if (trimmed.startsWith(marker) && trimmed.endsWith(marker) && trimmed.length >= marker.length * 2) {
-                wrapStart = marker;
-                wrapEnd = marker;
-                trimmed = trimmed.substring(marker.length, trimmed.length - marker.length);
-                break;
-            }
-        }
-
-        // 2. Border Box: #R# ... #/#
-        if (!wrapStart) {
-            const match = trimmed.match(/^(#[A-Z]+#)(.+)(#\/#)$/);
-            if (match) {
-                wrapStart = match[1];
-                wrapEnd = match[3];
-                trimmed = match[2];
-            }
-        }
         
-        // 3. Text Stroke: ŝŝ...: ... ŝŝ
-        if (!wrapStart) {
-             const match = trimmed.match(/^(ŝŝ(?:[\d.]+:)?)(.+)( ŝŝ)$/);
-             if (match) {
-                wrapStart = match[1];
-                wrapEnd = match[3];
-                trimmed = match[2];
-             }
-        }
-
         // Split by pipe and trim each cell
         let cells = trimmed.split('|').map(c => c.trim());
         
-        // Apply wrapping to each cell
-        if (wrapStart) {
-            cells = cells.map(c => wrapStart + c + wrapEnd);
-        }
-        
-        // Filter out completely empty cells only if they're at the edges (from double pipes)
-        // Keep intentionally empty cells (marked with -)
         return cells;
     });
     const cols = rows[0].length;
@@ -3254,29 +3213,172 @@ function parseMarkdownInline(text, cellStyle = {}) {
 }
 
 // Helper to distribute formatting tags across table pipes
-// e.g. "**A | B**" -> "**A** | **B**"
+
+// e.g. "**__A | B__**" -> "**__A__** | **__B__**"
+
+// or "| **A | B** |" -> "| **A** | **B** |"
+
 function distributeTableFormatting(text) {
-    if (!text) return text;
-    // Supported tags: **, ==, __, @@, !!
-    const tags = ['**', '==', '@@', '__', '!!'];
-    let processed = text;
 
-    tags.forEach(tag => {
-        // Escape the tag for regex
-        const escaped = tag.replace(/([.*+?^${}()|[\]\\])/g, '\\$1');
-        // Regex to find tag wrapping content
-        const regex = new RegExp(`${escaped}(.+?)${escaped}`, 'g');
+    if (!text || !text.includes('|')) return text;
 
-        processed = processed.replace(regex, (match, inner) => {
-            // Only distribute if the inner content contains a pipe
-            if (inner.includes('|')) {
-                return inner.split('|').map(p => `${tag}${p}${tag}`).join('|');
+
+
+    // Process line by line to avoid crossing row boundaries
+
+    return text.split('\n').map(line => {
+
+        if (!line.includes('|')) return line;
+
+
+
+        let trimmedLine = line.trim();
+
+        // Detect and peel outer pipes if they exist
+
+        const hasLeadingPipe = trimmedLine.startsWith('|');
+
+        const hasTrailingPipe = trimmedLine.endsWith('|') && trimmedLine.length > 1;
+
+        
+
+        let current = trimmedLine;
+
+        if (hasLeadingPipe) current = current.substring(1);
+
+        if (hasTrailingPipe) current = current.substring(0, current.length - 1);
+
+        current = current.trim();
+
+
+
+        let prefixes = [];
+
+        let suffixes = [];
+
+        
+
+        // 1. Simple markers: ** == __ ~~ !! ?? ^ ~ ` @@
+
+        const simpleTags = ['**', '==', '__', '~~', '!!', '??', '^', '~', '`', '@@'];
+
+
+
+        let changed = true;
+
+        while (changed) {
+
+            changed = false;
+
+            
+
+            // Try simple tags
+
+            for (const tag of simpleTags) {
+
+                if (current.startsWith(tag) && current.endsWith(tag) && current.length >= tag.length * 2) {
+
+                    const inner = current.substring(tag.length, current.length - tag.length);
+
+                    if (inner.includes('|')) {
+
+                        prefixes.push(tag);
+
+                        suffixes.unshift(tag);
+
+                        current = inner;
+
+                        changed = true;
+
+                        break;
+
+                    }
+
+                }
+
             }
-            return match;
-        });
-    });
-    return processed;
+
+            if (changed) continue;
+
+
+
+            // Try Border Box: #R# ... #/#
+
+            const borderMatch = current.match(/^(#[A-Z]+#)(.+)(#\/#)$/);
+
+            if (borderMatch && borderMatch[2].includes('|')) {
+
+                prefixes.push(borderMatch[1]);
+
+                suffixes.unshift(borderMatch[3]);
+
+                current = borderMatch[2];
+
+                changed = true;
+
+                continue;
+
+            }
+
+
+
+            // Try Text Stroke: ŝŝ...: ... ŝŝ
+
+            // Note: handles both "ŝŝtextŝŝ" and "ŝŝtext ŝŝ"
+
+            const strokeMatch = current.match(/^(ŝŝ(?:[\d.]+:)?)(.+?)( ?ŝŝ)$/);
+
+            if (strokeMatch && strokeMatch[2].includes('|')) {
+
+                prefixes.push(strokeMatch[1]);
+
+                suffixes.unshift(strokeMatch[3]);
+
+                current = strokeMatch[2];
+
+                changed = true;
+
+                continue;
+
+            }
+
+        }
+
+
+
+        if (prefixes.length > 0) {
+
+            const fullPrefix = prefixes.join('');
+
+            const fullSuffix = suffixes.join('');
+
+            const result = current.split('|').map(p => `${fullPrefix}${p}${fullSuffix}`).join('|');
+
+            
+
+            // Reconstruct the line with outer pipes and original spacing
+
+            const leadingSpace = line.match(/^\s*/)[0];
+
+            const trailingSpace = line.match(/\s*$/)[0];
+
+            return leadingSpace + (hasLeadingPipe ? '| ' : '') + result + (hasTrailingPipe ? ' |' : '') + trailingSpace;
+
+        }
+
+
+
+        return line;
+
+    }).join('\n');
+
 }
+
+
+
+
+
+
 
 /**
  * Parse markdown syntax and convert to HTML

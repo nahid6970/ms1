@@ -47,6 +47,31 @@ Previous implementation assumed clean starting data. There was no "clean-up" pha
 
 ---
 
+## [2026-02-06 16:15] - Extra Stars in Nested Table Formatting
+
+**Problem:** 
+When wrapping a pipe table row in multiple formatting tags (e.g., `**__চাকমা | রাঙ্গামাটি__**`), extra stars (`**`) appeared after words or the raw syntax remained visible without rendering any effects.
+
+**Root Cause:** 
+1. **Conflict**: There was a global `distributeTableFormatting` function and a local one inside `parseGridTable`. When both ran, they created redundant tags (e.g., `****`).
+2. **Detection Failure**: The new stack-based logic failed when rows included leading/trailing pipes (e.g., `| **A | B** |`). The tags were not detected because the line started with `|` instead of the tag (e.g., `**`). This resulted in broken fragments like `**A` and `B**` inside cells.
+
+**Solution:** 
+1. **Removed Redundancy**: Deleted the wrapping logic from `parseGridTable` entirely.
+2. **Pipe Peeling**: Updated `distributeTableFormatting` to detect and temporarily remove outer pipes (`|`) before looking for wrapping tags. 
+3. **Stack Distribution**: It now finds ALL wrapping tags at once (from outside in), builds a clean prefix/suffix stack, and applies it to each cell content.
+4. **Multi-tag Support**: Added support for all marker types including italic (`@@`), math (`^`, `~`), border boxes (`#R#`), and strokes (`ŝŝ`).
+
+**Files Modified:**
+- `static/script.js`
+- `export_static.py`
+
+**Related Issues:** Pipe Tables, distributeTableFormatting logic
+
+**Result:** Table rows now support unlimited nested formatting (e.g. `| **__!!ŝŝA | Bŝŝ!!__** |`) and every cell correctly inherits all styles.
+
+---
+
 ## [2026-02-06 14:55] - Sort Rank Gaps and Non-Contiguous Numbers
 
 **Problem:** 
