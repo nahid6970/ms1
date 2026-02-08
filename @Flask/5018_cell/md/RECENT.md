@@ -13,11 +13,11 @@
 **What We Accomplished:**
 
 ### ✅ Final Fix for Nested Table Formatting (Stars and Punctuation)
-- **Problem**: Mixing row-wrapped formatting (e.g. `**A | B**`) with cell-specific formatting (e.g. `**A** | B`) caused "double stars" and detection failures.
-- **Root Cause**: The distribution logic was too aggressive, treating any tags at the start/end of a line as a row-wrapper, even if they were already correctly paired within the first cell.
+- **Problem**: Table rows with trailing punctuation failed to distribute formatting tags. Additionally, border boxes (`#R#`) were being clipped in exports.
 - **Solution**: 
-  - **Local Closure Check**: Added a check to see if a tag is already closed *before* the first pipe. If it is, it's ignored as a row-wrapper. This allows you to have bold in the first cell without bolding the whole row by accident.
-  - **Improved Robustness**: Maintained the punctuation fix (`।` support) while making the tag peeling much more accurate.
+  - **Clipping Fix**: Changed `overflow` from `hidden` to `visible` for `.md-cell`. This ensures that even with a compact layout, the 2px borders are fully visible and not cut off by the cell edges.
+  - **Smart Detection**: Refined `distributeTableFormatting` to correctly handle punctuation and local tag pairs.
+- **Compact UI**: Reverted extra padding/line-height to maintain the original compact spreadsheet look while keeping the border fix.
 - **Consistency**: Synchronized these improvements to `export_static.py`.
 
 ### 🎨 UI Consistency Improvements

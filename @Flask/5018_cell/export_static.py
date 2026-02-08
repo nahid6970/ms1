@@ -947,11 +947,11 @@ def generate_static_html(data, custom_syntaxes):
         }
 
         .md-cell {
-            padding: 1px 12px;
+            padding: 2px 12px;
             border: none;
             border-right: 3px solid #000000;
             background: transparent;
-            overflow: hidden;
+            overflow: visible;
             word-break: break-word;
             white-space: normal;
             min-width: 80px;
