@@ -2923,23 +2923,29 @@ def generate_static_html(data, custom_syntaxes):
                     }
 
                     // 3. Text Stroke: ŝŝ...: ... ŝŝ
-                    const strokeMatch = current.match(/^(ŝŝ(?:[\\d.]+:)?)(.+?)( ?ŝŝ)$/);
-                    if (strokeMatch) {
-                        const startTag = strokeMatch[1];
-                        const endTag = strokeMatch[3];
+                    const strokeStartMatch = checkStr.match(/^ŝŝ(?:[\\d.]+:)?/);
+                    if (strokeStartMatch) {
+                        const startTag = strokeStartMatch[0];
                         const firstStartIdx = current.indexOf(startTag);
                         const lastPipeIdx = current.lastIndexOf('|');
-                        const lastEndIdx = current.lastIndexOf(endTag);
+                        
+                        // Check for "ŝŝ" or " ŝŝ" after last pipe
+                        let lastEndIdx = current.lastIndexOf('ŝŝ');
+                        let endTagLen = 2;
+                        if (lastEndIdx > 0 && current[lastEndIdx-1] === ' ') {
+                            lastEndIdx--;
+                            endTagLen = 3;
+                        }
                         
                         if (lastEndIdx > lastPipeIdx) {
                             // Check if closed locally
                             const localClosingIdx = current.indexOf('ŝŝ', firstStartIdx + startTag.length);
                             if (localClosingIdx === -1 || localClosingIdx >= firstPipeIdx) {
                                 prefixes.push(startTag);
-                                suffixes.unshift(endTag);
+                                suffixes.unshift(current.substring(lastEndIdx, lastEndIdx + endTagLen));
                                 current = current.substring(0, firstStartIdx) + 
                                           current.substring(firstStartIdx + startTag.length, lastEndIdx) + 
-                                          current.substring(lastEndIdx + endTag.length);
+                                          current.substring(lastEndIdx + endTagLen);
                                 changed = true;
                                 continue;
                             }
