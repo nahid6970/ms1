@@ -5921,6 +5921,7 @@ function renderSheetTabs() {
 
 function renderSubSheetBar() {
     const subsheetTabs = document.getElementById('subsheetTabs');
+    const subsheetBar = document.getElementById('subsheetBar');
     if (!subsheetTabs) return;
 
     subsheetTabs.innerHTML = '';
@@ -5932,10 +5933,33 @@ function renderSubSheetBar() {
 
     if (!parentSheet) return;
 
+    // Apply parent sheet colors to subsheet bar
+    if (subsheetBar) {
+        if (parentSheet.bgColor) {
+            subsheetBar.style.backgroundColor = parentSheet.bgColor;
+            subsheetBar.style.borderColor = 'rgba(255,255,255,0.1)';
+        } else {
+            subsheetBar.style.backgroundColor = '';
+            subsheetBar.style.borderColor = '';
+        }
+    }
+
+    // Function to apply colors to a tab
+    const applyTabColors = (tab, sheet, isActive) => {
+        if (sheet.bgColor) {
+            tab.style.backgroundColor = isActive ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.1)';
+            tab.style.borderColor = 'rgba(255,255,255,0.3)';
+        }
+        if (sheet.fgColor) {
+            tab.style.color = sheet.fgColor;
+        }
+    };
+
     // Add parent sheet tab
     const parentTab = document.createElement('div');
     parentTab.className = `subsheet-tab ${currentSheet === parentIndex ? 'active' : ''}`;
     parentTab.dataset.sheetIndex = parentIndex;
+    applyTabColors(parentTab, parentSheet, currentSheet === parentIndex);
 
     const parentName = document.createElement('span');
     parentName.className = 'subsheet-tab-name';
@@ -5958,6 +5982,7 @@ function renderSubSheetBar() {
             const tab = document.createElement('div');
             tab.className = `subsheet-tab ${currentSheet === index ? 'active' : ''}`;
             tab.dataset.sheetIndex = index;
+            applyTabColors(tab, sheet, currentSheet === index);
 
             const name = document.createElement('span');
             name.className = 'subsheet-tab-name';
@@ -5981,6 +6006,10 @@ function renderSubSheetBar() {
     addBtn.className = 'subsheet-add-btn';
     addBtn.innerHTML = '+';
     addBtn.title = 'Add sub-sheet';
+    if (parentSheet.fgColor) {
+        addBtn.style.color = parentSheet.fgColor;
+        addBtn.style.borderColor = parentSheet.fgColor;
+    }
     addBtn.onclick = () => addSubSheet(parentIndex);
     subsheetTabs.appendChild(addBtn);
 }
@@ -12751,6 +12780,53 @@ function renderSidebar() {
         document.getElementById('currentSheetTitle').textContent = currentSheetObj.name;
         const currentCat = tableData.sheetCategories[currentSheet] || 'Uncategorized';
         document.getElementById('currentCategoryTitle').textContent = currentCat;
+
+        // Apply category colors to sheet-tabs bar
+        const sheetTabsBar = document.querySelector('.sheet-tabs');
+        if (sheetTabsBar) {
+            const catStyle = tableData.categoryStyles ? tableData.categoryStyles[currentCat] : null;
+            if (catStyle) {
+                if (catStyle.bgColor) {
+                    sheetTabsBar.style.backgroundColor = catStyle.bgColor;
+                    sheetTabsBar.style.borderColor = 'rgba(255,255,255,0.1)';
+                } else {
+                    sheetTabsBar.style.backgroundColor = '';
+                    sheetTabsBar.style.borderColor = '';
+                }
+                if (catStyle.fgColor) {
+                    sheetTabsBar.style.color = catStyle.fgColor;
+                    // Update titles and buttons inside
+                    const titles = sheetTabsBar.querySelectorAll('.current-sheet-title, .current-category-title');
+                    titles.forEach(t => t.style.color = catStyle.fgColor);
+                    const buttons = sheetTabsBar.querySelectorAll('.btn-menu, .btn-sheet-action');
+                    buttons.forEach(b => {
+                        b.style.color = catStyle.fgColor;
+                        b.style.borderColor = catStyle.fgColor;
+                    });
+                } else {
+                    sheetTabsBar.style.color = '';
+                    const titles = sheetTabsBar.querySelectorAll('.current-sheet-title, .current-category-title');
+                    titles.forEach(t => t.style.color = '');
+                    const buttons = sheetTabsBar.querySelectorAll('.btn-menu, .btn-sheet-action');
+                    buttons.forEach(b => {
+                        b.style.color = '';
+                        b.style.borderColor = '';
+                    });
+                }
+            } else {
+                // Reset to default
+                sheetTabsBar.style.backgroundColor = '';
+                sheetTabsBar.style.color = '';
+                sheetTabsBar.style.borderColor = '';
+                const titles = sheetTabsBar.querySelectorAll('.current-sheet-title, .current-category-title');
+                titles.forEach(t => t.style.color = '');
+                const buttons = sheetTabsBar.querySelectorAll('.btn-menu, .btn-sheet-action');
+                buttons.forEach(b => {
+                    b.style.color = '';
+                    b.style.borderColor = '';
+                });
+            }
+        }
     }
 
     // Update sub-sheet bar
