@@ -10,6 +10,7 @@
 **Visual:** Blue badge in top-right corner showing rank.
 **Logic:** Ranked cells sort before unranked cells during column sort.
 **Auto-Reranking:** When setting a rank (e.g., "1"), any existing cells with the same or higher rank are automatically incremented (e.g., 1 becomes 2, 2 becomes 3). This allows for easy "insertion" of new top-priority items.
+**Normalization:** Ranks are globally normalized to a contiguous sequence (1, 2, 3...) upon app load and after every change, ensuring no gaps or duplicates.
 **Batch Support:** Works with multiple selected cells.
 **Function:** `setCellRank()`.
 

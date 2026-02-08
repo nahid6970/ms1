@@ -35,6 +35,43 @@
 
 ---
 
+## [2026-02-06 16:15] - UI/UX Refinements and Sub-sheet Customization
+
+**Session Duration:** 1.0 hours
+
+**What We Accomplished:**
+
+### 🎨 Advanced Color Customization & Inheritance
+- **Sub-sheet Styling**: Added "Set Colors" to the sub-sheet tab context menu. Sub-sheets now support unique background and text colors.
+- **Category Inheritance**: Implemented logic where sheets and sub-sheets automatically inherit the background/text colors of their parent Category if no explicit colors are set.
+- **Visual Sync**: Enhanced color application to be more robust using `!important` flags, ensuring custom themes correctly override default styles across the F1 window, Sidebar tree, and Navigation bars.
+- **Smarter Input**: Added auto-correction for hex codes (prepends `#` if missing) in prompt dialogs.
+
+### 📐 Square Professional UI
+- **Modern Aesthetic**: Replaced all rounded corners (`border-radius: 0`) across the entire application interface, including the main container, sheet tabs, subsheet bar, toolbar buttons, search boxes, and context menus.
+
+### 🎯 Bulletproof Sort Ranking
+- **Global Normalization**: Added a proactive cleanup step during app load that automatically resolves duplicate ranks or gaps in old sheets.
+- **Contiguous Sequencing**: Refined the re-ranking logic to ensure a perfect 1, 2, 3... sequence is maintained even during complex moves or deletions.
+
+### 🔧 Code Cleanup & Bug Fixes
+- **Duplicate Function Removal**: Identified and removed a duplicate `showSubSheetContextMenu` function that was preventing color options from appearing.
+- **Sync Fixes**: Integrated `renderSidebar()` and `renderTable()` updates into the sheet color picker to ensure changes reflect instantly without page refresh.
+
+**Files Modified:**
+- `static/script.js` - Major logic updates for colors, inheritance, and ranking.
+- `static/style.css` - UI-wide square border updates and background-color optimizations.
+- `md/RECENT.md` - Logged session.
+- `md/PROBLEMS_AND_FIXES.md` - Documented fixes.
+- `md/UX_NAVIGATION.md` - Updated navigation features.
+
+**Current Status:**
+- ✅ Navigation bars dynamically adapt to Category/Sheet themes.
+- ✅ Professional square-edge design implemented.
+- ✅ Sort ranks are consistently contiguous and gapless.
+
+---
+
 ## [2026-02-06 15:15] - Category Colors and Sort Rank Refinements
 
 **Session Duration:** 0.6 hours

@@ -78,8 +78,15 @@
 **UI Elements:**
 - Horizontal sub-sheet bar below toolbar.
 - Parent tab always first, followed by sub-sheets.
+- **Dynamic Themes**: The bar inherits the parent sheet's background color.
+- **Customizable Tabs**: Right-click any tab to set unique colors.
+- **Inheritance**: Sub-sheets automatically adopt their parent category's color theme unless overridden.
+- **Professional Look**: Square borders and distinct active-tab indicators.
 - Right-click tabs to manage.
 - Deletion cascade (Parent -> Children).
+
+## UI Aesthetic (Square Design)
+The application employs a professional square-edge design. All components including the main container, navigation bars, buttons, and input boxes have a `border-radius: 0` for a sharp, modern appearance.
 
 ## Scroll Position Memory
 **Purpose:** Remembers scroll position for each sheet.

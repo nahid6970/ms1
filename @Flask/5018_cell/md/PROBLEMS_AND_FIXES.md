@@ -7,6 +7,46 @@ This document tracks historical bugs, issues, and their solutions. Use this to:
 
 ---
 
+## [2026-02-06 16:15] - Sub-sheet Colors Not Working and Duplicate Context Menus
+
+**Problem:** 
+Custom colors applied to sub-sheets were not appearing, and the "Set Colors" option was missing from the sub-sheet tab context menu despite implementation.
+
+**Root Cause:** 
+1. **Redundant Logic**: There were two separate definitions of `showSubSheetContextMenu` and `renderSubSheetBar` in `static/script.js`. The second, older version was overwriting the newer version that contained the color features.
+2. **CSS Specificity**: Default styles were sometimes overriding dynamic inline styles applied via JS.
+
+**Solution:** 
+1. **Code Consolidation**: Deleted the duplicate functions and unified the logic into single, robust versions.
+2. **Robust Styling**: Updated JS to use `style.setProperty(..., 'important')` for dynamic colors to ensure they always override CSS defaults.
+3. **Category Inheritance**: Added a fallback in `applyTabColors` to check for the parent category's style if the sheet itself has no colors set.
+
+**Files Modified:**
+- `static/script.js` - Consolidated functions and added inheritance logic.
+
+**Related Issues:** Square Borders and Sub-sheet Tab Colorization
+
+---
+
+## [2026-02-06 15:45] - Sort Rank Gaps and Duplicate Numbers in Old Sheets
+
+**Problem:** 
+Old sheets or sheets with manual edits often had duplicate ranks (e.g., two cells ranked '1') or gaps (sequence starting at 3), which broke the auto-reranking logic.
+
+**Root Cause:** 
+Previous implementation assumed clean starting data. There was no "clean-up" phase during data loading.
+
+**Solution:** 
+1. **Global Normalization**: Added `normalizeAllSheetsRanks()` which is called inside `loadData()`. This function scans every sheet, removes duplicates, and re-assigns ranks to a clean 1..N sequence.
+2. **Proactive Cleanup**: Integrated this normalization into every ranking action to prevent "drift" over time.
+
+**Files Modified:**
+- `static/script.js` - Added global normalization logic.
+
+**Related Issues:** Sort Rank Gaps and Non-Contiguous Numbers
+
+---
+
 ## [2026-02-06 14:55] - Sort Rank Gaps and Non-Contiguous Numbers
 
 **Problem:** 
