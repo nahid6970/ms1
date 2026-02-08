@@ -612,7 +612,7 @@ class MainWindow(QMainWindow):
         explore_btn = CyberButton("EXPLORE COMMIT", CP_DIM, CP_CYAN, "white", "black")
         explore_btn.clicked.connect(self.open_commit_explorer)
         
-        restore_files_btn = CyberButton("REPLACE WITH PREVIOUS VERSION", CP_DIM, CP_YELLOW, "black", "black")
+        restore_files_btn = CyberButton("RESTORE COMMIT FILES (PREVIOUS)", CP_DIM, CP_YELLOW, "black", "black")
         restore_files_btn.clicked.connect(self.restore_files_to_current)
         
         revert_btn = CyberButton("RESTORE SELECTED VERSION", CP_DIM, CP_RED, "white", "black")
@@ -624,7 +624,7 @@ class MainWindow(QMainWindow):
         action_layout.addWidget(explore_btn)
         action_layout.addWidget(restore_files_btn)
         
-        restore_commit_files_btn = CyberButton("RESTORE COMMIT FILES", CP_DIM, CP_GREEN, "black", "black")
+        restore_commit_files_btn = CyberButton("RESTORE COMMIT FILES (SELECTED)", CP_DIM, CP_GREEN, "black", "black")
         restore_commit_files_btn.clicked.connect(self.restore_commit_files)
         action_layout.addWidget(restore_commit_files_btn)
         

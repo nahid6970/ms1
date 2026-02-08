@@ -14,53 +14,6 @@ Paste(text) {
 }
 
 ;! === BACKGROUND / STARTUP SCRIPTS ===
-;! Macro Recorder (Vim Style)
-;! Ctrl+Shift+Q to Record/Stop, Alt+W to Playback
-;! Macro Recorder Logic
-Global MacroBuffer := []
-Global IsRecordingMacro := false
-
-; Use a dedicated InputHook to capture all keys including modifiers
-Global MacroHook := InputHook("V")
-MacroHook.KeyOpt("{All}", "N")
-MacroHook.OnKeyDown := (hook, vk, sc) => MacroBuffer.Push("{vk" . Format("{:X}", vk) . "sc" . Format("{:X}", sc) . "}")
-
-^+q:: { ; Ctrl+Shift+Q to toggle recording
-    Global IsRecordingMacro, MacroBuffer
-    if !IsRecordingMacro {
-        MacroBuffer := []
-        IsRecordingMacro := true
-        MacroHook.Start()
-        ToolTip("● RECORDING MACRO")
-        SetTimer(() => ToolTip(), -1000)
-    } else {
-        MacroHook.Stop()
-        IsRecordingMacro := false
-        ; Remove the last keys (the modifiers that stopped the recording)
-        Loop 3 {
-            if MacroBuffer.Length > 0
-                MacroBuffer.Pop()
-        }
-        ToolTip("■ MACRO SAVED")
-        SetTimer(() => ToolTip(), -1000)
-    }
-}
-
-!w:: { ; Alt+W to Playback
-    Global IsRecordingMacro, MacroBuffer
-    if IsRecordingMacro || MacroBuffer.Length == 0
-        return
-    
-    ToolTip("▶ PLAYING")
-    SetTimer(() => ToolTip(), -500)
-    
-    ; Play back with small delay for stability
-    for key in MacroBuffer {
-        SendEvent(key)
-        Sleep(5)
-    }
-}
-
 ;! Smart Bengali Numbers
 ;! Converts ;[numbers] to Bengali after Space (Fixed letters conflict)
 ~;:: {
@@ -975,7 +928,6 @@ __text__ = underline
 --- text = list 3
 Dont add unnecessary extra lines between heading and its content
 dont use --- or dash to add separator just keep single empty line for spacing
-When adding any tables dont use | :--- | :--- | :--- | between headers and content cells
 for math use katex or latex formatting with \(Math\) or $Math$
 )")
 
