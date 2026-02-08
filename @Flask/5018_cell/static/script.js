@@ -2760,9 +2760,50 @@ function parseCommaTable(cols, text, borderColor, borderWidth) {
 function parseGridTable(lines) {
     const rows = lines.map(l => {
         // Remove leading/trailing whitespace and pipes
-        const trimmed = l.trim().replace(/^\||\|$/g, '');
+        let trimmed = l.trim().replace(/^\||\|$/g, '').trim();
+        let wrapStart = '', wrapEnd = '';
+
+        // Check for wrapping syntax markers that should apply to all cells
+        // 1. Simple markers: ** == __ ~~ !! ?? ^ ~ `
+        const simpleMarkers = ['**', '==', '__', '~~', '!!', '??', '^', '~', '`'];
+        for (const marker of simpleMarkers) {
+            // Check if the row starts and ends with the marker
+            if (trimmed.startsWith(marker) && trimmed.endsWith(marker) && trimmed.length >= marker.length * 2) {
+                wrapStart = marker;
+                wrapEnd = marker;
+                trimmed = trimmed.substring(marker.length, trimmed.length - marker.length);
+                break;
+            }
+        }
+
+        // 2. Border Box: #R# ... #/#
+        if (!wrapStart) {
+            const match = trimmed.match(/^(#[A-Z]+#)(.+)(#\/#)$/);
+            if (match) {
+                wrapStart = match[1];
+                wrapEnd = match[3];
+                trimmed = match[2];
+            }
+        }
+        
+        // 3. Text Stroke: ŝŝ...: ... ŝŝ
+        if (!wrapStart) {
+             const match = trimmed.match(/^(ŝŝ(?:[\d.]+:)?)(.+)( ŝŝ)$/);
+             if (match) {
+                wrapStart = match[1];
+                wrapEnd = match[3];
+                trimmed = match[2];
+             }
+        }
+
         // Split by pipe and trim each cell
-        const cells = trimmed.split('|').map(c => c.trim());
+        let cells = trimmed.split('|').map(c => c.trim());
+        
+        // Apply wrapping to each cell
+        if (wrapStart) {
+            cells = cells.map(c => wrapStart + c + wrapEnd);
+        }
+        
         // Filter out completely empty cells only if they're at the edges (from double pipes)
         // Keep intentionally empty cells (marked with -)
         return cells;
