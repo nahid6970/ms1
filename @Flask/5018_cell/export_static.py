@@ -2154,7 +2154,7 @@ def generate_static_html(data, custom_syntaxes):
                     'K': '#000000', 'GR': '#808080'
                 };
                 if (colorMap[colorCode]) {
-                    return '<span style="outline: 2px solid ' + colorMap[colorCode] + '; padding: 2px 8px; display: inline; box-decoration-break: slice; -webkit-box-decoration-break: slice; word-break: break-word; overflow-wrap: break-word; margin: 0 2px;">' + text + '</span>';
+                    return '<span style="outline: 2px solid ' + colorMap[colorCode] + '; outline-offset: 3px; padding: 0; display: inline; box-decoration-break: slice; -webkit-box-decoration-break: slice; word-break: break-word; overflow-wrap: break-word; margin: 0 4px; line-height: 1.5;">' + text + '</span>';
                 }
                 return match;
             });
@@ -2482,7 +2482,7 @@ def generate_static_html(data, custom_syntaxes):
                         'K': '#000000', 'GR': '#808080'
                     };
                     if (colorMap[colorCode]) {
-                        return '<span style="outline: 2px solid ' + colorMap[colorCode] + '; padding: 2px 8px; display: inline; box-decoration-break: slice; -webkit-box-decoration-break: slice; word-break: break-word; overflow-wrap: break-word; margin: 0 2px;">' + text + '</span>';
+                        return '<span style="outline: 2px solid ' + colorMap[colorCode] + '; outline-offset: 3px; padding: 0; display: inline; box-decoration-break: slice; -webkit-box-decoration-break: slice; word-break: break-word; overflow-wrap: break-word; margin: 0 4px; line-height: 1.5;">' + text + '</span>';
                     }
                     return match;
                 });
