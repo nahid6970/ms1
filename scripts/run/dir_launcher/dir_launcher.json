@@ -79,6 +79,11 @@
             "category": "AI"
         },
         {
+            "name": "Gemini Resume",
+            "template": "start \"Gemini\" /D \"{path}\" cmd /k gemini --resume latest",
+            "category": "AI"
+        },
+        {
             "name": "Antigravity",
             "template": "antigravity \"{path}\"",
             "category": "AI"
