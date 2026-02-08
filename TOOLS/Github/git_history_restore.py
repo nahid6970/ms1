@@ -1310,10 +1310,10 @@ class MainWindow(QMainWindow):
                 QMessageBox.critical(self, "Error", result['error'])
 
     def restore_files_to_current(self):
-        """Replace current working files with versions from the selected commit"""
+        """Replace current working files with the parent commit version (one commit before selected)"""
         selected_items = self.table.selectedItems()
         if not selected_items:
-            QMessageBox.warning(self, "Selection Required", "Please select a commit to restore from.")
+            QMessageBox.warning(self, "Selection Required", "Please select a commit.")
             return
 
         row = selected_items[0].row()
@@ -1321,7 +1321,6 @@ class MainWindow(QMainWindow):
         commit_msg = self.table.item(row, 3).text()
         directory = self.path_input.text()
         base_dir = GitWorker.get_git_root(directory)
-        scope = self.scope_input.text() or "."
         
         if not self.current_diff_sections:
             QMessageBox.information(self, "No Changes", "No files to restore. Select a commit first.")
@@ -1330,15 +1329,17 @@ class MainWindow(QMainWindow):
         target_files = [s['name'] for s in self.current_diff_sections]
         
         if not target_files:
-            QMessageBox.information(self, "No Files", "No files found to restore.")
+            QMessageBox.information(self, "No Files", "No files found.")
             return
 
+        # Use parent commit (commit before the selected one)
+        parent_hash = f"{commit_hash}^"
+
         confirm = QMessageBox.question(
-            self, "Replace Working Files",
-            f"Replace your current working files with versions from:\n\n[{commit_hash}] {commit_msg}\n\n"
-            f"Files to replace: {len(target_files)}\n"
-            f"Scope: '{scope}'\n\n"
-            f"⚠️ WARNING: This will OVERWRITE your current working directory files!",
+            self, "Replace with Previous Version",
+            f"Replace current files with the version BEFORE:\n\n[{commit_hash}] {commit_msg}\n\n"
+            f"Files to replace: {len(target_files)}\n\n"
+            f"⚠️ This will use the parent commit ({parent_hash})",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
         )
 
@@ -1351,10 +1352,10 @@ class MainWindow(QMainWindow):
             failed = []
             
             for file_path in target_files:
-                res = GitWorker.checkout_file(base_dir, commit_hash, file_path)
+                res = GitWorker.checkout_file(base_dir, parent_hash, file_path)
                 if "success" in res:
                     success_count += 1
-                    self.restored_files[file_path] = commit_hash
+                    self.restored_files[file_path] = parent_hash
                 else:
                     failed.append(file_path)
             
@@ -1363,12 +1364,11 @@ class MainWindow(QMainWindow):
             if success_count == len(target_files):
                 self.status_label.setStyleSheet(f"color: {CP_GREEN}; font-weight: bold;")
                 self.status_label.setText(f"SUCCESS: {success_count} FILE(S) REPLACED")
-                QMessageBox.information(self, "Success", f"Successfully replaced {success_count} file(s) with version {commit_hash}.")
+                QMessageBox.information(self, "Success", f"Replaced {success_count} file(s) with parent commit version.")
             else:
                 self.status_label.setStyleSheet(f"color: {CP_RED}; font-weight: bold;")
                 self.status_label.setText("REPLACE PARTIALLY FAILED")
-                QMessageBox.warning(self, "Partial Success", 
-                                   f"Replaced {success_count} file(s).\nFailed: {len(failed)}")
+                QMessageBox.warning(self, "Partial Success", f"Replaced {success_count} file(s).\nFailed: {len(failed)}")
 
 
 # --- SETTINGS DIALOG ---
