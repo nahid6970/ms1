@@ -1924,7 +1924,7 @@ function highlightSyntax(text) {
             'K': '#000000', 'GR': '#808080'
         };
         const color = colorMap[colorCode] || '#888';
-        return `<span style="border-left: 2px solid ${color}; border-right: 2px solid ${color}; padding: 2px 8px; display: inline; word-break: normal; overflow-wrap: break-word;"><span class="syn-marker">#${colorCode}#</span>${text}<span class="syn-marker">#/#</span></span>`;
+        return `<span style="border-left: 2px solid ${color}; border-right: 2px solid ${color}; border-top: 2px solid ${color}; border-bottom: 2px solid ${color}; padding: 2px 8px; display: inline; box-decoration-break: slice; -webkit-box-decoration-break: slice; word-break: normal; overflow-wrap: break-word;"><span class="syn-marker">#${colorCode}#</span>${text}<span class="syn-marker">#/#</span></span>`;
     });
 
     // Rule: Variable font size #2#text#/#
@@ -2531,7 +2531,7 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
             preview.classList.add('editing');
             // Get current value from input (source of truth)
             const rawValue = inputElement.value;
-            
+
             // Defer heavy highlighting to allow focus transition to happen first
             requestAnimationFrame(() => {
                 preview.innerHTML = highlightSyntax(rawValue);
@@ -2761,10 +2761,10 @@ function parseGridTable(lines) {
     const rows = lines.map(l => {
         // Remove leading/trailing whitespace and pipes
         let trimmed = l.trim().replace(/^\||\|$/g, '').trim();
-        
+
         // Split by pipe and trim each cell
         let cells = trimmed.split('|').map(c => c.trim());
-        
+
         return cells;
     });
     const cols = rows[0].length;
@@ -3029,7 +3029,7 @@ function parseMarkdownInline(text, cellStyle = {}) {
             'K': '#000000', 'GR': '#808080'
         };
         if (colorMap[colorCode]) {
-            return `<span style="border-left: 2px solid ${colorMap[colorCode]}; border-right: 2px solid ${colorMap[colorCode]}; padding: 2px 8px; display: inline; word-break: normal; overflow-wrap: break-word;">${text}</span>`;
+            return `<span style="outline: 2px solid ${colorMap[colorCode]}; padding: 2px 8px; display: inline; box-decoration-break: slice; -webkit-box-decoration-break: slice; word-break: break-word; overflow-wrap: break-word; margin: 0 2px;">${text}</span>`;
         }
         return match; // Not a valid color, leave unchanged
     });
@@ -3240,7 +3240,7 @@ function distributeTableFormatting(text) {
 
         const hasTrailingPipe = trimmedLine.endsWith('|') && trimmedLine.length > 1;
 
-        
+
 
         let current = trimmedLine;
 
@@ -3254,7 +3254,7 @@ function distributeTableFormatting(text) {
 
         let suffixes = [];
 
-        
+
 
         // Tags to check
 
@@ -3288,7 +3288,7 @@ function distributeTableFormatting(text) {
 
                     const lastTagIdx = current.lastIndexOf(tag);
 
-                    
+
 
                     // The tag must be AFTER the last pipe to be a row-wrapper
 
@@ -3306,11 +3306,11 @@ function distributeTableFormatting(text) {
 
                             suffixes.unshift(tag);
 
-                            current = current.substring(0, firstTagIdx) + 
+                            current = current.substring(0, firstTagIdx) +
 
-                                      current.substring(firstTagIdx + tag.length, lastTagIdx) + 
+                                current.substring(firstTagIdx + tag.length, lastTagIdx) +
 
-                                      current.substring(lastTagIdx + tag.length);
+                                current.substring(lastTagIdx + tag.length);
 
                             changed = true;
 
@@ -3342,7 +3342,7 @@ function distributeTableFormatting(text) {
 
                 const lastEndIdx = current.lastIndexOf('#/#');
 
-                
+
 
                 if (lastEndIdx > lastPipeIdx) {
 
@@ -3356,11 +3356,11 @@ function distributeTableFormatting(text) {
 
                         suffixes.unshift('#/#');
 
-                        current = current.substring(0, firstStartIdx) + 
+                        current = current.substring(0, firstStartIdx) +
 
-                                  current.substring(firstStartIdx + startTag.length, lastEndIdx) + 
+                            current.substring(firstStartIdx + startTag.length, lastEndIdx) +
 
-                                  current.substring(lastEndIdx + 3);
+                            current.substring(lastEndIdx + 3);
 
                         changed = true;
 
@@ -3386,7 +3386,7 @@ function distributeTableFormatting(text) {
 
                 const lastPipeIdx = current.lastIndexOf('|');
 
-                
+
 
                 // Check for "ŝŝ" or " ŝŝ" after last pipe
 
@@ -3394,7 +3394,7 @@ function distributeTableFormatting(text) {
 
                 let endTagLen = 2;
 
-                if (lastEndIdx > 0 && current[lastEndIdx-1] === ' ') {
+                if (lastEndIdx > 0 && current[lastEndIdx - 1] === ' ') {
 
                     lastEndIdx--;
 
@@ -3402,7 +3402,7 @@ function distributeTableFormatting(text) {
 
                 }
 
-                
+
 
                 if (lastEndIdx > lastPipeIdx) {
 
@@ -3416,11 +3416,11 @@ function distributeTableFormatting(text) {
 
                         suffixes.unshift(current.substring(lastEndIdx, lastEndIdx + endTagLen));
 
-                        current = current.substring(0, firstStartIdx) + 
+                        current = current.substring(0, firstStartIdx) +
 
-                                  current.substring(firstStartIdx + startTag.length, lastEndIdx) + 
+                            current.substring(firstStartIdx + startTag.length, lastEndIdx) +
 
-                                  current.substring(lastEndIdx + endTagLen);
+                            current.substring(lastEndIdx + endTagLen);
 
                         changed = true;
 
@@ -3444,7 +3444,7 @@ function distributeTableFormatting(text) {
 
             const result = current.split('|').map(p => `${fullPrefix}${p}${fullSuffix}`).join('|');
 
-            
+
 
             // Reconstruct the line
 
@@ -3628,7 +3628,7 @@ function oldParseMarkdownBody(lines, cellStyle = {}) {
 
         // IMPORTANT: Process simple inline formatting BEFORE KaTeX
         // KaTeX output may contain * characters that break bold/italic regex
-        
+
         // Text Stroke: ŝŝthickness:textŝŝ or ŝŝtextŝŝ (default 2px)
         formatted = formatted.replace(/ŝŝ([\d.]+):(.+?)ŝŝ/g, (match, thickness, text) => {
             return `<span style="font-weight: bold; -webkit-text-stroke: ${thickness}px currentColor; text-stroke: ${thickness}px currentColor; paint-order: stroke fill;">${text}</span>`;
@@ -3636,7 +3636,7 @@ function oldParseMarkdownBody(lines, cellStyle = {}) {
         formatted = formatted.replace(/ŝŝ(.+?)ŝŝ/g, (match, text) => {
             return `<span style="font-weight: bold; -webkit-text-stroke: 2px currentColor; text-stroke: 2px currentColor; paint-order: stroke fill;">${text}</span>`;
         });
-        
+
         // Bold: **text** -> <strong>text</strong>
         formatted = formatted.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
 
@@ -3735,7 +3735,7 @@ function oldParseMarkdownBody(lines, cellStyle = {}) {
                 'K': '#000000', 'GR': '#808080'
             };
             if (colorMap[colorCode]) {
-                return `<span style="border-left: 2px solid ${colorMap[colorCode]}; border-right: 2px solid ${colorMap[colorCode]}; padding: 2px 8px; display: inline; word-break: normal; overflow-wrap: break-word;">${text}</span>`;
+                return `<span style="outline: 2px solid ${colorMap[colorCode]}; padding: 2px 8px; display: inline; box-decoration-break: slice; -webkit-box-decoration-break: slice; word-break: break-word; overflow-wrap: break-word; white-space: pre-wrap; margin: 0 2px;">${text}</span>`;
             }
             return match; // Not a valid color, leave unchanged
         });
@@ -5617,16 +5617,16 @@ function clearCellFormatting() {
  */
 function normalizeSheetRanks(sheet) {
     if (!sheet.cellStyles) return;
-    
+
     // 1. Collect all keys that have a numeric rank
     const rankedKeys = Object.keys(sheet.cellStyles).filter(key => {
         const rank = sheet.cellStyles[key].rank;
         return rank !== undefined && rank !== null && typeof rank === 'number';
     });
-    
+
     // 2. Sort keys by their current rank value
     rankedKeys.sort((a, b) => sheet.cellStyles[a].rank - sheet.cellStyles[b].rank);
-    
+
     // 3. Re-assign ranks starting from 1
     rankedKeys.forEach((key, index) => {
         sheet.cellStyles[key].rank = index + 1;
@@ -5662,10 +5662,10 @@ function setCellRank() {
                 delete sheet.cellStyles[key].rank;
             }
         });
-        
+
         // Compact remaining ranks
         normalizeSheetRanks(sheet);
-        
+
         saveData();
         closeCellContextMenu();
         renderTable();
@@ -6189,7 +6189,7 @@ function renderSubSheetBar() {
     const applyTabColors = (tab, sheet, sheetIdx, isActive) => {
         const sheetCategory = tableData.sheetCategories[sheetIdx] || tableData.sheetCategories[String(sheetIdx)] || 'Uncategorized';
         const catStyle = tableData.categoryStyles ? tableData.categoryStyles[sheetCategory] : null;
-        
+
         const bgColor = sheet.bgColor || (catStyle ? catStyle.bgColor : null);
         const fgColor = sheet.fgColor || (catStyle ? catStyle.fgColor : null);
 
@@ -6259,7 +6259,7 @@ function renderSubSheetBar() {
     addBtn.className = 'subsheet-add-btn';
     addBtn.innerHTML = '+';
     addBtn.title = 'Add sub-sheet';
-    
+
     // Inherit color from parent sheet or category
     const parentCategory = tableData.sheetCategories[parentIndex] || tableData.sheetCategories[String(parentIndex)] || 'Uncategorized';
     const parentCatStyle = tableData.categoryStyles ? tableData.categoryStyles[parentCategory] : null;
@@ -6269,7 +6269,7 @@ function renderSubSheetBar() {
         addBtn.style.setProperty('color', parentFg, 'important');
         addBtn.style.setProperty('border-color', parentFg, 'important');
     }
-    
+
     addBtn.onclick = () => addSubSheet(parentIndex);
     subsheetTabs.appendChild(addBtn);
 }
@@ -11515,7 +11515,7 @@ function populateF1Categories() {
 
     const uncategorizedItem = document.createElement('div');
     uncategorizedItem.className = 'f1-category-item' + (selectedF1Category === null ? ' active' : '');
-    
+
     // Apply custom colors for Uncategorized if they exist
     const uncategorizedStyle = tableData.categoryStyles ? tableData.categoryStyles['Uncategorized'] : null;
     if (uncategorizedStyle) {
@@ -11557,7 +11557,7 @@ function populateF1Categories() {
 
         const item = document.createElement('div');
         item.className = 'f1-category-item' + (selectedF1Category === category ? ' active' : '');
-        
+
         // Apply custom colors if they exist
         const style = tableData.categoryStyles ? tableData.categoryStyles[category] : null;
         if (style) {
@@ -11738,19 +11738,19 @@ function showSheetColorPicker(sheetIndex) {
     const sheet = tableData.sheets[sheetIndex];
     const fgColor = sheet.fgColor || '#e0e0e0';
     const bgColor = sheet.bgColor || '#0a1f15';
-    
+
     // Use prompt for colors as a quick implementation, or better, reuse a modal
     let newBg = prompt('Enter background color (hex, e.g., #ff0000) or leave empty to reset:', bgColor);
     if (newBg === null) return; // Cancelled
     if (newBg && !newBg.startsWith('#') && /^[0-9A-Fa-f]{3,6}$/.test(newBg)) newBg = '#' + newBg;
-    
+
     let newFg = prompt('Enter text color (hex, e.g., #ffffff) or leave empty to reset:', fgColor);
     if (newFg === null) return; // Cancelled
     if (newFg && !newFg.startsWith('#') && /^[0-9A-Fa-f]{3,6}$/.test(newFg)) newFg = '#' + newFg;
-    
+
     sheet.bgColor = newBg || undefined;
     sheet.fgColor = newFg || undefined;
-    
+
     saveData();
     populateF1Sheets();
     renderSidebar(); // Update sidebar tree
@@ -11760,20 +11760,20 @@ function showSheetColorPicker(sheetIndex) {
 
 function showCategoryColorPicker(categoryName) {
     if (!categoryName) return;
-    
+
     initializeCategories();
     const style = tableData.categoryStyles[categoryName] || {};
     const fgColor = style.fgColor || '#e0e0e0';
     const bgColor = style.bgColor || '#0d0d0d';
-    
+
     let newBg = prompt('Enter background color for category (hex, e.g., #ff0000) or leave empty to reset:', bgColor);
     if (newBg === null) return; // Cancelled
     if (newBg && !newBg.startsWith('#') && /^[0-9A-Fa-f]{3,6}$/.test(newBg)) newBg = '#' + newBg;
-    
+
     let newFg = prompt('Enter text color for category (hex, e.g., #ffffff) or leave empty to reset:', fgColor);
     if (newFg === null) return; // Cancelled
     if (newFg && !newFg.startsWith('#') && /^[0-9A-Fa-f]{3,6}$/.test(newFg)) newFg = '#' + newFg;
-    
+
     if (!newBg && !newFg) {
         delete tableData.categoryStyles[categoryName];
     } else {
@@ -11782,7 +11782,7 @@ function showCategoryColorPicker(categoryName) {
             fgColor: newFg || undefined
         };
     }
-    
+
     saveData();
     populateF1Categories();
     renderSidebar();
@@ -12890,7 +12890,7 @@ function renderSidebar() {
 
         const header = document.createElement('div');
         header.className = 'tree-category-header tree-item';
-        
+
         // Apply custom colors if they exist (including Uncategorized)
         const style = tableData.categoryStyles ? tableData.categoryStyles[catName] : null;
         if (style) {
@@ -12926,7 +12926,7 @@ function renderSidebar() {
             const isLast = idx === sheets.length - 1;
             const sheetDiv = document.createElement('div');
             sheetDiv.className = `tree-sheet tree-item ${sheet.originalIndex === currentSheet ? 'active' : ''} ${isLast ? 'last' : ''}`;
-            
+
             // Apply custom colors to tree sheet items
             if (sheet.bgColor) {
                 sheetDiv.style.backgroundColor = sheet.bgColor;
@@ -13144,19 +13144,19 @@ async function loadCustomColorSyntaxes() {
         const response = await fetch('/api/custom-syntaxes');
         if (response.ok) {
             customColorSyntaxes = await response.json();
-            
+
             // Pre-compile and cache regexes for performance
             customColorSyntaxesCache = customColorSyntaxes.map(syntax => {
                 if (!syntax.marker) return null;
                 const escapedMarker = escapeHtml(syntax.marker);
                 const markerRegex = escapedMarker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
                 const regex = new RegExp(markerRegex + '(.*?)' + markerRegex, 'g');
-                
+
                 let style = `background: ${syntax.bgColor || 'transparent'}; color: ${syntax.fgColor || 'inherit'};`;
                 if (syntax.isBold) style += ' font-weight: bold;';
                 if (syntax.isItalic) style += ' font-style: italic;';
                 if (syntax.isUnderline) style += ' text-decoration: underline;';
-                
+
                 return { regex, style, marker: escapedMarker };
             }).filter(s => s !== null);
 

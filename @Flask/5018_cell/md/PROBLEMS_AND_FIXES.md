@@ -7,6 +7,25 @@ This document tracks historical bugs, issues, and their solutions. Use this to:
 
 ---
 
+## [2026-02-06 16:45] - Text Overflow in #R# Border Boxes
+
+**Problem:** 
+Long strings of text without spaces (e.g., `asdasdasd...`) inside `#R#` border boxes were not wrapping, causing them to overflow the box horizontally and break the layout.
+
+**Root Cause:** 
+The inline span style for the `#R#` syntax used `word-break: normal`, which prevents breaking of long unbroken words. Although `overflow-wrap: break-word` was present, it requires the element to have a defined width or be in a block context where overflow is calculated, which isn't always the case for inline spans in this specific context.
+
+**Solution:** 
+Changed the style to `word-break: break-word`. This ensures that if a word is too long to fit on the line, it will be broken at an arbitrary point to prevent overflow. This applies to both the main application (`static/script.js`) and the static export (`export_static.py`).
+
+**Files Modified:**
+- `static/script.js` - Updated `parseMarkdownInline` and `oldParseMarkdownBody`.
+- `export_static.py` - Updated embedded Javascript logic.
+
+**Related Issues:** Bangla Text Overflow and Border Box Fixes
+
+---
+
 ## [2026-02-06 16:15] - Sub-sheet Colors Not Working and Duplicate Context Menus
 
 **Problem:** 
