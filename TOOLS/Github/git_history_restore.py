@@ -240,18 +240,39 @@ class GitWorker:
             return {"error": str(e)}
 
     @staticmethod
+    def get_local_changes(directory):
+        """Get list of files that have local changes (modified, deleted, staged, etc.)"""
+        try:
+            # -u to see untracked, but let's stick to tracked changes for safety
+            cmd = ["git", "status", "--porcelain", "-z"]
+            result = subprocess.check_output(cmd, cwd=directory, text=True, encoding="utf-8")
+            files = []
+            parts = result.split("\x00")
+            for part in parts:
+                if not part: continue
+                # Format: XY filename (XY is 2 chars)
+                status = part[:2]
+                filename = part[3:]
+                # We care about anything changed in index or worktree
+                if status.strip():
+                    files.append(filename)
+            return {"success": files}
+        except Exception as e:
+            return {"error": str(e)}
+
+    @staticmethod
     def get_commit_changed_files(directory, commit_hash):
-        """Get only the files that were changed in a specific commit (excludes deletions)"""
+        """Get all files that were changed in a specific commit (including additions/deletions)"""
         try:
             cmd = ["git", "diff-tree", "--no-commit-id", "--name-status", "-r", "-z", commit_hash]
-            result = subprocess.check_output(cmd, cwd=directory, text=True, encoding='utf-8')
-            parts = result.split('\0')
+            result = subprocess.check_output(cmd, cwd=directory, text=True, encoding="utf-8")
+            parts = result.split("\x00")
             files = []
             for i in range(0, len(parts)-1, 2):
                 status = parts[i]
                 filename = parts[i+1]
-                if status and filename and not status.startswith('D'):
-                    files.append(filename)
+                if status and filename:
+                    files.append({"status": status, "path": filename})
             return {"success": files}
         except Exception as e:
             return {"error": str(e)}
@@ -1223,9 +1244,13 @@ class MainWindow(QMainWindow):
                 QMessageBox.critical(self, "Error", result['error'])
 
     def restore_files_to_current(self):
+        """
+        Implements 'Restore to Current': Effectively replaces current local changes 
+        with versions from the selected commit.
+        """
         selected_items = self.table.selectedItems()
         if not selected_items:
-            QMessageBox.warning(self, "Selection Required", "Please select a commit to restore files from.")
+            QMessageBox.warning(self, "Selection Required", "Please select a commit to restore from.")
             return
 
         row = selected_items[0].row()
@@ -1234,20 +1259,32 @@ class MainWindow(QMainWindow):
         directory = self.path_input.text()
         base_dir = GitWorker.get_git_root(directory)
 
-        # Get only files changed in this commit
-        result = GitWorker.get_commit_changed_files(base_dir, commit_hash)
-        if "error" in result:
-            QMessageBox.critical(self, "Error", f"Failed to get commit files:\n{result['error']}")
-            return
+        # 1. Look for currently dirty files (local changes we want to 'replace')
+        local_changes = GitWorker.get_local_changes(base_dir)
+        dirty_files = local_changes.get("success", []) if "success" in local_changes else []
         
-        changed_files = result["success"]
-        if not changed_files:
-            QMessageBox.information(self, "No Files", "No files were changed in this commit.")
+        # 2. Look for files in the selected commit (fallback or filter)
+        commit_result = GitWorker.get_commit_changed_files(base_dir, commit_hash)
+        commit_files_info = commit_result.get("success", []) if "success" in commit_result else []
+        commit_files = [f['path'] for f in commit_files_info]
+
+        # Determine target files:
+        # If the user has local changes, they likely want to replace THEM with versions from history.
+        # If no local changes, we provide a bulk 'apply' of the commit's changes.
+        if dirty_files:
+            target_files = dirty_files
+            source_desc = f"{len(dirty_files)} local change(s)"
+        else:
+            target_files = commit_files
+            source_desc = f"{len(commit_files)} file(s) from commit"
+        
+        if not target_files:
+            QMessageBox.information(self, "Nothing to Restore", "No local changes and no files in this commit to process.")
             return
 
         confirm = QMessageBox.question(
             self, "Confirm File Restore",
-            f"Restore {len(changed_files)} file(s) changed in this commit?\n\n[{commit_hash}] {commit_msg}\n\nThis will NOT change HEAD, only update files.",
+            f"Replace current {source_desc} with versions from commit:\n\n[{commit_hash}] {commit_msg}?\n\nThis will OVERWRITE your current work for these files.",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
         )
 
@@ -1255,20 +1292,32 @@ class MainWindow(QMainWindow):
             self.status_label.setText("RESTORING FILES...")
             QApplication.processEvents()
             
+            success_count = 0
             failed = []
-            for file_path in changed_files:
+            
+            for file_path in target_files:
+                # git checkout commit -- path will update the file to match the commit
                 res = GitWorker.checkout_file(base_dir, commit_hash, file_path)
-                if "error" in res:
+                if "success" in res:
+                    success_count += 1
+                    self.restored_files[file_path] = commit_hash
+                else:
                     failed.append(file_path)
             
-            if not failed:
+            # Refresh UI
+            self.render_diff_html()
+            
+            if success_count == len(target_files):
                 self.status_label.setStyleSheet(f"color: {CP_GREEN}; font-weight: bold;")
-                self.status_label.setText(f"SUCCESS: {len(changed_files)} FILE(S) RESTORED FROM {commit_hash}")
-                QMessageBox.information(self, "Success", f"Restored {len(changed_files)} file(s) from {commit_hash}.\nYou can now commit these changes.")
+                self.status_label.setText(f"SUCCESS: {success_count} FILE(S) RESTORED")
+                QMessageBox.information(self, "Success", f"Successfully restored {success_count} file(s) using commit {commit_hash} as source.")
             else:
                 self.status_label.setStyleSheet(f"color: {CP_RED}; font-weight: bold;")
                 self.status_label.setText("RESTORE PARTIALLY FAILED")
-                QMessageBox.warning(self, "Partial Success", f"Restored {len(changed_files) - len(failed)} file(s).\nFailed: {len(failed)}")
+                QMessageBox.warning(self, "Partial Success", 
+                                   f"Restored {success_count} file(s).\n"
+                                   f"Failed: {len(failed)}\n\n"
+                                   "(Note: Files that don't exist in the selected commit cannot be 'restored' this way.)")
 
 
 # --- SETTINGS DIALOG ---
