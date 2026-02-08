@@ -623,6 +623,11 @@ class MainWindow(QMainWindow):
         action_layout.addWidget(copy_hash_btn)
         action_layout.addWidget(explore_btn)
         action_layout.addWidget(restore_files_btn)
+        
+        restore_commit_files_btn = CyberButton("RESTORE COMMIT FILES", CP_DIM, CP_GREEN, "black", "black")
+        restore_commit_files_btn.clicked.connect(self.restore_commit_files)
+        action_layout.addWidget(restore_commit_files_btn)
+        
         action_layout.addWidget(revert_btn)
         layout.addLayout(action_layout)
 
@@ -1369,6 +1374,63 @@ class MainWindow(QMainWindow):
                 self.status_label.setStyleSheet(f"color: {CP_RED}; font-weight: bold;")
                 self.status_label.setText("REPLACE PARTIALLY FAILED")
                 QMessageBox.warning(self, "Partial Success", f"Replaced {success_count} file(s).\nFailed: {len(failed)}")
+
+    def restore_commit_files(self):
+        """Restore only the files from the selected commit (not parent)"""
+        selected_items = self.table.selectedItems()
+        if not selected_items:
+            QMessageBox.warning(self, "Selection Required", "Please select a commit.")
+            return
+
+        row = selected_items[0].row()
+        commit_hash = self.table.item(row, 0).text()
+        commit_msg = self.table.item(row, 3).text()
+        directory = self.path_input.text()
+        base_dir = GitWorker.get_git_root(directory)
+        
+        if not self.current_diff_sections:
+            QMessageBox.information(self, "No Changes", "No files to restore. Select a commit first.")
+            return
+        
+        target_files = [s['name'] for s in self.current_diff_sections]
+        
+        if not target_files:
+            QMessageBox.information(self, "No Files", "No files found.")
+            return
+
+        confirm = QMessageBox.question(
+            self, "Restore Commit Files",
+            f"Restore files from commit:\n\n[{commit_hash}] {commit_msg}\n\n"
+            f"Files to restore: {len(target_files)}",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+        )
+
+        if confirm == QMessageBox.StandardButton.Yes:
+            self.status_label.setText("RESTORING FILES...")
+            self.status_label.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold;")
+            QApplication.processEvents()
+            
+            success_count = 0
+            failed = []
+            
+            for file_path in target_files:
+                res = GitWorker.checkout_file(base_dir, commit_hash, file_path)
+                if "success" in res:
+                    success_count += 1
+                    self.restored_files[file_path] = commit_hash
+                else:
+                    failed.append(file_path)
+            
+            self.render_diff_html()
+            
+            if success_count == len(target_files):
+                self.status_label.setStyleSheet(f"color: {CP_GREEN}; font-weight: bold;")
+                self.status_label.setText(f"SUCCESS: {success_count} FILE(S) RESTORED")
+                QMessageBox.information(self, "Success", f"Restored {success_count} file(s) from commit {commit_hash}.")
+            else:
+                self.status_label.setStyleSheet(f"color: {CP_RED}; font-weight: bold;")
+                self.status_label.setText("RESTORE PARTIALLY FAILED")
+                QMessageBox.warning(self, "Partial Success", f"Restored {success_count} file(s).\nFailed: {len(failed)}")
 
 
 # --- SETTINGS DIALOG ---
