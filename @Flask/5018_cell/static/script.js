@@ -5935,12 +5935,16 @@ function renderSubSheetBar() {
 
     // Apply parent sheet colors to subsheet bar
     if (subsheetBar) {
-        if (parentSheet.bgColor) {
-            subsheetBar.style.backgroundColor = parentSheet.bgColor;
-            subsheetBar.style.borderColor = 'rgba(255,255,255,0.1)';
+        const sheetCategory = tableData.sheetCategories[parentIndex] || tableData.sheetCategories[String(parentIndex)] || 'Uncategorized';
+        const catStyle = tableData.categoryStyles ? tableData.categoryStyles[sheetCategory] : null;
+        const bgColor = parentSheet.bgColor || (catStyle ? catStyle.bgColor : null);
+
+        if (bgColor) {
+            subsheetBar.style.setProperty('background-color', bgColor, 'important');
+            subsheetBar.style.setProperty('border-color', 'rgba(255,255,255,0.1)', 'important');
         } else {
-            subsheetBar.style.backgroundColor = '';
-            subsheetBar.style.borderColor = '';
+            subsheetBar.style.removeProperty('background-color');
+            subsheetBar.style.removeProperty('border-color');
         }
     }
 
@@ -5953,17 +5957,17 @@ function renderSubSheetBar() {
         const fgColor = sheet.fgColor || (catStyle ? catStyle.fgColor : null);
 
         if (bgColor) {
-            tab.style.backgroundColor = bgColor;
+            tab.style.setProperty('background-color', bgColor, 'important');
             if (isActive) {
-                tab.style.boxShadow = 'inset 0 0 0 2px rgba(255,255,255,0.4)';
-                tab.style.borderColor = 'rgba(255,255,255,0.5)';
+                tab.style.setProperty('box-shadow', 'inset 0 0 0 2px rgba(255,255,255,0.4)', 'important');
+                tab.style.setProperty('border-color', 'rgba(255,255,255,0.5)', 'important');
             } else {
-                tab.style.boxShadow = 'none';
-                tab.style.borderColor = 'rgba(0,0,0,0.1)';
+                tab.style.removeProperty('box-shadow');
+                tab.style.setProperty('border-color', 'rgba(0,0,0,0.1)', 'important');
             }
         }
         if (fgColor) {
-            tab.style.color = fgColor;
+            tab.style.setProperty('color', fgColor, 'important');
         }
     };
 
@@ -6018,10 +6022,17 @@ function renderSubSheetBar() {
     addBtn.className = 'subsheet-add-btn';
     addBtn.innerHTML = '+';
     addBtn.title = 'Add sub-sheet';
-    if (parentSheet.fgColor) {
-        addBtn.style.color = parentSheet.fgColor;
-        addBtn.style.borderColor = parentSheet.fgColor;
+    
+    // Inherit color from parent sheet or category
+    const parentCategory = tableData.sheetCategories[parentIndex] || tableData.sheetCategories[String(parentIndex)] || 'Uncategorized';
+    const parentCatStyle = tableData.categoryStyles ? tableData.categoryStyles[parentCategory] : null;
+    const parentFg = parentSheet.fgColor || (parentCatStyle ? parentCatStyle.fgColor : null);
+
+    if (parentFg) {
+        addBtn.style.setProperty('color', parentFg, 'important');
+        addBtn.style.setProperty('border-color', parentFg, 'important');
     }
+    
     addBtn.onclick = () => addSubSheet(parentIndex);
     subsheetTabs.appendChild(addBtn);
 }
@@ -11272,12 +11283,12 @@ function populateF1Categories() {
     const uncategorizedStyle = tableData.categoryStyles ? tableData.categoryStyles['Uncategorized'] : null;
     if (uncategorizedStyle) {
         if (uncategorizedStyle.bgColor) {
-            uncategorizedItem.style.backgroundColor = uncategorizedStyle.bgColor;
+            uncategorizedItem.style.setProperty('background-color', uncategorizedStyle.bgColor, 'important');
             uncategorizedItem.style.backgroundImage = 'none';
-            uncategorizedItem.style.borderColor = uncategorizedStyle.bgColor;
+            uncategorizedItem.style.setProperty('border-color', uncategorizedStyle.bgColor, 'important');
         }
         if (uncategorizedStyle.fgColor) {
-            uncategorizedItem.style.color = uncategorizedStyle.fgColor;
+            uncategorizedItem.style.setProperty('color', uncategorizedStyle.fgColor, 'important');
         }
     }
 
@@ -11314,12 +11325,12 @@ function populateF1Categories() {
         const style = tableData.categoryStyles ? tableData.categoryStyles[category] : null;
         if (style) {
             if (style.bgColor) {
-                item.style.backgroundColor = style.bgColor;
+                item.style.setProperty('background-color', style.bgColor, 'important');
                 item.style.backgroundImage = 'none';
-                item.style.borderColor = style.bgColor;
+                item.style.setProperty('border-color', style.bgColor, 'important');
             }
             if (style.fgColor) {
-                item.style.color = style.fgColor;
+                item.style.setProperty('color', style.fgColor, 'important');
             }
         }
 
@@ -11492,11 +11503,13 @@ function showSheetColorPicker(sheetIndex) {
     const bgColor = sheet.bgColor || '#0a1f15';
     
     // Use prompt for colors as a quick implementation, or better, reuse a modal
-    const newBg = prompt('Enter background color (hex, e.g., #ff0000) or leave empty to reset:', bgColor);
+    let newBg = prompt('Enter background color (hex, e.g., #ff0000) or leave empty to reset:', bgColor);
     if (newBg === null) return; // Cancelled
+    if (newBg && !newBg.startsWith('#') && /^[0-9A-Fa-f]{3,6}$/.test(newBg)) newBg = '#' + newBg;
     
-    const newFg = prompt('Enter text color (hex, e.g., #ffffff) or leave empty to reset:', fgColor);
+    let newFg = prompt('Enter text color (hex, e.g., #ffffff) or leave empty to reset:', fgColor);
     if (newFg === null) return; // Cancelled
+    if (newFg && !newFg.startsWith('#') && /^[0-9A-Fa-f]{3,6}$/.test(newFg)) newFg = '#' + newFg;
     
     sheet.bgColor = newBg || undefined;
     sheet.fgColor = newFg || undefined;
@@ -11516,11 +11529,13 @@ function showCategoryColorPicker(categoryName) {
     const fgColor = style.fgColor || '#e0e0e0';
     const bgColor = style.bgColor || '#0d0d0d';
     
-    const newBg = prompt('Enter background color for category (hex, e.g., #ff0000) or leave empty to reset:', bgColor);
+    let newBg = prompt('Enter background color for category (hex, e.g., #ff0000) or leave empty to reset:', bgColor);
     if (newBg === null) return; // Cancelled
+    if (newBg && !newBg.startsWith('#') && /^[0-9A-Fa-f]{3,6}$/.test(newBg)) newBg = '#' + newBg;
     
-    const newFg = prompt('Enter text color for category (hex, e.g., #ffffff) or leave empty to reset:', fgColor);
+    let newFg = prompt('Enter text color for category (hex, e.g., #ffffff) or leave empty to reset:', fgColor);
     if (newFg === null) return; // Cancelled
+    if (newFg && !newFg.startsWith('#') && /^[0-9A-Fa-f]{3,6}$/.test(newFg)) newFg = '#' + newFg;
     
     if (!newBg && !newFg) {
         delete tableData.categoryStyles[categoryName];
@@ -11708,12 +11723,12 @@ function populateF1Sheets(searchAllCategories = false) {
 
         // Apply custom colors if they exist
         if (sheet.bgColor) {
-            item.style.backgroundColor = sheet.bgColor;
+            item.style.setProperty('background-color', sheet.bgColor, 'important');
             item.style.backgroundImage = 'none'; // Override cyberpunk gradient if custom color is set
-            item.style.borderColor = sheet.bgColor; // Match border to bg for cleaner look
+            item.style.setProperty('border-color', sheet.bgColor, 'important'); // Match border to bg for cleaner look
         }
         if (sheet.fgColor) {
-            item.style.color = sheet.fgColor;
+            item.style.setProperty('color', sheet.fgColor, 'important');
         }
 
         // Show category name if searching all categories
@@ -11791,12 +11806,12 @@ function populateF1Sheets(searchAllCategories = false) {
 
                 // Apply custom colors if they exist
                 if (subSheet.bgColor) {
-                    subItem.style.backgroundColor = subSheet.bgColor;
+                    subItem.style.setProperty('background-color', subSheet.bgColor, 'important');
                     subItem.style.backgroundImage = 'none';
-                    subItem.style.borderColor = subSheet.bgColor;
+                    subItem.style.setProperty('border-color', subSheet.bgColor, 'important');
                 }
                 if (subSheet.fgColor) {
-                    subItem.style.color = subSheet.fgColor;
+                    subItem.style.setProperty('color', subSheet.fgColor, 'important');
                 }
 
                 const subNameSpan = document.createElement('span');
@@ -12643,12 +12658,12 @@ function renderSidebar() {
         const style = tableData.categoryStyles ? tableData.categoryStyles[catName] : null;
         if (style) {
             if (style.bgColor) {
-                header.style.backgroundColor = style.bgColor;
+                header.style.setProperty('background-color', style.bgColor, 'important');
                 header.style.backgroundImage = 'none';
-                header.style.borderColor = style.bgColor;
+                header.style.setProperty('border-color', style.bgColor, 'important');
             }
             if (style.fgColor) {
-                header.style.color = style.fgColor;
+                header.style.setProperty('color', style.fgColor, 'important');
             }
         }
 
@@ -12674,6 +12689,16 @@ function renderSidebar() {
             const isLast = idx === sheets.length - 1;
             const sheetDiv = document.createElement('div');
             sheetDiv.className = `tree-sheet tree-item ${sheet.originalIndex === currentSheet ? 'active' : ''} ${isLast ? 'last' : ''}`;
+            
+            // Apply custom colors to tree sheet items
+            if (sheet.bgColor) {
+                sheetDiv.style.backgroundColor = sheet.bgColor;
+                sheetDiv.style.borderColor = sheet.bgColor;
+            }
+            if (sheet.fgColor) {
+                sheetDiv.style.color = sheet.fgColor;
+            }
+
             sheetDiv.onclick = () => {
                 switchSheet(sheet.originalIndex);
                 toggleSidebar();
@@ -12705,43 +12730,43 @@ function renderSidebar() {
             const catStyle = tableData.categoryStyles ? tableData.categoryStyles[currentCat] : null;
             if (catStyle) {
                 if (catStyle.bgColor) {
-                    sheetTabsBar.style.backgroundColor = catStyle.bgColor;
-                    sheetTabsBar.style.borderColor = 'rgba(255,255,255,0.1)';
+                    sheetTabsBar.style.setProperty('background-color', catStyle.bgColor, 'important');
+                    sheetTabsBar.style.setProperty('border-color', 'rgba(255,255,255,0.1)', 'important');
                 } else {
-                    sheetTabsBar.style.backgroundColor = '';
-                    sheetTabsBar.style.borderColor = '';
+                    sheetTabsBar.style.removeProperty('background-color');
+                    sheetTabsBar.style.removeProperty('border-color');
                 }
                 if (catStyle.fgColor) {
-                    sheetTabsBar.style.color = catStyle.fgColor;
+                    sheetTabsBar.style.setProperty('color', catStyle.fgColor, 'important');
                     // Update titles and buttons inside
                     const titles = sheetTabsBar.querySelectorAll('.current-sheet-title, .current-category-title');
-                    titles.forEach(t => t.style.color = catStyle.fgColor);
+                    titles.forEach(t => t.style.setProperty('color', catStyle.fgColor, 'important'));
                     const buttons = sheetTabsBar.querySelectorAll('.btn-menu, .btn-sheet-action');
                     buttons.forEach(b => {
-                        b.style.color = catStyle.fgColor;
-                        b.style.borderColor = catStyle.fgColor;
+                        b.style.setProperty('color', catStyle.fgColor, 'important');
+                        b.style.setProperty('border-color', catStyle.fgColor, 'important');
                     });
                 } else {
-                    sheetTabsBar.style.color = '';
+                    sheetTabsBar.style.removeProperty('color');
                     const titles = sheetTabsBar.querySelectorAll('.current-sheet-title, .current-category-title');
-                    titles.forEach(t => t.style.color = '');
+                    titles.forEach(t => t.style.removeProperty('color'));
                     const buttons = sheetTabsBar.querySelectorAll('.btn-menu, .btn-sheet-action');
                     buttons.forEach(b => {
-                        b.style.color = '';
-                        b.style.borderColor = '';
+                        b.style.removeProperty('color');
+                        b.style.removeProperty('border-color');
                     });
                 }
             } else {
                 // Reset to default
-                sheetTabsBar.style.backgroundColor = '';
-                sheetTabsBar.style.color = '';
-                sheetTabsBar.style.borderColor = '';
+                sheetTabsBar.style.removeProperty('background-color');
+                sheetTabsBar.style.removeProperty('color');
+                sheetTabsBar.style.removeProperty('border-color');
                 const titles = sheetTabsBar.querySelectorAll('.current-sheet-title, .current-category-title');
-                titles.forEach(t => t.style.color = '');
+                titles.forEach(t => t.style.removeProperty('color'));
                 const buttons = sheetTabsBar.querySelectorAll('.btn-menu, .btn-sheet-action');
                 buttons.forEach(b => {
-                    b.style.color = '';
-                    b.style.borderColor = '';
+                    b.style.removeProperty('color');
+                    b.style.removeProperty('border-color');
                 });
             }
         }
