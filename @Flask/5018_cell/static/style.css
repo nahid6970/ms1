@@ -197,34 +197,11 @@ body {
     transform: scale(1.05);
 }
 
-/* Subsheet More Dropdown */
+/* Subsheet More Dropdown (now triggered by the + button) */
 .subsheet-more-container {
     position: relative;
-    display: inline-block;
-}
-
-.subsheet-more-btn {
-    padding: 8px 16px;
-    background: #f8f9fa;
-    border: 1px solid #ddd;
-    border-radius: 0;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 600;
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 6px;
-    color: #555;
-    transition: all 0.2s;
-    height: 38px;
-    box-sizing: border-box;
-    white-space: nowrap;
-}
-
-.subsheet-more-btn:hover {
-    background-color: #e9ecef;
-    border-color: #007bff;
-    color: #007bff;
 }
 
 .subsheet-more-dropdown {
@@ -236,10 +213,10 @@ body {
     min-width: 220px;
     max-height: 400px;
     overflow-y: auto;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
     z-index: 10001;
     border: 1px solid #ddd;
-    margin-top: 4px;
+    margin-top: 0;
     padding: 4px 0;
 }
 
@@ -1135,13 +1112,11 @@ td.cell-complete::after {
     left: 0;
     right: 0;
     bottom: 0;
-    background-image: repeating-linear-gradient(
-        90deg,
-        transparent,
-        transparent 15px,
-        #999 15px,
-        #999 17px
-    );
+    background-image: repeating-linear-gradient(90deg,
+            transparent,
+            transparent 15px,
+            #999 15px,
+            #999 17px);
     pointer-events: none;
     z-index: 100;
 }
@@ -2906,8 +2881,17 @@ tr {
 }
 
 @keyframes pulse-border-green {
-    0%, 100% { border-color: #00ff9d; box-shadow: 0 0 5px rgba(0, 255, 157, 0.5); }
-    50% { border-color: #fff; box-shadow: 0 0 15px rgba(0, 255, 157, 0.8); }
+
+    0%,
+    100% {
+        border-color: #00ff9d;
+        box-shadow: 0 0 5px rgba(0, 255, 157, 0.5);
+    }
+
+    50% {
+        border-color: #fff;
+        box-shadow: 0 0 15px rgba(0, 255, 157, 0.8);
+    }
 }
 
 .f1-parent-sheet.active .f1-sheet-icon,
@@ -4695,7 +4679,8 @@ ll Rank Badge */
 }
 
 .temp-notepad-popup {
-    width: 400px; /* Slightly wider for notes */
+    width: 400px;
+    /* Slightly wider for notes */
 }
 
 .temp-notepad-container {

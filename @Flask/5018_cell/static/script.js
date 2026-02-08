@@ -6286,7 +6286,9 @@ function updateSubSheetOverflow() {
     const subsheetTabs = document.getElementById('subsheetTabs');
     if (!subsheetTabs) return;
 
-    // 1. Reset state: remove existing More container and put tabs back
+    const addBtn = subsheetTabs.querySelector('.subsheet-add-btn');
+
+    // 1. Reset state: remove existing More container and put elements back
     const existingMore = subsheetTabs.querySelector('.subsheet-more-container');
     if (existingMore) {
         const dropdown = existingMore.querySelector('.subsheet-more-dropdown');
@@ -6296,6 +6298,10 @@ function updateSubSheetOverflow() {
                 // Insert before the more container
                 subsheetTabs.insertBefore(tab, existingMore);
             });
+        }
+        // If the addBtn was inside, put it back into the main list
+        if (addBtn && addBtn.parentElement === existingMore) {
+            subsheetTabs.appendChild(addBtn);
         }
         existingMore.remove();
     }
@@ -6315,23 +6321,22 @@ function updateSubSheetOverflow() {
         }
     });
 
-    // 3. If overflow exists, move tabs to a dropdown
-    if (overflowTabs.length > 0) {
+    // 3. If overflow exists, move tabs to a dropdown attached to the + button
+    if (overflowTabs.length > 0 && addBtn) {
         const moreContainer = document.createElement('div');
         moreContainer.className = 'subsheet-more-container';
 
-        const moreBtn = document.createElement('button');
-        moreBtn.className = 'subsheet-more-btn';
+        // Move addBtn into the container
+        subsheetTabs.insertBefore(moreContainer, addBtn);
+        moreContainer.appendChild(addBtn);
 
-        // Find if any active sheet is in the overflow
+        // Indicate if active sheet is in overflow
         const hasActive = overflowTabs.some(t => t.classList.contains('active'));
         if (hasActive) {
-            moreBtn.classList.add('active');
-            moreBtn.style.color = '#007bff';
-            moreBtn.style.borderColor = '#007bff';
+            addBtn.style.setProperty('box-shadow', '0 0 0 2px #007bff', 'important');
+        } else {
+            addBtn.style.removeProperty('box-shadow');
         }
-
-        moreBtn.innerHTML = `More ▾ <span style="font-size: 11px; opacity: 0.7; margin-left: 2px;">(${overflowTabs.length})</span>`;
 
         const dropdown = document.createElement('div');
         dropdown.className = 'subsheet-more-dropdown';
@@ -6340,16 +6345,7 @@ function updateSubSheetOverflow() {
             dropdown.appendChild(tab);
         });
 
-        moreContainer.appendChild(moreBtn);
         moreContainer.appendChild(dropdown);
-
-        // Insert before the "Add" button if it exists, otherwise at the end
-        const addBtn = subsheetTabs.querySelector('.subsheet-add-btn');
-        if (addBtn) {
-            subsheetTabs.insertBefore(moreContainer, addBtn);
-        } else {
-            subsheetTabs.appendChild(moreContainer);
-        }
     }
 }
 
