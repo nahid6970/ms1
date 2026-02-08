@@ -6324,8 +6324,11 @@ function updateSubSheetOverflow() {
         }
     });
 
-    // 3. If overflow exists, move tabs to a dropdown attached to the + button
-    if (overflowTabs.length > 0 && addBtn) {
+    // Also check if addBtn itself is overflowing even if tabs aren't (unlikely but possible)
+    const addBtnWrapped = addBtn && addBtn.offsetTop > baseline + 5;
+
+    // 3. If overflow exists or button wrapped, move elements to dropdown
+    if ((overflowTabs.length > 0 || addBtnWrapped) && addBtn) {
         const moreContainer = document.createElement('div');
         moreContainer.className = 'subsheet-more-container';
 
@@ -6333,7 +6336,32 @@ function updateSubSheetOverflow() {
         subsheetTabs.insertBefore(moreContainer, addBtn);
         moreContainer.appendChild(addBtn);
 
-        // Update addBtn text to show overflow count
+        const dropdown = document.createElement('div');
+        dropdown.className = 'subsheet-more-dropdown';
+
+        // Move initially detected overflow tabs
+        overflowTabs.forEach(tab => {
+            dropdown.appendChild(tab);
+        });
+
+        moreContainer.appendChild(dropdown);
+
+        // CRITICAL FIX: If the button still sits on a new line, 
+        // keep moving preceding tabs into the dropdown one by one
+        let safetyCounter = 0;
+        while (moreContainer.offsetTop > baseline + 5 && safetyCounter < 50) {
+            const prevTab = moreContainer.previousElementSibling;
+            if (prevTab && prevTab.classList.contains('subsheet-tab')) {
+                // Prepend to dropdown to maintain order
+                dropdown.insertBefore(prevTab, dropdown.firstChild);
+                overflowTabs.unshift(prevTab);
+                safetyCounter++;
+            } else {
+                break;
+            }
+        }
+
+        // Update addBtn text to show final overflow count
         addBtn.innerHTML = `(${overflowTabs.length})+`;
 
         // Indicate if active sheet is in overflow
@@ -6343,15 +6371,6 @@ function updateSubSheetOverflow() {
         } else {
             addBtn.style.removeProperty('box-shadow');
         }
-
-        const dropdown = document.createElement('div');
-        dropdown.className = 'subsheet-more-dropdown';
-
-        overflowTabs.forEach(tab => {
-            dropdown.appendChild(tab);
-        });
-
-        moreContainer.appendChild(dropdown);
     }
 }
 
