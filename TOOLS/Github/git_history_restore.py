@@ -183,11 +183,11 @@ class GitWorker:
             
             # Get file stats (additions/deletions)
             cmd_stats = ["git", "diff", "--stat", "--format=", f"{commit_a}..{commit_b}", "--", git_scope]
-            stats_result = subprocess.check_output(cmd_stats, cwd=directory, text=True, encoding='utf-8')
+            stats_result = subprocess.check_output(cmd_stats, cwd=directory, text=True, encoding='utf-8', errors='replace')
             
             # Get detailed diff
             cmd_diff = ["git", "diff", f"{commit_a}..{commit_b}", "--color=never", "--", git_scope]
-            diff_result = subprocess.check_output(cmd_diff, cwd=directory, text=True, encoding='utf-8')
+            diff_result = subprocess.check_output(cmd_diff, cwd=directory, text=True, encoding='utf-8', errors='replace')
             
             return {"success": {"stats": stats_result, "diff": diff_result}}
         except Exception as e:
