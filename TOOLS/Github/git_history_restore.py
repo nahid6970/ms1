@@ -612,7 +612,7 @@ class MainWindow(QMainWindow):
         explore_btn = CyberButton("EXPLORE COMMIT", CP_DIM, CP_CYAN, "white", "black")
         explore_btn.clicked.connect(self.open_commit_explorer)
         
-        restore_files_btn = CyberButton("RESTORE FILES TO CURRENT", CP_DIM, CP_YELLOW, "black", "black")
+        restore_files_btn = CyberButton("REPLACE WITH PREVIOUS VERSION", CP_DIM, CP_YELLOW, "black", "black")
         restore_files_btn.clicked.connect(self.restore_files_to_current)
         
         revert_btn = CyberButton("RESTORE SELECTED VERSION", CP_DIM, CP_RED, "white", "black")
@@ -1310,10 +1310,7 @@ class MainWindow(QMainWindow):
                 QMessageBox.critical(self, "Error", result['error'])
 
     def restore_files_to_current(self):
-        """
-        Implements 'Restore to Current': Effectively replaces current local changes 
-        with versions from the selected commit.
-        """
+        """Replace current files with versions from the selected commit"""
         selected_items = self.table.selectedItems()
         if not selected_items:
             QMessageBox.warning(self, "Selection Required", "Please select a commit to restore from.")
@@ -1324,61 +1321,36 @@ class MainWindow(QMainWindow):
         commit_msg = self.table.item(row, 3).text()
         directory = self.path_input.text()
         base_dir = GitWorker.get_git_root(directory)
-
-        # 1. Look for currently dirty files (local changes we want to 'replace')
-        local_changes = GitWorker.get_local_changes(base_dir)
-        dirty_files = local_changes.get("success", []) if "success" in local_changes else []
-        
-        # 2. Look for files in the selected commit (fallback or filter)
-        compare_mode = self.compare_to_head_cb.isChecked()
         scope = self.scope_input.text() or "."
         
-        if compare_mode:
-            # Get files changed between selected commit and HEAD
-            commit_result = GitWorker.get_diff_between(directory, commit_hash, "HEAD", scope)
-            source_desc_type = "changes since commit"
-        else:
-            # Get files changed in this specific commit only
-            commit_result = GitWorker.get_diff_between(directory, f"{commit_hash}^", commit_hash, scope)
-            source_desc_type = "this commit"
-
-        if "error" in commit_result:
-            QMessageBox.critical(self, "Error", f"Failed to get changes:\n{commit_result['error']}")
+        # Get files from the diff display (what's currently shown)
+        if not self.current_diff_sections:
+            QMessageBox.information(self, "No Changes", "No files to restore. Select a commit first.")
             return
-            
-        diff_data = commit_result["success"]
-        sections = self.parse_diff(diff_data["diff"])
-        commit_files = [s['name'] for s in sections]
-
-        # Determine target files:
-        if dirty_files:
-            target_files = dirty_files
-            source_desc = f"{len(dirty_files)} local change(s)"
-            op_label = "Replace local changes"
-        else:
-            target_files = commit_files
-            source_desc = f"{len(commit_files)} file(s) from {source_desc_type}"
-            op_label = "Revert changes"
+        
+        target_files = [s['name'] for s in self.current_diff_sections]
         
         if not target_files:
-            QMessageBox.information(self, "Nothing to Restore", f"No local changes and no {source_desc_type} found to process.")
+            QMessageBox.information(self, "No Files", "No files found to restore.")
             return
 
         confirm = QMessageBox.question(
-            self, "Confirm File Restore",
-            f"{op_label} with versions from commit:\n\n[{commit_hash}] {commit_msg}?\n\nTargeting {len(target_files)} file(s) in {scope}.\n\nThis will OVERWRITE your current work for these files.",
+            self, "Replace Files with Previous Version",
+            f"Replace current files with versions from:\n\n[{commit_hash}] {commit_msg}\n\n"
+            f"This will replace {len(target_files)} file(s) in '{scope}'.\n\n"
+            f"⚠️ WARNING: This will OVERWRITE your current files!",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
         )
 
         if confirm == QMessageBox.StandardButton.Yes:
-            self.status_label.setText("RESTORING FILES...")
+            self.status_label.setText("REPLACING FILES...")
+            self.status_label.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold;")
             QApplication.processEvents()
             
             success_count = 0
             failed = []
             
             for file_path in target_files:
-                # git checkout commit -- path will update the file to match the commit
                 res = GitWorker.checkout_file(base_dir, commit_hash, file_path)
                 if "success" in res:
                     success_count += 1
@@ -1386,20 +1358,17 @@ class MainWindow(QMainWindow):
                 else:
                     failed.append(file_path)
             
-            # Refresh UI
             self.render_diff_html()
             
             if success_count == len(target_files):
                 self.status_label.setStyleSheet(f"color: {CP_GREEN}; font-weight: bold;")
-                self.status_label.setText(f"SUCCESS: {success_count} FILE(S) RESTORED")
-                QMessageBox.information(self, "Success", f"Successfully restored {success_count} file(s) using commit {commit_hash} as source.")
+                self.status_label.setText(f"SUCCESS: {success_count} FILE(S) REPLACED")
+                QMessageBox.information(self, "Success", f"Successfully replaced {success_count} file(s) with version {commit_hash}.")
             else:
                 self.status_label.setStyleSheet(f"color: {CP_RED}; font-weight: bold;")
-                self.status_label.setText("RESTORE PARTIALLY FAILED")
+                self.status_label.setText("REPLACE PARTIALLY FAILED")
                 QMessageBox.warning(self, "Partial Success", 
-                                   f"Restored {success_count} file(s).\n"
-                                   f"Failed: {len(failed)}\n\n"
-                                   "(Note: Files that don't exist in the selected commit cannot be 'restored' this way.)")
+                                   f"Replaced {success_count} file(s).\nFailed: {len(failed)}")
 
 
 # --- SETTINGS DIALOG ---
