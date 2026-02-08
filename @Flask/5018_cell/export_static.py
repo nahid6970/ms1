@@ -2154,7 +2154,7 @@ def generate_static_html(data, custom_syntaxes):
                     'K': '#000000', 'GR': '#808080'
                 };
                 if (colorMap[colorCode]) {
-                    return '<span style="border: 2px solid ' + colorMap[colorCode] + '; padding: 2px 4px; border-radius: 4px; display: inline; vertical-align: baseline; word-break: normal; overflow-wrap: break-word;">' + text + '</span>';
+                    return '<span style="border-left: 2px solid ' + colorMap[colorCode] + '; border-right: 2px solid ' + colorMap[colorCode] + '; padding: 2px 8px; display: inline; word-break: normal; overflow-wrap: break-word;">' + text + '</span>';
                 }
                 return match;
             });
@@ -2482,7 +2482,7 @@ def generate_static_html(data, custom_syntaxes):
                         'K': '#000000', 'GR': '#808080'
                     };
                     if (colorMap[colorCode]) {
-                        return '<span style="border: 2px solid ' + colorMap[colorCode] + '; padding: 2px 4px; border-radius: 4px; display: inline; vertical-align: baseline; word-break: normal; overflow-wrap: break-word;">' + text + '</span>';
+                        return '<span style="border-left: 2px solid ' + colorMap[colorCode] + '; border-right: 2px solid ' + colorMap[colorCode] + '; padding: 2px 8px; display: inline; word-break: normal; overflow-wrap: break-word;">' + text + '</span>';
                     }
                     return match;
                 });
