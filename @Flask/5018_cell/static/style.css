@@ -197,6 +197,87 @@ body {
     transform: scale(1.05);
 }
 
+/* Subsheet More Dropdown */
+.subsheet-more-container {
+    position: relative;
+    display: inline-block;
+}
+
+.subsheet-more-btn {
+    padding: 8px 16px;
+    background: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 0;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #555;
+    transition: all 0.2s;
+    height: 38px;
+    box-sizing: border-box;
+    white-space: nowrap;
+}
+
+.subsheet-more-btn:hover {
+    background-color: #e9ecef;
+    border-color: #007bff;
+    color: #007bff;
+}
+
+.subsheet-more-dropdown {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 100%;
+    background: white;
+    min-width: 220px;
+    max-height: 400px;
+    overflow-y: auto;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    z-index: 10001;
+    border: 1px solid #ddd;
+    margin-top: 4px;
+    padding: 4px 0;
+}
+
+.subsheet-more-container:hover .subsheet-more-dropdown {
+    display: block;
+}
+
+.subsheet-more-dropdown .subsheet-tab {
+    display: flex !important;
+    width: 100% !important;
+    margin: 0 !important;
+    border: none !important;
+    border-bottom: 1px solid #f0f0f0 !important;
+    padding: 10px 16px !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    background: white !important;
+    color: #333 !important;
+    justify-content: flex-start !important;
+    box-sizing: border-box !important;
+}
+
+.subsheet-more-dropdown .subsheet-tab:last-child {
+    border-bottom: none !important;
+}
+
+.subsheet-more-dropdown .subsheet-tab:hover {
+    background: #f8f9fa !important;
+    color: #007bff !important;
+}
+
+.subsheet-more-dropdown .subsheet-tab.active {
+    background: #e7f3ff !important;
+    color: #007bff !important;
+    font-weight: 700 !important;
+    border-left: 4px solid #007bff !important;
+}
+
 /* Sub-Sheet Context Menu */
 .subsheet-context-menu {
     background: white;

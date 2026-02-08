@@ -6272,6 +6272,85 @@ function renderSubSheetBar() {
 
     addBtn.onclick = () => addSubSheet(parentIndex);
     subsheetTabs.appendChild(addBtn);
+
+    // Add overflow check to show "More" dropdown if tabs exceed one row
+    requestAnimationFrame(() => {
+        updateSubSheetOverflow();
+    });
+}
+
+/**
+ * Checks if subsheet tabs overflow to multiple rows and moves extras to a dropdown
+ */
+function updateSubSheetOverflow() {
+    const subsheetTabs = document.getElementById('subsheetTabs');
+    if (!subsheetTabs) return;
+
+    // 1. Reset state: remove existing More container and put tabs back
+    const existingMore = subsheetTabs.querySelector('.subsheet-more-container');
+    if (existingMore) {
+        const dropdown = existingMore.querySelector('.subsheet-more-dropdown');
+        if (dropdown) {
+            const extraTabs = Array.from(dropdown.children);
+            extraTabs.forEach(tab => {
+                // Insert before the more container
+                subsheetTabs.insertBefore(tab, existingMore);
+            });
+        }
+        existingMore.remove();
+    }
+
+    // 2. Identify overflow
+    const tabs = Array.from(subsheetTabs.querySelectorAll('.subsheet-tab'));
+    if (tabs.length === 0) return;
+
+    // Use the first tab's top as the baseline for a "single row"
+    const baseline = tabs[0].offsetTop;
+    const overflowTabs = [];
+
+    // We allow a small tolerance (5px) for sub-pixel rendering or slight misalignments
+    tabs.forEach(tab => {
+        if (tab.offsetTop > baseline + 5) {
+            overflowTabs.push(tab);
+        }
+    });
+
+    // 3. If overflow exists, move tabs to a dropdown
+    if (overflowTabs.length > 0) {
+        const moreContainer = document.createElement('div');
+        moreContainer.className = 'subsheet-more-container';
+
+        const moreBtn = document.createElement('button');
+        moreBtn.className = 'subsheet-more-btn';
+
+        // Find if any active sheet is in the overflow
+        const hasActive = overflowTabs.some(t => t.classList.contains('active'));
+        if (hasActive) {
+            moreBtn.classList.add('active');
+            moreBtn.style.color = '#007bff';
+            moreBtn.style.borderColor = '#007bff';
+        }
+
+        moreBtn.innerHTML = `More ▾ <span style="font-size: 11px; opacity: 0.7; margin-left: 2px;">(${overflowTabs.length})</span>`;
+
+        const dropdown = document.createElement('div');
+        dropdown.className = 'subsheet-more-dropdown';
+
+        overflowTabs.forEach(tab => {
+            dropdown.appendChild(tab);
+        });
+
+        moreContainer.appendChild(moreBtn);
+        moreContainer.appendChild(dropdown);
+
+        // Insert before the "Add" button if it exists, otherwise at the end
+        const addBtn = subsheetTabs.querySelector('.subsheet-add-btn');
+        if (addBtn) {
+            subsheetTabs.insertBefore(moreContainer, addBtn);
+        } else {
+            subsheetTabs.appendChild(moreContainer);
+        }
+    }
 }
 
 function showSubSheetContextMenu(event, sheetIndex) {
@@ -12827,6 +12906,7 @@ renderTable = function (preserveScroll = true) {
 // Add resize listener to handle window scaling
 window.addEventListener('resize', () => {
     adjustAllMarkdownCells();
+    renderSubSheetBar();
 });
 
 
