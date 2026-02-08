@@ -49,7 +49,7 @@ body {
     align-items: center;
     gap: 10px;
     padding: 10px 20px;
-    background: #f8f9fa;
+    background-color: #f8f9fa;
     border-bottom: 1px solid #ddd;
     flex-wrap: nowrap;
     overflow-x: auto;
@@ -123,7 +123,7 @@ body {
 /* Sub-Sheet Navigation Bar */
 .subsheet-bar {
     padding: 10px 20px;
-    background: #f8f9fa;
+    background-color: #f8f9fa;
     border-bottom: 1px solid #ddd;
     min-height: 50px;
 }
@@ -156,12 +156,12 @@ body {
 }
 
 .subsheet-tab:hover {
-    background: #e9ecef;
+    background-color: #e9ecef;
     border-color: #007bff;
 }
 
 .subsheet-tab.active {
-    background: #007bff;
+    background-color: #007bff;
     color: white;
     border-color: #007bff;
     font-weight: 600;

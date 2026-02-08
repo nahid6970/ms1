@@ -5945,9 +5945,15 @@ function renderSubSheetBar() {
     }
 
     // Function to apply colors to a tab
-    const applyTabColors = (tab, sheet, isActive) => {
-        if (sheet.bgColor) {
-            tab.style.backgroundColor = sheet.bgColor;
+    const applyTabColors = (tab, sheet, sheetIdx, isActive) => {
+        const sheetCategory = tableData.sheetCategories[sheetIdx] || tableData.sheetCategories[String(sheetIdx)] || 'Uncategorized';
+        const catStyle = tableData.categoryStyles ? tableData.categoryStyles[sheetCategory] : null;
+        
+        const bgColor = sheet.bgColor || (catStyle ? catStyle.bgColor : null);
+        const fgColor = sheet.fgColor || (catStyle ? catStyle.fgColor : null);
+
+        if (bgColor) {
+            tab.style.backgroundColor = bgColor;
             if (isActive) {
                 tab.style.boxShadow = 'inset 0 0 0 2px rgba(255,255,255,0.4)';
                 tab.style.borderColor = 'rgba(255,255,255,0.5)';
@@ -5956,8 +5962,8 @@ function renderSubSheetBar() {
                 tab.style.borderColor = 'rgba(0,0,0,0.1)';
             }
         }
-        if (sheet.fgColor) {
-            tab.style.color = sheet.fgColor;
+        if (fgColor) {
+            tab.style.color = fgColor;
         }
     };
 
@@ -5965,7 +5971,7 @@ function renderSubSheetBar() {
     const parentTab = document.createElement('div');
     parentTab.className = `subsheet-tab ${currentSheet === parentIndex ? 'active' : ''}`;
     parentTab.dataset.sheetIndex = parentIndex;
-    applyTabColors(parentTab, parentSheet, currentSheet === parentIndex);
+    applyTabColors(parentTab, parentSheet, parentIndex, currentSheet === parentIndex);
 
     const parentName = document.createElement('span');
     parentName.className = 'subsheet-tab-name';
@@ -5988,7 +5994,7 @@ function renderSubSheetBar() {
             const tab = document.createElement('div');
             tab.className = `subsheet-tab ${currentSheet === index ? 'active' : ''}`;
             tab.dataset.sheetIndex = index;
-            applyTabColors(tab, sheet, currentSheet === index);
+            applyTabColors(tab, sheet, index, currentSheet === index);
 
             const name = document.createElement('span');
             name.className = 'subsheet-tab-name';
@@ -12571,68 +12577,6 @@ window.addEventListener('resize', () => {
     adjustAllMarkdownCells();
 });
 
-
-// Sub-Sheet Bar Logic
-function renderSubSheetBar() {
-    const subsheetTabs = document.getElementById('subsheetTabs');
-    if (!subsheetTabs) return;
-
-    subsheetTabs.innerHTML = '';
-
-    // Get current sheet's parent (if it's a sub-sheet) or use current sheet as parent
-    const currentSheetData = tableData.sheets[currentSheet];
-    const parentIndex = currentSheetData?.parentSheet !== undefined ?
-        currentSheetData.parentSheet : currentSheet;
-    const parentSheet = tableData.sheets[parentIndex];
-
-    if (!parentSheet) return;
-
-    // Create parent tab
-    const parentTab = document.createElement('div');
-    parentTab.className = `subsheet-tab ${currentSheet === parentIndex ? 'active' : ''}`;
-    parentTab.dataset.sheetIndex = parentIndex;
-
-    const parentName = document.createElement('span');
-    parentName.className = 'subsheet-tab-name';
-    parentName.textContent = parentSheet.name;
-    parentTab.appendChild(parentName);
-    parentTab.onclick = () => switchSheet(parentIndex);
-
-    subsheetTabs.appendChild(parentTab);
-
-    // Find and render all sub-sheets
-    tableData.sheets.forEach((sheet, index) => {
-        if (sheet.parentSheet === parentIndex) {
-            const tab = document.createElement('div');
-            tab.className = `subsheet-tab ${currentSheet === index ? 'active' : ''}`;
-            tab.dataset.sheetIndex = index;
-
-            const name = document.createElement('span');
-            name.className = 'subsheet-tab-name';
-            name.textContent = sheet.name;
-
-            tab.appendChild(name);
-            tab.onclick = () => switchSheet(index);
-
-            // Add right-click context menu for sub-sheet
-            tab.oncontextmenu = (e) => {
-                e.preventDefault();
-                showSubSheetContextMenu(e, index);
-            };
-
-            subsheetTabs.appendChild(tab);
-        }
-    });
-
-    // Add "+" button to add new sub-sheet
-    const addBtn = document.createElement('button');
-    addBtn.className = 'subsheet-add-btn';
-    addBtn.innerHTML = '+';
-    addBtn.title = 'Add sub-sheet';
-    addBtn.onclick = () => addSubSheet(parentIndex);
-
-    subsheetTabs.appendChild(addBtn);
-}
 
 // Sidebar Logic
 function toggleSidebar() {
