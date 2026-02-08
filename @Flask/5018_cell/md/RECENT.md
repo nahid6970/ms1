@@ -6,6 +6,35 @@
 
 ---
 
+## [2026-02-06 15:15] - Category Colors and Sort Rank Refinements
+
+**Session Duration:** 0.6 hours
+
+**What We Accomplished:**
+
+### 🎯 Added Category Colors in F1 and Sidebar
+- **New Feature**: Categories in the F1 Quick Navigation window can now have custom background and text colors.
+- **Implementation**:
+  - Added "Set Colors" to the Category context menu in F1.
+  - Colors are applied to both the F1 category list and the Sidebar tree headers.
+  - Supports "Uncategorized" as a colorable category.
+  - Data is stored in `tableData.categoryStyles`.
+
+### ✅ Enhanced Sort Ranking Logic
+- **Normalization**: Ranks are now automatically normalized to a contiguous sequence (1, 2, 3...) upon any change or app load.
+- **Improved Movement**: Setting a rank now properly shifts existing items and fills gaps, ensuring a consistent user experience.
+
+**Files Modified:**
+- `static/script.js` - Implemented `showCategoryColorPicker`, updated `populateF1Categories`, `renderSidebar`, and `initializeCategories`.
+- `md/UX_NAVIGATION.md` - Updated documentation.
+- `md/RECENT.md` - Logged session.
+
+**Current Status:**
+- ✅ Categories are now as customizable as sheets.
+- ✅ Sort ranking is bulletproof.
+
+---
+
 ## [2026-02-06 14:45] - Cell Sort Ranking Enhancements
 
 **Session Duration:** 0.3 hours

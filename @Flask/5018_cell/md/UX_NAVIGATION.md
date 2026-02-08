@@ -3,10 +3,11 @@
 ## F1 Quick Navigation Window
 **Purpose:** Reorder categories and sheets via a cyberpunk-themed modal.
 **Features:**
-- Category context menus (Rename, Delete, Add).
-- Sheet context menus (Rename, Move to Category, Delete).
+- Category context menus (Rename, Set Colors, Delete, Add).
+- Sheet context menus (Rename, Set Colors, Move to Category, Delete).
 - Drag and drop reorganization.
 - Search modes (🔍 Category, * All Sheets, # Content).
+- **Category Colors**: Right-click any category to set custom background and text colors.
 - **CSS:** `.f1-popup`, `.f1-search-mode-toggle`, `.f1-category-title`.
 
 ## Recent Sheets Popup (F2)

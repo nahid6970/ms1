@@ -6189,6 +6189,9 @@ function initializeCategories() {
     if (!tableData.sheetCategories) {
         tableData.sheetCategories = {};
     }
+    if (!tableData.categoryStyles) {
+        tableData.categoryStyles = {};
+    }
 }
 
 // Add category form handler
@@ -11213,6 +11216,20 @@ function populateF1Categories() {
 
     const uncategorizedItem = document.createElement('div');
     uncategorizedItem.className = 'f1-category-item' + (selectedF1Category === null ? ' active' : '');
+    
+    // Apply custom colors for Uncategorized if they exist
+    const uncategorizedStyle = tableData.categoryStyles ? tableData.categoryStyles['Uncategorized'] : null;
+    if (uncategorizedStyle) {
+        if (uncategorizedStyle.bgColor) {
+            uncategorizedItem.style.backgroundColor = uncategorizedStyle.bgColor;
+            uncategorizedItem.style.backgroundImage = 'none';
+            uncategorizedItem.style.borderColor = uncategorizedStyle.bgColor;
+        }
+        if (uncategorizedStyle.fgColor) {
+            uncategorizedItem.style.color = uncategorizedStyle.fgColor;
+        }
+    }
+
     uncategorizedItem.innerHTML = `
         <input type="radio" name="f1Category" class="f1-category-radio" ${selectedF1Category === null ? 'checked' : ''}>
         <span class="f1-category-name">Uncategorized</span>
@@ -11221,6 +11238,13 @@ function populateF1Categories() {
 
     uncategorizedItem.addEventListener('click', (e) => {
         selectF1Category(null);
+    });
+
+    // Add right-click context menu for Uncategorized (only for colors and add)
+    uncategorizedItem.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        showF1CategoryContextMenu(e, 'Uncategorized');
     });
 
     categoryList.appendChild(uncategorizedItem);
@@ -11234,6 +11258,20 @@ function populateF1Categories() {
 
         const item = document.createElement('div');
         item.className = 'f1-category-item' + (selectedF1Category === category ? ' active' : '');
+        
+        // Apply custom colors if they exist
+        const style = tableData.categoryStyles ? tableData.categoryStyles[category] : null;
+        if (style) {
+            if (style.bgColor) {
+                item.style.backgroundColor = style.bgColor;
+                item.style.backgroundImage = 'none';
+                item.style.borderColor = style.bgColor;
+            }
+            if (style.fgColor) {
+                item.style.color = style.fgColor;
+            }
+        }
+
         item.innerHTML = `
             <input type="radio" name="f1Category" class="f1-category-radio" ${selectedF1Category === category ? 'checked' : ''}>
             <span class="f1-category-name">${category}</span>
@@ -11259,21 +11297,30 @@ function populateF1Categories() {
 // F1 Category Context Menu
 function showF1CategoryContextMenu(event, categoryName) {
     const menu = document.getElementById('f1CategoryContextMenu');
+    const isUncategorized = categoryName === 'Uncategorized';
 
     menu.innerHTML = `
         <div class="context-menu-item" onclick="showAddCategoryModal(); hideF1CategoryContextMenu();">
             <span>➕</span>
             <span>Add Category</span>
         </div>
+        ${!isUncategorized ? `
         <div class="context-menu-item" onclick="renameF1Category('${categoryName}'); hideF1CategoryContextMenu();">
             <span>✏️</span>
             <span>Rename</span>
         </div>
+        ` : ''}
+        <div class="context-menu-item" onclick="showCategoryColorPicker('${categoryName}'); hideF1CategoryContextMenu();">
+            <span>🎨</span>
+            <span>Set Colors</span>
+        </div>
+        ${!isUncategorized ? `
         <div class="context-menu-separator"></div>
         <div class="context-menu-item" onclick="deleteF1Category('${categoryName}'); hideF1CategoryContextMenu();">
             <span>🗑️</span>
             <span>Delete</span>
         </div>
+        ` : ''}
     `;
 
     menu.classList.add('show');
@@ -11406,6 +11453,35 @@ function showSheetColorPicker(sheetIndex) {
     saveData();
     populateF1Sheets();
     showToast(`Colors updated for "${sheet.name}"`, 'success');
+}
+
+function showCategoryColorPicker(categoryName) {
+    if (!categoryName) return;
+    
+    initializeCategories();
+    const style = tableData.categoryStyles[categoryName] || {};
+    const fgColor = style.fgColor || '#e0e0e0';
+    const bgColor = style.bgColor || '#0d0d0d';
+    
+    const newBg = prompt('Enter background color for category (hex, e.g., #ff0000) or leave empty to reset:', bgColor);
+    if (newBg === null) return; // Cancelled
+    
+    const newFg = prompt('Enter text color for category (hex, e.g., #ffffff) or leave empty to reset:', fgColor);
+    if (newFg === null) return; // Cancelled
+    
+    if (!newBg && !newFg) {
+        delete tableData.categoryStyles[categoryName];
+    } else {
+        tableData.categoryStyles[categoryName] = {
+            bgColor: newBg || undefined,
+            fgColor: newFg || undefined
+        };
+    }
+    
+    saveData();
+    populateF1Categories();
+    renderSidebar();
+    showToast(`Colors updated for category "${categoryName}"`, 'success');
 }
 
 async function addF1Sheet() {
@@ -12615,6 +12691,20 @@ function renderSidebar() {
 
         const header = document.createElement('div');
         header.className = 'tree-category-header tree-item';
+        
+        // Apply custom colors if they exist (including Uncategorized)
+        const style = tableData.categoryStyles ? tableData.categoryStyles[catName] : null;
+        if (style) {
+            if (style.bgColor) {
+                header.style.backgroundColor = style.bgColor;
+                header.style.backgroundImage = 'none';
+                header.style.borderColor = style.bgColor;
+            }
+            if (style.fgColor) {
+                header.style.color = style.fgColor;
+            }
+        }
+
         header.onclick = (e) => {
             // Toggle collapse and icon
             catDiv.classList.toggle('collapsed');
