@@ -107,18 +107,19 @@ class CommitLoaderThread(QThread):
     """Background thread for loading commits"""
     finished = pyqtSignal(dict)  # Emits result when done
     
-    def __init__(self, directory, limit=None):
+    def __init__(self, directory, limit=None, scope="."):
         super().__init__()
         self.directory = directory
         self.limit = limit
+        self.scope = scope
     
     def run(self):
-        result = GitWorker.get_commits(self.directory, self.limit)
+        result = GitWorker.get_commits(self.directory, self.limit, self.scope)
         self.finished.emit(result)
 
 class GitWorker:
     @staticmethod
-    def get_commits(directory, limit=None):
+    def get_commits(directory, limit=None, scope="."):
         if not os.path.isdir(directory):
             return {"error": "Invalid directory"}
         
@@ -135,10 +136,14 @@ class GitWorker:
             return {"error": "Git not found on system path"}
 
         try:
+            # Ensure scope is handled correctly (default to current dir if empty)
+            git_scope = scope if scope and scope.strip() else "."
+            
             if limit and limit > 0:
-                cmd = ["git", "log", "--pretty=format:%h|%an|%ad|%s", "--date=short", "-n", str(limit), "--", "."]
+                cmd = ["git", "log", "--pretty=format:%h|%an|%ad|%s", "--date=short", "-n", str(limit), "--", git_scope]
             else:
-                cmd = ["git", "log", "--pretty=format:%h|%an|%ad|%s", "--date=short", "--", "."]
+                cmd = ["git", "log", "--pretty=format:%h|%an|%ad|%s", "--date=short", "--", git_scope]
+            
             result = subprocess.check_output(cmd, cwd=directory, text=True, encoding='utf-8')
             
             commits = []
@@ -171,15 +176,17 @@ class GitWorker:
             return directory
 
     @staticmethod
-    def get_commit_diff(directory, commit_hash):
-        """Get the diff for a specific commit"""
+    def get_diff_between(directory, commit_a, commit_b="HEAD", scope="."):
+        """Get the diff between two points, scoped to a path"""
         try:
+            git_scope = scope if scope and scope.strip() else "."
+            
             # Get file stats (additions/deletions)
-            cmd_stats = ["git", "show", "--stat", "--format=", commit_hash]
+            cmd_stats = ["git", "diff", "--stat", "--format=", f"{commit_a}..{commit_b}", "--", git_scope]
             stats_result = subprocess.check_output(cmd_stats, cwd=directory, text=True, encoding='utf-8')
             
             # Get detailed diff
-            cmd_diff = ["git", "show", commit_hash, "--color=never"]
+            cmd_diff = ["git", "diff", f"{commit_a}..{commit_b}", "--color=never", "--", git_scope]
             diff_result = subprocess.check_output(cmd_diff, cwd=directory, text=True, encoding='utf-8')
             
             return {"success": {"stats": stats_result, "diff": diff_result}}
@@ -187,9 +194,10 @@ class GitWorker:
             return {"error": str(e)}
 
     @staticmethod
-    def checkout_path(directory, commit_hash):
+    def checkout_path(directory, commit_hash, scope="."):
         try:
-            cmd = ["git", "checkout", commit_hash, "--", "."]
+            git_scope = scope if scope and scope.strip() else "."
+            cmd = ["git", "checkout", commit_hash, "--", git_scope]
             subprocess.check_call(cmd, cwd=directory)
             return {"success": True}
         except subprocess.CalledProcessError as e:
@@ -477,6 +485,15 @@ class MainWindow(QMainWindow):
 
         path_layout.addWidget(QLabel("DIR:"))
         path_layout.addWidget(self.path_input)
+        
+        path_layout.addWidget(QLabel("SCOPE:"))
+        self.scope_input = QLineEdit(".")
+        self.scope_input.setPlaceholderText("Folder or file path...")
+        self.scope_input.setToolTip("Narrow log to this sub-folder or specific file")
+        self.scope_input.setFixedWidth(200)
+        self.scope_input.returnPressed.connect(self.load_commits)
+        path_layout.addWidget(self.scope_input)
+
         path_layout.addWidget(browse_btn)
         path_layout.addWidget(tree_browse_btn)
         path_layout.addWidget(settings_btn)
@@ -492,9 +509,22 @@ class MainWindow(QMainWindow):
         table_layout = QVBoxLayout(table_widget)
         table_layout.setContentsMargins(0, 0, 0, 0)
         
+        # Search Bar
+        search_layout = QHBoxLayout()
+        search_layout.addWidget(QLabel("SEARCH:"))
+        self.search_input = QLineEdit()
+        self.search_input.setPlaceholderText("Filter commits by message, hash, or author...")
+        self.search_input.textChanged.connect(self.filter_commits)
+        search_layout.addWidget(self.search_input)
+        table_layout.addLayout(search_layout)
+
+        # Table Label
+        table_label_layout = QHBoxLayout()
         table_label = QLabel("COMMIT HISTORY:")
         table_label.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold;")
-        table_layout.addWidget(table_label)
+        table_label_layout.addWidget(table_label)
+        table_label_layout.addStretch()
+        table_layout.addLayout(table_label_layout)
 
         # Table Setup
         self.table = QTableWidget()
@@ -524,9 +554,21 @@ class MainWindow(QMainWindow):
         diff_layout = QVBoxLayout(diff_widget)
         diff_layout.setContentsMargins(0, 0, 0, 0)
         
+        diff_header_layout = QHBoxLayout()
         diff_label = QLabel("CHANGES:")
         diff_label.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold;")
-        diff_layout.addWidget(diff_label)
+        diff_header_layout.addWidget(diff_label)
+        
+        diff_header_layout.addStretch()
+        
+        from PyQt6.QtWidgets import QCheckBox
+        self.compare_to_head_cb = QCheckBox("Compare to HEAD")
+        self.compare_to_head_cb.setToolTip("Show everything that has changed in this folder since the selected commit, instead of just the commit itself.")
+        self.compare_to_head_cb.setStyleSheet(f"color: {CP_CYAN}; font-weight: bold;")
+        self.compare_to_head_cb.stateChanged.connect(self.on_commit_selected)
+        diff_header_layout.addWidget(self.compare_to_head_cb)
+        
+        diff_layout.addLayout(diff_header_layout)
         
         self.diff_display = CyberDiffBrowser(self)
         self.diff_display.file_context_requested.connect(self.open_file_in_editor)
@@ -997,11 +1039,19 @@ class MainWindow(QMainWindow):
         row = selected_items[0].row()
         commit_hash = self.table.item(row, 0).text()
         directory = self.path_input.text()
+        scope = self.scope_input.text() or "."
         
-        self.diff_display.setHtml(f"<div style='color: {CP_YELLOW}; padding: 20px;'>Loading changes...</div>")
+        compare_mode = self.compare_to_head_cb.isChecked()
+        loading_text = "Loading changes since commit..." if compare_mode else "Loading commit changes..."
+        self.diff_display.setHtml(f"<div style='color: {CP_YELLOW}; padding: 20px;'>{loading_text}</div>")
         QApplication.processEvents()
         
-        result = GitWorker.get_commit_diff(directory, commit_hash)
+        if compare_mode:
+            result = GitWorker.get_diff_between(directory, commit_hash, "HEAD", scope)
+        else:
+            # We want just the specific commit diff, but scoped to the path
+            result = GitWorker.get_diff_between(directory, f"{commit_hash}^", commit_hash, scope)
+            
         if "error" in result:
             self.diff_display.setHtml(f"<div style='color: {CP_RED}; padding: 20px;'>Error loading diff:<br>{result['error']}</div>")
             self.expanded_files.clear()
@@ -1164,7 +1214,7 @@ class MainWindow(QMainWindow):
         QApplication.processEvents()
 
         # Use threading for better performance
-        self.loader_thread = CommitLoaderThread(directory, self.commit_limit)
+        self.loader_thread = CommitLoaderThread(directory, self.commit_limit, self.scope_input.text())
         self.loader_thread.finished.connect(self.on_commits_loaded)
         self.loader_thread.start()
 
@@ -1201,6 +1251,8 @@ class MainWindow(QMainWindow):
         limit_text = f" (LIMIT: {self.commit_limit})" if self.commit_limit > 0 else " (ALL)"
         self.status_label.setText(f"LOADED {len(commits)} COMMITS{limit_text}")
 
+        self.table.viewport().update()
+
     def update_table_active_state(self):
         """Update the table items to show which commit is active"""
         for row in range(self.table.rowCount()):
@@ -1210,6 +1262,19 @@ class MainWindow(QMainWindow):
                 # Set UserRole data for the whole row (delegates look at col 0)
                 item.setData(Qt.ItemDataRole.UserRole, is_active)
         self.table.viewport().update()
+
+    def filter_commits(self):
+        """Client-side filter for the commit table"""
+        search_text = self.search_input.text().strip().lower()
+        for row in range(self.table.rowCount()):
+            match = False
+            # Check Hash, Author, and Message columns
+            for col in [0, 2, 3]:
+                item = self.table.item(row, col)
+                if item and search_text in item.text().lower():
+                    match = True
+                    break
+            self.table.setRowHidden(row, not match)
 
     def revert_commit(self):
         selected_items = self.table.selectedItems()
@@ -1231,7 +1296,8 @@ class MainWindow(QMainWindow):
         if confirm == QMessageBox.StandardButton.Yes:
             self.status_label.setText("RESTORING...")
             QApplication.processEvents()
-            result = GitWorker.checkout_path(directory, commit_hash)
+            scope = self.scope_input.text() or "."
+            result = GitWorker.checkout_path(directory, commit_hash, scope)
             if "success" in result:
                 self.active_commit_hash = commit_hash
                 self.update_table_active_state()
@@ -1264,27 +1330,43 @@ class MainWindow(QMainWindow):
         dirty_files = local_changes.get("success", []) if "success" in local_changes else []
         
         # 2. Look for files in the selected commit (fallback or filter)
-        commit_result = GitWorker.get_commit_changed_files(base_dir, commit_hash)
-        commit_files_info = commit_result.get("success", []) if "success" in commit_result else []
-        commit_files = [f['path'] for f in commit_files_info]
+        compare_mode = self.compare_to_head_cb.isChecked()
+        scope = self.scope_input.text() or "."
+        
+        if compare_mode:
+            # Get files changed between selected commit and HEAD
+            commit_result = GitWorker.get_diff_between(directory, commit_hash, "HEAD", scope)
+            source_desc_type = "changes since commit"
+        else:
+            # Get files changed in this specific commit only
+            commit_result = GitWorker.get_diff_between(directory, f"{commit_hash}^", commit_hash, scope)
+            source_desc_type = "this commit"
+
+        if "error" in commit_result:
+            QMessageBox.critical(self, "Error", f"Failed to get changes:\n{commit_result['error']}")
+            return
+            
+        diff_data = commit_result["success"]
+        sections = self.parse_diff(diff_data["diff"])
+        commit_files = [s['name'] for s in sections]
 
         # Determine target files:
-        # If the user has local changes, they likely want to replace THEM with versions from history.
-        # If no local changes, we provide a bulk 'apply' of the commit's changes.
         if dirty_files:
             target_files = dirty_files
             source_desc = f"{len(dirty_files)} local change(s)"
+            op_label = "Replace local changes"
         else:
             target_files = commit_files
-            source_desc = f"{len(commit_files)} file(s) from commit"
+            source_desc = f"{len(commit_files)} file(s) from {source_desc_type}"
+            op_label = "Revert changes"
         
         if not target_files:
-            QMessageBox.information(self, "Nothing to Restore", "No local changes and no files in this commit to process.")
+            QMessageBox.information(self, "Nothing to Restore", f"No local changes and no {source_desc_type} found to process.")
             return
 
         confirm = QMessageBox.question(
             self, "Confirm File Restore",
-            f"Replace current {source_desc} with versions from commit:\n\n[{commit_hash}] {commit_msg}?\n\nThis will OVERWRITE your current work for these files.",
+            f"{op_label} with versions from commit:\n\n[{commit_hash}] {commit_msg}?\n\nTargeting {len(target_files)} file(s) in {scope}.\n\nThis will OVERWRITE your current work for these files.",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
         )
 
