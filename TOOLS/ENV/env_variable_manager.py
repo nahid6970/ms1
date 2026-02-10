@@ -1407,25 +1407,29 @@ class EnvVariableManager(QMainWindow):
         path = os.path.join(self.scripts_dir, name)
         
         # Determine command based on extension
+        # Use %1 as it works for both files and directories
         cmd = ""
         if name.endswith(".py"):
-            cmd = f'python "{path}" "%V"'
+            cmd = f'python.exe "{path}" "%1"'
         elif name.endswith(".bat") or name.endswith(".cmd"):
-            cmd = f'"{path}" "%V"'
+            cmd = f'"{path}" "%1"'
         elif name.endswith(".ps1"):
-            cmd = f'powershell -ExecutionPolicy Bypass -File "{path}" "%V"'
+            cmd = f'powershell.exe -ExecutionPolicy Bypass -File "{path}" "%1"'
         else:
-            cmd = f'"{path}" "%V"'
+            cmd = f'"{path}" "%1"'
             
         label, ok = QInputDialog.getText(self, "Context Menu Label", 
                                         "Menu Label for this script:", 
                                         text=f"Run {name}")
         if ok and label:
             try:
+                # Register for Files (*), Folders (Directory), and Background
+                self._create_reg_entry(rf"*\shell\{label}", cmd)
                 self._create_reg_entry(rf"Directory\shell\{label}", cmd)
                 self._create_reg_entry(rf"Directory\Background\shell\{label}", cmd)
+                
                 self.load_context_entries()
-                QMessageBox.information(self, "Success", f"'{label}' added to context menu.")
+                QMessageBox.information(self, "Success", f"'{label}' added to context menu for files and folders.")
             except PermissionError:
                 QMessageBox.critical(self, "Error", "Permission Denied. Run as Admin.")
             except Exception as e:
