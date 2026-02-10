@@ -325,15 +325,18 @@ class EnvVariableManager(QMainWindow):
         self.path_list.clear()
         
         try:
-            if scope == "user":
-                key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Environment", 0, winreg.KEY_READ)
-            else:
-                key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, 
-                                    r"SYSTEM\CurrentControlSet\Control\Session Manager\Environment",
-                                    0, winreg.KEY_READ)
+            hkey = winreg.HKEY_CURRENT_USER if scope == "user" else winreg.HKEY_LOCAL_MACHINE
+            subkey = r"Environment" if scope == "user" else r"SYSTEM\CurrentControlSet\Control\Session Manager\Environment"
             
-            path_value, _ = winreg.QueryValueEx(key, "Path")
-            winreg.CloseKey(key)
+            with winreg.OpenKey(hkey, subkey, 0, winreg.KEY_READ) as key:
+                try:
+                    path_value, _ = winreg.QueryValueEx(key, "Path")
+                except FileNotFoundError:
+                    # Path might be named PATH or not exist
+                    try:
+                        path_value, _ = winreg.QueryValueEx(key, "PATH")
+                    except FileNotFoundError:
+                        path_value = ""
             
             paths = [p.strip() for p in path_value.split(';') if p.strip()]
             for path in paths:
@@ -349,16 +352,11 @@ class EnvVariableManager(QMainWindow):
             paths = [self.path_list.item(i).text() for i in range(self.path_list.count())]
             path_value = ';'.join(paths)
             
-            if self.current_path_scope == "user":
-                key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Environment", 0, 
-                                    winreg.KEY_SET_VALUE)
-            else:
-                key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE,
-                                    r"SYSTEM\CurrentControlSet\Control\Session Manager\Environment",
-                                    0, winreg.KEY_SET_VALUE)
+            hkey = winreg.HKEY_CURRENT_USER if self.current_path_scope == "user" else winreg.HKEY_LOCAL_MACHINE
+            subkey = r"Environment" if self.current_path_scope == "user" else r"SYSTEM\CurrentControlSet\Control\Session Manager\Environment"
             
-            winreg.SetValueEx(key, "Path", 0, winreg.REG_EXPAND_SZ, path_value)
-            winreg.CloseKey(key)
+            with winreg.OpenKey(hkey, subkey, 0, winreg.KEY_SET_VALUE) as key:
+                winreg.SetValueEx(key, "Path", 0, winreg.REG_EXPAND_SZ, path_value)
             
             # Broadcast change
             self.broadcast_env_change()
@@ -516,16 +514,12 @@ class EnvVariableManager(QMainWindow):
             value, ok2 = QInputDialog.getText(self, "Add Variable", f"Value for {name}:")
             if ok2:
                 try:
-                    if self.current_env_scope == "user":
-                        key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Environment", 0,
-                                            winreg.KEY_SET_VALUE)
-                    else:
-                        key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE,
-                                            r"SYSTEM\CurrentControlSet\Control\Session Manager\Environment",
-                                            0, winreg.KEY_SET_VALUE)
+                    hkey = winreg.HKEY_CURRENT_USER if self.current_env_scope == "user" else winreg.HKEY_LOCAL_MACHINE
+                    subkey = r"Environment" if self.current_env_scope == "user" else r"SYSTEM\CurrentControlSet\Control\Session Manager\Environment"
                     
-                    winreg.SetValueEx(key, name, 0, winreg.REG_EXPAND_SZ, value)
-                    winreg.CloseKey(key)
+                    with winreg.OpenKey(hkey, subkey, 0, winreg.KEY_SET_VALUE) as key:
+                        winreg.SetValueEx(key, name, 0, winreg.REG_EXPAND_SZ, value)
+                    
                     self.broadcast_env_change()
                     self.load_env_vars(self.current_env_scope)
                     self.set_status(f"Added {name}", CP_GREEN)
@@ -538,23 +532,24 @@ class EnvVariableManager(QMainWindow):
         """Edit selected environment variable"""
         current_row = self.env_table.currentRow()
         if current_row >= 0:
-            name = self.env_table.item(current_row, 0).text()
-            old_value = self.env_table.item(current_row, 1).text()
+            name_item = self.env_table.item(current_row, 0)
+            value_item = self.env_table.item(current_row, 1)
+            if not name_item or not value_item:
+                return
+                
+            name = name_item.text()
+            old_value = value_item.text()
             
             value, ok = QInputDialog.getText(self, "Edit Variable", f"New value for {name}:",
                                             text=old_value)
             if ok:
                 try:
-                    if self.current_env_scope == "user":
-                        key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Environment", 0,
-                                            winreg.KEY_SET_VALUE)
-                    else:
-                        key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE,
-                                            r"SYSTEM\CurrentControlSet\Control\Session Manager\Environment",
-                                            0, winreg.KEY_SET_VALUE)
+                    hkey = winreg.HKEY_CURRENT_USER if self.current_env_scope == "user" else winreg.HKEY_LOCAL_MACHINE
+                    subkey = r"Environment" if self.current_env_scope == "user" else r"SYSTEM\CurrentControlSet\Control\Session Manager\Environment"
                     
-                    winreg.SetValueEx(key, name, 0, winreg.REG_EXPAND_SZ, value)
-                    winreg.CloseKey(key)
+                    with winreg.OpenKey(hkey, subkey, 0, winreg.KEY_SET_VALUE) as key:
+                        winreg.SetValueEx(key, name, 0, winreg.REG_EXPAND_SZ, value)
+                    
                     self.broadcast_env_change()
                     self.load_env_vars(self.current_env_scope)
                     self.set_status(f"Updated {name}", CP_GREEN)
@@ -567,22 +562,21 @@ class EnvVariableManager(QMainWindow):
         """Remove selected environment variable"""
         current_row = self.env_table.currentRow()
         if current_row >= 0:
-            name = self.env_table.item(current_row, 0).text()
+            name_item = self.env_table.item(current_row, 0)
+            if not name_item:
+                return
+            name = name_item.text()
             
             reply = QMessageBox.question(self, "Confirm", f"Delete variable '{name}'?",
                                         QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
             if reply == QMessageBox.StandardButton.Yes:
                 try:
-                    if self.current_env_scope == "user":
-                        key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Environment", 0,
-                                            winreg.KEY_SET_VALUE)
-                    else:
-                        key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE,
-                                            r"SYSTEM\CurrentControlSet\Control\Session Manager\Environment",
-                                            0, winreg.KEY_SET_VALUE)
+                    hkey = winreg.HKEY_CURRENT_USER if self.current_env_scope == "user" else winreg.HKEY_LOCAL_MACHINE
+                    subkey = r"Environment" if self.current_env_scope == "user" else r"SYSTEM\CurrentControlSet\Control\Session Manager\Environment"
                     
-                    winreg.DeleteValue(key, name)
-                    winreg.CloseKey(key)
+                    with winreg.OpenKey(hkey, subkey, 0, winreg.KEY_SET_VALUE) as key:
+                        winreg.DeleteValue(key, name)
+                    
                     self.broadcast_env_change()
                     self.load_env_vars(self.current_env_scope)
                     self.set_status(f"Deleted {name}", CP_GREEN)
@@ -1644,9 +1638,19 @@ class EnvVariableManager(QMainWindow):
         try:
             import win32gui
             import win32con
-            win32gui.SendMessage(win32con.HWND_BROADCAST, win32con.WM_SETTINGCHANGE, 0, "Environment")
-        except ImportError:
-            # pywin32 not installed, changes will apply after restart
+            # Use SendMessageTimeout to avoid hanging if an application is unresponsive
+            # HWND_BROADCAST = 0xFFFF, WM_SETTINGCHANGE = 0x001A
+            win32gui.SendMessageTimeout(
+                win32con.HWND_BROADCAST, 
+                win32con.WM_SETTINGCHANGE, 
+                0, 
+                "Environment", 
+                win32con.SMTO_ABORTIFHUNG, 
+                1000, # 1 second timeout
+                None
+            )
+        except Exception:
+            # pywin32 not installed or other error, changes will apply after restart
             pass
     
     def set_status(self, message, color=CP_TEXT):
