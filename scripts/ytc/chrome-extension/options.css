@@ -1,0 +1,201 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: #050a0e;
+  color: #e0e0e0;
+  font-family: "Consolas", "Courier New", monospace;
+  font-size: 11pt;
+  padding: 20px;
+}
+
+.container {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 30px;
+  background-color: #10161d;
+  border: 1px solid #333;
+  border-radius: 8px;
+}
+
+.header {
+  text-align: center;
+  color: #00ff9f;
+  font-size: 20pt;
+  font-weight: bold;
+  margin-bottom: 30px;
+  text-shadow: 0 0 10px #00ff9f;
+}
+
+.section {
+  margin-bottom: 25px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #333;
+}
+
+.section:last-of-type {
+  border-bottom: none;
+}
+
+.section-title {
+  display: block;
+  color: #ff003c;
+  font-weight: bold;
+  margin-bottom: 10px;
+  font-size: 11pt;
+}
+
+.input-group {
+  display: flex;
+  gap: 10px;
+}
+
+.text-input {
+  flex: 1;
+  background-color: #050a0e;
+  border: 1px solid #00f0ff;
+  padding: 10px;
+  color: #00f0ff;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 10pt;
+}
+
+.browse-btn {
+  background-color: #10161d;
+  border: 1px solid #00ff9f;
+  color: #00ff9f;
+  padding: 10px 20px;
+  font-weight: bold;
+  font-family: inherit;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.3s;
+}
+
+.browse-btn:hover {
+  background-color: #00ff9f;
+  color: #050a0e;
+}
+
+.select {
+  width: 100%;
+  background-color: #050a0e;
+  border: 1px solid #ff003c;
+  padding: 10px;
+  color: #e0e0e0;
+  border-radius: 4px;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.select:focus {
+  outline: none;
+  border-color: #00ff9f;
+}
+
+.hint {
+  color: #888;
+  font-size: 9pt;
+  margin-top: 5px;
+  font-style: italic;
+}
+
+.subsection {
+  margin-bottom: 15px;
+}
+
+.subsection label {
+  display: block;
+  color: #00f0ff;
+  margin-bottom: 5px;
+  font-size: 10pt;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  color: #e0e0e0;
+  cursor: pointer;
+  user-select: none;
+}
+
+.checkbox-label input[type="checkbox"] {
+  margin-right: 8px;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: #00f0ff;
+}
+
+.save-btn {
+  width: 100%;
+  background-color: #10161d;
+  border: 2px solid #00ff9f;
+  color: #00ff9f;
+  padding: 15px;
+  font-weight: bold;
+  font-family: inherit;
+  font-size: 12pt;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.3s;
+  margin-top: 20px;
+}
+
+.save-btn:hover {
+  background-color: #00ff9f;
+  color: #050a0e;
+  box-shadow: 0 0 15px #00ff9f;
+}
+
+.status {
+  text-align: center;
+  color: #00f0ff;
+  margin-top: 15px;
+  padding: 10px;
+  background-color: #050a0e;
+  border-radius: 4px;
+  font-size: 10pt;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.info-section {
+  margin-top: 30px;
+  padding: 20px;
+  background-color: #050a0e;
+  border: 1px solid #00f0ff;
+  border-radius: 4px;
+}
+
+.info-section h3 {
+  color: #00ff9f;
+  margin-bottom: 15px;
+  font-size: 11pt;
+}
+
+.info-section ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.info-section li {
+  color: #e0e0e0;
+  margin-bottom: 8px;
+  padding-left: 20px;
+  position: relative;
+  font-size: 10pt;
+}
+
+.info-section li:before {
+  content: "▸";
+  color: #00f0ff;
+  position: absolute;
+  left: 0;
+}

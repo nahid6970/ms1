@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>YTC Subtitle Extractor</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <h1 class="header">YTC SUBTITLE EXTRACTOR</h1>
+    
+    <div class="section">
+      <label class="section-title">CURRENT URL:</label>
+      <input type="text" id="url" class="url-input" readonly>
+    </div>
+
+    <div class="section">
+      <label class="section-title">LANGUAGE:</label>
+      <select id="language" class="select">
+        <option value="en">English</option>
+        <option value="bn">Bengali</option>
+        <option value="hi">Hindi</option>
+        <option value="all">All</option>
+      </select>
+    </div>
+
+    <div class="section">
+      <label class="section-title">FORMAT:</label>
+      <select id="format" class="select">
+        <option value="srt">SRT</option>
+        <option value="vtt">VTT</option>
+        <option value="txt">TXT (Raw)</option>
+      </select>
+    </div>
+
+    <div class="section">
+      <label class="checkbox-label">
+        <input type="checkbox" id="autoSub">
+        INCLUDE AUTO-GENERATED
+      </label>
+    </div>
+
+    <div class="section">
+      <label class="checkbox-label">
+        <input type="checkbox" id="useTimeline">
+        TIMELINE RANGE
+      </label>
+    </div>
+
+    <div class="section timeline-section" id="timelineInputs" style="display: none;">
+      <div class="time-input-group">
+        <label>START:</label>
+        <input type="text" id="startTime" placeholder="0:00 or 3062" class="time-input">
+      </div>
+      <div class="time-input-group">
+        <label>END:</label>
+        <input type="text" id="endTime" placeholder="5:30 or 3428" class="time-input">
+      </div>
+    </div>
+
+    <button id="extract" class="extract-btn">[ EXTRACT SUBTITLES ]</button>
+    
+    <div id="status" class="status">READY</div>
+    
+    <div class="footer">
+      <a href="#" id="settingsLink">⚙️ Settings</a>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

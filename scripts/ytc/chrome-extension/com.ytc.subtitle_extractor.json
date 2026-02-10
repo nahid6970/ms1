@@ -1,0 +1,9 @@
+{
+  "name": "com.ytc.subtitle_extractor",
+  "description": "YTC Subtitle Extractor Native Host",
+  "path": "C:\\@delta\\ms1\\scripts\\ytc\\chrome-extension\\native_host.bat",
+  "type": "stdio",
+  "allowed_origins": [
+    "chrome-extension://lbjboinbngddjnklpggbnnaclandocpb/"
+  ]
+}
