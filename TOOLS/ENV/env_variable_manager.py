@@ -781,8 +781,8 @@ class EnvVariableManager(QMainWindow):
         list_group = QGroupBox("CONTEXT MENU ENTRIES")
         list_layout = QVBoxLayout()
         self.context_table = QTableWidget()
-        self.context_table.setColumnCount(2)
-        self.context_table.setHorizontalHeaderLabels(["Menu Label", "Command / Script"])
+        self.context_table.setColumnCount(3)
+        self.context_table.setHorizontalHeaderLabels(["Menu Label", "Type", "Command / Script"])
         self.context_table.horizontalHeader().setStretchLastSection(True)
         self.context_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         list_layout.addWidget(self.context_table)
@@ -792,19 +792,23 @@ class EnvVariableManager(QMainWindow):
         # Controls
         controls_layout = QHBoxLayout()
         add_btn = QPushButton("➕ ADD ENTRY")
+        add_group_btn = QPushButton("📁 ADD GROUP")
         edit_btn = QPushButton("✏️ EDIT")
         remove_btn = QPushButton("❌ REMOVE")
         refresh_btn = QPushButton("🔄 REFRESH")
         
         add_btn.clicked.connect(self.add_context_entry)
+        add_group_btn.clicked.connect(self.add_context_group)
         edit_btn.clicked.connect(self.edit_context_entry)
         remove_btn.clicked.connect(self.remove_context_entry)
         refresh_btn.clicked.connect(self.load_context_entries)
         
         controls_layout.addWidget(add_btn)
+        controls_layout.addWidget(add_group_btn)
         controls_layout.addWidget(edit_btn)
         controls_layout.addWidget(remove_btn)
         controls_layout.addWidget(refresh_btn)
+        layout.addLayout(controls_layout)
         layout.addLayout(controls_layout)
         
         # Initialize
@@ -816,51 +820,133 @@ class EnvVariableManager(QMainWindow):
         """Load context menu entries from registry"""
         self.context_table.setRowCount(0)
         
-        # We look in Directory\Background\shell (for empty space right-click)
-        # and Directory\shell (for right-click on folders)
-        paths = [
-            r"Directory\Background\shell",
-            r"Directory\shell"
-        ]
-        
-        found_entries = {} # label -> command
-        
-        for base_path in paths:
-            try:
-                key = winreg.OpenKey(winreg.HKEY_CLASSES_ROOT, base_path, 0, winreg.KEY_READ)
-                i = 0
-                while True:
-                    try:
-                        subkey_name = winreg.EnumKey(key, i)
-                        if subkey_name.lower() in ["cmd", "powershell", "anycode"]: # Skip standard Windows entries
-                            i += 1
-                            continue
-                            
-                        # Get command
-                        try:
-                            cmd_key = winreg.OpenKey(winreg.HKEY_CLASSES_ROOT, f"{base_path}\\{subkey_name}\\command", 0, winreg.KEY_READ)
-                            cmd_value, _ = winreg.QueryValueEx(cmd_key, "")
-                            winreg.CloseKey(cmd_key)
-                            
-                            found_entries[subkey_name] = cmd_value
-                        except:
-                            pass
-                        
-                        i += 1
-                    except OSError:
-                        break
-                winreg.CloseKey(key)
-            except Exception as e:
-                print(f"Error loading context menu for {base_path}: {e}")
+        # Scan both folder right-click and background right-click
+        # We use HKCR for a complete view, but HKCU entries will be what we manage
+        self._scan_shell_keys(r"Directory\shell", "Folder")
+        self._scan_shell_keys(r"Directory\Background\shell", "Background")
 
-        for name, cmd in found_entries.items():
-            row = self.context_table.rowCount()
-            self.context_table.insertRow(row)
-            self.context_table.setItem(row, 0, QTableWidgetItem(name))
-            self.context_table.setItem(row, 1, QTableWidgetItem(cmd))
+    def _scan_shell_keys(self, base_path, scope_label, indent=""):
+        """Recursive helper to scan for context menu items and groups"""
+        try:
+            key = winreg.OpenKey(winreg.HKEY_CLASSES_ROOT, base_path, 0, winreg.KEY_READ)
+            i = 0
+            while True:
+                try:
+                    subkey_name = winreg.EnumKey(key, i)
+                    # Skip standard Windows entries
+                    if subkey_name.lower() in ["cmd", "powershell", "anycode", "wsl"]:
+                        i += 1
+                        continue
+                        
+                    full_path = f"{base_path}\\{subkey_name}"
+                    
+                    # Try to get Label (from MUIVerb or default value)
+                    label = subkey_name
+                    try:
+                        subkey = winreg.OpenKey(winreg.HKEY_CLASSES_ROOT, full_path, 0, winreg.KEY_READ)
+                        try:
+                            label, _ = winreg.QueryValueEx(subkey, "MUIVerb")
+                        except:
+                            try:
+                                val = winreg.QueryValue(subkey, "")
+                                if val: label = val
+                            except: pass
+                        winreg.CloseKey(subkey)
+                    except: pass
+
+                    # Check if it has a command (it's a leaf node)
+                    cmd = ""
+                    is_group = False
+                    try:
+                        cmd_key = winreg.OpenKey(winreg.HKEY_CLASSES_ROOT, f"{full_path}\\command", 0, winreg.KEY_READ)
+                        cmd, _ = winreg.QueryValueEx(cmd_key, "")
+                        winreg.CloseKey(cmd_key)
+                    except:
+                        # No command key? Check if it has a 'shell' subkey (it's a group)
+                        try:
+                            shell_key = winreg.OpenKey(winreg.HKEY_CLASSES_ROOT, f"{full_path}\\shell", 0, winreg.KEY_READ)
+                            winreg.CloseKey(shell_key)
+                            is_group = True
+                            cmd = "(Cascading Menu)"
+                        except:
+                            # It might just be an empty/broken entry
+                            pass
+
+                    # Add to table
+                    row = self.context_table.rowCount()
+                    self.context_table.insertRow(row)
+                    
+                    # Store the internal path in the item data for editing/removal
+                    label_item = QTableWidgetItem(f"{indent}{label} [{scope_label}]")
+                    label_item.setData(Qt.ItemDataRole.UserRole, full_path)
+                    
+                    self.context_table.setItem(row, 0, label_item)
+                    self.context_table.setItem(row, 1, QTableWidgetItem("GROUP" if is_group else "ENTRY"))
+                    self.context_table.setItem(row, 2, QTableWidgetItem(cmd))
+                    
+                    # If it's a group, recurse
+                    if is_group:
+                        self._scan_shell_keys(f"{full_path}\\shell", scope_label, indent + "  ↳ ")
+                        
+                    i += 1
+                except OSError:
+                    break
+            winreg.CloseKey(key)
+        except Exception as e:
+            print(f"Error scanning {base_path}: {e}")
+
+    def add_context_group(self):
+        """Add a new cascading menu group"""
+        # Check if a group is selected to add a sub-group
+        parent_path = ""
+        row = self.context_table.currentRow()
+        if row >= 0:
+            type_text = self.context_table.item(row, 1).text()
+            if type_text == "GROUP":
+                parent_path = self.context_table.item(row, 0).data(Qt.ItemDataRole.UserRole)
+
+        name, ok = QInputDialog.getText(self, "Add Context Group", "Group Label:")
+        if ok and name:
+            try:
+                if parent_path:
+                    # Nested group
+                    # We must write to HKCU version of the path
+                    hkcu_base = parent_path.replace("Directory\\", "Software\\Classes\\Directory\\")
+                    path = rf"{hkcu_base}\shell\{name}"
+                else:
+                    # Top level groups (add to both locations)
+                    self._create_group_entry(rf"Software\Classes\Directory\shell\{name}")
+                    self._create_group_entry(rf"Software\Classes\Directory\Background\shell\{name}")
+                    path = "" # Already handled
+
+                if path:
+                    self._create_group_entry(path)
+
+                self.load_context_entries()
+                self.set_status(f"Added context group: {name}", CP_GREEN)
+            except Exception as e:
+                QMessageBox.critical(self, "Error", f"Failed to add group: {str(e)}")
+
+    def _create_group_entry(self, path):
+        """Helper to create a cascading menu group in registry"""
+        key = winreg.CreateKey(winreg.HKEY_CURRENT_USER, path)
+        # Get the leaf name for the label
+        label = path.split('\\')[-1]
+        winreg.SetValueEx(key, "MUIVerb", 0, winreg.REG_SZ, label)
+        winreg.SetValueEx(key, "SubCommands", 0, winreg.REG_SZ, "")
+        winreg.CreateKey(key, "shell")
+        winreg.CloseKey(key)
 
     def add_context_entry(self):
         """Add a new right-click context menu entry"""
+        # Check if a group is selected to add a child entry
+        parent_path = ""
+        row = self.context_table.currentRow()
+        if row >= 0:
+            type_text = self.context_table.item(row, 1).text()
+            if type_text == "GROUP":
+                parent_path = self.context_table.item(row, 0).data(Qt.ItemDataRole.UserRole)
+
         name, ok1 = QInputDialog.getText(self, "Add Context Entry", "Menu Label (e.g. 'Open Terminal Here'):")
         if ok1 and name:
             cmd, ok2 = QInputDialog.getText(self, "Add Context Entry", f"Command to execute for '{name}':\n(Use %V for current directory)")
@@ -869,10 +955,14 @@ class EnvVariableManager(QMainWindow):
                 cmd = cmd.replace("{path}", "\"%V\"").replace("%1", "\"%V\"")
                 
                 try:
-                    # Add to Directory (Folder right-click)
-                    self._create_reg_entry(rf"Software\Classes\Directory\shell\{name}", cmd)
-                    # Add to Directory Background (Empty space right-click)
-                    self._create_reg_entry(rf"Software\Classes\Directory\Background\shell\{name}", cmd)
+                    if parent_path:
+                        # Add as child of selected group
+                        hkcu_base = parent_path.replace("Directory\\", "Software\\Classes\\Directory\\")
+                        self._create_reg_entry(rf"{hkcu_base}\shell\{name}", cmd)
+                    else:
+                        # Add to top level (both locations)
+                        self._create_reg_entry(rf"Software\Classes\Directory\shell\{name}", cmd)
+                        self._create_reg_entry(rf"Software\Classes\Directory\Background\shell\{name}", cmd)
                     
                     self.load_context_entries()
                     self.set_status(f"Added context menu entry: {name}", CP_GREEN)
@@ -885,34 +975,44 @@ class EnvVariableManager(QMainWindow):
         if row < 0:
             return
             
-        old_name = self.context_table.item(row, 0).text()
-        old_cmd = self.context_table.item(row, 1).text()
+        old_full_path = self.context_table.item(row, 0).data(Qt.ItemDataRole.UserRole)
+        # Extract name from path
+        old_name = old_full_path.split('\\')[-1]
+        type_text = self.context_table.item(row, 1).text()
+        old_cmd = self.context_table.item(row, 2).text()
         
         # Edit Name
         new_name, ok1 = QInputDialog.getText(self, "Edit Context Entry", "Menu Label:", text=old_name)
         if not ok1 or not new_name:
             return
             
-        # Edit Command
-        new_cmd, ok2 = QInputDialog.getText(self, "Edit Context Entry", "Command:", text=old_cmd)
-        if not ok2 or not new_cmd:
-            return
-            
-        # Auto-fix common placeholder mistakes
-        new_cmd = new_cmd.replace("{path}", "\"%V\"").replace("%1", "\"%V\"")
+        if type_text == "ENTRY":
+            # Edit Command
+            new_cmd, ok2 = QInputDialog.getText(self, "Edit Context Entry", "Command:", text=old_cmd)
+            if not ok2 or not new_cmd:
+                return
+            # Auto-fix common placeholder mistakes
+            new_cmd = new_cmd.replace("{path}", "\"%V\"").replace("%1", "\"%V\"")
+        else:
+            new_cmd = "(Cascading Menu)"
             
         if new_name == old_name and new_cmd == old_cmd:
             return # No changes
 
         try:
-            # Create/Update keys in HKCU
-            self._create_reg_entry(rf"Software\Classes\Directory\shell\{new_name}", new_cmd)
-            self._create_reg_entry(rf"Software\Classes\Directory\Background\shell\{new_name}", new_cmd)
+            # We must work with HKCU path
+            hkcu_path = old_full_path.replace("Directory\\", "Software\\Classes\\Directory\\")
+            parent_path = "\\".join(hkcu_path.split('\\')[:-1])
+            new_hkcu_path = f"{parent_path}\\{new_name}"
+
+            if type_text == "ENTRY":
+                self._create_reg_entry(new_hkcu_path, new_cmd)
+            else:
+                self._create_group_entry(new_hkcu_path)
             
-            # If name changed, delete old keys from HKCU
+            # If name changed, delete old keys
             if new_name != old_name:
-                self._delete_reg_key(winreg.HKEY_CURRENT_USER, rf"Software\Classes\Directory\shell\{old_name}")
-                self._delete_reg_key(winreg.HKEY_CURRENT_USER, rf"Software\Classes\Directory\Background\shell\{old_name}")
+                self._delete_reg_key(winreg.HKEY_CURRENT_USER, hkcu_path)
                 
             self.load_context_entries()
             self.set_status(f"Updated context menu entry: {new_name}", CP_GREEN)
@@ -934,17 +1034,20 @@ class EnvVariableManager(QMainWindow):
         """Remove a context menu entry"""
         row = self.context_table.currentRow()
         if row >= 0:
-            name = self.context_table.item(row, 0).text()
-            reply = QMessageBox.question(self, "Confirm", f"Remove '{name}' from context menu?",
+            full_path = self.context_table.item(row, 0).data(Qt.ItemDataRole.UserRole)
+            # Extract label for display
+            display_name = self.context_table.item(row, 0).text().split('[')[0].strip()
+            
+            reply = QMessageBox.question(self, "Confirm", f"Remove '{display_name}' and all its sub-items?",
                                         QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
             if reply == QMessageBox.StandardButton.Yes:
                 try:
-                    # Delete from HKCU
-                    self._delete_reg_key(winreg.HKEY_CURRENT_USER, rf"Software\Classes\Directory\shell\{name}")
-                    self._delete_reg_key(winreg.HKEY_CURRENT_USER, rf"Software\Classes\Directory\Background\shell\{name}")
+                    # Convert HKCR path to HKCU path for deletion
+                    hkcu_path = full_path.replace("Directory\\", "Software\\Classes\\Directory\\")
+                    self._delete_reg_key(winreg.HKEY_CURRENT_USER, hkcu_path)
                     
                     self.load_context_entries()
-                    self.set_status(f"Removed {name}", CP_GREEN)
+                    self.set_status(f"Removed {display_name}", CP_GREEN)
                 except Exception as e:
                     self.set_status(f"Error removing entry: {str(e)}", CP_RED)
 
