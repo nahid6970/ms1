@@ -119,6 +119,8 @@ After setup, all new shells automatically load your aliases!
 - **Robust Registry Management**: All registry operations now use Python context managers (`with winreg.OpenKey(...)`), ensuring registry handles are safely closed even if an error occurs.
 - **Enhanced Safety Checks**: Added validation for table selection and item existence to prevent null-pointer style crashes during editing and removal.
 - **Smart PATH Loading**: Improved detection of the `Path` variable, handling cases where it might be missing or named differently (`PATH` vs `Path`).
+- **Dynamic Font Detection**: Implemented a robust font engine that automatically detects and applies "JetBrainsMono NFP" variations (Nerd Font) across all UI components.
+- **Streamlined Interface**: Removed redundant header labels to maximize vertical space for environment variable lists and configuration tables.
 
 ## Theme
 
