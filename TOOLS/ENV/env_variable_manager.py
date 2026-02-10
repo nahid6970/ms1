@@ -876,15 +876,16 @@ class EnvVariableManager(QMainWindow):
         """Load context menu entries from registry"""
         self.context_table.setRowCount(0)
         
-        # Scan folder right-click, background right-click, and all files (*)
-        self._scan_shell_keys(r"Directory\shell", "Folder")
-        self._scan_shell_keys(r"Directory\Background\shell", "Background")
-        self._scan_shell_keys(r"*\shell", "All Files")
+        # Only scan HKCU (user-created entries) to avoid duplicates and confusion
+        # Scan both Software\Classes paths (HKCU) for user entries
+        self._scan_shell_keys_hkcu(r"Software\Classes\Directory\shell", "Folder", winreg.HKEY_CURRENT_USER)
+        self._scan_shell_keys_hkcu(r"Software\Classes\Directory\Background\shell", "Background", winreg.HKEY_CURRENT_USER)
+        self._scan_shell_keys_hkcu(r"Software\Classes\*\shell", "All Files", winreg.HKEY_CURRENT_USER)
 
-    def _scan_shell_keys(self, base_path, scope_label, indent=""):
-        """Recursive helper to scan for context menu items and groups"""
+    def _scan_shell_keys_hkcu(self, base_path, scope_label, hkey, indent=""):
+        """Recursive helper to scan for context menu items and groups in HKCU only"""
         try:
-            key = winreg.OpenKey(winreg.HKEY_CLASSES_ROOT, base_path, 0, winreg.KEY_READ)
+            key = winreg.OpenKey(hkey, base_path, 0, winreg.KEY_READ)
             i = 0
             while True:
                 try:
@@ -901,7 +902,7 @@ class EnvVariableManager(QMainWindow):
                     icon = ""
                     is_sep = False
                     try:
-                        subkey = winreg.OpenKey(winreg.HKEY_CLASSES_ROOT, full_path, 0, winreg.KEY_READ)
+                        subkey = winreg.OpenKey(hkey, full_path, 0, winreg.KEY_READ)
                         try:
                             label, _ = winreg.QueryValueEx(subkey, "MUIVerb")
                         except:
@@ -929,13 +930,13 @@ class EnvVariableManager(QMainWindow):
                     cmd = ""
                     is_group = False
                     try:
-                        cmd_key = winreg.OpenKey(winreg.HKEY_CLASSES_ROOT, f"{full_path}\\command", 0, winreg.KEY_READ)
+                        cmd_key = winreg.OpenKey(hkey, f"{full_path}\\command", 0, winreg.KEY_READ)
                         cmd, _ = winreg.QueryValueEx(cmd_key, "")
                         winreg.CloseKey(cmd_key)
                     except:
                         # No command key? Check if it has a 'shell' subkey (it's a group)
                         try:
-                            shell_key = winreg.OpenKey(winreg.HKEY_CLASSES_ROOT, f"{full_path}\\shell", 0, winreg.KEY_READ)
+                            shell_key = winreg.OpenKey(hkey, f"{full_path}\\shell", 0, winreg.KEY_READ)
                             winreg.CloseKey(shell_key)
                             is_group = True
                             cmd = "(Cascading Menu)"
@@ -951,8 +952,10 @@ class EnvVariableManager(QMainWindow):
                     display_label = f"{indent}{label}"
                     if is_sep: display_label = f"{indent}--- SEPARATOR ---"
                     
-                    label_item = QTableWidgetItem(f"{display_label} [{scope_label}]")
+                    label_item = QTableWidgetItem(f"{display_label}")
+                    # Store both the path and scope for proper deletion
                     label_item.setData(Qt.ItemDataRole.UserRole, full_path)
+                    label_item.setData(Qt.ItemDataRole.UserRole + 1, scope_label)
                     
                     self.context_table.setItem(row, 0, label_item)
                     self.context_table.setItem(row, 1, QTableWidgetItem("GROUP" if is_group else "ENTRY"))
@@ -960,14 +963,15 @@ class EnvVariableManager(QMainWindow):
                     
                     # If it's a group, recurse
                     if is_group:
-                        self._scan_shell_keys(f"{full_path}\\shell", scope_label, indent + "  ↳ ")
+                        self._scan_shell_keys_hkcu(f"{full_path}\\shell", scope_label, hkey, indent + "  ↳ ")
                         
                     i += 1
                 except OSError:
                     break
             winreg.CloseKey(key)
         except Exception as e:
-            print(f"Error scanning {base_path}: {e}")
+            # Key doesn't exist yet, which is fine
+            pass
 
     def add_context_separator(self):
         """Add a separator before the next item or as a standalone"""
@@ -1010,8 +1014,7 @@ class EnvVariableManager(QMainWindow):
                                                   "Icons (*.ico *.exe *.dll);;All Files (*.*)")
         if icon_path:
             try:
-                hkcu_path = full_path.replace("Directory\\", "Software\\Classes\\Directory\\")
-                key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, hkcu_path, 0, winreg.KEY_SET_VALUE)
+                key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, full_path, 0, winreg.KEY_SET_VALUE)
                 winreg.SetValueEx(key, "Icon", 0, winreg.REG_SZ, icon_path)
                 winreg.CloseKey(key)
                 
@@ -1122,8 +1125,7 @@ class EnvVariableManager(QMainWindow):
         # Get icon from registry
         old_icon = ""
         try:
-            hkcu_path = old_full_path.replace("Directory\\", "Software\\Classes\\Directory\\")
-            key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, hkcu_path, 0, winreg.KEY_READ)
+            key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, old_full_path, 0, winreg.KEY_READ)
             old_icon, _ = winreg.QueryValueEx(key, "Icon")
             winreg.CloseKey(key)
         except:
@@ -1179,33 +1181,24 @@ class EnvVariableManager(QMainWindow):
             new_cmd = new_cmd.replace("{path}", "\"%V\"").replace("%1", "\"%V\"")
 
         try:
-            # Determine HKCU path correctly
-            if "Software\\Classes" in old_full_path:
-                hkcu_path = old_full_path
-            else:
-                if old_full_path.startswith("*\\"):
-                    hkcu_path = old_full_path.replace("*\\", "Software\\Classes\\*\\")
-                else:
-                    hkcu_path = old_full_path.replace("Directory\\", "Software\\Classes\\Directory\\")
-
-            parent_path = "\\".join(hkcu_path.split('\\')[:-1])
-            new_hkcu_path = f"{parent_path}\\{new_name}"
+            parent_path = "\\".join(old_full_path.split('\\')[:-1])
+            new_full_path = f"{parent_path}\\{new_name}"
 
             if type_text == "ENTRY":
-                self._create_reg_entry(new_hkcu_path, new_cmd)
+                self._create_reg_entry(new_full_path, new_cmd)
             else:
                 # If it's a group, we must preserve MUIVerb and SubCommands
-                self._create_group_entry(new_hkcu_path)
+                self._create_group_entry(new_full_path)
             
-            # Set icon if it had one
+            # Set icon if provided
             if new_icon:
-                with winreg.OpenKey(winreg.HKEY_CURRENT_USER, new_hkcu_path, 0, winreg.KEY_SET_VALUE) as key:
+                with winreg.OpenKey(winreg.HKEY_CURRENT_USER, new_full_path, 0, winreg.KEY_SET_VALUE) as key:
                     winreg.SetValueEx(key, "Icon", 0, winreg.REG_SZ, new_icon)
             
             # If it's a rename, move subkeys (especially important for groups like FFMPEG)
             if new_name != old_name:
-                self._copy_reg_key(winreg.HKEY_CURRENT_USER, hkcu_path, new_hkcu_path)
-                self._delete_reg_key(winreg.HKEY_CURRENT_USER, hkcu_path)
+                self._copy_reg_key(winreg.HKEY_CURRENT_USER, old_full_path, new_full_path)
+                self._delete_reg_key(winreg.HKEY_CURRENT_USER, old_full_path)
                 
             self.load_context_entries()
             self.set_status(f"Updated context menu entry: {new_name}", CP_GREEN)
@@ -1214,25 +1207,30 @@ class EnvVariableManager(QMainWindow):
 
     def _copy_reg_key(self, hkey, src, dst):
         """Helper to recursively copy a registry key"""
-        with winreg.OpenKey(hkey, src) as src_key:
-            # Copy values
-            with winreg.CreateKey(hkey, dst) as dst_key:
+        try:
+            with winreg.OpenKey(hkey, src, 0, winreg.KEY_READ) as src_key:
+                # Copy values
+                with winreg.CreateKey(hkey, dst) as dst_key:
+                    i = 0
+                    while True:
+                        try:
+                            name, value, type = winreg.EnumValue(src_key, i)
+                            winreg.SetValueEx(dst_key, name, 0, type, value)
+                            i += 1
+                        except OSError: 
+                            break
+                
+                # Copy subkeys
                 i = 0
                 while True:
                     try:
-                        name, value, type = winreg.EnumValue(src_key, i)
-                        winreg.SetValueEx(dst_key, name, 0, type, value)
+                        subkey_name = winreg.EnumKey(src_key, i)
+                        self._copy_reg_key(hkey, f"{src}\\{subkey_name}", f"{dst}\\{subkey_name}")
                         i += 1
-                    except OSError: break
-            
-            # Copy subkeys
-            i = 0
-            while True:
-                try:
-                    subkey_name = winreg.EnumKey(src_key, i)
-                    self._copy_reg_key(src_key, subkey_name, f"{dst}\\{subkey_name}")
-                    i += 1
-                except OSError: break
+                    except OSError: 
+                        break
+        except Exception as e:
+            print(f"Error copying registry key {src} to {dst}: {e}")
     
     def _browse_icon(self, line_edit):
         """Helper to browse for icon file"""
@@ -1258,6 +1256,7 @@ class EnvVariableManager(QMainWindow):
         row = self.context_table.currentRow()
         if row >= 0:
             full_path = self.context_table.item(row, 0).data(Qt.ItemDataRole.UserRole)
+            scope_label = self.context_table.item(row, 0).data(Qt.ItemDataRole.UserRole + 1)
             # Extract label for display
             display_name = self.context_table.item(row, 0).text().split('[')[0].strip()
             
@@ -1265,9 +1264,8 @@ class EnvVariableManager(QMainWindow):
                                         QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
             if reply == QMessageBox.StandardButton.Yes:
                 try:
-                    # Convert HKCR path to HKCU path for deletion
-                    hkcu_path = full_path.replace("Directory\\", "Software\\Classes\\Directory\\")
-                    self._delete_reg_key(winreg.HKEY_CURRENT_USER, hkcu_path)
+                    # Delete from HKCU (where we store user entries)
+                    self._delete_reg_key(winreg.HKEY_CURRENT_USER, full_path)
                     
                     self.load_context_entries()
                     self.set_status(f"Removed {display_name}", CP_GREEN)
@@ -1455,9 +1453,9 @@ class EnvVariableManager(QMainWindow):
         if ok and label:
             try:
                 # Register for Files (*), Folders (Directory), and Background
-                self._create_reg_entry(rf"*\shell\{label}", cmd)
-                self._create_reg_entry(rf"Directory\shell\{label}", cmd)
-                self._create_reg_entry(rf"Directory\Background\shell\{label}", cmd)
+                self._create_reg_entry(rf"Software\Classes\*\shell\{label}", cmd)
+                self._create_reg_entry(rf"Software\Classes\Directory\shell\{label}", cmd)
+                self._create_reg_entry(rf"Software\Classes\Directory\Background\shell\{label}", cmd)
                 
                 self.load_context_entries()
                 QMessageBox.information(self, "Success", f"'{label}' added to context menu for files and folders.")
