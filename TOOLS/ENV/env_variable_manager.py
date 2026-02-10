@@ -188,6 +188,7 @@ class EnvVariableManager(QMainWindow):
         up_btn = QPushButton("⬆️ MOVE UP")
         down_btn = QPushButton("⬇️ MOVE DOWN")
         refresh_btn = QPushButton("🔄 REFRESH")
+        cleanup_btn = QPushButton("🧹 CLEANUP PATH")
         
         add_btn.clicked.connect(self.add_path_entry)
         edit_btn.clicked.connect(self.edit_path_entry)
@@ -195,6 +196,7 @@ class EnvVariableManager(QMainWindow):
         up_btn.clicked.connect(self.move_path_up)
         down_btn.clicked.connect(self.move_path_down)
         refresh_btn.clicked.connect(lambda: self.load_path_vars(self.current_path_scope))
+        cleanup_btn.clicked.connect(self.cleanup_path)
         
         controls_layout.addWidget(add_btn)
         controls_layout.addWidget(edit_btn)
@@ -202,6 +204,7 @@ class EnvVariableManager(QMainWindow):
         controls_layout.addWidget(up_btn)
         controls_layout.addWidget(down_btn)
         controls_layout.addWidget(refresh_btn)
+        controls_layout.addWidget(cleanup_btn)
         layout.addLayout(controls_layout)
         
         # Initialize
@@ -409,6 +412,57 @@ class EnvVariableManager(QMainWindow):
             self.path_list.insertItem(current + 1, item)
             self.path_list.setCurrentRow(current + 1)
             self.save_path_vars()
+
+    def cleanup_path(self):
+        """Remove duplicates and non-existent folders from PATH"""
+        paths = [self.path_list.item(i).text() for i in range(self.path_list.count())]
+        initial_count = len(paths)
+        
+        # 1. Remove duplicates while preserving order
+        seen = set()
+        clean_paths = []
+        duplicates_removed = 0
+        for p in paths:
+            if p.lower() not in seen:
+                clean_paths.append(p)
+                seen.add(p.lower())
+            else:
+                duplicates_removed += 1
+        
+        # 2. Check for non-existent folders
+        valid_paths = []
+        invalid_removed = 0
+        invalid_list = []
+        
+        for p in clean_paths:
+            # Expand environment variables like %USERPROFILE% for checking
+            expanded = os.path.expandvars(p)
+            if os.path.exists(expanded):
+                valid_paths.append(p)
+            else:
+                invalid_removed += 1
+                invalid_list.append(p)
+        
+        if duplicates_removed == 0 and invalid_removed == 0:
+            QMessageBox.information(self, "Cleanup", "PATH is already clean!")
+            return
+            
+        msg = f"Cleanup Summary:\n\n- Duplicates removed: {duplicates_removed}\n- Invalid paths found: {invalid_removed}"
+        if invalid_list:
+            msg += "\n\nInvalid entries that will be removed:\n" + "\n".join(invalid_list[:10])
+            if len(invalid_list) > 10: msg += "\n..."
+            
+        msg += "\n\nApply these changes?"
+        
+        reply = QMessageBox.question(self, "Confirm Cleanup", msg,
+                                    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+        
+        if reply == QMessageBox.StandardButton.Yes:
+            self.path_list.clear()
+            for p in valid_paths:
+                self.path_list.addItem(p)
+            self.save_path_vars()
+            self.set_status(f"PATH cleaned: Removed {duplicates_removed + invalid_removed} entries", CP_GREEN)
     
     # ===== ENV VARIABLE METHODS =====
     
@@ -781,8 +835,8 @@ class EnvVariableManager(QMainWindow):
         list_group = QGroupBox("CONTEXT MENU ENTRIES")
         list_layout = QVBoxLayout()
         self.context_table = QTableWidget()
-        self.context_table.setColumnCount(3)
-        self.context_table.setHorizontalHeaderLabels(["Menu Label", "Type", "Command / Script"])
+        self.context_table.setColumnCount(4)
+        self.context_table.setHorizontalHeaderLabels(["Menu Label", "Type", "Command / Script", "Icon"])
         self.context_table.horizontalHeader().setStretchLastSection(True)
         self.context_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         list_layout.addWidget(self.context_table)
@@ -793,22 +847,27 @@ class EnvVariableManager(QMainWindow):
         controls_layout = QHBoxLayout()
         add_btn = QPushButton("➕ ADD ENTRY")
         add_group_btn = QPushButton("📁 ADD GROUP")
+        sep_btn = QPushButton("➖ SEPARATOR")
+        icon_btn = QPushButton("🖼️ SET ICON")
         edit_btn = QPushButton("✏️ EDIT")
         remove_btn = QPushButton("❌ REMOVE")
         refresh_btn = QPushButton("🔄 REFRESH")
         
         add_btn.clicked.connect(self.add_context_entry)
         add_group_btn.clicked.connect(self.add_context_group)
+        sep_btn.clicked.connect(self.add_context_separator)
+        icon_btn.clicked.connect(self.set_context_icon)
         edit_btn.clicked.connect(self.edit_context_entry)
         remove_btn.clicked.connect(self.remove_context_entry)
         refresh_btn.clicked.connect(self.load_context_entries)
         
         controls_layout.addWidget(add_btn)
         controls_layout.addWidget(add_group_btn)
+        controls_layout.addWidget(sep_btn)
+        controls_layout.addWidget(icon_btn)
         controls_layout.addWidget(edit_btn)
         controls_layout.addWidget(remove_btn)
         controls_layout.addWidget(refresh_btn)
-        layout.addLayout(controls_layout)
         layout.addLayout(controls_layout)
         
         # Initialize
@@ -842,6 +901,8 @@ class EnvVariableManager(QMainWindow):
                     
                     # Try to get Label (from MUIVerb or default value)
                     label = subkey_name
+                    icon = ""
+                    is_sep = False
                     try:
                         subkey = winreg.OpenKey(winreg.HKEY_CLASSES_ROOT, full_path, 0, winreg.KEY_READ)
                         try:
@@ -851,6 +912,19 @@ class EnvVariableManager(QMainWindow):
                                 val = winreg.QueryValue(subkey, "")
                                 if val: label = val
                             except: pass
+                        
+                        # Check for Icon
+                        try:
+                            icon, _ = winreg.QueryValueEx(subkey, "Icon")
+                        except: pass
+
+                        # Check for Separator flag
+                        try:
+                            flags, _ = winreg.QueryValueEx(subkey, "CommandFlags")
+                            if flags & 0x20: # 0x20 is separator before
+                                is_sep = True
+                        except: pass
+
                         winreg.CloseKey(subkey)
                     except: pass
 
@@ -877,12 +951,16 @@ class EnvVariableManager(QMainWindow):
                     self.context_table.insertRow(row)
                     
                     # Store the internal path in the item data for editing/removal
-                    label_item = QTableWidgetItem(f"{indent}{label} [{scope_label}]")
+                    display_label = f"{indent}{label}"
+                    if is_sep: display_label = f"{indent}--- SEPARATOR ---"
+                    
+                    label_item = QTableWidgetItem(f"{display_label} [{scope_label}]")
                     label_item.setData(Qt.ItemDataRole.UserRole, full_path)
                     
                     self.context_table.setItem(row, 0, label_item)
                     self.context_table.setItem(row, 1, QTableWidgetItem("GROUP" if is_group else "ENTRY"))
                     self.context_table.setItem(row, 2, QTableWidgetItem(cmd))
+                    self.context_table.setItem(row, 3, QTableWidgetItem(icon))
                     
                     # If it's a group, recurse
                     if is_group:
@@ -894,6 +972,57 @@ class EnvVariableManager(QMainWindow):
             winreg.CloseKey(key)
         except Exception as e:
             print(f"Error scanning {base_path}: {e}")
+
+    def add_context_separator(self):
+        """Add a separator before the next item or as a standalone"""
+        parent_path = ""
+        row = self.context_table.currentRow()
+        if row >= 0:
+            type_text = self.context_table.item(row, 1).text()
+            if type_text == "GROUP":
+                parent_path = self.context_table.item(row, 0).data(Qt.ItemDataRole.UserRole)
+
+        name = f"Sep_{datetime.now().strftime('%H%M%S')}"
+        try:
+            if parent_path:
+                hkcu_base = parent_path.replace("Directory\\", "Software\\Classes\\Directory\\")
+                self._create_separator_entry(rf"{hkcu_base}\shell\{name}")
+            else:
+                self._create_separator_entry(rf"Software\Classes\Directory\shell\{name}")
+                self._create_separator_entry(rf"Software\Classes\Directory\Background\shell\{name}")
+            
+            self.load_context_entries()
+            self.set_status("Separator added", CP_GREEN)
+        except Exception as e:
+            QMessageBox.critical(self, "Error", str(e))
+
+    def _create_separator_entry(self, path):
+        """Helper to create registry separator"""
+        key = winreg.CreateKey(winreg.HKEY_CURRENT_USER, path)
+        winreg.SetValueEx(key, "CommandFlags", 0, winreg.REG_DWORD, 0x20) # 0x20 = Separator
+        winreg.CloseKey(key)
+
+    def set_context_icon(self):
+        """Set icon for selected context menu item"""
+        row = self.context_table.currentRow()
+        if row < 0:
+            QMessageBox.warning(self, "Error", "Select an item first!")
+            return
+            
+        full_path = self.context_table.item(row, 0).data(Qt.ItemDataRole.UserRole)
+        icon_path, _ = QFileDialog.getOpenFileName(self, "Select Icon File", "", 
+                                                  "Icons (*.ico *.exe *.dll);;All Files (*.*)")
+        if icon_path:
+            try:
+                hkcu_path = full_path.replace("Directory\\", "Software\\Classes\\Directory\\")
+                key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, hkcu_path, 0, winreg.KEY_SET_VALUE)
+                winreg.SetValueEx(key, "Icon", 0, winreg.REG_SZ, icon_path)
+                winreg.CloseKey(key)
+                
+                self.load_context_entries()
+                self.set_status("Icon updated", CP_GREEN)
+            except Exception as e:
+                QMessageBox.critical(self, "Error", str(e))
 
     def add_context_group(self):
         """Add a new cascading menu group"""
