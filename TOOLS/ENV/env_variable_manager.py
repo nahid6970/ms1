@@ -1091,29 +1091,18 @@ class EnvVariableManager(QMainWindow):
                 try:
                     if parent_path:
                         # Add as child of selected group
-                        hkcu_base = parent_path.replace("Directory\\", "Software\\Classes\\Directory\\")
-                        self._create_reg_entry(rf"{hkcu_base}\shell\{name}", cmd)
+                        # parent_path is already in HKCU format (Software\Classes\...)
+                        self._create_reg_entry(rf"{parent_path}\shell\{name}", cmd)
                         
-                        # Sync to background if applicable
-                        if "Background" not in hkcu_base:
-                            bg_base = hkcu_base.replace("Directory\\shell", "Directory\\Background\\shell")
-                            try:
-                                winreg.OpenKey(winreg.HKEY_CURRENT_USER, bg_base, 0, winreg.KEY_READ)
-                                self._create_reg_entry(rf"{bg_base}\shell\{name}", cmd)
-                            except: pass
-                        elif "Background" in hkcu_base:
-                            folder_base = hkcu_base.replace("Directory\\Background\\shell", "Directory\\shell")
-                            try:
-                                winreg.OpenKey(winreg.HKEY_CURRENT_USER, folder_base, 0, winreg.KEY_READ)
-                                self._create_reg_entry(rf"{folder_base}\shell\{name}", cmd)
-                            except: pass
+                        self.load_context_entries()
+                        self.set_status(f"Added context menu entry: {name} to group", CP_GREEN)
                     else:
                         # Add to top level (both locations)
                         self._create_reg_entry(rf"Software\Classes\Directory\shell\{name}", cmd)
                         self._create_reg_entry(rf"Software\Classes\Directory\Background\shell\{name}", cmd)
-                    
-                    self.load_context_entries()
-                    self.set_status(f"Added context menu entry: {name}", CP_GREEN)
+                        
+                        self.load_context_entries()
+                        self.set_status(f"Added context menu entry: {name}", CP_GREEN)
                 except Exception as e:
                     QMessageBox.critical(self, "Error", f"Failed to add entry: {str(e)}")
 
