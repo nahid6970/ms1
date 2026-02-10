@@ -1224,10 +1224,8 @@ class EnvVariableManager(QMainWindow):
         return entries
 
     def export_config(self):
-        """Export all settings to JSON"""
-        file_path, _ = QFileDialog.getSaveFileName(self, "Export Configuration", "", "JSON Files (*.json)")
-        if not file_path:
-            return
+        """Export all settings to JSON (Fixed to data.json)"""
+        file_path = os.path.join(os.getcwd(), "data.json")
             
         try:
             # Collect scripts
@@ -1254,16 +1252,16 @@ class EnvVariableManager(QMainWindow):
             with open(file_path, 'w') as f:
                 json.dump(config, f, indent=4)
             
-            self.set_status(f"Configuration exported to {os.path.basename(file_path)}", CP_GREEN)
-            QMessageBox.information(self, "Export Success", f"Configuration successfully exported to:\n{file_path}")
+            self.set_status(f"Auto-exported to data.json", CP_GREEN)
         except Exception as e:
             self.set_status(f"Export failed: {str(e)}", CP_RED)
             QMessageBox.critical(self, "Error", f"Failed to export: {str(e)}")
 
     def import_config(self):
-        """Import settings from JSON"""
-        file_path, _ = QFileDialog.getOpenFileName(self, "Import Configuration", "", "JSON Files (*.json)")
-        if not file_path:
+        """Import settings from data.json (Fixed)"""
+        file_path = os.path.join(os.getcwd(), "data.json")
+        if not os.path.exists(file_path):
+            QMessageBox.warning(self, "Error", "data.json not found in current directory.")
             return
             
         try:
