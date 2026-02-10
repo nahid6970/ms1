@@ -7,7 +7,7 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QH
                              QLabel, QPushButton, QLineEdit, QGroupBox, QListWidget, 
                              QMessageBox, QInputDialog, QTabWidget, QTextEdit, QSplitter,
                              QListWidgetItem, QFormLayout, QTableWidget, QTableWidgetItem,
-                             QHeaderView, QFileDialog)
+                             QHeaderView, QFileDialog, QDialog, QDialogButtonBox)
 from PyQt6.QtCore import Qt, QSize
 from PyQt6.QtGui import QFont
 
@@ -837,8 +837,14 @@ class EnvVariableManager(QMainWindow):
         self.context_table = QTableWidget()
         self.context_table.setColumnCount(4)
         self.context_table.setHorizontalHeaderLabels(["Menu Label", "Type", "Command / Script", "Icon"])
-        self.context_table.horizontalHeader().setStretchLastSection(True)
+        self.context_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Interactive)
+        self.context_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
+        self.context_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
+        self.context_table.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeMode.Interactive)
+        self.context_table.setColumnWidth(0, 300)
+        self.context_table.setColumnWidth(3, 200)
         self.context_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+        self.context_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         list_layout.addWidget(self.context_table)
         list_group.setLayout(list_layout)
         layout.addWidget(list_group)
@@ -1119,31 +1125,61 @@ class EnvVariableManager(QMainWindow):
             return
             
         old_full_path = self.context_table.item(row, 0).data(Qt.ItemDataRole.UserRole)
-        # Extract name from path
         old_name = old_full_path.split('\\')[-1]
         type_text = self.context_table.item(row, 1).text()
         old_cmd = self.context_table.item(row, 2).text()
+        old_icon = self.context_table.item(row, 3).text() if self.context_table.item(row, 3) else ""
         
-        # Edit Name
-        new_name, ok1 = QInputDialog.getText(self, "Edit Context Entry", "Menu Label:", text=old_name)
-        if not ok1 or not new_name:
+        # Create dialog with form layout
+        from PyQt6.QtWidgets import QDialog, QDialogButtonBox
+        dialog = QDialog(self)
+        dialog.setWindowTitle("Edit Context Entry")
+        dialog.setMinimumWidth(500)
+        dialog_layout = QVBoxLayout(dialog)
+        
+        form_layout = QFormLayout()
+        
+        # Name field
+        name_edit = QLineEdit(old_name)
+        form_layout.addRow("Menu Label:", name_edit)
+        
+        # Command field (only for ENTRY type)
+        cmd_edit = None
+        if type_text == "ENTRY":
+            cmd_edit = QLineEdit(old_cmd)
+            form_layout.addRow("Command:", cmd_edit)
+        
+        # Icon field
+        icon_layout = QHBoxLayout()
+        icon_edit = QLineEdit(old_icon)
+        icon_browse = QPushButton("Browse...")
+        icon_browse.clicked.connect(lambda: self._browse_icon(icon_edit))
+        icon_layout.addWidget(icon_edit)
+        icon_layout.addWidget(icon_browse)
+        form_layout.addRow("Icon Path:", icon_layout)
+        
+        dialog_layout.addLayout(form_layout)
+        
+        # Buttons
+        button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
+        button_box.accepted.connect(dialog.accept)
+        button_box.rejected.connect(dialog.reject)
+        dialog_layout.addWidget(button_box)
+        
+        if dialog.exec() != QDialog.DialogCode.Accepted:
+            return
+        
+        new_name = name_edit.text().strip()
+        new_cmd = cmd_edit.text().strip() if cmd_edit else "(Cascading Menu)"
+        new_icon = icon_edit.text().strip()
+        
+        if not new_name:
             return
             
-        if type_text == "ENTRY":
-            # Edit Command
-            new_cmd, ok2 = QInputDialog.getText(self, "Edit Context Entry", "Command:", text=old_cmd)
-            if not ok2 or not new_cmd:
-                return
-            # Auto-fix common placeholder mistakes
+        if type_text == "ENTRY" and new_cmd:
             new_cmd = new_cmd.replace("{path}", "\"%V\"").replace("%1", "\"%V\"")
-        else:
-            new_cmd = "(Cascading Menu)"
-            
-        if new_name == old_name and new_cmd == old_cmd:
-            return # No changes
 
         try:
-            # We must work with HKCU path
             hkcu_path = old_full_path.replace("Directory\\", "Software\\Classes\\Directory\\")
             parent_path = "\\".join(hkcu_path.split('\\')[:-1])
             new_hkcu_path = f"{parent_path}\\{new_name}"
@@ -1153,6 +1189,12 @@ class EnvVariableManager(QMainWindow):
             else:
                 self._create_group_entry(new_hkcu_path)
             
+            # Set icon if provided
+            if new_icon:
+                key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, new_hkcu_path, 0, winreg.KEY_SET_VALUE)
+                winreg.SetValueEx(key, "Icon", 0, winreg.REG_SZ, new_icon)
+                winreg.CloseKey(key)
+            
             # If name changed, delete old keys
             if new_name != old_name:
                 self._delete_reg_key(winreg.HKEY_CURRENT_USER, hkcu_path)
@@ -1161,6 +1203,13 @@ class EnvVariableManager(QMainWindow):
             self.set_status(f"Updated context menu entry: {new_name}", CP_GREEN)
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Failed to update entry: {str(e)}")
+    
+    def _browse_icon(self, line_edit):
+        """Helper to browse for icon file"""
+        icon_path, _ = QFileDialog.getOpenFileName(self, "Select Icon File", "", 
+                                                  "Icons (*.ico *.exe *.dll);;All Files (*.*)")
+        if icon_path:
+            line_edit.setText(icon_path)
 
     def _create_reg_entry(self, path, command):
         """Helper to create registry keys for context menu in HKCU"""
