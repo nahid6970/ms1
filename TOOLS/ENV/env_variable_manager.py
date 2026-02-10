@@ -1043,18 +1043,13 @@ class EnvVariableManager(QMainWindow):
         if ok and name:
             try:
                 if parent_path:
-                    # Nested group
-                    # We must write to HKCU version of the path
-                    hkcu_base = parent_path.replace("Directory\\", "Software\\Classes\\Directory\\")
-                    path = rf"{hkcu_base}\shell\{name}"
-                else:
-                    # Top level groups (add to both locations)
-                    self._create_group_entry(rf"Software\Classes\Directory\shell\{name}")
-                    self._create_group_entry(rf"Software\Classes\Directory\Background\shell\{name}")
-                    path = "" # Already handled
-
-                if path:
+                    # Nested group - parent_path is already in HKCU format
+                    path = rf"{parent_path}\shell\{name}"
                     self._create_group_entry(path)
+                else:
+                    # Top level group - only create in Background (right-click on folder background)
+                    # This avoids duplicate entries in the list
+                    self._create_group_entry(rf"Software\Classes\Directory\Background\shell\{name}")
 
                 self.load_context_entries()
                 self.set_status(f"Added context group: {name}", CP_GREEN)
@@ -1097,8 +1092,7 @@ class EnvVariableManager(QMainWindow):
                         self.load_context_entries()
                         self.set_status(f"Added context menu entry: {name} to group", CP_GREEN)
                     else:
-                        # Add to top level (both locations)
-                        self._create_reg_entry(rf"Software\Classes\Directory\shell\{name}", cmd)
+                        # Add to top level - only Background to avoid duplicates
                         self._create_reg_entry(rf"Software\Classes\Directory\Background\shell\{name}", cmd)
                         
                         self.load_context_entries()
