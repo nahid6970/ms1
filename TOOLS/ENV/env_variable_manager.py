@@ -68,7 +68,7 @@ class EnvVariableManager(QMainWindow):
         """Apply cyberpunk theme to the application"""
         self.setStyleSheet(f"""
             QMainWindow {{ background-color: {CP_BG}; }}
-            QWidget {{ color: {CP_TEXT}; font-family: 'Consolas'; font-size: 10pt; }}
+            QWidget {{ color: {CP_TEXT}; font-family: 'JetBrainsMono NFP'; font-size: 10pt; }}
             
             QLineEdit, QTextEdit {{
                 background-color: {CP_PANEL}; 
@@ -1663,7 +1663,7 @@ def main():
     app = QApplication(sys.argv)
     
     # Set application font
-    font = QFont("Consolas", 10)
+    font = QFont("JetBrainsMono NFP", 10)
     app.setFont(font)
     
     window = EnvVariableManager()

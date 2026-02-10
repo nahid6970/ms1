@@ -125,7 +125,7 @@ After setup, all new shells automatically load your aliases!
 Uses cyberpunk color scheme from THEME_GUIDE.md:
 - Background: Dark (#050505)
 - Accents: Cyan (#00F0FF), Yellow (#FCEE0A)
-- Font: Consolas monospace
+- Font: JetBrainsMono NFP monospace
 
 ## Permissions
 
