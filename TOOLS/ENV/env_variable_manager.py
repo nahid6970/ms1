@@ -835,14 +835,12 @@ class EnvVariableManager(QMainWindow):
         list_group = QGroupBox("CONTEXT MENU ENTRIES")
         list_layout = QVBoxLayout()
         self.context_table = QTableWidget()
-        self.context_table.setColumnCount(4)
-        self.context_table.setHorizontalHeaderLabels(["Menu Label", "Type", "Command / Script", "Icon"])
+        self.context_table.setColumnCount(3)
+        self.context_table.setHorizontalHeaderLabels(["Menu Label", "Type", "Command / Script"])
         self.context_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Interactive)
         self.context_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
         self.context_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
-        self.context_table.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeMode.Interactive)
         self.context_table.setColumnWidth(0, 300)
-        self.context_table.setColumnWidth(3, 200)
         self.context_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self.context_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         list_layout.addWidget(self.context_table)
@@ -966,7 +964,6 @@ class EnvVariableManager(QMainWindow):
                     self.context_table.setItem(row, 0, label_item)
                     self.context_table.setItem(row, 1, QTableWidgetItem("GROUP" if is_group else "ENTRY"))
                     self.context_table.setItem(row, 2, QTableWidgetItem(cmd))
-                    self.context_table.setItem(row, 3, QTableWidgetItem(icon))
                     
                     # If it's a group, recurse
                     if is_group:
@@ -1128,7 +1125,16 @@ class EnvVariableManager(QMainWindow):
         old_name = old_full_path.split('\\')[-1]
         type_text = self.context_table.item(row, 1).text()
         old_cmd = self.context_table.item(row, 2).text()
-        old_icon = self.context_table.item(row, 3).text() if self.context_table.item(row, 3) else ""
+        
+        # Get icon from registry
+        old_icon = ""
+        try:
+            hkcu_path = old_full_path.replace("Directory\\", "Software\\Classes\\Directory\\")
+            key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, hkcu_path, 0, winreg.KEY_READ)
+            old_icon, _ = winreg.QueryValueEx(key, "Icon")
+            winreg.CloseKey(key)
+        except:
+            pass
         
         # Create dialog with form layout
         from PyQt6.QtWidgets import QDialog, QDialogButtonBox
