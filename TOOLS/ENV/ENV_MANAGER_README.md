@@ -113,6 +113,13 @@ After setup, all new shells automatically load your aliases!
 - **Apply All**: Applies to current CMD session only
 - Useful for testing before auto-setup
 
+## Latest Improvements
+
+- **Crash Prevention**: Uses `SendMessageTimeout` when broadcasting environment changes. This prevents the UI from hanging or crashing if other applications (like an unresponsive Explorer window) fail to respond to the system-wide message.
+- **Robust Registry Management**: All registry operations now use Python context managers (`with winreg.OpenKey(...)`), ensuring registry handles are safely closed even if an error occurs.
+- **Enhanced Safety Checks**: Added validation for table selection and item existence to prevent null-pointer style crashes during editing and removal.
+- **Smart PATH Loading**: Improved detection of the `Path` variable, handling cases where it might be missing or named differently (`PATH` vs `Path`).
+
 ## Theme
 
 Uses cyberpunk color scheme from THEME_GUIDE.md:
