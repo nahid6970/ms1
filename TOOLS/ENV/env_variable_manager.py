@@ -1610,37 +1610,153 @@ class EnvVariableManager(QMainWindow):
         return vars_dict
 
     def get_context_menu_data(self):
-        """Collect all custom context menu entries for backup"""
-        entries = {}
-        paths = [r"Directory\Background\shell", r"Directory\shell"]
-        for base_path in paths:
+        """Collect all custom context menu entries for backup with full structure"""
+        context_data = {}
+        
+        # Scan HKCU (user-created entries) to get everything we manage
+        bases = [
+            ("Directory\\Background\\shell", "Background"),
+            ("Directory\\shell", "Folder"),
+            ("*\\shell", "AllFiles")
+        ]
+        
+        for base_path, scope in bases:
+            full_base = f"Software\\Classes\\{base_path}"
             try:
-                key = winreg.OpenKey(winreg.HKEY_CLASSES_ROOT, base_path, 0, winreg.KEY_READ)
-                i = 0
-                while True:
-                    try:
-                        subkey_name = winreg.EnumKey(key, i)
-                        if subkey_name.lower() in ["cmd", "powershell", "anycode"]:
-                            i += 1
-                            continue
-                        try:
-                            cmd_key = winreg.OpenKey(winreg.HKEY_CLASSES_ROOT, f"{base_path}\\{subkey_name}\\command", 0, winreg.KEY_READ)
-                            cmd_value, _ = winreg.QueryValueEx(cmd_key, "")
-                            winreg.CloseKey(cmd_key)
-                            entries[subkey_name] = cmd_value
-                        except:
-                            pass
-                        i += 1
-                    except OSError:
-                        break
-                winreg.CloseKey(key)
+                entries = self._export_shell_keys(winreg.HKEY_CURRENT_USER, full_base)
+                if entries:
+                    context_data[scope] = entries
             except:
                 pass
+        
+        return context_data
+    
+    def _export_shell_keys(self, hkey, base_path):
+        """Recursively export shell keys with all properties"""
+        entries = {}
+        
+        try:
+            key = winreg.OpenKey(hkey, base_path, 0, winreg.KEY_READ)
+            i = 0
+            while True:
+                try:
+                    subkey_name = winreg.EnumKey(key, i)
+                    # Skip standard Windows entries
+                    if subkey_name.lower() in ["cmd", "powershell", "anycode", "wsl"]:
+                        i += 1
+                        continue
+                    
+                    full_path = f"{base_path}\\{subkey_name}"
+                    entry_data = {}
+                    
+                    # Get all properties
+                    try:
+                        subkey = winreg.OpenKey(hkey, full_path, 0, winreg.KEY_READ)
+                        
+                        # Get MUIVerb (display label)
+                        try:
+                            entry_data["MUIVerb"], _ = winreg.QueryValueEx(subkey, "MUIVerb")
+                        except:
+                            pass
+                        
+                        # Get Icon
+                        try:
+                            entry_data["Icon"], _ = winreg.QueryValueEx(subkey, "Icon")
+                        except:
+                            pass
+                        
+                        # Get SubCommands (for groups)
+                        try:
+                            entry_data["SubCommands"], _ = winreg.QueryValueEx(subkey, "SubCommands")
+                        except:
+                            pass
+                        
+                        # Get CommandFlags
+                        try:
+                            entry_data["CommandFlags"], _ = winreg.QueryValueEx(subkey, "CommandFlags")
+                        except:
+                            pass
+                        
+                        winreg.CloseKey(subkey)
+                    except:
+                        pass
+                    
+                    # Check if it has a command (it's a leaf entry)
+                    try:
+                        cmd_key = winreg.OpenKey(hkey, f"{full_path}\\command", 0, winreg.KEY_READ)
+                        cmd_value, _ = winreg.QueryValueEx(cmd_key, "")
+                        entry_data["command"] = cmd_value
+                        winreg.CloseKey(cmd_key)
+                    except:
+                        pass
+                    
+                    # Check if it has a shell subkey (it's a group with children)
+                    try:
+                        shell_path = f"{full_path}\\shell"
+                        shell_key = winreg.OpenKey(hkey, shell_path, 0, winreg.KEY_READ)
+                        winreg.CloseKey(shell_key)
+                        # Recursively get children
+                        entry_data["children"] = self._export_shell_keys(hkey, shell_path)
+                    except:
+                        pass
+                    
+                    entries[subkey_name] = entry_data
+                    i += 1
+                except OSError:
+                    break
+            winreg.CloseKey(key)
+        except:
+            pass
+        
         return entries
+    
+    def _import_shell_entries(self, hkey, base_path, entries):
+        """Recursively import shell entries with all properties"""
+        for name, data in entries.items():
+            full_path = f"{base_path}\\{name}"
+            
+            try:
+                # Create the key
+                key = winreg.CreateKey(hkey, full_path)
+                
+                # Set MUIVerb if present
+                if "MUIVerb" in data:
+                    winreg.SetValueEx(key, "MUIVerb", 0, winreg.REG_SZ, data["MUIVerb"])
+                
+                # Set Icon if present
+                if "Icon" in data:
+                    winreg.SetValueEx(key, "Icon", 0, winreg.REG_SZ, data["Icon"])
+                
+                # Set SubCommands if present (for groups)
+                if "SubCommands" in data:
+                    winreg.SetValueEx(key, "SubCommands", 0, winreg.REG_SZ, data["SubCommands"])
+                
+                # Set CommandFlags if present
+                if "CommandFlags" in data:
+                    winreg.SetValueEx(key, "CommandFlags", 0, winreg.REG_DWORD, data["CommandFlags"])
+                
+                winreg.CloseKey(key)
+                
+                # Create command subkey if present
+                if "command" in data:
+                    cmd_key = winreg.CreateKey(hkey, f"{full_path}\\command")
+                    winreg.SetValue(cmd_key, "", winreg.REG_SZ, data["command"])
+                    winreg.CloseKey(cmd_key)
+                
+                # Recursively import children if present
+                if "children" in data and data["children"]:
+                    shell_key = winreg.CreateKey(hkey, f"{full_path}\\shell")
+                    winreg.CloseKey(shell_key)
+                    self._import_shell_entries(hkey, f"{full_path}\\shell", data["children"])
+                    
+            except Exception as e:
+                print(f"Error importing {name}: {e}")
 
     def export_config(self):
         """Export all settings to JSON (Fixed to data.json)"""
-        file_path = os.path.join(os.getcwd(), "data.json")
+        # Save in the same directory as the script
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        file_path = os.path.join(script_dir, "data.json")
             
         try:
             # Collect scripts
@@ -1654,29 +1770,41 @@ class EnvVariableManager(QMainWindow):
                                 scripts_data[name] = f.read()
                         except: pass
 
+            # Get context menu data with error handling
+            context_menu_data = {}
+            try:
+                context_menu_data = self.get_context_menu_data()
+            except Exception as e:
+                print(f"Warning: Could not export context menu data: {e}")
+                context_menu_data = {}
+
             config = {
-                "version": "1.2",
+                "version": "1.3",
                 "timestamp": datetime.now().isoformat(),
                 "user_env": self.get_all_registry_vars(winreg.HKEY_CURRENT_USER, r"Environment"),
                 "system_env": self.get_all_registry_vars(winreg.HKEY_LOCAL_MACHINE, r"SYSTEM\CurrentControlSet\Control\Session Manager\Environment"),
                 "aliases": self.aliases,
-                "context_menu": self.get_context_menu_data(),
+                "context_menu": context_menu_data,
                 "scripts": scripts_data
             }
             
-            with open(file_path, 'w') as f:
+            with open(file_path, 'w', encoding='utf-8') as f:
                 json.dump(config, f, indent=4)
             
-            self.set_status(f"Auto-exported to data.json", CP_GREEN)
+            self.set_status(f"Exported to data.json", CP_GREEN)
+            QMessageBox.information(self, "Success", f"Configuration exported to:\n{file_path}")
         except Exception as e:
             self.set_status(f"Export failed: {str(e)}", CP_RED)
             QMessageBox.critical(self, "Error", f"Failed to export: {str(e)}")
 
     def import_config(self):
         """Import settings from data.json (Fixed)"""
-        file_path = os.path.join(os.getcwd(), "data.json")
+        # Look in the same directory as the script
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        file_path = os.path.join(script_dir, "data.json")
+        
         if not os.path.exists(file_path):
-            QMessageBox.warning(self, "Error", "data.json not found in current directory.")
+            QMessageBox.warning(self, "Error", f"data.json not found at:\n{file_path}")
             return
             
         try:
@@ -1721,11 +1849,21 @@ class EnvVariableManager(QMainWindow):
             # Import Context Menu
             if "context_menu" in config:
                 try:
-                    for name, cmd in config["context_menu"].items():
-                        self._create_reg_entry(rf"Directory\shell\{name}", cmd)
-                        self._create_reg_entry(rf"Directory\Background\shell\{name}", cmd)
-                except PermissionError:
-                    QMessageBox.warning(self, "Permission Denied", "Could not import Context Menu entries. Please run as Administrator.")
+                    for scope, entries in config["context_menu"].items():
+                        # Determine base path based on scope
+                        if scope == "Background":
+                            base_path = r"Software\Classes\Directory\Background\shell"
+                        elif scope == "Folder":
+                            base_path = r"Software\Classes\Directory\shell"
+                        elif scope == "AllFiles":
+                            base_path = r"Software\Classes\*\shell"
+                        else:
+                            continue
+                        
+                        # Import entries recursively
+                        self._import_shell_entries(winreg.HKEY_CURRENT_USER, base_path, entries)
+                except Exception as e:
+                    QMessageBox.warning(self, "Error", f"Could not import Context Menu entries: {str(e)}")
 
             # Import Scripts
             if "scripts" in config:
