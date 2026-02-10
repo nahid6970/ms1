@@ -792,14 +792,17 @@ class EnvVariableManager(QMainWindow):
         # Controls
         controls_layout = QHBoxLayout()
         add_btn = QPushButton("➕ ADD ENTRY")
+        edit_btn = QPushButton("✏️ EDIT")
         remove_btn = QPushButton("❌ REMOVE")
         refresh_btn = QPushButton("🔄 REFRESH")
         
         add_btn.clicked.connect(self.add_context_entry)
+        edit_btn.clicked.connect(self.edit_context_entry)
         remove_btn.clicked.connect(self.remove_context_entry)
         refresh_btn.clicked.connect(self.load_context_entries)
         
         controls_layout.addWidget(add_btn)
+        controls_layout.addWidget(edit_btn)
         controls_layout.addWidget(remove_btn)
         controls_layout.addWidget(refresh_btn)
         layout.addLayout(controls_layout)
@@ -874,6 +877,46 @@ class EnvVariableManager(QMainWindow):
                     QMessageBox.critical(self, "Error", "Permission Denied. Please run as Administrator to modify Context Menu.")
                 except Exception as e:
                     QMessageBox.critical(self, "Error", f"Failed to add entry: {str(e)}")
+
+    def edit_context_entry(self):
+        """Edit selected context menu entry"""
+        row = self.context_table.currentRow()
+        if row < 0:
+            return
+            
+        old_name = self.context_table.item(row, 0).text()
+        old_cmd = self.context_table.item(row, 1).text()
+        
+        # Edit Name
+        new_name, ok1 = QInputDialog.getText(self, "Edit Context Entry", "Menu Label:", text=old_name)
+        if not ok1 or not new_name:
+            return
+            
+        # Edit Command
+        new_cmd, ok2 = QInputDialog.getText(self, "Edit Context Entry", "Command:", text=old_cmd)
+        if not ok2 or not new_cmd:
+            return
+            
+        if new_name == old_name and new_cmd == old_cmd:
+            return # No changes
+
+        try:
+            # Create/Update keys
+            self._create_reg_entry(rf"Directory\shell\{new_name}", new_cmd)
+            self._create_reg_entry(rf"Directory\Background\shell\{new_name}", new_cmd)
+            
+            # If name changed, delete old keys
+            if new_name != old_name:
+                self._delete_reg_key(winreg.HKEY_CLASSES_ROOT, rf"Directory\shell\{old_name}")
+                self._delete_reg_key(winreg.HKEY_CLASSES_ROOT, rf"Directory\Background\shell\{old_name}")
+                
+            self.load_context_entries()
+            self.set_status(f"Updated context menu entry: {new_name}", CP_GREEN)
+            
+        except PermissionError:
+            QMessageBox.critical(self, "Error", "Permission Denied. Please run as Administrator.")
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Failed to update entry: {str(e)}")
 
     def _create_reg_entry(self, path, command):
         """Helper to create registry keys for context menu"""
