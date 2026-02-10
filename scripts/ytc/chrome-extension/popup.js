@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     language: 'en',
     format: 'srt',
     autoSub: false,
+    copyToClipboard: false,
     useTimeline: false,
     startTime: '',
     endTime: '',
@@ -25,6 +26,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('language').value = settings.language;
     document.getElementById('format').value = settings.format;
     document.getElementById('autoSub').checked = settings.autoSub;
+    document.getElementById('copyToClipboard').checked = settings.copyToClipboard;
     
     // Only override timeline if no URL timestamp was found
     if (!timeMatch) {
@@ -34,6 +36,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     
     toggleTimelineInputs();
+    toggleClipboardOption();
   });
 });
 
@@ -45,12 +48,31 @@ function toggleTimelineInputs() {
   document.getElementById('timelineInputs').style.display = checked ? 'block' : 'none';
 }
 
+// Toggle clipboard option based on format
+document.getElementById('format').addEventListener('change', toggleClipboardOption);
+
+function toggleClipboardOption() {
+  const format = document.getElementById('format').value;
+  const clipboardCheckbox = document.getElementById('copyToClipboard');
+  const clipboardLabel = clipboardCheckbox.parentElement;
+  
+  if (format === 'txt') {
+    clipboardLabel.style.opacity = '1';
+    clipboardCheckbox.disabled = false;
+  } else {
+    clipboardLabel.style.opacity = '0.5';
+    clipboardCheckbox.disabled = true;
+    clipboardCheckbox.checked = false;
+  }
+}
+
 // Extract button handler
 document.getElementById('extract').addEventListener('click', async () => {
   const url = document.getElementById('url').value;
   const language = document.getElementById('language').value;
   const format = document.getElementById('format').value;
   const autoSub = document.getElementById('autoSub').checked;
+  const copyToClipboard = document.getElementById('copyToClipboard').checked;
   const useTimeline = document.getElementById('useTimeline').checked;
   const startTime = document.getElementById('startTime').value;
   const endTime = document.getElementById('endTime').value;
@@ -60,6 +82,7 @@ document.getElementById('extract').addEventListener('click', async () => {
     language,
     format,
     autoSub,
+    copyToClipboard,
     useTimeline,
     startTime,
     endTime
@@ -86,6 +109,7 @@ document.getElementById('extract').addEventListener('click', async () => {
       language,
       format,
       autoSub,
+      copyToClipboard,
       useTimeline,
       startTime,
       endTime,
@@ -95,7 +119,11 @@ document.getElementById('extract').addEventListener('click', async () => {
     extractBtn.disabled = false;
     
     if (response.success) {
-      setStatus('EXTRACTION COMPLETE!');
+      if (response.clipboardCopied) {
+        setStatus('COMPLETE! TEXT COPIED TO CLIPBOARD');
+      } else {
+        setStatus('EXTRACTION COMPLETE!');
+      }
       setTimeout(() => setStatus('READY'), 3000);
     } else {
       setStatus(`ERROR: ${response.error}`);

@@ -9,7 +9,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 });
 
 async function extractSubtitles(data) {
-  const { url, language, format, autoSub, useTimeline, startTime, endTime, saveDir } = data;
+  const { url, language, format, autoSub, copyToClipboard, useTimeline, startTime, endTime, saveDir } = data;
   
   // Build yt-dlp command
   const cmd = ['yt-dlp', '--skip-download', '--write-subs'];
@@ -49,6 +49,7 @@ async function extractSubtitles(data) {
     {
       command: cmd,
       format: format,
+      copyToClipboard: copyToClipboard && format === 'txt',
       useTimeline: useTimeline,
       startTime: startTime,
       endTime: endTime,

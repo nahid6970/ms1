@@ -145,8 +145,12 @@ def convert_to_txt(file_path, time_range=None):
             else:
                 final_lines.append(line)
 
+        # Create final text content
+        txt_content = "\n".join(final_lines)
+        
+        # Write to file
         with open(txt_path, 'w', encoding='utf-8') as f:
-            f.write("\n".join(final_lines))
+            f.write(txt_content)
         
         # Remove original file
         try:
@@ -154,14 +158,15 @@ def convert_to_txt(file_path, time_range=None):
         except:
             pass
         
-        return True
+        return txt_content
     except Exception as e:
         send_message({"success": False, "error": f"Conversion error: {str(e)}"})
-        return False
+        return None
 
 
 def process_subtitles(save_dir, format_type, time_range, start_time):
     """Process downloaded subtitles (convert to TXT if needed)"""
+    txt_content = None
     try:
         for filename in os.listdir(save_dir):
             if filename.endswith(".srt") or filename.endswith(".vtt"):
@@ -170,9 +175,11 @@ def process_subtitles(save_dir, format_type, time_range, start_time):
                 # Check if file was created after download started
                 if os.path.getmtime(full_path) > start_time - 5:
                     if format_type == 'txt':
-                        convert_to_txt(full_path, time_range)
+                        txt_content = convert_to_txt(full_path, time_range)
     except Exception as e:
         send_message({"success": False, "error": f"Processing error: {str(e)}"})
+    
+    return txt_content
 
 
 def execute_download(message):
@@ -180,6 +187,7 @@ def execute_download(message):
     try:
         command = message['command']
         format_type = message.get('format', 'srt')
+        copy_to_clipboard = message.get('copyToClipboard', False)
         use_timeline = message.get('useTimeline', False)
         start_time_str = message.get('startTime', '')
         end_time_str = message.get('endTime', '')
@@ -214,10 +222,35 @@ def execute_download(message):
             return
         
         # Process subtitles if needed
+        txt_content = None
         if format_type == 'txt' or time_range:
-            process_subtitles(save_dir, format_type, time_range, download_start)
+            txt_content = process_subtitles(save_dir, format_type, time_range, download_start)
         
-        send_message({"success": True, "message": "Subtitles extracted successfully"})
+        # Copy to clipboard if requested
+        clipboard_copied = False
+        if copy_to_clipboard and format_type == 'txt' and txt_content:
+            try:
+                import pyperclip
+                pyperclip.copy(txt_content)
+                clipboard_copied = True
+            except ImportError:
+                # Fallback to Windows clip command
+                try:
+                    process = subprocess.Popen(
+                        ['clip'],
+                        stdin=subprocess.PIPE,
+                        creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0
+                    )
+                    process.communicate(input=txt_content.encode('utf-16le'))
+                    clipboard_copied = True
+                except:
+                    pass
+        
+        send_message({
+            "success": True, 
+            "message": "Subtitles extracted successfully",
+            "clipboardCopied": clipboard_copied
+        })
         
     except Exception as e:
         send_message({"success": False, "error": str(e)})
