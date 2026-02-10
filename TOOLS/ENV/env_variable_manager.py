@@ -848,6 +848,8 @@ class EnvVariableManager(QMainWindow):
         icon_btn = QPushButton("🖼️ SET ICON")
         edit_btn = QPushButton("✏️ EDIT")
         remove_btn = QPushButton("❌ REMOVE")
+        up_btn = QPushButton("⬆️ MOVE UP")
+        down_btn = QPushButton("⬇️ MOVE DOWN")
         refresh_btn = QPushButton("🔄 REFRESH")
         
         add_btn.clicked.connect(self.add_context_entry)
@@ -856,6 +858,8 @@ class EnvVariableManager(QMainWindow):
         icon_btn.clicked.connect(self.set_context_icon)
         edit_btn.clicked.connect(self.edit_context_entry)
         remove_btn.clicked.connect(self.remove_context_entry)
+        up_btn.clicked.connect(self.move_context_up)
+        down_btn.clicked.connect(self.move_context_down)
         refresh_btn.clicked.connect(self.load_context_entries)
         
         controls_layout.addWidget(add_btn)
@@ -864,6 +868,8 @@ class EnvVariableManager(QMainWindow):
         controls_layout.addWidget(icon_btn)
         controls_layout.addWidget(edit_btn)
         controls_layout.addWidget(remove_btn)
+        controls_layout.addWidget(up_btn)
+        controls_layout.addWidget(down_btn)
         controls_layout.addWidget(refresh_btn)
         layout.addLayout(controls_layout)
         
@@ -1281,6 +1287,95 @@ class EnvVariableManager(QMainWindow):
                     self.set_status(f"Removed {display_name}", CP_GREEN)
                 except Exception as e:
                     self.set_status(f"Error removing entry: {str(e)}", CP_RED)
+
+    def move_context_up(self):
+        """Move context menu entry up in order by swapping with previous entry"""
+        row = self.context_table.currentRow()
+        if row <= 0:
+            QMessageBox.warning(self, "Error", "Cannot move up - already at top or no selection!")
+            return
+        
+        # Get current and previous items
+        current_path = self.context_table.item(row, 0).data(Qt.ItemDataRole.UserRole)
+        prev_row = row - 1
+        
+        # Skip indented items (children) - only swap siblings at same level
+        current_indent = self.context_table.item(row, 0).text().count("↳")
+        prev_indent = self.context_table.item(prev_row, 0).text().count("↳")
+        
+        if current_indent != prev_indent:
+            QMessageBox.warning(self, "Error", "Cannot swap items at different nesting levels!")
+            return
+            
+        prev_path = self.context_table.item(prev_row, 0).data(Qt.ItemDataRole.UserRole)
+        
+        try:
+            # Swap by renaming keys
+            self._swap_registry_keys(current_path, prev_path)
+            self.load_context_entries()
+            self.context_table.selectRow(prev_row)
+            self.set_status("Moved entry up", CP_GREEN)
+        except Exception as e:
+            self.set_status(f"Error moving entry: {str(e)}", CP_RED)
+            QMessageBox.critical(self, "Error", f"Failed to move entry: {str(e)}")
+
+    def move_context_down(self):
+        """Move context menu entry down in order by swapping with next entry"""
+        row = self.context_table.currentRow()
+        if row < 0 or row >= self.context_table.rowCount() - 1:
+            QMessageBox.warning(self, "Error", "Cannot move down - already at bottom or no selection!")
+            return
+        
+        # Get current and next items
+        current_path = self.context_table.item(row, 0).data(Qt.ItemDataRole.UserRole)
+        next_row = row + 1
+        
+        # Skip indented items (children) - only swap siblings at same level
+        current_indent = self.context_table.item(row, 0).text().count("↳")
+        next_indent = self.context_table.item(next_row, 0).text().count("↳")
+        
+        if current_indent != next_indent:
+            QMessageBox.warning(self, "Error", "Cannot swap items at different nesting levels!")
+            return
+            
+        next_path = self.context_table.item(next_row, 0).data(Qt.ItemDataRole.UserRole)
+        
+        try:
+            # Swap by renaming keys
+            self._swap_registry_keys(current_path, next_path)
+            self.load_context_entries()
+            self.context_table.selectRow(next_row)
+            self.set_status("Moved entry down", CP_GREEN)
+        except Exception as e:
+            self.set_status(f"Error moving entry: {str(e)}", CP_RED)
+            QMessageBox.critical(self, "Error", f"Failed to move entry: {str(e)}")
+    
+    def _swap_registry_keys(self, path1, path2):
+        """Swap two registry keys by renaming them"""
+        import time
+        
+        # Extract key names
+        name1 = path1.split('\\')[-1]
+        name2 = path2.split('\\')[-1]
+        parent = "\\".join(path1.split('\\')[:-1])
+        
+        # Use temporary name to avoid conflicts
+        temp_name = f"_TEMP_SWAP_{int(time.time())}"
+        temp_path = f"{parent}\\{temp_name}"
+        
+        # Step 1: Rename path1 to temp
+        self._copy_reg_key(winreg.HKEY_CURRENT_USER, path1, temp_path)
+        self._delete_reg_key(winreg.HKEY_CURRENT_USER, path1)
+        
+        # Step 2: Rename path2 to path1's name
+        new_path1 = f"{parent}\\{name1}"
+        self._copy_reg_key(winreg.HKEY_CURRENT_USER, path2, new_path1)
+        self._delete_reg_key(winreg.HKEY_CURRENT_USER, path2)
+        
+        # Step 3: Rename temp to path2's name
+        new_path2 = f"{parent}\\{name2}"
+        self._copy_reg_key(winreg.HKEY_CURRENT_USER, temp_path, new_path2)
+        self._delete_reg_key(winreg.HKEY_CURRENT_USER, temp_path)
 
     def _delete_reg_key(self, hkey, path):
         """Helper to delete registry key and all subkeys"""
