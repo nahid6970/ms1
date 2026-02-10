@@ -37,12 +37,6 @@ class EnvVariableManager(QMainWindow):
         self.setCentralWidget(central)
         main_layout = QVBoxLayout(central)
         
-        # Title
-        title = QLabel("⚡ ENVIRONMENT VARIABLE CONTROL PANEL ⚡")
-        title.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        title.setStyleSheet(f"font-size: 16pt; font-weight: bold; color: {CP_YELLOW}; padding: 10px;")
-        main_layout.addWidget(title)
-        
         # Status Bar (create before tabs)
         self.status_label = QLabel("SYSTEM READY")
         self.status_label.setStyleSheet(f"color: {CP_GREEN}; font-weight: bold; padding: 5px;")
@@ -814,16 +808,6 @@ class EnvVariableManager(QMainWindow):
         """Create tab for Windows Right-Click Context Menu customization"""
         widget = QWidget()
         layout = QVBoxLayout(widget)
-        
-        info = QLabel("🖱️ SHELL CONTEXT MENU MANAGER")
-        info.setStyleSheet(f"font-size: 14pt; color: {CP_CYAN}; padding: 10px;")
-        info.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(info)
-        
-        desc = QLabel("Add custom actions to the Windows Explorer right-click menu (Background & Folders).")
-        desc.setStyleSheet(f"color: {CP_SUBTEXT}; padding: 5px;")
-        desc.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(desc)
         
         # Menu Table
         list_group = QGroupBox("CONTEXT MENU ENTRIES")
