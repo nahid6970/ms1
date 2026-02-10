@@ -876,10 +876,10 @@ class EnvVariableManager(QMainWindow):
         """Load context menu entries from registry"""
         self.context_table.setRowCount(0)
         
-        # Scan both folder right-click and background right-click
-        # We use HKCR for a complete view, but HKCU entries will be what we manage
+        # Scan folder right-click, background right-click, and all files (*)
         self._scan_shell_keys(r"Directory\shell", "Folder")
         self._scan_shell_keys(r"Directory\Background\shell", "Background")
+        self._scan_shell_keys(r"*\shell", "All Files")
 
     def _scan_shell_keys(self, base_path, scope_label, indent=""):
         """Recursive helper to scan for context menu items and groups"""
@@ -1179,29 +1179,60 @@ class EnvVariableManager(QMainWindow):
             new_cmd = new_cmd.replace("{path}", "\"%V\"").replace("%1", "\"%V\"")
 
         try:
-            hkcu_path = old_full_path.replace("Directory\\", "Software\\Classes\\Directory\\")
+            # Determine HKCU path correctly
+            if "Software\\Classes" in old_full_path:
+                hkcu_path = old_full_path
+            else:
+                if old_full_path.startswith("*\\"):
+                    hkcu_path = old_full_path.replace("*\\", "Software\\Classes\\*\\")
+                else:
+                    hkcu_path = old_full_path.replace("Directory\\", "Software\\Classes\\Directory\\")
+
             parent_path = "\\".join(hkcu_path.split('\\')[:-1])
             new_hkcu_path = f"{parent_path}\\{new_name}"
 
             if type_text == "ENTRY":
                 self._create_reg_entry(new_hkcu_path, new_cmd)
             else:
+                # If it's a group, we must preserve MUIVerb and SubCommands
                 self._create_group_entry(new_hkcu_path)
             
-            # Set icon if provided
+            # Set icon if it had one
             if new_icon:
-                key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, new_hkcu_path, 0, winreg.KEY_SET_VALUE)
-                winreg.SetValueEx(key, "Icon", 0, winreg.REG_SZ, new_icon)
-                winreg.CloseKey(key)
+                with winreg.OpenKey(winreg.HKEY_CURRENT_USER, new_hkcu_path, 0, winreg.KEY_SET_VALUE) as key:
+                    winreg.SetValueEx(key, "Icon", 0, winreg.REG_SZ, new_icon)
             
-            # If name changed, delete old keys
+            # If it's a rename, move subkeys (especially important for groups like FFMPEG)
             if new_name != old_name:
+                self._copy_reg_key(winreg.HKEY_CURRENT_USER, hkcu_path, new_hkcu_path)
                 self._delete_reg_key(winreg.HKEY_CURRENT_USER, hkcu_path)
                 
             self.load_context_entries()
             self.set_status(f"Updated context menu entry: {new_name}", CP_GREEN)
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Failed to update entry: {str(e)}")
+
+    def _copy_reg_key(self, hkey, src, dst):
+        """Helper to recursively copy a registry key"""
+        with winreg.OpenKey(hkey, src) as src_key:
+            # Copy values
+            with winreg.CreateKey(hkey, dst) as dst_key:
+                i = 0
+                while True:
+                    try:
+                        name, value, type = winreg.EnumValue(src_key, i)
+                        winreg.SetValueEx(dst_key, name, 0, type, value)
+                        i += 1
+                    except OSError: break
+            
+            # Copy subkeys
+            i = 0
+            while True:
+                try:
+                    subkey_name = winreg.EnumKey(src_key, i)
+                    self._copy_reg_key(src_key, subkey_name, f"{dst}\\{subkey_name}")
+                    i += 1
+                except OSError: break
     
     def _browse_icon(self, line_edit):
         """Helper to browse for icon file"""
