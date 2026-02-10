@@ -122,6 +122,19 @@ After setup, all new shells automatically load your aliases!
 - **Dynamic Font Detection**: Implemented a robust font engine that automatically detects and applies "JetBrainsMono NFP" variations (Nerd Font) across all UI components.
 - **Streamlined Interface**: Removed redundant header labels to maximize vertical space for environment variable lists and configuration tables.
 
+## 🎬 FFMPEG Script Suite
+
+The manager now includes a suite of FFMPEG-powered media tools accessible via the "SCRIPTS" tab and the Windows Context Menu:
+
+- **FFMPEG Convert**: Quickly convert media formats.
+- **FFMPEG Merge**: Join multiple media files.
+- **FFMPEG Trim**: Cut segments from video/audio.
+- **FFMPEG Vid Dim/Image Dimension**: Check media properties.
+- **FFMPEG Android Icon Generator**: Create icons for Android development.
+- **FFMPEG Image Resizer GUI**: A dedicated interface for batch image processing.
+
+These are automatically registered to the folder context menu (Background and Directory) for instant access.
+
 ## Theme
 
 Uses cyberpunk color scheme from THEME_GUIDE.md:
