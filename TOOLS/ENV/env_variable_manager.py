@@ -1122,11 +1122,19 @@ class EnvVariableManager(QMainWindow):
         type_text = self.context_table.item(row, 1).text()
         old_cmd = self.context_table.item(row, 2).text()
         
-        # Get icon from registry
+        # Get current label (MUIVerb) from registry
+        old_label = old_name
         old_icon = ""
         try:
             key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, old_full_path, 0, winreg.KEY_READ)
-            old_icon, _ = winreg.QueryValueEx(key, "Icon")
+            try:
+                old_label, _ = winreg.QueryValueEx(key, "MUIVerb")
+            except:
+                pass
+            try:
+                old_icon, _ = winreg.QueryValueEx(key, "Icon")
+            except:
+                pass
             winreg.CloseKey(key)
         except:
             pass
@@ -1140,9 +1148,9 @@ class EnvVariableManager(QMainWindow):
         
         form_layout = QFormLayout()
         
-        # Name field
-        name_edit = QLineEdit(old_name)
-        form_layout.addRow("Menu Label:", name_edit)
+        # Label field (what user sees in context menu)
+        label_edit = QLineEdit(old_label)
+        form_layout.addRow("Display Label:", label_edit)
         
         # Command field (only for ENTRY type)
         cmd_edit = None
@@ -1170,38 +1178,40 @@ class EnvVariableManager(QMainWindow):
         if dialog.exec() != QDialog.DialogCode.Accepted:
             return
         
-        new_name = name_edit.text().strip()
+        new_label = label_edit.text().strip()
         new_cmd = cmd_edit.text().strip() if cmd_edit else "(Cascading Menu)"
         new_icon = icon_edit.text().strip()
         
-        if not new_name:
+        if not new_label:
             return
             
         if type_text == "ENTRY" and new_cmd:
             new_cmd = new_cmd.replace("{path}", "\"%V\"").replace("%1", "\"%V\"")
 
         try:
-            parent_path = "\\".join(old_full_path.split('\\')[:-1])
-            new_full_path = f"{parent_path}\\{new_name}"
-
-            if type_text == "ENTRY":
-                self._create_reg_entry(new_full_path, new_cmd)
-            else:
-                # If it's a group, we must preserve MUIVerb and SubCommands
-                self._create_group_entry(new_full_path)
-            
-            # Set icon if provided
-            if new_icon:
-                with winreg.OpenKey(winreg.HKEY_CURRENT_USER, new_full_path, 0, winreg.KEY_SET_VALUE) as key:
+            # Update the existing entry (don't rename the key, just update MUIVerb)
+            with winreg.OpenKey(winreg.HKEY_CURRENT_USER, old_full_path, 0, winreg.KEY_SET_VALUE) as key:
+                # Update the display label
+                winreg.SetValueEx(key, "MUIVerb", 0, winreg.REG_SZ, new_label)
+                
+                # Set icon if provided
+                if new_icon:
                     winreg.SetValueEx(key, "Icon", 0, winreg.REG_SZ, new_icon)
+                elif old_icon and not new_icon:
+                    # Remove icon if cleared
+                    try:
+                        winreg.DeleteValue(key, "Icon")
+                    except:
+                        pass
             
-            # If it's a rename, move subkeys (especially important for groups like FFMPEG)
-            if new_name != old_name:
-                self._copy_reg_key(winreg.HKEY_CURRENT_USER, old_full_path, new_full_path)
-                self._delete_reg_key(winreg.HKEY_CURRENT_USER, old_full_path)
+            # Update command if it's an entry
+            if type_text == "ENTRY" and new_cmd:
+                cmd_path = f"{old_full_path}\\command"
+                with winreg.OpenKey(winreg.HKEY_CURRENT_USER, cmd_path, 0, winreg.KEY_SET_VALUE) as cmd_key:
+                    winreg.SetValue(cmd_key, "", winreg.REG_SZ, new_cmd)
                 
             self.load_context_entries()
-            self.set_status(f"Updated context menu entry: {new_name}", CP_GREEN)
+            self.set_status(f"Updated context menu entry: {new_label}", CP_GREEN)
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Failed to update entry: {str(e)}")
 

@@ -1,12 +1,14 @@
 import winreg
 import os
 
-def create_context_group(base_path, group_name, group_label):
+def create_context_group(base_path, group_name, group_label, icon=None):
     """Create a cascading menu group"""
     path = f"{base_path}\\{group_name}"
     key = winreg.CreateKey(winreg.HKEY_CURRENT_USER, path)
     winreg.SetValueEx(key, "MUIVerb", 0, winreg.REG_SZ, group_label)
     winreg.SetValueEx(key, "SubCommands", 0, winreg.REG_SZ, "")
+    if icon:
+        winreg.SetValueEx(key, "Icon", 0, winreg.REG_SZ, icon)
     winreg.CreateKey(key, "shell")
     winreg.CloseKey(key)
     return path
