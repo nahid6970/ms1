@@ -9,7 +9,7 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QH
                              QListWidgetItem, QFormLayout, QTableWidget, QTableWidgetItem,
                              QHeaderView, QFileDialog, QDialog, QDialogButtonBox)
 from PyQt6.QtCore import Qt, QSize
-from PyQt6.QtGui import QFont
+from PyQt6.QtGui import QFont, QFontDatabase
 
 # CYBERPUNK THEME PALETTE
 CP_BG = "#050505"
@@ -60,9 +60,24 @@ class EnvVariableManager(QMainWindow):
     
     def apply_theme(self):
         """Apply cyberpunk theme to the application"""
+        # Try to find the best match for JetBrainsMono NFP
+        target_font = "JetBrainsMono NFP"
+        for family in QFontDatabase.families():
+            if "JetBrainsMono" in family and ("NFP" in family or "NF" in family or "Nerd Font" in family):
+                target_font = family
+                break
+                
         self.setStyleSheet(f"""
+            * {{ font-family: '{target_font}', 'JetBrainsMono NFP', 'Consolas'; }}
             QMainWindow {{ background-color: {CP_BG}; }}
-            QWidget {{ color: {CP_TEXT}; font-family: 'JetBrainsMono NFP'; font-size: 10pt; }}
+            QWidget {{ 
+                color: {CP_TEXT}; 
+                font-family: '{target_font}', 'JetBrainsMono NFP';
+                font-size: 10pt; 
+            }}
+            QLabel, QPushButton, QLineEdit, QTextEdit, QListWidget, QTableWidget, QGroupBox, QTabBar::tab {{
+                font-family: '{target_font}', 'JetBrainsMono NFP';
+            }}
             
             QLineEdit, QTextEdit {{
                 background-color: {CP_PANEL}; 
@@ -1646,8 +1661,25 @@ class EnvVariableManager(QMainWindow):
 def main():
     app = QApplication(sys.argv)
     
-    # Set application font
-    font = QFont("JetBrainsMono NFP", 10)
+    # Diagnostic: Print available JetBrains fonts
+    jb_fonts = [f for f in QFontDatabase.families() if "JetBrains" in f]
+    if jb_fonts:
+        print(f"DEBUG: Found JetBrains fonts: {', '.join(jb_fonts)}")
+    else:
+        print("DEBUG: No JetBrains fonts found in system!")
+
+    # Try to set JetBrainsMono NFP as the default font
+    font_name = "JetBrainsMono NFP"
+    font = QFont(font_name, 10)
+    
+    # Check if font is actually available, otherwise it might fallback to system default
+    if font_name not in QFontDatabase.families():
+        # Fallback to similar names if the exact one isn't found
+        for family in QFontDatabase.families():
+            if "JetBrainsMono" in family and "NFP" in family:
+                font = QFont(family, 10)
+                break
+    
     app.setFont(font)
     
     window = EnvVariableManager()
