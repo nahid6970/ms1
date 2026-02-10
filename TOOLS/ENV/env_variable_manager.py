@@ -959,6 +959,20 @@ class EnvVariableManager(QMainWindow):
                         # Add as child of selected group
                         hkcu_base = parent_path.replace("Directory\\", "Software\\Classes\\Directory\\")
                         self._create_reg_entry(rf"{hkcu_base}\shell\{name}", cmd)
+                        
+                        # Sync to background if applicable
+                        if "Background" not in hkcu_base:
+                            bg_base = hkcu_base.replace("Directory\\shell", "Directory\\Background\\shell")
+                            try:
+                                winreg.OpenKey(winreg.HKEY_CURRENT_USER, bg_base, 0, winreg.KEY_READ)
+                                self._create_reg_entry(rf"{bg_base}\shell\{name}", cmd)
+                            except: pass
+                        elif "Background" in hkcu_base:
+                            folder_base = hkcu_base.replace("Directory\\Background\\shell", "Directory\\shell")
+                            try:
+                                winreg.OpenKey(winreg.HKEY_CURRENT_USER, folder_base, 0, winreg.KEY_READ)
+                                self._create_reg_entry(rf"{folder_base}\shell\{name}", cmd)
+                            except: pass
                     else:
                         # Add to top level (both locations)
                         self._create_reg_entry(rf"Software\Classes\Directory\shell\{name}", cmd)
@@ -1022,7 +1036,8 @@ class EnvVariableManager(QMainWindow):
     def _create_reg_entry(self, path, command):
         """Helper to create registry keys for context menu in HKCU"""
         key = winreg.CreateKey(winreg.HKEY_CURRENT_USER, path)
-        winreg.SetValue(key, "", winreg.REG_SZ, "") 
+        label = path.split('\\')[-1]
+        winreg.SetValue(key, "", winreg.REG_SZ, label) 
         
         cmd_key = winreg.CreateKey(key, "command")
         winreg.SetValue(cmd_key, "", winreg.REG_SZ, command)
