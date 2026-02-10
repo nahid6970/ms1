@@ -865,16 +865,17 @@ class EnvVariableManager(QMainWindow):
         if ok1 and name:
             cmd, ok2 = QInputDialog.getText(self, "Add Context Entry", f"Command to execute for '{name}':\n(Use %V for current directory)")
             if ok2 and cmd:
+                # Auto-fix common placeholder mistakes
+                cmd = cmd.replace("{path}", "\"%V\"").replace("%1", "\"%V\"")
+                
                 try:
                     # Add to Directory (Folder right-click)
-                    self._create_reg_entry(rf"Directory\shell\{name}", cmd)
+                    self._create_reg_entry(rf"Software\Classes\Directory\shell\{name}", cmd)
                     # Add to Directory Background (Empty space right-click)
-                    self._create_reg_entry(rf"Directory\Background\shell\{name}", cmd)
+                    self._create_reg_entry(rf"Software\Classes\Directory\Background\shell\{name}", cmd)
                     
                     self.load_context_entries()
                     self.set_status(f"Added context menu entry: {name}", CP_GREEN)
-                except PermissionError:
-                    QMessageBox.critical(self, "Error", "Permission Denied. Please run as Administrator to modify Context Menu.")
                 except Exception as e:
                     QMessageBox.critical(self, "Error", f"Failed to add entry: {str(e)}")
 
@@ -897,31 +898,31 @@ class EnvVariableManager(QMainWindow):
         if not ok2 or not new_cmd:
             return
             
+        # Auto-fix common placeholder mistakes
+        new_cmd = new_cmd.replace("{path}", "\"%V\"").replace("%1", "\"%V\"")
+            
         if new_name == old_name and new_cmd == old_cmd:
             return # No changes
 
         try:
-            # Create/Update keys
-            self._create_reg_entry(rf"Directory\shell\{new_name}", new_cmd)
-            self._create_reg_entry(rf"Directory\Background\shell\{new_name}", new_cmd)
+            # Create/Update keys in HKCU
+            self._create_reg_entry(rf"Software\Classes\Directory\shell\{new_name}", new_cmd)
+            self._create_reg_entry(rf"Software\Classes\Directory\Background\shell\{new_name}", new_cmd)
             
-            # If name changed, delete old keys
+            # If name changed, delete old keys from HKCU
             if new_name != old_name:
-                self._delete_reg_key(winreg.HKEY_CLASSES_ROOT, rf"Directory\shell\{old_name}")
-                self._delete_reg_key(winreg.HKEY_CLASSES_ROOT, rf"Directory\Background\shell\{old_name}")
+                self._delete_reg_key(winreg.HKEY_CURRENT_USER, rf"Software\Classes\Directory\shell\{old_name}")
+                self._delete_reg_key(winreg.HKEY_CURRENT_USER, rf"Software\Classes\Directory\Background\shell\{old_name}")
                 
             self.load_context_entries()
             self.set_status(f"Updated context menu entry: {new_name}", CP_GREEN)
-            
-        except PermissionError:
-            QMessageBox.critical(self, "Error", "Permission Denied. Please run as Administrator.")
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Failed to update entry: {str(e)}")
 
     def _create_reg_entry(self, path, command):
-        """Helper to create registry keys for context menu"""
-        key = winreg.CreateKey(winreg.HKEY_CLASSES_ROOT, path)
-        winreg.SetValue(key, "", winreg.REG_SZ, "") # Default value is empty or can be the label
+        """Helper to create registry keys for context menu in HKCU"""
+        key = winreg.CreateKey(winreg.HKEY_CURRENT_USER, path)
+        winreg.SetValue(key, "", winreg.REG_SZ, "") 
         
         cmd_key = winreg.CreateKey(key, "command")
         winreg.SetValue(cmd_key, "", winreg.REG_SZ, command)
@@ -938,14 +939,12 @@ class EnvVariableManager(QMainWindow):
                                         QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
             if reply == QMessageBox.StandardButton.Yes:
                 try:
-                    # Try to delete from both locations
-                    self._delete_reg_key(winreg.HKEY_CLASSES_ROOT, rf"Directory\shell\{name}")
-                    self._delete_reg_key(winreg.HKEY_CLASSES_ROOT, rf"Directory\Background\shell\{name}")
+                    # Delete from HKCU
+                    self._delete_reg_key(winreg.HKEY_CURRENT_USER, rf"Software\Classes\Directory\shell\{name}")
+                    self._delete_reg_key(winreg.HKEY_CURRENT_USER, rf"Software\Classes\Directory\Background\shell\{name}")
                     
                     self.load_context_entries()
                     self.set_status(f"Removed {name}", CP_GREEN)
-                except PermissionError:
-                    QMessageBox.critical(self, "Error", "Permission Denied. Please run as Administrator.")
                 except Exception as e:
                     self.set_status(f"Error removing entry: {str(e)}", CP_RED)
 

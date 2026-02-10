@@ -1,6 +1,6 @@
 {
     "version": "1.2",
-    "timestamp": "2026-02-10T16:15:03.022245",
+    "timestamp": "2026-02-10T16:43:17.852741",
     "user_env": {
         "chocolateyinstall": "C:\\Users\\nahid\\AppData\\Local\\UniGetUI\\Chocolatey",
         "OneDrive": "C:\\Users\\nahid\\OneDrive",
@@ -56,7 +56,7 @@
         "gr": "gemini --resume latest"
     },
     "context_menu": {
-        "Antigravity": "antigravity \\ \"{path}\"",
+        "Antigravity": "C:\\Users\\nahid\\AppData\\Local\\Programs\\Antigravity\\bin\\antigravity.cmd \"%V\"",
         "FilePilotHere": "C:\\Users\\nahid\\AppData\\Local\\Voidstar\\FilePilot\\FPilot.exe \"%V\"",
         "Kiro": "\"C:\\Users\\nahid\\AppData\\Local\\Programs\\Kiro\\Kiro.exe\" \"%V\"",
         "WSL": "wsl.exe --cd \"%V\"",
