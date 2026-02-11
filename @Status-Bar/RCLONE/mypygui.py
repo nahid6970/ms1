@@ -83,43 +83,15 @@ class HoverButton(tk.Button):
     def on_leave(self, event):
         self.configure(bg=self.default_color, fg=self.default_fg)
 
-# wait this time to start the gui
-def long_running_function():
-    time.sleep(0)
-    print("Function completed!")
-
-
-# Call the long-running function
-long_running_function()
-
 set_console_title("🔥")
 # Create main window
 ROOT = tk.Tk()
 ROOT.title("Python GUI")
-# ROOT.attributes('-topmost', True)  # Set always on top
-# ROOT.geometry("520x800")
 ROOT.configure(bg="#282c34")
 ROOT.overrideredirect(True)  # Remove default borders
 
-
-#!############################################################
-# def check_window_topmost():
-#     if not ROOT.attributes('-topmost'):
-#         ROOT.attributes('-topmost', True)
-#     ROOT.after(500, check_window_topmost)
-# # Call the function to check window topmost status periodically
-# check_window_topmost()
-#!############################################################
-
-
 # Create custom border
 BORDER_FRAME = create_custom_border(ROOT)
-
-# Add bindings to make the window movable
-# ROOT.bind("<ButtonPress-1>", start_drag)
-# ROOT.bind("<ButtonRelease-1>", stop_drag)
-# ROOT.bind("<B1-Motion>", do_drag)
-
 default_font = ("Jetbrainsmono nfp", 10)
 ROOT.option_add("*Font", default_font)
 
@@ -127,93 +99,13 @@ screen_width = ROOT.winfo_screenwidth()
 screen_height = ROOT.winfo_screenheight()
 
 x = screen_width//2 - 1920//2
-# y = screen_height//2 - 800//2
-# y = screen_height-47-40
 y = 993
 ROOT.geometry(f"1920x39+{x}+{y}") #! overall size of the window
-
-
-# #! Resize Window
-# #* Function to toggle window size
-# def toggle_window_size(size):
-#     global window_state
-#     global x
-#     global y
-#     if size == 'line':
-#         ROOT.geometry('1920x39')
-#         x = screen_width // 2 - 1920 // 2
-#         y = 993
-#         ROOT.configure(bg='red')
-#         LB_L.config(text='\ueab7', bg="#1d2027", fg="#00FF00", height=1, width=0, font=("JetBrainsMono NF", 16, "bold"))
-#         LB_M.config(text='\uea72', bg="#1d2027", fg="#26b2f3", height=1, width=0, font=("JetBrainsMono NF", 18, "bold"))
-#     elif size == 'max':
-#         ROOT.geometry('1920x140')
-#         x = screen_width // 2 - 1920 // 2
-#         y = 892
-#         ROOT.configure(bg='#1d2027')
-#         LB_L.config(text='\ueab7', bg="#1d2027", fg="#00FF00", height=1, width=0, font=("JetBrainsMono NF", 16, "bold"))
-#         LB_M.config(text='\uea72', bg="#1d2027", fg="#26b2f3", height=1, width=0, font=("JetBrainsMono NF", 18, "bold"))
-#     ROOT.focus_force()
-#     ROOT.update_idletasks()
-#     ROOT.geometry(f'{ROOT.winfo_width()}x{ROOT.winfo_height()}+{x}+{y}')
-# def on_windows_x_pressed():
-#     global window_size_state
-#     if window_size_state == 'line':
-#         toggle_window_size('max')
-#         window_size_state = 'max'
-#     else:
-#         toggle_window_size('line')
-#         window_size_state = 'line'
-# #* Initial window size state
-# window_size_state = 'line'
-# #* Bind Windows + X to toggle between 'line' and 'max' sizesx
-# #! keyboard.add_hotkey('win+x', on_windows_x_pressed)
-
-# x = screen_width//2 - 753//2
-# y = 0
-# ROOT.geometry(f"+{x}+{y}")
 
 # Create main frame
 MAIN_FRAME = tk.Frame(BORDER_FRAME, bg="#1D2027", width=1920, height=800)
 MAIN_FRAME.pack_propagate(False)
 MAIN_FRAME.pack(pady=1, expand=True)  #! Add some padding at the top
-
-# Adding transparent background property
-ROOT.wm_attributes('-transparentcolor', '#000001')
-
-
-
-
-
-#?  ██████╗  ██████╗  ██████╗ ████████╗    ███████╗██████╗  █████╗ ███╗   ███╗███████╗
-#?  ██╔══██╗██╔═══██╗██╔═══██╗╚══██╔══╝    ██╔════╝██╔══██╗██╔══██╗████╗ ████║██╔════╝
-#?  ██████╔╝██║   ██║██║   ██║   ██║       █████╗  ██████╔╝███████║██╔████╔██║█████╗
-#?  ██╔══██╗██║   ██║██║   ██║   ██║       ██╔══╝  ██╔══██╗██╔══██║██║╚██╔╝██║██╔══╝
-#?  ██║  ██║╚██████╔╝╚██████╔╝   ██║       ██║     ██║  ██║██║  ██║██║ ╚═╝ ██║███████╗
-#?  ╚═╝  ╚═╝ ╚═════╝  ╚═════╝    ╚═╝       ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝
-
-def get_active_window_info():
-   # Wait for 2 seconds
-   time.sleep(2)
-   # Get the position of the mouse cursor
-   pos = win32gui.GetCursorPos()
-   # Get the handle of the window under the cursor
-   hwnd = win32gui.WindowFromPoint(pos)
-   # Get the active window information
-   class_name = win32gui.GetClassName(hwnd)
-   window_text = win32gui.GetWindowText(hwnd)
-   _, pid = win32process.GetWindowThreadProcessId(hwnd)
-   process_name = psutil.Process(pid).name()
-   # Print the information with colors and separators
-   print(f"\033[91mActive Window Class:\033[0m {class_name}")
-   print(f"\033[92mActive Window Process Name:\033[0m {process_name}")
-   print(f"\033[94mActive Window Title:\033[0m {window_text}")
-   print("...")  # Add dots as a visual separator
-
-
-
-
-
 
 #! ALL Boxes
 ROOT1 = tk.Frame(MAIN_FRAME, bg="#1d2027")
