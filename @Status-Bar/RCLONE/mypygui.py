@@ -56,6 +56,7 @@ def load_settings():
         "check_interval": 600,
         "minimize_to_tray": True,
         "auto_sync_enabled": False,
+        "auto_sync_on_red": True,
         "topmost": False
     }
     if os.path.exists(SETTINGS_PATH):
@@ -158,7 +159,33 @@ def manage_topmost():
 
 # Auto-Sync logic
 auto_sync_enabled = app_settings.get("auto_sync_enabled", False)
+auto_sync_on_red = app_settings.get("auto_sync_on_red", True)
 pulse_id = None
+
+def run_sync_for_item(cfg, label):
+    """Run sync for a specific item"""
+    print(f"\n{'='*60}")
+    print(f"🔄 AUTO-SYNC TRIGGERED: {cfg['label']}")
+    print(f"{'='*60}")
+    
+    log_path = os.path.join(LOG_DIR, f"{cfg['label']}_sync.log")
+    cmd = cfg.get("left_click_cmd", "rclone sync src dst -P --fast-list --log-level INFO")
+    actual_cmd = cmd.replace("src", cfg["src"]).replace("dst", cfg["dst"])
+    
+    print(f"📁 Source: {cfg['src']}")
+    print(f"📁 Destination: {cfg['dst']}")
+    print(f"⚙️  Running sync command...")
+    
+    with open(log_path, "w") as f:
+        subprocess.run(actual_cmd, shell=True, stdout=f, stderr=f)
+    
+    print(f"✅ Sync completed for {cfg['label']}")
+    print(f"📝 Log saved to: {log_path}")
+    
+    # After sync, run check immediately
+    print(f"🔍 Running check for {cfg['label']}...")
+    check_single_item(label, cfg)
+    print(f"{'='*60}\n")
 
 def toggle_auto_sync():
     global auto_sync_enabled
@@ -166,8 +193,6 @@ def toggle_auto_sync():
     app_settings["auto_sync_enabled"] = auto_sync_enabled
     save_settings(app_settings)
     update_auto_sync_ui()
-    if auto_sync_enabled:
-        threading.Thread(target=auto_sync_loop, daemon=True).start()
 
 def update_auto_sync_ui():
     global pulse_id
@@ -186,18 +211,6 @@ def pulse_effect(color_idx=0):
     colors = ["#06de22", "#05a81a", "#047512", "#05a81a"]
     btn_auto.config(fg=colors[color_idx % len(colors)])
     pulse_id = ROOT.after(500, lambda: pulse_effect(color_idx + 1))
-
-def auto_sync_loop():
-    while auto_sync_enabled:
-        for key, cfg in commands.items():
-            if not auto_sync_enabled: break
-            cmd = cfg.get("left_click_cmd", "rclone sync src dst -P --fast-list --log-level INFO")
-            actual_cmd = cmd.replace("src", cfg["src"]).replace("dst", cfg["dst"])
-            subprocess.run(f'pwsh -Command "{actual_cmd}"', shell=True)
-        # Sleep in increments to remain responsive to toggle
-        for _ in range(app_settings["interval"]):
-            if not auto_sync_enabled: break
-            time.sleep(1)
 
 #! Variables to track the position of the mouse when clicking​⁡
 drag_data = {"x": 0, "y": 0}
@@ -330,8 +343,17 @@ def open_settings():
     topmost_var = tk.BooleanVar(value=app_settings.get("topmost", False))
     tk.Checkbutton(settings_win, text="Always on Top (hides for fullscreen)", variable=topmost_var, bg="#1D2027", fg="white", selectcolor="#1D2027", activebackground="#1D2027", activeforeground="white").pack(pady=5)
 
+    auto_sync_red_var = tk.BooleanVar(value=app_settings.get("auto_sync_on_red", True))
+    tk.Checkbutton(settings_win, text="Auto-Sync When Item Turns Red", variable=auto_sync_red_var, bg="#1D2027", fg="white", selectcolor="#1D2027", activebackground="#1D2027", activeforeground="white").pack(pady=5)
+
+    tk.Label(settings_win, text="Note: Enable Auto-Sync button in main window", bg="#1D2027", fg="yellow", font=("JetBrainsMono NFP", 8)).pack(pady=2)
+    tk.Label(settings_win, text="Items sync individually when they turn red", bg="#1D2027", fg="yellow", font=("JetBrainsMono NFP", 8)).pack(pady=2)
+    
+    tk.Label(settings_win, text="Note: Enable Auto-Sync button to sync items when red", bg="#1D2027", fg="yellow", font=("JetBrainsMono NFP", 8)).pack(pady=2)
+
     def save():
         try:
+            global auto_sync_on_red
             app_settings["width"] = int(w_entry.get()) if w_entry.get() else None
             app_settings["height"] = int(h_entry.get())
             app_settings["x"] = int(x_entry.get()) if x_entry.get() else None
@@ -340,6 +362,8 @@ def open_settings():
             app_settings["check_interval"] = int(c_entry.get())
             app_settings["minimize_to_tray"] = tray_var.get()
             app_settings["topmost"] = topmost_var.get()
+            app_settings["auto_sync_on_red"] = auto_sync_red_var.get()
+            auto_sync_on_red = auto_sync_red_var.get()
             save_settings(app_settings)
             
             # Apply topmost setting immediately
@@ -519,10 +543,33 @@ def add_command():
     tk.Button(button_frame, text="Cancel", command=add_win.destroy, bg="#2c313a", fg="white", width=10).pack(side="left", padx=5)
 
 # Periodically check using rclone
+def check_single_item(label, cfg):
+    """Run check for a single item"""
+    log_path = os.path.join(LOG_DIR, f"{cfg['label']}_check.log")
+    actual_cmd = cfg["cmd"].replace("src", cfg["src"]).replace("dst", cfg["dst"])
+    
+    print(f"🔍 Checking: {cfg['label']}")
+    
+    with open(log_path, "w") as f:
+        subprocess.run(actual_cmd, shell=True, stdout=f, stderr=f)
+    
+    if os.path.exists(log_path):
+        with open(log_path, "r") as f:
+            content = f.read()
+        if "ERROR" not in content and "0 differences found" in content:
+            label.config(fg="#06de22")
+            print(f"✅ {cfg['label']}: No differences found (GREEN)")
+        else:
+            label.config(fg="red")
+            print(f"❌ {cfg['label']}: Differences found (RED)")
+
 def check_and_update(label, cfg):
     def run_check():
         log_path = os.path.join(LOG_DIR, f"{cfg['label']}_check.log")
         actual_cmd = cfg["cmd"].replace("src", cfg["src"]).replace("dst", cfg["dst"])
+        
+        print(f"🔍 Periodic check: {cfg['label']}")
+        
         with open(log_path, "w") as f:
             subprocess.run(actual_cmd, shell=True, stdout=f, stderr=f)
         
@@ -531,8 +578,14 @@ def check_and_update(label, cfg):
                 content = f.read()
             if "ERROR" not in content and "0 differences found" in content:
                 label.config(fg="#06de22")
+                print(f"✅ {cfg['label']}: No differences (GREEN)")
             else:
                 label.config(fg="red")
+                print(f"❌ {cfg['label']}: Differences detected (RED)")
+                # If auto-sync on red is enabled, sync this item immediately
+                if auto_sync_enabled and auto_sync_on_red:
+                    print(f"🚀 Triggering auto-sync for {cfg['label']}...")
+                    threading.Thread(target=run_sync_for_item, args=(cfg, label), daemon=True).start()
         
         # Check again based on check_interval setting (in milliseconds)
         check_interval_ms = app_settings.get("check_interval", 600) * 1000
@@ -581,8 +634,6 @@ def create_gui():
     
     # Initialize UI state
     update_auto_sync_ui()
-    if auto_sync_enabled:
-        threading.Thread(target=auto_sync_loop, daemon=True).start()
 
     # Reload Button (🔄)
     btn_reload = HoverButton(ROOT1, text="\uf021", font=("JetBrainsMono NFP", 12, "bold"), command=lambda: os.execv(sys.executable, ['python'] + sys.argv))
