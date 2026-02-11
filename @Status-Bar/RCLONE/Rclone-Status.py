@@ -749,8 +749,10 @@ def check_and_update(label, cfg):
                 process = subprocess.Popen(actual_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
                 with open(log_path, "w") as f:
                     for line in process.stdout:
-                        print(f"  > {line.strip()}")
                         f.write(line)
+                        # Only print important lines, skip progress updates
+                        if any(x in line for x in ["ERROR", "NOTICE", "INFO", "differences found"]):
+                            print(f"  > {line.strip()}")
                 process.wait()
                 print(f"{'*'*40}\n")
             else:
@@ -783,8 +785,10 @@ def check_and_update(label, cfg):
                         process = subprocess.Popen(actual_sync_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
                         with open(sync_log_path, "w") as f:
                             for line in process.stdout:
-                                print(f"  >> {line.strip()}")
                                 f.write(line)
+                                # Only print important lines, skip progress updates
+                                if any(x in line for x in ["ERROR", "NOTICE", "INFO :", "Copied", "Deleted"]):
+                                    print(f"  >> {line.strip()}")
                         process.wait()
                         print(f"{'*'*40}\n")
                     else:
