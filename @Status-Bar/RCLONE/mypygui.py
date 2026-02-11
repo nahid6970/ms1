@@ -170,7 +170,7 @@ all_items = []
 def run_sync_for_item(cfg, label):
     """Run sync for a specific item"""
     print(f"\n{'='*60}")
-    print(f"🔄 AUTO-SYNC TRIGGERED: {cfg['label']}")
+    print(f"🔄 AUTO-SYNC TRIGGERED -- {cfg['label']}")
     print(f"{'='*60}")
     
     log_path = os.path.join(LOG_DIR, f"{cfg['label']}_sync.log")
@@ -184,11 +184,11 @@ def run_sync_for_item(cfg, label):
     with open(log_path, "w") as f:
         subprocess.run(actual_cmd, shell=True, stdout=f, stderr=f)
     
-    print(f"✅ Sync completed for {cfg['label']}")
+    print(f"✅ Sync completed -- {cfg['label']}")
     print(f"📝 Log saved to: {log_path}")
     
     # After sync, run check immediately
-    print(f"🔍 Running check for {cfg['label']}...")
+    print(f"🔍 Running check -- {cfg['label']}...")
     check_single_item(label, cfg)
     print(f"{'='*60}\n")
 
@@ -568,7 +568,7 @@ def check_single_item(label, cfg):
     log_path = os.path.join(LOG_DIR, f"{cfg['label']}_check.log")
     actual_cmd = cfg["cmd"].replace("src", cfg["src"]).replace("dst", cfg["dst"])
     
-    print(f"🔍 Checking: {cfg['label']}")
+    print(f"🔍 Checking -- {cfg['label']}")
     
     with open(log_path, "w") as f:
         subprocess.run(actual_cmd, shell=True, stdout=f, stderr=f)
@@ -578,10 +578,10 @@ def check_single_item(label, cfg):
             content = f.read()
         if "ERROR" not in content and "0 differences found" in content:
             label.config(fg="#06de22")
-            print(f"✅ {cfg['label']}: No differences found (GREEN)")
+            print(f"✅ {cfg['label']} -- No differences (GREEN)")
         else:
             label.config(fg="red")
-            print(f"❌ {cfg['label']}: Differences found (RED)")
+            print(f"❌ {cfg['label']} -- Differences found (RED)")
 
 # Global check cycle management
 check_cycle_running = False
@@ -669,7 +669,7 @@ def check_and_update(label, cfg):
             log_path = os.path.join(LOG_DIR, f"{cfg['label']}_check.log")
             actual_cmd = cfg["cmd"].replace("src", cfg["src"]).replace("dst", cfg["dst"])
 
-            print(f"🔍 Periodic check: {cfg['label']}")
+            print(f"🔍 Periodic check -- {cfg['label']}")
 
             with open(log_path, "w") as f:
                 subprocess.run(actual_cmd, shell=True, stdout=f, stderr=f)
@@ -681,12 +681,12 @@ def check_and_update(label, cfg):
                 # Check if differences found
                 if "ERROR" not in content and "0 differences found" in content:
                     label.config(fg="#06de22")
-                    print(f"✅ {cfg['label']}: No differences (GREEN)")
+                    print(f"✅ {cfg['label']} -- No differences (GREEN)")
                 else:
                     # Differences found - turn red and auto-sync
                     label.config(fg="red")
-                    print(f"❌ {cfg['label']}: Differences detected (RED)")
-                    print(f"🚀 Auto-syncing {cfg['label']}...")
+                    print(f"❌ {cfg['label']} -- Differences detected (RED)")
+                    print(f"🚀 Auto-syncing -- {cfg['label']}...")
 
                     # Auto-sync
                     sync_log_path = os.path.join(LOG_DIR, f"{cfg['label']}_sync.log")
@@ -696,7 +696,7 @@ def check_and_update(label, cfg):
                     with open(sync_log_path, "w") as f:
                         subprocess.run(actual_sync_cmd, shell=True, stdout=f, stderr=f)
 
-                    print(f"✅ Sync completed for {cfg['label']}, verifying...")
+                    print(f"✅ Sync completed -- {cfg['label']} verifying...")
 
                     # Check again after sync to verify
                     with open(log_path, "w") as f:
@@ -708,10 +708,10 @@ def check_and_update(label, cfg):
                             content = f.read()
                         if "ERROR" not in content and "0 differences found" in content:
                             label.config(fg="#06de22")
-                            print(f"✅ {cfg['label']}: Verified - No differences after sync (GREEN)")
+                            print(f"✅ {cfg['label']} -- Verified - No differences after sync (GREEN)")
                         else:
                             label.config(fg="red")
-                            print(f"⚠️ {cfg['label']}: Still has differences after sync (RED)")
+                            print(f"⚠️ {cfg['label']} -- Still has differences after sync (RED)")
         finally:
             # Mark this check as complete
             mark_check_complete()
