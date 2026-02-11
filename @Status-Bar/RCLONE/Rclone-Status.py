@@ -437,7 +437,7 @@ def edit_command(key):
     dialog_w = app_settings.get("dialog_width", 550)
     edit_win = tk.Toplevel(ROOT)
     edit_win.title(f"Edit: {key}")
-    edit_win.geometry(f"{dialog_w}x600")
+    edit_win.geometry(f"{dialog_w}x630")
     edit_win.configure(bg="#1D2027")
     
     tk.Label(edit_win, text="Name (key):", bg="#1D2027", fg="white").pack(pady=(10, 0))
@@ -475,6 +475,9 @@ def edit_command(key):
     index_entry.insert(0, str(cfg.get("index", 0)))
     index_entry.pack(fill="x", padx=20)
     
+    enabled_var = tk.BooleanVar(value=cfg.get("enabled", True))
+    tk.Checkbutton(edit_win, text="Enabled", variable=enabled_var, bg="#1D2027", fg="white", selectcolor="#1d2027", activebackground="#1D2027", activeforeground="white").pack(pady=10)
+    
     button_frame = tk.Frame(edit_win, bg="#1D2027")
     button_frame.pack(pady=15)
     
@@ -495,7 +498,8 @@ def edit_command(key):
             "label": label_entry.get(),
             "left_click_cmd": left_entry.get(),
             "right_click_cmd": right_entry.get(),
-            "index": int(index_entry.get()) if index_entry.get().isdigit() else 0
+            "index": int(index_entry.get()) if index_entry.get().isdigit() else 0,
+            "enabled": enabled_var.get()
         }
         save_commands(commands)
         refresh_gui()
@@ -523,7 +527,8 @@ def edit_command(key):
             "label": label_entry.get(),
             "left_click_cmd": left_entry.get(),
             "right_click_cmd": right_entry.get(),
-            "index": int(index_entry.get()) if index_entry.get().isdigit() else 0
+            "index": int(index_entry.get()) if index_entry.get().isdigit() else 0,
+            "enabled": enabled_var.get()
         }
         save_commands(commands)
         refresh_gui()
@@ -539,7 +544,7 @@ def add_command():
     dialog_w = app_settings.get("dialog_width", 550)
     add_win = tk.Toplevel(ROOT)
     add_win.title("Add New Command")
-    add_win.geometry(f"{dialog_w}x600")
+    add_win.geometry(f"{dialog_w}x630")
     add_win.configure(bg="#1D2027")
     
     tk.Label(add_win, text="Name (key):", bg="#1D2027", fg="white").pack(pady=(10, 0))
@@ -573,6 +578,9 @@ def add_command():
     index_entry.insert(0, str(len(commands)))
     index_entry.pack(fill="x", padx=20)
     
+    enabled_var = tk.BooleanVar(value=True)
+    tk.Checkbutton(add_win, text="Enabled", variable=enabled_var, bg="#1D2027", fg="white", selectcolor="#1d2027", activebackground="#1D2027", activeforeground="white").pack(pady=10)
+    
     def save_new():
         name = name_entry.get()
         label = label_entry.get()
@@ -590,7 +598,8 @@ def add_command():
             "label": label,
             "left_click_cmd": left_entry.get(),
             "right_click_cmd": right_entry.get(),
-            "index": int(index_entry.get()) if index_entry.get().isdigit() else 0
+            "index": int(index_entry.get()) if index_entry.get().isdigit() else 0,
+            "enabled": enabled_var.get()
         }
         save_commands(commands)
         refresh_gui()
@@ -817,12 +826,14 @@ def create_gui():
     sorted_items = sorted(commands.items(), key=lambda x: (x[1].get("index", 0), x[0]))
 
     for key, cfg in sorted_items:
+        is_enabled = cfg.get("enabled", True)
+        
         lbl = tk.Label(
             ROOT1,
             bg="#1d2027",
             text=cfg["label"],
             font=("JetBrainsMono NFP", 16, "bold"),
-            fg="#FFFFFF",
+            fg="#555555" if not is_enabled else "#FFFFFF",
             cursor="hand2"
         )
         lbl.pack(side="left", padx=(5, 5))
@@ -835,7 +846,8 @@ def create_gui():
         # Right click to edit
         lbl.bind("<Button-3>", lambda event, k=key: edit_command(k))
 
-        check_and_update(lbl, cfg)
+        if is_enabled:
+            check_and_update(lbl, cfg)
     
     # Add separator or just more padding
     tk.Frame(ROOT1, width=10, bg="#1d2027").pack(side="left")
