@@ -437,7 +437,7 @@ def edit_command(key):
     dialog_w = app_settings.get("dialog_width", 550)
     edit_win = tk.Toplevel(ROOT)
     edit_win.title(f"Edit: {key}")
-    edit_win.geometry(f"{dialog_w}x630")
+    edit_win.geometry(f"{dialog_w}x680")
     edit_win.configure(bg="#1D2027")
     
     tk.Label(edit_win, text="Name (key):", bg="#1D2027", fg="white").pack(pady=(10, 0))
@@ -459,6 +459,11 @@ def edit_command(key):
     dst_entry = tk.Entry(edit_win)
     dst_entry.insert(0, cfg["dst"])
     dst_entry.pack(fill="x", padx=20)
+    
+    tk.Label(edit_win, text="Check Command:", bg="#1D2027", fg="white").pack(pady=(10, 0))
+    check_entry = tk.Entry(edit_win)
+    check_entry.insert(0, cfg.get("cmd", "rclone check src dst --fast-list --size-only"))
+    check_entry.pack(fill="x", padx=20)
     
     tk.Label(edit_win, text="Left Click Command:", bg="#1D2027", fg="white").pack(pady=(10, 0))
     left_entry = tk.Entry(edit_win)
@@ -492,7 +497,7 @@ def edit_command(key):
             del commands[key]
         
         commands[new_key] = {
-            "cmd": "rclone check src dst --fast-list --size-only",
+            "cmd": check_entry.get(),
             "src": src_entry.get(),
             "dst": dst_entry.get(),
             "label": label_entry.get(),
@@ -521,7 +526,7 @@ def edit_command(key):
             counter += 1
         
         commands[new_key] = {
-            "cmd": "rclone check src dst --fast-list --size-only",
+            "cmd": check_entry.get(),
             "src": src_entry.get(),
             "dst": dst_entry.get(),
             "label": label_entry.get(),
@@ -544,7 +549,7 @@ def add_command():
     dialog_w = app_settings.get("dialog_width", 550)
     add_win = tk.Toplevel(ROOT)
     add_win.title("Add New Command")
-    add_win.geometry(f"{dialog_w}x630")
+    add_win.geometry(f"{dialog_w}x680")
     add_win.configure(bg="#1D2027")
     
     tk.Label(add_win, text="Name (key):", bg="#1D2027", fg="white").pack(pady=(10, 0))
@@ -562,6 +567,11 @@ def add_command():
     tk.Label(add_win, text="Destination Path:", bg="#1D2027", fg="white").pack(pady=(10, 0))
     dst_entry = tk.Entry(add_win)
     dst_entry.pack(fill="x", padx=20)
+    
+    tk.Label(add_win, text="Check Command (optional):", bg="#1D2027", fg="white").pack(pady=(10, 0))
+    check_entry = tk.Entry(add_win)
+    check_entry.insert(0, "rclone check src dst --fast-list --size-only")
+    check_entry.pack(fill="x", padx=20)
     
     tk.Label(add_win, text="Left Click Command (optional):", bg="#1D2027", fg="white").pack(pady=(10, 0))
     left_entry = tk.Entry(add_win)
@@ -592,7 +602,7 @@ def add_command():
             return
         
         commands[name] = {
-            "cmd": "rclone check src dst --fast-list --size-only",
+            "cmd": check_entry.get(),
             "src": src,
             "dst": dst,
             "label": label,

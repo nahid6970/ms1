@@ -5,7 +5,9 @@
         "dst": "gu:/msBackups",
         "label": "\udb85\ude32",
         "left_click_cmd": "rclone sync src dst -P --fast-list --log-level INFO",
-        "right_click_cmd": "rclone sync dst src -P --fast-list"
+        "right_click_cmd": "rclone sync dst src -P --fast-list",
+        "index": 0,
+        "enabled": false
     },
     "software": {
         "cmd": "rclone check src dst --fast-list --size-only",
@@ -13,7 +15,9 @@
         "dst": "gu:/software",
         "label": "\uf40e",
         "left_click_cmd": "rclone sync src dst -P --fast-list --log-level INFO",
-        "right_click_cmd": "rclone sync dst src -P --fast-list"
+        "right_click_cmd": "rclone sync dst src -P --fast-list",
+        "index": 0,
+        "enabled": false
     },
     "song": {
         "cmd": "rclone check src dst --fast-list --size-only",
@@ -21,7 +25,9 @@
         "dst": "gu:/song",
         "label": "\uec1b",
         "left_click_cmd": "rclone sync src dst -P --fast-list --log-level INFO",
-        "right_click_cmd": "rclone sync dst src -P --fast-list"
+        "right_click_cmd": "rclone sync dst src -P --fast-list",
+        "index": 0,
+        "enabled": false
     },
     "ms1": {
         "cmd": "rclone check src dst --fast-list --size-only --exclude \".git/**\" --exclude \"__pycache__/**\"",
@@ -29,22 +35,28 @@
         "dst": "o0:/ms1/",
         "label": "ms1",
         "left_click_cmd": "rclone sync src dst -P --fast-list --exclude \".git/**\" --exclude \"__pycache__/**\"  --log-level INFO",
-        "right_click_cmd": "rclone sync dst src -P --fast-list"
+        "right_click_cmd": "rclone sync dst src -P --fast-list",
+        "index": 1,
+        "enabled": true
     },
     "Photos": {
-        "cmd": "rclone check src dst --fast-list --size-only --exclude \".globalTrash/**\" --exclude \".stfolder/**\" --exclude \".stfolder (1)/**\"",
+        "cmd": "rclone check src dst --fast-list --size-only",
         "src": "C:/Users/nahid/Pictures/",
         "dst": "gu:/Pictures/",
         "label": "\uf03e",
         "left_click_cmd": "rclone sync src dst -P --fast-list --track-renames --exclude \".globalTrash/**\" --exclude \".stfolder/**\" --log-level INFO",
-        "right_click_cmd": "rclone sync dst src -P --fast-list"
+        "right_click_cmd": "rclone sync dst src -P --fast-list",
+        "index": 0,
+        "enabled": false
     },
     "db": {
-        "cmd": "rclone check src dst --fast-list --size-only",
+        "cmd": "rclone check src dst --fast-list --size-only --exclude \".git/**\" --exclude \"__pycache__/**\"",
         "src": "C:/@delta/db/",
         "dst": "o0:/db/",
         "label": "db",
         "left_click_cmd": "rclone sync src dst -P --fast-list --exclude \".git/**\" --exclude \"__pycache__/**\"  --log-level INFO",
-        "right_click_cmd": "rclone sync dst src -P --fast-list"
+        "right_click_cmd": "rclone sync dst src -P --fast-list",
+        "index": 2,
+        "enabled": true
     }
 }
