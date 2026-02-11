@@ -60,7 +60,8 @@ def load_settings():
         "topmost": False,
         "dialog_width": 550,
         "settings_win_width": 480,
-        "settings_win_height": 700
+        "settings_win_height": 700,
+        "show_command_output": False
     }
     if os.path.exists(SETTINGS_PATH):
         try:
@@ -360,6 +361,9 @@ def open_settings():
     auto_sync_red_var = tk.BooleanVar(value=app_settings.get("auto_sync_on_red", True))
     tk.Checkbutton(cb_frame, text="Auto-Sync When Item Turns Red", variable=auto_sync_red_var, bg="#1D2027", fg="white", selectcolor="#1d2027", activebackground="#1D2027", activeforeground="white").pack(anchor="w", pady=1)
 
+    show_output_var = tk.BooleanVar(value=app_settings.get("show_command_output", False))
+    tk.Checkbutton(cb_frame, text="Show Command Output in Terminal", variable=show_output_var, bg="#1D2027", fg="white", selectcolor="#1d2027", activebackground="#1D2027", activeforeground="white").pack(anchor="w", pady=1)
+
     # Note container
     notes_frame = tk.Frame(main_container, bg="#1D2027")
     notes_frame.pack(pady=5)
@@ -381,6 +385,7 @@ def open_settings():
             app_settings["minimize_to_tray"] = tray_var.get()
             app_settings["topmost"] = topmost_var.get()
             app_settings["auto_sync_on_red"] = auto_sync_red_var.get()
+            app_settings["show_command_output"] = show_output_var.get()
             auto_sync_on_red = auto_sync_red_var.get()
             save_settings(app_settings)
             
@@ -570,8 +575,20 @@ def check_single_item(label, cfg):
     
     print(f"🔍 Checking -- {cfg['label']}")
     
-    with open(log_path, "w") as f:
-        subprocess.run(actual_cmd, shell=True, stdout=f, stderr=f)
+    if app_settings.get("show_command_output"):
+        print(f"\n{'*'*40}")
+        print(f"🛠️  COMMAND -- {actual_cmd}")
+        print(f"{'*'*40}")
+        process = subprocess.Popen(actual_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+        with open(log_path, "w") as f:
+            for line in process.stdout:
+                print(f"  > {line.strip()}")
+                f.write(line)
+        process.wait()
+        print(f"{'*'*40}\n")
+    else:
+        with open(log_path, "w") as f:
+            subprocess.run(actual_cmd, shell=True, stdout=f, stderr=f)
     
     if os.path.exists(log_path):
         with open(log_path, "r") as f:
@@ -671,8 +688,20 @@ def check_and_update(label, cfg):
 
             print(f"🔍 Periodic check -- {cfg['label']}")
 
-            with open(log_path, "w") as f:
-                subprocess.run(actual_cmd, shell=True, stdout=f, stderr=f)
+            if app_settings.get("show_command_output"):
+                print(f"\n{'*'*40}")
+                print(f"🛠️  CHECK COMMAND: {actual_cmd}")
+                print(f"{'*'*40}")
+                process = subprocess.Popen(actual_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+                with open(log_path, "w") as f:
+                    for line in process.stdout:
+                        print(f"  > {line.strip()}")
+                        f.write(line)
+                process.wait()
+                print(f"{'*'*40}\n")
+            else:
+                with open(log_path, "w") as f:
+                    subprocess.run(actual_cmd, shell=True, stdout=f, stderr=f)
 
             if os.path.exists(log_path):
                 with open(log_path, "r") as f:
@@ -693,14 +722,33 @@ def check_and_update(label, cfg):
                     sync_cmd = cfg.get("left_click_cmd", "rclone sync src dst -P --fast-list --log-level INFO")
                     actual_sync_cmd = sync_cmd.replace("src", cfg["src"]).replace("dst", cfg["dst"])
 
-                    with open(sync_log_path, "w") as f:
-                        subprocess.run(actual_sync_cmd, shell=True, stdout=f, stderr=f)
+                    if app_settings.get("show_command_output"):
+                        print(f"\n{'*'*40}")
+                        print(f"🛠️  SYNC COMMAND: {actual_sync_cmd}")
+                        print(f"{'*'*40}")
+                        process = subprocess.Popen(actual_sync_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+                        with open(sync_log_path, "w") as f:
+                            for line in process.stdout:
+                                print(f"  >> {line.strip()}")
+                                f.write(line)
+                        process.wait()
+                        print(f"{'*'*40}\n")
+                    else:
+                        with open(sync_log_path, "w") as f:
+                            subprocess.run(actual_sync_cmd, shell=True, stdout=f, stderr=f)
 
                     print(f"✅ Sync completed -- {cfg['label']} verifying...")
 
                     # Check again after sync to verify
-                    with open(log_path, "w") as f:
-                        subprocess.run(actual_cmd, shell=True, stdout=f, stderr=f)
+                    if app_settings.get("show_command_output"):
+                        process = subprocess.Popen(actual_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+                        with open(log_path, "w") as f:
+                            for line in process.stdout:
+                                f.write(line)
+                        process.wait()
+                    else:
+                        with open(log_path, "w") as f:
+                            subprocess.run(actual_cmd, shell=True, stdout=f, stderr=f)
 
                     # Read result after sync
                     if os.path.exists(log_path):
