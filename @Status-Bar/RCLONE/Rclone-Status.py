@@ -659,6 +659,7 @@ check_cycle_running = False
 last_check_time = {}
 pending_checks = 0
 check_lock = threading.Lock()
+output_lock = threading.Lock()  # Prevent mixed output
 
 def start_global_countdown():
     """Start a global countdown timer for all items"""
@@ -740,21 +741,29 @@ def check_and_update(label, cfg):
             log_path = os.path.join(LOG_DIR, f"{cfg['label']}_check.log")
             actual_cmd = cfg["cmd"].replace("src", cfg["src"]).replace("dst", cfg["dst"])
 
-            print(f"🔍 Periodic check -- {cfg['label']}")
+            with output_lock:
+                print(f"🔍 Periodic check -- {cfg['label']}")
 
             if app_settings.get("show_command_output"):
-                print(f"\n{'*'*40}")
-                print(f"🛠️  CHECK COMMAND: {actual_cmd}")
-                print(f"{'*'*40}")
+                output_buffer = []
+                output_buffer.append(f"\n{'*'*40}")
+                output_buffer.append(f"🛠️  CHECK COMMAND: {actual_cmd}")
+                output_buffer.append(f"{'*'*40}")
+                
                 process = subprocess.Popen(actual_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
                 with open(log_path, "w") as f:
                     for line in process.stdout:
                         f.write(line)
-                        # Only print important lines, skip progress updates
+                        # Only buffer important lines, skip progress updates
                         if any(x in line for x in ["ERROR", "NOTICE", "INFO", "differences found"]):
-                            print(f"  > {line.strip()}")
+                            output_buffer.append(f"  > {line.strip()}")
                 process.wait()
-                print(f"{'*'*40}\n")
+                output_buffer.append(f"{'*'*40}\n")
+                
+                # Print all at once
+                with output_lock:
+                    for line in output_buffer:
+                        print(line)
             else:
                 with open(log_path, "w") as f:
                     subprocess.run(actual_cmd, shell=True, stdout=f, stderr=f)
@@ -766,12 +775,14 @@ def check_and_update(label, cfg):
                 # Check if differences found
                 if "ERROR" not in content and "0 differences found" in content:
                     label.config(fg="#06de22")
-                    print(f"✅ {cfg['label']} -- No differences (GREEN)")
+                    with output_lock:
+                        print(f"✅ {cfg['label']} -- No differences (GREEN)")
                 else:
                     # Differences found - turn red and auto-sync
                     label.config(fg="red")
-                    print(f"❌ {cfg['label']} -- Differences detected (RED)")
-                    print(f"🚀 Auto-syncing -- {cfg['label']}...")
+                    with output_lock:
+                        print(f"❌ {cfg['label']} -- Differences detected (RED)")
+                        print(f"🚀 Auto-syncing -- {cfg['label']}...")
 
                     # Auto-sync
                     sync_log_path = os.path.join(LOG_DIR, f"{cfg['label']}_sync.log")
@@ -779,23 +790,31 @@ def check_and_update(label, cfg):
                     actual_sync_cmd = sync_cmd.replace("src", cfg["src"]).replace("dst", cfg["dst"])
 
                     if app_settings.get("show_command_output"):
-                        print(f"\n{'*'*40}")
-                        print(f"🛠️  SYNC COMMAND: {actual_sync_cmd}")
-                        print(f"{'*'*40}")
+                        output_buffer = []
+                        output_buffer.append(f"\n{'*'*40}")
+                        output_buffer.append(f"🛠️  SYNC COMMAND: {actual_sync_cmd}")
+                        output_buffer.append(f"{'*'*40}")
+                        
                         process = subprocess.Popen(actual_sync_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
                         with open(sync_log_path, "w") as f:
                             for line in process.stdout:
                                 f.write(line)
-                                # Only print important lines, skip progress updates
+                                # Only buffer important lines, skip progress updates
                                 if any(x in line for x in ["ERROR", "NOTICE", "INFO :", "Copied", "Deleted"]):
-                                    print(f"  >> {line.strip()}")
+                                    output_buffer.append(f"  >> {line.strip()}")
                         process.wait()
-                        print(f"{'*'*40}\n")
+                        output_buffer.append(f"{'*'*40}\n")
+                        
+                        # Print all at once
+                        with output_lock:
+                            for line in output_buffer:
+                                print(line)
                     else:
                         with open(sync_log_path, "w") as f:
                             subprocess.run(actual_sync_cmd, shell=True, stdout=f, stderr=f)
 
-                    print(f"✅ Sync completed -- {cfg['label']} verifying...")
+                    with output_lock:
+                        print(f"✅ Sync completed -- {cfg['label']} verifying...")
 
                     # Check again after sync to verify
                     if app_settings.get("show_command_output"):
@@ -814,10 +833,12 @@ def check_and_update(label, cfg):
                             content = f.read()
                         if "ERROR" not in content and "0 differences found" in content:
                             label.config(fg="#06de22")
-                            print(f"✅ {cfg['label']} -- Verified - No differences after sync (GREEN)")
+                            with output_lock:
+                                print(f"✅ {cfg['label']} -- Verified - No differences after sync (GREEN)")
                         else:
                             label.config(fg="red")
-                            print(f"⚠️ {cfg['label']} -- Still has differences after sync (RED)")
+                            with output_lock:
+                                print(f"⚠️ {cfg['label']} -- Still has differences after sync (RED)")
         finally:
             # Mark this check as complete
             mark_check_complete()
