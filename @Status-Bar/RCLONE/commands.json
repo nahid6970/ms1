@@ -37,7 +37,7 @@
         "left_click_cmd": "rclone sync src dst -P --fast-list --exclude \".git/**\" --exclude \"__pycache__/**\"  --log-level INFO",
         "right_click_cmd": "rclone sync dst src -P --fast-list",
         "index": 1,
-        "enabled": true
+        "enabled": false
     },
     "Photos": {
         "cmd": "rclone check src dst --fast-list --size-only",
