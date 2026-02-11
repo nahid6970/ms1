@@ -199,8 +199,12 @@ def toggle_auto_sync():
 def update_auto_sync_ui():
     global pulse_id
     if auto_sync_enabled:
-        btn_auto.config(text="\uf017 ON")
-        pulse_effect()
+        # Stop any existing pulse effect
+        if pulse_id:
+            ROOT.after_cancel(pulse_id)
+            pulse_id = None
+        # Light green background with black text
+        btn_auto.config(text="\uf017 ON", bg="#06de22", fg="black")
     else:
         if pulse_id:
             ROOT.after_cancel(pulse_id)
