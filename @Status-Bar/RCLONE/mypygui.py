@@ -282,19 +282,18 @@ def check_and_update(label, cfg):
     
     threading.Thread(target=run_check, daemon=True).start()
 
-def refresh_gui():
+def create_gui():
+    # Clear existing widgets if any (for refresh)
     for widget in ROOT1.winfo_children():
         widget.destroy()
-    create_gui()
 
-# GUI setup
-def create_gui():
     for key, cfg in commands.items():
         lbl = tk.Label(
             ROOT1,
             bg="#1d2027",
             text=cfg["label"],
             font=("JetBrainsMono NFP", 16, "bold"),
+            fg="#FFFFFF",
             cursor="hand2"
         )
         lbl.pack(side="left", padx=(5, 5))
@@ -309,31 +308,45 @@ def create_gui():
 
         check_and_update(lbl, cfg)
     
-    # Add Button
-    btn_add = HoverButton(ROOT1, text="+", font=("JetBrainsMono NFP", 14, "bold"), command=add_command, width=2)
-    btn_add.pack(side="left", padx=(10, 2))
+    # Add separator or just more padding
+    tk.Frame(ROOT1, width=10, bg="#1d2027").pack(side="left")
 
-    # Auto Sync Toggle
+    # Add Button (+)
+    btn_add = HoverButton(ROOT1, text="+", font=("JetBrainsMono NFP", 14, "bold"), command=add_command, width=2)
+    btn_add.pack(side="left", padx=2)
+
+    # Auto Sync Toggle (🕒)
     global btn_auto
     btn_auto = HoverButton(ROOT1, text="\uf017 OFF", font=("JetBrainsMono NFP", 10, "bold"), command=toggle_auto_sync, fg="red")
-    btn_auto.pack(side="left", padx=(5, 5))
+    btn_auto.pack(side="left", padx=2)
 
-    # Settings Button
+    # Settings Button (⚙️)
     btn_settings = HoverButton(ROOT1, text="\uf013", font=("JetBrainsMono NFP", 12, "bold"), command=open_settings)
-    btn_settings.pack(side="left", padx=(5, 5))
+    btn_settings.pack(side="left", padx=2)
 
     # Update ROOT size logic
     def adjust_width():
         ROOT.update_idletasks()
-        # Calculate required width based on ROOT1 content
-        req_width = ROOT1.winfo_reqwidth() + 20 # Add some padding
-        if not app_settings["width"]:
-            curr_h = app_settings["height"]
-            curr_x = ROOT.winfo_x()
-            curr_y = ROOT.winfo_y()
-            ROOT.geometry(f"{req_width}x{curr_h}+{curr_x}+{curr_y}")
+        # Ensure ROOT1 is fully updated
+        req_width = ROOT1.winfo_reqwidth() + 25 
+        req_height = app_settings["height"]
+        
+        # Current position
+        curr_x = ROOT.winfo_x()
+        curr_y = ROOT.winfo_y()
+        
+        # If no width is set in settings, or if it's auto-adjusting
+        if not app_settings.get("width"):
+            ROOT.geometry(f"{req_width}x{req_height}+{curr_x}+{curr_y}")
+        else:
+            ROOT.geometry(f"{app_settings['width']}x{req_height}+{curr_x}+{curr_y}")
     
+    # Schedule multiple updates to ensure layout is finalized
     ROOT.after(100, adjust_width)
+    ROOT.after(500, adjust_width)
+
+def refresh_gui():
+    create_gui()
 
 # Support dragging on the main frame
 MAIN_FRAME.bind("<Button-1>", start_drag)
