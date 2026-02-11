@@ -58,6 +58,7 @@ python Rclone-Status.py
    - **Destination Path**: Destination directory or remote
    - **Left Click Command**: Command for Ctrl+Left click (default: sync src→dst)
    - **Right Click Command**: Command for Ctrl+Right click (default: sync dst→src)
+   - **Display Order (Index)**: Numeric value to determine the order from left to right
 3. Click **Add**
 
 ### Editing and Duplicating Profiles

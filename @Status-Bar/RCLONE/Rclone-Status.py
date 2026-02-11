@@ -437,7 +437,7 @@ def edit_command(key):
     dialog_w = app_settings.get("dialog_width", 550)
     edit_win = tk.Toplevel(ROOT)
     edit_win.title(f"Edit: {key}")
-    edit_win.geometry(f"{dialog_w}x500")
+    edit_win.geometry(f"{dialog_w}x600")
     edit_win.configure(bg="#1D2027")
     
     tk.Label(edit_win, text="Name (key):", bg="#1D2027", fg="white").pack(pady=(10, 0))
@@ -470,6 +470,11 @@ def edit_command(key):
     right_entry.insert(0, cfg.get("right_click_cmd", "rclone sync dst src -P --fast-list"))
     right_entry.pack(fill="x", padx=20)
     
+    tk.Label(edit_win, text="Display Order (Index):", bg="#1D2027", fg="white").pack(pady=(10, 0))
+    index_entry = tk.Entry(edit_win)
+    index_entry.insert(0, str(cfg.get("index", 0)))
+    index_entry.pack(fill="x", padx=20)
+    
     button_frame = tk.Frame(edit_win, bg="#1D2027")
     button_frame.pack(pady=15)
     
@@ -489,7 +494,8 @@ def edit_command(key):
             "dst": dst_entry.get(),
             "label": label_entry.get(),
             "left_click_cmd": left_entry.get(),
-            "right_click_cmd": right_entry.get()
+            "right_click_cmd": right_entry.get(),
+            "index": int(index_entry.get()) if index_entry.get().isdigit() else 0
         }
         save_commands(commands)
         refresh_gui()
@@ -516,7 +522,8 @@ def edit_command(key):
             "dst": dst_entry.get(),
             "label": label_entry.get(),
             "left_click_cmd": left_entry.get(),
-            "right_click_cmd": right_entry.get()
+            "right_click_cmd": right_entry.get(),
+            "index": int(index_entry.get()) if index_entry.get().isdigit() else 0
         }
         save_commands(commands)
         refresh_gui()
@@ -532,7 +539,7 @@ def add_command():
     dialog_w = app_settings.get("dialog_width", 550)
     add_win = tk.Toplevel(ROOT)
     add_win.title("Add New Command")
-    add_win.geometry(f"{dialog_w}x500")
+    add_win.geometry(f"{dialog_w}x600")
     add_win.configure(bg="#1D2027")
     
     tk.Label(add_win, text="Name (key):", bg="#1D2027", fg="white").pack(pady=(10, 0))
@@ -560,6 +567,11 @@ def add_command():
     right_entry = tk.Entry(add_win)
     right_entry.insert(0, "rclone sync dst src -P --fast-list")
     right_entry.pack(fill="x", padx=20)
+
+    tk.Label(add_win, text="Display Order (Index):", bg="#1D2027", fg="white").pack(pady=(10, 0))
+    index_entry = tk.Entry(add_win)
+    index_entry.insert(0, str(len(commands)))
+    index_entry.pack(fill="x", padx=20)
     
     def save_new():
         name = name_entry.get()
@@ -577,7 +589,8 @@ def add_command():
             "dst": dst,
             "label": label,
             "left_click_cmd": left_entry.get(),
-            "right_click_cmd": right_entry.get()
+            "right_click_cmd": right_entry.get(),
+            "index": int(index_entry.get()) if index_entry.get().isdigit() else 0
         }
         save_commands(commands)
         refresh_gui()
@@ -800,7 +813,10 @@ def create_gui():
     for widget in ROOT1.winfo_children():
         widget.destroy()
 
-    for key, cfg in commands.items():
+    # Sort items by index
+    sorted_items = sorted(commands.items(), key=lambda x: (x[1].get("index", 0), x[0]))
+
+    for key, cfg in sorted_items:
         lbl = tk.Label(
             ROOT1,
             bg="#1d2027",
