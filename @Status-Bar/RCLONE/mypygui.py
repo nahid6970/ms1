@@ -13,6 +13,7 @@ import json
 from PIL import Image, ImageDraw
 import pystray
 from pystray import MenuItem as item
+import sys
 
 def calculate_time_to_appear(start_time):
     end_time = time.time()
@@ -245,7 +246,7 @@ ROOT1.pack(side="left", pady=(2,2), padx=(5,1), anchor="w", fill="x")
 def open_settings():
     settings_win = tk.Toplevel(ROOT)
     settings_win.title("Settings")
-    settings_win.geometry("300x250")
+    settings_win.geometry("300x300")
     settings_win.configure(bg="#1D2027")
     
     tk.Label(settings_win, text="Width (empty for auto):", bg="#1D2027", fg="white").pack()
@@ -257,6 +258,11 @@ def open_settings():
     h_entry = tk.Entry(settings_win)
     h_entry.insert(0, str(app_settings["height"]))
     h_entry.pack()
+
+    tk.Label(settings_win, text="X Position (empty for auto):", bg="#1D2027", fg="white").pack()
+    x_entry = tk.Entry(settings_win)
+    x_entry.insert(0, str(app_settings["x"] or ""))
+    x_entry.pack()
 
     tk.Label(settings_win, text="Y Position:", bg="#1D2027", fg="white").pack()
     y_entry = tk.Entry(settings_win)
@@ -275,6 +281,7 @@ def open_settings():
         try:
             app_settings["width"] = int(w_entry.get()) if w_entry.get() else None
             app_settings["height"] = int(h_entry.get())
+            app_settings["x"] = int(x_entry.get()) if x_entry.get() else None
             app_settings["y"] = int(y_entry.get())
             app_settings["interval"] = int(i_entry.get())
             app_settings["minimize_to_tray"] = tray_var.get()
@@ -395,6 +402,10 @@ def create_gui():
     update_auto_sync_ui()
     if auto_sync_enabled:
         threading.Thread(target=auto_sync_loop, daemon=True).start()
+
+    # Reload Button (🔄)
+    btn_reload = HoverButton(ROOT1, text="\uf021", font=("JetBrainsMono NFP", 12, "bold"), command=lambda: os.execv(sys.executable, ['python'] + sys.argv))
+    btn_reload.pack(side="left", padx=2)
 
     # Settings Button (⚙️)
     btn_settings = HoverButton(ROOT1, text="\uf013", font=("JetBrainsMono NFP", 12, "bold"), command=open_settings)
