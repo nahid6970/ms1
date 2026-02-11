@@ -18,34 +18,7 @@ import win32gui
 import win32con
 from io import StringIO
 
-# Terminal output capture
-terminal_output = []
-terminal_window = None
-terminal_text_widget = None
-
-class OutputCapture:
-    def __init__(self, original_stdout):
-        self.original_stdout = original_stdout
-        
-    def write(self, text):
-        self.original_stdout.write(text)
-        self.original_stdout.flush()
-        if text:  # Capture all text including whitespace
-            terminal_output.append(text)
-            if len(terminal_output) > 1000:  # Keep last 1000 lines
-                terminal_output.pop(0)
-            if terminal_text_widget and terminal_text_widget.winfo_exists():
-                try:
-                    terminal_text_widget.insert(tk.END, text)
-                    terminal_text_widget.see(tk.END)
-                except:
-                    pass
-    
-    def flush(self):
-        self.original_stdout.flush()
-
-# Redirect stdout to capture
-sys.stdout = OutputCapture(sys.stdout)
+# Terminal output capture - removed, using real console instead
 
 def calculate_time_to_appear(start_time):
     end_time = time.time()
@@ -307,6 +280,16 @@ class HoverButton(tk.Button):
         self.configure(bg=self.default_color, fg=self.default_fg)
 
 set_console_title("🔥")
+
+# Get console window handle for later use
+kernel32 = ctypes.windll.kernel32
+user32 = ctypes.windll.user32
+console_hwnd = kernel32.GetConsoleWindow()
+
+# Hide console window by default
+if console_hwnd:
+    user32.ShowWindow(console_hwnd, 0)  # SW_HIDE = 0
+
 # Create main window
 ROOT = tk.Tk()
 ROOT.title("Python GUI")
@@ -343,92 +326,15 @@ ROOT1.pack(side="left", pady=(2,2), padx=(5,1), anchor="w", fill="x")
 # Auto-Sync state (Handled above with persistence)
 
 def toggle_terminal_viewer():
-    global terminal_window, terminal_text_widget
-    
-    # If window exists and is visible, hide it
-    if terminal_window and terminal_window.winfo_exists():
-        terminal_window.destroy()
-        terminal_window = None
-        terminal_text_widget = None
-        return
-    
-    # Create new terminal window
-    terminal_window = tk.Toplevel(ROOT)
-    terminal_window.title("Terminal Output")
-    terminal_window.overrideredirect(True)  # Remove window decorations
-    terminal_window.configure(bg="#1D2027")
-    
-    # Create custom border
-    border_frame = tk.Frame(terminal_window, bg="#1d2027", bd=0, highlightthickness=1, highlightbackground="red")
-    border_frame.pack(fill="both", expand=True)
-    
-    # Main container
-    main_container = tk.Frame(border_frame, bg="#1D2027")
-    main_container.pack(fill="both", expand=True, padx=2, pady=2)
-    
-    # Title bar for dragging
-    title_bar = tk.Frame(main_container, bg="#2c313a", height=25)
-    title_bar.pack(fill="x", side="top")
-    title_bar.pack_propagate(False)
-    
-    title_label = tk.Label(title_bar, text="Terminal Output", bg="#2c313a", fg="white", font=("JetBrainsMono NFP", 9))
-    title_label.pack(side="left", padx=10)
-    
-    # Drag functionality for terminal window
-    def start_terminal_drag(event):
-        terminal_window._drag_data = {"x": event.x, "y": event.y}
-    
-    def do_terminal_drag(event):
-        if hasattr(terminal_window, '_drag_data'):
-            x = terminal_window.winfo_x() + event.x - terminal_window._drag_data["x"]
-            y = terminal_window.winfo_y() + event.y - terminal_window._drag_data["y"]
-            terminal_window.geometry(f"+{x}+{y}")
-    
-    title_bar.bind("<Button-1>", start_terminal_drag)
-    title_bar.bind("<B1-Motion>", do_terminal_drag)
-    title_label.bind("<Button-1>", start_terminal_drag)
-    title_label.bind("<B1-Motion>", do_terminal_drag)
-    
-    # Create frame for text widget
-    frame = tk.Frame(main_container, bg="#1D2027")
-    frame.pack(fill="both", expand=True, padx=5, pady=5)
-    
-    # Create text widget with scrollbar
-    scrollbar = tk.Scrollbar(frame)
-    scrollbar.pack(side="right", fill="y")
-    
-    terminal_text_widget = tk.Text(
-        frame,
-        bg="#0C0C0C",
-        fg="#CCCCCC",
-        font=("Consolas", 9),
-        wrap="word",
-        yscrollcommand=scrollbar.set
-    )
-    terminal_text_widget.pack(side="left", fill="both", expand=True)
-    scrollbar.config(command=terminal_text_widget.yview)
-    
-    # Insert existing output
-    for line in terminal_output:
-        terminal_text_widget.insert(tk.END, line)
-    terminal_text_widget.see(tk.END)
-    
-    # Button frame
-    btn_frame = tk.Frame(main_container, bg="#1D2027")
-    btn_frame.pack(fill="x", padx=5, pady=(0, 5))
-    
-    def clear_terminal():
-        terminal_output.clear()
-        terminal_text_widget.delete(1.0, tk.END)
-    
-    tk.Button(btn_frame, text="Clear", command=clear_terminal, bg="#2c313a", fg="white", font=("JetBrainsMono NFP", 8)).pack(side="left", padx=2)
-    tk.Button(btn_frame, text="Close", command=lambda: terminal_window.destroy(), bg="#2c313a", fg="white", font=("JetBrainsMono NFP", 8)).pack(side="right", padx=2)
-    
-    # Position above main window
-    ROOT.update_idletasks()
-    main_x = ROOT.winfo_x()
-    main_y = ROOT.winfo_y()
-    terminal_window.geometry(f"900x300+{main_x}+{main_y - 320}")
+    """Toggle the console window visibility"""
+    global console_hwnd
+    if console_hwnd:
+        # Check if console is currently visible
+        if user32.IsWindowVisible(console_hwnd):
+            user32.ShowWindow(console_hwnd, 0)  # Hide
+        else:
+            user32.ShowWindow(console_hwnd, 1)  # Show
+            user32.SetForegroundWindow(console_hwnd)  # Bring to front
 
 def open_settings():
     settings_win = tk.Toplevel(ROOT)
