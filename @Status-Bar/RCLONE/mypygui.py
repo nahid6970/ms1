@@ -699,7 +699,7 @@ def create_gui():
 
 def refresh_gui():
     create_gui()
-    start_check_cycles()
+    start_global_countdown()
 
 # Support dragging on the main frame
 MAIN_FRAME.bind("<Button-1>", start_drag)
@@ -709,7 +709,9 @@ ROOT1.bind("<B1-Motion>", do_drag)
 
 # Call GUI init
 create_gui()
-start_check_cycles()
+
+# Start global countdown timer
+start_global_countdown()
 
 # Apply topmost setting on startup
 if app_settings.get("topmost", False):
