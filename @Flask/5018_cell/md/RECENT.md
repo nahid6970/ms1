@@ -6,6 +6,31 @@
 
 ---
 
+## [2026-02-11 10:30] - Single Row Mode Per-Sheet State
+
+**Session Duration:** 0.5 hours
+
+**What We Accomplished:**
+
+### ✅ Per-Sheet Single Row Mode
+- **Problem**: Toggling "Single Row Mode" or changing the focused row in one sheet would affect other sheets when switching back and forth. The state was global.
+- **Solution**: 
+  - Implemented `saveSingleRowState()` and `loadSingleRowState(index)` to persist `singleRowMode` (on/off) and `singleRowIndex` (row number) for each sheet individually in `localStorage`.
+  - Updated `switchSheet`, `loadData`, `toggleSingleRowMode`, `prevSingleRow`, and `nextSingleRow` to use this per-sheet state.
+  - Added clamping logic in `renderTable` to ensure the index stays valid if rows are deleted, saving the corrected state.
+
+**Files Modified:**
+- `static/script.js` - Added state management functions and updated navigation logic.
+- `md/CELL_FEATURES.md` - Updated feature documentation.
+- `md/PROBLEMS_AND_FIXES.md` - Documented the fix.
+- `md/RECENT.md` - Logged session.
+
+**Current Status:**
+- ✅ Users can have different sheets in different modes (Table vs Single Row).
+- ✅ Row focus is preserved individually for each sheet.
+
+---
+
 ## [2026-02-08 16:15] - #R# Border Box Refinement and Alignment Fixes
 
 **Session Duration:** 1.0 hours
@@ -134,35 +159,6 @@
 - ✅ Navigation bars dynamically adapt to Category/Sheet themes.
 - ✅ Professional square-edge design implemented.
 - ✅ Sort ranks are consistently contiguous and gapless.
-
----
-
-## [2026-02-06 15:15] - Category Colors and Sort Rank Refinements
-
-**Session Duration:** 0.6 hours
-
-**What We Accomplished:**
-
-### 🎯 Added Category Colors in F1 and Sidebar
-- **New Feature**: Categories in the F1 Quick Navigation window can now have custom background and text colors.
-- **Implementation**:
-  - Added "Set Colors" to the Category context menu in F1.
-  - Colors are applied to both the F1 category list and the Sidebar tree headers.
-  - Supports "Uncategorized" as a colorable category.
-  - Data is stored in `tableData.categoryStyles`.
-
-### ✅ Enhanced Sort Ranking Logic
-- **Normalization**: Ranks are now automatically normalized to a contiguous sequence (1, 2, 3...) upon any change or app load.
-- **Improved Movement**: Setting a rank now properly shifts existing items and fills gaps, ensuring a consistent user experience.
-
-**Files Modified:**
-- `static/script.js` - Implemented `showCategoryColorPicker`, updated `populateF1Categories`, `renderSidebar`, and `initializeCategories`.
-- `md/UX_NAVIGATION.md` - Updated documentation.
-- `md/RECENT.md` - Logged session.
-
-**Current Status:**
-- ✅ Categories are now as customizable as sheets.
-- ✅ Sort ranking is bulletproof.
 
 ---
 

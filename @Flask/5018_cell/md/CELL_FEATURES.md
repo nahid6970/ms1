@@ -23,7 +23,10 @@
 ## Single Row View Mode
 **Purpose:** Focus on one row at a time.
 **Controls:** 📖 Toggle, ⬅️ Previous, ➡️ Next buttons.
-**Logic:** `renderTable()` filters for only one row index when active.
+**Logic:** 
+- `renderTable()` filters for only one row index when active.
+- **Per-Sheet Persistence**: Each sheet remembers its own "Single Row Mode" state (On/Off) and the last viewed row index. This allows you to browse one sheet row-by-row while keeping another in full table view.
+- **State Management**: Saved to `localStorage` under `sheetSingleRowStates`.
 
 ## Smart Textareas
 **Purpose:** Ensures multiline and markdown content stays visible and editable.

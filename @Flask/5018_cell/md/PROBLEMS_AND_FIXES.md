@@ -7,6 +7,27 @@ This document tracks historical bugs, issues, and their solutions. Use this to:
 
 ---
 
+## [2026-02-11 10:30] - Single Row Mode State Leaking Between Sheets
+
+**Problem:** 
+When a user toggled "Single Row Mode" or changed the focused row (`singleRowIndex`) in one sheet, switching to another sheet would apply those same settings. This caused confusion and loss of context, as users expected each sheet to remember its own view state.
+
+**Root Cause:** 
+The `singleRowMode` and `singleRowIndex` variables were global and stored in `localStorage` as single global keys (`singleRowMode`, `singleRowIndex`). There was no mechanism to track these values separately for each sheet.
+
+**Solution:** 
+1. **Per-Sheet Persistence**: Implemented `saveSingleRowState()` to store state in a JSON object keyed by sheet name: `sheetSingleRowStates = { "Sheet1": { mode: true, index: 5 }, ... }`.
+2. **State Loading**: Created `loadSingleRowState(index)` which is called during `switchSheet` and `loadData`. It retrieves the specific state for the active sheet or defaults to `{ mode: false, index: 0 }`.
+3. **Clamping Logic**: Updated `renderTable` to check if the restored `singleRowIndex` is valid for the current sheet (e.g., if rows were deleted). If clamped, the corrected state is immediately saved.
+4. **Navigation Integration**: All Single Row navigation buttons (Next/Prev) now call `saveSingleRowState()` to ensure the latest position is persisted.
+
+**Files Modified:**
+- `static/script.js` - Added state management functions, updated `switchSheet`, `loadData`, `renderTable`, and navigation buttons.
+
+**Related Issues:** Sheet Scroll Position Persistence
+
+---
+
 ## [2026-02-08 16:05] - Multi-line #R# Border Box Styling Refinement
 
 **Problem:** 
