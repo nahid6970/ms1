@@ -20,6 +20,7 @@ The `singleRowMode` and `singleRowIndex` variables were global and stored in `lo
 2. **State Loading**: Created `loadSingleRowState(index)` which is called during `switchSheet` and `loadData`. It retrieves the specific state for the active sheet or defaults to `{ mode: false, index: 0 }`.
 3. **Clamping Logic**: Updated `renderTable` to check if the restored `singleRowIndex` is valid for the current sheet (e.g., if rows were deleted). If clamped, the corrected state is immediately saved.
 4. **Navigation Integration**: All Single Row navigation buttons (Next/Prev) now call `saveSingleRowState()` to ensure the latest position is persisted.
+5. **Untoggle Scroll Fix**: Added `scrollToRow(index)` function. When disabling Single Row Mode, the app now calls `renderTable(false)` followed by `scrollToRow(singleRowIndex)` to ensure the viewport stays focused on the row the user was viewing, rather than jumping to the top of the sheet.
 
 **Files Modified:**
 - `static/script.js` - Added state management functions, updated `switchSheet`, `loadData`, `renderTable`, and navigation buttons.

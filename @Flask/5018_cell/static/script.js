@@ -7644,6 +7644,19 @@ function loadSingleRowState(index) {
     updateSingleRowButtons();
 }
 
+function scrollToRow(index) {
+    const tableBody = document.getElementById('tableBody');
+    if (!tableBody) return;
+    
+    // Find the row with data-row attribute
+    // Note: row-number cells have the rowIndex in their context but TDs have dataset.row
+    // The TR itself doesn't have it, but we can find a TD and get its parent
+    const td = tableBody.querySelector(`td[data-row="${index}"]`);
+    if (td && td.parentElement) {
+        td.parentElement.scrollIntoView({ behavior: 'instant', block: 'center' });
+    }
+}
+
 function toggleSingleRowMode() {
     // Only update singleRowIndex if we are ENABLING single row mode
     // Use lastFocusedCell if available, otherwise try to find current focus
@@ -7659,6 +7672,7 @@ function toggleSingleRowMode() {
         }
     }
 
+    const wasSingleRow = singleRowMode;
     singleRowMode = !singleRowMode;
     const btn = document.getElementById('btnSingleRowMode');
     const prevBtn = document.getElementById('btnPrevRow');
@@ -7682,7 +7696,14 @@ function toggleSingleRowMode() {
     localStorage.setItem('singleRowIndex', singleRowIndex);
     saveSingleRowState();
 
-    renderTable();
+    if (wasSingleRow && !singleRowMode) {
+        // Disabling: render without preserving scroll (as scroll was likely 0)
+        // Then scroll to the row we were looking at
+        renderTable(false);
+        setTimeout(() => scrollToRow(singleRowIndex), 100);
+    } else {
+        renderTable();
+    }
     updateSingleRowButtons();
 }
 

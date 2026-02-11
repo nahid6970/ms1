@@ -14,10 +14,12 @@
 
 ### ✅ Per-Sheet Single Row Mode
 - **Problem**: Toggling "Single Row Mode" or changing the focused row in one sheet would affect other sheets when switching back and forth. The state was global.
+- **Problem 2**: Untoggling "Single Row Mode" would cause the sheet to scroll to the top.
 - **Solution**: 
   - Implemented `saveSingleRowState()` and `loadSingleRowState(index)` to persist `singleRowMode` (on/off) and `singleRowIndex` (row number) for each sheet individually in `localStorage`.
   - Updated `switchSheet`, `loadData`, `toggleSingleRowMode`, `prevSingleRow`, and `nextSingleRow` to use this per-sheet state.
   - Added clamping logic in `renderTable` to ensure the index stays valid if rows are deleted, saving the corrected state.
+  - **Scroll Fix**: Added `scrollToRow(index)` helper and updated `toggleSingleRowMode` to precisely scroll back to the active row when disabling Single Row Mode, preventing the "jump to top" issue.
 
 **Files Modified:**
 - `static/script.js` - Added state management functions and updated navigation logic.
