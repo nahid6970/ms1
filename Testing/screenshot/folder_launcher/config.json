@@ -8,5 +8,10 @@
         "path": "C:/Users/nahid/Pictures/edu",
         "color": "#ff0000",
         "icon": "\ueaf7"
+    },
+    {
+        "path": "C:/@delta",
+        "color": "#00ff00",
+        "icon": "\ueaf7"
     }
 ]
