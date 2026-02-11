@@ -219,10 +219,6 @@ def get_active_window_info():
 ROOT1 = tk.Frame(MAIN_FRAME, bg="#1d2027")
 ROOT1.pack(side="left", pady=(2,2),padx=(5,1),  anchor="w", fill="x")
 
-ROOT2 = tk.Frame(MAIN_FRAME, bg="#1d2027")
-ROOT2.pack(side="right", pady=(2,2),padx=(5,1), anchor="e", fill="x")
-
-
 # Command config
 # Ensure log folder exists
 LOG_DIR = r"C:\Users\nahid\script_output\rclone"
@@ -339,14 +335,4 @@ def create_gui():
 
 # Call GUI init
 create_gui()
-
-# ms1_rclone_o0 = tk.Label(ROOT1,text="ms1", bg="#1d2027", fg="#cc5907", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
-# ms1_rclone_o0.pack(side="left", padx=(0, 0), pady=(0, 0))
-# ms1_rclone_o0.bind( "<Button-1>", lambda event=None: run_command( r'rclone sync C:/@delta/ms1/ o0:/ms1/ --exclude ".git/**" --exclude "__pycache__/**" -P --fast-list' ))
-
-
-# check_window_topmost()
-# Lockbox_update_label(LockBox_lb)
-calculate_time_to_appear(start_time)
-
 ROOT.mainloop()
