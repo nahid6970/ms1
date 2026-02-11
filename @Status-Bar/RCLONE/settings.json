@@ -7,5 +7,9 @@
     "check_interval": 120,
     "minimize_to_tray": false,
     "auto_sync_enabled": true,
-    "topmost": true
+    "auto_sync_on_red": true,
+    "topmost": true,
+    "dialog_width": 1000,
+    "settings_win_width": 480,
+    "settings_win_height": 600
 }

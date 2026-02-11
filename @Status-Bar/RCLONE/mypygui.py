@@ -57,7 +57,10 @@ def load_settings():
         "minimize_to_tray": True,
         "auto_sync_enabled": False,
         "auto_sync_on_red": True,
-        "topmost": False
+        "topmost": False,
+        "dialog_width": 550,
+        "settings_win_width": 480,
+        "settings_win_height": 700
     }
     if os.path.exists(SETTINGS_PATH):
         try:
@@ -310,52 +313,58 @@ ROOT1.pack(side="left", pady=(2,2), padx=(5,1), anchor="w", fill="x")
 def open_settings():
     settings_win = tk.Toplevel(ROOT)
     settings_win.title("Settings")
-    settings_win.geometry("450x450")
+    
+    sw = app_settings.get("settings_win_width", 480)
+    sh = app_settings.get("settings_win_height", 700)
+    settings_win.geometry(f"{sw}x{sh}")
     settings_win.configure(bg="#1D2027")
     
-    tk.Label(settings_win, text="Width (empty for auto):", bg="#1D2027", fg="white").pack()
-    w_entry = tk.Entry(settings_win)
-    w_entry.insert(0, str(app_settings["width"] or ""))
-    w_entry.pack()
+    # Main container for settings (no scrolling as requested)
+    main_container = tk.Frame(settings_win, bg="#1D2027")
+    main_container.pack(fill="both", expand=True)
 
-    tk.Label(settings_win, text="Height:", bg="#1D2027", fg="white").pack()
-    h_entry = tk.Entry(settings_win)
-    h_entry.insert(0, str(app_settings["height"]))
-    h_entry.pack()
+    # Grid container for settings
+    grid_frame = tk.Frame(main_container, bg="#1D2027")
+    grid_frame.pack(pady=10, padx=20, fill="x")
+    grid_frame.columnconfigure(1, weight=1)
 
-    tk.Label(settings_win, text="X Position (empty for auto):", bg="#1D2027", fg="white").pack()
-    x_entry = tk.Entry(settings_win)
-    x_entry.insert(0, str(app_settings["x"] or ""))
-    x_entry.pack()
+    # Helper to add grid row
+    def add_setting_row(row, text, entry_val):
+        lbl = tk.Label(grid_frame, text=text, bg="#1D2027", fg="white", anchor="e", width=25)
+        lbl.grid(row=row, column=0, padx=(0, 10), pady=6, sticky="e")
+        ent = tk.Entry(grid_frame, bg="#2c313a", fg="white", insertbackground="white", bd=1)
+        ent.insert(0, str(entry_val))
+        ent.grid(row=row, column=1, pady=6, sticky="ew")
+        return ent
 
-    tk.Label(settings_win, text="Y Position:", bg="#1D2027", fg="white").pack()
-    y_entry = tk.Entry(settings_win)
-    y_entry.insert(0, str(app_settings["y"]))
-    y_entry.pack()
+    w_entry = add_setting_row(0, "Main Window Width (auto):", app_settings["width"] or "")
+    h_entry = add_setting_row(1, "Main Window Height:", app_settings["height"])
+    x_entry = add_setting_row(2, "X Position (auto):", app_settings["x"] or "")
+    y_entry = add_setting_row(3, "Y Position:", app_settings["y"])
+    i_entry = add_setting_row(4, "Auto-Sync Interval (sec):", app_settings["interval"])
+    c_entry = add_setting_row(5, "Check Interval (sec):", app_settings.get("check_interval", 600))
+    dw_entry = add_setting_row(6, "Edit/Add Window Width:", app_settings.get("dialog_width", 550))
+    sw_entry = add_setting_row(7, "Settings Win Width:", app_settings.get("settings_win_width", 480))
+    sh_entry = add_setting_row(8, "Settings Win Height:", app_settings.get("settings_win_height", 700))
 
-    tk.Label(settings_win, text="Auto-Sync Interval (sec):", bg="#1D2027", fg="white").pack()
-    i_entry = tk.Entry(settings_win)
-    i_entry.insert(0, str(app_settings["interval"]))
-    i_entry.pack()
-
-    tk.Label(settings_win, text="Check Interval (sec):", bg="#1D2027", fg="white").pack()
-    c_entry = tk.Entry(settings_win)
-    c_entry.insert(0, str(app_settings.get("check_interval", 600)))
-    c_entry.pack()
+    # Checkbuttons container
+    cb_frame = tk.Frame(main_container, bg="#1D2027")
+    cb_frame.pack(pady=5, padx=20, fill="x")
 
     tray_var = tk.BooleanVar(value=app_settings.get("minimize_to_tray", True))
-    tk.Checkbutton(settings_win, text="Minimize to Tray on Close", variable=tray_var, bg="#1D2027", fg="white", selectcolor="#1D2027", activebackground="#1D2027", activeforeground="white").pack(pady=5)
+    tk.Checkbutton(cb_frame, text="Minimize to Tray on Close", variable=tray_var, bg="#1D2027", fg="white", selectcolor="#1d2027", activebackground="#1D2027", activeforeground="white").pack(anchor="w", pady=1)
 
     topmost_var = tk.BooleanVar(value=app_settings.get("topmost", False))
-    tk.Checkbutton(settings_win, text="Always on Top (hides for fullscreen)", variable=topmost_var, bg="#1D2027", fg="white", selectcolor="#1D2027", activebackground="#1D2027", activeforeground="white").pack(pady=5)
+    tk.Checkbutton(cb_frame, text="Always on Top (hides for fullscreen)", variable=topmost_var, bg="#1D2027", fg="white", selectcolor="#1d2027", activebackground="#1D2027", activeforeground="white").pack(anchor="w", pady=1)
 
     auto_sync_red_var = tk.BooleanVar(value=app_settings.get("auto_sync_on_red", True))
-    tk.Checkbutton(settings_win, text="Auto-Sync When Item Turns Red", variable=auto_sync_red_var, bg="#1D2027", fg="white", selectcolor="#1D2027", activebackground="#1D2027", activeforeground="white").pack(pady=5)
+    tk.Checkbutton(cb_frame, text="Auto-Sync When Item Turns Red", variable=auto_sync_red_var, bg="#1D2027", fg="white", selectcolor="#1d2027", activebackground="#1D2027", activeforeground="white").pack(anchor="w", pady=1)
 
-    tk.Label(settings_win, text="Note: Enable Auto-Sync button in main window", bg="#1D2027", fg="yellow", font=("JetBrainsMono NFP", 8)).pack(pady=2)
-    tk.Label(settings_win, text="Items sync individually when they turn red", bg="#1D2027", fg="yellow", font=("JetBrainsMono NFP", 8)).pack(pady=2)
-    
-    tk.Label(settings_win, text="Note: Enable Auto-Sync button to sync items when red", bg="#1D2027", fg="yellow", font=("JetBrainsMono NFP", 8)).pack(pady=2)
+    # Note container
+    notes_frame = tk.Frame(main_container, bg="#1D2027")
+    notes_frame.pack(pady=5)
+    tk.Label(notes_frame, text="Note: Enable Auto-Sync button in main window", bg="#1D2027", fg="yellow", font=("JetBrainsMono NFP", 8)).pack()
+    tk.Label(notes_frame, text="Items sync individually when they turn red", bg="#1D2027", fg="yellow", font=("JetBrainsMono NFP", 8)).pack()
 
     def save():
         try:
@@ -366,6 +375,9 @@ def open_settings():
             app_settings["y"] = int(y_entry.get())
             app_settings["interval"] = int(i_entry.get())
             app_settings["check_interval"] = int(c_entry.get())
+            app_settings["dialog_width"] = int(dw_entry.get())
+            app_settings["settings_win_width"] = int(sw_entry.get())
+            app_settings["settings_win_height"] = int(sh_entry.get())
             app_settings["minimize_to_tray"] = tray_var.get()
             app_settings["topmost"] = topmost_var.get()
             app_settings["auto_sync_on_red"] = auto_sync_red_var.get()
@@ -384,7 +396,7 @@ def open_settings():
         except ValueError:
             messagebox.showerror("Error", "Invalid input. Use numbers.")
 
-    tk.Button(settings_win, text="Save", command=save).pack(pady=10)
+    tk.Button(main_container, text="Save Settings", command=save, bg="#2c313a", fg="white", width=20, height=1).pack(pady=15)
 
 def on_label_click(event, cfg):
     try:
@@ -417,40 +429,41 @@ def edit_command(key):
     """Open edit dialog for a command"""
     cfg = commands[key]
     
+    dialog_w = app_settings.get("dialog_width", 550)
     edit_win = tk.Toplevel(ROOT)
     edit_win.title(f"Edit: {key}")
-    edit_win.geometry("500x450")
+    edit_win.geometry(f"{dialog_w}x500")
     edit_win.configure(bg="#1D2027")
     
-    tk.Label(edit_win, text="Name (key):", bg="#1D2027", fg="white").pack(pady=5)
-    name_entry = tk.Entry(edit_win, width=50)
+    tk.Label(edit_win, text="Name (key):", bg="#1D2027", fg="white").pack(pady=(10, 0))
+    name_entry = tk.Entry(edit_win)
     name_entry.insert(0, key)
-    name_entry.pack()
+    name_entry.pack(fill="x", padx=20)
     
-    tk.Label(edit_win, text="Label (Icon/Text):", bg="#1D2027", fg="white").pack(pady=5)
-    label_entry = tk.Entry(edit_win, width=50)
+    tk.Label(edit_win, text="Label (Icon/Text):", bg="#1D2027", fg="white").pack(pady=(10, 0))
+    label_entry = tk.Entry(edit_win)
     label_entry.insert(0, cfg["label"])
-    label_entry.pack()
+    label_entry.pack(fill="x", padx=20)
     
-    tk.Label(edit_win, text="Source Path:", bg="#1D2027", fg="white").pack(pady=5)
-    src_entry = tk.Entry(edit_win, width=50)
+    tk.Label(edit_win, text="Source Path:", bg="#1D2027", fg="white").pack(pady=(10, 0))
+    src_entry = tk.Entry(edit_win)
     src_entry.insert(0, cfg["src"])
-    src_entry.pack()
+    src_entry.pack(fill="x", padx=20)
     
-    tk.Label(edit_win, text="Destination Path:", bg="#1D2027", fg="white").pack(pady=5)
-    dst_entry = tk.Entry(edit_win, width=50)
+    tk.Label(edit_win, text="Destination Path:", bg="#1D2027", fg="white").pack(pady=(10, 0))
+    dst_entry = tk.Entry(edit_win)
     dst_entry.insert(0, cfg["dst"])
-    dst_entry.pack()
+    dst_entry.pack(fill="x", padx=20)
     
-    tk.Label(edit_win, text="Left Click Command:", bg="#1D2027", fg="white").pack(pady=5)
-    left_entry = tk.Entry(edit_win, width=50)
+    tk.Label(edit_win, text="Left Click Command:", bg="#1D2027", fg="white").pack(pady=(10, 0))
+    left_entry = tk.Entry(edit_win)
     left_entry.insert(0, cfg.get("left_click_cmd", "rclone sync src dst -P --fast-list --log-level INFO"))
-    left_entry.pack()
+    left_entry.pack(fill="x", padx=20)
     
-    tk.Label(edit_win, text="Right Click Command:", bg="#1D2027", fg="white").pack(pady=5)
-    right_entry = tk.Entry(edit_win, width=50)
+    tk.Label(edit_win, text="Right Click Command:", bg="#1D2027", fg="white").pack(pady=(10, 0))
+    right_entry = tk.Entry(edit_win)
     right_entry.insert(0, cfg.get("right_click_cmd", "rclone sync dst src -P --fast-list"))
-    right_entry.pack()
+    right_entry.pack(fill="x", padx=20)
     
     button_frame = tk.Frame(edit_win, bg="#1D2027")
     button_frame.pack(pady=15)
@@ -489,36 +502,37 @@ def edit_command(key):
     tk.Button(button_frame, text="Cancel", command=edit_win.destroy, bg="#2c313a", fg="white", width=10).pack(side="left", padx=5)
 
 def add_command():
+    dialog_w = app_settings.get("dialog_width", 550)
     add_win = tk.Toplevel(ROOT)
     add_win.title("Add New Command")
-    add_win.geometry("500x450")
+    add_win.geometry(f"{dialog_w}x500")
     add_win.configure(bg="#1D2027")
     
-    tk.Label(add_win, text="Name (key):", bg="#1D2027", fg="white").pack(pady=5)
-    name_entry = tk.Entry(add_win, width=40)
-    name_entry.pack()
+    tk.Label(add_win, text="Name (key):", bg="#1D2027", fg="white").pack(pady=(10, 0))
+    name_entry = tk.Entry(add_win)
+    name_entry.pack(fill="x", padx=20)
     
-    tk.Label(add_win, text="Label (Icon/Text):", bg="#1D2027", fg="white").pack(pady=5)
-    label_entry = tk.Entry(add_win, width=40)
-    label_entry.pack()
+    tk.Label(add_win, text="Label (Icon/Text):", bg="#1D2027", fg="white").pack(pady=(10, 0))
+    label_entry = tk.Entry(add_win)
+    label_entry.pack(fill="x", padx=20)
     
-    tk.Label(add_win, text="Source Path:", bg="#1D2027", fg="white").pack(pady=5)
-    src_entry = tk.Entry(add_win, width=40)
-    src_entry.pack()
+    tk.Label(add_win, text="Source Path:", bg="#1D2027", fg="white").pack(pady=(10, 0))
+    src_entry = tk.Entry(add_win)
+    src_entry.pack(fill="x", padx=20)
     
-    tk.Label(add_win, text="Destination Path:", bg="#1D2027", fg="white").pack(pady=5)
-    dst_entry = tk.Entry(add_win, width=40)
-    dst_entry.pack()
+    tk.Label(add_win, text="Destination Path:", bg="#1D2027", fg="white").pack(pady=(10, 0))
+    dst_entry = tk.Entry(add_win)
+    dst_entry.pack(fill="x", padx=20)
     
-    tk.Label(add_win, text="Left Click Command (optional):", bg="#1D2027", fg="white").pack(pady=5)
-    left_entry = tk.Entry(add_win, width=40)
+    tk.Label(add_win, text="Left Click Command (optional):", bg="#1D2027", fg="white").pack(pady=(10, 0))
+    left_entry = tk.Entry(add_win)
     left_entry.insert(0, "rclone sync src dst -P --fast-list --log-level INFO")
-    left_entry.pack()
+    left_entry.pack(fill="x", padx=20)
     
-    tk.Label(add_win, text="Right Click Command (optional):", bg="#1D2027", fg="white").pack(pady=5)
-    right_entry = tk.Entry(add_win, width=40)
+    tk.Label(add_win, text="Right Click Command (optional):", bg="#1D2027", fg="white").pack(pady=(10, 0))
+    right_entry = tk.Entry(add_win)
     right_entry.insert(0, "rclone sync dst src -P --fast-list")
-    right_entry.pack()
+    right_entry.pack(fill="x", padx=20)
     
     def save_new():
         name = name_entry.get()
