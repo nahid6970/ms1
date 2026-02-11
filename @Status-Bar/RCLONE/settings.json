@@ -12,5 +12,6 @@
     "dialog_width": 1000,
     "settings_win_width": 480,
     "settings_win_height": 600,
-    "show_command_output": true
+    "show_command_output": true,
+    "buffer_output": false
 }

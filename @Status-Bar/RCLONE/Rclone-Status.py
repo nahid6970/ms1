@@ -61,7 +61,8 @@ def load_settings():
         "dialog_width": 550,
         "settings_win_width": 480,
         "settings_win_height": 700,
-        "show_command_output": False
+        "show_command_output": False,
+        "buffer_output": True
     }
     if os.path.exists(SETTINGS_PATH):
         try:
@@ -364,6 +365,9 @@ def open_settings():
     show_output_var = tk.BooleanVar(value=app_settings.get("show_command_output", False))
     tk.Checkbutton(cb_frame, text="Show Command Output in Terminal", variable=show_output_var, bg="#1D2027", fg="white", selectcolor="#1d2027", activebackground="#1D2027", activeforeground="white").pack(anchor="w", pady=1)
 
+    buffer_output_var = tk.BooleanVar(value=app_settings.get("buffer_output", True))
+    tk.Checkbutton(cb_frame, text="Buffer Output (prevents mixing, recommended)", variable=buffer_output_var, bg="#1D2027", fg="white", selectcolor="#1d2027", activebackground="#1D2027", activeforeground="white").pack(anchor="w", pady=1)
+
     # Note container
     notes_frame = tk.Frame(main_container, bg="#1D2027")
     notes_frame.pack(pady=5)
@@ -386,6 +390,7 @@ def open_settings():
             app_settings["topmost"] = topmost_var.get()
             app_settings["auto_sync_on_red"] = auto_sync_red_var.get()
             app_settings["show_command_output"] = show_output_var.get()
+            app_settings["buffer_output"] = buffer_output_var.get()
             auto_sync_on_red = auto_sync_red_var.get()
             save_settings(app_settings)
             
@@ -745,25 +750,39 @@ def check_and_update(label, cfg):
                 print(f"🔍 Periodic check -- {cfg['label']}")
 
             if app_settings.get("show_command_output"):
-                output_buffer = []
-                output_buffer.append(f"\n{'*'*40}")
-                output_buffer.append(f"🛠️  CHECK COMMAND: {actual_cmd}")
-                output_buffer.append(f"{'*'*40}")
-                
-                process = subprocess.Popen(actual_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
-                with open(log_path, "w") as f:
-                    for line in process.stdout:
-                        f.write(line)
-                        # Only buffer important lines, skip progress updates
-                        if any(x in line for x in ["ERROR", "NOTICE", "INFO", "differences found"]):
-                            output_buffer.append(f"  > {line.strip()}")
-                process.wait()
-                output_buffer.append(f"{'*'*40}\n")
-                
-                # Print all at once
-                with output_lock:
-                    for line in output_buffer:
-                        print(line)
+                if app_settings.get("buffer_output", True):
+                    # Buffered mode - collect all output then print
+                    output_buffer = []
+                    output_buffer.append(f"\n{'*'*40}")
+                    output_buffer.append(f"🛠️  CHECK COMMAND: {actual_cmd}")
+                    output_buffer.append(f"{'*'*40}")
+                    
+                    process = subprocess.Popen(actual_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+                    with open(log_path, "w") as f:
+                        for line in process.stdout:
+                            f.write(line)
+                            if any(x in line for x in ["ERROR", "NOTICE", "INFO", "differences found"]):
+                                output_buffer.append(f"  > {line.strip()}")
+                    process.wait()
+                    output_buffer.append(f"{'*'*40}\n")
+                    
+                    with output_lock:
+                        for line in output_buffer:
+                            print(line)
+                else:
+                    # Real-time mode - print each line with project label
+                    print(f"\n{'*'*40}")
+                    print(f"🛠️  CHECK COMMAND: {actual_cmd}")
+                    print(f"{'*'*40}")
+                    
+                    process = subprocess.Popen(actual_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+                    with open(log_path, "w") as f:
+                        for line in process.stdout:
+                            f.write(line)
+                            if any(x in line for x in ["ERROR", "NOTICE", "INFO", "differences found"]):
+                                print(f"\033[42m{cfg['label']}\033[0m > {line.strip()}")
+                    process.wait()
+                    print(f"{'*'*40}\n")
             else:
                 with open(log_path, "w") as f:
                     subprocess.run(actual_cmd, shell=True, stdout=f, stderr=f)
@@ -790,25 +809,39 @@ def check_and_update(label, cfg):
                     actual_sync_cmd = sync_cmd.replace("src", cfg["src"]).replace("dst", cfg["dst"])
 
                     if app_settings.get("show_command_output"):
-                        output_buffer = []
-                        output_buffer.append(f"\n{'*'*40}")
-                        output_buffer.append(f"🛠️  SYNC COMMAND: {actual_sync_cmd}")
-                        output_buffer.append(f"{'*'*40}")
-                        
-                        process = subprocess.Popen(actual_sync_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
-                        with open(sync_log_path, "w") as f:
-                            for line in process.stdout:
-                                f.write(line)
-                                # Only buffer important lines, skip progress updates
-                                if any(x in line for x in ["ERROR", "NOTICE", "INFO :", "Copied", "Deleted"]):
-                                    output_buffer.append(f"  >> {line.strip()}")
-                        process.wait()
-                        output_buffer.append(f"{'*'*40}\n")
-                        
-                        # Print all at once
-                        with output_lock:
-                            for line in output_buffer:
-                                print(line)
+                        if app_settings.get("buffer_output", True):
+                            # Buffered mode
+                            output_buffer = []
+                            output_buffer.append(f"\n{'*'*40}")
+                            output_buffer.append(f"🛠️  SYNC COMMAND: {actual_sync_cmd}")
+                            output_buffer.append(f"{'*'*40}")
+                            
+                            process = subprocess.Popen(actual_sync_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+                            with open(sync_log_path, "w") as f:
+                                for line in process.stdout:
+                                    f.write(line)
+                                    if any(x in line for x in ["ERROR", "NOTICE", "INFO :", "Copied", "Deleted"]):
+                                        output_buffer.append(f"  >> {line.strip()}")
+                            process.wait()
+                            output_buffer.append(f"{'*'*40}\n")
+                            
+                            with output_lock:
+                                for line in output_buffer:
+                                    print(line)
+                        else:
+                            # Real-time mode with project label
+                            print(f"\n{'*'*40}")
+                            print(f"🛠️  SYNC COMMAND: {actual_sync_cmd}")
+                            print(f"{'*'*40}")
+                            
+                            process = subprocess.Popen(actual_sync_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+                            with open(sync_log_path, "w") as f:
+                                for line in process.stdout:
+                                    f.write(line)
+                                    if any(x in line for x in ["ERROR", "NOTICE", "INFO :", "Copied", "Deleted"]):
+                                        print(f"\033[42m{cfg['label']}\033[0m >> {line.strip()}")
+                            process.wait()
+                            print(f"{'*'*40}\n")
                     else:
                         with open(sync_log_path, "w") as f:
                             subprocess.run(actual_sync_cmd, shell=True, stdout=f, stderr=f)
