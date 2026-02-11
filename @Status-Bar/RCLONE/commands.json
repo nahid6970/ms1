@@ -6,7 +6,7 @@
         "label": "\udb85\ude32",
         "left_click_cmd": "rclone sync src dst -P --fast-list --log-level INFO",
         "right_click_cmd": "rclone sync dst src -P --fast-list",
-        "index": 0,
+        "index": 3,
         "enabled": false
     },
     "software": {
@@ -16,7 +16,7 @@
         "label": "\uf40e",
         "left_click_cmd": "rclone sync src dst -P --fast-list --log-level INFO",
         "right_click_cmd": "rclone sync dst src -P --fast-list",
-        "index": 0,
+        "index": 6,
         "enabled": false
     },
     "song": {
@@ -26,7 +26,7 @@
         "label": "\uec1b",
         "left_click_cmd": "rclone sync src dst -P --fast-list --log-level INFO",
         "right_click_cmd": "rclone sync dst src -P --fast-list",
-        "index": 0,
+        "index": 5,
         "enabled": false
     },
     "ms1": {
@@ -46,7 +46,7 @@
         "label": "\uf03e",
         "left_click_cmd": "rclone sync src dst -P --fast-list --track-renames --exclude \".globalTrash/**\" --exclude \".stfolder/**\" --log-level INFO",
         "right_click_cmd": "rclone sync dst src -P --fast-list",
-        "index": 0,
+        "index": 4,
         "enabled": false
     },
     "db": {
