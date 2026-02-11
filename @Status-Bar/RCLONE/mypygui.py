@@ -383,23 +383,140 @@ def remove_command(key):
         save_commands(commands)
         refresh_gui()
 
+def edit_command(key):
+    """Open edit dialog for a command"""
+    cfg = commands[key]
+    
+    edit_win = tk.Toplevel(ROOT)
+    edit_win.title(f"Edit: {key}")
+    edit_win.geometry("400x350")
+    edit_win.configure(bg="#1D2027")
+    
+    tk.Label(edit_win, text="Name (key):", bg="#1D2027", fg="white").pack(pady=5)
+    name_entry = tk.Entry(edit_win, width=40)
+    name_entry.insert(0, key)
+    name_entry.pack()
+    
+    tk.Label(edit_win, text="Label (Icon/Text):", bg="#1D2027", fg="white").pack(pady=5)
+    label_entry = tk.Entry(edit_win, width=40)
+    label_entry.insert(0, cfg["label"])
+    label_entry.pack()
+    
+    tk.Label(edit_win, text="Source Path:", bg="#1D2027", fg="white").pack(pady=5)
+    src_entry = tk.Entry(edit_win, width=40)
+    src_entry.insert(0, cfg["src"])
+    src_entry.pack()
+    
+    tk.Label(edit_win, text="Destination Path:", bg="#1D2027", fg="white").pack(pady=5)
+    dst_entry = tk.Entry(edit_win, width=40)
+    dst_entry.insert(0, cfg["dst"])
+    dst_entry.pack()
+    
+    tk.Label(edit_win, text="Left Click Command:", bg="#1D2027", fg="white").pack(pady=5)
+    left_entry = tk.Entry(edit_win, width=40)
+    left_entry.insert(0, cfg.get("left_click_cmd", "rclone sync src dst -P --fast-list --log-level INFO"))
+    left_entry.pack()
+    
+    tk.Label(edit_win, text="Right Click Command:", bg="#1D2027", fg="white").pack(pady=5)
+    right_entry = tk.Entry(edit_win, width=40)
+    right_entry.insert(0, cfg.get("right_click_cmd", "rclone sync dst src -P --fast-list"))
+    right_entry.pack()
+    
+    button_frame = tk.Frame(edit_win, bg="#1D2027")
+    button_frame.pack(pady=15)
+    
+    def save_edit():
+        new_key = name_entry.get()
+        if not new_key:
+            messagebox.showerror("Error", "Name cannot be empty")
+            return
+        
+        # Remove old key if name changed
+        if new_key != key:
+            del commands[key]
+        
+        commands[new_key] = {
+            "cmd": "rclone check src dst --fast-list --size-only",
+            "src": src_entry.get(),
+            "dst": dst_entry.get(),
+            "label": label_entry.get(),
+            "left_click_cmd": left_entry.get(),
+            "right_click_cmd": right_entry.get()
+        }
+        save_commands(commands)
+        refresh_gui()
+        edit_win.destroy()
+    
+    def delete_item():
+        if messagebox.askyesno("Delete", f"Delete {key}?"):
+            del commands[key]
+            save_commands(commands)
+            refresh_gui()
+            edit_win.destroy()
+    
+    tk.Button(button_frame, text="Save", command=save_edit, bg="#2c313a", fg="white", width=10).pack(side="left", padx=5)
+    tk.Button(button_frame, text="Delete", command=delete_item, bg="red", fg="white", width=10).pack(side="left", padx=5)
+    tk.Button(button_frame, text="Cancel", command=edit_win.destroy, bg="#2c313a", fg="white", width=10).pack(side="left", padx=5)
+
 def add_command():
-    name = simpledialog.askstring("Input", "Name (key):")
-    if not name: return
-    label = simpledialog.askstring("Input", "Label (Icon/Text):")
-    src = simpledialog.askstring("Input", "Source Path:")
-    dst = simpledialog.askstring("Input", "Destination Path:")
-    if name and label and src and dst:
+    add_win = tk.Toplevel(ROOT)
+    add_win.title("Add New Command")
+    add_win.geometry("400x350")
+    add_win.configure(bg="#1D2027")
+    
+    tk.Label(add_win, text="Name (key):", bg="#1D2027", fg="white").pack(pady=5)
+    name_entry = tk.Entry(add_win, width=40)
+    name_entry.pack()
+    
+    tk.Label(add_win, text="Label (Icon/Text):", bg="#1D2027", fg="white").pack(pady=5)
+    label_entry = tk.Entry(add_win, width=40)
+    label_entry.pack()
+    
+    tk.Label(add_win, text="Source Path:", bg="#1D2027", fg="white").pack(pady=5)
+    src_entry = tk.Entry(add_win, width=40)
+    src_entry.pack()
+    
+    tk.Label(add_win, text="Destination Path:", bg="#1D2027", fg="white").pack(pady=5)
+    dst_entry = tk.Entry(add_win, width=40)
+    dst_entry.pack()
+    
+    tk.Label(add_win, text="Left Click Command (optional):", bg="#1D2027", fg="white").pack(pady=5)
+    left_entry = tk.Entry(add_win, width=40)
+    left_entry.insert(0, "rclone sync src dst -P --fast-list --log-level INFO")
+    left_entry.pack()
+    
+    tk.Label(add_win, text="Right Click Command (optional):", bg="#1D2027", fg="white").pack(pady=5)
+    right_entry = tk.Entry(add_win, width=40)
+    right_entry.insert(0, "rclone sync dst src -P --fast-list")
+    right_entry.pack()
+    
+    def save_new():
+        name = name_entry.get()
+        label = label_entry.get()
+        src = src_entry.get()
+        dst = dst_entry.get()
+        
+        if not all([name, label, src, dst]):
+            messagebox.showerror("Error", "Name, Label, Source, and Destination are required")
+            return
+        
         commands[name] = {
             "cmd": "rclone check src dst --fast-list --size-only",
             "src": src,
             "dst": dst,
             "label": label,
-            "left_click_cmd": "rclone sync src dst -P --fast-list --log-level INFO",
-            "right_click_cmd": "rclone sync dst src -P --fast-list"
+            "left_click_cmd": left_entry.get(),
+            "right_click_cmd": right_entry.get()
         }
         save_commands(commands)
         refresh_gui()
+        add_win.destroy()
+    
+    button_frame = tk.Frame(add_win, bg="#1D2027")
+    button_frame.pack(pady=15)
+    
+    tk.Button(button_frame, text="Add", command=save_new, bg="#2c313a", fg="white", width=10).pack(side="left", padx=5)
+    tk.Button(button_frame, text="Cancel", command=add_win.destroy, bg="#2c313a", fg="white", width=10).pack(side="left", padx=5)
 
 # Periodically check using rclone
 def check_and_update(label, cfg):
@@ -445,8 +562,8 @@ def create_gui():
         lbl.bind("<Control-Button-1>", lambda event, c=cfg: ctrl_left_click(event, c))  # ctrl + left
         lbl.bind("<Control-Button-3>", lambda event, c=cfg: ctrl_right_click(event, c)) # ctrl + right
         
-        # Right click to remove (without ctrl)
-        lbl.bind("<Button-3>", lambda event, k=key: remove_command(k))
+        # Right click to edit
+        lbl.bind("<Button-3>", lambda event, k=key: edit_command(k))
 
         check_and_update(lbl, cfg)
     
