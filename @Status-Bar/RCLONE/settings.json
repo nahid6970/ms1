@@ -1,10 +1,11 @@
 {
     "width": null,
     "height": 39,
-    "x": 500,
-    "y": 900,
+    "x": 10,
+    "y": 1040,
     "interval": 3600,
     "check_interval": 600,
     "minimize_to_tray": false,
-    "auto_sync_enabled": false
+    "auto_sync_enabled": false,
+    "topmost": true
 }

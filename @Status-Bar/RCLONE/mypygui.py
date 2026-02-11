@@ -14,6 +14,8 @@ from PIL import Image, ImageDraw
 import pystray
 from pystray import MenuItem as item
 import sys
+import win32gui
+import win32con
 
 def calculate_time_to_appear(start_time):
     end_time = time.time()
@@ -53,7 +55,8 @@ def load_settings():
         "interval": 3600,
         "check_interval": 600,
         "minimize_to_tray": True,
-        "auto_sync_enabled": False
+        "auto_sync_enabled": False,
+        "topmost": False
     }
     if os.path.exists(SETTINGS_PATH):
         try:
@@ -111,6 +114,47 @@ def on_close_click():
 
 commands = load_commands()
 app_settings = load_settings()
+
+# Fullscreen detection and topmost management
+def is_fullscreen_app_active():
+    """Check if a fullscreen application is currently active"""
+    try:
+        hwnd = win32gui.GetForegroundWindow()
+        if hwnd == 0:
+            return False
+        
+        # Get window rect
+        rect = win32gui.GetWindowRect(hwnd)
+        width = rect[2] - rect[0]
+        height = rect[3] - rect[1]
+        
+        # Get screen dimensions
+        screen_width = ctypes.windll.user32.GetSystemMetrics(0)
+        screen_height = ctypes.windll.user32.GetSystemMetrics(1)
+        
+        # Check if window covers entire screen
+        if width >= screen_width and height >= screen_height:
+            # Additional check: is it actually fullscreen style?
+            style = win32gui.GetWindowLong(hwnd, win32con.GWL_STYLE)
+            if not (style & win32con.WS_CAPTION):
+                return True
+        
+        return False
+    except:
+        return False
+
+def manage_topmost():
+    """Manage topmost state based on fullscreen detection"""
+    if not app_settings.get("topmost", False):
+        return
+    
+    if is_fullscreen_app_active():
+        ROOT.attributes('-topmost', False)
+    else:
+        ROOT.attributes('-topmost', True)
+    
+    # Check every 500ms
+    ROOT.after(500, manage_topmost)
 
 # Auto-Sync logic
 auto_sync_enabled = app_settings.get("auto_sync_enabled", False)
@@ -247,7 +291,7 @@ ROOT1.pack(side="left", pady=(2,2), padx=(5,1), anchor="w", fill="x")
 def open_settings():
     settings_win = tk.Toplevel(ROOT)
     settings_win.title("Settings")
-    settings_win.geometry("300x350")
+    settings_win.geometry("300x400")
     settings_win.configure(bg="#1D2027")
     
     tk.Label(settings_win, text="Width (empty for auto):", bg="#1D2027", fg="white").pack()
@@ -283,6 +327,9 @@ def open_settings():
     tray_var = tk.BooleanVar(value=app_settings.get("minimize_to_tray", True))
     tk.Checkbutton(settings_win, text="Minimize to Tray on Close", variable=tray_var, bg="#1D2027", fg="white", selectcolor="#1D2027", activebackground="#1D2027", activeforeground="white").pack(pady=5)
 
+    topmost_var = tk.BooleanVar(value=app_settings.get("topmost", False))
+    tk.Checkbutton(settings_win, text="Always on Top (hides for fullscreen)", variable=topmost_var, bg="#1D2027", fg="white", selectcolor="#1D2027", activebackground="#1D2027", activeforeground="white").pack(pady=5)
+
     def save():
         try:
             app_settings["width"] = int(w_entry.get()) if w_entry.get() else None
@@ -292,7 +339,16 @@ def open_settings():
             app_settings["interval"] = int(i_entry.get())
             app_settings["check_interval"] = int(c_entry.get())
             app_settings["minimize_to_tray"] = tray_var.get()
+            app_settings["topmost"] = topmost_var.get()
             save_settings(app_settings)
+            
+            # Apply topmost setting immediately
+            if app_settings["topmost"]:
+                ROOT.attributes('-topmost', True)
+                manage_topmost()
+            else:
+                ROOT.attributes('-topmost', False)
+            
             messagebox.showinfo("Success", "Settings saved.")
             settings_win.destroy()
         except ValueError:
@@ -455,4 +511,10 @@ ROOT1.bind("<B1-Motion>", do_drag)
 
 # Call GUI init
 create_gui()
+
+# Apply topmost setting on startup
+if app_settings.get("topmost", False):
+    ROOT.attributes('-topmost', True)
+    manage_topmost()
+
 ROOT.mainloop()
