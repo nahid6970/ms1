@@ -291,7 +291,7 @@ ROOT1.pack(side="left", pady=(2,2), padx=(5,1), anchor="w", fill="x")
 def open_settings():
     settings_win = tk.Toplevel(ROOT)
     settings_win.title("Settings")
-    settings_win.geometry("300x400")
+    settings_win.geometry("450x450")
     settings_win.configure(bg="#1D2027")
     
     tk.Label(settings_win, text="Width (empty for auto):", bg="#1D2027", fg="white").pack()
@@ -389,36 +389,36 @@ def edit_command(key):
     
     edit_win = tk.Toplevel(ROOT)
     edit_win.title(f"Edit: {key}")
-    edit_win.geometry("400x350")
+    edit_win.geometry("500x450")
     edit_win.configure(bg="#1D2027")
     
     tk.Label(edit_win, text="Name (key):", bg="#1D2027", fg="white").pack(pady=5)
-    name_entry = tk.Entry(edit_win, width=40)
+    name_entry = tk.Entry(edit_win, width=50)
     name_entry.insert(0, key)
     name_entry.pack()
     
     tk.Label(edit_win, text="Label (Icon/Text):", bg="#1D2027", fg="white").pack(pady=5)
-    label_entry = tk.Entry(edit_win, width=40)
+    label_entry = tk.Entry(edit_win, width=50)
     label_entry.insert(0, cfg["label"])
     label_entry.pack()
     
     tk.Label(edit_win, text="Source Path:", bg="#1D2027", fg="white").pack(pady=5)
-    src_entry = tk.Entry(edit_win, width=40)
+    src_entry = tk.Entry(edit_win, width=50)
     src_entry.insert(0, cfg["src"])
     src_entry.pack()
     
     tk.Label(edit_win, text="Destination Path:", bg="#1D2027", fg="white").pack(pady=5)
-    dst_entry = tk.Entry(edit_win, width=40)
+    dst_entry = tk.Entry(edit_win, width=50)
     dst_entry.insert(0, cfg["dst"])
     dst_entry.pack()
     
     tk.Label(edit_win, text="Left Click Command:", bg="#1D2027", fg="white").pack(pady=5)
-    left_entry = tk.Entry(edit_win, width=40)
+    left_entry = tk.Entry(edit_win, width=50)
     left_entry.insert(0, cfg.get("left_click_cmd", "rclone sync src dst -P --fast-list --log-level INFO"))
     left_entry.pack()
     
     tk.Label(edit_win, text="Right Click Command:", bg="#1D2027", fg="white").pack(pady=5)
-    right_entry = tk.Entry(edit_win, width=40)
+    right_entry = tk.Entry(edit_win, width=50)
     right_entry.insert(0, cfg.get("right_click_cmd", "rclone sync dst src -P --fast-list"))
     right_entry.pack()
     
@@ -461,7 +461,7 @@ def edit_command(key):
 def add_command():
     add_win = tk.Toplevel(ROOT)
     add_win.title("Add New Command")
-    add_win.geometry("400x350")
+    add_win.geometry("500x450")
     add_win.configure(bg="#1D2027")
     
     tk.Label(add_win, text="Name (key):", bg="#1D2027", fg="white").pack(pady=5)
