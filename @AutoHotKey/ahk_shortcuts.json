@@ -86,7 +86,7 @@
             "category": "Launch",
             "description": "",
             "hotkey": "#x",
-            "action": "Run('pythonw \"C:\\@delta\\db\\@run_from_db\\Script_Manager\\script_manager_gui_qt.py\"')\nWinWait(\"SCRIPT // MANAGER\")\nWinActivate(\"SCRIPT // MANAGER\")",
+            "action": "RestartScriptManager()\nRestartScriptManager() {\n    ; Check if the window exists\n    if WinExist(\"SCRIPT // MANAGER\") {\n        ; Get the process ID of the window\n        ProcessID := WinGetPID(\"SCRIPT // MANAGER\")\n        ; Kill the process\n        Run(\"taskkill /f /pid \" ProcessID, , \"Hide\")\n        ; Wait a moment for the process to close\n        Sleep(500)\n    }\n    ; Launch the script\n    Run('pythonw \"C:\\@delta\\db\\@run_from_db\\Script_Manager\\script_manager_gui_qt.py\"')\n    WinWait(\"SCRIPT // MANAGER\")\n    WinActivate(\"SCRIPT // MANAGER\")\n}",
             "enabled": true
         },
         {
@@ -457,8 +457,8 @@
         {
             "name": "Macro Recorder (Vim Style)",
             "category": "System",
-            "description": "Alt+Q to Record/Stop, Alt+W to Playback",
-            "action": ";! Macro Recorder Logic\nGlobal MacroBuffer := []\nGlobal IsRecordingMacro := false\n\n; Use a dedicated InputHook to capture all keys including modifiers\nGlobal MacroHook := InputHook(\"V\")\nMacroHook.KeyOpt(\"{All}\", \"N\")\nMacroHook.OnKeyDown := (hook, vk, sc) => MacroBuffer.Push(\"{vk\" . Format(\"{:X}\", vk) . \"sc\" . Format(\"{:X}\", sc) . \"}\")\n\n!q:: { ; Alt+Q to toggle recording\n    Global IsRecordingMacro, MacroBuffer\n    if !IsRecordingMacro {\n        MacroBuffer := []\n        IsRecordingMacro := true\n        MacroHook.Start()\n        ToolTip(\"● RECORDING MACRO\")\n        SetTimer(() => ToolTip(), -1000)\n    } else {\n        MacroHook.Stop()\n        IsRecordingMacro := false\n        ; Remove the last key (the Alt+Q that stopped the recording)\n        if MacroBuffer.Length > 0\n            MacroBuffer.Pop()\n        ToolTip(\"■ MACRO SAVED\")\n        SetTimer(() => ToolTip(), -1000)\n    }\n}\n\n!w:: { ; Alt+W to Playback\n    Global IsRecordingMacro, MacroBuffer\n    if IsRecordingMacro || MacroBuffer.Length == 0\n        return\n    \n    ToolTip(\"▶ PLAYING\")\n    SetTimer(() => ToolTip(), -500)\n    \n    ; Play back with small delay for stability\n    for key in MacroBuffer {\n        SendEvent(key)\n        Sleep(5)\n    }\n}",
+            "description": "Ctrl+R to Record/Stop, Ctrl+E to Playback",
+            "action": ";! Macro Recorder Logic\nGlobal MacroBuffer := []\nGlobal IsRecordingMacro := false\n\n; Use a dedicated InputHook to capture all keys including modifiers\nGlobal MacroHook := InputHook(\"V\")\nMacroHook.KeyOpt(\"{All}\", \"N\")\nMacroHook.OnKeyDown := (hook, vk, sc) => MacroBuffer.Push(\"{vk\" . Format(\"{:X}\", vk) . \"sc\" . Format(\"{:X}\", sc) . \"}\")\n\n^r:: { ; Ctrl+R to toggle recording\n    Global IsRecordingMacro, MacroBuffer\n    if !IsRecordingMacro {\n        MacroBuffer := []\n        IsRecordingMacro := true\n        MacroHook.Start()\n        ToolTip(\"● RECORDING MACRO\")\n        SetTimer(() => ToolTip(), -1000)\n    } else {\n        MacroHook.Stop()\n        IsRecordingMacro := false\n        ; Remove the last key (the Ctrl+R that stopped the recording)\n        if MacroBuffer.Length > 0\n            MacroBuffer.Pop()\n        ToolTip(\"■ MACRO SAVED\")\n        SetTimer(() => ToolTip(), -1000)\n    }\n}\n\n^e:: { ; Ctrl+E to Playback\n    Global IsRecordingMacro, MacroBuffer\n    if IsRecordingMacro || MacroBuffer.Length == 0\n        return\n    \n    ToolTip(\"▶ PLAYING\")\n    SetTimer(() => ToolTip(), -500)\n    \n    ; Play back with small delay for stability\n    for key in MacroBuffer {\n        SendEvent(key)\n        Sleep(5)\n    }\n}",
             "enabled": true
         },
         {
