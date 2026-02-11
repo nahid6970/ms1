@@ -568,6 +568,8 @@ def check_single_item(label, cfg):
 # Global check cycle management
 check_cycle_running = False
 last_check_time = {}
+pending_checks = 0
+check_lock = threading.Lock()
 
 def start_global_countdown():
     """Start a global countdown timer for all items"""
@@ -581,44 +583,126 @@ def start_global_countdown():
             print(f"\n{'='*60}")
             print(f"⏰ Check interval reached - Starting new check cycle")
             print(f"{'='*60}")
-            # Trigger all checks
-            for widget in ROOT1.winfo_children():
-                if isinstance(widget, tk.Label) and hasattr(widget, 'trigger_check'):
-                    widget.trigger_check()
-            # Start countdown again
-            start_global_countdown()
+            # Trigger all checks and wait for completion
+            trigger_all_checks_and_wait()
     
     countdown(check_interval_sec)
 
+def trigger_all_checks_and_wait():
+    """Trigger all checks and wait for them to complete before starting countdown"""
+    global pending_checks
+    
+    # Count how many checks we need to run
+    with check_lock:
+        pending_checks = 0
+        for widget in ROOT1.winfo_children():
+            if isinstance(widget, tk.Label) and hasattr(widget, 'trigger_check'):
+                pending_checks += 1
+    
+    if pending_checks == 0:
+        # No items to check, start countdown immediately
+        start_global_countdown()
+        return
+    
+    # Trigger all checks
+    for widget in ROOT1.winfo_children():
+        if isinstance(widget, tk.Label) and hasattr(widget, 'trigger_check'):
+            widget.trigger_check()
+    
+    # Wait for all checks to complete
+    check_completion()
+
+def check_completion():
+    """Check if all checks are done, verify all GREEN, then start countdown"""
+    global pending_checks
+    
+    with check_lock:
+        if pending_checks <= 0:
+            # All checks complete, now verify all items are GREEN
+            has_red = False
+            for widget in ROOT1.winfo_children():
+                if isinstance(widget, tk.Label) and widget.cget('fg') == 'red':
+                    has_red = True
+                    break
+            
+            if has_red:
+                print(f"\n⚠️  Some items still RED after sync, waiting...")
+                # Wait a bit more for syncs to complete
+                ROOT.after(2000, check_completion)
+            else:
+                print(f"\n{'='*60}")
+                print(f"✅ All items GREEN - Starting countdown")
+                print(f"{'='*60}\n")
+                start_global_countdown()
+            return
+    
+    # Check again in 500ms
+    ROOT.after(500, check_completion)
+
+def mark_check_complete():
+    """Mark one check as complete"""
+    global pending_checks
+    with check_lock:
+        pending_checks -= 1
+
 def check_and_update(label, cfg):
     def run_check():
-        log_path = os.path.join(LOG_DIR, f"{cfg['label']}_check.log")
-        actual_cmd = cfg["cmd"].replace("src", cfg["src"]).replace("dst", cfg["dst"])
-        
-        print(f"🔍 Periodic check: {cfg['label']}")
-        
-        with open(log_path, "w") as f:
-            subprocess.run(actual_cmd, shell=True, stdout=f, stderr=f)
-        
-        if os.path.exists(log_path):
-            with open(log_path, "r") as f:
-                content = f.read()
-            if "ERROR" not in content and "0 differences found" in content:
-                label.config(fg="#06de22")
-                print(f"✅ {cfg['label']}: No differences (GREEN)")
-            else:
-                label.config(fg="red")
-                print(f"❌ {cfg['label']}: Differences detected (RED)")
-                # If auto-sync on red is enabled, sync this item immediately
-                if auto_sync_enabled and auto_sync_on_red:
-                    print(f"🚀 Triggering auto-sync for {cfg['label']}...")
-                    threading.Thread(target=run_sync_for_item, args=(cfg, label), daemon=True).start()
-    
+        try:
+            log_path = os.path.join(LOG_DIR, f"{cfg['label']}_check.log")
+            actual_cmd = cfg["cmd"].replace("src", cfg["src"]).replace("dst", cfg["dst"])
+
+            print(f"🔍 Periodic check: {cfg['label']}")
+
+            with open(log_path, "w") as f:
+                subprocess.run(actual_cmd, shell=True, stdout=f, stderr=f)
+
+            if os.path.exists(log_path):
+                with open(log_path, "r") as f:
+                    content = f.read()
+
+                # Check if differences found
+                if "ERROR" not in content and "0 differences found" in content:
+                    label.config(fg="#06de22")
+                    print(f"✅ {cfg['label']}: No differences (GREEN)")
+                else:
+                    # Differences found - turn red and auto-sync
+                    label.config(fg="red")
+                    print(f"❌ {cfg['label']}: Differences detected (RED)")
+                    print(f"🚀 Auto-syncing {cfg['label']}...")
+
+                    # Auto-sync
+                    sync_log_path = os.path.join(LOG_DIR, f"{cfg['label']}_sync.log")
+                    sync_cmd = cfg.get("left_click_cmd", "rclone sync src dst -P --fast-list --log-level INFO")
+                    actual_sync_cmd = sync_cmd.replace("src", cfg["src"]).replace("dst", cfg["dst"])
+
+                    with open(sync_log_path, "w") as f:
+                        subprocess.run(actual_sync_cmd, shell=True, stdout=f, stderr=f)
+
+                    print(f"✅ Sync completed for {cfg['label']}, verifying...")
+
+                    # Check again after sync to verify
+                    with open(log_path, "w") as f:
+                        subprocess.run(actual_cmd, shell=True, stdout=f, stderr=f)
+
+                    # Read result after sync
+                    if os.path.exists(log_path):
+                        with open(log_path, "r") as f:
+                            content = f.read()
+                        if "ERROR" not in content and "0 differences found" in content:
+                            label.config(fg="#06de22")
+                            print(f"✅ {cfg['label']}: Verified - No differences after sync (GREEN)")
+                        else:
+                            label.config(fg="red")
+                            print(f"⚠️ {cfg['label']}: Still has differences after sync (RED)")
+        finally:
+            # Mark this check as complete
+            mark_check_complete()
+
     # Store the check function on the label so it can be triggered globally
     label.trigger_check = lambda: threading.Thread(target=run_check, daemon=True).start()
     
-    # Run initial check
-    threading.Thread(target=run_check, daemon=True).start()
+    # Don't run initial check here - let trigger_all_checks_and_wait handle it
+
 
 def create_gui():
     # Clear existing widgets if any (for refresh)
@@ -699,7 +783,7 @@ def create_gui():
 
 def refresh_gui():
     create_gui()
-    start_global_countdown()
+    trigger_all_checks_and_wait()
 
 # Support dragging on the main frame
 MAIN_FRAME.bind("<Button-1>", start_drag)
@@ -711,7 +795,7 @@ ROOT1.bind("<B1-Motion>", do_drag)
 create_gui()
 
 # Start global countdown timer
-start_global_countdown()
+trigger_all_checks_and_wait()
 
 # Apply topmost setting on startup
 if app_settings.get("topmost", False):
