@@ -20,6 +20,7 @@ A lightweight, customizable GUI for managing multiple rclone sync operations wit
 - **System Tray**: Minimize to tray instead of closing
 - **Reload Button**: Restart the script without closing
 - **Custom Positioning**: Configure X/Y position and window dimensions
+- **Terminal Output Viewer**: Toggle-able terminal window that displays real-time command output above the main GUI
 
 ### Configuration
 - **Width/Height**: Auto or custom window size
@@ -158,6 +159,7 @@ The application provides detailed terminal output:
 
 - **+**: Add new sync profile
 - **🕒**: Toggle auto-sync (OFF=red, ON=green with pulse)
+- **🖥️**: Toggle terminal output viewer (shows/hides terminal window above main GUI)
 - **🔄**: Reload/restart the application
 - **⚙️**: Open settings
 - **✕**: Close (or minimize to tray if enabled)

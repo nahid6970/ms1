@@ -16,6 +16,36 @@ from pystray import MenuItem as item
 import sys
 import win32gui
 import win32con
+from io import StringIO
+
+# Terminal output capture
+terminal_output = []
+terminal_window = None
+terminal_text_widget = None
+
+class OutputCapture:
+    def __init__(self, original_stdout):
+        self.original_stdout = original_stdout
+        
+    def write(self, text):
+        self.original_stdout.write(text)
+        self.original_stdout.flush()
+        if text:  # Capture all text including whitespace
+            terminal_output.append(text)
+            if len(terminal_output) > 1000:  # Keep last 1000 lines
+                terminal_output.pop(0)
+            if terminal_text_widget and terminal_text_widget.winfo_exists():
+                try:
+                    terminal_text_widget.insert(tk.END, text)
+                    terminal_text_widget.see(tk.END)
+                except:
+                    pass
+    
+    def flush(self):
+        self.original_stdout.flush()
+
+# Redirect stdout to capture
+sys.stdout = OutputCapture(sys.stdout)
 
 def calculate_time_to_appear(start_time):
     end_time = time.time()
@@ -311,6 +341,94 @@ ROOT1 = tk.Frame(MAIN_FRAME, bg="#1d2027")
 ROOT1.pack(side="left", pady=(2,2), padx=(5,1), anchor="w", fill="x")
 
 # Auto-Sync state (Handled above with persistence)
+
+def toggle_terminal_viewer():
+    global terminal_window, terminal_text_widget
+    
+    # If window exists and is visible, hide it
+    if terminal_window and terminal_window.winfo_exists():
+        terminal_window.destroy()
+        terminal_window = None
+        terminal_text_widget = None
+        return
+    
+    # Create new terminal window
+    terminal_window = tk.Toplevel(ROOT)
+    terminal_window.title("Terminal Output")
+    terminal_window.overrideredirect(True)  # Remove window decorations
+    terminal_window.configure(bg="#1D2027")
+    
+    # Create custom border
+    border_frame = tk.Frame(terminal_window, bg="#1d2027", bd=0, highlightthickness=1, highlightbackground="red")
+    border_frame.pack(fill="both", expand=True)
+    
+    # Main container
+    main_container = tk.Frame(border_frame, bg="#1D2027")
+    main_container.pack(fill="both", expand=True, padx=2, pady=2)
+    
+    # Title bar for dragging
+    title_bar = tk.Frame(main_container, bg="#2c313a", height=25)
+    title_bar.pack(fill="x", side="top")
+    title_bar.pack_propagate(False)
+    
+    title_label = tk.Label(title_bar, text="Terminal Output", bg="#2c313a", fg="white", font=("JetBrainsMono NFP", 9))
+    title_label.pack(side="left", padx=10)
+    
+    # Drag functionality for terminal window
+    def start_terminal_drag(event):
+        terminal_window._drag_data = {"x": event.x, "y": event.y}
+    
+    def do_terminal_drag(event):
+        if hasattr(terminal_window, '_drag_data'):
+            x = terminal_window.winfo_x() + event.x - terminal_window._drag_data["x"]
+            y = terminal_window.winfo_y() + event.y - terminal_window._drag_data["y"]
+            terminal_window.geometry(f"+{x}+{y}")
+    
+    title_bar.bind("<Button-1>", start_terminal_drag)
+    title_bar.bind("<B1-Motion>", do_terminal_drag)
+    title_label.bind("<Button-1>", start_terminal_drag)
+    title_label.bind("<B1-Motion>", do_terminal_drag)
+    
+    # Create frame for text widget
+    frame = tk.Frame(main_container, bg="#1D2027")
+    frame.pack(fill="both", expand=True, padx=5, pady=5)
+    
+    # Create text widget with scrollbar
+    scrollbar = tk.Scrollbar(frame)
+    scrollbar.pack(side="right", fill="y")
+    
+    terminal_text_widget = tk.Text(
+        frame,
+        bg="#0C0C0C",
+        fg="#CCCCCC",
+        font=("Consolas", 9),
+        wrap="word",
+        yscrollcommand=scrollbar.set
+    )
+    terminal_text_widget.pack(side="left", fill="both", expand=True)
+    scrollbar.config(command=terminal_text_widget.yview)
+    
+    # Insert existing output
+    for line in terminal_output:
+        terminal_text_widget.insert(tk.END, line)
+    terminal_text_widget.see(tk.END)
+    
+    # Button frame
+    btn_frame = tk.Frame(main_container, bg="#1D2027")
+    btn_frame.pack(fill="x", padx=5, pady=(0, 5))
+    
+    def clear_terminal():
+        terminal_output.clear()
+        terminal_text_widget.delete(1.0, tk.END)
+    
+    tk.Button(btn_frame, text="Clear", command=clear_terminal, bg="#2c313a", fg="white", font=("JetBrainsMono NFP", 8)).pack(side="left", padx=2)
+    tk.Button(btn_frame, text="Close", command=lambda: terminal_window.destroy(), bg="#2c313a", fg="white", font=("JetBrainsMono NFP", 8)).pack(side="right", padx=2)
+    
+    # Position above main window
+    ROOT.update_idletasks()
+    main_x = ROOT.winfo_x()
+    main_y = ROOT.winfo_y()
+    terminal_window.geometry(f"900x300+{main_x}+{main_y - 320}")
 
 def open_settings():
     settings_win = tk.Toplevel(ROOT)
@@ -750,14 +868,12 @@ def check_and_update(label, cfg):
             log_path = os.path.join(LOG_DIR, f"{cfg['label']}_check.log")
             actual_cmd = cfg["cmd"].replace("src", cfg["src"]).replace("dst", cfg["dst"])
 
-            with output_lock:
-                print(f"🔍 Periodic check -- {cfg['label']}")
-
             if app_settings.get("show_command_output"):
                 if app_settings.get("buffer_output", True):
                     # Buffered mode - collect all output then print
                     output_buffer = []
-                    output_buffer.append(f"\n{'*'*40}")
+                    output_buffer.append(f"\n🔍 Periodic check -- {cfg['label']}")
+                    output_buffer.append(f"{'*'*40}")
                     output_buffer.append(f"🛠️  CHECK COMMAND: {actual_cmd}")
                     output_buffer.append(f"{'*'*40}")
                     
@@ -775,19 +891,25 @@ def check_and_update(label, cfg):
                             print(line)
                 else:
                     # Real-time mode - print each line with project label
-                    print(f"\n{'*'*40}")
-                    print(f"🛠️  CHECK COMMAND: {actual_cmd}")
-                    print(f"{'*'*40}")
+                    with output_lock:
+                        print(f"\n🔍 Periodic check -- {cfg['label']}")
+                        print(f"{'*'*40}")
+                        print(f"🛠️  CHECK COMMAND: {actual_cmd}")
+                        print(f"{'*'*40}")
                     
                     process = subprocess.Popen(actual_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
                     with open(log_path, "w") as f:
                         for line in process.stdout:
                             f.write(line)
                             if any(x in line for x in ["ERROR", "NOTICE", "INFO", "differences found"]) and "symlink" not in line.lower():
-                                print(f"\033[42m\033[30m{cfg['label']}\033[0m > {line.strip()}")
+                                with output_lock:
+                                    print(f"\033[42m\033[30m{cfg['label']}\033[0m > {line.strip()}")
                     process.wait()
-                    print(f"{'*'*40}\n")
+                    with output_lock:
+                        print(f"{'*'*40}\n")
             else:
+                with output_lock:
+                    print(f"🔍 Periodic check -- {cfg['label']}")
                 with open(log_path, "w") as f:
                     subprocess.run(actual_cmd, shell=True, stdout=f, stderr=f)
 
@@ -816,7 +938,7 @@ def check_and_update(label, cfg):
                         if app_settings.get("buffer_output", True):
                             # Buffered mode
                             output_buffer = []
-                            output_buffer.append(f"\n{'*'*40}")
+                            output_buffer.append(f"{'*'*40}")
                             output_buffer.append(f"🛠️  SYNC COMMAND: {actual_sync_cmd}")
                             output_buffer.append(f"{'*'*40}")
                             
@@ -834,18 +956,21 @@ def check_and_update(label, cfg):
                                     print(line)
                         else:
                             # Real-time mode with project label
-                            print(f"\n{'*'*40}")
-                            print(f"🛠️  SYNC COMMAND: {actual_sync_cmd}")
-                            print(f"{'*'*40}")
+                            with output_lock:
+                                print(f"\n{'*'*40}")
+                                print(f"🛠️  SYNC COMMAND: {actual_sync_cmd}")
+                                print(f"{'*'*40}")
                             
                             process = subprocess.Popen(actual_sync_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
                             with open(sync_log_path, "w") as f:
                                 for line in process.stdout:
                                     f.write(line)
                                     if any(x in line for x in ["ERROR", "NOTICE", "INFO :", "Copied", "Deleted"]) and "symlink" not in line.lower():
-                                        print(f"\033[42m\033[30m{cfg['label']}\033[0m >> {line.strip()}")
+                                        with output_lock:
+                                            print(f"\033[42m\033[30m{cfg['label']}\033[0m >> {line.strip()}")
                             process.wait()
-                            print(f"{'*'*40}\n")
+                            with output_lock:
+                                print(f"{'*'*40}\n")
                     else:
                         with open(sync_log_path, "w") as f:
                             subprocess.run(actual_sync_cmd, shell=True, stdout=f, stderr=f)
@@ -936,6 +1061,10 @@ def create_gui():
     
     # Initialize UI state
     update_auto_sync_ui()
+
+    # Terminal Viewer Button (�)
+    btn_terminal = HoverButton(ROOT1, text="\uf120", font=("JetBrainsMono NFP", 12, "bold"), command=toggle_terminal_viewer)
+    btn_terminal.pack(side="left", padx=2)
 
     # Reload Button (🔄)
     btn_reload = HoverButton(ROOT1, text="\uf021", font=("JetBrainsMono NFP", 12, "bold"), command=lambda: os.execv(sys.executable, ['python'] + sys.argv))
