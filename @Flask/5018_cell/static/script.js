@@ -240,20 +240,8 @@ function initializeApp() {
         }
     }
 
-    // Restore single row mode
-    singleRowMode = localStorage.getItem('singleRowMode') === 'true';
-    singleRowIndex = parseInt(localStorage.getItem('singleRowIndex')) || 0;
-    const btnSingleRow = document.getElementById('btnSingleRowMode');
-    if (btnSingleRow) {
-        if (singleRowMode) {
-            btnSingleRow.classList.add('active');
-            const prevBtn = document.getElementById('btnPrevRow');
-            const nextBtn = document.getElementById('btnNextRow');
-            if (prevBtn) prevBtn.disabled = (singleRowIndex <= 0);
-            if (nextBtn) nextBtn.disabled = false; // Will be properly updated in renderTable
-        }
-    }
-
+    // Single Row Mode state is now handled per-sheet in loadData and switchSheet
+    
     // Force search recalculation when search input is focused (e.g. clicking back after editing)
     const searchInput = document.getElementById('searchInput');
     if (searchInput) {
@@ -1035,6 +1023,7 @@ async function loadData() {
         const response = await fetch('/api/data');
         tableData = await response.json();
         currentSheet = tableData.activeSheet || 0;
+        loadSingleRowState(currentSheet);
 
         // Set currentCategory to match the active sheet's category
         const sheetCategory = tableData.sheetCategories[currentSheet] || tableData.sheetCategories[String(currentSheet)] || null;
@@ -6012,6 +6001,7 @@ async function deleteSheet(index) {
 function switchSheet(index) {
     // Save current scroll position before switching (using sheet name as key)
     if (currentSheet !== index) {
+        saveSingleRowState();
         const tableContainer = document.querySelector('.table-container');
         if (tableContainer && tableData.sheets[currentSheet]) {
             const scrollPositions = JSON.parse(localStorage.getItem('sheetScrollPositions') || '{}');
@@ -6045,6 +6035,7 @@ function switchSheet(index) {
     }
 
     currentSheet = index;
+    loadSingleRowState(index);
     lastFocusedCell = null; // Reset focused cell on sheet switch
 
     // Update currentCategory to match the sheet's category
@@ -7620,6 +7611,39 @@ function toggleRowWrap() {
     }
 }
 
+function saveSingleRowState() {
+    if (!tableData.sheets[currentSheet]) return;
+    const sheetName = tableData.sheets[currentSheet].name;
+    const states = JSON.parse(localStorage.getItem('sheetSingleRowStates') || '{}');
+    states[sheetName] = {
+        mode: singleRowMode,
+        index: singleRowIndex
+    };
+    localStorage.setItem('sheetSingleRowStates', JSON.stringify(states));
+}
+
+function loadSingleRowState(index) {
+    if (!tableData.sheets[index]) return;
+    const sheetName = tableData.sheets[index].name;
+    const states = JSON.parse(localStorage.getItem('sheetSingleRowStates') || '{}');
+    const state = states[sheetName] || { mode: false, index: 0 };
+    
+    singleRowMode = state.mode;
+    singleRowIndex = state.index;
+    
+    // Update global for backward compatibility/reference
+    localStorage.setItem('singleRowMode', singleRowMode);
+    localStorage.setItem('singleRowIndex', singleRowIndex);
+    
+    // Update UI
+    const btn = document.getElementById('btnSingleRowMode');
+    if (btn) {
+        if (singleRowMode) btn.classList.add('active');
+        else btn.classList.remove('active');
+    }
+    updateSingleRowButtons();
+}
+
 function toggleSingleRowMode() {
     // Only update singleRowIndex if we are ENABLING single row mode
     // Use lastFocusedCell if available, otherwise try to find current focus
@@ -7656,6 +7680,7 @@ function toggleSingleRowMode() {
 
     localStorage.setItem('singleRowMode', singleRowMode);
     localStorage.setItem('singleRowIndex', singleRowIndex);
+    saveSingleRowState();
 
     renderTable();
     updateSingleRowButtons();
@@ -7666,6 +7691,7 @@ function prevSingleRow() {
     if (singleRowIndex > 0) {
         singleRowIndex--;
         localStorage.setItem('singleRowIndex', singleRowIndex);
+        saveSingleRowState();
         renderTable();
         updateSingleRowButtons();
     }
@@ -7677,6 +7703,7 @@ function nextSingleRow() {
     if (singleRowIndex < sheet.rows.length - 1) {
         singleRowIndex++;
         localStorage.setItem('singleRowIndex', singleRowIndex);
+        saveSingleRowState();
         renderTable();
         updateSingleRowButtons();
     }
@@ -8133,8 +8160,10 @@ function renderTable(preserveScroll = true) {
     let rowsToRender, rowIndexOffset;
     if (singleRowMode) {
         // Clamp singleRowIndex to valid range
-        if (singleRowIndex >= sheet.rows.length) singleRowIndex = sheet.rows.length - 1;
+        const oldIndex = singleRowIndex;
+        if (singleRowIndex >= sheet.rows.length) singleRowIndex = Math.max(0, sheet.rows.length - 1);
         if (singleRowIndex < 0) singleRowIndex = 0;
+        if (singleRowIndex !== oldIndex) saveSingleRowState();
 
         rowsToRender = [sheet.rows[singleRowIndex]];
         rowIndexOffset = singleRowIndex;
