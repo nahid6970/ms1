@@ -3,5 +3,6 @@
     "height": 39,
     "x": null,
     "y": 800,
-    "interval": 3600
+    "interval": 3600,
+    "minimize_to_tray": false
 }

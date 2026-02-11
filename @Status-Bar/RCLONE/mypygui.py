@@ -10,6 +10,9 @@ import time
 import tkinter as tk
 from tkinter import simpledialog, messagebox
 import json
+from PIL import Image, ImageDraw
+import pystray
+from pystray import MenuItem as item
 
 def calculate_time_to_appear(start_time):
     end_time = time.time()
@@ -46,7 +49,8 @@ def load_settings():
         "height": 39,
         "x": None,
         "y": 993,
-        "interval": 3600
+        "interval": 3600,
+        "minimize_to_tray": True
     }
     if os.path.exists(SETTINGS_PATH):
         try:
@@ -62,6 +66,45 @@ def save_settings(settings):
             json.dump(settings, f, indent=4)
     except Exception as e:
         print(f"Error saving settings: {e}")
+
+# Tray Icon logic
+tray_icon = None
+
+def create_image():
+    # Generate a simple icon
+    width = 64
+    height = 64
+    image = Image.new('RGB', (width, height), (29, 32, 39)) # Match bg color
+    dc = ImageDraw.Draw(image)
+    dc.rectangle([width // 4, height // 4, width * 3 // 4, height * 3 // 4], fill='red')
+    return image
+
+def show_window(icon=None, item=None):
+    if icon:
+        icon.stop()
+    ROOT.after(0, ROOT.deiconify)
+    ROOT.after(0, ROOT.lift)
+    ROOT.after(0, ROOT.focus_force)
+
+def quit_app(icon=None, item=None):
+    if icon:
+        icon.stop()
+    ROOT.quit()
+    os._exit(0)
+
+def setup_tray():
+    global tray_icon
+    image = create_image()
+    menu = (item('Show', show_window), item('Quit', quit_app))
+    tray_icon = pystray.Icon("rclone_gui", image, "RClone GUI", menu)
+    tray_icon.run()
+
+def on_close_click():
+    if app_settings.get("minimize_to_tray"):
+        ROOT.withdraw()
+        threading.Thread(target=setup_tray, daemon=True).start()
+    else:
+        quit_app()
 
 commands = load_commands()
 app_settings = load_settings()
@@ -201,14 +244,18 @@ def open_settings():
     i_entry.insert(0, str(app_settings["interval"]))
     i_entry.pack()
 
+    tray_var = tk.BooleanVar(value=app_settings.get("minimize_to_tray", True))
+    tk.Checkbutton(settings_win, text="Minimize to Tray on Close", variable=tray_var, bg="#1D2027", fg="white", selectcolor="#1D2027", activebackground="#1D2027", activeforeground="white").pack(pady=5)
+
     def save():
         try:
             app_settings["width"] = int(w_entry.get()) if w_entry.get() else None
             app_settings["height"] = int(h_entry.get())
             app_settings["y"] = int(y_entry.get())
             app_settings["interval"] = int(i_entry.get())
+            app_settings["minimize_to_tray"] = tray_var.get()
             save_settings(app_settings)
-            messagebox.showinfo("Success", "Settings saved. Please restart to apply geometry changes.")
+            messagebox.showinfo("Success", "Settings saved.")
             settings_win.destroy()
         except ValueError:
             messagebox.showerror("Error", "Invalid input. Use numbers.")
@@ -323,6 +370,10 @@ def create_gui():
     # Settings Button (⚙️)
     btn_settings = HoverButton(ROOT1, text="\uf013", font=("JetBrainsMono NFP", 12, "bold"), command=open_settings)
     btn_settings.pack(side="left", padx=2)
+
+    # Close Button (X)
+    btn_close = HoverButton(ROOT1, text="\uf00d", font=("JetBrainsMono NFP", 12, "bold"), command=on_close_click, hover_color="red")
+    btn_close.pack(side="left", padx=(5, 2))
 
     # Update ROOT size logic
     def adjust_width():
