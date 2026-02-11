@@ -8,6 +8,8 @@ import subprocess
 import threading
 import time
 import tkinter as tk
+from tkinter import simpledialog, messagebox
+import json
 
 def calculate_time_to_appear(start_time):
     end_time = time.time()
@@ -16,8 +18,30 @@ def calculate_time_to_appear(start_time):
 
 start_time = time.time()
 
+# Relative path for JSON file
+JSON_PATH = os.path.join(os.path.dirname(__file__), "commands.json")
+LOG_DIR = r"C:\Users\nahid\script_output\rclone"
+os.makedirs(LOG_DIR, exist_ok=True)
 
-#! Vaiables to track the position of the mouse when clicking​⁡
+def load_commands():
+    if os.path.exists(JSON_PATH):
+        try:
+            with open(JSON_PATH, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception as e:
+            print(f"Error loading JSON: {e}")
+    return {}
+
+def save_commands(commands):
+    try:
+        with open(JSON_PATH, "w", encoding="utf-8") as f:
+            json.dump(commands, f, indent=4)
+    except Exception as e:
+        print(f"Error saving JSON: {e}")
+
+commands = load_commands()
+
+#! Variables to track the position of the mouse when clicking​⁡
 drag_data = {"x": 0, "y": 0}
 
 def start_drag(event):
@@ -47,20 +71,18 @@ def set_console_title(title):
 
 def run_command(pwsh_command):
     """Run a PowerShell command in a new terminal window."""
-    # Using 'start' (Windows shell command) to open a new window
-    # Using pwsh with -NoExit so the window stays open
     subprocess.Popen(f'start pwsh -NoExit -Command "{pwsh_command}"', shell=True)
 
 class HoverButton(tk.Button):
     def __init__(self, master=None, **kw):
-        self.default_color = kw.pop('default_color', "#000000")
+        self.default_color = kw.pop('default_color', "#1d2027")
         self.hover_color = kw.pop('hover_color', "red")
         self.default_fg = kw.pop('default_fg', "#FFFFFF")
         self.hover_fg = kw.pop('hover_fg', "#000000")
         super().__init__(master, **kw)
         self.bind("<Enter>", self.on_enter)
         self.bind("<Leave>", self.on_leave)
-        self.configure(bg=self.default_color, fg=self.default_fg)
+        self.configure(bg=self.default_color, fg=self.default_fg, activebackground=self.hover_color, activeforeground=self.hover_fg, bd=0, highlightthickness=0)
 
     def on_enter(self, event):
         self.configure(bg=self.hover_color, fg=self.hover_fg)
@@ -85,117 +107,116 @@ screen_height = ROOT.winfo_screenheight()
 
 x = screen_width//2 - 1920//2
 y = 993
-ROOT.geometry(f"1920x39+{x}+{y}") #! overall size of the window
+ROOT.geometry(f"+{x}+{y}") #! overall size of the window (auto width)
 
 # Create main frame
-MAIN_FRAME = tk.Frame(BORDER_FRAME, bg="#1D2027", width=1920, height=800)
-MAIN_FRAME.pack_propagate(False)
-MAIN_FRAME.pack(pady=1, expand=True)  #! Add some padding at the top
+MAIN_FRAME = tk.Frame(BORDER_FRAME, bg="#1D2027")
+MAIN_FRAME.pack(pady=1, padx=2, expand=True, fill="both")
 
 #! ALL Boxes
 ROOT1 = tk.Frame(MAIN_FRAME, bg="#1d2027")
-ROOT1.pack(side="left", pady=(2,2),padx=(5,1),  anchor="w", fill="x")
+ROOT1.pack(side="left", pady=(2,2), padx=(5,1), anchor="w", fill="x")
 
-# Command config
-# Ensure log folder exists
-LOG_DIR = r"C:\Users\nahid\script_output\rclone"
-os.makedirs(LOG_DIR, exist_ok=True)
+# Auto-Sync state
+auto_sync_enabled = False
+auto_sync_interval = 3600 # 1 hour by default, or whatever interval you want
 
-commands = {
-    "msBackups": {
-        "cmd": "rclone check src dst --fast-list --size-only",
-        "src": "C:/@delta/msBackups",
-        "dst": "gu:/msBackups",
-        "log": f"{LOG_DIR}/msBackups_check.log",
-        "label": "\udb85\ude32"
-    },
-    "software": {
-        "cmd": "rclone check src dst --fast-list --size-only",
-        "src": "D:/software",
-        "dst": "gu:/software",
-        "log": f"{LOG_DIR}/software_check.log",
-        "label": "\uf40e"
-    },
-    "song": {
-        "cmd": "rclone check src dst --fast-list --size-only",
-        "src": "D:/song",
-        "dst": "gu:/song",
-        "log": f"{LOG_DIR}/song_check.log",
-        "label": "\uec1b"
-    },
-    "ms1": {
-        "cmd": 'rclone check src dst --fast-list --size-only --exclude ".git/**" --exclude "__pycache__/**"',
-        "src": "C:/@delta/ms1/",
-        "dst": "o0:/ms1/",
-        "log": f"{LOG_DIR}/ms1_check.log",
-        "label": "ms1",
-        "left_click_cmd": "rclone sync src dst -P --fast-list --exclude \".git/**\" --exclude \"__pycache__/**\"  --log-level INFO",
-        "right_click_cmd": "rclone sync dst src -P --fast-list"
-    },
+def toggle_auto_sync():
+    global auto_sync_enabled
+    auto_sync_enabled = not auto_sync_enabled
+    if auto_sync_enabled:
+        btn_auto.config(fg="#06de22", text="\uf017 ON")
+        threading.Thread(target=auto_sync_loop, daemon=True).start()
+    else:
+        btn_auto.config(fg="red", text="\uf017 OFF")
 
-    "Photos": {
-        "cmd": 'rclone check src dst --fast-list --size-only --exclude \".globalTrash/**\" --exclude \".stfolder/**\" --exclude \".stfolder (1)/**\"',
-        "src": "C:/Users/nahid/Pictures/",
-        "dst": "gu:/Pictures/",
-        "log": f"{LOG_DIR}/Pictures_check.log",
-        "label": "\uf03e",
-        "left_click_cmd": "rclone sync src dst -P --fast-list --track-renames --exclude \".globalTrash/**\" --exclude \".stfolder/**\" --log-level INFO",
-        "right_click_cmd": "rclone sync dst src -P --fast-list"
-    },
-}
+def auto_sync_loop():
+    while auto_sync_enabled:
+        for key, cfg in commands.items():
+            if not auto_sync_enabled: break
+            cmd = cfg.get("left_click_cmd", "rclone sync src dst -P --fast-list --log-level INFO")
+            actual_cmd = cmd.replace("src", cfg["src"]).replace("dst", cfg["dst"])
+            # Run silently in background for auto-sync
+            subprocess.run(f'pwsh -Command "{actual_cmd}"', shell=True)
+        time.sleep(auto_sync_interval)
 
-# # Show log output in Notepad
-# def on_label_click(event, cfg):
-#     try:
-#         notepadpp_path = r"C:\Program Files\Notepad++\notepad++.exe"
-#         subprocess.Popen([notepadpp_path, cfg["log"]])
-#     except Exception as e:
-#         print(f"Error opening log file for {cfg['label']}: {e}")
-
-# Show log output in Microsoft Edit in a new PowerShell terminal
 def on_label_click(event, cfg):
     try:
+        log_path = os.path.join(LOG_DIR, f"{cfg['label']}_check.log")
         subprocess.Popen([
-            "powershell", "-NoExit", "-Command", f'edit "{cfg["log"]}"'
+            "powershell", "-NoExit", "-Command", f'edit "{log_path}"'
         ], creationflags=subprocess.CREATE_NEW_CONSOLE)
     except Exception as e:
-        print(f"Error opening log file for {cfg['label']}: {e}")
+        print(f"Error opening log file: {e}")
 
 def ctrl_left_click(event, cfg):
     if event.state & 0x0004:  # Ctrl key mask
-        # Replace placeholders and run the left_click_cmd command
         cmd = cfg.get("left_click_cmd", "rclone sync src dst -P --fast-list --log-level INFO")
         actual_cmd = cmd.replace("src", cfg["src"]).replace("dst", cfg["dst"])
         run_command(actual_cmd)
 
 def ctrl_right_click(event, cfg):
     if event.state & 0x0004:  # Ctrl key mask
-        # Replace placeholders and run the right_click_cmd command
         cmd = cfg.get("right_click_cmd", "rclone sync dst src -P --fast-list")
         actual_cmd = cmd.replace("src", cfg["src"]).replace("dst", cfg["dst"])
         run_command(actual_cmd)
 
+def remove_command(key):
+    if messagebox.askyesno("Remove", f"Remove {key}?"):
+        del commands[key]
+        save_commands(commands)
+        refresh_gui()
+
+def add_command():
+    name = simpledialog.askstring("Input", "Name (key):")
+    if not name: return
+    label = simpledialog.askstring("Input", "Label (Icon/Text):")
+    src = simpledialog.askstring("Input", "Source Path:")
+    dst = simpledialog.askstring("Input", "Destination Path:")
+    if name and label and src and dst:
+        commands[name] = {
+            "cmd": "rclone check src dst --fast-list --size-only",
+            "src": src,
+            "dst": dst,
+            "label": label,
+            "left_click_cmd": "rclone sync src dst -P --fast-list --log-level INFO",
+            "right_click_cmd": "rclone sync dst src -P --fast-list"
+        }
+        save_commands(commands)
+        refresh_gui()
+
 # Periodically check using rclone
 def check_and_update(label, cfg):
     def run_check():
+        log_path = os.path.join(LOG_DIR, f"{cfg['label']}_check.log")
         actual_cmd = cfg["cmd"].replace("src", cfg["src"]).replace("dst", cfg["dst"])
-        with open(cfg["log"], "w") as f:
+        with open(log_path, "w") as f:
             subprocess.run(actual_cmd, shell=True, stdout=f, stderr=f)
-        with open(cfg["log"], "r") as f:
-            content = f.read()
-        if not "ERROR" in content:
-            label.config(text=cfg["label"], fg="#06de22")
-        else:
-            label.config(text=cfg["label"], fg="red")
-        label.after(600000, lambda: threading.Thread(target=run_check).start())  # repeat every 10 minutes
-    threading.Thread(target=run_check).start()
+        
+        if os.path.exists(log_path):
+            with open(log_path, "r") as f:
+                content = f.read()
+            if "ERROR" not in content and "0 differences found" in content:
+                label.config(fg="#06de22")
+            else:
+                label.config(fg="red")
+        
+        # Check again in 10 minutes
+        if label.winfo_exists():
+            label.after(600000, lambda: threading.Thread(target=run_check, daemon=True).start())
+    
+    threading.Thread(target=run_check, daemon=True).start()
+
+def refresh_gui():
+    for widget in ROOT1.winfo_children():
+        widget.destroy()
+    create_gui()
 
 # GUI setup
 def create_gui():
     for key, cfg in commands.items():
         lbl = tk.Label(
             ROOT1,
-            width=0,
             bg="#1d2027",
             text=cfg["label"],
             font=("JetBrainsMono NFP", 16, "bold"),
@@ -207,8 +228,29 @@ def create_gui():
         lbl.bind("<Button-1>", lambda event, c=cfg: on_label_click(event, c))           # left click
         lbl.bind("<Control-Button-1>", lambda event, c=cfg: ctrl_left_click(event, c))  # ctrl + left
         lbl.bind("<Control-Button-3>", lambda event, c=cfg: ctrl_right_click(event, c)) # ctrl + right
+        
+        # Right click to remove (without ctrl)
+        lbl.bind("<Button-3>", lambda event, k=key: remove_command(k))
 
         check_and_update(lbl, cfg)
+    
+    # Add Button
+    btn_add = HoverButton(ROOT1, text="+", font=("JetBrainsMono NFP", 14, "bold"), command=add_command, width=2)
+    btn_add.pack(side="left", padx=(10, 2))
+
+    # Auto Sync Toggle
+    global btn_auto
+    btn_auto = HoverButton(ROOT1, text="\uf017 OFF", font=("JetBrainsMono NFP", 10, "bold"), command=toggle_auto_sync, fg="red")
+    btn_auto.pack(side="left", padx=(5, 5))
+
+    # Update ROOT size
+    ROOT.update_idletasks()
+
+# Support dragging on the main frame
+MAIN_FRAME.bind("<Button-1>", start_drag)
+MAIN_FRAME.bind("<B1-Motion>", do_drag)
+ROOT1.bind("<Button-1>", start_drag)
+ROOT1.bind("<B1-Motion>", do_drag)
 
 # Call GUI init
 create_gui()
