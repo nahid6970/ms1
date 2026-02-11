@@ -104,14 +104,6 @@ def show_window(icon=None, item=None):
 def quit_app(icon=None, item=None):
     if icon:
         icon.stop()
-    
-    # Kill all rclone processes before exiting
-    print("\n⚠️ Killing all rclone processes...")
-    try:
-        subprocess.run("taskkill /F /IM rclone.exe", shell=True, capture_output=True)
-    except:
-        pass
-        
     ROOT.quit()
     os._exit(0)
 
@@ -185,9 +177,6 @@ def run_sync_for_item(cfg, label):
     print(f"\n{'='*60}")
     print(f"🔄 AUTO-SYNC TRIGGERED -- {cfg['label']}")
     print(f"{'='*60}")
-    
-    # Kill any existing rclone processes before starting new sync
-    subprocess.run("taskkill /F /IM rclone.exe", shell=True, capture_output=True)
     
     log_path = os.path.join(LOG_DIR, f"{cfg['label']}_sync.log")
     cmd = cfg.get("left_click_cmd", "rclone sync src dst -P --fast-list --log-level INFO")
@@ -743,24 +732,31 @@ def trigger_all_checks_and_wait():
     check_completion()
 
 def check_completion():
-    """Check if all checks are done, then start countdown"""
+    """Check if all checks are done, verify all GREEN, then start countdown"""
     global pending_checks
     
     with check_lock:
         if pending_checks <= 0:
-            # All checks complete
-            red_items_count = 0
+            # All checks complete, now verify all items are GREEN
+            red_items = []
             for widget in ROOT1.winfo_children():
                 if isinstance(widget, tk.Label) and widget.cget('fg') == 'red' and hasattr(widget, 'cfg'):
-                    red_items_count += 1
+                    red_items.append(widget)
             
-            if red_items_count > 0:
-                print(f"\n⚠️  {red_items_count} item(s) are still RED. Will retry in next cycle.")
-            
-            print(f"\n{'='*60}")
-            print(f"🏁 Cycle complete - Starting countdown")
-            print(f"{'='*60}\n")
-            start_global_countdown()
+            if red_items:
+                print(f"\n⚠️  {len(red_items)} item(s) still RED after sync, re-syncing...")
+                # Reset counter for red items
+                pending_checks = len(red_items)
+                # Re-trigger sync for red items
+                for widget in red_items:
+                    widget.trigger_check()
+                # Wait for completion
+                ROOT.after(500, check_completion)
+            else:
+                print(f"\n{'='*60}")
+                print(f"✅ All items GREEN - Starting countdown")
+                print(f"{'='*60}\n")
+                start_global_countdown()
             return
     
     # Check again in 500ms
@@ -773,16 +769,7 @@ def mark_check_complete():
         pending_checks -= 1
 
 def check_and_update(label, cfg):
-    label.is_checking = False
-    
     def run_check():
-        if label.is_checking:
-            return
-        label.is_checking = True
-        
-        # Kill any existing rclone processes before starting new check
-        subprocess.run("taskkill /F /IM rclone.exe", shell=True, capture_output=True)
-        
         try:
             log_path = os.path.join(LOG_DIR, f"{cfg['label']}_check.log")
             actual_cmd = cfg["cmd"].replace("src", cfg["src"]).replace("dst", cfg["dst"])
@@ -921,7 +908,6 @@ def check_and_update(label, cfg):
                             with output_lock:
                                 print(f"⚠️ {cfg['label']} -- Still has differences after sync (RED)")
         finally:
-            label.is_checking = False
             # Mark this check as complete
             mark_check_complete()
 
