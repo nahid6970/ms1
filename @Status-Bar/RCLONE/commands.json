@@ -7,7 +7,7 @@
         "left_click_cmd": "rclone sync src dst -P --fast-list --log-level INFO",
         "right_click_cmd": "rclone sync dst src -P --fast-list",
         "index": 3,
-        "enabled": false
+        "enabled": true
     },
     "software": {
         "cmd": "rclone check src dst --fast-list --size-only",
@@ -17,7 +17,7 @@
         "left_click_cmd": "rclone sync src dst -P --fast-list --log-level INFO",
         "right_click_cmd": "rclone sync dst src -P --fast-list",
         "index": 6,
-        "enabled": false
+        "enabled": true
     },
     "song": {
         "cmd": "rclone check src dst --fast-list --size-only",
@@ -27,7 +27,7 @@
         "left_click_cmd": "rclone sync src dst -P --fast-list --log-level INFO",
         "right_click_cmd": "rclone sync dst src -P --fast-list",
         "index": 5,
-        "enabled": false
+        "enabled": true
     },
     "ms1": {
         "cmd": "rclone check src dst --fast-list --size-only --exclude \".git/**\" --exclude \"__pycache__/**\"",
@@ -37,7 +37,7 @@
         "left_click_cmd": "rclone sync src dst -P --fast-list --exclude \".git/**\" --exclude \"__pycache__/**\"  --log-level INFO",
         "right_click_cmd": "rclone sync dst src -P --fast-list",
         "index": 1,
-        "enabled": false
+        "enabled": true
     },
     "Photos": {
         "cmd": "rclone check src dst --fast-list --size-only",
@@ -47,7 +47,7 @@
         "left_click_cmd": "rclone sync src dst -P --fast-list --track-renames --exclude \".globalTrash/**\" --exclude \".stfolder/**\" --log-level INFO",
         "right_click_cmd": "rclone sync dst src -P --fast-list",
         "index": 4,
-        "enabled": false
+        "enabled": true
     },
     "db": {
         "cmd": "rclone check src dst --fast-list --size-only --exclude \".git/**\" --exclude \"__pycache__/**\"",
