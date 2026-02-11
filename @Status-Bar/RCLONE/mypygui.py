@@ -18,8 +18,9 @@ def calculate_time_to_appear(start_time):
 
 start_time = time.time()
 
-# Relative path for JSON file
+# Relative path for JSON files
 JSON_PATH = os.path.join(os.path.dirname(__file__), "commands.json")
+SETTINGS_PATH = os.path.join(os.path.dirname(__file__), "settings.json")
 LOG_DIR = r"C:\Users\nahid\script_output\rclone"
 os.makedirs(LOG_DIR, exist_ok=True)
 
@@ -39,7 +40,31 @@ def save_commands(commands):
     except Exception as e:
         print(f"Error saving JSON: {e}")
 
+def load_settings():
+    default_settings = {
+        "width": None, # Auto
+        "height": 39,
+        "x": None,
+        "y": 993,
+        "interval": 3600
+    }
+    if os.path.exists(SETTINGS_PATH):
+        try:
+            with open(SETTINGS_PATH, "r", encoding="utf-8") as f:
+                return {**default_settings, **json.load(f)}
+        except Exception as e:
+            print(f"Error loading settings: {e}")
+    return default_settings
+
+def save_settings(settings):
+    try:
+        with open(SETTINGS_PATH, "w", encoding="utf-8") as f:
+            json.dump(settings, f, indent=4)
+    except Exception as e:
+        print(f"Error saving settings: {e}")
+
 commands = load_commands()
+app_settings = load_settings()
 
 #! Variables to track the position of the mouse when clicking​⁡
 drag_data = {"x": 0, "y": 0}
@@ -51,6 +76,10 @@ def start_drag(event):
 def stop_drag(event):
     drag_data["x"] = None
     drag_data["y"] = None
+    # Save new position
+    app_settings["x"] = ROOT.winfo_x()
+    app_settings["y"] = ROOT.winfo_y()
+    save_settings(app_settings)
 
 def do_drag(event):
     if drag_data["x"] is not None and drag_data["y"] is not None:
@@ -75,7 +104,7 @@ def run_command(pwsh_command):
 
 class HoverButton(tk.Button):
     def __init__(self, master=None, **kw):
-        self.default_color = kw.pop('default_color', "#1d2027")
+        self.default_color = kw.pop('default_color', "#2c313a")
         self.hover_color = kw.pop('hover_color', "red")
         self.default_fg = kw.pop('default_fg', "#FFFFFF")
         self.hover_fg = kw.pop('hover_fg', "#000000")
@@ -105,9 +134,16 @@ ROOT.option_add("*Font", default_font)
 screen_width = ROOT.winfo_screenwidth()
 screen_height = ROOT.winfo_screenheight()
 
-x = screen_width//2 - 1920//2
-y = 993
-ROOT.geometry(f"+{x}+{y}") #! overall size of the window (auto width)
+# Initial geometry from settings
+init_x = app_settings["x"] if app_settings["x"] is not None else (screen_width//2 - 1920//2)
+init_y = app_settings["y"]
+init_w = app_settings["width"] if app_settings["width"] else ""
+init_h = app_settings["height"]
+
+if init_w:
+    ROOT.geometry(f"{init_w}x{init_h}+{init_x}+{init_y}")
+else:
+    ROOT.geometry(f"+{init_x}+{init_y}")
 
 # Create main frame
 MAIN_FRAME = tk.Frame(BORDER_FRAME, bg="#1D2027")
@@ -119,7 +155,6 @@ ROOT1.pack(side="left", pady=(2,2), padx=(5,1), anchor="w", fill="x")
 
 # Auto-Sync state
 auto_sync_enabled = False
-auto_sync_interval = 3600 # 1 hour by default, or whatever interval you want
 
 def toggle_auto_sync():
     global auto_sync_enabled
@@ -138,7 +173,47 @@ def auto_sync_loop():
             actual_cmd = cmd.replace("src", cfg["src"]).replace("dst", cfg["dst"])
             # Run silently in background for auto-sync
             subprocess.run(f'pwsh -Command "{actual_cmd}"', shell=True)
-        time.sleep(auto_sync_interval)
+        time.sleep(app_settings["interval"])
+
+def open_settings():
+    settings_win = tk.Toplevel(ROOT)
+    settings_win.title("Settings")
+    settings_win.geometry("300x250")
+    settings_win.configure(bg="#1D2027")
+    
+    tk.Label(settings_win, text="Width (empty for auto):", bg="#1D2027", fg="white").pack()
+    w_entry = tk.Entry(settings_win)
+    w_entry.insert(0, str(app_settings["width"] or ""))
+    w_entry.pack()
+
+    tk.Label(settings_win, text="Height:", bg="#1D2027", fg="white").pack()
+    h_entry = tk.Entry(settings_win)
+    h_entry.insert(0, str(app_settings["height"]))
+    h_entry.pack()
+
+    tk.Label(settings_win, text="Y Position:", bg="#1D2027", fg="white").pack()
+    y_entry = tk.Entry(settings_win)
+    y_entry.insert(0, str(app_settings["y"]))
+    y_entry.pack()
+
+    tk.Label(settings_win, text="Auto-Sync Interval (sec):", bg="#1D2027", fg="white").pack()
+    i_entry = tk.Entry(settings_win)
+    i_entry.insert(0, str(app_settings["interval"]))
+    i_entry.pack()
+
+    def save():
+        try:
+            app_settings["width"] = int(w_entry.get()) if w_entry.get() else None
+            app_settings["height"] = int(h_entry.get())
+            app_settings["y"] = int(y_entry.get())
+            app_settings["interval"] = int(i_entry.get())
+            save_settings(app_settings)
+            messagebox.showinfo("Success", "Settings saved. Please restart to apply geometry changes.")
+            settings_win.destroy()
+        except ValueError:
+            messagebox.showerror("Error", "Invalid input. Use numbers.")
+
+    tk.Button(settings_win, text="Save", command=save).pack(pady=10)
 
 def on_label_click(event, cfg):
     try:
@@ -243,8 +318,22 @@ def create_gui():
     btn_auto = HoverButton(ROOT1, text="\uf017 OFF", font=("JetBrainsMono NFP", 10, "bold"), command=toggle_auto_sync, fg="red")
     btn_auto.pack(side="left", padx=(5, 5))
 
-    # Update ROOT size
-    ROOT.update_idletasks()
+    # Settings Button
+    btn_settings = HoverButton(ROOT1, text="\uf013", font=("JetBrainsMono NFP", 12, "bold"), command=open_settings)
+    btn_settings.pack(side="left", padx=(5, 5))
+
+    # Update ROOT size logic
+    def adjust_width():
+        ROOT.update_idletasks()
+        # Calculate required width based on ROOT1 content
+        req_width = ROOT1.winfo_reqwidth() + 20 # Add some padding
+        if not app_settings["width"]:
+            curr_h = app_settings["height"]
+            curr_x = ROOT.winfo_x()
+            curr_y = ROOT.winfo_y()
+            ROOT.geometry(f"{req_width}x{curr_h}+{curr_x}+{curr_y}")
+    
+    ROOT.after(100, adjust_width)
 
 # Support dragging on the main frame
 MAIN_FRAME.bind("<Button-1>", start_drag)
