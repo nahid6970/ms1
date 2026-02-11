@@ -588,9 +588,22 @@ def check_and_update(label, cfg):
                     threading.Thread(target=run_sync_for_item, args=(cfg, label), daemon=True).start()
         
         # Check again based on check_interval setting (in milliseconds)
-        check_interval_ms = app_settings.get("check_interval", 600) * 1000
+        check_interval_sec = app_settings.get("check_interval", 600)
+        check_interval_ms = check_interval_sec * 1000
+        
         if label.winfo_exists():
-            label.after(check_interval_ms, lambda: [print(f"\n{'='*60}\n⏰ Check interval reached - Starting new check cycle\n{'='*60}"), threading.Thread(target=run_check, daemon=True).start()])
+            # Countdown timer
+            def countdown(remaining):
+                if remaining > 0 and label.winfo_exists():
+                    print(f"⏱️  Next check in {remaining} seconds...", end='\r')
+                    label.after(1000, lambda: countdown(remaining - 1))
+                elif remaining == 0 and label.winfo_exists():
+                    print(f"\n{'='*60}")
+                    print(f"⏰ Check interval reached - Starting new check cycle")
+                    print(f"{'='*60}")
+                    threading.Thread(target=run_check, daemon=True).start()
+            
+            countdown(check_interval_sec)
     
     threading.Thread(target=run_check, daemon=True).start()
 
