@@ -714,16 +714,18 @@ def check_completion():
     with check_lock:
         if pending_checks <= 0:
             # All checks complete, now verify all items are GREEN
-            has_red = False
+            red_items = []
             for widget in ROOT1.winfo_children():
-                if isinstance(widget, tk.Label) and widget.cget('fg') == 'red':
-                    has_red = True
-                    break
+                if isinstance(widget, tk.Label) and widget.cget('fg') == 'red' and hasattr(widget, 'cfg'):
+                    red_items.append(widget)
             
-            if has_red:
-                print(f"\n⚠️  Some items still RED after sync, waiting...")
-                # Wait a bit more for syncs to complete
-                ROOT.after(2000, check_completion)
+            if red_items:
+                print(f"\n⚠️  Some items still RED after sync, re-syncing...")
+                # Re-trigger sync for red items
+                for widget in red_items:
+                    widget.trigger_check()
+                # Wait for completion
+                ROOT.after(500, check_completion)
             else:
                 print(f"\n{'='*60}")
                 print(f"✅ All items GREEN - Starting countdown")
@@ -761,7 +763,7 @@ def check_and_update(label, cfg):
                     with open(log_path, "w") as f:
                         for line in process.stdout:
                             f.write(line)
-                            if any(x in line for x in ["ERROR", "NOTICE", "INFO", "differences found"]):
+                            if any(x in line for x in ["ERROR", "NOTICE", "INFO", "differences found"]) and "symlink" not in line.lower():
                                 output_buffer.append(f"  > {line.strip()}")
                     process.wait()
                     output_buffer.append(f"{'*'*40}\n")
@@ -779,8 +781,8 @@ def check_and_update(label, cfg):
                     with open(log_path, "w") as f:
                         for line in process.stdout:
                             f.write(line)
-                            if any(x in line for x in ["ERROR", "NOTICE", "INFO", "differences found"]):
-                                print(f"\033[42m{cfg['label']}\033[0m > {line.strip()}")
+                            if any(x in line for x in ["ERROR", "NOTICE", "INFO", "differences found"]) and "symlink" not in line.lower():
+                                print(f"\033[42m\033[30m{cfg['label']}\033[0m > {line.strip()}")
                     process.wait()
                     print(f"{'*'*40}\n")
             else:
@@ -820,7 +822,7 @@ def check_and_update(label, cfg):
                             with open(sync_log_path, "w") as f:
                                 for line in process.stdout:
                                     f.write(line)
-                                    if any(x in line for x in ["ERROR", "NOTICE", "INFO :", "Copied", "Deleted"]):
+                                    if any(x in line for x in ["ERROR", "NOTICE", "INFO :", "Copied", "Deleted"]) and "symlink" not in line.lower():
                                         output_buffer.append(f"  >> {line.strip()}")
                             process.wait()
                             output_buffer.append(f"{'*'*40}\n")
@@ -838,8 +840,8 @@ def check_and_update(label, cfg):
                             with open(sync_log_path, "w") as f:
                                 for line in process.stdout:
                                     f.write(line)
-                                    if any(x in line for x in ["ERROR", "NOTICE", "INFO :", "Copied", "Deleted"]):
-                                        print(f"\033[42m{cfg['label']}\033[0m >> {line.strip()}")
+                                    if any(x in line for x in ["ERROR", "NOTICE", "INFO :", "Copied", "Deleted"]) and "symlink" not in line.lower():
+                                        print(f"\033[42m\033[30m{cfg['label']}\033[0m >> {line.strip()}")
                             process.wait()
                             print(f"{'*'*40}\n")
                     else:
@@ -878,6 +880,7 @@ def check_and_update(label, cfg):
 
     # Store the check function on the label so it can be triggered globally
     label.trigger_check = lambda: threading.Thread(target=run_check, daemon=True).start()
+    label.cfg = cfg  # Store config reference for re-sync
     
     # Don't run initial check here - let trigger_all_checks_and_wait handle it
 
