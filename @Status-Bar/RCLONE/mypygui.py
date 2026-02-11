@@ -1,28 +1,13 @@
 #? https://pypi.org/project/pretty-errors/
 
 from customtkinter import *
-from datetime import datetime
-from PIL import Image, ImageTk
-from pyadl import ADLManager
-from queue import Queue
 from time import strftime
-from tkinter import Label, messagebox
-from tkinter import simpledialog
-from tkinter import ttk
 import ctypes
-import filecmp
-import importlib
-import keyboard
 import os
-import psutil
-import pyautogui
 import subprocess
-import sys
 import threading
 import time
 import tkinter as tk
-import win32gui
-import win32process
 
 def calculate_time_to_appear(start_time):
     end_time = time.time()
