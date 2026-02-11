@@ -56,14 +56,18 @@ python Rclone-Status.py
    - **Label**: Display text/icon (supports Unicode/emoji)
    - **Source Path**: Source directory or remote
    - **Destination Path**: Destination directory or remote
+   - **Check Command**: Command for checking differences (supports `--exclude` flags)
    - **Left Click Command**: Command for Ctrl+Left click (default: sync src→dst)
    - **Right Click Command**: Command for Ctrl+Right click (default: sync dst→src)
    - **Display Order (Index)**: Numeric value to determine the order from left to right
+   - **Enabled**: Toggle to enable/disable this profile
 3. Click **Add**
 
 ### Editing and Duplicating Profiles
 1. Right-click on any label
 2. In the edit window:
+   - **Check Command**: Customize the check command with exclusions (e.g., `--exclude ".git/**"`)
+   - **Enabled**: Uncheck to disable the profile (item will appear dimmed and won't auto-check/sync)
    - **Save**: Update the current profile
    - **Duplicate**: Create a copy of the profile (auto-renamed with `_copy`)
    - **Delete**: Remove the profile
@@ -90,12 +94,14 @@ Stores all sync profiles:
 ```json
 {
   "profile_name": {
-    "cmd": "rclone check src dst --fast-list --size-only",
+    "cmd": "rclone check src dst --fast-list --size-only --exclude \".git/**\"",
     "src": "/path/to/source",
     "dst": "/path/to/destination",
     "label": "📁",
     "left_click_cmd": "rclone sync src dst -P --fast-list --log-level INFO",
-    "right_click_cmd": "rclone sync dst src -P --fast-list"
+    "right_click_cmd": "rclone sync dst src -P --fast-list",
+    "index": 0,
+    "enabled": true
   }
 }
 ```
@@ -135,10 +141,12 @@ The application provides detailed terminal output:
 - ✅ Success indicators (green/synced)
 - ❌ Difference indicators (red/needs sync)
 - 🔄 Auto-sync triggers with details
-- 🛠️  **Live Command Tracking**: Real-time output of rclone commands (optional)
+- 🛠️  **Live Command Tracking**: Real-time output of rclone commands (optional, buffered per project)
 - 📁 Source/destination paths
 - ⚙️ Command execution status
 - 📝 Log file locations
+
+**Note**: When "Show Command Output" is enabled, output is buffered per project to prevent mixing when multiple items sync simultaneously.
 
 ## Keyboard Shortcuts
 
@@ -161,6 +169,8 @@ The application provides detailed terminal output:
 3. **Auto-Sync**: Enable for hands-free synchronization
 4. **Logs**: Check logs when items stay red to diagnose issues
 5. **System Tray**: Enable to keep the app running in background
+6. **Exclude Folders**: Use `--exclude ".git/**"` in check commands to skip unwanted folders
+7. **Disable Items**: Uncheck "Enabled" to temporarily disable items without deleting them
 
 ## Troubleshooting
 
