@@ -51,6 +51,7 @@ def load_settings():
         "x": None,
         "y": 993,
         "interval": 3600,
+        "check_interval": 600,
         "minimize_to_tray": True,
         "auto_sync_enabled": False
     }
@@ -246,7 +247,7 @@ ROOT1.pack(side="left", pady=(2,2), padx=(5,1), anchor="w", fill="x")
 def open_settings():
     settings_win = tk.Toplevel(ROOT)
     settings_win.title("Settings")
-    settings_win.geometry("300x300")
+    settings_win.geometry("300x350")
     settings_win.configure(bg="#1D2027")
     
     tk.Label(settings_win, text="Width (empty for auto):", bg="#1D2027", fg="white").pack()
@@ -274,6 +275,11 @@ def open_settings():
     i_entry.insert(0, str(app_settings["interval"]))
     i_entry.pack()
 
+    tk.Label(settings_win, text="Check Interval (sec):", bg="#1D2027", fg="white").pack()
+    c_entry = tk.Entry(settings_win)
+    c_entry.insert(0, str(app_settings.get("check_interval", 600)))
+    c_entry.pack()
+
     tray_var = tk.BooleanVar(value=app_settings.get("minimize_to_tray", True))
     tk.Checkbutton(settings_win, text="Minimize to Tray on Close", variable=tray_var, bg="#1D2027", fg="white", selectcolor="#1D2027", activebackground="#1D2027", activeforeground="white").pack(pady=5)
 
@@ -284,6 +290,7 @@ def open_settings():
             app_settings["x"] = int(x_entry.get()) if x_entry.get() else None
             app_settings["y"] = int(y_entry.get())
             app_settings["interval"] = int(i_entry.get())
+            app_settings["check_interval"] = int(c_entry.get())
             app_settings["minimize_to_tray"] = tray_var.get()
             save_settings(app_settings)
             messagebox.showinfo("Success", "Settings saved.")
@@ -354,9 +361,10 @@ def check_and_update(label, cfg):
             else:
                 label.config(fg="red")
         
-        # Check again in 10 minutes
+        # Check again based on check_interval setting (in milliseconds)
+        check_interval_ms = app_settings.get("check_interval", 600) * 1000
         if label.winfo_exists():
-            label.after(600000, lambda: threading.Thread(target=run_check, daemon=True).start())
+            label.after(check_interval_ms, lambda: threading.Thread(target=run_check, daemon=True).start())
     
     threading.Thread(target=run_check, daemon=True).start()
 
