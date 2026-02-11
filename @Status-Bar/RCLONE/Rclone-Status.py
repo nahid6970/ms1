@@ -239,12 +239,12 @@ def update_auto_sync_ui():
             ROOT.after_cancel(pulse_id)
             pulse_id = None
         # Light green background with black text
-        btn_auto.config(text="\uf017 ON", bg="#06de22", fg="black")
+        btn_auto.config(text="\uf017 ON", bg="#06de22", fg="black", activebackground="#06de22", activeforeground="black")
     else:
         if pulse_id:
             ROOT.after_cancel(pulse_id)
             pulse_id = None
-        btn_auto.config(fg="red", text="\uf017 OFF", bg="#2c313a")
+        btn_auto.config(fg="red", text="\uf017 OFF", bg="#2c313a", activebackground="#2c313a", activeforeground="red")
 
 def pulse_effect(color_idx=0):
     global pulse_id
@@ -1054,9 +1054,9 @@ def create_gui():
     btn_add = HoverButton(ROOT1, text="+", font=("JetBrainsMono NFP", 14, "bold"), command=add_command, width=2)
     btn_add.pack(side="left", padx=2)
 
-    # Auto Sync Toggle (🕒)
+    # Auto Sync Toggle (🕒) - Use regular button to maintain state colors
     global btn_auto
-    btn_auto = HoverButton(ROOT1, text="\uf017 OFF", font=("JetBrainsMono NFP", 10, "bold"), command=toggle_auto_sync, fg="red")
+    btn_auto = tk.Button(ROOT1, text="\uf017 OFF", font=("JetBrainsMono NFP", 10, "bold"), command=toggle_auto_sync, fg="red", bg="#2c313a", bd=0, highlightthickness=0, cursor="hand2", activebackground="#2c313a", activeforeground="red")
     btn_auto.pack(side="left", padx=2)
     
     # Initialize UI state
