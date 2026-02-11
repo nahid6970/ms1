@@ -161,6 +161,8 @@ def manage_topmost():
 auto_sync_enabled = app_settings.get("auto_sync_enabled", False)
 auto_sync_on_red = app_settings.get("auto_sync_on_red", True)
 pulse_id = None
+check_cycle_running = False
+all_items = []
 
 def run_sync_for_item(cfg, label):
     """Run sync for a specific item"""
@@ -563,6 +565,31 @@ def check_single_item(label, cfg):
             label.config(fg="red")
             print(f"❌ {cfg['label']}: Differences found (RED)")
 
+# Global check cycle management
+check_cycle_running = False
+last_check_time = {}
+
+def start_global_countdown():
+    """Start a global countdown timer for all items"""
+    check_interval_sec = app_settings.get("check_interval", 600)
+    
+    def countdown(remaining):
+        if remaining > 0:
+            print(f"⏱️  Next check cycle in {remaining} seconds...", end='\r')
+            ROOT.after(1000, lambda: countdown(remaining - 1))
+        elif remaining == 0:
+            print(f"\n{'='*60}")
+            print(f"⏰ Check interval reached - Starting new check cycle")
+            print(f"{'='*60}")
+            # Trigger all checks
+            for widget in ROOT1.winfo_children():
+                if isinstance(widget, tk.Label) and hasattr(widget, 'trigger_check'):
+                    widget.trigger_check()
+            # Start countdown again
+            start_global_countdown()
+    
+    countdown(check_interval_sec)
+
 def check_and_update(label, cfg):
     def run_check():
         log_path = os.path.join(LOG_DIR, f"{cfg['label']}_check.log")
@@ -586,29 +613,18 @@ def check_and_update(label, cfg):
                 if auto_sync_enabled and auto_sync_on_red:
                     print(f"🚀 Triggering auto-sync for {cfg['label']}...")
                     threading.Thread(target=run_sync_for_item, args=(cfg, label), daemon=True).start()
-        
-        # Check again based on check_interval setting (in milliseconds)
-        check_interval_sec = app_settings.get("check_interval", 600)
-        check_interval_ms = check_interval_sec * 1000
-        
-        if label.winfo_exists():
-            # Countdown timer
-            def countdown(remaining):
-                if remaining > 0 and label.winfo_exists():
-                    print(f"⏱️  Next check in {remaining} seconds...", end='\r')
-                    label.after(1000, lambda: countdown(remaining - 1))
-                elif remaining == 0 and label.winfo_exists():
-                    print(f"\n{'='*60}")
-                    print(f"⏰ Check interval reached - Starting new check cycle")
-                    print(f"{'='*60}")
-                    threading.Thread(target=run_check, daemon=True).start()
-            
-            countdown(check_interval_sec)
     
+    # Store the check function on the label so it can be triggered globally
+    label.trigger_check = lambda: threading.Thread(target=run_check, daemon=True).start()
+    
+    # Run initial check
     threading.Thread(target=run_check, daemon=True).start()
 
 def create_gui():
     # Clear existing widgets if any (for refresh)
+    global all_items
+    all_items = []
+    
     for widget in ROOT1.winfo_children():
         widget.destroy()
 
@@ -683,6 +699,7 @@ def create_gui():
 
 def refresh_gui():
     create_gui()
+    start_check_cycles()
 
 # Support dragging on the main frame
 MAIN_FRAME.bind("<Button-1>", start_drag)
@@ -692,6 +709,7 @@ ROOT1.bind("<B1-Motion>", do_drag)
 
 # Call GUI init
 create_gui()
+start_check_cycles()
 
 # Apply topmost setting on startup
 if app_settings.get("topmost", False):
