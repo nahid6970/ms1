@@ -27,6 +27,8 @@ A lightweight, customizable GUI for managing multiple rclone sync operations wit
 - **Check Interval**: How often to check for differences (seconds)
 - **Auto-Sync Toggle**: Enable/disable automatic syncing
 - **Auto-Sync on Red**: Sync items immediately when they turn red
+- **Configurable Dialogs**: Customize width for Add/Edit windows and dimensions for the Settings window
+- **Terminal Output Tracking**: Optional real-time command output in the terminal
 - **Minimize to Tray**: Close button minimizes to system tray
 
 ## Installation
@@ -108,7 +110,11 @@ Application settings:
   "minimize_to_tray": true,
   "auto_sync_enabled": false,
   "auto_sync_on_red": true,
-  "topmost": false
+  "topmost": false,
+  "dialog_width": 550,
+  "settings_win_width": 480,
+  "settings_win_height": 700,
+  "show_command_output": true
 }
 ```
 
@@ -122,10 +128,11 @@ All logs are saved to: `C:\Users\<username>\script_output\rclone\`
 ## Terminal Output
 
 The application provides detailed terminal output:
-- 🔍 Check operations with status
+- 🔍 Check operations with status (formatted as `✅ <label> -- No differences (GREEN)`)
 - ✅ Success indicators (green/synced)
 - ❌ Difference indicators (red/needs sync)
 - 🔄 Auto-sync triggers with details
+- 🛠️  **Live Command Tracking**: Real-time output of rclone commands (optional)
 - 📁 Source/destination paths
 - ⚙️ Command execution status
 - 📝 Log file locations
