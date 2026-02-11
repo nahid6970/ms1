@@ -1,4 +1,4 @@
-# Cyberpunk UI Theme Guide
+# Cyberpunk UI Theme Guide ggggg
 
 This document outlines the visual style, color palette, and widget stylesheets used in `script_manager_gui_qt.py`. Use this guide to bootstrap new PyQt6 applications with the same Cyberpunk aesthetic.
 

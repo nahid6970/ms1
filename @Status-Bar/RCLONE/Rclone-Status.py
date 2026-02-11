@@ -720,7 +720,9 @@ def check_completion():
                     red_items.append(widget)
             
             if red_items:
-                print(f"\n⚠️  Some items still RED after sync, re-syncing...")
+                print(f"\n⚠️  {len(red_items)} item(s) still RED after sync, re-syncing...")
+                # Reset counter for red items
+                pending_checks = len(red_items)
                 # Re-trigger sync for red items
                 for widget in red_items:
                     widget.trigger_check()
