@@ -4,5 +4,6 @@
     "x": null,
     "y": 800,
     "interval": 3600,
-    "minimize_to_tray": false
+    "minimize_to_tray": false,
+    "auto_sync_enabled": false
 }

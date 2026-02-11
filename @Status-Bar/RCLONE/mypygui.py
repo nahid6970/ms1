@@ -50,7 +50,8 @@ def load_settings():
         "x": None,
         "y": 993,
         "interval": 3600,
-        "minimize_to_tray": True
+        "minimize_to_tray": True,
+        "auto_sync_enabled": False
     }
     if os.path.exists(SETTINGS_PATH):
         try:
@@ -108,6 +109,49 @@ def on_close_click():
 
 commands = load_commands()
 app_settings = load_settings()
+
+# Auto-Sync logic
+auto_sync_enabled = app_settings.get("auto_sync_enabled", False)
+pulse_id = None
+
+def toggle_auto_sync():
+    global auto_sync_enabled
+    auto_sync_enabled = not auto_sync_enabled
+    app_settings["auto_sync_enabled"] = auto_sync_enabled
+    save_settings(app_settings)
+    update_auto_sync_ui()
+    if auto_sync_enabled:
+        threading.Thread(target=auto_sync_loop, daemon=True).start()
+
+def update_auto_sync_ui():
+    global pulse_id
+    if auto_sync_enabled:
+        btn_auto.config(text="\uf017 ON")
+        pulse_effect()
+    else:
+        if pulse_id:
+            ROOT.after_cancel(pulse_id)
+            pulse_id = None
+        btn_auto.config(fg="red", text="\uf017 OFF", bg="#2c313a")
+
+def pulse_effect(color_idx=0):
+    global pulse_id
+    if not auto_sync_enabled: return
+    colors = ["#06de22", "#05a81a", "#047512", "#05a81a"]
+    btn_auto.config(fg=colors[color_idx % len(colors)])
+    pulse_id = ROOT.after(500, lambda: pulse_effect(color_idx + 1))
+
+def auto_sync_loop():
+    while auto_sync_enabled:
+        for key, cfg in commands.items():
+            if not auto_sync_enabled: break
+            cmd = cfg.get("left_click_cmd", "rclone sync src dst -P --fast-list --log-level INFO")
+            actual_cmd = cmd.replace("src", cfg["src"]).replace("dst", cfg["dst"])
+            subprocess.run(f'pwsh -Command "{actual_cmd}"', shell=True)
+        # Sleep in increments to remain responsive to toggle
+        for _ in range(app_settings["interval"]):
+            if not auto_sync_enabled: break
+            time.sleep(1)
 
 #! Variables to track the position of the mouse when clicking​⁡
 drag_data = {"x": 0, "y": 0}
@@ -196,27 +240,7 @@ MAIN_FRAME.pack(pady=1, padx=2, expand=True, fill="both")
 ROOT1 = tk.Frame(MAIN_FRAME, bg="#1d2027")
 ROOT1.pack(side="left", pady=(2,2), padx=(5,1), anchor="w", fill="x")
 
-# Auto-Sync state
-auto_sync_enabled = False
-
-def toggle_auto_sync():
-    global auto_sync_enabled
-    auto_sync_enabled = not auto_sync_enabled
-    if auto_sync_enabled:
-        btn_auto.config(fg="#06de22", text="\uf017 ON")
-        threading.Thread(target=auto_sync_loop, daemon=True).start()
-    else:
-        btn_auto.config(fg="red", text="\uf017 OFF")
-
-def auto_sync_loop():
-    while auto_sync_enabled:
-        for key, cfg in commands.items():
-            if not auto_sync_enabled: break
-            cmd = cfg.get("left_click_cmd", "rclone sync src dst -P --fast-list --log-level INFO")
-            actual_cmd = cmd.replace("src", cfg["src"]).replace("dst", cfg["dst"])
-            # Run silently in background for auto-sync
-            subprocess.run(f'pwsh -Command "{actual_cmd}"', shell=True)
-        time.sleep(app_settings["interval"])
+# Auto-Sync state (Handled above with persistence)
 
 def open_settings():
     settings_win = tk.Toplevel(ROOT)
@@ -366,6 +390,11 @@ def create_gui():
     global btn_auto
     btn_auto = HoverButton(ROOT1, text="\uf017 OFF", font=("JetBrainsMono NFP", 10, "bold"), command=toggle_auto_sync, fg="red")
     btn_auto.pack(side="left", padx=2)
+    
+    # Initialize UI state
+    update_auto_sync_ui()
+    if auto_sync_enabled:
+        threading.Thread(target=auto_sync_loop, daemon=True).start()
 
     # Settings Button (⚙️)
     btn_settings = HoverButton(ROOT1, text="\uf013", font=("JetBrainsMono NFP", 12, "bold"), command=open_settings)
