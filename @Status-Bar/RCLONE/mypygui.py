@@ -565,10 +565,12 @@ def check_single_item(label, cfg):
 
 def check_and_update(label, cfg):
     def run_check():
+        print(f"\n{'='*60}")
+        print(f"🔍 Periodic check: {cfg['label']}")
+        print(f"{'='*60}")
+        
         log_path = os.path.join(LOG_DIR, f"{cfg['label']}_check.log")
         actual_cmd = cfg["cmd"].replace("src", cfg["src"]).replace("dst", cfg["dst"])
-        
-        print(f"🔍 Periodic check: {cfg['label']}")
         
         with open(log_path, "w") as f:
             subprocess.run(actual_cmd, shell=True, stdout=f, stderr=f)
@@ -586,6 +588,8 @@ def check_and_update(label, cfg):
                 if auto_sync_enabled and auto_sync_on_red:
                     print(f"🚀 Triggering auto-sync for {cfg['label']}...")
                     threading.Thread(target=run_sync_for_item, args=(cfg, label), daemon=True).start()
+        
+        print(f"{'='*60}\n")
         
         # Check again based on check_interval setting (in milliseconds)
         check_interval_ms = app_settings.get("check_interval", 600) * 1000
