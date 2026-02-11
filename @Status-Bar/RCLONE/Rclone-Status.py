@@ -502,7 +502,29 @@ def edit_command(key):
             refresh_gui()
             edit_win.destroy()
     
+    def duplicate_item():
+        base_name = name_entry.get()
+        new_key = base_name + "_copy"
+        counter = 1
+        while new_key in commands:
+            new_key = f"{base_name}_copy_{counter}"
+            counter += 1
+        
+        commands[new_key] = {
+            "cmd": "rclone check src dst --fast-list --size-only",
+            "src": src_entry.get(),
+            "dst": dst_entry.get(),
+            "label": label_entry.get(),
+            "left_click_cmd": left_entry.get(),
+            "right_click_cmd": right_entry.get()
+        }
+        save_commands(commands)
+        refresh_gui()
+        edit_win.destroy()
+        messagebox.showinfo("Success", f"Duplicated as: {new_key}")
+
     tk.Button(button_frame, text="Save", command=save_edit, bg="#2c313a", fg="white", width=10).pack(side="left", padx=5)
+    tk.Button(button_frame, text="Duplicate", command=duplicate_item, bg="#2c313a", fg="white", width=10).pack(side="left", padx=5)
     tk.Button(button_frame, text="Delete", command=delete_item, bg="red", fg="white", width=10).pack(side="left", padx=5)
     tk.Button(button_frame, text="Cancel", command=edit_win.destroy, bg="#2c313a", fg="white", width=10).pack(side="left", padx=5)
 

@@ -38,5 +38,13 @@
         "label": "\uf03e",
         "left_click_cmd": "rclone sync src dst -P --fast-list --track-renames --exclude \".globalTrash/**\" --exclude \".stfolder/**\" --log-level INFO",
         "right_click_cmd": "rclone sync dst src -P --fast-list"
+    },
+    "db": {
+        "cmd": "rclone check src dst --fast-list --size-only",
+        "src": "C:/@delta/db/",
+        "dst": "o0:/db/",
+        "label": "db",
+        "left_click_cmd": "rclone sync src dst -P --fast-list --exclude \".git/**\" --exclude \"__pycache__/**\"  --log-level INFO",
+        "right_click_cmd": "rclone sync dst src -P --fast-list"
     }
 }

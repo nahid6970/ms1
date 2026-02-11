@@ -46,7 +46,7 @@ pip install customtkinter pillow pystray pywin32
 
 ### Running the Application
 ```bash
-python mypygui.py
+python Rclone-Status.py
 ```
 
 ### Adding a Sync Profile
@@ -60,10 +60,12 @@ python mypygui.py
    - **Right Click Command**: Command for Ctrl+Right click (default: sync dst→src)
 3. Click **Add**
 
-### Editing a Profile
+### Editing and Duplicating Profiles
 1. Right-click on any label
-2. Modify the fields
-3. Click **Save** to update or **Delete** to remove
+2. In the edit window:
+   - **Save**: Update the current profile
+   - **Duplicate**: Create a copy of the profile (auto-renamed with `_copy`)
+   - **Delete**: Remove the profile
 
 ### Auto-Sync Workflow
 1. Enable auto-sync by clicking the **🕒** button (turns green when ON)
