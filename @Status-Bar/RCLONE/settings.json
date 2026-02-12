@@ -5,7 +5,7 @@
     "y": 1040,
     "interval": 300,
     "check_interval": 120,
-    "minimize_to_tray": false,
+    "minimize_to_tray": true,
     "auto_sync_enabled": true,
     "auto_sync_on_red": true,
     "topmost": true,
