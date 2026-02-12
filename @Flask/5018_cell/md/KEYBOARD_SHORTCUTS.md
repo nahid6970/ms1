@@ -37,7 +37,6 @@ When text is selected, press F3 to open the formatter with these options:
 - **Underline** (`__text__`)
 - **Strikethrough** (`~~text~~`)
 - **Heading** (`##text##`)
-- **Small text** (`..text..`)
 - **Code** (`` `text` ``)
 - **Superscript** (`^text^`)
 - **Subscript** (`~text~`)

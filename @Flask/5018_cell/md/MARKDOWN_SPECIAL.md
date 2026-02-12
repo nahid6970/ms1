@@ -34,10 +34,6 @@
 2. Second numbered item
 ```
 
-## Small Text
-**Syntax:** `..small text..` 
-**Output:** `<span style="font-size: 0.75em;">$1</span>`
-
 ## Variable Font Size Headings
 **Syntax:** `#2#text#/#` (2x size), `#0.5#text#/#` (0.5x size)
 **Output:** `<span style="font-size: {size}em; font-weight: 600;">`
