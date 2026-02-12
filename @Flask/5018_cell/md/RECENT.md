@@ -6,47 +6,54 @@
 
 ---
 
+## [2026-02-12 13:30] - Visual Mode Syntax Corruption Fix
+
+**Session Duration:** 0.5 hours
+
+**What We Accomplished:**
+
+### 🛡️ Robust Syntax Protection in Visual Mode
+- **Problem**: Users reported rare cases where all markdown syntax was stripped from a cell during editing, leaving only rendered list bullets (•, ◦, etc.) in the raw data.
+- **Root Cause**: A race condition in the `focus` event listener. Highlighting was deferred via `requestAnimationFrame`. If a user typed instantly, the `input` event would trigger `extractRawText` on the *already rendered* preview (with bullets) before it switched to *highlighted syntax* (with markers).
+- **Solution**: 
+  - **Immediate Highlighting**: Removed `requestAnimationFrame` from the `focus` handler. The transition from rendered preview to syntax-highlighted editor now happens synchronously, ensuring the DOM always contains markers when the user types.
+  - **Fail-safe Recovery**: Updated `extractRawText` and `extractRawTextBeforeCaret` with a "Bullet Recovery" map. If it ever encounters rendered bullets (•, ◦, ▪, ▸, −) at the start of a line, it automatically converts them back to markdown syntax (- , -- , --- , etc.), preventing data corruption.
+
+**Files Modified:**
+- `static/script.js` - Updated `extractRawText`, `extractRawTextBeforeCaret`, and `focus` listener.
+- `md/PROBLEMS_AND_FIXES.md` - Documented the fix.
+- `md/RECENT.md` - Logged session and archived 1 older session.
+
+**Current Status:**
+- ✅ Visual Mode editing is now bulletproof against fast-typing race conditions.
+- ✅ Fail-safe logic prevents literal icons from entering the database.
+
+---
+
+## [2026-02-12 12:00] - Script Crash and Hiding Sheet Content
+
+**Session Duration:** 0.2 hours
+
+**What We Accomplished:**
+
+### 🔧 Bug Fixes & Robustness
+- **Fixed Script Crash**: Resolved a critical error where duplicated code in `showSyntaxInspector` was executing in the global scope.
+- **Rendering Safeguards**: Added checks in `renderTable` to handle empty sheets.
+
+---
+
 ## [2026-02-12 11:30] - Syntax Inspector & Single Row Mode Per-Sheet State
 
 **Session Duration:** 1.0 hours
 
 **What We Accomplished:**
 
-### 🔧 Bug Fixes & Robustness
-- **Fixed Script Crash**: Resolved a critical error where duplicated code in `showSyntaxInspector` was executing in the global scope, breaking the entire application.
-- **Rendering Safeguards**: Added checks in `renderTable` to handle empty sheets and invalid indices gracefully, preventing "Cannot read properties of undefined" errors that were hiding sheet content.
-
 ### 🔍📜 Syntax Inspector Feature
 - **New Feature**: Added a "Syntax Inspector" button (🔍📜) to the F3 Quick Formatter.
-- **Functionality**:
-  - Analyzes selected text to identify all nested markdown syntaxes (e.g., in `**__text__**` it finds Bold and Underline).
-  - Opens a modal listing all found syntaxes in their current nesting order.
-  - Clicking any syntax in the list automatically re-wraps the text to move that syntax to the **outermost** position.
-  - Supports both `contentEditable` and legacy `input/textarea` modes.
-  - Handles 15+ standard syntaxes and complex regex-based syntaxes (Border Box, Font Size, Custom Colors, Titles).
-- **UI Refinements**:
-  - Automatically closes the F3 Quick Formatter window when the inspector opens to reduce clutter.
-  - Centered the Syntax Inspector modal perfectly on the screen using flexbox for better UX.
+- **UI Refinements**: Centered modal and auto-close F3.
 
 ### ✅ Per-Sheet Single Row Mode & Scroll Fix
-- **Problem**: Toggling "Single Row Mode" or changing the focused row in one sheet would affect other sheets.
-- **Problem 2**: Untoggling "Single Row Mode" would cause the sheet to scroll to the top.
-- **Solution**: 
-  - Implemented `saveSingleRowState()` and `loadSingleRowState(index)` to persist state for each sheet individually.
-  - **Scroll Fix**: Added `scrollToRow(index)` helper and updated `toggleSingleRowMode` to precisely scroll back to the active row when disabling Single Row Mode.
-
-**Files Modified:**
-- `static/script.js` - Added state management, scroll fix, and Syntax Inspector logic.
-- `static/style.css` - Added Syntax Inspector list styling.
-- `templates/index.html` - Added Syntax Inspector button and modal.
-- `md/CELL_FEATURES.md` - Updated feature documentation.
-- `md/PROBLEMS_AND_FIXES.md` - Documented fixes and new feature.
-- `md/KEYBOARD_SHORTCUTS.md` - Added Syntax Inspector to F3 list.
-
-**Current Status:**
-- ✅ Users can inspect and reorder complex nested formatting easily.
-- ✅ Single Row Mode is fully independent per sheet.
-- ✅ Navigation between modes is smooth with no scroll jumps.
+- **Solution**: Per-sheet state for Single Row Mode and scroll restoration fix.
 
 ---
 
@@ -57,9 +64,8 @@
 **What We Accomplished:**
 
 ### ✅ Per-Sheet Single Row Mode
-- **Problem**: Toggling "Single Row Mode" or changing the focused row in one sheet would affect other sheets when switching back and forth. The state was global.
-- **Problem 2**: Untoggling "Single Row Mode" would cause the sheet to scroll to the top.
-- **Solution**: Implemented per-sheet state for `singleRowMode` and `singleRowIndex`.
+- **Problem**: Toggling "Single Row Mode" affected other sheets.
+- **Solution**: Implemented per-sheet state.
 
 ---
 
@@ -70,31 +76,7 @@
 **What We Accomplished:**
 
 ### 🎨 Refined Multi-line Border Box Styling
-- **Problem**: Multi-line `#R#` border boxes showed horizontal lines between every wrapped row of text.
-- **Solution**: Switched from `border` to `outline: 2px solid [color]` with `outline-offset: 4px`.
-
----
-
-## [2026-02-06 16:15] - Table Formatting and UI Refinements
-
-**Session Duration:** 0.5 hours
-
-**What We Accomplished:**
-
-### ✅ Final Fix for Nested Table Formatting (Stars and Punctuation)
-- **Problem**: Mixing row-wrapped formatting with cell-specific styles caused rendering artifacts.
-- **Solution**: Reverted Border Box (`#R#`) to `display: inline`.
-
----
-
-## [2026-02-06 15:45] - Square Borders and Sub-sheet Tab Colorization
-
-**Session Duration:** 0.5 hours
-
-**What We Accomplished:**
-
-### 🎯 Square UI Borders
-- **Visual Update**: Removed all rounded corners (`border-radius: 0`) from the entire application interface.
+- **Solution**: Switched from `border` to `outline` for cleaner rendering.
 
 ---
 

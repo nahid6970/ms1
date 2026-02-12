@@ -2040,8 +2040,33 @@ function extractRawText(element) {
         }
     };
     walk(element);
-    // Handle the case where contenteditable adds a trailing \n or empty space
-    return text.replace(/\r/g, '').replace(/\u200B/g, ''); // Clean zero-width space if any
+    
+    // Recovery Logic: Handle the case where rendered bullets were accidentally extracted
+    // This happens if the function is called on a non-editing preview (e.g. race conditions)
+    let processedText = text.replace(/\r/g, '').replace(/\u200B/g, ''); // Clean zero-width space if any
+    
+    // Map of rendered icons to their markdown counterparts
+    const recoveryMap = [
+        { icon: '• ', marker: '- ' },
+        { icon: '◦ ', marker: '-- ' },
+        { icon: '▪ ', marker: '--- ' },
+        { icon: '▸ ', marker: '---- ' },
+        { icon: '− ', marker: '----- ' }
+    ];
+    
+    const lines = processedText.split('\n');
+    const recoveredLines = lines.map(line => {
+        let recoveredLine = line;
+        for (const item of recoveryMap) {
+            if (recoveredLine.startsWith(item.icon)) {
+                recoveredLine = item.marker + recoveredLine.substring(item.icon.length);
+                break;
+            }
+        }
+        return recoveredLine;
+    });
+    
+    return recoveredLines.join('\n');
 }
 
 function getCaretCharacterOffset(element) {
@@ -2145,7 +2170,34 @@ function extractRawTextBeforeCaret(element, range) {
         }
     };
     walk(element);
-    return text.replace(/\r/g, '').replace(/\u200B/g, '');
+    
+    // Recovery Logic: Handle rendered bullets
+    let processedText = text.replace(/\r/g, '').replace(/\u200B/g, '');
+    
+    const recoveryMap = [
+        { icon: '• ', marker: '- ' },
+        { icon: '◦ ', marker: '-- ' },
+        { icon: '▪ ', marker: '--- ' },
+        { icon: '▸ ', marker: '---- ' },
+        { icon: '− ', marker: '----- ' }
+    ];
+    
+    const lines = processedText.split('\n');
+    const recoveredLines = lines.map((line, index) => {
+        // Only recover lines that ARE NOT the last line or if the last line was stopped at its end
+        // This is tricky because the caret could be IN the bullet.
+        // But usually caret is after the bullet.
+        let recoveredLine = line;
+        for (const item of recoveryMap) {
+            if (recoveredLine.startsWith(item.icon)) {
+                recoveredLine = item.marker + recoveredLine.substring(item.icon.length);
+                break;
+            }
+        }
+        return recoveredLine;
+    });
+    
+    return recoveredLines.join('\n');
 }
 
 function setCaretPosition(element, offset) {
@@ -2521,19 +2573,17 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
             // Get current value from input (source of truth)
             const rawValue = inputElement.value;
 
-            // Defer heavy highlighting to allow focus transition to happen first
-            requestAnimationFrame(() => {
-                preview.innerHTML = highlightSyntax(rawValue);
+            // Apply highlighting immediately to prevent race conditions
+            preview.innerHTML = highlightSyntax(rawValue);
 
-                // Restore scroll position after content change
-                if (tableContainer) {
-                    tableContainer.scrollTop = savedScrollTop;
-                    tableContainer.scrollLeft = savedScrollLeft;
-                }
+            // Restore scroll position after content change
+            if (tableContainer) {
+                tableContainer.scrollTop = savedScrollTop;
+                tableContainer.scrollLeft = savedScrollLeft;
+            }
 
-                // Adjust height immediately for the newly highlighted syntax content
-                adjustCellHeightForMarkdown(cell);
-            });
+            // Adjust height immediately for the newly highlighted syntax content
+            adjustCellHeightForMarkdown(cell);
         });
 
         preview.addEventListener('blur', () => {

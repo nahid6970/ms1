@@ -7,6 +7,23 @@ This document tracks historical bugs, issues, and their solutions. Use this to:
 
 ---
 
+## [2026-02-12 13:30] - Syntax Corruption in Visual Mode
+
+**Problem:** 
+Occasionally, while editing a cell in Visual Mode (ContentEditable), all markdown syntax (like `**`, `__`) would be stripped, leaving only rendered icons like bullets (`•`) in the raw data.
+
+**Root Cause:** 
+A race condition in the `focus` event listener for the markdown preview. The highlighting logic (which replaces rendered icons with raw markers for editing) was wrapped in a `requestAnimationFrame`. If a user clicked and typed extremely fast, the `input` event would fire *before* the highlighting frame completed. The `input` handler would then call `extractRawText` on the still-rendered preview, gathering literal bullets as text and saving them back to the data source.
+
+**Solution:** 
+1. **Synchronous Transition**: Removed `requestAnimationFrame` from the `focus` handler. Highlighting now happens immediately upon focus, ensuring markers are present before the first possible keystroke.
+2. **Fail-safe Recovery**: Implemented a "Bullet Recovery" mechanism in `extractRawText`. The function now checks for known rendered icons (•, ◦, ▪, ▸, −) at the start of lines and automatically converts them back to their markdown equivalents (- , -- , --- , etc.). This acts as a final layer of protection against data corruption.
+
+**Files Modified:**
+- `static/script.js` - Refactored `focus` listener and enhanced `extractRawText`.
+
+---
+
 ## [2026-02-12 12:00] - Script Crash and Hiding Sheet Content
 
 **Problem:** 
