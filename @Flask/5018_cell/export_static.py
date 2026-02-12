@@ -1850,7 +1850,7 @@ def generate_static_html(data, custom_syntaxes):
                 const char = line[i];
                 
                 // Handle escapes
-                if (char === '\\\\' && i + 1 < line.length) {
+                if (char === '\\\\\\\\' && i + 1 < line.length) {
                     currentCell += char + line[i+1];
                     i += 2;
                     continue;
@@ -2360,32 +2360,32 @@ def generate_static_html(data, custom_syntaxes):
             });
 
             // List support in cells (-, --, ---, ----, -----)
-            // We split by <br> or \n, process each, and rejoin
             if (formatted.indexOf('- ') !== -1 || formatted.indexOf('. ') !== -1) {
-                const lines = formatted.split(/<br>|\\n/g);
-                formatted = lines.map(function(line) {
-                    const trimmed = line.trim();
-                    
-                    // Bullet lists
-                    const listMatch = trimmed.match(/^(\-{1,5})\s/);
+                var newlineChar = String.fromCharCode(10);
+                var lines = formatted.replace(/<br>/g, newlineChar).split(newlineChar);
+                var recovered = [];
+                for (var i = 0; i < lines.length; i++) {
+                    var line = lines[i];
+                    var trimmed = line.trim();
+                    var listMatch = trimmed.match(/^(\\-{1,5})\\s/);
                     if (listMatch) {
-                        const markerLength = listMatch[1].length;
-                        const icons = ['•', '◦', '▪', '▸', '−'];
-                        const icon = icons[markerLength - 1] || '•';
-                        const content = line.replace(/^\s*(\-{1,5})\s/, '');
-                        return '<span style="display: inline-block; width: 100%; box-sizing: border-box; padding-left: ' + markerLength + 'em; text-indent: -1em; white-space: pre-wrap;"><span style="display: inline-block; width: 1em; text-indent: 0;">' + icon + '</span>' + content + '</span>';
+                        var markerLength = listMatch[1].length;
+                        var icons = ['•', '◦', '▪', '▸', '−'];
+                        var icon = icons[markerLength - 1] || '•';
+                        var content = line.replace(/^\\s*(\\-{1,5})\\s/, '');
+                        recovered.push('<span style="display: inline-block; width: 100%; box-sizing: border-box; padding-left: ' + markerLength + 'em; text-indent: -1em; white-space: pre-wrap;"><span style="display: inline-block; width: 1em; text-indent: 0;">' + icon + '</span>' + content + '</span>');
+                    } else {
+                        var numMatch = trimmed.match(/^(\\d+\\.\\s)(.+)$/);
+                        if (numMatch) {
+                            var number = numMatch[1];
+                            var contentPart = numMatch[2];
+                            recovered.push('<span style="display: inline-block; width: 100%; box-sizing: border-box; padding-left: 2em; text-indent: -2em; white-space: pre-wrap;"><span style="display: inline-block; width: 2em; text-indent: 0;">' + number + '</span>' + contentPart + '</span>');
+                        } else {
+                            recovered.push(line);
+                        }
                     }
-                    
-                    // Numbered lists
-                    const numMatch = trimmed.match(/^(\d+\.\s)(.+)$/);
-                    if (numMatch) {
-                        const number = numMatch[1];
-                        const content = numMatch[2];
-                        return '<span style="display: inline-block; width: 100%; box-sizing: border-box; padding-left: 2em; text-indent: -2em; white-space: pre-wrap;"><span style="display: inline-block; width: 2em; text-indent: 0;">' + number + '</span>' + content + '</span>';
-                    }
-                    
-                    return line;
-                }).join('<br>');
+                }
+                formatted = recovered.join('<br>');
             }
 
             // Apply custom color syntaxes
@@ -3798,7 +3798,7 @@ def generate_static_html(data, custom_syntaxes):
             </div>
         </div>
     </div>
-</body>
+
     <!-- F1 Navigation Modal -->
     <div id="f1Modal" class="modal" style="display: none;">
         <div class="modal-content f1-modal">
