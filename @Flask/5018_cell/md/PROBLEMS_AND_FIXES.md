@@ -7,6 +7,32 @@ This document tracks historical bugs, issues, and their solutions. Use this to:
 
 ---
 
+## [2026-02-12 16:30] - List Formatting Not Updating in Edit Mode
+
+**Problem:** 
+When editing markdown cells with list items (e.g., `- item1`, `- item2`, `- item3`) and using backspace or delete to join multiple list lines into a single line, the visual display (list indentation styling) would not update immediately. The formatting only updated after exiting edit mode (blur event).
+
+**Root Cause:** 
+The `input` event handler in `applyMarkdownFormatting()` was intentionally not re-rendering content on every keystroke to avoid cursor jumping issues. The comment stated "DON'T re-render on every keystroke - the browser already updated the DOM." However, this prevented the `highlightSyntax()` function from being called when structural changes occurred (like line breaks being deleted), so line-based formatting like list indentation wouldn't update until blur.
+
+**Solution:** 
+1. Added smart re-rendering logic that detects when the line count changes (lines are joined or split).
+2. Uses regex pattern `/^(\-{1,5})\s/m` with multiline flag to detect list formatting anywhere in the content.
+3. Only triggers re-render when BOTH conditions are met:
+   - Line count has changed (detected by counting `\n` characters)
+   - Content contains special formatting (lists, pipe tables, or comma tables)
+4. Preserves cursor position during re-render using `getCaretCharacterOffset()` before and `setCaretPosition()` after the `highlightSyntax()` call.
+5. This ensures list indentation, table styling, and other line-based formatting updates immediately during editing without causing cursor jumping.
+
+**Files Modified:**
+- `static/script.js` - Updated `preview.addEventListener('input')` handler in `applyMarkdownFormatting()` function (around line 2610-2645)
+
+**Related Issues:**
+- This fix maintains the performance benefit of not re-rendering on every keystroke while solving the visual update issue for structural changes.
+- The regex check is more robust than the previous string includes check.
+
+---
+
 ## [2026-02-12 15:00] - Intelligent Scroll Memory in Single Row Mode
 
 **Problem:** 

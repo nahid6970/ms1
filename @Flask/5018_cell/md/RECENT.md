@@ -6,6 +6,38 @@
 
 ---
 
+## [2026-02-12 16:30] - List Line Joining Visual Update Fix
+
+**Session Duration:** 0.2 hours
+
+**What We Accomplished:**
+
+### 🐛 Fixed List Line Joining Not Updating Visually
+- **Problem**: When editing list items (e.g., `- item1`, `- item2`) and using backspace/delete to join them into one line, the visual display wouldn't update until exiting edit mode.
+- **Root Cause**: The `input` event handler wasn't re-rendering the content when structural changes occurred. The comment said "DON'T re-render on every keystroke" to avoid cursor jumping, but this caused list indentation styling to not update when line breaks were removed.
+- **Solution**: 
+  - Added smart detection for when line count changes (lines joined/split).
+  - Used regex `/^(\-{1,5})\s/m` to detect list markers (1-5 dashes followed by space).
+  - When line count changes AND content has special formatting (lists, tables), re-render with `highlightSyntax()`.
+  - Preserved cursor position during re-render using `getCaretCharacterOffset()` and `setCaretPosition()`.
+- **Result**: List indentation styling now updates immediately when joining/splitting lines, providing instant visual feedback.
+
+**Files Modified:**
+- `static/script.js` - Updated input event handler in `applyMarkdownFormatting()` (~10 lines)
+
+**Technical Details:**
+- **Detection**: Tracks `_previousLineCount` on the preview element to detect structural changes
+- **Regex Pattern**: `/^(\-{1,5})\s/m` matches list markers at start of any line (multiline flag)
+- **Cursor Preservation**: Saves character offset before re-render, restores after
+- **Performance**: Only re-renders when necessary (line count changes + special formatting present)
+
+**Current Status:**
+- ✅ List line joining updates immediately in edit mode
+- ✅ Cursor position preserved during re-render
+- ✅ No performance impact on regular typing
+
+---
+
 ## [2026-02-12 15:00] - Reliable Scroll & Navigation Fixes (Final)
 
 **Session Duration:** 0.5 hours
@@ -62,17 +94,6 @@
 
 ### 🛡️ Robust Syntax Protection
 - **Solution**: Immediate highlighting on focus and fail-safe bullet recovery.
-
----
-
-## [2026-02-12 12:00] - Script Crash and Hiding Sheet Content
-
-**Session Duration:** 0.2 hours
-
-**What We Accomplished:**
-
-### 🔧 Bug Fixes & Robustness
-- **Solution**: Fixed duplicated code error and added rendering safeguards.
 
 ---
 
