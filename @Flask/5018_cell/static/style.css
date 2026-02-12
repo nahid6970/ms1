@@ -4989,3 +4989,34 @@ ll Rank Badge */
     overflow-y: auto;
     overflow-x: hidden;
 }
+.syntax-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.syntax-list-item:hover {
+    background: #e9ecef;
+    border-color: #007bff;
+}
+
+.syntax-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    color: #333;
+}
+
+.syntax-markers {
+    font-size: 12px;
+    color: #666;
+    background: #eee;
+    padding: 2px 6px;
+    border-radius: 3px;
+}

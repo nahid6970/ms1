@@ -7,6 +7,30 @@ This document tracks historical bugs, issues, and their solutions. Use this to:
 
 ---
 
+## [2026-02-12 11:30] - Syntax Reordering and Single Row Mode Scroll Fix
+
+**Problem 1: Formatting Nesting Control**
+Users had no easy way to change the nesting order of markdown syntaxes (e.g., changing `**__text__**` to `__**text**__`). Manually deleting and retyping markers was error-prone and tedious for complex nested formats.
+
+**Problem 2: Single Row Mode Scroll Jump**
+Untoggling "Single Row Mode" caused the table to jump to the top, losing the user's position on the specific row they were focusing on.
+
+**Solution 1: Syntax Inspector**
+- Added a "Syntax Inspector" (🔍📜) to the F3 formatter.
+- It recursively strips paired markers from the selection edges to identify all wrapping syntaxes.
+- Provides a UI list where clicking a syntax rebuilds the string with that syntax as the outermost pair, preserving the core text and all other inner syntaxes.
+
+**Solution 2: Precise Scroll Restoration**
+- Created `scrollToRow(index)` which uses `getBoundingClientRect` and `scrollTop` adjustments to bring a specific row into the center of the viewport instantly.
+- Integrated this into `toggleSingleRowMode` when disabling the mode.
+
+**Files Modified:**
+- `static/script.js` - `inspectSyntaxes`, `moveSyntaxToFirst`, `scrollToRow`, `toggleSingleRowMode`.
+- `static/style.css` - `.syntax-list-item`, `.syntax-name`, `.syntax-markers`.
+- `templates/index.html` - F3 button and Inspector modal.
+
+---
+
 ## [2026-02-11 10:30] - Single Row Mode State Leaking Between Sheets
 
 **Problem:** 

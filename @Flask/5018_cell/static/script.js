@@ -14769,6 +14769,183 @@ function removeFormatting(event) {
     showToast('Formatting removed', 'success');
 }
 
+// Syntax Inspector Implementation
+function showSyntaxInspector(event) {
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+
+    if (!quickFormatterTarget) return;
+
+    let selectedText = '';
+    if (quickFormatterSelection.isContentEditable) {
+        selectedText = quickFormatterSelection.text || '';
+    } else {
+        selectedText = quickFormatterTarget.value.substring(
+            quickFormatterSelection.start,
+            quickFormatterSelection.end
+        );
+    }
+
+    if (!selectedText) {
+        showToast('Please select text with syntax first', 'warning');
+        return;
+    }
+
+    const foundSyntaxes = inspectSyntaxes(selectedText);
+    
+    if (foundSyntaxes.length === 0) {
+        showToast('No syntaxes found in selection', 'info');
+        return;
+    }
+
+    const syntaxList = document.getElementById('syntaxList');
+    syntaxList.innerHTML = '';
+
+    foundSyntaxes.forEach((syntax, index) => {
+        const item = document.createElement('div');
+        item.className = 'syntax-list-item';
+        item.onclick = () => moveSyntaxToFirst(index, foundSyntaxes, selectedText);
+        
+        const label = document.createElement('span');
+        label.className = 'syntax-name';
+        label.textContent = syntax.name;
+        
+        const markers = document.createElement('span');
+        markers.className = 'syntax-markers';
+        markers.textContent = `${syntax.prefix} ... ${syntax.suffix}`;
+        
+        item.appendChild(label);
+        item.appendChild(markers);
+        syntaxList.appendChild(item);
+    });
+
+    document.getElementById('syntaxInspectorModal').style.display = 'block';
+}
+
+function closeSyntaxInspectorModal() {
+    document.getElementById('syntaxInspectorModal').style.display = 'none';
+}
+
+function inspectSyntaxes(text) {
+    const syntaxes = [
+        { name: 'Bold', prefix: '**', suffix: '**' },
+        { name: 'Italic', prefix: '@@', suffix: '@@' },
+        { name: 'Underline', prefix: '__', suffix: '__' },
+        { name: 'Strikethrough', prefix: '~~', suffix: '~~' },
+        { name: 'Heading', prefix: '##', suffix: '##' },
+        { name: 'Small', prefix: '..', suffix: '..' },
+        { name: 'Wavy Underline', prefix: '_.', suffix: '._' },
+        { name: 'Code', prefix: '`', suffix: '`' },
+        { name: 'Highlight', prefix: '==', suffix: '==' },
+        { name: 'Red Highlight', prefix: '!!', suffix: '!!' },
+        { name: 'Blue Highlight', prefix: '??', suffix: '??' },
+        { name: 'Superscript', prefix: '^', suffix: '^' },
+        { name: 'Subscript', prefix: '~', suffix: '~' },
+        { name: 'Hidden', prefix: '{{{', suffix: '}}}' },
+        { name: 'Correct Answer', prefix: '[[', suffix: ']]' }
+    ];
+
+    // Add regex-based syntaxes
+    const regexSyntaxes = [
+        { name: 'Border Box', prefixRegex: /#([A-Z]+)#/, suffix: '#/#' },
+        { name: 'Font Size', prefixRegex: /#([\d.]+)#/, suffix: '#/#' },
+        { name: 'Text Stroke', prefixRegex: /ŝŝ([\d.]+:)?/, suffix: 'ŝŝ' },
+        { name: 'Custom Color', prefixRegex: /\{[^}]+\}/, suffix: '{/}' },
+        { name: 'Title', prefixRegex: /:::(?:[A-Za-z0-9_#.-]+:::)?/, suffix: ':::' }
+    ];
+
+    let results = [];
+    let currentText = text;
+
+    // We want to find paired syntaxes that wrap the core text
+    // E.g. **__text__** should find Bold and Underline
+    
+    let found = true;
+    while (found) {
+        found = false;
+        
+        // Check standard syntaxes
+        for (const s of syntaxes) {
+            if (currentText.startsWith(s.prefix) && currentText.endsWith(s.suffix)) {
+                results.push(s);
+                currentText = currentText.substring(s.prefix.length, currentText.length - s.suffix.length);
+                found = true;
+                break;
+            }
+        }
+        
+        if (found) continue;
+        
+        // Check regex syntaxes
+        for (const s of regexSyntaxes) {
+            const prefixMatch = currentText.match(new RegExp('^' + s.prefixRegex.source));
+            if (prefixMatch && currentText.endsWith(s.suffix)) {
+                const prefix = prefixMatch[0];
+                results.push({ name: s.name, prefix: prefix, suffix: s.suffix });
+                currentText = currentText.substring(prefix.length, currentText.length - s.suffix.length);
+                found = true;
+                break;
+            }
+        }
+    }
+
+    return results;
+}
+
+function moveSyntaxToFirst(selectedIndex, foundSyntaxes, originalSelectedText) {
+    const syntaxToMove = foundSyntaxes[selectedIndex];
+    
+    // Get the core text (without any of the identified syntaxes)
+    let coreText = originalSelectedText;
+    foundSyntaxes.forEach(s => {
+        coreText = coreText.substring(s.prefix.length, coreText.length - s.suffix.length);
+    });
+    
+    // Rebuild the text with the selected syntax outermost
+    let newFormattedText = coreText;
+    
+    // Add all other syntaxes first (innermost)
+    foundSyntaxes.forEach((s, idx) => {
+        if (idx !== selectedIndex) {
+            newFormattedText = s.prefix + newFormattedText + s.suffix;
+        }
+    });
+    
+    // Add the selected syntax last (outermost)
+    newFormattedText = syntaxToMove.prefix + newFormattedText + syntaxToMove.suffix;
+    
+    // Apply the new text to the document
+    const input = quickFormatterTarget;
+    if (quickFormatterSelection.isContentEditable) {
+        const range = quickFormatterSelection.range;
+        range.deleteContents();
+        const textNode = document.createTextNode(newFormattedText);
+        range.insertNode(textNode);
+
+        // Update the underlying input value
+        const rawText = extractRawText(input);
+        const actualInput = input.previousElementSibling;
+        if (actualInput && (actualInput.tagName === 'INPUT' || actualInput.tagName === 'TEXTAREA')) {
+            actualInput.value = rawText;
+            const changeEvent = new Event('input', { bubbles: true });
+            actualInput.dispatchEvent(changeEvent);
+        }
+    } else {
+        const start = quickFormatterSelection.start;
+        const end = quickFormatterSelection.end;
+        const fullValue = input.value;
+        input.value = fullValue.substring(0, start) + newFormattedText + fullValue.substring(end);
+        const changeEvent = new Event('input', { bubbles: true });
+        input.dispatchEvent(changeEvent);
+    }
+    
+    closeSyntaxInspectorModal();
+    closeQuickFormatter();
+    showToast(`Moved ${syntaxToMove.name} to outermost position`, 'success');
+}
+
 // ==========================================
 // PDF EXPORT FEATURE
 // ==========================================

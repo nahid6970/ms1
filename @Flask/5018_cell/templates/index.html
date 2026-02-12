@@ -1136,6 +1136,9 @@
             <button class="format-btn" onclick="removeFormatting(event)" title="Remove All Formatting">
                 🧹
             </button>
+            <button class="format-btn" onclick="showSyntaxInspector(event)" title="Inspect & Reorder Syntaxes">
+                🔍📜
+            </button>
         </div>
 
         <div class="quick-formatter-separator"></div>
@@ -1241,6 +1244,22 @@
     <!-- Recent Edits Popup (Moved to body to avoid overflow clipping) -->
     <div id="lastEditedPopup" class="recent-edits-popup">
         <!-- Content injected via JS -->
+    </div>
+
+    <!-- Syntax Inspector Modal -->
+    <div id="syntaxInspectorModal" class="modal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h2>Syntax Inspector</h2>
+                <span class="close" onclick="closeSyntaxInspectorModal()">&times;</span>
+            </div>
+            <div id="syntaxList" class="syntax-list" style="padding: 15px; max-height: 400px; overflow-y: auto;">
+                <!-- Syntax items will be listed here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeSyntaxInspectorModal()">Close</button>
+            </div>
+        </div>
     </div>
 
     <script src="{{ url_for('static', filename='script.js') }}"></script>
