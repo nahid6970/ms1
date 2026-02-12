@@ -1699,6 +1699,7 @@ def generate_static_html(data, custom_syntaxes):
                         cellValue.trim().startsWith('- ') || 
                         cellValue.trim().startsWith('-- ') || 
                         cellValue.trim().startsWith('--- ') ||
+                        cellValue.trim().startsWith('* ') ||
                         cellValue.match(/^\\\\d+\\\\.\\\\s/m) ||
                         cellValue.includes('\\\\n') ||
                         cellValue.match(/Table\\\\*\\\\d+/i) ||
