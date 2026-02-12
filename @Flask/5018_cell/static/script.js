@@ -8179,7 +8179,7 @@ function renderTable(preserveScroll = true) {
 
     // Determine which rows to render based on Single Row Mode
     let rowsToRender, rowIndexOffset;
-    if (singleRowMode) {
+    if (singleRowMode && sheet.rows.length > 0) {
         // Clamp singleRowIndex to valid range
         const oldIndex = singleRowIndex;
         if (singleRowIndex >= sheet.rows.length) singleRowIndex = Math.max(0, sheet.rows.length - 1);
@@ -8188,6 +8188,9 @@ function renderTable(preserveScroll = true) {
 
         rowsToRender = [sheet.rows[singleRowIndex]];
         rowIndexOffset = singleRowIndex;
+    } else if (singleRowMode && sheet.rows.length === 0) {
+        rowsToRender = [];
+        rowIndexOffset = 0;
     } else {
         rowsToRender = sheet.rows;
         rowIndexOffset = 0;
@@ -8195,6 +8198,8 @@ function renderTable(preserveScroll = true) {
 
     // Render rows
     rowsToRender.forEach((row, loopIndex) => {
+        if (!row) return; // Safeguard against undefined rows
+        
         const rowIndex = singleRowMode ? singleRowIndex : loopIndex;
         const tr = document.createElement('tr');
 
@@ -14800,6 +14805,23 @@ function showSyntaxInspector(event) {
         return;
     }
 
+    // Save target and selection before closing F3
+    const savedTarget = quickFormatterTarget;
+    const savedSelection = quickFormatterSelection;
+    
+    // EXPLICITLY HIDE the formatter first
+    const formatter = document.getElementById('quickFormatter');
+    if (formatter) {
+        formatter.style.setProperty('display', 'none', 'important');
+    }
+    
+    // Then call the official close function to clean up listeners etc.
+    closeQuickFormatter();
+    
+    // Restore state so inspector can use it
+    quickFormatterTarget = savedTarget;
+    quickFormatterSelection = savedSelection;
+
     const syntaxList = document.getElementById('syntaxList');
     syntaxList.innerHTML = '';
 
@@ -14821,11 +14843,16 @@ function showSyntaxInspector(event) {
         syntaxList.appendChild(item);
     });
 
-    document.getElementById('syntaxInspectorModal').style.display = 'block';
+    const modal = document.getElementById('syntaxInspectorModal');
+    modal.style.display = 'flex';
+    modal.style.alignItems = 'center';
+    modal.style.justifyContent = 'center';
 }
 
 function closeSyntaxInspectorModal() {
     document.getElementById('syntaxInspectorModal').style.display = 'none';
+    quickFormatterTarget = null;
+    quickFormatterSelection = null;
 }
 
 function inspectSyntaxes(text) {
@@ -14942,7 +14969,6 @@ function moveSyntaxToFirst(selectedIndex, foundSyntaxes, originalSelectedText) {
     }
     
     closeSyntaxInspectorModal();
-    closeQuickFormatter();
     showToast(`Moved ${syntaxToMove.name} to outermost position`, 'success');
 }
 

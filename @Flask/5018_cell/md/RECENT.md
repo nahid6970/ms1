@@ -12,6 +12,10 @@
 
 **What We Accomplished:**
 
+### 🔧 Bug Fixes & Robustness
+- **Fixed Script Crash**: Resolved a critical error where duplicated code in `showSyntaxInspector` was executing in the global scope, breaking the entire application.
+- **Rendering Safeguards**: Added checks in `renderTable` to handle empty sheets and invalid indices gracefully, preventing "Cannot read properties of undefined" errors that were hiding sheet content.
+
 ### 🔍📜 Syntax Inspector Feature
 - **New Feature**: Added a "Syntax Inspector" button (🔍📜) to the F3 Quick Formatter.
 - **Functionality**:
@@ -20,6 +24,9 @@
   - Clicking any syntax in the list automatically re-wraps the text to move that syntax to the **outermost** position.
   - Supports both `contentEditable` and legacy `input/textarea` modes.
   - Handles 15+ standard syntaxes and complex regex-based syntaxes (Border Box, Font Size, Custom Colors, Titles).
+- **UI Refinements**:
+  - Automatically closes the F3 Quick Formatter window when the inspector opens to reduce clutter.
+  - Centered the Syntax Inspector modal perfectly on the screen using flexbox for better UX.
 
 ### ✅ Per-Sheet Single Row Mode & Scroll Fix
 - **Problem**: Toggling "Single Row Mode" or changing the focused row in one sheet would affect other sheets.

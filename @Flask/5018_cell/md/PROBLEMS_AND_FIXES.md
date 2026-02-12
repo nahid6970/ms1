@@ -7,6 +7,24 @@ This document tracks historical bugs, issues, and their solutions. Use this to:
 
 ---
 
+## [2026-02-12 12:00] - Script Crash and Hiding Sheet Content
+
+**Problem:** 
+After implementing the Syntax Inspector, the entire application interface became unresponsive, and no sheet content was displayed.
+
+**Root Cause:** 
+1. **Global Scope Error**: A duplicated block of code from `showSyntaxInspector` was accidentally pasted into the global scope of `script.js`. This code tried to access variables like `syntaxList` which only existed inside a function, causing a runtime error that stopped all further script execution.
+2. **Rendering TypeError**: In "Single Row Mode," if a sheet was empty, `renderTable` would attempt to access properties of an `undefined` row, leading to a crash.
+
+**Solution:** 
+1. **Code Cleanup**: Removed the duplicated global-scope code block in `script.js`.
+2. **Robust Rendering**: Updated `renderTable` to explicitly handle cases where a sheet has no rows or where an index might be out of bounds, ensuring it returns or skips rendering instead of crashing.
+
+**Files Modified:**
+- `static/script.js` - Cleaned up code and added rendering safeguards.
+
+---
+
 ## [2026-02-12 11:30] - Syntax Reordering and Single Row Mode Scroll Fix
 
 **Problem 1: Formatting Nesting Control**
