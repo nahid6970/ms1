@@ -1520,3 +1520,6 @@ CONFIG_FILE = os.path.join(SCRIPT_DIR, ""projects_config.json"")
 
 ;! bangla er
 :X:;er::Paste('এর')
+
+;! diamon list dot
+:X:;dot::Paste('💠')

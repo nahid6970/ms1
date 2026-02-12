@@ -451,6 +451,14 @@
             "trigger": ";er",
             "replacement": "এর",
             "enabled": true
+        },
+        {
+            "name": "diamon list dot",
+            "category": "General",
+            "description": "",
+            "trigger": ";dot",
+            "replacement": "💠",
+            "enabled": true
         }
     ],
     "startup_scripts": [

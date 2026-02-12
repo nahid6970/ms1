@@ -3245,6 +3245,35 @@ function parseMarkdownInline(text, cellStyle = {}) {
             <div class="md-timeline-right" style="flex: 1; line-height: 1.4;">`;
     });
 
+    // List support in cells (-, --, ---, ----, -----)
+    // We split by <br> or \n, process each, and rejoin
+    if (formatted.includes('- ') || formatted.includes('. ')) {
+        const lines = formatted.split(/<br>|\n/g);
+        formatted = lines.map(line => {
+            const trimmed = line.trim();
+            
+            // Bullet lists
+            const listMatch = trimmed.match(/^(\-{1,5})\s/);
+            if (listMatch) {
+                const markerLength = listMatch[1].length;
+                const icons = ['•', '◦', '▪', '▸', '−'];
+                const icon = icons[markerLength - 1] || '•';
+                const content = line.replace(/^\s*(\-{1,5})\s/, '');
+                return `<span style="display: inline-block; width: 100%; box-sizing: border-box; padding-left: ${markerLength}em; text-indent: -1em; white-space: pre-wrap;"><span style="display: inline-block; width: 1em; text-indent: 0;">${icon}</span>${content}</span>`;
+            }
+            
+            // Numbered lists
+            const numMatch = trimmed.match(/^(\d+\.\s)(.+)$/);
+            if (numMatch) {
+                const number = numMatch[1];
+                const content = numMatch[2];
+                return `<span style="display: inline-block; width: 100%; box-sizing: border-box; padding-left: 2em; text-indent: -2em; white-space: pre-wrap;"><span style="display: inline-block; width: 2em; text-indent: 0;">${number}</span>${content}</span>`;
+            }
+            
+            return line;
+        }).join('<br>');
+    }
+
     // Apply custom color syntaxes
     formatted = applyCustomColorSyntaxes(formatted);
 
