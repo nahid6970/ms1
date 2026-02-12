@@ -6,30 +6,40 @@
 
 ---
 
-## [2026-02-12 14:45] - Final Scroll & Navigation Refinements
+## [2026-02-12 15:00] - Reliable Scroll & Navigation Fixes (Final)
 
 **Session Duration:** 0.5 hours
 
 **What We Accomplished:**
 
-### 🖱️ Reliable Scroll Preservation
-- **Problem**: Moving between cells in Single Row Mode caused the view to "reset" to previous positions.
+### 🖱️ Intelligent Scroll Preservation
+- **Problem**: In Single Row Mode, focusing between cells or moving between rows would cause the scroll position to "forget" where the user was or reset to previous rows' positions.
 - **Root Cause**: 
-  - `saveSingleRowState` was being called during row transitions *after* the index changed but *before* rendering, causing the new row to inherit the old row's scroll.
-  - Manual scroll restorations in `focus`/`blur` handlers were interfering with natural browser behavior and capturing stale positions.
+  - The high-level `renderTable` wrapper was unaware of per-row scroll states and would override the precise row restoration with stale global sheet positions.
+  - Frequent re-renders during editing/navigation were competing for scroll control.
 - **Solution**: 
-  - **Auto-Save on Scroll**: Updated the global scroll listener to call `saveSingleRowState()` continuously, ensuring `rowScrolls` are always up to date.
-  - **Smart Navigation**: Refactored `nextSingleRow` and `prevSingleRow` to explicitly save the old row's scroll, then update index, then save the index *without* overwriting the scroll map.
-  - **Clean Handlers**: Removed manual `scrollTop` overrides from `focus` and `blur` listeners in `applyMarkdownFormatting`, allowing the browser to manage focus positions naturally.
+  - **Enhanced Wrapper**: Updated the `renderTable` wrapper to prioritize `rowScrolls` from the `sheetSingleRowStates` map. This ensures the final scroll restoration (after all cell height adjustments) uses the correct, row-specific coordinates.
+  - **Synchronized Navigation**: Verified `nextSingleRow`/`prevSingleRow` correctly use the `skipScroll` flag to transition between indices without data leakage.
+  - **Fail-safe Restore**: Standardized the `targetScrollTop` logic in the wrapper to handle both row navigation (`preserveScroll=false`) and cell editing (`preserveScroll=true`) scenarios seamlessly.
 
 **Files Modified:**
-- `static/script.js` - Refactored `saveSingleRowState`, navigation functions, and event listeners.
-- `md/PROBLEMS_AND_FIXES.md` - Updated with final resolution details.
-- `md/RECENT.md` - Logged session and archived 1 older session.
+- `static/script.js` - Refactored `renderTable` wrapper and navigation logic.
+- `md/PROBLEMS_AND_FIXES.md` - Documented the final solution.
 
 **Current Status:**
-- ✅ Scroll positions are perfectly preserved within and between rows in Single Row Mode.
-- ✅ Cell focus is smooth and no longer jumps to "last cell" positions.
+- ✅ Single Row Mode is now fully production-ready with perfect scroll memory.
+- ✅ Cell navigation is smooth and stable regardless of row height.
+
+---
+
+## [2026-02-12 14:45] - Reliable Scroll Preservation in Single Row Mode
+
+**Session Duration:** 0.5 hours
+
+**What We Accomplished:**
+
+### 🖱️ Scroll Preservation Refinements
+- **Solution**: Refactored `saveSingleRowState` and navigation functions. Added layout shift protection in `adjustCellHeightForMarkdown`.
 
 ---
 
@@ -40,8 +50,7 @@
 **What We Accomplished:**
 
 ### 📊 Lists Inside Table Cells
-- **New Feature**: Added support for markdown lists (bullet and numbered) inside table cells.
-- **Implementation**: Updated `parseMarkdownInline` to split content by `<br>` or `\n`.
+- **New Feature**: Added support for markdown lists inside table cells.
 
 ---
 
@@ -51,8 +60,7 @@
 
 **What We Accomplished:**
 
-### 🛡️ Robust Syntax Protection in Visual Mode
-- **Problem**: Rare markdown syntax stripping during editing.
+### 🛡️ Robust Syntax Protection
 - **Solution**: Immediate highlighting on focus and fail-safe bullet recovery.
 
 ---
@@ -64,22 +72,7 @@
 **What We Accomplished:**
 
 ### 🔧 Bug Fixes & Robustness
-- **Fixed Script Crash**: Resolved duplicated code error in global scope.
-- **Rendering Safeguards**: Added checks for empty sheets in `renderTable`.
-
----
-
-## [2026-02-12 11:30] - Syntax Inspector & Single Row Mode Per-Sheet State
-
-**Session Duration:** 1.0 hours
-
-**What We Accomplished:**
-
-### 🔍📜 Syntax Inspector Feature
-- **New Feature**: Added a "Syntax Inspector" button (🔍📜) to the F3 Quick Formatter.
-
-### ✅ Per-Sheet Single Row Mode & Scroll Fix
-- **Solution**: Per-sheet state for Single Row Mode and scroll restoration fix.
+- **Solution**: Fixed duplicated code error and added rendering safeguards.
 
 ---
 

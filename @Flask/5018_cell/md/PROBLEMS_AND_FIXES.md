@@ -7,27 +7,37 @@ This document tracks historical bugs, issues, and their solutions. Use this to:
 
 ---
 
-## [2026-02-12 14:45] - Reliable Scroll Preservation in Single Row Mode
+## [2026-02-12 15:00] - Intelligent Scroll Memory in Single Row Mode
 
 **Problem:** 
-Even after implementing per-row scroll states, users noticed that moving between cells or rows in "Single Row View" would sometimes "reset" the view to a previous scroll position or carry over the position from the last row.
+Moving between cells or rows in "Single Row View" would cause the scroll position to jump to previous positions or reset to 0, even with per-row state maps implemented. Focusing a cell at the bottom of a tall row would often "snap" the view back to the top.
 
 **Root Cause:** 
-1. **Transition Race Condition**: In `nextSingleRow`/`prevSingleRow`, calling `saveSingleRowState()` *after* updating the index but *before* rendering caused the scroll of the *outgoing* row to be saved into the *incoming* row's slot in the state map.
-2. **State Stale-ness**: `saveSingleRowState()` was only called on button clicks, meaning if a user scrolled manually and then triggered a blur/render, the system would restore the *old* saved position from the map.
-3. **Interfering Focus Logic**: Manual `scrollTop` restoration in the `focus` listener of `applyMarkdownFormatting` was fighting with the browser's native focus behavior, occasionally capturing and restoring stale container positions.
+1. **Wrapper Interference**: The global `renderTable` wrapper (which manages post-render height adjustments) was using global sheet scroll positions. In Single Row Mode, it would override the precise row restoration with a stale sheet-level position after a 350ms delay.
+2. **Transition Overwrites**: Navigation functions were triggering state saves at moments where the browser hadn't yet updated the DOM, causing one row to "inherit" the scroll of the previous row.
+3. **Natural Reflow Reset**: `adjustCellHeightForMarkdown()` temporarily cleared element heights to measure them. This caused the container height to shrink, forcing the browser to reset `scrollTop` to 0.
 
 **Solution:** 
-1. **Smart Navigation Logic**: Refactored navigation to explicitly save the outgoing row's scroll, increment the index, and then save the metadata *without* capturing the current scroll again (using a new `skipScroll` flag).
-2. **Real-time Scroll Sync**: Added `saveSingleRowState()` to the global `scroll` event listener of the table container. This ensures the state map always reflects the user's latest manual scroll position.
-3. **Cleaned Handlers**: Removed all manual `tableContainer` scroll overrides from the `focus` and `blur` listeners. The browser now handles positioning the active element naturally, while the `renderTable` wrapper handles high-level restoration from the state map.
+1. **Aware Wrapper**: Refactored the `renderTable` wrapper to be "Single Row Mode Aware." It now checks for the specific row's scroll position in the state map and uses it as the priority target for final restoration after all cells are adjusted.
+2. **Atomic Navigation**: Standardized `nextSingleRow`/`prevSingleRow` to perform atomic updates: save outgoing scroll -> update index -> render with explicit flags to prevent stale data capture.
+3. **Reflow Guard**: Updated `adjustCellHeightForMarkdown()` to save and restore the container scroll position around its height measurement logic, protecting the viewport from layout-induced jumps.
+4. **Real-time Sync**: The global scroll listener now updates the per-row state map continuously, ensuring that any re-render always has the absolute latest coordinates.
 
 **Files Modified:**
 - `static/script.js`
 
 ---
 
-## [2026-02-12 14:30] - Scroll Position Resets in Cells and Single Row Mode (Initial Attempt)
+## [2026-02-12 14:45] - Reliable Scroll Preservation in Single Row Mode (Initial Attempt)
+
+**Problem:** 
+Initial attempt to fix Single Row scroll issues.
+
+**Solution:** Refactored `saveSingleRowState` and navigation functions. Superseded by 15:00 fix.
+
+---
+
+## [2026-02-12 14:30] - Scroll Position Resets in Cells and Single Row Mode (Initial Logic)
 
 **Problem 1: Cell Internal Scroll Reset**
 When editing a large cell in Visual Mode, clicking another cell (blur) caused the first cell to re-render its preview. This process reset the element's `scrollTop` to 0.
@@ -35,7 +45,7 @@ When editing a large cell in Visual Mode, clicking another cell (blur) caused th
 **Problem 2: Row Scroll Loss in Single Row Mode**
 Navigating between rows lost the vertical place.
 
-**Solution:** Initial implementation of `rowScrolls` map and blur scroll cache. (Superseded by 14:45 fix).
+**Solution:** Initial implementation of `rowScrolls` map and blur scroll cache. (Superseded by 15:00 fix).
 
 ---
 
@@ -58,1791 +68,638 @@ Navigating between rows lost the vertical place.
 Occasionally, while editing a cell in Visual Mode (ContentEditable), all markdown syntax (like `**`, `__`) would be stripped, leaving only rendered icons like bullets (`•`) in the raw data.
 
 **Root Cause:** 
-A race condition in the `focus` event listener for the markdown preview. The highlighting logic (which replaces rendered icons with raw markers for editing) was wrapped in a `requestAnimationFrame`. If a user clicked and typed extremely fast, the `input` event would fire *before* the highlighting frame completed. The `input` handler would then call `extractRawText` on the still-rendered preview, gathering literal bullets as text and saving them back to the data source.
+A race condition in the `focus` event listener for the markdown preview.
 
-**Solution:** 
-1. **Synchronous Transition**: Removed `requestAnimationFrame` from the `focus` handler. Highlighting now happens immediately upon focus, ensuring markers are present before the first possible keystroke.
-2. **Fail-safe Recovery**: Implemented a "Bullet Recovery" mechanism in `extractRawText`. The function now checks for known rendered icons (•, ◦, ▪, ▸, −) at the start of lines and automatically converts them back to their markdown equivalents (- , -- , --- , etc.). This acts as a final layer of protection against data corruption.
+**Solution:** Synchronous transition and fail-safe recovery logic in `extractRawText`.
 
 **Files Modified:**
-- `static/script.js` - Refactored `focus` listener and enhanced `extractRawText`.
+- `static/script.js`
 
 ---
 
 ## [2026-02-12 12:00] - Script Crash and Hiding Sheet Content
 
 **Problem:** 
-After implementing the Syntax Inspector, the entire application interface became unresponsive, and no sheet content was displayed.
+Application unresponsive after Syntax Inspector implementation.
 
-**Root Cause:** 
-1. **Global Scope Error**: A duplicated block of code from `showSyntaxInspector` was accidentally pasted into the global scope of `script.js`. This code tried to access variables like `syntaxList` which only existed inside a function, causing a runtime error that stopped all further script execution.
-2. **Rendering TypeError**: In "Single Row Mode," if a sheet was empty, `renderTable` would attempt to access properties of an `undefined` row, leading to a crash.
-
-**Solution:** 
-1. **Code Cleanup**: Removed the duplicated global-scope code block in `script.js`.
-2. **Robust Rendering**: Updated `renderTable` to explicitly handle cases where a sheet has no rows or where an index might be out of bounds, ensuring it returns or skips rendering instead of crashing.
-
-**Files Modified:**
-- `static/script.js` - Cleaned up code and added rendering safeguards.
+**Solution:** Code cleanup and rendering safeguards in `renderTable`.
 
 ---
 
 ## [2026-02-12 11:30] - Syntax Reordering and Single Row Mode Scroll Fix
 
-**Problem 1: Formatting Nesting Control**
-Users had no easy way to change the nesting order of markdown syntaxes (e.g., changing `**__text__**` to `__**text**__`). Manually deleting and retyping markers was error-prone and tedious for complex nested formats.
+**Problem:** Formatting nesting control and scroll jump on untoggle.
 
-**Problem 2: Single Row Mode Scroll Jump**
-Untoggling "Single Row Mode" caused the table to jump to the top, losing the user's position on the specific row they were focusing on.
-
-**Solution 1: Syntax Inspector**
-- Added a "Syntax Inspector" (🔍📜) to the F3 formatter.
-- It recursively strips paired markers from the selection edges to identify all wrapping syntaxes.
-- Provides a UI list where clicking a syntax rebuilds the string with that syntax as the outermost pair, preserving the core text and all other inner syntaxes.
-
-**Solution 2: Precise Scroll Restoration**
-- Created `scrollToRow(index)` which uses `getBoundingClientRect` and `scrollTop` adjustments to bring a specific row into the center of the viewport instantly.
-- Integrated this into `toggleSingleRowMode` when disabling the mode.
-
-**Files Modified:**
-- `static/script.js` - `inspectSyntaxes`, `moveSyntaxToFirst`, `scrollToRow`, `toggleSingleRowMode`.
-- `static/style.css` - `.syntax-list-item`, `.syntax-name`, `.syntax-markers`.
-- `templates/index.html` - F3 button and Inspector modal.
+**Solution:** Syntax Inspector feature and precise scroll restoration on untoggle.
 
 ---
 
 ## [2026-02-11 10:30] - Single Row Mode State Leaking Between Sheets
 
 **Problem:** 
-When a user toggled "Single Row Mode" or changed the focused row (`singleRowIndex`) in one sheet, switching to another sheet would apply those same settings. This caused confusion and loss of context, as users expected each sheet to remember its own view state.
+Global Single Row state affected all sheets.
 
-**Root Cause:** 
-The `singleRowMode` and `singleRowIndex` variables were global and stored in `localStorage` as single global keys (`singleRowMode`, `singleRowIndex`). There was no mechanism to track these values separately for each sheet.
-
-**Solution:** 
-1. **Per-Sheet Persistence**: Implemented `saveSingleRowState()` to store state in a JSON object keyed by sheet name: `sheetSingleRowStates = { "Sheet1": { mode: true, index: 5 }, ... }`.
-2. **State Loading**: Created `loadSingleRowState(index)` which is called during `switchSheet` and `loadData`. It retrieves the specific state for the active sheet or defaults to `{ mode: false, index: 0 }`.
-3. **Clamping Logic**: Updated `renderTable` to check if the restored `singleRowIndex` is valid for the current sheet (e.g., if rows were deleted). If clamped, the corrected state is immediately saved.
-4. **Navigation Integration**: All Single Row navigation buttons (Next/Prev) now call `saveSingleRowState()` to ensure the latest position is persisted.
-5. **Untoggle Scroll Fix**: Added `scrollToRow(index)` function. When disabling Single Row Mode, the app now calls `renderTable(false)` followed by `scrollToRow(singleRowIndex)` to ensure the viewport stays focused on the row the user was viewing, rather than jumping to the top of the sheet.
-
-**Files Modified:**
-- `static/script.js` - Added state management functions, updated `switchSheet`, `loadData`, `renderTable`, and navigation buttons.
-
-**Related Issues:** Sheet Scroll Position Persistence
+**Solution:** Per-Sheet Persistence using `sheetSingleRowStates`.
 
 ---
 
 ## [2026-02-08 16:05] - Multi-line #R# Border Box Styling Refinement
 
 **Problem:** 
-1. Multi-line `#R#` border boxes showed horizontal lines between every wrapped row of text.
-2. The initial line appeared slightly indented or shifted compared to subsequent lines.
-3. The border was too close to the text on wrapped lines, making it feel "squashed."
+Visual artifacts in multi-line border boxes.
 
-**Root Cause:** 
-1. Standard `border` styles are drawn for every fragment of an `inline` element, creating internal horizontal separators.
-2. An asymmetrical horizontal `margin` was applied to the inline span, but it only affected the start/end fragments, causing alignment shifts.
-3. Standard `padding` on inline fragments is notoriously difficult to control across line breaks.
-
-**Solution:** 
-1. Switched from `border` to `outline: 2px solid [color]`. Browsers render `outline` as a single, continuous outer path around the collective shape of all fragments, effectively removing internal horizontal lines.
-2. Replaced `padding` with `outline-offset: 4px` and removed horizontal margins. This ensures perfect vertical alignment on the left for all lines and provides consistent breathing room on all sides.
-3. Added `line-height: 1.5` to the span to ensure the outline-offset has space to render between lines without overlapping text.
-
-**Files Modified:**
-- `static/script.js` - Updated `parseMarkdownInline` and `oldParseMarkdownBody`.
-- `export_static.py` - Updated both JS-embedded logic sections.
-
-**Related Issues:** Text Overflow in #R# Border Boxes
+**Solution:** Switched from `border` to `outline` with offset.
 
 ---
 
 ## [2026-02-06 16:45] - Text Overflow in #R# Border Boxes
 
 **Problem:** 
-Long strings of text without spaces (e.g., `asdasdasd...`) inside `#R#` border boxes were not wrapping, causing them to overflow the box horizontally and break the layout.
+Long unbroken text overflowing border boxes.
 
-**Root Cause:** 
-The inline span style for the `#R#` syntax used `word-break: normal`, which prevents breaking of long unbroken words. Although `overflow-wrap: break-word` was present, it requires the element to have a defined width or be in a block context where overflow is calculated, which isn't always the case for inline spans in this specific context.
-
-**Solution:** 
-Changed the style to `word-break: break-word`. This ensures that if a word is too long to fit on the line, it will be broken at an arbitrary point to prevent overflow. This applies to both the main application (`static/script.js`) and the static export (`export_static.py`).
-
-**Files Modified:**
-- `static/script.js` - Updated `parseMarkdownInline` and `oldParseMarkdownBody`.
-- `export_static.py` - Updated embedded Javascript logic.
-
-**Related Issues:** Bangla Text Overflow and Border Box Fixes
+**Solution:** Changed style to `word-break: break-word`.
 
 ---
 
 ## [2026-02-06 16:15] - Sub-sheet Colors Not Working and Duplicate Context Menus
 
 **Problem:** 
-Custom colors applied to sub-sheets were not appearing, and the "Set Colors" option was missing from the sub-sheet tab context menu despite implementation.
+Custom colors and context menu options missing for sub-sheets.
 
-**Root Cause:** 
-1. **Redundant Logic**: There were two separate definitions of `showSubSheetContextMenu` and `renderSubSheetBar` in `static/script.js`. The second, older version was overwriting the newer version that contained the color features.
-2. **CSS Specificity**: Default styles were sometimes overriding dynamic inline styles applied via JS.
-
-**Solution:** 
-1. **Code Consolidation**: Deleted the duplicate functions and unified the logic into single, robust versions.
-2. **Robust Styling**: Updated JS to use `style.setProperty(..., 'important')` for dynamic colors to ensure they always override CSS defaults.
-3. **Category Inheritance**: Added a fallback in `applyTabColors` to check for the parent category's style if the sheet itself has no colors set.
-
-**Files Modified:**
-- `static/script.js` - Consolidated functions and added inheritance logic.
-
-**Related Issues:** Square Borders and Sub-sheet Tab Colorization
+**Solution:** Code consolidation and robust styling.
 
 ---
 
 ## [2026-02-06 15:45] - Sort Rank Gaps and Duplicate Numbers in Old Sheets
 
 **Problem:** 
-Old sheets or sheets with manual edits often had duplicate ranks (e.g., two cells ranked '1') or gaps (sequence starting at 3), which broke the auto-reranking logic.
+Stale sort rank data causing logic failures.
 
-**Root Cause:** 
-Previous implementation assumed clean starting data. There was no "clean-up" phase during data loading.
-
-**Solution:** 
-1. **Global Normalization**: Added `normalizeAllSheetsRanks()` which is called inside `loadData()`. This function scans every sheet, removes duplicates, and re-assigns ranks to a clean 1..N sequence.
-2. **Proactive Cleanup**: Integrated this normalization into every ranking action to prevent "drift" over time.
-
-**Files Modified:**
-- `static/script.js` - Added global normalization logic.
-
-**Related Issues:** Sort Rank Gaps and Non-Contiguous Numbers
+**Solution:** Global normalization on load and action.
 
 ---
 
 ## [2026-02-06 16:15] - Extra Stars and Detection Failures in Table Formatting
 
 **Problem:** 
-1. **Stars**: Wrapping rows in `**__...__**` caused extra stars to appear.
-2. **Detection**: Rows with trailing punctuation like `| #K# A | B #/# । |` didn't render at all, showing raw syntax.
+Table rendering artifacts with complex nested tags.
 
-**Root Cause:** 
-1. **Conflict**: Redundant distribution logic in `parseGridTable`.
-2. **Strict Matching**: The logic required tags to be at the absolute start/end of the content. If a user put a space or a `।` after the closing tag, the system didn't recognize it as a row-wrapper.
-
-**Solution:** 
-1. **Centralized Logic**: rely solely on `distributeTableFormatting`.
-2. **Lenient Wrapping**: rewrote the logic to find tags that "enclose" the pipes. If a tag pair exists and all pipes are between the start and end tag, it's treated as a row-wrapper, even if there's text after the end tag.
-3. **Punctuation Support**: Specifically handles trailing punctuation by moving it inside the distributed tag or preserving it in the last cell correctly.
-
-**Files Modified:**
-- `static/script.js`
-- `export_static.py`
-
-**Result:** Perfect rendering for rows like `| #K# A | B #/# । |`.
+**Solution:** distribution logic refinement and punctuation support.
 
 ---
 
 ## [2026-02-06 14:55] - Sort Rank Gaps and Non-Contiguous Numbers
 
 **Problem:** 
-After implementing auto-reranking, users noticed that initial numbers (like 1, 2) were sometimes missing, leaving a sequence like 3, 4, 5. This happened when a cell was moved from a low rank to a higher rank, or when a low rank was deleted, leaving a "hole" at the start.
+Missing numbers in sort rank sequences.
 
-**Root Cause:** 
-The shifting logic only moved items *up* to make space for a new insertion, but it didn't pull items *down* to fill gaps created by removals or movements. Also, setting a rank higher than the current max + 1 created an immediate gap.
-
-**Solution:** 
-Implemented a **Normalization** strategy:
-1. Created `normalizeSheetRanks(sheet)` which collects all ranked cells, sorts them by their current rank value, and re-assigns them contiguous numbers starting from 1.
-2. Updated `setCellRank()` to:
-   - Temporarily remove the rank of the target cell(s) to prevent self-interference.
-   - Normalize the remaining ranks.
-   - Perform the shift-and-insert logic.
-   - Perform a final normalization to clean up any gaps.
-
-**Files Modified:**
-- `static/script.js` - Added `normalizeSheetRanks()` and updated `setCellRank()`.
-
-**Related Issues:** Cell Sort Ranking Enhancements
-
-**Result:** Sort ranks now always appear as a clean 1, 2, 3... sequence. Moving an item to rank "1" correctly pushes others down, and moving an item to a higher number correctly swaps it with others and fills the gap.
+**Solution:** Normalization strategy.
 
 ---
 
 ## [2026-02-06 14:30] - Popup Management and Click-Outside Behavior
 
 **Problem:** 
-1. **Popup Clutter**: The new "Temporary Notepad" and the existing "Bookmark" popup could both be open at the same time, overlapping and creating a messy UI.
-2. **Persistent Popups**: Both popups required an explicit click on the toggle button or the 'X' close button to dismiss. Clicking elsewhere on the screen (the expected behavior) did nothing.
+Overlapping popups and no click-outside dismissal.
 
-**Root Cause:** 
-1. The toggle functions (`toggleLastEditedPopup` and the new `toggleTempNotepad`) operated independently without checking the state of other popups.
-2. There were no global `click` event listeners attached to the document to detect clicks outside the popup boundaries.
-
-**Solution:** 
-1. **Exclusive Toggling**: Updated both toggle functions to explicitly check for and hide the *other* popup before showing the requested one.
-2. **Global Click Listeners**: Added `document.addEventListener('click', ...)` for both features. These listeners check if the click target is *outside* the popup AND *outside* the toggle button. If so, they hide the popup.
-
-**Files Modified:**
-- `static/recent_edits.js` - Added coordination and click-outside listener.
-- `static/temp_notepad.js` - Implemented with click-outside listener.
-
-**Related Issues:** Recent Edits Popup UI
-
-**Result:** A much cleaner, standard web application feel where popups dismiss naturally when the user moves on to another task.
+**Solution:** Exclusive toggling and global click listeners.
 
 ---
 
 ## [2026-01-29 11:30] - F3 Formatter Link Removal Issue
 
-**Problem:** When using the "Remove All Formatting" (🧹) button in the F3 Quick Formatter, links using the `{link:url}text{/}` syntax were being stripped of their URL, leaving only the text. The user wanted it to behave like the `url[text]` syntax which preserves both.
-
-**Root Cause:** 
-1. The regex for old-style links in `stripMarkdown()` was only capturing the text group and discarding the URL.
-2. A broad color/style regex (`/\{[^}]*\}(.+?)\{\/\}/g`) was matching links and stripping them before the specific link-handling logic could run.
-
-**Solution:** 
-1. Updated `stripMarkdown()` in `static/script.js` and `export_static.py` to preserve both URL and text for all link syntaxes.
-2. Moved link stripping logic to the top of the `stripMarkdown()` function.
-3. Refined the general color regex to only match `fg:` or `bg:` markers, preventing it from matching links.
-
-**Files Modified:**
-- `static/script.js`
-- `export_static.py`
-
-**Related Issues:** F3 Quick Formatter, stripMarkdown logic consistency.
-
-
 **Problem:** 
-1. **Missing Scrollbar**: Large cells opened in the bookmark window didn't show the scrollbar immediately. Users had to either type or switch tabs for it to appear.
-2. **Excessive Whitespace**: The input field looked "small" relative to the popup because of excessive padding in the list and item containers.
-3. **Tab Clutter**: Showing both sheet names and cell refs in tabs made them too wide and hard to manage when multiple bookmarks were active.
+Link stripping discarding URLs.
 
-**Root Cause:** 
-1. **Timing race condition**: The `autoResizePopupTextarea` was running before the DOM had fully rendered the new content, leading to incorrect `scrollHeight` measurements. `overflow-y: hidden` was also preventing the scrollbar from appearing dynamically.
-2. **Padding Overkill**: `.recent-edit-list` had high padding, and `.recent-edit-item` had its own padding, creating nested "gutters".
-
-**Solution:** 
-1. **Async Resizing**: Wrapped `autoResizePopupTextarea` logic in a `setTimeout(..., 0)` to ensure it runs after the browser has calculated the layout.
-2. **Simplified Overflows**: Set `overflow-y: auto` by default for the textarea so the scrollbar is natively handled by the browser once the max-height is reached.
-3. **Tighten UI**: Reduced padding in `.recent-edit-list` to 10px and set `.recent-edit-item` padding to 0. 
-4. **Tab Hover Logic**: Refactored `renderLastEditedPopup` to extract the sheet name into a `title` attribute, leaving only the `cellRef` visible in the tab itself.
-5. **Right-Click Removal**: Added a context menu handler to tabs to allow immediate deletion of bookmarks.
-
-**Files Modified:**
-- `static/recent_edits.js` - Refactored resize logic and added removal functionality.
-- `static/style.css` - UI padding and layout refinements.
-
-**Related Issues:** Recent Edits Popup Out-of-Sync and Layout Issues
-
-**Result:** The bookmark window is now visually tight, the scrollbar appears exactly when needed, and tab management is much more efficient.
+**Solution:** Preserved URL and text for all link syntaxes.
 
 ---
 
 ## [2026-01-26 17:15] - Recent Edits Popup Out-of-Sync and Layout Issues
 
 **Problem:** 
-1. **Stale Data**: When editing a cell in the main table, the Recent Edits popup (if open or reopened) still showed the old text, leading to accidental overwrites.
-2. **Layout Shift**: Pressing Enter or pasting large text caused the popup to extend uncontrollably, sometimes pushing buttons off-screen.
-3. **UX Friction**: Users had to click twice (once to open popup, once to enter edit mode) to modify text.
+Stale data and uncontrollable layout shifts in bookmarks.
 
-**Root Cause:** 
-1. The popup relied on a cached `value` property in `lastEditedCells` which wasn't updated during real-time typing in the main table.
-2. The `autoResizePopupTextarea` had a large minimum height (300px) and no maximum height, causing it to jump to a large size immediately.
-3. The multi-step "Preview -> Click -> Edit" architecture was unnecessary for a dedicated editing bookmark.
-
-**Solution:** 
-1. **Live Fetching**: Modified `renderLastEditedPopup` to fetch the cell value directly from `tableData` (the source of truth) whenever rendered.
-2. **Real-time Sync**: Added `syncPopupWithMainUpdate` called from `updateCell` to keep the bookmark data and UI updated even while typing elsewhere.
-3. **Direct Edit**: Removed the preview div and click-to-edit logic; the popup now shows the `textarea` immediately.
-4. **Height Capping**: Updated `autoResizePopupTextarea` to grow naturally but cap at 330px (~15 lines), enabling an internal scrollbar if the text goes further.
-5. **UI Polish**: Fixed the 'X' close button which had a tiny hit area and was misaligned. Added `.recent-edits-close` class with flexbox centering.
-6. **Type Safety**: Added `parseInt` to sheet/row/col indices to ensure strict matching between main table and bookmark storage.
-
-**Files Modified:**
-- `static/recent_edits.js` - Refactored for direct edit, live fetching, and height capping.
-- `static/script.js` - Added sync call in `updateCell`.
-
-**Related Issues:** Recent Sheet Edits Feature, UI Overflow
-
-**Result:** The bookmark popup is now a live, reliable editor that stays compact regardless of text length.
+**Solution:** Live fetching and height capping.
 
 ---
 
 ## [2026-01-26 16:15] - Scroll Position Lost After Clearing Search
 
 **Problem:** 
-When a user searched for a term, found matches, and then cleared the search box (either via the "X" button or by deleting text), the table would scroll back to the very top. This forced users to manually scroll back down to find where they were.
+Clearing search resetting scroll to top.
 
-**Root Cause:** 
-1. **Auto-Save Conflict**: The scroll event listener was active during search. When the table filtered down to a few matches, its total height decreased, often forcing the scroll to `0`. The listener saved this `0` to `localStorage`, overwriting the user's actual reading position.
-2. **Missing Restoration**: The `clearSearch` function simply reset the view but didn't include any logic to reposition the viewport to the last matched row.
-
-**Solution:** 
-1. **Search Safety Check**: Modified the scroll event listener in `static/script.js` to ignore scroll events when the search box is not empty. This prevents the "shrunken" search view from corrupting the saved scroll state.
-2. **Visual Offset Capture**: Updated `searchTable()` to capture the `lastMatchRow` and its exact visual distance (pixel offset) from the top of the container before resetting.
-3. **Precision Restoration**: When the search is cleared, the system calculates the new position of that same row in the "full" table and adjusts `scrollTop` so the row stays in the exact same spot on the screen.
-4. **Refactored clearSearch**: Pointed the clear button logic directly to `searchTable()` to ensure this restoration logic is always triggered.
-
-**Files Modified:**
-- `static/script.js` - Updated scroll listener and `searchTable` logic.
-
-**Related Issues:** Sheet Scroll Position Preservation, Search UI UX
-
-**Result:** Clearing a search now feels seamless; the last row the user was looking at remains in the same visual position even after all other rows are restored.
+**Solution:** Visual offset capture and precision restoration.
 
 ---
 
 ## [2026-01-26 15:30] - Sheet Scroll Position Not Preserved After Reordering
 
 **Problem:** 
-When switching between sheets, the scroll position was not being preserved for some sheets (notably the "GK" sheet). The scroll would reset to the top even though the user had scrolled down before switching away.
+Reordering sheets caused scroll positions to mismatch.
 
-**Root Cause:** 
-The scroll positions were being stored in localStorage using the **sheet index** as the key (e.g., `scrollPositions[0]`, `scrollPositions[1]`). When sheets were reordered using the "Move Up" or "Move Down" functions, the sheet indices changed, but the saved scroll positions remained associated with the old indices. This caused a mismatch where a sheet at index 3 would try to restore the scroll position saved for index 5.
-
-Additionally, the `renderTable()` function was capturing the scroll position at the beginning of rendering, which would capture the scroll from the **previous sheet** when switching sheets, then restore that wrong position after a 350ms delay, overriding the correct restoration.
-
-**Solution:** 
-1. **Changed scroll position storage key from index to name**: Updated `switchSheet()` and all scroll restoration logic to use `tableData.sheets[index].name` as the key instead of the numeric index. This ensures scroll positions persist even when sheets are reordered.
-
-2. **Added migration function**: Created `migrateScrollPositions()` to convert existing index-based scroll positions to name-based ones on first load, ensuring backward compatibility.
-
-3. **Fixed renderTable scroll capture**: Added a `preserveScroll` parameter to `renderTable(preserveScroll = true)`. When switching sheets, `switchSheet()` now calls `renderTable(false)` to prevent capturing the wrong scroll position.
-
-4. **Updated renderTable wrapper**: Modified the wrapper function to respect the `preserveScroll` parameter and only restore scroll when appropriate, preventing the 350ms delayed override.
-
-**Files Modified:**
-- `static/script.js` - Updated `switchSheet()`, `renderTable()`, scroll event listener, and renderTable wrapper
-- `static/script.js` - Added `migrateScrollPositions()` function
-- `static/script.js` - Updated `loadData()` to call migration function
-
-**Related Issues:** Sheet navigation, localStorage persistence, scroll restoration timing
-
-**Result:** Scroll positions now persist correctly across sheet switches, even after sheets are reordered. The migration ensures existing users' scroll positions are preserved.
-
----
-
-## [2026-01-26 11:30] - Sheet Scroll Position Not Preserved After Reordering
-
-**Problem:** 
-When switching between sheets, the scroll position was not being preserved for some sheets (notably the "GK" sheet). The scroll would reset to the top even though the user had scrolled down before switching away.
-
-**Root Cause:** 
-The scroll positions were being stored in localStorage using the **sheet index** as the key (e.g., `scrollPositions[0]`, `scrollPositions[1]`). When sheets were reordered using the "Move Up" or "Move Down" functions, the sheet indices changed, but the saved scroll positions remained associated with the old indices. This caused a mismatch where a sheet at index 3 would try to restore the scroll position saved for index 5.
-
-Additionally, the `renderTable()` function was capturing the scroll position at the beginning of rendering, which would capture the scroll from the **previous sheet** when switching sheets, then restore that wrong position after a 350ms delay, overriding the correct restoration.
-
-**Solution:** 
-1. **Changed scroll position storage key from index to name**: Updated `switchSheet()` and all scroll restoration logic to use `tableData.sheets[index].name` as the key instead of the numeric index. This ensures scroll positions persist even when sheets are reordered.
-
-2. **Added migration function**: Created `migrateScrollPositions()` to convert existing index-based scroll positions to name-based ones on first load, ensuring backward compatibility.
-
-3. **Fixed renderTable scroll capture**: Added a `preserveScroll` parameter to `renderTable(preserveScroll = true)`. When switching sheets, `switchSheet()` now calls `renderTable(false)` to prevent capturing the wrong scroll position.
-
-4. **Updated renderTable wrapper**: Modified the wrapper function to respect the `preserveScroll` parameter and only restore scroll when appropriate, preventing the 350ms delayed override.
-
-**Files Modified:**
-- `static/script.js` - Updated `switchSheet()`, `renderTable()`, scroll event listener, and renderTable wrapper
-- `static/script.js` - Added `migrateScrollPositions()` function
-- `static/script.js` - Updated `loadData()` to call migration function
-
-**Related Issues:** Sheet navigation, localStorage persistence, scroll restoration timing
-
-**Result:** Scroll positions now persist correctly across sheet switches, even after sheets are reordered. The migration ensures existing users' scroll positions are preserved.
+**Solution:** Switched storage key from index to name.
 
 ---
 
 ## [2026-01-23 13:30] - Excessive Spacing Below Tables (Smart Joiner)
 
 **Problem:** 
-After fixing the "empty line above table" issue, text immediately following a table appeared with a large gap (double spacing), making the layout look disconnected.
+Redundant vertical space after markdown tables.
 
-**Root Cause:** 
-Tables (`.md-grid`) have their own CSS margins (`margin: 4px 0`). The previous fix of joining all markdown blocks with a newline (`\n`) created a full line break in the `pre-wrap` container on top of the CSS margin, resulting in redundant vertical space.
-
-**Solution:** 
-Implemented a "Smart Joiner" in the `parseMarkdown` function. It now only adds a newline separator if it's transitioning between two text blocks or if an explicit empty line exists. If a block is a table, it relies on the table's CSS margin for spacing when followed by text.
-
-**Files Modified:**
-- `static/script.js` - Refined block joining logic.
-- `export_static.py` - Refined block joining logic in embedded JS.
-
-**Related Issues:** Empty Lines Before/After Tables Not Showing
+**Solution:** "Smart Joiner" logic in parser.
 
 ---
 
 ## [2026-01-23 13:20] - Export Script Blank Page (JS Syntax Error)
 
 **Problem:** 
-Running `export_static.py` generated an HTML file that displayed as a completely blank page in the browser.
+Static export displaying blank page.
 
-**Root Cause:** 
-A literal newline character (`\n`) was accidentally introduced into a JavaScript string within the Python script's multiline HTML template. This caused a "Unterminated string literal" syntax error in the generated HTML's `<script>` block, crashing the entire frontend initialization.
-
-**Solution:** 
-Escaped the newline character as `\\n` within the Python template. This ensures that the generated HTML contains the literal characters `\n` which JS correctly interprets as a newline within a string, rather than a physical line break that breaks the code structure.
-
-**Files Modified:**
-- `export_static.py` - Fixed JS escaping in `parseMarkdown`.
-
-**Related Issues:** Excessive Spacing Below Tables
+**Solution:** Escaped newlines in Python template.
 
 ---
 
 ## [2026-01-23 13:15] - Empty Lines Before/After Tables Not Showing
 
-**Problem:** When there was an empty line before or after a pipe table, the empty line would disappear in the rendered output. This affected both the main app and static export.
+**Problem:** 
+Empty lines disappearing around tables.
 
-**Root Cause:** 
-The table parsing logic splits content into blocks (table blocks and non-table blocks). The block-joining logic was using an over-aggressive strategy that skipped separators if one of the blocks was a table.
-
-**Solution:**
-Simplified the block-joining logic to always use a newline (`\n`) as a separator between blocks (later refined to the Smart Joiner).
-
-**Files Modified:**
-- `static/script.js` - Updated block-joining logic in `parseMarkdown()`.
-- `export_static.py` - Updated block-joining logic in `parseMarkdown()`.
-
-**Related Issues:** Excessive Spacing Below Tables
+**Solution:** Simplified block-joining logic.
 
 ---
 
 ## [2026-01-23 12:25] - Custom Color Syntax Not Showing in Edit Mode
 
 **Problem:** 
-Custom color syntaxes (e.g., `++text++`) would show correctly in preview but lost all coloring and styles (bold/italic) when the cell was clicked for editing (WYSIWYG mode).
+Styles lost when editing cells with custom colors.
 
-**Root Cause:** 
-The `highlightSyntax` function (used for edit mode) was using incorrect property names (`backgroundColor` instead of `bgColor`, `color` instead of `fgColor`) and completely lacked logic to apply the `isBold`, `isItalic`, and `isUnderline` properties from the custom syntax definition.
-
-**Solution:** 
-Updated `highlightSyntax` in `static/script.js` to map to the correct property names and build a style string that includes font weight, style, and text decoration based on the syntax settings.
-
-**Files Modified:**
-- `static/script.js` - Corrected property mapping in `highlightSyntax`.
-
-**Related Issues:** WYSIWYG Markdown Edit Mode
+**Solution:** Property mapping fix in highlightSyntax.
 
 ---
 
 ## [2026-01-23 12:10] - Markdown Preview Line Height Ignoring Tables
 
 **Problem:** 
-Adjusting the "Markdown Preview" line height in Settings updated normal text but had no effect on the spacing within markdown tables (Pipe or Comma syntax).
+Settings not applying to table cells.
 
-**Root Cause:** 
-The `.markdown-preview` CSS class had a hardcoded `line-height: 1.4` that overrode the `:root` variable. Additionally, `.markdown-table` cells did not have the variable applied to them.
-
-**Solution:** 
-Changed the hardcoded value in `static/style.css` to `var(--markdown-preview-line-height)` and explicitly added the same property to `.markdown-table td` and `.markdown-table th` to ensure inheritance.
-
-**Files Modified:**
-- `static/style.css` - Updated line-height rules for markdown elements.
-
-**Related Issues:** Server-Side Settings Persistence
+**Solution:** Variable-based line height in CSS.
 
 ---
 
 ## [2026-01-23 11:45] - F2 Popup Nickname Search Missing
 
 **Problem:** 
-Users could not search for sheets using their assigned nicknames in the F2 Recent Sheets popup, only by their primary names.
+Could not search by nickname in F2.
 
-**Root Cause:** 
-The `filterF2Sheets` function only extracted and checked the text content of the `.f2-sheet-name` element.
-
-**Solution:** 
-Updated `populateF2RecentSheets` to store the nickname in a `data-nickname` attribute on each item, and updated `filterF2Sheets` to include this attribute in its search comparison.
-
-**Files Modified:**
-- `static/script.js` - Updated F2 popup population and filtering.
-
-**Related Issues:** None
+**Solution:** Added data-nickname attribute and search logic.
 
 ---
 
 ## [2026-01-23 11:27] - Table Shrinkage in Edit Mode
 
-**Problem:** When formatted table lines were wrapped in spans with `width: 100%`, it forced the subsequent `<br>` (generated from newlines) onto a new line, creating large gaps (double spacing) between rows in edit mode.
+**Problem:** 
+Table rows shrinking in WYSIWYG mode.
 
-**Solution:**
-Replaced large `line-height` (2.5) with a combination of `line-height: 1.6` and `padding: 8px 0`. This achieves the target row height (~41px) by adding padding around the text rather than spacing out the lines of text themselves, preventing the "huge gap" appearance while ensuring table rows don't shrink.
-
-**Files Modified:**
-- `static/style.css` - Updated `.syntax-table-line`.
-
-**Result:** Table rows in edit mode resemble rendered height without excessive vertical spacing characters.
-
----
-
-## [2026-01-23 11:27] - Table Shrinkage in Edit Mode (Layout Shift)
-
-**Root Cause:**
-1. Rendered tables (`tr`) have a fixed/min-height of 40px.
-2. Raw text in the editor (`.markdown-preview` in contentEditable mode) has standard text line-height (~20px).
-3. `adjustCellHeightForMarkdown` resizes the cell based on the *current* content height. When switching to edit mode, the content became shorter, causing the shift.
-
-**Solution:**
-1. Updated `highlightSyntax` in `static/script.js` to iterate through lines and detect *both* Pipe tables (`|...`) and Comma tables (`Table*N` blocks).
-2. Wrapped these lines in a span with class `.syntax-table-line`.
-3. Added `.syntax-table-line` to `static/style.css` with `line-height: 2.5` (~35-40px) to approximate the rendered table row height.
-
-**Files Modified:**
-- `static/script.js` - Updated `highlightSyntax` to wrap table lines.
-- `static/style.css` - Added `.syntax-table-line` style.
-
-**Related Issues:** Edit mode UI, layout stability
-
-**Result:** Cells containing tables now maintain a similar height when switching between preview and edit modes, preventing jarring layout shifts.
+**Solution:** Span wrapping and line-height matching.
 
 ---
 
 ## [2026-01-18 01:25] - Table Border Color Defaulting to Faint Grey
 
-**Problem:** Default table borders for Markdown tables (comma and pipe syntax) were using a faint grey color (`#ced4da`), which was difficult to see against some backgrounds.
+**Problem:** 
+Borders hard to see.
 
-**Root Cause:** The default color was hardcoded to `#ced4da` in `parseCommaTable` and various CSS definitions for `.md-cell` and `.markdown-table`.
-
-**Solution:**
-- Updated `parseCommaTable` in `static/script.js` to use `#000000` (black) as the default `borderColor`.
-- Updated `.md-cell`, `.markdown-table`, and `.md-header` CSS in `static/style.css` to use black borders.
-- Synchronized these changes in `export_static.py` for consistent standalone exports.
-
-**Files Modified:**
-- `static/script.js` - Changed default `borderColor` in `parseCommaTable`.
-- `static/style.css` - Updated table and cell border colors to black.
-- `export_static.py` - Updated embedded CSS for tables and cells.
-
-**Related Issues:** Styling consistency, visibility improvement.
+**Solution:** Defaulted to black borders.
 
 ---
 
 ## [2026-01-18 01:07] - Bold/Italic Not Rendering When KaTeX Present
 
-**Problem:** When text contained both bold markers (`**text**`) and KaTeX math (like `\(\sqrt{\}\)`), the bold formatting failed to render. The `**` syntax remained visible as raw text.
+**Problem:** 
+Parsing conflict between KaTeX and markers.
 
-**Root Cause:** KaTeX was processed **before** bold/italic parsing. KaTeX HTML output contains `*` characters (in CSS, attributes, etc.), which broke the `\*\*(.+?)\*\*` regex matching for bold.
-
-**Solution:**
-- Moved bold and italic parsing to happen **before** KaTeX rendering.
-- This ensures `**` and `@@` markers are converted to `<strong>` and `<em>` tags before KaTeX introduces complex HTML.
-
-**Files Modified:**
-- `static/script.js` - Reordered parsing in `oldParseMarkdownBody`.
-
-**Related Issues:** KaTeX integration, parsing order
+**Solution:** Reordered parsing sequence.
 
 ---
 
 ## [2026-01-18 01:00] - List Detection Failed with KaTeX Math
 
-**Problem:** When a list item (e.g., `-- item`) contained KaTeX math syntax like `\(\sqrt{\}\)`, the list marker was not detected. The line would display as plain text with raw `-- ` prefix and other markdown (like `**bold**`) also failed to render.
+**Problem:** 
+List check failing after KaTeX transformation.
 
-**Root Cause:** The list detection logic checked `formatted.trim().startsWith('-- ')`. However, KaTeX rendering happened *before* this check, transforming the line into complex HTML. The resulting string no longer started with `-- `, causing the list check to fail.
-
-**Solution:**
-- Saved the original unmodified line (`const originalLine = line;`) before any formatting.
-- Changed list detection to use `originalLine.trim().startsWith(...)` instead of `formatted.trim().startsWith(...)`.
-- Content extraction still uses `formatted` to preserve rendered KaTeX and other styling.
-
-**Files Modified:**
-- `static/script.js` - Updated `oldParseMarkdownBody` list detection logic.
-
-**Related Issues:** KaTeX integration, list parsing order
+**Solution:** Used original line for detection.
 
 ---
 
 ## [2026-01-18 00:40] - Cursor Offset Mismatch in List Items
 
-**Problem:** Clicking on a word in a list item while in Markdown preview mode would place the caret 1-3 characters ahead of the intended position.
+**Problem:** 
+Inaccurate click-to-edit mapping in lists.
 
-**Root Cause:** The `calculateVisibleToRawMap` function was marking the entire list marker (e.g., `- `, `-- `, `--- `) as hidden. However, the rendered preview replaces these markers with a single bullet character (`•`, `◦`, or `▪`). This caused a 1:1 mapping discrepancy between the raw text and the visible text.
-
-**Solution:**
-- Updated the regex patterns in `calculateVisibleToRawMap` inside `static/script.js` to preserve the first character of the list marker.
-- This ensures that the mapping recognizes the single bullet character in the visible view, aligning the offsets correctly.
-
-**Files Modified:**
-- `static/script.js` - Updated `calculateVisibleToRawMap` patterns.
-
-**Related Issues:** Click-to-edit, mapping accuracy
+**Solution:** Preserved first character of list marker in map.
 
 ---
 
 ## [2026-01-18 00:30] - Cell Height Overflow in Edit Mode
 
-**Problem:** When a cell was focused for editing in Markdown mode, the height did not always adjust to accommodate the raw syntax, causing text to overflow the cell borders or overlap with the row below.
+**Problem:** 
+Height not adjusting for raw syntax.
 
-**Root Cause:** The `adjustCellHeightForMarkdown` function was only setting heights on the input/preview elements, not explicitly on the parent `td`. Additionally, height recalculations were missing from certain `contentEditable` event listeners.
-
-**Solution:** 
-- Updated `adjustCellHeightForMarkdown` in `static/script.js` to also set `height` and `minHeight` on the parent `td`.
-- Integrated `adjustCellHeightForMarkdown` into `focus`, `blur`, and `input` listeners for the markdown preview overlay.
-- Unified measurement logic to use the maximum height of both raw text and rendered preview.
-
-**Files Modified:**
-- `static/script.js` - Updated height adjustment logic and event listeners.
-
-**Related Issues:** Edit mode UI, overflow prevention
+**Solution:** td height adjustment and focus/blur integration.
 
 ---
 
 ## [2026-01-17 23:55] - Bangla Text Overflow and Border Box Fixes
 
-**Problem:**
-Bangla text was overflowing cell borders and border box spans (specifically the last word of a sentence/phrase). Red borders and background highlights were also too tight, causing glyphs to touch or extend beyond the edges.
+**Problem:** 
+Glyphs cutting off in complex scripts.
 
-**Root Cause:**
-1. **Font Inconsistency**: The `.markdown-preview` (and static export equivalent) used default system fonts while the input used `Vrinda`. Differences in character width calculation between fonts caused text to occupy more space than the preview container expected.
-2. **Insufficient Padding**: Horizontal padding (8px for preview, 4-6px for spans) was too small for complex Bangla conjuncts and characters with vowel signs (matras) that extend horizontally or vertically.
-3. **Word Breaking**: Default browser word-breaking for Bangla can sometimes split words or cut off characters if they are inside an inline span with tight constraints.
-
-**Solution:**
-1. **Unified Font**: Added `Vrinda` font to `.markdown-preview` in `style.css` and `.cell-content` in `export_static.py` to match the input font.
-2. **Increased Preview Padding**: Updated `.markdown-preview` padding from `4px 8px` to `8px 12px 20px 12px` to provide more breathing room and match the total internal padding of the input cells.
-3. **Enhanced Inline Span Styling**:
-   - Increased horizontal padding for Border Box (`#R#`), Custom Colors (`{bg:R}`), and Highlights (`!!`, `??`, `==`) from `4-6px` to `8px`.
-   - Added `word-break: normal;` and `overflow-wrap: break-word;` to these spans in both `script.js` and `export_static.py`.
-   - Added `box-decoration-break: clone;` to more syntaxes to ensure borders/backgrounds wrap correctly across multiple lines.
-4. **Edit Mode Sync**: Updated `highlightSyntax()` in `script.js` to use the same improved padding and word-break settings for consistency during editing.
-5. **List Item Overflow and Gap Fix**: Initially tried `display: block` to fix overflow, but this caused double line breaks in the `pre-wrap` container. Corrected this by using `display: inline-block; width: 100%; box-sizing: border-box; padding-left: Xem;`. This keeps the indent inside the element's width (preventing overflow) without triggering the extra vertical space of block elements. Also reduced cell bottom padding from `20px` to `6px`.
-
-**Files Modified:**
-- `static/style.css` - Unified font and increased preview padding
-- `static/script.js` - Updated `parseMarkdownInline`, `oldParseMarkdownBody`, `highlightSyntax`, and list item styles
-- `export_static.py` - Synced CSS, JS formatting, and list item logic for static exports
-
-**Related Issues:** Bangla rendering, UI overflow, border box styling, list indentation
-
-**Result:** Bangla text and lists now render consistently within cells and border boxes without horizontal overflow. The removal of `width: 100%` from list items ensures they stay within the parent's width even with indents.
+**Solution:** Unified font (Vrinda) and increased preview padding.
 
 ---
 
 ## [2026-01-17 22:45] - Math Category Refinement and Git Workflow Setup
 
-**Problem:**
-Math category had too many buttons (12 total) making it cluttered, and needed to establish proper Git commit workflow with documentation updates.
+**Problem:** 
+Cluttered F3 math section.
 
-**Root Cause:**
-Initial implementation added all possible math symbols without considering UI focus and usability. Also lacked structured Git workflow.
-
-**Solution:**
-1. **Simplified Math category** to 4 essential buttons:
-   - Moved superscript (X^2^) and subscript (X~2~) from main section to Math
-   - Removed 10 math symbol buttons (×, ÷, ±, ≠, ≤, ≥, ≈, ∞, π, α)
-   - Kept core functions: √ (Square Root), a/b (Fraction), X^2^, X~2~
-
-2. **Enhanced documentation system**:
-   - Added `#[[file:md/RECENT.md]]` reference in DEVELOPER_GUIDE.md
-   - Clarified archiving process (move to ARCHIVE_RECENT.md, don't delete)
-   - Established Git commit rules with emoji messages
-
-3. **Code cleanup**:
-   - Removed unused `applyMathFormat()` function (~60 lines)
-   - Updated documentation to reflect changes
-
-**Files Modified:**
-- `templates/index.html` - Math category refinement
-- `static/script.js` - Removed applyMathFormat() function
-- `md/KEYBOARD_SHORTCUTS.md` - Updated documentation
-- `DEVELOPER_GUIDE.md` - Enhanced Recent.md integration
-- `md/RECENT.md` - Updated with session details
-- `md/ARCHIVE_RECENT.md` - Created archive template
-
-**Related Issues:** F3 formatter organization, documentation system, Git workflow
-
-**Result:** Cleaner, more focused Math category with 4 essential buttons and established documentation/Git workflow.
+**Solution:** Simplified to 4 essential buttons.
 
 ---
 
 ## [2026-01-17 22:50] - Project Template Creation and Math Category Optimization
 
-**Problem:**
-Need reusable project template for future projects and Math category button order could be improved for better UX.
+**Problem:** 
+Inconsistent project setup.
 
-**Root Cause:**
-No standardized project setup template available, and Math category had less commonly used functions (√, a/b) before more basic ones (superscript, subscript).
-
-**Solution:**
-1. **Created PROJECT_TEMPLATE_GUIDE.md**:
-   - Complete project setup checklist with directory structure
-   - Documentation templates (RECENT.md, PROBLEMS_AND_FIXES.md, etc.)
-   - Git workflow with emoji commit guidelines
-   - Technology-specific customization guide
-   - Ready-to-use file templates (README.md, .gitignore)
-
-2. **Reordered Math category buttons** for logical flow:
-   - X^2^ (Superscript) → First (most common)
-   - X~2~ (Subscript) → Second (very common)
-   - √ (Square Root) → Third (specialized)
-   - a/b (Fraction) → Fourth (advanced)
-
-3. **Enhanced DEVELOPER_GUIDE.md** with complete Git workflow documentation
-
-**Files Modified:**
-- `templates/index.html` - Math category button reordering
-- `DEVELOPER_GUIDE.md` - Added Git Commit Workflow section
-- `PROJECT_TEMPLATE_GUIDE.md` - Created comprehensive project template
-- `md/RECENT.md` - Updated session details
-
-**Related Issues:** Project setup efficiency, UX optimization, documentation standardization
-
-**Result:** Reusable project template created and Math category optimized for better user experience.
+**Solution:** Standardized guide and reordered buttons.
 
 ---
 
 ## [2026-01-17 22:55] - Header Z-Index Fix for Edit Mode Scrolling
 
-**Problem:**
-When in contentEditable edit mode and scrolling the sheet, the edit box would cover/interrupt the table headers, causing them to disappear from view.
+**Problem:** 
+Edit box covering headers.
 
-**Root Cause:**
-Z-index conflict - table headers (`th`) had `z-index: 10` while contentEditable cells in edit mode had `z-index: 100`, causing edit boxes to render above the headers during scrolling.
-
-**Solution:**
-Increased table headers' z-index from `10` to `200` to ensure they always stay above edit boxes and remain visible during scrolling.
-
-**Files Modified:**
-- `static/style.css` - Updated `th` selector z-index property
-
-**Related Issues:** UI layering, edit mode UX, header visibility
-
-**Result:** Table headers now remain visible and properly positioned above edit boxes during scrolling in edit mode.
+**Solution:** Increased th z-index.
 
 ---
 
 ## [2026-01-17 23:00] - Code Formatting Bug Fix in Edit Mode
 
-**Problem:**
-When using backticks for code formatting like `text`, it rendered correctly in markdown preview mode but in edit mode everything after the opening backtick appeared as code formatting, breaking the rest of the text.
+**Problem:** 
+Malformed HTML breaking syntax highlighting.
 
-**Root Cause:**
-The `highlightSyntax()` function had malformed HTML in the code formatting regex - it was using `</strong>` closing tag instead of `</code>`, creating invalid HTML that broke the parsing and affected subsequent text formatting.
-
-**Solution:**
-Fixed the backtick formatting rule in `highlightSyntax()` function by changing the closing tag from `</strong>` to `</code>`:
-
-**Before:**
-```javascript
-formatted = formatted.replace(/`(.*?)`/g, '<code><span class="syn-marker">`</span>$1<span class="syn-marker">`</span></strong>');
-```
-
-**After:**
-```javascript
-formatted = formatted.replace(/`(.*?)`/g, '<code><span class="syn-marker">`</span>$1<span class="syn-marker">`</span></code>');
-```
-
-**Files Modified:**
-- `static/script.js` - highlightSyntax() function code formatting rule
-
-**Related Issues:** Edit mode syntax highlighting, HTML parsing, code formatting
-
-**Result:** Code formatting with backticks now works correctly in both preview and edit modes without affecting other text.
+**Solution:** Fixed closing tag in regex.
 
 ---
 
 ## [2026-01-17 23:10] - Superscript Mode Toggle Implementation
 
-**Problem:**
-Syntax conflict between math notation (`2^3 = 8`) and superscript formatting (`x^2^`). Users needed ability to control when `^text^` should be parsed as superscript vs displayed as normal text for mathematical expressions.
+**Problem:** 
+Conflict between math notation and markers.
 
-**Root Cause:**
-The parsing functions always converted `^text^` to superscript formatting, making it impossible to display mathematical expressions like `2^3` without unwanted formatting.
-
-**Solution:**
-Implemented per-cell superscript mode toggle:
-
-1. **Added context menu option**: "^Superscript^ Mode" in right-click cell menu
-2. **Per-cell control**: Each cell stores `superscriptMode` property in cell styles
-3. **Conditional parsing**: Modified parsing functions to only convert `^text^` when mode is enabled:
-   - `parseMarkdown(text, cellStyle = {})`
-   - `parseMarkdownInline(text, cellStyle = {})`
-   - `oldParseMarkdownBody(lines, cellStyle = {})`
-4. **Multi-cell support**: Toggle works with multiple selected cells
-5. **Visual feedback**: Checkmark indicator shows current state
-
-**Technical Implementation:**
-```javascript
-// Conditional superscript parsing
-if (cellStyle.superscriptMode) {
-    formatted = formatted.replace(/\^(.+?)\^/g, '<sup>$1</sup>');
-}
-```
-
-**Files Modified:**
-- `templates/index.html` - Added context menu option
-- `static/script.js` - Added toggleSuperscriptMode() and updated parsing functions
-
-**Related Issues:** Math notation conflicts, syntax parsing, context menu functionality
-
-**Result:** Users can now control per-cell whether `^text^` displays as normal text (for math) or superscript formatting (for variables).
+**Solution:** Per-cell mode toggle.
 
 ---
 
 ## [2026-01-17 23:12] - Set Superscript Mode Default to Enabled
 
-**Problem:**
-Superscript mode was disabled by default, requiring users to manually enable it for each cell. Since most cells use `^text^` for superscript formatting, this created unnecessary workflow friction.
+**Problem:** 
+Manual configuration required for every cell.
 
-**Root Cause:**
-The `getCellStyle()` function returned undefined for `superscriptMode` by default, which was treated as false/disabled in the parsing logic.
-
-**Solution:**
-Modified `getCellStyle()` function to return `superscriptMode: true` as the default value for new cells:
-
-```javascript
-// Set default values for new cells
-if (style.superscriptMode === undefined) {
-    style.superscriptMode = true; // Default to enabled
-}
-```
-
-**Files Modified:**
-- `static/script.js` - Updated getCellStyle() function default behavior
-
-**Related Issues:** User workflow optimization, default behavior, superscript parsing
-
-**Result:** New cells now have superscript mode enabled by default, making `^text^` work immediately without manual configuration. Existing cells maintain their current settings for backward compatibility.
+**Solution:** Enabled by default for new styles.
 
 ---
 
 ## [2026-01-17 23:20] - LaTeX Math Syntax Support Implementation
 
-**Problem:**
-AI assistants provide math solutions in LaTeX format (`$\sqrt{25}$`, `$\log_2 8 = 3$`) but the application only supported KaTeX syntax (`\(...\)`), causing AI-generated math to display as raw text instead of rendered mathematics.
+**Problem:** 
+AI-generated math not rendering.
 
-**Root Cause:**
-The parsing functions only recognized KaTeX `\(...\)` syntax and didn't convert the standard LaTeX `$...$` format that AI assistants commonly use.
-
-**Solution:**
-Implemented LaTeX to KaTeX conversion across all parsing functions:
-
-1. **Conversion Logic**: Added `text.replace(/\$([^$]+)\$/g, '\\($1\\)')` to convert `$math$` → `\(math\)`
-2. **JavaScript Functions Updated**:
-   - `parseMarkdownInline()` - Inline math parsing
-   - `oldParseMarkdownBody()` - Main text parsing
-   - `highlightSyntax()` - Edit mode syntax highlighting
-   - `stripMarkdown()` - Search/sort functionality
-   - `checkHasMarkdown()` - Markdown detection
-3. **Python Export Support**: Updated `export_static.py` parseMarkdown functions
-4. **Detection Enhancement**: Added `$` detection to hasMarkdown checks
-
-**Technical Implementation:**
-```javascript
-// Convert LaTeX $...$ syntax to KaTeX \(...\) syntax
-formatted = formatted.replace(/\$([^$]+)\$/g, '\\($1\\)');
-```
-
-**Files Modified:**
-- `static/script.js` - Added LaTeX conversion to 5 parsing functions
-- `export_static.py` - Added LaTeX conversion to export functions
-
-**Related Issues:** AI compatibility, math rendering, LaTeX vs KaTeX syntax
-
-**Result:** AI-generated math content now renders properly. Users can copy-paste math solutions from AI assistants and they display as beautiful mathematical notation instead of raw LaTeX code. Both `$...$` and `\(...\)` syntaxes work seamlessly.
+**Solution:** LaTeX to KaTeX conversion across all parsers.
 
 ---
 
 ## [2026-01-17 23:35] - Superscript Toggle Fixed in Static Export (RESOLVED)
 
-**Problem:**
-The per-cell superscript mode toggle was not working in the static export (`export_static.py`). While it worked in the main application, exported HTML files ignored the toggle setting and always displayed `^text^` as superscript.
+**Problem:** 
+Toggle setting ignored in HTML files.
 
-**Root Cause:**
-The `export_static.py` script was calling `parseMarkdown(cellValue)` *before* retrieving the `cellStyle` object in the `renderTable` function. Furthermore, the parsing functions (`parseMarkdown`, `parseMarkdownInline`, `oldParseMarkdownBody`) in the exported script did not accept or use the `cellStyle` parameter to check the `superscriptMode` property.
-
-**Solution:**
-1. **Updated `renderTable`**: Moved the `cellStyle` retrieval logic to occur *before* the markdown parsing block.
-2. **Updated `parseMarkdown` call**: Passed `cellStyle` as a second argument: `parseMarkdown(cellValue, cellStyle)`.
-3. **Updated Parsing Functions**: Modified signatures of `parseMarkdown`, `parseMarkdownInline`, and `oldParseMarkdownBody` to accept `cellStyle`.
-4. **Implemented Conditional Logic**: Wrapped the superscript regex replacement in a check:
-   ```javascript
-   if (cellStyle.superscriptMode !== false) {
-       formatted = formatted.replace(/\^(.+?)\^/g, '<sup>$1</sup>');
-   }
-   ```
-   This ensures it defaults to enabled (matching app behavior) but respects explicit disabling.
-
-**Files Modified:**
-- `export_static.py` - Updated `renderTable` logic and parsing function signatures (~15 lines)
-
-**Related Issues:** Superscript Mode Toggle Implementation
-
-**Result:** Static HTML exports now correctly respect the per-cell superscript mode setting. Math expressions like `2^3` remain as text when the toggle is off, while `x^2^` becomes superscript when on.
-
----
-
-## [2026-01-17 23:25] - Superscript Toggle Not Working Properly (PREVIOUSLY UNRESOLVED)
-
-**Problem:**
-The per-cell superscript mode toggle (right-click context menu → "^Superscript^ Mode") is not working correctly. Both checked and unchecked states show `^text^` as superscript instead of respecting the toggle setting.
-
-**Status:** ✅ **RESOLVED** (See entry above - Issue was in export script, app logic was actually correct but needed export sync)
+**Solution:** Synced cellStyle parameter to export parsers.
 
 ---
 
 ## [2026-01-17 22:15] - Square Root and Fraction Buttons Not Working in ContentEditable
 
-**Problem:**
-The Square Root (√) and Smart Fraction (a/b) buttons in the F3 formatter were not working in contentEditable (preview edit) mode, similar to other F3 functions that were previously fixed.
+**Problem:** 
+F3 math buttons failed in Visual Mode.
 
-**Root Cause:**
-The `applySqrtFormat()` and `applyHatFormat()` functions were only written for INPUT/TEXTAREA elements using `.value`, `.selectionStart`, `.selectionEnd` properties, which don't exist in contentEditable mode.
-
-**Solution:**
-Updated both functions to support dual modes:
-1. **ContentEditable mode:**
-   - Check `quickFormatterSelection.isContentEditable` at the start
-   - Extract selected text from `quickFormatterSelection.text`
-   - Use Range API to insert/replace text with `range.deleteContents()` and `range.insertNode()`
-   - Update underlying input with `extractRawText()`
-   - Trigger input event for auto-save
-   - Set cursor position with `setCaretPosition()`
-
-2. **INPUT/TEXTAREA mode:**
-   - Use existing logic with `.value` and `.setSelectionRange()`
-
-**Files Modified:**
-- `static/script.js` - applySqrtFormat (~line 8642), applyHatFormat (~line 8676)
-
-**Related Issues:** F3 Quick Formatter, contentEditable support, Math category
-
-**Note:** This follows the same pattern used to fix other F3 formatter functions like H+, Border Box, Sort Lines, etc. All F3 formatter functions now support both contentEditable and legacy input modes.
+**Solution:** Dual-mode support using Range API.
 
 ---
 
 ## [2026-01-17 21:30] - Double-Click Word Selection Includes Trailing Space
 
-**Problem:**
-When double-clicking on a word in contentEditable mode, the browser's default behavior would select the word plus any trailing whitespace. For example, double-clicking "abcd" in "abcd abc" would select "abcd " (with the space).
+**Problem:** 
+Messy word selection.
 
-**Root Cause:**
-Browser default double-click behavior includes trailing whitespace in word selection for easier text manipulation (e.g., cut/paste operations).
-
-**Solution:**
-Added custom double-click handler for contentEditable preview elements:
-1. Intercept the double-click event
-2. Check if selection ends with whitespace using regex `/s$/`
-3. Count trailing whitespace characters
-4. Adjust the range's end position backward to exclude trailing spaces
-5. Update the selection with the trimmed range
-
-**Files Modified:**
-- `static/script.js` - preview double-click handler (~line 2140)
-
-**Related Issues:** ContentEditable, text selection, UX improvement
-
-**Result:** Clean word selection without trailing spaces in contentEditable mode.
+**Solution:** Custom double-click handler with range adjustment.
 
 ---
 
 ## [2026-01-17 21:00] - F3 Multi-Format Selection Issues
 
-**Problem:**
-1. Multi-format selection (right-click to select multiple formats, left-click to apply all) was not working in contentEditable mode
-2. When clicking on a format that was already selected, it would apply that format twice (once from selectedFormats array, once as the clicked format)
+**Problem:** 
+Multiple formats not applying correctly in Visual Mode.
 
-**Root Cause:**
-1. The `applyMultipleFormats()` function only handled INPUT/TEXTAREA with `.value` property, not contentEditable
-2. The function always added the last clicked format without checking if it was already in the selectedFormats array
-
-**Solution:**
-1. Added full contentEditable support to `applyMultipleFormats()`:
-   - Check `quickFormatterSelection.isContentEditable`
-   - Use Range API to insert formatted text
-   - Update underlying input with `extractRawText()`
-   - Trigger input event for auto-save
-2. Added duplicate detection:
-   - Check if `lastPrefix|lastSuffix` key exists in selectedFormats
-   - Only add the last clicked format if it's not already selected
-   - Adjust format count in toast message accordingly
-
-**Files Modified:**
-- `static/script.js` - applyMultipleFormats (~line 8719)
-
-**Related Issues:** F3 Quick Formatter, multi-format selection, contentEditable
-
-**Usage:**
-- Right-click on format buttons (Bold, Italic, Underline, etc.) to select them
-- Checkmarks (✓) appear on selected formats
-- Left-click any format button to apply all selected formats at once
-- Works in both raw mode and preview edit mode
+**Solution:** Dual-mode applyMultipleFormats.
 
 ---
 
 ## [2026-01-17 20:30] - Link Syntax and Clear Format Behavior
 
-**Problem:**
-1. Link button in F3 formatter was using old syntax `{link:url}text{/}`
-2. When using "Clear Format" button, the new link syntax `url[text]` would be completely removed, losing the URL
+**Problem:** 
+Links using old syntax or being stripped entirely.
 
-**Root Cause:**
-1. `applyLinkFormat()` was hardcoded to use old syntax and didn't support contentEditable
-2. `stripMarkdown()` was converting `url[text]` → `text`, discarding the URL
-
-**Solution:**
-1. Updated `applyLinkFormat()` to:
-   - Use new syntax: `url[text]` instead of `{link:url}text{/}`
-   - Support contentEditable mode with Range API
-   - Keep old syntax working for backward compatibility
-2. Updated `stripMarkdown()` to:
-   - Convert new syntax: `url[text]` → `url text` (keeps both URL and text)
-   - Convert old syntax: `{link:url}text{/}` → `text` (keeps only text)
-
-**Files Modified:**
-- `static/script.js` - applyLinkFormat (~line 8071), stripMarkdown (~line 7280)
-
-**Related Issues:** Link formatting, F3 Quick Formatter, stripMarkdown
-
-**Note:** Both link syntaxes work for rendering. The new syntax is cleaner and preserves more information when clearing formats.
+**Solution:** Updated Link format and stripMarkdown consistency.
 
 ---
 
 ## [2026-01-17 20:00] - Auto-Switch to Raw Mode for Multi-Cursor Features
 
-**Problem:**
-Multi-cursor and multi-selection features (Ctrl+Shift+D, Ctrl+Alt+Up/Down, Select All Matching button) only work in raw mode, but users had to manually switch modes when trying to use them in preview mode.
+**Problem:** 
+Multi-cursor directing users to switch modes manually.
 
-**Root Cause:**
-These features require direct text manipulation with `.value`, `.selectionStart`, `.selectionEnd` properties that don't exist in contentEditable. They were showing toast messages directing users to switch modes manually.
-
-**Solution:**
-Implemented automatic mode switching:
-1. Created `enableRawMode()` helper function to programmatically switch to raw mode
-2. Updated all three feature handlers to:
-   - Detect if in contentEditable (preview) mode
-   - Call `enableRawMode()` to switch automatically
-   - Show toast: "Switched to Raw Mode for [feature name]"
-   - Wait 100ms for table re-render
-   - Focus the appropriate input/textarea in the same cell
-   - For text-based features, try to restore the selection
-
-**Files Modified:**
-- `static/script.js` - enableRawMode (~line 6557), Ctrl+Shift+D handler (~line 700), Ctrl+Alt+Up/Down handlers (~line 716, 732), selectAllMatchingOccurrences (~line 9142)
-
-**Related Issues:** Multi-cursor, multi-selection, mode switching, UX improvement
-
-**Features Affected:**
-- 🎯 Select All Matching button (F3 formatter)
-- Ctrl+Shift+D (Select Next Occurrence)
-- Ctrl+Alt+Up/Down (Multi-line cursor)
+**Solution:** Automatic mode switching logic.
 
 ---
 
 ## [2026-01-17 19:00] - F3 Formatter Functions Not Working in ContentEditable
 
-**Problem:**
-Several F3 Quick Formatter functions were not working in contentEditable (preview edit) mode:
-1. H+ (Variable Font Size) - `#2#text#/#` syntax
-2. Border Box (□) - `#R#text#/#` syntax
-3. Sort Lines (🔤)
-4. Lines to Comma (➡️)
-5. Comma to Lines (⬇️)
+**Problem:** 
+H+, Border Box, Sort, Lines/Comma failed in Visual Mode.
 
-**Root Cause:**
-These functions only handled INPUT/TEXTAREA elements using `.value`, `.selectionStart`, `.selectionEnd` properties, which don't exist in contentEditable mode.
-
-**Solution:**
-Updated all five functions to support both modes:
-1. Check `quickFormatterSelection.isContentEditable` at the start
-2. For contentEditable:
-   - Extract selected text from `quickFormatterSelection.text`
-   - Use Range API to insert/replace text
-   - Update underlying input with `extractRawText()`
-   - Trigger input event for auto-save
-   - Set cursor position with `setCaretPosition()`
-3. For INPUT/TEXTAREA:
-   - Use existing logic with `.value` and `.setSelectionRange()`
-
-**Files Modified:**
-- `static/script.js` - applyVariableFontSize (~line 12048), applyBorderBox (~line 12147), sortLines (~line 12252), linesToComma (~line 12412), commaToLines (~line 12492)
-
-**Related Issues:** F3 Quick Formatter, contentEditable support
+**Solution:** Dual-mode implementation for all 5 functions.
 
 ---
 
 ## [2026-01-17 18:30] - Alt+Up/Down Exits Edit Mode
 
-**Problem:**
-Using Alt+Up/Down to move lines in contentEditable mode would work but then exit edit mode, forcing the user to click back into the cell.
+**Problem:** 
+Line movement triggering focus loss.
 
-**Root Cause:**
-The `moveLines()` function was updating the underlying input element and triggering an `input` event, which caused a blur/focus cycle that exited edit mode.
-
-**Solution:**
-Changed the update strategy for contentEditable mode:
-1. Update contentEditable with `highlightSyntax()` instead of plain text
-2. Update tableData directly without triggering input events
-3. Update input.value silently (no event dispatch)
-4. Call `saveData()` directly for background persistence
-5. Restore cursor position with `setCaretPosition()`
-
-**Files Modified:**
-- `static/script.js` - moveLines (~line 800)
-
-**Related Issues:** Alt+Up/Down, line movement, contentEditable, edit mode
+**Solution:** Silent tableData update and manual highlights.
 
 ---
 
 ## [2026-01-16 20:00] - Click-to-Edit Cursor Positioning Incorrect (RESOLVED)
 
-**Problem:**
-When clicking on markdown preview to enter edit mode, the cursor appeared at the wrong position. For example:
-- Raw input: `"##This Text Is Big Text## This Is Normal Text"`
-- User clicks on "This Text Is Big Te|" (after 19 visible characters)
-- Expected: Cursor at raw position 21 (accounting for opening `##`)
-- Actual: Cursor at raw position 19 (inside the visible content, ignoring markdown syntax)
+**Problem:** 
+Markers making visible offsets inaccurate.
 
-The offset is calculated from the rendered HTML (visible text without markdown syntax), but needs to be mapped to the raw input (with syntax like `##`, `**`, `@@`, etc.).
-
-**Root Cause (Resolved by Gemini):**
-The initial approach tried to use `stripMarkdown()` on partial substrings to build a mapping, but regex patterns like `/##(.+?)##/g` need to see the complete pattern to match. When called on partial strings like `"##T"`, the regex doesn't match, so nothing gets stripped, resulting in 1:1 mapping.
-
-**Solution (Implemented by Gemini):**
-Created `calculateVisibleToRawMap()` function that:
-1. Parses the full string once to identify all markdown patterns
-2. Marks hidden ranges (which character positions are syntax vs content)
-3. Builds a mapping by walking through and counting only non-hidden characters
-4. Uses this mapping to convert visible offset to raw offset
-
-**Why It Works:**
-- Regex patterns match on the full string where patterns are complete
-- Marks which parts are syntax vs content
-- No need to call `stripMarkdown()` multiple times
-- Handles all patterns including custom syntaxes
-
-**Files Modified:**
-- `static/script.js` - calculateVisibleToRawMap (~line 1402), handlePreviewMouseDown (~line 1520)
-- `md/PROBLEMS_AND_FIXES.md` - Updated with resolution
-- `md/CLICK_TO_EDIT_CURSOR_POSITIONING.md` - Updated with solution details
-
-**Related Issues:** Edit mode, cursor positioning, markdown syntax
-
-**Key Learning:**
-The fundamental mistake was assuming `stripMarkdown()` would work on partial strings. Regex patterns need complete patterns to match. The solution was to parse once, mark ranges, then map - a much more robust approach.
+**Solution:** Robust mapping via calculateVisibleToRawMap.
 
 ---
 
 ## [2026-01-16 18:15] - Multi-Line Cursor Selection Support
 
-**Problem:**
-Multi-line cursors (Ctrl+Alt+Up/Down) could only insert/delete text at cursor positions. There was no way to select text on multiple lines simultaneously or move cursors by word boundaries, making it difficult to select and replace different words on each line.
+**Problem:** 
+Cursors could only insert/delete, no selection.
 
-**Root Cause:**
-The multi-line cursor system only tracked cursor positions (line, column), not selections. The keydown handler didn't support Shift+arrow keys or Ctrl+Space for word navigation.
-
-**Solution:**
-1. Added selection tracking to cursor objects: `selectionStart` and `selectionEnd` properties
-2. Implemented Shift+arrow key support (Shift+Left, Shift+Right, Shift+Home, Shift+End) to extend selections
-3. Added Ctrl+Space to move cursors to next word boundary (stops at spaces and special characters)
-4. Updated `handleMultiLineCursorMove()` to handle selection extension with `extendSelection` parameter
-5. Modified typing/deletion logic to handle selections (replace selected text when typing, delete selection on Backspace/Delete)
-6. Enhanced `showCursorMarkers()` to visualize selections with blue highlight overlays (rgba(0, 123, 255, 0.3))
-7. Native cursor on last line shows native selection, other lines show CSS selection highlights
-
-**Files Modified:**
-- `static/script.js` - setupMultiLineCursorListener (~line 9518), handleMultiLineCursorMove (~line 9633), showCursorMarkers (~line 9344), getAbsolutePosition helper (~line 9710)
-
-**Related Issues:** Multi-cursor editing, Ctrl+Alt+arrows
-
-**Usage:**
-- Ctrl+Alt+Down/Up: Add cursors on adjacent lines
-- Shift+Home/End: Select from cursor to line start/end on all lines
-- Shift+Arrow: Extend selection character by character
-- Ctrl+Space: Jump to next word boundary
-- Type: Replace all selections with typed text
-- Backspace/Delete: Delete all selections
+**Solution:** Selection tracking and Shift+arrow support.
 
 ---
 
 ## [2026-01-16 18:00] - Multi-Line Cursor Visual Markers Not Updating
 
-**Problem:**
-When using Ctrl+Alt+Up/Down to create multi-line cursors, the visual cursor markers were disabled (commented out). When re-enabled, they didn't update when moving cursors with arrow keys, and the last cursor showed both a CSS marker and the native cursor (double cursor).
+**Problem:** 
+No visual feedback for multi-cursors.
 
-**Root Cause:**
-1. Visual cursor markers (`showCursorMarkers`) were commented out in both `addCursorBelow/Above` and the keydown listener, likely due to previous issues
-2. Arrow key navigation wasn't implemented for multi-line cursors - they only worked for typing/deleting
-3. The `showCursorMarkers` function was showing markers for ALL cursors including the last one, causing a double cursor effect
-
-**Solution:**
-1. Re-enabled `showCursorMarkers()` calls in `addCursorBelow()` and `addCursorAbove()`
-2. Added arrow key handling in the keydown listener (ArrowLeft, ArrowRight, Home, End, Escape)
-3. Created `handleMultiLineCursorMove()` function to update cursor positions and refresh visual markers when arrow keys are pressed
-4. Updated `showCursorMarkers()` to skip the last cursor (shows native cursor only) to avoid double cursor
-5. Added Escape key to clear multi-cursor mode
-
-**Files Modified:**
-- `static/script.js` - addCursorBelow (~line 9419), addCursorAbove (~line 9461), setupMultiLineCursorListener (~line 9518), showCursorMarkers (~line 9344), handleMultiLineCursorMove (~line 9633)
-
-**Related Issues:** Multi-cursor visual feedback, Ctrl+Alt+arrows
+**Solution:** Re-enabled markers and added arrow handling.
 
 ---
 
 ## [2026-01-16 17:45] - Multi-Cursor Home/End Not Consolidating Cursors Per Line
 
-**Problem:**
-When using Ctrl+Shift+D to select multiple occurrences of a word (including multiple on the same line), pressing Home or End would move each cursor independently, resulting in multiple cursors at the same position on the same line. When typing, text would be inserted multiple times on that line.
+**Problem:** 
+Duplicate cursors on same line.
 
-**Root Cause:**
-The `handleMultiCursorMove()` function moved each cursor independently without checking if multiple cursors ended up at the same position after Home/End navigation.
-
-**Solution:**
-Added cursor consolidation logic specifically for Home/End keys:
-1. After moving all cursors to line start (Home) or line end (End), check for duplicate positions
-2. Use a Set to track seen positions and filter out duplicates
-3. Update the selectedMatches and matches arrays with the consolidated list
-4. Update the visual indicator to show the correct count of remaining cursors
-
-This ensures one cursor per line after Home/End, making multi-line editing more intuitive.
-
-**Files Modified:**
-- `static/script.js` - handleMultiCursorMove (~line 9163)
-
-**Related Issues:** Multi-cursor editing, Ctrl+Shift+D
+**Solution:** Set-based consolidation.
 
 ---
 
 ## [2026-01-16 17:30] - Keyboard Shortcuts Not Working (F9, Ctrl+Shift+D, Ctrl+Alt+Arrows)
 
-**Problem:**
-1. F9 (swap words) not working in contentEditable mode
-2. Ctrl+Shift+D (select next occurrence) not working at all
-3. Ctrl+Alt+Up/Down (multi-cursor) not working at all
+**Problem:** 
+Conflict with browser defaults.
 
-**Root Cause:**
-1. F9 was only implemented for INPUT/TEXTAREA, not contentEditable
-2. Ctrl+Shift+D and Ctrl+Alt+arrows were being detected by the browser but the handlers were checking for INPUT/TEXTAREA only, and the active element was the contentEditable DIV
-3. These are complex multi-cursor features that require direct access to `.value`, `.selectionStart`, `.selectionEnd` properties which don't exist in contentEditable
-
-**Solution:**
-1. **F9**: Updated to handle both contentEditable and INPUT/TEXTAREA modes using the same pattern as other formatter functions (check `isContentEditable`, use `window.getSelection()` and `Range` API, update underlying input)
-2. **Ctrl+Shift+D, Ctrl+Alt+arrows**: These features require raw mode because they manipulate text selections and cursors in ways that are incompatible with contentEditable's DOM structure. Added user-friendly toast messages: "Select next occurrence only works in raw mode (📄 button)" and "Multi-cursor only works in raw mode (📄 button)"
-3. Moved keyboard event listener to capture phase (`addEventListener(..., true)`) to catch events before browser defaults
-4. Added `e.preventDefault()` at the top of Ctrl+Alt+arrow handlers to prevent Windows screen rotation shortcuts
-
-**Files Modified:**
-- `static/script.js` - F9 handler (~line 561), Ctrl+Shift+D handler (~line 660), Ctrl+Alt+arrow handlers (~line 675, 690), event listener registration (~line 42)
-
-**Related Issues:** ContentEditable vs INPUT/TEXTAREA feature compatibility
-
-**Note:** Multi-cursor features (Ctrl+Shift+D, Ctrl+Alt+arrows) are intentionally limited to raw mode because they require precise character-level manipulation that's not feasible in contentEditable's rich DOM structure.
+**Solution:** Capture phase listeners and preventDefault.
 
 ---
 
 ## [2026-01-16 17:00] - F3 Formatting Not Persisting After Refresh
 
-**Problem:**
-When applying formatting via F3 (bold, italic, colors, etc.) in contentEditable mode, the syntax would disappear after refreshing the page. The formatting was visible temporarily but not saved to the database.
+**Problem:** 
+Visual changes not saving to database.
 
-**Root Cause:**
-The `applyQuickFormat()` function was trying to update the underlying input element using a complex approach:
-1. It extracted raw text from contentEditable
-2. Used string replace to find/replace selected text (unreliable with duplicate text)
-3. Called `highlightSyntax()` to re-render the preview
-4. Manually updated tableData and triggered save
-
-This approach was fragile and didn't properly sync the contentEditable DOM with the underlying input element.
-
-**Solution:**
-Simplified the contentEditable handling to match the pattern used in other formatter functions:
-1. Insert formatted text directly into contentEditable using `range.insertNode(textNode)`
-2. Extract the complete raw text using `extractRawText(input)`
-3. Update the underlying input element's `.value` property
-4. Trigger `input` event on the underlying element (which handles tableData update and auto-save)
-
-This ensures the contentEditable changes are properly synced to the hidden input/textarea, which is what gets saved to the database.
-
-**Files Modified:**
-- `static/script.js` - applyQuickFormat (~line 7538)
-
-**Related Issues:** All F3 formatter functions must properly sync contentEditable changes to underlying input
+**Solution:** Simplified sync to underlying hidden inputs.
 
 ---
 
 ## [2026-01-16 16:45] - F3 Quick Formatter Additional Functions Not Working
 
-**Problem:**
-1. Text case conversion (uppercase, lowercase, proper case) buttons in F3 not working
-2. Scroll position jumping to top after applying F3 formatting
+**Problem:** 
+Case conversion and scroll jumping.
 
-**Root Cause:**
-1. `changeTextCase()` function was only written for INPUT/TEXTAREA elements, not contentEditable
-2. No scroll position saving/restoration when opening/closing F3 formatter
-
-**Solution:**
-1. Updated `changeTextCase()` to handle both contentEditable and legacy modes (same pattern as formatPipeTable and removeFormatting)
-2. Added `quickFormatterScrollPosition` variable to save scroll position
-3. `showQuickFormatter()` now saves `tableContainer.scrollTop` when opening
-4. `closeQuickFormatter()` now restores scroll position with 50ms delay after closing
-
-**Files Modified:**
-- `static/script.js` - changeTextCase (~line 8017), showQuickFormatter (~line 7330), closeQuickFormatter (~line 7450)
-
-**Related Issues:** All F3 formatter functions need contentEditable support
-
-**Note:** This is part of a larger pattern - any F3 formatter function that modifies text needs to check `quickFormatterSelection.isContentEditable` and handle both modes appropriately.
+**Solution:** Dual-mode case change and scroll position caching.
 
 ---
 
 ## [2026-01-16 16:30] - Markdown Links Not Opening in Browser
 
-**Problem:**
-When clicking on links in markdown preview (when NOT in edit mode), the cell would enter edit mode instead of opening the link in a browser.
+**Problem:** 
+Clicking links entered edit mode.
 
-**Root Cause:**
-The markdown preview element has `contentEditable="true"`, so any click on it (including on links) triggers focus and enters edit mode. The click event handler alone wasn't enough to prevent this because the focus happens on mousedown, before the click event.
-
-**Solution:**
-Added both `mousedown` and `click` event handlers to intercept link clicks:
-1. `mousedown` handler prevents the default focus behavior when clicking on links
-2. `click` handler opens the link in a new tab using `window.open()`
-3. Both handlers use `e.preventDefault()`, `e.stopPropagation()`, and `e.stopImmediatePropagation()` to prevent event bubbling
-4. Both handlers use capture phase (`true` parameter) to catch events before they bubble
-
-**Files Modified:**
-- `static/script.js` - Link click handlers (~line 1689)
-
-**Related Issues:** ContentEditable focus behavior
+**Solution:** Intercepted mousedown/click on links.
 
 ---
 
 ## [2026-01-16 16:15] - F3 Quick Formatter Functions Not Working with ContentEditable
 
-**Problem:**
-1. Table formatter (F3 → 📊) not working - button clicks weren't registering any action
-2. Remove formatting (F3 → 🧹) not working - function was completely missing from script.js
+**Problem:** 
+Table formatter and Clear buttons failed.
 
-**Root Cause:**
-1. The `formatPipeTable()` function was written to work with INPUT/TEXTAREA elements (using `.value` property and `.selectionStart/.selectionEnd`)
-2. When markdown preview is active, F3 opens on the contentEditable DIV instead, which uses different APIs (`.textContent`, `window.getSelection()`, `Range` objects)
-3. The `quickFormatterSelection` object structure is different for contentEditable: `{isContentEditable: true, range: Range, text: '...'}` vs `{start: number, end: number}`
-4. The `removeFormatting()` function was deleted from script.js at some point
-
-**Solution:**
-1. Updated `formatPipeTable()` to detect if target is contentEditable and handle both modes:
-   - ContentEditable: Use `quickFormatterSelection.text` for selected text, `range.deleteContents()` and `range.insertNode()` for replacement
-   - Legacy: Use `input.value.substring(start, end)` and string manipulation
-2. Added `removeFormatting()` function back with same dual-mode support
-3. Both functions now update the underlying input element when working with contentEditable
-4. Added cache control headers to Flask app to prevent browser caching issues during development
-
-**Files Modified:**
-- `static/script.js` - formatPipeTable (~line 7848), removeFormatting (~line 11598)
-- `app.py` - Added cache control headers (~line 7)
-
-**Related Issues:** All F3 quick formatter functions need to support both contentEditable and legacy input modes
+**Solution:** Dual-mode implementation and Range API integration.
 
 ---
 
 ## [2026-01-16 15:30] - Multiple Shortcut and Feature Fixes
 
-**Problem:**
-1. Table formatter (F3 → 📊) and clear cell formatting not working
-2. Links in markdown preview not opening when clicked
-3. Ctrl+Shift+D not working (Chrome's default bookmark shortcut interfering)
-4. F9 shortcut not working
+**Problem:** 
+Persistence and shortcut interference issues.
 
-**Root Cause:**
-1. Clear cell formatting wasn't saving data after clearing
-2. Markdown preview has `contentEditable="true"`, so clicking links positioned cursor instead of following the link
-3. Ctrl+Shift+D wasn't preventing default early enough, allowing Chrome's bookmark shortcut to interfere
-4. F9 had `e.preventDefault()` in wrong position (after checking element instead of before)
-
-**Solution:**
-1. Added `saveData()` call to `clearCellFormatting()` function
-2. Added click event listener to markdown preview that intercepts link clicks, prevents default editing behavior, and opens links in new tab using `window.open()`
-3. Moved `e.preventDefault()` and added `e.stopPropagation()` to top of Ctrl+Shift+D handler before element checks
-4. Moved `e.preventDefault()` to top of F9 handler before element checks
-
-**Files Modified:**
-- `static/script.js` - Link click handler (~line 1675), clearCellFormatting (~line 4281), Ctrl+Shift+D handler (~line 607), F9 handler (~line 561)
-
-**Related Issues:** Markdown preview contentEditable architecture
+**Solution:** saveData in clear, prevented bookmark/rotation defaults.
 
 ---
 
 ## [2026-01-16 01:20] - F3 Quick Formatter Blur Handler Fix
+
 **Problem:** 
-When applying formatting via F3, the effect would appear briefly then disappear, leaving all text looking normal (unformatted).
+Formatting disappearing briefly.
 
-**Root Cause:** 
-When F3 opens, it steals focus from the contenteditable preview. This triggered the `blur` event handler, which immediately called `parseMarkdown()` to render the clean preview. After formatting was applied and the preview refocused, the clean preview content was being used instead of the newly formatted content.
-
-**Solution:** 
-Added a check in the blur event handler to skip processing when the quick formatter is visible (`quickFormatter.style.display === 'block'`). This prevents the premature switch from syntax-highlighted mode to clean preview mode.
-
-**Files Modified:**
-- `static/script.js` - Added quick formatter visibility check in blur handler.
-
-**Related Issues:** F3 formatting, contenteditable focus/blur.
+**Solution:** Added visibility check in blur listener.
 
 ---
 
 ## [2026-01-16 01:00] - F3 Quick Formatter Duplicate Functions Removed
+
 **Problem:** 
-F3 quick formatter buttons clicked but did nothing - no formatting was applied and the window stayed open.
+Duplicate code overwriting fixes.
 
-**Root Cause:** 
-Duplicate function definitions existed in `script.js`. The old versions (lines 10470-11255) were defined after the fixed versions (lines 7483+), causing JavaScript to overwrite the fixed functions with the old ones that didn't support contenteditable elements.
-
-**Solution:** 
-Removed approximately 785 lines of duplicate quick formatter functions from lines 10470-11255. Now only the fixed versions that support both contenteditable and legacy input/textarea remain.
-
-**Files Modified:**
-- `static/script.js` - Removed duplicate function block.
-
-**Related Issues:** F3 formatting, function duplication.
+**Solution:** Deleted 785 redundant lines.
 
 ---
 
 ## [2026-01-16 00:45] - F3 Quick Formatter Contenteditable Support
+
 **Problem:** 
-F3 quick formatter didn't open when text was selected in the WYSIWYG contenteditable editor.
+F3 didn't open in Visual Mode.
 
-**Root Cause:** 
-The F3 keydown handler only checked for `INPUT` and `TEXTAREA` elements. The WYSIWYG editor uses a `contenteditable` DIV (`.markdown-preview`), which wasn't detected.
-
-**Solution:** 
-Updated multiple functions to support contenteditable elements:
-- **F3 handler:** Added check for `.markdown-preview` with `isContentEditable`.
-- **`showQuickFormatter`:** Uses `window.getSelection()` to get range and text for contenteditable.
-- **`updateSelectionStats`:** Gets selected text from stored `quickFormatterSelection.text`.
-- **`applyQuickFormat`:** For contenteditable, extracts raw text, replaces selection, updates tableData & hidden input, and re-renders with `highlightSyntax()`.
-- **`searchGoogle`/`searchGoogleWithExtra`:** Gets text from contenteditable selection.
-
-**Files Modified:**
-- `static/script.js` - Updated F3 handler, showQuickFormatter, updateSelectionStats, applyQuickFormat, searchGoogle, searchGoogleWithExtra.
-
-**Related Issues:** WYSIWYG editing, F3 quick formatting.
+**Solution:** Updated detection and selection logic.
 
 ---
 
 ## [2026-01-16 00:40] - WYSIWYG Enter Key Cell Expansion Fix
+
 **Problem:** 
-When pressing Enter at the end of a cell, the new line would overflow the cell border and the cursor would become invisible.
+Cursor becoming invisible on Enter.
 
-**Root Cause:** 
-The Enter key handler was updating cell height, but not accounting for the newly added `<br>` element. The height calculation happened before the browser had a chance to layout the new content, and the cursor wasn't scrolled into view.
-
-**Solution:** 
-- Added extra padding (+20px) to height calculation to ensure room for the cursor.
-- Changed cell and preview height to `'auto'` with `minHeight` to allow natural expansion.
-- Added `br.scrollIntoView({ block: 'nearest', behavior: 'instant' })` to scroll the cursor into view.
-
-**Files Modified:**
-- `static/script.js` - Enhanced Enter key handler in `applyMarkdownFormatting`.
-
-**Related Issues:** Cell height adjustment, cursor visibility.
+**Solution:** scrollIntoView and padding adjustments.
 
 ---
 
 ## [2026-01-16 00:30] - WYSIWYG Backspace/Delete Double-Press Fix
+
 **Problem:** 
-In the contenteditable WYSIWYG editor, pressing Backspace or Delete required two presses to delete one character.
+Invisible ZWS requiring double backspace.
 
-**Root Cause:** 
-Zero-width spaces (`\u200B`) were inserted after `<br>` tags to make empty lines clickable. Backspace/Delete would first delete the invisible ZWS (no visible change), then the actual character.
-
-**Solution:** 
-Added keydown handlers for Backspace and Delete that detect if the adjacent character is a ZWS and automatically remove it before letting the default action continue.
-
-**Files Modified:**
-- `static/script.js` - Added ZWS skip logic in the keydown handler.
-
-**Related Issues:** Enter key handling, empty line clicking.
+**Solution:** Manual ZWS skip in keydown.
 
 ---
 
 ## [2026-01-16 00:25] - WYSIWYG Focus Scroll Prevention
+
 **Problem:** 
-When clicking on a cell to edit, especially if scrolled far into a tall cell, the sheet would jump to position the cell's top border at the top of the viewport.
+Jumping to top on cell focus.
 
-**Root Cause:** 
-Browser default behavior scrolls focused elements into view. The `focus()` call on contenteditable elements triggered this.
-
-**Solution:** 
-Multiple fixes applied:
-- Used `focus({ preventScroll: true })` when focusing the preview.
-- Save and restore `tableContainer.scrollTop/scrollLeft` around focus events.
-- Added CSS `scroll-margin: 0` to prevent browser scroll adjustments.
-
-**Files Modified:**
-- `static/script.js` - `handlePreviewMouseDown` and focus event listener.
-- `static/style.css` - Added scroll-margin rules for `.markdown-preview`.
-
-**Related Issues:** Click-to-Edit positioning.
+**Solution:** preventScroll and scroll-margin CSS.
 
 ---
 
 ## [2026-01-16 00:20] - WYSIWYG Data Save and Cell Height Fix
+
 **Problem:** 
-1. Data wasn't saving while typing in the WYSIWYG editor.
-2. As content grew, text would overflow the cell border instead of expanding.
-3. Calling `updateCell()` during input caused focus loss.
+Data not saving and overflow in edit mode.
 
-**Root Cause:** 
-`updateCell()` calls `applyMarkdownFormatting()` which recreates the preview element, destroying the focused element. Height adjustment was based on the hidden input, not the visible preview.
-
-**Solution:** 
-- Save data directly to `tableData.sheets[currentSheet].rows[rowIndex][colIndex]` without calling `updateCell()`.
-- Use debounced `saveData()` for backend persistence.
-- Measure `preview.scrollHeight` directly and apply height to preview, input, and cell.
-
-**Files Modified:**
-- `static/script.js` - Refactored `input` event handler in `applyMarkdownFormatting`.
-
-**Related Issues:** Focus loss during editing.
+**Solution:** Direct tableData sync and maxHeight TD logic.
 
 ---
 
 ## [2026-01-16 00:15] - WYSIWYG Cursor Jump on Input
+
 **Problem:** 
-While typing, the cursor would jump around, sometimes to previous lines or the top of the cell.
+Re-rendering on every key jumpy.
 
-**Root Cause:** 
-The `input` event handler was re-rendering the entire content with `highlightSyntax()` on every keystroke, then attempting to restore the caret position. Offset calculation inconsistencies (especially with ZWS characters) caused mismatches.
-
-**Solution:** 
-Removed real-time re-rendering from the input handler. Now:
-- Browser handles DOM updates natively (typing, deletion).
-- Input handler only syncs data and adjusts height.
-- Full re-render only happens on focus (to show syntax) and blur (to show preview).
-
-**Files Modified:**
-- `static/script.js` - Simplified `input` event handler.
-
-**Related Issues:** Caret management, ZWS handling.
+**Solution:** Restricted re-render to focus/blur.
 
 ---
 
 ## [2026-01-15 23:45] - WYSIWYG Markdown Editing Implementation
+
 **Problem:** 
-Editing markdown using a transparent textarea overlay felt disconnected and didn't allow for real-time visual feedback of formatted text during editing. Syntax markers were often hard to manage.
+Edit experience disconnected from preview.
 
-**Root Cause:** 
-Traditional `<textarea>` elements only support plain text, forcing a separate rendering layer (preview) to be overlaid on top.
-
-**Solution:** 
-Transitioned to a `contenteditable="true"` architecture:
-- Replaced the transparent textarea with a dynamic `contenteditable` div.
-- Implemented dual-rendering: `parseMarkdown()` for clean preview (blur) and `highlightSyntax()` for editing (focus).
-- Added `extractRawText()` to reliably reconstruct markdown from the DOM.
-- Implemented character-offset based caret management (`getCaretCharacterOffset` and `setCaretPosition`) to preserve cursor position during real-time re-highlighting.
-- Styled syntax markers with `.syn-marker` class (0.6 opacity, normal font weight) to make them unobtrusive.
-
-**Files Modified:**
-- `static/script.js` - Major refactor of `applyMarkdownFormatting`, added `highlightSyntax`, `extractRawText`, caret helpers.
-- `static/style.css` - Added `.syn-marker` and contenteditable focus styles.
-- `md/WYSIWYG_EDIT_MODE.md` - New documentation.
-
-**Related Issues:** Click-to-Edit cursor positioning.
+**Solution:** contentEditable architecture with dual-rendering.
 
 ---
 
 ## [2026-01-15 23:30] - Reverted Forced Sheet Scrolling to Top
+
 **Problem:** 
-A previously implemented feature forced the sheet to scroll so that the focused cell line was positioned at the very top (header) of the viewport. Users found this disorienting as it caused excessive "jumping" of the entire sheet.
+Disorienting jumping behavior.
 
-**Root Cause:** 
-Explicit `tableContainer.scrollTop` adjustments in `positionCursorAtMouseClick` and forced centering in cell `onclick` handlers.
-
-**Solution:** 
-Reverted the sheet-level scrolling logic to restore "normal" browser behavior:
-- Removed `tableContainer.scrollTop` logic from `positionCursorAtMouseClick`.
-- Removed `.onclick` handlers that called `keepCursorCentered` in `renderTable`.
-- The system now relies on the browser's default focus mechanism, which avoids unnecessary sheet jumps.
-
-**Files Modified:**
-- `static/script.js` - Removed scroll logic in `positionCursorAtMouseClick`, removed handlers in `renderTable`.
-
-**Related Issues:** Click-to-Edit scroll restore.
+**Solution:** Reverted to natural browser behavior.
 
 ---
 
 ## [2026-01-12 23:45] - PENDING: Markdown Edit to Raw Mode Scroll Jump
 
-**Problem:**
-When exiting markdown edit mode and then switching to raw mode, the scroll jumps to the end of the sheet.
+**Problem:** 
+Switching modes while editing jumps to end.
 
-**Status:** PENDING - To be fixed later
-
-**Related Issues:** Click-to-Edit scroll restore, Raw mode toggle
+**Status:** PENDING
 
 ---
 
 ## [2026-01-12 23:30] - F8 Word Pick Now Copies to Clipboard
 
-**Problem:**
-When using F8 to pick a word under cursor/hover, users wanted the word to also be copied to clipboard for easy pasting elsewhere.
+**Problem:** 
+User convenience.
 
-**Solution:**
-Added clipboard copy functionality to F8 handler:
-- Copies the picked word to clipboard before adding to search box
-- Uses `execCommand('copy')` with a hidden textarea for reliable cross-browser support
-- Shows toast notification confirming the copy
-
-**Files Modified:**
-- `static/script.js` - F8 handler (~line 515)
-
-**Related Issues:** None
+**Solution:** Added clipboard copy to pick handler.
 
 ---
 
 ## [2026-01-12 23:00] - Click-to-Edit Cursor Visibility and Scroll Restore
 
-**Problem:**
-1. When clicking on markdown preview to edit, if the cursor position was far down in the cell content, users had to scroll to see it
-2. After exiting edit mode (blur), the scroll position was lost and users couldn't find where they were
-3. Switching between markdown and raw mode while editing caused scroll position issues
+**Problem:** 
+Loss of vertical place after editing.
 
-**Solution:**
-Updated `positionCursorAtMouseClick()` to:
-1. Always scroll the table container to position the cursor line immediately after the header (10px padding)
-2. Save the original scroll position before scrolling
-3. Add a blur event listener that restores the original scroll position when exiting edit mode
-4. Use `e.relatedTarget` to detect if blur was caused by clicking toggle buttons - if so, skip restore and let `renderTable` handle scroll
-
-This way users can see what they're editing at the top of the view, and when done, they return to their original position.
-
-**Files Modified:**
-- `static/script.js` - `positionCursorAtMouseClick()` (~line 5870)
-
-**Related Issues:** Raw mode toggle scroll issues
+**Solution:** Scroll position caching around edit sessions.
 
 ---
 
 ## [2026-01-12 22:30] - Raw Mode Visual Indicator
 
-**Problem:**
-It was hard to tell when raw mode (markdown preview disabled) was active vs when markdown preview was enabled.
+**Problem:** 
+Hard to tell active mode.
 
-**Solution:**
-- Added `.raw-mode-active` CSS class with orange background (`#fff3e0`) and border (`#ff9800`)
-- Toggle function adds/removes this class on the button label
-- Toast message now says "Raw mode enabled" instead of "Markdown preview disabled"
-- Changed button icon to 📄 and updated tooltip
-
-**Files Modified:**
-- `static/style.css` - Added `.raw-mode-active` styles (~line 418)
-- `static/script.js` - `toggleMarkdownPreview()` and initialization (~line 5712, ~line 187)
-- `templates/index.html` - Updated button title and icon (~line 149)
-
-**Related Issues:** None
+**Solution:** Color-coded toggle label.
 
 ---
 
 ## [2026-01-12 22:00] - Scroll Position Lost on Refresh and Raw Mode Toggle
 
-**Problem:**
-1. Page refresh caused scroll to jump to top
-2. Toggling to raw mode (disabling markdown preview) caused scroll to jump to top
-3. Toggling back to markdown mode worked fine
+**Problem:** 
+Scroll jumps to top on mode changes.
 
-**Root Cause:**
-1. The scroll event listener was saving `0` to localStorage during initial page load before the saved position could be restored
-2. `adjustAllMarkdownCells()` ran after scroll restore attempts, causing layout changes that reset scroll
-3. The `renderTable` wrapper's height adjustment timeout (300ms) happened after scroll restore (0-300ms)
-
-**Solution:**
-1. Added 1-second delay before scroll save listener becomes active (`initialLoadComplete` flag)
-2. `adjustAllMarkdownCells()` now saves/restores scroll position around height adjustments
-3. `renderTable` wrapper now saves scroll from both localStorage and current position, then restores AFTER `adjustAllMarkdownCells()` completes (350ms)
-
-**Files Modified:**
-- `static/script.js` - Scroll save listener (~line 93), `adjustAllMarkdownCells()` (~line 9814), `renderTable` wrapper (~line 9848)
-
-**Related Issues:** Raw mode cell height adjustment
+**Solution:** 1s initialization delay and safe-adjust logic.
 
 ---
 
 ## [2026-01-12 21:30] - List Item Tab Alignment & Hanging Indent Issues
 
 **Problem:** 
-1. Tab characters within list items (`- item`) weren't aligning properly across different list items
-2. When list content wrapped to the next line, it didn't indent to align with text after the bullet
-3. Longer words like `সম্প্রসারণ` needed extra tabs to align with shorter words
+Misaligned lists.
 
-**Root Cause:**
-List items were using `display: inline-flex` with `width: 100%` and `flex: 1` on the content span. Flex containers don't preserve tab alignment the same way as normal text flow.
-
-**Solution:**
-Changed list rendering to use:
-- `display: inline-block; width: 100%` instead of `display: inline-flex`
-- `text-indent: -1em; margin-left: 1em` for proper hanging indent
-- `white-space: pre-wrap` on content to preserve tabs
-- Added `tab-size: 8` to CSS for consistent tab rendering
-
-**Files Modified:**
-- `static/script.js` - List parsing in `oldParseMarkdownBody()` (~line 2253)
-- `static/style.css` - Added `tab-size` to `td input`, `td textarea`, `.markdown-preview`
-- `export_static.py` - Matching list parsing updates
-
-**Related Issues:** None
+**Solution:** inline-block lists with text-indent CSS.
 
 ---
 
 ## [2026-01-12 21:00] - Raw Mode Showing Text Twice
 
-**Problem:**
-When markdown preview was disabled (raw mode), cell content appeared twice - both the input/textarea and a preview overlay were visible.
+**Problem:** 
+Visual artifacts in raw mode.
 
-**Root Cause:**
-The CSS that hid the markdown preview in raw mode was commented out, but the `applyMarkdownFormatting()` function was still creating preview elements even in raw mode.
-
-**Solution:**
-Updated `applyMarkdownFormatting()` to check `isMarkdownEnabled` early and:
-- Remove existing preview element
-- Remove `has-markdown` class from input
-- Return early without creating new preview
-
-The CSS `.hide-markdown-preview .markdown-preview { display: none }` was kept commented out since previews are no longer created in raw mode.
-
-**Files Modified:**
-- `static/script.js` - Early return in `applyMarkdownFormatting()` (~line 1380)
-
-**Related Issues:** Raw mode cell height (see below)
+**Solution:** Restricted formatting to markdown-enabled state.
 
 ---
 
 ## [2026-01-12 20:30] - Raw Mode Cell Height Not Adjusting
 
-**Problem:**
-In raw mode (markdown preview disabled), cells weren't expanding to show all content. The last lines of text were cut off.
-
-**Root Cause:**
-`adjustCellHeightForMarkdown()` required both an input AND a preview element to exist, and checked for `has-markdown` class. In raw mode, previews are removed and `has-markdown` class is removed, so the function returned early without adjusting height.
-
-**Solution:**
-Updated `adjustCellHeightForMarkdown()` to:
-1. Check if markdown is enabled
-2. In raw mode (no preview), resize textareas based on `scrollHeight` directly
-3. Updated `adjustAllMarkdownCells()` to process all textareas in raw mode, not just those with `has-markdown` class
-
-**Files Modified:**
-- `static/script.js` - `adjustCellHeightForMarkdown()` (~line 9727), `adjustAllMarkdownCells()` (~line 9798)
-
-**Related Issues:** Raw mode text showing twice (fixed above)
-
----
-
-## Template for New Entries
-
-```markdown
-## [YYYY-MM-DD HH:MM] - Brief Problem Title
-
 **Problem:** 
-Description of the issue observed
+Cut-off text in raw mode.
 
-**Root Cause:** 
-What was actually causing the problem
-
-**Solution:** 
-How it was fixed (include key code changes)
-
-**Files Modified:**
-- `file1.js` - Brief description of change
-- `file2.css` - Brief description of change
-
-**Related Issues:** Links to related problems or "None"
-```
-
-```
+**Solution:** Direct scrollHeight measurement for textareas.

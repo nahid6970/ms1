@@ -12932,10 +12932,15 @@ function adjustCellHeightForMarkdown(cell) {
     const input = cell.querySelector('input, textarea');
     const preview = cell.querySelector('.markdown-preview');
     const isMarkdownEnabled = localStorage.getItem('markdownPreviewEnabled') !== 'false';
+    const tableContainer = document.querySelector('.table-container');
 
     if (!input) {
         return;
     }
+
+    // Save container scroll position to prevent jumping during reflow
+    const savedScrollTop = tableContainer ? tableContainer.scrollTop : 0;
+    const savedScrollLeft = tableContainer ? tableContainer.scrollLeft : 0;
 
     // In raw mode (no preview), just resize based on input content
     if (!isMarkdownEnabled || !preview) {
@@ -12951,6 +12956,12 @@ function adjustCellHeightForMarkdown(cell) {
             const inputHeight = input.scrollHeight + 10;
             input.style.height = inputHeight + 'px';
             input.style.minHeight = inputHeight + 'px';
+        }
+        
+        // Restore container scroll
+        if (tableContainer) {
+            tableContainer.scrollTop = savedScrollTop;
+            tableContainer.scrollLeft = savedScrollLeft;
         }
         return;
     }
@@ -12999,6 +13010,12 @@ function adjustCellHeightForMarkdown(cell) {
     // Restore display
     input.style.display = originalInputDisplay;
     preview.style.display = originalPreviewDisplay;
+
+    // Restore container scroll
+    if (tableContainer) {
+        tableContainer.scrollTop = savedScrollTop;
+        tableContainer.scrollLeft = savedScrollLeft;
+    }
 }
 
 // Apply to all cells with markdown after rendering (or all textareas in raw mode)
@@ -13042,19 +13059,31 @@ const originalRenderTable = renderTable;
 renderTable = function (preserveScroll = true) {
     const tableContainer = document.querySelector('.table-container');
 
-    // Save scroll from per-sheet positions for page refresh scenario
+    // 1. Get standard sheet-level scroll positions
     const scrollPositions = JSON.parse(localStorage.getItem('sheetScrollPositions') || '{}');
     const sheetName = tableData.sheets[currentSheet]?.name;
     const savedPosition = sheetName ? scrollPositions[sheetName] : null;
-    const savedScrollTop = savedPosition ? (savedPosition.scrollTop || 0) : 0;
-    const savedScrollLeft = savedPosition ? (savedPosition.scrollLeft || 0) : 0;
+    let savedScrollTop = savedPosition ? (savedPosition.scrollTop || 0) : 0;
+    let savedScrollLeft = savedPosition ? (savedPosition.scrollLeft || 0) : 0;
+
+    // 2. Override with row-specific scroll if in single row mode
+    if (singleRowMode && sheetName) {
+        const states = JSON.parse(localStorage.getItem('sheetSingleRowStates') || '{}');
+        const rowScrolls = states[sheetName]?.rowScrolls || {};
+        const rowPos = rowScrolls[singleRowIndex];
+        if (rowPos) {
+            savedScrollTop = rowPos.scrollTop || 0;
+            savedScrollLeft = rowPos.scrollLeft || 0;
+            console.log(`[SCROLL] renderTable wrapper: Detected row scroll for "${sheetName}" row ${singleRowIndex}:`, rowPos);
+        }
+    }
 
     // Also save current scroll if already scrolled
     const currentScrollTop = tableContainer ? tableContainer.scrollTop : 0;
     const currentScrollLeft = tableContainer ? tableContainer.scrollLeft : 0;
 
     // When switching sheets (preserveScroll=false), don't capture current scroll
-    // Use saved position from localStorage instead
+    // Use saved position instead
     let targetScrollTop, targetScrollLeft;
 
     if (preserveScroll) {
@@ -13062,19 +13091,17 @@ renderTable = function (preserveScroll = true) {
         targetScrollTop = currentScrollTop > 0 ? currentScrollTop : savedScrollTop;
         targetScrollLeft = currentScrollLeft > 0 ? currentScrollLeft : savedScrollLeft;
     } else {
-        // Switching sheets: ignore current scroll, use saved position for new sheet
+        // Switching sheets or rows: ignore current scroll, use saved position
         targetScrollTop = savedScrollTop;
         targetScrollLeft = savedScrollLeft;
     }
 
     console.log(`[SCROLL] renderTable wrapper for "${sheetName}":`, {
         preserveScroll,
+        singleRowMode,
+        singleRowIndex,
         savedScrollTop,
-        savedScrollLeft,
-        currentScrollTop,
-        currentScrollLeft,
-        targetScrollTop,
-        targetScrollLeft
+        targetScrollTop
     });
 
     originalRenderTable.apply(this, arguments);
