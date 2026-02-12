@@ -14,6 +14,51 @@ Paste(text) {
 }
 
 ;! === BACKGROUND / STARTUP SCRIPTS ===
+;! Macro Recorder (Vim Style)
+;! Ctrl+R to Record/Stop, Ctrl+E to Playback
+;! Macro Recorder Logic
+Global MacroBuffer := []
+Global IsRecordingMacro := false
+
+; Use a dedicated InputHook to capture all keys including modifiers
+Global MacroHook := InputHook("V")
+MacroHook.KeyOpt("{All}", "N")
+MacroHook.OnKeyDown := (hook, vk, sc) => MacroBuffer.Push("{vk" . Format("{:X}", vk) . "sc" . Format("{:X}", sc) . "}")
+
+^r:: { ; Ctrl+R to toggle recording
+    Global IsRecordingMacro, MacroBuffer
+    if !IsRecordingMacro {
+        MacroBuffer := []
+        IsRecordingMacro := true
+        MacroHook.Start()
+        ToolTip("● RECORDING MACRO")
+        SetTimer(() => ToolTip(), -1000)
+    } else {
+        MacroHook.Stop()
+        IsRecordingMacro := false
+        ; Remove the last key (the Ctrl+R that stopped the recording)
+        if MacroBuffer.Length > 0
+            MacroBuffer.Pop()
+        ToolTip("■ MACRO SAVED")
+        SetTimer(() => ToolTip(), -1000)
+    }
+}
+
+^e:: { ; Ctrl+E to Playback
+    Global IsRecordingMacro, MacroBuffer
+    if IsRecordingMacro || MacroBuffer.Length == 0
+        return
+    
+    ToolTip("▶ PLAYING")
+    SetTimer(() => ToolTip(), -500)
+    
+    ; Play back with small delay for stability
+    for key in MacroBuffer {
+        SendEvent(key)
+        Sleep(5)
+    }
+}
+
 ;! Smart Bengali Numbers
 ;! Converts ;[numbers] to Bengali after Space (Fixed letters conflict)
 ~;:: {
