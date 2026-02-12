@@ -95,7 +95,7 @@
         },
         {
             "name": "Kiro CLI (WSL)",
-            "template": "start \"kiro-cli\" wsl bash -c \"cd $(wslpath '{path}') && exec bash -l -c kiro-cli\"",
+            "template": "wsl bash -c \"cd \\\"$(wslpath '{path}')\\\" && exec bash -l -c 'kiro-cli chat --trust-all-tools'\"",
             "category": "AI"
         },
         {
