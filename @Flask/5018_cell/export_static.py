@@ -2170,8 +2170,6 @@ def generate_static_html(data, custom_syntaxes):
             // Heading: ##text## -> larger text
             formatted = formatted.replace(/##(.+?)##/g, '<span style="font-size: 1.3em; font-weight: 600;">$1</span>');
 
-            // Small text: ..text.. -> smaller text
-            formatted = formatted.replace(/\\.\\.(.+?)\\.\\./g, '<span style="font-size: 0.75em;">$1</span>');
 
             // Wavy underline: _.text._ -> wavy underline
             formatted = formatted.replace(/_\\.(.+?)\\._/g, '<span style="text-decoration: underline wavy;">$1</span>');
@@ -2530,8 +2528,6 @@ def generate_static_html(data, custom_syntaxes):
                 // Heading: ##text## -> larger text
                 formatted = formatted.replace(/##(.+?)##/g, '<span style="font-size: 1.3em; font-weight: 600;">$1</span>');
 
-                // Small text: ..text.. -> smaller text
-                formatted = formatted.replace(/\\.\\.(.+?)\\.\\./g, '<span style="font-size: 0.75em;">$1</span>');
 
                 // Wavy underline: _.text._ -> wavy underline
                 formatted = formatted.replace(/_\\.(.+?)\\._/g, '<span style="text-decoration: underline wavy;">$1</span>');
