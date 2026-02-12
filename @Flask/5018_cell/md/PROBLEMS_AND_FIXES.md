@@ -7,6 +7,38 @@ This document tracks historical bugs, issues, and their solutions. Use this to:
 
 ---
 
+## [2026-02-12 14:45] - Reliable Scroll Preservation in Single Row Mode
+
+**Problem:** 
+Even after implementing per-row scroll states, users noticed that moving between cells or rows in "Single Row View" would sometimes "reset" the view to a previous scroll position or carry over the position from the last row.
+
+**Root Cause:** 
+1. **Transition Race Condition**: In `nextSingleRow`/`prevSingleRow`, calling `saveSingleRowState()` *after* updating the index but *before* rendering caused the scroll of the *outgoing* row to be saved into the *incoming* row's slot in the state map.
+2. **State Stale-ness**: `saveSingleRowState()` was only called on button clicks, meaning if a user scrolled manually and then triggered a blur/render, the system would restore the *old* saved position from the map.
+3. **Interfering Focus Logic**: Manual `scrollTop` restoration in the `focus` listener of `applyMarkdownFormatting` was fighting with the browser's native focus behavior, occasionally capturing and restoring stale container positions.
+
+**Solution:** 
+1. **Smart Navigation Logic**: Refactored navigation to explicitly save the outgoing row's scroll, increment the index, and then save the metadata *without* capturing the current scroll again (using a new `skipScroll` flag).
+2. **Real-time Scroll Sync**: Added `saveSingleRowState()` to the global `scroll` event listener of the table container. This ensures the state map always reflects the user's latest manual scroll position.
+3. **Cleaned Handlers**: Removed all manual `tableContainer` scroll overrides from the `focus` and `blur` listeners. The browser now handles positioning the active element naturally, while the `renderTable` wrapper handles high-level restoration from the state map.
+
+**Files Modified:**
+- `static/script.js`
+
+---
+
+## [2026-02-12 14:30] - Scroll Position Resets in Cells and Single Row Mode (Initial Attempt)
+
+**Problem 1: Cell Internal Scroll Reset**
+When editing a large cell in Visual Mode, clicking another cell (blur) caused the first cell to re-render its preview. This process reset the element's `scrollTop` to 0.
+
+**Problem 2: Row Scroll Loss in Single Row Mode**
+Navigating between rows lost the vertical place.
+
+**Solution:** Initial implementation of `rowScrolls` map and blur scroll cache. (Superseded by 14:45 fix).
+
+---
+
 ## [2026-02-12 14:00] - List Support in Table Cells
 
 **Feature:** Added ability to use markdown lists (bullet and numbered) inside table cells.

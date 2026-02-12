@@ -122,6 +122,12 @@ function initializeApp() {
                     scrollLeft: tableContainer.scrollLeft
                 };
                 localStorage.setItem('sheetScrollPositions', JSON.stringify(scrollPositions));
+                
+                // Also save single row state if active to capture per-row scroll
+                if (singleRowMode) {
+                    saveSingleRowState();
+                }
+
                 console.log(`[SCROLL] Auto-saved scroll for "${sheetName}":`, {
                     scrollTop: tableContainer.scrollTop,
                     scrollLeft: tableContainer.scrollLeft
@@ -2564,23 +2570,13 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
 
         preview.addEventListener('focus', () => {
             lastFocusedCell = { row: rowIndex, col: colIndex };
-            // Save scroll position before any DOM changes
-            const tableContainer = document.querySelector('.table-container');
-            const savedScrollTop = tableContainer ? tableContainer.scrollTop : 0;
-            const savedScrollLeft = tableContainer ? tableContainer.scrollLeft : 0;
-
+            
             preview.classList.add('editing');
             // Get current value from input (source of truth)
             const rawValue = inputElement.value;
 
             // Apply highlighting immediately to prevent race conditions
             preview.innerHTML = highlightSyntax(rawValue);
-
-            // Restore scroll position after content change
-            if (tableContainer) {
-                tableContainer.scrollTop = savedScrollTop;
-                tableContainer.scrollLeft = savedScrollLeft;
-            }
 
             // Adjust height immediately for the newly highlighted syntax content
             adjustCellHeightForMarkdown(cell);
@@ -7690,13 +7686,27 @@ function toggleRowWrap() {
     }
 }
 
-function saveSingleRowState() {
+function saveSingleRowState(skipScroll = false) {
     if (!tableData.sheets[currentSheet]) return;
     const sheetName = tableData.sheets[currentSheet].name;
     const states = JSON.parse(localStorage.getItem('sheetSingleRowStates') || '{}');
+    
+    // Maintain row-specific scroll positions
+    const rowScrolls = states[sheetName]?.rowScrolls || {};
+    if (singleRowMode && !skipScroll) {
+        const tableContainer = document.querySelector('.table-container');
+        if (tableContainer) {
+            rowScrolls[singleRowIndex] = {
+                scrollTop: tableContainer.scrollTop,
+                scrollLeft: tableContainer.scrollLeft
+            };
+        }
+    }
+
     states[sheetName] = {
         mode: singleRowMode,
-        index: singleRowIndex
+        index: singleRowIndex,
+        rowScrolls: rowScrolls
     };
     localStorage.setItem('sheetSingleRowStates', JSON.stringify(states));
 }
@@ -7789,10 +7799,16 @@ function toggleSingleRowMode() {
 function prevSingleRow() {
     if (!singleRowMode) return;
     if (singleRowIndex > 0) {
+        // 1. Save current row's scroll position
+        saveSingleRowState(false); 
+        
         singleRowIndex--;
         localStorage.setItem('singleRowIndex', singleRowIndex);
-        saveSingleRowState();
-        renderTable();
+        
+        // 2. Save the fact that we moved to a new index, but DON'T overwrite its scroll with the current one
+        saveSingleRowState(true); 
+        
+        renderTable(false);
         updateSingleRowButtons();
     }
 }
@@ -7801,10 +7817,16 @@ function nextSingleRow() {
     if (!singleRowMode) return;
     const sheet = tableData.sheets[currentSheet];
     if (singleRowIndex < sheet.rows.length - 1) {
+        // 1. Save current row's scroll position
+        saveSingleRowState(false);
+        
         singleRowIndex++;
         localStorage.setItem('singleRowIndex', singleRowIndex);
-        saveSingleRowState();
-        renderTable();
+        
+        // 2. Save the fact that we moved to a new index, but DON'T overwrite its scroll with the current one
+        saveSingleRowState(true);
+        
+        renderTable(false);
         updateSingleRowButtons();
     }
 }
@@ -8571,6 +8593,21 @@ function renderTable(preserveScroll = true) {
     // Restore scroll position after rendering
     if (tableContainer) {
         const restoreScroll = () => {
+            const sheetName = tableData.sheets[currentSheet]?.name;
+
+            // If in single row mode, try to restore row-specific scroll first
+            if (singleRowMode && sheetName) {
+                const states = JSON.parse(localStorage.getItem('sheetSingleRowStates') || '{}');
+                const rowScrolls = states[sheetName]?.rowScrolls || {};
+                const rowPos = rowScrolls[singleRowIndex];
+                if (rowPos) {
+                    tableContainer.scrollTop = rowPos.scrollTop || 0;
+                    tableContainer.scrollLeft = rowPos.scrollLeft || 0;
+                    console.log(`[SCROLL] renderTable: Restored row scroll for "${sheetName}" row ${singleRowIndex}:`, rowPos);
+                    return;
+                }
+            }
+
             // First try to restore from saved position during this render
             if (scrollTop > 0 || scrollLeft > 0) {
                 tableContainer.scrollTop = scrollTop;
@@ -8579,7 +8616,6 @@ function renderTable(preserveScroll = true) {
             } else {
                 // Otherwise restore from per-sheet scroll positions
                 const scrollPositions = JSON.parse(localStorage.getItem('sheetScrollPositions') || '{}');
-                const sheetName = tableData.sheets[currentSheet]?.name;
                 const savedPosition = sheetName ? scrollPositions[sheetName] : null;
                 console.log(`[SCROLL] renderTable: Restoring for "${sheetName}":`, savedPosition);
                 if (savedPosition) {

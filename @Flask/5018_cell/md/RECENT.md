@@ -6,6 +6,33 @@
 
 ---
 
+## [2026-02-12 14:45] - Final Scroll & Navigation Refinements
+
+**Session Duration:** 0.5 hours
+
+**What We Accomplished:**
+
+### 🖱️ Reliable Scroll Preservation
+- **Problem**: Moving between cells in Single Row Mode caused the view to "reset" to previous positions.
+- **Root Cause**: 
+  - `saveSingleRowState` was being called during row transitions *after* the index changed but *before* rendering, causing the new row to inherit the old row's scroll.
+  - Manual scroll restorations in `focus`/`blur` handlers were interfering with natural browser behavior and capturing stale positions.
+- **Solution**: 
+  - **Auto-Save on Scroll**: Updated the global scroll listener to call `saveSingleRowState()` continuously, ensuring `rowScrolls` are always up to date.
+  - **Smart Navigation**: Refactored `nextSingleRow` and `prevSingleRow` to explicitly save the old row's scroll, then update index, then save the index *without* overwriting the scroll map.
+  - **Clean Handlers**: Removed manual `scrollTop` overrides from `focus` and `blur` listeners in `applyMarkdownFormatting`, allowing the browser to manage focus positions naturally.
+
+**Files Modified:**
+- `static/script.js` - Refactored `saveSingleRowState`, navigation functions, and event listeners.
+- `md/PROBLEMS_AND_FIXES.md` - Updated with final resolution details.
+- `md/RECENT.md` - Logged session and archived 1 older session.
+
+**Current Status:**
+- ✅ Scroll positions are perfectly preserved within and between rows in Single Row Mode.
+- ✅ Cell focus is smooth and no longer jumps to "last cell" positions.
+
+---
+
 ## [2026-02-12 14:00] - List Support in Table Cells
 
 **Session Duration:** 0.5 hours
@@ -13,28 +40,8 @@
 **What We Accomplished:**
 
 ### 📊 Lists Inside Table Cells
-- **New Feature**: Added support for markdown lists (bullet and numbered) inside table cells for both Pipe and Comma tables.
-- **Implementation**: 
-  - Updated `parseMarkdownInline` to split cell content by `<br>` or `\n` and process each line for list markers.
-  - Supports standard bullet markers (`-`, `--`, `---`, etc.) and numbered markers (`1.`, `2.`, etc.).
-  - Preserves hanging indents and tab alignment using the same styling logic as main-sheet lists.
-- **Rule of 6 Compliance**:
-  - Synchronized the logic to `export_static.py` for correct rendering in standalone exports.
-  - Updated the "Markdown Formatting Guide" in `templates/index.html` with examples and instructions.
-
-### 🛡️ Robust Syntax Protection in Visual Mode
-- **Problem**: Users reported rare cases where markdown syntax was stripped during editing.
-- **Solution**: Removed `requestAnimationFrame` from focus handler and added "Bullet Recovery" logic to `extractRawText`.
-
-**Files Modified:**
-- `static/script.js` - Updated `parseMarkdownInline` with list parsing.
-- `export_static.py` - Synced `parseMarkdownInline` improvements.
-- `templates/index.html` - Updated Formatting Guide.
-- `md/RECENT.md` - Logged session and archived 1 older session.
-
-**Current Status:**
-- ✅ Tables now support rich multiline content including nested lists.
-- ✅ Consistent rendering between live app and static exports.
+- **New Feature**: Added support for markdown lists (bullet and numbered) inside table cells.
+- **Implementation**: Updated `parseMarkdownInline` to split content by `<br>` or `\n`.
 
 ---
 
@@ -45,11 +52,8 @@
 **What We Accomplished:**
 
 ### 🛡️ Robust Syntax Protection in Visual Mode
-- **Problem**: Users reported rare cases where all markdown syntax was stripped from a cell during editing, leaving only rendered list bullets (•, ◦, etc.) in the raw data.
-- **Root Cause**: A race condition in the `focus` event listener. Highlighting was deferred via `requestAnimationFrame`. If a user typed instantly, the `input` event would trigger `extractRawText` on the *already rendered* preview (with bullets) before it switched to *highlighted syntax* (with markers).
-- **Solution**: 
-  - **Immediate Highlighting**: Removed `requestAnimationFrame` from the `focus` handler. The transition from rendered preview to syntax-highlighted editor now happens synchronously, ensuring the DOM always contains markers when the user types.
-  - **Fail-safe Recovery**: Updated `extractRawText` and `extractRawTextBeforeCaret` with a "Bullet Recovery" map. If it ever encounters rendered bullets (•, ◦, ▪, ▸, −) at the start of a line, it automatically converts them back to markdown syntax (- , -- , --- , etc.), preventing data corruption.
+- **Problem**: Rare markdown syntax stripping during editing.
+- **Solution**: Immediate highlighting on focus and fail-safe bullet recovery.
 
 ---
 
@@ -60,8 +64,8 @@
 **What We Accomplished:**
 
 ### 🔧 Bug Fixes & Robustness
-- **Fixed Script Crash**: Resolved a critical error where duplicated code in `showSyntaxInspector` was executing in the global scope.
-- **Rendering Safeguards**: Added checks in `renderTable` to handle empty sheets.
+- **Fixed Script Crash**: Resolved duplicated code error in global scope.
+- **Rendering Safeguards**: Added checks for empty sheets in `renderTable`.
 
 ---
 
@@ -73,22 +77,9 @@
 
 ### 🔍📜 Syntax Inspector Feature
 - **New Feature**: Added a "Syntax Inspector" button (🔍📜) to the F3 Quick Formatter.
-- **UI Refinements**: Centered modal and auto-close F3.
 
 ### ✅ Per-Sheet Single Row Mode & Scroll Fix
 - **Solution**: Per-sheet state for Single Row Mode and scroll restoration fix.
-
----
-
-## [2026-02-11 10:30] - Single Row Mode Per-Sheet State
-
-**Session Duration:** 0.5 hours
-
-**What We Accomplished:**
-
-### ✅ Per-Sheet Single Row Mode
-- **Problem**: Toggling "Single Row Mode" affected other sheets.
-- **Solution**: Implemented per-sheet state.
 
 ---
 
