@@ -1,7 +1,9 @@
 import json
 import os
 from datetime import datetime
-from flask import Flask, render_template, request, redirect, url_for, jsonify
+from flask import Flask, render_template, request, redirect, url_for, jsonify, send_from_directory
+import requests
+import hashlib
 from apscheduler.schedulers.background import BackgroundScheduler
 
 app = Flask(__name__)
@@ -16,6 +18,29 @@ def add_header(response):
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 DATA_FILE = r"C:\@delta\db\5011_tv_show\data.json"
 ROOT_SHOWS_FOLDER = r"D:\Downloads\@Sonarr"
+IMAGE_CACHE_DIR = r"C:\@delta\output\sonarr_img"
+
+os.makedirs(IMAGE_CACHE_DIR, exist_ok=True)
+
+def get_cached_image(url):
+    if not url:
+        return url
+    url_hash = hashlib.md5(url.encode()).hexdigest()
+    ext = url.split('.')[-1].split('?')[0][:4]
+    cached_path = os.path.join(IMAGE_CACHE_DIR, f"{url_hash}.{ext}")
+    
+    if os.path.exists(cached_path):
+        return f"/cached_image/{url_hash}.{ext}"
+    
+    try:
+        response = requests.get(url, timeout=10)
+        if response.status_code == 200:
+            with open(cached_path, 'wb') as f:
+                f.write(response.content)
+            return f"/cached_image/{url_hash}.{ext}"
+    except:
+        pass
+    return url
 
 def load_data():
     try:
@@ -187,6 +212,10 @@ scheduler = BackgroundScheduler()
 scheduler.add_job(func=scan_and_add_missing_shows, trigger="interval", hours=1)
 scheduler.start()
 
+@app.route('/cached_image/<filename>')
+def cached_image(filename):
+    return send_from_directory(IMAGE_CACHE_DIR, filename)
+
 @app.route('/')
 def index():
     sort_by = request.args.get('sort_by', 'title')
@@ -201,6 +230,7 @@ def index():
 
     # Calculate watched and total episodes, and last episode added date
     for show in shows:
+        show['cover_image'] = get_cached_image(show.get('cover_image', ''))
         watched_episodes = sum(1 for episode in show.get('episodes', []) if episode.get('watched'))
         total_episodes = len(show.get('episodes', []))
         show['watched_count'] = watched_episodes
@@ -266,6 +296,7 @@ def show(show_id):
     shows = load_data()
     show = next((s for s in shows if s['id'] == show_id), None)
     if show:
+        show['cover_image'] = get_cached_image(show.get('cover_image', ''))
         # Initialize sort preferences if they don't exist
         if 'episode_sort_type' not in show:
             show['episode_sort_type'] = 'default'
