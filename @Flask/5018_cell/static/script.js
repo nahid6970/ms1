@@ -2623,8 +2623,26 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
                 saveData();
             }, 1000);
 
-            // DON'T re-render on every keystroke - the browser already updated the DOM
-            // Only sync data and adjust height
+            // Check if we need to re-render due to structural changes
+            // Store previous line count to detect when lines are joined/split
+            const currentLineCount = (newRawValue.match(/\n/g) || []).length;
+            const previousLineCount = preview._previousLineCount || 0;
+            preview._previousLineCount = currentLineCount;
+
+            // Re-render if line count changed (lines joined/split) and content has special formatting
+            // This ensures list indentation, table styling, and other line-based formatting updates immediately
+            const hasSpecialFormatting = /^(\-{1,5})\s/m.test(newRawValue) || newRawValue.includes('|') || newRawValue.includes('Table*');
+            
+            if (currentLineCount !== previousLineCount && hasSpecialFormatting) {
+                // Save cursor position
+                const cursorOffset = getCaretCharacterOffset(preview);
+                
+                // Re-render with highlightSyntax
+                preview.innerHTML = highlightSyntax(newRawValue);
+                
+                // Restore cursor position
+                setCaretPosition(preview, cursorOffset);
+            }
 
             // Debounce height adjustment to prevent lag on large content
             clearTimeout(preview._heightAdjustTimeout);
