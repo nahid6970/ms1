@@ -6,6 +6,38 @@
 
 ---
 
+## [2026-02-12 14:00] - List Support in Table Cells
+
+**Session Duration:** 0.5 hours
+
+**What We Accomplished:**
+
+### 📊 Lists Inside Table Cells
+- **New Feature**: Added support for markdown lists (bullet and numbered) inside table cells for both Pipe and Comma tables.
+- **Implementation**: 
+  - Updated `parseMarkdownInline` to split cell content by `<br>` or `\n` and process each line for list markers.
+  - Supports standard bullet markers (`-`, `--`, `---`, etc.) and numbered markers (`1.`, `2.`, etc.).
+  - Preserves hanging indents and tab alignment using the same styling logic as main-sheet lists.
+- **Rule of 6 Compliance**:
+  - Synchronized the logic to `export_static.py` for correct rendering in standalone exports.
+  - Updated the "Markdown Formatting Guide" in `templates/index.html` with examples and instructions.
+
+### 🛡️ Robust Syntax Protection in Visual Mode
+- **Problem**: Users reported rare cases where markdown syntax was stripped during editing.
+- **Solution**: Removed `requestAnimationFrame` from focus handler and added "Bullet Recovery" logic to `extractRawText`.
+
+**Files Modified:**
+- `static/script.js` - Updated `parseMarkdownInline` with list parsing.
+- `export_static.py` - Synced `parseMarkdownInline` improvements.
+- `templates/index.html` - Updated Formatting Guide.
+- `md/RECENT.md` - Logged session and archived 1 older session.
+
+**Current Status:**
+- ✅ Tables now support rich multiline content including nested lists.
+- ✅ Consistent rendering between live app and static exports.
+
+---
+
 ## [2026-02-12 13:30] - Visual Mode Syntax Corruption Fix
 
 **Session Duration:** 0.5 hours
@@ -18,15 +50,6 @@
 - **Solution**: 
   - **Immediate Highlighting**: Removed `requestAnimationFrame` from the `focus` handler. The transition from rendered preview to syntax-highlighted editor now happens synchronously, ensuring the DOM always contains markers when the user types.
   - **Fail-safe Recovery**: Updated `extractRawText` and `extractRawTextBeforeCaret` with a "Bullet Recovery" map. If it ever encounters rendered bullets (•, ◦, ▪, ▸, −) at the start of a line, it automatically converts them back to markdown syntax (- , -- , --- , etc.), preventing data corruption.
-
-**Files Modified:**
-- `static/script.js` - Updated `extractRawText`, `extractRawTextBeforeCaret`, and `focus` listener.
-- `md/PROBLEMS_AND_FIXES.md` - Documented the fix.
-- `md/RECENT.md` - Logged session and archived 1 older session.
-
-**Current Status:**
-- ✅ Visual Mode editing is now bulletproof against fast-typing race conditions.
-- ✅ Fail-safe logic prevents literal icons from entering the database.
 
 ---
 
@@ -66,17 +89,6 @@
 ### ✅ Per-Sheet Single Row Mode
 - **Problem**: Toggling "Single Row Mode" affected other sheets.
 - **Solution**: Implemented per-sheet state.
-
----
-
-## [2026-02-08 16:15] - #R# Border Box Refinement and Alignment Fixes
-
-**Session Duration:** 1.0 hours
-
-**What We Accomplished:**
-
-### 🎨 Refined Multi-line Border Box Styling
-- **Solution**: Switched from `border` to `outline` for cleaner rendering.
 
 ---
 

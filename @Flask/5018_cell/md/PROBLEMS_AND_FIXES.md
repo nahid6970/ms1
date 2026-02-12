@@ -7,6 +7,19 @@ This document tracks historical bugs, issues, and their solutions. Use this to:
 
 ---
 
+## [2026-02-12 14:00] - List Support in Table Cells
+
+**Feature:** Added ability to use markdown lists (bullet and numbered) inside table cells.
+
+**Solution:** Updated `parseMarkdownInline` (the specialized parser for cells) to detect `<br>` or `\n` and process lines individually. It now recognizes list markers like `- ` and `1. ` and applies the same rich formatting (hanging indents, icons) used in the main sheet.
+
+**Files Modified:**
+- `static/script.js`
+- `export_static.py`
+- `templates/index.html`
+
+---
+
 ## [2026-02-12 13:30] - Syntax Corruption in Visual Mode
 
 **Problem:** 
