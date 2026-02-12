@@ -1699,7 +1699,9 @@ def generate_static_html(data, custom_syntaxes):
                         cellValue.trim().startsWith('- ') || 
                         cellValue.trim().startsWith('-- ') || 
                         cellValue.trim().startsWith('--- ') ||
-                        cellValue.match(/Table\\*\\d+/i) ||
+                        cellValue.match(/^\\\\d+\\\\.\\\\s/m) ||
+                        cellValue.includes('\\\\n') ||
+                        cellValue.match(/Table\\\\*\\\\d+/i) ||
                         cellValue.trim().startsWith('|') ||
                         cellValue.match(/^-{5,}$/m) ||
                         cellValue.match(/^[A-Z]+-{5,}$/m) ||
@@ -2361,21 +2363,20 @@ def generate_static_html(data, custom_syntaxes):
 
             // List support in cells (-, --, ---, ----, -----)
             if (formatted.indexOf('- ') !== -1 || formatted.indexOf('. ') !== -1) {
-                var newlineChar = String.fromCharCode(10);
-                var lines = formatted.replace(/<br>/g, newlineChar).split(newlineChar);
+                var lines = formatted.split(new RegExp('<br>|\\\\n', 'g'));
                 var recovered = [];
                 for (var i = 0; i < lines.length; i++) {
                     var line = lines[i];
                     var trimmed = line.trim();
-                    var listMatch = trimmed.match(/^(\\-{1,5})\\s/);
+                    var listMatch = trimmed.match(/^(\\\\-{1,5})\\\\s/);
                     if (listMatch) {
                         var markerLength = listMatch[1].length;
-                        var icons = ['•', '◦', '▪', '▸', '−'];
-                        var icon = icons[markerLength - 1] || '•';
-                        var content = line.replace(/^\\s*(\\-{1,5})\\s/, '');
+                        var icons = ['\\\\u2022', '\\\\u25e6', '\\\\u25aa', '\\\\u25b8', '\\\\u2212'];
+                        var icon = icons[markerLength - 1] || '\\\\u2022';
+                        var content = line.replace(/^\\\\s*(\\\\-{1,5})\\\\s/, '');
                         recovered.push('<span style="display: inline-block; width: 100%; box-sizing: border-box; padding-left: ' + markerLength + 'em; text-indent: -1em; white-space: pre-wrap;"><span style="display: inline-block; width: 1em; text-indent: 0;">' + icon + '</span>' + content + '</span>');
                     } else {
-                        var numMatch = trimmed.match(/^(\\d+\\.\\s)(.+)$/);
+                        var numMatch = trimmed.match(/^(\\\\d+\\\\.\\\\s)(.+)$/);
                         if (numMatch) {
                             var number = numMatch[1];
                             var contentPart = numMatch[2];
