@@ -157,11 +157,28 @@ class TerminalChooser(QWidget):
                 border: 1px solid {CP_CYAN};
             }}
         """)
+        self.dir_input.textChanged.connect(self.update_dir_list)
         layout.addWidget(self.dir_input)
+        
+        self.dir_list_label = QLabel("")
+        self.dir_list_label.setStyleSheet(f"color: {CP_DIM}; font-size: 9pt; margin-top: 5px;")
+        layout.addWidget(self.dir_list_label)
+        self.update_dir_list()
         
         outer_layout = QVBoxLayout(self)
         outer_layout.setContentsMargins(0, 0, 0, 0)
         outer_layout.addWidget(self.main_frame)
+    
+    def update_dir_list(self):
+        dir_path = self.dir_input.text().strip()
+        if dir_path and os.path.isdir(dir_path):
+            try:
+                items = [d for d in os.listdir(dir_path) if os.path.isdir(os.path.join(dir_path, d))][:5]
+                self.dir_list_label.setText(" | ".join(items) if items else "")
+            except:
+                self.dir_list_label.setText("")
+        else:
+            self.dir_list_label.setText("")
         
     def center_window(self):
         self.adjustSize()
