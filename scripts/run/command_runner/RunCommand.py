@@ -14,6 +14,20 @@ def run_command_ui():
     view_bookmarks_script = os.path.join(script_dir, "view_command_bookmarks.py")
     terminal_chooser_script = os.path.join(script_dir, "terminal_chooser.py")
 
+    shortcuts_text = r"""
+Shortcuts available:
+  Enter     : Run selected command (opens terminal chooser)
+  F5        : Add command to bookmarks
+  Del       : Remove from history or bookmarks
+  Ctrl-R    : Refresh history/bookmarks list
+  ?         : Show this help window
+  ESC       : Exit
+"""
+    
+    with tempfile.NamedTemporaryFile(mode='w', delete=False, encoding='utf-8', suffix='.txt') as help_file:
+        help_file.write(shortcuts_text)
+        help_path = help_file.name
+
     # Create feeder script content
     feeder_script_content = f'''
 import json
@@ -92,7 +106,7 @@ if __name__ == "__main__":
         remover_file.write(remover_script_content)
         remover_path = remover_file.name
 
-    help_header = "Enter: Run Command (Select Terminal)\nF5: Bookmark | Del: Remove | Ctrl-R: Refresh"
+    help_header = "Enter: Run Command  |  F5: Bookmark  |  Del: Remove\nCtrl-R: Refresh     |  ?: Help"
 
     fzf_args = [
         "fzf",
@@ -108,7 +122,10 @@ if __name__ == "__main__":
         f'--bind=enter:execute(python "{terminal_chooser_script}" {{1}} {{q}} {{2}})+abort',
         f'--bind=f5:execute-silent(python "{add_bookmark_script}" {{1}} || python "{add_bookmark_script}" {{q}})+reload(python "{feeder_path}")',
         f'--bind=del:execute-silent(python "{remover_path}" {{1}} && python "{view_bookmarks_script}" --remove {{1}})+reload(python "{feeder_path}")',
-        f'--bind=ctrl-r:reload(python "{feeder_path}")'
+        f'--bind=ctrl-r:reload(python "{feeder_path}")',
+        f'--bind=f1:execute-silent(cmd /c start cmd /k type "{help_path}" ^& pause)',
+        "--bind=?:toggle-header",
+        "--bind=start:toggle-header"
     ]
 
     try:
@@ -131,6 +148,9 @@ if __name__ == "__main__":
             except: pass
         if os.path.exists(remover_path):
             try: os.remove(remover_path)
+            except: pass
+        if os.path.exists(help_path):
+            try: os.remove(help_path)
             except: pass
 
 if __name__ == "__main__":

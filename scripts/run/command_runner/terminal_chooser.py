@@ -115,9 +115,9 @@ class TerminalChooser(QWidget):
         
         # Grid for Terminals
         terminals = [
-            ("PWSH", CP_GREEN),
+            ("CMD", CP_YELLOW),
             ("POWERSHELL", CP_CYAN),
-            ("CMD", CP_YELLOW)
+            ("PWSH", CP_GREEN)
         ]
         
         grid = QGridLayout()
