@@ -20,7 +20,7 @@ CP_TEXT = "#E0E0E0"
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 EXECUTOR_SCRIPT = os.path.join(SCRIPT_DIR, "executor.py")
-HISTORY_FILE = os.path.join(SCRIPT_DIR, "dir_history.json")
+HISTORY_FILE = r"C:\@delta\db\FZF_launcher\command_dir_list.json"
 
 class CyberButton(QPushButton):
     def __init__(self, text, bg_color, text_color=CP_BG, border_color=CP_DIM):
