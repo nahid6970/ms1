@@ -92,7 +92,7 @@ if __name__ == "__main__":
         remover_file.write(remover_script_content)
         remover_path = remover_file.name
 
-    help_header = "Enter: Choose Terminal | Alt-1: CMD | Alt-2: WinPS | Alt-3: PWSH\\nF5: Bookmark | Del: Remove | Ctrl-R: Refresh"
+    help_header = "Enter: Run Command (Select Terminal)\nF5: Bookmark | Del: Remove | Ctrl-R: Refresh"
 
     fzf_args = [
         "fzf",
@@ -106,9 +106,6 @@ if __name__ == "__main__":
         "--border",
         "--color=bg:#1e1e1e,fg:#d0d0d0,bg+:#2e2e2e,fg+:#ffffff,hl:#00d9ff,hl+:#00ff00,info:#afaf87,prompt:#d782ff,pointer:#d782ff,marker:#19d600,header:#888888,border:#d782ff",
         f'--bind=enter:execute(python "{terminal_chooser_script}" {{1}} {{q}} {{2}})+abort',
-        f'--bind=alt-1:execute(python "{executor_script}" cmd {{1}} {{q}} {{2}})+abort',
-        f'--bind=alt-2:execute(python "{executor_script}" powershell {{1}} {{q}} {{2}})+abort',
-        f'--bind=alt-3:execute(python "{executor_script}" pwsh {{1}} {{q}} {{2}})+abort',
         f'--bind=f5:execute-silent(python "{add_bookmark_script}" {{1}} || python "{add_bookmark_script}" {{q}})+reload(python "{feeder_path}")',
         f'--bind=del:execute-silent(python "{remover_path}" {{1}} && python "{view_bookmarks_script}" --remove {{1}})+reload(python "{feeder_path}")',
         f'--bind=ctrl-r:reload(python "{feeder_path}")'
