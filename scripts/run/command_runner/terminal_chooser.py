@@ -63,7 +63,14 @@ class TerminalChooser(QWidget):
         self.selection = selection
         self.query = query
         self.stored_shell = stored_shell
-        self.command = selection if selection else query
+        
+        # Strip markers from selection if present
+        clean_selection = selection
+        if selection.startswith("* "): clean_selection = selection[2:]
+        elif selection.startswith("  "): clean_selection = selection[2:]
+        
+        self.command = clean_selection if clean_selection else query
+        self.clean_selection = clean_selection
         
         self.buttons = []
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.Tool)
@@ -142,8 +149,8 @@ class TerminalChooser(QWidget):
         self.move(x, y)
         
     def handle_action(self, shell):
-        # Call executor.py
-        subprocess.run(['python', EXECUTOR_SCRIPT, shell, self.selection, self.query, self.stored_shell])
+        # Call executor.py with clean selection
+        subprocess.run(['python', EXECUTOR_SCRIPT, shell, self.clean_selection, self.query, self.stored_shell])
         self.close()
 
     def keyPressEvent(self, event):

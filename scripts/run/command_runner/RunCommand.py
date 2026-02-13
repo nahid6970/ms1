@@ -17,11 +17,15 @@ def run_command_ui():
     shortcuts_text = r"""
 Shortcuts available:
   Enter     : Run selected command (opens terminal chooser)
+  F1        : Show this help window
   F5        : Add command to bookmarks
   Del       : Remove from history or bookmarks
   Ctrl-R    : Refresh history/bookmarks list
-  ?         : Show this help window
+  ?         : Toggle help header at the top
   ESC       : Exit
+
+Selected command can be bookmarked with F5.
+History items (marked with HIST) appear after Bookmarks (marked with *).
 """
     
     with tempfile.NamedTemporaryFile(mode='w', delete=False, encoding='utf-8', suffix='.txt') as help_file:
@@ -53,7 +57,8 @@ def get_items():
                 for bm in bms:
                     cmd = bm["command"]
                     shell = bm.get("shell", "pwsh")
-                    display = f"{{cmd}}\\t{{shell}}\\tBM"
+                    # Use * marker like Run.py
+                    display = f"* {{cmd}}\\t{{shell}}\\tBM"
                     print(display)
                     seen.add(cmd)
         except: pass
@@ -67,7 +72,7 @@ def get_items():
                     cmd = h["command"]
                     if cmd in seen: continue
                     shell = h.get("shell", "pwsh")
-                    display = f"{{cmd}}\\t{{shell}}\\tHIST"
+                    display = f"  {{cmd}}\\t{{shell}}\\tHIST"
                     print(display)
                     seen.add(cmd)
         except: pass
@@ -99,27 +104,33 @@ def remove_history(command):
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
-        remove_history(sys.argv[1])
+        # Strip the marker from the command if passed
+        cmd = sys.argv[1]
+        if cmd.startswith("* "): cmd = cmd[2:]
+        elif cmd.startswith("  "): cmd = cmd[2:]
+        remove_history(cmd)
 '''
 
     with tempfile.NamedTemporaryFile(mode='w', delete=False, encoding='utf-8', suffix='.py') as remover_file:
         remover_file.write(remover_script_content)
         remover_path = remover_file.name
 
-    help_header = "Enter: Run Command  |  F5: Bookmark  |  Del: Remove\nCtrl-R: Refresh     |  ?: Help"
+    # Header style matching Run.py
+    help_header = "Enter: Choose Terminal | F1: Help | F5: Bookmark\nDel: Remove | Ctrl-R: Refresh | ?: Toggle Help"
 
     fzf_args = [
         "fzf",
         "--ansi",
-        "--prompt=Run Command > ",
+        "--prompt=Run Command [?] > ",
         "--header-first",
+        "--no-header",
         f"--header={help_header}",
         "--delimiter=\\t",
         "--with-nth=1",
         "--layout=reverse",
         "--border",
         "--color=bg:#1e1e1e,fg:#d0d0d0,bg+:#2e2e2e,fg+:#ffffff,hl:#00d9ff,hl+:#00ff00,info:#afaf87,prompt:#d782ff,pointer:#d782ff,marker:#19d600,header:#888888,border:#d782ff",
-        f'--bind=enter:execute(python "{terminal_chooser_script}" {{1}} {{q}} {{2}})+abort',
+        f'--bind=enter:execute-silent(python "{terminal_chooser_script}" {{1}} {{q}} {{2}})',
         f'--bind=f5:execute-silent(python "{add_bookmark_script}" {{1}} || python "{add_bookmark_script}" {{q}})+reload(python "{feeder_path}")',
         f'--bind=del:execute-silent(python "{remover_path}" {{1}} && python "{view_bookmarks_script}" --remove {{1}})+reload(python "{feeder_path}")',
         f'--bind=ctrl-r:reload(python "{feeder_path}")',
