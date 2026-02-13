@@ -31,14 +31,20 @@ def run_command(command, shell):
     add_to_history(command, shell)
     
     # Launch the terminal in a decoupled way
+    # Using a list with Popen is much safer than a string with shell=True
     if shell == "cmd":
-        subprocess.Popen('start cmd /k "{}"'.format(command), shell=True)
+        # cmd /c start cmd /k "command"
+        subprocess.Popen(['cmd', '/c', 'start', 'cmd', '/k', command])
     elif shell == "powershell":
-        subprocess.Popen('start powershell -NoExit -Command "{}"'.format(command), shell=True)
+        # start powershell -NoExit -Command "& { command }"
+        ps_cmd = f"& {{ {command} }}"
+        subprocess.Popen(['cmd', '/c', 'start', 'powershell', '-NoExit', '-Command', ps_cmd])
     elif shell == "pwsh":
-        subprocess.Popen('start pwsh -NoExit -Command "{}"'.format(command), shell=True)
+        ps_cmd = f"& {{ {command} }}"
+        subprocess.Popen(['cmd', '/c', 'start', 'pwsh', '-NoExit', '-Command', ps_cmd])
     else:
-        subprocess.Popen('start pwsh -NoExit -Command "{}"'.format(command), shell=True)
+        ps_cmd = f"& {{ {command} }}"
+        subprocess.Popen(['cmd', '/c', 'start', 'pwsh', '-NoExit', '-Command', ps_cmd])
 
 if __name__ == "__main__":
     if len(sys.argv) > 3:

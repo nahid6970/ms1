@@ -58,18 +58,24 @@ class CyberButton(QPushButton):
             super().keyPressEvent(event)
 
 class TerminalChooser(QWidget):
-    def __init__(self, selection, query, stored_shell):
+    def __init__(self, data_file):
         super().__init__()
-        self.selection = selection
-        self.query = query
-        self.stored_shell = stored_shell
+        self.data_file = data_file
+        
+        # Load data from temp file
+        with open(data_file, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            
+        self.selection = data.get('selection', '')
+        self.query = data.get('query', '')
+        self.stored_shell = data.get('shell', 'pwsh')
         
         # Strip markers from selection if present
-        clean_selection = selection
-        if selection.startswith("* "): clean_selection = selection[2:]
-        elif selection.startswith("  "): clean_selection = selection[2:]
+        clean_selection = self.selection
+        if clean_selection.startswith("* "): clean_selection = clean_selection[2:]
+        elif clean_selection.startswith("  "): clean_selection = clean_selection[2:]
         
-        self.command = clean_selection if clean_selection else query
+        self.command = clean_selection if clean_selection else self.query
         self.clean_selection = clean_selection
         
         self.buttons = []
@@ -80,10 +86,9 @@ class TerminalChooser(QWidget):
         self.center_window()
         
         if self.buttons:
-            # Focus stored shell if it exists, else first button
             found = False
             for btn in self.buttons:
-                if btn.text().lower() == stored_shell.lower():
+                if btn.text().lower() == self.stored_shell.lower():
                     btn.setFocus()
                     found = True
                     break
@@ -98,7 +103,6 @@ class TerminalChooser(QWidget):
         layout = QVBoxLayout(self.main_frame)
         layout.setContentsMargins(20, 20, 20, 20)
         
-        # Header
         header_layout = QHBoxLayout()
         title_label = QLabel(f"// EXECUTE COMMAND")
         title_label.setStyleSheet(f"color: {CP_ORANGE}; font-weight: bold; font-size: 14pt;")
@@ -113,14 +117,12 @@ class TerminalChooser(QWidget):
         header_layout.addWidget(close_btn)
         layout.addLayout(header_layout)
         
-        # Command Preview
         cmd_preview = QLabel(self.command if len(self.command) < 50 else self.command[:47] + "...")
         cmd_preview.setStyleSheet(f"color: {CP_CYAN}; font-style: italic; margin-bottom: 10px;")
         layout.addWidget(cmd_preview)
         
         layout.addWidget(QLabel(">> SELECT TERMINAL"))
         
-        # Grid for Terminals
         terminals = [
             ("CMD", CP_YELLOW),
             ("POWERSHELL", CP_CYAN),
@@ -149,7 +151,6 @@ class TerminalChooser(QWidget):
         self.move(x, y)
         
     def handle_action(self, shell):
-        # Launch executor.py and exit immediately to return control to fzf
         subprocess.Popen(['python', EXECUTOR_SCRIPT, shell, self.clean_selection, self.query, self.stored_shell])
         self.close()
 
@@ -172,19 +173,23 @@ class TerminalChooser(QWidget):
         if event.type() == event.Type.ActivationChange and not self.isActiveWindow():
             self.close()
         super().changeEvent(event)
+    
+    def closeEvent(self, event):
+        # Clean up temp file when closing
+        if os.path.exists(self.data_file):
+            try: os.remove(self.data_file)
+            except: pass
+        super().closeEvent(event)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     app.setFont(QFont("Consolas", 10))
     
-    if len(sys.argv) >= 3:
-        # Args: selection, query, stored_shell
-        selection = sys.argv[1]
-        query = sys.argv[2]
-        stored_shell = sys.argv[3] if len(sys.argv) > 3 else "pwsh"
-        
-        window = TerminalChooser(selection, query, stored_shell)
-        window.show()
-        window.activateWindow()
-        window.raise_()
-        sys.exit(app.exec())
+    if len(sys.argv) > 1:
+        data_file = sys.argv[1]
+        if os.path.exists(data_file):
+            window = TerminalChooser(data_file)
+            window.show()
+            window.activateWindow()
+            window.raise_()
+            sys.exit(app.exec())

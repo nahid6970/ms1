@@ -43,12 +43,28 @@ def get_feeder_data():
     except Exception:
         pass
 
+def save_and_launch_chooser(selection, query, shell, script_dir):
+    """Saves selection data to a temp file and launches the chooser."""
+    data = {
+        "selection": selection,
+        "query": query,
+        "shell": shell
+    }
+    
+    # Create temp file
+    fd, path = tempfile.mkstemp(suffix=".json", prefix="fzf_cmd_")
+    with os.fdopen(fd, 'w', encoding='utf-8') as f:
+        json.dump(data, f)
+    
+    chooser_script = os.path.join(script_dir, "terminal_chooser.py")
+    # Launch detached
+    subprocess.Popen(['start', '/b', 'pythonw', chooser_script, path], shell=True)
+
 def run_command_ui():
     script_path = os.path.abspath(__file__)
     script_dir = os.path.dirname(script_path)
     
     # Scripts
-    terminal_chooser_script = os.path.join(script_dir, "terminal_chooser.py")
     add_bookmark_script = os.path.join(script_dir, "add_command_bookmark.py")
     view_bookmarks_script = os.path.join(script_dir, "view_command_bookmarks.py")
 
@@ -84,9 +100,8 @@ History items (marked with HIST) appear after Bookmarks (marked with *).
         "--layout=reverse",
         "--border",
         "--color=bg:#1e1e1e,fg:#d0d0d0,bg+:#2e2e2e,fg+:#ffffff,hl:#00d9ff,hl+:#00ff00,info:#afaf87,prompt:#d782ff,pointer:#d782ff,marker:#19d600,header:#888888,border:#d782ff",
-        # Use start /b to detach the GUI completely - this keeps fzf responsive
-        f'--bind=enter:execute-silent(start /b pythonw "{terminal_chooser_script}" "{{1}}" "{{q}}" "{{2}}")',
-        f'--bind=f5:execute-silent(python "{add_bookmark_script}" "{{1}}" || python "{add_bookmark_script}" "{{q}}")+reload(python "{script_path}" --feed)',
+        f'--bind=enter:execute-silent(python "{script_path}" --launch {{1}} {{q}} {{2}})',
+        f'--bind=f5:execute-silent(python "{add_bookmark_script}" {{1}} || python "{add_bookmark_script}" {{q}})+reload(python "{script_path}" --feed)',
         f'--bind=del:execute-silent(python "{view_bookmarks_script}" --remove {{1}})+reload(python "{script_path}" --feed)',
         f'--bind=ctrl-r:reload(python "{script_path}" --feed)',
         f'--bind=f1:execute-silent(cmd /c start cmd /k type "{help_path}" ^& pause)',
@@ -95,21 +110,11 @@ History items (marked with HIST) appear after Bookmarks (marked with *).
     ]
 
     try:
-        # Run fzf in a loop to allow for complete refreshes if needed, matching Run.py
         while True:
             initial_feed = subprocess.Popen(['python', script_path, '--feed'], stdout=subprocess.PIPE, text=True, encoding='utf-8')
             process = subprocess.Popen(fzf_args, stdin=initial_feed.stdout, text=True, encoding='utf-8')
             initial_feed.stdout.close()
             process.wait()
-            
-            # If fzf exited with 0 (Enter pressed on a non-binding) or 130 (ESC), exit the loop
-            if process.returncode != 0 and process.returncode != 1:
-                break
-            if process.returncode == 130:
-                break
-            # Otherwise loop continues (e.g. if we used an action that didn't exit fzf)
-            # But since we use bindings for everything, fzf usually stays open.
-            # We only get here if fzf itself exits.
             break
 
     except Exception as e:
@@ -122,6 +127,14 @@ History items (marked with HIST) appear after Bookmarks (marked with *).
 if __name__ == "__main__":
     if "--feed" in sys.argv:
         get_feeder_data()
+        os._exit(0)
+    elif "--launch" in sys.argv:
+        # Args: selection, query, shell
+        selection = sys.argv[2] if len(sys.argv) > 2 else ""
+        query = sys.argv[3] if len(sys.argv) > 3 else ""
+        shell = sys.argv[4] if len(sys.argv) > 4 else "pwsh"
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        save_and_launch_chooser(selection, query, shell, script_dir)
         os._exit(0)
     else:
         run_command_ui()
