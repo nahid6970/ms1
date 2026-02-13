@@ -9,6 +9,9 @@ Tray.Add("Restart Explorer", (*) => RestartExplorer())
 Tray.SetIcon("Restart Explorer", "C:\@delta\msBackups\icon\system_icon\shell32\965.ico")
 Tray.Add("Screen Dimmer", (*) => Run("C:\@delta\ms1\scripts\Autohtokey\version1\Display\ScreenDimmer.ahk"))
 Tray.Add("Reset WS", (*) => Toggle_Reset_Workspace())
+Tray.Add("Suspend", (*) => Suspend(-1))
+Tray.Default := "Suspend"
+Tray.ClickCount := 1
 Tray.Add() ; Add a separator
 Tray.Add("Exit", (*) => ExitApp()) ; Add Exit button
 Tray.SetIcon("Exit","C:\@delta\msBackups\icon\system_icon\shell32\295.ico")
