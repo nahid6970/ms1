@@ -4,8 +4,8 @@ import json
 import subprocess
 
 # Centralized database path
-HISTORY_FILE = r"C:\@delta\db\FZF_launcher\command_history.json"
-BOOKMARKS_FILE = r"C:\@delta\db\FZF_launcher\command_bookmarks.json"
+HISTORY_FILE = r"C:\@delta\db\FZF_launcher\CommandRunner\command_history.json"
+BOOKMARKS_FILE = r"C:\@delta\db\FZF_launcher\CommandRunner\command_bookmarks.json"
 
 def add_to_history(command, shell, dir_path=None):
     os.makedirs(os.path.dirname(HISTORY_FILE), exist_ok=True)

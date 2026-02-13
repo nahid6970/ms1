@@ -3,7 +3,7 @@ import json
 import os
 
 def toggle_bookmark(command, shell="pwsh"):
-    bookmarks_file = "C:\\@delta\\db\\FZF_launcher\\command_bookmarks.json"
+    bookmarks_file = "C:\\@delta\\db\\FZF_launcher\\CommandRunner\\command_bookmarks.json"
     
     # Strip markers if present
     if command.startswith("* "): command = command[2:]
@@ -40,7 +40,7 @@ def toggle_bookmark(command, shell="pwsh"):
         json.dump(bookmarks, f, indent=2, ensure_ascii=False)
 
 def move_bookmark(command, direction):
-    bookmarks_file = "C:\\@delta\\db\\FZF_launcher\\command_bookmarks.json"
+    bookmarks_file = "C:\\@delta\\db\\FZF_launcher\\CommandRunner\\command_bookmarks.json"
     if not os.path.exists(bookmarks_file):
         return
     

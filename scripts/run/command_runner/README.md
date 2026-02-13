@@ -36,9 +36,9 @@ A cyberpunk-themed terminal command launcher with FZF integration for quick comm
 
 ## Data Storage
 
-- Command history: `C:\@delta\db\FZF_launcher\command_history.json`
-- Bookmarks: `C:\@delta\db\FZF_launcher\command_bookmarks.json`
-- Directory history: `C:\@delta\db\FZF_launcher\command_dir_list.json`
+- Command history: `C:\@delta\db\FZF_launcher\CommandRunner\command_history.json`
+- Bookmarks: `C:\@delta\db\FZF_launcher\CommandRunner\command_bookmarks.json`
+- Directory history: `C:\@delta\db\FZF_launcher\CommandRunner\command_dir_list.json`
 
 ## Requirements
 

@@ -5,8 +5,8 @@ import sys
 import json
 
 # Centralized database paths
-HISTORY_FILE = r"C:\@delta\db\FZF_launcher\command_history.json"
-BOOKMARKS_FILE = r"C:\@delta\db\FZF_launcher\command_bookmarks.json"
+HISTORY_FILE = r"C:\@delta\db\FZF_launcher\CommandRunner\command_history.json"
+BOOKMARKS_FILE = r"C:\@delta\db\FZF_launcher\CommandRunner\command_bookmarks.json"
 
 def get_feeder_data():
     """Outputs the history and bookmarks for fzf."""
