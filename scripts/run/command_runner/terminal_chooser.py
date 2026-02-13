@@ -20,6 +20,7 @@ CP_TEXT = "#E0E0E0"
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 EXECUTOR_SCRIPT = os.path.join(SCRIPT_DIR, "executor.py")
+HISTORY_FILE = os.path.join(SCRIPT_DIR, "dir_history.json")
 
 class CyberButton(QPushButton):
     def __init__(self, text, bg_color, text_color=CP_BG, border_color=CP_DIM):
@@ -176,32 +177,35 @@ class TerminalChooser(QWidget):
             if item.widget():
                 item.widget().deleteLater()
         
-        dir_path = self.dir_input.text().strip()
-        if dir_path and os.path.isdir(dir_path):
+        # Load history
+        history = []
+        if os.path.exists(HISTORY_FILE):
             try:
-                items = [d for d in os.listdir(dir_path) if os.path.isdir(os.path.join(dir_path, d))][:5]
-                for item in items:
-                    btn = QPushButton(item)
-                    btn.setStyleSheet(f"""
-                        QPushButton {{
-                            background-color: {CP_PANEL};
-                            color: {CP_DIM};
-                            border: 1px solid {CP_DIM};
-                            padding: 4px 8px;
-                            font-family: 'Consolas';
-                            font-size: 9pt;
-                        }}
-                        QPushButton:hover {{
-                            color: {CP_CYAN};
-                            border: 1px solid {CP_CYAN};
-                        }}
-                    """)
-                    btn.setCursor(Qt.CursorShape.PointingHandCursor)
-                    btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-                    btn.clicked.connect(lambda checked, d=item: self.dir_input.setText(os.path.join(dir_path, d)))
-                    self.dir_buttons_layout.addWidget(btn)
+                with open(HISTORY_FILE, 'r') as f:
+                    history = json.load(f)
             except:
                 pass
+        
+        for dir_path in history[:5]:
+            btn = QPushButton(dir_path)
+            btn.setStyleSheet(f"""
+                QPushButton {{
+                    background-color: {CP_PANEL};
+                    color: {CP_DIM};
+                    border: 1px solid {CP_DIM};
+                    padding: 4px 8px;
+                    font-family: 'Consolas';
+                    font-size: 9pt;
+                }}
+                QPushButton:hover {{
+                    color: {CP_CYAN};
+                    border: 1px solid {CP_CYAN};
+                }}
+            """)
+            btn.setCursor(Qt.CursorShape.PointingHandCursor)
+            btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+            btn.clicked.connect(lambda checked, d=dir_path: self.dir_input.setText(d))
+            self.dir_buttons_layout.addWidget(btn)
         
     def center_window(self):
         self.adjustSize()
@@ -212,6 +216,28 @@ class TerminalChooser(QWidget):
         
     def handle_action(self, shell):
         dir_path = self.dir_input.text().strip()
+        
+        # Save to history
+        if dir_path:
+            history = []
+            if os.path.exists(HISTORY_FILE):
+                try:
+                    with open(HISTORY_FILE, 'r') as f:
+                        history = json.load(f)
+                except:
+                    pass
+            
+            if dir_path in history:
+                history.remove(dir_path)
+            history.insert(0, dir_path)
+            history = history[:5]
+            
+            try:
+                with open(HISTORY_FILE, 'w') as f:
+                    json.dump(history, f)
+            except:
+                pass
+        
         # Launch executor.py with clean selection and directory
         subprocess.Popen(['python', EXECUTOR_SCRIPT, shell, self.clean_selection, self.query, self.stored_shell, dir_path])
         self.close()
