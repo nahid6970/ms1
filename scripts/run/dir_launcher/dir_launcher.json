@@ -99,6 +99,11 @@
             "category": "AI"
         },
         {
+            "name": "Kiro CLI (Select Model)",
+            "template": "cls && wsl bash -l -c \"cd $(wslpath '{path}') && kiro-cli chat --trust-all-tools /model\"",
+            "category": "AI"
+        },
+        {
             "name": "Explorer",
             "template": "explorer \"{path}\"",
             "category": "General"
