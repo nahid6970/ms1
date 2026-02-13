@@ -191,7 +191,7 @@ class TerminalChooser(QWidget):
             btn.setStyleSheet(f"""
                 QPushButton {{
                     background-color: {CP_PANEL};
-                    color: {CP_DIM};
+                    color: {CP_TEXT};
                     border: 1px solid {CP_DIM};
                     padding: 4px 8px;
                     font-family: 'Consolas';
