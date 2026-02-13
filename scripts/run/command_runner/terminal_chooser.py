@@ -160,9 +160,9 @@ class TerminalChooser(QWidget):
         self.dir_input.textChanged.connect(self.update_dir_list)
         layout.addWidget(self.dir_input)
         
-        self.dir_list_label = QLabel("")
-        self.dir_list_label.setStyleSheet(f"color: {CP_DIM}; font-size: 9pt; margin-top: 5px;")
-        layout.addWidget(self.dir_list_label)
+        self.dir_buttons_layout = QHBoxLayout()
+        self.dir_buttons_layout.setSpacing(5)
+        layout.addLayout(self.dir_buttons_layout)
         self.update_dir_list()
         
         outer_layout = QVBoxLayout(self)
@@ -170,15 +170,38 @@ class TerminalChooser(QWidget):
         outer_layout.addWidget(self.main_frame)
     
     def update_dir_list(self):
+        # Clear existing buttons
+        while self.dir_buttons_layout.count():
+            item = self.dir_buttons_layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+        
         dir_path = self.dir_input.text().strip()
         if dir_path and os.path.isdir(dir_path):
             try:
                 items = [d for d in os.listdir(dir_path) if os.path.isdir(os.path.join(dir_path, d))][:5]
-                self.dir_list_label.setText(" | ".join(items) if items else "")
+                for item in items:
+                    btn = QPushButton(item)
+                    btn.setStyleSheet(f"""
+                        QPushButton {{
+                            background-color: {CP_PANEL};
+                            color: {CP_DIM};
+                            border: 1px solid {CP_DIM};
+                            padding: 4px 8px;
+                            font-family: 'Consolas';
+                            font-size: 9pt;
+                        }}
+                        QPushButton:hover {{
+                            color: {CP_CYAN};
+                            border: 1px solid {CP_CYAN};
+                        }}
+                    """)
+                    btn.setCursor(Qt.CursorShape.PointingHandCursor)
+                    btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+                    btn.clicked.connect(lambda checked, d=item: self.dir_input.setText(os.path.join(dir_path, d)))
+                    self.dir_buttons_layout.addWidget(btn)
             except:
-                self.dir_list_label.setText("")
-        else:
-            self.dir_list_label.setText("")
+                pass
         
     def center_window(self):
         self.adjustSize()
