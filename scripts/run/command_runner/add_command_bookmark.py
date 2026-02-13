@@ -2,9 +2,16 @@ import sys
 import json
 import os
 
-def add_bookmark(command, shell="pwsh"):
+def toggle_bookmark(command, shell="pwsh"):
     bookmarks_file = "C:\\@delta\\db\\FZF_launcher\\command_bookmarks.json"
     
+    # Strip markers if present
+    if command.startswith("* "): command = command[2:]
+    elif command.startswith("  "): command = command[2:]
+    
+    if not command.strip():
+        return
+
     # Ensure directory exists
     os.makedirs(os.path.dirname(bookmarks_file), exist_ok=True)
     
@@ -18,12 +25,16 @@ def add_bookmark(command, shell="pwsh"):
             bookmarks = []
     
     # Check if already bookmarked
-    for bm in bookmarks:
+    exists = False
+    for i, bm in enumerate(bookmarks):
         if bm['command'] == command:
-            return
+            bookmarks.pop(i)
+            exists = True
+            break
             
-    # Add new bookmark
-    bookmarks.append({"command": command, "shell": shell})
+    # Add new bookmark if it didn't exist
+    if not exists:
+        bookmarks.append({"command": command, "shell": shell})
     
     with open(bookmarks_file, 'w', encoding='utf-8') as f:
         json.dump(bookmarks, f, indent=2, ensure_ascii=False)
@@ -32,4 +43,4 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         command = sys.argv[1]
         shell = sys.argv[2] if len(sys.argv) > 2 else "pwsh"
-        add_bookmark(command, shell)
+        toggle_bookmark(command, shell)

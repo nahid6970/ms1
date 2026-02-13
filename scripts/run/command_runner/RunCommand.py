@@ -51,13 +51,11 @@ def save_and_launch_chooser(selection, query, shell, script_dir):
         "shell": shell
     }
     
-    # Create temp file
     fd, path = tempfile.mkstemp(suffix=".json", prefix="fzf_cmd_")
     with os.fdopen(fd, 'w', encoding='utf-8') as f:
         json.dump(data, f)
     
     chooser_script = os.path.join(script_dir, "terminal_chooser.py")
-    # Launch detached
     subprocess.Popen(['start', '/b', 'pythonw', chooser_script, path], shell=True)
 
 def run_command_ui():
@@ -66,27 +64,55 @@ def run_command_ui():
     
     # Scripts
     add_bookmark_script = os.path.join(script_dir, "add_command_bookmark.py")
-    view_bookmarks_script = os.path.join(script_dir, "view_command_bookmarks.py")
+    view_command_bookmarks_script = os.path.join(script_dir, "view_command_bookmarks.py")
 
     shortcuts_text = r"""
 Shortcuts available:
   Enter     : Run selected command (opens terminal chooser)
   F1        : Show this help window
-  F5        : Add command to bookmarks
+  F5        : Bookmark/Unbookmark selected command
   Del       : Remove from history or bookmarks
   Ctrl-R    : Refresh history/bookmarks list
   ?         : Toggle help header at the top
   ESC       : Exit
 
-Selected command can be bookmarked with F5.
-History items (marked with HIST) appear after Bookmarks (marked with *).
+Bookmarks are marked with *. History is marked with HIST.
 """
     
     with tempfile.NamedTemporaryFile(mode='w', delete=False, encoding='utf-8', suffix='.txt') as help_file:
         help_file.write(shortcuts_text)
         help_path = help_file.name
 
-    help_header = "Enter: Choose Terminal | F1: Help | F5: Bookmark\nDel: Remove | Ctrl-R: Refresh | ?: Toggle Help"
+    # Create history remover script content (inline to keep things simple)
+    remover_script_content = f'''
+import sys
+import json
+import os
+
+def remove_history(command):
+    history_file = r"{HISTORY_FILE}"
+    if command.startswith("* "): command = command[2:]
+    elif command.startswith("  "): command = command[2:]
+    
+    if os.path.exists(history_file):
+        try:
+            with open(history_file, "r", encoding="utf-8") as f:
+                history = json.load(f)
+            history = [h for h in history if h["command"] != command]
+            with open(history_file, "w", encoding="utf-8") as f:
+                json.dump(history, f, indent=2, ensure_ascii=False)
+        except: pass
+
+if __name__ == "__main__":
+    if len(sys.argv) > 1:
+        remove_history(sys.argv[1])
+'''
+
+    with tempfile.NamedTemporaryFile(mode='w', delete=False, encoding='utf-8', suffix='.py') as remover_file:
+        remover_file.write(remover_script_content)
+        remover_path = remover_file.name
+
+    help_header = "Enter: Choose Terminal | F1: Help | F5: Toggle Bookmark\nDel: Remove | Ctrl-R: Refresh | ?: Toggle Help"
 
     fzf_args = [
         "fzf",
@@ -100,10 +126,13 @@ History items (marked with HIST) appear after Bookmarks (marked with *).
         "--layout=reverse",
         "--border",
         "--color=bg:#1e1e1e,fg:#d0d0d0,bg+:#2e2e2e,fg+:#ffffff,hl:#00d9ff,hl+:#00ff00,info:#afaf87,prompt:#d782ff,pointer:#d782ff,marker:#19d600,header:#888888,border:#d782ff",
-        f'--bind=enter:execute-silent(python "{script_path}" --launch {{1}} {{q}} {{2}})',
-        f'--bind=f5:execute-silent(python "{add_bookmark_script}" {{1}} || python "{add_bookmark_script}" {{q}})+reload(python "{script_path}" --feed)',
-        f'--bind=del:execute-silent(python "{view_bookmarks_script}" --remove {{1}})+reload(python "{script_path}" --feed)',
-        f'--bind=ctrl-r:reload(python "{script_path}" --feed)',
+        # Enter: Run command and reload (reload helps bring focus back and refresh list)
+        f'--bind=enter:execute-silent(python "{script_path}" --launch {{1}} {{q}} {{2}})+reload(python "{script_path}" --feed)+clear-query',
+        # F5: Toggle bookmark and reload
+        f'--bind=f5:execute-silent(python "{add_bookmark_script}" {{1}} || python "{add_bookmark_script}" {{q}})+reload(python "{script_path}" --feed)+clear-query',
+        # Del: Remove from history AND bookmarks
+        f'--bind=del:execute-silent(python "{remover_path}" {{1}} && python "{view_command_bookmarks_script}" --remove {{1}})+reload(python "{script_path}" --feed)',
+        f'--bind=ctrl-r:reload(python "{script_path}" --feed)+clear-query',
         f'--bind=f1:execute-silent(cmd /c start cmd /k type "{help_path}" ^& pause)',
         "--bind=?:toggle-header",
         "--bind=start:toggle-header"
@@ -120,16 +149,16 @@ History items (marked with HIST) appear after Bookmarks (marked with *).
     except Exception as e:
         print(f"Error: {e}")
     finally:
-        if os.path.exists(help_path):
-            try: os.remove(help_path)
-            except: pass
+        for f in [help_path, remover_path]:
+            if os.path.exists(f):
+                try: os.remove(f)
+                except: pass
 
 if __name__ == "__main__":
     if "--feed" in sys.argv:
         get_feeder_data()
         os._exit(0)
     elif "--launch" in sys.argv:
-        # Args: selection, query, shell
         selection = sys.argv[2] if len(sys.argv) > 2 else ""
         query = sys.argv[3] if len(sys.argv) > 3 else ""
         shell = sys.argv[4] if len(sys.argv) > 4 else "pwsh"

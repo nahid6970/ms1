@@ -7,6 +7,10 @@ def remove_bookmark(command):
     if not os.path.exists(bookmarks_file):
         return
     
+    # Strip markers
+    if command.startswith("* "): command = command[2:]
+    elif command.startswith("  "): command = command[2:]
+
     try:
         with open(bookmarks_file, 'r', encoding='utf-8') as f:
             bookmarks = json.load(f)
@@ -43,3 +47,6 @@ if __name__ == "__main__":
             remove_bookmark(sys.argv[2])
         elif sys.argv[1] == "--reload":
             print(get_bookmarks_display())
+        else:
+            # Default to removal if just a command is passed
+            remove_bookmark(sys.argv[1])
