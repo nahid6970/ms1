@@ -379,14 +379,15 @@ python "{menu_script_path}" "!temp_file!" "{editor_chooser_script}"
             batch_file = batch_temp.name
 
 
-        # View mode state file for F3 toggle (full path vs filename) - stored in script dir for persistence
-        view_mode_file = os.path.join(script_dir, "run_settings.txt")
+        # View mode state file for F3 toggle (full path vs filename)
+        view_mode_file = r"C:\@delta\db\FZF_launcher\run_settings.txt"
         if not os.path.exists(view_mode_file):
+            os.makedirs(os.path.dirname(view_mode_file), exist_ok=True)
             with open(view_mode_file, 'w') as f:
                 f.write("full")
         
         # Create file feeder script that outputs files in different formats based on view mode
-        bookmarks_file = r"C:\Users\nahid\script_output\bookmarks.json"
+        bookmarks_file = r"C:\@delta\db\FZF_launcher\bookmarks.json"
         feeder_script_content = f'''
 import os
 import sys

@@ -35,7 +35,7 @@ def reload_bookmarks(bookmarks_file):
 
 def view_bookmarks():
     """Display bookmarks in fzf and allow actions on selected bookmark"""
-    bookmarks_file = r"C:\Users\nahid\script_output\bookmarks.json"
+    bookmarks_file = r"C:\@delta\db\FZF_launcher\bookmarks.json"
     
     while True:  # Loop to keep showing bookmarks after opening files
         # Load bookmarks
@@ -175,7 +175,7 @@ catch {
                     pass
 
 if __name__ == "__main__":
-    bookmarks_file = r"C:\Users\nahid\script_output\bookmarks.json"
+    bookmarks_file = r"C:\@delta\db\FZF_launcher\bookmarks.json"
     
     # Handle command line arguments for remove/reload
     if len(sys.argv) > 1:

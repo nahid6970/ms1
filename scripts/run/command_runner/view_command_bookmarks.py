@@ -3,7 +3,7 @@ import os
 import sys
 
 def remove_bookmark(command):
-    bookmarks_file = "C:\\Users\\nahid\\script_output\\command_bookmarks.json"
+    bookmarks_file = "C:\\@delta\\db\\FZF_launcher\\command_bookmarks.json"
     if not os.path.exists(bookmarks_file):
         return
     
@@ -21,7 +21,7 @@ def remove_bookmark(command):
             json.dump(new_bookmarks, f, indent=2, ensure_ascii=False)
 
 def get_bookmarks_display():
-    bookmarks_file = "C:\\Users\\nahid\\script_output\\command_bookmarks.json"
+    bookmarks_file = "C:\\@delta\\db\\FZF_launcher\\command_bookmarks.json"
     if not os.path.exists(bookmarks_file):
         return ""
     

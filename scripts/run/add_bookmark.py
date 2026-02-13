@@ -5,7 +5,7 @@ import os
 if __name__ == "__main__":
     if len(sys.argv) > 1:
         file_path = sys.argv[1]
-        bookmarks_file = r"C:\Users\nahid\script_output\bookmarks.json"
+        bookmarks_file = r"C:\@delta\db\FZF_launcher\bookmarks.json"
         
         # Ensure directory exists
         os.makedirs(os.path.dirname(bookmarks_file), exist_ok=True)

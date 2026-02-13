@@ -3,7 +3,10 @@ import os
 import json
 import subprocess
 
-DATA_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dir_launcher.json")
+DATA_FILE = r"C:\@delta\db\FZF_launcher\dir_launcher.json"
+
+# Ensure directory exists
+os.makedirs(os.path.dirname(DATA_FILE), exist_ok=True)
 
 # ANSI Colors
 C_RESET = "\033[0m"

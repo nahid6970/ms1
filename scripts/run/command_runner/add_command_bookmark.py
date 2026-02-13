@@ -3,7 +3,7 @@ import json
 import os
 
 def add_bookmark(command, shell="pwsh"):
-    bookmarks_file = "C:\\Users\\nahid\\script_output\\command_bookmarks.json"
+    bookmarks_file = "C:\\@delta\\db\\FZF_launcher\\command_bookmarks.json"
     
     # Ensure directory exists
     os.makedirs(os.path.dirname(bookmarks_file), exist_ok=True)

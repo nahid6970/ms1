@@ -4,8 +4,8 @@ import json
 import subprocess
 
 def add_to_history(command, shell):
-    # Using escaped backslashes for safety
-    history_file = "C:\\Users\\nahid\\script_output\\command_history.json"
+    # Centralized database path
+    history_file = "C:\\@delta\\db\\FZF_launcher\\command_history.json"
     os.makedirs(os.path.dirname(history_file), exist_ok=True)
     
     history = []

@@ -6,9 +6,9 @@ import json
 
 def run_command_ui():
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    # Use double backslashes for paths to avoid escape sequence issues
-    history_file = "C:\\Users\\nahid\\script_output\\command_history.json"
-    bookmarks_file = "C:\\Users\\nahid\\script_output\\command_bookmarks.json"
+    # Centralized database path
+    history_file = "C:\\@delta\\db\\FZF_launcher\\command_history.json"
+    bookmarks_file = "C:\\@delta\\db\\FZF_launcher\\command_bookmarks.json"
     executor_script = os.path.join(script_dir, "executor.py")
     add_bookmark_script = os.path.join(script_dir, "add_command_bookmark.py")
     view_bookmarks_script = os.path.join(script_dir, "view_command_bookmarks.py")
