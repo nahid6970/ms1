@@ -26,7 +26,7 @@ To match existing tools, key bindings must be implemented as follows:
 
 | Key | Action | Implementation Detail |
 | :--- | :--- | :--- |
-| **Enter** | Primary Action | Use `execute-silent` if opening a GUI menu to prevent terminal clearing. |
+| **Enter** | Primary Action | Use `execute-silent(...) + reload(feeder)` to prevent terminal clearing AND maintain responsiveness on Windows. |
 | **?** | Toggle Header | Use `--no-header` + `--bind=start:toggle-header` + `--bind=?:toggle-header`. |
 | **F1** | Help Window | `execute-silent(cmd /c start cmd /k type "{help_path}" ^& pause)` |
 | **F5** | Bookmark | `execute-silent(python add_script.py {selection}) + reload(feeder)` |

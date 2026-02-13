@@ -149,8 +149,8 @@ class TerminalChooser(QWidget):
         self.move(x, y)
         
     def handle_action(self, shell):
-        # Call executor.py with clean selection
-        subprocess.run(['python', EXECUTOR_SCRIPT, shell, self.clean_selection, self.query, self.stored_shell])
+        # Launch executor.py and exit immediately to return control to fzf
+        subprocess.Popen(['python', EXECUTOR_SCRIPT, shell, self.clean_selection, self.query, self.stored_shell])
         self.close()
 
     def keyPressEvent(self, event):
