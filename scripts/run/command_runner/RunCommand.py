@@ -71,6 +71,8 @@ Shortcuts available:
   Enter     : Run selected command (opens terminal chooser)
   F1        : Show this help window
   F5        : Bookmark/Unbookmark selected command
+  Alt-Up    : Move bookmarked command up in order
+  Alt-Down  : Move bookmarked command down in order
   Del       : Remove from history or bookmarks
   Ctrl-R    : Refresh history/bookmarks list
   ?         : Toggle help header at the top
@@ -134,6 +136,8 @@ if __name__ == "__main__":
         f'--bind=del:execute-silent(python "{remover_path}" {{1}} && python "{view_command_bookmarks_script}" --remove {{1}})+reload(python "{script_path}" --feed)',
         f'--bind=ctrl-r:reload(python "{script_path}" --feed)+clear-query',
         f'--bind=f1:execute-silent(cmd /c start cmd /k type "{help_path}" ^& pause)',
+        f'--bind=alt-up:execute-silent(python "{add_bookmark_script}" --move-up {{1}})+reload(python "{script_path}" --feed)+up',
+        f'--bind=alt-down:execute-silent(python "{add_bookmark_script}" --move-down {{1}})+reload(python "{script_path}" --feed)+down',
         "--bind=?:toggle-header",
         "--bind=start:toggle-header"
     ]
