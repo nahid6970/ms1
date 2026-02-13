@@ -161,7 +161,7 @@ class TerminalChooser(QWidget):
         self.dir_input.textChanged.connect(self.update_dir_list)
         layout.addWidget(self.dir_input)
         
-        self.dir_buttons_layout = QHBoxLayout()
+        self.dir_buttons_layout = QVBoxLayout()
         self.dir_buttons_layout.setSpacing(5)
         layout.addLayout(self.dir_buttons_layout)
         self.update_dir_list()
@@ -186,7 +186,7 @@ class TerminalChooser(QWidget):
             except:
                 pass
         
-        for dir_path in history[:5]:
+        for dir_path in history[:10]:
             btn = QPushButton(dir_path)
             btn.setStyleSheet(f"""
                 QPushButton {{
@@ -230,7 +230,7 @@ class TerminalChooser(QWidget):
             if dir_path in history:
                 history.remove(dir_path)
             history.insert(0, dir_path)
-            history = history[:5]
+            history = history[:10]
             
             try:
                 with open(HISTORY_FILE, 'w') as f:
