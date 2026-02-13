@@ -3,7 +3,7 @@ import sys
 import subprocess
 import json
 from PyQt6.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout, 
-                             QLabel, QPushButton, QGridLayout, QFrame)
+                             QLabel, QPushButton, QGridLayout, QFrame, QLineEdit)
 from PyQt6.QtCore import Qt, QSize
 from PyQt6.QtGui import QFont
 
@@ -69,6 +69,7 @@ class TerminalChooser(QWidget):
         self.selection = data.get('selection', '')
         self.query = data.get('query', '')
         self.stored_shell = data.get('shell', 'pwsh')
+        self.stored_dir = data.get('dir', '')
         
         # Strip markers from selection if present
         clean_selection = self.selection
@@ -139,6 +140,25 @@ class TerminalChooser(QWidget):
         
         layout.addLayout(grid)
         
+        # Directory Input Section
+        layout.addSpacing(15)
+        layout.addWidget(QLabel(">> WORKING DIRECTORY"))
+        self.dir_input = QLineEdit(self.stored_dir)
+        self.dir_input.setStyleSheet(f"""
+            QLineEdit {{
+                background-color: {CP_PANEL};
+                color: {CP_CYAN};
+                border: 1px solid {CP_DIM};
+                padding: 8px;
+                font-family: 'Consolas';
+                font-size: 10pt;
+            }}
+            QLineEdit:focus {{
+                border: 1px solid {CP_CYAN};
+            }}
+        """)
+        layout.addWidget(self.dir_input)
+        
         outer_layout = QVBoxLayout(self)
         outer_layout.setContentsMargins(0, 0, 0, 0)
         outer_layout.addWidget(self.main_frame)
@@ -151,7 +171,9 @@ class TerminalChooser(QWidget):
         self.move(x, y)
         
     def handle_action(self, shell):
-        subprocess.Popen(['python', EXECUTOR_SCRIPT, shell, self.clean_selection, self.query, self.stored_shell])
+        dir_path = self.dir_input.text().strip()
+        # Launch executor.py with clean selection and directory
+        subprocess.Popen(['python', EXECUTOR_SCRIPT, shell, self.clean_selection, self.query, self.stored_shell, dir_path])
         self.close()
 
     def keyPressEvent(self, event):
@@ -162,10 +184,21 @@ class TerminalChooser(QWidget):
                 self.buttons[idx+1].setFocus()
             elif event.key() == Qt.Key.Key_Left and idx > 0:
                 self.buttons[idx-1].setFocus()
+            elif event.key() == Qt.Key.Key_Down:
+                self.dir_input.setFocus()
             elif event.key() == Qt.Key.Key_Escape:
                 self.close()
             elif event.key() in (Qt.Key.Key_Return, Qt.Key.Key_Enter):
                 current_widget.click()
+        elif current_widget == self.dir_input:
+            if event.key() == Qt.Key.Key_Up:
+                self.buttons[0].setFocus()
+            elif event.key() == Qt.Key.Key_Escape:
+                self.close()
+            elif event.key() in (Qt.Key.Key_Return, Qt.Key.Key_Enter):
+                # Trigger action on stored shell or first shell if enter pressed in input
+                shell_to_use = self.stored_shell if self.stored_shell else "pwsh"
+                self.handle_action(shell_to_use)
         else:
             super().keyPressEvent(event)
 

@@ -24,7 +24,9 @@ def get_feeder_data():
                 for bm in bms:
                     cmd = bm["command"]
                     shell = bm.get("shell", "pwsh")
-                    print(f"* {cmd}\t{shell}\tBM")
+                    directory = bm.get("dir", "")
+                    # Format: cmd \t shell \t dir \t type
+                    print(f"* {cmd}\t{shell}\t{directory}\tBM")
                     seen.add(cmd)
                     
         # Load History
@@ -35,7 +37,8 @@ def get_feeder_data():
                     cmd = h["command"]
                     if cmd not in seen:
                         shell = h.get("shell", "pwsh")
-                        print(f"  {cmd}\t{shell}\tHIST")
+                        directory = h.get("dir", "")
+                        print(f"  {cmd}\t{shell}\t{directory}\tHIST")
                         seen.add(cmd)
         sys.stdout.flush()
     except (BrokenPipeError, IOError):
@@ -43,12 +46,13 @@ def get_feeder_data():
     except Exception:
         pass
 
-def save_and_launch_chooser(selection, query, shell, script_dir):
+def save_and_launch_chooser(selection, query, shell, directory, script_dir):
     """Saves selection data to a temp file and launches the chooser."""
     data = {
         "selection": selection,
         "query": query,
-        "shell": shell
+        "shell": shell,
+        "dir": directory
     }
     
     fd, path = tempfile.mkstemp(suffix=".json", prefix="fzf_cmd_")
@@ -85,7 +89,7 @@ Bookmarks are marked with *. History is marked with HIST.
         help_file.write(shortcuts_text)
         help_path = help_file.name
 
-    # Create history remover script content (inline to keep things simple)
+    # Create history remover script content
     remover_script_content = f'''
 import sys
 import json
@@ -128,8 +132,8 @@ if __name__ == "__main__":
         "--layout=reverse",
         "--border",
         "--color=bg:#1e1e1e,fg:#d0d0d0,bg+:#2e2e2e,fg+:#ffffff,hl:#00d9ff,hl+:#00ff00,info:#afaf87,prompt:#d782ff,pointer:#d782ff,marker:#19d600,header:#888888,border:#d782ff",
-        # Enter: Run command and reload (reload helps bring focus back and refresh list)
-        f'--bind=enter:execute-silent(python "{script_path}" --launch {{1}} {{q}} {{2}})+reload(python "{script_path}" --feed)+clear-query',
+        # Enter: Run command and reload. {1}=cmd, {2}=shell, {3}=dir
+        f'--bind=enter:execute-silent(python "{script_path}" --launch {{1}} {{q}} {{2}} {{3}})+reload(python "{script_path}" --feed)+clear-query',
         # F5: Toggle bookmark and reload
         f'--bind=f5:execute-silent(python "{add_bookmark_script}" {{1}} || python "{add_bookmark_script}" {{q}})+reload(python "{script_path}" --feed)+clear-query',
         # Del: Remove from history AND bookmarks
@@ -163,11 +167,13 @@ if __name__ == "__main__":
         get_feeder_data()
         os._exit(0)
     elif "--launch" in sys.argv:
+        # Args: selection, query, shell, dir
         selection = sys.argv[2] if len(sys.argv) > 2 else ""
         query = sys.argv[3] if len(sys.argv) > 3 else ""
         shell = sys.argv[4] if len(sys.argv) > 4 else "pwsh"
+        directory = sys.argv[5] if len(sys.argv) > 5 else ""
         script_dir = os.path.dirname(os.path.abspath(__file__))
-        save_and_launch_chooser(selection, query, shell, script_dir)
+        save_and_launch_chooser(selection, query, shell, directory, script_dir)
         os._exit(0)
     else:
         run_command_ui()
