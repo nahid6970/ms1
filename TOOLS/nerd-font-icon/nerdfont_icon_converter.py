@@ -27,7 +27,7 @@ class NerdFontConverter(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("NERDFONT ICON CONVERTER")
-        self.resize(1200, 550)
+        self.resize(1400, 500)
         
         # Config file path
         self.config_dir = Path(r"C:\@delta\output\nerd-icon")
