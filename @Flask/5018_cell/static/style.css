@@ -1112,7 +1112,13 @@ td.cell-complete::after {
     left: 0;
     right: 0;
     bottom: 0;
-    background-image: repeating-linear-gradient(90deg,
+    background-image: 
+        repeating-linear-gradient(90deg,
+            transparent,
+            transparent 15px,
+            #999 15px,
+            #999 17px),
+        repeating-linear-gradient(0deg,
             transparent,
             transparent 15px,
             #999 15px,
