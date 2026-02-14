@@ -78,6 +78,7 @@ Shortcuts available:
   Alt-Up    : Move bookmarked command up in order
   Alt-Down  : Move bookmarked command down in order
   Del       : Remove from history or bookmarks
+  Ctrl-C    : Copy command to clipboard
   Ctrl-R    : Refresh history/bookmarks list
   ?         : Toggle help header at the top
   ESC       : Exit
@@ -118,7 +119,23 @@ if __name__ == "__main__":
         remover_file.write(remover_script_content)
         remover_path = remover_file.name
 
-    help_header = "Enter: Choose Terminal | F1: Help | F5: Toggle Bookmark\nDel: Remove | Ctrl-R: Refresh | ?: Toggle Help"
+    # Create clipboard copy script
+    copy_script_content = '''
+import sys
+import subprocess
+
+if len(sys.argv) > 1:
+    cmd = sys.argv[1]
+    if cmd.startswith("* "): cmd = cmd[2:]
+    elif cmd.startswith("  "): cmd = cmd[2:]
+    subprocess.run(["clip"], input=cmd.encode("utf-8"), check=True)
+'''
+
+    with tempfile.NamedTemporaryFile(mode='w', delete=False, encoding='utf-8', suffix='.py') as copy_file:
+        copy_file.write(copy_script_content)
+        copy_path = copy_file.name
+
+    help_header = "Enter: Choose Terminal | F1: Help | F5: Toggle Bookmark\nDel: Remove | Ctrl-C: Copy | Ctrl-R: Refresh | ?: Toggle Help"
 
     fzf_args = [
         "fzf",
@@ -138,6 +155,8 @@ if __name__ == "__main__":
         f'--bind=f5:execute-silent(python "{add_bookmark_script}" {{1}} || python "{add_bookmark_script}" {{q}})+reload(python "{script_path}" --feed)+clear-query',
         # Del: Remove from history AND bookmarks
         f'--bind=del:execute-silent(python "{remover_path}" {{1}} && python "{view_command_bookmarks_script}" --remove {{1}})+reload(python "{script_path}" --feed)',
+        # Ctrl-C: Copy to clipboard
+        f'--bind=ctrl-c:execute-silent(python "{copy_path}" {{1}})',
         f'--bind=ctrl-r:reload(python "{script_path}" --feed)+clear-query',
         f'--bind=f1:execute-silent(cmd /c start cmd /k type "{help_path}" ^& pause)',
         f'--bind=alt-up:execute-silent(python "{add_bookmark_script}" --move-up {{1}})+reload(python "{script_path}" --feed)+up',
@@ -157,7 +176,7 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"Error: {e}")
     finally:
-        for f in [help_path, remover_path]:
+        for f in [help_path, remover_path, copy_path]:
             if os.path.exists(f):
                 try: os.remove(f)
                 except: pass
