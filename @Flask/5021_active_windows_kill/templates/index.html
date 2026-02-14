@@ -12,6 +12,7 @@
         h1 { margin-bottom: 30px; color: #333; }
         .list-group-item { display: flex; justify-content: space-between; align-items: center; }
         .window-title { font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 80%; }
+        .app-icon { width: 16px; height: 16px; margin-right: 8px; vertical-align: middle; }
         .accordion-header { position: relative; }
         .kill-all-btn { position: absolute; right: 4.5rem; z-index: 10; top: 50%; transform: translateY(-50%); }
         .accordion-button { padding-right: 10rem; }
@@ -25,7 +26,12 @@
                 {% if group.windows|length == 1 %}
                     <div class="list-group-item">
                         <div>
-                            <small class="text-muted d-block">{{ group.app_name }}</small>
+                            <small class="text-muted d-block">
+                                {% if group.icon %}
+                                <img src="data:image/png;base64,{{ group.icon }}" class="app-icon" alt="">
+                                {% endif %}
+                                {{ group.app_name }}
+                            </small>
                             <span class="window-title" title="{{ group.windows[0].title }}">{{ group.windows[0].title }}</span>
                         </div>
                         <a href="{{ url_for('close_window', hwnd=group.windows[0].hwnd) }}" class="btn btn-outline-danger btn-sm" title="Kill Process"><i class="bi bi-x-lg"></i></a>
@@ -40,6 +46,9 @@
                 <div class="accordion-item">
                     <h2 class="accordion-header" id="heading{{ loop.index }}">
                         <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ loop.index }}" aria-expanded="true" aria-controls="collapse{{ loop.index }}">
+                            {% if group.icon %}
+                            <img src="data:image/png;base64,{{ group.icon }}" class="app-icon" alt="">
+                            {% endif %}
                             <strong>{{ group.app_name }}</strong> &nbsp; <span class="badge bg-secondary rounded-pill">{{ group.windows|length }}</span>
                         </button>
                         <a href="{{ url_for('kill_app', name=group.app_name) }}" class="btn btn-danger btn-sm kill-all-btn" title="Kill All Processes"><i class="bi bi-x-circle"></i> Kill All</a>
