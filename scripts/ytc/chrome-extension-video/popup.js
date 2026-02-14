@@ -16,10 +16,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       const audioSelect = document.getElementById('audioFormat');
       
       videoSelect.innerHTML = '<option value="best">best</option>' + 
-        videoFormats.map(f => `<option value="${f.id}">${f.id} | ${f.ext} | ${f.resolution}</option>`).join('');
+        videoFormats.map(f => `<option value="${f.id}">${f.id} | ${f.ext} | ${f.resolution} | ${f.size}</option>`).join('');
       
       audioSelect.innerHTML = '<option value="best">best</option>' + 
-        audioFormats.map(f => `<option value="${f.id}">${f.id} | ${f.ext} | ${f.abr}k</option>`).join('');
+        audioFormats.map(f => `<option value="${f.id}">${f.id} | ${f.ext} | ${f.abr}k | ${f.size}</option>`).join('');
       
       videoSelect.disabled = false;
       audioSelect.disabled = false;
@@ -83,10 +83,10 @@ document.getElementById('fetchFormats').addEventListener('click', async () => {
       const audioSelect = document.getElementById('audioFormat');
       
       videoSelect.innerHTML = '<option value="best">best</option>' + 
-        videoFormats.map(f => `<option value="${f.id}">${f.id} | ${f.ext} | ${f.resolution}</option>`).join('');
+        videoFormats.map(f => `<option value="${f.id}">${f.id} | ${f.ext} | ${f.resolution} | ${f.size}</option>`).join('');
       
       audioSelect.innerHTML = '<option value="best">best</option>' + 
-        audioFormats.map(f => `<option value="${f.id}">${f.id} | ${f.ext} | ${f.abr}k</option>`).join('');
+        audioFormats.map(f => `<option value="${f.id}">${f.id} | ${f.ext} | ${f.abr}k | ${f.size}</option>`).join('');
       
       videoSelect.disabled = false;
       audioSelect.disabled = false;
