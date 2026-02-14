@@ -74,16 +74,22 @@ def fetch_formats(message):
         
         for f in formats:
             if f.get('vcodec') != 'none' and f.get('acodec') == 'none':
+                filesize = f.get('filesize') or f.get('filesize_approx', 0)
+                size_mb = f"{filesize / (1024*1024):.1f}MB" if filesize else "N/A"
                 video_formats.append({
                     'id': f['format_id'],
                     'ext': f['ext'],
-                    'resolution': f.get('resolution', 'N/A')
+                    'resolution': f.get('resolution', 'N/A'),
+                    'size': size_mb
                 })
             elif f.get('acodec') != 'none' and f.get('vcodec') == 'none':
+                filesize = f.get('filesize') or f.get('filesize_approx', 0)
+                size_mb = f"{filesize / (1024*1024):.1f}MB" if filesize else "N/A"
                 audio_formats.append({
                     'id': f['format_id'],
                     'ext': f['ext'],
-                    'abr': f.get('abr', 'N/A')
+                    'abr': f.get('abr', 'N/A'),
+                    'size': size_mb
                 })
         
         send_message({
