@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>YTC Video Downloader</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <h1 class="header">YTC VIDEO DOWNLOADER</h1>
+    
+    <div class="section">
+      <label class="section-title">CURRENT URL:</label>
+      <input type="text" id="url" class="url-input" readonly>
+    </div>
+
+    <button id="fetchFormats" class="action-btn">[ FETCH FORMATS ]</button>
+
+    <div class="section">
+      <label class="section-title">VIDEO FORMAT:</label>
+      <select id="videoFormat" class="select" disabled>
+        <option value="">Fetch formats first...</option>
+      </select>
+    </div>
+
+    <div class="section">
+      <label class="section-title">AUDIO FORMAT:</label>
+      <select id="audioFormat" class="select" disabled>
+        <option value="">Fetch formats first...</option>
+      </select>
+    </div>
+
+    <div class="section">
+      <label class="checkbox-label">
+        <input type="checkbox" id="downloadSubs">
+        DOWNLOAD SUBTITLES
+      </label>
+    </div>
+
+    <div class="section" id="subLangSection" style="display: none;">
+      <label class="section-title">SUBTITLE LANGUAGE:</label>
+      <select id="subLang" class="select">
+        <option value="en">English</option>
+        <option value="bn">Bengali</option>
+        <option value="hi">Hindi</option>
+      </select>
+    </div>
+
+    <button id="download" class="download-btn" disabled>[ DOWNLOAD VIDEO ]</button>
+    
+    <div id="status" class="status">READY</div>
+    
+    <div class="footer">
+      <a href="#" id="settingsLink">⚙️ Settings</a>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

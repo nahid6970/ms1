@@ -1,0 +1,9 @@
+{
+  "name": "com.ytc.video_downloader",
+  "description": "YTC Video Downloader Native Host",
+  "path": "C:\\@delta\\ms1\\scripts\\ytc\\chrome-extension-video\\native_host.bat",
+  "type": "stdio",
+  "allowed_origins": [
+    "chrome-extension://oabjflnlkoaecejehdnejglehkhchdif/"
+  ]
+}

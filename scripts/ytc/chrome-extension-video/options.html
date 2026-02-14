@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>YTC Video Downloader - Settings</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="container">
+    <h1 class="header">YTC VIDEO DOWNLOADER - SETTINGS</h1>
+    
+    <div class="section">
+      <label class="section-title">SAVE DIRECTORY:</label>
+      <div class="input-group">
+        <input type="text" id="saveDir" class="input" placeholder="C:\Downloads\Videos">
+        <button id="browseSaveDir" class="browse-btn">BROWSE</button>
+      </div>
+      <p class="help-text">Directory where videos will be saved</p>
+    </div>
+
+    <div class="section">
+      <label class="section-title">AUTHENTICATION (for age-restricted videos):</label>
+      <div class="radio-group">
+        <label class="radio-label">
+          <input type="radio" name="authMethod" value="none" checked>
+          None
+        </label>
+        <label class="radio-label">
+          <input type="radio" name="authMethod" value="browser">
+          Browser Cookies
+        </label>
+        <label class="radio-label">
+          <input type="radio" name="authMethod" value="file">
+          Cookie File
+        </label>
+      </div>
+    </div>
+
+    <div class="section" id="browserSection" style="display: none;">
+      <label class="section-title">BROWSER:</label>
+      <select id="browser" class="select">
+        <option value="chrome">Chrome</option>
+        <option value="firefox">Firefox</option>
+        <option value="edge">Edge</option>
+        <option value="opera">Opera</option>
+        <option value="brave">Brave</option>
+      </select>
+    </div>
+
+    <div class="section" id="cookieFileSection" style="display: none;">
+      <label class="section-title">COOKIE FILE:</label>
+      <div class="input-group">
+        <input type="text" id="cookieFile" class="input" placeholder="C:\path\to\cookies.txt">
+        <button id="browseCookieFile" class="browse-btn">BROWSE</button>
+      </div>
+      <p class="help-text">Export cookies using "Get cookies.txt LOCALLY" extension</p>
+    </div>
+
+    <button id="save" class="save-btn">[ SAVE SETTINGS ]</button>
+    
+    <div id="status" class="status">Configure settings above</div>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>
