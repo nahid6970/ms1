@@ -709,5 +709,17 @@
     "ExecutableType": "pythonw",
     "script_enabled": false,
     "added_at": 1769513702.432895
+  },
+  {
+    "name": "RCLONE SYNC",
+    "type": "Command",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\@delta\\ms1\\@Status-Bar\\RCLONE\\Rclone-Status.py",
+    "ps1_command": "Start-Process -FilePath \"C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe\" -ArgumentList \"C:\\@delta\\ms1\\@Status-Bar\\RCLONE\\Rclone-Status.py\"",
+    "ExecutableType": "pythonw",
+    "script_enabled": false,
+    "added_at": 1771037792.422986
   }
 ]
