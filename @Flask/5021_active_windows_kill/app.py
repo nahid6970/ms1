@@ -50,23 +50,20 @@ def get_icon_as_base64(hwnd):
         bmp.CreateCompatibleBitmap(src_dc, width, height)
         mem_dc.SelectObject(bmp)
         
-        # Fill background with white to avoid black background if alpha is ignored
-        brush = win32gui.CreateSolidBrush(win32api.RGB(255, 255, 255))
-        win32gui.FillRect(mem_dc.GetSafeHdc(), (0, 0, width, height), brush)
-        win32gui.DeleteObject(brush)
-        
+        # Use DrawIconEx with DI_NORMAL to preserve alpha if present
         win32gui.DrawIconEx(mem_dc.GetSafeHdc(), 0, 0, hicon, width, height, 0, None, win32con.DI_NORMAL)
         
         bmp_info = bmp.GetInfo()
         bmp_str = bmp.GetBitmapBits(True)
-        img = Image.frombuffer('RGB', (bmp_info['bmWidth'], bmp_info['bmHeight']), bmp_str, 'raw', 'BGRX', 0, 1)
+        # Use RGBA and BGRA to handle the alpha channel correctly
+        img = Image.frombuffer('RGBA', (bmp_info['bmWidth'], bmp_info['bmHeight']), bmp_str, 'raw', 'BGRA', 0, 1)
         
         mem_dc.DeleteDC()
         src_dc.DeleteDC()
         win32gui.ReleaseDC(0, hdc)
 
         buffered = io.BytesIO()
-        img.save(buffered, format="PNG")
+        img.save(buffered, format="PNG") # PNG supports transparency
         return base64.b64encode(buffered.getvalue()).decode('utf-8')
     except:
         return None
