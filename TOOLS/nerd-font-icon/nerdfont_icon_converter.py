@@ -27,7 +27,7 @@ class NerdFontConverter(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("NERDFONT ICON CONVERTER")
-        self.resize(900, 700)
+        self.resize(1200, 550)
         
         # Config file path
         self.config_dir = Path(r"C:\@delta\output\nerd-icon")
@@ -125,6 +125,12 @@ class NerdFontConverter(QMainWindow):
         title.setStyleSheet(f"font-size: 16pt; font-weight: bold; color: {CP_YELLOW}; padding: 10px;")
         main_layout.addWidget(title)
         
+        # Two-column layout
+        columns_layout = QHBoxLayout()
+        
+        # LEFT COLUMN
+        left_column = QVBoxLayout()
+        
         # Input Group
         input_group = QGroupBox("ICON INPUT")
         input_layout = QFormLayout()
@@ -167,7 +173,7 @@ class NerdFontConverter(QMainWindow):
         input_layout.addRow("Custom Font:", font_layout)
         
         input_group.setLayout(input_layout)
-        main_layout.addWidget(input_group)
+        left_column.addWidget(input_group)
         
         # Settings Group
         settings_group = QGroupBox("CONVERSION SETTINGS")
@@ -214,15 +220,26 @@ class NerdFontConverter(QMainWindow):
         self.icon_size_ratio.setRange(10, 200)
         self.icon_size_ratio.setValue(self.config.get("icon_size_ratio", 75))
         self.icon_size_ratio.setSuffix("%")
-        icon_ratio_label = QLabel("(How much of the image the icon fills, >100% crops)")
-        icon_ratio_label.setStyleSheet(f"color: {CP_SUBTEXT}; font-size: 9pt;")
-        icon_ratio_layout = QHBoxLayout()
-        icon_ratio_layout.addWidget(self.icon_size_ratio)
-        icon_ratio_layout.addWidget(icon_ratio_label)
-        settings_layout.addRow("Icon Size Ratio:", icon_ratio_layout)
+        settings_layout.addRow("Icon Size Ratio:", self.icon_size_ratio)
         
         settings_group.setLayout(settings_layout)
-        main_layout.addWidget(settings_group)
+        left_column.addWidget(settings_group)
+        
+        # Dimensions Group
+        dim_group = QGroupBox("OUTPUT DIMENSIONS")
+        dim_layout = QVBoxLayout()
+        
+        self.dimensions_text = QTextEdit()
+        self.dimensions_text.setPlainText("\n".join(map(str, self.config["dimensions"])))
+        self.dimensions_text.setMaximumHeight(100)
+        dim_layout.addWidget(self.dimensions_text)
+        
+        dim_group.setLayout(dim_layout)
+        left_column.addWidget(dim_group)
+        left_column.addStretch()
+        
+        # RIGHT COLUMN
+        right_column = QVBoxLayout()
         
         # Border Settings Group
         border_group = QGroupBox("BORDER SETTINGS")
@@ -255,26 +272,10 @@ class NerdFontConverter(QMainWindow):
         self.border_radius = QSpinBox()
         self.border_radius.setRange(0, 500)
         self.border_radius.setValue(self.config.get("border_radius", 0))
-        border_layout.addRow("Border Radius (0=square):", self.border_radius)
+        border_layout.addRow("Border Radius:", self.border_radius)
         
         border_group.setLayout(border_layout)
-        main_layout.addWidget(border_group)
-        
-        # Dimensions Group
-        dim_group = QGroupBox("OUTPUT DIMENSIONS")
-        dim_layout = QVBoxLayout()
-        
-        dim_info = QLabel("Modify dimensions (one per line, e.g., 16, 32, 64):")
-        dim_info.setStyleSheet(f"color: {CP_SUBTEXT}; font-size: 9pt;")
-        dim_layout.addWidget(dim_info)
-        
-        self.dimensions_text = QTextEdit()
-        self.dimensions_text.setPlainText("\n".join(map(str, self.config["dimensions"])))
-        self.dimensions_text.setMaximumHeight(120)
-        dim_layout.addWidget(self.dimensions_text)
-        
-        dim_group.setLayout(dim_layout)
-        main_layout.addWidget(dim_group)
+        right_column.addWidget(border_group)
         
         # Output Group
         output_group = QGroupBox("OUTPUT SETTINGS")
@@ -292,17 +293,23 @@ class NerdFontConverter(QMainWindow):
         
         # Filename pattern
         self.filename_pattern = QLineEdit(self.config.get("filename_pattern", "icon_{size}x{size}"))
-        self.filename_pattern.setPlaceholderText("Use {size} for dimension, e.g., icon_{size}x{size} or icon{size}")
-        pattern_info = QLabel("Pattern examples: icon_{size}x{size}, icon{size}, myicon_{size}")
-        pattern_info.setStyleSheet(f"color: {CP_SUBTEXT}; font-size: 9pt;")
+        self.filename_pattern.setPlaceholderText("Use {size} for dimension")
         output_layout.addRow("Filename Pattern:", self.filename_pattern)
-        output_layout.addRow("", pattern_info)
         
         output_group.setLayout(output_layout)
-        main_layout.addWidget(output_group)
+        right_column.addWidget(output_group)
+        right_column.addStretch()
+        
+        # Add columns to layout
+        columns_layout.addLayout(left_column)
+        columns_layout.addLayout(right_column)
+        main_layout.addLayout(columns_layout)
         
         # Action Buttons
         btn_layout = QHBoxLayout()
+        
+        save_config_btn = QPushButton("SAVE CONFIG")
+        save_config_btn.clicked.connect(self.save_config)
         
         self.convert_btn = QPushButton("⚡ CONVERT ICON ⚡")
         self.convert_btn.clicked.connect(self.convert_icon)
@@ -319,9 +326,6 @@ class NerdFontConverter(QMainWindow):
             }}
         """)
         
-        save_config_btn = QPushButton("SAVE CONFIG")
-        save_config_btn.clicked.connect(self.save_config)
-        
         btn_layout.addWidget(save_config_btn)
         btn_layout.addWidget(self.convert_btn)
         main_layout.addLayout(btn_layout)
@@ -332,7 +336,7 @@ class NerdFontConverter(QMainWindow):
         
         self.log_text = QTextEdit()
         self.log_text.setReadOnly(True)
-        self.log_text.setMaximumHeight(150)
+        self.log_text.setMaximumHeight(120)
         self.log_text.setStyleSheet(f"color: {CP_GREEN};")
         log_layout.addWidget(self.log_text)
         
