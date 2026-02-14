@@ -53,10 +53,15 @@ def load_data():
             data.update(file_data)
             
     if os.path.exists(STATE_FILE):
-        with open(STATE_FILE, 'r') as f:
-            state_data = json.load(f)
-            if 'activeSheet' in state_data:
-                data['activeSheet'] = state_data['activeSheet']
+        try:
+            with open(STATE_FILE, 'r') as f:
+                content = f.read().strip()
+                if content:
+                    state_data = json.loads(content)
+                    if 'activeSheet' in state_data:
+                        data['activeSheet'] = state_data['activeSheet']
+        except (json.JSONDecodeError, ValueError):
+            pass
                 
     return data
 
