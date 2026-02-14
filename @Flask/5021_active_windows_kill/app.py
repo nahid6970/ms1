@@ -37,11 +37,10 @@ def close_window(hwnd):
     return redirect(url_for('index'))
 
 if __name__ == '__main__':
-    port = 21
+    port = 5021
     print(f"Starting Flask app on port {port}...")
     try:
         app.run(host='0.0.0.0', port=port, debug=True)
     except Exception as e:
         print(f"Failed to start server on port {port}: {e}")
-        print("Note: Port 21 may require administrative privileges or is already in use.")
         sys.exit(1)
