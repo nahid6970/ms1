@@ -78,7 +78,7 @@
                     },
                     "Kiro CLI": {
                         "MUIVerb": "Kiro CLI",
-                        "command": "wsl.exe --cd \"%V\" bash -c \"~/.local/bin/kiro-cli chat --trust-all-tools\""
+                        "command": "wsl.exe --cd \"%V\" bash -c \"echo '/model' | ~/.local/bin/kiro-cli chat --trust-all-tools\""
                     }
                 }
             },
