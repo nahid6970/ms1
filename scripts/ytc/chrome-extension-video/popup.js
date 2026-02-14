@@ -32,8 +32,22 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (data.isDownloading) {
         document.getElementById('download').disabled = true;
         document.getElementById('progressContainer').style.display = 'block';
-        setProgress(data.downloadProgress || 0, data.downloadProgress ? `${data.downloadProgress.toFixed(1)}%` : 'Downloading...');
-        setStatus('DOWNLOADING...');
+        const progress = data.downloadProgress || 0;
+        
+        // Check if download actually finished
+        if (progress >= 100) {
+          setProgress(100, '✓ Complete');
+          setStatus('DOWNLOAD COMPLETE!');
+          chrome.storage.local.set({ isDownloading: false, downloadProgress: 0 });
+          setTimeout(() => {
+            document.getElementById('progressContainer').style.display = 'none';
+            document.getElementById('download').disabled = false;
+            setStatus('READY');
+          }, 2000);
+        } else {
+          setProgress(progress, progress ? `${progress.toFixed(1)}%` : 'Downloading...');
+          setStatus('DOWNLOADING...');
+        }
       } else {
         setStatus('READY');
       }
@@ -144,15 +158,19 @@ document.getElementById('download').addEventListener('click', async () => {
     }
   }, (response) => {
     downloadBtn.disabled = false;
-    document.getElementById('progressContainer').style.display = 'none';
     
     // Clear download state
     chrome.storage.local.set({ isDownloading: false, downloadProgress: 0 });
     
     if (response.success) {
+      setProgress(100, '✓ Complete');
       setStatus('DOWNLOAD COMPLETE!');
-      setTimeout(() => setStatus('READY'), 3000);
+      setTimeout(() => {
+        document.getElementById('progressContainer').style.display = 'none';
+        setStatus('READY');
+      }, 2000);
     } else {
+      document.getElementById('progressContainer').style.display = 'none';
       setStatus(`ERROR: ${response.error}`);
     }
   });
