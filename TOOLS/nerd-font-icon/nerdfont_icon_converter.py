@@ -229,9 +229,9 @@ class NerdFontConverter(QMainWindow):
         dim_group = QGroupBox("OUTPUT DIMENSIONS")
         dim_layout = QVBoxLayout()
         
-        self.dimensions_text = QTextEdit()
-        self.dimensions_text.setPlainText("\n".join(map(str, self.config["dimensions"])))
-        self.dimensions_text.setMaximumHeight(100)
+        self.dimensions_text = QLineEdit()
+        self.dimensions_text.setText(", ".join(map(str, self.config["dimensions"])))
+        self.dimensions_text.setPlaceholderText("e.g., 16, 32, 64, 128")
         dim_layout.addWidget(self.dimensions_text)
         
         dim_group.setLayout(dim_layout)
@@ -437,12 +437,12 @@ class NerdFontConverter(QMainWindow):
                 pass
     
     def parse_dimensions(self):
-        text = self.dimensions_text.toPlainText()
+        text = self.dimensions_text.text()
         dimensions = []
-        for line in text.split('\n'):
-            line = line.strip()
-            if line.isdigit():
-                dimensions.append(int(line))
+        for item in text.split(','):
+            item = item.strip()
+            if item.isdigit():
+                dimensions.append(int(item))
         return dimensions if dimensions else [64]
     
     def convert_icon(self):
@@ -618,6 +618,7 @@ class NerdFontConverter(QMainWindow):
     
     def save_config(self):
         self.config["dimensions"] = self.parse_dimensions()
+        self.dimensions_text.setText(", ".join(map(str, self.config["dimensions"])))
         self.config["output_format"] = self.format_combo.currentText()
         self.config["icon_color"] = self.icon_color_input.text().strip()
         self.config["bg_color"] = self.bg_color_input.text().strip()
