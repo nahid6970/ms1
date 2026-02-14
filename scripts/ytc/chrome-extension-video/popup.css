@@ -125,6 +125,8 @@ body {
   border-radius: 4px;
   transition: all 0.3s;
   margin-top: 10px;
+  position: relative;
+  overflow: hidden;
 }
 
 .download-btn:hover:not(:disabled) {
@@ -137,6 +139,21 @@ body {
   border-color: #555;
   color: #555;
   cursor: not-allowed;
+}
+
+.button-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #00f0ff, #00ff9f);
+  width: 0%;
+  transition: width 0.3s;
+}
+
+#downloadText {
+  position: relative;
+  z-index: 1;
 }
 
 .status {

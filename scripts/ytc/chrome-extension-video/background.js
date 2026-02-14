@@ -41,6 +41,23 @@ function downloadVideo(data, sendResponse) {
         status: response.status
       });
     } else {
+      // Show notification on completion
+      if (response.success) {
+        chrome.notifications.create({
+          type: 'basic',
+          iconUrl: 'icons/icon128.png',
+          title: 'Download Complete',
+          message: 'Video downloaded successfully!'
+        });
+      } else {
+        chrome.notifications.create({
+          type: 'basic',
+          iconUrl: 'icons/icon128.png',
+          title: 'Download Failed',
+          message: response.error || 'Download failed'
+        });
+      }
+      
       if (downloadCallback) {
         downloadCallback(response);
         downloadCallback = null;

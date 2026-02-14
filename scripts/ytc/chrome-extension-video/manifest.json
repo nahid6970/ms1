@@ -6,7 +6,8 @@
   "permissions": [
     "activeTab",
     "storage",
-    "nativeMessaging"
+    "nativeMessaging",
+    "notifications"
   ],
   "host_permissions": [
     "<all_urls>"

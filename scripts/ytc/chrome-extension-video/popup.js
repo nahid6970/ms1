@@ -6,8 +6,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const currentUrl = tab.url;
   document.getElementById('url').value = currentUrl;
   
-  // Restore saved state
-  chrome.storage.local.get(['videoFormats', 'audioFormats', 'selectedVideo', 'selectedAudio', 'lastUrl', 'isDownloading', 'downloadProgress'], (data) => {
+  // Restore saved state for this URL
+  chrome.storage.local.get(['videoFormats', 'audioFormats', 'selectedVideo', 'selectedAudio', 'lastUrl'], (data) => {
     if (data.lastUrl === currentUrl && data.videoFormats && data.audioFormats) {
       videoFormats = data.videoFormats;
       audioFormats = data.audioFormats;
@@ -16,10 +16,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       const audioSelect = document.getElementById('audioFormat');
       
       videoSelect.innerHTML = '<option value="best">best</option>' + 
-        videoFormats.map(f => `<option value="${f.id}">${f.id} | ${f.ext} | ${f.resolution} | ${f.size}</option>`).join('');
+        videoFormats.map(f => `<option value="${f.id}">${f.id} | ${f.ext} | ${f.resolution}</option>`).join('');
       
       audioSelect.innerHTML = '<option value="best">best</option>' + 
-        audioFormats.map(f => `<option value="${f.id}">${f.id} | ${f.ext} | ${f.abr}k | ${f.size}</option>`).join('');
+        audioFormats.map(f => `<option value="${f.id}">${f.id} | ${f.ext} | ${f.abr}k</option>`).join('');
       
       videoSelect.disabled = false;
       audioSelect.disabled = false;
@@ -28,29 +28,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (data.selectedVideo) videoSelect.value = data.selectedVideo;
       if (data.selectedAudio) audioSelect.value = data.selectedAudio;
       
-      // Restore download state
-      if (data.isDownloading) {
-        document.getElementById('download').disabled = true;
-        document.getElementById('progressContainer').style.display = 'block';
-        const progress = data.downloadProgress || 0;
-        
-        // Check if download actually finished
-        if (progress >= 100) {
-          setProgress(100, '✓ Complete');
-          setStatus('DOWNLOAD COMPLETE!');
-          chrome.storage.local.set({ isDownloading: false, downloadProgress: 0 });
-          setTimeout(() => {
-            document.getElementById('progressContainer').style.display = 'none';
-            document.getElementById('download').disabled = false;
-            setStatus('READY');
-          }, 2000);
-        } else {
-          setProgress(progress, progress ? `${progress.toFixed(1)}%` : 'Downloading...');
-          setStatus('DOWNLOADING...');
-        }
-      } else {
-        setStatus('READY');
-      }
+      setStatus('READY');
     }
   });
   
@@ -105,10 +83,10 @@ document.getElementById('fetchFormats').addEventListener('click', async () => {
       const audioSelect = document.getElementById('audioFormat');
       
       videoSelect.innerHTML = '<option value="best">best</option>' + 
-        videoFormats.map(f => `<option value="${f.id}">${f.id} | ${f.ext} | ${f.resolution} | ${f.size}</option>`).join('');
+        videoFormats.map(f => `<option value="${f.id}">${f.id} | ${f.ext} | ${f.resolution}</option>`).join('');
       
       audioSelect.innerHTML = '<option value="best">best</option>' + 
-        audioFormats.map(f => `<option value="${f.id}">${f.id} | ${f.ext} | ${f.abr}k | ${f.size}</option>`).join('');
+        audioFormats.map(f => `<option value="${f.id}">${f.id} | ${f.ext} | ${f.abr}k</option>`).join('');
       
       videoSelect.disabled = false;
       audioSelect.disabled = false;
@@ -139,12 +117,9 @@ document.getElementById('download').addEventListener('click', async () => {
   
   const downloadBtn = document.getElementById('download');
   downloadBtn.disabled = true;
-  document.getElementById('progressContainer').style.display = 'block';
-  setProgress(0, 'Starting download...');
+  document.getElementById('downloadText').textContent = '[ DOWNLOADING 0% ]';
+  document.getElementById('downloadProgress').style.width = '0%';
   setStatus('DOWNLOADING...');
-  
-  // Save download state
-  chrome.storage.local.set({ isDownloading: true, downloadProgress: 0 });
   
   chrome.runtime.sendMessage({
     action: 'downloadVideo',
@@ -159,18 +134,18 @@ document.getElementById('download').addEventListener('click', async () => {
   }, (response) => {
     downloadBtn.disabled = false;
     
-    // Clear download state
-    chrome.storage.local.set({ isDownloading: false, downloadProgress: 0 });
-    
     if (response.success) {
-      setProgress(100, '✓ Complete');
+      document.getElementById('downloadText').textContent = '[ ✓ COMPLETE ]';
+      document.getElementById('downloadProgress').style.width = '100%';
       setStatus('DOWNLOAD COMPLETE!');
       setTimeout(() => {
-        document.getElementById('progressContainer').style.display = 'none';
+        document.getElementById('downloadText').textContent = '[ DOWNLOAD VIDEO ]';
+        document.getElementById('downloadProgress').style.width = '0%';
         setStatus('READY');
-      }, 2000);
+      }, 3000);
     } else {
-      document.getElementById('progressContainer').style.display = 'none';
+      document.getElementById('downloadText').textContent = '[ DOWNLOAD VIDEO ]';
+      document.getElementById('downloadProgress').style.width = '0%';
       setStatus(`ERROR: ${response.error}`);
     }
   });
@@ -179,16 +154,10 @@ document.getElementById('download').addEventListener('click', async () => {
 // Listen for progress updates
 chrome.runtime.onMessage.addListener((message) => {
   if (message.action === 'downloadProgress') {
-    setProgress(message.percent, message.status);
-    // Save progress
-    chrome.storage.local.set({ downloadProgress: message.percent });
+    document.getElementById('downloadText').textContent = `[ DOWNLOADING ${message.percent.toFixed(0)}% ]`;
+    document.getElementById('downloadProgress').style.width = message.percent + '%';
   }
 });
-
-function setProgress(percent, text) {
-  document.getElementById('progressFill').style.width = percent + '%';
-  document.getElementById('progressText').textContent = text;
-}
 
 document.getElementById('settingsLink').addEventListener('click', (e) => {
   e.preventDefault();
