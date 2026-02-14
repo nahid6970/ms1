@@ -2,7 +2,10 @@
 
 ## Cell Complete Checkmark
 **Access:** Right-click context menu → "Mark Complete"
-**Visual:** Green checkmark (✓) in top-left corner via `.cell-complete::before`.
+**Visual:** 
+- Green checkmark (✓) in top-left corner via `.cell-complete::before`
+- Grid pattern overlay with vertical and horizontal gray lines (15px spacing)
+- Grayed out background with reduced opacity
 **Function:** `toggleCellComplete()`.
 
 ## Cell Sort Ranking
