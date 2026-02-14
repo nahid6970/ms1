@@ -1,6 +1,6 @@
 {
     "version": "1.3",
-    "timestamp": "2026-02-12T00:10:22.794617",
+    "timestamp": "2026-02-14T09:40:11.896128",
     "user_env": {
         "chocolateyinstall": "C:\\Users\\nahid\\AppData\\Local\\UniGetUI\\Chocolatey",
         "OneDrive": "C:\\Users\\nahid\\OneDrive",
@@ -67,28 +67,42 @@
                         "Icon": "C:\\Users\\nahid\\AppData\\Local\\Programs\\Antigravity\\Antigravity.exe",
                         "command": "C:\\Users\\nahid\\AppData\\Local\\Programs\\Antigravity\\bin\\antigravity.cmd \"%V\""
                     },
+                    "Gemini CLI": {
+                        "MUIVerb": "Gemini CLI",
+                        "command": "cmd start /k Gemini \"%V\""
+                    },
                     "KIRO": {
                         "MUIVerb": "KIRO",
                         "Icon": "C:\\Users\\nahid\\AppData\\Local\\Programs\\Kiro\\Kiro.exe",
                         "command": "\"C:\\Users\\nahid\\AppData\\Local\\Programs\\Kiro\\Kiro.exe\" \"\"%V\"\""
+                    },
+                    "Kiro CLI": {
+                        "MUIVerb": "Kiro CLI",
+                        "command": "wsl.exe --cd \"%V\" bash -c \"~/.local/bin/kiro-cli chat --trust-all-tools\""
                     }
                 }
             },
             "FFMPEG": {
-                "MUIVerb": "\ud83c\udfac FFMPEG Tools",
+                "MUIVerb": "FFMPEG Tools",
+                "Icon": "C:\\@delta\\msBackups\\icon\\nerd-icon\\media\\icon16.ico",
                 "SubCommands": "",
                 "children": {
                     "Convert": {
-                        "MUIVerb": "\u26a0\ufe0f Android Icon",
+                        "MUIVerb": "Android Icon",
+                        "Icon": "C:\\@delta\\msBackups\\icon\\nerd-icon\\android\\icon16.ico",
                         "command": "cmd start /k C:\\@delta\\ms1\\scripts\\ffmpeg\\android_icon_generator.ps1"
                     },
                     "ImageDim": {
                         "command": "powershell.exe -ExecutionPolicy Bypass -File \"C:\\Users\\nahid\\.env_manager\\scripts\\convert.ps1\" \"%V\""
                     },
                     "ImageResize": {
+                        "MUIVerb": "ImageResize",
+                        "Icon": "C:\\@delta\\msBackups\\icon\\nerd-icon\\image-dimension\\icon16.ico",
                         "command": "powershell.exe -ExecutionPolicy Bypass -File \"C:\\Users\\nahid\\.env_manager\\scripts\\image_dimension.ps1\" \"%V\""
                     },
                     "Merge": {
+                        "MUIVerb": "Image Resizer",
+                        "Icon": "C:\\@delta\\msBackups\\icon\\nerd-icon\\image-dimension\\icon16.ico",
                         "command": "powershell.exe -ExecutionPolicy Bypass -File \"C:\\Users\\nahid\\.env_manager\\scripts\\image_resizer.ps1\" \"%V\""
                     },
                     "Trim": {
@@ -103,6 +117,7 @@
                 }
             },
             "FilePilotHere": {
+                "MUIVerb": "File Pilot Here",
                 "Icon": "C:\\Users\\nahid\\AppData\\Local\\Voidstar\\FilePilot\\FPilot.exe",
                 "command": "C:\\Users\\nahid\\AppData\\Local\\Voidstar\\FilePilot\\FPilot.exe \"%V\""
             }
