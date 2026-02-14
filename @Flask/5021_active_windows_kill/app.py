@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for, flash
+from flask import Flask, render_template, redirect, url_for, flash, request
 import win32gui
 import win32con
 import win32process
@@ -8,11 +8,31 @@ import psutil
 import sys
 import base64
 import io
+import json
+import os
 from PIL import Image
 from collections import defaultdict
 
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'
+
+BLOCKLIST_FILE = 'blocklist.json'
+
+def load_blocklist():
+    if os.path.exists(BLOCKLIST_FILE):
+        try:
+            with open(BLOCKLIST_FILE, 'r') as f:
+                return set(json.load(f))
+        except:
+            return set()
+    return set()
+
+def save_blocklist(blocklist):
+    with open(BLOCKLIST_FILE, 'w') as f:
+        json.dump(list(blocklist), f)
+
+# Initialize blocklist
+BLOCKLIST = load_blocklist()
 
 def get_icon_as_base64(hwnd):
     try:
@@ -50,12 +70,10 @@ def get_icon_as_base64(hwnd):
         bmp.CreateCompatibleBitmap(src_dc, width, height)
         mem_dc.SelectObject(bmp)
         
-        # Use DrawIconEx with DI_NORMAL to preserve alpha if present
         win32gui.DrawIconEx(mem_dc.GetSafeHdc(), 0, 0, hicon, width, height, 0, None, win32con.DI_NORMAL)
         
         bmp_info = bmp.GetInfo()
         bmp_str = bmp.GetBitmapBits(True)
-        # Use RGBA and BGRA to handle the alpha channel correctly
         img = Image.frombuffer('RGBA', (bmp_info['bmWidth'], bmp_info['bmHeight']), bmp_str, 'raw', 'BGRA', 0, 1)
         
         mem_dc.DeleteDC()
@@ -63,42 +81,15 @@ def get_icon_as_base64(hwnd):
         win32gui.ReleaseDC(0, hdc)
 
         buffered = io.BytesIO()
-        img.save(buffered, format="PNG") # PNG supports transparency
+        img.save(buffered, format="PNG")
         return base64.b64encode(buffered.getvalue()).decode('utf-8')
     except:
         return None
 
-BLOCKLIST = [
-    "ShellExperienceHost.exe",
-    "StartMenuExperienceHost.exe",
-    "SearchHost.exe",
-    "Widgets.exe",
-    "TextInputHost.exe",
-    "Taskmgr.exe",
-    "explorer.exe",
-    "SystemSettings.exe",
-    "ApplicationFrameHost.exe",
-    "RuntimeBroker.exe",
-    "DllHost.exe",
-    "Conhost.exe",
-    "Sihost.exe",
-    "SmartScreen.exe",
-    "SettingSyncHost.exe",
-    "ctfmon.exe",
-    "lsass.exe",
-    "csrss.exe",
-    "wininit.exe",
-    "services.exe",
-    "winlogon.exe",
-    "smss.exe",
-    "fontdrvhost.exe",
-    "dwm.exe",
-    "Memory Compression",
-]
-
 def get_active_windows():
     groups = defaultdict(list)
     memo_icons = {}
+    current_blocklist = load_blocklist()
 
     def enum_handler(hwnd, lParam):
         is_visible = win32gui.IsWindowVisible(hwnd)
@@ -112,8 +103,7 @@ def get_active_windows():
             except (psutil.NoSuchProcess, psutil.AccessDenied):
                 app_name = "Unknown"
 
-            # Filter by blocklist
-            if app_name in BLOCKLIST:
+            if app_name in current_blocklist:
                 return
 
             style = win32gui.GetWindowLong(hwnd, win32con.GWL_STYLE)
@@ -125,7 +115,6 @@ def get_active_windows():
             
             if is_visible or (parent == 0 and owner == 0 and not is_tool):
                 if not is_visible:
-                    # Stricter check for invisible windows
                     if title in ["Program Manager", "Settings"]:
                         return
 
@@ -148,7 +137,6 @@ def get_active_windows():
             'icon': memo_icons.get(app_name)
         })
     
-    # Sort: Multiple windows first, then by app name
     sorted_groups.sort(key=lambda x: (len(x['windows']) == 1, x['app_name'].lower()))
     
     return sorted_groups
@@ -156,7 +144,8 @@ def get_active_windows():
 @app.route('/')
 def index():
     groups = get_active_windows()
-    return render_template('index.html', groups=groups)
+    blocked_apps = sorted(list(load_blocklist()))
+    return render_template('index.html', groups=groups, blocked_apps=blocked_apps)
 
 @app.route('/close/<int:hwnd>')
 def close_window(hwnd):
@@ -166,7 +155,6 @@ def close_window(hwnd):
         process.kill()
     except Exception as e:
         print(f"Error killing window {hwnd}: {e}")
-    
     return redirect(url_for('index'))
 
 @app.route('/kill_app/<name>')
@@ -177,6 +165,26 @@ def kill_app(name):
                 proc.kill()
         except (psutil.NoSuchProcess, psutil.AccessDenied):
             pass
+    return redirect(url_for('index'))
+
+@app.route('/block_app/<name>')
+def block_app(name):
+    blocklist = load_blocklist()
+    blocklist.add(name)
+    save_blocklist(blocklist)
+    return redirect(url_for('index'))
+
+@app.route('/unblock_app/<name>')
+def unblock_app(name):
+    blocklist = load_blocklist()
+    if name in blocklist:
+        blocklist.remove(name)
+    save_blocklist(blocklist)
+    return redirect(url_for('index'))
+
+@app.route('/clear_blocklist')
+def clear_blocklist():
+    save_blocklist(set())
     return redirect(url_for('index'))
 
 if __name__ == '__main__':

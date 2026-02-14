@@ -14,13 +14,19 @@
         .window-title { font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 80%; }
         .app-icon { width: 16px; height: 16px; margin-right: 8px; vertical-align: middle; }
         .accordion-header { position: relative; }
-        .kill-all-btn { position: absolute; right: 4.5rem; z-index: 10; top: 50%; transform: translateY(-50%); }
-        .accordion-button { padding-right: 10rem; }
+        .header-actions { position: absolute; right: 4.5rem; z-index: 10; top: 50%; transform: translateY(-50%); display: flex; gap: 5px; }
+        .accordion-button { padding-right: 15rem; }
+        .action-btns { display: flex; gap: 5px; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Active Windows</h1>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>Active Windows</h1>
+            <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#settingsModal">
+                <i class="bi bi-gear"></i> Blocked Apps
+            </button>
+        </div>
         
         <div class="accordion mb-4" id="windowAccordion">
             {% for group in groups %}
@@ -33,7 +39,10 @@
                             {% endif %}
                             <strong>{{ group.app_name }}</strong> &nbsp; <span class="badge bg-secondary rounded-pill">{{ group.windows|length }}</span>
                         </button>
-                        <a href="{{ url_for('kill_app', name=group.app_name) }}" class="btn btn-danger btn-sm kill-all-btn" title="Kill All Processes"><i class="bi bi-x-circle"></i> Kill All</a>
+                        <div class="header-actions">
+                            <a href="{{ url_for('block_app', name=group.app_name) }}" class="btn btn-outline-warning btn-sm" title="Block Application"><i class="bi bi-eye-slash"></i></a>
+                            <a href="{{ url_for('kill_app', name=group.app_name) }}" class="btn btn-danger btn-sm" title="Kill All Processes"><i class="bi bi-x-circle"></i> Kill All</a>
+                        </div>
                     </h2>
                     <div id="collapse{{ loop.index }}" class="accordion-collapse collapse show" aria-labelledby="heading{{ loop.index }}">
                         <div class="accordion-body">
@@ -41,7 +50,10 @@
                                 {% for window in group.windows %}
                                 <li class="list-group-item">
                                     <span class="window-title" title="{{ window.title }}">{{ window.title }}</span>
-                                    <a href="{{ url_for('close_window', hwnd=window.hwnd) }}" class="btn btn-outline-danger btn-sm" title="Kill Process"><i class="bi bi-x-lg"></i></a>
+                                    <div class="action-btns">
+                                        <a href="{{ url_for('block_app', name=group.app_name) }}" class="btn btn-outline-warning btn-sm" title="Block App"><i class="bi bi-eye-slash"></i></a>
+                                        <a href="{{ url_for('close_window', hwnd=window.hwnd) }}" class="btn btn-outline-danger btn-sm" title="Kill Process"><i class="bi bi-x-lg"></i></a>
+                                    </div>
                                 </li>
                                 {% endfor %}
                             </ul>
@@ -65,7 +77,10 @@
                             </small>
                             <span class="window-title" title="{{ group.windows[0].title }}">{{ group.windows[0].title }}</span>
                         </div>
-                        <a href="{{ url_for('close_window', hwnd=group.windows[0].hwnd) }}" class="btn btn-outline-danger btn-sm" title="Kill Process"><i class="bi bi-x-lg"></i></a>
+                        <div class="action-btns">
+                            <a href="{{ url_for('block_app', name=group.app_name) }}" class="btn btn-outline-warning btn-sm" title="Block App"><i class="bi bi-eye-slash"></i></a>
+                            <a href="{{ url_for('close_window', hwnd=group.windows[0].hwnd) }}" class="btn btn-outline-danger btn-sm" title="Kill Process"><i class="bi bi-x-lg"></i></a>
+                        </div>
                     </div>
                 {% endif %}
             {% endfor %}
@@ -78,6 +93,34 @@
             <button onclick="window.location.reload()" class="btn btn-secondary">Refresh</button>
         </div>
     </div>
+
+    <!-- Settings Modal -->
+    <div class="modal fade" id="settingsModal" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="settingsModalLabel">Blocked Applications</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <ul class="list-group mb-3">
+                        {% for app_name in blocked_apps %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            {{ app_name }}
+                            <a href="{{ url_for('unblock_app', name=app_name) }}" class="btn btn-sm btn-outline-primary">Unblock</a>
+                        </li>
+                        {% else %}
+                        <li class="list-group-item text-muted">No applications blocked.</li>
+                        {% endfor %}
+                    </ul>
+                    {% if blocked_apps %}
+                    <a href="{{ url_for('clear_blocklist') }}" class="btn btn-danger btn-sm w-100">Clear All</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
