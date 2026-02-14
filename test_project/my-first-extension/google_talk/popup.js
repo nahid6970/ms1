@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnBn = document.getElementById('btn-bn');
     const btnTextOnly = document.getElementById('btn-text-only');
     const btnCopy = document.getElementById('btn-copy');
+    const btnSearch = document.getElementById('btn-search');
 
     let currentLang = 'en-US';
     let recognition = null;
@@ -21,6 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (result.text_only_mode) {
             textOnlyMode = result.text_only_mode;
             btnTextOnly.classList.toggle('active', textOnlyMode);
+            btnSearch.style.display = textOnlyMode ? 'block' : 'none';
         }
         updateLangUI(currentLang);
         // Start automatically on open, small delay to ensure UI is ready
@@ -154,6 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
     btnTextOnly.addEventListener('click', () => {
         textOnlyMode = !textOnlyMode;
         btnTextOnly.classList.toggle('active', textOnlyMode);
+        btnSearch.style.display = textOnlyMode ? 'block' : 'none';
         chrome.storage.local.set({ text_only_mode: textOnlyMode });
     });
 
@@ -163,6 +166,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 statusEl.textContent = 'Copied!';
                 setTimeout(() => statusEl.textContent = '', 1500);
             });
+        }
+    });
+
+    btnSearch.addEventListener('click', () => {
+        if (lastTranscript) {
+            performSearch(lastTranscript);
         }
     });
 });
