@@ -83,6 +83,8 @@ document.getElementById('download').addEventListener('click', async () => {
   
   const downloadBtn = document.getElementById('download');
   downloadBtn.disabled = true;
+  document.getElementById('progressContainer').style.display = 'block';
+  setProgress(0, 'Starting download...');
   setStatus('DOWNLOADING...');
   
   chrome.runtime.sendMessage({
@@ -97,6 +99,7 @@ document.getElementById('download').addEventListener('click', async () => {
     }
   }, (response) => {
     downloadBtn.disabled = false;
+    document.getElementById('progressContainer').style.display = 'none';
     
     if (response.success) {
       setStatus('DOWNLOAD COMPLETE!');
@@ -106,6 +109,18 @@ document.getElementById('download').addEventListener('click', async () => {
     }
   });
 });
+
+// Listen for progress updates
+chrome.runtime.onMessage.addListener((message) => {
+  if (message.action === 'downloadProgress') {
+    setProgress(message.percent, message.status);
+  }
+});
+
+function setProgress(percent, text) {
+  document.getElementById('progressFill').style.width = percent + '%';
+  document.getElementById('progressText').textContent = text;
+}
 
 document.getElementById('settingsLink').addEventListener('click', (e) => {
   e.preventDefault();

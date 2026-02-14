@@ -120,7 +120,8 @@ def download_video(message):
             'yt-dlp',
             '-f', format_str,
             '-o', f'{save_dir}/%(title)s.%(ext)s',
-            '--extractor-args', 'youtube:player_client=default'
+            '--extractor-args', 'youtube:player_client=default',
+            '--newline'
         ]
         
         # Add subtitle options
@@ -137,9 +138,26 @@ def download_video(message):
             creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0
         )
         
-        stdout, stderr = process.communicate()
+        # Parse progress
+        import re
+        while True:
+            line = process.stdout.readline()
+            if not line and process.poll() is not None:
+                break
+            
+            if line:
+                # Parse download progress
+                match = re.search(r'\[download\]\s+(\d+\.?\d*)%', line)
+                if match:
+                    percent = float(match.group(1))
+                    send_message({
+                        "progress": True,
+                        "percent": percent,
+                        "status": f"{percent:.1f}%"
+                    })
         
         if process.returncode != 0:
+            stderr = process.communicate()[1]
             send_message({"success": False, "error": stderr})
             return
         
