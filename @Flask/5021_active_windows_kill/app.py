@@ -73,9 +73,31 @@ def get_active_windows():
     memo_icons = {}
 
     def enum_handler(hwnd, lParam):
-        if win32gui.IsWindowVisible(hwnd):
-            title = win32gui.GetWindowText(hwnd)
-            if title:
+        # Loosen visibility check for workspace managers like komorebi
+        is_visible = win32gui.IsWindowVisible(hwnd)
+        title = win32gui.GetWindowText(hwnd)
+        
+        # Criteria for "real" application windows even if hidden by WM
+        if title:
+            style = win32gui.GetWindowLong(hwnd, win32con.GWL_STYLE)
+            ex_style = win32gui.GetWindowLong(hwnd, win32con.GWL_EXSTYLE)
+            parent = win32gui.GetParent(hwnd)
+            owner = win32gui.GetWindow(hwnd, win32con.GW_OWNER)
+            
+            # Must be a top-level window and not a tool window
+            is_tool = ex_style & win32con.WS_EX_TOOLWINDOW
+            is_app = ex_style & win32con.WS_EX_APPWINDOW
+            
+            # We include it if it's visible OR (it's a top-level window, not a tool window, and not owned)
+            if is_visible or (parent == 0 and owner == 0 and not is_tool):
+                # Filter out some common invisible system windows that might get caught
+                if not is_visible:
+                    # If not visible, be stricter about what we show
+                    if title in ["Program Manager", "Settings", "Microsoft Store", "Calculators"]:
+                        return
+                    if "ShellExperienceHost" in title or "Start" == title:
+                        return
+
                 try:
                     _, pid = win32process.GetWindowThreadProcessId(hwnd)
                     process = psutil.Process(pid)
