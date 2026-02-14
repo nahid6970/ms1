@@ -68,43 +68,67 @@ def get_icon_as_base64(hwnd):
     except:
         return None
 
+BLOCKLIST = [
+    "ShellExperienceHost.exe",
+    "StartMenuExperienceHost.exe",
+    "SearchHost.exe",
+    "Widgets.exe",
+    "TextInputHost.exe",
+    "Taskmgr.exe",
+    "explorer.exe",
+    "SystemSettings.exe",
+    "ApplicationFrameHost.exe",
+    "RuntimeBroker.exe",
+    "DllHost.exe",
+    "Conhost.exe",
+    "Sihost.exe",
+    "SmartScreen.exe",
+    "SettingSyncHost.exe",
+    "ctfmon.exe",
+    "lsass.exe",
+    "csrss.exe",
+    "wininit.exe",
+    "services.exe",
+    "winlogon.exe",
+    "smss.exe",
+    "fontdrvhost.exe",
+    "dwm.exe",
+    "Memory Compression",
+]
+
 def get_active_windows():
     groups = defaultdict(list)
     memo_icons = {}
 
     def enum_handler(hwnd, lParam):
-        # Loosen visibility check for workspace managers like komorebi
         is_visible = win32gui.IsWindowVisible(hwnd)
         title = win32gui.GetWindowText(hwnd)
         
-        # Criteria for "real" application windows even if hidden by WM
         if title:
+            try:
+                _, pid = win32process.GetWindowThreadProcessId(hwnd)
+                process = psutil.Process(pid)
+                app_name = process.name()
+            except (psutil.NoSuchProcess, psutil.AccessDenied):
+                app_name = "Unknown"
+
+            # Filter by blocklist
+            if app_name in BLOCKLIST:
+                return
+
             style = win32gui.GetWindowLong(hwnd, win32con.GWL_STYLE)
             ex_style = win32gui.GetWindowLong(hwnd, win32con.GWL_EXSTYLE)
             parent = win32gui.GetParent(hwnd)
             owner = win32gui.GetWindow(hwnd, win32con.GW_OWNER)
             
-            # Must be a top-level window and not a tool window
             is_tool = ex_style & win32con.WS_EX_TOOLWINDOW
-            is_app = ex_style & win32con.WS_EX_APPWINDOW
             
-            # We include it if it's visible OR (it's a top-level window, not a tool window, and not owned)
             if is_visible or (parent == 0 and owner == 0 and not is_tool):
-                # Filter out some common invisible system windows that might get caught
                 if not is_visible:
-                    # If not visible, be stricter about what we show
-                    if title in ["Program Manager", "Settings", "Microsoft Store", "Calculators"]:
-                        return
-                    if "ShellExperienceHost" in title or "Start" == title:
+                    # Stricter check for invisible windows
+                    if title in ["Program Manager", "Settings"]:
                         return
 
-                try:
-                    _, pid = win32process.GetWindowThreadProcessId(hwnd)
-                    process = psutil.Process(pid)
-                    app_name = process.name()
-                except (psutil.NoSuchProcess, psutil.AccessDenied):
-                    app_name = "Unknown"
-                
                 if app_name not in memo_icons:
                     memo_icons[app_name] = get_icon_as_base64(hwnd)
                 
@@ -116,13 +140,16 @@ def get_active_windows():
     win32gui.EnumWindows(enum_handler, None)
     
     sorted_groups = []
-    for app_name in sorted(groups.keys()):
+    for app_name in groups.keys():
         windows = sorted(groups[app_name], key=lambda x: x['title'].lower())
         sorted_groups.append({
             'app_name': app_name, 
             'windows': windows,
             'icon': memo_icons.get(app_name)
         })
+    
+    # Sort: Multiple windows first, then by app name
+    sorted_groups.sort(key=lambda x: (len(x['windows']) == 1, x['app_name'].lower()))
     
     return sorted_groups
 

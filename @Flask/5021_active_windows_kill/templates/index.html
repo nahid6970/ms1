@@ -21,26 +21,8 @@
 <body>
     <div class="container">
         <h1>Active Windows</h1>
-        <div class="list-group mb-4">
-            {% for group in groups %}
-                {% if group.windows|length == 1 %}
-                    <div class="list-group-item">
-                        <div>
-                            <small class="text-muted d-block">
-                                {% if group.icon %}
-                                <img src="data:image/png;base64,{{ group.icon }}" class="app-icon" alt="">
-                                {% endif %}
-                                {{ group.app_name }}
-                            </small>
-                            <span class="window-title" title="{{ group.windows[0].title }}">{{ group.windows[0].title }}</span>
-                        </div>
-                        <a href="{{ url_for('close_window', hwnd=group.windows[0].hwnd) }}" class="btn btn-outline-danger btn-sm" title="Kill Process"><i class="bi bi-x-lg"></i></a>
-                    </div>
-                {% endif %}
-            {% endfor %}
-        </div>
-
-        <div class="accordion" id="windowAccordion">
+        
+        <div class="accordion mb-4" id="windowAccordion">
             {% for group in groups %}
                 {% if group.windows|length > 1 %}
                 <div class="accordion-item">
@@ -68,12 +50,31 @@
                 </div>
                 {% endif %}
             {% endfor %}
-            
+        </div>
+
+        <div class="list-group mb-4">
+            {% for group in groups %}
+                {% if group.windows|length == 1 %}
+                    <div class="list-group-item">
+                        <div>
+                            <small class="text-muted d-block">
+                                {% if group.icon %}
+                                <img src="data:image/png;base64,{{ group.icon }}" class="app-icon" alt="">
+                                {% endif %}
+                                {{ group.app_name }}
+                            </small>
+                            <span class="window-title" title="{{ group.windows[0].title }}">{{ group.windows[0].title }}</span>
+                        </div>
+                        <a href="{{ url_for('close_window', hwnd=group.windows[0].hwnd) }}" class="btn btn-outline-danger btn-sm" title="Kill Process"><i class="bi bi-x-lg"></i></a>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        <div class="mt-4">
             {% if not groups %}
             <div class="alert alert-info">No visible windows found.</div>
             {% endif %}
-        </div>
-        <div class="mt-4">
             <button onclick="window.location.reload()" class="btn btn-secondary">Refresh</button>
         </div>
     </div>
