@@ -1,34 +1,48 @@
 # Active Windows Manager
 
-A simple Flask application to monitor and manage active windows on Windows.
+A refined Flask application for monitoring, managing, and forcefully terminating active windows on Windows systems.
 
-## Features
-- **List Active Windows:** Displays all currently visible windows grouped by application.
-- **Single Window View:** Applications with only one window are shown in a simple list.
-- **Grouped View:** Multiple windows from the same application (like Chrome or VS Code) are grouped in an accordion.
-- **Force Kill:** Kill individual windows or all processes of an application directly from the web interface.
-- **Auto-Refresh:** Easily refresh the list to see current active windows.
+## Key Features
+- **Real-time Search:** Instantly filter active windows or applications using the integrated search bar.
+- **Dynamic Grouping:** Automatically groups multiple windows of the same application (e.g., Chrome tabs, VS Code instances) for a cleaner view.
+- **Smart Prioritization:** Grouped applications are sorted to appear at the top of the list.
+- **Persistent Blocklist:** 
+  - Hide unwanted background apps with a single click.
+  - Manage your blocklist via the settings modal.
+  - Blocklist persists across application restarts in `blocklist.json`.
+- **Process Termination:**
+  - **Kill Window:** Terminate specific windows instantly.
+  - **Kill All:** Force-close all running instances of a specific application.
+- **High-Quality Icons:** Displays application icons with transparency support for better visibility.
+- **Workspace Support:** Enhanced window detection works with tiling window managers like **Komorebi**.
 
-## Requirements
-- Windows OS
-- Python 3.x
-- `flask`
-- `pywin32`
-- `psutil`
+## Prerequisites
+- **Operating System:** Windows 10/11
+- **Python:** 3.x
+- **Dependencies:**
+  - `flask`
+  - `pywin32`
+  - `psutil`
+  - `pillow`
 
-## Setup and Run
-1. Install dependencies:
+## Installation
+1. Install the required Python packages:
    ```bash
-   pip install flask pywin32 psutil
+   pip install flask pywin32 psutil pillow
    ```
-2. Run the application:
+
+## Running the Application
+1. Start the server:
    ```bash
    python app.py
    ```
-3. Open your browser and navigate to:
-   `http://localhost:5021`
+2. Access the dashboard:
+   Open your browser to `http://localhost:5021`
 
-## Usage
-- Click the **Refresh** button to update the list of active windows.
-- Click the **red cross icon** next to a window title to kill that specific process.
-- Click **Kill All** in an application group to terminate all instances of that application.
+## Interface Guide
+- **Search Bar:** Type to filter the list of windows.
+- **Gear Icon (Settings):** View and manage blocked applications.
+- **Eye-Slash Icon:** Block an application from appearing in the list.
+- **Red Cross Icon:** Terminate the process associated with that window.
+- **Kill All Button:** Close all processes of that specific application.
+- **Refresh Icon:** Manually reload the window list.
