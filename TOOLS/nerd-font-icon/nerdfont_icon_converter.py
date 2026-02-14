@@ -603,7 +603,7 @@ class NerdFontConverter(QMainWindow):
         QTimer.singleShot(1000, self.reset_convert_button)
     
     def reset_convert_button(self):
-        self.convert_btn.setStyleSheet("")
+        self.convert_btn.setStyleSheet(f"background-color: {CP_DIM}; border: 1px solid {CP_DIM}; color: white; padding: 8px 16px; font-weight: bold;")
         self.convert_btn.setText("⚡ CONVERT ICON")
         self.convert_btn.setEnabled(True)
     
