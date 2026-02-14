@@ -130,3 +130,33 @@ body {
     color: #fff;
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
+
+.action-buttons {
+    display: flex;
+    gap: 8px;
+    margin-top: 15px;
+}
+
+.action-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 16px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.action-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.action-btn:active {
+    transform: scale(0.95);
+}
+
+.action-btn.active {
+    background: rgba(255, 75, 75, 0.6);
+}

@@ -3,16 +3,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const wrapper = document.querySelector('.mic-wrapper');
     const btnEn = document.getElementById('btn-en');
     const btnBn = document.getElementById('btn-bn');
+    const btnTextOnly = document.getElementById('btn-text-only');
+    const btnCopy = document.getElementById('btn-copy');
 
     let currentLang = 'en-US';
     let recognition = null;
     let isListening = false;
     let ignoreEndEvent = false;
+    let lastTranscript = '';
+    let textOnlyMode = false;
 
     // Initialize logic
-    chrome.storage.local.get(['speech_lang'], (result) => {
+    chrome.storage.local.get(['speech_lang', 'text_only_mode'], (result) => {
         if (result.speech_lang) {
             currentLang = result.speech_lang;
+        }
+        if (result.text_only_mode) {
+            textOnlyMode = result.text_only_mode;
+            btnTextOnly.classList.toggle('active', textOnlyMode);
         }
         updateLangUI(currentLang);
         // Start automatically on open, small delay to ensure UI is ready
@@ -105,7 +113,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 if (finalTranscript.length > 0) {
-                    performSearch(finalTranscript);
+                    lastTranscript = finalTranscript;
+                    if (textOnlyMode) {
+                        statusEl.textContent = finalTranscript;
+                    } else {
+                        performSearch(finalTranscript);
+                    }
                 } else if (interimTranscript.length > 0) {
                     statusEl.textContent = interimTranscript;
                 }
@@ -135,6 +148,21 @@ document.addEventListener('DOMContentLoaded', () => {
             if (recognition) recognition.stop();
         } else {
             startListening();
+        }
+    });
+
+    btnTextOnly.addEventListener('click', () => {
+        textOnlyMode = !textOnlyMode;
+        btnTextOnly.classList.toggle('active', textOnlyMode);
+        chrome.storage.local.set({ text_only_mode: textOnlyMode });
+    });
+
+    btnCopy.addEventListener('click', () => {
+        if (lastTranscript) {
+            navigator.clipboard.writeText(lastTranscript).then(() => {
+                statusEl.textContent = 'Copied!';
+                setTimeout(() => statusEl.textContent = '', 1500);
+            });
         }
     });
 });
