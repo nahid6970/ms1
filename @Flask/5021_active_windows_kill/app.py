@@ -42,12 +42,22 @@ def index():
 @app.route('/close/<int:hwnd>')
 def close_window(hwnd):
     try:
-        # Use PostMessage to send WM_CLOSE to the window
-        # This is generally safer than TerminateProcess as it allows the app to save work
-        win32gui.PostMessage(hwnd, win32con.WM_CLOSE, 0, 0)
+        _, pid = win32process.GetWindowThreadProcessId(hwnd)
+        process = psutil.Process(pid)
+        process.kill()
     except Exception as e:
-        print(f"Error closing window {hwnd}: {e}")
+        print(f"Error killing window {hwnd}: {e}")
     
+    return redirect(url_for('index'))
+
+@app.route('/kill_app/<name>')
+def kill_app(name):
+    for proc in psutil.process_iter(['name']):
+        try:
+            if proc.info['name'] == name:
+                proc.kill()
+        except (psutil.NoSuchProcess, psutil.AccessDenied):
+            pass
     return redirect(url_for('index'))
 
 if __name__ == '__main__':

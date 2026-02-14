@@ -10,7 +10,9 @@
         .container { max-width: 800px; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         h1 { margin-bottom: 30px; color: #333; }
         .list-group-item { display: flex; justify-content: space-between; align-items: center; }
-        .window-title { font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 80%; }
+        .accordion-header { position: relative; }
+        .kill-all-btn { position: absolute; right: 60px; z-index: 10; top: 50%; transform: translateY(-50%); }
+        .accordion-button { padding-right: 130px; }
     </style>
 </head>
 <body>
@@ -24,7 +26,7 @@
                             <small class="text-muted d-block">{{ group.app_name }}</small>
                             <span class="window-title" title="{{ group.windows[0].title }}">{{ group.windows[0].title }}</span>
                         </div>
-                        <a href="{{ url_for('close_window', hwnd=group.windows[0].hwnd) }}" class="btn btn-danger btn-sm">Close</a>
+                        <a href="{{ url_for('close_window', hwnd=group.windows[0].hwnd) }}" class="btn btn-danger btn-sm">Kill</a>
                     </div>
                 {% endif %}
             {% endfor %}
@@ -38,6 +40,7 @@
                         <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ loop.index }}" aria-expanded="true" aria-controls="collapse{{ loop.index }}">
                             <strong>{{ group.app_name }}</strong> &nbsp; <span class="badge bg-secondary rounded-pill">{{ group.windows|length }}</span>
                         </button>
+                        <a href="{{ url_for('kill_app', name=group.app_name) }}" class="btn btn-danger btn-sm kill-all-btn">Kill All</a>
                     </h2>
                     <div id="collapse{{ loop.index }}" class="accordion-collapse collapse show" aria-labelledby="heading{{ loop.index }}">
                         <div class="accordion-body">
@@ -45,7 +48,7 @@
                                 {% for window in group.windows %}
                                 <li class="list-group-item">
                                     <span class="window-title" title="{{ window.title }}">{{ window.title }}</span>
-                                    <a href="{{ url_for('close_window', hwnd=window.hwnd) }}" class="btn btn-danger btn-sm">Close</a>
+                                    <a href="{{ url_for('close_window', hwnd=window.hwnd) }}" class="btn btn-danger btn-sm">Kill</a>
                                 </li>
                                 {% endfor %}
                             </ul>
