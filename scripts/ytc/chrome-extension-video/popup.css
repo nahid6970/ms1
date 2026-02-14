@@ -1,10 +1,15 @@
-body {
-  width: 450px;
+* {
   margin: 0;
   padding: 0;
-  font-family: 'Courier New', monospace;
-  background: #1a1a1a;
-  color: #00ff00;
+  box-sizing: border-box;
+}
+
+body {
+  width: 400px;
+  background-color: #050a0e;
+  color: #e0e0e0;
+  font-family: "Consolas", "Courier New", monospace;
+  font-size: 11pt;
 }
 
 .container {
@@ -12,13 +17,12 @@ body {
 }
 
 .header {
-  font-size: 16px;
-  font-weight: bold;
   text-align: center;
-  margin: 0 0 20px 0;
-  padding: 10px;
-  border: 2px solid #00ff00;
-  background: #0a0a0a;
+  color: #00ff9f;
+  font-size: 16pt;
+  font-weight: bold;
+  margin-bottom: 20px;
+  text-shadow: 0 0 10px #00ff9f;
 }
 
 .section {
@@ -27,32 +31,37 @@ body {
 
 .section-title {
   display: block;
-  font-size: 11px;
+  color: #ff003c;
   font-weight: bold;
   margin-bottom: 5px;
-  color: #00ff00;
+  font-size: 10pt;
 }
 
 .url-input {
   width: 100%;
+  background-color: #10161d;
+  border: 1px solid #00f0ff;
   padding: 8px;
-  background: #0a0a0a;
-  border: 1px solid #00ff00;
-  color: #00ff00;
-  font-family: 'Courier New', monospace;
-  font-size: 10px;
-  box-sizing: border-box;
+  color: #00f0ff;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 9pt;
 }
 
 .select {
   width: 100%;
+  background-color: #10161d;
+  border: 1px solid #ff003c;
   padding: 8px;
-  background: #0a0a0a;
-  border: 1px solid #00ff00;
-  color: #00ff00;
-  font-family: 'Courier New', monospace;
-  font-size: 11px;
+  color: #e0e0e0;
+  border-radius: 4px;
+  font-family: inherit;
   cursor: pointer;
+}
+
+.select:focus {
+  outline: none;
+  border-color: #00ff9f;
 }
 
 .select:disabled {
@@ -63,83 +72,100 @@ body {
 .checkbox-label {
   display: flex;
   align-items: center;
-  font-size: 11px;
+  color: #e0e0e0;
   cursor: pointer;
+  user-select: none;
 }
 
 .checkbox-label input[type="checkbox"] {
   margin-right: 8px;
+  width: 16px;
+  height: 16px;
   cursor: pointer;
+  accent-color: #00f0ff;
 }
 
 .action-btn {
   width: 100%;
+  background-color: #10161d;
+  border: 2px solid #ff003c;
+  color: #ff003c;
   padding: 12px;
-  background: #0a0a0a;
-  border: 2px solid #00ff00;
-  color: #00ff00;
-  font-family: 'Courier New', monospace;
-  font-size: 12px;
   font-weight: bold;
+  font-family: inherit;
+  font-size: 11pt;
   cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.3s;
   margin-bottom: 15px;
-  transition: all 0.2s;
 }
 
-.action-btn:hover {
-  background: #00ff00;
-  color: #000;
+.action-btn:hover:not(:disabled) {
+  background-color: #ff003c;
+  color: #050a0e;
+  box-shadow: 0 0 15px #ff003c;
 }
 
 .action-btn:disabled {
-  opacity: 0.5;
+  border-color: #555;
+  color: #555;
   cursor: not-allowed;
 }
 
 .download-btn {
   width: 100%;
-  padding: 15px;
-  background: #0a0a0a;
-  border: 3px solid #00ff00;
-  color: #00ff00;
-  font-family: 'Courier New', monospace;
-  font-size: 14px;
+  background-color: #10161d;
+  border: 2px solid #00ff9f;
+  color: #00ff9f;
+  padding: 12px;
   font-weight: bold;
+  font-family: inherit;
+  font-size: 11pt;
   cursor: pointer;
-  margin: 20px 0;
-  transition: all 0.2s;
+  border-radius: 4px;
+  transition: all 0.3s;
+  margin-top: 10px;
 }
 
 .download-btn:hover:not(:disabled) {
-  background: #00ff00;
-  color: #000;
+  background-color: #00ff9f;
+  color: #050a0e;
+  box-shadow: 0 0 15px #00ff9f;
 }
 
 .download-btn:disabled {
-  opacity: 0.5;
+  border-color: #555;
+  color: #555;
   cursor: not-allowed;
 }
 
 .status {
   text-align: center;
-  font-size: 11px;
-  padding: 10px;
-  border: 1px solid #00ff00;
-  background: #0a0a0a;
-  margin: 10px 0;
+  color: #00f0ff;
+  margin-top: 15px;
+  padding: 8px;
+  background-color: #10161d;
+  border-radius: 4px;
+  font-size: 10pt;
+  min-height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .footer {
   text-align: center;
   margin-top: 15px;
+  padding-top: 10px;
+  border-top: 1px solid #333;
 }
 
 .footer a {
-  color: #00ff00;
+  color: #00f0ff;
   text-decoration: none;
-  font-size: 12px;
+  font-size: 10pt;
 }
 
 .footer a:hover {
-  text-decoration: underline;
+  color: #00ff9f;
 }
