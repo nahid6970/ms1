@@ -16,28 +16,45 @@
 <body>
     <div class="container">
         <h1>Active Windows</h1>
+        <div class="list-group mb-4">
+            {% for group in groups %}
+                {% if group.windows|length == 1 %}
+                    <div class="list-group-item">
+                        <div>
+                            <small class="text-muted d-block">{{ group.app_name }}</small>
+                            <span class="window-title" title="{{ group.windows[0].title }}">{{ group.windows[0].title }}</span>
+                        </div>
+                        <a href="{{ url_for('close_window', hwnd=group.windows[0].hwnd) }}" class="btn btn-danger btn-sm">Close</a>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+
         <div class="accordion" id="windowAccordion">
             {% for group in groups %}
-            <div class="accordion-item">
-                <h2 class="accordion-header" id="heading{{ loop.index }}">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ loop.index }}" aria-expanded="false" aria-controls="collapse{{ loop.index }}">
-                        <strong>{{ group.app_name }}</strong> &nbsp; <span class="badge bg-secondary rounded-pill">{{ group.windows|length }}</span>
-                    </button>
-                </h2>
-                <div id="collapse{{ loop.index }}" class="accordion-collapse collapse" aria-labelledby="heading{{ loop.index }}" data-bs-parent="#windowAccordion">
-                    <div class="accordion-body">
-                        <ul class="list-group">
-                            {% for window in group.windows %}
-                            <li class="list-group-item">
-                                <span class="window-title" title="{{ window.title }}">{{ window.title }}</span>
-                                <a href="{{ url_for('close_window', hwnd=window.hwnd) }}" class="btn btn-danger btn-sm">Close</a>
-                            </li>
-                            {% endfor %}
-                        </ul>
+                {% if group.windows|length > 1 %}
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="heading{{ loop.index }}">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ loop.index }}" aria-expanded="true" aria-controls="collapse{{ loop.index }}">
+                            <strong>{{ group.app_name }}</strong> &nbsp; <span class="badge bg-secondary rounded-pill">{{ group.windows|length }}</span>
+                        </button>
+                    </h2>
+                    <div id="collapse{{ loop.index }}" class="accordion-collapse collapse show" aria-labelledby="heading{{ loop.index }}">
+                        <div class="accordion-body">
+                            <ul class="list-group">
+                                {% for window in group.windows %}
+                                <li class="list-group-item">
+                                    <span class="window-title" title="{{ window.title }}">{{ window.title }}</span>
+                                    <a href="{{ url_for('close_window', hwnd=window.hwnd) }}" class="btn btn-danger btn-sm">Close</a>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
                     </div>
                 </div>
-            </div>
+                {% endif %}
             {% endfor %}
+            
             {% if not groups %}
             <div class="alert alert-info">No visible windows found.</div>
             {% endif %}
