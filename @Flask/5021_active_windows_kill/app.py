@@ -1,29 +1,43 @@
 from flask import Flask, render_template, redirect, url_for, flash
 import win32gui
 import win32con
+import win32process
+import psutil
 import sys
+from collections import defaultdict
 
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'
 
 def get_active_windows():
-    windows = []
+    groups = defaultdict(list)
     def enum_handler(hwnd, lParam):
         if win32gui.IsWindowVisible(hwnd):
             title = win32gui.GetWindowText(hwnd)
-            # Filter out empty titles and common system windows if necessary
-            # For now, let's just show everything with a title
             if title:
-                windows.append({'hwnd': hwnd, 'title': title})
+                try:
+                    _, pid = win32process.GetWindowThreadProcessId(hwnd)
+                    process = psutil.Process(pid)
+                    app_name = process.name()
+                except (psutil.NoSuchProcess, psutil.AccessDenied):
+                    app_name = "Unknown"
+                
+                groups[app_name].append({'hwnd': hwnd, 'title': title})
+    
     win32gui.EnumWindows(enum_handler, None)
-    # Sort by title
-    windows.sort(key=lambda x: x['title'].lower())
-    return windows
+    
+    # Sort windows within groups and the groups themselves
+    sorted_groups = []
+    for app_name in sorted(groups.keys()):
+        windows = sorted(groups[app_name], key=lambda x: x['title'].lower())
+        sorted_groups.append({'app_name': app_name, 'windows': windows})
+    
+    return sorted_groups
 
 @app.route('/')
 def index():
-    windows = get_active_windows()
-    return render_template('index.html', windows=windows)
+    groups = get_active_windows()
+    return render_template('index.html', groups=groups)
 
 @app.route('/close/<int:hwnd>')
 def close_window(hwnd):
