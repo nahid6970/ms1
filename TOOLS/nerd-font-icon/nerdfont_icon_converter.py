@@ -5,7 +5,7 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QH
                              QLabel, QPushButton, QLineEdit, QGroupBox, QFormLayout,
                              QComboBox, QSpinBox, QTextEdit, QFileDialog, QMessageBox,
                              QListWidget, QListWidgetItem, QColorDialog, QCheckBox)
-from PyQt6.QtCore import Qt, QSize
+from PyQt6.QtCore import Qt, QSize, QTimer
 from PyQt6.QtGui import QFont, QPixmap, QPainter, QColor, QIcon
 from PIL import Image, ImageDraw, ImageFont
 import json
@@ -311,42 +311,17 @@ class NerdFontConverter(QMainWindow):
         save_config_btn = QPushButton("SAVE CONFIG")
         save_config_btn.clicked.connect(self.save_config)
         
-        self.convert_btn = QPushButton("⚡ CONVERT ICON ⚡")
+        self.convert_btn = QPushButton("⚡ CONVERT ICON")
         self.convert_btn.clicked.connect(self.convert_icon)
-        self.convert_btn.setStyleSheet(f"""
-            QPushButton {{
-                background-color: {CP_GREEN};
-                color: black;
-                font-size: 12pt;
-                padding: 12px;
-                font-weight: bold;
-            }}
-            QPushButton:hover {{
-                background-color: {CP_YELLOW};
-            }}
-        """)
         
         btn_layout.addWidget(save_config_btn)
         btn_layout.addWidget(self.convert_btn)
         main_layout.addLayout(btn_layout)
         
-        # Status Log
-        log_group = QGroupBox("STATUS LOG")
-        log_layout = QVBoxLayout()
-        
-        self.log_text = QTextEdit()
-        self.log_text.setReadOnly(True)
-        self.log_text.setMaximumHeight(120)
-        self.log_text.setStyleSheet(f"color: {CP_GREEN};")
-        log_layout.addWidget(self.log_text)
-        
-        log_group.setLayout(log_layout)
-        main_layout.addWidget(log_group)
-        
-        self.log("System ready. Load a Nerd Font and enter an icon character.")
+
     
     def log(self, message):
-        self.log_text.append(f">> {message}")
+        pass
     
     def get_system_fonts(self):
         """Get all system fonts with their paths"""
@@ -471,6 +446,10 @@ class NerdFontConverter(QMainWindow):
         return dimensions if dimensions else [64]
     
     def convert_icon(self):
+        self.convert_btn.setEnabled(False)
+        self.convert_btn.setText("CONVERTING...")
+        QApplication.processEvents()
+        
         # Validate inputs
         icon_char = self.icon_input.text().strip()
         
@@ -617,6 +596,16 @@ class NerdFontConverter(QMainWindow):
         self.config["output_path"] = str(output_dir)
         self.config["last_icon"] = icon_char
         self.save_config()
+        
+        # Show success feedback
+        self.convert_btn.setStyleSheet(f"background-color: {CP_GREEN}; color: black; font-weight: bold;")
+        self.convert_btn.setText("✓ COMPLETE")
+        QTimer.singleShot(1000, self.reset_convert_button)
+    
+    def reset_convert_button(self):
+        self.convert_btn.setStyleSheet("")
+        self.convert_btn.setText("⚡ CONVERT ICON")
+        self.convert_btn.setEnabled(True)
     
     def load_config(self):
         if self.config_file.exists():
