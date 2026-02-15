@@ -177,6 +177,11 @@ MergeTab(hNewWnd) {
     }
 }
 
+;! English TO Bangla Text
+;! eng to bng
+::;er::এর
+::;r::র
+
 ;! === SCRIPT SHORTCUTS ===
 ;! Run Python Script
 ;! Opens run.py in the ms1 directory
@@ -1464,17 +1469,11 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 CONFIG_FILE = os.path.join(SCRIPT_DIR, ""projects_config.json"")
 )")
 
-;! er
-:X:;er::Paste('এর')
-
 ;! Theme Guidlines & Rules
 :X:;theme::Paste('For theming C:\@delta\ms1\THEME_GUIDE.md use this file guidline u can use cat or some other command to see whats inside THEME_GUIDE.md')
 
 ;! Bengla e
 :X:;e::Paste('ে')
-
-;! bangla er
-:X:;er::Paste('এর')
 
 ;! diamon list dot
 :X:;dot::Paste('💠')
