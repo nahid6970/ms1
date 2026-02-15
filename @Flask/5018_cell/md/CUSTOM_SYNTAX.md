@@ -4,6 +4,12 @@ Users can define their own custom highlighting rules through the Settings menu. 
 
 ## Usage
 **Syntax:** `{marker}text{marker}`
+
+### Table Support
+Custom color syntax works across multiple table cells:
+- **Example:** `¿¿Cell1 | Cell2 | Cell3¿¿` applies the custom syntax to all three cells
+- Each cell gets properly closed syntax: `¿¿Cell1¿¿ | ¿¿Cell2¿¿ | ¿¿Cell3¿¿`
+- Works in both pipe tables (`|`) and comma tables (`Table*N`)
 **Example:** If marker is `++`, syntax is `++text++`.
 
 ## Settings Interface

@@ -4,6 +4,48 @@ This document tracks historical bugs, issues, and their solutions. Use this to:
 - Understand past problems and how they were resolved
 - Check if old fixes might conflict with new features
 - Debug similar issues by referencing past solutions
+## [2026-02-15 12:20] - Nerd Font Icons Not Displaying & Table Markdown Not Spanning Cells
+
+**Problem:** 
+1. Nerd Font icons (, , etc.) were displaying as square boxes instead of proper glyphs
+2. Markdown syntax spanning multiple table cells (e.g., `==Cell1 | Cell2 | Cell3==`) was not applying formatting to all cells - only the last cell would get the effect
+3. Custom color syntax had the same issue - only worked on single cells, not across multiple cells
+
+**Root Cause:** 
+1. **Nerd Font Issue**: Google Fonts version of JetBrains Mono does not include Nerd Font icon glyphs (Unicode Private Use Area U+E000-U+F8FF). The font fallback chain did not include the locally installed Nerd Font variant.
+2. **Table Spanning Issue**: The `parseGridTable()` function was splitting cells by pipe (`|`) without tracking markdown delimiter state across cells. When syntax like `==Cell1 | Cell2==` was encountered, it would split into `==Cell1` and `Cell2==`, treating them as independent cells without recognizing the spanning syntax.
+
+**Solution:** 
+1. **Nerd Font Fix**:
+   - Added `'JetBrainsMono Nerd Font'` to the font fallback chain in both `static/script.js` and `export_static.py`
+   - Fallback order: `'JetBrains Mono'` (Google Fonts) → `'JetBrainsMono Nerd Font'` (local) → `Vrinda` → `monospace`
+   - Icons now display if Nerd Font is installed locally
+   - Added note in documentation: users should add space after icons to prevent text overlap
+
+2. **Table Spanning Fix**:
+   - Updated `parseGridTable()` to track open/close state of markdown delimiters across cells
+   - Added logic that:
+     - Tracks which delimiters are currently open (`**`, `==`, `!!`, `??`, `@@`, `##`, `~~`, `<<`, `>>`, and custom syntax markers)
+     - Prepends open delimiters to the next cell
+     - Counts delimiter occurrences to determine if still open
+     - Closes delimiter in current cell and marks as open for next cell if odd count
+   - Result: `==Cell1 | Cell2 | Cell3==` becomes `==Cell1== | ==Cell2== | ==Cell3==`
+   - Works with all built-in markdown syntax and dynamically loaded custom color syntax markers
+
+**Files Modified:**
+- `static/script.js` - Added Nerd Font fallback (lines 8365, 8463, 8497), table spanning logic in `parseGridTable()` (~40 lines)
+- `export_static.py` - Added Nerd Font fallback (line 1731)
+- `static/style.css` - Added letter-spacing for icon spacing
+- `templates/index.html` - Restored Google Fonts link
+- `md/CORE_SYSTEMS.md` - Documented Nerd Font support
+- `md/TABLE_ADVANCED.md` - Documented markdown spanning feature
+- `md/CUSTOM_SYNTAX.md` - Added table support section
+
+**Related Issues:**
+- None
+
+---
+
 
 ---
 

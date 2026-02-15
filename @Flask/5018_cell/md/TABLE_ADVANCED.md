@@ -16,6 +16,10 @@
 ## Table Detection & Rows
 - **Detection:** `isTableLine(line)` (checks for pipes).
 - **Rowspan:** `^^` syntax merges a cell with the one above (uses `grid-row: span N`).
+- **Markdown Spanning:** Markdown and custom color syntax can span multiple cells
+  - Example: `==Cell1 | Cell2 | Cell3==` applies highlight to all three cells
+  - Works with: `**`, `==`, `!!`, `??`, `@@`, `##`, `~~`, `<<`, `>>`, and custom syntax markers
+  - Each cell gets properly closed syntax: `==Cell1== | ==Cell2== | ==Cell3==`
 - **Processing:** `parseGridTable()` parses pipes, colors, alignment, and rowspan.
 
 ## Table Styling

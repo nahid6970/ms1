@@ -4,6 +4,54 @@
 
 **Archiving Process:** When you have 6+ sessions, move the oldest one to ARCHIVE_RECENT.md with "ARCHIVED" prefix.
 
+## [2026-02-15 12:20] - Nerd Font Support & Table Markdown Spanning
+
+**Session Duration:** 0.5 hours
+
+**What We Accomplished:**
+
+### 🎨 Nerd Font Icon Support
+- **Feature**: Added JetBrains Mono Nerd Font support for icon glyphs (, , etc.)
+- **Implementation**:
+  - Added Nerd Font to fallback chain: `'JetBrains Mono', 'JetBrainsMono Nerd Font', Vrinda, monospace`
+  - Updated both main app (`static/script.js`) and export (`export_static.py`)
+  - Icons display if Nerd Font is installed locally
+- **Note**: Users should add a space after Nerd Font icons to prevent text overlap
+
+### 📊 Table Markdown Spanning
+- **Feature**: Markdown and custom color syntax can now span multiple table cells
+- **Examples**:
+  - `==Cell1 | Cell2 | Cell3==` → applies highlight to all three cells
+  - `¿¿Cell1 | Cell2 | Cell3¿¿` → applies custom syntax to all cells
+- **Implementation**:
+  - Updated `parseGridTable()` to track open/close state of delimiters across cells
+  - Each cell gets properly closed syntax: `==Cell1== | ==Cell2== | ==Cell3==`
+  - Works with: `**`, `==`, `!!`, `??`, `@@`, `##`, `~~`, `<<`, `>>`, and custom syntax markers
+- **Logic**: Tracks which delimiters are open, prepends them to next cell, closes them, and marks as open for following cells
+
+**Files Modified:**
+- `static/script.js` - Added Nerd Font fallback (3 lines), table spanning logic (~40 lines)
+- `export_static.py` - Added Nerd Font fallback (1 line)
+- `static/style.css` - Added letter-spacing for icon spacing
+- `templates/index.html` - Restored Google Fonts link
+- `md/CORE_SYSTEMS.md` - Documented Nerd Font support
+- `md/TABLE_ADVANCED.md` - Documented markdown spanning feature
+- `md/CUSTOM_SYNTAX.md` - Added table support section
+
+**Current Status:**
+- ✅ Nerd Font icons display correctly
+- ✅ Markdown syntax spans multiple table cells
+- ✅ Custom color syntax works across table cells
+- ✅ Export HTML includes Nerd Font support
+
+**Next Steps:**
+- Test with various Nerd Font icon combinations
+- Verify export HTML renders correctly
+
+**Time Spent:** 0.5 hours
+
+---
+
 ---
 
 ## [2026-02-12 16:30] - List Line Joining Visual Update Fix
