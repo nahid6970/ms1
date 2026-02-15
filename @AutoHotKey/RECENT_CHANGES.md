@@ -1,5 +1,20 @@
 # Recent Changes
 
+## 2026-02-15
+
+### ✅ Added "Open Focused App Directory" Shortcut
+**New Feature:** Added a global shortcut (Alt+f) that opens the folder containing the executable of the currently focused window.
+
+**How It Works:**
+- Press `Alt+f` while any application is focused
+- The script identifies the process path of the active window
+- Opens the containing directory in File Explorer
+- Uses `WinGetProcessPath` and `SplitPath` for reliable path extraction
+
+**Files Modified:**
+- `ahk_shortcuts.json` - Added the new shortcut to database
+- `generated_shortcuts.ahk` - Updated the generated script with the new functionality
+
 ## 2025-01-22
 
 ### ✅ Added Action Code Hints & Command Reference

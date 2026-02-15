@@ -29,9 +29,24 @@ Complete overview of all features and recent additions.
 - **Command Reference** - Built-in AutoHotkey command guide (NEW!)
 - **Duplicate** - Copy shortcuts with one click (NEW!)
 
-## Recent Additions (2025-01-22)
+## Recent Additions
 
-### 1. Context-Aware Shortcuts ✅
+### 1. Open Focused App Directory (2026-02-15) ✅
+
+**What:** Global shortcut (Alt+f) to open the containing folder of the active application.
+
+**Features:**
+- Works with any focused window
+- Automatically identifies the executable path
+- Opens the directory in File Explorer
+- Robust error handling for system processes
+
+**Use Case:**
+- Quickly find where an app is installed
+- Access configuration files or logs for the current app
+- Open the script directory for a running script
+
+### 2. Context-Aware Shortcuts (2025-01-22) ✅
 
 **What:** Window-specific hotkeys that only work in certain contexts
 

@@ -834,6 +834,38 @@ PrintScreen::Run("C:\@delta\ms1\scripts\Autohtokey\version2\gui\Bio.ahk", "", "H
     }
 }
 
+;! Open Focused App Directory
+;! Opens the directory of the focused application or script
+!f:: {
+    OpenFocusedDirectory()
+    OpenFocusedDirectory() {
+        try {
+            hwnd := WinExist("A")
+            if !hwnd
+                return
+            pid := WinGetPID("ahk_id " hwnd)
+            processName := WinGetProcessName("ahk_id " hwnd)
+            finalPath := ""
+            ; Handle script interpreters
+            if (processName ~= "i)python|powershell|pwsh|autohotkey") {
+                for proc in ComObjGet("winmgmts:").ExecQuery("Select CommandLine from Win32_Process Where ProcessId = " pid) {
+                    cmdLine := proc.CommandLine
+                    ; Look for paths ending in script extensions in the command line
+                    if RegExMatch(cmdLine, 'i)"([^"]+\.(py|ps1|ahk|bat|cmd))"', &match)
+                        finalPath := match[1]
+                    else if RegExMatch(cmdLine, 'i)\s([^\s]+\.(py|ps1|ahk|bat|cmd))(\s|$)', &match)
+                        finalPath := match[1]
+                }
+            }
+            if (finalPath == "")
+                finalPath := WinGetProcessPath("ahk_id " hwnd)
+            SplitPath(finalPath, , &dir)
+            if DirExist(dir)
+                Run(dir)
+        }
+    }
+}
+
 ;! === CONTEXT SHORTCUTS ===
 ;! Gemini Save Chat
 ;! Save current Gemini chat session
