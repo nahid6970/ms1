@@ -22,9 +22,8 @@ Advanced bookmark manager with grouped links, extensive customization, and multi
   
 - **Other Features**:
   - Drag-and-drop reordering (items & groups)
-  - Password protection per group
+  - **Password protection** - Lock groups with password
   - Hidden items (visible only in edit mode)
-  - Note preview with markdown
   - Context menu (copy, edit, delete)
   - Multiple URL support per link
 
@@ -71,9 +70,8 @@ const linkValidator = v.object({
   name: v.string(),
   url: v.optional(v.string()),
   title: v.optional(v.string()),
-  note: v.optional(v.string()),
   group: v.optional(v.string()),
-  click_action: v.optional(v.string()), // 'url' or 'note'
+  click_action: v.optional(v.string()), // 'url'
   default_type: v.optional(v.string()), // 'text', 'nerd-font', etc.
   icon_class: v.optional(v.string()),
   hidden: v.optional(v.boolean()),
@@ -176,6 +174,17 @@ Shows items as cards in grid layout.
 }
 ```
 Shows items as compact list with truncated text.
+
+### Password Protection
+Lock groups with password:
+```javascript
+{
+  "group": "Private",
+  "password_protect": true,
+  "collapsible": true
+}
+```
+When clicked, prompts for password before showing group contents.
 
 // Get all links
 export const getLinks = query({
