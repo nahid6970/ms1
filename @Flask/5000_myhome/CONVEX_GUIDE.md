@@ -58,6 +58,54 @@ Save the generated Convex URL (e.g., `https://xxx.convex.cloud`)
 
 ---
 
+## Frontend Features
+
+### Color Input Preview
+Add live color preview to input fields (shows the color as background):
+
+```javascript
+// Detect color fields by name/placeholder
+function isColorField(input) {
+  return input.type === 'text' && (
+    input.placeholder.toLowerCase().includes('color') ||
+    input.id.toLowerCase().includes('color')
+  );
+}
+
+// Apply color as background, adjust text color for readability
+function applyColorPreview(input) {
+  const value = input.value.trim();
+  if (value && value.match(/^#[0-9A-Fa-f]{3,6}$/)) {
+    input.style.backgroundColor = value;
+    // Calculate brightness to set text color
+    const brightness = getBrightness(value);
+    input.style.color = brightness > 128 ? '#000000' : '#ffffff';
+  } else {
+    input.style.backgroundColor = '';
+    input.style.color = '';
+  }
+}
+
+function getBrightness(hex) {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return (r * 299 + g * 587 + b * 114) / 1000;
+}
+
+// Apply on input/change events
+document.querySelectorAll('input[type="text"]').forEach(input => {
+  if (isColorField(input)) {
+    input.addEventListener('input', () => applyColorPreview(input));
+    applyColorPreview(input); // Initial preview
+  }
+});
+```
+
+This gives instant visual feedback when typing color values.
+
+---
+
 ## Backend Implementation
 
 ### File: `convex/links.ts`
