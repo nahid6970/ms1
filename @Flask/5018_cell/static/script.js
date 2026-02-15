@@ -2817,6 +2817,52 @@ function parseGridTable(lines) {
         // Split by pipe and trim each cell
         let cells = trimmed.split('|').map(c => c.trim());
 
+        // Handle markdown/custom syntax spanning multiple cells
+        // e.g., ==Cell1 | Cell2 | Cell3== becomes ==Cell1== | ==Cell2== | ==Cell3==
+        const delimiters = ['**', '==', '!!', '??', '@@', '##', '~~', '<<', '>>'];
+        
+        // Add custom color syntax markers
+        if (typeof customColorSyntaxes !== 'undefined') {
+            customColorSyntaxes.forEach(syntax => {
+                if (syntax.marker && !delimiters.includes(syntax.marker)) {
+                    delimiters.push(syntax.marker);
+                }
+            });
+        }
+        
+        // Track which delimiters are currently open
+        let openDelims = [];
+        
+        for (let i = 0; i < cells.length; i++) {
+            let cell = cells[i];
+            let newOpenDelims = [];
+            
+            // Check each delimiter
+            for (const delim of delimiters) {
+                const wasOpen = openDelims.includes(delim);
+                const regex = new RegExp(delim.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
+                const countInCell = (cell.match(regex) || []).length;
+                
+                // If delimiter was open from previous cell, prepend it
+                if (wasOpen) {
+                    cell = delim + cell;
+                }
+                
+                // Calculate if delimiter is now open after this cell
+                const totalCount = wasOpen ? countInCell + 1 : countInCell;
+                const isNowOpen = totalCount % 2 === 1;
+                
+                // If delimiter is open, close it in this cell and mark as open for next
+                if (isNowOpen) {
+                    cell = cell + delim;
+                    newOpenDelims.push(delim);
+                }
+            }
+            
+            cells[i] = cell;
+            openDelims = newOpenDelims;
+        }
+
         return cells;
     });
     const cols = rows[0].length;

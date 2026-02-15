@@ -5,6 +5,10 @@
 - **Vrinda:** Primary for Bangla.
 - **Segoe UI:** Fallback/English.
 - **JetBrains Mono:** Loaded via Google Fonts for code columns.
+- **Nerd Font Support:** JetBrains Mono Nerd Font fallback added for icon glyphs (, , etc.)
+  - Fallback chain: `'JetBrains Mono', 'JetBrainsMono Nerd Font', Vrinda, monospace`
+  - Icons display if Nerd Font is installed locally
+  - **Note:** Add a space after Nerd Font icons to prevent text overlap (e.g., " text" not "text")
 **Toggle:** Disable Vrinda via Settings (applied as `.disable-vrinda`).
 
 ## Page Load Time Indicator
