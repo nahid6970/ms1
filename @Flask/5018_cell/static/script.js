@@ -8362,7 +8362,7 @@ function renderTable(preserveScroll = true) {
                 textarea.style.wordWrap = 'break-word';
 
                 if (col.font && col.font !== '') {
-                    textarea.style.fontFamily = `'${col.font}', Vrinda, monospace`;
+                    textarea.style.fontFamily = `'${col.font}', 'JetBrainsMono Nerd Font', Vrinda, monospace`;
                 }
 
                 if (col.fontSize && col.fontSize !== '') {
@@ -8460,7 +8460,7 @@ function renderTable(preserveScroll = true) {
                 input.style.color = col.textColor || '#000000';
 
                 if (col.font && col.font !== '') {
-                    input.style.fontFamily = `'${col.font}', Vrinda, monospace`;
+                    input.style.fontFamily = `'${col.font}', 'JetBrainsMono Nerd Font', Vrinda, monospace`;
                 }
 
                 if (col.fontSize && col.fontSize !== '') {
@@ -8494,7 +8494,7 @@ function renderTable(preserveScroll = true) {
                 input.style.color = col.textColor || '#000000';
 
                 if (col.font && col.font !== '') {
-                    input.style.fontFamily = `'${col.font}', Vrinda, monospace`;
+                    input.style.fontFamily = `'${col.font}', 'JetBrainsMono Nerd Font', Vrinda, monospace`;
                 }
 
                 if (col.fontSize && col.fontSize !== '') {
