@@ -14702,6 +14702,216 @@ function sortLines(event) {
     showToast('Lines sorted (keeping lists with parents)', 'success');
 }
 
+// Sort Lines by Bangla Date Function
+function sortLinesBanglaDate(event) {
+    if (!quickFormatterTarget) return;
+
+    const input = quickFormatterTarget;
+    let selectedText = '';
+    let start = 0;
+    let end = 0;
+
+    // Handle contenteditable (WYSIWYG mode)
+    if (quickFormatterSelection.isContentEditable) {
+        selectedText = quickFormatterSelection.text || '';
+    } else {
+        // Handle input/textarea (legacy mode)
+        start = quickFormatterSelection.start;
+        end = quickFormatterSelection.end;
+        selectedText = input.value.substring(start, end);
+    }
+
+    if (!selectedText) {
+        showToast('No text selected', 'warning');
+        return;
+    }
+
+    // Parse lines into blocks (parent + children)
+    const lines = selectedText.split('\n');
+    const blocks = [];
+    let currentBlock = null;
+
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        const trimmed = line.trim();
+
+        // Check dash patterns
+        const isDoubleDash = trimmed.startsWith('-- ');
+        const isSingleDash = trimmed.startsWith('- ') && !trimmed.startsWith('-- ');
+
+        // Determine if this is a child line
+        let isChildLine = false;
+
+        if (isDoubleDash) {
+            isChildLine = true;
+        } else if (isSingleDash) {
+            if (currentBlock && currentBlock.children.length === 0) {
+                const prevParentTrimmed = currentBlock.parent.trim();
+                if (prevParentTrimmed.startsWith('- ')) {
+                    isChildLine = false;
+                } else {
+                    isChildLine = true;
+                }
+            } else if (currentBlock && currentBlock.children.length > 0) {
+                const lastChild = currentBlock.children[currentBlock.children.length - 1];
+                if (lastChild.trim().startsWith('-- ')) {
+                    isChildLine = false;
+                } else {
+                    isChildLine = true;
+                }
+            } else {
+                isChildLine = false;
+            }
+        }
+
+        if (isChildLine) {
+            if (currentBlock) {
+                currentBlock.children.push(line);
+            } else {
+                blocks.push({
+                    parent: line,
+                    children: [],
+                    isOrphan: true
+                });
+            }
+        } else {
+            if (currentBlock) {
+                blocks.push(currentBlock);
+            }
+            currentBlock = {
+                parent: line,
+                children: []
+            };
+        }
+    }
+
+    if (currentBlock) {
+        blocks.push(currentBlock);
+    }
+
+    // Helper to parse Bangla date
+    const parseBanglaDateLocal = (text) => {
+        const months = {
+            'জানুয়ারি': 1, 'জানুয়ারি': 1,
+            'ফেব্রুয়ারি': 2, 'ফেব্রুয়ারি': 2,
+            'মার্চ': 3,
+            'এপ্রিল': 4,
+            'মে': 5,
+            'জুন': 6,
+            'জুলাই': 7,
+            'আগস্ট': 8, 'অগাস্ট': 8,
+            'সেপ্টেম্বর': 9, 'সেপ্টেম্বার': 9,
+            'অক্টোবর': 10, 'অক্টোবার': 10,
+            'নভেম্বর': 11, 'নভেম্বার': 11,
+            'ডিসেম্বর': 12, 'ডিসেম্বার': 12
+        };
+
+        const bn2en = (str) => {
+            if (!str) return '';
+            return str.replace(/[০-৯]/g, d => "০১২৩৪৫৬৭৮৯".indexOf(d));
+        };
+
+        // Strip markdown first
+        const cleanText = stripMarkdown(text).trim();
+
+        // Month pattern including variations
+        const monthPattern = '(জানুয়ারি|জানুয়ারি|ফেব্রুয়ারি|ফেব্রুয়ারি|মার্চ|এপ্রিল|মে|জুন|জুলাই|আগস্ট|অগাস্ট|সেপ্টেম্বর|সেপ্টেম্বার|অক্টোবর|অক্টোবার|নভেম্বর|নভেম্বার|ডিসেম্বর|ডিসেম্বার)';
+        
+        // 1. Full Date: Day Month Year (Comma after month is optional)
+        const fullDateRegex = new RegExp(`(\\d+|[০-৯]+)?\\s*${monthPattern}\\s*,?\\s*(\\d+|[০-৯]+)`);
+        const fullMatch = cleanText.match(fullDateRegex);
+        
+        if (fullMatch) {
+            let day = fullMatch[1] ? parseInt(bn2en(fullMatch[1])) : 1;
+            let monthStr = fullMatch[2];
+            let year = parseInt(bn2en(fullMatch[3]));
+            let month = months[monthStr];
+            
+            if (month && !isNaN(year)) {
+                return { year, month, day };
+            }
+        }
+
+        // 2. Just Year: 4 digits
+        const yearRegex = /(\d{4}|[০-৯]{4})/;
+        const yearMatch = cleanText.match(yearRegex);
+        if (yearMatch) {
+            return { year: parseInt(bn2en(yearMatch[1])), month: 0, day: 0 };
+        }
+
+        return null;
+    };
+
+    // Sort blocks by Bangla date
+    const sortedBlocks = blocks.sort((a, b) => {
+        const dateA = parseBanglaDateLocal(a.parent);
+        const dateB = parseBanglaDateLocal(b.parent);
+
+        if (dateA && dateB) {
+            if (dateA.year !== dateB.year) return dateA.year - dateB.year;
+            if (dateA.month !== dateB.month) return dateA.month - dateB.month;
+            if (dateA.day !== dateB.day) return dateA.day - dateB.day;
+            return a.parent.localeCompare(b.parent);
+        }
+
+        // Keep lines without dates at the end
+        if (dateA) return -1;
+        if (dateB) return 1;
+
+        return a.parent.localeCompare(b.parent);
+    });
+
+    // Reconstruct the sorted text
+    const sortedLines = [];
+    for (const block of sortedBlocks) {
+        sortedLines.push(block.parent);
+        sortedLines.push(...block.children);
+    }
+
+    const sortedText = sortedLines.join('\n');
+
+    // Apply the sorted text
+    if (quickFormatterSelection.isContentEditable) {
+        const range = quickFormatterSelection.range;
+        range.deleteContents();
+        const textNode = document.createTextNode(sortedText);
+        range.insertNode(textNode);
+
+        const cell = quickFormatterTarget.closest('td');
+        if (cell) {
+            const inputElement = cell.querySelector('input, textarea');
+            if (inputElement) {
+                inputElement.value = extractRawText(quickFormatterTarget);
+                const changeEvent = new Event('input', { bubbles: true });
+                inputElement.dispatchEvent(changeEvent);
+            }
+        }
+
+        const newRange = document.createRange();
+        newRange.setStartAfter(textNode);
+        newRange.collapse(true);
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(newRange);
+    } else {
+        const newText = input.value.substring(0, start) +
+            sortedText +
+            input.value.substring(end);
+
+        input.value = newText;
+
+        const changeEvent = new Event('input', { bubbles: true });
+        input.dispatchEvent(changeEvent);
+
+        const newCursorPos = start + sortedText.length;
+        input.setSelectionRange(newCursorPos, newCursorPos);
+        input.focus();
+    }
+
+    closeQuickFormatter();
+    showToast('Lines sorted by Bangla date', 'success');
+}
+
 // Lines to Comma Function
 function linesToComma(event) {
     if (!quickFormatterTarget) return;
