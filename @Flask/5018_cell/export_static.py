@@ -1728,7 +1728,7 @@ def generate_static_html(data, custom_syntaxes):
                     cellContent.style.color = col.textColor || '#000000';
 
                     if (col.font && col.font !== '') {
-                        cellContent.style.fontFamily = `'${col.font}', monospace`;
+                        cellContent.style.fontFamily = `'${col.font}', 'JetBrainsMono Nerd Font', monospace`;
                     }
                     
                     if (col.fontSize && col.fontSize !== '') {
