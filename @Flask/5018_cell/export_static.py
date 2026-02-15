@@ -1713,7 +1713,8 @@ def generate_static_html(data, custom_syntaxes):
                         cellValue.match(/^Timeline(?:C)?(?:-[A-Z]+)?\\*/m) ||
                         cellValue.match(/:::(?:[A-Za-z0-9_#.-]+:::)?.*?:::/) ||
                         cellValue.match(/\\[\\d+(?:-[A-Z]+)?\\]\\S+/) ||
-                        (cellValue.includes('|') && cellValue.split('|').length >= 2);
+                        (cellValue.includes('|') && cellValue.split('|').length >= 2) ||
+                        (typeof customColorSyntaxes !== 'undefined' && customColorSyntaxes.some(syntax => cellValue.includes(syntax.marker)));
                     
                     if (hasMarkdown) {
                         // Apply markdown formatting
@@ -1839,60 +1840,61 @@ def generate_static_html(data, custom_syntaxes):
          * - ``` code block ```
          */
         /* ----------  PIPE-TABLE → CSS-GRID  ---------- */
-        function splitTableLine(line) {
-            let cells = [];
-            let currentCell = '';
-            let i = 0;
-            let inBold = false;      // **
-            let inItalic = false;    // @@
-            let inHighlight = false; // ==
-            let inUnderline = false; // __
-            let inLink = false;      // [[
-
-            while (i < line.length) {
-                const char = line[i];
-                
-                // Handle escapes
-                if (char === '\\\\\\\\' && i + 1 < line.length) {
-                    currentCell += char + line[i+1];
-                    i += 2;
-                    continue;
-                }
-                
-                // Check for markers (2 chars)
-                if (i + 1 < line.length) {
-                    const twoChars = char + line[i+1];
-                    if (twoChars === '**') { inBold = !inBold; currentCell += twoChars; i += 2; continue; }
-                    if (twoChars === '@@') { inItalic = !inItalic; currentCell += twoChars; i += 2; continue; }
-                    if (twoChars === '==') { inHighlight = !inHighlight; currentCell += twoChars; i += 2; continue; }
-                    if (twoChars === '__') { inUnderline = !inUnderline; currentCell += twoChars; i += 2; continue; }
-                    if (twoChars === '[[') { inLink = true; currentCell += twoChars; i += 2; continue; }
-                    if (twoChars === ']]') { inLink = false; currentCell += twoChars; i += 2; continue; }
-                }
-
-                // Check for pipe
-                if (char === '|') {
-                    if (!inBold && !inItalic && !inHighlight && !inUnderline && !inLink) {
-                        cells.push(currentCell);
-                        currentCell = '';
-                        i++;
-                        continue;
-                    }
-                }
-                
-                currentCell += char;
-                i++;
-            }
-            cells.push(currentCell);
-            return cells.map(c => c.trim());
-        }
-
         function parseGridTable(lines, cellStyle = {}) {
             const rows = lines.map(l => {
                 // Remove leading/trailing whitespace and pipes
-                const trimmed = l.trim().replace(/^\\||\\|$/g, '');
-                // Split by pipe and trim each cell, respecting delimiters
-                return splitTableLine(trimmed);
+                let trimmed = l.trim().replace(/^\\||\\|$/g, '').trim();
+
+                // Split by pipe and trim each cell
+                let cells = trimmed.split('|').map(c => c.trim());
+
+                // Handle markdown/custom syntax spanning multiple cells
+                // e.g., ==Cell1 | Cell2 | Cell3== becomes ==Cell1== | ==Cell2== | ==Cell3==
+                const delimiters = ['**', '==', '!!', '??', '@@', '##', '~~', '<<', '>>'];
+                
+                // Add custom color syntax markers
+                if (typeof customColorSyntaxes !== 'undefined') {
+                    customColorSyntaxes.forEach(syntax => {
+                        if (syntax.marker && !delimiters.includes(syntax.marker)) {
+                            delimiters.push(syntax.marker);
+                        }
+                    });
+                }
+                
+                // Track which delimiters are currently open
+                let openDelims = [];
+                
+                for (let i = 0; i < cells.length; i++) {
+                    let cell = cells[i];
+                    let newOpenDelims = [];
+                    
+                    // Check each delimiter
+                    for (const delim of delimiters) {
+                        const wasOpen = openDelims.includes(delim);
+                        const regex = new RegExp(delim.replace(/[.*+?^${}()|[\]\\\\]/g, '\\\\$&'), 'g');
+                        const countInCell = (cell.match(regex) || []).length;
+                        
+                        // If delimiter was open from previous cell, prepend it
+                        if (wasOpen) {
+                            cell = delim + cell;
+                        }
+                        
+                        // Calculate if delimiter is now open after this cell
+                        const totalCount = wasOpen ? countInCell + 1 : countInCell;
+                        const isNowOpen = totalCount % 2 === 1;
+                        
+                        // If delimiter is open, close it in this cell and mark as open for next
+                        if (isNowOpen) {
+                            cell = cell + delim;
+                            newOpenDelims.push(delim);
+                        }
+                    }
+                    
+                    cells[i] = cell;
+                    openDelims = newOpenDelims;
+                }
+
+                return cells;
             });
             const cols = rows[0].length;
             
