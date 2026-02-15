@@ -26,7 +26,7 @@ Advanced bookmark manager with grouped links, extensive customization, and multi
   - Drag-and-drop reordering (items & groups)
   - **Password protection** - Lock groups with password
   - Hidden items (visible only in edit mode)
-  - Context menu (right-click: copy, edit, delete)
+  - Context menu (right-click: copy, duplicate, edit, delete)
 
 ## Migration Strategy
 Keep the frontend UI intact, replace Flask API with Convex backend.
@@ -103,6 +103,38 @@ document.querySelectorAll('input[type="text"]').forEach(input => {
 ```
 
 This gives instant visual feedback when typing color values.
+
+### Context Menu with Duplicate
+Add duplicate functionality to context menu:
+
+```javascript
+// Context menu items
+const items = [
+  { label: 'New-Tab', action: () => window.open(link.url, '_blank') },
+  { label: 'Edit', action: () => openEditLinkPopup(link, index) },
+  { label: 'Copy', action: () => copyLink(link, index) },
+  { label: 'Duplicate', action: () => duplicateLink(link, index) },
+  { label: 'Delete', action: () => deleteLink(index) }
+];
+
+// Duplicate function
+async function duplicateLink(link, index) {
+  const duplicatedLink = { ...link }; // Clone all properties
+  
+  // Add " (Copy)" to name if it exists
+  if (duplicatedLink.name) {
+    duplicatedLink.name = duplicatedLink.name + ' (Copy)';
+  }
+  
+  // For Convex
+  await client.mutation("links:addLink", { link: duplicatedLink });
+  
+  // Reload links
+  await loadLinks();
+}
+```
+
+This creates an exact copy of the link with all styling preserved.
 
 ---
 
