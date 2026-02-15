@@ -257,7 +257,7 @@
         {
             "kind": "Title",
             "id": "Character Map UWP",
-            "matching_strategy": "Equals"
+            "matching_strategy": "Contains"
         },
         {
             "kind": "Exe",
