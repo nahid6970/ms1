@@ -163,6 +163,20 @@ All display areas support font customization:
 "li_font_family": "Georgia, serif"
 ```
 
+**IMPORTANT - Font Family Fix**: 
+In your frontend CSS, ensure font-family is applied with `!important` to override default styles:
+```javascript
+// When applying font family in JavaScript
+if (link.li_font_family) {
+  element.style.setProperty('font-family', link.li_font_family, 'important');
+}
+
+// Or in inline styles
+style="font-family: ${link.li_font_family} !important;"
+```
+
+Without `!important`, CSS cascade may use a different font from parent elements or global styles.
+
 ### Group Display Types
 
 **1. Collapsible (Top Groups)**
