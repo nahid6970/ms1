@@ -297,19 +297,51 @@
     function renderListGroup(groupName, links, container) {
       const section = document.createElement('div');
       section.className = 'list-group';
-      section.innerHTML = `<h2>${groupName}</h2>`;
       
-      const list = document.createElement('ul');
+      const header = document.createElement('h2');
+      header.textContent = groupName;
+      header.style.cursor = 'pointer';
+      header.style.userSelect = 'none';
+      
+      const firstLink = links[0];
+      if (firstLink.top_bg_color) header.style.backgroundColor = firstLink.top_bg_color;
+      if (firstLink.top_text_color) header.style.color = firstLink.top_text_color;
+      
+      header.onclick = () => {
+        showListPopup(groupName, links, firstLink);
+      };
+      
+      section.appendChild(header);
+      container.appendChild(section);
+    }
+    
+    function showListPopup(groupName, links, styleLink) {
+      const popup = document.createElement('div');
+      popup.className = 'popup-overlay';
+      
+      const content = document.createElement('div');
+      content.className = 'popup-content list-popup';
+      
+      if (styleLink.popup_bg_color) content.style.backgroundColor = styleLink.popup_bg_color;
+      if (styleLink.popup_text_color) content.style.color = styleLink.popup_text_color;
+      if (styleLink.popup_border_color) content.style.borderColor = styleLink.popup_border_color;
+      
+      content.innerHTML = `
+        <button class="close-popup">&times;</button>
+        <h2>${groupName}</h2>
+        <div class="popup-list"></div>
+      `;
+      
+      const listContainer = content.querySelector('.popup-list');
+      
       links.forEach(link => {
-        const item = document.createElement('li');
-        item.draggable = editMode;
-        item.dataset.linkIndex = link.originalIndex;
+        const item = document.createElement('div');
+        item.className = 'popup-list-item';
         
         const a = document.createElement('a');
         a.href = link.url || '#';
         if (link.url) a.target = '_blank';
         
-        // Handle icon/name display
         if (link.icon_class) {
           if (link.icon_class.startsWith('<svg')) {
             a.innerHTML = link.icon_class + (link.name ? `<span>${link.name}</span>` : '');
@@ -322,55 +354,43 @@
           a.textContent = link.name;
         }
         
-        // Apply styles to anchor
-        if (link.li_font_size) a.style.fontSize = link.li_font_size;
-        if (link.li_font_family) a.style.setProperty('font-family', link.li_font_family, 'important');
+        if (link.horizontal_font_size) a.style.fontSize = link.horizontal_font_size;
+        if (link.horizontal_font_family) a.style.setProperty('font-family', link.horizontal_font_family, 'important');
         
         item.appendChild(a);
         
-        // Apply item styles
-        if (link.li_bg_color) item.style.backgroundColor = link.li_bg_color;
-        if (link.li_border_color) item.style.border = `1px solid ${link.li_border_color}`;
-        if (link.li_border_radius) item.style.borderRadius = link.li_border_radius;
+        if (link.horizontal_bg_color) item.style.backgroundColor = link.horizontal_bg_color;
+        if (link.horizontal_border_color) item.style.borderColor = link.horizontal_border_color;
         
-        // Hover effect
-        if (link.li_hover_color) {
-          const originalBg = item.style.backgroundColor || link.li_bg_color;
+        if (link.horizontal_hover_color) {
+          const originalBg = item.style.backgroundColor || link.horizontal_bg_color;
           item.addEventListener('mouseenter', () => {
-            item.style.backgroundColor = link.li_hover_color;
+            item.style.backgroundColor = link.horizontal_hover_color;
           });
           item.addEventListener('mouseleave', () => {
             if (originalBg) item.style.backgroundColor = originalBg;
           });
         }
         
-        if (editMode) {
-          item.ondragstart = handleDragStart;
-          item.ondragover = handleDragOver;
-          item.ondrop = handleDrop;
-          item.ondragend = handleDragEnd;
-          
-          const editBtn = document.createElement('button');
-          editBtn.className = 'edit-btn';
-          editBtn.textContent = '✏️';
-          editBtn.onclick = (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            openEditPopup(link);
-          };
-          item.appendChild(editBtn);
-        }
-        
-        item.oncontextmenu = (e) => {
+        const editBtn = document.createElement('button');
+        editBtn.className = 'popup-edit-btn';
+        editBtn.textContent = '✏️';
+        editBtn.onclick = (e) => {
           e.preventDefault();
-          showContextMenu(e, link, link.originalIndex);
+          e.stopPropagation();
+          popup.remove();
+          openEditPopup(link);
         };
+        item.appendChild(editBtn);
         
-        list.appendChild(item);
+        listContainer.appendChild(item);
       });
       
-      section.appendChild(list);
-      container.appendChild(section);
+      popup.appendChild(content);
+      content.querySelector('.close-popup').onclick = () => popup.remove();
+      popup.onclick = (e) => { if (e.target === popup) popup.remove(); };
+      
+      document.body.appendChild(popup);
     }
     
     function showPopup(groupName, links) {
