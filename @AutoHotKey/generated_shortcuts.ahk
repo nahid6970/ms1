@@ -181,6 +181,7 @@ MergeTab(hNewWnd) {
 ;! eng to bng
 ::;er::এর
 ::;r::র
+::;e::ে
 
 ;! === SCRIPT SHORTCUTS ===
 ;! Run Python Script
@@ -946,7 +947,8 @@ __text__ = underline
 --- text = list 3
 Dont add unnecessary extra lines between heading and its content
 dont use --- or dash to add separator just keep single empty line for spacing
-for math use katex or latex formatting with \(Math\) or $Math$
+Use bangla/english whichever is good for the study
+For math use katex or latex formatting with \(Math\) or $Math$
 )")
 
 ;! Cyberpunk styling with pyqt
@@ -1471,9 +1473,6 @@ CONFIG_FILE = os.path.join(SCRIPT_DIR, ""projects_config.json"")
 
 ;! Theme Guidlines & Rules
 :X:;theme::Paste('For theming C:\@delta\ms1\THEME_GUIDE.md use this file guidline u can use cat or some other command to see whats inside THEME_GUIDE.md')
-
-;! Bengla e
-:X:;e::Paste('ে')
 
 ;! diamon list dot
 :X:;dot::Paste('💠')

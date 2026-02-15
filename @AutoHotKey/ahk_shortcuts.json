@@ -369,7 +369,7 @@
             "category": "General",
             "description": "",
             "trigger": ";cms",
-            "replacement": "make a study note for this\nmd syntex formet is a bit different here is how i use them\n\n#1.5#text#/#  = extra big text\n##text##  = big text\n**text** = bold text\n@@text@@ = italic text\n__text__ = underline\n- text = list 1\n-- text = list 2\n--- text = list 3\nDont add unnecessary extra lines between heading and its content\ndont use --- or dash to add separator just keep single empty line for spacing\nfor math use katex or latex formatting with \\(Math\\) or $Math$",
+            "replacement": "make a study note for this\nmd syntex formet is a bit different here is how i use them\n\n#1.5#text#/#  = extra big text\n##text##  = big text\n**text** = bold text\n@@text@@ = italic text\n__text__ = underline\n- text = list 1\n-- text = list 2\n--- text = list 3\nDont add unnecessary extra lines between heading and its content\ndont use --- or dash to add separator just keep single empty line for spacing\nUse bangla/english whichever is good for the study\nFor math use katex or latex formatting with \\(Math\\) or $Math$",
             "enabled": true
         },
         {
@@ -429,14 +429,6 @@
             "enabled": true
         },
         {
-            "name": "Bengla e",
-            "category": "General",
-            "description": "",
-            "trigger": ";e",
-            "replacement": "ে",
-            "enabled": true
-        },
-        {
             "name": "diamon list dot",
             "category": "General",
             "description": "",
@@ -471,7 +463,7 @@
             "name": "English TO Bangla Text",
             "category": "General",
             "description": "eng to bng",
-            "action": "::;er::এর\n::;r::র",
+            "action": "::;er::এর\n::;r::র\n::;e::ে",
             "enabled": true
         }
     ],
