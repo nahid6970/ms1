@@ -11,7 +11,7 @@ Advanced bookmark manager with grouped links, extensive customization, and multi
   
 - **Icon Customization**:
   - NerdFont icons (e.g., `nf nf-fa-home`)
-  - SVG code with custom width/height/color
+  - **SVG code** with custom width/height/color
   - Plain text labels
   
 - **Advanced Styling**:
@@ -19,13 +19,14 @@ Advanced bookmark manager with grouped links, extensive customization, and multi
   - Per-item colors (background, border, text, hover)
   - Per-group colors (top bar, popup, horizontal items)
   - Border radius, width, height customization
+  - **Font size & font family** (for items and groups)
   
 - **Other Features**:
+  - **Edit mode** - Press F1 to toggle edit mode
   - Drag-and-drop reordering (items & groups)
   - **Password protection** - Lock groups with password
   - Hidden items (visible only in edit mode)
-  - Context menu (copy, edit, delete)
-  - Multiple URL support per link
+  - Context menu (right-click: copy, edit, delete)
 
 ## Migration Strategy
 Keep the frontend UI intact, replace Flask API with Convex backend.
@@ -88,6 +89,8 @@ const linkValidator = v.object({
   top_text_color: v.optional(v.string()),
   top_border_color: v.optional(v.string()),
   top_hover_color: v.optional(v.string()),
+  top_font_size: v.optional(v.string()),
+  top_font_family: v.optional(v.string()),
   
   // Popup styling (for expanded collapsible groups)
   popup_bg_color: v.optional(v.string()),
@@ -100,6 +103,8 @@ const linkValidator = v.object({
   horizontal_text_color: v.optional(v.string()),
   horizontal_border_color: v.optional(v.string()),
   horizontal_hover_color: v.optional(v.string()),
+  horizontal_font_size: v.optional(v.string()),
+  horizontal_font_family: v.optional(v.string()),
   
   // Individual link item styling
   li_bg_color: v.optional(v.string()),
@@ -108,6 +113,8 @@ const linkValidator = v.object({
   li_border_radius: v.optional(v.string()),
   li_width: v.optional(v.string()),
   li_height: v.optional(v.string()),
+  li_font_size: v.optional(v.string()),
+  li_font_family: v.optional(v.string()),
   
   order: v.optional(v.number()),
 });
@@ -137,7 +144,23 @@ The `top_name` field supports:
 "top_name": "nf nf-fa-folder"
 
 // SVG code (with custom size/color via CSS)
-"top_name": "<svg width='24' height='24'>...</svg>"
+"top_name": "<svg width='24' height='24' viewBox='0 0 24 24'><path d='...' fill='currentColor'/></svg>"
+```
+
+### Font Customization
+All display areas support font customization:
+```javascript
+// Top group button
+"top_font_size": "18px",
+"top_font_family": "Arial, sans-serif"
+
+// Items inside popup (horizontal)
+"horizontal_font_size": "14px",
+"horizontal_font_family": "Courier New, monospace"
+
+// Individual link items
+"li_font_size": "16px",
+"li_font_family": "Georgia, serif"
 ```
 
 ### Group Display Types
@@ -185,6 +208,146 @@ Lock groups with password:
 }
 ```
 When clicked, prompts for password before showing group contents.
+
+### Drag-and-Drop Implementation
+
+**Key approach**: Uses HTML5 Drag & Drop API with index-based reordering.
+
+**For individual items:**
+```javascript
+// Set draggable and store index
+listItem.draggable = true;
+listItem.dataset.linkIndex = index;
+
+// Track dragged element
+let draggedElement = null;
+let draggedIndex = null;
+
+function handleDragStart(e) {
+  draggedElement = this;
+  draggedIndex = parseInt(this.dataset.linkIndex);
+  this.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+}
+
+async function handleDrop(e) {
+  e.stopPropagation();
+  if (draggedElement !== this) {
+    const targetIndex = parseInt(this.dataset.linkIndex);
+    await reorderLink(draggedIndex, targetIndex);
+  }
+}
+
+// Reorder by swapping positions in array
+async function reorderLink(oldIndex, newIndex) {
+  const links = await fetch('/api/links').then(r => r.json());
+  const movedLink = links[oldIndex];
+  
+  // Remove from old position
+  links.splice(oldIndex, 1);
+  // Insert at new position
+  links.splice(newIndex, 0, movedLink);
+  
+  // Save entire array
+  await fetch('/api/links', {
+    method: 'PUT',
+    body: JSON.stringify(links)
+  });
+}
+```
+
+**For groups:**
+```javascript
+// Groups are reordered by moving all links in that group
+async function reorderGroup(draggedGroupName, targetGroupName) {
+  const links = await fetch('/api/links').then(r => r.json());
+  
+  // Get unique group names in order
+  const groupNames = [...new Set(links.map(l => l.group || 'Ungrouped'))];
+  
+  // Reorder group names
+  const draggedIndex = groupNames.indexOf(draggedGroupName);
+  const targetIndex = groupNames.indexOf(targetGroupName);
+  groupNames.splice(draggedIndex, 1);
+  groupNames.splice(targetIndex, 0, draggedGroupName);
+  
+  // Rebuild links array in new group order
+  const linksByGroup = links.reduce((acc, link) => {
+    const group = link.group || 'Ungrouped';
+    if (!acc[group]) acc[group] = [];
+    acc[group].push(link);
+    return acc;
+  }, {});
+  
+  const newLinks = [];
+  groupNames.forEach(group => {
+    newLinks.push(...(linksByGroup[group] || []));
+  });
+  
+  // Save
+  await fetch('/api/links', { method: 'PUT', body: JSON.stringify(newLinks) });
+}
+```
+
+**Critical issue solved**: Preserve group-level properties during reorder to prevent losing styling.
+
+```javascript
+// IMPORTANT: When reordering, preserve group properties
+async function reorderLink(oldIndex, newIndex) {
+  const links = await fetch('/api/links').then(r => r.json());
+  
+  // Store group properties BEFORE reordering
+  const groupProperties = {};
+  links.forEach(link => {
+    const group = link.group || 'Ungrouped';
+    if (!groupProperties[group]) {
+      groupProperties[group] = {
+        collapsible: link.collapsible,
+        display_style: link.display_style,
+        top_bg_color: link.top_bg_color,
+        popup_bg_color: link.popup_bg_color,
+        // ... all other group styling properties
+      };
+    }
+  });
+  
+  // Do the reorder
+  const movedLink = links.splice(oldIndex, 1)[0];
+  links.splice(newIndex, 0, movedLink);
+  
+  // Restore group properties to ALL links in each group
+  links.forEach(link => {
+    const group = link.group || 'Ungrouped';
+    if (groupProperties[group]) {
+      Object.assign(link, groupProperties[group]);
+    }
+  });
+  
+  // Save
+  await fetch('/api/links', { method: 'PUT', body: JSON.stringify(links) });
+}
+```
+
+**Why this matters**: Without preserving properties, dragging an item can copy its styling to other items in the group, breaking the group's appearance.
+
+**For Convex**: Store group properties in a separate `groups` table to avoid this issue entirely:
+
+```typescript
+// convex/groups.ts
+export const groupValidator = v.object({
+  name: v.string(),
+  collapsible: v.optional(v.boolean()),
+  display_style: v.optional(v.string()),
+  top_name: v.optional(v.string()),
+  top_bg_color: v.optional(v.string()),
+  // ... all group-level styling
+});
+
+// Then links only store: name, url, group (reference), order
+// No duplicate styling properties on every link!
+```
+
+This prevents the styling corruption issue completely.
 
 // Get all links
 export const getLinks = query({
