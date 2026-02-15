@@ -4,6 +4,28 @@ This file contains older development sessions that have been moved from RECENT.m
 
 ---
 
+## ARCHIVED [2026-02-12 14:00] - List Support in Table Cells
+
+**Session Duration:** 0.5 hours
+
+**What We Accomplished:**
+
+### 📊 Lists Inside Table Cells
+- **New Feature**: Added support for markdown lists inside table cells.
+
+---
+
+## ARCHIVED [2026-02-12 13:30] - Visual Mode Syntax Corruption Fix
+
+**Session Duration:** 0.5 hours
+
+**What We Accomplished:**
+
+### 🛡️ Robust Syntax Protection
+- **Solution**: Immediate highlighting on focus and fail-safe bullet recovery.
+
+---
+
 ## ARCHIVED [2026-02-06 14:30] - Temporary Notepad Feature
 
 **Session Duration:** 0.4 hours

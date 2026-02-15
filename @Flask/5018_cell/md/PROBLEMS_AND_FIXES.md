@@ -4,6 +4,30 @@ This document tracks historical bugs, issues, and their solutions. Use this to:
 - Understand past problems and how they were resolved
 - Check if old fixes might conflict with new features
 - Debug similar issues by referencing past solutions
+
+## [2026-02-15 13:10] - Table Markdown Spanning Missing in Static Export
+
+**Problem:** 
+The "Table Markdown Spanning" feature (e.g., `==Cell1 | Cell2==`) worked in the main application but was missing in the static HTML export. Additionally, custom color syntaxes were not being detected in exported cells.
+
+**Root Cause:** 
+1. `export_static.py` used an outdated `splitTableLine` function that didn't track delimiter state across cells.
+2. The `hasMarkdown` detection in the export script lacked the `customColorSyntaxes` check.
+3. Embedded JavaScript regex patterns in the Python script had incorrect backslash escaping, causing `SyntaxWarning: invalid escape sequence`.
+
+**Solution:** 
+1. **Synchronized Logic**: Replaced `splitTableLine` with the full spanning-aware logic from `static/script.js` within `export_static.py`.
+2. **Fixed Escaping**: Corrected backslash escaping in the Python string (using `\\\\` for a single backslash in the final JS) to ensure regex like `new RegExp(delim.replace(/[.*+?^${}()|[\]\\\\]/g, '\\\\$&'), 'g')` works correctly.
+3. **Enhanced Detection**: Added `customColorSyntaxes.some()` check to the `hasMarkdown` detection loop in the export's `renderTable` equivalent.
+
+**Files Modified:**
+- `export_static.py`
+
+**Related Issues:**
+- Synced with [2026-02-15 12:20] main application update.
+
+---
+
 ## [2026-02-15 12:20] - Nerd Font Icons Not Displaying & Table Markdown Not Spanning Cells
 
 **Problem:** 

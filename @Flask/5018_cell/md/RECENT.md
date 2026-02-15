@@ -4,6 +4,42 @@
 
 **Archiving Process:** When you have 6+ sessions, move the oldest one to ARCHIVE_RECENT.md with "ARCHIVED" prefix.
 
+## [2026-02-15 13:10] - Table Markdown Spanning in Static Export
+
+**Session Duration:** 0.8 hours
+
+**What We Accomplished:**
+
+### 📊 Table Markdown Spanning for Static Export
+- **Feature**: Synced the new table markdown spanning feature to `export_static.py`.
+- **Implementation**:
+  - Integrated the logic to track open/close state of delimiters across table cells into the embedded JS in `export_static.py`.
+  - Removed the outdated `splitTableLine` function in favor of the new `parseGridTable` logic that matches `static/script.js`.
+  - Fixed backslash escaping in the embedded JavaScript regex within the Python script to ensure proper rendering in exported HTML.
+- **Improved Detection**:
+  - Updated `hasMarkdown` check in `export_static.py` to include `customColorSyntaxes` detection, ensuring cells with custom highlighting are processed correctly during export.
+- **Verification**:
+  - Ran `export_static.py` and confirmed successful generation of `mycell.html` (5.9MB) without syntax errors.
+
+**Files Modified:**
+- `export_static.py` - Updated `parseGridTable`, removed `splitTableLine`, and refined `hasMarkdown` logic.
+- `md/RECENT.md` - Added current session, archived oldest.
+- `md/PROBLEMS_AND_FIXES.md` - Documented the export synchronization fix.
+
+**Current Status:**
+- ✅ Table markdown spanning works in both main app and static export.
+- ✅ Custom color syntaxes are correctly detected in static export.
+- ✅ Static export generates successfully without warnings.
+
+**Next Steps:**
+- Visually verify the exported HTML with complex spanning tables.
+
+**Time Spent:** 0.8 hours
+
+---
+
+---
+
 ## [2026-02-15 12:20] - Nerd Font Support & Table Markdown Spanning
 
 **Session Duration:** 0.5 hours
@@ -120,28 +156,6 @@
 
 ### 🖱️ Scroll Preservation Refinements
 - **Solution**: Refactored `saveSingleRowState` and navigation functions. Added layout shift protection in `adjustCellHeightForMarkdown`.
-
----
-
-## [2026-02-12 14:00] - List Support in Table Cells
-
-**Session Duration:** 0.5 hours
-
-**What We Accomplished:**
-
-### 📊 Lists Inside Table Cells
-- **New Feature**: Added support for markdown lists inside table cells.
-
----
-
-## [2026-02-12 13:30] - Visual Mode Syntax Corruption Fix
-
-**Session Duration:** 0.5 hours
-
-**What We Accomplished:**
-
-### 🛡️ Robust Syntax Protection
-- **Solution**: Immediate highlighting on focus and fail-safe bullet recovery.
 
 ---
 
