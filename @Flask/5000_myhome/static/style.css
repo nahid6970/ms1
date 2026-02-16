@@ -1503,18 +1503,25 @@ div.toggle-container {
     overflow-y: auto;
   }
 
-  /* Ensure sidebar buttons are visible on mobile */
+  /* Mobile adjustments for sidebar buttons in topbar */
   .top-center-controls {
     display: flex !important;
     flex-direction: row !important;
-    flex-wrap: wrap !important;
-    justify-content: center !important;
+    flex-wrap: nowrap !important;
+    justify-content: flex-start !important;
     align-items: center !important;
     width: 100% !important;
     max-width: 100% !important;
     overflow-x: auto !important;
     overflow-y: hidden !important;
-    padding: 5px 0 !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding: 5px 10px !important;
+    gap: 8px !important;
+    scrollbar-width: none;
+  }
+
+  .top-center-controls::-webkit-scrollbar {
+    display: none !important;
   }
 
   .topbar {
@@ -1523,35 +1530,22 @@ div.toggle-container {
     top: 0;
     left: 0;
     transform: none;
-    padding: 5px;
+    padding: 0;
     border-left: none;
     border-right: none;
     border-top: none;
     display: flex;
-    justify-content: center;
-  }
-
-  .topbar .top-center-controls {
-    display: flex;
-    flex-direction: row;
     justify-content: flex-start;
-    align-items: center;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    gap: 5px;
-    width: 100%;
-    max-width: 100%;
-    scrollbar-width: none;
-    padding: 2px 5px;
-  }
-
-  .topbar .top-center-controls::-webkit-scrollbar {
-    display: none; /* Hide scrollbar for Chrome/Safari */
+    z-index: 1001;
+    height: auto;
+    min-height: 50px;
   }
 
   .top-center-controls .notification-button-container {
     flex-shrink: 0;
-    margin: 2px;
+    margin: 0;
+    display: flex;
+    align-items: center;
   }
 
   .flex-container2 {
