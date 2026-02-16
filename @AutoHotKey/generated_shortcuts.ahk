@@ -699,7 +699,6 @@ PrintScreen::Run("C:\@delta\ms1\scripts\Autohtokey\version2\gui\Bio.ahk", "", "H
 ;! Komorebi Toggle Workspace
 #q:: {
     {
-        ; Static variables keep their value between keypresses
         static toggle := 0
         if (toggle == 0) {
             Run("komorebic.exe focus-workspace 1", , "Hide")
@@ -708,6 +707,9 @@ PrintScreen::Run("C:\@delta\ms1\scripts\Autohtokey\version2\gui\Bio.ahk", "", "H
             Run("komorebic.exe focus-workspace 0", , "Hide")
             toggle := 0
         }
+        Sleep(100)
+        ToolTip(toggle == 0 ? "1" : "2")
+        SetTimer(() => ToolTip(), -800)
     }
 }
 
