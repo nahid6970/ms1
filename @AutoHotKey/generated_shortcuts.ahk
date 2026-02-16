@@ -717,7 +717,7 @@ PrintScreen::Run("C:\@delta\ms1\scripts\Autohtokey\version2\gui\Bio.ahk", "", "H
         wsGui.BackColor := "000000"
         wsGui.SetFont("s80 bold", "Consolas")
         txt := wsGui.Add("Text", "cWhite Center w300 h120", num)
-        wsGui.Show("x" (A_ScreenWidth/2 - 150) " y" (A_ScreenHeight/2 - 60) " NoActivate")
+        wsGui.Show("x810 y480 NoActivate")
         SetTimer(() => wsGui.Destroy(), -800)
     }
 }
