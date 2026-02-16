@@ -68,8 +68,7 @@ Shortcuts available:
   F1        : Show this shortcuts help window
   F2        : Toggle between chafa/viu and QuickLook for image preview
   F3        : Toggle view mode (Full Path / Filename)
-  F4        : View bookmarks (open saved bookmarks list)
-  F5        : Add current file to bookmarks
+  F5        : Toggle bookmark on/off
   Alt-Up    : Move bookmarked file up in order
   Alt-Down  : Move bookmarked file down in order
   ?         : Show this help
@@ -247,7 +246,6 @@ Start-Sleep -Milliseconds 500
         # Get absolute paths for scripts
         script_dir = os.path.dirname(os.path.abspath(__file__))
         script_path = os.path.abspath(__file__)
-        view_bookmarks_script = os.path.join(script_dir, "view_bookmarks.py")
         editor_chooser_script = os.path.join(script_dir, "editor_chooser.py")
 
         # Create the menu handler Python script
@@ -560,7 +558,6 @@ if __name__ == "__main__":
             f"--bind=f1:execute-silent(cmd /c start cmd /k type {temp_shortcut_file} & pause)",
             f"--bind=f2:execute-silent(powershell -ExecutionPolicy Bypass -File \"{toggle_script_file}\")+refresh-preview",
             f"--bind=f3:reload(python \"{feeder_script_file}\" --toggle)",
-            f"--bind=f4:execute-silent(start cmd /c python \"{view_bookmarks_script}\")",
             f"--bind=f5:execute-silent(python \"{script_path}\" --toggle-bookmark {{2}})+reload(python \"{feeder_script_file}\")",
             "--bind=ctrl-p:toggle-preview",
             "--bind=?:toggle-header",
