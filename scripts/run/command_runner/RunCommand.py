@@ -90,8 +90,8 @@ def get_feeder_data():
                     cmd = bm["command"]
                     shell = bm.get("shell", "pwsh")
                     directory = bm.get("dir", "")
-                    # Format: cmd \t shell \t dir \t type
-                    print(f"* {cmd}\t{shell}\t{directory}\tBM")
+                    # Format: cmd \t shell \t dir \t type (with light green color)
+                    print(f"\033[92m* {cmd}\033[0m\t{shell}\t{directory}\tBM")
                     seen.add(cmd)
                     
         # Load History

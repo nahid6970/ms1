@@ -464,6 +464,10 @@ def format_display(full_path, is_bookmarked):
         display = f"{{marker}}{{file}} ({{parent}})"
     else:
         display = f"{{marker}}{{full_path}}"
+    
+    if is_bookmarked:
+        display = f"\033[92m{{display}}\033[0m"
+    
     return display
 
 # Output bookmarked files first
@@ -538,6 +542,7 @@ if __name__ == "__main__":
          
         fzf_args = [
             "fzf",
+            "--ansi",
             "--multi",
             "--with-nth=1",
             "--delimiter=\t",
