@@ -261,4 +261,4 @@ if __name__ == "__main__":
 #IMPORTANT Rules
 - USE relative path so when i launch it from another directory it properly loads json file etc
 - ADD a restart button so the script restarts itself bcz sometime i change a lot of things in the script  and need to restart the app many times
-- add a setting button and setting panel where i can add different things i can customize by default keep it empty
+- when creating a new project, add a setting button and setting panel where i can add different things i can customize by default keep it empty
