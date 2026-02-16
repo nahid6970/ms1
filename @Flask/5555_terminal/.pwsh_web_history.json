@@ -27,8 +27,9 @@
     "ls",
     "get-process",
     "get-process| grep -i rob",
-    "pkill potpl"
+    "pkill potpl",
+    "gemini"
   ],
-  "last_updated": "2025-11-06T14:05:17.371004",
+  "last_updated": "2026-02-16T11:24:19.498000",
   "current_directory": "C:\\Users\\nahid"
 }
