@@ -12,7 +12,14 @@ project/
 
 ## Initial Setup
 
-### 1. Create package.json
+### 1. Create `.gitignore`
+```
+node_modules/
+.convex/
+package-lock.json
+```
+
+### 2. Create package.json
 ```json
 {
   "name": "project-name",
@@ -23,12 +30,12 @@ project/
 }
 ```
 
-### 2. Install Dependencies (Run Manually)
+### 3. Install Dependencies (Run Manually)
 ```bash
 npm install
 ```
 
-### 3. Initialize Convex (Run Manually)
+### 4. Initialize Convex (Run Manually)
 ```bash
 npx convex dev
 ```
@@ -252,6 +259,7 @@ const html = `<div onclick="func('${id}', \`${text.replace(/`/g, '\\`')}\`)">`;
 - Verify function names match
 
 ## Quick Start Checklist
+- [ ] Create `.gitignore` file (node_modules/, .convex/, package-lock.json)
 - [ ] Create `package.json` with convex dependency
 - [ ] Run `npm install` manually
 - [ ] Run `npx convex dev` manually
