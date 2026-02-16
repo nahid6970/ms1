@@ -93,7 +93,11 @@ MergeTab(hNewWnd) {
             for window in sh.Windows {
                 try {
                     if (window.hwnd == hNewWnd) {
-                        newPath := window.Document.Folder.Self.Path
+                        try {
+                            newPath := window.Document.Folder.Self.Path
+                        } catch {
+                            newPath := window.LocationURL
+                        }
                         break
                     }
                 }
@@ -104,7 +108,7 @@ MergeTab(hNewWnd) {
         Sleep(100)
     }
 
-    if (newPath == "" || newPath ~= "i)^::{")
+    if (newPath == "")
         return
 
     try {
