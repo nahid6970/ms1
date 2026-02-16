@@ -698,18 +698,27 @@ PrintScreen::Run("C:\@delta\ms1\scripts\Autohtokey\version2\gui\Bio.ahk", "", "H
 
 ;! Komorebi Toggle Workspace
 #q:: {
-    {
+    ShowWorkspace()
+    ShowWorkspace() {
         static toggle := 0
+        static wsGui := ""
         if (toggle == 0) {
             Run("komorebic.exe focus-workspace 1", , "Hide")
             toggle := 1
-            ToolTip("2")
+            num := "2"
         } else {
             Run("komorebic.exe focus-workspace 0", , "Hide")
             toggle := 0
-            ToolTip("1")
+            num := "1"
         }
-        SetTimer(() => ToolTip(), -800)
+        if (wsGui)
+            wsGui.Destroy()
+        wsGui := Gui("+AlwaysOnTop -Caption +ToolWindow")
+        wsGui.BackColor := "000000"
+        wsGui.SetFont("s80 bold", "Consolas")
+        txt := wsGui.Add("Text", "cWhite Center w300 h120", num)
+        wsGui.Show("x" (A_ScreenWidth/2 - 150) " y" (A_ScreenHeight/2 - 60) " NoActivate")
+        SetTimer(() => wsGui.Destroy(), -800)
     }
 }
 

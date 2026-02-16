@@ -276,7 +276,7 @@
             "category": "General",
             "description": "",
             "hotkey": "#q",
-            "action": "{\n    static toggle := 0\n    \n    if (toggle == 0) {\n        Run(\"komorebic.exe focus-workspace 1\", , \"Hide\")\n        toggle := 1\n        ToolTip(\"2\")\n    } else {\n        Run(\"komorebic.exe focus-workspace 0\", , \"Hide\")\n        toggle := 0\n        ToolTip(\"1\")\n    }\n    SetTimer(() => ToolTip(), -800)\n}",
+            "action": "ShowWorkspace()\nShowWorkspace() {\n    static toggle := 0\n    static wsGui := \"\"\n    \n    if (toggle == 0) {\n        Run(\"komorebic.exe focus-workspace 1\", , \"Hide\")\n        toggle := 1\n        num := \"2\"\n    } else {\n        Run(\"komorebic.exe focus-workspace 0\", , \"Hide\")\n        toggle := 0\n        num := \"1\"\n    }\n    \n    if (wsGui)\n        wsGui.Destroy()\n    \n    wsGui := Gui(\"+AlwaysOnTop -Caption +ToolWindow\")\n    wsGui.BackColor := \"000000\"\n    wsGui.SetFont(\"s80 bold\", \"Consolas\")\n    txt := wsGui.Add(\"Text\", \"cWhite Center w300 h120\", num)\n    wsGui.Show(\"x\" (A_ScreenWidth/2 - 150) \" y\" (A_ScreenHeight/2 - 60) \" NoActivate\")\n    SetTimer(() => wsGui.Destroy(), -800)\n}",
             "enabled": true
         },
         {
