@@ -119,7 +119,7 @@
     <script type="module">
         import { ConvexHttpClient } from "https://esm.sh/convex@1.16.0/browser";
         
-        const client = new ConvexHttpClient("YOUR_CONVEX_URL_HERE");
+        const client = new ConvexHttpClient("https://dazzling-akita-709.convex.cloud");
 
         async function loadLogs() {
             const logs = await client.query("functions:list");
