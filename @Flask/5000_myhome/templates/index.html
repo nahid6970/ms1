@@ -164,42 +164,7 @@
         }
       }
 
-      /* Preview note button styles */
-      .preview-note-button {
-        background: #2196F3;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        padding: 8px 12px;
-        cursor: pointer;
-        font-size: 16px;
-        height: fit-content;
-        min-height: 36px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.3s ease;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        gap: 5px;
-      }
 
-      .preview-note-button:hover {
-        background: #1976D2;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-      }
-
-      .preview-note-button:active {
-        transform: translateY(0);
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-      }
-
-      .preview-note-button:disabled {
-        background: #ccc;
-        cursor: not-allowed;
-        transform: none;
-        box-shadow: none;
-      }
     </style>
 
     <div id="links-container"
@@ -432,10 +397,6 @@
                     <input type="radio" name="link-click-action" id="link-action-url" value="url" checked>
                     <span>Open URL</span>
                   </label>
-                  <label style="display: flex; align-items: center; gap: 5px;" data-type="note">
-                    <input type="radio" name="link-click-action" id="link-action-note" value="note">
-                    <span>Open Note</span>
-                  </label>
                 </div>
               </div>
               <div style="flex: 1;">
@@ -500,17 +461,7 @@
             <button type="submit">Add Link</button>
           </form>
         </div>
-        <div id="add-link-note-panel" style="width: 450px; display: flex; flex-direction: column; gap: 10px;"
-          class="note-panel">
-          <h3>Note</h3>
-          <textarea id="link-note"
-            placeholder="Note (optional) - Supports Markdown: **bold**, *italic*, `code`, # Header" rows="15"
-            style="resize: vertical; font-family: inherit; flex: 1; width: 100%;"></textarea>
-          <button type="button" id="preview-note-btn" class="preview-note-button" title="Preview Note as Markdown"
-            style="align-self: center;">
-            <i class="nf nf-md-eye"></i> Preview Note
-          </button>
-        </div>
+
         <span class="close-button">&times;</span>
       </div>
     </div>
@@ -547,10 +498,6 @@
                   <label style="display: flex; align-items: center; gap: 5px;">
                     <input type="radio" name="edit-link-click-action" id="edit-link-action-url" value="url" checked>
                     <span>Open URL</span>
-                  </label>
-                  <label style="display: flex; align-items: center; gap: 5px;" data-type="note">
-                    <input type="radio" name="edit-link-click-action" id="edit-link-action-note" value="note">
-                    <span>Open Note</span>
                   </label>
                 </div>
               </div>
@@ -616,17 +563,7 @@
             <button type="submit">Save Changes</button>
           </form>
         </div>
-        <div id="edit-link-note-panel" style="width: 450px; display: flex; flex-direction: column; gap: 10px;"
-          class="note-panel">
-          <h3>Note</h3>
-          <textarea id="edit-link-note"
-            placeholder="Note (optional) - Supports Markdown: **bold**, *italic*, `code`, # Header" rows="15"
-            style="resize: vertical; font-family: inherit; flex: 1; width: 100%;"></textarea>
-          <button type="button" id="edit-preview-note-btn" class="preview-note-button" title="Preview Note as Markdown"
-            style="align-self: center;">
-            <i class="nf nf-md-eye"></i> Preview Note
-          </button>
-        </div>
+
         <span class="close-button">&times;</span>
       </div>
     </div>
@@ -979,40 +916,7 @@
         }
       }, true);
 
-      // Handle note preview button clicks
-      document.addEventListener('click', function (e) {
-        if (e.target.id === 'preview-note-btn' || e.target.closest('#preview-note-btn')) {
-          e.preventDefault();
-          const noteContent = document.getElementById('link-note').value;
-          previewNote(noteContent);
-        } else if (e.target.id === 'edit-preview-note-btn' || e.target.closest('#edit-preview-note-btn')) {
-          e.preventDefault();
-          const noteContent = document.getElementById('edit-link-note').value;
-          previewNote(noteContent);
-        }
-      });
 
-      // Function to preview note in new window
-      function previewNote(content) {
-        if (!content || !content.trim()) {
-          alert('No note content to preview');
-          return;
-        }
-
-        const encodedContent = encodeURIComponent(content);
-        const previewUrl = `/preview-note?content=${encodedContent}`;
-
-        // Open in new window
-        const previewWindow = window.open(
-          previewUrl,
-          'notePreview',
-          'width=900,height=700,scrollbars=yes,resizable=yes,toolbar=no,menubar=no,location=no,status=no'
-        );
-
-        if (!previewWindow) {
-          alert('Please allow popups to preview notes');
-        }
-      }
     </script>
 
 

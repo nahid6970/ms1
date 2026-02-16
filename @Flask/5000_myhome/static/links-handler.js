@@ -3,7 +3,7 @@
 function renderDisplayName(element, displayName) {
   // Clear existing content
   element.innerHTML = '';
-  
+
   // Handle different display types
   if (displayName.startsWith('nf nf-')) {
     // NerdFont icon
@@ -26,7 +26,7 @@ function renderDisplayName(element, displayName) {
         }
         svgElement.style.display = 'inline-block';
         svgElement.style.verticalAlign = 'middle';
-        
+
         // Only remove fill attributes if they are generic colors, keep specific colors
         // Remove fill from root SVG only if it's a generic color
         const rootFill = svgElement.getAttribute('fill');
@@ -34,7 +34,7 @@ function renderDisplayName(element, displayName) {
           svgElement.removeAttribute('fill');
           svgElement.style.fill = 'currentColor';
         }
-        
+
         // For child elements, only remove fill if it's a generic color or if parent has no specific fill
         const paths = svgElement.querySelectorAll('path, circle, rect, polygon, ellipse');
         paths.forEach(path => {
@@ -47,7 +47,7 @@ function renderDisplayName(element, displayName) {
             path.style.fill = 'currentColor';
           }
         });
-        
+
         element.appendChild(svgElement);
       } else {
         element.textContent = displayName;
@@ -199,20 +199,12 @@ document.addEventListener('DOMContentLoaded', function () {
           const simpleLink = document.createElement('a');
           const clickAction = link.click_action || 'url';
 
-          if (clickAction === 'note') {
-            simpleLink.href = '#';
-            simpleLink.addEventListener('click', (e) => {
-              e.preventDefault();
-              openNotePreview(encodeURIComponent(link.note || ''));
-            });
-          } else {
-            // Handle multiple URLs
-            simpleLink.href = '#';
-            simpleLink.addEventListener('click', (e) => {
-              e.preventDefault();
-              handleLinkClick(e, link);
-            });
-          }
+          // Handle multiple URLs
+          simpleLink.href = '#';
+          simpleLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            handleLinkClick(e, link);
+          });
 
           if (link.name && link.name.trim() !== '') {
             const truncatedName = link.name.length > 25 ? link.name.substring(0, 25) + '...' : link.name;
@@ -230,7 +222,6 @@ document.addEventListener('DOMContentLoaded', function () {
             { label: 'New-Tab', action: () => window.open(link.url, '_blank') },
             { label: 'Edit', action: () => openEditLinkPopup(link, index) },
             { label: 'Copy', action: () => copyLink(link, index) },
-            { label: 'Copy Note', action: () => copyNote(link) },
             { label: 'Delete', action: () => deleteLink(index) }
           ];
           addMobileContextMenu(simpleListItem, items);
@@ -417,9 +408,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
           // Determine what to do on click based on click_action
           const clickAction = link.click_action || 'url';
-          const linkUrl = clickAction === 'note' ? '#' : link.url;
-          const clickHandler = clickAction === 'note' ? `onclick="openNotePreview('${encodeURIComponent(link.note || '')}'); return false;"` : '';
-          const targetAttr = clickAction === 'url' ? 'target="_blank"' : '';
+          const linkUrl = link.url;
+          const clickHandler = '';
+          const targetAttr = 'target="_blank"';
 
           // Build width and height styles for non-image elements
           const dimensionStyles = [];
@@ -636,10 +627,6 @@ document.addEventListener('DOMContentLoaded', function () {
               action: () => copyLink(link, index)
             },
             {
-              label: 'Copy Note',
-              action: () => copyNote(link)
-            },
-            {
               label: 'Delete',
               action: () => deleteLink(index)
             }
@@ -733,7 +720,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Use custom top name if available, otherwise use group name
     const firstLink = links[0];
     const displayName = (firstLink && firstLink.link.top_name) ? firstLink.link.top_name : groupName;
-    
+
     // Render the display name (handles text, NF icons, and SVG)
     renderDisplayName(title, displayName);
 
@@ -816,7 +803,7 @@ document.addEventListener('DOMContentLoaded', function () {
           } else {
             const angle = parsed.angle || '45deg';
             const gradientColors = parsed.colors.join(', ');
-            
+
             // For slide gradients, we'll use a rotating color animation for SVG since SVG gradients are complex
             const numColors = parsed.colors.length;
             let svgSlideKeyframes = '';
@@ -824,7 +811,7 @@ document.addEventListener('DOMContentLoaded', function () {
               const percent = (i / (numColors - 1) * 100).toFixed(2);
               svgSlideKeyframes += `${percent}% { color: ${parsed.colors[i]}; }\n`;
             }
-            
+
             style.textContent = `
               .animated-top-gradient-text[data-top-text-gradient-id="${uniqueId}"] {
                 background: linear-gradient(${angle}, ${gradientColors});
@@ -851,7 +838,7 @@ document.addEventListener('DOMContentLoaded', function () {
             `;
           }
           document.head.appendChild(style);
-          
+
           // For multi-color animations, ensure SVG elements are properly styled
           // The CSS animations will handle the color changes via currentColor
         } else {
@@ -1401,7 +1388,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
           `;
           document.head.appendChild(style);
-          
+
         } else {
           groupDiv.style.setProperty('--horizontal-bg-color', linkData.horizontal_bg_color);
           groupDiv.style.backgroundColor = linkData.horizontal_bg_color;
@@ -1464,7 +1451,7 @@ document.addEventListener('DOMContentLoaded', function () {
           } else {
             const angle = parsed.angle || '45deg';
             const gradientColors = parsed.colors.join(', ');
-            
+
             // For slide gradients, create color cycling animation for SVG
             const numColors = parsed.colors.length;
             let svgSlideKeyframes = '';
@@ -1472,7 +1459,7 @@ document.addEventListener('DOMContentLoaded', function () {
               const percent = (i / (numColors - 1) * 100).toFixed(2);
               svgSlideKeyframes += `${percent}% { color: ${parsed.colors[i]}; }\n`;
             }
-            
+
             style.textContent = `
               .group_type_box.animated-horiz-gradient-text[data-horiz-text-gradient-id="${uniqueId}"],
               .group_type_box.animated-horiz-gradient-text[data-horiz-text-gradient-id="${uniqueId}"] .group-title {
@@ -1503,7 +1490,7 @@ document.addEventListener('DOMContentLoaded', function () {
         } else {
           groupDiv.style.setProperty('--horizontal-text-color', linkData.horizontal_text_color);
           groupDiv.style.color = linkData.horizontal_text_color;
-          
+
           // For multi-color animations, ensure SVG elements are properly styled
           // The CSS animations will handle the color changes via currentColor
         }
@@ -1678,10 +1665,6 @@ document.addEventListener('DOMContentLoaded', function () {
                   action: () => copyLink(linkData.link, linkData.index)
                 },
                 {
-                  label: 'Copy Note',
-                  action: () => copyNote(linkData.link)
-                },
-                {
                   label: 'Delete',
                   action: () => deleteLink(linkData.index)
                 }
@@ -1751,11 +1734,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const groupTitle = document.createElement('h3');
     groupTitle.className = 'group-title';
-    
+
     // Use custom display name if available, otherwise use group name
     const displayName = (firstLinkInGroup && firstLinkInGroup.link.top_name) ? firstLinkInGroup.link.top_name : groupName;
     renderDisplayName(groupTitle, displayName);
-    
+
     // Apply color styling to SVG elements in the title if this is a box group
     if (firstLinkInGroup && firstLinkInGroup.link.horizontal_stack && firstLinkInGroup.link.horizontal_text_color) {
       const parsed = parseColors(firstLinkInGroup.link.horizontal_text_color);
@@ -1768,7 +1751,7 @@ document.addEventListener('DOMContentLoaded', function () {
       }
       // Multi-color animations are handled by the CSS classes applied to the groupDiv
     }
-    
+
     groupHeaderContainer.appendChild(groupTitle);
 
     // Add context menu to header only for regular (non-box) groups
@@ -2318,7 +2301,7 @@ document.addEventListener('DOMContentLoaded', function () {
       const selectedUrlIndex = getSelectedUrlIndex(false);
       const clickActionElement = document.querySelector('input[name="link-click-action"]:checked');
       const selectedClickAction = clickActionElement ? clickActionElement.value : 'url';
-      
+
       const defaultTypeElement = document.querySelector('input[name="link-default-type"]:checked');
       const defaultType = defaultTypeElement ? defaultTypeElement.value : 'text';
 
@@ -2341,7 +2324,7 @@ document.addEventListener('DOMContentLoaded', function () {
         font_family: document.getElementById('link-font-family').value || undefined,
         font_size: document.getElementById('link-font-size').value || undefined,
         title: document.getElementById('link-title').value || undefined,
-        note: document.getElementById('link-note').value || undefined,
+
         click_action: selectedClickAction,
         li_width: document.getElementById('link-li-width').value || undefined,
         li_height: document.getElementById('link-li-height').value || undefined,
@@ -2364,7 +2347,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (groupName !== 'Ungrouped') {
           const response = await fetch('/api/links');
           const allLinks = await response.json();
-          
+
           // Look for an existing link in the same group to copy properties from
           const existingGroupLink = allLinks.find(link => (link.group || 'Ungrouped') === groupName);
           if (existingGroupLink) {
@@ -2455,16 +2438,16 @@ document.addEventListener('DOMContentLoaded', function () {
     const container = document.getElementById('urls-container');
     const urlCount = container.querySelectorAll('.url-input-group').length;
     const newIndex = urlCount + 1;
-    
+
     const urlGroup = document.createElement('div');
     urlGroup.className = 'url-input-group';
     urlGroup.style.cssText = 'display: flex; gap: 5px; align-items: center; margin-bottom: 5px;';
-    
+
     urlGroup.innerHTML = `
       <input type="url" id="link-url-${newIndex}" placeholder="URL ${newIndex}" style="flex: 1;">
       <button type="button" onclick="removeUrlField(this)" style="background: #f44336; color: white; border: none; border-radius: 3px; padding: 5px 8px; cursor: pointer; font-size: 14px;" title="Remove URL">−</button>
     `;
-    
+
     container.appendChild(urlGroup);
     updateClickActionOptions();
   }
@@ -2473,16 +2456,16 @@ document.addEventListener('DOMContentLoaded', function () {
     const container = document.getElementById('edit-urls-container');
     const urlCount = container.querySelectorAll('.url-input-group').length;
     const newIndex = urlCount + 1;
-    
+
     const urlGroup = document.createElement('div');
     urlGroup.className = 'url-input-group';
     urlGroup.style.cssText = 'display: flex; gap: 5px; align-items: center; margin-bottom: 5px;';
-    
+
     urlGroup.innerHTML = `
       <input type="url" id="edit-link-url-${newIndex}" placeholder="URL ${newIndex}" style="flex: 1;">
       <button type="button" onclick="removeUrlField(this)" style="background: #f44336; color: white; border: none; border-radius: 3px; padding: 5px 8px; cursor: pointer; font-size: 14px;" title="Remove URL">−</button>
     `;
-    
+
     container.appendChild(urlGroup);
     updateEditClickActionOptions();
   }
@@ -2490,11 +2473,11 @@ document.addEventListener('DOMContentLoaded', function () {
   function removeUrlField(button) {
     const urlGroup = button.parentElement;
     const container = urlGroup.parentElement;
-    
+
     // Don't remove if it's the only URL field
     if (container.querySelectorAll('.url-input-group').length > 1) {
       urlGroup.remove();
-      
+
       // Update click action options
       if (container.id === 'urls-container') {
         updateClickActionOptions();
@@ -2508,11 +2491,11 @@ document.addEventListener('DOMContentLoaded', function () {
     const container = document.getElementById('urls-container');
     const urlGroups = container.querySelectorAll('.url-input-group');
     const optionsContainer = document.getElementById('click-action-options');
-    
+
     // Clear existing URL options
-    const existingUrlOptions = optionsContainer.querySelectorAll('label:not([data-type="note"])');
+    const existingUrlOptions = optionsContainer.querySelectorAll('label');
     existingUrlOptions.forEach(option => option.remove());
-    
+
     // Add URL options for each URL field
     urlGroups.forEach((group, index) => {
       const label = document.createElement('label');
@@ -2521,10 +2504,8 @@ document.addEventListener('DOMContentLoaded', function () {
         <input type="radio" name="link-click-action" id="link-action-url-${index + 1}" value="url-${index + 1}" ${index === 0 ? 'checked' : ''}>
         <span>Open URL${index + 1}</span>
       `;
-      
-      // Insert before the note option
-      const noteOption = optionsContainer.querySelector('[data-type="note"]') || optionsContainer.lastElementChild;
-      optionsContainer.insertBefore(label, noteOption);
+
+      optionsContainer.appendChild(label);
     });
   }
 
@@ -2532,11 +2513,11 @@ document.addEventListener('DOMContentLoaded', function () {
     const container = document.getElementById('edit-urls-container');
     const urlGroups = container.querySelectorAll('.url-input-group');
     const optionsContainer = document.getElementById('edit-click-action-options');
-    
+
     // Clear existing URL options
-    const existingUrlOptions = optionsContainer.querySelectorAll('label:not([data-type="note"])');
+    const existingUrlOptions = optionsContainer.querySelectorAll('label');
     existingUrlOptions.forEach(option => option.remove());
-    
+
     // Add URL options for each URL field
     urlGroups.forEach((group, index) => {
       const label = document.createElement('label');
@@ -2545,10 +2526,8 @@ document.addEventListener('DOMContentLoaded', function () {
         <input type="radio" name="edit-link-click-action" id="edit-link-action-url-${index + 1}" value="url-${index + 1}" ${index === 0 ? 'checked' : ''}>
         <span>Open URL${index + 1}</span>
       `;
-      
-      // Insert before the note option
-      const noteOption = optionsContainer.querySelector('[data-type="note"]') || optionsContainer.lastElementChild;
-      optionsContainer.insertBefore(label, noteOption);
+
+      optionsContainer.appendChild(label);
     });
   }
 
@@ -2557,13 +2536,13 @@ document.addEventListener('DOMContentLoaded', function () {
     const container = document.getElementById(`${prefix}urls-container`);
     const urlInputs = container.querySelectorAll('input[type="url"]');
     const urls = [];
-    
+
     urlInputs.forEach(input => {
       if (input.value.trim()) {
         urls.push(input.value.trim());
       }
     });
-    
+
     return urls;
   }
 
@@ -2571,36 +2550,36 @@ document.addEventListener('DOMContentLoaded', function () {
     const prefix = isEdit ? 'edit-' : '';
     const actionName = `${prefix}link-click-action`;
     const selectedAction = document.querySelector(`input[name="${actionName}"]:checked`);
-    
+
     if (selectedAction && selectedAction.value.startsWith('url')) {
       const match = selectedAction.value.match(/url-?(\d+)?/);
       return match ? (parseInt(match[1]) || 1) - 1 : 0;
     }
-    
+
     return 0;
   }
 
   function populateEditUrlFields(link) {
     const container = document.getElementById('edit-urls-container');
-    
+
     if (!container) {
       console.error('edit-urls-container not found');
       return;
     }
-    
+
     // Clear existing URL fields
     container.innerHTML = '';
-    
+
     // Get URLs (either from urls array or single url)
     const urls = link.urls || [link.url || ''];
     const selectedIndex = link.selected_url_index || 0;
-    
+
     // Create URL fields
     urls.forEach((url, index) => {
       const urlGroup = document.createElement('div');
       urlGroup.className = 'url-input-group';
       urlGroup.style.cssText = 'display: flex; gap: 5px; align-items: center; margin-bottom: 5px;';
-      
+
       if (index === 0) {
         // First URL field (main one)
         urlGroup.innerHTML = `
@@ -2614,51 +2593,49 @@ document.addEventListener('DOMContentLoaded', function () {
           <button type="button" onclick="removeUrlField(this)" style="background: #f44336; color: white; border: none; border-radius: 3px; padding: 5px 8px; cursor: pointer; font-size: 14px;" title="Remove URL">−</button>
         `;
       }
-      
+
       container.appendChild(urlGroup);
     });
-    
+
     // Update click action options
     updateEditClickActionOptions();
-    
+
     // Set the selected click action
     if (link.click_action && link.click_action.startsWith('url')) {
       const actionElement = document.querySelector(`input[name="edit-link-click-action"][value="${link.click_action}"]`);
       if (actionElement) {
         actionElement.checked = true;
       }
-    } else if (link.click_action === 'note') {
-      document.getElementById('edit-link-action-note').checked = true;
     }
   }
 
   // Helper function to convert local file paths to file:// URLs
   function normalizeUrl(url) {
     if (!url) return url;
-    
+
     // Check if it's a Windows file path first (before checking for protocols)
     // Windows: C:\path\to\file or C:/path/to/file
     const isWindowsPath = /^[a-zA-Z]:[\\\/]/.test(url);
-    
+
     if (isWindowsPath) {
       // Convert backslashes to forward slashes
       let filePath = url.replace(/\\/g, '/');
       // For Windows paths, ensure proper format: file:///C:/path
       return 'file:///' + filePath;
     }
-    
+
     // Check for Unix file paths
     const isUnixPath = /^\/[^\/]/.test(url);
     if (isUnixPath) {
       // For Unix paths: file:///path
       return 'file://' + url;
     }
-    
+
     // If already a proper URL (http, https, file, etc.), return as-is
     if (/^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(url)) {
       return url;
     }
-    
+
     // Return as-is if we can't determine the type
     return url;
   }
@@ -2666,20 +2643,14 @@ document.addEventListener('DOMContentLoaded', function () {
   // Handle link clicks with multiple URLs
   function handleLinkClick(event, link) {
     event.preventDefault();
-    
-    if (link.click_action === 'note' && link.note) {
-      // Open note
-      openNotePreview(link.note);
-      return;
-    }
-    
+
     // Handle URL clicks
     let urlToOpen = link.url; // Default to primary URL
-    
+
     if (link.urls && link.urls.length > 1) {
       // Multiple URLs - determine which one to open based on click_action
       let selectedIndex = 0;
-      
+
       if (link.click_action && link.click_action.startsWith('url-')) {
         // Extract the URL index from click_action (e.g., "url-2" -> index 1)
         const match = link.click_action.match(/url-(\d+)/);
@@ -2687,14 +2658,14 @@ document.addEventListener('DOMContentLoaded', function () {
           selectedIndex = parseInt(match[1]) - 1; // Convert to 0-based index
         }
       }
-      
+
       urlToOpen = link.urls[selectedIndex] || link.urls[0];
     }
-    
+
     if (urlToOpen) {
       // Normalize the URL (convert file paths to file:// URLs)
       urlToOpen = normalizeUrl(urlToOpen);
-      
+
       // Try to open the URL - use different methods for file:// URLs
       if (urlToOpen.startsWith('file://')) {
         // For file:// URLs, create a temporary link and click it
@@ -2746,7 +2717,7 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('edit-link-background-color').value = link.background_color || '';
     document.getElementById('edit-link-border-radius').value = link.border_radius || '';
     document.getElementById('edit-link-title').value = link.title || '';
-    document.getElementById('edit-link-note').value = link.note || '';
+
 
     // Click action is already set by populateEditUrlFields, no need to set it again here
 
@@ -2770,7 +2741,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const linkId = editLinkIndexInput.value;
         const originalLink = links[linkId];
-        
+
         if (!originalLink) {
           console.error('Original link not found at index:', linkId);
           alert('Error: Could not find the link being edited.');
@@ -2785,7 +2756,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const selectedUrlIndex = getSelectedUrlIndex(true);
         const clickActionElement = document.querySelector('input[name="edit-link-click-action"]:checked');
         const selectedClickAction = clickActionElement ? clickActionElement.value : 'url';
-        
+
         const defaultTypeElement = document.querySelector('input[name="edit-link-default-type"]:checked');
         const defaultType = defaultTypeElement ? defaultTypeElement.value : 'text';
 
@@ -2806,7 +2777,7 @@ document.addEventListener('DOMContentLoaded', function () {
           background_color: document.getElementById('edit-link-background-color').value || undefined,
           border_radius: document.getElementById('edit-link-border-radius').value || undefined,
           title: document.getElementById('edit-link-title').value || undefined,
-          note: document.getElementById('edit-link-note').value || undefined,
+
           click_action: selectedClickAction,
           font_family: document.getElementById('edit-link-font-family').value || undefined,
           font_size: document.getElementById('edit-link-font-size').value || undefined,
@@ -2959,27 +2930,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
-  // Copy Note functionality
-  function copyNote(link) {
-    if (!link.note || !link.note.trim()) {
-      showNotification('No note to copy', 'error');
-      return;
-    }
-
-    // Try modern clipboard API first
-    if (navigator.clipboard && window.isSecureContext) {
-      navigator.clipboard.writeText(link.note).then(() => {
-        showNotification('Note copied to clipboard!', 'success');
-      }).catch(() => {
-        // Fallback to older method
-        fallbackCopyTextToClipboard(link.note);
-      });
-    } else {
-      // Fallback to older method
-      fallbackCopyTextToClipboard(link.note);
-    }
-  }
-
   // Fallback copy method for older browsers or non-secure contexts
   function fallbackCopyTextToClipboard(text) {
     const textArea = document.createElement('textarea');
@@ -2994,39 +2944,17 @@ document.addEventListener('DOMContentLoaded', function () {
     try {
       const successful = document.execCommand('copy');
       if (successful) {
-        showNotification('Note copied to clipboard!', 'success');
+        showNotification('Text copied to clipboard!', 'success');
       } else {
-        showNotification('Failed to copy note', 'error');
+        showNotification('Failed to copy text', 'error');
       }
     } catch (err) {
-      showNotification('Failed to copy note', 'error');
+      showNotification('Failed to copy text', 'error');
     }
 
     document.body.removeChild(textArea);
   }
 
-  // Function to open note preview
-  window.openNotePreview = function (noteContent) {
-    const decodedContent = decodeURIComponent(noteContent);
-    if (!decodedContent || !decodedContent.trim()) {
-      alert('No note content to preview');
-      return;
-    }
-
-    const encodedContent = encodeURIComponent(decodedContent);
-    const previewUrl = `/preview-note?content=${encodedContent}`;
-
-    // Open in new window
-    const previewWindow = window.open(
-      previewUrl,
-      'notePreview',
-      'width=900,height=700,scrollbars=yes,resizable=yes,toolbar=no,menubar=no,location=no,status=no'
-    );
-
-    if (!previewWindow) {
-      alert('Please allow popups to preview notes');
-    }
-  };
 
   // Show notification function
   function showNotification(message, type = 'info') {
@@ -3169,14 +3097,14 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   // Add global click handler for all link items to handle multiple URLs
-  document.addEventListener('click', function(event) {
+  document.addEventListener('click', function (event) {
     // Check if the clicked element is a link item or inside a link item
     const linkItem = event.target.closest('.link-item:not(.add-link-item)');
-    
+
     if (linkItem && linkItem.dataset.linkIndex !== undefined) {
       const linkIndex = parseInt(linkItem.dataset.linkIndex);
       const link = links[linkIndex];
-      
+
       if (link && link.urls && link.urls.length > 1) {
         // This link has multiple URLs, intercept the click
         event.preventDefault();
@@ -3582,10 +3510,10 @@ function updateDateTime() {
   const now = new Date();
   const optionsDate = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
   const optionsTime = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
-  
+
   const dateElement = document.getElementById('currentDate');
   const timeElement = document.getElementById('currentTime');
-  
+
   if (dateElement) {
     dateElement.innerText = now.toLocaleDateString('en-US', optionsDate);
   }
