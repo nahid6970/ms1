@@ -140,9 +140,9 @@ class GitWorker:
             git_scope = scope if scope and scope.strip() else "."
             
             if limit and limit > 0:
-                cmd = ["git", "log", "--pretty=format:%h|%an|%ad|%s", "--date=short", "-n", str(limit), "--", git_scope]
+                cmd = ["git", "log", "--pretty=format:%h|%an|%ad|%s", "--date=format:%Y-%m-%d--%H:%M", "-n", str(limit), "--", git_scope]
             else:
-                cmd = ["git", "log", "--pretty=format:%h|%an|%ad|%s", "--date=short", "--", git_scope]
+                cmd = ["git", "log", "--pretty=format:%h|%an|%ad|%s", "--date=format:%Y-%m-%d--%H:%M", "--", git_scope]
             
             result = subprocess.check_output(cmd, cwd=directory, text=True, encoding='utf-8')
             
@@ -219,7 +219,7 @@ class GitWorker:
     @staticmethod
     def get_file_history(directory, file_path, limit=50):
         try:
-            cmd = ["git", "log", "--pretty=format:%h|%ad|%s", "--date=short", "-n", str(limit), "--", file_path]
+            cmd = ["git", "log", "--pretty=format:%h|%ad|%s", "--date=format:%Y-%m-%d--%H:%M", "-n", str(limit), "--", file_path]
             result = subprocess.check_output(cmd, cwd=directory, text=True, encoding='utf-8')
             commits = []
             for line in result.strip().split('\n'):
