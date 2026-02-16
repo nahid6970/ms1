@@ -13,9 +13,6 @@ class ProcessViewer(QWidget):
         super().__init__()
         self.processes = []
         self.is_expanded = False
-        self.show_all = False
-        self.sort_column = -1  # -1: No specific sort, 0: Name, 1: CPU, 2: RAM
-        self.sort_order = Qt.SortOrder.DescendingOrder
         self.init_ui()
         self.load_processes()
         # Update processes every 2 seconds
@@ -49,34 +46,8 @@ class ProcessViewer(QWidget):
         self.search_bar.textChanged.connect(self.on_search_changed)
         search_layout.addWidget(self.search_bar)
 
-        # Add toggle button beside kill button
-        self.toggle_button = QPushButton("☰")
-        self.toggle_button.setToolTip("Show All Processes")
-        self.toggle_button.setStyleSheet("""
-            QPushButton {
-                background-color: #4a4a4a;
-                border: none;
-                border-radius: 15px;
-                color: white;
-                font-size: 18px;
-                font-weight: bold;
-                width: 30px;
-                height: 30px;
-            }
-            QPushButton:hover {
-                background-color: #6a6a6a;
-            }
-            QPushButton:pressed {
-                background-color: #3a3a3a;
-            }
-        """)
-        self.toggle_button.setFixedSize(30, 30)
-        self.toggle_button.clicked.connect(self.toggle_show_all)
-        search_layout.addWidget(self.toggle_button)
-
         # Add red round button to kill matching processes
         self.kill_button = QPushButton("●")
-        self.kill_button.setToolTip("Kill matching processes")
         self.kill_button.setStyleSheet("""
             QPushButton {
                 background-color: red;
@@ -103,19 +74,13 @@ class ProcessViewer(QWidget):
 
         # Process table
         self.process_table = QTableWidget()
-        self.process_table.setColumnCount(4)
-        self.process_table.setHorizontalHeaderLabels(['Name', 'CPU %', 'RAM %', 'Command Path'])
+        self.process_table.setColumnCount(2)
+        self.process_table.setHorizontalHeaderLabels(['Name', 'Command Path'])
         # Set specific resize modes for columns
-        self.process_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)  # Name
-        self.process_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)  # CPU
-        self.process_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)  # RAM
-        self.process_table.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeMode.Stretch)  # Command Path
+        self.process_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)  # Name column
+        self.process_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)  # Command Path column
         self.process_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self.process_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
-        
-        # Connect header click for sorting
-        self.process_table.horizontalHeader().sectionClicked.connect(self.on_header_clicked)
-        
         # Hide table initially
         self.process_table.hide()
         layout.addWidget(self.process_table)
@@ -129,48 +94,16 @@ class ProcessViewer(QWidget):
 
         self.setLayout(layout)
 
-    def toggle_show_all(self):
-        self.show_all = not self.show_all
-        color = "#aaec24" if self.show_all else "#4a4a4a"
-        text_color = "#25251b" if self.show_all else "white"
-        hover_color = "#bbf34d" if self.show_all else "#6a6a6a"
-        self.toggle_button.setStyleSheet(f"""
-            QPushButton {{
-                background-color: {color};
-                border: none;
-                border-radius: 15px;
-                color: {text_color};
-                font-size: 18px;
-                font-weight: bold;
-                width: 30px;
-                height: 30px;
-            }}
-            QPushButton:hover {{
-                background-color: {hover_color};
-            }}
-        """)
-        self.filter_processes()
-
-    def on_header_clicked(self, logical_index):
-        if logical_index == self.sort_column:
-            # Toggle order if same column clicked
-            self.sort_order = Qt.SortOrder.AscendingOrder if self.sort_order == Qt.SortOrder.DescendingOrder else Qt.SortOrder.DescendingOrder
-        else:
-            self.sort_column = logical_index
-            self.sort_order = Qt.SortOrder.DescendingOrder
-        
-        self.filter_processes()
-
     def load_processes(self):
+        # Store the current search text
+        search_text = self.search_bar.text().lower()
+
         # Get all processes with their information
         self.processes = []
-        for proc in psutil.process_iter(['pid', 'name', 'exe', 'cmdline', 'cpu_percent', 'memory_percent']):
+        for proc in psutil.process_iter(['pid', 'name', 'exe', 'cmdline']):
             try:
                 pid = proc.info['pid']
                 name = proc.info['name']
-                cpu = proc.info['cpu_percent'] if proc.info['cpu_percent'] is not None else 0.0
-                mem = proc.info['memory_percent'] if proc.info['memory_percent'] is not None else 0.0
-                
                 # Try to get the full command line first, fallback to exe if not available
                 if proc.info['cmdline']:
                     # Join the command line arguments into a single string
@@ -181,23 +114,32 @@ class ProcessViewer(QWidget):
                 self.processes.append({
                     'pid': pid,
                     'name': name,
-                    'exe': exe,
-                    'cpu': cpu,
-                    'mem': mem
+                    'exe': exe
                 })
             except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
                 # Process might have terminated or we don't have access
                 pass
 
-        # Always update the table view
-        self.filter_processes()
+        # Don't auto-update table, only update when user searches
+        if search_text:
+            self.update_table_with_filter(search_text)
 
     def on_search_changed(self):
+        search_text = self.search_bar.text().strip()
+        
+        if not search_text:
+            # Collapse window when search is empty
+            if self.is_expanded:
+                self.collapse_window()
+            return
+        
+        # Expand window when user starts typing
+        if not self.is_expanded:
+            self.expand_window()
+        
         self.filter_processes()
     
     def expand_window(self):
-        if self.is_expanded:
-            return
         self.is_expanded = True
         self.process_table.show()
         
@@ -218,8 +160,6 @@ class ProcessViewer(QWidget):
         self.animation.start()
     
     def collapse_window(self):
-        if not self.is_expanded:
-            return
         self.is_expanded = False
         
         # Get current geometry
@@ -243,32 +183,22 @@ class ProcessViewer(QWidget):
 
     def filter_processes(self):
         search_text = self.search_bar.text().strip()
-        
-        # Determine if we should show processes (if searching OR if show_all is active)
-        should_show = bool(search_text) or self.show_all
-        
-        if not should_show:
-            if self.is_expanded:
-                self.collapse_window()
+        if not search_text:
+            # If search bar is empty, clear table
             self.update_table([])
             return
-
-        if not self.is_expanded:
-            self.expand_window()
 
         # Split search text into multiple words
         search_terms = search_text.lower().split()
         
-        # Filter processes based on search terms
+        # Filter processes based on all search terms
         filtered_processes = []
         for proc in self.processes:
-            if not search_terms:
-                filtered_processes.append(proc)
-                continue
-                
+            # Check if all search terms match either name or exe path
             name_lower = proc['name'].lower()
             exe_lower = proc['exe'].lower()
             
+            # Check if all terms match
             all_terms_match = True
             for term in search_terms:
                 if term not in name_lower and term not in exe_lower:
@@ -278,18 +208,35 @@ class ProcessViewer(QWidget):
             if all_terms_match:
                 filtered_processes.append(proc)
         
-        # Apply sorting based on self.sort_column
-        if self.sort_column != -1:
-            reverse = self.sort_order == Qt.SortOrder.DescendingOrder
-            if self.sort_column == 0: # Name
-                filtered_processes.sort(key=lambda x: x['name'].lower(), reverse=reverse)
-            elif self.sort_column == 1: # CPU
-                filtered_processes.sort(key=lambda x: x['cpu'], reverse=reverse)
-            elif self.sort_column == 2: # RAM
-                filtered_processes.sort(key=lambda x: x['mem'], reverse=reverse)
-            elif self.sort_column == 3: # Path
-                filtered_processes.sort(key=lambda x: x['exe'].lower(), reverse=reverse)
+        self.update_table(filtered_processes)
+
+    def update_table_with_filter(self, search_text):
+        search_text = search_text.strip()
+        if not search_text:
+            # If search bar is empty, show all processes
+            self.update_table(self.processes)
+            return
             
+        # Split search text into multiple words
+        search_terms = search_text.lower().split()
+        
+        # Filter processes based on all search terms
+        filtered_processes = []
+        for proc in self.processes:
+            # Check if all search terms match either name or exe path
+            name_lower = proc['name'].lower()
+            exe_lower = proc['exe'].lower()
+            
+            # Check if all terms match
+            all_terms_match = True
+            for term in search_terms:
+                if term not in name_lower and term not in exe_lower:
+                    all_terms_match = False
+                    break
+            
+            if all_terms_match:
+                filtered_processes.append(proc)
+        
         self.update_table(filtered_processes)
 
     def kill_matching_processes(self):
@@ -345,16 +292,10 @@ class ProcessViewer(QWidget):
             name_item.setBackground(QColor('#aaec24'))
             self.process_table.setItem(row_position, 0, name_item)
 
-            # Add CPU %
-            cpu_item = QTableWidgetItem(f"{proc['cpu']:.1f}%")
-            self.process_table.setItem(row_position, 1, cpu_item)
-
-            # Add RAM %
-            mem_item = QTableWidgetItem(f"{proc['mem']:.1f}%")
-            self.process_table.setItem(row_position, 2, mem_item)
-
             # Add command path
-            self.process_table.setItem(row_position, 3, QTableWidgetItem(proc['exe']))
+            self.process_table.setItem(row_position, 1, QTableWidgetItem(proc['exe']))
+
+
 
     def on_search_enter(self):
         # If there are results, select the first one
@@ -368,6 +309,9 @@ class ProcessViewer(QWidget):
             # Get selected row
             selected_row = self.process_table.currentRow()
             if selected_row >= 0 and selected_row < self.process_table.rowCount():
+                # Get the process PID from the selected row
+                # Note: We don't display PID in the table, so we need to find it
+                # This would require storing the mapping between table rows and processes
                 pass
         elif event.key() == Qt.Key.Key_Escape:
             # Return focus to search bar
@@ -375,6 +319,9 @@ class ProcessViewer(QWidget):
         else:
             # Default behavior for other keys
             QTableWidget.keyPressEvent(self.process_table, event)
+
+
+
 
 
 def main():
