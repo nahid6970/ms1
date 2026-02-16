@@ -716,8 +716,10 @@ PrintScreen::Run("C:\@delta\ms1\scripts\Autohtokey\version2\gui\Bio.ahk", "", "H
         wsGui := Gui("+AlwaysOnTop -Caption +ToolWindow")
         wsGui.BackColor := "000000"
         wsGui.SetFont("s80 bold", "Consolas")
-        txt := wsGui.Add("Text", "cWhite Center w300 h120", num)
-        wsGui.Show("x810 y480 NoActivate")
+        wsGui.Add("Text", "cWhite Center w300 h120", num)
+        wsGui.Show("NoActivate")
+        WinGetPos(&x, &y, &w, &h, wsGui)
+        wsGui.Move((1920-w)/2, (1080-h)/2)
         SetTimer(() => wsGui.Destroy(), -800)
     }
 }
