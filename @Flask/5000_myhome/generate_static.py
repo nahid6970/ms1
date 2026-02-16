@@ -19,7 +19,7 @@ SIDEBAR_BUTTONS_FILE = r'C:\@delta\ms1\@Flask\5000_myhome\sidebar_buttons.json'
 
 # Paths to source files
 TEMPLATE_FILE = os.path.join(PROJECT_ROOT, 'templates', 'index.html')
-NOTE_PREVIEW_TEMPLATE_FILE = os.path.join(PROJECT_ROOT, 'templates', 'note_preview.html')
+
 CSS_FILE = os.path.join(PROJECT_ROOT, 'static', 'style.css')
 MAIN_JS_FILE = os.path.join(PROJECT_ROOT, 'static', 'main.js')
 LINKS_HANDLER_JS_FILE = os.path.join(PROJECT_ROOT, 'static', 'links-handler.js')
@@ -29,7 +29,7 @@ CYBERPUNK_POPUP_CSS_FILE = os.path.join(PROJECT_ROOT, 'static', 'cyberpunk-popup
 
 # Path to the output files
 OUTPUT_HTML_FILE = r"C:\@delta\db\5000_myhome\myhome.html"
-OUTPUT_NOTE_PREVIEW_FILE = r"C:\@delta\db\5000_myhome\note_preview.html"
+
 
 
 def read_data():
@@ -126,24 +126,7 @@ def generate_static_html():
         editToggle.style.display = 'none';
       }}
       
-      // Override note preview to use static file
-      if (window.openNotePreview) {{
-        window.openNotePreview = function(noteContent) {{
-          const decodedContent = decodeURIComponent(noteContent);
-          const encodedContent = encodeURIComponent(decodedContent);
-          const previewUrl = `note_preview.html?content=${{encodedContent}}`;
-          
-          const previewWindow = window.open(
-            previewUrl,
-            'notePreview',
-            'width=900,height=700,scrollbars=yes,resizable=yes,toolbar=no,menubar=no,location=no,status=no'
-          );
-          
-          if (!previewWindow) {{
-            alert('Please allow popups to preview notes');
-          }}
-        }};
-      }}
+
       
       // Remove edit buttons and functionality
       const style = document.createElement('style');
@@ -187,44 +170,7 @@ def generate_static_html():
     with open(OUTPUT_HTML_FILE, 'w', encoding='utf-8') as f:
         f.write(static_html)
 
-    # Generate static note preview HTML
-    note_preview_html = read_file(NOTE_PREVIEW_TEMPLATE_FILE)
-    if note_preview_html:
-        # Create a standalone note preview that can handle URL parameters
-        note_preview_script = """
-  <script>
-    // Get note content from URL parameter
-    const urlParams = new URLSearchParams(window.location.search);
-    const encodedContent = urlParams.get('content');
-    
-    if (encodedContent) {
-      try {
-        const decodedContent = decodeURIComponent(encodedContent);
-        // Simple markdown-like conversion
-        let html = decodedContent
-          .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-          .replace(/\*(.+?)\*/g, '<em>$1</em>')
-          .replace(/`(.+?)`/g, '<code>$1</code>')
-          .replace(/^# (.+)$/gm, '<h1>$1</h1>')
-          .replace(/^## (.+)$/gm, '<h2>$2</h2>')
-          .replace(/^### (.+)$/gm, '<h3>$1</h3>')
-          .replace(/\\n/g, '<br>');
-        
-        document.querySelector('.content').innerHTML = html;
-      } catch (e) {
-        document.querySelector('.content').innerHTML = '<p>Error loading note content</p>';
-      }
-    } else {
-      document.querySelector('.content').innerHTML = '<p>No note content provided</p>';
-    }
-  </script>
-"""
-        note_preview_html = note_preview_html.replace('</body>', f'{note_preview_script}</body>')
-        
-        with open(OUTPUT_NOTE_PREVIEW_FILE, 'w', encoding='utf-8') as f:
-            f.write(note_preview_html)
-        
-        print(f"[SUCCESS] Static note preview generated: {os.path.basename(OUTPUT_NOTE_PREVIEW_FILE)}")
+
 
     print(f"[SUCCESS] Static HTML generated successfully: {os.path.basename(OUTPUT_HTML_FILE)}")
     print(f"[INFO] Included {len(links_data)} links")
