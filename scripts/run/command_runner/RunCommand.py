@@ -58,6 +58,20 @@ def move_bookmark(command, direction):
         with open(BOOKMARKS_FILE, 'w', encoding='utf-8') as f:
             json.dump(bookmarks, f, indent=2, ensure_ascii=False)
 
+def remove_bookmark(command):
+    if command.startswith("* "): command = command[2:]
+    elif command.startswith("  "): command = command[2:]
+    
+    if not os.path.exists(BOOKMARKS_FILE): return
+    try:
+        with open(BOOKMARKS_FILE, 'r', encoding='utf-8') as f:
+            bookmarks = json.load(f)
+    except: return
+    
+    new_bookmarks = [bm for bm in bookmarks if bm.get("command") != command]
+    if len(new_bookmarks) != len(bookmarks):
+        with open(BOOKMARKS_FILE, 'w', encoding='utf-8') as f:
+            json.dump(new_bookmarks, f, indent=2, ensure_ascii=False)
 
 def get_feeder_data():
     """Outputs the history and bookmarks for fzf."""
@@ -118,7 +132,6 @@ def run_command_ui():
     script_dir = os.path.dirname(script_path)
     
     # Scripts
-    view_command_bookmarks_script = os.path.join(script_dir, "view_command_bookmarks.py")
 
     shortcuts_text = r"""
 Shortcuts available:
@@ -204,7 +217,7 @@ if len(sys.argv) > 1:
         # F5: Toggle bookmark and reload
         f'--bind=f5:execute-silent(python "{script_path}" --toggle-bookmark {{1}} {{q}})+reload(python "{script_path}" --feed)+clear-query',
         # Del: Remove from history AND bookmarks
-        f'--bind=del:execute-silent(python "{remover_path}" {{1}} && python "{view_command_bookmarks_script}" --remove {{1}})+reload(python "{script_path}" --feed)',
+        f'--bind=del:execute-silent(python "{remover_path}" {{1}} && python "{script_path}" --remove-bookmark {{1}})+reload(python "{script_path}" --feed)',
         # Ctrl-C: Copy to clipboard
         f'--bind=ctrl-c:execute-silent(python "{copy_path}" {{1}})',
         f'--bind=ctrl-r:reload(python "{script_path}" --feed)+clear-query',
@@ -257,6 +270,9 @@ if __name__ == "__main__":
         command = sys.argv[3] if len(sys.argv) > 3 else ""
         if command:
             move_bookmark(command, direction)
+        os._exit(0)
+    elif "--remove-bookmark" in sys.argv and len(sys.argv) > 2:
+        remove_bookmark(sys.argv[2])
         os._exit(0)
     else:
         run_command_ui()
