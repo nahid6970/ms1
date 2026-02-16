@@ -703,12 +703,12 @@ PrintScreen::Run("C:\@delta\ms1\scripts\Autohtokey\version2\gui\Bio.ahk", "", "H
         if (toggle == 0) {
             Run("komorebic.exe focus-workspace 1", , "Hide")
             toggle := 1
+            ToolTip("2")
         } else {
             Run("komorebic.exe focus-workspace 0", , "Hide")
             toggle := 0
+            ToolTip("1")
         }
-        Sleep(100)
-        ToolTip(toggle == 0 ? "1" : "2")
         SetTimer(() => ToolTip(), -800)
     }
 }
