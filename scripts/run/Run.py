@@ -2,6 +2,41 @@ import os
 import subprocess
 import tempfile
 import sys
+import json
+
+BOOKMARKS_FILE = r"C:\@delta\db\FZF_launcher\bookmarks.json"
+
+def toggle_bookmark(file_path):
+    dir_path = os.path.dirname(BOOKMARKS_FILE)
+    if dir_path:
+        os.makedirs(dir_path, exist_ok=True)
+    bookmarks = []
+    if os.path.exists(BOOKMARKS_FILE):
+        try:
+            with open(BOOKMARKS_FILE, 'r', encoding='utf-8') as f:
+                bookmarks = json.load(f)
+        except: pass
+    if file_path in bookmarks:
+        bookmarks.remove(file_path)
+    else:
+        bookmarks.append(file_path)
+    with open(BOOKMARKS_FILE, 'w', encoding='utf-8') as f:
+        json.dump(bookmarks, f, indent=2, ensure_ascii=False)
+
+def move_bookmark(file_path, direction):
+    if not os.path.exists(BOOKMARKS_FILE): return
+    try:
+        with open(BOOKMARKS_FILE, 'r', encoding='utf-8') as f:
+            bookmarks = json.load(f)
+    except: return
+    if file_path not in bookmarks: return
+    idx = bookmarks.index(file_path)
+    new_idx = idx + direction
+    if 0 <= new_idx < len(bookmarks):
+        bookmarks[idx], bookmarks[new_idx] = bookmarks[new_idx], bookmarks[idx]
+        with open(BOOKMARKS_FILE, 'w', encoding='utf-8') as f:
+            json.dump(bookmarks, f, indent=2, ensure_ascii=False)
+
 
 def search_directories_and_files():
     # Start with an empty list
@@ -209,9 +244,9 @@ Start-Sleep -Milliseconds 500
             toggle_script.write(toggle_script_content)
             toggle_script_file = toggle_script.name
 
-        # Get absolute paths for bookmark scripts
+        # Get absolute paths for scripts
         script_dir = os.path.dirname(os.path.abspath(__file__))
-        add_bookmark_script = os.path.join(script_dir, "add_bookmark.py")
+        script_path = os.path.abspath(__file__)
         view_bookmarks_script = os.path.join(script_dir, "view_bookmarks.py")
         editor_chooser_script = os.path.join(script_dir, "editor_chooser.py")
 
@@ -526,12 +561,12 @@ if __name__ == "__main__":
             f"--bind=f2:execute-silent(powershell -ExecutionPolicy Bypass -File \"{toggle_script_file}\")+refresh-preview",
             f"--bind=f3:reload(python \"{feeder_script_file}\" --toggle)",
             f"--bind=f4:execute-silent(start cmd /c python \"{view_bookmarks_script}\")",
-            f"--bind=f5:execute-silent(python \"{add_bookmark_script}\" {{2}})+reload(python \"{feeder_script_file}\")",
+            f"--bind=f5:execute-silent(python \"{script_path}\" --toggle-bookmark {{2}})+reload(python \"{feeder_script_file}\")",
             "--bind=ctrl-p:toggle-preview",
             "--bind=?:toggle-header",
             "--bind=start:toggle-header",
-            f"--bind=alt-up:execute-silent(python \"{bookmark_reorder_script_file}\" up {{2}})+reload(python \"{feeder_script_file}\")+up",
-            f"--bind=alt-down:execute-silent(python \"{bookmark_reorder_script_file}\" down {{2}})+reload(python \"{feeder_script_file}\")+down",
+            f"--bind=alt-up:execute-silent(python \"{script_path}\" --move-bookmark up {{2}})+reload(python \"{feeder_script_file}\")+up",
+            f"--bind=alt-down:execute-silent(python \"{script_path}\" --move-bookmark down {{2}})+reload(python \"{feeder_script_file}\")+down",
         ]
 
         # Start fzf process with initial file feed from feeder script
@@ -574,4 +609,13 @@ if __name__ == "__main__":
                 pass
 
 if __name__ == "__main__":
+    if len(sys.argv) > 1:
+        if sys.argv[1] == "--toggle-bookmark" and len(sys.argv) > 2:
+            toggle_bookmark(sys.argv[2])
+            sys.exit(0)
+        elif sys.argv[1] == "--move-bookmark" and len(sys.argv) > 3:
+            direction = -1 if sys.argv[2] == "up" else 1
+            move_bookmark(sys.argv[3], direction)
+            sys.exit(0)
+    
     search_directories_and_files()

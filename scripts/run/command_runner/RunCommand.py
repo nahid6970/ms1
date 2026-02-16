@@ -8,6 +8,57 @@ import json
 HISTORY_FILE = r"C:\@delta\db\FZF_launcher\CommandRunner\command_history.json"
 BOOKMARKS_FILE = r"C:\@delta\db\FZF_launcher\CommandRunner\command_bookmarks.json"
 
+def toggle_bookmark(command):
+    if command.startswith("* "): command = command[2:]
+    elif command.startswith("  "): command = command[2:]
+    
+    os.makedirs(os.path.dirname(BOOKMARKS_FILE), exist_ok=True)
+    bookmarks = []
+    if os.path.exists(BOOKMARKS_FILE):
+        try:
+            with open(BOOKMARKS_FILE, 'r', encoding='utf-8') as f:
+                bookmarks = json.load(f)
+        except: pass
+    
+    # Find and toggle
+    found = None
+    for bm in bookmarks:
+        if bm.get("command") == command:
+            found = bm
+            break
+    
+    if found:
+        bookmarks.remove(found)
+    else:
+        bookmarks.append({"command": command, "shell": "pwsh", "dir": ""})
+    
+    with open(BOOKMARKS_FILE, 'w', encoding='utf-8') as f:
+        json.dump(bookmarks, f, indent=2, ensure_ascii=False)
+
+def move_bookmark(command, direction):
+    if command.startswith("* "): command = command[2:]
+    elif command.startswith("  "): command = command[2:]
+    
+    if not os.path.exists(BOOKMARKS_FILE): return
+    try:
+        with open(BOOKMARKS_FILE, 'r', encoding='utf-8') as f:
+            bookmarks = json.load(f)
+    except: return
+    
+    idx = None
+    for i, bm in enumerate(bookmarks):
+        if bm.get("command") == command:
+            idx = i
+            break
+    
+    if idx is None: return
+    new_idx = idx + direction
+    if 0 <= new_idx < len(bookmarks):
+        bookmarks[idx], bookmarks[new_idx] = bookmarks[new_idx], bookmarks[idx]
+        with open(BOOKMARKS_FILE, 'w', encoding='utf-8') as f:
+            json.dump(bookmarks, f, indent=2, ensure_ascii=False)
+
+
 def get_feeder_data():
     """Outputs the history and bookmarks for fzf."""
     try:
@@ -67,7 +118,6 @@ def run_command_ui():
     script_dir = os.path.dirname(script_path)
     
     # Scripts
-    add_bookmark_script = os.path.join(script_dir, "add_command_bookmark.py")
     view_command_bookmarks_script = os.path.join(script_dir, "view_command_bookmarks.py")
 
     shortcuts_text = r"""
@@ -152,15 +202,15 @@ if len(sys.argv) > 1:
         # Enter: Run command and reload. {1}=cmd, {2}=shell, {3}=dir
         f'--bind=enter:execute-silent(python "{script_path}" --launch {{1}} {{q}} {{2}} {{3}})+reload(python "{script_path}" --feed)+clear-query',
         # F5: Toggle bookmark and reload
-        f'--bind=f5:execute-silent(python "{add_bookmark_script}" {{1}} || python "{add_bookmark_script}" {{q}})+reload(python "{script_path}" --feed)+clear-query',
+        f'--bind=f5:execute-silent(python "{script_path}" --toggle-bookmark {{1}} {{q}})+reload(python "{script_path}" --feed)+clear-query',
         # Del: Remove from history AND bookmarks
         f'--bind=del:execute-silent(python "{remover_path}" {{1}} && python "{view_command_bookmarks_script}" --remove {{1}})+reload(python "{script_path}" --feed)',
         # Ctrl-C: Copy to clipboard
         f'--bind=ctrl-c:execute-silent(python "{copy_path}" {{1}})',
         f'--bind=ctrl-r:reload(python "{script_path}" --feed)+clear-query',
         f'--bind=f1:execute-silent(cmd /c start cmd /k type "{help_path}" ^& pause)',
-        f'--bind=alt-up:execute-silent(python "{add_bookmark_script}" --move-up {{1}})+reload(python "{script_path}" --feed)+up',
-        f'--bind=alt-down:execute-silent(python "{add_bookmark_script}" --move-down {{1}})+reload(python "{script_path}" --feed)+down',
+        f'--bind=alt-up:execute-silent(python "{script_path}" --move-bookmark up {{1}})+reload(python "{script_path}" --feed)+up',
+        f'--bind=alt-down:execute-silent(python "{script_path}" --move-bookmark down {{1}})+reload(python "{script_path}" --feed)+down',
         "--bind=?:toggle-header",
         "--bind=start:toggle-header"
     ]
@@ -193,6 +243,20 @@ if __name__ == "__main__":
         directory = sys.argv[5] if len(sys.argv) > 5 else ""
         script_dir = os.path.dirname(os.path.abspath(__file__))
         save_and_launch_chooser(selection, query, shell, directory, script_dir)
+        os._exit(0)
+    elif "--toggle-bookmark" in sys.argv:
+        # Toggle bookmark for command (either from {1} or {q})
+        command = sys.argv[2] if len(sys.argv) > 2 else ""
+        if not command and len(sys.argv) > 3:
+            command = sys.argv[3]
+        if command:
+            toggle_bookmark(command)
+        os._exit(0)
+    elif "--move-bookmark" in sys.argv and len(sys.argv) > 3:
+        direction = -1 if sys.argv[2] == "up" else 1
+        command = sys.argv[3] if len(sys.argv) > 3 else ""
+        if command:
+            move_bookmark(command, direction)
         os._exit(0)
     else:
         run_command_ui()
