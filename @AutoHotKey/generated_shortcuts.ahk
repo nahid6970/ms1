@@ -54,6 +54,79 @@ Paste(text) {
     }
 }
 
+;! Explorer Tabs Hook
+;! Explorer Tabs Hook
+DllCall("RegisterShellHookWindow", "Ptr", A_ScriptHwnd)
+msgNum := DllCall("RegisterWindowMessage", "Str", "SHELLHOOK")
+OnMessage(msgNum, ShellMessage)
+
+ShellMessage(wParam, lParam, *) {
+    if (wParam == 1) {
+        try {
+            if (WinGetClass(lParam) == "CabinetWClass")
+                SetTimer(MergeTab.Bind(lParam), -200)
+        }
+    }
+}
+
+MergeTab(hNewWnd) {
+    if !WinExist(hNewWnd)
+        return
+
+    allExplorers := WinGetList("ahk_class CabinetWClass")
+    targetWnd := 0
+    
+    for hWnd in allExplorers {
+        if (hWnd != hNewWnd) {
+            targetWnd := hWnd
+            break
+        }
+    }
+
+    if (!targetWnd)
+        return
+
+    newPath := ""
+    Loop 10 {
+        try {
+            sh := ComObject("Shell.Application")
+            for window in sh.Windows {
+                try {
+                    if (window.hwnd == hNewWnd) {
+                        newPath := window.Document.Folder.Self.Path
+                        break
+                    }
+                }
+            }
+        }
+        if (newPath != "")
+            break
+        Sleep(100)
+    }
+
+    if (newPath == "" || newPath ~= "i)^::{")
+        return
+
+    try {
+        WinClose(hNewWnd)
+        WinActivate(targetWnd)
+        Sleep(100)
+        Send("^t")
+        Sleep(200)
+        Send("{Esc}")
+        Sleep(50)
+        Send("!d")
+        Sleep(50)
+        Send("^a")
+        Sleep(50)
+        SendText(newPath)
+        Sleep(100)
+        Send("{Enter}")
+        Sleep(50)
+        Send("{Esc}")
+    }
+}
+
 ;! English TO Bangla Text
 ;! eng to bng
 ::;er::এর
