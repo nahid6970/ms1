@@ -19,8 +19,11 @@ if __name__ == "__main__":
             except json.JSONDecodeError:
                 bookmarks = []
         
-        # Add new bookmark if not already present
-        if file_path not in bookmarks:
+        # Toggle bookmark
+        if file_path in bookmarks:
+            bookmarks.remove(file_path)
+        else:
             bookmarks.append(file_path)
-            with open(bookmarks_file, 'w', encoding='utf-8') as f:
-                json.dump(bookmarks, f, indent=2, ensure_ascii=False)
+        
+        with open(bookmarks_file, 'w', encoding='utf-8') as f:
+            json.dump(bookmarks, f, indent=2, ensure_ascii=False)
