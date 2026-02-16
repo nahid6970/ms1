@@ -122,5 +122,20 @@
     "name": "Gallery",
     "text_color": "white",
     "url": "https://nahid6970.github.io/db/@Convex/image-share/index"
+  },
+  {
+    "id": "custom-button-1771259294738",
+    "name": "Copy text",
+    "display_type": "icon",
+    "icon_class": "nf nf-md-content_copy",
+    "img_src": "",
+    "url": "https://nahid6970.github.io/db/@Convex/@Convex/share_text_convex/index",
+    "has_notification": false,
+    "text_color": "white",
+    "bg_color": "transparent",
+    "hover_color": "gray",
+    "border_color": "transparent",
+    "border_radius": "4px",
+    "font_size": "25px"
   }
 ]
