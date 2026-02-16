@@ -335,30 +335,25 @@
       const listContainer = content.querySelector('.popup-list');
       
       links.forEach(link => {
-        const item = document.createElement('div');
+        const item = document.createElement('a');
         item.className = 'popup-list-item';
-        
-        const a = document.createElement('a');
-        a.href = link.url || '#';
-        if (link.url) a.target = '_blank';
+        item.href = link.url || '#';
+        if (link.url) item.target = '_blank';
         
         if (link.icon_class) {
           if (link.icon_class.startsWith('<svg')) {
-            a.innerHTML = link.icon_class + (link.name ? `<span>${link.name}</span>` : '');
+            item.innerHTML = link.icon_class + (link.name ? `<span>${link.name}</span>` : '');
           } else if (link.icon_class.startsWith('nf ')) {
-            a.innerHTML = `<i class="${link.icon_class}"></i><span>${link.name}</span>`;
+            item.innerHTML = `<i class="${link.icon_class}"></i><span>${link.name}</span>`;
           } else {
-            a.textContent = link.name;
+            item.textContent = link.name;
           }
         } else {
-          a.textContent = link.name;
+          item.textContent = link.name;
         }
         
-        if (link.horizontal_font_size) a.style.fontSize = link.horizontal_font_size;
-        if (link.horizontal_font_family) a.style.setProperty('font-family', link.horizontal_font_family, 'important');
-        
-        item.appendChild(a);
-        
+        if (link.horizontal_font_size) item.style.fontSize = link.horizontal_font_size;
+        if (link.horizontal_font_family) item.style.setProperty('font-family', link.horizontal_font_family, 'important');
         if (link.horizontal_bg_color) item.style.backgroundColor = link.horizontal_bg_color;
         if (link.horizontal_border_color) item.style.borderColor = link.horizontal_border_color;
         
@@ -371,17 +366,6 @@
             if (originalBg) item.style.backgroundColor = originalBg;
           });
         }
-        
-        const editBtn = document.createElement('button');
-        editBtn.className = 'popup-edit-btn';
-        editBtn.textContent = '✏️';
-        editBtn.onclick = (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          popup.remove();
-          openEditPopup(link);
-        };
-        item.appendChild(editBtn);
         
         listContainer.appendChild(item);
       });
