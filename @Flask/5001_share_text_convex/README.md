@@ -14,12 +14,42 @@ npm install
 npx convex dev
 ```
 - This will create a Convex account if needed
-- Copy the deployment URL provided
+- Copy the **deployment URL** provided (looks like `https://xxx.convex.cloud`)
+- Keep this terminal running
 
 3. Update `index.html`:
-- Replace `YOUR_CONVEX_URL_HERE` with your actual Convex URL
+- Open `index.html` in a text editor
+- Find line with `YOUR_CONVEX_URL_HERE`
+- Replace it with your actual Convex URL from step 2
 
-4. Open `index.html` in browser to test
+4. Test locally:
+- Open `index.html` in your browser
+- Try adding, copying, and deleting text entries
+
+## After Setup - What to Do Next
+
+### For Local Development:
+- Keep `npx convex dev` running in terminal
+- Any changes to `convex/functions.ts` auto-deploy
+- Refresh browser to see changes
+
+### For Production Deployment:
+1. Run production deployment:
+```bash
+npx convex deploy
+```
+
+2. Copy the **production URL** (different from dev URL)
+
+3. Update `index.html` with production URL
+
+4. Deploy `index.html` to:
+   - GitHub Pages
+   - Netlify
+   - Vercel
+   - Any static file host
+
+5. Access your app from anywhere via the deployed URL
 
 ## Features
 
@@ -29,11 +59,9 @@ npx convex dev
 - Clean all entries
 - Auto-refresh every 5 seconds
 
-## Deployment
+## Important Notes
 
-For production:
-```bash
-npx convex deploy
-```
-- Use the production URL in `index.html`
-- Deploy `index.html` to any static host (GitHub Pages, etc.)
+- Dev URL is for testing only
+- Production URL is for public deployment
+- Backend runs on Convex servers (free tier: 40 deployments/month)
+- Only `convex/` folder changes count as deployments
