@@ -82,6 +82,14 @@
             "action": "{\n    ; Kill dnplayer.exe\n    Run(\"taskkill /F /IM dnplayer.exe\",,\"Hide\")\n    ; Kill python.exe\n    Run(\"taskkill /F /IM python.exe\",,\"Hide\")\n    ; Run the command\n    Run(\"C:\\@delta\\msBackups\\Display\\DisplaySwitch.exe /internal\",,\"Hide\")\n}"
         },
         {
+            "name": "Restart Glance",
+            "category": "System",
+            "description": "Kills and restarts Glance with config",
+            "hotkey": "^!g",
+            "action": "RestartGlance()\nRestartGlance() {\n    try {\n        RunWait(\"taskkill /F /IM glance.exe\", , \"Hide\")\n    }\n    Run('\"C:\\@delta\\msBackups\\glance\\glance.exe\" --config \"C:\\@delta\\ms1\\asset\\Glance\\glance.yml\"', , \"Hide\")\n}",
+             "enabled": true
+         },
+        {
             "name": "Script Manager",
             "category": "Launch",
             "description": "",
@@ -276,15 +284,7 @@
             "category": "General",
             "description": "",
             "hotkey": "#q",
-            "action": "GoToWorkspace(CurrentWorkspace == 0 ? 1 : 0)",
-            "enabled": true
-        },
-        {
-            "name": "Restart Glance",
-            "category": "System",
-            "description": "Kills and restarts Glance with config",
-            "hotkey": "^!g",
-            "action": "RestartGlance()\nRestartGlance() {\n    try {\n        RunWait(\"taskkill /F /IM glance.exe\", , \"Hide\")\n    }\n    Run('\"C:\\@delta\\msBackups\\glance\\glance.exe\" --config \"C:\\@delta\\ms1\\asset\\Glance\\glance.yml\"', , \"Hide\")\n}",
+            "action": "ShowWorkspace()\nShowWorkspace() {\n    static toggle := 0\n    static wsGui := \"\"\n    \n    if (toggle == 0) {\n        Run(\"komorebic.exe focus-workspace 1\", , \"Hide\")\n        toggle := 1\n        num := \"2\"\n    } else {\n        Run(\"komorebic.exe focus-workspace 0\", , \"Hide\")\n        toggle := 0\n        num := \"1\"\n    }\n    \n    if (wsGui)\n        wsGui.Destroy()\n    \n    wsGui := Gui(\"+AlwaysOnTop -Caption +ToolWindow\")\n    wsGui.BackColor := \"000000\"\n    wsGui.SetFont(\"s80 bold\", \"Consolas\")\n    wsGui.Add(\"Text\", \"cWhite Center w300 h120\", num)\n    wsGui.Show(\"NoActivate\")\n    WinGetPos(&x, &y, &w, &h, wsGui)\n    wsGui.Move((1920-w)/2, (1080-h)/2)\n    SetTimer(() => wsGui.Destroy(), -800)\n}",
             "enabled": true
         },
         {
@@ -454,13 +454,6 @@
         }
     ],
     "startup_scripts": [
-        {
-            "name": "Workspace Manager",
-            "category": "System",
-            "description": "Handles workspace switching, icon updates, and numeric overlay",
-            "action": "Global CurrentWorkspace := 0\nGlobal wsGui := \"\"\n\nGoToWorkspace(idx) {\n    Global CurrentWorkspace, wsGui\n    Run(\"komorebic.exe focus-workspace \" . idx, , \"Hide\")\n    CurrentWorkspace := idx\n    \n    ; Update Icon\n    if (idx == 0) {\n        TraySetIcon() ; Default icon for Main\n    } else {\n        TraySetIcon(\"shell32.dll\", 295) ; Numeric '2' icon\n    }\n\n    ; Show numeric overlay\n    if (wsGui)\n        wsGui.Destroy()\n    \n    wsGui := Gui(\"+AlwaysOnTop -Caption +ToolWindow\")\n    wsGui.BackColor := \"000000\"\n    wsGui.SetFont(\"s120 bold\", \"Consolas\")\n    wsGui.Add(\"Text\", \"cWhite Center w350 h180\", (idx + 1))\n    wsGui.Show(\"NoActivate\")\n    \n    ; Center the GUI\n    WinGetPos(&x, &y, &w, &h, wsGui)\n    wsGui.Move((A_ScreenWidth-w)/2, (A_ScreenHeight-h)/2)\n    \n    SetTimer(() => wsGui.Destroy(), -800)\n}",
-            "enabled": true
-        },
         {
             "name": "Macro Recorder (Vim Style)",
             "category": "System",
