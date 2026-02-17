@@ -13,14 +13,30 @@
     .btn { padding: 10px 20px; background: #007bff; color: #fff; border: none; border-radius: 5px; cursor: pointer; }
     .btn:hover { background: #0056b3; }
     input, select { padding: 10px; border-radius: 5px; border: 1px solid #444; background: #2a2a2a; color: #fff; }
-    .form-container { background: #2a2a2a; padding: 20px; border-radius: 10px; margin-bottom: 20px; display: none; }
-    .form-container.active { display: block; }
+    
+    .form-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; }
+    .form-overlay.active { display: flex; justify-content: center; align-items: center; }
+    .form-container { background: #2a2a2a; padding: 30px; border-radius: 10px; max-width: 500px; width: 90%; }
+    .form-container h2 { margin-bottom: 20px; text-align: center; }
     .form-group { margin-bottom: 15px; }
     .form-group input, .form-group select { width: 100%; }
+    
+    .rating-group { display: flex; justify-content: center; gap: 10px; margin-bottom: 15px; }
+    .rating-group label { cursor: pointer; }
+    .rating-group input[type="radio"] { display: none; }
+    .rating-group label span { padding: 8px 15px; border: 1px solid #555; border-radius: 15px; background: #444; color: white; min-width: 40px; text-align: center; display: inline-block; }
+    .rating-group input[type="radio"]:checked + span { background: gold; border-color: gold; color: black; }
+    
+    .progression-group { display: flex; justify-content: center; gap: 10px; margin-bottom: 15px; }
+    .progression-group label { cursor: pointer; }
+    .progression-group input[type="radio"] { display: none; }
+    .progression-group label span { padding: 8px 15px; border: 1px solid #555; border-radius: 5px; background: #444; color: white; min-width: 120px; text-align: center; display: inline-block; }
+    .progression-group input[type="radio"]:checked + span { background: #28a745; border-color: #28a745; }
+    
     .games-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
-    .game-card { background: #2a2a2a; border-radius: 10px; overflow: hidden; cursor: pointer; transition: transform 0.2s; }
-    .game-card:hover { transform: scale(1.05); }
-    .game-card img { width: 100%; height: 280px; object-fit: cover; }
+    .game-card { background: #2a2a2a; border-radius: 10px; overflow: hidden; transition: transform 0.2s; border: 1px solid #444; }
+    .game-card:hover { transform: scale(1.05); border-color: #4dfa47; }
+    .game-card img { width: 100%; height: 280px; object-fit: cover; cursor: pointer; }
     .game-info { padding: 10px; }
     .game-name { font-weight: bold; margin-bottom: 5px; }
     .game-year { color: #888; font-size: 0.9em; }
@@ -49,36 +65,40 @@
       </select>
     </div>
 
-    <div class="form-container" id="gameForm">
-      <h2 id="formTitle">Add New Game</h2>
-      <input type="hidden" id="gameId">
-      <div class="form-group">
-        <input type="text" id="gameName" placeholder="Game Name" required>
+    <div class="form-overlay" id="formOverlay">
+      <div class="form-container">
+        <h2 id="formTitle">Add New Game</h2>
+        <input type="hidden" id="gameId">
+        <div class="form-group">
+          <input type="text" id="gameName" placeholder="Game Name" required>
+        </div>
+        <div class="form-group">
+          <input type="text" id="gameYear" placeholder="Year">
+        </div>
+        <div class="form-group">
+          <input type="text" id="gameImage" placeholder="Image URL">
+        </div>
+        <div class="form-group">
+          <input type="text" id="gameUrl" placeholder="Game URL">
+        </div>
+        <div class="rating-group">
+          <label><input type="radio" name="rating" value="1"><span>1</span></label>
+          <label><input type="radio" name="rating" value="2"><span>2</span></label>
+          <label><input type="radio" name="rating" value="3"><span>3</span></label>
+          <label><input type="radio" name="rating" value="4"><span>4</span></label>
+          <label><input type="radio" name="rating" value="5"><span>5</span></label>
+        </div>
+        <div class="progression-group">
+          <label><input type="radio" name="progression" value="Unplayed🆕" checked><span>Unplayed🆕</span></label>
+          <label><input type="radio" name="progression" value="Unfinished🔄️"><span>Unfinished🔄️</span></label>
+          <label><input type="radio" name="progression" value="Complete✅"><span>Complete✅</span></label>
+        </div>
+        <div class="form-group">
+          <input type="text" id="gameCollection" placeholder="Collection">
+        </div>
+        <button class="btn" onclick="saveGame()">Save</button>
+        <button class="btn" onclick="cancelForm()" style="background: #6c757d;">Cancel</button>
       </div>
-      <div class="form-group">
-        <input type="text" id="gameYear" placeholder="Year">
-      </div>
-      <div class="form-group">
-        <input type="text" id="gameImage" placeholder="Image URL">
-      </div>
-      <div class="form-group">
-        <input type="text" id="gameUrl" placeholder="Game URL">
-      </div>
-      <div class="form-group">
-        <input type="number" id="gameRating" placeholder="Rating (1-5)" min="1" max="5">
-      </div>
-      <div class="form-group">
-        <select id="gameProgression">
-          <option value="Unplayed🆕">Unplayed🆕</option>
-          <option value="Unfinished">Unfinished</option>
-          <option value="Complete">Complete</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <input type="text" id="gameCollection" placeholder="Collection">
-      </div>
-      <button class="btn" onclick="saveGame()">Save</button>
-      <button class="btn" onclick="cancelForm()" style="background: #6c757d;">Cancel</button>
     </div>
 
     <div class="games-grid" id="gamesGrid"></div>
@@ -90,11 +110,12 @@
     const client = new ConvexHttpClient("https://hearty-bloodhound-550.convex.cloud");
 
     window.toggleForm = () => {
-      document.getElementById('gameForm').classList.toggle('active');
+      document.getElementById('formOverlay').classList.toggle('active');
+      clearForm();
     };
 
     window.cancelForm = () => {
-      document.getElementById('gameForm').classList.remove('active');
+      document.getElementById('formOverlay').classList.remove('active');
       clearForm();
     };
 
@@ -104,8 +125,8 @@
       document.getElementById('gameYear').value = '';
       document.getElementById('gameImage').value = '';
       document.getElementById('gameUrl').value = '';
-      document.getElementById('gameRating').value = '';
-      document.getElementById('gameProgression').value = 'Unplayed🆕';
+      document.querySelectorAll('input[name="rating"]').forEach(r => r.checked = false);
+      document.querySelector('input[name="progression"][value="Unplayed🆕"]').checked = true;
       document.getElementById('gameCollection').value = '';
       document.getElementById('formTitle').textContent = 'Add New Game';
     }
@@ -116,8 +137,8 @@
       const year = document.getElementById('gameYear').value;
       const image = document.getElementById('gameImage').value;
       const url = document.getElementById('gameUrl').value;
-      const rating = parseInt(document.getElementById('gameRating').value) || 0;
-      const progression = document.getElementById('gameProgression').value;
+      const rating = parseInt(document.querySelector('input[name="rating"]:checked')?.value) || 0;
+      const progression = document.querySelector('input[name="progression"]:checked')?.value || 'Unplayed🆕';
       const collection = document.getElementById('gameCollection').value;
       
       if (!name) return alert('Game name is required');
@@ -138,11 +159,19 @@
       document.getElementById('gameYear').value = game.year || '';
       document.getElementById('gameImage').value = game.image || '';
       document.getElementById('gameUrl').value = game.url || '';
-      document.getElementById('gameRating').value = game.rating || '';
-      document.getElementById('gameProgression').value = game.progression || 'Unplayed🆕';
+      
+      document.querySelectorAll('input[name="rating"]').forEach(r => r.checked = false);
+      if (game.rating) {
+        const ratingInput = document.querySelector(`input[name="rating"][value="${game.rating}"]`);
+        if (ratingInput) ratingInput.checked = true;
+      }
+      
+      const progressionInput = document.querySelector(`input[name="progression"][value="${game.progression || 'Unplayed🆕'}"]`);
+      if (progressionInput) progressionInput.checked = true;
+      
       document.getElementById('gameCollection').value = game.collection || '';
       document.getElementById('formTitle').textContent = 'Edit Game';
-      document.getElementById('gameForm').classList.add('active');
+      document.getElementById('formOverlay').classList.add('active');
     };
 
     window.deleteGame = async (id, name) => {
