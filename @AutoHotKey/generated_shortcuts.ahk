@@ -14,6 +14,40 @@ Paste(text) {
 }
 
 ;! === BACKGROUND / STARTUP SCRIPTS ===
+;! Workspace Manager
+;! Handles workspace switching, icon updates, and numeric overlay
+Global CurrentWorkspace := 0
+Global wsGui := ""
+
+GoToWorkspace(idx) {
+    Global CurrentWorkspace, wsGui
+    Run("komorebic.exe focus-workspace " . idx, , "Hide")
+    CurrentWorkspace := idx
+    
+    ; Update Icon
+    if (idx == 0) {
+        TraySetIcon() ; Default icon for Main
+    } else {
+        TraySetIcon("shell32.dll", 295) ; Numeric '2' icon
+    }
+
+    ; Show numeric overlay
+    if (wsGui)
+        wsGui.Destroy()
+    
+    wsGui := Gui("+AlwaysOnTop -Caption +ToolWindow")
+    wsGui.BackColor := "000000"
+    wsGui.SetFont("s120 bold", "Consolas")
+    wsGui.Add("Text", "cWhite Center w350 h180", (idx + 1))
+    wsGui.Show("NoActivate")
+    
+    ; Center the GUI
+    WinGetPos(&x, &y, &w, &h, wsGui)
+    wsGui.Move((A_ScreenWidth-w)/2, (A_ScreenHeight-h)/2)
+    
+    SetTimer(() => wsGui.Destroy(), -800)
+}
+
 ;! Smart Bengali Numbers
 ;! Converts ;[numbers] to Bengali after Space (Fixed letters conflict)
 ~;:: {
@@ -774,30 +808,17 @@ PrintScreen::Run("C:\@delta\ms1\scripts\Autohtokey\version2\gui\Bio.ahk", "", "H
 #2::Run("komorebic.exe focus-workspace 1", , "Hide")
 
 ;! Komorebi Toggle Workspace
-#q:: {
-    ShowWorkspace()
-    ShowWorkspace() {
-        static toggle := 0
-        static wsGui := ""
-        if (toggle == 0) {
-            Run("komorebic.exe focus-workspace 1", , "Hide")
-            toggle := 1
-            num := "2"
-        } else {
-            Run("komorebic.exe focus-workspace 0", , "Hide")
-            toggle := 0
-            num := "1"
+#q::GoToWorkspace(CurrentWorkspace == 0 ? 1 : 0)
+
+;! Restart Glance
+;! Kills and restarts Glance with config
+^!g:: {
+    RestartGlance()
+    RestartGlance() {
+        try {
+            RunWait("taskkill /F /IM glance.exe", , "Hide")
         }
-        if (wsGui)
-            wsGui.Destroy()
-        wsGui := Gui("+AlwaysOnTop -Caption +ToolWindow")
-        wsGui.BackColor := "000000"
-        wsGui.SetFont("s80 bold", "Consolas")
-        wsGui.Add("Text", "cWhite Center w300 h120", num)
-        wsGui.Show("NoActivate")
-        WinGetPos(&x, &y, &w, &h, wsGui)
-        wsGui.Move((1920-w)/2, (1080-h)/2)
-        SetTimer(() => wsGui.Destroy(), -800)
+        Run('"C:\@delta\msBackups\glance\glance.exe" --config "C:\@delta\ms1\asset\Glance\glance.yml"', , "Hide")
     }
 }
 
