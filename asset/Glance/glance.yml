@@ -32,6 +32,7 @@ pages:
               - UCBJycsmduvYEL83R_U4JriQ # Marques Brownlee
               - UCHnyfMqiRRG1u-2MsSQLbXA # Veritasium
             api-key: AIzaSyDldspf8b3zX9IS2dmXjwDWzgRdORzUvl8
+            style: grid-cards
         
           - type: group
             widgets:
