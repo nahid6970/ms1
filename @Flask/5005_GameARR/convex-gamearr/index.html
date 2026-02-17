@@ -5,8 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GameARR</title>
   <style>
+    @import url("https://www.nerdfonts.com/assets/css/webfont.css");
+    
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: Arial, sans-serif; background: #1a1a1a; color: #fff; padding: 20px; }
+    body { font-family: 'JetBrainsMono NFP', Arial, sans-serif; background: #1a1a1a; color: #fff; padding: 20px; }
     .container { max-width: 1400px; margin: 0 auto; }
     h1 { text-align: center; margin-bottom: 20px; }
     .controls { display: flex; gap: 10px; margin-bottom: 20px; justify-content: center; flex-wrap: wrap; }
@@ -46,6 +48,15 @@
     .game-actions button { padding: 5px 10px; border: none; border-radius: 3px; cursor: pointer; font-size: 0.85em; }
     .edit-btn { background: #ffc107; color: #000; }
     .delete-btn { background: #dc3545; color: #fff; }
+    
+    .collection-info { margin-top: 10px; text-align: center; }
+    .collection-toggle { color: lightblue; cursor: pointer; font-size: 0.8em; display: inline-block; }
+    .collection-toggle::before { content: "▼ "; display: inline-block; margin-right: 5px; transition: transform 0.2s; }
+    .collection-toggle.collapsed::before { transform: rotate(-90deg); }
+    .collection-text { color: lightblue; font-size: 0.8em; display: none; margin-top: 5px; text-decoration: underline; }
+    .other-games { font-size: 0.75em; color: #aaa; margin-top: 5px; display: none; }
+    .other-games ul { list-style: none; padding: 0; }
+    .other-games li { margin: 3px 0; }
   </style>
 </head>
 <body>
@@ -180,6 +191,45 @@
       loadGames();
     };
 
+    let collectionCache = {};
+
+    window.toggleCollection = async (gameId, collectionName) => {
+      const toggle = document.querySelector(`#collection-${gameId}`).previousElementSibling;
+      const collectionText = document.getElementById(`collection-${gameId}`);
+      const otherGamesDiv = document.getElementById(`other-games-${gameId}`);
+      
+      toggle.classList.toggle('collapsed');
+      
+      const isExpanded = collectionText.style.display === 'block';
+      
+      if (!isExpanded) {
+        collectionText.style.display = 'block';
+        
+        if (!collectionCache[collectionName]) {
+          otherGamesDiv.style.display = 'block';
+          otherGamesDiv.innerHTML = 'Loading...';
+          
+          const allGames = await client.query("games:list");
+          const collectionGames = allGames.filter(g => g.collection === collectionName && g._id !== gameId);
+          
+          if (collectionGames.length > 0) {
+            otherGamesDiv.innerHTML = '<ul>' + collectionGames.map(g => 
+              `<li>${g.name} (${g.year || 'N/A'})</li>`
+            ).join('') + '</ul>';
+          } else {
+            otherGamesDiv.innerHTML = 'No other games in this collection.';
+          }
+          
+          collectionCache[collectionName] = true;
+        } else {
+          otherGamesDiv.style.display = 'block';
+        }
+      } else {
+        collectionText.style.display = 'none';
+        otherGamesDiv.style.display = 'none';
+      }
+    };
+
     window.loadGames = async () => {
       const searchQuery = document.getElementById('searchInput').value;
       const collectionFilter = document.getElementById('collectionFilter').value;
@@ -219,6 +269,13 @@
               <button class="edit-btn" onclick='editGame(${JSON.stringify(game)})'>Edit</button>
               <button class="delete-btn" onclick="deleteGame('${game._id}', '${game.name.replace(/'/g, "\\'")}')">Delete</button>
             </div>
+            ${game.collection ? `
+              <div class="collection-info">
+                <div class="collection-toggle collapsed" onclick="toggleCollection('${game._id}', '${game.collection.replace(/'/g, "\\'")}')">Collection</div>
+                <div class="collection-text" id="collection-${game._id}">${game.collection}</div>
+                <div class="other-games" id="other-games-${game._id}"></div>
+              </div>
+            ` : ''}
           </div>
         </div>
       `).join('');
