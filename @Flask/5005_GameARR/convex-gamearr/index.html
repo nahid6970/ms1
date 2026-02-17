@@ -44,10 +44,14 @@
     .game-year { color: #888; font-size: 0.9em; }
     .game-rating { color: #ffd700; }
     .game-progression { color: #4dfa47; font-size: 0.85em; }
-    .game-actions { display: flex; gap: 5px; margin-top: 10px; }
-    .game-actions button { padding: 5px 10px; border: none; border-radius: 3px; cursor: pointer; font-size: 0.85em; }
-    .edit-btn { background: #ffc107; color: #000; }
-    .delete-btn { background: #dc3545; color: #fff; }
+    .game-actions { display: flex; gap: 8px; margin-top: 10px; justify-content: center; }
+    .game-actions button, .game-actions a { padding: 8px 10px; border: none; border-radius: 5px; cursor: pointer; font-size: 0.85em; text-decoration: none; display: inline-block; }
+    .edit-btn { background: transparent; color: #fff; border: 2px solid #fff; }
+    .edit-btn:hover { background: #007bff; color: #fff; }
+    .delete-btn { background: transparent; color: rgb(255, 0, 0); border: 2px solid red; }
+    .delete-btn:hover { background: #ff0019; color: rgb(255, 254, 254); }
+    .ytreview-btn { background: transparent; color: rgb(253, 38, 38); border: 2px solid white; }
+    .ytreview-btn:hover { background: #dc3545; color: white; }
     
     .collection-info { margin-top: 10px; text-align: center; }
     .collection-toggle { color: lightblue; cursor: pointer; font-size: 0.8em; display: inline-block; }
@@ -278,8 +282,9 @@
             <div class="game-rating">${'⭐'.repeat(game.rating || 0)}</div>
             <div class="game-progression">${game.progression || ''}</div>
             <div class="game-actions">
-              <button class="edit-btn" onclick='editGame(${JSON.stringify(game)})'>Edit</button>
-              <button class="delete-btn" onclick="deleteGame('${game._id}', '${game.name.replace(/'/g, "\\'")}')">Delete</button>
+              <button class="edit-btn" onclick='editGame(${JSON.stringify(game)})'><i class="nf nf-fa-edit"></i></button>
+              <button class="delete-btn" onclick="deleteGame('${game._id}', '${game.name.replace(/'/g, "\\'")}')"><i class="nf nf-md-delete"></i></button>
+              <a class="ytreview-btn" href="https://www.youtube.com/results?search_query=${encodeURIComponent(game.name)}+review" target="_blank"><i class="nf nf-fa-youtube"></i></a>
             </div>
             ${game.collection ? `
               <div class="collection-info">
