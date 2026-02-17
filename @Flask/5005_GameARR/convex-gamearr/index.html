@@ -23,6 +23,7 @@
     .form-container h2 { margin-bottom: 20px; text-align: center; }
     .form-group { margin-bottom: 15px; }
     .form-group input, .form-group select { width: 100%; }
+    .form-buttons { display: flex; gap: 10px; justify-content: center; margin-top: 20px; }
     
     .rating-group { display: flex; justify-content: center; gap: 10px; margin-bottom: 15px; }
     .rating-group label { cursor: pointer; }
@@ -110,8 +111,10 @@
         <div class="form-group">
           <input type="text" id="gameCollection" placeholder="Collection">
         </div>
-        <button class="btn" onclick="saveGame()">Save</button>
-        <button class="btn" onclick="cancelForm()" style="background: #6c757d;">Cancel</button>
+        <div class="form-buttons">
+          <button class="btn" onclick="saveGame()">Save</button>
+          <button class="btn" onclick="cancelForm()" style="background: #6c757d;">Cancel</button>
+        </div>
       </div>
     </div>
 
