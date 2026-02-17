@@ -4,7 +4,33 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GameARR</title>
-  <link rel="stylesheet" href="style.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; background: #1a1a1a; color: #fff; padding: 20px; }
+    .container { max-width: 1400px; margin: 0 auto; }
+    h1 { text-align: center; margin-bottom: 20px; }
+    .controls { display: flex; gap: 10px; margin-bottom: 20px; justify-content: center; flex-wrap: wrap; }
+    .btn { padding: 10px 20px; background: #007bff; color: #fff; border: none; border-radius: 5px; cursor: pointer; }
+    .btn:hover { background: #0056b3; }
+    input, select { padding: 10px; border-radius: 5px; border: 1px solid #444; background: #2a2a2a; color: #fff; }
+    .form-container { background: #2a2a2a; padding: 20px; border-radius: 10px; margin-bottom: 20px; display: none; }
+    .form-container.active { display: block; }
+    .form-group { margin-bottom: 15px; }
+    .form-group input, .form-group select { width: 100%; }
+    .games-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
+    .game-card { background: #2a2a2a; border-radius: 10px; overflow: hidden; cursor: pointer; transition: transform 0.2s; }
+    .game-card:hover { transform: scale(1.05); }
+    .game-card img { width: 100%; height: 280px; object-fit: cover; }
+    .game-info { padding: 10px; }
+    .game-name { font-weight: bold; margin-bottom: 5px; }
+    .game-year { color: #888; font-size: 0.9em; }
+    .game-rating { color: #ffd700; }
+    .game-progression { color: #4dfa47; font-size: 0.85em; }
+    .game-actions { display: flex; gap: 5px; margin-top: 10px; }
+    .game-actions button { padding: 5px 10px; border: none; border-radius: 3px; cursor: pointer; font-size: 0.85em; }
+    .edit-btn { background: #ffc107; color: #000; }
+    .delete-btn { background: #dc3545; color: #fff; }
+  </style>
 </head>
 <body>
   <div class="container">
@@ -24,7 +50,8 @@
     </div>
 
     <div class="form-container" id="gameForm">
-      <h2>Add New Game</h2>
+      <h2 id="formTitle">Add New Game</h2>
+      <input type="hidden" id="gameId">
       <div class="form-group">
         <input type="text" id="gameName" placeholder="Game Name" required>
       </div>
@@ -50,13 +77,127 @@
       <div class="form-group">
         <input type="text" id="gameCollection" placeholder="Collection">
       </div>
-      <button class="btn" onclick="addGame()">Add Game</button>
-      <button class="btn" onclick="toggleForm()" style="background: #6c757d;">Cancel</button>
+      <button class="btn" onclick="saveGame()">Save</button>
+      <button class="btn" onclick="cancelForm()" style="background: #6c757d;">Cancel</button>
     </div>
 
     <div class="games-grid" id="gamesGrid"></div>
   </div>
 
-  <script type="module" src="app.js"></script>
+  <script type="module">
+    import { ConvexHttpClient } from "https://esm.sh/convex@1.16.0/browser";
+
+    const client = new ConvexHttpClient("https://hearty-bloodhound-550.convex.cloud");
+
+    window.toggleForm = () => {
+      document.getElementById('gameForm').classList.toggle('active');
+    };
+
+    window.cancelForm = () => {
+      document.getElementById('gameForm').classList.remove('active');
+      clearForm();
+    };
+
+    function clearForm() {
+      document.getElementById('gameId').value = '';
+      document.getElementById('gameName').value = '';
+      document.getElementById('gameYear').value = '';
+      document.getElementById('gameImage').value = '';
+      document.getElementById('gameUrl').value = '';
+      document.getElementById('gameRating').value = '';
+      document.getElementById('gameProgression').value = 'Unplayed🆕';
+      document.getElementById('gameCollection').value = '';
+      document.getElementById('formTitle').textContent = 'Add New Game';
+    }
+
+    window.saveGame = async () => {
+      const id = document.getElementById('gameId').value;
+      const name = document.getElementById('gameName').value;
+      const year = document.getElementById('gameYear').value;
+      const image = document.getElementById('gameImage').value;
+      const url = document.getElementById('gameUrl').value;
+      const rating = parseInt(document.getElementById('gameRating').value) || 0;
+      const progression = document.getElementById('gameProgression').value;
+      const collection = document.getElementById('gameCollection').value;
+      
+      if (!name) return alert('Game name is required');
+      
+      if (id) {
+        await client.mutation("games:update", { id, name, year, image, url, rating, progression, collection });
+      } else {
+        await client.mutation("games:add", { name, year, image, url, rating, progression, collection });
+      }
+      
+      cancelForm();
+      loadGames();
+    };
+
+    window.editGame = (game) => {
+      document.getElementById('gameId').value = game._id;
+      document.getElementById('gameName').value = game.name;
+      document.getElementById('gameYear').value = game.year || '';
+      document.getElementById('gameImage').value = game.image || '';
+      document.getElementById('gameUrl').value = game.url || '';
+      document.getElementById('gameRating').value = game.rating || '';
+      document.getElementById('gameProgression').value = game.progression || 'Unplayed🆕';
+      document.getElementById('gameCollection').value = game.collection || '';
+      document.getElementById('formTitle').textContent = 'Edit Game';
+      document.getElementById('gameForm').classList.add('active');
+    };
+
+    window.deleteGame = async (id, name) => {
+      if (!confirm(`Delete "${name}"?`)) return;
+      await client.mutation("games:remove", { id });
+      loadGames();
+    };
+
+    window.loadGames = async () => {
+      const searchQuery = document.getElementById('searchInput').value;
+      const collectionFilter = document.getElementById('collectionFilter').value;
+      const sortBy = document.getElementById('sortBy').value;
+      
+      let games = searchQuery 
+        ? await client.query("games:search", { query: searchQuery })
+        : await client.query("games:list");
+      
+      if (collectionFilter) {
+        games = games.filter(g => g.collection === collectionFilter);
+      }
+      
+      games.sort((a, b) => {
+        if (sortBy === 'name') return a.name.localeCompare(b.name);
+        if (sortBy === 'year') return (b.year || '').localeCompare(a.year || '');
+        if (sortBy === 'rating') return (b.rating || 0) - (a.rating || 0);
+        return 0;
+      });
+      
+      const collections = [...new Set(games.map(g => g.collection).filter(c => c))];
+      const collectionSelect = document.getElementById('collectionFilter');
+      const currentValue = collectionSelect.value;
+      collectionSelect.innerHTML = '<option value="">All Collections</option>' + 
+        collections.map(c => `<option value="${c}">${c}</option>`).join('');
+      collectionSelect.value = currentValue;
+      
+      document.getElementById('gamesGrid').innerHTML = games.map(game => `
+        <div class="game-card">
+          <img src="${game.image || 'https://via.placeholder.com/200x280?text=No+Image'}" alt="${game.name}" onclick="window.open('${game.url || '#'}', '_blank')" style="cursor: pointer;">
+          <div class="game-info">
+            <div class="game-name">${game.name}</div>
+            <div class="game-year">${game.year || 'N/A'}</div>
+            <div class="game-rating">${'⭐'.repeat(game.rating || 0)}</div>
+            <div class="game-progression">${game.progression || ''}</div>
+            <div class="game-actions">
+              <button class="edit-btn" onclick='editGame(${JSON.stringify(game)})'>Edit</button>
+              <button class="delete-btn" onclick="deleteGame('${game._id}', '${game.name.replace(/'/g, "\\'")}')">Delete</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    };
+
+    document.getElementById('searchInput').addEventListener('input', loadGames);
+
+    loadGames();
+  </script>
 </body>
 </html>
