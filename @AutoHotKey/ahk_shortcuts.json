@@ -87,8 +87,8 @@
             "description": "Kills and restarts Glance with config",
             "hotkey": "^!g",
             "action": "RestartGlance()\nRestartGlance() {\n    try {\n        RunWait(\"taskkill /F /IM glance.exe\", , \"Hide\")\n    }\n    Run('\"C:\\@delta\\msBackups\\glance\\glance.exe\" --config \"C:\\@delta\\ms1\\asset\\Glance\\glance.yml\"', , \"Hide\")\n}",
-             "enabled": true
-         },
+            "enabled": true
+        },
         {
             "name": "Script Manager",
             "category": "Launch",
@@ -450,6 +450,14 @@
             "description": "",
             "trigger": ";dot",
             "replacement": "💠",
+            "enabled": true
+        },
+        {
+            "name": "Cloudinary Name",
+            "category": "General",
+            "description": "",
+            "trigger": ";cloud",
+            "replacement": "dwc7hjiub",
             "enabled": true
         }
     ],
