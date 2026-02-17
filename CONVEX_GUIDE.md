@@ -100,84 +100,85 @@ If file is `convex/functions.ts`, call functions as:
 - `functions:add`
 - `functions:update`
 
-## Frontend (Simple HTML + JavaScript)
+## Frontend (Separate Files)
 
-### Basic Template (No Framework)
+### File Structure
+```
+project/
+├── index.html
+├── style.css
+└── app.js
+```
+
+### index.html
 ```html
 <!DOCTYPE html>
 <html>
 <head>
   <title>App</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div id="app"></div>
-
-  <script type="module">
-    import { ConvexHttpClient } from "https://esm.sh/convex@1.16.0/browser";
-    
-    const client = new ConvexHttpClient("YOUR_CONVEX_URL_HERE");
-    
-    // Query data
-    async function loadData() {
-      const data = await client.query("functions:list");
-      document.getElementById('app').innerHTML = data.map(item => 
-        `<div>${item.title}</div>`
-      ).join('');
-    }
-    
-    // Mutate data
-    async function addItem(title, content) {
-      await client.mutation("functions:add", { title, content });
-      loadData();
-    }
-    
-    loadData();
-  </script>
+  <script type="module" src="app.js"></script>
 </body>
 </html>
 ```
 
-### With Markdown Support (Optional)
-```html
-<!DOCTYPE html>
-<html>
-<head>
-  <title>App</title>
-  <style>
-    .content { color: #666; }
-    .content h1, .content h2, .content h3 { margin: 10px 0 5px 0; }
-    .content p { margin: 5px 0; }
-    .content code { background: #f4f4f4; padding: 2px 5px; border-radius: 3px; font-family: monospace; }
-    .content pre { background: #f4f4f4; padding: 10px; border-radius: 5px; overflow-x: auto; }
-    .content pre code { background: none; padding: 0; }
-    .content ul, .content ol { margin-left: 20px; }
-    .content table { border-collapse: collapse; width: 100%; margin: 10px 0; }
-    .content table th, .content table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-    .content table th { background: #f4f4f4; font-weight: bold; }
-  </style>
-</head>
-<body>
-  <div id="app"></div>
+### style.css
+```css
+body {
+  font-family: Arial, sans-serif;
+  padding: 20px;
+}
 
-  <script type="module">
-    import { ConvexHttpClient } from "https://esm.sh/convex@1.16.0/browser";
-    import { marked } from "https://esm.sh/marked@11.1.1";
-    
-    marked.setOptions({ gfm: true, breaks: true });
-    
-    const client = new ConvexHttpClient("YOUR_CONVEX_URL_HERE");
-    
-    async function loadData() {
-      const data = await client.query("functions:list");
-      document.getElementById('app').innerHTML = data.map(item => 
-        `<div class="content">${marked.parse(item.content)}</div>`
-      ).join('');
-    }
-    
-    loadData();
-  </script>
-</body>
-</html>
+.content {
+  color: #666;
+  margin: 10px 0;
+}
+```
+
+### app.js
+```javascript
+import { ConvexHttpClient } from "https://esm.sh/convex@1.16.0/browser";
+
+const client = new ConvexHttpClient("YOUR_CONVEX_URL_HERE");
+
+// Query data
+async function loadData() {
+  const data = await client.query("functions:list");
+  document.getElementById('app').innerHTML = data.map(item => 
+    `<div>${item.title}</div>`
+  ).join('');
+}
+
+// Mutate data
+async function addItem(title, content) {
+  await client.mutation("functions:add", { title, content });
+  loadData();
+}
+
+loadData();
+```
+
+### With Markdown Support (Optional)
+Add to `app.js`:
+```javascript
+import { ConvexHttpClient } from "https://esm.sh/convex@1.16.0/browser";
+import { marked } from "https://esm.sh/marked@11.1.1";
+
+marked.setOptions({ gfm: true, breaks: true });
+
+const client = new ConvexHttpClient("YOUR_CONVEX_URL_HERE");
+
+async function loadData() {
+  const data = await client.query("functions:list");
+  document.getElementById('app').innerHTML = data.map(item => 
+    `<div class="content">${marked.parse(item.content)}</div>`
+  ).join('');
+}
+
+loadData();
 ```
 
 ## Deployment Workflow

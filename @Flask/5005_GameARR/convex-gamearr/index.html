@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GameARR</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>GameARR</h1>
+    
+    <div class="controls">
+      <button class="btn" onclick="toggleForm()">Add Game</button>
+      <input type="text" id="searchInput" placeholder="Search games..." style="width: 300px;">
+      <select id="collectionFilter" onchange="loadGames()">
+        <option value="">All Collections</option>
+      </select>
+      <select id="sortBy" onchange="loadGames()">
+        <option value="name">Name</option>
+        <option value="year">Year</option>
+        <option value="rating">Rating</option>
+      </select>
+    </div>
+
+    <div class="form-container" id="gameForm">
+      <h2>Add New Game</h2>
+      <div class="form-group">
+        <input type="text" id="gameName" placeholder="Game Name" required>
+      </div>
+      <div class="form-group">
+        <input type="text" id="gameYear" placeholder="Year">
+      </div>
+      <div class="form-group">
+        <input type="text" id="gameImage" placeholder="Image URL">
+      </div>
+      <div class="form-group">
+        <input type="text" id="gameUrl" placeholder="Game URL">
+      </div>
+      <div class="form-group">
+        <input type="number" id="gameRating" placeholder="Rating (1-5)" min="1" max="5">
+      </div>
+      <div class="form-group">
+        <select id="gameProgression">
+          <option value="Unplayed🆕">Unplayed🆕</option>
+          <option value="Unfinished">Unfinished</option>
+          <option value="Complete">Complete</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <input type="text" id="gameCollection" placeholder="Collection">
+      </div>
+      <button class="btn" onclick="addGame()">Add Game</button>
+      <button class="btn" onclick="toggleForm()" style="background: #6c757d;">Cancel</button>
+    </div>
+
+    <div class="games-grid" id="gamesGrid"></div>
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
