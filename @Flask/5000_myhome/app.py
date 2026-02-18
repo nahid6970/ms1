@@ -149,6 +149,8 @@ def read_sidebar_buttons():
 def write_sidebar_buttons(data):
     with open(SIDEBAR_BUTTONS_FILE, 'w') as f:
         json.dump(data, f, indent=2)
+    # Auto-generate static HTML after sidebar buttons update
+    generate_static_html()
 
 # Function to generate static HTML
 def generate_static_html():
