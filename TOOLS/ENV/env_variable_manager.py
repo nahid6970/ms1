@@ -1070,55 +1070,92 @@ class EnvVariableManager(QMainWindow):
             if type_text == "GROUP":
                 parent_path = self.context_table.item(row, 0).data(Qt.ItemDataRole.UserRole)
 
-        name, ok1 = QInputDialog.getText(self, "Add Context Entry", "Menu Label (e.g. 'Open Terminal Here'):")
-        if ok1 and name:
-            cmd, ok2 = QInputDialog.getText(self, "Add Context Entry", f"Command to execute for '{name}':\n(Use %V for directory, %1 for file path)")
-            if ok2 and cmd:
-                try:
-                    if parent_path:
-                        # Add as child of selected group
-                        self._create_reg_entry(rf"{parent_path}\shell\{name}", cmd)
-                        self.load_context_entries()
-                        self.set_status(f"Added context menu entry: {name} to group", CP_GREEN)
-                    else:
-                        # Ask where to add
-                        from PyQt6.QtWidgets import QCheckBox
-                        dialog = QDialog(self)
-                        dialog.setWindowTitle("Context Menu Scope")
-                        layout = QVBoxLayout(dialog)
-                        
-                        layout.addWidget(QLabel("Where should this menu item appear?"))
-                        
-                        cb_files = QCheckBox("Files (right-click on any file)")
-                        cb_folders = QCheckBox("Folders (right-click on folder)")
-                        cb_background = QCheckBox("Folder Background (right-click on empty space)")
-                        
-                        cb_files.setChecked(True)
-                        
-                        layout.addWidget(cb_files)
-                        layout.addWidget(cb_folders)
-                        layout.addWidget(cb_background)
-                        
-                        buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
-                        buttons.accepted.connect(dialog.accept)
-                        buttons.rejected.connect(dialog.reject)
-                        layout.addWidget(buttons)
-                        
-                        if dialog.exec() != QDialog.DialogCode.Accepted:
-                            return
-                        
-                        # Create entries based on selection
-                        if cb_files.isChecked():
-                            self._create_reg_entry(rf"Software\Classes\*\shell\{name}", cmd)
-                        if cb_folders.isChecked():
-                            self._create_reg_entry(rf"Software\Classes\Directory\shell\{name}", cmd)
-                        if cb_background.isChecked():
-                            self._create_reg_entry(rf"Software\Classes\Directory\Background\shell\{name}", cmd)
-                        
-                        self.load_context_entries()
-                        self.set_status(f"Added context menu entry: {name}", CP_GREEN)
-                except Exception as e:
-                    QMessageBox.critical(self, "Error", f"Failed to add entry: {str(e)}")
+        # Create dialog with all fields
+        from PyQt6.QtWidgets import QCheckBox
+        dialog = QDialog(self)
+        dialog.setWindowTitle("Add Context Entry")
+        dialog.setMinimumWidth(500)
+        dialog_layout = QVBoxLayout(dialog)
+        
+        form_layout = QFormLayout()
+        
+        # Menu label
+        label_edit = QLineEdit()
+        label_edit.setPlaceholderText("e.g. 'Open Terminal Here'")
+        form_layout.addRow("Menu Label:", label_edit)
+        
+        # Command
+        cmd_edit = QLineEdit()
+        cmd_edit.setPlaceholderText("Use %V for directory, %1 for file path")
+        form_layout.addRow("Command:", cmd_edit)
+        
+        # Icon
+        icon_layout = QHBoxLayout()
+        icon_edit = QLineEdit()
+        icon_edit.setPlaceholderText("Optional icon path")
+        icon_browse = QPushButton("Browse...")
+        icon_browse.clicked.connect(lambda: self._browse_icon(icon_edit))
+        icon_layout.addWidget(icon_edit)
+        icon_layout.addWidget(icon_browse)
+        form_layout.addRow("Icon:", icon_layout)
+        
+        dialog_layout.addLayout(form_layout)
+        
+        # Scope selection (only if not adding to a group)
+        scope_group = None
+        cb_files = cb_folders = cb_background = None
+        if not parent_path:
+            scope_group = QGroupBox("Where should this appear?")
+            scope_layout = QVBoxLayout()
+            
+            cb_files = QCheckBox("Files (right-click on any file)")
+            cb_folders = QCheckBox("Folders (right-click on folder)")
+            cb_background = QCheckBox("Folder Background (right-click on empty space)")
+            
+            cb_files.setChecked(True)
+            
+            scope_layout.addWidget(cb_files)
+            scope_layout.addWidget(cb_folders)
+            scope_layout.addWidget(cb_background)
+            scope_group.setLayout(scope_layout)
+            dialog_layout.addWidget(scope_group)
+        
+        # Buttons
+        buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
+        buttons.accepted.connect(dialog.accept)
+        buttons.rejected.connect(dialog.reject)
+        dialog_layout.addWidget(buttons)
+        
+        if dialog.exec() != QDialog.DialogCode.Accepted:
+            return
+        
+        name = label_edit.text().strip()
+        cmd = cmd_edit.text().strip()
+        icon = icon_edit.text().strip()
+        
+        if not name or not cmd:
+            QMessageBox.warning(self, "Error", "Label and Command are required!")
+            return
+        
+        try:
+            if parent_path:
+                # Add as child of selected group
+                self._create_reg_entry(rf"{parent_path}\shell\{name}", cmd, icon)
+                self.load_context_entries()
+                self.set_status(f"Added context menu entry: {name} to group", CP_GREEN)
+            else:
+                # Create entries based on selection
+                if cb_files.isChecked():
+                    self._create_reg_entry(rf"Software\Classes\*\shell\{name}", cmd, icon)
+                if cb_folders.isChecked():
+                    self._create_reg_entry(rf"Software\Classes\Directory\shell\{name}", cmd, icon)
+                if cb_background.isChecked():
+                    self._create_reg_entry(rf"Software\Classes\Directory\Background\shell\{name}", cmd, icon)
+                
+                self.load_context_entries()
+                self.set_status(f"Added context menu entry: {name}", CP_GREEN)
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Failed to add entry: {str(e)}")
 
     def edit_context_entry(self):
         """Edit selected context menu entry"""
@@ -1258,11 +1295,15 @@ class EnvVariableManager(QMainWindow):
         if icon_path:
             line_edit.setText(icon_path)
 
-    def _create_reg_entry(self, path, command):
+    def _create_reg_entry(self, path, command, icon=""):
         """Helper to create registry keys for context menu in HKCU"""
         key = winreg.CreateKey(winreg.HKEY_CURRENT_USER, path)
         label = path.split('\\')[-1]
-        winreg.SetValue(key, "", winreg.REG_SZ, label) 
+        winreg.SetValue(key, "", winreg.REG_SZ, label)
+        
+        # Set icon if provided
+        if icon:
+            winreg.SetValueEx(key, "Icon", 0, winreg.REG_SZ, icon)
         
         cmd_key = winreg.CreateKey(key, "command")
         winreg.SetValue(cmd_key, "", winreg.REG_SZ, command)
