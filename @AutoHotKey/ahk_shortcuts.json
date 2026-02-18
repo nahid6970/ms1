@@ -459,6 +459,14 @@
             "trigger": ";cloud",
             "replacement": "dwc7hjiub",
             "enabled": true
+        },
+        {
+            "name": "domain full name",
+            "category": "General",
+            "description": "domain name",
+            "trigger": ";domain",
+            "replacement": "nahid@192.168.0.101",
+            "enabled": true
         }
     ],
     "startup_scripts": [

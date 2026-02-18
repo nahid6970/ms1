@@ -1490,3 +1490,7 @@ CONFIG_FILE = os.path.join(SCRIPT_DIR, ""projects_config.json"")
 
 ;! Cloudinary Name
 :X:;cloud::Paste('dwc7hjiub')
+
+;! domain full name
+;! domain name
+:X:;domain::Paste('nahid@192.168.0.101')
