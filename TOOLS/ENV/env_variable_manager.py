@@ -844,8 +844,6 @@ class EnvVariableManager(QMainWindow):
         controls_layout = QHBoxLayout()
         add_btn = QPushButton("➕ ADD ENTRY")
         add_group_btn = QPushButton("📁 ADD GROUP")
-        sep_btn = QPushButton("➖ SEPARATOR")
-        icon_btn = QPushButton("🖼️ SET ICON")
         edit_btn = QPushButton("✏️ EDIT")
         remove_btn = QPushButton("❌ REMOVE")
         up_btn = QPushButton("⬆️ MOVE UP")
@@ -854,8 +852,6 @@ class EnvVariableManager(QMainWindow):
         
         add_btn.clicked.connect(self.add_context_entry)
         add_group_btn.clicked.connect(self.add_context_group)
-        sep_btn.clicked.connect(self.add_context_separator)
-        icon_btn.clicked.connect(self.set_context_icon)
         edit_btn.clicked.connect(self.edit_context_entry)
         remove_btn.clicked.connect(self.remove_context_entry)
         up_btn.clicked.connect(self.move_context_up)
@@ -864,8 +860,6 @@ class EnvVariableManager(QMainWindow):
         
         controls_layout.addWidget(add_btn)
         controls_layout.addWidget(add_group_btn)
-        controls_layout.addWidget(sep_btn)
-        controls_layout.addWidget(icon_btn)
         controls_layout.addWidget(edit_btn)
         controls_layout.addWidget(remove_btn)
         controls_layout.addWidget(up_btn)
