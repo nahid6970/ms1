@@ -1,10 +1,10 @@
 {
     "version": "1.3",
-    "timestamp": "2026-02-14T22:15:49.842330",
+    "timestamp": "2026-02-18T13:49:52.035587",
     "user_env": {
         "chocolateyinstall": "C:\\Users\\nahid\\AppData\\Local\\UniGetUI\\Chocolatey",
         "OneDrive": "C:\\Users\\nahid\\OneDrive",
-        "Path": "C:\\Users\\nahid\\go\\bin;C:\\Users\\nahid\\scoop\\apps\\git\\current\\cmd;C:\\Users\\nahid\\scoop\\apps\\gcc\\current\\bin;C:\\Users\\nahid\\scoop\\apps\\nodejs-lts\\current\\bin;C:\\Users\\nahid\\scoop\\apps\\nodejs-lts\\current;C:\\Users\\nahid\\scoop\\apps\\perl\\current\\perl\\site\\bin;C:\\Users\\nahid\\scoop\\apps\\perl\\current\\perl\\bin;C:\\Users\\nahid\\.local\\bin;C:\\Users\\nahid\\scoop\\apps\\python312\\current\\Scripts;C:\\Users\\nahid\\scoop\\apps\\python312\\current;C:\\Users\\nahid\\AppData\\Local\\UniGetUI\\Chocolatey\\bin;C:\\Users\\nahid\\scoop\\shims;C:\\Users\\nahid\\AppData\\Local\\Microsoft\\WindowsApps;C:\\Users\\nahid\\AppData\\Local\\Programs\\Microsoft VS Code\\bin;C:\\Users\\nahid\\.cache\\lm-studio\\bin;C:\\Users\\nahid\\AppData\\Local\\Programs\\Ollama;C:\\Users\\nahid\\AppData\\Local\\Microsoft\\WinGet\\Packages\\aria2.aria2_Microsoft.Winget.Source_8wekyb3d8bbwe\\aria2-1.37.0-win-64bit-build1;C:\\Users\\nahid\\AppData\\Local\\Programs\\superfile\\;%USERPROFILE%\\.dotnet\\tools;C:\\Users\\nahid\\AppData\\Local\\Programs\\Kiro\\bin;C:\\Users\\nahid\\scoop\\apps\\msys2\\current\\usr\\bin;C:\\Users\\nahid\\scoop\\apps\\msys2\\current\\mingw64\\bin;C:\\Users\\nahid\\AppData\\Local\\Microsoft\\WinGet\\Links;C:\\Users\\nahid\\AppData\\Local\\Programs\\Antigravity\\bin",
+        "Path": "C:\\Users\\nahid\\go\\bin;C:\\Users\\nahid\\scoop\\apps\\git\\current\\cmd;C:\\Users\\nahid\\scoop\\apps\\gcc\\current\\bin;C:\\Users\\nahid\\scoop\\apps\\nodejs-lts\\current\\bin;C:\\Users\\nahid\\scoop\\apps\\nodejs-lts\\current;C:\\Users\\nahid\\scoop\\apps\\perl\\current\\perl\\site\\bin;C:\\Users\\nahid\\scoop\\apps\\perl\\current\\perl\\bin;C:\\Users\\nahid\\.local\\bin;C:\\Users\\nahid\\scoop\\apps\\python312\\current\\Scripts;C:\\Users\\nahid\\scoop\\apps\\python312\\current;C:\\Users\\nahid\\AppData\\Local\\UniGetUI\\Chocolatey\\bin;C:\\Users\\nahid\\scoop\\shims;C:\\Users\\nahid\\AppData\\Local\\Microsoft\\WindowsApps;C:\\Users\\nahid\\AppData\\Local\\Programs\\Microsoft VS Code\\bin;C:\\Users\\nahid\\.cache\\lm-studio\\bin;C:\\Users\\nahid\\AppData\\Local\\Programs\\Ollama;C:\\Users\\nahid\\AppData\\Local\\Microsoft\\WinGet\\Packages\\aria2.aria2_Microsoft.Winget.Source_8wekyb3d8bbwe\\aria2-1.37.0-win-64bit-build1;C:\\Users\\nahid\\AppData\\Local\\Programs\\superfile\\;%USERPROFILE%\\.dotnet\\tools;C:\\Users\\nahid\\AppData\\Local\\Programs\\Kiro\\bin;C:\\Users\\nahid\\scoop\\apps\\msys2\\current\\usr\\bin;C:\\Users\\nahid\\scoop\\apps\\msys2\\current\\mingw64\\bin;C:\\Users\\nahid\\AppData\\Local\\Microsoft\\WinGet\\Links;C:\\Users\\nahid\\AppData\\Local\\Programs\\Antigravity\\bin;C:\\Users\\nahid\\AppData\\Local\\Programs\\cursor\\resources\\app\\bin",
         "SCROLLVIEW_PATH": "C:\\Users\\nahid\\scoop\\persist\\tesseract\\tessdata",
         "TEMP": "%USERPROFILE%\\AppData\\Local\\Temp",
         "TESSDATA_PREFIX": "C:\\Users\\nahid\\scoop\\persist\\tesseract\\tessdata",
@@ -79,6 +79,10 @@
                     "Kiro CLI": {
                         "MUIVerb": "Kiro CLI",
                         "command": "wsl.exe --cd \"%V\" bash -ic \"mkdir -p ~/.local/bin && echo '#!/bin/bash' > ~/.local/bin/kiro-with-model && echo '~/.local/bin/kiro-cli chat --trust-all-tools \\\"/model\\\"' >> ~/.local/bin/kiro-with-model && chmod +x ~/.local/bin/kiro-with-model && ~/.local/bin/kiro-with-model\""
+                    },
+                    "Kiro CLI Resume": {
+                        "MUIVerb": "Kiro CLI Resume",
+                        "command": "wsl.exe --cd \"%V\" bash -ic \"mkdir -p ~/.local/bin && echo '#!/bin/bash' > ~/.local/bin/kiro-with-model && echo '~/.local/bin/kiro-cli chat --trust-all-tools --resume' >> ~/.local/bin/kiro-with-model && chmod +x ~/.local/bin/kiro-with-model && ~/.local/bin/kiro-with-model\""
                     }
                 }
             },
