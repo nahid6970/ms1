@@ -1074,7 +1074,7 @@ class EnvVariableManager(QMainWindow):
         from PyQt6.QtWidgets import QCheckBox
         dialog = QDialog(self)
         dialog.setWindowTitle("Add Context Entry")
-        dialog.setMinimumWidth(500)
+        dialog.setMinimumWidth(700)
         dialog_layout = QVBoxLayout(dialog)
         
         form_layout = QFormLayout()
@@ -1085,8 +1085,9 @@ class EnvVariableManager(QMainWindow):
         form_layout.addRow("Menu Label:", label_edit)
         
         # Command
-        cmd_edit = QLineEdit()
+        cmd_edit = QTextEdit()
         cmd_edit.setPlaceholderText("Use %V for directory, %1 for file path")
+        cmd_edit.setMaximumHeight(60)
         form_layout.addRow("Command:", cmd_edit)
         
         # Icon
@@ -1130,7 +1131,7 @@ class EnvVariableManager(QMainWindow):
             return
         
         name = label_edit.text().strip()
-        cmd = cmd_edit.text().strip()
+        cmd = cmd_edit.toPlainText().strip()
         icon = icon_edit.text().strip()
         
         if not name or not cmd:
@@ -1189,7 +1190,7 @@ class EnvVariableManager(QMainWindow):
         from PyQt6.QtWidgets import QDialog, QDialogButtonBox
         dialog = QDialog(self)
         dialog.setWindowTitle("Edit Context Entry")
-        dialog.setMinimumWidth(500)
+        dialog.setMinimumWidth(700)
         dialog_layout = QVBoxLayout(dialog)
         
         form_layout = QFormLayout()
@@ -1201,7 +1202,9 @@ class EnvVariableManager(QMainWindow):
         # Command field (only for ENTRY type)
         cmd_edit = None
         if type_text == "ENTRY":
-            cmd_edit = QLineEdit(old_cmd)
+            cmd_edit = QTextEdit()
+            cmd_edit.setPlainText(old_cmd)
+            cmd_edit.setMaximumHeight(60)
             form_layout.addRow("Command:", cmd_edit)
         
         # Icon field
@@ -1225,7 +1228,7 @@ class EnvVariableManager(QMainWindow):
             return
         
         new_label = label_edit.text().strip()
-        new_cmd = cmd_edit.text().strip() if cmd_edit else "(Cascading Menu)"
+        new_cmd = cmd_edit.toPlainText().strip() if cmd_edit else "(Cascading Menu)"
         new_icon = icon_edit.text().strip()
         
         if not new_label:
