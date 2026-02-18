@@ -1078,22 +1078,48 @@ class EnvVariableManager(QMainWindow):
 
         name, ok1 = QInputDialog.getText(self, "Add Context Entry", "Menu Label (e.g. 'Open Terminal Here'):")
         if ok1 and name:
-            cmd, ok2 = QInputDialog.getText(self, "Add Context Entry", f"Command to execute for '{name}':\n(Use %V for current directory)")
+            cmd, ok2 = QInputDialog.getText(self, "Add Context Entry", f"Command to execute for '{name}':\n(Use %V for directory, %1 for file path)")
             if ok2 and cmd:
-                # Auto-fix common placeholder mistakes
-                cmd = cmd.replace("{path}", "\"%V\"").replace("%1", "\"%V\"")
-                
                 try:
                     if parent_path:
                         # Add as child of selected group
-                        # parent_path is already in HKCU format (Software\Classes\...)
                         self._create_reg_entry(rf"{parent_path}\shell\{name}", cmd)
-                        
                         self.load_context_entries()
                         self.set_status(f"Added context menu entry: {name} to group", CP_GREEN)
                     else:
-                        # Add to top level - only Background to avoid duplicates
-                        self._create_reg_entry(rf"Software\Classes\Directory\Background\shell\{name}", cmd)
+                        # Ask where to add
+                        from PyQt6.QtWidgets import QCheckBox
+                        dialog = QDialog(self)
+                        dialog.setWindowTitle("Context Menu Scope")
+                        layout = QVBoxLayout(dialog)
+                        
+                        layout.addWidget(QLabel("Where should this menu item appear?"))
+                        
+                        cb_files = QCheckBox("Files (right-click on any file)")
+                        cb_folders = QCheckBox("Folders (right-click on folder)")
+                        cb_background = QCheckBox("Folder Background (right-click on empty space)")
+                        
+                        cb_files.setChecked(True)
+                        
+                        layout.addWidget(cb_files)
+                        layout.addWidget(cb_folders)
+                        layout.addWidget(cb_background)
+                        
+                        buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
+                        buttons.accepted.connect(dialog.accept)
+                        buttons.rejected.connect(dialog.reject)
+                        layout.addWidget(buttons)
+                        
+                        if dialog.exec() != QDialog.DialogCode.Accepted:
+                            return
+                        
+                        # Create entries based on selection
+                        if cb_files.isChecked():
+                            self._create_reg_entry(rf"Software\Classes\*\shell\{name}", cmd)
+                        if cb_folders.isChecked():
+                            self._create_reg_entry(rf"Software\Classes\Directory\shell\{name}", cmd)
+                        if cb_background.isChecked():
+                            self._create_reg_entry(rf"Software\Classes\Directory\Background\shell\{name}", cmd)
                         
                         self.load_context_entries()
                         self.set_status(f"Added context menu entry: {name}", CP_GREEN)
