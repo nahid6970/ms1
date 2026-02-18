@@ -9,148 +9,43 @@ from datetime import datetime
 app = Flask(__name__)
 
 DATA_FILE = r'C:\@delta\ms1\@Flask\5000_myhome\data.json'
-SIDEBAR_BUTTONS_FILE = r'C:\@delta\ms1\@Flask\5000_myhome\sidebar_buttons.json'
 
-# Helper function to read data from JSON file
-def read_data():
+# Helper function to read all data from JSON file
+def read_all_data():
     if not os.path.exists(DATA_FILE):
-        return []
-    with open(DATA_FILE, 'r') as f:
+        return {"sidebar_buttons": [], "links": []}
+    with open(DATA_FILE, 'r', encoding='utf-8') as f:
         return json.load(f)
 
-# Helper function to write data to JSON file
-def write_data(data):
-    with open(DATA_FILE, 'w') as f:
+# Helper function to write all data to JSON file
+def write_all_data(data):
+    with open(DATA_FILE, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=2)
     # Auto-generate static HTML after data update
     generate_static_html()
 
-# Helper function to read sidebar buttons from JSON file
-def read_sidebar_buttons():
-    if not os.path.exists(SIDEBAR_BUTTONS_FILE):
-        # Default sidebar buttons
-        default_buttons = [
-            {
-                "id": "tv-button",
-                "name": "TV Shows",
-                "display_type": "icon",
-                "icon_class": "nf nf-md-television_classic",
-                "img_src": "",
-                "url": "http://192.168.0.101:5011/",
-                "has_notification": True,
-                "notification_api": "/api/tv-notifications",
-                "mark_seen_api": "/api/mark-all-tv-seen",
-                "text_color": "#000000",
-                "bg_color": "#ffffff",
-                "hover_color": "#e0e0e0",
-                "border_color": "#cccccc",
-                "border_radius": "4px",
-                "font_size": "16px"
-            },
-            {
-                "id": "movie-button", 
-                "name": "Movies",
-                "display_type": "icon",
-                "icon_class": "nf nf-md-movie_roll",
-                "img_src": "",
-                "url": "http://192.168.0.101:5013/",
-                "has_notification": True,
-                "notification_api": "/api/movie-notifications",
-                "mark_seen_api": "/api/mark-all-movies-seen",
-                "text_color": "#000000",
-                "bg_color": "#ffffff",
-                "hover_color": "#e0e0e0",
-                "border_color": "#cccccc",
-                "border_radius": "4px",
-                "font_size": "16px"
-            },
-            {
-                "id": "drive-button",
-                "name": "Drive",
-                "display_type": "icon",
-                "icon_class": "nf nf-fa-hard_drive",
-                "img_src": "",
-                "url": "http://192.168.0.101:5003/",
-                "has_notification": False,
-                "text_color": "#000000",
-                "bg_color": "#ffffff",
-                "hover_color": "#e0e0e0",
-                "border_color": "#cccccc",
-                "border_radius": "4px",
-                "font_size": "16px"
-            },
-            {
-                "id": "education-button",
-                "name": "Education",
-                "display_type": "icon",
-                "icon_class": "nf nf-md-book_education", 
-                "img_src": "",
-                "url": "http://192.168.0.101:5015/",
-                "has_notification": False,
-                "text_color": "#000000",
-                "bg_color": "#ffffff",
-                "hover_color": "#e0e0e0",
-                "border_color": "#cccccc",
-                "border_radius": "4px",
-                "font_size": "16px"
-            },
-            {
-                "id": "rocket-button",
-                "name": "Rocket",
-                "display_type": "icon",
-                "icon_class": "nf nf-fa-rocket",
-                "img_src": "",
-                "url": "http://192.168.0.101:4999/",
-                "has_notification": False,
-                "text_color": "#000000",
-                "bg_color": "#ffffff",
-                "hover_color": "#e0e0e0",
-                "border_color": "#cccccc",
-                "border_radius": "4px",
-                "font_size": "16px"
-            },
-            {
-                "id": "apps-button",
-                "name": "Apps",
-                "display_type": "icon",
-                "icon_class": "nf nf-oct-apps",
-                "img_src": "",
-                "url": "http://192.168.0.101:4998/",
-                "has_notification": False,
-                "text_color": "#000000",
-                "bg_color": "#ffffff",
-                "hover_color": "#e0e0e0",
-                "border_color": "#cccccc",
-                "border_radius": "4px",
-                "font_size": "16px"
-            },
-            {
-                "id": "terminal-button",
-                "name": "Terminal",
-                "display_type": "icon",
-                "icon_class": "nf nf-dev-terminal",
-                "img_src": "",
-                "url": "http://192.168.0.101:5555/",
-                "has_notification": False,
-                "text_color": "#000000",
-                "bg_color": "#ffffff",
-                "hover_color": "#e0e0e0",
-                "border_color": "#cccccc",
-                "border_radius": "4px",
-                "font_size": "16px"
-            }
-        ]
-        write_sidebar_buttons(default_buttons)
-        return default_buttons
-    with open(SIDEBAR_BUTTONS_FILE, 'r') as f:
-        return json.load(f)
+# Helper function to read links data
+def read_data():
+    data = read_all_data()
+    return data.get('links', [])
 
-# Helper function to write sidebar buttons to JSON file
-def write_sidebar_buttons(data):
-    with open(SIDEBAR_BUTTONS_FILE, 'w') as f:
-        json.dump(data, f, indent=2)
-    # Auto-generate static HTML after sidebar buttons update
-    generate_static_html()
+# Helper function to write links data
+def write_data(links):
+    data = read_all_data()
+    data['links'] = links
+    write_all_data(data)
+
+# Helper function to read sidebar buttons
+def read_sidebar_buttons():
+    data = read_all_data()
+    return data.get('sidebar_buttons', [])
+
+# Helper function to write sidebar buttons
+def write_sidebar_buttons(buttons):
+    data = read_all_data()
+    data['sidebar_buttons'] = buttons
+    write_all_data(data)
+
 
 # Function to generate static HTML
 def generate_static_html():

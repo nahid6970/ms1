@@ -15,39 +15,43 @@ PROJECT_ROOT = SCRIPT_DIR  # Assuming the script is in the project root
 
 # Path to the data files
 DATA_FILE = r'C:\@delta\ms1\@Flask\5000_myhome\data.json'
-SIDEBAR_BUTTONS_FILE = r'C:\@delta\ms1\@Flask\5000_myhome\sidebar_buttons.json'
 
 # Paths to source files
-TEMPLATE_FILE = os.path.join(PROJECT_ROOT, 'templates', 'index.html')
+TEMPLATES_DIR = os.path.join(PROJECT_ROOT, 'templates')
+TEMPLATE_FILE = os.path.join(TEMPLATES_DIR, 'index.html')
 
-CSS_FILE = os.path.join(PROJECT_ROOT, 'static', 'style.css')
-MAIN_JS_FILE = os.path.join(PROJECT_ROOT, 'static', 'main.js')
-LINKS_HANDLER_JS_FILE = os.path.join(PROJECT_ROOT, 'static', 'links-handler.js')
-SIDEBAR_HANDLER_JS_FILE = os.path.join(PROJECT_ROOT, 'static', 'sidebar-handler.js')
-CONTEXT_MENU_JS_FILE = os.path.join(PROJECT_ROOT, 'static', 'context-menu.js')
-CYBERPUNK_POPUP_CSS_FILE = os.path.join(PROJECT_ROOT, 'static', 'cyberpunk-popup.css')
+STATIC_DIR = os.path.join(PROJECT_ROOT, 'static')
+CSS_FILE = os.path.join(STATIC_DIR, 'style.css')
+MAIN_JS_FILE = os.path.join(STATIC_DIR, 'main.js')
+LINKS_HANDLER_JS_FILE = os.path.join(STATIC_DIR, 'links-handler.js')
+SIDEBAR_HANDLER_JS_FILE = os.path.join(STATIC_DIR, 'sidebar-handler.js')
+CONTEXT_MENU_JS_FILE = os.path.join(STATIC_DIR, 'context-menu.js')
+CYBERPUNK_POPUP_CSS_FILE = os.path.join(STATIC_DIR, 'cyberpunk-popup.css')
 
 # Path to the output files
 OUTPUT_HTML_FILE = r"C:\@delta\db\5000_myhome\myhome.html"
 
 
-
-def read_data():
-    """Read data from JSON file"""
+def read_all_data():
+    """Read all data from the unified JSON file"""
     if not os.path.exists(DATA_FILE):
         print(f"Warning: Data file not found at {DATA_FILE}")
-        return []
+        return {"sidebar_buttons": [], "links": []}
     with open(DATA_FILE, 'r', encoding='utf-8') as f:
         return json.load(f)
 
 
+def read_data():
+    """Read links data from the unified data file"""
+    data = read_all_data()
+    return data.get('links', [])
+
+
 def read_sidebar_buttons():
-    """Read sidebar buttons from JSON file"""
-    if not os.path.exists(SIDEBAR_BUTTONS_FILE):
-        print(f"Warning: Sidebar buttons file not found at {SIDEBAR_BUTTONS_FILE}")
-        return []
-    with open(SIDEBAR_BUTTONS_FILE, 'r', encoding='utf-8') as f:
-        return json.load(f)
+    """Read sidebar buttons from the unified data file"""
+    data = read_all_data()
+    return data.get('sidebar_buttons', [])
+
 
 
 def read_file(filepath):
