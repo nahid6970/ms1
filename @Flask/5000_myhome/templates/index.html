@@ -163,8 +163,6 @@
           opacity: 0;
         }
       }
-
-
     </style>
 
     <div id="links-container"
@@ -592,6 +590,7 @@
           <select id="sidebar-button-display-type">
             <option value="icon">Icon (NerdF)</option>
             <option value="image">Image</option>
+            <option value="svg">SVG</option>
           </select>
 
           <div id="icon-settings">
@@ -600,6 +599,11 @@
 
           <div id="image-settings" style="display: none;">
             <input type="url" id="sidebar-button-img-src" placeholder="Image URL">
+          </div>
+
+          <div id="sidebar-svg-settings" style="display: none;">
+            <textarea id="sidebar-button-svg-code" placeholder="SVG Code (paste full <svg>...</svg> code here)" rows="4"
+              style="resize: vertical; font-family: monospace; width: 100%;"></textarea>
           </div>
 
           <h4 style="color: white; margin: 15px 0 10px 0; border-bottom: 1px solid #555; padding-bottom: 5px;">Colors &
@@ -647,6 +651,7 @@
           <select id="edit-sidebar-button-display-type">
             <option value="icon">Icon (NerdF)</option>
             <option value="image">Image</option>
+            <option value="svg">SVG</option>
           </select>
 
           <div id="edit-icon-settings">
@@ -655,6 +660,11 @@
 
           <div id="edit-image-settings" style="display: none;">
             <input type="url" id="edit-sidebar-button-img-src" placeholder="Image URL">
+          </div>
+
+          <div id="edit-sidebar-svg-settings" style="display: none;">
+            <textarea id="edit-sidebar-button-svg-code" placeholder="SVG Code (paste full <svg>...</svg> code here)"
+              rows="4" style="resize: vertical; font-family: monospace; width: 100%;"></textarea>
           </div>
 
           <h4 style="color: white; margin: 15px 0 10px 0; border-bottom: 1px solid #555; padding-bottom: 5px;">Colors &
