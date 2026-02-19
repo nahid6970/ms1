@@ -11,6 +11,7 @@
 <body>
   <div class="topbar" id="topbar">
     <div class="top-center-controls" id="sidebar-buttons-container"></div>
+    <button id="edit-mode-toggle" class="edit-mode-toggle" title="Toggle Edit Mode (F1)">✏️ Edit</button>
   </div>
 
   <div class="flex-container2">
@@ -251,9 +252,13 @@
   <div id="context-menu" class="context-menu hidden"></div>
   <div id="copy-notification" class="copy-notification"></div>
 
-  <script type="module" src="app.js"></script>
+  <!-- Load regular scripts first -->
   <script src="context-menu.js"></script>
   <script src="links-handler.js"></script>
   <script src="sidebar-handler.js"></script>
+  
+  <!-- Then load app.js as module which will initialize everything -->
+  <script type="module" src="app.js"></script>
+
 </body>
 </html>

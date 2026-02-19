@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Convex Connection Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #1a1a1a;
+      color: #fff;
+    }
+    .test-box {
+      background: #2a2a2a;
+      padding: 20px;
+      margin: 10px 0;
+      border-radius: 8px;
+      border: 1px solid #444;
+    }
+    button {
+      background: #4CAF50;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    button:hover {
+      background: #45a049;
+    }
+    .error { color: #ff6b6b; }
+    .success { color: #51cf66; }
+    pre {
+      background: #1a1a1a;
+      padding: 10px;
+      border-radius: 4px;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔌 Convex Connection Test</h1>
+  
+  <div class="test-box">
+    <h2>Connection Status</h2>
+    <p id="status">Testing connection...</p>
+  </div>
+
+  <div class="test-box">
+    <h2>Test Operations</h2>
+    <button onclick="testQuery()">Test Query (Get Links)</button>
+    <button onclick="testMutation()">Test Mutation (Add Link)</button>
+    <button onclick="clearAll()">Clear All Links</button>
+  </div>
+
+  <div class="test-box">
+    <h2>Results</h2>
+    <pre id="results">Click a button to test...</pre>
+  </div>
+
+  <div class="test-box">
+    <h2>Instructions</h2>
+    <ol>
+      <li>Make sure <code>npx convex dev</code> is running in terminal</li>
+      <li>Click "Test Query" to fetch links from database</li>
+      <li>Click "Test Mutation" to add a test link</li>
+      <li>If successful, go to <a href="index.html" style="color: #51cf66;">index.html</a> and press F1 to enter edit mode</li>
+    </ol>
+  </div>
+
+  <script type="module">
+    import { ConvexHttpClient } from "https://esm.sh/convex@1.16.0/browser";
+    import { api } from "./convex/_generated/api.js";
+
+    const client = new ConvexHttpClient("https://lovable-wildcat-595.convex.cloud");
+    window.convexClient = client;
+    window.api = api;
+
+    // Test connection
+    async function checkConnection() {
+      try {
+        const links = await client.query(api.functions.getLinks);
+        document.getElementById('status').innerHTML = 
+          '<span class="success">✅ Connected to Convex!</span><br>' +
+          `Found ${links.length} links in database.`;
+      } catch (error) {
+        document.getElementById('status').innerHTML = 
+          '<span class="error">❌ Connection failed!</span><br>' +
+          `Error: ${error.message}`;
+      }
+    }
+
+    window.testQuery = async function() {
+      try {
+        const links = await client.query(api.functions.getLinks);
+        document.getElementById('results').textContent = 
+          `Success! Found ${links.length} links:\n\n` + 
+          JSON.stringify(links, null, 2);
+      } catch (error) {
+        document.getElementById('results').textContent = 
+          `Error: ${error.message}\n\n${error.stack}`;
+      }
+    };
+
+    window.testMutation = async function() {
+      try {
+        await client.mutation(api.functions.addLink, {
+          name: "Test Link " + Date.now(),
+          group: "Test Group",
+          urls: ["https://example.com"],
+          url: "https://example.com",
+          default_type: "text",
+          text: "Test Link",
+          hidden: false
+        });
+        
+        const links = await client.query(api.functions.getLinks);
+        document.getElementById('results').textContent = 
+          `Success! Link added. Total links: ${links.length}\n\n` + 
+          JSON.stringify(links, null, 2);
+      } catch (error) {
+        document.getElementById('results').textContent = 
+          `Error: ${error.message}\n\n${error.stack}`;
+      }
+    };
+
+    window.clearAll = async function() {
+      if (!confirm('Delete all links?')) return;
+      
+      try {
+        await client.mutation(api.functions.updateAllLinks, { links: [] });
+        document.getElementById('results').textContent = 'All links cleared!';
+        checkConnection();
+      } catch (error) {
+        document.getElementById('results').textContent = 
+          `Error: ${error.message}\n\n${error.stack}`;
+      }
+    };
+
+    // Check connection on load
+    checkConnection();
+  </script>
+</body>
+</html>

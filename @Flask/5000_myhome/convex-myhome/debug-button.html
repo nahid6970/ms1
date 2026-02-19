@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Debug - Add Link Button</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #1a1a1a;
+      color: #fff;
+    }
+    .add-button {
+      padding: 15px 30px;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      margin: 20px 0;
+      display: block;
+    }
+    .add-button:hover {
+      background: #45a049;
+    }
+    .info {
+      background: #333;
+      padding: 15px;
+      border-radius: 5px;
+      margin: 10px 0;
+    }
+    .success {
+      color: #4CAF50;
+    }
+    .error {
+      color: #f44336;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔍 Debug: Add Link Button Test</h1>
+  
+  <div class="info">
+    <h3>Test Results:</h3>
+    <div id="results"></div>
+  </div>
+
+  <div id="links-container">
+    <p>Links container is here...</p>
+  </div>
+
+  <script type="module">
+    const results = document.getElementById('results');
+    
+    function log(message, isSuccess = true) {
+      const p = document.createElement('p');
+      p.className = isSuccess ? 'success' : 'error';
+      p.textContent = (isSuccess ? '✅ ' : '❌ ') + message;
+      results.appendChild(p);
+    }
+
+    // Test 1: Check if container exists
+    const container = document.getElementById('links-container');
+    if (container) {
+      log('Container found: #links-container');
+    } else {
+      log('Container NOT found: #links-container', false);
+    }
+
+    // Test 2: Create and add button
+    try {
+      const addBtn = document.createElement('button');
+      addBtn.className = 'add-button';
+      addBtn.textContent = '+ Add Link';
+      addBtn.onclick = () => alert('Button clicked!');
+      container.appendChild(addBtn);
+      log('Button created and added to container');
+    } catch (error) {
+      log('Error creating button: ' + error.message, false);
+    }
+
+    // Test 3: Check if button is visible
+    setTimeout(() => {
+      const button = container.querySelector('.add-button');
+      if (button) {
+        log('Button found in DOM');
+        const styles = window.getComputedStyle(button);
+        log(`Button display: ${styles.display}`);
+        log(`Button visibility: ${styles.visibility}`);
+        log(`Button opacity: ${styles.opacity}`);
+        
+        if (styles.display === 'none') {
+          log('Button is hidden by CSS (display: none)', false);
+        } else if (styles.visibility === 'hidden') {
+          log('Button is hidden by CSS (visibility: hidden)', false);
+        } else if (styles.opacity === '0') {
+          log('Button is hidden by CSS (opacity: 0)', false);
+        } else {
+          log('Button should be VISIBLE!');
+        }
+      } else {
+        log('Button NOT found in DOM', false);
+      }
+    }, 100);
+  </script>
+</body>
+</html>

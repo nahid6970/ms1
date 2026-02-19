@@ -1,62 +1,199 @@
+console.log('🔍 links-handler.js loaded!');
+
 let links = [];
 let draggedElement = null;
+
+// Initialize Convex client if not already initialized
+if (!window.convexClient) {
+  console.log('🔵 Initializing Convex client in links-handler.js...');
+  
+  // Load ConvexHttpClient dynamically
+  import('https://esm.sh/convex@1.16.0/browser').then(module => {
+    const { ConvexHttpClient } = module;
+    window.convexClient = new ConvexHttpClient("https://lovable-wildcat-595.convex.cloud");
+    console.log('✅ Convex client initialized!');
+    
+    // Now load links
+    if (typeof loadLinks === 'function') {
+      loadLinks();
+    }
+  }).catch(error => {
+    console.error('❌ Failed to load Convex client:', error);
+  });
+}
+
+// Helper functions for Convex API calls
+if (!window.convexQuery) {
+  window.convexQuery = async (functionName, args = {}) => {
+    if (!window.convexClient) {
+      throw new Error('Convex client not initialized');
+    }
+    return await window.convexClient.query(functionName, args);
+  };
+}
+
+if (!window.convexMutation) {
+  window.convexMutation = async (functionName, args = {}) => {
+    if (!window.convexClient) {
+      throw new Error('Convex client not initialized');
+    }
+    return await window.convexClient.mutation(functionName, args);
+  };
+}
 
 // Load links from Convex
 async function loadLinks() {
   try {
-    const data = await window.convexClient.query("functions:getLinks");
+    // Wait for convexQuery to be available
+    if (!window.convexQuery) {
+      console.warn('Waiting for Convex client to initialize...');
+      await new Promise(resolve => {
+        const checkInterval = setInterval(() => {
+          if (window.convexQuery) {
+            clearInterval(checkInterval);
+            resolve();
+          }
+        }, 100);
+      });
+    }
+    
+    const data = await window.convexQuery("functions:getLinks");
     links = data.sort((a, b) => (a._creationTime || 0) - (b._creationTime || 0));
-    renderLinks();
   } catch (error) {
     console.error('Error loading links:', error);
   }
+  renderLinks();
 }
 
 // Render links
 function renderLinks() {
+  console.log('🔵 renderLinks() called!');
   const container = document.getElementById('links-container');
-  container.innerHTML = '';
+  console.log('🔵 Container found:', container);
   
+  if (!container) {
+    console.error('❌ links-container not found!');
+    return;
+  }
+  
+  container.innerHTML = '';
+  console.log('🔵 Container cleared');
+
   const grouped = {};
   const collapsible = {};
-  
+
+  console.log('🔵 Processing links:', links.length);
   links.forEach((link, index) => {
     if (link.hidden && !window.editMode) return;
-    
+
     const group = link.group || 'Ungrouped';
     if (!grouped[group]) grouped[group] = [];
     grouped[group].push({ link, index });
-    
+
     if (link.collapsible) collapsible[group] = true;
   });
-  
+
+  console.log('🔵 Grouped:', Object.keys(grouped).length, 'groups');
+  console.log('🔵 Collapsible:', Object.keys(collapsible).length, 'groups');
+
   // Render collapsible groups
   if (Object.keys(collapsible).length > 0) {
     const topContainer = document.createElement('div');
     topContainer.className = 'group_type_top-container';
-    
+
     Object.keys(collapsible).forEach(groupName => {
       const groupDiv = createCollapsibleGroup(groupName, grouped[groupName]);
       topContainer.appendChild(groupDiv);
     });
-    
+
     container.appendChild(topContainer);
   }
-  
+
   // Render regular groups
+  console.log('🔵 Rendering regular groups...');
   Object.keys(grouped).forEach(groupName => {
     if (collapsible[groupName]) return;
-    
+
     const groupDiv = createRegularGroup(groupName, grouped[groupName]);
     container.appendChild(groupDiv);
   });
-  
-  // Add link button
+
+  // Add link button - ALWAYS VISIBLE AND PROMINENT
+  console.log('🟢 Creating Add Link button NOW...');
   const addBtn = document.createElement('button');
-  addBtn.className = 'add-button';
-  addBtn.textContent = '+ Add Link';
-  addBtn.onclick = () => showAddLinkPopup();
+  addBtn.className = 'add-button main-add-button';
+  addBtn.innerHTML = '<span style="font-size: 24px;">+</span> Add New Link';
+  addBtn.style.display = 'block';
+  addBtn.style.margin = '30px auto';
+  addBtn.style.padding = '20px 40px';
+  addBtn.style.fontSize = '18px';
+  addBtn.style.fontWeight = 'bold';
+  addBtn.style.background = '#4CAF50';
+  addBtn.style.color = 'white';
+  addBtn.style.border = 'none';
+  addBtn.style.borderRadius = '8px';
+  addBtn.style.cursor = 'pointer';
+  addBtn.style.boxShadow = '0 4px 6px rgba(0,0,0,0.3)';
+  addBtn.onclick = () => {
+    console.log('🟢 Add Link button clicked!');
+    showAddLinkPopup();
+  };
+  addBtn.onmouseenter = () => {
+    addBtn.style.background = '#45a049';
+    addBtn.style.transform = 'scale(1.05)';
+  };
+  addBtn.onmouseleave = () => {
+    addBtn.style.background = '#4CAF50';
+    addBtn.style.transform = 'scale(1)';
+  };
   container.appendChild(addBtn);
+  console.log('✅ Add Link button added to container!');
+  console.log('✅ Button element:', addBtn);
+  console.log('✅ Button in DOM:', document.querySelector('.main-add-button'));
+  
+  // Also add a floating action button (FAB) for easy access
+  console.log('🟢 Creating floating action button (FAB)...');
+  let fab = document.getElementById('fab-add-link');
+  if (!fab) {
+    fab = document.createElement('button');
+    fab.id = 'fab-add-link';
+    fab.innerHTML = '+';
+    fab.title = 'Add New Link';
+    fab.style.position = 'fixed';
+    fab.style.bottom = '30px';
+    fab.style.right = '30px';
+    fab.style.width = '60px';
+    fab.style.height = '60px';
+    fab.style.borderRadius = '50%';
+    fab.style.background = '#4CAF50';
+    fab.style.color = 'white';
+    fab.style.border = 'none';
+    fab.style.fontSize = '32px';
+    fab.style.cursor = 'pointer';
+    fab.style.boxShadow = '0 4px 12px rgba(0,0,0,0.5)';
+    fab.style.zIndex = '1000';
+    fab.style.display = 'flex';
+    fab.style.alignItems = 'center';
+    fab.style.justifyContent = 'center';
+    fab.onclick = () => {
+      console.log('🟢 FAB clicked!');
+      showAddLinkPopup();
+    };
+    fab.onmouseenter = () => {
+      fab.style.background = '#45a049';
+      fab.style.transform = 'scale(1.1)';
+    };
+    fab.onmouseleave = () => {
+      fab.style.background = '#4CAF50';
+      fab.style.transform = 'scale(1)';
+    };
+    document.body.appendChild(fab);
+    console.log('✅ Floating action button (FAB) added!');
+    console.log('✅ FAB element:', fab);
+    console.log('✅ FAB in DOM:', document.getElementById('fab-add-link'));
+  }
+  
+  console.log('✅ renderLinks() completed!');
 }
 
 // Create collapsible group
@@ -64,23 +201,23 @@ function createCollapsibleGroup(groupName, items) {
   const div = document.createElement('div');
   div.className = 'group_type_top';
   div.dataset.groupName = groupName;
-  
+
   const firstLink = items[0].link;
   const displayName = firstLink.top_name || groupName;
-  
+
   const header = document.createElement('div');
   header.className = 'group_type_top-header';
-  
+
   const title = document.createElement('h4');
   title.className = 'group_type_top-title';
   renderDisplayName(title, displayName);
-  
+
   const toggleBtn = document.createElement('button');
   toggleBtn.className = 'group_type_top-toggle-btn';
   toggleBtn.textContent = '▼';
-  
+
   header.appendChild(title);
-  
+
   if (window.editMode) {
     const editBtn = document.createElement('button');
     editBtn.className = 'edit-btn';
@@ -91,25 +228,25 @@ function createCollapsibleGroup(groupName, items) {
     };
     header.appendChild(editBtn);
   }
-  
+
   header.appendChild(toggleBtn);
-  
+
   const content = document.createElement('ul');
   content.className = 'group_type_top-content';
-  
+
   items.forEach(({ link, index }) => {
     const item = createLinkItem(link, index);
     content.appendChild(item);
   });
-  
+
   div.appendChild(header);
   div.appendChild(content);
-  
+
   // Apply styling
   if (firstLink.top_bg_color) div.style.backgroundColor = firstLink.top_bg_color;
   if (firstLink.top_text_color) title.style.color = firstLink.top_text_color;
   if (firstLink.top_border_color) div.style.borderColor = firstLink.top_border_color;
-  
+
   div.onclick = (e) => {
     if (e.target === toggleBtn || e.target === header) {
       if (firstLink.password_protect) {
@@ -122,7 +259,7 @@ function createCollapsibleGroup(groupName, items) {
       div.classList.toggle('expanded');
     }
   };
-  
+
   // Context menu
   div.addEventListener('contextmenu', (e) => {
     showContextMenu(e, [
@@ -130,7 +267,7 @@ function createCollapsibleGroup(groupName, items) {
       { label: 'Delete', action: () => deleteGroup(groupName) }
     ]);
   });
-  
+
   return div;
 }
 
@@ -139,14 +276,14 @@ function createRegularGroup(groupName, items) {
   const div = document.createElement('div');
   div.className = 'link-group';
   div.dataset.groupName = groupName;
-  
+
   const firstLink = items[0].link;
   const isHorizontal = firstLink.horizontal_stack;
-  
+
   const title = document.createElement('h3');
   title.textContent = groupName;
   div.appendChild(title);
-  
+
   if (window.editMode) {
     const editBtn = document.createElement('button');
     editBtn.className = 'edit-btn';
@@ -154,20 +291,20 @@ function createRegularGroup(groupName, items) {
     editBtn.onclick = () => openEditGroupPopup(groupName);
     div.appendChild(editBtn);
   }
-  
+
   const ul = document.createElement('ul');
   if (isHorizontal) ul.className = 'horizontal-stack-group';
-  
+
   const displayStyle = firstLink.display_style || 'flex';
   if (displayStyle === 'list-item') div.classList.add('list-style');
-  
+
   items.forEach(({ link, index }) => {
     const item = createLinkItem(link, index);
     ul.appendChild(item);
   });
-  
+
   div.appendChild(ul);
-  
+
   // Context menu
   div.addEventListener('contextmenu', (e) => {
     if (e.target === div || e.target === title) {
@@ -177,7 +314,7 @@ function createRegularGroup(groupName, items) {
       ]);
     }
   });
-  
+
   return div;
 }
 
@@ -187,14 +324,14 @@ function createLinkItem(link, index) {
   li.className = 'link-item';
   li.dataset.linkIndex = index;
   li.draggable = true;
-  
+
   if (link.hidden) li.classList.add('hidden-item');
-  
+
   const a = document.createElement('a');
   a.href = link.url;
   a.target = '_blank';
   a.title = link.title || link.name || '';
-  
+
   // Render content based on type
   if (link.default_type === 'nerd-font' && link.icon_class) {
     const icon = document.createElement('i');
@@ -223,7 +360,7 @@ function createLinkItem(link, index) {
   } else {
     a.textContent = link.text || link.name || 'Link';
   }
-  
+
   // Apply styling
   if (link.color) a.style.color = link.color;
   if (link.background_color) a.style.backgroundColor = link.background_color;
@@ -232,18 +369,18 @@ function createLinkItem(link, index) {
   if (link.width) a.style.width = link.width;
   if (link.height) a.style.height = link.height;
   if (link.border_radius) a.style.borderRadius = link.border_radius;
-  
+
   if (link.li_bg_color) li.style.backgroundColor = link.li_bg_color;
   if (link.li_border_color) li.style.borderColor = link.li_border_color;
   if (link.li_border_radius) li.style.borderRadius = link.li_border_radius;
   if (link.li_width) li.style.minWidth = link.li_width;
   if (link.li_height) li.style.minHeight = link.li_height;
-  
+
   if (link.li_hover_color) {
     li.addEventListener('mouseenter', () => li.style.backgroundColor = link.li_hover_color);
     li.addEventListener('mouseleave', () => li.style.backgroundColor = link.li_bg_color || '');
   }
-  
+
   // Handle multiple URLs
   a.onclick = (e) => {
     if (link.urls && link.urls.length > 1) {
@@ -251,9 +388,9 @@ function createLinkItem(link, index) {
       window.open(link.urls[0], '_blank');
     }
   };
-  
+
   li.appendChild(a);
-  
+
   // Edit buttons
   if (window.editMode) {
     const editBtn = document.createElement('button');
@@ -264,7 +401,7 @@ function createLinkItem(link, index) {
       openEditLinkPopup(link, index);
     };
     li.appendChild(editBtn);
-    
+
     const delBtn = document.createElement('button');
     delBtn.className = 'delete-btn';
     delBtn.textContent = '🗑';
@@ -274,7 +411,7 @@ function createLinkItem(link, index) {
     };
     li.appendChild(delBtn);
   }
-  
+
   // Context menu
   li.addEventListener('contextmenu', (e) => {
     showContextMenu(e, [
@@ -284,17 +421,17 @@ function createLinkItem(link, index) {
       { label: 'Delete', action: () => deleteLink(link._id) }
     ]);
   });
-  
+
   // Drag and drop
   li.addEventListener('dragstart', (e) => {
     draggedElement = li;
     li.classList.add('dragging');
   });
-  
+
   li.addEventListener('dragover', (e) => {
     e.preventDefault();
   });
-  
+
   li.addEventListener('drop', async (e) => {
     e.preventDefault();
     if (draggedElement && draggedElement !== li) {
@@ -303,19 +440,19 @@ function createLinkItem(link, index) {
       await reorderLinks(fromIndex, toIndex);
     }
   });
-  
+
   li.addEventListener('dragend', () => {
     li.classList.remove('dragging');
     draggedElement = null;
   });
-  
+
   return li;
 }
 
 // Render display name (text, icon, or SVG)
 function renderDisplayName(element, name) {
   element.innerHTML = '';
-  
+
   if (name.startsWith('nf nf-')) {
     const icon = document.createElement('i');
     icon.className = name;
@@ -347,12 +484,12 @@ function showAddLinkPopup() {
 
 document.getElementById('add-link-form').addEventListener('submit', async (e) => {
   e.preventDefault();
-  
+
   const urls = getAllUrls(false);
   const typeRadios = document.querySelectorAll('input[name="link-type"]');
   let defaultType = 'text';
   typeRadios.forEach(r => { if (r.checked) defaultType = r.value; });
-  
+
   const newLink = {
     name: document.getElementById('link-name').value,
     group: document.getElementById('link-group').value,
@@ -379,15 +516,15 @@ document.getElementById('add-link-form').addEventListener('submit', async (e) =>
     title: document.getElementById('link-title').value,
     hidden: document.getElementById('link-hidden').checked
   };
-  
+
   try {
-    await window.convexClient.mutation("functions:addLink", newLink);
+    await window.convexMutation("functions:addLink", newLink);
     document.getElementById('add-link-popup').classList.add('hidden');
     await loadLinks();
     window.showNotification('Link added!');
   } catch (error) {
     console.error('Error adding link:', error);
-    alert('Error adding link');
+    alert('Error adding link: ' + error.message);
   }
 });
 
@@ -396,10 +533,10 @@ function openEditLinkPopup(link, index) {
   document.getElementById('edit-link-id').value = link._id;
   document.getElementById('edit-link-name').value = link.name || '';
   document.getElementById('edit-link-group').value = link.group || '';
-  
+
   // Populate URL fields
   populateUrlFields(link.urls || [link.url], true);
-  
+
   document.getElementById('edit-link-text').value = link.text || '';
   document.getElementById('edit-link-icon-class').value = link.icon_class || '';
   document.getElementById('edit-link-img-src').value = link.img_src || '';
@@ -419,25 +556,25 @@ function openEditLinkPopup(link, index) {
   document.getElementById('edit-link-border-radius').value = link.border_radius || '';
   document.getElementById('edit-link-title').value = link.title || '';
   document.getElementById('edit-link-hidden').checked = link.hidden || false;
-  
+
   const typeRadios = document.querySelectorAll('input[name="edit-link-type"]');
   typeRadios.forEach(r => r.checked = r.value === link.default_type);
-  
+
   const svgTextarea = document.getElementById('edit-link-svg-code');
   svgTextarea.style.display = link.default_type === 'svg' ? 'block' : 'none';
-  
+
   document.getElementById('edit-link-popup').classList.remove('hidden');
 }
 
 document.getElementById('edit-link-form').addEventListener('submit', async (e) => {
   e.preventDefault();
-  
+
   const id = document.getElementById('edit-link-id').value;
   const urls = getAllUrls(true);
   const typeRadios = document.querySelectorAll('input[name="edit-link-type"]');
   let defaultType = 'text';
   typeRadios.forEach(r => { if (r.checked) defaultType = r.value; });
-  
+
   const updatedLink = {
     id,
     name: document.getElementById('edit-link-name').value,
@@ -465,29 +602,29 @@ document.getElementById('edit-link-form').addEventListener('submit', async (e) =
     title: document.getElementById('edit-link-title').value,
     hidden: document.getElementById('edit-link-hidden').checked
   };
-  
+
   try {
-    await window.convexClient.mutation("functions:updateLink", updatedLink);
+    await window.convexMutation("functions:updateLink", updatedLink);
     document.getElementById('edit-link-popup').classList.add('hidden');
     await loadLinks();
     window.showNotification('Link updated!');
   } catch (error) {
     console.error('Error updating link:', error);
-    alert('Error updating link');
+    alert('Error updating link: ' + error.message);
   }
 });
 
 // Delete link
 async function deleteLink(id) {
   if (!confirm('Delete this link?')) return;
-  
+
   try {
-    await window.convexClient.mutation("functions:deleteLink", { id });
+    await window.convexMutation("functions:deleteLink", { id });
     await loadLinks();
     window.showNotification('Link deleted!');
   } catch (error) {
     console.error('Error deleting link:', error);
-    alert('Error deleting link');
+    alert('Error deleting link: ' + error.message);
   }
 }
 
@@ -495,14 +632,14 @@ async function deleteLink(id) {
 async function copyLink(link) {
   const { _id, _creationTime, ...newLink } = link;
   newLink.name = (newLink.name || '') + ' (Copy)';
-  
+
   try {
-    await window.convexClient.mutation("functions:addLink", newLink);
+    await window.convexMutation("functions:addLink", newLink);
     await loadLinks();
     window.showNotification('Link copied!');
   } catch (error) {
     console.error('Error copying link:', error);
-    alert('Error copying link');
+    alert('Error copying link: ' + error.message);
   }
 }
 
@@ -511,12 +648,13 @@ async function reorderLinks(fromIndex, toIndex) {
   const newLinks = [...links];
   const [moved] = newLinks.splice(fromIndex, 1);
   newLinks.splice(toIndex, 0, moved);
-  
+
   try {
-    await window.convexClient.mutation("functions:updateAllLinks", { links: newLinks });
+    await window.convexMutation("functions:updateAllLinks", { links: newLinks });
     await loadLinks();
   } catch (error) {
     console.error('Error reordering:', error);
+    alert('Error reordering: ' + error.message);
   }
 }
 
@@ -524,17 +662,17 @@ async function reorderLinks(fromIndex, toIndex) {
 function openEditGroupPopup(groupName) {
   const groupLinks = links.filter(l => (l.group || 'Ungrouped') === groupName);
   const firstLink = groupLinks[0] || {};
-  
+
   document.getElementById('edit-group-original-name').value = groupName;
   document.getElementById('edit-group-name').value = groupName;
   document.getElementById('edit-group-top-name').value = firstLink.top_name || '';
   document.getElementById('edit-group-collapsible').checked = firstLink.collapsible || false;
   document.getElementById('edit-group-horizontal-stack').checked = firstLink.horizontal_stack || false;
   document.getElementById('edit-group-password-protect').checked = firstLink.password_protect || false;
-  
+
   const displayRadios = document.querySelectorAll('input[name="edit-group-display"]');
   displayRadios.forEach(r => r.checked = r.value === (firstLink.display_style || 'flex'));
-  
+
   document.getElementById('edit-group-top-bg-color').value = firstLink.top_bg_color || '';
   document.getElementById('edit-group-top-text-color').value = firstLink.top_text_color || '';
   document.getElementById('edit-group-top-border-color').value = firstLink.top_border_color || '';
@@ -551,9 +689,9 @@ function openEditGroupPopup(groupName) {
   document.getElementById('edit-group-horizontal-text-color').value = firstLink.horizontal_text_color || '';
   document.getElementById('edit-group-horizontal-border-color').value = firstLink.horizontal_border_color || '';
   document.getElementById('edit-group-horizontal-hover-color').value = firstLink.horizontal_hover_color || '';
-  
+
   document.getElementById('edit-group-popup').classList.remove('hidden');
-  
+
   // Show/hide sections
   const collapsible = document.getElementById('edit-group-collapsible').checked;
   const horizontal = document.getElementById('edit-group-horizontal-stack').checked;
@@ -571,14 +709,14 @@ document.getElementById('edit-group-horizontal-stack').addEventListener('change'
 
 document.getElementById('edit-group-form').addEventListener('submit', async (e) => {
   e.preventDefault();
-  
+
   const originalName = document.getElementById('edit-group-original-name').value;
   const newName = document.getElementById('edit-group-name').value;
-  
+
   const displayRadios = document.querySelectorAll('input[name="edit-group-display"]');
   let displayStyle = 'flex';
   displayRadios.forEach(r => { if (r.checked) displayStyle = r.value; });
-  
+
   const groupSettings = {
     collapsible: document.getElementById('edit-group-collapsible').checked,
     display_style: displayStyle,
@@ -602,7 +740,7 @@ document.getElementById('edit-group-form').addEventListener('submit', async (e) 
     horizontal_border_color: document.getElementById('edit-group-horizontal-border-color').value,
     horizontal_hover_color: document.getElementById('edit-group-horizontal-hover-color').value
   };
-  
+
   try {
     const updatedLinks = links.map(link => {
       if ((link.group || 'Ungrouped') === originalName) {
@@ -610,29 +748,29 @@ document.getElementById('edit-group-form').addEventListener('submit', async (e) 
       }
       return link;
     });
-    
-    await window.convexClient.mutation("functions:updateAllLinks", { links: updatedLinks });
+
+    await window.convexMutation("functions:updateAllLinks", { links: updatedLinks });
     document.getElementById('edit-group-popup').classList.add('hidden');
     await loadLinks();
     window.showNotification('Group updated!');
   } catch (error) {
     console.error('Error updating group:', error);
-    alert('Error updating group');
+    alert('Error updating group: ' + error.message);
   }
 });
 
 // Delete group
 async function deleteGroup(groupName) {
   if (!confirm(`Delete group "${groupName}" and all its links?`)) return;
-  
+
   try {
     const remaining = links.filter(l => (l.group || 'Ungrouped') !== groupName);
-    await window.convexClient.mutation("functions:updateAllLinks", { links: remaining });
+    await window.convexClient.mutation(window.api.functions.updateAllLinks.name, { links: remaining });
     await loadLinks();
     window.showNotification('Group deleted!');
   } catch (error) {
     console.error('Error deleting group:', error);
-    alert('Error deleting group');
+    alert('Error deleting group: ' + error.message);
   }
 }
 
@@ -654,18 +792,18 @@ window.addUrlField = () => {
   const container = document.getElementById('urls-container');
   const group = document.createElement('div');
   group.className = 'url-input-group';
-  
+
   const input = document.createElement('input');
   input.type = 'url';
   input.className = 'url-input';
   input.placeholder = 'URL';
-  
+
   const removeBtn = document.createElement('button');
   removeBtn.type = 'button';
   removeBtn.className = 'remove-btn';
   removeBtn.textContent = '−';
   removeBtn.onclick = () => group.remove();
-  
+
   group.appendChild(input);
   group.appendChild(removeBtn);
   container.appendChild(group);
@@ -675,18 +813,18 @@ window.addEditUrlField = () => {
   const container = document.getElementById('edit-urls-container');
   const group = document.createElement('div');
   group.className = 'url-input-group';
-  
+
   const input = document.createElement('input');
   input.type = 'url';
   input.className = 'url-input';
   input.placeholder = 'URL';
-  
+
   const removeBtn = document.createElement('button');
   removeBtn.type = 'button';
   removeBtn.className = 'remove-btn';
   removeBtn.textContent = '−';
   removeBtn.onclick = () => group.remove();
-  
+
   group.appendChild(input);
   group.appendChild(removeBtn);
   container.appendChild(group);
@@ -701,27 +839,27 @@ function getAllUrls(isEdit = false) {
 function populateUrlFields(urls, isEdit = false) {
   const container = document.getElementById(isEdit ? 'edit-urls-container' : 'urls-container');
   container.innerHTML = '';
-  
+
   if (!urls || urls.length === 0) urls = [''];
-  
+
   urls.forEach((url, index) => {
     const group = document.createElement('div');
     group.className = 'url-input-group';
-    
+
     const input = document.createElement('input');
     input.type = 'url';
     input.className = 'url-input';
     input.placeholder = 'URL';
     input.value = url;
     if (index === 0) input.required = true;
-    
+
     const addBtn = document.createElement('button');
     addBtn.type = 'button';
     addBtn.textContent = '+';
     addBtn.onclick = isEdit ? window.addEditUrlField : window.addUrlField;
-    
+
     group.appendChild(input);
-    
+
     if (index > 0) {
       const removeBtn = document.createElement('button');
       removeBtn.type = 'button';
@@ -732,7 +870,7 @@ function populateUrlFields(urls, isEdit = false) {
     } else {
       group.appendChild(addBtn);
     }
-    
+
     container.appendChild(group);
   });
 }
@@ -746,3 +884,75 @@ window.openEditGroupPopup = openEditGroupPopup;
 window.deleteLink = deleteLink;
 window.deleteGroup = deleteGroup;
 window.copyLink = copyLink;
+window.reorderLinks = reorderLinks;
+
+// Fallback initialization if app.js fails
+document.addEventListener('DOMContentLoaded', () => {
+  console.log('🔵 DOMContentLoaded fired in links-handler.js');
+  
+  if (!window.convexClient) {
+    console.warn('Convex client not initialized (app.js failed?), running fallback...');
+    loadLinks();
+  }
+  
+  // EMERGENCY: Force create buttons after 2 seconds if they don't exist
+  setTimeout(() => {
+    console.log('🔵 Checking if buttons exist...');
+    
+    const mainBtn = document.querySelector('.main-add-button');
+    const fab = document.getElementById('fab-add-link');
+    
+    if (!mainBtn) {
+      console.warn('⚠️ Main button not found! Creating emergency button...');
+      const container = document.getElementById('links-container');
+      if (container) {
+        const emergencyBtn = document.createElement('button');
+        emergencyBtn.className = 'add-button main-add-button emergency-button';
+        emergencyBtn.innerHTML = '<span style="font-size: 24px;">+</span> Add New Link (Emergency)';
+        emergencyBtn.style.display = 'block';
+        emergencyBtn.style.margin = '30px auto';
+        emergencyBtn.style.padding = '20px 40px';
+        emergencyBtn.style.fontSize = '18px';
+        emergencyBtn.style.fontWeight = 'bold';
+        emergencyBtn.style.background = '#FF5722';
+        emergencyBtn.style.color = 'white';
+        emergencyBtn.style.border = 'none';
+        emergencyBtn.style.borderRadius = '8px';
+        emergencyBtn.style.cursor = 'pointer';
+        emergencyBtn.onclick = () => showAddLinkPopup();
+        container.appendChild(emergencyBtn);
+        console.log('✅ Emergency button created!');
+      }
+    } else {
+      console.log('✅ Main button exists!');
+    }
+    
+    if (!fab) {
+      console.warn('⚠️ FAB not found! Creating emergency FAB...');
+      const emergencyFab = document.createElement('button');
+      emergencyFab.id = 'fab-add-link';
+      emergencyFab.innerHTML = '+';
+      emergencyFab.style.position = 'fixed';
+      emergencyFab.style.bottom = '30px';
+      emergencyFab.style.right = '30px';
+      emergencyFab.style.width = '60px';
+      emergencyFab.style.height = '60px';
+      emergencyFab.style.borderRadius = '50%';
+      emergencyFab.style.background = '#FF5722';
+      emergencyFab.style.color = 'white';
+      emergencyFab.style.border = 'none';
+      emergencyFab.style.fontSize = '32px';
+      emergencyFab.style.cursor = 'pointer';
+      emergencyFab.style.boxShadow = '0 4px 12px rgba(0,0,0,0.5)';
+      emergencyFab.style.zIndex = '1000';
+      emergencyFab.style.display = 'flex';
+      emergencyFab.style.alignItems = 'center';
+      emergencyFab.style.justifyContent = 'center';
+      emergencyFab.onclick = () => showAddLinkPopup();
+      document.body.appendChild(emergencyFab);
+      console.log('✅ Emergency FAB created!');
+    } else {
+      console.log('✅ FAB exists!');
+    }
+  }, 2000);
+});

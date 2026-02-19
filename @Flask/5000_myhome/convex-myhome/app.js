@@ -1,17 +1,53 @@
 import { ConvexHttpClient } from "https://esm.sh/convex@1.16.0/browser";
+import { api } from "./convex/_generated/api.js";
 
 const client = new ConvexHttpClient("https://lovable-wildcat-595.convex.cloud");
 
 window.convexClient = client;
+window.api = api;
 window.editMode = false;
+
+// Helper functions for queries and mutations
+window.convexQuery = async (functionPath) => {
+  const [module, funcName] = functionPath.split(':');
+  return await client.query(api[module][funcName]);
+};
+
+window.convexMutation = async (functionPath, args) => {
+  const [module, funcName] = functionPath.split(':');
+  return await client.mutation(api[module][funcName], args);
+};
+
+// Notify that Convex is ready
+console.log('✓ Convex client initialized');
+window.convexReady = true;
+window.dispatchEvent(new CustomEvent('convexReady'));
 
 // F1 key toggle edit mode
 document.addEventListener('keydown', (e) => {
   if (e.key === 'F1') {
     e.preventDefault();
-    window.editMode = !window.editMode;
-    document.querySelector('.flex-container2').classList.toggle('edit-mode', window.editMode);
-    document.dispatchEvent(new CustomEvent('editModeChanged', { detail: { isEditMode: window.editMode } }));
+    toggleEditMode();
+  }
+});
+
+// Toggle edit mode function
+function toggleEditMode() {
+  window.editMode = !window.editMode;
+  document.querySelector('.flex-container2').classList.toggle('edit-mode', window.editMode);
+  const toggleBtn = document.getElementById('edit-mode-toggle');
+  if (toggleBtn) {
+    toggleBtn.textContent = window.editMode ? '✓ Edit' : '✏️ Edit';
+    toggleBtn.classList.toggle('active', window.editMode);
+  }
+  document.dispatchEvent(new CustomEvent('editModeChanged', { detail: { isEditMode: window.editMode } }));
+}
+
+// Edit mode toggle button
+document.addEventListener('DOMContentLoaded', () => {
+  const toggleBtn = document.getElementById('edit-mode-toggle');
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', toggleEditMode);
   }
 });
 
@@ -37,9 +73,25 @@ window.showNotification = (message, type = 'success') => {
 };
 
 // Initialize
-document.addEventListener('DOMContentLoaded', () => {
-  if (typeof loadLinks === 'function') loadLinks();
-  if (typeof loadSidebarButtons === 'function') loadSidebarButtons();
+document.addEventListener('DOMContentLoaded', async () => {
+  console.log('Initializing Convex app...');
+  console.log('Convex client:', window.convexClient);
+  console.log('API:', window.api);
+  
+  // Load data
+  try {
+    if (typeof loadLinks === 'function') {
+      console.log('Loading links...');
+      await loadLinks();
+    }
+    if (typeof loadSidebarButtons === 'function') {
+      console.log('Loading sidebar buttons...');
+      await loadSidebarButtons();
+    }
+  } catch (error) {
+    console.error('Error during initialization:', error);
+  }
+  
   setupColorPreview();
 });
 

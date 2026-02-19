@@ -3,25 +3,38 @@ let sidebarButtons = [];
 // Load sidebar buttons
 async function loadSidebarButtons() {
   try {
-    const data = await window.convexClient.query("functions:getSidebarButtons");
+    // Wait for convexQuery to be available
+    if (!window.convexQuery) {
+      console.warn('Waiting for Convex client to initialize...');
+      await new Promise(resolve => {
+        const checkInterval = setInterval(() => {
+          if (window.convexQuery) {
+            clearInterval(checkInterval);
+            resolve();
+          }
+        }, 100);
+      });
+    }
+    
+    const data = await window.convexQuery("functions:getSidebarButtons");
     sidebarButtons = data;
-    renderSidebarButtons();
   } catch (error) {
     console.error('Error loading sidebar buttons:', error);
   }
+  renderSidebarButtons();
 }
 
 // Render sidebar buttons
 function renderSidebarButtons() {
   const container = document.getElementById('sidebar-buttons-container');
   container.innerHTML = '';
-  
+
   sidebarButtons.forEach((button, index) => {
     const btn = createSidebarButton(button, index);
     container.appendChild(btn);
   });
-  
-  // Add button
+
+  // Add button (always visible)
   const addBtn = document.createElement('a');
   addBtn.href = '#';
   addBtn.className = 'add-button';
@@ -39,14 +52,14 @@ function createSidebarButton(button, index) {
   const btn = document.createElement('a');
   btn.href = button.url;
   btn.target = '_blank';
-  btn.className = 'add-button';
+  btn.className = 'sidebar-button';
   btn.title = button.name;
   btn.style.color = button.text_color;
   btn.style.backgroundColor = button.bg_color;
   btn.style.borderColor = button.border_color;
   btn.style.borderRadius = button.border_radius;
   btn.style.fontSize = button.font_size;
-  
+
   // Content based on display type
   if (button.display_type === 'image' && button.img_src) {
     const img = document.createElement('img');
@@ -71,7 +84,7 @@ function createSidebarButton(button, index) {
     icon.className = button.icon_class || 'nf nf-fa-question';
     btn.appendChild(icon);
   }
-  
+
   // Hover effect
   btn.addEventListener('mouseenter', () => {
     btn.style.backgroundColor = button.hover_color;
@@ -79,7 +92,7 @@ function createSidebarButton(button, index) {
   btn.addEventListener('mouseleave', () => {
     btn.style.backgroundColor = button.bg_color;
   });
-  
+
   // Edit mode buttons
   if (window.editMode) {
     const editBtn = document.createElement('button');
@@ -91,7 +104,7 @@ function createSidebarButton(button, index) {
       openEditSidebarButtonPopup(button, index);
     };
     btn.appendChild(editBtn);
-    
+
     const delBtn = document.createElement('button');
     delBtn.className = 'delete-btn';
     delBtn.textContent = '🗑';
@@ -102,7 +115,7 @@ function createSidebarButton(button, index) {
     };
     btn.appendChild(delBtn);
   }
-  
+
   return btn;
 }
 
@@ -116,7 +129,7 @@ document.getElementById('sidebar-button-display-type').addEventListener('change'
   const iconInput = document.getElementById('sidebar-button-icon');
   const imgInput = document.getElementById('sidebar-button-img-src');
   const svgInput = document.getElementById('sidebar-button-svg-code');
-  
+
   iconInput.style.display = e.target.value === 'icon' ? 'block' : 'none';
   imgInput.style.display = e.target.value === 'image' ? 'block' : 'none';
   svgInput.style.display = e.target.value === 'svg' ? 'block' : 'none';
@@ -124,7 +137,7 @@ document.getElementById('sidebar-button-display-type').addEventListener('change'
 
 document.getElementById('add-sidebar-button-form').addEventListener('submit', async (e) => {
   e.preventDefault();
-  
+
   const newButton = {
     id: `btn-${Date.now()}`,
     name: document.getElementById('sidebar-button-name').value,
@@ -141,15 +154,15 @@ document.getElementById('add-sidebar-button-form').addEventListener('submit', as
     font_size: document.getElementById('sidebar-button-font-size').value || '16px',
     has_notification: false
   };
-  
+
   try {
-    await window.convexClient.mutation("functions:addSidebarButton", newButton);
+    await window.convexMutation("functions:addSidebarButton", newButton);
     document.getElementById('add-sidebar-button-popup').classList.add('hidden');
     await loadSidebarButtons();
     window.showNotification('Button added!');
   } catch (error) {
     console.error('Error adding button:', error);
-    alert('Error adding button');
+    alert('Error adding button: ' + error.message);
   }
 });
 
@@ -168,15 +181,15 @@ function openEditSidebarButtonPopup(button, index) {
   document.getElementById('edit-sidebar-button-border-color').value = button.border_color;
   document.getElementById('edit-sidebar-button-border-radius').value = button.border_radius;
   document.getElementById('edit-sidebar-button-font-size').value = button.font_size;
-  
+
   const iconInput = document.getElementById('edit-sidebar-button-icon');
   const imgInput = document.getElementById('edit-sidebar-button-img-src');
   const svgInput = document.getElementById('edit-sidebar-button-svg-code');
-  
+
   iconInput.style.display = button.display_type === 'icon' ? 'block' : 'none';
   imgInput.style.display = button.display_type === 'image' ? 'block' : 'none';
   svgInput.style.display = button.display_type === 'svg' ? 'block' : 'none';
-  
+
   document.getElementById('edit-sidebar-button-popup').classList.remove('hidden');
 }
 
@@ -184,7 +197,7 @@ document.getElementById('edit-sidebar-button-display-type').addEventListener('ch
   const iconInput = document.getElementById('edit-sidebar-button-icon');
   const imgInput = document.getElementById('edit-sidebar-button-img-src');
   const svgInput = document.getElementById('edit-sidebar-button-svg-code');
-  
+
   iconInput.style.display = e.target.value === 'icon' ? 'block' : 'none';
   imgInput.style.display = e.target.value === 'image' ? 'block' : 'none';
   svgInput.style.display = e.target.value === 'svg' ? 'block' : 'none';
@@ -192,10 +205,10 @@ document.getElementById('edit-sidebar-button-display-type').addEventListener('ch
 
 document.getElementById('edit-sidebar-button-form').addEventListener('submit', async (e) => {
   e.preventDefault();
-  
+
   const dbId = document.getElementById('edit-sidebar-button-id').value;
   const button = sidebarButtons.find(b => b._id === dbId);
-  
+
   const updatedButton = {
     dbId,
     id: button.id,
@@ -213,29 +226,29 @@ document.getElementById('edit-sidebar-button-form').addEventListener('submit', a
     font_size: document.getElementById('edit-sidebar-button-font-size').value,
     has_notification: button.has_notification || false
   };
-  
+
   try {
-    await window.convexClient.mutation("functions:updateSidebarButton", updatedButton);
+    await window.convexMutation("functions:updateSidebarButton", updatedButton);
     document.getElementById('edit-sidebar-button-popup').classList.add('hidden');
     await loadSidebarButtons();
     window.showNotification('Button updated!');
   } catch (error) {
     console.error('Error updating button:', error);
-    alert('Error updating button');
+    alert('Error updating button: ' + error.message);
   }
 });
 
 // Delete sidebar button
 async function deleteSidebarButton(id) {
   if (!confirm('Delete this button?')) return;
-  
+
   try {
-    await window.convexClient.mutation("functions:deleteSidebarButton", { id });
+    await window.convexClient.mutation(window.api.functions.deleteSidebarButton.name, { id });
     await loadSidebarButtons();
     window.showNotification('Button deleted!');
   } catch (error) {
     console.error('Error deleting button:', error);
-    alert('Error deleting button');
+    alert('Error deleting button: ' + error.message);
   }
 }
 
@@ -245,3 +258,11 @@ document.addEventListener('editModeChanged', loadSidebarButtons);
 window.loadSidebarButtons = loadSidebarButtons;
 window.openEditSidebarButtonPopup = openEditSidebarButtonPopup;
 window.deleteSidebarButton = deleteSidebarButton;
+
+// Fallback initialization if app.js fails
+document.addEventListener('DOMContentLoaded', () => {
+  if (!window.convexClient) {
+    console.warn('Convex client not initialized (app.js failed?), running fallback...');
+    loadSidebarButtons();
+  }
+});

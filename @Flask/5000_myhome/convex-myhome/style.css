@@ -113,3 +113,47 @@ details[open] summary { margin-bottom: 10px; }
 button, .link-item, .add-button { transition: all 0.3s; }
 .popup-container { animation: fadeIn 0.2s; }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* Edit Mode Toggle Button */
+.edit-mode-toggle {
+  position: absolute;
+  right: 20px;
+  background: #4CAF50;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s;
+}
+
+.edit-mode-toggle:hover {
+  background: #45a049;
+  transform: scale(1.05);
+}
+
+.edit-mode-toggle.active {
+  background: #ff9800;
+}
+
+/* Make Add Link button more prominent */
+#links-container > .add-button {
+  width: 100%;
+  max-width: 300px;
+  margin: 20px auto;
+  display: block;
+  padding: 15px 30px;
+  font-size: 16px;
+  font-weight: bold;
+  background: #4CAF50 !important;
+  color: white !important;
+  border: 2px solid #45a049;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+}
+
+#links-container > .add-button:hover {
+  background: #45a049 !important;
+  transform: scale(1.05);
+  box-shadow: 0 6px 8px rgba(0,0,0,0.4);
+}
