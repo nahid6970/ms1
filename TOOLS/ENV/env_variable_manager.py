@@ -9,7 +9,7 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QH
                              QListWidgetItem, QFormLayout, QTableWidget, QTableWidgetItem,
                              QHeaderView, QFileDialog, QDialog, QDialogButtonBox)
 from PyQt6.QtCore import Qt, QSize
-from PyQt6.QtGui import QFont, QFontDatabase, QColor, QColor
+from PyQt6.QtGui import QFont, QFontDatabase, QColor
 
 # CYBERPUNK THEME PALETTE
 CP_BG = "#050505"
@@ -879,41 +879,31 @@ class EnvVariableManager(QMainWindow):
         # Only scan HKCU (user-created entries) to avoid duplicates and confusion
         # Scan both Software\Classes paths (HKCU) for user entries
         
-        # Add Folder scope header
-        self._add_scope_separator("📁 FOLDER CONTEXT MENU")
+        self._add_scope_header("FOLDERS (Right-click on folder)")
         self._scan_shell_keys_hkcu(r"Software\Classes\Directory\shell", "Folder", winreg.HKEY_CURRENT_USER)
         
-        # Add Background scope header
-        self._add_scope_separator("🖥️ BACKGROUND CONTEXT MENU")
+        self._add_scope_header("BACKGROUND (Right-click on empty space)")
         self._scan_shell_keys_hkcu(r"Software\Classes\Directory\Background\shell", "Background", winreg.HKEY_CURRENT_USER)
         
-        # Add All Files scope header
-        self._add_scope_separator("📄 ALL FILES CONTEXT MENU")
+        self._add_scope_header("FILES (Right-click on any file)")
         self._scan_shell_keys_hkcu(r"Software\Classes\*\shell", "All Files", winreg.HKEY_CURRENT_USER)
 
-    def _add_scope_separator(self, label):
-        """Add a visual separator row for scope grouping"""
+    def _add_scope_header(self, title):
+        """Add a separator/header row to the table"""
         row = self.context_table.rowCount()
         self.context_table.insertRow(row)
         
-        # Create a styled separator item
-        separator_item = QTableWidgetItem(label)
-        separator_item.setBackground(QColor(CP_YELLOW))
-        separator_item.setForeground(QColor(CP_BG))
-        font = separator_item.font()
+        item = QTableWidgetItem(title)
+        item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+        font = item.font()
         font.setBold(True)
-        separator_item.setFont(font)
-        separator_item.setFlags(Qt.ItemFlag.NoItemFlags)  # Make it non-selectable
-        separator_item.setData(Qt.ItemDataRole.UserRole, "__SEPARATOR__")  # Mark as separator
+        item.setFont(font)
+        item.setBackground(QColor(CP_DIM))
+        item.setForeground(QColor(CP_YELLOW))
+        item.setFlags(Qt.ItemFlag.NoItemFlags) # Not selectable/editable
         
-        self.context_table.setItem(row, 0, separator_item)
-        
-        # Fill other columns
-        for col in [1, 2]:
-            empty_item = QTableWidgetItem("")
-            empty_item.setBackground(QColor(CP_YELLOW))
-            empty_item.setFlags(Qt.ItemFlag.NoItemFlags)
-            self.context_table.setItem(row, col, empty_item)
+        self.context_table.setItem(row, 0, item)
+        self.context_table.setSpan(row, 0, 1, 3)
 
     def _scan_shell_keys_hkcu(self, base_path, scope_label, hkey, indent=""):
         """Recursive helper to scan for context menu items and groups in HKCU only"""
