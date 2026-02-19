@@ -140,10 +140,34 @@ function createSidebarButton(button, index) {
         action: () => openEditSidebarButtonPopup(button, index) 
       },
       { 
-        label: 'Copy URL', 
-        action: () => {
-          navigator.clipboard.writeText(button.url);
-          window.showNotification('URL copied to clipboard!', 'success');
+        label: 'Duplicate', 
+        action: async () => {
+          const duplicatedButton = {
+            name: button.name + ' (Copy)',
+            url: button.url,
+            display_type: button.display_type,
+            icon_class: button.icon_class || '',
+            img_src: button.img_src || '',
+            svg_code: button.svg_code || '',
+            text_color: button.text_color,
+            bg_color: button.bg_color,
+            hover_color: button.hover_color,
+            border_color: button.border_color,
+            border_radius: button.border_radius,
+            font_size: button.font_size,
+            has_notification: button.has_notification || false,
+            notification_api: button.notification_api || '',
+            mark_seen_api: button.mark_seen_api || '',
+            id: button.id || ''
+          };
+          try {
+            await window.convexMutation("functions:addSidebarButton", duplicatedButton);
+            await loadSidebarButtons();
+            window.showNotification('Button duplicated!', 'success');
+          } catch (error) {
+            console.error('Error duplicating button:', error);
+            window.showNotification('Error duplicating button', 'error');
+          }
         }
       },
       { 
