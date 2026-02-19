@@ -90,11 +90,15 @@ function createSidebarButton(button, index) {
   btn.target = '_blank';
   btn.className = 'sidebar-button';
   btn.title = button.name;
-  btn.style.color = button.text_color;
-  btn.style.backgroundColor = button.bg_color;
-  btn.style.borderColor = button.border_color;
-  btn.style.borderRadius = button.border_radius;
-  btn.style.fontSize = button.font_size;
+  
+  // Apply custom colors using inline styles with !important
+  btn.style.setProperty('color', button.text_color, 'important');
+  btn.style.setProperty('background-color', button.bg_color, 'important');
+  btn.style.setProperty('border-color', button.border_color, 'important');
+  btn.style.setProperty('border-radius', button.border_radius, 'important');
+  btn.style.setProperty('font-size', button.font_size, 'important');
+  btn.style.setProperty('border-width', '2px', 'important');
+  btn.style.setProperty('border-style', 'solid', 'important');
 
   // Content based on display type
   if (button.display_type === 'image' && button.img_src) {
@@ -118,15 +122,18 @@ function createSidebarButton(button, index) {
   } else {
     const icon = document.createElement('i');
     icon.className = button.icon_class || 'nf nf-fa-question';
+    icon.style.fontFamily = 'jetbrainsmono nfp, monospace';
+    icon.style.fontSize = button.font_size;
+    icon.style.display = 'inline-block';
     btn.appendChild(icon);
   }
 
   // Hover effect
   btn.addEventListener('mouseenter', () => {
-    btn.style.backgroundColor = button.hover_color;
+    btn.style.setProperty('background-color', button.hover_color, 'important');
   });
   btn.addEventListener('mouseleave', () => {
-    btn.style.backgroundColor = button.bg_color;
+    btn.style.setProperty('background-color', button.bg_color, 'important');
   });
 
   // Add context menu for right-click

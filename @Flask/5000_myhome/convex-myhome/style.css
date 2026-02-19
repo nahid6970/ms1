@@ -7,8 +7,27 @@ body { font-family: Arial, sans-serif; background: #1a1a1a; color: #fff; }
 /* Topbar */
 .topbar { background: #2d2d2d; padding: 10px; display: flex; justify-content: center; border-bottom: 2px solid #444; }
 .top-center-controls { display: flex; gap: 10px; align-items: center; }
-.add-button { background: #4CAF50; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; }
-.add-button:hover { background: #45a049; }
+.add-button { 
+  background: #ffffff; 
+  color: #000000; 
+  border: 2px solid #cccccc; 
+  padding: 8px 15px; 
+  border-radius: 4px; 
+  cursor: pointer; 
+  text-decoration: none; 
+  display: inline-flex; 
+  align-items: center; 
+  min-width: 40px;
+  min-height: 40px;
+  justify-content: center;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.add-button:hover { 
+  background: #e0e0e0; 
+  transform: scale(1.05);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+}
 
 /* Main Container */
 .flex-container2 { padding: 20px; display: flex; flex-wrap: wrap; gap: 15px; }
@@ -121,11 +140,64 @@ details[open] summary { margin-bottom: 10px; }
 .url-input-group { display: flex; gap: 5px; margin-bottom: 5px; }
 .url-input-group input { flex: 1; }
 
+/* Sidebar Button Styling */
+.sidebar-button {
+  color: #000000;
+  background-color: #ffffff;
+  border: 2px solid #cccccc;
+  border-radius: 4px;
+  padding: 8px 10px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  min-width: 40px;
+  min-height: 40px;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.sidebar-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+}
+
+/* Custom sidebar button styling with higher specificity */
+.top-center-controls .sidebar-button {
+  color: var(--custom-text-color, #000000) !important;
+  background-color: var(--custom-bg-color, #ffffff) !important;
+  border: 2px solid var(--custom-border-color, #cccccc) !important;
+  border-radius: var(--custom-border-radius, 4px) !important;
+  font-size: var(--custom-font-size, 16px) !important;
+  transition: background-color 0.2s ease, transform 0.2s ease !important;
+  min-width: 40px;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.top-center-controls .sidebar-button:hover {
+  color: var(--custom-text-color, #000000) !important;
+  background-color: var(--custom-hover-color, #e0e0e0) !important;
+  transform: scale(1.05) !important;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15) !important;
+}
+
 /* Context Menu */
-.context-menu { position: fixed; background: #2d2d2d; border: 2px solid #555; border-radius: 4px; padding: 5px 0; z-index: 2000; min-width: 120px; }
+.context-menu { position: fixed; background: #383838; border: 1px solid #ccc; border-radius: 0; padding: 5px 0; z-index: 2000; min-width: 150px; box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.15); }
 .context-menu.hidden { display: none; }
-.context-menu-item { padding: 8px 15px; cursor: pointer; color: #fff; }
-.context-menu-item:hover { background: #4CAF50; }
+.context-menu-item { padding: 8px 12px; cursor: pointer; color: #fff; }
+.context-menu-item:hover { background: #4f4f4f; }
+.context-menu-item.context-menu-edit { color: #4CAF50; }
+.context-menu-item.context-menu-edit:hover { background: #4CAF50; color: white; }
+.context-menu-item.context-menu-copy { color: #2196F3; }
+.context-menu-item.context-menu-copy:hover { background: #2196F3; color: white; }
+.context-menu-item.context-menu-delete { color: #f44336; }
+.context-menu-item.context-menu-delete:hover { background: #f44336; color: white; }
 
 /* Notifications */
 .copy-notification { position: fixed; top: 20px; right: 20px; padding: 12px 20px; border-radius: 6px; background: #4CAF50; color: white; z-index: 3000; opacity: 0; transition: opacity 0.3s; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
