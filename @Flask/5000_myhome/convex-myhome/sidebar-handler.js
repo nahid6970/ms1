@@ -129,6 +129,38 @@ function createSidebarButton(button, index) {
     btn.style.backgroundColor = button.bg_color;
   });
 
+  // Add context menu for right-click
+  btn.addEventListener('contextmenu', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const items = [
+      { 
+        label: 'Edit', 
+        action: () => openEditSidebarButtonPopup(button, index) 
+      },
+      { 
+        label: 'Copy URL', 
+        action: () => {
+          navigator.clipboard.writeText(button.url);
+          window.showNotification('URL copied to clipboard!', 'success');
+        }
+      },
+      { 
+        label: 'Delete', 
+        action: () => {
+          if (confirm(`Delete "${button.name}"?`)) {
+            deleteSidebarButton(button._id);
+          }
+        }
+      }
+    ];
+    
+    if (typeof window.showContextMenu === 'function') {
+      window.showContextMenu(e, items);
+    }
+  });
+
   // Edit mode buttons
   if (window.editMode) {
     const editBtn = document.createElement('button');
