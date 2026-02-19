@@ -1,6 +1,6 @@
 {
     "version": "1.3",
-    "timestamp": "2026-02-20T01:03:10.205571",
+    "timestamp": "2026-02-20T01:36:03.870946",
     "user_env": {
         "chocolateyinstall": "C:\\Users\\nahid\\AppData\\Local\\UniGetUI\\Chocolatey",
         "OneDrive": "C:\\Users\\nahid\\OneDrive",
@@ -132,11 +132,6 @@
         "AllFiles": {
             "Convex (Folder+File)": {
                 "command": "\"C:\\@delta\\db\\@Convex\\myFiles\\context_menu_share\\upload.bat\" \"%V\""
-            },
-            "FilePilotHere": {
-                "MUIVerb": "File Pilot Here",
-                "Icon": "C:\\Users\\nahid\\AppData\\Local\\Voidstar\\FilePilot\\FPilot.exe",
-                "command": "C:\\Users\\nahid\\AppData\\Local\\Voidstar\\FilePilot\\FPilot.exe \"%V\""
             },
             "TakeOwnership": {
                 "command": "powershell.exe -windowstyle hidden -command \"Start-Process cmd -ArgumentList '/c takeown /f \\\"%1\\\" && icacls \\\"%1\\\" /grant *S-1-3-4:F /c /l & pause' -Verb runAs\""
