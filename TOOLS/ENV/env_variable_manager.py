@@ -9,7 +9,7 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QH
                              QListWidgetItem, QFormLayout, QTableWidget, QTableWidgetItem,
                              QHeaderView, QFileDialog, QDialog, QDialogButtonBox)
 from PyQt6.QtCore import Qt, QSize
-from PyQt6.QtGui import QFont, QFontDatabase
+from PyQt6.QtGui import QFont, QFontDatabase, QColor, QColor
 
 # CYBERPUNK THEME PALETTE
 CP_BG = "#050505"
@@ -878,9 +878,42 @@ class EnvVariableManager(QMainWindow):
         
         # Only scan HKCU (user-created entries) to avoid duplicates and confusion
         # Scan both Software\Classes paths (HKCU) for user entries
+        
+        # Add Folder scope header
+        self._add_scope_separator("📁 FOLDER CONTEXT MENU")
         self._scan_shell_keys_hkcu(r"Software\Classes\Directory\shell", "Folder", winreg.HKEY_CURRENT_USER)
+        
+        # Add Background scope header
+        self._add_scope_separator("🖥️ BACKGROUND CONTEXT MENU")
         self._scan_shell_keys_hkcu(r"Software\Classes\Directory\Background\shell", "Background", winreg.HKEY_CURRENT_USER)
+        
+        # Add All Files scope header
+        self._add_scope_separator("📄 ALL FILES CONTEXT MENU")
         self._scan_shell_keys_hkcu(r"Software\Classes\*\shell", "All Files", winreg.HKEY_CURRENT_USER)
+
+    def _add_scope_separator(self, label):
+        """Add a visual separator row for scope grouping"""
+        row = self.context_table.rowCount()
+        self.context_table.insertRow(row)
+        
+        # Create a styled separator item
+        separator_item = QTableWidgetItem(label)
+        separator_item.setBackground(QColor(CP_CYAN))
+        separator_item.setForeground(QColor(CP_BG))
+        font = separator_item.font()
+        font.setBold(True)
+        separator_item.setFont(font)
+        separator_item.setFlags(Qt.ItemFlag.NoItemFlags)  # Make it non-selectable
+        separator_item.setData(Qt.ItemDataRole.UserRole, "__SEPARATOR__")  # Mark as separator
+        
+        self.context_table.setItem(row, 0, separator_item)
+        
+        # Fill other columns
+        for col in [1, 2]:
+            empty_item = QTableWidgetItem("")
+            empty_item.setBackground(QColor(CP_CYAN))
+            empty_item.setFlags(Qt.ItemFlag.NoItemFlags)
+            self.context_table.setItem(row, col, empty_item)
 
     def _scan_shell_keys_hkcu(self, base_path, scope_label, hkey, indent=""):
         """Recursive helper to scan for context menu items and groups in HKCU only"""
