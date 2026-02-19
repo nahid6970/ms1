@@ -3,6 +3,42 @@ console.log('🔍 links-handler.js loaded!');
 let links = [];
 let draggedElement = null;
 
+// Initialize edit mode
+if (typeof window.editMode === 'undefined') {
+  window.editMode = false;
+}
+
+// F1 key toggle edit mode
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'F1') {
+    e.preventDefault();
+    window.editMode = !window.editMode;
+    console.log('🔵 Edit mode toggled:', window.editMode);
+    
+    const container = document.querySelector('.flex-container2');
+    if (container) {
+      container.classList.toggle('edit-mode', window.editMode);
+    }
+    
+    // Dispatch event for other handlers
+    document.dispatchEvent(new CustomEvent('editModeChanged', { 
+      detail: { isEditMode: window.editMode } 
+    }));
+    
+    // Re-render to show/hide edit buttons
+    renderLinks();
+    if (typeof loadSidebarButtons === 'function') {
+      loadSidebarButtons();
+    }
+    
+    // Show notification
+    window.showNotification(
+      window.editMode ? 'Edit mode enabled (F1 to disable)' : 'Edit mode disabled',
+      'success'
+    );
+  }
+});
+
 // Initialize Convex client if not already initialized
 if (!window.convexClient) {
   console.log('🔵 Initializing Convex client in links-handler.js...');
