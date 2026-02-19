@@ -1,6 +1,6 @@
 {
     "version": "1.3",
-    "timestamp": "2026-02-19T00:14:15.675062",
+    "timestamp": "2026-02-19T21:30:49.752286",
     "user_env": {
         "chocolateyinstall": "C:\\Users\\nahid\\AppData\\Local\\UniGetUI\\Chocolatey",
         "OneDrive": "C:\\Users\\nahid\\OneDrive",
@@ -140,7 +140,7 @@
         "AllFiles": {
             "Share w Convex": {
                 "MUIVerb": "Share w Convex",
-                "command": "\"C:\\@delta\\db\\@Convex\\myFiles\\context_menu_share\\upload.bat\" \"\"%V\"\""
+                "command": "\"C:\\@delta\\db\\@Convex\\myFiles\\context_menu_share\\upload.bat\" \"%V\""
             },
             "TakeOwnership": {
                 "command": "powershell.exe -windowstyle hidden -command \"Start-Process cmd -ArgumentList '/c takeown /f \\\"%1\\\" && icacls \\\"%1\\\" /grant *S-1-3-4:F /c /l & pause' -Verb runAs\""
