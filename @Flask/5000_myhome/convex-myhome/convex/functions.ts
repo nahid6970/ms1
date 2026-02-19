@@ -137,12 +137,15 @@ export const deleteLink = mutation({
 export const updateAllLinks = mutation({
   args: { links: v.array(v.any()) },
   handler: async (ctx, args) => {
+    // Delete all existing links
     const existing = await ctx.db.query("links").collect();
     for (const link of existing) {
       await ctx.db.delete(link._id);
     }
+    
+    // Insert new links without _id and _creationTime fields
     for (const link of args.links) {
-      const { _id, ...data } = link;
+      const { _id, _creationTime, ...data } = link;
       await ctx.db.insert("links", data);
     }
   },

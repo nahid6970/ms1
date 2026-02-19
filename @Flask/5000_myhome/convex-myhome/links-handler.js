@@ -41,6 +41,20 @@ if (!window.convexMutation) {
   };
 }
 
+// Show notification helper
+if (!window.showNotification) {
+  window.showNotification = (message, type = 'success') => {
+    const notif = document.getElementById('copy-notification');
+    if (notif) {
+      notif.textContent = message;
+      notif.className = `copy-notification ${type} show`;
+      setTimeout(() => notif.classList.remove('show'), 2000);
+    } else {
+      console.log(`[${type.toUpperCase()}] ${message}`);
+    }
+  };
+}
+
 // Load links from Convex
 async function loadLinks() {
   try {
