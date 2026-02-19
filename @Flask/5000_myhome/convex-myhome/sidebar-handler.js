@@ -1,23 +1,53 @@
+console.log('🔍 sidebar-handler.js loaded!');
+
 let sidebarButtons = [];
+
+// Initialize helper functions if not available
+if (!window.showNotification) {
+  window.showNotification = (message, type = 'success') => {
+    const notif = document.getElementById('copy-notification');
+    if (notif) {
+      notif.textContent = message;
+      notif.className = `copy-notification ${type} show`;
+      setTimeout(() => notif.classList.remove('show'), 2000);
+    } else {
+      console.log(`[${type.toUpperCase()}] ${message}`);
+    }
+  };
+}
 
 // Load sidebar buttons
 async function loadSidebarButtons() {
+  console.log('🔵 loadSidebarButtons() called');
   try {
-    // Wait for convexQuery to be available
-    if (!window.convexQuery) {
+    // Wait for both convexClient and convexQuery to be available
+    if (!window.convexClient || !window.convexQuery) {
       console.warn('Waiting for Convex client to initialize...');
       await new Promise(resolve => {
         const checkInterval = setInterval(() => {
-          if (window.convexQuery) {
+          if (window.convexClient && window.convexQuery) {
             clearInterval(checkInterval);
             resolve();
           }
         }, 100);
+        
+        // Timeout after 10 seconds
+        setTimeout(() => {
+          clearInterval(checkInterval);
+          resolve();
+        }, 10000);
       });
     }
     
+    if (!window.convexClient) {
+      console.error('❌ Convex client still not available after timeout');
+      return;
+    }
+    
+    console.log('🔵 Calling convexQuery for sidebar buttons...');
     const data = await window.convexQuery("functions:getSidebarButtons");
     sidebarButtons = data;
+    console.log('🔵 Loaded sidebar buttons:', sidebarButtons.length);
   } catch (error) {
     console.error('Error loading sidebar buttons:', error);
   }
@@ -26,7 +56,13 @@ async function loadSidebarButtons() {
 
 // Render sidebar buttons
 function renderSidebarButtons() {
+  console.log('🔵 renderSidebarButtons() called, buttons count:', sidebarButtons.length);
   const container = document.getElementById('sidebar-buttons-container');
+  if (!container) {
+    console.error('❌ Container #sidebar-buttons-container not found!');
+    return;
+  }
+  console.log('✅ Container found');
   container.innerHTML = '';
 
   sidebarButtons.forEach((button, index) => {
@@ -243,7 +279,7 @@ async function deleteSidebarButton(id) {
   if (!confirm('Delete this button?')) return;
 
   try {
-    await window.convexClient.mutation(window.api.functions.deleteSidebarButton.name, { id });
+    await window.convexMutation("functions:deleteSidebarButton", { id });
     await loadSidebarButtons();
     window.showNotification('Button deleted!');
   } catch (error) {
@@ -261,8 +297,21 @@ window.deleteSidebarButton = deleteSidebarButton;
 
 // Fallback initialization if app.js fails
 document.addEventListener('DOMContentLoaded', () => {
-  if (!window.convexClient) {
-    console.warn('Convex client not initialized (app.js failed?), running fallback...');
+  console.log('🔵 DOMContentLoaded fired in sidebar-handler.js');
+  
+  // Always try to load sidebar buttons
+  if (typeof loadSidebarButtons === 'function') {
+    console.log('🔵 Calling loadSidebarButtons...');
     loadSidebarButtons();
   }
+  
+  // Also set up a fallback timer
+  setTimeout(() => {
+    console.log('🔵 Fallback timer: checking if sidebar buttons loaded...');
+    const container = document.getElementById('sidebar-buttons-container');
+    if (container && container.children.length === 0) {
+      console.warn('⚠️ No sidebar buttons rendered, trying again...');
+      loadSidebarButtons();
+    }
+  }, 2000);
 });
