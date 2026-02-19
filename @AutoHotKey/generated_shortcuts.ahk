@@ -1494,3 +1494,7 @@ CONFIG_FILE = os.path.join(SCRIPT_DIR, ""projects_config.json"")
 ;! domain full name
 ;! domain name
 :X:;domain::Paste('nahid@192.168.0.101')
+
+;! convex guidline
+;! convex guidline
+:X:;convex::Paste('Here is the convex guidline that u can follow for my project C:\@delta\ms1\CONVEX_GUIDE.md')

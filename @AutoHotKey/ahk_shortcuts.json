@@ -467,6 +467,14 @@
             "trigger": ";domain",
             "replacement": "nahid@192.168.0.101",
             "enabled": true
+        },
+        {
+            "name": "convex guidline",
+            "category": "General",
+            "description": "convex guidline",
+            "trigger": ";convex",
+            "replacement": "Here is the convex guidline that u can follow for my project C:\\@delta\\ms1\\CONVEX_GUIDE.md",
+            "enabled": true
         }
     ],
     "startup_scripts": [
