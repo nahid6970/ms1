@@ -118,40 +118,7 @@ function renderLinks() {
     container.appendChild(groupDiv);
   });
 
-  // Add link button - ALWAYS VISIBLE AND PROMINENT
-  console.log('🟢 Creating Add Link button NOW...');
-  const addBtn = document.createElement('button');
-  addBtn.className = 'add-button main-add-button';
-  addBtn.innerHTML = '<span style="font-size: 24px;">+</span> Add New Link';
-  addBtn.style.display = 'block';
-  addBtn.style.margin = '30px auto';
-  addBtn.style.padding = '20px 40px';
-  addBtn.style.fontSize = '18px';
-  addBtn.style.fontWeight = 'bold';
-  addBtn.style.background = '#4CAF50';
-  addBtn.style.color = 'white';
-  addBtn.style.border = 'none';
-  addBtn.style.borderRadius = '8px';
-  addBtn.style.cursor = 'pointer';
-  addBtn.style.boxShadow = '0 4px 6px rgba(0,0,0,0.3)';
-  addBtn.onclick = () => {
-    console.log('🟢 Add Link button clicked!');
-    showAddLinkPopup();
-  };
-  addBtn.onmouseenter = () => {
-    addBtn.style.background = '#45a049';
-    addBtn.style.transform = 'scale(1.05)';
-  };
-  addBtn.onmouseleave = () => {
-    addBtn.style.background = '#4CAF50';
-    addBtn.style.transform = 'scale(1)';
-  };
-  container.appendChild(addBtn);
-  console.log('✅ Add Link button added to container!');
-  console.log('✅ Button element:', addBtn);
-  console.log('✅ Button in DOM:', document.querySelector('.main-add-button'));
-  
-  // Also add a floating action button (FAB) for easy access
+  // Only add floating action button (FAB) - removed the large button
   console.log('🟢 Creating floating action button (FAB)...');
   let fab = document.getElementById('fab-add-link');
   if (!fab) {
@@ -895,50 +862,25 @@ document.addEventListener('DOMContentLoaded', () => {
     loadLinks();
   }
   
-  // EMERGENCY: Force create buttons after 2 seconds if they don't exist
+  // EMERGENCY: Force create FAB after 2 seconds if it doesn't exist
   setTimeout(() => {
-    console.log('🔵 Checking if buttons exist...');
+    console.log('🔵 Checking if FAB exists...');
     
-    const mainBtn = document.querySelector('.main-add-button');
     const fab = document.getElementById('fab-add-link');
-    
-    if (!mainBtn) {
-      console.warn('⚠️ Main button not found! Creating emergency button...');
-      const container = document.getElementById('links-container');
-      if (container) {
-        const emergencyBtn = document.createElement('button');
-        emergencyBtn.className = 'add-button main-add-button emergency-button';
-        emergencyBtn.innerHTML = '<span style="font-size: 24px;">+</span> Add New Link (Emergency)';
-        emergencyBtn.style.display = 'block';
-        emergencyBtn.style.margin = '30px auto';
-        emergencyBtn.style.padding = '20px 40px';
-        emergencyBtn.style.fontSize = '18px';
-        emergencyBtn.style.fontWeight = 'bold';
-        emergencyBtn.style.background = '#FF5722';
-        emergencyBtn.style.color = 'white';
-        emergencyBtn.style.border = 'none';
-        emergencyBtn.style.borderRadius = '8px';
-        emergencyBtn.style.cursor = 'pointer';
-        emergencyBtn.onclick = () => showAddLinkPopup();
-        container.appendChild(emergencyBtn);
-        console.log('✅ Emergency button created!');
-      }
-    } else {
-      console.log('✅ Main button exists!');
-    }
     
     if (!fab) {
       console.warn('⚠️ FAB not found! Creating emergency FAB...');
       const emergencyFab = document.createElement('button');
       emergencyFab.id = 'fab-add-link';
       emergencyFab.innerHTML = '+';
+      emergencyFab.title = 'Add New Link';
       emergencyFab.style.position = 'fixed';
       emergencyFab.style.bottom = '30px';
       emergencyFab.style.right = '30px';
       emergencyFab.style.width = '60px';
       emergencyFab.style.height = '60px';
       emergencyFab.style.borderRadius = '50%';
-      emergencyFab.style.background = '#FF5722';
+      emergencyFab.style.background = '#4CAF50';
       emergencyFab.style.color = 'white';
       emergencyFab.style.border = 'none';
       emergencyFab.style.fontSize = '32px';
