@@ -11,7 +11,7 @@ function showContextMenu(event, items) {
   contextMenu.innerHTML = '';
   items.forEach(item => {
     const div = document.createElement('div');
-    div.className = 'context-menu-item';
+    div.className = 'context-menu-item' + (item.className ? ' ' + item.className : '');
     div.textContent = item.label;
     div.onclick = () => {
       item.action();

@@ -84,21 +84,28 @@ function renderSidebarButtons() {
 }
 
 // Create sidebar button
+// Create sidebar button
 function createSidebarButton(button, index) {
   const btn = document.createElement('a');
   btn.href = button.url;
   btn.target = '_blank';
-  btn.className = 'sidebar-button';
+  btn.className = 'sidebar-button add-button';
   btn.title = button.name;
-  
-  // Apply custom colors using inline styles with !important
-  btn.style.setProperty('color', button.text_color, 'important');
-  btn.style.setProperty('background-color', button.bg_color, 'important');
-  btn.style.setProperty('border-color', button.border_color, 'important');
-  btn.style.setProperty('border-radius', button.border_radius, 'important');
-  btn.style.setProperty('font-size', button.font_size, 'important');
-  btn.style.setProperty('border-width', '2px', 'important');
-  btn.style.setProperty('border-style', 'solid', 'important');
+
+  // Apply custom CSS variables for dynamic styling
+  btn.style.setProperty('--custom-text-color', button.text_color);
+  btn.style.setProperty('--custom-bg-color', button.bg_color);
+  btn.style.setProperty('--custom-hover-color', button.hover_color);
+  btn.style.setProperty('--custom-border-color', button.border_color);
+  btn.style.setProperty('--custom-border-radius', button.border_radius);
+  btn.style.setProperty('--custom-font-size', button.font_size);
+
+  // Apply inline styles
+  btn.style.color = button.text_color;
+  btn.style.backgroundColor = button.bg_color;
+  btn.style.borderColor = button.border_color;
+  btn.style.borderRadius = button.border_radius;
+  btn.style.fontSize = button.font_size;
 
   // Content based on display type
   if (button.display_type === 'image' && button.img_src) {
@@ -130,24 +137,26 @@ function createSidebarButton(button, index) {
 
   // Hover effect
   btn.addEventListener('mouseenter', () => {
-    btn.style.setProperty('background-color', button.hover_color, 'important');
+    btn.style.backgroundColor = button.hover_color;
   });
   btn.addEventListener('mouseleave', () => {
-    btn.style.setProperty('background-color', button.bg_color, 'important');
+    btn.style.backgroundColor = button.bg_color;
   });
 
   // Add context menu for right-click
   btn.addEventListener('contextmenu', (e) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     const items = [
-      { 
-        label: 'Edit', 
-        action: () => openEditSidebarButtonPopup(button, index) 
+      {
+        label: 'Edit',
+        className: 'context-menu-edit',
+        action: () => openEditSidebarButtonPopup(button, index)
       },
-      { 
-        label: 'Duplicate', 
+      {
+        label: 'Duplicate',
+        className: 'context-menu-copy',
         action: async () => {
           const duplicatedButton = {
             name: button.name + ' (Copy)',
@@ -177,8 +186,9 @@ function createSidebarButton(button, index) {
           }
         }
       },
-      { 
-        label: 'Delete', 
+      {
+        label: 'Delete',
+        className: 'context-menu-delete',
         action: () => {
           if (confirm(`Delete "${button.name}"?`)) {
             deleteSidebarButton(button._id);
@@ -186,7 +196,7 @@ function createSidebarButton(button, index) {
         }
       }
     ];
-    
+
     if (typeof window.showContextMenu === 'function') {
       window.showContextMenu(e, items);
     }
@@ -217,6 +227,7 @@ function createSidebarButton(button, index) {
 
   return btn;
 }
+
 
 // Add sidebar button popup
 function showAddSidebarButtonPopup() {

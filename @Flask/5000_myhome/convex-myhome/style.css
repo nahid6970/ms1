@@ -140,12 +140,19 @@ details[open] summary { margin-bottom: 10px; }
 .url-input-group { display: flex; gap: 5px; margin-bottom: 5px; }
 .url-input-group input { flex: 1; }
 
+/* Sidebar buttons container */
+#sidebar-buttons-container {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
 /* Sidebar Button Styling */
 .sidebar-button {
-  color: #000000;
-  background-color: #ffffff;
-  border: 2px solid #cccccc;
-  border-radius: 4px;
+  color: #000000 !important;
+  background-color: #ffffff !important;
+  border: 2px solid #cccccc !important;
+  border-radius: 4px !important;
   padding: 8px 10px;
   text-decoration: none;
   display: inline-flex;
@@ -154,14 +161,21 @@ details[open] summary { margin-bottom: 10px; }
   cursor: pointer;
   min-width: 40px;
   min-height: 40px;
-  transition: all 0.2s ease;
+  transition: all 0.2s ease !important;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   position: relative;
 }
 
 .sidebar-button:hover {
-  transform: scale(1.05);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+  transform: scale(1.05) !important;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Sidebar button icon styling */
+.sidebar-button i {
+  font-family: jetbrainsmono nfp, monospace;
+  font-style: normal;
+  display: inline-block;
 }
 
 /* Custom sidebar button styling with higher specificity */
