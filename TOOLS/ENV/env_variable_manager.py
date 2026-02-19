@@ -898,7 +898,7 @@ class EnvVariableManager(QMainWindow):
         
         # Create a styled separator item
         separator_item = QTableWidgetItem(label)
-        separator_item.setBackground(QColor(CP_CYAN))
+        separator_item.setBackground(QColor(CP_YELLOW))
         separator_item.setForeground(QColor(CP_BG))
         font = separator_item.font()
         font.setBold(True)
@@ -911,7 +911,7 @@ class EnvVariableManager(QMainWindow):
         # Fill other columns
         for col in [1, 2]:
             empty_item = QTableWidgetItem("")
-            empty_item.setBackground(QColor(CP_CYAN))
+            empty_item.setBackground(QColor(CP_YELLOW))
             empty_item.setFlags(Qt.ItemFlag.NoItemFlags)
             self.context_table.setItem(row, col, empty_item)
 
