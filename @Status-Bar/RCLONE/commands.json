@@ -54,7 +54,7 @@
         "src": "C:/@delta/db/",
         "dst": "o0:/db/",
         "label": "db",
-        "left_click_cmd": "rclone sync src dst -P --fast-list --exclude \".git/**\" --exclude \"__pycache__/**\"  --log-level INFO",
+        "left_click_cmd": "rclone sync src dst -P --fast-list --exclude \".git/**\" --exclude \"__pycache__/**\" --exclude \"node_modules/**\"  --log-level INFO",
         "right_click_cmd": "rclone sync dst src -P --fast-list",
         "index": 2,
         "enabled": true
