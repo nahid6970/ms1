@@ -1,6 +1,6 @@
 import { ConvexHttpClient } from "https://esm.sh/convex@1.16.0/browser";
 
-const client = new ConvexHttpClient("YOUR_CONVEX_URL_HERE");
+const client = new ConvexHttpClient("https://lovable-wildcat-595.convex.cloud");
 
 window.convexClient = client;
 window.editMode = false;
