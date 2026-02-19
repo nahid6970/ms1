@@ -43,27 +43,6 @@ function toggleEditMode() {
   document.dispatchEvent(new CustomEvent('editModeChanged', { detail: { isEditMode: window.editMode } }));
 }
 
-// Edit mode toggle button
-document.addEventListener('DOMContentLoaded', () => {
-  const toggleBtn = document.getElementById('edit-mode-toggle');
-  if (toggleBtn) {
-    toggleBtn.addEventListener('click', toggleEditMode);
-  }
-});
-
-// Close popups
-document.querySelectorAll('.close-button').forEach(btn => {
-  btn.addEventListener('click', () => {
-    btn.closest('.popup-container').classList.add('hidden');
-  });
-});
-
-window.addEventListener('click', (e) => {
-  if (e.target.classList.contains('popup-container')) {
-    e.target.classList.add('hidden');
-  }
-});
-
 // Show notification
 window.showNotification = (message, type = 'success') => {
   const notif = document.getElementById('copy-notification');
@@ -74,22 +53,58 @@ window.showNotification = (message, type = 'success') => {
 
 // Initialize
 document.addEventListener('DOMContentLoaded', async () => {
-  console.log('Initializing Convex app...');
+  console.log('🚀 Initializing Convex app...');
   console.log('Convex client:', window.convexClient);
   console.log('API:', window.api);
+  
+  // Setup edit mode toggle button
+  const toggleBtn = document.getElementById('edit-mode-toggle');
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', toggleEditMode);
+    console.log('✅ Edit mode toggle button set up');
+  }
+  
+  // Setup close button handlers with logging
+  console.log('🔧 Setting up close button handlers...');
+  const closeButtons = document.querySelectorAll('.close-button');
+  console.log('Found', closeButtons.length, 'close buttons');
+  
+  closeButtons.forEach((btn, index) => {
+    btn.addEventListener('click', (e) => {
+      console.log('❌ Close button', index, 'clicked');
+      e.stopPropagation();
+      const popup = btn.closest('.popup-container');
+      if (popup) {
+        popup.classList.add('hidden');
+        console.log('✅ Popup closed');
+      }
+    });
+  });
+  
+  // Close popup when clicking outside (on the backdrop)
+  document.querySelectorAll('.popup-container').forEach((popup, index) => {
+    popup.addEventListener('click', (e) => {
+      if (e.target === popup) {
+        console.log('🖱️ Clicked outside popup', index, ', closing');
+        popup.classList.add('hidden');
+      }
+    });
+  });
+  
+  console.log('✅ Close handlers set up');
   
   // Load data
   try {
     if (typeof loadLinks === 'function') {
-      console.log('Loading links...');
+      console.log('📦 Loading links...');
       await loadLinks();
     }
     if (typeof loadSidebarButtons === 'function') {
-      console.log('Loading sidebar buttons...');
+      console.log('📦 Loading sidebar buttons...');
       await loadSidebarButtons();
     }
   } catch (error) {
-    console.error('Error during initialization:', error);
+    console.error('❌ Error during initialization:', error);
   }
   
   setupColorPreview();
@@ -138,8 +153,8 @@ function setupColorPreview() {
 function applyColorPreview(input) {
   const value = input.value.trim();
   if (!value) {
-    input.style.backgroundColor = '';
-    input.style.color = '';
+    input.style.setProperty('background-color', '', 'important');
+    input.style.setProperty('color', '', 'important');
     input.classList.remove('color-preview');
     return;
   }
@@ -148,12 +163,12 @@ function applyColorPreview(input) {
   const test = document.createElement('div');
   test.style.color = value;
   if (test.style.color || value.match(/^#[0-9A-Fa-f]{3,6}$/)) {
-    input.style.backgroundColor = value;
-    input.style.color = getContrastColor(value);
+    input.style.setProperty('background-color', value, 'important');
+    input.style.setProperty('color', getContrastColor(value), 'important');
     input.classList.add('color-preview');
   } else {
-    input.style.backgroundColor = '';
-    input.style.color = '';
+    input.style.setProperty('background-color', '', 'important');
+    input.style.setProperty('color', '', 'important');
     input.classList.remove('color-preview');
   }
 }

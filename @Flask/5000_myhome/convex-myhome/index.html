@@ -315,6 +315,39 @@
   <!-- Then load app.js as module which will initialize everything -->
   <script type="module" src="app.js"></script>
 
+  <!-- Close button handlers - must run after DOM is loaded -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('🔧 Setting up close button handlers...');
+      
+      // Close popups with X button
+      document.querySelectorAll('.close-button').forEach(btn => {
+        console.log('✅ Found close button:', btn);
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const popup = btn.closest('.popup-container');
+          if (popup) {
+            popup.classList.add('hidden');
+            console.log('✅ Closed popup');
+          }
+        });
+      });
+      
+      // Close popup when clicking outside (on the backdrop)
+      document.querySelectorAll('.popup-container').forEach(popup => {
+        popup.addEventListener('click', (e) => {
+          if (e.target === popup) {
+            popup.classList.add('hidden');
+            console.log('✅ Closed popup by clicking outside');
+          }
+        });
+      });
+      
+      console.log('✅ Close button handlers set up!');
+    });
+  </script>
+
   <!-- Color Preview Functionality -->
   <script>
     // Function to apply color preview to input fields
