@@ -1,6 +1,6 @@
 {
     "version": "1.3",
-    "timestamp": "2026-02-19T21:40:58.301317",
+    "timestamp": "2026-02-20T00:30:22.295121",
     "user_env": {
         "chocolateyinstall": "C:\\Users\\nahid\\AppData\\Local\\UniGetUI\\Chocolatey",
         "OneDrive": "C:\\Users\\nahid\\OneDrive",
@@ -125,19 +125,22 @@
                 "Icon": "C:\\Users\\nahid\\AppData\\Local\\Voidstar\\FilePilot\\FPilot.exe",
                 "command": "C:\\Users\\nahid\\AppData\\Local\\Voidstar\\FilePilot\\FPilot.exe \"%V\""
             },
-            "Sep_183531": {
-                "CommandFlags": 32
-            },
             "Share-Files": {
                 "command": "\"C:\\@delta\\db\\@Convex\\myFiles\\upload.bat\" \"\"%V\"\""
             }
         },
         "Folder": {
+            "Convex (Folder+File)": {
+                "command": "\"C:\\@delta\\db\\@Convex\\myFiles\\context_menu_share\\upload.bat\" \"%V\""
+            },
             "TakeOwnership": {
                 "command": "powershell.exe -windowstyle hidden -command \"Start-Process cmd -ArgumentList '/c takeown /f \\\"\"%V\"\\\"  /r /d Y /skipsl && icacls \\\"\"%V\"\\\" /grant *S-1-3-4:F /t /c /l & pause' -Verb runAs\""
             }
         },
         "AllFiles": {
+            "Convex (Folder+File)": {
+                "command": "\"C:\\@delta\\db\\@Convex\\myFiles\\context_menu_share\\upload.bat\" \"%V\""
+            },
             "Share w Convex": {
                 "MUIVerb": "Share w Convex",
                 "command": "\"C:\\@delta\\db\\@Convex\\myFiles\\context_menu_share\\upload.bat\" \"%V\""
