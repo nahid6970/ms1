@@ -273,5 +273,174 @@
   <!-- Then load app.js as module which will initialize everything -->
   <script type="module" src="app.js"></script>
 
+  <!-- Color Preview Functionality -->
+  <script>
+    // Function to apply color preview to input fields
+    function applyColorPreview(input) {
+      const value = input.value.trim();
+      console.log('🎨 Applying color preview to:', input.id || input.placeholder, 'Value:', value);
+      
+      if (value) {
+        // Check if it's a valid color (hex, rgb, named color, etc.)
+        const tempDiv = document.createElement('div');
+        tempDiv.style.color = value;
+        if (tempDiv.style.color || value.match(/^#[0-9A-Fa-f]{3,6}$/)) {
+          input.style.backgroundColor = value;
+          // Determine text color based on background brightness
+          const brightness = getBrightness(value);
+          input.style.color = brightness > 128 ? '#000000' : '#ffffff';
+          input.style.border = '2px solid ' + value;
+          console.log('✅ Color applied:', value, 'Brightness:', brightness);
+        } else {
+          // Reset if invalid color
+          input.style.backgroundColor = '#2d2d2d';
+          input.style.color = '#fff';
+          input.style.border = '1px solid #555';
+          console.log('❌ Invalid color, reset');
+        }
+      } else {
+        // Reset if empty
+        input.style.backgroundColor = '#2d2d2d';
+        input.style.color = '#fff';
+        input.style.border = '1px solid #555';
+      }
+    }
+
+    // Function to calculate brightness of a color
+    function getBrightness(color) {
+      let r, g, b;
+
+      if (color.startsWith('#')) {
+        // Hex color
+        const hex = color.slice(1);
+        if (hex.length === 3) {
+          r = parseInt(hex[0] + hex[0], 16);
+          g = parseInt(hex[1] + hex[1], 16);
+          b = parseInt(hex[2] + hex[2], 16);
+        } else {
+          r = parseInt(hex.slice(0, 2), 16);
+          g = parseInt(hex.slice(2, 4), 16);
+          b = parseInt(hex.slice(4, 6), 16);
+        }
+      } else {
+        // For other color formats, use a temporary element
+        const tempDiv = document.createElement('div');
+        tempDiv.style.color = color;
+        document.body.appendChild(tempDiv);
+        const computedColor = window.getComputedStyle(tempDiv).color;
+        document.body.removeChild(tempDiv);
+
+        const match = computedColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+        if (match) {
+          r = parseInt(match[1]);
+          g = parseInt(match[2]);
+          b = parseInt(match[3]);
+        } else {
+          return 128; // Default to medium brightness
+        }
+      }
+
+      // Calculate brightness using luminance formula
+      return (r * 299 + g * 587 + b * 114) / 1000;
+    }
+
+    // Function to check if an input field is color-related
+    function isColorField(input) {
+      return input.type === 'text' && (
+        input.placeholder.toLowerCase().includes('color') ||
+        input.id.toLowerCase().includes('color') ||
+        (input.name && input.name.toLowerCase().includes('color')) ||
+        input.classList.contains('color-input')
+      );
+    }
+
+    // Function to apply color preview to all color fields in a container
+    function applyColorPreviewToContainer(container) {
+      const inputs = container.querySelectorAll('input[type="text"]');
+      console.log('🔍 Checking', inputs.length, 'text inputs for color fields');
+      
+      inputs.forEach(input => {
+        if (isColorField(input)) {
+          console.log('✅ Found color field:', input.id || input.placeholder);
+          applyColorPreview(input);
+
+          // Add event listeners if not already added
+          if (!input.hasAttribute('data-color-preview-enabled')) {
+            input.setAttribute('data-color-preview-enabled', 'true');
+
+            input.addEventListener('input', function () {
+              applyColorPreview(this);
+            });
+
+            input.addEventListener('change', function () {
+              applyColorPreview(this);
+            });
+
+            input.addEventListener('blur', function () {
+              applyColorPreview(this);
+            });
+            
+            input.addEventListener('focus', function () {
+              applyColorPreview(this);
+            });
+          }
+        }
+      });
+    }
+
+    // Apply color preview on page load
+    document.addEventListener('DOMContentLoaded', function () {
+      console.log('🚀 Color preview system initialized');
+      applyColorPreviewToContainer(document);
+
+      // Use MutationObserver to detect when popups are opened and fields are populated
+      const observer = new MutationObserver(function (mutations) {
+        mutations.forEach(function (mutation) {
+          // Check for added nodes (popups opening)
+          mutation.addedNodes.forEach(function (node) {
+            if (node.nodeType === Node.ELEMENT_NODE) {
+              console.log('👀 New element added, checking for color fields');
+              applyColorPreviewToContainer(node);
+            }
+          });
+
+          // Check for attribute changes (value changes)
+          if (mutation.type === 'attributes' && mutation.attributeName === 'value') {
+            const target = mutation.target;
+            if (isColorField(target)) {
+              applyColorPreview(target);
+            }
+          }
+        });
+      });
+
+      // Start observing the document for changes
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['value']
+      });
+      
+      // Also listen for popup visibility changes
+      const popups = document.querySelectorAll('.popup-container');
+      popups.forEach(popup => {
+        const observer2 = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.attributeName === 'class') {
+              const isVisible = !popup.classList.contains('hidden');
+              if (isVisible) {
+                console.log('📦 Popup opened, applying color preview');
+                setTimeout(() => applyColorPreviewToContainer(popup), 100);
+              }
+            }
+          });
+        });
+        
+        observer2.observe(popup, { attributes: true, attributeFilter: ['class'] });
+      });
+    });
+  </script>
+
 </body>
 </html>

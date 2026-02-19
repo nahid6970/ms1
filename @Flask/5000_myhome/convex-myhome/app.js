@@ -97,16 +97,41 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // Color preview system
 function setupColorPreview() {
+  // Use event delegation for dynamically added inputs
   document.addEventListener('input', (e) => {
     if (e.target.classList.contains('color-input') || 
-        e.target.placeholder?.toLowerCase().includes('color')) {
+        e.target.placeholder?.toLowerCase().includes('color') ||
+        e.target.placeholder?.toLowerCase().includes('bg') ||
+        e.target.placeholder?.toLowerCase().includes('hover')) {
       applyColorPreview(e.target);
     }
   });
   
-  // Apply to existing inputs
-  document.querySelectorAll('.color-input, input[placeholder*="olor"], input[placeholder*="Color"]').forEach(input => {
-    applyColorPreview(input);
+  // Apply to existing inputs on page load
+  const applyToExisting = () => {
+    document.querySelectorAll('.color-input, input[placeholder*="olor"], input[placeholder*="Color"], input[placeholder*="BG"], input[placeholder*="Hover"]').forEach(input => {
+      if (input.value) {
+        applyColorPreview(input);
+      }
+    });
+  };
+  
+  applyToExisting();
+  
+  // Re-apply when popups are opened
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+        const target = mutation.target;
+        if (target.classList.contains('popup-container') && !target.classList.contains('hidden')) {
+          setTimeout(applyToExisting, 100);
+        }
+      }
+    });
+  });
+  
+  document.querySelectorAll('.popup-container').forEach(popup => {
+    observer.observe(popup, { attributes: true });
   });
 }
 
