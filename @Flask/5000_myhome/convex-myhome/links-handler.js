@@ -500,6 +500,13 @@ function renderDisplayName(element, name) {
 function showAddLinkPopup() {
   document.getElementById('add-link-popup').classList.remove('hidden');
   document.getElementById('add-link-form').reset();
+  
+  // Apply color preview to all color fields
+  setTimeout(() => {
+    if (typeof applyColorPreviewToContainer === 'function') {
+      applyColorPreviewToContainer(document.getElementById('add-link-popup'));
+    }
+  }, 50);
 }
 
 document.getElementById('add-link-form').addEventListener('submit', async (e) => {
@@ -584,6 +591,13 @@ function openEditLinkPopup(link, index) {
   svgTextarea.style.display = link.default_type === 'svg' ? 'block' : 'none';
 
   document.getElementById('edit-link-popup').classList.remove('hidden');
+  
+  // Apply color preview to all color fields
+  setTimeout(() => {
+    if (typeof applyColorPreviewToContainer === 'function') {
+      applyColorPreviewToContainer(document.getElementById('edit-link-popup'));
+    }
+  }, 50);
 }
 
 document.getElementById('edit-link-form').addEventListener('submit', async (e) => {
@@ -714,6 +728,13 @@ function openEditGroupPopup(groupName) {
 
   // Show/hide sections
   const collapsible = document.getElementById('edit-group-collapsible').checked;
+  
+  // Apply color preview to all color fields
+  setTimeout(() => {
+    if (typeof applyColorPreviewToContainer === 'function') {
+      applyColorPreviewToContainer(document.getElementById('edit-group-popup'));
+    }
+  }, 50);
   const horizontal = document.getElementById('edit-group-horizontal-stack').checked;
   document.getElementById('collapsible-settings').style.display = collapsible ? 'block' : 'none';
   document.getElementById('horizontal-settings').style.display = horizontal ? 'block' : 'none';

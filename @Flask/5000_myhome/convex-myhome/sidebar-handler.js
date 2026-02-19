@@ -159,6 +159,13 @@ function createSidebarButton(button, index) {
 function showAddSidebarButtonPopup() {
   document.getElementById('add-sidebar-button-popup').classList.remove('hidden');
   document.getElementById('add-sidebar-button-form').reset();
+  
+  // Apply color preview to all color fields
+  setTimeout(() => {
+    if (typeof applyColorPreviewToContainer === 'function') {
+      applyColorPreviewToContainer(document.getElementById('add-sidebar-button-popup'));
+    }
+  }, 50);
 }
 
 document.getElementById('sidebar-button-display-type').addEventListener('change', (e) => {
@@ -227,6 +234,13 @@ function openEditSidebarButtonPopup(button, index) {
   svgInput.style.display = button.display_type === 'svg' ? 'block' : 'none';
 
   document.getElementById('edit-sidebar-button-popup').classList.remove('hidden');
+  
+  // Apply color preview to all color fields
+  setTimeout(() => {
+    if (typeof applyColorPreviewToContainer === 'function') {
+      applyColorPreviewToContainer(document.getElementById('edit-sidebar-button-popup'));
+    }
+  }, 50);
 }
 
 document.getElementById('edit-sidebar-button-display-type').addEventListener('change', (e) => {

@@ -119,22 +119,36 @@
               <label><input type="radio" name="link-type" value="svg"> SVG</label>
             </div>
           </div>
-          <input type="text" id="link-text" placeholder="Text">
-          <input type="text" id="link-icon-class" placeholder="Icon Class">
+          <div style="display: flex; gap: 10px;">
+            <input type="text" id="link-text" placeholder="Text" style="flex: 1;">
+            <input type="text" id="link-icon-class" placeholder="Icon Class" style="flex: 1;">
+          </div>
           <input type="url" id="link-img-src" placeholder="Image URL">
           <textarea id="link-svg-code" placeholder="SVG Code" style="display:none;"></textarea>
-          <input type="text" id="link-width" placeholder="Width">
-          <input type="text" id="link-height" placeholder="Height">
-          <input type="text" id="link-color" placeholder="Color">
-          <input type="text" id="link-background-color" placeholder="Background">
-          <input type="text" id="link-font-family" placeholder="Font Family">
-          <input type="text" id="link-font-size" placeholder="Font Size">
-          <input type="text" id="link-li-width" placeholder="Item Width">
-          <input type="text" id="link-li-height" placeholder="Item Height">
-          <input type="text" id="link-li-bg-color" placeholder="Item BG">
-          <input type="text" id="link-li-hover-color" placeholder="Item Hover">
-          <input type="text" id="link-li-border-color" placeholder="Border Color">
-          <input type="text" id="link-li-border-radius" placeholder="Border Radius">
+          <div style="display: flex; gap: 10px;">
+            <input type="text" id="link-width" placeholder="Width" style="flex: 1;">
+            <input type="text" id="link-height" placeholder="Height" style="flex: 1;">
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <input type="text" id="link-color" placeholder="Color" class="color-input" style="flex: 1;">
+            <input type="text" id="link-background-color" placeholder="Background" class="color-input" style="flex: 1;">
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <input type="text" id="link-font-family" placeholder="Font Family" style="flex: 1;">
+            <input type="text" id="link-font-size" placeholder="Font Size" style="flex: 1;">
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <input type="text" id="link-li-width" placeholder="Item Width" style="flex: 1;">
+            <input type="text" id="link-li-height" placeholder="Item Height" style="flex: 1;">
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <input type="text" id="link-li-bg-color" placeholder="Item BG" class="color-input" style="flex: 1;">
+            <input type="text" id="link-li-hover-color" placeholder="Item Hover" class="color-input" style="flex: 1;">
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <input type="text" id="link-li-border-color" placeholder="Border Color" class="color-input" style="flex: 1;">
+            <input type="text" id="link-li-border-radius" placeholder="Border Radius" style="flex: 1;">
+          </div>
           <input type="text" id="link-border-radius" placeholder="Inner Radius">
           <input type="text" id="link-title" placeholder="Tooltip">
           <button type="submit">Add</button>
@@ -151,8 +165,10 @@
         </div>
         <form id="edit-link-form">
           <input type="hidden" id="edit-link-id">
-          <input type="text" id="edit-link-name" placeholder="Name">
-          <input type="text" id="edit-link-group" placeholder="Group">
+          <div style="display: flex; gap: 10px;">
+            <input type="text" id="edit-link-name" placeholder="Name" style="flex: 1;">
+            <input type="text" id="edit-link-group" placeholder="Group" style="flex: 1;">
+          </div>
           <label><input type="checkbox" id="edit-link-hidden"> Hide</label>
           <div id="edit-urls-container">
             <div class="url-input-group">
@@ -169,22 +185,36 @@
               <label><input type="radio" name="edit-link-type" value="svg"> SVG</label>
             </div>
           </div>
-          <input type="text" id="edit-link-text" placeholder="Text">
-          <input type="text" id="edit-link-icon-class" placeholder="Icon Class">
+          <div style="display: flex; gap: 10px;">
+            <input type="text" id="edit-link-text" placeholder="Text">
+            <input type="text" id="edit-link-icon-class" placeholder="Icon Class">
+          </div>
           <input type="url" id="edit-link-img-src" placeholder="Image URL">
           <textarea id="edit-link-svg-code" placeholder="SVG Code" style="display:none;"></textarea>
-          <input type="text" id="edit-link-width" placeholder="Width">
-          <input type="text" id="edit-link-height" placeholder="Height">
-          <input type="text" id="edit-link-color" placeholder="Color">
-          <input type="text" id="edit-link-background-color" placeholder="Background">
-          <input type="text" id="edit-link-font-family" placeholder="Font Family">
-          <input type="text" id="edit-link-font-size" placeholder="Font Size">
-          <input type="text" id="edit-link-li-width" placeholder="Item Width">
-          <input type="text" id="edit-link-li-height" placeholder="Item Height">
-          <input type="text" id="edit-link-li-bg-color" placeholder="Item BG">
-          <input type="text" id="edit-link-li-hover-color" placeholder="Item Hover">
-          <input type="text" id="edit-link-li-border-color" placeholder="Border Color">
-          <input type="text" id="edit-link-li-border-radius" placeholder="Border Radius">
+          <div style="display: flex; gap: 10px;">
+            <input type="text" id="edit-link-width" placeholder="Width">
+            <input type="text" id="edit-link-height" placeholder="Height">
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <input type="text" id="edit-link-color" placeholder="Color" class="color-input">
+            <input type="text" id="edit-link-background-color" placeholder="Background" class="color-input">
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <input type="text" id="edit-link-font-family" placeholder="Font Family">
+            <input type="text" id="edit-link-font-size" placeholder="Font Size">
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <input type="text" id="edit-link-li-width" placeholder="Item Width">
+            <input type="text" id="edit-link-li-height" placeholder="Item Height">
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <input type="text" id="edit-link-li-bg-color" placeholder="Item BG" class="color-input">
+            <input type="text" id="edit-link-li-hover-color" placeholder="Item Hover" class="color-input">
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <input type="text" id="edit-link-li-border-color" placeholder="Border Color" class="color-input">
+            <input type="text" id="edit-link-li-border-radius" placeholder="Border Radius">
+          </div>
           <input type="text" id="edit-link-border-radius" placeholder="Inner Radius">
           <input type="text" id="edit-link-title" placeholder="Tooltip">
           <button type="submit">Save</button>
@@ -221,12 +251,18 @@
           <input type="text" id="sidebar-button-icon" placeholder="Icon Class">
           <input type="url" id="sidebar-button-img-src" placeholder="Image URL" style="display:none;">
           <textarea id="sidebar-button-svg-code" placeholder="SVG Code" style="display:none;"></textarea>
-          <input type="text" id="sidebar-button-text-color" placeholder="Text Color">
-          <input type="text" id="sidebar-button-bg-color" placeholder="BG Color">
-          <input type="text" id="sidebar-button-hover-color" placeholder="Hover Color">
-          <input type="text" id="sidebar-button-border-color" placeholder="Border Color">
-          <input type="text" id="sidebar-button-border-radius" placeholder="Border Radius">
-          <input type="text" id="sidebar-button-font-size" placeholder="Font Size">
+          <div style="display: flex; gap: 10px;">
+            <input type="text" id="sidebar-button-text-color" placeholder="Text Color" class="color-input">
+            <input type="text" id="sidebar-button-bg-color" placeholder="BG Color" class="color-input">
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <input type="text" id="sidebar-button-hover-color" placeholder="Hover Color" class="color-input">
+            <input type="text" id="sidebar-button-border-color" placeholder="Border Color" class="color-input">
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <input type="text" id="sidebar-button-border-radius" placeholder="Border Radius">
+            <input type="text" id="sidebar-button-font-size" placeholder="Font Size">
+          </div>
           <button type="submit">Add</button>
         </form>
       </div>
@@ -250,12 +286,18 @@
           <input type="text" id="edit-sidebar-button-icon" placeholder="Icon Class">
           <input type="url" id="edit-sidebar-button-img-src" placeholder="Image URL" style="display:none;">
           <textarea id="edit-sidebar-button-svg-code" placeholder="SVG Code" style="display:none;"></textarea>
-          <input type="text" id="edit-sidebar-button-text-color" placeholder="Text Color">
-          <input type="text" id="edit-sidebar-button-bg-color" placeholder="BG Color">
-          <input type="text" id="edit-sidebar-button-hover-color" placeholder="Hover Color">
-          <input type="text" id="edit-sidebar-button-border-color" placeholder="Border Color">
-          <input type="text" id="edit-sidebar-button-border-radius" placeholder="Border Radius">
-          <input type="text" id="edit-sidebar-button-font-size" placeholder="Font Size">
+          <div style="display: flex; gap: 10px;">
+            <input type="text" id="edit-sidebar-button-text-color" placeholder="Text Color" class="color-input">
+            <input type="text" id="edit-sidebar-button-bg-color" placeholder="BG Color" class="color-input">
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <input type="text" id="edit-sidebar-button-hover-color" placeholder="Hover Color" class="color-input">
+            <input type="text" id="edit-sidebar-button-border-color" placeholder="Border Color" class="color-input">
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <input type="text" id="edit-sidebar-button-border-radius" placeholder="Border Radius">
+            <input type="text" id="edit-sidebar-button-font-size" placeholder="Font Size">
+          </div>
           <button type="submit">Save</button>
         </form>
       </div>
@@ -285,24 +327,24 @@
         const tempDiv = document.createElement('div');
         tempDiv.style.color = value;
         if (tempDiv.style.color || value.match(/^#[0-9A-Fa-f]{3,6}$/)) {
-          input.style.backgroundColor = value;
+          input.style.setProperty('background-color', value, 'important');
           // Determine text color based on background brightness
           const brightness = getBrightness(value);
-          input.style.color = brightness > 128 ? '#000000' : '#ffffff';
-          input.style.border = '2px solid ' + value;
+          input.style.setProperty('color', brightness > 128 ? '#000000' : '#ffffff', 'important');
+          input.style.setProperty('border', '2px solid ' + value, 'important');
           console.log('✅ Color applied:', value, 'Brightness:', brightness);
         } else {
           // Reset if invalid color
-          input.style.backgroundColor = '#2d2d2d';
-          input.style.color = '#fff';
-          input.style.border = '1px solid #555';
+          input.style.setProperty('background-color', '#2d2d2d', 'important');
+          input.style.setProperty('color', '#fff', 'important');
+          input.style.setProperty('border', '1px solid #555', 'important');
           console.log('❌ Invalid color, reset');
         }
       } else {
         // Reset if empty
-        input.style.backgroundColor = '#2d2d2d';
-        input.style.color = '#fff';
-        input.style.border = '1px solid #555';
+        input.style.setProperty('background-color', '#2d2d2d', 'important');
+        input.style.setProperty('color', '#fff', 'important');
+        input.style.setProperty('border', '1px solid #555', 'important');
       }
     }
 
@@ -346,11 +388,15 @@
 
     // Function to check if an input field is color-related
     function isColorField(input) {
+      // Check if it has the color-input class (most reliable)
+      if (input.classList.contains('color-input')) {
+        return true;
+      }
+      // Fallback: check placeholder and id
       return input.type === 'text' && (
         input.placeholder.toLowerCase().includes('color') ||
         input.id.toLowerCase().includes('color') ||
-        (input.name && input.name.toLowerCase().includes('color')) ||
-        input.classList.contains('color-input')
+        (input.name && input.name.toLowerCase().includes('color'))
       );
     }
 
