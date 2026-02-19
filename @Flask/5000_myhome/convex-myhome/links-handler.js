@@ -353,6 +353,9 @@ function createLinkItem(link, index) {
   if (link.default_type === 'nerd-font' && link.icon_class) {
     const icon = document.createElement('i');
     icon.className = link.icon_class;
+    icon.style.fontFamily = 'jetbrainsmono nfp, monospace';
+    icon.style.fontSize = link.font_size || '24px';
+    icon.style.display = 'inline-block';
     a.appendChild(icon);
   } else if (link.default_type === 'img' && link.img_src) {
     const img = document.createElement('img');
