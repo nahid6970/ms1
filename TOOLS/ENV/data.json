@@ -1,6 +1,6 @@
 {
     "version": "1.3",
-    "timestamp": "2026-02-20T00:32:45.140677",
+    "timestamp": "2026-02-20T00:56:43.135755",
     "user_env": {
         "chocolateyinstall": "C:\\Users\\nahid\\AppData\\Local\\UniGetUI\\Chocolatey",
         "OneDrive": "C:\\Users\\nahid\\OneDrive",
@@ -119,11 +119,6 @@
                         "command": "powershell.exe -ExecutionPolicy Bypass -File \"C:\\Users\\nahid\\.env_manager\\scripts\\vid_dim.ps1\" \"%V\""
                     }
                 }
-            },
-            "FilePilotHere": {
-                "MUIVerb": "File Pilot Here",
-                "Icon": "C:\\Users\\nahid\\AppData\\Local\\Voidstar\\FilePilot\\FPilot.exe",
-                "command": "C:\\Users\\nahid\\AppData\\Local\\Voidstar\\FilePilot\\FPilot.exe \"%V\""
             }
         },
         "Folder": {
@@ -138,9 +133,10 @@
             "Convex (Folder+File)": {
                 "command": "\"C:\\@delta\\db\\@Convex\\myFiles\\context_menu_share\\upload.bat\" \"%V\""
             },
-            "Share w Convex": {
-                "MUIVerb": "Share w Convex",
-                "command": "\"C:\\@delta\\db\\@Convex\\myFiles\\context_menu_share\\upload.bat\" \"%V\""
+            "FilePilotHere": {
+                "MUIVerb": "File Pilot Here",
+                "Icon": "C:\\Users\\nahid\\AppData\\Local\\Voidstar\\FilePilot\\FPilot.exe",
+                "command": "C:\\Users\\nahid\\AppData\\Local\\Voidstar\\FilePilot\\FPilot.exe \"%V\""
             },
             "TakeOwnership": {
                 "command": "powershell.exe -windowstyle hidden -command \"Start-Process cmd -ArgumentList '/c takeown /f \\\"%1\\\" && icacls \\\"%1\\\" /grant *S-1-3-4:F /c /l & pause' -Verb runAs\""
