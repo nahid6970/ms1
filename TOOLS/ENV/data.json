@@ -1,10 +1,10 @@
 {
     "version": "1.3",
-    "timestamp": "2026-02-20T01:36:03.870946",
+    "timestamp": "2026-02-21T19:26:20.949142",
     "user_env": {
         "chocolateyinstall": "C:\\Users\\nahid\\AppData\\Local\\UniGetUI\\Chocolatey",
         "OneDrive": "C:\\Users\\nahid\\OneDrive",
-        "Path": "C:\\Users\\nahid\\go\\bin;C:\\Users\\nahid\\scoop\\apps\\git\\current\\cmd;C:\\Users\\nahid\\scoop\\apps\\gcc\\current\\bin;C:\\Users\\nahid\\scoop\\apps\\nodejs-lts\\current\\bin;C:\\Users\\nahid\\scoop\\apps\\nodejs-lts\\current;C:\\Users\\nahid\\scoop\\apps\\perl\\current\\perl\\site\\bin;C:\\Users\\nahid\\scoop\\apps\\perl\\current\\perl\\bin;C:\\Users\\nahid\\.local\\bin;C:\\Users\\nahid\\scoop\\apps\\python312\\current\\Scripts;C:\\Users\\nahid\\scoop\\apps\\python312\\current;C:\\Users\\nahid\\AppData\\Local\\UniGetUI\\Chocolatey\\bin;C:\\Users\\nahid\\scoop\\shims;C:\\Users\\nahid\\AppData\\Local\\Microsoft\\WindowsApps;C:\\Users\\nahid\\AppData\\Local\\Programs\\Microsoft VS Code\\bin;C:\\Users\\nahid\\.cache\\lm-studio\\bin;C:\\Users\\nahid\\AppData\\Local\\Programs\\Ollama;C:\\Users\\nahid\\AppData\\Local\\Microsoft\\WinGet\\Packages\\aria2.aria2_Microsoft.Winget.Source_8wekyb3d8bbwe\\aria2-1.37.0-win-64bit-build1;C:\\Users\\nahid\\AppData\\Local\\Programs\\superfile\\;%USERPROFILE%\\.dotnet\\tools;C:\\Users\\nahid\\AppData\\Local\\Programs\\Kiro\\bin;C:\\Users\\nahid\\scoop\\apps\\msys2\\current\\usr\\bin;C:\\Users\\nahid\\scoop\\apps\\msys2\\current\\mingw64\\bin;C:\\Users\\nahid\\AppData\\Local\\Microsoft\\WinGet\\Links;C:\\Users\\nahid\\AppData\\Local\\Programs\\Antigravity\\bin;C:\\Users\\nahid\\AppData\\Local\\Programs\\cursor\\resources\\app\\bin",
+        "Path": "C:\\Users\\nahid\\go\\bin;C:\\Users\\nahid\\scoop\\apps\\git\\current\\cmd;C:\\Users\\nahid\\scoop\\apps\\gcc\\current\\bin;C:\\Users\\nahid\\scoop\\apps\\nodejs-lts\\current\\bin;C:\\Users\\nahid\\scoop\\apps\\nodejs-lts\\current;C:\\Users\\nahid\\scoop\\apps\\perl\\current\\perl\\site\\bin;C:\\Users\\nahid\\scoop\\apps\\perl\\current\\perl\\bin;C:\\Users\\nahid\\.local\\bin;C:\\Users\\nahid\\scoop\\apps\\python312\\current\\Scripts;C:\\Users\\nahid\\scoop\\apps\\python312\\current;C:\\Users\\nahid\\AppData\\Local\\UniGetUI\\Chocolatey\\bin;C:\\Users\\nahid\\scoop\\shims;C:\\Users\\nahid\\AppData\\Local\\Microsoft\\WindowsApps;C:\\Users\\nahid\\AppData\\Local\\Programs\\Microsoft VS Code\\bin;C:\\Users\\nahid\\.cache\\lm-studio\\bin;C:\\Users\\nahid\\AppData\\Local\\Programs\\Ollama;C:\\Users\\nahid\\AppData\\Local\\Microsoft\\WinGet\\Packages\\aria2.aria2_Microsoft.Winget.Source_8wekyb3d8bbwe\\aria2-1.37.0-win-64bit-build1;C:\\Users\\nahid\\AppData\\Local\\Programs\\superfile\\;%USERPROFILE%\\.dotnet\\tools;C:\\Users\\nahid\\scoop\\apps\\msys2\\current\\usr\\bin;C:\\Users\\nahid\\scoop\\apps\\msys2\\current\\mingw64\\bin;C:\\Users\\nahid\\AppData\\Local\\Microsoft\\WinGet\\Links;C:\\Users\\nahid\\AppData\\Local\\Programs\\Antigravity\\bin;C:\\Users\\nahid\\AppData\\Local\\Programs\\cursor\\resources\\app\\bin;C:\\Users\\nahid\\AppData\\Local\\Programs\\Kiro\\bin",
         "SCROLLVIEW_PATH": "C:\\Users\\nahid\\scoop\\persist\\tesseract\\tessdata",
         "TEMP": "%USERPROFILE%\\AppData\\Local\\Temp",
         "TESSDATA_PREFIX": "C:\\Users\\nahid\\scoop\\persist\\tesseract\\tessdata",
@@ -70,6 +70,10 @@
                     "Gemini CLI": {
                         "MUIVerb": "Gemini CLI",
                         "command": "cmd /k cd /d \"%V\" && gemini --yolo"
+                    },
+                    "Gemini CLI Resume": {
+                        "MUIVerb": "Gemini CLI Resume",
+                        "command": "cmd /k cd /d \"%V\" && gemini --resume --yolo"
                     },
                     "KIRO": {
                         "MUIVerb": "KIRO",
