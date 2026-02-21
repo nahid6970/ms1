@@ -222,6 +222,7 @@ document.addEventListener('DOMContentLoaded', function () {
             { label: 'New-Tab', action: () => window.open(link.url, '_blank') },
             { label: 'Edit', action: () => openEditLinkPopup(link, index) },
             { label: 'Copy', action: () => copyLink(link, index) },
+            { label: 'Copy URL', action: () => copyURLToClipboard(link.url) },
             { label: 'Delete', action: () => deleteLink(index) }
           ];
           addMobileContextMenu(simpleListItem, items);
@@ -627,6 +628,10 @@ document.addEventListener('DOMContentLoaded', function () {
               action: () => copyLink(link, index)
             },
             {
+              label: 'Copy URL',
+              action: () => copyURLToClipboard(link.url)
+            },
+            {
               label: 'Delete',
               action: () => deleteLink(index)
             }
@@ -1026,6 +1031,10 @@ document.addEventListener('DOMContentLoaded', function () {
             action: () => copyLink(linkInfo.link, linkInfo.index)
           },
           {
+            label: 'Copy URL',
+            action: () => copyURLToClipboard(linkInfo.link.url)
+          },
+          {
             label: 'Copy Note',
             action: () => copyNote(linkInfo.link)
           },
@@ -1251,6 +1260,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 { label: 'New-Tab', action: () => window.open(linkData.url, '_blank') },
                 { label: 'Edit', action: () => openEditLinkPopup(linkData, linkIndex) },
                 { label: 'Copy', action: () => copyLink(linkData, linkIndex) },
+                { label: 'Copy URL', action: () => copyURLToClipboard(linkData.url) },
                 { label: 'Copy Note', action: () => copyNote(linkData) },
                 { label: 'Delete', action: () => deleteLink(linkIndex) }
               ];
@@ -1287,6 +1297,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 { label: 'New-Tab', action: () => window.open(linkData.url, '_blank') },
                 { label: 'Edit', action: () => openEditLinkPopup(linkData, linkIndex) },
                 { label: 'Copy', action: () => copyLink(linkData, linkIndex) },
+                { label: 'Copy URL', action: () => copyURLToClipboard(linkData.url) },
                 { label: 'Copy Note', action: () => copyNote(linkData) },
                 { label: 'Delete', action: () => deleteLink(linkIndex) }
               ];
@@ -1663,6 +1674,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 {
                   label: 'Copy',
                   action: () => copyLink(linkData.link, linkData.index)
+                },
+                {
+                  label: 'Copy URL',
+                  action: () => copyURLToClipboard(linkData.link.url)
                 },
                 {
                   label: 'Delete',
@@ -2928,6 +2943,40 @@ document.addEventListener('DOMContentLoaded', function () {
       });
       editGroupForm.setAttribute('data-listener-attached', 'true');
     }
+  }
+
+  // Function to copy text to clipboard using modern API with fallback
+  async function copyToClipboard(text) {
+    if (!navigator.clipboard) {
+      fallbackCopyTextToClipboard(text);
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(text);
+      showNotification('Text copied to clipboard!', 'success');
+    } catch (err) {
+      console.error('Could not copy text: ', err);
+      fallbackCopyTextToClipboard(text);
+    }
+  }
+
+  // Function to copy the URL to clipboard
+  function copyURLToClipboard(url) {
+    if (!url) {
+      showNotification('No URL to copy', 'error');
+      return;
+    }
+    copyToClipboard(url);
+  }
+
+  // Function to copy the note (title) to clipboard
+  function copyNote(link) {
+    if (!link || !link.title) {
+      showNotification('No note to copy', 'error');
+      return;
+    }
+    copyToClipboard(link.title);
   }
 
   // Fallback copy method for older browsers or non-secure contexts

@@ -1147,6 +1147,16 @@ div.toggle-container {
   color: white;
 }
 
+.context-menu-item.context-menu-copy-url {
+  color: #00BCD4;
+  /* Cyan */
+}
+
+.context-menu-item.context-menu-copy-url:hover {
+  background-color: #00BCD4;
+  color: white;
+}
+
 .context-menu-item.context-menu-copy-note {
   color: #9C27B0;
   /* Purple */
