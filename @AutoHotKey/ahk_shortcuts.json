@@ -475,6 +475,14 @@
             "trigger": ";convex",
             "replacement": "Here is the convex guidline that u can follow for my project C:\\@delta\\ms1\\CONVEX_GUIDE.md",
             "enabled": true
+        },
+        {
+            "name": "missed notes",
+            "category": "General",
+            "description": "",
+            "trigger": ";missed",
+            "replacement": "if u missed any notes then give the missing notes",
+            "enabled": true
         }
     ],
     "startup_scripts": [
