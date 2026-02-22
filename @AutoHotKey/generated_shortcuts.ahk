@@ -950,7 +950,7 @@ md syntex formet is a bit different here is how i use them
 
 #1.5#text#/#  = extra big text
 ##text##  = big text
-**text** = bold text
+**text** = bold text, also dont ever use single star syntax i saw u sometime use them which are not defined in my project so they shows single star which is annoying and i have to fix them to double star
 @@text@@ = italic text
 __text__ = underline
 - text = list 1
