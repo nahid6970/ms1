@@ -1,6 +1,6 @@
 {
     "version": "1.3",
-    "timestamp": "2026-02-21T19:26:20.949142",
+    "timestamp": "2026-02-23T16:42:43.478172",
     "user_env": {
         "chocolateyinstall": "C:\\Users\\nahid\\AppData\\Local\\UniGetUI\\Chocolatey",
         "OneDrive": "C:\\Users\\nahid\\OneDrive",
@@ -123,6 +123,10 @@
                         "command": "powershell.exe -ExecutionPolicy Bypass -File \"C:\\Users\\nahid\\.env_manager\\scripts\\vid_dim.ps1\" \"%V\""
                     }
                 }
+            },
+            "Rclone NCDU": {
+                "MUIVerb": "Rclone NCDU",
+                "command": "cmd /k \"rclone ncdu \"%V\"\""
             }
         },
         "Folder": {
