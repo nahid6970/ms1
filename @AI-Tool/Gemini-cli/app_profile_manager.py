@@ -45,10 +45,14 @@ class ProfileDialog(QDialog):
     def __init__(self, parent=None, profile=None, app_name=None, saved_targets=None):
         super().__init__(parent)
         self.saved_targets = saved_targets or {}
+        self.remember_target = False
         self.profile = profile or {
             "name": "", "path": "", "target_path": "", "app_name": app_name or "",
             "is_locked": False, "password": "", "timer_enabled": False, "target_time": None
         }
+        # Auto-fill target if app_name exists in saved_targets
+        if app_name and app_name in self.saved_targets and not self.profile.get("target_path"):
+            self.profile["target_path"] = self.saved_targets[app_name]
         self.init_ui()
 
     def init_ui(self):
@@ -218,7 +222,7 @@ class ProfileDialog(QDialog):
 
     def on_app_name_changed(self):
         app_name = self.app_input.text().strip()
-        if app_name in self.saved_targets and not self.profile.get("target_path"):
+        if app_name in self.saved_targets:
             self.target_input.setText(self.saved_targets[app_name])
 
     def save(self):
@@ -467,10 +471,10 @@ class AppProfileManager(QMainWindow):
         self.back_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self.back_btn.setVisible(False)
 
-        add_btn = QPushButton("+ Add Profile")
-        add_btn.setObjectName("addBtn")
-        add_btn.clicked.connect(self.add_profile)
-        add_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.add_btn = QPushButton("+ Add App")
+        self.add_btn.setObjectName("addBtn")
+        self.add_btn.clicked.connect(self.add_profile)
+        self.add_btn.setCursor(Qt.CursorShape.PointingHandCursor)
 
         restart_btn = QPushButton("⟳ Restart")
         restart_btn.setObjectName("restartBtn")
@@ -481,7 +485,7 @@ class AppProfileManager(QMainWindow):
         self.header_layout.addWidget(self.header_label)
         self.header_layout.addStretch()
         self.header_layout.addWidget(restart_btn)
-        self.header_layout.addWidget(add_btn)
+        self.header_layout.addWidget(self.add_btn)
         main_layout.addLayout(self.header_layout)
 
         self.scroll = QScrollArea()
@@ -500,6 +504,7 @@ class AppProfileManager(QMainWindow):
         self.current_app = None
         self.header_label.setText("Applications")
         self.back_btn.setVisible(False)
+        self.add_btn.setText("+ Add App")
         
         for i in reversed(range(self.scroll_layout.count())):
             widget = self.scroll_layout.itemAt(i).widget()
@@ -512,7 +517,7 @@ class AppProfileManager(QMainWindow):
             app_counts[app_name] = app_counts.get(app_name, 0) + 1
 
         if not app_counts:
-            empty_label = QLabel("No applications. Click '+ Add Profile' to start.")
+            empty_label = QLabel("No applications. Click '+ Add App' to start.")
             empty_label.setStyleSheet(f"color: {CP_SUBTEXT}; font-style: italic; margin-top: 50px;")
             empty_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
             self.scroll_layout.addWidget(empty_label)
@@ -527,6 +532,7 @@ class AppProfileManager(QMainWindow):
         self.current_app = app_name
         self.header_label.setText(app_name)
         self.back_btn.setVisible(True)
+        self.add_btn.setText("+ Add Profile")
         
         for i in reversed(range(self.scroll_layout.count())):
             widget = self.scroll_layout.itemAt(i).widget()
