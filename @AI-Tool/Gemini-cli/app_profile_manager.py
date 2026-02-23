@@ -42,8 +42,9 @@ def decrypt_file_data(file_path, password):
         raise Exception("Decryption failed. Incorrect password or corrupted file.")
 
 class ProfileDialog(QDialog):
-    def __init__(self, parent=None, profile=None, app_name=None):
+    def __init__(self, parent=None, profile=None, app_name=None, saved_targets=None):
         super().__init__(parent)
+        self.saved_targets = saved_targets or {}
         self.profile = profile or {
             "name": "", "path": "", "target_path": "", "app_name": app_name or "",
             "is_locked": False, "password": "", "timer_enabled": False, "target_time": None
@@ -77,6 +78,7 @@ class ProfileDialog(QDialog):
 
         layout.addWidget(QLabel("Application Name"))
         self.app_input = QLineEdit(self.profile["app_name"])
+        self.app_input.textChanged.connect(self.on_app_name_changed)
         layout.addWidget(self.app_input)
 
         layout.addWidget(QLabel("Profile Name"))
@@ -102,6 +104,9 @@ class ProfileDialog(QDialog):
         target_layout.addWidget(self.target_input)
         target_layout.addWidget(target_btn)
         layout.addLayout(target_layout)
+
+        self.remember_target_checkbox = QCheckBox("Remember this target path for this application")
+        layout.addWidget(self.remember_target_checkbox)
 
         self.lock_checkbox = QCheckBox("Files are encrypted (.enc)")
         self.lock_checkbox.setChecked(self.profile["is_locked"])
@@ -211,6 +216,11 @@ class ProfileDialog(QDialog):
         if path:
             (self.path_input if mode == "source" else self.target_input).setText(path)
 
+    def on_app_name_changed(self):
+        app_name = self.app_input.text().strip()
+        if app_name in self.saved_targets and not self.profile.get("target_path"):
+            self.target_input.setText(self.saved_targets[app_name])
+
     def save(self):
         if not all([self.app_input.text(), self.name_input.text(), self.path_input.text(), self.target_input.text()]):
             QMessageBox.warning(self, "Error", "All fields are required!")
@@ -229,10 +239,46 @@ class ProfileDialog(QDialog):
             "timer_enabled": self.timer_checkbox.isChecked(),
             "target_time": self.dt_edit.dateTime().toString(Qt.DateFormat.ISODate) if self.timer_checkbox.isChecked() else None
         })
+        
+        self.remember_target = self.remember_target_checkbox.isChecked()
         self.accept()
 
     def get_data(self):
         return self.profile
+
+class AppCard(QFrame):
+    clicked = pyqtSignal(str)
+
+    def __init__(self, app_name, profile_count):
+        super().__init__()
+        self.app_name = app_name
+        self.profile_count = profile_count
+        self.init_ui()
+
+    def init_ui(self):
+        self.setFrameShape(QFrame.Shape.StyledPanel)
+        self.setObjectName("appCard")
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.setStyleSheet(f"""
+            #appCard {{ background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; padding: 20px; }}
+            #appCard:hover {{ border: 1px solid {CP_YELLOW}; }}
+            QLabel#appName {{ color: {CP_YELLOW}; font-size: 18px; font-weight: bold; }}
+            QLabel#profileCount {{ color: {CP_CYAN}; font-size: 14px; }}
+        """)
+
+        layout = QVBoxLayout(self)
+        layout.setSpacing(10)
+
+        app_label = QLabel(self.app_name)
+        app_label.setObjectName("appName")
+        count_label = QLabel(f"{self.profile_count} profile{'s' if self.profile_count != 1 else ''}")
+        count_label.setObjectName("profileCount")
+
+        layout.addWidget(app_label)
+        layout.addWidget(count_label)
+
+    def mousePressEvent(self, event):
+        self.clicked.emit(self.app_name)
 
 class ProfileCard(QFrame):
     clicked = pyqtSignal(dict)
@@ -348,7 +394,10 @@ class AppProfileManager(QMainWindow):
     def __init__(self):
         super().__init__()
         self.profiles = []
+        self.saved_targets = {}
+        self.current_app = None
         self.load_profiles()
+        self.load_saved_targets()
         self.init_ui()
 
     def load_profiles(self):
@@ -362,6 +411,20 @@ class AppProfileManager(QMainWindow):
     def save_profiles(self):
         with open(JSON_FILE, 'w') as f:
             json.dump(self.profiles, f, indent=4)
+
+    def load_saved_targets(self):
+        targets_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "saved_targets.json")
+        if os.path.exists(targets_file):
+            try:
+                with open(targets_file, 'r') as f:
+                    self.saved_targets = json.load(f)
+            except:
+                self.saved_targets = {}
+
+    def save_saved_targets(self):
+        targets_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "saved_targets.json")
+        with open(targets_file, 'w') as f:
+            json.dump(self.saved_targets, f, indent=4)
 
     def init_ui(self):
         self.setWindowTitle("Application Profile Manager")
@@ -377,6 +440,9 @@ class AppProfileManager(QMainWindow):
             #addBtn {{ background-color: {CP_CYAN}; color: {CP_BG}; 
                 padding: 10px 20px; font-weight: bold; margin: 20px; }}
             #addBtn:hover {{ background-color: {CP_YELLOW}; }}
+            #backBtn {{ background-color: {CP_DIM}; color: {CP_TEXT}; border: 1px solid {CP_DIM}; 
+                padding: 10px 20px; font-weight: bold; margin: 20px; }}
+            #backBtn:hover {{ border: 1px solid {CP_CYAN}; color: {CP_CYAN}; }}
             #restartBtn {{ background-color: {CP_DIM}; color: {CP_TEXT}; border: 1px solid {CP_DIM}; 
                 padding: 10px 20px; font-weight: bold; margin: 20px; }}
             #restartBtn:hover {{ border: 1px solid {CP_YELLOW}; color: {CP_YELLOW}; }}
@@ -391,12 +457,15 @@ class AppProfileManager(QMainWindow):
         main_layout = QVBoxLayout(central_widget)
         main_layout.setContentsMargins(20, 20, 20, 20)
 
-        header_layout = QHBoxLayout()
-        header_label = QLabel("Profiles")
-        header_label.setObjectName("headerLabel")
+        self.header_layout = QHBoxLayout()
+        self.header_label = QLabel("Applications")
+        self.header_label.setObjectName("headerLabel")
 
-        self.app_filter = QComboBox()
-        self.app_filter.currentTextChanged.connect(self.refresh_list)
+        self.back_btn = QPushButton("← Back")
+        self.back_btn.setObjectName("backBtn")
+        self.back_btn.clicked.connect(self.show_apps)
+        self.back_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.back_btn.setVisible(False)
 
         add_btn = QPushButton("+ Add Profile")
         add_btn.setObjectName("addBtn")
@@ -408,13 +477,12 @@ class AppProfileManager(QMainWindow):
         restart_btn.clicked.connect(self.restart_app)
         restart_btn.setCursor(Qt.CursorShape.PointingHandCursor)
 
-        header_layout.addWidget(header_label)
-        header_layout.addWidget(QLabel("Filter:"))
-        header_layout.addWidget(self.app_filter)
-        header_layout.addStretch()
-        header_layout.addWidget(restart_btn)
-        header_layout.addWidget(add_btn)
-        main_layout.addLayout(header_layout)
+        self.header_layout.addWidget(self.back_btn)
+        self.header_layout.addWidget(self.header_label)
+        self.header_layout.addStretch()
+        self.header_layout.addWidget(restart_btn)
+        self.header_layout.addWidget(add_btn)
+        main_layout.addLayout(self.header_layout)
 
         self.scroll = QScrollArea()
         self.scroll.setWidgetResizable(True)
@@ -426,29 +494,49 @@ class AppProfileManager(QMainWindow):
         self.scroll.setWidget(self.scroll_widget)
         main_layout.addWidget(self.scroll)
 
-        self.refresh_list()
+        self.show_apps()
 
-    def refresh_list(self):
+    def show_apps(self):
+        self.current_app = None
+        self.header_label.setText("Applications")
+        self.back_btn.setVisible(False)
+        
         for i in reversed(range(self.scroll_layout.count())):
             widget = self.scroll_layout.itemAt(i).widget()
             if widget:
                 widget.setParent(None)
 
-        apps = sorted(set(p["app_name"] for p in self.profiles if p.get("app_name")))
-        self.app_filter.blockSignals(True)
-        current = self.app_filter.currentText()
-        self.app_filter.clear()
-        self.app_filter.addItem("All Applications")
-        self.app_filter.addItems(apps)
-        if current in [self.app_filter.itemText(i) for i in range(self.app_filter.count())]:
-            self.app_filter.setCurrentText(current)
-        self.app_filter.blockSignals(False)
+        app_counts = {}
+        for p in self.profiles:
+            app_name = p.get("app_name", "Unknown")
+            app_counts[app_name] = app_counts.get(app_name, 0) + 1
 
-        filter_app = self.app_filter.currentText()
-        filtered = [p for p in self.profiles if filter_app == "All Applications" or p.get("app_name") == filter_app]
+        if not app_counts:
+            empty_label = QLabel("No applications. Click '+ Add Profile' to start.")
+            empty_label.setStyleSheet(f"color: {CP_SUBTEXT}; font-style: italic; margin-top: 50px;")
+            empty_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            self.scroll_layout.addWidget(empty_label)
+            return
+
+        for app_name in sorted(app_counts.keys()):
+            card = AppCard(app_name, app_counts[app_name])
+            card.clicked.connect(self.show_profiles)
+            self.scroll_layout.addWidget(card)
+
+    def show_profiles(self, app_name):
+        self.current_app = app_name
+        self.header_label.setText(app_name)
+        self.back_btn.setVisible(True)
+        
+        for i in reversed(range(self.scroll_layout.count())):
+            widget = self.scroll_layout.itemAt(i).widget()
+            if widget:
+                widget.setParent(None)
+
+        filtered = [p for p in self.profiles if p.get("app_name") == app_name]
 
         if not filtered:
-            empty_label = QLabel("No profiles. Click '+ Add Profile' to start.")
+            empty_label = QLabel("No profiles for this app.")
             empty_label.setStyleSheet(f"color: {CP_SUBTEXT}; font-style: italic; margin-top: 50px;")
             empty_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
             self.scroll_layout.addWidget(empty_label)
@@ -461,21 +549,37 @@ class AppProfileManager(QMainWindow):
             card.delete_clicked.connect(self.delete_profile)
             self.scroll_layout.addWidget(card)
 
+    def refresh_list(self):
+        if self.current_app:
+            self.show_profiles(self.current_app)
+        else:
+            self.show_apps()
+
     def add_profile(self):
-        dialog = ProfileDialog(self)
+        dialog = ProfileDialog(self, app_name=self.current_app, saved_targets=self.saved_targets)
         if dialog.exec():
             new_profile = dialog.get_data()
             new_profile["active"] = False
             self.profiles.append(new_profile)
             self.save_profiles()
+            
+            if dialog.remember_target:
+                self.saved_targets[new_profile["app_name"]] = new_profile["target_path"]
+                self.save_saved_targets()
+            
             self.refresh_list()
 
     def edit_profile(self, profile):
-        dialog = ProfileDialog(self, profile.copy())
+        dialog = ProfileDialog(self, profile.copy(), saved_targets=self.saved_targets)
         if dialog.exec():
             updated = dialog.get_data()
             self.profiles[self.profiles.index(profile)] = updated
             self.save_profiles()
+            
+            if dialog.remember_target:
+                self.saved_targets[updated["app_name"]] = updated["target_path"]
+                self.save_saved_targets()
+            
             self.refresh_list()
 
     def delete_profile(self, profile):
