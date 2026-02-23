@@ -58,11 +58,12 @@ class ProfileDialog(QDialog):
             QLabel {{ color: {CP_SUBTEXT}; font-size: 14px; margin-top: 10px; }}
             QLineEdit, QDateTimeEdit, QComboBox {{ 
                 background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; 
-                border-radius: 5px; padding: 8px; color: {CP_CYAN}; font-size: 14px; 
+                padding: 8px; color: {CP_CYAN}; font-size: 14px; 
+                selection-background-color: {CP_CYAN}; selection-color: #000000;
             }}
-            QLineEdit:focus, QDateTimeEdit:focus {{ border: 1px solid {CP_CYAN}; }}
+            QLineEdit:focus, QDateTimeEdit:focus, QComboBox:focus {{ border: 1px solid {CP_CYAN}; }}
             QCheckBox, QRadioButton {{ color: {CP_TEXT}; font-size: 14px; margin-top: 5px; }}
-            QPushButton {{ padding: 10px; border-radius: 5px; font-weight: bold; font-size: 14px; }}
+            QPushButton {{ padding: 10px; font-weight: bold; font-size: 14px; }}
             #saveBtn {{ background-color: {CP_CYAN}; color: {CP_BG}; }}
             #saveBtn:hover {{ background-color: {CP_YELLOW}; color: {CP_BG}; }}
             #cancelBtn {{ background-color: {CP_DIM}; color: {CP_TEXT}; }}
@@ -324,20 +325,20 @@ class ProfileCard(QFrame):
     def update_style(self, active_timer=False):
         is_active = self.profile.get("active", False)
         if is_active:
-            style = f"#profileCard {{ background-color: {CP_PANEL}; border: 2px solid {CP_CYAN}; border-radius: 8px; }}"
+            style = f"#profileCard {{ background-color: {CP_PANEL}; border: 2px solid {CP_CYAN}; }}"
         elif active_timer:
-            style = f"#profileCard {{ background-color: {CP_PANEL}; border: 1px solid {CP_RED}; border-radius: 8px; }} #profileCard:hover {{ border: 1px solid {CP_YELLOW}; }}"
+            style = f"#profileCard {{ background-color: {CP_PANEL}; border: 1px solid {CP_RED}; }} #profileCard:hover {{ border: 1px solid {CP_YELLOW}; }}"
         else:
-            style = f"#profileCard {{ background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; border-radius: 8px; }} #profileCard:hover {{ border: 1px solid {CP_YELLOW}; }}"
+            style = f"#profileCard {{ background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; }} #profileCard:hover {{ border: 1px solid {CP_YELLOW}; }}"
 
         self.setStyleSheet(style + f"""
             QLabel#nameLabel {{ color: {CP_YELLOW}; font-size: 16px; font-weight: bold; }}
             QLabel#pathLabel {{ color: {CP_SUBTEXT}; font-size: 12px; }}
             QLabel#countdownLabel {{ color: {CP_RED}; font-weight: bold; font-size: 13px; margin-left: 10px; 
-                background-color: {CP_BG}; padding: 2px 6px; border-radius: 4px; }}
+                background-color: {CP_BG}; padding: 2px 6px; }}
             QPushButton#actionBtn {{ background-color: transparent; color: {CP_SUBTEXT}; border: none; font-size: 14px; }}
             QPushButton#actionBtn:hover {{ color: {CP_YELLOW}; }}
-            QPushButton#activateBtn {{ background-color: {CP_CYAN}; color: {CP_BG}; border-radius: 6px; 
+            QPushButton#activateBtn {{ background-color: {CP_CYAN}; color: {CP_BG}; 
                 padding: 8px 15px; font-weight: bold; }}
             QPushButton#activateBtn:hover {{ background-color: {CP_YELLOW}; }}
             #statusLabel {{ color: {CP_GREEN}; font-weight: bold; font-size: 12px; }}
@@ -371,16 +372,17 @@ class AppProfileManager(QMainWindow):
             QScrollArea {{ border: none; background-color: transparent; }}
             #scrollWidget {{ background-color: transparent; }}
             QScrollBar:vertical {{ border: none; background: {CP_BG}; width: 10px; }}
-            QScrollBar::handle:vertical {{ background: {CP_DIM}; min-height: 20px; border-radius: 5px; }}
+            QScrollBar::handle:vertical {{ background: {CP_DIM}; min-height: 20px; }}
             #headerLabel {{ color: {CP_YELLOW}; font-size: 24px; font-weight: bold; padding: 20px; }}
-            #addBtn {{ background-color: {CP_CYAN}; color: {CP_BG}; border-radius: 8px; 
+            #addBtn {{ background-color: {CP_CYAN}; color: {CP_BG}; 
                 padding: 10px 20px; font-weight: bold; margin: 20px; }}
             #addBtn:hover {{ background-color: {CP_YELLOW}; }}
             #restartBtn {{ background-color: {CP_DIM}; color: {CP_TEXT}; border: 1px solid {CP_DIM}; 
-                border-radius: 8px; padding: 10px 20px; font-weight: bold; margin: 20px; }}
+                padding: 10px 20px; font-weight: bold; margin: 20px; }}
             #restartBtn:hover {{ border: 1px solid {CP_YELLOW}; color: {CP_YELLOW}; }}
-            QComboBox {{ background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; border-radius: 5px; 
-                padding: 8px; color: {CP_CYAN}; font-size: 14px; min-width: 150px; }}
+            QComboBox {{ background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; 
+                padding: 8px; color: {CP_CYAN}; font-size: 14px; min-width: 150px; 
+                selection-background-color: {CP_CYAN}; selection-color: #000000; }}
             QComboBox:focus {{ border: 1px solid {CP_CYAN}; }}
         """)
 

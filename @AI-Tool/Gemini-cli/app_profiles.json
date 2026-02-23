@@ -1,1 +1,24 @@
-[]
+[
+    {
+        "name": "ex",
+        "path": "ex",
+        "target_path": "ex",
+        "app_name": "diddy",
+        "is_locked": false,
+        "password": "",
+        "timer_enabled": false,
+        "target_time": null,
+        "active": false
+    },
+    {
+        "name": "dd",
+        "path": "dd",
+        "target_path": "dd",
+        "app_name": "pdiddy",
+        "is_locked": false,
+        "password": "",
+        "timer_enabled": false,
+        "target_time": null,
+        "active": false
+    }
+]
