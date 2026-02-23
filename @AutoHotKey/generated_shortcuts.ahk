@@ -1502,78 +1502,51 @@ CONFIG_FILE = os.path.join(SCRIPT_DIR, ""projects_config.json"")
 ;! missed notes
 :X:;missed::Paste('if u missed any notes then give the missing notes')
 
-;! mouse context menu
+;! Context Menu Guide Path
+;! Insert context menu guide file path
 :X:;context::Paste("
 (
 # Context Menu Command Reference
 
-I have a PyQt6 GUI application (`env_variable_manager.py`) that manages Windows right-click context menu entries. When I ask for context menu commands, provide ONLY the command string - no registry scripts or manual setup needed.
+I have a GUI app that manages Windows right-click context menu entries. When I ask for context menu commands, provide ONLY the command string itself - nothing else.
 
-## How to Provide Commands
+## What to Provide
 
-**Format:**
+Just the command line, like:
 ```
-Menu Label: <what appears in context menu>
-Command: <the actual command to execute>
-Scope: Files | Folders | Background | (combination)
+cmd.exe /k cd /d ""%1""
 ```
 
-## Command Placeholders
+## Placeholders
 
-- `%1` - Full path to the selected file/folder
-- `%V` - Directory path (for folder backgrounds)
-- `%*` - All selected files (space-separated)
+- `%1` - Selected file/folder path
+- `%V` - Directory path (backgrounds)
 
 ## Examples
 
-### Open Terminal Here
+**Open Terminal:**
 ```
-Menu Label: Open Terminal Here
-Command: cmd.exe /k cd /d ""%1""
-Scope: Folders, Background
+cmd.exe /k cd /d ""%1""
 ```
 
-### Copy File Path
+**Copy Path:**
 ```
-Menu Label: Copy Path
-Command: cmd /c echo %1 | clip
-Scope: Files
+cmd /c echo %1 | clip
 ```
 
-### Open with VS Code
+**Run Python Script:**
 ```
-Menu Label: Open with VS Code
-Command: ""C:\Program Files\Microsoft VS Code\Code.exe"" ""%1""
-Scope: Files, Folders
+pythonw ""C:\path\to\script.py"" ""%1""
 ```
 
-### Run Python Script
+**PowerShell Script:**
 ```
-Menu Label: Process with Python
-Command: pythonw ""C:\path\to\script.py"" ""%1""
-Scope: Files
-```
-
-### PowerShell Script
-```
-Menu Label: My PowerShell Action
-Command: powershell.exe -ExecutionPolicy Bypass -WindowStyle Hidden -File ""C:\path\to\script.ps1"" ""%1""
-Scope: Files
+powershell.exe -ExecutionPolicy Bypass -WindowStyle Hidden -File ""C:\path\to\script.ps1"" ""%1""
 ```
 
 ## Notes
 
-- Use `pythonw` instead of `python` to avoid terminal windows
-- Use `start /B` or `-WindowStyle Hidden` for background execution
-- Wrap paths with spaces in quotes: `""%1""`
-- I can add icons during setup via the GUI
-- Commands can be batch files, executables, or direct shell commands
-
-## What NOT to Provide
-
-❌ Registry scripts (.reg files)
-❌ Manual registry editing instructions
-❌ Long setup procedures
-
-✅ Just give me the command string - I'll add it through my GUI!
+- Use `pythonw` to avoid terminal windows
+- Wrap paths in quotes: `""%1""`
+- Don't include menu labels, scope, or explanations - just the command
 )")
