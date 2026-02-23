@@ -1,24 +1,79 @@
 [
     {
-        "name": "ex",
-        "path": "ex",
-        "target_path": "ex",
-        "app_name": "diddy",
-        "is_locked": false,
-        "password": "",
+        "app_name": "Gemini-Cli",
+        "name": "nahid6970",
+        "path": "C:\\@delta\\ms1\\@AI-Tool\\Gemini-cli\\nahid6970",
+        "target_path": "C:\\Users\\nahid\\.gemini",
+        "active": true,
+        "is_locked": true,
+        "password": "182358",
         "timer_enabled": false,
-        "target_time": null,
-        "active": false
+        "target_time": null
     },
     {
-        "name": "dd",
-        "path": "dd",
-        "target_path": "dd",
-        "app_name": "pdiddy",
-        "is_locked": false,
-        "password": "",
+        "app_name": "Gemini-Cli",
+        "name": "nahid69701",
+        "path": "C:\\@delta\\ms1\\@AI-Tool\\Gemini-cli\\nahid69701",
+        "target_path": "C:\\Users\\nahid\\.gemini",
+        "active": false,
+        "is_locked": true,
+        "password": "1823",
         "timer_enabled": false,
-        "target_time": null,
-        "active": false
+        "target_time": null
+    },
+    {
+        "app_name": "Gemini-Cli",
+        "name": "nahid-2016912207",
+        "path": "C:\\@delta\\ms1\\@AI-Tool\\Gemini-cli\\nahid-2016912207",
+        "target_path": "C:\\Users\\nahid\\.gemini",
+        "active": false,
+        "is_locked": true,
+        "password": "1823",
+        "timer_enabled": false,
+        "target_time": null
+    },
+    {
+        "app_name": "Gemini-Cli",
+        "name": "nahid69702",
+        "path": "C:\\@delta\\ms1\\@AI-Tool\\Gemini-cli\\nahid69702",
+        "target_path": "C:\\Users\\nahid\\.gemini",
+        "active": false,
+        "is_locked": true,
+        "password": "1823",
+        "timer_enabled": false,
+        "target_time": null
+    },
+    {
+        "app_name": "Gemini-Cli",
+        "name": "nahid69703",
+        "path": "C:\\@delta\\ms1\\@AI-Tool\\Gemini-cli\\nahid69703",
+        "target_path": "C:\\Users\\nahid\\.gemini",
+        "active": false,
+        "is_locked": true,
+        "password": "1823",
+        "timer_enabled": false,
+        "target_time": null
+    },
+    {
+        "app_name": "Gemini-Cli",
+        "name": "nahid69704",
+        "path": "C:\\@delta\\ms1\\@AI-Tool\\Gemini-cli\\nahid69704",
+        "target_path": "C:\\Users\\nahid\\.gemini",
+        "active": false,
+        "is_locked": true,
+        "password": "1823",
+        "timer_enabled": false,
+        "target_time": null
+    },
+    {
+        "app_name": "Gemini-Cli",
+        "name": "nahid69705",
+        "path": "C:\\@delta\\ms1\\@AI-Tool\\Gemini-cli\\nahid69705",
+        "target_path": "C:\\Users\\nahid\\.gemini",
+        "active": false,
+        "is_locked": true,
+        "password": "1823",
+        "timer_enabled": false,
+        "target_time": null
     }
 ]
