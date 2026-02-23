@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Extension Organizer</title>
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>EXTENSIONS</h1>
+            <button class="add-group-btn" id="addGroup">+ GROUP</button>
+        </div>
+        
+        <div class="groups" id="groups"></div>
+        
+        <div class="modal" id="modal">
+            <div class="modal-content">
+                <input type="text" id="groupName" placeholder="Group name..." maxlength="20">
+                <div class="modal-actions">
+                    <button class="btn-cancel" id="cancelBtn">CANCEL</button>
+                    <button class="btn-save" id="saveBtn">SAVE</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="popup.js"></script>
+</body>
+</html>
