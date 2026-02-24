@@ -1,4 +1,5 @@
 {
   "language": "en-US",
-  "always_on_top": true
+  "always_on_top": true,
+  "auto_paste": true
 }

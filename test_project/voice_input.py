@@ -255,7 +255,6 @@ class VoiceApp(QMainWindow):
         self.voice_thread.start()
     
     def on_result(self, text):
-        self.output_text.append(text)
         self.status_label.setText("SUCCESS")
         self.status_label.setStyleSheet(f"color: {CP_GREEN}; font-weight: bold; font-size: 12pt;")
         self.record_btn.setText("🎤 RECORD")
@@ -263,8 +262,12 @@ class VoiceApp(QMainWindow):
         # Auto-paste if enabled
         if self.config.get("auto_paste", False):
             pyperclip.copy(text)
+            import time
+            time.sleep(0.1)
             import pyautogui
             pyautogui.hotkey('ctrl', 'v')
+        else:
+            self.output_text.append(text)
     
     def on_error(self, error):
         self.status_label.setText(f"ERROR: {error}")
