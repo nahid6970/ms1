@@ -5,7 +5,7 @@ A cyberpunk-themed voice input application using Python and PyQt6.
 ## Requirements
 
 ```bash
-pip install PyQt6 SpeechRecognition pyaudio
+pip install PyQt6 SpeechRecognition pyaudio pyperclip pyautogui pynput
 ```
 
 ## Usage
@@ -18,6 +18,8 @@ python voice_input.py
 
 - 🎤 Voice recording with Google Speech Recognition
 - 🌐 Language toggle (English/Bengali)
+- 📌 Pin window (Always on Top)
+- ⚡ Auto-paste to active window
 - 📋 Copy to clipboard
 - 🔄 Restart button
 - 💾 Settings saved to `voice_config.json`
@@ -25,7 +27,7 @@ python voice_input.py
 
 ## Controls
 
-- **RECORD**: Start/stop voice recording
+- **RECORD / Alt+H**: Start/stop voice recording (works globally)
 - **COPY**: Copy output to clipboard
 - **CLEAR**: Clear output text
 - **RESTART**: Restart the application

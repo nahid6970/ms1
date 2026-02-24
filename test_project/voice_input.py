@@ -3,9 +3,11 @@ import os
 import json
 from pathlib import Path
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
-                             QLabel, QPushButton, QTextEdit, QComboBox, QGroupBox)
+                             QLabel, QPushButton, QTextEdit, QComboBox, QGroupBox, QCheckBox)
 from PyQt6.QtCore import Qt, QThread, pyqtSignal
 from PyQt6.QtGui import QFont
+import pyperclip
+from pynput import keyboard
 
 # CYBERPUNK PALETTE
 CP_BG = "#050505"
@@ -51,13 +53,14 @@ class VoiceApp(QMainWindow):
         self.voice_thread = None
         self.load_config()
         self.init_ui()
+        self.setup_global_hotkey()
         
     def load_config(self):
         if self.config_file.exists():
             with open(self.config_file, 'r') as f:
                 self.config = json.load(f)
         else:
-            self.config = {"language": "en-US"}
+            self.config = {"language": "en-US", "always_on_top": False, "auto_paste": False}
             self.save_config()
     
     def save_config(self):
@@ -66,7 +69,11 @@ class VoiceApp(QMainWindow):
     
     def init_ui(self):
         self.setWindowTitle("Voice Input")
-        self.resize(500, 400)
+        self.resize(500, 450)
+        
+        # Apply always on top from config
+        if self.config.get("always_on_top", False):
+            self.setWindowFlags(self.windowFlags() | Qt.WindowType.WindowStaysOnTopHint)
         
         self.setStyleSheet(f"""
             QMainWindow {{ background-color: {CP_BG}; }}
@@ -105,6 +112,16 @@ class VoiceApp(QMainWindow):
             QGroupBox::title {{ subcontrol-origin: margin; subcontrol-position: top left; padding: 0 5px; }}
             
             QLabel {{ color: {CP_TEXT}; }}
+            
+            QCheckBox {{
+                spacing: 8px; color: {CP_TEXT};
+            }}
+            QCheckBox::indicator {{
+                width: 14px; height: 14px; border: 1px solid {CP_DIM}; background: {CP_PANEL};
+            }}
+            QCheckBox::indicator:checked {{
+                background: {CP_YELLOW}; border-color: {CP_YELLOW};
+            }}
         """)
         
         central = QWidget()
@@ -117,16 +134,34 @@ class VoiceApp(QMainWindow):
         self.status_label.setStyleSheet(f"color: {CP_GREEN}; font-weight: bold; font-size: 12pt;")
         layout.addWidget(self.status_label)
         
+        # Settings
+        settings_group = QGroupBox("SETTINGS")
+        settings_layout = QVBoxLayout()
+        
         # Language
-        lang_group = QGroupBox("LANGUAGE")
         lang_layout = QHBoxLayout()
+        lang_layout.addWidget(QLabel("Language:"))
         self.lang_combo = QComboBox()
         self.lang_combo.addItems(["English (en-US)", "Bengali (bn-BD)"])
         self.lang_combo.setCurrentText("English (en-US)" if self.config["language"] == "en-US" else "Bengali (bn-BD)")
         self.lang_combo.currentTextChanged.connect(self.change_language)
         lang_layout.addWidget(self.lang_combo)
-        lang_group.setLayout(lang_layout)
-        layout.addWidget(lang_group)
+        settings_layout.addLayout(lang_layout)
+        
+        # Pin window
+        self.pin_check = QCheckBox("📌 Always on Top")
+        self.pin_check.setChecked(self.config.get("always_on_top", False))
+        self.pin_check.stateChanged.connect(self.toggle_pin)
+        settings_layout.addWidget(self.pin_check)
+        
+        # Auto paste
+        self.paste_check = QCheckBox("⚡ Auto-paste to active window")
+        self.paste_check.setChecked(self.config.get("auto_paste", False))
+        self.paste_check.stateChanged.connect(self.toggle_auto_paste)
+        settings_layout.addWidget(self.paste_check)
+        
+        settings_group.setLayout(settings_layout)
+        layout.addWidget(settings_group)
         
         # Output
         output_group = QGroupBox("OUTPUT")
@@ -164,6 +199,36 @@ class VoiceApp(QMainWindow):
         
         layout.addLayout(btn_layout)
     
+    def setup_global_hotkey(self):
+        def on_activate():
+            self.toggle_record()
+        
+        def for_canonical(f):
+            return lambda k: f(listener.canonical(k))
+        
+        hotkey = keyboard.HotKey(
+            keyboard.HotKey.parse('<alt>+h'),
+            on_activate)
+        
+        listener = keyboard.Listener(
+            on_press=for_canonical(hotkey.press),
+            on_release=for_canonical(hotkey.release))
+        listener.start()
+    
+    def toggle_pin(self, state):
+        self.config["always_on_top"] = bool(state)
+        self.save_config()
+        
+        if state:
+            self.setWindowFlags(self.windowFlags() | Qt.WindowType.WindowStaysOnTopHint)
+        else:
+            self.setWindowFlags(self.windowFlags() & ~Qt.WindowType.WindowStaysOnTopHint)
+        self.show()
+    
+    def toggle_auto_paste(self, state):
+        self.config["auto_paste"] = bool(state)
+        self.save_config()
+    
     def change_language(self, text):
         self.config["language"] = "en-US" if "English" in text else "bn-BD"
         self.save_config()
@@ -194,6 +259,12 @@ class VoiceApp(QMainWindow):
         self.status_label.setText("SUCCESS")
         self.status_label.setStyleSheet(f"color: {CP_GREEN}; font-weight: bold; font-size: 12pt;")
         self.record_btn.setText("🎤 RECORD")
+        
+        # Auto-paste if enabled
+        if self.config.get("auto_paste", False):
+            pyperclip.copy(text)
+            import pyautogui
+            pyautogui.hotkey('ctrl', 'v')
     
     def on_error(self, error):
         self.status_label.setText(f"ERROR: {error}")
@@ -203,7 +274,7 @@ class VoiceApp(QMainWindow):
     def copy_text(self):
         text = self.output_text.toPlainText()
         if text:
-            QApplication.clipboard().setText(text)
+            pyperclip.copy(text)
             self.status_label.setText("COPIED")
             self.status_label.setStyleSheet(f"color: {CP_GREEN}; font-weight: bold; font-size: 12pt;")
     
