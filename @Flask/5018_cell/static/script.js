@@ -7027,6 +7027,27 @@ function nextSearchMatch() {
 // Voice Search
 let voiceRecognition = null;
 let isVoiceListening = false;
+let voiceLang = 'en-US';
+
+function toggleVoiceLang(event) {
+    event.preventDefault();
+    const voiceBtn = document.getElementById('voiceSearchBtn');
+    
+    if (voiceLang === 'en-US') {
+        voiceLang = 'bn-BD';
+        voiceBtn.classList.add('bengali');
+        showToast('Bengali voice mode', 'info');
+    } else {
+        voiceLang = 'en-US';
+        voiceBtn.classList.remove('bengali');
+        showToast('English voice mode', 'info');
+    }
+    
+    if (isVoiceListening) {
+        stopVoiceSearch();
+        setTimeout(startVoiceSearch, 300);
+    }
+}
 
 function toggleVoiceSearch() {
     if (!('webkitSpeechRecognition' in window)) {
@@ -7048,7 +7069,7 @@ function startVoiceSearch() {
     voiceRecognition = new webkitSpeechRecognition();
     voiceRecognition.continuous = false;
     voiceRecognition.interimResults = true;
-    voiceRecognition.lang = 'en-US';
+    voiceRecognition.lang = voiceLang;
 
     voiceRecognition.onstart = () => {
         isVoiceListening = true;

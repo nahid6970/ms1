@@ -384,8 +384,12 @@ body {
     justify-content: center;
 }
 
+.btn-voice-search.bengali {
+    color: #28a745;
+}
+
 .btn-voice-search.listening {
-    color: #dc3545;
+    color: #dc3545 !important;
     animation: pulse 1.5s infinite;
 }
 
