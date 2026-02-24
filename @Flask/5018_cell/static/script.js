@@ -1051,7 +1051,7 @@ async function loadData() {
         initializeCategories();
         renderSidebar();
         renderTable();
-
+        initVoiceLang();
         // Display load time after everything is rendered
         requestAnimationFrame(() => {
             // performance.now() gives time in milliseconds since page load started
@@ -7027,8 +7027,15 @@ function nextSearchMatch() {
 // Voice Search
 let voiceRecognition = null;
 let isVoiceListening = false;
-let voiceLang = 'en-US';
+let voiceLang = localStorage.getItem('voiceLang') || 'en-US';
 
+
+function initVoiceLang() {
+    const voiceBtn = document.getElementById('voiceSearchBtn');
+    if (voiceBtn && voiceLang === 'bn-BD') {
+        voiceBtn.classList.add('bengali');
+    }
+}
 function toggleVoiceLang(event) {
     event.preventDefault();
     const voiceBtn = document.getElementById('voiceSearchBtn');
@@ -7042,6 +7049,8 @@ function toggleVoiceLang(event) {
         voiceBtn.classList.remove('bengali');
         showToast('English voice mode', 'info');
     }
+    
+    localStorage.setItem('voiceLang', voiceLang);
     
     if (isVoiceListening) {
         stopVoiceSearch();
@@ -15949,7 +15958,7 @@ document.addEventListener('DOMContentLoaded', loadLineHeightSettings);
 
 // Initialize markdown toggle context menu and clicks
 document.addEventListener('DOMContentLoaded', () => {
-    const rawToggle = document.getElementById('rawModeToggle');
+    initVoiceLang();    const rawToggle = document.getElementById('rawModeToggle');
     const visualToggle = document.getElementById('visualModeToggle');
 
     if (rawToggle) {
