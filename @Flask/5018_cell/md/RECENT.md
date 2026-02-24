@@ -4,6 +4,48 @@
 
 **Archiving Process:** When you have 6+ sessions, move the oldest one to ARCHIVE_RECENT.md with "ARCHIVED" prefix.
 
+## [2026-02-24 14:21] - Voice Search for Sheet Searchbox
+
+**Session Duration:** 0.3 hours
+
+**What We Accomplished:**
+
+### 🎤 Voice Search Feature
+- **Feature**: Added voice input to sheet searchbox with language toggle
+- **Implementation**:
+  - Added microphone button (CSS circle) next to search input
+  - Web Speech API integration with `webkitSpeechRecognition`
+  - Left-click: Start/stop voice recording
+  - Right-click: Toggle English ↔ Bengali language
+  - Visual indicators: Gray (English), Green (Bengali), Red pulsing (Recording)
+  - Language preference saved to `localStorage` (persists across reloads)
+- **Features**:
+  - Interim results show as you speak
+  - Final transcript triggers search automatically
+  - Works with existing search features (comma-separated terms, markdown stripping)
+  - `initVoiceLang()` restores language state on page load
+
+**Files Modified:**
+- `templates/index.html` - Added voice button with right-click handler
+- `static/style.css` - Added `.btn-voice-search` styling with `.bengali` and `.listening` states, pulse animation
+- `static/script.js` - Added voice search functions (~70 lines): `initVoiceLang()`, `toggleVoiceLang()`, `toggleVoiceSearch()`, `startVoiceSearch()`, `stopVoiceSearch()`
+
+**Technical Details:**
+- **API**: `webkitSpeechRecognition` (Chrome/Edge)
+- **Languages**: `en-US` (English), `bn-BD` (Bengali)
+- **Storage**: `localStorage.getItem/setItem('voiceLang')`
+- **Permissions**: Requires microphone access (use `chrome://flags/#unsafely-treat-insecure-origin-as-secure` for localhost)
+
+**Current Status:**
+- ✅ Voice search works in both English and Bengali
+- ✅ Language preference persists across page reloads
+- ✅ Visual feedback for recording state
+- ✅ Integrates seamlessly with existing search
+
+**Time Spent:** 0.3 hours
+
+---
+
 ## [2026-02-15 13:10] - Table Markdown Spanning in Static Export
 
 **Session Duration:** 0.8 hours

@@ -1,5 +1,22 @@
 # Editing Extensions & Tools
 
+
+## Voice Search Feature
+**Purpose:** Hands-free voice input for searching the table.
+**Access:** Microphone button (circle) next to the search input.
+**Controls:**
+- **Left-click:** Start/stop voice recording
+- **Right-click:** Toggle language (English ↔ Bengali)
+**Visual Indicators:**
+- **Gray circle:** English mode (en-US)
+- **Green circle:** Bengali mode (bn-BD)
+- **Red pulsing circle:** Recording in progress
+**Features:**
+- Interim results display as you speak
+- Final transcript automatically triggers search
+- Language preference saved to browser localStorage
+- Works with all existing search features (comma-separated terms, markdown stripping)
+**Requirements:** Microphone permission (for localhost, enable via `chrome://flags/#unsafely-treat-insecure-origin-as-secure`)
 ## Multi-Term Search Feature
 **Syntax:** `term1, term2, term3` (comma-separated)
 **Purpose:** Search for multiple terms at once. Shows rows containing ANY of the search terms.
