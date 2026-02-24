@@ -7024,6 +7024,74 @@ function nextSearchMatch() {
     showToast(`Match ${currentMatchIndex + 1} of ${searchMatches.length}`, 'info');
 }
 
+// Voice Search
+let voiceRecognition = null;
+let isVoiceListening = false;
+
+function toggleVoiceSearch() {
+    if (!('webkitSpeechRecognition' in window)) {
+        showToast('Voice search not supported', 'error');
+        return;
+    }
+
+    if (isVoiceListening) {
+        stopVoiceSearch();
+    } else {
+        startVoiceSearch();
+    }
+}
+
+function startVoiceSearch() {
+    const voiceBtn = document.getElementById('voiceSearchBtn');
+    const searchInput = document.getElementById('searchInput');
+
+    voiceRecognition = new webkitSpeechRecognition();
+    voiceRecognition.continuous = false;
+    voiceRecognition.interimResults = true;
+    voiceRecognition.lang = 'en-US';
+
+    voiceRecognition.onstart = () => {
+        isVoiceListening = true;
+        voiceBtn.classList.add('listening');
+    };
+
+    voiceRecognition.onend = () => {
+        isVoiceListening = false;
+        voiceBtn.classList.remove('listening');
+    };
+
+    voiceRecognition.onerror = (event) => {
+        isVoiceListening = false;
+        voiceBtn.classList.remove('listening');
+        if (event.error === 'not-allowed') {
+            showToast('Microphone access denied', 'error');
+        } else if (event.error !== 'no-speech') {
+            showToast('Voice error: ' + event.error, 'error');
+        }
+    };
+
+    voiceRecognition.onresult = (event) => {
+        let transcript = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+            if (event.results[i].isFinal) {
+                transcript = event.results[i][0].transcript;
+                searchInput.value = transcript;
+                searchTable();
+            } else {
+                searchInput.value = event.results[i][0].transcript;
+            }
+        }
+    };
+
+    voiceRecognition.start();
+}
+
+function stopVoiceSearch() {
+    if (voiceRecognition) {
+        voiceRecognition.stop();
+    }
+}
+
 function searchTable(force = false) {
     const searchInput = document.getElementById('searchInput');
     const searchTerm = searchInput.value.trim();

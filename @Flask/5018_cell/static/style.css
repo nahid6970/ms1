@@ -364,6 +364,40 @@ body {
     justify-content: center;
 }
 
+
+.btn-voice-search {
+    position: absolute;
+    right: 60px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    font-size: 16px;
+    color: #adb5bd;
+    cursor: pointer;
+    line-height: 1;
+    padding: 2px 5px;
+    border-radius: 4px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-voice-search.listening {
+    color: #dc3545;
+    animation: pulse 1.5s infinite;
+}
+
+.btn-voice-search:hover {
+    color: #495057;
+    background-color: #e9ecef;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
 .btn-move-matches {
     right: 30px;
     font-size: 14px;
