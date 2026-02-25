@@ -5,6 +5,30 @@ This document tracks historical bugs, issues, and their solutions. Use this to:
 - Check if old fixes might conflict with new features
 - Debug similar issues by referencing past solutions
 
+## [2026-02-25 16:13] - Cursor Jumps to Top on Multi-line Delete in Visual Mode
+
+**Problem:** 
+When selecting multiple lines in visual mode (contentEditable) and pressing backspace, the cursor would jump to the top of the cell, forcing the user to scroll back down to continue editing.
+
+**Root Cause:** 
+The `beforeinput` event handler that prevents scroll jumps only checked for `TEXTAREA` elements, not `contentEditable` divs used in visual/markdown mode. Additionally, cursor position wasn't being preserved during delete operations in contentEditable elements.
+
+**Solution:** 
+1. Extended the element type check to include both `TEXTAREA` and `contentEditable` elements
+2. Added cursor position preservation:
+   - Save cursor offset using `getCaretCharacterOffset()` before the operation
+   - Restore cursor position using `setCaretPosition()` after the operation in a `setTimeout`
+3. Applied the existing scroll lock mechanism (triple `requestAnimationFrame`) to contentEditable elements
+
+**Files Modified:**
+- `static/script.js` - Updated `beforeinput` event handler (~10 lines)
+
+**Related Issues:**
+- Scroll prevention already existed for textareas, just needed extension to contentEditable
+- Works for backspace, delete, and cut operations
+
+---
+
 ## [2026-02-15 13:10] - Table Markdown Spanning Missing in Static Export
 
 **Problem:** 

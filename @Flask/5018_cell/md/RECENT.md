@@ -4,6 +4,39 @@
 
 **Archiving Process:** When you have 6+ sessions, move the oldest one to ARCHIVE_RECENT.md with "ARCHIVED" prefix.
 
+## [2026-02-25 16:13] - Fixed Cursor Jump on Multi-line Delete in Visual Mode
+
+**Session Duration:** 0.1 hours
+
+**What We Accomplished:**
+
+### 🐛 Fixed Cursor Position Jump on Backspace
+- **Problem**: When selecting multiple lines in visual mode (contentEditable) and pressing backspace, the cursor would jump to the top of the cell, requiring scrolling back to the edit location.
+- **Root Cause**: The `beforeinput` event handler only prevented scroll jumps for `TEXTAREA` elements, not `contentEditable` divs used in visual/markdown mode. Additionally, cursor position wasn't preserved during delete operations.
+- **Solution**: 
+  - Extended scroll prevention to check for both `TEXTAREA` and `contentEditable` elements
+  - Added cursor position preservation using `getCaretCharacterOffset()` before operation
+  - Restored cursor position using `setCaretPosition()` after operation
+  - Maintained scroll lock through multiple `requestAnimationFrame` calls
+- **Result**: Cursor now stays at the deletion point when removing multi-line selections in visual mode.
+
+**Files Modified:**
+- `static/script.js` - Updated `beforeinput` event handler (~10 lines modified)
+
+**Technical Details:**
+- **Detection**: Added `isContentEditable` check alongside `isTextarea`
+- **Cursor Preservation**: Saved offset before operation, restored in `setTimeout` after DOM update
+- **Scroll Lock**: Existing triple `requestAnimationFrame` pattern now applies to contentEditable
+
+**Current Status:**
+- ✅ No scroll jump when deleting multi-line selection in visual mode
+- ✅ Cursor stays at deletion point
+- ✅ Works for backspace, delete, cut operations
+
+**Time Spent:** 0.1 hours
+
+---
+
 ## [2026-02-24 14:21] - Voice Search for Sheet Searchbox
 
 **Session Duration:** 0.3 hours
