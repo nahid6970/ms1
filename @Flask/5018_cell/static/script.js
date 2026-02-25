@@ -52,8 +52,11 @@ function initializeApp() {
 
     // Prevent scroll jump on Enter, Cut, and other operations in textareas
     document.addEventListener('beforeinput', e => {
-        const ta = e.target;
-        if (ta.tagName !== 'TEXTAREA') return;
+        const el = e.target;
+        const isTextarea = el.tagName === 'TEXTAREA';
+        const isContentEditable = el.getAttribute('contenteditable') === 'true';
+        
+        if (!isTextarea && !isContentEditable) return;
 
         // Handle operations that might cause scroll jump
         const scrollTriggeringOps = [
@@ -76,9 +79,9 @@ function initializeApp() {
                 tableContainer.scrollTop = savedScrollTop;
                 tableContainer.scrollLeft = savedScrollLeft;
 
-                // Only call keepCursorCentered for Enter key
-                if (e.inputType === 'insertLineBreak') {
-                    keepCursorCentered(ta);
+                // Only call keepCursorCentered for Enter key in textareas
+                if (e.inputType === 'insertLineBreak' && isTextarea) {
+                    keepCursorCentered(el);
                 }
 
                 requestAnimationFrame(() => {
@@ -91,9 +94,9 @@ function initializeApp() {
                     });
                 });
             });
-        } else if (e.inputType === 'insertLineBreak') {
+        } else if (e.inputType === 'insertLineBreak' && isTextarea) {
             requestAnimationFrame(() => {
-                keepCursorCentered(ta);
+                keepCursorCentered(el);
             });
         }
     });
