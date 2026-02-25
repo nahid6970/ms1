@@ -58,5 +58,15 @@
         "right_click_cmd": "rclone sync dst src -P --fast-list",
         "index": 2,
         "enabled": true
+    },
+    "AndroidTest-Collab": {
+        "cmd": "rclone check src dst -P --fast-list --exclude \".git/**\" --exclude \"__pycache__/**\" --exclude \"node_modules/**\" --exclude \".gradle/**\" --exclude \".kotlin/**\" --exclude \"build/**\" --exclude \"*.apk\" --exclude \"local.properties\" --log-level INFO",
+        "src": "C:\\@delta\\test\\FolderSync",
+        "dst": "g00:\\FolderSync",
+        "label": "T",
+        "left_click_cmd": "rclone sync src dst -P --fast-list --exclude \".git/**\" --exclude \"__pycache__/**\" --exclude \"node_modules/**\" --exclude \".gradle/**\" --exclude \".kotlin/**\" --exclude \"build/**\" --exclude \"*.apk\" --exclude \"local.properties\" --log-level INFO",
+        "right_click_cmd": "rclone sync dst src -P --fast-list",
+        "index": 6,
+        "enabled": true
     }
 }
