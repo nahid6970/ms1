@@ -68,6 +68,12 @@ function initializeApp() {
 
         if (!scrollTriggeringOps.includes(e.inputType)) return;
 
+        // Save cursor position for contentEditable before operation
+        let savedCursorOffset;
+        if (isContentEditable) {
+            savedCursorOffset = getCaretCharacterOffset(el);
+        }
+
         // Prevent the container from scrolling
         const tableContainer = document.querySelector('.table-container');
         if (tableContainer) {
@@ -78,6 +84,13 @@ function initializeApp() {
             requestAnimationFrame(() => {
                 tableContainer.scrollTop = savedScrollTop;
                 tableContainer.scrollLeft = savedScrollLeft;
+
+                // Restore cursor position for contentEditable after operation
+                if (isContentEditable && savedCursorOffset !== undefined) {
+                    setTimeout(() => {
+                        setCaretPosition(el, savedCursorOffset);
+                    }, 0);
+                }
 
                 // Only call keepCursorCentered for Enter key in textareas
                 if (e.inputType === 'insertLineBreak' && isTextarea) {
