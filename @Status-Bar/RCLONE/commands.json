@@ -6,7 +6,7 @@
         "label": "\udb85\ude32",
         "left_click_cmd": "rclone sync src dst -P --fast-list --log-level INFO",
         "right_click_cmd": "rclone sync dst src -P --fast-list",
-        "index": 3,
+        "index": 2,
         "enabled": true
     },
     "software": {
@@ -16,7 +16,7 @@
         "label": "\uf40e",
         "left_click_cmd": "rclone sync src dst -P --fast-list --log-level INFO",
         "right_click_cmd": "rclone sync dst src -P --fast-list",
-        "index": 6,
+        "index": 5,
         "enabled": true
     },
     "song": {
@@ -26,7 +26,7 @@
         "label": "\uec1b",
         "left_click_cmd": "rclone sync src dst -P --fast-list --log-level INFO",
         "right_click_cmd": "rclone sync dst src -P --fast-list",
-        "index": 5,
+        "index": 4,
         "enabled": true
     },
     "ms1": {
@@ -36,7 +36,7 @@
         "label": "ms1",
         "left_click_cmd": "rclone sync src dst -P --fast-list --exclude \".git/**\" --exclude \"__pycache__/**\"  --log-level INFO",
         "right_click_cmd": "rclone sync dst src -P --fast-list",
-        "index": 1,
+        "index": 0,
         "enabled": true
     },
     "Photos": {
@@ -46,7 +46,7 @@
         "label": "\uf03e",
         "left_click_cmd": "rclone sync src dst -P --fast-list --track-renames --exclude \".globalTrash/**\" --exclude \".stfolder/**\" --log-level INFO",
         "right_click_cmd": "rclone sync dst src -P --fast-list",
-        "index": 4,
+        "index": 3,
         "enabled": true
     },
     "db": {
@@ -56,7 +56,7 @@
         "label": "db",
         "left_click_cmd": "rclone sync src dst -P --fast-list --exclude \".git/**\" --exclude \"__pycache__/**\" --exclude \"node_modules/**\"  --log-level INFO",
         "right_click_cmd": "rclone sync dst src -P --fast-list",
-        "index": 2,
+        "index": 1,
         "enabled": true
     },
     "AndroidTest-Collab": {
@@ -66,7 +66,7 @@
         "label": "T",
         "left_click_cmd": "rclone sync src dst -P --fast-list --exclude \".git/**\" --exclude \"__pycache__/**\" --exclude \"node_modules/**\" --exclude \".gradle/**\" --exclude \".kotlin/**\" --exclude \"build/**\" --exclude \"*.apk\" --exclude \"local.properties\" --log-level INFO",
         "right_click_cmd": "rclone sync dst src -P --fast-list",
-        "index": 7,
+        "index": 6,
         "enabled": true
     }
 }
