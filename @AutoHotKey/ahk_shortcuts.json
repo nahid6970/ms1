@@ -491,6 +491,14 @@
             "trigger": ";context",
             "replacement": "# Context Menu Command Reference\n\nI have a GUI app that manages Windows right-click context menu entries. When I ask for context menu commands, provide ONLY the command string itself - nothing else.\n\n## What to Provide\n\nJust the command line, like:\n```\ncmd.exe /k cd /d \"%1\"\n```\n\n## Placeholders\n\n- `%1` - Selected file/folder path\n- `%V` - Directory path (backgrounds)\n\n## Examples\n\n**Open Terminal:**\n```\ncmd.exe /k cd /d \"%1\"\n```\n\n**Copy Path:**\n```\ncmd /c echo %1 | clip\n```\n\n**Run Python Script:**\n```\npythonw \"C:\\path\\to\\script.py\" \"%1\"\n```\n\n**PowerShell Script:**\n```\npowershell.exe -ExecutionPolicy Bypass -WindowStyle Hidden -File \"C:\\path\\to\\script.ps1\" \"%1\"\n```\n\n## Notes\n\n- Use `pythonw` to avoid terminal windows\n- Wrap paths in quotes: `\"%1\"`\n- Don't include menu labels, scope, or explanations - just the command",
             "enabled": true
+        },
+        {
+            "name": "Career Objective",
+            "category": "General",
+            "description": "",
+            "trigger": ";career",
+            "replacement": "Highly motivated MBA graduate from the University of Dhaka with a major in Finance, seeking to leverage a deep understanding of financial modeling, risk assessment, and corporate valuation. Eager to apply rigorous academic training and analytical skills to a challenging role in a leading financial institution. Committed to driving data-backed decisions and contributing to organizational growth in the fast-paced Bangladeshi financial sector",
+            "enabled": true
         }
     ],
     "startup_scripts": [

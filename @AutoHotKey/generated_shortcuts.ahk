@@ -1474,3 +1474,6 @@ powershell.exe -ExecutionPolicy Bypass -WindowStyle Hidden -File ""C:\path\to\sc
 - Wrap paths in quotes: `""%1""`
 - Don't include menu labels, scope, or explanations - just the command
 )")
+
+;! Career Objective
+:X:;career::Paste('Highly motivated MBA graduate from the University of Dhaka with a major in Finance, seeking to leverage a deep understanding of financial modeling, risk assessment, and corporate valuation. Eager to apply rigorous academic training and analytical skills to a challenging role in a leading financial institution. Committed to driving data-backed decisions and contributing to organizational growth in the fast-paced Bangladeshi financial sector')
