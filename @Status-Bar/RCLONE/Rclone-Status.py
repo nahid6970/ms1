@@ -475,49 +475,49 @@ def edit_command(key):
     
     row = 0
     tk.Label(container, text="Name (key):", bg="#050505", fg="#E0E0E0", font=("Consolas", 10), anchor="w").grid(row=row, column=0, sticky="w", padx=(0,10), pady=5)
-    name_entry = tk.Entry(container, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid")
+    name_entry = tk.Entry(container, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid", highlightthickness=1, highlightbackground="#3a3a3a", highlightcolor="#00F0FF")
     name_entry.insert(0, key)
     name_entry.grid(row=row, column=1, sticky="ew", pady=5)
     
     row += 1
     tk.Label(container, text="Label (Icon/Text):", bg="#050505", fg="#E0E0E0", font=("Consolas", 10), anchor="w").grid(row=row, column=0, sticky="w", padx=(0,10), pady=5)
-    label_entry = tk.Entry(container, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid")
+    label_entry = tk.Entry(container, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid", highlightthickness=1, highlightbackground="#3a3a3a", highlightcolor="#00F0FF")
     label_entry.insert(0, cfg["label"])
     label_entry.grid(row=row, column=1, sticky="ew", pady=5)
     
     row += 1
     tk.Label(container, text="Source Path:", bg="#050505", fg="#E0E0E0", font=("Consolas", 10), anchor="w").grid(row=row, column=0, sticky="w", padx=(0,10), pady=5)
-    src_entry = tk.Entry(container, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid")
+    src_entry = tk.Entry(container, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid", highlightthickness=1, highlightbackground="#3a3a3a", highlightcolor="#00F0FF")
     src_entry.insert(0, cfg["src"])
     src_entry.grid(row=row, column=1, sticky="ew", pady=5)
     
     row += 1
     tk.Label(container, text="Destination Path:", bg="#050505", fg="#E0E0E0", font=("Consolas", 10), anchor="w").grid(row=row, column=0, sticky="w", padx=(0,10), pady=5)
-    dst_entry = tk.Entry(container, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid")
+    dst_entry = tk.Entry(container, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid", highlightthickness=1, highlightbackground="#3a3a3a", highlightcolor="#00F0FF")
     dst_entry.insert(0, cfg["dst"])
     dst_entry.grid(row=row, column=1, sticky="ew", pady=5)
     
     row += 1
     tk.Label(container, text="Check Command:", bg="#050505", fg="#E0E0E0", font=("Consolas", 10), anchor="nw").grid(row=row, column=0, sticky="nw", padx=(0,10), pady=5)
-    check_entry = tk.Text(container, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid", height=5, wrap="word", font=("Consolas", 9))
+    check_entry = tk.Text(container, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid", highlightthickness=1, highlightbackground="#3a3a3a", highlightcolor="#00F0FF", height=5, wrap="word", font=("Consolas", 9))
     check_entry.insert("1.0", cfg.get("cmd", "rclone check src dst --fast-list --size-only"))
     check_entry.grid(row=row, column=1, sticky="ew", pady=5)
     
     row += 1
     tk.Label(container, text="Left Click Command:", bg="#050505", fg="#E0E0E0", font=("Consolas", 10), anchor="nw").grid(row=row, column=0, sticky="nw", padx=(0,10), pady=5)
-    left_entry = tk.Text(container, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid", height=5, wrap="word", font=("Consolas", 9))
+    left_entry = tk.Text(container, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid", highlightthickness=1, highlightbackground="#3a3a3a", highlightcolor="#00F0FF", height=5, wrap="word", font=("Consolas", 9))
     left_entry.insert("1.0", cfg.get("left_click_cmd", "rclone sync src dst -P --fast-list --log-level INFO"))
     left_entry.grid(row=row, column=1, sticky="ew", pady=5)
     
     row += 1
     tk.Label(container, text="Right Click Command:", bg="#050505", fg="#E0E0E0", font=("Consolas", 10), anchor="w").grid(row=row, column=0, sticky="w", padx=(0,10), pady=5)
-    right_entry = tk.Entry(container, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid")
+    right_entry = tk.Entry(container, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid", highlightthickness=1, highlightbackground="#3a3a3a", highlightcolor="#00F0FF")
     right_entry.insert(0, cfg.get("right_click_cmd", "rclone sync dst src -P --fast-list"))
     right_entry.grid(row=row, column=1, sticky="ew", pady=5)
     
     row += 1
     tk.Label(container, text="Display Order (Index):", bg="#050505", fg="#E0E0E0", font=("Consolas", 10), anchor="w").grid(row=row, column=0, sticky="w", padx=(0,10), pady=5)
-    index_entry = tk.Entry(container, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid")
+    index_entry = tk.Entry(container, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid", highlightthickness=1, highlightbackground="#3a3a3a", highlightcolor="#00F0FF")
     index_entry.insert(0, str(cfg.get("index", 0)))
     index_entry.grid(row=row, column=1, sticky="ew", pady=5)
     
@@ -600,45 +600,45 @@ def add_command():
     
     row = 0
     tk.Label(container, text="Name (key):", bg="#050505", fg="#E0E0E0", font=("Consolas", 10), anchor="w").grid(row=row, column=0, sticky="w", padx=(0,10), pady=5)
-    name_entry = tk.Entry(container, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid")
+    name_entry = tk.Entry(container, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid", highlightthickness=1, highlightbackground="#3a3a3a", highlightcolor="#00F0FF")
     name_entry.grid(row=row, column=1, sticky="ew", pady=5)
     
     row += 1
     tk.Label(container, text="Label (Icon/Text):", bg="#050505", fg="#E0E0E0", font=("Consolas", 10), anchor="w").grid(row=row, column=0, sticky="w", padx=(0,10), pady=5)
-    label_entry = tk.Entry(container, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid")
+    label_entry = tk.Entry(container, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid", highlightthickness=1, highlightbackground="#3a3a3a", highlightcolor="#00F0FF")
     label_entry.grid(row=row, column=1, sticky="ew", pady=5)
     
     row += 1
     tk.Label(container, text="Source Path:", bg="#050505", fg="#E0E0E0", font=("Consolas", 10), anchor="w").grid(row=row, column=0, sticky="w", padx=(0,10), pady=5)
-    src_entry = tk.Entry(container, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid")
+    src_entry = tk.Entry(container, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid", highlightthickness=1, highlightbackground="#3a3a3a", highlightcolor="#00F0FF")
     src_entry.grid(row=row, column=1, sticky="ew", pady=5)
     
     row += 1
     tk.Label(container, text="Destination Path:", bg="#050505", fg="#E0E0E0", font=("Consolas", 10), anchor="w").grid(row=row, column=0, sticky="w", padx=(0,10), pady=5)
-    dst_entry = tk.Entry(container, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid")
+    dst_entry = tk.Entry(container, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid", highlightthickness=1, highlightbackground="#3a3a3a", highlightcolor="#00F0FF")
     dst_entry.grid(row=row, column=1, sticky="ew", pady=5)
     
     row += 1
     tk.Label(container, text="Check Command (optional):", bg="#050505", fg="#E0E0E0", font=("Consolas", 10), anchor="nw").grid(row=row, column=0, sticky="nw", padx=(0,10), pady=5)
-    check_entry = tk.Text(container, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid", height=5, wrap="word", font=("Consolas", 9))
+    check_entry = tk.Text(container, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid", highlightthickness=1, highlightbackground="#3a3a3a", highlightcolor="#00F0FF", height=5, wrap="word", font=("Consolas", 9))
     check_entry.insert("1.0", "rclone check src dst --fast-list --size-only")
     check_entry.grid(row=row, column=1, sticky="ew", pady=5)
     
     row += 1
     tk.Label(container, text="Left Click Command (optional):", bg="#050505", fg="#E0E0E0", font=("Consolas", 10), anchor="nw").grid(row=row, column=0, sticky="nw", padx=(0,10), pady=5)
-    left_entry = tk.Text(container, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid", height=5, wrap="word", font=("Consolas", 9))
+    left_entry = tk.Text(container, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid", highlightthickness=1, highlightbackground="#3a3a3a", highlightcolor="#00F0FF", height=5, wrap="word", font=("Consolas", 9))
     left_entry.insert("1.0", "rclone sync src dst -P --fast-list --log-level INFO")
     left_entry.grid(row=row, column=1, sticky="ew", pady=5)
     
     row += 1
     tk.Label(container, text="Right Click Command (optional):", bg="#050505", fg="#E0E0E0", font=("Consolas", 10), anchor="w").grid(row=row, column=0, sticky="w", padx=(0,10), pady=5)
-    right_entry = tk.Entry(container, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid")
+    right_entry = tk.Entry(container, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid", highlightthickness=1, highlightbackground="#3a3a3a", highlightcolor="#00F0FF")
     right_entry.insert(0, "rclone sync dst src -P --fast-list")
     right_entry.grid(row=row, column=1, sticky="ew", pady=5)
 
     row += 1
     tk.Label(container, text="Display Order (Index):", bg="#050505", fg="#E0E0E0", font=("Consolas", 10), anchor="w").grid(row=row, column=0, sticky="w", padx=(0,10), pady=5)
-    index_entry = tk.Entry(container, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid")
+    index_entry = tk.Entry(container, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid", highlightthickness=1, highlightbackground="#3a3a3a", highlightcolor="#00F0FF")
     index_entry.insert(0, str(len(commands)))
     index_entry.grid(row=row, column=1, sticky="ew", pady=5)
     
