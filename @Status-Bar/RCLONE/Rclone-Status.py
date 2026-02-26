@@ -463,54 +463,67 @@ def edit_command(key):
     """Open edit dialog for a command"""
     cfg = commands[key]
     
-    dialog_w = app_settings.get("dialog_width", 550)
+    dialog_w = app_settings.get("dialog_width", 700)
     edit_win = tk.Toplevel(ROOT)
     edit_win.title(f"Edit: {key}")
     edit_win.geometry(f"{dialog_w}x680")
     edit_win.configure(bg="#050505")
     
-    tk.Label(edit_win, text="Name (key):", bg="#050505", fg="#E0E0E0", font=("Consolas", 10)).pack(pady=(10, 0))
-    name_entry = tk.Entry(edit_win, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid")
+    container = tk.Frame(edit_win, bg="#050505")
+    container.pack(fill="both", expand=True, padx=20, pady=10)
+    container.columnconfigure(1, weight=1)
+    
+    row = 0
+    tk.Label(container, text="Name (key):", bg="#050505", fg="#E0E0E0", font=("Consolas", 10), anchor="w").grid(row=row, column=0, sticky="w", padx=(0,10), pady=5)
+    name_entry = tk.Entry(container, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid")
     name_entry.insert(0, key)
-    name_entry.pack(fill="x", padx=20)
+    name_entry.grid(row=row, column=1, sticky="ew", pady=5)
     
-    tk.Label(edit_win, text="Label (Icon/Text):", bg="#050505", fg="#E0E0E0", font=("Consolas", 10)).pack(pady=(10, 0))
-    label_entry = tk.Entry(edit_win, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid")
+    row += 1
+    tk.Label(container, text="Label (Icon/Text):", bg="#050505", fg="#E0E0E0", font=("Consolas", 10), anchor="w").grid(row=row, column=0, sticky="w", padx=(0,10), pady=5)
+    label_entry = tk.Entry(container, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid")
     label_entry.insert(0, cfg["label"])
-    label_entry.pack(fill="x", padx=20)
+    label_entry.grid(row=row, column=1, sticky="ew", pady=5)
     
-    tk.Label(edit_win, text="Source Path:", bg="#050505", fg="#E0E0E0", font=("Consolas", 10)).pack(pady=(10, 0))
-    src_entry = tk.Entry(edit_win, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid")
+    row += 1
+    tk.Label(container, text="Source Path:", bg="#050505", fg="#E0E0E0", font=("Consolas", 10), anchor="w").grid(row=row, column=0, sticky="w", padx=(0,10), pady=5)
+    src_entry = tk.Entry(container, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid")
     src_entry.insert(0, cfg["src"])
-    src_entry.pack(fill="x", padx=20)
+    src_entry.grid(row=row, column=1, sticky="ew", pady=5)
     
-    tk.Label(edit_win, text="Destination Path:", bg="#050505", fg="#E0E0E0", font=("Consolas", 10)).pack(pady=(10, 0))
-    dst_entry = tk.Entry(edit_win, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid")
+    row += 1
+    tk.Label(container, text="Destination Path:", bg="#050505", fg="#E0E0E0", font=("Consolas", 10), anchor="w").grid(row=row, column=0, sticky="w", padx=(0,10), pady=5)
+    dst_entry = tk.Entry(container, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid")
     dst_entry.insert(0, cfg["dst"])
-    dst_entry.pack(fill="x", padx=20)
+    dst_entry.grid(row=row, column=1, sticky="ew", pady=5)
     
-    tk.Label(edit_win, text="Check Command:", bg="#050505", fg="#E0E0E0", font=("Consolas", 10)).pack(pady=(10, 0))
-    check_entry = tk.Text(edit_win, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid", height=5, wrap="word", font=("Consolas", 9))
+    row += 1
+    tk.Label(container, text="Check Command:", bg="#050505", fg="#E0E0E0", font=("Consolas", 10), anchor="nw").grid(row=row, column=0, sticky="nw", padx=(0,10), pady=5)
+    check_entry = tk.Text(container, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid", height=5, wrap="word", font=("Consolas", 9))
     check_entry.insert("1.0", cfg.get("cmd", "rclone check src dst --fast-list --size-only"))
-    check_entry.pack(fill="x", padx=20)
+    check_entry.grid(row=row, column=1, sticky="ew", pady=5)
     
-    tk.Label(edit_win, text="Left Click Command:", bg="#050505", fg="#E0E0E0", font=("Consolas", 10)).pack(pady=(10, 0))
-    left_entry = tk.Text(edit_win, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid", height=5, wrap="word", font=("Consolas", 9))
+    row += 1
+    tk.Label(container, text="Left Click Command:", bg="#050505", fg="#E0E0E0", font=("Consolas", 10), anchor="nw").grid(row=row, column=0, sticky="nw", padx=(0,10), pady=5)
+    left_entry = tk.Text(container, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid", height=5, wrap="word", font=("Consolas", 9))
     left_entry.insert("1.0", cfg.get("left_click_cmd", "rclone sync src dst -P --fast-list --log-level INFO"))
-    left_entry.pack(fill="x", padx=20)
+    left_entry.grid(row=row, column=1, sticky="ew", pady=5)
     
-    tk.Label(edit_win, text="Right Click Command:", bg="#050505", fg="#E0E0E0", font=("Consolas", 10)).pack(pady=(10, 0))
-    right_entry = tk.Entry(edit_win, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid")
+    row += 1
+    tk.Label(container, text="Right Click Command:", bg="#050505", fg="#E0E0E0", font=("Consolas", 10), anchor="w").grid(row=row, column=0, sticky="w", padx=(0,10), pady=5)
+    right_entry = tk.Entry(container, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid")
     right_entry.insert(0, cfg.get("right_click_cmd", "rclone sync dst src -P --fast-list"))
-    right_entry.pack(fill="x", padx=20)
+    right_entry.grid(row=row, column=1, sticky="ew", pady=5)
     
-    tk.Label(edit_win, text="Display Order (Index):", bg="#050505", fg="#E0E0E0", font=("Consolas", 10)).pack(pady=(10, 0))
-    index_entry = tk.Entry(edit_win, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid")
+    row += 1
+    tk.Label(container, text="Display Order (Index):", bg="#050505", fg="#E0E0E0", font=("Consolas", 10), anchor="w").grid(row=row, column=0, sticky="w", padx=(0,10), pady=5)
+    index_entry = tk.Entry(container, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid")
     index_entry.insert(0, str(cfg.get("index", 0)))
-    index_entry.pack(fill="x", padx=20)
+    index_entry.grid(row=row, column=1, sticky="ew", pady=5)
     
+    row += 1
     enabled_var = tk.BooleanVar(value=cfg.get("enabled", True))
-    tk.Checkbutton(edit_win, text="Enabled", variable=enabled_var, bg="#050505", fg="#E0E0E0", selectcolor="#111111", activebackground="#050505", activeforeground="#E0E0E0").pack(pady=10)
+    tk.Checkbutton(container, text="Enabled", variable=enabled_var, bg="#050505", fg="#E0E0E0", selectcolor="#111111", activebackground="#050505", activeforeground="#E0E0E0").grid(row=row, column=0, columnspan=2, sticky="w", pady=10)
     
     button_frame = tk.Frame(edit_win, bg="#050505")
     button_frame.pack(pady=15)
@@ -575,50 +588,63 @@ def edit_command(key):
     tk.Button(button_frame, text="Cancel", command=edit_win.destroy, bg="#3a3a3a", fg="white", width=10, font=("Consolas", 10, "bold")).pack(side="left", padx=5)
 
 def add_command():
-    dialog_w = app_settings.get("dialog_width", 550)
+    dialog_w = app_settings.get("dialog_width", 700)
     add_win = tk.Toplevel(ROOT)
     add_win.title("Add New Command")
     add_win.geometry(f"{dialog_w}x680")
     add_win.configure(bg="#050505")
     
-    tk.Label(add_win, text="Name (key):", bg="#050505", fg="#E0E0E0", font=("Consolas", 10)).pack(pady=(10, 0))
-    name_entry = tk.Entry(add_win, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid")
-    name_entry.pack(fill="x", padx=20)
+    container = tk.Frame(add_win, bg="#050505")
+    container.pack(fill="both", expand=True, padx=20, pady=10)
+    container.columnconfigure(1, weight=1)
     
-    tk.Label(add_win, text="Label (Icon/Text):", bg="#050505", fg="#E0E0E0", font=("Consolas", 10)).pack(pady=(10, 0))
-    label_entry = tk.Entry(add_win, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid")
-    label_entry.pack(fill="x", padx=20)
+    row = 0
+    tk.Label(container, text="Name (key):", bg="#050505", fg="#E0E0E0", font=("Consolas", 10), anchor="w").grid(row=row, column=0, sticky="w", padx=(0,10), pady=5)
+    name_entry = tk.Entry(container, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid")
+    name_entry.grid(row=row, column=1, sticky="ew", pady=5)
     
-    tk.Label(add_win, text="Source Path:", bg="#050505", fg="#E0E0E0", font=("Consolas", 10)).pack(pady=(10, 0))
-    src_entry = tk.Entry(add_win, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid")
-    src_entry.pack(fill="x", padx=20)
+    row += 1
+    tk.Label(container, text="Label (Icon/Text):", bg="#050505", fg="#E0E0E0", font=("Consolas", 10), anchor="w").grid(row=row, column=0, sticky="w", padx=(0,10), pady=5)
+    label_entry = tk.Entry(container, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid")
+    label_entry.grid(row=row, column=1, sticky="ew", pady=5)
     
-    tk.Label(add_win, text="Destination Path:", bg="#050505", fg="#E0E0E0", font=("Consolas", 10)).pack(pady=(10, 0))
-    dst_entry = tk.Entry(add_win, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid")
-    dst_entry.pack(fill="x", padx=20)
+    row += 1
+    tk.Label(container, text="Source Path:", bg="#050505", fg="#E0E0E0", font=("Consolas", 10), anchor="w").grid(row=row, column=0, sticky="w", padx=(0,10), pady=5)
+    src_entry = tk.Entry(container, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid")
+    src_entry.grid(row=row, column=1, sticky="ew", pady=5)
     
-    tk.Label(add_win, text="Check Command (optional):", bg="#050505", fg="#E0E0E0", font=("Consolas", 10)).pack(pady=(10, 0))
-    check_entry = tk.Text(add_win, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid", height=4, wrap="word", font=("Consolas", 9))
+    row += 1
+    tk.Label(container, text="Destination Path:", bg="#050505", fg="#E0E0E0", font=("Consolas", 10), anchor="w").grid(row=row, column=0, sticky="w", padx=(0,10), pady=5)
+    dst_entry = tk.Entry(container, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid")
+    dst_entry.grid(row=row, column=1, sticky="ew", pady=5)
+    
+    row += 1
+    tk.Label(container, text="Check Command (optional):", bg="#050505", fg="#E0E0E0", font=("Consolas", 10), anchor="nw").grid(row=row, column=0, sticky="nw", padx=(0,10), pady=5)
+    check_entry = tk.Text(container, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid", height=5, wrap="word", font=("Consolas", 9))
     check_entry.insert("1.0", "rclone check src dst --fast-list --size-only")
-    check_entry.pack(fill="x", padx=20, pady=(0, 5))
+    check_entry.grid(row=row, column=1, sticky="ew", pady=5)
     
-    tk.Label(add_win, text="Left Click Command (optional):", bg="#050505", fg="#E0E0E0", font=("Consolas", 10)).pack(pady=(10, 0))
-    left_entry = tk.Text(add_win, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid", height=4, wrap="word", font=("Consolas", 9))
+    row += 1
+    tk.Label(container, text="Left Click Command (optional):", bg="#050505", fg="#E0E0E0", font=("Consolas", 10), anchor="nw").grid(row=row, column=0, sticky="nw", padx=(0,10), pady=5)
+    left_entry = tk.Text(container, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid", height=5, wrap="word", font=("Consolas", 9))
     left_entry.insert("1.0", "rclone sync src dst -P --fast-list --log-level INFO")
-    left_entry.pack(fill="x", padx=20, pady=(0, 5))
+    left_entry.grid(row=row, column=1, sticky="ew", pady=5)
     
-    tk.Label(add_win, text="Right Click Command (optional):", bg="#050505", fg="#E0E0E0", font=("Consolas", 10)).pack(pady=(10, 0))
-    right_entry = tk.Entry(add_win, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid")
+    row += 1
+    tk.Label(container, text="Right Click Command (optional):", bg="#050505", fg="#E0E0E0", font=("Consolas", 10), anchor="w").grid(row=row, column=0, sticky="w", padx=(0,10), pady=5)
+    right_entry = tk.Entry(container, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid")
     right_entry.insert(0, "rclone sync dst src -P --fast-list")
-    right_entry.pack(fill="x", padx=20)
+    right_entry.grid(row=row, column=1, sticky="ew", pady=5)
 
-    tk.Label(add_win, text="Display Order (Index):", bg="#050505", fg="#E0E0E0", font=("Consolas", 10)).pack(pady=(10, 0))
-    index_entry = tk.Entry(add_win, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid")
+    row += 1
+    tk.Label(container, text="Display Order (Index):", bg="#050505", fg="#E0E0E0", font=("Consolas", 10), anchor="w").grid(row=row, column=0, sticky="w", padx=(0,10), pady=5)
+    index_entry = tk.Entry(container, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid")
     index_entry.insert(0, str(len(commands)))
-    index_entry.pack(fill="x", padx=20)
+    index_entry.grid(row=row, column=1, sticky="ew", pady=5)
     
+    row += 1
     enabled_var = tk.BooleanVar(value=True)
-    tk.Checkbutton(add_win, text="Enabled", variable=enabled_var, bg="#050505", fg="#E0E0E0", selectcolor="#111111", activebackground="#050505", activeforeground="#E0E0E0").pack(pady=10)
+    tk.Checkbutton(container, text="Enabled", variable=enabled_var, bg="#050505", fg="#E0E0E0", selectcolor="#111111", activebackground="#050505", activeforeground="#E0E0E0").grid(row=row, column=0, columnspan=2, sticky="w", pady=10)
     
     def save_new():
         name = name_entry.get()
