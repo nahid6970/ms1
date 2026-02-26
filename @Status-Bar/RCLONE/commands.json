@@ -68,5 +68,15 @@
         "right_click_cmd": "rclone sync dst src -P --fast-list",
         "index": 6,
         "enabled": true
+    },
+    "Convext Android Share": {
+        "cmd": "rclone check src dst -P --fast-list --exclude \".git/**\" --exclude \"__pycache__/**\" --exclude \"node_modules/**\" --exclude \".gradle/**\" --exclude \".kotlin/**\" --exclude \"build/**\" --exclude \"*.apk\" --exclude \"local.properties\" --log-level INFO",
+        "src": "C:\\@delta\\test\\android-convex-explorer",
+        "dst": "g00:\\ConvexShare",
+        "label": "ConvexShare",
+        "left_click_cmd": "rclone sync src dst -P --fast-list --exclude \".git/**\" --exclude \"__pycache__/**\" --exclude \"node_modules/**\" --exclude \".gradle/**\" --exclude \".kotlin/**\" --exclude \"build/**\" --exclude \"*.apk\" --exclude \"local.properties\" --log-level INFO",
+        "right_click_cmd": "rclone sync dst src -P --fast-list",
+        "index": 7,
+        "enabled": true
     }
 }
