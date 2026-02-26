@@ -490,13 +490,13 @@ def edit_command(key):
     dst_entry.pack(fill="x", padx=20)
     
     tk.Label(edit_win, text="Check Command:", bg="#050505", fg="#E0E0E0", font=("Consolas", 10)).pack(pady=(10, 0))
-    check_entry = tk.Entry(edit_win, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid")
-    check_entry.insert(0, cfg.get("cmd", "rclone check src dst --fast-list --size-only"))
+    check_entry = tk.Text(edit_win, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid", height=5, wrap="word", font=("Consolas", 9))
+    check_entry.insert("1.0", cfg.get("cmd", "rclone check src dst --fast-list --size-only"))
     check_entry.pack(fill="x", padx=20)
     
     tk.Label(edit_win, text="Left Click Command:", bg="#050505", fg="#E0E0E0", font=("Consolas", 10)).pack(pady=(10, 0))
-    left_entry = tk.Entry(edit_win, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid")
-    left_entry.insert(0, cfg.get("left_click_cmd", "rclone sync src dst -P --fast-list --log-level INFO"))
+    left_entry = tk.Text(edit_win, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid", height=5, wrap="word", font=("Consolas", 9))
+    left_entry.insert("1.0", cfg.get("left_click_cmd", "rclone sync src dst -P --fast-list --log-level INFO"))
     left_entry.pack(fill="x", padx=20)
     
     tk.Label(edit_win, text="Right Click Command:", bg="#050505", fg="#E0E0E0", font=("Consolas", 10)).pack(pady=(10, 0))
@@ -526,11 +526,11 @@ def edit_command(key):
             del commands[key]
         
         commands[new_key] = {
-            "cmd": check_entry.get(),
+            "cmd": check_entry.get("1.0", "end-1c"),
             "src": src_entry.get(),
             "dst": dst_entry.get(),
             "label": label_entry.get(),
-            "left_click_cmd": left_entry.get(),
+            "left_click_cmd": left_entry.get("1.0", "end-1c"),
             "right_click_cmd": right_entry.get(),
             "index": int(index_entry.get()) if index_entry.get().isdigit() else 0,
             "enabled": enabled_var.get()
@@ -555,11 +555,11 @@ def edit_command(key):
             counter += 1
         
         commands[new_key] = {
-            "cmd": check_entry.get(),
+            "cmd": check_entry.get("1.0", "end-1c"),
             "src": src_entry.get(),
             "dst": dst_entry.get(),
             "label": label_entry.get(),
-            "left_click_cmd": left_entry.get(),
+            "left_click_cmd": left_entry.get("1.0", "end-1c"),
             "right_click_cmd": right_entry.get(),
             "index": int(index_entry.get()) if index_entry.get().isdigit() else 0,
             "enabled": enabled_var.get()
@@ -598,14 +598,14 @@ def add_command():
     dst_entry.pack(fill="x", padx=20)
     
     tk.Label(add_win, text="Check Command (optional):", bg="#050505", fg="#E0E0E0", font=("Consolas", 10)).pack(pady=(10, 0))
-    check_entry = tk.Entry(add_win, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid")
-    check_entry.insert(0, "rclone check src dst --fast-list --size-only")
-    check_entry.pack(fill="x", padx=20)
+    check_entry = tk.Text(add_win, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid", height=4, wrap="word", font=("Consolas", 9))
+    check_entry.insert("1.0", "rclone check src dst --fast-list --size-only")
+    check_entry.pack(fill="x", padx=20, pady=(0, 5))
     
     tk.Label(add_win, text="Left Click Command (optional):", bg="#050505", fg="#E0E0E0", font=("Consolas", 10)).pack(pady=(10, 0))
-    left_entry = tk.Entry(add_win, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid")
-    left_entry.insert(0, "rclone sync src dst -P --fast-list --log-level INFO")
-    left_entry.pack(fill="x", padx=20)
+    left_entry = tk.Text(add_win, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid", height=4, wrap="word", font=("Consolas", 9))
+    left_entry.insert("1.0", "rclone sync src dst -P --fast-list --log-level INFO")
+    left_entry.pack(fill="x", padx=20, pady=(0, 5))
     
     tk.Label(add_win, text="Right Click Command (optional):", bg="#050505", fg="#E0E0E0", font=("Consolas", 10)).pack(pady=(10, 0))
     right_entry = tk.Entry(add_win, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid")
@@ -631,11 +631,11 @@ def add_command():
             return
         
         commands[name] = {
-            "cmd": check_entry.get(),
+            "cmd": check_entry.get("1.0", "end-1c"),
             "src": src,
             "dst": dst,
             "label": label,
-            "left_click_cmd": left_entry.get(),
+            "left_click_cmd": left_entry.get("1.0", "end-1c"),
             "right_click_cmd": right_entry.get(),
             "index": int(index_entry.get()) if index_entry.get().isdigit() else 0,
             "enabled": enabled_var.get()
