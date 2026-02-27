@@ -191,13 +191,13 @@ class ImageCanvas(QLabel):
         if self.image is None or len(self.corners) != 4:
             return None
         
-        # Build all points for each side
+        # Build all points for each side in original image coordinates
         all_sides = []
         for i in range(4):
             side_points = [self.corners[i]] + self.sides[i] + [self.corners[(i+1)%4]]
             all_sides.append(np.array([[p[0]/self.scale, p[1]/self.scale] for p in side_points], dtype=np.float32))
         
-        # Calculate output dimensions
+        # Calculate output dimensions based on arc lengths
         top_len = sum(np.linalg.norm(all_sides[0][i+1] - all_sides[0][i]) for i in range(len(all_sides[0])-1))
         bottom_len = sum(np.linalg.norm(all_sides[2][i+1] - all_sides[2][i]) for i in range(len(all_sides[2])-1))
         left_len = sum(np.linalg.norm(all_sides[3][i+1] - all_sides[3][i]) for i in range(len(all_sides[3])-1))
@@ -206,47 +206,39 @@ class ImageCanvas(QLabel):
         width = int(max(top_len, bottom_len))
         height = int(max(left_len, right_len))
         
-        if width <= 0 or height <= 0:
+        if width <= 1 or height <= 1:
             return None
 
-        # Create mesh grid resolution
-        rows = max(len(all_sides[3]), len(all_sides[1]), 2)
-        cols = max(len(all_sides[0]), len(all_sides[2]), 2)
-        
-        # Interpolate points on each side with correct orientation
+        # Interpolate boundary curves for full resolution to ensure pixel-perfect mapping
         # Corners: 0(TL), 1(TR), 2(BR), 3(BL)
-        top_interp = self.interpolate_points(all_sides[0], cols)             # 0 -> 1
-        bottom_interp = self.interpolate_points(all_sides[2][::-1], cols)      # 3 -> 2
-        left_interp = self.interpolate_points(all_sides[3][::-1], rows)       # 0 -> 3
-        right_interp = self.interpolate_points(all_sides[1], rows)            # 1 -> 2
+        top_full = self.interpolate_points(all_sides[0], width)             # TL -> TR
+        bottom_full = self.interpolate_points(all_sides[2][::-1], width)      # BL -> BR
+        left_full = self.interpolate_points(all_sides[3][::-1], height)       # TL -> BL
+        right_full = self.interpolate_points(all_sides[1], height)            # TR -> BR
         
-        # Build mapping grid using Coon's Patch (Transfinite Interpolation)
-        src_grid = np.zeros((rows, cols, 2), dtype=np.float32)
-        c00, c10, c11, c01 = top_interp[0], top_interp[-1], bottom_interp[-1], bottom_interp[0]
+        # Build coordinate mesh
+        u_coords = np.linspace(0, 1, width)
+        v_coords = np.linspace(0, 1, height)
+        u_mesh, v_mesh = np.meshgrid(u_coords, v_coords)
         
-        for i in range(rows):
-            v = i / (rows - 1)
-            for j in range(cols):
-                u = j / (cols - 1)
-                
-                # Boundary curves
-                top = top_interp[j]
-                bottom = bottom_interp[j]
-                left = left_interp[i]
-                right = right_interp[i]
-                
-                # Bilinear surface
-                bilinear = (1-u)*(1-v)*c00 + u*(1-v)*c10 + u*v*c11 + (1-u)*v*c01
-                
-                # Coon's patch formula: S = (1-v)T + vB + (1-u)L + uR - Bilinear
-                src_grid[i, j] = (1-v)*top + v*bottom + (1-u)*left + u*right - bilinear
+        # Vectorized Coon's Patch calculation (H, W, 2)
+        U, V = u_mesh[..., np.newaxis], v_mesh[..., np.newaxis]
+        T, B = top_full[np.newaxis, ...], bottom_full[np.newaxis, ...]
+        L, R = left_full[:, np.newaxis, :], right_full[:, np.newaxis, :]
         
-        # Generate full mapping using cv2.remap for performance
-        map_full = cv2.resize(src_grid, (width, height), interpolation=cv2.INTER_LINEAR)
+        # Explicit corner points from the curves
+        c00, c10, c11, c01 = top_full[0], top_full[-1], bottom_full[-1], bottom_full[0]
+        
+        # Transfinite Interpolation (Coon's Patch)
+        bilinear = (1-U)*(1-V)*c00 + U*(1-V)*c10 + U*V*c11 + (1-U)*V*c01
+        map_full = (1-V)*T + V*B + (1-U)*L + U*R - bilinear
+        
+        # Separate mapping channels
         map_x = map_full[:, :, 0].astype(np.float32)
         map_y = map_full[:, :, 1].astype(np.float32)
         
-        return cv2.remap(self.image, map_x, map_y, interpolation=cv2.INTER_LINEAR)
+        # Remap with BORDER_REPLICATE to prevent thin black borders at the edges
+        return cv2.remap(self.image, map_x, map_y, interpolation=cv2.INTER_LINEAR, borderMode=cv2.BORDER_REPLICATE)
     
     def interpolate_points(self, points, n):
         if len(points) == 0:
