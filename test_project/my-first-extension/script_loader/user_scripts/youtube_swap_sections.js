@@ -5,95 +5,53 @@
 (function () {
     'use strict';
 
-    console.log('YouTube Section Swapper: Script loaded');
-
     let isSwapped = false;
     let swapApplied = false;
-    let initAttempts = 0;
 
     // Swap comments with sidebar video list
     function swapSections() {
-        const secondary = document.querySelector('#secondary-inner') || document.querySelector('#secondary');
+        const secondary = document.querySelector('#secondary-inner, #secondary');
         const comments = document.querySelector('ytd-comments#comments');
         const below = document.querySelector('#below');
 
-        if (!secondary || !comments || !below) {
-            console.log('YouTube Section Swapper: Elements not found', { secondary: !!secondary, comments: !!comments, below: !!below });
-            return false;
-        }
+        if (!secondary || !comments || !below || swapApplied) return false;
 
-        if (swapApplied) {
-            console.log('YouTube Section Swapper: Already swapped');
-            return true;
-        }
-
-        // Clone the related videos before clearing
         const relatedContainer = secondary.querySelector('ytd-watch-next-secondary-results-renderer');
+        if (!relatedContainer) return false;
 
-        if (!relatedContainer) {
-            console.log('YouTube Section Swapper: Related videos container not found');
-            return false;
-        }
-
-        // Create wrapper for related videos in main section
         let videoListWrapper = document.getElementById('swapped-video-list');
         if (!videoListWrapper) {
             videoListWrapper = document.createElement('div');
             videoListWrapper.id = 'swapped-video-list';
         }
 
-        // Move related videos to wrapper
         videoListWrapper.appendChild(relatedContainer);
-
-        // Add wrapper to below section
         below.appendChild(videoListWrapper);
-
-        // Move comments to secondary sidebar
         secondary.appendChild(comments);
 
-        // Add indicator and styling
         injectSwapCSS();
-
         swapApplied = true;
         isSwapped = true;
-        console.log('YouTube Section Swapper: ✅ Sections swapped!');
         return true;
     }
 
     // Restore original layout
     function restoreSections() {
-        const secondary = document.querySelector('#secondary-inner') || document.querySelector('#secondary');
+        const secondary = document.querySelector('#secondary-inner, #secondary');
         const comments = document.querySelector('ytd-comments#comments');
         const below = document.querySelector('#below');
         const relatedContainer = document.querySelector('ytd-watch-next-secondary-results-renderer');
         const videoListWrapper = document.getElementById('swapped-video-list');
 
-        if (!secondary || !below) {
-            console.log('YouTube Section Swapper: Cannot restore - elements not found');
-            return;
-        }
+        if (!secondary || !below) return;
 
-        // Move comments back to #below
-        if (comments) {
-            below.appendChild(comments);
-        }
+        if (comments) below.appendChild(comments);
+        if (relatedContainer) secondary.appendChild(relatedContainer);
+        if (videoListWrapper) videoListWrapper.remove();
 
-        // Move related videos back to secondary
-        if (relatedContainer) {
-            secondary.appendChild(relatedContainer);
-        }
-
-        // Remove wrapper
-        if (videoListWrapper) {
-            videoListWrapper.remove();
-        }
-
-        // Remove styling
         removeSwapCSS();
-
         swapApplied = false;
         isSwapped = false;
-        console.log('YouTube Section Swapper: ✅ Sections restored!');
     }
 
     // CSS styling for swapped layout
@@ -337,17 +295,13 @@
             }
         `;
         document.head.appendChild(style);
-
-        // Add indicator banner to comments
         addIndicator();
     }
 
     // Add visual indicator
     function addIndicator() {
-        if (document.getElementById('youtube-swap-indicator')) return;
-
         const comments = document.querySelector('#secondary ytd-comments#comments, #secondary-inner ytd-comments#comments');
-        if (!comments) return;
+        if (!comments || document.getElementById('youtube-swap-indicator')) return;
 
         const indicator = document.createElement('div');
         indicator.id = 'youtube-swap-indicator';
@@ -360,11 +314,8 @@
 
     // Remove swap CSS
     function removeSwapCSS() {
-        const style = document.getElementById('youtube-section-swap-css');
-        if (style) style.remove();
-
-        const indicator = document.getElementById('youtube-swap-indicator');
-        if (indicator) indicator.remove();
+        document.getElementById('youtube-section-swap-css')?.remove();
+        document.getElementById('youtube-swap-indicator')?.remove();
     }
 
     // Toggle function
@@ -377,128 +328,71 @@
     }
 
     // Add keyboard shortcut (Alt + Q)
-    function setupKeyboardShortcut() {
-        document.addEventListener('keydown', (e) => {
-            if (e.altKey && e.key.toLowerCase() === 'q') {
-                e.preventDefault();
-                toggleSwap();
-            }
-        });
-        console.log('YouTube Section Swapper: 🎹 Press Alt+Q to toggle');
-    }
+    document.addEventListener('keydown', (e) => {
+        if (e.altKey && e.key.toLowerCase() === 'q') {
+            e.preventDefault();
+            toggleSwap();
+        }
+    });
 
     // Wait for all elements to load and then swap
     function waitForElementsAndSwap() {
-        const maxAttempts = 50; // More attempts
+        if (window._ytSwapInterval) clearInterval(window._ytSwapInterval);
+
         let attempts = 0;
-
-        // Clear any existing interval
-        if (window._ytSwapInterval) {
-            clearInterval(window._ytSwapInterval);
-        }
-
         window._ytSwapInterval = setInterval(() => {
-            attempts++;
-
             const comments = document.querySelector('ytd-comments#comments');
-            const secondary = document.querySelector('#secondary-inner') || document.querySelector('#secondary');
+            const secondary = document.querySelector('#secondary-inner, #secondary');
             const relatedVideos = document.querySelector('ytd-watch-next-secondary-results-renderer');
-            const commentsHeader = comments?.querySelector('#header, #title, #count');
+            const below = document.querySelector('#below');
 
-            console.log(`YouTube Section Swapper: Attempt ${attempts}`, {
-                comments: !!comments,
-                commentsHeader: !!commentsHeader,
-                secondary: !!secondary,
-                relatedVideos: !!relatedVideos
-            });
-
-            if (comments && secondary && relatedVideos && commentsHeader) {
+            if (++attempts > 60) {
                 clearInterval(window._ytSwapInterval);
-                console.log('YouTube Section Swapper: All elements ready, swapping...');
-                setTimeout(() => swapSections(), 300);
-            } else if (attempts >= maxAttempts) {
-                clearInterval(window._ytSwapInterval);
-                console.log('YouTube Section Swapper: Timeout - some elements not found');
+                return;
             }
-        }, 300); // Check every 300ms
+
+            if (comments && secondary && relatedVideos && below && comments.offsetHeight > 0) {
+                clearInterval(window._ytSwapInterval);
+                setTimeout(() => swapSections(), 200);
+            }
+        }, 200);
     }
 
     // Reset state and prepare for new page
     function resetState() {
         swapApplied = false;
         isSwapped = false;
-        initAttempts = 0;
-
-        // Clean up any existing swapped elements
-        const indicator = document.getElementById('youtube-swap-indicator');
-        if (indicator) indicator.remove();
-
-        const style = document.getElementById('youtube-section-swap-css');
-        if (style) style.remove();
-
-        const wrapper = document.getElementById('swapped-video-list');
-        if (wrapper) wrapper.remove();
+        document.getElementById('youtube-swap-indicator')?.remove();
+        document.getElementById('youtube-section-swap-css')?.remove();
+        document.getElementById('swapped-video-list')?.remove();
     }
 
     // Handle page navigation (YouTube SPA)
     function handleNavigation() {
-        console.log('YouTube Section Swapper: Navigation detected');
         resetState();
-
         if (window.location.pathname.includes('/watch')) {
-            console.log('YouTube Section Swapper: Watch page - waiting for elements...');
-            // Add a delay before starting to check for elements
-            setTimeout(() => {
-                waitForElementsAndSwap();
-            }, 1000);
+            setTimeout(waitForElementsAndSwap, 800);
         }
     }
 
     // Initialize
-    function init() {
-        if (!window.location.hostname.includes('youtube.com')) return;
+    if (!window.location.hostname.includes('youtube.com')) return;
 
-        setupKeyboardShortcut();
+    window.addEventListener('yt-navigate-finish', handleNavigation);
+    window.addEventListener('yt-navigate-start', () => {
+        if (window._ytSwapInterval) clearInterval(window._ytSwapInterval);
+    });
 
-        // Listen for YouTube's navigation events
-        window.addEventListener('yt-navigate-finish', handleNavigation);
-        window.addEventListener('yt-navigate-start', () => {
-            console.log('YouTube Section Swapper: Navigation starting...');
-            if (window._ytSwapInterval) {
-                clearInterval(window._ytSwapInterval);
-            }
-        });
-
-        // Also use popstate for browser back/forward
-        window.addEventListener('popstate', handleNavigation);
-
-        // URL change observer as backup
-        let lastUrl = location.href;
-        const urlObserver = new MutationObserver(() => {
-            if (location.href !== lastUrl) {
-                console.log('YouTube Section Swapper: URL changed');
-                lastUrl = location.href;
-                handleNavigation();
-            }
-        });
-        urlObserver.observe(document.body, { childList: true, subtree: true });
-
-        // Initial load
-        if (window.location.pathname.includes('/watch')) {
-            console.log('YouTube Section Swapper: Initial watch page load');
-            setTimeout(() => {
-                waitForElementsAndSwap();
-            }, 1500);
+    let lastUrl = location.href;
+    new MutationObserver(() => {
+        if (location.href !== lastUrl) {
+            lastUrl = location.href;
+            handleNavigation();
         }
+    }).observe(document.body, { childList: true, subtree: true });
 
-        console.log('YouTube Section Swapper: 🚀 Initialized!');
-    }
-
-    // Start
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', init);
-    } else {
-        init();
+    if (window.location.pathname.includes('/watch')) {
+        setTimeout(waitForElementsAndSwap, 1000);
     }
 
 })();
