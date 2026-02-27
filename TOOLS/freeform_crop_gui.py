@@ -195,7 +195,7 @@ class ImageCanvas(QLabel):
         all_sides = []
         for i in range(4):
             side_points = [self.corners[i]] + self.sides[i] + [self.corners[(i+1)%4]]
-            all_sides.append(np.array([[int(p[0]/self.scale), int(p[1]/self.scale)] for p in side_points], dtype=np.float32))
+            all_sides.append(np.array([[p[0]/self.scale, p[1]/self.scale] for p in side_points], dtype=np.float32))
         
         # Calculate output dimensions
         top_len = sum(np.linalg.norm(all_sides[0][i+1] - all_sides[0][i]) for i in range(len(all_sides[0])-1))
@@ -206,83 +206,47 @@ class ImageCanvas(QLabel):
         width = int(max(top_len, bottom_len))
         height = int(max(left_len, right_len))
         
-        # Create mesh grid
-        n_top = len(all_sides[0])
-        n_bottom = len(all_sides[2])
-        n_left = len(all_sides[3])
-        n_right = len(all_sides[1])
+        if width <= 0 or height <= 0:
+            return None
+
+        # Create mesh grid resolution
+        rows = max(len(all_sides[3]), len(all_sides[1]), 2)
+        cols = max(len(all_sides[0]), len(all_sides[2]), 2)
         
-        rows = max(n_left, n_right)
-        cols = max(n_top, n_bottom)
+        # Interpolate points on each side with correct orientation
+        # Corners: 0(TL), 1(TR), 2(BR), 3(BL)
+        top_interp = self.interpolate_points(all_sides[0], cols)             # 0 -> 1
+        bottom_interp = self.interpolate_points(all_sides[2][::-1], cols)      # 3 -> 2
+        left_interp = self.interpolate_points(all_sides[3][::-1], rows)       # 0 -> 3
+        right_interp = self.interpolate_points(all_sides[1], rows)            # 1 -> 2
         
-        # Interpolate points on each side
-        top_interp = self.interpolate_points(all_sides[0], cols)
-        bottom_interp = self.interpolate_points(all_sides[2][::-1], cols)[::-1]
-        left_interp = self.interpolate_points(all_sides[3], rows)
-        right_interp = self.interpolate_points(all_sides[1][::-1], rows)[::-1]
-        
-        # Build mesh
-        src_points = []
-        dst_points = []
+        # Build mapping grid using Coon's Patch (Transfinite Interpolation)
+        src_grid = np.zeros((rows, cols, 2), dtype=np.float32)
+        c00, c10, c11, c01 = top_interp[0], top_interp[-1], bottom_interp[-1], bottom_interp[0]
         
         for i in range(rows):
-            t_row = i / (rows - 1) if rows > 1 else 0
+            v = i / (rows - 1)
             for j in range(cols):
-                t_col = j / (cols - 1) if cols > 1 else 0
+                u = j / (cols - 1)
                 
-                top_pt = top_interp[j]
-                bottom_pt = bottom_interp[j]
-                left_pt = left_interp[i]
-                right_pt = right_interp[i]
+                # Boundary curves
+                top = top_interp[j]
+                bottom = bottom_interp[j]
+                left = left_interp[i]
+                right = right_interp[i]
                 
-                # Bilinear interpolation
-                src_x = (1-t_row)*(1-t_col)*top_interp[0][0] + (1-t_row)*t_col*top_interp[-1][0] + \
-                        t_row*(1-t_col)*bottom_interp[0][0] + t_row*t_col*bottom_interp[-1][0]
-                src_y = (1-t_row)*(1-t_col)*top_interp[0][1] + (1-t_row)*t_col*top_interp[-1][1] + \
-                        t_row*(1-t_col)*bottom_interp[0][1] + t_row*t_col*bottom_interp[-1][1]
+                # Bilinear surface
+                bilinear = (1-u)*(1-v)*c00 + u*(1-v)*c10 + u*v*c11 + (1-u)*v*c01
                 
-                # Better interpolation using all sides
-                h_interp = (1-t_row) * top_pt + t_row * bottom_pt
-                v_interp = (1-t_col) * left_pt + t_col * right_pt
-                src_pt = (h_interp + v_interp) / 2
-                
-                src_points.append(src_pt)
-                dst_points.append([j * width / (cols-1) if cols > 1 else 0, 
-                                  i * height / (rows-1) if rows > 1 else 0])
+                # Coon's patch formula: S = (1-v)T + vB + (1-u)L + uR - Bilinear
+                src_grid[i, j] = (1-v)*top + v*bottom + (1-u)*left + u*right - bilinear
         
-        src_points = np.array(src_points, dtype=np.float32)
-        dst_points = np.array(dst_points, dtype=np.float32)
+        # Generate full mapping using cv2.remap for performance
+        map_full = cv2.resize(src_grid, (width, height), interpolation=cv2.INTER_LINEAR)
+        map_x = map_full[:, :, 0].astype(np.float32)
+        map_y = map_full[:, :, 1].astype(np.float32)
         
-        # Use thin plate spline or piecewise affine
-        result = np.zeros((height, width, 3), dtype=np.uint8)
-        
-        for y in range(height):
-            for x in range(width):
-                # Find nearest grid points
-                grid_x = x * (cols - 1) / width if width > 0 else 0
-                grid_y = y * (rows - 1) / height if height > 0 else 0
-                
-                gx0, gx1 = int(grid_x), min(int(grid_x) + 1, cols - 1)
-                gy0, gy1 = int(grid_y), min(int(grid_y) + 1, rows - 1)
-                
-                tx = grid_x - gx0
-                ty = grid_y - gy0
-                
-                idx00 = gy0 * cols + gx0
-                idx01 = gy0 * cols + gx1
-                idx10 = gy1 * cols + gx0
-                idx11 = gy1 * cols + gx1
-                
-                src_x = (1-tx)*(1-ty)*src_points[idx00][0] + tx*(1-ty)*src_points[idx01][0] + \
-                        (1-tx)*ty*src_points[idx10][0] + tx*ty*src_points[idx11][0]
-                src_y = (1-tx)*(1-ty)*src_points[idx00][1] + tx*(1-ty)*src_points[idx01][1] + \
-                        (1-tx)*ty*src_points[idx10][1] + tx*ty*src_points[idx11][1]
-                
-                src_x, src_y = int(src_x), int(src_y)
-                if 0 <= src_x < self.image.shape[1] and 0 <= src_y < self.image.shape[0]:
-                    result[y, x] = self.image[src_y, src_x]
-        
-        return result
+        return cv2.remap(self.image, map_x, map_y, interpolation=cv2.INTER_LINEAR)
     
     def interpolate_points(self, points, n):
         if len(points) == 0:
