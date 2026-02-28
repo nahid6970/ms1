@@ -82,6 +82,8 @@ class VoiceApp(QMainWindow):
             QPushButton {{ background-color: {CP_DIM}; border: 1px solid {CP_DIM}; color: white; padding: 6px 12px; font-weight: bold; }}
             QPushButton:hover {{ background-color: #2a2a2a; border: 1px solid {CP_YELLOW}; color: {CP_YELLOW}; }}
             QPushButton:pressed {{ background-color: {CP_YELLOW}; color: black; }}
+            QPushButton#lang {{ background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; color: {CP_TEXT}; padding: 4px 8px; }}
+            QPushButton#lang:checked {{ border: 2px solid {CP_GREEN}; color: {CP_GREEN}; }}
             QCheckBox {{ spacing: 6px; color: {CP_TEXT}; }}
             QCheckBox::indicator {{ width: 12px; height: 12px; border: 1px solid {CP_DIM}; background: {CP_PANEL}; }}
             QCheckBox::indicator:checked {{ background: {CP_YELLOW}; border-color: {CP_YELLOW}; }}
@@ -97,15 +99,19 @@ class VoiceApp(QMainWindow):
         self.status_label.setStyleSheet(f"color: {CP_GREEN}; font-weight: bold; font-size: 14pt;")
         layout.addWidget(self.status_label)
         
-        self.en_check = QCheckBox("EN")
-        self.en_check.setChecked(self.config["language"] == "en-US")
-        self.en_check.stateChanged.connect(lambda: self.change_language("en-US") if self.en_check.isChecked() else None)
-        layout.addWidget(self.en_check)
+        self.en_btn = QPushButton("EN")
+        self.en_btn.setObjectName("lang")
+        self.en_btn.setCheckable(True)
+        self.en_btn.setChecked(self.config["language"] == "en-US")
+        self.en_btn.clicked.connect(lambda: self.change_language("en-US"))
+        layout.addWidget(self.en_btn)
         
-        self.bd_check = QCheckBox("BD")
-        self.bd_check.setChecked(self.config["language"] == "bn-BD")
-        self.bd_check.stateChanged.connect(lambda: self.change_language("bn-BD") if self.bd_check.isChecked() else None)
-        layout.addWidget(self.bd_check)
+        self.bd_btn = QPushButton("BD")
+        self.bd_btn.setObjectName("lang")
+        self.bd_btn.setCheckable(True)
+        self.bd_btn.setChecked(self.config["language"] == "bn-BD")
+        self.bd_btn.clicked.connect(lambda: self.change_language("bn-BD"))
+        layout.addWidget(self.bd_btn)
         
         self.pin_check = QCheckBox("Pin")
         self.pin_check.setChecked(self.config.get("always_on_top", False))
@@ -139,12 +145,8 @@ class VoiceApp(QMainWindow):
     def change_language(self, lang):
         self.config["language"] = lang
         self.save_config()
-        if lang == "en-US":
-            self.en_check.setChecked(True)
-            self.bd_check.setChecked(False)
-        else:
-            self.en_check.setChecked(False)
-            self.bd_check.setChecked(True)
+        self.en_btn.setChecked(lang == "en-US")
+        self.bd_btn.setChecked(lang == "bn-BD")
     
     def toggle_record(self):
         if self.voice_thread and self.voice_thread.running:
