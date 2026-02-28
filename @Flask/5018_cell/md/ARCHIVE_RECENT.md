@@ -4,6 +4,75 @@ This file contains older development sessions that have been moved from RECENT.m
 
 ---
 
+## ARCHIVED [2026-02-12 16:30] - List Line Joining Visual Update Fix
+
+**Session Duration:** 0.2 hours
+
+**What We Accomplished:**
+
+### 🐛 Fixed List Line Joining Not Updating Visually
+- **Problem**: When editing list items (e.g., `- item1`, `- item2`) and using backspace/delete to join them into one line, the visual display wouldn't update until exiting edit mode.
+- **Root Cause**: The `input` event handler wasn't re-rendering the content when structural changes occurred. The comment said "DON'T re-render on every keystroke" to avoid cursor jumping, but this caused list indentation styling to not update when line breaks were removed.
+- **Solution**: 
+  - Added smart detection for when line count changes (lines joined/split).
+  - Used regex `/^(\-{1,5})\s/m` to detect list markers (1-5 dashes followed by space).
+  - When line count changes AND content has special formatting (lists, tables), re-render with `highlightSyntax()`.
+  - Preserved cursor position during re-render using `getCaretCharacterOffset()` and `setCaretPosition()`.
+- **Result**: List indentation styling now updates immediately when joining/splitting lines, providing instant visual feedback.
+
+**Files Modified:**
+- `static/script.js` - Updated input event handler in `applyMarkdownFormatting()` (~10 lines)
+
+**Technical Details:**
+- **Detection**: Tracks `_previousLineCount` on the preview element to detect structural changes
+- **Regex Pattern**: `/^(\-{1,5})\s/m` matches list markers at start of any line (multiline flag)
+- **Cursor Preservation**: Saves character offset before re-render, restores after
+- **Performance**: Only re-renders when necessary (line count changes + special formatting present)
+
+**Current Status:**
+- ✅ List line joining updates immediately in edit mode
+- ✅ Cursor position preserved during re-render
+- ✅ No performance impact on regular typing
+
+---
+
+## ARCHIVED [2026-02-12 15:00] - Reliable Scroll & Navigation Fixes (Final)
+
+**Session Duration:** 0.5 hours
+
+**What We Accomplished:**
+
+### 🖱️ Intelligent Scroll Preservation
+- **Problem**: In Single Row Mode, focusing between cells or moving between rows would cause the scroll position to "forget" where the user was or reset to previous rows' positions.
+- **Root Cause**: 
+  - The high-level `renderTable` wrapper was unaware of per-row scroll states and would override the precise row restoration with stale global sheet positions.
+  - Frequent re-renders during editing/navigation were competing for scroll control.
+- **Solution**: 
+  - **Enhanced Wrapper**: Updated the `renderTable` wrapper to prioritize `rowScrolls` from the `sheetSingleRowStates` map. This ensures the final scroll restoration (after all cell height adjustments) uses the correct, row-specific coordinates.
+  - **Synchronized Navigation**: Verified `nextSingleRow`/`prevSingleRow` correctly use the `skipScroll` flag to transition between indices without data leakage.
+  - **Fail-safe Restore**: Standardized the `targetScrollTop` logic in the wrapper to handle both row navigation (`preserveScroll=false`) and cell editing (`preserveScroll=true`) scenarios seamlessly.
+
+**Files Modified:**
+- `static/script.js` - Refactored `renderTable` wrapper and navigation logic.
+- `md/PROBLEMS_AND_FIXES.md` - Documented the final solution.
+
+**Current Status:**
+- ✅ Single Row Mode is now fully production-ready with perfect scroll memory.
+- ✅ Cell navigation is smooth and stable regardless of row height.
+
+---
+
+## ARCHIVED [2026-02-12 14:45] - Reliable Scroll Preservation in Single Row Mode
+
+**Session Duration:** 0.5 hours
+
+**What We Accomplished:**
+
+### 🖱️ Scroll Preservation Refinements
+- **Solution**: Refactored `saveSingleRowState` and navigation functions. Added layout shift protection in `adjustCellHeightForMarkdown`.
+
+---
+
 ## ARCHIVED [2026-02-12 14:00] - List Support in Table Cells
 
 **Session Duration:** 0.5 hours
