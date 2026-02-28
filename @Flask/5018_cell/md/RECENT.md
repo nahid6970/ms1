@@ -4,9 +4,9 @@
 
 **Archiving Process:** When you have 6+ sessions, move the oldest one to ARCHIVE_RECENT.md with "ARCHIVED" prefix.
 
-## [2026-02-28 10:30] - Fixed Cursor Position Issues in Visual Mode
+## [2026-02-28 10:30] - Fixed Cursor Jump, Drift, and Arrow Key Navigation Issues
 
-**Session Duration:** 0.3 hours
+**Session Duration:** 0.5 hours
 
 **What We Accomplished:**
 
@@ -14,30 +14,28 @@
 - **Problem**: 
   1. Selecting multiple lines and pressing backspace caused the cursor to jump to the top of the cell.
   2. Editing multi-line content caused the cursor to drift or move in the wrong direction due to incorrect newline handling.
-- **Root Cause**: 
-  - `extractRawTextBeforeCaret` returned 0 offset when the selection started at an element node.
-  - `setCaretPosition` did not account for newlines created by `DIV` and `P` tags, mismatching `extractRawText` logic.
-  - `beforeinput` handler restored cursor position even for single-character deletions (like simple backspace), fighting against natural browser behavior.
 - **Solution**: 
   - **Fixed Offset Calculation**: Updated `extractRawTextBeforeCaret` to correctly traverse children of element nodes.
   - **Synced Cursor Placement**: Updated `setCaretPosition` to handle `DIV`/`P` newlines exactly like `extractRawText`.
-  - **Refined Restoration**: Modified `beforeinput` to ONLY restore cursor for range-based deletions (to prevent scroll jumps) and explicitly excluded 'insertLineBreak' (Enter).
-- **Result**: Cursor now stays correctly positioned during all editing operations, including multi-line deletions and simple typing.
+  - **Refined Restoration**: Modified `beforeinput` to ONLY restore cursor for range-based deletions.
+
+### ⌨️ Fixed Arrow Key "Jump to Top/Bottom" Issue
+- **Problem**: Pressing ArrowUp or ArrowDown in a cell often caused the cursor to jump to the very top or very bottom of the content instead of moving line-by-line.
+- **Root Cause**: The use of full-width `display: inline-block` elements for table and list lines acted as barriers for the browser's native caret navigation algorithm. Chrome often fails to find "above/below" lines when they are mixed with `inline-block` blocks.
+- **Solution**: 
+  - **Block-Level Architecture**: Converted all syntax-highlighted lines (tables, lists) from `inline-block` `<span>` tags to block-level `<div>` tags.
+  - **CSS Update**: Modified `.syntax-table-line` in `style.css` to use `display: block`.
+  - **Caret Navigation Cleanup**: Updated `highlightSyntax()` to remove redundant `<br>` tags that immediately follow these `<div>` blocks, ensuring a clean vertical flow for the browser's caret.
+- **Result**: ArrowUp and ArrowDown now move the cursor naturally line-by-line across all content types.
 
 **Files Modified:**
-- `static/script.js` - Updated `extractRawTextBeforeCaret`, `setCaretPosition`, and `beforeinput` handler (~30 lines)
-
-**Technical Details:**
-- **Recursion**: Added recursive child traversal to `extractRawTextBeforeCaret` for element stops.
-- **Newline Logic**: Added `lastCharWasNewline` tracking to `setCaretPosition` to handle block-level element spacing.
-- **Event Filtering**: Used `!sel.isCollapsed` to strictly limit cursor restoration to selection-based operations.
+- `static/script.js` - Updated `extractRawTextBeforeCaret`, `setCaretPosition`, `beforeinput`, and `highlightSyntax` (~45 lines)
+- `static/style.css` - Updated `.syntax-table-line` (~10 lines)
 
 **Current Status:**
 - ✅ No scroll jump on multi-line delete.
 - ✅ No cursor drift on multi-line editing.
-- ✅ Natural typing and backspacing feel correct.
-
-**Time Spent:** 0.3 hours
+- ✅ ArrowUp/Down navigation is smooth and reliable.
 
 ---
 

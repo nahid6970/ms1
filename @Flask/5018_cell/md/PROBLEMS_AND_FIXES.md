@@ -5,29 +5,30 @@ This document tracks historical bugs, issues, and their solutions. Use this to:
 - Check if old fixes might conflict with new features
 - Debug similar issues by referencing past solutions
 
-## [2026-02-28 10:30] - Cursor Drift and Jump Fixes in Visual Mode
+## [2026-02-28 10:30] - Arrow Key Navigation and Cursor Jump Fixes in Visual Mode
 
 **Problem:** 
-1. **Jump to Top**: Selecting multiple lines and pressing backspace caused the cursor to jump to the top of the cell.
-2. **Cursor Drift**: Editing multi-line content caused the cursor to drift or move in the wrong direction due to incorrect newline handling.
-3. **Single Backspace Stuck**: Simple backspace sometimes failed to move the cursor properly because of aggressive restoration logic.
+1. **Arrow Key Jump**: Pressing ArrowUp or ArrowDown often caused the cursor to jump to the very top or bottom of the cell.
+2. **Jump to Top on Delete**: Selecting multiple lines and pressing backspace caused the cursor to jump to the top of the cell.
+3. **Cursor Drift**: Editing multi-line content caused the cursor to drift or move in the wrong direction due to incorrect newline handling.
 
 **Root Cause:** 
-1. `extractRawTextBeforeCaret` returned 0 offset when the selection started at an element node (common in multi-line selections).
-2. `setCaretPosition` logic for `DIV`/`P` newlines did not match `extractRawText`, causing offset mismatches.
-3. `beforeinput` handler restored cursor position even for single-character deletions, fighting against natural browser behavior.
+1. **Navigation Barriers**: Full-width `display: inline-block` elements used for syntax-highlighted lines (tables, lists) acted as barriers for the browser's line-finding algorithm.
+2. **Invalid Offsets**: `extractRawTextBeforeCaret` returned 0 offset when the selection started at an element node (common in multi-line selections).
+3. **Mismatch Logic**: `setCaretPosition` logic for block-level newlines did not match `extractRawText`.
 
 **Solution:** 
-1. **Recursion**: Updated `extractRawTextBeforeCaret` to correctly traverse children of element nodes to find the exact character offset.
-2. **Sync**: Updated `setCaretPosition` to handle block-level element spacing exactly like `extractRawText`.
-3. **Filter**: Refined `beforeinput` to ONLY restore cursor for range-based deletions (to prevent scroll jumps) and explicitly excluded 'insertLineBreak' (Enter).
+1. **Block Architecture**: Converted all syntax lines from `inline-block` `<span>` to block-level `<div>`.
+2. **Caret Optimization**: Updated `highlightSyntax()` to remove redundant `<br>` tags following these `<div>` blocks, providing a continuous vertical path for the caret.
+3. **Recursive Calculation**: Updated `extractRawTextBeforeCaret` to traverse children of element nodes to find exact offsets.
+4. **Synced Navigation**: Synchronized `setCaretPosition` newline handling with `extractRawText`.
 
 **Files Modified:**
-- `static/script.js` - Updated `extractRawTextBeforeCaret`, `setCaretPosition`, and `beforeinput` handler.
+- `static/script.js` - Updated `highlightSyntax`, `extractRawTextBeforeCaret`, and `setCaretPosition`.
+- `static/style.css` - Updated `.syntax-table-line` to `display: block`.
 
 **Related Issues:**
-- Supersedes previous partial fixes for cursor jumps.
-- Fixes the "wrong direction" behavior reported by user.
+- Fully resolves the "wrong direction" and "jump to top" behaviors reported by users in visual mode.
 
 ---
 

@@ -2002,13 +2002,13 @@ function highlightSyntax(text) {
             // Rule: Table lines detection (Pipe and Comma tables)
             // Pipe Table Line
             if (trimmed.startsWith('|')) {
-                return `<span class="syntax-table-line">${line}</span>`;
+                return `<div class="syntax-table-line">${line}</div>`;
             }
 
             // Comma Table Start
             if (trimmed.startsWith('Table*')) {
                 inCommaTable = true;
-                return `<span class="syntax-table-line">${line}</span>`;
+                return `<div class="syntax-table-line">${line}</div>`;
             }
 
             // Inside Comma Table
@@ -2017,10 +2017,10 @@ function highlightSyntax(text) {
                 if (trimmed === '' || trimmed.startsWith('Table*end')) {
                     inCommaTable = false;
                     if (trimmed.startsWith('Table*end')) {
-                        return `<span class="syntax-table-line">${line}</span>`;
+                        return `<div class="syntax-table-line">${line}</div>`;
                     }
                 } else {
-                    return `<span class="syntax-table-line">${line}</span>`;
+                    return `<div class="syntax-table-line">${line}</div>`;
                 }
             }
 
@@ -2029,7 +2029,7 @@ function highlightSyntax(text) {
             const listMatch = trimmed.match(/^(\-{1,5})\s/);
             if (listMatch) {
                 const markerLength = listMatch[1].length;
-                return `<span style="display: inline-block; width: 100%; box-sizing: border-box; padding-left: ${markerLength}em; text-indent: -1em; white-space: pre-wrap;">${line}</span>`;
+                return `<div style="display: block; width: 100%; box-sizing: border-box; padding-left: ${markerLength}em; text-indent: -1em;">${line}</div>`;
             }
 
             return line;
@@ -2038,6 +2038,10 @@ function highlightSyntax(text) {
 
     // Convert newlines to BR
     formatted = formatted.replace(/\n/g, '<br>');
+
+    // Standardize caret navigation by removing BR tags that immediately follow block-level elements
+    // This prevents double-spacing and helps the browser's line-by-line navigation
+    formatted = formatted.replace(/(<\/div>|<p>|<\/p>)<br>/g, '$1');
 
     // Ensure empty lines are clickable by adding zero-width space after BR
     // Handle consecutive BRs (empty lines in the middle)

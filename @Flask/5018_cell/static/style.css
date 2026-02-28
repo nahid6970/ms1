@@ -8,10 +8,10 @@
 
 /* Table line styling in Edit Mode to match rendered row height */
 .syntax-table-line {
-    display: inline-block;
+    display: block;
+    width: 100%;
     line-height: var(--table-edit-line-height) !important;
     padding: 8px 0;
-    vertical-align: middle;
 }
 
 * {
@@ -4693,10 +4693,10 @@ ll Rank Badge */
 
 /* Table line styling in Edit Mode to match rendered row height */
 .syntax-table-line {
-    display: inline-block;
+    display: block;
+    width: 100%;
     line-height: var(--table-edit-line-height) !important;
     padding: 8px 0;
-    vertical-align: middle;
 }
 
 /* Recent Edits Popup */
