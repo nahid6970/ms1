@@ -1,9 +1,5 @@
 # Recent Development Log
 
-**KEEP ONLY LAST 5 SESSIONS** - Move older sessions to `md/ARCHIVE_RECENT.md` (don't delete them!)
-
-**Archiving Process:** When you have 6+ sessions, move the oldest one to ARCHIVE_RECENT.md with "ARCHIVED" prefix.
-
 ## [2026-02-28 10:30] - Fixed Cursor Navigation and Bengali Search Inconsistency
 
 **Session Duration:** 0.7 hours
@@ -195,7 +191,3 @@
 - Verify export HTML renders correctly
 
 **Time Spent:** 0.5 hours
-
----
-
-*Older sessions archived in md/ARCHIVE_RECENT.md*
