@@ -1,0 +1,40 @@
+<Window x:Class="MyPowerTools.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="My Power Tools" Height="600" Width="900"
+        Background="#F3F3F3" WindowStartupLocation="CenterScreen">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="200"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Sidebar -->
+        <Border Grid.Column="0" Background="#2D2D30" BorderThickness="0,0,1,0" BorderBrush="#3E3E42">
+            <StackPanel Margin="0,20,0,0">
+                <TextBlock Text="MY POWER TOOLS" Foreground="#CCCCCC" FontSize="12" FontWeight="Bold" 
+                           Margin="15,0,0,20" Opacity="0.7"/>
+                
+                <Button x:Name="BtnGeneral" Content="General" Click="BtnGeneral_Click"
+                        Background="Transparent" Foreground="#CCCCCC" BorderThickness="0" 
+                        Padding="15,12" HorizontalContentAlignment="Left" FontSize="14" Cursor="Hand"/>
+                <Button x:Name="BtnColorPicker" Content="Color Picker" Click="BtnColorPicker_Click"
+                        Background="Transparent" Foreground="#CCCCCC" BorderThickness="0" 
+                        Padding="15,12" HorizontalContentAlignment="Left" FontSize="14" Cursor="Hand"/>
+                <Button x:Name="BtnTextTools" Content="Text Tools" Click="BtnTextTools_Click"
+                        Background="Transparent" Foreground="#CCCCCC" BorderThickness="0" 
+                        Padding="15,12" HorizontalContentAlignment="Left" FontSize="14" Cursor="Hand"/>
+                <Button x:Name="BtnSystemInfo" Content="System Info" Click="BtnSystemInfo_Click"
+                        Background="Transparent" Foreground="#CCCCCC" BorderThickness="0" 
+                        Padding="15,12" HorizontalContentAlignment="Left" FontSize="14" Cursor="Hand"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Content Area -->
+        <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel x:Name="ContentPanel" Margin="30">
+                <!-- Content will be loaded here -->
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Window>
