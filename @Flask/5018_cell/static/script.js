@@ -70,7 +70,10 @@ function initializeApp() {
 
         // Save cursor position for contentEditable before operation
         let savedCursorOffset;
+        let isSelection = false;
         if (isContentEditable) {
+            const sel = window.getSelection();
+            isSelection = !sel.isCollapsed;
             savedCursorOffset = getCaretCharacterOffset(el);
         }
 
@@ -86,7 +89,10 @@ function initializeApp() {
                 tableContainer.scrollLeft = savedScrollLeft;
 
                 // Restore cursor position for contentEditable after operation
-                if (isContentEditable && savedCursorOffset !== undefined) {
+                // ONLY for selection-based deletes (Cut, Backspace/Delete with range)
+                // Exclude Enter (insertLineBreak) and single-character deletions
+                const isDeleteOp = ['deleteByCut', 'deleteContentBackward', 'deleteContentForward'].includes(e.inputType);
+                if (isContentEditable && isSelection && isDeleteOp && savedCursorOffset !== undefined) {
                     setTimeout(() => {
                         setCaretPosition(el, savedCursorOffset);
                     }, 0);
@@ -2165,10 +2171,9 @@ function extractRawTextBeforeCaret(element, range) {
             return; // Skip rendered math nodes
         }
 
-        if (node === stopNode) {
-            if (node.nodeType === Node.TEXT_NODE) {
-                text += node.textContent.substring(0, stopOffset);
-            }
+        // If this is the stopNode and it's a text node, add substring and stop
+        if (node === stopNode && node.nodeType === Node.TEXT_NODE) {
+            text += node.textContent.substring(0, stopOffset);
             stopped = true;
             return;
         }
@@ -2176,17 +2181,36 @@ function extractRawTextBeforeCaret(element, range) {
         if (node.nodeType === Node.TEXT_NODE) {
             text += node.textContent;
         } else if (node.nodeName === 'BR') {
-            text += '\n';
-        } else if (node.nodeName === 'DIV' || node.nodeName === 'P') {
-            if (text.length > 0 && !text.endsWith('\n')) text += '\n';
-            for (let child of node.childNodes) {
-                walk(child);
-                if (stopped) return;
+            if (node === stopNode) {
+                stopped = true;
+                return;
             }
+            text += '\n';
         } else {
-            for (let child of node.childNodes) {
-                walk(child);
-                if (stopped) return;
+            // Element node
+            if (node === stopNode) {
+                // Process children up to stopOffset
+                for (let i = 0; i < stopOffset; i++) {
+                    if (i < node.childNodes.length) {
+                        walk(node.childNodes[i]);
+                    }
+                    if (stopped) return;
+                }
+                stopped = true;
+                return;
+            }
+
+            if (node.nodeName === 'DIV' || node.nodeName === 'P') {
+                if (text.length > 0 && !text.endsWith('\n')) text += '\n';
+                for (let child of node.childNodes) {
+                    walk(child);
+                    if (stopped) return;
+                }
+            } else {
+                for (let child of node.childNodes) {
+                    walk(child);
+                    if (stopped) return;
+                }
             }
         }
     };
@@ -2226,6 +2250,7 @@ function setCaretPosition(element, offset) {
     const sel = window.getSelection();
     let currentOffset = 0;
     let found = false;
+    let lastCharWasNewline = false;
 
     const walk = (node) => {
         if (found) return;
@@ -2263,6 +2288,9 @@ function setCaretPosition(element, offset) {
                 found = true;
             } else {
                 currentOffset += cleanLength;
+                if (cleanLength > 0) {
+                    lastCharWasNewline = cleanText.endsWith('\n');
+                }
             }
         } else if (node.nodeName === 'BR') {
             if (currentOffset === offset) {
@@ -2271,6 +2299,7 @@ function setCaretPosition(element, offset) {
                 found = true;
             } else {
                 currentOffset += 1; // BR is one \n
+                lastCharWasNewline = true;
                 if (currentOffset === offset) {
                     range.setStartAfter(node);
                     range.collapse(true);
@@ -2278,6 +2307,17 @@ function setCaretPosition(element, offset) {
                 }
             }
         } else if (node.nodeName === 'DIV' || node.nodeName === 'P') {
+            // Match extractRawText's newline logic
+            if (currentOffset > 0 && !lastCharWasNewline) {
+                if (currentOffset === offset) {
+                    range.setStartBefore(node);
+                    range.collapse(true);
+                    found = true;
+                    return;
+                }
+                currentOffset += 1;
+                lastCharWasNewline = true;
+            }
             for (const child of node.childNodes) {
                 walk(child);
                 if (found) break;
