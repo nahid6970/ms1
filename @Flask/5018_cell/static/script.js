@@ -92,10 +92,18 @@ function initializeApp() {
                 // ONLY for selection-based deletes (Cut, Backspace/Delete with range)
                 // Exclude Enter (insertLineBreak) and single-character deletions
                 const isDeleteOp = ['deleteByCut', 'deleteContentBackward', 'deleteContentForward'].includes(e.inputType);
+                const isInsertOp = ['insertText', 'insertParagraph', 'insertLineBreak', 'insertFromPaste'].includes(e.inputType);
+
                 if (isContentEditable && isSelection && isDeleteOp && savedCursorOffset !== undefined) {
                     setTimeout(() => {
                         setCaretPosition(el, savedCursorOffset);
                     }, 0);
+                }
+
+                // If it's a standard insertion, we definitely DON'T want to force the cursor back
+                // to the saved position, as the browser has already moved it forward correctly.
+                if (isContentEditable && isInsertOp) {
+                    // Let browser handle it
                 }
 
                 // Only call keepCursorCentered for Enter key in textareas
@@ -2039,15 +2047,15 @@ function highlightSyntax(text) {
     // Convert newlines to BR
     formatted = formatted.replace(/\n/g, '<br>');
 
-    // Standardize caret navigation by removing BR tags that immediately follow block-level elements
-    // This prevents double-spacing and helps the browser's line-by-line navigation
-    formatted = formatted.replace(/(<\/div>|<p>|<\/p>)<br>/g, '$1');
-
-    // Ensure empty lines are clickable by adding zero-width space after BR
-    // Handle consecutive BRs (empty lines in the middle)
+    // Handle consecutive BRs (empty lines) - browser often collapses these
+    // Add ZWS between them to ensure they remain distinct lines
     formatted = formatted.replace(/<br><br>/g, '<br>\u200B<br>');
     // Handle trailing BR
     formatted = formatted.replace(/<br>$/g, '<br>\u200B');
+
+    // Standardize caret navigation by removing BR tags that immediately follow block-level elements
+    // This prevents double-spacing and helps the browser's line-by-line navigation
+    formatted = formatted.replace(/(<\/div>|<p>|<\/p>)<br>/g, '$1');
 
     return formatted;
 }
@@ -2064,8 +2072,16 @@ function extractRawText(element) {
         } else if (node.nodeName === 'BR') {
             text += '\n';
         } else if (node.nodeName === 'DIV' || node.nodeName === 'P') {
-            if (text.length > 0 && !text.endsWith('\n')) text += '\n';
+            // Only add newline if we already have text and it doesn't end with a newline
+            // This prevents a leading newline if the first element is a DIV
+            if (text.length > 0 && !text.endsWith('\n')) {
+                text += '\n';
+            }
             node.childNodes.forEach(walk);
+            // After processing children, ensure we don't end with double newlines
+            if (text.length > 0 && !text.endsWith('\n')) {
+                text += '\n';
+            }
         } else {
             node.childNodes.forEach(walk);
         }
