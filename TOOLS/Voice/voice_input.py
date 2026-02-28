@@ -68,7 +68,7 @@ class VoiceApp(QMainWindow):
     
     def init_ui(self):
         self.setWindowTitle("Voice Input")
-        self.setFixedSize(300, 50)
+        self.setFixedSize(240, 50)
         
         if self.config.get("always_on_top", False):
             self.setWindowFlags(self.windowFlags() | Qt.WindowType.WindowStaysOnTopHint)
@@ -97,12 +97,15 @@ class VoiceApp(QMainWindow):
         self.status_label.setStyleSheet(f"color: {CP_GREEN}; font-weight: bold; font-size: 14pt;")
         layout.addWidget(self.status_label)
         
-        layout.addWidget(QLabel("Lang:"))
-        self.lang_combo = QComboBox()
-        self.lang_combo.addItems(["en-US", "bn-BD"])
-        self.lang_combo.setCurrentText(self.config["language"])
-        self.lang_combo.currentTextChanged.connect(self.change_language)
-        layout.addWidget(self.lang_combo)
+        self.en_check = QCheckBox("EN")
+        self.en_check.setChecked(self.config["language"] == "en-US")
+        self.en_check.stateChanged.connect(lambda: self.change_language("en-US") if self.en_check.isChecked() else None)
+        layout.addWidget(self.en_check)
+        
+        self.bd_check = QCheckBox("BD")
+        self.bd_check.setChecked(self.config["language"] == "bn-BD")
+        self.bd_check.stateChanged.connect(lambda: self.change_language("bn-BD") if self.bd_check.isChecked() else None)
+        layout.addWidget(self.bd_check)
         
         self.pin_check = QCheckBox("Pin")
         self.pin_check.setChecked(self.config.get("always_on_top", False))
@@ -112,8 +115,6 @@ class VoiceApp(QMainWindow):
         self.record_btn = QPushButton("🎤 REC")
         self.record_btn.clicked.connect(self.toggle_record)
         layout.addWidget(self.record_btn)
-        
-        layout.addStretch()
     
     def setup_global_hotkey(self):
         def on_activate():
@@ -135,9 +136,15 @@ class VoiceApp(QMainWindow):
             self.setWindowFlags(self.windowFlags() & ~Qt.WindowType.WindowStaysOnTopHint)
         self.show()
     
-    def change_language(self, text):
-        self.config["language"] = text
+    def change_language(self, lang):
+        self.config["language"] = lang
         self.save_config()
+        if lang == "en-US":
+            self.en_check.setChecked(True)
+            self.bd_check.setChecked(False)
+        else:
+            self.en_check.setChecked(False)
+            self.bd_check.setChecked(True)
     
     def toggle_record(self):
         if self.voice_thread and self.voice_thread.running:
