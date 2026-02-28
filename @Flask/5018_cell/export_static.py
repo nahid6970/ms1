@@ -1810,6 +1810,9 @@ def generate_static_html(data, custom_syntaxes):
                 stripped = stripped.replace(regex, '$1');
             });
 
+            // Remove zero-width spaces (\u200B) used for line maintenance
+            stripped = stripped.replace(/\u200B/g, '');
+
             return stripped;
         }
 
@@ -3058,7 +3061,8 @@ def generate_static_html(data, custom_syntaxes):
 
         function searchTable() {
             const searchInput = document.getElementById('searchInput');
-            const searchTerm = searchInput.value.toLowerCase().trim();
+            // Use NFC normalization for better matching of Unicode characters (like Bengali)
+            const searchTerm = searchInput.value.toLowerCase().trim().normalize('NFC');
             const table = document.getElementById('dataTable');
             const tbody = table.querySelector('tbody');
             const rows = tbody.querySelectorAll('tr');
@@ -3085,7 +3089,8 @@ def generate_static_html(data, custom_syntaxes):
                 cells.forEach(cell => {
                     const cellContent = cell.querySelector('.cell-content');
                     if (cellContent) {
-                        const cellValue = cellContent.textContent.toLowerCase();
+                        // Use NFC normalization for better matching of Unicode characters
+                        const cellValue = cellContent.textContent.toLowerCase().normalize('NFC');
                         // Strip markdown for searching
                         const strippedValue = stripMarkdown(cellValue);
 

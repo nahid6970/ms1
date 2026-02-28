@@ -5,30 +5,32 @@ This document tracks historical bugs, issues, and their solutions. Use this to:
 - Check if old fixes might conflict with new features
 - Debug similar issues by referencing past solutions
 
-## [2026-02-28 10:30] - Arrow Key Navigation and Cursor Jump Fixes in Visual Mode
+## [2026-02-28 10:30] - Bengali Search Inconsistency and Cursor Navigation Fixes
 
 **Problem:** 
-1. **Arrow Key Jump**: Pressing ArrowUp or ArrowDown often caused the cursor to jump to the very top or bottom of the cell.
-2. **Jump to Top on Delete**: Selecting multiple lines and pressing backspace caused the cursor to jump to the top of the cell.
-3. **Cursor Drift**: Editing multi-line content caused the cursor to drift or move in the wrong direction due to incorrect newline handling.
+1. **Bengali Search**: Search sometimes failed to find Bengali text even when clearly visible in the sheet.
+2. **Arrow Key Jump**: Pressing ArrowUp or ArrowDown often caused the cursor to jump to the very top or bottom of the cell.
+3. **Jump to Top on Delete**: Selecting multiple lines and pressing backspace caused the cursor to jump to the top of the cell.
+4. **Cursor Drift**: Editing multi-line content caused the cursor to drift or move in the "wrong direction".
 
 **Root Cause:** 
-1. **Navigation Barriers**: Full-width `display: inline-block` elements used for syntax-highlighted lines (tables, lists) acted as barriers for the browser's line-finding algorithm.
-2. **Invalid Offsets**: `extractRawTextBeforeCaret` returned 0 offset when the selection started at an element node (common in multi-line selections).
-3. **Mismatch Logic**: `setCaretPosition` logic for block-level newlines did not match `extractRawText`.
+1. **Unicode Variance**: Bengali characters have multiple Unicode representations (combining vs. precomposed). If the search query uses one form and the cell data uses another, they won't match.
+2. **Navigation Barriers**: `display: inline-block` elements used for syntax lines blocked the browser's native line-by-line caret navigation.
+3. **Recursive Mismatch**: Offsets for multi-line selections were incorrectly calculated when starting at element nodes.
 
 **Solution:** 
-1. **Block Architecture**: Converted all syntax lines from `inline-block` `<span>` to block-level `<div>`.
-2. **Caret Optimization**: Updated `highlightSyntax()` to remove redundant `<br>` tags following these `<div>` blocks, providing a continuous vertical path for the caret.
-3. **Recursive Calculation**: Updated `extractRawTextBeforeCaret` to traverse children of element nodes to find exact offsets.
-4. **Synced Navigation**: Synchronized `setCaretPosition` newline handling with `extractRawText`.
+1. **Unicode Normalization**: Added `.normalize('NFC')` to both the search term and the cell content in `searchTable()`. This forces all Bengali characters into a consistent canonical form before comparison.
+2. **Block Architecture**: Converted syntax lines from `inline-block` `<span>` to block-level `<div>`.
+3. **Caret Cleanup**: Removed redundant `<br>` tags following `<div>` blocks in `highlightSyntax()`.
+4. **Recursive Calculation**: Updated `extractRawTextBeforeCaret` and `setCaretPosition` to correctly traverse child nodes.
 
 **Files Modified:**
-- `static/script.js` - Updated `highlightSyntax`, `extractRawTextBeforeCaret`, and `setCaretPosition`.
+- `static/script.js` - Updated `searchTable`, `highlightSyntax`, `extractRawTextBeforeCaret`, and `setCaretPosition`.
 - `static/style.css` - Updated `.syntax-table-line` to `display: block`.
+- `export_static.py` - Updated `searchTable` in embedded JS for consistency.
 
 **Related Issues:**
-- Fully resolves the "wrong direction" and "jump to top" behaviors reported by users in visual mode.
+- Fixes the "Bengali search failure" and "wrong direction" behaviors.
 
 ---
 

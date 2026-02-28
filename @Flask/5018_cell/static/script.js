@@ -7259,8 +7259,9 @@ function searchTable(force = false) {
     }
 
     // Split search terms by comma, strip markdown, and trim each term
+    // Use NFC normalization for better matching of Unicode characters (like Bengali)
     const searchTerms = searchTerm.split(',')
-        .map(term => stripMarkdown(term.trim()).toLowerCase())
+        .map(term => stripMarkdown(term.trim()).toLowerCase().normalize('NFC'))
         .filter(term => term.length > 0);
 
     if (searchTerms.length === 0) {
@@ -7288,7 +7289,8 @@ function searchTable(force = false) {
             const input = cell.querySelector('input, textarea');
             if (input) {
                 const cellValue = input.value;
-                const cellValueLower = cellValue.toLowerCase();
+                // Use NFC normalization for better matching of Unicode characters
+                const cellValueLower = cellValue.toLowerCase().normalize('NFC');
                 // Strip markdown for searching
                 const strippedValue = stripMarkdown(cellValueLower);
 
@@ -7651,23 +7653,54 @@ function highlightTextInHtml(html, searchTerm) {
 function highlightMultipleTermsInHtml(html, searchTerms) {
     if (!searchTerms || searchTerms.length === 0) return html;
 
+    // Use NFC normalization to match searchTerms
+    const normHtml = html.normalize('NFC');
+
     // Create a temporary div to parse HTML
     const temp = document.createElement('div');
-    temp.innerHTML = html;
+    temp.innerHTML = normHtml;
 
     // Function to highlight text in text nodes
     function highlightInNode(node) {
         if (node.nodeType === Node.TEXT_NODE) {
-            const text = node.textContent;
-            const lowerText = text.toLowerCase();
+            // Normalize text and remove ZWS for searching
+            const originalText = node.textContent;
+            const normText = originalText.normalize('NFC');
+            const lowerText = normText.toLowerCase().replace(/\u200B/g, '');
 
             // Find all matches for all terms
             const matches = [];
             searchTerms.forEach(term => {
-                const lowerTerm = term.toLowerCase();
+                const lowerTerm = term.toLowerCase().normalize('NFC').replace(/\u200B/g, '');
+                if (!lowerTerm) return;
+
                 let index = lowerText.indexOf(lowerTerm);
                 while (index !== -1) {
-                    matches.push({ start: index, length: lowerTerm.length });
+                    // Need to map the clean index back to the normalized text index
+                    // since lowerText had \u200B removed
+                    let actualStart = 0;
+                    let cleanCount = 0;
+                    for (let i = 0; i < normText.length; i++) {
+                        if (normText[i] !== '\u200B') {
+                            if (cleanCount === index) {
+                                actualStart = i;
+                                break;
+                            }
+                            cleanCount++;
+                        }
+                    }
+
+                    let actualEnd = actualStart;
+                    let cleanEndCount = 0;
+                    for (let i = actualStart; i < normText.length; i++) {
+                        if (normText[i] !== '\u200B') {
+                            cleanEndCount++;
+                        }
+                        actualEnd = i + 1;
+                        if (cleanEndCount === lowerTerm.length) break;
+                    }
+
+                    matches.push({ start: actualStart, length: actualEnd - actualStart });
                     index = lowerText.indexOf(lowerTerm, index + 1);
                 }
             });
@@ -7691,24 +7724,24 @@ function highlightMultipleTermsInHtml(html, searchTerms) {
                 }
                 merged.push(current);
 
-                // Build highlighted content
+                // Build highlighted content using normText (which matches actualStart/length)
                 const parts = [];
                 let lastIndex = 0;
                 merged.forEach(match => {
                     // Add text before match
                     if (match.start > lastIndex) {
-                        parts.push(document.createTextNode(text.substring(lastIndex, match.start)));
+                        parts.push(document.createTextNode(normText.substring(lastIndex, match.start)));
                     }
                     // Add highlighted match
                     const span = document.createElement('span');
                     span.className = 'text-match-highlight';
-                    span.textContent = text.substring(match.start, match.start + match.length);
+                    span.textContent = normText.substring(match.start, match.start + match.length);
                     parts.push(span);
                     lastIndex = match.start + match.length;
                 });
                 // Add remaining text
-                if (lastIndex < text.length) {
-                    parts.push(document.createTextNode(text.substring(lastIndex)));
+                if (lastIndex < normText.length) {
+                    parts.push(document.createTextNode(normText.substring(lastIndex)));
                 }
 
                 // Replace the text node with highlighted parts
@@ -7780,8 +7813,9 @@ function createTextHighlightOverlayMulti(cell, input, searchTerms) {
     overlay.style.wordWrap = computedStyle.wordWrap;
     overlay.style.overflowWrap = computedStyle.overflowWrap;
 
-    // Highlight all terms in the text
-    const highlightedHtml = highlightMultipleTermsInHtml(input.value.replace(/\n/g, '<br>'), searchTerms);
+    // Highlight all terms in the text - escape raw value first
+    const escapedValue = escapeHtml(input.value).replace(/\n/g, '<br>');
+    const highlightedHtml = highlightMultipleTermsInHtml(escapedValue, searchTerms);
     overlay.innerHTML = highlightedHtml;
 
     cell.appendChild(overlay);
@@ -8979,6 +9013,9 @@ function stripMarkdown(text, preserveLinks = false) {
 
     // Remove Timeline markers: Timeline*Name or Timeline-R*Name -> Name
     stripped = stripped.replace(/^Timeline(?:C)?(?:-[A-Z]+)?\*(.+?)$/gm, '$1');
+
+    // Remove zero-width spaces (\u200B) used for line maintenance
+    stripped = stripped.replace(/\u200B/g, '');
 
 
     // Remove word connector markers: [1]Word or [1-R]Word -> Word

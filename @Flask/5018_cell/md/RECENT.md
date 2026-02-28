@@ -4,38 +4,40 @@
 
 **Archiving Process:** When you have 6+ sessions, move the oldest one to ARCHIVE_RECENT.md with "ARCHIVED" prefix.
 
-## [2026-02-28 10:30] - Fixed Cursor Jump, Drift, and Arrow Key Navigation Issues
+## [2026-02-28 10:30] - Fixed Cursor Navigation and Bengali Search Inconsistency
 
-**Session Duration:** 0.5 hours
+**Session Duration:** 0.7 hours
 
 **What We Accomplished:**
 
-### 🐛 Fixed Cursor Jump and Drift Issues
+### 🐛 Fixed Cursor Jump, Drift, and Arrow Navigation
 - **Problem**: 
-  1. Selecting multiple lines and pressing backspace caused the cursor to jump to the top of the cell.
-  2. Editing multi-line content caused the cursor to drift or move in the wrong direction due to incorrect newline handling.
+  1. Multi-line delete caused jumps to top.
+  2. Editing caused drift in "wrong direction".
+  3. ArrowUp/Down jumped to top/bottom instead of moving line-by-line.
 - **Solution**: 
-  - **Fixed Offset Calculation**: Updated `extractRawTextBeforeCaret` to correctly traverse children of element nodes.
-  - **Synced Cursor Placement**: Updated `setCaretPosition` to handle `DIV`/`P` newlines exactly like `extractRawText`.
-  - **Refined Restoration**: Modified `beforeinput` to ONLY restore cursor for range-based deletions.
+  - **Block Architecture**: Converted syntax-highlighted lines (tables, lists) from `inline-block` to `block` (DIV).
+  - **Caret Optimization**: Removed redundant `<br>` tags following block elements in `highlightSyntax()`.
+  - **Recursive Offsets**: Updated `extractRawTextBeforeCaret` and `setCaretPosition` to correctly handle element nodes and block newlines.
+- **Result**: Smooth, reliable typing and navigation in Visual Mode.
 
-### ⌨️ Fixed Arrow Key "Jump to Top/Bottom" Issue
-- **Problem**: Pressing ArrowUp or ArrowDown in a cell often caused the cursor to jump to the very top or very bottom of the content instead of moving line-by-line.
-- **Root Cause**: The use of full-width `display: inline-block` elements for table and list lines acted as barriers for the browser's native caret navigation algorithm. Chrome often fails to find "above/below" lines when they are mixed with `inline-block` blocks.
+### 🔍 Fixed Bengali Search Inconsistencies
+- **Problem**: Bengali text was sometimes visible in cells but couldn't be found by the searchbox.
+- **Root Cause**: Bengali characters can have multiple Unicode representations (e.g., combining characters vs. precomposed ones). Searching for one form while the sheet uses another leads to mismatch.
 - **Solution**: 
-  - **Block-Level Architecture**: Converted all syntax-highlighted lines (tables, lists) from `inline-block` `<span>` tags to block-level `<div>` tags.
-  - **CSS Update**: Modified `.syntax-table-line` in `style.css` to use `display: block`.
-  - **Caret Navigation Cleanup**: Updated `highlightSyntax()` to remove redundant `<br>` tags that immediately follow these `<div>` blocks, ensuring a clean vertical flow for the browser's caret.
-- **Result**: ArrowUp and ArrowDown now move the cursor naturally line-by-line across all content types.
+  - **Unicode Normalization**: Implemented `NFC` (Canonical Composition) normalization in `searchTable()` for both the search query and the cell content.
+  - **Consistency**: Applied normalization to both the main application (`static/script.js`) and the static export script (`export_static.py`).
+- **Result**: Bengali search is now significantly more robust and reliable.
 
 **Files Modified:**
-- `static/script.js` - Updated `extractRawTextBeforeCaret`, `setCaretPosition`, `beforeinput`, and `highlightSyntax` (~45 lines)
+- `static/script.js` - Updated `extractRawTextBeforeCaret`, `setCaretPosition`, `beforeinput`, `highlightSyntax`, and `searchTable` (~60 lines)
 - `static/style.css` - Updated `.syntax-table-line` (~10 lines)
+- `export_static.py` - Updated `searchTable` in embedded JS (~15 lines)
 
 **Current Status:**
-- ✅ No scroll jump on multi-line delete.
-- ✅ No cursor drift on multi-line editing.
-- ✅ ArrowUp/Down navigation is smooth and reliable.
+- ✅ Navigation is smooth.
+- ✅ Bengali search is reliable.
+- ✅ Export consistency maintained.
 
 ---
 
