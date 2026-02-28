@@ -68,15 +68,6 @@ function initializeApp() {
 
         if (!scrollTriggeringOps.includes(e.inputType)) return;
 
-        // Save cursor position for contentEditable before operation
-        let savedCursorOffset;
-        let isSelection = false;
-        if (isContentEditable) {
-            const sel = window.getSelection();
-            isSelection = !sel.isCollapsed;
-            savedCursorOffset = getCaretCharacterOffset(el);
-        }
-
         // Prevent the container from scrolling
         const tableContainer = document.querySelector('.table-container');
         if (tableContainer) {
@@ -87,24 +78,6 @@ function initializeApp() {
             requestAnimationFrame(() => {
                 tableContainer.scrollTop = savedScrollTop;
                 tableContainer.scrollLeft = savedScrollLeft;
-
-                // Restore cursor position for contentEditable after operation
-                // ONLY for selection-based deletes (Cut, Backspace/Delete with range)
-                // Exclude Enter (insertLineBreak) and single-character deletions
-                const isDeleteOp = ['deleteByCut', 'deleteContentBackward', 'deleteContentForward'].includes(e.inputType);
-                const isInsertOp = ['insertText', 'insertParagraph', 'insertLineBreak', 'insertFromPaste'].includes(e.inputType);
-
-                if (isContentEditable && isSelection && isDeleteOp && savedCursorOffset !== undefined) {
-                    setTimeout(() => {
-                        setCaretPosition(el, savedCursorOffset);
-                    }, 0);
-                }
-
-                // If it's a standard insertion, we definitely DON'T want to force the cursor back
-                // to the saved position, as the browser has already moved it forward correctly.
-                if (isContentEditable && isInsertOp) {
-                    // Let browser handle it
-                }
 
                 // Only call keepCursorCentered for Enter key in textareas
                 if (e.inputType === 'insertLineBreak' && isTextarea) {
@@ -2072,14 +2045,11 @@ function extractRawText(element) {
         } else if (node.nodeName === 'BR') {
             text += '\n';
         } else if (node.nodeName === 'DIV' || node.nodeName === 'P') {
-            // Only add newline if we already have text and it doesn't end with a newline
-            // This prevents a leading newline if the first element is a DIV
             if (text.length > 0 && !text.endsWith('\n')) {
                 text += '\n';
             }
             node.childNodes.forEach(walk);
-            // After processing children, ensure we don't end with double newlines
-            if (text.length > 0 && !text.endsWith('\n')) {
+            if (node.childNodes.length > 0 && !text.endsWith('\n')) {
                 text += '\n';
             }
         } else {
@@ -2604,13 +2574,20 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
                     if (node.nodeType === Node.TEXT_NODE && offset > 0) {
                         const text = node.textContent;
                         if (text[offset - 1] === '\u200B') {
-                            // Delete the ZWS and let the event continue to delete the real character
-                            node.textContent = text.slice(0, offset - 1) + text.slice(offset);
-                            range.setStart(node, offset - 1);
-                            range.setEnd(node, offset - 1);
+                            e.preventDefault();
+                            // Delete both ZWS and the character before it
+                            if (offset > 1) {
+                                node.textContent = text.slice(0, offset - 2) + text.slice(offset);
+                                range.setStart(node, offset - 2);
+                                range.setEnd(node, offset - 2);
+                            } else {
+                                node.textContent = text.slice(1);
+                                range.setStart(node, 0);
+                                range.setEnd(node, 0);
+                            }
                             selection.removeAllRanges();
                             selection.addRange(range);
-                            // Don't prevent default - let it delete the next character too
+                            preview.dispatchEvent(new Event('input', { bubbles: true }));
                         }
                     }
                 }
@@ -2628,13 +2605,18 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
                     if (node.nodeType === Node.TEXT_NODE && offset < node.textContent.length) {
                         const text = node.textContent;
                         if (text[offset] === '\u200B') {
-                            // Delete the ZWS and let the event continue to delete the real character
-                            node.textContent = text.slice(0, offset) + text.slice(offset + 1);
+                            e.preventDefault();
+                            // Delete both ZWS and the character after it
+                            if (offset + 1 < text.length) {
+                                node.textContent = text.slice(0, offset) + text.slice(offset + 2);
+                            } else {
+                                node.textContent = text.slice(0, offset);
+                            }
                             range.setStart(node, offset);
                             range.setEnd(node, offset);
                             selection.removeAllRanges();
                             selection.addRange(range);
-                            // Don't prevent default - let it delete the next character too
+                            preview.dispatchEvent(new Event('input', { bubbles: true }));
                         }
                     }
                 }
@@ -2682,7 +2664,7 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
         });
 
 
-        preview.addEventListener('input', () => {
+        preview.addEventListener('input', (e) => {
             const newRawValue = extractRawText(preview);
 
             // Update input source of truth
@@ -2704,19 +2686,22 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
             const previousLineCount = preview._previousLineCount || 0;
             preview._previousLineCount = currentLineCount;
 
+            // Skip re-render for delete operations to prevent cursor jumping
+            const isDeleteOp = e.inputType && (e.inputType.includes('delete') || e.inputType === 'deleteByCut');
+            
             // Re-render if line count changed (lines joined/split) and content has special formatting
             // This ensures list indentation, table styling, and other line-based formatting updates immediately
             const hasSpecialFormatting = /^(\-{1,5})\s/m.test(newRawValue) || newRawValue.includes('|') || newRawValue.includes('Table*');
             
-            if (currentLineCount !== previousLineCount && hasSpecialFormatting) {
-                // Save cursor position
-                const cursorOffset = getCaretCharacterOffset(preview);
-                
+            if (currentLineCount !== previousLineCount && hasSpecialFormatting && !isDeleteOp) {
                 // Re-render with highlightSyntax
-                preview.innerHTML = highlightSyntax(newRawValue);
-                
-                // Restore cursor position
-                setCaretPosition(preview, cursorOffset);
+                requestAnimationFrame(() => {
+                    const cursorOffset = getCaretCharacterOffset(preview);
+                    preview.innerHTML = highlightSyntax(newRawValue);
+                    requestAnimationFrame(() => {
+                        setCaretPosition(preview, cursorOffset);
+                    });
+                });
             }
 
             // Debounce height adjustment to prevent lag on large content
