@@ -2020,15 +2020,14 @@ function highlightSyntax(text) {
     // Convert newlines to BR
     formatted = formatted.replace(/\n/g, '<br>');
 
-    // Handle consecutive BRs (empty lines) - browser often collapses these
-    // Add ZWS between them to ensure they remain distinct lines
-    formatted = formatted.replace(/<br><br>/g, '<br>\u200B<br>');
-    // Handle trailing BR
-    formatted = formatted.replace(/<br>$/g, '<br>\u200B');
-
-    // Standardize caret navigation by removing BR tags that immediately follow block-level elements
-    // This prevents double-spacing and helps the browser's line-by-line navigation
+    // Standardize block flow by removing BR tags that immediately follow block-level elements
+    // This prevents double-spacing between DIV blocks
     formatted = formatted.replace(/(<\/div>|<p>|<\/p>)<br>/g, '$1');
+
+    // Ensure empty lines and trailing newlines are clickable and distinct
+    // Add ZWS between consecutive BRs and after trailing BRs
+    formatted = formatted.replace(/<br><br>/g, '<br>\u200B<br>');
+    formatted = formatted.replace(/<br>$/g, '<br>\u200B');
 
     return formatted;
 }
