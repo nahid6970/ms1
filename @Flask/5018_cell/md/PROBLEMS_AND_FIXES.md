@@ -5,6 +5,29 @@ This document tracks historical bugs, issues, and their solutions. Use this to:
 - Check if old fixes might conflict with new features
 - Debug similar issues by referencing past solutions
 
+## [2026-03-02 18:54] - Trailing Newlines Accumulation and List Inline Display
+
+**Problem:** 
+1. **Accumulating Empty Lines**: When editing cells, unnecessary empty lines kept accumulating at the end, eventually becoming huge and annoying.
+2. **List Items Breaking to New Line**: When typing multiple list items on the same line (e.g., `- item1 -- item2`), the second list would jump to a new line, requiring manual editing to bring it back.
+
+**Root Cause:** 
+1. **Newline Accumulation**: The `extractRawText()` function was adding newlines after DIV/P elements during the tree walk. It added a newline before processing children AND after processing children if they existed. This caused trailing newlines to accumulate with each edit cycle.
+2. **Block Display**: The `highlightSyntax()` function wrapped list items in `<div>` tags with `display: block`, which forced them to be block-level elements on separate lines.
+
+**Solution:** 
+1. **Trim Trailing Newlines**: Added logic at the end of `extractRawText()` to trim excessive trailing newlines using regex, keeping at most one trailing newline: `result.replace(/\n+$/, match => match.length > 1 ? '\n' : match)`
+2. **Inline-Block Display**: Changed list item wrapper from `display: block` to `display: inline-block` in `highlightSyntax()`, allowing multiple list items to stay on the same line while maintaining hanging indent styling.
+
+**Files Modified:**
+- `static/script.js` - Updated `extractRawText()` (added trailing newline trim) and `highlightSyntax()` (changed display property)
+
+**Related Issues:**
+- Fixes the contentEditable edit mode text extraction and display issues
+- Maintains proper list formatting while allowing inline composition
+
+---
+
 ## [2026-02-28 10:30] - Bengali Search Inconsistency and Cursor Navigation Fixes
 
 **Problem:** 

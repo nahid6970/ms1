@@ -1,5 +1,33 @@
 # Recent Development Log
 
+## [2026-03-02 18:54] - Fixed Trailing Newlines and List Inline Display
+
+**Session Duration:** 0.1 hours
+
+**What We Accomplished:**
+
+### 🐛 Fixed Accumulating Empty Lines at Cell End
+- **Problem**: When editing cells, unnecessary empty lines kept accumulating at the end, eventually becoming huge and annoying.
+- **Root Cause**: `extractRawText()` was adding newlines after DIV/P elements without trimming excessive trailing newlines.
+- **Solution**: Added logic to trim multiple trailing newlines, keeping at most one.
+- **Result**: No more accumulating empty lines during editing.
+
+### 🐛 Fixed List Items Going to Second Line
+- **Problem**: When typing multiple list items on the same line (e.g., `- item1 -- item2`), the second list would jump to a new line.
+- **Root Cause**: `highlightSyntax()` wrapped list items in `<div>` with `display: block`, forcing them onto separate lines.
+- **Solution**: Changed to `display: inline-block` to keep list items inline while maintaining hanging indent styling.
+- **Result**: Multiple list items can now stay on the same line.
+
+**Files Modified:**
+- `static/script.js` - Updated `extractRawText()` and `highlightSyntax()` (~5 lines)
+
+**Current Status:**
+- ✅ No more trailing newline accumulation
+- ✅ List items stay inline as expected
+
+---
+
+
 ## [2026-02-28 10:30] - Fixed Cursor Navigation and Bengali Search Inconsistency
 
 **Session Duration:** 0.7 hours
