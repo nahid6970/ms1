@@ -2010,7 +2010,7 @@ function highlightSyntax(text) {
             const listMatch = trimmed.match(/^(\-{1,5})\s/);
             if (listMatch) {
                 const markerLength = listMatch[1].length;
-                return `<div style="display: block; width: 100%; box-sizing: border-box; padding-left: ${markerLength}em; text-indent: -1em;">${line}</div>`;
+                return `<span style="display: inline-block; width: 100%; box-sizing: border-box; padding-left: ${markerLength}em; text-indent: -1em;">${line}</span>`;
             }
 
             return line;
@@ -2082,7 +2082,12 @@ function extractRawText(element) {
         return recoveredLine;
     });
     
-    return recoveredLines.join('\n');
+    
+    // Remove trailing empty lines that accumulate during editing
+    let result = recoveredLines.join('\n');
+    result = result.replace(/\n+$/, match => match.length > 1 ? '\n' : match);
+    
+    return result;
 }
 
 function getCaretCharacterOffset(element) {
@@ -2231,7 +2236,11 @@ function extractRawTextBeforeCaret(element, range) {
         return recoveredLine;
     });
     
-    return recoveredLines.join('\n');
+    // Remove trailing empty lines that accumulate during editing
+    let result = recoveredLines.join('\n');
+    result = result.replace(/\n+$/, match => match.length > 1 ? '\n' : match);
+    
+    return result;
 }
 
 function setCaretPosition(element, offset) {
