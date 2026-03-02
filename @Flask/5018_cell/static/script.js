@@ -2005,13 +2005,8 @@ function highlightSyntax(text) {
                 }
             }
 
-            // Rule: List indentation (Hanging Indent)
-            // Check for list patterns (-, --, ---, ----, -----)
-            const listMatch = trimmed.match(/^(\-{1,5})\s/);
-            if (listMatch) {
-                const markerLength = listMatch[1].length;
-                return `<span style="display: inline-block; width: 100%; box-sizing: border-box; padding-left: ${markerLength}em; text-indent: -1em;">${line}</span>`;
-            }
+            // Rule: List indentation removed in edit mode to prevent navigation issues
+            // Lists are rendered properly in preview mode via parseMarkdown
 
             return line;
         }).join('\n');
