@@ -62,6 +62,27 @@ body {
     flex: 1;
 }
 
+.current-sheet-info > div[onclick] {
+    position: relative;
+    padding-right: 20px;
+}
+
+.current-sheet-info > div[onclick]::after {
+    content: '▼';
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 10px;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+}
+
+.current-sheet-info > div[onclick]:hover::after {
+    opacity: 1;
+}
+
+
 .current-sheet-title {
     font-size: 16px;
     font-weight: 600;
