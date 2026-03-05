@@ -6628,6 +6628,11 @@ function toggleSubSheetDropdown() {
     if (isVisible) {
         dropdown.style.display = 'none';
     } else {
+        const sheetInfo = document.querySelector('.current-sheet-info');
+        const rect = sheetInfo.getBoundingClientRect();
+        dropdown.style.left = rect.left + 'px';
+        dropdown.style.top = rect.bottom + 5 + 'px';
+        
         renderSubSheetDropdown();
         dropdown.style.display = 'block';
     }
