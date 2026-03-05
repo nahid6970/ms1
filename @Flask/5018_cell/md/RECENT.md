@@ -16,14 +16,16 @@
   - "+ Add Sub-sheet" button at bottom
   - Click outside to close
   - Positioned directly below the sheet title text
+  - Added ▼ indicator arrow that appears on hover
 
 **Files Modified:**
 - `templates/index.html` - Added dropdown container to current-sheet-info
-- `static/style.css` - Added .subsheet-dropdown-menu styles
+- `static/style.css` - Added .subsheet-dropdown-menu styles and dropdown indicator
 - `static/script.js` - Added toggleSubSheetDropdown() and renderSubSheetDropdown()
 
 **Current Status:**
 - ✅ Quick access to all sub-sheets from title
+- ✅ Visual indicator shows it's clickable
 - ✅ All customization features work (colors, context menu)
 - ✅ Subsheet bar remains unchanged
 - ✅ Dropdown positioned at sheet title location
