@@ -1,5 +1,36 @@
 # Recent Development Log
 
+## [2026-03-05 22:26] - Added Sub-sheet Dropdown to Current Sheet Title
+
+**Session Duration:** 0.2 hours
+
+**What We Accomplished:**
+
+### 🎯 Added Quick Sub-sheet Access Dropdown
+- **Feature**: Click on current sheet title (top-left) to show dropdown with all sub-sheets
+- **Implementation**:
+  - Dropdown shows parent sheet + all sub-sheets
+  - Active sheet highlighted in blue
+  - Custom colors from sheet/category settings applied
+  - Right-click context menu (Rename, Set Colors, Delete)
+  - "+ Add Sub-sheet" button at bottom
+  - Click outside to close
+  - Positioned directly below the sheet title text
+
+**Files Modified:**
+- `templates/index.html` - Added dropdown container to current-sheet-info
+- `static/style.css` - Added .subsheet-dropdown-menu styles
+- `static/script.js` - Added toggleSubSheetDropdown() and renderSubSheetDropdown()
+
+**Current Status:**
+- ✅ Quick access to all sub-sheets from title
+- ✅ All customization features work (colors, context menu)
+- ✅ Subsheet bar remains unchanged
+- ✅ Dropdown positioned at sheet title location
+
+---
+
+
 ## [2026-03-02 18:54] - Fixed Trailing Newlines and List Inline Display
 
 **Session Duration:** 0.1 hours
