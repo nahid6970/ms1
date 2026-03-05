@@ -5,6 +5,36 @@ This document tracks historical bugs, issues, and their solutions. Use this to:
 - Check if old fixes might conflict with new features
 - Debug similar issues by referencing past solutions
 
+## [2026-03-05 22:07] - Sub-sheet Bar Overflow and Accessibility Issues
+
+**Problem:** 
+1. **Wrapping to 2nd Line**: When window was resized or many sub-sheets existed, the horizontal sub-sheet bar would wrap tabs to a second line, breaking the layout.
+2. **Hidden Dropdown**: The overflow dropdown (triggered by hovering on "(3)+" button) would appear behind other windows due to z-index conflicts.
+3. **Poor Discoverability**: Users had to hover on a button to discover overflow sheets - not intuitive, especially on touch devices.
+
+**Root Cause:** 
+1. **Layout Calculation Timing**: Overflow detection happened before layout was fully settled, causing inconsistent wrapping behavior.
+2. **Z-index Conflicts**: Dropdown had z-index 10001, but other elements had higher values.
+3. **Hover-based UI**: Relying on hover for critical navigation is poor UX and doesn't work on touch devices.
+
+**Solution:** 
+1. **Removed Horizontal Bar**: Completely removed the sub-sheet bar to eliminate overflow issues.
+2. **Dropdown on Title**: Made the current sheet title (top-left) clickable to show a dropdown menu.
+3. **Fixed Positioning**: Used `position: fixed` with `z-index: 999999` to ensure dropdown appears above everything.
+4. **Full Feature Parity**: Added custom colors and right-click context menu to dropdown items.
+
+**Files Modified:**
+- `templates/index.html` - Added dropdown container with click handler
+- `static/style.css` - Hidden `.subsheet-bar`, added `.subsheet-dropdown-menu` styles
+- `static/script.js` - Added `toggleSubSheetDropdown()` and `renderSubSheetDropdown()` functions
+
+**Related Issues:**
+- Fixes all sub-sheet navigation and overflow problems
+- Improves accessibility and mobile compatibility
+- Maintains all customization features (colors, rename, delete)
+
+---
+
 ## [2026-03-02 18:54] - Trailing Newlines Accumulation and List Inline Display
 
 **Problem:** 

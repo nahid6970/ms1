@@ -1,5 +1,43 @@
 # Recent Development Log
 
+## [2026-03-05 22:07] - Replaced Sub-sheet Bar with Dropdown Menu
+
+**Session Duration:** 0.3 hours
+
+**What We Accomplished:**
+
+### 🎨 Replaced Horizontal Sub-sheet Bar with Dropdown
+- **Problem**: 
+  1. Horizontal sub-sheet bar had overflow issues - tabs would wrap to 2nd line on resize
+  2. Hover-based dropdown was hidden behind other windows (z-index issues)
+  3. Not intuitive - had to hover on "(3)+" button to see overflow sheets
+- **Solution**: 
+  - Removed the entire horizontal sub-sheet bar
+  - Added clickable dropdown on current sheet title (top-left)
+  - Click the sheet name → dropdown shows all parent + sub-sheets
+  - "+ Add Sub-sheet" button at bottom of dropdown
+- **Result**: Clean, always accessible, no layout issues
+
+### ✨ Added Full Customization to Dropdown
+- Applied custom colors from sheet/category settings to dropdown items
+- Right-click context menu on dropdown items (Rename, Set Colors, Delete)
+- Active sheet highlighted in dropdown
+- Fixed positioning (appears above all elements)
+
+**Files Modified:**
+- `templates/index.html` - Added dropdown container to current-sheet-info
+- `static/style.css` - Hidden subsheet-bar, added dropdown styles
+- `static/script.js` - Added toggleSubSheetDropdown() and renderSubSheetDropdown()
+
+**Current Status:**
+- ✅ No more sub-sheet bar wrapping issues
+- ✅ Dropdown always accessible with one click
+- ✅ All customization features work (colors, context menu)
+- ✅ Clean UI without horizontal overflow
+
+---
+
+
 ## [2026-03-02 18:54] - Fixed Trailing Newlines and List Inline Display
 
 **Session Duration:** 0.1 hours

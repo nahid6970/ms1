@@ -95,9 +95,14 @@
     <div class="container">
         <div class="sheet-tabs">
             <button class="btn-menu" onclick="toggleSidebar()" title="Open Navigation">☰</button>
-            <div class="current-sheet-info">
-                <span id="currentSheetTitle" class="current-sheet-title">Sheet1</span>
-                <span id="currentCategoryTitle" class="current-category-title">Uncategorized</span>
+            <div class="current-sheet-info" style="position: relative;">
+                <div onclick="toggleSubSheetDropdown()" style="cursor: pointer;">
+                    <span id="currentSheetTitle" class="current-sheet-title">Sheet1</span>
+                    <span id="currentCategoryTitle" class="current-category-title">Uncategorized</span>
+                </div>
+                <div id="subSheetDropdown" class="subsheet-dropdown-menu" style="display: none;">
+                    <!-- Populated by JS -->
+                </div>
             </div>
 
             <div class="sheet-controls">

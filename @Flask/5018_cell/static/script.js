@@ -6468,6 +6468,110 @@ function renderSubSheetBar() {
     });
 }
 
+function toggleSubSheetDropdown() {
+    const dropdown = document.getElementById('subSheetDropdown');
+    const isVisible = dropdown.style.display === 'block';
+    
+    if (isVisible) {
+        dropdown.style.display = 'none';
+    } else {
+        renderSubSheetDropdown();
+        dropdown.style.display = 'block';
+    }
+}
+
+function renderSubSheetDropdown() {
+    const dropdown = document.getElementById('subSheetDropdown');
+    if (!dropdown) return;
+    
+    dropdown.innerHTML = '';
+    
+    // Get current sheet's parent
+    const currentSheetData = tableData.sheets[currentSheet];
+    const parentIndex = currentSheetData?.parentSheet !== undefined ? currentSheetData.parentSheet : currentSheet;
+    const parentSheet = tableData.sheets[parentIndex];
+    
+    if (!parentSheet) return;
+    
+    // Helper to apply colors
+    const applyColors = (item, sheet, sheetIdx) => {
+        const sheetCategory = tableData.sheetCategories[sheetIdx] || tableData.sheetCategories[String(sheetIdx)] || 'Uncategorized';
+        const catStyle = tableData.categoryStyles ? tableData.categoryStyles[sheetCategory] : null;
+        const bgColor = sheet.bgColor || (catStyle ? catStyle.bgColor : null);
+        const fgColor = sheet.fgColor || (catStyle ? catStyle.fgColor : null);
+        
+        if (bgColor) item.style.backgroundColor = bgColor;
+        if (fgColor) item.style.color = fgColor;
+    };
+    
+    // Add parent sheet
+    const parentItem = document.createElement('div');
+    parentItem.className = `subsheet-dropdown-item ${currentSheet === parentIndex ? 'active' : ''}`;
+    parentItem.textContent = parentSheet.name;
+    applyColors(parentItem, parentSheet, parentIndex);
+    
+    parentItem.onclick = (e) => {
+        if (e.button === 0) {
+            switchSheet(parentIndex);
+            dropdown.style.display = 'none';
+        }
+    };
+    
+    parentItem.oncontextmenu = (e) => {
+        e.preventDefault();
+        showSubSheetContextMenu(e, parentIndex);
+        dropdown.style.display = 'none';
+    };
+    
+    dropdown.appendChild(parentItem);
+    
+    // Add sub-sheets
+    tableData.sheets.forEach((sheet, index) => {
+        if (sheet.parentSheet === parentIndex) {
+            const item = document.createElement('div');
+            item.className = `subsheet-dropdown-item ${currentSheet === index ? 'active' : ''}`;
+            item.textContent = '  ' + sheet.name;
+            applyColors(item, sheet, index);
+            
+            item.onclick = (e) => {
+                if (e.button === 0) {
+                    switchSheet(index);
+                    dropdown.style.display = 'none';
+                }
+            };
+            
+            item.oncontextmenu = (e) => {
+                e.preventDefault();
+                showSubSheetContextMenu(e, index);
+                dropdown.style.display = 'none';
+            };
+            
+            dropdown.appendChild(item);
+        }
+    });
+    
+    // Add "+" button
+    const addItem = document.createElement('div');
+    addItem.className = 'subsheet-dropdown-add';
+    addItem.innerHTML = '<span>+</span><span>Add Sub-sheet</span>';
+    addItem.onclick = () => {
+        addSubSheet(parentIndex);
+        dropdown.style.display = 'none';
+    };
+    dropdown.appendChild(addItem);
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', (e) => {
+    const dropdown = document.getElementById('subSheetDropdown');
+    const sheetInfo = document.querySelector('.current-sheet-info');
+    if (dropdown && sheetInfo && !sheetInfo.contains(e.target)) {
+        dropdown.style.display = 'none';
+    }
+});
+
+
+
 /**
  * Checks if subsheet tabs overflow to multiple rows and moves extras to a dropdown
  */
