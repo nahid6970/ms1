@@ -1,10 +1,10 @@
 {
     "msBackups": {
-        "cmd": "rclone check src dst --fast-list --size-only",
+        "cmd": "rclone check src dst --fast-list --size-only --exclude \"*.pyc\" --exclude \"*.pyo\" --exclude \"*.log\" --exclude \"*.tmp\" --exclude \"*.cache\"",
         "src": "C:/@delta/msBackups",
         "dst": "gu:/msBackups",
         "label": "\udb85\ude32",
-        "left_click_cmd": "rclone sync src dst -P --fast-list --log-level INFO",
+        "left_click_cmd": "rclone sync src dst -P --fast-list --exclude \"*.pyc\" --exclude \"*.pyo\" --exclude \"*.log\" --exclude \"*.tmp\" --exclude \"*.cache\" --log-level INFO ",
         "right_click_cmd": "rclone sync dst src -P --fast-list",
         "index": 2,
         "enabled": true
