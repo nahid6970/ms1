@@ -1959,7 +1959,7 @@ function highlightSyntax(text) {
             });
         }
 
-        return `<div style="border-top: ${borderWidth} solid ${borderColor}; border-bottom: ${borderWidth} solid ${borderColor}; padding: 10px 0; margin: 10px 0; text-align: center; font-weight: bold; width: 100%; font-size: ${fontSize}; color: ${textColor};"><span class="syn-marker">:::${params ? params + ':::' : ''}</span>${content}<span class="syn-marker">:::</span></div>`;
+        return `<div style="border-top: ${borderWidth} solid ${borderColor}; border-bottom: ${borderWidth} solid ${borderColor}; padding: 10px 0; margin: 0; text-align: center; font-weight: bold; width: 100%; font-size: ${fontSize}; color: ${textColor};"><span class="syn-marker">:::${params ? params + ':::' : ''}</span>${content}<span class="syn-marker">:::</span></div>`;
     });
 
     // Custom Color Syntax support using cache
@@ -2043,9 +2043,6 @@ function extractRawText(element) {
                 text += '\n';
             }
             node.childNodes.forEach(walk);
-            if (node.childNodes.length > 0 && !text.endsWith('\n')) {
-                text += '\n';
-            }
         } else {
             node.childNodes.forEach(walk);
         }
@@ -4185,7 +4182,7 @@ function oldParseMarkdownBody(lines, cellStyle = {}) {
                 });
             }
 
-            return `<div style="border-top: ${borderWidth} solid ${borderColor}; border-bottom: ${borderWidth} solid ${borderColor}; padding: 10px 0; margin: 10px 0; text-align: center; font-weight: bold; width: 100%; font-size: ${fontSize}; color: ${textColor};">${content}</div>`;
+            return `<div style="border-top: ${borderWidth} solid ${borderColor}; border-bottom: ${borderWidth} solid ${borderColor}; padding: 10px 0; margin: 0; text-align: center; font-weight: bold; width: 100%; font-size: ${fontSize}; color: ${textColor};">${content}</div>`;
         });
 
         return formatted;
