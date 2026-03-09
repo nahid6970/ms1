@@ -1,5 +1,36 @@
 # Recent Development Log
 
+## [2026-03-09 20:46] - Search Highlights in Edit Mode & F2 Scrollbar Fix
+
+**Session Duration:** 0.2 hours
+
+**What We Accomplished:**
+
+### 🔍 Search Highlights Now Visible in Edit Mode
+- **Problem**: When searching for text and clicking to edit a cell, the search highlights disappeared, making it hard to find the searched items.
+- **Solution**: 
+  - Modified focus event handler to preserve search highlights when entering edit mode
+  - Added search highlight preservation during typing (when re-rendering for special formatting)
+  - Search terms are re-applied using `highlightMultipleTermsInHtml()` after `highlightSyntax()`
+- **Result**: Yellow search highlights remain visible while editing cells
+
+### 🎨 Fixed F2 Horizontal Scrollbar
+- **Problem**: F2 recent sheets popup showed an unwanted horizontal scrollbar at the bottom
+- **Solution**: Added `overflow-x: hidden` to `.f2-sheets-list`
+- **Result**: Clean popup without horizontal scrollbar
+
+**Files Modified:**
+- `static/script.js` - Updated preview focus and input event handlers to preserve search highlights
+- `static/style.css` - Added overflow-x: hidden to F2 sheets list
+
+**Current Status:**
+- ✅ Search highlights visible in edit mode
+- ✅ Highlights persist while typing
+- ✅ F2 popup clean without horizontal scroll
+
+---
+
+
 ## [2026-03-05 22:26] - Added Sub-sheet Dropdown to Current Sheet Title
 
 **Session Duration:** 0.2 hours
