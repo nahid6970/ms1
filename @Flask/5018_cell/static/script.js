@@ -2645,10 +2645,7 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
                     .map(term => stripMarkdown(term.trim()).toLowerCase().normalize('NFC'))
                     .filter(term => term.length > 0);
                 if (searchTerms.length > 0) {
-                    const beforeHighlight = highlightedHtml;
                     highlightedHtml = highlightMultipleTermsInHtml(highlightedHtml, searchTerms);
-                    console.log('Search terms:', searchTerms);
-                    console.log('Has text-match-highlight:', highlightedHtml.includes('text-match-highlight'));
                 }
             }
             
