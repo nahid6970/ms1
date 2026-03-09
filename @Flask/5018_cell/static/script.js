@@ -2636,7 +2636,23 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
             const rawValue = inputElement.value;
 
             // Apply highlighting immediately to prevent race conditions
-            preview.innerHTML = highlightSyntax(rawValue);
+            let highlightedHtml = highlightSyntax(rawValue);
+            
+            // Preserve search highlights if active
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput && searchInput.value.trim()) {
+                const searchTerms = searchInput.value.split(',')
+                    .map(term => stripMarkdown(term.trim()).toLowerCase().normalize('NFC'))
+                    .filter(term => term.length > 0);
+                if (searchTerms.length > 0) {
+                    const beforeHighlight = highlightedHtml;
+                    highlightedHtml = highlightMultipleTermsInHtml(highlightedHtml, searchTerms);
+                    console.log('Search terms:', searchTerms);
+                    console.log('Has text-match-highlight:', highlightedHtml.includes('text-match-highlight'));
+                }
+            }
+            
+            preview.innerHTML = highlightedHtml;
 
             // Adjust height immediately for the newly highlighted syntax content
             adjustCellHeightForMarkdown(cell);
@@ -2700,7 +2716,20 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
                 // Re-render with highlightSyntax
                 requestAnimationFrame(() => {
                     const cursorOffset = getCaretCharacterOffset(preview);
-                    preview.innerHTML = highlightSyntax(newRawValue);
+                    let highlightedHtml = highlightSyntax(newRawValue);
+                    
+                    // Preserve search highlights if active
+                    const searchInput = document.getElementById('searchInput');
+                    if (searchInput && searchInput.value.trim()) {
+                        const searchTerms = searchInput.value.split(',')
+                            .map(term => stripMarkdown(term.trim()).toLowerCase().normalize('NFC'))
+                            .filter(term => term.length > 0);
+                        if (searchTerms.length > 0) {
+                            highlightedHtml = highlightMultipleTermsInHtml(highlightedHtml, searchTerms);
+                        }
+                    }
+                    
+                    preview.innerHTML = highlightedHtml;
                     requestAnimationFrame(() => {
                         setCaretPosition(preview, cursorOffset);
                     });
