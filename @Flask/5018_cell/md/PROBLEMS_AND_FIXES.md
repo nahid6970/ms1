@@ -5,6 +5,31 @@ This document tracks historical bugs, issues, and their solutions. Use this to:
 - Check if old fixes might conflict with new features
 - Debug similar issues by referencing past solutions
 
+## [2026-03-10 00:31] - Title Syntax Extra Line Gap
+
+**Problem:** 
+Title syntax `:::K_5px_1em_f-K:::text:::` was creating an extra empty line after it, causing unwanted spacing in the layout.
+
+**Root Cause:** 
+The `extractRawText()` function (used to extract plain text from contentEditable DIVs) was adding a newline after processing DIV/P element children. This was part of a previous fix to handle block elements, but it caused the title DIV to always add an extra line when extracted back to markdown.
+
+**Solution:** 
+1. Removed the extra newline addition after DIV/P children in `extractRawText()`
+2. Changed title DIV margin from `10px 0` to `0` to remove spacing
+3. Kept the newline BEFORE DIV content to maintain proper line separation
+
+**Files Modified:**
+- `static/script.js` - Updated `extractRawText()` DIV/P handling and title styling
+
+**Known Limitation:**
+List syntax (-, --, etc.) on the first line immediately after a title won't be recognized as a list. Use normal text on the first line after titles. Lists work normally from the second line onwards.
+
+**Related Issues:**
+- Related to the earlier fix for accumulating empty lines at cell end
+- Trade-off between proper title spacing and list syntax recognition
+
+---
+
 ## [2026-03-02 18:54] - Trailing Newlines Accumulation and List Inline Display
 
 **Problem:** 

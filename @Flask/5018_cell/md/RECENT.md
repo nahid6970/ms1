@@ -1,5 +1,31 @@
 # Recent Development Log
 
+## [2026-03-10 00:31] - Fixed Title Syntax Extra Line Issue
+
+**Session Duration:** 0.3 hours
+
+**What We Accomplished:**
+
+### 🔧 Fixed Title Syntax Creating Extra Lines
+- **Problem**: Title syntax `:::K_5px_1em_f-K:::text:::` was creating an extra empty line after it, breaking the layout.
+- **Root Cause**: The `extractRawText()` function was adding a newline after DIV/P elements during contentEditable extraction, which accumulated over time.
+- **Solution**: 
+  - Removed the extra newline that was added after processing DIV/P children
+  - Removed margins from title DIV styling
+  - Title now renders without extra spacing
+- **Known Limitation**: List syntax (-, --, etc.) on the first line immediately after a title won't work - use normal text instead. Lists work fine from the second line onwards.
+
+**Files Modified:**
+- `static/script.js` - Updated `extractRawText()` to not add newline after DIV content, updated title margin
+
+**Current Status:**
+- ✅ Title syntax works without extra gaps
+- ✅ No accumulation of empty lines
+- ⚠️ First line after title should be normal text (not list syntax)
+
+---
+
+
 ## [2026-03-09 20:46] - Search Highlights in Edit Mode & F2 Scrollbar Fix
 
 **Session Duration:** 0.2 hours
