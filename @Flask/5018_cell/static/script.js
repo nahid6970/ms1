@@ -2043,6 +2043,11 @@ function extractRawText(element) {
                 text += '\n';
             }
             node.childNodes.forEach(walk);
+            // Add newline after DIV/P unless it's empty or already ends with newline
+            // This ensures table lines and other block elements are properly separated
+            if (node.childNodes.length > 0 && !text.endsWith('\n')) {
+                text += '\n';
+            }
         } else {
             node.childNodes.forEach(walk);
         }
