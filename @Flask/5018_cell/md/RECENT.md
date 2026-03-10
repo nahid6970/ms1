@@ -1,29 +1,38 @@
 # Recent Development Log
 
-## [2026-03-10 00:31] - Fixed Title Syntax Extra Line Issue
+## [2026-03-10 14:15] - Fixed Title Spacing & Table Merging Issues
 
-**Session Duration:** 0.3 hours
+**Session Duration:** 0.4 hours
 
 **What We Accomplished:**
 
-### 🔧 Fixed Title Syntax Creating Extra Lines
-- **Problem**: Title syntax `:::K_5px_1em_f-K:::text:::` was creating an extra empty line after it, breaking the layout.
-- **Root Cause**: The `extractRawText()` function was adding a newline after DIV/P elements during contentEditable extraction, which accumulated over time.
+### 🔧 Fixed Title Syntax Extra Line & Table Merging
+- **Problem**: 
+  1. Title syntax `:::K_5px_1em_f-K:::text:::` was creating an extra empty line after it.
+  2. Attempting to fix the gap often caused tables to merge with the preceding line incorrectly.
+- **Root Cause**: 
+  - Redundant newlines were being added during the joining of block-level elements (titles, tables, etc.) in the Markdown renderer.
+  - Since these elements already force a new line, the additional `\n` character in a `white-space: pre-wrap` container created an unwanted gap.
 - **Solution**: 
-  - Removed the extra newline that was added after processing DIV/P children
-  - Removed margins from title DIV styling
-  - Title now renders without extra spacing
-- **Known Limitation**: List syntax (-, --, etc.) on the first line immediately after a title won't work - use normal text instead. Lists work fine from the second line onwards.
+  - **md-title Class**: Added the `md-title` class to title `div`s for reliable identification.
+  - **Smart Block Joiner**: Updated `oldParseMarkdownBody` and `parseMarkdown` with a block-aware reducer that skips redundant newlines when joining block elements (titles, tables, separators, timelines, and lists).
+  - **Table Refinement**: Refactored `Table*N` recursive parsing to prevent gaps before and after tables while maintaining user-intended spacing.
+- **Result**: 
+  - Clean layout with consistent spacing.
+  - No more extra gaps after titles.
+  - Tables remain distinct and don't merge with surrounding text.
 
 **Files Modified:**
-- `static/script.js` - Updated `extractRawText()` to not add newline after DIV content, updated title margin
+- `static/script.js` - Updated `highlightSyntax`, `oldParseMarkdownBody`, and `parseMarkdown` with smart joiner logic.
 
 **Current Status:**
 - ✅ Title syntax works without extra gaps
-- ✅ No accumulation of empty lines
-- ⚠️ First line after title should be normal text (not list syntax)
+- ✅ Tables render correctly without merging
+- ✅ User-intended empty lines are preserved
 
 ---
+
+## [2026-03-10 00:31] - Fixed Title Syntax Extra Line Issue (Superseded)
 
 
 ## [2026-03-09 20:46] - Search Highlights in Edit Mode & F2 Scrollbar Fix

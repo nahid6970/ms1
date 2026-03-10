@@ -5,30 +5,33 @@ This document tracks historical bugs, issues, and their solutions. Use this to:
 - Check if old fixes might conflict with new features
 - Debug similar issues by referencing past solutions
 
-## [2026-03-10 00:31] - Title Syntax Extra Line Gap
+## [2026-03-10 14:15] - Title Spacing & Table Merging Issues
 
 **Problem:** 
-Title syntax `:::K_5px_1em_f-K:::text:::` was creating an extra empty line after it, causing unwanted spacing in the layout.
+1. Title syntax `:::K_5px_1em_f-K:::text:::` was creating an extra empty line after it.
+2. Attempting to fix the gap often caused tables to merge with the preceding line incorrectly.
 
 **Root Cause:** 
-The `extractRawText()` function (used to extract plain text from contentEditable DIVs) was adding a newline after processing DIV/P element children. This was part of a previous fix to handle block elements, but it caused the title DIV to always add an extra line when extracted back to markdown.
+The Markdown renderer's joiner logic was adding redundant `\n` characters between block-level elements (like titles and tables). Since these elements are rendered as DIVs (block elements), they already force a new line. Adding an extra newline in a `white-space: pre-wrap` container resulted in a visible empty gap. Conversely, removing newlines indiscriminately caused tables to merge with normal text lines.
 
 **Solution:** 
-1. Removed the extra newline addition after DIV/P children in `extractRawText()`
-2. Changed title DIV margin from `10px 0` to `0` to remove spacing
-3. Kept the newline BEFORE DIV content to maintain proper line separation
+1. **md-title Class**: Added the `md-title` class to title `div`s to allow for reliable identification.
+2. **Smart Block Joiner**: Replaced the simple `\n` joiner with a block-aware reducer in `oldParseMarkdownBody` and `parseMarkdown`. 
+3. **Logic**:
+   - Skips adding a newline if the current line or the previous line is a block element (Title, Table, Separator, Timeline, or List).
+   - Only skips the newline if both lines have content; explicit empty lines (user-intended spacing) are preserved.
+4. **Table Parser Refinement**: Updated `parseMarkdown` recursive logic for `Table*N` to use the same block-aware spacing rules.
 
 **Files Modified:**
-- `static/script.js` - Updated `extractRawText()` DIV/P handling and title styling
-
-**Known Limitation:**
-List syntax (-, --, etc.) on the first line immediately after a title won't be recognized as a list. Use normal text on the first line after titles. Lists work normally from the second line onwards.
+- `static/script.js` - Updated `highlightSyntax`, `oldParseMarkdownBody`, and `parseMarkdown`.
 
 **Related Issues:**
-- Related to the earlier fix for accumulating empty lines at cell end
-- Trade-off between proper title spacing and list syntax recognition
+- Supersedes the initial `extractRawText` fix attempt which had side effects on list recognition.
+- Fixes the "Extra gap after titles" reported in early March 2026.
 
 ---
+
+## [2026-03-10 00:31] - Title Syntax Extra Line Gap (Superseded)
 
 ## [2026-03-02 18:54] - Trailing Newlines Accumulation and List Inline Display
 
