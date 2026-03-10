@@ -1959,7 +1959,7 @@ function highlightSyntax(text) {
             });
         }
 
-        return `<div style="border-top: ${borderWidth} solid ${borderColor}; border-bottom: ${borderWidth} solid ${borderColor}; padding: 10px 0; margin: 0; text-align: center; font-weight: bold; width: 100%; font-size: ${fontSize}; color: ${textColor};"><span class="syn-marker">:::${params ? params + ':::' : ''}</span>${content}<span class="syn-marker">:::</span></div>`;
+        return `<div class="md-title" style="border-top: ${borderWidth} solid ${borderColor}; border-bottom: ${borderWidth} solid ${borderColor}; padding: 10px 0; margin: 0; text-align: center; font-weight: bold; width: 100%; font-size: ${fontSize}; color: ${textColor};"><span class="syn-marker">:::${params ? params + ':::' : ''}</span>${content}<span class="syn-marker">:::</span></div>`;
     });
 
     // Custom Color Syntax support using cache
@@ -3712,8 +3712,12 @@ function parseMarkdown(text, cellStyle = {}) {
         }
 
         // Restore the newline consumed by (?:^|\n) if it matched \n
+        // Only if preText doesn't already end with a block element
         if (tableMatch[0].startsWith('\n')) {
-            preText += '\n';
+            const trimmedPre = preText.trim();
+            if (!trimmedPre.endsWith('</div>') && !trimmedPre.endsWith('</span>')) {
+                preText += '\n';
+            }
         }
 
         const cols = parseInt(tableMatch[1]);
@@ -3749,8 +3753,8 @@ function parseMarkdown(text, cellStyle = {}) {
 
             const currentTableHtml = parseCommaTable(cols, currentTableContent, borderColor, borderWidth);
 
-            // Recursively parse the rest. Add newline only if the next part doesn't already start with one
-            const separator = remainingContent.startsWith('\n') ? '' : '\n';
+            // Recursively parse the rest. Skip newline if joining with block element
+            const separator = (remainingContent.startsWith('\n') || currentTableHtml.trim().endsWith('</div>')) ? '' : '\n';
             return preText + currentTableHtml + separator + parseMarkdown(remainingContent, cellStyle);
         }
 
@@ -3762,7 +3766,7 @@ function parseMarkdown(text, cellStyle = {}) {
             const remainingContent = content.substring(splitIndex);
 
             const currentTableHtml = parseCommaTable(cols, currentTableContent, borderColor, borderWidth);
-            const separator = remainingContent.startsWith('\n') ? '' : '\n';
+            const separator = (remainingContent.startsWith('\n') || currentTableHtml.trim().endsWith('</div>')) ? '' : '\n';
             return preText + currentTableHtml + separator + parseMarkdown(remainingContent, cellStyle);
         }
 
@@ -3800,14 +3804,19 @@ function parseMarkdown(text, cellStyle = {}) {
             isGrid: b.grid
         }));
 
-        // Join blocks with a newline only if needed
+        // Join blocks with a newline only if needed (block-aware)
         return processedBlocks.reduce((acc, item, i) => {
             if (i === 0) return item.content;
 
-            // If previous block was a table, don't add a newline (tables have CSS margin)
-            // UNLESS the current block is empty (explicit empty line)
-            const prevWasGrid = processedBlocks[i - 1].isGrid;
-            if (prevWasGrid && item.content.trim() !== '') {
+            const prev = processedBlocks[i - 1];
+            const isBlock = (c) => {
+                const t = c.trim();
+                return t.endsWith('</div>') || t.endsWith('</span>') && t.includes('display: inline-block');
+            };
+
+            // If either block is a block element, skip redundant newline
+            if ((prev.isGrid || item.isGrid || isBlock(prev.content) || isBlock(item.content)) && 
+                item.content.trim() !== '' && prev.content.trim() !== '') {
                 return acc + item.content;
             }
 
@@ -4187,7 +4196,7 @@ function oldParseMarkdownBody(lines, cellStyle = {}) {
                 });
             }
 
-            return `<div style="border-top: ${borderWidth} solid ${borderColor}; border-bottom: ${borderWidth} solid ${borderColor}; padding: 10px 0; margin: 0; text-align: center; font-weight: bold; width: 100%; font-size: ${fontSize}; color: ${textColor};">${content}</div>`;
+            return `<div class="md-title" style="border-top: ${borderWidth} solid ${borderColor}; border-bottom: ${borderWidth} solid ${borderColor}; padding: 10px 0; margin: 0; text-align: center; font-weight: bold; width: 100%; font-size: ${fontSize}; color: ${textColor};">${content}</div>`;
         });
 
         return formatted;
@@ -4203,8 +4212,8 @@ function oldParseMarkdownBody(lines, cellStyle = {}) {
     for (let i = 0; i < formattedLines.length; i++) {
         const line = formattedLines[i];
         const isTimelineStart = line.includes('class="md-timeline"');
-        const isListItem = line.trim().startsWith('<span style="display: inline-flex') &&
-            (line.includes('•') || line.includes('◦') || line.includes('▪'));
+        const isListItem = line.trim().startsWith('<span style="display: inline-block; width: 100%') &&
+            (line.includes('•') || line.includes('◦') || line.includes('▪') || line.includes('▸') || line.includes('−'));
         const isEmpty = line.trim() === '';
 
         // Check for background section markers (now with optional text color)
@@ -4274,20 +4283,25 @@ function oldParseMarkdownBody(lines, cellStyle = {}) {
     return processedLines.reduce((acc, line, i) => {
         if (i === 0) return line;
         const prev = processedLines[i - 1];
-        // Check for separator to avoid double line breaks (newline + block element break)
-        const isSeparator = line.includes('class="md-separator"');
-        const prevIsSeparator = prev.includes('class="md-separator"');
+        
+        // Helper to detect block elements that should skip the redundant newline
+        const isBlock = (l) => {
+            if (!l) return false;
+            const t = l.trim();
+            return t.includes('class="md-separator"') || 
+                   t.includes('class="md-title"') || 
+                   t.includes('class="md-grid"') ||
+                   t.includes('class="md-timeline"') ||
+                   t.includes('class="md-bg-section"') ||
+                   t.startsWith('<div style="background-color:') ||
+                   (t.startsWith('<span style="display: inline-block; width: 100%') && 
+                    (t.includes('•') || t.includes('◦') || t.includes('▪') || t.includes('▸') || t.includes('−') || /\d+\.\s/.test(t)));
+        };
 
-        // Check for background section wrapper
-        const isBgWrapper = line.includes('background-color:') && line.trim().startsWith('<div style=');
-        const prevIsBgWrapper = prev.includes('background-color:') && prev.trim().startsWith('<div style=');
-
-        // Don't add newline after timeline opening or before timeline closing
-        const isTimelineStart = prev.includes('class="md-timeline"');
         const isTimelineEnd = line === '</div></div>';
-        const isListItem = line.trim().startsWith('<span style="display: inline-flex');
+        const isListItem = line.trim().startsWith('<span style="display: inline-block; width: 100%');
 
-        if (isSeparator || prevIsSeparator || isBgWrapper || prevIsBgWrapper || (isTimelineStart && isListItem) || isTimelineEnd) {
+        if (isBlock(line) || isBlock(prev) || isTimelineEnd) {
             // Only skip the newline if both lines have content (to rely on block margins)
             // If either line is empty, we must add the newline to preserve the user's spacing
             if (line.trim() !== '' && prev.trim() !== '') {
