@@ -15806,13 +15806,18 @@ function showSyntaxReplacer(event) {
     modal.style.alignItems = 'center';
     modal.style.justifyContent = 'center';
 
-    // Add input listeners for preview
+    // Remove old listeners to prevent duplicates
     const findInput = document.getElementById('findSyntaxInput');
     const replaceInput = document.getElementById('replaceSyntaxInput');
-    
+    const newFindInput = findInput.cloneNode(true);
+    const newReplaceInput = replaceInput.cloneNode(true);
+    findInput.parentNode.replaceChild(newFindInput, findInput);
+    replaceInput.parentNode.replaceChild(newReplaceInput, replaceInput);
+
+    // Add input listeners for preview
     const updatePreview = () => {
-        const findPattern = findInput.value;
-        const replacePattern = replaceInput.value;
+        const findPattern = newFindInput.value;
+        const replacePattern = newReplaceInput.value;
         
         if (findPattern && replacePattern) {
             const preview = generateSyntaxReplacePreview(cellContent, findPattern, replacePattern);
@@ -15833,8 +15838,8 @@ function showSyntaxReplacer(event) {
         }
     };
     
-    findInput.addEventListener('input', updatePreview);
-    replaceInput.addEventListener('input', updatePreview);
+    newFindInput.addEventListener('input', updatePreview);
+    newReplaceInput.addEventListener('input', updatePreview);
 }
 
 function findAllSyntaxesInCell(cellContent) {
@@ -15881,6 +15886,30 @@ function findAllSyntaxesInCell(cellContent) {
             example: example
         });
     });
+    
+    // Handle custom syntaxes
+    if (typeof customColorSyntaxes !== 'undefined' && customColorSyntaxes.length > 0) {
+        customColorSyntaxes.forEach(syntax => {
+            if (!syntax.marker) return;
+            try {
+                const escapedMarker = syntax.marker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                const regex = new RegExp(escapedMarker + '(.+?)' + escapedMarker, 'g');
+                const matches = [...cellContent.matchAll(regex)];
+                if (matches.length > 0) {
+                    const firstMatch = matches[0][0];
+                    const example = firstMatch.length > 30 ? firstMatch.substring(0, 30) + '...' : firstMatch;
+                    results.push({
+                        name: `Custom: ${syntax.marker}`,
+                        pattern: `${syntax.marker}text${syntax.marker}`,
+                        count: matches.length,
+                        example: example
+                    });
+                }
+            } catch (e) {
+                console.log('Error processing custom syntax:', syntax.marker, e);
+            }
+        });
+    }
     
     // Handle other syntaxes
     syntaxPatterns.forEach(syntax => {
