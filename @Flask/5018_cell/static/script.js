@@ -15819,7 +15819,6 @@ function showSyntaxReplacer(event) {
 
 function findAllSyntaxesInCell(cellContent) {
     const syntaxPatterns = [
-        { name: 'Custom Color', regex: /\{[^}]+\}([^{]+)\{\/\}/g, pattern: '{fg:#color}text{/}' },
         { name: 'Bold', regex: /\*\*([^*]+)\*\*/g, pattern: '**text**' },
         { name: 'Italic', regex: /@@([^@]+)@@/g, pattern: '@@text@@' },
         { name: 'Underline', regex: /__([^_]+)__/g, pattern: '__text__' },
@@ -15838,6 +15837,32 @@ function findAllSyntaxesInCell(cellContent) {
 
     const results = [];
     
+    // Handle custom colors separately to group by actual color values
+    const colorRegex = /\{([^}]+)\}([^{]+)\{\/\}/g;
+    const colorMatches = [...cellContent.matchAll(colorRegex)];
+    const colorGroups = {};
+    
+    colorMatches.forEach(match => {
+        const colorParams = match[1];
+        if (!colorGroups[colorParams]) {
+            colorGroups[colorParams] = [];
+        }
+        colorGroups[colorParams].push(match[0]);
+    });
+    
+    Object.keys(colorGroups).forEach(colorParams => {
+        const matches = colorGroups[colorParams];
+        const firstMatch = matches[0];
+        const example = firstMatch.length > 30 ? firstMatch.substring(0, 30) + '...' : firstMatch;
+        results.push({
+            name: `Color: ${colorParams}`,
+            pattern: `{${colorParams}}text{/}`,
+            count: matches.length,
+            example: example
+        });
+    });
+    
+    // Handle other syntaxes
     syntaxPatterns.forEach(syntax => {
         const matches = [...cellContent.matchAll(syntax.regex)];
         if (matches.length > 0) {
