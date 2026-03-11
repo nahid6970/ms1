@@ -3447,7 +3447,7 @@ Markdown Table Styles */
     padding: 12px;
     box-shadow: 0 8px 24px rgba(0, 123, 255, 0.3);
     z-index: 10000;
-    min-width: 320px;
+    min-width: 480px;
     animation: quickFormatterFadeIn 0.2s ease-out;
 }
 
@@ -3487,7 +3487,7 @@ Markdown Table Styles */
 
 .quick-formatter-options {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(8, 1fr);
     gap: 8px;
 }
 
@@ -3748,7 +3748,7 @@ Markdown Table Styles */
 
 .color-swatches {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(8, 1fr);
     gap: 6px;
 }
 
@@ -3819,7 +3819,7 @@ Markdown Table Styles */
 
 .color-history {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(8, 1fr);
     gap: 6px;
 }
 
