@@ -15725,6 +15725,265 @@ function moveSyntaxToFirst(selectedIndex, foundSyntaxes, originalSelectedText) {
 }
 
 // ==========================================
+// SYNTAX REPLACER FEATURE
+// ==========================================
+
+function showSyntaxReplacer(event) {
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+
+    if (!quickFormatterTarget) return;
+
+    // Get the cell's full content
+    let cellContent = '';
+    if (quickFormatterSelection.isContentEditable) {
+        const actualInput = quickFormatterTarget.previousElementSibling;
+        if (actualInput && (actualInput.tagName === 'INPUT' || actualInput.tagName === 'TEXTAREA')) {
+            cellContent = actualInput.value;
+        }
+    } else {
+        cellContent = quickFormatterTarget.value;
+    }
+
+    // Save target and selection
+    const savedTarget = quickFormatterTarget;
+    const savedSelection = quickFormatterSelection;
+    
+    // Close F3 formatter
+    const formatter = document.getElementById('quickFormatter');
+    if (formatter) {
+        formatter.style.setProperty('display', 'none', 'important');
+    }
+    closeQuickFormatter();
+    
+    // Restore state
+    quickFormatterTarget = savedTarget;
+    quickFormatterSelection = savedSelection;
+
+    // Find all syntaxes in cell
+    const foundSyntaxes = findAllSyntaxesInCell(cellContent);
+    
+    // Populate dropdown
+    const dropdown = document.getElementById('findSyntaxDropdown');
+    dropdown.innerHTML = '<option value="">-- Select found syntax --</option>';
+    foundSyntaxes.forEach(syntax => {
+        const option = document.createElement('option');
+        option.value = syntax.pattern;
+        option.textContent = `${syntax.name} (${syntax.count}x) - ${syntax.example}`;
+        dropdown.appendChild(option);
+    });
+
+    // Clear inputs
+    document.getElementById('findSyntaxInput').value = '';
+    document.getElementById('replaceSyntaxInput').value = '';
+    document.getElementById('syntaxReplacePreview').style.display = 'none';
+
+    // Show modal
+    const modal = document.getElementById('syntaxReplacerModal');
+    modal.style.display = 'flex';
+    modal.style.alignItems = 'center';
+    modal.style.justifyContent = 'center';
+
+    // Add input listeners for preview
+    const findInput = document.getElementById('findSyntaxInput');
+    const replaceInput = document.getElementById('replaceSyntaxInput');
+    
+    const updatePreview = () => {
+        const findPattern = findInput.value;
+        const replacePattern = replaceInput.value;
+        
+        if (findPattern && replacePattern) {
+            const preview = generateSyntaxReplacePreview(cellContent, findPattern, replacePattern);
+            const previewDiv = document.getElementById('syntaxReplacePreview');
+            const previewContent = document.getElementById('syntaxReplacePreviewContent');
+            
+            if (preview.count > 0) {
+                previewContent.innerHTML = `<div style="color: #666; margin-bottom: 5px;">Found ${preview.count} occurrence(s)</div>` +
+                    `<div style="color: #d00;">- ${escapeHtml(preview.example.before)}</div>` +
+                    `<div style="color: #0a0;">+ ${escapeHtml(preview.example.after)}</div>`;
+                previewDiv.style.display = 'block';
+            } else {
+                previewContent.innerHTML = '<div style="color: #999;">No matches found</div>';
+                previewDiv.style.display = 'block';
+            }
+        } else {
+            document.getElementById('syntaxReplacePreview').style.display = 'none';
+        }
+    };
+    
+    findInput.addEventListener('input', updatePreview);
+    replaceInput.addEventListener('input', updatePreview);
+}
+
+function findAllSyntaxesInCell(cellContent) {
+    const syntaxPatterns = [
+        { name: 'Custom Color', regex: /\{[^}]+\}([^{]+)\{\/\}/g, pattern: '{fg:#color}text{/}' },
+        { name: 'Bold', regex: /\*\*([^*]+)\*\*/g, pattern: '**text**' },
+        { name: 'Italic', regex: /@@([^@]+)@@/g, pattern: '@@text@@' },
+        { name: 'Underline', regex: /__([^_]+)__/g, pattern: '__text__' },
+        { name: 'Strikethrough', regex: /~~([^~]+)~~/g, pattern: '~~text~~' },
+        { name: 'Heading', regex: /##([^#]+)##/g, pattern: '##text##' },
+        { name: 'Small', regex: /\.\.([^.]+)\.\./g, pattern: '..text..' },
+        { name: 'Wavy Underline', regex: /_\.([^_]+)\._/g, pattern: '_.text._' },
+        { name: 'Code', regex: /`([^`]+)`/g, pattern: '`text`' },
+        { name: 'Black Highlight', regex: /==([^=]+)==/g, pattern: '==text==' },
+        { name: 'Red Highlight', regex: /!!([^!]+)!!/g, pattern: '!!text!!' },
+        { name: 'Blue Highlight', regex: /\?\?([^?]+)\?\?/g, pattern: '??text??' },
+        { name: 'Border Box', regex: /#[A-Z]+#([^#]+)#\/#/g, pattern: '#R#text#/#' },
+        { name: 'Font Size', regex: /#[\d.]+#([^#]+)#\/#/g, pattern: '#2#text#/#' },
+        { name: 'Title Text', regex: /:::(?:[^:]+:::)?([^:]+):::/g, pattern: ':::text:::' }
+    ];
+
+    const results = [];
+    
+    syntaxPatterns.forEach(syntax => {
+        const matches = [...cellContent.matchAll(syntax.regex)];
+        if (matches.length > 0) {
+            const firstMatch = matches[0][0];
+            const example = firstMatch.length > 30 ? firstMatch.substring(0, 30) + '...' : firstMatch;
+            results.push({
+                name: syntax.name,
+                pattern: syntax.pattern,
+                count: matches.length,
+                example: example
+            });
+        }
+    });
+
+    return results;
+}
+
+function selectFoundSyntax() {
+    const dropdown = document.getElementById('findSyntaxDropdown');
+    const findInput = document.getElementById('findSyntaxInput');
+    findInput.value = dropdown.value;
+    
+    // Trigger preview update
+    const event = new Event('input', { bubbles: true });
+    findInput.dispatchEvent(event);
+}
+
+function setReplaceSyntax(syntax) {
+    const replaceInput = document.getElementById('replaceSyntaxInput');
+    replaceInput.value = syntax;
+    
+    // Trigger preview update
+    const event = new Event('input', { bubbles: true });
+    replaceInput.dispatchEvent(event);
+}
+
+function closeSyntaxReplacerModal() {
+    document.getElementById('syntaxReplacerModal').style.display = 'none';
+    quickFormatterTarget = null;
+    quickFormatterSelection = null;
+}
+
+function generateSyntaxReplacePreview(cellContent, findPattern, replacePattern) {
+    // Extract the content placeholder from find pattern
+    const contentMatch = findPattern.match(/text/i);
+    if (!contentMatch) {
+        return { count: 0, example: { before: '', after: '' } };
+    }
+
+    // Build regex from find pattern
+    const escapedPattern = findPattern
+        .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+        .replace(/text/gi, '(.+?)');
+    
+    const regex = new RegExp(escapedPattern, 'g');
+    const matches = [...cellContent.matchAll(regex)];
+    
+    if (matches.length === 0) {
+        return { count: 0, example: { before: '', after: '' } };
+    }
+
+    // Get first match for preview
+    const firstMatch = matches[0];
+    const capturedContent = firstMatch[1];
+    const before = firstMatch[0];
+    const after = replacePattern.replace(/text/gi, capturedContent);
+
+    return {
+        count: matches.length,
+        example: { before, after }
+    };
+}
+
+function applySyntaxReplace() {
+    if (!quickFormatterTarget) return;
+
+    const findPattern = document.getElementById('findSyntaxInput').value;
+    const replacePattern = document.getElementById('replaceSyntaxInput').value;
+
+    if (!findPattern || !replacePattern) {
+        showToast('Please enter both find and replace patterns', 'warning');
+        return;
+    }
+
+    // Get the cell's full content
+    let cellContent = '';
+    const input = quickFormatterTarget;
+    
+    if (quickFormatterSelection.isContentEditable) {
+        const actualInput = input.previousElementSibling;
+        if (actualInput && (actualInput.tagName === 'INPUT' || actualInput.tagName === 'TEXTAREA')) {
+            cellContent = actualInput.value;
+        }
+    } else {
+        cellContent = input.value;
+    }
+
+    // Build regex from find pattern
+    const contentMatch = findPattern.match(/text/i);
+    if (!contentMatch) {
+        showToast('Find pattern must contain "text" as placeholder', 'warning');
+        return;
+    }
+
+    const escapedPattern = findPattern
+        .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+        .replace(/text/gi, '(.+?)');
+    
+    const regex = new RegExp(escapedPattern, 'g');
+    
+    // Replace all occurrences
+    let count = 0;
+    const newContent = cellContent.replace(regex, (match, capturedContent) => {
+        count++;
+        return replacePattern.replace(/text/gi, capturedContent);
+    });
+
+    if (count === 0) {
+        showToast('No matches found', 'info');
+        return;
+    }
+
+    // Update the cell content
+    if (quickFormatterSelection.isContentEditable) {
+        const actualInput = input.previousElementSibling;
+        if (actualInput && (actualInput.tagName === 'INPUT' || actualInput.tagName === 'TEXTAREA')) {
+            actualInput.value = newContent;
+            const changeEvent = new Event('input', { bubbles: true });
+            actualInput.dispatchEvent(changeEvent);
+        }
+    } else {
+        input.value = newContent;
+        const changeEvent = new Event('input', { bubbles: true });
+        input.dispatchEvent(changeEvent);
+    }
+
+    closeSyntaxReplacerModal();
+    showToast(`Replaced ${count} occurrence(s)`, 'success');
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+// ==========================================
 // PDF EXPORT FEATURE
 // ==========================================
 
