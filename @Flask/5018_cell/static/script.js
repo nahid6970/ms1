@@ -15775,6 +15775,26 @@ function showSyntaxReplacer(event) {
         dropdown.appendChild(option);
     });
 
+    // Populate custom syntax buttons
+    const buttonContainer = document.getElementById('quickHighlightButtons');
+    const existingCustomButtons = buttonContainer.querySelectorAll('.custom-syntax-replace-btn');
+    existingCustomButtons.forEach(btn => btn.remove());
+    
+    if (typeof customColorSyntaxes !== 'undefined' && customColorSyntaxes.length > 0) {
+        customColorSyntaxes.forEach(syntax => {
+            if (!syntax.marker) return;
+            const button = document.createElement('button');
+            button.className = 'custom-syntax-replace-btn';
+            button.onclick = () => setReplaceSyntax(`${syntax.marker}text${syntax.marker}`);
+            button.style.cssText = `padding: 4px 12px; background: ${syntax.bgColor}; color: ${syntax.fgColor}; border: none; border-radius: 3px; cursor: pointer; font-size: 11px;`;
+            if (syntax.isBold) button.style.fontWeight = 'bold';
+            if (syntax.isItalic) button.style.fontStyle = 'italic';
+            if (syntax.isUnderline) button.style.textDecoration = 'underline';
+            button.textContent = syntax.marker;
+            buttonContainer.appendChild(button);
+        });
+    }
+
     // Clear inputs
     document.getElementById('findSyntaxInput').value = '';
     document.getElementById('replaceSyntaxInput').value = '';
