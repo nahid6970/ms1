@@ -57,7 +57,7 @@ When text is selected, press F3 to open the formatter with these options:
 - **Lines ↔ Comma** - Convert between formats
 - **🔍 Search in Google** - Search selected text
 - **🎯 Select all matching** - Multi-cursor for all occurrences
-- **🔍📜 Syntax Inspector** - Inspect nested syntaxes and reorder them
+- **🔄 Find & Replace Syntax** - Replace syntax patterns in entire cell- **🔍📜 Syntax Inspector** - Inspect nested syntaxes and reorder them
 
 ---
 

@@ -1,5 +1,40 @@
 # Recent Development Log
 
+
+## [2026-03-11 12:42] - Find & Replace Syntax Feature in F3 Formatter
+
+**Session Duration:** 0.5 hours
+
+**What We Accomplished:**
+
+### 🔄 New Find & Replace Syntax Feature
+- **Feature**: Added a powerful syntax replacement tool in F3 Quick Formatter
+- **Button**: 🔄 icon button opens a modal for finding and replacing syntax patterns
+- **Smart Detection**: 
+  - Automatically scans entire cell and lists all found syntaxes
+  - Groups custom colors by exact color values (e.g., `{fg:#ff0000}` separate from `{fg:#ffffff;bg:#000000}`)
+  - Detects all standard syntaxes (bold, italic, highlights, etc.)
+  - Detects user-defined custom syntax markers
+- **Quick Replace Buttons**: 
+  - One-click buttons for common replacements (Black, Red, Blue, Bold, Italic, Underline)
+  - Dynamically shows all custom syntax markers with their colors
+- **Live Preview**: Shows occurrence count and before/after example
+- **Pattern Matching**: Uses `text` as placeholder to preserve content while changing syntax
+
+**Files Modified:**
+- `templates/index.html` - Added 🔄 button and Syntax Replacer modal
+- `static/script.js` - Added `showSyntaxReplacer()`, `findAllSyntaxesInCell()`, `applySyntaxReplace()`, and helper functions
+- `md/KEYBOARD_SHORTCUTS.md` - Added feature to F3 shortcuts list
+- `md/FIND_REPLACE_SYNTAX.md` - Created comprehensive feature documentation
+
+**Current Status:**
+- ✅ Find & Replace Syntax feature working
+- ✅ Detects all syntax types including custom ones
+- ✅ Live preview shows changes before applying
+- ✅ Custom syntax buttons appear dynamically
+
+**Known Issues:**
+- None
 ## [2026-03-10 14:15] - Fixed Title Spacing & Table Merging Issues
 
 **Session Duration:** 0.4 hours
