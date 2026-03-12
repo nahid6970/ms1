@@ -315,6 +315,11 @@
             "kind": "Exe",
             "id": "AutoHotkey.exe",
             "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Exe",
+            "id": "WhatsApp.Root.exe",
+            "matching_strategy": "Legacy"
         }
     ]
 }
