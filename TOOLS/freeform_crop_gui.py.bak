@@ -365,28 +365,18 @@ class FreeformCropGUI(QMainWindow):
             QMessageBox.critical(self, "Error", "Crop failed")
             return
         
+        default_name = "cropped_output.png"
         if self.current_image_path:
-            original_path = Path(self.current_image_path)
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            save_path = original_path.parent / f"{original_path.stem}_{timestamp}{original_path.suffix}"
-            cv2.imwrite(str(save_path), result)
+            stem = Path(self.current_image_path).stem
+            default_name = f"{stem}_cropped.png"
+        
+        save_path, _ = QFileDialog.getSaveFileName(
+            self, "Save Cropped Image", default_name, "PNG (*.png);;JPEG (*.jpg);;All Files (*)"
+        )
+        
+        if save_path:
+            cv2.imwrite(save_path, result)
             QMessageBox.information(self, "Success", f"Saved to:\n{save_path}")
-        else:
-            QMessageBox.warning(self, "Warning", "No source path available")
-    
-    def dragEnterEvent(self, event):
-        if event.mimeData().hasUrls():
-            event.acceptProposedAction()
-    
-    def dropEvent(self, event):
-        urls = event.mimeData().urls()
-        if urls:
-            file_path = urls[0].toLocalFile()
-            if self.canvas.load_image(file_path):
-                self.current_image_path = file_path
-                self.info_label.setText(f"Loaded: {Path(file_path).name} | Phase 1: Set 4 corners")
-            else:
-                QMessageBox.critical(self, "Error", "Failed to load image")
     
     def restart_app(self):
         QApplication.quit()
