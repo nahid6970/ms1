@@ -61,5 +61,16 @@ async function extractSubtitles(data) {
     throw new Error(response.error || 'Unknown error');
   }
   
+  if (response.content) {
+    chrome.storage.local.set({ subtitleContent: response.content }, () => {
+      chrome.windows.create({
+        url: 'viewer.html',
+        type: 'popup',
+        width: 800,
+        height: 600
+      });
+    });
+  }
+  
   return response;
 }

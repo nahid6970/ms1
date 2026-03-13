@@ -249,7 +249,8 @@ def execute_download(message):
         send_message({
             "success": True, 
             "message": "Subtitles extracted successfully",
-            "clipboardCopied": clipboard_copied
+            "clipboardCopied": clipboard_copied,
+            "content": txt_content if txt_content else None
         })
         
     except Exception as e:
