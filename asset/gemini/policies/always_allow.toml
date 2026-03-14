@@ -18,9 +18,8 @@ priority = 999
 
 [[rule]]
 # Wildcard to match ANY tool from ANY MCP server
-# The documentation says 'mcpName__toolName' is the format
-# So '*__*' should match any tool on any server
-toolName = "*__*"
+# The deprecated 'mcpName__toolName' syntax is replaced by mcpName = "*"
+mcpName = "*"
 decision = "allow"
 priority = 999
 
