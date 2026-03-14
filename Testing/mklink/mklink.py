@@ -573,49 +573,52 @@ class SymlinkManager(QMainWindow):
         items = link_entry.get("items", [])
         copy_mode = link_entry.get("copy_mode", False)
         
+        if not items:
+            return
+
+        # 1. PRE-CHECK FOR CONFLICTS
+        conflicts = []
+        for item in items:
+            fake = os.path.normpath(item["fake"])
+            if os.path.exists(fake) or os.path.lexists(fake):
+                conflicts.append(fake)
+        
+        if conflicts:
+            msg = f"The following {len(conflicts)} item(s) already exist:\n\n"
+            msg += "\n".join([f"• {c}" for c in conflicts[:10]])
+            if len(conflicts) > 10:
+                msg += f"\n... and {len(conflicts)-10} more."
+            msg += "\n\nOverwrite all and proceed?"
+            
+            reply = QMessageBox.question(self, "Conflict Detected", msg, 
+                                       QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+            if reply != QMessageBox.StandardButton.Yes:
+                return
+
+        # 2. EXECUTION
         success_count = 0
+        error_logs = []
+        
         for item in items:
             target = os.path.normpath(item["target"])
             fake = os.path.normpath(item["fake"])
             link_type = item.get("type", "folder")
 
             if not os.path.exists(target):
-                QMessageBox.critical(self, "Error", f"Target path does not exist:\n{target}")
+                error_logs.append(f"Target missing: {target}")
                 continue
 
-            # Handle existing
-            if os.path.exists(fake) or os.path.lexists(fake):
-                # If copy mode, check if we need to replace a link with a copy
-                if copy_mode:
-                    if os.path.islink(fake) or self.is_junction(fake):
-                         reply = QMessageBox.question(self, "Replace Link?", 
-                                                    f"A link exists at {fake}. Replace with copy?",
-                                                    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
-                         if reply != QMessageBox.StandardButton.Yes: continue
-                    else:
-                         # It's a real file/folder. Warn overwrite?
-                         reply = QMessageBox.question(self, "Overwrite?", 
-                                                    f"File/Folder exists at {fake}. Overwrite?",
-                                                    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
-                         if reply != QMessageBox.StandardButton.Yes: continue
-                else:
-                    is_proper_link = os.path.islink(fake) or (link_type == "folder" and self.is_junction(fake))
-                    if not is_proper_link:
-                         reply = QMessageBox.question(self, "File Exists", 
-                                                    f"A {link_type} already exists at {fake}. Delete and replace?",
-                                                    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
-                         if reply != QMessageBox.StandardButton.Yes:
-                             continue
-                
-                try:
+            # Remove existing if any (permission already granted above)
+            try:
+                if os.path.exists(fake) or os.path.lexists(fake):
                     if os.path.isdir(fake) and not os.path.islink(fake) and not self.is_junction(fake):
                         shutil.rmtree(fake)
                     else:
                         if os.path.isdir(fake): os.rmdir(fake)
                         else: os.remove(fake)
-                except Exception as e:
-                    QMessageBox.critical(self, "Delete Error", f"Failed to remove existing file:\n{str(e)}")
-                    continue
+            except Exception as e:
+                error_logs.append(f"Failed to remove {fake}: {str(e)}")
+                continue
 
             # Create
             try:
@@ -643,14 +646,28 @@ class SymlinkManager(QMainWindow):
                             if ret > 32:
                                 success_count += 1
                             else:
-                                QMessageBox.critical(self, "Error", "Failed to elevate privileges.")
+                                error_logs.append(f"Elevation failed for: {fake}")
                         else:
-                            QMessageBox.critical(self, "Error", f"Cmd failed for {fake}:\n{err}")
-
+                            error_logs.append(f"Cmd failed for {fake}: {err}")
             except Exception as e:
-                QMessageBox.critical(self, "Error", f"Unexpected error:\n{str(e)}")
+                error_logs.append(f"Unexpected error for {fake}: {str(e)}")
         
-        if success_count == len(items):
+        # 3. SUMMARY REPORT
+        if error_logs:
+            report = f"Processed {len(items)} items:\n"
+            report += f"✅ Success: {success_count}\n"
+            report += f"❌ Failed: {len(error_logs)}\n\n"
+            report += "Errors:\n" + "\n".join([f"• {e}" for e in error_logs])
+            
+            # Show in a scrollable message box if it's long
+            msg_box = QMessageBox(self)
+            msg_box.setWindowTitle("Operation Results")
+            msg_box.setText(f"Completed with {len(error_logs)} errors.")
+            msg_box.setInformativeText("See details below.")
+            msg_box.setDetailedText(report)
+            msg_box.setIcon(QMessageBox.Icon.Warning)
+            msg_box.exec()
+        else:
             op = "copied" if copy_mode else "linked"
             QMessageBox.information(self, "Success", f"All {len(items)} items {op} successfully.")
         
