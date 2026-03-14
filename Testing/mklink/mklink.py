@@ -82,22 +82,50 @@ STYLESHEET = f"""
         padding: 0 5px;
     }}
     
-    /* SCROLL AREA */
+    /* SCROLL AREA & SCROLLBARS */
     QScrollArea {{
         background: transparent;
         border: none;
     }}
     QScrollBar:vertical {{
-        border: none;
-        background: {CP_PANEL};
+        border: 1px solid #3a3a3a;
+        background: #111111;
         width: 10px;
-        margin: 0px 0px 0px 0px;
+        margin: 0px;
     }}
     QScrollBar::handle:vertical {{
-        background: {CP_DIM};
+        background: #00F0FF;
         min-height: 20px;
     }}
+    QScrollBar::handle:vertical:hover {{
+        background: #FCEE0A;
+    }}
     QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{
+        background: none;
+        height: 0px;
+    }}
+    QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {{
+        background: none;
+    }}
+
+    QScrollBar:horizontal {{
+        border: 1px solid #3a3a3a;
+        background: #111111;
+        height: 10px;
+        margin: 0px;
+    }}
+    QScrollBar::handle:horizontal {{
+        background: #00F0FF;
+        min-width: 20px;
+    }}
+    QScrollBar::handle:horizontal:hover {{
+        background: #FCEE0A;
+    }}
+    QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {{
+        background: none;
+        width: 0px;
+    }}
+    QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {{
         background: none;
     }}
     
