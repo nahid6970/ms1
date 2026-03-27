@@ -506,16 +506,16 @@ SendText("Hello World")"""
         browser.setOpenExternalLinks(True)
         
         # Load the reference content
-        ref_file = os.path.join(SCRIPT_DIR, "AHK_COMMAND_REFERENCE.md")
+        ref_file = os.path.join(SCRIPT_DIR, "README.md")
         if os.path.exists(ref_file):
             try:
                 with open(ref_file, 'r', encoding='utf-8') as f:
                     content = f.read()
                     browser.setMarkdown(content)
             except Exception as e:
-                browser.setPlainText(f"Error loading reference: {e}\n\nPlease check AHK_COMMAND_REFERENCE.md file.")
+                browser.setPlainText(f"Error loading reference: {e}\n\nPlease check README.md file.")
         else:
-            browser.setPlainText("Command reference file not found.\n\nPlease ensure AHK_COMMAND_REFERENCE.md exists in the script directory.")
+            browser.setPlainText("Command reference file not found.\n\nPlease ensure README.md exists in the script directory.")
         
         layout.addWidget(browser)
         
