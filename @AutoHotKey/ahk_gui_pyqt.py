@@ -9,8 +9,9 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QVBoxLayout, QHBoxLayout
 from PyQt6.QtCore import Qt, pyqtSignal, QSettings, QPoint, QSize
 from PyQt6.QtGui import QFont, QTextCursor, QKeySequence
 
-AHK_SCRIPT_PATH = "ahk_v2.ahk"
-SHORTCUTS_JSON_PATH = "ahk_shortcuts.json"
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+AHK_SCRIPT_PATH = os.path.join(SCRIPT_DIR, "ahk_v2.ahk")
+SHORTCUTS_JSON_PATH = os.path.join(SCRIPT_DIR, "ahk_shortcuts.json")
 
 class ShortcutBuilderPopup(QDialog):
     def __init__(self, parent=None, initial_value=""):
@@ -505,7 +506,7 @@ SendText("Hello World")"""
         browser.setOpenExternalLinks(True)
         
         # Load the reference content
-        ref_file = "AHK_COMMAND_REFERENCE.md"
+        ref_file = os.path.join(SCRIPT_DIR, "AHK_COMMAND_REFERENCE.md")
         if os.path.exists(ref_file):
             try:
                 with open(ref_file, 'r', encoding='utf-8') as f:
@@ -1775,7 +1776,7 @@ class AHKShortcutEditor(QMainWindow):
                         output_lines.append(f":X:{trigger}::Paste('{safe_replacement}')")
                     output_lines.append("")
 
-            output_file = "generated_shortcuts.ahk"
+            output_file = os.path.join(SCRIPT_DIR, "generated_shortcuts.ahk")
             with open(output_file, 'w', encoding='utf-8') as f:
                 f.write('\n'.join(output_lines))
 
