@@ -8,7 +8,7 @@ title Fresh Setup - Winget + PWSH + Scoop
 net session >nul 2>&1
 if %errorlevel% neq 0 (
     echo [*] Requesting Administrator privileges...
-    powershell -NoProfile -Command "Start-Process cmd -ArgumentList '/c \"%~f0\"' -Verb RunAs"
+    powershell -NoProfile -Command "Start-Process cmd -ArgumentList '/k \"%~f0\"' -Verb RunAs"
     exit /b
 )
 
