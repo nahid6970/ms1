@@ -5,14 +5,10 @@ import importlib.metadata
 
 def install_uv():
     print("--------------------------------------------------")
-    print("Step 1: Installing/Upgrading 'uv' package manager...")
+    print("Step 1: Installing 'uv' package manager...")
     print("--------------------------------------------------")
     try:
-        # Upgrade pip, wheel, and setuptools first
-        print("Upgrading pip, wheel, and setuptools...")
-        subprocess.check_call([sys.executable, "-m", "pip", "install", "--upgrade", "pip", "wheel", "setuptools"])
-        
-        # Install uv
+        # Skip the pip/wheel/setuptools upgrade step that is failing
         print("Installing uv...")
         subprocess.check_call([sys.executable, "-m", "pip", "install", "uv"])
         print("\n'uv' installed successfully.")
