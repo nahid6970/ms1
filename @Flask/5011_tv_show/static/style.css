@@ -401,6 +401,22 @@ body {
     justify-content: space-between;
     align-items: center;
     border: 1px solid transparent;
+    gap: 15px;
+}
+
+.episode-item > div:first-child {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+    flex: 1;
+}
+
+.episode-item span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
 }
 
 .episode-item.episode-watched { background: rgba(29, 185, 84, 0.08); border-color: rgba(29, 185, 84, 0.2); }

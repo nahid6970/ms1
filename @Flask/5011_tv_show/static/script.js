@@ -219,13 +219,13 @@ async function openEpisodesPopup(event, showId, showTitle) {
                 if (ep.watched) li.style.background = 'rgba(29, 185, 84, 0.1)';
 
                 li.innerHTML = `
-                    <div style="display: flex; align-items: center; gap: 12px;">
+                    <div>
                         <input type="checkbox" ${ep.watched ? 'checked' : ''} onchange="toggleWatched(${showId}, ${ep.id})">
                         <span>${ep.title}</span>
                     </div>
                     <div style="display: flex; gap: 8px;">
-                        <div class="edit-dot" onclick="openEditEpisodeModal(${showId}, ${ep.id})" style="width: 10px; height: 10px; border-radius: 50%; background: #3498db; cursor: pointer;"></div>
-                        <div class="delete-dot" onclick="deleteEpisode(${showId}, ${ep.id})" style="width: 10px; height: 10px; border-radius: 50%; background: #e74c3c; cursor: pointer;"></div>
+                        <div class="edit-dot" onclick="openEditEpisodeModal(${showId}, ${ep.id})"></div>
+                        <div class="delete-dot" onclick="deleteEpisode(${showId}, ${ep.id})"></div>
                     </div>
                 `;
                 ul.appendChild(li);
