@@ -572,17 +572,24 @@ html.show-hidden-shows .show-card.ended-completed { display: flex; }
     flex-direction: column;
     gap: 2px;
     flex-grow: 1;
+    min-width: 0; /* Required for ellipsis to work in flexbox */
 }
 
 .missing-show-title {
     font-weight: bold;
     color: #1db954;
     font-size: 0.9em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .missing-episode-title {
     color: #eee;
     font-size: 0.95em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .missing-episode-actions {
