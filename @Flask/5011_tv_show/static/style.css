@@ -290,7 +290,22 @@ body {
     background: linear-gradient(to bottom, rgba(0,0,0,0.6), transparent);
 }
 
-.star-svg { width: 20px; height: 20px; fill: #ffd700; }
+.star-svg { 
+    width: 22px; 
+    height: 22px; 
+    fill: #ffd700; 
+    stroke: rgba(0,0,0,0.8);
+    stroke-width: 1px;
+    filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5));
+}
+
+.stars-container.rating-4 .star-svg {
+    fill: #00d2ff;
+}
+
+.stars-container.rating-5 .star-svg {
+    fill: #4ade80;
+}
 
 .card-info {
     background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
@@ -362,12 +377,13 @@ body {
 .modal-content {
     background: #181818;
     margin: 5% auto;
-    padding: 40px;
+    padding: 25px;
     border: 1px solid #333;
     width: 90%;
-    max-width: 500px;
-    border-radius: 25px;
+    max-width: 450px;
+    border-radius: 15px;
     position: relative;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.6);
 }
 
 .episodes-modal-content {
@@ -378,24 +394,94 @@ body {
 .episodes-modal-content .episode-list {
     max-height: 60vh;
     overflow-y: auto;
-    margin-top: 20px;
+    margin-top: 15px;
 }
 
-.close { position: absolute; right: 25px; top: 20px; font-size: 30px; color: #666; cursor: pointer; }
+.close { position: absolute; right: 15px; top: 10px; font-size: 24px; color: #666; cursor: pointer; }
 .close:hover { color: white; }
+
+h2 { margin-bottom: 20px; font-size: 1.4rem; }
+
+label {
+    display: block;
+    text-align: left;
+    font-size: 0.85rem;
+    color: #888;
+    margin-bottom: 4px;
+}
 
 input[type="text"], input[type="number"], input[type="url"], select {
     width: 100%;
-    padding: 14px;
-    margin: 10px 0 20px;
+    padding: 10px 12px;
+    margin: 0 0 15px;
     background: #252525;
     border: 1px solid #333;
     color: white;
-    border-radius: 10px;
+    border-radius: 8px;
     box-sizing: border-box;
+    font-size: 0.95rem;
 }
 
-.setting-item { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; border-bottom: 1px solid #222; }
+.setting-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #222; }
+.setting-item label { margin-bottom: 0; color: #eee; font-size: 0.95rem; }
+
+/* Rating Group Modern Styling */
+.rating-group {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin: 15px 0 25px;
+}
+
+.rating-group label {
+    cursor: pointer;
+}
+
+.rating-group input[type="radio"] {
+    display: none;
+}
+
+.rating-group label span {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    line-height: 40px;
+    text-align: center;
+    background: #252525;
+    border: 1px solid #333;
+    border-radius: 50%;
+    color: #666;
+    font-weight: bold;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 1rem;
+}
+
+.rating-group label:hover span {
+    background: #333;
+    color: #eee;
+    transform: translateY(-2px);
+}
+
+.rating-group input[type="radio"]:checked + span {
+    background: #ffd700;
+    color: #000;
+    border-color: #ffd700;
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+    transform: scale(1.1);
+}
+
+/* Color coding for high ratings */
+.rating-group label:nth-child(4) input[type="radio"]:checked + span {
+    background: #00d2ff;
+    border-color: #00d2ff;
+    box-shadow: 0 4px 15px rgba(0, 210, 255, 0.4);
+}
+
+.rating-group label:nth-child(5) input[type="radio"]:checked + span {
+    background: #4ade80;
+    border-color: #4ade80;
+    box-shadow: 0 4px 15px rgba(74, 222, 128, 0.4);
+}
 
 /* Switch */
 .switch { position: relative; display: inline-block; width: 50px; height: 28px; }
