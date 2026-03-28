@@ -231,17 +231,18 @@ class SettingsPanel(QGroupBox):
         self.ui_label_w.textChanged.connect(update_callback)
         self.ui_text_w.textChanged.connect(update_callback)
 
-        def row(*pairs):
+        def row(field1, *pairs):
             w = QWidget(); h = QHBoxLayout(w); h.setContentsMargins(0,0,0,0)
+            h.addWidget(field1)
             for lbl, field in pairs:
                 h.addWidget(QLabel(lbl)); h.addWidget(field)
             return w
 
-        self.layout.addRow("Auto-Hide / Sleep (ms):", row(("", self.auto_hide), ("Sleep:", self.sleep_delay)))
-        self.layout.addRow("Font Size:", row(("", self.font_size)))
-        self.layout.addRow("UI Label / Text Width:", row(("L:", self.ui_label_w), ("T:", self.ui_text_w)))
-        self.layout.addRow("Title H / W:", row(("H:", self.title_h), ("W:", self.title_w)))
-        self.layout.addRow("Button H / W:", row(("H:", self.btn_h), ("W:", self.btn_w)))
+        self.layout.addRow("Auto-Hide / Sleep (ms):", row(self.auto_hide, ("Sleep:", self.sleep_delay)))
+        self.layout.addRow("Font Size:", self.font_size)
+        self.layout.addRow("UI Label / Text Width:", row(self.ui_label_w, ("T:", self.ui_text_w)))
+        self.layout.addRow("Title H / W:", row(self.title_h, ("W:", self.title_w)))
+        self.layout.addRow("Button H / W:", row(self.btn_h, ("W:", self.btn_w)))
 
 class App(QMainWindow):
     def __init__(self):
