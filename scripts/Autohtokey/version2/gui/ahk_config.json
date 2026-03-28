@@ -1,31 +1,40 @@
-[
-    {
-        "title": "GG",
-        "buttons": [
-            {
-                "label": "ez",
-                "text": "asdasdasdasdadsadasd",
-                "color": "0000FF",
-                "text_color": "FF0B75"
-            },
-            {
-                "label": "asdasdasd",
-                "text": "asdasdasdasdasd",
-                "color": "00CCFF",
-                "text_color": "000000"
-            },
-            {
-                "label": "asdasd",
-                "text": "asdasdasdasd",
-                "color": "00CCFF",
-                "text_color": "000000"
-            },
-            {
-                "label": "asdasd",
-                "text": "asdasdasdad asdasd as asda ds asd asda ds asd asd ad as dsdasd asda sdas s sasd as",
-                "color": "00CCFF",
-                "text_color": "000000"
-            }
-        ]
-    }
-]
+{
+    "settings": {
+        "auto_hide": "True",
+        "sleep_delay": "200",
+        "font_size": "12",
+        "ui_label_w": "150",
+        "ui_text_w": "550"
+    },
+    "rows": [
+        {
+            "title": "GG",
+            "buttons": [
+                {
+                    "label": "ez",
+                    "text": "asdasdasdasdadsadasd",
+                    "color": "0000FF",
+                    "text_color": "FF0B75"
+                },
+                {
+                    "label": "asdasdasd",
+                    "text": "asdasdasdasdasd",
+                    "color": "00CCFF",
+                    "text_color": "000000"
+                },
+                {
+                    "label": "asdasd",
+                    "text": "asdasdasdasd",
+                    "color": "00CCFF",
+                    "text_color": "000000"
+                },
+                {
+                    "label": "asdasd",
+                    "text": "asdasdasdad asdasd as asda ds asd asda ds asd asd ad as dsdasd asda sdas s sasd as",
+                    "color": "00CCFF",
+                    "text_color": "000000"
+                }
+            ]
+        }
+    ]
+}

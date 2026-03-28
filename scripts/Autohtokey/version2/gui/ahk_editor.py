@@ -30,8 +30,9 @@ CONFIG_FILE = os.path.join(SCRIPT_DIR, "ahk_config.json")
 AHK_OUTPUT = os.path.join(SCRIPT_DIR, "generate_AHK.ahk")
 
 class RowWidget(QFrame):
-    def __init__(self, data=None, on_remove=None):
+    def __init__(self, data=None, on_remove=None, parent_app=None):
         super().__init__()
+        self.parent_app = parent_app
         self.setFrameShape(QFrame.Shape.StyledPanel)
         self.setStyleSheet(f"border: 1px solid {CP_DIM}; background-color: {CP_PANEL}; margin-bottom: 5px;")
         self.on_remove = on_remove
@@ -68,6 +69,20 @@ class RowWidget(QFrame):
         else:
             # Default empty button
             self.add_button_ui()
+
+    def refresh_widths(self):
+        if not self.parent_app: return
+        try:
+            lw = int(self.parent_app.settings_panel.ui_label_w.text())
+            tw = int(self.parent_app.settings_panel.ui_text_w.text())
+            for i in range(self.btns_layout.count()):
+                btn_frame = self.btns_layout.itemAt(i).widget()
+                if btn_frame:
+                    inputs = btn_frame.findChildren(QLineEdit)
+                    if len(inputs) >= 2:
+                        inputs[0].setFixedWidth(lw)
+                        inputs[1].setFixedWidth(tw)
+        except: pass
 
     def add_button_ui(self, b_data=None):
         btn_frame = QFrame()
@@ -130,6 +145,7 @@ class RowWidget(QFrame):
         blayout.addWidget(rem_btn)
         
         self.btns_layout.addWidget(btn_frame)
+        self.refresh_widths()
 
     def remove_self(self):
         if self.on_remove:
@@ -155,13 +171,25 @@ class RowWidget(QFrame):
         return row_data
 
 class SettingsPanel(QGroupBox):
-    def __init__(self):
+    def __init__(self, update_callback):
         super().__init__("SETTINGS")
         self.setVisible(False)
         self.layout = QFormLayout(self)
-        self.layout.addRow("Auto-Hide GUI:", QLineEdit("True"))
-        self.layout.addRow("Sleep Delay (ms):", QLineEdit("200"))
-        self.layout.addRow("Font Size:", QLineEdit("12"))
+        
+        self.auto_hide = QLineEdit("True")
+        self.sleep_delay = QLineEdit("200")
+        self.font_size = QLineEdit("12")
+        self.ui_label_w = QLineEdit("80")
+        self.ui_text_w = QLineEdit("200")
+        
+        self.ui_label_w.textChanged.connect(update_callback)
+        self.ui_text_w.textChanged.connect(update_callback)
+
+        self.layout.addRow("Auto-Hide GUI:", self.auto_hide)
+        self.layout.addRow("Sleep Delay (ms):", self.sleep_delay)
+        self.layout.addRow("Font Size:", self.font_size)
+        self.layout.addRow("UI Label Width:", self.ui_label_w)
+        self.layout.addRow("UI Text Width:", self.ui_text_w)
 
 class App(QMainWindow):
     def __init__(self):
@@ -218,7 +246,7 @@ class App(QMainWindow):
         self.main_layout.addLayout(toolbar)
 
         # Settings Panel (Hidden by default)
-        self.settings_panel = SettingsPanel()
+        self.settings_panel = SettingsPanel(self.update_ui_widths)
         self.main_layout.addWidget(self.settings_panel)
 
         # Content Area (Scrollable)
@@ -232,8 +260,12 @@ class App(QMainWindow):
 
         self.load_config()
 
+    def update_ui_widths(self):
+        for row in self.rows:
+            row.refresh_widths()
+
     def add_row(self, data=None):
-        row = RowWidget(data, on_remove=self.remove_row)
+        row = RowWidget(data, on_remove=self.remove_row, parent_app=self)
         self.rows.append(row)
         self.rows_layout.addWidget(row)
 
@@ -252,7 +284,20 @@ class App(QMainWindow):
             try:
                 with open(CONFIG_FILE, "r", encoding="utf-8") as f:
                     data = json.load(f)
-                    for r_data in data:
+                    rows_data = []
+                    if isinstance(data, dict):
+                        if "settings" in data:
+                            s = data["settings"]
+                            if "auto_hide" in s: self.settings_panel.auto_hide.setText(s["auto_hide"])
+                            if "sleep_delay" in s: self.settings_panel.sleep_delay.setText(s["sleep_delay"])
+                            if "font_size" in s: self.settings_panel.font_size.setText(s["font_size"])
+                            if "ui_label_w" in s: self.settings_panel.ui_label_w.setText(s["ui_label_w"])
+                            if "ui_text_w" in s: self.settings_panel.ui_text_w.setText(s["ui_text_w"])
+                        rows_data = data.get("rows", [])
+                    else:
+                        rows_data = data
+                    
+                    for r_data in rows_data:
                         self.add_row(r_data)
             except Exception as e:
                 print(f"Error loading config: {e}")
@@ -261,7 +306,16 @@ class App(QMainWindow):
             self.add_row({"title": "Example Name", "buttons": [{"label": "en", "text": "Hello", "color": "00CCFF"}]})
 
     def save_config(self):
-        data = [r.get_data() for r in self.rows]
+        data = {
+            "settings": {
+                "auto_hide": self.settings_panel.auto_hide.text(),
+                "sleep_delay": self.settings_panel.sleep_delay.text(),
+                "font_size": self.settings_panel.font_size.text(),
+                "ui_label_w": self.settings_panel.ui_label_w.text(),
+                "ui_text_w": self.settings_panel.ui_text_w.text()
+            },
+            "rows": [r.get_data() for r in self.rows]
+        }
         with open(CONFIG_FILE, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=4)
 
