@@ -405,6 +405,7 @@ class App(QMainWindow):
                 ahk_code.append(f'btn := myGui.Add("Text", "x+5 yp w100 h{bh} +Border Center Background{bg}", "{label}")')
                 ahk_code.append(f'btn.SetFont("c{fg}")')
                 ahk_code.append(f'btn.OnEvent("Click", (*) => SendText("{text}"))')
+                ahk_code.append(f'btn.OnEvent("ContextMenu", (*) => (A_Clipboard := "{text}"))')
             
             ahk_code.append("")
 
