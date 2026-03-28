@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, minimum-scale=0.5, maximum-scale=3.0">
     <title>PowerShell Web Terminal</title>
     <link rel="icon" type="image/png" href="https://upload.wikimedia.org/wikipedia/commons/a/af/PowerShell_Core_6.0_icon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -204,7 +204,8 @@
             <span class="profile-indicator profile-not-loaded"></span>
             <span>Profile: Loading...</span>
             <button id="reload-profile-btn" class="reload-btn" title="Reload PowerShell Profile">🔄</button>
-        </div>
+            <button id="zoom-out-btn" class="reload-btn" title="Zoom Out">－</button>
+            <button id="zoom-in-btn" class="reload-btn" title="Zoom In">＋</button>        </div>
     </div>
     
     <div class="terminal-container">
@@ -448,6 +449,19 @@
         });
         
         loadHistory().then(loadProfileStatus).then(() => commandInput.focus());
-    </script>
+
+        // Zoom controls
+        let fontSize = 13;
+        const termOutput = document.getElementById('terminal-output');
+        document.getElementById('zoom-in-btn').addEventListener('click', () => {
+            fontSize = Math.min(fontSize + 1, 22);
+            termOutput.style.fontSize = fontSize + 'px';
+            commandInput.style.fontSize = fontSize + 'px';
+        });
+        document.getElementById('zoom-out-btn').addEventListener('click', () => {
+            fontSize = Math.max(fontSize - 1, 9);
+            termOutput.style.fontSize = fontSize + 'px';
+            commandInput.style.fontSize = fontSize + 'px';
+        });    </script>
 </body>
 </html>
