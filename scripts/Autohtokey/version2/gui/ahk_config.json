@@ -1,96 +1,26 @@
 [
     {
-        "title": "Permanent Address",
+        "title": "GG",
         "buttons": [
             {
-                "label": "P.O",
-                "text": "Radhapur",
+                "label": "ez",
+                "text": "asdasdasdasdadsadasd",
+                "color": "0000FF"
+            },
+            {
+                "label": "asdasdasd",
+                "text": "asdasdasdasdasd",
                 "color": "00CCFF"
             },
             {
-                "label": "P.C",
-                "text": "3706",
-                "color": "FF6666"
-            }
-        ]
-    },
-    {
-        "title": "SCS & HSC Registration",
-        "buttons": [
-            {
-                "label": "Reg",
-                "text": "1110241111",
-                "color": "FFCC00"
-            }
-        ]
-    },
-    {
-        "title": "SSC Roll",
-        "buttons": [
-            {
-                "label": "Y.R 2014",
-                "text": "2014",
+                "label": "asdasd",
+                "text": "asdasdasdasd",
                 "color": "00CCFF"
             },
             {
-                "label": "School",
-                "text": "Provati Uchya Bidyanikaton",
-                "color": "FF6666"
-            }
-        ]
-    },
-    {
-        "title": "HSC Roll",
-        "buttons": [
-            {
-                "label": "Y.R 2016",
-                "text": "2016",
+                "label": "asdasd",
+                "text": "asdasdasdad asdasd as asda ds asd asda ds asd asd ad as dsdasd asda sdas s sasd as",
                 "color": "00CCFF"
-            },
-            {
-                "label": "College",
-                "text": "Notre Dame College",
-                "color": "FF6666"
-            }
-        ]
-    },
-    {
-        "title": "BBA Roll",
-        "buttons": [
-            {
-                "label": "Y.R 2020",
-                "text": "2020",
-                "color": "00CCFF"
-            },
-            {
-                "label": "Versity",
-                "text": "University of Dhaka",
-                "color": "FF6666"
-            },
-            {
-                "label": "CGPA",
-                "text": "3.3",
-                "color": "FF6666"
-            }
-        ]
-    },
-    {
-        "title": "MBA Roll",
-        "buttons": [
-            {
-                "label": "Y.R 2021",
-                "text": "2021",
-                "color": "00CCFF"
-            },
-            {
-                "label": "Versity",
-                "text": "University of Dhaka",
-                "color": "FF6666"
-            },
-            {
-                "label": "CGPA",
-                "text": "3.23",
-                "color": "FF6666"
             }
         ]
     }

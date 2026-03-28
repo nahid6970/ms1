@@ -8,8 +8,9 @@ os.environ["QT_LOGGING_RULES"] = "qt.text.font.db.warning=false"
 
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QLabel, QPushButton, QLineEdit, QGroupBox, QScrollArea,
-                             QFormLayout, QMessageBox, QFrame)
+                             QFormLayout, QMessageBox, QFrame, QColorDialog)
 from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QColor
 
 # CYBERPUNK THEME PALETTE (from THEME_GUIDE.md)
 CP_BG = "#050505"
@@ -87,6 +88,27 @@ class RowWidget(QFrame):
         color_input.setText(b_data.get("color", "00CCFF") if b_data else "00CCFF")
         color_input.setFixedWidth(80)
 
+        # Color Preview & Picker Button
+        color_preview = QPushButton()
+        color_preview.setFixedWidth(30)
+        color_preview.setCursor(Qt.CursorShape.PointingHandCursor)
+        
+        def update_preview():
+            hex_val = color_input.text().strip("#")
+            if len(hex_val) == 6:
+                color_preview.setStyleSheet(f"background-color: #{hex_val}; border: 1px solid {CP_TEXT};")
+        
+        def open_picker():
+            current_hex = color_input.text().strip("#")
+            initial = QColor(f"#{current_hex}") if len(current_hex) == 6 else QColor("#00CCFF")
+            color = QColorDialog.getColor(initial)
+            if color.isValid():
+                color_input.setText(color.name().upper().strip("#"))
+        
+        color_input.textChanged.connect(update_preview)
+        color_preview.clicked.connect(open_picker)
+        update_preview()
+
         rem_btn = QPushButton("-")
         rem_btn.setFixedWidth(25)
         rem_btn.clicked.connect(lambda: btn_frame.deleteLater())
@@ -97,6 +119,7 @@ class RowWidget(QFrame):
         blayout.addWidget(text_input)
         blayout.addWidget(QLabel("Hex:"))
         blayout.addWidget(color_input)
+        blayout.addWidget(color_preview)
         blayout.addWidget(rem_btn)
         
         self.btns_layout.addWidget(btn_frame)
