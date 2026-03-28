@@ -292,6 +292,32 @@ async function scanForEpisodes(event) {
     }
 }
 
+async function syncShow(event, showId, btn) {
+    if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+    }
+    
+    const originalHTML = btn.innerHTML;
+    btn.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="spin"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>';
+    btn.style.pointerEvents = 'none';
+
+    try {
+        const response = await fetch(`/scan_manual/${showId}`);
+        const data = await response.json();
+        if (data.success) {
+            btn.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#4ade80" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+        }
+    } catch (error) {
+        console.error('Error syncing show:', error);
+        btn.innerHTML = originalHTML;
+        btn.style.pointerEvents = 'auto';
+    }
+}
+
 // Settings Modal Functions
 function openSettingsModal() {
     document.getElementById('settingsModal').style.display = 'block';
