@@ -327,6 +327,10 @@ body {
     text-align: center;
 }
 
+.show-card.completed .card-info {
+    background: linear-gradient(to top, rgba(29, 185, 84, 0.8), rgba(29, 185, 84, 0.4), transparent);
+}
+
 .card-info p {
     margin: 3px 0;
     font-size: 0.85em;
