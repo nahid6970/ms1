@@ -1284,3 +1284,77 @@ html.show-hidden-shows .show-card.ended-completed {
     width: 16px;
     text-align: center;
 }
+
+/* Missing Episodes Styles */
+.missing-episodes-list {
+    margin-top: 20px;
+    max-height: 400px;
+    overflow-y: auto;
+    text-align: left;
+}
+
+.missing-episode-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    margin-bottom: 12px;
+    background-color: #333;
+    border-radius: 8px;
+    border-left: 4px solid #1db954;
+    transition: opacity 0.5s ease;
+}
+
+.missing-episode-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.missing-show-title {
+    font-weight: bold;
+    font-size: 0.85rem;
+    color: #1db954;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.missing-episode-title {
+    font-size: 1rem;
+    color: #e0e0e0;
+}
+
+.missing-episode-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.missing-episode-actions button {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: white;
+    font-weight: 600;
+    transition: background 0.2s;
+}
+
+.btn-check {
+    background-color: #28a745;
+}
+
+.btn-check:hover {
+    background-color: #218838;
+}
+
+.btn-delete {
+    background-color: #dc3545;
+}
+
+.btn-delete:hover {
+    background-color: #c82333;
+}

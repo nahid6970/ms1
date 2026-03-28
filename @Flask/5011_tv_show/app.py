@@ -637,6 +637,58 @@ def get_unseen_count():
     
     return jsonify({'unseen_count': unseen_count})
 
+@app.route('/api/scan_missing_episodes')
+def api_scan_missing_episodes():
+    shows = load_data()
+    missing_episodes = []
+    
+    for show in shows:
+        dir_path = show.get('directory_path')
+        if not dir_path or not os.path.isdir(dir_path):
+            continue
+            
+        # Get all video files in the directory once
+        files_on_disk = set()
+        for root, _, files in os.walk(dir_path):
+            for filename in files:
+                name, ext = os.path.splitext(filename)
+                if ext.lower() in ['.mp4', '.mkv', '.avi', '.mov', '.webm']:
+                    files_on_disk.add(name)
+        
+        for episode in show.get('episodes', []):
+            if not episode.get('watched'):
+                if episode['title'] not in files_on_disk:
+                    missing_episodes.append({
+                        'show_id': show['id'],
+                        'show_title': show['title'],
+                        'episode_id': episode['id'],
+                        'episode_title': episode['title']
+                    })
+    
+    return jsonify(missing_episodes)
+
+@app.route('/api/delete_episode/<int:show_id>/<int:episode_id>', methods=['POST'])
+def api_delete_episode(show_id, episode_id):
+    shows = load_data()
+    show = next((s for s in shows if s['id'] == show_id), None)
+    if show:
+        show['episodes'] = [e for e in show['episodes'] if e['id'] != episode_id]
+        save_data(shows)
+        return jsonify({'success': True})
+    return jsonify({'success': False, 'message': 'Show not found'}), 404
+
+@app.route('/api/check_episode/<int:show_id>/<int:episode_id>', methods=['POST'])
+def api_check_episode(show_id, episode_id):
+    shows = load_data()
+    show = next((s for s in shows if s['id'] == show_id), None)
+    if show:
+        episode = next((e for e in show['episodes'] if e['id'] == episode_id), None)
+        if episode:
+            episode['watched'] = True
+            save_data(shows)
+            return jsonify({'success': True})
+    return jsonify({'success': False, 'message': 'Episode not found'}), 404
+
 @app.route('/api/mark_all_seen', methods=['POST'])
 def mark_all_episodes_seen():
     """Mark all episodes as seen"""

@@ -127,6 +127,85 @@ function closeEditEpisodeModal() {
     document.body.classList.remove('modal-open');
 }
 
+// Scan Missing Episodes Functions
+async function openScanMissingModal() {
+    const modal = document.getElementById('scanMissingModal');
+    const list = document.getElementById('missingEpisodesList');
+    
+    list.innerHTML = '<p>Scanning for missing episode files...</p>';
+    modal.style.display = 'block';
+    document.body.classList.add('modal-open');
+
+    try {
+        const response = await fetch('/api/scan_missing_episodes');
+        const missingEpisodes = await response.json();
+        
+        if (missingEpisodes.length === 0) {
+            list.innerHTML = '<p>No missing episodes found.</p>';
+        } else {
+            list.innerHTML = '';
+            missingEpisodes.forEach(ep => {
+                const item = document.createElement('div');
+                item.className = 'missing-episode-item';
+                item.dataset.showId = ep.show_id;
+                item.dataset.episodeId = ep.episode_id;
+                
+                item.innerHTML = `
+                    <div class="missing-episode-info">
+                        <span class="missing-show-title">${ep.show_title}</span>
+                        <span class="missing-episode-title">${ep.episode_title}</span>
+                    </div>
+                    <div class="missing-episode-actions">
+                        <button onclick="checkMissingEpisode(${ep.show_id}, ${ep.episode_id}, this)" class="btn-check" title="Mark as Watched"><i class="nf nf-fa-check"></i> Check</button>
+                        <button onclick="deleteMissingEpisode(${ep.show_id}, ${ep.episode_id}, this)" class="btn-delete" title="Delete from JSON"><i class="nf nf-fa-trash"></i> Del</button>
+                    </div>
+                `;
+                list.appendChild(item);
+            });
+        }
+    } catch (error) {
+        console.error('Error scanning missing episodes:', error);
+        list.innerHTML = '<p>Error occurred while scanning.</p>';
+    }
+}
+
+function closeScanMissingModal() {
+    document.getElementById('scanMissingModal').style.display = 'none';
+    document.body.classList.remove('modal-open');
+}
+
+async function checkMissingEpisode(showId, episodeId, button) {
+    try {
+        const response = await fetch(`/api/check_episode/${showId}/${episodeId}`, { method: 'POST' });
+        const data = await response.json();
+        if (data.success) {
+            const item = button.closest('.missing-episode-item');
+            item.style.opacity = '0.5';
+            item.style.pointerEvents = 'none';
+            setTimeout(() => item.remove(), 500);
+        }
+    } catch (error) {
+        console.error('Error checking episode:', error);
+    }
+}
+
+async function deleteMissingEpisode(showId, episodeId, button) {
+    if (confirm('Are you sure you want to delete this episode from JSON?')) {
+        try {
+            const response = await fetch(`/api/delete_episode/${showId}/${episodeId}`, { method: 'POST' });
+            const data = await response.json();
+            if (data.success) {
+                const item = button.closest('.missing-episode-item');
+                item.style.opacity = '0.5';
+                item.style.pointerEvents = 'none';
+                setTimeout(() => item.remove(), 500);
+            }
+        } catch (error) {
+            console.error('Error deleting episode:', error);
+        }
+    }
+}
+
 // Settings Modal Functions
 function openSettingsModal() {
     document.getElementById('settingsModal').style.display = 'block';
