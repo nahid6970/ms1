@@ -44,8 +44,24 @@ class RowWidget(QFrame):
         self.title_input = QLineEdit()
         self.title_input.setPlaceholderText("Row Title (e.g., Name/Label)")
         self.title_input.setText(data.get("title", "") if data else "")
+        self.title_color = data.get("title_color", "FFCC00") if data else "FFCC00"
+        self.title_text_color = data.get("title_text_color", "000000") if data else "000000"
+        self.title_color_btn = QPushButton()
+        self.title_color_btn.setFixedSize(50, 24)
+        self.title_color_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.title_color_btn.clicked.connect(self._pick_title_color)
+        self.title_text_color_btn = QPushButton()
+        self.title_text_color_btn.setFixedSize(50, 24)
+        self.title_text_color_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.title_text_color_btn.clicked.connect(self._pick_title_text_color)
+        self._update_title_color_btn()
+        self._update_title_text_color_btn()
         header_layout.addWidget(QLabel("TITLE:"))
         header_layout.addWidget(self.title_input)
+        header_layout.addWidget(QLabel("BG:"))
+        header_layout.addWidget(self.title_color_btn)
+        header_layout.addWidget(QLabel("TX:"))
+        header_layout.addWidget(self.title_text_color_btn)
         
         remove_row_btn = QPushButton("×")
         remove_row_btn.setFixedWidth(30)
@@ -69,6 +85,32 @@ class RowWidget(QFrame):
         else:
             # Default empty button
             self.add_button_ui()
+
+    def _update_title_color_btn(self):
+        c = self.title_color
+        r, g, b = int(c[0:2],16), int(c[2:4],16), int(c[4:6],16)
+        fg = "black" if (r*299+g*587+b*114)/1000 > 128 else "white"
+        self.title_color_btn.setText(f"#{c}")
+        self.title_color_btn.setStyleSheet(f"background-color: #{c}; color: {fg}; border: 1px solid #888; font-size: 7pt; font-weight: bold; padding: 0;")
+
+    def _pick_title_color(self):
+        color = QColorDialog.getColor(QColor(f"#{self.title_color}"))
+        if color.isValid():
+            self.title_color = color.name().upper().strip("#")
+            self._update_title_color_btn()
+
+    def _update_title_text_color_btn(self):
+        c = self.title_text_color
+        r, g, b = int(c[0:2],16), int(c[2:4],16), int(c[4:6],16)
+        fg = "black" if (r*299+g*587+b*114)/1000 > 128 else "white"
+        self.title_text_color_btn.setText(f"#{c}")
+        self.title_text_color_btn.setStyleSheet(f"background-color: #{c}; color: {fg}; border: 1px solid #888; font-size: 7pt; font-weight: bold; padding: 0;")
+
+    def _pick_title_text_color(self):
+        color = QColorDialog.getColor(QColor(f"#{self.title_text_color}"))
+        if color.isValid():
+            self.title_text_color = color.name().upper().strip("#")
+            self._update_title_text_color_btn()
 
     def refresh_widths(self):
         if not self.parent_app: return
@@ -154,6 +196,8 @@ class RowWidget(QFrame):
     def get_data(self):
         row_data = {
             "title": self.title_input.text(),
+            "title_color": self.title_color,
+            "title_text_color": self.title_text_color,
             "buttons": []
         }
         for i in range(self.btns_layout.count()):
@@ -339,7 +383,11 @@ class App(QMainWindow):
             ahk_code.append(f'; {title}')
             
             # Title button/label
-            ahk_code.append(f'myGui.Add("Text", "xm {y_pos} w200 +Border Center BackgroundFFCC00", "{title}")')
+            tc = row.get("title_color", "FFCC00")
+            ttc = row.get("title_text_color", "000000")
+            ahk_code.append(f'myGui.SetFont("s12 Bold c{ttc}", "Jetbrainsmono nfp")')
+            ahk_code.append(f'myGui.Add("Text", "xm {y_pos} w200 +Border Center Background{tc}", "{title}")')
+            ahk_code.append(f'myGui.SetFont("s12 Bold cDefault", "Jetbrainsmono nfp")')
             
             for btn in row["buttons"]:
                 label = btn["label"]

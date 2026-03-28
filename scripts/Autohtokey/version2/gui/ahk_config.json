@@ -9,6 +9,8 @@
     "rows": [
         {
             "title": "GG",
+            "title_color": "00007F",
+            "title_text_color": "55AAFF",
             "buttons": [
                 {
                     "label": "ez",
