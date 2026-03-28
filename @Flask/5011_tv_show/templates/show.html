@@ -9,11 +9,19 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+    <div class="sticky-controls-wrapper">
+        <div class="top-center-controls">
+            <a href="{{ url_for('index') }}" class="add-button home-button" title="Home" style="background-color: white; color: black; padding: 8px 10px;">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+            </a>
+            <h2 style="margin: 0; color: #1db954; font-size: 1.2rem;">{{ show.title }}</h2>
+        </div>
+    </div>
+
     <div class="show-details-container">
         <div class="show-cover">
             <img src="{{ show.cover_image }}" alt="{{ show.title }}">
-            <h2>{{ show.title }}</h2>
-            <div class="stars-container{% if show.rating %} rating-{{ show.rating | int }}{% endif %}" style="margin-bottom: 15px;">
+            <div class="stars-container{% if show.rating %} rating-{{ show.rating | int }}{% endif %}" style="margin-top: 15px; justify-content: center;">
                 {% if show.rating %}
                     {% for i in range(show.rating | int) %}
                         <svg viewBox="0 0 24 24" class="star-svg">
@@ -22,39 +30,13 @@
                     {% endfor %}
                 {% endif %}
             </div>
-            <form action="{{ url_for('add_episode', show_id=show.id) }}" method="post" style="display: flex; justify-content: center; align-items: center; gap: 5px; margin-bottom: 10px;">
-                <input type="text" name="title" placeholder="New episode title" required style="flex-grow: 1;">
-                <button type="submit" class="form-action-button add-episode-button">+</button>
-                <a href="{{ url_for('scan_manual', show_id=show.id) }}" class="form-action-button" title="Sync Files">
-                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
-                </a>
+            
+            <form action="{{ url_for('add_episode', show_id=show.id) }}" method="post" style="display: flex; justify-content: center; align-items: center; gap: 5px; margin-top: 20px;">
+                <input type="text" name="title" placeholder="New episode title" required style="flex-grow: 1; padding: 8px; background: #333; border: 1px solid #555; color: white; border-radius: 4px;">
+                <button type="submit" class="form-action-button add-episode-button" style="background: #1db954; border: none; color: white; width: 38px; height: 38px; border-radius: 4px; cursor: pointer;">+</button>
             </form>
-            <div style="display: flex; justify-content: center; gap: 10px;">
-                <a href="{{ url_for('index') }}" class="add-button home-button" style="background-color: white; color: black;" title="Home">
-                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-                </a>
-                <button onclick="openEditShowModal({{ show.id }})" class="add-button" style="background-color: #28a745; color: white;" title="Edit show">
-                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                </button>
-                {% if show.directory_path %}
-                    <a href="{{ url_for('open_folder', show_id=show.id) }}" class="add-button" style="background-color: #ffc936; color: black;" title="Open show folder" onclick="openFolderViaServer(event, {{ show.id }})">
-                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
-                    </a>
-                {% endif %}
-                <a href="{{ show.sonarr_url if show.sonarr_url else 'http://192.168.0.101:8989/series/' ~ show.title.lower().replace(' ', '-').replace(':', '').replace('!', '').replace('?', '').replace(',', '').replace('(', '').replace(')', '').replace('[', '').replace(']', '').replace('&', 'and').replace('.', '') }}" target="_blank" class="add-button" style="background-color: #007bff; color: white;" title="Open in Sonarr">
-                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-                </a>
-                {% if sort_episodes == 'alphabetical' %}
-                    <a href="{{ url_for('show', show_id=show.id, sort_episodes='alphabetical', order=next_order) }}" class="add-button sort-episodes-button" style="background-color: #ffc936; color: black;" title="Sort episodes alphabetically {{ 'descending' if order == 'asc' else 'ascending' }}">
-                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="11" y1="12" x2="19" y2="12"></line><line x1="11" y1="6" x2="19" y2="6"></line><line x1="11" y1="18" x2="19" y2="18"></line><polyline points="4 16 7 19 10 16"></polyline><polyline points="10 8 7 5 4 8"></polyline><line x1="7" y1="19" x2="7" y2="5"></line></svg>
-                    </a>
-                {% else %}
-                    <a href="{{ url_for('show', show_id=show.id, sort_episodes='alphabetical', order='asc') }}" class="add-button sort-episodes-button" style="background-color: #e0e0e0; color: black;" title="Sort episodes alphabetically ascending">
-                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="11" y1="12" x2="19" y2="12"></line><line x1="11" y1="6" x2="19" y2="6"></line><line x1="11" y1="18" x2="19" y2="18"></line><polyline points="4 16 7 19 10 16"></polyline><polyline points="10 8 7 5 4 8"></polyline><line x1="7" y1="19" x2="7" y2="5"></line></svg>
-                    </a>
-                {% endif %}
-            </div>
         </div>
+
         <div class="episode-list">
             <ul>
                 {% for episode in show.episodes %}
@@ -64,8 +46,8 @@
                             {{ episode.title }}
                         </span>
                         <span class="episode-controls">
-                            <a href="#" onclick="openEditEpisodeModal({{ show.id }}, {{ episode.id }})" class="edit-dot"></a>
-                            <a href="{{ url_for('delete_episode', show_id=show.id, episode_id=episode.id) }}" class="delete-dot" onclick="return confirm('Are you sure you want to delete this episode?')"></a>
+                            <a href="#" onclick="openEditEpisodeModal({{ show.id }}, {{ episode.id }})" class="edit-dot" title="Edit Episode"></a>
+                            <a href="{{ url_for('delete_episode', show_id=show.id, episode_id=episode.id) }}" class="delete-dot" title="Delete Episode" onclick="return confirm('Are you sure you want to delete this episode?')"></a>
                         </span>
                     </li>
                 {% endfor %}
@@ -73,7 +55,7 @@
         </div>
     </div>
 
-    <!-- The Edit Episode Modal -->
+    <!-- Modals (kept for functionality) -->
     <div id="editEpisodeModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeEditEpisodeModal()">&times;</span>
@@ -83,40 +65,6 @@
                 <input type="hidden" id="editEpisodeId" name="id">
                 <label for="editEpisodeTitle">Title:</label>
                 <input type="text" id="editEpisodeTitle" name="title" required>
-                <button type="submit">Save Changes</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- The Edit Show Modal -->
-    <div id="editShowModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeEditShowModal()">&times;</span>
-            <h2>Edit Show</h2>
-            <form id="editShowForm" action="/edit_show" method="post">
-                <input type="hidden" id="editShowId" name="id">
-                <label for="editShowTitle">Title:</label>
-                <input type="text" id="editShowTitle" name="title" required>
-                <label for="editShowYear">Year:</label>
-                <input type="number" id="editShowYear" name="year">
-                <label for="editShowCoverImage">Cover Image URL:</label>
-                <input type="url" id="editShowCoverImage" name="cover_image">
-                <label for="editShowDirectoryPath">Directory Path (Optional):</label>
-                <input type="text" id="editShowDirectoryPath" name="directory_path">
-                <label for="editShowSonarrUrl">Sonarr Link:</label>
-                <input type="url" id="editShowSonarrUrl" name="sonarr_url">
-                <label for="editShowStatus">Status:</label>
-                <select id="editShowStatus" name="status" class="setting-select">
-                    <option value="Continuing">Continuing</option>
-                    <option value="Ended">Ended</option>
-                </select>
-                <div class="rating-group">
-                    <label><input type="radio" name="rating" value="1"> <span>1</span></label>
-                    <label><input type="radio" name="rating" value="2"> <span>2</span></label>
-                    <label><input type="radio" name="rating" value="3"> <span>3</span></label>
-                    <label><input type="radio" name="rating" value="4"> <span>4</span></label>
-                    <label><input type="radio" name="rating" value="5"> <span>5</span></label>
-                </div><br>
                 <button type="submit">Save Changes</button>
             </form>
         </div>

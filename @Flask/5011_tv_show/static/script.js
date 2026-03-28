@@ -174,6 +174,70 @@ function closeScanMissingModal() {
     document.body.classList.remove('modal-open');
 }
 
+function closeEpisodesModal() {
+    document.getElementById('episodesModal').style.display = 'none';
+    document.body.classList.remove('modal-open');
+}
+
+async function openEpisodesPopup(event, showId, showTitle) {
+    if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+    }
+    
+    const modal = document.getElementById('episodesModal');
+    const titleEl = document.getElementById('episodesModalTitle');
+    const listContainer = document.getElementById('episodesListContainer');
+
+    titleEl.textContent = showTitle;
+    listContainer.innerHTML = '<p style="text-align: center;">Loading episodes...</p>';
+    modal.style.display = 'block';
+    document.body.classList.add('modal-open');
+
+    try {
+        const response = await fetch(`/edit_show/${showId}`);
+        const show = await response.json();
+        
+        listContainer.innerHTML = '';
+        if (!show.episodes || show.episodes.length === 0) {
+            listContainer.innerHTML = '<p style="text-align: center;">No episodes found.</p>';
+        } else {
+            const ul = document.createElement('ul');
+            ul.style.listStyle = 'none';
+            ul.style.padding = '0';
+            
+            show.episodes.forEach(ep => {
+                const li = document.createElement('li');
+                li.className = `episode-item ${ep.watched ? 'episode-watched' : ''}`;
+                li.style.display = 'flex';
+                li.style.justifyContent = 'space-between';
+                li.style.alignItems = 'center';
+                li.style.padding = '12px 15px';
+                li.style.marginBottom = '8px';
+                li.style.background = '#2a2a2a';
+                li.style.borderRadius = '8px';
+                if (ep.watched) li.style.background = 'rgba(29, 185, 84, 0.1)';
+
+                li.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <input type="checkbox" ${ep.watched ? 'checked' : ''} onchange="toggleWatched(${showId}, ${ep.id})">
+                        <span>${ep.title}</span>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <div class="edit-dot" onclick="openEditEpisodeModal(${showId}, ${ep.id})" style="width: 10px; height: 10px; border-radius: 50%; background: #3498db; cursor: pointer;"></div>
+                        <div class="delete-dot" onclick="deleteEpisode(${showId}, ${ep.id})" style="width: 10px; height: 10px; border-radius: 50%; background: #e74c3c; cursor: pointer;"></div>
+                    </div>
+                `;
+                ul.appendChild(li);
+            });
+            listContainer.appendChild(ul);
+        }
+    } catch (error) {
+        console.error('Error fetching episodes:', error);
+        listContainer.innerHTML = '<p style="text-align: center; color: #ff6b6b;">Error loading episodes.</p>';
+    }
+}
+
 async function checkMissingEpisode(showId, episodeId, button) {
     try {
         const response = await fetch(`/api/check_episode/${showId}/${episodeId}`, { method: 'POST' });
@@ -335,17 +399,83 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Add click listener for show cards
     document.querySelectorAll('.show-card').forEach(card => {
-        card.addEventListener('click', (event) => {
-            // Check if the click wasn't on an edit/delete button
-            if (!event.target.classList.contains('btn-edit') &&
-                !event.target.classList.contains('btn-delete')) {
+        card.addEventListener('click', async (event) => {
+            // Check if the click wasn't on a button or inside hover controls
+            if (!event.target.closest('.hover-controls')) {
                 const showId = card.dataset.showId;
-                if (showId) {
-                    window.location.href = `/show/${showId}`;
+                if (!showId) return;
+
+                const modal = document.getElementById('episodesModal');
+                const titleEl = document.getElementById('episodesModalTitle');
+                const listContainer = document.getElementById('episodesListContainer');
+
+                titleEl.textContent = card.dataset.title;
+                listContainer.innerHTML = '<p style="text-align: center;">Loading episodes...</p>';
+                modal.style.display = 'block';
+                document.body.classList.add('modal-open');
+
+                try {
+                    const response = await fetch(`/edit_show/${showId}`); // Reusing edit_show to get data
+                    const show = await response.json();
+                    
+                    listContainer.innerHTML = '';
+                    if (!show.episodes || show.episodes.length === 0) {
+                        listContainer.innerHTML = '<p style="text-align: center;">No episodes found.</p>';
+                    } else {
+                        const ul = document.createElement('ul');
+                        ul.style.listStyle = 'none';
+                        ul.style.padding = '0';
+                        
+                        show.episodes.forEach(ep => {
+                            const li = document.createElement('li');
+                            li.className = `episode-item ${ep.watched ? 'episode-watched' : ''}`;
+                            li.style.display = 'flex';
+                            li.style.justifyContent = 'space-between';
+                            li.style.alignItems = 'center';
+                            li.style.padding = '12px 15px';
+                            li.style.marginBottom = '8px';
+                            li.style.background = '#2a2a2a';
+                            li.style.borderRadius = '8px';
+                            if (ep.watched) li.style.background = 'rgba(29, 185, 84, 0.1)';
+
+                            li.innerHTML = `
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <input type="checkbox" ${ep.watched ? 'checked' : ''} onchange="toggleWatched(${showId}, ${ep.id})">
+                                    <span>${ep.title}</span>
+                                </div>
+                                <div style="display: flex; gap: 8px;">
+                                    <div class="edit-dot" onclick="openEditEpisodeModal(${showId}, ${ep.id})" style="width: 10px; height: 10px; border-radius: 50%; background: #3498db; cursor: pointer;"></div>
+                                    <div class="delete-dot" onclick="deleteEpisode(${showId}, ${ep.id})" style="width: 10px; height: 10px; border-radius: 50%; background: #e74c3c; cursor: pointer;"></div>
+                                </div>
+                            `;
+                            ul.appendChild(li);
+                        });
+                        listContainer.appendChild(ul);
+                    }
+                } catch (error) {
+                    console.error('Error fetching episodes:', error);
+                    listContainer.innerHTML = '<p style="text-align: center; color: #ff6b6b;">Error loading episodes.</p>';
                 }
             }
         });
     });
+
+    // Helper functions for popup interactions
+    window.toggleWatched = function(showId, episodeId) {
+        fetch(`/toggle_watched/${showId}/${episodeId}`).then(() => {
+            // Optional: refresh the modal or just the item
+            // For simplicity, let's just update the count on main page if needed
+        });
+    };
+
+    window.deleteEpisode = function(showId, episodeId) {
+        if (confirm('Are you sure?')) {
+            fetch(`/delete_episode/${showId}/${episodeId}`).then(() => {
+                // Refresh modal content
+                document.querySelector(`.show-card[data-show-id="${showId}"]`).click();
+            });
+        }
+    };
 
     // Context Menu functionality
     const contextMenu = document.getElementById('contextMenu');
