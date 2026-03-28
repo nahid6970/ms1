@@ -76,50 +76,57 @@ class RowWidget(QFrame):
         blayout = QHBoxLayout(btn_frame)
         
         label_input = QLineEdit()
-        label_input.setPlaceholderText("Btn Label (e.g., en)")
+        label_input.setPlaceholderText("Label")
         label_input.setText(b_data.get("label", "") if b_data else "")
         
         text_input = QLineEdit()
-        text_input.setPlaceholderText("Send Text")
+        text_input.setPlaceholderText("Text")
         text_input.setText(b_data.get("text", "") if b_data else "")
         
-        color_input = QLineEdit()
-        color_input.setPlaceholderText("Color (Hex)")
-        color_input.setText(b_data.get("color", "00CCFF") if b_data else "00CCFF")
-        color_input.setFixedWidth(80)
+        # BG Color Picker Button
+        bg_btn = QPushButton("BG")
+        bg_btn.setObjectName("bg_btn")
+        bg_btn.setFixedWidth(35)
+        bg_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        bg_btn.color_val = b_data.get("color", "00CCFF") if b_data else "00CCFF"
 
-        # Color Preview & Picker Button
-        color_preview = QPushButton()
-        color_preview.setFixedWidth(30)
-        color_preview.setCursor(Qt.CursorShape.PointingHandCursor)
+        # TX Color Picker Button
+        tx_btn = QPushButton("TX")
+        tx_btn.setObjectName("tx_btn")
+        tx_btn.setFixedWidth(35)
+        tx_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        tx_btn.color_val = b_data.get("text_color", "000000") if b_data else "000000"
+
+        def update_styles():
+            bg_btn.setStyleSheet(f"background-color: #{bg_btn.color_val}; color: {'white' if bg_btn.color_val == '000000' else 'black'}; border: 1px solid white; font-size: 8pt; font-weight: bold;")
+            tx_btn.setStyleSheet(f"background-color: #{tx_btn.color_val}; color: {'white' if tx_btn.color_val == '000000' else 'black'}; border: 1px solid white; font-size: 8pt; font-weight: bold;")
         
-        def update_preview():
-            hex_val = color_input.text().strip("#")
-            if len(hex_val) == 6:
-                color_preview.setStyleSheet(f"background-color: #{hex_val}; border: 1px solid {CP_TEXT};")
-        
-        def open_picker():
-            current_hex = color_input.text().strip("#")
-            initial = QColor(f"#{current_hex}") if len(current_hex) == 6 else QColor("#00CCFF")
-            color = QColorDialog.getColor(initial)
+        def pick_bg():
+            color = QColorDialog.getColor(QColor(f"#{bg_btn.color_val}"))
             if color.isValid():
-                color_input.setText(color.name().upper().strip("#"))
-        
-        color_input.textChanged.connect(update_preview)
-        color_preview.clicked.connect(open_picker)
-        update_preview()
+                bg_btn.color_val = color.name().upper().strip("#")
+                update_styles()
+
+        def pick_tx():
+            color = QColorDialog.getColor(QColor(f"#{tx_btn.color_val}"))
+            if color.isValid():
+                tx_btn.color_val = color.name().upper().strip("#")
+                update_styles()
+
+        bg_btn.clicked.connect(pick_bg)
+        tx_btn.clicked.connect(pick_tx)
+        update_styles()
 
         rem_btn = QPushButton("-")
         rem_btn.setFixedWidth(25)
         rem_btn.clicked.connect(lambda: btn_frame.deleteLater())
 
-        blayout.addWidget(QLabel("Label:"))
+        blayout.addWidget(QLabel("L:"))
         blayout.addWidget(label_input)
-        blayout.addWidget(QLabel("Text:"))
+        blayout.addWidget(QLabel("T:"))
         blayout.addWidget(text_input)
-        blayout.addWidget(QLabel("Hex:"))
-        blayout.addWidget(color_input)
-        blayout.addWidget(color_preview)
+        blayout.addWidget(bg_btn)
+        blayout.addWidget(tx_btn)
         blayout.addWidget(rem_btn)
         
         self.btns_layout.addWidget(btn_frame)
@@ -137,11 +144,13 @@ class RowWidget(QFrame):
             btn_frame = self.btns_layout.itemAt(i).widget()
             if btn_frame:
                 inputs = btn_frame.findChildren(QLineEdit)
-                # Order of QLineEdit: Label, Text, Color
+                bg = btn_frame.findChild(QPushButton, "bg_btn").color_val
+                tx = btn_frame.findChild(QPushButton, "tx_btn").color_val
                 row_data["buttons"].append({
                     "label": inputs[0].text(),
                     "text": inputs[1].text(),
-                    "color": inputs[2].text().strip("#")
+                    "color": bg,
+                    "text_color": tx
                 })
         return row_data
 
@@ -281,8 +290,11 @@ class App(QMainWindow):
             for btn in row["buttons"]:
                 label = btn["label"]
                 text = btn["text"].replace('"', '""') # AHK escape
-                color = btn["color"]
-                ahk_code.append(f'myGui.Add("Text", "x+5 yp w100 +Border Center Background{color}", "{label}") .OnEvent("Click", (*) => SendText("{text}"))')
+                bg = btn.get("color", "00CCFF")
+                fg = btn.get("text_color", "000000")
+                ahk_code.append(f'btn := myGui.Add("Text", "x+5 yp w100 +Border Center Background{bg}", "{label}")')
+                ahk_code.append(f'btn.SetFont("c{fg}")')
+                ahk_code.append(f'btn.OnEvent("Click", (*) => SendText("{text}"))')
             
             ahk_code.append("")
 
