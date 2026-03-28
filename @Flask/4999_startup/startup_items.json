@@ -631,7 +631,7 @@
     "added_at": 1768273756.591541
   },
   {
-    "name": "WingetUI",
+    "name": "WingetUI / UNIGET",
     "type": "App",
     "paths": [
       "C:\\Users\\nahid\\AppData\\Local\\Programs\\UniGetUI\\UniGetUI.exe"
@@ -639,7 +639,7 @@
     "Command": "--daemon",
     "ps1_command": "Start-Process -FilePath \"C:\\Users\\nahid\\AppData\\Local\\Programs\\UniGetUI\\UniGetUI.exe\" -ArgumentList \"--daemon\"",
     "ExecutableType": "other",
-    "added_at": 1768273756.591541
+    "script_enabled": false
   },
   {
     "name": "YASB",
