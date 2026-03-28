@@ -4,10 +4,6 @@
     "actions": 
     [
         {
-            "command": "openSystemMenu",
-            "id": "User.openSystemMenu"
-        },
-        {
             "command": 
             {
                 "action": "copy",
@@ -16,12 +12,12 @@
             "id": "User.copy.644BA8F2"
         },
         {
-            "command": "paste",
-            "id": "User.paste"
+            "command": "openSystemMenu",
+            "id": "User.openSystemMenu"
         },
         {
-            "command": "find",
-            "id": "User.find"
+            "command": "paste",
+            "id": "User.paste"
         },
         {
             "command": 
@@ -31,6 +27,10 @@
                 "splitMode": "duplicate"
             },
             "id": "User.splitPane.A6751878"
+        },
+        {
+            "command": "find",
+            "id": "User.find"
         }
     ],
     "autoHideWindow": false,
@@ -57,12 +57,12 @@
             "keys": "ctrl+alt+space"
         },
         {
-            "id": "User.find",
-            "keys": "ctrl+shift+f"
-        },
-        {
             "id": "User.paste",
             "keys": "ctrl+v"
+        },
+        {
+            "id": "User.find",
+            "keys": "ctrl+shift+f"
         },
         {
             "id": "User.splitPane.A6751878",
@@ -141,6 +141,12 @@
                 "hidden": false,
                 "name": "Git Bash",
                 "source": "Git"
+            },
+            {
+                "guid": "{f1d288ae-8f02-525d-bb6e-ca1c52d6c6fa}",
+                "hidden": false,
+                "name": "archlinux",
+                "source": "Microsoft.WSL"
             }
         ]
     },
