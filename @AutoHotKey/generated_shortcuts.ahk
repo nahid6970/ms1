@@ -1407,7 +1407,7 @@ CONFIG_FILE = os.path.join(SCRIPT_DIR, ""projects_config.json"")
 )")
 
 ;! Theme Guidlines & Rules
-:X:;theme::Paste('For theming C:\@delta\ms1\THEME_GUIDE.md use this file guidline u can use cat or some other command to see whats inside THEME_GUIDE.md')
+:X:;theme::Paste('For theming C:\@delta\ms1\md\THEME_GUIDE.md use this file guidline u can use cat or some other command to see whats inside THEME_GUIDE.md')
 
 ;! diamon list dot
 :X:;dot::Paste('💠')
@@ -1477,3 +1477,6 @@ powershell.exe -ExecutionPolicy Bypass -WindowStyle Hidden -File ""C:\path\to\sc
 
 ;! Career Objective
 :X:;career::Paste('Highly motivated MBA graduate from the University of Dhaka with a major in Finance, seeking to leverage a deep understanding of financial modeling, risk assessment, and corporate valuation. Eager to apply rigorous academic training and analytical skills to a challenging role in a leading financial institution. Committed to driving data-backed decisions and contributing to organizational growth in the fast-paced Bangladeshi financial sector')
+
+;! Convex  Guidlines & Rules
+:X:;convex::Paste('For convex rules and guid lines follow this file C:\@delta\ms1\md\CONVEX_GUIDE.md')

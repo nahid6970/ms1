@@ -441,7 +441,7 @@
             "category": "General",
             "description": "",
             "trigger": ";theme",
-            "replacement": "For theming C:\\@delta\\ms1\\THEME_GUIDE.md use this file guidline u can use cat or some other command to see whats inside THEME_GUIDE.md",
+            "replacement": "For theming C:\\@delta\\ms1\\md\\THEME_GUIDE.md use this file guidline u can use cat or some other command to see whats inside THEME_GUIDE.md",
             "enabled": true
         },
         {
@@ -498,6 +498,14 @@
             "description": "",
             "trigger": ";career",
             "replacement": "Highly motivated MBA graduate from the University of Dhaka with a major in Finance, seeking to leverage a deep understanding of financial modeling, risk assessment, and corporate valuation. Eager to apply rigorous academic training and analytical skills to a challenging role in a leading financial institution. Committed to driving data-backed decisions and contributing to organizational growth in the fast-paced Bangladeshi financial sector",
+            "enabled": true
+        },
+        {
+            "name": "Convex  Guidlines & Rules",
+            "category": "General",
+            "description": "",
+            "trigger": ";convex",
+            "replacement": "For convex rules and guid lines follow this file C:\\@delta\\ms1\\md\\CONVEX_GUIDE.md",
             "enabled": true
         }
     ],
