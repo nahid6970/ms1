@@ -632,9 +632,10 @@ document.addEventListener('click', function(event) {
 window.onclick = function(event) {
     const addModal = document.getElementById('addShowModal');
     const editShowModal = document.getElementById('editShowModal');
-    const editEpisodeModal = document.getElementById('editEpisodeModal');
     const settingsModal = document.getElementById('settingsModal');
     const hiddenShowsModal = document.getElementById('hiddenShowsModal');
+    const scanMissingModal = document.getElementById('scanMissingModal');
+    const episodesModal = document.getElementById('episodesModal');
 
     if (event.target == addModal) {
         addModal.style.display = 'none';
@@ -642,14 +643,17 @@ window.onclick = function(event) {
     } else if (event.target == editShowModal) {
         editShowModal.style.display = 'none';
         document.body.classList.remove('modal-open');
-    } else if (event.target == editEpisodeModal) {
-        editEpisodeModal.style.display = 'none';
-        document.body.classList.remove('modal-open');
     } else if (event.target == settingsModal) {
         settingsModal.style.display = 'none';
         document.body.classList.remove('modal-open');
     } else if (event.target == hiddenShowsModal) {
         hiddenShowsModal.style.display = 'none';
+        document.body.classList.remove('modal-open');
+    } else if (event.target == scanMissingModal) {
+        scanMissingModal.style.display = 'none';
+        document.body.classList.remove('modal-open');
+    } else if (event.target == episodesModal) {
+        episodesModal.style.display = 'none';
         document.body.classList.remove('modal-open');
     }
 }
