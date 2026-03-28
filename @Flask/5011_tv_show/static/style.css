@@ -544,16 +544,84 @@ html.show-hidden-shows .show-card.ended-completed { display: flex; }
 .hidden-show-item img { width: 100%; border-radius: 10px; }
 
 /* Missing Episodes Modal */
-.missing-episodes-list { max-height: 500px; overflow-y: auto; text-align: left; }
-.missing-episode-item {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 15px; margin-bottom: 12px;
-    background: #222; border-radius: 12px;
-    border-left: 4px solid #1db954;
+.missing-modal-content {
+    max-width: 700px;
 }
 
-.btn-check { background: #28a745; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-size: 0.8em; font-weight: bold; }
-.btn-del { background: #dc3545; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-size: 0.8em; font-weight: bold; }
+.missing-episodes-list { 
+    max-height: 500px; 
+    overflow-y: auto; 
+    text-align: left;
+    padding-right: 5px;
+}
+
+.missing-episode-item {
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center;
+    padding: 12px 18px; 
+    margin-bottom: 10px;
+    background: #222; 
+    border-radius: 10px;
+    border-left: 4px solid #1db954;
+    gap: 15px;
+}
+
+.missing-episode-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex-grow: 1;
+}
+
+.missing-show-title {
+    font-weight: bold;
+    color: #1db954;
+    font-size: 0.9em;
+}
+
+.missing-episode-title {
+    color: #eee;
+    font-size: 0.95em;
+}
+
+.missing-episode-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.btn-check { 
+    background: #28a745; 
+    color: white; 
+    border: none; 
+    padding: 8px 12px; 
+    border-radius: 6px; 
+    cursor: pointer; 
+    font-size: 0.85em; 
+    font-weight: bold; 
+    display: flex;
+    align-items: center;
+    transition: background 0.2s;
+}
+
+.btn-check:hover { background: #218838; }
+
+.btn-del { 
+    background: #dc3545; 
+    color: white; 
+    border: none; 
+    padding: 8px 12px; 
+    border-radius: 6px; 
+    cursor: pointer; 
+    font-size: 0.85em; 
+    font-weight: bold; 
+    display: flex;
+    align-items: center;
+    transition: background 0.2s;
+}
+
+.btn-del:hover { background: #c82333; }
 
 @media (max-width: 800px) {
     .show-details-container { grid-template-columns: 1fr; }
