@@ -2,6 +2,10 @@ import sys
 import os
 import json
 import subprocess
+
+# Suppress Qt font warnings
+os.environ["QT_LOGGING_RULES"] = "qt.text.font.db.warning=false"
+
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QLabel, QPushButton, QLineEdit, QGroupBox, QScrollArea,
                              QFormLayout, QMessageBox, QFrame)
@@ -273,7 +277,7 @@ class App(QMainWindow):
             "}"
         ])
 
-        with open(AHK_OUTPUT, "w", encoding="utf-16-sig") as f:
+        with open(AHK_OUTPUT, "w", encoding="utf-8-sig") as f:
             f.write("\n".join(ahk_code))
         
         QMessageBox.information(self, "Success", f"AHK Script generated at:\n{AHK_OUTPUT}")
