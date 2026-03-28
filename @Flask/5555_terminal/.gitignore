@@ -1,0 +1,8 @@
+node_modules/
+.convex/
+package-lock.json
+.pwsh_web_history.json
+__pycache__/
+*.pyc
+
+.env.local

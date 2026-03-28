@@ -241,7 +241,13 @@
         </div>
     </div>
 
-    <script>
+    <script type="module">
+        import { ConvexHttpClient } from "https://esm.sh/convex@1.16.0/browser";
+
+        // Replace with your actual Convex URL from 'npx convex dev'
+        const CONVEX_URL = "https://academic-swan-974.convex.cloud"; 
+        const convex = new ConvexHttpClient(CONVEX_URL);
+
         const outputDiv = document.getElementById('terminal-output');
         const commandInput = document.getElementById('command-input');
         const executeBtn = document.getElementById('execute-btn');
@@ -322,15 +328,14 @@
             }
         }
         
-        // Load command history on page load
+        // Load command history on page load from Convex
         async function loadHistory() {
             try {
-                const response = await fetch('/history');
-                const result = await response.json();
-                commandHistory = result.history || [];
-                console.log(`Loaded ${commandHistory.length} commands from history`);
+                const result = await convex.query("functions:list");
+                commandHistory = result.map(item => item.command) || [];
+                console.log(`Loaded ${commandHistory.length} commands from Convex`);
             } catch (error) {
-                console.error('Error loading history:', error);
+                console.error('Error loading history from Convex:', error);
             }
         }
         
@@ -391,12 +396,15 @@
                     addToOutput(result.output, className);
                 }
 
+                // Add to Convex history
+                await convex.mutation("functions:add", { command: command });
+                
                 // Reload history
                 await loadHistory();
                 
             } catch (error) {
                 // Remove loading indicator
-                outputDiv.removeChild(loadingDiv);
+                if (loadingDiv.parentNode) outputDiv.removeChild(loadingDiv);
                 addToOutput(`Error: ${error.message}`, 'error-text');
             } finally {
                 // Re-enable button
@@ -411,30 +419,20 @@
             if (!command) return;
 
             try {
-                const response = await fetch('/history/delete', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ command: command })
-                });
+                const result = await convex.mutation("functions:remove", { command: command });
 
-                const result = await response.json();
-
-                if (result.success) {
+                if (result) {
                     addToOutput(`Command deleted: ${command}`, 'success-text');
                     commandInput.value = '';
                     await loadHistory();
                 } else {
-                    addToOutput(`Error deleting command: ${result.error}`, 'error-text');
+                    addToOutput(`Error deleting command: Command not found in Convex history`, 'error-text');
                 }
             } catch (error) {
                 addToOutput(`Error: ${error.message}`, 'error-text');
             }
         }
 
-        // Event listeners
-        
         // Event listeners
         executeBtn.addEventListener('click', executeCommand);
         deleteBtn.addEventListener('click', deleteCommand);
@@ -454,17 +452,10 @@
                 if (historyIndex === -1) {
                     const term = commandInput.value.trim();
                     try {
-                        const response = await fetch('/history/search', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({ term: term })
-                        });
-                        const result = await response.json();
-                        searchHistory = result.history || [];
+                        const result = await convex.query("functions:search", { term: term });
+                        searchHistory = result.map(item => item.command) || [];
                     } catch (error) {
-                        console.error('Error searching history:', error);
+                        console.error('Error searching history in Convex:', error);
                         searchHistory = [];
                     }
                 }
@@ -489,7 +480,7 @@
         });
         
         // Load history and profile status when page loads
-        Promise.all([loadHistory(), loadProfileStatus()]).then(() => {
+        loadHistory().then(loadProfileStatus).then(() => {
             // Focus input after everything is loaded
             commandInput.focus();
         });
@@ -505,5 +496,7 @@
             }
         });
     </script>
+</body>
+</html>
 </body>
 </html>

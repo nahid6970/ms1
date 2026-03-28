@@ -1,0 +1,12 @@
+{
+  "name": "powershell-web-terminal",
+  "version": "1.0.0",
+  "description": "PowerShell Web Terminal with Convex Database history storage",
+  "devDependencies": {
+    "convex": "^1.16.0"
+  },
+  "scripts": {
+    "dev": "npx convex dev",
+    "deploy": "npx convex deploy"
+  }
+}

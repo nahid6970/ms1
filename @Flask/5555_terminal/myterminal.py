@@ -13,8 +13,6 @@ class PowerShellSession:
     def __init__(self):
         self.current_directory = os.path.expanduser('~')  # Start in home directory
         self.app_directory = os.path.dirname(os.path.abspath(__file__))
-        self.history_file = os.path.join(self.app_directory, '.pwsh_web_history.json')
-        self.command_history = self._load_history()
         self.profile_loaded = False
         self.profile_error = None
         self.profile_path = os.path.join(self.app_directory, 'Microsoft.PowerShell_profile.ps1')
@@ -50,56 +48,14 @@ class PowerShellSession:
                 if result.returncode == 0:
                     self.profile_loaded = True
                     print("✓ PowerShell profile loaded successfully")
-                    if result.stdout.strip():
-                        print(f"Profile output: {result.stdout.strip()}")
                 else:
                     self.profile_error = result.stderr.strip()
                     print(f"✗ Error loading profile: {self.profile_error}")
-                    print("Tip: Check your PowerShell profile for syntax errors")
-                    print(f"Profile location: {self.profile_path}")
             else:
                 print(f"ℹ No PowerShell profile found at: {self.profile_path}")
         except Exception as e:
             self.profile_error = str(e)
             print(f"Exception loading profile: {e}")
-    
-    def _load_history(self):
-        """Load command history from file"""
-        try:
-            if os.path.exists(self.history_file):
-                with open(self.history_file, 'r', encoding='utf-8') as f:
-                    data = json.load(f)
-                    return data.get('commands', [])
-            return []
-        except Exception as e:
-            print(f"Error loading history: {e}")
-            return []
-    
-    def _save_history(self):
-        """Save command history to file"""
-        try:
-            history_data = {
-                'commands': self.command_history[-1000:],  # Keep only last 1000 commands
-                'last_updated': datetime.now().isoformat(),
-                'current_directory': self.current_directory
-            }
-            with open(self.history_file, 'w', encoding='utf-8') as f:
-                json.dump(history_data, f, indent=2, ensure_ascii=False)
-        except Exception as e:
-            print(f"Error saving history: {e}")
-    
-    def _add_to_history(self, command):
-        """Add command to history"""
-        if command.strip():
-            # If command exists, remove it to re-add it at the end
-            if command in self.command_history:
-                self.command_history.remove(command)
-            self.command_history.append(command)
-            self._save_history()
-    
-    def get_history(self):
-        """Get command history in reverse order (latest first)"""
-        return self.command_history[::-1]
     
     def get_profile_status(self):
         """Get profile loading status"""
@@ -112,9 +68,6 @@ class PowerShellSession:
     
     def execute_command(self, command):
         """Execute a command in PowerShell with persistent directory"""
-        # Add to history before executing
-        self._add_to_history(command)
-        
         try:
             # Handle cd commands specially to maintain directory state
             if command.strip().lower().startswith('cd ') or command.strip().lower() == 'cd':
@@ -161,16 +114,10 @@ class PowerShellSession:
     
     def _handle_cd_command(self, command):
         """Handle cd command to maintain directory state"""
-        # Add to history
-        self._add_to_history(command)
-        
         try:
             parts = command.split(' ', 1)
             if len(parts) == 1:  # Just 'cd' - go to home directory
-                if os.name == 'nt':
-                    new_path = os.path.expanduser('~')
-                else:
-                    new_path = os.path.expanduser('~')
+                new_path = os.path.expanduser('~')
             else:
                 target = parts[1].strip().strip('"').strip("'")
                 
@@ -191,8 +138,6 @@ class PowerShellSession:
             
             if os.path.exists(new_path) and os.path.isdir(new_path):
                 self.current_directory = new_path
-                # Save updated directory to history file
-                self._save_history()
                 return f"Location: {self.current_directory}", False
             else:
                 return f"cd: cannot access '{target}': No such file or directory\nLocation: {self.current_directory}", True
@@ -200,21 +145,7 @@ class PowerShellSession:
         except Exception as e:
             return f"Error changing directory: {str(e)}\nLocation: {self.current_directory}", True
 
-    def delete_from_history(self, command):
-        """Delete a command from history"""
-        if command.strip() and command in self.command_history:
-            self.command_history.remove(command)
-            self._save_history()
-            return True
-        return False
-
-    def search_history(self, term):
-        """Search for a term in the history"""
-        if not term:
-            return self.get_history()
-        return [cmd for cmd in self.command_history if term in cmd][::-1]
-
-# Global session (you could extend this to support multiple sessions)
+# Global session
 pwsh_session = PowerShellSession()
 
 @app.route('/')
@@ -239,30 +170,6 @@ def execute_command():
         'output': output,
         'error': has_error
     })
-
-@app.route('/history', methods=['GET'])
-def get_history():
-    """Get command history"""
-    return jsonify({
-        'history': pwsh_session.get_history()
-    })
-
-@app.route('/history/delete', methods=['POST'])
-def delete_history():
-    """Delete a command from history"""
-    data = request.json
-    command = data.get('command', '').strip()
-    if pwsh_session.delete_from_history(command):
-        return jsonify({'success': True})
-    else:
-        return jsonify({'success': False, 'error': 'Command not found in history'})
-
-@app.route('/history/search', methods=['POST'])
-def search_history():
-    """Search for a term in the history"""
-    data = request.json
-    term = data.get('term', '').strip()
-    return jsonify({'history': pwsh_session.search_history(term)})
 
 @app.route('/profile-status', methods=['GET'])
 def get_profile_status():
