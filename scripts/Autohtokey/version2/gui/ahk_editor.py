@@ -58,9 +58,7 @@ class RowWidget(QFrame):
         self._update_title_text_color_btn()
         header_layout.addWidget(QLabel("TITLE:"))
         header_layout.addWidget(self.title_input)
-        header_layout.addWidget(QLabel("BG:"))
         header_layout.addWidget(self.title_color_btn)
-        header_layout.addWidget(QLabel("TX:"))
         header_layout.addWidget(self.title_text_color_btn)
         
         remove_row_btn = QPushButton("×")

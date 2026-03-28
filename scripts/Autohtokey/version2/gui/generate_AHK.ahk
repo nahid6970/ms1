@@ -7,7 +7,7 @@ myGui.MarginY := 20
 
 ; GG
 myGui.SetFont("s12 Bold c55AAFF", "Jetbrainsmono nfp")
-myGui.Add("Text", "xm ym w200 +Border Center Background00007F", "GG")
+myGui.Add("Text", "xm ym w200 +Border Center Background4A7F04", "GG")
 myGui.SetFont("s12 Bold cDefault", "Jetbrainsmono nfp")
 btn := myGui.Add("Text", "x+5 yp w100 +Border Center Background0000FF", "ez")
 btn.SetFont("cFF0B75")
