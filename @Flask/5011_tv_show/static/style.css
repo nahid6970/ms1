@@ -226,10 +226,6 @@ body {
     opacity: 0;
     visibility: hidden;
     transition: all 0.3s ease;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
     z-index: 50;
     backdrop-filter: blur(3px);
 }
@@ -240,8 +236,8 @@ body {
 }
 
 .hover-btn {
-    width: 50px;
-    height: 50px;
+    width: 45px;
+    height: 45px;
     border-radius: 50%;
     background: white;
     color: black;
@@ -250,21 +246,39 @@ body {
     justify-content: center;
     border: none;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 4px 15px rgba(0,0,0,0.4);
     text-decoration: none;
 }
 
 .hover-btn:hover {
-    transform: scale(1.15);
+    transform: scale(1.1);
     background: #1db954;
     color: white;
 }
 
-.hover-row {
+/* Vertical Stack Layout */
+.hover-controls {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
     display: flex;
-    gap: 25px;
-    margin: 15px 0;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    z-index: 50;
+    backdrop-filter: blur(3px);
+}
+
+.btn-list {
+    width: 50px;
+    height: 50px;
+    background: #1db954;
+    color: white;
 }
 
 .btn-delete:hover { background: #dc3545; }
