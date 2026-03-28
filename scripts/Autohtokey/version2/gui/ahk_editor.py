@@ -223,6 +223,8 @@ class SettingsPanel(QGroupBox):
         self.font_size = QLineEdit("12")
         self.ui_label_w = QLineEdit("80")
         self.ui_text_w = QLineEdit("200")
+        self.title_h = QLineEdit("30")
+        self.btn_h = QLineEdit("30")
         
         self.ui_label_w.textChanged.connect(update_callback)
         self.ui_text_w.textChanged.connect(update_callback)
@@ -232,6 +234,8 @@ class SettingsPanel(QGroupBox):
         self.layout.addRow("Font Size:", self.font_size)
         self.layout.addRow("UI Label Width:", self.ui_label_w)
         self.layout.addRow("UI Text Width:", self.ui_text_w)
+        self.layout.addRow("Title Height:", self.title_h)
+        self.layout.addRow("Button Height:", self.btn_h)
 
 class App(QMainWindow):
     def __init__(self):
@@ -335,6 +339,8 @@ class App(QMainWindow):
                             if "font_size" in s: self.settings_panel.font_size.setText(s["font_size"])
                             if "ui_label_w" in s: self.settings_panel.ui_label_w.setText(s["ui_label_w"])
                             if "ui_text_w" in s: self.settings_panel.ui_text_w.setText(s["ui_text_w"])
+                            if "title_h" in s: self.settings_panel.title_h.setText(s["title_h"])
+                            if "btn_h" in s: self.settings_panel.btn_h.setText(s["btn_h"])
                         rows_data = data.get("rows", [])
                     else:
                         rows_data = data
@@ -354,7 +360,9 @@ class App(QMainWindow):
                 "sleep_delay": self.settings_panel.sleep_delay.text(),
                 "font_size": self.settings_panel.font_size.text(),
                 "ui_label_w": self.settings_panel.ui_label_w.text(),
-                "ui_text_w": self.settings_panel.ui_text_w.text()
+                "ui_text_w": self.settings_panel.ui_text_w.text(),
+                "title_h": self.settings_panel.title_h.text(),
+                "btn_h": self.settings_panel.btn_h.text()
             },
             "rows": [r.get_data() for r in self.rows]
         }
@@ -384,7 +392,9 @@ class App(QMainWindow):
             tc = row.get("title_color", "FFCC00")
             ttc = row.get("title_text_color", "000000")
             ahk_code.append(f'myGui.SetFont("s12 Bold c{ttc}", "Jetbrainsmono nfp")')
-            ahk_code.append(f'myGui.Add("Text", "xm {y_pos} w200 +Border Center Background{tc}", "{title}")')
+            th = self.settings_panel.title_h.text() or "30"
+            bh = self.settings_panel.btn_h.text() or "30"
+            ahk_code.append(f'myGui.Add("Text", "xm {y_pos} w200 h{th} +Border Center Background{tc}", "{title}")')
             ahk_code.append(f'myGui.SetFont("s12 Bold cDefault", "Jetbrainsmono nfp")')
             
             for btn in row["buttons"]:
@@ -392,7 +402,7 @@ class App(QMainWindow):
                 text = btn["text"].replace('"', '""') # AHK escape
                 bg = btn.get("color", "00CCFF")
                 fg = btn.get("text_color", "000000")
-                ahk_code.append(f'btn := myGui.Add("Text", "x+5 yp w100 +Border Center Background{bg}", "{label}")')
+                ahk_code.append(f'btn := myGui.Add("Text", "x+5 yp w100 h{bh} +Border Center Background{bg}", "{label}")')
                 ahk_code.append(f'btn.SetFont("c{fg}")')
                 ahk_code.append(f'btn.OnEvent("Click", (*) => SendText("{text}"))')
             

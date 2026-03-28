@@ -4,7 +4,9 @@
         "sleep_delay": "200",
         "font_size": "12",
         "ui_label_w": "150",
-        "ui_text_w": "550"
+        "ui_text_w": "550",
+        "title_h": "25",
+        "btn_h": "25"
     },
     "rows": [
         {
