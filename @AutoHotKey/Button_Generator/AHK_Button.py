@@ -238,7 +238,7 @@ class SettingsPanel(QGroupBox):
             return w
 
         self.layout.addRow("Auto-Hide / Sleep (ms):", row(("", self.auto_hide), ("Sleep:", self.sleep_delay)))
-        self.layout.addRow("Font Size:", self.font_size)
+        self.layout.addRow("Font Size:", row(("", self.font_size)))
         self.layout.addRow("UI Label / Text Width:", row(("L:", self.ui_label_w), ("T:", self.ui_text_w)))
         self.layout.addRow("Title H / W:", row(("H:", self.title_h), ("W:", self.title_w)))
         self.layout.addRow("Button H / W:", row(("H:", self.btn_h), ("W:", self.btn_w)))
