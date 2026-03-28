@@ -644,17 +644,18 @@ def api_scan_missing_episodes():
     
     for show in shows:
         dir_path = show.get('directory_path')
-        if not dir_path or not os.path.isdir(dir_path):
-            continue
-            
-        # Get all video files in the directory once
         files_on_disk = set()
-        for root, _, files in os.walk(dir_path):
-            for filename in files:
-                name, ext = os.path.splitext(filename)
-                if ext.lower() in ['.mp4', '.mkv', '.avi', '.mov', '.webm']:
-                    files_on_disk.add(name)
         
+        # Only try to scan files if the directory exists
+        if dir_path and os.path.isdir(dir_path):
+            for root, _, files in os.walk(dir_path):
+                for filename in files:
+                    name, ext = os.path.splitext(filename)
+                    if ext.lower() in ['.mp4', '.mkv', '.avi', '.mov', '.webm']:
+                        files_on_disk.add(name)
+        
+        # If the directory doesn't exist, files_on_disk remains empty,
+        # so all unwatched episodes will be flagged as missing.
         for episode in show.get('episodes', []):
             if not episode.get('watched'):
                 if episode['title'] not in files_on_disk:
