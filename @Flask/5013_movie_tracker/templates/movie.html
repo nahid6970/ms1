@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ movie.title }}</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -12,17 +13,19 @@
             <img src="{{ movie.cover_image }}" alt="{{ movie.title }}">
             <h2>{{ movie.title }}</h2>
             <div style="display: flex; justify-content: center; gap: 10px;">
-                <a href="{{ url_for('index') }}" class="add-button home-button" style="background-color: white; color: black;"><i class="nf nf-cod-home"></i></a>
+                <a href="{{ url_for('index') }}" class="add-button home-button" style="background-color: white; color: black; padding: 8px 10px;" title="Home">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                </a>
                 <button onclick="openEditMovieModal({{ movie.id }})" class="add-button" style="background-color: #28a745; color: white;" title="Edit movie">
-                    <i class="nf nf-fa-edit"></i>
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                 </button>
                 {% if movie.directory_path %}
                     <a href="{{ url_for('open_movie_folder', movie_id=movie.id) }}" class="add-button" style="background-color: #ffc936; color: black;" title="Open movie folder" onclick="openFolderViaServer(event, {{ movie.id }})">
-                        <i class="nf nf-fa-folder"></i>
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
                     </a>
                 {% endif %}
                 <a href="http://192.168.0.101:8989/movies/{{ movie.title.lower().replace(' ', '-').replace(':', '').replace('!', '').replace('?', '').replace(',', '').replace('(', '').replace(')', '').replace('[', '').replace(']', '').replace('&', 'and').replace('.', '') }}" target="_blank" class="add-button" style="background-color: #007bff; color: white;" title="Open in Radarr">
-                    <i class="nf nf-fa-external_link"></i>
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
                 </a>
             </div>
         </div>
