@@ -5,250 +5,200 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PowerShell Web Terminal</title>
     <link rel="icon" type="image/png" href="https://upload.wikimedia.org/wikipedia/commons/a/af/PowerShell_Core_6.0_icon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
-            background: #1e1e1e;
-            color: #ffffff;
-            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            background: #0a0a0f;
+            color: #e0e0e0;
+            font-family: 'JetBrains Mono', 'Consolas', monospace;
             height: 100vh;
             display: flex;
             flex-direction: column;
+            background-image:
+                radial-gradient(ellipse at 15% 50%, rgba(0,255,170,0.04) 0%, transparent 55%),
+                radial-gradient(ellipse at 85% 20%, rgba(0,180,255,0.04) 0%, transparent 55%);
         }
-        
+
         .header {
-            background: #0078d4;
+            background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
             padding: 10px 20px;
             display: flex;
             align-items: center;
             justify-content: space-between;
+            border-bottom: 1px solid #00ffaa22;
+            box-shadow: 0 2px 20px rgba(0,255,170,0.06);
         }
-        
+
         .header-left {
             display: flex;
             align-items: center;
             gap: 10px;
         }
-        
+
         .header h1 {
-            font-size: 18px;
-            font-weight: normal;
+            font-size: 15px;
+            font-weight: 700;
+            color: #00ffaa;
+            text-shadow: 0 0 12px rgba(0,255,170,0.5);
+            letter-spacing: 1px;
         }
-        
+
+        .header-left > span {
+            color: #444;
+            font-size: 11px;
+        }
+
         .profile-status {
-            font-size: 12px;
-            opacity: 0.8;
+            font-size: 11px;
+            color: #666;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
-        
+
         .profile-indicator {
             display: inline-block;
-            width: 8px;
-            height: 8px;
+            width: 7px;
+            height: 7px;
             border-radius: 50%;
-            margin-right: 5px;
+            margin-right: 4px;
         }
-        
-        .profile-loaded {
-            background-color: #4CAF50;
-        }
-        
-        .profile-not-loaded {
-            background-color: #ff6b6b;
-        }
-        
+
+        .profile-loaded { background: #00ffaa; box-shadow: 0 0 6px #00ffaa; }
+        .profile-not-loaded { background: #ff4466; box-shadow: 0 0 6px #ff4466; }
+
         .reload-btn {
             background: transparent;
-            border: 1px solid rgba(255,255,255,0.3);
-            color: white;
-            padding: 2px 6px;
-            border-radius: 3px;
+            border: 1px solid #00ffaa33;
+            color: #00ffaa;
+            padding: 2px 7px;
+            border-radius: 4px;
             cursor: pointer;
-            font-size: 12px;
-            margin-left: 10px;
+            font-size: 11px;
+            transition: all 0.2s;
         }
-        
-        .reload-btn:hover {
-            background: rgba(255,255,255,0.1);
-        }
-        
-        .reload-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        
+        .reload-btn:hover { background: rgba(0,255,170,0.1); border-color: #00ffaa88; }
+        .reload-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
         .terminal-container {
             flex: 1;
             display: flex;
             flex-direction: column;
-            padding: 20px;
+            padding: 14px;
             overflow: hidden;
+            gap: 10px;
         }
-        
+
         .terminal-output {
             flex: 1;
-            background: #000000;
-            border: 1px solid #333;
-            padding: 15px;
+            background: #05050a;
+            border: 1px solid #00ffaa18;
+            border-radius: 6px;
+            padding: 14px;
             overflow-y: auto;
-            margin-bottom: 10px;
             white-space: pre-wrap;
-            font-size: 14px;
-            line-height: 1.4;
+            font-size: 13px;
+            line-height: 1.65;
+            box-shadow: inset 0 0 40px rgba(0,0,0,0.6);
         }
-        
+
         .terminal-input-container {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             flex-wrap: wrap;
+            background: #0d1117;
+            border: 1px solid #00ffaa1a;
+            border-radius: 6px;
+            padding: 8px 12px;
+            transition: border-color 0.2s;
         }
-        
+        .terminal-input-container:focus-within {
+            border-color: #00ffaa44;
+            box-shadow: 0 0 0 1px #00ffaa11;
+        }
+
         .prompt {
-            color: #0078d4;
-            font-weight: bold;
+            color: #00ffaa;
+            font-weight: 700;
+            text-shadow: 0 0 8px rgba(0,255,170,0.6);
+            white-space: nowrap;
         }
-        
+
         .terminal-input {
             flex: 1;
             min-width: 200px;
-            background: #2d2d30;
-            border: 1px solid #3e3e42;
-            color: #ffffff;
-            padding: 8px 12px;
-            font-family: inherit;
-            font-size: 14px;
-            border-radius: 3px;
-        }
-        
-        .terminal-input:focus {
-            outline: none;
-            border-color: #0078d4;
-            box-shadow: 0 0 0 1px #0078d4;
-        }
-
-        .controls-group {
-            display: flex;
-            gap: 5px;
-        }
-        
-        .btn {
-            color: white;
+            background: transparent;
             border: none;
-            padding: 8px 12px;
-            border-radius: 3px;
+            color: #e0e0e0;
+            padding: 2px 4px;
+            font-family: inherit;
+            font-size: 13px;
+            caret-color: #00ffaa;
+        }
+        .terminal-input:focus { outline: none; }
+        .terminal-input::placeholder { color: #2a2a2a; }
+
+        .controls-group { display: flex; gap: 5px; }
+
+        .btn {
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
             cursor: pointer;
             font-family: inherit;
+            font-size: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            min-width: 40px;
+            min-width: 36px;
+            transition: all 0.15s;
         }
 
         .execute-btn {
-            background: #0078d4;
+            background: linear-gradient(135deg, #00cc88, #00aa77);
+            color: #000;
+            font-weight: 700;
+            box-shadow: 0 0 10px rgba(0,204,136,0.25);
         }
-        
-        .execute-btn:hover {
-            background: #106ebe;
-        }
+        .execute-btn:hover { box-shadow: 0 0 18px rgba(0,255,170,0.45); transform: translateY(-1px); }
 
-        .nav-btn {
-            background: #3e3e42;
-            font-size: 16px;
-        }
+        .nav-btn { background: #141920; border: 1px solid #1e2530; color: #888; font-size: 14px; }
+        .nav-btn:hover { background: #1a2030; border-color: #00ffaa33; color: #ccc; }
 
-        .nav-btn:hover {
-            background: #505050;
-        }
+        .delete-btn { background: #1a0810; border: 1px solid #ff446633; color: #ff4466; }
+        .delete-btn:hover { background: #250a14; box-shadow: 0 0 10px rgba(255,68,102,0.25); }
 
-        .delete-btn {
-            background: #ff6b6b;
-        }
+        .btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
 
-        .delete-btn:hover {
-            background: #ff4c4c;
-        }
-        
-        .btn:disabled {
-            background: #666;
-            cursor: not-allowed;
-            opacity: 0.5;
-        }
-        
-        .command-line {
-            color: #ffffff;
-            margin-bottom: 5px;
-        }
-        
-        .command-text {
-            color: #ffff00;
-        }
-        
-        .output-text {
-            color: #ffffff;
-            margin-bottom: 10px;
-        }
-        
-        .error-text {
-            color: #ff6b6b;
-            margin-bottom: 10px;
-        }
-        
-        .success-text {
-            color: #4CAF50;
-            margin-bottom: 10px;
-        }
-        
-        .loading {
-            color: #888;
-            font-style: italic;
-        }
-        
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        
-        ::-webkit-scrollbar-track {
-            background: #1e1e1e;
-        }
-        
-        ::-webkit-scrollbar-thumb {
-            background: #555;
-            border-radius: 4px;
-        }
-        
-        ::-webkit-scrollbar-thumb:hover {
-            background: #777;
-        }
+        .command-line { margin-bottom: 3px; }
+        .command-text { color: #00ccff; text-shadow: 0 0 6px rgba(0,204,255,0.35); }
+        .output-text { color: #b8b8b8; margin-bottom: 8px; }
+        .error-text { color: #ff4466; margin-bottom: 8px; }
+        .success-text { color: #00ffaa; margin-bottom: 8px; }
+        .loading { color: #333; font-style: italic; }
+
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #00ffaa22; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #00ffaa55; }
 
         @media (max-width: 600px) {
-            .header h1 {
-                font-size: 16px;
-            }
-            .terminal-container {
-                padding: 10px;
-            }
-            .controls-group {
-                width: 100%;
-                justify-content: flex-end;
-            }
+            .header h1 { font-size: 13px; }
+            .terminal-container { padding: 8px; }
+            .controls-group { width: 100%; justify-content: flex-end; }
         }
     </style>
 </head>
 <body>
     <div class="header">
         <div class="header-left">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/a/af/PowerShell_Core_6.0_icon.png" alt="PowerShell Icon" style="width: 20px; height: 20px;">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/a/af/PowerShell_Core_6.0_icon.png" alt="PowerShell Icon" style="width: 18px; height: 18px;">
             <h1>PowerShell Web Terminal</h1>
-            <span style="font-size: 12px; opacity: 0.8;">Local Session - Port 5555</span>
+            <span>Local Session · Port 5555</span>
         </div>
         <div class="profile-status" id="profile-status">
             <span class="profile-indicator profile-not-loaded"></span>
@@ -260,8 +210,7 @@
     <div class="terminal-container">
         <div id="terminal-output" class="terminal-output">
             <div id="profile-info" class="output-text" style="margin-top: 10px;"></div>
-            <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #333;">
-            </div>
+            <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #00ffaa11;"></div>
         </div>
         
         <div class="terminal-input-container">
@@ -279,7 +228,6 @@
     <script type="module">
         import { ConvexHttpClient } from "https://esm.sh/convex@1.16.0/browser";
 
-        // Replace with your actual Convex URL from 'npx convex dev'
         const CONVEX_URL = "https://academic-swan-974.convex.cloud"; 
         const convex = new ConvexHttpClient(CONVEX_URL);
 
@@ -297,14 +245,12 @@
         let searchHistory = [];
         let historyIndex = -1;
         
-        // Load profile status
         async function loadProfileStatus() {
             try {
                 const response = await fetch('/profile-status');
                 const status = await response.json();
                 updateProfileDisplay(status);
             } catch (error) {
-                console.error('Error loading profile status:', error);
                 const indicator = profileStatus.querySelector('.profile-indicator');
                 const text = profileStatus.querySelector('span:last-child');
                 indicator.className = 'profile-indicator profile-not-loaded';
@@ -339,17 +285,13 @@
             }
         }
         
-        // Reload profile
         async function reloadProfile() {
             reloadProfileBtn.disabled = true;
             reloadProfileBtn.textContent = '⏳';
-            
             try {
                 const response = await fetch('/reload-profile', { method: 'POST' });
                 const status = await response.json();
                 updateProfileDisplay(status);
-                
-                // Add reload message to terminal
                 if (status.profile_loaded) {
                     addToOutput('✓ PowerShell profile reloaded successfully', 'success-text');
                 } else if (status.profile_error) {
@@ -365,12 +307,10 @@
             }
         }
         
-        // Load command history on page load from Convex
         async function loadHistory() {
             try {
                 const result = await convex.query("functions:list");
                 commandHistory = result.map(item => item.command) || [];
-                console.log(`Loaded ${commandHistory.length} commands from Convex`);
             } catch (error) {
                 console.error('Error loading history from Convex:', error);
             }
@@ -398,16 +338,11 @@
             historyIndex = -1;
             searchHistory = [];
             deleteBtn.style.display = 'none';
-            
-            // Show command in output
             addCommandToOutput(command);
-            
-            // Clear input and disable button
             commandInput.value = '';
             executeBtn.disabled = true;
             executeBtn.textContent = 'Executing...';
             
-            // Show loading indicator
             const loadingDiv = document.createElement('div');
             loadingDiv.className = 'loading';
             loadingDiv.textContent = 'Executing command...';
@@ -416,35 +351,20 @@
             try {
                 const response = await fetch('/execute', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ command: command })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ command })
                 });
-                
                 const result = await response.json();
-                
-                // Remove loading indicator
                 outputDiv.removeChild(loadingDiv);
-                
-                // Add output
                 if (result.output) {
-                    const className = result.error ? 'error-text' : 'output-text';
-                    addToOutput(result.output, className);
+                    addToOutput(result.output, result.error ? 'error-text' : 'output-text');
                 }
-
-                // Add to Convex history
-                await convex.mutation("functions:add", { command: command });
-                
-                // Reload history
+                await convex.mutation("functions:add", { command });
                 await loadHistory();
-                
             } catch (error) {
-                // Remove loading indicator
                 if (loadingDiv.parentNode) outputDiv.removeChild(loadingDiv);
                 addToOutput(`Error: ${error.message}`, 'error-text');
             } finally {
-                // Re-enable button
                 executeBtn.disabled = false;
                 executeBtn.textContent = 'Execute';
                 commandInput.focus();
@@ -454,10 +374,8 @@
         async function deleteCommand() {
             const command = commandInput.value.trim();
             if (!command) return;
-
             try {
-                const result = await convex.mutation("functions:remove", { command: command });
-
+                const result = await convex.mutation("functions:remove", { command });
                 if (result) {
                     addToOutput(`Command deleted: ${command}`, 'success-text');
                     commandInput.value = '';
@@ -474,14 +392,12 @@
             if (historyIndex === -1) {
                 const term = commandInput.value.trim();
                 try {
-                    const result = await convex.query("functions:search", { term: term });
+                    const result = await convex.query("functions:search", { term });
                     searchHistory = result.map(item => item.command) || [];
                 } catch (error) {
-                    console.error('Error searching history in Convex:', error);
                     searchHistory = [];
                 }
             }
-
             if (direction === 'up') {
                 if (searchHistory.length > 0 && historyIndex < searchHistory.length - 1) {
                     historyIndex++;
@@ -501,20 +417,19 @@
             }
         }
 
-        // Event listeners
         executeBtn.addEventListener('click', executeCommand);
         deleteBtn.addEventListener('click', deleteCommand);
         reloadProfileBtn.addEventListener('click', reloadProfile);
         historyUpBtn.addEventListener('click', () => navigateHistory('up'));
         historyDownBtn.addEventListener('click', () => navigateHistory('down'));
         
-        commandInput.addEventListener('input', function() {
+        commandInput.addEventListener('input', () => {
             historyIndex = -1;
             searchHistory = [];
             deleteBtn.style.display = 'none';
         });
 
-        commandInput.addEventListener('keydown', async function(event) {
+        commandInput.addEventListener('keydown', async (event) => {
             if (event.key === 'Enter') {
                 executeCommand();
             } else if (event.key === 'ArrowUp') {
@@ -523,25 +438,16 @@
             } else if (event.key === 'ArrowDown') {
                 event.preventDefault();
                 navigateHistory('down');
-            }
-        });
-        
-        // Load history and profile status when page loads
-        loadHistory().then(loadProfileStatus).then(() => {
-            // Focus input after everything is loaded
-            commandInput.focus();
-        });
-        
-        // Clear command
-        commandInput.addEventListener('keydown', function(event) {
-            if (event.ctrlKey && event.key === 'l') {
+            } else if (event.ctrlKey && event.key === 'l') {
                 event.preventDefault();
                 outputDiv.innerHTML = `
                     <div class="output-text">Terminal cleared</div>
-                    <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #333;"></div>
+                    <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #00ffaa11;"></div>
                 `;
             }
         });
+        
+        loadHistory().then(loadProfileStatus).then(() => commandInput.focus());
     </script>
 </body>
 </html>
