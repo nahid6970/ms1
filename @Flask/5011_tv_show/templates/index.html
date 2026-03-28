@@ -22,11 +22,21 @@
 <body>
     <div class="sticky-controls-wrapper">
         <div class="top-center-controls">
-            <button onclick="openAddShowModal()" class="add-button" title="Add Show"><i class="nf nf-cod-add"></i></button>
-            <a href="{{ url_for('index') }}" class="add-button" title="Home"><i class="nf nf-fa-home"></i></a>
-            <a href="http://192.168.0.101:5013" class="add-button" title="Movies"><i class="nf nf-md-movie_roll"></i></a>
-            <a href="{{ url_for('scan_and_add_all') }}" class="add-button scan-button" title="Scan for episodes and auto-add missing shows"><i class="nf nf-fa-refresh"></i></a>
-            <button onclick="openScanMissingModal()" class="add-button scan-missing-button" title="Scan for missing episode files"><i class="nf nf-fa-search"></i></button>
+            <button onclick="openAddShowModal()" class="add-button" title="Add Show">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            </button>
+            <a href="{{ url_for('index') }}" class="add-button" title="Home">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+            </a>
+            <a href="http://192.168.0.101:5013" class="add-button" title="Movies">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg>
+            </a>
+            <a href="{{ url_for('scan_and_add_all') }}" class="add-button scan-button" title="Scan for episodes and auto-add missing shows">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 18 10"></polyline><polyline points="1 20 1 14 6 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+            </a>
+            <button onclick="openScanMissingModal()" class="add-button scan-missing-button" title="Scan for missing episode files">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            </button>
             
             <form action="/" method="get" class="search-form" onsubmit="return false;">
                 <div class="search-wrapper">
@@ -37,30 +47,32 @@
 
             <div class="sort-menu-container">
                 <button class="add-button sort-menu-button" onclick="toggleSortMenu()" title="Sort shows">
-                    <i class="nf nf-fa-sort"></i>
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="11" y1="12" x2="19" y2="12"></line><line x1="11" y1="6" x2="19" y2="6"></line><line x1="11" y1="18" x2="19" y2="18"></line><polyline points="4 16 7 19 10 16"></polyline><polyline points="10 8 7 5 4 8"></polyline><line x1="7" y1="19" x2="7" y2="5"></line></svg>
                 </button>
                 <div class="sort-menu-dropdown" id="sortMenuDropdown">
                     <a href="{{ url_for('index', sort_by='title', order=next_order, query=query) }}" class="sort-menu-item">
-                        <i class="nf nf-fa-sort_alpha_asc"></i> Title
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"></polyline><line x1="9" y1="20" x2="15" y2="20"></line><line x1="12" y1="4" x2="12" y2="20"></line></svg> Title
                     </a>
                     <a href="{{ url_for('index', sort_by='year', order=next_order, query=query) }}" class="sort-menu-item">
-                        <i class="nf nf-md-sort_calendar_ascending"></i> Year
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> Year
                     </a>
                     <a href="{{ url_for('index', sort_by='rating', order=next_order, query=query) }}" class="sort-menu-item">
-                        <svg viewBox="0 0 24 24" width="16" height="16" style="fill: currentColor; margin-right: 5px;">
-                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26" />
-                        </svg> Rating
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26" /></svg> Rating
                     </a>
                     <a href="{{ url_for('index', sort_by='added', order=next_order, query=query) }}" class="sort-menu-item">
-                        <i class="nf nf-fa-sort_numeric_asc"></i> Added
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg> Added
                     </a>
                     <a href="{{ url_for('index', sort_by='last_episode', order=next_order, query=query) }}" class="sort-menu-item">
-                        <i class="nf nf-fa-clock_o"></i> Last Episode
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> Last Episode
                     </a>
                 </div>
             </div>
-            <button onclick="openSettingsModal()" class="add-button settings-button" title="Settings"><i class="nf nf-fa-cog"></i></button>
-            <button onclick="showHiddenShows()" class="add-button hidden-shows-button" title="Show hidden shows"><i class="nf nf-fa-eye"></i></button>
+            <button onclick="openSettingsModal()" class="add-button settings-button" title="Settings">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+            </button>
+            <button onclick="showHiddenShows()" class="add-button hidden-shows-button" title="Show hidden shows">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            </button>
         </div>
     </div>
 
