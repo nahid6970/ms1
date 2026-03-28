@@ -216,7 +216,7 @@ def movie(movie_id):
     if movie:
         
         next_order = 'desc' if order == 'asc' else 'asc'
-        return render_template('show.html', movie=movie, sort_files=sort_files, order=order, next_order=next_order)
+        return render_template('movie.html', movie=movie, sort_files=sort_files, order=order, next_order=next_order)
     return 'Movie not found', 404
 
 @app.route('/toggle_seen/<int:movie_id>', methods=['POST'])
