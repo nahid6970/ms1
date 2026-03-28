@@ -4,7 +4,7 @@ import json
 import subprocess
 
 # Suppress Qt font warnings
-os.environ["QT_LOGGING_RULES"] = "qt.text.font.db.warning=false"
+os.environ["QT_LOGGING_RULES"] = "qt.text.font.db=false"
 
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QLabel, QPushButton, QLineEdit, QGroupBox, QScrollArea,
