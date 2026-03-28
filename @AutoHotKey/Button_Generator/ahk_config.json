@@ -6,7 +6,7 @@
         "ui_label_w": "150",
         "ui_text_w": "550",
         "title_h": "25",
-        "title_w": "350",
+        "title_w": "150",
         "btn_h": "25",
         "btn_w": "250"
     },
@@ -17,27 +17,27 @@
             "title_text_color": "000000",
             "buttons": [
                 {
-                    "label": "BangladeshTT",
-                    "text": "\u09ac\u09be\u0982\u09b2\u09be\u09a6\u09c7\u09b6\u09c7\u09b0 \u0995\u09af\u09bc\u099f\u09bf \u09ac\u09bf\u09ad\u09be\u0997 \u09b0\u09af\u09bc\u09c7\u099b\u09c7",
+                    "label": "SSK",
+                    "text": "FFF",
                     "color": "00CCFF",
                     "text_color": "000000"
                 },
                 {
-                    "label": "sadasdasd",
-                    "text": "asdasdasdasdasdasdasdasdasdasd asdasdasda",
+                    "label": "LMG",
+                    "text": "Fast",
                     "color": "00CCFF",
                     "text_color": "000000"
                 }
             ]
         },
         {
-            "title": "dddddddddddddddddddddddddddddddd",
+            "title": "RR",
             "title_color": "FFCC00",
             "title_text_color": "000000",
             "buttons": [
                 {
-                    "label": "dddddddddddddddd",
-                    "text": "dddddddddddddddddddddddd",
+                    "label": "F1",
+                    "text": "Field2",
                     "color": "00CCFF",
                     "text_color": "000000"
                 }

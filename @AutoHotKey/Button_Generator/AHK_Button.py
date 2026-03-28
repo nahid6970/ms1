@@ -8,8 +8,8 @@ os.environ["QT_LOGGING_RULES"] = "qt.text.font.db=false"
 
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QLabel, QPushButton, QLineEdit, QGroupBox, QScrollArea,
-                             QFormLayout, QMessageBox, QFrame, QColorDialog)
-from PyQt6.QtCore import Qt
+                             QFormLayout, QFrame, QColorDialog)
+from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QColor
 
 # CYBERPUNK THEME PALETTE (from THEME_GUIDE.md)
@@ -293,6 +293,9 @@ class App(QMainWindow):
 
         toolbar.addWidget(add_row_btn)
         toolbar.addStretch()
+        self.status_label = QLabel("")
+        self.status_label.setStyleSheet(f"color: {CP_GREEN}; font-size: 9pt;")
+        toolbar.addWidget(self.status_label)
         toolbar.addWidget(settings_btn)
         toolbar.addWidget(restart_btn)
         toolbar.addWidget(gen_btn)
@@ -439,7 +442,8 @@ class App(QMainWindow):
         with open(AHK_OUTPUT, "w", encoding="utf-8-sig") as f:
             f.write("\n".join(ahk_code))
         
-        QMessageBox.information(self, "Success", f"AHK Script generated at:\n{AHK_OUTPUT}")
+        self.status_label.setText(f"✔ Generated: {AHK_OUTPUT}")
+        QTimer.singleShot(1000, lambda: self.status_label.setText(""))
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

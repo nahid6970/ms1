@@ -7,25 +7,25 @@ myGui.MarginY := 20
 
 ; Example Name
 myGui.SetFont("s12 Bold c000000", "Jetbrainsmono nfp")
-myGui.Add("Text", "xm ym w350 h25 +Border Center BackgroundFFCC00", "Example Name")
+myGui.Add("Text", "xm ym w150 h25 +Border Center BackgroundFFCC00", "Example Name")
 myGui.SetFont("s12 Bold cDefault", "Jetbrainsmono nfp")
-btn := myGui.Add("Text", "x+5 yp w250 h25 +Border Center Background00CCFF", "BangladeshTT")
+btn := myGui.Add("Text", "x+5 yp w250 h25 +Border Center Background00CCFF", "SSK")
 btn.SetFont("c000000")
-btn.OnEvent("Click", (*) => SendText("বাংলাদেশের কয়টি বিভাগ রয়েছে"))
-btn.OnEvent("ContextMenu", (*) => (A_Clipboard := "বাংলাদেশের কয়টি বিভাগ রয়েছে"))
-btn := myGui.Add("Text", "x+5 yp w250 h25 +Border Center Background00CCFF", "sadasdasd")
+btn.OnEvent("Click", (*) => SendText("FFF"))
+btn.OnEvent("ContextMenu", (*) => (A_Clipboard := "FFF"))
+btn := myGui.Add("Text", "x+5 yp w250 h25 +Border Center Background00CCFF", "LMG")
 btn.SetFont("c000000")
-btn.OnEvent("Click", (*) => SendText("asdasdasdasdasdasdasdasdasdasd asdasdasda"))
-btn.OnEvent("ContextMenu", (*) => (A_Clipboard := "asdasdasdasdasdasdasdasdasdasd asdasdasda"))
+btn.OnEvent("Click", (*) => SendText("Fast"))
+btn.OnEvent("ContextMenu", (*) => (A_Clipboard := "Fast"))
 
-; dddddddddddddddddddddddddddddddd
+; RR
 myGui.SetFont("s12 Bold c000000", "Jetbrainsmono nfp")
-myGui.Add("Text", "xm y+5 w350 h25 +Border Center BackgroundFFCC00", "dddddddddddddddddddddddddddddddd")
+myGui.Add("Text", "xm y+5 w150 h25 +Border Center BackgroundFFCC00", "RR")
 myGui.SetFont("s12 Bold cDefault", "Jetbrainsmono nfp")
-btn := myGui.Add("Text", "x+5 yp w250 h25 +Border Center Background00CCFF", "dddddddddddddddd")
+btn := myGui.Add("Text", "x+5 yp w250 h25 +Border Center Background00CCFF", "F1")
 btn.SetFont("c000000")
-btn.OnEvent("Click", (*) => SendText("dddddddddddddddddddddddd"))
-btn.OnEvent("ContextMenu", (*) => (A_Clipboard := "dddddddddddddddddddddddd"))
+btn.OnEvent("Click", (*) => SendText("Field2"))
+btn.OnEvent("ContextMenu", (*) => (A_Clipboard := "Field2"))
 
 myGui.Show()
 myGui.OnEvent("Close", (*) => ExitApp())
