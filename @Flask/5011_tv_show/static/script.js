@@ -270,6 +270,28 @@ async function deleteMissingEpisode(showId, episodeId, button) {
     }
 }
 
+async function scanForEpisodes(event) {
+    if (event) event.preventDefault();
+    const btn = document.querySelector('.scan-button');
+    const originalHTML = btn.innerHTML;
+    
+    btn.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="spin"><polyline points="23 4 23 10 18 10"></polyline><polyline points="1 20 1 14 6 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>';
+    btn.style.pointerEvents = 'none';
+
+    try {
+        const response = await fetch('/scan_and_add_all');
+        const data = await response.json();
+        if (data.success) {
+            location.reload();
+        }
+    } catch (error) {
+        console.error('Error scanning:', error);
+        btn.innerHTML = originalHTML;
+        btn.style.pointerEvents = 'auto';
+        alert('Error during scan');
+    }
+}
+
 // Settings Modal Functions
 function openSettingsModal() {
     document.getElementById('settingsModal').style.display = 'block';

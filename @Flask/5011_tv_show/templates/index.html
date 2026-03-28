@@ -32,7 +32,7 @@
             <a href="http://192.168.0.101:5013" class="add-button" title="Movies">
                 <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg>
             </a>
-            <a href="{{ url_for('scan_and_add_all') }}" class="add-button scan-button" title="Scan for episodes and auto-add missing shows">
+            <a href="javascript:void(0)" onclick="scanForEpisodes(event)" class="add-button scan-button" title="Scan for episodes and auto-add missing shows">
                 <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 18 10"></polyline><polyline points="1 20 1 14 6 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
             </a>
             <button onclick="openScanMissingModal()" class="add-button scan-missing-button" title="Scan for missing episode files">

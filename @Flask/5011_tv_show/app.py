@@ -424,24 +424,24 @@ def toggle_watched(show_id, episode_id):
         if episode:
             episode['watched'] = not episode['watched']
             save_data(shows)
-            return redirect(url_for('show', show_id=show_id))
-    return 'Episode not found', 404
+            return jsonify({'success': True, 'watched': episode['watched']})
+    return jsonify({'success': False, 'message': 'Episode not found'}), 404
 
 @app.route('/scan_manual/<int:show_id>')
 def scan_manual(show_id):
     scan_and_update_episodes()
-    return redirect(url_for('show', show_id=show_id))
+    return jsonify({'success': True})
 
 @app.route('/scan_all')
 def scan_all():
     scan_and_update_episodes()
-    return redirect(url_for('index'))
+    return jsonify({'success': True})
 
 @app.route('/scan_and_add_all')
 def scan_and_add_all():
     """Manual trigger for combined scan function"""
     scan_and_add_missing_shows()
-    return redirect(url_for('index'))
+    return jsonify({'success': True})
 
 @app.route('/open_folder/<int:show_id>')
 def open_folder(show_id):
