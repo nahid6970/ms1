@@ -102,6 +102,7 @@ body {
     height: 38px;
     box-sizing: border-box;
     font-size: 1em;
+    margin: 0;
 }
 
 .search-form input[type="text"]:focus {
