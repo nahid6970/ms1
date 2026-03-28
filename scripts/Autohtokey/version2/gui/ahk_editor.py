@@ -27,7 +27,7 @@ CP_SUBTEXT = "#808080"
 # Relative paths
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 CONFIG_FILE = os.path.join(SCRIPT_DIR, "ahk_config.json")
-AHK_OUTPUT = os.path.join(SCRIPT_DIR, "Bio_Generated.ahk")
+AHK_OUTPUT = os.path.join(SCRIPT_DIR, "generate_AHK.ahk")
 
 class RowWidget(QFrame):
     def __init__(self, data=None, on_remove=None):
