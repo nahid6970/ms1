@@ -24,28 +24,32 @@
             <form action="{{ url_for('add_episode', show_id=show.id) }}" method="post" style="display: flex; justify-content: center; align-items: center; gap: 5px; margin-bottom: 10px;">
                 <input type="text" name="title" placeholder="New episode title" required style="flex-grow: 1;">
                 <button type="submit" class="form-action-button add-episode-button">+</button>
-                <a href="{{ url_for('scan_manual', show_id=show.id) }}" class="form-action-button"><i class="nf nf-oct-sync"></i></a>
+                <a href="{{ url_for('scan_manual', show_id=show.id) }}" class="form-action-button" title="Sync Files">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                </a>
             </form>
             <div style="display: flex; justify-content: center; gap: 10px;">
-                <a href="{{ url_for('index') }}" class="add-button home-button" style="background-color: white; color: black;"><i class="nf nf-cod-home"></i></a>
+                <a href="{{ url_for('index') }}" class="add-button home-button" style="background-color: white; color: black;" title="Home">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                </a>
                 <button onclick="openEditShowModal({{ show.id }})" class="add-button" style="background-color: #28a745; color: white;" title="Edit show">
-                    <i class="nf nf-fa-edit"></i>
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                 </button>
                 {% if show.directory_path %}
                     <a href="{{ url_for('open_folder', show_id=show.id) }}" class="add-button" style="background-color: #ffc936; color: black;" title="Open show folder" onclick="openFolderViaServer(event, {{ show.id }})">
-                        <i class="nf nf-fa-folder"></i>
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
                     </a>
                 {% endif %}
                 <a href="{{ show.sonarr_url if show.sonarr_url else 'http://192.168.0.101:8989/series/' ~ show.title.lower().replace(' ', '-').replace(':', '').replace('!', '').replace('?', '').replace(',', '').replace('(', '').replace(')', '').replace('[', '').replace(']', '').replace('&', 'and').replace('.', '') }}" target="_blank" class="add-button" style="background-color: #007bff; color: white;" title="Open in Sonarr">
-                    <i class="nf nf-fa-external_link"></i>
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
                 </a>
                 {% if sort_episodes == 'alphabetical' %}
                     <a href="{{ url_for('show', show_id=show.id, sort_episodes='alphabetical', order=next_order) }}" class="add-button sort-episodes-button" style="background-color: #ffc936; color: black;" title="Sort episodes alphabetically {{ 'descending' if order == 'asc' else 'ascending' }}">
-                        <i class="nf nf-fa-sort_alpha_{{ 'desc' if order == 'asc' else 'asc' }}"></i>
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="11" y1="12" x2="19" y2="12"></line><line x1="11" y1="6" x2="19" y2="6"></line><line x1="11" y1="18" x2="19" y2="18"></line><polyline points="4 16 7 19 10 16"></polyline><polyline points="10 8 7 5 4 8"></polyline><line x1="7" y1="19" x2="7" y2="5"></line></svg>
                     </a>
                 {% else %}
                     <a href="{{ url_for('show', show_id=show.id, sort_episodes='alphabetical', order='asc') }}" class="add-button sort-episodes-button" style="background-color: #e0e0e0; color: black;" title="Sort episodes alphabetically ascending">
-                        <i class="nf nf-fa-sort_alpha_asc"></i>
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="11" y1="12" x2="19" y2="12"></line><line x1="11" y1="6" x2="19" y2="6"></line><line x1="11" y1="18" x2="19" y2="18"></line><polyline points="4 16 7 19 10 16"></polyline><polyline points="10 8 7 5 4 8"></polyline><line x1="7" y1="19" x2="7" y2="5"></line></svg>
                     </a>
                 {% endif %}
             </div>

@@ -156,8 +156,8 @@ async function openScanMissingModal() {
                         <span class="missing-episode-title">${ep.episode_title}</span>
                     </div>
                     <div class="missing-episode-actions">
-                        <button onclick="checkMissingEpisode(${ep.show_id}, ${ep.episode_id}, this)" class="btn-check" title="Mark as Watched"><i class="nf nf-fa-check"></i> Check</button>
-                        <button onclick="deleteMissingEpisode(${ep.show_id}, ${ep.episode_id}, this)" class="btn-delete" title="Delete from JSON"><i class="nf nf-fa-trash"></i> Del</button>
+                        <button onclick="checkMissingEpisode(${ep.show_id}, ${ep.episode_id}, this)" class="btn-check" title="Mark as Watched"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><polyline points="20 6 9 17 4 12"></polyline></svg> Check</button>
+                        <button onclick="deleteMissingEpisode(${ep.show_id}, ${ep.episode_id}, this)" class="btn-delete" title="Delete from JSON"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg> Del</button>
                     </div>
                 `;
                 list.appendChild(item);
