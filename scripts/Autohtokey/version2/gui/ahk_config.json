@@ -1,0 +1,74 @@
+[
+    {
+        "title": "Nahid Ahmed",
+        "buttons": [
+            {"label": "en", "text": "Nahid Ahmed", "color": "00CCFF"},
+            {"label": "bn", "text": "নাহিদ আহমেদ", "color": "FF6666"},
+            {"label": "NID", "text": "1505190676", "color": "66FF66"}
+        ]
+    },
+    {
+        "title": "Father",
+        "buttons": [
+            {"label": "en", "text": "Nurul Amin", "color": "00CCFF"},
+            {"label": "bn", "text": "{U+09A8}{U+09C1}{U+09B0}{U+09C1}{U+09B2} {U+0986}{U+09AE}{U+09BF}{U+09A8}", "color": "FF6666"}
+        ]
+    },
+    {
+        "title": "Mother",
+        "buttons": [
+            {"label": "en", "text": "Nazma Begum", "color": "00CCFF"},
+            {"label": "bn", "text": "{U+09A8}{U+09BE}{U+099C}{U+09AE}{U+09BE} {U+09AC}{U+09C7}{U+0997}{U+09AE}", "color": "FF6666"}
+        ]
+    },
+    {
+        "title": "Present Address",
+        "buttons": [
+            {"label": "P.O", "text": "Narayangonj", "color": "00CCFF"},
+            {"label": "P.C", "text": "1420", "color": "FF6666"}
+        ]
+    },
+    {
+        "title": "Permanent Address",
+        "buttons": [
+            {"label": "P.O", "text": "Radhapur", "color": "00CCFF"},
+            {"label": "P.C", "text": "3706", "color": "FF6666"}
+        ]
+    },
+    {
+        "title": "SCS & HSC Registration",
+        "buttons": [
+            {"label": "Reg", "text": "1110241111", "color": "FFCC00"}
+        ]
+    },
+    {
+        "title": "SSC Roll",
+        "buttons": [
+            {"label": "Y.R 2014", "text": "2014", "color": "00CCFF"},
+            {"label": "School", "text": "Provati Uchya Bidyanikaton", "color": "FF6666"}
+        ]
+    },
+    {
+        "title": "HSC Roll",
+        "buttons": [
+            {"label": "Y.R 2016", "text": "2016", "color": "00CCFF"},
+            {"label": "College", "text": "Notre Dame College", "color": "FF6666"}
+        ]
+    },
+    {
+        "title": "BBA Roll",
+        "buttons": [
+            {"label": "Y.R 2020", "text": "2020", "color": "00CCFF"},
+            {"label": "Versity", "text": "University of Dhaka", "color": "FF6666"},
+            {"label": "CGPA", "text": "3.3", "color": "FF6666"}
+        ]
+    },
+    {
+        "title": "MBA Roll",
+        "buttons": [
+            {"label": "Y.R 2021", "text": "2021", "color": "00CCFF"},
+            {"label": "Versity", "text": "University of Dhaka", "color": "FF6666"},
+            {"label": "CGPA", "text": "3.23", "color": "FF6666"}
+        ]
+    }
+]
