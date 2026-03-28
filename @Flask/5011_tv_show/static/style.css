@@ -41,16 +41,28 @@ body {
     scrollbar-color: #dc3545 #2c2c2c;
 }
 
-.top-center-controls {
+.sticky-controls-wrapper {
     position: sticky;
     top: 0;
+    z-index: 1000;
     display: flex;
     justify-content: center;
+    padding: 10px;
+    pointer-events: none;
+}
+
+.top-center-controls {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     align-items: center;
-    gap: 15px;
-    padding: 10px 0;
-    z-index: 1000;
-    background-color: #1c1c1c;
+    gap: 12px;
+    padding: 8px 15px;
+    background-color: #000000;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    pointer-events: auto;
+    max-width: fit-content;
 }
 
 .header-container {
@@ -282,7 +294,6 @@ body.modal-open {
     padding: 10px 0;
     margin-bottom: 20px;
     z-index: 999;
-    background-color: #1c1c1c;
 }
 
 .search-form {

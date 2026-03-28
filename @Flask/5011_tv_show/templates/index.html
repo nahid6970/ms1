@@ -20,45 +20,46 @@
     </script>
 </head>
 <body>
-    <div class="top-center-controls">
-        <button onclick="openAddShowModal()" class="add-button"><i class="nf nf-cod-add"></i></button>
-        <a href="{{ url_for('index') }}" class="add-button"><i class="nf nf-fa-home"></i></a>
-        <a href="http://192.168.0.101:5013" class="add-button"><i class="nf nf-md-movie_roll"></i></a>
-        <a href="{{ url_for('scan_and_add_all') }}" class="add-button scan-button" title="Scan for episodes and auto-add missing shows"><i class="nf nf-fa-refresh"></i></a>
-        <button onclick="openScanMissingModal()" class="add-button scan-missing-button" title="Scan for missing episode files"><i class="nf nf-fa-search"></i></button>
-        <div class="sort-menu-container">
-            <button class="add-button sort-menu-button" onclick="toggleSortMenu()" title="Sort shows">
-                <i class="nf nf-fa-sort"></i>
-            </button>
-            <div class="sort-menu-dropdown" id="sortMenuDropdown">
-                <a href="{{ url_for('index', sort_by='title', order=next_order, query=query) }}" class="sort-menu-item">
-                    <i class="nf nf-fa-sort_alpha_asc"></i> Title
-                </a>
-                <a href="{{ url_for('index', sort_by='year', order=next_order, query=query) }}" class="sort-menu-item">
-                    <i class="nf nf-md-sort_calendar_ascending"></i> Year
-                </a>
-                <a href="{{ url_for('index', sort_by='rating', order=next_order, query=query) }}" class="sort-menu-item">
-                    <svg viewBox="0 0 24 24" width="16" height="16" style="fill: currentColor; margin-right: 5px;">
-                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26" />
-                    </svg> Rating
-                </a>
-                <a href="{{ url_for('index', sort_by='added', order=next_order, query=query) }}" class="sort-menu-item">
-                    <i class="nf nf-fa-sort_numeric_asc"></i> Added
-                </a>
-                <a href="{{ url_for('index', sort_by='last_episode', order=next_order, query=query) }}" class="sort-menu-item">
-                    <i class="nf nf-fa-clock_o"></i> Last Episode
-                </a>
-            </div>
-        </div>
-        <button onclick="openSettingsModal()" class="add-button settings-button"><i class="nf nf-fa-cog"></i></button>
-        <button onclick="showHiddenShows()" class="add-button hidden-shows-button" title="Show hidden shows"><i class="nf nf-fa-eye"></i></button>
-    </div>
+    <div class="sticky-controls-wrapper">
+        <div class="top-center-controls">
+            <button onclick="openAddShowModal()" class="add-button" title="Add Show"><i class="nf nf-cod-add"></i></button>
+            <a href="{{ url_for('index') }}" class="add-button" title="Home"><i class="nf nf-fa-home"></i></a>
+            <a href="http://192.168.0.101:5013" class="add-button" title="Movies"><i class="nf nf-md-movie_roll"></i></a>
+            <a href="{{ url_for('scan_and_add_all') }}" class="add-button scan-button" title="Scan for episodes and auto-add missing shows"><i class="nf nf-fa-refresh"></i></a>
+            <button onclick="openScanMissingModal()" class="add-button scan-missing-button" title="Scan for missing episode files"><i class="nf nf-fa-search"></i></button>
+            
+            <form action="/" method="get" class="search-form">
+                <input type="text" name="query" placeholder="Search Shows" value="{{ query if query }}">
+                <button type="submit" class="btn">Search</button>
+            </form>
 
-    <div class="controls-container">
-        <form action="/" method="get" class="search-form">
-            <input type="text" name="query" placeholder="Search Shows" value="{{ query if query }}">
-            <button type="submit" class="btn">Search</button>
-        </form>
+            <div class="sort-menu-container">
+                <button class="add-button sort-menu-button" onclick="toggleSortMenu()" title="Sort shows">
+                    <i class="nf nf-fa-sort"></i>
+                </button>
+                <div class="sort-menu-dropdown" id="sortMenuDropdown">
+                    <a href="{{ url_for('index', sort_by='title', order=next_order, query=query) }}" class="sort-menu-item">
+                        <i class="nf nf-fa-sort_alpha_asc"></i> Title
+                    </a>
+                    <a href="{{ url_for('index', sort_by='year', order=next_order, query=query) }}" class="sort-menu-item">
+                        <i class="nf nf-md-sort_calendar_ascending"></i> Year
+                    </a>
+                    <a href="{{ url_for('index', sort_by='rating', order=next_order, query=query) }}" class="sort-menu-item">
+                        <svg viewBox="0 0 24 24" width="16" height="16" style="fill: currentColor; margin-right: 5px;">
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26" />
+                        </svg> Rating
+                    </a>
+                    <a href="{{ url_for('index', sort_by='added', order=next_order, query=query) }}" class="sort-menu-item">
+                        <i class="nf nf-fa-sort_numeric_asc"></i> Added
+                    </a>
+                    <a href="{{ url_for('index', sort_by='last_episode', order=next_order, query=query) }}" class="sort-menu-item">
+                        <i class="nf nf-fa-clock_o"></i> Last Episode
+                    </a>
+                </div>
+            </div>
+            <button onclick="openSettingsModal()" class="add-button settings-button" title="Settings"><i class="nf nf-fa-cog"></i></button>
+            <button onclick="showHiddenShows()" class="add-button hidden-shows-button" title="Show hidden shows"><i class="nf nf-fa-eye"></i></button>
+        </div>
     </div>
 
     <div class="show-grid">
