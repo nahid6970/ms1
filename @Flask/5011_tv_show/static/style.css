@@ -81,12 +81,14 @@ body {
     display: flex;
     align-items: center;
     margin: 0 10px;
+    height: 100%;
 }
 
 .search-wrapper {
     position: relative;
     display: flex;
     align-items: center;
+    height: 45px; /* Match button height */
 }
 
 .search-form input[type="text"] {
@@ -128,6 +130,7 @@ body {
     position: relative;
     display: flex;
     align-items: center;
+    height: 45px; /* Match other buttons */
 }
 
 .sort-menu-dropdown {
@@ -281,6 +284,7 @@ body {
     color: white;
 }
 
+.btn-edit:hover { background: #28a745; color: white; }
 .btn-delete:hover { background: #dc3545; }
 .btn-sync:hover { background: #3498db; }
 .btn-folder:hover { background: #ffc936; color: black; }
@@ -343,9 +347,13 @@ body {
 }
 
 .show-card.completed .card-info p {
-    color: #000;
+    color: #000 !important;
     text-shadow: none;
-    font-weight: 500;
+    font-weight: 600;
+}
+
+.show-card.completed .episode-count {
+    color: #000 !important;
 }
 
 .card-info p {

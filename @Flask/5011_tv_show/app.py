@@ -288,39 +288,6 @@ def index():
 
     return render_template('index.html', shows=shows, sort_by=sort_by, order=order, next_order=next_order, query=query)
 
-@app.route('/show/<int:show_id>')
-def show(show_id):
-    sort_episodes = request.args.get('sort_episodes', 'default')
-    order = request.args.get('order', 'asc')
-    
-    shows = load_data()
-    show = next((s for s in shows if s['id'] == show_id), None)
-    if show:
-        show['cover_image'] = get_cached_image(show.get('cover_image', ''))
-        # Initialize sort preferences if they don't exist
-        if 'episode_sort_type' not in show:
-            show['episode_sort_type'] = 'default'
-        if 'episode_sort_order' not in show:
-            show['episode_sort_order'] = 'asc'
-        
-        # If sort parameters are provided, update and save
-        if sort_episodes != 'default':
-            show['episode_sort_type'] = sort_episodes
-            show['episode_sort_order'] = order
-            show['episodes'].sort(key=lambda x: x['title'].lower(), reverse=(order == 'desc'))
-            save_data(shows)
-        else:
-            # Use stored preferences
-            sort_episodes = show['episode_sort_type']
-            order = show['episode_sort_order']
-            # Apply stored sort if it's alphabetical
-            if sort_episodes == 'alphabetical':
-                show['episodes'].sort(key=lambda x: x['title'].lower(), reverse=(order == 'desc'))
-        
-        next_order = 'desc' if order == 'asc' else 'asc'
-        return render_template('show.html', show=show, sort_episodes=sort_episodes, order=order, next_order=next_order)
-    return 'Show not found', 404
-
 @app.route('/add_show', methods=['GET', 'POST'])
 def add_show():
     if request.method == 'POST':
@@ -394,14 +361,14 @@ def edit_episode(show_id, episode_id):
     shows = load_data()
     show = next((s for s in shows if s['id'] == show_id), None)
     if not show:
-        return 'Show not found', 404
+        return jsonify({'success': False, 'message': 'Show not found'}), 404
     episode = next((e for e in show['episodes'] if e['id'] == episode_id), None)
     if not episode:
-        return 'Episode not found', 404
+        return jsonify({'success': False, 'message': 'Episode not found'}), 404
     if request.method == 'POST':
         episode['title'] = request.form['title']
         save_data(shows)
-        return redirect(url_for('show', show_id=show_id))
+        return jsonify({'success': True})
     else:
         return jsonify(episode)
 
@@ -412,8 +379,8 @@ def delete_episode(show_id, episode_id):
     if show:
         show['episodes'] = [e for e in show['episodes'] if e['id'] != episode_id]
         save_data(shows)
-        return redirect(url_for('show', show_id=show_id))
-    return 'Show not found', 404
+        return jsonify({'success': True})
+    return jsonify({'success': False, 'message': 'Show not found'}), 404
 
 @app.route('/toggle_watched/<int:show_id>/<int:episode_id>')
 def toggle_watched(show_id, episode_id):
@@ -468,161 +435,6 @@ def open_folder(show_id):
             return jsonify({'success': False, 'message': f'Error: {str(e)}'})
     
     return jsonify({'success': False, 'message': 'Show not found or no directory path'})
-
-@app.route('/sync_shows')
-def sync_shows():
-    missing_shows = scan_for_missing_shows()
-    return render_template('sync_shows.html', missing_shows=missing_shows)
-
-@app.route('/auto_add_all_shows', methods=['POST'])
-def auto_add_all_shows():
-    """Automatically add all missing shows to the library"""
-    missing_shows = scan_for_missing_shows()
-    shows = load_data()
-    added_count = 0
-    
-    for missing_show in missing_shows:
-        folder_name = missing_show['folder_name']
-        full_path = missing_show['full_path']
-        
-        if os.path.exists(full_path):
-            # Create new show entry
-            new_show = {
-                'id': max([show['id'] for show in shows], default=0) + 1,
-                'title': folder_name,
-                'year': '',
-                'cover_image': '',
-                'directory_path': full_path,
-                'rating': None,
-                'status': 'Continuing',
-                'episodes': []
-            }
-            
-            # Scan for episodes in this directory
-            existing_episode_titles = set()
-            for root, _, files in os.walk(full_path):
-                for filename in files:
-                    name, ext = os.path.splitext(filename)
-                    if ext.lower() in ['.mp4', '.mkv', '.avi', '.mov', '.webm']:
-                        if name not in existing_episode_titles:
-                            episode = {
-                                'id': len(new_show['episodes']) + 1,
-                                'title': name,
-                                'watched': False,
-                                'added_date': datetime.now().isoformat(),
-                                'notify': 'unseen'
-                            }
-                            new_show['episodes'].append(episode)
-                            existing_episode_titles.add(name)
-            
-            # Sort episodes by title (newest first by default)
-            new_show['episodes'].reverse()
-            
-            shows.append(new_show)
-            added_count += 1
-    
-    if added_count > 0:
-        save_data(shows)
-    
-    return redirect(url_for('sync_shows'))
-
-@app.route('/rescan_library', methods=['POST'])
-def rescan_library():
-    """Rescan the entire library for new episodes"""
-    scan_and_update_episodes()
-    return redirect(url_for('sync_shows'))
-
-@app.route('/add_missing_show', methods=['POST'])
-def add_missing_show():
-    folder_name = request.form.get('folder_name')
-    full_path = request.form.get('full_path')
-    
-    if folder_name and full_path and os.path.exists(full_path):
-        shows = load_data()
-        
-        # Create new show entry
-        new_show = {
-            'id': max([show['id'] for show in shows], default=0) + 1,
-            'title': folder_name,
-            'year': '',
-            'cover_image': '',
-            'directory_path': full_path,
-            'rating': None,
-            'status': 'Continuing', # Default status for synced shows
-            'episodes': []
-        }
-        
-        # Scan for episodes in this directory
-        existing_episode_titles = set()
-        for root, _, files in os.walk(full_path):
-            for filename in files:
-                name, ext = os.path.splitext(filename)
-                if ext.lower() in ['.mp4', '.mkv', '.avi', '.mov', '.webm']:
-                    if name not in existing_episode_titles:
-                        episode = {
-                            'id': len(new_show['episodes']) + 1,
-                            'title': name,
-                            'watched': False,
-                            'added_date': datetime.now().isoformat(),
-                            'notify': 'unseen'
-                        }
-                        new_show['episodes'].append(episode)
-                        existing_episode_titles.add(name)
-        
-        # Sort episodes by title (newest first by default)
-        new_show['episodes'].reverse()
-        
-        shows.append(new_show)
-        save_data(shows)
-    
-    return redirect(url_for('sync_shows'))
-
-@app.route('/update_notify_fields')
-def update_notify_fields():
-    """Route to update existing episodes with notify field"""
-    update_existing_episodes_with_notify()
-    return redirect(url_for('index'))
-
-@app.route('/toggle_notify/<int:show_id>/<int:episode_id>')
-def toggle_notify(show_id, episode_id):
-    """Toggle notify status between 'seen' and 'unseen'"""
-    shows = load_data()
-    show = next((s for s in shows if s['id'] == show_id), None)
-    if show:
-        episode = next((e for e in show['episodes'] if e['id'] == episode_id), None)
-        if episode:
-            # Toggle between 'seen' and 'unseen'
-            current_status = episode.get('notify', 'unseen')
-            episode['notify'] = 'seen' if current_status == 'unseen' else 'unseen'
-            save_data(shows)
-            return redirect(url_for('show', show_id=show_id))
-    return 'Episode not found', 404
-
-@app.route('/mark_notify_seen/<int:show_id>/<int:episode_id>')
-def mark_notify_seen(show_id, episode_id):
-    """Mark episode notify status as 'seen'"""
-    shows = load_data()
-    show = next((s for s in shows if s['id'] == show_id), None)
-    if show:
-        episode = next((e for e in show['episodes'] if e['id'] == episode_id), None)
-        if episode:
-            episode['notify'] = 'seen'
-            save_data(shows)
-            return jsonify({'success': True, 'notify': 'seen'})
-    return jsonify({'success': False, 'message': 'Episode not found'}), 404
-
-@app.route('/mark_notify_unseen/<int:show_id>/<int:episode_id>')
-def mark_notify_unseen(show_id, episode_id):
-    """Mark episode notify status as 'unseen'"""
-    shows = load_data()
-    show = next((s for s in shows if s['id'] == show_id), None)
-    if show:
-        episode = next((e for e in show['episodes'] if e['id'] == episode_id), None)
-        if episode:
-            episode['notify'] = 'unseen'
-            save_data(shows)
-            return jsonify({'success': True, 'notify': 'unseen'})
-    return jsonify({'success': False, 'message': 'Episode not found'}), 404
 
 @app.route('/api/unseen_count')
 def get_unseen_count():
