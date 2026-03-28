@@ -26,12 +26,11 @@ export const add = mutation({
       .first();
 
     if (existing) {
-      // If it exists, update timestamp to move it to the top
-      await ctx.db.patch(existing._id, { _creationTime: Date.now() });
-      return existing._id;
+      // If it exists, delete and re-insert to move it to the top of the "creation" order
+      await ctx.db.delete(existing._id);
     }
 
-    // Otherwise, insert new entry
+    // Insert new entry (or re-insert existing one)
     return await ctx.db.insert("history", {
       command: command,
     });
