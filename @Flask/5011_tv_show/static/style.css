@@ -283,40 +283,50 @@ body.modal-open {
     margin: 0 auto;
 }
 
-.controls-container {
-    position: sticky;
-    top: 58px; /* Height of top-center-controls + padding */
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-    gap: 20px;
-    padding: 10px 0;
-    margin-bottom: 20px;
-    z-index: 999;
-}
-
 .search-form {
     display: flex;
-    gap: 10px;
     align-items: center;
+    margin: 0 10px;
 }
 
-.search-form input[type="text"],
-.search-form .btn {
-    padding: 8px 10px;
-    height: 38px;
-    box-sizing: border-box;
-    font-size: 1em;
-    line-height: 1.2;
-    margin: 0;
+.search-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
 }
 
 .search-form input[type="text"] {
+    width: 200px;
+    transition: width 0.3s ease;
     border: 1px solid #555;
     background-color: #333;
     color: #e0e0e0;
     border-radius: 4px;
+    padding: 8px 30px 8px 10px;
+    height: 38px;
+    box-sizing: border-box;
+    font-size: 1em;
+}
+
+.search-form input[type="text"]:focus {
+    width: 250px;
+}
+
+.search-clear {
+    position: absolute;
+    right: 8px;
+    background: none;
+    border: none;
+    color: #aaa;
+    font-size: 18px;
+    cursor: pointer;
+    display: none;
+    padding: 0;
+    line-height: 1;
+}
+
+.search-clear:hover {
+    color: white;
 }
 
 /* Sort Menu Dropdown Styles */

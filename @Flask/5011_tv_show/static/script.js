@@ -291,22 +291,46 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Live Search Functionality
     const searchInput = document.querySelector('.search-form input[name="query"]');
-    if (searchInput) {
-        searchInput.addEventListener('input', function(e) {
-            const query = e.target.value.toLowerCase().trim();
-            const showCards = document.querySelectorAll('.show-card');
+    const searchClear = document.getElementById('searchClear');
+
+    function filterShows(query) {
+        const showCards = document.querySelectorAll('.show-card');
+        query = query.toLowerCase().trim();
+        
+        showCards.forEach(card => {
+            const title = (card.getAttribute('data-title') || "").toLowerCase();
+            const year = (card.getAttribute('data-year') || "").toLowerCase();
             
-            showCards.forEach(card => {
-                const title = (card.getAttribute('data-title') || "").toLowerCase();
-                const year = (card.getAttribute('data-year') || "").toLowerCase();
-                
-                if (title.includes(query) || year.includes(query)) {
-                    card.style.display = ''; // Restore default display
-                } else {
-                    card.style.display = 'none';
-                }
-            });
+            if (title.includes(query) || year.includes(query)) {
+                card.style.display = ''; 
+            } else {
+                card.style.display = 'none';
+            }
         });
+
+        // Show/hide clear button
+        if (searchClear) {
+            searchClear.style.display = query.length > 0 ? 'block' : 'none';
+        }
+    }
+
+    if (searchInput) {
+        // Initial check for clear button visibility (e.g. on page reload with query)
+        if (searchClear) {
+            searchClear.style.display = searchInput.value.length > 0 ? 'block' : 'none';
+        }
+
+        searchInput.addEventListener('input', function(e) {
+            filterShows(e.target.value);
+        });
+
+        if (searchClear) {
+            searchClear.addEventListener('click', function() {
+                searchInput.value = '';
+                filterShows('');
+                searchInput.focus();
+            });
+        }
     }
 
     // Add click listener for show cards
