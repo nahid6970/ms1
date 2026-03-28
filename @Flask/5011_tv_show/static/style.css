@@ -328,7 +328,14 @@ body {
 }
 
 .show-card.completed .card-info {
-    background: linear-gradient(to top, rgba(29, 185, 84, 0.8), rgba(29, 185, 84, 0.4), transparent);
+    background: #1db954;
+    border-top: 1px solid #17a34a;
+}
+
+.show-card.completed .card-info p {
+    color: #000;
+    text-shadow: none;
+    font-weight: 500;
 }
 
 .card-info p {
