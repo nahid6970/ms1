@@ -78,6 +78,23 @@ btn.SetFont("c000000")
 btn.OnEvent("Click", (*) => SendText("Provati Uchya Bidyanikaton"))
 btn.OnEvent("ContextMenu", (*) => (A_Clipboard := "Provati Uchya Bidyanikaton"))
 
+; HSC
+myGui.SetFont("s12 Bold c000000", "Jetbrainsmono nfp")
+myGui.Add("Text", "xm y+5 w150 h25 +Border Center BackgroundFFCC00", "HSC")
+myGui.SetFont("s12 Bold cDefault", "Jetbrainsmono nfp")
+btn := myGui.Add("Text", "x+5 yp w100 h25 +Border Center Background00CCFF", "Roll")
+btn.SetFont("c000000")
+btn.OnEvent("Click", (*) => SendText("510014"))
+btn.OnEvent("ContextMenu", (*) => (A_Clipboard := "510014"))
+btn := myGui.Add("Text", "x+5 yp w100 h25 +Border Center Background00CCFF", "YR")
+btn.SetFont("c000000")
+btn.OnEvent("Click", (*) => SendText("2016"))
+btn.OnEvent("ContextMenu", (*) => (A_Clipboard := "2016"))
+btn := myGui.Add("Text", "x+5 yp w100 h25 +Border Center Background00CCFF", "College")
+btn.SetFont("c000000")
+btn.OnEvent("Click", (*) => SendText("Notre Dame College"))
+btn.OnEvent("ContextMenu", (*) => (A_Clipboard := "Notre Dame College"))
+
 myGui.Show()
 myGui.OnEvent("Close", (*) => ExitApp())
 

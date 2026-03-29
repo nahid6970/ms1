@@ -117,6 +117,31 @@
                     "text_color": "000000"
                 }
             ]
+        },
+        {
+            "title": "HSC",
+            "title_color": "FFCC00",
+            "title_text_color": "000000",
+            "buttons": [
+                {
+                    "label": "Roll",
+                    "text": "510014",
+                    "color": "00CCFF",
+                    "text_color": "000000"
+                },
+                {
+                    "label": "YR",
+                    "text": "2016",
+                    "color": "00CCFF",
+                    "text_color": "000000"
+                },
+                {
+                    "label": "College",
+                    "text": "Notre Dame College",
+                    "color": "00CCFF",
+                    "text_color": "000000"
+                }
+            ]
         }
     ]
 }
