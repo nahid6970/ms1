@@ -543,37 +543,37 @@
     "Name": "Java Runtime Environment",
     "ID": "Oracle.JavaRuntimeEnvironment",
     "Source": "winget",
-    "Category": "General"
+    "Category": "Scripting"
   },
   {
     "Name": "JellyFin",
     "ID": "Jellyfin.Server",
     "Source": "winget",
-    "Category": "General"
+    "Category": "ARR"
   },
   {
     "Name": "keyviz [keypress monitor]",
     "ID": "keyviz",
     "Source": "scoop",
-    "Category": "General"
+    "Category": "Monitor"
   },
   {
     "Name": "komorebi",
     "ID": "komorebi",
     "Source": "scoop",
-    "Category": "General"
+    "Category": "Window Manager"
   },
   {
     "Name": "lazygit [S]",
     "ID": "lazygit",
     "Source": "scoop",
-    "Category": "General"
+    "Category": "Tool"
   },
   {
     "Name": "lazygit [W]",
     "ID": "JesseDuffield.lazygit",
     "Source": "winget",
-    "Category": "General"
+    "Category": "Tool"
   },
   {
     "Name": "less [Text-View] [S]",
