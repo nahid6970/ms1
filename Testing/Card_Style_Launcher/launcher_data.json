@@ -1,0 +1,34 @@
+{
+    "directories": [
+        {
+            "path": "C:/@delta/ms1/Testing/Card_Style_Launcher",
+            "name": "ENA",
+            "category": "SSK",
+            "last_used": 1774758318.399392
+        },
+        {
+            "path": "C:/@delta/ms1/Testing",
+            "name": "FK",
+            "category": "General",
+            "last_used": 1774758316.5436158
+        }
+    ],
+    "commands": [
+        {
+            "name": "Open in Explorer",
+            "template": "explorer \"{path}\"",
+            "category": "System"
+        },
+        {
+            "name": "Open in VS Code",
+            "template": "code \"{path}\"",
+            "category": "System"
+        },
+        {
+            "name": "Open in Terminal",
+            "template": "wt -d \"{path}\"",
+            "category": "System"
+        }
+    ],
+    "settings": {}
+}

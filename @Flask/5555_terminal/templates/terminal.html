@@ -111,20 +111,15 @@
             gap: 8px;
             flex-wrap: wrap;
             background: #0d1117;
-            border: 1px solid #00ffaa1a;
+            border: 1px solid #ffffff1a;
             border-radius: 6px;
             padding: 8px 12px;
-            transition: border-color 0.2s;
-        }
-        .terminal-input-container:focus-within {
-            border-color: #00ffaa44;
-            box-shadow: 0 0 0 1px #00ffaa11;
         }
 
         .prompt {
-            color: #00ffaa;
+            color: #ffffff;
             font-weight: 700;
-            text-shadow: 0 0 8px rgba(0,255,170,0.6);
+
             white-space: nowrap;
         }
 
@@ -178,7 +173,7 @@
         .command-text { color: #00ccff; text-shadow: 0 0 6px rgba(0,204,255,0.35); }
         .output-text { color: #b8b8b8; margin-bottom: 8px; }
         .error-text { color: #ff4466; margin-bottom: 8px; }
-        .success-text { color: #00ffaa; margin-bottom: 8px; }
+        .success-text { color: #ffffff; margin-bottom: 8px; }
         .loading { color: #333; font-style: italic; }
 
         ::-webkit-scrollbar { width: 5px; }
@@ -210,8 +205,8 @@
     
     <div class="terminal-container">
         <div id="terminal-output" class="terminal-output">
-            <div id="profile-info" class="output-text" style="margin-top: 10px;"></div>
-            <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #00ffaa11;"></div>
+            <div id="profile-info" class="output-text"></div>
+
         </div>
         
         <div class="terminal-input-container">
@@ -443,7 +438,7 @@
                 event.preventDefault();
                 outputDiv.innerHTML = `
                     <div class="output-text">Terminal cleared</div>
-                    <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #00ffaa11;"></div>
+        
                 `;
             }
         });
