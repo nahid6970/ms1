@@ -1167,11 +1167,11 @@ cpu_core_frame.pack(side="left",padx=(3,0),pady=(0,0))
 
 Download_lb=tk.Label(ROOT2,bg="#000000",fg="#080505",height=0,width =0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor ="w",font=("JetBrainsMono NFP",10,"bold"),text="")
 Download_lb.pack(side="left",padx=(3,0 ),pady=(0,0))
-Download_lb.bind("<Button-1>",None)
+Download_lb.bind("<Button-1>", lambda event: subprocess.Popen(["sniffnet"], shell=True))
 
 Upload_lb=tk.Label(ROOT2,bg="#000000",fg="#FFFFFF",height=0,width =0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor ="w",font=("JetBrainsMono NFP",10,"bold"),text="")
 Upload_lb.pack(side="left",padx=(3,0 ),pady=(0,0))
-Upload_lb.bind("<Button-1>",None)
+Upload_lb.bind("<Button-1>", lambda event: subprocess.Popen(["sniffnet"], shell=True))
 
 LB_CPU=tk.Label(ROOT2,bg="#000000",fg="#FFFFFF",height=0,width =5,relief="flat",highlightthickness=1,highlightbackground="#1b8af1",anchor ="center",font=("JetBrainsMono NFP",10,"bold"),text="")
 LB_CPU.pack(side="left",padx=(3,0 ),pady=(0,0))
