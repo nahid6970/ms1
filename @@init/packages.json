@@ -1,72 +1,104 @@
 [
   {
+    "Name": "Visual Studio Code",
+    "ID": "Microsoft.VisualStudioCode",
+    "Source": "winget",
+    "Category": "Editor"
+  },
+  {
+    "Name": "Git",
+    "ID": "git",
+    "Source": "scoop",
+    "Category": ""
+  },
+  {
     "Name": "Node.js (LTS)",
     "ID": "nodejs-lts",
-    "Source": "scoop"
+    "Source": "scoop",
+    "Category": ""
+  },
+  {
+    "Name": "Python",
+    "ID": "python",
+    "Source": "scoop",
+    "Category": ""
   },
   {
     "Name": "7-Zip",
     "ID": "7zip",
-    "Source": "scoop"
+    "Source": "scoop",
+    "Category": ""
   },
   {
     "Name": "Google Chrome",
     "ID": "Google.Chrome",
-    "Source": "winget"
+    "Source": "winget",
+    "Category": ""
   },
   {
     "Name": "Brave Browser",
     "ID": "Brave.Brave",
-    "Source": "winget"
+    "Source": "winget",
+    "Category": ""
   },
   {
     "Name": "Discord",
     "ID": "Discord.Discord",
-    "Source": "winget"
+    "Source": "winget",
+    "Category": ""
   },
   {
     "Name": "Spotify",
     "ID": "Spotify.Spotify",
-    "Source": "winget"
+    "Source": "winget",
+    "Category": ""
   },
   {
     "Name": "VLC Media Player",
     "ID": "VideoLAN.VLC",
-    "Source": "winget"
+    "Source": "winget",
+    "Category": ""
   },
   {
     "Name": "Notepad++",
     "ID": "Notepad++.Notepad++",
-    "Source": "winget"
+    "Source": "winget",
+    "Category": ""
   },
   {
     "Name": "Docker Desktop",
     "ID": "Docker.DockerDesktop",
-    "Source": "winget"
+    "Source": "winget",
+    "Category": ""
   },
   {
     "Name": "Postman",
     "ID": "Postman.Postman",
-    "Source": "winget"
+    "Source": "winget",
+    "Category": ""
   },
   {
     "Name": "PowerToys",
     "ID": "Microsoft.PowerToys",
-    "Source": "winget"
+    "Source": "winget",
+    "Category": ""
   },
   {
     "Name": "Go",
     "ID": "go",
-    "Source": "scoop"
+    "Source": "scoop",
+    "Category": ""
   },
   {
     "Name": "Rust (rustup)",
     "ID": "rustup",
-    "Source": "scoop"
+    "Source": "scoop",
+    "Category": ""
   },
   {
-    "Name": "fzf",
+    "Name": "FZF",
     "ID": "fzf",
-    "Source": "scoop"
+    "Source": "scoop",
+    "Category": ""
   }
 ]
