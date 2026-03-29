@@ -1,15 +1,5 @@
 [
   {
-    "Name": "Visual Studio Code",
-    "ID": "Microsoft.VisualStudioCode",
-    "Source": "winget"
-  },
-  {
-    "Name": "Git",
-    "ID": "git",
-    "Source": "scoop"
-  },
-  {
     "Name": "Node.js (LTS)",
     "ID": "nodejs-lts",
     "Source": "scoop"
