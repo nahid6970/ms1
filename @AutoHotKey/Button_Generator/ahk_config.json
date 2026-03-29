@@ -142,6 +142,68 @@
                     "text_color": "000000"
                 }
             ]
+        },
+        {
+            "title": "BBA",
+            "title_color": "FFCC00",
+            "title_text_color": "000000",
+            "buttons": [
+                {
+                    "label": "Roll",
+                    "text": "23-208",
+                    "color": "00CCFF",
+                    "text_color": "000000"
+                },
+                {
+                    "label": "YR",
+                    "text": "2020",
+                    "color": "00CCFF",
+                    "text_color": "000000"
+                },
+                {
+                    "label": "Versity",
+                    "text": "University of Dhaka",
+                    "color": "00CCFF",
+                    "text_color": "000000"
+                },
+                {
+                    "label": "CGPA",
+                    "text": "3.3",
+                    "color": "00CCFF",
+                    "text_color": "000000"
+                }
+            ]
+        },
+        {
+            "title": "MBA",
+            "title_color": "FFCC00",
+            "title_text_color": "000000",
+            "buttons": [
+                {
+                    "label": "Roll",
+                    "text": "23-2191",
+                    "color": "00CCFF",
+                    "text_color": "000000"
+                },
+                {
+                    "label": "YR",
+                    "text": "2021",
+                    "color": "00CCFF",
+                    "text_color": "000000"
+                },
+                {
+                    "label": "Versity",
+                    "text": "University of Dhaka",
+                    "color": "00CCFF",
+                    "text_color": "000000"
+                },
+                {
+                    "label": "CGPA",
+                    "text": "3.23",
+                    "color": "00CCFF",
+                    "text_color": "000000"
+                }
+            ]
         }
     ]
 }
