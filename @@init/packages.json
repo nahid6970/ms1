@@ -9,13 +9,13 @@
     "Name": "Git",
     "ID": "git",
     "Source": "scoop",
-    "Category": "UtilityFX"
+    "Category": "Utility"
   },
   {
     "Name": "Node.js (LTS)",
     "ID": "nodejs-lts",
     "Source": "scoop",
-    "Category": "UtilityFX"
+    "Category": "Utility"
   },
   {
     "Name": "Python",

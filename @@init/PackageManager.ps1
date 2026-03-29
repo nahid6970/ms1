@@ -63,11 +63,11 @@ function Update-List {
     $selectedCat = [string]$cmbCategory.SelectedItem
     $packageListUI.ItemsSource = $null
     
-    $filtered = $global:allPackages | Where-Object { 
+    $filtered = @($global:allPackages | Where-Object { 
         ($null -eq $selectedCat -or $selectedCat -eq "All" -or $_.Category -eq $selectedCat) -and
         ($_.Name.ToLower().Contains($term) -or $_.ID.ToLower().Contains($term))
-    }
-    $packageListUI.ItemsSource = @($filtered)
+    } | Where-Object { $_ -ne $null })
+    $packageListUI.ItemsSource = if ($filtered.Count -gt 0) { $filtered } else { @() }
 }
 
 function Set-RowButtonsVisibility {
