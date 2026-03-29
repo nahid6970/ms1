@@ -215,7 +215,7 @@ $btnCheckStatus.Add_Click({
     
     foreach ($pkg in $global:allPackages) {
         $found = if ($pkg.Source -eq "scoop") { $scoopNames -contains $pkg.ID } else { $wingetList -like "*$($pkg.ID)*" }
-        if ($found) { $pkg.RowBackground = $installedColor; $pkg.Checkmark = " ✅" } else { $pkg.RowBackground = [System.Windows.Media.Brushes]::Transparent; $pkg.Checkmark = "" }
+        if ($found) { $pkg.RowBackground = $installedColor; $pkg.Checkmark = " ✔️" } else { $pkg.RowBackground = [System.Windows.Media.Brushes]::Transparent; $pkg.Checkmark = "" }
     }
     Update-List; $window.Cursor = [System.Windows.Input.Cursors]::Arrow; $statusText.Text = "Scan complete."
 })
