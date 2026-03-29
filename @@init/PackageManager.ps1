@@ -105,7 +105,10 @@ function Show-PackageDialog {
     $txtID = New-Object System.Windows.Controls.TextBox; $txtID.Padding = "5"; $txtID.Margin = "0,0,0,15"; if($ExistingPkg){ $txtID.Text = $ExistingPkg.ID }; [System.Windows.Controls.Grid]::SetRow($txtID, 1); [System.Windows.Controls.Grid]::SetColumn($txtID, 1); [void]$grid.Children.Add($txtID)
     
     $lblCat = New-Object System.Windows.Controls.TextBlock; $lblCat.Text = "Category:"; $lblCat.VerticalAlignment = "Center"; $lblCat.Margin = "0,0,15,15"; [System.Windows.Controls.Grid]::SetRow($lblCat, 2); [System.Windows.Controls.Grid]::SetColumn($lblCat, 0); [void]$grid.Children.Add($lblCat)
-    $txtCat = New-Object System.Windows.Controls.TextBox; $txtCat.Padding = "5"; $txtCat.Margin = "0,0,0,15"; $txtCat.Text = if($ExistingPkg){ $ExistingPkg.Category } else { "General" }; [System.Windows.Controls.Grid]::SetRow($txtCat, 2); [System.Windows.Controls.Grid]::SetColumn($txtCat, 1); [void]$grid.Children.Add($txtCat)
+    $cmbCat = New-Object System.Windows.Controls.ComboBox; $cmbCat.IsEditable = $true; $cmbCat.Padding = "5"; $cmbCat.Margin = "0,0,0,15"; $cmbCat.Text = if($ExistingPkg){ $ExistingPkg.Category } else { "General" }
+    $categories = $global:allPackages.Category | Where-Object { $_ } | Select-Object -Unique | Sort-Object
+    foreach ($cat in $categories) { [void]$cmbCat.Items.Add($cat) }
+    [System.Windows.Controls.Grid]::SetRow($cmbCat, 2); [System.Windows.Controls.Grid]::SetColumn($cmbCat, 1); [void]$grid.Children.Add($cmbCat)
     
     $lbl3 = New-Object System.Windows.Controls.TextBlock; $lbl3.Text = "Source:"; $lbl3.VerticalAlignment = "Center"; $lbl3.Margin = "0,0,15,0"; [System.Windows.Controls.Grid]::SetRow($lbl3, 3); [System.Windows.Controls.Grid]::SetColumn($lbl3, 0); [void]$grid.Children.Add($lbl3)
     $cmbSource = New-Object System.Windows.Controls.ComboBox; $cmbSource.Width = 100; $cmbSource.Height = 25; $cmbSource.HorizontalAlignment = "Left"; [void]$cmbSource.Items.Add("winget"); [void]$cmbSource.Items.Add("scoop"); $cmbSource.SelectedItem = if($ExistingPkg){ $ExistingPkg.Source } else { "winget" }; [System.Windows.Controls.Grid]::SetRow($cmbSource, 3); [System.Windows.Controls.Grid]::SetColumn($cmbSource, 1); [void]$grid.Children.Add($cmbSource)
@@ -116,7 +119,7 @@ function Show-PackageDialog {
     
     $btnSave.Add_Click({ 
         if(-not [string]::IsNullOrWhiteSpace($txtName.Text) -and -not [string]::IsNullOrWhiteSpace($txtID.Text)){ 
-            $script:dialogResult = New-PackageObject -Name $txtName.Text -ID $txtID.Text -Source $cmbSource.SelectedItem -Category $txtCat.Text.Trim()
+            $script:dialogResult = New-PackageObject -Name $txtName.Text -ID $txtID.Text -Source $cmbSource.SelectedItem -Category $cmbCat.Text.Trim()
             $dlg.Close() 
         } 
     })

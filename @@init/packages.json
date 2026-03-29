@@ -15,7 +15,7 @@
     "Name": "Node.js (LTS)",
     "ID": "nodejs-lts",
     "Source": "scoop",
-    "Category": ""
+    "Category": "NecessarySS"
   },
   {
     "Name": "Python",
