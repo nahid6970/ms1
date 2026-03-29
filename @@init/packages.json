@@ -177,7 +177,7 @@
     "Name": "Autoruns",
     "ID": "Microsoft.Sysinternals.Autoruns",
     "Source": "winget",
-    "Category": "Tool"
+    "Category": "Monitor"
   },
   {
     "Name": "BareGrep [Find]",
@@ -231,13 +231,13 @@
     "Name": "btop [Sys-Monitor] [S]",
     "ID": "btop",
     "Source": "scoop",
-    "Category": "General"
+    "Category": "Monitor"
   },
   {
     "Name": "btop [Sys-Monitor] [W]",
     "ID": "aristocratos.btop4win",
     "Source": "winget",
-    "Category": "General"
+    "Category": "Monitor"
   },
   {
     "Name": "Bulk Crap Uninstaller [S]",
