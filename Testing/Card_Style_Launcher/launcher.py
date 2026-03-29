@@ -7,7 +7,7 @@ from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, 
     QLabel, QPushButton, QLineEdit, QGroupBox, QFormLayout, 
     QScrollArea, QFrame, QGridLayout, QSizePolicy, QLayout,
-    QDialog, QMessageBox, QFileDialog, QMenu, QStyle
+    QDialog, QMessageBox, QFileDialog, QMenu, QStyle, QSlider, QSpinBox, QCheckBox
 )
 from PyQt6.QtCore import Qt, QSize, QPoint, QRect, pyqtSignal
 from PyQt6.QtGui import QFont, QCursor, QAction, QFontMetrics
@@ -174,12 +174,18 @@ class CyberCard(QPushButton):
     """
     A card-style button for a directory.
     """
-    def __init__(self, name, path, category, last_used=0, parent=None):
+    def __init__(self, name, path, category, last_used=0, settings=None, parent=None):
         super().__init__(parent)
         self.name = name or os.path.basename(path.rstrip(os.sep))
         self.path = path
         self.category = category
         self.last_used = last_used
+        
+        # Settings
+        settings = settings or {}
+        name_font_size = settings.get("name_font_size", 11)
+        name_bold = settings.get("name_bold", True)
+        show_category = settings.get("show_category", True)
         
         self.setFixedSize(200, 120)
         self.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -190,9 +196,11 @@ class CyberCard(QPushButton):
         
         self.cat_label = QLabel(f"[{category.upper()}]")
         self.cat_label.setStyleSheet(f"color: {CP_CYAN}; font-size: 8pt; border: none; background: transparent;")
+        self.cat_label.setVisible(show_category)
         
         self.name_label = QLabel(self.name)
-        self.name_label.setStyleSheet(f"color: {CP_TEXT}; font-weight: bold; font-size: 11pt; border: none; background: transparent;")
+        weight = "bold" if name_bold else "normal"
+        self.name_label.setStyleSheet(f"color: {CP_TEXT}; font-weight: {weight}; font-size: {name_font_size}pt; border: none; background: transparent;")
         self.name_label.setWordWrap(True)
         self.name_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         
@@ -353,12 +361,15 @@ class CardLauncher(QMainWindow):
         add_btn.clicked.connect(self.add_directory)
         self.flow_layout.addWidget(add_btn)
         
+        # Add Directory Cards
+        settings = self.data.get("settings", {})
         for d in sorted_dirs:
             card = CyberCard(
                 d.get("name"), 
                 d.get("path"), 
                 d.get("category", "General"),
-                d.get("last_used", 0)
+                d.get("last_used", 0),
+                settings=settings
             )
             card.clicked.connect(lambda checked, arg=d: self.on_card_clicked(arg))
             card.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
@@ -470,6 +481,13 @@ class CardLauncher(QMainWindow):
             save_data(self.data)
             self.refresh_cards()
 
+    def update_setting(self, key, value):
+        if "settings" not in self.data:
+            self.data["settings"] = {}
+        self.data["settings"][key] = value
+        save_data(self.data)
+        self.refresh_cards()
+
     def update_window_width(self, width):
         self.resize(width, self.height())
         if "settings" not in self.data:
@@ -480,36 +498,51 @@ class CardLauncher(QMainWindow):
     def show_settings(self):
         dialog = QDialog(self)
         dialog.setWindowTitle("SETTINGS")
-        dialog.setMinimumSize(400, 300)
+        dialog.setMinimumSize(400, 450)
         layout = QVBoxLayout(dialog)
         
         layout.addWidget(QLabel("--- UI CONFIGURATION ---"))
+        
+        settings = self.data.get("settings", {})
         
         # Width Control
         width_layout = QHBoxLayout()
         width_layout.addWidget(QLabel("Window Width:"))
         
-        from PyQt6.QtWidgets import QSlider, QSpinBox
-        
         width_slider = QSlider(Qt.Orientation.Horizontal)
         width_slider.setRange(800, 1920)
-        current_width = self.width()
-        width_slider.setValue(current_width)
-        
+        width_slider.setValue(self.width())
         width_spin = QSpinBox()
         width_spin.setRange(800, 1920)
-        width_spin.setValue(current_width)
-        
-        # Sync Slider and SpinBox
+        width_spin.setValue(self.width())
         width_slider.valueChanged.connect(width_spin.setValue)
         width_spin.valueChanged.connect(width_slider.setValue)
-        
-        # Apply Change
         width_slider.valueChanged.connect(self.update_window_width)
-        
         width_layout.addWidget(width_slider)
         width_layout.addWidget(width_spin)
         layout.addLayout(width_layout)
+        
+        # Font Size Control
+        font_layout = QHBoxLayout()
+        font_layout.addWidget(QLabel("Name Font Size:"))
+        font_spin = QSpinBox()
+        font_spin.setRange(6, 24)
+        font_spin.setValue(settings.get("name_font_size", 11))
+        font_spin.valueChanged.connect(lambda val: self.update_setting("name_font_size", val))
+        font_layout.addWidget(font_spin)
+        layout.addLayout(font_layout)
+        
+        # Boldness Control
+        bold_check = QCheckBox("Bold Project Name")
+        bold_check.setChecked(settings.get("name_bold", True))
+        bold_check.toggled.connect(lambda checked: self.update_setting("name_bold", checked))
+        layout.addWidget(bold_check)
+        
+        # Category Control
+        cat_check = QCheckBox("Show Category Label")
+        cat_check.setChecked(settings.get("show_category", True))
+        cat_check.toggled.connect(lambda checked: self.update_setting("show_category", checked))
+        layout.addWidget(cat_check)
         
         layout.addStretch()
         

@@ -10,13 +10,13 @@
             "path": "C:/@delta/ms1/Testing",
             "name": "FK",
             "category": "General",
-            "last_used": 1774760264.9289403
+            "last_used": 1774760432.2196681
         },
         {
             "path": "C:/@delta",
-            "name": "asdasdasd",
+            "name": "DEAD",
             "category": "General",
-            "last_used": 1774760263.9371195
+            "last_used": 1774760433.5960524
         }
     ],
     "commands": [
@@ -37,6 +37,7 @@
         }
     ],
     "settings": {
-        "window_width": 920
+        "window_width": 920,
+        "name_font_size": 20
     }
 }
