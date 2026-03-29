@@ -207,30 +207,29 @@ async function openEpisodesPopup(event, showId, showTitle) {
             ul.style.padding = '0';
             
             show.episodes.forEach(ep => {
-                const li = document.createElement('li');
-                li.className = `episode-item ${ep.watched ? 'episode-watched' : ''}`;
-                li.style.display = 'flex';
-                li.style.justifyContent = 'space-between';
-                li.style.alignItems = 'center';
-                li.style.padding = '12px 15px';
-                li.style.marginBottom = '8px';
-                li.style.background = '#2a2a2a';
-                li.style.borderRadius = '8px';
-                if (ep.watched) li.style.background = 'rgba(29, 185, 84, 0.1)';
+            const li = document.createElement('li');
+            li.className = `episode-item ${ep.watched ? 'episode-watched' : ''}`;
+            li.style.display = 'flex';
+            li.style.justifyContent = 'space-between';
+            li.style.alignItems = 'center';
+            li.style.padding = '12px 15px';
+            li.style.marginBottom = '8px';
+            li.style.background = '#2a2a2a';
+            li.style.borderRadius = '8px';
+            if (ep.watched) li.style.background = 'rgba(29, 185, 84, 0.1)';
 
-                li.innerHTML = `
-                    <div>
-                        <input type="checkbox" ${ep.watched ? 'checked' : ''} onchange="toggleWatched(${showId}, ${ep.id})">
-                        <span>${ep.title}</span>
-                    </div>
-                    <div style="display: flex; gap: 8px;">
-                        <div class="edit-dot" onclick="openEditEpisodeModal(${showId}, ${ep.id})"></div>
-                        <div class="delete-dot" onclick="deleteEpisode(${showId}, ${ep.id})"></div>
-                    </div>
-                `;
-                ul.appendChild(li);
-            });
-            listContainer.appendChild(ul);
+            li.innerHTML = `
+            <div>
+            <input type="checkbox" ${ep.watched ? 'checked' : ''} onchange="toggleWatched(${showId}, ${ep.id}, this)">
+            <span>${ep.title}</span>
+            </div>
+            <div style="display: flex; gap: 8px;">
+            <div class="edit-dot" onclick="openEditEpisodeModal(${showId}, ${ep.id})"></div>
+            <div class="delete-dot" onclick="deleteEpisode(${showId}, ${ep.id})"></div>
+            </div>
+            `;
+            ul.appendChild(li);
+            });            listContainer.appendChild(ul);
         }
     } catch (error) {
         console.error('Error fetching episodes:', error);
@@ -488,7 +487,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                             li.innerHTML = `
                                 <div style="display: flex; align-items: center; gap: 12px;">
-                                    <input type="checkbox" ${ep.watched ? 'checked' : ''} onchange="toggleWatched(${showId}, ${ep.id})">
+                                    <input type="checkbox" ${ep.watched ? 'checked' : ''} onchange="toggleWatched(${showId}, ${ep.id}, this)">
                                     <span>${ep.title}</span>
                                 </div>
                                 <div style="display: flex; gap: 8px;">
@@ -509,11 +508,52 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Helper functions for popup interactions
-    window.toggleWatched = function(showId, episodeId) {
-        fetch(`/toggle_watched/${showId}/${episodeId}`).then(() => {
-            // Optional: refresh the modal or just the item
-            // For simplicity, let's just update the count on main page if needed
-        });
+    window.toggleWatched = function(showId, episodeId, checkbox) {
+        fetch(`/toggle_watched/${showId}/${episodeId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // 1. Update episode item in modal
+                    const li = checkbox.closest('.episode-item');
+                    if (data.watched) {
+                        li.classList.add('episode-watched');
+                        li.style.background = 'rgba(29, 185, 84, 0.1)';
+                    } else {
+                        li.classList.remove('episode-watched');
+                        li.style.background = '#2a2a2a';
+                    }
+
+                    // 2. Update show card on main page
+                    const showCard = document.querySelector(`.show-card[data-show-id="${showId}"]`);
+                    if (showCard) {
+                        const countEl = showCard.querySelector('.episode-count');
+                        const [watched, total] = countEl.textContent.split('/').map(Number);
+                        const newWatched = data.watched ? watched + 1 : watched - 1;
+                        countEl.textContent = `${newWatched}/${total}`;
+
+                        // Update color class for count
+                        countEl.classList.remove('no-episodes-watched', 'some-episodes-watched', 'all-episodes-watched');
+                        if (newWatched === 0) {
+                            countEl.classList.add('no-episodes-watched');
+                        } else if (newWatched < total) {
+                            countEl.classList.add('some-episodes-watched');
+                        } else {
+                            countEl.classList.add('all-episodes-watched');
+                        }
+
+                        // Update completed status classes
+                        const status = showCard.dataset.status;
+                        if (newWatched === total && total > 0) {
+                            showCard.classList.add('completed');
+                            if (status === 'Ended') {
+                                showCard.classList.add('ended-completed');
+                            }
+                        } else {
+                            showCard.classList.remove('completed', 'ended-completed');
+                        }
+                    }
+                }
+            });
     };
 
     window.deleteEpisode = function(showId, episodeId) {
