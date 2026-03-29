@@ -153,79 +153,79 @@
     "Name": "AutoHotkey v1 [S]",
     "ID": "autohotkey1.1",
     "Source": "scoop",
-    "Category": "Tool"
+    "Category": "Scripting"
   },
   {
     "Name": "AutoHotkey v1 [W]",
     "ID": "9NQ8Q8J78637",
     "Source": "winget",
-    "Category": "Tool"
+    "Category": "Scripting"
   },
   {
     "Name": "AutoHotkey v2 [S]",
     "ID": "autohotkey",
     "Source": "scoop",
-    "Category": "Tool"
+    "Category": "Scripting"
   },
   {
     "Name": "AutoHotkey v2 [W]",
     "ID": "AutoHotkey.AutoHotkey",
     "Source": "winget",
-    "Category": "Tool"
+    "Category": "Scripting"
   },
   {
     "Name": "Autoruns",
     "ID": "Microsoft.Sysinternals.Autoruns",
     "Source": "winget",
-    "Category": "General"
+    "Category": "Tool"
   },
   {
     "Name": "BareGrep [Find]",
     "ID": "baregrep",
     "Source": "scoop",
-    "Category": "General"
+    "Category": "Tool"
   },
   {
     "Name": "Bat [Text-View]",
     "ID": "bat",
     "Source": "scoop",
-    "Category": "General"
+    "Category": "Tool"
   },
   {
     "Name": "Bazarr",
     "ID": "Morpheus.Bazarr",
     "Source": "winget",
-    "Category": "General"
+    "Category": "ARR"
   },
   {
     "Name": "beyond-compare",
     "ID": "beyondcompare",
     "Source": "scoop",
-    "Category": "General"
+    "Category": "Tool"
   },
   {
     "Name": "Bitwarden [S]",
     "ID": "bitwarden",
     "Source": "scoop",
-    "Category": "General"
+    "Category": "Security"
   },
   {
     "Name": "Bitwarden [W]",
     "ID": "Bitwarden.Bitwarden",
     "Source": "winget",
-    "Category": "General"
+    "Category": "Security"
   },
   {
     "Name": "BleachBit [S]",
     "ID": "bleachbit",
     "Source": "scoop",
-    "Category": "General"
+    "Category": "Cleanup"
   },
   {
     "Name": "BleachBit [W]",
     "ID": "BleachBit.BleachBit",
     "Source": "winget",
-    "Category": "General"
+    "Category": "Cleanup"
   },
   {
     "Name": "btop [Sys-Monitor] [S]",
