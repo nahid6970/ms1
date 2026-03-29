@@ -7,7 +7,8 @@ from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, 
     QLabel, QPushButton, QLineEdit, QGroupBox, QFormLayout, 
     QScrollArea, QFrame, QGridLayout, QSizePolicy, QLayout,
-    QDialog, QMessageBox, QFileDialog, QMenu, QStyle, QSlider, QSpinBox, QCheckBox
+    QDialog, QMessageBox, QFileDialog, QMenu, QStyle, QSlider, QSpinBox, QCheckBox,
+    QListWidget, QListWidgetItem, QInputDialog
 )
 from PyQt6.QtCore import Qt, QSize, QPoint, QRect, pyqtSignal
 from PyQt6.QtGui import QFont, QCursor, QAction, QFontMetrics
@@ -396,7 +397,6 @@ class CardLauncher(QMainWindow):
         # Show actions
         self.show_actions(dir_obj)
         
-        # DO NOT call refresh_cards here to avoid flicker and items jumping around.
         # Sorting will apply after next app restart.
 
     def show_actions(self, dir_obj):
@@ -505,10 +505,44 @@ class CardLauncher(QMainWindow):
         self.data["settings"]["window_width"] = width
         save_data(self.data)
 
+    def add_custom_command(self, list_widget):
+        name, ok = QInputDialog.getText(self, "Add Command", "Command Name (e.g. Open in Notepad++):")
+        if not ok or not name: return
+        
+        template, ok = QInputDialog.getText(self, "Add Command", 'Command Template (use {path} for folder path):\nExample: notepad++ "{path}"')
+        if not ok or not template: return
+        
+        if "commands" not in self.data:
+            self.data["commands"] = []
+            
+        self.data["commands"].append({"name": name, "template": template, "category": "Custom"})
+        save_data(self.data)
+        
+        # Refresh list
+        item = QListWidgetItem(f"{name} | {template}")
+        list_widget.addItem(item)
+
+    def remove_custom_command(self, list_widget):
+        current_item = list_widget.currentItem()
+        if not current_item:
+            QMessageBox.warning(self, "Warning", "Please select a command to remove.")
+            return
+            
+        index = list_widget.row(current_item)
+        cmd_name = self.data["commands"][index]["name"]
+        
+        reply = QMessageBox.question(self, "Remove", f"Remove command '{cmd_name}'?", 
+                                   QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+        
+        if reply == QMessageBox.StandardButton.Yes:
+            self.data["commands"].pop(index)
+            save_data(self.data)
+            list_widget.takeItem(index)
+
     def show_settings(self):
         dialog = QDialog(self)
         dialog.setWindowTitle("SETTINGS")
-        dialog.setMinimumSize(400, 450)
+        dialog.setMinimumSize(500, 600)
         layout = QVBoxLayout(dialog)
         
         layout.addWidget(QLabel("--- UI CONFIGURATION ---"))
@@ -518,7 +552,6 @@ class CardLauncher(QMainWindow):
         # Width Control
         width_layout = QHBoxLayout()
         width_layout.addWidget(QLabel("Window Width:"))
-        
         width_slider = QSlider(Qt.Orientation.Horizontal)
         width_slider.setRange(800, 1920)
         width_slider.setValue(self.width())
@@ -553,6 +586,23 @@ class CardLauncher(QMainWindow):
         cat_check.setChecked(settings.get("show_category", True))
         cat_check.toggled.connect(lambda checked: self.update_setting("show_category", checked))
         layout.addWidget(cat_check)
+        
+        layout.addWidget(QLabel("\n--- COMMAND MANAGEMENT ---"))
+        
+        cmd_list = QListWidget()
+        cmd_list.setStyleSheet(f"background-color: {CP_PANEL}; color: {CP_TEXT}; border: 1px solid {CP_DIM};")
+        for cmd in self.data.get("commands", []):
+            cmd_list.addItem(f"{cmd['name']} | {cmd['template']}")
+        layout.addWidget(cmd_list)
+        
+        cmd_btns = QHBoxLayout()
+        add_cmd_btn = QPushButton("ADD COMMAND")
+        add_cmd_btn.clicked.connect(lambda: self.add_custom_command(cmd_list))
+        remove_cmd_btn = QPushButton("REMOVE SELECTED")
+        remove_cmd_btn.clicked.connect(lambda: self.remove_custom_command(cmd_list))
+        cmd_btns.addWidget(add_cmd_btn)
+        cmd_btns.addWidget(remove_cmd_btn)
+        layout.addLayout(cmd_btns)
         
         layout.addStretch()
         
