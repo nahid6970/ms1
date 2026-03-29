@@ -12,32 +12,44 @@
     },
     "rows": [
         {
-            "title": "Example Name",
+            "title": "Nahid Ahmed",
             "title_color": "FFCC00",
             "title_text_color": "000000",
             "buttons": [
                 {
-                    "label": "SSK",
-                    "text": "FFF",
+                    "label": "en",
+                    "text": "Nahid Ahmed",
                     "color": "00CCFF",
                     "text_color": "000000"
                 },
                 {
-                    "label": "LMG",
-                    "text": "Fast",
+                    "label": "bn",
+                    "text": "\u09a8\u09be\u09b9\u09bf\u09a6 \u0986\u09b9\u09ae\u09c7\u09a6",
+                    "color": "00CCFF",
+                    "text_color": "000000"
+                },
+                {
+                    "label": "NID",
+                    "text": "1505190676",
                     "color": "00CCFF",
                     "text_color": "000000"
                 }
             ]
         },
         {
-            "title": "RR",
+            "title": "Father",
             "title_color": "FFCC00",
             "title_text_color": "000000",
             "buttons": [
                 {
-                    "label": "F1",
-                    "text": "Field2",
+                    "label": "en",
+                    "text": "Nurul Amin",
+                    "color": "00CCFF",
+                    "text_color": "000000"
+                },
+                {
+                    "label": "bn",
+                    "text": "\u09a8\u09c1\u09b0\u09c1\u09b2 \u0986\u09ae\u09bf\u09a8",
                     "color": "00CCFF",
                     "text_color": "000000"
                 }
