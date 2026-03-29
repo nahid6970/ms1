@@ -2,21 +2,15 @@
     "directories": [
         {
             "path": "C:/@delta/ms1/Testing/Card_Style_Launcher",
-            "name": "ENA",
-            "category": "SSK",
-            "last_used": 1774760841.7169356
-        },
-        {
-            "path": "C:/@delta/ms1/Testing",
-            "name": "FK",
+            "name": "TEST",
             "category": "General",
-            "last_used": 1774760845.325746
+            "last_used": 1774761662.5858994
         },
         {
             "path": "C:/@delta",
-            "name": "DEAD",
+            "name": "Delta",
             "category": "General",
-            "last_used": 1774761409.248753
+            "last_used": 1774761653.9339056
         }
     ],
     "commands": [
@@ -48,6 +42,7 @@
     ],
     "settings": {
         "window_width": 920,
-        "name_font_size": 20
+        "name_font_size": 20,
+        "show_category": false
     }
 }

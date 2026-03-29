@@ -339,12 +339,10 @@ class CardLauncher(QMainWindow):
                 if item.widget():
                     item.widget().deleteLater()
             
+            # Sort directories by last_used (descending)
             sorted_dirs = sorted(self.data.get("directories", []), key=lambda x: x.get("last_used", 0), reverse=True)
             
-            add_btn = AddCard()
-            add_btn.clicked.connect(self.add_directory)
-            self.flow_layout.addWidget(add_btn)
-            
+            # Add Directory Cards
             settings = self.data.get("settings", {})
             for d in sorted_dirs:
                 card = CyberCard(d.get("name"), d.get("path"), d.get("category", "General"), d.get("last_used", 0), settings=settings)
@@ -352,6 +350,11 @@ class CardLauncher(QMainWindow):
                 card.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
                 card.customContextMenuRequested.connect(lambda pos, arg=d: self.show_context_menu(pos, arg))
                 self.flow_layout.addWidget(card)
+
+            # Add "Add Card" last
+            add_btn = AddCard()
+            add_btn.clicked.connect(self.add_directory)
+            self.flow_layout.addWidget(add_btn)
         finally:
             self.setUpdatesEnabled(True)
 
