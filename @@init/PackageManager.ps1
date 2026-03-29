@@ -5,7 +5,19 @@ Add-Type -AssemblyName PresentationFramework, PresentationCore, WindowsBase, Mic
 $jsonPath = Join-Path $PSScriptRoot "packages.json"
 $global:allPackages = New-Object System.Collections.Generic.List[PSCustomObject]
 $global:lastHoveredItem = $null
-$global:isUpdating = $false
+
+# Helper to create a standardized package object
+function New-PackageObject {
+    param($Name, $ID, $Source)
+    return [PSCustomObject]@{
+        Name          = [string]$Name
+        ID            = [string]$ID
+        Source        = [string]$Source
+        IsSelected    = $false
+        RowBackground = [System.Windows.Media.Brushes]::Transparent
+        Checkmark     = ""
+    }
+}
 
 function Load-Packages {
     if (Test-Path $jsonPath) {
@@ -15,16 +27,8 @@ function Load-Packages {
             $data = $content | ConvertFrom-Json
             $global:allPackages.Clear()
             foreach ($item in @($data)) {
-                # STRICT VALIDATION: Ignore null or empty entries
-                if ($null -ne $item -and -not [string]::IsNullOrWhiteSpace($item.Name) -and -not [string]::IsNullOrWhiteSpace($item.ID)) {
-                    $global:allPackages.Add([PSCustomObject]@{
-                        Name          = [string]$item.Name
-                        ID            = [string]$item.ID
-                        Source        = [string]$item.Source
-                        IsSelected    = $false
-                        RowBackground = [System.Windows.Media.Brushes]::Transparent
-                        Checkmark     = ""
-                    })
+                if ($item.Name -and $item.ID) {
+                    $global:allPackages.Add((New-PackageObject -Name $item.Name -ID $item.ID -Source $item.Source))
                 }
             }
         } catch { }
@@ -33,15 +37,10 @@ function Load-Packages {
 
 function Save-Packages {
     try {
-        $cleanData = New-Object System.Collections.Generic.List[PSCustomObject]
+        $cleanData = @()
         foreach($p in $global:allPackages) {
-            # Ensure we only save items that actually have content
-            if (-not [string]::IsNullOrWhiteSpace($p.Name) -and -not [string]::IsNullOrWhiteSpace($p.ID)) {
-                $cleanData.Add([PSCustomObject]@{
-                    Name   = $p.Name
-                    ID     = $p.ID
-                    Source = $p.Source
-                })
+            if ($p.Name -and $p.ID) {
+                $cleanData += [PSCustomObject]@{ Name = $p.Name; ID = $p.ID; Source = $p.Source }
             }
         }
         $json = $cleanData | ConvertTo-Json -Depth 10
@@ -50,23 +49,18 @@ function Save-Packages {
     } catch { }
 }
 
-# --- Central Refresh Function ---
 function Update-List {
-    if ($global:isUpdating) { return }
-    $global:isUpdating = $true
-    
     $term = [string]$txtSearch.Text.ToLower().Trim()
-    $displayList = if ([string]::IsNullOrWhiteSpace($term)) {
-        @($global:allPackages)
-    } else {
-        @($global:allPackages | Where-Object { 
-            $_.Name.ToLower().Contains($term) -or $_.ID.ToLower().Contains($term) 
-        })
-    }
-    
     $packageListUI.ItemsSource = $null
-    $packageListUI.ItemsSource = $displayList
-    $global:isUpdating = $false
+    
+    if ([string]::IsNullOrWhiteSpace($term)) {
+        $packageListUI.ItemsSource = $global:allPackages.ToArray()
+    } else {
+        $filtered = $global:allPackages | Where-Object { 
+            $_.Name.ToLower().Contains($term) -or $_.ID.ToLower().Contains($term) 
+        }
+        $packageListUI.ItemsSource = @($filtered)
+    }
 }
 
 function Set-RowButtonsVisibility {
@@ -92,20 +86,23 @@ function Show-PackageDialog {
     $grid = New-Object System.Windows.Controls.Grid; $grid.Margin = "20"; $dlg.Content = $grid
     for($i=0; $i -lt 5; $i++){ $grid.RowDefinitions.Add((New-Object System.Windows.Controls.RowDefinition)) }
     $grid.RowDefinitions[4].Height = New-Object System.Windows.GridLength(1, [System.Windows.GridUnitType]::Star)
-    $lbl1 = New-Object System.Windows.Controls.TextBlock; $lbl1.Text = "Display Name:"; $lbl1.Margin = "0,0,0,5"; [System.Windows.Controls.Grid]::SetRow($lbl1, 0); $grid.Children.Add($lbl1)
-    $txtName = New-Object System.Windows.Controls.TextBox; $txtName.Margin = "0,0,0,15"; $txtName.Padding = "5"; if($ExistingPkg){ $txtName.Text = $ExistingPkg.Name }; [System.Windows.Controls.Grid]::SetRow($txtName, 1); $grid.Children.Add($txtName)
-    $lbl2 = New-Object System.Windows.Controls.TextBlock; $lbl2.Text = "Package ID:"; $lbl2.Margin = "0,0,0,5"; [System.Windows.Controls.Grid]::SetRow($lbl2, 2); $grid.Children.Add($lbl2)
-    $txtID = New-Object System.Windows.Controls.TextBox; $txtID.Margin = "0,0,0,15"; $txtID.Padding = "5"; if($ExistingPkg){ $txtID.Text = $ExistingPkg.ID }; [System.Windows.Controls.Grid]::SetRow($txtID, 3); $grid.Children.Add($txtID)
-    $spSource = New-Object System.Windows.Controls.StackPanel; $spSource.Orientation = "Horizontal"; $spSource.Margin = "0,0,0,20"; [System.Windows.Controls.Grid]::SetRow($spSource, 4); $grid.Children.Add($spSource)
-    $lbl3 = New-Object System.Windows.Controls.TextBlock; $lbl3.Text = "Source:"; $lbl3.VerticalAlignment = "Center"; $lbl3.Margin = "0,0,10,0"; $spSource.Children.Add($lbl3)
+    
+    $lbl1 = New-Object System.Windows.Controls.TextBlock; $lbl1.Text = "Display Name:"; [System.Windows.Controls.Grid]::SetRow($lbl1, 0); $grid.Children.Add($lbl1)
+    $txtName = New-Object System.Windows.Controls.TextBox; $txtName.Margin = "0,5,0,15"; $txtName.Padding = "5"; if($ExistingPkg){ $txtName.Text = $ExistingPkg.Name }; [System.Windows.Controls.Grid]::SetRow($txtName, 1); $grid.Children.Add($txtName)
+    
+    $lbl2 = New-Object System.Windows.Controls.TextBlock; $lbl2.Text = "Package ID:"; [System.Windows.Controls.Grid]::SetRow($lbl2, 2); $grid.Children.Add($lbl2)
+    $txtID = New-Object System.Windows.Controls.TextBox; $txtID.Margin = "0,5,0,15"; $txtID.Padding = "5"; if($ExistingPkg){ $txtID.Text = $ExistingPkg.ID }; [System.Windows.Controls.Grid]::SetRow($txtID, 3); $grid.Children.Add($txtID)
+    
+    $spSource = New-Object System.Windows.Controls.StackPanel; $spSource.Orientation = "Horizontal"; [System.Windows.Controls.Grid]::SetRow($spSource, 4); $grid.Children.Add($spSource)
     $cmbSource = New-Object System.Windows.Controls.ComboBox; $cmbSource.Width = 100; $cmbSource.Height = 25; [void]$cmbSource.Items.Add("winget"); [void]$cmbSource.Items.Add("scoop"); $cmbSource.SelectedItem = if($ExistingPkg){ $ExistingPkg.Source } else { "winget" }; $spSource.Children.Add($cmbSource)
+    
     $spBtns = New-Object System.Windows.Controls.StackPanel; $spBtns.Orientation = "Horizontal"; $spBtns.HorizontalAlignment = "Right"; $spBtns.VerticalAlignment = "Bottom"; [System.Windows.Controls.Grid]::SetRow($spBtns, 4); $grid.Children.Add($spBtns)
     $btnSave = New-Object System.Windows.Controls.Button; $btnSave.Content = "Save"; $btnSave.Width = 70; $btnSave.Height = 30; $btnSave.Margin = "0,0,10,0"; $btnSave.Background = New-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Color]::FromRgb(13, 110, 253)); $btnSave.Foreground = [System.Windows.Media.Brushes]::White; $spBtns.Children.Add($btnSave)
     $btnCancel = New-Object System.Windows.Controls.Button; $btnCancel.Content = "Cancel"; $btnCancel.Width = 70; $btnCancel.Height = 30; $spBtns.Children.Add($btnCancel)
     
     $btnSave.Add_Click({ 
         if(-not [string]::IsNullOrWhiteSpace($txtName.Text) -and -not [string]::IsNullOrWhiteSpace($txtID.Text)){ 
-            $script:dialogResult = [PSCustomObject]@{ Name = $txtName.Text; ID = $txtID.Text; Source = $cmbSource.SelectedItem; IsSelected = $false; RowBackground = [System.Windows.Media.Brushes]::Transparent; Checkmark = "" }
+            $script:dialogResult = New-PackageObject -Name $txtName.Text -ID $txtID.Text -Source $cmbSource.SelectedItem
             $dlg.Close() 
         } 
     })
@@ -113,7 +110,7 @@ function Show-PackageDialog {
     $script:dialogResult = $null; $dlg.ShowDialog() | Out-Null; return $script:dialogResult
 }
 
-# --- Main UI Build ---
+# --- Main Window ---
 $window = New-Object System.Windows.Window; $window.Title = "Package Manager Pro"; $window.Width = 580; $window.Height = 650; $window.Background = [System.Windows.Media.Brushes]::White; $window.WindowStartupLocation = "CenterScreen"
 $mainGrid = New-Object System.Windows.Controls.Grid; $mainGrid.Margin = "15"; $window.Content = $mainGrid
 for($i=0; $i -lt 4; $i++){ $mainGrid.RowDefinitions.Add((New-Object System.Windows.Controls.RowDefinition)) }
@@ -182,26 +179,18 @@ $statusText = New-Object System.Windows.Controls.TextBlock; $statusText.Text = "
 # --- Events ---
 Load-Packages; Update-List
 $txtSearch.Add_TextChanged({ Update-List })
-
-$btnAdd.Add_Click({ 
-    $res = Show-PackageDialog
-    if ($res) { 
-        $global:allPackages.Add($res)
-        $txtSearch.Text = "" # Reset search first
-        Update-List
-        Save-Packages
-    } 
-})
-
+$btnAdd.Add_Click({ $res = Show-PackageDialog; if ($res) { $global:allPackages.Add($res); $txtSearch.Text = ""; Update-List; Save-Packages } })
 $selectAll.Add_Checked({ foreach ($p in $packageListUI.ItemsSource) { $p.IsSelected = $true }; $packageListUI.Items.Refresh() })
 $selectAll.Add_Unchecked({ foreach ($p in $packageListUI.ItemsSource) { $p.IsSelected = $false }; $packageListUI.Items.Refresh() })
 
 $btnCheckStatus.Add_Click({
     $window.Cursor = [System.Windows.Input.Cursors]::Wait; $statusText.Text = "Scanning..."; $window.UpdateLayout()
     $installedColor = New-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Color]::FromRgb(232, 245, 233))
-    $scoopList = (scoop list) -join "`n"; $wingetList = (winget list --source winget) -join "`n"
+    $scoopList = (scoop list) -join " "
+    $wingetList = (winget list --source winget) -join " "
+    
     foreach ($pkg in $global:allPackages) {
-        $found = if ($pkg.Source -eq "scoop") { $scoopList -match "(?m)^$($pkg.ID)\s+" } else { $wingetList -match [regex]::Escape($pkg.ID) }
+        $found = if ($pkg.Source -eq "scoop") { $scoopList -like "*$($pkg.ID)*" } else { $wingetList -like "*$($pkg.ID)*" }
         if ($found) { $pkg.RowBackground = $installedColor; $pkg.Checkmark = "[✓]" } else { $pkg.RowBackground = [System.Windows.Media.Brushes]::Transparent; $pkg.Checkmark = "" }
     }
     Update-List; $window.Cursor = [System.Windows.Input.Cursors]::Arrow; $statusText.Text = "Scan complete."
