@@ -822,12 +822,6 @@
     "Category": "Terminal"
   },
   {
-    "Name": "FzF [W]",
-    "ID": "junegunn.fzf",
-    "Source": "winget",
-    "Category": "Terminal"
-  },
-  {
     "Name": "grep [Find]",
     "ID": "grep",
     "Source": "scoop",
