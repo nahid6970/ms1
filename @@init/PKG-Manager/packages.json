@@ -768,13 +768,7 @@
     "Category": "System"
   },
   {
-    "Name": "Alacritty [Terminal] [S]",
-    "ID": "alacritty",
-    "Source": "scoop",
-    "Category": "Terminal"
-  },
-  {
-    "Name": "Alacritty [Terminal] [W]",
+    "Name": "Alacritty",
     "ID": "Alacritty.Alacritty",
     "Source": "winget",
     "Category": "Terminal"
@@ -1062,14 +1056,8 @@
     "Category": "Utility"
   },
   {
-    "Name": "UniGetUI  [S]",
-    "ID": "unigetui",
-    "Source": "scoop",
-    "Category": "Utility"
-  },
-  {
     "Name": "UniGetUI  [W]",
-    "ID": "MartiCliment.UniGetUI",
+    "ID": "Devolutions.UniGetUI",
     "Source": "winget",
     "Category": "Utility"
   },
