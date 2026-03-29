@@ -186,11 +186,11 @@ $selectAll.Add_Unchecked({ foreach ($p in $packageListUI.ItemsSource) { $p.IsSel
 $btnCheckStatus.Add_Click({
     $window.Cursor = [System.Windows.Input.Cursors]::Wait; $statusText.Text = "Scanning..."; $window.UpdateLayout()
     $installedColor = New-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Color]::FromRgb(232, 245, 233))
-    $scoopList = (scoop list) -join " "
-    $wingetList = (winget list --source winget) -join " "
+    $scoopNames = @(); try { $scoopNames = (scoop export 2>$null | ConvertFrom-Json).apps.Name } catch {}
+    $wingetList = (winget list 2>$null) -join " "
     
     foreach ($pkg in $global:allPackages) {
-        $found = if ($pkg.Source -eq "scoop") { $scoopList -like "*$($pkg.ID)*" } else { $wingetList -like "*$($pkg.ID)*" }
+        $found = if ($pkg.Source -eq "scoop") { $scoopNames -contains $pkg.ID } else { $wingetList -match "(?i)\b$([regex]::Escape($pkg.ID))\b" }
         if ($found) { $pkg.RowBackground = $installedColor; $pkg.Checkmark = "[✓]" } else { $pkg.RowBackground = [System.Windows.Media.Brushes]::Transparent; $pkg.Checkmark = "" }
     }
     Update-List; $window.Cursor = [System.Windows.Input.Cursors]::Arrow; $statusText.Text = "Scan complete."
