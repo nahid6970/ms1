@@ -306,8 +306,6 @@ class CardLauncher(QMainWindow):
         self.main_layout = QVBoxLayout(central_widget)
         
         header_layout = QHBoxLayout()
-        title_label = QLabel("CARD STYLE LAUNCHER")
-        title_label.setStyleSheet(f"color: {CP_YELLOW}; font-size: 18pt; font-weight: bold;")
         
         self.search_bar = QLineEdit()
         self.search_bar.setPlaceholderText("Search directories...")
@@ -321,7 +319,6 @@ class CardLauncher(QMainWindow):
         self.settings_btn = QPushButton("SETTINGS")
         self.settings_btn.clicked.connect(self.show_settings)
         
-        header_layout.addWidget(title_label)
         header_layout.addStretch()
         header_layout.addWidget(self.search_bar)
         header_layout.addWidget(self.restart_btn)
