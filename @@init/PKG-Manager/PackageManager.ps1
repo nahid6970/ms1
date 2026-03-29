@@ -223,7 +223,7 @@ $btnCheckStatus.Add_Click({
 $btnInstallSelected.Add_Click({
     $selected = @($global:allPackages | Where-Object { $_.IsSelected }); if ($selected.Count -eq 0) { [System.Windows.MessageBox]::Show("No apps selected."); return }
     $statusText.Text = "Installing selected..."; $window.UpdateLayout()
-    foreach ($pkg in $selected) { $cmd = if ($pkg.Source -eq "scoop") { "scoop install $($pkg.ID)" } else { "winget install --id $($pkg.ID) --silent" }; Start-Process powershell -ArgumentList "-NoProfile -Command $cmd" -Wait }
+    foreach ($pkg in $selected) { $cmd = if ($pkg.Source -eq "scoop") { "scoop install $($pkg.ID)" } else { "winget install --id $($pkg.ID) --exact --silent" }; Start-Process powershell -ArgumentList "-NoProfile -Command $cmd" -Wait }
     $statusText.Text = "Batch installation complete."; Update-List
 })
 
@@ -242,8 +242,8 @@ $packageListUI.Add_PreviewMouseLeftButtonUp({
     if ($target -is [System.Windows.Controls.Button] -and $target.ToolTip) {
         $pkg = $target.Tag
         switch ($target.ToolTip) {
-            "Install" { if ([System.Windows.MessageBox]::Show("Install $($pkg.Name)?", "Confirm", "YesNo") -eq "Yes") { $statusText.Text = "Installing..."; $window.UpdateLayout(); Start-Process powershell -ArgumentList "-NoProfile -Command $(if ($pkg.Source -eq 'scoop') { 'scoop install ' + $pkg.ID } else { 'winget install --id ' + $pkg.ID + ' --silent' }); pause" -Wait; $statusText.Text = "Finished." } }
-            "Uninstall" { if ([System.Windows.MessageBox]::Show("Uninstall $($pkg.Name)?", "Confirm", "YesNo") -eq "Yes") { $statusText.Text = "Uninstalling..."; $window.UpdateLayout(); Start-Process powershell -ArgumentList "-NoProfile -Command $(if ($pkg.Source -eq 'scoop') { 'scoop uninstall ' + $pkg.ID } else { 'winget uninstall --id ' + $pkg.ID + ' --silent' }); pause" -Wait; $statusText.Text = "Finished." } }
+            "Install" { if ([System.Windows.MessageBox]::Show("Install $($pkg.Name)?", "Confirm", "YesNo") -eq "Yes") { $statusText.Text = "Installing..."; $window.UpdateLayout(); Start-Process powershell -ArgumentList "-NoProfile -Command $(if ($pkg.Source -eq 'scoop') { 'scoop install ' + $pkg.ID } else { 'winget install --id ' + $pkg.ID + ' --exact --silent' }); pause" -Wait -Verb RunAs; $statusText.Text = "Finished." } }
+            "Uninstall" { if ([System.Windows.MessageBox]::Show("Uninstall $($pkg.Name)?", "Confirm", "YesNo") -eq "Yes") { $statusText.Text = "Uninstalling..."; $window.UpdateLayout(); Start-Process powershell -ArgumentList "-NoProfile -Command $(if ($pkg.Source -eq 'scoop') { 'scoop uninstall ' + $pkg.ID } else { 'winget uninstall --id ' + $pkg.ID + ' --exact --silent' }); pause" -Wait -Verb RunAs; $statusText.Text = "Finished." } }
             "Edit" { $res = Show-PackageDialog -ExistingPkg $pkg; if ($res -is [PSCustomObject]) { $pkg.Name = $res.Name; $pkg.ID = $res.ID; $pkg.Source = $res.Source; $pkg.Category = $res.Category; Update-Categories; Update-List; Save-Packages } }
             "Remove" { if ([System.Windows.MessageBox]::Show("Remove from list?", "Confirm", "YesNo") -eq "Yes") { [void]$global:allPackages.Remove($pkg); Update-Categories; Update-List; Save-Packages } }
         }
@@ -251,4 +251,4 @@ $packageListUI.Add_PreviewMouseLeftButtonUp({
 })
 
 $window.Add_Closing({ Save-Packages })
-$window.ShowDialog() | Out-Null
+$window.ShowDialog() | Out-NullOut-NullullOut-Null
