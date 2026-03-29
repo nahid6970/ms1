@@ -135,43 +135,43 @@
     "Name": "Aria2 [W]",
     "ID": "aria2.aria2",
     "Source": "winget",
-    "Category": "General"
+    "Category": "Utility"
   },
   {
     "Name": "Audio Share (cmd)",
     "ID": "mkckr0.AudioShare",
     "Source": "winget",
-    "Category": "General"
+    "Category": "AudioSound"
   },
   {
     "Name": "AudioRelay",
     "ID": "AsaphaHalifa.AudioRelay",
     "Source": "winget",
-    "Category": "General"
+    "Category": "AudioSound"
   },
   {
     "Name": "AutoHotkey v1 [S]",
     "ID": "autohotkey1.1",
     "Source": "scoop",
-    "Category": "General"
+    "Category": "Tool"
   },
   {
     "Name": "AutoHotkey v1 [W]",
     "ID": "9NQ8Q8J78637",
     "Source": "winget",
-    "Category": "General"
+    "Category": "Tool"
   },
   {
     "Name": "AutoHotkey v2 [S]",
     "ID": "autohotkey",
     "Source": "scoop",
-    "Category": "General"
+    "Category": "Tool"
   },
   {
     "Name": "AutoHotkey v2 [W]",
     "ID": "AutoHotkey.AutoHotkey",
     "Source": "winget",
-    "Category": "General"
+    "Category": "Tool"
   },
   {
     "Name": "Autoruns",
