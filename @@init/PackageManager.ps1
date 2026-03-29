@@ -1,4 +1,4 @@
-# Required Assemblies
+﻿# Required Assemblies
 Add-Type -AssemblyName PresentationFramework, PresentationCore, WindowsBase, Microsoft.VisualBasic, System.Xml
 
 # State Management
@@ -67,11 +67,8 @@ function Update-List {
         ($null -eq $selectedCat -or $selectedCat -eq "All" -or $_.Category -eq $selectedCat) -and
         ($_.Name.ToLower().Contains($term) -or $_.ID.ToLower().Contains($term))
     } | Where-Object { $_ -ne $null } | Sort-Object Name)
-    $script:pendingList = $filtered
-    $packageListUI.Dispatcher.BeginInvoke([System.Windows.Threading.DispatcherPriority]::Loaded, [Action]{
-        $packageListUI.ItemsSource = $null
-        $packageListUI.ItemsSource = $script:pendingList
-    })
+    $packageListUI.ItemsSource = $null
+    $packageListUI.ItemsSource = $filtered
 }
 
 function Set-RowButtonsVisibility {
@@ -218,7 +215,7 @@ $btnCheckStatus.Add_Click({
     
     foreach ($pkg in $global:allPackages) {
         $found = if ($pkg.Source -eq "scoop") { $scoopNames -contains $pkg.ID } else { $wingetList -like "*$($pkg.ID)*" }
-        if ($found) { $pkg.RowBackground = $installedColor; $pkg.Checkmark = " ✓" } else { $pkg.RowBackground = [System.Windows.Media.Brushes]::Transparent; $pkg.Checkmark = "" }
+        if ($found) { $pkg.RowBackground = $installedColor; $pkg.Checkmark = " [OK]" } else { $pkg.RowBackground = [System.Windows.Media.Brushes]::Transparent; $pkg.Checkmark = "" }
     }
     Update-List; $window.Cursor = [System.Windows.Input.Cursors]::Arrow; $statusText.Text = "Scan complete."
 })
