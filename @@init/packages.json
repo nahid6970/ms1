@@ -411,25 +411,25 @@
     "Name": "FFmpeg-Batch [S]",
     "ID": "ffmpeg-batch",
     "Source": "scoop",
-    "Category": "Converter"
+    "Category": "Media"
   },
   {
     "Name": "FFmpeg-Batch [W]",
     "ID": "eibol.FFmpegBatchAVConverter",
     "Source": "winget",
-    "Category": "Converter"
+    "Category": "Media"
   },
   {
     "Name": "FileConverter [S]",
     "ID": "file-converter-np",
     "Source": "scoop",
-    "Category": "Converter"
+    "Category": "Media"
   },
   {
     "Name": "FileConverter [W]",
     "ID": "AdrienAllard.FileConverter",
     "Source": "winget",
-    "Category": "Converter"
+    "Category": "Media"
   },
   {
     "Name": "filezilla-server",
@@ -501,7 +501,7 @@
     "Name": "handbrake",
     "ID": "handbrake",
     "Source": "scoop",
-    "Category": "Converter"
+    "Category": "Media"
   },
   {
     "Name": "highlight [Text-View]",
@@ -513,13 +513,13 @@
     "Name": "imagemagick [S]",
     "ID": "imagemagick",
     "Source": "scoop",
-    "Category": "Converter"
+    "Category": "Media"
   },
   {
     "Name": "imagemagick [W]",
     "ID": "ImageMagick.ImageMagick",
     "Source": "winget",
-    "Category": "Converter"
+    "Category": "Media"
   },
   {
     "Name": "Inkscape [S]",
