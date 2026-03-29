@@ -1,16 +1,10 @@
 {
     "directories": [
         {
-            "path": "C:/@delta/ms1/Testing/Card_Style_Launcher",
-            "name": "TEST",
+            "path": "C:/@delta/ms1/@Flask/5011_tv_show",
+            "name": "5011 (Show)",
             "category": "General",
-            "last_used": 1774761662.5858994
-        },
-        {
-            "path": "C:/@delta",
-            "name": "Delta",
-            "category": "General",
-            "last_used": 1774761653.9339056
+            "last_used": 1774762395.1670923
         }
     ],
     "commands": [
