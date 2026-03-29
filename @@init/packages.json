@@ -78,5 +78,10 @@
     "Name": "Rust (rustup)",
     "ID": "rustup",
     "Source": "scoop"
+  },
+  {
+    "Name": "fzf",
+    "ID": "fzf",
+    "Source": "scoop"
   }
 ]

@@ -5,6 +5,7 @@ Add-Type -AssemblyName PresentationFramework, PresentationCore, WindowsBase, Mic
 $jsonPath = Join-Path $PSScriptRoot "packages.json"
 $global:allPackages = New-Object System.Collections.Generic.List[PSCustomObject]
 $global:lastHoveredItem = $null
+$global:isUpdating = $false
 
 function Load-Packages {
     if (Test-Path $jsonPath) {
@@ -14,12 +15,15 @@ function Load-Packages {
             $data = $content | ConvertFrom-Json
             $global:allPackages.Clear()
             foreach ($item in @($data)) {
-                if ($item.Name -and $item.ID) {
+                # STRICT VALIDATION: Ignore null or empty entries
+                if ($null -ne $item -and -not [string]::IsNullOrWhiteSpace($item.Name) -and -not [string]::IsNullOrWhiteSpace($item.ID)) {
                     $global:allPackages.Add([PSCustomObject]@{
-                        Name       = $item.Name
-                        ID         = $item.ID
-                        Source     = $item.Source
-                        IsSelected = $false
+                        Name          = [string]$item.Name
+                        ID            = [string]$item.ID
+                        Source        = [string]$item.Source
+                        IsSelected    = $false
+                        RowBackground = [System.Windows.Media.Brushes]::Transparent
+                        Checkmark     = ""
                     })
                 }
             }
@@ -29,102 +33,88 @@ function Load-Packages {
 
 function Save-Packages {
     try {
-        $toSave = @($global:allPackages) | Select-Object Name, ID, Source
-        $json = $toSave | ConvertTo-Json -Depth 10
-        $json | Set-Content $jsonPath -Encoding UTF8
+        $cleanData = New-Object System.Collections.Generic.List[PSCustomObject]
+        foreach($p in $global:allPackages) {
+            # Ensure we only save items that actually have content
+            if (-not [string]::IsNullOrWhiteSpace($p.Name) -and -not [string]::IsNullOrWhiteSpace($p.ID)) {
+                $cleanData.Add([PSCustomObject]@{
+                    Name   = $p.Name
+                    ID     = $p.ID
+                    Source = $p.Source
+                })
+            }
+        }
+        $json = $cleanData | ConvertTo-Json -Depth 10
+        if ($cleanData.Count -eq 1 -and $json -notlike "[*") { $json = "[$json]" }
+        [System.IO.File]::WriteAllText($jsonPath, $json)
     } catch { }
 }
 
 # --- Central Refresh Function ---
 function Update-List {
-    $term = $txtSearch.Text.ToLower().Trim()
-    if ([string]::IsNullOrWhiteSpace($term)) {
-        $packageListUI.ItemsSource = $global:allPackages.ToArray()
+    if ($global:isUpdating) { return }
+    $global:isUpdating = $true
+    
+    $term = [string]$txtSearch.Text.ToLower().Trim()
+    $displayList = if ([string]::IsNullOrWhiteSpace($term)) {
+        @($global:allPackages)
     } else {
-        $filtered = $global:allPackages | Where-Object { 
+        @($global:allPackages | Where-Object { 
             $_.Name.ToLower().Contains($term) -or $_.ID.ToLower().Contains($term) 
-        }
-        $packageListUI.ItemsSource = @($filtered)
+        })
     }
-    $packageListUI.Items.Refresh()
+    
+    $packageListUI.ItemsSource = $null
+    $packageListUI.ItemsSource = $displayList
+    $global:isUpdating = $false
 }
 
-# --- Helper to toggle buttons in a row ---
 function Set-RowButtonsVisibility {
     param($ItemContainer, $Opacity)
     if ($null -eq $ItemContainer) { return }
-    
     $queue = New-Object System.Collections.Generic.Queue[System.Windows.DependencyObject]
     $queue.Enqueue($ItemContainer)
     while ($queue.Count -gt 0) {
         $parent = $queue.Dequeue()
         for ($i = 0; $i -lt [System.Windows.Media.VisualTreeHelper]::GetChildrenCount($parent); $i++) {
             $child = [System.Windows.Media.VisualTreeHelper]::GetChild($parent, $i)
-            if ($child -is [System.Windows.Controls.Button] -and $child.ToolTip) {
-                $child.Opacity = $Opacity
-            }
+            if ($child -is [System.Windows.Controls.Button] -and $child.ToolTip) { $child.Opacity = $Opacity }
             $queue.Enqueue($child)
         }
     }
 }
 
-# --- Custom Add/Edit Dialog ---
 function Show-PackageDialog {
     param($ExistingPkg = $null)
-    
     $dlg = New-Object System.Windows.Window
     $dlg.Title = if ($ExistingPkg) { "Edit Package" } else { "Add New Package" }
-    $dlg.Width = 350; $dlg.Height = 350
-    $dlg.WindowStartupLocation = "CenterOwner"
-    $dlg.Owner = $window; $dlg.Background = [System.Windows.Media.Brushes]::White; $dlg.ResizeMode = "NoResize"
-
-    $grid = New-Object System.Windows.Controls.Grid; $grid.Margin = "20"
-    $dlg.Content = $grid
+    $dlg.Width = 350; $dlg.Height = 350; $dlg.WindowStartupLocation = "CenterOwner"; $dlg.Owner = $window; $dlg.Background = [System.Windows.Media.Brushes]::White; $dlg.ResizeMode = "NoResize"
+    $grid = New-Object System.Windows.Controls.Grid; $grid.Margin = "20"; $dlg.Content = $grid
     for($i=0; $i -lt 5; $i++){ $grid.RowDefinitions.Add((New-Object System.Windows.Controls.RowDefinition)) }
     $grid.RowDefinitions[4].Height = New-Object System.Windows.GridLength(1, [System.Windows.GridUnitType]::Star)
-
-    $lbl1 = New-Object System.Windows.Controls.TextBlock; $lbl1.Text = "Display Name:"; $lbl1.Margin = "0,0,0,5"
-    [System.Windows.Controls.Grid]::SetRow($lbl1, 0); $grid.Children.Add($lbl1)
-    $txtName = New-Object System.Windows.Controls.TextBox; $txtName.Margin = "0,0,0,15"; $txtName.Padding = "5"
-    if($ExistingPkg){ $txtName.Text = $ExistingPkg.Name }
-    [System.Windows.Controls.Grid]::SetRow($txtName, 1); $grid.Children.Add($txtName)
-
-    $lbl2 = New-Object System.Windows.Controls.TextBlock; $lbl2.Text = "Package ID (e.g. git):"; $lbl2.Margin = "0,0,0,5"
-    [System.Windows.Controls.Grid]::SetRow($lbl2, 2); $grid.Children.Add($lbl2)
-    $txtID = New-Object System.Windows.Controls.TextBox; $txtID.Margin = "0,0,0,15"; $txtID.Padding = "5"
-    if($ExistingPkg){ $txtID.Text = $ExistingPkg.ID }
-    [System.Windows.Controls.Grid]::SetRow($txtID, 3); $grid.Children.Add($txtID)
-
-    $spSource = New-Object System.Windows.Controls.StackPanel; $spSource.Orientation = "Horizontal"; $spSource.Margin = "0,0,0,20"
-    [System.Windows.Controls.Grid]::SetRow($spSource, 4); $grid.Children.Add($spSource)
-    $lbl3 = New-Object System.Windows.Controls.TextBlock; $lbl3.Text = "Source:"; $lbl3.VerticalAlignment = "Center"; $lbl3.Margin = "0,0,10,0"
-    $spSource.Children.Add($lbl3)
-    $cmbSource = New-Object System.Windows.Controls.ComboBox; $cmbSource.Width = 100; $cmbSource.Height = 25
-    [void]$cmbSource.Items.Add("winget"); [void]$cmbSource.Items.Add("scoop")
-    $cmbSource.SelectedItem = if($ExistingPkg){ $ExistingPkg.Source } else { "winget" }
-    $spSource.Children.Add($cmbSource)
-
-    $spBtns = New-Object System.Windows.Controls.StackPanel; $spBtns.Orientation = "Horizontal"; $spBtns.HorizontalAlignment = "Right"; $spBtns.VerticalAlignment = "Bottom"
-    [System.Windows.Controls.Grid]::SetRow($spBtns, 4); $grid.Children.Add($spBtns)
-    $btnSave = New-Object System.Windows.Controls.Button; $btnSave.Content = "Save"; $btnSave.Width = 70; $btnSave.Height = 30; $btnSave.Margin = "0,0,10,0"
-    $btnSave.Background = New-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Color]::FromRgb(13, 110, 253)); $btnSave.Foreground = [System.Windows.Media.Brushes]::White
-    $spBtns.Children.Add($btnSave)
-    $btnCancel = New-Object System.Windows.Controls.Button; $btnCancel.Content = "Cancel"; $btnCancel.Width = 70; $btnCancel.Height = 30
-    $spBtns.Children.Add($btnCancel)
-
-    $btnSave.Add_Click({
-        if(-not [string]::IsNullOrWhiteSpace($txtName.Text) -and -not [string]::IsNullOrWhiteSpace($txtID.Text)){
-            $script:dialogResult = [PSCustomObject]@{ Name = $txtName.Text; ID = $txtID.Text; Source = $cmbSource.SelectedItem; IsSelected = $false }
-            $dlg.Close()
-        }
+    $lbl1 = New-Object System.Windows.Controls.TextBlock; $lbl1.Text = "Display Name:"; $lbl1.Margin = "0,0,0,5"; [System.Windows.Controls.Grid]::SetRow($lbl1, 0); $grid.Children.Add($lbl1)
+    $txtName = New-Object System.Windows.Controls.TextBox; $txtName.Margin = "0,0,0,15"; $txtName.Padding = "5"; if($ExistingPkg){ $txtName.Text = $ExistingPkg.Name }; [System.Windows.Controls.Grid]::SetRow($txtName, 1); $grid.Children.Add($txtName)
+    $lbl2 = New-Object System.Windows.Controls.TextBlock; $lbl2.Text = "Package ID:"; $lbl2.Margin = "0,0,0,5"; [System.Windows.Controls.Grid]::SetRow($lbl2, 2); $grid.Children.Add($lbl2)
+    $txtID = New-Object System.Windows.Controls.TextBox; $txtID.Margin = "0,0,0,15"; $txtID.Padding = "5"; if($ExistingPkg){ $txtID.Text = $ExistingPkg.ID }; [System.Windows.Controls.Grid]::SetRow($txtID, 3); $grid.Children.Add($txtID)
+    $spSource = New-Object System.Windows.Controls.StackPanel; $spSource.Orientation = "Horizontal"; $spSource.Margin = "0,0,0,20"; [System.Windows.Controls.Grid]::SetRow($spSource, 4); $grid.Children.Add($spSource)
+    $lbl3 = New-Object System.Windows.Controls.TextBlock; $lbl3.Text = "Source:"; $lbl3.VerticalAlignment = "Center"; $lbl3.Margin = "0,0,10,0"; $spSource.Children.Add($lbl3)
+    $cmbSource = New-Object System.Windows.Controls.ComboBox; $cmbSource.Width = 100; $cmbSource.Height = 25; [void]$cmbSource.Items.Add("winget"); [void]$cmbSource.Items.Add("scoop"); $cmbSource.SelectedItem = if($ExistingPkg){ $ExistingPkg.Source } else { "winget" }; $spSource.Children.Add($cmbSource)
+    $spBtns = New-Object System.Windows.Controls.StackPanel; $spBtns.Orientation = "Horizontal"; $spBtns.HorizontalAlignment = "Right"; $spBtns.VerticalAlignment = "Bottom"; [System.Windows.Controls.Grid]::SetRow($spBtns, 4); $grid.Children.Add($spBtns)
+    $btnSave = New-Object System.Windows.Controls.Button; $btnSave.Content = "Save"; $btnSave.Width = 70; $btnSave.Height = 30; $btnSave.Margin = "0,0,10,0"; $btnSave.Background = New-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Color]::FromRgb(13, 110, 253)); $btnSave.Foreground = [System.Windows.Media.Brushes]::White; $spBtns.Children.Add($btnSave)
+    $btnCancel = New-Object System.Windows.Controls.Button; $btnCancel.Content = "Cancel"; $btnCancel.Width = 70; $btnCancel.Height = 30; $spBtns.Children.Add($btnCancel)
+    
+    $btnSave.Add_Click({ 
+        if(-not [string]::IsNullOrWhiteSpace($txtName.Text) -and -not [string]::IsNullOrWhiteSpace($txtID.Text)){ 
+            $script:dialogResult = [PSCustomObject]@{ Name = $txtName.Text; ID = $txtID.Text; Source = $cmbSource.SelectedItem; IsSelected = $false; RowBackground = [System.Windows.Media.Brushes]::Transparent; Checkmark = "" }
+            $dlg.Close() 
+        } 
     })
     $btnCancel.Add_Click({ $dlg.Close() })
-    $script:dialogResult = $null; $dlg.ShowDialog() | Out-Null
-    return $script:dialogResult
+    $script:dialogResult = $null; $dlg.ShowDialog() | Out-Null; return $script:dialogResult
 }
 
 # --- Main UI Build ---
-$window = New-Object System.Windows.Window; $window.Title = "Package Manager Pro"; $window.Width = 550; $window.Height = 650; $window.Background = [System.Windows.Media.Brushes]::White; $window.WindowStartupLocation = "CenterScreen"
+$window = New-Object System.Windows.Window; $window.Title = "Package Manager Pro"; $window.Width = 580; $window.Height = 650; $window.Background = [System.Windows.Media.Brushes]::White; $window.WindowStartupLocation = "CenterScreen"
 $mainGrid = New-Object System.Windows.Controls.Grid; $mainGrid.Margin = "15"; $window.Content = $mainGrid
 for($i=0; $i -lt 4; $i++){ $mainGrid.RowDefinitions.Add((New-Object System.Windows.Controls.RowDefinition)) }
 $mainGrid.RowDefinitions[0].Height = [System.Windows.GridLength]::Auto
@@ -136,18 +126,19 @@ $title = New-Object System.Windows.Controls.TextBlock; $title.Text = "App Manage
 
 $headerGrid = New-Object System.Windows.Controls.Grid; $headerGrid.Margin = "0,0,0,15"; [System.Windows.Controls.Grid]::SetRow($headerGrid, 1); $mainGrid.Children.Add($headerGrid)
 $headerGrid.ColumnDefinitions.Add((New-Object System.Windows.Controls.ColumnDefinition -Property @{Width=(New-Object System.Windows.GridLength(1, [System.Windows.GridUnitType]::Star))}))
+$headerGrid.ColumnDefinitions.Add((New-Object System.Windows.Controls.ColumnDefinition -Property @{Width=(New-Object System.Windows.GridLength(1.2, [System.Windows.GridUnitType]::Star))}))
 $headerGrid.ColumnDefinitions.Add((New-Object System.Windows.Controls.ColumnDefinition -Property @{Width=(New-Object System.Windows.GridLength(1.5, [System.Windows.GridUnitType]::Star))}))
-$headerGrid.ColumnDefinitions.Add((New-Object System.Windows.Controls.ColumnDefinition -Property @{Width=(New-Object System.Windows.GridLength(1, [System.Windows.GridUnitType]::Star))}))
 
 $leftStack = New-Object System.Windows.Controls.StackPanel; $leftStack.Orientation = "Horizontal"; $headerGrid.Children.Add($leftStack)
-$selectAll = New-Object System.Windows.Controls.CheckBox; $selectAll.Content = "All"; $selectAll.VerticalAlignment = "Center"; $selectAll.Margin = "5,0,15,0"; $leftStack.Children.Add($selectAll)
+$selectAll = New-Object System.Windows.Controls.CheckBox; $selectAll.Content = "All"; $selectAll.VerticalAlignment = "Center"; $selectAll.Margin = "5,0,10,0"; $leftStack.Children.Add($selectAll)
 $btnAdd = New-Object System.Windows.Controls.Button; $btnAdd.Content = "+"; $btnAdd.Width = 35; $btnAdd.Height = 35; $btnAdd.FontWeight = "Bold"; $btnAdd.FontSize = 18; $btnAdd.Background = New-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Color]::FromRgb(13, 110, 253)); $btnAdd.Foreground = [System.Windows.Media.Brushes]::White; $leftStack.Children.Add($btnAdd)
 
 $searchStack = New-Object System.Windows.Controls.StackPanel; $searchStack.Orientation = "Horizontal"; $searchStack.HorizontalAlignment = "Center"; [System.Windows.Controls.Grid]::SetColumn($searchStack, 1); $headerGrid.Children.Add($searchStack)
-$lblSearch = New-Object System.Windows.Controls.TextBlock; $lblSearch.Text = "Search: "; $lblSearch.VerticalAlignment = "Center"; $lblSearch.FontSize = 14; $searchStack.Children.Add($lblSearch)
-$txtSearch = New-Object System.Windows.Controls.TextBox; $txtSearch.Width = 160; $txtSearch.Height = 25; $txtSearch.VerticalAlignment = "Center"; $txtSearch.Padding = "3"; $searchStack.Children.Add($txtSearch)
+$txtSearch = New-Object System.Windows.Controls.TextBox; $txtSearch.Width = 130; $txtSearch.Height = 25; $txtSearch.VerticalAlignment = "Center"; $txtSearch.Padding = "3"; $searchStack.Children.Add($txtSearch)
 
-$btnInstallSelected = New-Object System.Windows.Controls.Button; $btnInstallSelected.Content = "Install Selected"; $btnInstallSelected.Padding = "10,5"; $btnInstallSelected.HorizontalAlignment = "Right"; $btnInstallSelected.Background = New-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Color]::FromRgb(25, 135, 84)); $btnInstallSelected.Foreground = [System.Windows.Media.Brushes]::White; [System.Windows.Controls.Grid]::SetColumn($btnInstallSelected, 2); $headerGrid.Children.Add($btnInstallSelected)
+$rightStack = New-Object System.Windows.Controls.StackPanel; $rightStack.Orientation = "Horizontal"; $rightStack.HorizontalAlignment = "Right"; [System.Windows.Controls.Grid]::SetColumn($rightStack, 2); $headerGrid.Children.Add($rightStack)
+$btnCheckStatus = New-Object System.Windows.Controls.Button; $btnCheckStatus.Content = "Check Status"; $btnCheckStatus.Padding = "10,5"; $btnCheckStatus.Margin = "0,0,10,0"; $btnCheckStatus.Background = New-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Color]::FromRgb(108, 117, 125)); $btnCheckStatus.Foreground = [System.Windows.Media.Brushes]::White; $rightStack.Children.Add($btnCheckStatus)
+$btnInstallSelected = New-Object System.Windows.Controls.Button; $btnInstallSelected.Content = "Install Selected"; $btnInstallSelected.Padding = "10,5"; $btnInstallSelected.Background = New-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Color]::FromRgb(25, 135, 84)); $btnInstallSelected.Foreground = [System.Windows.Media.Brushes]::White; $rightStack.Children.Add($btnInstallSelected)
 
 $packageListUI = New-Object System.Windows.Controls.ListView; $packageListUI.Background = [System.Windows.Media.Brushes]::White; [System.Windows.Controls.Grid]::SetRow($packageListUI, 2); $mainGrid.Children.Add($packageListUI)
 
@@ -155,24 +146,26 @@ $packageListUI = New-Object System.Windows.Controls.ListView; $packageListUI.Bac
 $dataTemplate = New-Object System.Windows.DataTemplate
 $borderFactory = New-Object System.Windows.FrameworkElementFactory([System.Windows.Controls.Border])
 $borderFactory.SetValue([System.Windows.Controls.Border]::BorderThicknessProperty, (New-Object System.Windows.Thickness(0,0,0,1))); $borderFactory.SetValue([System.Windows.Controls.Border]::BorderBrushProperty, (New-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Color]::FromRgb(241, 243, 245)))); $borderFactory.SetValue([System.Windows.Controls.Border]::PaddingProperty, (New-Object System.Windows.Thickness(5)))
-$gridFactory = New-Object System.Windows.FrameworkElementFactory([System.Windows.Controls.Grid]); $gridFactory.SetValue([System.Windows.Controls.Grid]::WidthProperty, 480.0)
+$borderFactory.SetBinding([System.Windows.Controls.Border]::BackgroundProperty, (New-Object System.Windows.Data.Binding "RowBackground"))
 
-# Correct way to set ColumnDefinitions in FrameworkElementFactory
+$gridFactory = New-Object System.Windows.FrameworkElementFactory([System.Windows.Controls.Grid]); $gridFactory.SetValue([System.Windows.Controls.Grid]::WidthProperty, 510.0)
 $c1 = New-Object System.Windows.FrameworkElementFactory([System.Windows.Controls.ColumnDefinition]); $c1.SetValue([System.Windows.Controls.ColumnDefinition]::WidthProperty, (New-Object System.Windows.GridLength(35))); $gridFactory.AppendChild($c1)
 $c2 = New-Object System.Windows.FrameworkElementFactory([System.Windows.Controls.ColumnDefinition]); $c2.SetValue([System.Windows.Controls.ColumnDefinition]::WidthProperty, (New-Object System.Windows.GridLength(1, [System.Windows.GridUnitType]::Star))); $gridFactory.AppendChild($c2)
 $c3 = New-Object System.Windows.FrameworkElementFactory([System.Windows.Controls.ColumnDefinition]); $c3.SetValue([System.Windows.Controls.ColumnDefinition]::WidthProperty, (New-Object System.Windows.GridLength(150))); $gridFactory.AppendChild($c3)
-
 $cb = New-Object System.Windows.FrameworkElementFactory([System.Windows.Controls.CheckBox]); $cb.SetBinding([System.Windows.Controls.CheckBox]::IsCheckedProperty, (New-Object System.Windows.Data.Binding "IsSelected")); $cb.SetValue([System.Windows.Controls.CheckBox]::VerticalAlignmentProperty, [System.Windows.VerticalAlignment]::Center); $gridFactory.AppendChild($cb)
+
 $spInfo = New-Object System.Windows.FrameworkElementFactory([System.Windows.Controls.StackPanel]); $spInfo.SetValue([System.Windows.Controls.Grid]::ColumnProperty, 1)
-$txtName = New-Object System.Windows.FrameworkElementFactory([System.Windows.Controls.TextBlock]); $txtName.SetBinding([System.Windows.Controls.TextBlock]::TextProperty, (New-Object System.Windows.Data.Binding "Name")); $txtName.SetValue([System.Windows.Controls.TextBlock]::FontWeightProperty, [System.Windows.FontWeights]::SemiBold); $txtName.SetValue([System.Windows.Controls.TextBlock]::FontSizeProperty, 14.0); $spInfo.AppendChild($txtName)
+$spName = New-Object System.Windows.FrameworkElementFactory([System.Windows.Controls.StackPanel]); $spName.SetValue([System.Windows.Controls.StackPanel]::OrientationProperty, [System.Windows.Controls.Orientation]::Horizontal)
+$txtName = New-Object System.Windows.FrameworkElementFactory([System.Windows.Controls.TextBlock]); $txtName.SetBinding([System.Windows.Controls.TextBlock]::TextProperty, (New-Object System.Windows.Data.Binding "Name")); $txtName.SetValue([System.Windows.Controls.TextBlock]::FontWeightProperty, [System.Windows.FontWeights]::SemiBold); $txtName.SetValue([System.Windows.Controls.TextBlock]::FontSizeProperty, 14.0); $spName.AppendChild($txtName)
+$txtCheck = New-Object System.Windows.FrameworkElementFactory([System.Windows.Controls.TextBlock]); $txtCheck.SetBinding([System.Windows.Controls.TextBlock]::TextProperty, (New-Object System.Windows.Data.Binding "Checkmark")); $txtCheck.SetValue([System.Windows.Controls.TextBlock]::ForegroundProperty, [System.Windows.Media.Brushes]::SeaGreen); $txtCheck.SetValue([System.Windows.Controls.TextBlock]::FontWeightProperty, [System.Windows.FontWeights]::Bold); $txtCheck.SetValue([System.Windows.Controls.TextBlock]::MarginProperty, (New-Object System.Windows.Thickness(5,0,0,0))); $spName.AppendChild($txtCheck)
+$spInfo.AppendChild($spName)
 $txtID = New-Object System.Windows.FrameworkElementFactory([System.Windows.Controls.TextBlock]); $txtID.SetBinding([System.Windows.Controls.TextBlock]::TextProperty, (New-Object System.Windows.Data.Binding "ID")); $txtID.SetValue([System.Windows.Controls.TextBlock]::FontSizeProperty, 11.0); $txtID.SetValue([System.Windows.Controls.TextBlock]::ForegroundProperty, [System.Windows.Media.Brushes]::Gray); $spInfo.AppendChild($txtID)
 $txtS = New-Object System.Windows.FrameworkElementFactory([System.Windows.Controls.TextBlock]); $txtS.SetBinding([System.Windows.Controls.TextBlock]::TextProperty, (New-Object System.Windows.Data.Binding "Source")); $txtS.SetValue([System.Windows.Controls.TextBlock]::FontSizeProperty, 10.0); $txtS.SetValue([System.Windows.Controls.TextBlock]::ForegroundProperty, [System.Windows.Media.Brushes]::DodgerBlue); $txtS.SetValue([System.Windows.Controls.TextBlock]::FontWeightProperty, [System.Windows.FontWeights]::Bold); $spInfo.AppendChild($txtS)
 $gridFactory.AppendChild($spInfo)
 
 function Create-IconButton {
     param($PathStr, $Color, $Tip)
-    $btn = New-Object System.Windows.FrameworkElementFactory([System.Windows.Controls.Button]); $btn.SetValue([System.Windows.Controls.Button]::WidthProperty, 28.0); $btn.SetValue([System.Windows.Controls.Button]::HeightProperty, 28.0); $btn.SetValue([System.Windows.Controls.Button]::MarginProperty, (New-Object System.Windows.Thickness(2))); $btn.SetValue([System.Windows.Controls.Button]::ToolTipProperty, $Tip); $btn.SetValue([System.Windows.Controls.Button]::BackgroundProperty, [System.Windows.Media.Brushes]::Transparent); $btn.SetValue([System.Windows.Controls.Button]::BorderThicknessProperty, (New-Object System.Windows.Thickness(0))); $btn.SetBinding([System.Windows.Controls.Button]::TagProperty, (New-Object System.Windows.Data.Binding))
-    $btn.SetValue([System.Windows.Controls.Button]::OpacityProperty, 0.0)
+    $btn = New-Object System.Windows.FrameworkElementFactory([System.Windows.Controls.Button]); $btn.SetValue([System.Windows.Controls.Button]::WidthProperty, 28.0); $btn.SetValue([System.Windows.Controls.Button]::HeightProperty, 28.0); $btn.SetValue([System.Windows.Controls.Button]::MarginProperty, (New-Object System.Windows.Thickness(2))); $btn.SetValue([System.Windows.Controls.Button]::ToolTipProperty, $Tip); $btn.SetValue([System.Windows.Controls.Button]::BackgroundProperty, [System.Windows.Media.Brushes]::Transparent); $btn.SetValue([System.Windows.Controls.Button]::BorderThicknessProperty, (New-Object System.Windows.Thickness(0))); $btn.SetBinding([System.Windows.Controls.Button]::TagProperty, (New-Object System.Windows.Data.Binding)); $btn.SetValue([System.Windows.Controls.Button]::OpacityProperty, 0.0)
     $vb = New-Object System.Windows.FrameworkElementFactory([System.Windows.Controls.Viewbox]); $vb.SetValue([System.Windows.Controls.Viewbox]::WidthProperty, 16.0); $p = New-Object System.Windows.FrameworkElementFactory([System.Windows.Shapes.Path]); $p.SetValue([System.Windows.Shapes.Path]::DataProperty, [System.Windows.Media.Geometry]::Parse($PathStr)); $p.SetValue([System.Windows.Shapes.Path]::FillProperty, $Color); $vb.AppendChild($p); $btn.AppendChild($vb); return $btn
 }
 
@@ -186,60 +179,49 @@ $gridFactory.AppendChild($spBtns); $borderFactory.AppendChild($gridFactory); $da
 $statusBar = New-Object System.Windows.Controls.Primitives.StatusBar; $statusBar.Background = [System.Windows.Media.Brushes]::Transparent; $statusBar.Margin = "0,10,0,0"; [System.Windows.Controls.Grid]::SetRow($statusBar, 3); $mainGrid.Children.Add($statusBar)
 $statusText = New-Object System.Windows.Controls.TextBlock; $statusText.Text = "Ready"; $statusText.Foreground = [System.Windows.Media.Brushes]::Gray; $statusItem = New-Object System.Windows.Controls.Primitives.StatusBarItem; $statusItem.Content = $statusText; $statusBar.Items.Add($statusItem)
 
-# --- Initialization & Events ---
+# --- Events ---
 Load-Packages; Update-List
-
 $txtSearch.Add_TextChanged({ Update-List })
 
-$btnAdd.Add_Click({
+$btnAdd.Add_Click({ 
     $res = Show-PackageDialog
-    if ($res) {
+    if ($res) { 
         $global:allPackages.Add($res)
-        $txtSearch.Text = "" # Triggers refresh
+        $txtSearch.Text = "" # Reset search first
         Update-List
         Save-Packages
-    }
+    } 
 })
 
 $selectAll.Add_Checked({ foreach ($p in $packageListUI.ItemsSource) { $p.IsSelected = $true }; $packageListUI.Items.Refresh() })
 $selectAll.Add_Unchecked({ foreach ($p in $packageListUI.ItemsSource) { $p.IsSelected = $false }; $packageListUI.Items.Refresh() })
 
-$btnInstallSelected.Add_Click({
-    $selected = $global:allPackages | Where-Object { $_.IsSelected }
-    if ($selected.Count -eq 0) { [System.Windows.MessageBox]::Show("No apps selected."); return }
-    $statusText.Text = "Installing selected..."; $window.UpdateLayout()
-    foreach ($pkg in $selected) {
-        $cmd = if ($pkg.Source -eq "scoop") { "scoop install $($pkg.ID)" } else { "winget install --id $($pkg.ID) --silent" }
-        Start-Process powershell -ArgumentList "-NoProfile -Command $cmd" -Wait
+$btnCheckStatus.Add_Click({
+    $window.Cursor = [System.Windows.Input.Cursors]::Wait; $statusText.Text = "Scanning..."; $window.UpdateLayout()
+    $installedColor = New-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Color]::FromRgb(232, 245, 233))
+    $scoopList = (scoop list) -join "`n"; $wingetList = (winget list --source winget) -join "`n"
+    foreach ($pkg in $global:allPackages) {
+        $found = if ($pkg.Source -eq "scoop") { $scoopList -match "(?m)^$($pkg.ID)\s+" } else { $wingetList -match [regex]::Escape($pkg.ID) }
+        if ($found) { $pkg.RowBackground = $installedColor; $pkg.Checkmark = "[✓]" } else { $pkg.RowBackground = [System.Windows.Media.Brushes]::Transparent; $pkg.Checkmark = "" }
     }
+    Update-List; $window.Cursor = [System.Windows.Input.Cursors]::Arrow; $statusText.Text = "Scan complete."
+})
+
+$btnInstallSelected.Add_Click({
+    $selected = @($global:allPackages | Where-Object { $_.IsSelected }); if ($selected.Count -eq 0) { [System.Windows.MessageBox]::Show("No apps selected."); return }
+    $statusText.Text = "Installing selected..."; $window.UpdateLayout()
+    foreach ($pkg in $selected) { $cmd = if ($pkg.Source -eq "scoop") { "scoop install $($pkg.ID)" } else { "winget install --id $($pkg.ID) --silent" }; Start-Process powershell -ArgumentList "-NoProfile -Command $cmd" -Wait }
     $statusText.Text = "Batch installation complete."; Update-List
 })
 
-# --- REFINED HOVER LOGIC ---
 $packageListUI.Add_MouseMove({
     $target = $_.OriginalSource
-    while ($target -ne $null -and $target -isnot [System.Windows.Controls.ListViewItem]) { 
-        $target = [System.Windows.Media.VisualTreeHelper]::GetParent($target) 
-    }
-    
-    # If hovering a new item, hide the previous one and show the current one
+    while ($target -ne $null -and $target -isnot [System.Windows.Controls.ListViewItem]) { $target = [System.Windows.Media.VisualTreeHelper]::GetParent($target) }
     if ($target -is [System.Windows.Controls.ListViewItem]) {
-        if ($target -ne $global:lastHoveredItem) {
-            Set-RowButtonsVisibility -ItemContainer $global:lastHoveredItem -Opacity 0.0
-            Set-RowButtonsVisibility -ItemContainer $target -Opacity 1.0
-            $global:lastHoveredItem = $target
-        }
-    } else {
-        # Not over an item, hide last one
-        Set-RowButtonsVisibility -ItemContainer $global:lastHoveredItem -Opacity 0.0
-        $global:lastHoveredItem = $null
-    }
+        if ($target -ne $global:lastHoveredItem) { Set-RowButtonsVisibility -ItemContainer $global:lastHoveredItem -Opacity 0.0; Set-RowButtonsVisibility -ItemContainer $target -Opacity 1.0; $global:lastHoveredItem = $target }
+    } else { Set-RowButtonsVisibility -ItemContainer $global:lastHoveredItem -Opacity 0.0; $global:lastHoveredItem = $null }
 })
-
-$packageListUI.Add_MouseLeave({
-    Set-RowButtonsVisibility -ItemContainer $global:lastHoveredItem -Opacity 0.0
-    $global:lastHoveredItem = $null
-})
+$packageListUI.Add_MouseLeave({ Set-RowButtonsVisibility -ItemContainer $global:lastHoveredItem -Opacity 0.0; $global:lastHoveredItem = $null })
 
 $packageListUI.Add_PreviewMouseLeftButtonUp({
     $target = $_.OriginalSource
@@ -247,37 +229,10 @@ $packageListUI.Add_PreviewMouseLeftButtonUp({
     if ($target -is [System.Windows.Controls.Button] -and $target.ToolTip) {
         $pkg = $target.Tag
         switch ($target.ToolTip) {
-            "Install" {
-                $confirm = [System.Windows.MessageBox]::Show("Install $($pkg.Name)?", "Confirm", "YesNo")
-                if ($confirm -eq "Yes") {
-                    $statusText.Text = "Installing $($pkg.Name)..."; $window.UpdateLayout()
-                    $cmd = if ($pkg.Source -eq "scoop") { "scoop install $($pkg.ID)" } else { "winget install --id $($pkg.ID) --silent" }
-                    Start-Process powershell -ArgumentList "-NoProfile -Command $cmd; pause" -Wait
-                    $statusText.Text = "Finished $($pkg.Name)"
-                }
-            }
-            "Uninstall" {
-                $confirm = [System.Windows.MessageBox]::Show("Uninstall $($pkg.Name)?", "Confirm", "YesNo")
-                if ($confirm -eq "Yes") {
-                    $statusText.Text = "Uninstalling $($pkg.Name)..."; $window.UpdateLayout()
-                    $cmd = if ($pkg.Source -eq "scoop") { "scoop uninstall $($pkg.ID)" } else { "winget uninstall --id $($pkg.ID) --silent" }
-                    Start-Process powershell -ArgumentList "-NoProfile -Command $cmd; pause" -Wait
-                    $statusText.Text = "Finished $($pkg.Name)"
-                }
-            }
-            "Edit" {
-                $res = Show-PackageDialog -ExistingPkg $pkg
-                if ($res) {
-                    $pkg.Name = $res.Name; $pkg.ID = $res.ID; $pkg.Source = $res.Source
-                    Update-List; Save-Packages
-                }
-            }
-            "Remove" {
-                if ([System.Windows.MessageBox]::Show("Remove from list?", "Confirm", "YesNo") -eq "Yes") {
-                    [void]$global:allPackages.Remove($pkg)
-                    Update-List; Save-Packages
-                }
-            }
+            "Install" { if ([System.Windows.MessageBox]::Show("Install $($pkg.Name)?", "Confirm", "YesNo") -eq "Yes") { $statusText.Text = "Installing..."; $window.UpdateLayout(); Start-Process powershell -ArgumentList "-NoProfile -Command $(if ($pkg.Source -eq 'scoop') { 'scoop install ' + $pkg.ID } else { 'winget install --id ' + $pkg.ID + ' --silent' }); pause" -Wait; $statusText.Text = "Finished." } }
+            "Uninstall" { if ([System.Windows.MessageBox]::Show("Uninstall $($pkg.Name)?", "Confirm", "YesNo") -eq "Yes") { $statusText.Text = "Uninstalling..."; $window.UpdateLayout(); Start-Process powershell -ArgumentList "-NoProfile -Command $(if ($pkg.Source -eq 'scoop') { 'scoop uninstall ' + $pkg.ID } else { 'winget uninstall --id ' + $pkg.ID + ' --silent' }); pause" -Wait; $statusText.Text = "Finished." } }
+            "Edit" { $res = Show-PackageDialog -ExistingPkg $pkg; if ($res) { $pkg.Name = $res.Name; $pkg.ID = $res.ID; $pkg.Source = $res.Source; Update-List; Save-Packages } }
+            "Remove" { if ([System.Windows.MessageBox]::Show("Remove from list?", "Confirm", "YesNo") -eq "Yes") { [void]$global:allPackages.Remove($pkg); Update-List; Save-Packages } }
         }
     }
 })
