@@ -468,6 +468,23 @@ class CardLauncher(QMainWindow):
             save_data(self.data)
             list_widget.takeItem(index)
 
+    def edit_custom_command(self, list_widget):
+        current_item = list_widget.currentItem()
+        if not current_item: return
+        index = list_widget.row(current_item)
+        if 0 <= index < len(self.data.get("commands", [])):
+            cmd = self.data["commands"][index]
+            
+            new_name, ok1 = QInputDialog.getText(self, "Edit Command", "Command Name:", text=cmd["name"])
+            if not ok1 or not new_name: return
+            
+            new_template, ok2 = QInputDialog.getText(self, "Edit Command", "Command Template:", text=cmd["template"])
+            if not ok2 or not new_template: return
+            
+            self.data["commands"][index] = {"name": new_name, "template": new_template, "category": cmd.get("category", "Custom")}
+            save_data(self.data)
+            current_item.setText(f"{new_name} | {new_template}")
+
     def show_settings(self):
         dialog = QDialog(self)
         dialog.setWindowTitle("SETTINGS")
@@ -506,9 +523,10 @@ class CardLauncher(QMainWindow):
         layout.addWidget(cmd_list)
         
         cmd_btns = QHBoxLayout()
-        add_cmd_btn = QPushButton("ADD COMMAND"); add_cmd_btn.clicked.connect(lambda: self.add_custom_command(cmd_list))
-        remove_cmd_btn = QPushButton("REMOVE SELECTED"); remove_cmd_btn.clicked.connect(lambda: self.remove_custom_command(cmd_list))
-        cmd_btns.addWidget(add_cmd_btn); cmd_btns.addWidget(remove_cmd_btn)
+        add_cmd_btn = QPushButton("ADD"); add_cmd_btn.clicked.connect(lambda: self.add_custom_command(cmd_list))
+        edit_cmd_btn = QPushButton("EDIT"); edit_cmd_btn.clicked.connect(lambda: self.edit_custom_command(cmd_list))
+        remove_cmd_btn = QPushButton("REMOVE"); remove_cmd_btn.clicked.connect(lambda: self.remove_custom_command(cmd_list))
+        cmd_btns.addWidget(add_cmd_btn); cmd_btns.addWidget(edit_cmd_btn); cmd_btns.addWidget(remove_cmd_btn)
         layout.addLayout(cmd_btns)
         
         layout.addStretch()
