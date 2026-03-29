@@ -61,6 +61,23 @@ btn.SetFont("c000000")
 btn.OnEvent("Click", (*) => SendText("Vill:Munshibari, P.O-Radhapur, 9 No Ward, Dist-Lakshmipur Post Code: 3706"))
 btn.OnEvent("ContextMenu", (*) => (A_Clipboard := "Vill:Munshibari, P.O-Radhapur, 9 No Ward, Dist-Lakshmipur Post Code: 3706"))
 
+; SSC
+myGui.SetFont("s12 Bold c000000", "Jetbrainsmono nfp")
+myGui.Add("Text", "xm y+5 w150 h25 +Border Center BackgroundFFCC00", "SSC")
+myGui.SetFont("s12 Bold cDefault", "Jetbrainsmono nfp")
+btn := myGui.Add("Text", "x+5 yp w100 h25 +Border Center Background00CCFF", "Roll")
+btn.SetFont("c000000")
+btn.OnEvent("Click", (*) => SendText("402206"))
+btn.OnEvent("ContextMenu", (*) => (A_Clipboard := "402206"))
+btn := myGui.Add("Text", "x+5 yp w100 h25 +Border Center Background00CCFF", "YR")
+btn.SetFont("c000000")
+btn.OnEvent("Click", (*) => SendText("2014"))
+btn.OnEvent("ContextMenu", (*) => (A_Clipboard := "2014"))
+btn := myGui.Add("Text", "x+5 yp w100 h25 +Border Center Background00CCFF", "School")
+btn.SetFont("c000000")
+btn.OnEvent("Click", (*) => SendText("Provati Uchya Bidyanikaton"))
+btn.OnEvent("ContextMenu", (*) => (A_Clipboard := "Provati Uchya Bidyanikaton"))
+
 myGui.Show()
 myGui.OnEvent("Close", (*) => ExitApp())
 
