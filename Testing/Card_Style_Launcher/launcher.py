@@ -185,11 +185,6 @@ class CyberCard(QPushButton):
         self.setCursor(Qt.CursorShape.PointingHandCursor)
         self.setToolTip(f"Path: {path}\nLast Used: {time.ctime(last_used) if last_used else 'Never'}")
         
-        # Simple HTML-like content using layout and labels is better for interactivity, 
-        # but for a simple "CyberCard" we can use a layout inside the button or just style it.
-        # Since it's a QPushButton, we can't easily add sub-widgets that handle clicks, 
-        # but we can set a layout on it.
-        
         self.layout = QVBoxLayout(self)
         self.layout.setContentsMargins(10, 10, 10, 10)
         
@@ -204,7 +199,6 @@ class CyberCard(QPushButton):
         self.path_label = QLabel()
         self.path_label.setStyleSheet(f"color: {CP_SUBTEXT}; font-size: 7pt; border: none; background: transparent;")
         
-        # Elide the path if it's too long for the card (card width 200 - padding 20)
         metrics = QFontMetrics(QFont("Consolas", 7))
         elided_path = metrics.elidedText(path, Qt.TextElideMode.ElideRight, 180)
         self.path_label.setText(elided_path)
@@ -307,7 +301,6 @@ class CardLauncher(QMainWindow):
         self.setCentralWidget(central_widget)
         self.main_layout = QVBoxLayout(central_widget)
         
-        # Header
         header_layout = QHBoxLayout()
         title_label = QLabel("CARD STYLE LAUNCHER")
         title_label.setStyleSheet(f"color: {CP_YELLOW}; font-size: 18pt; font-weight: bold;")
@@ -332,40 +325,33 @@ class CardLauncher(QMainWindow):
         
         self.main_layout.addLayout(header_layout)
         
-        # Scroll Area for Cards
         self.scroll = QScrollArea()
         self.scroll.setWidgetResizable(True)
         self.card_container = QWidget()
         self.flow_layout = FlowLayout(self.card_container, margin=20, hspacing=20, vspacing=20)
         self.scroll.setWidget(self.card_container)
-        
         self.main_layout.addWidget(self.scroll)
         
-        # Status Bar
         self.status_bar = QLabel("SYSTEM READY")
         self.status_bar.setStyleSheet(f"color: {CP_DIM}; font-size: 8pt;")
         self.main_layout.addWidget(self.status_bar)
 
     def refresh_cards(self):
-        # Clear existing
         while self.flow_layout.count():
             item = self.flow_layout.takeAt(0)
             if item.widget():
                 item.widget().deleteLater()
         
-        # Sort directories by last_used (descending)
         sorted_dirs = sorted(
             self.data.get("directories", []), 
             key=lambda x: x.get("last_used", 0), 
             reverse=True
         )
         
-        # Add "Add Card" first
         add_btn = AddCard()
         add_btn.clicked.connect(self.add_directory)
         self.flow_layout.addWidget(add_btn)
         
-        # Add Directory Cards
         for d in sorted_dirs:
             card = CyberCard(
                 d.get("name"), 
@@ -387,14 +373,9 @@ class CardLauncher(QMainWindow):
                 widget.setVisible(visible)
 
     def on_card_clicked(self, dir_obj):
-        # Update last_used
         dir_obj["last_used"] = time.time()
         save_data(self.data)
-        
-        # Show actions
         self.show_actions(dir_obj)
-        
-        # Refresh to update sort
         self.refresh_cards()
 
     def show_actions(self, dir_obj):
@@ -406,7 +387,17 @@ class CardLauncher(QMainWindow):
         
         path = dir_obj.get("path")
         
-        # Add commands from data
+        # Add Gemini specific actions
+        gemini_action = QAction("GEMINI", self)
+        gemini_action.triggered.connect(lambda: self.execute_command('wt -d "{path}" powershell -NoExit -Command gemini', path))
+        menu.addAction(gemini_action)
+
+        gemini_resume_action = QAction("GEMINI RESUME", self)
+        gemini_resume_action.triggered.connect(lambda: self.execute_command('wt -d "{path}" powershell -NoExit -Command "gemini --resume"', path))
+        menu.addAction(gemini_resume_action)
+
+        menu.addSeparator()
+
         for cmd in self.data.get("commands", []):
             action = QAction(cmd.get("name"), self)
             action.triggered.connect(lambda checked, t=cmd.get("template"), p=path: self.execute_command(t, p))
@@ -425,21 +416,13 @@ class CardLauncher(QMainWindow):
     def add_directory(self):
         path = QFileDialog.getExistingDirectory(self, "Select Directory")
         if path:
-            # Check if exists
             if any(d["path"] == path for d in self.data["directories"]):
                 QMessageBox.warning(self, "Warning", "Directory already in launcher.")
                 return
-                
             name, ok = self.get_input("Directory Name", "Enter a display name (optional):")
             category, ok2 = self.get_input("Category", "Enter category (default 'General'):")
             if not category: category = "General"
-            
-            new_entry = {
-                "path": path,
-                "name": name,
-                "category": category,
-                "last_used": time.time()
-            }
+            new_entry = {"path": path, "name": name, "category": category, "last_used": time.time()}
             self.data["directories"].append(new_entry)
             save_data(self.data)
             self.refresh_cards()
@@ -452,16 +435,11 @@ class CardLauncher(QMainWindow):
         edit = QLineEdit()
         layout.addWidget(edit)
         btns = QHBoxLayout()
-        ok_btn = QPushButton("OK")
-        ok_btn.clicked.connect(dialog.accept)
-        cancel_btn = QPushButton("CANCEL")
-        cancel_btn.clicked.connect(dialog.reject)
-        btns.addWidget(ok_btn)
-        btns.addWidget(cancel_btn)
+        ok_btn = QPushButton("OK"); ok_btn.clicked.connect(dialog.accept)
+        cancel_btn = QPushButton("CANCEL"); cancel_btn.clicked.connect(dialog.reject)
+        btns.addWidget(ok_btn); btns.addWidget(cancel_btn)
         layout.addLayout(btns)
-        
-        if dialog.exec() == QDialog.DialogCode.Accepted:
-            return edit.text(), True
+        if dialog.exec() == QDialog.DialogCode.Accepted: return edit.text(), True
         return "", False
 
     def show_context_menu(self, pos, dir_obj):
@@ -471,15 +449,9 @@ class CardLauncher(QMainWindow):
             QMenu {{ background-color: {CP_PANEL}; color: {CP_TEXT}; border: 1px solid {CP_CYAN}; }}
             QMenu::item:selected {{ background-color: {CP_CYAN}; color: {CP_BG}; }}
         """)
-        
-        edit_action = QAction("Edit", self)
-        edit_action.triggered.connect(lambda: self.edit_directory(dir_obj))
-        
-        remove_action = QAction("Remove", self)
-        remove_action.triggered.connect(lambda: self.remove_directory(dir_obj))
-        
-        menu.addAction(edit_action)
-        menu.addAction(remove_action)
+        edit_action = QAction("Edit", self); edit_action.triggered.connect(lambda: self.edit_directory(dir_obj))
+        remove_action = QAction("Remove", self); remove_action.triggered.connect(lambda: self.remove_directory(dir_obj))
+        menu.addAction(edit_action); menu.addAction(remove_action)
         menu.exec(card.mapToGlobal(pos))
 
     def edit_directory(self, dir_obj):
@@ -498,26 +470,19 @@ class CardLauncher(QMainWindow):
             self.refresh_cards()
 
     def show_settings(self):
-        # Setting button and setting panel as requested
-        # By default keep it empty
         dialog = QDialog(self)
-        dialog.setWindowTitle("SETTINGS")
-        dialog.setMinimumSize(400, 300)
+        dialog.setWindowTitle("SETTINGS"); dialog.setMinimumSize(400, 300)
         layout = QVBoxLayout(dialog)
-        
         layout.addWidget(QLabel("--- SETTINGS PANEL ---"))
         layout.addWidget(QLabel("Configuration options will appear here."))
         layout.addStretch()
-        
-        close_btn = QPushButton("CLOSE")
-        close_btn.clicked.connect(dialog.accept)
+        close_btn = QPushButton("CLOSE"); close_btn.clicked.connect(dialog.accept)
         layout.addWidget(close_btn)
-        
         dialog.exec()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    app.setStyle("Fusion") # Better base for custom styling
+    app.setStyle("Fusion")
     window = CardLauncher()
     window.show()
     sys.exit(app.exec())
