@@ -346,35 +346,39 @@ class CardLauncher(QMainWindow):
         self.main_layout.addWidget(self.status_bar)
 
     def refresh_cards(self):
-        while self.flow_layout.count():
-            item = self.flow_layout.takeAt(0)
-            if item.widget():
-                item.widget().deleteLater()
-        
-        sorted_dirs = sorted(
-            self.data.get("directories", []), 
-            key=lambda x: x.get("last_used", 0), 
-            reverse=True
-        )
-        
-        add_btn = AddCard()
-        add_btn.clicked.connect(self.add_directory)
-        self.flow_layout.addWidget(add_btn)
-        
-        # Add Directory Cards
-        settings = self.data.get("settings", {})
-        for d in sorted_dirs:
-            card = CyberCard(
-                d.get("name"), 
-                d.get("path"), 
-                d.get("category", "General"),
-                d.get("last_used", 0),
-                settings=settings
+        self.setUpdatesEnabled(False)
+        try:
+            while self.flow_layout.count():
+                item = self.flow_layout.takeAt(0)
+                if item.widget():
+                    item.widget().deleteLater()
+            
+            sorted_dirs = sorted(
+                self.data.get("directories", []), 
+                key=lambda x: x.get("last_used", 0), 
+                reverse=True
             )
-            card.clicked.connect(lambda checked, arg=d: self.on_card_clicked(arg))
-            card.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
-            card.customContextMenuRequested.connect(lambda pos, arg=d: self.show_context_menu(pos, arg))
-            self.flow_layout.addWidget(card)
+            
+            add_btn = AddCard()
+            add_btn.clicked.connect(self.add_directory)
+            self.flow_layout.addWidget(add_btn)
+            
+            # Add Directory Cards
+            settings = self.data.get("settings", {})
+            for d in sorted_dirs:
+                card = CyberCard(
+                    d.get("name"), 
+                    d.get("path"), 
+                    d.get("category", "General"),
+                    d.get("last_used", 0),
+                    settings=settings
+                )
+                card.clicked.connect(lambda checked, arg=d: self.on_card_clicked(arg))
+                card.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+                card.customContextMenuRequested.connect(lambda pos, arg=d: self.show_context_menu(pos, arg))
+                self.flow_layout.addWidget(card)
+        finally:
+            self.setUpdatesEnabled(True)
 
     def filter_cards(self, text):
         text = text.lower()
@@ -385,10 +389,15 @@ class CardLauncher(QMainWindow):
                 widget.setVisible(visible)
 
     def on_card_clicked(self, dir_obj):
+        # Update last_used
         dir_obj["last_used"] = time.time()
         save_data(self.data)
+        
+        # Show actions
         self.show_actions(dir_obj)
-        self.refresh_cards()
+        
+        # DO NOT call refresh_cards here to avoid flicker and items jumping around.
+        # Sorting will apply after next app restart.
 
     def show_actions(self, dir_obj):
         menu = QMenu(self)
@@ -420,7 +429,8 @@ class CardLauncher(QMainWindow):
     def execute_command(self, template, path):
         final_cmd = template.replace("{path}", path)
         try:
-            subprocess.Popen(final_cmd, shell=True)
+            # 0x08000000 is CREATE_NO_WINDOW, prevents cmd.exe flicker
+            subprocess.Popen(final_cmd, shell=True, creationflags=0x08000000)
             self.status_bar.setText(f"EXECUTED: {final_cmd}")
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Failed to execute command: {e}")
