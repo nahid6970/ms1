@@ -97,9 +97,8 @@
             background: #05050a;
             border: 1px solid #00ffaa18;
             border-radius: 6px;
-            padding: 14px;
+            padding: 4px 14px 14px 14px;
             overflow-y: auto;
-            white-space: pre-wrap;
             font-size: 13px;
             line-height: 1.65;
             box-shadow: inset 0 0 40px rgba(0,0,0,0.6);
@@ -171,9 +170,9 @@
 
         .command-line { margin-bottom: 3px; }
         .command-text { color: #00ccff; text-shadow: 0 0 6px rgba(0,204,255,0.35); }
-        .output-text { color: #b8b8b8; margin-bottom: 8px; }
-        .error-text { color: #ff4466; margin-bottom: 8px; }
-        .success-text { color: #ffffff; margin-bottom: 8px; }
+        .output-text { color: #b8b8b8; margin-bottom: 8px; white-space: pre-wrap; }
+        .error-text { color: #ff4466; margin-bottom: 8px; white-space: pre-wrap; }
+        .success-text { color: #ffffff; margin-bottom: 8px; white-space: pre-wrap; }
         .loading { color: #333; font-style: italic; }
 
         ::-webkit-scrollbar { width: 5px; }
@@ -205,9 +204,7 @@
     
     <div class="terminal-container">
         <div id="terminal-output" class="terminal-output">
-            <div id="profile-info" class="output-text"></div>
-
-        </div>
+            <div id="profile-info" class="output-text"></div></div>
         
         <div class="terminal-input-container">
             <span class="prompt">PS></span>
