@@ -67,8 +67,8 @@ function Update-List {
         ($null -eq $selectedCat -or $selectedCat -eq "All" -or $_.Category -eq $selectedCat) -and
         ($_.Name.ToLower().Contains($term) -or $_.ID.ToLower().Contains($term))
     } | Where-Object { $_ -ne $null } | Sort-Object Name)
-    $packageListUI.ItemsSource = $null
-    $packageListUI.ItemsSource = $filtered
+    $script:pendingList = $filtered
+    $packageListUI.Dispatcher.BeginInvoke([System.Windows.Threading.DispatcherPriority]::Loaded, [System.Windows.Threading.DispatcherOperationCallback]{ param($arg); $packageListUI.ItemsSource = $null; $packageListUI.ItemsSource = $script:pendingList; $null }, $null)
 }
 
 function Set-RowButtonsVisibility {
