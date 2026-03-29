@@ -98,7 +98,7 @@ $col2.SetValue([System.Windows.Controls.ColumnDefinition]::WidthProperty, (New-O
 $gridFactory.AppendChild($col2)
 
 $col3 = New-Object System.Windows.FrameworkElementFactory([System.Windows.Controls.ColumnDefinition])
-$col3.SetValue([System.Windows.Controls.ColumnDefinition]::WidthProperty, (New-Object System.Windows.GridLength(140)))
+$col3.SetValue([System.Windows.Controls.ColumnDefinition]::WidthProperty, (New-Object System.Windows.GridLength(100)))
 $gridFactory.AppendChild($col3)
 
 # CheckBox
@@ -131,17 +131,44 @@ $spBtns.SetValue([System.Windows.Controls.StackPanel]::OrientationProperty, [Sys
 $spBtns.SetValue([System.Windows.Controls.Grid]::ColumnProperty, 2)
 $spBtns.SetValue([System.Windows.Controls.StackPanel]::HorizontalAlignmentProperty, [System.Windows.HorizontalAlignment]::Right)
 
+# --- Install Button with Icon ---
 $btnInstall = New-Object System.Windows.FrameworkElementFactory([System.Windows.Controls.Button])
-$btnInstall.SetValue([System.Windows.Controls.Button]::ContentProperty, "Install")
 $btnInstall.SetValue([System.Windows.Controls.Button]::MarginProperty, (New-Object System.Windows.Thickness(2)))
+$btnInstall.SetValue([System.Windows.Controls.Button]::ToolTipProperty, "Install App")
+$btnInstall.SetValue([System.Windows.Controls.Button]::WidthProperty, 30.0)
+$btnInstall.SetValue([System.Windows.Controls.Button]::HeightProperty, 30.0)
+$btnInstall.SetValue([System.Windows.Controls.Button]::BackgroundProperty, [System.Windows.Media.Brushes]::Transparent)
+$btnInstall.SetValue([System.Windows.Controls.Button]::BorderThicknessProperty, (New-Object System.Windows.Thickness(0)))
 $btnInstall.SetBinding([System.Windows.Controls.Button]::TagProperty, (New-Object System.Windows.Data.Binding))
+
+$installIconView = New-Object System.Windows.FrameworkElementFactory([System.Windows.Controls.Viewbox])
+$installIconView.SetValue([System.Windows.Controls.Viewbox]::WidthProperty, 18.0)
+$installIconView.SetValue([System.Windows.Controls.Viewbox]::HeightProperty, 18.0)
+$installIconPath = New-Object System.Windows.FrameworkElementFactory([System.Windows.Shapes.Path])
+$installIconPath.SetValue([System.Windows.Shapes.Path]::DataProperty, [System.Windows.Media.Geometry]::Parse("M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"))
+$installIconPath.SetValue([System.Windows.Shapes.Path]::FillProperty, [System.Windows.Media.Brushes]::SeaGreen)
+$installIconView.AppendChild($installIconPath)
+$btnInstall.AppendChild($installIconView)
 $spBtns.AppendChild($btnInstall)
 
+# --- Uninstall Button with Icon ---
 $btnUninstall = New-Object System.Windows.FrameworkElementFactory([System.Windows.Controls.Button])
-$btnUninstall.SetValue([System.Windows.Controls.Button]::ContentProperty, "Uninstall")
 $btnUninstall.SetValue([System.Windows.Controls.Button]::MarginProperty, (New-Object System.Windows.Thickness(2)))
-$btnUninstall.SetValue([System.Windows.Controls.Button]::ForegroundProperty, [System.Windows.Media.Brushes]::Red)
+$btnUninstall.SetValue([System.Windows.Controls.Button]::ToolTipProperty, "Uninstall App")
+$btnUninstall.SetValue([System.Windows.Controls.Button]::WidthProperty, 30.0)
+$btnUninstall.SetValue([System.Windows.Controls.Button]::HeightProperty, 30.0)
+$btnUninstall.SetValue([System.Windows.Controls.Button]::BackgroundProperty, [System.Windows.Media.Brushes]::Transparent)
+$btnUninstall.SetValue([System.Windows.Controls.Button]::BorderThicknessProperty, (New-Object System.Windows.Thickness(0)))
 $btnUninstall.SetBinding([System.Windows.Controls.Button]::TagProperty, (New-Object System.Windows.Data.Binding))
+
+$uninstallIconView = New-Object System.Windows.FrameworkElementFactory([System.Windows.Controls.Viewbox])
+$uninstallIconView.SetValue([System.Windows.Controls.Viewbox]::WidthProperty, 18.0)
+$uninstallIconView.SetValue([System.Windows.Controls.Viewbox]::HeightProperty, 18.0)
+$uninstallIconPath = New-Object System.Windows.FrameworkElementFactory([System.Windows.Shapes.Path])
+$uninstallIconPath.SetValue([System.Windows.Shapes.Path]::DataProperty, [System.Windows.Media.Geometry]::Parse("M19 4h-3.5l-1-1h-5l-1 1H5v2h14V4zM6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12z"))
+$uninstallIconPath.SetValue([System.Windows.Shapes.Path]::FillProperty, [System.Windows.Media.Brushes]::Crimson)
+$uninstallIconView.AppendChild($uninstallIconPath)
+$btnUninstall.AppendChild($uninstallIconView)
 $spBtns.AppendChild($btnUninstall)
 
 $gridFactory.AppendChild($spBtns)
@@ -222,10 +249,16 @@ $btnInstallSelected.Add_Click({
 
 $packageListUI.Add_PreviewMouseLeftButtonUp({
     $source = $_.OriginalSource
-    if ($source -is [System.Windows.Controls.Button]) {
-        $pkg = $source.Tag
-        if ($source.Content -eq "Install") { Execute-Action -Action "install" -Pkg $pkg }
-        elseif ($source.Content -eq "Uninstall") { Execute-Action -Action "uninstall" -Pkg $pkg }
+    # We now check if the click was on the Path or Viewbox inside the button
+    $target = $source
+    while ($target -ne $null -and $target -isnot [System.Windows.Controls.Button]) {
+        $target = [System.Windows.Media.VisualTreeHelper]::GetParent($target)
+    }
+
+    if ($target -is [System.Windows.Controls.Button] -and $target.ToolTip -ne $null) {
+        $pkg = $target.Tag
+        if ($target.ToolTip -eq "Install App") { Execute-Action -Action "install" -Pkg $pkg }
+        elseif ($target.ToolTip -eq "Uninstall App") { Execute-Action -Action "uninstall" -Pkg $pkg }
     }
 })
 
