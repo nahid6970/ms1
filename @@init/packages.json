@@ -5,11 +5,6 @@
     "Source": "scoop"
   },
   {
-    "Name": "Python",
-    "ID": "python",
-    "Source": "scoop"
-  },
-  {
     "Name": "7-Zip",
     "ID": "7zip",
     "Source": "scoop"
