@@ -4,6 +4,7 @@ Add-Type -AssemblyName PresentationFramework, PresentationCore, WindowsBase, Mic
 # State Management
 $jsonPath = Join-Path $PSScriptRoot "packages.json"
 $global:allPackages = New-Object System.Collections.Generic.List[PSCustomObject]
+$global:lastHoveredItem = $null
 
 function Load-Packages {
     if (Test-Path $jsonPath) {
@@ -46,6 +47,25 @@ function Update-List {
         $packageListUI.ItemsSource = @($filtered)
     }
     $packageListUI.Items.Refresh()
+}
+
+# --- Helper to toggle buttons in a row ---
+function Set-RowButtonsVisibility {
+    param($ItemContainer, $Opacity)
+    if ($null -eq $ItemContainer) { return }
+    
+    $queue = New-Object System.Collections.Generic.Queue[System.Windows.DependencyObject]
+    $queue.Enqueue($ItemContainer)
+    while ($queue.Count -gt 0) {
+        $parent = $queue.Dequeue()
+        for ($i = 0; $i -lt [System.Windows.Media.VisualTreeHelper]::GetChildrenCount($parent); $i++) {
+            $child = [System.Windows.Media.VisualTreeHelper]::GetChild($parent, $i)
+            if ($child -is [System.Windows.Controls.Button] -and $child.ToolTip) {
+                $child.Opacity = $Opacity
+            }
+            $queue.Enqueue($child)
+        }
+    }
 }
 
 # --- Custom Add/Edit Dialog ---
@@ -137,6 +157,7 @@ $borderFactory = New-Object System.Windows.FrameworkElementFactory([System.Windo
 $borderFactory.SetValue([System.Windows.Controls.Border]::BorderThicknessProperty, (New-Object System.Windows.Thickness(0,0,0,1))); $borderFactory.SetValue([System.Windows.Controls.Border]::BorderBrushProperty, (New-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Color]::FromRgb(241, 243, 245)))); $borderFactory.SetValue([System.Windows.Controls.Border]::PaddingProperty, (New-Object System.Windows.Thickness(5)))
 $gridFactory = New-Object System.Windows.FrameworkElementFactory([System.Windows.Controls.Grid]); $gridFactory.SetValue([System.Windows.Controls.Grid]::WidthProperty, 480.0)
 
+# Correct way to set ColumnDefinitions in FrameworkElementFactory
 $c1 = New-Object System.Windows.FrameworkElementFactory([System.Windows.Controls.ColumnDefinition]); $c1.SetValue([System.Windows.Controls.ColumnDefinition]::WidthProperty, (New-Object System.Windows.GridLength(35))); $gridFactory.AppendChild($c1)
 $c2 = New-Object System.Windows.FrameworkElementFactory([System.Windows.Controls.ColumnDefinition]); $c2.SetValue([System.Windows.Controls.ColumnDefinition]::WidthProperty, (New-Object System.Windows.GridLength(1, [System.Windows.GridUnitType]::Star))); $gridFactory.AppendChild($c2)
 $c3 = New-Object System.Windows.FrameworkElementFactory([System.Windows.Controls.ColumnDefinition]); $c3.SetValue([System.Windows.Controls.ColumnDefinition]::WidthProperty, (New-Object System.Windows.GridLength(150))); $gridFactory.AppendChild($c3)
@@ -151,16 +172,12 @@ $gridFactory.AppendChild($spInfo)
 function Create-IconButton {
     param($PathStr, $Color, $Tip)
     $btn = New-Object System.Windows.FrameworkElementFactory([System.Windows.Controls.Button]); $btn.SetValue([System.Windows.Controls.Button]::WidthProperty, 28.0); $btn.SetValue([System.Windows.Controls.Button]::HeightProperty, 28.0); $btn.SetValue([System.Windows.Controls.Button]::MarginProperty, (New-Object System.Windows.Thickness(2))); $btn.SetValue([System.Windows.Controls.Button]::ToolTipProperty, $Tip); $btn.SetValue([System.Windows.Controls.Button]::BackgroundProperty, [System.Windows.Media.Brushes]::Transparent); $btn.SetValue([System.Windows.Controls.Button]::BorderThicknessProperty, (New-Object System.Windows.Thickness(0))); $btn.SetBinding([System.Windows.Controls.Button]::TagProperty, (New-Object System.Windows.Data.Binding))
-    # NEW: Hide by default for hover effect
     $btn.SetValue([System.Windows.Controls.Button]::OpacityProperty, 0.0)
-    $btn.SetValue([System.Windows.Controls.Button]::NameProperty, "ActionBtn")
-
     $vb = New-Object System.Windows.FrameworkElementFactory([System.Windows.Controls.Viewbox]); $vb.SetValue([System.Windows.Controls.Viewbox]::WidthProperty, 16.0); $p = New-Object System.Windows.FrameworkElementFactory([System.Windows.Shapes.Path]); $p.SetValue([System.Windows.Shapes.Path]::DataProperty, [System.Windows.Media.Geometry]::Parse($PathStr)); $p.SetValue([System.Windows.Shapes.Path]::FillProperty, $Color); $vb.AppendChild($p); $btn.AppendChild($vb); return $btn
 }
 
 $spBtns = New-Object System.Windows.FrameworkElementFactory([System.Windows.Controls.StackPanel]); $spBtns.SetValue([System.Windows.Controls.StackPanel]::OrientationProperty, [System.Windows.Controls.Orientation]::Horizontal); $spBtns.SetValue([System.Windows.Controls.Grid]::ColumnProperty, 2); $spBtns.SetValue([System.Windows.Controls.StackPanel]::HorizontalAlignmentProperty, [System.Windows.HorizontalAlignment]::Right)
 $spBtns.AppendChild((Create-IconButton "M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" ([System.Windows.Media.Brushes]::SeaGreen) "Install"))
-# Clockwise/Reverse Clock Icon for Uninstall
 $spBtns.AppendChild((Create-IconButton "M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z" ([System.Windows.Media.Brushes]::Crimson) "Uninstall"))
 $spBtns.AppendChild((Create-IconButton "M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" ([System.Windows.Media.Brushes]::DodgerBlue) "Edit"))
 $spBtns.AppendChild((Create-IconButton "M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" ([System.Windows.Media.Brushes]::Crimson) "Remove"))
@@ -198,54 +215,30 @@ $btnInstallSelected.Add_Click({
     $statusText.Text = "Batch installation complete."; Update-List
 })
 
-# --- HOVER EFFECT LOGIC ---
+# --- REFINED HOVER LOGIC ---
 $packageListUI.Add_MouseMove({
     $target = $_.OriginalSource
-    # Try to find the ListViewItem container
     while ($target -ne $null -and $target -isnot [System.Windows.Controls.ListViewItem]) { 
         $target = [System.Windows.Media.VisualTreeHelper]::GetParent($target) 
     }
     
+    # If hovering a new item, hide the previous one and show the current one
     if ($target -is [System.Windows.Controls.ListViewItem]) {
-        # Search for buttons inside the item's visual tree
-        $stackPanel = $target.ContentTemplate.VisualTree
-        # Since we use FrameworkElementFactory, we can't easily find children by name at runtime without traversing the VisualTreeHelper
-        # Programmatic approach to find buttons in the row:
-        $queue = New-Object System.Collections.Generic.Queue[System.Windows.DependencyObject]
-        $queue.Enqueue($target)
-        while ($queue.Count -gt 0) {
-            $parent = $queue.Dequeue()
-            for ($i = 0; $i -lt [System.Windows.Media.VisualTreeHelper]::GetChildrenCount($parent); $i++) {
-                $child = [System.Windows.Media.VisualTreeHelper]::GetChild($parent, $i)
-                if ($child -is [System.Windows.Controls.Button] -and $child.ToolTip) {
-                    $child.Opacity = 1.0
-                }
-                $queue.Enqueue($child)
-            }
+        if ($target -ne $global:lastHoveredItem) {
+            Set-RowButtonsVisibility -ItemContainer $global:lastHoveredItem -Opacity 0.0
+            Set-RowButtonsVisibility -ItemContainer $target -Opacity 1.0
+            $global:lastHoveredItem = $target
         }
+    } else {
+        # Not over an item, hide last one
+        Set-RowButtonsVisibility -ItemContainer $global:lastHoveredItem -Opacity 0.0
+        $global:lastHoveredItem = $null
     }
 })
 
-# Hide when mouse leaves the item
 $packageListUI.Add_MouseLeave({
-    # Reset all buttons in the list
-    for ($i = 0; $i -lt $packageListUI.Items.Count; $i++) {
-        $container = $packageListUI.ItemContainerGenerator.ContainerFromIndex($i)
-        if ($container) {
-            $queue = New-Object System.Collections.Generic.Queue[System.Windows.DependencyObject]
-            $queue.Enqueue($container)
-            while ($queue.Count -gt 0) {
-                $parent = $queue.Dequeue()
-                for ($j = 0; $j -lt [System.Windows.Media.VisualTreeHelper]::GetChildrenCount($parent); $j++) {
-                    $child = [System.Windows.Media.VisualTreeHelper]::GetChild($parent, $j)
-                    if ($child -is [System.Windows.Controls.Button] -and $child.ToolTip) {
-                        $child.Opacity = 0.0
-                    }
-                    $queue.Enqueue($child)
-                }
-            }
-        }
-    }
+    Set-RowButtonsVisibility -ItemContainer $global:lastHoveredItem -Opacity 0.0
+    $global:lastHoveredItem = $null
 })
 
 $packageListUI.Add_PreviewMouseLeftButtonUp({
