@@ -10,7 +10,7 @@ from PyQt6.QtWidgets import (
     QDialog, QMessageBox, QFileDialog, QMenu, QStyle
 )
 from PyQt6.QtCore import Qt, QSize, QPoint, QRect, pyqtSignal
-from PyQt6.QtGui import QFont, QCursor, QAction
+from PyQt6.QtGui import QFont, QCursor, QAction, QFontMetrics
 
 # --- CONFIGURATION & CONSTANTS ---
 DATA_FILE = "launcher_data.json"
@@ -201,10 +201,14 @@ class CyberCard(QPushButton):
         self.name_label.setWordWrap(True)
         self.name_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         
-        self.path_label = QLabel(path)
+        self.path_label = QLabel()
         self.path_label.setStyleSheet(f"color: {CP_SUBTEXT}; font-size: 7pt; border: none; background: transparent;")
-        self.path_label.setWordWrap(True)
-        self.path_label.setMaximumHeight(30)
+        
+        # Elide the path if it's too long for the card (card width 200 - padding 20)
+        metrics = QFontMetrics(QFont("Consolas", 7))
+        elided_path = metrics.elidedText(path, Qt.TextElideMode.ElideRight, 180)
+        self.path_label.setText(elided_path)
+        self.path_label.setWordWrap(False)
         
         self.layout.addWidget(self.cat_label)
         self.layout.addStretch()
