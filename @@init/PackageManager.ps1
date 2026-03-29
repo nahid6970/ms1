@@ -51,11 +51,13 @@ function Save-Packages {
 }
 
 function Update-Categories {
+    $script:suppressCatChange = $true
     $current = $cmbCategory.SelectedItem
     $categories = @("All") + ($global:allPackages.Category | Where-Object { $_ } | Select-Object -Unique | Sort-Object)
     $cmbCategory.Items.Clear()
     foreach ($cat in $categories) { [void]$cmbCategory.Items.Add($cat) }
     if ($cmbCategory.Items.Contains($current)) { $cmbCategory.SelectedItem = $current } else { $cmbCategory.SelectedIndex = 0 }
+    $script:suppressCatChange = $false
 }
 
 function Update-List {
@@ -199,7 +201,8 @@ $statusText = New-Object System.Windows.Controls.TextBlock; $statusText.Text = "
 # --- Events ---
 Load-Packages; Update-Categories; Update-List
 $txtSearch.Add_TextChanged({ Update-List })
-$cmbCategory.Add_SelectionChanged({ Update-List })
+$script:suppressCatChange = $false
+$cmbCategory.Add_SelectionChanged({ if (-not $script:suppressCatChange) { Update-List } })
 $btnAdd.Add_Click({ $res = Show-PackageDialog; if ($res) { $global:allPackages.Add($res); $txtSearch.Text = ""; Update-Categories; Update-List; Save-Packages } })
 $selectAll.Add_Checked({ foreach ($p in $packageListUI.ItemsSource) { $p.IsSelected = $true }; $packageListUI.Items.Refresh() })
 $selectAll.Add_Unchecked({ foreach ($p in $packageListUI.ItemsSource) { $p.IsSelected = $false }; $packageListUI.Items.Refresh() })
