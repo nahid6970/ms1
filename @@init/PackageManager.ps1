@@ -113,31 +113,27 @@ function Show-PackageDialog {
 # --- Main Window ---
 $window = New-Object System.Windows.Window; $window.Title = "Package Manager Pro"; $window.Width = 580; $window.Height = 650; $window.Background = [System.Windows.Media.Brushes]::White; $window.WindowStartupLocation = "CenterScreen"
 $mainGrid = New-Object System.Windows.Controls.Grid; $mainGrid.Margin = "15"; $window.Content = $mainGrid
-for($i=0; $i -lt 4; $i++){ $mainGrid.RowDefinitions.Add((New-Object System.Windows.Controls.RowDefinition)) }
+for($i=0; $i -lt 3; $i++){ $mainGrid.RowDefinitions.Add((New-Object System.Windows.Controls.RowDefinition)) }
 $mainGrid.RowDefinitions[0].Height = [System.Windows.GridLength]::Auto
-$mainGrid.RowDefinitions[1].Height = [System.Windows.GridLength]::Auto
-$mainGrid.RowDefinitions[2].Height = New-Object System.Windows.GridLength(1, [System.Windows.GridUnitType]::Star)
-$mainGrid.RowDefinitions[3].Height = [System.Windows.GridLength]::Auto
+$mainGrid.RowDefinitions[1].Height = New-Object System.Windows.GridLength(1, [System.Windows.GridUnitType]::Star)
+$mainGrid.RowDefinitions[2].Height = [System.Windows.GridLength]::Auto
 
-$title = New-Object System.Windows.Controls.TextBlock; $title.Text = "App Manager"; $title.FontSize = 26; $title.FontWeight = "Bold"; $title.Margin = "0,0,0,15"; [System.Windows.Controls.Grid]::SetRow($title, 0); $mainGrid.Children.Add($title)
-
-$headerGrid = New-Object System.Windows.Controls.Grid; $headerGrid.Margin = "0,0,0,15"; [System.Windows.Controls.Grid]::SetRow($headerGrid, 1); $mainGrid.Children.Add($headerGrid)
+$headerGrid = New-Object System.Windows.Controls.Grid; $headerGrid.Margin = "0,0,0,15"; [System.Windows.Controls.Grid]::SetRow($headerGrid, 0); $mainGrid.Children.Add($headerGrid)
+$headerGrid.ColumnDefinitions.Add((New-Object System.Windows.Controls.ColumnDefinition -Property @{Width=(New-Object System.Windows.GridLength(1, [System.Windows.GridUnitType]::Auto))}))
 $headerGrid.ColumnDefinitions.Add((New-Object System.Windows.Controls.ColumnDefinition -Property @{Width=(New-Object System.Windows.GridLength(1, [System.Windows.GridUnitType]::Star))}))
-$headerGrid.ColumnDefinitions.Add((New-Object System.Windows.Controls.ColumnDefinition -Property @{Width=(New-Object System.Windows.GridLength(1.2, [System.Windows.GridUnitType]::Star))}))
-$headerGrid.ColumnDefinitions.Add((New-Object System.Windows.Controls.ColumnDefinition -Property @{Width=(New-Object System.Windows.GridLength(1.5, [System.Windows.GridUnitType]::Star))}))
+$headerGrid.ColumnDefinitions.Add((New-Object System.Windows.Controls.ColumnDefinition -Property @{Width=(New-Object System.Windows.GridLength(1, [System.Windows.GridUnitType]::Auto))}))
 
-$leftStack = New-Object System.Windows.Controls.StackPanel; $leftStack.Orientation = "Horizontal"; $headerGrid.Children.Add($leftStack)
+$leftStack = New-Object System.Windows.Controls.StackPanel; $leftStack.Orientation = "Horizontal"; $leftStack.Margin = "0,0,10,0"; $headerGrid.Children.Add($leftStack)
 $selectAll = New-Object System.Windows.Controls.CheckBox; $selectAll.Content = "All"; $selectAll.VerticalAlignment = "Center"; $selectAll.Margin = "5,0,10,0"; $leftStack.Children.Add($selectAll)
 $btnAdd = New-Object System.Windows.Controls.Button; $btnAdd.Content = "+"; $btnAdd.Width = 35; $btnAdd.Height = 35; $btnAdd.FontWeight = "Bold"; $btnAdd.FontSize = 18; $btnAdd.Background = New-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Color]::FromRgb(13, 110, 253)); $btnAdd.Foreground = [System.Windows.Media.Brushes]::White; $leftStack.Children.Add($btnAdd)
 
-$searchStack = New-Object System.Windows.Controls.StackPanel; $searchStack.Orientation = "Horizontal"; $searchStack.HorizontalAlignment = "Center"; [System.Windows.Controls.Grid]::SetColumn($searchStack, 1); $headerGrid.Children.Add($searchStack)
-$txtSearch = New-Object System.Windows.Controls.TextBox; $txtSearch.Width = 130; $txtSearch.Height = 25; $txtSearch.VerticalAlignment = "Center"; $txtSearch.Padding = "3"; $searchStack.Children.Add($txtSearch)
+$txtSearch = New-Object System.Windows.Controls.TextBox; $txtSearch.Height = 35; $txtSearch.VerticalAlignment = "Center"; $txtSearch.Padding = "10,5"; $txtSearch.FontSize = 14; $txtSearch.VerticalContentAlignment = "Center"; $txtSearch.Margin = "10,0"; $txtSearch.ToolTip = "Search by Name or ID"; [System.Windows.Controls.Grid]::SetColumn($txtSearch, 1); $headerGrid.Children.Add($txtSearch)
 
-$rightStack = New-Object System.Windows.Controls.StackPanel; $rightStack.Orientation = "Horizontal"; $rightStack.HorizontalAlignment = "Right"; [System.Windows.Controls.Grid]::SetColumn($rightStack, 2); $headerGrid.Children.Add($rightStack)
+$rightStack = New-Object System.Windows.Controls.StackPanel; $rightStack.Orientation = "Horizontal"; $rightStack.HorizontalAlignment = "Right"; $rightStack.Margin = "10,0,0,0"; [System.Windows.Controls.Grid]::SetColumn($rightStack, 2); $headerGrid.Children.Add($rightStack)
 $btnCheckStatus = New-Object System.Windows.Controls.Button; $btnCheckStatus.Content = "Check Status"; $btnCheckStatus.Padding = "10,5"; $btnCheckStatus.Margin = "0,0,10,0"; $btnCheckStatus.Background = New-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Color]::FromRgb(108, 117, 125)); $btnCheckStatus.Foreground = [System.Windows.Media.Brushes]::White; $rightStack.Children.Add($btnCheckStatus)
 $btnInstallSelected = New-Object System.Windows.Controls.Button; $btnInstallSelected.Content = "Install Selected"; $btnInstallSelected.Padding = "10,5"; $btnInstallSelected.Background = New-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Color]::FromRgb(25, 135, 84)); $btnInstallSelected.Foreground = [System.Windows.Media.Brushes]::White; $rightStack.Children.Add($btnInstallSelected)
 
-$packageListUI = New-Object System.Windows.Controls.ListView; $packageListUI.Background = [System.Windows.Media.Brushes]::White; [System.Windows.Controls.Grid]::SetRow($packageListUI, 2); $mainGrid.Children.Add($packageListUI)
+$packageListUI = New-Object System.Windows.Controls.ListView; $packageListUI.Background = [System.Windows.Media.Brushes]::White; [System.Windows.Controls.Grid]::SetRow($packageListUI, 1); $mainGrid.Children.Add($packageListUI)
 
 # --- DataTemplate ---
 $dataTemplate = New-Object System.Windows.DataTemplate
@@ -173,7 +169,7 @@ $spBtns.AppendChild((Create-IconButton "M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3
 $spBtns.AppendChild((Create-IconButton "M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" ([System.Windows.Media.Brushes]::Crimson) "Remove"))
 $gridFactory.AppendChild($spBtns); $borderFactory.AppendChild($gridFactory); $dataTemplate.VisualTree = $borderFactory; $packageListUI.ItemTemplate = $dataTemplate
 
-$statusBar = New-Object System.Windows.Controls.Primitives.StatusBar; $statusBar.Background = [System.Windows.Media.Brushes]::Transparent; $statusBar.Margin = "0,10,0,0"; [System.Windows.Controls.Grid]::SetRow($statusBar, 3); $mainGrid.Children.Add($statusBar)
+$statusBar = New-Object System.Windows.Controls.Primitives.StatusBar; $statusBar.Background = [System.Windows.Media.Brushes]::Transparent; $statusBar.Margin = "0,10,0,0"; [System.Windows.Controls.Grid]::SetRow($statusBar, 2); $mainGrid.Children.Add($statusBar)
 $statusText = New-Object System.Windows.Controls.TextBlock; $statusText.Text = "Ready"; $statusText.Foreground = [System.Windows.Media.Brushes]::Gray; $statusItem = New-Object System.Windows.Controls.Primitives.StatusBarItem; $statusItem.Content = $statusText; $statusBar.Items.Add($statusItem)
 
 # --- Events ---
