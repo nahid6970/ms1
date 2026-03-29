@@ -759,7 +759,7 @@
     "Name": "Prowlarr",
     "ID": "TeamProwlarr.Prowlarr",
     "Source": "winget",
-    "Category": "General"
+    "Category": "ARR"
   },
   {
     "Name": "qBittorrent [S]",
@@ -783,7 +783,7 @@
     "Name": "Radarr",
     "ID": "TeamRadarr.Radarr",
     "Source": "winget",
-    "Category": "General"
+    "Category": "ARR"
   },
   {
     "Name": "Rclone [S]",
@@ -885,7 +885,7 @@
     "Name": "Sonarr",
     "ID": "TeamSonarr.Sonarr",
     "Source": "winget",
-    "Category": "General"
+    "Category": "ARR"
   },
   {
     "Name": "Steam [S]",
