@@ -21,6 +21,16 @@
     ],
     "commands": [
         {
+            "name": "GEMINI",
+            "template": "wt -d \"{path}\" powershell -NoExit -Command gemini",
+            "category": "System"
+        },
+        {
+            "name": "GEMINI RESUME",
+            "template": "wt -d \"{path}\" powershell -NoExit -Command \"gemini --resume\"",
+            "category": "System"
+        },
+        {
             "name": "Open in Explorer",
             "template": "explorer \"{path}\"",
             "category": "System"
