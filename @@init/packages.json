@@ -45,7 +45,7 @@
     "Name": "Discord",
     "ID": "Discord.Discord",
     "Source": "winget",
-    "Category": ""
+    "Category": "Chat"
   },
   {
     "Name": "Spotify",
@@ -291,43 +291,43 @@
     "Name": "CPU-Z [S]",
     "ID": "cpu-z",
     "Source": "scoop",
-    "Category": "General"
+    "Category": "System-Info"
   },
   {
     "Name": "CPU-Z [W]",
     "ID": "CPUID.CPU-Z",
     "Source": "winget",
-    "Category": "General"
+    "Category": "System-Info"
   },
   {
     "Name": "Crystal DiskInfo [S]",
     "ID": "crystaldiskinfo",
     "Source": "scoop",
-    "Category": "General"
+    "Category": "System-Info"
   },
   {
     "Name": "Crystal DiskInfo [W]",
     "ID": "CrystalDewWorld.CrystalDiskInfo",
     "Source": "winget",
-    "Category": "General"
+    "Category": "System-Info"
   },
   {
     "Name": "DesktopOK",
     "ID": "SoftwareOK.DesktopOK",
     "Source": "winget",
-    "Category": "General"
+    "Category": "Tool"
   },
   {
     "Name": "Ditto [S]",
     "ID": "ditto",
     "Source": "scoop",
-    "Category": "General"
+    "Category": "Tool"
   },
   {
     "Name": "Ditto [W]",
     "ID": "Ditto.Ditto",
     "Source": "winget",
-    "Category": "General"
+    "Category": "Tool"
   },
   {
     "Name": "DotNet_6 [S]",

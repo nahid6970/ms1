@@ -63,13 +63,15 @@ function Update-Categories {
 function Update-List {
     $term = [string]$txtSearch.Text.ToLower().Trim()
     $selectedCat = [string]$cmbCategory.SelectedItem
-    $packageListUI.ItemsSource = $null
-    
-    $filtered = @($global:allPackages | Where-Object { 
+    $filtered = [object[]]@($global:allPackages | Where-Object {
         ($null -eq $selectedCat -or $selectedCat -eq "All" -or $_.Category -eq $selectedCat) -and
         ($_.Name.ToLower().Contains($term) -or $_.ID.ToLower().Contains($term))
     } | Where-Object { $_ -ne $null } | Sort-Object Name)
-    $packageListUI.ItemsSource = [object[]]@($filtered)
+    $script:pendingList = $filtered
+    $packageListUI.Dispatcher.BeginInvoke([System.Windows.Threading.DispatcherPriority]::Loaded, [Action]{
+        $packageListUI.ItemsSource = $null
+        $packageListUI.ItemsSource = $script:pendingList
+    })
 }
 
 function Set-RowButtonsVisibility {
