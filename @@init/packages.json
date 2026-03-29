@@ -1,0 +1,82 @@
+[
+  {
+    "Name": "Visual Studio Code",
+    "ID": "Microsoft.VisualStudioCode",
+    "Source": "winget"
+  },
+  {
+    "Name": "Git",
+    "ID": "git",
+    "Source": "scoop"
+  },
+  {
+    "Name": "Node.js (LTS)",
+    "ID": "nodejs-lts",
+    "Source": "scoop"
+  },
+  {
+    "Name": "Python",
+    "ID": "python",
+    "Source": "scoop"
+  },
+  {
+    "Name": "7-Zip",
+    "ID": "7zip",
+    "Source": "scoop"
+  },
+  {
+    "Name": "Google Chrome",
+    "ID": "Google.Chrome",
+    "Source": "winget"
+  },
+  {
+    "Name": "Brave Browser",
+    "ID": "Brave.Brave",
+    "Source": "winget"
+  },
+  {
+    "Name": "Discord",
+    "ID": "Discord.Discord",
+    "Source": "winget"
+  },
+  {
+    "Name": "Spotify",
+    "ID": "Spotify.Spotify",
+    "Source": "winget"
+  },
+  {
+    "Name": "VLC Media Player",
+    "ID": "VideoLAN.VLC",
+    "Source": "winget"
+  },
+  {
+    "Name": "Notepad++",
+    "ID": "Notepad++.Notepad++",
+    "Source": "winget"
+  },
+  {
+    "Name": "Docker Desktop",
+    "ID": "Docker.DockerDesktop",
+    "Source": "winget"
+  },
+  {
+    "Name": "Postman",
+    "ID": "Postman.Postman",
+    "Source": "winget"
+  },
+  {
+    "Name": "PowerToys",
+    "ID": "Microsoft.PowerToys",
+    "Source": "winget"
+  },
+  {
+    "Name": "Go",
+    "ID": "go",
+    "Source": "scoop"
+  },
+  {
+    "Name": "Rust (rustup)",
+    "ID": "rustup",
+    "Source": "scoop"
+  }
+]
