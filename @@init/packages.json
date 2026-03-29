@@ -399,13 +399,13 @@
     "Name": "ffmpeg [S]",
     "ID": "ffmpeg",
     "Source": "scoop",
-    "Category": "Converter"
+    "Category": "Media"
   },
   {
     "Name": "ffmpeg [W]",
     "ID": "Gyan.FFmpeg",
     "Source": "winget",
-    "Category": "Converter"
+    "Category": "Media"
   },
   {
     "Name": "FFmpeg-Batch [S]",
@@ -579,121 +579,121 @@
     "Name": "less [Text-View] [S]",
     "ID": "less",
     "Source": "scoop",
-    "Category": "General"
+    "Category": "Utility"
   },
   {
     "Name": "less [Text-View] [W]",
     "ID": "jftuga.less",
     "Source": "winget",
-    "Category": "General"
+    "Category": "Utility"
   },
   {
     "Name": "LM Studio",
     "ID": "LMStudio.LMStudio",
     "Source": "winget",
-    "Category": "General"
+    "Category": "AI & LLM"
   },
   {
     "Name": "localsend [S]",
     "ID": "localsend",
     "Source": "scoop",
-    "Category": "General"
+    "Category": "Tool"
   },
   {
     "Name": "localsend [W]",
     "ID": "LocalSend.LocalSend",
     "Source": "winget",
-    "Category": "General"
+    "Category": "Tool"
   },
   {
     "Name": "Meld - File Compare [S]",
     "ID": "meld",
     "Source": "scoop",
-    "Category": "General"
+    "Category": "Tool"
   },
   {
     "Name": "Meld - File Compare [W]",
     "ID": "Meld.Meld",
     "Source": "winget",
-    "Category": "General"
+    "Category": "Tool"
   },
   {
     "Name": "MinGW",
     "ID": "mingw-msvcrt",
     "Source": "scoop",
-    "Category": "General"
+    "Category": "Utility"
   },
   {
     "Name": "Msty (CPU only)",
     "ID": "CloudStack.Msty.CPU",
     "Source": "winget",
-    "Category": "General"
+    "Category": "AI & LLM"
   },
   {
     "Name": "msys2",
     "ID": "msys2",
     "Source": "scoop",
-    "Category": "General"
+    "Category": "Utility"
   },
   {
     "Name": "Nilesoft Shell [S]",
     "ID": "nilesoft-shell",
     "Source": "scoop",
-    "Category": "General"
+    "Category": "Customization"
   },
   {
     "Name": "Nilesoft Shell [W]",
     "ID": "nilesoft.shell",
     "Source": "winget",
-    "Category": "General"
+    "Category": "Customization"
   },
   {
     "Name": "node.js / npm [S]",
     "ID": "nodejs",
     "Source": "scoop",
-    "Category": "General"
+    "Category": "Uninstaller"
   },
   {
     "Name": "node.js / npm [W]",
     "ID": "OpenJS.NodeJS",
     "Source": "winget",
-    "Category": "General"
+    "Category": "Utility"
   },
   {
     "Name": "notepad++ [S]",
     "ID": "notepadplusplus",
     "Source": "scoop",
-    "Category": "General"
+    "Category": "Editor"
   },
   {
     "Name": "OBS Studio [S]",
     "ID": "obs-studio",
     "Source": "scoop",
-    "Category": "General"
+    "Category": "Media"
   },
   {
     "Name": "OBS Studio [W]",
     "ID": "OBSProject.OBSStudio",
     "Source": "winget",
-    "Category": "General"
+    "Category": "Media"
   },
   {
     "Name": "oh-my-posh [S]",
     "ID": "oh-my-posh",
     "Source": "scoop",
-    "Category": "General"
+    "Category": "Command Tools"
   },
   {
     "Name": "oh-my-posh [W]",
     "ID": "JanDeDobbeleer.OhMyPosh",
     "Source": "winget",
-    "Category": "General"
+    "Category": "Command Tools"
   },
   {
     "Name": "Ollama",
     "ID": "Ollama.Ollama",
     "Source": "winget",
-    "Category": "General"
+    "Category": "AI & LLM"
   },
   {
     "Name": "pandoc [S]",
@@ -711,37 +711,37 @@
     "Name": "perl [Language] [S]",
     "ID": "perl",
     "Source": "scoop",
-    "Category": "General"
+    "Category": "Scripting"
   },
   {
     "Name": "perl [Language] [W]",
     "ID": "StrawberryPerl.StrawberryPerl",
     "Source": "winget",
-    "Category": "General"
+    "Category": "Scripting"
   },
   {
     "Name": "php [Language]",
     "ID": "php",
     "Source": "scoop",
-    "Category": "General"
+    "Category": "Scripting"
   },
   {
     "Name": "PotPlayer [S]",
     "ID": "potplayer",
     "Source": "scoop",
-    "Category": "General"
+    "Category": "Media"
   },
   {
     "Name": "PotPlayer [W]",
     "ID": "Daum.PotPlayer",
     "Source": "winget",
-    "Category": "General"
+    "Category": "Media"
   },
   {
     "Name": "PowerShell",
     "ID": "Microsoft.PowerShell",
     "Source": "winget",
-    "Category": "General"
+    "Category": "Scripting"
   },
   {
     "Name": "PowerToys [S]",
