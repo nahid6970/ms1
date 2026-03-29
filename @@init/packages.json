@@ -489,37 +489,37 @@
     "Name": "GlazeWM [W]",
     "ID": "GlazeWM",
     "Source": "winget",
-    "Category": "General"
+    "Category": "Window Manager"
   },
   {
     "Name": "grep [Find]",
     "ID": "grep",
     "Source": "scoop",
-    "Category": "General"
+    "Category": "Tool"
   },
   {
     "Name": "handbrake",
     "ID": "handbrake",
     "Source": "scoop",
-    "Category": "General"
+    "Category": "Converter"
   },
   {
     "Name": "highlight [Text-View]",
     "ID": "highlight",
     "Source": "scoop",
-    "Category": "General"
+    "Category": "Utility"
   },
   {
     "Name": "imagemagick [S]",
     "ID": "imagemagick",
     "Source": "scoop",
-    "Category": "General"
+    "Category": "Converter"
   },
   {
     "Name": "imagemagick [W]",
     "ID": "ImageMagick.ImageMagick",
     "Source": "winget",
-    "Category": "General"
+    "Category": "Converter"
   },
   {
     "Name": "Inkscape [S]",
@@ -537,7 +537,7 @@
     "Name": "Jackett",
     "ID": "Jackett.Jackett",
     "Source": "winget",
-    "Category": "General"
+    "Category": "Utility"
   },
   {
     "Name": "Java Runtime Environment",
@@ -1143,6 +1143,6 @@
     "Name": "JackieLiu.NotepadsApp",
     "ID": "JackieLiu.NotepadsApp",
     "Source": "winget",
-    "Category": "General"
+    "Category": "Editor"
   }
 ]
