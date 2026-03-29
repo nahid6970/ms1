@@ -39,7 +39,7 @@
     "Name": "Brave Browser",
     "ID": "Brave.Brave",
     "Source": "winget",
-    "Category": ""
+    "Category": "Browser"
   },
   {
     "Name": "Discord",
@@ -105,31 +105,31 @@
     "Name": "Ack [Find]",
     "ID": "ack",
     "Source": "scoop",
-    "Category": "General"
+    "Category": "Tool"
   },
   {
     "Name": "Adb",
     "ID": "adb",
     "Source": "scoop",
-    "Category": "General"
+    "Category": "Utility"
   },
   {
     "Name": "Alacritty [Terminal] [S]",
     "ID": "alacritty",
     "Source": "scoop",
-    "Category": "General"
+    "Category": "Terminal"
   },
   {
     "Name": "Alacritty [Terminal] [W]",
     "ID": "Alacritty.Alacritty",
     "Source": "winget",
-    "Category": "General"
+    "Category": "Terminal"
   },
   {
     "Name": "Aria2 [S]",
     "ID": "aria2",
     "Source": "scoop",
-    "Category": "General"
+    "Category": "Utility"
   },
   {
     "Name": "Aria2 [W]",
