@@ -269,8 +269,12 @@ class CardLauncher(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Cyberpunk Card Launcher")
-        self.setMinimumSize(900, 600)
         self.data = load_data()
+        
+        # Apply window width from settings
+        saved_width = self.data.get("settings", {}).get("window_width", 900)
+        self.setMinimumSize(800, 600)
+        self.resize(saved_width, 600)
         
         self.init_ui()
         self.apply_theme()
@@ -469,15 +473,53 @@ class CardLauncher(QMainWindow):
             save_data(self.data)
             self.refresh_cards()
 
+    def update_window_width(self, width):
+        self.resize(width, self.height())
+        if "settings" not in self.data:
+            self.data["settings"] = {}
+        self.data["settings"]["window_width"] = width
+        save_data(self.data)
+
     def show_settings(self):
         dialog = QDialog(self)
-        dialog.setWindowTitle("SETTINGS"); dialog.setMinimumSize(400, 300)
+        dialog.setWindowTitle("SETTINGS")
+        dialog.setMinimumSize(400, 300)
         layout = QVBoxLayout(dialog)
-        layout.addWidget(QLabel("--- SETTINGS PANEL ---"))
-        layout.addWidget(QLabel("Configuration options will appear here."))
+        
+        layout.addWidget(QLabel("--- UI CONFIGURATION ---"))
+        
+        # Width Control
+        width_layout = QHBoxLayout()
+        width_layout.addWidget(QLabel("Window Width:"))
+        
+        from PyQt6.QtWidgets import QSlider, QSpinBox
+        
+        width_slider = QSlider(Qt.Orientation.Horizontal)
+        width_slider.setRange(800, 1920)
+        current_width = self.width()
+        width_slider.setValue(current_width)
+        
+        width_spin = QSpinBox()
+        width_spin.setRange(800, 1920)
+        width_spin.setValue(current_width)
+        
+        # Sync Slider and SpinBox
+        width_slider.valueChanged.connect(width_spin.setValue)
+        width_spin.valueChanged.connect(width_slider.setValue)
+        
+        # Apply Change
+        width_slider.valueChanged.connect(self.update_window_width)
+        
+        width_layout.addWidget(width_slider)
+        width_layout.addWidget(width_spin)
+        layout.addLayout(width_layout)
+        
         layout.addStretch()
-        close_btn = QPushButton("CLOSE"); close_btn.clicked.connect(dialog.accept)
+        
+        close_btn = QPushButton("CLOSE")
+        close_btn.clicked.connect(dialog.accept)
         layout.addWidget(close_btn)
+        
         dialog.exec()
 
 if __name__ == "__main__":

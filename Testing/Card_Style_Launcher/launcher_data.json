@@ -36,5 +36,7 @@
             "category": "System"
         }
     ],
-    "settings": {}
+    "settings": {
+        "window_width": 920
+    }
 }
