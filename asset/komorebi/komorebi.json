@@ -283,6 +283,11 @@
             "kind": "Exe",
             "id": "UniGetUI.exe",
             "matching_strategy": "Legacy"
+        },
+        {
+            "kind": "Exe",
+            "id": "pwsh.exe",
+            "matching_strategy": "Legacy"
         }
     ],
     "tray_and_multi_window_applications": [

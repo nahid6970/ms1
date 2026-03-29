@@ -435,37 +435,37 @@
     "Name": "filezilla-server",
     "ID": "filezilla-server",
     "Source": "scoop",
-    "Category": "General"
+    "Category": "Tool"
   },
   {
     "Name": "flaresolverr",
     "ID": "flaresolverr",
     "Source": "scoop",
-    "Category": "General"
+    "Category": "Utility"
   },
   {
     "Name": "FreeDownloadManager",
     "ID": "SoftDeluxe.FreeDownloadManager",
     "Source": "winget",
-    "Category": "General"
+    "Category": "Browser"
   },
   {
     "Name": "FzF [W]",
     "ID": "junegunn.fzf",
     "Source": "winget",
-    "Category": "General"
+    "Category": "Tool"
   },
   {
     "Name": "gdu [ncdu alternative]",
     "ID": "gdu",
     "Source": "scoop",
-    "Category": "General"
+    "Category": "Tool"
   },
   {
     "Name": "git [W]",
     "ID": "Git.Git",
     "Source": "winget",
-    "Category": "General"
+    "Category": "Utility"
   },
   {
     "Name": "Github-Desktop [S]",
@@ -483,7 +483,7 @@
     "Name": "GlazeWM [S]",
     "ID": "glazewm",
     "Source": "scoop",
-    "Category": "General"
+    "Category": "Window Manager"
   },
   {
     "Name": "GlazeWM [W]",
