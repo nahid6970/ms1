@@ -639,7 +639,8 @@
     "Command": "--daemon",
     "ps1_command": "Start-Process -FilePath \"C:\\Users\\nahid\\AppData\\Local\\Programs\\UniGetUI\\UniGetUI.exe\" -ArgumentList \"--daemon\"",
     "ExecutableType": "other",
-    "script_enabled": false
+    "script_enabled": false,
+    "added_at": 1774754711.519753
   },
   {
     "name": "YASB",
