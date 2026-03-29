@@ -243,49 +243,49 @@
     "Name": "Bulk Crap Uninstaller [S]",
     "ID": "bulk-crap-uninstaller",
     "Source": "scoop",
-    "Category": "General"
+    "Category": "Uninstaller"
   },
   {
     "Name": "Bulk Crap Uninstaller [W]",
     "ID": "BCUninstaller",
     "Source": "winget",
-    "Category": "General"
+    "Category": "Uninstaller"
   },
   {
     "Name": "Capture2Text",
     "ID": "Capture2Text",
     "Source": "scoop",
-    "Category": "General"
+    "Category": "Font"
   },
   {
     "Name": "carnac [keypress monitor]",
     "ID": "carnac",
     "Source": "scoop",
-    "Category": "General"
+    "Category": "Monitor"
   },
   {
     "Name": "Cheat Engine [7.4]",
     "ID": "cheat-engine",
     "Source": "scoop",
-    "Category": "General"
+    "Category": "Tool"
   },
   {
     "Name": "clink [Terminal] [S]",
     "ID": "clink",
     "Source": "scoop",
-    "Category": "General"
+    "Category": "Terminal"
   },
   {
     "Name": "clink [Terminal] [W]",
     "ID": "chrisant996.Clink",
     "Source": "winget",
-    "Category": "General"
+    "Category": "Terminal"
   },
   {
     "Name": "Cmder [Terminal]",
     "ID": "Cmder",
     "Source": "scoop",
-    "Category": "General"
+    "Category": "Terminal"
   },
   {
     "Name": "CPU-Z [S]",
