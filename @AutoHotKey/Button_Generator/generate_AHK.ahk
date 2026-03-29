@@ -35,6 +35,32 @@ btn.SetFont("c000000")
 btn.OnEvent("Click", (*) => SendText("নুরুল আমিন"))
 btn.OnEvent("ContextMenu", (*) => (A_Clipboard := "নুরুল আমিন"))
 
+; Mother
+myGui.SetFont("s12 Bold c000000", "Jetbrainsmono nfp")
+myGui.Add("Text", "xm y+5 w150 h25 +Border Center BackgroundFFCC00", "Mother")
+myGui.SetFont("s12 Bold cDefault", "Jetbrainsmono nfp")
+btn := myGui.Add("Text", "x+5 yp w100 h25 +Border Center Background00CCFF", "en")
+btn.SetFont("c000000")
+btn.OnEvent("Click", (*) => SendText("Nazma Begum"))
+btn.OnEvent("ContextMenu", (*) => (A_Clipboard := "Nazma Begum"))
+btn := myGui.Add("Text", "x+5 yp w100 h25 +Border Center Background00CCFF", "bn")
+btn.SetFont("c000000")
+btn.OnEvent("Click", (*) => SendText("নাজমা বেগম"))
+btn.OnEvent("ContextMenu", (*) => (A_Clipboard := "নাজমা বেগম"))
+
+; Address
+myGui.SetFont("s12 Bold c000000", "Jetbrainsmono nfp")
+myGui.Add("Text", "xm y+5 w150 h25 +Border Center BackgroundFFCC00", "Address")
+myGui.SetFont("s12 Bold cDefault", "Jetbrainsmono nfp")
+btn := myGui.Add("Text", "x+5 yp w100 h25 +Border Center Background00CCFF", "Present")
+btn.SetFont("c000000")
+btn.OnEvent("Click", (*) => SendText("Village/Town: AAM Tower, Flat: A-8, Giridhara Residential Area, Saddam Market, Matuail, Dhaka"))
+btn.OnEvent("ContextMenu", (*) => (A_Clipboard := "Village/Town: AAM Tower, Flat: A-8, Giridhara Residential Area, Saddam Market, Matuail, Dhaka"))
+btn := myGui.Add("Text", "x+5 yp w100 h25 +Border Center Background00CCFF", "Permanent")
+btn.SetFont("c000000")
+btn.OnEvent("Click", (*) => SendText("Vill:Munshibari, P.O-Radhapur, 9 No Ward, Dist-Lakshmipur Post Code: 3706"))
+btn.OnEvent("ContextMenu", (*) => (A_Clipboard := "Vill:Munshibari, P.O-Radhapur, 9 No Ward, Dist-Lakshmipur Post Code: 3706"))
+
 myGui.Show()
 myGui.OnEvent("Close", (*) => ExitApp())
 

@@ -54,6 +54,44 @@
                     "text_color": "000000"
                 }
             ]
+        },
+        {
+            "title": "Mother",
+            "title_color": "FFCC00",
+            "title_text_color": "000000",
+            "buttons": [
+                {
+                    "label": "en",
+                    "text": "Nazma Begum",
+                    "color": "00CCFF",
+                    "text_color": "000000"
+                },
+                {
+                    "label": "bn",
+                    "text": "\u09a8\u09be\u099c\u09ae\u09be \u09ac\u09c7\u0997\u09ae",
+                    "color": "00CCFF",
+                    "text_color": "000000"
+                }
+            ]
+        },
+        {
+            "title": "Address",
+            "title_color": "FFCC00",
+            "title_text_color": "000000",
+            "buttons": [
+                {
+                    "label": "Present",
+                    "text": "Village/Town: AAM Tower, Flat: A-8, Giridhara Residential Area, Saddam Market, Matuail, Dhaka",
+                    "color": "00CCFF",
+                    "text_color": "000000"
+                },
+                {
+                    "label": "Permanent",
+                    "text": "Vill:Munshibari, P.O-Radhapur, 9 No Ward, Dist-Lakshmipur Post Code: 3706",
+                    "color": "00CCFF",
+                    "text_color": "000000"
+                }
+            ]
         }
     ]
 }
