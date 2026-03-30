@@ -1,1130 +1,1130 @@
 [
-    {
-        "Name":  "LM Studio",
-        "ID":  "LMStudio.LMStudio",
-        "Source":  "winget",
-        "Category":  "AI"
-    },
-    {
-        "Name":  "Msty (CPU only)",
-        "ID":  "CloudStack.Msty.CPU",
-        "Source":  "winget",
-        "Category":  "AI"
-    },
-    {
-        "Name":  "Ollama",
-        "ID":  "Ollama.Ollama",
-        "Source":  "winget",
-        "Category":  "AI"
-    },
-    {
-        "Name":  "AutoHotkey v1 [S]",
-        "ID":  "autohotkey1.1",
-        "Source":  "scoop",
-        "Category":  "Automation"
-    },
-    {
-        "Name":  "AutoHotkey v1 [W]",
-        "ID":  "9NQ8Q8J78637",
-        "Source":  "winget",
-        "Category":  "Automation"
-    },
-    {
-        "Name":  "AutoHotkey v2 [S]",
-        "ID":  "autohotkey",
-        "Source":  "scoop",
-        "Category":  "Automation"
-    },
-    {
-        "Name":  "AutoHotkey v2 [W]",
-        "ID":  "AutoHotkey.AutoHotkey",
-        "Source":  "winget",
-        "Category":  "Automation"
-    },
-    {
-        "Name":  "Brave Browser",
-        "ID":  "Brave.Brave",
-        "Source":  "winget",
-        "Category":  "Browser"
-    },
-    {
-        "Name":  "Google Chrome",
-        "ID":  "Google.Chrome",
-        "Source":  "winget",
-        "Category":  "Browser"
-    },
-    {
-        "Name":  "Discord",
-        "ID":  "Discord.Discord",
-        "Source":  "winget",
-        "Category":  "Communication"
-    },
-    {
-        "Name":  "Rss Guard [S]",
-        "ID":  "rssguard",
-        "Source":  "scoop",
-        "Category":  "Communication"
-    },
-    {
-        "Name":  "Rss Guard [W]",
-        "ID":  "martinrotter.RSSGuard",
-        "Source":  "winget",
-        "Category":  "Communication"
-    },
-    {
-        "Name":  "WhatsApp [S]",
-        "ID":  "whatsapp",
-        "Source":  "scoop",
-        "Category":  "Communication"
-    },
-    {
-        "Name":  "WhatsApp [W]",
-        "ID":  "9NKSQGP7F2NH",
-        "Source":  "winget",
-        "Category":  "Communication"
-    },
-    {
-        "Name":  "Ack [Find]",
-        "ID":  "ack",
-        "Source":  "scoop",
-        "Category":  "Development"
-    },
-    {
-        "Name":  "Adb",
-        "ID":  "adb",
-        "Source":  "scoop",
-        "Category":  "Development"
-    },
-    {
-        "Name":  "beyond-compare",
-        "ID":  "beyondcompare",
-        "Source":  "scoop",
-        "Category":  "Development"
-    },
-    {
-        "Name":  "Docker Desktop",
-        "ID":  "Docker.DockerDesktop",
-        "Source":  "winget",
-        "Category":  "Development"
-    },
-    {
-        "Name":  "DotNet_6 [S]",
-        "ID":  "ScoopName",
-        "Source":  "scoop",
-        "Category":  "Development"
-    },
-    {
-        "Name":  "DotNet_6 [W]",
-        "ID":  "Microsoft.DotNet.DesktopRuntime.6",
-        "Source":  "winget",
-        "Category":  "Development"
-    },
-    {
-        "Name":  "DotNet_8",
-        "ID":  "Microsoft.DotNet.DesktopRuntime.8",
-        "Source":  "winget",
-        "Category":  "Development"
-    },
-    {
-        "Name":  "Git",
-        "ID":  "git",
-        "Source":  "scoop",
-        "Category":  "Development"
-    },
-    {
-        "Name":  "git [W]",
-        "ID":  "Git.Git",
-        "Source":  "winget",
-        "Category":  "Development"
-    },
-    {
-        "Name":  "Github-Desktop [S]",
-        "ID":  "github",
-        "Source":  "scoop",
-        "Category":  "Development"
-    },
-    {
-        "Name":  "Github-Desktop [W]",
-        "ID":  "GitHub.GitHubDesktop",
-        "Source":  "winget",
-        "Category":  "Development"
-    },
-    {
-        "Name":  "Go",
-        "ID":  "go",
-        "Source":  "scoop",
-        "Category":  "Development"
-    },
-    {
-        "Name":  "Java Runtime Environment",
-        "ID":  "Oracle.JavaRuntimeEnvironment",
-        "Source":  "winget",
-        "Category":  "Development"
-    },
-    {
-        "Name":  "lazygit [S]",
-        "ID":  "lazygit",
-        "Source":  "scoop",
-        "Category":  "Development"
-    },
-    {
-        "Name":  "lazygit [W]",
-        "ID":  "JesseDuffield.lazygit",
-        "Source":  "winget",
-        "Category":  "Development"
-    },
-    {
-        "Name":  "Meld - File Compare [S]",
-        "ID":  "meld",
-        "Source":  "scoop",
-        "Category":  "Development"
-    },
-    {
-        "Name":  "Meld - File Compare [W]",
-        "ID":  "Meld.Meld",
-        "Source":  "winget",
-        "Category":  "Development"
-    },
-    {
-        "Name":  "MinGW",
-        "ID":  "mingw-msvcrt",
-        "Source":  "scoop",
-        "Category":  "Development"
-    },
-    {
-        "Name":  "msys2",
-        "ID":  "msys2",
-        "Source":  "scoop",
-        "Category":  "Development"
-    },
-    {
-        "Name":  "Node.js (LTS)",
-        "ID":  "nodejs-lts",
-        "Source":  "scoop",
-        "Category":  "Development"
-    },
-    {
-        "Name":  "node.js / npm [S]",
-        "ID":  "nodejs",
-        "Source":  "scoop",
-        "Category":  "Development"
-    },
-    {
-        "Name":  "node.js / npm [W]",
-        "ID":  "OpenJS.NodeJS",
-        "Source":  "winget",
-        "Category":  "Development"
-    },
-    {
-        "Name":  "perl [Language] [S]",
-        "ID":  "perl",
-        "Source":  "scoop",
-        "Category":  "Development"
-    },
-    {
-        "Name":  "perl [Language] [W]",
-        "ID":  "StrawberryPerl.StrawberryPerl",
-        "Source":  "winget",
-        "Category":  "Development"
-    },
-    {
-        "Name":  "php [Language]",
-        "ID":  "php",
-        "Source":  "scoop",
-        "Category":  "Development"
-    },
-    {
-        "Name":  "Postman",
-        "ID":  "Postman.Postman",
-        "Source":  "winget",
-        "Category":  "Development"
-    },
-    {
-        "Name":  "Python",
-        "ID":  "python",
-        "Source":  "scoop",
-        "Category":  "Development"
-    },
-    {
-        "Name":  "Rust (rustup)",
-        "ID":  "rustup",
-        "Source":  "scoop",
-        "Category":  "Development"
-    },
-    {
-        "Name":  "VCredist-aio [S]",
-        "ID":  "vcredist-aio",
-        "Source":  "scoop",
-        "Category":  "Development"
-    },
-    {
-        "Name":  "VCredist-aio [W]",
-        "ID":  "abbodi1406.vcredist",
-        "Source":  "winget",
-        "Category":  "Development"
-    },
-    {
-        "Name":  "emacs",
-        "ID":  "emacs",
-        "Source":  "scoop",
-        "Category":  "Editor"
-    },
-    {
-        "Name":  "JackieLiu.NotepadsApp",
-        "ID":  "JackieLiu.NotepadsApp",
-        "Source":  "winget",
-        "Category":  "Editor"
-    },
-    {
-        "Name":  "Notepad++",
-        "ID":  "Notepad++.Notepad++",
-        "Source":  "winget",
-        "Category":  "Editor"
-    },
-    {
-        "Name":  "notepad++ [S]",
-        "ID":  "notepadplusplus",
-        "Source":  "scoop",
-        "Category":  "Editor"
-    },
-    {
-        "Name":  "Visual Studio Code",
-        "ID":  "Microsoft.VisualStudioCode",
-        "Source":  "winget",
-        "Category":  "Editor"
-    },
-    {
-        "Name":  "VSCode [S]",
-        "ID":  "vscode",
-        "Source":  "scoop",
-        "Category":  "Editor"
-    },
-    {
-        "Name":  "VSCodium [S]",
-        "ID":  "vscodium",
-        "Source":  "scoop",
-        "Category":  "Editor"
-    },
-    {
-        "Name":  "VSCodium [W]",
-        "ID":  "VSCodium",
-        "Source":  "winget",
-        "Category":  "Editor"
-    },
-    {
-        "Name":  "Steam [S]",
-        "ID":  "steam",
-        "Source":  "scoop",
-        "Category":  "Gaming"
-    },
-    {
-        "Name":  "Steam [W]",
-        "ID":  "Valve.Steam",
-        "Source":  "winget",
-        "Category":  "Gaming"
-    },
-    {
-        "Name":  "imagemagick [S]",
-        "ID":  "imagemagick",
-        "Source":  "scoop",
-        "Category":  "Graphics"
-    },
-    {
-        "Name":  "imagemagick [W]",
-        "ID":  "ImageMagick.ImageMagick",
-        "Source":  "winget",
-        "Category":  "Graphics"
-    },
-    {
-        "Name":  "Inkscape [S]",
-        "ID":  "inkscape",
-        "Source":  "scoop",
-        "Category":  "Graphics"
-    },
-    {
-        "Name":  "Inkscape [W]",
-        "ID":  "Inkscape.Inkscape",
-        "Source":  "winget",
-        "Category":  "Graphics"
-    },
-    {
-        "Name":  "ThioJoe.SvgThumbnailExtension",
-        "ID":  "ThioJoe.SvgThumbnailExtension",
-        "Source":  "winget",
-        "Category":  "Graphics"
-    },
-    {
-        "Name":  "Bazarr",
-        "ID":  "Morpheus.Bazarr",
-        "Source":  "winget",
-        "Category":  "HomeServer"
-    },
-    {
-        "Name":  "flaresolverr",
-        "ID":  "flaresolverr",
-        "Source":  "scoop",
-        "Category":  "HomeServer"
-    },
-    {
-        "Name":  "Jackett",
-        "ID":  "Jackett.Jackett",
-        "Source":  "winget",
-        "Category":  "HomeServer"
-    },
-    {
-        "Name":  "JellyFin",
-        "ID":  "Jellyfin.Server",
-        "Source":  "winget",
-        "Category":  "HomeServer"
-    },
-    {
-        "Name":  "Prowlarr",
-        "ID":  "TeamProwlarr.Prowlarr",
-        "Source":  "winget",
-        "Category":  "HomeServer"
-    },
-    {
-        "Name":  "Radarr",
-        "ID":  "TeamRadarr.Radarr",
-        "Source":  "winget",
-        "Category":  "HomeServer"
-    },
-    {
-        "Name":  "Sonarr",
-        "ID":  "TeamSonarr.Sonarr",
-        "Source":  "winget",
-        "Category":  "HomeServer"
-    },
-    {
-        "Name":  "Audio Share (cmd)",
-        "ID":  "mkckr0.AudioShare",
-        "Source":  "winget",
-        "Category":  "Media"
-    },
-    {
-        "Name":  "AudioRelay",
-        "ID":  "AsaphaHalifa.AudioRelay",
-        "Source":  "winget",
-        "Category":  "Media"
-    },
-    {
-        "Name":  "ffmpeg [S]",
-        "ID":  "ffmpeg",
-        "Source":  "scoop",
-        "Category":  "Media"
-    },
-    {
-        "Name":  "ffmpeg [W]",
-        "ID":  "Gyan.FFmpeg",
-        "Source":  "winget",
-        "Category":  "Media"
-    },
-    {
-        "Name":  "FFmpeg-Batch [S]",
-        "ID":  "ffmpeg-batch",
-        "Source":  "scoop",
-        "Category":  "Media"
-    },
-    {
-        "Name":  "FFmpeg-Batch [W]",
-        "ID":  "eibol.FFmpegBatchAVConverter",
-        "Source":  "winget",
-        "Category":  "Media"
-    },
-    {
-        "Name":  "FileConverter [S]",
-        "ID":  "file-converter-np",
-        "Source":  "scoop",
-        "Category":  "Media"
-    },
-    {
-        "Name":  "FileConverter [W]",
-        "ID":  "AdrienAllard.FileConverter",
-        "Source":  "winget",
-        "Category":  "Media"
-    },
-    {
-        "Name":  "handbrake",
-        "ID":  "handbrake",
-        "Source":  "scoop",
-        "Category":  "Media"
-    },
-    {
-        "Name":  "OBS Studio [S]",
-        "ID":  "obs-studio",
-        "Source":  "scoop",
-        "Category":  "Media"
-    },
-    {
-        "Name":  "OBS Studio [W]",
-        "ID":  "OBSProject.OBSStudio",
-        "Source":  "winget",
-        "Category":  "Media"
-    },
-    {
-        "Name":  "PotPlayer [S]",
-        "ID":  "potplayer",
-        "Source":  "scoop",
-        "Category":  "Media"
-    },
-    {
-        "Name":  "PotPlayer [W]",
-        "ID":  "Daum.PotPlayer",
-        "Source":  "winget",
-        "Category":  "Media"
-    },
-    {
-        "Name":  "Ruffle",
-        "ID":  "ruffle-nightly",
-        "Source":  "scoop",
-        "Category":  "Media"
-    },
-    {
-        "Name":  "Spotify",
-        "ID":  "Spotify.Spotify",
-        "Source":  "winget",
-        "Category":  "Media"
-    },
-    {
-        "Name":  "VLC Media Player",
-        "ID":  "VideoLAN.VLC",
-        "Source":  "winget",
-        "Category":  "Media"
-    },
-    {
-        "Name":  "yt-dlp [S]",
-        "ID":  "yt-dlp",
-        "Source":  "scoop",
-        "Category":  "Media"
-    },
-    {
-        "Name":  "yt-dlp [W]",
-        "ID":  "yt-dlp.yt-dlp",
-        "Source":  "winget",
-        "Category":  "Media"
-    },
-    {
-        "Name":  "Aria2 [S]",
-        "ID":  "aria2",
-        "Source":  "scoop",
-        "Category":  "Networking"
-    },
-    {
-        "Name":  "Aria2 [W]",
-        "ID":  "aria2.aria2",
-        "Source":  "winget",
-        "Category":  "Networking"
-    },
-    {
-        "Name":  "filezilla-server",
-        "ID":  "filezilla-server",
-        "Source":  "scoop",
-        "Category":  "Networking"
-    },
-    {
-        "Name":  "FreeDownloadManager",
-        "ID":  "SoftDeluxe.FreeDownloadManager",
-        "Source":  "winget",
-        "Category":  "Networking"
-    },
-    {
-        "Name":  "localsend [S]",
-        "ID":  "localsend",
-        "Source":  "scoop",
-        "Category":  "Networking"
-    },
-    {
-        "Name":  "localsend [W]",
-        "ID":  "LocalSend.LocalSend",
-        "Source":  "winget",
-        "Category":  "Networking"
-    },
-    {
-        "Name":  "qBittorrent [S]",
-        "ID":  "qbittorrent",
-        "Source":  "scoop",
-        "Category":  "Networking"
-    },
-    {
-        "Name":  "qBittorrent [W]",
-        "ID":  "qBittorrent.qBittorrent",
-        "Source":  "winget",
-        "Category":  "Networking"
-    },
-    {
-        "Name":  "Rclone [S]",
-        "ID":  "rclone",
-        "Source":  "scoop",
-        "Category":  "Networking"
-    },
-    {
-        "Name":  "Rclone [W]",
-        "ID":  "Rclone.Rclone",
-        "Source":  "winget",
-        "Category":  "Networking"
-    },
-    {
-        "Name":  "RustDesk",
-        "ID":  "rustdesk",
-        "Source":  "scoop",
-        "Category":  "Networking"
-    },
-    {
-        "Name":  "Syncthing [S]",
-        "ID":  "syncthing",
-        "Source":  "scoop",
-        "Category":  "Networking"
-    },
-    {
-        "Name":  "Syncthing [W]",
-        "ID":  "Syncthing.Syncthing",
-        "Source":  "winget",
-        "Category":  "Networking"
-    },
-    {
-        "Name":  "TigerVNC",
-        "ID":  "TigerVNCproject.TigerVNC",
-        "Source":  "winget",
-        "Category":  "Networking"
-    },
-    {
-        "Name":  "DesktopOK",
-        "ID":  "SoftwareOK.DesktopOK",
-        "Source":  "winget",
-        "Category":  "Personalization"
-    },
-    {
-        "Name":  "ExplorerPatcher",
-        "ID":  "ExplorerPatcher",
-        "Source":  "winget",
-        "Category":  "Personalization"
-    },
-    {
-        "Name":  "GlazeWM [S]",
-        "ID":  "glazewm",
-        "Source":  "scoop",
-        "Category":  "Personalization"
-    },
-    {
-        "Name":  "GlazeWM [W]",
-        "ID":  "GlazeWM",
-        "Source":  "winget",
-        "Category":  "Personalization"
-    },
-    {
-        "Name":  "komorebi",
-        "ID":  "komorebi",
-        "Source":  "scoop",
-        "Category":  "Personalization"
-    },
-    {
-        "Name":  "Nilesoft Shell [S]",
-        "ID":  "nilesoft-shell",
-        "Source":  "scoop",
-        "Category":  "Personalization"
-    },
-    {
-        "Name":  "Nilesoft Shell [W]",
-        "ID":  "nilesoft.shell",
-        "Source":  "winget",
-        "Category":  "Personalization"
-    },
-    {
-        "Name":  "PowerToys",
-        "ID":  "Microsoft.PowerToys",
-        "Source":  "winget",
-        "Category":  "Personalization"
-    },
-    {
-        "Name":  "PowerToys [S]",
-        "ID":  "powertoys",
-        "Source":  "scoop",
-        "Category":  "Personalization"
-    },
-    {
-        "Name":  "ReIcon",
-        "ID":  "ReIcon",
-        "Source":  "scoop",
-        "Category":  "Personalization"
-    },
-    {
-        "Name":  "Twinkle Tray",
-        "ID":  "xanderfrangos.twinkletray",
-        "Source":  "winget",
-        "Category":  "Personalization"
-    },
-    {
-        "Name":  "whkd",
-        "ID":  "whkd",
-        "Source":  "scoop",
-        "Category":  "Personalization"
-    },
-    {
-        "Name":  "WinaeroTweaker",
-        "ID":  "winaero-tweaker",
-        "Source":  "scoop",
-        "Category":  "Personalization"
-    },
-    {
-        "Name":  "WinToy",
-        "ID":  "wintoy",
-        "Source":  "winget",
-        "Category":  "Personalization"
-    },
-    {
-        "Name":  "Bitwarden [S]",
-        "ID":  "bitwarden",
-        "Source":  "scoop",
-        "Category":  "Security"
-    },
-    {
-        "Name":  "Bitwarden [W]",
-        "ID":  "Bitwarden.Bitwarden",
-        "Source":  "winget",
-        "Category":  "Security"
-    },
-    {
-        "Name":  "Autoruns",
-        "ID":  "Microsoft.Sysinternals.Autoruns",
-        "Source":  "winget",
-        "Category":  "System"
-    },
-    {
-        "Name":  "btop [Sys-Monitor] [S]",
-        "ID":  "btop",
-        "Source":  "scoop",
-        "Category":  "System"
-    },
-    {
-        "Name":  "btop [Sys-Monitor] [W]",
-        "ID":  "aristocratos.btop4win",
-        "Source":  "winget",
-        "Category":  "System"
-    },
-    {
-        "Name":  "CPU-Z [S]",
-        "ID":  "cpu-z",
-        "Source":  "scoop",
-        "Category":  "System"
-    },
-    {
-        "Name":  "CPU-Z [W]",
-        "ID":  "CPUID.CPU-Z",
-        "Source":  "winget",
-        "Category":  "System"
-    },
-    {
-        "Name":  "Crystal DiskInfo [S]",
-        "ID":  "crystaldiskinfo",
-        "Source":  "scoop",
-        "Category":  "System"
-    },
-    {
-        "Name":  "Crystal DiskInfo [W]",
-        "ID":  "CrystalDewWorld.CrystalDiskInfo",
-        "Source":  "winget",
-        "Category":  "System"
-    },
-    {
-        "Name":  "FastFetch",
-        "ID":  "fastfetch",
-        "Source":  "scoop",
-        "Category":  "System"
-    },
-    {
-        "Name":  "gdu [ncdu alternative]",
-        "ID":  "gdu",
-        "Source":  "scoop",
-        "Category":  "System"
-    },
-    {
-        "Name":  "ProcessExplorer",
-        "ID":  "Microsoft.Sysinternals.ProcessExplorer",
-        "Source":  "winget",
-        "Category":  "System"
-    },
-    {
-        "Name":  "windirstat [S]",
-        "ID":  "windirstat",
-        "Source":  "scoop",
-        "Category":  "System"
-    },
-    {
-        "Name":  "windirstat [W]",
-        "ID":  "WinDirStat.WinDirStat",
-        "Source":  "winget",
-        "Category":  "System"
-    },
-    {
-        "Name":  "WizTree [S]",
-        "ID":  "WizTree",
-        "Source":  "scoop",
-        "Category":  "System"
-    },
-    {
-        "Name":  "WizTree [W]",
-        "ID":  "AntibodySoftware.WizTree",
-        "Source":  "winget",
-        "Category":  "System"
-    },
-    {
-        "Name":  "Alacritty",
-        "ID":  "Alacritty.Alacritty",
-        "Source":  "winget",
-        "Category":  "Terminal"
-    },
-    {
-        "Name":  "Bat [Text-View]",
-        "ID":  "bat",
-        "Source":  "scoop",
-        "Category":  "Terminal"
-    },
-    {
-        "Name":  "clink [Terminal] [S]",
-        "ID":  "clink",
-        "Source":  "scoop",
-        "Category":  "Terminal"
-    },
-    {
-        "Name":  "clink [Terminal] [W]",
-        "ID":  "chrisant996.Clink",
-        "Source":  "winget",
-        "Category":  "Terminal"
-    },
-    {
-        "Name":  "Cmder [Terminal]",
-        "ID":  "Cmder",
-        "Source":  "scoop",
-        "Category":  "Terminal"
-    },
-    {
-        "Name":  "eza [ls] [S]",
-        "ID":  "eza",
-        "Source":  "scoop",
-        "Category":  "Terminal"
-    },
-    {
-        "Name":  "eza [ls] [W]",
-        "ID":  "eza-community.eza",
-        "Source":  "winget",
-        "Category":  "Terminal"
-    },
-    {
-        "Name":  "fd [find alternative]",
-        "ID":  "fd",
-        "Source":  "scoop",
-        "Category":  "Terminal"
-    },
-    {
-        "Name":  "FZF",
-        "ID":  "fzf",
-        "Source":  "scoop",
-        "Category":  "Terminal"
-    },
-    {
-        "Name":  "grep [Find]",
-        "ID":  "grep",
-        "Source":  "scoop",
-        "Category":  "Terminal"
-    },
-    {
-        "Name":  "highlight [Text-View]",
-        "ID":  "highlight",
-        "Source":  "scoop",
-        "Category":  "Terminal"
-    },
-    {
-        "Name":  "less [Text-View] [S]",
-        "ID":  "less",
-        "Source":  "scoop",
-        "Category":  "Terminal"
-    },
-    {
-        "Name":  "less [Text-View] [W]",
-        "ID":  "jftuga.less",
-        "Source":  "winget",
-        "Category":  "Terminal"
-    },
-    {
-        "Name":  "oh-my-posh [S]",
-        "ID":  "oh-my-posh",
-        "Source":  "scoop",
-        "Category":  "Terminal"
-    },
-    {
-        "Name":  "oh-my-posh [W]",
-        "ID":  "JanDeDobbeleer.OhMyPosh",
-        "Source":  "winget",
-        "Category":  "Terminal"
-    },
-    {
-        "Name":  "PowerShell",
-        "ID":  "Microsoft.PowerShell",
-        "Source":  "winget",
-        "Category":  "Terminal"
-    },
-    {
-        "Name":  "ripgrep [rg] [S]",
-        "ID":  "ripgrep",
-        "Source":  "scoop",
-        "Category":  "Terminal"
-    },
-    {
-        "Name":  "ripgrep [rg] [W]",
-        "ID":  "BurntSushi.ripgrep.MSVC",
-        "Source":  "winget",
-        "Category":  "Terminal"
-    },
-    {
-        "Name":  "scoop-completion",
-        "ID":  "scoop-completion",
-        "Source":  "scoop",
-        "Category":  "Terminal"
-    },
-    {
-        "Name":  "scoop-search",
-        "ID":  "scoop-search",
-        "Source":  "scoop",
-        "Category":  "Terminal"
-    },
-    {
-        "Name":  "Sudo",
-        "ID":  "sudo",
-        "Source":  "scoop",
-        "Category":  "Terminal"
-    },
-    {
-        "Name":  "tldr [S]",
-        "ID":  "tldr",
-        "Source":  "scoop",
-        "Category":  "Terminal"
-    },
-    {
-        "Name":  "tldr [W]",
-        "ID":  "tldr-pages.tlrc",
-        "Source":  "winget",
-        "Category":  "Terminal"
-    },
-    {
-        "Name":  "WezTerm",
-        "ID":  "wezterm",
-        "Source":  "scoop",
-        "Category":  "Terminal"
-    },
-    {
-        "Name":  "Zoxide",
-        "ID":  "zoxide",
-        "Source":  "scoop",
-        "Category":  "Terminal"
-    },
-    {
-        "Name":  "7-Zip",
-        "ID":  "7zip",
-        "Source":  "scoop",
-        "Category":  "Utility"
-    },
-    {
-        "Name":  "BareGrep [Find]",
-        "ID":  "baregrep",
-        "Source":  "scoop",
-        "Category":  "Utility"
-    },
-    {
-        "Name":  "BleachBit [S]",
-        "ID":  "bleachbit",
-        "Source":  "scoop",
-        "Category":  "Utility"
-    },
-    {
-        "Name":  "BleachBit [W]",
-        "ID":  "BleachBit.BleachBit",
-        "Source":  "winget",
-        "Category":  "Utility"
-    },
-    {
-        "Name":  "Bulk Crap Uninstaller [S]",
-        "ID":  "bulk-crap-uninstaller",
-        "Source":  "scoop",
-        "Category":  "Utility"
-    },
-    {
-        "Name":  "Bulk Crap Uninstaller [W]",
-        "ID":  "BCUninstaller",
-        "Source":  "winget",
-        "Category":  "Utility"
-    },
-    {
-        "Name":  "Capture2Text",
-        "ID":  "Capture2Text",
-        "Source":  "scoop",
-        "Category":  "Utility"
-    },
-    {
-        "Name":  "carnac [keypress monitor]",
-        "ID":  "carnac",
-        "Source":  "scoop",
-        "Category":  "Utility"
-    },
-    {
-        "Name":  "Cheat Engine [7.4]",
-        "ID":  "cheat-engine",
-        "Source":  "scoop",
-        "Category":  "Utility"
-    },
-    {
-        "Name":  "Ditto [S]",
-        "ID":  "ditto",
-        "Source":  "scoop",
-        "Category":  "Utility"
-    },
-    {
-        "Name":  "Ditto [W]",
-        "ID":  "Ditto.Ditto",
-        "Source":  "winget",
-        "Category":  "Utility"
-    },
-    {
-        "Name":  "Everything [S]",
-        "ID":  "everything",
-        "Source":  "scoop",
-        "Category":  "Utility"
-    },
-    {
-        "Name":  "Everything [W]",
-        "ID":  "voidtools.Everything",
-        "Source":  "winget",
-        "Category":  "Utility"
-    },
-    {
-        "Name":  "keyviz [keypress monitor]",
-        "ID":  "keyviz",
-        "Source":  "scoop",
-        "Category":  "Utility"
-    },
-    {
-        "Name":  "pandoc [S]",
-        "ID":  "pandoc",
-        "Source":  "scoop",
-        "Category":  "Utility"
-    },
-    {
-        "Name":  "pandoc [W]",
-        "ID":  "JohnMacFarlane.Pandoc",
-        "Source":  "winget",
-        "Category":  "Utility"
-    },
-    {
-        "Name":  "QuickLook",
-        "ID":  "QL-Win.QuickLook",
-        "Source":  "winget",
-        "Category":  "Utility"
-    },
-    {
-        "Name":  "Rufus [S]",
-        "ID":  "rufus",
-        "Source":  "scoop",
-        "Category":  "Utility"
-    },
-    {
-        "Name":  "Rufus [W]",
-        "ID":  "Rufus.Rufus",
-        "Source":  "winget",
-        "Category":  "Utility"
-    },
-    {
-        "Name":  "scrcpy [S]",
-        "ID":  "scrcpy",
-        "Source":  "scoop",
-        "Category":  "Utility"
-    },
-    {
-        "Name":  "scrcpy [W]",
-        "ID":  "Genymobile.scrcpy",
-        "Source":  "winget",
-        "Category":  "Utility"
-    },
-    {
-        "Name":  "scrcpy+",
-        "ID":  "Frontesque.scrcpy+",
-        "Source":  "winget",
-        "Category":  "Utility"
-    },
-    {
-        "Name":  "UniGetUI  [W]",
-        "ID":  "Devolutions.UniGetUI",
-        "Source":  "winget",
-        "Category":  "Utility"
-    },
-    {
-        "Name":  "Ventoy",
-        "ID":  "ventoy",
-        "Source":  "scoop",
-        "Category":  "Utility"
-    },
-    {
-        "Name":  "winfsp",
-        "ID":  "winfsp-np",
-        "Source":  "scoop",
-        "Category":  "Utility"
-    },
-    {
-        "Name":  "winget",
-        "ID":  "winget",
-        "Source":  "scoop",
-        "Category":  "Utility"
-    },
-    {
-        "Name":  "Wise Program Uninstaller",
-        "ID":  "WiseCleaner.WiseProgramUninstaller",
-        "Source":  "winget",
-        "Category":  "Utility"
-    },
-    {
-        "Name":  "Workspace Utilities",
-        "ID":  "workspaceutilities",
-        "Source":  "scoop",
-        "Category":  "Utility"
-    },
-    {
-        "Name":  "X-Mouse Button Control [S]",
-        "ID":  "xmousebuttoncontrol",
-        "Source":  "scoop",
-        "Category":  "Utility"
-    },
-    {
-        "Name":  "X-Mouse Button Control [W]",
-        "ID":  "Highresolution.X-MouseButtonControl",
-        "Source":  "winget",
-        "Category":  "Utility"
-    },
-    {
-        "Name":  "xodo pdf reader",
-        "ID":  "Apryse.XodoPDFReader",
-        "Source":  "winget",
-        "Category":  "Utility"
-    },
-    {
-        "Name":  "VirtualBox [S]",
-        "ID":  "virtualbox-with-extension-pack-np",
-        "Source":  "scoop",
-        "Category":  "Virtualization"
-    },
-    {
-        "Name":  "VirtualBox [W]",
-        "ID":  "Oracle.VirtualBox",
-        "Source":  "winget",
-        "Category":  "Virtualization"
-    },
-    {
-        "Name":  "WSA-pacman [S]",
-        "ID":  "wsa-pacman",
-        "Source":  "scoop",
-        "Category":  "Virtualization"
-    },
-    {
-        "Name":  "WSA-pacman [W]",
-        "ID":  "alesimula.wsa_pacman",
-        "Source":  "winget",
-        "Category":  "Virtualization"
-    }
+  {
+    "Name": "LM Studio",
+    "ID": "LMStudio.LMStudio",
+    "Source": "winget",
+    "Category": "AI"
+  },
+  {
+    "Name": "Msty (CPU only)",
+    "ID": "CloudStack.Msty.CPU",
+    "Source": "winget",
+    "Category": "AI"
+  },
+  {
+    "Name": "Ollama",
+    "ID": "Ollama.Ollama",
+    "Source": "winget",
+    "Category": "AI"
+  },
+  {
+    "Name": "AutoHotkey v1 [S]",
+    "ID": "autohotkey1.1",
+    "Source": "scoop",
+    "Category": "Automation"
+  },
+  {
+    "Name": "AutoHotkey v1 [W]",
+    "ID": "9NQ8Q8J78637",
+    "Source": "winget",
+    "Category": "Automation"
+  },
+  {
+    "Name": "AutoHotkey v2 [S]",
+    "ID": "autohotkey",
+    "Source": "scoop",
+    "Category": "Automation"
+  },
+  {
+    "Name": "AutoHotkey v2 [W]",
+    "ID": "AutoHotkey.AutoHotkey",
+    "Source": "winget",
+    "Category": "Automation"
+  },
+  {
+    "Name": "Brave Browser",
+    "ID": "Brave.Brave",
+    "Source": "winget",
+    "Category": "Browser"
+  },
+  {
+    "Name": "Google Chrome",
+    "ID": "Google.Chrome",
+    "Source": "winget",
+    "Category": "Browser"
+  },
+  {
+    "Name": "Discord",
+    "ID": "Discord.Discord",
+    "Source": "winget",
+    "Category": "Communication"
+  },
+  {
+    "Name": "Rss Guard [S]",
+    "ID": "rssguard",
+    "Source": "scoop",
+    "Category": "Communication"
+  },
+  {
+    "Name": "Rss Guard [W]",
+    "ID": "martinrotter.RSSGuard",
+    "Source": "winget",
+    "Category": "Communication"
+  },
+  {
+    "Name": "WhatsApp [S]",
+    "ID": "whatsapp",
+    "Source": "scoop",
+    "Category": "Communication"
+  },
+  {
+    "Name": "WhatsApp [W]",
+    "ID": "9NKSQGP7F2NH",
+    "Source": "winget",
+    "Category": "Communication"
+  },
+  {
+    "Name": "Ack [Find]",
+    "ID": "ack",
+    "Source": "scoop",
+    "Category": "Development"
+  },
+  {
+    "Name": "Adb",
+    "ID": "adb",
+    "Source": "scoop",
+    "Category": "Development"
+  },
+  {
+    "Name": "beyond-compare",
+    "ID": "beyondcompare",
+    "Source": "scoop",
+    "Category": "Development"
+  },
+  {
+    "Name": "Docker Desktop",
+    "ID": "Docker.DockerDesktop",
+    "Source": "winget",
+    "Category": "Development"
+  },
+  {
+    "Name": "DotNet_6 [S]",
+    "ID": "ScoopName",
+    "Source": "scoop",
+    "Category": "Development"
+  },
+  {
+    "Name": "DotNet_6 [W]",
+    "ID": "Microsoft.DotNet.DesktopRuntime.6",
+    "Source": "winget",
+    "Category": "Development"
+  },
+  {
+    "Name": "DotNet_8",
+    "ID": "Microsoft.DotNet.DesktopRuntime.8",
+    "Source": "winget",
+    "Category": "Development"
+  },
+  {
+    "Name": "Git",
+    "ID": "git",
+    "Source": "scoop",
+    "Category": "Development"
+  },
+  {
+    "Name": "git [W]",
+    "ID": "Git.Git",
+    "Source": "winget",
+    "Category": "Development"
+  },
+  {
+    "Name": "Github-Desktop [S]",
+    "ID": "github",
+    "Source": "scoop",
+    "Category": "Development"
+  },
+  {
+    "Name": "Github-Desktop [W]",
+    "ID": "GitHub.GitHubDesktop",
+    "Source": "winget",
+    "Category": "Development"
+  },
+  {
+    "Name": "Go",
+    "ID": "go",
+    "Source": "scoop",
+    "Category": "Development"
+  },
+  {
+    "Name": "Java Runtime Environment",
+    "ID": "Oracle.JavaRuntimeEnvironment",
+    "Source": "winget",
+    "Category": "Development"
+  },
+  {
+    "Name": "lazygit [S]",
+    "ID": "lazygit",
+    "Source": "scoop",
+    "Category": "Development"
+  },
+  {
+    "Name": "lazygit [W]",
+    "ID": "JesseDuffield.lazygit",
+    "Source": "winget",
+    "Category": "Development"
+  },
+  {
+    "Name": "Meld - File Compare [S]",
+    "ID": "meld",
+    "Source": "scoop",
+    "Category": "Development"
+  },
+  {
+    "Name": "Meld - File Compare [W]",
+    "ID": "Meld.Meld",
+    "Source": "winget",
+    "Category": "Development"
+  },
+  {
+    "Name": "MinGW",
+    "ID": "mingw-msvcrt",
+    "Source": "scoop",
+    "Category": "Development"
+  },
+  {
+    "Name": "msys2",
+    "ID": "msys2",
+    "Source": "scoop",
+    "Category": "Development"
+  },
+  {
+    "Name": "Node.js (LTS)",
+    "ID": "nodejs-lts",
+    "Source": "scoop",
+    "Category": "Development"
+  },
+  {
+    "Name": "node.js / npm [S]",
+    "ID": "nodejs",
+    "Source": "scoop",
+    "Category": "Development"
+  },
+  {
+    "Name": "node.js / npm [W]",
+    "ID": "OpenJS.NodeJS",
+    "Source": "winget",
+    "Category": "Development"
+  },
+  {
+    "Name": "perl [Language] [S]",
+    "ID": "perl",
+    "Source": "scoop",
+    "Category": "Development"
+  },
+  {
+    "Name": "perl [Language] [W]",
+    "ID": "StrawberryPerl.StrawberryPerl",
+    "Source": "winget",
+    "Category": "Development"
+  },
+  {
+    "Name": "php [Language]",
+    "ID": "php",
+    "Source": "scoop",
+    "Category": "Development"
+  },
+  {
+    "Name": "Postman",
+    "ID": "Postman.Postman",
+    "Source": "winget",
+    "Category": "Development"
+  },
+  {
+    "Name": "Python",
+    "ID": "python",
+    "Source": "scoop",
+    "Category": "Development"
+  },
+  {
+    "Name": "Rust (rustup)",
+    "ID": "rustup",
+    "Source": "scoop",
+    "Category": "Development"
+  },
+  {
+    "Name": "VCredist-aio [S]",
+    "ID": "vcredist-aio",
+    "Source": "scoop",
+    "Category": "Development"
+  },
+  {
+    "Name": "VCredist-aio [W]",
+    "ID": "abbodi1406.vcredist",
+    "Source": "winget",
+    "Category": "Development"
+  },
+  {
+    "Name": "emacs",
+    "ID": "emacs",
+    "Source": "scoop",
+    "Category": "Editor"
+  },
+  {
+    "Name": "JackieLiu.NotepadsApp",
+    "ID": "JackieLiu.NotepadsApp",
+    "Source": "winget",
+    "Category": "Editor"
+  },
+  {
+    "Name": "Notepad++",
+    "ID": "Notepad++.Notepad++",
+    "Source": "winget",
+    "Category": "Editor"
+  },
+  {
+    "Name": "notepad++ [S]",
+    "ID": "notepadplusplus",
+    "Source": "scoop",
+    "Category": "Editor"
+  },
+  {
+    "Name": "Visual Studio Code",
+    "ID": "Microsoft.VisualStudioCode",
+    "Source": "winget",
+    "Category": "Editor"
+  },
+  {
+    "Name": "VSCode [S]",
+    "ID": "vscode",
+    "Source": "scoop",
+    "Category": "Editor"
+  },
+  {
+    "Name": "VSCodium [S]",
+    "ID": "vscodium",
+    "Source": "scoop",
+    "Category": "Editor"
+  },
+  {
+    "Name": "VSCodium [W]",
+    "ID": "VSCodium",
+    "Source": "winget",
+    "Category": "Editor"
+  },
+  {
+    "Name": "Steam [S]",
+    "ID": "steam",
+    "Source": "scoop",
+    "Category": "Gaming"
+  },
+  {
+    "Name": "Steam [W]",
+    "ID": "Valve.Steam",
+    "Source": "winget",
+    "Category": "Gaming"
+  },
+  {
+    "Name": "imagemagick [S]",
+    "ID": "imagemagick",
+    "Source": "scoop",
+    "Category": "Graphics"
+  },
+  {
+    "Name": "imagemagick [W]",
+    "ID": "ImageMagick.ImageMagick",
+    "Source": "winget",
+    "Category": "Graphics"
+  },
+  {
+    "Name": "Inkscape [S]",
+    "ID": "inkscape",
+    "Source": "scoop",
+    "Category": "Graphics"
+  },
+  {
+    "Name": "Inkscape [W]",
+    "ID": "Inkscape.Inkscape",
+    "Source": "winget",
+    "Category": "Graphics"
+  },
+  {
+    "Name": "ThioJoe.SvgThumbnailExtension",
+    "ID": "ThioJoe.SvgThumbnailExtension",
+    "Source": "winget",
+    "Category": "Graphics"
+  },
+  {
+    "Name": "Bazarr",
+    "ID": "Morpheus.Bazarr",
+    "Source": "winget",
+    "Category": "HomeServer"
+  },
+  {
+    "Name": "flaresolverr",
+    "ID": "flaresolverr",
+    "Source": "scoop",
+    "Category": "HomeServer"
+  },
+  {
+    "Name": "Jackett",
+    "ID": "Jackett.Jackett",
+    "Source": "winget",
+    "Category": "HomeServer"
+  },
+  {
+    "Name": "JellyFin",
+    "ID": "Jellyfin.Server",
+    "Source": "winget",
+    "Category": "HomeServer"
+  },
+  {
+    "Name": "Prowlarr",
+    "ID": "TeamProwlarr.Prowlarr",
+    "Source": "winget",
+    "Category": "HomeServer"
+  },
+  {
+    "Name": "Radarr",
+    "ID": "TeamRadarr.Radarr",
+    "Source": "winget",
+    "Category": "HomeServer"
+  },
+  {
+    "Name": "Sonarr",
+    "ID": "TeamSonarr.Sonarr",
+    "Source": "winget",
+    "Category": "HomeServer"
+  },
+  {
+    "Name": "Audio Share (cmd)",
+    "ID": "mkckr0.AudioShare",
+    "Source": "winget",
+    "Category": "Media"
+  },
+  {
+    "Name": "AudioRelay",
+    "ID": "AsaphaHalifa.AudioRelay",
+    "Source": "winget",
+    "Category": "Media"
+  },
+  {
+    "Name": "ffmpeg [S]",
+    "ID": "ffmpeg",
+    "Source": "scoop",
+    "Category": "Media"
+  },
+  {
+    "Name": "ffmpeg [W]",
+    "ID": "Gyan.FFmpeg",
+    "Source": "winget",
+    "Category": "Media"
+  },
+  {
+    "Name": "FFmpeg-Batch [S]",
+    "ID": "ffmpeg-batch",
+    "Source": "scoop",
+    "Category": "Media"
+  },
+  {
+    "Name": "FFmpeg-Batch [W]",
+    "ID": "eibol.FFmpegBatchAVConverter",
+    "Source": "winget",
+    "Category": "Media"
+  },
+  {
+    "Name": "FileConverter [S]",
+    "ID": "file-converter-np",
+    "Source": "scoop",
+    "Category": "Media"
+  },
+  {
+    "Name": "FileConverter [W]",
+    "ID": "AdrienAllard.FileConverter",
+    "Source": "winget",
+    "Category": "Media"
+  },
+  {
+    "Name": "handbrake",
+    "ID": "handbrake",
+    "Source": "scoop",
+    "Category": "Media"
+  },
+  {
+    "Name": "OBS Studio [S]",
+    "ID": "obs-studio",
+    "Source": "scoop",
+    "Category": "Media"
+  },
+  {
+    "Name": "OBS Studio [W]",
+    "ID": "OBSProject.OBSStudio",
+    "Source": "winget",
+    "Category": "Media"
+  },
+  {
+    "Name": "PotPlayer [S]",
+    "ID": "potplayer",
+    "Source": "scoop",
+    "Category": "Media"
+  },
+  {
+    "Name": "PotPlayer [W]",
+    "ID": "Daum.PotPlayer",
+    "Source": "winget",
+    "Category": "Media"
+  },
+  {
+    "Name": "Ruffle",
+    "ID": "ruffle-nightly",
+    "Source": "scoop",
+    "Category": "Media"
+  },
+  {
+    "Name": "Spotify",
+    "ID": "Spotify.Spotify",
+    "Source": "winget",
+    "Category": "Media"
+  },
+  {
+    "Name": "VLC Media Player",
+    "ID": "VideoLAN.VLC",
+    "Source": "winget",
+    "Category": "Media"
+  },
+  {
+    "Name": "yt-dlp [S]",
+    "ID": "yt-dlp",
+    "Source": "scoop",
+    "Category": "Media"
+  },
+  {
+    "Name": "yt-dlp [W]",
+    "ID": "yt-dlp.yt-dlp",
+    "Source": "winget",
+    "Category": "Media"
+  },
+  {
+    "Name": "Aria2 [S]",
+    "ID": "aria2",
+    "Source": "scoop",
+    "Category": "Networking"
+  },
+  {
+    "Name": "Aria2 [W]",
+    "ID": "aria2.aria2",
+    "Source": "winget",
+    "Category": "Networking"
+  },
+  {
+    "Name": "filezilla-server",
+    "ID": "filezilla-server",
+    "Source": "scoop",
+    "Category": "Networking"
+  },
+  {
+    "Name": "FreeDownloadManager",
+    "ID": "SoftDeluxe.FreeDownloadManager",
+    "Source": "winget",
+    "Category": "Networking"
+  },
+  {
+    "Name": "localsend [S]",
+    "ID": "localsend",
+    "Source": "scoop",
+    "Category": "Networking"
+  },
+  {
+    "Name": "localsend [W]",
+    "ID": "LocalSend.LocalSend",
+    "Source": "winget",
+    "Category": "Networking"
+  },
+  {
+    "Name": "qBittorrent [S]",
+    "ID": "qbittorrent",
+    "Source": "scoop",
+    "Category": "Networking"
+  },
+  {
+    "Name": "qBittorrent [W]",
+    "ID": "qBittorrent.qBittorrent",
+    "Source": "winget",
+    "Category": "Networking"
+  },
+  {
+    "Name": "Rclone [S]",
+    "ID": "rclone",
+    "Source": "scoop",
+    "Category": "Networking"
+  },
+  {
+    "Name": "Rclone [W]",
+    "ID": "Rclone.Rclone",
+    "Source": "winget",
+    "Category": "Networking"
+  },
+  {
+    "Name": "RustDesk",
+    "ID": "rustdesk",
+    "Source": "scoop",
+    "Category": "Networking"
+  },
+  {
+    "Name": "Syncthing [S]",
+    "ID": "syncthing",
+    "Source": "scoop",
+    "Category": "Networking"
+  },
+  {
+    "Name": "Syncthing [W]",
+    "ID": "Syncthing.Syncthing",
+    "Source": "winget",
+    "Category": "Networking"
+  },
+  {
+    "Name": "TigerVNC",
+    "ID": "TigerVNCproject.TigerVNC",
+    "Source": "winget",
+    "Category": "Networking"
+  },
+  {
+    "Name": "DesktopOK",
+    "ID": "SoftwareOK.DesktopOK",
+    "Source": "winget",
+    "Category": "Personalization"
+  },
+  {
+    "Name": "ExplorerPatcher",
+    "ID": "ExplorerPatcher",
+    "Source": "winget",
+    "Category": "Personalization"
+  },
+  {
+    "Name": "GlazeWM [S]",
+    "ID": "glazewm",
+    "Source": "scoop",
+    "Category": "Personalization"
+  },
+  {
+    "Name": "GlazeWM [W]",
+    "ID": "GlazeWM",
+    "Source": "winget",
+    "Category": "Personalization"
+  },
+  {
+    "Name": "komorebi",
+    "ID": "komorebi",
+    "Source": "scoop",
+    "Category": "Personalization"
+  },
+  {
+    "Name": "Nilesoft Shell [S]",
+    "ID": "nilesoft-shell",
+    "Source": "scoop",
+    "Category": "Personalization"
+  },
+  {
+    "Name": "Nilesoft Shell [W]",
+    "ID": "nilesoft.shell",
+    "Source": "winget",
+    "Category": "Personalization"
+  },
+  {
+    "Name": "PowerToys",
+    "ID": "Microsoft.PowerToys",
+    "Source": "winget",
+    "Category": "Personalization"
+  },
+  {
+    "Name": "PowerToys [S]",
+    "ID": "powertoys",
+    "Source": "scoop",
+    "Category": "Personalization"
+  },
+  {
+    "Name": "ReIcon",
+    "ID": "ReIcon",
+    "Source": "scoop",
+    "Category": "Personalization"
+  },
+  {
+    "Name": "Twinkle Tray",
+    "ID": "xanderfrangos.twinkletray",
+    "Source": "winget",
+    "Category": "Personalization"
+  },
+  {
+    "Name": "whkd",
+    "ID": "whkd",
+    "Source": "scoop",
+    "Category": "Personalization"
+  },
+  {
+    "Name": "WinaeroTweaker",
+    "ID": "winaero-tweaker",
+    "Source": "scoop",
+    "Category": "Personalization"
+  },
+  {
+    "Name": "WinToy",
+    "ID": "wintoy",
+    "Source": "winget",
+    "Category": "Personalization"
+  },
+  {
+    "Name": "Bitwarden [S]",
+    "ID": "bitwarden",
+    "Source": "scoop",
+    "Category": "Security"
+  },
+  {
+    "Name": "Bitwarden [W]",
+    "ID": "Bitwarden.Bitwarden",
+    "Source": "winget",
+    "Category": "Security"
+  },
+  {
+    "Name": "Autoruns",
+    "ID": "Microsoft.Sysinternals.Autoruns",
+    "Source": "winget",
+    "Category": "System"
+  },
+  {
+    "Name": "btop [Sys-Monitor] [S]",
+    "ID": "btop",
+    "Source": "scoop",
+    "Category": "System"
+  },
+  {
+    "Name": "btop [Sys-Monitor] [W]",
+    "ID": "aristocratos.btop4win",
+    "Source": "winget",
+    "Category": "System"
+  },
+  {
+    "Name": "CPU-Z [S]",
+    "ID": "cpu-z",
+    "Source": "scoop",
+    "Category": "System"
+  },
+  {
+    "Name": "CPU-Z [W]",
+    "ID": "CPUID.CPU-Z",
+    "Source": "winget",
+    "Category": "System"
+  },
+  {
+    "Name": "Crystal DiskInfo [S]",
+    "ID": "crystaldiskinfo",
+    "Source": "scoop",
+    "Category": "System"
+  },
+  {
+    "Name": "Crystal DiskInfo [W]",
+    "ID": "CrystalDewWorld.CrystalDiskInfo",
+    "Source": "winget",
+    "Category": "System"
+  },
+  {
+    "Name": "FastFetch",
+    "ID": "fastfetch",
+    "Source": "scoop",
+    "Category": "System"
+  },
+  {
+    "Name": "gdu [ncdu alternative]",
+    "ID": "gdu",
+    "Source": "scoop",
+    "Category": "System"
+  },
+  {
+    "Name": "ProcessExplorer",
+    "ID": "Microsoft.Sysinternals.ProcessExplorer",
+    "Source": "winget",
+    "Category": "System"
+  },
+  {
+    "Name": "windirstat [S]",
+    "ID": "windirstat",
+    "Source": "scoop",
+    "Category": "System"
+  },
+  {
+    "Name": "windirstat [W]",
+    "ID": "WinDirStat.WinDirStat",
+    "Source": "winget",
+    "Category": "System"
+  },
+  {
+    "Name": "WizTree [S]",
+    "ID": "WizTree",
+    "Source": "scoop",
+    "Category": "System"
+  },
+  {
+    "Name": "WizTree [W]",
+    "ID": "AntibodySoftware.WizTree",
+    "Source": "winget",
+    "Category": "System"
+  },
+  {
+    "Name": "Alacritty",
+    "ID": "Alacritty.Alacritty",
+    "Source": "winget",
+    "Category": "Terminal"
+  },
+  {
+    "Name": "Bat [Text-View]",
+    "ID": "bat",
+    "Source": "scoop",
+    "Category": "Terminal"
+  },
+  {
+    "Name": "clink [Terminal] [S]",
+    "ID": "clink",
+    "Source": "scoop",
+    "Category": "Terminal"
+  },
+  {
+    "Name": "clink [Terminal] [W]",
+    "ID": "chrisant996.Clink",
+    "Source": "winget",
+    "Category": "Terminal"
+  },
+  {
+    "Name": "Cmder [Terminal]",
+    "ID": "Cmder",
+    "Source": "scoop",
+    "Category": "Terminal"
+  },
+  {
+    "Name": "eza [ls] [S]",
+    "ID": "eza",
+    "Source": "scoop",
+    "Category": "Terminal"
+  },
+  {
+    "Name": "eza [ls] [W]",
+    "ID": "eza-community.eza",
+    "Source": "winget",
+    "Category": "Terminal"
+  },
+  {
+    "Name": "fd [find alternative]",
+    "ID": "fd",
+    "Source": "scoop",
+    "Category": "Terminal"
+  },
+  {
+    "Name": "FZF",
+    "ID": "fzf",
+    "Source": "scoop",
+    "Category": "Terminal"
+  },
+  {
+    "Name": "grep [Find]",
+    "ID": "grep",
+    "Source": "scoop",
+    "Category": "Terminal"
+  },
+  {
+    "Name": "highlight [Text-View]",
+    "ID": "highlight",
+    "Source": "scoop",
+    "Category": "Terminal"
+  },
+  {
+    "Name": "less [Text-View] [S]",
+    "ID": "less",
+    "Source": "scoop",
+    "Category": "Terminal"
+  },
+  {
+    "Name": "less [Text-View] [W]",
+    "ID": "jftuga.less",
+    "Source": "winget",
+    "Category": "Terminal"
+  },
+  {
+    "Name": "oh-my-posh [S]",
+    "ID": "oh-my-posh",
+    "Source": "scoop",
+    "Category": "Terminal"
+  },
+  {
+    "Name": "oh-my-posh [W]",
+    "ID": "JanDeDobbeleer.OhMyPosh",
+    "Source": "winget",
+    "Category": "Terminal"
+  },
+  {
+    "Name": "PowerShell",
+    "ID": "Microsoft.PowerShell",
+    "Source": "winget",
+    "Category": "Terminal"
+  },
+  {
+    "Name": "ripgrep [rg] [S]",
+    "ID": "ripgrep",
+    "Source": "scoop",
+    "Category": "Terminal"
+  },
+  {
+    "Name": "ripgrep [rg] [W]",
+    "ID": "BurntSushi.ripgrep.MSVC",
+    "Source": "winget",
+    "Category": "Terminal"
+  },
+  {
+    "Name": "scoop-completion",
+    "ID": "scoop-completion",
+    "Source": "scoop",
+    "Category": "Terminal"
+  },
+  {
+    "Name": "scoop-search",
+    "ID": "scoop-search",
+    "Source": "scoop",
+    "Category": "Terminal"
+  },
+  {
+    "Name": "Sudo",
+    "ID": "sudo",
+    "Source": "scoop",
+    "Category": "Terminal"
+  },
+  {
+    "Name": "tldr [S]",
+    "ID": "tldr",
+    "Source": "scoop",
+    "Category": "Terminal"
+  },
+  {
+    "Name": "tldr [W]",
+    "ID": "tldr-pages.tlrc",
+    "Source": "winget",
+    "Category": "Terminal"
+  },
+  {
+    "Name": "WezTerm",
+    "ID": "wezterm",
+    "Source": "scoop",
+    "Category": "Terminal"
+  },
+  {
+    "Name": "Zoxide",
+    "ID": "zoxide",
+    "Source": "scoop",
+    "Category": "Terminal"
+  },
+  {
+    "Name": "7-Zip",
+    "ID": "7zip",
+    "Source": "scoop",
+    "Category": "Utility"
+  },
+  {
+    "Name": "BareGrep [Find]",
+    "ID": "baregrep",
+    "Source": "scoop",
+    "Category": "Utility"
+  },
+  {
+    "Name": "BleachBit [S]",
+    "ID": "bleachbit",
+    "Source": "scoop",
+    "Category": "Utility"
+  },
+  {
+    "Name": "BleachBit [W]",
+    "ID": "BleachBit.BleachBit",
+    "Source": "winget",
+    "Category": "Utility"
+  },
+  {
+    "Name": "Bulk Crap Uninstaller [S]",
+    "ID": "bulk-crap-uninstaller",
+    "Source": "scoop",
+    "Category": "Utility"
+  },
+  {
+    "Name": "Bulk Crap Uninstaller [W]",
+    "ID": "BCUninstaller",
+    "Source": "winget",
+    "Category": "Utility"
+  },
+  {
+    "Name": "Capture2Text",
+    "ID": "Capture2Text",
+    "Source": "scoop",
+    "Category": "Utility"
+  },
+  {
+    "Name": "carnac [keypress monitor]",
+    "ID": "carnac",
+    "Source": "scoop",
+    "Category": "Utility"
+  },
+  {
+    "Name": "Cheat Engine [7.4]",
+    "ID": "cheat-engine",
+    "Source": "scoop",
+    "Category": "Utility"
+  },
+  {
+    "Name": "Ditto [S]",
+    "ID": "ditto",
+    "Source": "scoop",
+    "Category": "Utility"
+  },
+  {
+    "Name": "Ditto [W]",
+    "ID": "Ditto.Ditto",
+    "Source": "winget",
+    "Category": "Utility"
+  },
+  {
+    "Name": "Everything [S]",
+    "ID": "everything",
+    "Source": "scoop",
+    "Category": "Utility"
+  },
+  {
+    "Name": "Everything [W]",
+    "ID": "voidtools.Everything",
+    "Source": "winget",
+    "Category": "Utility"
+  },
+  {
+    "Name": "keyviz [keypress monitor]",
+    "ID": "keyviz",
+    "Source": "scoop",
+    "Category": "Utility"
+  },
+  {
+    "Name": "pandoc [S]",
+    "ID": "pandoc",
+    "Source": "scoop",
+    "Category": "Utility"
+  },
+  {
+    "Name": "pandoc [W]",
+    "ID": "JohnMacFarlane.Pandoc",
+    "Source": "winget",
+    "Category": "Utility"
+  },
+  {
+    "Name": "QuickLook",
+    "ID": "QL-Win.QuickLook",
+    "Source": "winget",
+    "Category": "Utility"
+  },
+  {
+    "Name": "Rufus [S]",
+    "ID": "rufus",
+    "Source": "scoop",
+    "Category": "Utility"
+  },
+  {
+    "Name": "Rufus [W]",
+    "ID": "Rufus.Rufus",
+    "Source": "winget",
+    "Category": "Utility"
+  },
+  {
+    "Name": "scrcpy [S]",
+    "ID": "scrcpy",
+    "Source": "scoop",
+    "Category": "Utility"
+  },
+  {
+    "Name": "scrcpy [W]",
+    "ID": "Genymobile.scrcpy",
+    "Source": "winget",
+    "Category": "Utility"
+  },
+  {
+    "Name": "scrcpy+",
+    "ID": "Frontesque.scrcpy+",
+    "Source": "winget",
+    "Category": "Utility"
+  },
+  {
+    "Name": "UniGetUI  [W]",
+    "ID": "Devolutions.UniGetUI",
+    "Source": "winget",
+    "Category": "Utility"
+  },
+  {
+    "Name": "Ventoy",
+    "ID": "ventoy",
+    "Source": "scoop",
+    "Category": "Utility"
+  },
+  {
+    "Name": "winfsp",
+    "ID": "winfsp-np",
+    "Source": "scoop",
+    "Category": "Utility"
+  },
+  {
+    "Name": "winget",
+    "ID": "winget",
+    "Source": "scoop",
+    "Category": "Utility"
+  },
+  {
+    "Name": "Wise Program Uninstaller",
+    "ID": "WiseCleaner.WiseProgramUninstaller",
+    "Source": "winget",
+    "Category": "Utility"
+  },
+  {
+    "Name": "Workspace Utilities",
+    "ID": "workspaceutilities",
+    "Source": "scoop",
+    "Category": "Utility"
+  },
+  {
+    "Name": "X-Mouse Button Control [S]",
+    "ID": "xmousebuttoncontrol",
+    "Source": "scoop",
+    "Category": "Utility"
+  },
+  {
+    "Name": "X-Mouse Button Control [W]",
+    "ID": "Highresolution.X-MouseButtonControl",
+    "Source": "winget",
+    "Category": "Utility"
+  },
+  {
+    "Name": "xodo pdf reader",
+    "ID": "Apryse.XodoPDFReader",
+    "Source": "winget",
+    "Category": "Utility"
+  },
+  {
+    "Name": "VirtualBox [S]",
+    "ID": "virtualbox-with-extension-pack-np",
+    "Source": "scoop",
+    "Category": "Virtualization"
+  },
+  {
+    "Name": "VirtualBox [W]",
+    "ID": "Oracle.VirtualBox",
+    "Source": "winget",
+    "Category": "Virtualization"
+  },
+  {
+    "Name": "WSA-pacman [S]",
+    "ID": "wsa-pacman",
+    "Source": "scoop",
+    "Category": "Virtualization"
+  },
+  {
+    "Name": "WSA-pacman [W]",
+    "ID": "alesimula.wsa_pacman",
+    "Source": "winget",
+    "Category": "Virtualization"
+  }
 ]
