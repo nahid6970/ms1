@@ -1480,3 +1480,6 @@ powershell.exe -ExecutionPolicy Bypass -WindowStyle Hidden -File ""C:\path\to\sc
 
 ;! Convex  Guidlines & Rules
 :X:;convex::Paste('For convex rules and guid lines follow this file C:\@delta\ms1\md\CONVEX_GUIDE.md')
+
+;! Allow Port
+:X:;port::Paste('New-NetFirewallRule -DisplayName "Allow Port XXXX" -Direction Inbound -Action Allow -Protocol TCP -LocalPort XXXX -Profile Any')

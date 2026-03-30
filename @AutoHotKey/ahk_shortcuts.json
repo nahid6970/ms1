@@ -507,6 +507,14 @@
             "trigger": ";convex",
             "replacement": "For convex rules and guid lines follow this file C:\\@delta\\ms1\\md\\CONVEX_GUIDE.md",
             "enabled": true
+        },
+        {
+            "name": "Allow Port",
+            "category": "General",
+            "description": "",
+            "trigger": ";port",
+            "replacement": "New-NetFirewallRule -DisplayName \"Allow Port XXXX\" -Direction Inbound -Action Allow -Protocol TCP -LocalPort XXXX -Profile Any",
+            "enabled": true
         }
     ],
     "startup_scripts": [
