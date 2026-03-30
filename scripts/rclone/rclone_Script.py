@@ -227,25 +227,44 @@ class PathInput(QLineEdit):
 
 # ── TOGGLE LABEL (flag chip) ──────────────────────────────────────────────────
 class ToggleLabel(QLabel):
-    def __init__(self, text, active=False):
+    def __init__(self, text, active=False, on_change=None):
         super().__init__(text)
         self.active = active
+        self._on_change = on_change
         self.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.setFixedWidth(190)
         self.setCursor(Qt.CursorShape.PointingHandCursor)
         self._refresh()
 
     def _refresh(self):
-        bg = CP_GREEN if self.active else CP_RED
+        bg = "#90ee90" if self.active else "#ff9999"  # light green / light red
         self.setStyleSheet(f"background:{bg}; color:#000; font-weight:bold; padding:4px; font-family:Consolas;")
 
     def mousePressEvent(self, _):
         self.active = not self.active
         self._refresh()
+        if self._on_change:
+            self._on_change()
 
 
 # ── MAIN WINDOW ───────────────────────────────────────────────────────────────
 class RcloneApp(QMainWindow):
+    SETTINGS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "settings.json")
+
+    def _load_settings(self):
+        try:
+            with open(self.SETTINGS_FILE) as f:
+                return json.load(f)
+        except Exception:
+            return {}
+
+    def _save_toggles(self):
+        cfg = self._load_settings()
+        cfg["flags"]   = [lbl.active for lbl in self.flag_labels]
+        cfg["filters"] = [lbl.active for lbl in self.filter_labels]
+        with open(self.SETTINGS_FILE, "w") as f:
+            json.dump(cfg, f)
+
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Rclone + WinFSP")
@@ -346,9 +365,11 @@ class RcloneApp(QMainWindow):
             ("Modified Time **tree",    "-t",                                False),
         ]
         self.flag_defs = flag_defs
+        saved_flags = self._load_settings().get("flags", [])
         cols = 3
         for i, (name, _, active) in enumerate(flag_defs):
-            lbl = ToggleLabel(name, active)
+            state = saved_flags[i] if i < len(saved_flags) else active
+            lbl = ToggleLabel(name, state, on_change=self._save_toggles)
             self.flag_labels.append(lbl)
             flags_grid.addWidget(lbl, i // cols, i % cols)
         left.addWidget(flags_group)
@@ -376,8 +397,10 @@ class RcloneApp(QMainWindow):
         self.filter_defs = filter_defs
         self.filter_labels = []
         self.filter_entries = []
+        saved_filters = self._load_settings().get("filters", [])
         for i, (name, _, default) in enumerate(filter_defs):
-            lbl = ToggleLabel(name, False)
+            state = saved_filters[i] if i < len(saved_filters) else False
+            lbl = ToggleLabel(name, state, on_change=self._save_toggles)
             entry = QLineEdit(default)
             self.filter_labels.append(lbl)
             self.filter_entries.append(entry)
@@ -469,8 +492,6 @@ class RcloneApp(QMainWindow):
 
 
 class SettingsDialog(QDialog):
-    SETTINGS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "settings.json")
-
     def __init__(self, parent):
         super().__init__(parent)
         self.setWindowTitle("Settings")
@@ -478,7 +499,7 @@ class SettingsDialog(QDialog):
         layout = QVBoxLayout(self)
 
         form = QFormLayout()
-        cfg = self._load()
+        cfg = parent._load_settings()
 
         self.w_spin = QSpinBox()
         self.w_spin.setRange(400, 3840)
@@ -499,18 +520,14 @@ class SettingsDialog(QDialog):
         save_btn.clicked.connect(self._save)
         layout.addWidget(save_btn)
 
-    def _load(self):
-        try:
-            with open(self.SETTINGS_FILE) as f:
-                return json.load(f)
-        except Exception:
-            return {}
-
     def _save(self):
-        cfg = {"width": self.w_spin.value(), "height": self.h_spin.value()}
-        with open(self.SETTINGS_FILE, "w") as f:
+        p = self.parent()
+        cfg = p._load_settings()
+        cfg["width"]  = self.w_spin.value()
+        cfg["height"] = self.h_spin.value()
+        with open(p.SETTINGS_FILE, "w") as f:
             json.dump(cfg, f)
-        self.parent().resize(cfg["width"], cfg["height"])
+        p.resize(cfg["width"], cfg["height"])
         self.accept()
 
 
