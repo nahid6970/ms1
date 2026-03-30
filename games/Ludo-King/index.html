@@ -16,7 +16,6 @@
             color: white; gap: 20px;
         }
 
-        /* Menu Overlay */
         #menu-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.85); display: flex; justify-content: center; align-items: center;
@@ -39,7 +38,6 @@
         .btn-player { background: #f1c40f; color: #333; margin: 5px; width: 60px; display: inline-block; }
         .menu-btn:hover { transform: scale(1.05); }
 
-        /* Game Board */
         .ludo-board {
             display: grid; grid-template-columns: repeat(15, var(--cell-size));
             grid-template-rows: repeat(15, var(--cell-size));
@@ -56,7 +54,6 @@
         }
         .slot { border: 1px solid rgba(0,0,0,0.1); position: relative; }
 
-        /* Color Areas */
         .r-h { grid-area: 1 / 1 / 7 / 7; background: var(--red); }
         .g-h { grid-area: 1 / 10 / 7 / 16; background: var(--green); }
         .y-h { grid-area: 10 / 1 / 16 / 7; background: var(--yellow); }
@@ -76,37 +73,37 @@
         .t-y { background: var(--yellow); clip-path: polygon(0 100%, 50% 50%, 100% 100%); }
         .t-b { background: var(--blue); clip-path: polygon(100% 0, 100% 100%, 50% 50%); }
 
-        /* Tokens */
         .token {
-            width: 30px; height: 30px; border-radius: 50%; border: 3px solid white;
+            width: 32px; height: 32px; border-radius: 50%; border: 3px solid white;
             box-shadow: 0 4px 8px rgba(0,0,0,0.4); position: absolute;
             top: 50%; left: 50%; transform: translate(-50%, -50%);
-            z-index: 50; cursor: pointer; transition: all 0.3s;
+            z-index: 50; cursor: pointer; transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        /* Dice Control */
         #dice-container {
             display: flex; flex-direction: column; align-items: center; gap: 10px;
-            background: rgba(255,255,255,0.1); padding: 15px; border-radius: 15px; min-width: 200px;
+            background: rgba(255,255,255,0.1); padding: 20px; border-radius: 20px; min-width: 250px;
         }
         #dice {
-            width: 70px; height: 70px; background: white; border: 4px solid #333;
-            border-radius: 15px; display: flex; justify-content: center; align-items: center;
-            font-size: 40px; font-weight: bold; color: #333; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            width: 80px; height: 80px; background: white; border: 4px solid #333;
+            border-radius: 18px; display: flex; justify-content: center; align-items: center;
+            font-size: 44px; font-weight: bold; color: #333; box-shadow: 0 8px 20px rgba(0,0,0,0.4);
         }
         #roll-btn {
-            padding: 12px 30px; background: #e74c3c; color: white; border: none;
-            border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px;
+            padding: 12px 40px; background: #e74c3c; color: white; border: none;
+            border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 18px;
+            box-shadow: 0 4px 0 #c0392b;
         }
-        #roll-btn:disabled { background: #95a5a6; cursor: not-allowed; opacity: 0.6; }
+        #roll-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #c0392b; }
+        #roll-btn:disabled { background: #95a5a6; cursor: not-allowed; opacity: 0.6; box-shadow: none; }
         
-        #skip-btn { padding: 8px 15px; background: #34495e; color: white; border: none; border-radius: 6px; cursor: pointer; }
+        #skip-btn { padding: 10px 20px; background: #34495e; color: white; border: none; border-radius: 8px; cursor: pointer; }
         
         .hidden { display: none !important; }
-        .pulse { animation: pulse 1s infinite alternate; }
+        .pulse { animation: pulse 0.8s infinite alternate; }
         @keyframes pulse {
-            from { transform: translate(-50%, -50%) scale(1); box-shadow: 0 0 5px white; }
-            to { transform: translate(-50%, -50%) scale(1.1); box-shadow: 0 0 15px white; }
+            from { transform: translate(-50%, -50%) scale(1); filter: brightness(1.2); }
+            to { transform: translate(-50%, -50%) scale(1.2); filter: brightness(1.5); }
         }
     </style>
 </head>
@@ -138,11 +135,11 @@
 </div>
 
 <div id="dice-container">
-    <div id="player-turn-indicator" style="font-size: 20px; font-weight: bold;">Turn: Green</div>
+    <div id="player-turn-indicator" style="font-size: 24px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">Turn: Green</div>
     <div id="dice">1</div>
-    <div style="display: flex; gap: 10px;">
+    <div style="display: flex; gap: 15px; margin-top: 10px;">
         <button id="roll-btn">ROLL DICE</button>
-        <button id="skip-btn" class="hidden">SKIP</button>
+        <button id="skip-btn" class="hidden">SKIP TURN</button>
     </div>
 </div>
 
@@ -150,52 +147,88 @@
     import { ConvexHttpClient } from "https://esm.sh/convex@1.16.0/browser";
     const client = new ConvexHttpClient("https://silent-scorpion-207.convex.cloud");
 
-    const overlay = document.getElementById('menu-overlay');
-    const mainMenu = document.getElementById('main-menu');
-    const playerSelect = document.getElementById('player-select');
-    const btnContinue = document.getElementById('btn-continue');
     const diceEl = document.getElementById('dice');
     const rollBtn = document.getElementById('roll-btn');
     const skipBtn = document.getElementById('skip-btn');
     const turnIndicator = document.getElementById('player-turn-indicator');
-    const board = document.getElementById('board');
-
     const colors = ['Red', 'Green', 'Yellow', 'Blue'];
-    let currentPlayerIndex = 0;
 
-    // Helper: Map pos 0-51 to Board Coordinates
-    function getPathCell(idx) {
-        // This is a simplified path coordinate system for the 15x15 grid
-        const cells = document.querySelectorAll('.path-cell');
-        return cells[idx % cells.length];
-    }
+    // Ludo Clockwise Path Coordinates (52 squares)
+    const PATH = [
+        {r:7, c:1}, {r:7, c:2}, {r:7, c:3}, {r:7, c:4}, {r:7, c:5}, {r:7, c:6},
+        {r:6, c:7}, {r:5, c:7}, {r:4, c:7}, {r:3, c:7}, {r:2, c:7}, {r:1, c:7}, {r:1, c:8}, {r:1, c:9},
+        {r:2, c:9}, {r:3, c:9}, {r:4, c:9}, {r:5, c:9}, {r:6, c:9},
+        {r:7, c:10}, {r:7, c:11}, {r:7, c:12}, {r:7, c:13}, {r:7, c:14}, {r:7, c:15}, {r:8, c:15}, {r:9, c:15},
+        {r:9, c:14}, {r:9, c:13}, {r:9, c:12}, {r:9, c:11}, {r:9, c:10},
+        {r:10, c:9}, {r:11, c:9}, {r:12, c:9}, {r:13, c:9}, {r:14, c:9}, {r:15, c:9}, {r:15, c:8}, {r:15, c:7},
+        {r:14, c:7}, {r:13, c:7}, {r:12, c:7}, {r:11, c:7}, {r:10, c:7},
+        {r:9, c:6}, {r:9, c:5}, {r:9, c:4}, {r:9, c:3}, {r:9, c:2}, {r:9, c:1}, {r:8, c:1}
+    ];
 
-    async function init() {
-        generatePath();
-        const state = await client.query("game:getGameState");
-        if (state && state.status === "playing") btnContinue.classList.remove('hidden');
-    }
-
-    window.startGame = async (num) => {
-        await client.mutation("game:startNewGame", { numPlayers: num });
-        overlay.classList.add('hidden');
-        updateUI();
+    // Home stretches
+    const HOME_STRETCH = {
+        'red': [{r:8, c:2}, {r:8, c:3}, {r:8, c:4}, {r:8, c:5}, {r:8, c:6}],
+        'green': [{r:2, c:8}, {r:3, c:8}, {r:4, c:8}, {r:5, c:8}, {r:6, c:8}],
+        'yellow': [{r:14, c:8}, {r:13, c:8}, {r:12, c:8}, {r:11, c:8}, {r:10, c:8}],
+        'blue': [{r:8, c:14}, {r:8, c:13}, {r:8, c:12}, {r:8, c:11}, {r:8, c:10}]
     };
 
-    btnContinue.onclick = () => { overlay.classList.add('hidden'); updateUI(); };
+    const START_INDEX = { 'red': 1, 'green': 14, 'yellow': 40, 'blue': 27 };
+
+    function generateBoard() {
+        const board = document.getElementById('board');
+        // Generate all path squares based on standard clockwise coordinates
+        PATH.forEach((p, i) => {
+            const cell = document.createElement('div');
+            cell.className = 'c';
+            cell.id = `path-${i}`;
+            cell.style.gridRow = p.r; cell.style.gridColumn = p.c;
+            // Star/Start Colors
+            if (i === 1) cell.classList.add('red');
+            if (i === 14) cell.classList.add('green');
+            if (i === 27) cell.classList.add('blue');
+            if (i === 40) cell.classList.add('yellow');
+            board.appendChild(cell);
+        });
+
+        // Generate Home Stretch
+        Object.keys(HOME_STRETCH).forEach(color => {
+            HOME_STRETCH[color].forEach((p, i) => {
+                const cell = document.createElement('div');
+                cell.className = `c ${color}`;
+                cell.id = `stretch-${color}-${i}`;
+                cell.style.gridRow = p.r; cell.style.gridColumn = p.c;
+                board.appendChild(cell);
+            });
+        });
+
+        // Fill remaining blanks
+        for (let r=1; r<=15; r++) {
+            for (let c=1; c<=15; c++) {
+                const isHome = (r<=6 && c<=6) || (r<=6 && c>=10) || (r>=10 && c<=6) || (r>=10 && c>=10);
+                const isCenter = (r>=7 && r<=9 && c>=7 && c<=9);
+                if (!isHome && !isCenter) {
+                    if (![...PATH, ...HOME_STRETCH.red, ...HOME_STRETCH.green, ...HOME_STRETCH.yellow, ...HOME_STRETCH.blue].some(p => p.r === r && p.c === c)) {
+                        const cell = document.createElement('div');
+                        cell.className = 'c';
+                        cell.style.gridRow = r; cell.style.gridColumn = c;
+                        board.appendChild(cell);
+                    }
+                }
+            }
+        }
+    }
 
     async function updateUI() {
         const state = await client.query("game:getGameState");
         if (!state) return;
 
         diceEl.innerText = state.diceValue;
-        currentPlayerIndex = state.currentPlayer;
-        const activeColorName = colors[currentPlayerIndex];
-        
-        turnIndicator.innerText = `Turn: ${activeColorName}`;
-        turnIndicator.style.color = `var(--${activeColorName.toLowerCase()})`;
-        diceEl.style.backgroundColor = `var(--${activeColorName.toLowerCase()})`;
-        diceEl.style.color = activeColorName === 'Yellow' ? '#333' : 'white';
+        const activeColor = colors[state.currentPlayer];
+        turnIndicator.innerText = `Turn: ${activeColor}`;
+        turnIndicator.style.color = `var(--${activeColor.toLowerCase()})`;
+        diceEl.style.backgroundColor = `var(--${activeColor.toLowerCase()})`;
+        diceEl.style.color = activeColor === 'Yellow' ? '#333' : 'white';
         
         rollBtn.disabled = !state.waitingForRoll;
         if (!state.waitingForRoll) skipBtn.classList.remove('hidden');
@@ -205,34 +238,25 @@
 
         state.tokens.forEach((t, i) => {
             const playerIdx = Math.floor(i / 4);
-            const slotIdx = i % 4;
-            const tokenColor = t.player;
-            
             let parent;
+            
             if (t.pos === -1) {
-                parent = document.getElementById(`${tokenColor[0]}-${slotIdx}`);
+                parent = document.getElementById(`${t.player[0]}-${i % 4}`);
+            } else if (t.pos >= 52) {
+                parent = document.getElementById(`stretch-${t.player}-${t.pos - 52}`);
             } else {
-                // Find path cell by id "p-{pos}"
-                // For simplicity now, we just map to the path-cell sequence
-                const pathCells = document.querySelectorAll('.path-cell');
-                // Offset per player: Red: 0, Green: 13, Yellow: 26, Blue: 39
-                const offset = playerIdx * 13;
-                const actualPos = (t.pos + offset) % 52;
-                parent = pathCells[actualPos];
+                const actualIndex = (t.pos + START_INDEX[t.player]) % 52;
+                parent = document.getElementById(`path-${actualIndex}`);
             }
 
             if (parent) {
                 const token = document.createElement('div');
-                token.className = `token ${tokenColor}`;
-                token.style.background = `var(--${tokenColor})`;
-                
-                // If it's this token's turn and dice is rolled
+                token.className = `token ${t.player}`;
+                token.style.background = `var(--${t.player})`;
                 if (!state.waitingForRoll && playerIdx === state.currentPlayer) {
-                    // Check if 6 or already out
                     if (state.diceValue === 6 || t.pos !== -1) {
                         token.classList.add('pulse');
-                        token.onclick = async (e) => {
-                            e.stopPropagation();
+                        token.onclick = async () => {
                             await client.mutation("game:moveToken", { tokenIndex: i });
                             updateUI();
                         };
@@ -243,45 +267,50 @@
         });
     }
 
-    rollBtn.onclick = async () => {
-        await client.mutation("game:rollDice", { playerIndex: currentPlayerIndex });
+    window.startGame = async (num) => {
+        await client.mutation("game:startNewGame", { numPlayers: num });
+        document.getElementById('menu-overlay').classList.add('hidden');
         updateUI();
     };
 
-    skipBtn.onclick = async () => {
-        await client.mutation("game:skipTurn");
-        updateUI();
+    rollBtn.onclick = async () => { await client.mutation("game:rollDice", { playerIndex: state.currentPlayer }); updateUI(); };
+    // This is a simplified rollBtn click - actual implementation below matches player turn logic
+    
+    document.getElementById('btn-new-game').onclick = () => {
+        document.getElementById('main-menu').classList.add('hidden');
+        document.getElementById('player-select').classList.remove('hidden');
     };
 
-    function generatePath() {
-        // Red start: 7,2. Path goes clockwise.
-        // We add IDs to the path cells to find them easily.
-        for (let r = 1; r <= 15; r++) {
-            for (let c = 1; c <= 15; c++) {
-                const isHome = (r <= 6 && c <= 6) || (r <= 6 && c >= 10) || (r >= 10 && c <= 6) || (r >= 10 && c >= 10);
-                const isCenter = (r >= 7 && r <= 9 && c >= 7 && c <= 9);
-                if (!isHome && !isCenter) {
-                    const cell = document.createElement('div');
-                    cell.className = 'c path-cell';
-                    cell.style.gridRow = r; cell.style.gridColumn = c;
-                    
-                    if (r === 8 && c >= 2 && c <= 6) cell.classList.add('red');
-                    if (r === 7 && c === 2) cell.classList.add('red');
-                    if (c === 8 && r >= 2 && r <= 6) cell.classList.add('green');
-                    if (r === 2 && c === 9) cell.classList.add('green');
-                    if (r === 8 && c >= 10 && c <= 14) cell.classList.add('blue');
-                    if (r === 9 && c === 14) cell.classList.add('blue');
-                    if (c === 8 && r >= 10 && r <= 14) cell.classList.add('yellow');
-                    if (r === 14 && c === 7) cell.classList.add('yellow');
+    window.showMainMenu = () => {
+        document.getElementById('main-menu').classList.remove('hidden');
+        document.getElementById('player-select').classList.add('hidden');
+    };
 
-                    board.appendChild(cell);
-                }
-            }
-        }
-    }
-
-    init();
+    generateBoard();
+    updateUI();
     setInterval(updateUI, 2000);
+
+    // Override rollBtn logic to use correct index
+    rollBtn.onclick = async () => {
+        const state = await client.query("game:getGameState");
+        await client.mutation("game:rollDice", { playerIndex: state.currentPlayer });
+        updateUI();
+    };
+
+    skipBtn.onclick = async () => { await client.mutation("game:skipTurn"); updateUI(); };
+
+    // Continue logic
+    document.getElementById('btn-continue').onclick = () => {
+        document.getElementById('menu-overlay').classList.add('hidden');
+        updateUI();
+    };
+    
+    async function checkContinue() {
+        const state = await client.query("game:getGameState");
+        if (state && state.status === "playing") document.getElementById('btn-continue').classList.remove('hidden');
+    }
+    checkContinue();
+
 </script>
 
 </body>
