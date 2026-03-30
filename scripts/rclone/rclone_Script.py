@@ -108,16 +108,14 @@ class FolderFetcher(QThread):
 
     def run(self):
         try:
-            result = subprocess.run(
-                ["rclone", "lsd", self.path],
-                capture_output=True, text=True, timeout=15
-            )
-            folders = []
-            for line in result.stdout.splitlines():
-                parts = line.split()
-                if parts:
-                    folders.append(self.path.rstrip("/") + "/" + parts[-1])
-            self.done.emit(folders)
+            base = self.path.rstrip("/") + "/"
+            def parse(cmd):
+                r = subprocess.run(cmd, capture_output=True, text=True, timeout=15, encoding="utf-8", errors="replace")
+                return [base + line.split()[-1] for line in r.stdout.splitlines() if line.split()]
+
+            folders = parse(["rclone", "lsd",  "--max-depth", "1", self.path])
+            files   = parse(["rclone", "lsf",  "--max-depth", "1", "--files-only", self.path])
+            self.done.emit(folders + files)
         except Exception:
             self.done.emit([])
 
