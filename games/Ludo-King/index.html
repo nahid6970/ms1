@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ludo Board</title>
+    <style>
+        :root {
+            --red: #ff0000;
+            --green: #00a000;
+            --yellow: #ffff00;
+            --blue: #0099ff;
+            --bg: #ffffff;
+            --border: #333;
+            --cell-size: 40px;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+            font-family: sans-serif;
+        }
+
+        .ludo-board {
+            display: grid;
+            grid-template-columns: repeat(15, var(--cell-size));
+            grid-template-rows: repeat(15, var(--cell-size));
+            border: 2px solid var(--border);
+            background-color: var(--bg);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .cell {
+            border: 0.5px solid #ccc;
+            box-sizing: border-box;
+        }
+
+        /* Home Bases */
+        .home-base {
+            grid-column: span 6;
+            grid-row: span 6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+        }
+
+        .home-inner {
+            background: white;
+            width: 100%;
+            height: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 20px;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .token-slot {
+            border-radius: 0;
+        }
+
+        .red-home { background-color: var(--red); grid-area: 1 / 1 / 7 / 7; }
+        .red-home .token-slot { background-color: var(--red); }
+
+        .green-home { background-color: var(--green); grid-area: 1 / 10 / 7 / 16; }
+        .green-home .token-slot { background-color: var(--green); }
+
+        .yellow-home { background-color: var(--yellow); grid-area: 10 / 1 / 16 / 7; }
+        .yellow-home .token-slot { background-color: var(--yellow); }
+
+        .blue-home { background-color: var(--blue); grid-area: 10 / 10 / 16 / 16; }
+        .blue-home .token-slot { background-color: var(--blue); }
+
+        /* Paths and Colors */
+        .red { background-color: var(--red); }
+        .green { background-color: var(--green); }
+        .yellow { background-color: var(--yellow); }
+        .blue { background-color: var(--blue); }
+
+        /* Center Piece */
+        .center {
+            grid-column: 7 / 10;
+            grid-row: 7 / 10;
+            position: relative;
+            border: 1px solid var(--border);
+        }
+
+        .triangle {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .tri-red { background-color: var(--red); clip-path: polygon(0 0, 50% 50%, 0 100%); }
+        .tri-green { background-color: var(--green); clip-path: polygon(0 0, 100% 0, 50% 50%); }
+        .tri-yellow { background-color: var(--yellow); clip-path: polygon(0 100%, 50% 50%, 100% 100%); }
+        .tri-blue { background-color: var(--blue); clip-path: polygon(100% 0, 100% 100%, 50% 50%); }
+
+        .center::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: 
+                linear-gradient(to top right, transparent 49.5%, var(--border) 49.5%, var(--border) 50.5%, transparent 50.5%),
+                linear-gradient(to top left, transparent 49.5%, var(--border) 49.5%, var(--border) 50.5%, transparent 50.5%);
+            pointer-events: none;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="ludo-board" id="board">
+    <div class="home-base red-home">
+        <div class="home-inner">
+            <div class="token-slot"></div><div class="token-slot"></div>
+            <div class="token-slot"></div><div class="token-slot"></div>
+        </div>
+    </div>
+    <div class="home-base green-home">
+        <div class="home-inner">
+            <div class="token-slot"></div><div class="token-slot"></div>
+            <div class="token-slot"></div><div class="token-slot"></div>
+        </div>
+    </div>
+    <div class="home-base yellow-home">
+        <div class="home-inner">
+            <div class="token-slot"></div><div class="token-slot"></div>
+            <div class="token-slot"></div><div class="token-slot"></div>
+        </div>
+    </div>
+    <div class="home-base blue-home">
+        <div class="home-inner">
+            <div class="token-slot"></div><div class="token-slot"></div>
+            <div class="token-slot"></div><div class="token-slot"></div>
+        </div>
+    </div>
+
+    <div class="center">
+        <div class="triangle tri-red"></div>
+        <div class="triangle tri-green"></div>
+        <div class="triangle tri-yellow"></div>
+        <div class="triangle tri-blue"></div>
+    </div>
+</div>
+
+<script>
+    const board = document.getElementById('board');
+    for (let r = 1; r <= 15; r++) {
+        for (let c = 1; c <= 15; c++) {
+            const isHome = (r <= 6 && c <= 6) || (r <= 6 && c >= 10) || (r >= 10 && c <= 6) || (r >= 10 && c >= 10);
+            const isCenter = (r >= 7 && r <= 9 && c >= 7 && c <= 9);
+            
+            if (!isHome && !isCenter) {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                cell.style.gridRow = r;
+                cell.style.gridColumn = c;
+
+                if (r === 8 && c >= 2 && c <= 6) cell.classList.add('red');
+                if (r === 7 && c === 2) cell.classList.add('red');
+                if (c === 8 && r >= 2 && r <= 6) cell.classList.add('green');
+                if (r === 2 && c === 9) cell.classList.add('green');
+                if (r === 8 && c >= 10 && c <= 14) cell.classList.add('blue');
+                if (r === 9 && c === 14) cell.classList.add('blue');
+                if (c === 8 && r >= 10 && r <= 14) cell.classList.add('yellow');
+                if (r === 14 && c === 7) cell.classList.add('yellow');
+
+                board.appendChild(cell);
+            }
+        }
+    }
+</script>
+
+</body>
+</html>
