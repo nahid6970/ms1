@@ -248,7 +248,13 @@
     <div id="episodesModal" class="modal">
         <div class="modal-content episodes-modal-content">
             <span class="close" onclick="closeEpisodesModal()">&times;</span>
-            <h2 id="episodesModalTitle" style="margin-top: 0;"></h2>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-right: 30px;">
+                <h2 id="episodesModalTitle" style="margin: 0; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></h2>
+                <button id="sortEpisodesDesc" class="add-button" title="Sort by Name DESC" style="padding: 5px 10px; font-size: 12px; flex-shrink: 0; margin-left: 10px;">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><polyline points="3 16 7 20 11 16"></polyline><line x1="7" y1="20" x2="7" y2="4"></line><line x1="11" y1="4" x2="21" y2="4"></line><line x1="11" y1="8" x2="19" y2="8"></line><line x1="11" y1="12" x2="17" y2="12"></line></svg>
+                    Sort DESC
+                </button>
+            </div>
             <div id="episodesListContainer" class="episode-list">
                 <!-- Episodes will be populated here -->
             </div>

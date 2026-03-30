@@ -174,9 +174,77 @@ function closeScanMissingModal() {
     document.body.classList.remove('modal-open');
 }
 
+// Global variables for episodes modal
+let currentEpisodes = [];
+let currentShowIdForEpisodes = null;
+
+function renderEpisodes(episodes, showId) {
+    const listContainer = document.getElementById('episodesListContainer');
+    listContainer.innerHTML = '';
+    
+    if (!episodes || episodes.length === 0) {
+        listContainer.innerHTML = '<p style="text-align: center;">No episodes found.</p>';
+        return;
+    }
+
+    const ul = document.createElement('ul');
+    ul.style.listStyle = 'none';
+    ul.style.padding = '0';
+    
+    episodes.forEach(ep => {
+        const li = document.createElement('li');
+        li.className = `episode-item ${ep.watched ? 'episode-watched' : ''}`;
+        li.style.display = 'flex';
+        li.style.justifyContent = 'space-between';
+        li.style.alignItems = 'center';
+        li.style.padding = '12px 15px';
+        li.style.marginBottom = '8px';
+        li.style.background = '#2a2a2a';
+        li.style.borderRadius = '8px';
+        if (ep.watched) li.style.background = 'rgba(29, 185, 84, 0.1)';
+
+        li.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <input type="checkbox" ${ep.watched ? 'checked' : ''} onchange="toggleWatched(${showId}, ${ep.id}, this)">
+                <span>${ep.title}</span>
+            </div>
+            <div style="display: flex; gap: 8px;">
+                <div class="edit-dot" onclick="openEditEpisodeModal(${showId}, ${ep.id})" style="width: 10px; height: 10px; border-radius: 50%; background: #3498db; cursor: pointer;"></div>
+                <div class="delete-dot" onclick="deleteEpisode(${showId}, ${ep.id})" style="width: 10px; height: 10px; border-radius: 50%; background: #e74c3c; cursor: pointer;"></div>
+            </div>
+        `;
+        ul.appendChild(li);
+    });
+    listContainer.appendChild(ul);
+}
+
+function applyEpisodeSort() {
+    const sortBtn = document.getElementById('sortEpisodesDesc');
+    const isNameDesc = localStorage.getItem(`episodeSort_${currentShowIdForEpisodes}`) === 'name_desc';
+    
+    if (isNameDesc) {
+        currentEpisodes.sort((a, b) => {
+            return b.title.localeCompare(a.title, undefined, {numeric: true, sensitivity: 'base'});
+        });
+        if (sortBtn) {
+            sortBtn.style.background = '#1db954';
+            sortBtn.style.color = 'white';
+        }
+    } else {
+        // If not name_desc, we keep server order (usually newest first)
+        // or we could implement a default sort. For now, we'll just reload if they toggle off.
+        if (sortBtn) {
+            sortBtn.style.background = '';
+            sortBtn.style.color = '';
+        }
+    }
+}
+
 function closeEpisodesModal() {
     document.getElementById('episodesModal').style.display = 'none';
     document.body.classList.remove('modal-open');
+    currentEpisodes = [];
+    currentShowIdForEpisodes = null;
 }
 
 async function openEpisodesPopup(event, showId, showTitle) {
@@ -198,39 +266,11 @@ async function openEpisodesPopup(event, showId, showTitle) {
         const response = await fetch(`/edit_show/${showId}`);
         const show = await response.json();
         
-        listContainer.innerHTML = '';
-        if (!show.episodes || show.episodes.length === 0) {
-            listContainer.innerHTML = '<p style="text-align: center;">No episodes found.</p>';
-        } else {
-            const ul = document.createElement('ul');
-            ul.style.listStyle = 'none';
-            ul.style.padding = '0';
-            
-            show.episodes.forEach(ep => {
-            const li = document.createElement('li');
-            li.className = `episode-item ${ep.watched ? 'episode-watched' : ''}`;
-            li.style.display = 'flex';
-            li.style.justifyContent = 'space-between';
-            li.style.alignItems = 'center';
-            li.style.padding = '12px 15px';
-            li.style.marginBottom = '8px';
-            li.style.background = '#2a2a2a';
-            li.style.borderRadius = '8px';
-            if (ep.watched) li.style.background = 'rgba(29, 185, 84, 0.1)';
-
-            li.innerHTML = `
-            <div>
-            <input type="checkbox" ${ep.watched ? 'checked' : ''} onchange="toggleWatched(${showId}, ${ep.id}, this)">
-            <span>${ep.title}</span>
-            </div>
-            <div style="display: flex; gap: 8px;">
-            <div class="edit-dot" onclick="openEditEpisodeModal(${showId}, ${ep.id})"></div>
-            <div class="delete-dot" onclick="deleteEpisode(${showId}, ${ep.id})"></div>
-            </div>
-            `;
-            ul.appendChild(li);
-            });            listContainer.appendChild(ul);
-        }
+        currentEpisodes = show.episodes || [];
+        currentShowIdForEpisodes = showId;
+        
+        applyEpisodeSort();
+        renderEpisodes(currentEpisodes, showId);
     } catch (error) {
         console.error('Error fetching episodes:', error);
         listContainer.innerHTML = '<p style="text-align: center; color: #ff6b6b;">Error loading episodes.</p>';
@@ -465,40 +505,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     const response = await fetch(`/edit_show/${showId}`); // Reusing edit_show to get data
                     const show = await response.json();
                     
-                    listContainer.innerHTML = '';
-                    if (!show.episodes || show.episodes.length === 0) {
-                        listContainer.innerHTML = '<p style="text-align: center;">No episodes found.</p>';
-                    } else {
-                        const ul = document.createElement('ul');
-                        ul.style.listStyle = 'none';
-                        ul.style.padding = '0';
-                        
-                        show.episodes.forEach(ep => {
-                            const li = document.createElement('li');
-                            li.className = `episode-item ${ep.watched ? 'episode-watched' : ''}`;
-                            li.style.display = 'flex';
-                            li.style.justifyContent = 'space-between';
-                            li.style.alignItems = 'center';
-                            li.style.padding = '12px 15px';
-                            li.style.marginBottom = '8px';
-                            li.style.background = '#2a2a2a';
-                            li.style.borderRadius = '8px';
-                            if (ep.watched) li.style.background = 'rgba(29, 185, 84, 0.1)';
-
-                            li.innerHTML = `
-                                <div style="display: flex; align-items: center; gap: 12px;">
-                                    <input type="checkbox" ${ep.watched ? 'checked' : ''} onchange="toggleWatched(${showId}, ${ep.id}, this)">
-                                    <span>${ep.title}</span>
-                                </div>
-                                <div style="display: flex; gap: 8px;">
-                                    <div class="edit-dot" onclick="openEditEpisodeModal(${showId}, ${ep.id})" style="width: 10px; height: 10px; border-radius: 50%; background: #3498db; cursor: pointer;"></div>
-                                    <div class="delete-dot" onclick="deleteEpisode(${showId}, ${ep.id})" style="width: 10px; height: 10px; border-radius: 50%; background: #e74c3c; cursor: pointer;"></div>
-                                </div>
-                            `;
-                            ul.appendChild(li);
-                        });
-                        listContainer.appendChild(ul);
-                    }
+                    currentEpisodes = show.episodes || [];
+                    currentShowIdForEpisodes = showId;
+                    renderEpisodes(currentEpisodes, showId);
                 } catch (error) {
                     console.error('Error fetching episodes:', error);
                     listContainer.innerHTML = '<p style="text-align: center; color: #ff6b6b;">Error loading episodes.</p>';
@@ -507,12 +516,30 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // Episode sorting logic
+    const sortBtn = document.getElementById('sortEpisodesDesc');
+    if (sortBtn) {
+        sortBtn.addEventListener('click', () => {
+            if (currentEpisodes && currentEpisodes.length > 0) {
+                // Sort by title descending
+                currentEpisodes.sort((a, b) => {
+                    return b.title.localeCompare(a.title, undefined, {numeric: true, sensitivity: 'base'});
+                });
+                renderEpisodes(currentEpisodes, currentShowIdForEpisodes);
+            }
+        });
+    }
+
     // Helper functions for popup interactions
     window.toggleWatched = function(showId, episodeId, checkbox) {
         fetch(`/toggle_watched/${showId}/${episodeId}`)
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
+                    // Update global state
+                    const ep = currentEpisodes.find(e => e.id === episodeId);
+                    if (ep) ep.watched = data.watched;
+
                     // 1. Update episode item in modal
                     const li = checkbox.closest('.episode-item');
                     if (data.watched) {
@@ -558,9 +585,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.deleteEpisode = function(showId, episodeId) {
         if (confirm('Are you sure?')) {
-            fetch(`/delete_episode/${showId}/${episodeId}`).then(() => {
-                // Refresh modal content
-                document.querySelector(`.show-card[data-show-id="${showId}"]`).click();
+            fetch(`/delete_episode/${showId}/${episodeId}`).then(response => response.json()).then(data => {
+                if (data.success) {
+                    // Update global state and re-render
+                    currentEpisodes = currentEpisodes.filter(e => e.id !== episodeId);
+                    renderEpisodes(currentEpisodes, showId);
+                    
+                    // Update show card count (simple reload for now or manual update)
+                    // For simplicity, we can let it be, but a full card update would be better.
+                    // Let's just update the total count on the card.
+                    const showCard = document.querySelector(`.show-card[data-show-id="${showId}"]`);
+                    if (showCard) {
+                        const countEl = showCard.querySelector('.episode-count');
+                        let [watched, total] = countEl.textContent.split('/').map(Number);
+                        // We don't know if the deleted one was watched or not without checking the state
+                        // But we already updated the global state, so we could recalculate.
+                        const newWatched = currentEpisodes.filter(e => e.watched).length;
+                        const newTotal = currentEpisodes.length;
+                        countEl.textContent = `${newWatched}/${newTotal}`;
+                    }
+                }
             });
         }
     };
