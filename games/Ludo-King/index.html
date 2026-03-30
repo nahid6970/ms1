@@ -3,222 +3,255 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ludo Board with Dice</title>
+    <title>Ludo Master</title>
     <style>
         :root {
-            --red: #ff0000;
-            --green: #00a000;
-            --yellow: #ffff00;
-            --blue: #0099ff;
-            --white: #ffffff;
-            --border: #333;
-            --cell-size: 40px;
+            --red: #ff0000; --green: #00a000; --yellow: #ffff00; --blue: #0099ff;
+            --white: #ffffff; --border: #333; --cell-size: 40px;
         }
 
         body {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            background-color: #e0e0e0;
-            gap: 20px;
-            padding: 20px;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            min-height: 100vh; margin: 0; background-color: #2c3e50; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: white; gap: 20px;
         }
 
+        /* Menu Overlay */
+        #menu-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); display: flex; justify-content: center; align-items: center;
+            z-index: 100; flex-direction: column; gap: 20px;
+        }
+
+        .menu-card {
+            background: white; padding: 40px; border-radius: 20px; color: #333;
+            text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); min-width: 300px;
+        }
+
+        .menu-btn {
+            display: block; width: 100%; padding: 15px; margin: 10px 0;
+            border: none; border-radius: 10px; font-size: 18px; font-weight: bold;
+            cursor: pointer; transition: transform 0.2s, background 0.2s;
+        }
+
+        .btn-primary { background: #3498db; color: white; }
+        .btn-success { background: #2ecc71; color: white; }
+        .btn-player { background: #f1c40f; color: #333; margin: 5px; width: 60px; display: inline-block; }
+        .menu-btn:hover { transform: scale(1.05); }
+
+        /* Game Board */
         .ludo-board {
-            display: grid;
-            grid-template-columns: repeat(15, var(--cell-size));
+            display: grid; grid-template-columns: repeat(15, var(--cell-size));
             grid-template-rows: repeat(15, var(--cell-size));
-            background-color: var(--white);
-            border: 2px solid var(--border);
-            box-shadow: 0 0 50px rgba(0,0,0,0.3);
+            background-color: var(--white); border: 2px solid var(--border);
+            box-shadow: 0 0 50px rgba(0,0,0,0.3); position: relative;
         }
 
-        .c {
-            border: 0.5px solid #aaa;
-            box-sizing: border-box;
-        }
-
-        /* Home Bases */
-        .home {
-            grid-column: span 6;
-            grid-row: span 6;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 30px;
-        }
+        .c { border: 0.5px solid #aaa; box-sizing: border-box; }
+        .home { grid-column: span 6; grid-row: span 6; display: flex; justify-content: center; align-items: center; padding: 30px; }
         .home-inner {
-            background: white;
-            width: 100%;
-            height: 100%;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            grid-template-rows: 1fr 1fr;
-            gap: 15px;
-            padding: 15px;
-            box-sizing: border-box;
-            border: 1px solid rgba(0,0,0,0.1);
+            background: white; width: 100%; height: 100%; display: grid;
+            grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr;
+            gap: 15px; padding: 15px; box-sizing: border-box; border: 1px solid rgba(0,0,0,0.1);
         }
-        .slot { border: 1px solid rgba(0,0,0,0.1); }
+        .slot { border: 1px solid rgba(0,0,0,0.1); position: relative; }
 
+        /* Color Areas */
         .r-h { grid-area: 1 / 1 / 7 / 7; background: var(--red); }
-        .r-h .slot { background: var(--red); }
         .g-h { grid-area: 1 / 10 / 7 / 16; background: var(--green); }
-        .g-h .slot { background: var(--green); }
         .y-h { grid-area: 10 / 1 / 16 / 7; background: var(--yellow); }
-        .y-h .slot { background: var(--yellow); }
         .b-h { grid-area: 10 / 10 / 16 / 16; background: var(--blue); }
-        .b-h .slot { background: var(--blue); }
-
-        /* Paths */
         .red { background-color: var(--red); }
         .green { background-color: var(--green); }
         .yellow { background-color: var(--yellow); }
         .blue { background-color: var(--blue); }
 
-        /* Center */
         .center {
-            grid-area: 7 / 7 / 10 / 10;
-            position: relative;
-            background: white;
-            border: 1px solid var(--border);
-            overflow: hidden;
+            grid-area: 7 / 7 / 10 / 10; position: relative; background: white;
+            border: 1px solid var(--border); overflow: hidden;
         }
-        .tri {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-        }
+        .tri { position: absolute; width: 100%; height: 100%; }
         .t-r { background: var(--red); clip-path: polygon(0 0, 50% 50%, 0 100%); }
         .t-g { background: var(--green); clip-path: polygon(0 0, 100% 0, 50% 50%); }
         .t-y { background: var(--yellow); clip-path: polygon(0 100%, 50% 50%, 100% 100%); }
         .t-b { background: var(--blue); clip-path: polygon(100% 0, 100% 100%, 50% 50%); }
 
-        /* Dice Styles (Bottom) */
+        /* Tokens */
+        .token {
+            width: 25px; height: 25px; border-radius: 50%; border: 2px solid white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3); position: absolute;
+            top: 50%; left: 50%; transform: translate(-50%, -50%);
+            z-index: 50; cursor: pointer;
+        }
+
+        /* Dice Control */
         #dice-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-            background: white;
-            padding: 15px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            display: flex; flex-direction: column; align-items: center; gap: 10px;
+            background: rgba(255,255,255,0.1); padding: 15px; border-radius: 15px;
         }
         #dice {
-            width: 60px; height: 60px;
-            background: white;
-            border: 3px solid #333;
-            border-radius: 12px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 32px;
-            font-weight: bold;
+            width: 60px; height: 60px; background: white; border: 3px solid #333;
+            border-radius: 12px; display: flex; justify-content: center; align-items: center;
+            font-size: 32px; font-weight: bold; color: #333;
         }
         #roll-btn {
-            padding: 10px 25px;
-            cursor: pointer;
-            background: #333;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-weight: bold;
-            transition: transform 0.1s;
+            padding: 10px 25px; background: #e74c3c; color: white; border: none;
+            border-radius: 8px; font-weight: bold; cursor: pointer;
         }
-        #roll-btn:active { transform: scale(0.95); }
-        #roll-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        #roll-btn:disabled { background: #95a5a6; cursor: not-allowed; }
+        
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-<div class="ludo-board">
-    <!-- Home Bases -->
-    <div class="home r-h"><div class="home-inner"><div class="slot"></div><div class="slot"></div><div class="slot"></div><div class="slot"></div></div></div>
-    <div class="home g-h"><div class="home-inner"><div class="slot"></div><div class="slot"></div><div class="slot"></div><div class="slot"></div></div></div>
-    <div class="home y-h"><div class="home-inner"><div class="slot"></div><div class="slot"></div><div class="slot"></div><div class="slot"></div></div></div>
-    <div class="home b-h"><div class="home-inner"><div class="slot"></div><div class="slot"></div><div class="slot"></div><div class="slot"></div></div></div>
-
-    <!-- Center -->
-    <div class="center">
-        <div class="tri t-r"></div>
-        <div class="tri t-g"></div>
-        <div class="tri t-y"></div>
-        <div class="tri t-b"></div>
+<!-- Menu Overlay -->
+<div id="menu-overlay">
+    <!-- Initial Menu -->
+    <div id="main-menu" class="menu-card">
+        <h2>Ludo Master</h2>
+        <button id="btn-continue" class="menu-btn btn-primary hidden">CONTINUE GAME</button>
+        <button id="btn-new-game" class="menu-btn btn-success">NEW GAME</button>
     </div>
 
-    <!-- Top Arm (Green Path) -->
-    <div class="c" style="grid-area: 1/7"></div><div class="c" style="grid-area: 1/8"></div><div class="c" style="grid-area: 1/9"></div>
-    <div class="c" style="grid-area: 2/7"></div><div class="c green" style="grid-area: 2/8"></div><div class="c green" style="grid-area: 2/9"></div>
-    <div class="c" style="grid-area: 3/7"></div><div class="c green" style="grid-area: 3/8"></div><div class="c" style="grid-area: 3/9"></div>
-    <div class="c" style="grid-area: 4/7"></div><div class="c green" style="grid-area: 4/8"></div><div class="c" style="grid-area: 4/9"></div>
-    <div class="c" style="grid-area: 5/7"></div><div class="c green" style="grid-area: 5/8"></div><div class="c" style="grid-area: 5/9"></div>
-    <div class="c" style="grid-area: 6/7"></div><div class="c green" style="grid-area: 6/8"></div><div class="c" style="grid-area: 6/9"></div>
-
-    <!-- Bottom Arm (Yellow Path) -->
-    <div class="c" style="grid-area: 10/7"></div><div class="c yellow" style="grid-area: 10/8"></div><div class="c" style="grid-area: 10/9"></div>
-    <div class="c" style="grid-area: 11/7"></div><div class="c yellow" style="grid-area: 11/8"></div><div class="c" style="grid-area: 11/9"></div>
-    <div class="c" style="grid-area: 12/7"></div><div class="c yellow" style="grid-area: 12/8"></div><div class="c" style="grid-area: 12/9"></div>
-    <div class="c" style="grid-area: 13/7"></div><div class="c yellow" style="grid-area: 13/8"></div><div class="c" style="grid-area: 13/9"></div>
-    <div class="c yellow" style="grid-area: 14/7"></div><div class="c yellow" style="grid-area: 14/8"></div><div class="c" style="grid-area: 14/9"></div>
-    <div class="c" style="grid-area: 15/7"></div><div class="c" style="grid-area: 15/8"></div><div class="c" style="grid-area: 15/9"></div>
-
-    <!-- Left Arm (Red Path) -->
-    <div class="c" style="grid-area: 7/1"></div><div class="c red" style="grid-area: 7/2"></div><div class="c" style="grid-area: 7/3"></div><div class="c" style="grid-area: 7/4"></div><div class="c" style="grid-area: 7/5"></div><div class="c" style="grid-area: 7/6"></div>
-    <div class="c" style="grid-area: 8/1"></div><div class="c red" style="grid-area: 8/2"></div><div class="c red" style="grid-area: 8/3"></div><div class="c red" style="grid-area: 8/4"></div><div class="c red" style="grid-area: 8/5"></div><div class="c red" style="grid-area: 8/6"></div>
-    <div class="c" style="grid-area: 9/1"></div><div class="c" style="grid-area: 9/2"></div><div class="c" style="grid-area: 9/3"></div><div class="c" style="grid-area: 9/4"></div><div class="c" style="grid-area: 9/5"></div><div class="c" style="grid-area: 9/6"></div>
-
-    <!-- Right Arm (Blue Path) -->
-    <div class="c" style="grid-area: 7/10"></div><div class="c" style="grid-area: 7/11"></div><div class="c" style="grid-area: 7/12"></div><div class="c" style="grid-area: 7/13"></div><div class="c" style="grid-area: 7/14"></div><div class="c" style="grid-area: 7/15"></div>
-    <div class="c blue" style="grid-area: 8/10"></div><div class="c blue" style="grid-area: 8/11"></div><div class="c blue" style="grid-area: 8/12"></div><div class="c blue" style="grid-area: 8/13"></div><div class="c blue" style="grid-area: 8/14"></div><div class="c" style="grid-area: 8/15"></div>
-    <div class="c" style="grid-area: 9/10"></div><div class="c" style="grid-area: 9/11"></div><div class="c" style="grid-area: 9/12"></div><div class="c" style="grid-area: 9/13"></div><div class="c blue" style="grid-area: 9/14"></div><div class="c" style="grid-area: 9/15"></div>
+    <!-- Player Select -->
+    <div id="player-select" class="menu-card hidden">
+        <h2>Select Players</h2>
+        <div>
+            <button class="menu-btn btn-player" onclick="startGame(2)">2</button>
+            <button class="menu-btn btn-player" onclick="startGame(3)">3</button>
+            <button class="menu-btn btn-player" onclick="startGame(4)">4</button>
+        </div>
+        <button onclick="showMainMenu()" class="menu-btn">Back</button>
+    </div>
 </div>
 
-<!-- Dice Container (Now at bottom) -->
+<div class="ludo-board" id="board">
+    <!-- Homes & Center (Generated or hardcoded) -->
+    <div class="home r-h"><div class="home-inner"><div class="slot" id="r-0"></div><div class="slot" id="r-1"></div><div class="slot" id="r-2"></div><div class="slot" id="r-3"></div></div></div>
+    <div class="home g-h"><div class="home-inner"><div class="slot" id="g-0"></div><div class="slot" id="g-1"></div><div class="slot" id="g-2"></div><div class="slot" id="g-3"></div></div></div>
+    <div class="home y-h"><div class="home-inner"><div class="slot" id="y-0"></div><div class="slot" id="y-1"></div><div class="slot" id="y-2"></div><div class="slot" id="y-3"></div></div></div>
+    <div class="home b-h"><div class="home-inner"><div class="slot" id="b-0"></div><div class="slot" id="b-1"></div><div class="slot" id="b-2"></div><div class="slot" id="b-3"></div></div></div>
+    <div class="center"><div class="tri t-r"></div><div class="tri t-g"></div><div class="tri t-y"></div><div class="tri t-b"></div></div>
+</div>
+
 <div id="dice-container">
+    <div id="player-turn-indicator">Current: Red</div>
     <div id="dice">1</div>
     <button id="roll-btn">ROLL DICE</button>
 </div>
 
 <script type="module">
     import { ConvexHttpClient } from "https://esm.sh/convex@1.16.0/browser";
-
     const client = new ConvexHttpClient("https://silent-scorpion-207.convex.cloud");
 
+    const overlay = document.getElementById('menu-overlay');
+    const mainMenu = document.getElementById('main-menu');
+    const playerSelect = document.getElementById('player-select');
+    const btnContinue = document.getElementById('btn-continue');
     const diceEl = document.getElementById('dice');
     const rollBtn = document.getElementById('roll-btn');
+    const turnIndicator = document.getElementById('player-turn-indicator');
 
-    async function updateUI() {
-        try {
-            const state = await client.query("game:getGameState");
-            if (state) {
-                diceEl.innerText = state.diceValue;
-            }
-        } catch (e) {
-            console.error("Convex error:", e);
+    let currentPlayerIndex = 0;
+    const colors = ['Red', 'Green', 'Yellow', 'Blue'];
+
+    // Initial check for existing game
+    async function init() {
+        const state = await client.query("game:getGameState");
+        if (state && state.status === "playing") {
+            btnContinue.classList.remove('hidden');
         }
     }
 
-    rollBtn.onclick = async () => {
-        rollBtn.disabled = true;
-        diceEl.style.opacity = "0.5";
+    window.showMainMenu = () => {
+        mainMenu.classList.remove('hidden');
+        playerSelect.classList.add('hidden');
+    };
 
+    document.getElementById('btn-new-game').onclick = () => {
+        mainMenu.classList.add('hidden');
+        playerSelect.classList.remove('hidden');
+    };
+
+    btnContinue.onclick = () => {
+        overlay.classList.add('hidden');
+        updateUI();
+    };
+
+    window.startGame = async (num) => {
+        await client.mutation("game:startNewGame", { numPlayers: num });
+        overlay.classList.add('hidden');
+        updateUI();
+    };
+
+    async function updateUI() {
+        const state = await client.query("game:getGameState");
+        if (!state) return;
+
+        diceEl.innerText = state.diceValue;
+        currentPlayerIndex = state.currentPlayer;
+        turnIndicator.innerText = `Turn: ${colors[currentPlayerIndex]}`;
+        rollBtn.disabled = !state.waitingForRoll;
+
+        // Render Tokens in Homes
+        state.tokens.forEach((t, i) => {
+            const playerColor = t.player[0]; // r, g, y, b
+            const slotIdx = i % 4;
+            const slot = document.getElementById(`${playerColor}-${slotIdx}`);
+            if (t.pos === -1 && slot) {
+                if (!slot.querySelector('.token')) {
+                    const token = document.createElement('div');
+                    token.className = `token ${t.player}`;
+                    token.style.background = `var(--${t.player})`;
+                    slot.appendChild(token);
+                }
+            }
+        });
+    }
+
+    rollBtn.onclick = async () => {
         try {
-            await client.mutation("game:rollDice", { player: "Player 1" });
-            await updateUI();
+            await client.mutation("game:rollDice", { playerIndex: currentPlayerIndex });
+            updateUI();
         } catch (e) {
-            alert("Error rolling dice. Make sure 'npx convex dev' is running!");
-        } finally {
-            rollBtn.disabled = false;
-            diceEl.style.opacity = "1";
+            console.error(e);
         }
     };
 
-    updateUI();
+    init();
     setInterval(updateUI, 2000);
+</script>
+
+<script>
+    // Grid path generation (Static parts)
+    const board = document.getElementById('board');
+    const generatePath = () => {
+        for (let r = 1; r <= 15; r++) {
+            for (let c = 1; c <= 15; c++) {
+                const isHome = (r <= 6 && c <= 6) || (r <= 6 && c >= 10) || (r >= 10 && c <= 6) || (r >= 10 && c >= 10);
+                const isCenter = (r >= 7 && r <= 9 && c >= 7 && c <= 9);
+                if (!isHome && !isCenter) {
+                    const cell = document.createElement('div');
+                    cell.className = 'c';
+                    cell.style.gridRow = r; cell.style.gridColumn = c;
+                    
+                    // Specific path colors
+                    if (r === 8 && c >= 2 && c <= 6) cell.classList.add('red');
+                    if (r === 7 && c === 2) cell.classList.add('red');
+                    if (c === 8 && r >= 2 && r <= 6) cell.classList.add('green');
+                    if (r === 2 && c === 9) cell.classList.add('green');
+                    if (r === 8 && c >= 10 && c <= 14) cell.classList.add('blue');
+                    if (r === 9 && c === 14) cell.classList.add('blue');
+                    if (c === 8 && r >= 10 && r <= 14) cell.classList.add('yellow');
+                    if (r === 14 && c === 7) cell.classList.add('yellow');
+
+                    board.appendChild(cell);
+                }
+            }
+        }
+    };
+    generatePath();
 </script>
 
 </body>
