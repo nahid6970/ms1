@@ -1,12 +1,13 @@
 import sys
 import os
+import json
 import subprocess
 import threading
 
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QLabel, QPushButton, QLineEdit, QRadioButton, QButtonGroup,
-    QGroupBox, QGridLayout, QListWidget, QScrollArea,
+    QGroupBox, QGridLayout, QListWidget, QScrollArea, QDialog, QFormLayout, QSpinBox,
 )
 from PyQt6.QtCore import Qt, QThread, pyqtSignal
 
@@ -256,9 +257,19 @@ class RcloneApp(QMainWindow):
 
         container = QWidget()
         scroll.setWidget(container)
+
         root = QVBoxLayout(container)
         root.setSpacing(8)
         root.setContentsMargins(12, 12, 12, 12)
+
+        # Two-column layout
+        outer = QHBoxLayout()
+        outer.setSpacing(10)
+        root.addLayout(outer)
+
+        # ── LEFT COLUMN ───────────────────────────────────────────────────────
+        left = QVBoxLayout()
+        left.setSpacing(8)
 
         # ── Command ──────────────────────────────────────────────────────────
         cmd_group = QGroupBox("COMMAND")
@@ -271,7 +282,7 @@ class RcloneApp(QMainWindow):
             self.cmd_group_btn.addButton(rb)
             cmd_layout.addWidget(rb)
         cmd_layout.addStretch()
-        root.addWidget(cmd_group)
+        left.addWidget(cmd_group)
 
         # ── Storage ───────────────────────────────────────────────────────────
         stor_group = QGroupBox("STORAGE")
@@ -297,7 +308,7 @@ class RcloneApp(QMainWindow):
                 rb.setChecked(True)
             self.storage_btn_group.addButton(rb)
             stor_grid.addWidget(rb, r, c)
-        root.addWidget(stor_group)
+        left.addWidget(stor_group)
 
         # ── From / To ─────────────────────────────────────────────────────────
         ft_group = QGroupBox("FROM / TO")
@@ -308,7 +319,7 @@ class RcloneApp(QMainWindow):
         ft_layout.addWidget(QLabel("To:"), 1, 0)
         self.to_input = PathInput("type storage prefix e.g. o0:/")
         ft_layout.addWidget(self.to_input, 1, 1)
-        root.addWidget(ft_group)
+        left.addWidget(ft_group)
 
         # ── Main Flags ────────────────────────────────────────────────────────
         flags_group = QGroupBox("FLAGS")
@@ -335,16 +346,24 @@ class RcloneApp(QMainWindow):
             ("Modified Time **tree",    "-t",                                False),
         ]
         self.flag_defs = flag_defs
-        cols = 4
+        cols = 3
         for i, (name, _, active) in enumerate(flag_defs):
             lbl = ToggleLabel(name, active)
             self.flag_labels.append(lbl)
             flags_grid.addWidget(lbl, i // cols, i % cols)
-        root.addWidget(flags_group)
+        left.addWidget(flags_group)
+
+        left.addStretch()
+        outer.addLayout(left, stretch=3)
+
+        # ── RIGHT COLUMN ──────────────────────────────────────────────────────
+        right = QVBoxLayout()
+        right.setSpacing(8)
 
         # ── Filter Flags ──────────────────────────────────────────────────────
         filter_group = QGroupBox("FILTERS")
         filter_grid = QGridLayout(filter_group)
+        filter_grid.setColumnStretch(1, 1)
         filter_defs = [
             ("Transfers", "--transfers", "4"),
             ("Include",   "--include",   "*.jpg"),
@@ -360,24 +379,23 @@ class RcloneApp(QMainWindow):
         for i, (name, _, default) in enumerate(filter_defs):
             lbl = ToggleLabel(name, False)
             entry = QLineEdit(default)
-            entry.setFixedWidth(120)
             self.filter_labels.append(lbl)
             self.filter_entries.append(entry)
             filter_grid.addWidget(lbl,   i, 0)
             filter_grid.addWidget(entry, i, 1)
-        root.addWidget(filter_group)
+        right.addWidget(filter_group)
 
         # ── Grep ──────────────────────────────────────────────────────────────
         grep_group = QGroupBox("GREP")
         grep_layout = QHBoxLayout(grep_group)
         grep_layout.addWidget(QLabel("Grep Text:"))
         self.grep_entry = QLineEdit()
-        self.grep_entry.setFixedWidth(240)
         grep_layout.addWidget(self.grep_entry)
-        grep_layout.addStretch()
-        root.addWidget(grep_group)
+        right.addWidget(grep_group)
 
-        # ── Buttons ───────────────────────────────────────────────────────────
+        right.addStretch()
+        outer.addLayout(right, stretch=3)
+
         btn_row = QHBoxLayout()
         exec_btn = QPushButton("▶  EXECUTE")
         exec_btn.setStyleSheet(f"background:{CP_CYAN}; color:#000; font-weight:bold; padding:8px 20px; border:none;")
@@ -392,12 +410,16 @@ class RcloneApp(QMainWindow):
         restart_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         restart_btn.clicked.connect(self.restart)
 
+        settings_btn = QPushButton("⚙  SETTINGS")
+        settings_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        settings_btn.clicked.connect(self.open_settings)
+
         btn_row.addWidget(exec_btn)
         btn_row.addWidget(clear_btn)
         btn_row.addWidget(restart_btn)
+        btn_row.addWidget(settings_btn)
         btn_row.addStretch()
         root.addLayout(btn_row)
-        root.addStretch()
 
     def _selected_storage(self):
         btn = self.storage_btn_group.checkedButton()
@@ -441,10 +463,66 @@ class RcloneApp(QMainWindow):
     def restart(self):
         os.execv(sys.executable, [sys.executable] + sys.argv)
 
+    def open_settings(self):
+        dlg = SettingsDialog(self)
+        dlg.exec()
+
+
+class SettingsDialog(QDialog):
+    SETTINGS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "settings.json")
+
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.setWindowTitle("Settings")
+        self.setStyleSheet(parent.styleSheet())
+        layout = QVBoxLayout(self)
+
+        form = QFormLayout()
+        cfg = self._load()
+
+        self.w_spin = QSpinBox()
+        self.w_spin.setRange(400, 3840)
+        self.w_spin.setValue(cfg.get("width", 900))
+        self.w_spin.setStyleSheet(f"background:{CP_PANEL}; color:{CP_CYAN}; border:1px solid {CP_DIM}; padding:4px;")
+
+        self.h_spin = QSpinBox()
+        self.h_spin.setRange(300, 2160)
+        self.h_spin.setValue(cfg.get("height", 800))
+        self.h_spin.setStyleSheet(f"background:{CP_PANEL}; color:{CP_CYAN}; border:1px solid {CP_DIM}; padding:4px;")
+
+        form.addRow("Width:", self.w_spin)
+        form.addRow("Height:", self.h_spin)
+        layout.addLayout(form)
+
+        save_btn = QPushButton("SAVE")
+        save_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        save_btn.clicked.connect(self._save)
+        layout.addWidget(save_btn)
+
+    def _load(self):
+        try:
+            with open(self.SETTINGS_FILE) as f:
+                return json.load(f)
+        except Exception:
+            return {}
+
+    def _save(self):
+        cfg = {"width": self.w_spin.value(), "height": self.h_spin.value()}
+        with open(self.SETTINGS_FILE, "w") as f:
+            json.dump(cfg, f)
+        self.parent().resize(cfg["width"], cfg["height"])
+        self.accept()
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     win = RcloneApp()
-    win.resize(900, 800)
+    cfg_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "settings.json")
+    try:
+        with open(cfg_file) as f:
+            cfg = json.load(f)
+        win.resize(cfg.get("width", 900), cfg.get("height", 800))
+    except Exception:
+        win.resize(900, 800)
     win.show()
     sys.exit(app.exec())
