@@ -2,7 +2,6 @@ import sys
 import os
 import json
 import subprocess
-import threading
 
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
@@ -477,11 +476,7 @@ class RcloneApp(QMainWindow):
         final = " ".join(p for p in parts if p)
         print("Executing:", final)
 
-        def run():
-            subprocess.Popen(final, shell=True).wait()
-            print("\033[92mTask Completed\033[0m")
-
-        threading.Thread(target=run, daemon=True).start()
+        subprocess.Popen(f'start cmd /k "{final}"', shell=True)
 
     def restart(self):
         os.execv(sys.executable, [sys.executable] + sys.argv)
