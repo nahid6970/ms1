@@ -7409,7 +7409,7 @@ function searchTable(force = false) {
     // Split search terms by comma, strip markdown, and trim each term
     // Use NFC normalization for better matching of Unicode characters (like Bengali)
     const searchTerms = searchTerm.split(',')
-        .map(term => stripMarkdown(term.trim()).toLowerCase().normalize('NFC'))
+        .map(term => normalizeBengali(stripMarkdown(term.trim()).toLowerCase().normalize('NFC')))
         .filter(term => term.length > 0);
 
     if (searchTerms.length === 0) {
@@ -7438,7 +7438,7 @@ function searchTable(force = false) {
             if (input) {
                 const cellValue = input.value;
                 // Use NFC normalization for better matching of Unicode characters
-                const cellValueLower = cellValue.toLowerCase().normalize('NFC');
+                const cellValueLower = normalizeBengali(cellValue.toLowerCase().normalize('NFC'));
                 // Strip markdown for searching
                 const strippedValue = stripMarkdown(cellValueLower);
 
@@ -9055,6 +9055,11 @@ function closeAllColumnMenus() {
     document.querySelectorAll('.column-menu').forEach(menu => {
         menu.classList.remove('show');
     });
+}
+
+// Normalize Bengali vowel signs ি (U+09BF) and ী (U+09C0) to be treated as the same in search
+function normalizeBengali(str) {
+    return str.replace(/\u09C0/g, '\u09BF');
 }
 
 function stripMarkdown(text, preserveLinks = false) {
@@ -13049,7 +13054,7 @@ function filterF1Sheets() {
     // Check for special search prefixes
     if (searchTerm.startsWith('*')) {
         // Search all categories by sheet name or nickname
-        const actualSearch = searchTerm.substring(1).toLowerCase();
+        const actualSearch = normalizeBengali(searchTerm.substring(1).toLowerCase());
         populateF1Sheets(true); // Show all sheets from all categories
 
         // Hide separators when searching
@@ -13061,8 +13066,8 @@ function filterF1Sheets() {
         sheetItems.forEach(item => {
             const sheetIndex = parseInt(item.dataset.sheetIndex);
             const sheet = tableData.sheets[sheetIndex];
-            const sheetName = sheet.name.toLowerCase();
-            const sheetNickname = (sheet.nickname || '').toLowerCase();
+            const sheetName = normalizeBengali(sheet.name.toLowerCase());
+            const sheetNickname = (normalizeBengali((sheet.nickname || '').toLowerCase()));
 
             if (sheetName.includes(actualSearch) || sheetNickname.includes(actualSearch)) {
                 item.classList.remove('hidden');
@@ -13072,7 +13077,7 @@ function filterF1Sheets() {
         });
     } else if (searchTerm.startsWith('#')) {
         // Search by content inside sheets
-        const actualSearch = searchTerm.substring(1).toLowerCase();
+        const actualSearch = normalizeBengali(searchTerm.substring(1).toLowerCase());
         const sheetList = document.getElementById('f1SheetList');
         if (!sheetList) return;
 
@@ -13087,7 +13092,7 @@ function filterF1Sheets() {
             if (sheet.rows && sheet.rows.length > 0) {
                 for (let row of sheet.rows) {
                     for (let cell of row) {
-                        if (cell && String(cell).toLowerCase().includes(actualSearch)) {
+                        if (cell && normalizeBengali(String(cell).toLowerCase()).includes(actualSearch)) {
                             hasMatch = true;
                             break;
                         }
@@ -13143,7 +13148,7 @@ function filterF1Sheets() {
         // Normal search - filter current category sheets by name or nickname
         populateF1Sheets(false); // Show sheets from selected category only
 
-        const searchLower = searchTerm.toLowerCase();
+        const searchLower = normalizeBengali(searchTerm.toLowerCase());
         const sheetItems = document.querySelectorAll('.f1-sheet-item');
 
         // Hide separators when searching
@@ -13155,8 +13160,8 @@ function filterF1Sheets() {
         sheetItems.forEach(item => {
             const sheetIndex = parseInt(item.dataset.sheetIndex);
             const sheet = tableData.sheets[sheetIndex];
-            const sheetName = sheet.name.toLowerCase();
-            const sheetNickname = (sheet.nickname || '').toLowerCase();
+            const sheetName = normalizeBengali(sheet.name.toLowerCase());
+            const sheetNickname = (normalizeBengali((sheet.nickname || '').toLowerCase()));
 
             if (sheetName.includes(searchLower) || sheetNickname.includes(searchLower)) {
                 item.classList.remove('hidden');
