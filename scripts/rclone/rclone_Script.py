@@ -251,8 +251,6 @@ class PathInput(QLineEdit):
 
     def focusInEvent(self, e):
         super().focusInEvent(e)
-        if "/" in self.text():
-            self._on_text_changed(self.text())
 
     def _on_item_clicked(self, item):
         if not item: return
