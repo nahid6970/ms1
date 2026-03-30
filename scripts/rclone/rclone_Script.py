@@ -143,11 +143,12 @@ class PathInput(QLineEdit):
         self.setMinimumWidth(420)
         self._fetcher = None
 
-        # Floating popup
-        self._popup = QListWidget(None)  # no parent = top-level window
+        # Floating popup — no focus steal
+        self._popup = QListWidget(None)
         self._popup.setWindowFlags(
-            Qt.WindowType.Popup | Qt.WindowType.FramelessWindowHint
+            Qt.WindowType.Tool | Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint
         )
+        self._popup.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self._popup.setStyleSheet(f"""
             QListWidget {{
                 background-color: {CP_PANEL};
@@ -196,6 +197,27 @@ class PathInput(QLineEdit):
     def _on_item_clicked(self, item):
         self.setText(item.text())
         self._popup.hide()
+
+    def keyPressEvent(self, e):
+        key = e.key()
+        if self._popup.isVisible():
+            cur = self._popup.currentRow()
+            count = self._popup.count()
+            if key == Qt.Key.Key_Down:
+                self._popup.setCurrentRow(min(cur + 1, count - 1))
+                return
+            if key == Qt.Key.Key_Up:
+                self._popup.setCurrentRow(max(cur - 1, 0))
+                return
+            if key in (Qt.Key.Key_Return, Qt.Key.Key_Enter):
+                item = self._popup.currentItem()
+                if item:
+                    self._on_item_clicked(item)
+                return
+            if key == Qt.Key.Key_Escape:
+                self._popup.hide()
+                return
+        super().keyPressEvent(e)
 
     def resizeEvent(self, e):
         super().resizeEvent(e)
