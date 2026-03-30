@@ -586,7 +586,7 @@ def create_tools_window():
         ("Tools", "\ueb51", lambda: subprocess.Popen(["cmd /c C:\\@delta\\ms1\\scripts\\mypygui_import\\tools.py"], shell=True)),
         ("Startup", "\uf4cc", lambda: subprocess.Popen([r"cmd /c C:\@delta\ms1\@Flask\4999_startup\startup.py"], shell=True)),
         ("App Management", "\uf40e", lambda: subprocess.Popen([r"cmd /c start C:\@delta\ms1\@Flask\4998_Applist\applist.py"], shell=True)),
-        ("Rclone", "\uef2c", lambda: subprocess.Popen(["cmd /c start C:\\@delta\\ms1\\scripts\\rclone_Script.py"], shell=True)),
+        ("Rclone", "\uef2c", lambda: subprocess.Popen(["cmd /c start C:\\@delta\\ms1\\scripts\\rclone\\rclone_Script.py"], shell=True)),
         ("Folder", "\ueaf7", lambda: subprocess.Popen(["cmd /c C:\\@delta\\ms1\\scripts\\mypygui_import\\folder.py"], shell=True)),
         ("Position XY", "\uf05b", lambda: subprocess.Popen(["cmd /c C:\\@delta\\ms1\\scripts\\xy\\XY_CroosHair.py"], shell=True)),
         ("Color Tool", "\ue22b", lambda: subprocess.Popen(["cmd /c C:\\@delta\\ms1\\scripts\\color\\color_picker.py"], shell=True)),
@@ -634,7 +634,7 @@ def create_tools_window():
             tool_btn.bind("<Button-3>", lambda e: subprocess.Popen([r"cmd /c code C:\@delta\ms1\@Flask\4998_Applist\applist.py"], shell=True))
             tool_btn.bind("<Control-Button-3>", lambda e: subprocess.Popen(["cmd /c code C:\\@delta\\ms1\\scripts\\mypygui_import\\app_store.py"], shell=True))
         elif name == "Rclone":
-            tool_btn.bind("<Button-3>", lambda e: subprocess.Popen(["cmd /c code C:\\@delta\\ms1\\scripts\\rclone_Script.py"], shell=True))
+            tool_btn.bind("<Button-3>", lambda e: subprocess.Popen(["cmd /c code C:\\@delta\\ms1\\scripts\\rclone\\rclone_Script.py"], shell=True))
         elif name == "Folder":
             tool_btn.bind("<Button-3>", lambda e: subprocess.Popen(["cmd /c code C:\\@delta\\ms1\\scripts\\mypygui_import\\folder.py"], shell=True))
         elif name == "Position XY":
