@@ -1,6 +1,26 @@
 # Recent Development Log
 
 
+## [2026-03-30 20:12] - Fixed Bengali Search Highlight & Scroll
+
+**Session Duration:** 0.05 hours
+
+**What We Accomplished:**
+- Fixed highlight and scroll-to-match not working when searching Bengali vowel variants
+- Root cause: `highlightMultipleTermsInHtml` compared raw cell text (e.g. `ী`) against normalized search term (`ি`), so no highlight spans were created and `searchMatches` stayed empty
+- Fix: applied `normalizeBengali()` to `lowerText` inside `highlightMultipleTermsInHtml` (line 7817)
+
+**Files Modified:**
+- `static/script.js` — `normalizeBengali()` applied to `lowerText` in `highlightMultipleTermsInHtml`
+
+**Current Status:**
+- ✅ Bengali vowel variants now highlight and scroll correctly in sheet search
+
+**Known Issues:**
+- None
+
+---
+
 ## [2026-03-30 20:08] - Bengali Vowel Sign Search Normalization
 
 **Session Duration:** 0.1 hours
