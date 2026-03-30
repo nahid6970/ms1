@@ -382,6 +382,30 @@ def delete_episode(show_id, episode_id):
         return jsonify({'success': True})
     return jsonify({'success': False, 'message': 'Show not found'}), 404
 
+@app.route('/update_episode_sort/<int:show_id>', methods=['POST'])
+def update_episode_sort(show_id):
+    data = request.get_json()
+    sort_type = data.get('sort_type', 'default') # 'alphabetical' or 'default'
+    order = data.get('order', 'asc') # 'asc' or 'desc'
+    
+    shows = load_data()
+    show = next((s for s in shows if s['id'] == show_id), None)
+    
+    if not show:
+        return jsonify({'success': False, 'message': 'Show not found'}), 404
+        
+    show['episode_sort_type'] = sort_type
+    show['episode_sort_order'] = order
+    
+    if sort_type == 'alphabetical':
+        show['episodes'].sort(key=lambda x: x['title'].lower(), reverse=(order == 'desc'))
+    elif sort_type == 'default':
+        # Default is usually by ID or added date, let's say ID descending (newest first)
+        show['episodes'].sort(key=lambda x: x['id'], reverse=True)
+        
+    save_data(shows)
+    return jsonify({'success': True, 'episodes': show['episodes']})
+
 @app.route('/toggle_watched/<int:show_id>/<int:episode_id>')
 def toggle_watched(show_id, episode_id):
     shows = load_data()

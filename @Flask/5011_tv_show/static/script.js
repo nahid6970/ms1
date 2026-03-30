@@ -218,22 +218,15 @@ function renderEpisodes(episodes, showId) {
     listContainer.appendChild(ul);
 }
 
-function applyEpisodeSort() {
+function updateSortButtonUI(sortType, sortOrder) {
     const sortBtn = document.getElementById('sortEpisodesDesc');
-    const isNameDesc = localStorage.getItem(`episodeSort_${currentShowIdForEpisodes}`) === 'name_desc';
-    
-    if (isNameDesc) {
-        currentEpisodes.sort((a, b) => {
-            return b.title.localeCompare(a.title, undefined, {numeric: true, sensitivity: 'base'});
-        });
-        if (sortBtn) {
+    if (sortBtn) {
+        if (sortType === 'alphabetical' && sortOrder === 'desc') {
+            sortBtn.classList.add('active-sort');
             sortBtn.style.background = '#1db954';
             sortBtn.style.color = 'white';
-        }
-    } else {
-        // If not name_desc, we keep server order (usually newest first)
-        // or we could implement a default sort. For now, we'll just reload if they toggle off.
-        if (sortBtn) {
+        } else {
+            sortBtn.classList.remove('active-sort');
             sortBtn.style.background = '';
             sortBtn.style.color = '';
         }
@@ -269,7 +262,7 @@ async function openEpisodesPopup(event, showId, showTitle) {
         currentEpisodes = show.episodes || [];
         currentShowIdForEpisodes = showId;
         
-        applyEpisodeSort();
+        updateSortButtonUI(show.episode_sort_type, show.episode_sort_order);
         renderEpisodes(currentEpisodes, showId);
     } catch (error) {
         console.error('Error fetching episodes:', error);
@@ -490,28 +483,11 @@ document.addEventListener('DOMContentLoaded', () => {
             // Check if the click wasn't on a button or inside hover controls
             if (!event.target.closest('.hover-controls')) {
                 const showId = card.dataset.showId;
+                const showTitle = card.dataset.title;
                 if (!showId) return;
-
-                const modal = document.getElementById('episodesModal');
-                const titleEl = document.getElementById('episodesModalTitle');
-                const listContainer = document.getElementById('episodesListContainer');
-
-                titleEl.textContent = card.dataset.title;
-                listContainer.innerHTML = '<p style="text-align: center;">Loading episodes...</p>';
-                modal.style.display = 'block';
-                document.body.classList.add('modal-open');
-
-                try {
-                    const response = await fetch(`/edit_show/${showId}`); // Reusing edit_show to get data
-                    const show = await response.json();
-                    
-                    currentEpisodes = show.episodes || [];
-                    currentShowIdForEpisodes = showId;
-                    renderEpisodes(currentEpisodes, showId);
-                } catch (error) {
-                    console.error('Error fetching episodes:', error);
-                    listContainer.innerHTML = '<p style="text-align: center; color: #ff6b6b;">Error loading episodes.</p>';
-                }
+                
+                // Use the consolidated function to open the popup
+                openEpisodesPopup(event, showId, showTitle);
             }
         });
     });
@@ -519,13 +495,28 @@ document.addEventListener('DOMContentLoaded', () => {
     // Episode sorting logic
     const sortBtn = document.getElementById('sortEpisodesDesc');
     if (sortBtn) {
-        sortBtn.addEventListener('click', () => {
-            if (currentEpisodes && currentEpisodes.length > 0) {
-                // Sort by title descending
-                currentEpisodes.sort((a, b) => {
-                    return b.title.localeCompare(a.title, undefined, {numeric: true, sensitivity: 'base'});
+        sortBtn.addEventListener('click', async () => {
+            if (!currentShowIdForEpisodes) return;
+            
+            const isActive = sortBtn.classList.contains('active-sort');
+            const newSortType = isActive ? 'default' : 'alphabetical';
+            const newOrder = isActive ? 'desc' : 'desc'; // We're specifically implementing name DESC
+            
+            try {
+                const response = await fetch(`/update_episode_sort/${currentShowIdForEpisodes}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sort_type: newSortType, order: newOrder })
                 });
-                renderEpisodes(currentEpisodes, currentShowIdForEpisodes);
+                
+                const data = await response.json();
+                if (data.success) {
+                    currentEpisodes = data.episodes;
+                    updateSortButtonUI(newSortType, newOrder);
+                    renderEpisodes(currentEpisodes, currentShowIdForEpisodes);
+                }
+            } catch (error) {
+                console.error('Error updating episode sort:', error);
             }
         });
     }
