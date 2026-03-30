@@ -47,7 +47,7 @@
             box-shadow: 0 0 50px rgba(0,0,0,0.3); position: relative;
         }
 
-        .c { border: 0.5px solid #aaa; box-sizing: border-box; }
+        .c { border: 0.5px solid #aaa; box-sizing: border-box; position: relative; }
         .home { grid-column: span 6; grid-row: span 6; display: flex; justify-content: center; align-items: center; padding: 30px; }
         .home-inner {
             background: white; width: 100%; height: 100%; display: grid;
@@ -78,43 +78,46 @@
 
         /* Tokens */
         .token {
-            width: 25px; height: 25px; border-radius: 50%; border: 2px solid white;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3); position: absolute;
+            width: 30px; height: 30px; border-radius: 50%; border: 3px solid white;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4); position: absolute;
             top: 50%; left: 50%; transform: translate(-50%, -50%);
-            z-index: 50; cursor: pointer;
+            z-index: 50; cursor: pointer; transition: all 0.3s;
         }
 
         /* Dice Control */
         #dice-container {
             display: flex; flex-direction: column; align-items: center; gap: 10px;
-            background: rgba(255,255,255,0.1); padding: 15px; border-radius: 15px;
+            background: rgba(255,255,255,0.1); padding: 15px; border-radius: 15px; min-width: 200px;
         }
         #dice {
-            width: 60px; height: 60px; background: white; border: 3px solid #333;
-            border-radius: 12px; display: flex; justify-content: center; align-items: center;
-            font-size: 32px; font-weight: bold; color: #333;
+            width: 70px; height: 70px; background: white; border: 4px solid #333;
+            border-radius: 15px; display: flex; justify-content: center; align-items: center;
+            font-size: 40px; font-weight: bold; color: #333; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
         }
         #roll-btn {
-            padding: 10px 25px; background: #e74c3c; color: white; border: none;
-            border-radius: 8px; font-weight: bold; cursor: pointer;
+            padding: 12px 30px; background: #e74c3c; color: white; border: none;
+            border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px;
         }
-        #roll-btn:disabled { background: #95a5a6; cursor: not-allowed; }
+        #roll-btn:disabled { background: #95a5a6; cursor: not-allowed; opacity: 0.6; }
+        
+        #skip-btn { padding: 8px 15px; background: #34495e; color: white; border: none; border-radius: 6px; cursor: pointer; }
         
         .hidden { display: none !important; }
+        .pulse { animation: pulse 1s infinite alternate; }
+        @keyframes pulse {
+            from { transform: translate(-50%, -50%) scale(1); box-shadow: 0 0 5px white; }
+            to { transform: translate(-50%, -50%) scale(1.1); box-shadow: 0 0 15px white; }
+        }
     </style>
 </head>
 <body>
 
-<!-- Menu Overlay -->
 <div id="menu-overlay">
-    <!-- Initial Menu -->
     <div id="main-menu" class="menu-card">
         <h2>Ludo Master</h2>
         <button id="btn-continue" class="menu-btn btn-primary hidden">CONTINUE GAME</button>
         <button id="btn-new-game" class="menu-btn btn-success">NEW GAME</button>
     </div>
-
-    <!-- Player Select -->
     <div id="player-select" class="menu-card hidden">
         <h2>Select Players</h2>
         <div>
@@ -127,7 +130,6 @@
 </div>
 
 <div class="ludo-board" id="board">
-    <!-- Homes & Center (Generated or hardcoded) -->
     <div class="home r-h"><div class="home-inner"><div class="slot" id="r-0"></div><div class="slot" id="r-1"></div><div class="slot" id="r-2"></div><div class="slot" id="r-3"></div></div></div>
     <div class="home g-h"><div class="home-inner"><div class="slot" id="g-0"></div><div class="slot" id="g-1"></div><div class="slot" id="g-2"></div><div class="slot" id="g-3"></div></div></div>
     <div class="home y-h"><div class="home-inner"><div class="slot" id="y-0"></div><div class="slot" id="y-1"></div><div class="slot" id="y-2"></div><div class="slot" id="y-3"></div></div></div>
@@ -136,9 +138,12 @@
 </div>
 
 <div id="dice-container">
-    <div id="player-turn-indicator">Current: Red</div>
+    <div id="player-turn-indicator" style="font-size: 20px; font-weight: bold;">Turn: Green</div>
     <div id="dice">1</div>
-    <button id="roll-btn">ROLL DICE</button>
+    <div style="display: flex; gap: 10px;">
+        <button id="roll-btn">ROLL DICE</button>
+        <button id="skip-btn" class="hidden">SKIP</button>
+    </div>
 </div>
 
 <script type="module">
@@ -151,33 +156,25 @@
     const btnContinue = document.getElementById('btn-continue');
     const diceEl = document.getElementById('dice');
     const rollBtn = document.getElementById('roll-btn');
+    const skipBtn = document.getElementById('skip-btn');
     const turnIndicator = document.getElementById('player-turn-indicator');
+    const board = document.getElementById('board');
 
-    let currentPlayerIndex = 0;
     const colors = ['Red', 'Green', 'Yellow', 'Blue'];
+    let currentPlayerIndex = 0;
 
-    // Initial check for existing game
-    async function init() {
-        const state = await client.query("game:getGameState");
-        if (state && state.status === "playing") {
-            btnContinue.classList.remove('hidden');
-        }
+    // Helper: Map pos 0-51 to Board Coordinates
+    function getPathCell(idx) {
+        // This is a simplified path coordinate system for the 15x15 grid
+        const cells = document.querySelectorAll('.path-cell');
+        return cells[idx % cells.length];
     }
 
-    window.showMainMenu = () => {
-        mainMenu.classList.remove('hidden');
-        playerSelect.classList.add('hidden');
-    };
-
-    document.getElementById('btn-new-game').onclick = () => {
-        mainMenu.classList.add('hidden');
-        playerSelect.classList.remove('hidden');
-    };
-
-    btnContinue.onclick = () => {
-        overlay.classList.add('hidden');
-        updateUI();
-    };
+    async function init() {
+        generatePath();
+        const state = await client.query("game:getGameState");
+        if (state && state.status === "playing") btnContinue.classList.remove('hidden');
+    }
 
     window.startGame = async (num) => {
         await client.mutation("game:startNewGame", { numPlayers: num });
@@ -185,58 +182,89 @@
         updateUI();
     };
 
+    btnContinue.onclick = () => { overlay.classList.add('hidden'); updateUI(); };
+
     async function updateUI() {
         const state = await client.query("game:getGameState");
         if (!state) return;
 
         diceEl.innerText = state.diceValue;
         currentPlayerIndex = state.currentPlayer;
-        turnIndicator.innerText = `Turn: ${colors[currentPlayerIndex]}`;
+        const activeColorName = colors[currentPlayerIndex];
+        
+        turnIndicator.innerText = `Turn: ${activeColorName}`;
+        turnIndicator.style.color = `var(--${activeColorName.toLowerCase()})`;
+        diceEl.style.backgroundColor = `var(--${activeColorName.toLowerCase()})`;
+        diceEl.style.color = activeColorName === 'Yellow' ? '#333' : 'white';
+        
         rollBtn.disabled = !state.waitingForRoll;
+        if (!state.waitingForRoll) skipBtn.classList.remove('hidden');
+        else skipBtn.classList.add('hidden');
 
-        // Render Tokens in Homes
+        document.querySelectorAll('.token').forEach(el => el.remove());
+
         state.tokens.forEach((t, i) => {
-            const playerColor = t.player[0]; // r, g, y, b
+            const playerIdx = Math.floor(i / 4);
             const slotIdx = i % 4;
-            const slot = document.getElementById(`${playerColor}-${slotIdx}`);
-            if (t.pos === -1 && slot) {
-                if (!slot.querySelector('.token')) {
-                    const token = document.createElement('div');
-                    token.className = `token ${t.player}`;
-                    token.style.background = `var(--${t.player})`;
-                    slot.appendChild(token);
+            const tokenColor = t.player;
+            
+            let parent;
+            if (t.pos === -1) {
+                parent = document.getElementById(`${tokenColor[0]}-${slotIdx}`);
+            } else {
+                // Find path cell by id "p-{pos}"
+                // For simplicity now, we just map to the path-cell sequence
+                const pathCells = document.querySelectorAll('.path-cell');
+                // Offset per player: Red: 0, Green: 13, Yellow: 26, Blue: 39
+                const offset = playerIdx * 13;
+                const actualPos = (t.pos + offset) % 52;
+                parent = pathCells[actualPos];
+            }
+
+            if (parent) {
+                const token = document.createElement('div');
+                token.className = `token ${tokenColor}`;
+                token.style.background = `var(--${tokenColor})`;
+                
+                // If it's this token's turn and dice is rolled
+                if (!state.waitingForRoll && playerIdx === state.currentPlayer) {
+                    // Check if 6 or already out
+                    if (state.diceValue === 6 || t.pos !== -1) {
+                        token.classList.add('pulse');
+                        token.onclick = async (e) => {
+                            e.stopPropagation();
+                            await client.mutation("game:moveToken", { tokenIndex: i });
+                            updateUI();
+                        };
+                    }
                 }
+                parent.appendChild(token);
             }
         });
     }
 
     rollBtn.onclick = async () => {
-        try {
-            await client.mutation("game:rollDice", { playerIndex: currentPlayerIndex });
-            updateUI();
-        } catch (e) {
-            console.error(e);
-        }
+        await client.mutation("game:rollDice", { playerIndex: currentPlayerIndex });
+        updateUI();
     };
 
-    init();
-    setInterval(updateUI, 2000);
-</script>
+    skipBtn.onclick = async () => {
+        await client.mutation("game:skipTurn");
+        updateUI();
+    };
 
-<script>
-    // Grid path generation (Static parts)
-    const board = document.getElementById('board');
-    const generatePath = () => {
+    function generatePath() {
+        // Red start: 7,2. Path goes clockwise.
+        // We add IDs to the path cells to find them easily.
         for (let r = 1; r <= 15; r++) {
             for (let c = 1; c <= 15; c++) {
                 const isHome = (r <= 6 && c <= 6) || (r <= 6 && c >= 10) || (r >= 10 && c <= 6) || (r >= 10 && c >= 10);
                 const isCenter = (r >= 7 && r <= 9 && c >= 7 && c <= 9);
                 if (!isHome && !isCenter) {
                     const cell = document.createElement('div');
-                    cell.className = 'c';
+                    cell.className = 'c path-cell';
                     cell.style.gridRow = r; cell.style.gridColumn = c;
                     
-                    // Specific path colors
                     if (r === 8 && c >= 2 && c <= 6) cell.classList.add('red');
                     if (r === 7 && c === 2) cell.classList.add('red');
                     if (c === 8 && r >= 2 && r <= 6) cell.classList.add('green');
@@ -250,8 +278,10 @@
                 }
             }
         }
-    };
-    generatePath();
+    }
+
+    init();
+    setInterval(updateUI, 2000);
 </script>
 
 </body>
