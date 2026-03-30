@@ -8,12 +8,17 @@ export const getGameState = query({
   },
 });
 
+const START_INDEXES = [1, 14, 40, 27]; // Red, Green, Yellow, Blue
+const SAFE_SQUARES = [1, 9, 14, 22, 27, 35, 40, 48];
+
+function getAbsPos(playerIdx: number, relativePos: number) {
+  if (relativePos === -1 || relativePos >= 52) return -1;
+  return (relativePos + START_INDEXES[playerIdx]) % 52;
+}
+
 export const startNewGame = mutation({
   args: { numPlayers: v.number() },
   handler: async (ctx, args) => {
-    // 2 players: Green (1) and Yellow (2)
-    // 3 players: Red (0), Green (1), Yellow (2)
-    // 4 players: Red, Green, Yellow, Blue
     let firstPlayer = 0;
     if (args.numPlayers === 2) firstPlayer = 1;
 
@@ -24,7 +29,7 @@ export const startNewGame = mutation({
       diceValue: 1,
       waitingForRoll: true,
       sixCount: 0,
-      turnId: Date.now().toString(), // Track unique turn states
+      turnId: Date.now().toString(),
       tokens: [
         { player: 'red', pos: -1 }, { player: 'red', pos: -1 }, { player: 'red', pos: -1 }, { player: 'red', pos: -1 },
         { player: 'green', pos: -1 }, { player: 'green', pos: -1 }, { player: 'green', pos: -1 }, { player: 'green', pos: -1 },
@@ -45,18 +50,11 @@ export const rollDice = mutation({
 
     const diceValue = Math.floor(Math.random() * 6) + 1;
     let sixCount = state.sixCount;
+    if (diceValue === 6) sixCount++; else sixCount = 0;
 
-    if (diceValue === 6) {
-      sixCount++;
-    } else {
-      sixCount = 0;
-    }
-
-    // Rule: Three consecutive sixes skips turn
     if (sixCount === 3) {
       await ctx.db.patch(state._id, {
-        diceValue,
-        sixCount: 0,
+        diceValue, sixCount: 0,
         currentPlayer: getNextPlayer(state.currentPlayer, state.numPlayers),
         waitingForRoll: true,
         turnId: Date.now().toString(),
@@ -64,12 +62,7 @@ export const rollDice = mutation({
       return { diceValue, skipped: true };
     }
 
-    await ctx.db.patch(state._id, {
-      diceValue,
-      sixCount,
-      waitingForRoll: false,
-      timestamp: Date.now(),
-    });
+    await ctx.db.patch(state._id, { diceValue, sixCount, waitingForRoll: false, timestamp: Date.now() });
     return { diceValue };
   },
 });
@@ -87,12 +80,9 @@ export const moveToken = mutation({
     const token = tokens[args.tokenIndex];
     let extraTurn = false;
 
-    // Move Logic
     if (token.pos === -1) {
-      if (state.diceValue === 6) {
-        token.pos = 0;
-        extraTurn = true; 
-      } else return;
+      if (state.diceValue === 6) { token.pos = 0; extraTurn = true; }
+      else return;
     } else {
       const newPos = token.pos + state.diceValue;
       if (newPos <= 57) {
@@ -101,21 +91,25 @@ export const moveToken = mutation({
       } else return;
     }
 
-    // Capture logic
-    if (token.pos < 52 && ![0, 8, 13, 21, 26, 34, 39, 47].includes(token.pos)) {
+    // Correct Capture Logic using Absolute Positions
+    const myAbsPos = getAbsPos(state.currentPlayer, token.pos);
+    const isAtSafeSquare = SAFE_SQUARES.includes(myAbsPos);
+
+    if (myAbsPos !== -1 && !isAtSafeSquare) {
       for (let i = 0; i < tokens.length; i++) {
-        const otherPlayer = Math.floor(i / 4);
-        if (otherPlayer !== state.currentPlayer && tokens[i].pos === token.pos) {
-          tokens[i].pos = -1;
-          extraTurn = true; // Bonus turn for capture
+        const otherPlayerIdx = Math.floor(i / 4);
+        if (otherPlayerIdx !== state.currentPlayer) {
+          const otherAbsPos = getAbsPos(otherPlayerIdx, tokens[i].pos);
+          if (otherAbsPos === myAbsPos) {
+            tokens[i].pos = -1; // Capture!
+            extraTurn = true; 
+          }
         }
       }
     }
 
     let nextPlayer = state.currentPlayer;
-    if (!extraTurn) {
-      nextPlayer = getNextPlayer(state.currentPlayer, state.numPlayers);
-    }
+    if (!extraTurn) nextPlayer = getNextPlayer(state.currentPlayer, state.numPlayers);
 
     await ctx.db.patch(state._id, {
       tokens,
@@ -133,14 +127,11 @@ export const skipTurn = mutation({
   handler: async (ctx, args) => {
     const state = await ctx.db.query("game_state").order("desc").first();
     if (!state || state.waitingForRoll || state.currentPlayer !== args.playerIndex) return;
-
-    const nextPlayer = getNextPlayer(state.currentPlayer, state.numPlayers);
     await ctx.db.patch(state._id, {
-      currentPlayer: nextPlayer,
+      currentPlayer: getNextPlayer(state.currentPlayer, state.numPlayers),
       waitingForRoll: true,
       sixCount: 0,
       turnId: Date.now().toString(),
-      timestamp: Date.now(),
     });
   },
 });

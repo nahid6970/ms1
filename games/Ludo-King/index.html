@@ -148,6 +148,7 @@
     const colors = ['Red', 'Green', 'Yellow', 'Blue'];
 
     const START_INDEX = { 'red': 1, 'green': 14, 'yellow': 40, 'blue': 27 };
+    const SAFE_SQUARES = [1, 9, 14, 22, 27, 35, 40, 48];
     let lastProcessedTurnId = "";
 
     async function updateUI() {
@@ -305,6 +306,18 @@
 
     generateBoard();
     updateUI();
+    setInterval(updateUI, 2000);
+
+    const checkContinue = async () => {
+        const state = await client.query("game:getGameState");
+        if (state && state.status === "playing") document.getElementById('btn-continue').classList.remove('hidden');
+    };
+    checkContinue();
+</script>
+
+</body>
+</html>
+
     setInterval(updateUI, 2000);
 
     const checkContinue = async () => {
