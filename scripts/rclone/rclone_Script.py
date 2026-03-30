@@ -105,15 +105,17 @@ class FolderFetcher(QThread):
     def __init__(self, path):
         super().__init__()
         self.path = path
+        self._procs = []
 
     def run(self):
         try:
             base = self.path.rstrip("/") + "/"
-            # Run both in parallel
             p_dirs  = subprocess.Popen(["rclone", "lsd", self.path],
                         stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
             p_files = subprocess.Popen(["rclone", "lsf", "--max-depth", "1", "--files-only", self.path],
                         stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+            self._procs = [p_dirs, p_files]
+            
             dirs_out,  _ = p_dirs.communicate(timeout=15)
             files_out, _ = p_files.communicate(timeout=15)
 
@@ -124,6 +126,12 @@ class FolderFetcher(QThread):
             self.done.emit(parse(dirs_out) + parse(files_out))
         except Exception:
             self.done.emit([])
+
+    def stop(self):
+        for p in self._procs:
+            try: p.kill()
+            except: pass
+        self.wait(100)
 
 
 # ── PATH INPUT WITH FLOATING DROPDOWN ────────────────────────────────────────
@@ -173,19 +181,14 @@ class PathInput(QLineEdit):
         return None
 
     def _on_text_changed(self, text):
-        # 1. Handle Prefix Suggestions (if no / yet or just started typing)
+        # Only show dropdown if a slash is present
         if "/" not in text:
-            matches = [p for p in self.STORAGE_PREFIXES if p.lower().startswith(text.lower())]
-            if matches and not (len(matches) == 1 and matches[0] == text):
-                self._all_items = []
-                self._last_fetched_path = ""
-                self._update_popup(matches)
-                return
-            elif not matches:
-                self._popup.hide()
-                return
+            self._popup.hide()
+            self._all_items = []
+            self._last_fetched_path = ""
+            return
 
-        # 2. Handle Folder Suggestions
+        # Handle Folder Suggestions
         last_slash_idx = text.rfind("/")
         base_path = text[:last_slash_idx + 1]
         search_term = text[last_slash_idx + 1:]
@@ -194,7 +197,9 @@ class PathInput(QLineEdit):
         if text.endswith("/") and self._matching_prefix(text):
             if text != self._last_fetched_path:
                 if self._fetcher and self._fetcher.isRunning():
-                    self._fetcher.terminate()
+                    try: self._fetcher.done.disconnect()
+                    except: pass
+                    self._fetcher.stop()
                 self._fetcher = FolderFetcher(text)
                 self._fetcher.done.connect(self._populate)
                 self._fetcher.start()
@@ -206,10 +211,11 @@ class PathInput(QLineEdit):
                 self._update_popup(matches)
             else:
                 self._popup.hide()
-        elif not text.endswith("/"):
+        elif not text.endswith("/") and not self._all_items:
              self._popup.hide()
 
     def _populate(self, folders):
+        if not self._fetcher: return
         self._last_fetched_path = self._fetcher.path
         self._all_items = folders
         
@@ -225,10 +231,11 @@ class PathInput(QLineEdit):
             self._popup.hide()
 
     def _update_popup(self, items):
-        self._popup.clear()
-        if not items:
+        if not items or "/" not in self.text():
             self._popup.hide()
             return
+        
+        self._popup.clear()
         for i in items:
             self._popup.addItem(i)
         
@@ -241,11 +248,14 @@ class PathInput(QLineEdit):
 
     def focusInEvent(self, e):
         super().focusInEvent(e)
-        self._on_text_changed(self.text())
+        if "/" in self.text():
+            self._on_text_changed(self.text())
 
     def _on_item_clicked(self, item):
-        self.setText(item.text())
-        if not item.text().endswith("/"):
+        if not item: return
+        path = item.text() # Capture text BEFORE setText, as setText can trigger clear()
+        self.setText(path)
+        if not path.endswith("/"):
             self._popup.hide()
 
     def keyPressEvent(self, e):
