@@ -133,7 +133,7 @@
 </div>
 
 <div id="dice-container">
-    <div id="player-turn-indicator" style="font-size: 24px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">Turn: Green</div>
+    <div id="player-turn-indicator" style="font-size: 24px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">Turn: Red</div>
     <div id="dice">1</div>
     <button id="roll-btn">ROLL DICE</button>
 </div>
@@ -147,22 +147,118 @@
     const turnIndicator = document.getElementById('player-turn-indicator');
     const colors = ['Red', 'Green', 'Yellow', 'Blue'];
 
-    const PATH = [
-        {r:7, c:1}, {r:7, c:2}, {r:7, c:3}, {r:7, c:4}, {r:7, c:5}, {r:7, c:6},
-        {r:6, c:7}, {r:5, c:7}, {r:4, c:7}, {r:3, c:7}, {r:2, c:7}, {r:1, c:7}, {r:1, c:8}, {r:1, c:9},
-        {r:2, c:9}, {r:3, c:9}, {r:4, c:9}, {r:5, c:9}, {r:6, c:9},
-        {r:7, c:10}, {r:7, c:11}, {r:7, c:12}, {r:7, c:13}, {r:7, c:14}, {r:7, c:15}, {r:8, c:15}, {r:9, c:15},
-        {r:9, c:14}, {r:9, c:13}, {r:9, c:12}, {r:9, c:11}, {r:9, c:10},
-        {r:10, c:9}, {r:11, c:9}, {r:12, c:9}, {r:13, c:9}, {r:14, c:9}, {r:15, c:9}, {r:15, c:8}, {r:15, c:7},
-        {r:14, c:7}, {r:13, c:7}, {r:12, c:7}, {r:11, c:7}, {r:10, c:7},
-        {r:9, c:6}, {r:9, c:5}, {r:9, c:4}, {r:9, c:3}, {r:9, c:2}, {r:9, c:1}, {r:8, c:1}
-    ];
-
     const START_INDEX = { 'red': 1, 'green': 14, 'yellow': 40, 'blue': 27 };
-    let isAutoActing = false;
+    let lastProcessedTurnId = "";
+
+    async function updateUI() {
+        const state = await client.query("game:getGameState");
+        if (!state) return;
+
+        diceEl.innerText = state.diceValue;
+        const activeColor = colors[state.currentPlayer];
+        turnIndicator.innerText = `Turn: ${activeColor}`;
+        turnIndicator.style.color = `var(--${activeColor.toLowerCase()})`;
+        diceEl.style.backgroundColor = `var(--${activeColor.toLowerCase()})`;
+        diceEl.style.color = activeColor === 'Yellow' ? '#333' : 'white';
+        
+        const validMoves = [];
+        state.tokens.forEach((t, i) => {
+            if (Math.floor(i/4) === state.currentPlayer) {
+                if (t.pos === -1) { if (state.diceValue === 6) validMoves.push(i); }
+                else if (t.pos + state.diceValue <= 57) { validMoves.push(i); }
+            }
+        });
+
+        if (state.waitingForRoll) {
+            rollBtn.disabled = false;
+            rollBtn.innerText = "ROLL DICE";
+            lastProcessedTurnId = state.turnId; // Ready for next roll
+        } else {
+            rollBtn.disabled = true;
+            rollBtn.innerText = "SELECT TOKEN";
+
+            // Process auto-action ONLY ONCE per turn state
+            if (lastProcessedTurnId !== state.turnId) {
+                lastProcessedTurnId = state.turnId;
+                setTimeout(async () => {
+                    if (validMoves.length === 0) {
+                        await client.mutation("game:skipTurn", { playerIndex: state.currentPlayer });
+                        updateUI();
+                    } else if (validMoves.length === 1) {
+                        await client.mutation("game:moveToken", { tokenIndex: validMoves[0] });
+                        updateUI();
+                    }
+                }, 1000);
+            }
+        }
+
+        renderTokens(state, validMoves);
+    }
+
+    function renderTokens(state, validMoves) {
+        document.querySelectorAll('.token').forEach(el => el.remove());
+        state.tokens.forEach((t, i) => {
+            const playerIdx = Math.floor(i / 4);
+            let parent;
+            if (t.pos === -1) parent = document.getElementById(`${t.player[0]}-${i % 4}`);
+            else if (t.pos >= 52) parent = document.getElementById(`stretch-${t.player}-${t.pos - 52}`);
+            else parent = document.getElementById(`path-${(t.pos + START_INDEX[t.player]) % 52}`);
+
+            if (parent) {
+                const token = document.createElement('div');
+                token.className = `token ${t.player}`;
+                token.style.background = `var(--${t.player})`;
+                if (!state.waitingForRoll && validMoves.includes(i)) {
+                    token.classList.add('pulse');
+                    token.onclick = async () => {
+                        await client.mutation("game:moveToken", { tokenIndex: i });
+                        updateUI();
+                    };
+                }
+                parent.appendChild(token);
+            }
+        });
+    }
+
+    rollBtn.onclick = async () => {
+        const state = await client.query("game:getGameState");
+        await client.mutation("game:rollDice", { playerIndex: state.currentPlayer });
+        updateUI();
+    };
+
+    window.startGame = async (num) => {
+        await client.mutation("game:startNewGame", { numPlayers: num });
+        document.getElementById('menu-overlay').classList.add('hidden');
+        updateUI();
+    };
+
+    document.getElementById('btn-new-game').onclick = () => {
+        document.getElementById('main-menu').classList.add('hidden');
+        document.getElementById('player-select').classList.remove('hidden');
+    };
+
+    window.showMainMenu = () => {
+        document.getElementById('main-menu').classList.remove('hidden');
+        document.getElementById('player-select').classList.add('hidden');
+    };
+
+    document.getElementById('btn-continue').onclick = () => {
+        document.getElementById('menu-overlay').classList.add('hidden');
+        updateUI();
+    };
 
     function generateBoard() {
         const board = document.getElementById('board');
+        const PATH = [
+            {r:7, c:1}, {r:7, c:2}, {r:7, c:3}, {r:7, c:4}, {r:7, c:5}, {r:7, c:6},
+            {r:6, c:7}, {r:5, c:7}, {r:4, c:7}, {r:3, c:7}, {r:2, c:7}, {r:1, c:7}, {r:1, c:8}, {r:1, c:9},
+            {r:2, c:9}, {r:3, c:9}, {r:4, c:9}, {r:5, c:9}, {r:6, c:9},
+            {r:7, c:10}, {r:7, c:11}, {r:7, c:12}, {r:7, c:13}, {r:7, c:14}, {r:7, c:15}, {r:8, c:15}, {r:9, c:15},
+            {r:9, c:14}, {r:9, c:13}, {r:9, c:12}, {r:9, c:11}, {r:9, c:10},
+            {r:10, c:9}, {r:11, c:9}, {r:12, c:9}, {r:13, c:9}, {r:14, c:9}, {r:15, c:9}, {r:15, c:8}, {r:15, c:7},
+            {r:14, c:7}, {r:13, c:7}, {r:12, c:7}, {r:11, c:7}, {r:10, c:7},
+            {r:9, c:6}, {r:9, c:5}, {r:9, c:4}, {r:9, c:3}, {r:9, c:2}, {r:9, c:1}, {r:8, c:1}
+        ];
         PATH.forEach((p, i) => {
             const cell = document.createElement('div');
             cell.className = 'c'; cell.id = `path-${i}`;
@@ -206,99 +302,6 @@
             }
         }
     }
-
-    async function updateUI() {
-        const state = await client.query("game:getGameState");
-        if (!state) return;
-
-        diceEl.innerText = state.diceValue;
-        const activeColor = colors[state.currentPlayer];
-        turnIndicator.innerText = `Turn: ${activeColor}`;
-        turnIndicator.style.color = `var(--${activeColor.toLowerCase()})`;
-        diceEl.style.backgroundColor = `var(--${activeColor.toLowerCase()})`;
-        diceEl.style.color = activeColor === 'Yellow' ? '#333' : 'white';
-        
-        const validMoveIndices = [];
-        state.tokens.forEach((t, i) => {
-            if (Math.floor(i/4) === state.currentPlayer) {
-                if (t.pos === -1) { if (state.diceValue === 6) validMoveIndices.push(i); }
-                else if (t.pos + state.diceValue <= 57) { validMoveIndices.push(i); }
-            }
-        });
-
-        if (state.waitingForRoll) {
-            rollBtn.disabled = false;
-            rollBtn.innerText = "ROLL DICE";
-            isAutoActing = false;
-        } else {
-            rollBtn.disabled = true;
-            rollBtn.innerText = "SELECT TOKEN";
-
-            // Auto-action logic
-            if (!isAutoActing) {
-                isAutoActing = true;
-                setTimeout(async () => {
-                    if (validMoveIndices.length === 0) {
-                        await client.mutation("game:skipTurn");
-                        updateUI();
-                    } else if (validMoveIndices.length === 1) {
-                        await client.mutation("game:moveToken", { tokenIndex: validMoveIndices[0] });
-                        updateUI();
-                    }
-                }, 1000);
-            }
-        }
-
-        document.querySelectorAll('.token').forEach(el => el.remove());
-        state.tokens.forEach((t, i) => {
-            const playerIdx = Math.floor(i / 4);
-            let parent;
-            if (t.pos === -1) parent = document.getElementById(`${t.player[0]}-${i % 4}`);
-            else if (t.pos >= 52) parent = document.getElementById(`stretch-${t.player}-${t.pos - 52}`);
-            else parent = document.getElementById(`path-${(t.pos + START_INDEX[t.player]) % 52}`);
-
-            if (parent) {
-                const token = document.createElement('div');
-                token.className = `token ${t.player}`;
-                token.style.background = `var(--${t.player})`;
-                if (!state.waitingForRoll && validMoveIndices.includes(i)) {
-                    token.classList.add('pulse');
-                    token.onclick = async () => {
-                        await client.mutation("game:moveToken", { tokenIndex: i });
-                        updateUI();
-                    };
-                }
-                parent.appendChild(token);
-            }
-        });
-    }
-
-    rollBtn.onclick = async () => {
-        const state = await client.query("game:getGameState");
-        await client.mutation("game:rollDice", { playerIndex: state.currentPlayer });
-        updateUI();
-    };
-
-    window.startGame = async (num) => {
-        await client.mutation("game:startNewGame", { numPlayers: num });
-        document.getElementById('menu-overlay').classList.add('hidden');
-        updateUI();
-    };
-
-    document.getElementById('btn-new-game').onclick = () => {
-        document.getElementById('main-menu').classList.add('hidden');
-        document.getElementById('player-select').classList.remove('hidden');
-    };
-
-    window.showMainMenu = () => {
-        document.getElementById('main-menu').classList.remove('hidden');
-        document.getElementById('player-select').classList.add('hidden');
-    };
-
-    document.getElementById('btn-continue').onclick = () => {
-        document.getElementById('menu-overlay').classList.add('hidden');
-        updateUI();
-    };
 
     generateBoard();
     updateUI();
