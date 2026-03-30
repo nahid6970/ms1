@@ -218,12 +218,15 @@ class PathInput(QLineEdit):
         if not self._fetcher: return
         self._last_fetched_path = self._fetcher.path
         self._all_items = folders
-        
-        # Filter based on current text state
+
         text = self.text()
+        if "/" not in text:
+            self._popup.hide()
+            return
+
         last_slash_idx = text.rfind("/")
-        search_term = text[last_slash_idx + 1:] if last_slash_idx != -1 else text
-        
+        search_term = text[last_slash_idx + 1:]
+
         matches = [item for item in self._all_items if search_term.lower() in item.lower()]
         if matches:
             self._update_popup(matches)
