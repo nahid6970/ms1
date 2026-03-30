@@ -109,13 +109,19 @@ class FolderFetcher(QThread):
     def run(self):
         try:
             base = self.path.rstrip("/") + "/"
-            def parse(cmd):
-                r = subprocess.run(cmd, capture_output=True, text=True, timeout=15, encoding="utf-8", errors="replace")
-                return [base + line.split()[-1] for line in r.stdout.splitlines() if line.split()]
+            # Run both in parallel
+            p_dirs  = subprocess.Popen(["rclone", "lsd", self.path],
+                        stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+            p_files = subprocess.Popen(["rclone", "lsf", "--max-depth", "1", "--files-only", self.path],
+                        stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+            dirs_out,  _ = p_dirs.communicate(timeout=15)
+            files_out, _ = p_files.communicate(timeout=15)
 
-            folders = parse(["rclone", "lsd",  "--max-depth", "1", self.path])
-            files   = parse(["rclone", "lsf",  "--max-depth", "1", "--files-only", self.path])
-            self.done.emit(folders + files)
+            def parse(raw):
+                return [base + line.split()[-1]
+                        for line in raw.decode("utf-8", errors="replace").splitlines() if line.split()]
+
+            self.done.emit(parse(dirs_out) + parse(files_out))
         except Exception:
             self.done.emit([])
 
