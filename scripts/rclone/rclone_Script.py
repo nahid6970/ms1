@@ -476,7 +476,8 @@ class RcloneApp(QMainWindow):
         final = " ".join(p for p in parts if p)
         print("Executing:", final)
 
-        subprocess.Popen(f'start cmd /k "{final}"', shell=True)
+        cmd_str = f'echo Command: {final} && {final}'
+        subprocess.Popen(f'start cmd /k "{cmd_str}"', shell=True)
 
     def restart(self):
         os.execv(sys.executable, [sys.executable] + sys.argv)
