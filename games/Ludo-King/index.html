@@ -58,6 +58,7 @@
         .g-h { grid-area: 1 / 10 / 7 / 16; background: var(--green); }
         .y-h { grid-area: 10 / 1 / 16 / 7; background: var(--yellow); }
         .b-h { grid-area: 10 / 10 / 16 / 16; background: var(--blue); }
+        
         .red { background-color: var(--red); }
         .green { background-color: var(--green); }
         .yellow { background-color: var(--yellow); }
@@ -72,6 +73,11 @@
         .t-g { background: var(--green); clip-path: polygon(0 0, 100% 0, 50% 50%); }
         .t-y { background: var(--yellow); clip-path: polygon(0 100%, 50% 50%, 100% 100%); }
         .t-b { background: var(--blue); clip-path: polygon(100% 0, 100% 100%, 50% 50%); }
+
+        .star {
+            position: absolute; top: 15%; left: 15%; width: 70%; height: 70%;
+            fill: rgba(0,0,0,0.4); z-index: 1; pointer-events: none;
+        }
 
         .token {
             width: 32px; height: 32px; border-radius: 50%; border: 3px solid white;
@@ -97,12 +103,12 @@
         #roll-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #c0392b; }
         #roll-btn:disabled { background: #95a5a6; cursor: not-allowed; opacity: 0.6; box-shadow: none; }
         
-        .hidden { display: none !important; }
         .pulse { animation: pulse 0.8s infinite alternate; }
         @keyframes pulse {
             from { transform: translate(-50%, -50%) scale(1); filter: brightness(1.2); }
             to { transform: translate(-50%, -50%) scale(1.2); filter: brightness(1.5); }
         }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
@@ -133,7 +139,7 @@
 </div>
 
 <div id="dice-container">
-    <div id="player-turn-indicator" style="font-size: 24px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">Turn: Red</div>
+    <div id="player-turn-indicator" style="font-size: 24px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">Turn: Loading...</div>
     <div id="dice">1</div>
     <button id="roll-btn">ROLL DICE</button>
 </div>
@@ -146,10 +152,11 @@
     const rollBtn = document.getElementById('roll-btn');
     const turnIndicator = document.getElementById('player-turn-indicator');
     const colors = ['Red', 'Green', 'Yellow', 'Blue'];
-
     const START_INDEX = { 'red': 1, 'green': 14, 'yellow': 40, 'blue': 27 };
     const SAFE_SQUARES = [1, 9, 14, 22, 27, 35, 40, 48];
     let lastProcessedTurnId = "";
+
+    const STAR_SVG = `<svg class="star" viewBox="0 0 24 24"><path d="M12,17.27L18.18,21L16.54,13.97L22,9.24L14.81,8.62L12,2L9.19,8.62L2,9.24L7.45,13.97L5.82,21L12,17.27Z"/></svg>`;
 
     async function updateUI() {
         const state = await client.query("game:getGameState");
@@ -173,12 +180,11 @@
         if (state.waitingForRoll) {
             rollBtn.disabled = false;
             rollBtn.innerText = "ROLL DICE";
-            lastProcessedTurnId = state.turnId; // Ready for next roll
+            lastProcessedTurnId = state.turnId;
         } else {
             rollBtn.disabled = true;
             rollBtn.innerText = "SELECT TOKEN";
 
-            // Process auto-action ONLY ONCE per turn state
             if (lastProcessedTurnId !== state.turnId) {
                 lastProcessedTurnId = state.turnId;
                 setTimeout(async () => {
@@ -223,27 +229,14 @@
 
     rollBtn.onclick = async () => {
         const state = await client.query("game:getGameState");
-        await client.mutation("game:rollDice", { playerIndex: state.currentPlayer });
-        updateUI();
+        if (state) {
+            await client.mutation("game:rollDice", { playerIndex: state.currentPlayer });
+            updateUI();
+        }
     };
 
     window.startGame = async (num) => {
         await client.mutation("game:startNewGame", { numPlayers: num });
-        document.getElementById('menu-overlay').classList.add('hidden');
-        updateUI();
-    };
-
-    document.getElementById('btn-new-game').onclick = () => {
-        document.getElementById('main-menu').classList.add('hidden');
-        document.getElementById('player-select').classList.remove('hidden');
-    };
-
-    window.showMainMenu = () => {
-        document.getElementById('main-menu').classList.remove('hidden');
-        document.getElementById('player-select').classList.add('hidden');
-    };
-
-    document.getElementById('btn-continue').onclick = () => {
         document.getElementById('menu-overlay').classList.add('hidden');
         updateUI();
     };
@@ -268,6 +261,7 @@
             if (i === 14) cell.classList.add('green');
             if (i === 27) cell.classList.add('blue');
             if (i === 40) cell.classList.add('yellow');
+            if (SAFE_SQUARES.includes(i)) cell.innerHTML = STAR_SVG;
             board.appendChild(cell);
         });
 
@@ -295,8 +289,7 @@
                     const exists = document.querySelector(`.c[style*="grid-row: ${r}"][style*="grid-column: ${c}"]`);
                     if (!exists) {
                         const cell = document.createElement('div');
-                        cell.className = 'c';
-                        cell.style.gridRow = r; cell.style.gridColumn = c;
+                        cell.className = 'c'; cell.style.gridRow = r; cell.style.gridColumn = c;
                         board.appendChild(cell);
                     }
                 }
@@ -304,26 +297,29 @@
         }
     }
 
+    document.getElementById('btn-new-game').onclick = () => {
+        document.getElementById('main-menu').classList.add('hidden');
+        document.getElementById('player-select').classList.remove('hidden');
+    };
+
+    window.showMainMenu = () => {
+        document.getElementById('main-menu').classList.remove('hidden');
+        document.getElementById('player-select').classList.add('hidden');
+    };
+
+    document.getElementById('btn-continue').onclick = () => {
+        document.getElementById('menu-overlay').classList.add('hidden');
+        updateUI();
+    };
+
+    const checkContinue = async () => {
+        const state = await client.query("game:getGameState");
+        if (state && state.status === "playing") document.getElementById('btn-continue').classList.remove('hidden');
+    };
+
     generateBoard();
     updateUI();
     setInterval(updateUI, 2000);
-
-    const checkContinue = async () => {
-        const state = await client.query("game:getGameState");
-        if (state && state.status === "playing") document.getElementById('btn-continue').classList.remove('hidden');
-    };
-    checkContinue();
-</script>
-
-</body>
-</html>
-
-    setInterval(updateUI, 2000);
-
-    const checkContinue = async () => {
-        const state = await client.query("game:getGameState");
-        if (state && state.status === "playing") document.getElementById('btn-continue').classList.remove('hidden');
-    };
     checkContinue();
 </script>
 
