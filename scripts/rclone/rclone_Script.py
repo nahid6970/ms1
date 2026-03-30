@@ -216,63 +216,55 @@ for item in storage_radios:
     radio.grid(row=item["row"], column=item["column"], sticky=tk.W)
 
 
-# Define common paths with custom names
-common_paths = {
-    "Songs_Cloud": "gu:/song",
-    "Software_Cloud": "gu:/software",
-    "MX_Cloud": "gu:/mx",
+# All known storage prefixes (from storage_radios, excluding empty)
+storage_prefixes = [item["value"] for item in storage_radios if item["value"]]
 
-    "-------------------------------1": "",
+def fetch_folders(path):
+    try:
+        result = subprocess.run(["rclone", "lsd", path], capture_output=True, text=True, timeout=10)
+        folders = []
+        for line in result.stdout.splitlines():
+            parts = line.split()
+            if parts:
+                folders.append(path.rstrip("/") + "/" + parts[-1])
+        return folders
+    except Exception:
+        return []
 
-    "Desktop_Local": "C:/Users/nahid/Desktop",
-    "Desktop_Cloud": "o0/Desktop",
-    "Pictures_Local": "C:/Users/nahid/Pictures",
-    "Pictures_Cloud": "o0:/Pictures",
+def get_matching_prefix(text):
+    for prefix in storage_prefixes:
+        if text.lower().startswith(prefix.lower()):
+            return prefix
+    return None
 
-    "-------------------------------2": "",
-
-    "Download_Rclone_C": "C:/rclone_download/",
-    "Download_Rclone_D": "D:/rclone_download/"
-}
+def on_combo_trigger(combo, var):
+    text = var.get()
+    combo["values"] = []
+    if get_matching_prefix(text):
+        def _fetch():
+            folders = fetch_folders(text)
+            combo["values"] = folders if folders else []
+        threading.Thread(target=_fetch, daemon=True).start()
 
 # From
 from_frame = ttk.Frame(BottomFrame, padding="0", style="Black.TFrame")
 from_frame.grid(row=2, column=0, sticky=tk.W, pady=(10,0), padx=(10,0))
 
 ttk.Label(from_frame, text="From:", width=5, background="#f15812", font=("JetBrainsmono nfp", 12, "bold")).grid(row=0, column=0, sticky=tk.W)
-from_options = list(common_paths.keys())
-from_combo = ttk.Combobox(from_frame, textvariable=from_var, values=from_options, width=50, font=("JetBrainsmono nfp", 12, "bold"))
+from_combo = ttk.Combobox(from_frame, textvariable=from_var, values=[], width=50, font=("JetBrainsmono nfp", 12, "bold"))
 from_combo.grid(row=0, column=1, sticky=tk.W)
-from_combo.set("") # Set a default value
-
-def update_from_var(event):
-    selected_name = from_combo.get()
-    if selected_name in common_paths:
-        from_var.set(common_paths[selected_name])
-    else:
-        from_var.set("") # Clear if not in the predefined paths
-
-from_combo.bind("<<ComboboxSelected>>", update_from_var)
-
+from_combo.bind("<KeyRelease>", lambda e: on_combo_trigger(from_combo, from_var))
+from_combo.bind("<<ComboboxDropdown>>", lambda e: on_combo_trigger(from_combo, from_var))
 
 # TO
 to_frame = ttk.Frame(BottomFrame, padding="0", style="Black.TFrame")
 to_frame.grid(row=3, column=0, sticky=tk.W, pady=(0,10), padx=(10,0))
 
 ttk.Label(to_frame, text="To:", width=5, background="#f15812", font=("JetBrainsmono nfp", 12, "bold")).grid(row=0, column=0, sticky=tk.W)
-to_options = list(common_paths.keys())
-to_combo = ttk.Combobox(to_frame, textvariable=to_var, values=to_options, width=50, font=("JetBrainsmono nfp", 12, "bold"))
+to_combo = ttk.Combobox(to_frame, textvariable=to_var, values=[], width=50, font=("JetBrainsmono nfp", 12, "bold"))
 to_combo.grid(row=0, column=1, sticky=tk.W)
-to_combo.set("") # Set a default value
-
-def update_to_var(event):
-    selected_name = to_combo.get()
-    if selected_name in common_paths:
-        to_var.set(common_paths[selected_name])
-    else:
-        to_var.set("") # Clear if not in the predefined paths
-
-to_combo.bind("<<ComboboxSelected>>", update_to_var)
+to_combo.bind("<KeyRelease>", lambda e: on_combo_trigger(to_combo, to_var))
+to_combo.bind("<<ComboboxDropdown>>", lambda e: on_combo_trigger(to_combo, to_var))
 
 # Create arguments frame
 Main_Flags_list = ttk.Frame(BottomFrame, padding="10", style="Black.TFrame")
