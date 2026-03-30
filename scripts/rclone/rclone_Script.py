@@ -476,7 +476,12 @@ class RcloneApp(QMainWindow):
         final = " ".join(p for p in parts if p)
         print("Executing:", final)
 
-        cmd_str = f'echo Command: {final} && {final}'
+        # Escape special characters for the echo command to prevent them from being interpreted as pipes/redirects
+        echo_safe_final = final.replace("|", "^|").replace("&", "^&").replace(">", "^>").replace("<", "^<")
+        completion_cmd = 'powershell -NoProfile -Command "Write-Host \' COMPLETE \' -ForegroundColor Black -BackgroundColor Green"'
+        
+        # Use '&' to ensure completion message shows even if the command fails or is interrupted
+        cmd_str = f'echo Command: {echo_safe_final} & {final} & {completion_cmd}'
         subprocess.Popen(f'start cmd /k "{cmd_str}"', shell=True)
 
     def restart(self):
