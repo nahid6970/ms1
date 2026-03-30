@@ -7814,7 +7814,7 @@ function highlightMultipleTermsInHtml(html, searchTerms) {
             // Normalize text and remove ZWS for searching
             const originalText = node.textContent;
             const normText = originalText.normalize('NFC');
-            const lowerText = normText.toLowerCase().replace(/\u200B/g, '');
+            const lowerText = normalizeBengali(normText.toLowerCase()).replace(/\u200B/g, '');
 
             // Find all matches for all terms
             const matches = [];

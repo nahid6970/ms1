@@ -1,6 +1,27 @@
 # Recent Development Log
 
 
+## [2026-03-30 20:08] - Bengali Vowel Sign Search Normalization
+
+**Session Duration:** 0.1 hours
+
+**What We Accomplished:**
+- Added `normalizeBengali()` helper in `static/script.js` (near `stripMarkdown`)
+- Maps `ী` (U+09C0) → `ি` (U+09BF) and `ূ` (U+09C2) → `ু` (U+09C1) so both forms match in search
+- Applied to all search paths: sheet search (`searchTable`) and F1 window search (`filterF1Sheets`) — all 3 modes (`*`, `#`, normal)
+
+**Files Modified:**
+- `static/script.js` — Added `normalizeBengali()`, applied at 10 locations across both search functions
+
+**Current Status:**
+- ✅ Searching `ি` matches cells/sheets with `ী` and vice versa
+- ✅ Searching `ু` matches cells/sheets with `ূ` and vice versa
+
+**Known Issues:**
+- None
+
+---
+
 ## [2026-03-11 12:42] - Find & Replace Syntax Feature in F3 Formatter
 
 **Session Duration:** 0.5 hours
