@@ -142,6 +142,8 @@ class PathInput(QLineEdit):
         self.setPlaceholderText(placeholder)
         self.setMinimumWidth(420)
         self._fetcher = None
+        self._all_items = []
+        self._last_fetched_path = ""
 
         # Floating popup — no focus steal
         self._popup = QListWidget(None)
@@ -171,32 +173,80 @@ class PathInput(QLineEdit):
         return None
 
     def _on_text_changed(self, text):
-        self._popup.hide()
-        self._popup.clear()
-        if self._fetcher and self._fetcher.isRunning():
-            self._fetcher.terminate()
+        # 1. Handle Prefix Suggestions (if no / yet or just started typing)
+        if "/" not in text:
+            matches = [p for p in self.STORAGE_PREFIXES if p.lower().startswith(text.lower())]
+            if matches and not (len(matches) == 1 and matches[0] == text):
+                self._all_items = []
+                self._last_fetched_path = ""
+                self._update_popup(matches)
+                return
+            elif not matches:
+                self._popup.hide()
+                return
+
+        # 2. Handle Folder Suggestions
+        last_slash_idx = text.rfind("/")
+        base_path = text[:last_slash_idx + 1]
+        search_term = text[last_slash_idx + 1:]
+
+        # Trigger fetch if we hit a new directory
         if text.endswith("/") and self._matching_prefix(text):
-            self._fetcher = FolderFetcher(text)
-            self._fetcher.done.connect(self._populate)
-            self._fetcher.start()
+            if text != self._last_fetched_path:
+                if self._fetcher and self._fetcher.isRunning():
+                    self._fetcher.terminate()
+                self._fetcher = FolderFetcher(text)
+                self._fetcher.done.connect(self._populate)
+                self._fetcher.start()
+
+        # Filter existing items if base_path matches our cache
+        if self._all_items and base_path == self._last_fetched_path:
+            matches = [item for item in self._all_items if search_term.lower() in item.lower()]
+            if matches:
+                self._update_popup(matches)
+            else:
+                self._popup.hide()
+        elif not text.endswith("/"):
+             self._popup.hide()
 
     def _populate(self, folders):
+        self._last_fetched_path = self._fetcher.path
+        self._all_items = folders
+        
+        # Filter based on current text state
+        text = self.text()
+        last_slash_idx = text.rfind("/")
+        search_term = text[last_slash_idx + 1:] if last_slash_idx != -1 else text
+        
+        matches = [item for item in self._all_items if search_term.lower() in item.lower()]
+        if matches:
+            self._update_popup(matches)
+        else:
+            self._popup.hide()
+
+    def _update_popup(self, items):
         self._popup.clear()
-        if not folders:
+        if not items:
+            self._popup.hide()
             return
-        for f in folders:
-            self._popup.addItem(f)
-        # Position popup directly below this widget
+        for i in items:
+            self._popup.addItem(i)
+        
         pos = self.mapToGlobal(self.rect().bottomLeft())
         self._popup.move(pos)
         self._popup.setFixedWidth(self.width())
         row_h = self._popup.sizeHintForRow(0) + 2
-        self._popup.setFixedHeight(min(len(folders), 10) * row_h + 4)
+        self._popup.setFixedHeight(min(len(items), 10) * row_h + 4)
         self._popup.show()
+
+    def focusInEvent(self, e):
+        super().focusInEvent(e)
+        self._on_text_changed(self.text())
 
     def _on_item_clicked(self, item):
         self.setText(item.text())
-        self._popup.hide()
+        if not item.text().endswith("/"):
+            self._popup.hide()
 
     def keyPressEvent(self, e):
         key = e.key()
