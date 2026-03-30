@@ -532,6 +532,7 @@ class SettingsDialog(QDialog):
 
 
 if __name__ == "__main__":
+    os.environ["QT_LOGGING_RULES"] = "qt.text.font.db=false"
     app = QApplication(sys.argv)
     win = RcloneApp()
     cfg_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "settings.json")
