@@ -6,11 +6,9 @@ import threading
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QLabel, QPushButton, QLineEdit, QRadioButton, QButtonGroup,
-    QGroupBox, QGridLayout, QCompleter, QListWidget, QListWidgetItem,
-    QScrollArea, QSizePolicy, QFrame
+    QGroupBox, QGridLayout, QListWidget, QScrollArea,
 )
-from PyQt6.QtCore import Qt, QThread, pyqtSignal, QStringListModel
-from PyQt6.QtGui import QFont
+from PyQt6.QtCore import Qt, QThread, pyqtSignal
 
 # ── PALETTE ──────────────────────────────────────────────────────────────────
 CP_BG     = "#050505"
@@ -124,10 +122,8 @@ class FolderFetcher(QThread):
             self.done.emit([])
 
 
-# ── PATH INPUT WITH LIVE DROPDOWN ─────────────────────────────────────────────
-class PathInput(QWidget):
-    """LineEdit + live folder list that appears below when rclone lsd returns results."""
-
+# ── PATH INPUT WITH FLOATING DROPDOWN ────────────────────────────────────────
+class PathInput(QLineEdit):
     STORAGE_PREFIXES = [
         "C:/", "D:/",
         "cgu:/", "gu:/", "g00:/",
@@ -139,23 +135,29 @@ class PathInput(QWidget):
 
     def __init__(self, placeholder=""):
         super().__init__()
+        self.setPlaceholderText(placeholder)
+        self.setMinimumWidth(420)
         self._fetcher = None
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(0)
 
-        self.line = QLineEdit()
-        self.line.setPlaceholderText(placeholder)
-        self.line.setMinimumWidth(420)
-        layout.addWidget(self.line)
+        # Floating popup
+        self._popup = QListWidget(None)  # no parent = top-level window
+        self._popup.setWindowFlags(
+            Qt.WindowType.Popup | Qt.WindowType.FramelessWindowHint
+        )
+        self._popup.setStyleSheet(f"""
+            QListWidget {{
+                background-color: {CP_PANEL};
+                color: {CP_CYAN};
+                border: 1px solid {CP_CYAN};
+                font-family: Consolas;
+                font-size: 10pt;
+            }}
+            QListWidget::item:hover {{ background-color: #1a1a1a; }}
+            QListWidget::item:selected {{ background-color: {CP_CYAN}; color: #000; }}
+        """)
+        self._popup.itemClicked.connect(self._on_item_clicked)
 
-        self.dropdown = QListWidget()
-        self.dropdown.setMaximumHeight(160)
-        self.dropdown.hide()
-        layout.addWidget(self.dropdown)
-
-        self.line.textChanged.connect(self._on_text_changed)
-        self.dropdown.itemClicked.connect(self._on_item_clicked)
+        self.textChanged.connect(self._on_text_changed)
 
     def _matching_prefix(self, text):
         for p in self.STORAGE_PREFIXES:
@@ -164,36 +166,36 @@ class PathInput(QWidget):
         return None
 
     def _on_text_changed(self, text):
-        self.dropdown.hide()
-        self.dropdown.clear()
-        if self._fetcher and self.fetcher_running():
+        self._popup.hide()
+        self._popup.clear()
+        if self._fetcher and self._fetcher.isRunning():
             self._fetcher.terminate()
         if self._matching_prefix(text):
             self._fetcher = FolderFetcher(text)
             self._fetcher.done.connect(self._populate)
             self._fetcher.start()
 
-    def fetcher_running(self):
-        return self._fetcher is not None and self._fetcher.isRunning()
-
     def _populate(self, folders):
-        self.dropdown.clear()
-        if folders:
-            for f in folders:
-                self.dropdown.addItem(f)
-            self.dropdown.show()
-        else:
-            self.dropdown.hide()
+        self._popup.clear()
+        if not folders:
+            return
+        for f in folders:
+            self._popup.addItem(f)
+        # Position popup directly below this widget
+        pos = self.mapToGlobal(self.rect().bottomLeft())
+        self._popup.move(pos)
+        self._popup.setFixedWidth(self.width())
+        row_h = self._popup.sizeHintForRow(0) + 2
+        self._popup.setFixedHeight(min(len(folders), 10) * row_h + 4)
+        self._popup.show()
 
     def _on_item_clicked(self, item):
-        self.line.setText(item.text())
-        self.dropdown.hide()
+        self.setText(item.text())
+        self._popup.hide()
 
-    def text(self):
-        return self.line.text()
-
-    def setText(self, t):
-        self.line.setText(t)
+    def resizeEvent(self, e):
+        super().resizeEvent(e)
+        self._popup.setFixedWidth(self.width())
 
 
 # ── TOGGLE LABEL (flag chip) ──────────────────────────────────────────────────
