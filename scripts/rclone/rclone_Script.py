@@ -170,7 +170,7 @@ class PathInput(QLineEdit):
         self._popup.clear()
         if self._fetcher and self._fetcher.isRunning():
             self._fetcher.terminate()
-        if self._matching_prefix(text):
+        if text.endswith("/") and self._matching_prefix(text):
             self._fetcher = FolderFetcher(text)
             self._fetcher.done.connect(self._populate)
             self._fetcher.start()
