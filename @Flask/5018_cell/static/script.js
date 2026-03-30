@@ -9057,9 +9057,10 @@ function closeAllColumnMenus() {
     });
 }
 
-// Normalize Bengali vowel signs ি (U+09BF) and ী (U+09C0) to be treated as the same in search
+// Normalize Bengali vowel signs to be treated as the same in search:
+// ি (U+09BF) = ী (U+09C0), ু (U+09C1) = ূ (U+09C2)
 function normalizeBengali(str) {
-    return str.replace(/\u09C0/g, '\u09BF');
+    return str.replace(/\u09C0/g, '\u09BF').replace(/\u09C2/g, '\u09C1');
 }
 
 function stripMarkdown(text, preserveLinks = false) {
