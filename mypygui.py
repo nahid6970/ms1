@@ -537,7 +537,7 @@ AppManagement_bt.bind("<Control-Button-3>",lambda event:subprocess.Popen(["cmd /
 
 Rclone_bt=CTkLabel(ROOT1, text="\uef2c", font=("JetBrainsMono NFP",25,"bold"), anchor="w", bg_color="#1d2027",text_color="#fcfcfc")
 Rclone_bt.pack(side="left",padx=(10,0),pady=(1,0))
-Rclone_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c start C:\\@delta\\ms1\\scripts\\rclone\\rclone_Script.py"], shell=True))
+Rclone_bt.bind("<Button-1>",lambda event:subprocess.Popen([sys.executable, r"C:\@delta\ms1\scripts\rclone\rclone_Script.py"], creationflags=subprocess.CREATE_NO_WINDOW))
 Rclone_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\@delta\\ms1\\scripts\\rclone\\rclone_Script.py"], shell=True))
 
 Folder_bt=CTkLabel(ROOT1, text="\ueaf7", font=("JetBrainsMono NFP",25,"bold"), anchor="w", bg_color="#1d2027",text_color="#ffd900")
