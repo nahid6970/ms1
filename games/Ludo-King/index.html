@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pure HTML Ludo Board</title>
+    <title>Ludo Board with Dice</title>
     <style>
         :root {
             --red: #ff0000;
@@ -17,11 +17,14 @@
 
         body {
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             margin: 0;
             background-color: #e0e0e0;
+            gap: 20px;
+            padding: 20px;
         }
 
         .ludo-board {
@@ -33,13 +36,12 @@
             box-shadow: 0 0 50px rgba(0,0,0,0.3);
         }
 
-        /* Common Cell Style */
         .c {
             border: 0.5px solid #aaa;
             box-sizing: border-box;
         }
 
-        /* Home Bases (6x6) */
+        /* Home Bases */
         .home {
             grid-column: span 6;
             grid-row: span 6;
@@ -77,7 +79,7 @@
         .yellow { background-color: var(--yellow); }
         .blue { background-color: var(--blue); }
 
-        /* Center (3x3) */
+        /* Center */
         .center {
             grid-area: 7 / 7 / 10 / 10;
             position: relative;
@@ -95,6 +97,40 @@
         .t-y { background: var(--yellow); clip-path: polygon(0 100%, 50% 50%, 100% 100%); }
         .t-b { background: var(--blue); clip-path: polygon(100% 0, 100% 100%, 50% 50%); }
 
+        /* Dice Styles (Bottom) */
+        #dice-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        #dice {
+            width: 60px; height: 60px;
+            background: white;
+            border: 3px solid #333;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 32px;
+            font-weight: bold;
+        }
+        #roll-btn {
+            padding: 10px 25px;
+            cursor: pointer;
+            background: #333;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            transition: transform 0.1s;
+        }
+        #roll-btn:active { transform: scale(0.95); }
+        #roll-btn:disabled { opacity: 0.5; cursor: not-allowed; }
     </style>
 </head>
 <body>
@@ -108,8 +144,10 @@
 
     <!-- Center -->
     <div class="center">
-        <div class="tri t-r"></div><div class="tri t-g"></div>
-        <div class="tri t-y"></div><div class="tri t-b"></div>
+        <div class="tri t-r"></div>
+        <div class="tri t-g"></div>
+        <div class="tri t-y"></div>
+        <div class="tri t-b"></div>
     </div>
 
     <!-- Top Arm (Green Path) -->
@@ -138,6 +176,50 @@
     <div class="c blue" style="grid-area: 8/10"></div><div class="c blue" style="grid-area: 8/11"></div><div class="c blue" style="grid-area: 8/12"></div><div class="c blue" style="grid-area: 8/13"></div><div class="c blue" style="grid-area: 8/14"></div><div class="c" style="grid-area: 8/15"></div>
     <div class="c" style="grid-area: 9/10"></div><div class="c" style="grid-area: 9/11"></div><div class="c" style="grid-area: 9/12"></div><div class="c" style="grid-area: 9/13"></div><div class="c blue" style="grid-area: 9/14"></div><div class="c" style="grid-area: 9/15"></div>
 </div>
+
+<!-- Dice Container (Now at bottom) -->
+<div id="dice-container">
+    <div id="dice">1</div>
+    <button id="roll-btn">ROLL DICE</button>
+</div>
+
+<script type="module">
+    import { ConvexHttpClient } from "https://esm.sh/convex@1.16.0/browser";
+
+    const client = new ConvexHttpClient("https://silent-scorpion-207.convex.cloud");
+
+    const diceEl = document.getElementById('dice');
+    const rollBtn = document.getElementById('roll-btn');
+
+    async function updateUI() {
+        try {
+            const state = await client.query("game:getGameState");
+            if (state) {
+                diceEl.innerText = state.diceValue;
+            }
+        } catch (e) {
+            console.error("Convex error:", e);
+        }
+    }
+
+    rollBtn.onclick = async () => {
+        rollBtn.disabled = true;
+        diceEl.style.opacity = "0.5";
+
+        try {
+            await client.mutation("game:rollDice", { player: "Player 1" });
+            await updateUI();
+        } catch (e) {
+            alert("Error rolling dice. Make sure 'npx convex dev' is running!");
+        } finally {
+            rollBtn.disabled = false;
+            diceEl.style.opacity = "1";
+        }
+    };
+
+    updateUI();
+    setInterval(updateUI, 2000);
+</script>
 
 </body>
 </html>
