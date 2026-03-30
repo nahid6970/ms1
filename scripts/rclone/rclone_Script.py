@@ -1,386 +1,422 @@
-import threading
-import tkinter as tk
-from tkinter import ttk
+import sys
+import os
 import subprocess
-import pyautogui
+import threading
 
-
-
-# Create the main window
-root = tk.Tk()
-root.title("Rclone + winfsp")
-root.configure(bg="#282c34")
-
-# Configure row and column weights for root to allow expansion
-root.grid_rowconfigure(0, weight=1)
-root.grid_columnconfigure(0, weight=1)
-root.overrideredirect(True)  # Remove default borders
-
-
-# Create the Notebook widget (for tabs)
-notebook = ttk.Notebook(root)
-notebook.grid(row=0, column=0, sticky="nsew") # Changed sticky to "nsew"
-
-# First tab: General Commands
-tab1 = ttk.Frame(notebook, style="TNotebook.Tab")
-notebook.add(tab1, text='General')
-
-# Configure row and column weights for tab1 if needed (though pack might handle this)
-tab1.grid_rowconfigure(0, weight=1)
-tab1.grid_columnconfigure(0, weight=1)
-
-BottomFrame = ttk.Frame(tab1, padding="10", style="TNotebook.Tab")
-BottomFrame.pack(fill="both", expand=False) # Use fill="both" to expand in both directions
-
-# Second tab: Quick Commands
-tab2 = ttk.Frame(notebook, style="TNotebook.Tab")
-notebook.add(tab2, text='Quick Commands')
-
-quick_commands_frame = ttk.Frame(tab2, padding="10", style="TNotebook.Tab")
-quick_commands_frame.pack(fill="x", expand=False)
-
-style = ttk.Style()
-style.theme_use('default') # Try a different theme (e.g.,'winnative', 'clam', 'alt', 'default', 'classic', 'vista', 'xpnative')
-# print(style.theme_names())  # See available themes
-
-style.configure("Custom.TRadiobutton", font=("Arial", 12, "bold"), foreground="#e6f752", background="#282c34")
-style.map("Custom.TRadiobutton",
-    foreground=[('active', '#333333'), ('selected', '#000000')],
-    background=[('active', '#e0e0e0'), ('selected', '#ffffff')]
+from PyQt6.QtWidgets import (
+    QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
+    QLabel, QPushButton, QLineEdit, QRadioButton, QButtonGroup,
+    QGroupBox, QGridLayout, QCompleter, QListWidget, QListWidgetItem,
+    QScrollArea, QSizePolicy, QFrame
 )
-style.configure("Black.TFrame", background="#282c34")
-style.configure("TCombobox", font=("JetBrainsmono nfp", 10))
-style.configure("TEntry", font=("JetBrainsmono nfp", 10))
+from PyQt6.QtCore import Qt, QThread, pyqtSignal, QStringListModel
+from PyQt6.QtGui import QFont
 
-# --- Customizing the Notebook Tab Bar ---
-style.configure("TNotebook",
-                    background="#272727",
-                    foreground="#c0c0c0",                   
-                    borderwidth=0)
-style.configure("TNotebook.Tab",
-                    background="#333333",
-                    foreground="#c39645",
-                    focuscolor="#666666",
-                    borderwidth=0                            
-                    )
-style.map('TNotebook.Tab',background=[("selected",'#272727')],
-                    highlightbackground =[("active","#333")],                                    
-                            lightcolor=[("selected", "#333333")],
-                            foreground=[("active","#4f5a69")])
+# ── PALETTE ──────────────────────────────────────────────────────────────────
+CP_BG     = "#050505"
+CP_PANEL  = "#111111"
+CP_YELLOW = "#FCEE0A"
+CP_CYAN   = "#00F0FF"
+CP_RED    = "#FF003C"
+CP_GREEN  = "#00ff21"
+CP_ORANGE = "#ff934b"
+CP_DIM    = "#3a3a3a"
+CP_TEXT   = "#E0E0E0"
 
+GLOBAL_QSS = f"""
+QMainWindow, QDialog, QWidget {{
+    background-color: {CP_BG};
+    color: {CP_TEXT};
+    font-family: 'Consolas';
+    font-size: 10pt;
+}}
+QGroupBox {{
+    border: 1px solid {CP_DIM};
+    margin-top: 10px;
+    padding-top: 10px;
+    font-weight: bold;
+    color: {CP_YELLOW};
+}}
+QGroupBox::title {{
+    subcontrol-origin: margin;
+    subcontrol-position: top left;
+    padding: 0 5px;
+}}
+QLineEdit {{
+    background-color: {CP_PANEL};
+    color: {CP_CYAN};
+    border: 1px solid {CP_DIM};
+    padding: 4px;
+    selection-background-color: {CP_CYAN};
+    selection-color: #000000;
+}}
+QLineEdit:focus {{ border: 1px solid {CP_CYAN}; }}
+QPushButton {{
+    background-color: {CP_DIM};
+    border: 1px solid {CP_DIM};
+    color: white;
+    padding: 6px 12px;
+    font-weight: bold;
+}}
+QPushButton:hover {{
+    background-color: #2a2a2a;
+    border: 1px solid {CP_YELLOW};
+    color: {CP_YELLOW};
+}}
+QPushButton:pressed {{
+    background-color: {CP_YELLOW};
+    color: black;
+}}
+QListWidget {{
+    background-color: {CP_PANEL};
+    color: {CP_CYAN};
+    border: 1px solid {CP_DIM};
+}}
+QListWidget::item:hover {{ background-color: #1a1a1a; }}
+QListWidget::item:selected {{
+    background-color: {CP_CYAN};
+    color: #000000;
+}}
+QRadioButton {{
+    color: {CP_YELLOW};
+    spacing: 6px;
+}}
+QRadioButton::indicator {{
+    width: 12px; height: 12px;
+    border: 1px solid {CP_DIM};
+    border-radius: 6px;
+    background: {CP_PANEL};
+}}
+QRadioButton::indicator:checked {{
+    background: {CP_YELLOW};
+    border-color: {CP_YELLOW};
+}}
+QScrollArea {{ background: transparent; border: none; }}
+QScrollBar:vertical {{
+    background: {CP_BG}; width: 8px;
+}}
+QScrollBar::handle:vertical {{
+    background: {CP_DIM}; min-height: 20px;
+}}
+"""
 
-# Variables
-command_var = tk.StringVar(value="ls")
-storage_var = tk.StringVar(value="")
-from_var = tk.StringVar(value="")
-to_var = tk.StringVar(value="")
-transfer_var = tk.StringVar(value="4")
-include_var = tk.StringVar(value="*.jpg")
-exclude_var = tk.StringVar(value="*.jpg")
-maxage_var = tk.StringVar(value="1d")
-minage_var = tk.StringVar(value="1d")
-maxsize_var = tk.StringVar(value="100M")
-minsize_var = tk.StringVar(value="100M")
-grep_var = tk.StringVar(value="")
+# ── FOLDER FETCH THREAD ───────────────────────────────────────────────────────
+class FolderFetcher(QThread):
+    done = pyqtSignal(list)
 
+    def __init__(self, path):
+        super().__init__()
+        self.path = path
 
-# Additional options with display names
-additional_options = [
-    ("Fast List"              ,"--fast-list"                       ,True) ,
-    ("Readable"               , "--human-readable"                 ,True) ,
-    ("Acknowledge Abuse"      , "--drive-acknowledge-abuse"        ,True) ,
-    ("Progress"               , "-P"                               ,True) ,
-    ("Dry Run"                , "--dry-run"                        ,False),
-    ("Web Gui **Rcd"          , "--rc-web-gui"                     ,False),
-    ("vfs-cache"              , "--vfs-cache-mode writes"          ,False),
-    ("Verbose Lengthy"        , "-vv"                              ,False),
-    ("Verbose Minimal"        , "-v"                               ,False),
-    ("Log Level"              , "--log-level ERROR"                ,False),
-    ("Stats Oneline"          , "--stats-one-line"                 ,False),
-    ("Trashed Only"           , "--drive-trashed-only "            ,False),
-    ("Shared With Me"         , "--drive-shared-with-me "          ,False),
-    ("Skip Dangling Shortcuts", "--drive-skip-dangling-shortcuts " ,False),
-    ("Skip Shortcuts"         , "--drive-skip-shortcuts "          ,False),
-    ("Date **tree "           , "-D "                              ,False),
-    ("Modified Time **tree"   , "-t "                              ,False),
-]
-
-# Manage additional items
-extra_items = {
-    "transfer": {"text": "Transfers", "prefix": "--transfers", "var": transfer_var, "state": False},
-    "include": {"text": "Include", "prefix": "--include", "var": include_var, "state": False},
-    "exclude": {"text": "Exclude", "prefix": "--exclude", "var": exclude_var, "state": False},
-    "Max_Age": {"text": "Max Age", "prefix": "--max-age", "var": maxage_var, "state": False},
-    "Min_Age": {"text": "Min Age", "prefix": "--min-age", "var": minage_var, "state": False},
-    "Max_Size": {"text": "Max Size", "prefix": "--max-size", "var": maxsize_var, "state": False},
-    "Min_Size": {"text": "Min Size", "prefix": "--min-size", "var": minsize_var, "state": False},
-}
-
-def toggle_option(label, idx):
-    additional_options[idx] = (additional_options[idx][0], additional_options[idx][1], not additional_options[idx][2])
-    update_label_color(label, additional_options[idx][2])
-
-def update_extra_item(label, key):
-    item = extra_items[key]
-    item["state"] = not item["state"]
-    update_label_color(label, item["state"])
-
-def update_label_color(label, is_selected):
-    label.config(bg="#b6fba0" if is_selected else "#fa8a93")
-
-def Main_Flags():
-    for idx, (display_text, _, is_selected) in enumerate(additional_options):
-        column = idx // 5
-        row = idx % 5
-        label = tk.Label(Main_Flags_list, text=display_text, font=("Jetbrainsmono nfp",10,"bold"), bg="#b6fba0" if is_selected else "#fa8a93", width=25, anchor="center")
-        label.grid(row=row, column=column, sticky=tk.W, padx=5, pady=5)
-        label.bind("<Button-1>", lambda e, l=label, i=idx: toggle_option(l, i))
-
-def update_extra_labels():
-    for idx, (key, item) in enumerate(extra_items.items()):
-        row = idx
-        label = tk.Label(Filter_Flags, text=item["text"], font=("Jetbrainsmono nfp",10,"bold"), bg="#b6fba0" if item["state"] else "#fa8a93", width=15)
-        label.grid(row=row, column=0, sticky=tk.W, padx=5, pady=5)
-        label.bind("<Button-1>", lambda e, l=label, k=key: update_extra_item(l, k))
-
-        entry = ttk.Entry(Filter_Flags, textvariable=item["var"], font=("JetBrainsmono nfp", 12, "bold"))
-        entry.grid(row=row, column=1, sticky=tk.W)
-
-# Create the style for the frame
-
-# Create command frame with the new style
-command_frame = ttk.Frame(BottomFrame, padding="10", style="Black.TFrame")
-command_frame.grid(row=0, column=0, sticky=tk.W)
-
-
-ttk.Label(command_frame, text="Command:", background="#f15812", font=("Jetbrainsmono nfp", 12, "bold")).grid(row=0, column=0, sticky=tk.W)
-# Command radios configuration
-command_radios = [
-    {"text": "ls"    ,"value": "ls"},
-    {"text": "copy"  ,"value": "copy"},
-    {"text": "sync"  ,"value": "sync"},
-    {"text": "tree"  ,"value": "tree"} ,
-    {"text": "ncdu"  ,"value": "ncdu"} ,
-    {"text": "size"  ,"value": "size"} ,
-    {"text": "mount(winfsp)","value": "mount"},
-    {"text": "rcd"   ,"value": "rcd"},
-]
-# Initialize command radio buttons
-for idx, item in enumerate(command_radios):
-    radio = ttk.Radiobutton(command_frame, text=item["text"], variable=command_var, value=item["value"], style="Custom.TRadiobutton")
-    radio.grid(row=0, column=idx+1, sticky=tk.W)
+    def run(self):
+        try:
+            result = subprocess.run(
+                ["rclone", "lsd", self.path],
+                capture_output=True, text=True, timeout=15
+            )
+            folders = []
+            for line in result.stdout.splitlines():
+                parts = line.split()
+                if parts:
+                    folders.append(self.path.rstrip("/") + "/" + parts[-1])
+            self.done.emit(folders)
+        except Exception:
+            self.done.emit([])
 
 
-# Create storage frame
-storage_frame = ttk.Frame(BottomFrame, padding="10", style="Black.TFrame")
-storage_frame.grid(row=1, column=0, sticky=tk.W)
+# ── PATH INPUT WITH LIVE DROPDOWN ─────────────────────────────────────────────
+class PathInput(QWidget):
+    """LineEdit + live folder list that appears below when rclone lsd returns results."""
 
-#! alt1 start
-ttk.Label(storage_frame, text="Storage:", background="#f15812", font=("JetBrainsmono nfp", 12, "bold")).grid(row=0, column=0, sticky=tk.W)
-storage_radios = [
-    {"text": "N/A"   ,"value": ""      ,"row": 0,"column": 1},
-    {"text": "C:/"   ,"value": "C:/"   ,"row": 0,"column": 2},
-    {"text": "D:/"   ,"value": "D:/"   ,"row": 0,"column": 3},
+    STORAGE_PREFIXES = [
+        "C:/", "D:/",
+        "cgu:/", "gu:/", "g00:/",
+        "g01:/", "g02:/", "g03:/", "g04:/", "g05:/",
+        "g06:/", "g07:/", "g08:/", "g09:/", "g10:/",
+        "g11:/", "g12:/", "g13:/", "g14:/", "g15:/",
+        "o0:/", "ouk:/", "m0:/", "m1:/",
+    ]
 
-    {"text": "cgu:/" ,"value": "cgu:/" ,"row": 1,"column": 1},
-    {"text": "gu:/"  ,"value": "gu:/"  ,"row": 1,"column": 2},
-    {"text": "g00:/" ,"value": "g00:/" ,"row": 1,"column": 3},
+    def __init__(self, placeholder=""):
+        super().__init__()
+        self._fetcher = None
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
 
-    {"text": "g01:/" ,"value": "g01:/" ,"row": 2,"column": 1},
-    {"text": "g02:/" ,"value": "g02:/" ,"row": 2,"column": 2},
-    {"text": "g03:/" ,"value": "g03:/" ,"row": 2,"column": 3},
-    {"text": "g04:/" ,"value": "g04:/" ,"row": 2,"column": 4},
-    {"text": "g05:/" ,"value": "g05:/" ,"row": 2,"column": 5},
+        self.line = QLineEdit()
+        self.line.setPlaceholderText(placeholder)
+        self.line.setMinimumWidth(420)
+        layout.addWidget(self.line)
 
-    {"text": "g06:/" ,"value": "g06:/" ,"row": 3,"column": 1},
-    {"text": "g07:/" ,"value": "g07:/" ,"row": 3,"column": 2},
-    {"text": "g08:/" ,"value": "g08:/" ,"row": 3,"column": 3},
-    {"text": "g09:/" ,"value": "g09:/" ,"row": 3,"column": 4},
-    {"text": "g10:/" ,"value": "g10:/" ,"row": 3,"column": 5},
+        self.dropdown = QListWidget()
+        self.dropdown.setMaximumHeight(160)
+        self.dropdown.hide()
+        layout.addWidget(self.dropdown)
 
-    {"text": "g11:/" ,"value": "g11:/" ,"row": 4,"column": 1},
-    {"text": "g12:/" ,"value": "g12:/" ,"row": 4,"column": 2},
-    {"text": "g13:/" ,"value": "g13:/" ,"row": 4,"column": 3},
-    {"text": "g14:/" ,"value": "g14:/" ,"row": 4,"column": 4},
-    {"text": "g15:/" ,"value": "g15:/" ,"row": 4,"column": 5},
+        self.line.textChanged.connect(self._on_text_changed)
+        self.dropdown.itemClicked.connect(self._on_item_clicked)
 
-    {"text": "o0:/"  ,"value": "o0:/"  ,"row": 5,"column": 1},
-    {"text": "ouk:/" ,"value": "ouk:/" ,"row": 5,"column": 2},
+    def _matching_prefix(self, text):
+        for p in self.STORAGE_PREFIXES:
+            if text.lower().startswith(p.lower()):
+                return p
+        return None
 
-    {"text": "m0:/"  ,"value": "m0:/"  ,"row": 6,"column": 1},
-    {"text": "m1:/"  ,"value": "m1:/"  ,"row": 6,"column": 2},
-]
+    def _on_text_changed(self, text):
+        self.dropdown.hide()
+        self.dropdown.clear()
+        if self._fetcher and self.fetcher_running():
+            self._fetcher.terminate()
+        if self._matching_prefix(text):
+            self._fetcher = FolderFetcher(text)
+            self._fetcher.done.connect(self._populate)
+            self._fetcher.start()
 
-for item in storage_radios:
-    radio = ttk.Radiobutton(storage_frame, text=item["text"], variable=storage_var, value=item["value"], style="Custom.TRadiobutton")
-    radio.grid(row=item["row"], column=item["column"], sticky=tk.W)
+    def fetcher_running(self):
+        return self._fetcher is not None and self._fetcher.isRunning()
 
+    def _populate(self, folders):
+        self.dropdown.clear()
+        if folders:
+            for f in folders:
+                self.dropdown.addItem(f)
+            self.dropdown.show()
+        else:
+            self.dropdown.hide()
 
-# All known storage prefixes (from storage_radios, excluding empty)
-storage_prefixes = [item["value"] for item in storage_radios if item["value"]]
+    def _on_item_clicked(self, item):
+        self.line.setText(item.text())
+        self.dropdown.hide()
 
-def fetch_folders(path):
-    try:
-        result = subprocess.run(["rclone", "lsd", path], capture_output=True, text=True, timeout=10)
-        folders = []
-        for line in result.stdout.splitlines():
-            parts = line.split()
-            if parts:
-                folders.append(path.rstrip("/") + "/" + parts[-1])
-        return folders
-    except Exception:
-        return []
+    def text(self):
+        return self.line.text()
 
-def get_matching_prefix(text):
-    for prefix in storage_prefixes:
-        if text.lower().startswith(prefix.lower()):
-            return prefix
-    return None
-
-def on_combo_trigger(combo, var):
-    text = var.get()
-    combo["values"] = []
-    if get_matching_prefix(text):
-        def _fetch():
-            folders = fetch_folders(text)
-            combo["values"] = folders if folders else []
-        threading.Thread(target=_fetch, daemon=True).start()
-
-# From
-from_frame = ttk.Frame(BottomFrame, padding="0", style="Black.TFrame")
-from_frame.grid(row=2, column=0, sticky=tk.W, pady=(10,0), padx=(10,0))
-
-ttk.Label(from_frame, text="From:", width=5, background="#f15812", font=("JetBrainsmono nfp", 12, "bold")).grid(row=0, column=0, sticky=tk.W)
-from_combo = ttk.Combobox(from_frame, textvariable=from_var, values=[], width=50, font=("JetBrainsmono nfp", 12, "bold"))
-from_combo.grid(row=0, column=1, sticky=tk.W)
-from_combo.bind("<KeyRelease>", lambda e: on_combo_trigger(from_combo, from_var))
-from_combo.bind("<<ComboboxDropdown>>", lambda e: on_combo_trigger(from_combo, from_var))
-
-# TO
-to_frame = ttk.Frame(BottomFrame, padding="0", style="Black.TFrame")
-to_frame.grid(row=3, column=0, sticky=tk.W, pady=(0,10), padx=(10,0))
-
-ttk.Label(to_frame, text="To:", width=5, background="#f15812", font=("JetBrainsmono nfp", 12, "bold")).grid(row=0, column=0, sticky=tk.W)
-to_combo = ttk.Combobox(to_frame, textvariable=to_var, values=[], width=50, font=("JetBrainsmono nfp", 12, "bold"))
-to_combo.grid(row=0, column=1, sticky=tk.W)
-to_combo.bind("<KeyRelease>", lambda e: on_combo_trigger(to_combo, to_var))
-to_combo.bind("<<ComboboxDropdown>>", lambda e: on_combo_trigger(to_combo, to_var))
-
-# Create arguments frame
-Main_Flags_list = ttk.Frame(BottomFrame, padding="10", style="Black.TFrame")
-Main_Flags_list.grid(row=4, column=0, sticky=tk.W)
-
-# Create labels for additional options
-Main_Flags()
-
-# Create options frame for --transfer, --include, and --exclude
-Filter_Flags = ttk.Frame(BottomFrame, padding="10", style="Black.TFrame")
-Filter_Flags.grid(row=5, column=0, sticky=tk.W)
-
-grep_frame = ttk.Frame(BottomFrame, padding="10", style="Black.TFrame")
-grep_frame.grid(row=6, column=0, sticky=tk.W)
-
-ttk.Label(grep_frame, text="Grep Text:", background="#f15812", font=("Jetbrainsmono nfp", 12, "bold")).grid(row=0, column=0, sticky=tk.W)
-grep_entry = ttk.Entry(grep_frame, textvariable=grep_var, width=30, font=("JetBrainsmono nfp", 12, "bold"))
-grep_entry.grid(row=0, column=1, padx=5, pady=5, sticky=tk.W)
-
-# Update labels for extra items
-update_extra_labels()
-
-def execute_command():
-    command = ["rclone", command_var.get(), storage_var.get(), from_var.get(), to_var.get()]
-    if command_var.get() == "mount":
-        # For mount command, generate the specific mount argument
-        mount_dir = f"c:/{storage_var.get().strip(':/')}/"
-        command.append(mount_dir)
-    for display_text, actual_text, is_selected in additional_options:
-        if is_selected:
-            command.append(actual_text)
-    # Include/exclude options
-    for key, item in extra_items.items():
-        if item["state"]:
-            command.append(f"{item['prefix']}={item['var'].get()}")
-
-    # Append grep filter if text is provided
-    grep_text = grep_var.get().strip()
-    if grep_text:
-        command.append(f"| grep -i {grep_text}")
-
-    final_command = " ".join(command)
-    print("Executing:", final_command)
-
-    def run_command():
-        process = subprocess.Popen(final_command, shell=True)
-        process.wait()
-        print("\033[92mTask Completed\033[0m")
-    thread = threading.Thread(target=run_command)
-    thread.start()
+    def setText(self, t):
+        self.line.setText(t)
 
 
+# ── TOGGLE LABEL (flag chip) ──────────────────────────────────────────────────
+class ToggleLabel(QLabel):
+    def __init__(self, text, active=False):
+        super().__init__(text)
+        self.active = active
+        self.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.setFixedWidth(190)
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
+        self._refresh()
 
-def clear_terminal():
-    subprocess.run("cls", shell=True)
+    def _refresh(self):
+        bg = CP_GREEN if self.active else CP_RED
+        self.setStyleSheet(f"background:{bg}; color:#000; font-weight:bold; padding:4px; font-family:Consolas;")
 
-execute_button = tk.Button(BottomFrame, text="Execute", font=("Jetbrainsmono nfp",12,"bold"), bg="#4da9ff", fg="#000000", command=execute_command)
-execute_button.grid(row=10, column=0, pady=10, padx=10, sticky=tk.W)
-
-clear_button = tk.Button(BottomFrame, text="Clear", font=("Jetbrainsmono nfp",12,"bold"), bg="#282c34",fg="#ffffff", command=clear_terminal)
-clear_button.grid(row=10, column=1, pady=10, sticky=tk.W)
-
-
-
-# Assuming quick_commands_frame is already created.
-msBackups_Label = tk.Label( quick_commands_frame, text="msBackups \uf40a", font=("Jetbrainsmono nfp", 12, "bold"), bg="#a0522d", fg="#ffffff" )
-msBackups_Label.grid(row=1, column=1, pady=10, padx=10, sticky=tk.W)
-msBackups_Label.bind("<Button-1>", lambda event: threading.Thread(target=lambda: (
-    print("Executing: rclone sync C:\\@delta\\msBackups\\ o0:\\msBackups\\ -P --check-first --transfers=10 --track-renames --fast-list"),
-    subprocess.Popen("rclone sync C:\\@delta\\msBackups\\ o0:\\msBackups\\ -P --check-first --transfers=10 --track-renames --fast-list", shell=True).wait(),
-    print("\033[92mBackup Sync Completed\033[0m")
-)).start())
-
-# Assuming quick_commands_frame is already created.
-Song_Label = tk.Label( quick_commands_frame, text="Song \uf40a", font=("Jetbrainsmono nfp", 12, "bold"), bg="#a0522d", fg="#ffffff" )
-Song_Label.grid(row=2, column=1, pady=10, padx=10, sticky=tk.W)
-Song_Label.bind("<Button-1>", lambda event: threading.Thread(target=lambda: (
-    print("Executing: rclone sync D:\\song\\ gu:\\song\\ -P --check-first --transfers=10 --track-renames --fast-list"),
-    subprocess.Popen("rclone sync D:\\song\\ gu:\\song\\ -P --check-first --transfers=10 --track-renames --fast-list", shell=True).wait(),
-    print("\033[92mBackup Sync Completed\033[0m")
-)).start())
-
-# Assuming quick_commands_frame is already created.
-software_upload = tk.Label( quick_commands_frame, text="software \uf40a", font=("Jetbrainsmono nfp", 12, "bold"), bg="#a0522d", fg="#ffffff" )
-software_upload.grid(row=3, column=1, pady=10, padx=10, sticky=tk.W)
-software_upload.bind("<Button-1>", lambda event: threading.Thread(target=lambda: (
-    print("Executing: rclone sync D:\\software\\ gu:\\software\\ -P --check-first --transfers=10 --track-renames --fast-list"),
-    subprocess.Popen("rclone sync D:\\software\\ gu:\\software\\ -P --check-first --transfers=10 --track-renames --fast-list", shell=True).wait(),
-    print("\033[92mBackup Sync Completed\033[0m")
-)).start())
-
-# Assuming quick_commands_frame is already created.
-software_download = tk.Label( quick_commands_frame, text="software \uf409", font=("Jetbrainsmono nfp", 12, "bold"), bg="#a0522d", fg="#ffffff" )
-software_download.grid(row=3, column=2, pady=10, padx=10, sticky=tk.W)
-software_download.bind("<Button-1>", lambda event: threading.Thread(target=lambda: (
-    print("Executing: rclone sync gu:\\software\\ D:\\software\\ -P --check-first --transfers=10 --track-renames --fast-list"),
-    subprocess.Popen("rclone sync gu:\\software\\ D:\\software\\ -P --check-first --transfers=10 --track-renames --fast-list", shell=True).wait(),
-    print("\033[92mBackup Sync Completed\033[0m")
-)).start())
-
-# Assuming quick_commands_frame is already created.
-Picture_Label = tk.Label( quick_commands_frame, text="Picture \uf40a", font=("Jetbrainsmono nfp", 12, "bold"), bg="#a0522d", fg="#ffffff" )
-Picture_Label.grid(row=4, column=1, pady=10, padx=10, sticky=tk.W)
-Picture_Label.bind("<Button-1>", lambda event: threading.Thread(target=lambda: (
-    print("Executing: rclone sync C:\\Users\\nahid\\Pictures o0:\\Pictures -P --check-first --transfers=10 --track-renames --fast-list"),
-    subprocess.Popen("rclone sync C:\\Users\\nahid\\Pictures o0:\\Pictures -P --check-first --transfers=10 --track-renames --fast-list", shell=True).wait(),
-    print("\033[92mBackup Sync Completed\033[0m")
-)).start())
+    def mousePressEvent(self, _):
+        self.active = not self.active
+        self._refresh()
 
 
+# ── MAIN WINDOW ───────────────────────────────────────────────────────────────
+class RcloneApp(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Rclone + WinFSP")
+        self.setStyleSheet(GLOBAL_QSS)
 
-root.update_idletasks()
-width = root.winfo_width()
-height = root.winfo_height()
-x = (root.winfo_screenwidth() // 2) - (width // 2)
-y = (root.winfo_screenheight() // 2) - (height // 2)
-root.geometry(f'{width}x{height}+{x}+{y}')
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        self.setCentralWidget(scroll)
 
-root.mainloop()
+        container = QWidget()
+        scroll.setWidget(container)
+        root = QVBoxLayout(container)
+        root.setSpacing(8)
+        root.setContentsMargins(12, 12, 12, 12)
+
+        # ── Command ──────────────────────────────────────────────────────────
+        cmd_group = QGroupBox("COMMAND")
+        cmd_layout = QHBoxLayout(cmd_group)
+        self.cmd_group_btn = QButtonGroup(self)
+        for val in ["ls", "copy", "sync", "tree", "ncdu", "size", "mount", "rcd"]:
+            rb = QRadioButton(val)
+            if val == "ls":
+                rb.setChecked(True)
+            self.cmd_group_btn.addButton(rb)
+            cmd_layout.addWidget(rb)
+        cmd_layout.addStretch()
+        root.addWidget(cmd_group)
+
+        # ── Storage ───────────────────────────────────────────────────────────
+        stor_group = QGroupBox("STORAGE")
+        stor_grid = QGridLayout(stor_group)
+        stor_grid.setSpacing(2)
+        self.storage_btn_group = QButtonGroup(self)
+        storage_radios = [
+            ("N/A",  "",      0, 0), ("C:/",  "C:/",  0, 1), ("D:/",  "D:/",  0, 2),
+            ("cgu:/","cgu:/", 1, 0), ("gu:/", "gu:/", 1, 1), ("g00:/","g00:/",1, 2),
+            ("g01:/","g01:/", 2, 0), ("g02:/","g02:/",2, 1), ("g03:/","g03:/",2, 2),
+            ("g04:/","g04:/", 2, 3), ("g05:/","g05:/",2, 4),
+            ("g06:/","g06:/", 3, 0), ("g07:/","g07:/",3, 1), ("g08:/","g08:/",3, 2),
+            ("g09:/","g09:/", 3, 3), ("g10:/","g10:/",3, 4),
+            ("g11:/","g11:/", 4, 0), ("g12:/","g12:/",4, 1), ("g13:/","g13:/",4, 2),
+            ("g14:/","g14:/", 4, 3), ("g15:/","g15:/",4, 4),
+            ("o0:/", "o0:/",  5, 0), ("ouk:/","ouk:/",5, 1),
+            ("m0:/", "m0:/",  6, 0), ("m1:/", "m1:/", 6, 1),
+        ]
+        for text, val, r, c in storage_radios:
+            rb = QRadioButton(text)
+            rb.setProperty("rclone_val", val)
+            if val == "":
+                rb.setChecked(True)
+            self.storage_btn_group.addButton(rb)
+            stor_grid.addWidget(rb, r, c)
+        root.addWidget(stor_group)
+
+        # ── From / To ─────────────────────────────────────────────────────────
+        ft_group = QGroupBox("FROM / TO")
+        ft_layout = QGridLayout(ft_group)
+        ft_layout.addWidget(QLabel("From:"), 0, 0)
+        self.from_input = PathInput("type storage prefix e.g. gu:/")
+        ft_layout.addWidget(self.from_input, 0, 1)
+        ft_layout.addWidget(QLabel("To:"), 1, 0)
+        self.to_input = PathInput("type storage prefix e.g. o0:/")
+        ft_layout.addWidget(self.to_input, 1, 1)
+        root.addWidget(ft_group)
+
+        # ── Main Flags ────────────────────────────────────────────────────────
+        flags_group = QGroupBox("FLAGS")
+        flags_grid = QGridLayout(flags_group)
+        flags_grid.setSpacing(4)
+        self.flag_labels = []
+        flag_defs = [
+            ("Fast List",               "--fast-list",                      True),
+            ("Readable",                "--human-readable",                  True),
+            ("Acknowledge Abuse",       "--drive-acknowledge-abuse",         True),
+            ("Progress",                "-P",                                True),
+            ("Dry Run",                 "--dry-run",                         False),
+            ("Web Gui **Rcd",           "--rc-web-gui",                      False),
+            ("vfs-cache",               "--vfs-cache-mode writes",           False),
+            ("Verbose Lengthy",         "-vv",                               False),
+            ("Verbose Minimal",         "-v",                                False),
+            ("Log Level",               "--log-level ERROR",                 False),
+            ("Stats Oneline",           "--stats-one-line",                  False),
+            ("Trashed Only",            "--drive-trashed-only",              False),
+            ("Shared With Me",          "--drive-shared-with-me",            False),
+            ("Skip Dangling Shortcuts", "--drive-skip-dangling-shortcuts",   False),
+            ("Skip Shortcuts",          "--drive-skip-shortcuts",            False),
+            ("Date **tree",             "-D",                                False),
+            ("Modified Time **tree",    "-t",                                False),
+        ]
+        self.flag_defs = flag_defs
+        cols = 4
+        for i, (name, _, active) in enumerate(flag_defs):
+            lbl = ToggleLabel(name, active)
+            self.flag_labels.append(lbl)
+            flags_grid.addWidget(lbl, i // cols, i % cols)
+        root.addWidget(flags_group)
+
+        # ── Filter Flags ──────────────────────────────────────────────────────
+        filter_group = QGroupBox("FILTERS")
+        filter_grid = QGridLayout(filter_group)
+        filter_defs = [
+            ("Transfers", "--transfers", "4"),
+            ("Include",   "--include",   "*.jpg"),
+            ("Exclude",   "--exclude",   "*.jpg"),
+            ("Max Age",   "--max-age",   "1d"),
+            ("Min Age",   "--min-age",   "1d"),
+            ("Max Size",  "--max-size",  "100M"),
+            ("Min Size",  "--min-size",  "100M"),
+        ]
+        self.filter_defs = filter_defs
+        self.filter_labels = []
+        self.filter_entries = []
+        for i, (name, _, default) in enumerate(filter_defs):
+            lbl = ToggleLabel(name, False)
+            entry = QLineEdit(default)
+            entry.setFixedWidth(120)
+            self.filter_labels.append(lbl)
+            self.filter_entries.append(entry)
+            filter_grid.addWidget(lbl,   i, 0)
+            filter_grid.addWidget(entry, i, 1)
+        root.addWidget(filter_group)
+
+        # ── Grep ──────────────────────────────────────────────────────────────
+        grep_group = QGroupBox("GREP")
+        grep_layout = QHBoxLayout(grep_group)
+        grep_layout.addWidget(QLabel("Grep Text:"))
+        self.grep_entry = QLineEdit()
+        self.grep_entry.setFixedWidth(240)
+        grep_layout.addWidget(self.grep_entry)
+        grep_layout.addStretch()
+        root.addWidget(grep_group)
+
+        # ── Buttons ───────────────────────────────────────────────────────────
+        btn_row = QHBoxLayout()
+        exec_btn = QPushButton("▶  EXECUTE")
+        exec_btn.setStyleSheet(f"background:{CP_CYAN}; color:#000; font-weight:bold; padding:8px 20px; border:none;")
+        exec_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        exec_btn.clicked.connect(self.execute_command)
+
+        clear_btn = QPushButton("CLEAR")
+        clear_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        clear_btn.clicked.connect(lambda: subprocess.run("cls", shell=True))
+
+        restart_btn = QPushButton("↺  RESTART")
+        restart_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        restart_btn.clicked.connect(self.restart)
+
+        btn_row.addWidget(exec_btn)
+        btn_row.addWidget(clear_btn)
+        btn_row.addWidget(restart_btn)
+        btn_row.addStretch()
+        root.addLayout(btn_row)
+        root.addStretch()
+
+    def _selected_storage(self):
+        btn = self.storage_btn_group.checkedButton()
+        return btn.property("rclone_val") if btn else ""
+
+    def _selected_command(self):
+        btn = self.cmd_group_btn.checkedButton()
+        return btn.text() if btn else "ls"
+
+    def execute_command(self):
+        cmd   = self._selected_command()
+        stor  = self._selected_storage()
+        frm   = self.from_input.text().strip()
+        to    = self.to_input.text().strip()
+
+        parts = ["rclone", cmd, stor, frm, to]
+        if cmd == "mount":
+            parts.append(f"c:/{stor.strip(':/')}/")
+
+        for i, (_, flag, _) in enumerate(self.flag_defs):
+            if self.flag_labels[i].active:
+                parts.append(flag)
+
+        for i, (_, prefix, _) in enumerate(self.filter_defs):
+            if self.filter_labels[i].active:
+                parts.append(f"{prefix}={self.filter_entries[i].text()}")
+
+        grep = self.grep_entry.text().strip()
+        if grep:
+            parts.append(f"| grep -i {grep}")
+
+        final = " ".join(p for p in parts if p)
+        print("Executing:", final)
+
+        def run():
+            subprocess.Popen(final, shell=True).wait()
+            print("\033[92mTask Completed\033[0m")
+
+        threading.Thread(target=run, daemon=True).start()
+
+    def restart(self):
+        os.execv(sys.executable, [sys.executable] + sys.argv)
+
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    win = RcloneApp()
+    win.resize(900, 800)
+    win.show()
+    sys.exit(app.exec())
