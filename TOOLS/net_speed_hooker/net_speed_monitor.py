@@ -196,7 +196,9 @@ class MonitorStats:
                 dl = d['recv_curr']; ul = d['sent_curr']; d['recv_curr'] = 0; d['sent_curr'] = 0; sum_dl += dl; sum_ul += ul
                 snap.append({ 'pid': pid, 'name': d['name'], 'exe': d['exe'], 'dl_speed': dl, 'ul_speed': ul, 'dl_total': d['recv_total'], 'ul_total': d['sent_total'] })
             md = max(0, dl_delta - sum_dl); mu = max(0, ul_delta - sum_ul)
-            if md > 1024 or mu > 1024: snap.append({ 'pid': 0, 'name': '[SYSTEM/OTHER/VPN]', 'exe': '', 'dl_speed': md, 'ul_speed': mu, 'dl_total': md, 'ul_total': mu })
+            self.sys_dl_total = getattr(self, 'sys_dl_total', 0) + md
+            self.sys_ul_total = getattr(self, 'sys_ul_total', 0) + mu
+            snap.append({ 'pid': 0, 'name': '[SYSTEM/OTHER/VPN]', 'exe': '', 'dl_speed': md, 'ul_speed': mu, 'dl_total': self.sys_dl_total, 'ul_total': self.sys_ul_total })
             return snap, dl_delta, ul_delta
 
 class NetworkThread(threading.Thread):
