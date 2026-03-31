@@ -493,11 +493,12 @@ class App(QMainWindow):
         self.db.reset()
         with self.stats.lock:
             self.stats.proc_data.clear(); self.stats.sys_dl_total = 0; self.stats.sys_ul_total = 0
+        # unblock all and clear json
+        for n in list(self.blocked_names):
+            threading.Thread(target=self._fw_unblock_by_name, args=(n,), daemon=True).start()
+        self.blocked_names.clear(); self.blocked_exe.clear()
+        save_blocked_json({})
         self.tree.clear()
-        for n in self.blocked_names:
-            r = TreeItem(self.tree); r.setText(1, n)
-            r.setFlags(r.flags() | Qt.ItemFlag.ItemIsUserCheckable)
-            r.setCheckState(6, Qt.CheckState.Checked)
 
     def show_settings(self):
         curr = {'unit':self.unit,'win_w':self.width(),'win_h':self.height(),'row_height':self.row_height,
