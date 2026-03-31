@@ -314,10 +314,14 @@ class App(QMainWindow):
     def save_settings(self):
         try:
             os.makedirs(SETTINGS_DIR, exist_ok=True)
-            try: _ms = float(self.filter_combo.currentText()) if hasattr(self,'filter_combo') else self.min_speed
-            except ValueError: _ms = self.min_speed
-            try: _mt = float(self.filter_total_combo.currentText()) if hasattr(self,'filter_total_combo') else self.min_total
-            except ValueError: _mt = self.min_total
+            try: 
+                v = self.filter_combo.currentData() if hasattr(self,'filter_combo') else self.min_speed
+                _ms = float(v) if v is not None else self.min_speed
+            except: _ms = self.min_speed
+            try: 
+                v = self.filter_total_combo.currentData() if hasattr(self,'filter_total_combo') else self.min_total
+                _mt = float(v) if v is not None else self.min_total
+            except: _mt = self.min_total
             s = {'unit':self.unit,'win_w':self.width(),'win_h':self.height(),'row_height':self.row_height,
                  'col_weights':self.col_weights,'sort_col':self.current_sort_col,'sort_order':self.current_sort_order.value,
                  'show_dl':self.show_dl,'show_ul':self.show_ul,'hi_enabled':self.hi_enabled,'hi_color':self.hi_color,
@@ -341,6 +345,8 @@ class App(QMainWindow):
         self.filter_total_combo.setStyleSheet(f'QComboBox{{background-color:{CP_PANEL};color:{CP_CYAN};border:1px solid {CP_DIM};padding:2px;}}')
         ht.addWidget(self.filter_total_combo)
         self._rebuild_filter_combo()
+        self.filter_combo.currentIndexChanged.connect(self.save_settings)
+        self.filter_total_combo.currentIndexChanged.connect(self.save_settings)
         ht.addWidget(self.cb_dl); ht.addWidget(self.cb_ul)
         self.tl = QLabel("DL: 0.00 | UL: 0.00"); self.tl.setStyleSheet(f"color:{CP_YELLOW};font-weight:bold;font-size:10pt;border:1px solid {CP_DIM};padding:5px;"); ht.addWidget(self.tl); l.addLayout(ht)
         hb = QHBoxLayout(); hb.addStretch()
@@ -363,8 +369,8 @@ class App(QMainWindow):
 
 
     def _rebuild_filter_combo(self):
-        curs = self.filter_combo.currentText() if hasattr(self,'filter_combo') else str(self.min_speed)
-        curt = self.filter_total_combo.currentText() if hasattr(self,'filter_total_combo') else str(self.min_total)
+        curs = self.filter_combo.currentData() if hasattr(self,'filter_combo') and self.filter_combo.currentData() is not None else self.min_speed
+        curt = self.filter_total_combo.currentData() if hasattr(self,'filter_total_combo') and self.filter_total_combo.currentData() is not None else self.min_total
         for cb, cur in [(self.filter_combo, curs), (self.filter_total_combo, curt)]:
             cb.blockSignals(True); cb.clear()
             for v in self.filter_presets.split(','):
@@ -377,7 +383,9 @@ class App(QMainWindow):
                     cb.addItem(display_text, num)
                 except ValueError: pass
             try:
-                fval = float(cur) if cur and cur.strip() else 0.0
+                if cur is None: fval = 0.0
+                elif isinstance(cur, (float, int)): fval = float(cur)
+                else: fval = float(cur) if str(cur).strip() else 0.0
                 idx = cb.findData(fval)
             except ValueError:
                 idx = 0
