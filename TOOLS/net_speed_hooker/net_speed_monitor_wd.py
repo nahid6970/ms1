@@ -170,7 +170,9 @@ class TrafficDB:
         self.conn.commit()
 
     def reset(self):
-        self.conn.execute("DELETE FROM traffic"); self.conn.commit()  # keep blocked table intact
+        self.conn.execute("DELETE FROM traffic")
+        self.conn.execute("DELETE FROM blocked")
+        self.conn.commit()
 
 class MonitorStats:
     def __init__(self, db):
@@ -496,7 +498,9 @@ class App(QMainWindow):
     def reset_db(self):
         self.db.reset()
         with self.stats.lock:
-            self.stats.proc_data.clear(); self.stats.sys_dl_total = 0; self.stats.sys_ul_total = 0
+            self.stats.proc_data.clear()
+            self.stats.db_totals.clear()
+            self.stats.sys_dl_total = 0; self.stats.sys_ul_total = 0
         # unblock all and clear json
         for n in list(self.blocked_names):
             threading.Thread(target=self._fw_unblock_by_name, args=(n,), daemon=True).start()
