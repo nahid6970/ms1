@@ -274,17 +274,24 @@ class App(QMainWindow):
                 background-color: {CP_PANEL}; 
                 border: 1px solid {CP_DIM}; 
                 color: {CP_TEXT};
-                outline: 0;
-                selection-background-color: {CP_DIM};
-                selection-color: {CP_YELLOW};
+                outline: none;
+                show-decoration-selected: 1;
             }}
             QTreeWidget::item {{ 
                 border-bottom: 1px solid {CP_DIM}; 
+                border-left: none;
+                border-right: none;
                 padding: 4px;
             }}
             QTreeWidget::item:selected {{
                 background-color: {CP_DIM};
-                border: 1px solid {CP_CYAN};
+                color: {CP_YELLOW};
+                outline: none;
+                border: none;
+            }}
+            QTreeWidget::item:focus {{
+                outline: none;
+                border: none;
             }}
             QHeaderView::section {{
                 background-color: {CP_DIM}; 
@@ -325,6 +332,8 @@ class App(QMainWindow):
         self.tree.setIndentation(20)
         self.tree.header().setSectionResizeMode(QHeaderView.ResizeMode.Interactive)
         self.tree.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.tree.setSelectionBehavior(QTreeWidget.SelectionBehavior.SelectRows)
+        self.tree.setAllColumnsShowFocus(True)
         
         for i, width in enumerate(self.col_widths):
             self.tree.setColumnWidth(i, width)
