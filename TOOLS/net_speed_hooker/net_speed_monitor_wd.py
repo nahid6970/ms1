@@ -158,7 +158,7 @@ class TrafficDB:
         self.conn.commit()
 
     def reset(self):
-        self.conn.execute("DELETE FROM traffic"); self.conn.execute("DELETE FROM blocked"); self.conn.commit()
+        self.conn.execute("DELETE FROM traffic"); self.conn.commit()  # keep blocked table intact
 
 class MonitorStats:
     def __init__(self, db):
@@ -460,13 +460,10 @@ class App(QMainWindow):
         self.blocked_names = new_blocked
 
     def reset_db(self):
-        for n in self.blocked_names:
-            with self.stats.lock:
-                for d in self.stats.proc_data.values():
-                    if d['name']==n and d['exe']: self._fw_block(d['exe'], False); break
-        self.db.reset(); self.blocked_names = set()
+        self.db.reset()  # clears traffic only, blocked entries preserved
         with self.stats.lock:
             self.stats.proc_data.clear(); self.stats.sys_dl_total = 0; self.stats.sys_ul_total = 0
+        self.tree.clear()
         self.tree.clear()
 
     def show_settings(self):
