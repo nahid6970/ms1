@@ -333,11 +333,12 @@ class App(QMainWindow):
         fl = QLabel("MIN SPD:"); fl.setStyleSheet(f"color:{CP_DIM};font-size:9pt;"); ht.addWidget(fl)
         self.filter_combo = QComboBox(); self.filter_combo.setFixedWidth(80)
         self.filter_combo.setStyleSheet(f'QComboBox{{background-color:{CP_PANEL};color:{CP_CYAN};border:1px solid {CP_DIM};padding:2px;}}')
+        ht.addWidget(self.filter_combo)
         ftl = QLabel("MIN TOT:"); ftl.setStyleSheet(f"color:{CP_DIM};font-size:9pt;"); ht.addWidget(ftl)
         self.filter_total_combo = QComboBox(); self.filter_total_combo.setFixedWidth(80)
         self.filter_total_combo.setStyleSheet(f'QComboBox{{background-color:{CP_PANEL};color:{CP_CYAN};border:1px solid {CP_DIM};padding:2px;}}')
+        ht.addWidget(self.filter_total_combo)
         self._rebuild_filter_combo()
-        ht.addWidget(self.filter_combo); ht.addWidget(self.filter_total_combo)
         ht.addWidget(self.cb_dl); ht.addWidget(self.cb_ul)
         self.tl = QLabel("DL: 0.00 | UL: 0.00"); self.tl.setStyleSheet(f"color:{CP_YELLOW};font-weight:bold;font-size:10pt;border:1px solid {CP_DIM};padding:5px;"); ht.addWidget(self.tl); l.addLayout(ht)
         hb = QHBoxLayout(); hb.addStretch()
@@ -391,7 +392,12 @@ class App(QMainWindow):
 
     def on_sort_changed(self, i, o):
         if i != self.current_sort_col and o == Qt.SortOrder.AscendingOrder:
+            self.tree.header().blockSignals(True)
             self.tree.header().setSortIndicator(i, Qt.SortOrder.DescendingOrder)
+            self.tree.header().blockSignals(False)
+            self.current_sort_col = i; self.current_sort_order = Qt.SortOrder.DescendingOrder
+            self.tree.sortByColumn(i, Qt.SortOrder.DescendingOrder)
+            self.save_settings()
             return
         self.current_sort_col = i; self.current_sort_order = o; self.save_settings()
 
