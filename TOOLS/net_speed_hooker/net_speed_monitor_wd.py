@@ -15,7 +15,18 @@ CP_TEXT="#E0E0E0"; CP_SUBTEXT="#808080"
 SETTINGS_DIR = r"C:\@delta\output\net_speed_monitor"
 SETTINGS_FILE = os.path.join(SETTINGS_DIR, "settings.json")
 DB_FILE = os.path.join(SETTINGS_DIR, "traffic.db")
-BLOCKED_FILE = os.path.join(SETTINGS_DIR, "blocked_cmds.json")
+BLOCKED_FILE = os.path.join(SETTINGS_DIR, "blocked.json")
+
+def load_blocked_json():
+    try:
+        if os.path.exists(BLOCKED_FILE):
+            with open(BLOCKED_FILE) as f: return json.load(f)  # {name: exe}
+    except: pass
+    return {}
+
+def save_blocked_json(name_exe_map):
+    os.makedirs(SETTINGS_DIR, exist_ok=True)
+    with open(BLOCKED_FILE, 'w') as f: json.dump(name_exe_map, f)
 
 def format_size(b, unit="MB/s"):
     if b <= 0: return "0 B"
@@ -267,7 +278,10 @@ class App(QMainWindow):
     def __init__(self):
         super().__init__(); self.setWindowTitle("NET-SPEED HOOKER // WinDivert")
         self.load_settings(); self.resize(self.win_w, self.win_h)
-        self.db = TrafficDB(); self.blocked_names = self.db.load_blocked(); self.blocked_exe = {}
+        self.db = TrafficDB()
+        _bj = load_blocked_json()  # {name: exe}
+        self.blocked_names = set(_bj.keys())
+        self.blocked_exe = dict(_bj)
         self.stats = MonitorStats(self.db); self.monitor = NetworkThread(self.stats); self.monitor.start()
         self.icon_cache = {}; self.icon_provider = QFileIconProvider()
         self.init_ui(); self.timer = QTimer(); self.timer.timeout.connect(self.update_stats); self.timer.start(1000)
@@ -319,7 +333,6 @@ class App(QMainWindow):
         ht.addWidget(self.cb_dl); ht.addWidget(self.cb_ul)
         self.tl = QLabel("DL: 0.00 | UL: 0.00"); self.tl.setStyleSheet(f"color:{CP_YELLOW};font-weight:bold;font-size:10pt;border:1px solid {CP_DIM};padding:5px;"); ht.addWidget(self.tl); l.addLayout(ht)
         hb = QHBoxLayout(); hb.addStretch()
-        blb = QPushButton("BLOCKED"); blb.clicked.connect(self.show_blocked); hb.addWidget(blb)
         dbb = QPushButton("RESET DB"); dbb.clicked.connect(self.reset_db); hb.addWidget(dbb)
         rb = QPushButton("RESTART"); rb.clicked.connect(self.restart_app); hb.addWidget(rb)
         sb = QPushButton("SETTINGS"); sb.clicked.connect(self.show_settings); hb.addWidget(sb); l.addLayout(hb)
@@ -392,7 +405,6 @@ class App(QMainWindow):
             if gd['exe'] and os.path.exists(gd['exe']) and gd['exe'] not in self.icon_cache:
                 self.icon_cache[gd['exe']] = self.icon_provider.icon(QFileInfo(gd['exe'])).pixmap(QSize(24,24))
             if gd['exe'] in self.icon_cache: r.setIcon(0, QIcon(self.icon_cache[gd['exe']]))
-            if n in self.blocked_names and n not in self.blocked_exe and gd['exe']: self.blocked_exe[n] = gd['exe']
             r.setText(2, format_size(gd['dl_s'],self.unit)); r.setData(2, Qt.ItemDataRole.UserRole, gd['dl_s'])
             r.setText(3, format_size(gd['ul_s'],self.unit)); r.setData(3, Qt.ItemDataRole.UserRole, gd['ul_s'])
             r.setText(4, format_size(gd['dl_t'],"MB/s")); r.setData(4, Qt.ItemDataRole.UserRole, gd['dl_t'])
@@ -435,17 +447,32 @@ class App(QMainWindow):
         self.db.save_batch([(n, dl, ul) for n, (dl, ul) in groups.items()])
 
     def _fw_block(self, exe, block):
+        import subprocess
         rule = f'NSH_BLOCK_{os.path.basename(exe)}'
         if block:
-            os.system(f'netsh advfirewall firewall add rule name="{rule}" dir=out action=block program="{exe}" enable=yes >nul 2>&1')
-            os.system(f'netsh advfirewall firewall add rule name="{rule}_in" dir=in action=block program="{exe}" enable=yes >nul 2>&1')
+            cmds = [
+                f'netsh advfirewall firewall add rule name="{rule}" dir=out action=block program="{exe}" enable=yes',
+                f'netsh advfirewall firewall add rule name="{rule}_in" dir=in action=block program="{exe}" enable=yes',
+            ]
         else:
-            os.system(f'netsh advfirewall firewall delete rule name="{rule}" >nul 2>&1')
-            os.system(f'netsh advfirewall firewall delete rule name="{rule}_in" >nul 2>&1')
+            cmds = [
+                f'netsh advfirewall firewall delete rule name="{rule}"',
+                f'netsh advfirewall firewall delete rule name="{rule}_in"',
+            ]
+        for cmd in cmds:
+            r = subprocess.run(['powershell','-NoProfile','-Command', cmd], capture_output=True, text=True, creationflags=0x08000000)
+            print(f'[fw] {cmd}: {r.stdout.strip() or r.stderr.strip()}')
+
+    def _fw_unblock_by_name(self, proc_name):
+        import subprocess
+        rule = f'NSH_BLOCK_{proc_name}'
+        for r_name in [rule, f'{rule}_in']:
+            cmd = f'netsh advfirewall firewall delete rule name="{r_name}"'
+            r = subprocess.run(['powershell','-NoProfile','-Command', cmd], capture_output=True, text=True, creationflags=0x08000000)
+            print(f'[fw] {cmd}: {r.stdout.strip() or r.stderr.strip()}')
 
     def _sync_blocked(self):
         new_blocked = set()
-        # build exe_map from all currently known processes
         exe_map = {}
         with self.stats.lock:
             for d in self.stats.proc_data.values():
@@ -453,57 +480,21 @@ class App(QMainWindow):
         for i in range(self.tree.topLevelItemCount()):
             r = self.tree.topLevelItem(i)
             if r.checkState(6) == Qt.CheckState.Checked: new_blocked.add(r.text(1))
+        if new_blocked == self.blocked_names: return
         for n in new_blocked - self.blocked_names:
-            self.db.set_blocked(n, True)
             if n in exe_map: self.blocked_exe[n] = exe_map[n]; threading.Thread(target=self._fw_block, args=(exe_map[n], True), daemon=True).start()
         for n in self.blocked_names - new_blocked:
-            self.db.set_blocked(n, False)
-            exe = self.blocked_exe.pop(n, exe_map.get(n))
-            if exe: threading.Thread(target=self._fw_block, args=(exe, False), daemon=True).start()
+            self.blocked_exe.pop(n, None)
+            threading.Thread(target=self._fw_unblock_by_name, args=(n,), daemon=True).start()
         self.blocked_names = new_blocked
+        save_blocked_json(self.blocked_exe)
 
     def reset_db(self):
-        self.db.reset()
+        self.db.reset()  # clears traffic only, blocked entries preserved
         with self.stats.lock:
             self.stats.proc_data.clear(); self.stats.sys_dl_total = 0; self.stats.sys_ul_total = 0
         self.tree.clear()
-
-    def _save_blocked_json(self):
-        data = {}
-        for n, exe in self.blocked_exe.items():
-            rule = f"NSH_BLOCK_{os.path.basename(exe)}"
-            data[n] = {
-                'exe': exe,
-                'unblock': [
-                    f'netsh advfirewall firewall delete rule name="{rule}"',
-                    f'netsh advfirewall firewall delete rule name="{rule}_in"'
-                ]
-            }
-        os.makedirs(SETTINGS_DIR, exist_ok=True)
-        with open(BLOCKED_FILE, 'w') as f: json.dump(data, f, indent=4)
-
-    def show_blocked(self):
-        if not os.path.exists(BLOCKED_FILE):
-            dlg = QDialog(self); dlg.setWindowTitle("BLOCKED"); dlg.setStyleSheet(f"QDialog{{background:{CP_BG};}} QLabel{{color:{CP_TEXT};}}")
-            QVBoxLayout(dlg).addWidget(QLabel("No blocked entries.")); dlg.exec(); return
-        with open(BLOCKED_FILE) as f: data = json.load(f)
-        if not data:
-            dlg = QDialog(self); dlg.setWindowTitle("BLOCKED"); dlg.setStyleSheet(f"QDialog{{background:{CP_BG};}} QLabel{{color:{CP_TEXT};}}")
-            QVBoxLayout(dlg).addWidget(QLabel("No blocked entries.")); dlg.exec(); return
-        dlg = QDialog(self); dlg.setWindowTitle("BLOCKED PROCESSES"); dlg.resize(600, 400)
-        dlg.setStyleSheet(f"QDialog{{background:{CP_BG};border:1px solid {CP_CYAN};}} QLabel{{color:{CP_YELLOW};font-family:'Consolas';font-size:9pt;}} QPushButton{{background:{CP_DIM};border:1px solid {CP_DIM};color:white;padding:4px 8px;}} QPushButton:hover{{border:1px solid {CP_CYAN};color:{CP_CYAN};}}")
-        sv = QScrollArea(); sv.setWidgetResizable(True); sv.setStyleSheet("QScrollArea{border:none;background:transparent;}")
-        cw = QWidget(); cl = QVBoxLayout(cw)
-        for name, info in data.items():
-            for cmd in info['unblock']:
-                row = QHBoxLayout()
-                lbl = QLabel(cmd); lbl.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
-                btn = QPushButton("COPY"); btn.setFixedWidth(60)
-                btn.clicked.connect(lambda _, c=cmd: QApplication.clipboard().setText(c))
-                row.addWidget(lbl); row.addWidget(btn); cl.addLayout(row)
-        cl.addStretch(); sv.setWidget(cw)
-        vl = QVBoxLayout(dlg); vl.addWidget(QLabel(f"  {len(data)} blocked process(es) — copy commands and run as Admin:")); vl.addWidget(sv)
-        dlg.exec()
+        self.tree.clear()
 
     def show_settings(self):
         curr = {'unit':self.unit,'win_w':self.width(),'win_h':self.height(),'row_height':self.row_height,
