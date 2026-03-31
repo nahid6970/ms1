@@ -2,7 +2,7 @@ import sys, os, psutil, socket, threading, time, json
 from datetime import datetime
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QLabel, QPushButton, QTreeWidget, QTreeWidgetItem, QHeaderView,
-                             QGroupBox, QDialog, QSpinBox, QFormLayout, QScrollArea, QComboBox,
+                             QGroupBox, QDialog, QSpinBox, QFormLayout, QScrollArea, QComboBox, QLineEdit,
                              QCheckBox, QStyledItemDelegate, QColorDialog, QSizePolicy, QFileIconProvider)
 from PyQt6.QtCore import Qt, QTimer, QSize, QRectF, QFileInfo
 from PyQt6.QtGui import QIcon, QPixmap, QColor, QFont, QPainter, QPen
@@ -60,7 +60,7 @@ class SettingsDialog(QDialog):
     def __init__(self, parent=None, current_settings=None):
         super().__init__(parent)
         self.setWindowTitle("SETTINGS"); self.resize(500, 700)
-        self.setStyleSheet(f"QDialog{{background-color:{CP_BG};border:1px solid {CP_CYAN};}} QLabel{{color:{CP_YELLOW};font-family:'Consolas';font-weight:bold;}} QSpinBox,QComboBox{{background-color:{CP_PANEL};color:{CP_CYAN};border:1px solid {CP_DIM};padding:4px;}} QPushButton{{background-color:{CP_DIM};border:1px solid {CP_DIM};color:white;padding:10px;font-weight:bold;}} QPushButton:hover{{background-color:#2a2a2a;border:1px solid {CP_YELLOW};color:{CP_YELLOW};}} QScrollArea{{border:none;background-color:transparent;}} QCheckBox{{color:{CP_TEXT};}}")
+        self.setStyleSheet(f"QDialog{{background-color:{CP_BG};border:1px solid {CP_CYAN};}} QLabel{{color:{CP_YELLOW};font-family:'Consolas';font-weight:bold;}} QSpinBox,QComboBox,QLineEdit{{background-color:{CP_PANEL};color:{CP_CYAN};border:1px solid {CP_DIM};padding:4px;}} QPushButton{{background-color:{CP_DIM};border:1px solid {CP_DIM};color:white;padding:10px;font-weight:bold;}} QPushButton:hover{{background-color:#2a2a2a;border:1px solid {CP_YELLOW};color:{CP_YELLOW};}} QScrollArea{{border:none;background-color:transparent;}} QCheckBox{{color:{CP_TEXT};}}")
         l = QVBoxLayout(self); s = QScrollArea(); s.setWidgetResizable(True); c = QWidget(); layout = QVBoxLayout(c)
 
         gs = f"QGroupBox{{color:{CP_CYAN};border:1px solid {CP_DIM};margin-top:10px;}} QGroupBox::title{{subcontrol-origin:margin;left:10px;}}"
@@ -105,6 +105,11 @@ class SettingsDialog(QDialog):
         hf.addRow("COLOR:", self.color_btn); hf.addRow("THICKNESS:", self.hi_thick)
         hg.setLayout(hf); layout.addWidget(hg)
 
+        fg = QGroupBox("SPEED FILTER PRESETS"); fg.setStyleSheet(gs); ff = QFormLayout()
+        self.filter_presets = QLineEdit(current_settings.get('filter_presets','0,1024,10240,102400,1048576'))
+        self.filter_presets.setPlaceholderText('e.g. 0,1024,10240,102400')
+        ff.addRow("PRESETS (B/s):", self.filter_presets); fg.setLayout(ff); layout.addWidget(fg)
+
         s.setWidget(c); l.addWidget(s)
         self.save_btn = QPushButton("SAVE & APPLY"); self.save_btn.clicked.connect(self.accept); l.addWidget(self.save_btn)
 
@@ -121,7 +126,8 @@ class SettingsDialog(QDialog):
             'col_weights': [sb.value() for sb in self.spins],
             'hi_enabled': self.hi_global.isChecked(), 'hi_color': self.hi_color, 'hi_thickness': self.hi_thick.value(),
             'hi_dl_s': self.hi_dl_s.isChecked(), 'hi_ul_s': self.hi_ul_s.isChecked(),
-            'hi_dl_t': self.hi_dl_t.isChecked(), 'hi_ul_t': self.hi_ul_t.isChecked()
+            'hi_dl_t': self.hi_dl_t.isChecked(), 'hi_ul_t': self.hi_ul_t.isChecked(),
+            'filter_presets': self.filter_presets.text()
         }
 
 
@@ -235,7 +241,7 @@ class App(QMainWindow):
         self.unit="MB/s"; self.show_dl=True; self.show_ul=True
         self.hi_enabled=True; self.hi_color=CP_CYAN; self.hi_thickness=2
         self.hi_dl_s=True; self.hi_ul_s=True; self.hi_dl_t=True; self.hi_ul_t=True
-        self.min_speed=0
+        self.min_speed=0; self.filter_presets='0,1024,10240,102400,1048576'
         try:
             if os.path.exists(SETTINGS_FILE):
                 with open(SETTINGS_FILE) as f: s = json.load(f)
@@ -247,7 +253,7 @@ class App(QMainWindow):
                 self.hi_thickness=s.get('hi_thickness',2)
                 self.hi_dl_s=s.get('hi_dl_s',True); self.hi_ul_s=s.get('hi_ul_s',True)
                 self.hi_dl_t=s.get('hi_dl_t',True); self.hi_ul_t=s.get('hi_ul_t',True)
-                self.min_speed=s.get('min_speed',0)
+                self.min_speed=s.get('min_speed',0); self.filter_presets=s.get('filter_presets','0,1024,10240,102400,1048576')
         except: pass
 
     def save_settings(self):
@@ -257,7 +263,7 @@ class App(QMainWindow):
                  'col_weights':self.col_weights,'sort_col':self.current_sort_col,'sort_order':self.current_sort_order.value,
                  'show_dl':self.show_dl,'show_ul':self.show_ul,'hi_enabled':self.hi_enabled,'hi_color':self.hi_color,
                  'hi_thickness':self.hi_thickness,'hi_dl_s':self.hi_dl_s,'hi_ul_s':self.hi_ul_s,
-                 'hi_dl_t':self.hi_dl_t,'hi_ul_t':self.hi_ul_t,'min_speed':getattr(self.filter_spin,'value',lambda:self.min_speed)()}
+                 'hi_dl_t':self.hi_dl_t,'hi_ul_t':self.hi_ul_t,'min_speed':int(self.filter_combo.currentText()) if hasattr(self,'filter_combo') and self.filter_combo.currentText().isdigit() else self.min_speed,'filter_presets':self.filter_presets}
             with open(SETTINGS_FILE,'w') as f: json.dump(s, f, indent=4)
         except: pass
 
@@ -269,9 +275,10 @@ class App(QMainWindow):
         self.cb_ul = QCheckBox("UPLOAD"); self.cb_ul.setChecked(self.show_ul); self.cb_ul.stateChanged.connect(self.toggle_cols)
         ht.addStretch()
         fl = QLabel("MIN SPEED:"); fl.setStyleSheet(f"color:{CP_DIM};font-size:9pt;"); ht.addWidget(fl)
-        self.filter_spin = QSpinBox(); self.filter_spin.setRange(0, 100000); self.filter_spin.setValue(self.min_speed); self.filter_spin.setSuffix(" B/s"); self.filter_spin.setFixedWidth(100)
-        self.filter_spin.setStyleSheet(f"QSpinBox{{background-color:{CP_PANEL};color:{CP_CYAN};border:1px solid {CP_DIM};padding:2px;}} QSpinBox::up-button,QSpinBox::down-button{{width:0;border:none;}}")
-        ht.addWidget(self.filter_spin)
+        self.filter_combo = QComboBox(); self.filter_combo.setFixedWidth(110)
+        self.filter_combo.setStyleSheet(f'QComboBox{{background-color:{CP_PANEL};color:{CP_CYAN};border:1px solid {CP_DIM};padding:2px;}}')
+        self._rebuild_filter_combo()
+        ht.addWidget(self.filter_combo)
         ht.addWidget(self.cb_dl); ht.addWidget(self.cb_ul)
         self.tl = QLabel("DL: 0.00 | UL: 0.00"); self.tl.setStyleSheet(f"color:{CP_YELLOW};font-weight:bold;font-size:10pt;border:1px solid {CP_DIM};padding:5px;"); ht.addWidget(self.tl); l.addLayout(ht)
         hb = QHBoxLayout(); hb.addStretch()
@@ -290,6 +297,16 @@ class App(QMainWindow):
         self.fl = QLabel(f"STATUS: MONITORING_ACTIVE // ENGINE: WinDivert // UNIT: {self.unit}")
         self.fl.setStyleSheet(f"color:{CP_DIM};font-size:8pt;"); l.addWidget(self.fl); self.toggle_cols()
 
+
+    def _rebuild_filter_combo(self):
+        cur = self.filter_combo.currentText() if hasattr(self,'filter_combo') else str(self.min_speed)
+        self.filter_combo.blockSignals(True); self.filter_combo.clear()
+        for v in self.filter_presets.split(','):
+            v=v.strip()
+            if v.isdigit(): self.filter_combo.addItem(v)
+        idx = self.filter_combo.findText(cur)
+        self.filter_combo.setCurrentIndex(idx if idx>=0 else 0)
+        self.filter_combo.blockSignals(False)
 
     def _apply_col_widths(self):
         self.tree.header().setStretchLastSection(False)
@@ -337,7 +354,9 @@ class App(QMainWindow):
             r.setForeground(2, QColor(CP_CYAN if gd['dl_s']>0 else CP_TEXT))
             r.setForeground(3, QColor(CP_ORANGE if gd['ul_s']>0 else CP_TEXT))
             r.setForeground(4, QColor(CP_YELLOW)); r.setForeground(5, QColor(CP_GREEN))
-            r.setHidden(gd['dl_s'] < self.filter_spin.value() and gd['ul_s'] < self.filter_spin.value())
+            try: _f=int(self.filter_combo.currentText())
+            except: _f=0
+            r.setHidden(gd['dl_s'] < _f and gd['ul_s'] < _f)
             if len(gd['items']) > 1:
                 eps = {r.child(j).text(1): r.child(j) for j in range(r.childCount())}; nps = set()
                 for id in gd['items']:
@@ -362,14 +381,15 @@ class App(QMainWindow):
         curr = {'unit':self.unit,'win_w':self.width(),'win_h':self.height(),'row_height':self.row_height,
                 'col_weights':self.col_weights,'hi_enabled':self.hi_enabled,'hi_color':self.hi_color,
                 'hi_thickness':self.hi_thickness,'hi_dl_s':self.hi_dl_s,'hi_ul_s':self.hi_ul_s,
-                'hi_dl_t':self.hi_dl_t,'hi_ul_t':self.hi_ul_t}
+                'hi_dl_t':self.hi_dl_t,'hi_ul_t':self.hi_ul_t,'filter_presets':self.filter_presets}
         dlg = SettingsDialog(self, curr)
         if dlg.exec():
             ns = dlg.get_settings()
             self.unit=ns['unit']; self.row_height=ns['row_height']; self.resize(ns['win_w'],ns['win_h'])
             self.hi_enabled=ns['hi_enabled']; self.hi_color=ns['hi_color']; self.hi_thickness=ns['hi_thickness']
             self.hi_dl_s=ns['hi_dl_s']; self.hi_ul_s=ns['hi_ul_s']; self.hi_dl_t=ns['hi_dl_t']; self.hi_ul_t=ns['hi_ul_t']
-            self.col_weights=ns['col_weights']
+            self.col_weights=ns['col_weights']; self.filter_presets=ns['filter_presets']
+            self._rebuild_filter_combo()
             self.apply_delegate_settings()
             self._apply_col_widths()
             self.save_settings(); self.restart_app()
