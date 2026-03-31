@@ -297,7 +297,8 @@ class App(QMainWindow):
             if os.path.exists(SETTINGS_FILE):
                 with open(SETTINGS_FILE) as f: s = json.load(f)
                 self.win_w=s.get('win_w',1000); self.win_h=s.get('win_h',700); self.row_height=s.get('row_height',40)
-                self.col_weights=s.get('col_weights',[5,25,18,18,17,17])
+                self.col_weights=s.get('col_weights',[5,22,16,16,14,14,13])
+                while len(self.col_weights) < 7: self.col_weights.append(13)
                 self.current_sort_col=s.get('sort_col',2); self.current_sort_order=Qt.SortOrder(s.get('sort_order',1))
                 self.unit=s.get('unit','MB/s'); self.show_dl=s.get('show_dl',True); self.show_ul=s.get('show_ul',True)
                 self.hi_enabled=s.get('hi_enabled',True); self.hi_color=s.get('hi_color',CP_CYAN)
@@ -340,6 +341,7 @@ class App(QMainWindow):
         self.tree.setHeaderLabels(["ICON","APPLICATION","DL SPEED","UL SPEED","TOTAL DL","TOTAL UL","BLOCK"])
         self.tree.setIndentation(20); self.tree.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.tree.setSelectionBehavior(QTreeWidget.SelectionBehavior.SelectRows)
+        self.tree.setAutoScroll(False)
         self.delegate = CustomBorderDelegate(self.tree); self.apply_delegate_settings(); self.tree.setItemDelegate(self.delegate)
         self.tree.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         QTimer.singleShot(0, self._apply_col_widths)
@@ -361,11 +363,13 @@ class App(QMainWindow):
         self.filter_combo.blockSignals(False)
 
     def _apply_col_widths(self):
-        self.tree.header().setStretchLastSection(False)
+        header = self.tree.header()
+        header.setStretchLastSection(False)
         total = self.tree.viewport().width() or self.win_w
         s = sum(self.col_weights) or 1
-        for i, w in enumerate(self.col_weights): self.tree.setColumnWidth(i, int(total * w / s))
-        self.tree.header().setStretchLastSection(False)
+        for i in range(min(len(self.col_weights), 6)):
+            self.tree.setColumnWidth(i, int(total * self.col_weights[i] / s))
+        header.setStretchLastSection(True)
     def apply_delegate_settings(self):
         self.delegate.settings = {'enabled':self.hi_enabled,'color':self.hi_color,'thickness':self.hi_thickness,
                                   'cols':{2:self.hi_dl_s,3:self.hi_ul_s,4:self.hi_dl_t,5:self.hi_ul_t}}
