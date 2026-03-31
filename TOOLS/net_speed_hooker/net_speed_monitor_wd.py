@@ -265,7 +265,12 @@ class App(QMainWindow):
         t = QLabel("NET-SPEED HOOKER // WinDivert"); t.setStyleSheet(f"color:{CP_CYAN};font-size:16pt;font-weight:bold;"); ht.addWidget(t)
         self.cb_dl = QCheckBox("DOWNLOAD"); self.cb_dl.setChecked(self.show_dl); self.cb_dl.stateChanged.connect(self.toggle_cols)
         self.cb_ul = QCheckBox("UPLOAD"); self.cb_ul.setChecked(self.show_ul); self.cb_ul.stateChanged.connect(self.toggle_cols)
-        ht.addStretch(); ht.addWidget(self.cb_dl); ht.addWidget(self.cb_ul)
+        ht.addStretch()
+        fl = QLabel("MIN SPEED:"); fl.setStyleSheet(f"color:{CP_DIM};font-size:9pt;"); ht.addWidget(fl)
+        self.filter_spin = QSpinBox(); self.filter_spin.setRange(0, 100000); self.filter_spin.setValue(0); self.filter_spin.setSuffix(" B/s")
+        self.filter_spin.setStyleSheet(f"background-color:{CP_PANEL};color:{CP_CYAN};border:1px solid {CP_DIM};padding:2px;max-width:90px;")
+        ht.addWidget(self.filter_spin)
+        ht.addWidget(self.cb_dl); ht.addWidget(self.cb_ul)
         self.tl = QLabel("DL: 0.00 | UL: 0.00"); self.tl.setStyleSheet(f"color:{CP_YELLOW};font-weight:bold;font-size:10pt;border:1px solid {CP_DIM};padding:5px;"); ht.addWidget(self.tl); l.addLayout(ht)
         hb = QHBoxLayout(); hb.addStretch()
         rb = QPushButton("RESTART"); rb.clicked.connect(self.restart_app); hb.addWidget(rb)
@@ -330,6 +335,7 @@ class App(QMainWindow):
             r.setForeground(2, QColor(CP_CYAN if gd['dl_s']>0 else CP_TEXT))
             r.setForeground(3, QColor(CP_ORANGE if gd['ul_s']>0 else CP_TEXT))
             r.setForeground(4, QColor(CP_YELLOW)); r.setForeground(5, QColor(CP_GREEN))
+            r.setHidden(gd['dl_s'] < self.filter_spin.value() and gd['ul_s'] < self.filter_spin.value())
             if len(gd['items']) > 1:
                 eps = {r.child(j).text(1): r.child(j) for j in range(r.childCount())}; nps = set()
                 for id in gd['items']:
