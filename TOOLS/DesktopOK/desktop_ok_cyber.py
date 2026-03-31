@@ -6,6 +6,7 @@ import struct
 import win32gui
 import win32api
 import win32con
+from datetime import datetime
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                              QHBoxLayout, QLabel, QPushButton, QLineEdit, 
                              QGroupBox, QFormLayout, QListWidget, QComboBox, 
@@ -397,7 +398,9 @@ class App(QMainWindow):
     def save_current_layout(self):
         name = self.name_input.text().strip()
         if not name:
-            name = f"Layout_{len(self.layouts)+1}"
+            # Format: Layout_YYYY-MM-DD_HH-MM-SS
+            timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+            name = f"Layout_{timestamp}"
         
         icons = DesktopManager.get_icon_positions()
         windows = WindowManager.get_open_windows()
