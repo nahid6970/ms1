@@ -7,7 +7,7 @@ import time
 from datetime import datetime
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QLabel, QPushButton, QTableWidget, QTableWidgetItem, 
-                             QHeaderView, QGroupBox, QFrame)
+                             QHeaderView, QGroupBox, QFrame, QDialog, QSpinBox, QFormLayout)
 from PyQt6.QtCore import Qt, QTimer, QSize, pyqtSignal, QObject
 from PyQt6.QtGui import QIcon, QPixmap, QColor, QFont
 from scapy.all import sniff, IP, TCP, UDP
@@ -29,10 +29,53 @@ def format_size(size_bytes):
         return "0 B"
     size_name = ("B", "KB", "MB", "GB", "TB")
     import math
-    i = int(math.floor(math.log(size_bytes, 1024)))
-    p = math.pow(1024, i)
-    s = round(size_bytes / p, 2)
-    return f"{s} {size_name[i]}"
+    try:
+        i = int(math.floor(math.log(size_bytes, 1024)))
+        p = math.pow(1024, i)
+        s = round(size_bytes / p, 2)
+        return f"{s} {size_name[i]}"
+    except:
+        return "0 B"
+
+class NumericTableWidgetItem(QTableWidgetItem):
+    def __lt__(self, other):
+        if isinstance(other, QTableWidgetItem):
+            my_data = self.data(Qt.ItemDataRole.UserRole)
+            other_data = other.data(Qt.ItemDataRole.UserRole)
+            if my_data is not None and other_data is not None:
+                return my_data < other_data
+        return super().__lt__(other)
+
+class SettingsDialog(QDialog):
+    def __init__(self, parent=None, current_row_height=40):
+        super().__init__(parent)
+        self.setWindowTitle("SYSTEM_SETTINGS")
+        self.setFixedWidth(300)
+        self.setStyleSheet(f"""
+            QDialog {{ background-color: {CP_BG}; border: 1px solid {CP_CYAN}; }}
+            QLabel {{ color: {CP_YELLOW}; font-family: 'Consolas'; }}
+            QSpinBox {{
+                background-color: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 4px;
+            }}
+            QPushButton {{
+                background-color: {CP_DIM}; border: 1px solid {CP_DIM}; color: white; padding: 6px; font-weight: bold;
+            }}
+            QPushButton:hover {{ background-color: #2a2a2a; border: 1px solid {CP_YELLOW}; color: {CP_YELLOW}; }}
+        """)
+        
+        layout = QVBoxLayout(self)
+        form = QFormLayout()
+        
+        self.height_spin = QSpinBox()
+        self.height_spin.setRange(20, 100)
+        self.height_spin.setValue(current_row_height)
+        form.addRow("ROW HEIGHT:", self.height_spin)
+        
+        layout.addLayout(form)
+        
+        self.save_btn = QPushButton("APPLY_CHANGES")
+        self.save_btn.clicked.connect(self.accept)
+        layout.addWidget(self.save_btn)
 
 class MonitorStats:
     def __init__(self):
@@ -52,7 +95,7 @@ class MonitorStats:
                 if conn.laddr and conn.pid:
                     new_map[(conn.laddr.ip, conn.laddr.port)] = conn.pid
         except Exception as e:
-            print(f"Error refreshing connections: {e}")
+            pass
             
         with self.lock:
             self.conn_map = new_map
@@ -120,16 +163,11 @@ class NetworkThread(threading.Thread):
                     sport = packet[UDP].sport
                     dport = packet[UDP].dport
                 
-                # Check mapping
                 pid = self.stats.conn_map.get((src_ip, sport)) or self.stats.conn_map.get((dst_ip, dport))
                 
                 if pid:
                     self.stats.update_packet(pid, len(packet))
-                else:
-                    # Maybe it's a new connection, trigger refresh soon if many misses
-                    pass
 
-        # Periodically refresh connections in another small thread or just here
         def refresher():
             while self.running:
                 self.stats.refresh_connections()
@@ -138,7 +176,10 @@ class NetworkThread(threading.Thread):
         refresh_t = threading.Thread(target=refresher, daemon=True)
         refresh_t.start()
 
-        sniff(prn=packet_callback, store=0, stop_filter=lambda x: not self.running)
+        try:
+            sniff(prn=packet_callback, store=0, stop_filter=lambda x: not self.running)
+        except:
+            pass
 
 class App(QMainWindow):
     def __init__(self):
@@ -146,11 +187,15 @@ class App(QMainWindow):
         self.setWindowTitle("NET-SPEED HOOKER // CYBER_MONITOR")
         self.resize(900, 700)
         
+        self.row_height = 40
+        self.current_sort_col = 2 # Default: Speed
+        self.current_sort_order = Qt.SortOrder.DescendingOrder
+
         self.stats = MonitorStats()
         self.monitor_thread = NetworkThread(self.stats)
         self.monitor_thread.start()
 
-        self.icon_cache = {} # exe_path -> QPixmap
+        self.icon_cache = {}
         from PyQt6.QtWidgets import QFileIconProvider
         self.icon_provider = QFileIconProvider()
 
@@ -161,7 +206,6 @@ class App(QMainWindow):
         self.timer.start(1000)
 
     def init_ui(self):
-        # Global Theme
         self.setStyleSheet(f"""
             QMainWindow {{ background-color: {CP_BG}; }}
             QWidget {{ color: {CP_TEXT}; font-family: 'Consolas'; font-size: 10pt; }}
@@ -171,6 +215,7 @@ class App(QMainWindow):
                 gridline-color: {CP_DIM};
                 border: 1px solid {CP_DIM};
                 color: {CP_TEXT};
+                selection-background-color: {CP_DIM};
             }}
             QHeaderView::section {{
                 background-color: {CP_DIM};
@@ -178,9 +223,6 @@ class App(QMainWindow):
                 padding: 5px;
                 border: 1px solid {CP_BG};
                 font-weight: bold;
-            }}
-            QTableWidget::item {{
-                padding: 5px;
             }}
             
             QPushButton {{
@@ -194,19 +236,6 @@ class App(QMainWindow):
                 background-color: #2a2a2a;
                 border: 1px solid {CP_YELLOW};
                 color: {CP_YELLOW};
-            }}
-            
-            QGroupBox {{
-                border: 1px solid {CP_DIM};
-                margin-top: 10px;
-                padding-top: 10px;
-                font-weight: bold;
-                color: {CP_YELLOW};
-            }}
-            QGroupBox::title {{
-                subcontrol-origin: margin;
-                subcontrol-position: top left;
-                padding: 0 5px;
             }}
         """)
 
@@ -244,6 +273,11 @@ class App(QMainWindow):
         self.table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self.table.setSortingEnabled(True)
         
+        # Connect sort signal
+        self.table.horizontalHeader().sortIndicatorChanged.connect(self.on_sort_changed)
+        # Apply initial sort
+        self.table.horizontalHeader().setSortIndicator(self.current_sort_col, self.current_sort_order)
+
         layout.addWidget(self.table)
         
         # Footer
@@ -251,20 +285,22 @@ class App(QMainWindow):
         footer.setStyleSheet(f"color: {CP_DIM}; font-size: 8pt;")
         layout.addWidget(footer)
 
+    def on_sort_changed(self, index, order):
+        self.current_sort_col = index
+        self.current_sort_order = order
+
     def update_stats(self):
         snapshot = self.stats.get_snapshot()
         
-        # Sort by speed descending
-        snapshot.sort(key=lambda x: x['speed'], reverse=True)
+        # We don't manually sort 'snapshot' here because we want QTableWidget 
+        # to handle the sorting based on user interaction.
         
-        # Filter: only show if they have used internet (glasswire style)
-        # or just show everything that has ever been caught.
-        
-        # Update table
         self.table.setSortingEnabled(False)
         self.table.setRowCount(len(snapshot))
         
         for i, data in enumerate(snapshot):
+            self.table.setRowHeight(i, self.row_height)
+            
             # Icon
             icon_label = QLabel()
             icon_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -280,18 +316,17 @@ class App(QMainWindow):
             
             # Name
             name_item = QTableWidgetItem(data['name'])
+            name_item.setData(Qt.ItemDataRole.UserRole, data['name'].lower())
             name_item.setForeground(QColor(CP_TEXT))
             self.table.setItem(i, 1, name_item)
             
             # Speed
             speed_str = format_size(data['speed']) + "/s"
-            speed_item = QTableWidgetItem()
-            speed_item.setData(Qt.ItemDataRole.DisplayRole, speed_str)
-            # Custom sorting data
+            speed_item = NumericTableWidgetItem(speed_str)
             speed_item.setData(Qt.ItemDataRole.UserRole, data['speed'])
-            if data['speed'] > 1024 * 1024: # > 1MB/s
+            if data['speed'] > 1024 * 1024:
                 speed_item.setForeground(QColor(CP_RED))
-            elif data['speed'] > 1024 * 10: # > 10KB/s
+            elif data['speed'] > 1024 * 10:
                 speed_item.setForeground(QColor(CP_CYAN))
             else:
                 speed_item.setForeground(QColor(CP_TEXT))
@@ -299,22 +334,25 @@ class App(QMainWindow):
             
             # Total
             total_str = format_size(data['total'])
-            total_item = QTableWidgetItem()
-            total_item.setData(Qt.ItemDataRole.DisplayRole, total_str)
+            total_item = NumericTableWidgetItem(total_str)
             total_item.setData(Qt.ItemDataRole.UserRole, data['total'])
             total_item.setForeground(QColor(CP_YELLOW))
             self.table.setItem(i, 3, total_item)
             
         self.table.setSortingEnabled(True)
+        # Re-apply current sorting
+        self.table.sortByColumn(self.current_sort_col, self.current_sort_order)
 
     def restart_app(self):
         self.monitor_thread.running = False
         os.execl(sys.executable, sys.executable, *sys.argv)
 
     def show_settings(self):
-        # Empty settings panel as requested
-        from PyQt6.QtWidgets import QMessageBox
-        QMessageBox.information(self, "SETTINGS", "Settings panel is currently empty.")
+        dlg = SettingsDialog(self, self.row_height)
+        if dlg.exec():
+            self.row_height = dlg.height_spin.value()
+            # Force update immediately to reflect changes
+            self.update_stats()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
