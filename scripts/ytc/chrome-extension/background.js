@@ -12,7 +12,7 @@ async function extractSubtitles(data) {
   const { url, language, format, autoSub, copyToClipboard, useTimeline, startTime, endTime, saveDir } = data;
   
   // Build yt-dlp command
-  const cmd = ['yt-dlp', '--skip-download', '--write-subs', '--no-playlist'];
+  const cmd = ['yt-dlp', '--skip-download', '--write-subs', '--no-playlist', '--cookies-from-browser', 'chrome'];
   
   // Auto-generated subtitles
   if (autoSub) {

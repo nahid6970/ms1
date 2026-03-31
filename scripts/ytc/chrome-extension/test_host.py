@@ -77,6 +77,25 @@ def test_installation():
                 print(f"  Install: pip install yt-dlp")
                 return False
             
+            # Check for JS runtime
+            print(f"  Checking JavaScript runtime...")
+            js_found = False
+            for runtime in ['node', 'deno']:
+                try:
+                    result = subprocess.run([runtime, '--version'], 
+                                         capture_output=True, text=True,
+                                         creationflags=subprocess.CREATE_NO_WINDOW)
+                    if result.returncode == 0:
+                        print(f"✓ {runtime} is installed: {result.stdout.strip()}")
+                        js_found = True
+                        break
+                except FileNotFoundError:
+                    continue
+            
+            if not js_found:
+                print(f"⚠ WARNING: No JavaScript runtime (node or deno) found in PATH.")
+                print(f"  YouTube extraction may be limited or fail. Recommend installing Node.js.")
+            
             print(f"\n" + "="*60)
             print("✓ INSTALLATION LOOKS GOOD!")
             print("="*60)
