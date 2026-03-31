@@ -1046,5 +1046,487 @@
                 "h": 1080
             }
         ]
+    },
+    "Layout_2026-03-31_11-27-35": {
+        "icons": {
+            "This PC": {
+                "x": 16,
+                "y": 2
+            },
+            "Recycle Bin": {
+                "x": 16,
+                "y": 102
+            },
+            "Control Panel": {
+                "x": 16,
+                "y": 202
+            },
+            "DesktopOK": {
+                "x": 16,
+                "y": 302
+            },
+            "Google Chrome": {
+                "x": 16,
+                "y": 402
+            },
+            "PotPlayer 64 bit": {
+                "x": 16,
+                "y": 502
+            },
+            "Sonarr": {
+                "x": 16,
+                "y": 602
+            },
+            "Prowlarr": {
+                "x": 16,
+                "y": 702
+            },
+            "Cleanuparr": {
+                "x": 16,
+                "y": 802
+            },
+            "KDE Connect": {
+                "x": 16,
+                "y": 902
+            },
+            "UniGetUI": {
+                "x": 92,
+                "y": 2
+            },
+            "Antigravity": {
+                "x": 92,
+                "y": 102
+            },
+            "HighFleet": {
+                "x": 92,
+                "y": 202
+            },
+            "Thunderbird": {
+                "x": 92,
+                "y": 302
+            },
+            "QuickLook": {
+                "x": 92,
+                "y": 402
+            },
+            "Free Download Manager": {
+                "x": 92,
+                "y": 502
+            },
+            "Xodo PDF Reader": {
+                "x": 92,
+                "y": 602
+            },
+            "Zoom Workplace": {
+                "x": 92,
+                "y": 702
+            },
+            "Sniffnet": {
+                "x": 92,
+                "y": 802
+            },
+            "BCUninstaller": {
+                "x": 92,
+                "y": 902
+            },
+            "Google AI Studio": {
+                "x": 168,
+                "y": 2
+            },
+            "Excel-like Data Table": {
+                "x": 168,
+                "y": 102
+            },
+            "Claude": {
+                "x": 168,
+                "y": 202
+            },
+            "XLaunch": {
+                "x": 168,
+                "y": 302
+            },
+            "nexusfont": {
+                "x": 168,
+                "y": 402
+            },
+            "Grammer & Vocab [Over-View Main]_A_Row2.pdf": {
+                "x": 244,
+                "y": 2
+            },
+            "481133401_1792295234890919_906037966534795884_n.jpg": {
+                "x": 244,
+                "y": 102
+            },
+            "FBS previous bank Question solution.pdf": {
+                "x": 244,
+                "y": 302
+            },
+            "\u09eb\u09e6\u09a4\u09ae \u09ac\u09bf\u09b8\u09bf\u098f\u09b8 \u09aa\u09cd\u09b0\u09b6\u09cd\u09a8 \u0993 \u09b8\u09ae\u09be\u09a7\u09be\u09a8 \uff5c 50th BCS Exam Question Solution 2026 \uff5c BCS question solve.bn.txt": {
+                "x": 244,
+                "y": 602
+            },
+            "\u09eb\u09e6\u09a4\u09ae \u09ac\u09bf\u09b8\u09bf\u098f\u09b8 \u09b8\u09be\u09ae\u09cd\u09aa\u09cd\u09b0\u09a4\u09bf\u0995 \u0993 \u099a\u09b2\u09ae\u09be\u09a8 \u0998\u099f\u09a8\u09be  \u09aa\u09cd\u09b0\u09ac\u09be\u09b9 by Zahidul Islam BCS Intelligence.pdf": {
+                "x": 244,
+                "y": 802
+            },
+            "SyncFolders": {
+                "x": 320,
+                "y": 2
+            },
+            "\u0995\u09cd\u09b2\u09be\u09b8-\u09e6\u09eb \uff1a \u0987\u0982\u09b0\u09c7\u099c\u09bf \uff5c \u099c\u09ac \u09aa\u09cd\u09b0\u09be\u09b0\u09cd\u09a5\u09c0\u09a6\u09c7\u09b0 \u099c\u09a8\u09cd\u09af \u09aa\u09cd\u09b0\u09b6\u09cd\u09a8 \u09b8\u09b2\u09ad\u09c7\u09b0 \u0986\u09df\u09cb\u099c\u09a8 \uff5c \u09ed\u09eb \u09a6\u09bf\u09a8\u09c7\u09b0 \u099c\u09be\u09b0\u09cd\u09a8\u09bf.bn.txt": {
+                "x": 320,
+                "y": 102
+            },
+            "\u0995\u09cd\u09b2\u09be\u09b8-\u09e6\u09ec \uff1a \u0987\u0982\u09b0\u09c7\u099c\u09bf \uff5c \u099c\u09ac \u09aa\u09cd\u09b0\u09be\u09b0\u09cd\u09a5\u09c0\u09a6\u09c7\u09b0 \u099c\u09a8\u09cd\u09af \u09aa\u09cd\u09b0\u09b6\u09cd\u09a8 \u09b8\u09b2\u09ad\u09c7\u09b0 \u0986\u09df\u09cb\u099c\u09a8 \uff5c \u09ed\u09eb \u09a6\u09bf\u09a8\u09c7\u09b0 \u099c\u09be\u09b0\u09cd\u09a8\u09bf.bn.txt": {
+                "x": 320,
+                "y": 202
+            },
+            "bank155.pdf": {
+                "x": 320,
+                "y": 302
+            },
+            "\u0995\u09cd\u09b2\u09be\u09b8-\u09e6\u09ec \uff1a \u09b8\u09be\u09a7\u09be\u09b0\u09a3 \u099c\u09cd\u099e\u09be\u09a8 \uff5c \u099c\u09ac \u09aa\u09cd\u09b0\u09be\u09b0\u09cd\u09a5\u09c0\u09a6\u09c7\u09b0 \u099c\u09a8\u09cd\u09af \u09aa\u09cd\u09b0\u09b6\u09cd\u09a8 \u09b8\u09b2\u09ad\u09c7\u09b0 \u0986\u09df\u09cb\u099c\u09a8 \uff5c \u09ed\u09eb \u09a6\u09bf\u09a8\u09c7\u09b0 \u099c\u09be\u09b0\u09cd\u09a8\u09bf.bn.txt": {
+                "x": 320,
+                "y": 502
+            },
+            "Grammer & Vocab [Over-View Main]_A_Row2 (1).pdf": {
+                "x": 320,
+                "y": 702
+            },
+            "Map_of_Bangladesh-en.svg": {
+                "x": 320,
+                "y": 902
+            },
+            "youtube_cookies.txt": {
+                "x": 396,
+                "y": 2
+            },
+            "ScrcpyGUI_v3.0_Setup.exe": {
+                "x": 396,
+                "y": 102
+            },
+            "\u0997\u09cd\u09a3\u0985\u09ad\u09c2\u09a4\u09cd\u09a5\u09be\u09a8\u09c7 \u0986\u09b9\u09a4\u09a6\u09c7\u09b0 \u09a4\u09be\u09b2\u09bf\u0995\u09be \u099a\u09c2\u09a1\u09bc\u09be\u09a8\u09cd\u09a4 \u0995\u09b0\u09a4\u09c7 \u0997\u09a3\u09ac\u09bf\u099c\u09cd\u099e\u09aa\u09cd\u09a4\u09bf \u09aa\u09cd\u09b0\u0995\u09be\u09b6 (1).pdf": {
+                "x": 396,
+                "y": 202
+            },
+            "WhatsApp Image 2024-11-29 at 10.37.20 AM.jpeg": {
+                "x": 396,
+                "y": 402
+            },
+            "WhatsApp Image 2024-11-29 at 10.37.20 AM (1).jpeg": {
+                "x": 396,
+                "y": 502
+            },
+            "50th bcsAdmitCard_CSAUYIZC.pdf": {
+                "x": 396,
+                "y": 602
+            },
+            "idloc admit.pdf": {
+                "x": 396,
+                "y": 702
+            },
+            "@delta.xlsx": {
+                "x": 396,
+                "y": 902
+            },
+            "glance-windows-amd64.zip": {
+                "x": 472,
+                "y": 2
+            },
+            "glance-windows-amd64": {
+                "x": 472,
+                "y": 102
+            },
+            "\u099c\u09ac\u09b0\u09a6\u0996\u09b2\u0995\u09c3\u09a4 \u09ac\u09a8\u09ad\u09c2\u09ae\u09bf.pdf": {
+                "x": 472,
+                "y": 202
+            },
+            "pdf2png.zip": {
+                "x": 472,
+                "y": 402
+            },
+            "Bitwarden": {
+                "x": 472,
+                "y": 502
+            },
+            "LSPosed-v1.10.1-7115-zygisk-release.zip": {
+                "x": 472,
+                "y": 602
+            },
+            "CamScanner 31-12-2025 21.46.pdf": {
+                "x": 472,
+                "y": 702
+            },
+            "CamScanner 05-01-2026 19.02.pdf": {
+                "x": 472,
+                "y": 802
+            },
+            "urn_aaid_sc_AP_d6205df4-3539-4201-946a-3ad80a8e5761.jpeg": {
+                "x": 472,
+                "y": 902
+            },
+            "LSPosed-v1.10.1-7115-zygisk-release (1).zip": {
+                "x": 548,
+                "y": 2
+            },
+            "CamScanner 05-01-2026 19.26.pdf": {
+                "x": 548,
+                "y": 102
+            },
+            "50th bcsAdmitCard_CSAUYIZC (1).pdf": {
+                "x": 548,
+                "y": 202
+            },
+            "obs9kqjnkzrntdjqyv68.txt": {
+                "x": 548,
+                "y": 302
+            },
+            "Local Government Division - LGD _ Powered By Teletalk.pdf": {
+                "x": 548,
+                "y": 402
+            },
+            "LGD.pdf": {
+                "x": 548,
+                "y": 502
+            },
+            "\u09a8\u09bf\u09b7\u09cd\u09aa\u09a8\u09cd\u09a8 \u0985\u09a8\u09bf\u09b7\u09cd\u09aa\u09a8\u09cd\u09a8 \u098f\u09ac\u0982 \u09ae\u09be\u09b8\u09bf\u0995 \u09aa\u09cd\u09b0\u09a4\u09bf\u09ac\u09c7\u09a6\u09a8.docx": {
+                "x": 548,
+                "y": 602
+            },
+            "obs9kqjnkzrntdjqyv68 (1).txt": {
+                "x": 548,
+                "y": 702
+            },
+            "Gemini_Generated_Image_fuvreofuvreofuvr.png": {
+                "x": 548,
+                "y": 802
+            },
+            "Nid_compressed.pdf": {
+                "x": 624,
+                "y": 202
+            },
+            "IMG_20260114_230942.jpg": {
+                "x": 624,
+                "y": 302
+            },
+            "chrome_Eo9YvBMQPO.png": {
+                "x": 700,
+                "y": 302
+            },
+            "Nid_compressed-1.png": {
+                "x": 700,
+                "y": 402
+            },
+            "Nid_compressed-1.jpg": {
+                "x": 700,
+                "y": 502
+            },
+            "www.livecareer.co.uk_build-cv_final-cv (1).png": {
+                "x": 776,
+                "y": 602
+            },
+            "u note.docx": {
+                "x": 852,
+                "y": 202
+            },
+            "Nazma Begum Edited.pdf": {
+                "x": 928,
+                "y": 202
+            },
+            "www.livecareer.co.uk_build-cv_final-cv.png": {
+                "x": 928,
+                "y": 402
+            },
+            "1952-1969-1971_A_Row4.pdf": {
+                "x": 1080,
+                "y": 202
+            },
+            "new 1.txt": {
+                "x": 1080,
+                "y": 302
+            },
+            "\u09eb\u09e6 \u09a4\u09ae \u09ac\u09bf\u09b8\u09bf\u098f\u09b8 \u09aa\u09cd\u09b0\u09bf\u09b2\u09bf \uff5c \u0987\u0982\u09b0\u09c7\u099c\u09bf \u09ac\u09cd\u09af\u09be\u0996\u09cd\u09af\u09be\u09b8\u09b9 \u09b8\u09ae\u09be\u09a7\u09be\u09a8.bn.txt": {
+                "x": 1080,
+                "y": 402
+            },
+            "AdmitCard_IDRA_2WYUZKMC .pdf": {
+                "x": 1080,
+                "y": 502
+            },
+            "vcxsrv-64.21.1.16.1.installer.exe": {
+                "x": 1156,
+                "y": 2
+            },
+            "Subs": {
+                "x": 1156,
+                "y": 902
+            },
+            "New Microsoft Word Document.docx": {
+                "x": 1232,
+                "y": 302
+            },
+            "math kiro": {
+                "x": 1232,
+                "y": 902
+            },
+            "TEST": {
+                "x": 1308,
+                "y": 902
+            },
+            "surakafirun.png": {
+                "x": 1384,
+                "y": 702
+            },
+            "song": {
+                "x": 1384,
+                "y": 902
+            },
+            "ShareFolder": {
+                "x": 1460,
+                "y": 902
+            },
+            "image_225.png": {
+                "x": 1536,
+                "y": 502
+            },
+            "admitcard": {
+                "x": 1536,
+                "y": 902
+            },
+            "Magisk-Tailscaled-arm64-v1.66.4.1.zip": {
+                "x": 1612,
+                "y": 202
+            },
+            "Root": {
+                "x": 1612,
+                "y": 502
+            },
+            "ms": {
+                "x": 1612,
+                "y": 902
+            },
+            "msBackups": {
+                "x": 1688,
+                "y": 902
+            },
+            "myShare": {
+                "x": 1764,
+                "y": 602
+            },
+            "ms1": {
+                "x": 1764,
+                "y": 902
+            },
+            "playlist.dpl": {
+                "x": 1840,
+                "y": 702
+            },
+            "nahid": {
+                "x": 1840,
+                "y": 802
+            },
+            "@JOB": {
+                "x": 1840,
+                "y": 902
+            }
+        },
+        "windows": [
+            {
+                "title": "CYBER_DESKTOP_OK v1.0",
+                "class": "Qt692QWindowIcon",
+                "x": 702,
+                "y": 185,
+                "w": 516,
+                "h": 639
+            },
+            {
+                "title": "(10) US Jet Damaged, Haifa Targeted: War Escalate on Day 31 | Vantage on Firstpost | N18G - YouTube - Google Chrome",
+                "class": "Chrome_WidgetWin_1",
+                "x": -1,
+                "y": 6,
+                "w": 1922,
+                "h": 987
+            },
+            {
+                "title": "komoborder-290AFLeFqbcRs0bOKzAar",
+                "class": "komoborder-290AFLeFqbcRs0bOKzAar",
+                "x": 5,
+                "y": 5,
+                "w": 1910,
+                "h": 982
+            },
+            {
+                "title": "Python GUI",
+                "class": "TkTopLevel",
+                "x": 0,
+                "y": 993,
+                "w": 1920,
+                "h": 39
+            },
+            {
+                "title": "Excel-like Data Table",
+                "class": "Chrome_WidgetWin_1",
+                "x": -32000,
+                "y": -32000,
+                "w": 160,
+                "h": 28
+            },
+            {
+                "title": "Google AI Studio - Study Notes: Bengali Literatur | Google AI Studio",
+                "class": "Chrome_WidgetWin_1",
+                "x": -32000,
+                "y": -32000,
+                "w": 160,
+                "h": 28
+            },
+            {
+                "title": "UniGetUI",
+                "class": "WinUIDesktopWin32WindowClass",
+                "x": -32000,
+                "y": -32000,
+                "w": 160,
+                "h": 28
+            },
+            {
+                "title": "chrome-extension - File Explorer",
+                "class": "CabinetWClass",
+                "x": -32000,
+                "y": -32000,
+                "w": 160,
+                "h": 28
+            },
+            {
+                "title": "DesktopOK - File Explorer",
+                "class": "CabinetWClass",
+                "x": -32000,
+                "y": -32000,
+                "w": 160,
+                "h": 28
+            },
+            {
+                "title": "Jackett",
+                "class": "WindowsForms10.Window.8.app.0.784086_r3_ad1",
+                "x": 0,
+                "y": 1004,
+                "w": 160,
+                "h": 28
+            },
+            {
+                "title": "Windows Input Experience",
+                "class": "Windows.UI.Core.CoreWindow",
+                "x": 0,
+                "y": 0,
+                "w": 1920,
+                "h": 1080
+            },
+            {
+                "title": "Program Manager",
+                "class": "Progman",
+                "x": 0,
+                "y": 0,
+                "w": 1920,
+                "h": 1080
+            }
+        ]
     }
 }
