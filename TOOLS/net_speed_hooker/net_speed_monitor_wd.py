@@ -275,6 +275,7 @@ class App(QMainWindow):
         self.tree.setIndentation(20); self.tree.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.tree.setSelectionBehavior(QTreeWidget.SelectionBehavior.SelectRows)
         self.delegate = CustomBorderDelegate(self.tree); self.apply_delegate_settings(); self.tree.setItemDelegate(self.delegate)
+        self.tree.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         QTimer.singleShot(0, self._apply_col_widths)
         self.tree.setSortingEnabled(True)
         self.tree.header().sortIndicatorChanged.connect(self.on_sort_changed)
@@ -288,6 +289,7 @@ class App(QMainWindow):
         total = self.tree.viewport().width() or self.win_w
         s = sum(self.col_weights) or 1
         for i, w in enumerate(self.col_weights): self.tree.setColumnWidth(i, int(total * w / s))
+        self.tree.header().setStretchLastSection(False)
     def apply_delegate_settings(self):
         self.delegate.settings = {'enabled':self.hi_enabled,'color':self.hi_color,'thickness':self.hi_thickness,
                                   'cols':{2:self.hi_dl_s,3:self.hi_ul_s,4:self.hi_dl_t,5:self.hi_ul_t}}
@@ -306,9 +308,10 @@ class App(QMainWindow):
         groups = {}; max_v = {2:0, 3:0, 4:0, 5:0}
         for d in snap:
             n = d['name']
-            if n not in groups: groups[n] = {'dl_s':0,'ul_s':0,'dl_t':0,'ul_t':0,'exe':d['exe']}
+            if n not in groups: groups[n] = {'dl_s':0,'ul_s':0,'dl_t':0,'ul_t':0,'exe':d['exe'],'items':[]}
             groups[n]['dl_s'] += d['dl_speed']; groups[n]['ul_s'] += d['ul_speed']
             groups[n]['dl_t'] += d['dl_total']; groups[n]['ul_t'] += d['ul_total']
+            groups[n]['items'].append(d)
             max_v[2]=max(max_v[2],groups[n]['dl_s']); max_v[3]=max(max_v[3],groups[n]['ul_s'])
             max_v[4]=max(max_v[4],groups[n]['dl_t']); max_v[5]=max(max_v[5],groups[n]['ul_t'])
         self.delegate.max_values = max_v
@@ -327,6 +330,21 @@ class App(QMainWindow):
             r.setForeground(2, QColor(CP_CYAN if gd['dl_s']>0 else CP_TEXT))
             r.setForeground(3, QColor(CP_ORANGE if gd['ul_s']>0 else CP_TEXT))
             r.setForeground(4, QColor(CP_YELLOW)); r.setForeground(5, QColor(CP_GREEN))
+            if len(gd['items']) > 1:
+                eps = {r.child(j).text(1): r.child(j) for j in range(r.childCount())}; nps = set()
+                for id in gd['items']:
+                    pt = f"PID: {id['pid']}"; nps.add(pt)
+                    c = eps[pt] if pt in eps else TreeItem(r)
+                    c.setText(1, pt); c.setText(2, format_size(id['dl_speed'],self.unit)); c.setData(2, Qt.ItemDataRole.UserRole, id['dl_speed'])
+                    c.setText(3, format_size(id['ul_speed'],self.unit)); c.setData(3, Qt.ItemDataRole.UserRole, id['ul_speed'])
+                    c.setText(4, format_size(id['dl_total'],"MB/s")); c.setData(4, Qt.ItemDataRole.UserRole, id['dl_total'])
+                    c.setText(5, format_size(id['ul_total'],"MB/s")); c.setData(5, Qt.ItemDataRole.UserRole, id['ul_total'])
+                    c.setSizeHint(0, QSize(0, self.row_height))
+                    for col in range(1, 6): c.setForeground(col, QColor(CP_SUBTEXT))
+                for pt, child in eps.items():
+                    if pt not in nps: r.removeChild(child)
+            else:
+                for j in reversed(range(r.childCount())): r.removeChild(r.child(j))
         for i in reversed(range(self.tree.topLevelItemCount())):
             if self.tree.topLevelItem(i).text(1) not in groups: self.tree.takeTopLevelItem(i)
         self.tree.setSortingEnabled(True); self.tree.sortByColumn(self.current_sort_col, self.current_sort_order)

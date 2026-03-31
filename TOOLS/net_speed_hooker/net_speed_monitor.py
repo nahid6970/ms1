@@ -253,6 +253,7 @@ class App(QMainWindow):
         hb = QHBoxLayout(); hb.addStretch(); rb = QPushButton("RESTART"); rb.clicked.connect(self.restart_app); hb.addWidget(rb); sb = QPushButton("SETTINGS"); sb.clicked.connect(self.show_settings); hb.addWidget(sb); l.addLayout(hb)
         self.tree = QTreeWidget(); self.tree.setColumnCount(6); self.tree.setHeaderLabels(["ICON", "APPLICATION", "DL SPEED", "UL SPEED", "TOTAL DL", "TOTAL UL"]); self.tree.setIndentation(20); self.tree.setFocusPolicy(Qt.FocusPolicy.NoFocus); self.tree.setSelectionBehavior(QTreeWidget.SelectionBehavior.SelectRows); self.tree.setAllColumnsShowFocus(True)
         self.delegate = CustomBorderDelegate(self.tree); self.apply_delegate_settings(); self.tree.setItemDelegate(self.delegate)
+        self.tree.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         QTimer.singleShot(0, self._apply_col_widths)
         self.tree.setSortingEnabled(True); self.tree.header().sortIndicatorChanged.connect(self.on_sort_changed); self.tree.header().setSortIndicator(self.current_sort_col, self.current_sort_order); l.addWidget(self.tree)
         self.fl = QLabel(f"STATUS: MONITORING_ACTIVE // ADAPTER: {self.interface} // UNIT: {self.unit}"); self.fl.setStyleSheet(f"color: {CP_DIM}; font-size: 8pt;"); l.addWidget(self.fl); self.toggle_cols()
@@ -263,6 +264,7 @@ class App(QMainWindow):
         total = self.tree.viewport().width() or self.win_w
         s = sum(self.col_weights) or 1
         for i, w in enumerate(self.col_weights): self.tree.setColumnWidth(i, int(total * w / s))
+        self.tree.header().setStretchLastSection(False)
     def apply_delegate_settings(self):
         self.delegate.settings = { 'enabled': self.hi_enabled, 'color': self.hi_color, 'thickness': self.hi_thickness, 'cols': { 2: self.hi_dl_s, 3: self.hi_ul_s, 4: self.hi_dl_t, 5: self.hi_ul_t } }
 
