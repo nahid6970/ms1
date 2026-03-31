@@ -346,7 +346,7 @@ class App(QMainWindow):
         rb = QPushButton("RESTART"); rb.clicked.connect(self.restart_app); hb.addWidget(rb)
         sb = QPushButton("SETTINGS"); sb.clicked.connect(self.show_settings); hb.addWidget(sb); l.addLayout(hb)
         self.tree = QTreeWidget(); self.tree.setColumnCount(7)
-        self.tree.setHeaderLabels(["ICON","APP","SPD IN","SPD OUT","TOT IN","TOT OUT","BLOCK"])
+        self.tree.setHeaderLabels(["ICON","APP","SPD IN","SPD OUT","TOT IN","TOT OUT","⛔"])
         self.tree.setIndentation(20); self.tree.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.tree.setSelectionBehavior(QTreeWidget.SelectionBehavior.SelectRows)
         self.tree.setAutoScroll(False)
