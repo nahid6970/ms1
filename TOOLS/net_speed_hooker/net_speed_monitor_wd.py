@@ -245,10 +245,8 @@ class NetworkThread(threading.Thread):
             return self._conn_map.get((src_ip, sport)) or self._conn_map.get((dst_ip, dport))
 
     def run(self):
-        # NETWORK layer, outbound+inbound, no loopback — read-only (no re-inject needed for monitoring)
-        self.blocked_pids = set()
         try:
-            with pydivert.WinDivert("ip", layer=pydivert.Layer.NETWORK) as w:
+            with pydivert.WinDivert("ip", layer=pydivert.Layer.NETWORK, flags=pydivert.Flag.SNIFF) as w:
                 for packet in w:
                     if not self.running: break
                     pid = self._get_pid(packet)
@@ -257,8 +255,6 @@ class NetworkThread(threading.Thread):
                             dport = packet.tcp.dst_port if packet.tcp else (packet.udp.dst_port if packet.udp else 0)
                             dst_ip = packet.ipv4.dst_addr if packet.ipv4 else None
                             pid = self._conn_map.get((dst_ip, dport))
-                    if pid in self.blocked_pids: continue  # drop — don't re-inject
-                    w.send(packet)  # re-inject allowed packets
                     size = len(packet.raw)
                     direction = 'sent' if packet.is_outbound else 'recv'
                     self.stats.update_packet(pid, size, direction)
@@ -270,7 +266,7 @@ class App(QMainWindow):
     def __init__(self):
         super().__init__(); self.setWindowTitle("NET-SPEED HOOKER // WinDivert")
         self.load_settings(); self.resize(self.win_w, self.win_h)
-        self.db = TrafficDB(); self.blocked_names = self.db.load_blocked()
+        self.db = TrafficDB(); self.blocked_names = self.db.load_blocked(); self.blocked_exe = {}
         self.stats = MonitorStats(self.db); self.monitor = NetworkThread(self.stats); self.monitor.start()
         self.icon_cache = {}; self.icon_provider = QFileIconProvider()
         self.init_ui(); self.timer = QTimer(); self.timer.timeout.connect(self.update_stats); self.timer.start(1000)
@@ -383,9 +379,10 @@ class App(QMainWindow):
         self.tree.setSortingEnabled(False)
         exs = {self.tree.topLevelItem(i).text(1): self.tree.topLevelItem(i) for i in range(self.tree.topLevelItemCount())}
         for n, gd in groups.items():
-            r = exs[n] if n in exs else TreeItem(self.tree); r.setText(1, n)
+            is_new = n not in exs
+            r = exs[n] if not is_new else TreeItem(self.tree); r.setText(1, n)
             r.setFlags(r.flags() | Qt.ItemFlag.ItemIsUserCheckable)
-            r.setCheckState(6, Qt.CheckState.Checked if n in self.blocked_names else Qt.CheckState.Unchecked)
+            if is_new: r.setCheckState(6, Qt.CheckState.Checked if n in self.blocked_names else Qt.CheckState.Unchecked)
             # resolve exe from running processes if missing
             if not gd['exe']:
                 for pid, d in list(self.stats.proc_data.items()):
@@ -434,25 +431,40 @@ class App(QMainWindow):
             groups[n][0] += d['dl_total']; groups[n][1] += d['ul_total']
         self.db.save_batch([(n, dl, ul) for n, (dl, ul) in groups.items()])
 
+    def _fw_block(self, exe, block):
+        rule = f'NSH_BLOCK_{os.path.basename(exe)}'
+        if block:
+            os.system(f'netsh advfirewall firewall add rule name="{rule}" dir=out action=block program="{exe}" enable=yes >nul 2>&1')
+            os.system(f'netsh advfirewall firewall add rule name="{rule}_in" dir=in action=block program="{exe}" enable=yes >nul 2>&1')
+        else:
+            os.system(f'netsh advfirewall firewall delete rule name="{rule}" >nul 2>&1')
+            os.system(f'netsh advfirewall firewall delete rule name="{rule}_in" >nul 2>&1')
+
     def _sync_blocked(self):
-        # read checkboxes -> update blocked_names and monitor.blocked_pids
         new_blocked = set()
+        # build exe_map from all currently known processes
+        exe_map = {}
+        with self.stats.lock:
+            for d in self.stats.proc_data.values():
+                if d['exe']: exe_map[d['name']] = d['exe']
         for i in range(self.tree.topLevelItemCount()):
             r = self.tree.topLevelItem(i)
             if r.checkState(6) == Qt.CheckState.Checked: new_blocked.add(r.text(1))
-        # persist changes
-        for n in new_blocked - self.blocked_names: self.db.set_blocked(n, True)
-        for n in self.blocked_names - new_blocked: self.db.set_blocked(n, False)
+        for n in new_blocked - self.blocked_names:
+            self.db.set_blocked(n, True)
+            if n in exe_map: self.blocked_exe[n] = exe_map[n]; threading.Thread(target=self._fw_block, args=(exe_map[n], True), daemon=True).start()
+        for n in self.blocked_names - new_blocked:
+            self.db.set_blocked(n, False)
+            exe = self.blocked_exe.pop(n, exe_map.get(n))
+            if exe: threading.Thread(target=self._fw_block, args=(exe, False), daemon=True).start()
         self.blocked_names = new_blocked
-        # update monitor blocked pids
-        blocked_pids = set()
-        with self.stats.lock:
-            for pid, d in self.stats.proc_data.items():
-                if d['name'] in self.blocked_names: blocked_pids.add(pid)
-        self.monitor.blocked_pids = blocked_pids
 
     def reset_db(self):
-        self.db.reset(); self.blocked_names = set(); self.monitor.blocked_pids = set()
+        for n in self.blocked_names:
+            with self.stats.lock:
+                for d in self.stats.proc_data.values():
+                    if d['name']==n and d['exe']: self._fw_block(d['exe'], False); break
+        self.db.reset(); self.blocked_names = set()
         with self.stats.lock:
             self.stats.proc_data.clear(); self.stats.sys_dl_total = 0; self.stats.sys_ul_total = 0
         self.tree.clear()
