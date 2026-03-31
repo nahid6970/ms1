@@ -1,4 +1,4 @@
-import sys, os, psutil, socket, threading, time, json
+import sys, os, psutil, socket, threading, time, json, sqlite3
 from datetime import datetime
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QLabel, QPushButton, QTreeWidget, QTreeWidgetItem, QHeaderView,
@@ -14,6 +14,7 @@ CP_TEXT="#E0E0E0"; CP_SUBTEXT="#808080"
 
 SETTINGS_DIR = r"C:\@delta\output\net_speed_monitor"
 SETTINGS_FILE = os.path.join(SETTINGS_DIR, "settings.json")
+DB_FILE = os.path.join(SETTINGS_DIR, "traffic.db")
 
 def format_size(b, unit="MB/s"):
     if b <= 0: return "0 B"
@@ -82,9 +83,9 @@ class SettingsDialog(QDialog):
         # Columns
         cg = QGroupBox("COLUMN WIDTHS"); cg.setStyleSheet(gs); cf = QFormLayout()
         ws = current_settings.get('col_weights',[5,25,18,18,17,17])
-        while len(ws) < 6: ws.append(17)
+        while len(ws) < 7: ws.append(13)
         self.spins = []
-        for label, w in zip(["ICON","NAME","DL SPEED","UL SPEED","TOTAL DL","TOTAL UL"], ws):
+        for label, w in zip(["ICON","NAME","DL SPEED","UL SPEED","TOTAL DL","TOTAL UL","BLOCK"], ws):
             sb = QSpinBox(); sb.setRange(1,100); sb.setValue(w); self.spins.append(sb)
             cf.addRow(f"{label}:", sb)
         cg.setLayout(cf); layout.addWidget(cg)
@@ -131,12 +132,45 @@ class SettingsDialog(QDialog):
         }
 
 
-class MonitorStats:
+
+class TrafficDB:
     def __init__(self):
-        self.lock = threading.Lock()
+        os.makedirs(SETTINGS_DIR, exist_ok=True)
+        self.conn = sqlite3.connect(DB_FILE, check_same_thread=False)
+        self.conn.execute("CREATE TABLE IF NOT EXISTS traffic (name TEXT PRIMARY KEY, dl_total INTEGER DEFAULT 0, ul_total INTEGER DEFAULT 0)")
+        self.conn.execute("CREATE TABLE IF NOT EXISTS blocked (name TEXT PRIMARY KEY)")
+        self.conn.commit()
+
+    def load(self):
+        rows = self.conn.execute("SELECT name, dl_total, ul_total FROM traffic").fetchall()
+        return {r[0]: (r[1], r[2]) for r in rows}
+
+    def load_blocked(self):
+        return {r[0] for r in self.conn.execute("SELECT name FROM blocked").fetchall()}
+
+    def save_batch(self, data):
+        self.conn.executemany("INSERT INTO traffic(name,dl_total,ul_total) VALUES(?,?,?) ON CONFLICT(name) DO UPDATE SET dl_total=excluded.dl_total, ul_total=excluded.ul_total", data)
+        self.conn.commit()
+
+    def set_blocked(self, name, blocked):
+        if blocked: self.conn.execute("INSERT OR IGNORE INTO blocked(name) VALUES(?)", (name,))
+        else: self.conn.execute("DELETE FROM blocked WHERE name=?", (name,))
+        self.conn.commit()
+
+    def reset(self):
+        self.conn.execute("DELETE FROM traffic"); self.conn.execute("DELETE FROM blocked"); self.conn.commit()
+
+class MonitorStats:
+    def __init__(self, db):
+        self.lock = threading.Lock(); self.db = db
         self.proc_data = {}  # pid -> {name, exe, sent_total, recv_total, sent_curr, recv_curr}
         self.sys_dl_total = 0; self.sys_ul_total = 0
         self.sys_dl_curr = 0; self.sys_ul_curr = 0
+        # pre-load totals from DB (keyed by name, merged into proc_data when PID seen)
+        self.db_totals = {}
+        for name, (dl, ul) in db.load().items():
+            if name == '[SYSTEM/OTHER/VPN]': self.sys_dl_total = dl; self.sys_ul_total = ul
+            else: self.db_totals[name] = (dl, ul)
 
     def update_packet(self, pid, size, direction):
         with self.lock:
@@ -147,7 +181,8 @@ class MonitorStats:
             if pid not in self.proc_data:
                 try: p = psutil.Process(pid); name = p.name(); exe = p.exe()
                 except: name = f"PID {pid}"; exe = ""
-                self.proc_data[pid] = {'name': name, 'exe': exe, 'sent_total':0, 'recv_total':0, 'sent_curr':0, 'recv_curr':0}
+                dl0, ul0 = self.db_totals.pop(name, (0, 0))
+                self.proc_data[pid] = {'name': name, 'exe': exe, 'sent_total':ul0, 'recv_total':dl0, 'sent_curr':0, 'recv_curr':0}
             d = self.proc_data[pid]
             if direction == 'sent': d['sent_total'] += size; d['sent_curr'] += size
             else: d['recv_total'] += size; d['recv_curr'] += size
@@ -159,6 +194,9 @@ class MonitorStats:
                 dl = d['recv_curr']; ul = d['sent_curr']; d['recv_curr'] = 0; d['sent_curr'] = 0
                 snap.append({'pid': pid, 'name': d['name'], 'exe': d['exe'],
                              'dl_speed': dl, 'ul_speed': ul, 'dl_total': d['recv_total'], 'ul_total': d['sent_total']})
+            # include DB-only entries (not yet active this session)
+            for name, (dl, ul) in self.db_totals.items():
+                snap.append({'pid': -1, 'name': name, 'exe': '', 'dl_speed': 0, 'ul_speed': 0, 'dl_total': dl, 'ul_total': ul})
             snap.append({'pid': 0, 'name': '[SYSTEM/OTHER/VPN]', 'exe': '',
                          'dl_speed': self.sys_dl_curr, 'ul_speed': self.sys_ul_curr,
                          'dl_total': self.sys_dl_total, 'ul_total': self.sys_ul_total})
@@ -208,20 +246,21 @@ class NetworkThread(threading.Thread):
 
     def run(self):
         # NETWORK layer, outbound+inbound, no loopback — read-only (no re-inject needed for monitoring)
+        self.blocked_pids = set()
         try:
-            with pydivert.WinDivert("ip", layer=pydivert.Layer.NETWORK, flags=pydivert.Flag.SNIFF) as w:
+            with pydivert.WinDivert("ip", layer=pydivert.Layer.NETWORK) as w:
                 for packet in w:
                     if not self.running: break
-                    size = len(packet.raw)
-                    is_outbound = packet.is_outbound
-                    direction = 'sent' if is_outbound else 'recv'
                     pid = self._get_pid(packet)
-                    if pid is None and not is_outbound:
-                        # inbound: try dst port
+                    if pid is None and not packet.is_outbound:
                         with self._conn_lock:
                             dport = packet.tcp.dst_port if packet.tcp else (packet.udp.dst_port if packet.udp else 0)
                             dst_ip = packet.ipv4.dst_addr if packet.ipv4 else None
                             pid = self._conn_map.get((dst_ip, dport))
+                    if pid in self.blocked_pids: continue  # drop — don't re-inject
+                    w.send(packet)  # re-inject allowed packets
+                    size = len(packet.raw)
+                    direction = 'sent' if packet.is_outbound else 'recv'
                     self.stats.update_packet(pid, size, direction)
         except Exception as e:
             print(f"[pydivert error] {e}")
@@ -231,12 +270,13 @@ class App(QMainWindow):
     def __init__(self):
         super().__init__(); self.setWindowTitle("NET-SPEED HOOKER // WinDivert")
         self.load_settings(); self.resize(self.win_w, self.win_h)
-        self.stats = MonitorStats(); self.monitor = NetworkThread(self.stats); self.monitor.start()
+        self.db = TrafficDB(); self.blocked_names = self.db.load_blocked()
+        self.stats = MonitorStats(self.db); self.monitor = NetworkThread(self.stats); self.monitor.start()
         self.icon_cache = {}; self.icon_provider = QFileIconProvider()
         self.init_ui(); self.timer = QTimer(); self.timer.timeout.connect(self.update_stats); self.timer.start(1000)
 
     def load_settings(self):
-        self.win_w=1000; self.win_h=700; self.row_height=40; self.col_weights=[5,25,18,18,17,17]
+        self.win_w=1000; self.win_h=700; self.row_height=40; self.col_weights=[5,22,16,16,14,14,13]
         self.current_sort_col=2; self.current_sort_order=Qt.SortOrder.DescendingOrder
         self.unit="MB/s"; self.show_dl=True; self.show_ul=True
         self.hi_enabled=True; self.hi_color=CP_CYAN; self.hi_thickness=2
@@ -282,10 +322,11 @@ class App(QMainWindow):
         ht.addWidget(self.cb_dl); ht.addWidget(self.cb_ul)
         self.tl = QLabel("DL: 0.00 | UL: 0.00"); self.tl.setStyleSheet(f"color:{CP_YELLOW};font-weight:bold;font-size:10pt;border:1px solid {CP_DIM};padding:5px;"); ht.addWidget(self.tl); l.addLayout(ht)
         hb = QHBoxLayout(); hb.addStretch()
+        dbb = QPushButton("RESET DB"); dbb.clicked.connect(self.reset_db); hb.addWidget(dbb)
         rb = QPushButton("RESTART"); rb.clicked.connect(self.restart_app); hb.addWidget(rb)
         sb = QPushButton("SETTINGS"); sb.clicked.connect(self.show_settings); hb.addWidget(sb); l.addLayout(hb)
-        self.tree = QTreeWidget(); self.tree.setColumnCount(6)
-        self.tree.setHeaderLabels(["ICON","APPLICATION","DL SPEED","UL SPEED","TOTAL DL","TOTAL UL"])
+        self.tree = QTreeWidget(); self.tree.setColumnCount(7)
+        self.tree.setHeaderLabels(["ICON","APPLICATION","DL SPEED","UL SPEED","TOTAL DL","TOTAL UL","BLOCK"])
         self.tree.setIndentation(20); self.tree.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.tree.setSelectionBehavior(QTreeWidget.SelectionBehavior.SelectRows)
         self.delegate = CustomBorderDelegate(self.tree); self.apply_delegate_settings(); self.tree.setItemDelegate(self.delegate)
@@ -343,6 +384,12 @@ class App(QMainWindow):
         exs = {self.tree.topLevelItem(i).text(1): self.tree.topLevelItem(i) for i in range(self.tree.topLevelItemCount())}
         for n, gd in groups.items():
             r = exs[n] if n in exs else TreeItem(self.tree); r.setText(1, n)
+            r.setFlags(r.flags() | Qt.ItemFlag.ItemIsUserCheckable)
+            r.setCheckState(6, Qt.CheckState.Checked if n in self.blocked_names else Qt.CheckState.Unchecked)
+            # resolve exe from running processes if missing
+            if not gd['exe']:
+                for pid, d in list(self.stats.proc_data.items()):
+                    if d['name'] == n and d['exe']: gd['exe'] = d['exe']; break
             if gd['exe'] and os.path.exists(gd['exe']) and gd['exe'] not in self.icon_cache:
                 self.icon_cache[gd['exe']] = self.icon_provider.icon(QFileInfo(gd['exe'])).pixmap(QSize(24,24))
             if gd['exe'] in self.icon_cache: r.setIcon(0, QIcon(self.icon_cache[gd['exe']]))
@@ -376,6 +423,39 @@ class App(QMainWindow):
             if self.tree.topLevelItem(i).text(1) not in groups: self.tree.takeTopLevelItem(i)
         self.tree.setSortingEnabled(True); self.tree.sortByColumn(self.current_sort_col, self.current_sort_order)
         self.tree.viewport().update()
+        self._save_db(snap)
+        self._sync_blocked()
+
+    def _save_db(self, snap):
+        groups = {}
+        for d in snap:
+            n = d['name']
+            if n not in groups: groups[n] = [0, 0]
+            groups[n][0] += d['dl_total']; groups[n][1] += d['ul_total']
+        self.db.save_batch([(n, dl, ul) for n, (dl, ul) in groups.items()])
+
+    def _sync_blocked(self):
+        # read checkboxes -> update blocked_names and monitor.blocked_pids
+        new_blocked = set()
+        for i in range(self.tree.topLevelItemCount()):
+            r = self.tree.topLevelItem(i)
+            if r.checkState(6) == Qt.CheckState.Checked: new_blocked.add(r.text(1))
+        # persist changes
+        for n in new_blocked - self.blocked_names: self.db.set_blocked(n, True)
+        for n in self.blocked_names - new_blocked: self.db.set_blocked(n, False)
+        self.blocked_names = new_blocked
+        # update monitor blocked pids
+        blocked_pids = set()
+        with self.stats.lock:
+            for pid, d in self.stats.proc_data.items():
+                if d['name'] in self.blocked_names: blocked_pids.add(pid)
+        self.monitor.blocked_pids = blocked_pids
+
+    def reset_db(self):
+        self.db.reset(); self.blocked_names = set(); self.monitor.blocked_pids = set()
+        with self.stats.lock:
+            self.stats.proc_data.clear(); self.stats.sys_dl_total = 0; self.stats.sys_ul_total = 0
+        self.tree.clear()
 
     def show_settings(self):
         curr = {'unit':self.unit,'win_w':self.width(),'win_h':self.height(),'row_height':self.row_height,
