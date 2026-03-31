@@ -7,7 +7,7 @@ import time
 import json
 from datetime import datetime
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
-                             QLabel, QPushButton, QTableWidget, QTableWidgetItem, 
+                             QLabel, QPushButton, QTreeWidget, QTreeWidgetItem, 
                              QHeaderView, QGroupBox, QFrame, QDialog, QSpinBox, QFormLayout,
                              QScrollArea)
 from PyQt6.QtCore import Qt, QTimer, QSize, pyqtSignal, QObject
@@ -26,13 +26,11 @@ CP_DIM = "#3a3a3a"
 CP_TEXT = "#E0E0E0"
 CP_SUBTEXT = "#808080"
 
-# Target settings path
 SETTINGS_DIR = r"C:\@delta\output\net_speed_monitor"
 SETTINGS_FILE = os.path.join(SETTINGS_DIR, "settings.json")
 
 def format_size(size_bytes):
-    if size_bytes == 0:
-        return "0 B"
+    if size_bytes == 0: return "0 B"
     size_name = ("B", "KB", "MB", "GB", "TB")
     import math
     try:
@@ -40,16 +38,14 @@ def format_size(size_bytes):
         p = math.pow(1024, i)
         s = round(size_bytes / p, 2)
         return f"{s} {size_name[i]}"
-    except:
-        return "0 B"
+    except: return "0 B"
 
-class NumericTableWidgetItem(QTableWidgetItem):
+class TreeItem(QTreeWidgetItem):
     def __lt__(self, other):
-        if isinstance(other, QTableWidgetItem):
-            my_data = self.data(Qt.ItemDataRole.UserRole)
-            other_data = other.data(Qt.ItemDataRole.UserRole)
-            if my_data is not None and other_data is not None:
-                return my_data < other_data
+        column = self.treeWidget().sortColumn()
+        # Custom numeric sorting for columns 2 and 3 (Speed and Total)
+        if column in [2, 3]:
+            return float(self.data(column, Qt.ItemDataRole.UserRole) or 0) < float(other.data(column, Qt.ItemDataRole.UserRole) or 0)
         return super().__lt__(other)
 
 class SettingsDialog(QDialog):
@@ -80,12 +76,8 @@ class SettingsDialog(QDialog):
         win_group = QGroupBox("WINDOW DIMENSIONS")
         win_group.setStyleSheet(f"QGroupBox {{ color: {CP_CYAN}; border: 1px solid {CP_DIM}; margin-top: 10px; }} QGroupBox::title {{ subcontrol-origin: margin; left: 10px; }}")
         win_form = QFormLayout()
-        self.win_w = QSpinBox()
-        self.win_w.setRange(400, 3840)
-        self.win_w.setValue(current_settings.get('win_w', 900))
-        self.win_h = QSpinBox()
-        self.win_h.setRange(300, 2160)
-        self.win_h.setValue(current_settings.get('win_h', 700))
+        self.win_w = QSpinBox(); self.win_w.setRange(400, 3840); self.win_w.setValue(current_settings.get('win_w', 900))
+        self.win_h = QSpinBox(); self.win_h.setRange(300, 2160); self.win_h.setValue(current_settings.get('win_h', 700))
         win_form.addRow("WIDTH:", self.win_w)
         win_form.addRow("HEIGHT:", self.win_h)
         win_group.setLayout(win_form)
@@ -95,9 +87,7 @@ class SettingsDialog(QDialog):
         tbl_group = QGroupBox("TABLE CONFIG")
         tbl_group.setStyleSheet(f"QGroupBox {{ color: {CP_CYAN}; border: 1px solid {CP_DIM}; margin-top: 10px; }} QGroupBox::title {{ subcontrol-origin: margin; left: 10px; }}")
         tbl_form = QFormLayout()
-        self.row_h = QSpinBox()
-        self.row_h.setRange(20, 100)
-        self.row_h.setValue(current_settings.get('row_height', 40))
+        self.row_h = QSpinBox(); self.row_h.setRange(20, 100); self.row_h.setValue(current_settings.get('row_height', 40))
         tbl_form.addRow("ROW HEIGHT:", self.row_h)
         tbl_group.setLayout(tbl_form)
         layout.addWidget(tbl_group)
@@ -106,19 +96,11 @@ class SettingsDialog(QDialog):
         col_group = QGroupBox("COLUMN WIDTHS")
         col_group.setStyleSheet(f"QGroupBox {{ color: {CP_CYAN}; border: 1px solid {CP_DIM}; margin-top: 10px; }} QGroupBox::title {{ subcontrol-origin: margin; left: 10px; }}")
         col_form = QFormLayout()
-        self.col_0 = QSpinBox() # ICON
-        self.col_0.setRange(30, 200)
-        self.col_0.setValue(current_settings.get('col_widths', [50, 200, 150, 150])[0])
-        self.col_1 = QSpinBox() # APPLICATION
-        self.col_1.setRange(50, 1000)
-        self.col_1.setValue(current_settings.get('col_widths', [50, 200, 150, 150])[1])
-        self.col_2 = QSpinBox() # SPEED
-        self.col_2.setRange(50, 1000)
-        self.col_2.setValue(current_settings.get('col_widths', [50, 200, 150, 150])[2])
-        self.col_3 = QSpinBox() # TOTAL
-        self.col_3.setRange(50, 1000)
-        self.col_3.setValue(current_settings.get('col_widths', [50, 200, 150, 150])[3])
-        
+        widths = current_settings.get('col_widths', [60, 250, 150, 150])
+        self.col_0 = QSpinBox(); self.col_0.setRange(30, 200); self.col_0.setValue(widths[0])
+        self.col_1 = QSpinBox(); self.col_1.setRange(50, 1000); self.col_1.setValue(widths[1])
+        self.col_2 = QSpinBox(); self.col_2.setRange(50, 1000); self.col_2.setValue(widths[2])
+        self.col_3 = QSpinBox(); self.col_3.setRange(50, 1000); self.col_3.setValue(widths[3])
         col_form.addRow("ICON COL:", self.col_0)
         col_form.addRow("APP NAME COL:", self.col_1)
         col_form.addRow("SPEED COL:", self.col_2)
@@ -150,15 +132,13 @@ class MonitorStats:
 
     def refresh_connections(self):
         now = time.time()
-        if now - self.last_conn_refresh < 2:
-            return
+        if now - self.last_conn_refresh < 2: return
         new_map = {}
         try:
             for conn in psutil.net_connections(kind='inet'):
                 if conn.laddr and conn.pid:
                     new_map[(conn.laddr.ip, conn.laddr.port)] = conn.pid
-        except:
-            pass
+        except: pass
         with self.lock:
             self.conn_map = new_map
             self.last_conn_refresh = now
@@ -210,14 +190,11 @@ class NetworkThread(threading.Thread):
             if IP in packet:
                 src_ip = packet[IP].src
                 dst_ip = packet[IP].dst
-                sport = None
-                dport = None
+                sport = None; dport = None
                 if TCP in packet:
-                    sport = packet[TCP].sport
-                    dport = packet[TCP].dport
+                    sport = packet[TCP].sport; dport = packet[TCP].dport
                 elif UDP in packet:
-                    sport = packet[UDP].sport
-                    dport = packet[UDP].dport
+                    sport = packet[UDP].sport; dport = packet[UDP].dport
                 pid = self.stats.conn_map.get((src_ip, sport)) or self.stats.conn_map.get((dst_ip, dport))
                 if pid: self.stats.update_packet(pid, len(packet))
 
@@ -229,14 +206,12 @@ class NetworkThread(threading.Thread):
         threading.Thread(target=refresher, daemon=True).start()
         try:
             sniff(prn=packet_callback, store=0, stop_filter=lambda x: not self.running)
-        except:
-            pass
+        except: pass
 
 class App(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("NET-SPEED HOOKER // CYBER_MONITOR")
-        
         self.load_settings()
         self.resize(self.win_w, self.win_h)
 
@@ -249,17 +224,13 @@ class App(QMainWindow):
         self.icon_provider = QFileIconProvider()
 
         self.init_ui()
-        
         self.timer = QTimer()
         self.timer.timeout.connect(self.update_stats)
         self.timer.start(1000)
 
     def load_settings(self):
-        # Default values
-        self.win_w = 900
-        self.win_h = 700
-        self.row_height = 40
-        self.col_widths = [50, 200, 150, 150]
+        self.win_w = 900; self.win_h = 700; self.row_height = 40
+        self.col_widths = [60, 250, 150, 150]
         self.current_sort_col = 2
         self.current_sort_order = Qt.SortOrder.DescendingOrder
 
@@ -270,11 +241,10 @@ class App(QMainWindow):
                     self.win_w = s.get('win_w', 900)
                     self.win_h = s.get('win_h', 700)
                     self.row_height = s.get('row_height', 40)
-                    self.col_widths = s.get('col_widths', [50, 200, 150, 150])
+                    self.col_widths = s.get('col_widths', [60, 250, 150, 150])
                     self.current_sort_col = s.get('sort_col', 2)
                     self.current_sort_order = Qt.SortOrder(s.get('sort_order', 1))
-            except:
-                pass
+            except: pass
 
     def save_settings(self):
         try:
@@ -283,22 +253,23 @@ class App(QMainWindow):
                 'win_w': self.width(),
                 'win_h': self.height(),
                 'row_height': self.row_height,
-                'col_widths': [self.table.columnWidth(i) for i in range(4)],
+                'col_widths': [self.tree.columnWidth(i) for i in range(4)],
                 'sort_col': self.current_sort_col,
                 'sort_order': self.current_sort_order.value
             }
             with open(SETTINGS_FILE, 'w') as f:
                 json.dump(settings, f, indent=4)
-        except:
-            pass
+        except: pass
 
     def init_ui(self):
         self.setStyleSheet(f"""
             QMainWindow {{ background-color: {CP_BG}; }}
             QWidget {{ color: {CP_TEXT}; font-family: 'Consolas'; font-size: 10pt; }}
-            QTableWidget {{
-                background-color: {CP_PANEL}; gridline-color: {CP_DIM}; border: 1px solid {CP_DIM}; color: {CP_TEXT};
+            QTreeWidget {{
+                background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; color: {CP_TEXT};
+                selection-background-color: {CP_DIM};
             }}
+            QTreeWidget::item {{ border-bottom: 1px solid {CP_DIM}; }}
             QHeaderView::section {{
                 background-color: {CP_DIM}; color: {CP_YELLOW}; padding: 5px; border: 1px solid {CP_BG}; font-weight: bold;
             }}
@@ -312,7 +283,6 @@ class App(QMainWindow):
         self.setCentralWidget(central)
         layout = QVBoxLayout(central)
 
-        # Header
         header = QHBoxLayout()
         title = QLabel("SYSTEM NETWORK TRAFFIC")
         title.setStyleSheet(f"color: {CP_CYAN}; font-size: 18pt; font-weight: bold;")
@@ -328,22 +298,19 @@ class App(QMainWindow):
         header.addWidget(self.settings_btn)
         layout.addLayout(header)
 
-        # Table
-        self.table = QTableWidget()
-        self.table.setColumnCount(4)
-        self.table.setHorizontalHeaderLabels(["ICON", "APPLICATION", "SPEED / SEC", "TOTAL USAGE"])
-        self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Interactive)
+        # Tree Widget
+        self.tree = QTreeWidget()
+        self.tree.setColumnCount(4)
+        self.tree.setHeaderLabels(["ICON", "APPLICATION", "SPEED / SEC", "TOTAL USAGE"])
+        self.tree.header().setSectionResizeMode(QHeaderView.ResizeMode.Interactive)
         
-        # Apply Column Widths
         for i, width in enumerate(self.col_widths):
-            self.table.setColumnWidth(i, width)
+            self.tree.setColumnWidth(i, width)
         
-        self.table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
-        self.table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
-        self.table.setSortingEnabled(True)
-        self.table.horizontalHeader().sortIndicatorChanged.connect(self.on_sort_changed)
-        self.table.horizontalHeader().setSortIndicator(self.current_sort_col, self.current_sort_order)
-        layout.addWidget(self.table)
+        self.tree.setSortingEnabled(True)
+        self.tree.header().sortIndicatorChanged.connect(self.on_sort_changed)
+        self.tree.header().setSortIndicator(self.current_sort_col, self.current_sort_order)
+        layout.addWidget(self.tree)
         
         footer = QLabel("STATUS: MONITORING_ACTIVE // PATH: " + SETTINGS_FILE)
         footer.setStyleSheet(f"color: {CP_DIM}; font-size: 8pt;")
@@ -356,42 +323,77 @@ class App(QMainWindow):
 
     def update_stats(self):
         snapshot = self.stats.get_snapshot()
-        self.table.setSortingEnabled(False)
-        self.table.setRowCount(len(snapshot))
-        for i, data in enumerate(snapshot):
-            self.table.setRowHeight(i, self.row_height)
+        
+        # Group by Application Name
+        groups = {}
+        for data in snapshot:
+            name = data['name']
+            if name not in groups:
+                groups[name] = {'speed': 0, 'total': 0, 'exe': data['exe'], 'items': []}
+            groups[name]['speed'] += data['speed']
+            groups[name]['total'] += data['total']
+            groups[name]['items'].append(data)
+
+        self.tree.setSortingEnabled(False)
+        
+        # Keep track of existing groups to update instead of clearing
+        existing_groups = {}
+        for i in range(self.tree.topLevelItemCount()):
+            item = self.tree.topLevelItem(i)
+            existing_groups[item.text(1)] = item
             
-            icon_label = QLabel()
-            icon_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            exe_path = data['exe']
-            if exe_path and os.path.exists(exe_path):
-                if exe_path not in self.icon_cache:
-                    from PyQt6.QtCore import QFileInfo
-                    icon = self.icon_provider.icon(QFileInfo(exe_path))
-                    pixmap = icon.pixmap(QSize(24, 24))
-                    self.icon_cache[exe_path] = pixmap
-                icon_label.setPixmap(self.icon_cache[exe_path])
-            self.table.setCellWidget(i, 0, icon_label)
+        # Update or Create Groups
+        for name, gdata in groups.items():
+            if name in existing_groups:
+                root = existing_groups[name]
+            else:
+                root = TreeItem(self.tree)
+                root.setText(1, name)
+                # Load Icon
+                exe_path = gdata['exe']
+                if exe_path and os.path.exists(exe_path):
+                    if exe_path not in self.icon_cache:
+                        from PyQt6.QtCore import QFileInfo
+                        icon = self.icon_provider.icon(QFileInfo(exe_path))
+                        self.icon_cache[exe_path] = icon.pixmap(QSize(24, 24))
+                    root.setIcon(0, QIcon(self.icon_cache[exe_path]))
             
-            name_item = QTableWidgetItem(data['name'])
-            name_item.setData(Qt.ItemDataRole.UserRole, data['name'].lower())
-            name_item.setForeground(QColor(CP_TEXT))
-            self.table.setItem(i, 1, name_item)
+            # Update Root Stats
+            root.setText(2, format_size(gdata['speed']) + "/s")
+            root.setData(2, Qt.ItemDataRole.UserRole, gdata['speed'])
+            root.setText(3, format_size(gdata['total']))
+            root.setData(3, Qt.ItemDataRole.UserRole, gdata['total'])
             
-            speed_str = format_size(data['speed']) + "/s"
-            speed_item = NumericTableWidgetItem(speed_str)
-            speed_item.setData(Qt.ItemDataRole.UserRole, data['speed'])
-            speed_item.setForeground(QColor(CP_RED if data['speed'] > 1024*1024 else (CP_CYAN if data['speed'] > 1024*10 else CP_TEXT)))
-            self.table.setItem(i, 2, speed_item)
+            # Root Colors
+            root.setForeground(2, QColor(CP_RED if gdata['speed'] > 1024*1024 else (CP_CYAN if gdata['speed'] > 1024*10 else CP_TEXT)))
+            root.setForeground(3, QColor(CP_YELLOW))
             
-            total_str = format_size(data['total'])
-            total_item = NumericTableWidgetItem(total_str)
-            total_item.setData(Qt.ItemDataRole.UserRole, data['total'])
-            total_item.setForeground(QColor(CP_YELLOW))
-            self.table.setItem(i, 3, total_item)
-            
-        self.table.setSortingEnabled(True)
-        self.table.sortByColumn(self.current_sort_col, self.current_sort_order)
+            # Update Children (Individual Processes)
+            # Only if more than 1 process or for clarity
+            if len(gdata['items']) > 1:
+                # Simple sync: remove all children and re-add for now to keep it clean
+                for child in root.takeChildren(): del child
+                for item_data in gdata['items']:
+                    child = TreeItem(root)
+                    child.setText(1, f"PID: {item_data['pid']}")
+                    child.setText(2, format_size(item_data['speed']) + "/s")
+                    child.setData(2, Qt.ItemDataRole.UserRole, item_data['speed'])
+                    child.setText(3, format_size(item_data['total']))
+                    child.setData(3, Qt.ItemDataRole.UserRole, item_data['total'])
+                    child.setForeground(1, QColor(CP_SUBTEXT))
+                    child.setForeground(2, QColor(CP_SUBTEXT))
+                    child.setForeground(3, QColor(CP_SUBTEXT))
+            else:
+                for child in root.takeChildren(): del child
+
+        # Remove groups that no longer exist
+        for i in reversed(range(self.tree.topLevelItemCount())):
+            item = self.tree.topLevelItem(i)
+            if item.text(1) not in groups:
+                self.tree.takeTopLevelItem(i)
+
+        self.tree.setSortingEnabled(True)
+        self.tree.sortByColumn(self.current_sort_col, self.current_sort_order)
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
@@ -403,10 +405,9 @@ class App(QMainWindow):
 
     def show_settings(self):
         current = {
-            'win_w': self.width(),
-            'win_h': self.height(),
+            'win_w': self.width(), 'win_h': self.height(),
             'row_height': self.row_height,
-            'col_widths': [self.table.columnWidth(i) for i in range(4)]
+            'col_widths': [self.tree.columnWidth(i) for i in range(4)]
         }
         dlg = SettingsDialog(self, current)
         if dlg.exec():
@@ -414,7 +415,7 @@ class App(QMainWindow):
             self.row_height = new_s['row_height']
             self.resize(new_s['win_w'], new_s['win_h'])
             for i, width in enumerate(new_s['col_widths']):
-                self.table.setColumnWidth(i, width)
+                self.tree.setColumnWidth(i, width)
             self.save_settings()
             self.update_stats()
 
