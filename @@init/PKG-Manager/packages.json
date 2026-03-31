@@ -1126,5 +1126,11 @@
     "ID": "alesimula.wsa_pacman",
     "Source": "winget",
     "Category": "Virtualization"
+  },
+  {
+    "Name": "Nexus Font Preview",
+    "ID": "xiles.NexusFont",
+    "Source": "winget",
+    "Category": "General"
   }
 ]
