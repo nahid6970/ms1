@@ -9,7 +9,7 @@ from datetime import datetime
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QLabel, QPushButton, QTreeWidget, QTreeWidgetItem, 
                              QHeaderView, QGroupBox, QFrame, QDialog, QSpinBox, QFormLayout,
-                             QScrollArea)
+                             QScrollArea, QComboBox)
 from PyQt6.QtCore import Qt, QTimer, QSize, pyqtSignal, QObject
 from PyQt6.QtGui import QIcon, QPixmap, QColor, QFont
 from scapy.all import sniff, IP, TCP, UDP
@@ -26,25 +26,33 @@ CP_DIM = "#3a3a3a"
 CP_TEXT = "#E0E0E0"
 CP_SUBTEXT = "#808080"
 
-# Target settings path
 SETTINGS_DIR = r"C:\@delta\output\net_speed_monitor"
 SETTINGS_FILE = os.path.join(SETTINGS_DIR, "settings.json")
 
-def format_size(size_bytes):
+def format_size(size_bytes, unit="MB/s"):
     if size_bytes == 0: return "0 B"
-    size_name = ("B", "KB", "MB", "GB", "TB")
+    
+    # Convert to bits if Mbps requested
+    value = size_bytes
+    if "bps" in unit.lower() or "bit" in unit.lower():
+        value = size_bytes * 8
+        base_names = ("bps", "Kbps", "Mbps", "Gbps", "Tbps")
+    else:
+        base_names = ("B", "KB", "MB", "GB", "TB")
+    
     import math
     try:
-        i = int(math.floor(math.log(size_bytes, 1024)))
+        if value == 0: return f"0 {base_names[0]}"
+        i = int(math.floor(math.log(value, 1024))) if value > 0 else 0
+        if i >= len(base_names): i = len(base_names) - 1
         p = math.pow(1024, i)
-        s = round(size_bytes / p, 2)
-        return f"{s} {size_name[i]}"
-    except: return "0 B"
+        s = round(value / p, 2)
+        return f"{s} {base_names[i]}"
+    except: return f"0 {base_names[0]}"
 
 class TreeItem(QTreeWidgetItem):
     def __lt__(self, other):
         column = self.treeWidget().sortColumn()
-        # Custom numeric sorting for columns 2 and 3 (Speed and Total)
         if column in [2, 3]:
             try:
                 val_self = float(self.data(column, Qt.ItemDataRole.UserRole) or 0)
@@ -57,11 +65,11 @@ class SettingsDialog(QDialog):
     def __init__(self, parent=None, current_settings=None):
         super().__init__(parent)
         self.setWindowTitle("SYSTEM_EXTENDED_SETTINGS")
-        self.resize(400, 500)
+        self.resize(400, 550)
         self.setStyleSheet(f"""
             QDialog {{ background-color: {CP_BG}; border: 1px solid {CP_CYAN}; }}
             QLabel {{ color: {CP_YELLOW}; font-family: 'Consolas'; font-weight: bold; }}
-            QSpinBox {{
+            QSpinBox, QComboBox {{
                 background-color: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 4px;
             }}
             QPushButton {{
@@ -77,6 +85,17 @@ class SettingsDialog(QDialog):
         container = QWidget()
         layout = QVBoxLayout(container)
         
+        # Display Group
+        disp_group = QGroupBox("DISPLAY SETTINGS")
+        disp_group.setStyleSheet(f"QGroupBox {{ color: {CP_CYAN}; border: 1px solid {CP_DIM}; margin-top: 10px; }} QGroupBox::title {{ subcontrol-origin: margin; left: 10px; }}")
+        disp_form = QFormLayout()
+        self.unit_combo = QComboBox()
+        self.unit_combo.addItems(["MB/s (Bytes)", "Mbps (Bits)"])
+        self.unit_combo.setCurrentIndex(0 if current_settings.get('unit', 'MB/s') == 'MB/s' else 1)
+        disp_form.addRow("SPEED UNIT:", self.unit_combo)
+        disp_group.setLayout(disp_form)
+        layout.addWidget(disp_group)
+
         # Window Group
         win_group = QGroupBox("WINDOW DIMENSIONS")
         win_group.setStyleSheet(f"QGroupBox {{ color: {CP_CYAN}; border: 1px solid {CP_DIM}; margin-top: 10px; }} QGroupBox::title {{ subcontrol-origin: margin; left: 10px; }}")
@@ -122,6 +141,7 @@ class SettingsDialog(QDialog):
 
     def get_settings(self):
         return {
+            'unit': 'MB/s' if self.unit_combo.currentIndex() == 0 else 'Mbps',
             'win_w': self.win_w.value(),
             'win_h': self.win_h.value(),
             'row_height': self.row_h.value(),
@@ -134,6 +154,8 @@ class MonitorStats:
         self.proc_data = {}
         self.conn_map = {}
         self.last_conn_refresh = 0
+        self.total_system_bytes = 0
+        self.last_net_io = psutil.net_io_counters()
 
     def refresh_connections(self):
         now = time.time()
@@ -168,11 +190,19 @@ class MonitorStats:
             self.proc_data[pid]['current_bytes'] += size
 
     def get_snapshot(self):
+        # Calculate real system total from psutil (100% accurate)
+        new_net_io = psutil.net_io_counters()
+        system_delta = (new_net_io.bytes_sent + new_net_io.bytes_recv) - \
+                       (self.last_net_io.bytes_sent + self.last_net_io.bytes_recv)
+        self.last_net_io = new_net_io
+
         with self.lock:
             snapshot = []
+            sum_proc_speed = 0
             for pid, data in self.proc_data.items():
                 speed = data['current_bytes']
                 data['current_bytes'] = 0
+                sum_proc_speed += speed
                 snapshot.append({
                     'pid': pid,
                     'name': data['name'],
@@ -180,7 +210,19 @@ class MonitorStats:
                     'speed': speed,
                     'total': data['total_bytes']
                 })
-            return snapshot
+            
+            # If sniffing missed some packets, attribute them to 'System/Other'
+            missed = max(0, system_delta - sum_proc_speed)
+            if missed > 1024: # Only if significant (>1KB)
+                snapshot.append({
+                    'pid': 0,
+                    'name': '[SYSTEM/OTHER]',
+                    'exe': '',
+                    'speed': missed,
+                    'total': missed
+                })
+                
+            return snapshot, system_delta
 
 class NetworkThread(threading.Thread):
     def __init__(self, stats):
@@ -193,15 +235,13 @@ class NetworkThread(threading.Thread):
         def packet_callback(packet):
             if not self.running: return
             if IP in packet:
-                src_ip = packet[IP].src
-                dst_ip = packet[IP].dst
-                sport = None; dport = None
-                if TCP in packet:
-                    sport = packet[TCP].sport; dport = packet[TCP].dport
-                elif UDP in packet:
-                    sport = packet[UDP].sport; dport = packet[UDP].dport
-                pid = self.stats.conn_map.get((src_ip, sport)) or self.stats.conn_map.get((dst_ip, dport))
-                if pid: self.stats.update_packet(pid, len(packet))
+                pkt_size = len(packet)
+                # Quick lookup
+                laddr = (packet[IP].src, packet[TCP].sport if TCP in packet else (packet[UDP].sport if UDP in packet else None))
+                raddr = (packet[IP].dst, packet[TCP].dport if TCP in packet else (packet[UDP].dport if UDP in packet else None))
+                
+                pid = self.stats.conn_map.get(laddr) or self.stats.conn_map.get(raddr)
+                if pid: self.stats.update_packet(pid, pkt_size)
 
         def refresher():
             while self.running:
@@ -210,7 +250,8 @@ class NetworkThread(threading.Thread):
         
         threading.Thread(target=refresher, daemon=True).start()
         try:
-            sniff(prn=packet_callback, store=0, stop_filter=lambda x: not self.running)
+            # Using BPF filter 'ip' to reduce processing overhead
+            sniff(filter="ip", prn=packet_callback, store=0, stop_filter=lambda x: not self.running)
         except: pass
 
 class App(QMainWindow):
@@ -238,6 +279,7 @@ class App(QMainWindow):
         self.col_widths = [60, 250, 150, 150]
         self.current_sort_col = 2
         self.current_sort_order = Qt.SortOrder.DescendingOrder
+        self.unit = "MB/s"
 
         if os.path.exists(SETTINGS_FILE):
             try:
@@ -249,12 +291,14 @@ class App(QMainWindow):
                     self.col_widths = s.get('col_widths', [60, 250, 150, 150])
                     self.current_sort_col = s.get('sort_col', 2)
                     self.current_sort_order = Qt.SortOrder(s.get('sort_order', 1))
+                    self.unit = s.get('unit', 'MB/s')
             except: pass
 
     def save_settings(self):
         try:
             os.makedirs(SETTINGS_DIR, exist_ok=True)
             settings = {
+                'unit': self.unit,
                 'win_w': self.width(),
                 'win_h': self.height(),
                 'row_height': self.row_height,
@@ -271,34 +315,13 @@ class App(QMainWindow):
             QMainWindow {{ background-color: {CP_BG}; }}
             QWidget {{ color: {CP_TEXT}; font-family: 'Consolas'; font-size: 10pt; }}
             QTreeWidget {{
-                background-color: {CP_PANEL}; 
-                border: 1px solid {CP_DIM}; 
-                color: {CP_TEXT};
-                outline: none;
-                show-decoration-selected: 1;
+                background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; color: {CP_TEXT};
+                outline: none; show-decoration-selected: 1;
             }}
-            QTreeWidget::item {{ 
-                border-bottom: 1px solid {CP_DIM}; 
-                border-left: none;
-                border-right: none;
-                padding: 4px;
-            }}
-            QTreeWidget::item:selected {{
-                background-color: {CP_DIM};
-                color: {CP_YELLOW};
-                outline: none;
-                border: none;
-            }}
-            QTreeWidget::item:focus {{
-                outline: none;
-                border: none;
-            }}
+            QTreeWidget::item {{ border-bottom: 1px solid {CP_DIM}; padding: 4px; }}
+            QTreeWidget::item:selected {{ background-color: {CP_DIM}; color: {CP_YELLOW}; outline: none; }}
             QHeaderView::section {{
-                background-color: {CP_DIM}; 
-                color: {CP_YELLOW}; 
-                padding: 5px; 
-                border: 1px solid {CP_BG}; 
-                font-weight: bold;
+                background-color: {CP_DIM}; color: {CP_YELLOW}; padding: 5px; border: 1px solid {CP_BG}; font-weight: bold;
             }}
             QPushButton {{
                 background-color: {CP_DIM}; border: 1px solid {CP_DIM}; color: white; padding: 6px 12px; font-weight: bold;
@@ -310,27 +333,32 @@ class App(QMainWindow):
         self.setCentralWidget(central)
         layout = QVBoxLayout(central)
 
-        header = QHBoxLayout()
+        header_top = QHBoxLayout()
         title = QLabel("SYSTEM NETWORK TRAFFIC")
         title.setStyleSheet(f"color: {CP_CYAN}; font-size: 18pt; font-weight: bold;")
-        header.addWidget(title)
-        header.addStretch()
+        header_top.addWidget(title)
+        header_top.addStretch()
         
+        self.total_label = QLabel("TOTAL: 0.00 MB/s")
+        self.total_label.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold; font-size: 12pt; border: 1px solid {CP_DIM}; padding: 5px;")
+        header_top.addWidget(self.total_label)
+        layout.addLayout(header_top)
+
+        header_btns = QHBoxLayout()
+        header_btns.addStretch()
         self.restart_btn = QPushButton("RESTART")
         self.restart_btn.clicked.connect(self.restart_app)
-        header.addWidget(self.restart_btn)
+        header_btns.addWidget(self.restart_btn)
         
         self.settings_btn = QPushButton("SETTINGS")
         self.settings_btn.clicked.connect(self.show_settings)
-        header.addWidget(self.settings_btn)
-        layout.addLayout(header)
+        header_btns.addWidget(self.settings_btn)
+        layout.addLayout(header_btns)
 
-        # Tree Widget
         self.tree = QTreeWidget()
         self.tree.setColumnCount(4)
-        self.tree.setHeaderLabels(["ICON", "APPLICATION", "SPEED / SEC", "TOTAL USAGE"])
+        self.tree.setHeaderLabels(["ICON", "APPLICATION", f"SPEED ({self.unit})", "TOTAL USAGE"])
         self.tree.setIndentation(20)
-        self.tree.header().setSectionResizeMode(QHeaderView.ResizeMode.Interactive)
         self.tree.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.tree.setSelectionBehavior(QTreeWidget.SelectionBehavior.SelectRows)
         self.tree.setAllColumnsShowFocus(True)
@@ -343,9 +371,9 @@ class App(QMainWindow):
         self.tree.header().setSortIndicator(self.current_sort_col, self.current_sort_order)
         layout.addWidget(self.tree)
         
-        footer = QLabel("STATUS: MONITORING_ACTIVE // PATH: " + SETTINGS_FILE)
-        footer.setStyleSheet(f"color: {CP_DIM}; font-size: 8pt;")
-        layout.addWidget(footer)
+        self.footer_label = QLabel("STATUS: MONITORING_ACTIVE // UNIT: " + self.unit)
+        self.footer_label.setStyleSheet(f"color: {CP_DIM}; font-size: 8pt;")
+        layout.addWidget(self.footer_label)
 
     def on_sort_changed(self, index, order):
         self.current_sort_col = index
@@ -353,9 +381,9 @@ class App(QMainWindow):
         self.save_settings()
 
     def update_stats(self):
-        snapshot = self.stats.get_snapshot()
+        snapshot, system_total = self.stats.get_snapshot()
+        self.total_label.setText(f"TOTAL: {format_size(system_total, self.unit)}")
         
-        # Group by Application Name
         groups = {}
         for data in snapshot:
             name = data['name']
@@ -366,21 +394,14 @@ class App(QMainWindow):
             groups[name]['items'].append(data)
 
         self.tree.setSortingEnabled(False)
-        
-        # Keep track of existing groups to update instead of clearing
-        existing_groups = {}
-        for i in range(self.tree.topLevelItemCount()):
-            item = self.tree.topLevelItem(i)
-            existing_groups[item.text(1)] = item
+        existing_groups = {self.tree.topLevelItem(i).text(1): self.tree.topLevelItem(i) for i in range(self.tree.topLevelItemCount())}
             
-        # Update or Create Groups
         for name, gdata in groups.items():
             if name in existing_groups:
                 root = existing_groups[name]
             else:
                 root = TreeItem(self.tree)
                 root.setText(1, name)
-                # Load Icon
                 exe_path = gdata['exe']
                 if exe_path and os.path.exists(exe_path):
                     if exe_path not in self.icon_cache:
@@ -389,58 +410,37 @@ class App(QMainWindow):
                         self.icon_cache[exe_path] = icon.pixmap(QSize(24, 24))
                     root.setIcon(0, QIcon(self.icon_cache[exe_path]))
             
-            # Update Root Stats
-            root.setText(2, format_size(gdata['speed']) + "/s")
+            root.setText(2, format_size(gdata['speed'], self.unit))
             root.setData(2, Qt.ItemDataRole.UserRole, gdata['speed'])
-            root.setText(3, format_size(gdata['total']))
+            root.setText(3, format_size(gdata['total'], "MB/s")) # Total usage always in MB for consistency
             root.setData(3, Qt.ItemDataRole.UserRole, gdata['total'])
-            
-            # Apply Row Height
             root.setSizeHint(0, QSize(0, self.row_height))
             
-            # Root Colors
+            # Color coding based on MB/s always
             root.setForeground(2, QColor(CP_RED if gdata['speed'] > 1024*1024 else (CP_CYAN if gdata['speed'] > 1024*10 else CP_TEXT)))
             root.setForeground(3, QColor(CP_YELLOW))
             
-            # Update Children (Individual Processes)
             if len(gdata['items']) > 1:
-                # Sync children to avoid flickering
                 existing_pids = {root.child(j).text(1): root.child(j) for j in range(root.childCount())}
                 new_pids = set()
-                
                 for item_data in gdata['items']:
                     pid_text = f"PID: {item_data['pid']}"
                     new_pids.add(pid_text)
-                    if pid_text in existing_pids:
-                        child = existing_pids[pid_text]
-                    else:
-                        child = TreeItem(root)
-                        child.setText(1, pid_text)
-                    
-                    child.setText(2, format_size(item_data['speed']) + "/s")
+                    child = existing_pids[pid_text] if pid_text in existing_pids else TreeItem(root)
+                    child.setText(1, pid_text)
+                    child.setText(2, format_size(item_data['speed'], self.unit))
                     child.setData(2, Qt.ItemDataRole.UserRole, item_data['speed'])
-                    child.setText(3, format_size(item_data['total']))
+                    child.setText(3, format_size(item_data['total'], "MB/s"))
                     child.setData(3, Qt.ItemDataRole.UserRole, item_data['total'])
-                    
                     child.setSizeHint(0, QSize(0, self.row_height))
-                    child.setForeground(1, QColor(CP_SUBTEXT))
-                    child.setForeground(2, QColor(CP_SUBTEXT))
-                    child.setForeground(3, QColor(CP_SUBTEXT))
-                
-                # Remove children no longer present
+                    for col in range(1, 4): child.setForeground(col, QColor(CP_SUBTEXT))
                 for pid_text, child in existing_pids.items():
-                    if pid_text not in new_pids:
-                        root.removeChild(child)
+                    if pid_text not in new_pids: root.removeChild(child)
             else:
-                # Clear children if only 1 process
-                for j in reversed(range(root.childCount())):
-                    root.removeChild(root.child(j))
+                for j in reversed(range(root.childCount())): root.removeChild(root.child(j))
 
-        # Remove groups that no longer exist
         for i in reversed(range(self.tree.topLevelItemCount())):
-            item = self.tree.topLevelItem(i)
-            if item.text(1) not in groups:
-                self.tree.takeTopLevelItem(i)
+            if self.tree.topLevelItem(i).text(1) not in groups: self.tree.takeTopLevelItem(i)
 
         self.tree.setSortingEnabled(True)
         self.tree.sortByColumn(self.current_sort_col, self.current_sort_order)
@@ -455,17 +455,18 @@ class App(QMainWindow):
 
     def show_settings(self):
         current = {
-            'win_w': self.width(), 'win_h': self.height(),
-            'row_height': self.row_height,
-            'col_widths': [self.tree.columnWidth(i) for i in range(4)]
+            'unit': self.unit, 'win_w': self.width(), 'win_h': self.height(),
+            'row_height': self.row_height, 'col_widths': [self.tree.columnWidth(i) for i in range(4)]
         }
         dlg = SettingsDialog(self, current)
         if dlg.exec():
             new_s = dlg.get_settings()
+            self.unit = new_s['unit']
             self.row_height = new_s['row_height']
             self.resize(new_s['win_w'], new_s['win_h'])
-            for i, width in enumerate(new_s['col_widths']):
-                self.tree.setColumnWidth(i, width)
+            for i, width in enumerate(new_s['col_widths']): self.tree.setColumnWidth(i, width)
+            self.tree.setHeaderLabel(2, f"SPEED ({self.unit})")
+            self.footer_label.setText("STATUS: MONITORING_ACTIVE // UNIT: " + self.unit)
             self.save_settings()
             self.update_stats()
 
