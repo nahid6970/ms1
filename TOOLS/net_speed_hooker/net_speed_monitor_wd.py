@@ -235,6 +235,7 @@ class App(QMainWindow):
         self.unit="MB/s"; self.show_dl=True; self.show_ul=True
         self.hi_enabled=True; self.hi_color=CP_CYAN; self.hi_thickness=2
         self.hi_dl_s=True; self.hi_ul_s=True; self.hi_dl_t=True; self.hi_ul_t=True
+        self.min_speed=0
         try:
             if os.path.exists(SETTINGS_FILE):
                 with open(SETTINGS_FILE) as f: s = json.load(f)
@@ -246,6 +247,7 @@ class App(QMainWindow):
                 self.hi_thickness=s.get('hi_thickness',2)
                 self.hi_dl_s=s.get('hi_dl_s',True); self.hi_ul_s=s.get('hi_ul_s',True)
                 self.hi_dl_t=s.get('hi_dl_t',True); self.hi_ul_t=s.get('hi_ul_t',True)
+                self.min_speed=s.get('min_speed',0)
         except: pass
 
     def save_settings(self):
@@ -255,7 +257,7 @@ class App(QMainWindow):
                  'col_weights':self.col_weights,'sort_col':self.current_sort_col,'sort_order':self.current_sort_order.value,
                  'show_dl':self.show_dl,'show_ul':self.show_ul,'hi_enabled':self.hi_enabled,'hi_color':self.hi_color,
                  'hi_thickness':self.hi_thickness,'hi_dl_s':self.hi_dl_s,'hi_ul_s':self.hi_ul_s,
-                 'hi_dl_t':self.hi_dl_t,'hi_ul_t':self.hi_ul_t}
+                 'hi_dl_t':self.hi_dl_t,'hi_ul_t':self.hi_ul_t,'min_speed':getattr(self.filter_spin,'value',lambda:self.min_speed)()}
             with open(SETTINGS_FILE,'w') as f: json.dump(s, f, indent=4)
         except: pass
 
@@ -267,8 +269,8 @@ class App(QMainWindow):
         self.cb_ul = QCheckBox("UPLOAD"); self.cb_ul.setChecked(self.show_ul); self.cb_ul.stateChanged.connect(self.toggle_cols)
         ht.addStretch()
         fl = QLabel("MIN SPEED:"); fl.setStyleSheet(f"color:{CP_DIM};font-size:9pt;"); ht.addWidget(fl)
-        self.filter_spin = QSpinBox(); self.filter_spin.setRange(0, 100000); self.filter_spin.setValue(0); self.filter_spin.setSuffix(" B/s")
-        self.filter_spin.setStyleSheet(f"background-color:{CP_PANEL};color:{CP_CYAN};border:1px solid {CP_DIM};padding:2px;max-width:90px;")
+        self.filter_spin = QSpinBox(); self.filter_spin.setRange(0, 100000); self.filter_spin.setValue(self.min_speed); self.filter_spin.setSuffix(" B/s"); self.filter_spin.setFixedWidth(100)
+        self.filter_spin.setStyleSheet(f"QSpinBox{{background-color:{CP_PANEL};color:{CP_CYAN};border:1px solid {CP_DIM};padding:2px;}} QSpinBox::up-button,QSpinBox::down-button{{width:0;border:none;}}")
         ht.addWidget(self.filter_spin)
         ht.addWidget(self.cb_dl); ht.addWidget(self.cb_ul)
         self.tl = QLabel("DL: 0.00 | UL: 0.00"); self.tl.setStyleSheet(f"color:{CP_YELLOW};font-weight:bold;font-size:10pt;border:1px solid {CP_DIM};padding:5px;"); ht.addWidget(self.tl); l.addLayout(ht)
