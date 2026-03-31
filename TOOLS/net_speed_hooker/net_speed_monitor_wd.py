@@ -294,7 +294,7 @@ class App(QMainWindow):
         self.unit="MB/s"; self.show_dl=True; self.show_ul=True
         self.hi_enabled=True; self.hi_color=CP_CYAN; self.hi_thickness=2
         self.hi_dl_s=True; self.hi_ul_s=True; self.hi_dl_t=True; self.hi_ul_t=True
-        self.min_speed=0; self.filter_presets='0,1024,10240,102400,1048576'
+        self.min_speed=0; self.min_total=0; self.filter_presets='0,1024,10240,102400,1048576'
         try:
             if os.path.exists(SETTINGS_FILE):
                 with open(SETTINGS_FILE) as f: s = json.load(f)
@@ -307,32 +307,37 @@ class App(QMainWindow):
                 self.hi_thickness=s.get('hi_thickness',2)
                 self.hi_dl_s=s.get('hi_dl_s',True); self.hi_ul_s=s.get('hi_ul_s',True)
                 self.hi_dl_t=s.get('hi_dl_t',True); self.hi_ul_t=s.get('hi_ul_t',True)
-                self.min_speed=s.get('min_speed',0); self.filter_presets=s.get('filter_presets','0,1024,10240,102400,1048576')
+                self.min_speed=s.get('min_speed',0); self.min_total=s.get('min_total',0)
+                self.filter_presets=s.get('filter_presets','0,1024,10240,102400,1048576')
         except: pass
 
     def save_settings(self):
         try:
             os.makedirs(SETTINGS_DIR, exist_ok=True)
+            _ms = int(self.filter_combo.currentText()) if hasattr(self,'filter_combo') and self.filter_combo.currentText().isdigit() else self.min_speed
+            _mt = int(self.filter_total_combo.currentText()) if hasattr(self,'filter_total_combo') and self.filter_total_combo.currentText().isdigit() else self.min_total
             s = {'unit':self.unit,'win_w':self.width(),'win_h':self.height(),'row_height':self.row_height,
                  'col_weights':self.col_weights,'sort_col':self.current_sort_col,'sort_order':self.current_sort_order.value,
                  'show_dl':self.show_dl,'show_ul':self.show_ul,'hi_enabled':self.hi_enabled,'hi_color':self.hi_color,
                  'hi_thickness':self.hi_thickness,'hi_dl_s':self.hi_dl_s,'hi_ul_s':self.hi_ul_s,
-                 'hi_dl_t':self.hi_dl_t,'hi_ul_t':self.hi_ul_t,'min_speed':int(self.filter_combo.currentText()) if hasattr(self,'filter_combo') and self.filter_combo.currentText().isdigit() else self.min_speed,'filter_presets':self.filter_presets}
+                 'hi_dl_t':self.hi_dl_t,'hi_ul_t':self.hi_ul_t,'min_speed':_ms,'min_total':_mt,'filter_presets':self.filter_presets}
             with open(SETTINGS_FILE,'w') as f: json.dump(s, f, indent=4)
         except: pass
 
     def init_ui(self):
         self.setStyleSheet(f"QMainWindow{{background-color:{CP_BG};}} QWidget{{color:{CP_TEXT};font-family:'Consolas';font-size:10pt;}} QTreeWidget{{background-color:{CP_PANEL};border:1px solid {CP_DIM};color:{CP_TEXT};outline:none;show-decoration-selected:0;}} QTreeWidget::item{{border-bottom:1px solid {CP_DIM};padding:4px;}} QTreeWidget::item:hover{{background-color:#1a1a1a;}} QTreeWidget::item:selected{{background-color:{CP_DIM};color:{CP_YELLOW};outline:none;}} QHeaderView::section{{background-color:{CP_DIM};color:{CP_YELLOW};padding:5px;border:1px solid {CP_BG};font-weight:bold;}} QPushButton{{background-color:{CP_DIM};border:1px solid {CP_DIM};color:white;padding:6px 12px;font-weight:bold;}} QPushButton:hover{{background-color:#2a2a2a;border:1px solid {CP_YELLOW};color:{CP_YELLOW};}} QCheckBox{{color:{CP_CYAN};font-weight:bold;}} QTreeWidget::indicator{{width:13px;height:13px;border:1px solid {CP_DIM};background:{CP_PANEL};}}QTreeWidget::indicator:checked{{background:{CP_CYAN};border:1px solid {CP_CYAN};}}QCheckBox::indicator{{width:13px;height:13px;border:1px solid {CP_DIM};background:{CP_PANEL};}}QCheckBox::indicator:checked{{background:{CP_CYAN};border:1px solid {CP_CYAN};}}")
         c = QWidget(); self.setCentralWidget(c); l = QVBoxLayout(c); ht = QHBoxLayout()
-        t = QLabel("NET-SPEED HOOKER // WinDivert"); t.setStyleSheet(f"color:{CP_CYAN};font-size:16pt;font-weight:bold;"); ht.addWidget(t)
         self.cb_dl = QCheckBox("DOWNLOAD"); self.cb_dl.setChecked(self.show_dl); self.cb_dl.stateChanged.connect(self.toggle_cols)
         self.cb_ul = QCheckBox("UPLOAD"); self.cb_ul.setChecked(self.show_ul); self.cb_ul.stateChanged.connect(self.toggle_cols)
         ht.addStretch()
-        fl = QLabel("MIN SPEED:"); fl.setStyleSheet(f"color:{CP_DIM};font-size:9pt;"); ht.addWidget(fl)
-        self.filter_combo = QComboBox(); self.filter_combo.setFixedWidth(110)
+        fl = QLabel("MIN SPD:"); fl.setStyleSheet(f"color:{CP_DIM};font-size:9pt;"); ht.addWidget(fl)
+        self.filter_combo = QComboBox(); self.filter_combo.setFixedWidth(80)
         self.filter_combo.setStyleSheet(f'QComboBox{{background-color:{CP_PANEL};color:{CP_CYAN};border:1px solid {CP_DIM};padding:2px;}}')
+        ftl = QLabel("MIN TOT:"); ftl.setStyleSheet(f"color:{CP_DIM};font-size:9pt;"); ht.addWidget(ftl)
+        self.filter_total_combo = QComboBox(); self.filter_total_combo.setFixedWidth(80)
+        self.filter_total_combo.setStyleSheet(f'QComboBox{{background-color:{CP_PANEL};color:{CP_CYAN};border:1px solid {CP_DIM};padding:2px;}}')
         self._rebuild_filter_combo()
-        ht.addWidget(self.filter_combo)
+        ht.addWidget(self.filter_combo); ht.addWidget(self.filter_total_combo)
         ht.addWidget(self.cb_dl); ht.addWidget(self.cb_ul)
         self.tl = QLabel("DL: 0.00 | UL: 0.00"); self.tl.setStyleSheet(f"color:{CP_YELLOW};font-weight:bold;font-size:10pt;border:1px solid {CP_DIM};padding:5px;"); ht.addWidget(self.tl); l.addLayout(ht)
         hb = QHBoxLayout(); hb.addStretch()
@@ -340,7 +345,7 @@ class App(QMainWindow):
         rb = QPushButton("RESTART"); rb.clicked.connect(self.restart_app); hb.addWidget(rb)
         sb = QPushButton("SETTINGS"); sb.clicked.connect(self.show_settings); hb.addWidget(sb); l.addLayout(hb)
         self.tree = QTreeWidget(); self.tree.setColumnCount(7)
-        self.tree.setHeaderLabels(["ICON","APPLICATION","DL SPEED","UL SPEED","TOTAL DL","TOTAL UL","BLOCK"])
+        self.tree.setHeaderLabels(["ICON","APP","SPD IN","SPD OUT","TOT IN","TOT OUT","BLOCK"])
         self.tree.setIndentation(20); self.tree.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.tree.setSelectionBehavior(QTreeWidget.SelectionBehavior.SelectRows)
         self.tree.setAutoScroll(False)
@@ -355,14 +360,16 @@ class App(QMainWindow):
 
 
     def _rebuild_filter_combo(self):
-        cur = self.filter_combo.currentText() if hasattr(self,'filter_combo') else str(self.min_speed)
-        self.filter_combo.blockSignals(True); self.filter_combo.clear()
-        for v in self.filter_presets.split(','):
-            v=v.strip()
-            if v.isdigit(): self.filter_combo.addItem(v)
-        idx = self.filter_combo.findText(cur)
-        self.filter_combo.setCurrentIndex(idx if idx>=0 else 0)
-        self.filter_combo.blockSignals(False)
+        curs = self.filter_combo.currentText() if hasattr(self,'filter_combo') else str(self.min_speed)
+        curt = self.filter_total_combo.currentText() if hasattr(self,'filter_total_combo') else str(self.min_total)
+        for cb, cur in [(self.filter_combo, curs), (self.filter_total_combo, curt)]:
+            cb.blockSignals(True); cb.clear()
+            for v in self.filter_presets.split(','):
+                v=v.strip()
+                if v.isdigit(): cb.addItem(v)
+            idx = cb.findText(cur)
+            cb.setCurrentIndex(idx if idx>=0 else 0)
+            cb.blockSignals(False)
 
     def _apply_col_widths(self):
         header = self.tree.header()
@@ -382,7 +389,11 @@ class App(QMainWindow):
         self.tree.setColumnHidden(3, not self.show_ul); self.tree.setColumnHidden(5, not self.show_ul)
         self.save_settings()
 
-    def on_sort_changed(self, i, o): self.current_sort_col = i; self.current_sort_order = o; self.save_settings()
+    def on_sort_changed(self, i, o):
+        if i != self.current_sort_col and o == Qt.SortOrder.AscendingOrder:
+            self.tree.header().setSortIndicator(i, Qt.SortOrder.DescendingOrder)
+            return
+        self.current_sort_col = i; self.current_sort_order = o; self.save_settings()
 
     def update_stats(self):
         snap, dl_t, ul_t = self.stats.get_snapshot()
@@ -419,9 +430,19 @@ class App(QMainWindow):
             r.setForeground(2, QColor(CP_CYAN if gd['dl_s']>0 else CP_TEXT))
             r.setForeground(3, QColor(CP_ORANGE if gd['ul_s']>0 else CP_TEXT))
             r.setForeground(4, QColor(CP_YELLOW)); r.setForeground(5, QColor(CP_GREEN))
-            try: _f=int(self.filter_combo.currentText())
-            except: _f=0
-            r.setHidden(gd['dl_s'] < _f and gd['ul_s'] < _f)
+            
+            try: _fs=int(self.filter_combo.currentText())
+            except: _fs=0
+            try: _ft=int(self.filter_total_combo.currentText())
+            except: _ft=0
+            
+            hide_spd = (gd['dl_s'] < _fs and gd['ul_s'] < _fs) if _fs > 0 else False
+            hide_tot = (gd['dl_t'] < _ft and gd['ul_t'] < _ft) if _ft > 0 else False
+            
+            if _fs > 0 and _ft > 0:
+                r.setHidden(hide_spd and hide_tot)
+            else:
+                r.setHidden(hide_spd or hide_tot)
             if len(gd['items']) > 1:
                 eps = {r.child(j).text(1): r.child(j) for j in range(r.childCount())}; nps = set()
                 for id in gd['items']:
