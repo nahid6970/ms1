@@ -490,11 +490,14 @@ class App(QMainWindow):
         save_blocked_json(self.blocked_exe)
 
     def reset_db(self):
-        self.db.reset()  # clears traffic only, blocked entries preserved
+        self.db.reset()
         with self.stats.lock:
             self.stats.proc_data.clear(); self.stats.sys_dl_total = 0; self.stats.sys_ul_total = 0
         self.tree.clear()
-        self.tree.clear()
+        for n in self.blocked_names:
+            r = TreeItem(self.tree); r.setText(1, n)
+            r.setFlags(r.flags() | Qt.ItemFlag.ItemIsUserCheckable)
+            r.setCheckState(6, Qt.CheckState.Checked)
 
     def show_settings(self):
         curr = {'unit':self.unit,'win_w':self.width(),'win_h':self.height(),'row_height':self.row_height,
