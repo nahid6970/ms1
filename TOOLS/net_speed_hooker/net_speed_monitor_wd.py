@@ -119,9 +119,9 @@ class SettingsDialog(QDialog):
         hg.setLayout(hf); layout.addWidget(hg)
 
         fg = QGroupBox("SPEED FILTER PRESETS"); fg.setStyleSheet(gs); ff = QFormLayout()
-        self.filter_presets = QLineEdit(current_settings.get('filter_presets','0,1024,10240,102400,1048576'))
-        self.filter_presets.setPlaceholderText('e.g. 0,1024,10240,102400')
-        ff.addRow("PRESETS (B/s):", self.filter_presets); fg.setLayout(ff); layout.addWidget(fg)
+        self.filter_presets = QLineEdit(current_settings.get('filter_presets','0,0.001,0.01,0.1,1'))
+        self.filter_presets.setPlaceholderText('e.g. 0,0.01,0.1,1')
+        ff.addRow("PRESETS (MB/s):", self.filter_presets); fg.setLayout(ff); layout.addWidget(fg)
 
         s.setWidget(c); l.addWidget(s)
         self.save_btn = QPushButton("SAVE & APPLY"); self.save_btn.clicked.connect(self.accept); l.addWidget(self.save_btn)
@@ -294,7 +294,7 @@ class App(QMainWindow):
         self.unit="MB/s"; self.show_dl=True; self.show_ul=True
         self.hi_enabled=True; self.hi_color=CP_CYAN; self.hi_thickness=2
         self.hi_dl_s=True; self.hi_ul_s=True; self.hi_dl_t=True; self.hi_ul_t=True
-        self.min_speed=0; self.min_total=0; self.filter_presets='0,1024,10240,102400,1048576'
+        self.min_speed=0; self.min_total=0; self.filter_presets='0,0.001,0.01,0.1,1'
         try:
             if os.path.exists(SETTINGS_FILE):
                 with open(SETTINGS_FILE) as f: s = json.load(f)
@@ -308,14 +308,16 @@ class App(QMainWindow):
                 self.hi_dl_s=s.get('hi_dl_s',True); self.hi_ul_s=s.get('hi_ul_s',True)
                 self.hi_dl_t=s.get('hi_dl_t',True); self.hi_ul_t=s.get('hi_ul_t',True)
                 self.min_speed=s.get('min_speed',0); self.min_total=s.get('min_total',0)
-                self.filter_presets=s.get('filter_presets','0,1024,10240,102400,1048576')
+                self.filter_presets=s.get('filter_presets','0,0.001,0.01,0.1,1')
         except: pass
 
     def save_settings(self):
         try:
             os.makedirs(SETTINGS_DIR, exist_ok=True)
-            _ms = int(self.filter_combo.currentText()) if hasattr(self,'filter_combo') and self.filter_combo.currentText().isdigit() else self.min_speed
-            _mt = int(self.filter_total_combo.currentText()) if hasattr(self,'filter_total_combo') and self.filter_total_combo.currentText().isdigit() else self.min_total
+            try: _ms = float(self.filter_combo.currentText()) if hasattr(self,'filter_combo') else self.min_speed
+            except ValueError: _ms = self.min_speed
+            try: _mt = float(self.filter_total_combo.currentText()) if hasattr(self,'filter_total_combo') else self.min_total
+            except ValueError: _mt = self.min_total
             s = {'unit':self.unit,'win_w':self.width(),'win_h':self.height(),'row_height':self.row_height,
                  'col_weights':self.col_weights,'sort_col':self.current_sort_col,'sort_order':self.current_sort_order.value,
                  'show_dl':self.show_dl,'show_ul':self.show_ul,'hi_enabled':self.hi_enabled,'hi_color':self.hi_color,
@@ -367,8 +369,18 @@ class App(QMainWindow):
             cb.blockSignals(True); cb.clear()
             for v in self.filter_presets.split(','):
                 v=v.strip()
-                if v.isdigit(): cb.addItem(v)
-            idx = cb.findText(cur)
+                try: 
+                    num = float(v)
+                    # Convert MB (from presets) to Bytes for format_size, but show units
+                    # Presets are in MB, so num * 1024 * 1024
+                    display_text = format_size(num * 1048576, "MB/s") if num > 0 else "0 B"
+                    cb.addItem(display_text, num)
+                except ValueError: pass
+            try:
+                fval = float(cur) if cur and cur.strip() else 0.0
+                idx = cb.findData(fval)
+            except ValueError:
+                idx = 0
             cb.setCurrentIndex(idx if idx>=0 else 0)
             cb.blockSignals(False)
 
@@ -437,9 +449,16 @@ class App(QMainWindow):
             r.setForeground(3, QColor(CP_ORANGE if gd['ul_s']>0 else CP_TEXT))
             r.setForeground(4, QColor(CP_YELLOW)); r.setForeground(5, QColor(CP_GREEN))
             
-            try: _fs=int(self.filter_combo.currentText())
+            try: 
+                # Use currentData() to get the raw float value (MB) stored in the combo
+                _fs_mb = self.filter_combo.currentData()
+                if _fs_mb is None: _fs_mb = float(self.filter_combo.currentText()) # fallback
+                _fs = _fs_mb * 1048576.0
             except: _fs=0
-            try: _ft=int(self.filter_total_combo.currentText())
+            try: 
+                _ft_mb = self.filter_total_combo.currentData()
+                if _ft_mb is None: _ft_mb = float(self.filter_total_combo.currentText()) # fallback
+                _ft = _ft_mb * 1048576.0
             except: _ft=0
             
             hide_spd = (gd['dl_s'] < _fs and gd['ul_s'] < _fs) if _fs > 0 else False
