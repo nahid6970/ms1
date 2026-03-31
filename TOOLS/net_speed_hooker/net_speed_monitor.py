@@ -26,6 +26,7 @@ CP_DIM = "#3a3a3a"
 CP_TEXT = "#E0E0E0"
 CP_SUBTEXT = "#808080"
 
+# Target settings path
 SETTINGS_DIR = r"C:\@delta\output\net_speed_monitor"
 SETTINGS_FILE = os.path.join(SETTINGS_DIR, "settings.json")
 
@@ -45,7 +46,11 @@ class TreeItem(QTreeWidgetItem):
         column = self.treeWidget().sortColumn()
         # Custom numeric sorting for columns 2 and 3 (Speed and Total)
         if column in [2, 3]:
-            return float(self.data(column, Qt.ItemDataRole.UserRole) or 0) < float(other.data(column, Qt.ItemDataRole.UserRole) or 0)
+            try:
+                val_self = float(self.data(column, Qt.ItemDataRole.UserRole) or 0)
+                val_other = float(other.data(column, Qt.ItemDataRole.UserRole) or 0)
+                return val_self < val_other
+            except: pass
         return super().__lt__(other)
 
 class SettingsDialog(QDialog):
@@ -266,12 +271,27 @@ class App(QMainWindow):
             QMainWindow {{ background-color: {CP_BG}; }}
             QWidget {{ color: {CP_TEXT}; font-family: 'Consolas'; font-size: 10pt; }}
             QTreeWidget {{
-                background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; color: {CP_TEXT};
+                background-color: {CP_PANEL}; 
+                border: 1px solid {CP_DIM}; 
+                color: {CP_TEXT};
+                outline: 0;
                 selection-background-color: {CP_DIM};
+                selection-color: {CP_YELLOW};
             }}
-            QTreeWidget::item {{ border-bottom: 1px solid {CP_DIM}; }}
+            QTreeWidget::item {{ 
+                border-bottom: 1px solid {CP_DIM}; 
+                padding: 4px;
+            }}
+            QTreeWidget::item:selected {{
+                background-color: {CP_DIM};
+                border: 1px solid {CP_CYAN};
+            }}
             QHeaderView::section {{
-                background-color: {CP_DIM}; color: {CP_YELLOW}; padding: 5px; border: 1px solid {CP_BG}; font-weight: bold;
+                background-color: {CP_DIM}; 
+                color: {CP_YELLOW}; 
+                padding: 5px; 
+                border: 1px solid {CP_BG}; 
+                font-weight: bold;
             }}
             QPushButton {{
                 background-color: {CP_DIM}; border: 1px solid {CP_DIM}; color: white; padding: 6px 12px; font-weight: bold;
@@ -302,7 +322,9 @@ class App(QMainWindow):
         self.tree = QTreeWidget()
         self.tree.setColumnCount(4)
         self.tree.setHeaderLabels(["ICON", "APPLICATION", "SPEED / SEC", "TOTAL USAGE"])
+        self.tree.setIndentation(20)
         self.tree.header().setSectionResizeMode(QHeaderView.ResizeMode.Interactive)
+        self.tree.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         
         for i, width in enumerate(self.col_widths):
             self.tree.setColumnWidth(i, width)
@@ -364,27 +386,46 @@ class App(QMainWindow):
             root.setText(3, format_size(gdata['total']))
             root.setData(3, Qt.ItemDataRole.UserRole, gdata['total'])
             
+            # Apply Row Height
+            root.setSizeHint(0, QSize(0, self.row_height))
+            
             # Root Colors
             root.setForeground(2, QColor(CP_RED if gdata['speed'] > 1024*1024 else (CP_CYAN if gdata['speed'] > 1024*10 else CP_TEXT)))
             root.setForeground(3, QColor(CP_YELLOW))
             
             # Update Children (Individual Processes)
-            # Only if more than 1 process or for clarity
             if len(gdata['items']) > 1:
-                # Simple sync: remove all children and re-add for now to keep it clean
-                for child in root.takeChildren(): del child
+                # Sync children to avoid flickering
+                existing_pids = {root.child(j).text(1): root.child(j) for j in range(root.childCount())}
+                new_pids = set()
+                
                 for item_data in gdata['items']:
-                    child = TreeItem(root)
-                    child.setText(1, f"PID: {item_data['pid']}")
+                    pid_text = f"PID: {item_data['pid']}"
+                    new_pids.add(pid_text)
+                    if pid_text in existing_pids:
+                        child = existing_pids[pid_text]
+                    else:
+                        child = TreeItem(root)
+                        child.setText(1, pid_text)
+                    
                     child.setText(2, format_size(item_data['speed']) + "/s")
                     child.setData(2, Qt.ItemDataRole.UserRole, item_data['speed'])
                     child.setText(3, format_size(item_data['total']))
                     child.setData(3, Qt.ItemDataRole.UserRole, item_data['total'])
+                    
+                    child.setSizeHint(0, QSize(0, self.row_height))
                     child.setForeground(1, QColor(CP_SUBTEXT))
                     child.setForeground(2, QColor(CP_SUBTEXT))
                     child.setForeground(3, QColor(CP_SUBTEXT))
+                
+                # Remove children no longer present
+                for pid_text, child in existing_pids.items():
+                    if pid_text not in new_pids:
+                        root.removeChild(child)
             else:
-                for child in root.takeChildren(): del child
+                # Clear children if only 1 process
+                for j in reversed(range(root.childCount())):
+                    root.removeChild(root.child(j))
 
         # Remove groups that no longer exist
         for i in reversed(range(self.tree.topLevelItemCount())):
