@@ -104,11 +104,11 @@ class SettingsDialog(QDialog):
 
         # Column Widths
         col_group = QGroupBox("COLUMN WIDTHS"); col_group.setStyleSheet(f"QGroupBox {{ color: {CP_CYAN}; border: 1px solid {CP_DIM}; margin-top: 10px; }} QGroupBox::title {{ subcontrol-origin: margin; left: 10px; }}")
-        col_form = QFormLayout(); ws = current_settings.get('col_widths', [60, 200, 120, 120, 120, 120])
-        while len(ws) < 6: ws.append(120)
+        col_form = QFormLayout(); ws = current_settings.get('col_weights', [5, 25, 18, 18, 17, 17])
+        while len(ws) < 6: ws.append(17)
         self.spins = []
         for label, w in zip(["ICON", "NAME", "DL SPEED", "UL SPEED", "TOTAL DL", "TOTAL UL"], ws):
-            sb = QSpinBox(); sb.setRange(30, 1000); sb.setValue(w); self.spins.append(sb)
+            sb = QSpinBox(); sb.setRange(1, 100); sb.setValue(w); self.spins.append(sb)
             col_form.addRow(f"{label}:", sb)
         col_group.setLayout(col_form); layout.addWidget(col_group)
 
@@ -148,7 +148,7 @@ class SettingsDialog(QDialog):
             'win_w': self.win_w.value(), 
             'win_h': self.win_h.value(), 
             'row_height': self.row_h.value(),
-            'col_widths': [sb.value() for sb in self.spins],
+            'col_weights': [sb.value() for sb in self.spins],
             'hi_enabled': self.hi_global.isChecked(), 
             'hi_color': self.hi_color, 
             'hi_thickness': self.hi_thick.value(),
@@ -226,19 +226,19 @@ class App(QMainWindow):
         self.init_ui(); self.timer = QTimer(); self.timer.timeout.connect(self.update_stats); self.timer.start(1000)
 
     def load_settings(self):
-        self.win_w = 1000; self.win_h = 700; self.row_height = 40; self.col_widths = [60, 200, 120, 120, 120, 120]; self.current_sort_col = 2; self.current_sort_order = Qt.SortOrder.DescendingOrder; self.unit = "MB/s"; self.interface = str(conf.iface); self.show_dl = True; self.show_ul = True
+        self.win_w = 1000; self.win_h = 700; self.row_height = 40; self.col_weights = [5, 25, 18, 18, 17, 17]; self.current_sort_col = 2; self.current_sort_order = Qt.SortOrder.DescendingOrder; self.unit = "MB/s"; self.interface = str(conf.iface); self.show_dl = True; self.show_ul = True
         self.hi_enabled = True; self.hi_color = CP_CYAN; self.hi_thickness = 2; self.hi_dl_s = True; self.hi_ul_s = True; self.hi_dl_t = True; self.hi_ul_t = True
         if os.path.exists(SETTINGS_FILE):
             try:
                 with open(SETTINGS_FILE, 'r') as f:
-                    s = json.load(f); self.win_w = s.get('win_w', 1000); self.win_h = s.get('win_h', 700); self.row_height = s.get('row_height', 40); self.col_widths = s.get('col_widths', [60, 200, 120, 120, 120, 120]); self.current_sort_col = s.get('sort_col', 2); self.current_sort_order = Qt.SortOrder(s.get('sort_order', 1)); self.unit = s.get('unit', 'MB/s'); self.interface = s.get('interface', str(conf.iface)); self.show_dl = s.get('show_dl', True); self.show_ul = s.get('show_ul', True)
+                    s = json.load(f); self.win_w = s.get('win_w', 1000); self.win_h = s.get('win_h', 700); self.row_height = s.get('row_height', 40); self.col_weights = s.get('col_weights', [5, 25, 18, 18, 17, 17]); self.current_sort_col = s.get('sort_col', 2); self.current_sort_order = Qt.SortOrder(s.get('sort_order', 1)); self.unit = s.get('unit', 'MB/s'); self.interface = s.get('interface', str(conf.iface)); self.show_dl = s.get('show_dl', True); self.show_ul = s.get('show_ul', True)
                     self.hi_enabled = s.get('hi_enabled', True); self.hi_color = s.get('hi_color', CP_CYAN); self.hi_thickness = s.get('hi_thickness', 2); self.hi_dl_s = s.get('hi_dl_s', True); self.hi_ul_s = s.get('hi_ul_s', True); self.hi_dl_t = s.get('hi_dl_t', True); self.hi_ul_t = s.get('hi_ul_t', True)
             except: pass
 
     def save_settings(self):
         try:
             os.makedirs(SETTINGS_DIR, exist_ok=True)
-            settings = { 'unit': self.unit, 'interface': self.interface, 'win_w': self.width(), 'win_h': self.height(), 'row_height': self.row_height, 'col_widths': self.col_widths, 'sort_col': self.current_sort_col, 'sort_order': self.current_sort_order.value, 'show_dl': self.show_dl, 'show_ul': self.show_ul, 'hi_enabled': self.hi_enabled, 'hi_color': self.hi_color, 'hi_thickness': self.hi_thickness, 'hi_dl_s': self.hi_dl_s, 'hi_ul_s': self.hi_ul_s, 'hi_dl_t': self.hi_dl_t, 'hi_ul_t': self.hi_ul_t }
+            settings = { 'unit': self.unit, 'interface': self.interface, 'win_w': self.width(), 'win_h': self.height(), 'row_height': self.row_height, 'col_weights': self.col_weights, 'sort_col': self.current_sort_col, 'sort_order': self.current_sort_order.value, 'show_dl': self.show_dl, 'show_ul': self.show_ul, 'hi_enabled': self.hi_enabled, 'hi_color': self.hi_color, 'hi_thickness': self.hi_thickness, 'hi_dl_s': self.hi_dl_s, 'hi_ul_s': self.hi_ul_s, 'hi_dl_t': self.hi_dl_t, 'hi_ul_t': self.hi_ul_t }
             with open(SETTINGS_FILE, 'w') as f: json.dump(settings, f, indent=4)
         except: pass
 
@@ -253,10 +253,16 @@ class App(QMainWindow):
         hb = QHBoxLayout(); hb.addStretch(); rb = QPushButton("RESTART"); rb.clicked.connect(self.restart_app); hb.addWidget(rb); sb = QPushButton("SETTINGS"); sb.clicked.connect(self.show_settings); hb.addWidget(sb); l.addLayout(hb)
         self.tree = QTreeWidget(); self.tree.setColumnCount(6); self.tree.setHeaderLabels(["ICON", "APPLICATION", "DL SPEED", "UL SPEED", "TOTAL DL", "TOTAL UL"]); self.tree.setIndentation(20); self.tree.setFocusPolicy(Qt.FocusPolicy.NoFocus); self.tree.setSelectionBehavior(QTreeWidget.SelectionBehavior.SelectRows); self.tree.setAllColumnsShowFocus(True)
         self.delegate = CustomBorderDelegate(self.tree); self.apply_delegate_settings(); self.tree.setItemDelegate(self.delegate)
-        for i, w in enumerate(self.col_widths): self.tree.setColumnWidth(i, w)
-        self.tree.setSortingEnabled(True); self.tree.header().sortIndicatorChanged.connect(self.on_sort_changed); self.tree.header().sectionResized.connect(lambda i, _, w: self.col_widths.__setitem__(i, w)); self.tree.header().setSortIndicator(self.current_sort_col, self.current_sort_order); l.addWidget(self.tree)
+        QTimer.singleShot(0, self._apply_col_widths)
+        self.tree.setSortingEnabled(True); self.tree.header().sortIndicatorChanged.connect(self.on_sort_changed); self.tree.header().setSortIndicator(self.current_sort_col, self.current_sort_order); l.addWidget(self.tree)
         self.fl = QLabel(f"STATUS: MONITORING_ACTIVE // ADAPTER: {self.interface} // UNIT: {self.unit}"); self.fl.setStyleSheet(f"color: {CP_DIM}; font-size: 8pt;"); l.addWidget(self.fl); self.toggle_cols()
 
+
+    def _apply_col_widths(self):
+        self.tree.header().setStretchLastSection(False)
+        total = self.tree.viewport().width() or self.win_w
+        s = sum(self.col_weights) or 1
+        for i, w in enumerate(self.col_weights): self.tree.setColumnWidth(i, int(total * w / s))
     def apply_delegate_settings(self):
         self.delegate.settings = { 'enabled': self.hi_enabled, 'color': self.hi_color, 'thickness': self.hi_thickness, 'cols': { 2: self.hi_dl_s, 3: self.hi_ul_s, 4: self.hi_dl_t, 5: self.hi_ul_t } }
 
@@ -302,15 +308,15 @@ class App(QMainWindow):
     def restart_app(self): self.monitor.running = False; os.execl(sys.executable, sys.executable, *sys.argv)
 
     def show_settings(self):
-        curr = { 'unit': self.unit, 'interface': self.interface, 'win_w': self.width(), 'win_h': self.height(), 'row_height': self.row_height, 'col_widths': [self.tree.columnWidth(i) for i in range(6)], 'hi_enabled': self.hi_enabled, 'hi_color': self.hi_color, 'hi_thickness': self.hi_thickness, 'hi_dl_s': self.hi_dl_s, 'hi_ul_s': self.hi_ul_s, 'hi_dl_t': self.hi_dl_t, 'hi_ul_t': self.hi_ul_t }
+        curr = { 'unit': self.unit, 'interface': self.interface, 'win_w': self.width(), 'win_h': self.height(), 'row_height': self.row_height, 'col_weights': self.col_weights, 'hi_enabled': self.hi_enabled, 'hi_color': self.hi_color, 'hi_thickness': self.hi_thickness, 'hi_dl_s': self.hi_dl_s, 'hi_ul_s': self.hi_ul_s, 'hi_dl_t': self.hi_dl_t, 'hi_ul_t': self.hi_ul_t }
         dlg = SettingsDialog(self, curr)
         if dlg.exec():
             ns = dlg.get_settings(); self.unit = ns['unit']; self.interface = ns['interface']; self.row_height = ns['row_height']; self.resize(ns['win_w'], ns['win_h'])
             self.hi_enabled = ns['hi_enabled']; self.hi_color = ns['hi_color']; self.hi_thickness = ns['hi_thickness']
             self.hi_dl_s = ns['hi_dl_s']; self.hi_ul_s = ns['hi_ul_s']; self.hi_dl_t = ns['hi_dl_t']; self.hi_ul_t = ns['hi_ul_t']
-            self.col_widths = ns['col_widths']
+            self.col_weights = ns['col_weights']
             self.apply_delegate_settings()
-            for i, w in enumerate(self.col_widths): self.tree.setColumnWidth(i, w)
+            self._apply_col_widths()
             self.save_settings(); self.restart_app()
 
 if __name__ == "__main__":
