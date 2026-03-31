@@ -4,6 +4,7 @@ import psutil
 import socket
 import threading
 import time
+import json
 from datetime import datetime
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QLabel, QPushButton, QTableWidget, QTableWidgetItem, 
@@ -23,6 +24,8 @@ CP_ORANGE = "#ff934b"
 CP_DIM = "#3a3a3a"
 CP_TEXT = "#E0E0E0"
 CP_SUBTEXT = "#808080"
+
+SETTINGS_FILE = "settings.json"
 
 def format_size(size_bytes):
     if size_bytes == 0:
@@ -187,9 +190,7 @@ class App(QMainWindow):
         self.setWindowTitle("NET-SPEED HOOKER // CYBER_MONITOR")
         self.resize(900, 700)
         
-        self.row_height = 40
-        self.current_sort_col = 2 # Default: Speed
-        self.current_sort_order = Qt.SortOrder.DescendingOrder
+        self.load_settings()
 
         self.stats = MonitorStats()
         self.monitor_thread = NetworkThread(self.stats)
@@ -204,6 +205,35 @@ class App(QMainWindow):
         self.timer = QTimer()
         self.timer.timeout.connect(self.update_stats)
         self.timer.start(1000)
+
+    def load_settings(self):
+        # Default settings
+        self.row_height = 40
+        self.current_sort_col = 2
+        self.current_sort_order = Qt.SortOrder.DescendingOrder
+
+        if os.path.exists(SETTINGS_FILE):
+            try:
+                with open(SETTINGS_FILE, 'r') as f:
+                    settings = json.load(f)
+                    self.row_height = settings.get('row_height', 40)
+                    self.current_sort_col = settings.get('sort_col', 2)
+                    order_val = settings.get('sort_order', 1) # 1 is Descending
+                    self.current_sort_order = Qt.SortOrder(order_val)
+            except Exception as e:
+                print(f"Error loading settings: {e}")
+
+    def save_settings(self):
+        try:
+            settings = {
+                'row_height': self.row_height,
+                'sort_col': self.current_sort_col,
+                'sort_order': self.current_sort_order.value
+            }
+            with open(SETTINGS_FILE, 'w') as f:
+                json.dump(settings, f, indent=4)
+        except Exception as e:
+            print(f"Error saving settings: {e}")
 
     def init_ui(self):
         self.setStyleSheet(f"""
@@ -275,7 +305,7 @@ class App(QMainWindow):
         
         # Connect sort signal
         self.table.horizontalHeader().sortIndicatorChanged.connect(self.on_sort_changed)
-        # Apply initial sort
+        # Apply initial sort from settings
         self.table.horizontalHeader().setSortIndicator(self.current_sort_col, self.current_sort_order)
 
         layout.addWidget(self.table)
@@ -288,12 +318,10 @@ class App(QMainWindow):
     def on_sort_changed(self, index, order):
         self.current_sort_col = index
         self.current_sort_order = order
+        self.save_settings()
 
     def update_stats(self):
         snapshot = self.stats.get_snapshot()
-        
-        # We don't manually sort 'snapshot' here because we want QTableWidget 
-        # to handle the sorting based on user interaction.
         
         self.table.setSortingEnabled(False)
         self.table.setRowCount(len(snapshot))
@@ -351,6 +379,7 @@ class App(QMainWindow):
         dlg = SettingsDialog(self, self.row_height)
         if dlg.exec():
             self.row_height = dlg.height_spin.value()
+            self.save_settings()
             # Force update immediately to reflect changes
             self.update_stats()
 
