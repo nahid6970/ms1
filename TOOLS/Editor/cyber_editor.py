@@ -330,7 +330,7 @@ class MainWindow(QMainWindow):
             QTabWidget::pane {{ border: 1px solid {CP_DIM}; background: {CP_BG}; top: -1px; }}
             QTabBar::tab {{
                 background: {CP_PANEL}; color: {CP_SUBTEXT}; border: 1px solid {CP_DIM};
-                border-bottom: none; padding: 10px 20px; margin-right: 2px;
+                border-bottom: none; padding: 6px 0px 6px 15px; margin-right: 2px;
                 font-family: 'Consolas'; font-weight: bold;
             }}
             QTabBar::tab:selected {{ background: {CP_BG}; color: {accent}; border-top: 2px solid {accent}; }}
@@ -410,18 +410,18 @@ class MainWindow(QMainWindow):
         name = os.path.basename(path) if path else "UNTITLED.txt"
         idx = self.tabs.addTab(editor, name)
         
-        # Proper Close Button X
-        close_btn = QPushButton("✕") # Multiplication X
-        close_btn.setFixedSize(18, 18)
+        # Proper Close Button X - Ultra Integrated Look
+        close_btn = QPushButton("x")
+        close_btn.setFixedSize(14, 14)
         close_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         close_btn.setStyleSheet(f"""
             QPushButton {{ 
-                background: none; color: {CP_SUBTEXT}; border: none; font-size: 14px; font-weight: bold; 
-                margin-top: 1px;
+                background: none; color: {CP_SUBTEXT}; border: none; 
+                font-size: 13px; font-weight: normal; font-family: 'Arial'; /* Sharpness */
+                padding: 0px; margin-left: -8px; /* Move closer to label */
             }}
             QPushButton:hover {{ color: {CP_RED}; }}
         """)
-        # We need a closure for the index because it might change
         close_btn.clicked.connect(lambda: self.close_tab(self.tabs.indexOf(editor)))
         self.tabs.tabBar().setTabButton(idx, QTabBar.ButtonPosition.RightSide, close_btn)
 
