@@ -63,6 +63,8 @@ class SettingsManager:
             "cursor_color": "",
             "open_files": [],
             "current_tab_index": 0,
+            "word_wrap": False,
+            "search_visible": False,
             "shortcuts": DEFAULT_SHORTCUTS.copy()
         }
         self.load()
@@ -111,7 +113,9 @@ class CodeEditor(QPlainTextEdit):
         self.setObjectName("CyberEditorCore")
         self.apply_font() # Load from settings
         self.set_accent(accent); self.update_line_number_area_width(0); self.highlight_current_line()
-        self.setLineWrapMode(QPlainTextEdit.LineWrapMode.NoWrap); self.setAcceptDrops(True)
+        
+        wrap_mode = QPlainTextEdit.LineWrapMode.WidgetWidth if self.mgr.settings.get("word_wrap", False) else QPlainTextEdit.LineWrapMode.NoWrap
+        self.setLineWrapMode(wrap_mode); self.setAcceptDrops(True)
         self.setCursorWidth(0) # Using custom paintEvent caret
 
     def set_accent(self, accent):
@@ -372,6 +376,10 @@ class MainWindow(QMainWindow):
         self.search_panel.btn_replace.clicked.connect(self.do_replace); self.search_panel.btn_replace_all.clicked.connect(self.do_replace_all)
         self.search_panel.search_input.textChanged.connect(self.search_next); self.main_layout.addWidget(self.search_panel)
         
+        # Initial Search visibility
+        if self.mgr.settings.get("search_visible", False):
+            self.toggle_search(True)
+        
         # Tab Widget
         self.tabs = QTabWidget(); self.tabs.setTabsClosable(True); self.tabs.setMovable(True)
         self.tabs.tabCloseRequested.connect(self.close_tab)
@@ -533,15 +541,24 @@ class MainWindow(QMainWindow):
         elif action == "RESTART_APP": self.on_restart()
 
     def toggle_word_wrap(self):
-        editor = self.current_editor()
-        if not editor: return
-        mode = QPlainTextEdit.LineWrapMode.WidgetWidth if editor.lineWrapMode() == QPlainTextEdit.LineWrapMode.NoWrap else QPlainTextEdit.LineWrapMode.NoWrap
-        editor.setLineWrapMode(mode)
-        self.statusBar().showMessage(f"WORD WRAP: {'ON' if mode == QPlainTextEdit.LineWrapMode.WidgetWidth else 'OFF'}", 2000)
+        new_state = not self.mgr.settings.get("word_wrap", False)
+        self.mgr.settings["word_wrap"] = new_state
+        self.mgr.save()
+        
+        qt_mode = QPlainTextEdit.LineWrapMode.WidgetWidth if new_state else QPlainTextEdit.LineWrapMode.NoWrap
+        for i in range(self.tabs.count()):
+            editor = self.tabs.widget(i)
+            if isinstance(editor, CodeEditor):
+                editor.setLineWrapMode(qt_mode)
+        
+        self.statusBar().showMessage(f"WORD WRAP: {'ON' if new_state else 'OFF'}", 2000)
 
     def toggle_search(self, force=None):
         visible = not self.search_panel.isVisible() if force is None else force
         self.search_panel.setVisible(visible)
+        self.mgr.settings["search_visible"] = visible
+        self.mgr.save()
+        
         if visible:
             self.search_panel.search_input.setFocus()
             self.search_panel.search_input.selectAll()
