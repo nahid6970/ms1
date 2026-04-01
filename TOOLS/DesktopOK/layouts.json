@@ -3328,5 +3328,291 @@
                 "h": 1080
             }
         ]
+    },
+    "Layout_2026-04-01_11-49-33": {
+        "icons": {
+            "This PC": {
+                "x": 16,
+                "y": 2
+            },
+            "Recycle Bin": {
+                "x": 16,
+                "y": 102
+            },
+            "Control Panel": {
+                "x": 16,
+                "y": 202
+            },
+            "DesktopOK": {
+                "x": 16,
+                "y": 302
+            },
+            "Google Chrome": {
+                "x": 16,
+                "y": 402
+            },
+            "PotPlayer 64 bit": {
+                "x": 16,
+                "y": 502
+            },
+            "Sonarr": {
+                "x": 16,
+                "y": 602
+            },
+            "Prowlarr": {
+                "x": 16,
+                "y": 702
+            },
+            "Cleanuparr": {
+                "x": 16,
+                "y": 802
+            },
+            "KDE Connect": {
+                "x": 16,
+                "y": 902
+            },
+            "UniGetUI": {
+                "x": 92,
+                "y": 2
+            },
+            "Antigravity": {
+                "x": 92,
+                "y": 102
+            },
+            "HighFleet": {
+                "x": 92,
+                "y": 202
+            },
+            "Thunderbird": {
+                "x": 92,
+                "y": 302
+            },
+            "QuickLook": {
+                "x": 92,
+                "y": 402
+            },
+            "Free Download Manager": {
+                "x": 92,
+                "y": 502
+            },
+            "Xodo PDF Reader": {
+                "x": 92,
+                "y": 602
+            },
+            "Zoom Workplace": {
+                "x": 92,
+                "y": 702
+            },
+            "Sniffnet": {
+                "x": 92,
+                "y": 802
+            },
+            "BCUninstaller": {
+                "x": 92,
+                "y": 902
+            },
+            "Google AI Studio": {
+                "x": 168,
+                "y": 2
+            },
+            "Excel-like Data Table": {
+                "x": 168,
+                "y": 102
+            },
+            "Claude": {
+                "x": 168,
+                "y": 202
+            },
+            "XLaunch": {
+                "x": 168,
+                "y": 302
+            },
+            "nexusfont": {
+                "x": 168,
+                "y": 402
+            },
+            "Bitwarden": {
+                "x": 168,
+                "y": 502
+            },
+            "FBS previous bank Question solution.pdf": {
+                "x": 928,
+                "y": 2
+            },
+            "\u09eb\u09e6\u09a4\u09ae \u09ac\u09bf\u09b8\u09bf\u098f\u09b8 \u09b8\u09be\u09ae\u09cd\u09aa\u09cd\u09b0\u09a4\u09bf\u0995 \u0993 \u099a\u09b2\u09ae\u09be\u09a8 \u0998\u099f\u09a8\u09be  \u09aa\u09cd\u09b0\u09ac\u09be\u09b9 by Zahidul Islam BCS Intelligence.pdf": {
+                "x": 928,
+                "y": 102
+            },
+            "Vocab.txt": {
+                "x": 928,
+                "y": 202
+            },
+            "481133401_1792295234890919_906037966534795884_n.jpg": {
+                "x": 1004,
+                "y": 2
+            },
+            "Map_of_Bangladesh-en.svg": {
+                "x": 1004,
+                "y": 102
+            },
+            "surakafirun.png": {
+                "x": 1004,
+                "y": 202
+            },
+            "@delta.xlsx": {
+                "x": 1080,
+                "y": 2
+            },
+            "Subs": {
+                "x": 1156,
+                "y": 902
+            },
+            "math kiro": {
+                "x": 1232,
+                "y": 902
+            },
+            "TEST": {
+                "x": 1308,
+                "y": 902
+            },
+            "song": {
+                "x": 1384,
+                "y": 902
+            },
+            "ShareFolder": {
+                "x": 1460,
+                "y": 902
+            },
+            "admitcard": {
+                "x": 1536,
+                "y": 902
+            },
+            "ms": {
+                "x": 1612,
+                "y": 902
+            },
+            "msBackups": {
+                "x": 1688,
+                "y": 902
+            },
+            "playlist.dpl": {
+                "x": 1764,
+                "y": 802
+            },
+            "ms1": {
+                "x": 1764,
+                "y": 902
+            },
+            "myShare": {
+                "x": 1840,
+                "y": 502
+            },
+            "Root": {
+                "x": 1840,
+                "y": 602
+            },
+            "youtube_cookies.txt": {
+                "x": 1840,
+                "y": 702
+            },
+            "nahid": {
+                "x": 1840,
+                "y": 802
+            },
+            "@JOB": {
+                "x": 1840,
+                "y": 902
+            }
+        },
+        "windows": [
+            {
+                "title": "Python GUI",
+                "class": "TkTopLevel",
+                "x": 10,
+                "y": 1040,
+                "w": 477,
+                "h": 39
+            },
+            {
+                "title": "CYBER_DESKTOP_OK v1.0",
+                "class": "Qt692QWindowIcon",
+                "x": 702,
+                "y": 185,
+                "w": 516,
+                "h": 639
+            },
+            {
+                "title": "Python GUI",
+                "class": "TkTopLevel",
+                "x": 0,
+                "y": 993,
+                "w": 1920,
+                "h": 39
+            },
+            {
+                "title": "@Family - File Explorer",
+                "class": "CabinetWClass",
+                "x": -32000,
+                "y": -32000,
+                "w": 160,
+                "h": 28
+            },
+            {
+                "title": "(24) BREAKING: Claude Code source leaked - YouTube - Google Chrome",
+                "class": "Chrome_WidgetWin_1",
+                "x": -32000,
+                "y": -32000,
+                "w": 160,
+                "h": 28
+            },
+            {
+                "title": "Excel-like Data Table",
+                "class": "Chrome_WidgetWin_1",
+                "x": -32000,
+                "y": -32000,
+                "w": 160,
+                "h": 28
+            },
+            {
+                "title": "Settings",
+                "class": "Windows.UI.Core.CoreWindow",
+                "x": 0,
+                "y": 1,
+                "w": 941,
+                "h": 978
+            },
+            {
+                "title": "Settings",
+                "class": "ApplicationFrameWindow",
+                "x": 963,
+                "y": 6,
+                "w": 957,
+                "h": 987
+            },
+            {
+                "title": "Jackett",
+                "class": "WindowsForms10.Window.8.app.0.784086_r3_ad1",
+                "x": 0,
+                "y": 1004,
+                "w": 160,
+                "h": 28
+            },
+            {
+                "title": "Windows Input Experience",
+                "class": "Windows.UI.Core.CoreWindow",
+                "x": 0,
+                "y": 0,
+                "w": 1920,
+                "h": 1080
+            },
+            {
+                "title": "Program Manager",
+                "class": "Progman",
+                "x": 0,
+                "y": 0,
+                "w": 1920,
+                "h": 1080
+            }
+        ]
     }
 }
