@@ -1,8 +1,9 @@
 {
     "width": 1000,
     "height": 700,
-    "theme": "CyberCyan",
+    "theme": "CyberRed",
     "font_size": 10,
+    "cursor_line_color": "#ff471eff",
     "last_file": "",
     "shortcuts": {
         "MOVE_LINE_UP": "Alt+Up",
