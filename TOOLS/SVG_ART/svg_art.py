@@ -1,6 +1,7 @@
 import sys
 import os
 import math
+import json
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, 
                              QPushButton, QToolBar, QFileDialog, QColorDialog, QSlider, 
                              QLabel, QGraphicsView, QGraphicsScene, QGraphicsPathItem,
@@ -8,7 +9,7 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QH
                              QGraphicsPixmapItem, QFrame, QGroupBox, QFormLayout, QDialog, 
                              QSizePolicy, QComboBox, QGraphicsBlurEffect)
 from PyQt6.QtCore import Qt, QPointF, QRectF, QLineF, QSize
-from PyQt6.QtGui import (QPainter, QPen, QColor, QPainterPath, QPixmap, QCursor, QAction, QIcon, QTransform, QBrush)
+from PyQt6.QtGui import (QPainter, QPen, QColor, QPainterPath, QPixmap, QCursor, QAction, QIcon, QTransform, QBrush, QKeySequence)
 from PyQt6 import QtSvg
 from PyQt6.QtSvg import QSvgGenerator
 
@@ -24,6 +25,8 @@ CP_DIM = "#3a3a3a"
 CP_TEXT = "#E0E0E0"
 CP_SUBTEXT = "#808080"
 
+SETTINGS_FILE = "settings.json"
+
 class SymItem:
     """ Mixin to track symmetry clones for any QGraphicsItem """
     def __init__(self):
@@ -34,7 +37,7 @@ class SymPath(QGraphicsPathItem, SymItem):
     def __init__(self, *args, **kwargs):
         QGraphicsPathItem.__init__(self, *args, **kwargs)
         SymItem.__init__(self)
-        self.path_points = [] # For stroke reconstruction
+        self.path_points = []
 
 class SymRect(QGraphicsRectItem, SymItem):
     def __init__(self, *args, **kwargs):
@@ -57,7 +60,6 @@ class ArtScene(QGraphicsScene):
         self.setBackgroundBrush(QColor(CP_BG))
         self.setSceneRect(-5000, -5000, 10000, 10000)
         
-        # Center Marker
         self.center_marker = QGraphicsLineItem(-15, 0, 15, 0)
         self.center_marker.setPen(QPen(QColor(CP_YELLOW), 1))
         self.center_marker_v = QGraphicsLineItem(0, -15, 0, 15)
@@ -91,11 +93,15 @@ class ArtView(QGraphicsView):
         self.symmetry_mode = "none"
         self.mirror_count = 4
         self.undo_stack = []
+        self.redo_stack = []
 
-        # Tool states
         self.poly_points = []
-        self.curve_state = 0 # 0: none, 1: start set, 2: end set
+        self.curve_state = 0 
         self.curve_points = []
+
+    def save_to_undo(self, item, action="add"):
+        self.undo_stack.append((action, item))
+        self.redo_stack.clear()
 
     def wheelEvent(self, event):
         zoom = 1.25 if event.angleDelta().y() > 0 else 0.8
@@ -121,16 +127,13 @@ class ArtView(QGraphicsView):
                     self.scene().addItem(self.current_item)
                     self.create_symmetry_clones(self.current_item)
                 else:
-                    # Check for closure
                     dist = (scene_pos - self.poly_points[0]).manhattanLength()
-                    if dist < 15:
-                        self.finish_poly()
+                    if dist < 15: self.finish_poly()
                     else:
                         self.poly_points.append(scene_pos)
                         self.update_poly()
 
-            elif self.tool == "curve":
-                self.handle_curve_click(scene_pos)
+            elif self.tool == "curve": self.handle_curve_click(scene_pos)
 
             elif self.tool in ["rect", "ellipse", "line", "triangle"]:
                 self.drawing = True
@@ -174,10 +177,8 @@ class ArtView(QGraphicsView):
                     for i in range(self.multi_line_count):
                         offset = (i - (self.multi_line_count - 1) / 2) * spacing
                         off_pt = QPointF(offset, offset)
-                        
                         new_path.moveTo(self.current_item.path_points[0] + off_pt)
-                        for pt in self.current_item.path_points[1:]:
-                            new_path.lineTo(pt + off_pt)
+                        for pt in self.current_item.path_points[1:]: new_path.lineTo(pt + off_pt)
                     self.current_item.setPath(new_path)
                 else:
                     path = self.current_item.path()
@@ -197,21 +198,16 @@ class ArtView(QGraphicsView):
                 self.current_item.setPath(path); self.update_clones(self.current_item)
             elif self.tool == "eraser": self.erase_at(scene_pos)
             
-        # Tool-specific previews
-        if self.tool == "poly" and self.poly_points:
-            self.update_poly(scene_pos)
-        elif self.tool == "curve" and self.curve_state > 0:
-            self.update_curve_preview(scene_pos)
+        if self.tool == "poly" and self.poly_points: self.update_poly(scene_pos)
+        elif self.tool == "curve" and self.curve_state > 0: self.update_curve_preview(scene_pos)
 
-        # Image/SVG Movement
         if self.drawing:
             if self.tool == "move_image" and self.image_item:
                 delta = scene_pos - self.start_point; self.image_item.setPos(self.image_item.pos() + delta); self.start_point = scene_pos
             elif self.tool == "move_svg":
                 delta = scene_pos - self.start_point
                 for item in self.scene().items():
-                    if getattr(item, 'is_art_item', False):
-                        item.setPos(item.pos() + delta)
+                    if getattr(item, 'is_art_item', False): item.setPos(item.pos() + delta)
                 self.start_point = scene_pos
 
         super().mouseMoveEvent(event)
@@ -221,17 +217,13 @@ class ArtView(QGraphicsView):
         path.moveTo(0, 0)
         self.current_item = SymPath(path)
         self.current_item.setPos(pos)
-        
+        self.current_item.path_points = [QPointF(0,0)]
         alpha = 100 if self.brush_type == "highlighter" else 255
         color = QColor(self.pen_color.red(), self.pen_color.green(), self.pen_color.blue(), alpha)
-        
         pen = QPen(color, self.pen_width, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap, Qt.PenJoinStyle.RoundJoin)
         self.current_item.setPen(pen)
-        
         if self.brush_type == "airbrush":
-            blur = QGraphicsBlurEffect()
-            blur.setBlurRadius(self.pen_width * 1.5); self.current_item.setGraphicsEffect(blur)
-            
+            blur = QGraphicsBlurEffect(); blur.setBlurRadius(self.pen_width * 1.5); self.current_item.setGraphicsEffect(blur)
         self.scene().addItem(self.current_item)
         self.create_symmetry_clones(self.current_item)
 
@@ -241,10 +233,8 @@ class ArtView(QGraphicsView):
             clone = self.clone_item(item)
             if not clone: continue
             if self.symmetry_mode == "radial":
-                angle = i * (360 / self.mirror_count)
-                tr = QTransform().rotate(angle)
-                clone.setPos(tr.map(item.pos()))
-                clone.setRotation(angle)
+                angle = i * (360 / self.mirror_count); tr = QTransform().rotate(angle)
+                clone.setPos(tr.map(item.pos())); clone.setRotation(angle)
             elif self.symmetry_mode == "reflect":
                 if i == 1: clone.setPos(-item.x(), item.y()); clone.setTransform(QTransform().scale(-1, 1))
                 elif i == 2: clone.setPos(item.x(), -item.y()); clone.setTransform(QTransform().scale(1, -1))
@@ -271,49 +261,34 @@ class ArtView(QGraphicsView):
 
     def update_poly(self, preview_pos=None):
         if not self.current_item: return
-        path = QPainterPath()
-        path.moveTo(0, 0)
-        for p in self.poly_points[1:]:
-            path.lineTo(p - self.current_item.pos())
-        if preview_pos:
-            path.lineTo(preview_pos - self.current_item.pos())
-        self.current_item.setPath(path)
-        self.update_clones(self.current_item)
+        path = QPainterPath(); path.moveTo(0, 0)
+        for p in self.poly_points[1:]: path.lineTo(p - self.current_item.pos())
+        if preview_pos: path.lineTo(preview_pos - self.current_item.pos())
+        self.current_item.setPath(path); self.update_clones(self.current_item)
 
     def finish_poly(self):
         if self.current_item:
-            path = self.current_item.path(); path.closeSubpath()
-            self.current_item.setPath(path); self.update_clones(self.current_item)
-            self.undo_stack.append(("add", self.current_item))
-            self.current_item = None; self.poly_points = []
+            path = self.current_item.path(); path.closeSubpath(); self.current_item.setPath(path); self.update_clones(self.current_item)
+            self.save_to_undo(self.current_item); self.current_item = None; self.poly_points = []
 
     def handle_curve_click(self, pos):
         if self.curve_state == 0:
-            self.curve_points = [pos]
-            self.curve_state = 1
+            self.curve_points = [pos]; self.curve_state = 1
             path = QPainterPath(); path.moveTo(0, 0)
             self.current_item = SymPath(path); self.current_item.setPos(pos)
             self.current_item.setPen(QPen(self.pen_color, self.pen_width))
             self.scene().addItem(self.current_item); self.create_symmetry_clones(self.current_item)
-        elif self.curve_state == 1:
-            self.curve_points.append(pos)
-            self.curve_state = 2
-        elif self.curve_state == 2:
-            self.curve_points.append(pos)
-            self.finish_curve()
+        elif self.curve_state == 1: self.curve_points.append(pos); self.curve_state = 2
+        elif self.curve_state == 2: self.curve_points.append(pos); self.finish_curve()
 
     def update_curve_preview(self, pos):
         if not self.current_item: return
         path = QPainterPath(); path.moveTo(0, 0)
-        if self.curve_state == 1:
-            path.lineTo(pos - self.current_item.pos())
-        elif self.curve_state == 2:
-            path.quadTo(pos - self.current_item.pos(), self.curve_points[1] - self.current_item.pos())
+        if self.curve_state == 1: path.lineTo(pos - self.current_item.pos())
+        elif self.curve_state == 2: path.quadTo(pos - self.current_item.pos(), self.curve_points[1] - self.current_item.pos())
         self.current_item.setPath(path); self.update_clones(self.current_item)
 
-    def finish_curve(self):
-        self.undo_stack.append(("add", self.current_item))
-        self.current_item = None; self.curve_points = []; self.curve_state = 0
+    def finish_curve(self): self.save_to_undo(self.current_item); self.current_item = None; self.curve_points = []; self.curve_state = 0
 
     def reset_curve(self):
         if self.current_item:
@@ -327,21 +302,22 @@ class ArtView(QGraphicsView):
             if getattr(item, 'is_art_item', False):
                 for c in getattr(item, 'symmetry_clones', []): self.scene().removeItem(c)
                 self.scene().removeItem(item)
+                self.save_to_undo(item, action="remove")
 
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
             if self.tool not in ["poly", "curve"] and self.drawing:
-                self.undo_stack.append(("add", self.current_item))
-                self.drawing = False; self.current_item = None
+                self.save_to_undo(self.current_item); self.drawing = False; self.current_item = None
         elif event.button() == Qt.MouseButton.MiddleButton: self.setDragMode(QGraphicsView.DragMode.NoDrag)
         super().mouseReleaseEvent(event)
 
     def apply_fill(self, pos):
         item = self.scene().itemAt(pos, QTransform())
         if item and getattr(item, 'is_art_item', False):
-            if hasattr(item, 'setBrush'):
-                item.setBrush(QBrush(self.pen_color))
-                for c in getattr(item, 'symmetry_clones', []): c.setBrush(QBrush(self.pen_color))
+            old_brush = item.brush()
+            item.setBrush(QBrush(self.pen_color))
+            for c in getattr(item, 'symmetry_clones', []): c.setBrush(QBrush(self.pen_color))
+            self.undo_stack.append(("fill", item, old_brush))
 
     def pick_color(self, pos):
         item = self.scene().itemAt(pos, QTransform())
@@ -351,60 +327,73 @@ class ArtView(QGraphicsView):
 
     def undo(self):
         if not self.undo_stack: return
-        action = self.undo_stack.pop()
-        if action[0] == "add" and action[1]:
-            item = action[1]; self.scene().removeItem(item)
+        action, item = self.undo_stack.pop()
+        if action == "add":
+            self.scene().removeItem(item)
             for c in getattr(item, 'symmetry_clones', []): self.scene().removeItem(c)
+            self.redo_stack.append((action, item))
+        elif action == "remove":
+            self.scene().addItem(item)
+            for c in getattr(item, 'symmetry_clones', []): self.scene().addItem(c)
+            self.redo_stack.append((action, item))
+        elif action == "fill":
+            old_brush = action[2]
+            item.setBrush(old_brush)
+            for c in getattr(item, 'symmetry_clones', []): c.setBrush(old_brush)
+
+    def redo(self):
+        if not self.redo_stack: return
+        action, item = self.redo_stack.pop()
+        if action == "add":
+            self.scene().addItem(item)
+            for c in getattr(item, 'symmetry_clones', []): self.scene().addItem(c)
+            self.undo_stack.append((action, item))
+        elif action == "remove":
+            self.scene().removeItem(item)
+            for c in getattr(item, 'symmetry_clones', []): self.scene().removeItem(c)
+            self.undo_stack.append((action, item))
 
 class SVGArtApp(QMainWindow):
     def __init__(self):
-        super().__init__(); self.setWindowTitle("NEURAL ART V1.3 - CYBER-PAINT PRO"); self.resize(1400, 900)
-        self.setup_ui(); self.apply_theme()
+        super().__init__(); self.setWindowTitle("NEURAL ART V1.5 - PERSISTENCE"); self.resize(1400, 900)
+        self.setup_ui()
+        self.apply_theme()
+        self.load_settings()
 
     def setup_ui(self):
         self.central_widget = QWidget(); self.setCentralWidget(self.central_widget); self.main_layout = QVBoxLayout(self.central_widget)
-        
-        # Upper Toolbar
         self.toolbar = QToolBar("Tools"); self.addToolBar(Qt.ToolBarArea.TopToolBarArea, self.toolbar)
         self.add_tool_action("BRUSH", "brush", CP_CYAN)
         self.brush_combo = QComboBox(); self.brush_combo.addItems(["Marker", "Airbrush", "Multiline", "Highlighter"])
         self.brush_combo.currentTextChanged.connect(self.set_brush_type); self.toolbar.addWidget(self.brush_combo)
-        
-        self.toolbar.addWidget(QLabel(" LINES: "))
-        self.multi_slider = QSlider(Qt.Orientation.Horizontal); self.multi_slider.setRange(1, 10); self.multi_slider.setValue(3)
-        self.multi_slider.setFixedWidth(60); self.multi_slider.valueChanged.connect(self.set_multi_count); self.toolbar.addWidget(self.multi_slider)
-
-        self.add_tool_action("POLY", "poly", CP_GREEN)
-        self.add_tool_action("CURVE", "curve", CP_GREEN)
-        self.add_tool_action("ERASE", "eraser", CP_RED)
-        self.add_tool_action("FILL", "fill", CP_YELLOW); self.add_tool_action("PICK", "picker", CP_CYAN)
-        
-        self.toolbar.addSeparator()
-        self.add_tool_action("RECT", "rect", CP_ORANGE); self.add_tool_action("CIRC", "ellipse", CP_ORANGE); self.add_tool_action("TRI", "triangle", CP_ORANGE)
+        self.toolbar.addWidget(QLabel(" LINES: ")); self.multi_slider = QSlider(Qt.Orientation.Horizontal); self.multi_slider.setRange(1, 10); self.multi_slider.setValue(3); self.multi_slider.valueChanged.connect(self.set_multi_count); self.toolbar.addWidget(self.multi_slider)
+        self.add_tool_action("POLY", "poly", CP_GREEN); self.add_tool_action("CURVE", "curve", CP_GREEN); self.add_tool_action("ERASE", "eraser", CP_RED); self.add_tool_action("FILL", "fill", CP_YELLOW); self.add_tool_action("PICK", "picker", CP_CYAN)
+        self.toolbar.addSeparator(); self.add_tool_action("RECT", "rect", CP_ORANGE); self.add_tool_action("CIRC", "ellipse", CP_ORANGE); self.add_tool_action("TRI", "triangle", CP_ORANGE)
         self.toolbar.addSeparator(); self.add_tool_action("MOVE IMG", "move_image", CP_SUBTEXT); self.add_tool_action("MOVE SVG", "move_svg", CP_SUBTEXT)
-        
         self.toolbar.addSeparator(); self.btn_color = QPushButton("COLOR"); self.btn_color.clicked.connect(self.choose_color); self.toolbar.addWidget(self.btn_color)
         self.toolbar.addWidget(QLabel(" THICK: ")); self.thickness_slider = QSlider(Qt.Orientation.Horizontal); self.thickness_slider.setRange(1, 100); self.thickness_slider.setValue(3); self.thickness_slider.valueChanged.connect(self.change_thickness); self.toolbar.addWidget(self.thickness_slider)
-        
-        # Left Toolbar
         self.sym_toolbar = QToolBar("Symmetry"); self.addToolBar(Qt.ToolBarArea.LeftToolBarArea, self.sym_toolbar)
-        self.sym_toolbar.addWidget(QLabel(" SYMMETRY "))
-        self.sym_combo = QComboBox(); self.sym_combo.addItems(["None", "Radial", "Reflect"]); self.sym_combo.currentTextChanged.connect(self.set_symmetry_mode); self.sym_toolbar.addWidget(self.sym_combo)
+        self.sym_toolbar.addWidget(QLabel(" SYMMETRY ")); self.sym_combo = QComboBox(); self.sym_combo.addItems(["None", "Radial", "Reflect"]); self.sym_combo.currentTextChanged.connect(self.set_symmetry_mode); self.sym_toolbar.addWidget(self.sym_combo)
         self.sym_toolbar.addWidget(QLabel(" MIRROR: ")); self.mirror_spin = QSlider(Qt.Orientation.Horizontal); self.mirror_spin.setRange(2, 20); self.mirror_spin.setValue(4); self.mirror_spin.valueChanged.connect(self.set_mirror_count); self.sym_toolbar.addWidget(self.mirror_spin)
-        
         spacer = QWidget(); spacer.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred); self.toolbar.addWidget(spacer)
-        self.add_system_action("UNDO", self.undo, CP_YELLOW); self.add_system_action("IMG", self.load_image, CP_CYAN); self.add_system_action("SAVE", self.save_svg, CP_GREEN); self.add_system_action("RST", self.restart_app, CP_RED)
-
+        
+        self.add_system_action("CLEAN", self.clear_art, CP_RED)
+        self.add_system_action("UNDO", self.undo, CP_YELLOW)
+        self.add_system_action("REDO", self.redo, CP_GREEN)
+        self.add_system_action("IMG", self.load_image, CP_CYAN); self.add_system_action("SAVE", self.save_svg, CP_GREEN); self.add_system_action("RST", self.restart_app, CP_RED)
+        
         self.scene = ArtScene(); self.view = ArtView(self.scene, self); self.main_layout.addWidget(self.view)
-        self.statusBar().showMessage("SYSTEM READY | POLY: R-Click to close | CURVE: 3-Click Tool")
+        
+        # Shortcuts
+        self.undo_action = QAction("Undo", self); self.undo_action.setShortcut(QKeySequence("Ctrl+Z")); self.undo_action.triggered.connect(self.undo); self.addAction(self.undo_action)
+        self.redo_action = QAction("Redo", self); self.redo_action.setShortcut(QKeySequence("Ctrl+Y")); self.redo_action.triggered.connect(self.redo); self.addAction(self.redo_action)
 
     def add_tool_action(self, text, tool_name, color):
         btn = QPushButton(text); btn.setStyleSheet(f"color: {color}; font-weight: bold;"); btn.clicked.connect(lambda: self.set_tool(tool_name)); self.toolbar.addWidget(btn)
-
     def add_system_action(self, text, func, color):
         btn = QPushButton(text); btn.setStyleSheet(f"color: {color}; font-weight: bold; border: 1px solid {color};"); btn.clicked.connect(func); self.toolbar.addWidget(btn)
 
-    def set_tool(self, tool): self.view.tool = tool; self.view.current_item = None; self.statusBar().showMessage(f"ACTIVE TOOL: {tool.upper()}")
+    def set_tool(self, tool): self.view.tool = tool; self.view.current_item = None
     def set_brush_type(self, btype): self.view.brush_type = btype.lower(); self.set_tool("brush")
     def set_multi_count(self, val): self.view.multi_line_count = val
     def set_symmetry_mode(self, mode): self.view.symmetry_mode = mode.lower()
@@ -415,46 +404,66 @@ class SVGArtApp(QMainWindow):
         if color.isValid(): self.view.pen_color = color; self.update_color_ui(color)
     def change_thickness(self, value): self.view.pen_width = value
     def undo(self): self.view.undo()
+    def redo(self): self.view.redo()
+    def clear_art(self):
+        for item in self.scene.items():
+            if getattr(item, 'is_art_item', False): self.scene.removeItem(item)
     def load_image(self):
         file_path, _ = QFileDialog.getOpenFileName(self, "LOAD IMAGE", "", "Images (*.png *.jpg *.jpeg *.bmp)")
         if file_path:
             pixmap = QPixmap(file_path); self.view.image_item = QGraphicsPixmapItem(pixmap); self.view.image_item.setZValue(-1); self.view.image_item.is_art_item = False; self.scene.addItem(self.view.image_item)
     def save_svg(self):
-        file_path, _ = QFileDialog.getOpenFileName(self, "SAVE SVG", "art.svg", "SVG files (*.svg)")
-        # Note: Using getSaveFileName is better, but keeping consistency with user request if they want to overwrite or similar. 
-        # Actually, let's fix it to getSaveFileName as it was before but with the filtering logic.
         file_path, _ = QFileDialog.getSaveFileName(self, "SAVE SVG", "art.svg", "SVG files (*.svg)")
         if file_path:
-            # 1. Identify non-art items and hide them
-            hidden_items = []
-            art_rect = QRectF()
+            hidden = []; rect = QRectF()
             for item in self.scene.items():
                 if not getattr(item, 'is_art_item', False):
-                    if item.isVisible():
-                        item.hide()
-                        hidden_items.append(item)
-                else:
-                    art_rect = art_rect.united(item.sceneBoundingRect())
-            
-            if art_rect.isEmpty(): art_rect = QRectF(0, 0, 800, 600)
-            
-            # 2. Export
-            generator = QSvgGenerator()
-            generator.setFileName(file_path)
-            generator.setSize(art_rect.size().toSize())
-            generator.setViewBox(art_rect)
-            generator.setTitle("Neural Art Export")
-            
-            painter = QPainter(generator)
-            self.scene.render(painter, art_rect, art_rect)
-            painter.end()
-            
-            # 3. Restore visibility
-            for item in hidden_items:
-                item.show()
-            
-            self.statusBar().showMessage(f"ART EXPORTED TO: {os.path.basename(file_path)}")
-    def restart_app(self): os.execl(sys.executable, sys.executable, *sys.argv)
+                    if item.isVisible(): item.hide(); hidden.append(item)
+                else: rect = rect.united(item.sceneBoundingRect())
+            if rect.isEmpty(): rect = QRectF(0, 0, 800, 600)
+            gen = QSvgGenerator(); gen.setFileName(file_path); gen.setSize(rect.size().toSize()); gen.setViewBox(rect)
+            painter = QPainter(gen); self.scene.render(painter, rect, rect); painter.end()
+            for item in hidden: item.show()
+    def restart_app(self): self.save_settings(); os.execl(sys.executable, sys.executable, *sys.argv)
+    
+    def load_settings(self):
+        if os.path.exists(SETTINGS_FILE):
+            try:
+                with open(SETTINGS_FILE, 'r') as f:
+                    s = json.load(f)
+                    self.view.tool = s.get("tool", "brush")
+                    self.view.brush_type = s.get("brush_type", "marker")
+                    self.view.pen_color = QColor(s.get("color", CP_CYAN))
+                    self.view.pen_width = s.get("width", 3)
+                    self.view.multi_line_count = s.get("multi_count", 3)
+                    self.view.symmetry_mode = s.get("symmetry_mode", "none")
+                    self.view.mirror_count = s.get("mirror_count", 4)
+                    
+                    # Update UI
+                    self.brush_combo.setCurrentText(self.view.brush_type.capitalize())
+                    self.thickness_slider.setValue(self.view.pen_width)
+                    self.multi_slider.setValue(self.view.multi_line_count)
+                    self.sym_combo.setCurrentText(self.view.symmetry_mode.capitalize())
+                    self.mirror_spin.setValue(self.view.mirror_count)
+                    self.update_color_ui(self.view.pen_color)
+            except: pass
+
+    def save_settings(self):
+        s = {
+            "tool": self.view.tool,
+            "brush_type": self.view.brush_type,
+            "color": self.view.pen_color.name(),
+            "width": self.view.pen_width,
+            "multi_count": self.view.multi_line_count,
+            "symmetry_mode": self.view.symmetry_mode,
+            "mirror_count": self.view.mirror_count
+        }
+        with open(SETTINGS_FILE, 'w') as f: json.dump(s, f)
+
+    def closeEvent(self, event):
+        self.save_settings()
+        super().closeEvent(event)
+
     def apply_theme(self):
         self.setStyleSheet(f"""
             QMainWindow {{ background-color: {CP_BG}; }}
