@@ -175,10 +175,10 @@ all_items = []
 def run_sync_for_item(cfg, label):
     """Run sync for a specific item"""
     print(f"\n{'='*60}")
-    print(f"🔄 AUTO-SYNC TRIGGERED -- {cfg['label']}")
+    print(f"🔄 AUTO-SYNC TRIGGERED -- {cfg.get('name', cfg['label'])}")
     print(f"{'='*60}")
     
-    log_path = os.path.join(LOG_DIR, f"{cfg['label']}_sync.log")
+    log_path = os.path.join(LOG_DIR, f"{cfg.get('name', cfg['label'])}_sync.log")
     cmd = cfg.get("left_click_cmd", "rclone sync src dst -P --fast-list --log-level INFO")
     actual_cmd = cmd.replace("src", cfg["src"]).replace("dst", cfg["dst"])
     
@@ -189,11 +189,11 @@ def run_sync_for_item(cfg, label):
     with open(log_path, "w", encoding='utf-8') as f:
         subprocess.run(actual_cmd, shell=True, stdout=f, stderr=f)
     
-    print(f"✅ Sync completed -- {cfg['label']}")
+    print(f"✅ Sync completed -- {cfg.get('name', cfg['label'])}")
     print(f"📝 Log saved to: {log_path}")
     
     # After sync, run check immediately
-    print(f"🔍 Running check -- {cfg['label']}...")
+    print(f"🔍 Running check -- {cfg.get('name', cfg['label'])}...")
     check_single_item(label, cfg)
     print(f"{'='*60}\n")
 
@@ -452,7 +452,7 @@ def open_settings():
 
 def on_label_click(event, cfg):
     try:
-        log_path = os.path.join(LOG_DIR, f"{cfg['label']}_check.log")
+        log_path = os.path.join(LOG_DIR, f"{cfg.get('name', cfg['label'])}_check.log")
         subprocess.Popen([
             "powershell", "-NoExit", "-Command", f'edit "{log_path}"'
         ], creationflags=subprocess.CREATE_NEW_CONSOLE)
@@ -697,10 +697,10 @@ def add_command():
 # Periodically check using rclone
 def check_single_item(label, cfg):
     """Run check for a single item"""
-    log_path = os.path.join(LOG_DIR, f"{cfg['label']}_check.log")
+    log_path = os.path.join(LOG_DIR, f"{cfg.get('name', cfg['label'])}_check.log")
     actual_cmd = cfg["cmd"].replace("src", cfg["src"]).replace("dst", cfg["dst"])
     
-    print(f"🔍 Checking -- {cfg['label']}")
+    print(f"🔍 Checking -- {cfg.get('name', cfg['label'])}")
     
     if app_settings.get("show_command_output"):
         print(f"\n{'*'*40}")
@@ -722,10 +722,10 @@ def check_single_item(label, cfg):
             content = f.read()
         if "ERROR" not in content and "0 differences found" in content:
             label.config(fg="#06de22")
-            print(f"✅ {cfg['label']} -- No differences (GREEN)")
+            print(f"✅ {cfg.get('name', cfg['label'])} -- No differences (GREEN)")
         else:
             label.config(fg="red")
-            print(f"❌ {cfg['label']} -- Differences found (RED)")
+            print(f"❌ {cfg.get('name', cfg['label'])} -- Differences found (RED)")
 
 # Global check cycle management
 check_cycle_running = False
@@ -815,14 +815,14 @@ def mark_check_complete():
 def check_and_update(label, cfg):
     def run_check():
         try:
-            log_path = os.path.join(LOG_DIR, f"{cfg['label']}_check.log")
+            log_path = os.path.join(LOG_DIR, f"{cfg.get('name', cfg['label'])}_check.log")
             actual_cmd = cfg["cmd"].replace("src", cfg["src"]).replace("dst", cfg["dst"])
 
             if app_settings.get("show_command_output"):
                 if app_settings.get("buffer_output", True):
                     # Buffered mode - collect all output then print
                     output_buffer = []
-                    output_buffer.append(f"\n🔍 Periodic check -- {cfg['label']}")
+                    output_buffer.append(f"\n🔍 Periodic check -- {cfg.get('name', cfg['label'])}")
                     output_buffer.append(f"{'*'*40}")
                     output_buffer.append(f"🛠️  CHECK COMMAND: {actual_cmd}")
                     output_buffer.append(f"{'*'*40}")
@@ -842,7 +842,7 @@ def check_and_update(label, cfg):
                 else:
                     # Real-time mode - print each line with project label
                     with output_lock:
-                        print(f"\n🔍 Periodic check -- {cfg['label']}")
+                        print(f"\n🔍 Periodic check -- {cfg.get('name', cfg['label'])}")
                         print(f"{'*'*40}")
                         print(f"🛠️  CHECK COMMAND: {actual_cmd}")
                         print(f"{'*'*40}")
@@ -853,13 +853,13 @@ def check_and_update(label, cfg):
                             f.write(line)
                             if any(x in line for x in ["ERROR", "NOTICE", "INFO", "differences found"]) and "symlink" not in line.lower():
                                 with output_lock:
-                                    print(f"\033[42m\033[30m{cfg['label']}\033[0m > {line.strip()}")
+                                    print(f"{cfg.get('name', cfg['label'])} > {line.strip()}")
                     process.wait()
                     with output_lock:
                         print(f"{'*'*40}\n")
             else:
                 with output_lock:
-                    print(f"🔍 Periodic check -- {cfg['label']}")
+                    print(f"🔍 Periodic check -- {cfg.get('name', cfg['label'])}")
                 with open(log_path, "w", encoding='utf-8') as f:
                     subprocess.run(actual_cmd, shell=True, stdout=f, stderr=f)
 
@@ -871,16 +871,16 @@ def check_and_update(label, cfg):
                 if "ERROR" not in content and "0 differences found" in content:
                     label.config(fg="#06de22")
                     with output_lock:
-                        print(f"✅ {cfg['label']} -- No differences (GREEN)")
+                        print(f"✅ {cfg.get('name', cfg['label'])} -- No differences (GREEN)")
                 else:
                     # Differences found - turn red and auto-sync
                     label.config(fg="red")
                     with output_lock:
-                        print(f"❌ {cfg['label']} -- Differences detected (RED)")
-                        print(f"🚀 Auto-syncing -- {cfg['label']}...")
+                        print(f"❌ {cfg.get('name', cfg['label'])} -- Differences detected (RED)")
+                        print(f"🚀 Auto-syncing -- {cfg.get('name', cfg['label'])}...")
 
                     # Auto-sync
-                    sync_log_path = os.path.join(LOG_DIR, f"{cfg['label']}_sync.log")
+                    sync_log_path = os.path.join(LOG_DIR, f"{cfg.get('name', cfg['label'])}_sync.log")
                     sync_cmd = cfg.get("left_click_cmd", "rclone sync src dst -P --fast-list --log-level INFO")
                     actual_sync_cmd = sync_cmd.replace("src", cfg["src"]).replace("dst", cfg["dst"])
 
@@ -917,7 +917,7 @@ def check_and_update(label, cfg):
                                     f.write(line)
                                     if any(x in line for x in ["ERROR", "NOTICE", "INFO :", "Copied", "Deleted"]) and "symlink" not in line.lower():
                                         with output_lock:
-                                            print(f"\033[42m\033[30m{cfg['label']}\033[0m >> {line.strip()}")
+                                            print(f"{cfg.get('name', cfg['label'])} >> {line.strip()}")
                             process.wait()
                             with output_lock:
                                 print(f"{'*'*40}\n")
@@ -926,7 +926,7 @@ def check_and_update(label, cfg):
                             subprocess.run(actual_sync_cmd, shell=True, stdout=f, stderr=f)
 
                     with output_lock:
-                        print(f"✅ Sync completed -- {cfg['label']} verifying...")
+                        print(f"✅ Sync completed -- {cfg.get('name', cfg['label'])} verifying...")
 
                     # Check again after sync to verify
                     if app_settings.get("show_command_output"):
@@ -946,11 +946,11 @@ def check_and_update(label, cfg):
                         if "ERROR" not in content and "0 differences found" in content:
                             label.config(fg="#06de22")
                             with output_lock:
-                                print(f"✅ {cfg['label']} -- Verified - No differences after sync (GREEN)")
+                                print(f"✅ {cfg.get('name', cfg['label'])} -- Verified - No differences after sync (GREEN)")
                         else:
                             label.config(fg="red")
                             with output_lock:
-                                print(f"⚠️ {cfg['label']} -- Still has differences after sync (RED)")
+                                print(f"⚠️ {cfg.get('name', cfg['label'])} -- Still has differences after sync (RED)")
         finally:
             # Mark this check as complete
             mark_check_complete()
@@ -975,6 +975,7 @@ def create_gui():
 
     for key, cfg in sorted_items:
         is_enabled = cfg.get("enabled", True)
+        cfg['name'] = key  # Add name for logging
         
         lbl = tk.Label(
             ROOT1,
