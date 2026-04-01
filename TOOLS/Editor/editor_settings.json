@@ -5,7 +5,10 @@
     "font_size": 10,
     "cursor_line_color": "#ff26ffac",
     "cursor_color": "#ff0004",
-    "last_file": "",
+    "open_files": [
+        "C:/@delta/ms1/TOOLS/Editor/cyber_editor.py"
+    ],
+    "current_tab_index": 0,
     "shortcuts": {
         "MOVE_LINE_UP": "Alt+Up",
         "MOVE_LINE_DOWN": "Alt+Down",
@@ -14,6 +17,8 @@
         "TOGGLE_SEARCH": "Ctrl+F",
         "SAVE_FILE": "Ctrl+S",
         "OPEN_FILE": "Ctrl+O",
-        "RESTART_APP": "Ctrl+R"
-    }
+        "RESTART_APP": "Ctrl+R",
+        "CLOSE_TAB": "Ctrl+W"
+    },
+    "last_file": ""
 }
