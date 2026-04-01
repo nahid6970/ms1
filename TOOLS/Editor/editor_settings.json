@@ -6,7 +6,9 @@
     "font_size": 14,
     "cursor_line_color": "#ff26ffac",
     "cursor_color": "#ff0004",
-    "open_files": [],
+    "open_files": [
+        "C:\\@delta\\ms1\\TOOLS\\Editor\\TODO.md"
+    ],
     "current_tab_index": 0,
     "word_wrap": true,
     "search_visible": false,

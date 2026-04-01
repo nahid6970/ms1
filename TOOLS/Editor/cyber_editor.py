@@ -13,9 +13,10 @@ try:
                                  QPlainTextEdit, QLabel, QPushButton, QFileDialog, QDialog,
                                  QFormLayout, QLineEdit, QComboBox, QStatusBar, QMessageBox,
                                  QFrame, QSplitter, QTextEdit, QCheckBox, QColorDialog, QTabWidget, QTabBar)
-    from PyQt6.QtCore import Qt, QRect, QSize, pyqtSignal, QTimer, QPoint
+    from PyQt6.QtCore import Qt, QRect, QSize, pyqtSignal, QTimer, QPoint, QRegularExpression
     from PyQt6.QtGui import (QPainter, QTextFormat, QColor, QFont, QAction, QIcon,
-                             QTextCursor, QKeySequence, QPalette, QTextDocument)
+                             QTextCursor, QKeySequence, QPalette, QTextDocument, QSyntaxHighlighter,
+                             QTextCharFormat)
 except ImportError:
     print("PyQt6 is required. Please install it using 'pip install PyQt6'")
     sys.exit(1)
@@ -104,6 +105,67 @@ class LineNumberArea(QWidget):
     def sizeHint(self): return QSize(self.editor.line_number_area_width(), 0)
     def paintEvent(self, event): self.editor.lineNumberAreaPaintEvent(event)
 
+# --- Highlighter ---
+
+class CyberHighlighter(QSyntaxHighlighter):
+    def __init__(self, parent, accent=CP_YELLOW):
+        super().__init__(parent)
+        self.accent = accent
+        self.rules = []
+        self.update_rules()
+
+    def set_accent(self, accent):
+        self.accent = accent
+        self.update_rules()
+        self.rehighlight()
+
+    def update_rules(self):
+        self.rules = []
+        
+        # Keywords
+        keyword_format = QTextCharFormat()
+        keyword_format.setForeground(QColor(self.accent))
+        keyword_format.setFontWeight(QFont.Weight.Bold)
+        
+        keywords = [
+            "False", "None", "True", "and", "as", "assert", "async", "await",
+            "break", "class", "continue", "def", "del", "elif", "else",
+            "except", "finally", "for", "from", "global", "if", "import",
+            "in", "is", "lambda", "nonlocal", "not", "or", "pass", "raise",
+            "return", "try", "while", "with", "yield",
+            "function", "var", "let", "const", "static", "void", "int", "float",
+            "bool", "public", "private", "protected", "new", "delete", "this",
+            "self", "cls"
+        ]
+        
+        for word in keywords:
+            self.rules.append((QRegularExpression(f"\\b{word}\\b"), keyword_format))
+
+        # Strings
+        string_format = QTextCharFormat()
+        string_format.setForeground(QColor(CP_GREEN))
+        self.rules.append((QRegularExpression("\".*?\""), string_format))
+        self.rules.append((QRegularExpression("'.*?'"), string_format))
+
+        # Comments
+        comment_format = QTextCharFormat()
+        comment_format.setForeground(QColor(CP_DIM))
+        comment_format.setFontItalic(True)
+        self.rules.append((QRegularExpression("#.*"), comment_format))
+        self.rules.append((QRegularExpression("//.*"), comment_format))
+
+        # Numbers
+        number_format = QTextCharFormat()
+        number_format.setForeground(QColor(CP_RED))
+        self.rules.append((QRegularExpression("\\b[0-9]+\\b"), number_format))
+
+    def highlightBlock(self, text):
+        for pattern, format in self.rules:
+            match_iterator = pattern.globalMatch(text)
+            while match_iterator.hasNext():
+                match = match_iterator.next()
+                self.setFormat(match.capturedStart(), match.capturedLength(), format)
+
 class CodeEditor(QPlainTextEdit):
     shortcut_triggered = pyqtSignal(str)
     def __init__(self, settings_mgr, accent=CP_YELLOW, file_path=None):
@@ -114,6 +176,10 @@ class CodeEditor(QPlainTextEdit):
         self.updateRequest.connect(self.update_line_number_area)
         self.cursorPositionChanged.connect(self.highlight_current_line)
         self.setObjectName("CyberEditorCore")
+        
+        # Syntax Highlighter
+        self.highlighter = CyberHighlighter(self.document(), self.accent)
+        
         self.apply_font() # Load from settings
         self.set_accent(accent); self.update_line_number_area_width(0); self.highlight_current_line()
         
@@ -131,6 +197,8 @@ class CodeEditor(QPlainTextEdit):
 
     def set_accent(self, accent):
         self.accent = accent; self.highlight_current_line(); self.apply_cursor_color()
+        if hasattr(self, 'highlighter'):
+            self.highlighter.set_accent(accent)
 
     def apply_font(self):
         family = self.mgr.settings.get("font_family", "Consolas")

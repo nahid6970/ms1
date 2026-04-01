@@ -4,7 +4,7 @@
 - [ ] **Unsaved changes warning** — confirm dialog when closing a modified tab or the window
 
 ## High Priority (Usability)
-- [ ] **Syntax highlighting** — keyword/string/comment coloring per file type (flat cyan currently)
+- [x] **Syntax highlighting** — keyword/string/comment coloring per file type (flat cyan currently)
 - [ ] **Go to line** (`Ctrl+G`) — jump to a specific line number
 - [ ] **Line:Col in status bar** — show cursor position (e.g. `Ln 42, Col 7`)
 
