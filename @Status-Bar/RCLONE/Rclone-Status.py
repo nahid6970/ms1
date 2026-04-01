@@ -186,7 +186,7 @@ def run_sync_for_item(cfg, label):
     print(f"📁 Destination: {cfg['dst']}")
     print(f"⚙️  Running sync command...")
     
-    with open(log_path, "w") as f:
+    with open(log_path, "w", encoding='utf-8') as f:
         subprocess.run(actual_cmd, shell=True, stdout=f, stderr=f)
     
     print(f"✅ Sync completed -- {cfg['label']}")
@@ -706,19 +706,19 @@ def check_single_item(label, cfg):
         print(f"\n{'*'*40}")
         print(f"🛠️  COMMAND -- {actual_cmd}")
         print(f"{'*'*40}")
-        process = subprocess.Popen(actual_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
-        with open(log_path, "w") as f:
+        process = subprocess.Popen(actual_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, encoding='utf-8', errors='replace')
+        with open(log_path, "w", encoding='utf-8') as f:
             for line in process.stdout:
                 print(f"  > {line.strip()}")
                 f.write(line)
         process.wait()
         print(f"{'*'*40}\n")
     else:
-        with open(log_path, "w") as f:
+        with open(log_path, "w", encoding='utf-8') as f:
             subprocess.run(actual_cmd, shell=True, stdout=f, stderr=f)
     
     if os.path.exists(log_path):
-        with open(log_path, "r") as f:
+        with open(log_path, "r", encoding='utf-8', errors='replace') as f:
             content = f.read()
         if "ERROR" not in content and "0 differences found" in content:
             label.config(fg="#06de22")
@@ -827,8 +827,8 @@ def check_and_update(label, cfg):
                     output_buffer.append(f"🛠️  CHECK COMMAND: {actual_cmd}")
                     output_buffer.append(f"{'*'*40}")
                     
-                    process = subprocess.Popen(actual_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
-                    with open(log_path, "w") as f:
+                    process = subprocess.Popen(actual_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, encoding='utf-8', errors='replace')
+                    with open(log_path, "w", encoding='utf-8') as f:
                         for line in process.stdout:
                             f.write(line)
                             if any(x in line for x in ["ERROR", "NOTICE", "INFO", "differences found"]) and "symlink" not in line.lower():
@@ -847,8 +847,8 @@ def check_and_update(label, cfg):
                         print(f"🛠️  CHECK COMMAND: {actual_cmd}")
                         print(f"{'*'*40}")
                     
-                    process = subprocess.Popen(actual_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
-                    with open(log_path, "w") as f:
+                    process = subprocess.Popen(actual_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, encoding='utf-8', errors='replace')
+                    with open(log_path, "w", encoding='utf-8') as f:
                         for line in process.stdout:
                             f.write(line)
                             if any(x in line for x in ["ERROR", "NOTICE", "INFO", "differences found"]) and "symlink" not in line.lower():
@@ -860,11 +860,11 @@ def check_and_update(label, cfg):
             else:
                 with output_lock:
                     print(f"🔍 Periodic check -- {cfg['label']}")
-                with open(log_path, "w") as f:
+                with open(log_path, "w", encoding='utf-8') as f:
                     subprocess.run(actual_cmd, shell=True, stdout=f, stderr=f)
 
             if os.path.exists(log_path):
-                with open(log_path, "r") as f:
+                with open(log_path, "r", encoding='utf-8', errors='replace') as f:
                     content = f.read()
 
                 # Check if differences found
@@ -892,7 +892,7 @@ def check_and_update(label, cfg):
                             output_buffer.append(f"🛠️  SYNC COMMAND: {actual_sync_cmd}")
                             output_buffer.append(f"{'*'*40}")
                             
-                            process = subprocess.Popen(actual_sync_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+                            process = subprocess.Popen(actual_sync_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, encoding='utf-8', errors='replace')
                             with open(sync_log_path, "w") as f:
                                 for line in process.stdout:
                                     f.write(line)
@@ -911,7 +911,7 @@ def check_and_update(label, cfg):
                                 print(f"🛠️  SYNC COMMAND: {actual_sync_cmd}")
                                 print(f"{'*'*40}")
                             
-                            process = subprocess.Popen(actual_sync_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+                            process = subprocess.Popen(actual_sync_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, encoding='utf-8', errors='replace')
                             with open(sync_log_path, "w") as f:
                                 for line in process.stdout:
                                     f.write(line)
@@ -930,18 +930,18 @@ def check_and_update(label, cfg):
 
                     # Check again after sync to verify
                     if app_settings.get("show_command_output"):
-                        process = subprocess.Popen(actual_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
-                        with open(log_path, "w") as f:
+                        process = subprocess.Popen(actual_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, encoding='utf-8', errors='replace')
+                        with open(log_path, "w", encoding='utf-8') as f:
                             for line in process.stdout:
                                 f.write(line)
                         process.wait()
                     else:
-                        with open(log_path, "w") as f:
+                        with open(log_path, "w", encoding='utf-8') as f:
                             subprocess.run(actual_cmd, shell=True, stdout=f, stderr=f)
 
                     # Read result after sync
                     if os.path.exists(log_path):
-                        with open(log_path, "r") as f:
+                        with open(log_path, "r", encoding='utf-8', errors='replace') as f:
                             content = f.read()
                         if "ERROR" not in content and "0 differences found" in content:
                             label.config(fg="#06de22")
