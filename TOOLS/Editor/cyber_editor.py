@@ -11,10 +11,10 @@ try:
     from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                                  QPlainTextEdit, QLabel, QPushButton, QFileDialog, QDialog,
                                  QFormLayout, QLineEdit, QComboBox, QStatusBar, QMessageBox,
-                                 QFrame, QSplitter, QTextEdit)
+                                 QFrame, QSplitter, QTextEdit, QCheckBox)
     from PyQt6.QtCore import Qt, QRect, QSize, pyqtSignal, QTimer
     from PyQt6.QtGui import (QPainter, QTextFormat, QColor, QFont, QAction, QIcon,
-                             QTextCursor, QKeySequence, QPalette)
+                             QTextCursor, QKeySequence, QPalette, QTextDocument)
 except ImportError:
     print("PyQt6 is required. Please install it using 'pip install PyQt6'")
     sys.exit(1)
@@ -36,17 +36,28 @@ THEMES = {
     "CyberRed":    {"accent": CP_RED,    "name": "Cyber Red"}
 }
 
+DEFAULT_SHORTCUTS = {
+    "MOVE_LINE_UP": "Alt+Up",
+    "MOVE_LINE_DOWN": "Alt+Down",
+    "DUPLICATE_LINE": "Ctrl+D",
+    "DELETE_LINE": "Ctrl+Shift+K",
+    "TOGGLE_SEARCH": "Ctrl+F",
+    "SAVE_FILE": "Ctrl+S",
+    "OPEN_FILE": "Ctrl+O",
+    "RESTART_APP": "Ctrl+R"
+}
+
 # --- Settings Manager ---
 class SettingsManager:
     def __init__(self):
-        # Use relative paths for settings in the same folder
         self.filename = os.path.join(os.path.dirname(os.path.abspath(__file__)), "editor_settings.json")
         self.settings = {
             "width": 1000,
             "height": 700,
             "theme": "CyberYellow",
             "font_size": 10,
-            "last_file": ""
+            "last_file": "",
+            "shortcuts": DEFAULT_SHORTCUTS.copy()
         }
         self.load()
 
@@ -55,6 +66,10 @@ class SettingsManager:
             try:
                 with open(self.filename, 'r') as f:
                     data = json.load(f)
+                    # Deep merge for shortcuts
+                    if "shortcuts" in data:
+                        self.settings["shortcuts"].update(data["shortcuts"])
+                        del data["shortcuts"]
                     self.settings.update(data)
             except Exception as e:
                 print(f"Error loading settings: {e}")
@@ -115,9 +130,12 @@ class LineNumberArea(QWidget):
         self.editor.lineNumberAreaPaintEvent(event)
 
 class CodeEditor(QPlainTextEdit):
-    """Enhanced Editor with Line Numbers and Highlighting"""
-    def __init__(self, accent=CP_YELLOW):
+    """Enhanced Editor with Line Numbers, Highlighting and Shortcuts"""
+    shortcut_triggered = pyqtSignal(str)
+
+    def __init__(self, settings_mgr, accent=CP_YELLOW):
         super().__init__()
+        self.mgr = settings_mgr
         self.accent = accent
         self.line_number_area = LineNumberArea(self)
 
@@ -134,7 +152,6 @@ class CodeEditor(QPlainTextEdit):
         
     def set_accent(self, accent):
         self.accent = accent
-        # Syncing Line Color
         self.highlight_current_line()
 
     def line_number_area_width(self):
@@ -143,7 +160,7 @@ class CodeEditor(QPlainTextEdit):
         while max_num >= 10:
             max_num //= 10
             digits += 1
-        return 10 + self.fontMetrics().horizontalAdvance('9') * digits
+        return 15 + self.fontMetrics().horizontalAdvance('9') * digits
 
     def update_line_number_area_width(self, _):
         self.setViewportMargins(self.line_number_area_width(), 0, 0, 0)
@@ -176,15 +193,9 @@ class CodeEditor(QPlainTextEdit):
                 is_current = (block_num == self.textCursor().blockNumber())
                 painter.setPen(QColor(self.accent if is_current else CP_DIM))
                 
-                # Highlight bg slightly for current line number
-                if is_current:
-                    f = painter.font()
-                    f.setBold(True)
-                    painter.setFont(f)
-                else:
-                    f = painter.font()
-                    f.setBold(False)
-                    painter.setFont(f)
+                f = painter.font()
+                f.setBold(is_current)
+                painter.setFont(f)
 
                 painter.drawText(0, int(top), self.line_number_area.width() - 5, 
                                  self.fontMetrics().height(), Qt.AlignmentFlag.AlignRight, number)
@@ -208,80 +219,228 @@ class CodeEditor(QPlainTextEdit):
         self.setExtraSelections(extra_selections)
         self.line_number_area.update()
 
-# --- Main App ---
+    def keyPressEvent(self, event):
+        # Modern way in PyQt6 to get key + modifiers as a sequence
+        try:
+            key_combo = event.keyCombination()
+            key_str = QKeySequence(key_combo).toString()
+        except:
+            # Fallback if keyCombination is not available (older PyQt6 versions)
+            key_str = QKeySequence(event.key() | event.modifiers().value).toString()
 
-class SettingsDialog(QDialog):
+        shortcuts = self.mgr.settings["shortcuts"]
+        
+        if key_str == shortcuts.get("MOVE_LINE_UP"):
+            self.move_line(-1)
+            event.accept()
+            return
+        elif key_str == shortcuts.get("MOVE_LINE_DOWN"):
+            self.move_line(1)
+            event.accept()
+            return
+        elif key_str == shortcuts.get("DUPLICATE_LINE"):
+            self.duplicate_line()
+            event.accept()
+            return
+        elif key_str == shortcuts.get("DELETE_LINE"):
+            self.delete_current_line()
+            event.accept()
+            return
+        elif key_str == shortcuts.get("TOGGLE_SEARCH"):
+            self.shortcut_triggered.emit("TOGGLE_SEARCH")
+            event.accept()
+            return
+        elif key_str == shortcuts.get("SAVE_FILE"):
+            self.shortcut_triggered.emit("SAVE_FILE")
+            event.accept()
+            return
+        elif key_str == shortcuts.get("OPEN_FILE"):
+            self.shortcut_triggered.emit("OPEN_FILE")
+            event.accept()
+            return
+        elif key_str == shortcuts.get("RESTART_APP"):
+            self.shortcut_triggered.emit("RESTART_APP")
+            event.accept()
+            return
+
+        super().keyPressEvent(event)
+
+    def move_line(self, direction):
+        cursor = self.textCursor()
+        cursor.beginEditBlock()
+        
+        # Select current line
+        cursor.movePosition(QTextCursor.MoveOperation.StartOfBlock)
+        cursor.movePosition(QTextCursor.MoveOperation.EndOfBlock, QTextCursor.MoveMode.KeepAnchor)
+        line_text = cursor.selectedText()
+        
+        # Delete line
+        cursor.removeSelectedText()
+        cursor.deleteChar() # Remove the newline if it's there
+        
+        if direction == -1: # Up
+            if cursor.movePosition(QTextCursor.MoveOperation.Up):
+                cursor.movePosition(QTextCursor.MoveOperation.StartOfBlock)
+                cursor.insertText(line_text + "\n")
+                cursor.movePosition(QTextCursor.MoveOperation.Up)
+            else:
+                # Top of file, put it back
+                cursor.insertText(line_text + "\n")
+                cursor.movePosition(QTextCursor.MoveOperation.StartOfBlock)
+        else: # Down
+            if cursor.movePosition(QTextCursor.MoveOperation.Down):
+                cursor.movePosition(QTextCursor.MoveOperation.EndOfBlock)
+                cursor.insertText("\n" + line_text)
+            else:
+                # Bottom of file, put it back
+                cursor.movePosition(QTextCursor.MoveOperation.EndOfBlock)
+                cursor.insertText("\n" + line_text)
+                
+        cursor.endEditBlock()
+        self.setTextCursor(cursor)
+
+    def duplicate_line(self):
+        cursor = self.textCursor()
+        cursor.beginEditBlock()
+        cursor.movePosition(QTextCursor.MoveOperation.StartOfBlock)
+        cursor.movePosition(QTextCursor.MoveOperation.EndOfBlock, QTextCursor.MoveMode.KeepAnchor)
+        line_text = cursor.selectedText()
+        cursor.movePosition(QTextCursor.MoveOperation.EndOfBlock)
+        cursor.insertText("\n" + line_text)
+        cursor.endEditBlock()
+        self.setTextCursor(cursor)
+
+    def delete_current_line(self):
+        cursor = self.textCursor()
+        cursor.select(QTextCursor.SelectionType.BlockUnderCursor)
+        cursor.removeSelectedText()
+        self.setTextCursor(cursor)
+
+# --- Dialogs ---
+
+class KeybindDialog(QDialog):
     def __init__(self, parent, mgr):
         super().__init__(parent)
         self.mgr = mgr
-        self.setWindowTitle("SYSTEM_SETTINGS")
+        self.setWindowTitle("KEYBIND_CONFIG")
         self.setModal(True)
+        self.edits = {}
         self.setup_ui()
         self.apply_theme()
 
     def setup_ui(self):
-        self.setMinimumWidth(400)
+        self.setMinimumWidth(500)
         layout = QVBoxLayout(self)
-        
         form = QFormLayout()
-        self.w_edit = QLineEdit(str(self.mgr.settings["width"]))
-        self.h_edit = QLineEdit(str(self.mgr.settings["height"]))
         
-        self.theme_sel = QComboBox()
-        for t_id, t_info in THEMES.items():
-            self.theme_sel.addItem(t_info["name"], t_id)
-        
-        idx = self.theme_sel.findData(self.mgr.settings["theme"])
-        self.theme_sel.setCurrentIndex(max(0, idx))
-        
-        form.addRow("UI_WIDTH:", self.w_edit)
-        form.addRow("UI_HEIGHT:", self.h_edit)
-        form.addRow("COLOR_THEME:", self.theme_sel)
-        
+        shortcuts = self.mgr.settings["shortcuts"]
+        for action, key in shortcuts.items():
+            le = QLineEdit(key)
+            le.setPlaceholderText("e.g., Ctrl+S")
+            self.edits[action] = le
+            form.addRow(f"{action}:", le)
+            
         layout.addLayout(form)
         
-        # Add space for more features later as requested
-        self.more_box = QFrame()
-        self.more_box.setFrameShape(QFrame.Shape.StyledPanel)
-        more_layout = QVBoxLayout(self.more_box)
-        more_layout.addWidget(QLabel("// Reserved for future modules..."))
-        layout.addWidget(self.more_box)
+        instr = QLabel("TYPE KEY COMBINATIONS (e.g. Ctrl+Shift+S)\nSAVE TO APPLY CHANGES.")
+        instr.setStyleSheet("color: #808080; font-size: 8pt;")
+        layout.addWidget(instr)
 
         btns = QHBoxLayout()
-        self.save_btn = CyberButton("APPLY & SAVE", accent=THEMES[self.mgr.settings["theme"]]["accent"])
-        self.save_btn.clicked.connect(self.do_save)
-        self.cancel_btn = CyberButton("ABORT", accent=CP_RED)
-        self.cancel_btn.clicked.connect(self.reject)
+        save_btn = CyberButton("APPLY", accent=THEMES[self.mgr.settings["theme"]]["accent"])
+        save_btn.clicked.connect(self.do_save)
+        cancel_btn = CyberButton("ABORT", accent=CP_RED)
+        cancel_btn.clicked.connect(self.reject)
         
-        btns.addWidget(self.save_btn)
-        btns.addWidget(self.cancel_btn)
+        btns.addWidget(save_btn)
+        btns.addWidget(cancel_btn)
         layout.addLayout(btns)
 
     def apply_theme(self):
         accent = THEMES[self.mgr.settings["theme"]]["accent"]
         self.setStyleSheet(f"""
             QDialog {{ background-color: {CP_BG}; border: 2px solid {accent}; }}
-            QLabel {{ color: {CP_TEXT}; font-family: 'Consolas'; font-weight: bold; text-transform: uppercase; }}
-            QLineEdit, QComboBox {{
-                background-color: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 6px;
-                font-family: 'Consolas'; font-size: 11pt;
+            QLabel {{ color: {CP_TEXT}; font-family: 'Consolas'; font-weight: bold; }}
+            QLineEdit {{
+                background-color: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 4px;
+                font-family: 'Consolas';
             }}
             QLineEdit:focus {{ border: 1px solid {accent}; }}
-            QComboBox QAbstractItemView {{
-                background-color: {CP_PANEL}; color: {CP_TEXT}; selection-background-color: {accent}; selection-color: black;
-            }}
-            QFrame {{ border: 1px dashed {CP_DIM}; margin: 10px 0; }}
         """)
 
     def do_save(self):
-        try:
-            self.mgr.settings["width"] = int(self.w_edit.text())
-            self.mgr.settings["height"] = int(self.h_edit.text())
-            self.mgr.settings["theme"] = self.theme_sel.currentData()
-            self.mgr.save()
-            self.accept()
-        except Exception as e:
-            QMessageBox.critical(self, "SYSTEM_ERR", f"INVALID INPUT: {e}")
+        for action, le in self.edits.items():
+            self.mgr.settings["shortcuts"][action] = le.text()
+        self.mgr.save()
+        self.accept()
+
+# --- Search Panel ---
+
+class SearchPanel(QFrame):
+    toggled = pyqtSignal(bool)
+    
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setVisible(False)
+        self.setup_ui()
+
+    def setup_ui(self):
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(5, 5, 5, 5)
+        
+        # Search Row
+        row1 = QHBoxLayout()
+        self.search_input = QLineEdit()
+        self.search_input.setPlaceholderText("SEARCH_QUERY...")
+        
+        self.btn_next = QPushButton("NEXT")
+        self.btn_prev = QPushButton("PREV")
+        self.btn_close = QPushButton("X")
+        self.btn_close.setFixedWidth(30)
+        
+        row1.addWidget(QLabel("FIND:"))
+        row1.addWidget(self.search_input)
+        row1.addWidget(self.btn_prev)
+        row1.addWidget(self.btn_next)
+        row1.addWidget(self.btn_close)
+        
+        # Replace Row
+        row2 = QHBoxLayout()
+        self.replace_input = QLineEdit()
+        self.replace_input.setPlaceholderText("REPLACE_WITH...")
+        
+        self.btn_replace = QPushButton("REPLACE")
+        self.btn_replace_all = QPushButton("ALL")
+        
+        row2.addWidget(QLabel("REPL:"))
+        row2.addWidget(self.replace_input)
+        row2.addWidget(self.btn_replace)
+        row2.addWidget(self.btn_replace_all)
+        row2.addStretch()
+        
+        layout.addLayout(row1)
+        layout.addLayout(row2)
+
+    def apply_theme(self, accent):
+        self.setStyleSheet(f"""
+            SearchPanel {{
+                background-color: {CP_PANEL};
+                border: 1px solid {accent};
+                border-radius: 4px;
+            }}
+            QLineEdit {{
+                background-color: #0c0c0c; color: {CP_CYAN}; border: 1px solid {CP_DIM};
+                font-family: 'Consolas'; padding: 2px;
+            }}
+            QPushButton {{
+                background-color: {CP_DIM}; color: white; border: none; padding: 2px 8px;
+                font-family: 'Consolas'; font-size: 9pt;
+            }}
+            QPushButton:hover {{ background-color: {accent}; color: black; }}
+            QLabel {{ color: {accent}; font-weight: bold; font-family: 'Consolas'; }}
+        """)
+
+# --- Main Window ---
 
 class MainWindow(QMainWindow):
     def __init__(self, initial_file=None, buffer_file=None):
@@ -293,7 +452,6 @@ class MainWindow(QMainWindow):
         self.setup_ui()
         self.apply_theme_global()
         
-        # Load Content
         if initial_file:
             self.load_file(initial_file)
             if buffer_file and os.path.exists(buffer_file):
@@ -301,7 +459,6 @@ class MainWindow(QMainWindow):
                     with open(buffer_file, 'r', encoding='utf-8') as f:
                         self.editor.setPlainText(f.read())
                     os.remove(buffer_file)
-                    self.statusBar().showMessage(f"STATUS: RECOVERED_BUFFER_LOADED [{datetime.now().strftime('%H:%M:%S')}]")
                 except: pass
 
     def check_admin(self):
@@ -310,25 +467,25 @@ class MainWindow(QMainWindow):
 
     def setup_ui(self):
         self.setWindowTitle(f"CYBER_EDITOR // {'[SUPERUSER]' if self.is_admin else '[USER]'}")
-        self.resize(self.mgr.settings["width"], self.mgr.settings["height"])
+        self.resize(self.mgr.settings.get("width", 1000), self.mgr.settings.get("height", 700))
         
         central = QWidget()
         self.setCentralWidget(central)
         self.main_layout = QVBoxLayout(central)
         self.main_layout.setContentsMargins(10, 10, 10, 10)
-        self.main_layout.setSpacing(10)
         
         # Nav Bar
         self.nav_layout = QHBoxLayout()
-        
         self.btn_open = CyberButton("OPEN_FILE")
         self.btn_save = CyberButton("SAVE_CACHE")
         self.btn_restart = CyberButton("RELOAD_APP")
+        self.btn_keybinds = CyberButton("KEYBINDS")
         self.btn_settings = CyberButton("SYSTEM_CFG")
         
         self.btn_open.clicked.connect(self.on_open)
         self.btn_save.clicked.connect(self.on_save)
         self.btn_restart.clicked.connect(self.on_restart)
+        self.btn_keybinds.clicked.connect(self.on_keybinds)
         self.btn_settings.clicked.connect(self.on_settings)
         
         self.nav_layout.addWidget(self.btn_open)
@@ -336,54 +493,110 @@ class MainWindow(QMainWindow):
         self.nav_layout.addStretch()
         
         if not self.is_admin:
-            self.btn_admin = CyberButton("ELEVATE_ACCESS", accent=CP_RED)
-            self.btn_admin.clicked.connect(self.on_elevate)
-            self.nav_layout.addWidget(self.btn_admin)
+            self.btn_elevate = CyberButton("ELEVATE", accent=CP_RED)
+            self.btn_elevate.clicked.connect(self.on_elevate)
+            self.nav_layout.addWidget(self.btn_elevate)
             
+        self.nav_layout.addWidget(self.btn_keybinds)
         self.nav_layout.addWidget(self.btn_restart)
         self.nav_layout.addWidget(self.btn_settings)
         
         self.main_layout.addLayout(self.nav_layout)
         
+        # Search Panel (Overlay-ish)
+        self.search_panel = SearchPanel(self)
+        self.search_panel.btn_close.clicked.connect(lambda: self.toggle_search(False))
+        self.search_panel.btn_next.clicked.connect(self.search_next)
+        self.search_panel.btn_prev.clicked.connect(self.search_prev)
+        self.search_panel.btn_replace.clicked.connect(self.do_replace)
+        self.search_panel.btn_replace_all.clicked.connect(self.do_replace_all)
+        self.search_panel.search_input.textChanged.connect(self.search_next)
+        
+        self.main_layout.addWidget(self.search_panel)
+        
         # Editor
-        self.editor = CodeEditor()
+        self.editor = CodeEditor(self.mgr)
+        self.editor.shortcut_triggered.connect(self.handle_shortcut)
         self.main_layout.addWidget(self.editor)
         
-        # Status Bar
         self.setStatusBar(QStatusBar())
         self.statusBar().showMessage("SYSTEM READY...")
 
     def apply_theme_global(self):
-        theme_key = self.mgr.settings["theme"]
+        theme_key = self.mgr.settings.get("theme", "CyberYellow")
         accent = THEMES[theme_key]["accent"]
         
-        # Update Editor
         self.editor.set_accent(accent)
+        self.search_panel.apply_theme(accent)
         
-        # Update Nav Buttons
-        self.btn_open.set_accent(accent)
-        self.btn_save.set_accent(accent)
-        self.btn_restart.set_accent(accent)
-        self.btn_settings.set_accent(accent)
-        if not self.is_admin: self.btn_admin.set_accent(CP_RED)
+        btns = [self.btn_open, self.btn_save, self.btn_restart, self.btn_keybinds, self.btn_settings]
+        for b in btns: b.set_accent(accent)
+        if not self.is_admin: self.btn_elevate.set_accent(CP_RED)
 
-        # Main Stylesheet
         self.setStyleSheet(f"""
             QMainWindow {{ background-color: {CP_BG}; }}
             QWidget {{ color: {CP_TEXT}; font-family: 'Consolas'; font-size: 10pt; }}
-            
             QPlainTextEdit {{
                 background-color: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 8px;
                 selection-background-color: {accent}; selection-color: black;
                 font-family: 'Consolas'; font-size: 11pt;
             }}
-            QPlainTextEdit:focus {{ border: 1px solid {accent}; }}
-            
-            QStatusBar {{ background: {CP_PANEL}; color: {CP_SUBTEXT}; border-top: 1px solid {CP_DIM}; font-size: 9pt; }}
+            QStatusBar {{ background: {CP_PANEL}; color: {CP_SUBTEXT}; border-top: 1px solid {CP_DIM}; }}
         """)
 
+    def handle_shortcut(self, action):
+        if action == "TOGGLE_SEARCH":
+            self.toggle_search()
+        elif action == "SAVE_FILE":
+            self.on_save()
+        elif action == "OPEN_FILE":
+            self.on_open()
+        elif action == "RESTART_APP":
+            self.on_restart()
+
+    def toggle_search(self, force=None):
+        visible = not self.search_panel.isVisible() if force is None else force
+        self.search_panel.setVisible(visible)
+        if visible:
+            self.search_panel.search_input.setFocus()
+            self.search_panel.search_input.selectAll()
+
+    def search_next(self):
+        query = self.search_panel.search_input.text()
+        if not query: return
+        if not self.editor.find(query):
+            # Wrap around
+            cursor = self.editor.textCursor()
+            cursor.movePosition(QTextCursor.MoveOperation.Start)
+            self.editor.setTextCursor(cursor)
+            self.editor.find(query)
+
+    def search_prev(self):
+        query = self.search_panel.search_input.text()
+        if not query: return
+        if not self.editor.find(query, QTextDocument.FindFlag.FindBackward):
+            cursor = self.editor.textCursor()
+            cursor.movePosition(QTextCursor.MoveOperation.End)
+            self.editor.setTextCursor(cursor)
+            self.editor.find(query, QTextDocument.FindFlag.FindBackward)
+
+    def do_replace(self):
+        cursor = self.editor.textCursor()
+        if cursor.hasSelection():
+            cursor.insertText(self.search_panel.replace_input.text())
+            self.search_next()
+
+    def do_replace_all(self):
+        query = self.search_panel.search_input.text()
+        repl = self.search_panel.replace_input.text()
+        if not query: return
+        
+        text = self.editor.toPlainText()
+        new_text = text.replace(query, repl)
+        self.editor.setPlainText(new_text)
+
     def on_open(self):
-        path, _ = QFileDialog.getOpenFileName(self, "SYSTEM_LINK_FILE", "", "All Files (*)")
+        path, _ = QFileDialog.getOpenFileName(self, "OPEN_FILE", "", "All Files (*)")
         if path: self.load_file(path)
 
     def load_file(self, path):
@@ -391,27 +604,31 @@ class MainWindow(QMainWindow):
             with open(path, 'r', encoding='utf-8') as f:
                 self.editor.setPlainText(f.read())
             self.current_file = path
-            self.setWindowTitle(f"CYBER_EDITOR // {os.path.basename(path)} // {'[ROOT]' if self.is_admin else '[USER]'}")
-            self.statusBar().showMessage(f"STATUS: FILE_CONNECTED [{path}]")
+            self.setWindowTitle(f"CYBER_EDITOR // {os.path.basename(path)}")
+            self.statusBar().showMessage(f"LOADED: {path}")
         except Exception as e:
-            QMessageBox.critical(self, "LINK_ERR", f"COULD NOT READ: {e}")
+            QMessageBox.critical(self, "ERR", str(e))
 
     def on_save(self):
         if not self.current_file:
-            path, _ = QFileDialog.getSaveFileName(self, "ESTABLISH_PERSISTENCE", "", "All Files (*)")
+            path, _ = QFileDialog.getSaveFileName(self, "SAVE_FILE", "", "All Files (*)")
             if not path: return
             self.current_file = path
-            
         try:
             with open(self.current_file, 'w', encoding='utf-8') as f:
                 f.write(self.editor.toPlainText())
-            self.statusBar().showMessage(f"STATUS: DATA_STREAMS_SYNCED // {datetime.now().strftime('%H:%M:%S')}")
+            self.statusBar().showMessage(f"SAVED: {self.current_file}")
         except Exception as e:
-            QMessageBox.warning(self, "SYNC_ERR", f"PERMISSION DENIED: {e}\nTRY ELEVATING ACCESS.")
+            QMessageBox.warning(self, "ERR", f"PERMISSION DENIED? {e}")
 
     def on_restart(self):
         QApplication.quit()
         subprocess.Popen([sys.executable] + sys.argv)
+
+    def on_keybinds(self):
+        dlg = KeybindDialog(self, self.mgr)
+        if dlg.exec():
+            self.statusBar().showMessage("KEYBINDS UPDATED.")
 
     def on_settings(self):
         dlg = SettingsDialog(self, self.mgr)
@@ -420,30 +637,23 @@ class MainWindow(QMainWindow):
             self.resize(self.mgr.settings["width"], self.mgr.settings["height"])
 
     def on_elevate(self):
-        # Save state to buffer
         buf_path = os.path.join(tempfile.gettempdir(), "cyber_edit_lock.tmp")
         try:
             with open(buf_path, 'w', encoding='utf-8') as f:
                 f.write(self.editor.toPlainText())
-            
             script = os.path.abspath(sys.argv[0])
-            params = f'"{script}"'
-            if self.current_file:
-                params += f' --file "{self.current_file}"'
-            params += f' --buffer "{buf_path}"'
-            
-            # Execute with 'runas'
+            params = f'"{script}" --buffer "{buf_path}"'
+            if self.current_file: params += f' --file "{self.current_file}"'
             ret = ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, params, None, 1)
             if ret > 32: QApplication.quit()
-            else: QMessageBox.warning(self, "AUTH_ERR", "ELEVATION_FAILED: ACCESS_DENIED")
         except Exception as e:
-            QMessageBox.critical(self, "INTERNAL_ERR", str(e))
+            QMessageBox.critical(self, "ERR", str(e))
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
     
-    # Arg parsing
+    # Simple Arg Parsing
     initial_file = None
     buffer_file = None
     args = sys.argv[1:]
