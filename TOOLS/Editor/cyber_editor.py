@@ -56,6 +56,7 @@ class SettingsManager:
             "width": 1000,
             "height": 700,
             "theme": "CyberYellow",
+            "font_family": "Consolas",
             "font_size": 10,
             "cursor_line_color": "",
             "cursor_color": "",
@@ -107,12 +108,18 @@ class CodeEditor(QPlainTextEdit):
         self.updateRequest.connect(self.update_line_number_area)
         self.cursorPositionChanged.connect(self.highlight_current_line)
         self.setObjectName("CyberEditorCore")
+        self.apply_font() # Load from settings
         self.set_accent(accent); self.update_line_number_area_width(0); self.highlight_current_line()
-        self.setFont(QFont('Consolas', 10)); self.setLineWrapMode(QPlainTextEdit.LineWrapMode.NoWrap); self.setAcceptDrops(True)
+        self.setLineWrapMode(QPlainTextEdit.LineWrapMode.NoWrap); self.setAcceptDrops(True)
         self.setCursorWidth(0) # Using custom paintEvent caret
 
     def set_accent(self, accent):
         self.accent = accent; self.highlight_current_line(); self.apply_cursor_color()
+
+    def apply_font(self):
+        family = self.mgr.settings.get("font_family", "Consolas")
+        size = self.mgr.settings.get("font_size", 10)
+        self.setFont(QFont(family, size))
 
     def apply_cursor_color(self):
         accent_color = THEMES.get(self.mgr.settings.get("theme", "CyberYellow"), THEMES["CyberYellow"])["accent"]
@@ -226,13 +233,23 @@ class SettingsDialog(QDialog):
     def setup_ui(self):
         self.setMinimumWidth(450); layout = QVBoxLayout(self); form = QFormLayout()
         self.w_edit = QLineEdit(str(self.mgr.settings.get("width", 1000))); self.h_edit = QLineEdit(str(self.mgr.settings.get("height", 700)))
+        
+        from PyQt6.QtWidgets import QFontComboBox # Local import for safety
+        self.font_sel = QFontComboBox()
+        self.font_sel.setCurrentFont(QFont(self.mgr.settings.get("font_family", "Consolas")))
+        self.size_edit = QLineEdit(str(self.mgr.settings.get("font_size", 10)))
+        
         self.theme_sel = QComboBox(); [self.theme_sel.addItem(t_info["name"], t_id) for t_id, t_info in THEMES.items()]
         self.theme_sel.setCurrentIndex(max(0, self.theme_sel.findData(self.mgr.settings.get("theme", "CyberYellow"))))
+        
         self.line_color_btn = QPushButton("PICK_HL_COLOR"); self.line_color_btn.clicked.connect(self.pick_line_color)
         self.cur_line_label = QLabel(self.temp_cursor_line_color if self.temp_cursor_line_color else "AUTO")
         self.cursor_color_btn = QPushButton("PICK_INSERT_COLOR"); self.cursor_color_btn.clicked.connect(self.pick_cursor_color)
         self.cur_cursor_label = QLabel(self.temp_cursor_color if self.temp_cursor_color else "AUTO")
-        form.addRow("UI_WIDTH:", self.w_edit); form.addRow("UI_HEIGHT:", self.h_edit); form.addRow("COLOR_THEME:", self.theme_sel)
+        
+        form.addRow("UI_WIDTH:", self.w_edit); form.addRow("UI_HEIGHT:", self.h_edit)
+        form.addRow("FONT_FAM:", self.font_sel); form.addRow("FONT_SIZE:", self.size_edit)
+        form.addRow("COLOR_THEME:", self.theme_sel)
         form.addRow("LINE_HL:", self.line_color_btn); form.addRow("VAL:", self.cur_line_label); form.addRow("CURSOR_COLOR:", self.cursor_color_btn); form.addRow("VAL:", self.cur_cursor_label)
         layout.addLayout(form); self.more_box = QFrame(); self.more_box.setFrameShape(QFrame.Shape.StyledPanel); more_layout = QVBoxLayout(self.more_box); more_layout.addWidget(QLabel("// Future modules reserved...")); layout.addWidget(self.more_box)
         btns = QHBoxLayout(); theme_accent = THEMES.get(self.mgr.settings.get("theme", "CyberYellow"), THEMES["CyberYellow"])["accent"]
@@ -249,9 +266,14 @@ class SettingsDialog(QDialog):
         if color.isValid(): self.temp_cursor_color = color.name(); self.cur_cursor_label.setText(self.temp_cursor_color); self.cur_cursor_label.setStyleSheet(f"color: {self.temp_cursor_color};")
     def apply_theme(self):
         accent = THEMES.get(self.mgr.settings.get("theme", "CyberYellow"), THEMES["CyberYellow"])["accent"]
-        self.setStyleSheet(f"QDialog {{ background-color: {CP_BG}; border: 2px solid {accent}; }} QLabel {{ color: {CP_TEXT}; font-family: 'Consolas'; font-weight: bold; text-transform: uppercase; }} QLineEdit, QComboBox {{ background-color: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 6px; font-family: 'Consolas'; }} QLineEdit:focus, QComboBox:focus {{ border: 1px solid {accent}; }} QComboBox::drop-down {{ border: none; width: 20px; }} QComboBox::arrow {{ border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 5px solid {CP_DIM}; margin-right: 5px; }} QComboBox QAbstractItemView {{ background-color: {CP_PANEL}; color: {CP_TEXT}; selection-background-color: {accent}; selection-color: black; border: 1px solid {accent}; outline: none; }} QPushButton {{ background-color: {CP_DIM}; color: white; border: 1px solid {CP_DIM}; padding: 4px; font-family: 'Consolas'; }} QPushButton:hover {{ border: 1px solid {accent}; color: {accent}; }} QFrame {{ border: 1px dashed {CP_DIM}; margin: 10px 0; }}")
+        self.setStyleSheet(f"QDialog {{ background-color: {CP_BG}; border: 2px solid {accent}; }} QLabel {{ color: {CP_TEXT}; font-family: 'Consolas'; font-weight: bold; text-transform: uppercase; }} QLineEdit, QComboBox, QFontComboBox {{ background-color: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 6px; font-family: 'Consolas'; }} QLineEdit:focus, QComboBox:focus, QFontComboBox:focus {{ border: 1px solid {accent}; }} QComboBox::drop-down, QFontComboBox::drop-down {{ border: none; width: 20px; }} QComboBox::arrow, QFontComboBox::arrow {{ border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 5px solid {CP_DIM}; margin-right: 5px; }} QComboBox QAbstractItemView, QFontComboBox QAbstractItemView {{ background-color: {CP_PANEL}; color: {CP_TEXT}; selection-background-color: {accent}; selection-color: black; border: 1px solid {accent}; outline: none; }} QPushButton {{ background-color: {CP_DIM}; color: white; border: 1px solid {CP_DIM}; padding: 4px; font-family: 'Consolas'; }} QPushButton:hover {{ border: 1px solid {accent}; color: {accent}; }} QFrame {{ border: 1px dashed {CP_DIM}; margin: 10px 0; }}")
     def do_save(self):
-        try: self.mgr.settings["width"] = int(self.w_edit.text()); self.mgr.settings["height"] = int(self.h_edit.text()); self.mgr.settings["theme"] = self.theme_sel.currentData(); self.mgr.settings["cursor_line_color"] = self.temp_cursor_line_color; self.mgr.settings["cursor_color"] = self.temp_cursor_color; self.mgr.save(); self.accept()
+        try:
+            self.mgr.settings["width"] = int(self.w_edit.text()); self.mgr.settings["height"] = int(self.h_edit.text())
+            self.mgr.settings["font_family"] = self.font_sel.currentFont().family()
+            self.mgr.settings["font_size"] = int(self.size_edit.text())
+            self.mgr.settings["theme"] = self.theme_sel.currentData()
+            self.mgr.settings["cursor_line_color"] = self.temp_cursor_line_color; self.mgr.settings["cursor_color"] = self.temp_cursor_color; self.mgr.save(); self.accept()
         except Exception as e: QMessageBox.critical(self, "SYSTEM_ERR", f"INVALID: {e}")
 
 class KeybindDialog(QDialog):
@@ -367,7 +389,9 @@ class MainWindow(QMainWindow):
         # Update each open editor
         for i in range(self.tabs.count()):
             editor = self.tabs.widget(i)
-            if isinstance(editor, CodeEditor): editor.set_accent(accent)
+            if isinstance(editor, CodeEditor):
+                editor.set_accent(accent)
+                editor.apply_font()
 
         self.setStyleSheet(f"QMainWindow {{ background-color: {CP_BG}; }} QWidget {{ color: {CP_TEXT}; font-family: 'Consolas'; font-size: 10pt; }} QStatusBar {{ background: {CP_PANEL}; color: {CP_SUBTEXT}; border-top: 1px solid {CP_DIM}; }}")
 
