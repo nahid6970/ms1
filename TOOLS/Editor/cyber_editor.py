@@ -338,13 +338,8 @@ class MainWindow(QMainWindow):
             
             QTabBar::close-button {{
                 image: none;
-                background: {CP_DIM};
-                subcontrol-position: right;
-                width: 14px; height: 14px;
-                margin-left: 5px;
-                border-radius: 7px;
+                width: 0px; height: 0px; /* Hide the native one completely */
             }}
-            QTabBar::close-button:hover {{ background: {CP_RED}; }}
 
             QScrollBar:vertical {{
                 background: {CP_BG}; width: 12px; margin: 0px;
@@ -403,24 +398,38 @@ class MainWindow(QMainWindow):
         return self.tabs.currentWidget()
 
     def add_new_tab(self, path=None):
-        # Prevent duplicates
         for i in range(self.tabs.count()):
             if self.tabs.widget(i).file_path == path and path is not None:
                 self.tabs.setCurrentIndex(i); return
-                
+        
         theme_key = self.mgr.settings.get("theme", "CyberYellow")
-        editor = CodeEditor(self.mgr, THEMES[theme_key]["accent"], path)
+        accent = THEMES[theme_key]["accent"]
+        editor = CodeEditor(self.mgr, accent, path)
         editor.shortcut_triggered.connect(self.handle_shortcut)
         
         name = os.path.basename(path) if path else "UNTITLED.txt"
         idx = self.tabs.addTab(editor, name)
+        
+        # Proper Close Button X
+        close_btn = QPushButton("✕") # Multiplication X
+        close_btn.setFixedSize(18, 18)
+        close_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        close_btn.setStyleSheet(f"""
+            QPushButton {{ 
+                background: none; color: {CP_SUBTEXT}; border: none; font-size: 14px; font-weight: bold; 
+                margin-top: 1px;
+            }}
+            QPushButton:hover {{ color: {CP_RED}; }}
+        """)
+        # We need a closure for the index because it might change
+        close_btn.clicked.connect(lambda: self.close_tab(self.tabs.indexOf(editor)))
+        self.tabs.tabBar().setTabButton(idx, QTabBar.ButtonPosition.RightSide, close_btn)
+
         if path:
             try:
                 with open(path, 'r', encoding='utf-8') as f: editor.setPlainText(f.read())
             except: pass
-        
-        self.tabs.setCurrentIndex(idx)
-        self.save_session_state()
+        self.tabs.setCurrentIndex(idx); self.save_session_state()
 
     def close_tab(self, index):
         self.tabs.removeTab(index)
