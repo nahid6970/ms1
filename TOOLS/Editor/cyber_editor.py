@@ -13,7 +13,7 @@ try:
                                  QPlainTextEdit, QLabel, QPushButton, QFileDialog, QDialog,
                                  QFormLayout, QLineEdit, QComboBox, QStatusBar, QMessageBox,
                                  QFrame, QSplitter, QTextEdit, QCheckBox, QColorDialog, QTabWidget, QTabBar)
-    from PyQt6.QtCore import Qt, QRect, QSize, pyqtSignal, QTimer, QPoint, QRegularExpression, QEvent
+    from PyQt6.QtCore import Qt, QRect, QSize, pyqtSignal, QTimer, QPoint, QRegularExpression
     from PyQt6.QtGui import (QPainter, QTextFormat, QColor, QFont, QAction, QIcon,
                              QTextCursor, QKeySequence, QPalette, QTextDocument, QSyntaxHighlighter,
                              QTextCharFormat)
