@@ -50,7 +50,8 @@ DEFAULT_SHORTCUTS = {
     "RESTART_APP": "Ctrl+R",
     "CLOSE_TAB": "Ctrl+W",
     "ZOOM_IN": "Ctrl++",
-    "ZOOM_OUT": "Ctrl+-"
+    "ZOOM_OUT": "Ctrl+-",
+    "PICK_COLOR": "Alt+P"
 }
 
 # --- Settings Manager ---
@@ -382,101 +383,33 @@ class CodeEditor(QPlainTextEdit):
             {scrollbar_style}
         """)
 
-    def mouseDoubleClickEvent(self, event):
-        cursor = self.cursorForPosition(event.pos())
-        cursor.select(QTextCursor.SelectionType.WordUnderCursor)
-        text = cursor.selectedText()
+    def trigger_color_picker(self):
+        cursor = self.textCursor()
+        # Intelligent hex detection around cursor
+        pos = cursor.position()
+        block_text = cursor.block().text()
+        rel_pos = pos - cursor.block().position()
         
-        # Check for hex color pattern
+        # Look for # within a reasonable range around cursor
         import re
-        match = re.search(r"#[0-9A-Fa-f]{6}|#[0-9A-Fa-f]{3}", text)
-        if match:
-            hex_code = match.group(0)
-            color = QColor(hex_code)
-            if color.isValid():
-                new_color = QColorDialog.getColor(color, self, "PICK_DOCUMENT_COLOR")
-                if new_color.isValid():
-                    # Replace exactly the hex code
-                    cursor.insertText(new_color.name().upper())
-                    return # Skip default word selection
-        
+        hex_pattern = r"#[0-9A-Fa-f]{6}|#[0-9A-Fa-f]{3}"
+        for match in re.finditer(hex_pattern, block_text):
+            if match.start() <= rel_pos <= match.end():
+                hex_code = match.group(0)
+                color = QColor(hex_code)
+                if color.isValid():
+                    new_color = QColorDialog.getColor(color, self, "PICK_DOCUMENT_COLOR")
+                    if new_color.isValid():
+                        # Select the exact match range and replace
+                        cursor.setPosition(cursor.block().position() + match.start())
+                        cursor.setPosition(cursor.block().position() + match.end(), QTextCursor.MoveMode.KeepAnchor)
+                        cursor.insertText(new_color.name().upper())
+                        return True
+        return False
+
+    def mouseDoubleClickEvent(self, event):
+        if self.trigger_color_picker(): return
         super().mouseDoubleClickEvent(event)
-
-    def dragEnterEvent(self, event):
-        if event.mimeData().hasUrls(): event.accept()
-        else: super().dragEnterEvent(event)
-    def dragMoveEvent(self, event):
-        if event.mimeData().hasUrls(): event.accept()
-        else: super().dragMoveEvent(event)
-    def dropEvent(self, event):
-        if event.mimeData().hasUrls():
-            urls = event.mimeData().urls()
-            if urls:
-                path = urls[0].toLocalFile()
-                if os.path.isfile(path): self.shortcut_triggered.emit(f"LOAD_FILE:{path}")
-            event.accept()
-        else: super().dropEvent(event)
-
-    def line_number_area_width(self):
-        digits, max_num = 1, max(1, self.blockCount())
-        while max_num >= 10: max_num //= 10; digits += 1
-        return 15 + self.fontMetrics().horizontalAdvance('9') * digits
-    def update_line_number_area_width(self, _): self.setViewportMargins(self.line_number_area_width(), 0, 0, 0)
-    def update_line_number_area(self, rect, dy):
-        if dy: self.line_number_area.scroll(0, dy)
-        else: self.line_number_area.update(0, rect.y(), self.line_number_area.width(), rect.height())
-        if rect.contains(self.viewport().rect()): self.update_line_number_area_width(0)
-    def resizeEvent(self, event):
-        super().resizeEvent(event); cr = self.contentsRect()
-        self.line_number_area.setGeometry(QRect(cr.left(), cr.top(), self.line_number_area_width(), cr.height()))
-    def lineNumberAreaPaintEvent(self, event):
-        painter = QPainter(self.line_number_area); painter.fillRect(event.rect(), QColor(CP_PANEL))
-        block = self.firstVisibleBlock(); block_num = block.blockNumber()
-        top = self.blockBoundingGeometry(block).translated(self.contentOffset()).top()
-        bottom = top + self.blockBoundingRect(block).height()
-        
-        # Sync font with editor
-        painter.setFont(self.font())
-        
-        while block.isValid() and top <= event.rect().bottom():
-            if block.isVisible() and bottom >= event.rect().top():
-                number = str(block_num + 1); is_current = (block_num == self.textCursor().blockNumber())
-                painter.setPen(QColor(self.accent if is_current else CP_DIM))
-                
-                # Bold current line number
-                if is_current:
-                    f = painter.font(); f.setBold(True); painter.setFont(f)
-                
-                painter.drawText(0, int(top), self.line_number_area.width() - 5, self.fontMetrics().height(), Qt.AlignmentFlag.AlignRight, number)
-                
-                if is_current:
-                    f = painter.font(); f.setBold(False); painter.setFont(f)
-                    
-            block = block.next(); top = bottom; bottom = top + self.blockBoundingRect(block).height(); block_num += 1
-
-    def highlight_current_line(self):
-        extra_selections = []
-        if not self.isReadOnly():
-            selection = QTextEdit.ExtraSelection()
-            custom_hex = self.mgr.settings.get("cursor_line_color", "")
-            if custom_hex:
-                line_color = QColor(custom_hex)
-                if line_color.alpha() == 255: line_color.setAlpha(40)
-            else:
-                line_color = QColor(self.accent); line_color.setAlpha(25)
-            selection.format.setBackground(line_color); selection.format.setProperty(QTextFormat.Property.FullWidthSelection, True)
-            selection.cursor = self.textCursor(); selection.cursor.clearSelection(); extra_selections.append(selection)
-        self.setExtraSelections(extra_selections); self.line_number_area.update()
-
-    def paintEvent(self, event):
-        super().paintEvent(event)
-        if not self.hasFocus() or self.isReadOnly(): return
-        if not hasattr(self, '_blink_state'):
-            self._blink_state = True; self._blink_timer = QTimer(self); self._blink_timer.timeout.connect(self._toggle_blink); self._blink_timer.start(500)
-        if self._blink_state:
-            painter = QPainter(self.viewport()); cursor_color = self.mgr.settings.get("cursor_color", "")
-            rect = self.cursorRect(); painter.fillRect(rect.left(), rect.top(), 2, rect.height(), QColor(cursor_color if cursor_color else CP_CYAN)); painter.end()
-    def _toggle_blink(self): self._blink_state = not self._blink_state; self.viewport().update()
 
     def keyPressEvent(self, event):
         try: key_str = QKeySequence(event.keyCombination()).toString()
@@ -487,6 +420,10 @@ class CodeEditor(QPlainTextEdit):
             if event.modifiers() & Qt.KeyboardModifier.AltModifier: mod_val |= Qt.Modifier.ALT
             key_str = QKeySequence(event.key() | mod_val).toString()
         shortcuts = self.mgr.settings["shortcuts"]
+        
+        if key_str == shortcuts.get("PICK_COLOR"):
+            if self.trigger_color_picker(): event.accept(); return
+            
         if key_str == shortcuts.get("MOVE_LINE_UP"): self.move_line(-1); event.accept(); return
         elif key_str == shortcuts.get("MOVE_LINE_DOWN"): self.move_line(1); event.accept(); return
         elif key_str == shortcuts.get("DUPLICATE_LINE"): self.duplicate_line(); event.accept(); return
@@ -537,6 +474,59 @@ class CodeEditor(QPlainTextEdit):
         line_text = cursor.selectedText(); cursor.movePosition(QTextCursor.MoveOperation.EndOfBlock); cursor.insertText("\n" + line_text); cursor.endEditBlock(); self.setTextCursor(cursor)
     def delete_current_line(self):
         cursor = self.textCursor(); cursor.select(QTextCursor.SelectionType.BlockUnderCursor); cursor.removeSelectedText(); self.setTextCursor(cursor)
+
+    def line_number_area_width(self):
+        digits, max_num = 1, max(1, self.blockCount())
+        while max_num >= 10: max_num //= 10; digits += 1
+        return 15 + self.fontMetrics().horizontalAdvance('9') * digits
+    def update_line_number_area_width(self, _): self.setViewportMargins(self.line_number_area_width(), 0, 0, 0)
+    def update_line_number_area(self, rect, dy):
+        if dy: self.line_number_area.scroll(0, dy)
+        else: self.line_number_area.update(0, rect.y(), self.line_number_area.width(), rect.height())
+        if rect.contains(self.viewport().rect()): self.update_line_number_area_width(0)
+    def resizeEvent(self, event):
+        super().resizeEvent(event); cr = self.contentsRect()
+        self.line_number_area.setGeometry(QRect(cr.left(), cr.top(), self.line_number_area_width(), cr.height()))
+    def lineNumberAreaPaintEvent(self, event):
+        painter = QPainter(self.line_number_area); painter.fillRect(event.rect(), QColor(CP_PANEL))
+        block = self.firstVisibleBlock(); block_num = block.blockNumber()
+        top = self.blockBoundingGeometry(block).translated(self.contentOffset()).top()
+        bottom = top + self.blockBoundingRect(block).height()
+        painter.setFont(self.font())
+        while block.isValid() and top <= event.rect().bottom():
+            if block.isVisible() and bottom >= event.rect().top():
+                number = str(block_num + 1); is_current = (block_num == self.textCursor().blockNumber())
+                painter.setPen(QColor(self.accent if is_current else CP_DIM))
+                if is_current:
+                    f = painter.font(); f.setBold(True); painter.setFont(f)
+                painter.drawText(0, int(top), self.line_number_area.width() - 5, self.fontMetrics().height(), Qt.AlignmentFlag.AlignRight, number)
+                if is_current:
+                    f = painter.font(); f.setBold(False); painter.setFont(f)
+            block = block.next(); top = bottom; bottom = top + self.blockBoundingRect(block).height(); block_num += 1
+
+    def highlight_current_line(self):
+        extra_selections = []
+        if not self.isReadOnly():
+            selection = QTextEdit.ExtraSelection()
+            custom_hex = self.mgr.settings.get("cursor_line_color", "")
+            if custom_hex:
+                line_color = QColor(custom_hex)
+                if line_color.alpha() == 255: line_color.setAlpha(40)
+            else:
+                line_color = QColor(self.accent); line_color.setAlpha(25)
+            selection.format.setBackground(line_color); selection.format.setProperty(QTextFormat.Property.FullWidthSelection, True)
+            selection.cursor = self.textCursor(); selection.cursor.clearSelection(); extra_selections.append(selection)
+        self.setExtraSelections(extra_selections); self.line_number_area.update()
+
+    def paintEvent(self, event):
+        super().paintEvent(event)
+        if not self.hasFocus() or self.isReadOnly(): return
+        if not hasattr(self, '_blink_state'):
+            self._blink_state = True; self._blink_timer = QTimer(self); self._blink_timer.timeout.connect(self._toggle_blink); self._blink_timer.start(500)
+        if self._blink_state:
+            painter = QPainter(self.viewport()); cursor_color = self.mgr.settings.get("cursor_color", "")
+            rect = self.cursorRect(); painter.fillRect(rect.left(), rect.top(), 2, rect.height(), QColor(cursor_color if cursor_color else CP_CYAN)); painter.end()
+    def _toggle_blink(self): self._blink_state = not self._blink_state; self.viewport().update()
 
 # --- Dialogs ---
 
