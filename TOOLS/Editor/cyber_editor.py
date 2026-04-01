@@ -342,14 +342,14 @@ class CodeEditor(QPlainTextEdit):
         
         # Build full stylesheet including scrollbars
         scrollbar_style = f"""
-            QScrollBar:vertical {{ background: {CP_BG}; width: 12px; margin: 0px; }}
-            QScrollBar::handle:vertical {{ background: {CP_DIM}; min-height: 20px; border: 1px solid {CP_PANEL}; }}
-            QScrollBar::handle:vertical:hover {{ background: {accent_color}; }}
-            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical, QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {{ background: none; height: 0px; }}
-            QScrollBar:horizontal {{ background: {CP_BG}; height: 12px; margin: 0px; }}
-            QScrollBar::handle:horizontal {{ background: {CP_DIM}; min-width: 20px; border: 1px solid {CP_PANEL}; }}
-            QScrollBar::handle:horizontal:hover {{ background: {accent_color}; }}
-            QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal, QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {{ background: none; width: 0px; }}
+            QScrollBar:vertical {{ background-color: {CP_BG}; width: 12px; margin: 0px; }}
+            QScrollBar::handle:vertical {{ background-color: {accent_color}; min-height: 30px; border: none; }}
+            QScrollBar::handle:vertical:hover {{ background-color: white; }}
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{ background: none; height: 0px; }}
+            QScrollBar:horizontal {{ background-color: {CP_BG}; height: 12px; margin: 0px; }}
+            QScrollBar::handle:horizontal {{ background-color: {accent_color}; min-width: 30px; border: none; }}
+            QScrollBar::handle:horizontal:hover {{ background-color: white; }}
+            QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {{ background: none; width: 0px; }}
         """
         
         self.setStyleSheet(f"""
@@ -643,14 +643,14 @@ class MainWindow(QMainWindow):
         
         # Style Tabs & Scrollbars
         scrollbar_qss = f"""
-            QScrollBar:vertical {{ background: {CP_BG}; width: 12px; margin: 0px; }}
-            QScrollBar::handle:vertical {{ background: {CP_DIM}; min-height: 20px; border: 1px solid {CP_PANEL}; }}
-            QScrollBar::handle:vertical:hover {{ background: {accent}; }}
-            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical, QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {{ background: none; height: 0px; }}
-            QScrollBar:horizontal {{ background: {CP_BG}; height: 12px; margin: 0px; }}
-            QScrollBar::handle:horizontal {{ background: {CP_DIM}; min-width: 20px; border: 1px solid {CP_PANEL}; }}
-            QScrollBar::handle:horizontal:hover {{ background: {accent}; }}
-            QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal, QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {{ background: none; width: 0px; }}
+            QScrollBar:vertical {{ background-color: {CP_BG}; width: 12px; margin: 0px; }}
+            QScrollBar::handle:vertical {{ background-color: {accent}; min-height: 30px; border: none; }}
+            QScrollBar::handle:vertical:hover {{ background-color: white; }}
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{ background: none; height: 0px; }}
+            QScrollBar:horizontal {{ background-color: {CP_BG}; height: 12px; margin: 0px; }}
+            QScrollBar::handle:horizontal {{ background-color: {accent}; min-width: 30px; border: none; }}
+            QScrollBar::handle:horizontal:hover {{ background-color: white; }}
+            QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {{ background: none; width: 0px; }}
         """
 
         self.tabs.setStyleSheet(f"""
