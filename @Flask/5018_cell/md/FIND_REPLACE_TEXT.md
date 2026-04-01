@@ -1,6 +1,6 @@
 # Find & Replace Text Feature
 
-**Location:** F3 Quick Formatter → 🔍🔄 Button
+**Location:** F3 Quick Formatter → 🔍➡️ SVG Button
 
 Simple text search and replace across an entire cell content.
 
@@ -14,7 +14,7 @@ The Find & Replace Text feature allows you to perform literal text replacement w
 
 1. Click on any cell to select it.
 2. Press **F3** to open the Quick Formatter.
-3. Click the **🔍🔄 Find & Replace Text** button.
+3. Click the **🔍➡️ Find & Replace Text** button.
 4. In the modal that appears:
     - **Find Text:** Enter the text you want to search for.
     - **Replace With:** Enter the text you want to replace it with.
