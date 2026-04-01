@@ -23,6 +23,7 @@ Custom mapping in `keyPressEvent` overrides standard behavior for enhanced produ
 - **Duplicate**: `Ctrl + D` copies the active line to the next row.
 - **Delete**: `Ctrl + Shift + K` kills the active line.
 - **Search**: `Ctrl + F` toggles the inline search terminal.
+- **Word Wrap**: `Alt + Z` toggles the line wrapping mode.
 
 ### 3. 🔍 Search_Mod_V1
 A custom-built `SearchPanel` (QFrame) integrated into the layout.

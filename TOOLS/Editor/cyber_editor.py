@@ -42,6 +42,7 @@ DEFAULT_SHORTCUTS = {
     "DUPLICATE_LINE": "Ctrl+D",
     "DELETE_LINE": "Ctrl+Shift+K",
     "TOGGLE_SEARCH": "Ctrl+F",
+    "TOGGLE_WRAP": "Alt+Z",
     "SAVE_FILE": "Ctrl+S",
     "OPEN_FILE": "Ctrl+O",
     "RESTART_APP": "Ctrl+R",
@@ -225,6 +226,7 @@ class CodeEditor(QPlainTextEdit):
         elif key_str == shortcuts.get("DUPLICATE_LINE"): self.duplicate_line(); event.accept(); return
         elif key_str == shortcuts.get("DELETE_LINE"): self.delete_current_line(); event.accept(); return
         elif key_str == shortcuts.get("TOGGLE_SEARCH"): self.shortcut_triggered.emit("TOGGLE_SEARCH"); event.accept(); return
+        elif key_str == shortcuts.get("TOGGLE_WRAP"): self.shortcut_triggered.emit("TOGGLE_WRAP"); event.accept(); return
         elif key_str == shortcuts.get("SAVE_FILE"): self.shortcut_triggered.emit("SAVE_FILE"); event.accept(); return
         elif key_str == shortcuts.get("OPEN_FILE"): self.shortcut_triggered.emit("OPEN_FILE"); event.accept(); return
         elif key_str == shortcuts.get("RESTART_APP"): self.shortcut_triggered.emit("RESTART_APP"); event.accept(); return
@@ -525,9 +527,17 @@ class MainWindow(QMainWindow):
         if action.startswith("LOAD_FILE:"): self.add_new_tab(action[len("LOAD_FILE:"):])
         elif action == "CLOSE_TAB": self.close_tab(self.tabs.currentIndex())
         elif action == "TOGGLE_SEARCH": self.toggle_search()
+        elif action == "TOGGLE_WRAP": self.toggle_word_wrap()
         elif action == "SAVE_FILE": self.on_save()
         elif action == "OPEN_FILE": self.on_open()
         elif action == "RESTART_APP": self.on_restart()
+
+    def toggle_word_wrap(self):
+        editor = self.current_editor()
+        if not editor: return
+        mode = QPlainTextEdit.LineWrapMode.WidgetWidth if editor.lineWrapMode() == QPlainTextEdit.LineWrapMode.NoWrap else QPlainTextEdit.LineWrapMode.NoWrap
+        editor.setLineWrapMode(mode)
+        self.statusBar().showMessage(f"WORD WRAP: {'ON' if mode == QPlainTextEdit.LineWrapMode.WidgetWidth else 'OFF'}", 2000)
 
     def toggle_search(self, force=None):
         visible = not self.search_panel.isVisible() if force is None else force

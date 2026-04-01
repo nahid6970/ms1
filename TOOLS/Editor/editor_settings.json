@@ -16,6 +16,7 @@
         "DUPLICATE_LINE": "Ctrl+D",
         "DELETE_LINE": "Ctrl+Shift+K",
         "TOGGLE_SEARCH": "Ctrl+F",
+        "TOGGLE_WRAP": "Alt+Z",
         "SAVE_FILE": "Ctrl+S",
         "OPEN_FILE": "Ctrl+O",
         "RESTART_APP": "Ctrl+R",
