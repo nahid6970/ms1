@@ -110,7 +110,6 @@ class RecentFileItem(QFrame):
         self.setFrameShape(QFrame.Shape.NoFrame)
         self.setFixedHeight(40)
         self.setup_ui()
-        self.apply_style()
 
     def setup_ui(self):
         layout = QHBoxLayout(self)
@@ -121,6 +120,7 @@ class RecentFileItem(QFrame):
         self.pin_btn.setFixedSize(24, 24)
         self.pin_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self.pin_btn.clicked.connect(self.toggle_pin)
+        self._update_pin_color()
         
         # File Name & Path
         self.name_label = QLabel(os.path.basename(self.path))
@@ -155,38 +155,12 @@ class RecentFileItem(QFrame):
     def toggle_pin(self):
         self.pinned = not self.pinned
         self.pin_btn.setText("★" if self.pinned else "☆")
+        self._update_pin_color()
         self.changed.emit()
+    def _update_pin_color(self):
+        self.pin_btn.setStyleSheet(f"color: {self.accent};" if self.pinned else f"color: {CP_DIM};")
 
-    def apply_style(self):
-        self.setStyleSheet(f"""
-            RecentFileItem {{ 
-                background-color: transparent; 
-                border-bottom: 1px solid #1a1a1a;
-                margin: 0px 10px;
-            }}
-            RecentFileItem:hover {{ 
-                background-color: rgba(255, 255, 255, 0.03); 
-                border-left: 4px solid {self.accent};
-            }}
-            #FileNameLabel {{ 
-                color: {self.accent}; 
-                font-family: 'Consolas'; 
-                font-weight: bold;
-                font-size: 10pt;
-                background: transparent;
-            }}
-            #FilePathLabel {{ 
-                color: {CP_SUBTEXT}; 
-                font-family: 'Consolas'; 
-                font-size: 7pt;
-                background: transparent;
-            }}
-            QPushButton {{ 
-                background: none; border: none; font-size: 14px; 
-                color: {self.accent if self.pinned else CP_DIM}; 
-            }}
-            QPushButton:hover {{ color: {CP_RED}; }}
-        """)
+
 
 class RecentFilesDialog(QDialog):
     file_selected = pyqtSignal(str)
@@ -268,6 +242,12 @@ class RecentFilesDialog(QDialog):
             QScrollBar:vertical {{ background-color: {CP_BG}; width: 10px; }}
             QScrollBar::handle:vertical {{ background-color: {accent}; }}
             QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{ height: 0px; }}
+            RecentFileItem {{ background-color: transparent; border-bottom: 1px solid #1a1a1a; margin: 0px 10px; }}
+            RecentFileItem:hover {{ background-color: rgba(255,255,255,0.03); border-left: 4px solid {accent}; }}
+            #FileNameLabel {{ color: {accent}; font-family: Consolas; font-weight: bold; font-size: 10pt; background: transparent; }}
+            #FilePathLabel {{ color: {CP_SUBTEXT}; font-family: Consolas; font-size: 7pt; background: transparent; }}
+            RecentFileItem QPushButton {{ background: none; border: none; font-size: 14px; color: {CP_DIM}; }}
+            RecentFileItem QPushButton:hover {{ color: {CP_RED}; }}
         """)
 
 class CyberButton(QPushButton):
