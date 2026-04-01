@@ -387,9 +387,25 @@ class SettingsDialog(QDialog):
                 background-color: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 6px;
                 font-family: 'Consolas'; font-size: 11pt;
             }}
-            QLineEdit:focus {{ border: 1px solid {accent}; }}
+            QLineEdit:focus, QComboBox:focus {{ border: 1px solid {accent}; }}
+            
+            QComboBox::drop-down {{
+                border: none;
+                width: 20px;
+            }}
+            QComboBox::arrow {{
+                border-left: 5px solid transparent;
+                border-right: 5px solid transparent;
+                border-top: 5px solid {CP_DIM};
+                margin-right: 5px;
+            }}
             QComboBox QAbstractItemView {{
-                background-color: {CP_PANEL}; color: {CP_TEXT}; selection-background-color: {accent}; selection-color: black;
+                background-color: {CP_PANEL};
+                color: {CP_TEXT};
+                selection-background-color: {accent};
+                selection-color: black;
+                border: 1px solid {accent};
+                outline: none;
             }}
             QFrame {{ border: 1px dashed {CP_DIM}; margin: 10px 0; }}
         """)
