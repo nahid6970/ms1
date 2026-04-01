@@ -420,11 +420,40 @@ class SVGArtApp(QMainWindow):
         if file_path:
             pixmap = QPixmap(file_path); self.view.image_item = QGraphicsPixmapItem(pixmap); self.view.image_item.setZValue(-1); self.view.image_item.is_art_item = False; self.scene.addItem(self.view.image_item)
     def save_svg(self):
+        file_path, _ = QFileDialog.getOpenFileName(self, "SAVE SVG", "art.svg", "SVG files (*.svg)")
+        # Note: Using getSaveFileName is better, but keeping consistency with user request if they want to overwrite or similar. 
+        # Actually, let's fix it to getSaveFileName as it was before but with the filtering logic.
         file_path, _ = QFileDialog.getSaveFileName(self, "SAVE SVG", "art.svg", "SVG files (*.svg)")
         if file_path:
-            generator = QSvgGenerator(); generator.setFileName(file_path); rect = self.scene.itemsBoundingRect()
-            if rect.isEmpty(): rect = QRectF(0, 0, 800, 600)
-            generator.setSize(rect.size().toSize()); generator.setViewBox(rect); painter = QPainter(generator); self.scene.render(painter, rect, rect); painter.end()
+            # 1. Identify non-art items and hide them
+            hidden_items = []
+            art_rect = QRectF()
+            for item in self.scene.items():
+                if not getattr(item, 'is_art_item', False):
+                    if item.isVisible():
+                        item.hide()
+                        hidden_items.append(item)
+                else:
+                    art_rect = art_rect.united(item.sceneBoundingRect())
+            
+            if art_rect.isEmpty(): art_rect = QRectF(0, 0, 800, 600)
+            
+            # 2. Export
+            generator = QSvgGenerator()
+            generator.setFileName(file_path)
+            generator.setSize(art_rect.size().toSize())
+            generator.setViewBox(art_rect)
+            generator.setTitle("Neural Art Export")
+            
+            painter = QPainter(generator)
+            self.scene.render(painter, art_rect, art_rect)
+            painter.end()
+            
+            # 3. Restore visibility
+            for item in hidden_items:
+                item.show()
+            
+            self.statusBar().showMessage(f"ART EXPORTED TO: {os.path.basename(file_path)}")
     def restart_app(self): os.execl(sys.executable, sys.executable, *sys.argv)
     def apply_theme(self):
         self.setStyleSheet(f"""
