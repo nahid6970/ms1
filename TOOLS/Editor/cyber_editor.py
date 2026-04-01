@@ -56,7 +56,7 @@ DEFAULT_SHORTCUTS = {
 # --- Settings Manager ---
 class SettingsManager:
     def __init__(self):
-        self.filename = os.path.join(os.path.dirname(os.path.abspath(__file__)), "editor_settings.json")
+        self.filename = r"C:\@delta\output\editor\editor_settings.json"
         self.settings = {
             "width": 1000,
             "height": 700,
@@ -86,6 +86,7 @@ class SettingsManager:
 
     def save(self):
         try:
+            os.makedirs(os.path.dirname(self.filename), exist_ok=True)
             with open(self.filename, 'w') as f: json.dump(self.settings, f, indent=4)
         except Exception as e: print(f"Error saving settings: {e}")
 
