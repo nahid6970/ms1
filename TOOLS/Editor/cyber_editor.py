@@ -344,11 +344,11 @@ class CodeEditor(QPlainTextEdit):
         scrollbar_style = f"""
             QScrollBar:vertical {{ background-color: {CP_BG}; width: 12px; margin: 0px; }}
             QScrollBar::handle:vertical {{ background-color: {accent_color}; min-height: 30px; border: none; }}
-            QScrollBar::handle:vertical:hover {{ background-color: white; }}
+            QScrollBar::handle:vertical:hover {{ background-color: {accent_color}; }}
             QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{ background: none; height: 0px; }}
             QScrollBar:horizontal {{ background-color: {CP_BG}; height: 12px; margin: 0px; }}
             QScrollBar::handle:horizontal {{ background-color: {accent_color}; min-width: 30px; border: none; }}
-            QScrollBar::handle:horizontal:hover {{ background-color: white; }}
+            QScrollBar::handle:horizontal:hover {{ background-color: {accent_color}; }}
             QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {{ background: none; width: 0px; }}
         """
         
