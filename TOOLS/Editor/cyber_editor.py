@@ -130,6 +130,12 @@ class CyberHighlighter(QSyntaxHighlighter):
         
         if self.ext in [".md", ".markdown", ".txt"]:
             self.setup_markdown_rules()
+        elif self.ext in [".html", ".htm", ".xml"]:
+            self.setup_html_rules()
+        elif self.ext in [".css"]:
+            self.setup_css_rules()
+        elif self.ext in [".json"]:
+            self.setup_json_rules()
         else:
             self.setup_code_rules()
 
@@ -147,11 +153,44 @@ class CyberHighlighter(QSyntaxHighlighter):
             "return", "try", "while", "with", "yield",
             "function", "var", "let", "const", "static", "void", "int", "float",
             "bool", "public", "private", "protected", "new", "delete", "this",
-            "self", "cls"
+            "self", "cls", "export", "default", "from", "import", "type", "interface",
+            "enum", "super", "extends", "implements", "instanceof", "typeof"
         ]
         
         for word in keywords:
             self.rules.append((QRegularExpression(f"\\b{word}\\b"), keyword_format))
+
+        # Strings
+        string_format = QTextCharFormat()
+        string_format.setForeground(QColor(CP_GREEN))
+        self.rules.append((QRegularExpression("\".*?\""), string_format))
+        self.rules.append((QRegularExpression("'.*?'"), string_format))
+        self.rules.append((QRegularExpression("`.*?`"), string_format)) # Template literals
+
+        # Comments
+        comment_format = QTextCharFormat()
+        comment_format.setForeground(QColor(CP_DIM))
+        comment_format.setFontItalic(True)
+        self.rules.append((QRegularExpression("#.*"), comment_format))
+        self.rules.append((QRegularExpression("//.*"), comment_format))
+        self.rules.append((QRegularExpression("/\\*.*?\\*/"), comment_format)) # Multi-line comments
+
+        # Numbers
+        number_format = QTextCharFormat()
+        number_format.setForeground(QColor(CP_RED))
+        self.rules.append((QRegularExpression("\\b[0-9]+\\b"), number_format))
+
+    def setup_html_rules(self):
+        # Tags
+        tag_format = QTextCharFormat()
+        tag_format.setForeground(QColor(self.accent))
+        tag_format.setFontWeight(QFont.Weight.Bold)
+        self.rules.append((QRegularExpression("<[^>]+>"), tag_format))
+
+        # Attributes
+        attr_format = QTextCharFormat()
+        attr_format.setForeground(QColor(CP_CYAN))
+        self.rules.append((QRegularExpression("\\b\\w+(?=\\s*=\\s*[\"'])"), attr_format))
 
         # Strings
         string_format = QTextCharFormat()
@@ -163,8 +202,49 @@ class CyberHighlighter(QSyntaxHighlighter):
         comment_format = QTextCharFormat()
         comment_format.setForeground(QColor(CP_DIM))
         comment_format.setFontItalic(True)
-        self.rules.append((QRegularExpression("#.*"), comment_format))
-        self.rules.append((QRegularExpression("//.*"), comment_format))
+        self.rules.append((QRegularExpression("<!--.*?-->"), comment_format))
+
+    def setup_css_rules(self):
+        # Selectors
+        sel_format = QTextCharFormat()
+        sel_format.setForeground(QColor(self.accent))
+        sel_format.setFontWeight(QFont.Weight.Bold)
+        self.rules.append((QRegularExpression("[.#]?\\w+(?=\\s*[{])"), sel_format))
+        self.rules.append((QRegularExpression("[.#]\\w+"), sel_format)) # .class or #id
+
+        # Properties
+        prop_format = QTextCharFormat()
+        prop_format.setForeground(QColor(CP_CYAN))
+        self.rules.append((QRegularExpression("\\b[\\w-]+(?=\\s*:)"), prop_format))
+
+        # Values (Numbers)
+        val_format = QTextCharFormat()
+        val_format.setForeground(QColor(CP_RED))
+        self.rules.append((QRegularExpression("\\b[0-9]+(px|em|rem|%|vh|vw|s|ms)?\\b"), val_format))
+
+        # Comments
+        comment_format = QTextCharFormat()
+        comment_format.setForeground(QColor(CP_DIM))
+        comment_format.setFontItalic(True)
+        self.rules.append((QRegularExpression("/\\*.*?\\*/"), comment_format))
+
+    def setup_json_rules(self):
+        # Keys
+        key_format = QTextCharFormat()
+        key_format.setForeground(QColor(CP_CYAN))
+        self.rules.append((QRegularExpression("\".*?\"(?=\\s*:)"), key_format))
+
+        # Values (Strings)
+        string_format = QTextCharFormat()
+        string_format.setForeground(QColor(CP_GREEN))
+        self.rules.append((QRegularExpression("(?<=:\\s*)\".*?\""), string_format))
+
+        # Values (Booleans/Null)
+        keyword_format = QTextCharFormat()
+        keyword_format.setForeground(QColor(self.accent))
+        keyword_format.setFontWeight(QFont.Weight.Bold)
+        for word in ["true", "false", "null"]:
+            self.rules.append((QRegularExpression(f"\\b{word}\\b"), keyword_format))
 
         # Numbers
         number_format = QTextCharFormat()
