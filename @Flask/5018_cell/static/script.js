@@ -2644,7 +2644,7 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
             const searchInput = document.getElementById('searchInput');
             if (searchInput && searchInput.value.trim()) {
                 const searchTerms = searchInput.value.split(',')
-                    .map(term => stripMarkdown(term.trim()).toLowerCase().normalize('NFC'))
+                    .map(term => normalizeBengali(stripMarkdown(term.trim()).toLowerCase().normalize('NFC')))
                     .filter(term => term.length > 0);
                 if (searchTerms.length > 0) {
                     highlightedHtml = highlightMultipleTermsInHtml(highlightedHtml, searchTerms);
@@ -2721,7 +2721,7 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
                     const searchInput = document.getElementById('searchInput');
                     if (searchInput && searchInput.value.trim()) {
                         const searchTerms = searchInput.value.split(',')
-                            .map(term => stripMarkdown(term.trim()).toLowerCase().normalize('NFC'))
+                            .map(term => normalizeBengali(stripMarkdown(term.trim()).toLowerCase().normalize('NFC')))
                             .filter(term => term.length > 0);
                         if (searchTerms.length > 0) {
                             highlightedHtml = highlightMultipleTermsInHtml(highlightedHtml, searchTerms);
