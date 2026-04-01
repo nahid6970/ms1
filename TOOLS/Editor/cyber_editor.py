@@ -235,11 +235,12 @@ class SettingsDialog(QDialog):
         self.w_edit = QLineEdit(str(self.mgr.settings.get("width", 1000))); self.h_edit = QLineEdit(str(self.mgr.settings.get("height", 700)))
         
         self.font_sel = QComboBox()
-        common_fonts = ["Consolas", "Courier New", "Monospace", "Lucida Console", "Fixedsys", "Terminal", "Cascadia Code", "Roboto Mono", "Fira Code", "JetBrains Mono"]
-        self.font_sel.addItems(common_fonts)
+        from PyQt6.QtGui import QFontDatabase
+        all_fonts = sorted(QFontDatabase.families())
+        self.font_sel.addItems(all_fonts)
         curr_fam = self.mgr.settings.get("font_family", "Consolas")
-        if self.font_sel.findText(curr_fam) == -1: self.font_sel.addItem(curr_fam)
-        self.font_sel.setCurrentText(curr_fam)
+        idx = self.font_sel.findText(curr_fam)
+        self.font_sel.setCurrentIndex(max(0, idx))
         
         self.size_edit = QLineEdit(str(self.mgr.settings.get("font_size", 10)))
         
@@ -270,7 +271,16 @@ class SettingsDialog(QDialog):
         if color.isValid(): self.temp_cursor_color = color.name(); self.cur_cursor_label.setText(self.temp_cursor_color); self.cur_cursor_label.setStyleSheet(f"color: {self.temp_cursor_color};")
     def apply_theme(self):
         accent = THEMES.get(self.mgr.settings.get("theme", "CyberYellow"), THEMES["CyberYellow"])["accent"]
-        self.setStyleSheet(f"QDialog {{ background-color: {CP_BG}; border: 2px solid {accent}; }} QLabel {{ color: {CP_TEXT}; font-family: 'Consolas'; font-weight: bold; text-transform: uppercase; }} QLineEdit, QComboBox, QFontComboBox {{ background-color: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 6px; font-family: 'Consolas'; }} QLineEdit:focus, QComboBox:focus, QFontComboBox:focus {{ border: 1px solid {accent}; }} QComboBox::drop-down, QFontComboBox::drop-down {{ border: none; width: 20px; }} QComboBox::arrow, QFontComboBox::arrow {{ border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 5px solid {CP_DIM}; margin-right: 5px; }} QComboBox QAbstractItemView, QFontComboBox QAbstractItemView {{ background-color: {CP_PANEL}; color: {CP_TEXT}; selection-background-color: {accent}; selection-color: black; border: 1px solid {accent}; outline: none; }} QPushButton {{ background-color: {CP_DIM}; color: white; border: 1px solid {CP_DIM}; padding: 4px; font-family: 'Consolas'; }} QPushButton:hover {{ border: 1px solid {accent}; color: {accent}; }} QFrame {{ border: 1px dashed {CP_DIM}; margin: 10px 0; }}")
+        self.setStyleSheet(f"""
+            QDialog {{ background-color: {CP_BG}; border: 2px solid {accent}; }}
+            QLabel {{ color: {CP_TEXT}; font-family: 'Consolas'; font-weight: bold; text-transform: uppercase; }}
+            QLineEdit, QComboBox {{ background-color: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 6px; font-family: 'Consolas'; }}
+            QLineEdit:focus, QComboBox:focus {{ border: 1px solid {accent}; }}
+            
+            QPushButton {{ background-color: {CP_DIM}; color: white; border: 1px solid {CP_DIM}; padding: 4px; font-family: 'Consolas'; }}
+            QPushButton:hover {{ border: 1px solid {accent}; color: {accent}; }}
+            QFrame {{ border: 1px dashed {CP_DIM}; margin: 10px 0; }}
+        """)
     def do_save(self):
         try:
             self.mgr.settings["width"] = int(self.w_edit.text()); self.mgr.settings["height"] = int(self.h_edit.text())
