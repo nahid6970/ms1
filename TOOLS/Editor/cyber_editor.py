@@ -57,6 +57,7 @@ class SettingsManager:
             "theme": "CyberYellow",
             "font_size": 10,
             "cursor_line_color": "", # Empty means use accent
+            "cursor_color": "",      # Empty means use accent/cyan
             "last_file": "",
             "shortcuts": DEFAULT_SHORTCUTS.copy()
         }
@@ -144,9 +145,11 @@ class CodeEditor(QPlainTextEdit):
         self.cursorPositionChanged.connect(self.highlight_current_line)
 
         self.set_accent(accent)
+        self.apply_cursor_color()
         self.update_line_number_area_width(0)
         self.highlight_current_line()
 
+        self.setObjectName("CyberEditorCore")
         self.setFont(QFont('Consolas', 10))
         self.setLineWrapMode(QPlainTextEdit.LineWrapMode.NoWrap)
         self.setAcceptDrops(True)
@@ -154,6 +157,24 @@ class CodeEditor(QPlainTextEdit):
     def set_accent(self, accent):
         self.accent = accent
         self.highlight_current_line()
+        self.apply_cursor_color()
+
+    def apply_cursor_color(self):
+        # We now use a custom paintEvent for the caret, so we hide the native one
+        self.setCursorWidth(0)
+        
+        # Consistent text styling
+        accent_color = THEMES.get(self.mgr.settings.get("theme", "CyberYellow"), THEMES["CyberYellow"])["accent"]
+        self.setStyleSheet(f"""
+            background-color: {CP_PANEL};
+            color: {CP_CYAN};
+            border: 1px solid {CP_DIM};
+            padding: 8px;
+            selection-background-color: {accent_color};
+            selection-color: black;
+            font-family: 'Consolas';
+            font-size: 11pt;
+        """)
 
     def dragEnterEvent(self, event):
         if event.mimeData().hasUrls(): event.accept()
@@ -216,17 +237,15 @@ class CodeEditor(QPlainTextEdit):
 
     def highlight_current_line(self):
         extra_selections = []
-        if not self.isReadOnly():
+        if not self.is_read_only(): # Using our new method
             selection = QTextEdit.ExtraSelection()
-            # Custom Color Logic
             custom_hex = self.mgr.settings.get("cursor_line_color", "")
             if custom_hex:
                 line_color = QColor(custom_hex)
-                if line_color.alpha() == 255: line_color.setAlpha(40) # Ensure transparency if not provided
+                if line_color.alpha() == 255: line_color.setAlpha(40)
             else:
                 line_color = QColor(self.accent)
                 line_color.setAlpha(25)
-            
             selection.format.setBackground(line_color)
             selection.format.setProperty(QTextFormat.Property.FullWidthSelection, True)
             selection.cursor = self.textCursor()
@@ -234,6 +253,39 @@ class CodeEditor(QPlainTextEdit):
             extra_selections.append(selection)
         self.setExtraSelections(extra_selections)
         self.line_number_area.update()
+
+    def is_read_only(self):
+        return self.isReadOnly()
+
+    def paintEvent(self, event):
+        # Let base class paint text and standard cursor (which we made invisible)
+        super().paintEvent(event)
+        
+        # Now paint OUR custom colored caret if focused and blinking
+        if not self.hasFocus() or self.isReadOnly():
+            return
+            
+        # Blinking logic (following Qt defaults roughly)
+        if not hasattr(self, '_blink_state'):
+            self._blink_state = True
+            self._blink_timer = QTimer(self)
+            self._blink_timer.timeout.connect(self._toggle_blink)
+            self._blink_timer.start(500)
+            
+        if self._blink_state:
+            # Draw the custom caret
+            painter = QPainter(self.viewport())
+            cursor_color = self.mgr.settings.get("cursor_color", "")
+            painter.setPen(QColor(cursor_color if cursor_color else CP_CYAN))
+            
+            rect = self.cursorRect()
+            # Draw a thick line like the user wants |
+            painter.fillRect(rect.left(), rect.top(), 2, rect.height(), QColor(cursor_color if cursor_color else CP_CYAN))
+            painter.end()
+
+    def _toggle_blink(self):
+        self._blink_state = not self._blink_state
+        self.viewport().update()
 
     def keyPressEvent(self, event):
         try:
@@ -290,7 +342,8 @@ class SettingsDialog(QDialog):
         self.mgr = mgr
         self.setWindowTitle("SYSTEM_SETTINGS")
         self.setModal(True)
-        self.temp_cursor_color = self.mgr.settings.get("cursor_line_color", "")
+        self.temp_cursor_line_color = self.mgr.settings.get("cursor_line_color", "")
+        self.temp_cursor_color = self.mgr.settings.get("cursor_color", "")
         self.setup_ui()
         self.apply_theme()
 
@@ -305,17 +358,25 @@ class SettingsDialog(QDialog):
         idx = self.theme_sel.findData(self.mgr.settings.get("theme", "CyberYellow"))
         self.theme_sel.setCurrentIndex(max(0, idx))
         
-        # Color Picker Section
-        self.color_btn = QPushButton("PICK_CURSOR_LINE_COLOR")
-        self.color_btn.clicked.connect(self.pick_color)
-        self.cur_color_label = QLabel(self.temp_cursor_color if self.temp_cursor_color else "AUTO (ACCENT)")
-        self.cur_color_label.setStyleSheet(f"color: {self.temp_cursor_color if self.temp_cursor_color else CP_SUBTEXT};")
+        # Color Picker Section: Line Highlight
+        self.line_color_btn = QPushButton("PICK_HL_COLOR")
+        self.line_color_btn.clicked.connect(self.pick_line_color)
+        self.cur_line_label = QLabel(self.temp_cursor_line_color if self.temp_cursor_line_color else "AUTO")
+        self.cur_line_label.setStyleSheet(f"color: {self.temp_cursor_line_color if self.temp_cursor_line_color else CP_SUBTEXT};")
+        
+        # Color Picker Section: Insertion Cursor
+        self.cursor_color_btn = QPushButton("PICK_INSERT_COLOR")
+        self.cursor_color_btn.clicked.connect(self.pick_cursor_color)
+        self.cur_cursor_label = QLabel(self.temp_cursor_color if self.temp_cursor_color else "AUTO")
+        self.cur_cursor_label.setStyleSheet(f"color: {self.temp_cursor_color if self.temp_cursor_color else CP_SUBTEXT};")
         
         form.addRow("UI_WIDTH:", self.w_edit)
         form.addRow("UI_HEIGHT:", self.h_edit)
         form.addRow("COLOR_THEME:", self.theme_sel)
-        form.addRow("CURSOR_HL:", self.color_btn)
-        form.addRow("CURRENT_HL:", self.cur_color_label)
+        form.addRow("LINE_HL:", self.line_color_btn)
+        form.addRow("VAL:", self.cur_line_label)
+        form.addRow("CURSOR_COLOR:", self.cursor_color_btn)
+        form.addRow("VAL:", self.cur_cursor_label)
         layout.addLayout(form)
         
         self.more_box = QFrame(); self.more_box.setFrameShape(QFrame.Shape.StyledPanel)
@@ -328,13 +389,21 @@ class SettingsDialog(QDialog):
         self.cancel_btn = CyberButton("ABORT", accent=CP_RED); self.cancel_btn.clicked.connect(self.reject)
         btns.addWidget(self.save_btn); btns.addWidget(self.cancel_btn); layout.addLayout(btns)
 
-    def pick_color(self):
-        cur = QColor(self.temp_cursor_color) if self.temp_cursor_color else QColor(CP_CYAN)
-        color = QColorDialog.getColor(cur, self, "SELECT_CURSOR_HIGHLIGHT_COLOR", QColorDialog.ColorDialogOption.ShowAlphaChannel)
+    def pick_line_color(self):
+        cur = QColor(self.temp_cursor_line_color) if self.temp_cursor_line_color else QColor(CP_CYAN)
+        color = QColorDialog.getColor(cur, self, "SELECT_LINE_HL_COLOR", QColorDialog.ColorDialogOption.ShowAlphaChannel)
         if color.isValid():
-            self.temp_cursor_color = color.name(QColor.NameFormat.HexArgb)
-            self.cur_color_label.setText(self.temp_cursor_color)
-            self.cur_color_label.setStyleSheet(f"color: {color.name()};")
+            self.temp_cursor_line_color = color.name(QColor.NameFormat.HexArgb)
+            self.cur_line_label.setText(self.temp_cursor_line_color)
+            self.cur_line_label.setStyleSheet(f"color: {color.name()};")
+
+    def pick_cursor_color(self):
+        cur = QColor(self.temp_cursor_color) if self.temp_cursor_color else QColor(CP_CYAN)
+        color = QColorDialog.getColor(cur, self, "SELECT_INSERTION_MARKER_COLOR")
+        if color.isValid():
+            self.temp_cursor_color = color.name()
+            self.cur_cursor_label.setText(self.temp_cursor_color)
+            self.cur_cursor_label.setStyleSheet(f"color: {self.temp_cursor_color};")
 
     def apply_theme(self):
         accent = THEMES.get(self.mgr.settings.get("theme", "CyberYellow"), THEMES["CyberYellow"])["accent"]
@@ -356,7 +425,8 @@ class SettingsDialog(QDialog):
             self.mgr.settings["width"] = int(self.w_edit.text())
             self.mgr.settings["height"] = int(self.h_edit.text())
             self.mgr.settings["theme"] = self.theme_sel.currentData()
-            self.mgr.settings["cursor_line_color"] = self.temp_cursor_color
+            self.mgr.settings["cursor_line_color"] = self.temp_cursor_line_color
+            self.mgr.settings["cursor_color"] = self.temp_cursor_color
             self.mgr.save(); self.accept()
         except Exception as e: QMessageBox.critical(self, "SYSTEM_ERR", f"INVALID: {e}")
 
@@ -421,7 +491,14 @@ class MainWindow(QMainWindow):
         theme_key = self.mgr.settings.get("theme", "CyberYellow"); accent = THEMES[theme_key]["accent"]; self.editor.set_accent(accent); self.search_panel.apply_theme(accent)
         for b in [self.btn_open, self.btn_save, self.btn_restart, self.btn_keybinds, self.btn_settings]: b.set_accent(accent)
         if not self.is_admin: self.btn_elevate.set_accent(CP_RED)
-        self.setStyleSheet(f"QMainWindow {{ background-color: {CP_BG}; }} QWidget {{ color: {CP_TEXT}; font-family: 'Consolas'; font-size: 10pt; }} QPlainTextEdit {{ background-color: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 8px; selection-background-color: {accent}; selection-color: black; font-family: 'Consolas'; font-size: 11pt; }} QPlainTextEdit:focus {{ border: 1px solid {accent}; }} QStatusBar {{ background: {CP_PANEL}; color: {CP_SUBTEXT}; border-top: 1px solid {CP_DIM}; }}")
+        self.setStyleSheet(f"""
+            QMainWindow {{ background-color: {CP_BG}; }}
+            QWidget {{ color: {CP_TEXT}; font-family: 'Consolas'; font-size: 10pt; }}
+            #CyberEditorCore:focus {{
+                border: 1px solid {accent};
+            }}
+            QStatusBar {{ background: {CP_PANEL}; color: {CP_SUBTEXT}; border-top: 1px solid {CP_DIM}; }}
+        """)
     def handle_shortcut(self, action):
         if action.startswith("LOAD_FILE:"): self.load_file(action[len("LOAD_FILE:"):])
         elif action == "TOGGLE_SEARCH": self.toggle_search()
