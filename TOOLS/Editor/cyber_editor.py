@@ -382,6 +382,26 @@ class CodeEditor(QPlainTextEdit):
             {scrollbar_style}
         """)
 
+    def mouseDoubleClickEvent(self, event):
+        cursor = self.cursorForPosition(event.pos())
+        cursor.select(QTextCursor.SelectionType.WordUnderCursor)
+        text = cursor.selectedText()
+        
+        # Check for hex color pattern
+        import re
+        match = re.search(r"#[0-9A-Fa-f]{6}|#[0-9A-Fa-f]{3}", text)
+        if match:
+            hex_code = match.group(0)
+            color = QColor(hex_code)
+            if color.isValid():
+                new_color = QColorDialog.getColor(color, self, "PICK_DOCUMENT_COLOR")
+                if new_color.isValid():
+                    # Replace exactly the hex code
+                    cursor.insertText(new_color.name().upper())
+                    return # Skip default word selection
+        
+        super().mouseDoubleClickEvent(event)
+
     def dragEnterEvent(self, event):
         if event.mimeData().hasUrls(): event.accept()
         else: super().dragEnterEvent(event)
