@@ -13,7 +13,7 @@ try:
                                  QPlainTextEdit, QLabel, QPushButton, QFileDialog, QDialog,
                                  QFormLayout, QLineEdit, QComboBox, QStatusBar, QMessageBox,
                                  QFrame, QSplitter, QTextEdit, QCheckBox, QColorDialog, QTabWidget, QTabBar)
-    from PyQt6.QtCore import Qt, QRect, QSize, pyqtSignal, QTimer, QPoint, QRegularExpression
+    from PyQt6.QtCore import Qt, QRect, QSize, pyqtSignal, QTimer, QPoint, QRegularExpression, QEvent
     from PyQt6.QtGui import (QPainter, QTextFormat, QColor, QFont, QAction, QIcon,
                              QTextCursor, QKeySequence, QPalette, QTextDocument, QSyntaxHighlighter,
                              QTextCharFormat)
@@ -869,8 +869,7 @@ class MainWindow(QMainWindow):
         dlg = RecentFilesDialog(self, self.mgr)
         dlg.file_selected.connect(self.add_new_tab)
         dlg.exec()
-        self.btn_recent.clearFocus()
-        self.btn_recent.update() # Force style refresh
+        QTimer.singleShot(0, lambda: (self.btn_recent.setAttribute(Qt.WidgetAttribute.WA_UnderMouse, False), self.btn_recent.update()))
 
     def update_recent_files(self, path):
         if not path: return
