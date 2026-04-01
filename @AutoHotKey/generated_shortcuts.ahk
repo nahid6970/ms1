@@ -768,6 +768,22 @@ PrintScreen::Run("C:\@delta\ms1\scripts\Autohtokey\version2\gui\Bio.ahk", "", "H
     }
 }
 
+;! Paste as One Line
+;! Pastes clipboard as a single line
+^+v:: {
+    PasteOneLine()
+    PasteOneLine() {
+        original := A_Clipboard
+        oneLine := StrReplace(A_Clipboard, "`r`n", " ")
+        oneLine := StrReplace(oneLine, "`n", " ")
+        oneLine := RegExReplace(oneLine, "\s+", " ")
+        A_Clipboard := Trim(oneLine)
+        Send("^v")
+        Sleep(200)
+        A_Clipboard := original
+    }
+}
+
 ;! === CONTEXT SHORTCUTS ===
 ;! Gemini Save Chat
 ;! Save current Gemini chat session

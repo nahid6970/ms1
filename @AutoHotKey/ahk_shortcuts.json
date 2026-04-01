@@ -294,6 +294,14 @@
             "hotkey": "!f",
             "action": "OpenFocusedDirectory()\nOpenFocusedDirectory() {\n    try {\n        hwnd := WinExist(\"A\")\n        if !hwnd\n            return\n            \n        pid := WinGetPID(\"ahk_id \" hwnd)\n        processName := WinGetProcessName(\"ahk_id \" hwnd)\n        \n        finalPath := \"\"\n        \n        ; Handle script interpreters\n        if (processName ~= \"i)python|powershell|pwsh|autohotkey\") {\n            for proc in ComObjGet(\"winmgmts:\").ExecQuery(\"Select CommandLine from Win32_Process Where ProcessId = \" pid) {\n                cmdLine := proc.CommandLine\n                ; Look for paths ending in script extensions in the command line\n                if RegExMatch(cmdLine, 'i)\"([^\"]+\\.(py|ps1|ahk|bat|cmd))\"', &match)\n                    finalPath := match[1]\n                else if RegExMatch(cmdLine, 'i)\\s([^\\s]+\\.(py|ps1|ahk|bat|cmd))(\\s|$)', &match)\n                    finalPath := match[1]\n            }\n        }\n        \n        if (finalPath == \"\")\n            finalPath := WinGetProcessPath(\"ahk_id \" hwnd)\n            \n        SplitPath(finalPath, , &dir)\n        if DirExist(dir)\n            Run(dir)\n    }\n}",
             "enabled": true
+        },
+        {
+            "name": "Paste as One Line",
+            "category": "Text",
+            "description": "Pastes clipboard as a single line",
+            "hotkey": "^+v",
+            "action": "PasteOneLine()\nPasteOneLine() {\n    original := A_Clipboard\n    oneLine := StrReplace(A_Clipboard, \"`r`n\", \" \")\n    oneLine := StrReplace(oneLine, \"`n\", \" \")\n    oneLine := RegExReplace(oneLine, \"\\s+\", \" \")\n    A_Clipboard := Trim(oneLine)\n    Send(\"^v\")\n    Sleep(200)\n    A_Clipboard := original\n}",
+            "enabled": true
         }
     ],
     "text_shortcuts": [
