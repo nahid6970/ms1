@@ -315,6 +315,8 @@ class CyberHighlighter(QSyntaxHighlighter):
             self.setup_css_rules()
         elif self.ext in [".json"]:
             self.setup_json_rules()
+        elif self.ext in [".ahk", ".ah2"]:
+            self.setup_ahk_rules()
         else:
             self.setup_code_rules()
 
@@ -429,6 +431,65 @@ class CyberHighlighter(QSyntaxHighlighter):
         number_format = QTextCharFormat()
         number_format.setForeground(QColor(CP_RED))
         self.rules.append((QRegularExpression("\\b[0-9]+\\b"), number_format))
+
+
+    def setup_ahk_rules(self):
+        # Keywords
+        kw_fmt = QTextCharFormat()
+        kw_fmt.setForeground(QColor(self.accent))
+        kw_fmt.setFontWeight(QFont.Weight.Bold)
+        for word in [
+            "if", "else", "while", "loop", "for", "in", "break", "continue", "return",
+            "try", "catch", "finally", "throw", "class", "extends", "new", "super",
+            "global", "local", "static", "and", "or", "not", "true", "false",
+            "unset", "IsSet", "goto"
+        ]:
+            self.rules.append((QRegularExpression(f"\\b{word}\\b", QRegularExpression.PatternOption.CaseInsensitiveOption), kw_fmt))
+
+        # Built-in functions
+        fn_fmt = QTextCharFormat()
+        fn_fmt.setForeground(QColor(CP_CYAN))
+        for word in [
+            "MsgBox", "Send", "SendInput", "SendEvent", "SendPlay", "Run", "RunWait",
+            "WinActivate", "WinWait", "WinExist", "WinGetTitle", "WinClose",
+            "Sleep", "Exit", "ExitApp", "Reload", "SetTimer", "SetWorkingDir",
+            "FileRead", "FileAppend", "FileDelete", "DirCreate", "DirDelete",
+            "StrLen", "SubStr", "StrReplace", "StrSplit", "Trim", "LTrim", "RTrim",
+            "InStr", "RegExMatch", "RegExReplace", "Format", "Number", "String",
+            "Array", "Map", "Type", "IsNumber", "IsInteger", "IsFloat", "IsAlpha",
+            "Hotkey", "HotIf", "InputBox", "ToolTip", "TrayTip", "Clipboard",
+            "A_ThisHotkey", "A_PriorHotkey", "A_TimeSincePriorHotkey"
+        ]:
+            self.rules.append((QRegularExpression(f"\\b{word}\\b"), fn_fmt))
+
+        # Directives (#Include, #Requires etc)
+        dir_fmt = QTextCharFormat()
+        dir_fmt.setForeground(QColor(CP_RED))
+        dir_fmt.setFontWeight(QFont.Weight.Bold)
+        self.rules.append((QRegularExpression("^#\\w+"), dir_fmt))
+
+        # Hotkeys (e.g. ^a::, !F1::)
+        hk_fmt = QTextCharFormat()
+        hk_fmt.setForeground(QColor(self.accent))
+        hk_fmt.setFontWeight(QFont.Weight.Bold)
+        self.rules.append((QRegularExpression("^[^;\\n]*?::"), hk_fmt))
+
+        # Strings
+        str_fmt = QTextCharFormat()
+        str_fmt.setForeground(QColor(CP_GREEN))
+        self.rules.append((QRegularExpression('".*?"'), str_fmt))
+        self.rules.append((QRegularExpression("'.*?'"), str_fmt))
+
+        # Numbers
+        num_fmt = QTextCharFormat()
+        num_fmt.setForeground(QColor(CP_RED))
+        self.rules.append((QRegularExpression("\\b[0-9]+(\\.[0-9]+)?\\b"), num_fmt))
+
+        # Comments
+        cmt_fmt = QTextCharFormat()
+        cmt_fmt.setForeground(QColor(CP_DIM))
+        cmt_fmt.setFontItalic(True)
+        self.rules.append((QRegularExpression(";.*"), cmt_fmt))
 
     def setup_markdown_rules(self):
         # Headers
