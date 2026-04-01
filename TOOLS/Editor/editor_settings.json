@@ -22,7 +22,9 @@
         "SAVE_FILE": "Ctrl+S",
         "OPEN_FILE": "Ctrl+O",
         "RESTART_APP": "Ctrl+R",
-        "CLOSE_TAB": "Ctrl+W"
+        "CLOSE_TAB": "Ctrl+W",
+        "ZOOM_IN": "Ctrl++",
+        "ZOOM_OUT": "Ctrl+-"
     },
     "last_file": ""
 }

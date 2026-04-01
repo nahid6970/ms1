@@ -46,7 +46,9 @@ DEFAULT_SHORTCUTS = {
     "SAVE_FILE": "Ctrl+S",
     "OPEN_FILE": "Ctrl+O",
     "RESTART_APP": "Ctrl+R",
-    "CLOSE_TAB": "Ctrl+W"
+    "CLOSE_TAB": "Ctrl+W",
+    "ZOOM_IN": "Ctrl++",
+    "ZOOM_OUT": "Ctrl+-"
 }
 
 # --- Settings Manager ---
@@ -185,11 +187,24 @@ class CodeEditor(QPlainTextEdit):
         block = self.firstVisibleBlock(); block_num = block.blockNumber()
         top = self.blockBoundingGeometry(block).translated(self.contentOffset()).top()
         bottom = top + self.blockBoundingRect(block).height()
+        
+        # Sync font with editor
+        painter.setFont(self.font())
+        
         while block.isValid() and top <= event.rect().bottom():
             if block.isVisible() and bottom >= event.rect().top():
                 number = str(block_num + 1); is_current = (block_num == self.textCursor().blockNumber())
-                painter.setPen(QColor(self.accent if is_current else CP_DIM)); f = painter.font(); f.setBold(is_current); painter.setFont(f)
+                painter.setPen(QColor(self.accent if is_current else CP_DIM))
+                
+                # Bold current line number
+                if is_current:
+                    f = painter.font(); f.setBold(True); painter.setFont(f)
+                
                 painter.drawText(0, int(top), self.line_number_area.width() - 5, self.fontMetrics().height(), Qt.AlignmentFlag.AlignRight, number)
+                
+                if is_current:
+                    f = painter.font(); f.setBold(False); painter.setFont(f)
+                    
             block = block.next(); top = bottom; bottom = top + self.blockBoundingRect(block).height(); block_num += 1
 
     def highlight_current_line(self):
@@ -235,6 +250,8 @@ class CodeEditor(QPlainTextEdit):
         elif key_str == shortcuts.get("OPEN_FILE"): self.shortcut_triggered.emit("OPEN_FILE"); event.accept(); return
         elif key_str == shortcuts.get("RESTART_APP"): self.shortcut_triggered.emit("RESTART_APP"); event.accept(); return
         elif key_str == shortcuts.get("CLOSE_TAB"): self.shortcut_triggered.emit("CLOSE_TAB"); event.accept(); return
+        elif key_str == shortcuts.get("ZOOM_IN") or key_str == "Ctrl+=": self.shortcut_triggered.emit("ZOOM_IN"); event.accept(); return
+        elif key_str == shortcuts.get("ZOOM_OUT") or key_str == "Ctrl+_": self.shortcut_triggered.emit("ZOOM_OUT"); event.accept(); return
         super().keyPressEvent(event)
 
     def move_line(self, direction):
@@ -539,6 +556,16 @@ class MainWindow(QMainWindow):
         elif action == "SAVE_FILE": self.on_save()
         elif action == "OPEN_FILE": self.on_open()
         elif action == "RESTART_APP": self.on_restart()
+        elif action == "ZOOM_IN": self.change_font_size(1)
+        elif action == "ZOOM_OUT": self.change_font_size(-1)
+
+    def change_font_size(self, delta):
+        size = self.mgr.settings.get("font_size", 10)
+        new_size = max(6, min(72, size + delta))
+        if new_size != size:
+            self.mgr.settings["font_size"] = new_size
+            self.mgr.save()
+            self.apply_theme_global()
 
     def toggle_word_wrap(self):
         new_state = not self.mgr.settings.get("word_wrap", False)
