@@ -122,8 +122,11 @@ class CodeEditor(QPlainTextEdit):
         self.setFont(QFont(family, size))
 
     def apply_cursor_color(self):
+        self.setCursorWidth(0) # Keep custom caret
         accent_color = THEMES.get(self.mgr.settings.get("theme", "CyberYellow"), THEMES["CyberYellow"])["accent"]
-        self.setStyleSheet(f"background-color: {CP_PANEL}; color: {CP_CYAN}; border: none; padding: 8px; selection-background-color: {accent_color}; selection-color: black; font-family: 'Consolas'; font-size: 11pt;")
+        font_fam = self.mgr.settings.get("font_family", "Consolas")
+        font_size = self.mgr.settings.get("font_size", 10)
+        self.setStyleSheet(f"background-color: {CP_PANEL}; color: {CP_CYAN}; border: none; padding: 8px; selection-background-color: {accent_color}; selection-color: black; font-family: '{font_fam}'; font-size: {font_size}pt;")
 
     def dragEnterEvent(self, event):
         if event.mimeData().hasUrls(): event.accept()
