@@ -398,9 +398,9 @@ class SearchPanel(QFrame):
 # --- Main Window ---
 
 class MainWindow(QMainWindow):
-    def __init__(self, initial_file=None, buffer_file=None):
+    def __init__(self, initial_files=None, buffer_file=None):
         super().__init__(); self.mgr = SettingsManager(); self.is_admin = self.check_admin(); self.setup_ui(); self.apply_theme_global()
-        self.restore_session(initial_file, buffer_file)
+        self.restore_session(initial_files or [], buffer_file)
 
     def check_admin(self):
         try: return ctypes.windll.shell32.IsUserAnAdmin() != 0
@@ -484,15 +484,16 @@ class MainWindow(QMainWindow):
             {scrollbar_qss}
         """)
 
-    def restore_session(self, initial_file, buffer_file):
+    def restore_session(self, initial_files, buffer_file):
         # Open saved files
         files = self.mgr.settings.get("open_files", [])
-        if not files and not initial_file:
+        if not files and not initial_files:
             self.add_new_tab() # Blank tab if nothing
         else:
             for f_path in files:
                 if os.path.exists(f_path): self.add_new_tab(f_path)
-            if initial_file: self.add_new_tab(initial_file)
+            for f in initial_files:
+                self.add_new_tab(f)
         
         # Handle Buffer
         if buffer_file and os.path.exists(buffer_file):
@@ -723,20 +724,19 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
     
-    initial_file, buffer_file, i = None, None, 0
+    initial_files, buffer_file, i = [], None, 0
     args = sys.argv[1:]
     while i < len(args):
         if args[i] == "--file" and i + 1 < len(args):
-            initial_file = args[i+1]
+            initial_files.append(args[i+1])
             i += 2
         elif args[i] == "--buffer" and i + 1 < len(args):
             buffer_file = args[i+1]
             i += 2
         else:
-            if not initial_file:
-                initial_file = args[i]
+            initial_files.append(args[i])
             i += 1
             
-    window = MainWindow(initial_file, buffer_file)
+    window = MainWindow(initial_files, buffer_file)
     window.show()
     sys.exit(app.exec())
