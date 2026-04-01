@@ -289,6 +289,22 @@ class CyberHighlighter(QSyntaxHighlighter):
             while match_iterator.hasNext():
                 match = match_iterator.next()
                 self.setFormat(match.capturedStart(), match.capturedLength(), format)
+        
+        # Dynamic Hex Color Highlighting
+        hex_regex = QRegularExpression(r"#[0-9A-Fa-f]{6}\b|#[0-9A-Fa-f]{3}\b")
+        match_it = hex_regex.globalMatch(text)
+        while match_it.hasNext():
+            m = match_it.next()
+            c_str = m.captured()
+            color = QColor(c_str)
+            if color.isValid():
+                fmt = QTextCharFormat()
+                fmt.setBackground(color)
+                fmt.setFontWeight(QFont.Weight.Bold)
+                # Auto-contrast foreground
+                lum = (color.red()*299 + color.green()*587 + color.blue()*114) / 1000
+                fmt.setForeground(QColor("white") if lum < 128 else QColor("black"))
+                self.setFormat(m.capturedStart(), m.capturedLength(), fmt)
 
 class CodeEditor(QPlainTextEdit):
     shortcut_triggered = pyqtSignal(str)
