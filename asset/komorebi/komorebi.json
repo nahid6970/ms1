@@ -288,6 +288,11 @@
             "kind": "Exe",
             "id": "pwsh.exe",
             "matching_strategy": "Legacy"
+        },
+        {
+            "kind": "Exe",
+            "id": "komorebi.exe",
+            "matching_strategy": "Equals"
         }
     ],
     "tray_and_multi_window_applications": [
@@ -324,6 +329,11 @@
         {
             "kind": "Exe",
             "id": "WhatsApp.Root.exe",
+            "matching_strategy": "Legacy"
+        },
+        {
+            "kind": "Exe",
+            "id": "komorebi.exe",
             "matching_strategy": "Legacy"
         }
     ]
