@@ -234,9 +234,12 @@ class SettingsDialog(QDialog):
         self.setMinimumWidth(450); layout = QVBoxLayout(self); form = QFormLayout()
         self.w_edit = QLineEdit(str(self.mgr.settings.get("width", 1000))); self.h_edit = QLineEdit(str(self.mgr.settings.get("height", 700)))
         
-        from PyQt6.QtWidgets import QFontComboBox # Local import for safety
-        self.font_sel = QFontComboBox()
-        self.font_sel.setCurrentFont(QFont(self.mgr.settings.get("font_family", "Consolas")))
+        self.font_sel = QComboBox()
+        common_fonts = ["Consolas", "Courier New", "Monospace", "Lucida Console", "Fixedsys", "Terminal", "Cascadia Code", "Roboto Mono", "Fira Code", "JetBrains Mono"]
+        self.font_sel.addItems(common_fonts)
+        curr_fam = self.mgr.settings.get("font_family", "Consolas")
+        if self.font_sel.findText(curr_fam) == -1: self.font_sel.addItem(curr_fam)
+        self.font_sel.setCurrentText(curr_fam)
         
         self.size_edit = QLineEdit(str(self.mgr.settings.get("font_size", 10)))
         
@@ -271,7 +274,7 @@ class SettingsDialog(QDialog):
     def do_save(self):
         try:
             self.mgr.settings["width"] = int(self.w_edit.text()); self.mgr.settings["height"] = int(self.h_edit.text())
-            self.mgr.settings["font_family"] = self.font_sel.currentFont().family()
+            self.mgr.settings["font_family"] = self.font_sel.currentText()
             self.mgr.settings["font_size"] = int(self.size_edit.text())
             self.mgr.settings["theme"] = self.theme_sel.currentData()
             self.mgr.settings["cursor_line_color"] = self.temp_cursor_line_color; self.mgr.settings["cursor_color"] = self.temp_cursor_color; self.mgr.save(); self.accept()
