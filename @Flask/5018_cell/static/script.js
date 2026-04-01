@@ -16065,9 +16065,205 @@ function escapeHtml(text) {
     div.textContent = text;
     return div.innerHTML;
 }
+
 // ==========================================
-// PDF EXPORT FEATURE
+// TEXT REPLACER FEATURE
 // ==========================================
+
+function showTextReplacer(event) {
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+
+    if (!quickFormatterTarget) return;
+
+    // Get the cell's full content
+    let cellContent = '';
+    if (quickFormatterSelection.isContentEditable) {
+        const actualInput = quickFormatterTarget.previousElementSibling;
+        if (actualInput && (actualInput.tagName === 'INPUT' || actualInput.tagName === 'TEXTAREA')) {
+            cellContent = actualInput.value;
+        }
+    } else {
+        cellContent = quickFormatterTarget.value;
+    }
+
+    // Save target and selection
+    const savedTarget = quickFormatterTarget;
+    const savedSelection = quickFormatterSelection;
+
+    // Close F3 formatter
+    const formatter = document.getElementById('quickFormatter');
+    if (formatter) {
+        formatter.style.setProperty('display', 'none', 'important');
+    }
+    closeQuickFormatter();
+
+    // Restore state
+    quickFormatterTarget = savedTarget;
+    quickFormatterSelection = savedSelection;
+
+    // Clear inputs
+    document.getElementById('findTextInput').value = '';
+    document.getElementById('replaceTextInput').value = '';
+    document.getElementById('textReplacePreview').style.display = 'none';
+    document.getElementById('textReplaceCaseSensitive').checked = false;
+
+    // Show modal
+    const modal = document.getElementById('textReplacerModal');
+    modal.style.display = 'flex';
+    modal.style.alignItems = 'center';
+    modal.style.justifyContent = 'center';
+
+    // Remove old listeners to prevent duplicates
+    const findInput = document.getElementById('findTextInput');
+    const replaceInput = document.getElementById('replaceTextInput');
+    const caseCheckbox = document.getElementById('textReplaceCaseSensitive');
+    
+    const newFindInput = findInput.cloneNode(true);
+    const newReplaceInput = replaceInput.cloneNode(true);
+    const newCaseCheckbox = caseCheckbox.cloneNode(true);
+    
+    findInput.parentNode.replaceChild(newFindInput, findInput);
+    replaceInput.parentNode.replaceChild(newReplaceInput, replaceInput);
+    caseCheckbox.parentNode.replaceChild(newCaseCheckbox, caseCheckbox);
+
+    // Add input listeners for preview
+    const updatePreview = () => {
+        const findText = newFindInput.value;
+        const replaceText = newReplaceInput.value;
+        const caseSensitive = newCaseCheckbox.checked;
+        
+        if (findText) {
+            const preview = generateTextReplacePreview(cellContent, findText, replaceText, caseSensitive);
+            const previewDiv = document.getElementById('textReplacePreview');
+            const previewContent = document.getElementById('textReplacePreviewContent');
+            
+            if (preview.count > 0) {
+                previewContent.innerHTML = `<div style="color: #666; margin-bottom: 5px;">Found ${preview.count} occurrence(s)</div>` +
+                    `<div style="color: #d00;">- ${escapeHtml(preview.example.before)}</div>` +
+                    `<div style="color: #0a0;">+ ${escapeHtml(preview.example.after)}</div>`;
+                previewDiv.style.display = 'block';
+            } else {
+                previewContent.innerHTML = '<div style="color: #999;">No matches found</div>';
+                previewDiv.style.display = 'block';
+            }
+        } else {
+            document.getElementById('textReplacePreview').style.display = 'none';
+        }
+    };
+    
+    newFindInput.addEventListener('input', updatePreview);
+    newReplaceInput.addEventListener('input', updatePreview);
+    newCaseCheckbox.addEventListener('change', updatePreview);
+
+    // Focus find input
+    setTimeout(() => newFindInput.focus(), 100);
+}
+
+function closeTextReplacerModal() {
+    document.getElementById('textReplacerModal').style.display = 'none';
+    quickFormatterTarget = null;
+    quickFormatterSelection = null;
+}
+
+function generateTextReplacePreview(cellContent, findText, replaceText, caseSensitive) {
+    if (!findText) return { count: 0, example: { before: '', after: '' } };
+
+    const escapedFindText = findText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const flags = caseSensitive ? 'g' : 'gi';
+    const regex = new RegExp(escapedFindText, flags);
+    
+    const matches = [...cellContent.matchAll(regex)];
+    
+    if (matches.length === 0) {
+        return { count: 0, example: { before: '', after: '' } };
+    }
+
+    // Get first match for preview
+    const firstMatch = matches[0];
+    const before = firstMatch[0];
+    const after = replaceText;
+
+    // Show context in preview (snippet)
+    const matchIndex = firstMatch.index;
+    const start = Math.max(0, matchIndex - 20);
+    const end = Math.min(cellContent.length, matchIndex + before.length + 20);
+    
+    let snippetBefore = cellContent.substring(start, matchIndex);
+    let snippetAfter = cellContent.substring(matchIndex + before.length, end);
+    
+    if (start > 0) snippetBefore = '...' + snippetBefore;
+    if (end < cellContent.length) snippetAfter = snippetAfter + '...';
+
+    return {
+        count: matches.length,
+        example: { 
+            before: snippetBefore + before + snippetAfter, 
+            after: snippetBefore + after + snippetAfter 
+        }
+    };
+}
+
+function applyTextReplace() {
+    if (!quickFormatterTarget) return;
+
+    const findText = document.getElementById('findTextInput').value;
+    const replaceText = document.getElementById('replaceTextInput').value;
+    const caseSensitive = document.getElementById('textReplaceCaseSensitive').checked;
+
+    if (!findText) {
+        showToast('Please enter text to find', 'warning');
+        return;
+    }
+
+    // Get the cell's full content
+    let cellContent = '';
+    const input = quickFormatterTarget;
+    
+    if (quickFormatterSelection.isContentEditable) {
+        const actualInput = input.previousElementSibling;
+        if (actualInput && (actualInput.tagName === 'INPUT' || actualInput.tagName === 'TEXTAREA')) {
+            cellContent = actualInput.value;
+        }
+    } else {
+        cellContent = input.value;
+    }
+
+    const escapedFindText = findText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const flags = caseSensitive ? 'g' : 'gi';
+    const regex = new RegExp(escapedFindText, flags);
+    
+    // Replace all occurrences
+    let count = 0;
+    const newContent = cellContent.replace(regex, (match) => {
+        count++;
+        return replaceText;
+    });
+
+    if (count === 0) {
+        showToast('No matches found', 'info');
+        return;
+    }
+
+    // Update the cell content
+    if (quickFormatterSelection.isContentEditable) {
+        const actualInput = input.previousElementSibling;
+        if (actualInput && (actualInput.tagName === 'INPUT' || actualInput.tagName === 'TEXTAREA')) {
+            actualInput.value = newContent;
+            const changeEvent = new Event('input', { bubbles: true });
+            actualInput.dispatchEvent(changeEvent);
+        }
+    } else {
+        input.value = newContent;
+        const changeEvent = new Event('input', { bubbles: true });
+        input.dispatchEvent(changeEvent);
+    }
+
+    closeTextReplacerModal();
+    showToast(`Replaced ${count} occurrence(s)`, 'success');
+}
 
 function exportCellToPDF() {
     if (!contextMenuCell) return;

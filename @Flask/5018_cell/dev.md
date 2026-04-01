@@ -241,6 +241,8 @@ The state is managed in a central object synced with persistence files:
 
 ### Advanced Editing Tools
 - **[Editing Extensions](md/EDITING_EXTENSIONS.md):** Search, Line tools, Case conversion, Multi-cursor.
+- **[Find & Replace Syntax](md/FIND_REPLACE_SYNTAX.md):** Pattern-based syntax conversion.
+- **[Find & Replace Text](md/FIND_REPLACE_TEXT.md):** Literal text search and replace.
 - **[Advanced Tables](md/TABLE_ADVANCED.md):** Pipe tables, Rowspan `^^`, Auto-formatting.
 - **[Math & KaTeX](md/KATEX_MATH.md):** LaTeX representation and smart fraction conversion.
 - **[Keyboard Shortcuts](md/KEYBOARD_SHORTCUTS.md):** Complete reference for all keyboard shortcuts.
