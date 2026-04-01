@@ -156,25 +156,26 @@ class RecentFileItem(QFrame):
     def apply_style(self):
         self.setStyleSheet(f"""
             RecentFileItem {{ 
-                background-color: {CP_BG}; 
-                border-bottom: 1px solid {CP_PANEL};
-                margin: 2px 5px;
-                border-radius: 2px;
+                background-color: transparent; 
+                border-bottom: 1px solid #1a1a1a;
+                margin: 0px 10px;
             }}
             RecentFileItem:hover {{ 
-                background-color: {CP_PANEL}; 
-                border-left: 3px solid {self.accent};
+                background-color: rgba(255, 255, 255, 0.03); 
+                border-left: 4px solid {self.accent};
             }}
             #FileNameLabel {{ 
                 color: {self.accent}; 
                 font-family: 'Consolas'; 
                 font-weight: bold;
                 font-size: 10pt;
+                background: transparent;
             }}
             #FilePathLabel {{ 
                 color: {CP_SUBTEXT}; 
                 font-family: 'Consolas'; 
                 font-size: 7pt;
+                background: transparent;
             }}
             QPushButton {{ 
                 background: none; border: none; font-size: 14px; 
