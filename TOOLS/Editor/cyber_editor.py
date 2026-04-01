@@ -528,36 +528,43 @@ class SettingsDialog(QDialog):
         self.theme_sel = QComboBox(); [self.theme_sel.addItem(t_info["name"], t_id) for t_id, t_info in THEMES.items()]
         self.theme_sel.setCurrentIndex(max(0, self.theme_sel.findData(self.mgr.settings.get("theme", "CyberYellow"))))
         
-        self.text_color_btn = QPushButton("PICK_TEXT_COLOR"); self.text_color_btn.clicked.connect(self.pick_text_color)
-        self.cur_text_label = QLabel(self.temp_text_color if self.temp_text_color else "AUTO")
-        self.line_color_btn = QPushButton("PICK_HL_COLOR"); self.line_color_btn.clicked.connect(self.pick_line_color)
-        self.cur_line_label = QLabel(self.temp_cursor_line_color if self.temp_cursor_line_color else "AUTO")
-        self.cursor_color_btn = QPushButton("PICK_INSERT_COLOR"); self.cursor_color_btn.clicked.connect(self.pick_cursor_color)
-        self.cur_cursor_label = QLabel(self.temp_cursor_color if self.temp_cursor_color else "AUTO")
+        self.text_color_btn = QPushButton(); self.text_color_btn.clicked.connect(self.pick_text_color)
+        self.line_color_btn = QPushButton(); self.line_color_btn.clicked.connect(self.pick_line_color)
+        self.cursor_color_btn = QPushButton(); self.cursor_color_btn.clicked.connect(self.pick_cursor_color)
+        
+        self.update_btn_style(self.text_color_btn, self.temp_text_color, "TEXT_COLOR", CP_CYAN)
+        self.update_btn_style(self.line_color_btn, self.temp_cursor_line_color, "LINE_HL", THEMES[self.mgr.settings["theme"]]["accent"])
+        self.update_btn_style(self.cursor_color_btn, self.temp_cursor_color, "CURSOR", CP_CYAN)
         
         form.addRow("UI_WIDTH:", self.w_edit); form.addRow("UI_HEIGHT:", self.h_edit)
         form.addRow("FONT_FAM:", self.font_sel); form.addRow("FONT_SIZE:", self.size_edit)
         form.addRow("COLOR_THEME:", self.theme_sel)
-        form.addRow("TEXT_COLOR:", self.text_color_btn); form.addRow("VAL:", self.cur_text_label)
-        form.addRow("LINE_HL:", self.line_color_btn); form.addRow("VAL:", self.cur_line_label)
-        form.addRow("CURSOR_COLOR:", self.cursor_color_btn); form.addRow("VAL:", self.cur_cursor_label)
+        form.addRow("TEXT_COLOR:", self.text_color_btn)
+        form.addRow("LINE_HL:", self.line_color_btn)
+        form.addRow("CURSOR_COLOR:", self.cursor_color_btn)
         layout.addLayout(form); self.more_box = QFrame(); self.more_box.setFrameShape(QFrame.Shape.StyledPanel); more_layout = QVBoxLayout(self.more_box); more_layout.addWidget(QLabel("// Future modules reserved...")); layout.addWidget(self.more_box)
         btns = QHBoxLayout(); theme_accent = THEMES.get(self.mgr.settings.get("theme", "CyberYellow"), THEMES["CyberYellow"])["accent"]
         self.save_btn = CyberButton("APPLY & SAVE", accent=theme_accent); self.save_btn.clicked.connect(self.do_save)
         self.cancel_btn = CyberButton("ABORT", accent=CP_RED); self.cancel_btn.clicked.connect(self.reject)
         btns.addWidget(self.save_btn); btns.addWidget(self.cancel_btn); layout.addLayout(btns)
+
+    def update_btn_style(self, btn, color_hex, label, fallback):
+        display_color = color_hex if color_hex else fallback
+        btn.setText(f"PICK_{label} [{display_color.upper() if color_hex else 'AUTO'}]")
+        btn.setStyleSheet(f"QPushButton {{ background-color: {CP_PANEL}; color: {display_color}; border: 1px solid {CP_DIM}; padding: 6px; font-family: 'Consolas'; font-weight: bold; }} QPushButton:hover {{ border: 1px solid {display_color}; background-color: #1a1a1a; }}")
+
     def pick_text_color(self):
         cur = QColor(self.temp_text_color) if self.temp_text_color else QColor(CP_CYAN)
         color = QColorDialog.getColor(cur, self, "SELECT_TEXT_COLOR")
-        if color.isValid(): self.temp_text_color = color.name(); self.cur_text_label.setText(self.temp_text_color); self.cur_text_label.setStyleSheet(f"color: {self.temp_text_color};")
+        if color.isValid(): self.temp_text_color = color.name(); self.update_btn_style(self.text_color_btn, self.temp_text_color, "TEXT_COLOR", CP_CYAN)
     def pick_line_color(self):
         cur = QColor(self.temp_cursor_line_color) if self.temp_cursor_line_color else QColor(CP_CYAN)
         color = QColorDialog.getColor(cur, self, "SELECT_LINE_HL_COLOR", QColorDialog.ColorDialogOption.ShowAlphaChannel)
-        if color.isValid(): self.temp_cursor_line_color = color.name(QColor.NameFormat.HexArgb); self.cur_line_label.setText(self.temp_cursor_line_color); self.cur_line_label.setStyleSheet(f"color: {color.name()};")
+        if color.isValid(): self.temp_cursor_line_color = color.name(QColor.NameFormat.HexArgb); self.update_btn_style(self.line_color_btn, self.temp_cursor_line_color, "LINE_HL", THEMES[self.mgr.settings["theme"]]["accent"])
     def pick_cursor_color(self):
         cur = QColor(self.temp_cursor_color) if self.temp_cursor_color else QColor(CP_CYAN)
         color = QColorDialog.getColor(cur, self, "SELECT_INSERTION_MARKER_COLOR")
-        if color.isValid(): self.temp_cursor_color = color.name(); self.cur_cursor_label.setText(self.temp_cursor_color); self.cur_cursor_label.setStyleSheet(f"color: {self.temp_cursor_color};")
+        if color.isValid(): self.temp_cursor_color = color.name(); self.update_btn_style(self.cursor_color_btn, self.temp_cursor_color, "CURSOR", CP_CYAN)
     def apply_theme(self):
         accent = THEMES.get(self.mgr.settings.get("theme", "CyberYellow"), THEMES["CyberYellow"])["accent"]
         self.setStyleSheet(f"""
