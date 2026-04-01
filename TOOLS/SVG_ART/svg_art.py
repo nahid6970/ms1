@@ -34,6 +34,7 @@ class SymPath(QGraphicsPathItem, SymItem):
     def __init__(self, *args, **kwargs):
         QGraphicsPathItem.__init__(self, *args, **kwargs)
         SymItem.__init__(self)
+        self.path_points = [] # For stroke reconstruction
 
 class SymRect(QGraphicsRectItem, SymItem):
     def __init__(self, *args, **kwargs):
@@ -165,24 +166,23 @@ class ArtView(QGraphicsView):
         
         if self.drawing and self.current_item:
             local_pos = scene_pos - self.current_item.pos()
-            if self.tool == "brush" and isinstance(self.current_item, QGraphicsPathItem):
-                path = self.current_item.path()
+            if self.tool == "brush" and isinstance(self.current_item, SymPath):
+                self.current_item.path_points.append(local_pos)
                 if self.brush_type == "multiline":
-                    spacing = self.pen_width * 2.5
                     new_path = QPainterPath()
+                    spacing = self.pen_width * 2.5
                     for i in range(self.multi_line_count):
                         offset = (i - (self.multi_line_count - 1) / 2) * spacing
-                        # Find the angle of movement to offset perpendicular? 
-                        # For simplicity, we use vertical/horizontal offset based on movement
                         off_pt = QPointF(offset, offset)
-                        # We reconstruct the entire path for multiline to keep segments separate
-                        # This is a bit heavy, but ensures clean SVG export
-                        # For the UI, we just append to the subpaths
-                        # (Simpler implementation: just one path with moveTo offsets)
-                    path.lineTo(local_pos)
+                        
+                        new_path.moveTo(self.current_item.path_points[0] + off_pt)
+                        for pt in self.current_item.path_points[1:]:
+                            new_path.lineTo(pt + off_pt)
+                    self.current_item.setPath(new_path)
                 else:
+                    path = self.current_item.path()
                     path.lineTo(local_pos)
-                self.current_item.setPath(path)
+                    self.current_item.setPath(path)
                 self.update_clones(self.current_item)
             
             elif self.tool in ["rect", "ellipse"]:
