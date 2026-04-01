@@ -284,15 +284,6 @@ kernel32 = ctypes.windll.kernel32
 user32 = ctypes.windll.user32
 console_hwnd = kernel32.GetConsoleWindow()
 
-def disable_console_close_button():
-    """Disable the close button (X) of the console window to prevent script termination"""
-    hwnd = kernel32.GetConsoleWindow()
-    if hwnd:
-        hMenu = user32.GetSystemMenu(hwnd, False)
-        if hMenu:
-            # SC_CLOSE = 0xF060, MF_BYCOMMAND = 0x0000
-            user32.DeleteMenu(hMenu, 0xF060, 0x0000)
-
 if not console_hwnd:
     kernel32.AllocConsole()
     console_hwnd = kernel32.GetConsoleWindow()
@@ -300,11 +291,9 @@ if not console_hwnd:
         # Redirect stdout/stderr to the new console
         sys.stdout = open('CONOUT$', 'w', buffering=1)
         sys.stderr = open('CONOUT$', 'w', buffering=1)
-        disable_console_close_button()
 
 if console_hwnd:
     set_console_title("🔥")
-    disable_console_close_button()
     user32.ShowWindow(console_hwnd, 0)  # SW_HIDE = 0
 
 # Create main window
