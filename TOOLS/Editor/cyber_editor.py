@@ -119,6 +119,14 @@ class CodeEditor(QPlainTextEdit):
         wrap_mode = QPlainTextEdit.LineWrapMode.WidgetWidth if self.mgr.settings.get("word_wrap", False) else QPlainTextEdit.LineWrapMode.NoWrap
         self.setLineWrapMode(wrap_mode); self.setAcceptDrops(True)
         self.setCursorWidth(0) # Using custom paintEvent caret
+        self.clean_text = ""
+        self.textChanged.connect(self.check_modified_state)
+
+    def check_modified_state(self):
+        # Intelligent revert tracking: if text is exactly as it was on disk, it's not modified
+        is_clean = (self.toPlainText() == self.clean_text)
+        if self.document().isModified() == is_clean:
+            self.document().setModified(not is_clean)
 
     def set_accent(self, accent):
         self.accent = accent; self.highlight_current_line(); self.apply_cursor_color()
@@ -532,10 +540,14 @@ class MainWindow(QMainWindow):
 
         if path:
             try:
-                with open(path, 'r', encoding='utf-8') as f: editor.setPlainText(f.read())
+                with open(path, 'r', encoding='utf-8') as f: 
+                    content = f.read()
+                    editor.setPlainText(content)
+                    editor.clean_text = content
             except: pass
         
         editor.document().setModified(False)
+        if not path: editor.clean_text = "" # For untilted
         self.tabs.setCurrentIndex(idx); self.save_session_state(); self.update_status_indicator(False, editor)
 
     def close_tab(self, index):
@@ -589,7 +601,9 @@ class MainWindow(QMainWindow):
             self.tabs.setTabText(self.tabs.currentIndex(), os.path.basename(path))
             
         try:
-            with open(path, 'w', encoding='utf-8') as f: f.write(editor.toPlainText())
+            content = editor.toPlainText()
+            with open(path, 'w', encoding='utf-8') as f: f.write(content)
+            editor.clean_text = content
             editor.document().setModified(False)
             self.save_session_state()
         except Exception as e: QMessageBox.warning(self, "ERR", str(e))
