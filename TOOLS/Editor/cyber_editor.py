@@ -108,9 +108,10 @@ class LineNumberArea(QWidget):
 # --- Highlighter ---
 
 class CyberHighlighter(QSyntaxHighlighter):
-    def __init__(self, parent, accent=CP_YELLOW):
+    def __init__(self, parent, accent=CP_YELLOW, ext=""):
         super().__init__(parent)
         self.accent = accent
+        self.ext = ext.lower()
         self.rules = []
         self.update_rules()
 
@@ -119,9 +120,20 @@ class CyberHighlighter(QSyntaxHighlighter):
         self.update_rules()
         self.rehighlight()
 
+    def set_extension(self, ext):
+        self.ext = ext.lower()
+        self.update_rules()
+        self.rehighlight()
+
     def update_rules(self):
         self.rules = []
         
+        if self.ext in [".md", ".markdown", ".txt"]:
+            self.setup_markdown_rules()
+        else:
+            self.setup_code_rules()
+
+    def setup_code_rules(self):
         # Keywords
         keyword_format = QTextCharFormat()
         keyword_format.setForeground(QColor(self.accent))
@@ -159,6 +171,36 @@ class CyberHighlighter(QSyntaxHighlighter):
         number_format.setForeground(QColor(CP_RED))
         self.rules.append((QRegularExpression("\\b[0-9]+\\b"), number_format))
 
+    def setup_markdown_rules(self):
+        # Headers
+        header_format = QTextCharFormat()
+        header_format.setForeground(QColor(self.accent))
+        header_format.setFontWeight(QFont.Weight.Bold)
+        self.rules.append((QRegularExpression("^#+.*"), header_format))
+
+        # Bold
+        bold_format = QTextCharFormat()
+        bold_format.setFontWeight(QFont.Weight.Bold)
+        bold_format.setForeground(QColor(CP_TEXT))
+        self.rules.append((QRegularExpression("\\*\\*.*?\\*\\*"), bold_format))
+        self.rules.append((QRegularExpression("__.*?__"), bold_format))
+
+        # Italic
+        italic_format = QTextCharFormat()
+        italic_format.setFontItalic(True)
+        self.rules.append((QRegularExpression("\\*.*?\\*"), italic_format))
+        self.rules.append((QRegularExpression("_.*?_"), italic_format))
+
+        # Links
+        link_format = QTextCharFormat()
+        link_format.setForeground(QColor(CP_CYAN))
+        self.rules.append((QRegularExpression("\\[.*?\\]\\(.*?\\)"), link_format))
+
+        # Code
+        code_format = QTextCharFormat()
+        code_format.setForeground(QColor(CP_YELLOW))
+        self.rules.append((QRegularExpression("`.*?`"), code_format))
+
     def highlightBlock(self, text):
         for pattern, format in self.rules:
             match_iterator = pattern.globalMatch(text)
@@ -178,7 +220,8 @@ class CodeEditor(QPlainTextEdit):
         self.setObjectName("CyberEditorCore")
         
         # Syntax Highlighter
-        self.highlighter = CyberHighlighter(self.document(), self.accent)
+        ext = os.path.splitext(file_path)[1] if file_path else ""
+        self.highlighter = CyberHighlighter(self.document(), self.accent, ext)
         
         self.apply_font() # Load from settings
         self.set_accent(accent); self.update_line_number_area_width(0); self.highlight_current_line()
@@ -199,6 +242,12 @@ class CodeEditor(QPlainTextEdit):
         self.accent = accent; self.highlight_current_line(); self.apply_cursor_color()
         if hasattr(self, 'highlighter'):
             self.highlighter.set_accent(accent)
+
+    def set_file_path(self, path):
+        self.file_path = path
+        if hasattr(self, 'highlighter'):
+            ext = os.path.splitext(path)[1] if path else ""
+            self.highlighter.set_extension(ext)
 
     def apply_font(self):
         family = self.mgr.settings.get("font_family", "Consolas")
@@ -667,7 +716,7 @@ class MainWindow(QMainWindow):
         if not path:
             path, _ = QFileDialog.getSaveFileName(self, "SAVE", "", "All Files (*)")
             if not path: return
-            editor.file_path = path
+            editor.set_file_path(path)
             self.tabs.setTabText(self.tabs.currentIndex(), os.path.basename(path))
             
         try:
