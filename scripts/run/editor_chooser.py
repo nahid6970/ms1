@@ -122,6 +122,13 @@ def open_with_editor(file_paths, editor):
                 subprocess.run(f'start ms-photos:viewer?fileName="{file_path}"', shell=True)
         else:
             subprocess.run(f'start ms-photos:viewer?fileName="{file_paths}"', shell=True)
+    elif editor == "cyber_editor":
+        cyber_path = r"C:\@delta\ms1\TOOLS\Editor\cyber_editor.py"
+        if isinstance(file_paths, list):
+            files_args = ' '.join([f'"{fp}"' for fp in file_paths])
+        else:
+            files_args = f'"{file_paths}"'
+        subprocess.Popen(f'pythonw "{cyber_path}" {files_args}', shell=True)
     elif editor == "emacs":
         env = os.environ.copy()
         if 'APPDATA' in env:
