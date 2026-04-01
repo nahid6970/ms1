@@ -30,7 +30,14 @@ A custom-built `SearchPanel` (QFrame) integrated into the layout.
 - Supports **Find Next**, **Find Prev**, and **Replace All**.
 - Features a "Wrap Around" logic ensuring searches cover the entire document buffer.
 
-### 4. 🎨 Theme System
+### 4. 🎨 Syntax Engine (CyberHighlighter)
+An extension-aware syntax highlighting module with specialized rules:
+- **Markdown Mode**: Headers (Accent), Bold/Italic, Links (Cyan), Inline Code (Yellow).
+- **Web Mode (HTML/CSS)**: Tags/Selectors (Accent), Attributes/Properties (Cyan), Units/Values (Red).
+- **Data Mode (JSON)**: Keys (Cyan), Values (Green/Accent), Numbers (Red).
+- **Code Mode (JS/PY/TS)**: Keywords (Accent), Strings (Green), Comments (Dim), Numbers (Red).
+
+### 5. 💅 Theme System
 Three built-in presets that change the global accent color:
 - **CyberYellow**: #FCEE0A (Classic)
 - **CyberCyan**: #00F0FF (Neon)
@@ -40,9 +47,10 @@ Three built-in presets that change the global accent color:
 - `cyber_editor.py`: The monolithic application core.
 - `editor_settings.json`: Stores window state, active theme, and custom keybinds.
 - `PROJECT_SUMMARY.md`: This reference document.
-- `walkthrough.md`: User-facing feature guide.
+- `TODO.md`: Roadmap and pending improvements.
 
 ## 🛠️ Developer Notes (For Future Sessions)
+- **Highlighter**: To add support for new languages, extend the `update_rules` and add a new `setup_X_rules` method in `CyberHighlighter`.
 - **Customization**: Use the `CyberButton` and `SettingsDialog` classes to add new UI modules.
 - **Shortcuts**: To add more shortcuts, update `DEFAULT_SHORTCUTS` and the `keyPressEvent` handler in `CodeEditor`.
 - **Styling**: All styles are managed via `apply_theme_global()` in `MainWindow` and `apply_theme()` in individual components.
