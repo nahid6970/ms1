@@ -888,8 +888,17 @@ class MainWindow(QMainWindow):
         editor.setPlainText(editor.toPlainText().replace(query, repl))
 
     def on_restart(self):
+        self.save_session_state()
         QApplication.quit()
-        subprocess.Popen([sys.executable] + sys.argv)
+        subprocess.Popen([sys.executable, os.path.abspath(sys.argv[0])])
+
+    def closeEvent(self, event):
+        self.save_session_state()
+        # Save current window geometry
+        self.mgr.settings["width"] = self.width()
+        self.mgr.settings["height"] = self.height()
+        self.mgr.save()
+        event.accept()
 
     def on_keybinds(self):
         KeybindDialog(self, self.mgr).exec()
