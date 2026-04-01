@@ -424,7 +424,11 @@ class MainWindow(QMainWindow):
         self.tabs.currentChanged.connect(self.tab_changed)
         self.main_layout.addWidget(self.tabs)
         
-        self.setStatusBar(QStatusBar()); self.statusBar().showMessage("SYSTEM READY...")
+        self.setStatusBar(QStatusBar())
+        self.status_indicator = QLabel(" STABLE ")
+        self.status_indicator.setContentsMargins(10, 0, 10, 0)
+        self.statusBar().addPermanentWidget(self.status_indicator)
+        self.statusBar().showMessage("SYSTEM READY...")
 
     def apply_theme_global(self):
         theme_key = self.mgr.settings.get("theme", "CyberYellow"); accent = THEMES[theme_key]["accent"]
@@ -507,6 +511,7 @@ class MainWindow(QMainWindow):
         accent = THEMES[theme_key]["accent"]
         editor = CodeEditor(self.mgr, accent, path)
         editor.shortcut_triggered.connect(self.handle_shortcut)
+        editor.document().modificationChanged.connect(lambda m: self.update_status_indicator(m, editor))
         
         name = os.path.basename(path) if path else "UNTITLED.txt"
         idx = self.tabs.addTab(editor, name)
@@ -530,14 +535,20 @@ class MainWindow(QMainWindow):
             try:
                 with open(path, 'r', encoding='utf-8') as f: editor.setPlainText(f.read())
             except: pass
-        self.tabs.setCurrentIndex(idx); self.save_session_state()
+        
+        editor.document().setModified(False)
+        self.tabs.setCurrentIndex(idx); self.save_session_state(); self.update_status_indicator(False, editor)
 
     def close_tab(self, index):
         self.tabs.removeTab(index)
         if self.tabs.count() == 0: self.add_new_tab()
         self.save_session_state()
 
-    def tab_changed(self, index): self.save_session_state()
+    def tab_changed(self, index):
+        self.save_session_state()
+        editor = self.tabs.widget(index)
+        if isinstance(editor, CodeEditor):
+            self.update_status_indicator(editor.document().isModified(), editor)
 
     def save_session_state(self):
         files = []
@@ -547,6 +558,21 @@ class MainWindow(QMainWindow):
         self.mgr.settings["open_files"] = files
         self.mgr.settings["current_tab_index"] = self.tabs.currentIndex()
         self.mgr.save()
+
+    def update_status_indicator(self, modified, editor):
+        # Update tab text regardless of current selection
+        idx = self.tabs.indexOf(editor)
+        if idx != -1:
+            name = os.path.basename(editor.file_path) if editor.file_path else "UNTITLED.txt"
+            if modified: name += " *"
+            self.tabs.setTabText(idx, name)
+        
+        # Only update status bar if this IS the current editor
+        if editor == self.current_editor():
+            color = CP_RED if modified else CP_GREEN
+            text = " MODIFIED " if modified else " STABLE "
+            self.status_indicator.setText(text)
+            self.status_indicator.setStyleSheet(f"color: {color}; font-weight: bold; font-family: 'Consolas'; border-left: 1px solid {CP_DIM};")
 
     def on_open(self):
         path, _ = QFileDialog.getOpenFileName(self, "OPEN", "", "All Files (*)")
@@ -565,7 +591,8 @@ class MainWindow(QMainWindow):
             
         try:
             with open(path, 'w', encoding='utf-8') as f: f.write(editor.toPlainText())
-            self.statusBar().showMessage(f"SAVED: {path}")
+            editor.document().setModified(False)
+            self.statusBar().showMessage(f"SAVED: {path}", 3000)
             self.save_session_state()
         except Exception as e: QMessageBox.warning(self, "ERR", str(e))
 
