@@ -255,15 +255,36 @@ class CodeEditor(QPlainTextEdit):
         super().keyPressEvent(event)
 
     def move_line(self, direction):
-        cursor = self.textCursor(); cursor.beginEditBlock(); cursor.movePosition(QTextCursor.MoveOperation.StartOfBlock)
-        cursor.movePosition(QTextCursor.MoveOperation.EndOfBlock, QTextCursor.MoveMode.KeepAnchor); line_text = cursor.selectedText(); cursor.removeSelectedText(); cursor.deleteChar()
-        if direction == -1:
-            if cursor.movePosition(QTextCursor.MoveOperation.Up): cursor.movePosition(QTextCursor.MoveOperation.StartOfBlock); cursor.insertText(line_text + "\n"); cursor.movePosition(QTextCursor.MoveOperation.Up)
-            else: cursor.insertText(line_text + "\n"); cursor.movePosition(QTextCursor.MoveOperation.StartOfBlock)
-        else:
-            if cursor.movePosition(QTextCursor.MoveOperation.Down): cursor.movePosition(QTextCursor.MoveOperation.EndOfBlock); cursor.insertText("\n" + line_text)
-            else: cursor.movePosition(QTextCursor.MoveOperation.EndOfBlock); cursor.insertText("\n" + line_text)
-        cursor.endEditBlock(); self.setTextCursor(cursor)
+        cursor = self.textCursor()
+        curr_block = cursor.block()
+        curr_num = curr_block.blockNumber()
+        target_num = curr_num + direction
+        
+        if target_num < 0 or target_num >= self.document().blockCount():
+            return
+            
+        cursor.beginEditBlock()
+        pos_in_block = cursor.position() - curr_block.position()
+        
+        target_block = self.document().findBlockByNumber(target_num)
+        curr_text = curr_block.text()
+        target_text = target_block.text()
+        
+        # Swap texts
+        cursor.setPosition(curr_block.position())
+        cursor.movePosition(QTextCursor.MoveOperation.EndOfBlock, QTextCursor.MoveMode.KeepAnchor)
+        cursor.insertText(target_text)
+        
+        cursor.setPosition(target_block.position())
+        cursor.movePosition(QTextCursor.MoveOperation.EndOfBlock, QTextCursor.MoveMode.KeepAnchor)
+        cursor.insertText(curr_text)
+        
+        # Return cursor to the moved line
+        new_cursor = self.textCursor()
+        new_cursor.setPosition(target_block.position() + min(pos_in_block, len(curr_text)))
+        self.setTextCursor(new_cursor)
+        
+        cursor.endEditBlock()
     def duplicate_line(self):
         cursor = self.textCursor(); cursor.beginEditBlock(); cursor.movePosition(QTextCursor.MoveOperation.StartOfBlock); cursor.movePosition(QTextCursor.MoveOperation.EndOfBlock, QTextCursor.MoveMode.KeepAnchor)
         line_text = cursor.selectedText(); cursor.movePosition(QTextCursor.MoveOperation.EndOfBlock); cursor.insertText("\n" + line_text); cursor.endEditBlock(); self.setTextCursor(cursor)
