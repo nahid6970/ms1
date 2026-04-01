@@ -237,6 +237,7 @@ class SettingsDialog(QDialog):
         from PyQt6.QtWidgets import QFontComboBox # Local import for safety
         self.font_sel = QFontComboBox()
         self.font_sel.setCurrentFont(QFont(self.mgr.settings.get("font_family", "Consolas")))
+        
         self.size_edit = QLineEdit(str(self.mgr.settings.get("font_size", 10)))
         
         self.theme_sel = QComboBox(); [self.theme_sel.addItem(t_info["name"], t_id) for t_id, t_info in THEMES.items()]
