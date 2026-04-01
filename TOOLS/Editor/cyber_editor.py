@@ -124,11 +124,12 @@ class RecentFileItem(QFrame):
         
         # File Name & Path
         self.name_label = QLabel(os.path.basename(self.path))
+        self.name_label.setObjectName("FileNameLabel")
         self.name_label.setCursor(Qt.CursorShape.PointingHandCursor)
         self.name_label.mousePressEvent = lambda e: self.clicked.emit(self.path)
         
         self.path_label = QLabel(self.path)
-        self.path_label.setStyleSheet(f"color: {CP_DIM}; font-size: 8pt;")
+        self.path_label.setObjectName("FilePathLabel")
         self.path_label.setCursor(Qt.CursorShape.PointingHandCursor)
         self.path_label.mousePressEvent = lambda e: self.clicked.emit(self.path)
         
@@ -140,7 +141,7 @@ class RecentFileItem(QFrame):
         
         layout.addWidget(self.pin_btn)
         vbox = QVBoxLayout()
-        vbox.setSpacing(0)
+        vbox.setSpacing(1)
         vbox.addWidget(self.name_label)
         vbox.addWidget(self.path_label)
         layout.addLayout(vbox)
@@ -154,14 +155,32 @@ class RecentFileItem(QFrame):
 
     def apply_style(self):
         self.setStyleSheet(f"""
-            RecentFileItem {{ background-color: {CP_PANEL}; border-bottom: 1px solid {CP_DIM}; }}
-            RecentFileItem:hover {{ background-color: #1a1a1a; }}
-            QLabel {{ color: {CP_TEXT}; font-family: 'Consolas'; }}
+            RecentFileItem {{ 
+                background-color: {CP_BG}; 
+                border-bottom: 1px solid {CP_PANEL};
+                margin: 2px 5px;
+                border-radius: 2px;
+            }}
+            RecentFileItem:hover {{ 
+                background-color: {CP_PANEL}; 
+                border-left: 3px solid {self.accent};
+            }}
+            #FileNameLabel {{ 
+                color: {self.accent}; 
+                font-family: 'Consolas'; 
+                font-weight: bold;
+                font-size: 10pt;
+            }}
+            #FilePathLabel {{ 
+                color: {CP_SUBTEXT}; 
+                font-family: 'Consolas'; 
+                font-size: 7pt;
+            }}
             QPushButton {{ 
                 background: none; border: none; font-size: 14px; 
                 color: {self.accent if self.pinned else CP_DIM}; 
             }}
-            QPushButton:hover {{ color: {self.accent}; }}
+            QPushButton:hover {{ color: {CP_RED}; }}
         """)
 
 class RecentFilesDialog(QDialog):
