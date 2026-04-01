@@ -425,11 +425,10 @@ class MainWindow(QMainWindow):
         self.main_layout.addWidget(self.tabs)
         
         self.setStatusBar(QStatusBar())
-        self.status_indicator = QLabel(" STABLE ")
-        self.status_indicator.setContentsMargins(10, 0, 10, 0)
-        self.statusBar().addPermanentWidget(self.status_indicator)
-        self.statusBar().showMessage("SYSTEM READY...")
-
+        self.path_status_label = QLabel("")
+        self.path_status_label.setContentsMargins(10, 0, 10, 0)
+        self.statusBar().addWidget(self.path_status_label)
+    
     def apply_theme_global(self):
         theme_key = self.mgr.settings.get("theme", "CyberYellow"); accent = THEMES[theme_key]["accent"]
         self.search_panel.apply_theme(accent)
@@ -569,10 +568,10 @@ class MainWindow(QMainWindow):
         
         # Only update status bar if this IS the current editor
         if editor == self.current_editor():
+            path = editor.file_path if editor.file_path else "UNTITLED.txt"
             color = CP_RED if modified else CP_GREEN
-            text = " MODIFIED " if modified else " STABLE "
-            self.status_indicator.setText(text)
-            self.status_indicator.setStyleSheet(f"color: {color}; font-weight: bold; font-family: 'Consolas'; border-left: 1px solid {CP_DIM};")
+            self.path_status_label.setText(path.upper())
+            self.path_status_label.setStyleSheet(f"color: {color}; font-weight: bold; font-family: 'Consolas';")
 
     def on_open(self):
         path, _ = QFileDialog.getOpenFileName(self, "OPEN", "", "All Files (*)")
@@ -592,7 +591,6 @@ class MainWindow(QMainWindow):
         try:
             with open(path, 'w', encoding='utf-8') as f: f.write(editor.toPlainText())
             editor.document().setModified(False)
-            self.statusBar().showMessage(f"SAVED: {path}", 3000)
             self.save_session_state()
         except Exception as e: QMessageBox.warning(self, "ERR", str(e))
 
