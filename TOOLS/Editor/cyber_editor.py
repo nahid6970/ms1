@@ -220,48 +220,61 @@ class CodeEditor(QPlainTextEdit):
         self.line_number_area.update()
 
     def keyPressEvent(self, event):
-        # Modern way in PyQt6 to get key + modifiers as a sequence
+        # Correctly get key + modifiers for PyQt6
         try:
-            key_combo = event.keyCombination()
-            key_str = QKeySequence(key_combo).toString()
-        except:
-            # Fallback if keyCombination is not available (older PyQt6 versions)
-            key_str = QKeySequence(event.key() | event.modifiers().value).toString()
-
-        shortcuts = self.mgr.settings["shortcuts"]
-        
-        if key_str == shortcuts.get("MOVE_LINE_UP"):
-            self.move_line(-1)
-            event.accept()
-            return
-        elif key_str == shortcuts.get("MOVE_LINE_DOWN"):
-            self.move_line(1)
-            event.accept()
-            return
-        elif key_str == shortcuts.get("DUPLICATE_LINE"):
-            self.duplicate_line()
-            event.accept()
-            return
-        elif key_str == shortcuts.get("DELETE_LINE"):
-            self.delete_current_line()
-            event.accept()
-            return
-        elif key_str == shortcuts.get("TOGGLE_SEARCH"):
-            self.shortcut_triggered.emit("TOGGLE_SEARCH")
-            event.accept()
-            return
-        elif key_str == shortcuts.get("SAVE_FILE"):
-            self.shortcut_triggered.emit("SAVE_FILE")
-            event.accept()
-            return
-        elif key_str == shortcuts.get("OPEN_FILE"):
-            self.shortcut_triggered.emit("OPEN_FILE")
-            event.accept()
-            return
-        elif key_str == shortcuts.get("RESTART_APP"):
-            self.shortcut_triggered.emit("RESTART_APP")
-            event.accept()
-            return
+            # We explicitly handle the modifier to avoid int() issues with enums
+            key = event.key()
+            modifiers = event.modifiers()
+            
+            # Use QKeySequence to represent the combination
+            # event.keyCombination() is the most robust if available
+            try:
+                key_combo = event.keyCombination()
+                key_str = QKeySequence(key_combo).toString()
+            except:
+                # Manual decomposition if needed
+                mod_val = 0
+                if modifiers & Qt.KeyboardModifier.ControlModifier: mod_val |= Qt.Modifier.CTRL
+                if modifiers & Qt.KeyboardModifier.ShiftModifier: mod_val |= Qt.Modifier.SHIFT
+                if modifiers & Qt.KeyboardModifier.AltModifier: mod_val |= Qt.Modifier.ALT
+                key_str = QKeySequence(key | mod_val).toString()
+                
+            shortcuts = self.mgr.settings["shortcuts"]
+            
+            if key_str == shortcuts.get("MOVE_LINE_UP"):
+                self.move_line(-1)
+                event.accept()
+                return
+            elif key_str == shortcuts.get("MOVE_LINE_DOWN"):
+                self.move_line(1)
+                event.accept()
+                return
+            elif key_str == shortcuts.get("DUPLICATE_LINE"):
+                self.duplicate_line()
+                event.accept()
+                return
+            elif key_str == shortcuts.get("DELETE_LINE"):
+                self.delete_current_line()
+                event.accept()
+                return
+            elif key_str == shortcuts.get("TOGGLE_SEARCH"):
+                self.shortcut_triggered.emit("TOGGLE_SEARCH")
+                event.accept()
+                return
+            elif key_str == shortcuts.get("SAVE_FILE"):
+                self.shortcut_triggered.emit("SAVE_FILE")
+                event.accept()
+                return
+            elif key_str == shortcuts.get("OPEN_FILE"):
+                self.shortcut_triggered.emit("OPEN_FILE")
+                event.accept()
+                return
+            elif key_str == shortcuts.get("RESTART_APP"):
+                self.shortcut_triggered.emit("RESTART_APP")
+                event.accept()
+                return
+        except Exception as e:
+            print(f"Key event error: {e}")
 
         super().keyPressEvent(event)
 
@@ -317,6 +330,79 @@ class CodeEditor(QPlainTextEdit):
         self.setTextCursor(cursor)
 
 # --- Dialogs ---
+
+class SettingsDialog(QDialog):
+    def __init__(self, parent, mgr):
+        super().__init__(parent)
+        self.mgr = mgr
+        self.setWindowTitle("SYSTEM_SETTINGS")
+        self.setModal(True)
+        self.setup_ui()
+        self.apply_theme()
+
+    def setup_ui(self):
+        self.setMinimumWidth(400)
+        layout = QVBoxLayout(self)
+        
+        form = QFormLayout()
+        self.w_edit = QLineEdit(str(self.mgr.settings.get("width", 1000)))
+        self.h_edit = QLineEdit(str(self.mgr.settings.get("height", 700)))
+        
+        self.theme_sel = QComboBox()
+        for t_id, t_info in THEMES.items():
+            self.theme_sel.addItem(t_info["name"], t_id)
+        
+        idx = self.theme_sel.findData(self.mgr.settings.get("theme", "CyberYellow"))
+        self.theme_sel.setCurrentIndex(max(0, idx))
+        
+        form.addRow("UI_WIDTH:", self.w_edit)
+        form.addRow("UI_HEIGHT:", self.h_edit)
+        form.addRow("COLOR_THEME:", self.theme_sel)
+        
+        layout.addLayout(form)
+        
+        self.more_box = QFrame()
+        self.more_box.setFrameShape(QFrame.Shape.StyledPanel)
+        more_layout = QVBoxLayout(self.more_box)
+        more_layout.addWidget(QLabel("// Reserved for future modules..."))
+        layout.addWidget(self.more_box)
+
+        btns = QHBoxLayout()
+        theme_accent = THEMES.get(self.mgr.settings.get("theme", "CyberYellow"), THEMES["CyberYellow"])["accent"]
+        self.save_btn = CyberButton("APPLY & SAVE", accent=theme_accent)
+        self.save_btn.clicked.connect(self.do_save)
+        self.cancel_btn = CyberButton("ABORT", accent=CP_RED)
+        self.cancel_btn.clicked.connect(self.reject)
+        
+        btns.addWidget(self.save_btn)
+        btns.addWidget(self.cancel_btn)
+        layout.addLayout(btns)
+
+    def apply_theme(self):
+        accent = THEMES.get(self.mgr.settings.get("theme", "CyberYellow"), THEMES["CyberYellow"])["accent"]
+        self.setStyleSheet(f"""
+            QDialog {{ background-color: {CP_BG}; border: 2px solid {accent}; }}
+            QLabel {{ color: {CP_TEXT}; font-family: 'Consolas'; font-weight: bold; text-transform: uppercase; }}
+            QLineEdit, QComboBox {{
+                background-color: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 6px;
+                font-family: 'Consolas'; font-size: 11pt;
+            }}
+            QLineEdit:focus {{ border: 1px solid {accent}; }}
+            QComboBox QAbstractItemView {{
+                background-color: {CP_PANEL}; color: {CP_TEXT}; selection-background-color: {accent}; selection-color: black;
+            }}
+            QFrame {{ border: 1px dashed {CP_DIM}; margin: 10px 0; }}
+        """)
+
+    def do_save(self):
+        try:
+            self.mgr.settings["width"] = int(self.w_edit.text())
+            self.mgr.settings["height"] = int(self.h_edit.text())
+            self.mgr.settings["theme"] = self.theme_sel.currentData()
+            self.mgr.save()
+            self.accept()
+        except Exception as e:
+            QMessageBox.critical(self, "SYSTEM_ERR", f"INVALID INPUT: {e}")
 
 class KeybindDialog(QDialog):
     def __init__(self, parent, mgr):
