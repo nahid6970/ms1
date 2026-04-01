@@ -126,7 +126,27 @@ class CodeEditor(QPlainTextEdit):
         accent_color = THEMES.get(self.mgr.settings.get("theme", "CyberYellow"), THEMES["CyberYellow"])["accent"]
         font_fam = self.mgr.settings.get("font_family", "Consolas")
         font_size = self.mgr.settings.get("font_size", 10)
-        self.setStyleSheet(f"background-color: {CP_PANEL}; color: {CP_CYAN}; border: none; padding: 8px; selection-background-color: {accent_color}; selection-color: black; font-family: '{font_fam}'; font-size: {font_size}pt;")
+        
+        # Build full stylesheet including scrollbars
+        scrollbar_style = f"""
+            QScrollBar:vertical {{ background: {CP_BG}; width: 12px; margin: 0px; }}
+            QScrollBar::handle:vertical {{ background: {CP_DIM}; min-height: 20px; border: 1px solid {CP_PANEL}; }}
+            QScrollBar::handle:vertical:hover {{ background: {accent_color}; }}
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical, QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {{ background: none; height: 0px; }}
+            QScrollBar:horizontal {{ background: {CP_BG}; height: 12px; margin: 0px; }}
+            QScrollBar::handle:horizontal {{ background: {CP_DIM}; min-width: 20px; border: 1px solid {CP_PANEL}; }}
+            QScrollBar::handle:horizontal:hover {{ background: {accent_color}; }}
+            QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal, QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {{ background: none; width: 0px; }}
+        """
+        
+        self.setStyleSheet(f"""
+            QPlainTextEdit {{
+                background-color: {CP_PANEL}; color: {CP_CYAN}; border: none; padding: 8px;
+                selection-background-color: {accent_color}; selection-color: black;
+                font-family: '{font_fam}'; font-size: {font_size}pt;
+            }}
+            {scrollbar_style}
+        """)
 
     def dragEnterEvent(self, event):
         if event.mimeData().hasUrls(): event.accept()
@@ -365,6 +385,17 @@ class MainWindow(QMainWindow):
         if not self.is_admin: self.btn_elevate.set_accent(CP_RED)
         
         # Style Tabs & Scrollbars
+        scrollbar_qss = f"""
+            QScrollBar:vertical {{ background: {CP_BG}; width: 12px; margin: 0px; }}
+            QScrollBar::handle:vertical {{ background: {CP_DIM}; min-height: 20px; border: 1px solid {CP_PANEL}; }}
+            QScrollBar::handle:vertical:hover {{ background: {accent}; }}
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical, QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {{ background: none; height: 0px; }}
+            QScrollBar:horizontal {{ background: {CP_BG}; height: 12px; margin: 0px; }}
+            QScrollBar::handle:horizontal {{ background: {CP_DIM}; min-width: 20px; border: 1px solid {CP_PANEL}; }}
+            QScrollBar::handle:horizontal:hover {{ background: {accent}; }}
+            QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal, QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {{ background: none; width: 0px; }}
+        """
+
         self.tabs.setStyleSheet(f"""
             QTabWidget::pane {{ border: 1px solid {CP_DIM}; background: {CP_BG}; top: -1px; }}
             QTabBar::tab {{
@@ -374,33 +405,8 @@ class MainWindow(QMainWindow):
             }}
             QTabBar::tab:selected {{ background: {CP_BG}; color: {accent}; border-top: 2px solid {accent}; }}
             QTabBar::tab:hover {{ background: #1a1a1a; color: {accent}; }}
-            
-            QTabBar::close-button {{
-                image: none;
-                width: 0px; height: 0px; /* Hide the native one completely */
-            }}
-
-            QScrollBar:vertical {{
-                background: {CP_BG}; width: 12px; margin: 0px;
-            }}
-            QScrollBar::handle:vertical {{
-                background: {CP_DIM}; min-height: 20px; border: 1px solid {CP_PANEL};
-            }}
-            QScrollBar::handle:vertical:hover {{ background: {accent}; }}
-            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical, QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {{
-                background: none; height: 0px;
-            }}
-            
-            QScrollBar:horizontal {{
-                background: {CP_BG}; height: 12px; margin: 0px;
-            }}
-            QScrollBar::handle:horizontal {{
-                background: {CP_DIM}; min-width: 20px; border: 1px solid {CP_PANEL};
-            }}
-            QScrollBar::handle:horizontal:hover {{ background: {accent}; }}
-            QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal, QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {{
-                background: none; width: 0px;
-            }}
+            QTabBar::close-button {{ image: none; width: 0px; height: 0px; }}
+            {scrollbar_qss}
         """)
         
         # Update each open editor
@@ -410,7 +416,13 @@ class MainWindow(QMainWindow):
                 editor.set_accent(accent)
                 editor.apply_font()
 
-        self.setStyleSheet(f"QMainWindow {{ background-color: {CP_BG}; }} QWidget {{ color: {CP_TEXT}; font-family: 'Consolas'; font-size: 10pt; }} QStatusBar {{ background: {CP_PANEL}; color: {CP_SUBTEXT}; border-top: 1px solid {CP_DIM}; }}")
+        self.setStyleSheet(f"""
+            QMainWindow {{ background-color: {CP_BG}; }}
+            QWidget {{ color: {CP_TEXT}; font-family: 'Consolas'; font-size: 10pt; }}
+            #CyberEditorCore:focus {{ border: 1px solid {accent}; }}
+            QStatusBar {{ background: {CP_PANEL}; color: {CP_SUBTEXT}; border-top: 1px solid {CP_DIM}; }}
+            {scrollbar_qss}
+        """)
 
     def restore_session(self, initial_file, buffer_file):
         # Open saved files

@@ -2,11 +2,13 @@
     "width": 1200,
     "height": 800,
     "theme": "CyberRed",
-    "font_family": "Imprint MT Shadow",
-    "font_size": 10,
+    "font_family": "JetBrainsMonoNL Nerd Font Propo",
+    "font_size": 14,
     "cursor_line_color": "#ff26ffac",
     "cursor_color": "#ff0004",
-    "open_files": [],
+    "open_files": [
+        "C:/@delta/ms1/TOOLS/Editor/PROJECT_SUMMARY.md"
+    ],
     "current_tab_index": 0,
     "shortcuts": {
         "MOVE_LINE_UP": "Alt+Up",
