@@ -537,7 +537,7 @@ class SVGArtApp(QMainWindow):
         self.addToolBar(Qt.ToolBarArea.LeftToolBarArea, self.tb_sym)
         self.tb_sym.addWidget(QLabel(" SYMMETRY "))
         self.sym_combo = QComboBox()
-        self.sym_combo.addItems(["None", "Radial", "Reflect"])
+        self.sym_combo.addItems(["None", "Radial", "Reflect (H)", "Reflect (V)", "Reflect (B)"])
         self.sym_combo.currentTextChanged.connect(self.set_symmetry_mode)
         self.tb_sym.addWidget(self.sym_combo)
         self.tb_sym.addWidget(QLabel(" MIRROR: "))
