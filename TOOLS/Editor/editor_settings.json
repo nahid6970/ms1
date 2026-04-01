@@ -1,0 +1,17 @@
+{
+    "width": 1000,
+    "height": 700,
+    "theme": "CyberRed",
+    "font_size": 10,
+    "last_file": "",
+    "shortcuts": {
+        "MOVE_LINE_UP": "Alt+Up",
+        "MOVE_LINE_DOWN": "Alt+Down",
+        "DUPLICATE_LINE": "Ctrl+D",
+        "DELETE_LINE": "Ctrl+Shift+K",
+        "TOGGLE_SEARCH": "Ctrl+F",
+        "SAVE_FILE": "Ctrl+S",
+        "OPEN_FILE": "Ctrl+O",
+        "RESTART_APP": "Ctrl+R"
+    }
+}
