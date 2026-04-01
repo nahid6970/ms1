@@ -150,9 +150,36 @@ class CodeEditor(QPlainTextEdit):
         self.setFont(QFont('Consolas', 10))
         self.setLineWrapMode(QPlainTextEdit.LineWrapMode.NoWrap)
         
+        # Drag and Drop Support
+        self.setAcceptDrops(True)
+        
     def set_accent(self, accent):
         self.accent = accent
         self.highlight_current_line()
+
+    def dragEnterEvent(self, event):
+        if event.mimeData().hasUrls():
+            event.accept()
+        else:
+            super().dragEnterEvent(event)
+
+    def dragMoveEvent(self, event):
+        if event.mimeData().hasUrls():
+            event.accept()
+        else:
+            super().dragMoveEvent(event)
+
+    def dropEvent(self, event):
+        if event.mimeData().hasUrls():
+            urls = event.mimeData().urls()
+            if urls:
+                path = urls[0].toLocalFile()
+                if os.path.isfile(path):
+                    # We trigger a signal to the main window to handle loading
+                    self.shortcut_triggered.emit(f"LOAD_FILE:{path}")
+            event.accept()
+        else:
+            super().dropEvent(event)
 
     def line_number_area_width(self):
         digits = 1
@@ -650,7 +677,10 @@ class MainWindow(QMainWindow):
         """)
 
     def handle_shortcut(self, action):
-        if action == "TOGGLE_SEARCH":
+        if action.startswith("LOAD_FILE:"):
+            path = action[len("LOAD_FILE:"):]
+            self.load_file(path)
+        elif action == "TOGGLE_SEARCH":
             self.toggle_search()
         elif action == "SAVE_FILE":
             self.on_save()
