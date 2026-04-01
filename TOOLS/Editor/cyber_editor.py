@@ -325,17 +325,48 @@ class MainWindow(QMainWindow):
         for b in [self.btn_open, self.btn_save, self.btn_restart, self.btn_keybinds, self.btn_settings]: b.set_accent(accent)
         if not self.is_admin: self.btn_elevate.set_accent(CP_RED)
         
-        # Style Tabs
+        # Style Tabs & Scrollbars
         self.tabs.setStyleSheet(f"""
             QTabWidget::pane {{ border: 1px solid {CP_DIM}; background: {CP_BG}; top: -1px; }}
             QTabBar::tab {{
                 background: {CP_PANEL}; color: {CP_SUBTEXT}; border: 1px solid {CP_DIM};
-                border-bottom: none; padding: 8px 15px; margin-right: 2px;
+                border-bottom: none; padding: 10px 20px; margin-right: 2px;
                 font-family: 'Consolas'; font-weight: bold;
             }}
             QTabBar::tab:selected {{ background: {CP_BG}; color: {accent}; border-top: 2px solid {accent}; }}
             QTabBar::tab:hover {{ background: #1a1a1a; color: {accent}; }}
-            QTabBar::close-button {{ image: none; }} /* Using standard close logic */
+            
+            QTabBar::close-button {{
+                image: none;
+                background: {CP_DIM};
+                subcontrol-position: right;
+                width: 14px; height: 14px;
+                margin-left: 5px;
+                border-radius: 7px;
+            }}
+            QTabBar::close-button:hover {{ background: {CP_RED}; }}
+
+            QScrollBar:vertical {{
+                background: {CP_BG}; width: 12px; margin: 0px;
+            }}
+            QScrollBar::handle:vertical {{
+                background: {CP_DIM}; min-height: 20px; border: 1px solid {CP_PANEL};
+            }}
+            QScrollBar::handle:vertical:hover {{ background: {accent}; }}
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical, QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {{
+                background: none; height: 0px;
+            }}
+            
+            QScrollBar:horizontal {{
+                background: {CP_BG}; height: 12px; margin: 0px;
+            }}
+            QScrollBar::handle:horizontal {{
+                background: {CP_DIM}; min-width: 20px; border: 1px solid {CP_PANEL};
+            }}
+            QScrollBar::handle:horizontal:hover {{ background: {accent}; }}
+            QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal, QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {{
+                background: none; width: 0px;
+            }}
         """)
         
         # Update each open editor
