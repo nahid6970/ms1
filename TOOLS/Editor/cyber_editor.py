@@ -126,12 +126,10 @@ class RecentFileItem(QFrame):
         self.name_label = QLabel(os.path.basename(self.path))
         self.name_label.setObjectName("FileNameLabel")
         self.name_label.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.name_label.mousePressEvent = lambda e: self.clicked.emit(self.path)
         
         self.path_label = QLabel(self.path)
         self.path_label.setObjectName("FilePathLabel")
         self.path_label.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.path_label.mousePressEvent = lambda e: self.clicked.emit(self.path)
         
         # Remove Button
         self.remove_btn = QPushButton("×")
@@ -147,6 +145,12 @@ class RecentFileItem(QFrame):
         layout.addLayout(vbox)
         layout.addStretch()
         layout.addWidget(self.remove_btn)
+
+    def mousePressEvent(self, event):
+        # Click anywhere (except child buttons) to trigger selection
+        if not self.pin_btn.underMouse() and not self.remove_btn.underMouse():
+            self.clicked.emit(self.path)
+        super().mousePressEvent(event)
 
     def toggle_pin(self):
         self.pinned = not self.pinned
@@ -865,6 +869,8 @@ class MainWindow(QMainWindow):
         dlg = RecentFilesDialog(self, self.mgr)
         dlg.file_selected.connect(self.add_new_tab)
         dlg.exec()
+        self.btn_recent.clearFocus()
+        self.btn_recent.update() # Force style refresh
 
     def update_recent_files(self, path):
         if not path: return
