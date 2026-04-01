@@ -110,8 +110,8 @@ def quit_app(icon=None, item=None):
 def setup_tray():
     global tray_icon
     image = create_image()
-    menu = (item('Show', show_window), item('Quit', quit_app))
-    tray_icon = pystray.Icon("rclone_gui", image, "RClone GUI", menu)
+    menu = (item('Show', show_window, default=True), item('Quit', quit_app))
+    tray_icon = pystray.Icon("rclone_gui", image, "RClone GUI", menu, action=show_window)
     tray_icon.run()
 
 def on_close_click():
