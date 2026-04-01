@@ -627,6 +627,9 @@ class MainWindow(QMainWindow):
                 selection-background-color: {accent}; selection-color: black;
                 font-family: 'Consolas'; font-size: 11pt;
             }}
+            QPlainTextEdit:focus {{
+                border: 1px solid {accent};
+            }}
             QStatusBar {{ background: {CP_PANEL}; color: {CP_SUBTEXT}; border-top: 1px solid {CP_DIM}; }}
         """)
 
