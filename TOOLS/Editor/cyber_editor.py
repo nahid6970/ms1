@@ -68,6 +68,7 @@ class SettingsManager:
             "cursor_line_color": "",
             "cursor_color": "",
             "open_files": [],
+            "recent_files": [], # List of {"path": "...", "pinned": bool}
             "current_tab_index": 0,
             "word_wrap": False,
             "search_visible": False,
@@ -83,6 +84,9 @@ class SettingsManager:
                     if "shortcuts" in data:
                         self.settings["shortcuts"].update(data["shortcuts"])
                         del data["shortcuts"]
+                    # Ensure recent_files exists and is correctly formatted
+                    if "recent_files" not in data:
+                        data["recent_files"] = []
                     self.settings.update(data)
             except Exception as e: print(f"Error loading settings: {e}")
 
@@ -93,6 +97,154 @@ class SettingsManager:
         except Exception as e: print(f"Error saving settings: {e}")
 
 # --- UI Components ---
+
+class RecentFileItem(QFrame):
+    clicked = pyqtSignal(str)
+    changed = pyqtSignal()
+    
+    def __init__(self, path, pinned, accent=CP_YELLOW):
+        super().__init__()
+        self.path = path
+        self.pinned = pinned
+        self.accent = accent
+        self.setFrameShape(QFrame.Shape.NoFrame)
+        self.setFixedHeight(40)
+        self.setup_ui()
+        self.apply_style()
+
+    def setup_ui(self):
+        layout = QHBoxLayout(self)
+        layout.setContentsMargins(5, 2, 5, 2)
+        
+        # Pin Toggle
+        self.pin_btn = QPushButton("★" if self.pinned else "☆")
+        self.pin_btn.setFixedSize(24, 24)
+        self.pin_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.pin_btn.clicked.connect(self.toggle_pin)
+        
+        # File Name & Path
+        self.name_label = QLabel(os.path.basename(self.path))
+        self.name_label.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.name_label.mousePressEvent = lambda e: self.clicked.emit(self.path)
+        
+        self.path_label = QLabel(self.path)
+        self.path_label.setStyleSheet(f"color: {CP_DIM}; font-size: 8pt;")
+        self.path_label.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.path_label.mousePressEvent = lambda e: self.clicked.emit(self.path)
+        
+        # Remove Button
+        self.remove_btn = QPushButton("×")
+        self.remove_btn.setFixedSize(24, 24)
+        self.remove_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.remove_btn.clicked.connect(lambda: self.changed.emit()) # Signal to parent to remove
+        
+        layout.addWidget(self.pin_btn)
+        vbox = QVBoxLayout()
+        vbox.setSpacing(0)
+        vbox.addWidget(self.name_label)
+        vbox.addWidget(self.path_label)
+        layout.addLayout(vbox)
+        layout.addStretch()
+        layout.addWidget(self.remove_btn)
+
+    def toggle_pin(self):
+        self.pinned = not self.pinned
+        self.pin_btn.setText("★" if self.pinned else "☆")
+        self.changed.emit()
+
+    def apply_style(self):
+        self.setStyleSheet(f"""
+            RecentFileItem {{ background-color: {CP_PANEL}; border-bottom: 1px solid {CP_DIM}; }}
+            RecentFileItem:hover {{ background-color: #1a1a1a; }}
+            QLabel {{ color: {CP_TEXT}; font-family: 'Consolas'; }}
+            QPushButton {{ 
+                background: none; border: none; font-size: 14px; 
+                color: {self.accent if self.pinned else CP_DIM}; 
+            }}
+            QPushButton:hover {{ color: {self.accent}; }}
+        """)
+
+class RecentFilesDialog(QDialog):
+    file_selected = pyqtSignal(str)
+    
+    def __init__(self, parent, mgr):
+        super().__init__(parent)
+        self.mgr = mgr
+        self.setWindowTitle("RECENT_FILES")
+        self.setModal(True)
+        self.resize(500, 400)
+        self.setup_ui()
+        self.apply_theme()
+
+    def setup_ui(self):
+        layout = QVBoxLayout(self)
+        
+        from PyQt6.QtWidgets import QScrollArea
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QFrame.Shape.NoFrame)
+        scroll.setStyleSheet(f"background-color: {CP_BG};")
+        
+        self.container = QWidget()
+        self.container_layout = QVBoxLayout(self.container)
+        self.container_layout.setContentsMargins(0, 0, 0, 0)
+        self.container_layout.setSpacing(1)
+        self.container_layout.addStretch()
+        
+        scroll.setWidget(self.container)
+        layout.addWidget(scroll)
+        
+        self.refresh_list()
+
+    def refresh_list(self):
+        # Clear current list (except stretch)
+        while self.container_layout.count() > 1:
+            child = self.container_layout.takeAt(0)
+            if child.widget(): child.widget().deleteLater()
+            
+        recent = self.mgr.settings.get("recent_files", [])
+        theme_accent = THEMES.get(self.mgr.settings.get("theme", "CyberYellow"), THEMES["CyberYellow"])["accent"]
+        
+        # Sort: Pinned first
+        sorted_recent = sorted(recent, key=lambda x: x.get("pinned", False), reverse=True)
+        
+        for item_data in sorted_recent:
+            path = item_data.get("path", "")
+            if not path: continue
+            
+            item_widget = RecentFileItem(path, item_data.get("pinned", False), accent=theme_accent)
+            item_widget.clicked.connect(self.on_file_clicked)
+            item_widget.changed.connect(lambda p=path, w=item_widget: self.on_item_changed(p, w))
+            self.container_layout.insertWidget(self.container_layout.count() - 1, item_widget)
+
+    def on_file_clicked(self, path):
+        self.file_selected.emit(path)
+        self.accept()
+
+    def on_item_changed(self, path, widget):
+        # Update settings
+        recent = self.mgr.settings.get("recent_files", [])
+        
+        if widget.remove_btn.underMouse(): # Check if it was a removal
+             recent = [r for r in recent if r["path"] != path]
+        else: # It was a pin toggle
+            for r in recent:
+                if r["path"] == path:
+                    r["pinned"] = widget.pinned
+                    break
+        
+        self.mgr.settings["recent_files"] = recent
+        self.mgr.save()
+        self.refresh_list()
+
+    def apply_theme(self):
+        accent = THEMES.get(self.mgr.settings.get("theme", "CyberYellow"), THEMES["CyberYellow"])["accent"]
+        self.setStyleSheet(f"""
+            QDialog {{ background-color: {CP_BG}; border: 2px solid {accent}; }}
+            QScrollBar:vertical {{ background-color: {CP_BG}; width: 10px; }}
+            QScrollBar::handle:vertical {{ background-color: {accent}; }}
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{ height: 0px; }}
+        """)
 
 class CyberButton(QPushButton):
     def __init__(self, text, accent=CP_YELLOW, parent=None):
@@ -659,9 +811,13 @@ class MainWindow(QMainWindow):
         central = QWidget(); self.setCentralWidget(central); self.main_layout = QVBoxLayout(central); self.main_layout.setContentsMargins(10, 10, 10, 10)
         
         self.nav_layout = QHBoxLayout()
-        self.btn_open = CyberButton("OPEN_FILE"); self.btn_save = CyberButton("SAVE"); self.btn_restart = CyberButton("RELOAD"); self.btn_keybinds = CyberButton("KEYS"); self.btn_settings = CyberButton("CFG")
-        self.btn_open.clicked.connect(self.on_open); self.btn_save.clicked.connect(self.on_save); self.btn_restart.clicked.connect(self.on_restart); self.btn_keybinds.clicked.connect(self.on_keybinds); self.btn_settings.clicked.connect(self.on_settings)
-        self.nav_layout.addWidget(self.btn_open); self.nav_layout.addWidget(self.btn_save); self.nav_layout.addStretch()
+        self.btn_open = CyberButton("OPEN_FILE"); self.btn_save = CyberButton("SAVE"); self.btn_recent = CyberButton("RECENT")
+        self.btn_restart = CyberButton("RELOAD"); self.btn_keybinds = CyberButton("KEYS"); self.btn_settings = CyberButton("CFG")
+        
+        self.btn_open.clicked.connect(self.on_open); self.btn_save.clicked.connect(self.on_save); self.btn_recent.clicked.connect(self.on_recent)
+        self.btn_restart.clicked.connect(self.on_restart); self.btn_keybinds.clicked.connect(self.on_keybinds); self.btn_settings.clicked.connect(self.on_settings)
+        
+        self.nav_layout.addWidget(self.btn_open); self.nav_layout.addWidget(self.btn_save); self.nav_layout.addWidget(self.btn_recent); self.nav_layout.addStretch()
         if not self.is_admin: self.btn_elevate = CyberButton("ELEVATE", accent=CP_RED); self.btn_elevate.clicked.connect(self.on_elevate); self.nav_layout.addWidget(self.btn_elevate)
         self.nav_layout.addWidget(self.btn_keybinds); self.nav_layout.addWidget(self.btn_restart); self.nav_layout.addWidget(self.btn_settings); self.main_layout.addLayout(self.nav_layout)
         
@@ -685,10 +841,34 @@ class MainWindow(QMainWindow):
         self.path_status_label.setContentsMargins(10, 0, 10, 0)
         self.statusBar().addWidget(self.path_status_label)
     
+    def on_recent(self):
+        dlg = RecentFilesDialog(self, self.mgr)
+        dlg.file_selected.connect(self.add_new_tab)
+        dlg.exec()
+
+    def update_recent_files(self, path):
+        if not path: return
+        recent = self.mgr.settings.get("recent_files", [])
+        
+        # Check if already in list
+        existing = next((r for r in recent if r["path"] == path), None)
+        if existing:
+            if not existing.get("pinned", False):
+                recent.remove(existing)
+                recent.insert(0, existing) # Move to top if not pinned (pinned stays where it is or sorted)
+        else:
+            recent.insert(0, {"path": path, "pinned": False})
+        
+        # Limit list (keep pinned ones, trim unpinned)
+        pinned = [r for r in recent if r.get("pinned", False)]
+        unpinned = [r for r in recent if not r.get("pinned", False)]
+        self.mgr.settings["recent_files"] = pinned + unpinned[:20]
+        self.mgr.save()
+
     def apply_theme_global(self):
         theme_key = self.mgr.settings.get("theme", "CyberYellow"); accent = THEMES[theme_key]["accent"]
         self.search_panel.apply_theme(accent)
-        for b in [self.btn_open, self.btn_save, self.btn_restart, self.btn_keybinds, self.btn_settings]: b.set_accent(accent)
+        for b in [self.btn_open, self.btn_save, self.btn_recent, self.btn_restart, self.btn_keybinds, self.btn_settings]: b.set_accent(accent)
         if not self.is_admin: self.btn_elevate.set_accent(CP_RED)
         
         # Style Tabs & Scrollbars
@@ -798,6 +978,7 @@ class MainWindow(QMainWindow):
         editor.document().setModified(False)
         if not path: editor.clean_text = "" # For untilted
         self.tabs.setCurrentIndex(idx); self.save_session_state(); self.update_status_indicator(False, editor)
+        if path: self.update_recent_files(path)
 
     def close_tab(self, index):
         self.tabs.removeTab(index)
@@ -855,6 +1036,7 @@ class MainWindow(QMainWindow):
             editor.clean_text = content
             editor.document().setModified(False)
             self.save_session_state()
+            self.update_recent_files(path)
         except Exception as e: QMessageBox.warning(self, "ERR", str(e))
 
     def handle_shortcut(self, action):
