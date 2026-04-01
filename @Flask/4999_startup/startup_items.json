@@ -756,6 +756,7 @@
     "Command": "C:\\@delta\\ms1\\TOOLS\\CPU.py",
     "ps1_command": "Start-Process -FilePath \"C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe\" -ArgumentList \"C:\\@delta\\ms1\\TOOLS\\CPU.py\"",
     "ExecutableType": "pythonw",
-    "script_enabled": false
+    "script_enabled": false,
+    "added_at": 1775017807.0811055
   }
 ]

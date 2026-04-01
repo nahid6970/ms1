@@ -279,15 +279,32 @@ class HoverButton(tk.Button):
     def on_leave(self, event):
         self.configure(bg=self.default_color, fg=self.default_fg)
 
-set_console_title("🔥")
-
-# Get console window handle for later use
+# Get console window handle and ensure it exists (for pythonw support)
 kernel32 = ctypes.windll.kernel32
 user32 = ctypes.windll.user32
 console_hwnd = kernel32.GetConsoleWindow()
 
-# Hide console window by default
+def disable_console_close_button():
+    """Disable the close button (X) of the console window to prevent script termination"""
+    hwnd = kernel32.GetConsoleWindow()
+    if hwnd:
+        hMenu = user32.GetSystemMenu(hwnd, False)
+        if hMenu:
+            # SC_CLOSE = 0xF060, MF_BYCOMMAND = 0x0000
+            user32.DeleteMenu(hMenu, 0xF060, 0x0000)
+
+if not console_hwnd:
+    kernel32.AllocConsole()
+    console_hwnd = kernel32.GetConsoleWindow()
+    if console_hwnd:
+        # Redirect stdout/stderr to the new console
+        sys.stdout = open('CONOUT$', 'w', buffering=1)
+        sys.stderr = open('CONOUT$', 'w', buffering=1)
+        disable_console_close_button()
+
 if console_hwnd:
+    set_console_title("🔥")
+    disable_console_close_button()
     user32.ShowWindow(console_hwnd, 0)  # SW_HIDE = 0
 
 # Create main window
@@ -328,13 +345,25 @@ ROOT1.pack(side="left", pady=(2,2), padx=(5,1), anchor="w", fill="x")
 def toggle_terminal_viewer():
     """Toggle the console window visibility"""
     global console_hwnd
+    
+    # If console was closed or never created, try to create it
+    if not console_hwnd or not user32.IsWindow(console_hwnd):
+        kernel32.AllocConsole()
+        console_hwnd = kernel32.GetConsoleWindow()
+        if console_hwnd:
+            sys.stdout = open('CONOUT$', 'w', buffering=1)
+            sys.stderr = open('CONOUT$', 'w', buffering=1)
+            set_console_title("🔥")
+            user32.ShowWindow(console_hwnd, 1)
+            user32.SetForegroundWindow(console_hwnd)
+            return
+
     if console_hwnd:
-        # Check if console is currently visible
         if user32.IsWindowVisible(console_hwnd):
             user32.ShowWindow(console_hwnd, 0)  # Hide
         else:
             user32.ShowWindow(console_hwnd, 1)  # Show
-            user32.SetForegroundWindow(console_hwnd)  # Bring to front
+            user32.SetForegroundWindow(console_hwnd)
 
 def open_settings():
     settings_win = tk.Toplevel(ROOT)
