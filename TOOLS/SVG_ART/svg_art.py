@@ -231,32 +231,28 @@ class ArtView(QGraphicsView):
             self.save_to_undo(self.current_item); self.current_item = None; self.poly_points = []
 
     def handle_curve_click(self, pos):
+        origin = self.current_item.pos() if self.current_item else pos
         if self.curve_state == 0:
             self.curve_points = [pos]; self.curve_state = 1; self.current_item = SymPath(QPainterPath()); self.current_item.setPos(pos)
             self.current_item.setPen(QPen(self.pen_color, self.pen_width)); self.scene().addItem(self.current_item); self.create_symmetry_clones(self.current_item)
+            self.persistent_path = QPainterPath(); self.persistent_path.moveTo(0, 0)
         elif self.curve_state == 1:
             self.curve_points.append(pos); self.curve_state = 2
         elif self.curve_state == 2:
-            if (pos - self.curve_points[0]).manhattanLength() < 15: self.finish_curve()
-            else:
-                self.curve_points.append(pos); self.curve_state = 1; self.update_curve_preview()
+            self.persistent_path.quadTo(pos - origin, self.curve_points[1] - origin)
+            self.curve_points = [self.curve_points[1]]; self.curve_state = 1; self.update_curve_preview()
 
     def update_curve_preview(self, pos=None):
         if not self.current_item: return
-        path = QPainterPath(); origin = self.current_item.pos(); path.moveTo(0, 0)
-        i = 1
-        while i + 1 < len(self.curve_points):
-            path.quadTo(self.curve_points[i] - origin, self.curve_points[i+1] - origin)
-            i += 2
+        path = QPainterPath(self.persistent_path); origin = self.current_item.pos()
         if pos:
             if self.curve_state == 1: path.lineTo(pos - origin)
-            elif self.curve_state == 2: path.quadTo(self.curve_points[-1] - origin, pos - origin)
+            elif self.curve_state == 2: path.quadTo(pos - origin, self.curve_points[1] - origin)
         self.current_item.setPath(path); self.update_clones(self.current_item)
 
     def finish_curve(self):
         if self.current_item:
-            self.update_curve_preview(); path = self.current_item.path(); path.closeSubpath(); self.current_item.setPath(path); self.update_clones(self.current_item)
-            self.save_to_undo(self.current_item)
+            self.update_curve_preview(); self.save_to_undo(self.current_item)
         self.current_item = None; self.curve_points = []; self.curve_state = 0
     def reset_curve(self):
         if self.current_item:
