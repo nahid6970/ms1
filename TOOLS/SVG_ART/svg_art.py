@@ -380,18 +380,18 @@ class ArtView(QGraphicsView):
         self.undo_stack.append((a, i))
 
 class ShapePickerDialog(QDialog):
-    def __init__(self, custom_shapes, on_delete, parent=None):
+    def __init__(self, custom_shapes, pixmap_cache, on_delete, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Custom Shapes"); self.setModal(True)
         self.setStyleSheet(f"background-color: {CP_BG}; color: {CP_TEXT}; font-family: Consolas;")
-        self.selected = None; self.custom_shapes = custom_shapes; self.on_delete = on_delete
+        self.selected = None; self.custom_shapes = custom_shapes
+        self.pixmap_cache = pixmap_cache; self.on_delete = on_delete
         self.layout_ = QVBoxLayout(self); self.layout_.setSizeConstraint(QVBoxLayout.SizeConstraint.SetFixedSize)
         self._build_grid()
 
     def _build_grid(self):
         from PyQt6.QtWidgets import QGridLayout
-        # remove old grid widget if rebuilding
-        if self.layout_.count(): 
+        if self.layout_.count():
             old = self.layout_.takeAt(0).widget()
             if old: old.deleteLater()
         container = QWidget(); gl = QGridLayout(container); gl.setSpacing(10); gl.setContentsMargins(10,10,10,10)
@@ -401,7 +401,7 @@ class ShapePickerDialog(QDialog):
             cell.setStyleSheet(f"background: {CP_PANEL}; border: 1px solid {CP_DIM};")
             vl = QVBoxLayout(cell); vl.setContentsMargins(2, 2, 2, 2); vl.setSpacing(0)
             lbl = QLabel(); lbl.setFixedSize(SIZE, SIZE)
-            lbl.setPixmap(self._make_pixmap(cmds, SIZE, SIZE))
+            lbl.setPixmap(self.pixmap_cache.get(name) or self.build_pixmap(cmds, SIZE, SIZE))
             lbl.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
             lbl.mousePressEvent = lambda e, n=name: self._pick(n)
             vl.addWidget(lbl)
@@ -415,7 +415,8 @@ class ShapePickerDialog(QDialog):
             gl.addWidget(cell, i // COLS, i % COLS)
         self.layout_.addWidget(container)
 
-    def _make_pixmap(self, cmds, w, h):
+    @staticmethod
+    def build_pixmap(cmds, w, h):
         px = QPixmap(w, h); px.fill(QColor(CP_PANEL))
         p = QPainter(px); p.setRenderHint(QPainter.RenderHint.Antialiasing)
         p.setPen(QPen(QColor(CP_CYAN), 1.5))
@@ -434,7 +435,7 @@ class ShapePickerDialog(QDialog):
     def _pick(self, name): self.selected = name; self.accept()
 
     def _delete(self, name):
-        del self.custom_shapes[name]; self.on_delete()
+        del self.custom_shapes[name]; self.pixmap_cache.pop(name, None); self.on_delete()
         self._build_grid(); self.adjustSize()
 
 
@@ -513,6 +514,7 @@ class SVGArtApp(QMainWindow):
                 with open(CUSTOM_SHAPES_FILE, 'r') as f:
                     self.view.custom_shapes = json.load(f)
             except: self.view.custom_shapes = {}
+        self._shape_pixmap_cache = {name: ShapePickerDialog.build_pixmap(cmds, 100, 100) for name, cmds in self.view.custom_shapes.items()}
 
     def save_custom_shapes(self):
         try:
@@ -526,13 +528,14 @@ class SVGArtApp(QMainWindow):
             QMessageBox.warning(self, "No Art", "Draw something first to save as a custom shape."); return
         name, ok = QInputDialog.getText(self, "Shape Name", "Enter shape name:")
         if ok and name.strip():
-            self.view.custom_shapes[name.strip()] = cmds
+            n = name.strip(); self.view.custom_shapes[n] = cmds
+            self._shape_pixmap_cache[n] = ShapePickerDialog.build_pixmap(cmds, 100, 100)
             self.save_custom_shapes()
 
     def show_shape_picker(self):
         if not self.view.custom_shapes:
             QMessageBox.information(self, "No Shapes", "No custom shapes saved yet."); return
-        dlg = ShapePickerDialog(self.view.custom_shapes, self.save_custom_shapes, self)
+        dlg = ShapePickerDialog(self.view.custom_shapes, self._shape_pixmap_cache, self.save_custom_shapes, self)
         if dlg.exec() and dlg.selected:
             self.set_tool(f"custom:{dlg.selected}")
 
