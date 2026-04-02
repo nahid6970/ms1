@@ -589,5 +589,6 @@
             "action": "SendText(\"/stats session\")",
             "enabled": true
         }
-    ]
+    ],
+    "app_font_family": "JetBrainsMonoNL Nerd Font Propo"
 }

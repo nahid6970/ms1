@@ -238,7 +238,7 @@ class AddEditShortcutDialog(QDialog):
             self.record_hotkey_btn.setFixedWidth(40)
             self.record_hotkey_btn.setStyleSheet("""
                 QPushButton {
-                    font-family: 'JetBrainsMono NFP', 'JetBrains Mono', monospace;
+                    font-family: inherit;
                     background-color: #3d3d3d;
                     border: 1px solid #555;
                     border-radius: 5px;
@@ -274,7 +274,7 @@ class AddEditShortcutDialog(QDialog):
             self.record_hotkey_btn.setFixedWidth(40)
             self.record_hotkey_btn.setStyleSheet("""
                 QPushButton {
-                    font-family: 'JetBrainsMono NFP', 'JetBrains Mono', monospace;
+                    font-family: inherit;
                     background-color: #3d3d3d;
                     border: 1px solid #555;
                     border-radius: 5px;
@@ -501,9 +501,10 @@ SendText("Hello World")"""
         ref_dialog.resize(1100, 850)
         ref_dialog.setStyleSheet("background-color: #1e1e1e; color: white;")
         
-        # Setup robust font with fallbacks
-        _fnt = QFont("JetBrainsMono NFP", 10)
-        _fnt.setFamilies(["JetBrainsMono NFP", "JetBrainsMono NF", "JetBrains Mono", "Consolas", "monospace"])
+        # Use the application's current font
+        app_font = self.parent_window.app_font_family
+        _fnt = QFont(app_font, 10)
+        _fnt.setFamilies([app_font, "JetBrainsMono NFP", "Segoe UI", "Consolas", "monospace"])
         ref_dialog.setFont(_fnt)
         
         layout = QVBoxLayout(ref_dialog)
@@ -513,30 +514,32 @@ SendText("Hello World")"""
         search_layout = QHBoxLayout()
         search_input = QLineEdit()
         search_input.setPlaceholderText("Search in documentation (Press Enter for next)...")
-        search_input.setStyleSheet("""
-            QLineEdit {
+        search_input.setStyleSheet(f"""
+            QLineEdit {{
                 padding: 10px;
                 border-radius: 5px;
                 background: #2d2d2d;
                 border: 1px solid #444;
                 color: white;
                 font-size: 14px;
-            }
-            QLineEdit:focus { border-color: #61dafb; }
+                font-family: '{app_font}';
+            }}
+            QLineEdit:focus {{ border-color: #61dafb; }}
         """)
         
         search_btn = QPushButton("Next")
-        search_btn.setStyleSheet("""
-            QPushButton {
+        search_btn.setStyleSheet(f"""
+            QPushButton {{
                 background-color: #3d3d3d;
                 border: 1px solid #555;
                 padding: 8px 15px;
                 border-radius: 5px;
-            }
-            QPushButton:hover {
+                font-family: '{app_font}';
+            }}
+            QPushButton:hover {{
                 background-color: #4d4d4d;
                 border-color: #61dafb;
-            }
+            }}
         """)
         
         search_layout.addWidget(QLabel("🔍 Search:"))
@@ -566,15 +569,15 @@ SendText("Hello World")"""
         browser.setOpenExternalLinks(False)
         browser.setFont(_fnt)
         browser.document().setDocumentMargin(15)
-        browser.setStyleSheet("""
-            QTextBrowser {
+        browser.setStyleSheet(f"""
+            QTextBrowser {{
                 background-color: #2b2b2b;
                 color: #e0e0e0;
                 border: none;
                 padding: 0px;
-                font-family: 'JetBrainsMono NFP', 'JetBrainsMono NF', 'JetBrains Mono', 'Consolas', monospace;
+                font-family: '{app_font}', 'JetBrainsMono NFP', 'Consolas', monospace;
                 font-size: 13px;
-            }
+            }}
         """)
         
         # Load the reference content
@@ -620,7 +623,7 @@ SendText("Hello World")"""
         toc_layout.setContentsMargins(5, 10, 5, 10)
         toc_layout.setSpacing(2)
         toc_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
-        toc_layout.addWidget(QLabel('<b style="color:#61dafb; font-size:14px;">Contents</b>'))
+        toc_layout.addWidget(QLabel(f'<b style="color:#61dafb; font-size:14px; font-family:\'{app_font}\';">Contents</b>'))
 
         # Extract headings from markdown for TOC
         toc_entries = []
@@ -648,7 +651,7 @@ SendText("Hello World")"""
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
             btn.setStyleSheet(f"""
                 QPushButton {{ text-align:left; color:{'#61dafb' if level==1 else '#ccc'};
-                    font-family:'JetBrainsMono NFP', 'JetBrainsMono NF', 'JetBrains Mono', 'Consolas', monospace; 
+                    font-family:'{app_font}', 'JetBrainsMono NFP', 'Consolas', monospace; 
                     font-size:{'13px' if level==1 else '12px'};
                     font-weight:{'bold' if level==1 else 'normal'};
                     padding:4px 8px; border:none; background:transparent; }}
@@ -688,15 +691,16 @@ SendText("Hello World")"""
         button_box = QHBoxLayout()
         close_btn = QPushButton("Close")
         close_btn.setFixedWidth(120)
-        close_btn.setStyleSheet("""
-            QPushButton {
+        close_btn.setStyleSheet(f"""
+            QPushButton {{
                 background-color: #444;
                 padding: 10px;
                 border-radius: 5px;
-            }
-            QPushButton:hover {
+                font-family: '{app_font}';
+            }}
+            QPushButton:hover {{
                 background-color: #555;
-            }
+            }}
         """)
         close_btn.clicked.connect(ref_dialog.close)
         button_box.addStretch()
@@ -887,6 +891,57 @@ class CategoryColorDialog(QDialog):
         CategoryColorDialog(self.parent_window).exec()
 
 
+class SettingsDialog(QDialog):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.parent_window = parent
+        self.setWindowTitle("Settings")
+        self.setModal(True)
+        self.resize(400, 200)
+        self.setup_ui()
+
+    def setup_ui(self):
+        layout = QVBoxLayout(self)
+        layout.setSpacing(15)
+
+        # Font Selection
+        font_layout = QHBoxLayout()
+        font_layout.addWidget(QLabel("Application Font:"))
+        
+        from PyQt6.QtWidgets import QFontComboBox
+        self.font_combo = QFontComboBox()
+        
+        # Try to find the current font in the list
+        current_font = self.parent_window.app_font_family
+        self.font_combo.setCurrentFont(QFont(current_font))
+        
+        font_layout.addWidget(self.font_combo)
+        layout.addLayout(font_layout)
+
+        layout.addWidget(QLabel("<small><i>Note: Some icons require a Nerd Font (NFP) to display correctly.</i></small>"))
+
+        # Buttons
+        buttons = QHBoxLayout()
+        save_btn = QPushButton("Save && Apply")
+        save_btn.setStyleSheet("background-color: #2ea44f; color: white; font-weight: bold;")
+        save_btn.clicked.connect(self.save_settings)
+        
+        close_btn = QPushButton("Close")
+        close_btn.clicked.connect(self.close)
+        
+        buttons.addStretch()
+        buttons.addWidget(save_btn)
+        buttons.addWidget(close_btn)
+        layout.addLayout(buttons)
+
+    def save_settings(self):
+        new_font = self.font_combo.currentFont().family()
+        self.parent_window.app_font_family = new_font
+        self.parent_window.apply_global_font()
+        self.parent_window.save_shortcuts_json()
+        QMessageBox.information(self, "Success", f"Font updated to '{new_font}' and applied!")
+
+
 class AHKShortcutEditor(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -894,6 +949,7 @@ class AHKShortcutEditor(QMainWindow):
         self.text_shortcuts = []
         self.startup_scripts = []
         self.context_shortcuts = []
+        self.app_font_family = "JetBrains Mono" # Default
         self.category_colors = {
             "System": "#FF6B6B", "Navigation": "#4ECDC4", "Text": "#45B7D1",
             "Media": "#96CEB4", "AutoHotkey": "#FFEAA7", "General": "#DDA0DD",
@@ -906,6 +962,7 @@ class AHKShortcutEditor(QMainWindow):
         self.load_shortcuts_json()
         self.setup_ui()
         self.load_settings()
+        self.apply_global_font()
         self.update_display()
 
     def setup_ui(self):
@@ -983,7 +1040,7 @@ class AHKShortcutEditor(QMainWindow):
         self.category_toggle.setToolTip("Group by Category")
         self.category_toggle.setStyleSheet("""
             QCheckBox {
-                font-family: 'JetBrainsMono NFP';
+                font-family: 'Segoe UI', sans-serif;
                 font-size: 24px;
                 color: #61dafb;
                 margin-left: 5px;
@@ -1008,20 +1065,35 @@ class AHKShortcutEditor(QMainWindow):
         self.colors_btn.clicked.connect(self.open_color_dialog)
         top_layout.addWidget(self.colors_btn)
 
+        # Settings button
+        self.settings_btn = QPushButton("⚙ Settings")
+        self.settings_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #444;
+                color: white;
+                border: 1px solid #555;
+            }
+            QPushButton:hover {
+                background-color: #555;
+            }
+        """)
+        self.settings_btn.clicked.connect(self.open_settings_dialog)
+        top_layout.addWidget(self.settings_btn)
+
         # Search box
         self.search_edit = HotkeyLineEdit()
         self.search_edit.setObjectName("search_edit")
         self.search_edit.setPlaceholderText(" Search shortcuts...")
         self.search_edit.textChanged.connect(self.update_display)
         self.search_edit.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
-        self.search_edit.setStyleSheet("font-family: 'Segoe UI', 'JetBrainsMono NFP';")
+        self.search_edit.setStyleSheet("font-family: 'Segoe UI', sans-serif;")
         
         self.record_search_btn = QPushButton("⌨")
         self.record_search_btn.setCheckable(True)
         self.record_search_btn.setFixedWidth(40)
         self.record_search_btn.setStyleSheet("""
             QPushButton {
-                font-family: 'JetBrainsMono NFP';
+                font-family: 'Segoe UI', sans-serif;
                 background-color: #2d2d2d;
                 border: 1px solid #444;
                 color: #888;
@@ -1087,6 +1159,18 @@ class AHKShortcutEditor(QMainWindow):
 
         self.selected_shortcut = None
         self.selected_type = None
+
+    def apply_global_font(self):
+        """Apply the selected font family globally to the application"""
+        font = QFont(self.app_font_family, 10)
+        QApplication.instance().setFont(font)
+        # Force update of elements that might have their own font set
+        if hasattr(self, 'text_browser'):
+            self.update_display() # Refresh HTML with new font
+
+    def open_settings_dialog(self):
+        dialog = SettingsDialog(self)
+        dialog.exec()
 
     def load_settings(self):
         """Load saved settings"""
@@ -1201,6 +1285,7 @@ class AHKShortcutEditor(QMainWindow):
                     self.text_shortcuts = data.get("text_shortcuts", [])
                     self.startup_scripts = data.get("startup_scripts", [])
                     self.context_shortcuts = data.get("context_shortcuts", [])
+                    self.app_font_family = data.get("app_font_family", "JetBrains Mono")
             except Exception as e:
                 QMessageBox.critical(self, "Error", f"Failed to load shortcuts JSON: {e}")
                 self.create_default_shortcuts()
@@ -1226,7 +1311,8 @@ class AHKShortcutEditor(QMainWindow):
                 "script_shortcuts": self.script_shortcuts, 
                 "text_shortcuts": self.text_shortcuts,
                 "startup_scripts": self.startup_scripts,
-                "context_shortcuts": self.context_shortcuts
+                "context_shortcuts": self.context_shortcuts,
+                "app_font_family": self.app_font_family
             }
             with open(SHORTCUTS_JSON_PATH, 'w', encoding='utf-8') as f:
                 json.dump(data, f, indent=4, ensure_ascii=False)
@@ -1263,83 +1349,83 @@ class AHKShortcutEditor(QMainWindow):
         QTimer.singleShot(1, lambda: scrollbar.setValue(scroll_position))
 
     def generate_html(self, script_shortcuts, text_shortcuts, context_shortcuts, startup_scripts, group_by_category):
-        html = """
+        html = f"""
         <!DOCTYPE html>
         <html>
         <head>
             <style>
-                body {
-                    font-family: 'JetBrains Mono', 'Consolas', monospace;
+                body {{
+                    font-family: '{self.app_font_family}', 'Segoe UI', sans-serif;
                     margin: 10px 20px;
                     background: #2b2b2b;
                     color: #ffffff;
                     font-size: 18px; /* High visibility base size */
-                }
-                .container { display: flex; gap: 20px; }
-                .column { flex: 1; }
-                .section-title {
+                }}
+                .container {{ display: flex; gap: 20px; }}
+                .column {{ flex: 1; }}
+                .section-title {{
                     font-size: 24px;
                     font-weight: bold;
                     margin: 15px 0 5px 0;
                     color: #61dafb;
-                }
-                .section-title:first-child {
+                }}
+                .section-title:first-child {{
                     margin-top: 5px;
-                }
-                .category-header {
+                }}
+                .category-header {{
                     font-size: 22px;
                     font-weight: bold;
                     margin: 12px 0 3px 0;
                     padding: 3px 10px;
                     border-radius: 5px;
                     background: #404040;
-                }
-                .category-header.first-in-section {
+                }}
+                .category-header.first-in-section {{
                     margin-top: 8px;
-                }
-                .shortcut-item {
+                }}
+                .shortcut-item {{
                     padding: 2px 10px;
                     margin: 1px 0;
                     border-radius: 5px;
                     cursor: pointer;
                     transition: background 0.2s;
                     border-left: 3px solid transparent;
-                }
-                .shortcut-item:hover {
+                }}
+                .shortcut-item:hover {{
                     background: rgba(255,255,255,0.05);
                     border-left-color: #61dafb;
-                }
-                .shortcut-item.selected {
+                }}
+                .shortcut-item.selected {{
                     background: rgba(97, 218, 251, 0.2);
                     border-left-color: #61dafb;
-                }
-                .shortcut-key {
+                }}
+                .shortcut-key {{
                     color: #ffffff;
                     font-weight: bold;
                     font-size: 18px;
                     white-space: nowrap;
                     padding-right: 15px;
-                }
-                .shortcut-separator {
+                }}
+                .shortcut-separator {{
                     color: #32CD32;
                     font-weight: bold;
                     font-size: 22px;
                     vertical-align: middle;
                     white-space: nowrap;
-                }
-                .shortcut-name {
+                }}
+                .shortcut-name {{
                     color: #ffffff;
                     font-size: 18px;
-                }
-                .shortcut-desc {
+                }}
+                .shortcut-desc {{
                     color: #888;
                     font-size: 15px;
-                }
-                .status-enabled { color: #27ae60; }
-                .status-disabled { color: #ff5555; }
+                }}
+                .status-enabled {{ color: #27ae60; }}
+                .status-disabled {{ color: #ff5555; }}
                 
-                .indent { margin-left: 20px; }
-                a { text-decoration: none; color: inherit; }
+                .indent {{ margin-left: 20px; }}
+                a {{ text-decoration: none; color: inherit; }}
             </style>
         </head>
         <body>
@@ -1399,178 +1485,6 @@ class AHKShortcutEditor(QMainWindow):
                 html += self.generate_shortcut_html(shortcut, "context", original_index, False)
 
         html += """
-                    <div class="section-title">Background Scripts</div>
-        """
-
-        if group_by_category:
-            startup_categories = {}
-            for shortcut in startup_scripts:
-                category = shortcut.get('category', 'General')
-                if category not in startup_categories:
-                    startup_categories[category] = []
-                startup_categories[category].append(shortcut)
-
-            for i, category in enumerate(sorted(startup_categories.keys())):
-                color = self.get_category_color(category)
-                first_class = " first-in-section" if i == 0 else ""
-                html += f'<div class="category-header{first_class}" style="color: {color};">📁 {category}</div>'
-
-                for shortcut in sorted(startup_categories[category], key=lambda x: x.get('name', '').lower()):
-                    original_index = self.startup_scripts.index(shortcut)
-                    html += self.generate_shortcut_html(shortcut, "startup", original_index, True)
-        else:
-            for shortcut in sorted(startup_scripts, key=lambda x: x.get('name', '').lower()):
-                original_index = self.startup_scripts.index(shortcut)
-                html += self.generate_shortcut_html(shortcut, "startup", original_index, False)
-
-        html += """
-                </div>
-                <div class="column">
-                    <div class="section-title">Text Shortcuts</div>
-        """
-
-        if group_by_category:
-            # Group text shortcuts by category
-            text_categories = {}
-            for shortcut in text_shortcuts:
-                category = shortcut.get('category', 'General')
-                if category not in text_categories:
-                    text_categories[category] = []
-                text_categories[category].append(shortcut)
-
-            for i, category in enumerate(sorted(text_categories.keys())):
-                color = self.get_category_color(category)
-                first_class = " first-in-section" if i == 0 else ""
-                html += f'<div class="category-header{first_class}" style="color: {color};">📁 {category}</div>'
-
-                for shortcut in sorted(text_categories[category], key=lambda x: x.get('trigger', '').lower()):
-                    original_index = self.text_shortcuts.index(shortcut)
-                    html += self.generate_shortcut_html(shortcut, "text", original_index, True)
-        else:
-            # Flat list
-            for shortcut in sorted(text_shortcuts, key=lambda x: x.get('trigger', '').lower()):
-                original_index = self.text_shortcuts.index(shortcut)
-                html += self.generate_shortcut_html(shortcut, "text", original_index, False)
-
-        html += """
-                </div>
-            </div>
-        </body>
-        </html>
-        """
-
-        return html
-        html = """
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <style>
-                body {
-                    font-family: 'JetBrains Mono', 'Consolas', monospace;
-                    margin: 10px 20px;
-                    background: #2b2b2b;
-                    color: #ffffff;
-                    font-size: 18px; /* High visibility base size */
-                }
-                .container { display: flex; gap: 20px; }
-                .column { flex: 1; }
-                .section-title {
-                    font-size: 24px;
-                    font-weight: bold;
-                    margin: 15px 0 5px 0;
-                    color: #61dafb;
-                }
-                .section-title:first-child {
-                    margin-top: 5px;
-                }
-                .category-header {
-                    font-size: 22px;
-                    font-weight: bold;
-                    margin: 12px 0 3px 0;
-                    padding: 3px 10px;
-                    border-radius: 5px;
-                    background: #404040;
-                }
-                .category-header.first-in-section {
-                    margin-top: 8px;
-                }
-                .shortcut-item {
-                    padding: 2px 10px;
-                    margin: 1px 0;
-                    border-radius: 5px;
-                    cursor: pointer;
-                    transition: background 0.2s;
-                    border-left: 3px solid transparent;
-                }
-                .shortcut-item:hover {
-                    background: rgba(255,255,255,0.05);
-                    border-left-color: #61dafb;
-                }
-                .shortcut-item.selected {
-                    background: rgba(97, 218, 251, 0.2);
-                    border-left-color: #61dafb;
-                }
-                .shortcut-key {
-                    color: #ffffff;
-                    font-weight: bold;
-                    font-size: 18px;
-                    white-space: nowrap;
-                    padding-right: 15px;
-                }
-                .shortcut-separator {
-                    color: #32CD32;
-                    font-weight: bold;
-                    font-size: 22px;
-                    vertical-align: middle;
-                    white-space: nowrap;
-                }
-                .shortcut-name {
-                    color: #ffffff;
-                    font-size: 18px;
-                }
-                .shortcut-desc {
-                    color: #888;
-                    font-size: 15px;
-                }
-                .status-enabled { color: #27ae60; }
-                .status-disabled { color: #ff5555; }
-                
-                .indent { margin-left: 20px; }
-                a { text-decoration: none; color: inherit; }
-            </style>
-        </head>
-        <body>
-            <div class="container">
-                <div class="column">
-                    <div class="section-title">Script Shortcuts</div>
-        """
-
-        if group_by_category:
-            # Group script shortcuts by category
-            script_categories = {}
-            for shortcut in script_shortcuts:
-                category = shortcut.get('category', 'General')
-                if category not in script_categories:
-                    script_categories[category] = []
-                script_categories[category].append(shortcut)
-
-            for i, category in enumerate(sorted(script_categories.keys())):
-                color = self.get_category_color(category)
-                first_class = " first-in-section" if i == 0 else ""
-                html += f'<div class="category-header{first_class}" style="color: {color};">📁 {category}</div>'
-
-                for shortcut in sorted(script_categories[category], key=lambda x: x.get('hotkey', '').lower()):
-                    original_index = self.script_shortcuts.index(shortcut)
-                    html += self.generate_shortcut_html(shortcut, "script", original_index, True)
-        else:
-            # Flat list
-            for shortcut in sorted(script_shortcuts, key=lambda x: x.get('hotkey', '').lower()):
-                original_index = self.script_shortcuts.index(shortcut)
-                html += self.generate_shortcut_html(shortcut, "script", original_index, False)
-
-        html += """
-                </div>
-                <div class="column">
                     <div class="section-title">Background Scripts</div>
         """
 
@@ -1968,11 +1882,8 @@ def main():
     app = QApplication(sys.argv)
     app.setStyle('Fusion')  # Modern look
 
-    # Set application font
-    font = QFont("JetBrains Mono", 10)
-    app.setFont(font)
-
     window = AHKShortcutEditor()
+    # Font is applied inside AHKShortcutEditor via load_shortcuts_json -> apply_global_font
     window.show()
 
     sys.exit(app.exec())
