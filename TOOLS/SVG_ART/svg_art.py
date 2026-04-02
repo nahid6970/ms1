@@ -56,10 +56,13 @@ class SymLine(QGraphicsLineItem, SymItem):
         SymItem.__init__(self)
 
 class SymSvg(QGraphicsSvgItem, SymItem):
-    def __init__(self, filename, *args, **kwargs):
-        QGraphicsSvgItem.__init__(self, filename, *args, **kwargs)
+    def __init__(self, code, name="", *args, **kwargs):
+        QGraphicsSvgItem.__init__(self, *args, **kwargs)
         SymItem.__init__(self)
-        self.filename = filename
+        self.code = code
+        self.name = name
+        self._renderer = QtSvg.QSvgRenderer(QByteArray(code.encode('utf-8')))
+        self.setSharedRenderer(self._renderer)
 
 class ArtScene(QGraphicsScene):
     def __init__(self, parent=None):
@@ -119,8 +122,8 @@ class ArtView(QGraphicsView):
             elif self.tool in ["rect", "ellipse", "line", "triangle", "custom_shape"]:
                 self.drawing = True; p = self.get_pen()
                 if self.tool == "custom_shape":
-                    if self.current_custom_shape and os.path.exists(self.current_custom_shape):
-                        self.current_item = SymSvg(self.current_custom_shape)
+                    if isinstance(self.current_custom_shape, dict) and "code" in self.current_custom_shape:
+                        self.current_item = SymSvg(self.current_custom_shape["code"], self.current_custom_shape.get("name", ""))
                         s = max(0.1, self.pen_width / 10.0); self.current_item.setScale(s)
                         b = self.current_item.boundingRect()
                         self.current_item.setPos(scene_pos.x() - b.width()*s/2, scene_pos.y() - b.height()*s/2)
@@ -224,7 +227,7 @@ class ArtView(QGraphicsView):
         elif isinstance(item, QGraphicsEllipseItem): clone = SymEllipse(item.rect())
         elif isinstance(item, QGraphicsLineItem): clone = SymLine(item.line())
         elif isinstance(item, SymSvg):
-            clone = SymSvg(item.filename)
+            clone = SymSvg(item.code, getattr(item, 'name', ''))
             clone.setScale(item.scale())
         else: return None
         if hasattr(clone, 'setPen') and hasattr(item, 'pen'): clone.setPen(item.pen())
@@ -388,18 +391,20 @@ class SVGArtApp(QMainWindow):
     
     def add_custom_shape(self):
         path, _ = QFileDialog.getOpenFileName(self, "Load Custom SVG", "", "SVG Files (*.svg)")
-        if path and path not in self.view.custom_shapes:
-            self.view.custom_shapes.append(path)
-            self.custom_combo.addItem(os.path.basename(path), path)
+        if path and os.path.exists(path):
+            with open(path, 'r', encoding='utf-8') as f: code = f.read()
+            name = os.path.basename(path)
+            self.view.custom_shapes.append({"name": name, "code": code})
+            self.custom_combo.addItem(name, len(self.view.custom_shapes) - 1)
             self.custom_combo.setCurrentIndex(self.custom_combo.count() - 1)
     
     def remove_custom_shape(self):
         idx = self.custom_combo.currentIndex()
         if idx >= 0:
-            path = self.custom_combo.itemData(idx)
+            dict_idx = self.custom_combo.itemData(idx)
             self.custom_combo.removeItem(idx)
-            if path in self.view.custom_shapes:
-                self.view.custom_shapes.remove(path)
+            if 0 <= dict_idx < len(self.view.custom_shapes):
+                self.view.custom_shapes[dict_idx] = None
             if self.custom_combo.count() > 0:
                 self.select_custom_shape(self.custom_combo.currentIndex())
             else:
@@ -408,8 +413,10 @@ class SVGArtApp(QMainWindow):
 
     def select_custom_shape(self, idx):
         if idx >= 0:
-            self.view.current_custom_shape = self.custom_combo.itemData(idx)
-            self.set_tool("custom_shape")
+            dict_idx = self.custom_combo.itemData(idx)
+            if 0 <= dict_idx < len(self.view.custom_shapes):
+                self.view.current_custom_shape = self.view.custom_shapes[dict_idx]
+                self.set_tool("custom_shape")
 
     def clear_art(self): [self.scene.removeItem(i) for i in self.scene.items() if getattr(i, 'is_art_item', False)]
     def load_image(self, path=None):
@@ -439,16 +446,23 @@ class SVGArtApp(QMainWindow):
                     if "state" in s: self.restoreState(QByteArray.fromHex(s["state"].encode()))
                     self.view.tool = s.get("tool", "brush"); self.view.brush_type = s.get("brush_type", "marker"); self.view.pen_color = QColor(s.get("color", CP_CYAN)); self.view.pen_width = s.get("width", 3); self.view.multi_line_count = s.get("multi_count", 3); sm = s.get("symmetry_mode", "None"); self.view.symmetry_mode = sm; self.sym_combo.setCurrentText(sm); self.view.mirror_count = s.get("mirror_count", 4); self.view.sym_center = QPointF(s.get("sym_x", 0), s.get("sym_y", 0)); self.scene.center_marker.setPos(self.view.sym_center); self.scene.center_marker_v.setPos(self.view.sym_center); self.brush_combo.setCurrentText(self.view.brush_type.capitalize()); self.thickness_slider.setValue(self.view.pen_width); self.multi_slider.setValue(self.view.multi_line_count); self.mirror_spin.setValue(self.view.mirror_count); self.update_color_ui(self.view.pen_color); ip = s.get("img_path", "")
                     self.view.is_sharp = s.get("is_sharp", True); self.btn_sharp.setChecked(self.view.is_sharp); self.toggle_sharp()
-                    self.view.custom_shapes = s.get("custom_shapes", [])
-                    for p in self.view.custom_shapes:
-                        if os.path.exists(p): self.custom_combo.addItem(os.path.basename(p), p)
+                    raw_shapes = s.get("custom_shapes", [])
+                    self.view.custom_shapes = []
+                    for c in raw_shapes:
+                        if isinstance(c, dict) and "code" in c: self.view.custom_shapes.append(c)
+                        elif isinstance(c, str) and os.path.exists(c):
+                            try:
+                                with open(c, 'r', encoding='utf-8') as f: self.view.custom_shapes.append({"name": os.path.basename(c), "code": f.read()})
+                            except: pass
+                    for i, shape in enumerate(self.view.custom_shapes):
+                        self.custom_combo.addItem(shape.get("name", "SVG"), i)
                     if ip and os.path.exists(ip):
                         self.load_image(ip)
                         if self.view.image_item: self.view.image_item.setPos(s.get("img_x", 0), s.get("img_y", 0))
             except: pass
 
     def save_settings(self):
-        s = {"geom": self.saveGeometry().toHex().data().decode(), "state": self.saveState().toHex().data().decode(), "tool": self.view.tool, "brush_type": self.view.brush_type, "color": self.view.pen_color.name(), "width": self.view.pen_width, "multi_count": self.view.multi_line_count, "symmetry_mode": self.view.symmetry_mode, "mirror_count": self.view.mirror_count, "sym_x": self.view.sym_center.x(), "sym_y": self.view.sym_center.y(), "img_path": self.view.image_path, "img_x": self.view.image_item.x() if self.view.image_item else 0, "img_y": self.view.image_item.y() if self.view.image_item else 0, "is_sharp": self.view.is_sharp, "custom_shapes": self.view.custom_shapes}
+        s = {"geom": self.saveGeometry().toHex().data().decode(), "state": self.saveState().toHex().data().decode(), "tool": self.view.tool, "brush_type": self.view.brush_type, "color": self.view.pen_color.name(), "width": self.view.pen_width, "multi_count": self.view.multi_line_count, "symmetry_mode": self.view.symmetry_mode, "mirror_count": self.view.mirror_count, "sym_x": self.view.sym_center.x(), "sym_y": self.view.sym_center.y(), "img_path": self.view.image_path, "img_x": self.view.image_item.x() if self.view.image_item else 0, "img_y": self.view.image_item.y() if self.view.image_item else 0, "is_sharp": self.view.is_sharp, "custom_shapes": [c for c in self.view.custom_shapes if c]}
         try:
             os.makedirs(os.path.dirname(SETTINGS_FILE), exist_ok=True)
             with open(SETTINGS_FILE, 'w') as f: json.dump(s, f)
