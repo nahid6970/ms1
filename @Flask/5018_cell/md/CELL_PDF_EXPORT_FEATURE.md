@@ -63,9 +63,98 @@ function printCellToPDF() {
 
 ```javascript
 function printCellToPDF() {
-    // Hidden iframe logic...
-    // Injects fonts (JetBrains Mono, Vrinda) and KaTeX
-    // Triggers native browser print
+    if (!contextMenuCell) return;
+
+    const { rowIndex, colIndex, tdElement } = contextMenuCell;
+    const sheet = tableData.sheets[currentSheet];
+    const columnName = sheet.columns[colIndex]?.name || getExcelColumnName(colIndex);
+    const sheetName = sheet.name || 'Sheet';
+
+    // Prompt for width (optional for printing, but useful to constrain layout)
+    const widthInput = prompt('Enter layout width in pixels (or leave for default):', '800');
+    if (widthInput === null) return; 
+    const customWidth = widthInput.trim() === '' ? '100%' : (parseInt(widthInput) || 800) + 'px';
+
+    // Create a hidden iframe for printing
+    const iframe = document.createElement('iframe');
+    iframe.style.position = 'fixed';
+    iframe.style.width = '0';
+    iframe.style.height = '0';
+    iframe.style.border = 'none';
+    document.body.appendChild(iframe);
+
+    const doc = iframe.contentWindow.document;
+
+    // Extract content
+    const contentContainer = extractCellContent(tdElement, rowIndex, colIndex);
+    
+    // Construct the full HTML with styles
+    const html = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>${sheetName}_${columnName}_Row${rowIndex + 1}</title>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+            <style>
+                @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
+                
+                body {
+                    font-family: 'JetBrains Mono', 'Vrinda', Tahoma, sans-serif;
+                    line-height: 1.6;
+                    color: #333;
+                    padding: 40px;
+                }
+                
+                .print-container { width: ${customWidth}; margin: 0 auto; }
+
+                /* Grid Table Styles for PDF */
+                .md-grid {
+                    display: grid !important;
+                    grid-template-columns: repeat(var(--cols), auto) !important;
+                    gap: 0 !important;
+                    border: 1px solid #eee;
+                    width: fit-content;
+                }
+
+                .md-cell {
+                    padding: 2px 12px !important;
+                    border-right: 3px solid #000000 !important;
+                    min-width: 80px;
+                }
+
+                .md-cell:nth-child(var(--cols)n) { border-right: none !important; }
+
+                .md-header {
+                    font-weight: 600 !important;
+                    border-bottom: 2px solid #000000 !important;
+                }
+                
+                /* Markdown and KaTeX */
+                .markdown-preview { word-wrap: break-word; white-space: pre-wrap; }
+                .katex-display { margin: 1em 0; overflow-x: auto; }
+            </style>
+        </head>
+        <body>
+            <div class="print-container">
+                ${contentContainer.innerHTML}
+            </div>
+            <script>
+                window.onload = function() {
+                    window.print();
+                    window.onfocus = function() {
+                        setTimeout(() => {
+                            window.frameElement.parentNode.removeChild(window.frameElement);
+                        }, 500);
+                    };
+                };
+            </script>
+        </body>
+        </html>
+    `;
+
+    doc.open();
+    doc.write(html);
+    doc.close();
 }
 ```
 
