@@ -379,6 +379,71 @@ class ArtView(QGraphicsView):
         else: [self.scene().removeItem(c) for c in getattr(i, 'symmetry_clones', [])]
         self.undo_stack.append((a, i))
 
+class ShapePickerDialog(QDialog):
+    def __init__(self, custom_shapes, on_delete, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Custom Shapes"); self.setModal(True); self.resize(520, 460)
+        self.setStyleSheet(f"background-color: {CP_BG}; color: {CP_TEXT}; font-family: Consolas;")
+        self.selected = None; self.custom_shapes = custom_shapes; self.on_delete = on_delete
+        self.layout_ = QVBoxLayout(self)
+        from PyQt6.QtWidgets import QScrollArea
+        self.scroll = QScrollArea(); self.scroll.setWidgetResizable(True)
+        self.scroll.setStyleSheet(f"border: none; background: {CP_BG};")
+        self.layout_.addWidget(self.scroll)
+        self._build_grid()
+
+    def _build_grid(self):
+        from PyQt6.QtWidgets import QGridLayout
+        container = QWidget(); gl = QGridLayout(container); gl.setSpacing(12)
+        SIZE = 110
+        for i, (name, cmds) in enumerate(self.custom_shapes.items()):
+            cell = QWidget(); cell.setFixedSize(SIZE + 4, SIZE + 30)
+            cell.setStyleSheet(f"background: {CP_PANEL}; border: 1px solid {CP_DIM};")
+            vl = QVBoxLayout(cell); vl.setContentsMargins(2, 2, 2, 2); vl.setSpacing(2)
+            # preview label
+            lbl = QLabel(); lbl.setFixedSize(SIZE, SIZE - 20); lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            lbl.setPixmap(self._make_pixmap(cmds, SIZE, SIZE - 20))
+            lbl.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+            lbl.mousePressEvent = lambda e, n=name: self._pick(n)
+            vl.addWidget(lbl)
+            # name + delete row
+            row = QWidget(); rl = QHBoxLayout(row); rl.setContentsMargins(0,0,0,0); rl.setSpacing(2)
+            nl = QLabel(name.upper()); nl.setStyleSheet(f"color: {CP_ORANGE}; font-size: 7pt; font-weight: bold; border: none;")
+            nl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            del_btn = QPushButton("✕"); del_btn.setFixedSize(16, 16)
+            del_btn.setStyleSheet(f"color: {CP_RED}; background: transparent; border: none; font-size: 8pt; padding: 0;")
+            del_btn.clicked.connect(lambda checked, n=name: self._delete(n))
+            rl.addWidget(nl, 1); rl.addWidget(del_btn)
+            vl.addWidget(row)
+            gl.addWidget(cell, i // 4, i % 4)
+        self.scroll.setWidget(container)
+
+    def _make_pixmap(self, cmds, w, h):
+        px = QPixmap(w, h); px.fill(QColor(CP_PANEL))
+        p = QPainter(px); p.setRenderHint(QPainter.RenderHint.Antialiasing)
+        p.setPen(QPen(QColor(CP_CYAN), 1.5))
+        path = QPainterPath()
+        pw, ph = w - 10, h - 10
+        for cmd, *args in cmds:
+            pts = [QPointF(a[0] * pw + 5, a[1] * ph + 5) for a in args]
+            if cmd == "M": path.moveTo(pts[0])
+            elif cmd == "L": path.lineTo(pts[0])
+            elif cmd == "Q": path.quadTo(pts[0], pts[1])
+            elif cmd == "C": path.cubicTo(pts[0], pts[1], pts[2])
+            elif cmd == "Z": path.closeSubpath()
+        p.drawPath(path); p.end()
+        return px
+
+    def _pick(self, name): self.selected = name; self.accept()
+
+    def _delete(self, name):
+        del self.custom_shapes[name]; self.on_delete()
+        # rebuild grid in place
+        old = self.scroll.takeWidget()
+        if old: old.deleteLater()
+        self._build_grid()
+
+
 class SVGArtApp(QMainWindow):
     def __init__(self):
         super().__init__(); self.setWindowTitle("NEURAL ART V1.6.2 - SYNCED"); self.resize(1400, 900)
@@ -393,8 +458,8 @@ class SVGArtApp(QMainWindow):
         self.tb_shapes = QToolBar("Shapes"); self.tb_shapes.setObjectName("ShapesToolbar"); self.addToolBar(Qt.ToolBarArea.TopToolBarArea, self.tb_shapes)
         self.add_tool_action(self.tb_shapes, "RECT", "rect", CP_ORANGE); self.add_tool_action(self.tb_shapes, "CIRC", "ellipse", CP_ORANGE); self.add_tool_action(self.tb_shapes, "TRI", "triangle", CP_ORANGE)
         btn_add_shape = QPushButton("+"); btn_add_shape.setToolTip("Save current art as custom shape"); btn_add_shape.setStyleSheet(f"color: {CP_GREEN}; font-weight: bold; font-size: 14pt; padding: 0px 6px;"); btn_add_shape.clicked.connect(self.add_custom_shape); self.tb_shapes.addWidget(btn_add_shape)
+        btn_list_shapes = QPushButton("▦"); btn_list_shapes.setToolTip("Browse custom shapes"); btn_list_shapes.setStyleSheet(f"color: {CP_CYAN}; font-weight: bold; font-size: 11pt; padding: 0px 6px;"); btn_list_shapes.clicked.connect(self.show_shape_picker); self.tb_shapes.addWidget(btn_list_shapes)
         self.tb_shapes.addSeparator(); self.add_tool_action(self.tb_shapes, "MOVE IMG", "move_image", CP_SUBTEXT); self.add_tool_action(self.tb_shapes, "MOVE SVG", "move_svg", CP_SUBTEXT); self.add_tool_action(self.tb_shapes, "MOVE SYM", "move_sym", CP_YELLOW)
-        self.tb_custom = QToolBar("Custom Shapes"); self.tb_custom.setObjectName("CustomShapesToolbar"); self.addToolBar(Qt.ToolBarArea.TopToolBarArea, self.tb_custom)
         self.tb_props = QToolBar("Properties"); self.tb_props.setObjectName("PropsToolbar"); self.addToolBar(Qt.ToolBarArea.TopToolBarArea, self.tb_props)
         self.btn_color = QPushButton("COLOR"); self.btn_color.clicked.connect(self.choose_color); self.tb_props.addWidget(self.btn_color)
         self.tb_props.addWidget(QLabel(" THICK: ")); self.thickness_slider = QSlider(Qt.Orientation.Horizontal); self.thickness_slider.setRange(1, 100); self.thickness_slider.setValue(3); self.thickness_slider.valueChanged.connect(self.change_thickness); self.tb_props.addWidget(self.thickness_slider)
@@ -454,31 +519,12 @@ class SVGArtApp(QMainWindow):
                 with open(CUSTOM_SHAPES_FILE, 'r') as f:
                     self.view.custom_shapes = json.load(f)
             except: self.view.custom_shapes = {}
-        self.rebuild_custom_toolbar()
 
     def save_custom_shapes(self):
         try:
             os.makedirs(os.path.dirname(CUSTOM_SHAPES_FILE), exist_ok=True)
             with open(CUSTOM_SHAPES_FILE, 'w') as f: json.dump(self.view.custom_shapes, f)
         except: pass
-
-    def rebuild_custom_toolbar(self):
-        self.tb_custom.clear()
-        for name in self.view.custom_shapes:
-            btn = QPushButton(name.upper())
-            btn.setStyleSheet(f"color: {CP_ORANGE}; font-weight: bold;")
-            btn.clicked.connect(lambda checked, n=name: self.set_tool(f"custom:{n}"))
-            btn.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
-            btn.customContextMenuRequested.connect(lambda pos, n=name, b=btn: self.custom_shape_context(n, b, pos))
-            self.tb_custom.addWidget(btn)
-
-    def custom_shape_context(self, name, btn, pos):
-        menu = QMenu(self)
-        menu.setStyleSheet(f"QMenu {{ background: {CP_PANEL}; color: {CP_TEXT}; border: 1px solid {CP_DIM}; }} QMenu::item:selected {{ background: {CP_DIM}; }}")
-        act = menu.addAction(f"Remove '{name}'")
-        if menu.exec(btn.mapToGlobal(pos)) == act:
-            del self.view.custom_shapes[name]
-            self.save_custom_shapes(); self.rebuild_custom_toolbar()
 
     def add_custom_shape(self):
         cmds = self.view.collect_art_as_shape()
@@ -487,7 +533,14 @@ class SVGArtApp(QMainWindow):
         name, ok = QInputDialog.getText(self, "Shape Name", "Enter shape name:")
         if ok and name.strip():
             self.view.custom_shapes[name.strip()] = cmds
-            self.save_custom_shapes(); self.rebuild_custom_toolbar()
+            self.save_custom_shapes()
+
+    def show_shape_picker(self):
+        if not self.view.custom_shapes:
+            QMessageBox.information(self, "No Shapes", "No custom shapes saved yet."); return
+        dlg = ShapePickerDialog(self.view.custom_shapes, self.save_custom_shapes, self)
+        if dlg.exec() and dlg.selected:
+            self.set_tool(f"custom:{dlg.selected}")
 
     def load_settings(self):
         if os.path.exists(SETTINGS_FILE):
