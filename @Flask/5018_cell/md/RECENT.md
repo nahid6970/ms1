@@ -22,6 +22,7 @@
   - Uses a hidden iframe and the browser's native print dialog (`window.print()`).
   - Produces high-quality, **searchable and selectable** PDFs.
   - **Table Fix**: Included comprehensive CSS in the print view to prevent complex markdown tables from collapsing "line-by-line".
+  - **Custom Color Syntax Fix**: Dynamically injects CSS for user-defined custom color syntaxes (like `¿¿text¿¿`) into the print view to ensure colors are preserved in the PDF.
   - **Font Support**: Injects JetBrains Mono, Vrinda, and KaTeX styles for consistent rendering.
 - **Icon Update**: Replaced dual-emoji icons (🔍🔄, 🔍📜) with professional SVG icons in the F3 menu for a cleaner look.
 

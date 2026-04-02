@@ -16663,6 +16663,25 @@ function printCellToPDF() {
         </div>
     `;
 
+    // Construct dynamic CSS for custom color syntaxes
+    let customSyntaxCss = '';
+    if (typeof customColorSyntaxesCache !== 'undefined') {
+        customColorSyntaxesCache.forEach((syntax, idx) => {
+            customSyntaxCss += `
+                .custom-syntax-idx-${idx} {
+                    ${syntax.style}
+                    padding: 1px 4px;
+                    border-radius: 3px;
+                    display: inline;
+                    vertical-align: baseline;
+                    line-height: 1.3;
+                    box-decoration-break: clone;
+                    -webkit-box-decoration-break: clone;
+                }
+            `;
+        });
+    }
+
     // Construct the full HTML for the iframe
     const html = `
         <!DOCTYPE html>
@@ -16730,6 +16749,16 @@ function printCellToPDF() {
                     border-top: 1px solid #000000 !important;
                     border-bottom: 1px solid #000000 !important;
                 }
+
+                /* Custom Syntax Markers */
+                .custom-syntax-marker {
+                    color: rgba(0, 0, 0, 0.3) !important;
+                    font-size: 0.8em !important;
+                    user-select: none !important;
+                }
+
+                /* Dynamic Custom Color Syntaxes */
+                ${customSyntaxCss}
 
                 /* Markdown elements */
                 strong { font-weight: bold; }
