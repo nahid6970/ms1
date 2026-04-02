@@ -564,7 +564,7 @@
             "window_title": "Ready",
             "process_name": "WindowsTerminal.exe",
             "window_class": "",
-            "action": "SendText(\"/chat save \" FormatTime(, \"yyyy-MM-dd_HH-mm\"))",
+            "action": "SendText(\"/chat save \" FormatTime(, \"yyyy-MM-dd_HH-mm-ss\"))",
             "enabled": true
         },
         {
