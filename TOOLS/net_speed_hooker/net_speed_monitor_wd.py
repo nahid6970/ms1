@@ -364,8 +364,23 @@ class App(QMainWindow):
         self.tree.setSortingEnabled(True)
         self.tree.header().sortIndicatorChanged.connect(self.on_sort_changed)
         self.tree.header().setSortIndicator(self.current_sort_col, self.current_sort_order); l.addWidget(self.tree)
-        self.fl = QLabel(f"STATUS: MONITORING_ACTIVE // ENGINE: WinDivert // UNIT: {self.unit}")
-        self.fl.setStyleSheet(f"color:{CP_DIM};font-size:8pt;"); l.addWidget(self.fl); self.toggle_cols()
+        
+        # Structured Footer
+        self.footer_widget = QWidget()
+        self.footer_widget.setStyleSheet(f"background-color:{CP_PANEL}; border-top:1px solid {CP_DIM};")
+        self.footer_layout = QHBoxLayout(self.footer_widget)
+        self.footer_layout.setContentsMargins(0,0,0,0); self.footer_layout.setSpacing(0)
+        self.footer_labels = []
+        for i in range(7):
+            lbl = QLabel()
+            lbl.setAlignment(Qt.AlignmentFlag.AlignCenter if i >= 2 else Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
+            lbl.setStyleSheet(f"padding: 5px; font-weight: bold; border-right: 1px solid {CP_DIM};")
+            if i == 1: lbl.setText(" TOTALS:")
+            self.footer_layout.addWidget(lbl)
+            self.footer_labels.append(lbl)
+        l.addWidget(self.footer_widget)
+        
+        self.toggle_cols()
 
 
     def _rebuild_filter_combo(self):
@@ -397,9 +412,13 @@ class App(QMainWindow):
         header.setStretchLastSection(False)
         total = self.tree.viewport().width() or self.win_w
         s = sum(self.col_weights) or 1
-        for i in range(min(len(self.col_weights), 6)):
-            self.tree.setColumnWidth(i, int(total * self.col_weights[i] / s))
+        for i in range(min(len(self.col_weights), 7)):
+            w = int(total * self.col_weights[i] / s)
+            self.tree.setColumnWidth(i, w)
+            if i < len(self.footer_labels):
+                self.footer_labels[i].setFixedWidth(w)
         header.setStretchLastSection(True)
+
     def apply_delegate_settings(self):
         self.delegate.settings = {'enabled':self.hi_enabled,'color':self.hi_color,'thickness':self.hi_thickness,
                                   'cols':{2:self.hi_dl_s,3:self.hi_ul_s,4:self.hi_dl_t,5:self.hi_ul_t}}
@@ -408,6 +427,9 @@ class App(QMainWindow):
         self.show_dl = self.cb_dl.isChecked(); self.show_ul = self.cb_ul.isChecked()
         self.tree.setColumnHidden(2, not self.show_dl); self.tree.setColumnHidden(4, not self.show_dl)
         self.tree.setColumnHidden(3, not self.show_ul); self.tree.setColumnHidden(5, not self.show_ul)
+        if hasattr(self, 'footer_labels'):
+            self.footer_labels[2].setHidden(not self.show_dl); self.footer_labels[4].setHidden(not self.show_dl)
+            self.footer_labels[3].setHidden(not self.show_ul); self.footer_labels[5].setHidden(not self.show_ul)
         self.save_settings()
 
     def on_sort_changed(self, i, o):
@@ -426,7 +448,11 @@ class App(QMainWindow):
         total_dl_acc = sum(e['dl_total'] for e in snap)
         total_ul_acc = sum(e['ul_total'] for e in snap)
         
-        self.fl.setText(f"DL: {format_size(dl_t, self.unit)} | UL: {format_size(ul_t, self.unit)} | TOT DL: {format_size(total_dl_acc, 'MB/s')} | TOT UL: {format_size(total_ul_acc, 'MB/s')} // UNIT: {self.unit}")
+        if hasattr(self, 'footer_labels'):
+            self.footer_labels[2].setText(format_size(dl_t, self.unit)); self.footer_labels[2].setStyleSheet(f"padding:5px; font-weight:bold; color:{CP_CYAN if dl_t>0 else CP_TEXT}; border-right:1px solid {CP_DIM};")
+            self.footer_labels[3].setText(format_size(ul_t, self.unit)); self.footer_labels[3].setStyleSheet(f"padding:5px; font-weight:bold; color:{CP_ORANGE if ul_t>0 else CP_TEXT}; border-right:1px solid {CP_DIM};")
+            self.footer_labels[4].setText(format_size(total_dl_acc, "MB/s")); self.footer_labels[4].setStyleSheet(f"padding:5px; font-weight:bold; color:{CP_YELLOW}; border-right:1px solid {CP_DIM};")
+            self.footer_labels[5].setText(format_size(total_ul_acc, "MB/s")); self.footer_labels[5].setStyleSheet(f"padding:5px; font-weight:bold; color:{CP_GREEN}; border-right:1px solid {CP_DIM};")
         
         groups = {}; max_v = {2:0, 3:0, 4:0, 5:0}
         for d in snap:
