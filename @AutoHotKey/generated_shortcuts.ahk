@@ -800,7 +800,7 @@ IsGeminiSaveChatContext() {
 
 #HotIf IsGeminiSaveChatContext()
 
-^s::SendText("/chat save ")
+^s::SendText("/chat save " FormatTime(, "yyyy-MM-dd_HH-mm"))
 
 #HotIf
 
