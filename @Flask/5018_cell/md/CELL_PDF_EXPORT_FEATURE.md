@@ -10,67 +10,63 @@ Users need to export individual cells or selected cells to PDF format while pres
 
 ## Proposed Solution
 
-Add a "📄 Export Cell to PDF" option to the right-click context menu that captures the visual appearance of cells and generates a professional PDF document.
+Add a "📄 Export Cell to PDF (Image)" and "🖨️ Print Cell (Selectable PDF)" options to the right-click context menu.
 
 ## Implementation Approach
 
-### Option 1: Visual Capture Method (Recommended)
+### Option 1: Visual Capture Method (Image-based)
 
-Use `html2canvas` to capture the exact visual appearance of cells and embed as images in PDF:
+Use `html2canvas` to capture the exact visual appearance of cells and embed as images in PDF. This is best for preserving pixel-perfect layout but the text is not selectable.
+
+### Option 2: Native Print Method (Selectable PDF)
+
+Use a hidden iframe to render the cell content and trigger the browser's native print dialog. This produces high-quality, searchable, and selectable PDFs with vector text and math.
 
 ```javascript
-function exportCellToPDF() {
-    // 1. Create temporary container with cell content
-    // 2. Extract and style content without size constraints
-    // 3. Capture visual appearance with html2canvas
-    // 4. Embed high-quality image in PDF
-    // 5. Add professional headers and metadata
+function printCellToPDF() {
+    // 1. Create hidden iframe
+    // 2. Inject cell content and full application CSS
+    // 3. Call window.print() on the iframe
+    // 4. Remove iframe after printing
 }
 ```
 
 **Pros:**
-- Preserves ALL visual formatting perfectly
-- Works with complex markdown and styling
-- Professional PDF layout
-- Handles multi-line content correctly
+- Text is fully selectable and searchable
+- Perfectly renders vector fonts and KaTeX math
+- High-quality output regardless of zoom level
+- Smaller file sizes than image-based PDFs
 
 **Cons:**
-- Larger file sizes (image-based)
-- Requires external libraries
-- More complex implementation
+- Relies on the browser's print dialog (extra user step)
+- CSS must be explicitly handled for the print media
 
-### Option 2: Text-Based PDF Generation
+## Recommended Implementation
 
-Convert cell content to styled text in PDF using jsPDF text functions:
-
-```javascript
-function exportCellToPDF() {
-    // 1. Extract plain text content
-    // 2. Apply basic formatting (bold, italic)
-    // 3. Generate text-based PDF
-}
-```
-
-**Pros:**
-- Smaller file sizes
-- Faster generation
-- Simpler implementation
-
-**Cons:**
-- Limited formatting support
-- No markdown rendering
-- Complex styling lost
-
-## Recommended Implementation: Option 1
-
-### Step 1: Add Context Menu Option
+### Step 1: Add Context Menu Options
 
 **File:** `templates/index.html`
 ```html
 <div class="context-menu-item" onclick="exportCellToPDF()">
     <span>📄</span>
-    <span>Export Cell to PDF</span>
+    <span>Export Cell to PDF (Image)</span>
 </div>
+<div class="context-menu-item" onclick="printCellToPDF()">
+    <span>🖨️</span>
+    <span>Print Cell (Selectable PDF)</span>
+</div>
+```
+
+... (keep existing steps) ...
+
+### Step 6: Selectable PDF Generation
+
+```javascript
+function printCellToPDF() {
+    // Hidden iframe logic...
+    // Injects fonts (JetBrains Mono, Vrinda) and KaTeX
+    // Triggers native browser print
+}
 ```
 
 ### Step 2: Add Required Libraries
