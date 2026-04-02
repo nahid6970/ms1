@@ -2,29 +2,53 @@
 # Priority 999 ensures this wins within the User tier (base 2)
 
 [[rule]]
-# Matches all built-in tools and any tool name exactly
-toolName = [
-    "run_shell_command",
-    "write_file",
-    "replace",
-    "delete_file",
-    "create_directory",
-    "move_file",
-    "delegate_to_agent",
-    "show_task_complete_notification"
-]
+toolName = "run_shell_command"
 decision = "allow"
 priority = 999
 
 [[rule]]
-# Wildcard to match ANY tool from ANY MCP server
-# The deprecated 'mcpName__toolName' syntax is replaced by mcpName = "*"
+toolName = "write_file"
+decision = "allow"
+priority = 999
+
+[[rule]]
+toolName = "replace"
+decision = "allow"
+priority = 999
+
+[[rule]]
+toolName = "delete_file"
+decision = "allow"
+priority = 999
+
+[[rule]]
+toolName = "create_directory"
+decision = "allow"
+priority = 999
+
+[[rule]]
+toolName = "move_file"
+decision = "allow"
+priority = 999
+
+[[rule]]
+toolName = "delegate_to_agent"
+decision = "allow"
+priority = 999
+
+[[rule]]
+toolName = "show_task_complete_notification"
+decision = "allow"
+priority = 999
+
+[[rule]]
 mcpName = "*"
+toolName = "*"
 decision = "allow"
 priority = 999
 
 [[rule]]
-# Allow all tools on specific servers we know about
 mcpName = "notify"
+toolName = "*"
 decision = "allow"
 priority = 999
