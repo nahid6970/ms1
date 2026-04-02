@@ -8,7 +8,7 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QVBoxLayout, QHBoxLayout
                             QDialogButtonBox, QLabel, QTextEdit, QComboBox, QMessageBox,
                             QSplitter, QFrame, QTextBrowser, QMenu, QSizePolicy)
 from PyQt6.QtCore import Qt, pyqtSignal, QSettings, QPoint, QSize
-from PyQt6.QtGui import QFont, QTextCursor, QKeySequence, QTextDocument, QFontDatabase, QFontMetrics
+from PyQt6.QtGui import QFont, QTextCursor, QKeySequence, QTextDocument, QFontDatabase, QFontMetrics, QTextCharFormat, QColor
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 AHK_SCRIPT_PATH = os.path.join(SCRIPT_DIR, "ahk_v2.ahk")
@@ -690,16 +690,63 @@ SendText("Hello World")"""
         layout.addWidget(content_splitter)
         
         # Search functionality
+        def clear_highlights():
+            browser.setExtraSelections([])
+
         def do_search():
             text = search_input.text()
-            if text:
-                if not browser.find(text):
-                    # Wrap around to start if not found
-                    cursor = browser.textCursor()
-                    cursor.movePosition(QTextCursor.MoveOperation.Start)
-                    browser.setTextCursor(cursor)
-                    browser.find(text)
+            if not text:
+                clear_highlights()
+                return
+
+            # Find all occurrences for highlighting
+            extra_selections = []
+            
+            # Format for ALL matches
+            fmt = QTextCharFormat()
+            fmt.setBackground(QColor("#555500")) # Dim yellow for all matches
+            
+            # Format for CURRENT selection
+            current_fmt = QTextCharFormat()
+            current_fmt.setBackground(QColor("#ffff00")) # Bright yellow for current
+            current_fmt.setForeground(QColor("black"))
+
+            # First, find the next occurrence to scroll to it
+            found = browser.find(text)
+            if not found:
+                # Wrap around
+                cursor = browser.textCursor()
+                cursor.movePosition(QTextCursor.MoveOperation.Start)
+                browser.setTextCursor(cursor)
+                found = browser.find(text)
+
+            if found:
+                # Store the current selection to highlight it differently later
+                current_selection_cursor = browser.textCursor()
+
+                # Search all matches to highlight them
+                doc = browser.document()
+                highlight_cursor = QTextCursor(doc)
+                while True:
+                    highlight_cursor = doc.find(text, highlight_cursor)
+                    if highlight_cursor.isNull():
+                        break
+                    
+                    selection = QTextEdit.ExtraSelection()
+                    # Check if this match is the currently selected one
+                    if highlight_cursor.selectionStart() == current_selection_cursor.selectionStart():
+                        selection.format = current_fmt
+                    else:
+                        selection.format = fmt
+                        
+                    selection.cursor = highlight_cursor
+                    extra_selections.append(selection)
+
+                browser.setExtraSelections(extra_selections)
+            else:
+                clear_highlights()
         
+        search_input.textChanged.connect(lambda t: clear_highlights() if not t else None)
         search_input.returnPressed.connect(do_search)
         search_btn.clicked.connect(do_search)
         
