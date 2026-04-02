@@ -7,7 +7,7 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QVBoxLayout, QHBoxLayout
                             QDialogButtonBox, QLabel, QTextEdit, QComboBox, QMessageBox,
                             QSplitter, QFrame, QTextBrowser, QMenu, QSizePolicy)
 from PyQt6.QtCore import Qt, pyqtSignal, QSettings, QPoint, QSize
-from PyQt6.QtGui import QFont, QTextCursor, QKeySequence
+from PyQt6.QtGui import QFont, QTextCursor, QKeySequence, QTextDocument
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 AHK_SCRIPT_PATH = os.path.join(SCRIPT_DIR, "ahk_v2.ahk")
