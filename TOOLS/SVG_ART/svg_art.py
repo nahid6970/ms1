@@ -382,41 +382,38 @@ class ArtView(QGraphicsView):
 class ShapePickerDialog(QDialog):
     def __init__(self, custom_shapes, on_delete, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Custom Shapes"); self.setModal(True); self.resize(520, 460)
+        self.setWindowTitle("Custom Shapes"); self.setModal(True)
         self.setStyleSheet(f"background-color: {CP_BG}; color: {CP_TEXT}; font-family: Consolas;")
         self.selected = None; self.custom_shapes = custom_shapes; self.on_delete = on_delete
-        self.layout_ = QVBoxLayout(self)
-        from PyQt6.QtWidgets import QScrollArea
-        self.scroll = QScrollArea(); self.scroll.setWidgetResizable(True)
-        self.scroll.setStyleSheet(f"border: none; background: {CP_BG};")
-        self.layout_.addWidget(self.scroll)
+        self.layout_ = QVBoxLayout(self); self.layout_.setSizeConstraint(QVBoxLayout.SizeConstraint.SetFixedSize)
         self._build_grid()
 
     def _build_grid(self):
         from PyQt6.QtWidgets import QGridLayout
-        container = QWidget(); gl = QGridLayout(container); gl.setSpacing(12)
-        SIZE = 110
+        # remove old grid widget if rebuilding
+        if self.layout_.count(): 
+            old = self.layout_.takeAt(0).widget()
+            if old: old.deleteLater()
+        container = QWidget(); gl = QGridLayout(container); gl.setSpacing(10); gl.setContentsMargins(10,10,10,10)
+        COLS, SIZE, LABEL_H = 4, 100, 36
         for i, (name, cmds) in enumerate(self.custom_shapes.items()):
-            cell = QWidget(); cell.setFixedSize(SIZE + 4, SIZE + 30)
+            cell = QWidget(); cell.setFixedSize(SIZE + 4, SIZE + LABEL_H)
             cell.setStyleSheet(f"background: {CP_PANEL}; border: 1px solid {CP_DIM};")
-            vl = QVBoxLayout(cell); vl.setContentsMargins(2, 2, 2, 2); vl.setSpacing(2)
-            # preview label
-            lbl = QLabel(); lbl.setFixedSize(SIZE, SIZE - 20); lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            lbl.setPixmap(self._make_pixmap(cmds, SIZE, SIZE - 20))
+            vl = QVBoxLayout(cell); vl.setContentsMargins(2, 2, 2, 2); vl.setSpacing(0)
+            lbl = QLabel(); lbl.setFixedSize(SIZE, SIZE)
+            lbl.setPixmap(self._make_pixmap(cmds, SIZE, SIZE))
             lbl.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
             lbl.mousePressEvent = lambda e, n=name: self._pick(n)
             vl.addWidget(lbl)
-            # name + delete row
-            row = QWidget(); rl = QHBoxLayout(row); rl.setContentsMargins(0,0,0,0); rl.setSpacing(2)
             nl = QLabel(name.upper()); nl.setStyleSheet(f"color: {CP_ORANGE}; font-size: 7pt; font-weight: bold; border: none;")
-            nl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            del_btn = QPushButton("✕"); del_btn.setFixedSize(16, 16)
-            del_btn.setStyleSheet(f"color: {CP_RED}; background: transparent; border: none; font-size: 8pt; padding: 0;")
+            nl.setAlignment(Qt.AlignmentFlag.AlignCenter); nl.setFixedHeight(18)
+            vl.addWidget(nl)
+            del_btn = QPushButton("✕ remove"); del_btn.setFixedHeight(16)
+            del_btn.setStyleSheet(f"color: {CP_RED}; background: transparent; border: none; font-size: 7pt; padding: 0;")
             del_btn.clicked.connect(lambda checked, n=name: self._delete(n))
-            rl.addWidget(nl, 1); rl.addWidget(del_btn)
-            vl.addWidget(row)
-            gl.addWidget(cell, i // 4, i % 4)
-        self.scroll.setWidget(container)
+            vl.addWidget(del_btn)
+            gl.addWidget(cell, i // COLS, i % COLS)
+        self.layout_.addWidget(container)
 
     def _make_pixmap(self, cmds, w, h):
         px = QPixmap(w, h); px.fill(QColor(CP_PANEL))
@@ -438,10 +435,7 @@ class ShapePickerDialog(QDialog):
 
     def _delete(self, name):
         del self.custom_shapes[name]; self.on_delete()
-        # rebuild grid in place
-        old = self.scroll.takeWidget()
-        if old: old.deleteLater()
-        self._build_grid()
+        self._build_grid(); self.adjustSize()
 
 
 class SVGArtApp(QMainWindow):
@@ -458,7 +452,7 @@ class SVGArtApp(QMainWindow):
         self.tb_shapes = QToolBar("Shapes"); self.tb_shapes.setObjectName("ShapesToolbar"); self.addToolBar(Qt.ToolBarArea.TopToolBarArea, self.tb_shapes)
         self.add_tool_action(self.tb_shapes, "RECT", "rect", CP_ORANGE); self.add_tool_action(self.tb_shapes, "CIRC", "ellipse", CP_ORANGE); self.add_tool_action(self.tb_shapes, "TRI", "triangle", CP_ORANGE)
         btn_add_shape = QPushButton("+"); btn_add_shape.setToolTip("Save current art as custom shape"); btn_add_shape.setStyleSheet(f"color: {CP_GREEN}; font-weight: bold; font-size: 14pt; padding: 0px 6px;"); btn_add_shape.clicked.connect(self.add_custom_shape); self.tb_shapes.addWidget(btn_add_shape)
-        btn_list_shapes = QPushButton("▦"); btn_list_shapes.setToolTip("Browse custom shapes"); btn_list_shapes.setStyleSheet(f"color: {CP_CYAN}; font-weight: bold; font-size: 11pt; padding: 0px 6px;"); btn_list_shapes.clicked.connect(self.show_shape_picker); self.tb_shapes.addWidget(btn_list_shapes)
+        btn_list_shapes = QPushButton("SHAPE"); btn_list_shapes.setToolTip("Browse custom shapes"); btn_list_shapes.setStyleSheet(f"color: {CP_CYAN}; font-weight: bold;"); btn_list_shapes.clicked.connect(self.show_shape_picker); self.tb_shapes.addWidget(btn_list_shapes)
         self.tb_shapes.addSeparator(); self.add_tool_action(self.tb_shapes, "MOVE IMG", "move_image", CP_SUBTEXT); self.add_tool_action(self.tb_shapes, "MOVE SVG", "move_svg", CP_SUBTEXT); self.add_tool_action(self.tb_shapes, "MOVE SYM", "move_sym", CP_YELLOW)
         self.tb_props = QToolBar("Properties"); self.tb_props.setObjectName("PropsToolbar"); self.addToolBar(Qt.ToolBarArea.TopToolBarArea, self.tb_props)
         self.btn_color = QPushButton("COLOR"); self.btn_color.clicked.connect(self.choose_color); self.tb_props.addWidget(self.btn_color)
