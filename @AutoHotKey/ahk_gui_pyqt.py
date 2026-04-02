@@ -2,6 +2,7 @@ import sys
 import json
 import os
 import re
+import webbrowser
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QVBoxLayout, QHBoxLayout,
                             QWidget, QPushButton, QLineEdit, QCheckBox, QDialog,
                             QDialogButtonBox, QLabel, QTextEdit, QComboBox, QMessageBox,
@@ -537,10 +538,25 @@ SendText("Hello World")"""
         search_layout.addWidget(search_btn)
         layout.addLayout(search_layout)
         
-        # Create text browser for the reference
-        browser = QTextBrowser()
-        browser.setOpenExternalLinks(True)
-        browser.setOpenLinks(True)
+        # Create text browser with anchor-click override
+        class AnchorBrowser(QTextBrowser):
+            def mousePressEvent(self, e):
+                anchor = self.anchorAt(e.pos())
+                if anchor and anchor.startswith('#'):
+                    self._jump_to(anchor[1:])
+                    return
+                super().mousePressEvent(e)
+            def _jump_to(self, fragment):
+                amap = getattr(self, '_anchor_map', {})
+                text = amap.get(fragment, fragment.replace('-', ' '))
+                c = self.textCursor()
+                c.movePosition(QTextCursor.MoveOperation.Start)
+                self.setTextCursor(c)
+                self.find(text)
+                self.ensureCursorVisible()
+        browser = AnchorBrowser()
+        browser.setOpenLinks(False)
+        browser.setOpenExternalLinks(False)
         browser.setStyleSheet("""
             QTextBrowser {
                 background-color: #2b2b2b;
@@ -559,14 +575,85 @@ SendText("Hello World")"""
             try:
                 with open(ref_file, 'r', encoding='utf-8') as f:
                     content = f.read()
-                    # PyQt6 setMarkdown handles standard Markdown and some HTML
-                    browser.setMarkdown(content)
+
+                # Build anchor->heading map from <a name="x"> tags
+                anchor_map = {}
+                lines = content.split('\n')
+                pending_anchor = None
+                for line in lines:
+                    am = re.match(r'<a name="([^"]+)"', line.strip(), re.IGNORECASE)
+                    if am:
+                        pending_anchor = am.group(1)
+                    elif pending_anchor:
+                        hm = re.match(r'^#{1,6}\s+(.*)', line)
+                        if hm:
+                            anchor_map[pending_anchor] = hm.group(1).strip()
+                        pending_anchor = None
+
+                # Strip <a name> lines so setMarkdown works cleanly
+                clean = re.sub(r'<a name="[^"]+">\s*</a>\n?', '', content, flags=re.IGNORECASE)
+                browser.setMarkdown(clean)
+                browser._anchor_map = anchor_map
             except Exception as e:
                 browser.setPlainText(f"Error loading reference: {e}")
         else:
             browser.setPlainText("Command reference file not found (README.md).")
         
-        layout.addWidget(browser)
+        # TOC sidebar + browser in a splitter
+        from PyQt6.QtWidgets import QScrollArea
+        toc_scroll = QScrollArea()
+        toc_scroll.setWidgetResizable(True)
+        toc_scroll.setFixedWidth(220)
+        toc_scroll.setStyleSheet('QScrollArea { background:#1a1a1a; border:1px solid #444; border-radius:5px; }')
+        toc_widget = QWidget()
+        toc_widget.setStyleSheet('background:#1a1a1a;')
+        toc_layout = QVBoxLayout(toc_widget)
+        toc_layout.setContentsMargins(4,8,4,8)
+        toc_layout.setSpacing(2)
+        toc_layout.addWidget(QLabel('<b style="color:#61dafb">Contents</b>'))
+
+        # Extract headings from markdown for TOC
+        toc_entries = []
+        if os.path.exists(ref_file):
+            with open(ref_file, 'r', encoding='utf-8') as _f:
+                _in_code = False
+                for _line in _f:
+                    if _line.startswith('```'): _in_code = not _in_code; continue
+                    if _in_code or _line.strip().startswith('<'): continue
+                    _hm = re.match(r'^(#{1,3})\s+(.*)', _line)
+                    if _hm: toc_entries.append((len(_hm.group(1)), _hm.group(2).strip()))
+
+        def make_jump(heading_text):
+            def jump():
+                c = browser.textCursor()
+                c.movePosition(QTextCursor.MoveOperation.Start)
+                browser.setTextCursor(c)
+                browser.find(heading_text)
+                browser.ensureCursorVisible()
+            return jump
+
+        for level, title in toc_entries:
+            btn = QPushButton(('  ' * (level-1)) + title)
+            btn.setFlat(True)
+            btn.setCursor(Qt.CursorShape.PointingHandCursor)
+            btn.setStyleSheet(f"""
+                QPushButton {{ text-align:left; color:{'#61dafb' if level==1 else '#ccc'};
+                    font-size:{'13px' if level==1 else '12px'};
+                    font-weight:{'bold' if level==1 else 'normal'};
+                    padding:3px 6px; border:none; background:transparent; }}
+                QPushButton:hover {{ color:white; background:#2d2d2d; border-radius:3px; }}
+            """)
+            btn.clicked.connect(make_jump(title))
+            toc_layout.addWidget(btn)
+
+        toc_layout.addStretch()
+        toc_scroll.setWidget(toc_widget)
+
+        content_splitter = QSplitter(Qt.Orientation.Horizontal)
+        content_splitter.addWidget(toc_scroll)
+        content_splitter.addWidget(browser)
+        content_splitter.setStretchFactor(1, 1)
+        layout.addWidget(content_splitter)
         
         # Search functionality
         def do_search():
@@ -577,28 +664,11 @@ SendText("Hello World")"""
                     cursor = browser.textCursor()
                     cursor.movePosition(QTextCursor.MoveOperation.Start)
                     browser.setTextCursor(cursor)
-                    if not browser.find(text):
-                        # Still not found after wrap
-                        pass
+                    browser.find(text)
         
         search_input.returnPressed.connect(do_search)
         search_btn.clicked.connect(do_search)
         
-        # Internal anchor handling fallback
-        def handle_anchor(url):
-            fragment = url.fragment()
-            if fragment:
-                # Standard Qt fragment scrolling
-                if not browser.scrollToAnchor(fragment):
-                    # Fallback for some markdown-generated headers
-                    # Search for headers that look like the fragment
-                    search_text = fragment.replace('-', ' ')
-                    cursor = browser.document().find(search_text, 0, browser.FindFlag.FindCaseSensitively)
-                    if not cursor.isNull():
-                        browser.setTextCursor(cursor)
-                        browser.ensureCursorVisible()
-        
-        browser.anchorClicked.connect(handle_anchor)
         
         # Close button
         button_box = QHBoxLayout()
