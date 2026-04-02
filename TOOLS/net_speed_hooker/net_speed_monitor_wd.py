@@ -348,7 +348,7 @@ class App(QMainWindow):
         self.filter_combo.currentIndexChanged.connect(self.save_settings)
         self.filter_total_combo.currentIndexChanged.connect(self.save_settings)
         ht.addWidget(self.cb_dl); ht.addWidget(self.cb_ul)
-        self.tl = QLabel("DL: 0.00 | UL: 0.00"); self.tl.setStyleSheet(f"color:{CP_YELLOW};font-weight:bold;font-size:10pt;border:1px solid {CP_DIM};padding:5px;"); ht.addWidget(self.tl); l.addLayout(ht)
+        l.addLayout(ht)
         hb = QHBoxLayout(); hb.addStretch()
         dbb = QPushButton("RESET DB"); dbb.clicked.connect(self.reset_db); hb.addWidget(dbb)
         rb = QPushButton("RESTART"); rb.clicked.connect(self.restart_app); hb.addWidget(rb)
@@ -423,7 +423,11 @@ class App(QMainWindow):
 
     def update_stats(self):
         snap, dl_t, ul_t = self.stats.get_snapshot()
-        self.tl.setText(f"DL: {format_size(dl_t, self.unit)} | UL: {format_size(ul_t, self.unit)}")
+        total_dl_acc = sum(e['dl_total'] for e in snap)
+        total_ul_acc = sum(e['ul_total'] for e in snap)
+        
+        self.fl.setText(f"DL: {format_size(dl_t, self.unit)} | UL: {format_size(ul_t, self.unit)} | TOT DL: {format_size(total_dl_acc, 'MB/s')} | TOT UL: {format_size(total_ul_acc, 'MB/s')} // UNIT: {self.unit}")
+        
         groups = {}; max_v = {2:0, 3:0, 4:0, 5:0}
         for d in snap:
             n = d['name']
