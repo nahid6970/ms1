@@ -8,7 +8,7 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QVBoxLayout, QHBoxLayout
                             QDialogButtonBox, QLabel, QTextEdit, QComboBox, QMessageBox,
                             QSplitter, QFrame, QTextBrowser, QMenu, QSizePolicy)
 from PyQt6.QtCore import Qt, pyqtSignal, QSettings, QPoint, QSize
-from PyQt6.QtGui import QFont, QTextCursor, QKeySequence, QTextDocument, QFontDatabase
+from PyQt6.QtGui import QFont, QTextCursor, QKeySequence, QTextDocument, QFontDatabase, QFontMetrics
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 AHK_SCRIPT_PATH = os.path.join(SCRIPT_DIR, "ahk_v2.ahk")
@@ -615,15 +615,14 @@ SendText("Hello World")"""
         from PyQt6.QtWidgets import QScrollArea
         toc_scroll = QScrollArea()
         toc_scroll.setWidgetResizable(True)
-        toc_scroll.setMinimumWidth(200)
         toc_scroll.setStyleSheet('QScrollArea { background:#1a1a1a; border:1px solid #444; border-radius:5px; }')
         toc_widget = QWidget()
         toc_widget.setStyleSheet('background:#1a1a1a;')
         toc_layout = QVBoxLayout(toc_widget)
-        toc_layout.setContentsMargins(5, 10, 5, 10)
-        toc_layout.setSpacing(2)
+        toc_layout.setContentsMargins(2, 5, 2, 5)
+        toc_layout.setSpacing(0)
         toc_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
-        toc_layout.addWidget(QLabel(f'<b style="color:#61dafb; font-size:14px; font-family:\'{app_font}\';">Contents</b>'))
+        toc_layout.addWidget(QLabel(f'<b style="color:#61dafb; font-size:13px; font-family:\'{app_font}\'; padding-left:5px;">Contents</b>'))
 
         # Extract headings from markdown for TOC
         toc_entries = []
@@ -645,21 +644,38 @@ SendText("Hello World")"""
                 browser.ensureCursorVisible()
             return jump
 
+        # Dynamic width calculation
+        fm_lvl1 = QFontMetrics(QFont(app_font, 12, QFont.Weight.Bold))
+        fm_lvlN = QFontMetrics(QFont(app_font, 11))
+        max_toc_w = 180
+
         for level, title in toc_entries:
-            btn = QPushButton(('  ' * (level-1)) + title)
+            display_text = ('  ' * (level-1)) + title
+            btn = QPushButton(display_text)
             btn.setFlat(True)
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
+            
+            # Use smaller fonts for more compact look
+            f_size = '12px' if level==1 else '11px'
+            f_weight = 'bold' if level==1 else 'normal'
+            color = '#61dafb' if level==1 else '#ccc'
+            
             btn.setStyleSheet(f"""
-                QPushButton {{ text-align:left; color:{'#61dafb' if level==1 else '#ccc'};
+                QPushButton {{ text-align:left; color:{color};
                     font-family:'{app_font}', 'JetBrainsMono NFP', 'Consolas', monospace; 
-                    font-size:{'13px' if level==1 else '12px'};
-                    font-weight:{'bold' if level==1 else 'normal'};
-                    padding:4px 8px; border:none; background:transparent; }}
+                    font-size:{f_size}; font-weight:{f_weight};
+                    padding:2px 6px; border:none; background:transparent; }}
                 QPushButton:hover {{ color:white; background:#2d2d2d; border-radius:3px; }}
             """)
             btn.clicked.connect(make_jump(title))
             toc_layout.addWidget(btn)
+            
+            # Calculate width needed
+            w = (fm_lvl1 if level == 1 else fm_lvlN).horizontalAdvance(display_text)
+            max_toc_w = max(max_toc_w, w + 35)
 
+        max_toc_w = min(max_toc_w, 450) # Cap at 450px
+        toc_scroll.setMinimumWidth(max_toc_w)
         toc_scroll.setWidget(toc_widget)
 
         content_splitter = QSplitter(Qt.Orientation.Horizontal)
@@ -668,9 +684,9 @@ SendText("Hello World")"""
         content_splitter.setStyleSheet("QSplitter::handle { background:#444; }")
         content_splitter.addWidget(toc_scroll)
         content_splitter.addWidget(browser)
-        content_splitter.setStretchFactor(0, 0) # TOC doesn't stretch by default
-        content_splitter.setStretchFactor(1, 1) # Browser stretches
-        content_splitter.setSizes([250, 850])
+        content_splitter.setStretchFactor(0, 0)
+        content_splitter.setStretchFactor(1, 1)
+        content_splitter.setSizes([max_toc_w, 1100 - max_toc_w])
         layout.addWidget(content_splitter)
         
         # Search functionality
