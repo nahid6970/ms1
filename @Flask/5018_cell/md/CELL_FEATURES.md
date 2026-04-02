@@ -39,6 +39,24 @@
 - These editors auto-resize as you type to match the content height.
 - Global **Wrap (↩️)** settings are respected, but markdown always ensures data never gets squashed into a 1-line box.
 
+## Export Cell to PDF (Image)
+**Access:** Right-click context menu → 📄 Export Cell to PDF (Image).
+**Purpose:** Generates a professional PDF from a single cell's visual appearance.
+**Features:**
+- **Custom Width:** Prompts the user for a layout width (in pixels) before generating.
+- **Visual Fidelity:** Uses `html2canvas` to capture exactly how the cell looks in the browser.
+- **Professional Header:** Includes sheet name, column name, and row index.
+
+## Print Cell (Selectable PDF)
+**Access:** Right-click context menu → 🖨️ Print Cell (Selectable PDF).
+**Purpose:** Generates a high-quality, searchable, and selectable PDF via the browser's print dialog.
+**Features:**
+- **Searchable Text:** Unlike the image export, text can be selected and searched.
+- **Perfect Tables:** Custom CSS ensures complex markdown tables render correctly (no "line-by-line" collapse).
+- **Vector Fonts:** Uses JetBrains Mono and Vrinda fonts for crisp text at any zoom level.
+- **Math Support:** Full KaTeX math rendering support.
+- **Documentation:** See [Cell PDF Export](md/CELL_PDF_EXPORT_FEATURE.md) for full details.
+
 ## Raw Mode (Markdown Preview Toggle)
 **Purpose:** View and edit raw text without markdown rendering.
 **Toggle:** Markdown preview checkbox in toolbar.

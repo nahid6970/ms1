@@ -1,5 +1,46 @@
 # Recent Development Log
 
+## [2026-04-02 11:30] - Find & Replace Text & Searchable PDF Export
+
+**Session Duration:** 1.2 hours
+
+**What We Accomplished:**
+
+### 🔍 New Find & Replace Text Feature
+- **Feature**: Added a literal text search and replace tool in the F3 Quick Formatter.
+- **UI**: Added a new SVG icon button (Magnifying glass with arrow 🔍➡️) to the F3 menu.
+- **Modal**: Implemented a dedicated modal with:
+  - **Find Text** and **Replace With** input boxes.
+  - **Case Sensitive** toggle checkbox.
+  - **Live Preview**: Shows occurrence count and a before/after snippet of the first match as you type.
+- **Logic**: Uses regex (with automatic escaping of special characters) to perform global replaces while preserving cell state and triggering necessary input events.
+
+### 📄 Professional PDF Export Enhancements
+- **Custom Width**: Both PDF export methods now prompt for a layout width (default 800px) before generation.
+- **🖨️ Print Cell (Selectable PDF)**: 
+  - Added a second export option to the right-click context menu.
+  - Uses a hidden iframe and the browser's native print dialog (`window.print()`).
+  - Produces high-quality, **searchable and selectable** PDFs.
+  - **Table Fix**: Included comprehensive CSS in the print view to prevent complex markdown tables from collapsing "line-by-line".
+  - **Font Support**: Injects JetBrains Mono, Vrinda, and KaTeX styles for consistent rendering.
+- **Icon Update**: Replaced dual-emoji icons (🔍🔄, 🔍📜) with professional SVG icons in the F3 menu for a cleaner look.
+
+**Files Modified:**
+- `templates/index.html` - Added F3 button, Text Replacer modal, and new context menu option.
+- `static/script.js` - Implemented `showTextReplacer()`, `applyTextReplace()`, `printCellToPDF()`, and updated `exportCellToPDF()`.
+- `md/FIND_REPLACE_TEXT.md` - Created new feature documentation.
+- `md/CELL_PDF_EXPORT_FEATURE.md` - Updated with custom width and searchable PDF details.
+- `dev.md`, `md/KEYBOARD_SHORTCUTS.md`, `md/EDITING_EXTENSIONS.md`, `md/CELL_FEATURES.md` - Updated references.
+
+**Current Status:**
+- ✅ Find & Replace Text working with live preview.
+- ✅ Professional selectable PDFs now support complex tables.
+- ✅ UI icons modernized with SVGs.
+
+**Known Issues:**
+- None
+
+---
 
 ## [2026-03-30 20:12] - Fixed Bengali Search Highlight & Scroll
 

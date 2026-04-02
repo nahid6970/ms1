@@ -83,6 +83,16 @@
 - This allows for precise alignment of text using the app's monospaced font support.
 - Focus navigation between cells can still be done via mouse or other keyboard arrows/Enter keys.
 
+## Find & Replace Text (F3 → 🔍➡️)
+**Purpose:** Literal text search and replace within a single cell.
+**Access:** F3 Quick Formatter → 🔍➡️ SVG Button.
+**Features:**
+- **Real-time Preview:** Shows the number of matches and a before/after snippet of the first match as you type.
+- **Case Sensitivity:** Toggle between case-sensitive and case-insensitive search.
+- **Regex-Safe:** Automatically escapes special characters in the "Find" field to treat them as literal text.
+- **Replace All:** Updates all occurrences in the cell and triggers the `input` event for state persistence.
+- **Documentation:** See [Find & Replace Text](md/FIND_REPLACE_TEXT.md) for full details.
+
 ## Move Lines Up/Down (Alt + Up / Down)
 **Purpose:** Quickly reorder lines within a cell (Input or Textarea), similar to VS Code's `Alt + Up/Down` feature.
 **Behavior:**
