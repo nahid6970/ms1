@@ -497,13 +497,61 @@ SendText("Hello World")"""
         """Show AutoHotkey command reference in a dialog"""
         ref_dialog = QDialog(self)
         ref_dialog.setWindowTitle("AutoHotkey Command Reference")
-        ref_dialog.resize(800, 600)
+        ref_dialog.resize(1000, 800)
+        ref_dialog.setStyleSheet("background-color: #1e1e1e; color: white;")
         
-        layout = QVBoxLayout()
+        layout = QVBoxLayout(ref_dialog)
+        
+        # Search Bar
+        search_layout = QHBoxLayout()
+        search_input = QLineEdit()
+        search_input.setPlaceholderText("Search in documentation (Press Enter for next)...")
+        search_input.setStyleSheet("""
+            QLineEdit {
+                padding: 10px;
+                border-radius: 5px;
+                background: #2d2d2d;
+                border: 1px solid #444;
+                color: white;
+                font-size: 14px;
+            }
+            QLineEdit:focus { border-color: #61dafb; }
+        """)
+        
+        search_btn = QPushButton("Next")
+        search_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #3d3d3d;
+                border: 1px solid #555;
+                padding: 8px 15px;
+                border-radius: 5px;
+            }
+            QPushButton:hover {
+                background-color: #4d4d4d;
+                border-color: #61dafb;
+            }
+        """)
+        
+        search_layout.addWidget(QLabel("🔍 Search:"))
+        search_layout.addWidget(search_input)
+        search_layout.addWidget(search_btn)
+        layout.addLayout(search_layout)
         
         # Create text browser for the reference
         browser = QTextBrowser()
         browser.setOpenExternalLinks(True)
+        browser.setOpenLinks(True)
+        browser.setStyleSheet("""
+            QTextBrowser {
+                background-color: #2b2b2b;
+                color: #e0e0e0;
+                border: 1px solid #444;
+                border-radius: 5px;
+                padding: 15px;
+                font-size: 16px;
+                line-height: 150%;
+            }
+        """)
         
         # Load the reference content
         ref_file = os.path.join(SCRIPT_DIR, "README.md")
@@ -511,20 +559,66 @@ SendText("Hello World")"""
             try:
                 with open(ref_file, 'r', encoding='utf-8') as f:
                     content = f.read()
+                    # PyQt6 setMarkdown handles standard Markdown and some HTML
                     browser.setMarkdown(content)
             except Exception as e:
-                browser.setPlainText(f"Error loading reference: {e}\n\nPlease check README.md file.")
+                browser.setPlainText(f"Error loading reference: {e}")
         else:
-            browser.setPlainText("Command reference file not found.\n\nPlease ensure README.md exists in the script directory.")
+            browser.setPlainText("Command reference file not found (README.md).")
         
         layout.addWidget(browser)
         
-        # Close button
-        close_btn = QPushButton("Close")
-        close_btn.clicked.connect(ref_dialog.close)
-        layout.addWidget(close_btn)
+        # Search functionality
+        def do_search():
+            text = search_input.text()
+            if text:
+                if not browser.find(text):
+                    # Wrap around to start if not found
+                    cursor = browser.textCursor()
+                    cursor.movePosition(QTextCursor.MoveOperation.Start)
+                    browser.setTextCursor(cursor)
+                    if not browser.find(text):
+                        # Still not found after wrap
+                        pass
         
-        ref_dialog.setLayout(layout)
+        search_input.returnPressed.connect(do_search)
+        search_btn.clicked.connect(do_search)
+        
+        # Internal anchor handling fallback
+        def handle_anchor(url):
+            fragment = url.fragment()
+            if fragment:
+                # Standard Qt fragment scrolling
+                if not browser.scrollToAnchor(fragment):
+                    # Fallback for some markdown-generated headers
+                    # Search for headers that look like the fragment
+                    search_text = fragment.replace('-', ' ')
+                    cursor = browser.document().find(search_text, 0, browser.FindFlag.FindCaseSensitively)
+                    if not cursor.isNull():
+                        browser.setTextCursor(cursor)
+                        browser.ensureCursorVisible()
+        
+        browser.anchorClicked.connect(handle_anchor)
+        
+        # Close button
+        button_box = QHBoxLayout()
+        close_btn = QPushButton("Close")
+        close_btn.setFixedWidth(120)
+        close_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #444;
+                padding: 10px;
+                border-radius: 5px;
+            }
+            QPushButton:hover {
+                background-color: #555;
+            }
+        """)
+        close_btn.clicked.connect(ref_dialog.close)
+        button_box.addStretch()
+        button_box.addWidget(close_btn)
+        layout.addLayout(button_box)
+        
         ref_dialog.exec()
 
     def accept_dialog(self):
