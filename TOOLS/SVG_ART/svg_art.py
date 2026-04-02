@@ -7,12 +7,12 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QH
                              QLabel, QGraphicsView, QGraphicsScene, QGraphicsPathItem,
                              QGraphicsRectItem, QGraphicsEllipseItem, QGraphicsLineItem,
                              QGraphicsPixmapItem, QFrame, QGroupBox, QFormLayout, QDialog, 
-                             QSizePolicy, QComboBox, QGraphicsBlurEffect)
+                             QSizePolicy, QComboBox, QGraphicsBlurEffect, QInputDialog,
+                             QMessageBox, QMenu)
 from PyQt6.QtCore import Qt, QPointF, QRectF, QLineF, QSize, QByteArray
 from PyQt6.QtGui import (QPainter, QPen, QColor, QPainterPath, QPixmap, QCursor, QAction, QIcon, QTransform, QBrush, QKeySequence)
 from PyQt6 import QtSvg
 from PyQt6.QtSvg import QSvgGenerator
-from PyQt6.QtSvgWidgets import QGraphicsSvgItem
 
 # CYBERPUNK THEME PALETTE
 CP_BG = "#050505"
@@ -27,6 +27,7 @@ CP_TEXT = "#E0E0E0"
 CP_SUBTEXT = "#808080"
 
 SETTINGS_FILE = os.path.join(r"C:\@delta\output\svg_art", "settings.json")
+CUSTOM_SHAPES_FILE = os.path.join(r"C:\@delta\output\svg_art", "custom_shapes.json")
 
 class SymItem:
     def __init__(self):
@@ -55,15 +56,6 @@ class SymLine(QGraphicsLineItem, SymItem):
         QGraphicsLineItem.__init__(self, *args, **kwargs)
         SymItem.__init__(self)
 
-class SymSvg(QGraphicsSvgItem, SymItem):
-    def __init__(self, code, name="", *args, **kwargs):
-        QGraphicsSvgItem.__init__(self, *args, **kwargs)
-        SymItem.__init__(self)
-        self.code = code
-        self.name = name
-        self._renderer = QtSvg.QSvgRenderer(QByteArray(code.encode('utf-8')))
-        self.setSharedRenderer(self._renderer)
-
 class ArtScene(QGraphicsScene):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -91,9 +83,7 @@ class ArtView(QGraphicsView):
         self.image_item = None; self.image_path = ""; self.sym_center = QPointF(0, 0)
         self.symmetry_mode = "None"; self.mirror_count = 4; self.undo_stack = []; self.redo_stack = []
         self.poly_points = []; self.curve_state = 0; self.curve_points = []
-        self.is_sharp = True
-        self.custom_shapes = []
-        self.current_custom_shape = ""
+        self.is_sharp = True; self.custom_shapes = {}
 
     def get_pen(self, alpha=255):
         cap = Qt.PenCapStyle.SquareCap if self.is_sharp else Qt.PenCapStyle.RoundCap
@@ -119,23 +109,16 @@ class ArtView(QGraphicsView):
                     if (scene_pos - self.poly_points[0]).manhattanLength() < 15: self.finish_poly()
                     else: self.poly_points.append(scene_pos); self.update_poly()
             elif self.tool == "curve": self.handle_curve_click(scene_pos)
-            elif self.tool in ["rect", "ellipse", "line", "triangle", "custom_shape"]:
+            elif self.tool in ["rect", "ellipse", "line", "triangle"] or self.tool.startswith("custom:"):
                 self.drawing = True; p = self.get_pen()
-                if self.tool == "custom_shape":
-                    if isinstance(self.current_custom_shape, dict) and "code" in self.current_custom_shape:
-                        self.current_item = SymSvg(self.current_custom_shape["code"], self.current_custom_shape.get("name", ""))
-                        s = max(0.1, self.pen_width / 10.0); self.current_item.setScale(s)
-                        b = self.current_item.boundingRect()
-                        self.current_item.setPos(scene_pos.x() - b.width()*s/2, scene_pos.y() - b.height()*s/2)
-                        self.scene().addItem(self.current_item); self.create_symmetry_clones(self.current_item)
-                    else:
-                        self.drawing = False
-                else:
-                    if self.tool == "rect": self.current_item = SymRect(0, 0, 0, 0)
-                    elif self.tool == "ellipse": self.current_item = SymEllipse(0, 0, 0, 0)
-                    elif self.tool == "line": self.current_item = SymLine(0, 0, 0, 0)
-                    elif self.tool == "triangle": self.current_item = SymPath(QPainterPath())
-                    self.current_item.setPos(scene_pos); self.current_item.setPen(p); self.scene().addItem(self.current_item); self.create_symmetry_clones(self.current_item)
+                if self.tool == "rect": self.current_item = SymRect(0, 0, 0, 0)
+                elif self.tool == "ellipse": self.current_item = SymEllipse(0, 0, 0, 0)
+                elif self.tool == "line": self.current_item = SymLine(0, 0, 0, 0)
+                elif self.tool == "triangle": self.current_item = SymPath(QPainterPath())
+                elif self.tool.startswith("custom:"):
+                    self.current_item = SymPath(QPainterPath())
+                    self.current_item._custom_base = self.custom_shapes.get(self.tool[7:], [])
+                self.current_item.setPos(scene_pos); self.current_item.setPen(p); self.scene().addItem(self.current_item); self.create_symmetry_clones(self.current_item)
             elif self.tool == "fill": self.apply_fill(scene_pos)
             elif self.tool == "picker": self.pick_color(scene_pos)
             elif self.tool == "eraser": self.drawing = True; self.erase_at(scene_pos)
@@ -171,6 +154,9 @@ class ArtView(QGraphicsView):
                     path = QPainterPath(); top_x = local_pos.x() / 2
                     path.moveTo(top_x, 0); path.lineTo(0, local_pos.y()); path.lineTo(local_pos.x(), local_pos.y()); path.closeSubpath()
                     self.current_item.setPath(path); self.update_clones(self.current_item)
+                elif self.tool.startswith("custom:") and hasattr(self.current_item, '_custom_base'):
+                    self.current_item.setPath(self._scale_custom_path(self.current_item._custom_base, local_pos))
+                    self.update_clones(self.current_item)
             if self.tool == "eraser": self.erase_at(scene_pos)
             elif self.tool == "move_image" and self.image_item:
                 delta = scene_pos - self.start_point; self.image_item.setPos(self.image_item.pos() + delta); self.start_point = scene_pos
@@ -226,13 +212,8 @@ class ArtView(QGraphicsView):
         elif isinstance(item, QGraphicsRectItem): clone = SymRect(item.rect())
         elif isinstance(item, QGraphicsEllipseItem): clone = SymEllipse(item.rect())
         elif isinstance(item, QGraphicsLineItem): clone = SymLine(item.line())
-        elif isinstance(item, SymSvg):
-            clone = SymSvg(item.code, getattr(item, 'name', ''))
-            clone.setScale(item.scale())
         else: return None
-        if hasattr(clone, 'setPen') and hasattr(item, 'pen'): clone.setPen(item.pen())
-        if hasattr(clone, 'setBrush') and hasattr(item, 'brush'): clone.setBrush(item.brush())
-        clone.is_art_item = True
+        clone.setPen(item.pen()); clone.setBrush(item.brush()); clone.is_art_item = True
         if item.graphicsEffect():
             blur = QGraphicsBlurEffect(); blur.setBlurRadius(item.graphicsEffect().blurRadius()); clone.setGraphicsEffect(blur)
         return clone
@@ -244,7 +225,6 @@ class ArtView(QGraphicsView):
             elif isinstance(item, QGraphicsRectItem): clone.setRect(item.rect())
             elif isinstance(item, QGraphicsEllipseItem): clone.setRect(item.rect())
             elif isinstance(item, QGraphicsLineItem): clone.setLine(item.line())
-            elif isinstance(item, SymSvg): clone.setScale(item.scale())
             if clone.clone_type == "radial":
                 angle = (i+1) * (360 / self.mirror_count); tr = QTransform().translate(cx, cy).rotate(angle).translate(-cx, -cy)
                 clone.setPos(tr.map(item.pos()))
@@ -296,6 +276,68 @@ class ArtView(QGraphicsView):
             self.scene().removeItem(self.current_item); [self.scene().removeItem(c) for c in getattr(self.current_item, 'symmetry_clones', [])]
         self.current_item = None; self.curve_points = []; self.curve_state = 0
 
+
+    def _scale_custom_path(self, points, local_pos):
+        """Scale stored path points (normalized 0-1) to fit drag bounding box."""
+        path = QPainterPath()
+        w, h = local_pos.x() or 1, local_pos.y() or 1
+        for i, (cmd, *args) in enumerate(points):
+            scaled = [QPointF(p[0] * w, p[1] * h) for p in args]
+            if cmd == "M": path.moveTo(scaled[0])
+            elif cmd == "L": path.lineTo(scaled[0])
+            elif cmd == "Q": path.quadTo(scaled[0], scaled[1])
+            elif cmd == "C": path.cubicTo(scaled[0], scaled[1], scaled[2])
+            elif cmd == "Z": path.closeSubpath()
+        return path
+
+    def collect_art_as_shape(self):
+        """Collect all art items and return normalized path commands (0-1 range)."""
+        items = [i for i in self.scene().items() if getattr(i, 'is_art_item', False)]
+        if not items: return None
+        bounds = QRectF()
+        for item in items: bounds = bounds.united(item.mapToScene(item.boundingRect()).boundingRect())
+        if bounds.isEmpty(): return None
+        w, h = bounds.width() or 1, bounds.height() or 1
+        commands = []
+        for item in items:
+            if isinstance(item, QGraphicsPathItem):
+                path = item.path()
+                for i in range(path.elementCount()):
+                    el = path.elementAt(i)
+                    sp = item.mapToScene(QPointF(el.x, el.y))
+                    nx, ny = (sp.x() - bounds.x()) / w, (sp.y() - bounds.y()) / h
+                    if el.type == QPainterPath.ElementType.MoveToElement: commands.append(["M", [nx, ny]])
+                    elif el.type == QPainterPath.ElementType.LineToElement: commands.append(["L", [nx, ny]])
+                    elif el.type == QPainterPath.ElementType.CurveToElement: commands.append(["_C", [nx, ny]])
+                    elif el.type == QPainterPath.ElementType.CurveToDataElement:
+                        if commands and commands[-1][0] in ["_C", "_CD"]:
+                            commands.append(["_CD", [nx, ny]])
+                            # flush cubic when we have 3 control points
+                            ctrl = [c for c in commands if c[0] in ["_C", "_CD"]]
+                            if len(ctrl) >= 2:
+                                pts = [c[1] for c in ctrl[-2:]] + [[nx, ny]]
+                                commands = [c for c in commands if c[0] not in ["_C", "_CD"]]
+                                commands.append(["C", pts[0], pts[1], [nx, ny]])
+            elif isinstance(item, QGraphicsRectItem):
+                r = item.mapRectToScene(item.rect())
+                pts = [(r.left(), r.top()), (r.right(), r.top()), (r.right(), r.bottom()), (r.left(), r.bottom())]
+                commands.append(["M", [(pts[0][0]-bounds.x())/w, (pts[0][1]-bounds.y())/h]])
+                for px, py in pts[1:]: commands.append(["L", [(px-bounds.x())/w, (py-bounds.y())/h]])
+                commands.append(["Z"])
+            elif isinstance(item, QGraphicsEllipseItem):
+                r = item.mapRectToScene(item.rect())
+                cx, cy = (r.center().x()-bounds.x())/w, (r.center().y()-bounds.y())/h
+                rx, ry = r.width()/2/w, r.height()/2/h
+                # approximate ellipse with 4 cubic beziers
+                k = 0.5523
+                commands += [["M",[cx,cy-ry]],["C",[cx+k*rx,cy-ry],[cx+rx,cy-k*ry],[cx+rx,cy]],
+                              ["C",[cx+rx,cy+k*ry],[cx+k*rx,cy+ry],[cx,cy+ry]],
+                              ["C",[cx-k*rx,cy+ry],[cx-rx,cy+k*ry],[cx-rx,cy]],
+                              ["C",[cx-rx,cy-k*ry],[cx-k*rx,cy-ry],[cx,cy-ry]],["Z"]]
+        # clean up any leftover _C/_CD
+        commands = [c for c in commands if not c[0].startswith("_")]
+        return commands
+
     def erase_at(self, pos):
         items = self.scene().items(pos)
         for item in items:
@@ -340,7 +382,7 @@ class ArtView(QGraphicsView):
 class SVGArtApp(QMainWindow):
     def __init__(self):
         super().__init__(); self.setWindowTitle("NEURAL ART V1.6.2 - SYNCED"); self.resize(1400, 900)
-        self.setup_ui(); self.apply_theme(); self.toggle_sharp(); self.load_settings()
+        self.setup_ui(); self.apply_theme(); self.toggle_sharp(); self.load_settings(); self.load_custom_shapes()
 
     def setup_ui(self):
         self.central_widget = QWidget(); self.setCentralWidget(self.central_widget); self.main_layout = QVBoxLayout(self.central_widget)
@@ -350,10 +392,9 @@ class SVGArtApp(QMainWindow):
         self.add_tool_action(self.tb_main, "POLY", "poly", CP_GREEN); self.add_tool_action(self.tb_main, "CURVE", "curve", CP_GREEN); self.add_tool_action(self.tb_main, "ERASE", "eraser", CP_RED); self.add_tool_action(self.tb_main, "FILL", "fill", CP_YELLOW); self.add_tool_action(self.tb_main, "PICK", "picker", CP_CYAN)
         self.tb_shapes = QToolBar("Shapes"); self.tb_shapes.setObjectName("ShapesToolbar"); self.addToolBar(Qt.ToolBarArea.TopToolBarArea, self.tb_shapes)
         self.add_tool_action(self.tb_shapes, "RECT", "rect", CP_ORANGE); self.add_tool_action(self.tb_shapes, "CIRC", "ellipse", CP_ORANGE); self.add_tool_action(self.tb_shapes, "TRI", "triangle", CP_ORANGE)
-        self.custom_combo = QComboBox(); self.custom_combo.currentIndexChanged.connect(self.select_custom_shape); self.tb_shapes.addWidget(self.custom_combo)
-        self.btn_add_custom = QPushButton("+ SVG"); self.btn_add_custom.setStyleSheet(f"color: {CP_GREEN}; font-weight: bold; border: 1px solid {CP_DIM}; padding: 2px;"); self.btn_add_custom.clicked.connect(self.add_custom_shape); self.tb_shapes.addWidget(self.btn_add_custom)
-        self.btn_rem_custom = QPushButton("- SVG"); self.btn_rem_custom.setStyleSheet(f"color: {CP_RED}; font-weight: bold; border: 1px solid {CP_DIM}; padding: 2px;"); self.btn_rem_custom.clicked.connect(self.remove_custom_shape); self.tb_shapes.addWidget(self.btn_rem_custom)
+        btn_add_shape = QPushButton("+"); btn_add_shape.setToolTip("Save current art as custom shape"); btn_add_shape.setStyleSheet(f"color: {CP_GREEN}; font-weight: bold; font-size: 14pt; padding: 0px 6px;"); btn_add_shape.clicked.connect(self.add_custom_shape); self.tb_shapes.addWidget(btn_add_shape)
         self.tb_shapes.addSeparator(); self.add_tool_action(self.tb_shapes, "MOVE IMG", "move_image", CP_SUBTEXT); self.add_tool_action(self.tb_shapes, "MOVE SVG", "move_svg", CP_SUBTEXT); self.add_tool_action(self.tb_shapes, "MOVE SYM", "move_sym", CP_YELLOW)
+        self.tb_custom = QToolBar("Custom Shapes"); self.tb_custom.setObjectName("CustomShapesToolbar"); self.addToolBar(Qt.ToolBarArea.TopToolBarArea, self.tb_custom)
         self.tb_props = QToolBar("Properties"); self.tb_props.setObjectName("PropsToolbar"); self.addToolBar(Qt.ToolBarArea.TopToolBarArea, self.tb_props)
         self.btn_color = QPushButton("COLOR"); self.btn_color.clicked.connect(self.choose_color); self.tb_props.addWidget(self.btn_color)
         self.tb_props.addWidget(QLabel(" THICK: ")); self.thickness_slider = QSlider(Qt.Orientation.Horizontal); self.thickness_slider.setRange(1, 100); self.thickness_slider.setValue(3); self.thickness_slider.valueChanged.connect(self.change_thickness); self.tb_props.addWidget(self.thickness_slider)
@@ -388,36 +429,6 @@ class SVGArtApp(QMainWindow):
         self.btn_sharp.setStyleSheet(f"background-color: {color}; color: white; font-weight: bold; padding: 4px 8px;")
     def undo(self): self.view.undo()
     def redo(self): self.view.redo()
-    
-    def add_custom_shape(self):
-        path, _ = QFileDialog.getOpenFileName(self, "Load Custom SVG", "", "SVG Files (*.svg)")
-        if path and os.path.exists(path):
-            with open(path, 'r', encoding='utf-8') as f: code = f.read()
-            name = os.path.basename(path)
-            self.view.custom_shapes.append({"name": name, "code": code})
-            self.custom_combo.addItem(name, len(self.view.custom_shapes) - 1)
-            self.custom_combo.setCurrentIndex(self.custom_combo.count() - 1)
-    
-    def remove_custom_shape(self):
-        idx = self.custom_combo.currentIndex()
-        if idx >= 0:
-            dict_idx = self.custom_combo.itemData(idx)
-            self.custom_combo.removeItem(idx)
-            if 0 <= dict_idx < len(self.view.custom_shapes):
-                self.view.custom_shapes[dict_idx] = None
-            if self.custom_combo.count() > 0:
-                self.select_custom_shape(self.custom_combo.currentIndex())
-            else:
-                self.view.current_custom_shape = ""
-                self.set_tool("brush")
-
-    def select_custom_shape(self, idx):
-        if idx >= 0:
-            dict_idx = self.custom_combo.itemData(idx)
-            if 0 <= dict_idx < len(self.view.custom_shapes):
-                self.view.current_custom_shape = self.view.custom_shapes[dict_idx]
-                self.set_tool("custom_shape")
-
     def clear_art(self): [self.scene.removeItem(i) for i in self.scene.items() if getattr(i, 'is_art_item', False)]
     def load_image(self, path=None):
         if not path: path, _ = QFileDialog.getOpenFileName(self, "IMG", "", "Images (*.png *.jpg *.jpeg *.bmp)")
@@ -436,7 +447,48 @@ class SVGArtApp(QMainWindow):
             if r.isEmpty(): r = QRectF(0, 0, 800, 600)
             g = QSvgGenerator(); g.setFileName(f); g.setSize(r.size().toSize()); g.setViewBox(r); painter = QPainter(g); self.scene.render(painter, r, r); painter.end(); [i.show() for i in hidden]
     def restart_app(self): self.save_settings(); os.execl(sys.executable, sys.executable, *sys.argv)
-    
+
+    def load_custom_shapes(self):
+        if os.path.exists(CUSTOM_SHAPES_FILE):
+            try:
+                with open(CUSTOM_SHAPES_FILE, 'r') as f:
+                    self.view.custom_shapes = json.load(f)
+            except: self.view.custom_shapes = {}
+        self.rebuild_custom_toolbar()
+
+    def save_custom_shapes(self):
+        try:
+            os.makedirs(os.path.dirname(CUSTOM_SHAPES_FILE), exist_ok=True)
+            with open(CUSTOM_SHAPES_FILE, 'w') as f: json.dump(self.view.custom_shapes, f)
+        except: pass
+
+    def rebuild_custom_toolbar(self):
+        self.tb_custom.clear()
+        for name in self.view.custom_shapes:
+            btn = QPushButton(name.upper())
+            btn.setStyleSheet(f"color: {CP_ORANGE}; font-weight: bold;")
+            btn.clicked.connect(lambda checked, n=name: self.set_tool(f"custom:{n}"))
+            btn.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+            btn.customContextMenuRequested.connect(lambda pos, n=name, b=btn: self.custom_shape_context(n, b, pos))
+            self.tb_custom.addWidget(btn)
+
+    def custom_shape_context(self, name, btn, pos):
+        menu = QMenu(self)
+        menu.setStyleSheet(f"QMenu {{ background: {CP_PANEL}; color: {CP_TEXT}; border: 1px solid {CP_DIM}; }} QMenu::item:selected {{ background: {CP_DIM}; }}")
+        act = menu.addAction(f"Remove '{name}'")
+        if menu.exec(btn.mapToGlobal(pos)) == act:
+            del self.view.custom_shapes[name]
+            self.save_custom_shapes(); self.rebuild_custom_toolbar()
+
+    def add_custom_shape(self):
+        cmds = self.view.collect_art_as_shape()
+        if not cmds:
+            QMessageBox.warning(self, "No Art", "Draw something first to save as a custom shape."); return
+        name, ok = QInputDialog.getText(self, "Shape Name", "Enter shape name:")
+        if ok and name.strip():
+            self.view.custom_shapes[name.strip()] = cmds
+            self.save_custom_shapes(); self.rebuild_custom_toolbar()
+
     def load_settings(self):
         if os.path.exists(SETTINGS_FILE):
             try:
@@ -446,23 +498,13 @@ class SVGArtApp(QMainWindow):
                     if "state" in s: self.restoreState(QByteArray.fromHex(s["state"].encode()))
                     self.view.tool = s.get("tool", "brush"); self.view.brush_type = s.get("brush_type", "marker"); self.view.pen_color = QColor(s.get("color", CP_CYAN)); self.view.pen_width = s.get("width", 3); self.view.multi_line_count = s.get("multi_count", 3); sm = s.get("symmetry_mode", "None"); self.view.symmetry_mode = sm; self.sym_combo.setCurrentText(sm); self.view.mirror_count = s.get("mirror_count", 4); self.view.sym_center = QPointF(s.get("sym_x", 0), s.get("sym_y", 0)); self.scene.center_marker.setPos(self.view.sym_center); self.scene.center_marker_v.setPos(self.view.sym_center); self.brush_combo.setCurrentText(self.view.brush_type.capitalize()); self.thickness_slider.setValue(self.view.pen_width); self.multi_slider.setValue(self.view.multi_line_count); self.mirror_spin.setValue(self.view.mirror_count); self.update_color_ui(self.view.pen_color); ip = s.get("img_path", "")
                     self.view.is_sharp = s.get("is_sharp", True); self.btn_sharp.setChecked(self.view.is_sharp); self.toggle_sharp()
-                    raw_shapes = s.get("custom_shapes", [])
-                    self.view.custom_shapes = []
-                    for c in raw_shapes:
-                        if isinstance(c, dict) and "code" in c: self.view.custom_shapes.append(c)
-                        elif isinstance(c, str) and os.path.exists(c):
-                            try:
-                                with open(c, 'r', encoding='utf-8') as f: self.view.custom_shapes.append({"name": os.path.basename(c), "code": f.read()})
-                            except: pass
-                    for i, shape in enumerate(self.view.custom_shapes):
-                        self.custom_combo.addItem(shape.get("name", "SVG"), i)
                     if ip and os.path.exists(ip):
                         self.load_image(ip)
                         if self.view.image_item: self.view.image_item.setPos(s.get("img_x", 0), s.get("img_y", 0))
             except: pass
 
     def save_settings(self):
-        s = {"geom": self.saveGeometry().toHex().data().decode(), "state": self.saveState().toHex().data().decode(), "tool": self.view.tool, "brush_type": self.view.brush_type, "color": self.view.pen_color.name(), "width": self.view.pen_width, "multi_count": self.view.multi_line_count, "symmetry_mode": self.view.symmetry_mode, "mirror_count": self.view.mirror_count, "sym_x": self.view.sym_center.x(), "sym_y": self.view.sym_center.y(), "img_path": self.view.image_path, "img_x": self.view.image_item.x() if self.view.image_item else 0, "img_y": self.view.image_item.y() if self.view.image_item else 0, "is_sharp": self.view.is_sharp, "custom_shapes": [c for c in self.view.custom_shapes if c]}
+        s = {"geom": self.saveGeometry().toHex().data().decode(), "state": self.saveState().toHex().data().decode(), "tool": self.view.tool, "brush_type": self.view.brush_type, "color": self.view.pen_color.name(), "width": self.view.pen_width, "multi_count": self.view.multi_line_count, "symmetry_mode": self.view.symmetry_mode, "mirror_count": self.view.mirror_count, "sym_x": self.view.sym_center.x(), "sym_y": self.view.sym_center.y(), "img_path": self.view.image_path, "img_x": self.view.image_item.x() if self.view.image_item else 0, "img_y": self.view.image_item.y() if self.view.image_item else 0, "is_sharp": self.view.is_sharp}
         try:
             os.makedirs(os.path.dirname(SETTINGS_FILE), exist_ok=True)
             with open(SETTINGS_FILE, 'w') as f: json.dump(s, f)
