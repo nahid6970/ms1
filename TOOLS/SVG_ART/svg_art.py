@@ -244,6 +244,15 @@ class ArtView(QGraphicsView):
             path = self.current_item.path(); path.closeSubpath(); self.current_item.setPath(path); self.update_clones(self.current_item)
             self.save_to_undo(self.current_item); self.current_item = None; self.poly_points = []
 
+    def cancel_poly(self):
+        if self.current_item:
+            self.save_to_undo(self.current_item)
+        self.current_item = None; self.poly_points = []
+
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key.Key_Escape and self.tool == "poly": self.cancel_poly()
+        else: super().keyPressEvent(event)
+
     def handle_curve_click(self, pos):
         origin = self.current_item.pos() if self.current_item else pos
         if self.curve_state == 0:
