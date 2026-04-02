@@ -16277,6 +16277,11 @@ function exportCellToPDF() {
     const columnName = sheet.columns[colIndex]?.name || getExcelColumnName(colIndex);
     const sheetName = sheet.name || 'Sheet';
 
+    // Prompt for width first
+    const widthInput = prompt('Enter PDF width (px):', '800');
+    if (widthInput === null) return; // User cancelled
+    const customWidth = parseInt(widthInput) || 800;
+
     // Prompt for filename
     const defaultFilename = `${sheetName}_${columnName}_Row${rowIndex + 1}.pdf`;
     const filename = prompt('Enter filename for PDF:', defaultFilename);
@@ -16285,7 +16290,7 @@ function exportCellToPDF() {
     showToast('Generating PDF...', 'info');
 
     // Create temporary container for rendering
-    const tempContainer = createTempContainer();
+    const tempContainer = createTempContainer(customWidth);
 
     // Add header
     addPDFHeader(tempContainer, sheetName, columnName, rowIndex, colIndex);
@@ -16301,13 +16306,13 @@ function exportCellToPDF() {
     captureAndGeneratePDF(tempContainer, filename);
 }
 
-function createTempContainer() {
+function createTempContainer(width = 800) {
     const container = document.createElement('div');
     container.id = 'pdf-export-container';
     container.style.position = 'fixed'; // Fixed to ensure it renders even if scrolled
     container.style.left = '-9999px'; // Move off-screen
     container.style.top = '0';
-    container.style.width = '800px'; // A4 width approx
+    container.style.width = width + 'px';
     container.style.minHeight = '100px';
     container.style.backgroundColor = 'white';
     container.style.padding = '20px';

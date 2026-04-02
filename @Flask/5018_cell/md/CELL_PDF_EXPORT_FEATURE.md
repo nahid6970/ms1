@@ -97,13 +97,18 @@ function exportCellToPDF() {
     const columnName = sheet.columns[colIndex]?.name || `Column ${colIndex + 1}`;
     const sheetName = sheet.name || 'Sheet';
     
+    // Prompt for width first
+    const widthInput = prompt('Enter PDF width (px):', '800');
+    if (widthInput === null) return; // User cancelled
+    const customWidth = parseInt(widthInput) || 800;
+
     // Prompt for filename
     const defaultFilename = `${sheetName}_${columnName}_Row${rowIndex + 1}.pdf`;
     const filename = prompt('Enter filename for PDF:', defaultFilename);
     if (!filename) return;
     
     // Create temporary container for rendering
-    const tempContainer = createTempContainer();
+    const tempContainer = createTempContainer(customWidth);
     
     // Add header
     addPDFHeader(tempContainer, sheetName, columnName, rowIndex, colIndex);
@@ -123,45 +128,15 @@ function exportCellToPDF() {
 ### Step 4: Content Extraction
 
 ```javascript
-function extractCellContent(tdElement, rowIndex, colIndex) {
-    const contentContainer = document.createElement('div');
-    
-    // Style container
-    contentContainer.style.padding = '20px';
-    contentContainer.style.border = '1px solid #ddd';
-    contentContainer.style.borderRadius = '4px';
-    contentContainer.style.backgroundColor = 'white';
-    
-    // Get content sources
-    const inputElement = tdElement.querySelector('input, textarea');
-    const previewElement = tdElement.querySelector('.markdown-preview');
-    const cellStyle = getCellStyle(rowIndex, colIndex);
-    
-    // Create content div
-    const contentDiv = document.createElement('div');
-    contentDiv.style.wordWrap = 'break-word';
-    contentDiv.style.whiteSpace = 'pre-wrap';
-    
-    // Extract content
-    if (previewElement && previewElement.innerHTML.trim()) {
-        // Use markdown preview (clone and clean)
-        const previewClone = previewElement.cloneNode(true);
-        cleanPreviewElement(previewClone);
-        contentDiv.appendChild(previewClone);
-    } else if (inputElement && inputElement.value.trim()) {
-        // Use raw text with styling
-        contentDiv.innerHTML = inputElement.value.replace(/\n/g, '<br>');
-        applyCellStyling(contentDiv, inputElement, cellStyle);
-    } else {
-        // Empty cell
-        contentDiv.innerHTML = '<em style="color: #999;">Empty cell</em>';
-    }
-    
-    // Apply container styling
-    applyContainerStyling(contentContainer, cellStyle);
-    
-    contentContainer.appendChild(contentDiv);
-    return contentContainer;
+function createTempContainer(width = 800) {
+    const container = document.createElement('div');
+    container.id = 'pdf-export-container';
+    container.style.position = 'fixed';
+    container.style.left = '-9999px';
+    container.style.top = '0';
+    container.style.width = width + 'px';
+    // ... rest of styling ...
+    return container;
 }
 ```
 
