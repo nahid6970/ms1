@@ -25,7 +25,7 @@ CP_DIM = "#3a3a3a"
 CP_TEXT = "#E0E0E0"
 CP_SUBTEXT = "#808080"
 
-SETTINGS_FILE = "settings.json"
+SETTINGS_FILE = os.path.join(r"C:\@delta\output\svg_art", "settings.json")
 
 class SymItem:
     def __init__(self):
@@ -116,7 +116,7 @@ class ArtView(QGraphicsView):
             self.setDragMode(QGraphicsView.DragMode.ScrollHandDrag); super().mousePressEvent(event)
         elif event.button() == Qt.MouseButton.RightButton:
             if self.tool == "poly": self.finish_poly()
-            elif self.tool == "curve": self.reset_curve()
+            elif self.tool == "curve": self.finish_curve()
 
     def mouseMoveEvent(self, event):
         scene_pos = self.mapToScene(event.pos())
@@ -234,20 +234,33 @@ class ArtView(QGraphicsView):
         if self.curve_state == 0:
             self.curve_points = [pos]; self.curve_state = 1; self.current_item = SymPath(QPainterPath()); self.current_item.setPos(pos)
             self.current_item.setPen(QPen(self.pen_color, self.pen_width)); self.scene().addItem(self.current_item); self.create_symmetry_clones(self.current_item)
-        elif self.curve_state == 1: self.curve_points.append(pos); self.curve_state = 2
-        elif self.curve_state == 2: self.curve_points.append(pos); self.finish_curve()
+        elif self.curve_state == 1:
+            self.curve_points.append(pos); self.curve_state = 2
+        elif self.curve_state == 2:
+            if (pos - self.curve_points[0]).manhattanLength() < 15: self.finish_curve()
+            else:
+                self.curve_points.append(pos); self.curve_state = 1; self.update_curve_preview()
 
-    def update_curve_preview(self, pos):
+    def update_curve_preview(self, pos=None):
         if not self.current_item: return
-        path = QPainterPath(); path.moveTo(0, 0)
-        if self.curve_state == 1: path.lineTo(pos - self.current_item.pos())
-        elif self.curve_state == 2: path.quadTo(pos - self.current_item.pos(), self.curve_points[1] - self.current_item.pos())
+        path = QPainterPath(); origin = self.current_item.pos(); path.moveTo(0, 0)
+        i = 1
+        while i + 1 < len(self.curve_points):
+            path.quadTo(self.curve_points[i] - origin, self.curve_points[i+1] - origin)
+            i += 2
+        if pos:
+            if self.curve_state == 1: path.lineTo(pos - origin)
+            elif self.curve_state == 2: path.quadTo(self.curve_points[-1] - origin, pos - origin)
         self.current_item.setPath(path); self.update_clones(self.current_item)
 
-    def finish_curve(self): self.save_to_undo(self.current_item); self.current_item = None; self.curve_points = []; self.curve_state = 0
+    def finish_curve(self):
+        if self.current_item:
+            self.update_curve_preview(); path = self.current_item.path(); path.closeSubpath(); self.current_item.setPath(path); self.update_clones(self.current_item)
+            self.save_to_undo(self.current_item)
+        self.current_item = None; self.curve_points = []; self.curve_state = 0
     def reset_curve(self):
         if self.current_item:
-            self.scene().removeItem(self.current_item); [self.scene().removeItem(c) for c in self.current_item.symmetry_clones]
+            self.scene().removeItem(self.current_item); [self.scene().removeItem(c) for c in getattr(self.current_item, 'symmetry_clones', [])]
         self.current_item = None; self.curve_points = []; self.curve_state = 0
 
     def erase_at(self, pos):
@@ -368,7 +381,10 @@ class SVGArtApp(QMainWindow):
 
     def save_settings(self):
         s = {"geom": self.saveGeometry().toHex().data().decode(), "state": self.saveState().toHex().data().decode(), "tool": self.view.tool, "brush_type": self.view.brush_type, "color": self.view.pen_color.name(), "width": self.view.pen_width, "multi_count": self.view.multi_line_count, "symmetry_mode": self.view.symmetry_mode, "mirror_count": self.view.mirror_count, "sym_x": self.view.sym_center.x(), "sym_y": self.view.sym_center.y(), "img_path": self.view.image_path, "img_x": self.view.image_item.x() if self.view.image_item else 0, "img_y": self.view.image_item.y() if self.view.image_item else 0}
-        with open(SETTINGS_FILE, 'w') as f: json.dump(s, f)
+        try:
+            os.makedirs(os.path.dirname(SETTINGS_FILE), exist_ok=True)
+            with open(SETTINGS_FILE, 'w') as f: json.dump(s, f)
+        except: pass
 
     def closeEvent(self, e): self.save_settings(); super().closeEvent(e)
     def apply_theme(self):
