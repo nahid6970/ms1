@@ -8,7 +8,7 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QVBoxLayout, QHBoxLayout
                             QDialogButtonBox, QLabel, QTextEdit, QComboBox, QMessageBox,
                             QSplitter, QFrame, QTextBrowser, QMenu, QSizePolicy)
 from PyQt6.QtCore import Qt, pyqtSignal, QSettings, QPoint, QSize
-from PyQt6.QtGui import QFont, QTextCursor, QKeySequence, QTextDocument
+from PyQt6.QtGui import QFont, QTextCursor, QKeySequence, QTextDocument, QFontDatabase
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 AHK_SCRIPT_PATH = os.path.join(SCRIPT_DIR, "ahk_v2.ahk")
@@ -498,10 +498,16 @@ SendText("Hello World")"""
         """Show AutoHotkey command reference in a dialog"""
         ref_dialog = QDialog(self)
         ref_dialog.setWindowTitle("AutoHotkey Command Reference")
-        ref_dialog.resize(1000, 800)
+        ref_dialog.resize(1100, 850)
         ref_dialog.setStyleSheet("background-color: #1e1e1e; color: white;")
         
+        # Setup robust font with fallbacks
+        _fnt = QFont("JetBrainsMono NFP", 10)
+        _fnt.setFamilies(["JetBrainsMono NFP", "JetBrainsMono NF", "JetBrains Mono", "Consolas", "monospace"])
+        ref_dialog.setFont(_fnt)
+        
         layout = QVBoxLayout(ref_dialog)
+        layout.setContentsMargins(10, 10, 10, 10)
         
         # Search Bar
         search_layout = QHBoxLayout()
@@ -554,18 +560,20 @@ SendText("Hello World")"""
                 self.setTextCursor(c)
                 self.find(text)
                 self.ensureCursorVisible()
+        
         browser = AnchorBrowser()
         browser.setOpenLinks(False)
         browser.setOpenExternalLinks(False)
+        browser.setFont(_fnt)
+        browser.document().setDocumentMargin(15)
         browser.setStyleSheet("""
             QTextBrowser {
                 background-color: #2b2b2b;
                 color: #e0e0e0;
-                border: 1px solid #444;
-                border-radius: 5px;
-                padding: 15px;
-                font-size: 16px;
-                line-height: 150%;
+                border: none;
+                padding: 0px;
+                font-family: 'JetBrainsMono NFP', 'JetBrainsMono NF', 'JetBrains Mono', 'Consolas', monospace;
+                font-size: 13px;
             }
         """)
         
@@ -590,8 +598,9 @@ SendText("Hello World")"""
                             anchor_map[pending_anchor] = hm.group(1).strip()
                         pending_anchor = None
 
-                # Strip <a name> lines so setMarkdown works cleanly
+                # Strip <a name> lines and TOC section so setMarkdown works cleanly
                 clean = re.sub(r'<a name="[^"]+">\s*</a>\n?', '', content, flags=re.IGNORECASE)
+                clean = re.sub(r'## Table of Contents.*?\n---', '', clean, flags=re.DOTALL)
                 browser.setMarkdown(clean)
                 browser._anchor_map = anchor_map
             except Exception as e:
@@ -603,14 +612,15 @@ SendText("Hello World")"""
         from PyQt6.QtWidgets import QScrollArea
         toc_scroll = QScrollArea()
         toc_scroll.setWidgetResizable(True)
-        toc_scroll.setFixedWidth(220)
+        toc_scroll.setMinimumWidth(200)
         toc_scroll.setStyleSheet('QScrollArea { background:#1a1a1a; border:1px solid #444; border-radius:5px; }')
         toc_widget = QWidget()
         toc_widget.setStyleSheet('background:#1a1a1a;')
         toc_layout = QVBoxLayout(toc_widget)
-        toc_layout.setContentsMargins(4,8,4,8)
+        toc_layout.setContentsMargins(5, 10, 5, 10)
         toc_layout.setSpacing(2)
-        toc_layout.addWidget(QLabel('<b style="color:#61dafb">Contents</b>'))
+        toc_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        toc_layout.addWidget(QLabel('<b style="color:#61dafb; font-size:14px;">Contents</b>'))
 
         # Extract headings from markdown for TOC
         toc_entries = []
@@ -621,7 +631,7 @@ SendText("Hello World")"""
                     if _line.startswith('```'): _in_code = not _in_code; continue
                     if _in_code or _line.strip().startswith('<'): continue
                     _hm = re.match(r'^(#{1,3})\s+(.*)', _line)
-                    if _hm: toc_entries.append((len(_hm.group(1)), _hm.group(2).strip()))
+                    if _hm and 'table of contents' not in _hm.group(2).lower(): toc_entries.append((len(_hm.group(1)), _hm.group(2).strip()))
 
         def make_jump(heading_text):
             def jump():
@@ -638,21 +648,26 @@ SendText("Hello World")"""
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
             btn.setStyleSheet(f"""
                 QPushButton {{ text-align:left; color:{'#61dafb' if level==1 else '#ccc'};
+                    font-family:'JetBrainsMono NFP', 'JetBrainsMono NF', 'JetBrains Mono', 'Consolas', monospace; 
                     font-size:{'13px' if level==1 else '12px'};
                     font-weight:{'bold' if level==1 else 'normal'};
-                    padding:3px 6px; border:none; background:transparent; }}
+                    padding:4px 8px; border:none; background:transparent; }}
                 QPushButton:hover {{ color:white; background:#2d2d2d; border-radius:3px; }}
             """)
             btn.clicked.connect(make_jump(title))
             toc_layout.addWidget(btn)
 
-        toc_layout.addStretch()
         toc_scroll.setWidget(toc_widget)
 
         content_splitter = QSplitter(Qt.Orientation.Horizontal)
+        content_splitter.setHandleWidth(2)
+        content_splitter.setContentsMargins(0,0,0,0)
+        content_splitter.setStyleSheet("QSplitter::handle { background:#444; }")
         content_splitter.addWidget(toc_scroll)
         content_splitter.addWidget(browser)
-        content_splitter.setStretchFactor(1, 1)
+        content_splitter.setStretchFactor(0, 0) # TOC doesn't stretch by default
+        content_splitter.setStretchFactor(1, 1) # Browser stretches
+        content_splitter.setSizes([250, 850])
         layout.addWidget(content_splitter)
         
         # Search functionality
@@ -668,7 +683,6 @@ SendText("Hello World")"""
         
         search_input.returnPressed.connect(do_search)
         search_btn.clicked.connect(do_search)
-        
         
         # Close button
         button_box = QHBoxLayout()
