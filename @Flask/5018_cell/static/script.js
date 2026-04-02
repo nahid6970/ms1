@@ -16698,6 +16698,8 @@ function printCellToPDF() {
                     color: #333;
                     padding: 40px;
                     background: white;
+                    -webkit-print-color-adjust: exact !important;
+                    print-color-adjust: exact !important;
                 }
                 
                 .print-container {
@@ -16711,45 +16713,28 @@ function printCellToPDF() {
                 /* Grid Table Styles */
                 .md-grid {
                     display: grid !important;
-                    grid-template-columns: repeat(var(--cols), auto) !important;
+                    grid-template-columns: repeat(var(--cols), 1fr) !important;
                     gap: 0 !important;
                     margin: 10px 0 !important;
-                    font-size: inherit !important;
-                    font-family: inherit !important;
-                    width: fit-content !important;
-                    max-width: 100% !important;
-                    border: 1px solid #eee;
+                    border: 1px solid #000 !important;
+                    width: 100% !important;
+                    table-layout: fixed !important;
                 }
 
                 .md-cell {
-                    padding: 2px 12px !important;
-                    border: none !important;
-                    border-right: 3px solid #000000 !important;
+                    padding: 4px 12px !important;
+                    border: 1px solid #000 !important;
                     background: transparent !important;
-                    overflow: visible !important;
                     word-break: break-word !important;
-                    white-space: normal !important;
-                    min-width: 80px;
-                    max-width: 100%;
-                    text-indent: -1em !important;
-                    padding-left: calc(12px + 1em) !important;
-                }
-
-                .md-cell:nth-child(var(--cols)n) {
-                    border-right: none !important;
+                    white-space: pre-wrap !important;
+                    min-width: 0 !important;
                 }
 
                 .md-header {
-                    background: transparent !important;
-                    font-weight: 600 !important;
-                    border-bottom: 2px solid #000000 !important;
+                    background: #f0f0f0 !important;
+                    font-weight: bold !important;
                 }
                 
-                .md-rowspan-row {
-                    border-top: 1px solid #000000 !important;
-                    border-bottom: 1px solid #000000 !important;
-                }
-
                 /* Custom Syntax Markers */
                 .custom-syntax-marker {
                     color: rgba(0, 0, 0, 0.3) !important;
@@ -16757,20 +16742,17 @@ function printCellToPDF() {
                     user-select: none !important;
                 }
 
-                /* Dynamic Custom Color Syntaxes */
-                ${customSyntaxCss}
-
                 /* Markdown elements */
                 strong { font-weight: bold; }
                 em { font-style: italic; }
                 u { text-decoration: underline; }
-                mark { background-color: #ff0; padding: 0 2px; }
-                code { background: #f0f0f0; padding: 2px 4px; border-radius: 3px; font-family: monospace; }
+                mark { background-color: #ff0 !important; padding: 0 2px; -webkit-print-color-adjust: exact; }
+                code { background: #f0f0f0 !important; padding: 2px 4px; border-radius: 3px; font-family: monospace; -webkit-print-color-adjust: exact; }
                 
                 /* Colors from the app */
-                .syntax-red { color: #ff0000; }
-                .syntax-green { color: #00ff00; }
-                .syntax-blue { color: #0000ff; }
+                .syntax-red { color: #ff0000 !important; }
+                .syntax-green { color: #00ff00 !important; }
+                .syntax-blue { color: #0000ff !important; }
                 
                 /* KaTeX fixes for print */
                 .katex-display { margin: 1em 0; overflow-x: auto; overflow-y: hidden; }
