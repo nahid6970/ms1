@@ -81,6 +81,12 @@ class ArtView(QGraphicsView):
         self.image_item = None; self.image_path = ""; self.sym_center = QPointF(0, 0)
         self.symmetry_mode = "None"; self.mirror_count = 4; self.undo_stack = []; self.redo_stack = []
         self.poly_points = []; self.curve_state = 0; self.curve_points = []
+        self.is_sharp = True
+
+    def get_pen(self, alpha=255):
+        cap = Qt.PenCapStyle.SquareCap if self.is_sharp else Qt.PenCapStyle.RoundCap
+        join = Qt.PenJoinStyle.MiterJoin if self.is_sharp else Qt.PenJoinStyle.RoundJoin
+        return QPen(QColor(*self.pen_color.getRgb()[:3], alpha), self.pen_width, Qt.PenStyle.SolidLine, cap, join)
 
     def save_to_undo(self, item, action="add"):
         self.undo_stack.append((action, item)); self.redo_stack.clear()
@@ -96,13 +102,13 @@ class ArtView(QGraphicsView):
             elif self.tool == "poly":
                 if not self.poly_points:
                     self.poly_points = [scene_pos]; self.current_item = SymPath(QPainterPath()); self.current_item.setPos(scene_pos)
-                    self.current_item.setPen(QPen(self.pen_color, self.pen_width)); self.scene().addItem(self.current_item); self.create_symmetry_clones(self.current_item)
+                    self.current_item.setPen(self.get_pen()); self.scene().addItem(self.current_item); self.create_symmetry_clones(self.current_item)
                 else:
                     if (scene_pos - self.poly_points[0]).manhattanLength() < 15: self.finish_poly()
                     else: self.poly_points.append(scene_pos); self.update_poly()
             elif self.tool == "curve": self.handle_curve_click(scene_pos)
             elif self.tool in ["rect", "ellipse", "line", "triangle"]:
-                self.drawing = True; p = QPen(self.pen_color, self.pen_width)
+                self.drawing = True; p = self.get_pen()
                 if self.tool == "rect": self.current_item = SymRect(0, 0, 0, 0)
                 elif self.tool == "ellipse": self.current_item = SymEllipse(0, 0, 0, 0)
                 elif self.tool == "line": self.current_item = SymLine(0, 0, 0, 0)
@@ -161,7 +167,7 @@ class ArtView(QGraphicsView):
     def create_brush_item(self, pos):
         path = QPainterPath(); path.moveTo(0, 0); self.current_item = SymPath(path); self.current_item.setPos(pos); self.current_item.path_points = [QPointF(0,0)]
         alpha = 100 if self.brush_type == "highlighter" else 255
-        p = QPen(QColor(*self.pen_color.getRgb()[:3], alpha), self.pen_width, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap, Qt.PenJoinStyle.RoundJoin)
+        p = self.get_pen(alpha)
         self.current_item.setPen(p)
         if self.brush_type == "airbrush":
             blur = QGraphicsBlurEffect(); blur.setBlurRadius(self.pen_width * 1.5); self.current_item.setGraphicsEffect(blur)
@@ -234,7 +240,7 @@ class ArtView(QGraphicsView):
         origin = self.current_item.pos() if self.current_item else pos
         if self.curve_state == 0:
             self.curve_points = [pos]; self.curve_state = 1; self.current_item = SymPath(QPainterPath()); self.current_item.setPos(pos)
-            self.current_item.setPen(QPen(self.pen_color, self.pen_width)); self.scene().addItem(self.current_item); self.create_symmetry_clones(self.current_item)
+            self.current_item.setPen(self.get_pen()); self.scene().addItem(self.current_item); self.create_symmetry_clones(self.current_item)
             self.persistent_path = QPainterPath(); self.persistent_path.moveTo(0, 0)
         elif self.curve_state == 1:
             self.curve_points.append(pos); self.curve_state = 2
@@ -306,7 +312,7 @@ class ArtView(QGraphicsView):
 class SVGArtApp(QMainWindow):
     def __init__(self):
         super().__init__(); self.setWindowTitle("NEURAL ART V1.6.2 - SYNCED"); self.resize(1400, 900)
-        self.setup_ui(); self.apply_theme(); self.load_settings()
+        self.setup_ui(); self.apply_theme(); self.toggle_sharp(); self.load_settings()
 
     def setup_ui(self):
         self.central_widget = QWidget(); self.setCentralWidget(self.central_widget); self.main_layout = QVBoxLayout(self.central_widget)
@@ -320,6 +326,7 @@ class SVGArtApp(QMainWindow):
         self.tb_props = QToolBar("Properties"); self.tb_props.setObjectName("PropsToolbar"); self.addToolBar(Qt.ToolBarArea.TopToolBarArea, self.tb_props)
         self.btn_color = QPushButton("COLOR"); self.btn_color.clicked.connect(self.choose_color); self.tb_props.addWidget(self.btn_color)
         self.tb_props.addWidget(QLabel(" THICK: ")); self.thickness_slider = QSlider(Qt.Orientation.Horizontal); self.thickness_slider.setRange(1, 100); self.thickness_slider.setValue(3); self.thickness_slider.valueChanged.connect(self.change_thickness); self.tb_props.addWidget(self.thickness_slider)
+        self.btn_sharp = QPushButton("SHARP"); self.btn_sharp.setCheckable(True); self.btn_sharp.setChecked(True); self.btn_sharp.clicked.connect(self.toggle_sharp); self.tb_props.addWidget(self.btn_sharp)
         self.tb_sym = QToolBar("Symmetry"); self.tb_sym.setObjectName("SymmetryToolbar"); self.addToolBar(Qt.ToolBarArea.LeftToolBarArea, self.tb_sym)
         self.tb_sym.addWidget(QLabel(" SYMMETRY ")); self.sym_combo = QComboBox(); self.sym_combo.addItems(["None", "Radial", "Reflect (H)", "Reflect (V)", "Reflect (B)"]); self.sym_combo.currentTextChanged.connect(self.set_symmetry_mode); self.tb_sym.addWidget(self.sym_combo)
         self.tb_sym.addWidget(QLabel(" MIRROR: ")); self.mirror_spin = QSlider(Qt.Orientation.Horizontal); self.mirror_spin.setRange(2, 20); self.mirror_spin.setValue(4); self.mirror_spin.valueChanged.connect(self.set_mirror_count); self.tb_sym.addWidget(self.mirror_spin)
@@ -344,6 +351,10 @@ class SVGArtApp(QMainWindow):
         c = QColorDialog.getColor(self.view.pen_color, self, "COLOR")
         if c.isValid(): self.view.pen_color = c; self.update_color_ui(c)
     def change_thickness(self, v): self.view.pen_width = v
+    def toggle_sharp(self):
+        self.view.is_sharp = self.btn_sharp.isChecked()
+        color = CP_GREEN if self.view.is_sharp else CP_DIM
+        self.btn_sharp.setStyleSheet(f"background-color: {color}; color: white; font-weight: bold; padding: 4px 8px;")
     def undo(self): self.view.undo()
     def redo(self): self.view.redo()
     def clear_art(self): [self.scene.removeItem(i) for i in self.scene.items() if getattr(i, 'is_art_item', False)]
@@ -373,13 +384,14 @@ class SVGArtApp(QMainWindow):
                     if "geom" in s: self.restoreGeometry(QByteArray.fromHex(s["geom"].encode()))
                     if "state" in s: self.restoreState(QByteArray.fromHex(s["state"].encode()))
                     self.view.tool = s.get("tool", "brush"); self.view.brush_type = s.get("brush_type", "marker"); self.view.pen_color = QColor(s.get("color", CP_CYAN)); self.view.pen_width = s.get("width", 3); self.view.multi_line_count = s.get("multi_count", 3); sm = s.get("symmetry_mode", "None"); self.view.symmetry_mode = sm; self.sym_combo.setCurrentText(sm); self.view.mirror_count = s.get("mirror_count", 4); self.view.sym_center = QPointF(s.get("sym_x", 0), s.get("sym_y", 0)); self.scene.center_marker.setPos(self.view.sym_center); self.scene.center_marker_v.setPos(self.view.sym_center); self.brush_combo.setCurrentText(self.view.brush_type.capitalize()); self.thickness_slider.setValue(self.view.pen_width); self.multi_slider.setValue(self.view.multi_line_count); self.mirror_spin.setValue(self.view.mirror_count); self.update_color_ui(self.view.pen_color); ip = s.get("img_path", "")
+                    self.view.is_sharp = s.get("is_sharp", True); self.btn_sharp.setChecked(self.view.is_sharp); self.toggle_sharp()
                     if ip and os.path.exists(ip):
                         self.load_image(ip)
                         if self.view.image_item: self.view.image_item.setPos(s.get("img_x", 0), s.get("img_y", 0))
             except: pass
 
     def save_settings(self):
-        s = {"geom": self.saveGeometry().toHex().data().decode(), "state": self.saveState().toHex().data().decode(), "tool": self.view.tool, "brush_type": self.view.brush_type, "color": self.view.pen_color.name(), "width": self.view.pen_width, "multi_count": self.view.multi_line_count, "symmetry_mode": self.view.symmetry_mode, "mirror_count": self.view.mirror_count, "sym_x": self.view.sym_center.x(), "sym_y": self.view.sym_center.y(), "img_path": self.view.image_path, "img_x": self.view.image_item.x() if self.view.image_item else 0, "img_y": self.view.image_item.y() if self.view.image_item else 0}
+        s = {"geom": self.saveGeometry().toHex().data().decode(), "state": self.saveState().toHex().data().decode(), "tool": self.view.tool, "brush_type": self.view.brush_type, "color": self.view.pen_color.name(), "width": self.view.pen_width, "multi_count": self.view.multi_line_count, "symmetry_mode": self.view.symmetry_mode, "mirror_count": self.view.mirror_count, "sym_x": self.view.sym_center.x(), "sym_y": self.view.sym_center.y(), "img_path": self.view.image_path, "img_x": self.view.image_item.x() if self.view.image_item else 0, "img_y": self.view.image_item.y() if self.view.image_item else 0, "is_sharp": self.view.is_sharp}
         try:
             os.makedirs(os.path.dirname(SETTINGS_FILE), exist_ok=True)
             with open(SETTINGS_FILE, 'w') as f: json.dump(s, f)
