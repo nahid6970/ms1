@@ -740,6 +740,13 @@ PrintScreen::Run("C:\@delta\ms1\scripts\Autohtokey\version2\gui\Bio.ahk", "", "H
 ;! Opens the directory of the focused application or script
 !f:: {
     OpenFocusedDirectory()
+    ; Ensure script runs as admin to interact with admin windows
+    if !A_IsAdmin {
+        try {
+            Run('*RunAs "' . A_AhkPath . '" /restart "' . A_ScriptFullPath . '"')
+        }
+        ExitApp()
+    }
     OpenFocusedDirectory() {
         try {
             hwnd := WinExist("A")
@@ -750,20 +757,29 @@ PrintScreen::Run("C:\@delta\ms1\scripts\Autohtokey\version2\gui\Bio.ahk", "", "H
             finalPath := ""
             ; Handle script interpreters
             if (processName ~= "i)python|powershell|pwsh|autohotkey") {
-                for proc in ComObjGet("winmgmts:").ExecQuery("Select CommandLine from Win32_Process Where ProcessId = " pid) {
-                    cmdLine := proc.CommandLine
-                    ; Look for paths ending in script extensions in the command line
-                    if RegExMatch(cmdLine, 'i)"([^"]+\.(py|ps1|ahk|bat|cmd))"', &match)
-                        finalPath := match[1]
-                    else if RegExMatch(cmdLine, 'i)\s([^\s]+\.(py|ps1|ahk|bat|cmd))(\s|$)', &match)
-                        finalPath := match[1]
+                try {
+                    for proc in ComObjGet("winmgmts:").ExecQuery("Select CommandLine from Win32_Process Where ProcessId = " pid) {
+                        cmdLine := proc.CommandLine
+                        if !cmdLine
+                            continue
+                        ; Look for paths ending in script extensions in the command line
+                        if RegExMatch(cmdLine, 'i)"([^"]+\.(py|ps1|ahk|bat|cmd))"', &match)
+                            finalPath := match[1]
+                        else if RegExMatch(cmdLine, 'i)\s([^\s]+\.(py|ps1|ahk|bat|cmd))(\s|$)', &match)
+                            finalPath := match[1]
+                    }
                 }
             }
-            if (finalPath == "")
-                finalPath := WinGetProcessPath("ahk_id " hwnd)
-            SplitPath(finalPath, , &dir)
-            if DirExist(dir)
-                Run(dir)
+            if (finalPath == "") {
+                try {
+                    finalPath := WinGetProcessPath("ahk_id " hwnd)
+                }
+            }
+            if (finalPath != "") {
+                SplitPath(finalPath, , &dir)
+                if DirExist(dir)
+                    Run(dir)
+            }
         }
     }
 }
