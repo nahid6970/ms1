@@ -253,7 +253,7 @@ class ArtView(QGraphicsView):
     def finish_curve(self):
         if self.current_item:
             path = QPainterPath(self.persistent_path)
-            if self.curve_state == 1 and path.elementCount() > 1:
+            if self.curve_state == 2:
                 path.closeSubpath()
             self.current_item.setPath(path); self.update_clones(self.current_item); self.save_to_undo(self.current_item)
         self.current_item = None; self.curve_points = []; self.curve_state = 0
