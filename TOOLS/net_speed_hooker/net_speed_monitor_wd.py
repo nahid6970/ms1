@@ -74,8 +74,10 @@ class CustomBorderDelegate(QStyledItemDelegate):
 class TreeItem(QTreeWidgetItem):
     def __lt__(self, other):
         col = self.treeWidget().sortColumn()
-        if col in [2,3,4,5]:
-            try: return float(self.data(col, Qt.ItemDataRole.UserRole) or 0) < float(other.data(col, Qt.ItemDataRole.UserRole) or 0)
+        v1 = self.data(col, Qt.ItemDataRole.UserRole)
+        v2 = other.data(col, Qt.ItemDataRole.UserRole)
+        if v1 is not None and v2 is not None:
+            try: return float(v1) < float(v2)
             except: pass
         return super().__lt__(other)
 
@@ -190,6 +192,10 @@ class TrafficDB:
 
     def get_daily_usage(self, date):
         return self.conn.execute("SELECT name, dl, ul FROM daily_traffic WHERE date=?", (date,)).fetchall()
+
+    def get_available_dates(self):
+        rows = self.conn.execute("SELECT DISTINCT date FROM daily_traffic").fetchall()
+        return [r[0] for r in rows]
 
     def set_blocked(self, name, blocked):
         if blocked: self.conn.execute("INSERT OR IGNORE INTO blocked(name) VALUES(?)", (name,))
@@ -318,6 +324,7 @@ class DailyUsageDialog(QDialog):
         self.tree = QTreeWidget(); self.tree.setColumnCount(3)
         self.tree.setHeaderLabels(["APPLICATION", "TOTAL DL", "TOTAL UL"])
         self.tree.header().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        self.tree.setSortingEnabled(True)
         l.addWidget(self.tree)
         
         # Structured Footer for Dialog
@@ -335,17 +342,33 @@ class DailyUsageDialog(QDialog):
             self.footer_labels.append(lbl)
         l.addWidget(self.footer_widget)
         
+        self.highlight_dates()
         self.update_list()
+
+    def highlight_dates(self):
+        from PyQt6.QtGui import QTextCharFormat
+        fmt = QTextCharFormat()
+        fmt.setForeground(QColor(CP_CYAN))
+        fmt.setFontWeight(QFont.Weight.Bold)
+        for d_str in self.db.get_available_dates():
+            try:
+                d = datetime.strptime(d_str, "%Y-%m-%d")
+                from PyQt6.QtCore import QDate
+                self.cal.setDateTextFormat(QDate(d.year, d.month, d.day), fmt)
+            except: pass
 
     def update_list(self):
         date_str = self.cal.selectedDate().toString("yyyy-MM-dd")
         rows = self.db.get_daily_usage(date_str)
+        self.tree.setSortingEnabled(False)
         self.tree.clear()
         t_dl = 0; t_ul = 0
-        for name, dl, ul in sorted(rows, key=lambda x: x[1]+x[2], reverse=True):
+        for name, dl, ul in rows:
             t_dl += dl; t_ul += ul
-            item = QTreeWidgetItem([name, format_size(dl, "MB/s"), format_size(ul, "MB/s")])
-            self.tree.addTopLevelItem(item)
+            item = TreeItem(self.tree)
+            item.setText(0, name)
+            item.setText(1, format_size(dl, "MB/s")); item.setData(1, Qt.ItemDataRole.UserRole, dl)
+            item.setText(2, format_size(ul, "MB/s")); item.setData(2, Qt.ItemDataRole.UserRole, ul)
         
         if hasattr(self, 'footer_labels'):
             self.footer_labels[1].setText(format_size(t_dl, "MB/s"))
@@ -353,6 +376,8 @@ class DailyUsageDialog(QDialog):
             self.footer_labels[2].setText(format_size(t_ul, "MB/s"))
             self.footer_labels[2].setStyleSheet(f"padding:5px; font-weight:bold; color:{CP_GREEN}; border-right:1px solid {CP_DIM};")
             QTimer.singleShot(10, self._sync_footer)
+        self.tree.setSortingEnabled(True)
+        self.tree.sortByColumn(1, Qt.SortOrder.DescendingOrder)
 
     def _sync_footer(self):
         for i in range(min(3, len(self.footer_labels))):
