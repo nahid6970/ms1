@@ -25,7 +25,6 @@ SHORTCUTS_JSON_PATH = os.path.join(SCRIPT_DIR, "ahk_shortcuts.json")
 #  THEME  – terminal-noir / cyberpunk
 # ══════════════════════════════════════════════════════════════════════
 THEME = dict(
-    # backgrounds
     bg_deep    = "#0d0d0f",
     bg_base    = "#111114",
     bg_panel   = "#16161a",
@@ -33,25 +32,17 @@ THEME = dict(
     bg_hover   = "#222228",
     bg_input   = "#1a1a1f",
     bg_sel     = "#0e2233",
-
-    # borders
     border     = "#2a2a32",
     border_hi  = "#00e5ff",
-
-    # accents
     cyan       = "#00e5ff",
     green      = "#00ff9d",
     amber      = "#ffb800",
     red        = "#ff3c5a",
     purple     = "#b06cff",
     muted      = "#4a4a58",
-
-    # text
     txt_hi     = "#f0f0f8",
     txt_mid    = "#9090a8",
     txt_dim    = "#545468",
-
-    # fonts
     font_ui    = "JetBrains Mono",
     font_size  = 13,
 )
@@ -59,11 +50,16 @@ THEME = dict(
 def _t(key):
     return THEME[key]
 
+# ── small uppercase field label style (used everywhere) ──────────────
+# letter-spacing: 0.5px keeps chars readable without gaps
+_LBL_STYLE = (
+    f"color:{_t('muted')}; font-size:10px; letter-spacing:0.5px; margin-bottom:2px;"
+)
+
 # ──────────────────────────────────────────────────────────────────────
 #  Global stylesheet
 # ──────────────────────────────────────────────────────────────────────
 GLOBAL_QSS = f"""
-/* ── base ── */
 QMainWindow, QDialog, QWidget {{
     background-color: {_t('bg_base')};
     color: {_t('txt_hi')};
@@ -74,8 +70,6 @@ QLabel {{
     color: {_t('txt_mid')};
     background: transparent;
 }}
-
-/* ── inputs ── */
 QLineEdit, QTextEdit, QComboBox {{
     background-color: {_t('bg_input')};
     border: 1px solid {_t('border')};
@@ -89,18 +83,13 @@ QLineEdit:focus, QTextEdit:focus, QComboBox:focus {{
     border-color: {_t('cyan')};
     background-color: {_t('bg_hover')};
 }}
-QComboBox::drop-down {{
-    border: none;
-    padding-right: 6px;
-}}
+QComboBox::drop-down {{ border: none; padding-right: 6px; }}
 QComboBox QAbstractItemView {{
     background: {_t('bg_card')};
     border: 1px solid {_t('border_hi')};
     color: {_t('txt_hi')};
     selection-background-color: {_t('bg_sel')};
 }}
-
-/* ── buttons ── */
 QPushButton {{
     background-color: {_t('bg_card')};
     color: {_t('txt_hi')};
@@ -114,65 +103,33 @@ QPushButton:hover {{
     border-color: {_t('cyan')};
     color: {_t('cyan')};
 }}
-QPushButton:pressed {{
-    background-color: {_t('bg_sel')};
-}}
-QPushButton:checked {{
-    background-color: {_t('bg_sel')};
-    border-color: {_t('cyan')};
-    color: {_t('cyan')};
-}}
-QPushButton:disabled {{
-    color: {_t('muted')};
-    border-color: {_t('border')};
-}}
-
-/* ── checkboxes ── */
-QCheckBox {{
-    color: {_t('txt_mid')};
-    spacing: 6px;
-}}
+QPushButton:pressed  {{ background-color: {_t('bg_sel')}; }}
+QPushButton:checked  {{ background-color: {_t('bg_sel')}; border-color: {_t('cyan')}; color: {_t('cyan')}; }}
+QPushButton:disabled {{ color: {_t('muted')}; border-color: {_t('border')}; }}
+QCheckBox {{ color: {_t('txt_mid')}; spacing: 6px; }}
 QCheckBox::indicator {{
-    width: 14px;
-    height: 14px;
+    width: 14px; height: 14px;
     border: 1px solid {_t('border')};
     border-radius: 3px;
     background: {_t('bg_input')};
 }}
-QCheckBox::indicator:checked {{
-    background: {_t('cyan')};
-    border-color: {_t('cyan')};
-}}
-
-/* ── scrollbars ── */
+QCheckBox::indicator:checked {{ background: {_t('cyan')}; border-color: {_t('cyan')}; }}
 QScrollBar:vertical {{
-    background: {_t('bg_deep')};
-    width: 8px;
-    border-radius: 4px;
+    background: {_t('bg_deep')}; width: 8px; border-radius: 4px;
 }}
 QScrollBar::handle:vertical {{
-    background: {_t('muted')};
-    border-radius: 4px;
-    min-height: 24px;
+    background: {_t('muted')}; border-radius: 4px; min-height: 24px;
 }}
-QScrollBar::handle:vertical:hover {{
-    background: {_t('cyan')};
-}}
+QScrollBar::handle:vertical:hover {{ background: {_t('cyan')}; }}
 QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{ height: 0px; }}
 QScrollBar:horizontal {{
-    background: {_t('bg_deep')};
-    height: 8px;
-    border-radius: 4px;
+    background: {_t('bg_deep')}; height: 8px; border-radius: 4px;
 }}
 QScrollBar::handle:horizontal {{
-    background: {_t('muted')};
-    border-radius: 4px;
-    min-width: 24px;
+    background: {_t('muted')}; border-radius: 4px; min-width: 24px;
 }}
 QScrollBar::handle:horizontal:hover {{ background: {_t('cyan')}; }}
 QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {{ width: 0px; }}
-
-/* ── menus ── */
 QMenu {{
     background: {_t('bg_card')};
     border: 1px solid {_t('border_hi')};
@@ -181,35 +138,12 @@ QMenu {{
     color: {_t('txt_hi')};
 }}
 QMenu::item {{ padding: 6px 20px; }}
-QMenu::item:selected {{
-    background: {_t('bg_hover')};
-    color: {_t('cyan')};
-}}
-QMenu::separator {{
-    height: 1px;
-    background: {_t('border')};
-    margin: 4px 0;
-}}
-
-/* ── splitter ── */
-QSplitter::handle {{
-    background: {_t('border')};
-}}
-QSplitter::handle:hover {{
-    background: {_t('cyan')};
-}}
-
-/* ── dialog button box ── */
-QDialogButtonBox QPushButton {{
-    min-width: 80px;
-}}
-
-/* ── text browser ── */
-QTextBrowser {{
-    background: {_t('bg_base')};
-    border: none;
-    color: {_t('txt_hi')};
-}}
+QMenu::item:selected {{ background: {_t('bg_hover')}; color: {_t('cyan')}; }}
+QMenu::separator {{ height: 1px; background: {_t('border')}; margin: 4px 0; }}
+QSplitter::handle {{ background: {_t('border')}; }}
+QSplitter::handle:hover {{ background: {_t('cyan')}; }}
+QDialogButtonBox QPushButton {{ min-width: 80px; }}
+QTextBrowser {{ background: {_t('bg_base')}; border: none; color: {_t('txt_hi')}; }}
 """
 
 
@@ -242,7 +176,7 @@ class ShortcutBuilderPopup(QDialog):
         layout.setSpacing(14)
         layout.setContentsMargins(20, 20, 20, 20)
 
-        # ── preview badge ──
+        # preview badge
         self.preview = QLabel(self._fmt_preview())
         self.preview.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.preview.setStyleSheet(f"""
@@ -254,19 +188,18 @@ class ShortcutBuilderPopup(QDialog):
                 border: 1px solid {_t('cyan')};
                 border-radius: 6px;
                 padding: 12px 16px;
-                letter-spacing: 2px;
+                letter-spacing: 1px;
             }}
         """)
         layout.addWidget(self.preview)
 
-        # ── modifier row ──
         sep = QFrame()
         sep.setFrameShape(QFrame.Shape.HLine)
         sep.setStyleSheet(f"background:{_t('border')}; max-height:1px;")
         layout.addWidget(sep)
 
         mod_lbl = QLabel("MODIFIERS")
-        mod_lbl.setStyleSheet(f"color:{_t('muted')}; font-size:10px; letter-spacing:2px;")
+        mod_lbl.setStyleSheet(_LBL_STYLE)
         layout.addWidget(mod_lbl)
 
         mod_row = QHBoxLayout()
@@ -278,10 +211,8 @@ class ShortcutBuilderPopup(QDialog):
             btn.setChecked(self.mods[sym])
             btn.setStyleSheet(f"""
                 QPushButton {{
-                    font-size: 12px;
-                    font-weight: bold;
-                    letter-spacing: 1px;
-                    padding: 8px 0;
+                    font-size: 12px; font-weight: bold;
+                    letter-spacing: 0.5px; padding: 8px 0;
                     border-radius: 4px;
                     background: {_t('bg_input')};
                     border: 1px solid {_t('border')};
@@ -292,19 +223,15 @@ class ShortcutBuilderPopup(QDialog):
                     border-color: {_t('cyan')};
                     color: {_t('cyan')};
                 }}
-                QPushButton:hover {{
-                    border-color: {_t('cyan')};
-                    color: {_t('cyan')};
-                }}
+                QPushButton:hover {{ border-color: {_t('cyan')}; color: {_t('cyan')}; }}
             """)
             btn.toggled.connect(lambda chk, s=sym: self._update_mod(s, chk))
             mod_row.addWidget(btn)
             self.mod_btns[sym] = btn
         layout.addLayout(mod_row)
 
-        # ── key selector ──
         key_lbl = QLabel("MAIN KEY")
-        key_lbl.setStyleSheet(f"color:{_t('muted')}; font-size:10px; letter-spacing:2px;")
+        key_lbl.setStyleSheet(_LBL_STYLE)
         layout.addWidget(key_lbl)
 
         self.key_search = QLineEdit()
@@ -330,9 +257,8 @@ class ShortcutBuilderPopup(QDialog):
         self.key_combo.currentTextChanged.connect(self._update_key)
         layout.addWidget(self.key_combo)
 
-        # ── quick keys ──
         quick_lbl = QLabel("QUICK KEYS")
-        quick_lbl.setStyleSheet(f"color:{_t('muted')}; font-size:10px; letter-spacing:2px;")
+        quick_lbl.setStyleSheet(_LBL_STYLE)
         layout.addWidget(quick_lbl)
 
         quick_row = QHBoxLayout()
@@ -341,12 +267,10 @@ class ShortcutBuilderPopup(QDialog):
             btn = QPushButton(k)
             btn.setStyleSheet(f"""
                 QPushButton {{
-                    font-size: 11px;
-                    padding: 5px 8px;
+                    font-size: 11px; padding: 5px 8px;
                     background: {_t('bg_card')};
                     border: 1px solid {_t('border')};
-                    border-radius: 3px;
-                    color: {_t('amber')};
+                    border-radius: 3px; color: {_t('amber')};
                 }}
                 QPushButton:hover {{
                     border-color: {_t('amber')};
@@ -357,7 +281,6 @@ class ShortcutBuilderPopup(QDialog):
             quick_row.addWidget(btn)
         layout.addLayout(quick_row)
 
-        # ── buttons ──
         bb = QDialogButtonBox(
             QDialogButtonBox.StandardButton.Ok |
             QDialogButtonBox.StandardButton.Cancel
@@ -366,7 +289,6 @@ class ShortcutBuilderPopup(QDialog):
         bb.rejected.connect(self.reject)
         layout.addWidget(bb)
 
-    # ── helpers ──
     def _update_mod(self, sym, state):
         self.mods[sym] = state
         self.preview.setText(self._fmt_preview())
@@ -425,7 +347,7 @@ class HotkeyLineEdit(QLineEdit):
 class AddEditShortcutDialog(QDialog):
     def __init__(self, parent, shortcut_type, shortcut_data=None):
         super().__init__(parent)
-        self.pw           = parent
+        self.pw            = parent
         self.shortcut_type = shortcut_type
         self.shortcut_data = shortcut_data
         verb = "Edit" if shortcut_data else "Add"
@@ -436,7 +358,6 @@ class AddEditShortcutDialog(QDialog):
         if shortcut_data:
             self._populate()
 
-    # ── ui ──
     def _build_ui(self):
         root = QVBoxLayout(self)
         root.setSpacing(0)
@@ -449,7 +370,9 @@ class AddEditShortcutDialog(QDialog):
         hdr_l = QHBoxLayout(hdr)
         hdr_l.setContentsMargins(16, 0, 16, 0)
         t_lbl = QLabel(self.windowTitle().upper())
-        t_lbl.setStyleSheet(f"color:{_t('cyan')}; font-weight:bold; letter-spacing:2px; font-size:12px;")
+        t_lbl.setStyleSheet(
+            f"color:{_t('cyan')}; font-weight:bold; letter-spacing:1px; font-size:12px;"
+        )
         hdr_l.addWidget(t_lbl)
         hdr_l.addStretch()
         root.addWidget(hdr)
@@ -468,24 +391,24 @@ class AddEditShortcutDialog(QDialog):
         form_l.setSpacing(10)
         form_l.setContentsMargins(0, 0, 0, 0)
 
-        def field_lbl(text):
+        def fl(text):
             l = QLabel(text)
-            l.setStyleSheet(f"color:{_t('muted')}; font-size:10px; letter-spacing:1px; margin-bottom:2px;")
+            l.setStyleSheet(_LBL_STYLE)
             return l
 
-        form_l.addWidget(field_lbl("NAME"))
+        form_l.addWidget(fl("NAME"))
         self.name_edit = QLineEdit()
         self.name_edit.setPlaceholderText("e.g., Open Terminal")
         form_l.addWidget(self.name_edit)
 
-        form_l.addWidget(field_lbl("CATEGORY"))
+        form_l.addWidget(fl("CATEGORY"))
         self.cat_combo = QComboBox()
         self.cat_combo.setEditable(True)
         self.cat_combo.addItems(self._get_categories())
         self.cat_combo.setCurrentText("General")
         form_l.addWidget(self.cat_combo)
 
-        form_l.addWidget(field_lbl("DESCRIPTION"))
+        form_l.addWidget(fl("DESCRIPTION"))
         self.desc_edit = QLineEdit()
         self.desc_edit.setPlaceholderText("Brief description")
         form_l.addWidget(self.desc_edit)
@@ -495,10 +418,9 @@ class AddEditShortcutDialog(QDialog):
         self.enabled_cb.setStyleSheet(f"color:{_t('green')}; font-size:12px; margin-top:4px;")
         form_l.addWidget(self.enabled_cb)
 
-        # ── type-specific left fields ──
         st = self.shortcut_type
         if st in ("script", "context"):
-            form_l.addWidget(field_lbl("HOTKEY"))
+            form_l.addWidget(fl("HOTKEY"))
             hk_row = QHBoxLayout()
             hk_row.setSpacing(6)
             self.hotkey_edit = HotkeyLineEdit()
@@ -516,13 +438,14 @@ class AddEditShortcutDialog(QDialog):
                 ("PROCESS NAME (optional)", "pn_edit", "e.g., Code.exe"),
                 ("WINDOW CLASS (optional)", "wc_edit", "e.g., CabinetWClass"),
             ]:
-                form_l.addWidget(field_lbl(lbl_txt))
-                w = QLineEdit(); w.setPlaceholderText(ph)
+                form_l.addWidget(fl(lbl_txt))
+                w = QLineEdit()
+                w.setPlaceholderText(ph)
                 setattr(self, attr, w)
                 form_l.addWidget(w)
 
         if st == "text":
-            form_l.addWidget(field_lbl("TRIGGER (without ::)"))
+            form_l.addWidget(fl("TRIGGER (without ::)"))
             self.trigger_edit = QLineEdit()
             self.trigger_edit.setPlaceholderText("e.g., ;v1, ;run")
             form_l.addWidget(self.trigger_edit)
@@ -530,20 +453,20 @@ class AddEditShortcutDialog(QDialog):
         form_l.addStretch()
         body_l.addWidget(form_w)
 
-        # ── divider ──
         div = QFrame()
         div.setFrameShape(QFrame.Shape.VLine)
         div.setStyleSheet(f"background:{_t('border')}; max-width:1px;")
         body_l.addWidget(div)
 
-        # ── right: code / text editor ──
+        # right: code editor
         code_w = QWidget()
         code_l = QVBoxLayout(code_w)
         code_l.setSpacing(8)
         code_l.setContentsMargins(0, 0, 0, 0)
 
         code_hdr = QHBoxLayout()
-        code_title = field_lbl("ACTION CODE" if st != "text" else "REPLACEMENT TEXT")
+        code_title = QLabel("ACTION CODE" if st != "text" else "REPLACEMENT TEXT")
+        code_title.setStyleSheet(_LBL_STYLE)
         code_hdr.addWidget(code_title)
         code_hdr.addStretch()
 
@@ -554,9 +477,7 @@ class AddEditShortcutDialog(QDialog):
                     background:{_t('bg_card')};
                     border:1px solid {_t('purple')};
                     color:{_t('purple')};
-                    font-size:11px;
-                    padding:3px 10px;
-                    border-radius:3px;
+                    font-size:11px; padding:3px 10px; border-radius:3px;
                 }}
                 QPushButton:hover {{
                     background:{_t('bg_hover')};
@@ -578,8 +499,7 @@ class AddEditShortcutDialog(QDialog):
                     border-radius:4px;
                     color:{_t('green')};
                     font-family:'{_t('font_ui')}','Consolas',monospace;
-                    font-size:13px;
-                    padding:8px;
+                    font-size:13px; padding:8px;
                 }}
                 QTextEdit:focus {{ border-color:{_t('cyan')}; }}
             """)
@@ -596,8 +516,7 @@ class AddEditShortcutDialog(QDialog):
                     border-radius:4px;
                     color:{_t('amber')};
                     font-family:'{_t('font_ui')}','Consolas',monospace;
-                    font-size:13px;
-                    padding:8px;
+                    font-size:13px; padding:8px;
                 }}
                 QTextEdit:focus {{ border-color:{_t('cyan')}; }}
             """)
@@ -606,7 +525,7 @@ class AddEditShortcutDialog(QDialog):
         body_l.addWidget(code_w, stretch=1)
         root.addWidget(body, stretch=1)
 
-        # ── footer / button bar ──
+        # footer
         footer = QWidget()
         footer.setFixedHeight(54)
         footer.setStyleSheet(f"background:{_t('bg_deep')}; border-top:1px solid {_t('border')};")
@@ -615,19 +534,13 @@ class AddEditShortcutDialog(QDialog):
         foot_l.addStretch()
 
         cancel_btn = QPushButton("Cancel")
-        ok_btn     = QPushButton("Save")
+        ok_btn = QPushButton("Save")
         ok_btn.setStyleSheet(f"""
             QPushButton {{
-                background:{_t('cyan')};
-                color:{_t('bg_deep')};
-                font-weight:bold;
-                border:none;
-                padding:6px 22px;
-                border-radius:4px;
+                background:{_t('cyan')}; color:{_t('bg_deep')};
+                font-weight:bold; border:none; padding:6px 22px; border-radius:4px;
             }}
-            QPushButton:hover {{
-                background:{_t('green')};
-            }}
+            QPushButton:hover {{ background:{_t('green')}; }}
         """)
         cancel_btn.clicked.connect(self.reject)
         ok_btn.clicked.connect(self._accept)
@@ -635,7 +548,6 @@ class AddEditShortcutDialog(QDialog):
         foot_l.addWidget(ok_btn)
         root.addWidget(footer)
 
-    # ── helpers ──
     def _make_rec_btn(self):
         btn = QPushButton("⌨")
         btn.setCheckable(True)
@@ -654,9 +566,7 @@ class AddEditShortcutDialog(QDialog):
                 border-color:{_t('cyan')};
                 color:{_t('cyan')};
             }}
-            QPushButton:hover {{
-                border-color:{_t('cyan')};
-            }}
+            QPushButton:hover {{ border-color:{_t('cyan')}; }}
         """)
         return btn
 
@@ -667,7 +577,7 @@ class AddEditShortcutDialog(QDialog):
             c = s.get("category", "").strip()
             if c:
                 cats.add(c)
-        base = ["System","Navigation","Text","Media","AutoHotkey","General"]
+        base = ["System", "Navigation", "Text", "Media", "AutoHotkey", "General"]
         result = [c for c in base if c in cats]
         result += sorted(cats - set(base))
         for c in base:
@@ -695,7 +605,6 @@ class AddEditShortcutDialog(QDialog):
             self.replacement_edit.setPlainText(d.get("replacement", ""))
 
     def _show_reference(self):
-        """Show README.md in a styled reference dialog."""
         dlg = QDialog(self)
         dlg.setWindowTitle("AutoHotkey Reference")
         dlg.resize(1100, 800)
@@ -703,22 +612,44 @@ class AddEditShortcutDialog(QDialog):
         dlg_l.setContentsMargins(0, 0, 0, 0)
         dlg_l.setSpacing(0)
 
-        # search bar
+        # ── search bar ──
         search_bar = QWidget()
         search_bar.setFixedHeight(46)
-        search_bar.setStyleSheet(f"background:{_t('bg_deep')}; border-bottom:1px solid {_t('border')};")
+        search_bar.setStyleSheet(
+            f"background:{_t('bg_deep')}; border-bottom:1px solid {_t('border')};"
+        )
         sb_l = QHBoxLayout(search_bar)
         sb_l.setContentsMargins(12, 0, 12, 0)
         sb_l.setSpacing(8)
+
         search_lbl = QLabel("SEARCH")
-        search_lbl.setStyleSheet(f"color:{_t('muted')}; font-size:10px; letter-spacing:2px;")
+        search_lbl.setStyleSheet(_LBL_STYLE)
         sb_l.addWidget(search_lbl)
+
+        # Explicit style so :focus border-color is never overridden by parent
         search_input = QLineEdit()
         search_input.setPlaceholderText("Find in documentation…")
+        search_input.setStyleSheet(f"""
+            QLineEdit {{
+                background: {_t('bg_input')};
+                border: 1px solid {_t('border')};
+                border-radius: 4px;
+                padding: 4px 10px;
+                color: {_t('txt_hi')};
+                font-family: '{_t('font_ui')}', 'Consolas', monospace;
+                font-size: 13px;
+            }}
+            QLineEdit:focus {{
+                border: 1px solid {_t('cyan')};
+                background: {_t('bg_hover')};
+            }}
+        """)
         sb_l.addWidget(search_input)
+
         next_btn = QPushButton("Next ↓")
         next_btn.setFixedWidth(80)
         sb_l.addWidget(next_btn)
+
         close_top = QPushButton("✕")
         close_top.setFixedWidth(34)
         close_top.clicked.connect(dlg.close)
@@ -732,11 +663,10 @@ class AddEditShortcutDialog(QDialog):
         sb_l.addWidget(close_top)
         dlg_l.addWidget(search_bar)
 
-        # content area: toc + browser
+        # ── content: toc + browser ──
         splitter = QSplitter(Qt.Orientation.Horizontal)
         splitter.setHandleWidth(1)
 
-        # toc
         toc_scroll = QScrollArea()
         toc_scroll.setWidgetResizable(True)
         toc_scroll.setStyleSheet(f"background:{_t('bg_deep')}; border:none;")
@@ -747,22 +677,22 @@ class AddEditShortcutDialog(QDialog):
         toc_vl.setSpacing(1)
         toc_vl.setAlignment(Qt.AlignmentFlag.AlignTop)
         toc_lbl = QLabel("CONTENTS")
-        toc_lbl.setStyleSheet(f"color:{_t('cyan')}; font-size:10px; letter-spacing:2px; margin-bottom:6px;")
+        toc_lbl.setStyleSheet(
+            f"color:{_t('cyan')}; font-size:10px; letter-spacing:0.5px;"
+            f" margin-bottom:6px; font-weight:bold;"
+        )
         toc_vl.addWidget(toc_lbl)
         toc_scroll.setWidget(toc_widget)
 
-        # browser
         browser = QTextBrowser()
         browser.setOpenLinks(False)
         browser.setStyleSheet(f"""
             QTextBrowser {{
                 background:{_t('bg_panel')};
                 color:{_t('txt_hi')};
-                border:none;
-                padding:20px;
+                border:none; padding:20px;
                 font-family:'{_t('font_ui')}','Consolas',monospace;
-                font-size:13px;
-                line-height:1.5;
+                font-size:13px; line-height:1.5;
             }}
         """)
 
@@ -778,8 +708,10 @@ class AddEditShortcutDialog(QDialog):
                 in_code = False
                 for line in content.splitlines():
                     if line.startswith("```"):
-                        in_code = not in_code; continue
-                    if in_code or line.strip().startswith("<"): continue
+                        in_code = not in_code
+                        continue
+                    if in_code or line.strip().startswith("<"):
+                        continue
                     m = re.match(r'^(#{1,3})\s+(.*)', line)
                     if m and 'table of contents' not in m.group(2).lower():
                         toc_entries.append((len(m.group(1)), m.group(2).strip()))
@@ -802,22 +734,15 @@ class AddEditShortcutDialog(QDialog):
             btn = QPushButton(indent + title)
             btn.setFlat(True)
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
-            c = _t('cyan') if lvl == 1 else _t('txt_mid')
-            fw = 'bold' if lvl == 1 else 'normal'
+            c   = _t('cyan') if lvl == 1 else _t('txt_mid')
+            fw  = 'bold' if lvl == 1 else 'normal'
             btn.setStyleSheet(f"""
                 QPushButton {{
-                    text-align:left;
-                    color:{c}; font-weight:{fw};
-                    font-size:12px;
-                    padding:3px 6px;
-                    border:none;
-                    background:transparent;
-                    border-radius:3px;
+                    text-align:left; color:{c}; font-weight:{fw};
+                    font-size:12px; padding:3px 6px;
+                    border:none; background:transparent; border-radius:3px;
                 }}
-                QPushButton:hover {{
-                    color:{_t('txt_hi')};
-                    background:{_t('bg_hover')};
-                }}
+                QPushButton:hover {{ color:{_t('txt_hi')}; background:{_t('bg_hover')}; }}
             """)
             btn.clicked.connect(make_jump(title))
             toc_vl.addWidget(btn)
@@ -830,10 +755,10 @@ class AddEditShortcutDialog(QDialog):
         splitter.setStretchFactor(1, 1)
         dlg_l.addWidget(splitter, stretch=1)
 
-        # search wiring
         def do_search():
             txt = search_input.text()
-            if not txt: return
+            if not txt:
+                return
             found = browser.find(txt)
             if not found:
                 c = browser.textCursor()
@@ -862,7 +787,8 @@ class AddEditShortcutDialog(QDialog):
             if not hk or not act:
                 QMessageBox.warning(self, "Required", "Hotkey and action are required.")
                 return
-            new = {"name":name,"category":cat,"description":desc,"hotkey":hk,"action":act,"enabled":ena}
+            new = {"name": name, "category": cat, "description": desc,
+                   "hotkey": hk, "action": act, "enabled": ena}
 
         elif st == "context":
             hk  = self.hotkey_edit.text().strip()
@@ -876,25 +802,26 @@ class AddEditShortcutDialog(QDialog):
             if not wt and not pn and not wc:
                 QMessageBox.warning(self, "Required", "At least one context field is required.")
                 return
-            new = {"name":name,"category":cat,"description":desc,
-                   "hotkey":hk,"window_title":wt,"process_name":pn,
-                   "window_class":wc,"action":act,"enabled":ena}
+            new = {"name": name, "category": cat, "description": desc,
+                   "hotkey": hk, "window_title": wt, "process_name": pn,
+                   "window_class": wc, "action": act, "enabled": ena}
 
         elif st == "startup":
             act = self.action_edit.toPlainText().strip()
             if not act:
                 QMessageBox.warning(self, "Required", "Action code is required.")
                 return
-            new = {"name":name,"category":cat,"description":desc,"action":act,"enabled":ena}
+            new = {"name": name, "category": cat, "description": desc,
+                   "action": act, "enabled": ena}
 
-        else:  # text
+        else:
             trig = self.trigger_edit.text().strip()
             repl = self.replacement_edit.toPlainText().strip()
             if not trig or not repl:
                 QMessageBox.warning(self, "Required", "Trigger and replacement are required.")
                 return
-            new = {"name":name,"category":cat,"description":desc,
-                   "trigger":trig,"replacement":repl,"enabled":ena}
+            new = {"name": name, "category": cat, "description": desc,
+                   "trigger": trig, "replacement": repl, "enabled": ena}
 
         if self.shortcut_data:
             self.shortcut_data.update(new)
@@ -928,7 +855,9 @@ class CategoryColorDialog(QDialog):
         l = QVBoxLayout(self)
         l.setSpacing(12)
         lbl = QLabel("CATEGORY COLORS")
-        lbl.setStyleSheet(f"color:{_t('cyan')}; font-size:11px; letter-spacing:2px; font-weight:bold;")
+        lbl.setStyleSheet(
+            f"color:{_t('cyan')}; font-size:11px; letter-spacing:0.5px; font-weight:bold;"
+        )
         l.addWidget(lbl)
 
         scroll = QScrollArea()
@@ -940,7 +869,8 @@ class CategoryColorDialog(QDialog):
         all_cats = set(self.pw.category_colors.keys())
         for s in (self.pw.script_shortcuts + self.pw.text_shortcuts + self.pw.context_shortcuts):
             c = s.get("category", "General")
-            if c: all_cats.add(c)
+            if c:
+                all_cats.add(c)
 
         self.color_edits = {}
         for cat in sorted(all_cats):
@@ -954,7 +884,9 @@ class CategoryColorDialog(QDialog):
             row.addWidget(ce)
             swatch = QLabel("  ")
             swatch.setFixedSize(24, 24)
-            swatch.setStyleSheet(f"background:{self.pw.get_category_color(cat)}; border-radius:3px;")
+            swatch.setStyleSheet(
+                f"background:{self.pw.get_category_color(cat)}; border-radius:3px;"
+            )
             row.addWidget(swatch)
             row.addStretch()
             inner_l.addLayout(row)
@@ -964,8 +896,10 @@ class CategoryColorDialog(QDialog):
         l.addWidget(scroll, stretch=1)
 
         btn_row = QHBoxLayout()
-        save_btn = QPushButton("Save")
-        save_btn.setStyleSheet(f"background:{_t('cyan')}; color:{_t('bg_deep')}; font-weight:bold; border:none;")
+        save_btn  = QPushButton("Save")
+        save_btn.setStyleSheet(
+            f"background:{_t('cyan')}; color:{_t('bg_deep')}; font-weight:bold; border:none;"
+        )
         save_btn.clicked.connect(self._save)
         reset_btn = QPushButton("Reset Defaults")
         reset_btn.clicked.connect(self._reset)
@@ -1009,7 +943,7 @@ class SettingsDialog(QDialog):
         l.setSpacing(14)
 
         lbl = QLabel("APPLICATION FONT")
-        lbl.setStyleSheet(f"color:{_t('muted')}; font-size:10px; letter-spacing:2px;")
+        lbl.setStyleSheet(_LBL_STYLE)
         l.addWidget(lbl)
 
         self.font_combo = QFontComboBox()
@@ -1023,7 +957,10 @@ class SettingsDialog(QDialog):
         row = QHBoxLayout()
         row.addStretch()
         save_btn = QPushButton("Apply")
-        save_btn.setStyleSheet(f"background:{_t('cyan')}; color:{_t('bg_deep')}; font-weight:bold; border:none; padding:6px 18px;")
+        save_btn.setStyleSheet(
+            f"background:{_t('cyan')}; color:{_t('bg_deep')}; font-weight:bold;"
+            f" border:none; padding:6px 18px;"
+        )
         save_btn.clicked.connect(self._save)
         close_btn = QPushButton("Close")
         close_btn.clicked.connect(self.close)
@@ -1054,7 +991,7 @@ class AHKShortcutEditor(QMainWindow):
             "Media": "#00ff9d", "AutoHotkey": "#ffb800", "General": "#b06cff",
             "Imported": "#ff7f50", "Tools": "#98d8c8", "Window": "#f7dc6f", "File": "#bb8fce"
         }
-        self.settings         = QSettings("AHKEditor", "ShortcutEditor")
+        self.settings          = QSettings("AHKEditor", "ShortcutEditor")
         self.selected_shortcut = None
         self.selected_type     = None
 
@@ -1064,7 +1001,6 @@ class AHKShortcutEditor(QMainWindow):
         self.apply_global_font()
         self.update_display()
 
-    # ══ UI BUILD ══════════════════════════════════════════════════════
     def _build_ui(self):
         self.setWindowTitle("AutoHotkey Script Editor")
         self.setGeometry(80, 80, 1340, 820)
@@ -1076,16 +1012,12 @@ class AHKShortcutEditor(QMainWindow):
         root.setContentsMargins(0, 0, 0, 0)
         root.setSpacing(0)
 
-        # ── title bar ──
+        # title bar
         title_bar = QWidget()
         title_bar.setFixedHeight(48)
         title_bar.setStyleSheet(f"""
-            background: qlineargradient(
-                x1:0, y1:0, x2:1, y2:0,
-                stop:0 {_t('bg_deep')},
-                stop:0.5 #0d1622,
-                stop:1 {_t('bg_deep')}
-            );
+            background: qlineargradient(x1:0,y1:0,x2:1,y2:0,
+                stop:0 {_t('bg_deep')}, stop:0.5 #0d1622, stop:1 {_t('bg_deep')});
             border-bottom: 1px solid {_t('border')};
         """)
         tb_l = QHBoxLayout(title_bar)
@@ -1097,12 +1029,9 @@ class AHKShortcutEditor(QMainWindow):
         tb_l.addWidget(logo)
 
         title_lbl = QLabel("AHK SCRIPT EDITOR")
-        title_lbl.setStyleSheet(f"""
-            color: {_t('cyan')};
-            font-size: 13px;
-            font-weight: bold;
-            letter-spacing: 3px;
-        """)
+        title_lbl.setStyleSheet(
+            f"color:{_t('cyan')}; font-size:13px; font-weight:bold; letter-spacing:2px;"
+        )
         tb_l.addWidget(title_lbl)
 
         sep_v = QFrame()
@@ -1110,22 +1039,14 @@ class AHKShortcutEditor(QMainWindow):
         sep_v.setStyleSheet(f"background:{_t('border')}; max-width:1px; margin:10px 0;")
         tb_l.addWidget(sep_v)
 
-        # ── add button ──
         self.add_btn = QPushButton("＋  ADD")
         self.add_btn.setStyleSheet(f"""
             QPushButton {{
-                background:{_t('cyan')};
-                color:{_t('bg_deep')};
-                font-weight:bold;
-                font-size:12px;
-                letter-spacing:1px;
-                border:none;
-                padding:5px 16px;
-                border-radius:4px;
+                background:{_t('cyan')}; color:{_t('bg_deep')};
+                font-weight:bold; font-size:12px; letter-spacing:0.5px;
+                border:none; padding:5px 16px; border-radius:4px;
             }}
-            QPushButton:hover {{
-                background:{_t('green')};
-            }}
+            QPushButton:hover {{ background:{_t('green')}; }}
             QPushButton::menu-indicator {{ image: none; }}
         """)
         add_menu = QMenu(self)
@@ -1139,69 +1060,48 @@ class AHKShortcutEditor(QMainWindow):
         self.add_btn.setMenu(add_menu)
         tb_l.addWidget(self.add_btn)
 
-        # ── category toggle ──
         self.cat_toggle = QCheckBox("GROUP")
         self.cat_toggle.setChecked(True)
         self.cat_toggle.toggled.connect(self._on_cat_toggle)
         self.cat_toggle.setStyleSheet(f"""
             QCheckBox {{
-                color:{_t('cyan')};
-                font-size:11px;
-                letter-spacing:1px;
+                color:{_t('cyan')}; font-size:11px; letter-spacing:0.5px;
             }}
             QCheckBox::indicator {{
                 width:16px; height:16px;
-                border:1px solid {_t('cyan')};
-                border-radius:3px;
+                border:1px solid {_t('cyan')}; border-radius:3px;
                 background:{_t('bg_input')};
             }}
-            QCheckBox::indicator:checked {{
-                background:{_t('cyan')};
-            }}
+            QCheckBox::indicator:checked {{ background:{_t('cyan')}; }}
         """)
         tb_l.addWidget(self.cat_toggle)
 
-        # ── colors ──
         colors_btn = QPushButton("🎨 Colors")
         colors_btn.setStyleSheet(f"""
             QPushButton {{
-                background:{_t('bg_card')};
-                border:1px solid {_t('purple')};
-                color:{_t('purple')};
-                font-size:12px;
-                padding:4px 12px;
-                border-radius:4px;
+                background:{_t('bg_card')}; border:1px solid {_t('purple')};
+                color:{_t('purple')}; font-size:12px; padding:4px 12px; border-radius:4px;
             }}
             QPushButton:hover {{
-                background:{_t('bg_hover')};
-                color:{_t('txt_hi')};
-                border-color:{_t('txt_hi')};
+                background:{_t('bg_hover')}; color:{_t('txt_hi')}; border-color:{_t('txt_hi')};
             }}
         """)
         colors_btn.clicked.connect(self.open_color_dialog)
         tb_l.addWidget(colors_btn)
 
-        # ── settings ──
         settings_btn = QPushButton("⚙")
         settings_btn.setFixedWidth(34)
         settings_btn.setToolTip("Settings")
         settings_btn.setStyleSheet(f"""
             QPushButton {{
-                background:{_t('bg_card')};
-                border:1px solid {_t('border')};
-                color:{_t('txt_mid')};
-                font-size:16px;
-                border-radius:4px;
+                background:{_t('bg_card')}; border:1px solid {_t('border')};
+                color:{_t('txt_mid')}; font-size:16px; border-radius:4px;
             }}
-            QPushButton:hover {{
-                border-color:{_t('cyan')};
-                color:{_t('cyan')};
-            }}
+            QPushButton:hover {{ border-color:{_t('cyan')}; color:{_t('cyan')}; }}
         """)
         settings_btn.clicked.connect(lambda: SettingsDialog(self).exec())
         tb_l.addWidget(settings_btn)
 
-        # ── search ──
         tb_l.addSpacing(8)
         self.search_edit = HotkeyLineEdit()
         self.search_edit.setPlaceholderText("⌕  Filter shortcuts…")
@@ -1210,16 +1110,11 @@ class AHKShortcutEditor(QMainWindow):
         self.search_edit.setFixedHeight(30)
         self.search_edit.setStyleSheet(f"""
             QLineEdit {{
-                background:{_t('bg_deep')};
-                border:1px solid {_t('border')};
-                border-radius:15px;
-                padding:0 14px;
-                color:{_t('txt_hi')};
-                font-size:13px;
+                background:{_t('bg_deep')}; border:1px solid {_t('border')};
+                border-radius:15px; padding:0 14px; color:{_t('txt_hi')}; font-size:13px;
             }}
             QLineEdit:focus {{
-                border-color:{_t('cyan')};
-                background:{_t('bg_input')};
+                border-color:{_t('cyan')}; background:{_t('bg_input')};
             }}
         """)
 
@@ -1228,16 +1123,11 @@ class AHKShortcutEditor(QMainWindow):
         self.rec_search_btn.setFixedSize(30, 30)
         self.rec_search_btn.setStyleSheet(f"""
             QPushButton {{
-                font-size:15px;
-                background:{_t('bg_deep')};
-                border:1px solid {_t('border')};
-                border-radius:15px;
-                color:{_t('txt_dim')};
+                font-size:15px; background:{_t('bg_deep')};
+                border:1px solid {_t('border')}; border-radius:15px; color:{_t('txt_dim')};
             }}
             QPushButton:checked {{
-                background:{_t('bg_sel')};
-                border-color:{_t('cyan')};
-                color:{_t('cyan')};
+                background:{_t('bg_sel')}; border-color:{_t('cyan')}; color:{_t('cyan')};
             }}
             QPushButton:hover {{ border-color:{_t('cyan')}; }}
         """)
@@ -1247,19 +1137,13 @@ class AHKShortcutEditor(QMainWindow):
         tb_l.addWidget(self.rec_search_btn)
         tb_l.addSpacing(8)
 
-        # ── generate ──
         gen_btn = QPushButton("🚀  GENERATE")
         gen_btn.setStyleSheet(f"""
             QPushButton {{
                 background: qlineargradient(x1:0,y1:0,x2:1,y2:0,
                     stop:0 #005fa3, stop:1 #0080cc);
-                color: white;
-                font-weight:bold;
-                font-size:12px;
-                letter-spacing:1px;
-                border:none;
-                padding:5px 16px;
-                border-radius:4px;
+                color:white; font-weight:bold; font-size:12px; letter-spacing:0.5px;
+                border:none; padding:5px 16px; border-radius:4px;
             }}
             QPushButton:hover {{
                 background: qlineargradient(x1:0,y1:0,x2:1,y2:0,
@@ -1270,7 +1154,6 @@ class AHKShortcutEditor(QMainWindow):
         tb_l.addWidget(gen_btn)
         root.addWidget(title_bar)
 
-        # ── text browser ──
         self.browser = QTextBrowser()
         self.browser.setOpenExternalLinks(False)
         self.browser.anchorClicked.connect(self._handle_click)
@@ -1279,19 +1162,14 @@ class AHKShortcutEditor(QMainWindow):
         self.browser.viewport().installEventFilter(self)
         root.addWidget(self.browser, stretch=1)
 
-        # ── status bar ──
         self.statusBar().setStyleSheet(f"""
             QStatusBar {{
-                background:{_t('bg_deep')};
-                border-top:1px solid {_t('border')};
-                color:{_t('txt_dim')};
-                font-size:11px;
-                padding:0 10px;
+                background:{_t('bg_deep')}; border-top:1px solid {_t('border')};
+                color:{_t('txt_dim')}; font-size:11px; padding:0 10px;
             }}
         """)
 
-        # right-click menu
-        self.ctx_menu = QMenu(self)
+        self.ctx_menu  = QMenu(self)
         self.act_edit  = self.ctx_menu.addAction("✏  Edit")
         self.act_dupe  = self.ctx_menu.addAction("⧉  Duplicate")
         self.ctx_menu.addSeparator()
@@ -1300,13 +1178,11 @@ class AHKShortcutEditor(QMainWindow):
         self.act_dupe.triggered.connect(self.duplicate_selected)
         self.act_del.triggered.connect(self.remove_selected)
 
-    # ══ FONT ══════════════════════════════════════════════════════════
     def apply_global_font(self):
         QApplication.instance().setFont(QFont(self.app_font_family, _t('font_size')))
         if hasattr(self, 'browser'):
             self.update_display()
 
-    # ══ SETTINGS ══════════════════════════════════════════════════════
     def _load_settings(self):
         self.cat_toggle.setChecked(self.settings.value("group_by_category", True, type=bool))
 
@@ -1321,7 +1197,6 @@ class AHKShortcutEditor(QMainWindow):
         self._save_settings()
         event.accept()
 
-    # ══ DATA I/O ══════════════════════════════════════════════════════
     def load_shortcuts_json(self):
         if os.path.exists(SHORTCUTS_JSON_PATH):
             try:
@@ -1346,7 +1221,8 @@ class AHKShortcutEditor(QMainWindow):
             "action": 'RunWait("pwsh -Command `"Start-Process pwsh -Verb RunAs`"",,"Hide")'
         }]
         self.text_shortcuts = [
-            {"name": "AHK v2 Header", "category": "AutoHotkey", "description": "v2 require line",
+            {"name": "AHK v2 Header", "category": "AutoHotkey",
+             "description": "v2 require line",
              "trigger": ";v2", "replacement": "#Requires AutoHotkey v2.0", "enabled": True},
         ]
 
@@ -1366,7 +1242,6 @@ class AHKShortcutEditor(QMainWindow):
     def get_category_color(self, cat):
         return self.category_colors.get(cat, "#7070a0")
 
-    # ══ DISPLAY ═══════════════════════════════════════════════════════
     def update_display(self):
         sb  = self.browser.verticalScrollBar()
         pos = sb.value()
@@ -1374,12 +1249,12 @@ class AHKShortcutEditor(QMainWindow):
         grp = self.cat_toggle.isChecked()
 
         def filt(lst, keys):
-            return [s for s in lst if q in " ".join(s.get(k,"") for k in keys).lower()]
+            return [s for s in lst if q in " ".join(s.get(k, "") for k in keys).lower()]
 
-        fs = filt(self.script_shortcuts,  ["name","hotkey","description","category"])
-        ft = filt(self.text_shortcuts,    ["name","trigger","description","category"])
-        fc = filt(self.context_shortcuts, ["name","hotkey","description","category","window_title"])
-        fu = filt(self.startup_scripts,   ["name","description","category"])
+        fs = filt(self.script_shortcuts,  ["name", "hotkey", "description", "category"])
+        ft = filt(self.text_shortcuts,    ["name", "trigger", "description", "category"])
+        fc = filt(self.context_shortcuts, ["name", "hotkey", "description", "category", "window_title"])
+        fu = filt(self.startup_scripts,   ["name", "description", "category"])
 
         self.browser.setHtml(self._gen_html(fs, ft, fc, fu, grp))
         sb.setValue(pos)
@@ -1393,55 +1268,38 @@ class AHKShortcutEditor(QMainWindow):
         * {{ box-sizing:border-box; margin:0; padding:0; }}
         body {{
             font-family:'{f}','Consolas',monospace;
-            background:{c('bg_base')};
-            color:{c('txt_hi')};
-            font-size:14px;
-            padding:10px 14px;
+            background:{c('bg_base')}; color:{c('txt_hi')};
+            font-size:14px; padding:10px 14px;
         }}
         .grid {{ display:flex; gap:14px; align-items:flex-start; }}
-        .col {{ flex:1; min-width:0; }}
+        .col  {{ flex:1; min-width:0; }}
         .sec-hdr {{
-            font-size:11px;
-            font-weight:bold;
-            letter-spacing:3px;
-            color:{c('cyan')};
-            padding:6px 10px 4px 10px;
-            margin-bottom:4px;
-            border-bottom:1px solid {c('border')};
+            font-size:11px; font-weight:bold; letter-spacing:1px;
+            color:{c('cyan')}; padding:6px 10px 4px 10px;
+            margin-bottom:4px; border-bottom:1px solid {c('border')};
             text-transform:uppercase;
         }}
         .cat-hdr {{
-            font-size:11px;
-            letter-spacing:1px;
-            font-weight:bold;
-            padding:8px 10px 3px 10px;
-            margin-top:6px;
-            color:#888;
+            font-size:11px; letter-spacing:0.5px; font-weight:bold;
+            padding:8px 10px 3px 10px; margin-top:6px; color:#888;
         }}
         .item {{
-            display:flex;
-            align-items:center;
-            padding:4px 8px;
-            border-radius:4px;
-            border-left:2px solid transparent;
-            margin:1px 0;
-            cursor:pointer;
+            display:flex; align-items:center;
+            padding:4px 8px; border-radius:4px;
+            border-left:2px solid transparent; margin:1px 0; cursor:pointer;
         }}
         .item:hover {{ background:{c('bg_hover')}; border-left-color:{c('cyan')}; }}
-        .item.sel {{ background:{c('bg_sel')}; border-left-color:{c('cyan')}; }}
-        .item.dis {{ opacity:0.45; }}
-        .tog {{ width:22px; flex-shrink:0; text-align:center; font-size:13px; }}
-        .key {{
-            font-weight:bold;
-            color:{c('amber')};
-            white-space:nowrap;
-            padding-right:10px;
-            min-width:120px;
-            font-size:13px;
+        .item.sel   {{ background:{c('bg_sel')};   border-left-color:{c('cyan')}; }}
+        .item.dis   {{ opacity:0.45; }}
+        .tog  {{ width:22px; flex-shrink:0; text-align:center; font-size:13px; }}
+        .key  {{
+            font-weight:bold; color:{c('amber')};
+            white-space:nowrap; padding-right:10px;
+            min-width:120px; font-size:13px;
         }}
         .arrow {{ color:{c('green')}; padding:0 6px; font-size:15px; font-weight:bold; }}
-        .nm {{ color:{c('txt_hi')}; font-size:13px; }}
-        .dsc {{ color:{c('txt_dim')}; font-size:11px; margin-left:6px; }}
+        .nm   {{ color:{c('txt_hi')}; font-size:13px; }}
+        .dsc  {{ color:{c('txt_dim')}; font-size:11px; margin-left:6px; }}
         a {{ text-decoration:none; color:inherit; display:contents; }}
         </style></head><body><div class="grid">
         """
@@ -1452,7 +1310,7 @@ class AHKShortcutEditor(QMainWindow):
         def col_close():
             return '</div>'
 
-        def item_html(s, stype, idx, indented):
+        def item_html(s, stype, idx, _indented):
             enabled = s.get("enabled", True)
             is_sel  = (self.selected_shortcut is s and self.selected_type == stype)
             cls     = "item" + (" sel" if is_sel else "") + ("" if enabled else " dis")
@@ -1472,10 +1330,12 @@ class AHKShortcutEditor(QMainWindow):
             else:
                 key = s.get("trigger", "")
 
-            nm   = s.get("name","Unnamed")
-            desc = s.get("description","")
-            dsc_html = f'<span class="dsc">({desc[:28]}{"…" if len(desc)>28 else ""})</span>' if desc else ""
-
+            nm   = s.get("name", "Unnamed")
+            desc = s.get("description", "")
+            dsc_html = (
+                f'<span class="dsc">({desc[:28]}{"…" if len(desc)>28 else ""})</span>'
+                if desc else ""
+            )
             return f"""
             <div class="{cls}" style="{bg}">
                 <a href="toggle://{stype}/{idx}">
@@ -1490,37 +1350,34 @@ class AHKShortcutEditor(QMainWindow):
             </div>"""
 
         def render_section(items_list, master_list, stype, sort_key):
-            items = sorted(items_list, key=lambda x: x.get(sort_key,"").lower())
-            html_out = ""
+            items = sorted(items_list, key=lambda x: x.get(sort_key, "").lower())
+            out = ""
             if grouped:
                 cats = {}
                 for s in items:
-                    cats.setdefault(s.get("category","General"), []).append(s)
+                    cats.setdefault(s.get("category", "General"), []).append(s)
                 for cat in sorted(cats):
                     color = self.get_category_color(cat)
-                    html_out += f'<div class="cat-hdr" style="color:{color}">▸ {cat}</div>'
-                    for s in sorted(cats[cat], key=lambda x: x.get(sort_key,"").lower()):
+                    out += f'<div class="cat-hdr" style="color:{color}">▸ {cat}</div>'
+                    for s in sorted(cats[cat], key=lambda x: x.get(sort_key, "").lower()):
                         idx = master_list.index(s)
-                        html_out += item_html(s, stype, idx, True)
+                        out += item_html(s, stype, idx, True)
             else:
                 for s in items:
                     idx = master_list.index(s)
-                    html_out += item_html(s, stype, idx, False)
-            return html_out
+                    out += item_html(s, stype, idx, False)
+            return out
 
-        # col 1: Script shortcuts
         html += col_open("Script Shortcuts")
         html += render_section(scripts, self.script_shortcuts, "script", "hotkey")
         html += col_close()
 
-        # col 2: Context + Background
         html += col_open("Context Shortcuts")
         html += render_section(contexts, self.context_shortcuts, "context", "hotkey")
         html += '<div class="sec-hdr" style="margin-top:16px;">Background Scripts</div>'
         html += render_section(startups, self.startup_scripts, "startup", "name")
         html += col_close()
 
-        # col 3: Text shortcuts
         html += col_open("Text Shortcuts")
         html += render_section(texts, self.text_shortcuts, "text", "trigger")
         html += col_close()
@@ -1528,27 +1385,33 @@ class AHKShortcutEditor(QMainWindow):
         html += "</div></body></html>"
         return html
 
-    # ══ INTERACTION ═══════════════════════════════════════════════════
     def _handle_click(self, url):
         s = url.toString()
-
         if s.startswith("select://"):
-            parts = s.replace("select://","").split("/")
+            parts = s.replace("select://", "").split("/")
             if len(parts) == 2:
                 stype, idx = parts[0], int(parts[1])
-                lst = {"script":self.script_shortcuts,"text":self.text_shortcuts,
-                       "context":self.context_shortcuts,"startup":self.startup_scripts}.get(stype,[])
+                lst = {
+                    "script":  self.script_shortcuts,
+                    "text":    self.text_shortcuts,
+                    "context": self.context_shortcuts,
+                    "startup": self.startup_scripts,
+                }.get(stype, [])
                 if idx < len(lst):
                     self.selected_shortcut = lst[idx]
                     self.selected_type     = stype
             self.update_display()
 
         elif s.startswith("toggle://"):
-            parts = s.replace("toggle://","").split("/")
+            parts = s.replace("toggle://", "").split("/")
             if len(parts) == 2:
                 stype, idx = parts[0], int(parts[1])
-                lst = {"script":self.script_shortcuts,"text":self.text_shortcuts,
-                       "context":self.context_shortcuts,"startup":self.startup_scripts}.get(stype,[])
+                lst = {
+                    "script":  self.script_shortcuts,
+                    "text":    self.text_shortcuts,
+                    "context": self.context_shortcuts,
+                    "startup": self.startup_scripts,
+                }.get(stype, [])
                 if idx < len(lst):
                     lst[idx]["enabled"] = not lst[idx].get("enabled", True)
             self.save_shortcuts_json()
@@ -1569,7 +1432,6 @@ class AHKShortcutEditor(QMainWindow):
             return True
         return super().eventFilter(obj, event)
 
-    # ══ ACTIONS ═══════════════════════════════════════════════════════
     def open_add_dialog(self, stype):
         AddEditShortcutDialog(self, stype).exec()
 
@@ -1584,34 +1446,40 @@ class AHKShortcutEditor(QMainWindow):
             QMessageBox.warning(self, "No Selection", "Click a shortcut first.")
             return
         duped = copy.deepcopy(self.selected_shortcut)
-        orig  = duped.get("name","Unnamed")
+        orig  = duped.get("name", "Unnamed")
         duped["name"] = f"{orig} (Copy)"
-        if self.selected_type in ("script","context"):
+        if self.selected_type in ("script", "context"):
             duped["hotkey"] = ""
         elif self.selected_type == "text":
             duped["trigger"] = ""
         lst_map = {
-            "script": self.script_shortcuts, "context": self.context_shortcuts,
-            "startup": self.startup_scripts, "text": self.text_shortcuts
+            "script":  self.script_shortcuts,
+            "context": self.context_shortcuts,
+            "startup": self.startup_scripts,
+            "text":    self.text_shortcuts,
         }
         lst_map[self.selected_type].append(duped)
         self.selected_shortcut = duped
         self.save_shortcuts_json()
         self.update_display()
         QMessageBox.information(self, "Duplicated",
-            f"'{orig}' copied as '{duped['name']}'.\nEdit the duplicate to set a unique hotkey/trigger.")
+            f"'{orig}' copied as '{duped['name']}'.\n"
+            "Edit the duplicate to set a unique hotkey/trigger.")
 
     def remove_selected(self):
         if not self.selected_shortcut:
             QMessageBox.warning(self, "No Selection", "Click a shortcut first.")
             return
-        if QMessageBox.question(self,"Confirm Remove",
-            f"Remove '{self.selected_shortcut.get('name','?')}'?",
+        if QMessageBox.question(
+            self, "Confirm Remove",
+            f"Remove '{self.selected_shortcut.get('name', '?')}'?",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
         ) == QMessageBox.StandardButton.Yes:
             lst_map = {
-                "script": self.script_shortcuts, "context": self.context_shortcuts,
-                "startup": self.startup_scripts, "text": self.text_shortcuts
+                "script":  self.script_shortcuts,
+                "context": self.context_shortcuts,
+                "startup": self.startup_scripts,
+                "text":    self.text_shortcuts,
             }
             lst_map[self.selected_type].remove(self.selected_shortcut)
             self.selected_shortcut = None
@@ -1622,7 +1490,6 @@ class AHKShortcutEditor(QMainWindow):
     def open_color_dialog(self):
         CategoryColorDialog(self).exec()
 
-    # ══ AHK GENERATOR ════════════════════════════════════════════════
     def generate_ahk_script(self):
         try:
             lines = [
@@ -1642,40 +1509,39 @@ class AHKShortcutEditor(QMainWindow):
             def clean(action):
                 return action.replace(',,,', ',,')
 
-            # Startup
             enabled_su = [s for s in self.startup_scripts if s.get("enabled", True)]
             if enabled_su:
                 lines.append(";! === BACKGROUND / STARTUP SCRIPTS ===")
                 for s in enabled_su:
-                    lines += [f";! {s.get('name','')}", clean(s.get("action","")), ""]
+                    lines += [f";! {s.get('name', '')}", clean(s.get("action", "")), ""]
 
-            # Script shortcuts
             enabled_sc = [s for s in self.script_shortcuts if s.get("enabled", True)]
             if enabled_sc:
                 lines.append(";! === SCRIPT SHORTCUTS ===")
                 for s in enabled_sc:
-                    lines.append(f";! {s.get('name','')}")
-                    if s.get('description'): lines.append(f";! {s['description']}")
-                    hk  = s.get("hotkey","")
-                    act = clean(s.get("action",""))
+                    lines.append(f";! {s.get('name', '')}")
+                    if s.get('description'):
+                        lines.append(f";! {s['description']}")
+                    hk  = s.get("hotkey", "")
+                    act = clean(s.get("action", ""))
                     if '\n' in act:
                         lines.append(f"{hk}:: {{")
                         for ln in act.split('\n'):
-                            if ln.strip(): lines.append(f"    {ln}")
+                            if ln.strip():
+                                lines.append(f"    {ln}")
                         lines.append("}")
                     else:
                         lines.append(f"{hk}::{act}")
                     lines.append("")
 
-            # Context shortcuts
             enabled_cx = [s for s in self.context_shortcuts if s.get("enabled", True)]
             if enabled_cx:
                 lines.append(";! === CONTEXT SHORTCUTS ===")
                 for s in enabled_cx:
-                    lines.append(f";! {s.get('name','')}")
-                    wt = s.get("window_title","")
-                    pn = s.get("process_name","")
-                    wc = s.get("window_class","")
+                    lines.append(f";! {s.get('name', '')}")
+                    wt = s.get("window_title", "")
+                    pn = s.get("process_name", "")
+                    wc = s.get("window_class", "")
                     fn = f"Is{''.join(w.capitalize() for w in s.get('name','Context').split())}Ctx"
                     conds = []
                     if pn: conds.append(f'processName = "{pn}"')
@@ -1686,36 +1552,39 @@ class AHKShortcutEditor(QMainWindow):
                     if pn: lines.append('        processName := WinGetProcessName("A")')
                     if wt: lines.append('        windowTitle := WinGetTitle("A")')
                     if wc: lines.append('        windowClass := WinGetClass("A")')
-                    lines += [f"        if ({cond}) {{","            return true","        }","    }","    return false","}", ""]
+                    lines += [
+                        f"        if ({cond}) {{", "            return true",
+                        "        }", "    }", "    return false", "}", ""
+                    ]
                     lines.append(f"#HotIf {fn}()")
-                    act = clean(s.get("action",""))
-                    hk  = s.get("hotkey","")
+                    act = clean(s.get("action", ""))
+                    hk  = s.get("hotkey", "")
                     if '\n' in act:
                         lines.append(f"{hk}:: {{")
                         for ln in act.split('\n'):
-                            if ln.strip(): lines.append(f"    {ln}")
-                        lines += ["}",""]
+                            if ln.strip():
+                                lines.append(f"    {ln}")
+                        lines += ["}", ""]
                     else:
-                        lines += [f"{hk}::{act}",""]
-                    lines += ["#HotIf",""]
+                        lines += [f"{hk}::{act}", ""]
+                    lines += ["#HotIf", ""]
 
-            # Text shortcuts
             enabled_tx = [s for s in self.text_shortcuts if s.get("enabled", True)]
             if enabled_tx:
                 lines.append(";! === TEXT SHORTCUTS ===")
                 for s in enabled_tx:
-                    lines.append(f";! {s.get('name','')}")
-                    trig = s.get("trigger","")
-                    repl = s.get("replacement","")
+                    lines.append(f";! {s.get('name', '')}")
+                    trig = s.get("trigger", "")
+                    repl = s.get("replacement", "")
                     if '\n' in repl:
-                        safe = repl.replace('"','""')
+                        safe = repl.replace('"', '""')
                         lines.append(f':X:{trig}::Paste("')
                         lines.append("(")
                         for ln in safe.split('\n'):
                             lines.append("`" + ln if ln.strip().startswith(")") else ln)
                         lines += [')")', ""]
                     else:
-                        safe = repl.replace("'","''")
+                        safe = repl.replace("'", "''")
                         lines += [f":X:{trig}::Paste('{safe}')", ""]
 
             out = os.path.join(SCRIPT_DIR, "generated_shortcuts.ahk")
@@ -1734,10 +1603,8 @@ def main():
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
 
-    # Dark Fusion palette to prevent white flash before QSS kicks in
     pal = QPalette()
-    dark = QColor(_t('bg_base'))
-    pal.setColor(QPalette.ColorRole.Window,          dark)
+    pal.setColor(QPalette.ColorRole.Window,          QColor(_t('bg_base')))
     pal.setColor(QPalette.ColorRole.WindowText,      QColor(_t('txt_hi')))
     pal.setColor(QPalette.ColorRole.Base,            QColor(_t('bg_input')))
     pal.setColor(QPalette.ColorRole.AlternateBase,   QColor(_t('bg_panel')))
