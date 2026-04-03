@@ -4,7 +4,7 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QH
                              QLabel, QPushButton, QTreeWidget, QTreeWidgetItem, QHeaderView,
                              QGroupBox, QDialog, QSpinBox, QFormLayout, QScrollArea, QComboBox, QLineEdit,
                              QCheckBox, QStyledItemDelegate, QColorDialog, QSizePolicy, QFileIconProvider,
-                             QSystemTrayIcon, QMenu)
+                             QSystemTrayIcon, QMenu, QCalendarWidget)
 from PyQt6.QtCore import Qt, QTimer, QSize, QRectF, QFileInfo
 from PyQt6.QtGui import QIcon, QPixmap, QColor, QFont, QPainter, QPen, QAction
 import pydivert
@@ -168,6 +168,7 @@ class TrafficDB:
         self.conn = sqlite3.connect(DB_FILE, check_same_thread=False)
         self.conn.execute("CREATE TABLE IF NOT EXISTS traffic (name TEXT PRIMARY KEY, dl_total INTEGER DEFAULT 0, ul_total INTEGER DEFAULT 0)")
         self.conn.execute("CREATE TABLE IF NOT EXISTS blocked (name TEXT PRIMARY KEY)")
+        self.conn.execute("CREATE TABLE IF NOT EXISTS daily_traffic (date TEXT, name TEXT, dl INTEGER DEFAULT 0, ul INTEGER DEFAULT 0, PRIMARY KEY(date, name))")
         self.conn.commit()
 
     def load(self):
@@ -180,6 +181,15 @@ class TrafficDB:
     def save_batch(self, data):
         self.conn.executemany("INSERT INTO traffic(name,dl_total,ul_total) VALUES(?,?,?) ON CONFLICT(name) DO UPDATE SET dl_total=excluded.dl_total, ul_total=excluded.ul_total", data)
         self.conn.commit()
+
+    def save_daily_batch(self, date, data):
+        # data: [(name, dl_inc, ul_inc), ...]
+        self.conn.executemany("INSERT INTO daily_traffic(date, name, dl, ul) VALUES(?,?,?,?) ON CONFLICT(date, name) DO UPDATE SET dl=dl+excluded.dl, ul=ul+excluded.ul", 
+                             [(date, n, dl, ul) for n, dl, ul in data if dl > 0 or ul > 0])
+        self.conn.commit()
+
+    def get_daily_usage(self, date):
+        return self.conn.execute("SELECT name, dl, ul FROM daily_traffic WHERE date=?", (date,)).fetchall()
 
     def set_blocked(self, name, blocked):
         if blocked: self.conn.execute("INSERT OR IGNORE INTO blocked(name) VALUES(?)", (name,))
@@ -293,6 +303,41 @@ class NetworkThread(threading.Thread):
             print(f"[pydivert error] {e}")
 
 
+class DailyUsageDialog(QDialog):
+    def __init__(self, parent=None, db=None):
+        super().__init__(parent)
+        self.db = db
+        self.setWindowTitle("DAILY TRAFFIC HISTORY"); self.resize(600, 500)
+        self.setStyleSheet(f"QDialog{{background-color:{CP_BG};border:1px solid {CP_CYAN};}} QLabel{{color:{CP_YELLOW};font-family:'Consolas';font-weight:bold;}} QTreeWidget{{background-color:{CP_PANEL};border:1px solid {CP_DIM};color:{CP_TEXT};outline:none;}} QHeaderView::section{{background-color:{CP_DIM};color:{CP_YELLOW};padding:5px;border:1px solid {CP_BG};font-weight:bold;}}")
+        l = QVBoxLayout(self)
+        self.cal = QCalendarWidget()
+        self.cal.setStyleSheet(f"QCalendarWidget QWidget{{ background-color: {CP_PANEL}; color: {CP_TEXT}; }} QCalendarWidget QAbstractItemView:enabled{{ background-color: {CP_PANEL}; color: {CP_TEXT}; selection-background-color: {CP_CYAN}; selection-color: black; }} QCalendarWidget QToolButton{{ color: {CP_YELLOW}; }}")
+        self.cal.selectionChanged.connect(self.update_list)
+        l.addWidget(self.cal)
+        
+        self.tree = QTreeWidget(); self.tree.setColumnCount(3)
+        self.tree.setHeaderLabels(["APPLICATION", "TOTAL DL", "TOTAL UL"])
+        self.tree.header().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        l.addWidget(self.tree)
+        
+        self.total_lbl = QLabel("TOTAL FOR DAY: DL: 0 B | UL: 0 B")
+        self.total_lbl.setStyleSheet(f"color:{CP_CYAN}; font-size:11pt; padding:10px; border-top:1px solid {CP_DIM};")
+        l.addWidget(self.total_lbl)
+        
+        self.update_list()
+
+    def update_list(self):
+        date_str = self.cal.selectedDate().toString("yyyy-MM-dd")
+        rows = self.db.get_daily_usage(date_str)
+        self.tree.clear()
+        t_dl = 0; t_ul = 0
+        for name, dl, ul in sorted(rows, key=lambda x: x[1]+x[2], reverse=True):
+            t_dl += dl; t_ul += ul
+            item = QTreeWidgetItem([name, format_size(dl, "MB/s"), format_size(ul, "MB/s")])
+            self.tree.addTopLevelItem(item)
+        self.total_lbl.setText(f"TOTAL FOR {date_str}: DL: {format_size(t_dl, 'MB/s')} | UL: {format_size(t_ul, 'MB/s')}")
+
+
 class App(QMainWindow):
     def __init__(self):
         super().__init__(); self.setWindowTitle("NET-SPEED HOOKER // WinDivert")
@@ -328,7 +373,7 @@ class App(QMainWindow):
         self.tray_icon.show()
 
     def on_tray_activated(self, reason):
-        if reason == QSystemTrayIcon.ActivationReason.DoubleClick:
+        if reason in (QSystemTrayIcon.ActivationReason.Trigger, QSystemTrayIcon.ActivationReason.DoubleClick):
             self.show_normal()
 
     def show_normal(self):
@@ -405,6 +450,7 @@ class App(QMainWindow):
         ht.addWidget(self.cb_dl); ht.addWidget(self.cb_ul)
         l.addLayout(ht)
         hb = QHBoxLayout(); hb.addStretch()
+        cb = QPushButton("CALENDAR"); cb.clicked.connect(self.show_calendar); hb.addWidget(cb)
         dbb = QPushButton("RESET DB"); dbb.clicked.connect(self.reset_db); hb.addWidget(dbb)
         rb = QPushButton("RESTART"); rb.clicked.connect(self.restart_app); hb.addWidget(rb)
         sb = QPushButton("SETTINGS"); sb.clicked.connect(self.show_settings); hb.addWidget(sb); l.addLayout(hb)
@@ -512,7 +558,9 @@ class App(QMainWindow):
         groups = {}; max_v = {2:0, 3:0, 4:0, 5:0}
         for d in snap:
             n = d['name']
-            if n not in groups: groups[n] = {'dl_s':0,'ul_s':0,'dl_t':0,'ul_t':0,'exe':d['exe'],'items':[]}
+            if n not in groups: groups[n] = {'dl_s':0,'ul_s':0,'dl_t':0,'ul_t':0,'exe':d['exe'],'items':[], 'dl_inc': 0, 'ul_inc': 0}
+            groups[n]['dl_inc'] += d['dl_speed']
+            groups[n]['ul_inc'] += d['ul_speed']
             groups[n]['dl_s'] += d['dl_speed']; groups[n]['ul_s'] += d['ul_speed']
             groups[n]['dl_t'] += d['dl_total']; groups[n]['ul_t'] += d['ul_total']
             groups[n]['items'].append(d)
@@ -580,16 +628,21 @@ class App(QMainWindow):
             if self.tree.topLevelItem(i).text(1) not in groups: self.tree.takeTopLevelItem(i)
         self.tree.setSortingEnabled(True); self.tree.sortByColumn(self.current_sort_col, self.current_sort_order)
         self.tree.viewport().update()
-        self._save_db(snap)
+        self._save_db(groups)
         self._sync_blocked()
 
-    def _save_db(self, snap):
-        groups = {}
-        for d in snap:
-            n = d['name']
-            if n not in groups: groups[n] = [0, 0]
-            groups[n][0] += d['dl_total']; groups[n][1] += d['ul_total']
-        self.db.save_batch([(n, dl, ul) for n, (dl, ul) in groups.items()])
+    def _save_db(self, groups):
+        # groups is per-name aggregation from update_stats
+        data = [(n, gd['dl_t'], gd['ul_t']) for n, gd in groups.items()]
+        self.db.save_batch(data)
+        
+        daily_data = [(n, gd['dl_inc'], gd['ul_inc']) for n, gd in groups.items() if gd['dl_inc'] > 0 or gd['ul_inc'] > 0]
+        if daily_data:
+            self.db.save_daily_batch(datetime.now().strftime("%Y-%m-%d"), daily_data)
+
+    def show_calendar(self):
+        dlg = DailyUsageDialog(self, self.db)
+        dlg.exec()
 
     def _fw_block(self, exe, block):
         import subprocess
