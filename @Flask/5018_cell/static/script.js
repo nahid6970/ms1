@@ -16746,13 +16746,16 @@ function printCellToPDF() {
                 strong { font-weight: bold; }
                 em { font-style: italic; }
                 u { text-decoration: underline; }
-                mark { background-color: #ff0 !important; padding: 0 2px; -webkit-print-color-adjust: exact; }
+                mark { background: black !important; color: white !important; padding: 2px 6px; border-radius: 3px; -webkit-print-color-adjust: exact; }
                 code { background: #f0f0f0 !important; padding: 2px 4px; border-radius: 3px; font-family: monospace; -webkit-print-color-adjust: exact; }
                 
                 /* Colors from the app */
                 .syntax-red { color: #ff0000 !important; }
                 .syntax-green { color: #00ff00 !important; }
                 .syntax-blue { color: #0000ff !important; }
+
+                /* Custom Color Syntaxes */
+                ${customSyntaxCss}
                 
                 /* KaTeX fixes for print */
                 .katex-display { margin: 1em 0; overflow-x: auto; overflow-y: hidden; }
