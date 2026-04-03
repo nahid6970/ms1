@@ -50,7 +50,8 @@
             "description": "Opens Ultimate_Gui.py",
             "hotkey": "!u",
             "action": "Run(\"C:\\@delta\\ms1\\TOOLS\\Ultimate_Gui.py\", \"\", \"Hide\")",
-            "category": "Launch"
+            "category": "Launch",
+            "enabled": true
         },
         {
             "name": "Always On Top Toggle",
