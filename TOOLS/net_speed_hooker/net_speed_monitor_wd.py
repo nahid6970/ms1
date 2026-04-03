@@ -320,9 +320,20 @@ class DailyUsageDialog(QDialog):
         self.tree.header().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         l.addWidget(self.tree)
         
-        self.total_lbl = QLabel("TOTAL FOR DAY: DL: 0 B | UL: 0 B")
-        self.total_lbl.setStyleSheet(f"color:{CP_CYAN}; font-size:11pt; padding:10px; border-top:1px solid {CP_DIM};")
-        l.addWidget(self.total_lbl)
+        # Structured Footer for Dialog
+        self.footer_widget = QWidget()
+        self.footer_widget.setStyleSheet(f"background-color:{CP_PANEL}; border-top:1px solid {CP_DIM};")
+        self.footer_layout = QHBoxLayout(self.footer_widget)
+        self.footer_layout.setContentsMargins(0,0,0,0); self.footer_layout.setSpacing(0)
+        self.footer_labels = []
+        for i in range(3):
+            lbl = QLabel()
+            lbl.setAlignment(Qt.AlignmentFlag.AlignCenter if i >= 1 else Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
+            lbl.setStyleSheet(f"padding: 5px; font-weight: bold; border-right: 1px solid {CP_DIM}; color: {CP_YELLOW};")
+            if i == 0: lbl.setText(" TOTAL FOR DAY:")
+            self.footer_layout.addWidget(lbl)
+            self.footer_labels.append(lbl)
+        l.addWidget(self.footer_widget)
         
         self.update_list()
 
@@ -335,7 +346,17 @@ class DailyUsageDialog(QDialog):
             t_dl += dl; t_ul += ul
             item = QTreeWidgetItem([name, format_size(dl, "MB/s"), format_size(ul, "MB/s")])
             self.tree.addTopLevelItem(item)
-        self.total_lbl.setText(f"TOTAL FOR {date_str}: DL: {format_size(t_dl, 'MB/s')} | UL: {format_size(t_ul, 'MB/s')}")
+        
+        if hasattr(self, 'footer_labels'):
+            self.footer_labels[1].setText(format_size(t_dl, "MB/s"))
+            self.footer_labels[1].setStyleSheet(f"padding:5px; font-weight:bold; color:{CP_YELLOW}; border-right:1px solid {CP_DIM};")
+            self.footer_labels[2].setText(format_size(t_ul, "MB/s"))
+            self.footer_labels[2].setStyleSheet(f"padding:5px; font-weight:bold; color:{CP_GREEN}; border-right:1px solid {CP_DIM};")
+            QTimer.singleShot(10, self._sync_footer)
+
+    def _sync_footer(self):
+        for i in range(min(3, len(self.footer_labels))):
+            self.footer_labels[i].setFixedWidth(self.tree.columnWidth(i))
 
 
 class App(QMainWindow):
