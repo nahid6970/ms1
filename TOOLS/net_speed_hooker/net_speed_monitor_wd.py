@@ -325,6 +325,8 @@ class DailyUsageDialog(QDialog):
         self.tree.setHeaderLabels(["APPLICATION", "TOTAL DL", "TOTAL UL"])
         self.tree.header().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         self.tree.setSortingEnabled(True)
+        self.current_sort_col = 1; self.current_sort_order = Qt.SortOrder.DescendingOrder
+        self.tree.header().sortIndicatorChanged.connect(self.on_sort_changed)
         l.addWidget(self.tree)
         
         # Structured Footer for Dialog
@@ -348,7 +350,8 @@ class DailyUsageDialog(QDialog):
     def highlight_dates(self):
         from PyQt6.QtGui import QTextCharFormat
         fmt = QTextCharFormat()
-        fmt.setForeground(QColor(CP_CYAN))
+        fmt.setForeground(QColor(CP_YELLOW))
+        fmt.setBackground(QColor("#1a3a3a"))
         fmt.setFontWeight(QFont.Weight.Bold)
         for d_str in self.db.get_available_dates():
             try:
@@ -356,6 +359,16 @@ class DailyUsageDialog(QDialog):
                 from PyQt6.QtCore import QDate
                 self.cal.setDateTextFormat(QDate(d.year, d.month, d.day), fmt)
             except: pass
+
+    def on_sort_changed(self, i, o):
+        if i != self.current_sort_col and o == Qt.SortOrder.AscendingOrder:
+            self.tree.header().blockSignals(True)
+            self.tree.header().setSortIndicator(i, Qt.SortOrder.DescendingOrder)
+            self.tree.header().blockSignals(False)
+            self.current_sort_col = i; self.current_sort_order = Qt.SortOrder.DescendingOrder
+            self.tree.sortByColumn(i, Qt.SortOrder.DescendingOrder)
+            return
+        self.current_sort_col = i; self.current_sort_order = o
 
     def update_list(self):
         date_str = self.cal.selectedDate().toString("yyyy-MM-dd")
