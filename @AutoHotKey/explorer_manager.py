@@ -1,9 +1,10 @@
 import sys
 import os
 import subprocess
+import json
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
                              QHBoxLayout, QLabel, QPushButton, QScrollArea, 
-                             QFrame)
+                             QFrame, QScrollBar)
 from PyQt6.QtCore import Qt, QPoint
 from PyQt6.QtGui import QIcon, QPixmap, QPainter, QColor
 from PyQt6.QtSvg import QSvgRenderer
@@ -40,7 +41,7 @@ class PathItem(QFrame):
                 background-color: {CP_PANEL};
                 border: 1px solid {CP_DIM};
                 border-radius: 0px;
-                margin: 2px;
+                margin: 1px;
             }}
             QFrame:hover {{
                 border-color: {CP_CYAN};
@@ -49,11 +50,11 @@ class PathItem(QFrame):
         """)
         
         layout = QHBoxLayout(self)
-        layout.setContentsMargins(15, 10, 15, 10)
+        layout.setContentsMargins(10, 4, 10, 4)  # Compact padding
         
         # Path Label
         self.label = QLabel(path)
-        self.label.setStyleSheet(f"color: {CP_TEXT}; font-family: 'Consolas'; font-size: 11pt; border: none; background: transparent;")
+        self.label.setStyleSheet(f"color: {CP_TEXT}; font-family: 'Consolas'; font-size: 10pt; border: none; background: transparent;")
         self.label.setWordWrap(True)
         layout.addWidget(self.label, stretch=1)
 
@@ -87,33 +88,38 @@ class ExplorerManager(QMainWindow):
             }}
             QScrollBar:vertical {{
                 background: {CP_BG};
-                width: 10px;
+                width: 12px;
+                margin: 0px;
             }}
             QScrollBar::handle:vertical {{
                 background: {CP_DIM};
-                min-height: 20px;
+                min-height: 30px;
             }}
             QScrollBar::handle:vertical:hover {{
                 background: {CP_CYAN};
+            }}
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{
+                height: 0px;
             }}
         """)
         
         central = QWidget()
         self.setCentralWidget(central)
         self.layout = QVBoxLayout(central)
-        self.layout.setContentsMargins(15, 15, 15, 15)
+        self.layout.setContentsMargins(10, 10, 10, 10)  # More compact
+        self.layout.setSpacing(5)
         
         # Header (Draggable Area)
         self.header = QWidget()
-        self.header.setFixedHeight(40)
+        self.header.setFixedHeight(35)
         header_layout = QHBoxLayout(self.header)
-        header_layout.setContentsMargins(0, 0, 0, 0)
+        header_layout.setContentsMargins(5, 0, 5, 0)
         
         # SVG Icon
         self.icon_label = QLabel()
-        self.icon_label.setFixedSize(24, 24)
+        self.icon_label.setFixedSize(20, 20)
         renderer = QSvgRenderer(SVG_ICON.encode('utf-8'))
-        pixmap = QPixmap(24, 24)
+        pixmap = QPixmap(20, 20)
         pixmap.fill(Qt.GlobalColor.transparent)
         painter = QPainter(pixmap)
         renderer.render(painter)
@@ -122,13 +128,13 @@ class ExplorerManager(QMainWindow):
         header_layout.addWidget(self.icon_label)
         
         title = QLabel("SYSTEM // OPEN EXPLORERS")
-        title.setStyleSheet(f"color: {CP_CYAN}; font-size: 14pt; font-weight: bold; letter-spacing: 2px; margin-left: 10px;")
+        title.setStyleSheet(f"color: {CP_CYAN}; font-size: 12pt; font-weight: bold; letter-spacing: 1px; margin-left: 5px;")
         header_layout.addWidget(title)
         header_layout.addStretch()
         
         # Minimize Button
         self.min_btn = QPushButton("—")
-        self.min_btn.setFixedSize(30, 30)
+        self.min_btn.setFixedSize(28, 28)
         self.min_btn.setStyleSheet(f"""
             QPushButton {{
                 background-color: transparent;
@@ -145,12 +151,12 @@ class ExplorerManager(QMainWindow):
         
         # Close Button
         self.close_btn = QPushButton("✕")
-        self.close_btn.setFixedSize(30, 30)
+        self.close_btn.setFixedSize(28, 28)
         self.close_btn.setStyleSheet(f"""
             QPushButton {{
                 background-color: transparent;
                 color: {CP_RED};
-                font-size: 14pt;
+                font-size: 12pt;
                 font-weight: bold;
                 border: none;
             }}
@@ -167,7 +173,7 @@ class ExplorerManager(QMainWindow):
         # Divider
         line = QFrame()
         line.setFrameShape(QFrame.Shape.HLine)
-        line.setStyleSheet(f"background-color: {CP_CYAN}; max-height: 2px; margin-bottom: 10px; border: none;")
+        line.setStyleSheet(f"background-color: {CP_CYAN}; max-height: 1px; margin-bottom: 5px; border: none;")
         self.layout.addWidget(line)
         
         # Scroll Area for paths
@@ -175,6 +181,8 @@ class ExplorerManager(QMainWindow):
         self.scroll_content = QWidget()
         self.paths_layout = QVBoxLayout(self.scroll_content)
         self.paths_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        self.paths_layout.setContentsMargins(0, 0, 5, 0)
+        self.paths_layout.setSpacing(2)  # Tight spacing
         self.scroll.setWidget(self.scroll_content)
         self.scroll.setWidgetResizable(True)
         self.layout.addWidget(self.scroll)
@@ -187,9 +195,10 @@ class ExplorerManager(QMainWindow):
                 background-color: transparent;
                 color: {CP_YELLOW};
                 border: 1px solid {CP_YELLOW};
-                padding: 8px 15px;
+                padding: 5px 12px;
                 font-weight: bold;
                 border-radius: 0px;
+                font-size: 9pt;
             }}
             QPushButton:hover {{
                 background-color: {CP_YELLOW};
@@ -202,7 +211,7 @@ class ExplorerManager(QMainWindow):
         footer.addStretch()
         
         self.status_lbl = QLabel("Ready")
-        self.status_lbl.setStyleSheet(f"color: {CP_SUBTEXT}; font-size: 9pt;")
+        self.status_lbl.setStyleSheet(f"color: {CP_SUBTEXT}; font-size: 8pt;")
         footer.addWidget(self.status_lbl)
         
         self.layout.addLayout(footer)
@@ -216,14 +225,11 @@ class ExplorerManager(QMainWindow):
             # Check what widget was clicked
             widget = self.childAt(event.position().toPoint())
             
-            # Determine if the click is in a draggable area:
-            # 1. Clicking the window background (widget is None or central widget)
-            # 2. Clicking the header area (excluding buttons)
-            
             is_interactive = False
             curr = widget
             while curr:
-                if isinstance(curr, (PathItem, QPushButton)):
+                # Add QScrollBar and its children to interactive list
+                if isinstance(curr, (PathItem, QPushButton, QScrollBar)):
                     is_interactive = True
                     break
                 curr = curr.parentWidget()
@@ -232,7 +238,6 @@ class ExplorerManager(QMainWindow):
                 self.dragPos = event.globalPosition().toPoint() - self.frameGeometry().topLeft()
                 event.accept()
             else:
-                # Let the interactive widget handle the event
                 super().mousePressEvent(event)
 
     def mouseMoveEvent(self, event):
@@ -263,10 +268,8 @@ class ExplorerManager(QMainWindow):
             return []
 
     def close_explorer_windows(self):
-        """Uses PowerShell to close all open Explorer windows aggressively."""
         ps_script = """
         $shell = New-Object -ComObject Shell.Application;
-        # Multi-pass attempt to ensure all windows close
         for($i=0; $i -lt 2; $i++) {
             $windows = @($shell.Windows());
             foreach($w in $windows) {
@@ -285,12 +288,8 @@ class ExplorerManager(QMainWindow):
     def scan_and_close(self):
         self.status_lbl.setText("Scanning...")
         QApplication.processEvents()
-        
         paths = self.get_explorer_paths()
-        
-        # Save to JSON as requested
         self.save_paths_to_json(paths)
-        
         if paths:
             self.close_explorer_windows()
             self.update_path_list(paths)
@@ -317,7 +316,7 @@ class ExplorerManager(QMainWindow):
         if not paths:
             empty_lbl = QLabel("NO ACTIVE EXPLORER WINDOWS DETECTED")
             empty_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            empty_lbl.setStyleSheet(f"color: {CP_DIM}; margin-top: 50px; font-size: 12pt;")
+            empty_lbl.setStyleSheet(f"color: {CP_DIM}; margin-top: 50px; font-size: 11pt;")
             self.paths_layout.addWidget(empty_lbl)
             return
 
