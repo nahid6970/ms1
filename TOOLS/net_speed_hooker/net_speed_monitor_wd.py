@@ -3,9 +3,10 @@ from datetime import datetime
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QLabel, QPushButton, QTreeWidget, QTreeWidgetItem, QHeaderView,
                              QGroupBox, QDialog, QSpinBox, QFormLayout, QScrollArea, QComboBox, QLineEdit,
-                             QCheckBox, QStyledItemDelegate, QColorDialog, QSizePolicy, QFileIconProvider)
+                             QCheckBox, QStyledItemDelegate, QColorDialog, QSizePolicy, QFileIconProvider,
+                             QSystemTrayIcon, QMenu)
 from PyQt6.QtCore import Qt, QTimer, QSize, QRectF, QFileInfo
-from PyQt6.QtGui import QIcon, QPixmap, QColor, QFont, QPainter, QPen
+from PyQt6.QtGui import QIcon, QPixmap, QColor, QFont, QPainter, QPen, QAction
 import pydivert
 
 CP_BG="#050505"; CP_PANEL="#111111"; CP_YELLOW="#FCEE0A"; CP_CYAN="#00F0FF"
@@ -16,6 +17,16 @@ SETTINGS_DIR = r"C:\@delta\output\net_speed_monitor"
 SETTINGS_FILE = os.path.join(SETTINGS_DIR, "settings.json")
 DB_FILE = os.path.join(SETTINGS_DIR, "traffic.db")
 BLOCKED_FILE = os.path.join(SETTINGS_DIR, "blocked.json")
+ICON_FILE = os.path.join(SETTINGS_DIR, "icon.svg")
+
+def create_default_icon():
+    if not os.path.exists(ICON_FILE):
+        os.makedirs(SETTINGS_DIR, exist_ok=True)
+        svg = """<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+          <rect width="32" height="32" fill="#050505" rx="4"/>
+          <path d="M16 4L6 14h6v14h8V14h6L16 4z" fill="#00F0FF"/>
+        </svg>"""
+        with open(ICON_FILE, "w") as f: f.write(svg)
 
 def load_blocked_json():
     try:
@@ -123,6 +134,11 @@ class SettingsDialog(QDialog):
         self.filter_presets.setPlaceholderText('e.g. 0,0.01,0.1,1')
         ff.addRow("PRESETS (MB/s):", self.filter_presets); fg.setLayout(ff); layout.addWidget(fg)
 
+        tg = QGroupBox("SYSTEM TRAY"); tg.setStyleSheet(gs); tf = QVBoxLayout()
+        self.tray_toggle = QCheckBox("Minimize to tray on close")
+        self.tray_toggle.setChecked(current_settings.get('minimize_to_tray', True))
+        tf.addWidget(self.tray_toggle); tg.setLayout(tf); layout.addWidget(tg)
+
         s.setWidget(c); l.addWidget(s)
         self.save_btn = QPushButton("SAVE & APPLY"); self.save_btn.clicked.connect(self.accept); l.addWidget(self.save_btn)
 
@@ -140,7 +156,8 @@ class SettingsDialog(QDialog):
             'hi_enabled': self.hi_global.isChecked(), 'hi_color': self.hi_color, 'hi_thickness': self.hi_thick.value(),
             'hi_dl_s': self.hi_dl_s.isChecked(), 'hi_ul_s': self.hi_ul_s.isChecked(),
             'hi_dl_t': self.hi_dl_t.isChecked(), 'hi_ul_t': self.hi_ul_t.isChecked(),
-            'filter_presets': self.filter_presets.text()
+            'filter_presets': self.filter_presets.text(),
+            'minimize_to_tray': self.tray_toggle.isChecked()
         }
 
 
@@ -279,14 +296,49 @@ class NetworkThread(threading.Thread):
 class App(QMainWindow):
     def __init__(self):
         super().__init__(); self.setWindowTitle("NET-SPEED HOOKER // WinDivert")
+        create_default_icon()
         self.load_settings(); self.resize(self.win_w, self.win_h)
+        self.setWindowIcon(QIcon(ICON_FILE))
         self.db = TrafficDB()
         _bj = load_blocked_json()  # {name: exe}
         self.blocked_names = set(_bj.keys())
         self.blocked_exe = dict(_bj)
         self.stats = MonitorStats(self.db); self.monitor = NetworkThread(self.stats); self.monitor.start()
         self.icon_cache = {}; self.icon_provider = QFileIconProvider()
-        self.init_ui(); self.timer = QTimer(); self.timer.timeout.connect(self.update_stats); self.timer.start(1000)
+        self.init_ui(); self.init_tray()
+        self.timer = QTimer(); self.timer.timeout.connect(self.update_stats); self.timer.start(1000)
+
+    def init_tray(self):
+        self.tray_icon = QSystemTrayIcon(self)
+        self.tray_icon.setIcon(QIcon(ICON_FILE))
+        self.tray_icon.setToolTip("NET-SPEED HOOKER")
+        
+        menu = QMenu()
+        restore_action = QAction("Restore", self)
+        restore_action.triggered.connect(self.show_normal)
+        exit_action = QAction("Exit", self)
+        exit_action.triggered.connect(self.full_exit)
+        
+        menu.addAction(restore_action)
+        menu.addSeparator()
+        menu.addAction(exit_action)
+        
+        self.tray_icon.setContextMenu(menu)
+        self.tray_icon.activated.connect(self.on_tray_activated)
+        self.tray_icon.show()
+
+    def on_tray_activated(self, reason):
+        if reason == QSystemTrayIcon.ActivationReason.DoubleClick:
+            self.show_normal()
+
+    def show_normal(self):
+        self.show()
+        self.activateWindow()
+
+    def full_exit(self):
+        self.monitor.running = False
+        self.save_settings()
+        QApplication.quit()
 
     def load_settings(self):
         self.win_w=1000; self.win_h=700; self.row_height=40; self.col_weights=[5,22,16,16,14,14,13]
@@ -295,6 +347,7 @@ class App(QMainWindow):
         self.hi_enabled=True; self.hi_color=CP_CYAN; self.hi_thickness=2
         self.hi_dl_s=True; self.hi_ul_s=True; self.hi_dl_t=True; self.hi_ul_t=True
         self.min_speed=0; self.min_total=0; self.filter_presets='0,0.001,0.01,0.1,1'
+        self.minimize_to_tray=True
         try:
             if os.path.exists(SETTINGS_FILE):
                 with open(SETTINGS_FILE) as f: s = json.load(f)
@@ -309,6 +362,7 @@ class App(QMainWindow):
                 self.hi_dl_t=s.get('hi_dl_t',True); self.hi_ul_t=s.get('hi_ul_t',True)
                 self.min_speed=s.get('min_speed',0); self.min_total=s.get('min_total',0)
                 self.filter_presets=s.get('filter_presets','0,0.001,0.01,0.1,1')
+                self.minimize_to_tray=s.get('minimize_to_tray',True)
         except: pass
 
     def save_settings(self):
@@ -326,7 +380,8 @@ class App(QMainWindow):
                  'col_weights':self.col_weights,'sort_col':self.current_sort_col,'sort_order':self.current_sort_order.value,
                  'show_dl':self.show_dl,'show_ul':self.show_ul,'hi_enabled':self.hi_enabled,'hi_color':self.hi_color,
                  'hi_thickness':self.hi_thickness,'hi_dl_s':self.hi_dl_s,'hi_ul_s':self.hi_ul_s,
-                 'hi_dl_t':self.hi_dl_t,'hi_ul_t':self.hi_ul_t,'min_speed':_ms,'min_total':_mt,'filter_presets':self.filter_presets}
+                 'hi_dl_t':self.hi_dl_t,'hi_ul_t':self.hi_ul_t,'min_speed':_ms,'min_total':_mt,
+                 'filter_presets':self.filter_presets,'minimize_to_tray':self.minimize_to_tray}
             with open(SETTINGS_FILE,'w') as f: json.dump(s, f, indent=4)
         except: pass
 
@@ -596,7 +651,8 @@ class App(QMainWindow):
         curr = {'unit':self.unit,'win_w':self.width(),'win_h':self.height(),'row_height':self.row_height,
                 'col_weights':self.col_weights,'hi_enabled':self.hi_enabled,'hi_color':self.hi_color,
                 'hi_thickness':self.hi_thickness,'hi_dl_s':self.hi_dl_s,'hi_ul_s':self.hi_ul_s,
-                'hi_dl_t':self.hi_dl_t,'hi_ul_t':self.hi_ul_t,'filter_presets':self.filter_presets}
+                'hi_dl_t':self.hi_dl_t,'hi_ul_t':self.hi_ul_t,'filter_presets':self.filter_presets,
+                'minimize_to_tray':self.minimize_to_tray}
         dlg = SettingsDialog(self, curr)
         if dlg.exec():
             ns = dlg.get_settings()
@@ -604,6 +660,7 @@ class App(QMainWindow):
             self.hi_enabled=ns['hi_enabled']; self.hi_color=ns['hi_color']; self.hi_thickness=ns['hi_thickness']
             self.hi_dl_s=ns['hi_dl_s']; self.hi_ul_s=ns['hi_ul_s']; self.hi_dl_t=ns['hi_dl_t']; self.hi_ul_t=ns['hi_ul_t']
             self.col_weights=ns['col_weights']; self.filter_presets=ns['filter_presets']
+            self.minimize_to_tray=ns['minimize_to_tray']
             self._rebuild_filter_combo()
             self.apply_delegate_settings()
             self._apply_col_widths()
@@ -613,7 +670,11 @@ class App(QMainWindow):
         self.monitor.running = False; os.execl(sys.executable, sys.executable, *sys.argv)
 
     def closeEvent(self, e):
-        self.monitor.running = False; self.save_settings(); super().closeEvent(e)
+        if self.minimize_to_tray:
+            e.ignore()
+            self.hide()
+        else:
+            self.full_exit()
 
 
 if __name__ == "__main__":
