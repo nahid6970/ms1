@@ -186,7 +186,8 @@ class ExplorerManager(QMainWindow):
         ps_script = '(New-Object -ComObject Shell.Application).Windows() | ForEach-Object { try { $_.Document.Folder.Self.Path } catch { $_.LocationURL } }'
         try:
             result = subprocess.run(['powershell', '-Command', ps_script], 
-                                     capture_output=True, text=True, check=True)
+                                     capture_output=True, text=True, check=True,
+                                     creationflags=subprocess.CREATE_NO_WINDOW)
             paths = [line.strip() for line in result.stdout.splitlines() if line.strip()]
             # Filter unique paths and remove non-file paths (like "This PC" which might show up as URL)
             unique_paths = []
@@ -204,7 +205,7 @@ class ExplorerManager(QMainWindow):
         """Uses PowerShell to close all open Explorer windows."""
         ps_script = '(New-Object -ComObject Shell.Application).Windows() | ForEach-Object { if ($_.Name -eq "Windows Explorer" -or $_.Name -eq "File Explorer") { $_.Quit() } }'
         try:
-            subprocess.run(['powershell', '-Command', ps_script], check=True)
+            subprocess.run(['powershell', '-Command', ps_script], check=True, creationflags=subprocess.CREATE_NO_WINDOW)
         except Exception as e:
             print(f"Error closing windows: {e}")
 
