@@ -775,6 +775,9 @@ class SettingsDialog(QDialog):
         self.line_color_btn = QPushButton(); self.line_color_btn.clicked.connect(self.pick_line_color)
         self.cursor_color_btn = QPushButton(); self.cursor_color_btn.clicked.connect(self.pick_cursor_color)
         
+        self.assoc_btn = CyberButton("REGISTER_FILE_ASSOC", accent=CP_GREEN)
+        self.assoc_btn.clicked.connect(self.do_assoc)
+        
         self.update_btn_style(self.text_color_btn, self.temp_text_color, "TEXT_COLOR", CP_CYAN)
         self.update_btn_style(self.line_color_btn, self.temp_cursor_line_color, "LINE_HL", THEMES[self.mgr.settings["theme"]]["accent"])
         self.update_btn_style(self.cursor_color_btn, self.temp_cursor_color, "CURSOR", CP_CYAN)
@@ -785,6 +788,7 @@ class SettingsDialog(QDialog):
         form.addRow("TEXT_COLOR:", self.text_color_btn)
         form.addRow("LINE_HL:", self.line_color_btn)
         form.addRow("CURSOR_COLOR:", self.cursor_color_btn)
+        form.addRow("REGISTRY:", self.assoc_btn)
         layout.addLayout(form); self.more_box = QFrame(); self.more_box.setFrameShape(QFrame.Shape.StyledPanel); more_layout = QVBoxLayout(self.more_box); more_layout.addWidget(QLabel("// Future modules reserved...")); layout.addWidget(self.more_box)
         btns = QHBoxLayout(); theme_accent = THEMES.get(self.mgr.settings.get("theme", "CyberYellow"), THEMES["CyberYellow"])["accent"]
         self.save_btn = CyberButton("APPLY & SAVE", accent=theme_accent); self.save_btn.clicked.connect(self.do_save)
@@ -830,6 +834,36 @@ class SettingsDialog(QDialog):
             self.mgr.settings["cursor_line_color"] = self.temp_cursor_line_color; self.mgr.settings["cursor_color"] = self.temp_cursor_color; self.mgr.save(); self.accept()
         except Exception as e: QMessageBox.critical(self, "SYSTEM_ERR", f"INVALID: {e}")
 
+    def do_assoc(self):
+        if not self.parent().is_admin:
+            QMessageBox.warning(self, "ELEVATION_REQUIRED", "Please ELEVATE the app first to modify registry.")
+            return
+        
+        try:
+            import winreg
+            exe_path = sys.executable if getattr(sys, 'frozen', False) else f'"{sys.executable}" "{os.path.abspath(sys.argv[0])}"'
+            app_name = "CyberEditor"
+            
+            # Register App
+            key_path = f"Software\\Classes\\{app_name}"
+            with winreg.CreateKey(winreg.HKEY_CURRENT_USER, key_path) as key:
+                winreg.SetValue(key, "", winreg.REG_SZ, "Cyber Editor Document")
+                with winreg.CreateKey(key, "DefaultIcon") as icon_key:
+                    icon_val = sys.executable if getattr(sys, 'frozen', False) else os.path.abspath("icon.ico")
+                    winreg.SetValue(icon_key, "", winreg.REG_SZ, icon_val)
+                with winreg.CreateKey(key, "shell\\open\\command") as cmd_key:
+                    winreg.SetValue(cmd_key, "", winreg.REG_SZ, f'{exe_path} "%1"')
+
+            # Associate Extensions
+            for ext in [".txt", ".json", ".py", ".md", ".ahk", ".log", ".ini"]:
+                ext_path = f"Software\\Classes\\{ext}"
+                with winreg.CreateKey(winreg.HKEY_CURRENT_USER, ext_path) as key:
+                    winreg.SetValue(key, "", winreg.REG_SZ, app_name)
+            
+            QMessageBox.information(self, "SUCCESS", "Registry updated. CyberEditor is now a default option.")
+        except Exception as e:
+            QMessageBox.critical(self, "REG_ERR", str(e))
+
 class KeybindDialog(QDialog):
     def __init__(self, parent, mgr):
         super().__init__(parent); self.mgr = mgr; self.setWindowTitle("KEYBIND_CONFIG"); self.setModal(True); self.edits = {}; self.setup_ui(); self.apply_theme()
@@ -872,6 +906,8 @@ class MainWindow(QMainWindow):
 
     def setup_ui(self):
         self.setWindowTitle(f"CYBER_EDITOR // {'[SUPERUSER]' if self.is_admin else '[USER]'}")
+        icon_path = os.path.join(sys._MEIPASS, "icon.ico") if getattr(sys, 'frozen', False) else "icon.ico"
+        if os.path.exists(icon_path): self.setWindowIcon(QIcon(icon_path))
         self.resize(self.mgr.settings.get("width", 1000), self.mgr.settings.get("height", 700))
         central = QWidget(); self.setCentralWidget(central); self.main_layout = QVBoxLayout(central); self.main_layout.setContentsMargins(10, 10, 10, 10)
         
