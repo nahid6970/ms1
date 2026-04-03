@@ -213,13 +213,36 @@ class ExplorerManager(QMainWindow):
     # Window Dragging Methods
     def mousePressEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
-            self.dragPos = event.globalPosition().toPoint() - self.frameGeometry().topLeft()
-            event.accept()
+            # Check what widget was clicked
+            widget = self.childAt(event.position().toPoint())
+            
+            # Determine if the click is in a draggable area:
+            # 1. Clicking the window background (widget is None or central widget)
+            # 2. Clicking the header area (excluding buttons)
+            
+            is_interactive = False
+            curr = widget
+            while curr:
+                if isinstance(curr, (PathItem, QPushButton)):
+                    is_interactive = True
+                    break
+                curr = curr.parentWidget()
+            
+            if not is_interactive:
+                self.dragPos = event.globalPosition().toPoint() - self.frameGeometry().topLeft()
+                event.accept()
+            else:
+                # Let the interactive widget handle the event
+                super().mousePressEvent(event)
 
     def mouseMoveEvent(self, event):
-        if event.buttons() == Qt.MouseButton.LeftButton:
+        if event.buttons() == Qt.MouseButton.LeftButton and not self.dragPos.isNull():
             self.move(event.globalPosition().toPoint() - self.dragPos)
             event.accept()
+
+    def mouseReleaseEvent(self, event):
+        self.dragPos = QPoint()
+        super().mouseReleaseEvent(event)
 
     def get_explorer_paths(self):
         ps_script = '(New-Object -ComObject Shell.Application).Windows() | ForEach-Object { try { $_.Document.Folder.Self.Path } catch { $_.LocationURL } }'
@@ -240,7 +263,20 @@ class ExplorerManager(QMainWindow):
             return []
 
     def close_explorer_windows(self):
-        ps_script = '(New-Object -ComObject Shell.Application).Windows() | ForEach-Object { if ($_.Name -eq "Windows Explorer" -or $_.Name -eq "File Explorer") { $_.Quit() } }'
+        """Uses PowerShell to close all open Explorer windows aggressively."""
+        ps_script = """
+        $shell = New-Object -ComObject Shell.Application;
+        # Multi-pass attempt to ensure all windows close
+        for($i=0; $i -lt 2; $i++) {
+            $windows = @($shell.Windows());
+            foreach($w in $windows) {
+                if ($w.Name -match "Explorer") {
+                    try { $w.Quit() } catch {}
+                }
+            }
+            if ($i -lt 1) { Start-Sleep -m 200 }
+        }
+        """
         try:
             subprocess.run(['powershell', '-Command', ps_script], check=True, creationflags=subprocess.CREATE_NO_WINDOW)
         except Exception as e:
