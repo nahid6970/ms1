@@ -26,6 +26,7 @@ class PathItem(QFrame):
         self.on_click = on_click
         
         self.setFrameShape(QFrame.Shape.StyledPanel)
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
         self.setStyleSheet(f"""
             QFrame {{
                 background-color: {CP_PANEL};
@@ -40,33 +41,13 @@ class PathItem(QFrame):
         """)
         
         layout = QHBoxLayout(self)
-        layout.setContentsMargins(10, 8, 10, 8)
+        layout.setContentsMargins(15, 10, 15, 10)
         
         # Path Label
         self.label = QLabel(path)
-        self.label.setStyleSheet(f"color: {CP_TEXT}; font-family: 'Consolas'; font-size: 11pt; border: none;")
+        self.label.setStyleSheet(f"color: {CP_TEXT}; font-family: 'Consolas'; font-size: 11pt; border: none; background: transparent;")
         self.label.setWordWrap(True)
         layout.addWidget(self.label, stretch=1)
-        
-        # Open Button
-        self.open_btn = QPushButton("OPEN")
-        self.open_btn.setFixedWidth(80)
-        self.open_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.open_btn.setStyleSheet(f"""
-            QPushButton {{
-                background-color: {CP_CYAN};
-                color: {CP_BG};
-                font-weight: bold;
-                border: none;
-                border-radius: 2px;
-                padding: 4px;
-            }}
-            QPushButton:hover {{
-                background-color: {CP_YELLOW};
-            }}
-        """)
-        self.open_btn.clicked.connect(lambda: self.on_click(self.path))
-        layout.addWidget(self.open_btn)
 
     def mousePressEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
@@ -189,7 +170,6 @@ class ExplorerManager(QMainWindow):
                                      capture_output=True, text=True, check=True,
                                      creationflags=subprocess.CREATE_NO_WINDOW)
             paths = [line.strip() for line in result.stdout.splitlines() if line.strip()]
-            # Filter unique paths and remove non-file paths (like "This PC" which might show up as URL)
             unique_paths = []
             for p in paths:
                 if p.startswith('file:///'):
@@ -246,7 +226,8 @@ class ExplorerManager(QMainWindow):
                 subprocess.run(['explorer.exe', 'shell:MyComputerFolder'])
             else:
                 os.startfile(path)
-            self.close() # Close manager after opening
+            # GUI stays open as requested
+            self.status_lbl.setText(f"Opened: {os.path.basename(path) if path != 'This PC' else path}")
         except Exception as e:
             self.status_lbl.setText(f"Error: {e}")
 
