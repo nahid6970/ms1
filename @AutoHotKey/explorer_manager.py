@@ -1,12 +1,12 @@
 import sys
 import os
 import subprocess
-import json
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
                              QHBoxLayout, QLabel, QPushButton, QScrollArea, 
-                             QFrame, QSizePolicy)
-from PyQt6.QtCore import Qt, QSize
-from PyQt6.QtGui import QFont, QColor, QIcon
+                             QFrame)
+from PyQt6.QtCore import Qt, QPoint
+from PyQt6.QtGui import QIcon, QPixmap, QPainter, QColor
+from PyQt6.QtSvg import QSvgRenderer
 
 # CYBERPUNK THEME PALETTE (from THEME_GUIDE.md)
 CP_BG = "#050505"           # Main Background
@@ -18,6 +18,14 @@ CP_YELLOW = "#FCEE0A"       # Primary accent
 CP_CYAN = "#00F0FF"         # Secondary accent
 CP_RED = "#FF003C"          # Error/Delete
 CP_GREEN = "#00FF00"        # Success
+
+# Simple SVG Icon String (Cyberpunk style hex/folder)
+SVG_ICON = """
+<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M22 19V9C22 7.89543 21.1046 7 20 7H11L9 5H4C2.89543 5 2 5.89543 2 7V19C2 20.1046 2.89543 21 4 21H20C21.1046 21 22 20.1046 22 19Z" stroke="#00F0FF" stroke-width="2"/>
+<path d="M7 13L10 16L17 9" stroke="#FCEE0A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+"""
 
 class PathItem(QFrame):
     def __init__(self, path, on_click):
@@ -31,7 +39,7 @@ class PathItem(QFrame):
             QFrame {{
                 background-color: {CP_PANEL};
                 border: 1px solid {CP_DIM};
-                border-radius: 4px;
+                border-radius: 0px;
                 margin: 2px;
             }}
             QFrame:hover {{
@@ -60,6 +68,9 @@ class ExplorerManager(QMainWindow):
         self.resize(700, 500)
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint)
         
+        # For window dragging
+        self.dragPos = QPoint()
+        
         self.setStyleSheet(f"""
             QMainWindow {{
                 background-color: {CP_BG};
@@ -68,6 +79,7 @@ class ExplorerManager(QMainWindow):
             QWidget {{
                 color: {CP_TEXT};
                 font-family: 'Consolas';
+                border-radius: 0px;
             }}
             QScrollArea {{
                 background: transparent;
@@ -91,20 +103,54 @@ class ExplorerManager(QMainWindow):
         self.layout = QVBoxLayout(central)
         self.layout.setContentsMargins(15, 15, 15, 15)
         
-        # Header
-        header = QHBoxLayout()
-        title = QLabel("SYSTEM // OPEN EXPLORERS")
-        title.setStyleSheet(f"color: {CP_CYAN}; font-size: 14pt; font-weight: bold; letter-spacing: 2px;")
-        header.addWidget(title)
-        header.addStretch()
+        # Header (Draggable Area)
+        self.header = QWidget()
+        self.header.setFixedHeight(40)
+        header_layout = QHBoxLayout(self.header)
+        header_layout.setContentsMargins(0, 0, 0, 0)
         
-        close_app_btn = QPushButton("✕")
-        close_app_btn.setFixedSize(30, 30)
-        close_app_btn.setStyleSheet(f"""
+        # SVG Icon
+        self.icon_label = QLabel()
+        self.icon_label.setFixedSize(24, 24)
+        renderer = QSvgRenderer(SVG_ICON.encode('utf-8'))
+        pixmap = QPixmap(24, 24)
+        pixmap.fill(Qt.GlobalColor.transparent)
+        painter = QPainter(pixmap)
+        renderer.render(painter)
+        painter.end()
+        self.icon_label.setPixmap(pixmap)
+        header_layout.addWidget(self.icon_label)
+        
+        title = QLabel("SYSTEM // OPEN EXPLORERS")
+        title.setStyleSheet(f"color: {CP_CYAN}; font-size: 14pt; font-weight: bold; letter-spacing: 2px; margin-left: 10px;")
+        header_layout.addWidget(title)
+        header_layout.addStretch()
+        
+        # Minimize Button
+        self.min_btn = QPushButton("—")
+        self.min_btn.setFixedSize(30, 30)
+        self.min_btn.setStyleSheet(f"""
+            QPushButton {{
+                background-color: transparent;
+                color: {CP_YELLOW};
+                font-weight: bold;
+                border: none;
+            }}
+            QPushButton:hover {{
+                background-color: {CP_DIM};
+            }}
+        """)
+        self.min_btn.clicked.connect(self.showMinimized)
+        header_layout.addWidget(self.min_btn)
+        
+        # Close Button
+        self.close_btn = QPushButton("✕")
+        self.close_btn.setFixedSize(30, 30)
+        self.close_btn.setStyleSheet(f"""
             QPushButton {{
                 background-color: transparent;
                 color: {CP_RED};
-                font-size: 16pt;
+                font-size: 14pt;
                 font-weight: bold;
                 border: none;
             }}
@@ -113,14 +159,15 @@ class ExplorerManager(QMainWindow):
                 background-color: {CP_RED};
             }}
         """)
-        close_app_btn.clicked.connect(self.close)
-        header.addWidget(close_app_btn)
-        self.layout.addLayout(header)
+        self.close_btn.clicked.connect(self.close)
+        header_layout.addWidget(self.close_btn)
+        
+        self.layout.addWidget(self.header)
         
         # Divider
         line = QFrame()
         line.setFrameShape(QFrame.Shape.HLine)
-        line.setStyleSheet(f"background-color: {CP_CYAN}; max-height: 2px; margin-bottom: 10px;")
+        line.setStyleSheet(f"background-color: {CP_CYAN}; max-height: 2px; margin-bottom: 10px; border: none;")
         self.layout.addWidget(line)
         
         # Scroll Area for paths
@@ -142,6 +189,7 @@ class ExplorerManager(QMainWindow):
                 border: 1px solid {CP_YELLOW};
                 padding: 8px 15px;
                 font-weight: bold;
+                border-radius: 0px;
             }}
             QPushButton:hover {{
                 background-color: {CP_YELLOW};
@@ -162,8 +210,18 @@ class ExplorerManager(QMainWindow):
         # Initial scan
         self.scan_and_close()
 
+    # Window Dragging Methods
+    def mousePressEvent(self, event):
+        if event.button() == Qt.MouseButton.LeftButton:
+            self.dragPos = event.globalPosition().toPoint() - self.frameGeometry().topLeft()
+            event.accept()
+
+    def mouseMoveEvent(self, event):
+        if event.buttons() == Qt.MouseButton.LeftButton:
+            self.move(event.globalPosition().toPoint() - self.dragPos)
+            event.accept()
+
     def get_explorer_paths(self):
-        """Uses PowerShell to get all open Explorer paths robustly."""
         ps_script = '(New-Object -ComObject Shell.Application).Windows() | ForEach-Object { try { $_.Document.Folder.Self.Path } catch { $_.LocationURL } }'
         try:
             result = subprocess.run(['powershell', '-Command', ps_script], 
@@ -182,7 +240,6 @@ class ExplorerManager(QMainWindow):
             return []
 
     def close_explorer_windows(self):
-        """Uses PowerShell to close all open Explorer windows."""
         ps_script = '(New-Object -ComObject Shell.Application).Windows() | ForEach-Object { if ($_.Name -eq "Windows Explorer" -or $_.Name -eq "File Explorer") { $_.Quit() } }'
         try:
             subprocess.run(['powershell', '-Command', ps_script], check=True, creationflags=subprocess.CREATE_NO_WINDOW)
@@ -203,7 +260,6 @@ class ExplorerManager(QMainWindow):
             self.status_lbl.setText("No active explorers found.")
 
     def update_path_list(self, paths):
-        # Clear existing
         while self.paths_layout.count():
             child = self.paths_layout.takeAt(0)
             if child.widget():
@@ -226,7 +282,6 @@ class ExplorerManager(QMainWindow):
                 subprocess.run(['explorer.exe', 'shell:MyComputerFolder'])
             else:
                 os.startfile(path)
-            # GUI stays open as requested
             self.status_lbl.setText(f"Opened: {os.path.basename(path) if path != 'This PC' else path}")
         except Exception as e:
             self.status_lbl.setText(f"Error: {e}")
