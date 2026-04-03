@@ -287,6 +287,10 @@ class ExplorerManager(QMainWindow):
         QApplication.processEvents()
         
         paths = self.get_explorer_paths()
+        
+        # Save to JSON as requested
+        self.save_paths_to_json(paths)
+        
         if paths:
             self.close_explorer_windows()
             self.update_path_list(paths)
@@ -294,6 +298,15 @@ class ExplorerManager(QMainWindow):
         else:
             self.update_path_list([])
             self.status_lbl.setText("No active explorers found.")
+
+    def save_paths_to_json(self, paths):
+        output_path = r"C:\@delta\output\folder_list.json"
+        try:
+            os.makedirs(os.path.dirname(output_path), exist_ok=True)
+            with open(output_path, 'w', encoding='utf-8') as f:
+                json.dump(paths, f, indent=4)
+        except Exception as e:
+            print(f"Error saving JSON: {e}")
 
     def update_path_list(self, paths):
         while self.paths_layout.count():
