@@ -1138,5 +1138,11 @@
     "ID": "RedHat.Podman",
     "Source": "winget",
     "Category": "General"
+  },
+  {
+    "Name": "RancherDesktop [Docker Alternative]",
+    "ID": "SUSE.RancherDesktop",
+    "Source": "winget",
+    "Category": "General"
   }
 ]
