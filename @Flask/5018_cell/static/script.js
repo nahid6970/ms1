@@ -118,28 +118,31 @@ function initializeApp() {
                 return; // Don't save scroll position while searching to avoid overwriting with collapsed view
             }
 
-            if (initialLoadComplete && tableData.sheets[currentSheet]) {
-                const scrollPositions = JSON.parse(localStorage.getItem('sheetScrollPositions') || '{}');
-                const sheetName = tableData.sheets[currentSheet].name;
-                scrollPositions[sheetName] = {
-                    scrollTop: tableContainer.scrollTop,
-                    scrollLeft: tableContainer.scrollLeft
-                };
-                localStorage.setItem('sheetScrollPositions', JSON.stringify(scrollPositions));
-                
-                // Also save single row state if active to capture per-row scroll
-                if (singleRowMode) {
-                    saveSingleRowState();
-                }
+            // Debounce scroll saving to prevent lag during scrollbar dragging
+            clearTimeout(window.scrollSaveTimeout);
+            window.scrollSaveTimeout = setTimeout(() => {
+                if (initialLoadComplete && tableData.sheets[currentSheet]) {
+                    const scrollPositions = JSON.parse(localStorage.getItem('sheetScrollPositions') || '{}');
+                    const sheetName = tableData.sheets[currentSheet].name;
+                    scrollPositions[sheetName] = {
+                        scrollTop: tableContainer.scrollTop,
+                        scrollLeft: tableContainer.scrollLeft
+                    };
+                    localStorage.setItem('sheetScrollPositions', JSON.stringify(scrollPositions));
 
-                console.log(`[SCROLL] Auto-saved scroll for "${sheetName}":`, {
-                    scrollTop: tableContainer.scrollTop,
-                    scrollLeft: tableContainer.scrollLeft
-                });
-            }
+                    // Also save single row state if active to capture per-row scroll
+                    if (singleRowMode) {
+                        saveSingleRowState();
+                    }
+
+                    console.log(`[SCROLL] Auto-saved scroll for "${sheetName}":`, {
+                        scrollTop: tableContainer.scrollTop,
+                        scrollLeft: tableContainer.scrollLeft
+                    });
+                }
+            }, 500); // 500ms debounce
         });
     }
-
     // Track mouse position for F8 hover search
     document.addEventListener('mousemove', (e) => {
         lastMouseX = e.clientX;
