@@ -770,5 +770,16 @@
     "ExecutableType": "pythonw",
     "script_enabled": false,
     "added_at": 1775242478.333501
+  },
+  {
+    "name": "GlassWire",
+    "type": "App",
+    "paths": [
+      "C:\\Program Files (x86)\\GlassWire\\glasswire.exe"
+    ],
+    "Command": "-hide",
+    "ps1_command": "Start-Process -FilePath \"C:\\Program Files (x86)\\GlassWire\\glasswire.exe\" -ArgumentList \"-hide\"",
+    "ExecutableType": "other",
+    "added_at": 1775278696.850471
   }
 ]
