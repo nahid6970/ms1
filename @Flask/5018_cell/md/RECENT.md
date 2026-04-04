@@ -439,6 +439,8 @@
 - ✅ Added **Sticky Edit Mode** (📌 toggle) to prevent cells from exiting edit mode on blur.
 - ✅ Persisted sticky mode state in `localStorage`.
 - ✅ Implemented **Escape** key override to force-exit edit mode when sticky mode is active.
+- ✅ Fixed **Sticky Edit Mode** exiting when using F3 Quick Formatter tools (added action cooldown check).
+- ✅ Enhanced **Sticky Edit Mode** to persist state across cell re-renders (preserves `editing` class and focus when formatting is applied).
 - ✅ Documentation updated in `md/WYSIWYG_EDIT_MODE.md`.
 
 **Next Steps:**

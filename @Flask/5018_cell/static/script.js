@@ -2416,8 +2416,11 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
     const hasMarkdown = checkHasMarkdown(value);
     const isTextCell = inputElement && (inputElement.tagName === 'TEXTAREA' || inputElement.type === 'text');
 
-    // Remove existing preview
+    // NEW: Check if existing preview is being edited
     const existingPreview = cell.querySelector('.markdown-preview');
+    const wasEditing = existingPreview && existingPreview.classList.contains('editing');
+    const isFocused = existingPreview && document.activeElement === existingPreview;
+
     if (existingPreview) {
         existingPreview.remove();
     }
@@ -2677,6 +2680,13 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
                 return; // Skip blur processing when quick formatter is active
             }
 
+            // NEW: Prevent exit if an F3 action just occurred (within 200ms)
+            // This handles cases where F3 tools are used but don't explicitly refocus
+            const timeSinceF3 = Date.now() - lastQuickFormatterAction;
+            if (timeSinceF3 < 200) {
+                return;
+            }
+
             // NEW: Sticky Edit Mode - skip exit if enabled unless forced (Esc)
             const stickyToggle = document.getElementById('stickyEditToggle');
             const isForced = preview.dataset.forceBlur === 'true';
@@ -2768,6 +2778,23 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
         cell.style.position = 'relative';
         cell.appendChild(preview);
 
+        // NEW: Restore editing state if it was active
+        if (wasEditing) {
+            preview.classList.add('editing');
+            // Re-apply syntax highlighting for edit mode
+            preview.innerHTML = highlightSyntax(value);
+            adjustCellHeightForMarkdown(cell);
+            
+            if (isFocused) {
+                // Focus the new preview and try to restore cursor position if needed
+                // For simplicity, we just focus the element
+                preview.focus();
+                
+                // If it was a quick format action, we might want to put cursor at the end
+                // or restore previous offset. For now, simple focus is better than losing it.
+            }
+        }
+
         requestAnimationFrame(() => {
             drawWordConnectors(preview);
         });
@@ -2829,11 +2856,13 @@ function drawWordConnectors(previewElement) {
             svg.classList.add('word-connector-line');
             svg.style.left = (Math.min(startX, endX) - 3) + 'px';
             svg.style.top = y + 'px';
-            svg.style.width = (Math.abs(endX - startX) + 6) + 'px';
+            const width = Math.abs(endX - startX);
+            svg.style.width = (width + 6) + 'px';
             svg.style.height = '12px';
             svg.style.position = 'absolute';
             svg.style.overflow = 'visible';
 
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
             // Draw U-shaped bracket line with arrows: ↑─────↑
             const d = `M 3,9 L 3,2 M 3,9 L ${width + 3},9 M ${width + 3},9 L ${width + 3},2 M 1.5,4 L 3,2 L 4.5,4 M ${width + 1.5},4 L ${width + 3},2 L ${width + 4.5},4`;
             path.setAttribute('d', d);
@@ -9611,6 +9640,7 @@ let quickFormatterSelection = { start: 0, end: 0 };
 let quickFormatterScrollPosition = 0; // Save scroll position
 
 let selectedFormats = []; // Track selected formats for multi-apply
+let lastQuickFormatterAction = 0; // Timestamp of last F3 action
 
 function showQuickFormatter(inputElement) {
     quickFormatterTarget = inputElement;
@@ -9726,6 +9756,9 @@ function closeQuickFormatter() {
     quickFormatterTarget = null;
     selectedFormats = [];
     document.removeEventListener('click', closeQuickFormatterOnClickOutside);
+
+    // Save timestamp to prevent immediate blur from exiting edit mode
+    lastQuickFormatterAction = Date.now();
 
     // Restore scroll position
     const tableContainer = document.querySelector('.table-container');
