@@ -16994,3 +16994,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 });
+
+function toggleStickyEdit() {
+    const stickyEditToggle = document.getElementById('stickyEditToggle');
+    if (stickyEditToggle) {
+        localStorage.setItem('stickyEditEnabled', stickyEditToggle.checked);
+        showToast(stickyEditToggle.checked ? 'Sticky Edit Enabled' : 'Sticky Edit Disabled', 'info');
+    }
+}
+
+function loadStickyEditState() {
+    const stickyEditToggle = document.getElementById('stickyEditToggle');
+    if (stickyEditToggle) {
+        const stickyEditEnabled = localStorage.getItem('stickyEditEnabled') === 'true';
+        stickyEditToggle.checked = stickyEditEnabled;
+    }
+}
