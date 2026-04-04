@@ -257,9 +257,13 @@ class NetworkThread(threading.Thread):
     def __init__(self, stats):
         super().__init__(); self.stats = stats; self.daemon = True; self.running = True
         self._local_ips = self._get_local_ips()
-        # port -> pid cache, refreshed every 500ms
+        self._loopback_prefixes = ('127.', '::1')
+        # (src_ip, src_port, dst_ip, dst_port) -> pid  — flow cache for inbound PID resolution
+        self._flow_map = {}; self._flow_lock = threading.Lock()
+        # port -> pid connection table, refreshed every 200ms
         self._conn_map = {}; self._conn_lock = threading.Lock()
         threading.Thread(target=self._refresh_conns, daemon=True).start()
+        threading.Thread(target=self._expire_flows, daemon=True).start()
 
     def _get_local_ips(self):
         ips = set()
@@ -269,40 +273,89 @@ class NetworkThread(threading.Thread):
         return ips
 
     def _refresh_conns(self):
+        """Refresh local port->pid map every 200 ms."""
         while self.running:
             m = {}
             try:
                 for c in psutil.net_connections(kind='inet'):
-                    if c.laddr and c.pid: m[(c.laddr.ip, c.laddr.port)] = c.pid
+                    if c.laddr and c.pid:
+                        m[(c.laddr.ip, c.laddr.port)] = c.pid
+                        if c.laddr.ip in ('0.0.0.0', '::'):
+                            m[('*', c.laddr.port)] = c.pid
             except: pass
             with self._conn_lock: self._conn_map = m
-            time.sleep(0.2)  # 200ms — tighter than scapy version
+            time.sleep(0.2)
+
+    def _expire_flows(self):
+        """Evict flow-cache entries older than 60 s to prevent unbounded growth."""
+        while self.running:
+            time.sleep(30)
+            cutoff = time.monotonic() - 60
+            with self._flow_lock:
+                stale = [k for k, (pid, ts) in self._flow_map.items() if ts < cutoff]
+                for k in stale: del self._flow_map[k]
+
+    def _is_loopback(self, ip):
+        if not ip: return False
+        return ip.startswith(self._loopback_prefixes)
 
     def _get_pid(self, packet):
-        # pydivert provides process_id directly on Windows for outbound packets
-        if hasattr(packet, 'process_id') and packet.process_id:
-            return packet.process_id
-        # fallback: port lookup
+        """
+        Resolve PID using three methods:
+        1. WinDivert process_id (outbound only, most reliable).
+           Also stores the outbound flow so the matching inbound reply
+           can be attributed to the same process without a port-table hit.
+        2. Flow cache  — inbound reply matched to its outbound request.
+        3. Connection table lookup by local port (last resort).
+        """
+        src_ip = packet.ipv4.src_addr if packet.ipv4 else None
+        dst_ip = packet.ipv4.dst_addr if packet.ipv4 else None
+        sport = dport = 0
+        if packet.tcp:   sport = packet.tcp.src_port;  dport = packet.tcp.dst_port
+        elif packet.udp: sport = packet.udp.src_port;  dport = packet.udp.dst_port
+
+        # 1. WinDivert direct PID (outbound only)
+        pid = getattr(packet, 'process_id', None) or None
+        if pid and packet.is_outbound:
+            flow_key = (dst_ip, dport, src_ip, sport)   # reversed = what the reply looks like
+            with self._flow_lock:
+                self._flow_map[flow_key] = (pid, time.monotonic())
+            return pid
+        if pid:
+            return pid
+
+        # 2. Flow cache for inbound reply packets
+        if not packet.is_outbound:
+            flow_key = (src_ip, sport, dst_ip, dport)
+            with self._flow_lock:
+                entry = self._flow_map.get(flow_key)
+                if entry:
+                    self._flow_map[flow_key] = (entry[0], time.monotonic())
+                    return entry[0]
+
+        # 3. Connection table by local port
         with self._conn_lock:
-            src_ip = packet.ipv4.src_addr if packet.ipv4 else None
-            dst_ip = packet.ipv4.dst_addr if packet.ipv4 else None
-            sport = dport = 0
-            if packet.tcp: sport = packet.tcp.src_port; dport = packet.tcp.dst_port
-            elif packet.udp: sport = packet.udp.src_port; dport = packet.udp.dst_port
-            return self._conn_map.get((src_ip, sport)) or self._conn_map.get((dst_ip, dport))
+            if packet.is_outbound:
+                pid = self._conn_map.get((src_ip, sport)) or self._conn_map.get(('*', sport))
+            else:
+                pid = self._conn_map.get((dst_ip, dport)) or self._conn_map.get(('*', dport))
+        return pid
 
     def run(self):
         try:
-            with pydivert.WinDivert("ip", layer=pydivert.Layer.NETWORK, flags=pydivert.Flag.SNIFF) as w:
+            flt = ("ip and "
+                   "ip.SrcAddr != 127.0.0.1 and ip.DstAddr != 127.0.0.1 and "
+                   "ip.SrcAddr != 0.0.0.0 and ip.DstAddr != 0.0.0.0")
+            with pydivert.WinDivert(flt, layer=pydivert.Layer.NETWORK, flags=pydivert.Flag.SNIFF) as w:
                 for packet in w:
                     if not self.running: break
-                    pid = self._get_pid(packet)
-                    if pid is None and not packet.is_outbound:
-                        with self._conn_lock:
-                            dport = packet.tcp.dst_port if packet.tcp else (packet.udp.dst_port if packet.udp else 0)
-                            dst_ip = packet.ipv4.dst_addr if packet.ipv4 else None
-                            pid = self._conn_map.get((dst_ip, dport))
+                    src_ip = packet.ipv4.src_addr if packet.ipv4 else None
+                    dst_ip = packet.ipv4.dst_addr if packet.ipv4 else None
+                    if self._is_loopback(src_ip) or self._is_loopback(dst_ip):
+                        continue
                     size = len(packet.raw)
+                    if size > 65535: continue
+                    pid = self._get_pid(packet)
                     direction = 'sent' if packet.is_outbound else 'recv'
                     self.stats.update_packet(pid, size, direction)
         except Exception as e:
