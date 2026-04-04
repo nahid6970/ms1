@@ -19,6 +19,24 @@ DB_FILE = os.path.join(SETTINGS_DIR, "traffic.db")
 BLOCKED_FILE = os.path.join(SETTINGS_DIR, "blocked.json")
 ICON_FILE = os.path.join(SETTINGS_DIR, "icon.svg")
 
+import ipaddress
+
+# Private/LAN IP ranges (RFC 1918, link-local, CGNAT)
+_LAN_NETWORKS = [
+    ipaddress.ip_network('10.0.0.0/8'),
+    ipaddress.ip_network('172.16.0.0/12'),
+    ipaddress.ip_network('192.168.0.0/16'),
+    ipaddress.ip_network('169.254.0.0/16'),   # link-local
+    ipaddress.ip_network('100.64.0.0/10'),    # CGNAT
+]
+
+def is_private_ip(ip_str):
+    """Return True if the IP is a private/LAN address."""
+    try:
+        addr = ipaddress.ip_address(ip_str)
+        return any(addr in net for net in _LAN_NETWORKS)
+    except: return False
+
 def create_default_icon():
     if not os.path.exists(ICON_FILE):
         os.makedirs(SETTINGS_DIR, exist_ok=True)
@@ -210,46 +228,103 @@ class TrafficDB:
 class MonitorStats:
     def __init__(self, db):
         self.lock = threading.Lock(); self.db = db
-        self.proc_data = {}  # pid -> {name, exe, sent_total, recv_total, sent_curr, recv_curr}
-        self.sys_dl_total = 0; self.sys_ul_total = 0
-        self.sys_dl_curr = 0; self.sys_ul_curr = 0
-        # pre-load totals from DB (keyed by name, merged into proc_data when PID seen)
+        # pid -> {name, exe,
+        #         wan_recv_total, wan_sent_total, wan_recv_curr, wan_sent_curr,
+        #         lan_recv_total, lan_sent_total, lan_recv_curr, lan_sent_curr}
+        self.proc_data = {}
+        self.sys_wan_dl_total = 0; self.sys_wan_ul_total = 0
+        self.sys_wan_dl_curr = 0;  self.sys_wan_ul_curr = 0
+        self.sys_lan_dl_total = 0; self.sys_lan_ul_total = 0
+        self.sys_lan_dl_curr = 0;  self.sys_lan_ul_curr = 0
         self.db_totals = {}
         for name, (dl, ul) in db.load().items():
-            if name == '[SYSTEM/OTHER/VPN]': self.sys_dl_total = dl; self.sys_ul_total = ul
+            if name == '[SYSTEM/OTHER/VPN]': self.sys_wan_dl_total = dl; self.sys_wan_ul_total = ul
             else: self.db_totals[name] = (dl, ul)
 
-    def update_packet(self, pid, size, direction):
+    def update_packet(self, pid, size, direction, is_lan):
         with self.lock:
             if pid is None:
-                if direction == 'recv': self.sys_dl_curr += size; self.sys_dl_total += size
-                else: self.sys_ul_curr += size; self.sys_ul_total += size
+                if is_lan:
+                    if direction == 'recv': self.sys_lan_dl_curr += size; self.sys_lan_dl_total += size
+                    else:                   self.sys_lan_ul_curr += size; self.sys_lan_ul_total += size
+                else:
+                    if direction == 'recv': self.sys_wan_dl_curr += size; self.sys_wan_dl_total += size
+                    else:                   self.sys_wan_ul_curr += size; self.sys_wan_ul_total += size
                 return
             if pid not in self.proc_data:
                 try: p = psutil.Process(pid); name = p.name(); exe = p.exe()
                 except: name = f"PID {pid}"; exe = ""
                 dl0, ul0 = self.db_totals.pop(name, (0, 0))
-                self.proc_data[pid] = {'name': name, 'exe': exe, 'sent_total':ul0, 'recv_total':dl0, 'sent_curr':0, 'recv_curr':0}
+                self.proc_data[pid] = {
+                    'name': name, 'exe': exe,
+                    'wan_recv_total': dl0, 'wan_sent_total': ul0,
+                    'wan_recv_curr': 0,    'wan_sent_curr': 0,
+                    'lan_recv_total': 0,   'lan_sent_total': 0,
+                    'lan_recv_curr': 0,    'lan_sent_curr': 0,
+                }
             d = self.proc_data[pid]
-            if direction == 'sent': d['sent_total'] += size; d['sent_curr'] += size
-            else: d['recv_total'] += size; d['recv_curr'] += size
+            if is_lan:
+                if direction == 'sent': d['lan_sent_total'] += size; d['lan_sent_curr'] += size
+                else:                   d['lan_recv_total'] += size; d['lan_recv_curr'] += size
+            else:
+                if direction == 'sent': d['wan_sent_total'] += size; d['wan_sent_curr'] += size
+                else:                   d['wan_recv_total'] += size; d['wan_recv_curr'] += size
 
-    def get_snapshot(self):
+    def get_snapshot(self, scope='WAN & LAN'):
+        """
+        scope: 'WAN' | 'LAN' | 'WAN & LAN'
+        Returns (snap_list, dl_speed_total, ul_speed_total)
+        Each snap entry has: pid, name, exe, dl_speed, ul_speed, dl_total, ul_total
+        """
         with self.lock:
             snap = []
             for pid, d in self.proc_data.items():
-                dl = d['recv_curr']; ul = d['sent_curr']; d['recv_curr'] = 0; d['sent_curr'] = 0
+                if scope == 'WAN':
+                    dl_s = d['wan_recv_curr']; ul_s = d['wan_sent_curr']
+                    dl_t = d['wan_recv_total']; ul_t = d['wan_sent_total']
+                    d['wan_recv_curr'] = 0; d['wan_sent_curr'] = 0
+                elif scope == 'LAN':
+                    dl_s = d['lan_recv_curr']; ul_s = d['lan_sent_curr']
+                    dl_t = d['lan_recv_total']; ul_t = d['lan_sent_total']
+                    d['lan_recv_curr'] = 0; d['lan_sent_curr'] = 0
+                else:  # WAN & LAN
+                    dl_s = d['wan_recv_curr'] + d['lan_recv_curr']
+                    ul_s = d['wan_sent_curr'] + d['lan_sent_curr']
+                    dl_t = d['wan_recv_total'] + d['lan_recv_total']
+                    ul_t = d['wan_sent_total'] + d['lan_sent_total']
+                    d['wan_recv_curr'] = 0; d['wan_sent_curr'] = 0
+                    d['lan_recv_curr'] = 0; d['lan_sent_curr'] = 0
                 snap.append({'pid': pid, 'name': d['name'], 'exe': d['exe'],
-                             'dl_speed': dl, 'ul_speed': ul, 'dl_total': d['recv_total'], 'ul_total': d['sent_total']})
-            # include DB-only entries (not yet active this session)
+                             'dl_speed': dl_s, 'ul_speed': ul_s,
+                             'dl_total': dl_t, 'ul_total': ul_t})
+            # DB-only entries (loaded from disk, not yet seen this session)
             for name, (dl, ul) in self.db_totals.items():
-                snap.append({'pid': -1, 'name': name, 'exe': '', 'dl_speed': 0, 'ul_speed': 0, 'dl_total': dl, 'ul_total': ul})
+                snap.append({'pid': -1, 'name': name, 'exe': '',
+                             'dl_speed': 0, 'ul_speed': 0,
+                             'dl_total': dl if scope != 'LAN' else 0,
+                             'ul_total': ul if scope != 'LAN' else 0})
+            # SYSTEM/OTHER/VPN row
+            if scope == 'WAN':
+                sys_dl_s = self.sys_wan_dl_curr; sys_ul_s = self.sys_wan_ul_curr
+                sys_dl_t = self.sys_wan_dl_total; sys_ul_t = self.sys_wan_ul_total
+                self.sys_wan_dl_curr = 0; self.sys_wan_ul_curr = 0
+            elif scope == 'LAN':
+                sys_dl_s = self.sys_lan_dl_curr; sys_ul_s = self.sys_lan_ul_curr
+                sys_dl_t = self.sys_lan_dl_total; sys_ul_t = self.sys_lan_ul_total
+                self.sys_lan_dl_curr = 0; self.sys_lan_ul_curr = 0
+            else:
+                sys_dl_s = self.sys_wan_dl_curr + self.sys_lan_dl_curr
+                sys_ul_s = self.sys_wan_ul_curr + self.sys_lan_ul_curr
+                sys_dl_t = self.sys_wan_dl_total + self.sys_lan_dl_total
+                sys_ul_t = self.sys_wan_ul_total + self.sys_lan_ul_total
+                self.sys_wan_dl_curr = 0; self.sys_wan_ul_curr = 0
+                self.sys_lan_dl_curr = 0; self.sys_lan_ul_curr = 0
             snap.append({'pid': 0, 'name': '[SYSTEM/OTHER/VPN]', 'exe': '',
-                         'dl_speed': self.sys_dl_curr, 'ul_speed': self.sys_ul_curr,
-                         'dl_total': self.sys_dl_total, 'ul_total': self.sys_ul_total})
-            self.sys_dl_curr = 0; self.sys_ul_curr = 0
-            dl_t = sum(e['dl_speed'] for e in snap); ul_t = sum(e['ul_speed'] for e in snap)
-            return snap, dl_t, ul_t
+                         'dl_speed': sys_dl_s, 'ul_speed': sys_ul_s,
+                         'dl_total': sys_dl_t, 'ul_total': sys_ul_t})
+            dl_t_total = sum(e['dl_speed'] for e in snap)
+            ul_t_total = sum(e['ul_speed'] for e in snap)
+            return snap, dl_t_total, ul_t_total
 
 
 class NetworkThread(threading.Thread):
@@ -357,7 +432,10 @@ class NetworkThread(threading.Thread):
                     if size > 65535: continue
                     pid = self._get_pid(packet)
                     direction = 'sent' if packet.is_outbound else 'recv'
-                    self.stats.update_packet(pid, size, direction)
+                    # Classify WAN vs LAN: the remote end determines scope
+                    remote_ip = dst_ip if packet.is_outbound else src_ip
+                    is_lan = is_private_ip(remote_ip) if remote_ip else False
+                    self.stats.update_packet(pid, size, direction, is_lan)
         except Exception as e:
             print(f"[pydivert error] {e}")
 
@@ -504,7 +582,7 @@ class App(QMainWindow):
         self.hi_enabled=True; self.hi_color=CP_CYAN; self.hi_thickness=2
         self.hi_dl_s=True; self.hi_ul_s=True; self.hi_dl_t=True; self.hi_ul_t=True
         self.min_speed=0; self.min_total=0; self.filter_presets='0,0.001,0.01,0.1,1'
-        self.minimize_to_tray=True
+        self.minimize_to_tray=True; self.net_scope='WAN & LAN'
         try:
             if os.path.exists(SETTINGS_FILE):
                 with open(SETTINGS_FILE) as f: s = json.load(f)
@@ -520,6 +598,7 @@ class App(QMainWindow):
                 self.min_speed=s.get('min_speed',0); self.min_total=s.get('min_total',0)
                 self.filter_presets=s.get('filter_presets','0,0.001,0.01,0.1,1')
                 self.minimize_to_tray=s.get('minimize_to_tray',True)
+                self.net_scope=s.get('net_scope','WAN & LAN')
         except: pass
 
     def save_settings(self):
@@ -538,7 +617,8 @@ class App(QMainWindow):
                  'show_dl':self.show_dl,'show_ul':self.show_ul,'hi_enabled':self.hi_enabled,'hi_color':self.hi_color,
                  'hi_thickness':self.hi_thickness,'hi_dl_s':self.hi_dl_s,'hi_ul_s':self.hi_ul_s,
                  'hi_dl_t':self.hi_dl_t,'hi_ul_t':self.hi_ul_t,'min_speed':_ms,'min_total':_mt,
-                 'filter_presets':self.filter_presets,'minimize_to_tray':self.minimize_to_tray}
+                 'filter_presets':self.filter_presets,'minimize_to_tray':self.minimize_to_tray,
+                 'net_scope': self.net_scope}
             with open(SETTINGS_FILE,'w') as f: json.dump(s, f, indent=4)
         except: pass
 
@@ -556,6 +636,14 @@ class App(QMainWindow):
         self.filter_total_combo = QComboBox(); self.filter_total_combo.setFixedWidth(80)
         self.filter_total_combo.setStyleSheet(f'QComboBox{{background-color:{CP_PANEL};color:{CP_CYAN};border:1px solid {CP_DIM};padding:2px;}}')
         ht.addWidget(self.filter_total_combo)
+        # WAN / LAN scope selector
+        scl = QLabel("SCOPE:"); scl.setStyleSheet(f"color:{CP_DIM};font-size:9pt;"); ht.addWidget(scl)
+        self.scope_combo = QComboBox(); self.scope_combo.setFixedWidth(100)
+        self.scope_combo.setStyleSheet(f'QComboBox{{background-color:{CP_PANEL};color:{CP_YELLOW};border:1px solid {CP_DIM};padding:2px;font-weight:bold;}}')
+        self.scope_combo.addItems(['WAN & LAN', 'WAN', 'LAN'])
+        self.scope_combo.setCurrentText(self.net_scope)
+        self.scope_combo.currentTextChanged.connect(self._on_scope_changed)
+        ht.addWidget(self.scope_combo)
         self._rebuild_filter_combo()
         self.filter_combo.currentIndexChanged.connect(self.save_settings)
         self.filter_total_combo.currentIndexChanged.connect(self.save_settings)
@@ -656,8 +744,12 @@ class App(QMainWindow):
             return
         self.current_sort_col = i; self.current_sort_order = o; self.save_settings()
 
+    def _on_scope_changed(self, text):
+        self.net_scope = text
+        self.save_settings()
+
     def update_stats(self):
-        snap, dl_t, ul_t = self.stats.get_snapshot()
+        snap, dl_t, ul_t = self.stats.get_snapshot(self.net_scope)
         total_dl_acc = sum(e['dl_total'] for e in snap)
         total_ul_acc = sum(e['ul_total'] for e in snap)
         
