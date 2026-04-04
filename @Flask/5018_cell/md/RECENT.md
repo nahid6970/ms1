@@ -435,6 +435,12 @@
 - ✅ Persisted last used values using `localStorage` for cross-session use.
 - ✅ Automatically triggers replacement preview when using last values.
 
+### 🛠️ Sticky Edit Mode
+- ✅ Added **Sticky Edit Mode** (📌 toggle) to prevent cells from exiting edit mode on blur.
+- ✅ Persisted sticky mode state in `localStorage`.
+- ✅ Implemented **Escape** key override to force-exit edit mode when sticky mode is active.
+- ✅ Documentation updated in `md/WYSIWYG_EDIT_MODE.md`.
+
 **Next Steps:**
 - Test with various Nerd Font icon combinations
 - Verify export HTML renders correctly

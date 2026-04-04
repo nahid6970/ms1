@@ -20,6 +20,12 @@ The system uses a single `div` with `contenteditable="true"` (the `.markdown-pre
     *   **Clean Mode:** Markers remain completely hidden (True WYSIWYG).
 *   **Purpose:** Intuitive editing while maintaining visual context.
 
+### 3. Sticky Edit Mode (Optional)
+*   **Trigger:** Enabled via the 📌 toggle in the toolbar.
+*   **Behavior:** When active, the cell will **not** exit edit mode (re-render as clean preview) on `blur`. This allows the user to switch windows, copy text from other applications, or use the F3 Find & Replace modal without losing the interactive editing state.
+*   **Exiting:** To exit sticky edit mode for a cell, the user must press the **Escape** key.
+*   **Persistence:** The state of the 📌 toggle is saved in `localStorage`.
+
 ## Syntax Markers (`.syn-marker`)
 
 To keep the markers unobtrusive during editing, they are wrapped in a special span:

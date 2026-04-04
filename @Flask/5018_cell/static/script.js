@@ -262,6 +262,9 @@ function initializeApp() {
             }
         });
     }
+
+    // Initialize sticky edit mode
+    loadStickyEditState();
 }
 
 function loadColumnWidths() {
@@ -2519,6 +2522,15 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
 
         // NEW: Standardize line breaks and handle ZWS
         preview.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                // Force exit even if sticky mode is on
+                preview.dataset.forceBlur = 'true';
+                preview.blur();
+                delete preview.dataset.forceBlur;
+                return;
+            }
+
             if (e.key === 'Enter') {
                 e.preventDefault();
                 const selection = window.getSelection();
@@ -2663,6 +2675,13 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
             const quickFormatter = document.getElementById('quickFormatter');
             if (quickFormatter && quickFormatter.style.display === 'block') {
                 return; // Skip blur processing when quick formatter is active
+            }
+
+            // NEW: Sticky Edit Mode - skip exit if enabled unless forced (Esc)
+            const stickyToggle = document.getElementById('stickyEditToggle');
+            const isForced = preview.dataset.forceBlur === 'true';
+            if (stickyToggle && stickyToggle.checked && !isForced) {
+                return; // Keep edit mode active
             }
 
             preview.classList.remove('editing');
