@@ -19,6 +19,7 @@ let singleRowIndex = 0;
 let lastFocusedCell = null; // Track last focused cell for context-aware operations
 let lastMouseX = 0;
 let lastMouseY = 0;
+let lastTextReplacerValues = JSON.parse(localStorage.getItem('lastTextReplacerValues')) || { find: '', replace: '', caseSensitive: false };
 
 /**
  * MULTI-CELL OPERATION PATTERN:
@@ -16206,6 +16207,31 @@ function generateTextReplacePreview(cellContent, findText, replaceText, caseSens
     };
 }
 
+function useLastTextReplacerValues() {
+    if (!lastTextReplacerValues || !lastTextReplacerValues.find) {
+        showToast('No previous values found', 'info');
+        return;
+    }
+    
+    const findInput = document.getElementById('findTextInput');
+    const replaceInput = document.getElementById('replaceTextInput');
+    const caseCheckbox = document.getElementById('textReplaceCaseSensitive');
+    
+    if (findInput && replaceInput && caseCheckbox) {
+        findInput.value = lastTextReplacerValues.find;
+        replaceInput.value = lastTextReplacerValues.replace;
+        caseCheckbox.checked = lastTextReplacerValues.caseSensitive;
+        
+        // Trigger preview update
+        const inputEvent = new Event('input', { bubbles: true });
+        findInput.dispatchEvent(inputEvent);
+        replaceInput.dispatchEvent(inputEvent);
+        caseCheckbox.dispatchEvent(inputEvent);
+        
+        showToast('Applied last used values', 'success');
+    }
+}
+
 function applyTextReplace() {
     if (!quickFormatterTarget) return;
 
@@ -16217,6 +16243,14 @@ function applyTextReplace() {
         showToast('Please enter text to find', 'warning');
         return;
     }
+
+    // Save for "Use Last" feature
+    lastTextReplacerValues = {
+        find: findText,
+        replace: replaceText,
+        caseSensitive: caseSensitive
+    };
+    localStorage.setItem('lastTextReplacerValues', JSON.stringify(lastTextReplacerValues));
 
     // Get the cell's full content
     let cellContent = '';

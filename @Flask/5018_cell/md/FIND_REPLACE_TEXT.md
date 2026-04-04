@@ -24,6 +24,7 @@ The Find & Replace Text feature allows you to perform literal text replacement w
 
 ## Features
 
+- **Use Last Feature:** A "Use Last" button has been added to the modal. This button populates the find and replace fields with the values from the previous successful replacement operation, making it easier to repeat the same replacement across multiple cells or sheets. These values are persisted across sessions using `localStorage`.
 - **Real-time Preview:** See the number of matches and a "before/after" snippet as you type.
 - **Case Sensitivity Toggle:** Option to match exact casing or ignore it.
 - **Regex-Safe:** Special characters in the "Find Text" box are automatically escaped so they are treated as literal text.

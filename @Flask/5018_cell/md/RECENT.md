@@ -431,6 +431,10 @@
 - ✅ Custom color syntax works across table cells
 - ✅ Export HTML includes Nerd Font support
 
+- ✅ Added **Use Last** button to the modal to reuse previous search/replace values.
+- ✅ Persisted last used values using `localStorage` for cross-session use.
+- ✅ Automatically triggers replacement preview when using last values.
+
 **Next Steps:**
 - Test with various Nerd Font icon combinations
 - Verify export HTML renders correctly
