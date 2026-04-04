@@ -1132,5 +1132,11 @@
     "ID": "xiles.NexusFont",
     "Source": "winget",
     "Category": "General"
+  },
+  {
+    "Name": "RedHat.Podman [Docker Alternative]",
+    "ID": "RedHat.Podman",
+    "Source": "winget",
+    "Category": "General"
   }
 ]
