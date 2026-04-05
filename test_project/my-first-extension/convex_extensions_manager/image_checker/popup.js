@@ -91,39 +91,39 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // Save to Python server button
-    const saveToPythonBtn = document.getElementById('saveToPython');
-    if (saveToPythonBtn) {
-        saveToPythonBtn.addEventListener('click', function () {
-            const originalText = saveToPythonBtn.textContent;
-            const originalBg = saveToPythonBtn.style.background;
+    // Save to Convex button
+    const saveToConvexBtn = document.getElementById('saveToConvex');
+    if (saveToConvexBtn) {
+        saveToConvexBtn.addEventListener('click', function () {
+            const originalText = saveToConvexBtn.textContent;
+            const originalBg = saveToConvexBtn.style.background;
             
-            saveToPythonBtn.textContent = '⏳ Saving...';
-            saveToPythonBtn.disabled = true;
+            saveToConvexBtn.textContent = '⏳ Saving...';
+            saveToConvexBtn.disabled = true;
             
             chrome.storage.local.get(null, function (items) {
                 // Send message to background script to save
                 chrome.runtime.sendMessage({
-                    action: 'saveToPython',
+                    action: 'saveToConvex',
                     data: items
                 }, function (response) {
-                    saveToPythonBtn.disabled = false;
+                    saveToConvexBtn.disabled = false;
                     
                     if (response && response.success !== false) {
                         // Success
-                        saveToPythonBtn.textContent = '✅ Saved!';
-                        saveToPythonBtn.style.background = '#4CAF50';
+                        saveToConvexBtn.textContent = '✅ Saved!';
+                        saveToConvexBtn.style.background = '#4CAF50';
                         setTimeout(() => {
-                            saveToPythonBtn.textContent = originalText;
-                            saveToPythonBtn.style.background = originalBg;
+                            saveToConvexBtn.textContent = originalText;
+                            saveToConvexBtn.style.background = originalBg;
                         }, 2000);
                     } else {
                         // Failed
-                        saveToPythonBtn.textContent = '❌ Failed';
-                        saveToPythonBtn.style.background = '#f44336';
+                        saveToConvexBtn.textContent = '❌ Failed';
+                        saveToConvexBtn.style.background = '#f44336';
                         setTimeout(() => {
-                            saveToPythonBtn.textContent = originalText;
-                            saveToPythonBtn.style.background = originalBg;
+                            saveToConvexBtn.textContent = originalText;
+                            saveToConvexBtn.style.background = originalBg;
                         }, 2000);
                     }
                 });
@@ -131,27 +131,27 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Load from Python server button
-    const loadFromPythonBtn = document.getElementById('loadFromPython');
-    if (loadFromPythonBtn) {
-        loadFromPythonBtn.addEventListener('click', function () {
-            const originalText = loadFromPythonBtn.textContent;
-            const originalBg = loadFromPythonBtn.style.background;
+    // Load from Convex button
+    const loadFromConvexBtn = document.getElementById('loadFromConvex');
+    if (loadFromConvexBtn) {
+        loadFromConvexBtn.addEventListener('click', function () {
+            const originalText = loadFromConvexBtn.textContent;
+            const originalBg = loadFromConvexBtn.style.background;
             
-            loadFromPythonBtn.textContent = '⏳ Loading...';
-            loadFromPythonBtn.disabled = true;
+            loadFromConvexBtn.textContent = '⏳ Loading...';
+            loadFromConvexBtn.disabled = true;
             
             chrome.runtime.sendMessage({
-                action: 'loadFromPython'
+                action: 'loadFromConvex'
             }, function (response) {
-                loadFromPythonBtn.disabled = false;
+                loadFromConvexBtn.disabled = false;
                 
                 if (response && response.success !== false && response.data) {
                     chrome.storage.local.set(response.data, () => {
-                        loadFromPythonBtn.textContent = '✅ Loaded!';
-                        loadFromPythonBtn.style.background = '#4CAF50';
+                        loadFromConvexBtn.textContent = '✅ Loaded!';
+                        loadFromConvexBtn.style.background = '#4CAF50';
                         
-                        alert('Data loaded from Python server! Refresh the page to see changes.');
+                        alert('Data loaded from Convex! Refresh the page to see changes.');
                         
                         // Notify active tab to refresh
                         chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -161,17 +161,17 @@ document.addEventListener('DOMContentLoaded', function () {
                         });
 
                         setTimeout(() => {
-                            loadFromPythonBtn.textContent = originalText;
-                            loadFromPythonBtn.style.background = originalBg;
+                            loadFromConvexBtn.textContent = originalText;
+                            loadFromConvexBtn.style.background = originalBg;
                         }, 2000);
                     });
                 } else {
-                    loadFromPythonBtn.textContent = '❌ Failed';
-                    loadFromPythonBtn.style.background = '#f44336';
-                    alert('Failed to load from Python server. Make sure the server is running and data exists.');
+                    loadFromConvexBtn.textContent = '❌ Failed';
+                    loadFromConvexBtn.style.background = '#f44336';
+                    alert('Failed to load from Convex.');
                     setTimeout(() => {
-                        loadFromPythonBtn.textContent = originalText;
-                        loadFromPythonBtn.style.background = originalBg;
+                        loadFromConvexBtn.textContent = originalText;
+                        loadFromConvexBtn.style.background = originalBg;
                     }, 2000);
                 }
             });

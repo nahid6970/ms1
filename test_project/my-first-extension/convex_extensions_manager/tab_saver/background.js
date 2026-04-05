@@ -151,14 +151,14 @@ function saveTab(savedTabs, tab, favicon, channelIcon = null) {
 
 // Handle manual save/load requests from popup
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.action === 'saveToPython') {
+  if (message.action === 'saveToConvex') {
     sendDataToConvex(message.data)
       .then(result => sendResponse(result))
       .catch(error => sendResponse({ success: false, error: error.message }));
     return true;
   }
   
-  if (message.action === 'loadFromPython') {
+  if (message.action === 'loadFromConvex') {
     loadDataFromConvex()
       .then(result => sendResponse(result))
       .catch(error => sendResponse({ success: false, error: error.message }));

@@ -221,13 +221,13 @@
     color: #666;
 }
 
-    .btn-python-save.loading {
+    .btn-convex-save.loading {
         opacity: 0.7;
         cursor: wait;
         pointer-events: none;
     }
 
-    .btn-python-save.success {
+    .btn-convex-save.success {
         background: #28a745 !important;
         animation: pulse-green 0.5s ease-in-out;
     }

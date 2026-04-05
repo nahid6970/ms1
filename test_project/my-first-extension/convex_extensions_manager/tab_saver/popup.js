@@ -125,12 +125,12 @@ function showButtonFeedback(button, success, message) {
   }, 2000);
 }
 
-// Save to Python server
-document.getElementById('saveToPython').addEventListener('click', (e) => {
+// Save to Convex
+document.getElementById('saveToConvex').addEventListener('click', (e) => {
   const button = e.target;
   chrome.storage.local.get(null, (items) => {
     chrome.runtime.sendMessage({
-      action: 'saveToPython',
+      action: 'saveToConvex',
       data: items
     }, (response) => {
       if (response && response.success !== false) {
@@ -142,11 +142,11 @@ document.getElementById('saveToPython').addEventListener('click', (e) => {
   });
 });
 
-// Load from Python server
-document.getElementById('loadFromPython').addEventListener('click', (e) => {
+// Load from Convex
+document.getElementById('loadFromConvex').addEventListener('click', (e) => {
   const button = e.target;
   chrome.runtime.sendMessage({
-    action: 'loadFromPython'
+    action: 'loadFromConvex'
   }, (response) => {
     if (response && response.success && response.data) {
       chrome.storage.local.set(response.data, () => {

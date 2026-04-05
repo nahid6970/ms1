@@ -1,8 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
   const clearBtn = document.getElementById('clearBtn');
   const status = document.getElementById('status');
-  const saveToPythonBtn = document.getElementById('saveToPython');
-  const loadFromPythonBtn = document.getElementById('loadFromPython');
+  const saveToConvexBtn = document.getElementById('saveToConvex');
+  const loadFromConvexBtn = document.getElementById('loadFromConvex');
   const saveColorsBtn = document.getElementById('saveColors');
   const reloadExtensionBtn = document.getElementById('reloadExtension');
 
@@ -109,37 +109,37 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => status.textContent = '', duration);
   }
 
-  // Save to Python server button
-  if (saveToPythonBtn) {
-    saveToPythonBtn.addEventListener('click', function () {
-      const originalContent = saveToPythonBtn.innerHTML;
-      saveToPythonBtn.classList.add('loading');
-      saveToPythonBtn.innerHTML = '<span>⏳</span> Saving...';
+  // Save to Convex button
+  if (saveToConvexBtn) {
+    saveToConvexBtn.addEventListener('click', function () {
+      const originalContent = saveToConvexBtn.innerHTML;
+      saveToConvexBtn.classList.add('loading');
+      saveToConvexBtn.innerHTML = '<span>⏳</span> Saving...';
 
       chrome.storage.local.get(null, function (items) {
         // Send message to background script to save
         chrome.runtime.sendMessage({
-          action: 'saveToPython',
+          action: 'saveToConvex',
           data: items
         }, function (response) {
-          saveToPythonBtn.classList.remove('loading');
+          saveToConvexBtn.classList.remove('loading');
           
           // Check if response exists and doesn't have success: false
           if (response && response.success !== false) {
-            saveToPythonBtn.classList.add('success');
-            saveToPythonBtn.innerHTML = '<span>✅</span> Saved!';
-            showStatus('Data saved to Python server!');
+            saveToConvexBtn.classList.add('success');
+            saveToConvexBtn.innerHTML = '<span>✅</span> Saved!';
+            showStatus('Data saved to Convex!');
             
             setTimeout(() => {
-              saveToPythonBtn.classList.remove('success');
-              saveToPythonBtn.innerHTML = originalContent;
+              saveToConvexBtn.classList.remove('success');
+              saveToConvexBtn.innerHTML = originalContent;
             }, 2000);
           } else {
-            saveToPythonBtn.innerHTML = '<span>❌</span> Failed';
-            showStatus('Failed to save to Python server. Make sure the server is running.');
+            saveToConvexBtn.innerHTML = '<span>❌</span> Failed';
+            showStatus('Failed to save to Convex.');
             
             setTimeout(() => {
-              saveToPythonBtn.innerHTML = originalContent;
+              saveToConvexBtn.innerHTML = originalContent;
             }, 2000);
           }
         });
@@ -147,15 +147,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Load from Python server button
-  if (loadFromPythonBtn) {
-    loadFromPythonBtn.addEventListener('click', function () {
+  // Load from Convex button
+  if (loadFromConvexBtn) {
+    loadFromConvexBtn.addEventListener('click', function () {
       chrome.runtime.sendMessage({
-        action: 'loadFromPython'
+        action: 'loadFromConvex'
       }, function (response) {
         if (response && response.success !== false && response.data) {
           chrome.storage.local.set(response.data, () => {
-            showStatus('Data loaded from Python server! Refresh pages to see changes.');
+            showStatus('Data loaded from Convex! Refresh pages to see changes.');
             // Notify all tabs to refresh
             chrome.tabs.query({}, (tabs) => {
               tabs.forEach(tab => {
@@ -164,7 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
           });
         } else {
-          showStatus('Failed to load from Python server. Make sure the server is running.');
+          showStatus('Failed to load from Convex.');
         }
       });
     });

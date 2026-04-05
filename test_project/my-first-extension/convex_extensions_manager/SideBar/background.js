@@ -45,14 +45,14 @@ chrome.storage.sync.onChanged.addListener((changes, areaName) => {
 
 // Handle manual save/load requests from popup
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.action === 'saveToPython') { // Keeping action name for compatibility or updating if preferred
+  if (message.action === 'saveToConvex') { // Keeping action name for compatibility or updating if preferred
     sendDataToConvex(message.data)
       .then(result => sendResponse(result))
       .catch(error => sendResponse({ success: false, error: error.message }));
     return true; 
   }
   
-  if (message.action === 'loadFromPython') {
+  if (message.action === 'loadFromConvex') {
     loadDataFromConvex()
       .then(result => sendResponse(result))
       .catch(error => sendResponse({ success: false, error: error.message }));

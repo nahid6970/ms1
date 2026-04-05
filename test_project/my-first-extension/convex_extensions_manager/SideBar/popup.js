@@ -6,8 +6,8 @@ const linksContainer = document.getElementById('links-container');
 const addBtn = document.getElementById('add-btn');
 const settingsBtn = document.getElementById('settings-btn');
 const addFirstBtn = document.getElementById('add-first-btn');
-const saveToPythonBtn = document.getElementById('saveToPython');
-const loadFromPythonBtn = document.getElementById('loadFromPython');
+const saveToConvexBtn = document.getElementById('saveToConvex');
+const loadFromConvexBtn = document.getElementById('loadFromConvex');
 const reloadBtn = document.getElementById('reload-extension');
 
 // Context Menu Elements
@@ -226,38 +226,38 @@ if (reloadBtn) {
     });
 }
 
-// Save to Python server button handler
-if (saveToPythonBtn) {
-    saveToPythonBtn.addEventListener('click', function () {
-        const originalContent = saveToPythonBtn.innerHTML;
+// Save to Convex button handler
+if (saveToConvexBtn) {
+    saveToConvexBtn.addEventListener('click', function () {
+        const originalContent = saveToConvexBtn.innerHTML;
         // Show spinning sync icon
-        saveToPythonBtn.innerHTML = `
+        saveToConvexBtn.innerHTML = `
             <svg viewBox="0 0 24 24" width="16" height="16">
                 <path fill="currentColor" d="M12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18Z" />
             </svg>`;
-        saveToPythonBtn.classList.add('loading');
+        saveToConvexBtn.classList.add('loading');
         
         chrome.storage.sync.get(null, function (items) {
             chrome.runtime.sendMessage({
-                action: 'saveToPython',
+                action: 'saveToConvex',
                 data: items
             }, function (response) {
-                saveToPythonBtn.classList.remove('loading');
+                saveToConvexBtn.classList.remove('loading');
                 if (response && response.success !== false) {
-                    saveToPythonBtn.classList.add('success');
-                    saveToPythonBtn.innerHTML = `
+                    saveToConvexBtn.classList.add('success');
+                    saveToConvexBtn.innerHTML = `
                         <svg viewBox="0 0 24 24" width="16" height="16">
                             <path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z" />
                         </svg>`;
                     setTimeout(() => {
-                        saveToPythonBtn.innerHTML = originalContent;
-                        saveToPythonBtn.classList.remove('success');
+                        saveToConvexBtn.innerHTML = originalContent;
+                        saveToConvexBtn.classList.remove('success');
                     }, 2000);
                 } else {
-                    saveToPythonBtn.classList.add('error');
+                    saveToConvexBtn.classList.add('error');
                     setTimeout(() => {
-                        saveToPythonBtn.innerHTML = originalContent;
-                        saveToPythonBtn.classList.remove('error');
+                        saveToConvexBtn.innerHTML = originalContent;
+                        saveToConvexBtn.classList.remove('error');
                     }, 2000);
                 }
             });
@@ -265,25 +265,25 @@ if (saveToPythonBtn) {
     });
 }
 
-// Load from Python server button handler
-if (loadFromPythonBtn) {
-    loadFromPythonBtn.addEventListener('click', function () {
-        const originalContent = loadFromPythonBtn.innerHTML;
+// Load from Convex button handler
+if (loadFromConvexBtn) {
+    loadFromConvexBtn.addEventListener('click', function () {
+        const originalContent = loadFromConvexBtn.innerHTML;
         // Show spinning sync icon
-        loadFromPythonBtn.innerHTML = `
+        loadFromConvexBtn.innerHTML = `
             <svg viewBox="0 0 24 24" width="16" height="16">
                 <path fill="currentColor" d="M12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18Z" />
             </svg>`;
-        loadFromPythonBtn.classList.add('loading');
+        loadFromConvexBtn.classList.add('loading');
 
         chrome.runtime.sendMessage({
-            action: 'loadFromPython'
+            action: 'loadFromConvex'
         }, function (response) {
-            loadFromPythonBtn.classList.remove('loading');
+            loadFromConvexBtn.classList.remove('loading');
             if (response && response.success !== false && response.data) {
                 chrome.storage.sync.set(response.data, () => {
-                    loadFromPythonBtn.classList.add('success');
-                    loadFromPythonBtn.innerHTML = `
+                    loadFromConvexBtn.classList.add('success');
+                    loadFromConvexBtn.innerHTML = `
                         <svg viewBox="0 0 24 24" width="16" height="16">
                             <path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z" />
                         </svg>`;
@@ -293,15 +293,15 @@ if (loadFromPythonBtn) {
                         renderLinks();
                     }
                     setTimeout(() => {
-                        loadFromPythonBtn.innerHTML = originalContent;
-                        loadFromPythonBtn.classList.remove('success');
+                        loadFromConvexBtn.innerHTML = originalContent;
+                        loadFromConvexBtn.classList.remove('success');
                     }, 2000);
                 });
             } else {
-                loadFromPythonBtn.classList.add('error');
+                loadFromConvexBtn.classList.add('error');
                 setTimeout(() => {
-                    loadFromPythonBtn.innerHTML = originalContent;
-                    loadFromPythonBtn.classList.remove('error');
+                    loadFromConvexBtn.innerHTML = originalContent;
+                    loadFromConvexBtn.classList.remove('error');
                 }, 2000);
             }
         });
