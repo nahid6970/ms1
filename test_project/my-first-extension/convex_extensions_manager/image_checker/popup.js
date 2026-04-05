@@ -67,29 +67,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    const exportBtn = document.getElementById('exportData');
-    exportBtn.addEventListener('click', function () {
-        chrome.storage.local.get(['seenItems'], function (result) {
-            const seenItems = result.seenItems || {};
-
-            // Create JSON data
-            const exportData = {
-                exportDate: new Date().toISOString(),
-                totalItems: Object.keys(seenItems).length,
-                data: seenItems
-            };
-
-            // Create and download file
-            const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-
-            chrome.downloads.download({
-                url: url,
-                filename: `image-checker-data-${new Date().toISOString().split('T')[0]}.json`,
-                saveAs: true
-            });
-        });
-    });
 
     // Save to Convex button
     const saveToConvexBtn = document.getElementById('saveToConvex');
@@ -178,68 +155,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Import functionality
-    const importBtn = document.getElementById('importData');
-    const fileInput = document.getElementById('fileInput');
-
-    importBtn.addEventListener('click', function () {
-        fileInput.click();
-    });
-
-    fileInput.addEventListener('change', function (event) {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = function (e) {
-            try {
-                const importData = JSON.parse(e.target.result);
-
-                // Validate the data structure
-                if (importData.data && typeof importData.data === 'object') {
-                    // Merge with existing data or replace
-                    chrome.storage.local.get(['seenItems'], function (result) {
-                        const existingData = result.seenItems || {};
-
-                        // Ask user if they want to merge or replace
-                        const shouldMerge = confirm(
-                            `Import ${importData.totalItems || Object.keys(importData.data).length} items?\n\n` +
-                            'Click OK to MERGE with existing data\n' +
-                            'Click Cancel to REPLACE all existing data'
-                        );
-
-                        let finalData;
-                        if (shouldMerge) {
-                            // Merge data
-                            finalData = { ...existingData, ...importData.data };
-                        } else {
-                            // Replace all data
-                            finalData = importData.data;
-                        }
-
-                        // Save to storage
-                        chrome.storage.local.set({ seenItems: finalData }, function () {
-                            alert('Data imported successfully! Refresh the page to see restored checkmarks.');
-
-                            // Refresh current tab to show imported checkmarks
-                            chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-                                chrome.tabs.reload(tabs[0].id);
-                            });
-                        });
-                    });
-                } else {
-                    alert('Invalid file format. Please select a valid Image Checker export file.');
-                }
-            } catch (error) {
-                alert('Error reading file. Please make sure it\'s a valid JSON file.');
-            }
-        };
-
-        reader.readAsText(file);
-
-        // Reset file input
-        fileInput.value = '';
-    });
 
     // Settings functionality
     const settingsToggle = document.getElementById('settingsToggle');
