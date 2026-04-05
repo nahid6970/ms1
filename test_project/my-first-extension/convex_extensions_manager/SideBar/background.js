@@ -52,6 +52,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return true; 
   }
   
+  if (message.action === 'getSmartFavicon') {
+    getSmartFavicon(message.url)
+      .then(icon => sendResponse(icon));
+    return true;
+  }
+
   if (message.action === 'loadFromConvex') {
     loadDataFromConvex()
       .then(result => sendResponse(result))
@@ -77,25 +83,56 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
   }
 });
 
-function addUrlToSidebar(url, title, favIconUrl) {
+
+async function getSmartFavicon(url) {
+  try {
+    const urlObj = new URL(url);
+    const domain = urlObj.hostname.replace('www.', '');
+
+    if (domain === 'github.com') {
+      const parts = urlObj.pathname.split('/').filter(p => p);
+      if (parts.length >= 1) return `https://github.com/${parts[0]}.png`;
+    }
+
+    if (domain.includes('youtube.com') || domain.includes('youtu.be')) {
+      try {
+        const res = await fetch(`https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.thumbnail_url) return data.thumbnail_url;
+        }
+      } catch (e) {}
+    }
+
+    const googleIcons = {
+      'mail.google.com': 'https://ssl.gstatic.com/ui/v1/icons/mail/images/favicon5.ico',
+      'drive.google.com': 'https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_48dp.png',
+      'docs.google.com': 'https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico',
+      'sheets.google.com': 'https://ssl.gstatic.com/docs/spreadsheets/favicon3.ico',
+      'slides.google.com': 'https://ssl.gstatic.com/docs/presentations/images/favicon5.ico',
+      'calendar.google.com': 'https://ssl.gstatic.com/calendar/images/favicon_v2014_15.ico',
+      'meet.google.com': 'https://www.google.com/s2/favicons?domain=meet.google.com&sz=128',
+      'photos.google.com': 'https://ssl.gstatic.com/social/white/br/p-v1.png',
+    };
+    if (googleIcons[urlObj.hostname]) return googleIcons[urlObj.hostname];
+
+    return `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
+  } catch (e) {
+    return `https://www.google.com/s2/favicons?domain=&sz=64`;
+  }
+}
+
+async function addUrlToSidebar(url, title) {
   if (!url) return;
 
-  chrome.storage.sync.get(['sidebar_links'], (result) => {
+  chrome.storage.sync.get(['sidebar_links'], async (result) => {
     let links = result.sidebar_links || [];
-    
-    // Check if URL already exists
-    if (links.some(l => l.url === url)) {
-      console.log('Link already exists in sidebar');
-      return;
-    }
+    if (links.some(l => l.url === url)) return;
 
     let domain = '';
-    try {
-        domain = new URL(url).hostname;
-    } catch (e) {
-        console.error('Invalid URL:', url);
-        return;
-    }
+    try { domain = new URL(url).hostname; } catch (e) { return; }
+
+    const icon = await getSmartFavicon(url);
 
     const newLink = {
       id: Date.now().toString(),
@@ -103,13 +140,12 @@ function addUrlToSidebar(url, title, favIconUrl) {
       url: url,
       color: '#38bdf8',
       isSolid: false,
-      icon: favIconUrl || `https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${url}&size=64`
+      icon
     };
 
     links.push(newLink);
-
     chrome.storage.sync.set({ sidebar_links: links }, () => {
-       console.log('Added to sidebar:', newLink);
+      console.log('Added to sidebar:', newLink);
     });
   });
 }
