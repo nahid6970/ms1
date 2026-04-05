@@ -160,10 +160,7 @@
   
   settingsOverlay.onclick = (e) => { if (e.target === settingsOverlay) settingsOverlay.classList.remove('visible'); };
 
-
-  }
-
-    saveBtn.onclick = () => {
+  saveBtn.onclick = () => {
     const title = titleInput.value.trim();
     let url = urlInput.value.trim();
     const imgUrl = imgInput.value.trim();
