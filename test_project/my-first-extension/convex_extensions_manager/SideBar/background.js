@@ -45,7 +45,7 @@ chrome.storage.sync.onChanged.addListener((changes, areaName) => {
 
 // Handle manual save/load requests from popup
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.action === 'saveToConvex') { // Keeping action name for compatibility or updating if preferred
+  if (message.action === 'saveToConvex') {
     sendDataToConvex(message.data)
       .then(result => sendResponse(result))
       .catch(error => sendResponse({ success: false, error: error.message }));
@@ -66,20 +66,25 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 });
 
-// Context Menu Setup
-chrome.runtime.onInstalled.addListener(() => {
-  chrome.contextMenus.create({
-    id: "add-to-sidebar",
-    title: "Add to Quick Sidebar",
-    contexts: ["page", "link"]
+// Context Menu Setup - Fixed to be more robust
+function setupContextMenu() {
+  chrome.contextMenus.removeAll(() => {
+    chrome.contextMenus.create({
+      id: "add-to-sidebar",
+      title: "Add to Quick Sidebar",
+      contexts: ["page", "link"]
+    });
   });
-});
+}
+
+chrome.runtime.onInstalled.addListener(setupContextMenu);
+chrome.runtime.onStartup.addListener(setupContextMenu);
 
 chrome.contextMenus.onClicked.addListener((info, tab) => {
   if (info.menuItemId === "add-to-sidebar") {
     const urlToAdd = info.linkUrl || info.pageUrl || tab.url;
     const titleToAdd = info.selectionText || tab.title || "New Link";
-    addUrlToSidebar(urlToAdd, titleToAdd, tab.favIconUrl);
+    addUrlToSidebar(urlToAdd, titleToAdd);
   }
 });
 
@@ -89,11 +94,27 @@ async function getSmartFavicon(url) {
     const urlObj = new URL(url);
     const domain = urlObj.hostname.replace('www.', '');
 
+    // 1. Specialized logic for GitHub
     if (domain === 'github.com') {
       const parts = urlObj.pathname.split('/').filter(p => p);
       if (parts.length >= 1) return `https://github.com/${parts[0]}.png`;
     }
 
+    // 2. Use Convex action for YouTube channels and Facebook (CORS bypass)
+    const isYouTubeChannel = (domain.includes('youtube.com') || domain.includes('youtu.be')) && 
+                             (urlObj.pathname.includes('/@') || urlObj.pathname.includes('/channel/') || urlObj.pathname.includes('/c/'));
+    const isFacebook = domain.includes('facebook.com');
+
+    if (isYouTubeChannel || isFacebook) {
+      try {
+        const icon = await client.action("actions:getFavicon", { url });
+        if (icon) return icon;
+      } catch (e) {
+        console.error("Convex action failed for favicon:", e);
+      }
+    }
+
+    // 3. Fallback to oEmbed for YouTube videos
     if (domain.includes('youtube.com') || domain.includes('youtu.be')) {
       try {
         const res = await fetch(`https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`);
@@ -104,6 +125,7 @@ async function getSmartFavicon(url) {
       } catch (e) {}
     }
 
+    // 4. Google services icons
     const googleIcons = {
       'mail.google.com': 'https://ssl.gstatic.com/ui/v1/icons/mail/images/favicon5.ico',
       'drive.google.com': 'https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_48dp.png',
@@ -116,9 +138,10 @@ async function getSmartFavicon(url) {
     };
     if (googleIcons[urlObj.hostname]) return googleIcons[urlObj.hostname];
 
-    return `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
+    // 5. Default Google Favicon Service
+    return `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
   } catch (e) {
-    return `https://www.google.com/s2/favicons?domain=&sz=64`;
+    return `https://www.google.com/s2/favicons?domain=&sz=128`;
   }
 }
 

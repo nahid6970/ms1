@@ -1,0 +1,16 @@
+# SideBar Known Issues - FIXED
+
+## 1. YouTube Channel Favicon - [FIXED]
+**Problem:** YouTube channel avatars were falling back to generic icons.
+**Fix:** Implemented a Convex server-side action (`convex/actions.ts`) to fetch the page HTML and extract the `og:image`, bypassing CORS.
+
+## 2. Facebook Favicon - [FIXED]
+**Problem:** Facebook profile/page icons were falling back to generic icons due to CORS.
+**Fix:** Implemented the same Convex server-side action to extract `og:image` server-side.
+
+## 3. Context Menu Disappears After Extension Update - [FIXED]
+**Problem:** The right-click menu would vanish after reloads.
+**Fix:** Added `chrome.runtime.onStartup` listener and implemented a robust `setupContextMenu` function that uses `removeAll` before recreating the menu.
+
+---
+*Last Updated: April 6, 2026*
