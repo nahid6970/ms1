@@ -1025,10 +1025,7 @@ class MainWindow(QMainWindow):
             
         commits = result["success"]
         dialog = FileTimelineDialog(self, rel_path, commits, self.restored_files.get(rel_path), base_dir)
-        if dialog.exec():
-            commit_hash = dialog.selected_commit
-            if commit_hash:
-                self.restore_file_by_path(rel_path, commit_hash)
+        dialog.exec()
 
     def open_file_timeline(self, idx):
         """Show timeline of all versions for a specific file"""
@@ -1050,27 +1047,7 @@ class MainWindow(QMainWindow):
             
         commits = result["success"]
         dialog = FileTimelineDialog(self, rel_path, commits, self.restored_files.get(rel_path), base_dir)
-        if dialog.exec():
-            commit_hash = dialog.selected_commit
-            if commit_hash:
-                confirm = QMessageBox.question(
-                    self, "Confirm Restore",
-                    f"Restore {rel_path} to version {commit_hash}?",
-                    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
-                )
-                if confirm == QMessageBox.StandardButton.Yes:
-                    self.status_label.setText(f"RESTORING {rel_path}...")
-                    QApplication.processEvents()
-                    res = GitWorker.checkout_file(base_dir, commit_hash, rel_path)
-                    if "success" in res:
-                        self.restored_files[rel_path] = commit_hash
-                        self.render_diff_html()
-                        self.status_label.setStyleSheet(f"color: {CP_GREEN}; font-weight: bold;")
-                        self.status_label.setText(f"SUCCESS: RESTORED {rel_path}")
-                        QMessageBox.information(self, "Success", f"Restored {rel_path} to {commit_hash}")
-                    else:
-                        self.status_label.setStyleSheet(f"color: {CP_RED}; font-weight: bold;")
-                        QMessageBox.critical(self, "Error", res['error'])
+        dialog.exec()
 
     def render_diff_html(self):
         """Render the diff HTML based on current expanded state"""
@@ -1742,8 +1719,19 @@ class FileTimelineDialog(QDialog):
         selected = self.table.selectedItems()
         if selected:
             row = selected[0].row()
-            self.selected_commit = self.table.item(row, 0).text()
-            self.accept()
+            commit_hash = self.table.item(row, 0).text()
+            
+            # Call restore on parent instead of closing
+            if hasattr(self.parent(), "restore_file_by_path"):
+                self.parent().restore_file_by_path(self.file_path, commit_hash)
+                
+                # Update visual state in table
+                self.active_hash = commit_hash
+                for i in range(self.table.rowCount()):
+                    item = self.table.item(i, 0)
+                    is_active = item.text() == self.active_hash
+                    item.setData(Qt.ItemDataRole.UserRole, is_active)
+                self.table.viewport().update()
         else:
             QMessageBox.warning(self, "Selection Required", "Please select a version to restore.")
 
