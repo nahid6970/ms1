@@ -1,17 +1,15 @@
 # Convex Integration Guide for Chrome Extensions
 
-This project has been migrated from a local Python backup system to **Convex**, a hosted backend that provides persistent storage and easy synchronization.
+This project uses **Convex** as a hosted backend for persistent storage and easy synchronization across extensions.
 
 ## 🚀 Quick Start (One-Time Setup)
 
 1. **Install Dependencies**:
-   Open your terminal in the project root and run:
    ```bash
    npm install
    ```
 
 2. **Start Convex Development**:
-   Run the following command to initialize your Convex project and start the development server:
    ```bash
    npx convex dev
    ```
@@ -19,18 +17,13 @@ This project has been migrated from a local Python backup system to **Convex**, 
    - Once running, it will provide a **Convex Deployment URL** (e.g., `https://happy-monkey-123.convex.cloud`).
 
 3. **Configure Extensions**:
-   Copy your **Convex Deployment URL** and replace `YOUR_CONVEX_URL_HERE` in the following files:
-   - `SideBar/background.js`
-   - `highlight/background.js`
-   - `image_checker/background.js`
-   - `tab_saver/background.js`
+   Replace `YOUR_CONVEX_URL_HERE` in each extension's `background.js` with your Convex URL.
+
+---
 
 ## ➕ Adding a New Extension
 
-To add backup support to a new extension, follow these steps:
-
 ### 1. Update `manifest.json`
-Add `type: "module"` to the background service worker and update `host_permissions`:
 
 ```json
 {
@@ -44,50 +37,133 @@ Add `type: "module"` to the background service worker and update `host_permissio
 }
 ```
 
-### 2. Implement Convex Logic in `background.js`
-Import the `ConvexHttpClient` and implement `save` and `get` calls:
+### 2. Add to `background.js`
 
 ```javascript
 import { ConvexHttpClient } from "https://esm.sh/convex@1.16.0/browser";
 
-const CONVEX_URL = "YOUR_CONVEX_URL_HERE"; 
-const EXTENSION_NAME = 'your_extension_unique_name';
+const CONVEX_URL = "YOUR_CONVEX_URL_HERE";
+const EXTENSION_NAME = 'your_extension_unique_name'; // must be unique per extension
 const client = new ConvexHttpClient(CONVEX_URL);
 
-// Save Function
-async function saveToConvex(data) {
-  return await client.mutation("functions:save", {
-    extensionName: EXTENSION_NAME,
-    data: data
-  });
+async function sendDataToConvex(data) {
+  try {
+    const result = await client.mutation("functions:save", { extensionName: EXTENSION_NAME, data });
+    return { success: true, result };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
 }
 
-// Load Function
-async function loadFromConvex() {
-  return await client.query("functions:get", { 
-    extensionName: EXTENSION_NAME 
-  });
+async function loadDataFromConvex() {
+  try {
+    const data = await client.query("functions:get", { extensionName: EXTENSION_NAME });
+    return { success: true, data };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
 }
 
-// Auto-save Example
-chrome.storage.local.onChanged.addListener((changes) => {
-  chrome.storage.local.get(null, (items) => {
-    saveToConvex(items);
-  });
+// Auto-save on storage changes
+chrome.storage.local.onChanged.addListener(() => {
+  chrome.storage.local.get(null, (items) => sendDataToConvex(items));
+});
+
+// Handle manual backup/restore from popup
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.action === 'saveToConvex') {
+    sendDataToConvex(message.data)
+      .then(result => sendResponse(result))
+      .catch(error => sendResponse({ success: false, error: error.message }));
+    return true;
+  }
+  if (message.action === 'loadFromConvex') {
+    loadDataFromConvex()
+      .then(result => sendResponse(result))
+      .catch(error => sendResponse({ success: false, error: error.message }));
+    return true;
+  }
 });
 ```
 
-### 3. (Optional) Manual Backup/Restore in Popup
-In your `popup.js`, you can trigger these functions via `chrome.runtime.sendMessage`.
+### 3. Add Backup/Restore Buttons to `popup.html`
+
+Add these buttons wherever you want them in your popup:
+
+```html
+<button id="saveToConvex" class="btn-convex-save">💾 Backup</button>
+<button id="loadFromConvex" class="btn-convex-load">📂 Restore</button>
+```
+
+Add these styles:
+
+```css
+.btn-convex-save { background: #9C27B0; color: white; }
+.btn-convex-load { background: #673AB7; color: white; }
+```
+
+### 4. Add Button Logic to `popup.js`
+
+Drop this block in — no popups, button text gives all the feedback:
+
+```javascript
+const saveToConvexBtn = document.getElementById('saveToConvex');
+const loadFromConvexBtn = document.getElementById('loadFromConvex');
+
+if (saveToConvexBtn) {
+  saveToConvexBtn.addEventListener('click', function () {
+    const original = saveToConvexBtn.innerHTML;
+    saveToConvexBtn.innerHTML = '⏳ Saving...';
+
+    chrome.storage.local.get(null, (items) => {
+      chrome.runtime.sendMessage({ action: 'saveToConvex', data: items }, (response) => {
+        if (response && response.success !== false) {
+          saveToConvexBtn.innerHTML = '✅ Saved!';
+        } else {
+          saveToConvexBtn.innerHTML = '❌ Failed';
+        }
+        setTimeout(() => { saveToConvexBtn.innerHTML = original; }, 2000);
+      });
+    });
+  });
+}
+
+if (loadFromConvexBtn) {
+  loadFromConvexBtn.addEventListener('click', function () {
+    const original = loadFromConvexBtn.innerHTML;
+    loadFromConvexBtn.innerHTML = '⏳ Loading...';
+
+    chrome.runtime.sendMessage({ action: 'loadFromConvex' }, (response) => {
+      if (response && response.success !== false && response.data) {
+        chrome.storage.local.set(response.data, () => {
+          loadFromConvexBtn.innerHTML = '✅ Restored!';
+          setTimeout(() => { loadFromConvexBtn.innerHTML = original; }, 2000);
+        });
+      } else {
+        loadFromConvexBtn.innerHTML = '❌ Failed';
+        setTimeout(() => { loadFromConvexBtn.innerHTML = original; }, 2000);
+      }
+    });
+  });
+}
+```
+
+> If your extension uses `chrome.storage.sync` instead of `local`, replace `chrome.storage.local` with `chrome.storage.sync` in both files.
+
+---
 
 ## 🛠️ Convex Backend Structure
 
-The backend is located in the `convex/` folder:
-- `schema.ts`: Defines the `backups` table with an index on `extensionName`.
-- `functions.ts`: Contains the `save` mutation (handles create/update) and the `get` query.
+Located in the `convex/` folder at the project root (shared by all extensions):
+- `schema.ts` — defines the `backups` table with an index on `extensionName`
+- `functions.ts` — contains the `save` mutation and `get` query
+
+---
 
 ## 📈 Deployment
-When you are ready for production:
-1. Run `npx convex deploy`.
-2. Use the **Production URL** in your extension files.
-3. This ensures your data remains even if you stop the `npx convex dev` command.
+
+```bash
+npx convex deploy
+```
+
+Use the **Production URL** in your extension files so data persists without `npx convex dev` running.
