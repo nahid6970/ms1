@@ -1,30 +1,35 @@
-// Background script for Python server integration
-const PYTHON_SERVER = 'http://localhost:8765';
-const EXTENSION_NAME = 'highlighter';
-const FILE_NAME = 'highlights.json';
+// Background script for Convex integration
+import { ConvexHttpClient } from "https://esm.sh/convex@1.16.0/browser";
 
-// Send data to Python server
-async function sendDataToPython(data) {
+// Replace with your actual Convex URL from 'npx convex dev'
+const CONVEX_URL = "YOUR_CONVEX_URL_HERE"; 
+const EXTENSION_NAME = 'highlighter';
+
+const client = new ConvexHttpClient(CONVEX_URL);
+
+// Send data to Convex
+async function sendDataToConvex(data) {
   try {
-    const response = await fetch(PYTHON_SERVER, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        extension_name: EXTENSION_NAME,
-        file_name: FILE_NAME,
-        data: data
-      })
+    const result = await client.mutation("functions:save", {
+      extensionName: EXTENSION_NAME,
+      data: data
     });
-    
-    if (!response.ok) {
-      throw new Error(`Server responded with ${response.status}`);
-    }
-    
-    const result = await response.json();
-    console.log('Data saved to Python server:', result);
-    return result;
+    console.log('Data saved to Convex:', result);
+    return { success: true, result };
   } catch (error) {
-    console.error('Failed to send data to Python server:', error);
+    console.error('Failed to send data to Convex:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+// Load data from Convex
+async function loadDataFromConvex() {
+  try {
+    const data = await client.query("functions:get", { extensionName: EXTENSION_NAME });
+    console.log('Data loaded from Convex:', data);
+    return { success: true, data };
+  } catch (error) {
+    console.error('Failed to load data from Convex:', error);
     return { success: false, error: error.message };
   }
 }
@@ -33,62 +38,37 @@ async function sendDataToPython(data) {
 chrome.storage.local.onChanged.addListener((changes, areaName) => {
   if (areaName === 'local') {
     chrome.storage.local.get(null, (items) => {
-      sendDataToPython(items);
+      sendDataToConvex(items);
     });
   }
 });
 
-// Load data from Python server
-async function loadDataFromPython() {
-  try {
-    const response = await fetch(`${PYTHON_SERVER}/load?extension_name=${EXTENSION_NAME}&file_name=${FILE_NAME}`, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' }
-    });
-    
-    if (!response.ok) {
-      throw new Error(`Server responded with ${response.status}`);
-    }
-    
-    const result = await response.json();
-    console.log('Data loaded from Python server:', result);
-    return result;
-  } catch (error) {
-    console.error('Failed to load data from Python server:', error);
-    return { success: false, error: error.message };
-  }
-}
-
 // Handle manual save/load requests from popup
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === 'saveToPython') {
-    sendDataToPython(message.data)
+    sendDataToConvex(message.data)
       .then(result => sendResponse(result))
       .catch(error => sendResponse({ success: false, error: error.message }));
     return true; // Keep channel open for async response
   }
   
   if (message.action === 'loadFromPython') {
-    loadDataFromPython()
+    loadDataFromConvex()
       .then(result => sendResponse(result))
       .catch(error => sendResponse({ success: false, error: error.message }));
     return true; // Keep channel open for async response
   }
 });
 
-// Health check on startup
-chrome.runtime.onStartup.addListener(() => {
-  fetch(`${PYTHON_SERVER}/health`)
-    .then(response => response.json())
-    .then(data => console.log('Python server status:', data))
-    .catch(error => console.log('Python server not available:', error.message));
-});
-
-// Initial health check
-fetch(`${PYTHON_SERVER}/health`)
-  .then(response => response.json())
-  .then(data => console.log('Python server status:', data))
-  .catch(error => console.log('Python server not available:', error.message));
+// Initial health check replaced by connection check
+(async () => {
+    try {
+        await client.query("functions:get", { extensionName: "health_check" });
+        console.log('Convex connection healthy');
+    } catch (e) {
+        console.log('Convex not available or not initialized:', e.message);
+    }
+})();
 
 chrome.runtime.onInstalled.addListener(() => {
     console.log("Highlighter Extension Installed");

@@ -8,10 +8,11 @@
         "contextMenus"
     ],
     "host_permissions": [
-        "http://localhost:8765/*"
+        "https://*.convex.cloud/*"
     ],
     "background": {
-        "service_worker": "background.js"
+        "service_worker": "background.js",
+        "type": "module"
     },
     "action": {
         "default_title": "Quick Sidebar Pro",

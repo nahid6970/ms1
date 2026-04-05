@@ -10,7 +10,7 @@
     ],
     "host_permissions": [
         "<all_urls>",
-        "http://localhost:8765/*"
+        "https://*.convex.cloud/*"
     ],
     "action": {
         "default_popup": "popup.html",
@@ -27,7 +27,8 @@
         "128": "icons/icon128.png"
     },
     "background": {
-        "service_worker": "background.js"
+        "service_worker": "background.js",
+        "type": "module"
     },
     "content_scripts": [
         {
