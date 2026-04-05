@@ -151,7 +151,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         loadFromConvexBtn.textContent = '✅ Loaded!';
                         loadFromConvexBtn.style.background = '#4CAF50';
                         
-                        alert('Data loaded from Convex! Refresh the page to see changes.');
+                        
                         
                         // Notify active tab to refresh
                         chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -168,7 +168,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 } else {
                     loadFromConvexBtn.textContent = '❌ Failed';
                     loadFromConvexBtn.style.background = '#f44336';
-                    alert('Failed to load from Convex.');
+                    
                     setTimeout(() => {
                         loadFromConvexBtn.textContent = originalText;
                         loadFromConvexBtn.style.background = originalBg;
