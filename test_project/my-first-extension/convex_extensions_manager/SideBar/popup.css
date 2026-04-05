@@ -174,12 +174,13 @@ header {
     height: 56px;
     background: var(--card-bg);
     border: 1px solid var(--border-color);
-    border-radius: 8px;
+    border-radius: 8px; /* Default, overridden by JS */
     display: flex;
     align-items: center;
     justify-content: center;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-    transition: all 0.2s;
+    transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+    overflow: hidden; /* Added to clip icons if they exceed border-radius */
 }
 
 .link-item:hover .favicon-box {
@@ -188,9 +189,10 @@ header {
 }
 
 .favicon-box img {
-    width: 28px;
-    height: 28px;
+    width: 28px; /* Default, overridden by JS */
+    height: 28px; /* Default, overridden by JS */
     object-fit: contain;
+    transition: width 0.2s, height 0.2s;
 }
 
 /* Context Menu */

@@ -1,4 +1,11 @@
 let links = [];
+let globalSettings = {
+    itemsPerRow: 4,
+    extraPadding: 20,
+    iconSize: 28,
+    borderRadius: 8,
+    borderOpacity: 100
+};
 
 const linksList = document.getElementById('links-list');
 const emptyState = document.getElementById('empty-state');
@@ -18,12 +25,18 @@ let currentRightClickedLinkId = null;
 
 // Initial Load
 function init() {
-    chrome.storage.sync.get(['sidebar_links', 'itemsPerRow', 'extraPadding'], (result) => {
+    chrome.storage.sync.get(['sidebar_links', 'itemsPerRow', 'extraPadding', 'iconSize', 'borderRadius', 'borderOpacity'], (result) => {
+        globalSettings = {
+            itemsPerRow: result.itemsPerRow || 4,
+            extraPadding: result.extraPadding || 20,
+            iconSize: result.iconSize || 28,
+            borderRadius: result.borderRadius !== undefined ? result.borderRadius : 8,
+            borderOpacity: result.borderOpacity !== undefined ? result.borderOpacity : 100
+        };
+
         if (result.sidebar_links && result.sidebar_links.length > 0) {
             links = result.sidebar_links;
-            const itemsPerRow = result.itemsPerRow || 4;
-            const extraPadding = result.extraPadding || 20;
-            applyGridLayout(itemsPerRow, extraPadding);
+            applyGridLayout(globalSettings.itemsPerRow, globalSettings.extraPadding);
             renderLinks();
         } else {
             showEmptyState(true);
@@ -55,39 +68,50 @@ function applyGridLayout(itemsPerRow, extraPadding = 20) {
     const containerPaddingRight = 20; // from CSS .container padding
     const minWidth = 320; // minimum width to show all header buttons
     
-    // Calculate popup width based on items per row
-    // Formula: (item_size * count) + (gap * (count - 1)) + left_padding + right_padding + extra_padding
     let popupWidth = (itemSize * itemsPerRow) + (gap * (itemsPerRow - 1)) + containerPaddingLeft + containerPaddingRight + extraPadding;
-    
-    // Ensure minimum width for header buttons
     popupWidth = Math.max(popupWidth, minWidth);
-    
     document.body.style.width = `${popupWidth}px`;
-    
-    // Update grid columns
     linksList.style.gridTemplateColumns = `repeat(${itemsPerRow}, 1fr)`;
 }
 
-// Listen for updates from other contexts (like background script context menu)
+// Listen for updates from other contexts
 chrome.storage.onChanged.addListener((changes, areaName) => {
     if (areaName === 'sync') {
+        let needsReRender = false;
+        
         if (changes.sidebar_links) {
             links = changes.sidebar_links.newValue || [];
-            renderLinks();
+            needsReRender = true;
         }
-        if (changes.itemsPerRow || changes.extraPadding) {
-            chrome.storage.sync.get(['itemsPerRow', 'extraPadding'], (result) => {
-                applyGridLayout(result.itemsPerRow || 4, result.extraPadding || 20);
-            });
-        }
+        
+        // Update global settings
+        ['itemsPerRow', 'extraPadding', 'iconSize', 'borderRadius', 'borderOpacity'].forEach(key => {
+            if (changes[key]) {
+                globalSettings[key] = changes[key].newValue;
+                if (key === 'itemsPerRow' || key === 'extraPadding') {
+                    applyGridLayout(globalSettings.itemsPerRow, globalSettings.extraPadding);
+                }
+                needsReRender = true;
+            }
+        });
+
+        if (needsReRender) renderLinks();
     }
 });
 
-// Listen for settings updates
+// Listen for settings updates via message
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === 'settings_updated') {
-        chrome.storage.sync.get(['itemsPerRow', 'extraPadding'], (result) => {
-            applyGridLayout(result.itemsPerRow || 4, result.extraPadding || 20);
+        chrome.storage.sync.get(['itemsPerRow', 'extraPadding', 'iconSize', 'borderRadius', 'borderOpacity'], (result) => {
+            globalSettings = {
+                itemsPerRow: result.itemsPerRow || 4,
+                extraPadding: result.extraPadding || 20,
+                iconSize: result.iconSize || 28,
+                borderRadius: result.borderRadius !== undefined ? result.borderRadius : 8,
+                borderOpacity: result.borderOpacity !== undefined ? result.borderOpacity : 100
+            };
+            applyGridLayout(globalSettings.itemsPerRow, globalSettings.extraPadding);
+            renderLinks();
         });
     }
 });
@@ -116,15 +140,32 @@ function renderLinks() {
         item.className = 'link-item';
         item.draggable = true;
 
+        // Calculate Border Color based on Opacity
+        const opacityHex = Math.round((globalSettings.borderOpacity / 100) * 255).toString(16).padStart(2, '0');
+        const borderColor = link.color ? `${link.color}${opacityHex}` : `rgba(51, 51, 51, ${globalSettings.borderOpacity / 100})`;
+        const shadowColor = link.color ? `${link.color}${Math.round((globalSettings.borderOpacity / 100) * 0.4 * 255).toString(16).padStart(2, '0')}` : `rgba(0, 0, 0, ${globalSettings.borderOpacity / 100 * 0.3})`;
+
         // Define Icon Styles
-        const iconStyle = link.color ? (link.isSolid
-            ? `background: ${link.color}; border-color: ${link.color}; box-shadow: 0 4px 10px ${link.color}66;`
-            : `border-color: ${link.color}; box-shadow: 0 0 15px ${link.color}44; background: ${link.color}15;`)
-            : '';
+        let iconBoxStyle = `border-radius: ${globalSettings.borderRadius}px; border-color: ${borderColor};`;
+        
+        if (link.color) {
+            if (link.isSolid) {
+                iconBoxStyle += `background: ${link.color}; box-shadow: 0 4px 10px ${shadowColor};`;
+            } else {
+                iconBoxStyle += `background: ${link.color}15; box-shadow: 0 0 15px ${shadowColor};`;
+            }
+        }
+        
+        // If opacity is 0, make border truly invisible
+        if (globalSettings.borderOpacity === 0) {
+            iconBoxStyle += "border-width: 0;";
+        }
+
+        const imgStyle = `width: ${globalSettings.iconSize}px; height: ${globalSettings.iconSize}px;`;
 
         item.innerHTML = `
-            <div class="favicon-box" style="${iconStyle}">
-                <img src="${link.icon || ''}" onerror="this.src='https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${link.url}&size=64'">
+            <div class="favicon-box" style="${iconBoxStyle}">
+                <img src="${link.icon || ''}" style="${imgStyle}" onerror="this.src='https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${link.url}&size=64'">
             </div>
         `;
 
@@ -142,7 +183,6 @@ function renderLinks() {
             contextMenu.style.top = `${e.clientY}px`;
             contextMenu.classList.add('visible');
 
-            // Prevent menu from going off-screen
             const menuBounds = contextMenu.getBoundingClientRect();
             if (menuBounds.right > window.innerWidth) {
                 contextMenu.style.left = `${e.clientX - menuBounds.width}px`;
@@ -192,7 +232,7 @@ function triggerBrowserModal(editLink = null) {
             }).catch(err => {
                 alert('Please visit a webpage (not a Chrome settings page) to use the Add/Edit form.');
             });
-            window.close(); // Close popup when modal opens in browser
+            window.close();
         }
     });
 }
@@ -230,11 +270,7 @@ if (reloadBtn) {
 if (saveToConvexBtn) {
     saveToConvexBtn.addEventListener('click', function () {
         const originalContent = saveToConvexBtn.innerHTML;
-        // Show spinning sync icon
-        saveToConvexBtn.innerHTML = `
-            <svg viewBox="0 0 24 24" width="16" height="16">
-                <path fill="currentColor" d="M12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18Z" />
-            </svg>`;
+        saveToConvexBtn.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18Z" /></svg>`;
         saveToConvexBtn.classList.add('loading');
         
         chrome.storage.sync.get(null, function (items) {
@@ -245,10 +281,7 @@ if (saveToConvexBtn) {
                 saveToConvexBtn.classList.remove('loading');
                 if (response && response.success !== false) {
                     saveToConvexBtn.classList.add('success');
-                    saveToConvexBtn.innerHTML = `
-                        <svg viewBox="0 0 24 24" width="16" height="16">
-                            <path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z" />
-                        </svg>`;
+                    saveToConvexBtn.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z" /></svg>`;
                     setTimeout(() => {
                         saveToConvexBtn.innerHTML = originalContent;
                         saveToConvexBtn.classList.remove('success');
@@ -269,11 +302,7 @@ if (saveToConvexBtn) {
 if (loadFromConvexBtn) {
     loadFromConvexBtn.addEventListener('click', function () {
         const originalContent = loadFromConvexBtn.innerHTML;
-        // Show spinning sync icon
-        loadFromConvexBtn.innerHTML = `
-            <svg viewBox="0 0 24 24" width="16" height="16">
-                <path fill="currentColor" d="M12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18Z" />
-            </svg>`;
+        loadFromConvexBtn.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18Z" /></svg>`;
         loadFromConvexBtn.classList.add('loading');
 
         chrome.runtime.sendMessage({
@@ -283,11 +312,7 @@ if (loadFromConvexBtn) {
             if (response && response.success !== false && response.data) {
                 chrome.storage.sync.set(response.data, () => {
                     loadFromConvexBtn.classList.add('success');
-                    loadFromConvexBtn.innerHTML = `
-                        <svg viewBox="0 0 24 24" width="16" height="16">
-                            <path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z" />
-                        </svg>`;
-                    // Update local links and re-render
+                    loadFromConvexBtn.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z" /></svg>`;
                     if (response.data.sidebar_links) {
                         links = response.data.sidebar_links;
                         renderLinks();

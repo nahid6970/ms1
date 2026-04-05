@@ -53,9 +53,8 @@
   // Settings Modal
   const settingsOverlay = document.createElement('div');
   settingsOverlay.id = 'qs-settings-overlay';
-  settingsOverlay.classList.add('qs-modal-overlay-custom'); // Reusing some base styles if possible
   settingsOverlay.innerHTML = `
-    <div id="qs-settings-content" class="qs-modal-content-custom">
+    <div id="qs-settings-content">
       <div class="qs-modal-title">Settings</div>
       <div class="qs-settings-section">
         <p class="qs-label">Display Settings</p>
@@ -63,24 +62,29 @@
           <label class="qs-label">Items per Row: <span id="qs-items-value">4</span></label>
           <input type="range" id="qs-items-slider" class="qs-slider" min="2" max="8" value="4" step="1">
           <div class="qs-slider-labels">
-            <span>2</span>
-            <span>3</span>
-            <span>4</span>
-            <span>5</span>
-            <span>6</span>
-            <span>7</span>
-            <span>8</span>
+            <span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span>
           </div>
         </div>
         <div class="qs-group" style="margin-top: 16px;">
           <label class="qs-label">Extra Padding (px): <span id="qs-padding-value">20</span></label>
           <input type="range" id="qs-padding-slider" class="qs-slider" min="0" max="50" value="20" step="2">
-          <div class="qs-slider-labels">
-            <span>0</span>
-            <span>25</span>
-            <span>50</span>
-          </div>
-          <p style="font-size: 10px; color: #64748b; margin-top: 4px;">Adjust if items are cut off at edges</p>
+        </div>
+        
+        <p class="qs-label" style="margin-top: 24px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 16px;">Icon Style</p>
+        
+        <div class="qs-group">
+          <label class="qs-label">Icon Size: <span id="qs-icon-size-value">28</span>px</label>
+          <input type="range" id="qs-icon-size-slider" class="qs-slider" min="16" max="56" value="28" step="2">
+        </div>
+
+        <div class="qs-group">
+          <label class="qs-label">Border Radius: <span id="qs-radius-value">8</span>px</label>
+          <input type="range" id="qs-radius-slider" class="qs-slider" min="0" max="28" value="8" step="1">
+        </div>
+
+        <div class="qs-group">
+          <label class="qs-label">Border Opacity: <span id="qs-opacity-value">100</span>%</label>
+          <input type="range" id="qs-opacity-slider" class="qs-slider" min="0" max="100" value="100" step="5">
         </div>
       </div>
       <div class="qs-actions">
@@ -95,6 +99,13 @@
   const itemsValue = document.getElementById('qs-items-value');
   const paddingSlider = document.getElementById('qs-padding-slider');
   const paddingValue = document.getElementById('qs-padding-value');
+  
+  const iconSizeSlider = document.getElementById('qs-icon-size-slider');
+  const iconSizeValue = document.getElementById('qs-icon-size-value');
+  const radiusSlider = document.getElementById('qs-radius-slider');
+  const radiusValue = document.getElementById('qs-radius-value');
+  const opacitySlider = document.getElementById('qs-opacity-slider');
+  const opacityValue = document.getElementById('qs-opacity-value');
 
   chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === 'open_modal') {
@@ -104,7 +115,6 @@
         editIdInput.value = link.id;
         titleInput.value = link.title;
         urlInput.value = link.url;
-        // Check if the current icon is a google favicon. If not, it's a custom image.
         const isGoogleFavicon = link.icon && link.icon.includes('google.com/s2/favicons');
         imgInput.value = isGoogleFavicon ? '' : (link.icon || '');
         colorInput.value = link.color || '#38bdf8';
@@ -116,7 +126,6 @@
         urlInput.value = window.location.href;
         colorInput.value = '#38bdf8';
         solidInput.checked = false;
-        // Smart favicon detection via background script
         chrome.runtime.sendMessage({ action: 'getSmartFavicon', url: window.location.href }, (icon) => {
           if (icon) imgInput.value = icon;
         });
@@ -124,36 +133,39 @@
       overlay.classList.add('visible');
       titleInput.focus();
     } else if (request.action === 'open_settings') {
-      // Load current items per row and padding settings
-      chrome.storage.sync.get(['itemsPerRow', 'extraPadding'], (result) => {
-        const itemsPerRow = result.itemsPerRow || 4;
-        const extraPadding = result.extraPadding || 20;
-        itemsSlider.value = itemsPerRow;
-        itemsValue.textContent = itemsPerRow;
-        paddingSlider.value = extraPadding;
-        paddingValue.textContent = extraPadding;
+      chrome.storage.sync.get(['itemsPerRow', 'extraPadding', 'iconSize', 'borderRadius', 'borderOpacity'], (result) => {
+        itemsSlider.value = result.itemsPerRow || 4;
+        itemsValue.textContent = itemsSlider.value;
+        paddingSlider.value = result.extraPadding || 20;
+        paddingValue.textContent = paddingSlider.value;
+        
+        iconSizeSlider.value = result.iconSize || 28;
+        iconSizeValue.textContent = iconSizeSlider.value;
+        radiusSlider.value = result.borderRadius !== undefined ? result.borderRadius : 8;
+        radiusValue.textContent = radiusSlider.value;
+        opacitySlider.value = result.borderOpacity !== undefined ? result.borderOpacity : 100;
+        opacityValue.textContent = opacitySlider.value;
       });
       settingsOverlay.classList.add('visible');
     }
   });
 
-  // Items per row slider
-  itemsSlider.oninput = () => {
-    itemsValue.textContent = itemsSlider.value;
-  };
+  itemsSlider.oninput = () => itemsValue.textContent = itemsSlider.value;
+  paddingSlider.oninput = () => paddingValue.textContent = paddingSlider.value;
+  iconSizeSlider.oninput = () => iconSizeValue.textContent = iconSizeSlider.value;
+  radiusSlider.oninput = () => radiusValue.textContent = radiusSlider.value;
+  opacitySlider.oninput = () => opacityValue.textContent = opacitySlider.value;
 
-  // Padding slider
-  paddingSlider.oninput = () => {
-    paddingValue.textContent = paddingSlider.value;
-  };
-
-  // Save settings and close
   settingsClose.onclick = () => {
-    const itemsPerRow = parseInt(itemsSlider.value);
-    const extraPadding = parseInt(paddingSlider.value);
-    chrome.storage.sync.set({ itemsPerRow: itemsPerRow, extraPadding: extraPadding }, () => {
+    const settings = {
+      itemsPerRow: parseInt(itemsSlider.value),
+      extraPadding: parseInt(paddingSlider.value),
+      iconSize: parseInt(iconSizeSlider.value),
+      borderRadius: parseInt(radiusSlider.value),
+      borderOpacity: parseInt(opacitySlider.value)
+    };
+    chrome.storage.sync.set(settings, () => {
       settingsOverlay.classList.remove('visible');
-      // Notify popup to update
       chrome.runtime.sendMessage({ action: 'settings_updated' });
     });
   };
