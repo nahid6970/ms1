@@ -1,0 +1,8 @@
+convex_extensions_manager/node_modules/
+convex_extensions_manager/.convex/
+convex_extensions_manager/.env.local
+convex_extensions_manager/package-lock.json
+node_modules/
+.convex/
+.env.local
+package-lock.json

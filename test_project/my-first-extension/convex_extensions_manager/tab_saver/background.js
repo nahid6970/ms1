@@ -2,7 +2,7 @@
 import { ConvexHttpClient } from "https://esm.sh/convex@1.16.0/browser";
 
 // Replace with your actual Convex URL from 'npx convex dev'
-const CONVEX_URL = "YOUR_CONVEX_URL_HERE"; 
+const CONVEX_URL = "https://joyous-stingray-672.convex.cloud"; 
 const EXTENSION_NAME = 'tab_saver';
 
 const client = new ConvexHttpClient(CONVEX_URL);
