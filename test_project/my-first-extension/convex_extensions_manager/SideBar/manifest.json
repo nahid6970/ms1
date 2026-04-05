@@ -8,7 +8,9 @@
         "contextMenus"
     ],
     "host_permissions": [
-        "https://*.convex.cloud/*"
+        "https://*.convex.cloud/*",
+        "https://www.youtube.com/oembed*",
+        "https://github.com/*"
     ],
     "background": {
         "service_worker": "background.js",
