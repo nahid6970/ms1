@@ -1454,7 +1454,7 @@ CONFIG_FILE = os.path.join(SCRIPT_DIR, ""projects_config.json"")
 
 ;! convex guidline
 ;! convex guidline
-:X:;convex::Paste('Here is the convex guidline that u can follow for my project C:\@delta\ms1\CONVEX_GUIDE.md')
+:X:;convex::Paste('Here is the convex guidline that u can follow for my project C:\@delta\ms1\CONVEX_GUIDE.md also use any command tool like cat too see whats inside this file if u dont have proper access')
 
 ;! missed notes
 :X:;missed::Paste('if u missed any notes then give the missing notes')

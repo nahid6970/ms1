@@ -481,7 +481,7 @@
             "category": "General",
             "description": "convex guidline",
             "trigger": ";convex",
-            "replacement": "Here is the convex guidline that u can follow for my project C:\\@delta\\ms1\\CONVEX_GUIDE.md",
+            "replacement": "Here is the convex guidline that u can follow for my project C:\\@delta\\ms1\\CONVEX_GUIDE.md also use any command tool like cat too see whats inside this file if u dont have proper access",
             "enabled": true
         },
         {
