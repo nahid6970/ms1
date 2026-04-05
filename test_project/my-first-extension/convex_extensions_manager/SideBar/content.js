@@ -114,9 +114,10 @@
         editIdInput.value = '';
         titleInput.value = document.title || '';
         urlInput.value = window.location.href;
-        imgInput.value = '';
         colorInput.value = '#38bdf8';
         solidInput.checked = false;
+        // Smart favicon detection
+        getSmartFavicon(window.location.href).then(icon => { imgInput.value = icon; });
       }
       overlay.classList.add('visible');
       titleInput.focus();
@@ -157,7 +158,54 @@
   
   settingsOverlay.onclick = (e) => { if (e.target === settingsOverlay) settingsOverlay.classList.remove('visible'); };
 
-  saveBtn.onclick = () => {
+
+  async function getSmartFavicon(url) {
+    try {
+      const urlObj = new URL(url);
+      const domain = urlObj.hostname.replace('www.', '');
+
+      // GitHub: use owner avatar
+      if (domain === 'github.com') {
+        const parts = urlObj.pathname.split('/').filter(p => p);
+        if (parts.length >= 1) return `https://github.com/${parts[0]}.png`;
+      }
+
+      // YouTube video: use video thumbnail
+      if (domain.includes('youtube.com') || domain.includes('youtu.be')) {
+        try {
+          const oembedUrl = `https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`;
+          const res = await fetch(oembedUrl);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.thumbnail_url) return data.thumbnail_url;
+          }
+        } catch (e) {}
+      }
+
+      // Google services: hardcoded high-quality icons
+      const googleIcons = {
+        'mail.google.com': 'https://ssl.gstatic.com/ui/v1/icons/mail/images/favicon5.ico',
+        'drive.google.com': 'https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_48dp.png',
+        'docs.google.com': 'https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico',
+        'sheets.google.com': 'https://ssl.gstatic.com/docs/spreadsheets/favicon3.ico',
+        'slides.google.com': 'https://ssl.gstatic.com/docs/presentations/images/favicon5.ico',
+        'calendar.google.com': 'https://ssl.gstatic.com/calendar/images/favicon_v2014_15.ico',
+        'meet.google.com': 'https://www.google.com/s2/favicons?domain=meet.google.com&sz=128',
+        'photos.google.com': 'https://ssl.gstatic.com/social/white/br/p-v1.png',
+      };
+      if (googleIcons[urlObj.hostname]) return googleIcons[urlObj.hostname];
+
+      // Facebook: use og:image via background.js fetch (CORS blocked client-side)
+      // Fall through to Google favicon which gives the FB logo — good enough
+
+      // Default: Google favicon service
+      return `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
+    } catch (e) {
+      return '';
+    }
+  }
+
+    saveBtn.onclick = () => {
     const title = titleInput.value.trim();
     let url = urlInput.value.trim();
     const imgUrl = imgInput.value.trim();
@@ -178,7 +226,7 @@
         url: url,
         color: color,
         isSolid: isSolid,
-        icon: imgUrl || `https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${url}&size=64`
+        icon: imgUrl || `https://www.google.com/s2/favicons?domain=${domain}&sz=64`
       };
 
       if (editId) {
