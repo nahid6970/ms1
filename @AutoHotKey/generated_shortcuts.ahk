@@ -600,7 +600,7 @@ LAlt & c:: {
 }
 
 ;! Take Screenshot
-PrintScreen::Run("C:\@delta\ms1\scripts\Autohtokey\version2\gui\Bio.ahk", "", "Hide")
+PrintScreen::Run("C:\@delta\ms1\Testing\screenshot\region_screenshot.py", "", "Hide")
 
 ;! Open Folder gui
 #f::Run("C:\@delta\ms1\Testing\screenshot\folder_launcher\launcher.py", "", "Hide")

@@ -228,7 +228,7 @@
             "category": "General",
             "description": "",
             "hotkey": "PrintScreen",
-            "action": "Run(\"C:\\@delta\\ms1\\scripts\\Autohtokey\\version2\\gui\\Bio.ahk\", \"\", \"Hide\")",
+            "action": "Run(\"C:\\@delta\\ms1\\Testing\\screenshot\\region_screenshot.py\", \"\", \"Hide\")",
             "enabled": true
         },
         {
