@@ -134,11 +134,6 @@ function initializeApp() {
                     if (singleRowMode) {
                         saveSingleRowState();
                     }
-
-                    console.log(`[SCROLL] Auto-saved scroll for "${sheetName}":`, {
-                        scrollTop: tableContainer.scrollTop,
-                        scrollLeft: tableContainer.scrollLeft
-                    });
                 }
             }, 500); // 500ms debounce
         });
