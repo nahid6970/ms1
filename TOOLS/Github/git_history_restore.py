@@ -285,6 +285,93 @@ class GitWorker:
         except Exception as e:
             return {"error": str(e)}
 
+    @staticmethod
+    def parse_diff(diff_text):
+        """Parse git diff into file sections"""
+        lines = diff_text.split("\n")
+        file_sections = []
+        skip_until_diff = True
+        current_file = None
+        current_file_lines = []
+        file_stats = {}
+        
+        # First pass: collect file stats from diff
+        for line in lines:
+            if line.startswith("diff --git"):
+                # Safer extraction using regex to handle spaces and b/ prefix correctly
+                m = re.match(r"diff --git a/(.*) b/(.*)", line)
+                if m:
+                    current_file = m.group(2)
+                    file_stats[current_file] = {"additions": 0, "deletions": 0}
+                else:
+                    parts = line.split(" ")
+                    if len(parts) >= 4:
+                        raw_name = parts[3]
+                        if raw_name.startswith("b/"):
+                            current_file = raw_name[2:]
+                        else:
+                            current_file = raw_name
+                        file_stats[current_file] = {"additions": 0, "deletions": 0}
+            elif current_file and line.startswith("+") and not line.startswith("+++"):
+                file_stats[current_file]["additions"] += 1
+            elif current_file and line.startswith("-") and not line.startswith("---"):
+                file_stats[current_file]["deletions"] += 1
+        
+        # Second pass: group by files
+        current_file = None
+        current_file_lines = []
+        
+        for line in lines:
+            # Skip everything until we hit the first diff
+            if skip_until_diff:
+                if line.startswith("diff --git"):
+                    skip_until_diff = False
+                else:
+                    continue
+            
+            # Detect file changes
+            if line.startswith("diff --git"):
+                # Save previous file section
+                if current_file and current_file_lines:
+                    file_sections.append({
+                        "name": current_file,
+                        "lines": current_file_lines[:],
+                        "stats": file_stats.get(current_file, {"additions": 0, "deletions": 0})
+                    })
+                    current_file_lines = []
+                
+                # Extract new filename
+                m = re.match(r"diff --git a/(.*) b/(.*)", line)
+                if m:
+                    current_file = m.group(2)
+                else:
+                    parts = line.split(" ")
+                    if len(parts) >= 4:
+                         raw_name = parts[3]
+                         if raw_name.startswith("b/"):
+                             current_file = raw_name[2:]
+                         else:
+                             current_file = raw_name
+                continue
+            
+            # Skip metadata
+            if line.startswith("index ") or line.startswith("new file") or line.startswith("deleted file") or line.startswith("mode ") or line.startswith("+++") or line.startswith("---") or line.startswith("@@"):
+                continue
+            
+            # Collect file lines
+            if current_file:
+                current_file_lines.append(line)
+        
+        # Save last file section
+        if current_file and current_file_lines:
+            file_sections.append({
+                "name": current_file,
+                "lines": current_file_lines,
+                "stats": file_stats.get(current_file, {"additions": 0, "deletions": 0})
+            })
+        
+        return file_sections
+
 # --- UI COMPONENTS ---
 
 class CyberButton(QPushButton):
@@ -937,7 +1024,7 @@ class MainWindow(QMainWindow):
             return
             
         commits = result["success"]
-        dialog = FileTimelineDialog(self, rel_path, commits, self.restored_files.get(rel_path))
+        dialog = FileTimelineDialog(self, rel_path, commits, self.restored_files.get(rel_path), base_dir)
         if dialog.exec():
             commit_hash = dialog.selected_commit
             if commit_hash:
@@ -962,7 +1049,7 @@ class MainWindow(QMainWindow):
             return
             
         commits = result["success"]
-        dialog = FileTimelineDialog(self, rel_path, commits, self.restored_files.get(rel_path))
+        dialog = FileTimelineDialog(self, rel_path, commits, self.restored_files.get(rel_path), base_dir)
         if dialog.exec():
             commit_hash = dialog.selected_commit
             if commit_hash:
@@ -1066,100 +1153,12 @@ class MainWindow(QMainWindow):
         diff_data = result["success"]
         
         # Parse and store diff sections
-        self.current_diff_sections = self.parse_diff(diff_data["diff"])
+        self.current_diff_sections = GitWorker.parse_diff(diff_data["diff"])
         self.expanded_files.clear()  # Collapse all by default
         
         # Render the diff
         self.render_diff_html()
     
-    def parse_diff(self, diff_text):
-        """Parse git diff into file sections"""
-        lines = diff_text.split('\n')
-        file_sections = []
-        skip_until_diff = True
-        current_file = None
-        current_file_lines = []
-        file_stats = {}
-        
-        # First pass: collect file stats from diff
-        for line in lines:
-            if line.startswith('diff --git'):
-                # Safer extraction using regex to handle spaces and b/ prefix correctly
-                m = re.match(r'diff --git a/(.*) b/(.*)', line)
-                if m:
-                    current_file = m.group(2)
-                    file_stats[current_file] = {'additions': 0, 'deletions': 0}
-                else:
-                    parts = line.split(' ')
-                    if len(parts) >= 4:
-                        # Fallback: simpler extraction, handle b/ prefix carefully
-                        # Check if part[3] starts with b/ and remove it
-                        raw_name = parts[3]
-                        if raw_name.startswith('b/'):
-                            current_file = raw_name[2:]
-                        else:
-                            current_file = raw_name
-                        file_stats[current_file] = {'additions': 0, 'deletions': 0}
-            elif current_file and line.startswith('+') and not line.startswith('+++'):
-                file_stats[current_file]['additions'] += 1
-            elif current_file and line.startswith('-') and not line.startswith('---'):
-                file_stats[current_file]['deletions'] += 1
-        
-        # Second pass: group by files
-        current_file = None
-        current_file_lines = []
-        
-        for line in lines:
-            # Skip everything until we hit the first diff
-            if skip_until_diff:
-                if line.startswith('diff --git'):
-                    skip_until_diff = False
-                else:
-                    continue
-            
-            # Detect file changes
-            if line.startswith('diff --git'):
-                # Save previous file section
-                if current_file and current_file_lines:
-                    file_sections.append({
-                        'name': current_file,
-                        'lines': current_file_lines[:],
-                        'stats': file_stats.get(current_file, {'additions': 0, 'deletions': 0})
-                    })
-                    current_file_lines = []
-                
-                # Extract new filename
-                m = re.match(r'diff --git a/(.*) b/(.*)', line)
-                if m:
-                    current_file = m.group(2)
-                else:
-                    parts = line.split(' ')
-                    if len(parts) >= 4:
-                         raw_name = parts[3]
-                         if raw_name.startswith('b/'):
-                             current_file = raw_name[2:]
-                         else:
-                             current_file = raw_name
-                continue
-            
-            # Skip metadata
-            if line.startswith('index ') or line.startswith('new file') or line.startswith('deleted file') or line.startswith('mode ') or line.startswith('+++') or line.startswith('---') or line.startswith('@@'):
-                continue
-            
-            # Collect file lines
-            if current_file:
-                current_file_lines.append(line)
-        
-        # Save last file section
-        if current_file and current_file_lines:
-            file_sections.append({
-                'name': current_file,
-                'lines': current_file_lines,
-                'stats': file_stats.get(current_file, {'additions': 0, 'deletions': 0})
-            })
-        
-        return file_sections
-
     def copy_hash(self):
         selected_items = self.table.selectedItems()
         if not selected_items:
@@ -1539,12 +1538,15 @@ class SettingsDialog(QDialog):
 
 # --- FILE TIMELINE DIALOG ---
 class FileTimelineDialog(QDialog):
-    def __init__(self, parent, file_path, commits, active_hash=None):
+    def __init__(self, parent, file_path, commits, active_hash=None, directory=None):
         super().__init__(parent)
-        self.setWindowTitle(f"Timeline: {os.path.basename(file_path)}")
-        self.resize(800, 500)
-        self.selected_commit = None
+        self.file_path = file_path
+        self.directory = directory
         self.active_hash = active_hash
+        self.selected_commit = None
+        
+        self.setWindowTitle(f"Timeline: {os.path.basename(file_path)}")
+        self.resize(1200, 700)
         
         self.setStyleSheet(f"""
             QDialog {{ background-color: {CP_BG}; }}
@@ -1565,12 +1567,21 @@ class FileTimelineDialog(QDialog):
         """)
         
         layout = QVBoxLayout(self)
-        layout.setSpacing(15)
-        layout.setContentsMargins(20, 20, 20, 20)
+        layout.setSpacing(2)
+        layout.setContentsMargins(20, 2, 20, 10)
         
-        header = QLabel(f"HISTORY FOR: {file_path}")
-        header.setStyleSheet(f"color: {CP_CYAN}; font-weight: bold; font-size: 12pt;")
+        header = QLabel(f"HISTORY: {file_path}")
+        header.setStyleSheet(f"color: {CP_CYAN}; font-weight: bold; font-size: 9pt; padding: 0px; margin: 0px;")
+        header.setFixedHeight(20)
         layout.addWidget(header)
+        
+        # Splitter for Table and Diff
+        splitter = QSplitter(Qt.Orientation.Horizontal)
+        
+        # Left: Table
+        table_container = QWidget()
+        table_layout = QVBoxLayout(table_container)
+        table_layout.setContentsMargins(0, 0, 0, 0)
         
         self.table = QTableWidget()
         self.table.setColumnCount(3)
@@ -1609,7 +1620,36 @@ class FileTimelineDialog(QDialog):
             if commit['hash'] == self.active_hash:
                 items[0].setData(Qt.ItemDataRole.UserRole, True)
             
-        layout.addWidget(self.table)
+        table_layout.addWidget(self.table)
+        splitter.addWidget(table_container)
+        
+        # Right: Diff Panel
+        diff_container = QWidget()
+        diff_layout = QVBoxLayout(diff_container)
+        diff_layout.setContentsMargins(0, 0, 0, 0)
+        
+        self.diff_display = CyberDiffBrowser(parent)
+        self.diff_display.setOpenExternalLinks(False)
+        self.diff_display.setOpenLinks(False)
+        self.diff_display.setStyleSheet(f"""
+            QTextBrowser {{
+                background-color: {CP_BG};
+                border: 1px solid {CP_DIM};
+                color: {CP_TEXT};
+                font-family: 'JetBrainsMono Nerd Font', 'Consolas', monospace;
+                font-size: 10pt;
+            }}
+        """)
+        self.diff_display.setHtml("<div style='color: #E0E0E0; padding: 20px;'>Select a version to view changes...</div>")
+        
+        diff_layout.addWidget(self.diff_display)
+        splitter.addWidget(diff_container)
+        
+        splitter.setStretchFactor(0, 2)
+        splitter.setStretchFactor(1, 3)
+        layout.addWidget(splitter)
+        
+        self.table.itemSelectionChanged.connect(self.on_commit_selected)
         
         btn_layout = QHBoxLayout()
         btn_layout.addStretch()
@@ -1631,6 +1671,72 @@ class FileTimelineDialog(QDialog):
     def on_table_leave(self, event):
         self.delegate.hovered_row = -1
         self.table.viewport().update()
+
+    def on_commit_selected(self):
+        """Load diff for the selected version of this file"""
+        selected_items = self.table.selectedItems()
+        if not selected_items:
+            self.diff_display.setHtml("<div style='color: #E0E0E0; padding: 20px;'>Select a version to view changes...</div>")
+            return
+            
+        row = selected_items[0].row()
+        commit_hash = self.table.item(row, 0).text()
+        
+        self.diff_display.setHtml(f"<div style='color: {CP_YELLOW}; padding: 20px;'>Loading changes...</div>")
+        QApplication.processEvents()
+        
+        # Get diff for THIS file at THIS commit
+        if not self.directory:
+             self.diff_display.setHtml("<div style='color: #FF003C; padding: 20px;'>Error: Git directory not set.</div>")
+             return
+
+        result = GitWorker.get_diff_between(self.directory, f"{commit_hash}^", commit_hash, self.file_path)
+        
+        if "success" in result:
+            diff_data = result["success"]
+            sections = GitWorker.parse_diff(diff_data["diff"])
+            self.render_diff_html(sections)
+        else:
+            self.diff_display.setHtml(f"<div style='color: {CP_RED}; padding: 20px;'>Error loading diff:<br>{result['error']}</div>")
+
+    def render_diff_html(self, sections):
+        """Render the diff HTML for the file timeline"""
+        if not sections:
+            self.diff_display.setHtml("<div style='color: #E0E0E0; padding: 20px;'>No changes found in this version.</div>")
+            return
+            
+        html_parts = []
+        html_parts.append(f"<html><body style='background-color: {CP_BG}; color: {CP_TEXT}; margin: 0; padding: 10px; font-family: \"JetBrainsMono Nerd Font\", \"Consolas\", monospace; font-size: 10pt;'>")
+        
+        for section in sections:
+            rel_path = section['name']
+            stats = section['stats']
+            stats_text = f'<span style="color: {CP_GREEN};">+{stats["additions"]}</span> <span style="color: {CP_RED};">-{stats["deletions"]}</span>'
+            
+            # File header
+            html_parts.append(f'''
+                <div style="background-color: {CP_DIM}; color: {CP_YELLOW}; padding: 6px 10px; margin-top: 5px; margin-bottom: 5px; font-weight: bold; border-left: 5px solid {CP_CYAN}; font-size: 10pt;">
+                    📄 {rel_path} &nbsp;&nbsp; {stats_text}
+                </div>
+            ''')
+            
+            # File content (always expanded in timeline view)
+            content_lines = []
+            for line in section['lines']:
+                if line.startswith('+'):
+                    escaped_line = line.replace('<', '&lt;').replace('>', '&gt;').replace(' ', '&nbsp;')
+                    content_lines.append(f'<div style="color: {CP_GREEN}; background-color: #001a00; padding: 3px 8px;">{escaped_line}</div>')
+                elif line.startswith('-'):
+                    escaped_line = line.replace('<', '&lt;').replace('>', '&gt;').replace(' ', '&nbsp;')
+                    content_lines.append(f'<div style="color: {CP_RED}; background-color: #1a0000; padding: 3px 8px;">{escaped_line}</div>')
+                elif line.strip():
+                    escaped_line = line.replace('<', '&lt;').replace('>', '&gt;').replace(' ', '&nbsp;')
+                    content_lines.append(f'<div style="color: {CP_TEXT}; padding: 3px 8px;">{escaped_line}</div>')
+            
+            html_parts.append(f'<div style="border-left: 5px solid {CP_DIM}; margin-bottom: 20px;">{"".join(content_lines)}</div>')
+        
+        html_parts.append("</body></html>")
+        self.diff_display.setHtml("".join(html_parts))
 
     def accept_selection(self):
         selected = self.table.selectedItems()
