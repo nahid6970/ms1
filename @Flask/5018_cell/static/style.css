@@ -728,6 +728,8 @@ body {
     flex: 1;
     overflow: auto;
     padding: 0 20px;
+    will-change: scroll-position;
+    contain: strict;
 }
 
 table {
@@ -892,6 +894,8 @@ th {
     position: sticky;
     top: 0;
     z-index: 200;
+    transform: translateZ(0);
+    will-change: transform;
 }
 
 .header-toggle-container {

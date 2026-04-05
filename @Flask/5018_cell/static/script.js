@@ -136,7 +136,7 @@ function initializeApp() {
                     }
                 }
             }, 500); // 500ms debounce
-        });
+        }, { passive: true });
     }
     // Track mouse position for F8 hover search
     document.addEventListener('mousemove', (e) => {
