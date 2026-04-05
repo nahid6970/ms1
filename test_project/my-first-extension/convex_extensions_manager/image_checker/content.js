@@ -126,31 +126,27 @@ function runExtension() {
 
     function getContentId(element) {
         // 1. YouTube Specific Logic
-        // We strictly prefer 'yt_' ID for global video tracking on YouTube
-        // Valid for both Links (Titles) and Thumbnails if we can extract ID.
-        // However, user wants separation.
-        // Let's keep strict YouTube ID ONLY for what looks like a video/thumbnail interaction.
         if (location.hostname.includes('youtube.com')) {
+            // If clicking the player itself while watching a video, use the current page video ID
+            if (element.closest('#movie_player') || element.tagName === 'VIDEO') {
+                const videoId = extractYouTubeId(location.href);
+                if (videoId) return `yt_${videoId}`;
+            }
+
             const link = element.closest('a');
             const urlPromise = link ? link.href : (element.src || element.href);
             if (urlPromise && (urlPromise.includes('youtube.com') || urlPromise.includes('youtu.be'))) {
                 const videoId = extractYouTubeId(urlPromise);
-                // Return yt_ID only for visual elements to avoid checking Titles
                 if (videoId) {
                     const isVisual = element.tagName === 'IMG' ||
                         element.tagName === 'VIDEO' ||
                         element.tagName === 'YTD-THUMBNAIL' ||
                         element.classList.contains('ytd-thumbnail') ||
                         element.style.backgroundImage;
-
-                    // If it is visual, return ID. If it's a Text Link (Title), fall through to generic link logic?
-                    // Or we can return separate ID for YouTube Title? 
-                    // Let's just return yt_ID for visuals.
                     if (isVisual) return `yt_${videoId}`;
                 }
             }
         }
-
         // 2. Generic Sites: Strict Decoupling
 
         // Case A: Visual Media (Image/Video/Background)
@@ -190,6 +186,8 @@ function runExtension() {
     // --- UI & Interaction ---
 
     function getTargetContainer(element) {
+        // For YouTube player page, use the player container
+        if (element.closest('#movie_player')) return element.closest('#movie_player');
         // For YouTube, we strictly want the thumbnail container
         if (element.closest('ytd-thumbnail')) return element.closest('ytd-thumbnail');
         if (element.closest('ytd-playlist-thumbnail')) return element.closest('ytd-playlist-thumbnail');
