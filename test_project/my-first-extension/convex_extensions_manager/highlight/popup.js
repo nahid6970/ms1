@@ -150,21 +150,25 @@ document.addEventListener('DOMContentLoaded', () => {
   // Load from Convex button
   if (loadFromConvexBtn) {
     loadFromConvexBtn.addEventListener('click', function () {
+      const originalContent = loadFromConvexBtn.innerHTML;
+      loadFromConvexBtn.innerHTML = '<span>⏳</span> Loading...';
+
       chrome.runtime.sendMessage({
         action: 'loadFromConvex'
       }, function (response) {
         if (response && response.success !== false && response.data) {
           chrome.storage.local.set(response.data, () => {
-            showStatus('Data loaded from Convex! Refresh pages to see changes.');
-            // Notify all tabs to refresh
+            loadFromConvexBtn.innerHTML = '<span>✅</span> Restored!';
             chrome.tabs.query({}, (tabs) => {
               tabs.forEach(tab => {
                 chrome.tabs.sendMessage(tab.id, { action: "refresh_highlights" }).catch(() => { });
               });
             });
+            setTimeout(() => { loadFromConvexBtn.innerHTML = originalContent; }, 2000);
           });
         } else {
-          showStatus('Failed to load from Convex.');
+          loadFromConvexBtn.innerHTML = '<span>❌</span> Failed';
+          setTimeout(() => { loadFromConvexBtn.innerHTML = originalContent; }, 2000);
         }
       });
     });
