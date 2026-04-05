@@ -1,6 +1,6 @@
 # Bug Report: Intermittent Scrollbar Drag Lag
 
-## Status: Investigating (Partial Fix Applied)
+## Status: ✅ FIXED (2026-04-05)
 
 ### Symptom
 Intermittent lag/stuttering occurs when **manually dragging the scrollbar** with the mouse.
@@ -16,11 +16,20 @@ The application renders a large grid/table where cells contain complex markdown 
 2. **Removed Debug Logging:** Removed `console.log` from the scroll event path to reduce overhead.
 3. **Audit of Listeners:** Verified that no other heavy `scroll` or `wheel` listeners are active on the `window` or `document`.
 
-### Remaining Hypotheses
-1. **Layout Thrashing/Paint Heavy Elements:** Visual mode renders many small DOM nodes and SVGs. High-frequency scrolling might be triggering expensive repaints or layout recalculations (Reflows), especially if `position: sticky` headers are interacting with complex content.
-2. **Main Thread vs. Compositor:** Mouse wheel scrolling is often handled by the browser's compositor thread (smooth), whereas scrollbar dragging depends on the main thread processing `scroll` events and updating the UI.
-3. **SVG/KaTeX Complexity:** If many KaTeX formulas or Word Connectors are visible, the sheer number of elements might be hitting the browser's limit for smooth real-time repositioning during a drag.
+### Fix Applied (2026-04-05)
 
-### Files to Investigate
-- `static/script.js`: Search for `tableContainer.addEventListener('scroll', ...)` (around line 105).
-- `static/style.css`: Check for expensive properties like `backdrop-filter`, `box-shadow`, or `position: sticky` on headers.
+**`static/style.css` — `.table-container`**
+- Added `will-change: scroll-position` — promotes the scroll container to its own GPU layer ahead of time, preventing main-thread repaints during drag.
+- Added `contain: strict` — isolates layout/paint of the container from the rest of the page, eliminating cross-page reflow on every scroll event.
+
+**`static/style.css` — `th` (sticky header)**
+- Added `transform: translateZ(0)` and `will-change: transform` — promotes each sticky header to its own compositor layer. The `position: sticky` + scroll interaction was the primary source of expensive repaints during scrollbar drag.
+
+**`static/script.js` — scroll event listener**
+- Added `{ passive: true }` to `tableContainer.addEventListener('scroll', ...)` — signals to the browser that `preventDefault()` will never be called, allowing scroll events to be processed on the compositor thread instead of blocking the main thread.
+
+### Root Cause Summary
+The lag was caused by three compounding issues:
+1. `position: sticky` on `th` elements forced the browser to recalculate layout on every scroll event (main thread).
+2. No GPU layer promotion meant sticky headers were repainted from scratch each frame.
+3. The scroll listener lacked `passive: true`, forcing the browser to wait for the main thread before compositing each scroll frame.

@@ -1,5 +1,37 @@
 # Recent Development Log
 
+## [2026-04-05 10:50] - Fixed Scrollbar Drag Lag in Visual Mode
+
+**Session Duration:** 0.1 hours
+
+**What We Accomplished:**
+
+### 🐛 Fixed Intermittent Scrollbar Drag Lag
+- **Problem**: Manually dragging the scrollbar in Visual Mode caused intermittent lag/stuttering. Mouse wheel scrolling was unaffected.
+- **Root Cause**:
+  - `position: sticky` on `th` headers forced layout recalculation on every scroll event (main thread).
+  - No GPU layer promotion meant sticky headers were repainted from scratch each frame.
+  - The scroll listener lacked `{ passive: true }`, blocking the compositor thread.
+- **Solution**:
+  - Added `will-change: scroll-position` + `contain: strict` to `.table-container` for GPU layer isolation.
+  - Added `transform: translateZ(0)` + `will-change: transform` to `th` to promote sticky headers to their own compositor layers.
+  - Added `{ passive: true }` to the scroll event listener so the browser can handle scroll on the compositor thread.
+
+**Files Modified:**
+- `static/style.css` - GPU promotion hints on `.table-container` and `th`
+- `static/script.js` - `{ passive: true }` on scroll listener
+- `SCROLL_LAG_BUG.md` - Marked as fixed with full root cause summary
+- `md/PROBLEMS_AND_FIXES.md` - Logged fix
+- `md/RECENT.md` - This entry
+
+**Current Status:**
+- ✅ Scrollbar drag is smooth in Visual Mode
+
+**Known Issues:**
+- None
+
+---
+
 ## [2026-04-02 11:30] - Find & Replace Text & Searchable PDF Export
 
 **Session Duration:** 1.2 hours

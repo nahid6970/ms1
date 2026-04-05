@@ -5,6 +5,28 @@ This document tracks historical bugs, issues, and their solutions. Use this to:
 - Check if old fixes might conflict with new features
 - Debug similar issues by referencing past solutions
 
+## [2026-04-05 10:50] - Scrollbar Drag Lag in Visual Mode
+
+**Problem:**
+Intermittent lag/stuttering when manually dragging the scrollbar in Visual Mode. Mouse wheel scrolling was unaffected.
+
+**Root Cause:**
+Three compounding issues:
+1. `position: sticky` on `th` elements forced layout recalculation on every scroll event (main thread).
+2. No GPU layer promotion — sticky headers were repainted from scratch each frame during drag.
+3. The scroll listener lacked `{ passive: true }`, forcing the browser to wait for the main thread before compositing each scroll frame.
+
+**Solution:**
+1. Added `will-change: scroll-position` and `contain: strict` to `.table-container` — promotes the container to its own GPU layer and isolates its layout/paint from the rest of the page.
+2. Added `transform: translateZ(0)` and `will-change: transform` to `th` — promotes each sticky header to its own compositor layer, eliminating the sticky-scroll repaint bottleneck.
+3. Added `{ passive: true }` to the `tableContainer` scroll event listener — allows the browser to process scroll events on the compositor thread without waiting for the main thread.
+
+**Files Modified:**
+- `static/style.css` - Added GPU promotion hints to `.table-container` and `th`
+- `static/script.js` - Added `{ passive: true }` to scroll listener
+
+---
+
 ## [2026-03-10 14:15] - Title Spacing & Table Merging Issues
 
 **Problem:** 
