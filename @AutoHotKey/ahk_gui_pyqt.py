@@ -1931,7 +1931,9 @@ class AHKShortcutEditor(QMainWindow):
                         output_lines.append(f":X:{trigger}::Paste('{safe_replacement}')")
                     output_lines.append("")
 
-            output_file = os.path.join(SCRIPT_DIR, "generated_shortcuts.ahk")
+            output_dir = r"C:\@delta\output\ahk"
+            os.makedirs(output_dir, exist_ok=True)
+            output_file = os.path.join(output_dir, "generated_shortcuts.ahk")
             with open(output_file, 'w', encoding='utf-8') as f:
                 f.write('\n'.join(output_lines))
 

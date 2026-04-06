@@ -111,7 +111,7 @@ else
 
 - `ahk_gui_pyqt.py`: The main Python application logic and UI.
 - `ahk_shortcuts.json`: Your database of saved shortcuts (automatically managed).
-- `generated_shortcuts.ahk`: The output file you run with AutoHotkey v2.
+- `C:\@delta\output\ahk\generated_shortcuts.ahk`: The output file you run with AutoHotkey v2.
 
 ## ⚠️ Requirements
 
@@ -157,7 +157,7 @@ The GUI will open with your existing shortcuts (if any).
    - Action: `Run("notepad.exe")`
 3. Click **OK**
 4. Click **[🚀 Generate AHK]**
-5. Run `generated_shortcuts.ahk`
+5. Run `C:\@delta\output\ahk\generated_shortcuts.ahk`
 6. Press `Win+N` → Notepad opens!
 
 ### Example 2: Text Shortcut
@@ -172,7 +172,7 @@ The GUI will open with your existing shortcuts (if any).
    - Replacement: `your.email@example.com`
 3. Click **OK**
 4. Click **[🚀 Generate AHK]**
-5. Run `generated_shortcuts.ahk`
+5. Run `C:\@delta\output\ahk\generated_shortcuts.ahk`
 6. Type `;email` → Expands to your email!
 
 ### Example 3: Context Shortcut (NEW!)
@@ -190,7 +190,7 @@ The GUI will open with your existing shortcuts (if any).
 4. Copy this example: `SendText("/chat save")`
 5. Click **OK**
 6. Click **[🚀 Generate AHK]**
-7. Run `generated_shortcuts.ahk`
+7. Run `C:\@delta\output\ahk\generated_shortcuts.ahk`
 8. Open Gemini terminal, press `Ctrl+S` → Saves chat!
 
 ## Using Hints & Reference
@@ -1450,7 +1450,7 @@ Run("notepad.exe")
 3. **Use Hints:** Look at placeholder examples
 4. **Check Reference:** Click 📖 for detailed docs
 5. **Generate Script:** Click "🚀 Generate AHK"
-6. **Run Script:** Double-click `generated_shortcuts.ahk`
+6. **Run Script:** Double-click `C:\@delta\output\ahk\generated_shortcuts.ahk`
 
 ## Tips & Best Practices
 
@@ -2466,7 +2466,7 @@ IsGeminiSaveChatContext() {
    - Action: `MsgBox("Hello from Notepad!")`
 4. Click OK
 5. Click "🚀 Generate AHK"
-6. Run `generated_shortcuts.ahk`
+6. Run `C:\@delta\output\ahk\generated_shortcuts.ahk`
 7. Open Notepad and press Ctrl+S
 
 The shortcut only works in Notepad! 🎉
@@ -2566,7 +2566,7 @@ The GUI now shows:
 
 ## Step 6: Check Generated Code
 
-Open `generated_shortcuts.ahk` and you'll see:
+Open `C:\@delta\output\ahk\generated_shortcuts.ahk` and you'll see:
 
 ```ahk
 #Requires AutoHotkey v2.0
@@ -2624,7 +2624,7 @@ IsGeminiResumeChatContext() {
 generated_shortcuts.ahk
 ```
 
-Or double-click `generated_shortcuts.ahk` in File Explorer.
+Or double-click `C:\@delta\output\ahk\generated_shortcuts.ahk` in File Explorer.
 
 ## Step 8: Test It!
 
@@ -2735,7 +2735,7 @@ Same hotkey (Ctrl+S), different actions based on context!
 
 **Files Modified:**
 - `ahk_shortcuts.json` - Added the new shortcut to database
-- `generated_shortcuts.ahk` - Updated the generated script with the new functionality
+- `C:\@delta\output\ahk\generated_shortcuts.ahk` - Updated the generated script with the new functionality
 
 ## 2025-01-22
 
@@ -2802,7 +2802,7 @@ Same hotkey (Ctrl+S), different actions based on context!
 
 **Files Modified:**
 - `ahk_shortcuts.json` - Updated Execute Script W/O Closing shortcut
-- `generated_shortcuts.ahk` - Updated generated script
+- `C:\@delta\output\ahk\generated_shortcuts.ahk` - Updated generated script
 
 ### ✅ Added Context-Aware Shortcuts Feature
 **New Feature:** Added support for window-specific shortcuts that only work in certain contexts (specific window title, process name, or window class).
