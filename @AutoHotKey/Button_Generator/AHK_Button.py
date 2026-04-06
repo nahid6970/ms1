@@ -8,9 +8,10 @@ os.environ["QT_LOGGING_RULES"] = "qt.text.font.db=false"
 
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QLabel, QPushButton, QLineEdit, QGroupBox, QScrollArea,
-                             QFormLayout, QFrame, QColorDialog)
-from PyQt6.QtCore import Qt, QTimer
-from PyQt6.QtGui import QColor
+                             QFormLayout, QFrame, QColorDialog, QDialog, QTextEdit)
+from PyQt6.QtCore import Qt, QTimer, QByteArray
+from PyQt6.QtGui import QColor, QPainter, QImage
+from PyQt6.QtSvg import QSvgRenderer
 
 # CYBERPUNK THEME PALETTE (from THEME_GUIDE.md)
 CP_BG = "#050505"
@@ -30,6 +31,30 @@ CONFIG_FILE = os.path.join(SCRIPT_DIR, "ahk_config.json")
 AHK_OUTPUT_DIR = r"C:\@delta\output\ahk"
 os.makedirs(AHK_OUTPUT_DIR, exist_ok=True)
 AHK_OUTPUT = os.path.join(AHK_OUTPUT_DIR, "generate_Button_AHK.ahk")
+
+class SVGInputDialog(QDialog):
+    def __init__(self, initial_code="", parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("SVG Code Editor")
+        self.resize(500, 400)
+        self.layout = QVBoxLayout(self)
+        self.editor = QTextEdit()
+        self.editor.setPlaceholderText("<svg ...> ... </svg>")
+        self.editor.setPlainText(initial_code)
+        self.editor.setStyleSheet(f"background-color: #1a1a1a; color: {CP_CYAN}; font-family: 'Consolas';")
+        self.layout.addWidget(self.editor)
+        
+        btns = QHBoxLayout()
+        save_btn = QPushButton("SAVE")
+        save_btn.clicked.connect(self.accept)
+        cancel_btn = QPushButton("CANCEL")
+        cancel_btn.clicked.connect(self.reject)
+        btns.addWidget(save_btn)
+        btns.addWidget(cancel_btn)
+        self.layout.addLayout(btns)
+
+    def get_code(self):
+        return self.editor.toPlainText().strip()
 
 class RowWidget(QFrame):
     def __init__(self, data=None, on_remove=None, parent_app=None):
@@ -139,7 +164,22 @@ class RowWidget(QFrame):
         text_input = QLineEdit()
         text_input.setPlaceholderText("Text")
         text_input.setText(b_data.get("text", "") if b_data else "")
+
+        # SVG Code Storage
+        btn_frame.svg_code = b_data.get("svg_code", "") if b_data else ""
         
+        svg_btn = QPushButton("SVG")
+        svg_btn.setFixedWidth(50)
+        def open_svg_dialog():
+            dlg = SVGInputDialog(btn_frame.svg_code, self)
+            if dlg.exec():
+                btn_frame.svg_code = dlg.get_code()
+                svg_btn.setStyleSheet(f"background-color: {CP_CYAN if btn_frame.svg_code else CP_DIM}; color: black;")
+        
+        svg_btn.clicked.connect(open_svg_dialog)
+        if btn_frame.svg_code:
+            svg_btn.setStyleSheet(f"background-color: {CP_CYAN}; color: black;")
+
         # BG Color Picker Button
         bg_btn = QPushButton("BG")
         bg_btn.setObjectName("bg_btn")
@@ -182,6 +222,7 @@ class RowWidget(QFrame):
         blayout.addWidget(label_input)
         blayout.addWidget(QLabel("T:"))
         blayout.addWidget(text_input)
+        blayout.addWidget(svg_btn)
         blayout.addWidget(bg_btn)
         blayout.addWidget(tx_btn)
         blayout.addWidget(rem_btn)
@@ -209,6 +250,7 @@ class RowWidget(QFrame):
                 row_data["buttons"].append({
                     "label": inputs[0].text(),
                     "text": inputs[1].text(),
+                    "svg_code": getattr(btn_frame, "svg_code", ""),
                     "color": bg,
                     "text_color": tx
                 })
@@ -413,6 +455,10 @@ class App(QMainWindow):
         self.save_config()
         data = [r.get_data() for r in self.rows]
         
+        # Setup assets directory
+        assets_dir = os.path.join(AHK_OUTPUT_DIR, "assets")
+        os.makedirs(assets_dir, exist_ok=True)
+
         ahk_code = [
             "#Requires AutoHotkey v2.0",
             "",
@@ -439,13 +485,42 @@ class App(QMainWindow):
             ahk_code.append(f'myGui.Add("Text", "xm {y_pos} w{tw} h{th} +Border Center Background{tc}", "{title}")')
             ahk_code.append(f'myGui.SetFont("s12 Bold cDefault", "Jetbrainsmono nfp")')
             
-            for btn in row["buttons"]:
+            for j, btn in enumerate(row["buttons"]):
                 label = btn["label"]
                 text = btn["text"].replace('"', '""') # AHK escape
                 bg = btn.get("color", "00CCFF")
                 fg = btn.get("text_color", "000000")
-                ahk_code.append(f'btn := myGui.Add("Text", "x+5 yp w{bw} h{bh} +Border Center Background{bg}", "{label}")')
-                ahk_code.append(f'btn.SetFont("c{fg}")')
+                svg_code = btn.get("svg_code", "")
+
+                if svg_code:
+                    # Priority 1: SVG Code (Render to PNG for AHK compatibility)
+                    png_filename = f"btn_{i}_{j}.png"
+                    png_path = os.path.join(assets_dir, png_filename)
+                    
+                    try:
+                        # Render SVG to QImage then save as PNG
+                        renderer = QSvgRenderer(QByteArray(svg_code.encode("utf-8")))
+                        # Use button dimensions from settings
+                        img_w = int(self.settings_panel.btn_w.text() or "100")
+                        img_h = int(self.settings_panel.btn_h.text() or "30")
+                        image = QImage(img_w, img_h, QImage.Format.Format_ARGB32)
+                        image.fill(Qt.GlobalColor.transparent)
+                        
+                        painter = QPainter(image)
+                        renderer.render(painter)
+                        painter.end()
+                        image.save(png_path, "PNG")
+                        
+                        ahk_img_path = f"assets\\{png_filename}"
+                        ahk_code.append(f'btn := myGui.Add("Picture", "x+5 yp w{bw} h{bh} +Border Background{bg}", "{ahk_img_path}")')
+                    except Exception as e:
+                        print(f"SVG Render Error: {e}")
+                        ahk_code.append(f'btn := myGui.Add("Text", "x+5 yp w{bw} h{bh} +Border Center Background{bg}", "ERR")')
+                else:
+                    # Priority 2: Text Label
+                    ahk_code.append(f'btn := myGui.Add("Text", "x+5 yp w{bw} h{bh} +Border Center Background{bg}", "{label}")')
+                    ahk_code.append(f'btn.SetFont("c{fg}")')
+                
                 ahk_code.append(f'btn.OnEvent("Click", (*) => SendText("{text}"))')
                 ahk_code.append(f'btn.OnEvent("ContextMenu", (*) => (A_Clipboard := "{text}"))')
             
