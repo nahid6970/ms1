@@ -110,14 +110,14 @@
             "title_text_color": "000000",
             "buttons": [
                 {
-                    "label": "Present",
+                    "label": "\ueb71",
                     "text": "Narayangonj",
                     "svg_code": "",
                     "color": "00CCFF",
                     "text_color": "000000"
                 },
                 {
-                    "label": "Permanent",
+                    "label": "\ueb71",
                     "text": "Radhapur",
                     "svg_code": "",
                     "color": "00CCFF",
@@ -131,14 +131,14 @@
             "title_text_color": "000000",
             "buttons": [
                 {
-                    "label": "Present",
+                    "label": "\ueb71",
                     "text": "1420",
                     "svg_code": "",
                     "color": "00CCFF",
                     "text_color": "000000"
                 },
                 {
-                    "label": "Permanent",
+                    "label": "\ueb71",
                     "text": "3706",
                     "svg_code": "",
                     "color": "00CCFF",
