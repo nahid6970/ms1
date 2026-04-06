@@ -9,7 +9,7 @@ os.environ["QT_LOGGING_RULES"] = "qt.text.font.db=false"
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QLabel, QPushButton, QLineEdit, QGroupBox, QScrollArea,
                              QFormLayout, QFrame, QColorDialog, QDialog, QTextEdit)
-from PyQt6.QtCore import Qt, QTimer, QByteArray
+from PyQt6.QtCore import Qt, QTimer, QByteArray, QRectF
 from PyQt6.QtGui import QColor, QPainter, QImage
 from PyQt6.QtSvg import QSvgRenderer
 
@@ -497,25 +497,37 @@ class App(QMainWindow):
                     png_filename = f"btn_{i}_{j}.png"
                     png_path = os.path.join(assets_dir, png_filename)
                     
+                    # Target dimensions from settings
+                    target_w = int(self.settings_panel.btn_w.text() or "100")
+                    target_h = int(self.settings_panel.btn_h.text() or "30")
+                    image = QImage(target_w, target_h, QImage.Format.Format_ARGB32)
+                    image.fill(Qt.GlobalColor.transparent)
+                    
+                    painter = QPainter(image)
                     try:
-                        # Render SVG to QImage then save as PNG
                         renderer = QSvgRenderer(QByteArray(svg_code.encode("utf-8")))
-                        # Use button dimensions from settings
-                        img_w = int(self.settings_panel.btn_w.text() or "100")
-                        img_h = int(self.settings_panel.btn_h.text() or "30")
-                        image = QImage(img_w, img_h, QImage.Format.Format_ARGB32)
-                        image.fill(Qt.GlobalColor.transparent)
-                        
-                        painter = QPainter(image)
-                        renderer.render(painter)
-                        painter.end()
-                        image.save(png_path, "PNG")
-                        
-                        ahk_img_path = f"assets\\{png_filename}"
-                        ahk_code.append(f'btn := myGui.Add("Picture", "x+5 yp w{bw} h{bh} +Border Background{bg}", "{ahk_img_path}")')
+                        # Calculate aspect ratio to prevent stretching
+                        svg_size = renderer.defaultSize()
+                        if not svg_size.isEmpty():
+                            ratio = min(target_w / svg_size.width(), target_h / svg_size.height())
+                            # Padding: 90% of max size to leave small margin
+                            fit_w = float(svg_size.width() * ratio * 0.9)
+                            fit_h = float(svg_size.height() * ratio * 0.9)
+                            
+                            # Center the rect
+                            x = float(target_w - fit_w) / 2.0
+                            y = float(target_h - fit_h) / 2.0
+                            renderer.render(painter, QRectF(x, y, fit_w, fit_h))
+                        else:
+                            renderer.render(painter)
                     except Exception as e:
                         print(f"SVG Render Error: {e}")
-                        ahk_code.append(f'btn := myGui.Add("Text", "x+5 yp w{bw} h{bh} +Border Center Background{bg}", "ERR")')
+                    finally:
+                        painter.end()
+
+                    image.save(png_path, "PNG")
+                    ahk_img_path = f"assets\\{png_filename}"
+                    ahk_code.append(f'btn := myGui.Add("Picture", "x+5 yp w{bw} h{bh} +Border Background{bg}", "{ahk_img_path}")')
                 else:
                     # Priority 2: Text Label
                     ahk_code.append(f'btn := myGui.Add("Text", "x+5 yp w{bw} h{bh} +Border Center Background{bg}", "{label}")')
