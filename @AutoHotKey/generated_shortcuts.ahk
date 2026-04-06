@@ -914,9 +914,9 @@ __text__ = underline
 Dont add unnecessary extra lines between heading and its content
 dont use --- or dash to add separator just keep single empty line for spacing
 try to use table for organizing similar types things
-For math use katex or latex formatting with \(Math\) or $Math$
 mostly use bengla language other than some names or important things
 No advertisement or any other talk like about coaching etc only study note
+For math use katex or latex formatting with \(Math\) or $Math$
 )")
 
 ;! Cyberpunk styling with pyqt
