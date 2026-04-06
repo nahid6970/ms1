@@ -370,10 +370,24 @@ class KomorebiApp(QMainWindow):
 
     def apply_result(self, res):
         base = {"kind": res["kind"], "id": res["id"], "matching_strategy": res["matching_strategy"]}
+        
+        float_added = False
+        tray_added = False
+        
         if res["is_float"]:
-            self.config_data.setdefault("float_rules", []).append(base)
+            if base not in self.config_data.setdefault("float_rules", []):
+                self.config_data["float_rules"].append(base)
+                float_added = True
+                
         if res["is_tray"]:
-            self.config_data.setdefault("tray_and_multi_window_applications", []).append(base)
+            if base not in self.config_data.setdefault("tray_and_multi_window_applications", []):
+                self.config_data["tray_and_multi_window_applications"].append(base)
+                tray_added = True
+        
+        # If the user selected a type but it wasn't added because it already exists
+        if (res["is_float"] and not float_added) or (res["is_tray"] and not tray_added):
+            QMessageBox.information(self, "DUPLICATE", "SOME OR ALL SELECTED RULES ALREADY EXIST AND WERE IGNORED.")
+            
         self.refresh_list()
 
     def remove_selected(self):
