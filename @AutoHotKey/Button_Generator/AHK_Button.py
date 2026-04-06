@@ -214,6 +214,18 @@ class RowWidget(QFrame):
                 })
         return row_data
 
+    def matches(self, search_text):
+        if not search_text: return True
+        search_text = search_text.lower()
+        if search_text in self.title_input.text().lower(): return True
+        for i in range(self.btns_layout.count()):
+            btn_frame = self.btns_layout.itemAt(i).widget()
+            if btn_frame:
+                inputs = btn_frame.findChildren(QLineEdit)
+                for inp in inputs:
+                    if search_text in inp.text().lower(): return True
+        return False
+
 class SettingsPanel(QGroupBox):
     def __init__(self, update_callback):
         super().__init__("SETTINGS")
@@ -294,6 +306,13 @@ class App(QMainWindow):
         settings_btn.clicked.connect(self.toggle_settings)
 
         toolbar.addWidget(add_row_btn)
+        
+        self.search_input = QLineEdit()
+        self.search_input.setPlaceholderText("🔍 Search Rows/Buttons...")
+        self.search_input.setFixedWidth(250)
+        self.search_input.textChanged.connect(self.filter_rows)
+        toolbar.addWidget(self.search_input)
+
         toolbar.addStretch()
         self.status_label = QLabel("")
         self.status_label.setStyleSheet(f"color: {CP_GREEN}; font-size: 9pt;")
@@ -322,10 +341,15 @@ class App(QMainWindow):
         for row in self.rows:
             row.refresh_widths()
 
+    def filter_rows(self, text):
+        for row in self.rows:
+            row.setVisible(row.matches(text))
+
     def add_row(self, data=None):
         row = RowWidget(data, on_remove=self.remove_row, parent_app=self)
         self.rows.append(row)
         self.rows_layout.addWidget(row)
+        row.setVisible(row.matches(self.search_input.text()))
 
     def remove_row(self, row_widget):
         self.rows.remove(row_widget)
