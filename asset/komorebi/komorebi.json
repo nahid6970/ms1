@@ -293,6 +293,11 @@
             "kind": "Exe",
             "id": "pythonw.exe",
             "matching_strategy": "Legacy"
+        },
+        {
+            "kind": "Class",
+            "id": "Qt692QWindowIcon",
+            "matching_strategy": "Legacy"
         }
     ],
     "tray_and_multi_window_applications": [
