@@ -283,9 +283,13 @@ class SettingsPanel(QGroupBox):
         self.title_w = QLineEdit("200")
         self.btn_h = QLineEdit("30")
         self.btn_w = QLineEdit("100")
+        self.win_w = QLineEdit("1000")
+        self.win_h = QLineEdit("800")
         
         self.ui_label_w.textChanged.connect(update_callback)
         self.ui_text_w.textChanged.connect(update_callback)
+        self.win_w.textChanged.connect(update_callback)
+        self.win_h.textChanged.connect(update_callback)
 
         def row(field1, *pairs):
             w = QWidget(); h = QHBoxLayout(w); h.setContentsMargins(0,0,0,0)
@@ -299,6 +303,7 @@ class SettingsPanel(QGroupBox):
         self.layout.addRow("UI Label / Text Width:", row(self.ui_label_w, ("T:", self.ui_text_w)))
         self.layout.addRow("Title H / W:", row(self.title_h, ("W:", self.title_w)))
         self.layout.addRow("Button H / W:", row(self.btn_h, ("W:", self.btn_w)))
+        self.layout.addRow("Window W / H:", row(self.win_w, ("H:", self.win_h)))
 
 class App(QMainWindow):
     def __init__(self):
@@ -380,6 +385,11 @@ class App(QMainWindow):
         self.load_config()
 
     def update_ui_widths(self):
+        try:
+            ww = int(self.settings_panel.win_w.text())
+            wh = int(self.settings_panel.win_h.text())
+            self.resize(ww, wh)
+        except: pass
         for row in self.rows:
             row.refresh_widths()
 
@@ -421,12 +431,15 @@ class App(QMainWindow):
                             if "title_w" in s: self.settings_panel.title_w.setText(s["title_w"])
                             if "btn_h" in s: self.settings_panel.btn_h.setText(s["btn_h"])
                             if "btn_w" in s: self.settings_panel.btn_w.setText(s["btn_w"])
+                            if "win_w" in s: self.settings_panel.win_w.setText(s["win_w"])
+                            if "win_h" in s: self.settings_panel.win_h.setText(s["win_h"])
                         rows_data = data.get("rows", [])
                     else:
                         rows_data = data
                     
                     for r_data in rows_data:
                         self.add_row(r_data)
+                    self.update_ui_widths()
             except Exception as e:
                 print(f"Error loading config: {e}")
         else:
@@ -444,7 +457,9 @@ class App(QMainWindow):
                 "title_h": self.settings_panel.title_h.text(),
                 "title_w": self.settings_panel.title_w.text(),
                 "btn_h": self.settings_panel.btn_h.text(),
-                "btn_w": self.settings_panel.btn_w.text()
+                "btn_w": self.settings_panel.btn_w.text(),
+                "win_w": self.settings_panel.win_w.text(),
+                "win_h": self.settings_panel.win_h.text()
             },
             "rows": [r.get_data() for r in self.rows]
         }
