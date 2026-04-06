@@ -29,7 +29,7 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 CONFIG_FILE = os.path.join(SCRIPT_DIR, "ahk_config.json")
 AHK_OUTPUT_DIR = r"C:\@delta\output\ahk"
 os.makedirs(AHK_OUTPUT_DIR, exist_ok=True)
-AHK_OUTPUT = os.path.join(AHK_OUTPUT_DIR, "generate_AHK.ahk")
+AHK_OUTPUT = os.path.join(AHK_OUTPUT_DIR, "generate_Button_AHK.ahk")
 
 class RowWidget(QFrame):
     def __init__(self, data=None, on_remove=None, parent_app=None):
