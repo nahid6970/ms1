@@ -156,11 +156,6 @@
         },
         {
             "kind": "Exe",
-            "id": "python.exe",
-            "matching_strategy": "Equals"
-        },
-        {
-            "kind": "Exe",
             "id": "VirtualBox.exe",
             "matching_strategy": "Equals"
         },
@@ -266,11 +261,6 @@
         },
         {
             "kind": "Exe",
-            "id": "pythonw.exe",
-            "matching_strategy": "Equals"
-        },
-        {
-            "kind": "Exe",
             "id": "Podman Desktop.exe",
             "matching_strategy": "Legacy"
         },
@@ -297,6 +287,11 @@
         {
             "kind": "Exe",
             "id": "python.exe",
+            "matching_strategy": "Legacy"
+        },
+        {
+            "kind": "Exe",
+            "id": "pythonw.exe",
             "matching_strategy": "Legacy"
         }
     ],
@@ -339,6 +334,16 @@
         {
             "kind": "Exe",
             "id": "komorebi.exe",
+            "matching_strategy": "Legacy"
+        },
+        {
+            "kind": "Exe",
+            "id": "python.exe",
+            "matching_strategy": "Legacy"
+        },
+        {
+            "kind": "Exe",
+            "id": "pythonw.exe",
             "matching_strategy": "Legacy"
         }
     ]
