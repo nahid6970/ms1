@@ -248,21 +248,50 @@ class KomorebiConfigApp(ctk.CTk):
             messagebox.showerror("Error", "pywin32 library is not installed. Please install it using 'pip install pywin32'.")
             return
             
-        messagebox.showinfo("Capture", "After clicking OK, you have 3 seconds to focus the target window.")
-        self.after(3000, self.perform_capture)
+        # Change button state to show we are waiting for a click
+        self.get_item_button.configure(text="Click target window...", fg_color="orange")
+        # First, wait for the user to release the mouse button from the current click
+        self.after(100, self.wait_for_mouse_release)
 
-    def perform_capture(self):
-        hwnd = win32gui.GetForegroundWindow()
+    def wait_for_mouse_release(self):
+        # 0x01 is VK_LBUTTON
+        if win32api.GetAsyncKeyState(0x01) == 0:
+            # Mouse is released, now wait for the NEXT click
+            self.poll_for_next_click()
+        else:
+            # Still holding the button from the initial click
+            self.after(50, self.wait_for_mouse_release)
+
+    def poll_for_next_click(self):
+        if win32api.GetAsyncKeyState(0x01) < 0:
+            # Click detected! Small delay to allow window focus/processing
+            self.after(150, self.perform_capture_at_cursor)
+        else:
+            # Keep waiting for a click
+            self.after(50, self.poll_for_next_click)
+
+    def perform_capture_at_cursor(self):
+        # Reset button appearance
+        self.get_item_button.configure(text="Get Item Info", fg_color=ctk.ThemeManager.theme["CTkButton"]["fg_color"])
+        
+        # Get window at the current cursor position
+        pos = win32api.GetCursorPos()
+        hwnd = win32gui.WindowFromPoint(pos)
+        
         if not hwnd:
-            messagebox.showwarning("Warning", "No window captured.")
+            messagebox.showwarning("Warning", "No window found at click position.")
             return
+
+        # Get the top-level (root) window from the handle
+        # GA_ROOT (2) gets the full root window
+        hwnd = win32gui.GetAncestor(hwnd, 2)
 
         title = win32gui.GetWindowText(hwnd)
         cls = win32gui.GetClassName(hwnd)
         
         try:
             _, pid = win32process.GetWindowThreadProcessId(hwnd)
-            handle = win32api.OpenProcess(0x0400 | 0x0010, False, pid) # PROCESS_QUERY_INFORMATION | PROCESS_VM_READ
+            handle = win32api.OpenProcess(0x0400 | 0x0010, False, pid) 
             path = win32process.GetModuleFileNameEx(handle, 0)
             exe = os.path.basename(path)
             win32api.CloseHandle(handle)
