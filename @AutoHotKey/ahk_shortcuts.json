@@ -523,6 +523,14 @@
             "trigger": ";port",
             "replacement": "New-NetFirewallRule -DisplayName \"Allow Port XXXX\" -Direction Inbound -Action Allow -Protocol TCP -LocalPort XXXX -Profile Any",
             "enabled": true
+        },
+        {
+            "name": "Recent Changes",
+            "category": "General",
+            "description": "",
+            "trigger": ";recent",
+            "replacement": "ur job is to tell me any recent changes to any world/internation organization WTO, UN, EU, G7 etc and also any bangladesh related organization for any perseon change in the head like president, chairmen, etc\nmake a study note for this\nmd syntex formet is a bit different here is how i use them\n\n#1.5#text#/#  = extra big text\n##text##  = big text\n**text** = bold text, also dont ever use single star syntax i saw u sometime use them which are not defined in my project so they shows single star which is annoying and i have to fix them to double star\n@@text@@ = italic text\n__text__ = underline\n- text = list 1\n-- text = list 2\n--- text = list 3\nDont add unnecessary extra lines between heading and its content\ndont use --- or dash to add separator just keep single empty line for spacing\ntry to use table for organizing similar types things",
+            "enabled": true
         }
     ],
     "startup_scripts": [
