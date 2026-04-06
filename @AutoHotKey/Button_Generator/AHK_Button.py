@@ -88,6 +88,17 @@ class RowWidget(QFrame):
         header_layout.addWidget(self.title_color_btn)
         header_layout.addWidget(self.title_text_color_btn)
         
+        move_up_btn = QPushButton("▲")
+        move_up_btn.setFixedWidth(30)
+        move_up_btn.clicked.connect(lambda: self.parent_app.move_row(self, -1))
+        
+        move_down_btn = QPushButton("▼")
+        move_down_btn.setFixedWidth(30)
+        move_down_btn.clicked.connect(lambda: self.parent_app.move_row(self, 1))
+        
+        header_layout.addWidget(move_up_btn)
+        header_layout.addWidget(move_down_btn)
+
         remove_row_btn = QPushButton("×")
         remove_row_btn.setFixedWidth(30)
         remove_row_btn.setStyleSheet(f"background-color: {CP_RED}; color: white; font-weight: bold;")
@@ -392,6 +403,20 @@ class App(QMainWindow):
         except: pass
         for row in self.rows:
             row.refresh_widths()
+
+    def move_row(self, row_widget, direction):
+        idx = self.rows.index(row_widget)
+        new_idx = idx + direction
+        if 0 <= new_idx < len(self.rows):
+            # Swap in list
+            self.rows[idx], self.rows[new_idx] = self.rows[new_idx], self.rows[idx]
+            
+            # Clear layout and re-add in new order
+            for r in self.rows:
+                self.rows_layout.removeWidget(r)
+            
+            for r in self.rows:
+                self.rows_layout.addWidget(r)
 
     def filter_rows(self, text):
         for row in self.rows:
