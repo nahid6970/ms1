@@ -147,6 +147,20 @@
             ]
         },
         {
+            "title": "SSC & HSC REG",
+            "title_color": "FFCC00",
+            "title_text_color": "000000",
+            "buttons": [
+                {
+                    "label": "REG",
+                    "text": "1110241111",
+                    "svg_code": "",
+                    "color": "00CCFF",
+                    "text_color": "000000"
+                }
+            ]
+        },
+        {
             "title": "SSC",
             "title_color": "FFCC00",
             "title_text_color": "000000",
