@@ -8,7 +8,7 @@ os.environ["QT_LOGGING_RULES"] = "qt.text.font.db=false"
 
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QLabel, QPushButton, QLineEdit, QGroupBox, QScrollArea,
-                             QFormLayout, QFrame, QColorDialog, QDialog, QTextEdit)
+                             QFormLayout, QFrame, QColorDialog, QDialog, QTextEdit, QListWidget, QListWidgetItem)
 from PyQt6.QtCore import Qt, QTimer, QByteArray, QRectF
 from PyQt6.QtGui import QColor, QPainter, QImage
 from PyQt6.QtSvg import QSvgRenderer
@@ -31,6 +31,40 @@ CONFIG_FILE = os.path.join(SCRIPT_DIR, "ahk_config.json")
 AHK_OUTPUT_DIR = r"C:\@delta\output\ahk"
 os.makedirs(AHK_OUTPUT_DIR, exist_ok=True)
 AHK_OUTPUT = os.path.join(AHK_OUTPUT_DIR, "generate_Button_AHK.ahk")
+
+class ReorderDialog(QDialog):
+    def __init__(self, rows, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Reorder Rows (Drag & Drop)")
+        self.resize(400, 500)
+        self.layout = QVBoxLayout(self)
+        
+        self.list_widget = QListWidget()
+        self.list_widget.setDragDropMode(QListWidget.DragDropMode.InternalMove)
+        self.list_widget.setStyleSheet(f"background-color: #1a1a1a; color: {CP_CYAN}; font-family: 'Consolas'; font-size: 11pt;")
+        
+        for row in rows:
+            title = row.title_input.text() or "Untitled Row"
+            item = QListWidgetItem(title)
+            item.setData(Qt.ItemDataRole.UserRole, row)
+            self.list_widget.addItem(item)
+            
+        self.layout.addWidget(self.list_widget)
+        
+        btns = QHBoxLayout()
+        save_btn = QPushButton("SAVE ORDER")
+        save_btn.clicked.connect(self.accept)
+        cancel_btn = QPushButton("CANCEL")
+        cancel_btn.clicked.connect(self.reject)
+        btns.addWidget(save_btn)
+        btns.addWidget(cancel_btn)
+        self.layout.addLayout(btns)
+
+    def get_new_order(self):
+        new_order = []
+        for i in range(self.list_widget.count()):
+            new_order.append(self.list_widget.item(i).data(Qt.ItemDataRole.UserRole))
+        return new_order
 
 class SVGInputDialog(QDialog):
     def __init__(self, initial_code="", parent=None):
@@ -88,17 +122,6 @@ class RowWidget(QFrame):
         header_layout.addWidget(self.title_color_btn)
         header_layout.addWidget(self.title_text_color_btn)
         
-        move_up_btn = QPushButton("▲")
-        move_up_btn.setFixedWidth(30)
-        move_up_btn.clicked.connect(lambda: self.parent_app.move_row(self, -1))
-        
-        move_down_btn = QPushButton("▼")
-        move_down_btn.setFixedWidth(30)
-        move_down_btn.clicked.connect(lambda: self.parent_app.move_row(self, 1))
-        
-        header_layout.addWidget(move_up_btn)
-        header_layout.addWidget(move_down_btn)
-
         remove_row_btn = QPushButton("×")
         remove_row_btn.setFixedWidth(30)
         remove_row_btn.setStyleSheet(f"background-color: {CP_RED}; color: white; font-weight: bold;")
@@ -352,6 +375,9 @@ class App(QMainWindow):
         toolbar = QHBoxLayout()
         add_row_btn = QPushButton("+ NEW ROW")
         add_row_btn.clicked.connect(self.add_row)
+
+        reorder_btn = QPushButton("REORDER")
+        reorder_btn.clicked.connect(self.open_reorder_dialog)
         
         gen_btn = QPushButton("GENERATE AHK")
         gen_btn.setStyleSheet(f"background-color: {CP_GREEN}; color: black;")
@@ -364,6 +390,7 @@ class App(QMainWindow):
         settings_btn.clicked.connect(self.toggle_settings)
 
         toolbar.addWidget(add_row_btn)
+        toolbar.addWidget(reorder_btn)
         
         self.search_input = QLineEdit()
         self.search_input.setPlaceholderText("🔍 Search Rows/Buttons...")
@@ -404,19 +431,24 @@ class App(QMainWindow):
         for row in self.rows:
             row.refresh_widths()
 
-    def move_row(self, row_widget, direction):
-        idx = self.rows.index(row_widget)
-        new_idx = idx + direction
-        if 0 <= new_idx < len(self.rows):
-            # Swap in list
-            self.rows[idx], self.rows[new_idx] = self.rows[new_idx], self.rows[idx]
+    def open_reorder_dialog(self):
+        dlg = ReorderDialog(self.rows, self)
+        if dlg.exec():
+            new_order = dlg.get_new_order()
+            self.apply_reorder(new_order)
+
+    def apply_reorder(self, new_order):
+        # Update internal list
+        self.rows = new_order
+        
+        # Refresh UI layout
+        # 1. Remove all from layout
+        for r in self.rows:
+            self.rows_layout.removeWidget(r)
             
-            # Clear layout and re-add in new order
-            for r in self.rows:
-                self.rows_layout.removeWidget(r)
-            
-            for r in self.rows:
-                self.rows_layout.addWidget(r)
+        # 2. Add back in new order
+        for r in self.rows:
+            self.rows_layout.addWidget(r)
 
     def filter_rows(self, text):
         for row in self.rows:
