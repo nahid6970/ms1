@@ -27,7 +27,7 @@ class CaptureSelectionDialog(ctk.CTkToplevel):
         self.info = info
         self.font = font
         self.title("Select Window Info")
-        self.geometry("500x380")
+        self.geometry("500x420")
         self.transient(master)
         self.grab_set()
 
@@ -48,37 +48,37 @@ class CaptureSelectionDialog(ctk.CTkToplevel):
             rb = ctk.CTkRadioButton(frame, text=display, variable=self.choice_var, value=kind, font=self.font)
             rb.pack(side="left", padx=10, pady=5)
 
-        ctk.CTkLabel(self, text="Add to rule list:", font=(font[0], font[1], "bold")).pack(pady=10)
-        self.type_var = ctk.StringVar(value="float")
+        ctk.CTkLabel(self, text="Add to rule lists:", font=(font[0], font[1], "bold")).pack(pady=10)
+        
+        self.is_float_var = ctk.BooleanVar(value=True)
+        self.is_tray_var = ctk.BooleanVar(value=False)
+        
         type_frame = ctk.CTkFrame(self)
         type_frame.pack(pady=5)
-        ctk.CTkRadioButton(type_frame, text="Float Rules", variable=self.type_var, value="float", font=self.font).pack(side="left", padx=10)
-        ctk.CTkRadioButton(type_frame, text="Tray Apps", variable=self.type_var, value="tray", font=self.font).pack(side="left", padx=10)
+        ctk.CTkCheckBox(type_frame, text="Float Rule", variable=self.is_float_var, font=self.font).pack(side="left", padx=10)
+        ctk.CTkCheckBox(type_frame, text="Tray App", variable=self.is_tray_var, font=self.font).pack(side="left", padx=10)
         
         ctk.CTkButton(self, text="Confirm and Open Editor", command=self.proceed, font=self.font).pack(pady=20)
         
     def proceed(self):
         kind = self.choice_var.get()
         val = self.info[kind]
-        item_type = self.type_var.get()
+        is_float = self.is_float_var.get()
+        is_tray = self.is_tray_var.get()
         self.destroy()
-        AddEditDialog(self.master, item_type, initial_kind=kind, initial_id=val, font=self.font)
+        AddEditDialog(self.master, initial_kind=kind, initial_id=val, is_float=is_float, is_tray=is_tray, font=self.font)
 
 class AddEditDialog(ctk.CTkToplevel):
-    def __init__(self, master, item_type, item_data=None, *, font=None, initial_kind=None, initial_id=None):
+    def __init__(self, master, item_data=None, *, font=None, initial_kind=None, initial_id=None, is_float=False, is_tray=False):
         super().__init__(master)
         self.master = master
-        self.item_type = item_type  # "float" or "tray"
-        self.item_data = item_data  # None for add, dict for edit
-        self.font = font if font else ("sans-serif", 12, "normal") # fallback
-        self.transient(master)  # Make dialog appear on top of main window
-        self.grab_set()  # Make it a modal window
-        self.geometry("400x180")
+        self.item_data = item_data  # unified dict if editing
+        self.font = font if font else ("sans-serif", 12, "normal")
+        self.transient(master)
+        self.grab_set()
+        self.geometry("400x260")
 
-        if self.item_data:
-            self.title(f"Edit {item_type.capitalize()} Item")
-        else:
-            self.title(f"Add New {item_type.capitalize()} Item")
+        self.title("Edit Item" if item_data else "Add Item")
 
         kind_options = ["Exe", "Class", "Title", "Path"]
         matching_strategy_options = [
@@ -88,22 +88,85 @@ class AddEditDialog(ctk.CTkToplevel):
 
         self.kind_combobox = ctk.CTkComboBox(self, values=kind_options, font=self.font)
         self.kind_combobox.pack(padx=20, pady=5, fill="x")
-        self.id_entry = ctk.CTkEntry(self, placeholder_text="ID (e.g., notepad.exe)", font=self.font)
+        self.id_entry = ctk.CTkEntry(self, placeholder_text="ID", font=self.font)
         self.id_entry.pack(padx=20, pady=5, fill="x")
         self.matching_strategy_combobox = ctk.CTkComboBox(self, values=matching_strategy_options, font=self.font)
         self.matching_strategy_combobox.pack(padx=20, pady=5, fill="x")
 
-        if self.item_data:  # Pre-fill for edit mode
-            self.kind_combobox.set(self.item_data.get("kind", "Exe"))
-            self.id_entry.insert(0, self.item_data.get("id", ""))
-            self.matching_strategy_combobox.set(self.item_data.get("matching_strategy", "Equals"))
-            save_button = ctk.CTkButton(self, text="Save Changes", command=self.save_changes, font=self.font)
+        self.is_float_var = ctk.BooleanVar(value=item_data["is_float"] if item_data else is_float)
+        self.is_tray_var = ctk.BooleanVar(value=item_data["is_tray"] if item_data else is_tray)
+
+        self.float_cb = ctk.CTkCheckBox(self, text="Float Rule", variable=self.is_float_var, font=self.font)
+        self.float_cb.pack(padx=20, pady=5, anchor="w")
+        self.tray_cb = ctk.CTkCheckBox(self, text="Tray / Multi-Window", variable=self.is_tray_var, font=self.font)
+        self.tray_cb.pack(padx=20, pady=5, anchor="w")
+
+        if item_data:
+            self.kind_combobox.set(item_data["kind"])
+            self.id_entry.insert(0, item_data["id"])
+            self.matching_strategy_combobox.set(item_data["matching_strategy"])
+            btn_text = "Save Changes"
+            cmd = self.save_changes
         else:
             self.kind_combobox.set(initial_kind if initial_kind else kind_options[0])
             self.id_entry.insert(0, initial_id if initial_id else "")
             self.matching_strategy_combobox.set(matching_strategy_options[0])
-            save_button = ctk.CTkButton(self, text="Add Item", command=self.add_item, font=self.font)
-        save_button.pack(padx=20, pady=10)
+            btn_text = "Add Item"
+            cmd = self.add_item
+
+        ctk.CTkButton(self, text=btn_text, command=cmd, font=self.font).pack(padx=20, pady=10)
+
+    def get_data(self):
+        return {
+            "kind": self.kind_combobox.get(),
+            "id": self.id_entry.get().strip(),
+            "matching_strategy": self.matching_strategy_combobox.get()
+        }
+
+    def add_item(self):
+        data = self.get_data()
+        if not data["id"]:
+            messagebox.showwarning("Warning", "ID cannot be empty.")
+            return
+        
+        if not self.is_float_var.get() and not self.is_tray_var.get():
+            messagebox.showwarning("Warning", "Select at least one type (Float or Tray).")
+            return
+
+        if self.is_float_var.get():
+            self.master.config_data.setdefault("float_rules", []).append(data)
+        if self.is_tray_var.get():
+            self.master.config_data.setdefault("tray_and_multi_window_applications", []).append(data)
+        
+        self.master.update_list_displays()
+        self.destroy()
+
+    def save_changes(self):
+        new_data = self.get_data()
+        if not new_data["id"]:
+            messagebox.showwarning("Warning", "ID cannot be empty.")
+            return
+
+        if not self.is_float_var.get() and not self.is_tray_var.get():
+            messagebox.showwarning("Warning", "Select at least one type (Float or Tray).")
+            return
+
+        # Remove old data from both lists
+        old_base = {"kind": self.item_data["kind"], "id": self.item_data["id"], "matching_strategy": self.item_data["matching_strategy"]}
+        
+        if old_base in self.master.config_data.get("float_rules", []):
+            self.master.config_data["float_rules"].remove(old_base)
+        if old_base in self.master.config_data.get("tray_and_multi_window_applications", []):
+            self.master.config_data["tray_and_multi_window_applications"].remove(old_base)
+
+        # Add new data to selected lists
+        if self.is_float_var.get():
+            self.master.config_data.setdefault("float_rules", []).append(new_data)
+        if self.is_tray_var.get():
+            self.master.config_data.setdefault("tray_and_multi_window_applications", []).append(new_data)
+
+        self.master.update_list_displays()
+        self.destroy()
 
     def add_item(self):
         kind = self.kind_combobox.get()
@@ -167,279 +230,181 @@ class KomorebiConfigApp(ctk.CTk):
         super().__init__()
 
         self.title("Komorebi Config Editor")
-        self.geometry("900x700")  # Adjusted size for two columns
+        self.geometry("800x700")
 
         self.app_font = ("jetbrainsmono nfp", 12, "normal")
         self.bold_font = ("jetbrainsmono nfp", 16, "bold")
 
         self.config_data = self.load_config()
 
-        # Configure grid layout for the main window
-        self.grid_columnconfigure(0, weight=1)  # Left panel for float rules
-        self.grid_columnconfigure(1, weight=1)  # Right panel for tray apps
-        self.grid_rowconfigure(0, weight=0)  # Search bar
-        self.grid_rowconfigure(1, weight=1)  # Main content (float/tray frames)
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_rowconfigure(0, weight=0)  # Search
+        self.grid_rowconfigure(1, weight=1)  # List
         self.grid_rowconfigure(2, weight=0)  # Buttons
 
         # --- Search Bar ---
         self.search_frame = ctk.CTkFrame(self)
-        self.search_frame.grid(row=0, column=0, columnspan=2, padx=10, pady=5, sticky="ew")
+        self.search_frame.grid(row=0, column=0, padx=10, pady=5, sticky="ew")
         self.search_frame.grid_columnconfigure(0, weight=1)
         self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Search rules and applications...", font=self.app_font)
         self.search_entry.grid(row=0, column=0, padx=5, pady=5, sticky="ew")
         self.search_entry.bind("<KeyRelease>", self.filter_list_displays)
 
-        # --- Float Rules Section (Left) ---
-        self.float_frame = ctk.CTkFrame(self)
-        self.float_frame.grid(row=1, column=0, padx=10, pady=5, sticky="nsew")
-        self.float_frame.grid_columnconfigure(0, weight=1)
-        self.float_frame.grid_rowconfigure(0, weight=0)
-        self.float_frame.grid_rowconfigure(1, weight=1)
+        # --- Main List Section ---
+        self.list_frame = ctk.CTkFrame(self)
+        self.list_frame.grid(row=1, column=0, padx=10, pady=5, sticky="nsew")
+        self.list_frame.grid_columnconfigure(0, weight=1)
+        self.list_frame.grid_rowconfigure(0, weight=1)
 
-        self.float_label = ctk.CTkLabel(self.float_frame, text="Float Rules", font=self.bold_font)
-        self.float_label.grid(row=0, column=0, padx=10, pady=5, sticky="w")
+        self.scroll_frame = ctk.CTkScrollableFrame(self.list_frame)
+        self.scroll_frame.grid(row=0, column=0, padx=10, pady=5, sticky="nsew")
+        self.scroll_frame.grid_columnconfigure(0, weight=1)
+        
+        self.list_items = []
+        self.selected_item = None
 
-        self.float_scroll_frame = ctk.CTkScrollableFrame(self.float_frame)
-        self.float_scroll_frame.grid(row=1, column=0, padx=10, pady=5, sticky="nsew")
-        self.float_scroll_frame.grid_columnconfigure(0, weight=1)
-        self.float_list_items = []  # To store references to the labels
-        self.selected_float_rule = None  # Stores the full dictionary of the selected rule
-
-        # --- Tray and Multi-Window Applications Section (Right) ---
-        self.tray_frame = ctk.CTkFrame(self)
-        self.tray_frame.grid(row=1, column=1, padx=10, pady=5, sticky="nsew")
-        self.tray_frame.grid_columnconfigure(0, weight=1)
-        self.tray_frame.grid_rowconfigure(0, weight=0)
-        self.tray_frame.grid_rowconfigure(1, weight=1)
-
-        self.tray_label = ctk.CTkLabel(self.tray_frame, text="Tray and Multi-Window Applications", font=self.bold_font)
-        self.tray_label.grid(row=0, column=0, padx=10, pady=5, sticky="w")
-
-        self.tray_scroll_frame = ctk.CTkScrollableFrame(self.tray_frame)
-        self.tray_scroll_frame.grid(row=1, column=0, padx=10, pady=5, sticky="nsew")
-        self.tray_scroll_frame.grid_columnconfigure(0, weight=1)
-        self.tray_list_items = []  # To store references to the labels
-        self.selected_tray_app = None  # Stores the full dictionary of the selected app
-
-        # --- Buttons Frame (Bottom) ---
+        # --- Buttons Frame ---
         self.button_frame = ctk.CTkFrame(self)
-        self.button_frame.grid(row=2, column=0, columnspan=2, padx=10, pady=10, sticky="ew",)
-        self.button_frame.grid_columnconfigure((0, 1, 2, 3, 4), weight=1)  # 5 buttons
+        self.button_frame.grid(row=2, column=0, padx=10, pady=10, sticky="ew")
+        self.button_frame.grid_columnconfigure((0, 1, 2, 3), weight=1)
 
-        self.add_float_button = ctk.CTkButton(self.button_frame, text="Add Float Rule", corner_radius=0, command=self.open_add_float_dialog, font=self.app_font)
-        self.add_float_button.grid(row=0, column=0, padx=5, pady=5, sticky="ew")
-
-        self.add_tray_button = ctk.CTkButton(self.button_frame, text="Add Tray App", corner_radius=0, command=self.open_add_tray_dialog, font=self.app_font)
-        self.add_tray_button.grid(row=0, column=1, padx=5, pady=5, sticky="ew")
+        self.add_button = ctk.CTkButton(self.button_frame, text="Add New Rule", corner_radius=0, command=self.open_add_dialog, font=self.app_font)
+        self.add_button.grid(row=0, column=0, padx=5, pady=5, sticky="ew")
 
         self.get_item_button = ctk.CTkButton(self.button_frame, text="Get Item Info", corner_radius=0, command=self.get_window_info, font=self.app_font)
-        self.get_item_button.grid(row=0, column=2, padx=5, pady=5, sticky="ew")
+        self.get_item_button.grid(row=0, column=1, padx=5, pady=5, sticky="ew")
 
-        self.remove_selected_button = ctk.CTkButton(self.button_frame, text="Remove Selected Item", fg_color="red", corner_radius=0, command=self.remove_selected_item, font=self.app_font)
-        self.remove_selected_button.grid(row=0, column=3, padx=5, pady=5, sticky="ew")
+        self.remove_button = ctk.CTkButton(self.button_frame, text="Remove Selected", fg_color="red", corner_radius=0, command=self.remove_selected_item, font=self.app_font)
+        self.remove_button.grid(row=0, column=2, padx=5, pady=5, sticky="ew")
 
-        self.save_button = ctk.CTkButton(self.button_frame, text="Save to komorebi.json", fg_color="green", corner_radius=0, command=self.save_config, font=self.app_font)
-        self.save_button.grid(row=0, column=4, padx=5, pady=5, sticky="ew")
+        self.save_button = ctk.CTkButton(self.button_frame, text="Save to JSON", fg_color="green", corner_radius=0, command=self.save_config, font=self.app_font)
+        self.save_button.grid(row=0, column=3, padx=5, pady=5, sticky="ew")
 
-        self.update_list_displays() # Initial display update
+        self.update_list_displays()
 
     def get_window_info(self):
         if not PYWIN32_AVAILABLE:
-            messagebox.showerror("Error", "pywin32 library is not installed. Please install it using 'pip install pywin32'.")
+            messagebox.showerror("Error", "pywin32 library is not installed.")
             return
-            
-        # Change button state to show we are waiting for a click
         self.get_item_button.configure(text="Click target window...", fg_color="orange")
-        # First, wait for the user to release the mouse button from the current click
         self.after(100, self.wait_for_mouse_release)
 
     def wait_for_mouse_release(self):
-        # 0x01 is VK_LBUTTON
         if win32api.GetAsyncKeyState(0x01) == 0:
-            # Mouse is released, now wait for the NEXT click
             self.poll_for_next_click()
         else:
-            # Still holding the button from the initial click
             self.after(50, self.wait_for_mouse_release)
 
     def poll_for_next_click(self):
         if win32api.GetAsyncKeyState(0x01) < 0:
-            # Click detected! Small delay to allow window focus/processing
             self.after(150, self.perform_capture_at_cursor)
         else:
-            # Keep waiting for a click
             self.after(50, self.poll_for_next_click)
 
     def perform_capture_at_cursor(self):
-        # Reset button appearance
         self.get_item_button.configure(text="Get Item Info", fg_color=ctk.ThemeManager.theme["CTkButton"]["fg_color"])
-        
-        # Get window at the current cursor position
         pos = win32api.GetCursorPos()
         hwnd = win32gui.WindowFromPoint(pos)
-        
-        if not hwnd:
-            messagebox.showwarning("Warning", "No window found at click position.")
-            return
-
-        # Get the top-level (root) window from the handle
-        # GA_ROOT (2) gets the full root window
+        if not hwnd: return
         hwnd = win32gui.GetAncestor(hwnd, 2)
-
         title = win32gui.GetWindowText(hwnd)
         cls = win32gui.GetClassName(hwnd)
-        
         try:
             _, pid = win32process.GetWindowThreadProcessId(hwnd)
-            handle = win32api.OpenProcess(0x0400 | 0x0010, False, pid) 
+            handle = win32api.OpenProcess(0x0400 | 0x0010, False, pid)
             path = win32process.GetModuleFileNameEx(handle, 0)
             exe = os.path.basename(path)
             win32api.CloseHandle(handle)
-        except Exception:
-            path = "Unknown"
-            exe = "Unknown"
-
-        info = {
-            "Exe": exe,
-            "Title": title,
-            "Class": cls,
-            "Path": path
-        }
-        
-        CaptureSelectionDialog(self, info, self.app_font)
+        except: path, exe = "Unknown", "Unknown"
+        CaptureSelectionDialog(self, {"Exe": exe, "Title": title, "Class": cls, "Path": path}, self.app_font)
 
     def load_config(self):
         if not os.path.exists(KOMOREBI_JSON_PATH):
-            messagebox.showerror("Error", f"komorebi.json not found at {KOMOREBI_JSON_PATH}")
             return {"float_rules": [], "tray_and_multi_window_applications": []}
         try:
             with open(KOMOREBI_JSON_PATH, 'r') as f:
                 return json.load(f)
-        except json.JSONDecodeError:
-            messagebox.showerror("Error", "Could not decode komorebi.json. Please check its format.")
-            return {"float_rules": [], "tray_and_multi_window_applications": []}
-        except Exception as e:
-            messagebox.showerror("Error", f"An unexpected error occurred while loading: {e}")
-            return {"float_rules": [], "tray_and_multi_window_applications": []}
+        except: return {"float_rules": [], "tray_and_multi_window_applications": []}
 
     def save_config(self):
         try:
             with open(KOMOREBI_JSON_PATH, 'w') as f:
                 json.dump(self.config_data, f, indent=4)
-            messagebox.showinfo("Success", "Configuration saved successfully!")
+            messagebox.showinfo("Success", "Configuration saved!")
         except Exception as e:
-            messagebox.showerror("Error", f"An error occurred while saving: {e}")
+            messagebox.showerror("Error", f"Failed to save: {e}")
 
     def filter_list_displays(self, event=None):
         self.update_list_displays(search_query=self.search_entry.get().lower())
 
     def update_list_displays(self, search_query=""):
-        # Clear existing items in float rules display
-        for item in self.float_list_items:
+        for item in self.list_items:
             item.destroy()
-        self.float_list_items.clear()
-        self.selected_float_rule = None
+        self.list_items.clear()
+        self.selected_item = None
 
-        # Populate float rules display
-        filtered_float_rules = sorted([
-            rule_obj for rule_obj in self.config_data.get("float_rules", [])
-            if search_query in f"{rule_obj.get('id', '')} {rule_obj.get('kind', '')} {rule_obj.get('matching_strategy', '')}".lower()
-        ], key=lambda x: x.get('id', '').lower())
-        for i, rule_obj in enumerate(filtered_float_rules):
-            display_text = f"{rule_obj.get('id', '')} ({rule_obj.get('kind', '')}) ({rule_obj.get('matching_strategy', '')})"
-            label = ctk.CTkLabel(self.float_scroll_frame, text=display_text, anchor="w", font=self.app_font)
-            label.grid(row=i, column=0, padx=5, pady=2, sticky="ew")
-            label.rule_obj = rule_obj
-            label.bind("<Button-1>", lambda event, l=label: self.select_float_rule(l))
-            label.bind("<Double-Button-1>", lambda event: self.open_edit_dialog())
-            self.float_list_items.append(label)
+        unified = {}
+        for rule in self.config_data.get("float_rules", []):
+            key = (rule["kind"], rule["id"], rule["matching_strategy"])
+            unified[key] = {**rule, "is_float": True, "is_tray": False}
+        
+        for app in self.config_data.get("tray_and_multi_window_applications", []):
+            key = (app["kind"], app["id"], app["matching_strategy"])
+            if key in unified:
+                unified[key]["is_tray"] = True
+            else:
+                unified[key] = {**app, "is_float": False, "is_tray": True}
 
-        # Clear existing items in tray apps display
-        for item in self.tray_list_items:
-            item.destroy()
-        self.tray_list_items.clear()
-        self.selected_tray_app = None
+        items_to_show = sorted([v for v in unified.values() if search_query in f"{v['id']} {v['kind']} {v['matching_strategy']}".lower()], key=lambda x: x["id"].lower())
 
-        # Populate tray apps display
-        filtered_tray_apps = sorted([
-            app_obj for app_obj in self.config_data.get("tray_and_multi_window_applications", [])
-            if search_query in f"{app_obj.get('id', '')} {app_obj.get('kind', '')} {app_obj.get('matching_strategy', '')}".lower()
-        ], key=lambda x: x.get('id', '').lower())
-        for i, app_obj in enumerate(filtered_tray_apps):
-            display_text = f"{app_obj.get('id', '')} ({app_obj.get('kind', '')}) ({app_obj.get('matching_strategy', '')})"
-            label = ctk.CTkLabel(self.tray_scroll_frame, text=display_text, anchor="w", font=self.app_font)
-            label.grid(row=i, column=0, padx=5, pady=2, sticky="ew")
-            label.app_obj = app_obj
-            label.bind("<Button-1>", lambda event, l=label: self.select_tray_app(l))
-            label.bind("<Double-Button-1>", lambda event: self.open_edit_dialog())
-            self.tray_list_items.append(label)
+        for i, val in enumerate(items_to_show):
+            frame = ctk.CTkFrame(self.scroll_frame)
+            frame.grid(row=i, column=0, padx=5, pady=2, sticky="ew")
+            frame.grid_columnconfigure(0, weight=1)
+            
+            label = ctk.CTkLabel(frame, text=f"{val['id']} ({val['kind']}) ({val['matching_strategy']})", anchor="w", font=self.app_font)
+            label.grid(row=0, column=0, padx=5, pady=5, sticky="w")
+            
+            tag_frame = ctk.CTkFrame(frame, fg_color="transparent")
+            tag_frame.grid(row=0, column=1, padx=5)
+            
+            if val["is_float"]:
+                ctk.CTkLabel(tag_frame, text="FLOAT", font=(self.app_font[0], 9, "bold"), fg_color="#1f538d", text_color="white", corner_radius=4).pack(side="left", padx=2)
+            if val["is_tray"]:
+                ctk.CTkLabel(tag_frame, text="TRAY", font=(self.app_font[0], 9, "bold"), fg_color="#22733d", text_color="white", corner_radius=4).pack(side="left", padx=2)
 
-    def select_float_rule(self, label):
-        # Deselect previous float rule
-        if self.selected_float_rule:
-            for item_label in self.float_list_items:
-                if item_label.rule_obj == self.selected_float_rule:
-                    item_label.configure(fg_color="transparent")
-                    break
-        # Deselect previous tray app
-        if self.selected_tray_app:
-            for item_label in self.tray_list_items:
-                if item_label.app_obj == self.selected_tray_app:
-                    item_label.configure(fg_color="transparent")
-                    break
-            self.selected_tray_app = None
+            frame.val = val
+            for widget in [frame, label, tag_frame]:
+                widget.bind("<Button-1>", lambda e, f=frame: self.select_item(f))
+                widget.bind("<Double-Button-1>", lambda e, v=val: self.open_edit_dialog(v))
+            self.list_items.append(frame)
 
-        # Select new float rule
-        self.selected_float_rule = label.rule_obj
-        label.configure(fg_color=ctk.ThemeManager.theme["CTkButton"]["fg_color"])
+    def select_item(self, frame):
+        if self.selected_item:
+            self.selected_item.configure(fg_color=ctk.ThemeManager.theme["CTkFrame"]["fg_color"])
+        self.selected_item = frame
+        frame.configure(fg_color=ctk.ThemeManager.theme["CTkButton"]["fg_color"])
 
-    def select_tray_app(self, label):
-        # Deselect previous tray app
-        if self.selected_tray_app:
-            for item_label in self.tray_list_items:
-                if item_label.app_obj == self.selected_tray_app:
-                    item_label.configure(fg_color="transparent")
-                    break
-        # Deselect previous float rule
-        if self.selected_float_rule:
-            for item_label in self.float_list_items:
-                if item_label.rule_obj == self.selected_float_rule:
-                    item_label.configure(fg_color="transparent")
-                    break
-            self.selected_float_rule = None
+    def open_add_dialog(self):
+        AddEditDialog(self, font=self.app_font)
 
-        # Select new tray app
-        self.selected_tray_app = label.app_obj
-        label.configure(fg_color=ctk.ThemeManager.theme["CTkButton"]["fg_color"])
-
-    def open_add_float_dialog(self):
-        AddEditDialog(self, "float", font=self.app_font)
-
-    def open_add_tray_dialog(self):
-        AddEditDialog(self, "tray", font=self.app_font)
-
-    def open_edit_dialog(self):
-        if self.selected_float_rule:
-            AddEditDialog(self, "float", self.selected_float_rule, font=self.app_font)
-        elif self.selected_tray_app:
-            AddEditDialog(self, "tray", self.selected_tray_app, font=self.app_font)
-        else:
-            messagebox.showwarning("Warning", "Please select an item to edit.")
+    def open_edit_dialog(self, val):
+        AddEditDialog(self, item_data=val, font=self.app_font)
 
     def remove_selected_item(self):
-        if self.selected_float_rule:
-            if self.selected_float_rule in self.config_data.get("float_rules", []):
-                self.config_data["float_rules"].remove(self.selected_float_rule)
-                self.update_list_displays()
-            self.selected_float_rule = None  # Clear selection after removal
-        elif self.selected_tray_app:
-            if self.selected_tray_app in self.config_data.get("tray_and_multi_window_applications", []):
-                self.config_data["tray_and_multi_window_applications"].remove(self.selected_tray_app)
-                self.update_list_displays()
-            self.selected_tray_app = None  # Clear selection after removal
-        else:
-            messagebox.showwarning("Warning", "No item selected to remove.")
-
+        if not self.selected_item:
+            messagebox.showwarning("Warning", "Select an item to remove.")
+            return
+        
+        val = self.selected_item.val
+        base = {"kind": val["kind"], "id": val["id"], "matching_strategy": val["matching_strategy"]}
+        
+        if base in self.config_data.get("float_rules", []):
+            self.config_data["float_rules"].remove(base)
+        if base in self.config_data.get("tray_and_multi_window_applications", []):
+            self.config_data["tray_and_multi_window_applications"].remove(base)
+            
+        self.update_list_displays()
 
 if __name__ == "__main__":
     app = KomorebiConfigApp()
