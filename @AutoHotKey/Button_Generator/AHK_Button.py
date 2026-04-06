@@ -555,7 +555,7 @@ class App(QMainWindow):
         with open(AHK_OUTPUT, "w", encoding="utf-8-sig") as f:
             f.write("\n".join(ahk_code))
         
-        self.status_label.setText(f"✔ Generated: {AHK_OUTPUT}")
+        self.status_label.setText("✔ Generated")
         QTimer.singleShot(1000, lambda: self.status_label.setText(""))
 
 if __name__ == "__main__":
