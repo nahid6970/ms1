@@ -2,6 +2,16 @@ import customtkinter as ctk
 from tkinter import messagebox
 import json
 import os
+import time
+
+# Optional imports for window info capture
+try:
+    import win32gui
+    import win32process
+    import win32api
+    PYWIN32_AVAILABLE = True
+except ImportError:
+    PYWIN32_AVAILABLE = False
 
 # Set the appearance mode and default color theme
 ctk.set_appearance_mode("System")  # Modes: "System" (default), "Dark", "Light"
@@ -9,8 +19,53 @@ ctk.set_default_color_theme("blue")  # Themes: "blue" (default), "dark-blue", "g
 
 KOMOREBI_JSON_PATH = "C:/@delta/ms1/asset/komorebi/komorebi.json"
 
+class CaptureSelectionDialog(ctk.CTkToplevel):
+    """Dialog to choose which property of a captured window to use."""
+    def __init__(self, master, info, font):
+        super().__init__(master)
+        self.master = master
+        self.info = info
+        self.font = font
+        self.title("Select Window Info")
+        self.geometry("500x380")
+        self.transient(master)
+        self.grab_set()
+
+        ctk.CTkLabel(self, text="Select the information you want to use:", font=(font[0], font[1], "bold")).pack(pady=10)
+
+        self.choice_var = ctk.StringVar(value="Exe")
+        
+        options = [
+            ("Exe", f"Executable: {info['Exe']}"),
+            ("Title", f"Window Title: {info['Title']}"),
+            ("Class", f"Window Class: {info['Class']}"),
+            ("Path", f"Full Path: {info['Path']}")
+        ]
+
+        for kind, display in options:
+            frame = ctk.CTkFrame(self)
+            frame.pack(fill="x", padx=20, pady=2)
+            rb = ctk.CTkRadioButton(frame, text=display, variable=self.choice_var, value=kind, font=self.font)
+            rb.pack(side="left", padx=10, pady=5)
+
+        ctk.CTkLabel(self, text="Add to rule list:", font=(font[0], font[1], "bold")).pack(pady=10)
+        self.type_var = ctk.StringVar(value="float")
+        type_frame = ctk.CTkFrame(self)
+        type_frame.pack(pady=5)
+        ctk.CTkRadioButton(type_frame, text="Float Rules", variable=self.type_var, value="float", font=self.font).pack(side="left", padx=10)
+        ctk.CTkRadioButton(type_frame, text="Tray Apps", variable=self.type_var, value="tray", font=self.font).pack(side="left", padx=10)
+        
+        ctk.CTkButton(self, text="Confirm and Open Editor", command=self.proceed, font=self.font).pack(pady=20)
+        
+    def proceed(self):
+        kind = self.choice_var.get()
+        val = self.info[kind]
+        item_type = self.type_var.get()
+        self.destroy()
+        AddEditDialog(self.master, item_type, initial_kind=kind, initial_id=val, font=self.font)
+
 class AddEditDialog(ctk.CTkToplevel):
-    def __init__(self, master, item_type, item_data=None, *, font=None):
+    def __init__(self, master, item_type, item_data=None, *, font=None, initial_kind=None, initial_id=None):
         super().__init__(master)
         self.master = master
         self.item_type = item_type  # "float" or "tray"
@@ -44,8 +99,9 @@ class AddEditDialog(ctk.CTkToplevel):
             self.matching_strategy_combobox.set(self.item_data.get("matching_strategy", "Equals"))
             save_button = ctk.CTkButton(self, text="Save Changes", command=self.save_changes, font=self.font)
         else:
-            self.kind_combobox.set(kind_options[0]) # Set default value
-            self.matching_strategy_combobox.set(matching_strategy_options[0]) # Set default value
+            self.kind_combobox.set(initial_kind if initial_kind else kind_options[0])
+            self.id_entry.insert(0, initial_id if initial_id else "")
+            self.matching_strategy_combobox.set(matching_strategy_options[0])
             save_button = ctk.CTkButton(self, text="Add Item", command=self.add_item, font=self.font)
         save_button.pack(padx=20, pady=10)
 
@@ -168,7 +224,7 @@ class KomorebiConfigApp(ctk.CTk):
         # --- Buttons Frame (Bottom) ---
         self.button_frame = ctk.CTkFrame(self)
         self.button_frame.grid(row=2, column=0, columnspan=2, padx=10, pady=10, sticky="ew",)
-        self.button_frame.grid_columnconfigure((0, 1, 2, 3), weight=1)  # 4 buttons
+        self.button_frame.grid_columnconfigure((0, 1, 2, 3, 4), weight=1)  # 5 buttons
 
         self.add_float_button = ctk.CTkButton(self.button_frame, text="Add Float Rule", corner_radius=0, command=self.open_add_float_dialog, font=self.app_font)
         self.add_float_button.grid(row=0, column=0, padx=5, pady=5, sticky="ew")
@@ -176,13 +232,52 @@ class KomorebiConfigApp(ctk.CTk):
         self.add_tray_button = ctk.CTkButton(self.button_frame, text="Add Tray App", corner_radius=0, command=self.open_add_tray_dialog, font=self.app_font)
         self.add_tray_button.grid(row=0, column=1, padx=5, pady=5, sticky="ew")
 
+        self.get_item_button = ctk.CTkButton(self.button_frame, text="Get Item Info", corner_radius=0, command=self.get_window_info, font=self.app_font)
+        self.get_item_button.grid(row=0, column=2, padx=5, pady=5, sticky="ew")
+
         self.remove_selected_button = ctk.CTkButton(self.button_frame, text="Remove Selected Item", fg_color="red", corner_radius=0, command=self.remove_selected_item, font=self.app_font)
-        self.remove_selected_button.grid(row=0, column=2, padx=5, pady=5, sticky="ew")
+        self.remove_selected_button.grid(row=0, column=3, padx=5, pady=5, sticky="ew")
 
         self.save_button = ctk.CTkButton(self.button_frame, text="Save to komorebi.json", fg_color="green", corner_radius=0, command=self.save_config, font=self.app_font)
-        self.save_button.grid(row=0, column=3, padx=5, pady=5, sticky="ew")
+        self.save_button.grid(row=0, column=4, padx=5, pady=5, sticky="ew")
 
         self.update_list_displays() # Initial display update
+
+    def get_window_info(self):
+        if not PYWIN32_AVAILABLE:
+            messagebox.showerror("Error", "pywin32 library is not installed. Please install it using 'pip install pywin32'.")
+            return
+            
+        messagebox.showinfo("Capture", "After clicking OK, you have 3 seconds to focus the target window.")
+        self.after(3000, self.perform_capture)
+
+    def perform_capture(self):
+        hwnd = win32gui.GetForegroundWindow()
+        if not hwnd:
+            messagebox.showwarning("Warning", "No window captured.")
+            return
+
+        title = win32gui.GetWindowText(hwnd)
+        cls = win32gui.GetClassName(hwnd)
+        
+        try:
+            _, pid = win32process.GetWindowThreadProcessId(hwnd)
+            handle = win32api.OpenProcess(0x0400 | 0x0010, False, pid) # PROCESS_QUERY_INFORMATION | PROCESS_VM_READ
+            path = win32process.GetModuleFileNameEx(handle, 0)
+            exe = os.path.basename(path)
+            win32api.CloseHandle(handle)
+        except Exception:
+            path = "Unknown"
+            exe = "Unknown"
+
+        info = {
+            "Exe": exe,
+            "Title": title,
+            "Class": cls,
+            "Path": path
+        }
+        
+        CaptureSelectionDialog(self, info, self.app_font)
 
     def load_config(self):
         if not os.path.exists(KOMOREBI_JSON_PATH):

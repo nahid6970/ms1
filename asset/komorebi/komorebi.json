@@ -293,6 +293,11 @@
             "kind": "Exe",
             "id": "komorebi.exe",
             "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Exe",
+            "id": "python.exe",
+            "matching_strategy": "Legacy"
         }
     ],
     "tray_and_multi_window_applications": [
