@@ -1,10 +1,10 @@
 {
     "version": "1.3",
-    "timestamp": "2026-02-23T19:03:37.044296",
+    "timestamp": "2026-04-06T19:26:46.506178",
     "user_env": {
         "chocolateyinstall": "C:\\Users\\nahid\\AppData\\Local\\UniGetUI\\Chocolatey",
         "OneDrive": "C:\\Users\\nahid\\OneDrive",
-        "Path": "C:\\Users\\nahid\\scoop\\apps\\nodejs-lts\\current\\bin;C:\\Users\\nahid\\scoop\\apps\\nodejs-lts\\current;C:\\Users\\nahid\\go\\bin;C:\\Users\\nahid\\scoop\\apps\\git\\current\\cmd;C:\\Users\\nahid\\scoop\\apps\\gcc\\current\\bin;C:\\Users\\nahid\\scoop\\apps\\perl\\current\\perl\\site\\bin;C:\\Users\\nahid\\scoop\\apps\\perl\\current\\perl\\bin;C:\\Users\\nahid\\.local\\bin;C:\\Users\\nahid\\scoop\\apps\\python312\\current\\Scripts;C:\\Users\\nahid\\scoop\\apps\\python312\\current;C:\\Users\\nahid\\AppData\\Local\\UniGetUI\\Chocolatey\\bin;C:\\Users\\nahid\\scoop\\shims;C:\\Users\\nahid\\AppData\\Local\\Microsoft\\WindowsApps;C:\\Users\\nahid\\AppData\\Local\\Programs\\Microsoft VS Code\\bin;C:\\Users\\nahid\\.cache\\lm-studio\\bin;C:\\Users\\nahid\\AppData\\Local\\Programs\\Ollama;C:\\Users\\nahid\\AppData\\Local\\Microsoft\\WinGet\\Packages\\aria2.aria2_Microsoft.Winget.Source_8wekyb3d8bbwe\\aria2-1.37.0-win-64bit-build1;C:\\Users\\nahid\\AppData\\Local\\Programs\\superfile\\;%USERPROFILE%\\.dotnet\\tools;C:\\Users\\nahid\\scoop\\apps\\msys2\\current\\usr\\bin;C:\\Users\\nahid\\scoop\\apps\\msys2\\current\\mingw64\\bin;C:\\Users\\nahid\\AppData\\Local\\Microsoft\\WinGet\\Links;C:\\Users\\nahid\\AppData\\Local\\Programs\\Antigravity\\bin;C:\\Users\\nahid\\AppData\\Local\\Programs\\cursor\\resources\\app\\bin;C:\\Users\\nahid\\AppData\\Local\\Programs\\Kiro\\bin",
+        "Path": "C:\\Users\\nahid\\scoop\\apps\\nodejs-lts\\current\\bin;C:\\Users\\nahid\\scoop\\apps\\nodejs-lts\\current;C:\\Users\\nahid\\scoop\\apps\\bun\\current\\bin;C:\\Users\\nahid\\scoop\\apps\\ghostscript\\current\\lib;C:\\Users\\nahid\\scoop\\apps\\git\\current\\cmd;C:\\Users\\nahid\\go\\bin;C:\\Users\\nahid\\scoop\\apps\\gcc\\current\\bin;C:\\Users\\nahid\\scoop\\apps\\perl\\current\\perl\\site\\bin;C:\\Users\\nahid\\scoop\\apps\\perl\\current\\perl\\bin;C:\\Users\\nahid\\.local\\bin;C:\\Users\\nahid\\scoop\\apps\\python312\\current\\Scripts;C:\\Users\\nahid\\scoop\\apps\\python312\\current;C:\\Users\\nahid\\AppData\\Local\\UniGetUI\\Chocolatey\\bin;C:\\Users\\nahid\\scoop\\shims;C:\\Users\\nahid\\AppData\\Local\\Microsoft\\WindowsApps;C:\\Users\\nahid\\AppData\\Local\\Programs\\Microsoft VS Code\\bin;C:\\Users\\nahid\\.cache\\lm-studio\\bin;C:\\Users\\nahid\\AppData\\Local\\Programs\\Ollama;C:\\Users\\nahid\\AppData\\Local\\Microsoft\\WinGet\\Packages\\aria2.aria2_Microsoft.Winget.Source_8wekyb3d8bbwe\\aria2-1.37.0-win-64bit-build1;C:\\Users\\nahid\\AppData\\Local\\Programs\\superfile\\;C:\\Users\\nahid\\.dotnet\\tools;C:\\Users\\nahid\\scoop\\apps\\msys2\\current\\usr\\bin;C:\\Users\\nahid\\scoop\\apps\\msys2\\current\\mingw64\\bin;C:\\Users\\nahid\\AppData\\Local\\Microsoft\\WinGet\\Links;C:\\Users\\nahid\\AppData\\Local\\Programs\\Antigravity\\bin;C:\\Users\\nahid\\AppData\\Local\\SpacetimeDB",
         "SCROLLVIEW_PATH": "C:\\Users\\nahid\\scoop\\persist\\tesseract\\tessdata",
         "TEMP": "%USERPROFILE%\\AppData\\Local\\Temp",
         "TESSDATA_PREFIX": "C:\\Users\\nahid\\scoop\\persist\\tesseract\\tessdata",
@@ -21,7 +21,8 @@
         "C_INCLUDE_PATH": "C:\\Users\\nahid\\scoop\\apps\\gcc\\current\\include",
         "GOOGLE_CLOUD_PROJECT": "123",
         "GIT_INSTALL_ROOT": "C:\\Users\\nahid\\scoop\\apps\\git\\current",
-        "POSH_THEMES_PATH": "C:\\Users\\nahid\\scoop\\apps\\oh-my-posh\\current\\themes"
+        "POSH_THEMES_PATH": "C:\\Users\\nahid\\scoop\\apps\\oh-my-posh\\current\\themes",
+        "BUN_INSTALL": "C:\\Users\\nahid\\scoop\\persist\\bun"
     },
     "system_env": {
         "ComSpec": "%SystemRoot%\\system32\\cmd.exe",
@@ -29,7 +30,7 @@
         "DriverData": "C:\\Windows\\System32\\Drivers\\DriverData",
         "NUMBER_OF_PROCESSORS": "8",
         "OS": "Windows_NT",
-        "Path": "C:\\Program Files\\ImageMagick-7.1.2-Q16;C:\\Program Files\\Common Files\\Oracle\\Java\\javapath;C:\\WINDOWS\\system32;C:\\WINDOWS;C:\\WINDOWS\\System32\\Wbem;C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\;C:\\WINDOWS\\System32\\OpenSSH\\;C:\\Program Files\\dotnet\\;C:\\Users\\nahid\\scoop\\apps\\imagemagick\\current;C:\\Users\\nahid\\AppData\\Local\\UniGetUI\\Chocolatey\\bin;C:\\Users\\nahid\\go\\bin;C:\\Users\\nahid\\scoop\\apps\\nodejs-lts\\current\\bin;C:\\Users\\nahid\\scoop\\apps\\nodejs-lts\\current;C:\\Users\\nahid\\scoop\\apps\\python312\\current\\Scripts;C:\\Users\\nahid\\scoop\\apps\\python312\\current;C:\\Users\\nahid\\scoop\\apps\\python311\\current\\Scripts;C:\\Users\\nahid\\scoop\\apps\\python311\\current;C:\\Users\\nahid\\scoop\\shims;C:\\Users\\nahid\\AppData\\Local\\Microsoft\\WindowsApps;C:\\Users\\nahid\\AppData\\Local\\Programs\\Microsoft VS Code\\bin;C:\\Users\\nahid\\.cache\\lm-studio\\bin;C:\\Users\\nahid\\AppData\\Local\\GitHubDesktop\\bin;C:\\Users\\nahid\\AppData\\Local\\Programs\\Ollama;C:\\Users\\nahid\\AppData\\Local\\Microsoft\\WinGet\\Packages\\aria2.aria2_Mic;C:\\Program Files\\Tailscale\\;C:\\Program Files\\Dart\\dart-sdk\\bin;C:\\Program Files\\Apryse Software\\Xodo PDF Reader\\jre\\bin\\server;C:\\Program Files\\Sniffnet\\;C:\\Program Files\\PowerShell\\7\\;C:\\Program Files\\Meld\\;C:\\Program Files\\Cloudflare\\Cloudflare WARP\\;C:\\Program Files\\Git\\cmd;C:\\Program Files\\YASB\\",
+        "Path": "C:\\Program Files\\ImageMagick-7.1.2-Q16;C:\\Program Files\\Common Files\\Oracle\\Java\\javapath;C:\\WINDOWS\\system32;C:\\WINDOWS;C:\\WINDOWS\\System32\\Wbem;C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\;C:\\WINDOWS\\System32\\OpenSSH\\;C:\\Program Files\\dotnet\\;C:\\Users\\nahid\\scoop\\apps\\imagemagick\\current;C:\\Users\\nahid\\AppData\\Local\\UniGetUI\\Chocolatey\\bin;C:\\Users\\nahid\\go\\bin;C:\\Users\\nahid\\scoop\\apps\\nodejs-lts\\current\\bin;C:\\Users\\nahid\\scoop\\apps\\nodejs-lts\\current;C:\\Users\\nahid\\scoop\\apps\\python312\\current\\Scripts;C:\\Users\\nahid\\scoop\\apps\\python312\\current;C:\\Users\\nahid\\scoop\\apps\\python311\\current\\Scripts;C:\\Users\\nahid\\scoop\\apps\\python311\\current;C:\\Users\\nahid\\scoop\\shims;C:\\Users\\nahid\\AppData\\Local\\Microsoft\\WindowsApps;C:\\Users\\nahid\\AppData\\Local\\Programs\\Microsoft VS Code\\bin;C:\\Users\\nahid\\.cache\\lm-studio\\bin;C:\\Users\\nahid\\AppData\\Local\\GitHubDesktop\\bin;C:\\Users\\nahid\\AppData\\Local\\Programs\\Ollama;C:\\Users\\nahid\\AppData\\Local\\Microsoft\\WinGet\\Packages\\aria2.aria2_Mic;C:\\Program Files\\Tailscale\\;C:\\Program Files\\Dart\\dart-sdk\\bin;C:\\Program Files\\Apryse Software\\Xodo PDF Reader\\jre\\bin\\server;C:\\Program Files\\Sniffnet\\;C:\\Program Files\\Meld\\;C:\\Program Files\\Git\\cmd;C:\\Program Files\\YASB\\;C:\\Program Files\\PowerShell\\7\\;C:\\Program Files\\Cloudflare\\Cloudflare WARP\\",
         "PATHEXT": ".COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC",
         "PROCESSOR_ARCHITECTURE": "AMD64",
         "PROCESSOR_IDENTIFIER": "AMD64 Family 23 Model 24 Stepping 1, AuthenticAMD",
@@ -125,8 +126,9 @@
                 }
             },
             "Rclone NCDU": {
+                "MUIVerb": "Disk Usage [GDU]",
                 "Icon": "C:\\@delta\\msBackups\\icon\\nerd-icon\\storage\\icon24.ico",
-                "command": "cmd /k \"rclone ncdu \"%V\"\""
+                "command": "cmd /k \"gdu \"%V\"\""
             }
         },
         "Folder": {
