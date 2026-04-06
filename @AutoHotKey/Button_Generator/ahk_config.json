@@ -105,6 +105,27 @@
             ]
         },
         {
+            "title": "P.O",
+            "title_color": "FFCC00",
+            "title_text_color": "000000",
+            "buttons": [
+                {
+                    "label": "Present",
+                    "text": "Narayangonj",
+                    "svg_code": "",
+                    "color": "00CCFF",
+                    "text_color": "000000"
+                },
+                {
+                    "label": "Permanent",
+                    "text": "Radhapur",
+                    "svg_code": "",
+                    "color": "00CCFF",
+                    "text_color": "000000"
+                }
+            ]
+        },
+        {
             "title": "SSC",
             "title_color": "FFCC00",
             "title_text_color": "000000",
@@ -224,27 +245,6 @@
                 {
                     "label": "CGPA",
                     "text": "3.23",
-                    "svg_code": "",
-                    "color": "00CCFF",
-                    "text_color": "000000"
-                }
-            ]
-        },
-        {
-            "title": "P.O",
-            "title_color": "FFCC00",
-            "title_text_color": "000000",
-            "buttons": [
-                {
-                    "label": "Present",
-                    "text": "Narayangonj",
-                    "svg_code": "",
-                    "color": "00CCFF",
-                    "text_color": "000000"
-                },
-                {
-                    "label": "Permanent",
-                    "text": "Radhapur",
                     "svg_code": "",
                     "color": "00CCFF",
                     "text_color": "000000"
