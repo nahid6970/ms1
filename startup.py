@@ -568,10 +568,10 @@ class RestoreDialog(QDialog):
         vbox.setSpacing(4)
         vbox.setContentsMargins(4, 4, 4, 4)
         for b in self._backups:
-            dt = datetime.datetime.fromtimestamp(b["createdAt"] / 1000).strftime("%Y-%m-%d %H:%M")
+            dt = datetime.datetime.fromtimestamp(b["createdAt"] / 1000).strftime("%Y-%m-%d %I:%M %p")
             row = QHBoxLayout()
             row.setSpacing(4)
-            btn = QPushButton(f"  {dt}  —  {b['label']}")
+            btn = QPushButton(f"  {dt}  ->  {b['label']}")
             btn.setStyleSheet(f"text-align: left; padding: 8px; background: {CP_BG}; color: {CP_TEXT}; border: 1px solid #2a2a2a;")
             btn.clicked.connect(lambda checked, bid=b["id"]: self._select(bid))
 
