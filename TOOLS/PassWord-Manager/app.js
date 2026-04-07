@@ -223,7 +223,7 @@ function renderEntries() {
 
 function copy(t, btn) {
     navigator.clipboard.writeText(t);
-    if (btn) { const orig = btn.innerHTML; btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>'; btn.style.color = 'var(--cp-green)'; setTimeout(() => { btn.innerHTML = orig; btn.style.color = ''; }, 1200); }
+    if (btn) { btn.style.color = 'var(--cp-green)'; btn.style.borderColor = 'var(--cp-green)'; setTimeout(() => { btn.style.color = ''; btn.style.borderColor = ''; }, 1200); }
 }
 
 function logout() {
