@@ -671,13 +671,14 @@ class ConvexLabelDialog(QDialog):
 
 class RestoreDialog(QDialog):
     """Shows list of backups and lets user pick one to restore or delete."""
-    def __init__(self, backups, convex_call_fn, parent=None):
+    def __init__(self, backups, convex_call_fn, local_data=None, parent=None):
         super().__init__(parent)
         self.setWindowTitle("RESTORE FROM BACKUP")
-        self.setFixedWidth(520)
+        self.setFixedWidth(550)
         self.selected_id = None
         self._convex_call = convex_call_fn
         self._backups = list(backups)
+        self._local_data = local_data
         self.setStyleSheet(f"QDialog {{ background-color: {CP_BG}; border: 2px solid {CP_YELLOW}; }} QLabel {{ color: {CP_TEXT}; }} QPushButton {{ background: {CP_DIM}; color: white; padding: 6px 14px; border: 1px solid {CP_DIM}; }} QPushButton:hover {{ border: 1px solid {CP_YELLOW}; }}")
         self._layout = QVBoxLayout(self)
         self._layout.addWidget(QLabel("Select a backup to restore:"))
@@ -706,6 +707,21 @@ class RestoreDialog(QDialog):
             btn.setStyleSheet(f"text-align: left; padding: 8px; background: {CP_BG}; color: {CP_TEXT}; border: 1px solid #2a2a2a; font-family: 'Consolas'; font-size: 10pt; font-weight: bold;")
             btn.clicked.connect(lambda checked, bid=b["id"]: self._select(bid))
 
+            # Diff button
+            diff_btn = QPushButton()
+            diff_btn.setFixedSize(32, 32)
+            diff_btn.setToolTip("Compare with local config")
+            diff_btn.setStyleSheet("background: transparent; border: 1px solid #2a2a2a; padding: 3px;")
+
+            renderer_diff = QSvgRenderer(QByteArray(SVGS["DIFF"].replace('currentColor', CP_YELLOW).encode()))
+            pix_diff = QPixmap(22, 22)
+            pix_diff.fill(Qt.GlobalColor.transparent)
+            painter_diff = QPainter(pix_diff)
+            renderer_diff.render(painter_diff)
+            painter_diff.end()
+            diff_btn.setIcon(QIcon(pix_diff))
+            diff_btn.clicked.connect(lambda checked, bid=b["id"]: self._diff(bid))
+
             # Delete button with SVG icon
             del_btn = QPushButton()
             del_btn.setFixedSize(32, 32)
@@ -722,10 +738,22 @@ class RestoreDialog(QDialog):
             del_btn.clicked.connect(lambda checked, bid=b["id"]: self._delete(bid))
 
             row.addWidget(btn)
+            row.addWidget(diff_btn)
             row.addWidget(del_btn)
             vbox.addLayout(row)
         vbox.addStretch()
         self._scroll.setWidget(inner)
+
+    def _diff(self, backup_id):
+        try:
+            data = self._convex_call("query", {
+                "path": "functions:get",
+                "args": {"id": backup_id}
+            }).get("value")
+            if data and self._local_data:
+                DiffDialog(self._local_data, data, parent=self).exec()
+        except Exception as e:
+            QMessageBox.critical(self, "DIFF FAILED", str(e))
 
     def _delete(self, backup_id):
         try:
@@ -1630,7 +1658,7 @@ class MainWindow(QMainWindow):
                 QMessageBox.information(self, "RESTORE", "No backups found.")
                 return
 
-            dlg = RestoreDialog(backups, self._convex_call, self)
+            dlg = RestoreDialog(backups, self._convex_call, local_data=self.items, parent=self)
             if dlg.exec() == QDialog.DialogCode.Accepted and dlg.selected_id:
                 data = self._convex_call("query", {
                     "path": "functions:get",
