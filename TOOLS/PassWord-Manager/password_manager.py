@@ -543,17 +543,16 @@ class MainWindow(QMainWindow):
         sidebar_layout.addSpacing(10)
         sidebar_layout.addWidget(QLabel("SELECT DOMAIN:"))
         
-        # CHANGED: Use QListWidget for groups instead of QComboBox
+        # Group list takes most space
         self.group_list = QListWidget()
         self.refresh_groups()
         self.group_list.currentItemChanged.connect(self.load_entries)
+        sidebar_layout.addWidget(self.group_list)
         
+        # Buttons at the bottom
         add_group_btn = QPushButton("+ NEW GROUP")
         add_group_btn.clicked.connect(self.add_group)
-        
-        sidebar_layout.addWidget(self.group_list)
         sidebar_layout.addWidget(add_group_btn)
-        sidebar_layout.addStretch()
         
         restart_btn = QPushButton("↺ RESTART")
         restart_btn.setStyleSheet(f"color: {CP_RED}; border-color: {CP_RED};")
@@ -663,10 +662,49 @@ class MainWindow(QMainWindow):
         current_item = self.group_list.currentItem()
         current_text = current_item.text() if current_item else None
         
-        self.group_list.clear()
-        groups = sorted(list(self.vault_data.keys()))
-        self.group_list.addItems(groups)
+        search_query = self.global_search.text().lower()
         
+        # Determine which groups to show
+        all_groups = list(self.vault_data.keys())
+        visible_groups = []
+        
+        if not search_query:
+            visible_groups = all_groups
+        else:
+            for domain in all_groups:
+                # Check if group name matches
+                if search_query in domain.lower():
+                    visible_groups.append(domain)
+                    continue
+                
+                # Check if any entry in group matches
+                match_found = False
+                for entry in self.vault_data[domain]:
+                    all_text = [
+                        entry.get('u', '').lower(),
+                        entry.get('p', '').lower(),
+                        domain.lower()
+                    ]
+                    for f_val in entry.get('fields', {}).values():
+                        all_text.append(str(f_val).lower())
+                    
+                    if search_query in " ".join(all_text):
+                        match_found = True
+                        break
+                
+                if match_found:
+                    visible_groups.append(domain)
+
+        # Sort: Alphabetical, but UNCATEGORIZED at the bottom
+        has_uncat = "UNCATEGORIZED" in visible_groups
+        sorted_groups = sorted([g for g in visible_groups if g != "UNCATEGORIZED"])
+        if has_uncat:
+            sorted_groups.append("UNCATEGORIZED")
+            
+        self.group_list.clear()
+        self.group_list.addItems(sorted_groups)
+        
+        # Restore selection if possible
         if current_text:
             items = self.group_list.findItems(current_text, Qt.MatchFlag.MatchExactly)
             if items:
@@ -756,6 +794,12 @@ class MainWindow(QMainWindow):
         return sorted(list(names))
 
     def load_entries(self):
+        # Trigger group refresh if global search is active (to filter the list)
+        if not hasattr(self, '_is_refreshing_lock') or not self._is_refreshing_lock:
+            self._is_refreshing_lock = True
+            self.refresh_groups()
+            self._is_refreshing_lock = False
+
         # Clear existing
         while self.entries_layout.count():
             item = self.entries_layout.takeAt(0)
