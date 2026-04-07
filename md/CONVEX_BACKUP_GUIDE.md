@@ -1,4 +1,4 @@
-﻿# Convex Config Backup — Integration Guide
+# Convex Config Backup � Integration Guide
 
 Add cloud backup/restore (with full version history) to any Python PyQt script using Convex.
 
@@ -7,9 +7,9 @@ Add cloud backup/restore (with full version history) to any Python PyQt script u
 ## Convex Project
 
 One shared Convex project handles all your scripts. Located at:
-`
+
 C:\@delta\ms1\convex_config_backup\
-`
+
 
 ### Current Deployment
 **CONVEX_URL:** https://different-gnat-734.convex.cloud
@@ -23,10 +23,10 @@ C:\@delta\ms1\convex_config_backup\
 import urllib.request
 import json
 import os
-from PyQt6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QLabel, 
+from PyQt6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QLabel,
                             QLineEdit, QPushButton, QScrollArea, QWidget, QMessageBox)
-from PyQt6.QtCore import Qt, QByteArray
-from PyQt6.QtGui import QIcon, QPixmap, QPainter
+from PyQt6.QtCore import Qt, QByteArray, QSize
+from PyQt6.QtGui import QIcon, QPixmap, QPainter, QFont
 from PyQt6.QtSvg import QSvgRenderer
 `
 
@@ -46,8 +46,8 @@ CP_TEXT = "#E0E0E0"
 
 # SVG Collection
 SVGS = {
-    "UPLOAD": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>',
-    "DOWNLOAD": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>',
+    "UPLOAD": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>',        
+    "DOWNLOAD": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>',   
     "TRASH": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2-0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>'
 }
 `
@@ -120,7 +120,7 @@ class ConvexLabelDialog(QDialog):
         self.inp = QLineEdit()
         self.inp.setPlaceholderText("e.g. before v2 update")
         layout.addWidget(self.inp)
-        
+
         btns = QHBoxLayout()
         ok = CyberButton("BACKUP", color=CP_CYAN)
         ok.clicked.connect(self.accept)
@@ -132,7 +132,9 @@ class ConvexLabelDialog(QDialog):
     @staticmethod
     def get_label(parent=None):
         dlg = ConvexLabelDialog(parent)
-        return dlg.inp.text(), dlg.exec() == QDialog.DialogCode.Accepted
+        # CRITICAL: exec() must be called before accessing inp.text()
+        ok = dlg.exec() == QDialog.DialogCode.Accepted
+        return dlg.inp.text(), ok
 `
 
 #### RestoreDialog
@@ -167,18 +169,20 @@ class RestoreDialog(QDialog):
         vbox = QVBoxLayout(inner)
         vbox.setSpacing(4)
         for b in self._backups:
-            dt = datetime.datetime.fromtimestamp(b["createdAt"] / 1000).strftime("%Y-%m-%d %H:%M")
+            # 12-hour format: %I:%M %p
+            dt = datetime.datetime.fromtimestamp(b["createdAt"] / 1000).strftime("%Y-%m-%d %I:%M %p")
             row = QHBoxLayout()
-            
-            btn = QPushButton(f"  {dt}  —  {b['label']}")
+
+            # Separator: ->
+            btn = QPushButton(f"  {dt}  ->  {b['label']}")
             btn.setStyleSheet(f"text-align: left; padding: 8px; background: {CP_BG}; color: {CP_TEXT}; border: 1px solid #2a2a2a;")
             btn.clicked.connect(lambda checked, bid=b["id"]: self._select(bid))
-            
+
             # Delete button with SVG icon
             del_btn = QPushButton()
             del_btn.setFixedSize(32, 32)
             del_btn.setStyleSheet("background: transparent; border: 1px solid #2a2a2a; padding: 3px;")
-            
+
             # Render TRASH icon with RED color
             renderer = QSvgRenderer(QByteArray(SVGS["TRASH"].replace('currentColor', CP_RED).encode()))
             pix = QPixmap(22, 22)
@@ -188,7 +192,7 @@ class RestoreDialog(QDialog):
             painter.end()
             del_btn.setIcon(QIcon(pix))
             del_btn.clicked.connect(lambda checked, bid=b["id"]: self._delete(bid))
-            
+
             row.addWidget(btn)
             row.addWidget(del_btn)
             vbox.addLayout(row)
@@ -234,15 +238,21 @@ def backup_to_convex(self):
     label, ok = ConvexLabelDialog.get_label(self)
     if not ok or not label.strip(): return
     
-    # Adapt backup_data to your script's config structure
-    backup_data = self.config 
-    
+    # CRITICAL: Convex reserves field names starting with $
+    # Strip  if present
+    backup_data = self.config.copy()
+    if "\" in backup_data:
+        del backup_data["\"]
+
     try:
-        self._convex_call("mutation", {
+        res = self._convex_call("mutation", {
             "path": "functions:save",
             "args": {"scriptName": SCRIPT_NAME, "label": label.strip(), "data": backup_data}
         })
-        QMessageBox.information(self, "BACKUP", f'Config backed up: "{label.strip()}"')
+        if res.get("status") == "success":
+            QMessageBox.information(self, "BACKUP", f'Config backed up: "{label.strip()}"')
+        else:
+            QMessageBox.warning(self, "BACKUP ERROR", str(res))
     except Exception as e:
         QMessageBox.critical(self, "BACKUP FAILED", str(e))
 
@@ -256,14 +266,14 @@ def restore_from_convex(self):
         if not backups:
             QMessageBox.information(self, "RESTORE", "No backups found.")
             return
-            
+
         dlg = RestoreDialog(backups, self._convex_call, self)
         if dlg.exec() == QDialog.DialogCode.Accepted and dlg.selected_id:
             data = self._convex_call("query", {
                 "path": "functions:get",
                 "args": {"id": dlg.selected_id}
             }).get("value")
-            
+
             if data:
                 self.config = self._fix_floats(data)
                 self.save_config()    # Implement this to write to disk
@@ -292,4 +302,6 @@ self.restore_btn.clicked.connect(self.restore_from_convex)
 ## Notes
 - Convex stores numbers as floats; use _fix_floats before loading into PyQt.
 - SCRIPT_NAME must be unique across all projects using this shared Convex URL.
+- **Reserved Fields**: Fields starting with $ (like \) are RESERVED by Convex and must be removed before saving.
+- **Time Format**: Use 12-hour format (%I:%M %p) and -> separator in the Restore dialog list for consistency.
 - Backups are immutable (full history), but individual versions can be deleted via the Trash icon in the Restore dialog.
