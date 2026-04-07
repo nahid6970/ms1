@@ -545,6 +545,8 @@ class MainWindow(QMainWindow):
         
         # Group list takes most space
         self.group_list = QListWidget()
+        self.group_list.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.group_list.customContextMenuRequested.connect(self.show_group_context_menu)
         self.refresh_groups()
         self.group_list.currentItemChanged.connect(self.load_entries)
         sidebar_layout.addWidget(self.group_list)
@@ -657,6 +659,72 @@ class MainWindow(QMainWindow):
         main_layout.addLayout(content_layout, 3)
         
         self.load_entries()
+
+    def show_group_context_menu(self, position):
+        item = self.group_list.itemAt(position)
+        if not item: return
+        
+        from PyQt6.QtWidgets import QMenu
+        from PyQt6.QtGui import QAction
+        
+        menu = QMenu(self)
+        menu.setStyleSheet(f"background-color: {CP_PANEL}; color: {CP_TEXT}; border: 1px solid {CP_DIM};")
+        
+        rename_action = QAction("RENAME GROUP", self)
+        rename_action.triggered.connect(lambda: self.rename_group(item.text()))
+        menu.addAction(rename_action)
+        
+        delete_action = QAction("DELETE GROUP & ALL ENTRIES", self)
+        delete_action.triggered.connect(lambda: self.delete_group_entirely(item.text()))
+        menu.addAction(delete_action)
+        
+        menu.exec(self.group_list.mapToGlobal(position))
+
+    def rename_group(self, old_name):
+        if old_name == "UNCATEGORIZED":
+            QMessageBox.warning(self, "WARN", "CANNOT RENAME UNCATEGORIZED GROUP")
+            return
+            
+        new_name, ok = QInputDialog.getText(self, "RENAME GROUP", f"ENTER NEW NAME FOR {old_name}:")
+        if ok and new_name:
+            new_name = new_name.strip().upper()
+            if new_name == old_name: return
+            
+            if new_name in self.vault_data:
+                QMessageBox.warning(self, "WARN", "GROUP ALREADY EXISTS")
+                return
+            
+            # Transfer data to new group
+            entries = self.vault_data.pop(old_name)
+            
+            # Update Domain field for entries IF it matched the old group name
+            # (i.e. if it was an automatically generated group)
+            for entry in entries:
+                current_domain = entry.get("fields", {}).get("Domain", "")
+                if self.clean_domain(current_domain) == old_name:
+                    # Update to match the new group name
+                    if "fields" not in entry: entry["fields"] = {}
+                    entry["fields"]["Domain"] = new_name
+            
+            self.vault_data[new_name] = entries
+            self.save_vault()
+            self.refresh_groups()
+            self.refresh_domain_list()
+            
+            items = self.group_list.findItems(new_name, Qt.MatchFlag.MatchExactly)
+            if items:
+                self.group_list.setCurrentItem(items[0])
+            self.load_entries()
+
+    def delete_group_entirely(self, domain):
+        msg = f"ARE YOU SURE YOU WANT TO DELETE THE GROUP '{domain}' AND ALL ITS CREDENTIALS?"
+        if QMessageBox.question(self, "CONFIRM DELETION", msg, 
+                                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No) == QMessageBox.StandardButton.Yes:
+            if domain in self.vault_data:
+                del self.vault_data[domain]
+                self.save_vault()
+                self.refresh_groups()
+                self.load_entries()
 
     def refresh_groups(self):
         current_item = self.group_list.currentItem()
@@ -876,7 +944,9 @@ class MainWindow(QMainWindow):
                 self.save_vault()
                 self.refresh_groups()
                 if not self.global_search.text():
-                    self.group_list.setCurrentText(target_group)
+                    items = self.group_list.findItems(target_group, Qt.MatchFlag.MatchExactly)
+                    if items:
+                        self.group_list.setCurrentItem(items[0])
                 self.load_entries()
             else:
                 QMessageBox.warning(self, "WARN", "FIELDS CANNOT BE EMPTY")
