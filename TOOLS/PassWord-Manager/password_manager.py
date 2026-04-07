@@ -181,18 +181,12 @@ class PasswordEntry(QFrame):
         
         self.main_layout = QVBoxLayout(self)
         self.main_layout.setContentsMargins(5, 5, 5, 5)
-        self.main_layout.setSpacing(2)
+        self.main_layout.setSpacing(0)
 
-        # Top Row
+        # Top Row: Info and Main Actions
         top_widget = QWidget()
         top_layout = QHBoxLayout(top_widget)
-        top_layout.setContentsMargins(0, 0, 0, 0)
-        
-        self.toggle_btn = QPushButton("▶")
-        self.toggle_btn.setFixedWidth(30)
-        self.toggle_btn.setStyleSheet("border: none; color: %s; font-size: 12pt;" % CP_CYAN)
-        self.toggle_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.toggle_btn.clicked.connect(self.toggle_expand)
+        top_layout.setContentsMargins(5, 5, 5, 5)
         
         info_layout = QVBoxLayout()
         user_lbl = QLabel(f"USER: {self.entry.get('u', '')}")
@@ -202,7 +196,6 @@ class PasswordEntry(QFrame):
         info_layout.addWidget(user_lbl)
         info_layout.addWidget(pass_lbl)
         
-        top_layout.addWidget(self.toggle_btn)
         top_layout.addLayout(info_layout)
         top_layout.addStretch()
         
@@ -230,26 +223,49 @@ class PasswordEntry(QFrame):
         
         self.main_layout.addWidget(top_widget)
 
+        # Toggle Button Row (Below the main info)
+        toggle_container = QWidget()
+        toggle_layout = QHBoxLayout(toggle_container)
+        toggle_layout.setContentsMargins(0, 0, 0, 0)
+        
+        self.toggle_btn = QPushButton("▼ SHOW DETAILS ▼")
+        self.toggle_btn.setStyleSheet(f"""
+            QPushButton {{
+                border: none; 
+                color: {CP_SUBTEXT}; 
+                font-size: 8pt; 
+                background: transparent;
+            }}
+            QPushButton:hover {{
+                color: {CP_CYAN};
+            }}
+        """)
+        self.toggle_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.toggle_btn.clicked.connect(self.toggle_expand)
+        
+        toggle_layout.addStretch()
+        toggle_layout.addWidget(self.toggle_btn)
+        toggle_layout.addStretch()
+        
+        self.main_layout.addWidget(toggle_container)
+
         # Expanded Area
         self.extra_widget = QWidget()
         self.extra_layout = QFormLayout(self.extra_widget)
-        self.extra_layout.setContentsMargins(40, 5, 10, 5)
+        self.extra_layout.setContentsMargins(20, 5, 20, 10)
         self.extra_widget.setVisible(False)
         
         fields = self.entry.get("fields", {})
-        if not fields:
-            # Fallback for old data or empty fields
-            pass
-        
         for name, value in fields.items():
             lbl = QLabel(f"{name.upper()}:")
             lbl.setStyleSheet(f"color: {CP_YELLOW}; border: none;")
             val_lbl = QLineEdit(value)
             val_lbl.setReadOnly(True)
-            val_lbl.setStyleSheet(f"background: transparent; border: none; color: {CP_TEXT};")
+            val_lbl.setStyleSheet(f"background: {CP_BG}; border: 1px solid {CP_DIM}; color: {CP_TEXT}; padding: 2px;")
             
             copy_btn = QPushButton("COPY")
             copy_btn.setFixedWidth(50)
+            copy_btn.setStyleSheet("font-size: 8pt; padding: 2px;")
             copy_btn.clicked.connect(lambda checked, v=value: self.copy_to_clipboard(v))
             
             row = QHBoxLayout()
@@ -262,7 +278,7 @@ class PasswordEntry(QFrame):
 
     def toggle_expand(self):
         self.is_expanded = not self.is_expanded
-        self.toggle_btn.setText("▼" if self.is_expanded else "▶")
+        self.toggle_btn.setText("▲ HIDE DETAILS ▲" if self.is_expanded else "▼ SHOW DETAILS ▼")
         self.extra_widget.setVisible(self.is_expanded)
 
     def copy_to_clipboard(self, text):
