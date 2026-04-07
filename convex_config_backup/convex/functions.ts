@@ -42,6 +42,16 @@ export const get = query({
   },
 });
 
+// List all unique script names
+export const listScripts = query({
+  args: {},
+  handler: async (ctx) => {
+    const all = await ctx.db.query("backups").collect();
+    const scripts = Array.from(new Set(all.map((b) => b.scriptName)));
+    return scripts.sort();
+  },
+});
+
 // Delete a specific backup
 export const remove = mutation({
   args: { id: v.id("backups") },
