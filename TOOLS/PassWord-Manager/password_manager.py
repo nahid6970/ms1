@@ -169,9 +169,10 @@ class PasswordEntry(QFrame):
     edit_requested = pyqtSignal()
     delete_requested = pyqtSignal()
     
-    def __init__(self, entry, parent=None):
+    def __init__(self, entry, domain, parent=None):
         super().__init__(parent)
         self.entry = entry
+        self.domain = domain
         self.is_expanded = False
         self.init_ui()
 
@@ -189,7 +190,9 @@ class PasswordEntry(QFrame):
         top_layout.setContentsMargins(5, 5, 5, 5)
         
         info_layout = QVBoxLayout()
-        user_lbl = QLabel(f"USER: {self.entry.get('u', '')}")
+        # Show domain in entry if it's from search
+        domain_str = f" [{self.domain}]" if self.domain else ""
+        user_lbl = QLabel(f"USER: {self.entry.get('u', '')}{domain_str}")
         pass_lbl = QLabel(f"PASS: {'*' * len(self.entry.get('p', ''))}")
         user_lbl.setStyleSheet(f"color: {CP_TEXT}; border: none; font-weight: bold;")
         pass_lbl.setStyleSheet(f"color: {CP_SUBTEXT}; border: none;")
@@ -259,14 +262,14 @@ class PasswordEntry(QFrame):
         for name, value in fields.items():
             lbl = QLabel(f"{name.upper()}:")
             lbl.setStyleSheet(f"color: {CP_YELLOW}; border: none;")
-            val_lbl = QLineEdit(value)
+            val_lbl = QLineEdit(str(value))
             val_lbl.setReadOnly(True)
             val_lbl.setStyleSheet(f"background: {CP_BG}; border: 1px solid {CP_DIM}; color: {CP_TEXT}; padding: 2px;")
             
             copy_btn = QPushButton("COPY")
             copy_btn.setFixedWidth(50)
             copy_btn.setStyleSheet("font-size: 8pt; padding: 2px;")
-            copy_btn.clicked.connect(lambda checked, v=value: self.copy_to_clipboard(v))
+            copy_btn.clicked.connect(lambda checked, v=value: self.copy_to_clipboard(str(v)))
             
             row = QHBoxLayout()
             row.addWidget(val_lbl)
@@ -410,6 +413,16 @@ class MainWindow(QMainWindow):
         sidebar_grp = QGroupBox("DOMAINS / GROUPS")
         sidebar_layout = QVBoxLayout()
         
+        # Global Search
+        sidebar_layout.addWidget(QLabel("GLOBAL SEARCH:"))
+        self.global_search = QLineEdit()
+        self.global_search.setPlaceholderText("SEARCH ALL FIELDS...")
+        self.global_search.setStyleSheet(f"border-color: {CP_CYAN};")
+        self.global_search.textChanged.connect(self.load_entries)
+        sidebar_layout.addWidget(self.global_search)
+        
+        sidebar_layout.addSpacing(10)
+        sidebar_layout.addWidget(QLabel("SELECT DOMAIN:"))
         self.group_list = QComboBox()
         self.refresh_groups()
         self.group_list.currentTextChanged.connect(self.load_entries)
@@ -579,37 +592,56 @@ class MainWindow(QMainWindow):
             if item.widget():
                 item.widget().deleteLater()
         
-        domain = self.group_list.currentText()
-        search_query = self.search_input.text().lower()
+        current_domain = self.group_list.currentText()
+        local_search = self.search_input.text().lower()
+        global_search = self.global_search.text().lower()
         
-        if domain in self.vault_data:
-            for i, entry in enumerate(self.vault_data[domain]):
-                # Handle old data format
-                if "u" not in entry and "u" in entry.keys(): # legacy check
-                     pass # entry is already correct structure
+        # Determine which domains to search
+        search_scope = {}
+        if global_search:
+            # Global search looks through EVERYTHING
+            search_scope = self.vault_data
+        elif current_domain in self.vault_data:
+            # Local search only looks in current domain
+            search_scope = {current_domain: self.vault_data[current_domain]}
+        
+        for domain, entries in search_scope.items():
+            for i, entry in enumerate(entries):
+                # Search logic: check all available text fields
+                all_text = [
+                    entry.get('u', '').lower(),
+                    entry.get('p', '').lower(),
+                    domain.lower()
+                ]
+                for f_val in entry.get('fields', {}).values():
+                    all_text.append(str(f_val).lower())
                 
-                if search_query and search_query not in entry.get('u', '').lower():
+                combined_text = " ".join(all_text)
+                
+                # Apply filters
+                if global_search and global_search not in combined_text:
                     continue
-                    
-                widget = PasswordEntry(entry)
-                widget.edit_requested.connect(lambda idx=i: self.edit_entry(idx))
-                widget.delete_requested.connect(lambda idx=i: self.delete_entry(idx))
+                if not global_search and local_search and local_search not in entry.get('u', '').lower():
+                    continue
+                
+                # In global search, we pass domain for display; in local, it's redundant but safe
+                widget = PasswordEntry(entry, domain)
+                # We need to capture domain and index correctly for signals
+                widget.edit_requested.connect(lambda d=domain, idx=i: self.edit_specific_entry(d, idx))
+                widget.delete_requested.connect(lambda d=domain, idx=i: self.delete_specific_entry(d, idx))
                 self.entries_layout.addWidget(widget)
 
-    def delete_entry(self, index):
-        domain = self.group_list.currentText()
-        if QMessageBox.question(self, "CONFIRM", "DELETE THIS CREDENTIAL?", 
+    def delete_specific_entry(self, domain, index):
+        if QMessageBox.question(self, "CONFIRM", f"DELETE THIS CREDENTIAL FROM {domain}?", 
                                 QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No) == QMessageBox.StandardButton.Yes:
             del self.vault_data[domain][index]
             self.save_vault()
             self.load_entries()
 
-    def edit_entry(self, index):
-        domain = self.group_list.currentText()
+    def edit_specific_entry(self, domain, index):
         entry = self.vault_data[domain][index]
         
         dlg = EditDialog(entry, self)
-        # Apply the same theme to dialog
         dlg.setStyleSheet(self.get_stylesheet())
         
         if dlg.exec():
@@ -620,6 +652,14 @@ class MainWindow(QMainWindow):
                 self.load_entries()
             else:
                 QMessageBox.warning(self, "WARN", "FIELDS CANNOT BE EMPTY")
+
+    def delete_entry(self, index):
+        # Deprecated by delete_specific_entry, but kept for signature safety if needed
+        pass
+
+    def edit_entry(self, index):
+        # Deprecated by edit_specific_entry
+        pass
 
     def save_vault(self):
         data_str = json.dumps(self.vault_data)
