@@ -71,11 +71,12 @@ class CryptoManager:
             return None
 
 class EditDialog(QDialog):
-    def __init__(self, entry, parent=None):
+    def __init__(self, entry, field_suggestions, parent=None):
         super().__init__(parent)
         self.setWindowTitle("EDIT CREDENTIALS")
         self.setFixedWidth(450)
         self.entry = entry.copy()
+        self.field_suggestions = field_suggestions
         if "fields" not in self.entry:
             self.entry["fields"] = {}
         self.init_ui()
@@ -91,18 +92,29 @@ class EditDialog(QDialog):
         
         # Additional fields
         self.extra_fields_widgets = {}
-        self.refresh_extra_fields()
+        for name, value in self.entry["fields"].items():
+            self.add_field_row(name, value)
 
         self.layout.addLayout(self.form)
 
         # Add Field Section
         add_field_layout = QHBoxLayout()
         self.new_field_name = QLineEdit()
-        self.new_field_name.setPlaceholderText("Field Name (e.g. Note, Phone)")
-        add_field_btn = QPushButton("+ ADD FIELD")
+        self.new_field_name.setPlaceholderText("New Field Name")
+        add_field_btn = QPushButton("+")
+        add_field_btn.setFixedWidth(30)
         add_field_btn.clicked.connect(self.add_custom_field)
+        
+        self.suggest_btn = QPushButton("▼")
+        self.suggest_btn.setFixedWidth(30)
+        self.suggest_btn.setStyleSheet(f"color: {CP_CYAN};")
+        self.suggest_btn.clicked.connect(self.show_suggestions)
+        
+        add_field_layout.addWidget(QLabel("ADD FIELD:"))
         add_field_layout.addWidget(self.new_field_name)
         add_field_layout.addWidget(add_field_btn)
+        add_field_layout.addWidget(self.suggest_btn)
+        
         self.layout.addLayout(add_field_layout)
         
         btns = QHBoxLayout()
@@ -118,16 +130,12 @@ class EditDialog(QDialog):
         self.layout.addStretch()
         self.layout.addLayout(btns)
 
-    def refresh_extra_fields(self):
-        # This is a bit tricky with QFormLayout if we want to refresh. 
-        # For simplicity, we'll just add new fields as they come.
-        for name, value in self.entry["fields"].items():
-            if name not in self.extra_fields_widgets:
-                self.add_field_row(name, value)
-
     def add_field_row(self, name, value):
+        if name in self.extra_fields_widgets:
+            return
+            
         row_layout = QHBoxLayout()
-        edit = QLineEdit(value)
+        edit = QLineEdit(str(value))
         del_btn = QPushButton("X")
         del_btn.setFixedWidth(30)
         del_btn.setStyleSheet(f"color: {CP_RED};")
@@ -141,9 +149,8 @@ class EditDialog(QDialog):
         
         def remove():
             self.form.removeRow(label)
-            del self.extra_fields_widgets[name]
-            if name in self.entry["fields"]:
-                del self.entry["fields"][name]
+            if name in self.extra_fields_widgets:
+                del self.extra_fields_widgets[name]
 
         del_btn.clicked.connect(remove)
 
@@ -156,6 +163,26 @@ class EditDialog(QDialog):
             QMessageBox.warning(self, "WARN", "FIELD NAME CANNOT BE EMPTY")
         else:
             QMessageBox.warning(self, "WARN", "FIELD ALREADY EXISTS")
+
+    def show_suggestions(self):
+        from PyQt6.QtWidgets import QMenu
+        from PyQt6.QtGui import QAction
+        
+        menu = QMenu(self)
+        menu.setStyleSheet(f"background-color: {CP_PANEL}; color: {CP_TEXT}; border: 1px solid {CP_DIM};")
+        
+        for name in self.field_suggestions:
+            if name not in self.extra_fields_widgets:
+                action = QAction(name, self)
+                action.triggered.connect(lambda checked, n=name: self.add_field_row(n, ""))
+                menu.addAction(action)
+        
+        if menu.isEmpty():
+            action = QAction("No suggestions", self)
+            action.setEnabled(False)
+            menu.addAction(action)
+            
+        menu.exec(self.suggest_btn.mapToGlobal(self.suggest_btn.rect().bottomLeft()))
 
     def get_data(self):
         data = {
@@ -456,14 +483,6 @@ class MainWindow(QMainWindow):
         add_form.addRow("USERNAME:", self.u_input)
         add_form.addRow("PASSWORD:", self.p_input)
         
-        # Extra fields for quick add
-        self.extra_add_fields = {}
-        for field in ["Note", "Phone", "Domain"]:
-            le = QLineEdit()
-            le.setPlaceholderText(f"Optional {field}")
-            self.extra_add_fields[field] = le
-            add_form.addRow(f"{field.upper()}:", le)
-
         add_vbox.addLayout(add_form)
         
         add_btn = QPushButton("SAVE TO VAULT")
@@ -564,22 +583,24 @@ class MainWindow(QMainWindow):
         p = self.p_input.text()
         
         if u and p:
-            fields = {}
-            for name, le in self.extra_add_fields.items():
-                val = le.text().strip()
-                if val:
-                    fields[name] = val
-                    
-            self.vault_data[domain].append({"u": u, "p": p, "fields": fields})
+            self.vault_data[domain].append({"u": u, "p": p, "fields": {}})
             self.u_input.clear()
             self.p_input.clear()
-            for le in self.extra_add_fields.values():
-                le.clear()
             self.p_input.setEchoMode(QLineEdit.EchoMode.Password) # Reset echo mode
             self.save_vault()
             self.load_entries()
         else:
             QMessageBox.warning(self, "WARN", "FIELDS CANNOT BE EMPTY")
+
+    def get_all_field_names(self):
+        names = set()
+        # Default common fields
+        names.update(["Note", "Phone", "Domain"])
+        for group in self.vault_data.values():
+            for entry in group:
+                fields = entry.get("fields", {})
+                names.update(fields.keys())
+        return sorted(list(names))
 
     def load_entries(self):
         # Clear existing
@@ -631,8 +652,9 @@ class MainWindow(QMainWindow):
 
     def edit_specific_entry(self, domain, index):
         entry = self.vault_data[domain][index]
+        suggestions = self.get_all_field_names()
         
-        dlg = EditDialog(entry, self)
+        dlg = EditDialog(entry, suggestions, self)
         dlg.setStyleSheet(self.get_stylesheet())
         
         if dlg.exec():
@@ -643,14 +665,6 @@ class MainWindow(QMainWindow):
                 self.load_entries()
             else:
                 QMessageBox.warning(self, "WARN", "FIELDS CANNOT BE EMPTY")
-
-    def delete_entry(self, index):
-        # Deprecated by delete_specific_entry, but kept for signature safety if needed
-        pass
-
-    def edit_entry(self, index):
-        # Deprecated by edit_specific_entry
-        pass
 
     def save_vault(self):
         data_str = json.dumps(self.vault_data)
