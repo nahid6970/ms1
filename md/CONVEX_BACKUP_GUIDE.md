@@ -171,7 +171,7 @@ class RestoreDialog(QDialog):
             row = QHBoxLayout()
             
             btn = QPushButton(f"  {dt}  —  {b['label']}")
-            btn.setStyleSheet(f"text-align: left; padding: 8px; background: {CP_BG}; color: {CP_TEXT}; border: 1px solid #2a2a2a; font-family: 'Consolas'; font-size: 10pt; font-weight: bold;")
+            btn.setStyleSheet(f"text-align: left; padding: 8px; background: {CP_BG}; color: {CP_TEXT}; border: 1px solid #2a2a2a;")
             btn.clicked.connect(lambda checked, bid=b["id"]: self._select(bid))
             
             # Delete button with SVG icon
