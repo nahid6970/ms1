@@ -31,6 +31,7 @@ CP_RED = "#FF003C"          # Neon Red (Error/Delete)
 CP_DIM = "#3a3a3a"          # Dimmed/Inactive
 CP_TEXT = "#E0E0E0"         # Main Text
 CP_SUBTEXT = "#808080"      # Sub Text
+CP_GREEN = "#00FF88"        # Neon Green (Sync OK)
 
 SVGS = {
     "PLUS": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>',
@@ -512,29 +513,73 @@ class ScanResultsDialog(QDialog):
         self.accept()
 
 class ConvexLabelDialog(QDialog):
-    """Simple dialog to get a backup label from the user."""
-    def __init__(self, parent=None):
+    """Backup label dialog with inline CHECK button to compare local vs latest backup."""
+    def __init__(self, parent=None, convex_call_fn=None, config_data=None):
         super().__init__(parent)
         self.setWindowTitle("BACKUP LABEL")
-        self.setFixedWidth(380)
-        self.setStyleSheet(f"QDialog {{ background-color: {CP_BG}; border: 2px solid {CP_CYAN}; }} QLabel {{ color: {CP_TEXT}; }} QLineEdit {{ background: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 5px; font-family: Consolas; }} QPushButton {{ background: {CP_DIM}; color: white; padding: 6px 14px; border: 1px solid {CP_DIM}; }} QPushButton:hover {{ border: 1px solid {CP_CYAN}; }}")
+        self.setFixedWidth(420)
+        self._convex_call = convex_call_fn
+        self._config_data = config_data or []
+        self.setStyleSheet(f"QDialog {{ background-color: {CP_BG}; border: 2px solid {CP_CYAN}; }} QLabel {{ color: {CP_TEXT}; }} QLineEdit {{ background: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 5px; font-family: Consolas; }}")
         layout = QVBoxLayout(self)
         layout.addWidget(QLabel("Enter a label for this backup:"))
         self.inp = QLineEdit()
         self.inp.setPlaceholderText("e.g. before v2 update")
         layout.addWidget(self.inp)
+
+        self.status_lbl = QLabel("")
+        self.status_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.status_lbl.setStyleSheet("font-family: Consolas; font-size: 9pt; padding: 4px;")
+        layout.addWidget(self.status_lbl)
+
         btns = QHBoxLayout()
-        ok = QPushButton("BACKUP")
-        ok.setStyleSheet(f"background: {CP_CYAN}; color: black; font-weight: bold;")
+        ok = CyberButton("BACKUP", color=CP_CYAN)
         ok.clicked.connect(self.accept)
-        cancel = QPushButton("CANCEL")
+        self.check_btn = CyberButton("CHECK", color=CP_YELLOW, is_outlined=True)
+        self.check_btn.clicked.connect(self._check_sync)
+        cancel = CyberButton("CANCEL", color=CP_DIM, is_outlined=True)
         cancel.clicked.connect(self.reject)
-        btns.addWidget(ok); btns.addWidget(cancel)
+        btns.addWidget(ok); btns.addWidget(self.check_btn); btns.addWidget(cancel)
         layout.addLayout(btns)
 
+    def _check_sync(self):
+        if not self._convex_call:
+            self.status_lbl.setText("No connection available.")
+            return
+        try:
+            self.check_btn.setEnabled(False)
+            self.status_lbl.setStyleSheet(f"color: {CP_SUBTEXT}; font-family: Consolas; font-size: 9pt; padding: 4px;")
+            self.status_lbl.setText("Checking...")
+            QApplication.processEvents()
+            result = self._convex_call("query", {"path": "functions:list", "args": {"scriptName": SCRIPT_NAME}})
+            backups = result.get("value", [])
+            if not backups:
+                self.status_lbl.setStyleSheet(f"color: {CP_RED}; font-family: Consolas; font-size: 9pt; padding: 4px;")
+                self.status_lbl.setText("⚠ No backups found — backup recommended!")
+                return
+            latest = max(backups, key=lambda b: b["createdAt"])
+            remote = self._convex_call("query", {"path": "functions:get", "args": {"id": latest["id"]}}).get("value", [])
+            def fix(obj):
+                if isinstance(obj, dict): return {k: fix(v) for k, v in obj.items()}
+                if isinstance(obj, list): return [fix(i) for i in obj]
+                if isinstance(obj, float) and obj.is_integer(): return int(obj)
+                return obj
+            dirty = json.dumps(self._config_data, sort_keys=True) != json.dumps(fix(remote), sort_keys=True)
+            if dirty:
+                self.status_lbl.setStyleSheet(f"color: {CP_RED}; font-family: Consolas; font-size: 9pt; padding: 4px;")
+                self.status_lbl.setText(f"⚠ OUT OF SYNC with '{latest['label']}' — backup recommended!")
+            else:
+                self.status_lbl.setStyleSheet(f"color: {CP_GREEN}; font-family: Consolas; font-size: 9pt; padding: 4px;")
+                self.status_lbl.setText(f"✔ In sync with '{latest['label']}' — no backup needed.")
+        except Exception as e:
+            self.status_lbl.setStyleSheet(f"color: {CP_RED}; font-family: Consolas; font-size: 9pt; padding: 4px;")
+            self.status_lbl.setText(f"Error: {e}")
+        finally:
+            self.check_btn.setEnabled(True)
+
     @staticmethod
-    def get_label(parent=None):
-        dlg = ConvexLabelDialog(parent)
+    def get_label(parent=None, convex_call_fn=None, config_data=None):
+        dlg = ConvexLabelDialog(parent, convex_call_fn=convex_call_fn, config_data=config_data)
         ok = dlg.exec() == QDialog.DialogCode.Accepted
         return dlg.inp.text(), ok
 
@@ -1473,7 +1518,7 @@ class MainWindow(QMainWindow):
             return json.loads(resp.read().decode("utf-8"))
 
     def backup_to_convex(self):
-        label, ok = ConvexLabelDialog.get_label(self)
+        label, ok = ConvexLabelDialog.get_label(self, convex_call_fn=self._convex_call, config_data=self.items)
         if not ok or not label.strip(): return
 
         # Adapt backup_data to your script's config structure
