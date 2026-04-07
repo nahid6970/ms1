@@ -660,12 +660,12 @@ AHKPY_BT.pack(side="left", padx=(0, 0), pady=(0, 0))
 AHKPY_BT.bind(
     "<Button-1>",
     lambda event=None: subprocess.Popen(
-        [sys.executable, r'C:\@delta\ms1\@AutoHotKey\ahk_gui_pyqt.py'],
+        [sys.executable, r'C:\@delta\ms1\@AutoHotKey\shortcut_manager\ahk_gui_pyqt.py'],
         cwd=r'C:\@delta\ms1\@AutoHotKey'
     )
 )
 AHKPY_BT.bind("<Control-Button-1>", lambda event=None: subprocess.Popen(
-    r'code C:\@delta\ms1\@AutoHotKey\ahk_gui_pyqt.py',
+    r'code C:\@delta\ms1\@AutoHotKey\shortcut_manager\ahk_gui_pyqt.py',
     cwd=r'C:\@delta\ms1\@AutoHotKey',
     shell=True
 ))
