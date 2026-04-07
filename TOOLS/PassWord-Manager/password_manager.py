@@ -8,7 +8,7 @@ from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QLabel, QPushButton, QLineEdit, QGroupBox, QFormLayout,
     QScrollArea, QFrame, QMessageBox, QComboBox, QInputDialog,
-    QCheckBox, QSlider, QDialog
+    QCheckBox, QSlider, QDialog, QListWidget
 )
 
 from PyQt6.QtCore import Qt, pyqtSignal, QSize
@@ -463,7 +463,7 @@ class MainWindow(QMainWindow):
             QLineEdit, QComboBox {{
                 background-color: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 6px; 
             }}
-            QLineEdit:focus {{ border: 1px solid {CP_CYAN}; }}
+            QLineEdit:focus, QComboBox:focus {{ border: 1px solid {CP_CYAN}; }}
             QPushButton {{
                 background-color: {CP_DIM}; border: 1px solid {CP_DIM}; color: white; padding: 8px 15px; font-weight: bold;
             }}
@@ -476,6 +476,25 @@ class MainWindow(QMainWindow):
             QGroupBox::title {{ subcontrol-origin: margin; subcontrol-position: top left; padding: 0 5px; }}
             QScrollArea {{ border: none; background: transparent; }}
             
+            QListWidget {{
+                background-color: {CP_BG};
+                border: 1px solid {CP_DIM};
+                color: {CP_TEXT};
+                outline: none;
+            }}
+            QListWidget::item {{
+                padding: 10px;
+                border-bottom: 1px solid {CP_PANEL};
+            }}
+            QListWidget::item:selected {{
+                background-color: {CP_PANEL};
+                color: {CP_YELLOW};
+                border-left: 3px solid {CP_YELLOW};
+            }}
+            QListWidget::item:hover {{
+                background-color: #1a1a1a;
+            }}
+
             QCheckBox {{ spacing: 8px; color: {CP_TEXT}; }}
             QCheckBox::indicator {{ width: 14px; height: 14px; border: 1px solid {CP_DIM}; background: {CP_PANEL}; }}
             QCheckBox::indicator:checked {{ background: {CP_YELLOW}; border-color: {CP_YELLOW}; }}
@@ -523,9 +542,11 @@ class MainWindow(QMainWindow):
         
         sidebar_layout.addSpacing(10)
         sidebar_layout.addWidget(QLabel("SELECT DOMAIN:"))
-        self.group_list = QComboBox()
+        
+        # CHANGED: Use QListWidget for groups instead of QComboBox
+        self.group_list = QListWidget()
         self.refresh_groups()
-        self.group_list.currentTextChanged.connect(self.load_entries)
+        self.group_list.currentItemChanged.connect(self.load_entries)
         
         add_group_btn = QPushButton("+ NEW GROUP")
         add_group_btn.clicked.connect(self.add_group)
@@ -552,9 +573,14 @@ class MainWindow(QMainWindow):
         add_form = QFormLayout()
         self.u_input = QLineEdit()
         self.p_input = QLineEdit()
-        self.d_input = QLineEdit()
+        
+        # CHANGED: Use editable QComboBox for Domain
+        self.d_input = QComboBox()
+        self.d_input.setEditable(True)
+        self.d_input.setPlaceholderText("Domain (e.g. google.com)")
+        self.refresh_domain_list()
+        
         self.p_input.setEchoMode(QLineEdit.EchoMode.Password)
-        self.d_input.setPlaceholderText("Optional Domain (e.g. google.com)")
         
         add_form.addRow("USERNAME:", self.u_input)
         add_form.addRow("PASSWORD:", self.p_input)
@@ -634,20 +660,44 @@ class MainWindow(QMainWindow):
         self.load_entries()
 
     def refresh_groups(self):
-        current = self.group_list.currentText()
+        current_item = self.group_list.currentItem()
+        current_text = current_item.text() if current_item else None
+        
         self.group_list.clear()
         groups = sorted(list(self.vault_data.keys()))
         self.group_list.addItems(groups)
-        if current in groups:
-            self.group_list.setCurrentText(current)
+        
+        if current_text:
+            items = self.group_list.findItems(current_text, Qt.MatchFlag.MatchExactly)
+            if items:
+                self.group_list.setCurrentItem(items[0])
+        elif self.group_list.count() > 0:
+            self.group_list.setCurrentRow(0)
+
+    def refresh_domain_list(self):
+        # Collect all unique "Domain" fields from all entries
+        domains = set()
+        for group in self.vault_data.values():
+            for entry in group:
+                d_val = entry.get("fields", {}).get("Domain")
+                if d_val:
+                    domains.add(d_val)
+        
+        current_text = self.d_input.currentText()
+        self.d_input.clear()
+        self.d_input.addItems(sorted(list(domains)))
+        self.d_input.setEditText(current_text)
 
     def add_group(self):
         name, ok = QInputDialog.getText(self, "NEW GROUP", "ENTER DOMAIN NAME:")
         if ok and name:
+            name = name.strip().upper()
             if name not in self.vault_data:
                 self.vault_data[name] = []
                 self.refresh_groups()
-                self.group_list.setCurrentText(name)
+                items = self.group_list.findItems(name, Qt.MatchFlag.MatchExactly)
+                if items:
+                    self.group_list.setCurrentItem(items[0])
                 self.save_vault()
 
     @staticmethod
@@ -664,7 +714,7 @@ class MainWindow(QMainWindow):
     def save_entry(self):
         u = self.u_input.text().strip()
         p = self.p_input.text().strip()
-        d = self.d_input.text().strip()
+        d = self.d_input.currentText().strip()
         
         if u and p:
             # Automatic Grouping
@@ -681,12 +731,16 @@ class MainWindow(QMainWindow):
             
             self.u_input.clear()
             self.p_input.clear()
-            self.d_input.clear()
+            self.d_input.setEditText("")
             self.p_input.setEchoMode(QLineEdit.EchoMode.Password)
             
             self.save_vault()
             self.refresh_groups()
-            self.group_list.setCurrentText(target_grp)
+            self.refresh_domain_list() # Update domain suggestions
+            
+            items = self.group_list.findItems(target_grp, Qt.MatchFlag.MatchExactly)
+            if items:
+                self.group_list.setCurrentItem(items[0])
             self.load_entries()
         else:
             QMessageBox.warning(self, "WARN", "USERNAME AND PASSWORD CANNOT BE EMPTY")
@@ -708,7 +762,8 @@ class MainWindow(QMainWindow):
             if item.widget():
                 item.widget().deleteLater()
         
-        current_domain = self.group_list.currentText()
+        current_item = self.group_list.currentItem()
+        current_domain = current_item.text() if current_item else None
         global_search = self.global_search.text().lower()
         
         # Determine which domains to search
