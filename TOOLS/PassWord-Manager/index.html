@@ -22,27 +22,33 @@
         </header>
 
         <div class="main-layout">
-            <!-- Sidebar for Groups -->
             <aside class="sidebar">
                 <h2>DOMAINS</h2>
                 <input type="text" id="global-search" placeholder="SEARCH...">
-                <div id="group-list">
-                    <!-- Groups injected here -->
-                </div>
+                <div id="group-list"></div>
             </aside>
 
-            <!-- Main Content Area -->
             <main class="content">
                 <section id="add-entry">
                     <div class="card">
                         <h3>NEW CREDENTIAL</h3>
-                        <div class="form">
+                        <div class="form" id="main-add-form">
                             <input type="text" id="new-domain" placeholder="DOMAIN (e.g. google.com)">
                             <input type="text" id="new-username" placeholder="USERNAME">
                             <div class="password-row">
                                 <input type="password" id="new-password" placeholder="PASSWORD">
                                 <button id="gen-btn">GEN</button>
                             </div>
+                            
+                            <div id="new-custom-fields" class="custom-fields-area">
+                                <!-- Dynamic fields here -->
+                            </div>
+                            
+                            <div class="add-field-row">
+                                <input type="text" id="new-field-name" placeholder="FIELD NAME">
+                                <button id="add-field-btn">+</button>
+                            </div>
+
                             <button id="save-btn" class="primary">SAVE TO VAULT</button>
                         </div>
                     </div>
@@ -53,9 +59,36 @@
                 </section>
 
                 <section id="entries-list">
-                    <!-- Entries will be injected here -->
+                    <!-- Entries injected here -->
                 </section>
             </main>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="edit-modal" class="modal hidden">
+        <div class="modal-content card">
+            <h2>EDIT CREDENTIAL</h2>
+            <div class="form">
+                <label>DOMAIN/GROUP:</label>
+                <input type="text" id="edit-domain">
+                <label>USERNAME:</label>
+                <input type="text" id="edit-username">
+                <label>PASSWORD:</label>
+                <input type="text" id="edit-password">
+                
+                <div id="edit-custom-fields" class="custom-fields-area"></div>
+                
+                <div class="add-field-row">
+                    <input type="text" id="edit-new-field-name" placeholder="NEW FIELD">
+                    <button id="edit-add-field-btn">+</button>
+                </div>
+
+                <div class="modal-actions">
+                    <button id="update-btn" class="primary">UPDATE</button>
+                    <button id="close-modal-btn">CANCEL</button>
+                </div>
+            </div>
         </div>
     </div>
 
