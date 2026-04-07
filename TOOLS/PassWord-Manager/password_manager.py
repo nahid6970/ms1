@@ -527,12 +527,8 @@ class MainWindow(QMainWindow):
         self.scroll.setWidgetResizable(True)
         
         search_layout = QHBoxLayout()
-        self.search_input = QLineEdit()
-        self.search_input.setPlaceholderText("SEARCH BY USERNAME...")
-        self.search_input.textChanged.connect(self.load_entries)
         search_layout.addWidget(QLabel("VAULT ENTRIES:"))
         search_layout.addStretch()
-        search_layout.addWidget(self.search_input)
         
         content_layout.addLayout(search_layout)
         content_layout.addWidget(self.scroll)
@@ -593,7 +589,6 @@ class MainWindow(QMainWindow):
                 item.widget().deleteLater()
         
         current_domain = self.group_list.currentText()
-        local_search = self.search_input.text().lower()
         global_search = self.global_search.text().lower()
         
         # Determine which domains to search
@@ -602,7 +597,7 @@ class MainWindow(QMainWindow):
             # Global search looks through EVERYTHING
             search_scope = self.vault_data
         elif current_domain in self.vault_data:
-            # Local search only looks in current domain
+            # Show current domain if no global search
             search_scope = {current_domain: self.vault_data[current_domain]}
         
         for domain, entries in search_scope.items():
@@ -618,15 +613,11 @@ class MainWindow(QMainWindow):
                 
                 combined_text = " ".join(all_text)
                 
-                # Apply filters
+                # Apply filter
                 if global_search and global_search not in combined_text:
                     continue
-                if not global_search and local_search and local_search not in entry.get('u', '').lower():
-                    continue
                 
-                # In global search, we pass domain for display; in local, it's redundant but safe
                 widget = PasswordEntry(entry, domain)
-                # We need to capture domain and index correctly for signals
                 widget.edit_requested.connect(lambda d=domain, idx=i: self.edit_specific_entry(d, idx))
                 widget.delete_requested.connect(lambda d=domain, idx=i: self.delete_specific_entry(d, idx))
                 self.entries_layout.addWidget(widget)
