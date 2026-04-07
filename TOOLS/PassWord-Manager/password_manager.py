@@ -71,20 +71,39 @@ class CryptoManager:
             return None
 
 class EditDialog(QDialog):
-    def __init__(self, username, password, parent=None):
+    def __init__(self, entry, parent=None):
         super().__init__(parent)
         self.setWindowTitle("EDIT CREDENTIALS")
-        self.setFixedWidth(350)
-        self.init_ui(username, password)
+        self.setFixedWidth(450)
+        self.entry = entry.copy()
+        if "fields" not in self.entry:
+            self.entry["fields"] = {}
+        self.init_ui()
 
-    def init_ui(self, u, p):
-        layout = QVBoxLayout(self)
+    def init_ui(self):
+        self.layout = QVBoxLayout(self)
         
-        form = QFormLayout()
-        self.u_input = QLineEdit(u)
-        self.p_input = QLineEdit(p)
-        form.addRow("USERNAME:", self.u_input)
-        form.addRow("PASSWORD:", self.p_input)
+        self.form = QFormLayout()
+        self.u_input = QLineEdit(self.entry.get("u", ""))
+        self.p_input = QLineEdit(self.entry.get("p", ""))
+        self.form.addRow("USERNAME:", self.u_input)
+        self.form.addRow("PASSWORD:", self.p_input)
+        
+        # Additional fields
+        self.extra_fields_widgets = {}
+        self.refresh_extra_fields()
+
+        self.layout.addLayout(self.form)
+
+        # Add Field Section
+        add_field_layout = QHBoxLayout()
+        self.new_field_name = QLineEdit()
+        self.new_field_name.setPlaceholderText("Field Name (e.g. Note, Phone)")
+        add_field_btn = QPushButton("+ ADD FIELD")
+        add_field_btn.clicked.connect(self.add_custom_field)
+        add_field_layout.addWidget(self.new_field_name)
+        add_field_layout.addWidget(add_field_btn)
+        self.layout.addLayout(add_field_layout)
         
         btns = QHBoxLayout()
         save_btn = QPushButton("UPDATE")
@@ -96,60 +115,155 @@ class EditDialog(QDialog):
         btns.addWidget(save_btn)
         btns.addWidget(cancel_btn)
         
-        layout.addLayout(form)
-        layout.addLayout(btns)
+        self.layout.addStretch()
+        self.layout.addLayout(btns)
+
+    def refresh_extra_fields(self):
+        # This is a bit tricky with QFormLayout if we want to refresh. 
+        # For simplicity, we'll just add new fields as they come.
+        for name, value in self.entry["fields"].items():
+            if name not in self.extra_fields_widgets:
+                self.add_field_row(name, value)
+
+    def add_field_row(self, name, value):
+        row_layout = QHBoxLayout()
+        edit = QLineEdit(value)
+        del_btn = QPushButton("X")
+        del_btn.setFixedWidth(30)
+        del_btn.setStyleSheet(f"color: {CP_RED};")
+        
+        self.extra_fields_widgets[name] = edit
+        row_layout.addWidget(edit)
+        row_layout.addWidget(del_btn)
+        
+        label = QLabel(f"{name.upper()}:")
+        self.form.addRow(label, row_layout)
+        
+        def remove():
+            self.form.removeRow(label)
+            del self.extra_fields_widgets[name]
+            if name in self.entry["fields"]:
+                del self.entry["fields"][name]
+
+        del_btn.clicked.connect(remove)
+
+    def add_custom_field(self):
+        name = self.new_field_name.text().strip()
+        if name and name not in self.extra_fields_widgets and name.lower() not in ["u", "p"]:
+            self.add_field_row(name, "")
+            self.new_field_name.clear()
+        elif not name:
+            QMessageBox.warning(self, "WARN", "FIELD NAME CANNOT BE EMPTY")
+        else:
+            QMessageBox.warning(self, "WARN", "FIELD ALREADY EXISTS")
 
     def get_data(self):
-        return self.u_input.text(), self.p_input.text()
+        data = {
+            "u": self.u_input.text(),
+            "p": self.p_input.text(),
+            "fields": {name: edit.text() for name, edit in self.extra_fields_widgets.items()}
+        }
+        return data
 
 class PasswordEntry(QFrame):
     edit_requested = pyqtSignal()
     delete_requested = pyqtSignal()
     
-    def __init__(self, username, password, parent=None):
+    def __init__(self, entry, parent=None):
         super().__init__(parent)
-        self.username = username
-        self.password = password
+        self.entry = entry
+        self.is_expanded = False
         self.init_ui()
 
     def init_ui(self):
         self.setFrameShape(QFrame.Shape.StyledPanel)
         self.setStyleSheet(f"border: 1px solid {CP_DIM}; background: {CP_PANEL}; margin: 2px; padding: 5px;")
         
-        layout = QHBoxLayout(self)
+        self.main_layout = QVBoxLayout(self)
+        self.main_layout.setContentsMargins(5, 5, 5, 5)
+        self.main_layout.setSpacing(2)
+
+        # Top Row
+        top_widget = QWidget()
+        top_layout = QHBoxLayout(top_widget)
+        top_layout.setContentsMargins(0, 0, 0, 0)
+        
+        self.toggle_btn = QPushButton("▶")
+        self.toggle_btn.setFixedWidth(30)
+        self.toggle_btn.setStyleSheet("border: none; color: %s; font-size: 12pt;" % CP_CYAN)
+        self.toggle_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.toggle_btn.clicked.connect(self.toggle_expand)
         
         info_layout = QVBoxLayout()
-        user_lbl = QLabel(f"USER: {self.username}")
-        pass_lbl = QLabel(f"PASS: {'*' * len(self.password)}")
-        user_lbl.setStyleSheet(f"color: {CP_TEXT}; border: none;")
+        user_lbl = QLabel(f"USER: {self.entry.get('u', '')}")
+        pass_lbl = QLabel(f"PASS: {'*' * len(self.entry.get('p', ''))}")
+        user_lbl.setStyleSheet(f"color: {CP_TEXT}; border: none; font-weight: bold;")
         pass_lbl.setStyleSheet(f"color: {CP_SUBTEXT}; border: none;")
         info_layout.addWidget(user_lbl)
         info_layout.addWidget(pass_lbl)
         
-        layout.addLayout(info_layout)
-        layout.addStretch()
+        top_layout.addWidget(self.toggle_btn)
+        top_layout.addLayout(info_layout)
+        top_layout.addStretch()
         
         self.edit_btn = QPushButton("EDIT")
         self.del_btn = QPushButton("DEL")
         self.del_btn.setStyleSheet(f"color: {CP_RED}; border-color: {CP_DIM};")
-        copy_user_btn = QPushButton("COPY USER")
-        copy_pass_btn = QPushButton("COPY PASS")
+        copy_user_btn = QPushButton("USER")
+        copy_pass_btn = QPushButton("PASS")
         
         for btn in [self.edit_btn, self.del_btn, copy_user_btn, copy_pass_btn]:
             if btn == self.del_btn: btn.setFixedWidth(40)
-            elif btn == self.edit_btn: btn.setFixedWidth(60)
-            else: btn.setFixedWidth(100)
+            elif btn == self.edit_btn: btn.setFixedWidth(50)
+            else: btn.setFixedWidth(55)
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
             
         self.edit_btn.clicked.connect(self.edit_requested.emit)
         self.del_btn.clicked.connect(self.delete_requested.emit)
-        copy_user_btn.clicked.connect(lambda: self.copy_to_clipboard(self.username))
-        copy_pass_btn.clicked.connect(lambda: self.copy_to_clipboard(self.password))
+        copy_user_btn.clicked.connect(lambda: self.copy_to_clipboard(self.entry.get('u', '')))
+        copy_pass_btn.clicked.connect(lambda: self.copy_to_clipboard(self.entry.get('p', '')))
         
-        layout.addWidget(self.edit_btn)
-        layout.addWidget(self.del_btn)
-        layout.addWidget(copy_user_btn)
-        layout.addWidget(copy_pass_btn)
+        top_layout.addWidget(copy_user_btn)
+        top_layout.addWidget(copy_pass_btn)
+        top_layout.addWidget(self.edit_btn)
+        top_layout.addWidget(self.del_btn)
+        
+        self.main_layout.addWidget(top_widget)
+
+        # Expanded Area
+        self.extra_widget = QWidget()
+        self.extra_layout = QFormLayout(self.extra_widget)
+        self.extra_layout.setContentsMargins(40, 5, 10, 5)
+        self.extra_widget.setVisible(False)
+        
+        fields = self.entry.get("fields", {})
+        if not fields:
+            # Fallback for old data or empty fields
+            pass
+        
+        for name, value in fields.items():
+            lbl = QLabel(f"{name.upper()}:")
+            lbl.setStyleSheet(f"color: {CP_YELLOW}; border: none;")
+            val_lbl = QLineEdit(value)
+            val_lbl.setReadOnly(True)
+            val_lbl.setStyleSheet(f"background: transparent; border: none; color: {CP_TEXT};")
+            
+            copy_btn = QPushButton("COPY")
+            copy_btn.setFixedWidth(50)
+            copy_btn.clicked.connect(lambda checked, v=value: self.copy_to_clipboard(v))
+            
+            row = QHBoxLayout()
+            row.addWidget(val_lbl)
+            row.addWidget(copy_btn)
+            
+            self.extra_layout.addRow(lbl, row)
+
+        self.main_layout.addWidget(self.extra_widget)
+
+    def toggle_expand(self):
+        self.is_expanded = not self.is_expanded
+        self.toggle_btn.setText("▼" if self.is_expanded else "▶")
+        self.extra_widget.setVisible(self.is_expanded)
 
     def copy_to_clipboard(self, text):
         QApplication.clipboard().setText(text)
@@ -305,6 +419,7 @@ class MainWindow(QMainWindow):
         
         # Entry Addition
         add_grp = QGroupBox("ADD NEW CREDENTIAL")
+        add_vbox = QVBoxLayout()
         add_form = QFormLayout()
         self.u_input = QLineEdit()
         self.p_input = QLineEdit()
@@ -312,10 +427,21 @@ class MainWindow(QMainWindow):
         add_form.addRow("USERNAME:", self.u_input)
         add_form.addRow("PASSWORD:", self.p_input)
         
+        # Extra fields for quick add
+        self.extra_add_fields = {}
+        for field in ["Note", "Phone", "Domain"]:
+            le = QLineEdit()
+            le.setPlaceholderText(f"Optional {field}")
+            self.extra_add_fields[field] = le
+            add_form.addRow(f"{field.upper()}:", le)
+
+        add_vbox.addLayout(add_form)
+        
         add_btn = QPushButton("SAVE TO VAULT")
         add_btn.clicked.connect(self.save_entry)
-        add_form.addRow(add_btn)
-        add_grp.setLayout(add_form)
+        add_vbox.addWidget(add_btn)
+        
+        add_grp.setLayout(add_vbox)
         content_layout.addWidget(add_grp)
 
         # Password Generator
@@ -413,9 +539,17 @@ class MainWindow(QMainWindow):
         p = self.p_input.text()
         
         if u and p:
-            self.vault_data[domain].append({"u": u, "p": p})
+            fields = {}
+            for name, le in self.extra_add_fields.items():
+                val = le.text().strip()
+                if val:
+                    fields[name] = val
+                    
+            self.vault_data[domain].append({"u": u, "p": p, "fields": fields})
             self.u_input.clear()
             self.p_input.clear()
+            for le in self.extra_add_fields.values():
+                le.clear()
             self.p_input.setEchoMode(QLineEdit.EchoMode.Password) # Reset echo mode
             self.save_vault()
             self.load_entries()
@@ -434,10 +568,14 @@ class MainWindow(QMainWindow):
         
         if domain in self.vault_data:
             for i, entry in enumerate(self.vault_data[domain]):
-                if search_query and search_query not in entry['u'].lower():
+                # Handle old data format
+                if "u" not in entry and "u" in entry.keys(): # legacy check
+                     pass # entry is already correct structure
+                
+                if search_query and search_query not in entry.get('u', '').lower():
                     continue
                     
-                widget = PasswordEntry(entry['u'], entry['p'])
+                widget = PasswordEntry(entry)
                 widget.edit_requested.connect(lambda idx=i: self.edit_entry(idx))
                 widget.delete_requested.connect(lambda idx=i: self.delete_entry(idx))
                 self.entries_layout.addWidget(widget)
@@ -454,14 +592,14 @@ class MainWindow(QMainWindow):
         domain = self.group_list.currentText()
         entry = self.vault_data[domain][index]
         
-        dlg = EditDialog(entry['u'], entry['p'], self)
+        dlg = EditDialog(entry, self)
         # Apply the same theme to dialog
         dlg.setStyleSheet(self.get_stylesheet())
         
         if dlg.exec():
-            new_u, new_p = dlg.get_data()
-            if new_u and new_p:
-                self.vault_data[domain][index] = {"u": new_u, "p": new_p}
+            new_data = dlg.get_data()
+            if new_data["u"] and new_data["p"]:
+                self.vault_data[domain][index] = new_data
                 self.save_vault()
                 self.load_entries()
             else:
