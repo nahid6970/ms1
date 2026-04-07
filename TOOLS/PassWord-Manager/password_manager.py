@@ -79,6 +79,9 @@ class EditDialog(QDialog):
         self.field_suggestions = field_suggestions
         if "fields" not in self.entry:
             self.entry["fields"] = {}
+        # Ensure Domain is in the fields by default for display
+        if "Domain" not in self.entry["fields"]:
+            self.entry["fields"]["Domain"] = ""
         self.init_ui()
 
     def init_ui(self):
@@ -92,8 +95,13 @@ class EditDialog(QDialog):
         
         # Additional fields
         self.extra_fields_widgets = {}
+        # We'll put Domain first if it exists
+        if "Domain" in self.entry["fields"]:
+             self.add_field_row("Domain", self.entry["fields"]["Domain"])
+             
         for name, value in self.entry["fields"].items():
-            self.add_field_row(name, value)
+            if name != "Domain":
+                self.add_field_row(name, value)
 
         self.layout.addLayout(self.form)
 
@@ -101,12 +109,16 @@ class EditDialog(QDialog):
         add_field_layout = QHBoxLayout()
         self.new_field_name = QLineEdit()
         self.new_field_name.setPlaceholderText("New Field Name")
-        add_field_btn = QPushButton("+")
-        add_field_btn.setFixedWidth(30)
+        
+        # Using clearer emoji-like icons
+        add_field_btn = QPushButton("➕")
+        add_field_btn.setFixedWidth(40)
+        add_field_btn.setToolTip("Add new custom field")
         add_field_btn.clicked.connect(self.add_custom_field)
         
-        self.suggest_btn = QPushButton("▼")
-        self.suggest_btn.setFixedWidth(30)
+        self.suggest_btn = QPushButton("📋")
+        self.suggest_btn.setFixedWidth(40)
+        self.suggest_btn.setToolTip("Show suggested fields")
         self.suggest_btn.setStyleSheet(f"color: {CP_CYAN};")
         self.suggest_btn.clicked.connect(self.show_suggestions)
         
@@ -479,9 +491,13 @@ class MainWindow(QMainWindow):
         add_form = QFormLayout()
         self.u_input = QLineEdit()
         self.p_input = QLineEdit()
+        self.d_input = QLineEdit()
         self.p_input.setEchoMode(QLineEdit.EchoMode.Password)
+        self.d_input.setPlaceholderText("Optional Domain (e.g. google.com)")
+        
         add_form.addRow("USERNAME:", self.u_input)
         add_form.addRow("PASSWORD:", self.p_input)
+        add_form.addRow("DOMAIN:", self.d_input)
         
         add_vbox.addLayout(add_form)
         
@@ -574,18 +590,24 @@ class MainWindow(QMainWindow):
                 self.save_vault()
 
     def save_entry(self):
-        domain = self.group_list.currentText()
-        if not domain:
+        domain_grp = self.group_list.currentText()
+        if not domain_grp:
             QMessageBox.warning(self, "WARN", "SELECT OR CREATE A DOMAIN FIRST")
             return
             
         u = self.u_input.text()
         p = self.p_input.text()
+        d = self.d_input.text().strip()
         
         if u and p:
-            self.vault_data[domain].append({"u": u, "p": p, "fields": {}})
+            fields = {}
+            if d:
+                fields["Domain"] = d
+                
+            self.vault_data[domain_grp].append({"u": u, "p": p, "fields": fields})
             self.u_input.clear()
             self.p_input.clear()
+            self.d_input.clear()
             self.p_input.setEchoMode(QLineEdit.EchoMode.Password) # Reset echo mode
             self.save_vault()
             self.load_entries()
