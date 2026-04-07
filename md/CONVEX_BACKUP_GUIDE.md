@@ -63,10 +63,47 @@ self.btn_restore = QPushButton("⬇")
 self.btn_restore.clicked.connect(self.restore_from_convex)
 ```
 
-### Step 6 — Adapt `restore_from_convex` to your save method
+### Step 6 — Add `_fix_floats` helper to your MainWindow class
+Convex returns all numbers as floats. PyQt requires ints for sizes, spans, positions etc.
+Add this method and call it in `load_config`:
+
+```python
+def _fix_floats(self, obj):
+    """Recursively convert whole-number floats to int (Convex returns all numbers as float)."""
+    if isinstance(obj, dict):
+        return {k: self._fix_floats(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [self._fix_floats(i) for i in obj]
+    if isinstance(obj, float) and obj.is_integer():
+        return int(obj)
+    return obj
+
+def load_config(self):
+    if os.path.exists(CONFIG_FILE):
+        try:
+            with open(CONFIG_FILE, "r", encoding='utf-8') as f:
+                self.config = self._fix_floats(json.load(f))  # <-- wrap with _fix_floats
+        except:
+            self.config = {"scripts": []}
+    else:
+        self.config = {"scripts": []}
+```
+
+This runs on every launch so the script is safe regardless of how the JSON was written.
+
+### Step 7 — Adapt `restore_from_convex` to your save method
 The restore method calls `self.save_config()` after writing `self.config`.
 Make sure your script has a `save_config()` method that writes `self.config` to disk and refreshes the UI.
 If your method is named differently, update the call inside `restore_from_convex`.
+
+---
+
+## Important: File Path & Isolation
+
+- **Restored JSON is always written to `CONFIG_FILE`** — whatever path that variable points to at the time of restore. Convex stores only the JSON content, never the file path.
+- **Changing `CONFIG_FILE` later is safe** — restores will follow the new path automatically.
+- **Each script is fully isolated** — the restore dialog only shows backups for that script's `SCRIPT_NAME`. A script with `SCRIPT_NAME = "tool_a"` will never see backups from `SCRIPT_NAME = "tool_b"`, even though they share the same Convex project.
+- **Never reuse the same `SCRIPT_NAME`** across different scripts — that's the only thing that keeps their backups separate.
 
 ---
 
