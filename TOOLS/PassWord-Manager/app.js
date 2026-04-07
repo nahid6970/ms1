@@ -99,9 +99,25 @@ async function loadVault() {
             const p = await decrypt({ salt: r.salt, iv: r.iv, data: r.p }, masterKey);
             if (u !== null && p !== null) vaultEntries.push({ id: r._id, domain: r.domain, u, p, fields: JSON.parse(r.fields || "{}"), salt: r.salt, iv: r.iv });
         }
+        updateSuggestions();
         renderGroups();
         renderEntries();
     } catch (e) { console.error(e); }
+}
+
+function updateSuggestions() {
+    const suggestions = new Set(["Note", "Phone", "Domain", "Email", "URL"]);
+    vaultEntries.forEach(e => {
+        Object.keys(e.fields).forEach(k => suggestions.add(k));
+    });
+    
+    const sorted = Array.from(suggestions).sort();
+    const mainDatalist = document.getElementById('field-suggestions');
+    const editDatalist = document.getElementById('edit-field-suggestions');
+    
+    const html = sorted.map(s => `<option value="${s}">`).join('');
+    mainDatalist.innerHTML = html;
+    editDatalist.innerHTML = html;
 }
 
 function renderGroups() {

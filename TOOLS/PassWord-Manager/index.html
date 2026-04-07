@@ -45,9 +45,10 @@
                             </div>
                             
                             <div class="add-field-row">
-                                <input type="text" id="new-field-name" placeholder="FIELD NAME">
+                                <input type="text" id="new-field-name" placeholder="FIELD NAME" list="field-suggestions">
                                 <button id="add-field-btn">+</button>
                             </div>
+                            <datalist id="field-suggestions"></datalist>
 
                             <button id="save-btn" class="primary">SAVE TO VAULT</button>
                         </div>
@@ -80,9 +81,10 @@
                 <div id="edit-custom-fields" class="custom-fields-area"></div>
                 
                 <div class="add-field-row">
-                    <input type="text" id="edit-new-field-name" placeholder="NEW FIELD">
+                    <input type="text" id="edit-new-field-name" placeholder="NEW FIELD" list="edit-field-suggestions">
                     <button id="edit-add-field-btn">+</button>
                 </div>
+                <datalist id="edit-field-suggestions"></datalist>
 
                 <div class="modal-actions">
                     <button id="update-btn" class="primary">UPDATE</button>
@@ -95,3 +97,4 @@
     <script type="module" src="app.js"></script>
 </body>
 </html>
+
