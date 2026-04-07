@@ -26,28 +26,39 @@ const editModal = document.getElementById('edit-modal');
 const settingsModal = document.getElementById('settings-modal');
 
 // --- INITIALIZE ---
-chrome.storage.local.get(['vaultSettings'], (result) => {
+async function init() {
+    const result = await chrome.storage.local.get(['vaultSettings', 'sessionData']);
     if (result.vaultSettings) {
         settings = result.vaultSettings;
         document.getElementById('setting-autolock').value = settings.autolock;
         document.getElementById('setting-autodomain').checked = settings.autodomain;
     }
-});
+    if (result.sessionData && result.sessionData.unlockTime) {
+        const elapsed = (Date.now() - result.sessionData.unlockTime) / 60000;
+        if (settings.autolock === 0 || elapsed < settings.autolock) {
+            unlockTime = result.sessionData.unlockTime;
+        } else {
+            chrome.storage.local.remove('sessionData');
+        }
+    }
+}
+init();
 
 // Auto-lock checker
 setInterval(() => {
     if (masterKey && settings.autolock > 0 && unlockTime) {
         const elapsed = (Date.now() - unlockTime) / 60000;
         if (elapsed >= settings.autolock) {
-            console.log("Auto-lock triggered");
+            chrome.storage.local.remove('sessionData');
             logout();
         }
     }
-}, 10000); // Check every 10s
+}, 10000);
 
 function resetActivityTimer() {
     if (masterKey) {
         unlockTime = Date.now();
+        chrome.storage.local.set({ sessionData: { unlockTime } });
     }
 }
 
@@ -103,6 +114,7 @@ async function handleLogin() {
         }
         masterKey = password;
         unlockTime = Date.now();
+        chrome.storage.local.set({ sessionData: { unlockTime } });
         loginContainer.classList.add('hidden');
         vaultContainer.classList.remove('hidden');
         loadVault();

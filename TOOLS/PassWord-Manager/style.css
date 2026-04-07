@@ -94,3 +94,11 @@ button.danger { color: var(--cp-red); border-color: var(--cp-red); }
 .entry-user { color: var(--cp-text); font-size: 0.8rem; }
 .entry-actions { display: flex; gap: 5px; }
 .entry-actions button { padding: 4px 8px; font-size: 0.7rem; }
+
+.details-toggle { cursor: pointer; font-size: 0.7rem; color: var(--cp-subtext); margin-top: 8px; text-align: center; }
+.details-toggle:hover { color: var(--cp-cyan); }
+.entry-details { margin-top: 8px; border-top: 1px solid var(--cp-dim); padding-top: 8px; width: 100%; box-sizing: border-box; }
+.detail-row { display: flex; align-items: center; gap: 8px; padding: 4px 0; border-bottom: 1px solid #1a1a1a; font-size: 0.8rem; }
+.detail-label { color: var(--cp-yellow); min-width: 70px; flex-shrink: 0; }
+.detail-row span:nth-child(2) { flex-grow: 1; color: var(--cp-cyan); word-break: break-all; }
+.detail-row .copy-field { padding: 2px 6px; font-size: 0.7rem; flex-shrink: 0; }
